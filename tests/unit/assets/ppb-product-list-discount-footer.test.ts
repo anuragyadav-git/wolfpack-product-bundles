@@ -29,7 +29,7 @@ function makeDiscountFooterContext(quantity: number) {
     selectedProducts: [{ '101': quantity }],
     stepProductData: [[{
       id: '101',
-      variantId: '101',
+      selectionId: '101',
       title: 'Bundle Product',
       price: 1000,
       available: true,

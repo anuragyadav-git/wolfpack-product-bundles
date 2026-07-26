@@ -90,10 +90,7 @@ function buildFullPageBundlePricing(pricing: any) {
 }
 
 function buildRuntimeProductReferences(products: any[] = []) {
-  return formatProductReferencesForRuntime(products, products).map((product: any) => {
-    const id = product.id || product.productId || product.graphqlId;
-    return id ? { ...product, id } : product;
-  });
+  return formatProductReferencesForRuntime(products, products);
 }
 
 function buildFullPageBundleMetafieldSteps(steps: any[] = []) {
@@ -130,8 +127,8 @@ function buildFullPageBundleMetafieldSteps(steps: any[] = []) {
       multiLangData: step.multiLangData ?? {},
       stepImage: step.stepImage ?? step.timelineIconUrl ?? null,
       position: step.position ?? index + 1,
-      minQuantity: step.minQuantity || 1,
-      maxQuantity: step.maxQuantity || 1,
+      minQuantity: Number.isFinite(Number(step.minQuantity)) ? Number(step.minQuantity) : 0,
+      maxQuantity: step.maxQuantity ?? null,
       enabled: step.enabled !== false,
       conditionType: step.conditionType ?? null,
       conditionOperator: step.conditionOperator ?? null,
@@ -295,8 +292,12 @@ export function buildFpbBaseConfig(
       pageTitle: step.pageTitle ?? null,
       multiLangData: step.multiLangData ?? {},
       stepImage: step.stepImage ?? null,
-      minQuantity: parseInt(step.minQuantity) || 1,
-      maxQuantity: parseInt(step.maxQuantity) || 1,
+      minQuantity: Number.isFinite(Number.parseInt(step.minQuantity, 10))
+        ? Number.parseInt(step.minQuantity, 10)
+        : 0,
+      maxQuantity: Number.isFinite(Number.parseInt(step.maxQuantity, 10))
+        ? Number.parseInt(step.maxQuantity, 10)
+        : null,
       enabled: step.enabled !== false,
       conditionType: stepConditionsData[step.id]?.[0]?.type || null,
       conditionOperator: stepConditionsData[step.id]?.[0]?.operator || null,

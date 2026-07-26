@@ -13,7 +13,7 @@ describe("Product Page widget direct Add-ons contract", () => {
     expect(source).toContain("calculateSelectedAddonDiscountAmount()");
     expect(source).toContain("getDiscountInfoWithSelectedAddonDiscount(discountInfo, totalPrice)");
     expect(source).toContain("const discount = step?.addonDiscount || tier?.discount || {}");
-    expect(source).toContain("chargeableAddonProductKeys.has(String(this.extractId(item.variantId) || item.variantId))");
+    expect(source).toContain("chargeableAddonProductKeys.has(String(item.selectionId || ''))");
   });
 
   it("renders add-on-related UI text and labels from step config", () => {
@@ -82,8 +82,8 @@ describe("Product Page widget direct Add-ons contract", () => {
       { addonVariant: 1 },
     ];
     const stepProductData = [
-      [{ variantId: "paidVariant", price: 10000 }],
-      [{ variantId: "addonVariant", price: 6000 }],
+      [{ selectionId: "paidVariant", price: 10000 }],
+      [{ selectionId: "addonVariant", price: 6000 }],
     ];
 
     expect(require("../../../app/assets/widgets/shared/pricing-calculator.js").PricingCalculator.calculateBundleTotal(

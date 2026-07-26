@@ -267,7 +267,7 @@ describe("formatBundleForWidget", () => {
     expect(result.steps[0].products).toEqual([]);
     expect((result.steps[0].categories as any[])[0].products).toEqual([
       expect.objectContaining({
-        id: "gid://shopify/Product/9427287703811",
+        selectionId: "gid://shopify/Product/9427287703811",
         title: "123Luxury Armor Matte Case",
       }),
     ]);
@@ -369,11 +369,11 @@ describe("formatBundleForWidget", () => {
         categoryRank: 1,
         products: [
           {
-            id: "gid://shopify/Product/9427287703811",
+            selectionId: "gid://shopify/Product/9427287703811",
             title: "123Luxury Armor Matte Case",
             variants: [
               {
-                id: "gid://shopify/ProductVariant/48191691456771",
+                selectionId: "gid://shopify/ProductVariant/48191691456771",
                 price: "123.00",
               },
             ],

@@ -726,8 +726,8 @@ describe('PricingCalculator.calculateBundleTotal — free gift step exclusion', 
     { 'var-gift': 1 },
   ];
   const stepProductData = [
-    [{ variantId: 'var-paid', price: 50000 }],  // 50000 cents = $500
-    [{ variantId: 'var-gift', price: 20000 }],  // 20000 cents = $200
+    [{ selectionId: 'var-paid', price: 50000 }],  // 50000 cents = $500
+    [{ selectionId: 'var-gift', price: 20000 }],  // 20000 cents = $200
   ];
   const steps = [
     { isFreeGift: false },

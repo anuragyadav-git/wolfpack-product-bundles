@@ -9,6 +9,13 @@ function extractFullPageId(idString) {
   return idString.toString().split('/').pop();
 }
 
+function normalizeDefaultQuantity(value) {
+  const rawQuantity = Number.parseFloat(value);
+  return Number.isFinite(rawQuantity) && rawQuantity >= 0
+    ? rawQuantity
+    : 0;
+}
+
 function normalizeAddonPercentageDiscount(discount, tier = null) {
   const type = String(discount?.type ?? tier?.discountType ?? '').toUpperCase();
   const value = Number(discount?.value ?? tier?.discountValue ?? 0);
@@ -24,16 +31,9 @@ function collectProductSelectionKeys(product) {
     keys.add(String(normalized));
   };
 
-  addKey(product?.id);
-  addKey(product?.productId);
-  addKey(product?.graphqlId);
-  addKey(product?.variantId);
-  addKey(product?.variantGraphqlId);
+  addKey(product?.selectionId);
   (Array.isArray(product?.variants) ? product.variants : []).forEach(variant => {
-    addKey(variant?.id);
-    addKey(variant?.variantId);
-    addKey(variant?.variantGraphqlId);
-    addKey(variant?.admin_graphql_api_id);
+    addKey(variant?.selectionId);
   });
 
   return keys;
@@ -160,12 +160,38 @@ function collectCategoryProducts(step) {
   return products;
 }
 
+function normalizeProductLookupId(product = {}) {
+  return extractFullPageId(product?.selectionId);
+}
+
+function normalizeStorefrontApiVariant(variant = {}) {
+  const selectionId = extractFullPageId(variant?.id);
+  if (!selectionId) return null;
+  return { ...variant, selectionId };
+}
+
+function normalizeStorefrontApiProduct(product = {}) {
+  const selectionId = extractFullPageId(product?.id);
+  if (!selectionId) return null;
+  return {
+    ...product,
+    selectionId,
+    variants: (Array.isArray(product?.variants) ? product.variants : [])
+      .map(normalizeStorefrontApiVariant)
+      .filter(Boolean),
+  };
+}
+
+function storefrontApiProductLookupKey(product = {}) {
+  return extractFullPageId(product?.id);
+}
+
 function productLookupKey(product) {
-  return extractFullPageId(product?.id || product?.productId || product?.graphqlId);
+  return normalizeProductLookupId(product);
 }
 
 function productGraphqlId(product) {
-  const rawId = product?.graphqlId || product?.productId || product?.id;
+  const rawId = product?.selectionId;
   if (!rawId) return null;
   const normalized = String(rawId);
   if (normalized.startsWith('gid://shopify/Product/')) return normalized;
@@ -194,13 +220,7 @@ function normalizeCachedRuntimeProduct(product) {
 }
 
 function variantLookupKey(variant) {
-  return extractFullPageId(
-    variant?.id
-    || variant?.variantId
-    || variant?.variantGraphqlId
-    || variant?.graphqlId
-    || variant?.admin_graphql_api_id
-  );
+  return extractFullPageId(variant?.selectionId);
 }
 
 function mergeVariantRuntimeAvailability(product, categoryProduct) {
@@ -240,8 +260,9 @@ function mergeVariantRuntimeAvailability(product, categoryProduct) {
 
 export function normalizeFullPageDirectDefaultProduct(product) {
   const variant = Array.isArray(product?.variants) ? product.variants[0] : null;
-  const variantId = extractFullPageId(variant?.variantGraphqlId || variant?.variantId || variant?.id);
+  const variantId = variant?.selectionId ? extractFullPageId(variant.selectionId) : null;
   if (!variantId) return null;
+  const productId = normalizeProductLookupId(product) || variantId;
 
   const imageUrl = product.images?.[0]?.originalSrc
     || product.images?.[0]?.url
@@ -251,26 +272,28 @@ export function normalizeFullPageDirectDefaultProduct(product) {
     ? variant.inventoryQuantity
     : null;
   const price = Number.parseFloat(variant?.price || product?.price || '0') * 100;
-  const requiredQuantity = Number(product.requiredQuantity || 1) || 1;
+  const normalizedRequiredQuantity = normalizeDefaultQuantity(product.requiredQuantity);
   const explicitlyUnavailable = variant?.availableForSale === false || variant?.available === false;
   const available = !explicitlyUnavailable;
   const quantityAvailable = inventoryQuantity;
 
   return {
-    id: extractFullPageId(product.graphqlId || product.productId) || product.productId || variantId,
+    id: productId,
     title: product.title || '',
     handle: product.handle || '',
     imageUrl,
     price,
     compareAtPrice: null,
     variantId,
+    selectionId: variantId,
     available,
     quantityAvailable,
     currentlyNotInStock: false,
-    defaultRequiredQuantity: requiredQuantity,
+    defaultRequiredQuantity: normalizedRequiredQuantity,
     isDirectDefaultProduct: true,
     variants: [{
       id: variantId,
+      selectionId: variantId,
       title: variant?.title || variant?.variantTitle || '',
       price,
       compareAtPrice: null,
@@ -349,7 +372,7 @@ async loadStepProducts(stepIndex) {
   const productIds = !step?.isFreeGift ? this.collectStepProductIds(step) : [];
   if (!step?.isFreeGift && Array.isArray(step.StepProduct)) {
     step.StepProduct.forEach(product => {
-      const id = product?.productId || product?.graphqlId || product?.id;
+      const id = normalizeProductLookupId(product);
       if (id && !productIds.includes(id)) productIds.push(id);
     });
   }
@@ -393,7 +416,7 @@ async loadStepProducts(stepIndex) {
                 this.rememberRuntimeProductInventory(data.products);
               }
               data.products.forEach(product => {
-                const key = productLookupKey(product);
+                const key = storefrontApiProductLookupKey(product);
                 if (key) fetchedProductsByKey.set(key, product);
               });
             }
@@ -447,7 +470,7 @@ async loadStepProducts(stepIndex) {
             }
             if (shouldRefreshRuntimeInventory) {
               data.products.forEach(product => {
-                const key = productLookupKey(product);
+                const key = storefrontApiProductLookupKey(product);
                 if (key) refreshedProductKeys.add(key);
               });
             }
@@ -490,6 +513,7 @@ async loadStepProducts(stepIndex) {
       // Transform StepProduct to match expected product format
       const enrichedProducts = step.StepProduct.map(sp => ({
         id: sp.productId,
+        selectionId: normalizeProductLookupId(sp),
         title: sp.title,
         handle: sp.handle,
         imageUrl: sp.imageUrl,
@@ -589,7 +613,8 @@ async loadStepProducts(stepIndex) {
   // Remove duplicates
   const seen = new Set();
   this.stepProductData[stepIndex] = processedProducts.filter(product => {
-    const key = product.variantId || product.id;
+    const key = product.selectionId || '';
+    if (!key) return true;
     if (seen.has(key)) {
       return false;
     }
@@ -625,7 +650,10 @@ _initDirectDefaultProducts() {
   if (this.directDefaultProducts.length === 0 || !this.selectedProducts[0]) return;
 
   this.directDefaultProducts.forEach(product => {
-    this.selectedProducts[0][product.variantId] = product.defaultRequiredQuantity || 1;
+    const selectionId = product?.selectionId;
+    if (!selectionId) return;
+    const defaultQuantity = normalizeDefaultQuantity(product.defaultRequiredQuantity);
+    this.selectedProducts[0][selectionId] = defaultQuantity;
   });
 },
 
@@ -636,12 +664,12 @@ _mergeDirectDefaultProductsIntoStep(stepIndex, products) {
 
   const directDefaultsByVariant = new Map(
     this.directDefaultProducts
-      .filter(product => product?.variantId)
-      .map(product => [String(product.variantId), product])
+      .filter(product => product?.selectionId)
+      .map(product => [String(product.selectionId), product])
   );
   const seenDirectDefaults = new Set();
   const mergedProducts = products.map(product => {
-    const key = String(product?.variantId || product?.id || '');
+    const key = String(product?.selectionId || '');
     const directDefault = directDefaultsByVariant.get(key);
     if (!directDefault) return product;
 
@@ -654,7 +682,7 @@ _mergeDirectDefaultProductsIntoStep(stepIndex, products) {
   });
 
   const unmatchedDirectDefaults = this.directDefaultProducts.filter(product => {
-    const key = String(product?.variantId || '');
+    const key = String(product?.selectionId || '');
     return key && !seenDirectDefaults.has(key);
   });
 
@@ -664,8 +692,8 @@ _mergeDirectDefaultProductsIntoStep(stepIndex, products) {
 _getDirectDefaultSelectionQuantities(stepIndex) {
   if (stepIndex !== 0 || !Array.isArray(this.directDefaultProducts)) return {};
   return this.directDefaultProducts.reduce((quantities, product) => {
-    if (product?.variantId) {
-      quantities[String(product.variantId)] = product.defaultRequiredQuantity || 1;
+    if (product?.selectionId) {
+      quantities[String(product.selectionId)] = normalizeDefaultQuantity(product.defaultRequiredQuantity);
     }
     return quantities;
   }, {});
@@ -716,7 +744,7 @@ rememberRuntimeProductInventory(products) {
 
   products.forEach(product => {
     (Array.isArray(product?.variants) ? product.variants : []).forEach(variant => {
-      const key = variantLookupKey(variant);
+      const key = extractFullPageId(variant?.id);
       if (!key) return;
       this._fpbRuntimeVariantInventoryById[key] = {
         available: variant.available === true,
@@ -765,10 +793,13 @@ processProductsForStep(products, step) {
   // currentlyNotInStock is true for backorder-accepting variants that are sold out.
   const toCents = (value) => Math.round(parseFloat(value || '0') * 100);
   const normalizeVariant = (v) => {
+    const variantId = variantLookupKey(v);
+    if (!variantId) return null;
     const quantityAvailable = typeof v.quantityAvailable === 'number' ? v.quantityAvailable : null;
     const currentlyNotInStock = v.currentlyNotInStock === true;
     return {
-      id: this.extractId(v.id),
+      id: variantId,
+      selectionId: variantId,
       title: v.title,
       price: toCents(v.price),
       compareAtPrice: v.compareAtPrice ? toCents(v.compareAtPrice) : null,
@@ -790,17 +821,24 @@ processProductsForStep(products, step) {
     };
   };
 
-  return products.flatMap(product => {
+  const normalizedProducts = (Array.isArray(products) ? products : [])
+    .map(normalizeStorefrontApiProduct)
+    .filter(Boolean);
+
+  return normalizedProducts.flatMap(product => {
     if (this.shouldExpandStepProductsDuringLoad(step) && product.variants && product.variants.length > 0) {
       // Display each variant as separate product - filter out unavailable variants
       // Preserve parent product reference for variant selection in modal
-      const processedVariants = (product.variants || []).map(normalizeVariant);
+      const processedVariants = (product.variants || []).map(normalizeVariant).filter(Boolean);
 
       const processedOptions = deriveProductOptionNames(product);
 
-      return product.variants
+    return product.variants
         .filter(variant => this.isVariantSelectableForInventory(variant))
         .map(variant => {
+          const variantId = variantLookupKey(variant);
+          if (!variantId) return null;
+
           // Storefront API: prioritize variant image, fallback to product featured image.
           // product.imageUrl — set by API path; product.featuredImage/images — metafield cache format.
           const imageUrl = variant?.image?.src
@@ -815,12 +853,13 @@ processProductsForStep(products, step) {
             || BUNDLE_WIDGET.PLACEHOLDER_IMAGE;
 
           return {
-            id: this.extractId(variant.id),
+            id: variantId,
             title: `${product.title} - ${variant.title}`,
             imageUrl,
             price: toCents(variant.price),
             compareAtPrice: variant.compareAtPrice ? toCents(variant.compareAtPrice) : null,
-            variantId: this.extractId(variant.id),
+            variantId,
+            selectionId: variantId,
             available: this.isVariantSelectableForInventory(variant),
             quantityAvailable: typeof variant.quantityAvailable === 'number' ? variant.quantityAvailable : null,
             currentlyNotInStock: variant.currentlyNotInStock === true,
@@ -828,7 +867,7 @@ processProductsForStep(products, step) {
             weightUnit: 'GRAMS',
             sellingPlanAllocations: variant.sellingPlanAllocations || [],
             // Preserve parent product data for variant selection in modal
-            parentProductId: this.extractId(product.id),
+            parentProductId: normalizeProductLookupId(product),
             parentTitle: product.title,
             variants: processedVariants,
             options: processedOptions,
@@ -836,7 +875,8 @@ processProductsForStep(products, step) {
             description: normalizeProductDescription(product),
             descriptionHtml: normalizeProductDescriptionHtml(product)
           };
-        });
+        })
+        .filter(Boolean);
     } else {
       // Grouped cards require at least one sellable variant. This also removes
       // tracked zero-stock products when the global inventory control is active.
@@ -864,15 +904,20 @@ processProductsForStep(products, step) {
       // Process options array for variant selector labels
       const processedOptions = deriveProductOptionNames(product);
 
+      const productId = normalizeProductLookupId(product);
+      const selectionId = variantLookupKey(defaultVariant) || normalizeProductLookupId(product);
+      if (!selectionId) return [];
+
       return [{
-        id: this.extractId(product.id),
+        id: productId,
         title: product.title,
         imageUrl,
         price: defaultVariant
           ? toCents(defaultVariant.price)
           : toCents(product.price),
         compareAtPrice: defaultVariant?.compareAtPrice ? toCents(defaultVariant.compareAtPrice) : null,
-        variantId: this.extractId(defaultVariant?.id || product.id),
+        variantId: selectionId,
+        selectionId,
         sellingPlanAllocations: defaultVariant?.sellingPlanAllocations || [],
         available: defaultVariant ? this.isVariantSelectableForInventory(defaultVariant) : product.available === true,
         quantityAvailable: typeof defaultVariant?.quantityAvailable === 'number' ? defaultVariant.quantityAvailable : null,
@@ -921,7 +966,7 @@ isVariantOutOfStock(product) {
 
 getVariantAvailable(stepIndex, variantId) {
   const products = this.stepProductData[stepIndex] || [];
-  const requestedVariantKey = variantLookupKey({ id: variantId });
+  const requestedVariantKey = extractFullPageId(variantId);
   const product = products.find(p => variantLookupKey(p) === requestedVariantKey)
     || products.flatMap(p => Array.isArray(p?.variants) ? p.variants : [])
       .find(variant => variantLookupKey(variant) === requestedVariantKey);
@@ -960,6 +1005,10 @@ extractId(idString) {
   return idString.toString().split('/').pop();
 },
 
+getProductSelectionId(product = {}) {
+  return String(product?.selectionId || '');
+},
+
 shouldApplyIndividualSellingPlanSelection() {
   return this.selectedBundle?.individualSellingPlanSelection?.isEnabled === true;
 },
@@ -974,9 +1023,12 @@ shouldApplyIndividualSellingPlanSelectionForProduct(product, variantId) {
     return true;
   }
 
-  const normalizedSelectedId = this.extractId(variantId) || String(variantId || "");
+  const normalizedSelectedId = this.getProductSelectionId({ selectionId: variantId });
   const variant = Array.isArray(product?.variants)
-    ? product.variants.find((candidate) => this.extractId(candidate.id) === normalizedSelectedId)
+    ? product.variants.find((candidate) => {
+      const candidateId = variantLookupKey(candidate);
+      return candidateId === normalizedSelectedId;
+    })
     : null;
 
   const target = variant ?? product;
@@ -1016,7 +1068,7 @@ async enrichMissingProductDescriptions(products) {
     (Array.isArray(data.products) ? data.products : []).forEach(product => {
       const description = normalizeProductDescription(product);
       const descriptionHtml = normalizeProductDescriptionHtml(product);
-      const key = productLookupKey(product);
+      const key = storefrontApiProductLookupKey(product);
       if (key && (description || descriptionHtml)) {
         descriptionsByProductId.set(key, { description, descriptionHtml });
       }

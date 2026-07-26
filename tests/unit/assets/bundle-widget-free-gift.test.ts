@@ -56,8 +56,8 @@ function getPaidSteps(steps: Step[]): Step[] {
 }
 
 function isStepCompleted(step: Step, selections: Record<string, SelectedProduct>): boolean {
-  const required = Number(step.conditionValue) || Number(step.minQuantity) || 1;
-  const selected = Object.values(selections || {}).reduce((sum, p) => sum + (p.quantity || 1), 0);
+  const required = Number(step.conditionValue) || Number(step.minQuantity);
+  const selected = Object.values(selections || {}).reduce((sum, p) => sum + (Number(p.quantity) || 0), 0);
   return selected >= required;
 }
 
@@ -83,11 +83,11 @@ function canNavigateToStep(
 
 function getFreeGiftRemainingCount(steps: Step[], selectedProducts: SelectedProducts): number {
   const paid = getPaidSteps(steps);
-  const total = paid.reduce((sum, s) => sum + (Number(s.conditionValue) || Number(s.minQuantity) || 1), 0);
+  const total = paid.reduce((sum, s) => sum + (Number(s.conditionValue) || Number(s.minQuantity)), 0);
   const selected = paid.reduce((sum, paidStep) => {
     const globalIndex = steps.indexOf(paidStep);
     const stepSel = selectedProducts[globalIndex] ?? {};
-    return sum + Object.values(stepSel).reduce((s, p) => s + (p.quantity || 1), 0);
+    return sum + Object.values(stepSel).reduce((s, p) => s + (Number(p.quantity) || 0), 0);
   }, 0);
   return Math.max(0, total - selected);
 }

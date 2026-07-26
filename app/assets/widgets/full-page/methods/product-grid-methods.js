@@ -22,6 +22,10 @@ import {
   buildCartLineSourceProperties,
 } from '../../shared/engine/cart-lines.js';
 
+function getSelectionId(item = {}) {
+  return String(item?.selectionId || '');
+}
+
 
 export function shouldCategoryTabActivateProducts() {
   return true;
@@ -185,7 +189,7 @@ orderProductsForActiveCategory(products, activeCategory, stepIndex) {
 
   const productOrder = new Map();
   const addProductId = (productId) => {
-    const normalizedProductId = this.extractId(productId) || productId;
+    const normalizedProductId = this.extractId(productId);
     if (normalizedProductId && !productOrder.has(normalizedProductId)) {
       productOrder.set(normalizedProductId, productOrder.size);
     }
@@ -203,7 +207,7 @@ orderProductsForActiveCategory(products, activeCategory, stepIndex) {
       return {
         product,
         index,
-        order: productOrder.get(this.extractId(productId) || productId),
+        order: productOrder.get(this.extractId(productId)),
       };
     })
     .filter(entry => entry.order !== undefined)
@@ -241,9 +245,9 @@ createFullPageProductGrid(stepIndex) {
         products = products.filter(p => {
           // parentProductId is numeric product ID (set when displayVariantsAsIndividual is true)
           // p.id is numeric product ID otherwise
-          const numericPid = p.parentProductId || p.id || '';
-          return collectionProductIds.some(cid => {
-            const numericCid = this.extractId(cid) || cid;
+        const numericPid = p.parentProductId || p.id || '';
+        return collectionProductIds.some(cid => {
+            const numericCid = this.extractId(cid);
             return numericPid === numericCid;
           });
         });
@@ -287,8 +291,8 @@ createFullPageProductGrid(stepIndex) {
     const productCard = this.createProductCard(product, stepIndex, {
       displayVariantsAsIndividualProducts: shouldDisplayVariantsAsIndividual,
     });
-    const productId = product.variantId || product.id;
-    const currentQty = stepSelections[productId] || 0;
+    const productId = getSelectionId(product);
+    const currentQty = productId ? (stepSelections[productId] || 0) : 0;
     // Dim unselected cards when step quota is full
     if (isStepAtCapacity && currentQty === 0) {
       productCard.classList.add('dimmed');
@@ -326,6 +330,7 @@ expandProductsByVariant(products, shouldExpand = true) {
       return product.variants
         .filter(variant => isVariantSelectable(variant))
         .map(variant => {
+          const variantSelectionId = getSelectionId(variant);
           const runtimeInventory = typeof context.getRuntimeVariantInventory === 'function'
             ? context.getRuntimeVariantInventory(variant)
             : null;
@@ -350,7 +355,8 @@ expandProductsByVariant(products, shouldExpand = true) {
             imageUrl,
             price: typeof variant.price === 'number' ? variant.price : toCents(variant.price),
             compareAtPrice: variant.compareAtPrice ? (typeof variant.compareAtPrice === 'number' ? variant.compareAtPrice : toCents(variant.compareAtPrice)) : null,
-            variantId: variant.id,
+            variantId: variantSelectionId || variant.id,
+            selectionId: variantSelectionId,
             available: isVariantSelectable(variant),
             quantityAvailable: typeof inventorySource.quantityAvailable === 'number' ? inventorySource.quantityAvailable : null,
             currentlyNotInStock: inventorySource.currentlyNotInStock === true,

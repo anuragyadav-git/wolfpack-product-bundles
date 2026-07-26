@@ -663,12 +663,10 @@ describe('FPB Standard mobile summary action', () => {
       title: '14k Dangling Obsidian Earrings',
       handle: '14k-dangling-obsidian-earrings',
       images: [{ originalSrc: 'https://cdn.shopify.com/default.jpg' }],
-      graphqlId: 'gid://shopify/Product/9506413773059',
-      productId: '9506413773059',
+      selectionId: 'gid://shopify/Product/9506413773059',
       requiredQuantity: 1,
       variants: [{
-        variantGraphqlId: 'gid://shopify/ProductVariant/48720141091075',
-        variantId: '48720141091075',
+        selectionId: 'gid://shopify/ProductVariant/48720141091075',
         price: '829.00',
         inventoryQuantity: 0,
       }],
@@ -688,11 +686,9 @@ describe('FPB Standard mobile summary action', () => {
   it('preserves missing direct default inventory as unbounded for full-page first-load selection', () => {
     const product = normalizeFullPageDirectDefaultProduct({
       title: 'Inventory Unknown Earrings',
-      graphqlId: 'gid://shopify/Product/9506413773059',
-      productId: '9506413773059',
+      selectionId: 'gid://shopify/Product/9506413773059',
       variants: [{
-        variantGraphqlId: 'gid://shopify/ProductVariant/48720141091075',
-        variantId: '48720141091075',
+        selectionId: 'gid://shopify/ProductVariant/48720141091075',
         price: '829.00',
       }],
     });
@@ -707,6 +703,7 @@ describe('FPB Standard mobile summary action', () => {
   it('preserves direct default metadata on matching grid products', () => {
     const directDefault = {
       variantId: '48720141091075',
+      selectionId: '48720141091075',
       defaultRequiredQuantity: 1,
       isDirectDefaultProduct: true,
     };
@@ -720,6 +717,7 @@ describe('FPB Standard mobile summary action', () => {
       [{
         id: '9506413773059',
         variantId: '48720141091075',
+        selectionId: '48720141091075',
         title: '14k Dangling Obsidian Earrings',
       }],
     );

@@ -13,7 +13,7 @@ const DEFAULT_PLACEHOLDER_IMAGE = 'data:image/svg+xml,%3Csvg xmlns="http://www.w
 const PRODUCT_DESCRIPTION_PREVIEW_LENGTH = 110;
 
 export function renderSharedProductCard(product = {}, currentQuantity = 0, currencyInfo = {}, options = {}) {
-  const selectionKey = product.variantId || product.id || '';
+  const selectionKey = String(product.selectionId || '');
   const quantity = Math.max(0, Number(currentQuantity || 0));
   const isSelected = quantity > 0;
   const mode = options.mode || 'grid';
@@ -23,7 +23,7 @@ export function renderSharedProductCard(product = {}, currentQuantity = 0, curre
       : product.description,
   );
   const variantText = getVariantDisplayText(product);
-  const isIndividualVariantCard = Boolean(product.parentProductId && product.variantId && variantText);
+  const isIndividualVariantCard = Boolean(product.parentProductId && selectionKey && variantText);
   const title = getDisplayTitle(product, variantText);
   const imageUrls = getProductImageUrls(product);
   const imageUrl = imageUrls[0] || DEFAULT_PLACEHOLDER_IMAGE;
@@ -84,7 +84,7 @@ export function renderSharedProductCard(product = {}, currentQuantity = 0, curre
               })
               : isSelected
               ? renderQuantityControl({
-                variantId: selectionKey,
+                selectionId: selectionKey,
                 quantity,
                 decreaseDisabled: options.decreaseDisabled === true,
                 increaseDisabled: options.increaseDisabled === true,

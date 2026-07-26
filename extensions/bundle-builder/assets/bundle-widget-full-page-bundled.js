@@ -1,13 +1,13 @@
 /*!
  * Wolfpack Bundle Widget — Full Page
- * Version : 5.0.202
- * Built   : 2026-07-22
+ * Version : 5.0.205
+ * Built   : 2026-07-26
  *
  * Cache note: Shopify CDN cache is busted automatically by shopify app deploy.
  * After deploying, allow 2-10 minutes for propagation before testing.
  * Verify live version: console.log(window.__BUNDLE_WIDGET_VERSION__)
  */
-window.__BUNDLE_WIDGET_VERSION__ = '5.0.202';
+window.__BUNDLE_WIDGET_VERSION__ = '5.0.205';
 (function() {
   'use strict';
 
@@ -147,10 +147,9 @@ const ConditionValidator = (function () {
     const ids = new Set();
     const products = Array.isArray(category && category.products) ? category.products : [];
     for (const product of products) {
-      const raw = product && (product.id || product.productId || product.graphqlId);
+      const raw = product && product.selectionId;
       if (raw == null || raw === '') continue;
-
-      const id = String(raw).replace(new RegExp('^gid://shopify/[^/]+/'), '');
+      const id = String(raw);
       if (id) ids.add(id);
     }
     return ids;
@@ -246,8 +245,7 @@ const ConditionValidator = (function () {
     if (!step.conditionType) return true;
 
     if (!step.conditionOperator || !_isPositiveConditionValue(step.conditionValue)) {
-      const min = step.minQuantity != null ? Number(step.minQuantity) : 1;
-      return total >= min;
+      return true;
     }
 
     if (!_evaluateSatisfied(step.conditionOperator, normalizedConditionValue, total)) return false;
@@ -787,7 +785,7 @@ class BundleDataManager {
       compareAtPrice: sp.product?.compareAtPrice || null,
       variants: sp.product?.variants || [],
       variantId: sp.variantId || null,
-      quantity: sp.quantity || 1
+      quantity: Number.isFinite(Number(sp.quantity)) ? Number(sp.quantity) : 0,
     }));
   }
 
@@ -890,14 +888,13 @@ class PricingCalculator {
       const productsInStep = stepProductData[stepIndex] || [];
 
       Object.entries(stepSelections).forEach(([variantId, quantity]) => {
-
-        let product = productsInStep.find(p => String(p.variantId || p.id) === String(variantId));
+        let product = productsInStep.find(p => String(p.selectionId || '') === String(variantId));
         let matchedVariant = null;
 
         if (!product) {
           for (const p of productsInStep) {
             if (p.variants && Array.isArray(p.variants)) {
-              const variant = p.variants.find(v => String(v.id) === String(variantId));
+              const variant = p.variants.find(v => String(v.selectionId || '') === String(variantId));
               if (variant) {
                 product = p;
                 matchedVariant = variant;
@@ -2834,13 +2831,13 @@ if (typeof module !== 'undefined' && module.exports) {
  */
 
 function renderQuantityControl({
-  variantId,
+  selectionId,
   quantity = 0,
   decreaseDisabled = false,
   increaseDisabled = false,
   className = '',
 } = {}) {
-  const key = escapeHtml(variantId || '');
+  const key = escapeHtml(selectionId || '');
   const normalizedQuantity = Math.max(0, Number(quantity || 0));
   const classes = ['bw-quantity-control', 'inline-quantity-controls', className]
     .filter(Boolean)
@@ -2868,7 +2865,7 @@ const DEFAULT_PLACEHOLDER_IMAGE = 'data:image/svg+xml,%3Csvg xmlns="http://www.w
 const PRODUCT_DESCRIPTION_PREVIEW_LENGTH = 110;
 
 function renderSharedProductCard(product = {}, currentQuantity = 0, currencyInfo = {}, options = {}) {
-  const selectionKey = product.variantId || product.id || '';
+  const selectionKey = String(product.selectionId || '');
   const quantity = Math.max(0, Number(currentQuantity || 0));
   const isSelected = quantity > 0;
   const mode = options.mode || 'grid';
@@ -2878,7 +2875,7 @@ function renderSharedProductCard(product = {}, currentQuantity = 0, currencyInfo
       : product.description,
   );
   const variantText = getVariantDisplayText(product);
-  const isIndividualVariantCard = Boolean(product.parentProductId && product.variantId && variantText);
+  const isIndividualVariantCard = Boolean(product.parentProductId && selectionKey && variantText);
   const title = getDisplayTitle(product, variantText);
   const imageUrls = getProductImageUrls(product);
   const imageUrl = imageUrls[0] || DEFAULT_PLACEHOLDER_IMAGE;
@@ -2939,7 +2936,7 @@ function renderSharedProductCard(product = {}, currentQuantity = 0, currencyInfo
               })
               : isSelected
               ? renderQuantityControl({
-                variantId: selectionKey,
+                selectionId: selectionKey,
                 quantity,
                 decreaseDisabled: options.decreaseDisabled === true,
                 increaseDisabled: options.increaseDisabled === true,
@@ -3106,10 +3103,10 @@ const SELECTED_ROW_PLACEHOLDER_IMAGE = 'data:image/svg+xml,%3Csvg xmlns="http://
 function renderSelectedProductRow(product = null, options = {}) {
   if (!product) return renderEmptyRow(options);
 
-  const selectionKey = product.variantId || product.id || product.productId || '';
+  const selectionKey = String(product.selectionId || '');
   const title = product.title || product.parentTitle || '';
   const variantTitle = product.variantTitle || product.variant || '';
-  const quantity = Math.max(1, Number(product.quantity || 1));
+  const quantity = Math.max(0, Number(product.quantity || 0));
   const quantityLabel = product.quantityLabel || options.quantityLabel || `x${quantity}`;
   const imageUrl = product.imageUrl || product.image?.src || SELECTED_ROW_PLACEHOLDER_IMAGE;
   const removable = product.isDefault !== true && product.isLocked !== true && options.removable !== false;
@@ -5303,6 +5300,7 @@ normalizePersonalizationAddonProduct(product) {
   return {
     productId: productGid,
     id: productGid,
+    selectionId: productGid,
     title: product?.title || '',
     handle: product?.handle || '',
     imageUrl,
@@ -5311,7 +5309,9 @@ normalizePersonalizationAddonProduct(product) {
     variants: variants.map(variant => {
       const variantGid = variant.variantGraphqlId || variant.id || (variant.variantId ? `gid://shopify/ProductVariant/${variant.variantId}` : productGid);
       return {
+        variantId: variantGid,
         id: variantGid,
+        selectionId: variantGid,
         title: variant.variantTitle || variant.title || 'Default Title',
         price: variant.price || '0',
         compareAtPrice: variant.compareAtPrice || null,
@@ -5615,14 +5615,13 @@ async renderSteps() {
 
 function getMobileBottomBarActionState({
   conditionlessMobile,
-  hasSelectionMobile,
   isLastStep,
   isComplete,
   boxSelectionValidMobile,
 }) {
   const shouldAddToCart = conditionlessMobile || isLastStep;
   const disabled = conditionlessMobile
-    ? (!hasSelectionMobile || !boxSelectionValidMobile)
+    ? !boxSelectionValidMobile
     : (isLastStep ? (!isComplete || !boxSelectionValidMobile) : false);
 
   return { shouldAddToCart, disabled };
@@ -5884,11 +5883,9 @@ _renderMobileBottomBar({ preserveOpen = false } = {}) {
   totalEl.textContent = CurrencyManager.convertAndFormat(finalPrice, currencyInfo);
 
   const conditionlessMobile = this.bundleHasNoConditions();
-  const hasSelectionMobile = conditionlessMobile && this.getAllSelectedProductsData().filter(p => !p.isDefault).length > 0;
   const boxSelectionValidMobile = this.canCheckoutWithBoxSelection();
   const mobileActionState = getMobileBottomBarActionState({
     conditionlessMobile,
-    hasSelectionMobile,
     isLastStep,
     isComplete,
     boxSelectionValidMobile,
@@ -5983,6 +5980,29 @@ usesCompactMobileSummaryTray() {
 },
 };
 
+function getSummarySlotQuantity(item = {}) {
+  const quantity = Number(item?.quantity);
+  return Number.isFinite(quantity) ? Math.max(0, Math.floor(quantity)) : 0;
+}
+
+function expandSelectedItemsForSummarySlots(allSelectedProducts = []) {
+  const selectedProducts = Array.isArray(allSelectedProducts) ? allSelectedProducts : [];
+  const expanded = [];
+
+  selectedProducts.forEach((item) => {
+    const normalizedQuantity = getSummarySlotQuantity(item);
+    for (let index = 0; index < normalizedQuantity; index += 1) {
+      expanded.push({ ...item, quantity: 1 });
+    }
+  });
+
+  return expanded;
+}
+
+function getSelectionId(item = {}) {
+  return String(item?.selectionId || '');
+}
+
 function shouldUseMobileSummarySlotTiles({ designPreset, productSlotsEnabled } = {}) {
   if (productSlotsEnabled !== true) return false;
 
@@ -6055,10 +6075,20 @@ _populateCompactMobileSummaryTray(sheet) {
     ? totalPrice
     : finalPrice;
   const nextRule = PricingCalculator.getNextDiscountRule?.(this.selectedBundle, totalQuantity, totalPrice) || null;
-  const selectedFooterQuantity = this.getAllSelectedProductsData().reduce(
-    (sum, item) => sum + (Number(item.quantity) || 1),
-    0
-  );
+  const allSelectedProducts = this.getAllSelectedProductsData();
+  const shouldRenderSlotTiles = shouldUseMobileSummarySlotTiles({
+    designPreset: this.getFullPageDesignPreset(),
+    productSlotsEnabled: this._shouldRenderProductSlots(),
+  });
+  const selectedSlotItems = shouldRenderSlotTiles
+    ? expandSelectedItemsForSummarySlots(allSelectedProducts)
+    : [];
+  const selectedFooterQuantity = shouldRenderSlotTiles
+    ? selectedSlotItems.length
+    : allSelectedProducts.reduce((sum, item) => {
+      const quantity = Number(item.quantity);
+      return sum + (Number.isFinite(quantity) ? quantity : 0);
+    }, 0);
   const designPreset = this.getFullPageDesignPreset?.();
   const isClassicPreset = designPreset === 'CLASSIC';
   const usesAnimatedSummarySection = isClassicPreset || designPreset === 'STANDARD';
@@ -6120,10 +6150,7 @@ _populateCompactMobileSummaryTray(sheet) {
   this._syncCompactMobileSummaryScrollLock();
   sheet.classList.toggle(
     'fpb-mobile-summary-tray--slots',
-    shouldUseMobileSummarySlotTiles({
-      designPreset: this.getFullPageDesignPreset(),
-      productSlotsEnabled: this._shouldRenderProductSlots(),
-    })
+    shouldRenderSlotTiles
   );
   sheet.classList.remove('fpb-mobile-summary-tray--has-discount-summary');
 
@@ -6211,12 +6238,10 @@ _populateCompactMobileSummaryTray(sheet) {
   navSection.className = 'side-panel-nav';
   const isLastStep = this.currentStepIndex === (this.selectedBundle?.steps?.length || 1) - 1;
   const conditionlessMobile = this.bundleHasNoConditions();
-  const hasSelectionMobile = conditionlessMobile && this.getAllSelectedProductsData().filter(p => !p.isDefault).length > 0;
   const actionButton = this._createMobileSummaryActionButton({
     finalPrice: displayFinalPrice,
     currencyInfo,
     conditionlessMobile,
-    hasSelectionMobile,
     isLastStep,
     isComplete: this.areBundleConditionsMet()
   });
@@ -6470,7 +6495,22 @@ _renderCompactMobileSummaryBundleItems(currencyInfo, totalQuantity) {
     productsList.appendChild(row);
   });
 
+  const remainingSummarySkeletonCount = getRemainingSummarySkeletonCount({
+    designPreset: this.getFullPageDesignPreset(),
+    productSlotsEnabled: this._shouldRenderProductSlots(),
+    requiredQuantity: typeof this.getSummarySidebarMaxItemCount === 'function'
+      ? this.getSummarySidebarMaxItemCount()
+      : 0,
+    selectedQuantity: totalQuantity,
+  });
+
   if (
+    remainingSummarySkeletonCount > 0
+    && typeof this._renderSidebarProductSkeletons === 'function'
+  ) {
+    productsList.classList.add('fpb-mobile-summary-products-list--skeletons');
+    this._renderSidebarProductSkeletons(productsList, remainingSummarySkeletonCount);
+  } else if (
     allSelectedProducts.length === 0
     && !this._shouldRenderProductSlots()
     && typeof this._renderSidebarProductSkeletons === 'function'
@@ -6480,8 +6520,8 @@ _renderCompactMobileSummaryBundleItems(currencyInfo, totalQuantity) {
   }
 
   const requiredSlots = Math.max(
-    allSelectedProducts.length + 1,
-    activeStep?.maxQuantity || activeStep?.minQuantity || totalQuantity + 1,
+    allSelectedProducts.length,
+    totalQuantity,
     2
   );
   if (this._shouldRenderProductSlots()) {
@@ -6511,14 +6551,14 @@ _renderCompactMobileSummaryBundleItems(currencyInfo, totalQuantity) {
 },
 
 _renderCompactMobileSummarySlotTiles(container, allSelectedProducts = [], activeStep = null, totalQuantity = 0) {
-  const selectedItems = Array.isArray(allSelectedProducts) ? allSelectedProducts : [];
+  const selectedItems = expandSelectedItemsForSummarySlots(allSelectedProducts);
+  const selectedCount = selectedItems.length;
   const sharedTargetCount = typeof this.getSummarySidebarMaxItemCount === 'function'
-    ? this.getSummarySidebarMaxItemCount(selectedItems.length)
+    ? this.getSummarySidebarMaxItemCount(selectedCount)
     : 0;
   const slotCount = Math.max(
     sharedTargetCount,
-    selectedItems.length + 1,
-    activeStep?.maxQuantity || activeStep?.minQuantity || totalQuantity + 1,
+    selectedCount,
     2
   );
   const emptyStateIconUrl = this._escapeHTML(this.selectedBundle?.productSlotIconUrl || '');
@@ -6550,7 +6590,6 @@ _createMobileSummaryActionButton({
   finalPrice,
   currencyInfo,
   conditionlessMobile,
-  hasSelectionMobile,
   isLastStep,
   isComplete
 }) {
@@ -6577,7 +6616,7 @@ _createMobileSummaryActionButton({
   if (
     shouldAddToCart
     && !shouldKeepClassicValidationClickable
-    && (conditionlessMobile ? (!hasSelectionMobile || !this.canCheckoutWithBoxSelection()) : (!isComplete || !this.canCheckoutWithBoxSelection()))
+    && (conditionlessMobile ? !this.canCheckoutWithBoxSelection() : (!isComplete || !this.canCheckoutWithBoxSelection()))
   ) ctaBtn.disabled = true;
   ctaBtn.addEventListener('click', async () => {
     if (shouldAddToCart) {
@@ -6687,7 +6726,7 @@ createStandardSidebarSelectedRow(item, currencyInfo) {
   const wrapper = document.createElement('div');
 
   wrapper.innerHTML = renderSelectedProductRow({
-    id: item.variantId || item.productId || item.id,
+    id: getSelectionId(item),
     title: summaryTitle,
     variantTitle: variantInfo,
     imageUrl: this._getSelectedProductImageSrc(item),
@@ -6735,6 +6774,29 @@ createStandardSidebarDiscountProgress({ discountMessage, combinedDiscountInfo, t
 
 };
 
+function getSummarySlotQuantity(item = {}) {
+  const quantity = Number(item?.quantity);
+  return Number.isFinite(quantity) ? Math.max(0, Math.floor(quantity)) : 0;
+}
+
+function expandSelectedItemsForSummarySlots(allSelectedProducts = []) {
+  const selectedProducts = Array.isArray(allSelectedProducts) ? allSelectedProducts : [];
+  const expanded = [];
+
+  selectedProducts.forEach((item) => {
+    const normalizedQuantity = getSummarySlotQuantity(item);
+    for (let index = 0; index < normalizedQuantity; index += 1) {
+      expanded.push({ ...item, quantity: 1 });
+    }
+  });
+
+  return expanded;
+}
+
+function getSelectionId(item = {}) {
+  return String(item?.selectionId || '');
+}
+
 function shouldUseSharedDesktopSummarySlotTiles({
   designPreset,
   productSlotsEnabled,
@@ -6743,6 +6805,24 @@ function shouldUseSharedDesktopSummarySlotTiles({
 
   const preset = typeof designPreset === 'string' ? designPreset.trim().toUpperCase() : '';
   return preset === 'STANDARD' || preset === 'COMPACT' || preset === 'HORIZONTAL';
+}
+
+function getRemainingSummarySkeletonCount({
+  designPreset,
+  productSlotsEnabled,
+  requiredQuantity,
+  selectedQuantity,
+} = {}) {
+  if (productSlotsEnabled === true) return 0;
+
+  const preset = typeof designPreset === 'string' ? designPreset.trim().toUpperCase() : '';
+  if (preset !== 'COMPACT' && preset !== 'HORIZONTAL') return 0;
+
+  const required = Number(requiredQuantity);
+  const selected = Number(selectedQuantity);
+  if (!Number.isFinite(required) || required <= 0) return 0;
+
+  return Math.max(0, required - (Number.isFinite(selected) ? Math.max(0, selected) : 0));
 }
 
 const fullPageSidePanelMethods = {
@@ -6786,6 +6866,20 @@ renderSidePanel(panel) {
     designPreset: this.getFullPageDesignPreset(),
     productSlotsEnabled: useInlineSummarySlots,
   });
+  const remainingSummarySkeletonCount = getRemainingSummarySkeletonCount({
+    designPreset: this.getFullPageDesignPreset(),
+    productSlotsEnabled: useInlineSummarySlots,
+    requiredQuantity: typeof this.getSummarySidebarMaxItemCount === 'function'
+      ? this.getSummarySidebarMaxItemCount()
+      : 0,
+    selectedQuantity: totalQuantity,
+  });
+  const selectedSlotItems = useInlineSummarySlots
+    ? expandSelectedItemsForSummarySlots(allSelectedProducts)
+    : [];
+  const selectedSummaryCount = useInlineSummarySlots
+    ? selectedSlotItems.length
+    : allSelectedProducts.length;
 
   panel.classList.toggle('full-page-side-panel--inline-slots', useInlineSummarySlots);
   panel.classList.toggle('full-page-side-panel--skeleton-list', !useInlineSummarySlots);
@@ -6919,11 +7013,9 @@ renderSidePanel(panel) {
 
   const countLabel = document.createElement('div');
   countLabel.className = 'side-panel-item-count';
-  countLabel.textContent = isClassicDesktopSidebar
-    ? `${allSelectedProducts.length} item${allSelectedProducts.length !== 1 ? 's' : ''}`
-    : isStandardDesktopSidebar
-      ? `${allSelectedProducts.length} item(s)`
-      : `${allSelectedProducts.length} item${allSelectedProducts.length !== 1 ? 's' : ''}`;
+  countLabel.textContent = isStandardDesktopSidebar
+    ? `${selectedSummaryCount} item(s)`
+    : `${selectedSummaryCount} item${selectedSummaryCount !== 1 ? 's' : ''}`;
   summaryContent.appendChild(countLabel);
 
   if (isClassicDesktopSidebar) {
@@ -7050,8 +7142,7 @@ renderSidePanel(panel) {
     }
     if (isHorizontalPreset && !useSharedDesktopSummarySlotTiles) {
       const requiredSlots = Math.max(
-        totalQuantity + 1,
-        activeStep?.maxQuantity || activeStep?.minQuantity || 2,
+        totalQuantity,
         2
       );
       if (this._shouldRenderProductSlots()) {
@@ -7078,10 +7169,22 @@ renderSidePanel(panel) {
         }
       }
     }
+    if (
+      remainingSummarySkeletonCount > 0
+      && typeof this._renderSidebarProductSkeletons === 'function'
+    ) {
+      this._renderSidebarProductSkeletons(productsContainer, remainingSummarySkeletonCount);
+    }
     summaryContent.appendChild(productsContainer);
   }
 
-  if (!isStandardDesktopSidebar && !isMobileSheet && allSelectedProducts.length === 0 && !isHorizontalPreset) {
+  if (
+    !isStandardDesktopSidebar
+    && !isMobileSheet
+    && allSelectedProducts.length === 0
+    && !isHorizontalPreset
+    && remainingSummarySkeletonCount === 0
+  ) {
     const skeletonContainer = document.createElement('div');
     skeletonContainer.className = 'side-panel-skeleton-slots';
     this._renderSidebarProductSkeletons(skeletonContainer);
@@ -7119,7 +7222,6 @@ renderSidePanel(panel) {
   const canProceed = this.canProceedToNextStep();
   const conditionless = this.bundleHasNoConditions();
   const canReturnToPreviousStep = !conditionless && this.currentStepIndex > 0;
-  const hasSelection = conditionless && this.getAllSelectedProductsData().length > 0;
   const sidebarTierCtaContent = (conditionless || isLastStep) && !isActiveAddonStep
     ? this.getSidebarTierCtaContent(nextRule)
     : null;
@@ -7173,7 +7275,7 @@ renderSidePanel(panel) {
       nextBtn.title = ctaTextParts.join(' ');
     }
   }
-  if (!isStandardDesktopSidebar && (conditionless ? !hasSelection : (isLastStep ? !this.areBundleConditionsMet() : !canProceed))) {
+  if (!isStandardDesktopSidebar && (conditionless ? !this.canCheckoutWithBoxSelection() : (isLastStep ? !this.areBundleConditionsMet() : !canProceed))) {
     nextBtn.disabled = true;
   }
   nextBtn.addEventListener('click', async () => {
@@ -7211,10 +7313,11 @@ renderSidePanel(panel) {
 },
 
 _renderStandardSidebarSlotTiles(container, allSelectedProducts = []) {
-  const selectedItems = Array.isArray(allSelectedProducts) ? allSelectedProducts : [];
+  const selectedItems = expandSelectedItemsForSummarySlots(allSelectedProducts);
+  const selectedCount = selectedItems.length;
   const slotCount = Math.max(
-    this.getSummarySidebarMaxItemCount(selectedItems.length),
-    selectedItems.length + 1,
+    this.getSummarySidebarMaxItemCount(selectedCount),
+    selectedCount,
     2
   );
   const emptyStateIconUrl = this._escapeHTML(this.selectedBundle?.productSlotIconUrl || '');
@@ -7230,6 +7333,8 @@ _renderStandardSidebarSlotTiles(container, allSelectedProducts = []) {
 
     if (item) {
       const summaryTitle = this.getSummaryProductDisplayTitle(item);
+      const productId = getSelectionId(item);
+      const selectedStepIndex = Number(item.stepIndex);
       const imgSrc = this._getSelectedProductImageSrc(item);
       slot.innerHTML = imgSrc
         ? `<img src="${imgSrc}" alt="${this._escapeHTML(summaryTitle)}" class="side-panel-inline-slot-image">`
@@ -7247,12 +7352,31 @@ _renderStandardSidebarSlotTiles(container, allSelectedProducts = []) {
           removeBtn.classList.add('side-panel-inline-slot-remove--disabled');
           removeBtn.setAttribute('aria-disabled', 'true');
           removeBtn.title = removalState.blockedMessage;
-        }
+          removeBtn.addEventListener('click', (event) => {
+            event.stopPropagation();
+          });
+        } else {
+          removeBtn.addEventListener('click', (event) => {
+            event.stopPropagation();
+            if (!Number.isFinite(selectedStepIndex) || !productId) return;
 
-        removeBtn.addEventListener('click', (event) => {
-          event.stopPropagation();
-          this.removeSummarySelectedProduct(item, summaryTitle);
-        });
+            const selectedQty = Number(this.selectedProducts?.[selectedStepIndex]?.[productId] || 0);
+            const nextQty = Math.max(0, selectedQty - 1);
+            if (nextQty === selectedQty) return;
+
+            this.updateProductSelection(selectedStepIndex, productId, nextQty);
+            const truncated = summaryTitle && summaryTitle.length > 25
+              ? summaryTitle.substring(0, 25) + '...'
+              : (summaryTitle || 'Product');
+            ToastManager.showWithUndo(
+              `Removed "${truncated}"`,
+              () => {
+                this.updateProductSelection(selectedStepIndex, productId, selectedQty);
+              },
+              5000
+            );
+          });
+        }
 
         slot.appendChild(removeBtn);
       }
@@ -7328,19 +7452,42 @@ removeSummarySelectedProduct(item = {}, summaryTitle = '') {
   }
 
   const stepIndex = item.stepIndex;
-  const productId = item.variantId || item.productId || item.id;
-  const removedItem = { stepIndex, variantId: productId, quantity: item.quantity, title: item.title };
+  const productId = getSelectionId(item);
+  const removedItem = { stepIndex, selectionId: productId, quantity: item.quantity, title: item.title };
   this.updateProductSelection(stepIndex, productId, 0);
   const displayTitle = summaryTitle || item.title || 'Product';
   const truncated = displayTitle.length > 25 ? displayTitle.substring(0, 25) + '...' : displayTitle;
   ToastManager.showWithUndo(
     `Removed "${truncated}"`,
-    () => { this.updateProductSelection(removedItem.stepIndex, removedItem.variantId, removedItem.quantity); },
+    () => { this.updateProductSelection(removedItem.stepIndex, removedItem.selectionId, removedItem.quantity); },
     5000
   );
   return true;
 },
 };
+
+function getSummarySlotQuantity(item = {}) {
+  const quantity = Number(item?.quantity);
+  return Number.isFinite(quantity) ? Math.max(0, Math.floor(quantity)) : 0;
+}
+
+function expandSelectedItemsForSummarySlots(allSelectedProducts = []) {
+  const selectedProducts = Array.isArray(allSelectedProducts) ? allSelectedProducts : [];
+  const expanded = [];
+
+  selectedProducts.forEach((item) => {
+    const normalizedQuantity = getSummarySlotQuantity(item);
+    for (let index = 0; index < normalizedQuantity; index += 1) {
+      expanded.push({ ...item, quantity: 1 });
+    }
+  });
+
+  return expanded;
+}
+
+function getSelectionId(item = {}) {
+  return String(item?.selectionId || '');
+}
 
 const fullPageBoxSelectionSidebarMethods = {
 getSidebarTierCtaContent(nextRule) {
@@ -7510,8 +7657,7 @@ getClassicSidebarSlotCount(allSelectedProducts = [], activeStep = null) {
   );
 
   const activeBoxQuantity = Number(activeBoxRule?.boxQuantity || 0);
-  const stepQuantity = Number(activeStep?.maxQuantity || activeStep?.minQuantity || 0);
-  const selectedCount = Array.isArray(allSelectedProducts) ? allSelectedProducts.length : 0;
+  const selectedCount = expandSelectedItemsForSummarySlots(allSelectedProducts).length;
 
   if (activeBoxQuantity > 0) {
     return Math.max(activeBoxQuantity, selectedCount);
@@ -7521,24 +7667,25 @@ getClassicSidebarSlotCount(allSelectedProducts = [], activeStep = null) {
     return this.getSummarySidebarMaxItemCount(selectedCount);
   }
 
-  return Math.max(stepQuantity, selectedCount + 1, 2);
+  return Math.max(selectedCount, 2);
 },
 
 renderClassicSidebarSlots(allSelectedProducts = [], slotCount = 0) {
   const safeSlotCount = Math.max(0, Number(slotCount || 0));
+  const selectedSlotItems = expandSelectedItemsForSummarySlots(allSelectedProducts);
   const slotData = [];
 
   for (let slotIndex = 0; slotIndex < safeSlotCount; slotIndex += 1) {
-    const item = allSelectedProducts[slotIndex];
+    const item = selectedSlotItems[slotIndex];
 
     if (item) {
       const summaryTitle = this.getSummaryProductDisplayTitle(item);
-      const productId = item.variantId || item.productId || item.id;
+      const productId = getSelectionId(item);
       slotData.push({
         id: `classic-slot-${slotIndex}`,
         label: summaryTitle,
         product: {
-          id: productId,
+          selectionId: productId,
           title: summaryTitle,
           variantTitle: this.getSummaryProductVariantDisplay(item),
           imageUrl: this._getSelectedProductImageSrc(item) || BUNDLE_WIDGET.PLACEHOLDER_IMAGE,
@@ -7568,20 +7715,34 @@ renderClassicSidebarSlots(allSelectedProducts = [], slotCount = 0) {
     removeBtn.addEventListener('click', (event) => {
       event.stopPropagation();
       const productId = removeBtn.dataset.variantId;
-      const item = allSelectedProducts.find(selectedItem =>
-        String(selectedItem.variantId || selectedItem.productId || selectedItem.id) === String(productId)
-      );
-      if (!item || !productId) return;
+      const slotNode = typeof removeBtn.closest === 'function'
+        ? removeBtn.closest('[data-slot-id]')
+        : null;
+      const slotId = slotNode?.dataset?.slotId
+        || slotNode?.getAttribute?.('data-slot-id')
+        || null;
 
-      const summaryTitle = this.getSummaryProductDisplayTitle(item);
+      let product = slotId
+        ? slotData.find((item) => item.id === slotId)?.product
+        : undefined;
+      if (!product && productId) {
+        product = slotData.find((item) => item.product?.selectionId === productId)?.product;
+      }
+      if (!product || !product.selectionId) return;
+
+      const selectedQty = Number(this.selectedProducts?.[product.stepIndex]?.[product.selectionId] || 0);
+      const nextQuantity = Math.max(0, selectedQty - 1);
+      if (nextQuantity === selectedQty) return;
+
+      const summaryTitle = this.getSummaryProductDisplayTitle(product);
       const removedItem = {
-        stepIndex: item.stepIndex,
-        variantId: productId,
-        quantity: item.quantity,
-        title: summaryTitle,
+        stepIndex: product.stepIndex,
+        selectionId: product.selectionId,
+        quantity: selectedQty,
+        title: product.title || summaryTitle || 'Product',
       };
 
-      this.updateProductSelection(item.stepIndex, productId, 0);
+      this.updateProductSelection(product.stepIndex, product.selectionId, nextQuantity);
 
       const truncated = summaryTitle && summaryTitle.length > 25
         ? summaryTitle.substring(0, 25) + '...'
@@ -7592,7 +7753,7 @@ renderClassicSidebarSlots(allSelectedProducts = [], slotCount = 0) {
         () => {
           this.updateProductSelection(
             removedItem.stepIndex,
-            removedItem.variantId,
+            removedItem.selectionId,
             removedItem.quantity
           );
         },
@@ -7672,7 +7833,7 @@ _getStepSelectedQuantity(stepIndex) {
 },
 
 _getStepRequiredQuantity(step) {
-  if (!step) return 1;
+  if (!step) return 0;
 
   const toNumber = (value) => {
     const parsed = Number(value);
@@ -7681,8 +7842,6 @@ _getStepRequiredQuantity(step) {
 
   const primaryValue = toNumber(step.conditionValue);
   const secondaryValue = toNumber(step.conditionValue2);
-  const minQuantity = toNumber(step.minQuantity);
-  const maxQuantity = toNumber(step.maxQuantity);
   const OPERATORS = ConditionValidator.OPERATORS;
 
   const targetForOperator = (operator, value) => {
@@ -7691,7 +7850,7 @@ _getStepRequiredQuantity(step) {
       case OPERATORS.GREATER_THAN:
         return value + 1;
       case OPERATORS.LESS_THAN:
-        return Math.max(1, value - 1);
+        return Math.max(0, value - 1);
       case OPERATORS.LESS_THAN_OR_EQUAL_TO:
       case OPERATORS.EQUAL_TO:
       case OPERATORS.GREATER_THAN_OR_EQUAL_TO:
@@ -7704,11 +7863,9 @@ _getStepRequiredQuantity(step) {
   const targets = [
     targetForOperator(step.conditionOperator, primaryValue),
     targetForOperator(step.conditionOperator2, secondaryValue),
-    minQuantity,
-    maxQuantity,
   ].filter((value) => value != null && value > 0);
 
-  return targets.length > 0 ? Math.max(...targets) : 1;
+  return targets.length > 0 ? Math.max(...targets) : 0;
 },
 
 _getStepProgressRatio(stepIndex) {
@@ -7717,6 +7874,7 @@ _getStepProgressRatio(stepIndex) {
   if (this.isStepCompleted(stepIndex)) return 1;
 
   const requiredQuantity = this._getStepRequiredQuantity(step);
+  if (!Number.isFinite(requiredQuantity) || requiredQuantity <= 0) return 0;
   const selectedQuantity = this._getStepSelectedQuantity(stepIndex);
   return Math.max(0, Math.min(1, selectedQuantity / requiredQuantity));
 },
@@ -8127,7 +8285,7 @@ ensureBundleBannerRuntimeStyles() {
 getStepQuantityHint(step) {
   if (!step) return null;
 
-  const { conditionOperator, conditionValue, conditionOperator2, conditionValue2, minQuantity, maxQuantity } = step;
+  const { conditionOperator, conditionValue, conditionOperator2, conditionValue2 } = step;
   const OPERATORS = ConditionValidator.OPERATORS;
 
   if (conditionOperator && conditionValue != null) {
@@ -8150,11 +8308,6 @@ getStepQuantityHint(step) {
     }
   }
 
-  const min = minQuantity != null ? Number(minQuantity) : null;
-  const max = maxQuantity != null ? Number(maxQuantity) : null;
-  if (min && max && min !== max) return `Pick ${min}–${max}`;
-  if (min && min > 1) return `Pick ${min}+`;
-  if (max && max > 1) return `Up to ${max}`;
   return null;
 },
 
@@ -8164,7 +8317,7 @@ getStepProductImages(stepIndex) {
 
   Object.entries(selectedProducts).forEach(([variantId, quantity]) => {
     if (quantity > 0) {
-      const product = this.stepProductData[stepIndex]?.find(p => (p.variantId || p.id) === variantId);
+      const product = this.stepProductData[stepIndex]?.find(p => String(p.selectionId || '') === String(variantId));
       if (product && product.imageUrl && !productImages.find(img => img.url === product.imageUrl)) {
         productImages.push({
           url: product.imageUrl,
@@ -8464,7 +8617,7 @@ formatPromoDiscountTierLabel(rule, pricing, currencyInfo) {
 collectStepProductIds(step) {
   const productIds = [];
   const addProductId = (product) => {
-    const id = product?.id || product?.graphqlId || product?.productId;
+    const id = product?.selectionId;
     if (id && !productIds.includes(id)) productIds.push(id);
   };
 
@@ -8510,7 +8663,7 @@ getStepCategoryTabEntries(step) {
         if (handle && !handles.includes(handle)) handles.push(handle);
       };
       const addProductId = (product) => {
-        const productId = product?.id || product?.graphqlId || product?.productId;
+        const productId = product?.selectionId;
         if (productId && !productIds.includes(productId)) productIds.push(productId);
       };
 
@@ -8577,6 +8730,10 @@ createActiveCategoryTitle(stepIndex) {
   return title;
 },
 };
+
+function getSelectionId(item = {}) {
+  return String(item?.selectionId || '');
+}
 
 function shouldCategoryTabActivateProducts() {
   return true;
@@ -8740,7 +8897,7 @@ orderProductsForActiveCategory(products, activeCategory, stepIndex) {
 
   const productOrder = new Map();
   const addProductId = (productId) => {
-    const normalizedProductId = this.extractId(productId) || productId;
+    const normalizedProductId = this.extractId(productId);
     if (normalizedProductId && !productOrder.has(normalizedProductId)) {
       productOrder.set(normalizedProductId, productOrder.size);
     }
@@ -8758,7 +8915,7 @@ orderProductsForActiveCategory(products, activeCategory, stepIndex) {
       return {
         product,
         index,
-        order: productOrder.get(this.extractId(productId) || productId),
+        order: productOrder.get(this.extractId(productId)),
       };
     })
     .filter(entry => entry.order !== undefined)
@@ -8792,9 +8949,9 @@ createFullPageProductGrid(stepIndex) {
       if (collectionProductIds && collectionProductIds.length > 0) {
         products = products.filter(p => {
 
-          const numericPid = p.parentProductId || p.id || '';
-          return collectionProductIds.some(cid => {
-            const numericCid = this.extractId(cid) || cid;
+        const numericPid = p.parentProductId || p.id || '';
+        return collectionProductIds.some(cid => {
+            const numericCid = this.extractId(cid);
             return numericPid === numericCid;
           });
         });
@@ -8833,8 +8990,8 @@ createFullPageProductGrid(stepIndex) {
     const productCard = this.createProductCard(product, stepIndex, {
       displayVariantsAsIndividualProducts: shouldDisplayVariantsAsIndividual,
     });
-    const productId = product.variantId || product.id;
-    const currentQty = stepSelections[productId] || 0;
+    const productId = getSelectionId(product);
+    const currentQty = productId ? (stepSelections[productId] || 0) : 0;
 
     if (isStepAtCapacity && currentQty === 0) {
       productCard.classList.add('dimmed');
@@ -8869,6 +9026,7 @@ expandProductsByVariant(products, shouldExpand = true) {
       return product.variants
         .filter(variant => isVariantSelectable(variant))
         .map(variant => {
+          const variantSelectionId = getSelectionId(variant);
           const runtimeInventory = typeof context.getRuntimeVariantInventory === 'function'
             ? context.getRuntimeVariantInventory(variant)
             : null;
@@ -8893,7 +9051,8 @@ expandProductsByVariant(products, shouldExpand = true) {
             imageUrl,
             price: typeof variant.price === 'number' ? variant.price : toCents(variant.price),
             compareAtPrice: variant.compareAtPrice ? (typeof variant.compareAtPrice === 'number' ? variant.compareAtPrice : toCents(variant.compareAtPrice)) : null,
-            variantId: variant.id,
+            variantId: variantSelectionId || variant.id,
+            selectionId: variantSelectionId,
             available: isVariantSelectable(variant),
             quantityAvailable: typeof inventorySource.quantityAvailable === 'number' ? inventorySource.quantityAvailable : null,
             currentlyNotInStock: inventorySource.currentlyNotInStock === true,
@@ -8966,12 +9125,16 @@ preloadNextStep() {
 
 };
 
+function getSelectionId(item = {}) {
+  return String(item?.selectionId || '');
+}
+
 const fullPageProductCardFooterMethods = {
 createProductCard(product, stepIndex, options = {}) {
-  const productId = product.variantId || product.id;
+  const productId = getSelectionId(product);
   const selectedQuantity = this.selectedProducts[stepIndex]?.[productId] || 0;
   const directDefaultQuantity = product?.isDirectDefaultProduct
-    ? Number(product.defaultRequiredQuantity || 1) || 1
+    ? Math.max(0, Number.parseFloat(product.defaultRequiredQuantity) || 0)
     : 0;
   const currentQuantity = Math.max(0, selectedQuantity - directDefaultQuantity);
 
@@ -9264,7 +9427,7 @@ attachProductCardListeners(cardElement, product, stepIndex, options = {}) {
   const step = (this.selectedBundle?.steps || [])[stepIndex];
   if (step?.isDefault) return;
 
-  const getProductId = () => product.variantId || product.id;
+  const getProductId = () => getSelectionId(product);
   const getClickedProductId = (element) => element?.dataset?.productId || getProductId();
 
   cardElement.addEventListener('click', (e) => {
@@ -9339,7 +9502,18 @@ attachProductCardListeners(cardElement, product, stepIndex, options = {}) {
     const productId = getClickedProductId(addBtn);
     const currentQty = this.selectedProducts[stepIndex]?.[productId] || 0;
     if (currentQty === 0) {
-      this.updateProductSelection(stepIndex, productId, 1);
+      const directDefaultQuantities = this._getDirectDefaultSelectionQuantities?.(stepIndex) || {};
+      const hasDirectDefaultQuantity = Object.prototype.hasOwnProperty.call(
+        directDefaultQuantities,
+        String(productId),
+      );
+      const directDefaultQuantity = hasDirectDefaultQuantity
+        ? Number(directDefaultQuantities[String(productId)] || 0)
+        : null;
+      const nextQuantity = directDefaultQuantity ?? 1;
+      if (nextQuantity > 0) {
+        this.updateProductSelection(stepIndex, productId, nextQuantity);
+      }
     }
   });
 
@@ -9473,10 +9647,9 @@ renderFullPageFooter() {
   const currencyInfo = CurrencyManager.getCurrencyInfo();
   const finalPrice = combinedDiscountInfo.hasDiscount ? combinedDiscountInfo.finalPrice : totalPrice;
 
-  const totalRequired = (this.selectedBundle.steps || []).reduce((sum, step) => {
-    if (step.isFreeGift || step.isDefault) return sum;
-    return sum + (Number(step.conditionValue) || Number(step.minQuantity) || 1);
-  }, 0);
+  const totalRequired = typeof this.getSummarySidebarMaxItemCount === 'function'
+    ? this.getSummarySidebarMaxItemCount()
+    : 0;
 
   const isLastStep = this.currentStepIndex === this.selectedBundle.steps.length - 1;
 
@@ -9514,8 +9687,20 @@ renderFullPageFooter() {
 
 };
 
+const getSelectionId = (value = {}) => String(value?.selectionId || '');
+const findProductBySelectionId = (products = [], selectionId = '') => {
+  const normalized = String(selectionId || '');
+  return products.find(product => getSelectionId(product) === normalized);
+};
+
+const findVariantBySelectionId = (product, selectionId = '') => {
+  const normalized = String(selectionId || '');
+  const variants = Array.isArray(product?.variants) ? product.variants : [];
+  return variants.find(variant => String(variant?.selectionId || '') === normalized);
+};
+
 const fullPageFooterSelectionMethods = {
-_createFooterPanel(allSelectedProducts, currencyInfo) {
+  _createFooterPanel(allSelectedProducts, currencyInfo) {
   const panel = document.createElement('div');
   panel.className = 'footer-panel';
 
@@ -9552,12 +9737,14 @@ _createFooterPanel(allSelectedProducts, currencyInfo) {
       if (!removeBtn) return;
       removeBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        const removedItem = { stepIndex: item.stepIndex, variantId: item.variantId, quantity: item.quantity, title: item.title };
-        this.updateProductSelection(item.stepIndex, item.variantId, 0);
+        const selectionId = getSelectionId(item);
+        if (!selectionId) return;
+        const removedItem = { stepIndex: item.stepIndex, selectionId, quantity: item.quantity, title: item.title };
+        this.updateProductSelection(item.stepIndex, selectionId, 0);
         const truncated = summaryTitle.length > 25 ? summaryTitle.substring(0, 25) + '...' : summaryTitle;
         ToastManager.showWithUndo(
           `Removed "${truncated}"`,
-          () => { this.updateProductSelection(removedItem.stepIndex, removedItem.variantId, removedItem.quantity); },
+          () => { this.updateProductSelection(removedItem.stepIndex, removedItem.selectionId, removedItem.quantity); },
           5000
         );
       });
@@ -9638,9 +9825,8 @@ _createFooterBar(allSelectedProducts, totalQuantity, totalRequired, totalPrice, 
   ctaBtn.className = 'footer-cta-btn';
   ctaBtn.setAttribute('type', 'button');
   const conditionless = this.bundleHasNoConditions();
-  const hasSelection = conditionless && this.getAllSelectedProductsData().length > 0;
   ctaBtn.textContent = (conditionless || isLastStep) ? this._resolveText('addToCartButton', this.config.addToCartText || 'Add to Cart') : this._resolveText('nextButton', 'Next');
-  if (conditionless ? (!hasSelection || !this.canCheckoutWithBoxSelection()) : (isLastStep ? (!this.areBundleConditionsMet() || !this.canCheckoutWithBoxSelection()) : !this.canProceedToNextStep())) {
+  if (conditionless ? !this.canCheckoutWithBoxSelection() : (isLastStep ? (!this.areBundleConditionsMet() || !this.canCheckoutWithBoxSelection()) : !this.canProceedToNextStep())) {
     ctaBtn.disabled = true;
   }
   ctaBtn.addEventListener('click', () => {
@@ -9682,49 +9868,44 @@ getAllSelectedProductsData() {
     Object.entries(stepSelections).forEach(([variantId, quantity]) => {
       if (quantity > 0) {
 
-        let product = productsInStep.find(p =>
-          String(p.variantId) === String(variantId) || String(p.id) === String(variantId)
-        );
-
+        let product = findProductBySelectionId(productsInStep, variantId);
         let matchedVariant = null;
         if (!product) {
           for (const p of productsInStep) {
-            if (p.variants && Array.isArray(p.variants)) {
-              const variant = p.variants.find(v => String(v.id) === String(variantId));
-              if (variant) {
-                product = p;
-                matchedVariant = variant;
-                break;
-              }
-            }
+            const variant = findVariantBySelectionId(p, variantId);
+            if (!variant) continue;
+            product = p;
+            matchedVariant = variant;
+            break;
           }
+        } else {
+          matchedVariant = findVariantBySelectionId(product, variantId);
         }
 
         if (product) {
 
-          const variantData = matchedVariant || product;
-          const isVariantMatch = !!matchedVariant;
-
           let variantTitle = '';
-          if (isVariantMatch && matchedVariant.title && matchedVariant.title !== 'Default Title') {
+          if (matchedVariant && matchedVariant.title && matchedVariant.title !== 'Default Title') {
             variantTitle = matchedVariant.title;
           } else if (product.variantTitle && product.variantTitle !== 'Default Title') {
             variantTitle = product.variantTitle;
           }
 
-          const imageUrl = isVariantMatch
+          const imageUrl = matchedVariant
             ? (matchedVariant.image?.src || matchedVariant.image || product.imageUrl || product.image?.src || '')
             : (product.imageUrl || product.image?.src || '');
 
-          const price = isVariantMatch
+          const price = matchedVariant
             ? (typeof matchedVariant.price === 'number' ? matchedVariant.price : (parseFloat(matchedVariant.price || '0') * 100))
             : (product.price || 0);
+          const selectionId = String(variantId || '');
 
           allProducts.push({
             stepIndex,
-            variantId,
+            selectionId,
+            variantId: selectionId,
             quantity,
-            title: isVariantMatch
+            title: matchedVariant
               ? (variantTitle ? `${product.title} - ${variantTitle}` : product.title)
               : (product.title || 'Untitled Product'),
             parentTitle: product.parentTitle || product.title || 'Untitled Product',
@@ -9749,15 +9930,17 @@ groupVariantsByProduct(selectedProducts) {
   const productMap = new Map();
 
   selectedProducts.forEach(item => {
+    const canonicalVariantId = getSelectionId(item);
+    if (!canonicalVariantId) return;
 
-    const product = this.stepProductData[item.stepIndex]?.find(p => {
-
-      return p.variants?.some(v => String(v.id) === String(item.variantId)) || String(p.id) === String(item.variantId);
-    });
+    const product = this.stepProductData[item.stepIndex]?.find(p =>
+      getSelectionId(p) === canonicalVariantId
+    );
 
     if (!product) return;
 
-    const productId = product.id || product.productId;
+    const productId = getSelectionId(product);
+    if (!productId) return;
     const key = `${item.stepIndex}-${productId}`;
 
     if (!productMap.has(key)) {
@@ -9783,18 +9966,20 @@ groupVariantsByProduct(selectedProducts) {
 
 showVariantBreakdown(productGroup) {
   const overlay = document.createElement('div');
-  overlay.className = 'variant-breakdown-overlay';
+  overlay.className = "variant-breakdown-overlay";
 
   const popup = document.createElement('div');
-  popup.className = 'variant-breakdown-popup';
+  popup.className = "variant-breakdown-popup";
 
   const currencyInfo = CurrencyManager.getCurrencyInfo();
   const variantsHtml = productGroup.variants.map(variant => {
+    const variantSelectionId = getSelectionId(variant);
     const product = this.stepProductData[variant.stepIndex]?.find(p =>
-      p.variants?.some(v => String(v.id) === String(variant.variantId)) || String(p.id) === String(variant.variantId)
+      getSelectionId(p) === variantSelectionId
     );
-    const variantObj = product?.variants?.find(v => String(v.id) === String(variant.variantId));
-    const variantTitle = variantObj?.title || variant.title || 'Variant';
+    const variantObj = product ? findVariantBySelectionId(product, variantSelectionId) : null;
+    const variantTitle = variantObj?.title || variant.title || "Variant";
+    const removeVariantId = String(variantSelectionId || '');
 
     return `
       <div class="variant-breakdown-item">
@@ -9803,7 +9988,7 @@ showVariantBreakdown(productGroup) {
           <span class="variant-title">${variantTitle}</span>
           <span class="variant-quantity">Qty: ${variant.quantity} × ${CurrencyManager.convertAndFormat(variant.price, currencyInfo)}</span>
         </div>
-        <button class="remove-variant-btn" data-step="${variant.stepIndex}" data-variant-id="${variant.variantId}">Remove</button>
+        <button class="remove-variant-btn" data-step="${variant.stepIndex}" data-variant-id="${removeVariantId}">Remove</button>
       </div>
     `;
   }).join('');
@@ -9825,8 +10010,9 @@ showVariantBreakdown(productGroup) {
 
   popup.querySelectorAll('.remove-variant-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
-      const stepIndex = parseInt(e.target.dataset.step);
-      const variantId = e.target.dataset.variantId;
+      const stepIndex = parseInt(e.target.dataset.step, 10);
+      const variantId = String(e.target.dataset.variantId || '');
+      if (!Number.isFinite(stepIndex) || !variantId) return;
       this.updateProductSelection(stepIndex, variantId, 0);
       document.body.removeChild(overlay);
       this.reRenderFullPage();
@@ -9836,7 +10022,9 @@ showVariantBreakdown(productGroup) {
   popup.querySelector('.add-another-variant-btn').addEventListener('click', () => {
     document.body.removeChild(overlay);
 
-    const product = this.stepProductData[productGroup.stepIndex]?.find(p => String(p.id) === String(productGroup.productId));
+    const product = this.stepProductData[productGroup.stepIndex]?.find(p =>
+      getSelectionId(p) === getSelectionId(productGroup)
+    );
     const step = this.selectedBundle.steps[productGroup.stepIndex];
     if (product && step && this.productModal) {
       this.productModal.open(product, step);
@@ -9852,8 +10040,9 @@ showVariantBreakdown(productGroup) {
 },
 
 findProductByVariantId(step, variantId) {
+  const normalizedVariantId = String(variantId || '');
   return step.products?.find(p =>
-    p.variants?.some(v => v.id === variantId) || p.id === variantId
+    getSelectionId(p) === normalizedVariantId
   );
 },
 
@@ -9928,6 +10117,19 @@ function normalizeAddonPercentageDiscount(...sources) {
 
 function getAddonDiscountForStepTier(step, tier) {
   return normalizeAddonPercentageDiscount(tier?.discount, tier, step?.addonDiscount);
+}
+
+function getSelectionId(item = {}) {
+  return String(item?.selectionId || '');
+}
+
+function getDefaultVariantQuantity(variant = {}) {
+  return normalizeDefaultRequiredQuantity(variant.defaultRequiredQuantity);
+}
+
+function normalizeDefaultRequiredQuantity(value = 0) {
+  const rawQuantity = Number.parseFloat(value);
+  return Number.isFinite(rawQuantity) && rawQuantity >= 0 ? rawQuantity : 0;
 }
 
 function createFreeGiftStatusIcon(state) {
@@ -10186,12 +10388,20 @@ _getFreeGiftRemainingCount() {
 
   if (paidStepsComplete) return 0;
 
-  const total = this.paidSteps.reduce((sum, s) =>
-    sum + (Number(s.conditionValue) || Number(s.minQuantity) || 1), 0);
+  const total = this.paidSteps.reduce((sum, s) => {
+      const required = typeof this._getSummarySidebarRequiredQuantity === 'function'
+        ? this._getSummarySidebarRequiredQuantity(s)
+        : null;
+      return sum + (Number.isFinite(required) && required > 0 ? required : 0);
+    },
+    0);
   const selected = this.paidSteps.reduce((sum, paidStep) => {
     const globalIndex = steps.indexOf(paidStep);
     const stepSel = this.selectedProducts[globalIndex] ?? {};
-    return sum + Object.values(stepSel).reduce((s, p) => s + (typeof p === 'number' ? p : (p.quantity || 1)), 0);
+    return sum + Object.values(stepSel).reduce((s, p) => {
+      const quantity = typeof p === 'number' ? p : Number(p?.quantity);
+      return s + (Number.isFinite(quantity) ? quantity : 0);
+    }, 0);
   }, 0);
   return Math.max(0, total - selected);
 },
@@ -10263,8 +10473,9 @@ getAddonProductSelectionKeys(step) {
   const keys = new Set();
   const addKey = (value) => {
     if (value === null || value === undefined || value === '') return;
-    const normalized = this.extractId(value) || value;
-    keys.add(String(normalized));
+    const selectionId = String(value?.selectionId || '');
+    if (!selectionId) return;
+    keys.add(selectionId);
   };
   const products = [
     ...(Array.isArray(step?.StepProduct) ? step.StepProduct : []),
@@ -10272,19 +10483,10 @@ getAddonProductSelectionKeys(step) {
   ];
 
   products.forEach(product => {
-    addKey(product.id);
-    addKey(product.productId);
-    addKey(product.graphqlId);
-    addKey(product.variantId);
-    addKey(product.variantGraphqlId);
-    addKey(product.title);
-    (Array.isArray(product.variants) ? product.variants : []).forEach(variant => {
-      addKey(variant.id);
-      addKey(variant.variantId);
-      addKey(variant.variantGraphqlId);
-      addKey(variant.admin_graphql_api_id);
-      addKey(variant.title);
-    });
+    addKey(product);
+    if (Array.isArray(product.variants)) {
+      product.variants.forEach(addKey);
+    }
   });
 
   return keys;
@@ -10406,26 +10608,65 @@ createAddonTierMessageElement(message, isEligible) {
 },
 
 _initDefaultProducts() {
-  const steps = this.selectedBundle?.steps || [];
+    const steps = this.selectedBundle?.steps || [];
+    const normalizeId = (value = '') => this.extractId(value);
+    const normalizeSelectionId = (candidate) => getSelectionId(candidate);
+    const canSelectDefault = (variant) => {
+      if (!variant) return false;
+      if (typeof this.isVariantSelectableForInventory === 'function') {
+        return this.isVariantSelectableForInventory(variant);
+      }
+      return variant.available !== false;
+  };
+
   steps.forEach((step, stepIndex) => {
     if (!step.isDefault || !step.defaultVariantId) return;
-
-    const targetId = this.extractId(step.defaultVariantId);
+    const targetId = normalizeId(step.defaultVariantId);
     if (!targetId) return;
     const allProducts = [...(step.products || []), ...(step.StepProduct || [])];
-    const product = allProducts.find(p =>
-      this.extractId(p.variantId) === targetId ||
-      this.extractId(p.id) === targetId ||
-      this.extractId(p.gid) === targetId ||
-      (p.variants || []).some(v =>
-        this.extractId(v.id) === targetId || this.extractId(v.gid) === targetId
-      )
-    );
-    if (product) {
-      if (!this.selectedProducts[stepIndex]) this.selectedProducts[stepIndex] = {};
-      this.selectedProducts[stepIndex][targetId] = 1;
+    const isMatchingDefault = (candidate) => normalizeSelectionId(candidate) === targetId;
+    const product = allProducts.find((product) => {
+      if (isMatchingDefault(product)) return true;
+      if (!Array.isArray(product.variants)) return false;
+      return product.variants.some(isMatchingDefault);
+    });
+    if (!product) return;
+    let selectedVariant = null;
+    if (Array.isArray(product.variants) && product.variants.length > 0) {
+      selectedVariant = product.variants.find(isMatchingDefault);
+      if (!selectedVariant) return;
+    } else {
+      selectedVariant = product;
     }
+
+    if (!canSelectDefault(selectedVariant)) return;
+    if (!this.selectedProducts[stepIndex]) this.selectedProducts[stepIndex] = {};
+    this.selectedProducts[stepIndex][targetId] = getDefaultVariantQuantity(selectedVariant);
   });
+},
+
+_initDirectDefaultProducts() {
+  const canSelectDirectDefault = (product = {}) => {
+    const firstVariant = Array.isArray(product.variants) ? product.variants[0] : null;
+    if (!firstVariant) return false;
+    if (typeof this.isVariantSelectableForInventory === 'function') {
+      return this.isVariantSelectableForInventory(firstVariant);
+    }
+    return firstVariant.available !== false;
+  };
+
+  this.directDefaultProducts = this._getDirectDefaultProductItems();
+  if (this.directDefaultProducts.length === 0 || !this.selectedProducts[0]) return;
+
+    this.directDefaultProducts = this.directDefaultProducts.filter(canSelectDirectDefault);
+    this.directDefaultProducts.forEach(product => {
+      const selectionId = getSelectionId(product);
+      if (!selectionId) return;
+      const defaultQuantity = Number.parseFloat(product.defaultRequiredQuantity);
+      this.selectedProducts[0][selectionId] = Number.isFinite(defaultQuantity) && defaultQuantity >= 0
+        ? defaultQuantity
+        : 0;
+    });
 },
 
 _syncFreeGiftLock() {
@@ -10549,8 +10790,10 @@ _renderStandardSidebarEmptySlots(container, options = {}) {
   }
 },
 
-_renderSidebarProductSkeletons(container) {
-  const slotCount = this.getSummarySidebarMaxItemCount();
+_renderSidebarProductSkeletons(container, slotCountOverride) {
+  const slotCount = Number.isFinite(Number(slotCountOverride))
+    ? Math.max(0, Number(slotCountOverride))
+    : this.getSummarySidebarMaxItemCount();
   for (let i = 0; i < slotCount; i++) {
     const slot = document.createElement('div');
     slot.className = 'side-panel-product-row side-panel-skeleton-slot';
@@ -10620,7 +10863,7 @@ getSummarySidebarMaxItemCount(selectedCount = 0) {
     : null;
   const activeBoxQuantity = Number(activeBoxRule?.boxQuantity || 0);
   if (activeBoxQuantity > 0) {
-    return Math.max(activeBoxQuantity, selected, 1);
+    return Math.max(activeBoxQuantity, selected);
   }
 
   let totalRequired = 0;
@@ -10632,7 +10875,7 @@ getSummarySidebarMaxItemCount(selectedCount = 0) {
     }
   }
 
-  return Math.max(totalRequired, selected, 1);
+  return Math.max(totalRequired, selected);
 },
 
 getSummarySidebarEmptyStateMode() {
@@ -10756,9 +10999,8 @@ async addBundleToCart(clickedButton = null) {
 
       Object.entries(stepSelections).forEach(([variantId, quantity]) => {
         if (quantity > 0) {
-
-          const numericVariantId = this.extractId(variantId) || variantId;
-          const product = productsInStep.find(p => String(p.variantId || p.id) === String(variantId))
+          const numericVariantId = String(variantId || '');
+          const product = productsInStep.find(p => String(p.selectionId || '') === String(variantId))
             || { id: variantId, title: variantId };
 
           if (isFullPageCartLineOutOfStock(this, product)) {
@@ -10789,8 +11031,7 @@ async addBundleToCart(clickedButton = null) {
             if (addonEval?.tier?.tierId) {
               properties._addonTierId = String(addonEval.tier.tierId);
             }
-            const addonVariantId = this.extractId(variantId);
-            properties._uniqueWpbItemKey = `${addonVariantId || numericVariantId}_pageId:addonProduct`;
+            properties._uniqueWpbItemKey = `${numericVariantId}_pageId:addonProduct`;
             properties._bundle_step_type = addonDiscount
               ? `addon:${addonDiscount.type}:${addonDiscount.value}`
               : 'addon';
@@ -11025,7 +11266,7 @@ getStepProductImages(stepIndex) {
 
   Object.entries(selectedProducts).forEach(([variantId, quantity]) => {
     if (quantity > 0) {
-      const product = this.stepProductData[stepIndex].find(p => (p.variantId || p.id) === variantId);
+      const product = this.stepProductData[stepIndex].find(p => String(p.selectionId || '') === String(variantId));
       if (product && product.imageUrl && !productImages.find(img => img.url === product.imageUrl)) {
         productImages.push({
           url: product.imageUrl,
@@ -11586,6 +11827,13 @@ function extractFullPageId(idString) {
   return idString.toString().split('/').pop();
 }
 
+function normalizeDefaultQuantity(value) {
+  const rawQuantity = Number.parseFloat(value);
+  return Number.isFinite(rawQuantity) && rawQuantity >= 0
+    ? rawQuantity
+    : 0;
+}
+
 function normalizeAddonPercentageDiscount(discount, tier = null) {
   const type = String(discount?.type ?? tier?.discountType ?? '').toUpperCase();
   const value = Number(discount?.value ?? tier?.discountValue ?? 0);
@@ -11601,16 +11849,9 @@ function collectProductSelectionKeys(product) {
     keys.add(String(normalized));
   };
 
-  addKey(product?.id);
-  addKey(product?.productId);
-  addKey(product?.graphqlId);
-  addKey(product?.variantId);
-  addKey(product?.variantGraphqlId);
+  addKey(product?.selectionId);
   (Array.isArray(product?.variants) ? product.variants : []).forEach(variant => {
-    addKey(variant?.id);
-    addKey(variant?.variantId);
-    addKey(variant?.variantGraphqlId);
-    addKey(variant?.admin_graphql_api_id);
+    addKey(variant?.selectionId);
   });
 
   return keys;
@@ -11737,12 +11978,38 @@ function collectCategoryProducts(step) {
   return products;
 }
 
+function normalizeProductLookupId(product = {}) {
+  return extractFullPageId(product?.selectionId);
+}
+
+function normalizeStorefrontApiVariant(variant = {}) {
+  const selectionId = extractFullPageId(variant?.id);
+  if (!selectionId) return null;
+  return { ...variant, selectionId };
+}
+
+function normalizeStorefrontApiProduct(product = {}) {
+  const selectionId = extractFullPageId(product?.id);
+  if (!selectionId) return null;
+  return {
+    ...product,
+    selectionId,
+    variants: (Array.isArray(product?.variants) ? product.variants : [])
+      .map(normalizeStorefrontApiVariant)
+      .filter(Boolean),
+  };
+}
+
+function storefrontApiProductLookupKey(product = {}) {
+  return extractFullPageId(product?.id);
+}
+
 function productLookupKey(product) {
-  return extractFullPageId(product?.id || product?.productId || product?.graphqlId);
+  return normalizeProductLookupId(product);
 }
 
 function productGraphqlId(product) {
-  const rawId = product?.graphqlId || product?.productId || product?.id;
+  const rawId = product?.selectionId;
   if (!rawId) return null;
   const normalized = String(rawId);
   if (normalized.startsWith('gid://shopify/Product/')) return normalized;
@@ -11771,13 +12038,7 @@ function normalizeCachedRuntimeProduct(product) {
 }
 
 function variantLookupKey(variant) {
-  return extractFullPageId(
-    variant?.id
-    || variant?.variantId
-    || variant?.variantGraphqlId
-    || variant?.graphqlId
-    || variant?.admin_graphql_api_id
-  );
+  return extractFullPageId(variant?.selectionId);
 }
 
 function mergeVariantRuntimeAvailability(product, categoryProduct) {
@@ -11817,8 +12078,9 @@ function mergeVariantRuntimeAvailability(product, categoryProduct) {
 
 function normalizeFullPageDirectDefaultProduct(product) {
   const variant = Array.isArray(product?.variants) ? product.variants[0] : null;
-  const variantId = extractFullPageId(variant?.variantGraphqlId || variant?.variantId || variant?.id);
+  const variantId = variant?.selectionId ? extractFullPageId(variant.selectionId) : null;
   if (!variantId) return null;
+  const productId = normalizeProductLookupId(product) || variantId;
 
   const imageUrl = product.images?.[0]?.originalSrc
     || product.images?.[0]?.url
@@ -11828,26 +12090,28 @@ function normalizeFullPageDirectDefaultProduct(product) {
     ? variant.inventoryQuantity
     : null;
   const price = Number.parseFloat(variant?.price || product?.price || '0') * 100;
-  const requiredQuantity = Number(product.requiredQuantity || 1) || 1;
+  const normalizedRequiredQuantity = normalizeDefaultQuantity(product.requiredQuantity);
   const explicitlyUnavailable = variant?.availableForSale === false || variant?.available === false;
   const available = !explicitlyUnavailable;
   const quantityAvailable = inventoryQuantity;
 
   return {
-    id: extractFullPageId(product.graphqlId || product.productId) || product.productId || variantId,
+    id: productId,
     title: product.title || '',
     handle: product.handle || '',
     imageUrl,
     price,
     compareAtPrice: null,
     variantId,
+    selectionId: variantId,
     available,
     quantityAvailable,
     currentlyNotInStock: false,
-    defaultRequiredQuantity: requiredQuantity,
+    defaultRequiredQuantity: normalizedRequiredQuantity,
     isDirectDefaultProduct: true,
     variants: [{
       id: variantId,
+      selectionId: variantId,
       title: variant?.title || variant?.variantTitle || '',
       price,
       compareAtPrice: null,
@@ -11920,7 +12184,7 @@ async loadStepProducts(stepIndex) {
   const productIds = !step?.isFreeGift ? this.collectStepProductIds(step) : [];
   if (!step?.isFreeGift && Array.isArray(step.StepProduct)) {
     step.StepProduct.forEach(product => {
-      const id = product?.productId || product?.graphqlId || product?.id;
+      const id = normalizeProductLookupId(product);
       if (id && !productIds.includes(id)) productIds.push(id);
     });
   }
@@ -11961,7 +12225,7 @@ async loadStepProducts(stepIndex) {
                 this.rememberRuntimeProductInventory(data.products);
               }
               data.products.forEach(product => {
-                const key = productLookupKey(product);
+                const key = storefrontApiProductLookupKey(product);
                 if (key) fetchedProductsByKey.set(key, product);
               });
             }
@@ -12013,7 +12277,7 @@ async loadStepProducts(stepIndex) {
             }
             if (shouldRefreshRuntimeInventory) {
               data.products.forEach(product => {
-                const key = productLookupKey(product);
+                const key = storefrontApiProductLookupKey(product);
                 if (key) refreshedProductKeys.add(key);
               });
             }
@@ -12055,6 +12319,7 @@ async loadStepProducts(stepIndex) {
 
       const enrichedProducts = step.StepProduct.map(sp => ({
         id: sp.productId,
+        selectionId: normalizeProductLookupId(sp),
         title: sp.title,
         handle: sp.handle,
         imageUrl: sp.imageUrl,
@@ -12149,7 +12414,8 @@ async loadStepProducts(stepIndex) {
 
   const seen = new Set();
   this.stepProductData[stepIndex] = processedProducts.filter(product => {
-    const key = product.variantId || product.id;
+    const key = product.selectionId || '';
+    if (!key) return true;
     if (seen.has(key)) {
       return false;
     }
@@ -12185,7 +12451,10 @@ _initDirectDefaultProducts() {
   if (this.directDefaultProducts.length === 0 || !this.selectedProducts[0]) return;
 
   this.directDefaultProducts.forEach(product => {
-    this.selectedProducts[0][product.variantId] = product.defaultRequiredQuantity || 1;
+    const selectionId = product?.selectionId;
+    if (!selectionId) return;
+    const defaultQuantity = normalizeDefaultQuantity(product.defaultRequiredQuantity);
+    this.selectedProducts[0][selectionId] = defaultQuantity;
   });
 },
 
@@ -12196,12 +12465,12 @@ _mergeDirectDefaultProductsIntoStep(stepIndex, products) {
 
   const directDefaultsByVariant = new Map(
     this.directDefaultProducts
-      .filter(product => product?.variantId)
-      .map(product => [String(product.variantId), product])
+      .filter(product => product?.selectionId)
+      .map(product => [String(product.selectionId), product])
   );
   const seenDirectDefaults = new Set();
   const mergedProducts = products.map(product => {
-    const key = String(product?.variantId || product?.id || '');
+    const key = String(product?.selectionId || '');
     const directDefault = directDefaultsByVariant.get(key);
     if (!directDefault) return product;
 
@@ -12214,7 +12483,7 @@ _mergeDirectDefaultProductsIntoStep(stepIndex, products) {
   });
 
   const unmatchedDirectDefaults = this.directDefaultProducts.filter(product => {
-    const key = String(product?.variantId || '');
+    const key = String(product?.selectionId || '');
     return key && !seenDirectDefaults.has(key);
   });
 
@@ -12224,8 +12493,8 @@ _mergeDirectDefaultProductsIntoStep(stepIndex, products) {
 _getDirectDefaultSelectionQuantities(stepIndex) {
   if (stepIndex !== 0 || !Array.isArray(this.directDefaultProducts)) return {};
   return this.directDefaultProducts.reduce((quantities, product) => {
-    if (product?.variantId) {
-      quantities[String(product.variantId)] = product.defaultRequiredQuantity || 1;
+    if (product?.selectionId) {
+      quantities[String(product.selectionId)] = normalizeDefaultQuantity(product.defaultRequiredQuantity);
     }
     return quantities;
   }, {});
@@ -12276,7 +12545,7 @@ rememberRuntimeProductInventory(products) {
 
   products.forEach(product => {
     (Array.isArray(product?.variants) ? product.variants : []).forEach(variant => {
-      const key = variantLookupKey(variant);
+      const key = extractFullPageId(variant?.id);
       if (!key) return;
       this._fpbRuntimeVariantInventoryById[key] = {
         available: variant.available === true,
@@ -12322,10 +12591,13 @@ processProductsForStep(products, step) {
 
   const toCents = (value) => Math.round(parseFloat(value || '0') * 100);
   const normalizeVariant = (v) => {
+    const variantId = variantLookupKey(v);
+    if (!variantId) return null;
     const quantityAvailable = typeof v.quantityAvailable === 'number' ? v.quantityAvailable : null;
     const currentlyNotInStock = v.currentlyNotInStock === true;
     return {
-      id: this.extractId(v.id),
+      id: variantId,
+      selectionId: variantId,
       title: v.title,
       price: toCents(v.price),
       compareAtPrice: v.compareAtPrice ? toCents(v.compareAtPrice) : null,
@@ -12347,16 +12619,22 @@ processProductsForStep(products, step) {
     };
   };
 
-  return products.flatMap(product => {
+  const normalizedProducts = (Array.isArray(products) ? products : [])
+    .map(normalizeStorefrontApiProduct)
+    .filter(Boolean);
+
+  return normalizedProducts.flatMap(product => {
     if (this.shouldExpandStepProductsDuringLoad(step) && product.variants && product.variants.length > 0) {
 
-      const processedVariants = (product.variants || []).map(normalizeVariant);
+      const processedVariants = (product.variants || []).map(normalizeVariant).filter(Boolean);
 
       const processedOptions = deriveProductOptionNames(product);
 
-      return product.variants
+    return product.variants
         .filter(variant => this.isVariantSelectableForInventory(variant))
         .map(variant => {
+          const variantId = variantLookupKey(variant);
+          if (!variantId) return null;
 
           const imageUrl = variant?.image?.src
             || variant?.image?.url
@@ -12370,12 +12648,13 @@ processProductsForStep(products, step) {
             || BUNDLE_WIDGET.PLACEHOLDER_IMAGE;
 
           return {
-            id: this.extractId(variant.id),
+            id: variantId,
             title: `${product.title} - ${variant.title}`,
             imageUrl,
             price: toCents(variant.price),
             compareAtPrice: variant.compareAtPrice ? toCents(variant.compareAtPrice) : null,
-            variantId: this.extractId(variant.id),
+            variantId,
+            selectionId: variantId,
             available: this.isVariantSelectableForInventory(variant),
             quantityAvailable: typeof variant.quantityAvailable === 'number' ? variant.quantityAvailable : null,
             currentlyNotInStock: variant.currentlyNotInStock === true,
@@ -12383,7 +12662,7 @@ processProductsForStep(products, step) {
             weightUnit: 'GRAMS',
             sellingPlanAllocations: variant.sellingPlanAllocations || [],
 
-            parentProductId: this.extractId(product.id),
+            parentProductId: normalizeProductLookupId(product),
             parentTitle: product.title,
             variants: processedVariants,
             options: processedOptions,
@@ -12391,7 +12670,8 @@ processProductsForStep(products, step) {
             description: normalizeProductDescription(product),
             descriptionHtml: normalizeProductDescriptionHtml(product)
           };
-        });
+        })
+        .filter(Boolean);
     } else {
 
       const defaultVariant = this.getFirstAvailableVariant(product);
@@ -12414,15 +12694,20 @@ processProductsForStep(products, step) {
 
       const processedOptions = deriveProductOptionNames(product);
 
+      const productId = normalizeProductLookupId(product);
+      const selectionId = variantLookupKey(defaultVariant) || normalizeProductLookupId(product);
+      if (!selectionId) return [];
+
       return [{
-        id: this.extractId(product.id),
+        id: productId,
         title: product.title,
         imageUrl,
         price: defaultVariant
           ? toCents(defaultVariant.price)
           : toCents(product.price),
         compareAtPrice: defaultVariant?.compareAtPrice ? toCents(defaultVariant.compareAtPrice) : null,
-        variantId: this.extractId(defaultVariant?.id || product.id),
+        variantId: selectionId,
+        selectionId,
         sellingPlanAllocations: defaultVariant?.sellingPlanAllocations || [],
         available: defaultVariant ? this.isVariantSelectableForInventory(defaultVariant) : product.available === true,
         quantityAvailable: typeof defaultVariant?.quantityAvailable === 'number' ? defaultVariant.quantityAvailable : null,
@@ -12471,7 +12756,7 @@ isVariantOutOfStock(product) {
 
 getVariantAvailable(stepIndex, variantId) {
   const products = this.stepProductData[stepIndex] || [];
-  const requestedVariantKey = variantLookupKey({ id: variantId });
+  const requestedVariantKey = extractFullPageId(variantId);
   const product = products.find(p => variantLookupKey(p) === requestedVariantKey)
     || products.flatMap(p => Array.isArray(p?.variants) ? p.variants : [])
       .find(variant => variantLookupKey(variant) === requestedVariantKey);
@@ -12508,6 +12793,10 @@ extractId(idString) {
   return idString.toString().split('/').pop();
 },
 
+getProductSelectionId(product = {}) {
+  return String(product?.selectionId || '');
+},
+
 shouldApplyIndividualSellingPlanSelection() {
   return this.selectedBundle?.individualSellingPlanSelection?.isEnabled === true;
 },
@@ -12522,9 +12811,12 @@ shouldApplyIndividualSellingPlanSelectionForProduct(product, variantId) {
     return true;
   }
 
-  const normalizedSelectedId = this.extractId(variantId) || String(variantId || "");
+  const normalizedSelectedId = this.getProductSelectionId({ selectionId: variantId });
   const variant = Array.isArray(product?.variants)
-    ? product.variants.find((candidate) => this.extractId(candidate.id) === normalizedSelectedId)
+    ? product.variants.find((candidate) => {
+      const candidateId = variantLookupKey(candidate);
+      return candidateId === normalizedSelectedId;
+    })
     : null;
 
   const target = variant ?? product;
@@ -12564,7 +12856,7 @@ async enrichMissingProductDescriptions(products) {
     (Array.isArray(data.products) ? data.products : []).forEach(product => {
       const description = normalizeProductDescription(product);
       const descriptionHtml = normalizeProductDescriptionHtml(product);
-      const key = productLookupKey(product);
+      const key = storefrontApiProductLookupKey(product);
       if (key && (description || descriptionHtml)) {
         descriptionsByProductId.set(key, { description, descriptionHtml });
       }
@@ -12591,15 +12883,19 @@ async enrichMissingProductDescriptions(products) {
 },
 };
 
+function getSelectionId(item = {}) {
+  return String(item?.selectionId || '');
+}
+
 const fullPageModalProductMethods = {
 getSelectedSellingPlanAllocationId(product, variantId) {
   if (!this.shouldApplyIndividualSellingPlanSelectionForProduct(product, variantId)) {
     return null;
   }
 
-  const normalizedSelectedId = this.extractId(variantId) || String(variantId || '');
+  const normalizedSelectedId = getSelectionId({ selectionId: variantId });
   const variant = Array.isArray(product?.variants)
-    ? product.variants.find((candidate) => this.extractId(candidate.id) === normalizedSelectedId)
+    ? product.variants.find((candidate) => getSelectionId(candidate) === normalizedSelectedId)
     : null;
 
   const normalizedProduct = (variant?.sellingPlanAllocations !== undefined ? variant : product) || {};
@@ -12708,7 +13004,7 @@ renderModalProducts(stepIndex, productsToRender = null) {
   }
 
   productGrid.innerHTML = products.map(product => {
-    const selectionKey = product.variantId || product.id;
+    const selectionKey = getSelectionId(product);
     const currentQuantity = selectedProducts[selectionKey] || 0;
     const currencyInfo = CurrencyManager.getCurrencyInfo();
 
@@ -12772,7 +13068,7 @@ attachProductEventHandlers(productGrid, stepIndex) {
 
   const findProduct = (productId) => {
     return this.stepProductData[stepIndex]?.find(p => {
-      const selectionKey = p.variantId || p.id;
+      const selectionKey = getSelectionId(p);
       return String(selectionKey) === String(productId);
     });
   };
@@ -12812,12 +13108,20 @@ attachProductEventHandlers(productGrid, stepIndex) {
       e.stopPropagation();
       const productId = e.target.dataset.productId;
       const currentQuantity = this.selectedProducts[stepIndex][productId] || 0;
+      const directDefaultQuantities = this._getDirectDefaultSelectionQuantities?.(stepIndex) || {};
+      const hasDirectDefaultQuantity = Object.prototype.hasOwnProperty.call(
+        directDefaultQuantities,
+        String(productId),
+      );
+      const directDefaultQuantity = hasDirectDefaultQuantity
+        ? Number(directDefaultQuantities[String(productId)] || 0)
+        : null;
+      const nextQuantity = currentQuantity > 0
+        ? 0
+        : (directDefaultQuantity ?? 1);
 
-      if (currentQuantity > 0) {
-        this.updateProductSelection(stepIndex, productId, 0);
-      } else {
-
-        this.updateProductSelection(stepIndex, productId, 1);
+      if (nextQuantity > 0 || currentQuantity > 0) {
+        this.updateProductSelection(stepIndex, productId, nextQuantity);
       }
     }
   });
@@ -12863,9 +13167,9 @@ attachProductEventHandlers(productGrid, stepIndex) {
       const newVariantId = e.target.value;
       const baseProductId = e.target.dataset.baseProductId;
 
-      const product = this.stepProductData[stepIndex].find(p => p.id === baseProductId);
+      const product = this.stepProductData[stepIndex].find(p => getSelectionId(p) === String(baseProductId));
       if (product) {
-        const variantData = product.variants.find(v => v.id === newVariantId);
+        const variantData = product.variants.find(v => getSelectionId(v) === String(newVariantId));
         if (variantData) {
 
           product.quantityAvailable = typeof variantData.quantityAvailable === 'number'
@@ -12874,9 +13178,10 @@ attachProductEventHandlers(productGrid, stepIndex) {
           product.currentlyNotInStock = variantData.currentlyNotInStock === true;
           product.available = variantData.available === true;
 
-          const oldQuantity = this.selectedProducts[stepIndex][product.variantId] || 0;
+          const productSelectionKey = getSelectionId(product);
+          const oldQuantity = this.selectedProducts[stepIndex][productSelectionKey] || 0;
           if (oldQuantity > 0) {
-            delete this.selectedProducts[stepIndex][product.variantId];
+            delete this.selectedProducts[stepIndex][productSelectionKey];
 
             const newQtyAvail = product.quantityAvailable;
             const newOOS = this.isVariantOutOfStock(product);
@@ -12897,6 +13202,7 @@ attachProductEventHandlers(productGrid, stepIndex) {
           }
 
           product.variantId = newVariantId;
+          product.selectionId = newVariantId;
           product.price = variantData.price;
 
           this.updateModalNavigation();
@@ -12910,6 +13216,14 @@ attachProductEventHandlers(productGrid, stepIndex) {
     el.style.cursor = 'pointer';
   });
 },
+};
+
+function getSelectionId(item = {}) {
+  return String(item?.selectionId || '');
+}
+
+const normalizeCategoryProductId = (product) => {
+  return getSelectionId(product);
 };
 
 function shouldAutoAdvanceFullPageStep({ quantity = 0, step = null } = {}) {
@@ -12967,18 +13281,17 @@ function buildCategoryRuleValidationStep(step, stepIndex, stepCollectionProductI
     categories: categories.map(category => {
       const products = Array.isArray(category?.products) ? [...category.products] : [];
       const seenProductIds = new Set(products.map(product => {
-        const rawId = product?.id || product?.productId || product?.graphqlId;
-        return rawId == null ? '' : String(extractId(rawId) || rawId);
+        return normalizeCategoryProductId(product);
       }));
       const addCollectionHandle = (collection) => {
         const handle = collection?.handle;
         if (!handle) return;
         const productIds = stepCollectionProductIds[`${stepIndex}:${handle}`] || [];
         productIds.forEach(productId => {
-          const normalizedId = String(extractId(productId) || productId);
+          const normalizedId = String(productId == null ? '' : productId);
           if (!normalizedId || seenProductIds.has(normalizedId)) return;
           seenProductIds.add(normalizedId);
-          products.push({ id: normalizedId });
+          products.push({ selectionId: normalizedId });
         });
       };
 
@@ -13194,18 +13507,30 @@ updateProductQuantityDisplay(stepIndex, productId, quantity) {
       existingQuantityControls.remove();
     }
 
-    if (!existingAddBtn) {
-      const addButton = document.createElement('button');
-      addButton.className = 'product-add-btn';
-      addButton.dataset.productId = productId;
-      addButton.textContent = this.getProductAddButtonText();
-      actionContainer.appendChild(addButton);
+      if (!existingAddBtn) {
+        const addButton = document.createElement('button');
+        addButton.className = 'product-add-btn';
+        addButton.dataset.productId = productId;
+        addButton.textContent = this.getProductAddButtonText();
+        actionContainer.appendChild(addButton);
 
-      addButton.addEventListener('click', (e) => {
-        e.stopPropagation();
-        this.updateProductSelection(stepIndex, productId, 1);
-      });
-    }
+        addButton.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const directDefaultQuantities = this._getDirectDefaultSelectionQuantities?.(stepIndex) || {};
+          const hasDirectDefaultQuantity = Object.prototype.hasOwnProperty.call(
+            directDefaultQuantities,
+            String(productId),
+          );
+          const directDefaultQuantity = hasDirectDefaultQuantity
+            ? Number(directDefaultQuantities[String(productId)] || 0)
+            : null;
+          const currentQuantity = this.selectedProducts[stepIndex]?.[productId] || 0;
+          const nextQuantity = currentQuantity > 0 ? 0 : (directDefaultQuantity ?? 1);
+          if (nextQuantity > 0 || currentQuantity > 0) {
+            this.updateProductSelection(stepIndex, productId, nextQuantity);
+          }
+        });
+      }
 
     productCard.classList.remove('bw-product-card--selected');
   }
@@ -13250,7 +13575,7 @@ _refreshSiblingDimState(stepIndex) {
 
 findProductById(stepIndex, productId) {
   const products = this.stepProductData[stepIndex] || [];
-  return products.find(p => (p.variantId || p.id) === productId);
+  return products.find(p => getSelectionId(p) === String(productId));
 },
 
   validateStepCondition(stepIndex, productId, newQuantity) {
@@ -13266,7 +13591,7 @@ findProductById(stepIndex, productId) {
     const conditionSelectionTotals = isAmountOrWeight
       ? this._buildConditionAwareStepSelections(stepProducts, conditionSelections)
       : conditionSelections;
-    const targetProduct = stepProducts.find(p => (p.variantId || p.id) === productId);
+    const targetProduct = stepProducts.find(p => getSelectionId(p) === String(productId));
     const targetValues = isAmountOrWeight
       ? {
         amount: Number(targetProduct?.price || 0),
@@ -13311,7 +13636,7 @@ findProductById(stepIndex, productId) {
     const products = this.stepProductData[stepIndex] || [];
     const translated = {};
     for (const [selKey, qty] of Object.entries(conditionSelections)) {
-      const product = products.find(p => (p.variantId || p.id) === selKey);
+      const product = products.find(p => getSelectionId(p) === String(selKey));
       const productId = String((product && (product.parentProductId || product.id)) || selKey);
       const quantity = Number(qty) || 0;
       const current = translated[productId] || { quantity: 0, amount: 0 };
@@ -13340,7 +13665,7 @@ findProductById(stepIndex, productId) {
     for (const [selKey, qty] of Object.entries(selections)) {
       const quantity = Number(qty) || 0;
       if (quantity <= 0) continue;
-      const product = stepProducts.find(p => (p.variantId || p.id) === selKey);
+      const product = stepProducts.find(p => getSelectionId(p) === String(selKey));
       const unitAmount = Number(product?.price || 0);
       const unitWeight = Number(product?.weight || product?.weightInGrams || product?.grams || 0);
       const current = translated[selKey] || { quantity: 0, amount: 0, weight: 0 };

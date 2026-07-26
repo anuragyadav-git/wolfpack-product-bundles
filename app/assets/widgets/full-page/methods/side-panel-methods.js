@@ -23,6 +23,29 @@ import {
 } from '../../shared/engine/cart-lines.js';
 import { shouldDisplayClassicFixedBundleRawTotal } from '../shared/summary-pricing-display.js';
 
+function getSummarySlotQuantity(item = {}) {
+  const quantity = Number(item?.quantity);
+  return Number.isFinite(quantity) ? Math.max(0, Math.floor(quantity)) : 0;
+}
+
+function expandSelectedItemsForSummarySlots(allSelectedProducts = []) {
+  const selectedProducts = Array.isArray(allSelectedProducts) ? allSelectedProducts : [];
+  const expanded = [];
+
+  selectedProducts.forEach((item) => {
+    const normalizedQuantity = getSummarySlotQuantity(item);
+    for (let index = 0; index < normalizedQuantity; index += 1) {
+      expanded.push({ ...item, quantity: 1 });
+    }
+  });
+
+  return expanded;
+}
+
+function getSelectionId(item = {}) {
+  return String(item?.selectionId || '');
+}
+
 export function shouldUseSharedDesktopSummarySlotTiles({
   designPreset,
   productSlotsEnabled,
@@ -31,6 +54,24 @@ export function shouldUseSharedDesktopSummarySlotTiles({
 
   const preset = typeof designPreset === 'string' ? designPreset.trim().toUpperCase() : '';
   return preset === 'STANDARD' || preset === 'COMPACT' || preset === 'HORIZONTAL';
+}
+
+export function getRemainingSummarySkeletonCount({
+  designPreset,
+  productSlotsEnabled,
+  requiredQuantity,
+  selectedQuantity,
+} = {}) {
+  if (productSlotsEnabled === true) return 0;
+
+  const preset = typeof designPreset === 'string' ? designPreset.trim().toUpperCase() : '';
+  if (preset !== 'COMPACT' && preset !== 'HORIZONTAL') return 0;
+
+  const required = Number(requiredQuantity);
+  const selected = Number(selectedQuantity);
+  if (!Number.isFinite(required) || required <= 0) return 0;
+
+  return Math.max(0, required - (Number.isFinite(selected) ? Math.max(0, selected) : 0));
 }
 
 export const fullPageSidePanelMethods = {
@@ -74,6 +115,20 @@ renderSidePanel(panel) {
     designPreset: this.getFullPageDesignPreset(),
     productSlotsEnabled: useInlineSummarySlots,
   });
+  const remainingSummarySkeletonCount = getRemainingSummarySkeletonCount({
+    designPreset: this.getFullPageDesignPreset(),
+    productSlotsEnabled: useInlineSummarySlots,
+    requiredQuantity: typeof this.getSummarySidebarMaxItemCount === 'function'
+      ? this.getSummarySidebarMaxItemCount()
+      : 0,
+    selectedQuantity: totalQuantity,
+  });
+  const selectedSlotItems = useInlineSummarySlots
+    ? expandSelectedItemsForSummarySlots(allSelectedProducts)
+    : [];
+  const selectedSummaryCount = useInlineSummarySlots
+    ? selectedSlotItems.length
+    : allSelectedProducts.length;
 
   panel.classList.toggle('full-page-side-panel--inline-slots', useInlineSummarySlots);
   panel.classList.toggle('full-page-side-panel--skeleton-list', !useInlineSummarySlots);
@@ -211,11 +266,9 @@ renderSidePanel(panel) {
   // Item count label
   const countLabel = document.createElement('div');
   countLabel.className = 'side-panel-item-count';
-  countLabel.textContent = isClassicDesktopSidebar
-    ? `${allSelectedProducts.length} item${allSelectedProducts.length !== 1 ? 's' : ''}`
-    : isStandardDesktopSidebar
-      ? `${allSelectedProducts.length} item(s)`
-      : `${allSelectedProducts.length} item${allSelectedProducts.length !== 1 ? 's' : ''}`;
+  countLabel.textContent = isStandardDesktopSidebar
+    ? `${selectedSummaryCount} item(s)`
+    : `${selectedSummaryCount} item${selectedSummaryCount !== 1 ? 's' : ''}`;
   summaryContent.appendChild(countLabel);
 
   // Selected products list / Classic slots
@@ -344,8 +397,7 @@ renderSidePanel(panel) {
     }
     if (isHorizontalPreset && !useSharedDesktopSummarySlotTiles) {
       const requiredSlots = Math.max(
-        totalQuantity + 1,
-        activeStep?.maxQuantity || activeStep?.minQuantity || 2,
+        totalQuantity,
         2
       );
       if (this._shouldRenderProductSlots()) {
@@ -372,10 +424,22 @@ renderSidePanel(panel) {
         }
       }
     }
+    if (
+      remainingSummarySkeletonCount > 0
+      && typeof this._renderSidebarProductSkeletons === 'function'
+    ) {
+      this._renderSidebarProductSkeletons(productsContainer, remainingSummarySkeletonCount);
+    }
     summaryContent.appendChild(productsContainer);
   }
 
-  if (!isStandardDesktopSidebar && !isMobileSheet && allSelectedProducts.length === 0 && !isHorizontalPreset) {
+  if (
+    !isStandardDesktopSidebar
+    && !isMobileSheet
+    && allSelectedProducts.length === 0
+    && !isHorizontalPreset
+    && remainingSummarySkeletonCount === 0
+  ) {
     const skeletonContainer = document.createElement('div');
     skeletonContainer.className = 'side-panel-skeleton-slots';
     this._renderSidebarProductSkeletons(skeletonContainer);
@@ -416,7 +480,6 @@ renderSidePanel(panel) {
   const canProceed = this.canProceedToNextStep();
   const conditionless = this.bundleHasNoConditions();
   const canReturnToPreviousStep = !conditionless && this.currentStepIndex > 0;
-  const hasSelection = conditionless && this.getAllSelectedProductsData().length > 0;
   const sidebarTierCtaContent = (conditionless || isLastStep) && !isActiveAddonStep
     ? this.getSidebarTierCtaContent(nextRule)
     : null;
@@ -470,7 +533,7 @@ renderSidePanel(panel) {
       nextBtn.title = ctaTextParts.join(' ');
     }
   }
-  if (!isStandardDesktopSidebar && (conditionless ? !hasSelection : (isLastStep ? !this.areBundleConditionsMet() : !canProceed))) {
+  if (!isStandardDesktopSidebar && (conditionless ? !this.canCheckoutWithBoxSelection() : (isLastStep ? !this.areBundleConditionsMet() : !canProceed))) {
     nextBtn.disabled = true;
   }
   nextBtn.addEventListener('click', async () => {
@@ -508,10 +571,11 @@ renderSidePanel(panel) {
 },
 
 _renderStandardSidebarSlotTiles(container, allSelectedProducts = []) {
-  const selectedItems = Array.isArray(allSelectedProducts) ? allSelectedProducts : [];
+  const selectedItems = expandSelectedItemsForSummarySlots(allSelectedProducts);
+  const selectedCount = selectedItems.length;
   const slotCount = Math.max(
-    this.getSummarySidebarMaxItemCount(selectedItems.length),
-    selectedItems.length + 1,
+    this.getSummarySidebarMaxItemCount(selectedCount),
+    selectedCount,
     2
   );
   const emptyStateIconUrl = this._escapeHTML(this.selectedBundle?.productSlotIconUrl || '');
@@ -527,6 +591,8 @@ _renderStandardSidebarSlotTiles(container, allSelectedProducts = []) {
 
     if (item) {
       const summaryTitle = this.getSummaryProductDisplayTitle(item);
+      const productId = getSelectionId(item);
+      const selectedStepIndex = Number(item.stepIndex);
       const imgSrc = this._getSelectedProductImageSrc(item);
       slot.innerHTML = imgSrc
         ? `<img src="${imgSrc}" alt="${this._escapeHTML(summaryTitle)}" class="side-panel-inline-slot-image">`
@@ -544,12 +610,31 @@ _renderStandardSidebarSlotTiles(container, allSelectedProducts = []) {
           removeBtn.classList.add('side-panel-inline-slot-remove--disabled');
           removeBtn.setAttribute('aria-disabled', 'true');
           removeBtn.title = removalState.blockedMessage;
-        }
+          removeBtn.addEventListener('click', (event) => {
+            event.stopPropagation();
+          });
+        } else {
+          removeBtn.addEventListener('click', (event) => {
+            event.stopPropagation();
+            if (!Number.isFinite(selectedStepIndex) || !productId) return;
 
-        removeBtn.addEventListener('click', (event) => {
-          event.stopPropagation();
-          this.removeSummarySelectedProduct(item, summaryTitle);
-        });
+            const selectedQty = Number(this.selectedProducts?.[selectedStepIndex]?.[productId] || 0);
+            const nextQty = Math.max(0, selectedQty - 1);
+            if (nextQty === selectedQty) return;
+
+            this.updateProductSelection(selectedStepIndex, productId, nextQty);
+            const truncated = summaryTitle && summaryTitle.length > 25
+              ? summaryTitle.substring(0, 25) + '...'
+              : (summaryTitle || 'Product');
+            ToastManager.showWithUndo(
+              `Removed "${truncated}"`,
+              () => {
+                this.updateProductSelection(selectedStepIndex, productId, selectedQty);
+              },
+              5000
+            );
+          });
+        }
 
         slot.appendChild(removeBtn);
       }
@@ -625,14 +710,14 @@ removeSummarySelectedProduct(item = {}, summaryTitle = '') {
   }
 
   const stepIndex = item.stepIndex;
-  const productId = item.variantId || item.productId || item.id;
-  const removedItem = { stepIndex, variantId: productId, quantity: item.quantity, title: item.title };
+  const productId = getSelectionId(item);
+  const removedItem = { stepIndex, selectionId: productId, quantity: item.quantity, title: item.title };
   this.updateProductSelection(stepIndex, productId, 0);
   const displayTitle = summaryTitle || item.title || 'Product';
   const truncated = displayTitle.length > 25 ? displayTitle.substring(0, 25) + '...' : displayTitle;
   ToastManager.showWithUndo(
     `Removed "${truncated}"`,
-    () => { this.updateProductSelection(removedItem.stepIndex, removedItem.variantId, removedItem.quantity); },
+    () => { this.updateProductSelection(removedItem.stepIndex, removedItem.selectionId, removedItem.quantity); },
     5000
   );
   return true;

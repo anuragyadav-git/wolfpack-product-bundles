@@ -58,7 +58,7 @@ describe('getDisplayPrice', () => {
     const bundle = makeBundle(null, null);
     const state = makeState(
       bundle,
-      [[{ variantId: 'v1', price: 2000, available: true }]],
+      [[{ selectionId: 'v1', price: 2000, available: true }]],
       { step_0: { v1: 2 } },
     );
     (state as { steps: object[] }).steps = [{ id: 'step_0', isFreeGift: false, isDefault: false }];
@@ -73,7 +73,7 @@ describe('getDisplayPrice', () => {
     const bundle = makeBundle('percentage_off', 20);
     const state = makeState(
       bundle,
-      [[{ variantId: 'v1', price: 5000, available: true }]],
+      [[{ selectionId: 'v1', price: 5000, available: true }]],
       { step_0: { v1: 2 } },
     );
     (state as { steps: object[] }).steps = [{ id: 'step_0', isFreeGift: false, isDefault: false }];
@@ -88,7 +88,7 @@ describe('getDisplayPrice', () => {
     const bundle = makeBundle('fixed_amount_off', 500);
     const state = makeState(
       bundle,
-      [[{ variantId: 'v1', price: 3000, available: true }]],
+      [[{ selectionId: 'v1', price: 3000, available: true }]],
       { step_0: { v1: 1 } },
     );
     (state as { steps: object[] }).steps = [{ id: 'step_0', isFreeGift: false, isDefault: false }];
@@ -102,7 +102,7 @@ describe('getDisplayPrice', () => {
     const bundle = makeBundle(null, null);
     const state = makeState(
       bundle,
-      [[{ variantId: 'v1', price: 1999, available: true }]],
+      [[{ selectionId: 'v1', price: 1999, available: true }]],
       { step_0: { v1: 1 } },
     );
     (state as { steps: object[] }).steps = [{ id: 'step_0', isFreeGift: false, isDefault: false }];
@@ -115,7 +115,7 @@ describe('getDisplayPrice', () => {
     const bundle = makeBundle('percentage_off', 100);
     const state = makeState(
       bundle,
-      [[{ variantId: 'v1', price: 1000, available: true }]],
+      [[{ selectionId: 'v1', price: 1000, available: true }]],
       { step_0: { v1: 1 } },
     );
     (state as { steps: object[] }).steps = [{ id: 'step_0', isFreeGift: false, isDefault: false }];

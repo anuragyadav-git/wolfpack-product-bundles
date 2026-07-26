@@ -8,13 +8,13 @@
 'use strict';
 
 export function renderQuantityControl({
-  variantId,
+  selectionId,
   quantity = 0,
   decreaseDisabled = false,
   increaseDisabled = false,
   className = '',
 } = {}) {
-  const key = escapeHtml(variantId || '');
+  const key = escapeHtml(selectionId || '');
   const normalizedQuantity = Math.max(0, Number(quantity || 0));
   const classes = ['bw-quantity-control', 'inline-quantity-controls', className]
     .filter(Boolean)

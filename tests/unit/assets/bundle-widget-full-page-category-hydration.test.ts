@@ -39,7 +39,7 @@ describe('Full Page widget category hydration behavior', () => {
         {
           categoryId: 'cat-manual',
           title: 'Manual',
-          products: [{ id: 'gid://shopify/Product/1' }],
+          products: [{ selectionId: 'gid://shopify/Product/1' }],
           collectionsSelectedData: [],
         },
         {
@@ -169,6 +169,7 @@ describe('Full Page widget category hydration behavior', () => {
     const expanded = expandProductsByVariant([
       {
         id: 'gid://shopify/Product/1',
+        selectionId: '1',
         title: 'Yellow Sofa',
         imageUrl: 'product.jpg',
         variants: [
@@ -291,20 +292,22 @@ describe('Full Page widget category hydration behavior', () => {
     const merged = mergeCategoryProductVariantAvailability([
       {
         id: 'gid://shopify/Product/1',
+        selectionId: '1',
         title: 'Fragrance Candle',
         variants: [
-          { id: '11', title: 'Cherry', available: true },
-          { id: '12', title: 'Peach', available: true },
+          { id: '11', selectionId: '11', title: 'Cherry', available: true },
+          { id: '12', selectionId: '12', title: 'Peach', available: true },
         ],
       },
     ], {
       categories: [{
         products: [{
           id: 'gid://shopify/Product/1',
+          selectionId: '1',
           title: 'Fragrance Candle',
           variants: [
-            { id: 'gid://shopify/ProductVariant/11', title: 'Cherry', available: true },
-            { id: 'gid://shopify/ProductVariant/12', title: 'Peach', available: false },
+            { id: 'gid://shopify/ProductVariant/11', selectionId: '11', title: 'Cherry', available: true },
+            { id: 'gid://shopify/ProductVariant/12', selectionId: '12', title: 'Peach', available: false },
           ],
         }],
       }],
@@ -347,11 +350,13 @@ describe('Full Page widget category hydration behavior', () => {
           products: [
             {
               id: 'gid://shopify/Product/1',
+              selectionId: 'gid://shopify/Product/1',
               title: 'Cached product',
               featuredImage: { url: 'https://cdn.example.test/cached.jpg' },
               price: 1999,
               variants: [{
                 id: 'gid://shopify/ProductVariant/11',
+                selectionId: 'gid://shopify/ProductVariant/11',
                 title: 'Default Title',
                 price: 1999,
                 available: true,
@@ -359,6 +364,7 @@ describe('Full Page widget category hydration behavior', () => {
             },
             {
               id: 'gid://shopify/Product/2',
+              selectionId: 'gid://shopify/Product/2',
               title: 'Incomplete product',
               featuredImage: { url: 'https://cdn.example.test/incomplete.jpg' },
               price: 0,

@@ -62,7 +62,7 @@ export function usePpbCategoryHandlers({
                 id: `category-rule-${Date.now()}`,
                 type: "quantity",
                 condition: "greaterThanOrEqualTo",
-                value: "01",
+                value: "",
               },
             ],
           };

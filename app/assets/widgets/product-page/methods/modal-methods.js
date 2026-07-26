@@ -576,9 +576,17 @@ attachProductEventHandlers(productGrid, stepIndex) {
       if (product && product.variants && product.variants.length > 1 && this.productModal) {
         this.productModal.open(product, step);
       } else {
-        // No variants or modal not available - toggle directly
+        // No variants or modal not available - toggle directly.
+        // Use direct-default required quantity when configured; only fall back to 1
+        // when there is no explicit default quantity for the product.
         const currentQuantity = this.getSelectedQuantity(stepIndex, productId);
-        this.updateProductSelection(stepIndex, productId, currentQuantity > 0 ? 0 : 1);
+        const directDefaultRequiredQuantity = this._getDirectDefaultRequiredQuantity(productId);
+        const toggleQuantity = currentQuantity > 0
+          ? 0
+          : directDefaultRequiredQuantity ?? 1;
+        if (toggleQuantity > 0 || currentQuantity > 0) {
+          this.updateProductSelection(stepIndex, productId, toggleQuantity);
+        }
       }
     }
   });
@@ -608,7 +616,14 @@ attachProductEventHandlers(productGrid, stepIndex) {
 
     if (canClickCardToAdd) {
       const currentQuantity = this.getSelectedQuantity(stepIndex, productId);
-      this.updateProductSelection(stepIndex, productId, currentQuantity > 0 ? 0 : 1);
+      const directDefaultRequiredQuantity = this._getDirectDefaultRequiredQuantity(productId);
+      const toggleQuantity = currentQuantity > 0
+        ? 0
+        : directDefaultRequiredQuantity ?? 1;
+
+      if (toggleQuantity > 0 || currentQuantity > 0) {
+        this.updateProductSelection(stepIndex, productId, toggleQuantity);
+      }
     }
   });
 

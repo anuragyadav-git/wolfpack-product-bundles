@@ -37,21 +37,21 @@ function makeProductPageContext() {
       [
         {
           id: 'gid://shopify/Product/1',
-          variantId: 'gid://shopify/ProductVariant/101',
+          selectionId: 'gid://shopify/ProductVariant/101',
           title: '14k Dangling Obsidian Earrings',
           price: 82900,
           available: true,
         },
         {
           id: 'gid://shopify/Product/2',
-          variantId: 'gid://shopify/ProductVariant/102',
+          selectionId: 'gid://shopify/ProductVariant/102',
           title: '14k Dangling Pendant Earrings',
           price: 61900,
           available: true,
         },
         {
           id: 'gid://shopify/Product/3',
-          variantId: 'gid://shopify/ProductVariant/103',
+          selectionId: 'gid://shopify/ProductVariant/103',
           title: '18k Pedal Ring - 8',
           variantTitle: '8',
           price: 39900,
@@ -69,8 +69,8 @@ function makeProductPageContext() {
     expandProductsByVariant(products: unknown[]) {
       return products;
     },
-    findProductBySelectionKey(products: Array<{ variantId: string }>, selectionKey: string) {
-      return products.find((product) => product.variantId === selectionKey);
+    findProductBySelectionKey(products: Array<{ selectionId: string }>, selectionKey: string) {
+      return products.find((product) => product.selectionId === selectionKey);
     },
     extractId(value: string) {
       return String(value).split('/').pop();
@@ -189,7 +189,7 @@ describe('PPB Product List box selection checkout validation', () => {
     try {
       await ProductPageCartMethods.addToCart.call({
         selectedProducts: [{ '101': 2 }],
-        stepProductData: [[{ variantId: '101', price: 1000, available: true }]],
+        stepProductData: [[{ selectionId: '101', price: 1000, available: true }]],
         selectedBundle: {
           steps: [{ id: 'productsData1' }],
           boxSelection,

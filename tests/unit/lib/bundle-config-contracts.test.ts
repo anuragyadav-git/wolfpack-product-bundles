@@ -339,9 +339,7 @@ describe("formatStepCategoryForRuntime", () => {
 
     expect(runtime.products).toEqual([
       {
-        id: "gid://shopify/Product/111",
-        productId: "111",
-        graphqlId: "gid://shopify/Product/111",
+        selectionId: "gid://shopify/Product/111",
         handle: "rings",
         title: "Rings",
         imageUrl: "https://cdn.example/ring-card.jpg",
@@ -354,7 +352,7 @@ describe("formatStepCategoryForRuntime", () => {
         options: [{ name: "Size", values: ["6", "7"] }],
         variants: expect.arrayContaining([
           {
-            id: "gid://shopify/ProductVariant/222",
+            selectionId: "gid://shopify/ProductVariant/222",
             title: "Size 6",
             price: "10.00",
             compareAtPrice: "12.00",
@@ -415,8 +413,8 @@ describe("formatStepCategoryForRuntime", () => {
       { name: "Color" },
     ]);
     expect(runtime.products[0].variants).toEqual(expect.arrayContaining([
-      expect.objectContaining({ id: "gid://shopify/ProductVariant/333", option1: "S", option2: "Black" }),
-      expect.objectContaining({ id: "gid://shopify/ProductVariant/444", option1: "M", option2: "Navy" }),
+      expect.objectContaining({ selectionId: "gid://shopify/ProductVariant/333", option1: "S", option2: "Black" }),
+      expect.objectContaining({ selectionId: "gid://shopify/ProductVariant/444", option1: "M", option2: "Navy" }),
     ]));
     expect(JSON.stringify(runtime.products[0])).not.toContain("selectedOptions");
   });
@@ -444,13 +442,12 @@ describe("formatStepCategoryForRuntime", () => {
 
     expect(runtime[0].products).toEqual([
       {
-        id: "gid://shopify/Product/111",
-        productId: "gid://shopify/Product/111",
+        selectionId: "gid://shopify/Product/111",
         title: "Category title",
         imageUrl: "https://cdn.example/ring-card.jpg",
         description: "Source product description",
         price: "10.00",
-        variants: [{ id: "gid://shopify/ProductVariant/222", price: "10.00", available: true }],
+        variants: [{ selectionId: "gid://shopify/ProductVariant/222", price: "10.00", available: true }],
       },
     ]);
   });

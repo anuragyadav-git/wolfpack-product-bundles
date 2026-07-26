@@ -135,9 +135,8 @@ async addBundleToCart(clickedButton = null) {
 
       Object.entries(stepSelections).forEach(([variantId, quantity]) => {
         if (quantity > 0) {
-          // Ensure we're using a numeric variant ID (extract from GID if needed)
-          const numericVariantId = this.extractId(variantId) || variantId;
-          const product = productsInStep.find(p => String(p.variantId || p.id) === String(variantId))
+          const numericVariantId = String(variantId || '');
+          const product = productsInStep.find(p => String(p.selectionId || '') === String(variantId))
             || { id: variantId, title: variantId };
 
           if (isFullPageCartLineOutOfStock(this, product)) {
@@ -168,8 +167,7 @@ async addBundleToCart(clickedButton = null) {
             if (addonEval?.tier?.tierId) {
               properties._addonTierId = String(addonEval.tier.tierId);
             }
-            const addonVariantId = this.extractId(variantId);
-            properties._uniqueWpbItemKey = `${addonVariantId || numericVariantId}_pageId:addonProduct`;
+            properties._uniqueWpbItemKey = `${numericVariantId}_pageId:addonProduct`;
             properties._bundle_step_type = addonDiscount
               ? `addon:${addonDiscount.type}:${addonDiscount.value}`
               : 'addon';
@@ -413,7 +411,7 @@ getStepProductImages(stepIndex) {
 
   Object.entries(selectedProducts).forEach(([variantId, quantity]) => {
     if (quantity > 0) {
-      const product = this.stepProductData[stepIndex].find(p => (p.variantId || p.id) === variantId);
+      const product = this.stepProductData[stepIndex].find(p => String(p.selectionId || '') === String(variantId));
       if (product && product.imageUrl && !productImages.find(img => img.url === product.imageUrl)) {
         productImages.push({
           url: product.imageUrl,

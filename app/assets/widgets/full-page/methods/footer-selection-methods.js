@@ -22,9 +22,21 @@ import {
   buildCartLineSourceProperties,
 } from '../../shared/engine/cart-lines.js';
 
+const getSelectionId = (value = {}) => String(value?.selectionId || '');
+const findProductBySelectionId = (products = [], selectionId = '') => {
+  const normalized = String(selectionId || '');
+  return products.find(product => getSelectionId(product) === normalized);
+};
+
+const findVariantBySelectionId = (product, selectionId = '') => {
+  const normalized = String(selectionId || '');
+  const variants = Array.isArray(product?.variants) ? product.variants : [];
+  return variants.find(variant => String(variant?.selectionId || '') === normalized);
+};
+
 
 export const fullPageFooterSelectionMethods = {
-_createFooterPanel(allSelectedProducts, currencyInfo) {
+  _createFooterPanel(allSelectedProducts, currencyInfo) {
   const panel = document.createElement('div');
   panel.className = 'footer-panel';
 
@@ -62,12 +74,14 @@ _createFooterPanel(allSelectedProducts, currencyInfo) {
       if (!removeBtn) return;
       removeBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        const removedItem = { stepIndex: item.stepIndex, variantId: item.variantId, quantity: item.quantity, title: item.title };
-        this.updateProductSelection(item.stepIndex, item.variantId, 0);
+        const selectionId = getSelectionId(item);
+        if (!selectionId) return;
+        const removedItem = { stepIndex: item.stepIndex, selectionId, quantity: item.quantity, title: item.title };
+        this.updateProductSelection(item.stepIndex, selectionId, 0);
         const truncated = summaryTitle.length > 25 ? summaryTitle.substring(0, 25) + '...' : summaryTitle;
         ToastManager.showWithUndo(
           `Removed "${truncated}"`,
-          () => { this.updateProductSelection(removedItem.stepIndex, removedItem.variantId, removedItem.quantity); },
+          () => { this.updateProductSelection(removedItem.stepIndex, removedItem.selectionId, removedItem.quantity); },
           5000
         );
       });
@@ -154,9 +168,8 @@ _createFooterBar(allSelectedProducts, totalQuantity, totalRequired, totalPrice, 
   ctaBtn.className = 'footer-cta-btn';
   ctaBtn.setAttribute('type', 'button');
   const conditionless = this.bundleHasNoConditions();
-  const hasSelection = conditionless && this.getAllSelectedProductsData().length > 0;
   ctaBtn.textContent = (conditionless || isLastStep) ? this._resolveText('addToCartButton', this.config.addToCartText || 'Add to Cart') : this._resolveText('nextButton', 'Next');
-  if (conditionless ? (!hasSelection || !this.canCheckoutWithBoxSelection()) : (isLastStep ? (!this.areBundleConditionsMet() || !this.canCheckoutWithBoxSelection()) : !this.canProceedToNextStep())) {
+  if (conditionless ? !this.canCheckoutWithBoxSelection() : (isLastStep ? (!this.areBundleConditionsMet() || !this.canCheckoutWithBoxSelection()) : !this.canProceedToNextStep())) {
     ctaBtn.disabled = true;
   }
   ctaBtn.addEventListener('click', () => {
@@ -199,55 +212,45 @@ getAllSelectedProductsData() {
 
     Object.entries(stepSelections).forEach(([variantId, quantity]) => {
       if (quantity > 0) {
-        // Find product in processed stepProductData
-        // Check multiple ways: direct variantId match, direct id match, or variant within variants array
-        let product = productsInStep.find(p =>
-          String(p.variantId) === String(variantId) || String(p.id) === String(variantId)
-        );
-
-        // If not found directly, search within variants array of each product
+        // Find product in processed stepProductData using the canonical selection id.
+        let product = findProductBySelectionId(productsInStep, variantId);
         let matchedVariant = null;
         if (!product) {
           for (const p of productsInStep) {
-            if (p.variants && Array.isArray(p.variants)) {
-              const variant = p.variants.find(v => String(v.id) === String(variantId));
-              if (variant) {
-                product = p;
-                matchedVariant = variant;
-                break;
-              }
-            }
+            const variant = findVariantBySelectionId(p, variantId);
+            if (!variant) continue;
+            product = p;
+            matchedVariant = variant;
+            break;
           }
+        } else {
+          matchedVariant = findVariantBySelectionId(product, variantId);
         }
 
         if (product) {
-          // Determine the correct data based on whether we found a variant within a product
-          const variantData = matchedVariant || product;
-          const isVariantMatch = !!matchedVariant;
-
           // Build variant title
           let variantTitle = '';
-          if (isVariantMatch && matchedVariant.title && matchedVariant.title !== 'Default Title') {
+          if (matchedVariant && matchedVariant.title && matchedVariant.title !== 'Default Title') {
             variantTitle = matchedVariant.title;
           } else if (product.variantTitle && product.variantTitle !== 'Default Title') {
             variantTitle = product.variantTitle;
           }
 
-          // Get the appropriate image - prefer variant image, fallback to product image
-          const imageUrl = isVariantMatch
+          const imageUrl = matchedVariant
             ? (matchedVariant.image?.src || matchedVariant.image || product.imageUrl || product.image?.src || '')
             : (product.imageUrl || product.image?.src || '');
 
-          // Get the appropriate price - use variant price if available
-          const price = isVariantMatch
+          const price = matchedVariant
             ? (typeof matchedVariant.price === 'number' ? matchedVariant.price : (parseFloat(matchedVariant.price || '0') * 100))
             : (product.price || 0);
+          const selectionId = String(variantId || '');
 
           allProducts.push({
             stepIndex,
-            variantId,
+            selectionId,
+            variantId: selectionId,
             quantity,
-            title: isVariantMatch
+            title: matchedVariant
               ? (variantTitle ? `${product.title} - ${variantTitle}` : product.title)
               : (product.title || 'Untitled Product'),
             parentTitle: product.parentTitle || product.title || 'Untitled Product',
@@ -268,24 +271,22 @@ getAllSelectedProductsData() {
   return allProducts;
 },
 
-/**
- * Group selected variants by product for multi-variant display
- * @param {Array} selectedProducts - Array of selected product variants
- * @returns {Array} Array of product groups with their variants
- */
+
 groupVariantsByProduct(selectedProducts) {
   const productMap = new Map();
 
   selectedProducts.forEach(item => {
-    // Find the full product data
-    const product = this.stepProductData[item.stepIndex]?.find(p => {
-      // Check if this product has this variant
-      return p.variants?.some(v => String(v.id) === String(item.variantId)) || String(p.id) === String(item.variantId);
-    });
+    const canonicalVariantId = getSelectionId(item);
+    if (!canonicalVariantId) return;
+
+    const product = this.stepProductData[item.stepIndex]?.find(p =>
+      getSelectionId(p) === canonicalVariantId
+    );
 
     if (!product) return;
 
-    const productId = product.id || product.productId;
+    const productId = getSelectionId(product);
+    if (!productId) return;
     const key = `${item.stepIndex}-${productId}`;
 
     if (!productMap.has(key)) {
@@ -315,19 +316,21 @@ groupVariantsByProduct(selectedProducts) {
  */
 showVariantBreakdown(productGroup) {
   const overlay = document.createElement('div');
-  overlay.className = 'variant-breakdown-overlay';
+  overlay.className = "variant-breakdown-overlay";
 
   const popup = document.createElement('div');
-  popup.className = 'variant-breakdown-popup';
+  popup.className = "variant-breakdown-popup";
 
   // Get variant details
   const currencyInfo = CurrencyManager.getCurrencyInfo();
   const variantsHtml = productGroup.variants.map(variant => {
+    const variantSelectionId = getSelectionId(variant);
     const product = this.stepProductData[variant.stepIndex]?.find(p =>
-      p.variants?.some(v => String(v.id) === String(variant.variantId)) || String(p.id) === String(variant.variantId)
+      getSelectionId(p) === variantSelectionId
     );
-    const variantObj = product?.variants?.find(v => String(v.id) === String(variant.variantId));
-    const variantTitle = variantObj?.title || variant.title || 'Variant';
+    const variantObj = product ? findVariantBySelectionId(product, variantSelectionId) : null;
+    const variantTitle = variantObj?.title || variant.title || "Variant";
+    const removeVariantId = String(variantSelectionId || '');
 
     return `
       <div class="variant-breakdown-item">
@@ -336,7 +339,7 @@ showVariantBreakdown(productGroup) {
           <span class="variant-title">${variantTitle}</span>
           <span class="variant-quantity">Qty: ${variant.quantity} × ${CurrencyManager.convertAndFormat(variant.price, currencyInfo)}</span>
         </div>
-        <button class="remove-variant-btn" data-step="${variant.stepIndex}" data-variant-id="${variant.variantId}">Remove</button>
+        <button class="remove-variant-btn" data-step="${variant.stepIndex}" data-variant-id="${removeVariantId}">Remove</button>
       </div>
     `;
   }).join('');
@@ -359,8 +362,9 @@ showVariantBreakdown(productGroup) {
 
   popup.querySelectorAll('.remove-variant-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
-      const stepIndex = parseInt(e.target.dataset.step);
-      const variantId = e.target.dataset.variantId;
+      const stepIndex = parseInt(e.target.dataset.step, 10);
+      const variantId = String(e.target.dataset.variantId || '');
+      if (!Number.isFinite(stepIndex) || !variantId) return;
       this.updateProductSelection(stepIndex, variantId, 0);
       document.body.removeChild(overlay);
       this.reRenderFullPage();
@@ -370,7 +374,9 @@ showVariantBreakdown(productGroup) {
   popup.querySelector('.add-another-variant-btn').addEventListener('click', () => {
     document.body.removeChild(overlay);
     // Find the product and open modal for it
-    const product = this.stepProductData[productGroup.stepIndex]?.find(p => String(p.id) === String(productGroup.productId));
+    const product = this.stepProductData[productGroup.stepIndex]?.find(p =>
+      getSelectionId(p) === getSelectionId(productGroup)
+    );
     const step = this.selectedBundle.steps[productGroup.stepIndex];
     if (product && step && this.productModal) {
       this.productModal.open(product, step);
@@ -384,11 +390,11 @@ showVariantBreakdown(productGroup) {
     if (e.target === overlay) document.body.removeChild(overlay);
   });
 },
-
 // Helper: Find product by variant ID in a step
 findProductByVariantId(step, variantId) {
+  const normalizedVariantId = String(variantId || '');
   return step.products?.find(p =>
-    p.variants?.some(v => v.id === variantId) || p.id === variantId
+    getSelectionId(p) === normalizedVariantId
   );
 },
 

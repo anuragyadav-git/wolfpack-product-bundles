@@ -37,8 +37,8 @@ describe("FPB checkout cart-line properties", () => {
             { addonVariant: 1 },
           ],
           stepProductData: [
-            [{ variantId: "paidVariant", title: "Paid product", price: 82900 }],
-            [{ variantId: "addonVariant", title: "Paid add-on", price: 82900 }],
+            [{ selectionId: "paidVariant", title: "Paid product", price: 82900 }],
+            [{ selectionId: "addonVariant", title: "Paid add-on", price: 82900 }],
           ],
           selectedBundle: {
             pricing: { enabled: false, rules: [] },
@@ -142,8 +142,8 @@ describe("FPB checkout cart-line properties", () => {
         ],
         stepProductData: [
           [
-            { variantId: "gid://shopify/ProductVariant/111", title: "First product", price: 82900 },
-            { variantId: "gid://shopify/ProductVariant/222", title: "Second product", price: 61900 },
+            { selectionId: "gid://shopify/ProductVariant/111", title: "First product", price: 82900 },
+            { selectionId: "gid://shopify/ProductVariant/222", title: "Second product", price: 61900 },
           ],
         ],
         areBundleConditionsMet: () => true,
@@ -238,8 +238,8 @@ describe("FPB checkout cart-line properties", () => {
           { "gid://shopify/ProductVariant/222": 1 },
         ],
         stepProductData: [
-          [{ variantId: "gid://shopify/ProductVariant/111", title: "Paid product" }],
-          [{ variantId: "gid://shopify/ProductVariant/222", title: "Paid add-on" }],
+          [{ selectionId: "gid://shopify/ProductVariant/111", title: "Paid product" }],
+          [{ selectionId: "gid://shopify/ProductVariant/222", title: "Paid add-on" }],
         ],
         areBundleConditionsMet: () => true,
         expandProductsByVariant: (products: unknown[]) => products,
@@ -334,7 +334,7 @@ describe("FPB checkout cart-line properties", () => {
         ],
         stepProductData: [
           [{
-            variantId: "gid://shopify/ProductVariant/111",
+            selectionId: "gid://shopify/ProductVariant/111",
             title: "Tracked zero-stock product",
             available: true,
             quantityAvailable: 0,
@@ -434,14 +434,14 @@ describe("FPB checkout cart-line properties", () => {
         stepProductData: [
           [
             {
-              variantId: "gid://shopify/ProductVariant/111",
+              selectionId: "gid://shopify/ProductVariant/111",
               title: "Paid product",
               price: 82900,
             },
           ],
           [
             {
-              variantId: "gid://shopify/ProductVariant/222",
+              selectionId: "gid://shopify/ProductVariant/222",
               title: "Free add-on",
               price: 82900,
             },
@@ -548,8 +548,7 @@ describe("FPB checkout cart-line properties", () => {
           {
             tierId: "tier2",
             eligibilityCondition: { type: "QUANTITY", value: 1 },
-            discountType: "PERCENTAGE",
-            discountValue: 100,
+            discount: { type: "PERCENTAGE", value: 100 },
           },
         ],
       };
@@ -570,14 +569,14 @@ describe("FPB checkout cart-line properties", () => {
         stepProductData: [
           [
             {
-              variantId: "gid://shopify/ProductVariant/111",
+              selectionId: "gid://shopify/ProductVariant/111",
               title: "Paid product",
               price: 82900,
             },
           ],
           [
             {
-              variantId: "gid://shopify/ProductVariant/222",
+              selectionId: "gid://shopify/ProductVariant/222",
               title: "Free add-on",
               price: 82900,
             },
@@ -690,12 +689,12 @@ describe("FPB checkout cart-line properties", () => {
         stepProductData: [
           [
             {
-              variantId: "gid://shopify/ProductVariant/111",
+              selectionId: "gid://shopify/ProductVariant/111",
               title: "First product",
               price: 82900,
             },
             {
-              variantId: "gid://shopify/ProductVariant/222",
+              selectionId: "gid://shopify/ProductVariant/222",
               title: "Second product",
               price: 61900,
             },

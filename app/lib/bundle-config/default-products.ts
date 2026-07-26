@@ -28,6 +28,12 @@ function extractShopifyNumericId(id: unknown): string | null {
   return match ? match[1] : id;
 }
 
+function toVariantSelectionId(value: unknown): string | null {
+  if (typeof value === "string" && value.trim()) return value.trim();
+  if (value == null) return null;
+  return String(value);
+}
+
 function firstImageUrl(product: any): string | null {
   return product.imageUrl
     || product.images?.[0]?.originalSrc
@@ -37,11 +43,12 @@ function firstImageUrl(product: any): string | null {
 }
 
 function normalizeVariant(variant: any): DefaultProductVariant | null {
-  const variantGid = variant.variantGraphqlId || variant.id || variant.gid || variant.admin_graphql_api_id;
-  const numericVariantId = variant.variantId && !String(variant.variantId).startsWith("gid://")
-    ? String(variant.variantId)
-    : extractShopifyNumericId(variantGid);
-  if (!variantGid || !numericVariantId) return null;
+  const variantSelectionId = toVariantSelectionId(variant?.selectionId);
+  if (!variantSelectionId) return null;
+
+  const variantGid = String(variantSelectionId);
+  const numericVariantId = extractShopifyNumericId(variantGid);
+  if (!numericVariantId) return null;
 
   const normalizedVariant: DefaultProductVariant = {
     variantId: numericVariantId,
@@ -55,11 +62,12 @@ function normalizeVariant(variant: any): DefaultProductVariant | null {
 }
 
 export function buildDefaultProductEntryFromPicker(product: any): DefaultProductEntry | null {
-  const productGid = product.graphqlId || product.productId || product.id;
-  const numericProductId = product.productId && !String(product.productId).startsWith("gid://")
-    ? String(product.productId)
-    : extractShopifyNumericId(productGid);
-  if (!productGid || !numericProductId) return null;
+  const productSelectionId = toVariantSelectionId(product?.selectionId);
+  if (!productSelectionId) return null;
+
+  const productGid = String(productSelectionId);
+  const numericProductId = extractShopifyNumericId(productGid);
+  if (!numericProductId) return null;
 
   const rawVariants = Array.isArray(product.variants) ? product.variants : [];
   const selectedVariant = rawVariants.find((variant: any) => (
@@ -76,7 +84,7 @@ export function buildDefaultProductEntryFromPicker(product: any): DefaultProduct
     images: imageUrl ? [{ originalSrc: imageUrl }] : [],
     variants,
     hasOnlyDefaultVariant: Boolean(product.hasOnlyDefaultVariant ?? rawVariants.length <= 1),
-    requiredQuantity: Number(product.requiredQuantity ?? product.minQuantity ?? 1) || 1,
+    requiredQuantity: Number(product.requiredQuantity ?? product.minQuantity ?? 0) || 0,
   };
   if (product.handle) entry.handle = product.handle;
 

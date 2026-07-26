@@ -1,13 +1,13 @@
 /*!
  * Wolfpack Bundle Widget — Product Page
- * Version : 5.0.202
- * Built   : 2026-07-22
+ * Version : 5.0.205
+ * Built   : 2026-07-26
  *
  * Cache note: Shopify CDN cache is busted automatically by shopify app deploy.
  * After deploying, allow 2-10 minutes for propagation before testing.
  * Verify live version: console.log(window.__BUNDLE_WIDGET_VERSION__)
  */
-window.__BUNDLE_WIDGET_VERSION__ = '5.0.202';
+window.__BUNDLE_WIDGET_VERSION__ = '5.0.205';
 (function() {
   'use strict';
 
@@ -147,10 +147,9 @@ const ConditionValidator = (function () {
     const ids = new Set();
     const products = Array.isArray(category && category.products) ? category.products : [];
     for (const product of products) {
-      const raw = product && (product.id || product.productId || product.graphqlId);
+      const raw = product && product.selectionId;
       if (raw == null || raw === '') continue;
-
-      const id = String(raw).replace(new RegExp('^gid://shopify/[^/]+/'), '');
+      const id = String(raw);
       if (id) ids.add(id);
     }
     return ids;
@@ -246,8 +245,7 @@ const ConditionValidator = (function () {
     if (!step.conditionType) return true;
 
     if (!step.conditionOperator || !_isPositiveConditionValue(step.conditionValue)) {
-      const min = step.minQuantity != null ? Number(step.minQuantity) : 1;
-      return total >= min;
+      return true;
     }
 
     if (!_evaluateSatisfied(step.conditionOperator, normalizedConditionValue, total)) return false;
@@ -787,7 +785,7 @@ class BundleDataManager {
       compareAtPrice: sp.product?.compareAtPrice || null,
       variants: sp.product?.variants || [],
       variantId: sp.variantId || null,
-      quantity: sp.quantity || 1
+      quantity: Number.isFinite(Number(sp.quantity)) ? Number(sp.quantity) : 0,
     }));
   }
 
@@ -890,14 +888,13 @@ class PricingCalculator {
       const productsInStep = stepProductData[stepIndex] || [];
 
       Object.entries(stepSelections).forEach(([variantId, quantity]) => {
-
-        let product = productsInStep.find(p => String(p.variantId || p.id) === String(variantId));
+        let product = productsInStep.find(p => String(p.selectionId || '') === String(variantId));
         let matchedVariant = null;
 
         if (!product) {
           for (const p of productsInStep) {
             if (p.variants && Array.isArray(p.variants)) {
-              const variant = p.variants.find(v => String(v.id) === String(variantId));
+              const variant = p.variants.find(v => String(v.selectionId || '') === String(variantId));
               if (variant) {
                 product = p;
                 matchedVariant = variant;
@@ -2834,13 +2831,13 @@ if (typeof module !== 'undefined' && module.exports) {
  */
 
 function renderQuantityControl({
-  variantId,
+  selectionId,
   quantity = 0,
   decreaseDisabled = false,
   increaseDisabled = false,
   className = '',
 } = {}) {
-  const key = escapeHtml(variantId || '');
+  const key = escapeHtml(selectionId || '');
   const normalizedQuantity = Math.max(0, Number(quantity || 0));
   const classes = ['bw-quantity-control', 'inline-quantity-controls', className]
     .filter(Boolean)
@@ -2868,7 +2865,7 @@ const DEFAULT_PLACEHOLDER_IMAGE = 'data:image/svg+xml,%3Csvg xmlns="http://www.w
 const PRODUCT_DESCRIPTION_PREVIEW_LENGTH = 110;
 
 function renderSharedProductCard(product = {}, currentQuantity = 0, currencyInfo = {}, options = {}) {
-  const selectionKey = product.variantId || product.id || '';
+  const selectionKey = String(product.selectionId || '');
   const quantity = Math.max(0, Number(currentQuantity || 0));
   const isSelected = quantity > 0;
   const mode = options.mode || 'grid';
@@ -2878,7 +2875,7 @@ function renderSharedProductCard(product = {}, currentQuantity = 0, currencyInfo
       : product.description,
   );
   const variantText = getVariantDisplayText(product);
-  const isIndividualVariantCard = Boolean(product.parentProductId && product.variantId && variantText);
+  const isIndividualVariantCard = Boolean(product.parentProductId && selectionKey && variantText);
   const title = getDisplayTitle(product, variantText);
   const imageUrls = getProductImageUrls(product);
   const imageUrl = imageUrls[0] || DEFAULT_PLACEHOLDER_IMAGE;
@@ -2939,7 +2936,7 @@ function renderSharedProductCard(product = {}, currentQuantity = 0, currencyInfo
               })
               : isSelected
               ? renderQuantityControl({
-                variantId: selectionKey,
+                selectionId: selectionKey,
                 quantity,
                 decreaseDisabled: options.decreaseDisabled === true,
                 increaseDisabled: options.increaseDisabled === true,
@@ -3106,10 +3103,10 @@ const SELECTED_ROW_PLACEHOLDER_IMAGE = 'data:image/svg+xml,%3Csvg xmlns="http://
 function renderSelectedProductRow(product = null, options = {}) {
   if (!product) return renderEmptyRow(options);
 
-  const selectionKey = product.variantId || product.id || product.productId || '';
+  const selectionKey = String(product.selectionId || '');
   const title = product.title || product.parentTitle || '';
   const variantTitle = product.variantTitle || product.variant || '';
-  const quantity = Math.max(1, Number(product.quantity || 1));
+  const quantity = Math.max(0, Number(product.quantity || 0));
   const quantityLabel = product.quantityLabel || options.quantityLabel || `x${quantity}`;
   const imageUrl = product.imageUrl || product.image?.src || SELECTED_ROW_PLACEHOLDER_IMAGE;
   const removable = product.isDefault !== true && product.isLocked !== true && options.removable !== false;
@@ -3986,7 +3983,10 @@ const modalSlotTemplateMethods = {
       return;
     }
 
-    const rawRequired = Number(step?.conditionValue) || 1;
+    const parsedRequired = Number.parseFloat(step?.conditionValue);
+    const rawRequired = Number.isFinite(parsedRequired) && parsedRequired >= 0
+      ? parsedRequired
+      : 0;
     const operator = String(step?.conditionOperator || '').toLowerCase();
     const requiredCount = ['greater_than', 'gt', '>'].includes(operator)
       ? rawRequired + 1
@@ -4100,10 +4100,10 @@ function getCascadeSelectedDrawerHeight({
 function prepareCascadeSelectedProductDisplay({
   product = {},
   variantId = '',
-  quantity = 1,
+  quantity = 0,
   formatPrice = null,
 } = {}) {
-  const normalizedQuantity = Math.max(1, Number(quantity || 1));
+  const normalizedQuantity = Number.isFinite(Number(quantity)) ? Math.max(0, Number(quantity)) : 0;
   const title = product.title || product.parentTitle || '';
   const variantTitle = normalizeSelectedRowVariantTitle(product, title);
   const amount = Number(product.price);
@@ -4926,6 +4926,11 @@ updateMessagesFromBundle() {
 };
 
 const ProductPageDefaultProductMethods = {
+  _normalizeRequiredQuantity(value) {
+    const parsed = Number.parseFloat(value);
+    return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0;
+  },
+
 initializeDataStructures() {
   const stepsCount = this.selectedBundle.steps.length;
 
@@ -4939,7 +4944,8 @@ initializeDataStructures() {
     if (step.isDefault && step.defaultVariantId) {
       const normalizedDefaultVariantId = this.normalizeSelectionKey(step.defaultVariantId);
       if (normalizedDefaultVariantId) {
-        this.setSelectedQuantity(i, normalizedDefaultVariantId, 1);
+        const initialDefaultQuantity = this._normalizeRequiredQuantity(step.defaultRequiredQuantity);
+        this.setSelectedQuantity(i, normalizedDefaultVariantId, initialDefaultQuantity);
       }
     }
   });
@@ -4953,9 +4959,9 @@ _getDirectDefaultProductsData() {
   return data;
 },
 
-_normalizeDirectDefaultProduct(product) {
+  _normalizeDirectDefaultProduct(product) {
   const variant = Array.isArray(product.variants) ? product.variants[0] : null;
-  const variantId = this.extractId(variant?.variantGraphqlId || variant?.variantId);
+  const variantId = this.extractId(variant?.selectionId);
   if (!variantId) return null;
 
   const imageUrl = product.images?.[0]?.originalSrc || product.imageUrl || BUNDLE_WIDGET.PLACEHOLDER_IMAGE;
@@ -4963,13 +4969,14 @@ _normalizeDirectDefaultProduct(product) {
     ? variant.inventoryQuantity
     : null;
   const price = Number.parseFloat(variant?.price || '0') * 100;
-  const requiredQuantity = Number(product.requiredQuantity || 1) || 1;
+  const requiredQuantity = this._normalizeRequiredQuantity(product.requiredQuantity);
   const explicitlyUnavailable = variant?.availableForSale === false || variant?.available === false;
   const available = !explicitlyUnavailable;
   const quantityAvailable = inventoryQuantity;
 
   return {
-    id: this.extractId(product.graphqlId || product.productId) || product.productId || variantId,
+    id: variantId,
+    selectionId: variantId,
     title: product.title || '',
     handle: product.handle || '',
     imageUrl,
@@ -4982,6 +4989,7 @@ _normalizeDirectDefaultProduct(product) {
     defaultRequiredQuantity: requiredQuantity,
     variants: [{
       id: variantId,
+      selectionId: variantId,
       title: variant?.title || '',
       price,
       compareAtPrice: null,
@@ -5007,7 +5015,7 @@ _initDirectDefaultProducts() {
   if (this.directDefaultProducts.length === 0 || !this.selectedProducts[0]) return;
 
   this.directDefaultProducts.forEach(product => {
-    this.setSelectedQuantity(0, product.variantId, product.defaultRequiredQuantity || 1);
+    this.setSelectedQuantity(0, product.variantId, this._normalizeRequiredQuantity(product.defaultRequiredQuantity));
   });
 },
 
@@ -5029,7 +5037,7 @@ _isDirectDefaultVariant(variantId) {
 _getDirectDefaultRequiredQuantity(variantId) {
   const normalizedVariantId = this.extractId(variantId);
   const product = this.directDefaultProducts.find(item => item.variantId === normalizedVariantId);
-  return product ? (product.defaultRequiredQuantity || 1) : null;
+  return product ? this._normalizeRequiredQuantity(product.defaultRequiredQuantity) : null;
 },
 
 /**
@@ -5561,7 +5569,9 @@ clearStepSelections(stepIndex) {
   }
   if (stepIndex === 0 && this.directDefaultProducts.length > 0) {
     this.directDefaultProducts.forEach(product => {
-      this.setSelectedQuantity(0, product.variantId, product.defaultRequiredQuantity || 1);
+      const defaultQuantity = Number.parseFloat(product.defaultRequiredQuantity);
+      const normalizedDefaultQuantity = Number.isFinite(defaultQuantity) && defaultQuantity >= 0 ? defaultQuantity : 0;
+      this.setSelectedQuantity(0, product.variantId, normalizedDefaultQuantity);
     });
   }
   this._persistSessionSelections?.();
@@ -6776,7 +6786,10 @@ _renderDirectDefaultProducts() {
   const currencyInfo = CurrencyManager.getCurrencyInfo();
 
   products.forEach(product => {
-    const quantity = this.getSelectedQuantity(0, product.variantId) || product.defaultRequiredQuantity || 1;
+    const selectedQuantity = Number(this.getSelectedQuantity(0, product.variantId));
+    const defaultQuantity = Number.parseFloat(product.defaultRequiredQuantity);
+    const resolvedDefaultQuantity = Number.isFinite(defaultQuantity) && defaultQuantity >= 0 ? defaultQuantity : 0;
+    const quantity = Number.isFinite(selectedQuantity) ? selectedQuantity : resolvedDefaultQuantity;
     const line = document.createElement('div');
     line.className = 'bw-default-products__line';
 
@@ -7530,7 +7543,8 @@ createAddMoreCard(step, stepIndex, currentCount) {
   const selectionCount = document.createElement('div');
   selectionCount.className = 'step-selection-count';
   const operator = step.conditionOperator;
-  const rawRequired = step.conditionValue || 1;
+  const parsedRequired = Number.parseFloat(step.conditionValue);
+  const rawRequired = Number.isFinite(parsedRequired) && parsedRequired >= 0 ? parsedRequired : 0;
   const requiredCount = operator === BUNDLE_WIDGET.CONDITION_OPERATORS.GREATER_THAN
     ? rawRequired + 1
     : rawRequired;
@@ -7823,6 +7837,11 @@ removeProductFromSelection(stepIndex, variantId) {
 };
 
 const ProductPageProductDataMethods = {
+  normalizeProductSelectionId(product = {}) {
+    const candidate = this.extractId(product?.selectionId);
+    return candidate || '';
+  },
+
 resolveStorefrontApiBase() {
   const appProxyPrefix = '/apps/product-bundles';
   if (window.location?.pathname?.startsWith(`${appProxyPrefix}/`)) {
@@ -7857,7 +7876,7 @@ resolveStorefrontApiBase() {
 collectStepProductIds(step) {
   const productIds = [];
   const addProductId = (product) => {
-    const id = product?.id || product?.graphqlId || product?.productId;
+    const id = this.normalizeProductSelectionId(product);
     if (id && !productIds.includes(id)) productIds.push(id);
   };
 
@@ -7892,7 +7911,7 @@ async loadStepProducts(stepIndex) {
 
   const cachedProducts = this.stepProductData[stepIndex] || [];
   const hasHydratedProducts = cachedProducts.some(product =>
-    product?.variantId
+    product?.selectionId
     || product?.imageUrl
     || (Array.isArray(product?.variants) && product.variants.length > 0)
     || typeof product?.price === 'number'
@@ -7949,7 +7968,7 @@ async loadStepProducts(stepIndex) {
 
   const seen = new Set();
   this.stepProductData[stepIndex] = processedProducts.filter(product => {
-    const key = product.variantId || product.id;
+    const key = this.normalizeProductSelectionId(product);
     if (seen.has(key)) {
       return false;
     }
@@ -7981,6 +8000,7 @@ processProductsForStep(products, step) {
   const toCents = (value) => Math.round(parseFloat(value || '0') * 100);
   const normalizeVariant = (v) => ({
     id: this.extractId(v.id),
+    selectionId: this.extractId(v.id),
     title: v.title,
     price: toCents(v.price),
     compareAtPrice: v.compareAtPrice ? toCents(v.compareAtPrice) : null,
@@ -8021,6 +8041,7 @@ processProductsForStep(products, step) {
 
           return {
             id: this.extractId(variant.id),
+            selectionId: this.extractId(variant.id),
             title: `${product.title} - ${variant.title}`,
             imageUrl,
             price: toCents(variant.price),
@@ -8058,7 +8079,7 @@ processProductsForStep(products, step) {
         return opt.name || opt;
       });
 
-        return [{
+      return [{
           id: this.extractId(product.id),
           title: product.title,
           imageUrl,
@@ -8067,6 +8088,7 @@ processProductsForStep(products, step) {
             : toCents(product.price),
           compareAtPrice: defaultVariant?.compareAtPrice ? toCents(defaultVariant.compareAtPrice) : null,
           variantId: this.extractId(defaultVariant?.id || product.id),
+          selectionId: this.extractId(defaultVariant?.id || product.id),
           sellingPlanAllocations: defaultVariant?.sellingPlanAllocations || [],
           available: defaultVariant ? isVariantSelectableForInventory(defaultVariant) : false,
           quantityAvailable: typeof defaultVariant?.quantityAvailable === 'number' ? defaultVariant.quantityAvailable : null,
@@ -8124,14 +8146,9 @@ findProductBySelectionKey(products, selectionKey) {
   const normalized = this.normalizeSelectionKey(selectionKey);
   if (!normalized) return null;
 
-  return products.find((product) => {
-    const ids = [product.variantId, product.id, product.productId];
-    if (Array.isArray(product.variants)) {
-      ids.push(...product.variants.map((variant) => variant.id));
-    }
-
-    return ids.some((id) => this.normalizeSelectionKey(id) === normalized);
-  }) || null;
+  return products.find((product) => (
+    String(product?.selectionId || '') === normalized
+  )) || null;
 },
 
 shouldApplyIndividualSellingPlanSelection() {
@@ -8148,9 +8165,11 @@ shouldApplyIndividualSellingPlanSelectionForProduct(product, variantId) {
     return true;
   }
 
-  const normalizedSelectedId = this.extractId(variantId) || String(variantId || "");
+  const normalizedSelectedId = this.normalizeSelectionKey(variantId);
   const variant = Array.isArray(product?.variants)
-    ? product.variants.find((candidate) => this.extractId(candidate.id) === normalizedSelectedId)
+    ? product.variants.find((candidate) => (
+      this.normalizeSelectionKey(candidate?.selectionId || '') === normalizedSelectedId
+    ))
     : null;
 
   const target = variant ?? product;
@@ -8166,9 +8185,11 @@ getSelectedSellingPlanAllocationId(product, variantId) {
     return null;
   }
 
-  const normalizedSelectedId = this.extractId(variantId) || String(variantId || '');
+  const normalizedSelectedId = this.normalizeSelectionKey(variantId);
   const variant = Array.isArray(product?.variants)
-    ? product.variants.find((candidate) => this.extractId(candidate.id) === normalizedSelectedId)
+    ? product.variants.find((candidate) => (
+      this.normalizeSelectionKey(candidate?.selectionId || '') === normalizedSelectedId
+    ))
     : null;
 
   const normalizedProduct = (variant?.sellingPlanAllocations !== undefined ? variant : product) || {};
@@ -8210,10 +8231,7 @@ getSelectedQuantity(stepIndex, variantId) {
     return Number(selectedProducts[normalized]) || 0;
   }
 
-  const alias = Object.entries(selectedProducts).find(([productId]) =>
-    this.normalizeSelectionKey(productId) === normalized
-  );
-  return alias ? Number(alias[1]) || 0 : 0;
+  return 0;
 },
 
 setSelectedQuantity(stepIndex, variantId, quantity) {
@@ -8223,19 +8241,8 @@ setSelectedQuantity(stepIndex, variantId, quantity) {
   const normalized = this.normalizeSelectionKey(variantId);
   if (!normalized) return;
 
-  Object.keys(selectedProducts).forEach((productId) => {
-    if (this.normalizeSelectionKey(productId) === normalized) {
-      delete selectedProducts[productId];
-    }
-  });
-
   this.selectedProductCategoryIndexes ||= [];
   this.selectedProductCategoryIndexes[stepIndex] ||= {};
-  Object.keys(this.selectedProductCategoryIndexes[stepIndex]).forEach((productId) => {
-    if (this.normalizeSelectionKey(productId) === normalized) {
-      delete this.selectedProductCategoryIndexes[stepIndex][productId];
-    }
-  });
 
   if (quantity > 0) {
     selectedProducts[normalized] = quantity;
@@ -8320,9 +8327,9 @@ getAddonTierEvaluation(step) {
 getAddonProductSelectionKeys(step) {
   const keys = new Set();
   const addKey = (value) => {
-    if (value === null || value === undefined || value === '') return;
-    const normalized = this.extractId(value) || value;
-    keys.add(String(normalized));
+    const selectionId = String(value?.selectionId || '');
+    if (!selectionId) return;
+    keys.add(selectionId);
   };
   const products = [
     ...(Array.isArray(step?.StepProduct) ? step.StepProduct : []),
@@ -8331,19 +8338,8 @@ getAddonProductSelectionKeys(step) {
   ];
 
   products.forEach(product => {
-    addKey(product.id);
-    addKey(product.productId);
-    addKey(product.graphqlId);
-    addKey(product.variantId);
-    addKey(product.variantGraphqlId);
-    addKey(product.title);
-    (Array.isArray(product.variants) ? product.variants : []).forEach(variant => {
-      addKey(variant.id);
-      addKey(variant.variantId);
-      addKey(variant.variantGraphqlId);
-      addKey(variant.admin_graphql_api_id);
-      addKey(variant.title);
-    });
+    addKey(product);
+    (Array.isArray(product.variants) ? product.variants : []).forEach(addKey);
   });
 
   return keys;
@@ -8357,10 +8353,7 @@ calculateSelectedAddonDiscountAmount() {
 
   return this.getAllSelectedProductsData().reduce((total, item) => {
     const isChargeableAddonItem = Number(item.stepIndex) === chargeableAddonStepIndex || (item.isFreeGift === true && item.addonDisplayFree !== true);
-    const isChargeableAddonProduct = chargeableAddonProductKeys.has(String(this.extractId(item.variantId) || item.variantId))
-      || chargeableAddonProductKeys.has(String(this.extractId(item.productId) || item.productId))
-      || chargeableAddonProductKeys.has(String(item.title || ''))
-      || chargeableAddonProductKeys.has(String(item.parentTitle || ''));
+    const isChargeableAddonProduct = chargeableAddonProductKeys.has(String(item.selectionId || ''));
     if (!isChargeableAddonItem && !isChargeableAddonProduct) return total;
     const step = steps[item.stepIndex];
     const addonDiscount = this.getAddonLineDiscount(step) || this.getAddonLineDiscount(chargeableAddonStep);
@@ -8391,8 +8384,8 @@ getDiscountInfoWithSelectedAddonDiscount(discountInfo, totalPrice) {
   };
 },
 
-getAllSelectedProductsData() {
-  const allProducts = [];
+  getAllSelectedProductsData() {
+    const allProducts = [];
 
   this.selectedBundle.steps.forEach((step, stepIndex) => {
     const stepSelections = this.selectedProducts[stepIndex] || {};
@@ -8401,27 +8394,17 @@ getAllSelectedProductsData() {
     Object.entries(stepSelections).forEach(([variantId, quantity]) => {
       if (quantity > 0) {
         const normalizedVariantId = this.normalizeSelectionKey(variantId);
-        let product = this.findProductBySelectionKey(productsInStep, normalizedVariantId);
-        if (!product && normalizedVariantId) {
-          product = this.findProductBySelectionKey(productsInStep, variantId);
+        const product = this.findProductBySelectionKey(productsInStep, normalizedVariantId);
+        if (!product) {
+          return;
         }
 
-        let matchedVariant = null;
-        if (!product) {
-          for (const p of productsInStep) {
-            if (p.variants && Array.isArray(p.variants)) {
-              const variant = p.variants.find(v =>
-                this.normalizeSelectionKey(v.id) === normalizedVariantId
-                || String(v.id) === String(variantId)
-              );
-              if (variant) {
-                product = p;
-                matchedVariant = variant;
-                break;
-              }
-            }
-          }
-        }
+        const matchedVariant = Array.isArray(product.variants)
+          ? product.variants.find((candidateVariant) => (
+              this.normalizeSelectionKey(candidateVariant?.selectionId || '')
+              === normalizedVariantId
+            ))
+          : null;
 
         if (product) {
           const variantData = matchedVariant || product;
@@ -8439,6 +8422,7 @@ getAllSelectedProductsData() {
           allProducts.push({
             stepIndex,
             variantId,
+            selectionId: String(variantId || ''),
             quantity,
             title: isVariantMatch
               ? (variantTitle ? `${product.title} - ${variantTitle}` : product.title)
@@ -8483,7 +8467,8 @@ expandProductsByVariant(products) {
             imageUrl,
             price: typeof variant.price === 'number' ? variant.price : (parseFloat(variant.price || '0') * 100),
             compareAtPrice: variant.compareAtPrice ? (typeof variant.compareAtPrice === 'number' ? variant.compareAtPrice : parseFloat(variant.compareAtPrice) * 100) : null,
-            variantId: variant.id,
+            variantId: variant.selectionId,
+            selectionId: variant.selectionId,
             available: variant.available !== false,
             parentProductId: product.id,
             parentTitle: product.title,
@@ -9257,7 +9242,13 @@ attachProductEventHandlers(productGrid, stepIndex) {
       } else {
 
         const currentQuantity = this.getSelectedQuantity(stepIndex, productId);
-        this.updateProductSelection(stepIndex, productId, currentQuantity > 0 ? 0 : 1);
+        const directDefaultRequiredQuantity = this._getDirectDefaultRequiredQuantity(productId);
+        const toggleQuantity = currentQuantity > 0
+          ? 0
+          : directDefaultRequiredQuantity ?? 1;
+        if (toggleQuantity > 0 || currentQuantity > 0) {
+          this.updateProductSelection(stepIndex, productId, toggleQuantity);
+        }
       }
     }
   });
@@ -9286,7 +9277,14 @@ attachProductEventHandlers(productGrid, stepIndex) {
 
     if (canClickCardToAdd) {
       const currentQuantity = this.getSelectedQuantity(stepIndex, productId);
-      this.updateProductSelection(stepIndex, productId, currentQuantity > 0 ? 0 : 1);
+      const directDefaultRequiredQuantity = this._getDirectDefaultRequiredQuantity(productId);
+      const toggleQuantity = currentQuantity > 0
+        ? 0
+        : directDefaultRequiredQuantity ?? 1;
+
+      if (toggleQuantity > 0 || currentQuantity > 0) {
+        this.updateProductSelection(stepIndex, productId, toggleQuantity);
+      }
     }
   });
 

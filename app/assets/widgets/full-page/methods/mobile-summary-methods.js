@@ -22,6 +22,30 @@ import {
   buildCartLineSourceProperties,
 } from '../../shared/engine/cart-lines.js';
 import { shouldDisplayClassicFixedBundleRawTotal } from '../shared/summary-pricing-display.js';
+import { getRemainingSummarySkeletonCount } from './side-panel-methods.js';
+
+function getSummarySlotQuantity(item = {}) {
+  const quantity = Number(item?.quantity);
+  return Number.isFinite(quantity) ? Math.max(0, Math.floor(quantity)) : 0;
+}
+
+function expandSelectedItemsForSummarySlots(allSelectedProducts = []) {
+  const selectedProducts = Array.isArray(allSelectedProducts) ? allSelectedProducts : [];
+  const expanded = [];
+
+  selectedProducts.forEach((item) => {
+    const normalizedQuantity = getSummarySlotQuantity(item);
+    for (let index = 0; index < normalizedQuantity; index += 1) {
+      expanded.push({ ...item, quantity: 1 });
+    }
+  });
+
+  return expanded;
+}
+
+function getSelectionId(item = {}) {
+  return String(item?.selectionId || '');
+}
 
 export function shouldUseMobileSummarySlotTiles({ designPreset, productSlotsEnabled } = {}) {
   if (productSlotsEnabled !== true) return false;
@@ -95,10 +119,20 @@ _populateCompactMobileSummaryTray(sheet) {
     ? totalPrice
     : finalPrice;
   const nextRule = PricingCalculator.getNextDiscountRule?.(this.selectedBundle, totalQuantity, totalPrice) || null;
-  const selectedFooterQuantity = this.getAllSelectedProductsData().reduce(
-    (sum, item) => sum + (Number(item.quantity) || 1),
-    0
-  );
+  const allSelectedProducts = this.getAllSelectedProductsData();
+  const shouldRenderSlotTiles = shouldUseMobileSummarySlotTiles({
+    designPreset: this.getFullPageDesignPreset(),
+    productSlotsEnabled: this._shouldRenderProductSlots(),
+  });
+  const selectedSlotItems = shouldRenderSlotTiles
+    ? expandSelectedItemsForSummarySlots(allSelectedProducts)
+    : [];
+  const selectedFooterQuantity = shouldRenderSlotTiles
+    ? selectedSlotItems.length
+    : allSelectedProducts.reduce((sum, item) => {
+      const quantity = Number(item.quantity);
+      return sum + (Number.isFinite(quantity) ? quantity : 0);
+    }, 0);
   const designPreset = this.getFullPageDesignPreset?.();
   const isClassicPreset = designPreset === 'CLASSIC';
   const usesAnimatedSummarySection = isClassicPreset || designPreset === 'STANDARD';
@@ -160,10 +194,7 @@ _populateCompactMobileSummaryTray(sheet) {
   this._syncCompactMobileSummaryScrollLock();
   sheet.classList.toggle(
     'fpb-mobile-summary-tray--slots',
-    shouldUseMobileSummarySlotTiles({
-      designPreset: this.getFullPageDesignPreset(),
-      productSlotsEnabled: this._shouldRenderProductSlots(),
-    })
+    shouldRenderSlotTiles
   );
   sheet.classList.remove('fpb-mobile-summary-tray--has-discount-summary');
 
@@ -251,12 +282,10 @@ _populateCompactMobileSummaryTray(sheet) {
   navSection.className = 'side-panel-nav';
   const isLastStep = this.currentStepIndex === (this.selectedBundle?.steps?.length || 1) - 1;
   const conditionlessMobile = this.bundleHasNoConditions();
-  const hasSelectionMobile = conditionlessMobile && this.getAllSelectedProductsData().filter(p => !p.isDefault).length > 0;
   const actionButton = this._createMobileSummaryActionButton({
     finalPrice: displayFinalPrice,
     currencyInfo,
     conditionlessMobile,
-    hasSelectionMobile,
     isLastStep,
     isComplete: this.areBundleConditionsMet()
   });
@@ -510,7 +539,22 @@ _renderCompactMobileSummaryBundleItems(currencyInfo, totalQuantity) {
     productsList.appendChild(row);
   });
 
+  const remainingSummarySkeletonCount = getRemainingSummarySkeletonCount({
+    designPreset: this.getFullPageDesignPreset(),
+    productSlotsEnabled: this._shouldRenderProductSlots(),
+    requiredQuantity: typeof this.getSummarySidebarMaxItemCount === 'function'
+      ? this.getSummarySidebarMaxItemCount()
+      : 0,
+    selectedQuantity: totalQuantity,
+  });
+
   if (
+    remainingSummarySkeletonCount > 0
+    && typeof this._renderSidebarProductSkeletons === 'function'
+  ) {
+    productsList.classList.add('fpb-mobile-summary-products-list--skeletons');
+    this._renderSidebarProductSkeletons(productsList, remainingSummarySkeletonCount);
+  } else if (
     allSelectedProducts.length === 0
     && !this._shouldRenderProductSlots()
     && typeof this._renderSidebarProductSkeletons === 'function'
@@ -520,8 +564,8 @@ _renderCompactMobileSummaryBundleItems(currencyInfo, totalQuantity) {
   }
 
   const requiredSlots = Math.max(
-    allSelectedProducts.length + 1,
-    activeStep?.maxQuantity || activeStep?.minQuantity || totalQuantity + 1,
+    allSelectedProducts.length,
+    totalQuantity,
     2
   );
   if (this._shouldRenderProductSlots()) {
@@ -551,14 +595,14 @@ _renderCompactMobileSummaryBundleItems(currencyInfo, totalQuantity) {
 },
 
 _renderCompactMobileSummarySlotTiles(container, allSelectedProducts = [], activeStep = null, totalQuantity = 0) {
-  const selectedItems = Array.isArray(allSelectedProducts) ? allSelectedProducts : [];
+  const selectedItems = expandSelectedItemsForSummarySlots(allSelectedProducts);
+  const selectedCount = selectedItems.length;
   const sharedTargetCount = typeof this.getSummarySidebarMaxItemCount === 'function'
-    ? this.getSummarySidebarMaxItemCount(selectedItems.length)
+    ? this.getSummarySidebarMaxItemCount(selectedCount)
     : 0;
   const slotCount = Math.max(
     sharedTargetCount,
-    selectedItems.length + 1,
-    activeStep?.maxQuantity || activeStep?.minQuantity || totalQuantity + 1,
+    selectedCount,
     2
   );
   const emptyStateIconUrl = this._escapeHTML(this.selectedBundle?.productSlotIconUrl || '');
@@ -590,7 +634,6 @@ _createMobileSummaryActionButton({
   finalPrice,
   currencyInfo,
   conditionlessMobile,
-  hasSelectionMobile,
   isLastStep,
   isComplete
 }) {
@@ -617,7 +660,7 @@ _createMobileSummaryActionButton({
   if (
     shouldAddToCart
     && !shouldKeepClassicValidationClickable
-    && (conditionlessMobile ? (!hasSelectionMobile || !this.canCheckoutWithBoxSelection()) : (!isComplete || !this.canCheckoutWithBoxSelection()))
+    && (conditionlessMobile ? !this.canCheckoutWithBoxSelection() : (!isComplete || !this.canCheckoutWithBoxSelection()))
   ) ctaBtn.disabled = true;
   ctaBtn.addEventListener('click', async () => {
     if (shouldAddToCart) {
@@ -727,7 +770,7 @@ createStandardSidebarSelectedRow(item, currencyInfo) {
   const wrapper = document.createElement('div');
 
   wrapper.innerHTML = renderSelectedProductRow({
-    id: item.variantId || item.productId || item.id,
+    id: getSelectionId(item),
     title: summaryTitle,
     variantTitle: variantInfo,
     imageUrl: this._getSelectedProductImageSrc(item),

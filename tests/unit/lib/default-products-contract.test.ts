@@ -6,13 +6,13 @@ import {
 describe("default products direct contract", () => {
   it("maps Shopify product-picker output to the direct defaultProductsData shape", () => {
     const entry = buildDefaultProductEntryFromPicker({
-      id: "gid://shopify/Product/8322625700036",
+      selectionId: "gid://shopify/Product/8322625700036",
       title: "18k Bloom Earrings",
       handle: "18k-bloom-earrings",
       images: [{ originalSrc: "https://cdn.example/earrings.jpg" }],
       variants: [
         {
-          id: "gid://shopify/ProductVariant/45038876459204",
+          selectionId: "gid://shopify/ProductVariant/45038876459204",
           title: "Default Title",
           price: "579.00",
           inventoryQuantity: 13,
@@ -36,24 +36,24 @@ describe("default products direct contract", () => {
         },
       ],
       hasOnlyDefaultVariant: true,
-      requiredQuantity: 1,
+      requiredQuantity: 0,
     });
   });
 
   it("serializes one available picker variant for a multi-variant default product", () => {
     const entry = buildDefaultProductEntryFromPicker({
-      id: "gid://shopify/Product/9427287703811",
+      selectionId: "gid://shopify/Product/9427287703811",
       title: "Multi Variant Case",
       handle: "multi-variant-case",
       variants: [
         {
-          id: "gid://shopify/ProductVariant/48191691424003",
+          selectionId: "gid://shopify/ProductVariant/48191691424003",
           price: "123.00",
           inventoryQuantity: 0,
           availableForSale: false,
         },
         {
-          id: "gid://shopify/ProductVariant/48191691456771",
+          selectionId: "gid://shopify/ProductVariant/48191691456771",
           price: "123.00",
           inventoryQuantity: 0,
           availableForSale: true,
@@ -73,11 +73,11 @@ describe("default products direct contract", () => {
 
   it("does not invent zero inventory when the picker omits inventory quantity", () => {
     const entry = buildDefaultProductEntryFromPicker({
-      id: "gid://shopify/Product/9427287703811",
+      selectionId: "gid://shopify/Product/9427287703811",
       title: "Unknown Inventory Case",
       variants: [
         {
-          id: "gid://shopify/ProductVariant/48191691456771",
+          selectionId: "gid://shopify/ProductVariant/48191691456771",
           price: "123.00",
           availableForSale: true,
         },
@@ -97,7 +97,7 @@ describe("default products direct contract", () => {
     expect(normalizeDefaultProductsData({
       isDefaultProductsEnabled: false,
       defaultProductsTitle: "Preselected audit products",
-      products: [{ productId: "8322625700036" }],
+      products: [{ selectionId: "gid://shopify/Product/8322625700036" }],
     })).toEqual({});
   });
 
@@ -107,17 +107,15 @@ describe("default products direct contract", () => {
       defaultProductsTitle: "Preselected audit products",
       products: [
         {
-          productId: "8322625700036",
-          graphqlId: "gid://shopify/Product/8322625700036",
+          selectionId: "gid://shopify/Product/8322625700036",
           title: "18k Bloom Earrings",
           variants: [
             {
-              variantId: "45038876459204",
-              variantGraphqlId: "gid://shopify/ProductVariant/45038876459204",
+              selectionId: "gid://shopify/ProductVariant/45038876459204",
               price: "579.00",
             },
           ],
-          requiredQuantity: 1,
+          requiredQuantity: 0,
         },
       ],
     })).toMatchObject({
@@ -135,7 +133,7 @@ describe("default products direct contract", () => {
               price: "579.00",
             },
           ],
-          requiredQuantity: 1,
+          requiredQuantity: 0,
         },
       ],
     });

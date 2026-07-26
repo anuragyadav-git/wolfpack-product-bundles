@@ -186,7 +186,7 @@ export function useConfigureVisibilityTemplateState(
                 id: `category-rule-${Date.now()}`,
                 type: "quantity",
                 condition: "greaterThanOrEqualTo",
-                value: "01",
+                value: "",
               },
             ],
           };

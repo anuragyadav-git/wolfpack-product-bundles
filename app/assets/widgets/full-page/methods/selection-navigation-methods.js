@@ -22,6 +22,14 @@ import {
   buildCartLineSourceProperties,
 } from '../../shared/engine/cart-lines.js';
 
+function getSelectionId(item = {}) {
+  return String(item?.selectionId || '');
+}
+
+const normalizeCategoryProductId = (product) => {
+  return getSelectionId(product);
+};
+
 export function shouldAutoAdvanceFullPageStep({ quantity = 0, step = null } = {}) {
   if (
     quantity > 0 &&
@@ -77,18 +85,17 @@ function buildCategoryRuleValidationStep(step, stepIndex, stepCollectionProductI
     categories: categories.map(category => {
       const products = Array.isArray(category?.products) ? [...category.products] : [];
       const seenProductIds = new Set(products.map(product => {
-        const rawId = product?.id || product?.productId || product?.graphqlId;
-        return rawId == null ? '' : String(extractId(rawId) || rawId);
+        return normalizeCategoryProductId(product);
       }));
       const addCollectionHandle = (collection) => {
         const handle = collection?.handle;
         if (!handle) return;
         const productIds = stepCollectionProductIds[`${stepIndex}:${handle}`] || [];
         productIds.forEach(productId => {
-          const normalizedId = String(extractId(productId) || productId);
+          const normalizedId = String(productId == null ? '' : productId);
           if (!normalizedId || seenProductIds.has(normalizedId)) return;
           seenProductIds.add(normalizedId);
-          products.push({ id: normalizedId });
+          products.push({ selectionId: normalizedId });
         });
       };
 
@@ -321,19 +328,31 @@ updateProductQuantityDisplay(stepIndex, productId, quantity) {
       existingQuantityControls.remove();
     }
 
-    if (!existingAddBtn) {
-      const addButton = document.createElement('button');
-      addButton.className = 'product-add-btn';
-      addButton.dataset.productId = productId;
-      addButton.textContent = this.getProductAddButtonText();
-      actionContainer.appendChild(addButton);
+      if (!existingAddBtn) {
+        const addButton = document.createElement('button');
+        addButton.className = 'product-add-btn';
+        addButton.dataset.productId = productId;
+        addButton.textContent = this.getProductAddButtonText();
+        actionContainer.appendChild(addButton);
 
-      // Attach event listener to the new button
-      addButton.addEventListener('click', (e) => {
-        e.stopPropagation();
-        this.updateProductSelection(stepIndex, productId, 1);
-      });
-    }
+        // Attach event listener to the new button
+        addButton.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const directDefaultQuantities = this._getDirectDefaultSelectionQuantities?.(stepIndex) || {};
+          const hasDirectDefaultQuantity = Object.prototype.hasOwnProperty.call(
+            directDefaultQuantities,
+            String(productId),
+          );
+          const directDefaultQuantity = hasDirectDefaultQuantity
+            ? Number(directDefaultQuantities[String(productId)] || 0)
+            : null;
+          const currentQuantity = this.selectedProducts[stepIndex]?.[productId] || 0;
+          const nextQuantity = currentQuantity > 0 ? 0 : (directDefaultQuantity ?? 1);
+          if (nextQuantity > 0 || currentQuantity > 0) {
+            this.updateProductSelection(stepIndex, productId, nextQuantity);
+          }
+        });
+      }
 
     productCard.classList.remove('bw-product-card--selected');
   }
@@ -386,7 +405,7 @@ _refreshSiblingDimState(stepIndex) {
 // Helper to find product by ID across all step data
 findProductById(stepIndex, productId) {
   const products = this.stepProductData[stepIndex] || [];
-  return products.find(p => (p.variantId || p.id) === productId);
+  return products.find(p => getSelectionId(p) === String(productId));
 },
 
   validateStepCondition(stepIndex, productId, newQuantity) {
@@ -402,7 +421,7 @@ findProductById(stepIndex, productId) {
     const conditionSelectionTotals = isAmountOrWeight
       ? this._buildConditionAwareStepSelections(stepProducts, conditionSelections)
       : conditionSelections;
-    const targetProduct = stepProducts.find(p => (p.variantId || p.id) === productId);
+    const targetProduct = stepProducts.find(p => getSelectionId(p) === String(productId));
     const targetValues = isAmountOrWeight
       ? {
         amount: Number(targetProduct?.price || 0),
@@ -451,7 +470,7 @@ findProductById(stepIndex, productId) {
     const products = this.stepProductData[stepIndex] || [];
     const translated = {};
     for (const [selKey, qty] of Object.entries(conditionSelections)) {
-      const product = products.find(p => (p.variantId || p.id) === selKey);
+      const product = products.find(p => getSelectionId(p) === String(selKey));
       const productId = String((product && (product.parentProductId || product.id)) || selKey);
       const quantity = Number(qty) || 0;
       const current = translated[productId] || { quantity: 0, amount: 0 };
@@ -480,7 +499,7 @@ findProductById(stepIndex, productId) {
     for (const [selKey, qty] of Object.entries(selections)) {
       const quantity = Number(qty) || 0;
       if (quantity <= 0) continue;
-      const product = stepProducts.find(p => (p.variantId || p.id) === selKey);
+      const product = stepProducts.find(p => getSelectionId(p) === String(selKey));
       const unitAmount = Number(product?.price || 0);
       const unitWeight = Number(product?.weight || product?.weightInGrams || product?.grams || 0);
       const current = translated[selKey] || { quantity: 0, amount: 0, weight: 0 };
