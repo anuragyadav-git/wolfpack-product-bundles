@@ -1,11 +1,11 @@
 /*!
  * Wolfpack Bundles SDK
- * Version : 5.0.202
- * Built   : 2026-07-22
+ * Version : 5.0.205
+ * Built   : 2026-07-26
  *
  * Verify live version: console.log(window.__WOLFPACK_BUNDLES_SDK_VERSION__)
  */
-window.__WOLFPACK_BUNDLES_SDK_VERSION__ = '5.0.202';
+window.__WOLFPACK_BUNDLES_SDK_VERSION__ = '5.0.205';
 (function (window) {
   'use strict';
 
@@ -195,11 +195,9 @@ const ConditionValidator = (function () {
     const ids = new Set();
     const products = Array.isArray(category && category.products) ? category.products : [];
     for (const product of products) {
-      const raw = product && (product.id || product.productId || product.graphqlId);
+      const raw = product && product.selectionId;
       if (raw == null || raw === '') continue;
-      // Strip GID prefix (e.g. "gid://shopify/Product/123" → "123") so that the
-      // Set matches numeric IDs used as widget selection keys.
-      const id = String(raw).replace(new RegExp('^gid://shopify/[^/]+/'), '');
+      const id = String(raw);
       if (id) ids.add(id);
     }
     return ids;
@@ -316,10 +314,10 @@ const ConditionValidator = (function () {
     // describe the retired rule and must not recreate it at navigation time.
     if (!step.conditionType) return true;
 
-    // An incomplete active condition keeps the existing minimum guard.
+    // Treat incomplete active conditions as unmet, so we don't infer a required
+    // quantity fallback from legacy/partial step config.
     if (!step.conditionOperator || !_isPositiveConditionValue(step.conditionValue)) {
-      const min = step.minQuantity != null ? Number(step.minQuantity) : 1;
-      return total >= min;
+      return false;
     }
 
     // Primary condition
@@ -926,7 +924,7 @@ class BundleDataManager {
       compareAtPrice: sp.product?.compareAtPrice || null,
       variants: sp.product?.variants || [],
       variantId: sp.variantId || null,
-      quantity: sp.quantity || 1
+      quantity: Number.isFinite(Number(sp.quantity)) ? Number(sp.quantity) : 0,
     }));
   }
 
@@ -3419,9 +3417,8 @@ function validateStep(stepId, state, ConditionValidator) {
   }
 
   var condVal = Number(step.conditionValue);
-  if (!Number.isFinite(condVal) || condVal < 1) {
-    condVal = 1;
-  }
+  if (!Number.isFinite(condVal) || condVal < 0) condVal = 0;
+  if (condVal === 0) return { valid: true };
   var op = step.conditionOperator || 'equal_to';
   var opLabels = {
     'equal_to': 'exactly ' + condVal,

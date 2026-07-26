@@ -13,7 +13,7 @@ export function isAddonStepLocked(
   if (!step.isFreeGift || !step.addonUnlockAfterCompletion) return false;
   for (let i = 0; i < stepIndex; i++) {
     const prior = allSteps[i];
-    if (prior.selectedQuantity < (prior.minQuantity ?? 1)) return true;
+    if (prior.selectedQuantity < (prior.minQuantity ?? 0)) return true;
   }
   return false;
 }
