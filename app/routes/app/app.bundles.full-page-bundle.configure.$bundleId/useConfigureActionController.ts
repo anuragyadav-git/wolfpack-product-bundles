@@ -5,6 +5,7 @@ import { validateSlug } from "../../../lib/slug-utils";
 import { markBundlePreviewComplete } from "../../../lib/bundle-preview-readiness";
 import { verifyAppEmbedEnabledBeforePreview } from "../../../lib/app-embed-status-check.client";
 import { prepareStorefrontPreviewForOpen } from "../../../lib/storefront-sync-preview.client";
+import { blockUnsavedAdminNavigation } from "../../../lib/admin-unsaved-navigation";
 import { useSharedBundleHandlers } from "../../../hooks/useSharedBundleHandlers";
 import { type TourStep } from "../../../components/bundle-configure/tourSteps";
 import type { ConfigureBundleFlowDraft } from "./configure-flow-types";
@@ -45,20 +46,17 @@ export function useConfigureActionController(flow: ConfigureBundleFlowDraft) {
   const visibilityActionHandlers = useConfigureVisibilityActionHandlers(flow);
   const closeDisabledPreviewModal = useCallback(() => undefined, []);
 
-  const promptSaveBarBeforeNavigation = useCallback(() => {
-    flow.shopify.toast.show(
-      "Save or discard your changes before moving to another section.",
-      { isError: true, duration: 5000 },
-    );
-    void flow.shopify.saveBar.leaveConfirmation();
-  }, [flow]);
   const handleBackClick = useCallback(() => {
-    if (flow.isDirty && !flow.forceNavigation) {
-      promptSaveBarBeforeNavigation();
+    if (
+      blockUnsavedAdminNavigation(
+        flow.isDirty && !flow.forceNavigation,
+        flow.triggerSaveBarIrritation,
+      )
+    ) {
       return;
     }
     navigateBackOrFallback(flow.navigate, "/app/dashboard", { replaceFallback: true });
-  }, [flow, promptSaveBarBeforeNavigation]);
+  }, [flow]);
   const enablePreviewGate = {
     modalProps: {
       open: false,
@@ -173,13 +171,17 @@ export function useConfigureActionController(flow: ConfigureBundleFlowDraft) {
   const handleSectionChange = useCallback(
     (section: string) => {
       if (section === flow.activeSection) return;
-      if (flow.isDirty) {
-        promptSaveBarBeforeNavigation();
+      if (
+        blockUnsavedAdminNavigation(
+          flow.isDirty,
+          flow.triggerSaveBarIrritation,
+        )
+      ) {
         return;
       }
       flow.setActiveSection(section);
     },
-    [flow, promptSaveBarBeforeNavigation],
+    [flow],
   );
   const openProductInAdmin = useCallback(
     (productId: string) => {
@@ -372,6 +374,5 @@ export function useConfigureActionController(flow: ConfigureBundleFlowDraft) {
     handleTemplatePreview,
     loadAvailablePages,
     openProductInAdmin,
-    promptSaveBarBeforeNavigation,
   });
 }

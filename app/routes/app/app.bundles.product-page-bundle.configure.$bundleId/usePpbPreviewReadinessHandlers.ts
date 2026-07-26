@@ -8,6 +8,7 @@ import { pickPpbPreviewUrl } from "../../../lib/ppb-preview-url";
 import { prepareStorefrontPreviewForOpen } from "../../../lib/storefront-sync-preview.client";
 import { validatePpbWidgetPlacementBeforePreview } from "../../../lib/ppb-widget-placement.client";
 import { openThemeEditorInNewTab } from "../../../lib/theme-editor-navigation.client";
+import { blockUnsavedAdminNavigation } from "../../../lib/admin-unsaved-navigation";
 import type { BundleReadinessItem } from "../../../components/bundle-configure/BundleReadinessOverlay";
 import type { TourStep } from "../../../components/bundle-configure/tourSteps";
 
@@ -244,12 +245,12 @@ export function usePpbPreviewReadinessHandlers({
         : productPageBundleStyles.readinessButtonLow;
   const handleSectionChange = useCallback(
     (section: string) => {
-      if (base.isDirty) {
-        base.shopify.toast.show(
-          "Please save or discard your changes before switching sections",
-          { isError: true, duration: 4000 },
-        );
-        void base.shopify.saveBar.leaveConfirmation();
+      if (
+        blockUnsavedAdminNavigation(
+          base.isDirty,
+          base.triggerSaveBarIrritation,
+        )
+      ) {
         return;
       }
       base.setActiveSection(section);
@@ -311,12 +312,12 @@ export function usePpbPreviewReadinessHandlers({
     [base],
   );
   const handleBackClick = useCallback(() => {
-    if (base.isDirty && !base.forceNavigation) {
-      base.shopify.toast.show(
-        "Save or discard your changes before moving to another section.",
-        { isError: true, duration: 5000 },
-      );
-      void base.shopify.saveBar.leaveConfirmation();
+    if (
+      blockUnsavedAdminNavigation(
+        base.isDirty && !base.forceNavigation,
+        base.triggerSaveBarIrritation,
+      )
+    ) {
       return;
     }
     navigateBackOrFallback(base.navigate, "/app/dashboard", { replaceFallback: true });
