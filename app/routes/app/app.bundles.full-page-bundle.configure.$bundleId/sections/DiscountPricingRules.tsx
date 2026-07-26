@@ -1,5 +1,12 @@
 import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
-import { DiscountMethod } from "../../../../types/pricing";
+import {
+  amountToCents,
+  DiscountMethod,
+} from "../../../../types/pricing";
+
+export function fixedBundlePriceInputToCents(value: string): number {
+  return amountToCents(Number(value) || 0);
+}
 
 export function FpbDiscountRulesSection({
   flow,
@@ -268,12 +275,10 @@ export function FpbDiscountRulesSection({
                             <s-number-field
                               label="Price"
                               value={String(centsToAmount(rule.discountValue))}
-                              onInput={(e) =>
+                              onChange={(e) =>
                                 pricingState.updateDiscountRule(rule.id, {
-                                  discountValue: amountToCents(
-                                    Number(
-                                      (e.target as HTMLInputElement).value,
-                                    ) || 0,
+                                  discountValue: fixedBundlePriceInputToCents(
+                                    (e.target as HTMLInputElement).value,
                                   ),
                                 })
                               }
