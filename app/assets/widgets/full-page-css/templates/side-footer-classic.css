@@ -52,3 +52,11 @@
   min-height: 0 !important;
   max-height: none !important;
 }
+
+@media (min-width: 769px) {
+  .layout-sidebar[data-fpb-design-preset="CLASSIC"]
+    .full-page-side-panel
+    .side-panel-discount-message {
+    display: none;
+  }
+}

@@ -3867,3 +3867,11 @@ body:has([data-fpb-design-preset]) {
   min-height: 0 !important;
   max-height: none !important;
 }
+
+@media (min-width: 769px) {
+  .layout-sidebar[data-fpb-design-preset="STANDARD"]
+    .full-page-side-panel
+    .side-panel-discount-message {
+    display: block;
+  }
+}

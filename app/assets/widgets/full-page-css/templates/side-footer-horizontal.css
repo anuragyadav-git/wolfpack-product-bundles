@@ -842,3 +842,11 @@
     flex: 0 0 18px;
   }
 }
+
+@media (min-width: 769px) {
+  .layout-sidebar[data-fpb-design-preset="HORIZONTAL"]
+    .full-page-side-panel
+    .side-panel-discount-message {
+    display: none;
+  }
+}
