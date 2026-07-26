@@ -1,3 +1,34 @@
+---
+schema_version: 1
+id: eb-full-data-flow-investigation
+title: EB Full Data-Flow Investigation
+type: evidence
+status: authoritative
+summary: Preserves the primary live EB FPB and PPB Admin, payload, storefront, and cart-runtime evidence record.
+last_audited: 2026-07-26
+owners:
+  - engineering
+domains:
+  - competitive-research
+  - storefront
+systems:
+  - bundle-configure
+  - widget-runtime
+source_paths:
+  - prisma/schema.prisma
+  - app/assets/bundle-widget-full-page.js
+  - app/assets/bundle-widget-product-page.js
+related_docs:
+  - internal docs/EB Implementation Reference.md
+  - docs/competitor-analysis/17-eb-complete-configure-e2e-audit.md
+tags:
+  - data-flow
+  - evidence
+keywords:
+  - stepsConfigurationData
+  - mixAndMatchBundleSettings
+---
+
 # EB Full Data-Flow Investigation
 
 **Date:** 2026-05-22  

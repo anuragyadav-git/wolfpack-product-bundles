@@ -1,8 +1,40 @@
+---
+schema_version: 1
+id: eb-settings-design-capture
+title: EB Settings Design Control Panel Capture
+type: evidence
+status: current
+summary: Records the observed EB Design Control Panel sections, defaults, and expert color controls.
+last_audited: 2026-07-26
+owners:
+  - engineering
+domains:
+  - competitive-research
+  - admin
+systems:
+  - design-settings
+source_paths:
+  - app/lib/settings-design-contract.ts
+  - app/lib/settings-design-runtime.ts
+  - app/routes/app/app.settings/DesignSettingsView.tsx
+related_docs:
+  - internal docs/EB Settings Design Reference.md
+  - docs/competitor-analysis/16-eb-full-data-flow-investigation.md
+tags:
+  - settings
+  - design
+keywords:
+  - pageCustomization
+  - expert-color-controls
+---
+
 # Settings — Design Control Panel (DCP)
 
 **Screenshots:** `23-settings-main.png`, `24-settings-design-brand-colors.png`, `25-settings-typography.png`, `26-settings-corners.png`, `27-settings-images-gifs.png`, `28-settings-expert-colors-general.png`
 
 Route: `/brandConfig` → "Design" → Configure
+
+This is the compact UI capture. The implementation-facing save contract, runtime mapping, local preview boundary, and newer help-link evidence are maintained in `internal docs/EB Settings Design Reference.md`.
 
 ---
 
