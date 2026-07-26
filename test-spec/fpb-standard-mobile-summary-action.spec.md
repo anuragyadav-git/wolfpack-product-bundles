@@ -5,7 +5,7 @@ title: Test Spec for FPB Standard Mobile Summary Action
 type: test-spec
 status: active
 summary: Covers mobile summary actions, category switching, defaults, validation, and navigation behavior for FPB storefronts.
-last_audited: 2026-07-21
+last_audited: 2026-07-26
 owners:
   - Wolfpack Product Bundles
 domains:
@@ -55,6 +55,7 @@ Lock the storefront behavior observed in EB Standard and Classic: a one-step FPB
 | 13 | Add-on step after multiple paid steps | Current mobile step is before another paid step and an add-on step exists later | Summary CTA targets the next paid step, not the add-on step | Prevents the visible mobile footer from skipping locked paid steps. |
 | 14 | Standard and Classic expanded tray scroll | Expanded compact mobile summary tray for `STANDARD` or `CLASSIC` | Body scroll-lock class is toggled off | Matches EB evidence that expanded Standard/Classic footer remains sticky without locking page scroll. |
 | 15 | Timestamped Chrome async subtitle leak | Step `pageTitle` is `Chrome async 08:17:02` | Content subtitle is suppressed | Prevents accidental debug text from rendering in the storefront header. |
+| 16 | Shared fluid mobile footer ownership | Compact, Horizontal, Standard, and Classic presets | Compact and Horizontal opt into the shared fluid footer; Standard and Classic retain their animated footer variants | Keeps common footer structure reusable without erasing evidence-backed preset deltas. |
 
 ## Acceptance Criteria
 

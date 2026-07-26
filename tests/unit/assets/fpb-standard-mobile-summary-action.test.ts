@@ -5,7 +5,10 @@ const { fullPageMobileSummaryMethods } = require('../../../app/assets/widgets/fu
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { PricingCalculator, ToastManager } = require('../../../app/assets/bundle-widget-components.js');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const { shouldUseMobileSummarySlotTiles } = require('../../../app/assets/widgets/full-page/methods/mobile-summary-methods.js');
+const {
+  shouldUseFluidMobileSummaryFooter,
+  shouldUseMobileSummarySlotTiles,
+} = require('../../../app/assets/widgets/full-page/methods/mobile-summary-methods.js');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { shouldUseSharedDesktopSummarySlotTiles } = require('../../../app/assets/widgets/full-page/methods/side-panel-methods.js');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -608,6 +611,11 @@ describe('FPB Standard mobile summary action', () => {
       designPreset: 'HORIZONTAL',
       productSlotsEnabled: true,
     })).toBe(true);
+
+    expect(shouldUseFluidMobileSummaryFooter('COMPACT')).toBe(true);
+    expect(shouldUseFluidMobileSummaryFooter('HORIZONTAL')).toBe(true);
+    expect(shouldUseFluidMobileSummaryFooter('STANDARD')).toBe(false);
+    expect(shouldUseFluidMobileSummaryFooter('CLASSIC')).toBe(false);
 
     expect(shouldUseSharedDesktopSummarySlotTiles({
       designPreset: 'CLASSIC',

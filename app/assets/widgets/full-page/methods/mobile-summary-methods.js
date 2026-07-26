@@ -54,6 +54,11 @@ export function shouldUseMobileSummarySlotTiles({ designPreset, productSlotsEnab
   return ['STANDARD', 'CLASSIC', 'COMPACT', 'HORIZONTAL'].includes(preset);
 }
 
+export function shouldUseFluidMobileSummaryFooter(designPreset) {
+  const preset = typeof designPreset === 'string' ? designPreset.trim().toUpperCase() : '';
+  return preset === 'COMPACT' || preset === 'HORIZONTAL';
+}
+
 export function getMobileAdditionalOffersPulseState({
   designPreset,
   currentStepIndex = 0,
@@ -134,6 +139,10 @@ _populateCompactMobileSummaryTray(sheet) {
       return sum + (Number.isFinite(quantity) ? quantity : 0);
     }, 0);
   const designPreset = this.getFullPageDesignPreset?.();
+  sheet.classList.toggle(
+    'fpb-mobile-summary-fluid-footer',
+    shouldUseFluidMobileSummaryFooter(designPreset)
+  );
   const isClassicPreset = designPreset === 'CLASSIC';
   const usesAnimatedSummarySection = isClassicPreset || designPreset === 'STANDARD';
   const summaryToggleLabel = isClassicPreset ? 'View Selected Products' : 'Review your bundle';
