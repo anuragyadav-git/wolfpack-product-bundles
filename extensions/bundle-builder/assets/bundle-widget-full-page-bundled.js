@@ -6079,6 +6079,7 @@ _populateCompactMobileSummaryTray(sheet) {
   const displayFinalPrice = shouldDisplayClassicFixedBundleRawTotal(this, combinedDiscountInfo)
     ? totalPrice
     : finalPrice;
+  const discountBadgeLabel = getSummaryDiscountBadgeLabel(combinedDiscountInfo);
   const nextRule = PricingCalculator.getNextDiscountRule?.(this.selectedBundle, totalQuantity, totalPrice) || null;
   const allSelectedProducts = this.getAllSelectedProductsData();
   const shouldRenderSlotTiles = shouldUseMobileSummarySlotTiles({
@@ -6176,6 +6177,12 @@ _populateCompactMobileSummaryTray(sheet) {
   if (this.selectedBundle?.pricing?.enabled) {
     const discountBlock = document.createElement('div');
     discountBlock.className = 'side-panel-discount-message';
+    if (discountBadgeLabel) {
+      const discountBadge = document.createElement('span');
+      discountBadge.className = 'fpb-summary-discount-badge';
+      discountBadge.textContent = discountBadgeLabel;
+      discountBlock.appendChild(discountBadge);
+    }
     if (this.config.showDiscountMessaging) {
       const variables = TemplateManager.createDiscountVariables(
         this.selectedBundle,
@@ -6856,6 +6863,7 @@ renderSidePanel(panel) {
   const shouldShowRawTotalOnly = shouldDisplayClassicFixedBundleRawTotal(this, combinedDiscountInfo);
   const displayFinalPrice = shouldShowRawTotalOnly ? totalPrice : finalPrice;
   const shouldShowOriginalTotal = combinedDiscountInfo.hasDiscount && !shouldShowRawTotalOnly;
+  const discountBadgeLabel = getSummaryDiscountBadgeLabel(combinedDiscountInfo);
   const allSelectedProducts = this.getAllSelectedProductsData();
   const nextRule = PricingCalculator.getNextDiscountRule?.(this.selectedBundle, totalQuantity, totalPrice) || null;
   const isMobileSheet = panel.classList?.contains('fpb-mobile-bottom-sheet');
@@ -7209,6 +7217,7 @@ renderSidePanel(panel) {
   totalSection.innerHTML = `
     <span class="side-panel-total-label">Total</span>
     <div class="side-panel-total-prices">
+      ${discountBadgeLabel ? `<span class="fpb-summary-discount-badge">${discountBadgeLabel}</span>` : ''}
       ${shouldShowOriginalTotal ? `<span class="side-panel-total-original">${CurrencyManager.convertAndFormat(totalPrice, currencyInfo)}</span>` : ''}
       <span class="side-panel-total-final">${CurrencyManager.convertAndFormat(displayFinalPrice, currencyInfo)}</span>
     </div>

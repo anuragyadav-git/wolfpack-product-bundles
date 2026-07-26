@@ -22,6 +22,7 @@ import {
   buildCartLineSourceProperties,
 } from '../../shared/engine/cart-lines.js';
 import { shouldDisplayClassicFixedBundleRawTotal } from '../shared/summary-pricing-display.js';
+import { getSummaryDiscountBadgeLabel } from '../shared/summary-discount-badge.js';
 import { getRemainingSummarySkeletonCount } from './side-panel-methods.js';
 
 function getSummarySlotQuantity(item = {}) {
@@ -123,6 +124,7 @@ _populateCompactMobileSummaryTray(sheet) {
   const displayFinalPrice = shouldDisplayClassicFixedBundleRawTotal(this, combinedDiscountInfo)
     ? totalPrice
     : finalPrice;
+  const discountBadgeLabel = getSummaryDiscountBadgeLabel(combinedDiscountInfo);
   const nextRule = PricingCalculator.getNextDiscountRule?.(this.selectedBundle, totalQuantity, totalPrice) || null;
   const allSelectedProducts = this.getAllSelectedProductsData();
   const shouldRenderSlotTiles = shouldUseMobileSummarySlotTiles({
@@ -220,6 +222,12 @@ _populateCompactMobileSummaryTray(sheet) {
   if (this.selectedBundle?.pricing?.enabled) {
     const discountBlock = document.createElement('div');
     discountBlock.className = 'side-panel-discount-message';
+    if (discountBadgeLabel) {
+      const discountBadge = document.createElement('span');
+      discountBadge.className = 'fpb-summary-discount-badge';
+      discountBadge.textContent = discountBadgeLabel;
+      discountBlock.appendChild(discountBadge);
+    }
     if (this.config.showDiscountMessaging) {
       const variables = TemplateManager.createDiscountVariables(
         this.selectedBundle,

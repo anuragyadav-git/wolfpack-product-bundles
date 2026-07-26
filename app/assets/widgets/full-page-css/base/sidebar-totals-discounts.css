@@ -20,7 +20,33 @@
 .side-panel-total-prices {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
   gap: 8px;
+  min-width: 0;
+}
+
+.fpb-summary-discount-badge {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  max-width: 100%;
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: var(--bundle-summary-discount-badge-bg, #e8f5e9);
+  color: var(--bundle-summary-discount-badge-color, #237a3b);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.fpb-mobile-summary-tray
+  .side-panel-discount-message
+  > .fpb-summary-discount-badge {
+  align-self: center;
 }
 
 .side-panel-total-original {

@@ -22,6 +22,7 @@ import {
   buildCartLineSourceProperties,
 } from '../../shared/engine/cart-lines.js';
 import { shouldDisplayClassicFixedBundleRawTotal } from '../shared/summary-pricing-display.js';
+import { getSummaryDiscountBadgeLabel } from '../shared/summary-discount-badge.js';
 
 function getSummarySlotQuantity(item = {}) {
   const quantity = Number(item?.quantity);
@@ -96,6 +97,7 @@ renderSidePanel(panel) {
   const shouldShowRawTotalOnly = shouldDisplayClassicFixedBundleRawTotal(this, combinedDiscountInfo);
   const displayFinalPrice = shouldShowRawTotalOnly ? totalPrice : finalPrice;
   const shouldShowOriginalTotal = combinedDiscountInfo.hasDiscount && !shouldShowRawTotalOnly;
+  const discountBadgeLabel = getSummaryDiscountBadgeLabel(combinedDiscountInfo);
   const allSelectedProducts = this.getAllSelectedProductsData();
   const nextRule = PricingCalculator.getNextDiscountRule?.(this.selectedBundle, totalQuantity, totalPrice) || null;
   const isMobileSheet = panel.classList?.contains('fpb-mobile-bottom-sheet');
@@ -457,6 +459,7 @@ renderSidePanel(panel) {
   totalSection.innerHTML = `
     <span class="side-panel-total-label">Total</span>
     <div class="side-panel-total-prices">
+      ${discountBadgeLabel ? `<span class="fpb-summary-discount-badge">${discountBadgeLabel}</span>` : ''}
       ${shouldShowOriginalTotal ? `<span class="side-panel-total-original">${CurrencyManager.convertAndFormat(totalPrice, currencyInfo)}</span>` : ''}
       <span class="side-panel-total-final">${CurrencyManager.convertAndFormat(displayFinalPrice, currencyInfo)}</span>
     </div>
