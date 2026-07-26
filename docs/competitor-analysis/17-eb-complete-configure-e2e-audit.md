@@ -1,3 +1,33 @@
+---
+schema_version: 1
+id: eb-complete-configure-e2e-audit
+title: Easy Bundles Complete Configure E2E Audit
+type: audit
+status: evidence
+summary: Records the live FPB and PPB configure controls, dependencies, payloads, help content, and storefront effects.
+last_audited: 2026-07-26
+owners:
+  - engineering
+domains:
+  - competitive-research
+  - admin
+systems:
+  - bundle-configure
+  - widget-runtime
+source_paths:
+  - app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/
+  - app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/
+related_docs:
+  - internal docs/EB Implementation Reference.md
+  - docs/competitor-analysis/16-eb-full-data-flow-investigation.md
+tags:
+  - configure
+  - evidence
+keywords:
+  - fpb
+  - ppb
+---
+
 # Easy Bundles Complete Configure E2E Audit
 
 **Date:** 2026-05-25
