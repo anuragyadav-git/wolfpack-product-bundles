@@ -1,8 +1,8 @@
 @media (max-width: 767px) {
   .bundle-builder-modal .modal-footer-discount-messaging,
   .discount-progress-banner,
-  .fpb-discount-progress {
-    display: none !important;
+  .fpb-discount-progress:not(.fpb-dp-sidebar) {
+    display: none;
   }
 }
 

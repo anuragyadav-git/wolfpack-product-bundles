@@ -1,13 +1,13 @@
 /*!
  * Wolfpack Bundle Widget — Full Page
- * Version : 5.0.205
+ * Version : 5.0.206
  * Built   : 2026-07-26
  *
  * Cache note: Shopify CDN cache is busted automatically by shopify app deploy.
  * After deploying, allow 2-10 minutes for propagation before testing.
  * Verify live version: console.log(window.__BUNDLE_WIDGET_VERSION__)
  */
-window.__BUNDLE_WIDGET_VERSION__ = '5.0.205';
+window.__BUNDLE_WIDGET_VERSION__ = '5.0.206';
 (function() {
   'use strict';
 
@@ -9687,10 +9687,10 @@ renderFullPageFooter() {
 
 };
 
-const getSelectionId = (value = {}) => String(value?.selectionId || '');
+const getFooterSelectionId = (value = {}) => String(value?.selectionId || '');
 const findProductBySelectionId = (products = [], selectionId = '') => {
   const normalized = String(selectionId || '');
-  return products.find(product => getSelectionId(product) === normalized);
+  return products.find(product => getFooterSelectionId(product) === normalized);
 };
 
 const findVariantBySelectionId = (product, selectionId = '') => {
@@ -9737,7 +9737,7 @@ const fullPageFooterSelectionMethods = {
       if (!removeBtn) return;
       removeBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        const selectionId = getSelectionId(item);
+        const selectionId = getFooterSelectionId(item);
         if (!selectionId) return;
         const removedItem = { stepIndex: item.stepIndex, selectionId, quantity: item.quantity, title: item.title };
         this.updateProductSelection(item.stepIndex, selectionId, 0);

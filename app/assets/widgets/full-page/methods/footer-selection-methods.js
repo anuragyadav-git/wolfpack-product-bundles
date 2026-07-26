@@ -22,10 +22,10 @@ import {
   buildCartLineSourceProperties,
 } from '../../shared/engine/cart-lines.js';
 
-const getSelectionId = (value = {}) => String(value?.selectionId || '');
+const getFooterSelectionId = (value = {}) => String(value?.selectionId || '');
 const findProductBySelectionId = (products = [], selectionId = '') => {
   const normalized = String(selectionId || '');
-  return products.find(product => getSelectionId(product) === normalized);
+  return products.find(product => getFooterSelectionId(product) === normalized);
 };
 
 const findVariantBySelectionId = (product, selectionId = '') => {
@@ -74,7 +74,7 @@ export const fullPageFooterSelectionMethods = {
       if (!removeBtn) return;
       removeBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        const selectionId = getSelectionId(item);
+        const selectionId = getFooterSelectionId(item);
         if (!selectionId) return;
         const removedItem = { stepIndex: item.stepIndex, selectionId, quantity: item.quantity, title: item.title };
         this.updateProductSelection(item.stepIndex, selectionId, 0);
