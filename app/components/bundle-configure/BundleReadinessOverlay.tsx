@@ -2,6 +2,14 @@ import { useState, useEffect, useCallback, type KeyboardEvent } from "react";
 import { useTranslation } from "react-i18next";
 import styles from "./BundleReadinessOverlay.module.css";
 
+const READINESS_TRIGGER_COLLAPSE_DELAY_MS = 5_000;
+
+export function scheduleReadinessTriggerCollapse(
+  collapse: () => void,
+): ReturnType<typeof setTimeout> {
+  return setTimeout(collapse, READINESS_TRIGGER_COLLAPSE_DELAY_MS);
+}
+
 export interface BundleReadinessItem {
   key: string;
   label: string;
@@ -28,6 +36,15 @@ function scoreColor(score: number) {
 export function BundleReadinessOverlay({ items, open, onOpenChange, hideCollapsedTrigger = false, onItemClick }: Props) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
+  const [showTriggerDetails, setShowTriggerDetails] = useState(true);
+
+  useEffect(() => {
+    const timeout = scheduleReadinessTriggerCollapse(() => {
+      setShowTriggerDetails(false);
+    });
+
+    return () => clearTimeout(timeout);
+  }, []);
 
   useEffect(() => {
     if (open !== undefined) setExpanded(open);
@@ -168,18 +185,35 @@ export function BundleReadinessOverlay({ items, open, onOpenChange, hideCollapse
           <button
             type="button"
             data-tour-target="fpb-readiness-score"
-            className={styles.collapsed}
+            className={`${styles.collapsed} ${
+              showTriggerDetails
+                ? styles.collapsedExpanded
+                : styles.collapsedMinimal
+            }`}
+            data-readiness-trigger-state={
+              showTriggerDetails ? "expanded" : "collapsed"
+            }
             onClick={toggle}
             aria-label={t("common.readiness.toggleAccessibility")}
           >
             {donut}
-            <div className={styles.scoreLabel}>
+            <div
+              className={styles.scoreLabel}
+              aria-hidden={!showTriggerDetails}
+            >
               <span className={styles.scoreLabelTitle}>{t("common.readiness.title")}</span>
               <span className={styles.scoreLabelSub}>
                 {t("common.readiness.helper")}
               </span>
             </div>
-            {chevron}
+            <span
+              className={`${styles.chevronWrapper} ${
+                showTriggerDetails ? "" : styles.chevronHidden
+              }`}
+              aria-hidden={!showTriggerDetails}
+            >
+              {chevron}
+            </span>
           </button>
         )}
       </div>
