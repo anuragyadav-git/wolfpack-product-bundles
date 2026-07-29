@@ -120,6 +120,15 @@ export default defineConfig({
           ) {
             return 'vendor-state';
           }
+          if (
+            id.includes('node_modules/@shopify/polaris/') ||
+            id.includes('node_modules/@shopify/polaris-icons/')
+          ) {
+            return 'vendor-polaris-react';
+          }
+          if (id.includes('node_modules/@shopify/app-bridge-react/')) {
+            return 'vendor-app-bridge-react';
+          }
           if (id.includes('node_modules/@shopify/')) {
             return 'vendor-shopify';
           }

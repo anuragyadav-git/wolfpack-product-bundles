@@ -30,6 +30,7 @@ export function ErrorBoundary() {
             <script> tag in <head>, before any other scripts. */}
         <meta name="shopify-api-key" content={apiKey} />
         <script src="https://cdn.shopify.com/shopifycloud/app-bridge.js" />
+        <script src="https://cdn.shopify.com/shopifycloud/polaris.js" />
         <link rel="preconnect" href="https://cdn.shopify.com/" />
         <link
           rel="stylesheet"
@@ -58,6 +59,7 @@ export default function App() {
             CDN URL is the official auto-updating endpoint — do not pin. */}
         <meta name="shopify-api-key" content={apiKey} />
         <script src="https://cdn.shopify.com/shopifycloud/app-bridge.js" />
+        <script src="https://cdn.shopify.com/shopifycloud/polaris.js" />
         {/*
           Issue: admin-lcp-phase2-universal-wins-1 — font loading strategy.
           Phase 1 baseline showed FCP == LCP at 4.4 s with the Inter stylesheet

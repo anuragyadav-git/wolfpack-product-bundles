@@ -32,6 +32,7 @@ import {
   handleSyncStorefrontNow,
 } from "../shared/storefront-sync-action.server";
 import ConfigureBundleFlow from "./ConfigureBundleFlow";
+import { ReduxProvider } from "../../../store/ReduxProvider";
 
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   const { session, admin } = await requireAdminSession(request);
@@ -196,4 +197,10 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
   }
 };
 
-export default ConfigureBundleFlow;
+export default function ProductPageBundleConfigureRoute() {
+  return (
+    <ReduxProvider>
+      <ConfigureBundleFlow />
+    </ReduxProvider>
+  );
+}

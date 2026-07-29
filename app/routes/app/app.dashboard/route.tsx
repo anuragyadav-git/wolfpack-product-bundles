@@ -10,6 +10,7 @@ import { handleCreateFpbPreview, handleRecordBundlePreview } from "../shared/bun
 import { saveShopAdminLocale } from "../../../services/admin-locale.server";
 import { handleCloneBundle, handleDeleteBundle } from "./handlers";
 import { DashboardPage } from "./DashboardPage";
+import { ReduxProvider } from "../../../store/ReduxProvider";
 import { getDashboardInitialImagePreloads } from "./dashboard-media-state";
 import { queueDashboardBackgroundTask } from "./dashboard-background-tasks.server";
 
@@ -232,5 +233,9 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 };
 
 export default function Dashboard() {
-  return <DashboardPage />;
+  return (
+    <ReduxProvider>
+      <DashboardPage />
+    </ReduxProvider>
+  );
 }
