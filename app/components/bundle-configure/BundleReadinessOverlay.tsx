@@ -29,8 +29,7 @@ interface Props {
 
 function scoreColor(score: number) {
   if (score >= 80) return "#008060";
-  if (score >= 40) return "#005bd3";
-  return "#b98900";
+  return "#f49300";
 }
 
 export function BundleReadinessOverlay({ items, open, onOpenChange, hideCollapsedTrigger = false, onItemClick }: Props) {
@@ -66,6 +65,7 @@ export function BundleReadinessOverlay({ items, open, onOpenChange, hideCollapse
   }, [onOpenChange]);
 
   const allDone = items.every((i) => i.done);
+  const showTriggerContext = showTriggerDetails || expanded;
 
   const activateItem = useCallback((key: string) => {
     if (!onItemClick) return;
@@ -87,7 +87,7 @@ export function BundleReadinessOverlay({ items, open, onOpenChange, hideCollapse
   if (hideCollapsedTrigger && !expanded) return null;
 
   const donut = (
-    <svg width="56" height="56" viewBox="0 0 56 56" className={styles.arc}>
+    <svg width="48" height="48" viewBox="0 0 56 56" className={styles.arc}>
       <circle
         cx="28" cy="28" r={radius}
         fill="none" stroke="#e8e8e8" strokeWidth="4.5"
@@ -120,7 +120,15 @@ export function BundleReadinessOverlay({ items, open, onOpenChange, hideCollapse
   return (
     <>
       {expanded && <div className={styles.dimOverlay} onClick={toggle} />}
-      <div className={styles.container}>
+      <div
+        className={`${styles.container} ${
+          expanded
+            ? styles.containerExpanded
+            : showTriggerContext
+              ? styles.containerIntro
+              : styles.containerCollapsed
+        }`}
+      >
         <div className={`${styles.panelWrapper} ${expanded ? styles.panelWrapperOpen : ""}`}>
           <div className={styles.panelInner}>
             <div className={styles.panel}>
@@ -143,8 +151,8 @@ export function BundleReadinessOverlay({ items, open, onOpenChange, hideCollapse
                         <div className={styles.itemIndicator}>
                           {item.done ? (
                             <svg width="18" height="18" viewBox="0 0 20 20">
-                              <circle cx="10" cy="10" r="10" fill="#008060" />
-                              <path d="M6 10.5l2.5 2.5L14 8" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                              <circle cx="10" cy="10" r="7.5" fill="none" stroke="#008f65" strokeWidth="1.8" />
+                              <path d="M6.5 10.5l2.2 2.2L14 7.8" stroke="#008f65" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none" />
                             </svg>
                           ) : (
                             <svg width="18" height="18" viewBox="0 0 20 20">
@@ -155,12 +163,19 @@ export function BundleReadinessOverlay({ items, open, onOpenChange, hideCollapse
                         <div className={styles.itemContent}>
                           <div className={styles.itemMainRow}>
                             <span className={styles.itemLabel}>{item.label}</span>
-                            <span className={`${styles.itemPoints} ${item.done ? styles.itemPointsDone : ""}`}>
-                              {t("common.readiness.points", { points: item.points })}
-                            </span>
+                            {item.done && (
+                              <span className={`${styles.itemPoints} ${styles.itemPointsDone}`}>
+                                {t("common.readiness.points", { points: item.points })}
+                              </span>
+                            )}
                           </div>
                           {showActionHint && (
                             <span className={styles.itemDesc}>{item.description}</span>
+                          )}
+                          {!item.done && (
+                            <span className={`${styles.itemPoints} ${styles.itemPointsPending}`}>
+                              {t("common.readiness.points", { points: item.points })}
+                            </span>
                           )}
                         </div>
                         {showActionChevron && (
@@ -186,12 +201,12 @@ export function BundleReadinessOverlay({ items, open, onOpenChange, hideCollapse
             type="button"
             data-tour-target="fpb-readiness-score"
             className={`${styles.collapsed} ${
-              showTriggerDetails
+              showTriggerContext
                 ? styles.collapsedExpanded
                 : styles.collapsedMinimal
             }`}
             data-readiness-trigger-state={
-              showTriggerDetails ? "expanded" : "collapsed"
+              showTriggerContext ? "expanded" : "collapsed"
             }
             onClick={toggle}
             aria-label={t("common.readiness.toggleAccessibility")}
@@ -199,7 +214,7 @@ export function BundleReadinessOverlay({ items, open, onOpenChange, hideCollapse
             {donut}
             <div
               className={styles.scoreLabel}
-              aria-hidden={!showTriggerDetails}
+              aria-hidden={!showTriggerContext}
             >
               <span className={styles.scoreLabelTitle}>{t("common.readiness.title")}</span>
               <span className={styles.scoreLabelSub}>
@@ -207,10 +222,8 @@ export function BundleReadinessOverlay({ items, open, onOpenChange, hideCollapse
               </span>
             </div>
             <span
-              className={`${styles.chevronWrapper} ${
-                showTriggerDetails ? "" : styles.chevronHidden
-              }`}
-              aria-hidden={!showTriggerDetails}
+              className={styles.chevronWrapper}
+              aria-hidden="true"
             >
               {chevron}
             </span>

@@ -63,7 +63,7 @@ describe("BundleReadinessOverlay trigger", () => {
     jest.useRealTimers();
   });
 
-  it("does not render a duplicate floating trigger when the header owns the control", () => {
+  it("can hide the floating trigger when another surface owns the control", () => {
     const Overlay = BundleReadinessOverlay as React.ComponentType<Record<string, unknown>>;
     const markup = renderToStaticMarkup(
       React.createElement(Overlay, {
@@ -74,6 +74,6 @@ describe("BundleReadinessOverlay trigger", () => {
     );
 
     expect(markup).not.toContain('data-tour-target="fpb-readiness-score"');
-    expect(markup).toContain("60");
+    expect(markup).toContain("Products selected");
   });
 });

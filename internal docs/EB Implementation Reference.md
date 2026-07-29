@@ -5,7 +5,7 @@ title: EB Implementation Reference
 type: reference
 status: authoritative
 summary: Records directly verified reference-app contracts used for Wolfpack bundle implementation and parity decisions.
-last_audited: 2026-07-22
+last_audited: 2026-07-30
 owners:
   - engineering
 domains:
@@ -33,6 +33,24 @@ keywords:
 When implementing a feature that mirrors EB behaviour — data shapes, admin flows, storefront runtime, cart integration, template IDs, widget settings — look here first. Every fact below was captured directly from live EB Admin/storefront inspection (Chrome DevTools MCP, authenticated `yash-wolfpack` store) and verified against EB's minified widget JS/CSS. No inferences are made; entries without direct evidence are labelled.
 
 **Full evidence record:** `docs/competitor-analysis/16-eb-full-data-flow-investigation.md`
+
+---
+
+## Admin Bundle Readiness Checklist
+
+Live EB Landing Page configure evidence captured on 2026-07-30:
+
+- The checklist is fixed 16px from the embedded app viewport's left and bottom edges.
+- Its resting collapsed card is approximately 100px wide by 64px high and contains a 48px three-quarter score gauge plus an upward chevron.
+- On initial page load, the trigger temporarily expands to approximately 320px and shows `Readiness Score` plus its helper text before collapsing.
+- Opening from either the header score or floating trigger expands one integrated approximately 320px card; the checklist and score footer are not separate floating cards.
+- The open state dims the configure canvas with a light neutral overlay.
+- Completed items use an outlined green check, green border, and points aligned at the right.
+- Pending items use an empty neutral circle, optional help copy, green points below the copy, and a right chevron when actionable.
+- The footer remains attached to the checklist, separated by a hairline border, and shows the score gauge, title, helper text, and collapse chevron.
+- The live 60-point example uses orange for both the header score and gauge; the completed 100-point example uses green.
+
+No `How to setup`, `Learn More`, or other help link is present inside the readiness checklist itself. Checklist item actions navigate to the corresponding configure section.
 
 ---
 
