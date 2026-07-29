@@ -146,7 +146,7 @@ _populateCompactMobileSummaryTray(sheet) {
   );
   const isClassicPreset = designPreset === 'CLASSIC';
   const usesAnimatedSummarySection = isClassicPreset || designPreset === 'STANDARD';
-  const summaryToggleLabel = isClassicPreset ? 'View Selected Products' : 'Review your bundle';
+  const summaryToggleLabel = 'Review your bundle';
   const addonStep = (this.selectedBundle?.steps || []).find(step => step?.isFreeGift === true) || null;
   const addonStates = addonStep && typeof this.getAddonSummaryEligibilityStates === 'function'
     ? this.getAddonSummaryEligibilityStates(addonStep)
@@ -162,15 +162,9 @@ _populateCompactMobileSummaryTray(sheet) {
   const toggleSummaryTray = () => {
     this._toggleCompactMobileSummaryTray(sheet);
   };
-  const handleSummaryToggleKeydown = (event) => {
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-      toggleSummaryTray();
-    }
-  };
-
-  const countBadge = document.createElement('div');
+  const countBadge = document.createElement('button');
   countBadge.className = 'fpb-mobile-summary-count-badge';
+  countBadge.setAttribute('type', 'button');
   if (countBadge.dataset) {
     countBadge.dataset.summaryQuantity = String(selectedFooterQuantity);
   } else {
@@ -189,15 +183,23 @@ _populateCompactMobileSummaryTray(sheet) {
   if (additionalOffersBadgeState.showMessage) {
     countBadge.classList.add('fpb-mobile-summary-count-badge--additional-offers-message');
   }
-  countBadge.textContent = additionalOffersBadgeState.showMessage
+  const toggleIcon = document.createElement('span');
+  toggleIcon.className = 'fpb-mobile-summary-toggle-icon';
+  toggleIcon.setAttribute('aria-hidden', 'true');
+  toggleIcon.innerHTML = `
+    <svg width="20" height="20" viewBox="0 0 20 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M6.07827 11.2095C6.36662 11.4773 6.81745 11.4606 7.0852 11.1722L9.65059 8.4095L12.216 11.1722C12.4837 11.4606 12.9346 11.4773 13.2229 11.2095C13.5113 10.9418 13.528 10.4909 13.2602 10.2026L10.1727 6.87758C10.0379 6.73239 9.84871 6.6499 9.65059 6.6499C9.45247 6.6499 9.26329 6.73239 9.12847 6.87758L6.04097 10.2026C5.77321 10.4909 5.78991 10.9418 6.07827 11.2095Z" fill="currentColor"></path>
+    </svg>
+  `;
+  const toggleValue = document.createElement('span');
+  toggleValue.setAttribute('data-mobile-summary-toggle-value', '');
+  toggleValue.textContent = additionalOffersBadgeState.showMessage
     ? additionalOffersPulseState.message
     : String(selectedFooterQuantity);
-  countBadge.setAttribute('role', 'button');
-  countBadge.setAttribute('tabindex', '0');
+  countBadge.append(toggleIcon, toggleValue);
   countBadge.setAttribute('aria-label', summaryToggleLabel);
   countBadge.setAttribute('aria-expanded', this.compactMobileSummaryTrayExpanded ? 'true' : 'false');
   countBadge.addEventListener('click', toggleSummaryTray);
-  countBadge.addEventListener('keydown', handleSummaryToggleKeydown);
   sheet.appendChild(countBadge);
 
   sheet.classList.toggle('fpb-mobile-summary-tray-expanded', this.compactMobileSummaryTrayExpanded);
@@ -207,16 +209,6 @@ _populateCompactMobileSummaryTray(sheet) {
     shouldRenderSlotTiles
   );
   sheet.classList.remove('fpb-mobile-summary-tray--has-discount-summary');
-
-  if (isClassicPreset) {
-    const toggleRow = document.createElement('button');
-    toggleRow.className = 'fpb-mobile-summary-toggle-row';
-    toggleRow.type = 'button';
-    toggleRow.setAttribute('aria-expanded', this.compactMobileSummaryTrayExpanded ? 'true' : 'false');
-    toggleRow.textContent = summaryToggleLabel;
-    toggleRow.addEventListener('click', toggleSummaryTray);
-    sheet.appendChild(toggleRow);
-  }
 
   if (this.selectedBundle?.pricing?.enabled) {
     const discountBlock = document.createElement('div');
@@ -343,11 +335,16 @@ _syncMobileAdditionalOffersPulse(pulseState = {}) {
       || '';
     const quantity = badge.dataset?.summaryQuantity
       || badge.getAttribute?.('data-summary-quantity')
-      || badge.textContent
       || '';
     badge.classList.toggle('fpb-mobile-summary-count-badge--additional-offers', active);
     badge.classList.toggle('fpb-mobile-summary-count-badge--additional-offers-message', showMessage);
-    badge.textContent = showMessage && message ? message : quantity;
+    const valueElement = badge.querySelector?.('[data-mobile-summary-toggle-value]');
+    const nextValue = showMessage && message ? message : quantity;
+    if (valueElement) {
+      valueElement.textContent = nextValue;
+    } else {
+      badge.textContent = nextValue;
+    }
   };
 
   const clearTimers = () => {
@@ -485,13 +482,11 @@ _renderCompactMobileSummaryBundleItems(currencyInfo, totalQuantity) {
   }
   bundleItems.appendChild(header);
 
-  if (this.getFullPageDesignPreset() === 'CLASSIC') {
-    const selectedBoxSelectionQuantity = this.getSelectedBoxSelectionQuantity();
-    const boxSelection = this.renderBoxSelectionOptions(selectedBoxSelectionQuantity);
-    if (boxSelection) {
-      boxSelection.classList.add('fpb-mobile-summary-box-selection');
-      bundleItems.appendChild(boxSelection);
-    }
+  const selectedBoxSelectionQuantity = this.getSelectedBoxSelectionQuantity();
+  const boxSelection = this.renderBoxSelectionOptions(selectedBoxSelectionQuantity);
+  if (boxSelection) {
+    boxSelection.classList.add('fpb-mobile-summary-box-selection');
+    bundleItems.appendChild(boxSelection);
   }
 
   const productsList = document.createElement('div');

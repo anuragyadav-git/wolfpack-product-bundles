@@ -1,4 +1,54 @@
 @media (max-width: 768px) {
+  .fpb-mobile-summary-tray
+    .fpb-mobile-summary-count-badge {
+    appearance: none;
+    min-width: max-content;
+    min-height: 0;
+    height: auto;
+    padding: 0 10px;
+    border: 0;
+    gap: 0;
+    color: var(
+      --bundle-sidebar-button-text,
+      var(--bundle-global-button-text, #ffffff)
+    );
+    font: inherit;
+    font-size: 14px;
+    line-height: 1.8;
+    cursor: pointer;
+  }
+
+  .fpb-mobile-summary-toggle-icon {
+    display: block;
+    flex: 0 0 20px;
+    width: 20px;
+    height: 20px;
+    transform: none;
+    transition: transform 300ms ease;
+    transform-origin: center;
+  }
+
+  .fpb-mobile-summary-toggle-icon svg {
+    display: block;
+    width: 20px;
+    height: 20px;
+  }
+
+  .fpb-mobile-summary-tray.fpb-mobile-summary-tray-expanded
+    .fpb-mobile-summary-toggle-icon {
+    transform: rotate(180deg);
+  }
+
+  .fpb-mobile-bottom-sheet.fpb-mobile-summary-tray-animating-open
+    .fpb-mobile-summary-toggle-icon {
+    animation: fpb-mobile-summary-chevron-open-stable 300ms ease both;
+  }
+
+  .fpb-mobile-bottom-sheet.fpb-mobile-summary-tray-animating-closed
+    .fpb-mobile-summary-toggle-icon {
+    animation: fpb-mobile-summary-chevron-close-stable 300ms ease both;
+  }
+
   .fpb-mobile-summary-fluid-footer {
     --fpb-mobile-summary-slot-size: calc(
       var(--fpb-card-action-size, 2.1875rem) +

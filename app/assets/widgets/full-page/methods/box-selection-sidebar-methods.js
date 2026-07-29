@@ -46,6 +46,10 @@ function getSelectionId(item = {}) {
   return String(item?.selectionId || '');
 }
 
+export function canSwitchBoxSelectionRule(selectedQuantity, targetQuantity) {
+  return Number(selectedQuantity || 0) <= Number(targetQuantity || 0);
+}
+
 
 export const fullPageBoxSelectionSidebarMethods = {
 getSidebarTierCtaContent(nextRule) {
@@ -196,6 +200,9 @@ renderBoxSelectionOptions(totalQuantity = 0) {
     }
 
     option.addEventListener('click', () => {
+      const selectedQuantity = this.getSelectedBoxSelectionQuantity();
+      if (!canSwitchBoxSelectionRule(selectedQuantity, rule.boxQuantity)) return;
+
       this.selectedBoxSelectionRuleId = rule.ruleId;
       this.reRenderFullPage();
     });

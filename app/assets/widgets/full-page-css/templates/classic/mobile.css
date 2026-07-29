@@ -625,7 +625,6 @@
       var(--fpb-mobile-footer-inner-width) - 50px
     );
     --classic-mobile-footer-block-padding: 5px;
-    --classic-mobile-footer-toggle-row: 32px;
     --classic-mobile-footer-summary-row: 33px;
     --classic-mobile-footer-action-row: 38px;
     --classic-mobile-footer-nav-row: calc(
@@ -637,16 +636,13 @@
     display: grid;
     position: sticky;
     grid-template-columns: var(--fpb-mobile-footer-inner-width);
-    grid-template-rows:
-      var(--classic-mobile-footer-toggle-row)
-      var(--classic-mobile-footer-collapsed-products-row);
+    grid-template-rows: var(--classic-mobile-footer-collapsed-products-row);
     bottom: 0;
     left: auto;
     right: auto;
     width: var(--fpb-mobile-footer-shell-width);
     height: calc(
-      var(--classic-mobile-footer-toggle-row)
-      + var(--classic-mobile-footer-collapsed-products-row)
+      var(--classic-mobile-footer-collapsed-products-row)
       + (var(--classic-mobile-footer-block-padding) * 2)
     );
     min-height: 0;
@@ -672,12 +668,10 @@
   .fpb-mobile-bottom-sheet.fpb-mobile-summary-tray.fpb-mobile-classic-footer.fpb-mobile-summary-tray--has-discount-summary {
     --classic-mobile-footer-summary-row: auto;
     grid-template-rows:
-      var(--classic-mobile-footer-toggle-row)
       var(--classic-mobile-footer-summary-row)
       var(--classic-mobile-footer-collapsed-products-row);
     height: calc(
-      var(--classic-mobile-footer-toggle-row)
-      + var(--classic-mobile-footer-summary-row)
+      var(--classic-mobile-footer-summary-row)
       + var(--classic-mobile-footer-collapsed-products-row)
       + 10px
     );
@@ -689,10 +683,10 @@
     cursor: pointer;
     top: calc(var(--classic-mobile-footer-block-padding) * -2);
     min-width: max-content;
-    min-height: 24px;
+    min-height: 0;
     height: auto;
-    line-height: 1.5;
-    padding-inline: 8px;
+    line-height: 1.8;
+    padding-inline: 10px;
     max-width: calc(var(--fpb-mobile-footer-inner-width) - 32px);
     gap: 0;
     white-space: nowrap;
@@ -714,64 +708,7 @@
     min-width: min(244px, calc(var(--fpb-mobile-footer-inner-width) - 64px));
   }
 
-  .fpb-mobile-classic-footer .fpb-mobile-summary-count-badge::before {
-    content: "";
-    width: 20px;
-    height: 20px;
-    border: 0;
-    background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6.2 8.1L10 11.9L13.8 8.1' stroke='white' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: 20px 20px;
-    transform: none;
-    margin: 0;
-    box-sizing: border-box;
-    transition:
-      transform 220ms ease,
-      margin 220ms ease;
-    transform-origin: center;
-  }
 
-  .fpb-mobile-classic-footer .fpb-mobile-summary-toggle-row {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: var(--fpb-mobile-footer-inner-width);
-    height: var(--classic-mobile-footer-toggle-row);
-    min-height: var(--classic-mobile-footer-toggle-row);
-    margin: 0;
-    padding: 0.3125rem 0 0;
-    border: 0;
-    border-radius: 0;
-    background: var(--bundle-side-panel-bg, var(--bundle-full-page-bg-color));
-    color: var(
-      --bundle-side-panel-text-color,
-      var(--bundle-global-primary-text, #000000)
-    );
-    font-family: Assistant, sans-serif;
-    font-size: 0.9375rem;
-    font-weight: 400;
-    line-height: 1.8;
-    text-align: center;
-    cursor: pointer;
-    box-sizing: border-box;
-  }
-
-  .fpb-mobile-summary-tray.fpb-mobile-classic-footer.fpb-mobile-summary-tray-expanded
-    .fpb-mobile-summary-count-badge::before {
-    transform: rotate(180deg);
-    margin: 0;
-  }
-  .fpb-mobile-bottom-sheet.fpb-mobile-classic-footer.fpb-mobile-summary-tray-animating-open
-    .fpb-mobile-summary-count-badge::before {
-    animation: fpb-mobile-summary-chevron-open-stable 220ms ease both;
-    margin: 0;
-  }
-  .fpb-mobile-bottom-sheet.fpb-mobile-classic-footer.fpb-mobile-summary-tray-animating-closed
-    .fpb-mobile-summary-count-badge::before {
-    animation: fpb-mobile-summary-chevron-close-stable 220ms ease both;
-    margin: 0;
-  }
   .fpb-mobile-bottom-sheet.fpb-mobile-classic-footer.fpb-mobile-summary-tray-animating-closed
     .fpb-mobile-summary-products-section {
     grid-template-rows:
@@ -1169,7 +1106,7 @@
   }
 
   .fpb-mobile-bottom-sheet.fpb-mobile-summary-tray.fpb-mobile-classic-footer.fpb-mobile-summary-tray-expanded {
-    grid-template-rows: auto auto;
+    grid-template-rows: auto;
     height: auto;
     padding: 0.3125rem;
   }
@@ -1177,7 +1114,7 @@
   .fpb-mobile-bottom-sheet.fpb-mobile-summary-tray.fpb-mobile-classic-footer.fpb-mobile-summary-tray-expanded:not(
       .fpb-mobile-summary-tray--has-discount-summary
     ) {
-    grid-template-rows: auto auto;
+    grid-template-rows: auto;
     height: auto;
     max-height: 100dvh;
     overflow-y: auto;
@@ -1185,7 +1122,6 @@
 
   .fpb-mobile-bottom-sheet.fpb-mobile-summary-tray.fpb-mobile-classic-footer.fpb-mobile-summary-tray-expanded.fpb-mobile-summary-tray--has-discount-summary {
     grid-template-rows:
-      var(--classic-mobile-footer-toggle-row)
       auto
       minmax(0, 1fr);
     height: auto;

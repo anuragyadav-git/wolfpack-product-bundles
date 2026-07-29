@@ -4,15 +4,45 @@ import {
 } from "../../../app/lib/bundle-config/default-products";
 
 describe("default products direct contract", () => {
+  it("maps canonical App Bridge picker id fields", () => {
+    const entry = buildDefaultProductEntryFromPicker({
+      id: "gid://shopify/Product/9506413773059",
+      title: "14k Dangling Obsidian Earrings",
+      handle: "14k-dangling-obsidian-earrings",
+      images: [{ originalSrc: "https://cdn.example/obsidian.jpg" }],
+      variants: [
+        {
+          id: "gid://shopify/ProductVariant/48720141091075",
+          title: "Default Title",
+          price: "829.00",
+          availableForSale: true,
+        },
+      ],
+      hasOnlyDefaultVariant: true,
+    });
+
+    expect(entry).toMatchObject({
+      productId: "9506413773059",
+      graphqlId: "gid://shopify/Product/9506413773059",
+      requiredQuantity: 1,
+      variants: [
+        {
+          variantId: "48720141091075",
+          variantGraphqlId: "gid://shopify/ProductVariant/48720141091075",
+        },
+      ],
+    });
+  });
+
   it("maps Shopify product-picker output to the direct defaultProductsData shape", () => {
     const entry = buildDefaultProductEntryFromPicker({
-      selectionId: "gid://shopify/Product/8322625700036",
+      id: "gid://shopify/Product/8322625700036",
       title: "18k Bloom Earrings",
       handle: "18k-bloom-earrings",
       images: [{ originalSrc: "https://cdn.example/earrings.jpg" }],
       variants: [
         {
-          selectionId: "gid://shopify/ProductVariant/45038876459204",
+          id: "gid://shopify/ProductVariant/45038876459204",
           title: "Default Title",
           price: "579.00",
           inventoryQuantity: 13,
@@ -36,24 +66,24 @@ describe("default products direct contract", () => {
         },
       ],
       hasOnlyDefaultVariant: true,
-      requiredQuantity: 0,
+      requiredQuantity: 1,
     });
   });
 
   it("serializes one available picker variant for a multi-variant default product", () => {
     const entry = buildDefaultProductEntryFromPicker({
-      selectionId: "gid://shopify/Product/9427287703811",
+      id: "gid://shopify/Product/9427287703811",
       title: "Multi Variant Case",
       handle: "multi-variant-case",
       variants: [
         {
-          selectionId: "gid://shopify/ProductVariant/48191691424003",
+          id: "gid://shopify/ProductVariant/48191691424003",
           price: "123.00",
           inventoryQuantity: 0,
           availableForSale: false,
         },
         {
-          selectionId: "gid://shopify/ProductVariant/48191691456771",
+          id: "gid://shopify/ProductVariant/48191691456771",
           price: "123.00",
           inventoryQuantity: 0,
           availableForSale: true,
@@ -73,11 +103,11 @@ describe("default products direct contract", () => {
 
   it("does not invent zero inventory when the picker omits inventory quantity", () => {
     const entry = buildDefaultProductEntryFromPicker({
-      selectionId: "gid://shopify/Product/9427287703811",
+      id: "gid://shopify/Product/9427287703811",
       title: "Unknown Inventory Case",
       variants: [
         {
-          selectionId: "gid://shopify/ProductVariant/48191691456771",
+          id: "gid://shopify/ProductVariant/48191691456771",
           price: "123.00",
           availableForSale: true,
         },
@@ -97,7 +127,7 @@ describe("default products direct contract", () => {
     expect(normalizeDefaultProductsData({
       isDefaultProductsEnabled: false,
       defaultProductsTitle: "Preselected audit products",
-      products: [{ selectionId: "gid://shopify/Product/8322625700036" }],
+      products: [{ graphqlId: "gid://shopify/Product/8322625700036" }],
     })).toEqual({});
   });
 
@@ -107,15 +137,15 @@ describe("default products direct contract", () => {
       defaultProductsTitle: "Preselected audit products",
       products: [
         {
-          selectionId: "gid://shopify/Product/8322625700036",
+          graphqlId: "gid://shopify/Product/8322625700036",
           title: "18k Bloom Earrings",
           variants: [
             {
-              selectionId: "gid://shopify/ProductVariant/45038876459204",
+              variantGraphqlId: "gid://shopify/ProductVariant/45038876459204",
               price: "579.00",
             },
           ],
-          requiredQuantity: 0,
+          requiredQuantity: 1,
         },
       ],
     })).toMatchObject({
@@ -133,7 +163,7 @@ describe("default products direct contract", () => {
               price: "579.00",
             },
           ],
-          requiredQuantity: 0,
+          requiredQuantity: 1,
         },
       ],
     });

@@ -81,6 +81,15 @@ npm test | npm run test:unit | npm run test:watch | npm run test:coverage
 
 TDD does NOT apply to: one-line config changes, CSS-only changes, docs changes, route annotation comments.
 
+### Parity Fixture Transitions
+
+For parity matrix testing, do not fully restore the fixture after every item. Each
+new parity pass must remove only configuration that is incompatible or no longer
+required, add only the configuration needed for the current item or fixture
+group, and carry compatible state forward. Perform a full restoration only at a
+fixture-group boundary or when malformed or contaminated state makes the
+evidence unreliable.
+
 ### 🚫 No UI Styling or Placement Unit Tests
 
 **A unit test must verify a component's BEHAVIOUR, never its CSS, class names, or where it sits on the screen.** These tests are useless: they fail on harmless cosmetic refactors, never catch real bugs, and ossify implementation details.

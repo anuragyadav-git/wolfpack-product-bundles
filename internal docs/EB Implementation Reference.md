@@ -972,6 +972,13 @@ Reference URLs:
 }
 ```
 
+Live invalid-default evidence captured on 2026-07-30 confirms:
+
+- EB retains a configured product and variant in `defaultProductsData` after the Shopify product becomes Draft.
+- The shopper runtime treats Storefront API availability as authoritative: the stale default is omitted from the catalog, initial selection, summary, and cart state.
+- The widget still mounts normally without an error or document overflow in Standard, Classic, Compact, and Horizontal on desktop and mobile.
+- Restoring the Shopify product to Active makes it eligible again without rewriting the saved default configuration.
+
 ---
 
 ## Template System
@@ -1181,6 +1188,8 @@ Per-category attribute: `categoryid="{categoryId}"`
 2026-07-04 Classic mobile evidence at `390 x 844` confirms the `FBP_SIDE_FOOTER + CLASSIC` footer tray is sticky, not fixed, and does not lock page scroll while expanded. In the empty-selection fixture, the collapsed footer (`.gbbAddProductsPageFooterHTML`) measured `370 x 101`, showed `View Selected Products`, `Next`, total `₹0.00`, and count `0`. Clicking `.showBoxProductsInFooter` expanded the same footer to `370 x 357`, kept `position: sticky`, `bottom: 0`, `overflow: visible`, and `body` overflow `auto hidden`; a forced `window.scrollBy(0, 350)` changed `scrollY` from `0` to `350` while the footer stayed pinned to the viewport bottom. Treat background scroll during expanded Classic footer state as EB-matching behavior unless a later fixture proves EB locks it.
 
 Evidence: `/private/tmp/fpb-classic-agentic-parity/CS4-mobile-footer-scroll-lock/eb-cs4-before-toggle-runtime-20260704.json`, `eb-cs4-empty-expanded-runtime-20260704.json`, and `eb-cs4-empty-expanded-scroll-probe-20260704.json`.
+
+2026-07-30 current selected/BQO Classic evidence clarifies that the operable expand/collapse control is one centered black quantity pill, not a separate visible toggle row. The pill measured approximately `47.5 x 25.2`, used a real filled `20 x 20` SVG child with `10px` inline pill padding, pointed up while collapsed and down while expanded, and rotated the SVG over `300ms`. The older empty-fixture `View Selected Products` text is therefore state-specific evidence and must not be implemented as a second always-present control.
 
 2026-07-06 selected-product Classic mobile footer evidence confirms the expanded selected slot strip does not render per-slot trash, delete, or remove controls. With two products selected, the visible removal affordance is the footer header `Clear` control; slot cells contain only the product images. Evidence: `/private/tmp/fpb-classic-agentic-parity/mobile-footer-remove-control/eb-mobile-selected-expanded-remove-probe-20260706.json` and `eb-mobile-selected-expanded-remove-20260706.png`.
 

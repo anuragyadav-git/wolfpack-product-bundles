@@ -11,9 +11,9 @@ function extractFullPageId(idString) {
 
 function normalizeDefaultQuantity(value) {
   const rawQuantity = Number.parseFloat(value);
-  return Number.isFinite(rawQuantity) && rawQuantity >= 0
+  return Number.isFinite(rawQuantity) && rawQuantity > 0
     ? rawQuantity
-    : 0;
+    : 1;
 }
 
 function normalizeAddonPercentageDiscount(discount, tier = null) {
@@ -260,9 +260,13 @@ function mergeVariantRuntimeAvailability(product, categoryProduct) {
 
 export function normalizeFullPageDirectDefaultProduct(product) {
   const variant = Array.isArray(product?.variants) ? product.variants[0] : null;
-  const variantId = variant?.selectionId ? extractFullPageId(variant.selectionId) : null;
+  const variantId = variant?.variantGraphqlId
+    ? extractFullPageId(variant.variantGraphqlId)
+    : null;
   if (!variantId) return null;
-  const productId = normalizeProductLookupId(product) || variantId;
+  const productId = product?.graphqlId
+    ? extractFullPageId(product.graphqlId)
+    : variantId;
 
   const imageUrl = product.images?.[0]?.originalSrc
     || product.images?.[0]?.url
@@ -305,6 +309,43 @@ export function normalizeFullPageDirectDefaultProduct(product) {
     description: normalizeProductDescription(product),
     descriptionHtml: normalizeProductDescriptionHtml(product),
   };
+}
+
+export function reconcileFullPageDirectDefaultProducts(directDefaults, hydratedProducts) {
+  const availableVariantIds = new Set();
+  (Array.isArray(hydratedProducts) ? hydratedProducts : []).forEach(product => {
+    (Array.isArray(product?.variants) ? product.variants : []).forEach(variant => {
+      if (variant?.available !== true) return;
+      const selectionId = extractFullPageId(variant?.selectionId || variant?.id);
+      if (selectionId) availableVariantIds.add(String(selectionId));
+    });
+  });
+
+  return (Array.isArray(directDefaults) ? directDefaults : []).filter(product => {
+    const selectionId = extractFullPageId(product?.selectionId || product?.variantId);
+    return selectionId && availableVariantIds.has(String(selectionId));
+  });
+}
+
+export function filterFullPageProductsByInvalidDefaultVariants(products, invalidVariantIds) {
+  if (!(invalidVariantIds instanceof Set) || invalidVariantIds.size === 0) {
+    return products;
+  }
+
+  return (Array.isArray(products) ? products : []).filter(product => {
+    const productKeys = collectProductSelectionKeys(product);
+    (Array.isArray(product?.variants) ? product.variants : []).forEach(variant => {
+      [
+        variant?.id,
+        variant?.variantId,
+        variant?.variantGraphqlId,
+      ].forEach(value => {
+        const selectionId = extractFullPageId(value);
+        if (selectionId) productKeys.add(String(selectionId));
+      });
+    });
+    return !Array.from(productKeys).some(key => invalidVariantIds.has(String(key)));
+  });
 }
 
 export const fullPageProductProcessingMethods = {
@@ -603,6 +644,11 @@ async loadStepProducts(stepIndex) {
 
   // Process and normalize product data
   allProducts = this.mergeCategoryProductVariantAvailability(allProducts, step);
+  await fullPageProductProcessingMethods._reconcileDirectDefaultProductsFromStorefront.call(this, stepIndex);
+  allProducts = filterFullPageProductsByInvalidDefaultVariants(
+    allProducts,
+    this._invalidDirectDefaultSelectionIds,
+  );
 
   const processedProducts = this._mergeDirectDefaultProductsIntoStep(
     stepIndex,
@@ -643,6 +689,69 @@ _getDirectDefaultProductItems() {
   return data.products
     .map(product => normalizeFullPageDirectDefaultProduct(product))
     .filter(Boolean);
+},
+
+async _reconcileDirectDefaultProductsFromStorefront(stepIndex) {
+  if (stepIndex !== 0 || !Array.isArray(this.directDefaultProducts) || this.directDefaultProducts.length === 0) {
+    return;
+  }
+
+  const productIds = Array.from(new Set(this.directDefaultProducts
+    .map(product => extractFullPageId(product?.id))
+    .filter(Boolean)
+    .map(productId => `gid://shopify/Product/${productId}`)));
+  if (productIds.length === 0) return;
+
+  const shop = window.Shopify?.shop || window.location.host;
+  const apiBaseUrl = this.resolveStorefrontApiBase();
+  const country = window.Shopify?.country
+    || (window.Shopify?.locale?.includes('-') ? window.Shopify.locale.split('-')[1] : null)
+    || null;
+
+  try {
+    const countryParam = country ? `&country=${encodeURIComponent(country)}` : '';
+    const response = await fetch(
+      `${apiBaseUrl}/api/storefront-products?ids=${encodeURIComponent(productIds.join(','))}&shop=${encodeURIComponent(shop)}${countryParam}`,
+      { cache: 'no-store' },
+    );
+    if (!response.ok) {
+      await response.text();
+      return;
+    }
+
+    const data = await response.json();
+    const previousDefaults = this.directDefaultProducts;
+    this.directDefaultProducts = reconcileFullPageDirectDefaultProducts(
+      previousDefaults,
+      Array.isArray(data.products) ? data.products : [],
+    );
+    const retainedSelectionIds = new Set(this.directDefaultProducts
+      .map(product => extractFullPageId(product?.selectionId || product?.variantId))
+      .filter(Boolean)
+      .map(String));
+    this._invalidDirectDefaultSelectionIds = new Set(previousDefaults
+      .map(product => extractFullPageId(product?.selectionId || product?.variantId))
+      .filter(selectionId => selectionId && !retainedSelectionIds.has(String(selectionId)))
+      .map(String));
+
+    previousDefaults.forEach(product => {
+      const selectionId = extractFullPageId(product?.selectionId || product?.variantId);
+      if (selectionId && this.selectedProducts?.[0]) {
+        delete this.selectedProducts[0][selectionId];
+      }
+    });
+    this.directDefaultProducts.forEach(product => {
+      const selectionId = extractFullPageId(product?.selectionId || product?.variantId);
+      if (selectionId && this.selectedProducts?.[0]) {
+        this.selectedProducts[0][selectionId] = normalizeDefaultQuantity(product.defaultRequiredQuantity);
+      }
+    });
+
+    if (typeof this.rememberRuntimeProductInventory === 'function') {
+      this.rememberRuntimeProductInventory(data.products);
+    }
+  } catch (error) {
+  }
 },
 
 _initDirectDefaultProducts() {

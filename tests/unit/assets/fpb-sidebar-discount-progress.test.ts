@@ -142,6 +142,9 @@ function makeContext(preset: string, progressType: 'simple' | 'step_based'): any
     getAllSelectedProductsData: () => [],
     getSummaryProductDisplayTitle: () => '',
     getSummaryProductVariantDisplay: () => '',
+    createStandardSidebarSelectedRow: () => document.createElement('div'),
+    getSummaryProductRemovalState: () => ({ canRemove: true, blockedMessage: '' }),
+    removeSummarySelectedProduct: () => undefined,
     getBundleSummaryText: () => ({ title: 'Your Bundle', subTitle: 'Review your bundle' }),
     getFullPageDesignPreset: () => preset,
     resolveFullPageLayout: () => 'footer_side',
@@ -411,6 +414,40 @@ describe('FPB configured summary header', () => {
       title: 'Daily Essentials',
       subTitle: 'Review your bundle',
     });
+  });
+});
+
+describe('FPB mobile bundle quantity options', () => {
+  it.each(['STANDARD', 'CLASSIC', 'COMPACT', 'HORIZONTAL'])(
+    'renders saved bundle quantity options in the %s mobile summary',
+    (preset) => {
+      const context = makeContext(preset, 'simple');
+      const boxSelection = document.createElement('div') as unknown as FakeElement;
+      context.renderBoxSelectionOptions = jest.fn(() => boxSelection);
+
+      const bundleItems = fullPageMobileSummaryMethods._renderCompactMobileSummaryBundleItems.call(
+        context,
+        { display: { format: '${{amount}}' } },
+        0,
+      ) as FakeElement;
+
+      expect(context.renderBoxSelectionOptions).toHaveBeenCalledWith(0);
+      expect(bundleItems.children).toContain(boxSelection);
+    },
+  );
+
+  it('omits mobile bundle quantity options when none are configured', () => {
+    const context = makeContext('STANDARD', 'simple');
+    context.renderBoxSelectionOptions = jest.fn(() => null);
+
+    const bundleItems = fullPageMobileSummaryMethods._renderCompactMobileSummaryBundleItems.call(
+      context,
+      { display: { format: '${{amount}}' } },
+      0,
+    ) as FakeElement;
+
+    expect(context.renderBoxSelectionOptions).toHaveBeenCalledWith(0);
+    expect(bundleItems.children).toHaveLength(2);
   });
 });
 

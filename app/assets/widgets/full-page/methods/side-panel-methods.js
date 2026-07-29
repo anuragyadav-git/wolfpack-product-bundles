@@ -56,6 +56,13 @@ export function shouldUseSharedDesktopSummarySlotTiles({
   return preset === 'STANDARD' || preset === 'COMPACT' || preset === 'HORIZONTAL';
 }
 
+export function shouldUseClassicDesktopSummarySlotTiles({
+  isClassicDesktopSidebar,
+  productSlotsEnabled,
+} = {}) {
+  return isClassicDesktopSidebar === true && productSlotsEnabled === true;
+}
+
 export function getRemainingSummarySkeletonCount({
   designPreset,
   productSlotsEnabled,
@@ -118,6 +125,10 @@ renderSidePanel(panel) {
   const useInlineSummarySlots = summaryEmptyStateMode === 'slots';
   const useSharedDesktopSummarySlotTiles = shouldUseSharedDesktopSummarySlotTiles({
     designPreset: this.getFullPageDesignPreset(),
+    productSlotsEnabled: useInlineSummarySlots,
+  });
+  const useClassicDesktopSummarySlotTiles = shouldUseClassicDesktopSummarySlotTiles({
+    isClassicDesktopSidebar,
     productSlotsEnabled: useInlineSummarySlots,
   });
   const remainingSummarySkeletonCount = getRemainingSummarySkeletonCount({
@@ -284,7 +295,7 @@ renderSidePanel(panel) {
   summaryContent.appendChild(countLabel);
 
   // Selected products list / Classic slots
-  if (isClassicDesktopSidebar) {
+  if (useClassicDesktopSummarySlotTiles) {
     const classicSlotCount = this.getClassicSidebarSlotCount(
       allSelectedProducts,
       activeStep

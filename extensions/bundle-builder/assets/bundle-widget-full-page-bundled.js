@@ -1,13 +1,13 @@
 /*!
  * Wolfpack Bundle Widget — Full Page
- * Version : 5.0.212
+ * Version : 5.0.219
  * Built   : 2026-07-29
  *
  * Cache note: Shopify CDN cache is busted automatically by shopify app deploy.
  * After deploying, allow 2-10 minutes for propagation before testing.
  * Verify live version: console.log(window.__BUNDLE_WIDGET_VERSION__)
  */
-window.__BUNDLE_WIDGET_VERSION__ = '5.0.212';
+window.__BUNDLE_WIDGET_VERSION__ = '5.0.219';
 (function() {
   'use strict';
 
@@ -6115,7 +6115,7 @@ _populateCompactMobileSummaryTray(sheet) {
   );
   const isClassicPreset = designPreset === 'CLASSIC';
   const usesAnimatedSummarySection = isClassicPreset || designPreset === 'STANDARD';
-  const summaryToggleLabel = isClassicPreset ? 'View Selected Products' : 'Review your bundle';
+  const summaryToggleLabel = 'Review your bundle';
   const addonStep = (this.selectedBundle?.steps || []).find(step => step?.isFreeGift === true) || null;
   const addonStates = addonStep && typeof this.getAddonSummaryEligibilityStates === 'function'
     ? this.getAddonSummaryEligibilityStates(addonStep)
@@ -6131,15 +6131,9 @@ _populateCompactMobileSummaryTray(sheet) {
   const toggleSummaryTray = () => {
     this._toggleCompactMobileSummaryTray(sheet);
   };
-  const handleSummaryToggleKeydown = (event) => {
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-      toggleSummaryTray();
-    }
-  };
-
-  const countBadge = document.createElement('div');
+  const countBadge = document.createElement('button');
   countBadge.className = 'fpb-mobile-summary-count-badge';
+  countBadge.setAttribute('type', 'button');
   if (countBadge.dataset) {
     countBadge.dataset.summaryQuantity = String(selectedFooterQuantity);
   } else {
@@ -6158,15 +6152,23 @@ _populateCompactMobileSummaryTray(sheet) {
   if (additionalOffersBadgeState.showMessage) {
     countBadge.classList.add('fpb-mobile-summary-count-badge--additional-offers-message');
   }
-  countBadge.textContent = additionalOffersBadgeState.showMessage
+  const toggleIcon = document.createElement('span');
+  toggleIcon.className = 'fpb-mobile-summary-toggle-icon';
+  toggleIcon.setAttribute('aria-hidden', 'true');
+  toggleIcon.innerHTML = `
+    <svg width="20" height="20" viewBox="0 0 20 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M6.07827 11.2095C6.36662 11.4773 6.81745 11.4606 7.0852 11.1722L9.65059 8.4095L12.216 11.1722C12.4837 11.4606 12.9346 11.4773 13.2229 11.2095C13.5113 10.9418 13.528 10.4909 13.2602 10.2026L10.1727 6.87758C10.0379 6.73239 9.84871 6.6499 9.65059 6.6499C9.45247 6.6499 9.26329 6.73239 9.12847 6.87758L6.04097 10.2026C5.77321 10.4909 5.78991 10.9418 6.07827 11.2095Z" fill="currentColor"></path>
+    </svg>
+  `;
+  const toggleValue = document.createElement('span');
+  toggleValue.setAttribute('data-mobile-summary-toggle-value', '');
+  toggleValue.textContent = additionalOffersBadgeState.showMessage
     ? additionalOffersPulseState.message
     : String(selectedFooterQuantity);
-  countBadge.setAttribute('role', 'button');
-  countBadge.setAttribute('tabindex', '0');
+  countBadge.append(toggleIcon, toggleValue);
   countBadge.setAttribute('aria-label', summaryToggleLabel);
   countBadge.setAttribute('aria-expanded', this.compactMobileSummaryTrayExpanded ? 'true' : 'false');
   countBadge.addEventListener('click', toggleSummaryTray);
-  countBadge.addEventListener('keydown', handleSummaryToggleKeydown);
   sheet.appendChild(countBadge);
 
   sheet.classList.toggle('fpb-mobile-summary-tray-expanded', this.compactMobileSummaryTrayExpanded);
@@ -6176,16 +6178,6 @@ _populateCompactMobileSummaryTray(sheet) {
     shouldRenderSlotTiles
   );
   sheet.classList.remove('fpb-mobile-summary-tray--has-discount-summary');
-
-  if (isClassicPreset) {
-    const toggleRow = document.createElement('button');
-    toggleRow.className = 'fpb-mobile-summary-toggle-row';
-    toggleRow.type = 'button';
-    toggleRow.setAttribute('aria-expanded', this.compactMobileSummaryTrayExpanded ? 'true' : 'false');
-    toggleRow.textContent = summaryToggleLabel;
-    toggleRow.addEventListener('click', toggleSummaryTray);
-    sheet.appendChild(toggleRow);
-  }
 
   if (this.selectedBundle?.pricing?.enabled) {
     const discountBlock = document.createElement('div');
@@ -6312,11 +6304,16 @@ _syncMobileAdditionalOffersPulse(pulseState = {}) {
       || '';
     const quantity = badge.dataset?.summaryQuantity
       || badge.getAttribute?.('data-summary-quantity')
-      || badge.textContent
       || '';
     badge.classList.toggle('fpb-mobile-summary-count-badge--additional-offers', active);
     badge.classList.toggle('fpb-mobile-summary-count-badge--additional-offers-message', showMessage);
-    badge.textContent = showMessage && message ? message : quantity;
+    const valueElement = badge.querySelector?.('[data-mobile-summary-toggle-value]');
+    const nextValue = showMessage && message ? message : quantity;
+    if (valueElement) {
+      valueElement.textContent = nextValue;
+    } else {
+      badge.textContent = nextValue;
+    }
   };
 
   const clearTimers = () => {
@@ -6454,13 +6451,11 @@ _renderCompactMobileSummaryBundleItems(currencyInfo, totalQuantity) {
   }
   bundleItems.appendChild(header);
 
-  if (this.getFullPageDesignPreset() === 'CLASSIC') {
-    const selectedBoxSelectionQuantity = this.getSelectedBoxSelectionQuantity();
-    const boxSelection = this.renderBoxSelectionOptions(selectedBoxSelectionQuantity);
-    if (boxSelection) {
-      boxSelection.classList.add('fpb-mobile-summary-box-selection');
-      bundleItems.appendChild(boxSelection);
-    }
+  const selectedBoxSelectionQuantity = this.getSelectedBoxSelectionQuantity();
+  const boxSelection = this.renderBoxSelectionOptions(selectedBoxSelectionQuantity);
+  if (boxSelection) {
+    boxSelection.classList.add('fpb-mobile-summary-box-selection');
+    bundleItems.appendChild(boxSelection);
   }
 
   const productsList = document.createElement('div');
@@ -6839,6 +6834,13 @@ function shouldUseSharedDesktopSummarySlotTiles({
   return preset === 'STANDARD' || preset === 'COMPACT' || preset === 'HORIZONTAL';
 }
 
+function shouldUseClassicDesktopSummarySlotTiles({
+  isClassicDesktopSidebar,
+  productSlotsEnabled,
+} = {}) {
+  return isClassicDesktopSidebar === true && productSlotsEnabled === true;
+}
+
 function getRemainingSummarySkeletonCount({
   designPreset,
   productSlotsEnabled,
@@ -6901,6 +6903,10 @@ renderSidePanel(panel) {
   const useInlineSummarySlots = summaryEmptyStateMode === 'slots';
   const useSharedDesktopSummarySlotTiles = shouldUseSharedDesktopSummarySlotTiles({
     designPreset: this.getFullPageDesignPreset(),
+    productSlotsEnabled: useInlineSummarySlots,
+  });
+  const useClassicDesktopSummarySlotTiles = shouldUseClassicDesktopSummarySlotTiles({
+    isClassicDesktopSidebar,
     productSlotsEnabled: useInlineSummarySlots,
   });
   const remainingSummarySkeletonCount = getRemainingSummarySkeletonCount({
@@ -7062,7 +7068,7 @@ renderSidePanel(panel) {
     : `${selectedSummaryCount} item${selectedSummaryCount !== 1 ? 's' : ''}`;
   summaryContent.appendChild(countLabel);
 
-  if (isClassicDesktopSidebar) {
+  if (useClassicDesktopSummarySlotTiles) {
     const classicSlotCount = this.getClassicSidebarSlotCount(
       allSelectedProducts,
       activeStep
@@ -7534,6 +7540,10 @@ function getSelectionId(item = {}) {
   return String(item?.selectionId || '');
 }
 
+function canSwitchBoxSelectionRule(selectedQuantity, targetQuantity) {
+  return Number(selectedQuantity || 0) <= Number(targetQuantity || 0);
+}
+
 const fullPageBoxSelectionSidebarMethods = {
 getSidebarTierCtaContent(nextRule) {
   const pricing = this.selectedBundle?.pricing;
@@ -7683,6 +7693,9 @@ renderBoxSelectionOptions(totalQuantity = 0) {
     }
 
     option.addEventListener('click', () => {
+      const selectedQuantity = this.getSelectedBoxSelectionQuantity();
+      if (!canSwitchBoxSelectionRule(selectedQuantity, rule.boxQuantity)) return;
+
       this.selectedBoxSelectionRuleId = rule.ruleId;
       this.reRenderFullPage();
     });
@@ -11874,9 +11887,9 @@ function extractFullPageId(idString) {
 
 function normalizeDefaultQuantity(value) {
   const rawQuantity = Number.parseFloat(value);
-  return Number.isFinite(rawQuantity) && rawQuantity >= 0
+  return Number.isFinite(rawQuantity) && rawQuantity > 0
     ? rawQuantity
-    : 0;
+    : 1;
 }
 
 function normalizeAddonPercentageDiscount(discount, tier = null) {
@@ -12123,9 +12136,13 @@ function mergeVariantRuntimeAvailability(product, categoryProduct) {
 
 function normalizeFullPageDirectDefaultProduct(product) {
   const variant = Array.isArray(product?.variants) ? product.variants[0] : null;
-  const variantId = variant?.selectionId ? extractFullPageId(variant.selectionId) : null;
+  const variantId = variant?.variantGraphqlId
+    ? extractFullPageId(variant.variantGraphqlId)
+    : null;
   if (!variantId) return null;
-  const productId = normalizeProductLookupId(product) || variantId;
+  const productId = product?.graphqlId
+    ? extractFullPageId(product.graphqlId)
+    : variantId;
 
   const imageUrl = product.images?.[0]?.originalSrc
     || product.images?.[0]?.url
@@ -12168,6 +12185,43 @@ function normalizeFullPageDirectDefaultProduct(product) {
     description: normalizeProductDescription(product),
     descriptionHtml: normalizeProductDescriptionHtml(product),
   };
+}
+
+function reconcileFullPageDirectDefaultProducts(directDefaults, hydratedProducts) {
+  const availableVariantIds = new Set();
+  (Array.isArray(hydratedProducts) ? hydratedProducts : []).forEach(product => {
+    (Array.isArray(product?.variants) ? product.variants : []).forEach(variant => {
+      if (variant?.available !== true) return;
+      const selectionId = extractFullPageId(variant?.selectionId || variant?.id);
+      if (selectionId) availableVariantIds.add(String(selectionId));
+    });
+  });
+
+  return (Array.isArray(directDefaults) ? directDefaults : []).filter(product => {
+    const selectionId = extractFullPageId(product?.selectionId || product?.variantId);
+    return selectionId && availableVariantIds.has(String(selectionId));
+  });
+}
+
+function filterFullPageProductsByInvalidDefaultVariants(products, invalidVariantIds) {
+  if (!(invalidVariantIds instanceof Set) || invalidVariantIds.size === 0) {
+    return products;
+  }
+
+  return (Array.isArray(products) ? products : []).filter(product => {
+    const productKeys = collectProductSelectionKeys(product);
+    (Array.isArray(product?.variants) ? product.variants : []).forEach(variant => {
+      [
+        variant?.id,
+        variant?.variantId,
+        variant?.variantGraphqlId,
+      ].forEach(value => {
+        const selectionId = extractFullPageId(value);
+        if (selectionId) productKeys.add(String(selectionId));
+      });
+    });
+    return !Array.from(productKeys).some(key => invalidVariantIds.has(String(key)));
+  });
 }
 
 const fullPageProductProcessingMethods = {
@@ -12451,6 +12505,11 @@ async loadStepProducts(stepIndex) {
   allProducts = await this.enrichMissingProductDescriptions(allProducts);
 
   allProducts = this.mergeCategoryProductVariantAvailability(allProducts, step);
+  await fullPageProductProcessingMethods._reconcileDirectDefaultProductsFromStorefront.call(this, stepIndex);
+  allProducts = filterFullPageProductsByInvalidDefaultVariants(
+    allProducts,
+    this._invalidDirectDefaultSelectionIds,
+  );
 
   const processedProducts = this._mergeDirectDefaultProductsIntoStep(
     stepIndex,
@@ -12489,6 +12548,69 @@ _getDirectDefaultProductItems() {
   return data.products
     .map(product => normalizeFullPageDirectDefaultProduct(product))
     .filter(Boolean);
+},
+
+async _reconcileDirectDefaultProductsFromStorefront(stepIndex) {
+  if (stepIndex !== 0 || !Array.isArray(this.directDefaultProducts) || this.directDefaultProducts.length === 0) {
+    return;
+  }
+
+  const productIds = Array.from(new Set(this.directDefaultProducts
+    .map(product => extractFullPageId(product?.id))
+    .filter(Boolean)
+    .map(productId => `gid://shopify/Product/${productId}`)));
+  if (productIds.length === 0) return;
+
+  const shop = window.Shopify?.shop || window.location.host;
+  const apiBaseUrl = this.resolveStorefrontApiBase();
+  const country = window.Shopify?.country
+    || (window.Shopify?.locale?.includes('-') ? window.Shopify.locale.split('-')[1] : null)
+    || null;
+
+  try {
+    const countryParam = country ? `&country=${encodeURIComponent(country)}` : '';
+    const response = await fetch(
+      `${apiBaseUrl}/api/storefront-products?ids=${encodeURIComponent(productIds.join(','))}&shop=${encodeURIComponent(shop)}${countryParam}`,
+      { cache: 'no-store' },
+    );
+    if (!response.ok) {
+      await response.text();
+      return;
+    }
+
+    const data = await response.json();
+    const previousDefaults = this.directDefaultProducts;
+    this.directDefaultProducts = reconcileFullPageDirectDefaultProducts(
+      previousDefaults,
+      Array.isArray(data.products) ? data.products : [],
+    );
+    const retainedSelectionIds = new Set(this.directDefaultProducts
+      .map(product => extractFullPageId(product?.selectionId || product?.variantId))
+      .filter(Boolean)
+      .map(String));
+    this._invalidDirectDefaultSelectionIds = new Set(previousDefaults
+      .map(product => extractFullPageId(product?.selectionId || product?.variantId))
+      .filter(selectionId => selectionId && !retainedSelectionIds.has(String(selectionId)))
+      .map(String));
+
+    previousDefaults.forEach(product => {
+      const selectionId = extractFullPageId(product?.selectionId || product?.variantId);
+      if (selectionId && this.selectedProducts?.[0]) {
+        delete this.selectedProducts[0][selectionId];
+      }
+    });
+    this.directDefaultProducts.forEach(product => {
+      const selectionId = extractFullPageId(product?.selectionId || product?.variantId);
+      if (selectionId && this.selectedProducts?.[0]) {
+        this.selectedProducts[0][selectionId] = normalizeDefaultQuantity(product.defaultRequiredQuantity);
+      }
+    });
+
+    if (typeof this.rememberRuntimeProductInventory === 'function') {
+      this.rememberRuntimeProductInventory(data.products);
+    }
+  } catch (error) {
+  }
 },
 
 _initDirectDefaultProducts() {

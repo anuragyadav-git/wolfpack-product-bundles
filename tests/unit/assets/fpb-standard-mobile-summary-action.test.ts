@@ -20,7 +20,9 @@ const { shouldCategoryTabActivateProducts } = require('../../../app/assets/widge
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const {
   fullPageProductProcessingMethods,
+  filterFullPageProductsByInvalidDefaultVariants,
   normalizeFullPageDirectDefaultProduct,
+  reconcileFullPageDirectDefaultProducts,
 } = require('../../../app/assets/widgets/full-page/methods/product-processing-methods.js');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const {
@@ -29,6 +31,7 @@ const {
 } = require('../../../app/assets/widgets/full-page/methods/selection-navigation-methods.js');
 
 class FakeElement {
+  tagName = '';
   className = '';
   disabled = false;
   innerHTML = '';
@@ -115,6 +118,16 @@ function locateFakeElementByClass(root: FakeElement, className: string): FakeEle
   return null;
 }
 
+function locateInteractiveElements(root: FakeElement): FakeElement[] {
+  const matches = root.tagName === 'BUTTON' || root.attributes.role === 'button'
+    ? [root]
+    : [];
+  return [
+    ...matches,
+    ...root.getChildren().flatMap((child) => locateInteractiveElements(child)),
+  ];
+}
+
 const originalDocument = global.document;
 
 beforeEach(() => {
@@ -129,7 +142,11 @@ beforeEach(() => {
     shopMoneyFormat,
   };
   global.document = {
-    createElement: () => new FakeElement(),
+    createElement: (tagName: string) => {
+      const element = new FakeElement();
+      element.tagName = tagName.toUpperCase();
+      return element;
+    },
   } as unknown as Document;
 });
 
@@ -564,7 +581,7 @@ describe('FPB Standard mobile summary action', () => {
     expect(classList.toggle).toHaveBeenCalledTimes(2);
   });
 
-  it('lets the Classic compact summary count toggle use the same interaction path as Standard', async () => {
+  it('renders one Classic compact-summary toggle using the shared interaction path', async () => {
     const sheet = new FakeElement();
     const toggleTray = jest.fn();
     const context = {
@@ -591,8 +608,12 @@ describe('FPB Standard mobile summary action', () => {
     };
 
     fullPageMobileSummaryMethods._populateCompactMobileSummaryTray.call(context, sheet);
-    await sheet.getChildren()[0].click();
+    const summaryToggles = locateInteractiveElements(sheet)
+      .filter((element) => element.attributes['aria-expanded'] !== undefined);
+    await summaryToggles[0].click();
 
+    expect(summaryToggles).toHaveLength(1);
+    expect(summaryToggles[0].tagName).toBe('BUTTON');
     expect(toggleTray).toHaveBeenCalledWith(sheet);
   });
 
@@ -748,10 +769,10 @@ describe('FPB Standard mobile summary action', () => {
       title: '14k Dangling Obsidian Earrings',
       handle: '14k-dangling-obsidian-earrings',
       images: [{ originalSrc: 'https://cdn.shopify.com/default.jpg' }],
-      selectionId: 'gid://shopify/Product/9506413773059',
+      graphqlId: 'gid://shopify/Product/9506413773059',
       requiredQuantity: 1,
       variants: [{
-        selectionId: 'gid://shopify/ProductVariant/48720141091075',
+        variantGraphqlId: 'gid://shopify/ProductVariant/48720141091075',
         price: '829.00',
         inventoryQuantity: 0,
       }],
@@ -771,9 +792,9 @@ describe('FPB Standard mobile summary action', () => {
   it('preserves missing direct default inventory as unbounded for full-page first-load selection', () => {
     const product = normalizeFullPageDirectDefaultProduct({
       title: 'Inventory Unknown Earrings',
-      selectionId: 'gid://shopify/Product/9506413773059',
+      graphqlId: 'gid://shopify/Product/9506413773059',
       variants: [{
-        selectionId: 'gid://shopify/ProductVariant/48720141091075',
+        variantGraphqlId: 'gid://shopify/ProductVariant/48720141091075',
         price: '829.00',
       }],
     });
@@ -783,6 +804,48 @@ describe('FPB Standard mobile summary action', () => {
       available: true,
       quantityAvailable: null,
     }));
+  });
+
+  it('drops direct defaults that are absent from Storefront API hydration', () => {
+    const directDefault = normalizeFullPageDirectDefaultProduct({
+      title: 'Draft Earrings',
+      graphqlId: 'gid://shopify/Product/9506413773059',
+      requiredQuantity: 1,
+      variants: [{
+        variantGraphqlId: 'gid://shopify/ProductVariant/48720141091075',
+        price: '829.00',
+      }],
+    });
+
+    expect(reconcileFullPageDirectDefaultProducts([directDefault], [{
+      id: '9506413773060',
+      selectionId: '48720141091076',
+      variantId: '48720141091076',
+      title: 'Published Earrings',
+      available: true,
+    }])).toEqual([]);
+  });
+
+  it('removes stale direct-default cards from cached step products', () => {
+    expect(filterFullPageProductsByInvalidDefaultVariants([{
+      selectionId: 'gid://shopify/Product/9506413773059',
+      title: 'Draft Earrings',
+      variants: [{
+        variantGraphqlId: 'gid://shopify/ProductVariant/48720141091075',
+      }],
+    }, {
+      selectionId: 'gid://shopify/Product/9506413773060',
+      title: 'Published Earrings',
+      variants: [{
+        variantGraphqlId: 'gid://shopify/ProductVariant/48720141091076',
+      }],
+    }], new Set(['48720141091075']))).toEqual([{
+      selectionId: 'gid://shopify/Product/9506413773060',
+      title: 'Published Earrings',
+      variants: [{
+        variantGraphqlId: 'gid://shopify/ProductVariant/48720141091076',
+      }],
+    }]);
   });
 
   it('preserves direct default metadata on matching grid products', () => {

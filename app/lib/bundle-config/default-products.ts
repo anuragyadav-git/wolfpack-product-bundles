@@ -42,8 +42,15 @@ function firstImageUrl(product: any): string | null {
     || null;
 }
 
+function normalizeRequiredQuantity(value: unknown): number {
+  const quantity = Number(value);
+  return Number.isFinite(quantity) && quantity > 0 ? quantity : 1;
+}
+
 function normalizeVariant(variant: any): DefaultProductVariant | null {
-  const variantSelectionId = toVariantSelectionId(variant?.selectionId);
+  const variantSelectionId = toVariantSelectionId(
+    variant?.variantGraphqlId || variant?.id,
+  );
   if (!variantSelectionId) return null;
 
   const variantGid = String(variantSelectionId);
@@ -62,7 +69,9 @@ function normalizeVariant(variant: any): DefaultProductVariant | null {
 }
 
 export function buildDefaultProductEntryFromPicker(product: any): DefaultProductEntry | null {
-  const productSelectionId = toVariantSelectionId(product?.selectionId);
+  const productSelectionId = toVariantSelectionId(
+    product?.graphqlId || product?.id,
+  );
   if (!productSelectionId) return null;
 
   const productGid = String(productSelectionId);
@@ -84,7 +93,9 @@ export function buildDefaultProductEntryFromPicker(product: any): DefaultProduct
     images: imageUrl ? [{ originalSrc: imageUrl }] : [],
     variants,
     hasOnlyDefaultVariant: Boolean(product.hasOnlyDefaultVariant ?? rawVariants.length <= 1),
-    requiredQuantity: Number(product.requiredQuantity ?? product.minQuantity ?? 0) || 0,
+    requiredQuantity: normalizeRequiredQuantity(
+      product.requiredQuantity ?? product.minQuantity,
+    ),
   };
   if (product.handle) entry.handle = product.handle;
 

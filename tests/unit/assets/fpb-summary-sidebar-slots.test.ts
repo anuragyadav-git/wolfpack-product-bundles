@@ -5,7 +5,10 @@ const { fullPageValidationAddonsMethods } = require('../../../app/assets/widgets
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { fullPageBoxSelectionSidebarMethods } = require('../../../app/assets/widgets/full-page/methods/box-selection-sidebar-methods.js');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const { fullPageSidePanelMethods } = require('../../../app/assets/widgets/full-page/methods/side-panel-methods.js');
+const {
+  fullPageSidePanelMethods,
+  shouldUseClassicDesktopSummarySlotTiles,
+} = require('../../../app/assets/widgets/full-page/methods/side-panel-methods.js');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { fullPageMobileSummaryMethods } = require('../../../app/assets/widgets/full-page/methods/mobile-summary-methods.js');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -241,6 +244,26 @@ describe('fullPageValidationAddonsMethods.getSummarySidebarMaxItemCount', () => 
     const count = fullPageValidationAddonsMethods.getSummarySidebarMaxItemCount.call(context);
 
     expect(count).toBe(3);
+  });
+});
+
+describe('shouldUseClassicDesktopSummarySlotTiles', () => {
+  it('uses Classic desktop slot tiles only when Product Slots is enabled', () => {
+    expect(shouldUseClassicDesktopSummarySlotTiles({
+      isClassicDesktopSidebar: true,
+      productSlotsEnabled: true,
+    })).toBe(true);
+    expect(shouldUseClassicDesktopSummarySlotTiles({
+      isClassicDesktopSidebar: true,
+      productSlotsEnabled: false,
+    })).toBe(false);
+  });
+
+  it('does not use Classic slot tiles outside the Classic desktop sidebar', () => {
+    expect(shouldUseClassicDesktopSummarySlotTiles({
+      isClassicDesktopSidebar: false,
+      productSlotsEnabled: true,
+    })).toBe(false);
   });
 });
 
