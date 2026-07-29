@@ -9,16 +9,17 @@ import { getPreviewReadinessStorageKey } from "../../../lib/bundle-preview-readi
 import type { ConfigureBundleFlowDraft } from "./configure-flow-types";
 
 export function useConfigureVisibilityTemplateState(
-  flow: ConfigureBundleFlowDraft,
+  flow: ConfigureBundleFlowDraft
 ) {
-  const { appEmbedEnabled, bundle, markAsDirty, stepsState, textOverrides } = flow;
+  const { appEmbedEnabled, bundle, markAsDirty, stepsState, textOverrides } =
+    flow;
   const [isInstallingWidget, setIsInstallingWidget] = useState(false);
   const [activeAssetTabIndex, setActiveAssetTabIndex] = useState(0);
   const [searchBarEnabled, setSearchBarEnabled] = useState<boolean>(
-    (bundle as any).searchBarEnabled ?? false,
+    (bundle as any).searchBarEnabled ?? false
   );
   const originalSearchBarEnabledRef = useRef<boolean>(
-    (bundle as any).searchBarEnabled ?? false,
+    (bundle as any).searchBarEnabled ?? false
   );
   const savedBundleUpsellConfig = ((bundle as any).bundleUpsellConfig ??
     null) as any;
@@ -28,96 +29,96 @@ export function useConfigureVisibilityTemplateState(
   const [upsellWidgetEnabled, setUpsellWidgetEnabled] = useState<boolean>(
     savedWidgetConfiguration?.isEnabled ??
       (bundle as any).upsellWidgetEnabled ??
-      false,
+      false
   );
   const [upsellWidgetDisplayMode, setUpsellWidgetDisplayMode] =
     useState<string>((bundle as any).upsellWidgetDisplayMode ?? "button");
   const [upsellWidgetDisplayOn, setUpsellWidgetDisplayOn] = useState<string>(
     (bundle as any).upsellWidgetDisplayOn ??
-      getVisibilityDisplayTarget(savedWidgetDisplayConfiguration, "all"),
+      getVisibilityDisplayTarget(savedWidgetDisplayConfiguration, "all")
   );
   const [upsellWidgetTitle, setUpsellWidgetTitle] = useState<string>(
-    savedWidgetConfiguration?.title ?? "Bundle & Save",
+    savedWidgetConfiguration?.title ?? "Bundle & Save"
   );
   const [upsellWidgetDescription, setUpsellWidgetDescription] =
     useState<string>(savedWidgetConfiguration?.description ?? "");
   const [upsellWidgetButtonText, setUpsellWidgetButtonText] = useState<string>(
     savedWidgetConfiguration?.buttonText ??
       textOverrides.widgetButtonText ??
-      "Save More With Bundle",
+      "Save More With Bundle"
   );
   const [upsellWidgetImageUrl, setUpsellWidgetImageUrl] = useState<string>(
-    savedWidgetConfiguration?.imageUrl ?? "",
+    savedWidgetConfiguration?.imageUrl ?? ""
   );
   const [upsellWidgetLanguageMode, setUpsellWidgetLanguageMode] =
     useState<string>(
       savedWidgetConfiguration?.languageMode ??
         savedBundleUpsellConfig?.languageMode ??
-        "SINGLE",
+        "SINGLE"
     );
   const [upsellWidgetSelectedProducts, setUpsellWidgetSelectedProducts] =
     useState<unknown[]>(
-      asVisibilityArray(savedWidgetDisplayConfiguration?.selectedProducts),
+      asVisibilityArray(savedWidgetDisplayConfiguration?.selectedProducts)
     );
   const [
     upsellWidgetSpecificProductPages,
     setUpsellWidgetSpecificProductPages,
   ] = useState<unknown[]>(
     asVisibilityArray(
-      savedWidgetDisplayConfiguration?.showOnSpecificProductPages,
-    ),
+      savedWidgetDisplayConfiguration?.showOnSpecificProductPages
+    )
   );
   const [
     upsellWidgetCollectionsSelectedData,
     setUpsellWidgetCollectionsSelectedData,
   ] = useState<unknown[]>(
-    asVisibilityArray(savedWidgetDisplayConfiguration?.collectionsSelectedData),
+    asVisibilityArray(savedWidgetDisplayConfiguration?.collectionsSelectedData)
   );
   const [
     upsellWidgetSpecificCollectionPages,
     setUpsellWidgetSpecificCollectionPages,
   ] = useState<unknown[]>(
     asVisibilityArray(
-      savedWidgetDisplayConfiguration?.showOnSpecificCollectionPages,
-    ),
+      savedWidgetDisplayConfiguration?.showOnSpecificCollectionPages
+    )
   );
   const [autoSelectBrowsedProduct, setAutoSelectBrowsedProduct] =
     useState<boolean>(
       savedWidgetConfiguration?.useLinkProductAsDefaultProduct ??
         (bundle as any).autoSelectBrowsedProduct ??
-        false,
+        false
     );
   const isBundleVisibilityPending = !appEmbedEnabled;
   const originalUpsellWidgetEnabledRef = useRef<boolean>(
     savedWidgetConfiguration?.isEnabled ??
       (bundle as any).upsellWidgetEnabled ??
-      false,
+      false
   );
   const originalUpsellWidgetDisplayModeRef = useRef<string>(
-    (bundle as any).upsellWidgetDisplayMode ?? "button",
+    (bundle as any).upsellWidgetDisplayMode ?? "button"
   );
   const originalUpsellWidgetDisplayOnRef = useRef<string>(
     (bundle as any).upsellWidgetDisplayOn ??
-      getVisibilityDisplayTarget(savedWidgetDisplayConfiguration, "all"),
+      getVisibilityDisplayTarget(savedWidgetDisplayConfiguration, "all")
   );
   const originalUpsellWidgetButtonTextRef = useRef<string>(
     savedWidgetConfiguration?.buttonText ??
       (bundle as any).textOverrides?.widgetButtonText ??
-      "Save More With Bundle",
+      "Save More With Bundle"
   );
   const originalAutoSelectBrowsedProductRef = useRef<boolean>(
     savedWidgetConfiguration?.useLinkProductAsDefaultProduct ??
       (bundle as any).autoSelectBrowsedProduct ??
-      false,
+      false
   );
   const [bundleBannerDesktopUrl, setBundleBannerDesktopUrl] = useState<string>(
-    (bundle as any).bundleBannerDesktopUrl ?? "",
+    (bundle as any).bundleBannerDesktopUrl ?? ""
   );
   const [bundleBannerMobileUrl, setBundleBannerMobileUrl] = useState<string>(
-    (bundle as any).bundleBannerMobileUrl ?? "",
+    (bundle as any).bundleBannerMobileUrl ?? ""
   );
   const [bundleLevelCss, setBundleLevelCss] = useState<string>(
-    (bundle as any).bundleLevelCss ?? "",
+    (bundle as any).bundleLevelCss ?? ""
   );
   const initialTemplateSelection = resolveFpbTemplateSelection(bundle as any);
   const [bundleDesignTemplate, setBundleDesignTemplate] = useState<
@@ -144,11 +145,11 @@ export function useConfigureVisibilityTemplateState(
   const getStepCategories = useCallback(
     (stepId: string): any[] => {
       const step = stepsState.steps.find(
-        (candidate: any) => candidate.id === stepId,
+        (candidate: any) => candidate.id === stepId
       ) as any;
       return ((step as any)?.StepCategory as any[] | undefined) ?? [];
     },
-    [stepsState.steps],
+    [stepsState.steps]
   );
   const updateStepCategories = useCallback(
     (stepId: string, updater: (categories: any[]) => any[]) => {
@@ -156,7 +157,7 @@ export function useConfigureVisibilityTemplateState(
       stepsState.updateStepField(stepId, "StepCategory", updater(categories));
       markAsDirty();
     },
-    [getStepCategories, markAsDirty, stepsState],
+    [getStepCategories, markAsDirty, stepsState]
   );
   const clearCategoryConditionRules = useCallback(
     (stepId: string) => {
@@ -165,10 +166,10 @@ export function useConfigureVisibilityTemplateState(
           ...category,
           conditions: [],
           autoNextStepOnConditionMet: false,
-        })),
+        }))
       );
     },
-    [updateStepCategories],
+    [updateStepCategories]
   );
   const addCategoryConditionRule = useCallback(
     (stepId: string, categoryIndex: number) => {
@@ -190,10 +191,10 @@ export function useConfigureVisibilityTemplateState(
               },
             ],
           };
-        }),
+        })
       );
     },
-    [updateStepCategories],
+    [updateStepCategories]
   );
   const removeCategoryConditionRule = useCallback(
     (stepId: string, categoryIndex: number, ruleId: string) => {
@@ -207,13 +208,13 @@ export function useConfigureVisibilityTemplateState(
             ...category,
             conditions: conditions.filter(
               (rule: any, ruleIndex: number) =>
-                String(rule.id ?? ruleIndex) !== ruleId,
+                String(rule.id ?? ruleIndex) !== ruleId
             ),
           };
-        }),
+        })
       );
     },
-    [updateStepCategories],
+    [updateStepCategories]
   );
   const updateCategoryConditionRule = useCallback(
     (
@@ -221,7 +222,7 @@ export function useConfigureVisibilityTemplateState(
       categoryIndex: number,
       ruleId: string,
       field: string,
-      value: string,
+      value: string
     ) => {
       updateStepCategories(stepId, (categories) =>
         categories.map((category, index) => {
@@ -234,13 +235,13 @@ export function useConfigureVisibilityTemplateState(
             conditions: conditions.map((rule: any, ruleIndex: number) =>
               String(rule.id ?? ruleIndex) === ruleId
                 ? { ...rule, [field]: value }
-                : rule,
+                : rule
             ),
           };
-        }),
+        })
       );
     },
-    [updateStepCategories],
+    [updateStepCategories]
   );
   const updateCategoryAutoNextRule = useCallback(
     (stepId: string, categoryIndex: number, enabled: boolean) => {
@@ -248,17 +249,17 @@ export function useConfigureVisibilityTemplateState(
         categories.map((category, index) =>
           index === categoryIndex
             ? { ...category, autoNextStepOnConditionMet: enabled }
-            : category,
-        ),
+            : category
+        )
       );
     },
-    [updateStepCategories],
+    [updateStepCategories]
   );
   const [showIconPickerForStep, setShowIconPickerForStep] = useState<
     string | null
   >(null);
   const [isStepLocaleModalOpen, setIsStepLocaleModalOpen] = useState(false);
-  const selectTemplateModalRef = useRef<HTMLDivElement>(null);
+  const selectTemplateModalRef = useRef<any>(null);
   const selectTemplateOpenButtonRef = useRef<HTMLButtonElement>(null);
   const [isSelectTemplateModalOpen, setIsSelectTemplateModalOpen] =
     useState(false);
@@ -271,12 +272,13 @@ export function useConfigureVisibilityTemplateState(
   >("templates");
   const templateFetcher = useFetcher();
   const [templateSaveError, setTemplateSaveError] = useState<string | null>(
-    null,
+    null
   );
   const lastTemplateRequestRef = useRef<{
     template: string | null;
     presetId: string | null;
   } | null>(null);
+  const templateSubmissionStartedRef = useRef(false);
   const lastTemplateResponseRef = useRef<unknown>(null);
   const [isSyncModalOpen, setIsSyncModalOpen] = useState(false);
   const [readinessOpen, setReadinessOpen] = useState(false);
@@ -285,7 +287,7 @@ export function useConfigureVisibilityTemplateState(
 
   useEffect(() => {
     setHasPreview(
-      !!localStorage.getItem(getPreviewReadinessStorageKey(bundle.id)),
+      !!localStorage.getItem(getPreviewReadinessStorageKey(bundle.id))
     );
   }, [bundle.id]);
 
@@ -313,6 +315,7 @@ export function useConfigureVisibilityTemplateState(
     isSyncModalOpen,
     lastTemplateRequestRef,
     lastTemplateResponseRef,
+    templateSubmissionStartedRef,
     originalAutoSelectBrowsedProductRef,
     originalSearchBarEnabledRef,
     originalUpsellWidgetButtonTextRef,

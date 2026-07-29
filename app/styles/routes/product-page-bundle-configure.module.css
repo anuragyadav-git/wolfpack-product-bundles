@@ -326,9 +326,7 @@
   font-weight: 600;
   line-height: 1;
   cursor: pointer;
-  transition:
-    background-color 0.15s ease,
-    box-shadow 0.15s ease,
+  transition: background-color 0.15s ease, box-shadow 0.15s ease,
     transform 0.15s ease;
 }
 
@@ -607,10 +605,7 @@
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition:
-    border-color 0.15s,
-    background 0.15s,
-    box-shadow 0.15s;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
 }
 
 .stepChip:hover,
@@ -672,9 +667,7 @@
   font-size: 13px;
   font-weight: 650;
   cursor: pointer;
-  transition:
-    background 0.15s,
-    border-color 0.15s;
+  transition: background 0.15s, border-color 0.15s;
 }
 
 .addStepBtn:hover {
@@ -732,9 +725,7 @@
 
 .stepCardDragOver {
   transform: translateY(-4px);
-  box-shadow:
-    0 8px 16px rgba(0, 0, 0, 0.15),
-    0 0 0 2px rgba(33, 150, 243, 0.3);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15), 0 0 0 2px rgba(33, 150, 243, 0.3);
   border: 2px dashed rgba(33, 150, 243, 0.5);
   background: rgba(33, 150, 243, 0.05);
 }
@@ -1397,54 +1388,13 @@
   composes: optionNote from "./bundle-configure-shared.module.css";
 }
 
-.templateDialogBackdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 2147483000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-  padding: clamp(16px, 4vw, 40px);
-  background: rgba(17, 24, 39, 0.42);
-}
-
-.templateDialog {
+.templateDialogContent {
   display: flex;
   flex-direction: column;
-  width: min(1080px, 100%);
-  height: min(760px, 100%);
-  max-height: 100%;
-  overflow: hidden;
-  border-radius: 16px;
+  min-height: min(612px, calc(100vh - 180px));
   background: #ffffff;
-  outline: none;
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.24);
-  animation: templateModalEnter 180ms ease-out both;
 }
 
-@keyframes templateModalEnter {
-  from {
-    opacity: 0;
-    transform: scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-.templateDialogHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  min-height: 56px;
-  padding: 14px 20px;
-  border-bottom: 1px solid #e3e3e3;
-}
-
-.templateDialogHeading,
 .templateDialogSubheading,
 .templateReadyTitle {
   margin: 0;
@@ -1453,42 +1403,9 @@
   line-height: 1.25;
 }
 
-.templateDialogHeading {
-  font-size: 18px;
-}
-
 .templateDialogSubheading,
 .templateReadyTitle {
   font-size: 20px;
-}
-
-.templateDialogHandle {
-  display: none;
-}
-
-.templateDialogClose {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border: 0;
-  border-radius: 8px;
-  background: transparent;
-  color: #303030;
-  cursor: pointer;
-  flex-shrink: 0;
-}
-
-.templateDialogClose svg {
-  display: block;
-  color: #303030;
-}
-
-.templateDialogClose:hover,
-.templateDialogClose:focus-visible {
-  background: #f1f1f1;
-  outline: none;
 }
 
 .templateDialogBody {
@@ -1776,9 +1693,7 @@
   color: #303030;
   cursor: pointer;
   flex-shrink: 0;
-  transition:
-    background 0.12s,
-    color 0.12s;
+  transition: background 0.12s, color 0.12s;
 }
 
 .categoryChevron:hover {
@@ -2058,9 +1973,7 @@
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition:
-    background 0.12s,
-    border-color 0.12s;
+  transition: background 0.12s, border-color 0.12s;
   margin-top: 8px;
 }
 
@@ -2490,14 +2403,8 @@
     grid-template-columns: 1fr;
   }
 
-  .templateDialogBackdrop {
-    padding: 12px;
-  }
-
-  .templateDialog {
-    width: 100%;
-    height: 100%;
-    border-radius: 12px;
+  .templateDialogContent {
+    min-height: calc(100vh - 112px);
   }
 
   .templateDialogIntro {
