@@ -34,6 +34,7 @@ export function shouldAutoShowOnMount(bundleVisibilityPending: boolean, hasBeenS
 }
 
 export type UseEnablePreviewGateOptions = EnablePreviewGateInput & {
+  refreshStatus?: () => Promise<{ appEmbedEnabled: boolean } | null>;
   onSilentBlock?: () => void;
   /**
    * Bundle ID — when provided with autoShowOnMount, the modal auto-shows on page
@@ -68,9 +69,10 @@ export function useEnablePreviewGate(options: UseEnablePreviewGateOptions) {
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps -- intentional mount-only trigger
 
-  const requestPreview = useCallback((onProceed: () => unknown) => {
+  const requestPreview = useCallback(async (onProceed: () => unknown) => {
+    const latestStatus = await options.refreshStatus?.();
     const decision = decideEnablePreviewGate({
-      appEmbedEnabled: options.appEmbedEnabled,
+      appEmbedEnabled: latestStatus?.appEmbedEnabled ?? options.appEmbedEnabled,
       themeEditorUrl: options.themeEditorUrl,
       blockBehavior: options.blockBehavior,
     });

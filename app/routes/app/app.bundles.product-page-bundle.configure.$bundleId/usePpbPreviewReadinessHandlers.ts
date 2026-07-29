@@ -3,7 +3,6 @@ import { AppLogger } from "../../../lib/logger";
 import { navigateBackOrFallback } from "../../../lib/navigation";
 import productPageBundleStyles from "../../../styles/routes/product-page-bundle-configure.module.css";
 import { markBundlePreviewComplete } from "../../../lib/bundle-preview-readiness";
-import { verifyAppEmbedEnabledBeforePreview } from "../../../lib/app-embed-status-check.client";
 import { pickPpbPreviewUrl } from "../../../lib/ppb-preview-url";
 import { prepareStorefrontPreviewForOpen } from "../../../lib/storefront-sync-preview.client";
 import { validatePpbWidgetPlacementBeforePreview } from "../../../lib/ppb-widget-placement.client";
@@ -47,18 +46,6 @@ export function usePpbPreviewReadinessHandlers({
       );
       return false;
     }
-    const appEmbedEnabled = await verifyAppEmbedEnabledBeforePreview(
-      base.appEmbedEnabled,
-      base.checkAppEmbedStatusBeforePreview,
-      {
-        onValidationStart: () => setIsPreviewBundleLoading(true),
-        onValidationBlocked: () => setIsPreviewBundleLoading(false),
-      },
-    );
-    if (!appEmbedEnabled) {
-      base.triggerAppEmbedBannerFeedback();
-      return false;
-    }
     setIsPreviewBundleLoading(true);
     try {
       await prepareStorefrontPreviewForOpen();
@@ -66,7 +53,7 @@ export function usePpbPreviewReadinessHandlers({
         (base.bundle as any).status ?? "",
       ).toLowerCase();
       let productUrl = pickPpbPreviewUrl({
-        appEmbedEnabled: base.appEmbedEnabled,
+        appEmbedEnabled: true,
         bundleStatus: bundleStatusForPreview,
         productHandle: base.bundle.shopifyProductHandle,
         bundleProduct: base.bundleProduct,

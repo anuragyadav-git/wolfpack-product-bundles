@@ -3,7 +3,7 @@
   bottom: 80px;
   left: 50%;
   transform: translateX(-50%);
-  width: min(420px, 90vw);
+  width: min(420px, calc(100vw - 24px));
   background: #005bd3;
   border-radius: 12px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
@@ -122,6 +122,13 @@
 
 .nextBtn:hover {
   opacity: 0.88;
+}
+
+@media (max-width: 480px) {
+  .overlay {
+    bottom: 16px;
+    padding: 14px 16px 16px;
+  }
 }
 
 /* SVG spotlight backdrop — dims the page with a cutout over the target element */

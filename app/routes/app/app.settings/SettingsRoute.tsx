@@ -5,7 +5,6 @@ import {
   CONTROL_LAYOUTS,
   DESIGN_CONFIGURATION,
   LANGUAGE_CONFIGURATION,
-  SETTINGS_CARDS,
   SUPPORTED_LANGUAGE_LABELS,
 } from "../../../lib/admin-configuration-surfaces";
 import styles from "../../../styles/routes/admin-configuration-surfaces.module.css";
@@ -15,10 +14,7 @@ import {
   getInitialDesignFieldValues,
   getInitialLanguageFieldValues,
 } from "./settings-state";
-import {
-  SettingsCardIcon,
-  getControlTabIcon,
-} from "./SettingsDesignFields";
+import { getControlTabIcon } from "./SettingsDesignFields";
 import {
   ControlsContentCards,
   ControlsFormGroup,
@@ -33,7 +29,7 @@ import { runAfterSaveBarLeaveConfirmation } from "../../../lib/admin-savebar-nav
 import { createSettingsDesignState, type SettingsDesignPayload } from "../../../lib/settings-design-contract";
 import { DesignSettingsView } from "./DesignSettingsView";
 
-export function SettingsRoute({ initialView = "landing" }: { initialView?: "landing" | "design" | "language" | "controls" }) {
+export function SettingsRoute({ initialView = "design", onExit }: { initialView?: "design" | "language" | "controls"; onExit: () => void }) {
   const { settingsPage, previewBundles } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const submit = useSubmit();
@@ -123,7 +119,14 @@ export function SettingsRoute({ initialView = "landing" }: { initialView?: "land
     (settingsView === "language" && isLanguageDirty) ||
     (settingsView === "controls" && isControlsDirty);
   const returnToSettingsLanding = () => {
-    void runAfterSaveBarLeaveConfirmation(shopify, () => setSettingsView("landing"));
+    void runAfterSaveBarLeaveConfirmation(shopify, onExit);
+  };
+
+  const navigateToSettingsView = (nextView: "design" | "language" | "controls") => {
+    void runAfterSaveBarLeaveConfirmation(shopify, () => {
+      setSettingsView(nextView);
+      if (nextView === "language") setActiveLanguagePanel("cartCheckout");
+    });
   };
 
   const discardActiveSettingsChanges = () => {
@@ -466,8 +469,7 @@ export function SettingsRoute({ initialView = "landing" }: { initialView?: "land
                 onFieldChange={(label, value) => setControlFieldValues((current) => ({ ...current, [label]: value }))}
                 onFieldAction={(label) => {
                   if (label === "Cart Messaging") {
-                    setSettingsView("language");
-                    setActiveLanguagePanel("cartCheckout");
+                    navigateToSettingsView("language");
                     return;
                   }
                   if (label === "Track inventory on Add To Cart (in beta)") {
@@ -486,35 +488,5 @@ export function SettingsRoute({ initialView = "landing" }: { initialView?: "land
     );
   }
 
-  return (
-    <>
-      <ui-title-bar title="Settings" />
-      <main className={styles.page}>
-        <header className={styles.hero}>
-          <div>
-            <h1 className={styles.title}>Settings</h1>
-          </div>
-        </header>
-
-        <section className={styles.cardGrid} aria-label="Settings sections">
-          {SETTINGS_CARDS.map((card) => (
-            <button
-              key={card.id}
-              type="button"
-              className={styles.settingCard}
-              aria-label={`Open ${card.title} settings`}
-              onClick={() => setSettingsView(card.id)}
-            >
-              <span className={styles.settingsCardContent}>
-                <SettingsCardIcon icon={card.icon} />
-                <h2 className={styles.cardTitle}>{card.title}</h2>
-                <p className={styles.cardDescription}>{card.description}</p>
-              </span>
-            </button>
-          ))}
-        </section>
-        <SettingsToast message={saveMessage} onDismiss={() => setSaveMessage(null)} />
-      </main>
-    </>
-  );
+  return null;
 }

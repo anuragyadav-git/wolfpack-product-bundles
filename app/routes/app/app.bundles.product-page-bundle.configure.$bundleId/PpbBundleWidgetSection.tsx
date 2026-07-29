@@ -1,4 +1,5 @@
 import type React from "react";
+import { LiveUpsellWidgetPreview } from "../../../components/bundle-configure/LiveUpsellWidgetPreview";
 import { usePpbConfigureContext } from "./PpbConfigureContext";
 
 export function PpbBundleWidgetSection() {
@@ -65,18 +66,12 @@ export function PpbBundleWidgetSection() {
               }}
             >
               <div className={productPageBundleStyles.visibilityPreviewFrame}>
-                <img
-                  className={productPageBundleStyles.visibilityPreviewFullImage}
-                  src={
-                    upsellWidgetDisplayMode === "button"
-                      ? "/Upsell-Button.avif"
-                      : "/Upsell-Block.avif"
-                  }
-                  alt={
-                    upsellWidgetDisplayMode === "button"
-                      ? "Upsell Button preview"
-                      : "Upsell Block preview"
-                  }
+                <LiveUpsellWidgetPreview
+                  mode={upsellWidgetDisplayMode === "button" ? "button" : "block"}
+                  title={upsellWidgetTitle}
+                  description={upsellWidgetDescription}
+                  buttonText={upsellWidgetButtonText}
+                  imageUrl={upsellWidgetImageUrl || undefined}
                 />
                 <div className={productPageBundleStyles.visibilityRadioBar}>
                   <label

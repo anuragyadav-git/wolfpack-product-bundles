@@ -5,7 +5,7 @@ title: Wolfpack Product Bundles App Navigation and UI Map
 type: navigation-map
 status: authoritative
 summary: Routes, screens, actions, modals, and storefront-preview flows for the embedded app.
-last_audited: 2026-07-23
+last_audited: 2026-07-29
 owners:
   - engineering
 domains:
@@ -72,6 +72,8 @@ Dashboard
 ├── Language selector → persists one shop-wide embedded Admin UI language for all staff accounts on change
 ├── Existing founder support card → direct support chat
 ├── Existing support issues card → purple hero, feature/storefront/uninstall help, and direct support chat
+├── Metrics: active bundle count
+├── Storefront setup status grid → all five theme blocks/embeds with Theme Editor action when needed
 ├── Section: "Your Bundles"
 │   └── DataTable of bundles (empty state if none exist)
 │       └── Per bundle row:
@@ -166,6 +168,8 @@ Primary action:
 - Relevant Expert Colour Control groups expose `Show Colour Guide` links to the five app-owned AVIF guide paths generated from tracked public PNG sources by CI/CD.
 - Settings back actions await App Bridge Save Bar leave confirmation while unsaved changes exist.
 - At phone widths, Language and Controls section navigation becomes a native disclosure that closes after a section is selected while retaining the current unsaved form state.
+- Settings has one landing owner; selecting a subpage lazy-loads the workspace and returning home is guarded by the contextual save bar.
+- Cart Messaging navigation from Controls to Language is also guarded by the contextual save bar.
 
 ---
 

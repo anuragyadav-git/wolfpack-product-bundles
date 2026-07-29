@@ -4,8 +4,8 @@ id: bfs-dashboard-homepage
 title: BFS Dashboard Homepage Test Spec
 type: test-spec
 status: active
-summary: Behavior gates for first-install onboarding and support access within existing dashboard cards.
-last_audited: 2026-07-20
+summary: Behavior gates for dashboard metrics, storefront extension status, onboarding, and support access.
+last_audited: 2026-07-29
 owners:
   - engineering
 domains:
@@ -29,7 +29,7 @@ keywords:
 **Spec ID:** bfs-dashboard-homepage  **Created:** 2026-07-20
 
 ## Purpose
-Reuse the existing onboarding route and dashboard cards to expose setup and direct support access without adding dashboard sections.
+Expose useful bundle metrics and complete published-theme extension status alongside onboarding and direct support access.
 
 ## Test Cases
 ### ExistingDashboardSurfaces
@@ -38,8 +38,9 @@ Reuse the existing onboarding route and dashboard cards to expose setup and dire
 | 1 | New install | Auth flow and first-create eligibility | Existing `/app/onboarding` route opens | Immediately visible onboarding |
 | 2 | Returning shop | Auth flow without eligibility | Dashboard opens | No repeated onboarding |
 | 3 | Existing secondary card | Merchant has a feature, storefront, design, analytics, or uninstall issue | Founder-aligned hero/body dimensions, five issue prompts, and a bottom-aligned direct support CTA are visible | CTA opens existing support chat |
-| 4 | Existing founder card | Bundle records exist | No total or active bundle count pills are visible | Founder card remains support-focused |
+| 4 | Existing bundles | Bundle records exist | Active bundle count is visible on the homepage | Metric is useful to merchants |
+| 5 | Theme setup | Published theme exposes extension blocks/embeds | All five Wolfpack resources show Active, Available, or Unavailable status | Theme Editor action appears when the embed is not active |
 
 ## Acceptance Criteria
 - [x] All listed test cases pass
-- [x] No separate homepage overview component remains
+- [x] Homepage includes metrics and complete theme extension status

@@ -24,6 +24,10 @@ const SPOTLIGHT_PAD = 8;
 const MAX_TARGET_LOOKUP_FRAMES = 30;
 const STABLE_FRAME_COUNT = 4;
 
+function getTooltipWidth() {
+  return Math.min(TOOLTIP_WIDTH, Math.max(240, window.innerWidth - 24));
+}
+
 export function BundleGuidedTour({
   steps,
   shop,
@@ -80,7 +84,8 @@ export function BundleGuidedTour({
 
   const centeredBottomStyle = useCallback((): CSSProperties => ({
     top: window.innerHeight - 280,
-    left: Math.max(12, window.innerWidth / 2 - TOOLTIP_WIDTH / 2),
+    left: Math.max(12, (window.innerWidth - getTooltipWidth()) / 2),
+    width: getTooltipWidth(),
     transform: "none",
     bottom: "auto",
   }), []);
@@ -122,10 +127,11 @@ export function BundleGuidedTour({
 
     const belowFits = rect.bottom + TOOLTIP_HEIGHT + 12 < vh;
     const top = belowFits ? rect.bottom + 12 : Math.max(12, rect.top - TOOLTIP_HEIGHT - 12);
-    let left = rect.left + rect.width / 2 - TOOLTIP_WIDTH / 2;
-    left = Math.max(12, Math.min(left, vw - TOOLTIP_WIDTH - 12));
+    const tooltipWidth = getTooltipWidth();
+    let left = rect.left + rect.width / 2 - tooltipWidth / 2;
+    left = Math.max(12, Math.min(left, vw - tooltipWidth - 12));
 
-    setTooltipStyle({ top, left, transform: "none", bottom: "auto" });
+    setTooltipStyle({ top, left, width: tooltipWidth, transform: "none", bottom: "auto" });
   }, []);
 
   const waitForStableTarget = useCallback((el: HTMLElement) => {

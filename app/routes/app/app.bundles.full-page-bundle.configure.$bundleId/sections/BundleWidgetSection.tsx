@@ -1,4 +1,5 @@
 import { isMultiLanguageActionDisabled } from "../../../../lib/bundle-config/common-configure-page-model";
+import { LiveUpsellWidgetPreview } from "../../../../components/bundle-configure/LiveUpsellWidgetPreview";
 import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
 
 export function BundleWidgetSection({
@@ -64,18 +65,10 @@ export function BundleWidgetSection({
               }}
             >
               <div className={fullPageBundleStyles.visibilityPreviewFrame}>
-                <img
-                  className={fullPageBundleStyles.visibilityPreviewFullImage}
-                  src={
-                    upsellWidgetDisplayMode === "button"
-                      ? "/Upsell-Button.avif"
-                      : "/Upsell-Block.avif"
-                  }
-                  alt={
-                    upsellWidgetDisplayMode === "button"
-                      ? "Upsell Button preview"
-                      : "Upsell Block preview"
-                  }
+                <LiveUpsellWidgetPreview
+                  mode={upsellWidgetDisplayMode === "button" ? "button" : "block"}
+                  title="Bundle offer"
+                  buttonText={upsellWidgetButtonText}
                 />
                 <div className={fullPageBundleStyles.visibilityRadioBar}>
                   <label className={fullPageBundleStyles.visibilityRadioLabel}>

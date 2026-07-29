@@ -275,7 +275,7 @@ export default function SettingsRouteDefault() {
 
   return (
     <Suspense fallback={<SettingsWorkspaceSkeleton />}>
-      <SettingsWorkspace initialView={workspaceView} />
+      <SettingsWorkspace initialView={workspaceView} onExit={() => setWorkspaceView(null)} />
     </Suspense>
   );
 }

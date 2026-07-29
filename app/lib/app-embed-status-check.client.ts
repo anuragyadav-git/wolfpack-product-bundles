@@ -1,6 +1,34 @@
+import {
+  hasActiveThemeExtension,
+  normalizeThemeExtensionResources,
+  type ShopifyThemeExtensionInfo,
+} from "./theme-extension-status";
+
 export interface AppEmbedStatusCheckResult {
   appEmbedEnabled: boolean;
   themeEditorUrl: string | null;
+}
+
+export type AppBridgeThemeStatus = {
+  resources: ReturnType<typeof normalizeThemeExtensionResources>;
+  appEmbedEnabled: boolean;
+};
+
+type AppBridgeExtensionsApi = {
+  app?: {
+    extensions?: () => Promise<ShopifyThemeExtensionInfo[]>;
+  };
+};
+
+export async function getThemeExtensionStatusFromAppBridge(
+  shopify: AppBridgeExtensionsApi,
+): Promise<AppBridgeThemeStatus> {
+  const extensions = await shopify.app?.extensions?.();
+  const resources = normalizeThemeExtensionResources(extensions ?? []);
+  return {
+    resources,
+    appEmbedEnabled: hasActiveThemeExtension(resources, "bundle-app-embed"),
+  };
 }
 
 interface AppEmbedStatusResponse extends Partial<AppEmbedStatusCheckResult> {

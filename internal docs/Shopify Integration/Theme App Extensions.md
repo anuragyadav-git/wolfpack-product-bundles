@@ -1,15 +1,39 @@
 ---
+schema_version: 1
+id: theme-app-extensions
 title: Theme App Extensions
 type: shopify-integration
-audited: 2026-07-10
-sources: shopify.dev ThemeRole, shopify.dev themes query, shopify.dev theme app extension configuration
+status: authoritative
+summary: Theme extension handles, activation status, and App Bridge status source for Wolfpack storefront resources.
+last_audited: 2026-07-29
+owners:
+  - engineering
+domains:
+  - shopify
+  - storefront
+systems:
+  - theme-app-extension
+source_paths:
+  - extensions/bundle-builder/shopify.extension.toml
+  - app/lib/theme-extension-status.ts
+related_docs:
+  - docs/bfs-review-remediation-plan.md
+tags:
+  - shopify
+  - theme-extension
+keywords:
+  - app-embed
+  - app.extensions
+  - bundle-product-page
 ---
 
 # Theme App Extensions
 
 Shopify stores app embed activation per theme. `ThemeRole.MAIN` is the currently published storefront theme, and Shopify allows only one main theme at a time. Unpublished and development themes can also have the app embed enabled, but that does not make the live storefront embed active.
 
-The Wolfpack app embed status check reads the MAIN theme's `config/settings_data.json` via Admin GraphQL theme files using `themes(first: 1, roles: [MAIN])`. The returned `appEmbedEnabled` boolean is based only on the active published storefront theme, matching EB-style app embed gating. Non-main enabled themes are not part of the Preview/banner hot path because a draft-theme activation does not make the live storefront embed active.
+The homepage and preview gate now use Shopify App Bridge `shopify.app.extensions()` in the embedded Admin context. The response is normalized into the five resources declared by the extension TOML, with explicit `active`, `available`, or `unavailable` status. The app embed is the global preview gate; product-page previews validate the product-page block separately and do not require the global embed.
+
+The server-side MAIN-theme `settings_data.json` checker remains available for legacy banner hydration and migration diagnostics, but it is not the authoritative client-side status source for the homepage or preview gate.
 
 App embed detection depends on the app handle and app embed block handle in Shopify's settings data, not the extension UID alone. For production, the expected app embed type is:
 

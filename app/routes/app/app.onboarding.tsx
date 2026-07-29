@@ -1,480 +1,158 @@
-/**
- * Onboarding Wizard
- *
- * Shown to new merchants after the landing screen.
- * Covers: bundle creation → widget install → design → analytics → go live.
- */
-
-import { useNavigate, useRouteLoaderData } from "@remix-run/react";
-import { useState, useEffect, useRef } from "react";
-import { AppLogger } from "../../lib/logger";
-import styles from "../../styles/routes/app-index.module.css";
-import { navigateBackOrFallback } from "../../lib/navigation";
+import { useNavigate } from "@remix-run/react";
+import { useState } from "react";
+import { BundleType } from "../../constants/bundle";
+import { buildBundleCreatePath } from "../../lib/onboarding-bundle-type";
 import { openSupportChat } from "../../lib/support-chat.client";
-import { type loader as appLoader } from "./app";
 
-const STEP_TITLES = [
-  "Create Your First Bundle",
-  "Install the Widget in Your Theme",
-  "Customize Your Bundle Design",
-  "Track Performance & Go Live",
+type GuideStep = {
+  id: number;
+  title: string;
+  description: string;
+  details: string[];
+};
+
+const GUIDE_STEPS: GuideStep[] = [
+  {
+    id: 0,
+    title: "Choose your bundle format",
+    description: "Pick the storefront experience that fits your offer.",
+    details: [
+      "Product-page bundles keep shoppers on a product page.",
+      "Full-page bundles give shoppers a dedicated bundle journey.",
+    ],
+  },
+  {
+    id: 1,
+    title: "Configure your bundle",
+    description: "Add products, steps, pricing, and bundle rules in the guided editor.",
+    details: [
+      "Create the bundle name and choose its products.",
+      "Set pricing and save before previewing the customer experience.",
+    ],
+  },
+  {
+    id: 2,
+    title: "Preview and publish",
+    description: "Use the storefront preview and setup status to take the bundle live.",
+    details: [
+      "Enable the required theme resource when the app asks for it.",
+      "Preview the result, then publish the theme changes.",
+    ],
+  },
 ];
 
 export default function Onboarding() {
-  const appData = useRouteLoaderData<typeof appLoader>("routes/app/app");
-  const shop = appData?.shop;
-  const apiKey = appData?.apiKey ?? process.env.SHOPIFY_API_KEY;
-  const blockHandle = "bundle-product-page";
   const navigate = useNavigate();
+  const [selectedBundleType, setSelectedBundleType] = useState<BundleType>(BundleType.PRODUCT_PAGE);
+  const [expandedGuideStep, setExpandedGuideStep] = useState(0);
 
-  const [currentStep, setCurrentStep] = useState(0);
-  const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
-
-  const [selectedTemplate, setSelectedTemplate] = useState("product");
-  const [selectedTarget, setSelectedTarget] = useState("newAppsSection");
-  const [showAdvancedPlacement, setShowAdvancedPlacement] = useState(false);
-
-  const templateSelectRef = useRef<any>(null);
-  const targetSelectRef = useRef<any>(null);
-
-  // s-select doesn't apply the value attribute until after slot children mount
-  useEffect(() => {
-    if (templateSelectRef.current) (templateSelectRef.current as any).value = selectedTemplate;
-  }, [selectedTemplate]);
-
-  useEffect(() => {
-    if (targetSelectRef.current) (targetSelectRef.current as any).value = selectedTarget;
-  }, [selectedTarget]);
-
-  const totalSteps = STEP_TITLES.length;
-
-  const generateThemeEditorLink = (template: string, target: string): string => {
-    const appBlockId = `${apiKey}/${blockHandle}`;
-    const params = new URLSearchParams({ template, addAppBlockId: appBlockId, target });
-    return `https://${shop}/admin/themes/current/editor?${params.toString()}`;
+  const openCreateFlow = () => {
+    navigate(buildBundleCreatePath(selectedBundleType));
   };
-
-  const handleOpenThemeEditor = () => {
-    const url = generateThemeEditorLink(selectedTemplate, selectedTarget);
-    AppLogger.info("Opening theme editor from onboarding", {
-      shop,
-      template: selectedTemplate,
-      target: selectedTarget,
-    });
-    window.open(url, "_blank");
-    markStepComplete(1);
-  };
-
-  const markStepComplete = (stepIndex: number) => {
-    setCompletedSteps((prev) => new Set(prev).add(stepIndex));
-  };
-
-  const goToStep = (index: number) => setCurrentStep(index);
-
-  const handleStepAction = (stepIndex: number) => {
-    markStepComplete(stepIndex);
-    if (stepIndex < totalSteps - 1) {
-      setCurrentStep(stepIndex + 1);
-    }
-  };
-
-  if (!shop || !apiKey) {
-    return null;
-  }
 
   return (
-    <>
-      <ui-title-bar title="Setup Guide">
-        <button variant="breadcrumb" onClick={() => navigate("/app")}>
-          Home
-        </button>
-      </ui-title-bar>
-
-      <div style={{ maxWidth: 1320, margin: "0 auto", padding: "0 4px 88px" }}>
-        <s-stack direction="block" gap="large">
-
-          {/* Progress header */}
-          <div className={styles.onboardingHero}>
-            <div className={styles.onboardingHeroInner}>
-              <div style={{ fontSize: 40 }}>🐺</div>
-              <div className={styles.onboardingHeroText}>
-                <h2>Welcome to Wolfpack: Product Bundles</h2>
-                <p>
-                  Complete these{" "}
-                  <strong style={{ color: "#ffffff" }}>{totalSteps} steps</strong> to
-                  set up bundles, customize your design, and start driving revenue.&nbsp;
-                  {completedSteps.size > 0 && (
-                    <span style={{ color: "rgba(255,255,255,0.6)" }}>
-                      {completedSteps.size}/{totalSteps} done ✓
-                    </span>
-                  )}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Step 1: Create Bundle */}
-          <s-section>
-            <s-stack direction="block" gap="base">
-              <s-stack direction="inline" justifyContent="space-between" alignItems="center">
-                <s-stack direction="inline" alignItems="center" gap="small">
-                  <div
-                    className={`${styles.stepBadge} ${
-                      completedSteps.has(0) ? styles.stepBadgeComplete : ""
-                    }`}
-                  >
-                    {completedSteps.has(0) ? "✓" : "1"}
-                  </div>
-                  <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>{STEP_TITLES[0]}</h3>
-                  {currentStep === 0 && !completedSteps.has(0) && (
-                    <s-badge tone="info">Current</s-badge>
-                  )}
-                  {completedSteps.has(0) && (
-                    <s-badge tone="success">Done</s-badge>
-                  )}
+    <s-page heading="Get started with Wolfpack" inlineSize="large">
+      <s-stack direction="block" gap="large">
+        <s-section>
+          <s-stack direction="block" gap="base">
+            <s-heading>Build your first bundle</s-heading>
+            <s-paragraph>
+              Choose a bundle format, then follow the guided editor to configure and publish it in Shopify.
+            </s-paragraph>
+            <s-grid
+              gridTemplateColumns="@container (inline-size <= 680px) 1fr, 1fr 1fr"
+              gap="base"
+            >
+              <s-clickable
+                accessibilityLabel="Select Product-page bundle"
+                padding="base"
+                border="base"
+                borderRadius="base"
+                background={selectedBundleType === BundleType.PRODUCT_PAGE ? "subdued" : "base"}
+                onClick={() => setSelectedBundleType(BundleType.PRODUCT_PAGE)}
+              >
+                <s-stack direction="block" gap="small">
+                  <s-stack direction="inline" alignItems="center" gap="small">
+                    <s-icon type="product" size="base" />
+                    <s-heading>Product-page bundle</s-heading>
+                    {selectedBundleType === BundleType.PRODUCT_PAGE && <s-badge tone="success">Selected</s-badge>}
+                  </s-stack>
+                  <s-text color="subdued">A bundle widget that appears on the product pages you choose.</s-text>
                 </s-stack>
-              </s-stack>
+              </s-clickable>
+              <s-clickable
+                accessibilityLabel="Select Full-page bundle"
+                padding="base"
+                border="base"
+                borderRadius="base"
+                background={selectedBundleType === BundleType.FULL_PAGE ? "subdued" : "base"}
+                onClick={() => setSelectedBundleType(BundleType.FULL_PAGE)}
+              >
+                <s-stack direction="block" gap="small">
+                  <s-stack direction="inline" alignItems="center" gap="small">
+                    <s-icon type="note" size="base" />
+                    <s-heading>Full-page bundle</s-heading>
+                    {selectedBundleType === BundleType.FULL_PAGE && <s-badge tone="success">Selected</s-badge>}
+                  </s-stack>
+                  <s-text color="subdued">A dedicated bundle page with a guided, step-by-step shopping flow.</s-text>
+                </s-stack>
+              </s-clickable>
+            </s-grid>
+            <s-button-group>
+              <s-button variant="primary" onClick={openCreateFlow}>Create your first bundle</s-button>
+              <s-button onClick={() => navigate("/app/dashboard")}>Go to dashboard</s-button>
+            </s-button-group>
+          </s-stack>
+        </s-section>
 
-              <p style={{ margin: 0, fontSize: 14, color: "#6d7175" }}>
-                Choose a bundle type and set up your first bundle in the Dashboard. You can create as many bundles as your plan allows.
-              </p>
-
-              <div className={styles.bundleTypeGrid}>
-                <div className={`${styles.bundleTypeCard} ${styles.bundleTypeCardActive}`}>
-                  <div className={styles.bundleTypeCardTitle}>
-                    🛒 Product Page Bundle
-                    <span className={styles.recommendedBadge}>Recommended</span>
-                  </div>
-                  <div className={styles.bundleTypeCardDesc}>
-                    A slide-out drawer widget that appears on product pages.
-                    Customers build their bundle without leaving the page.
-                  </div>
-                </div>
-                <div className={styles.bundleTypeCard}>
-                  <div className={styles.bundleTypeCardTitle}>
-                    📄 Full-Page Bundle
-                  </div>
-                  <div className={styles.bundleTypeCardDesc}>
-                    A dedicated Shopify page with step-by-step tabs, a timeline header, and sidebar or footer layouts.
-                  </div>
-                </div>
-              </div>
-
-              <s-stack direction="block" gap="small-100">
-                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                  <span className={styles.featureBadge}>✦ Mix &amp; Match steps</span>
-                  <span className={styles.featureBadge}>✦ Quantity conditions</span>
-                  <span className={styles.featureBadge}>✦ Collection filters</span>
-                  <span className={`${styles.featureBadge} ${styles.featureBadgeGreen}`}>✦ Smart discount rules</span>
-                </div>
-              </s-stack>
-
-              <s-stack direction="inline" gap="small-100">
-                  <s-button
-                    variant="primary"
-                    onClick={() => {
-                      handleStepAction(0);
-                      navigateBackOrFallback(navigate, "/app/dashboard", { replaceFallback: true });
-                    }}
-                  >
-                  Create Your First Bundle
-                </s-button>
-                {currentStep === 0 && (
-                  <s-button onClick={() => goToStep(1)}>Skip for now</s-button>
-                )}
-              </s-stack>
+        <s-section>
+          <s-stack direction="block" gap="base">
+            <s-stack direction="inline" alignItems="center" justifyContent="space-between">
+              <s-heading>Setup guide</s-heading>
+              <s-text color="subdued">{expandedGuideStep + 1} of {GUIDE_STEPS.length}</s-text>
             </s-stack>
-          </s-section>
-
-          {/* Step 2: Install Widget */}
-          <s-section>
-            <s-stack direction="block" gap="base">
-              <s-stack direction="inline" justifyContent="space-between" alignItems="center">
-                <s-stack direction="inline" alignItems="center" gap="small">
-                  <div
-                    className={`${styles.stepBadge} ${
-                      completedSteps.has(1) ? styles.stepBadgeComplete : ""
-                    }`}
-                  >
-                    {completedSteps.has(1) ? "✓" : "2"}
-                  </div>
-                  <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>{STEP_TITLES[1]}</h3>
-                  {currentStep === 1 && !completedSteps.has(1) && (
-                    <s-badge tone="info">Current</s-badge>
-                  )}
-                  {completedSteps.has(1) && (
-                    <s-badge tone="success">Done</s-badge>
-                  )}
-                </s-stack>
-              </s-stack>
-
-              <p style={{ margin: 0, fontSize: 14, color: "#6d7175" }}>
-                Add the Wolfpack bundle widget to your Shopify theme using the theme editor deep link below.
-                Your theme must be Online Store 2.0 compatible (JSON templates).
-              </p>
-
-              <s-divider />
-
-              <s-banner tone="info">
-                <s-stack direction="block" gap="small-100">
-                  <p style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>Where should bundles appear?</p>
-                  <p style={{ margin: 0, fontSize: 13, color: "#6d7175" }}>
-                    Select the page template and we&apos;ll open the theme editor with the bundle block ready to add.
-                  </p>
-                </s-stack>
-              </s-banner>
-
-              <s-section>
-                <s-stack direction="block" gap="base">
-	                  <s-select
-	                    ref={templateSelectRef}
-	                    label="Page template"
-	                    onChange={(e: Event) =>
-	                      setSelectedTemplate((e.target as HTMLSelectElement).value)
-	                    }
-	                  >
-	                    <s-text slot="details" color="subdued">Product pages are recommended — bundles are linked to specific products.</s-text>
-	                    <s-option value="product">Product Pages (Recommended)</s-option>
-	                    <s-option value="index">Home Page</s-option>
-	                    <s-option value="collection">Collection Pages</s-option>
-	                  </s-select>
-
-                  <s-checkbox
-                    label="Show advanced placement options"
-                    checked={showAdvancedPlacement || undefined}
-                    onChange={(e: Event) =>
-                      setShowAdvancedPlacement((e.target as HTMLInputElement).checked)
-                    }
-                  />
-
-                  {showAdvancedPlacement && (
-	                    <s-select
-	                      ref={targetSelectRef}
-	                      label="Block placement target"
-	                      onChange={(e: Event) =>
-	                        setSelectedTarget((e.target as HTMLSelectElement).value)
-	                      }
-	                    >
-	                      <s-text slot="details" color="subdued">Where on the template the bundle widget block will be inserted.</s-text>
-	                      <s-option value="newAppsSection">New Apps Section (Recommended)</s-option>
-	                      <s-option value="mainSection">Main Section</s-option>
-	                      <s-option value="sectionGroup:header">Header Section Group</s-option>
-                      <option value="sectionGroup:footer">Footer Section Group</option>
-                    </s-select>
-                  )}
-                </s-stack>
-              </s-section>
-
-              <s-banner tone="info">
-                <s-stack direction="block" gap="small-100">
-                  <p style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>Installation steps:</p>
-                  <ol style={{ margin: "0 0 0 20px", padding: 0 }}>
-                    <li style={{ fontSize: 13, marginBottom: 4 }}>
-                      Click &quot;Open Theme Editor&quot; — the bundle block will be pre-selected
-                    </li>
-                    <li style={{ fontSize: 13, marginBottom: 4 }}>
-                      Position the block near the product form (below &quot;Add to Cart&quot;)
-                    </li>
-                    <li style={{ fontSize: 13, marginBottom: 4 }}>
-                      Preview your changes to confirm placement
-                    </li>
-                    <li style={{ fontSize: 13 }}>
-                      Click &quot;Save&quot; in the theme editor to publish
-                    </li>
-                  </ol>
-                </s-stack>
-              </s-banner>
-
-              <s-banner tone="warning">
-                <p style={{ margin: 0, fontSize: 13 }}>
-                  <strong>Note:</strong> The bundle widget only displays on products that are configured as bundle
-                  containers. After creating a bundle, assign it to a product in the bundle settings.
-                </p>
-              </s-banner>
-
-              <s-stack direction="inline" gap="small-100">
-                <s-button variant="primary" onClick={handleOpenThemeEditor}>
-                  Open Theme Editor
-                </s-button>
-                {currentStep === 1 && (
-                  <s-button onClick={() => goToStep(2)}>Skip for now</s-button>
-                )}
-              </s-stack>
+            <s-stack direction="block" gap="small">
+              {GUIDE_STEPS.map((step) => {
+                const isExpanded = expandedGuideStep === step.id;
+                return (
+                  <s-box key={step.id} padding="base" border="base" borderRadius="base">
+                    <s-stack direction="block" gap="small">
+                      <s-stack direction="inline" alignItems="center" justifyContent="space-between" gap="base">
+                        <s-stack direction="inline" alignItems="center" gap="small">
+                          <s-badge tone={isExpanded ? "info" : "neutral"}>{step.id + 1}</s-badge>
+                          <s-heading>{step.title}</s-heading>
+                        </s-stack>
+                        <s-button
+                          variant="tertiary"
+                          icon={isExpanded ? "chevron-up" : "chevron-down"}
+                          accessibilityLabel={`${isExpanded ? "Collapse" : "Expand"} ${step.title}`}
+                          onClick={() => setExpandedGuideStep(isExpanded ? -1 : step.id)}
+                        />
+                      </s-stack>
+                      <s-text color="subdued">{step.description}</s-text>
+                      {isExpanded && (
+                        <s-unordered-list>
+                          {step.details.map((detail) => <s-list-item key={detail}>{detail}</s-list-item>)}
+                        </s-unordered-list>
+                      )}
+                    </s-stack>
+                  </s-box>
+                );
+              })}
             </s-stack>
-          </s-section>
+          </s-stack>
+        </s-section>
 
-          {/* Step 3: Customize Design */}
-          <s-section>
-            <s-stack direction="block" gap="base">
-              <s-stack direction="inline" justifyContent="space-between" alignItems="center">
-                <s-stack direction="inline" alignItems="center" gap="small">
-                  <div
-                    className={`${styles.stepBadge} ${
-                      completedSteps.has(2) ? styles.stepBadgeComplete : ""
-                    }`}
-                  >
-                    {completedSteps.has(2) ? "✓" : "3"}
-                  </div>
-                  <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>{STEP_TITLES[2]}</h3>
-                  {currentStep === 2 && !completedSteps.has(2) && (
-                    <s-badge tone="info">Current</s-badge>
-                  )}
-                  {completedSteps.has(2) && (
-                    <s-badge tone="success">Done</s-badge>
-                  )}
-                </s-stack>
-              </s-stack>
-
-              <p style={{ margin: 0, fontSize: 14, color: "#6d7175" }}>
-                Settings &rarr; Design gives you control over how your bundles look — no coding required.
-                Changes apply instantly to your storefront.
-              </p>
-
-              <s-stack direction="block" gap="small">
-                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                  <span className={styles.featureBadge}>🎨 Colors &amp; typography</span>
-                  <span className={styles.featureBadge}>🖼️ Promo banner with images/GIFs</span>
-                  <span className={styles.featureBadge}>⚡ Loading animations</span>
-                </div>
-                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                  <span className={`${styles.featureBadge} ${styles.featureBadgeGreen}`}>📐 Footer &amp; header layouts</span>
-                  <span className={`${styles.featureBadge} ${styles.featureBadgeGreen}`}>💅 Custom CSS injection</span>
-                  <span className={`${styles.featureBadge} ${styles.featureBadgeGreen}`}>🔢 Discount messaging templates</span>
-                </div>
-              </s-stack>
-
-              <s-banner tone="info">
-                <p style={{ margin: 0, fontSize: 13 }}>
-                  Settings &rarr; Design contains the active design, language, and controls flows for bundle storefront customization.
-                </p>
-              </s-banner>
-
-              <s-stack direction="inline" gap="small-100">
-                <s-button
-                  variant="primary"
-                  onClick={() => {
-                    handleStepAction(2);
-                    navigate("/app/settings");
-                  }}
-                >
-                  Open Settings
-                </s-button>
-                {currentStep === 2 && (
-                  <s-button onClick={() => goToStep(3)}>Skip for now</s-button>
-                )}
-              </s-stack>
+        <s-section>
+          <s-stack direction="inline" alignItems="center" justifyContent="space-between" gap="base">
+            <s-stack direction="block" gap="small-100">
+              <s-heading>Need help?</s-heading>
+              <s-text color="subdued">Our support team can help you set up your first bundle.</s-text>
             </s-stack>
-          </s-section>
-
-          {/* Step 4: Analytics & Go Live */}
-          <s-section>
-            <s-stack direction="block" gap="base">
-              <s-stack direction="inline" justifyContent="space-between" alignItems="center">
-                <s-stack direction="inline" alignItems="center" gap="small">
-                  <div
-                    className={`${styles.stepBadge} ${
-                      completedSteps.has(3) ? styles.stepBadgeComplete : ""
-                    }`}
-                  >
-                    {completedSteps.has(3) ? "✓" : "4"}
-                  </div>
-                  <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>{STEP_TITLES[3]}</h3>
-                  {currentStep === 3 && !completedSteps.has(3) && (
-                    <s-badge tone="info">Current</s-badge>
-                  )}
-                  {completedSteps.has(3) && (
-                    <s-badge tone="success">Done</s-badge>
-                  )}
-                </s-stack>
-              </s-stack>
-
-              <p style={{ margin: 0, fontSize: 14, color: "#6d7175" }}>
-                Wolfpack includes a built-in UTM attribution system. Add UTM parameters to your ad links and see
-                exactly which campaigns, platforms, and bundles are driving revenue.
-              </p>
-
-              <s-stack direction="block" gap="small">
-                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                  <span className={`${styles.featureBadge} ${styles.featureBadgeOrange}`}>📊 Revenue by platform</span>
-                  <span className={`${styles.featureBadge} ${styles.featureBadgeOrange}`}>📈 Revenue by campaign</span>
-                  <span className={`${styles.featureBadge} ${styles.featureBadgeOrange}`}>🎯 Top bundles by ad revenue</span>
-                </div>
-              </s-stack>
-
-              <s-banner tone="info">
-                <s-stack direction="block" gap="small-100">
-                  <p style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>How UTM tracking works:</p>
-                  <ol style={{ margin: "0 0 0 20px", padding: 0 }}>
-                    <li style={{ fontSize: 13, marginBottom: 4 }}>
-                      Add UTM params to your ad links —{" "}
-                      <code style={{ background: "#f0f4ff", padding: "1px 6px", borderRadius: 4, fontSize: 12 }}>
-                        ?utm_source=facebook&amp;utm_campaign=bundles
-                      </code>
-                    </li>
-                    <li style={{ fontSize: 13, marginBottom: 4 }}>
-                      The web pixel captures UTM params on the first page view and stores them in the browser session
-                    </li>
-                    <li style={{ fontSize: 13 }}>
-                      At checkout, attribution data is saved and appears on the Analytics dashboard
-                    </li>
-                  </ol>
-                </s-stack>
-              </s-banner>
-
-              <p style={{ margin: 0, fontSize: 13, color: "#6d7175" }}>
-                The attribution pixel is already installed — no additional setup required.
-                Start tagging your ad links and the data will appear automatically.
-              </p>
-
-              <s-stack direction="inline" gap="small-100">
-                <s-button
-                  variant="primary"
-                  onClick={() => {
-                    handleStepAction(3);
-                    navigateBackOrFallback(navigate, "/app/dashboard", { replaceFallback: true });
-                  }}
-                >
-                  Go to Dashboard
-                </s-button>
-                <s-button
-                  onClick={() => {
-                    handleStepAction(3);
-                    navigate("/app/attribution");
-                  }}
-                >
-                  View Analytics
-                </s-button>
-              </s-stack>
-            </s-stack>
-          </s-section>
-
-          {/* Help section */}
-          <s-section>
-            <s-stack direction="block" gap="base">
-              <h2 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>Need help getting set up?</h2>
-              <p style={{ margin: 0, fontSize: 14, color: "#6d7175" }}>
-                Our support team is here to help. Reach out any time and we&apos;ll get you sorted.
-              </p>
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                <s-button
-                  onClick={() => openSupportChat()}
-                >
-                  Chat with Support
-                </s-button>
-                <s-button href="https://docs.wolfpack-bundles.com" target="_blank">
-                  View Documentation
-                </s-button>
-                <s-button onClick={() =>
-                  navigateBackOrFallback(navigate, "/app/dashboard", { replaceFallback: true })
-                }>
-                  Skip to Dashboard
-                </s-button>
-              </div>
-            </s-stack>
-          </s-section>
-
-        </s-stack>
-      </div>
-    </>
+            <s-button onClick={openSupportChat}>Chat with support</s-button>
+          </s-stack>
+        </s-section>
+      </s-stack>
+    </s-page>
   );
 }

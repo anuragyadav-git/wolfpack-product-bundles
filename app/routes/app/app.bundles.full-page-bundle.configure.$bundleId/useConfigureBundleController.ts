@@ -10,8 +10,7 @@ import { handleAdminSaveLockedEvent } from "../../../lib/admin-save-lock";
 import { getParentProductStatusUi } from "../../../lib/parent-product-status-ui";
 import { openThemeEditorInNewTab } from "../../../lib/theme-editor-navigation.client";
 import {
-  checkAppEmbedStatusFromCurrentRoute,
-  resolveAppEmbedStatusThemeEditorUrl,
+  getThemeExtensionStatusFromAppBridge,
 } from "../../../lib/app-embed-status-check.client";
 import { useBundleConfigurationState } from "../../../hooks/useBundleConfigurationState";
 import { useEnsureProductTemplateMutation } from "../../../store/api/adminApi";
@@ -157,13 +156,11 @@ export function useConfigureBundleController(): ConfigureBundleFlowDraft {
     setAppEmbedBannerFeedbackTrigger((value) => value + 1);
   }, []);
   const checkAppEmbedStatusBeforePreview = useCallback(async () => {
-    const status = await checkAppEmbedStatusFromCurrentRoute();
-    setCurrentAppEmbedEnabled(status.appEmbedEnabled);
-    setCurrentThemeEditorUrl((currentUrl: string | null) =>
-      resolveAppEmbedStatusThemeEditorUrl(currentUrl, status.themeEditorUrl),
-    );
-    return status.appEmbedEnabled;
-  }, []);
+    const status = await getThemeExtensionStatusFromAppBridge(shopify);
+    const appEmbedEnabled = status?.appEmbedEnabled ?? false;
+    setCurrentAppEmbedEnabled(appEmbedEnabled);
+    return appEmbedEnabled;
+  }, [shopify]);
 
   return {
     activeSection,
