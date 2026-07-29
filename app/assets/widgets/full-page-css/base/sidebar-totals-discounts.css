@@ -581,8 +581,8 @@
     z-index: 1001;
     transform: translateY(0) !important;
     transition:
-      height 360ms ease,
-      grid-template-rows 360ms ease;
+      height 300ms ease,
+      grid-template-rows 300ms ease;
     will-change: height, grid-template-rows;
   }
 

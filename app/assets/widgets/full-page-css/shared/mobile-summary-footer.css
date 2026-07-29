@@ -2,7 +2,7 @@
   .fpb-mobile-summary-tray
     .fpb-mobile-summary-count-badge {
     appearance: none;
-    min-width: max-content;
+    min-width: 48px;
     min-height: 0;
     height: auto;
     padding: 0 10px;
