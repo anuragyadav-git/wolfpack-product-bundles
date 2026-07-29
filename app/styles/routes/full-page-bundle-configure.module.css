@@ -291,28 +291,28 @@
   align-items: center;
   gap: 6px;
   min-height: 28px;
-  padding: 4px 12px;
-  border: 1px solid #303030;
-  border-radius: 999px;
-  background: #303030;
-  color: #ffffff;
+  padding: 4px 8px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: #303030;
   font: inherit;
   font-size: 12px;
   font-weight: 600;
   line-height: 1;
   cursor: pointer;
-  transition: background-color 0.15s ease, box-shadow 0.15s ease,
-    transform 0.15s ease;
+  transition: background-color 0.15s ease;
 }
 
-.videoHelpButton:hover,
-.videoHelpButton:focus-visible {
-  background: #1a1a1a;
-  border-color: #1a1a1a;
-  color: #ffffff;
+.videoHelpButton:hover {
+  background: #f1f1f1;
   text-decoration: none;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
-  outline: none;
+}
+
+.videoHelpButton:focus-visible {
+  background: #f1f1f1;
+  outline: 2px solid #005bd3;
+  outline-offset: 1px;
 }
 
 .videoHelpIcon {
