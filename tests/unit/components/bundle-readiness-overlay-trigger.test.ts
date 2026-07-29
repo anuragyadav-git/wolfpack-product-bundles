@@ -76,4 +76,19 @@ describe("BundleReadinessOverlay trigger", () => {
     expect(markup).not.toContain('data-tour-target="fpb-readiness-score"');
     expect(markup).toContain("Products selected");
   });
+
+  it("renders the open checklist as an accessible modal dialog", () => {
+    const Overlay = BundleReadinessOverlay as React.ComponentType<Record<string, unknown>>;
+    const markup = renderToStaticMarkup(
+      React.createElement(Overlay, {
+        items: [{ key: "products", label: "Products selected", points: 60, done: false }],
+        open: true,
+      }),
+    );
+
+    expect(markup).toContain("<dialog");
+    expect(markup).toContain('aria-modal="true"');
+    expect(markup).toContain('aria-labelledby="bundle-readiness-title"');
+    expect(markup).toContain("Products selected");
+  });
 });

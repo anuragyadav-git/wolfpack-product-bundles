@@ -5,7 +5,7 @@ title: Wolfpack Product Bundles App Navigation and UI Map
 type: navigation-map
 status: authoritative
 summary: Routes, screens, actions, modals, and storefront-preview flows for the embedded app.
-last_audited: 2026-07-29
+last_audited: 2026-07-30
 owners:
   - engineering
 domains:
@@ -29,7 +29,7 @@ keywords:
 > Any time a new page, modal, tab, sidebar section, or user flow is added or removed,
 > this document **must** be updated. See CLAUDE.md for the enforcement rule.
 
-**Last Updated:** 2026-07-23
+**Last Updated:** 2026-07-30
 **Environment mapped:** SIT (`wolfpack-product-bundles-sit`)
 **Test store:** `wolfpack-store-test-1.myshopify.com`
 
@@ -39,6 +39,10 @@ keywords:
 
 The app runs inside the Shopify Admin embedded iframe. The outer Shopify Admin shell
 provides a persistent left-nav with the app's registered nav items.
+
+The authenticated `/app` entry renders a stable route-shaped loading shell while
+client-side auth parameters resolve. New shops continue to onboarding and returning
+shops continue to the dashboard without exposing a blank iframe.
 
 ### Shopify Admin Left Nav (app section)
 
@@ -70,8 +74,6 @@ Dashboard
 │
 ├── [Button] "Create Bundle"  → opens Create Bundle Modal
 ├── Language selector → persists one shop-wide embedded Admin UI language for all staff accounts on change
-├── Existing founder support card → direct support chat
-├── Existing support issues card → purple hero, feature/storefront/uninstall help, and direct support chat
 ├── Metrics: active bundle count
 ├── Storefront setup status grid → all five theme blocks/embeds with Theme Editor action when needed
 ├── Section: "Your Bundles"
@@ -81,6 +83,8 @@ Dashboard
 │           ├── [Button] "Clone"
 │           ├── [Button] "Preview"
 │           └── [Button] "Delete" → opens Delete Confirmation Modal
+├── Existing founder support card → direct support chat
+├── Existing support issues card → feature/storefront/uninstall help and direct support chat
 │
 ├── Section: "Bundle Setup Steps" (visible when no bundles)
 │   └── 6-step numbered guide
@@ -96,6 +100,7 @@ Dashboard preview behavior:
 - Every full-page bundle preview requests a new 15-minute signed `wpb_preview` URL on each click; active and unlisted bundles remain publicly accessible at the canonical URL without the token.
 - First successful preview records the Admin `bundle_previewed` event with bundle id, type, status, and link.
 - The bundle table uses Polaris automatic table/list presentation: desktop keeps Name, Status, Type, and Actions columns, while phone containers expose the same record fields and row actions as a stacked list.
+- Core bundle work stays above support and education content: create actions, unresolved storefront setup, filters, and bundle actions render before the support cards.
 
 #### "Create Bundle" Button
 Navigates to: `/app/bundles/create` (bundle type selection entry)
@@ -233,6 +238,11 @@ Analytics Page (revamped — issue wpb-analytics-revamp-1)
         └── Top-5 UTM campaigns w/ bar bg + revenue/orders
 ```
 
+Responsive analytics behavior:
+- The route owns a named `analytics-page` query container so toolbar, KPI, chart, and activity layouts respond to the embedded app width.
+- Date, comparison, and export actions stack without page-level clipping; matrices preserve every value inside their labelled internal scroller.
+- The lightweight route shell and its stylesheet render before the lazy dashboard module; the dashboard JavaScript and CSS resolve together behind the route skeleton.
+
 **Visual tokens:** `app/components/analytics/shared/tokens.css`
 - engagement teal `#0E7C7B`, revenue gold `#B08800`, warning amber `#A36F00`
 - 44 px hero numerics · 11 px uppercase labels · 12 px radius · warm `#F5F2EE` bg
@@ -338,7 +348,9 @@ Responsive configure behavior:
 - FPB and PPB keep the full Bundle Product and Bundle Setup sidebar on wide screens.
 - Tablet and phone containers show Bundle Product first and replace the long setup sidebar with a compact native disclosure labelled with the active parent or nested section.
 - Selecting a section closes the mobile disclosure without changing save, dirty-state, or route adapter behavior.
-- Readiness feedback participates in page flow on phones and remains floating on desktop so it cannot cover mobile editor actions.
+- The compact readiness trigger remains floating without covering editor actions. Opening it uses a labelled native modal dialog: a bounded floating checklist on desktop and a full-width, safe-area-aware bottom sheet on phones.
+- The readiness dialog supports Escape, safe backdrop dismissal, focus trapping, internal scrolling, and focus restoration without changing the existing readiness calculation or route adapter props.
+- App-owned discard and multi-language workflows share the same native dialog and phone bottom-sheet contract; Polaris-owned modal workflows retain their existing semantics.
 
 ---
 
