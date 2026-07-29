@@ -117,4 +117,40 @@ describe("FPB add-on active tier products", () => {
 
     expect(ctx.stepProductData[0]).toEqual([]);
   });
+
+  it("refreshes active-tier variant presentation when add-on products are cached", async () => {
+    const eligibleTier = {
+      eligibilityCondition: { type: "QUANTITY", value: 2 },
+      discount: { type: "PERCENTAGE", value: 100 },
+      displayVariantsAsIndividualProducts_addons: true,
+      selectedAddonProducts: [
+        {
+          graphqlId: "gid://shopify/Product/2",
+          title: "Tier 2 add-on",
+          variants: [
+            { variantGraphqlId: "gid://shopify/ProductVariant/21", price: "20.00" },
+            { variantGraphqlId: "gid://shopify/ProductVariant/22", price: "20.00" },
+          ],
+        },
+      ],
+    };
+    const step = {
+      isFreeGift: true,
+      addonTiers: [eligibleTier],
+      displayVariantsAsIndividual: false,
+    };
+    const ctx = {
+      selectedBundle: { steps: [step] },
+      stepProductData: [[{ title: "Cached grouped add-on" }]],
+      getAddonTierEvaluation: () => ({
+        tier: eligibleTier,
+        tierIndex: 0,
+        isEligible: true,
+      }),
+    };
+
+    await fullPageProductProcessingMethods.loadStepProducts.call(ctx, 0);
+
+    expect(step.displayVariantsAsIndividual).toBe(true);
+  });
 });

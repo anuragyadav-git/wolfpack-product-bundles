@@ -1,13 +1,13 @@
 /*!
  * Wolfpack Bundle Widget — Full Page
- * Version : 5.0.221
+ * Version : 5.0.222
  * Built   : 2026-07-29
  *
  * Cache note: Shopify CDN cache is busted automatically by shopify app deploy.
  * After deploying, allow 2-10 minutes for propagation before testing.
  * Verify live version: console.log(window.__BUNDLE_WIDGET_VERSION__)
  */
-window.__BUNDLE_WIDGET_VERSION__ = '5.0.221';
+window.__BUNDLE_WIDGET_VERSION__ = '5.0.222';
 (function() {
   'use strict';
 
@@ -12253,6 +12253,21 @@ mergeCategoryProductVariantAvailability(products, step) {
 
 async loadStepProducts(stepIndex) {
   const step = this.selectedBundle.steps[stepIndex];
+  let activeAddonTier = null;
+
+  if (step?.isFreeGift && Array.isArray(step.addonTiers)) {
+    const evaluation = typeof this.getAddonTierEvaluation === 'function'
+      ? this.getAddonTierEvaluation(step)
+      : { tier: null, isEligible: false };
+    activeAddonTier = evaluation?.isEligible === true ? evaluation.tier : null;
+    step.displayVariantsAsIndividual =
+      activeAddonTier?.displayVariantsAsIndividualProducts_addons === true;
+    const activeDiscount = normalizeAddonPercentageDiscount(
+      activeAddonTier?.discount,
+      activeAddonTier
+    );
+    step.addonDisplayFree = activeDiscount?.value >= 100;
+  }
 
   if (this.stepProductData[stepIndex].length > 0) {
     return;
@@ -12261,12 +12276,8 @@ async loadStepProducts(stepIndex) {
   let allProducts = [];
 
   if (step?.isFreeGift && Array.isArray(step.addonTiers)) {
-    const evaluation = typeof this.getAddonTierEvaluation === 'function'
-      ? this.getAddonTierEvaluation(step)
-      : { tier: null, isEligible: false };
-    const activeTier = evaluation?.isEligible === true ? evaluation.tier : null;
-    const activeProducts = Array.isArray(activeTier?.selectedAddonProducts)
-      ? activeTier.selectedAddonProducts
+    const activeProducts = Array.isArray(activeAddonTier?.selectedAddonProducts)
+      ? activeAddonTier.selectedAddonProducts
       : [];
     allProducts = activeProducts.map(product =>
       typeof this.normalizePersonalizationAddonProduct === 'function'
@@ -12276,9 +12287,6 @@ async loadStepProducts(stepIndex) {
     step.StepProduct = allProducts;
     step.products = allProducts;
     step.maxQuantity = allProducts.length;
-    step.displayVariantsAsIndividual = activeTier?.displayVariantsAsIndividualProducts_addons === true;
-    const activeDiscount = normalizeAddonPercentageDiscount(activeTier?.discount, activeTier);
-    step.addonDisplayFree = activeDiscount?.value >= 100;
   }
 
   const hasEnrichedStepProducts = !step?.isFreeGift && Array.isArray(step.StepProduct) && step.StepProduct.length > 0
