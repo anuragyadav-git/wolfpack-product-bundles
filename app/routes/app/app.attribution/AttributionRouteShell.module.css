@@ -124,6 +124,14 @@
     sans-serif;
 }
 
+.analyticsQueryContainer {
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr);
+  container-name: analytics-page;
+}
+
 .pixelStatusBoundary {
   margin-block-end: 1rem;
 }
@@ -224,7 +232,7 @@
   line-height: 1.5;
 }
 
-@media (max-width: 720px) {
+@container analytics-page (max-width: 720px) {
   .dashboardChartGrid,
   .dashboardActivityGrid {
     grid-template-columns: 1fr;
@@ -244,7 +252,7 @@
   }
 }
 
-@media (max-width: 520px) {
+@container analytics-page (max-width: 520px) {
   .dashboardPending,
   .dashboardShell {
     padding-inline: 16px;
