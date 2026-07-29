@@ -1,3 +1,4 @@
+import { Modal, TitleBar } from "@shopify/app-bridge-react";
 import { openThemeEditorInNewTab } from "../../../lib/theme-editor-navigation.client";
 import { TemplateReadyScreen } from "../../../components/bundle-configure/TemplateReadyScreen";
 import { usePpbConfigureContext } from "./PpbConfigureContext";
@@ -22,12 +23,12 @@ export function PpbSelectTemplateDialog() {
   } = usePpbConfigureContext();
 
   return (
-    <s-modal
+    <Modal
       id="ppb-template-customization-modal"
       ref={selectTemplateDialogRef}
-      heading="Customization"
-      size="large"
+      variant="max"
     >
+      <TitleBar title="Customization" />
       <div className={productPageBundleStyles.templateDialogContent}>
         {templateModalStep === "templates" ? (
           <>
@@ -373,6 +374,6 @@ export function PpbSelectTemplateDialog() {
               />
         )}
       </div>
-    </s-modal>
+    </Modal>
   );
 }

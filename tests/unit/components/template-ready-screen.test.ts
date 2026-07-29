@@ -27,6 +27,6 @@ describe("TemplateReadyScreen", () => {
     );
 
     expect(view).toContain("disabled");
-    expect(view).toContain("loading");
+    expect(view).toContain('aria-busy="true"');
   });
 });

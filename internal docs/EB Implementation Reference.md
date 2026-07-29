@@ -980,9 +980,14 @@ Reference URLs:
 
 Live FPB Select Template evidence captured on 2026-07-30 confirms:
 
-- Select Template opens in Shopify's native large modal shell with the heading
-  `Customization`; the overlay occupies the Admin surface rather than only the
-  embedded app iframe.
+- Select Template opens in Shopify's App Bridge host-level `max` modal shell
+  with the heading `Customization`; at a 1280px by 800px viewport, the dialog
+  starts at x=8px and y=64px and measures 1264px by 736px. An iframe-local
+  Polaris `large` modal does not match this Admin-surface shell.
+- App Bridge projects the modal body into a host iframe where nested Polaris
+  web components do not hydrate reliably. The completion screen must use
+  semantic projected markup for its stack, icon, and action so they do not
+  collapse into unstyled inline text.
 - The completion state begins with a 72px white internal header containing
   `View your bundle` and `View your bundle with your customizations`.
 - Its neutral body centers a 480px by 224px success card with 40px padding,
@@ -993,9 +998,9 @@ Live FPB Select Template evidence captured on 2026-07-30 confirms:
 - No `How to setup`, `Learn More`, or equivalent help link is present in the
   Select Template modal or its completion state.
 
-The same native modal and shared completion-state contract should be used by
-Wolfpack FPB and PPB; bundle-specific template selection and preview handlers
-remain separate.
+The same App Bridge `max` modal and shared completion-state contract should be
+used by Wolfpack FPB and PPB; bundle-specific template selection and preview
+handlers remain separate.
 
 ### FPB Templates (Two-Field System)
 
