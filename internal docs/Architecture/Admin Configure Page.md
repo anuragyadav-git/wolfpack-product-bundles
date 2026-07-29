@@ -61,3 +61,17 @@ area. Escape, safe backdrop dismissal, focus trapping, internal scrolling, and
 focus restoration are shared behavior. `LocalAppModal` applies the same native
 dialog contract to app-owned discard and multi-language workflows; documented
 Polaris modal workflows continue to use `s-modal`.
+
+## First-Create Tour and State Boundary
+
+Both type-specific configure routes mount `ReduxProvider` locally; the shared
+`/app` layout does not. Hidden save inputs and route-owned configure controllers
+remain mounted for the full route lifetime, so section changes and deferred
+overlays must not discard unsaved values.
+
+The create route signals the guided edit experience only with
+`mode=create&first_load=true`. The tour changes the active configure section
+before looking up its target, retries while a lazy target arrives, and falls
+back to a centered dialog when the target is unavailable. Completion,
+dismissal, and Escape persist the existing shop-keyed local-storage value,
+restore the previously focused control, and release the body scroll lock.

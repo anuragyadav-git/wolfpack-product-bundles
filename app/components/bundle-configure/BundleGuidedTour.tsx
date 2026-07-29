@@ -24,6 +24,14 @@ const SPOTLIGHT_PAD = 8;
 const MAX_TARGET_LOOKUP_FRAMES = 30;
 const STABLE_FRAME_COUNT = 4;
 
+export function getBundleGuidedTourStorageKey(shop: string) {
+  return `wpb_first_bundle_tour_seen_${shop}`;
+}
+
+export function isBundleGuidedTourDismissKey(key: string) {
+  return key === "Escape";
+}
+
 function getTooltipWidth() {
   return Math.min(TOOLTIP_WIDTH, Math.max(240, window.innerWidth - 24));
 }
@@ -41,13 +49,15 @@ export function BundleGuidedTour({
   const [spotlightRect, setSpotlightRect] = useState<SpotlightRect | null>(null);
   const [tooltipStyle, setTooltipStyle] = useState<CSSProperties>({});
   const rafRef = useRef<number | null>(null);
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  const previouslyFocusedRef = useRef<HTMLElement | null>(null);
   const highlightedTargetRef = useRef<{
     el: HTMLElement;
     position: string;
     zIndex: string;
   } | null>(null);
 
-  const storageKey = `wpb_first_bundle_tour_seen_${shop}`;
+  const storageKey = getBundleGuidedTourStorageKey(shop);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -60,8 +70,14 @@ export function BundleGuidedTour({
   useEffect(() => {
     if (!visible) return;
     const prev = document.body.style.overflow;
+    previouslyFocusedRef.current =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
     document.body.style.overflow = "hidden";
+    const focusFrame = requestAnimationFrame(() => dialogRef.current?.focus());
     return () => {
+      cancelAnimationFrame(focusFrame);
       document.body.style.overflow = prev;
     };
   }, [visible]);
@@ -224,21 +240,37 @@ export function BundleGuidedTour({
     };
   }, [cancelPendingFrame, cleanupHighlightedTarget]);
 
-  const handleDismiss = useCallback(() => {
+  const closeTour = useCallback((callback?: () => void) => {
     localStorage.setItem(storageKey, "1");
     setVisible(false);
-    onDismiss?.();
-  }, [storageKey, onDismiss]);
+    const previouslyFocused = previouslyFocusedRef.current;
+    requestAnimationFrame(() => previouslyFocused?.focus());
+    callback?.();
+  }, [storageKey]);
+
+  const handleDismiss = useCallback(() => {
+    closeTour(onDismiss);
+  }, [closeTour, onDismiss]);
+
+  useEffect(() => {
+    if (!visible) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (!isBundleGuidedTourDismissKey(event.key)) return;
+      event.preventDefault();
+      event.stopPropagation();
+      handleDismiss();
+    };
+    document.addEventListener("keydown", handleKeyDown, true);
+    return () => document.removeEventListener("keydown", handleKeyDown, true);
+  }, [handleDismiss, visible]);
 
   const handleNext = useCallback(() => {
     if (currentStep === steps.length - 1) {
-      localStorage.setItem(storageKey, "1");
-      setVisible(false);
-      onComplete?.();
+      closeTour(onComplete);
       return;
     }
     setCurrentStep((i) => i + 1);
-  }, [currentStep, steps.length, storageKey, onComplete]);
+  }, [closeTour, currentStep, steps.length, onComplete]);
 
   if (!visible) return null;
 
@@ -283,7 +315,15 @@ export function BundleGuidedTour({
         )}
       </svg>
 
-      <div className={styles.overlay} style={tooltipStyle}>
+      <div
+        ref={dialogRef}
+        className={styles.overlay}
+        style={tooltipStyle}
+        role="dialog"
+        aria-modal="true"
+        aria-label={`Guided tour step ${currentStep + 1} of ${steps.length}`}
+        tabIndex={-1}
+      >
         <div className={styles.tourHeader}>
           <button type="button" className={styles.dismissTourLink} onClick={handleDismiss}>
             Dismiss guided tour

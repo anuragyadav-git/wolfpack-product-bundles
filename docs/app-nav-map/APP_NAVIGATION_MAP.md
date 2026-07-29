@@ -44,6 +44,15 @@ The authenticated `/app` entry renders a stable route-shaped loading shell while
 client-side auth parameters resolve. New shops continue to onboarding and returning
 shops continue to the dashboard without exposing a blank iframe.
 
+Destination flow:
+```
+/app with Shopify auth parameters
+├── firstCreateTourEligible = true  → /app/onboarding
+└── returning shop                 → /app/dashboard
+
+/app without auth parameters       → intentional app landing
+```
+
 ### Shopify Admin Left Nav (app section)
 
 ```
@@ -127,6 +136,11 @@ Product Page: `/app/bundles/product-page-bundle/configure/:bundleId?mode=create`
 Full Page: `/app/bundles/full-page-bundle/configure/:bundleId?mode=create`
 First-install first-bundle tour adds: `&first_load=true`
 ```
+
+The first-install eligibility claim is consumed only after the bundle and its
+required Shopify parent product are created. The subsequent widget-status check
+is noncritical; a timeout or error leaves creation successful and the configure
+redirect intact.
 
 Configure page storefront sync status:
 - Full-page and product-page configure pages do not show a separate Storefront sync status or retry banner.
@@ -486,9 +500,15 @@ Billing Page
 
 ### Flow B: Create & Configure Bundle
 ```
+/app/onboarding
+  ├── select Product-page or Full-page bundle
+  ├── [Create your first bundle] → /app/bundles/create?bundleType={validatedType}
+  └── [Go to dashboard] → /app/dashboard
+
 /app/dashboard
   └── [Create Bundle] → /app/bundles/create → select type + enter name → POST
       └── redirect → /app/bundles/{type}/configure/{bundleId}?mode=create
+          └── first eligible create adds &first_load=true and opens the guided tour
           ├── Fill Bundle Settings tab
           ├── Add Steps tab
           ├── Set Pricing tab
