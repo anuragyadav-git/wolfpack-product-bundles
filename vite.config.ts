@@ -111,6 +111,15 @@ export default defineConfig({
           if (id.includes('node_modules/recharts/') || id.includes('node_modules/d3-') || id.includes('node_modules/victory-vendor/')) {
             return 'vendor-charts';
           }
+          if (
+            id.includes('node_modules/@reduxjs/toolkit/') ||
+            id.includes('node_modules/react-redux/') ||
+            id.includes('node_modules/redux/') ||
+            id.includes('node_modules/reselect/') ||
+            id.includes('node_modules/immer/')
+          ) {
+            return 'vendor-state';
+          }
           if (id.includes('node_modules/@shopify/')) {
             return 'vendor-shopify';
           }

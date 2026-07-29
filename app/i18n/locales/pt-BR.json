@@ -189,6 +189,10 @@
       "maybeLater": "Talvez mais tarde", "setUpVisibility": "Configurar visibilidade", "reinstallApp": "Reinstalar aplicativo",
       "upgradeNow": "Fazer upgrade agora", "viewPlans": "Ver planos", "discardChanges": "Descartar alterações", "continueEditing": "Continuar editando"
     },
+    "loading": {
+      "appLabel": "Carregando o Wolfpack Product Bundles",
+      "workspace": "Carregando seu espaço de trabalho"
+    },
     "appEmbed": {
       "body": "Ative a extensão de aplicativo do tema para Wolfpack Bundles para posicionar e visualizar o pacote.",
       "guideTitle": "Ativar incorporação do app",

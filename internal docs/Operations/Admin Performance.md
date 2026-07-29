@@ -195,6 +195,34 @@ audit found no `@heymantle/react` hook usage in Admin routes. Billing still uses
 the Shopify billing service directly. Keep any future third-party billing or
 analytics provider route-scoped until a shared runtime consumer exists.
 
+## Admin Mobile and First-Load Contract
+
+The authenticated `/app` index must render a route-shaped skeleton while the
+client resolves auth parameters and the onboarding/dashboard destination. It
+must not return a blank iframe during that interval. The skeleton reserves
+stable hero and card geometry, exposes an accessible busy state, and disables
+its shimmer under `prefers-reduced-motion`.
+
+Redux Toolkit, React Redux, Redux, Reselect, and Immer are isolated in
+`vendor-state`. Chart-only dependencies remain in `vendor-charts`. Production
+manifest verification must show that the app layout and every non-analytics
+route avoid `vendor-charts`; only the lazy attribution dashboard and its chart
+helpers may reference that chunk.
+
+Merchant workflow roots should use descriptive `s-query-container` names when
+their responsive behavior depends on embedded app width. Current shared roots
+include `dashboard-bundles`, `settings-landing`, `design-settings`,
+`pricing-page`, `billing-page`, `events-page`, `onboarding-page`,
+`integrations-page`, `analytics-page`, `file-picker`, and
+`bundle-configure`. Page shells remain shrinkable, use responsive inline
+padding, and keep horizontal scrolling inside labelled data regions rather than
+on the document.
+
+Analytics keeps shell styles with `AttributionRouteShell` and dashboard styles
+with the lazy `AttributionDashboard` chunk. This ensures dashboard markup and
+CSS resolve atomically behind the existing skeleton rather than painting
+unstyled analytics content.
+
 ## 2026-07-06 Attribution LCP Follow-up
 
 A fresh Chrome trace on `/app/attribution?wpbWebVitalsDebug=1&days=7` showed

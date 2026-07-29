@@ -1,6 +1,7 @@
 import { json } from "@remix-run/node";
 import { useNavigate, useRouteLoaderData } from "@remix-run/react";
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import styles from "../../styles/routes/app-index.module.css";
 import { navigateBackOrFallback } from "../../lib/navigation";
 import { openSupportChat } from "../../lib/support-chat.client";
@@ -33,6 +34,33 @@ export function getInitialAppDestination(
 ): "/app/onboarding" | "/app/dashboard" | null {
   if (!isAuthFlow) return null;
   return firstCreateTourEligible ? "/app/onboarding" : "/app/dashboard";
+}
+
+export function AppRouteSkeleton() {
+  const { t } = useTranslation();
+
+  return (
+    <main
+      className={styles.routeSkeleton}
+      aria-label={t("common.loading.appLabel")}
+      aria-busy="true"
+    >
+      <section className={styles.routeSkeletonHero}>
+        <div className={styles.routeSkeletonBrand} />
+        <div className={styles.routeSkeletonTitle} />
+        <div className={styles.routeSkeletonCopy} />
+        <div className={styles.routeSkeletonActions} />
+      </section>
+      <section className={styles.routeSkeletonCards}>
+        {Array.from({ length: 3 }, (_, index) => (
+          <div key={index} className={styles.routeSkeletonCard} />
+        ))}
+      </section>
+      <span className={styles.visuallyHidden}>
+        {t("common.loading.workspace")}
+      </span>
+    </main>
+  );
 }
 
 const FEATURES = [
@@ -99,7 +127,7 @@ export default function AppIndex() {
     }
   }, [appData?.firstCreateTourEligible, navigate]);
 
-  if (!showLanding) return null;
+  if (!showLanding) return <AppRouteSkeleton />;
 
   return (
     <div className={styles.page}>

@@ -189,6 +189,10 @@
       "maybeLater": "Vielleicht später", "setUpVisibility": "Sichtbarkeit einrichten", "reinstallApp": "App neu installieren",
       "upgradeNow": "Jetzt upgraden", "viewPlans": "Tarife anzeigen", "discardChanges": "Änderungen verwerfen", "continueEditing": "Weiter bearbeiten"
     },
+    "loading": {
+      "appLabel": "Wolfpack Product Bundles wird geladen",
+      "workspace": "Arbeitsbereich wird geladen"
+    },
     "appEmbed": {
       "body": "Aktiviere die Theme-App-Erweiterung für Wolfpack Bundles, um das Bundle zu platzieren und in der Vorschau anzuzeigen.",
       "guideTitle": "App-Einbettung aktivieren",

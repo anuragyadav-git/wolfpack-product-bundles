@@ -252,6 +252,10 @@
       "upgradeNow": "Upgrade Now", "viewPlans": "View Plans", "discardChanges": "Discard Changes",
       "continueEditing": "Continue Editing"
     },
+    "loading": {
+      "appLabel": "Loading Wolfpack Product Bundles",
+      "workspace": "Loading your workspace"
+    },
     "appEmbed": {
       "body": "Enable the Theme app extension for Wolfpack Bundles to place and preview the bundle.",
       "guideTitle": "Enable app embed",
