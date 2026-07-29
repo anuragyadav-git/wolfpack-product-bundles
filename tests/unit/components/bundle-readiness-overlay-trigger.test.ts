@@ -62,4 +62,18 @@ describe("BundleReadinessOverlay trigger", () => {
     clearTimeout(timeout);
     jest.useRealTimers();
   });
+
+  it("does not render a duplicate floating trigger when the header owns the control", () => {
+    const Overlay = BundleReadinessOverlay as React.ComponentType<Record<string, unknown>>;
+    const markup = renderToStaticMarkup(
+      React.createElement(Overlay, {
+        items: [{ key: "products", label: "Products selected", points: 60, done: true }],
+        open: true,
+        hideCollapsedTrigger: true,
+      }),
+    );
+
+    expect(markup).not.toContain('data-tour-target="fpb-readiness-score"');
+    expect(markup).toContain("60");
+  });
 });

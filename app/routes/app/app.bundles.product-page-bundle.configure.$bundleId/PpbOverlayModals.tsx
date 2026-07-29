@@ -32,6 +32,7 @@ export function PpbOverlayModals() {
       <BundleReadinessOverlay
         items={readinessItems}
         open={readinessOpen}
+        hideCollapsedTrigger
         onOpenChange={setReadinessOpen}
         onItemClick={handleReadinessItemClick}
       />

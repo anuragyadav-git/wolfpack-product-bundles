@@ -39,6 +39,7 @@ export function FpbGlobalOverlays({
       <BundleReadinessOverlay
         items={readinessItems}
         open={readinessOpen}
+        hideCollapsedTrigger
         onOpenChange={setReadinessOpen}
         onItemClick={handleReadinessItemClick}
       />

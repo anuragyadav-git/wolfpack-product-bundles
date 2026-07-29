@@ -35,7 +35,7 @@ function scoreColor(score: number) {
 
 export function BundleReadinessOverlay({ items, open, onOpenChange, hideCollapsedTrigger = false, onItemClick }: Props) {
   const { t } = useTranslation();
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(open ?? false);
   const [showTriggerDetails, setShowTriggerDetails] = useState(true);
 
   useEffect(() => {
@@ -181,7 +181,7 @@ export function BundleReadinessOverlay({ items, open, onOpenChange, hideCollapse
           </div>
         </div>
 
-        {(!hideCollapsedTrigger || expanded) && (
+        {!hideCollapsedTrigger && (
           <button
             type="button"
             data-tour-target="fpb-readiness-score"
