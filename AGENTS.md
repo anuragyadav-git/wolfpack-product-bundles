@@ -596,6 +596,10 @@ For any "parity", "compare", "match competitor" request — conduct a full audit
 
 The Shopify Admin embeds the app in a cross-origin OOPIF — `contentDocument` is null from the outer page.
 
+### Page Switching
+
+When switching Chrome DevTools pages with `select_page`, omit `bringToFront` or set it to `false`. Never use `bringToFront: true`.
+
 ### PRIMARY METHOD — Keyboard Tab Navigation
 
 Try Tab navigation BEFORE `evaluate_script`. The CDP accessibility tree traverses cross-origin iframes.
@@ -622,5 +626,5 @@ Always `select_page` to the **iframe target** before `evaluate_script`. For thir
 
 ---
 
-**Last Updated:** 2026-05-24
+**Last Updated:** 2026-07-29
 **Author:** Aditya Awasthi

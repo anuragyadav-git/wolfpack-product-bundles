@@ -845,7 +845,7 @@
 
 @media (min-width: 769px) {
   .layout-sidebar[data-fpb-design-preset="HORIZONTAL"]
-    .full-page-side-panel
+    .full-page-side-panel--horizontal-fixed-price
     .side-panel-discount-message {
     display: none;
   }

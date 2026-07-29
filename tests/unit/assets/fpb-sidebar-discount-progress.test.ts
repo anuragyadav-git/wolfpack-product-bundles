@@ -289,7 +289,43 @@ describe('FPB summary sidebar discount progress', () => {
     },
   );
 
-  it('shows only the raw Classic total for fixed bundle price summary display', () => {
+  it('renders qualified BOGO success copy when pricing qualifies without hasDiscount', () => {
+    const panel = document.createElement('aside');
+    const context = makeContext('HORIZONTAL', 'step_based');
+    context.config.showDiscountProgressBar = false;
+    context.selectedBundle.pricing.messages = {
+      ruleMessages: {
+        'rule-1': {
+          successMessage: 'Success! You got 1 product(s) at 100% off',
+        },
+      },
+    };
+    const totalSpy = jest.spyOn(PricingCalculator, 'calculateBundleTotal').mockReturnValue({
+      totalPrice: 177700,
+      totalQuantity: 2,
+      unitPrices: [82900, 61900, 32900],
+    });
+    const discountSpy = jest.spyOn(PricingCalculator, 'calculateDiscount').mockReturnValue({
+      hasDiscount: false,
+      finalPrice: 144800,
+      discountAmount: 32900,
+      discountPercentage: 19,
+      qualifiesForDiscount: true,
+      applicableRule: context.selectedBundle.pricing.rules[0],
+    });
+
+    try {
+      fullPageSidePanelMethods.renderSidePanel.call(context, panel);
+    } finally {
+      totalSpy.mockRestore();
+      discountSpy.mockRestore();
+    }
+
+    expect(panel.querySelector('.side-panel-discount-message')?.innerHTML)
+      .toContain('Success! You got 1 product(s) at 100% off');
+  });
+
+  it('shows the qualified Classic fixed bundle price in the desktop summary', () => {
     const panel = document.createElement('aside');
     const context = makeContext('CLASSIC', 'simple');
     context.selectedBundle.pricing.method = 'fixed_bundle_price';
@@ -318,8 +354,8 @@ describe('FPB summary sidebar discount progress', () => {
 
     const total = panel.querySelector('.side-panel-total');
     expect(total?.innerHTML).toContain('side-panel-total-final');
-    expect(total?.innerHTML).not.toContain('side-panel-total-original');
-    expect(total?.innerHTML).not.toContain('$5.00');
+    expect(total?.innerHTML).toContain('side-panel-total-original');
+    expect(total?.innerHTML).toContain('$5.00');
   });
 });
 

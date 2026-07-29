@@ -21,7 +21,6 @@ import {
   buildCartLineDisplayProperties,
   buildCartLineSourceProperties,
 } from '../../shared/engine/cart-lines.js';
-import { shouldDisplayClassicFixedBundleRawTotal } from '../shared/summary-pricing-display.js';
 import { getSummaryDiscountBadgeLabel } from '../shared/summary-discount-badge.js';
 import { getRemainingSummarySkeletonCount } from './side-panel-methods.js';
 
@@ -121,10 +120,10 @@ _populateCompactMobileSummaryTray(sheet) {
   const combinedDiscountInfo = this.getDiscountInfoWithSelectedAddonDiscount(discountInfo, totalPrice);
   const currencyInfo = CurrencyManager.getCurrencyInfo();
   const finalPrice = combinedDiscountInfo.hasDiscount ? combinedDiscountInfo.finalPrice : totalPrice;
-  const displayFinalPrice = shouldDisplayClassicFixedBundleRawTotal(this, combinedDiscountInfo)
-    ? totalPrice
-    : finalPrice;
-  const discountBadgeLabel = getSummaryDiscountBadgeLabel(combinedDiscountInfo);
+  const discountBadgeLabel = getSummaryDiscountBadgeLabel(
+    combinedDiscountInfo,
+    CurrencyManager.convertAndFormat(combinedDiscountInfo.discountAmount, currencyInfo)
+  );
   const nextRule = PricingCalculator.getNextDiscountRule?.(this.selectedBundle, totalQuantity, totalPrice) || null;
   const allSelectedProducts = this.getAllSelectedProductsData();
   const shouldRenderSlotTiles = shouldUseMobileSummarySlotTiles({
@@ -252,7 +251,10 @@ _populateCompactMobileSummaryTray(sheet) {
           progressTemplate,
           variables
         );
-      } else if (combinedDiscountInfo.hasDiscount) {
+      } else if (
+        combinedDiscountInfo.hasDiscount
+        || combinedDiscountInfo.qualifiesForDiscount
+      ) {
         const successTemplate = TemplateManager.getDiscountMessageTemplate({
           bundle: this.selectedBundle,
           totalQuantity,
@@ -300,7 +302,7 @@ _populateCompactMobileSummaryTray(sheet) {
   const isLastStep = this.currentStepIndex === (this.selectedBundle?.steps?.length || 1) - 1;
   const conditionlessMobile = this.bundleHasNoConditions();
   const actionButton = this._createMobileSummaryActionButton({
-    finalPrice: displayFinalPrice,
+      finalPrice,
     currencyInfo,
     conditionlessMobile,
     isLastStep,

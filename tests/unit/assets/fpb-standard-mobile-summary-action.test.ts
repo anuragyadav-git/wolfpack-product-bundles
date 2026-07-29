@@ -106,6 +106,15 @@ class FakeElement {
   }
 }
 
+function locateFakeElementByClass(root: FakeElement, className: string): FakeElement | null {
+  if (root.classList.contains(className)) return root;
+  for (const child of root.getChildren()) {
+    const match = locateFakeElementByClass(child, className);
+    if (match) return match;
+  }
+  return null;
+}
+
 const originalDocument = global.document;
 
 beforeEach(() => {
@@ -251,7 +260,7 @@ describe('FPB Standard mobile summary action', () => {
     expect(renderProgress).not.toHaveBeenCalled();
   });
 
-  it('uses the raw Classic total in compact mobile fixed bundle price action display', () => {
+  it('uses the qualified Classic fixed bundle price in compact mobile action display', () => {
     const sheet = new FakeElement();
     const context = {
       ...createContext(),
@@ -310,7 +319,75 @@ describe('FPB Standard mobile summary action', () => {
     }
 
     expect(sheet.textContent).toContain('Add To Cart');
-    expect(sheet.textContent).not.toContain('$5.00');
+    expect(sheet.textContent).toContain('$5.00');
+  });
+
+  it('renders qualified BOGO success copy when pricing qualifies without hasDiscount', () => {
+    const sheet = new FakeElement();
+    const context = {
+      ...createContext(),
+      selectedProducts: [{}, {}, {}],
+      stepProductData: [[]],
+      selectedBundle: {
+        bundleDesignPresetId: 'HORIZONTAL',
+        steps: [{ id: 'step-1', enabled: true }],
+        pricing: {
+          enabled: true,
+          method: 'buy_x_get_y',
+          rules: [{
+            id: 'rule-1',
+            conditionType: 'quantity',
+            conditionOperator: 'gte',
+            conditionValue: 3,
+            discountValue: 100,
+          }],
+          messages: {
+            ruleMessages: {
+              'rule-1': {
+                successMessage: 'Success! You got 1 product(s) at 100% off',
+              },
+            },
+          },
+        },
+      },
+      config: {
+        showDiscountMessaging: true,
+        showDiscountProgressBar: false,
+      },
+      compactMobileSummaryTrayExpanded: false,
+      currentStepIndex: 0,
+      getDiscountInfoWithSelectedAddonDiscount: (discountInfo: unknown) => discountInfo,
+      getAllSelectedProductsData: () => [{}, {}, {}],
+      _shouldRenderProductSlots: () => false,
+      _syncCompactMobileSummaryScrollLock: jest.fn(),
+      _renderDiscountProgress: jest.fn(),
+      _createMobileSummaryActionButton: fullPageMobileSummaryMethods._createMobileSummaryActionButton,
+      bundleHasNoConditions: () => false,
+      getFullPageDesignPreset: () => 'HORIZONTAL',
+    };
+    const totalSpy = jest.spyOn(PricingCalculator, 'calculateBundleTotal').mockReturnValue({
+      totalPrice: 177700,
+      totalQuantity: 3,
+      unitPrices: [82900, 61900, 32900],
+    });
+    const discountSpy = jest.spyOn(PricingCalculator, 'calculateDiscount').mockReturnValue({
+      hasDiscount: false,
+      finalPrice: 144800,
+      discountAmount: 32900,
+      discountPercentage: 19,
+      qualifiesForDiscount: true,
+      applicableRule: context.selectedBundle.pricing.rules[0],
+    });
+
+    try {
+      fullPageMobileSummaryMethods._populateCompactMobileSummaryTray.call(context, sheet);
+    } finally {
+      totalSpy.mockRestore();
+      discountSpy.mockRestore();
+    }
+
+    expect(locateFakeElementByClass(sheet, 'fpb-mobile-summary-discount-text')?.innerHTML)
+      .toContain('Success! You got 1 product(s) at 100% off');
   });
 
   it('keeps the final-step action as add to cart even when conditions are not complete', () => {

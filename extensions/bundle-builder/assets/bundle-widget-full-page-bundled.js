@@ -1,13 +1,13 @@
 /*!
  * Wolfpack Bundle Widget — Full Page
- * Version : 5.0.207
- * Built   : 2026-07-26
+ * Version : 5.0.212
+ * Built   : 2026-07-29
  *
  * Cache note: Shopify CDN cache is busted automatically by shopify app deploy.
  * After deploying, allow 2-10 minutes for propagation before testing.
  * Verify live version: console.log(window.__BUNDLE_WIDGET_VERSION__)
  */
-window.__BUNDLE_WIDGET_VERSION__ = '5.0.207';
+window.__BUNDLE_WIDGET_VERSION__ = '5.0.212';
 (function() {
   'use strict';
 
@@ -1447,11 +1447,6 @@ class TemplateManager {
     });
 
     if (!rule) return fallbackTemplate || '';
-
-    if (messageType === 'success') {
-      const tierMessage = this.getRuleTierMessage(bundle, rule);
-      if (tierMessage) return tierMessage;
-    }
 
     const ruleId = rule?.id ? String(rule.id) : '';
     const ruleMessages = this.getRuleMessages(bundle, locale);
@@ -4540,6 +4535,24 @@ function shouldDisplayClassicFixedBundleRawTotal(widget, discountInfo) {
   return method === 'fixed_bundle_price' || method === 'fixed_bundle' || method === 'fixed_price';
 }
 
+function getSummaryDiscountBadgeLabel(discountInfo = {}, formattedDiscountAmount = '') {
+  if (discountInfo.hasDiscount !== true) return '';
+
+  if (
+    String(discountInfo.discountMethod || '').toLowerCase() === 'fixed_amount_off'
+    && typeof formattedDiscountAmount === 'string'
+    && formattedDiscountAmount.trim()
+  ) {
+    return `${formattedDiscountAmount.trim()} off`;
+  }
+
+  const discountPercentage = Number(discountInfo.discountPercentage);
+  if (!Number.isFinite(discountPercentage)) return '';
+
+  const roundedPercentage = Math.round(discountPercentage);
+  return roundedPercentage > 0 ? `${roundedPercentage}% off` : '';
+}
+
 const buildSharedCartLineDisplayProperties = buildCartLineDisplayProperties;
 const buildSharedCartLineSourceProperties = buildCartLineSourceProperties;
 
@@ -6076,10 +6089,10 @@ _populateCompactMobileSummaryTray(sheet) {
   const combinedDiscountInfo = this.getDiscountInfoWithSelectedAddonDiscount(discountInfo, totalPrice);
   const currencyInfo = CurrencyManager.getCurrencyInfo();
   const finalPrice = combinedDiscountInfo.hasDiscount ? combinedDiscountInfo.finalPrice : totalPrice;
-  const displayFinalPrice = shouldDisplayClassicFixedBundleRawTotal(this, combinedDiscountInfo)
-    ? totalPrice
-    : finalPrice;
-  const discountBadgeLabel = getSummaryDiscountBadgeLabel(combinedDiscountInfo);
+  const discountBadgeLabel = getSummaryDiscountBadgeLabel(
+    combinedDiscountInfo,
+    CurrencyManager.convertAndFormat(combinedDiscountInfo.discountAmount, currencyInfo)
+  );
   const nextRule = PricingCalculator.getNextDiscountRule?.(this.selectedBundle, totalQuantity, totalPrice) || null;
   const allSelectedProducts = this.getAllSelectedProductsData();
   const shouldRenderSlotTiles = shouldUseMobileSummarySlotTiles({
@@ -6207,7 +6220,10 @@ _populateCompactMobileSummaryTray(sheet) {
           progressTemplate,
           variables
         );
-      } else if (combinedDiscountInfo.hasDiscount) {
+      } else if (
+        combinedDiscountInfo.hasDiscount
+        || combinedDiscountInfo.qualifiesForDiscount
+      ) {
         const successTemplate = TemplateManager.getDiscountMessageTemplate({
           bundle: this.selectedBundle,
           totalQuantity,
@@ -6255,7 +6271,7 @@ _populateCompactMobileSummaryTray(sheet) {
   const isLastStep = this.currentStepIndex === (this.selectedBundle?.steps?.length || 1) - 1;
   const conditionlessMobile = this.bundleHasNoConditions();
   const actionButton = this._createMobileSummaryActionButton({
-    finalPrice: displayFinalPrice,
+      finalPrice,
     currencyInfo,
     conditionlessMobile,
     isLastStep,
@@ -6860,14 +6876,18 @@ renderSidePanel(panel) {
   const combinedDiscountInfo = this.getDiscountInfoWithSelectedAddonDiscount(discountInfo, totalPrice);
   const currencyInfo = CurrencyManager.getCurrencyInfo();
   const finalPrice = combinedDiscountInfo.hasDiscount ? combinedDiscountInfo.finalPrice : totalPrice;
-  const shouldShowRawTotalOnly = shouldDisplayClassicFixedBundleRawTotal(this, combinedDiscountInfo);
-  const displayFinalPrice = shouldShowRawTotalOnly ? totalPrice : finalPrice;
-  const shouldShowOriginalTotal = combinedDiscountInfo.hasDiscount && !shouldShowRawTotalOnly;
-  const discountBadgeLabel = getSummaryDiscountBadgeLabel(combinedDiscountInfo);
+  const shouldShowOriginalTotal = combinedDiscountInfo.hasDiscount;
+  const discountBadgeLabel = getSummaryDiscountBadgeLabel(
+    combinedDiscountInfo,
+    CurrencyManager.convertAndFormat(combinedDiscountInfo.discountAmount, currencyInfo)
+  );
   const allSelectedProducts = this.getAllSelectedProductsData();
   const nextRule = PricingCalculator.getNextDiscountRule?.(this.selectedBundle, totalQuantity, totalPrice) || null;
   const isMobileSheet = panel.classList?.contains('fpb-mobile-bottom-sheet');
   const isHorizontalPreset = this.selectedBundle?.bundleDesignPresetId === 'HORIZONTAL';
+  const isHorizontalFixedBundlePrice =
+    isHorizontalPreset
+    && PricingCalculator.getDiscountMethod(this.selectedBundle) === 'fixed_bundle_price';
   const isStandardDesktopSidebar = this._isStandardDesktopSidebar(panel);
   const isClassicDesktopPreset = this.getFullPageDesignPreset() === 'CLASSIC' && !isMobileSheet;
   const activeStep = this.selectedBundle?.steps?.[this.currentStepIndex] || this.selectedBundle?.steps?.[0] || null;
@@ -6899,6 +6919,10 @@ renderSidePanel(panel) {
     : allSelectedProducts.length;
 
   panel.classList.toggle('full-page-side-panel--inline-slots', useInlineSummarySlots);
+  panel.classList.toggle(
+    'full-page-side-panel--horizontal-fixed-price',
+    isHorizontalFixedBundlePrice
+  );
   panel.classList.toggle('full-page-side-panel--skeleton-list', !useInlineSummarySlots);
   panel.classList.toggle('full-page-side-panel--has-addon-summary', false);
 
@@ -6978,7 +7002,10 @@ renderSidePanel(panel) {
           progressTemplate,
           variables
         );
-      } else if (combinedDiscountInfo.hasDiscount) {
+      } else if (
+        combinedDiscountInfo.hasDiscount
+        || combinedDiscountInfo.qualifiesForDiscount
+      ) {
         const successTemplate = TemplateManager.getDiscountMessageTemplate({
           bundle: this.selectedBundle,
           totalQuantity,
@@ -7219,7 +7246,7 @@ renderSidePanel(panel) {
     <div class="side-panel-total-prices">
       ${discountBadgeLabel ? `<span class="fpb-summary-discount-badge">${discountBadgeLabel}</span>` : ''}
       ${shouldShowOriginalTotal ? `<span class="side-panel-total-original">${CurrencyManager.convertAndFormat(totalPrice, currencyInfo)}</span>` : ''}
-      <span class="side-panel-total-final">${CurrencyManager.convertAndFormat(displayFinalPrice, currencyInfo)}</span>
+      <span class="side-panel-total-final">${CurrencyManager.convertAndFormat(finalPrice, currencyInfo)}</span>
     </div>
   `;
   if (isMobileSheet) {

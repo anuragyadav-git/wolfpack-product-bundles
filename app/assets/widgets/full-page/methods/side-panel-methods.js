@@ -21,7 +21,6 @@ import {
   buildCartLineDisplayProperties,
   buildCartLineSourceProperties,
 } from '../../shared/engine/cart-lines.js';
-import { shouldDisplayClassicFixedBundleRawTotal } from '../shared/summary-pricing-display.js';
 import { getSummaryDiscountBadgeLabel } from '../shared/summary-discount-badge.js';
 
 function getSummarySlotQuantity(item = {}) {
@@ -94,14 +93,18 @@ renderSidePanel(panel) {
   const combinedDiscountInfo = this.getDiscountInfoWithSelectedAddonDiscount(discountInfo, totalPrice);
   const currencyInfo = CurrencyManager.getCurrencyInfo();
   const finalPrice = combinedDiscountInfo.hasDiscount ? combinedDiscountInfo.finalPrice : totalPrice;
-  const shouldShowRawTotalOnly = shouldDisplayClassicFixedBundleRawTotal(this, combinedDiscountInfo);
-  const displayFinalPrice = shouldShowRawTotalOnly ? totalPrice : finalPrice;
-  const shouldShowOriginalTotal = combinedDiscountInfo.hasDiscount && !shouldShowRawTotalOnly;
-  const discountBadgeLabel = getSummaryDiscountBadgeLabel(combinedDiscountInfo);
+  const shouldShowOriginalTotal = combinedDiscountInfo.hasDiscount;
+  const discountBadgeLabel = getSummaryDiscountBadgeLabel(
+    combinedDiscountInfo,
+    CurrencyManager.convertAndFormat(combinedDiscountInfo.discountAmount, currencyInfo)
+  );
   const allSelectedProducts = this.getAllSelectedProductsData();
   const nextRule = PricingCalculator.getNextDiscountRule?.(this.selectedBundle, totalQuantity, totalPrice) || null;
   const isMobileSheet = panel.classList?.contains('fpb-mobile-bottom-sheet');
   const isHorizontalPreset = this.selectedBundle?.bundleDesignPresetId === 'HORIZONTAL';
+  const isHorizontalFixedBundlePrice =
+    isHorizontalPreset
+    && PricingCalculator.getDiscountMethod(this.selectedBundle) === 'fixed_bundle_price';
   const isStandardDesktopSidebar = this._isStandardDesktopSidebar(panel);
   const isClassicDesktopPreset = this.getFullPageDesignPreset() === 'CLASSIC' && !isMobileSheet;
   const activeStep = this.selectedBundle?.steps?.[this.currentStepIndex] || this.selectedBundle?.steps?.[0] || null;
@@ -133,6 +136,10 @@ renderSidePanel(panel) {
     : allSelectedProducts.length;
 
   panel.classList.toggle('full-page-side-panel--inline-slots', useInlineSummarySlots);
+  panel.classList.toggle(
+    'full-page-side-panel--horizontal-fixed-price',
+    isHorizontalFixedBundlePrice
+  );
   panel.classList.toggle('full-page-side-panel--skeleton-list', !useInlineSummarySlots);
   panel.classList.toggle('full-page-side-panel--has-addon-summary', false);
 
@@ -215,7 +222,10 @@ renderSidePanel(panel) {
           progressTemplate,
           variables
         );
-      } else if (combinedDiscountInfo.hasDiscount) {
+      } else if (
+        combinedDiscountInfo.hasDiscount
+        || combinedDiscountInfo.qualifiesForDiscount
+      ) {
         const successTemplate = TemplateManager.getDiscountMessageTemplate({
           bundle: this.selectedBundle,
           totalQuantity,
@@ -461,7 +471,7 @@ renderSidePanel(panel) {
     <div class="side-panel-total-prices">
       ${discountBadgeLabel ? `<span class="fpb-summary-discount-badge">${discountBadgeLabel}</span>` : ''}
       ${shouldShowOriginalTotal ? `<span class="side-panel-total-original">${CurrencyManager.convertAndFormat(totalPrice, currencyInfo)}</span>` : ''}
-      <span class="side-panel-total-final">${CurrencyManager.convertAndFormat(displayFinalPrice, currencyInfo)}</span>
+      <span class="side-panel-total-final">${CurrencyManager.convertAndFormat(finalPrice, currencyInfo)}</span>
     </div>
   `;
   if (isMobileSheet) {

@@ -1,11 +1,11 @@
 /*!
  * Wolfpack Bundles SDK
- * Version : 5.0.207
- * Built   : 2026-07-26
+ * Version : 5.0.212
+ * Built   : 2026-07-29
  *
  * Verify live version: console.log(window.__WOLFPACK_BUNDLES_SDK_VERSION__)
  */
-window.__WOLFPACK_BUNDLES_SDK_VERSION__ = '5.0.207';
+window.__WOLFPACK_BUNDLES_SDK_VERSION__ = '5.0.212';
 (function (window) {
   'use strict';
 
@@ -1646,11 +1646,6 @@ class TemplateManager {
     });
 
     if (!rule) return fallbackTemplate || '';
-
-    if (messageType === 'success') {
-      const tierMessage = this.getRuleTierMessage(bundle, rule);
-      if (tierMessage) return tierMessage;
-    }
 
     const ruleId = rule?.id ? String(rule.id) : '';
     const ruleMessages = this.getRuleMessages(bundle, locale);
