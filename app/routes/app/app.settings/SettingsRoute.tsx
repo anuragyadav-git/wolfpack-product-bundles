@@ -1,4 +1,4 @@
-import { useActionData, useLoaderData, useSubmit } from "@remix-run/react";
+import { useActionData, useSubmit } from "@remix-run/react";
 import { useEffect, useRef, useState } from "react";
 import { useAppBridge } from "@shopify/app-bridge-react";
 import {
@@ -8,7 +8,7 @@ import {
   SUPPORTED_LANGUAGE_LABELS,
 } from "../../../lib/admin-configuration-surfaces";
 import styles from "../../../styles/routes/admin-configuration-surfaces.module.css";
-import type { action, loader } from "../app.settings";
+import type { action } from "../app.settings";
 import {
   getInitialControlFieldValues,
   getInitialDesignFieldValues,
@@ -29,8 +29,24 @@ import { runAfterSaveBarLeaveConfirmation } from "../../../lib/admin-savebar-nav
 import { createSettingsDesignState, type SettingsDesignPayload } from "../../../lib/settings-design-contract";
 import { DesignSettingsView } from "./DesignSettingsView";
 
-export function SettingsRoute({ initialView = "design", onExit }: { initialView?: "design" | "language" | "controls"; onExit: () => void }) {
-  const { settingsPage, previewBundles } = useLoaderData<typeof loader>();
+type SettingsRouteProps = {
+  initialView?: "design" | "language" | "controls";
+  onExit: () => void;
+  settingsPage: Record<string, unknown> | null;
+  previewBundles: Array<{
+    id: string;
+    name: string;
+    type: string;
+    viewUrl: string | null;
+  }>;
+};
+
+export function SettingsRoute({
+  initialView = "design",
+  onExit,
+  settingsPage,
+  previewBundles,
+}: SettingsRouteProps) {
   const actionData = useActionData<typeof action>();
   const submit = useSubmit();
   const shopify = useAppBridge();
