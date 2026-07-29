@@ -51,8 +51,9 @@ export default function Onboarding() {
   };
 
   return (
-    <s-page heading="Get started with Wolfpack" inlineSize="large">
-      <s-stack direction="block" gap="large">
+    <s-query-container containerName="onboarding-page">
+      <s-page heading="Get started with Wolfpack" inlineSize="large">
+        <s-stack direction="block" gap="large">
         <s-section>
           <s-stack direction="block" gap="base">
             <s-heading>Build your first bundle</s-heading>
@@ -60,7 +61,7 @@ export default function Onboarding() {
               Choose a bundle format, then follow the guided editor to configure and publish it in Shopify.
             </s-paragraph>
             <s-grid
-              gridTemplateColumns="@container (inline-size <= 680px) 1fr, 1fr 1fr"
+              gridTemplateColumns="@container onboarding-page (inline-size <= 680px) 1fr, 1fr 1fr"
               gap="base"
             >
               <s-clickable
@@ -152,7 +153,8 @@ export default function Onboarding() {
             <s-button onClick={openSupportChat}>Chat with support</s-button>
           </s-stack>
         </s-section>
-      </s-stack>
-    </s-page>
+        </s-stack>
+      </s-page>
+    </s-query-container>
   );
 }

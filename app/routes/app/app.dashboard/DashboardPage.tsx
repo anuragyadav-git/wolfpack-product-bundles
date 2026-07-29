@@ -559,10 +559,6 @@ export function DashboardPage() {
             </Await>
           </Suspense>
 
-          <DashboardTopCards
-            handleDirectChat={handleDirectChat}
-          />
-
           <DashboardStatusGrid
             activeBundleCount={bundles.filter((bundle) => bundle.status === "active").length}
             resources={themeExtensionStatus.resources}
@@ -740,6 +736,10 @@ export function DashboardPage() {
               </s-section>
             </s-query-container>
           </div>
+
+          <DashboardTopCards
+            handleDirectChat={handleDirectChat}
+          />
 
           {/* Resources card */}
           {renderResourceCard && (

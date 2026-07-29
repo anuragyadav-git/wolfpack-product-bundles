@@ -12,7 +12,8 @@ export default function IntegrationsRoute() {
   return (
     <>
       <ui-title-bar title="Integrations" />
-      <main className={`${styles.page} ${styles.integrationsPage}`}>
+      <s-query-container containerName="integrations-page">
+        <main className={`${styles.page} ${styles.integrationsPage}`}>
         <header className={styles.integrationsHeader}>
           <div>
             <h1 className={styles.title}>Integrations Hub</h1>
@@ -65,7 +66,8 @@ export default function IntegrationsRoute() {
             </div>
           </section>
         ))}
-      </main>
+        </main>
+      </s-query-container>
     </>
   );
 }
