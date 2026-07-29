@@ -231,8 +231,8 @@ time and restore the `F0` minimum/exact baseline after every permutation.
 | A02 | F5 | Gifting step only | Gifting stage appears in the configured sequence | **P** P08 | **S** | **S** | **P** C06 |
 | A03 | F5 | Paid add-on tier | Eligible shopper can add the paid add-on at the configured price | **P** P09 | **S** | **T** | **P** C06 |
 | A04 | F5 | Free/100% add-on tier | Eligible item becomes free at the configured threshold | **P** P10 | **S** | **T** | **P** C06 |
-| A05 | F5 | Multiple eligible tiers | Highest eligible tier wins without duplicate gifts | **P** P10 | **S** | **T** | **T** |
-| A06 | F5 | Qualification and de-qualification | Add/remove immediately updates eligibility, copy, and totals | **S** | **S** | **T** | **T** |
+| A05 | F5 | Multiple eligible tiers | Highest eligible tier wins without duplicate gifts | **P** F5-MULTI-TIER-ALL | **P** F5-MULTI-TIER-ALL | **P** F5-MULTI-TIER-ALL | **P** F5-MULTI-TIER-ALL |
+| A06 | F5 | Qualification and de-qualification | Add/remove immediately updates eligibility, copy, and totals | **P** F5-MULTI-TIER-ALL | **P** F5-MULTI-TIER-ALL | **P** F5-MULTI-TIER-ALL | **P** F5-MULTI-TIER-ALL |
 | A07 | F5 | Add-on product variants | Variant identity and price survive add/remove and cart add | **S** | **S** | **T** | **T** |
 | A08 | F5 | Add-on step navigation | Back/Next preserves core selections and add-on state | **S** | **S** | **S** | **P** C06 |
 | A09 | F5 | Free-gift/sidebar presentation | Gift appears at the EB-owned summary/footer position | **S** | **S** | **T** | **T** |

@@ -479,7 +479,46 @@ describe("FPB add-ons / gifting step separation", () => {
     });
   });
 
-  it("renders every configured add-on tier message into the summary section", () => {
+  it("suppresses lower eligible add-on tiers after a higher tier qualifies", () => {
+    (global as any).window = {
+      Shopify: { currency: { active: "USD", format: "${{amount}}" } },
+      shopMoneyFormat: "${{amount}}",
+    };
+    const step = {
+      isFreeGift: true,
+      addonTiers: [
+        {
+          eligibilityCondition: { type: "QUANTITY", value: 1 },
+          discount: { type: "PERCENTAGE", value: 10 },
+          selectedAddonProducts: [makeProduct("gid://shopify/Product/1")],
+        },
+        {
+          eligibilityCondition: { type: "QUANTITY", value: 2 },
+          discount: { type: "PERCENTAGE", value: 100 },
+          selectedAddonProducts: [makeProduct("gid://shopify/Product/2")],
+        },
+      ],
+    };
+    const ctx = {
+      selectedProducts: [{ paidVariant: 2 }],
+      stepProductData: [[{ selectionId: "paidVariant", price: 1000 }]],
+      selectedBundle: { steps: [{ id: "paid" }, step] },
+    };
+
+    const summaryStates = getAddonSummaryEligibilityStates.call(ctx, step);
+
+    expect(summaryStates).toHaveLength(1);
+    expect(summaryStates[0]).toMatchObject({
+      tierIndex: 1,
+      isEligible: true,
+    });
+    expect(getAddonLineDiscount.call(ctx, step)).toEqual({
+      type: "PERCENTAGE",
+      value: 100,
+    });
+  });
+
+  it("renders only the active highest eligible add-on tier message", () => {
     (global as any).window = {
       Shopify: { currency: { active: "USD", format: "${{amount}}" } },
       shopMoneyFormat: "${{amount}}",
@@ -518,7 +557,7 @@ describe("FPB add-ons / gifting step separation", () => {
     const messageTexts: string[] = [];
     const ctx = {
       ...fullPageValidationAddonsMethods,
-      selectedProducts: [{ paidVariant: 1 }],
+      selectedProducts: [{ paidVariant: 2 }],
       stepProductData: [[{ selectionId: "paidVariant", price: 1000 }]],
       selectedBundle: { steps: [{ id: "paid" }, step] },
       freeGiftStep: step,
@@ -539,10 +578,10 @@ describe("FPB add-ons / gifting step separation", () => {
       (global as any).document = originalDocument;
     }
 
-    expect(messageTexts).toEqual(["Tier 1 unlocked", "Tier 2 locked"]);
+    expect(messageTexts).toEqual(["Tier 2 unlocked"]);
     expect(container.children).toHaveLength(1);
     expect(container.children[0].children).toHaveLength(2);
-    expect(container.children[0].children[1].children).toHaveLength(2);
+    expect(container.children[0].children[1].children).toHaveLength(1);
   });
 
   it("does not return an add-on line discount before the active tier is eligible", () => {

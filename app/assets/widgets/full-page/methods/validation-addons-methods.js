@@ -315,8 +315,21 @@ getAddonSummaryEligibilityStates(step) {
   const getEligibilityState = typeof this.getAddonEligibilityState === 'function'
     ? this.getAddonEligibilityState
     : fullPageValidationAddonsMethods.getAddonEligibilityState;
+  const compareTierProgression = (left, right) => (
+    (left.threshold - right.threshold) || (left.index - right.index)
+  );
+  const eligible = withState
+    .filter(candidate => candidate.isEligible)
+    .sort(compareTierProgression);
+  const activeEligible = eligible[eligible.length - 1] || null;
+  const visibleCandidates = activeEligible
+    ? withState.filter(candidate => (
+        candidate === activeEligible
+        || (!candidate.isEligible && compareTierProgression(candidate, activeEligible) > 0)
+      ))
+    : withState;
 
-  return withState.map(candidate => getEligibilityState.call(this, step, {
+  return visibleCandidates.map(candidate => getEligibilityState.call(this, step, {
     tier: candidate.tier,
     tierIndex: candidate.index,
     isEligible: candidate.isEligible === true,

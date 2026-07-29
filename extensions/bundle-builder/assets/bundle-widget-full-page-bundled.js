@@ -1,13 +1,13 @@
 /*!
  * Wolfpack Bundle Widget — Full Page
- * Version : 5.0.220
+ * Version : 5.0.221
  * Built   : 2026-07-29
  *
  * Cache note: Shopify CDN cache is busted automatically by shopify app deploy.
  * After deploying, allow 2-10 minutes for propagation before testing.
  * Verify live version: console.log(window.__BUNDLE_WIDGET_VERSION__)
  */
-window.__BUNDLE_WIDGET_VERSION__ = '5.0.220';
+window.__BUNDLE_WIDGET_VERSION__ = '5.0.221';
 (function() {
   'use strict';
 
@@ -10418,8 +10418,21 @@ getAddonSummaryEligibilityStates(step) {
   const getEligibilityState = typeof this.getAddonEligibilityState === 'function'
     ? this.getAddonEligibilityState
     : fullPageValidationAddonsMethods.getAddonEligibilityState;
+  const compareTierProgression = (left, right) => (
+    (left.threshold - right.threshold) || (left.index - right.index)
+  );
+  const eligible = withState
+    .filter(candidate => candidate.isEligible)
+    .sort(compareTierProgression);
+  const activeEligible = eligible[eligible.length - 1] || null;
+  const visibleCandidates = activeEligible
+    ? withState.filter(candidate => (
+        candidate === activeEligible
+        || (!candidate.isEligible && compareTierProgression(candidate, activeEligible) > 0)
+      ))
+    : withState;
 
-  return withState.map(candidate => getEligibilityState.call(this, step, {
+  return visibleCandidates.map(candidate => getEligibilityState.call(this, step, {
     tier: candidate.tier,
     tierIndex: candidate.index,
     isEligible: candidate.isEligible === true,
