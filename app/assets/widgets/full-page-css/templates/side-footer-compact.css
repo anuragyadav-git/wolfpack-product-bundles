@@ -1165,6 +1165,11 @@
 
   .fpb-mobile-bottom-sheet.fpb-preset-compact
     .fpb-mobile-summary-products-section {
+    padding-block: 0;
+  }
+
+  .fpb-mobile-bottom-sheet.fpb-preset-compact.fpb-mobile-summary-tray-expanded
+    .fpb-mobile-summary-products-section {
     padding-block: var(--bundle-summary-section-spacing, 0.625rem);
   }
 

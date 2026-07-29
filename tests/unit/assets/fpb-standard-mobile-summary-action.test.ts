@@ -540,6 +540,10 @@ describe('FPB Standard mobile summary action', () => {
     const classList = {
       add: jest.fn(),
       remove: jest.fn(),
+      toggle: jest.fn(),
+    };
+    const countBadge = {
+      setAttribute: jest.fn(),
     };
     const context = {
       compactMobileSummaryTrayExpanded: false,
@@ -551,12 +555,28 @@ describe('FPB Standard mobile summary action', () => {
 
     fullPageMobileSummaryMethods._toggleCompactMobileSummaryTray.call(
       context,
-      { classList },
+      {
+        classList,
+        querySelector: jest.fn(() => countBadge),
+      },
     );
 
     expect(context.compactMobileSummaryTrayExpanded).toBe(true);
-    expect(context._populateCompactMobileSummaryTray).toHaveBeenCalledTimes(1);
-    expect(classList.add).toHaveBeenCalledWith('fpb-mobile-summary-tray-animating-open');
+    expect(context._populateCompactMobileSummaryTray).not.toHaveBeenCalled();
+    expect(countBadge.setAttribute).toHaveBeenCalledWith('aria-expanded', 'true');
+
+    fullPageMobileSummaryMethods._toggleCompactMobileSummaryTray.call(
+      context,
+      {
+        classList,
+        querySelector: jest.fn(() => countBadge),
+      },
+    );
+
+    expect(context.compactMobileSummaryTrayExpanded).toBe(false);
+    expect(context._populateCompactMobileSummaryTray).not.toHaveBeenCalled();
+    expect(countBadge.setAttribute).toHaveBeenLastCalledWith('aria-expanded', 'false');
+    expect(context.compactMobileSummaryTrayAnimationTimeout).not.toBeNull();
   });
 
   it('does not lock page scroll when Standard or Classic mobile summary trays expand', () => {

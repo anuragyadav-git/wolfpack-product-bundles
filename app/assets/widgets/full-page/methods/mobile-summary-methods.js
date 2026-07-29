@@ -100,7 +100,7 @@ function normalizeStepContentSubtext(value) {
 const MOBILE_ADDITIONAL_OFFERS_GREEN_DELAY_MS = 550;
 const MOBILE_ADDITIONAL_OFFERS_MESSAGE_DELAY_MS = 800;
 const MOBILE_ADDITIONAL_OFFERS_DURATION_MS = 3000;
-const MOBILE_SUMMARY_TRAY_ANIMATION_MS = 720;
+const MOBILE_SUMMARY_TRAY_ANIMATION_MS = 300;
 
 export const fullPageMobileSummaryMethods = {
 _populateCompactMobileSummaryTray(sheet) {
@@ -144,8 +144,6 @@ _populateCompactMobileSummaryTray(sheet) {
     'fpb-mobile-summary-fluid-footer',
     shouldUseFluidMobileSummaryFooter(designPreset)
   );
-  const isClassicPreset = designPreset === 'CLASSIC';
-  const usesAnimatedSummarySection = isClassicPreset || designPreset === 'STANDARD';
   const summaryToggleLabel = 'Review your bundle';
   const addonStep = (this.selectedBundle?.steps || []).find(step => step?.isFreeGift === true) || null;
   const addonStates = addonStep && typeof this.getAddonSummaryEligibilityStates === 'function'
@@ -301,15 +299,11 @@ _populateCompactMobileSummaryTray(sheet) {
     isComplete: this.areBundleConditionsMet()
   });
   navSection.appendChild(actionButton);
-  if (usesAnimatedSummarySection || this.compactMobileSummaryTrayExpanded) {
-    const productsSection = document.createElement('div');
-    productsSection.className = 'fpb-mobile-summary-products-section';
-    productsSection.appendChild(this._renderCompactMobileSummaryBundleItems(currencyInfo, totalQuantity));
-    productsSection.appendChild(navSection);
-    sheet.appendChild(productsSection);
-  } else {
-    sheet.appendChild(navSection);
-  }
+  const productsSection = document.createElement('div');
+  productsSection.className = 'fpb-mobile-summary-products-section';
+  productsSection.appendChild(this._renderCompactMobileSummaryBundleItems(currencyInfo, totalQuantity));
+  productsSection.appendChild(navSection);
+  sheet.appendChild(productsSection);
 },
 
 _syncMobileAdditionalOffersPulse(pulseState = {}) {
@@ -413,7 +407,9 @@ _syncMobileAdditionalOffersPulse(pulseState = {}) {
 _toggleCompactMobileSummaryTray(sheet) {
   const nextExpanded = !this.compactMobileSummaryTrayExpanded;
   this.compactMobileSummaryTrayExpanded = nextExpanded;
-  this._populateCompactMobileSummaryTray(sheet);
+  sheet.classList.toggle('fpb-mobile-summary-tray-expanded', nextExpanded);
+  sheet.querySelector?.('.fpb-mobile-summary-count-badge')
+    ?.setAttribute('aria-expanded', nextExpanded ? 'true' : 'false');
   this._syncCompactMobileSummaryScrollLock();
 
   sheet.classList.remove(

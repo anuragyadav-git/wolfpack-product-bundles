@@ -190,7 +190,32 @@
 
   .fpb-mobile-summary-fluid-footer
     .fpb-mobile-summary-products-section {
+    display: grid;
+    grid-template-rows: 0fr auto;
+    padding-block: 0;
+    overflow: hidden;
+    transition:
+      grid-template-rows 300ms ease,
+      padding-block 300ms ease;
+  }
+
+  .fpb-mobile-summary-fluid-footer
+    .fpb-mobile-summary-bundle-items {
+    min-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: opacity 300ms ease;
+  }
+
+  .fpb-mobile-summary-fluid-footer.fpb-mobile-summary-tray-expanded
+    .fpb-mobile-summary-products-section {
+    grid-template-rows: 1fr auto;
     padding-block: var(--bundle-summary-section-spacing, 0.625rem);
+  }
+
+  .fpb-mobile-summary-fluid-footer.fpb-mobile-summary-tray-expanded
+    .fpb-mobile-summary-bundle-items {
+    opacity: 1;
   }
 
   .fpb-mobile-summary-fluid-footer
