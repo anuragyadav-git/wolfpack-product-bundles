@@ -51,7 +51,7 @@ export function usePpbBaseConfigureState() {
   const fetcher = useFetcher<any>();
   const subscriptionFetcher = useFetcher<SubscriptionValidationResponse>();
   const [currentAppEmbedEnabled, setCurrentAppEmbedEnabled] =
-    useState(appEmbedEnabled);
+    useState<boolean | null>(null);
   const [currentThemeEditorUrl, setCurrentThemeEditorUrl] =
     useState(themeEditorUrl);
   const [appEmbedBannerFeedbackTrigger, setAppEmbedBannerFeedbackTrigger] =
@@ -59,7 +59,9 @@ export function usePpbBaseConfigureState() {
   const [showSubscriptionSetupGuide, setShowSubscriptionSetupGuide] =
     useState(false);
   const revalidator = useRevalidator();
-  const isBundleVisibilityPending = !currentAppEmbedEnabled;
+  const presentedAppEmbedEnabled =
+    currentAppEmbedEnabled ?? true;
+  const isBundleVisibilityPending = !presentedAppEmbedEnabled;
   const isSaveInFlight = fetcher.state !== "idle";
   const saveBarRef = useRef<UISaveBarElement | null>(null);
   const triggerSaveBarIrritation = useCallback(() => {
@@ -130,9 +132,22 @@ export function usePpbBaseConfigureState() {
     productStatus || bundleProduct?.status || loadedBundleProduct?.status,
   );
   useEffect(() => {
-    setCurrentAppEmbedEnabled(appEmbedEnabled);
+    let active = true;
+    setCurrentAppEmbedEnabled(null);
     setCurrentThemeEditorUrl(themeEditorUrl);
-  }, [appEmbedEnabled, themeEditorUrl]);
+    void getThemeExtensionStatusFromAppBridge(shopify)
+      .then((status) => {
+        if (active) {
+          setCurrentAppEmbedEnabled(status.appEmbedEnabled);
+        }
+      })
+      .catch(() => {
+        if (active) setCurrentAppEmbedEnabled(appEmbedEnabled);
+      });
+    return () => {
+      active = false;
+    };
+  }, [appEmbedEnabled, shopify, themeEditorUrl]);
   const refreshParentProductStatusFromShopify = useCallback(() => {
     const revalidateNow = () => {
       revalidator.revalidate();
@@ -237,7 +252,7 @@ export function usePpbBaseConfigureState() {
     blockHandle,
     shopLocales,
     appEmbedBannerFeedbackTrigger,
-    appEmbedEnabled: currentAppEmbedEnabled,
+    appEmbedEnabled: presentedAppEmbedEnabled,
     themeEditorUrl: currentThemeEditorUrl,
     openThemeEditorForAppEmbed,
     checkAppEmbedStatusBeforePreview,

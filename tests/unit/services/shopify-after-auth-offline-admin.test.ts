@@ -87,9 +87,10 @@ jest.mock("../../../app/services/addon-discount-function-service.server", () => 
   AddOnDiscountFunctionService: {
     completeSetup: jest.fn().mockResolvedValue({
       success: true,
-      alreadyExists: true,
+      outcome: "already_active",
       discountId: "gid://shopify/DiscountAutomaticApp/1",
       functionId: "gid://shopify/ShopifyFunction/1",
+      functionHandle: "bundle-discount-function",
     }),
   },
 }));

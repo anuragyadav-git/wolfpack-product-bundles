@@ -232,7 +232,8 @@ const shopify = shopifyApp({
             attributes: {
               discount_id: result.discountId ?? null,
               function_id: result.functionId ?? null,
-              already_exists: result.alreadyExists ?? false,
+              function_handle: result.functionHandle ?? null,
+              setup_outcome: result.outcome ?? null,
             },
           });
         } else {

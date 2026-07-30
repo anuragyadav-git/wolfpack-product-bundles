@@ -40,7 +40,7 @@ export function useConfigureBundleController(): ConfigureBundleFlowDraft {
   const fetcher = useFetcher<any>();
   const revalidator = useRevalidator();
   const [currentAppEmbedEnabled, setCurrentAppEmbedEnabled] =
-    useState(appEmbedEnabled);
+    useState<boolean | null>(null);
   const [currentThemeEditorUrl, setCurrentThemeEditorUrl] =
     useState(themeEditorUrl);
   const [appEmbedBannerFeedbackTrigger, setAppEmbedBannerFeedbackTrigger] =
@@ -119,9 +119,22 @@ export function useConfigureBundleController(): ConfigureBundleFlowDraft {
     productStatus || bundleProduct?.status || loadedBundleProduct?.status,
   );
   useEffect(() => {
-    setCurrentAppEmbedEnabled(appEmbedEnabled);
+    let active = true;
+    setCurrentAppEmbedEnabled(null);
     setCurrentThemeEditorUrl(themeEditorUrl);
-  }, [appEmbedEnabled, themeEditorUrl]);
+    void getThemeExtensionStatusFromAppBridge(shopify)
+      .then((status) => {
+        if (active) {
+          setCurrentAppEmbedEnabled(status.appEmbedEnabled);
+        }
+      })
+      .catch(() => {
+        if (active) setCurrentAppEmbedEnabled(appEmbedEnabled);
+      });
+    return () => {
+      active = false;
+    };
+  }, [appEmbedEnabled, shopify, themeEditorUrl]);
   const refreshParentProductStatusFromShopify = useCallback(() => {
     const revalidateNow = () => {
       revalidator.revalidate();
@@ -167,7 +180,7 @@ export function useConfigureBundleController(): ConfigureBundleFlowDraft {
     activeTabIndex,
     apiKey,
     appEmbedBannerFeedbackTrigger,
-    appEmbedEnabled: currentAppEmbedEnabled,
+    appEmbedEnabled: currentAppEmbedEnabled ?? true,
     availableBundles,
     availablePages,
     blockConfigurationChangeWhileSaving,
