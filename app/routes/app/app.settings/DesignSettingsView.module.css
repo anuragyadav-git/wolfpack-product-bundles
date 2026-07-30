@@ -2,8 +2,6 @@
   width: 100%;
   max-width: 1800px;
   box-sizing: border-box;
-  container-name: design-settings;
-  container-type: inline-size;
   margin: 0 auto;
   padding: 20px clamp(10px, 2vw, 20px) 40px;
 }
@@ -18,13 +16,28 @@
 .layout {
   display: grid;
   grid-template-columns:
-    minmax(190px, 0.68fr)
-    minmax(520px, 2.2fr)
-    minmax(280px, 0.92fr);
+    minmax(210px, 0.68fr)
+    minmax(720px, 2.2fr)
+    minmax(300px, 0.92fr);
   grid-template-areas: "navigation preview fields";
   gap: clamp(12px, 1.5vw, 22px);
   align-items: start;
   margin-top: 18px;
+}
+
+.mobileWorkspaceTabs {
+  display: none;
+  justify-content: center;
+  gap: 8px;
+}
+
+.previewPane {
+  min-width: 0;
+  grid-area: preview;
+}
+
+.customizePane {
+  display: contents;
 }
 
 .inspectorNavigation,
@@ -135,7 +148,6 @@
 .previewPanel {
   position: sticky;
   top: 16px;
-  grid-area: preview;
   overflow: hidden;
 }
 
@@ -201,20 +213,19 @@
 .previewStage {
   display: grid;
   min-height: min(720px, 72vh);
-  place-items: stretch;
+  place-items: start center;
   overflow: auto;
   background: #f1f2f3;
   padding: clamp(10px, 1.6vw, 20px);
 }
 
-.previewStage[data-preview-viewport="mobile"] {
-  justify-items: center;
+.previewCanvas {
+  position: relative;
+  flex: none;
 }
 
 .previewSurface {
   position: relative;
-  width: 100%;
-  min-width: 0;
   overflow: hidden;
   border: 1px solid #d5d7d8;
   border-radius: 10px;
@@ -222,11 +233,8 @@
   color: var(--preview-primary-text, #202223);
   font-size: var(--preview-body-font-size, 14px);
   font-weight: var(--preview-body-font-weight, 400);
-  transition: width 160ms ease;
-}
-
-.previewStage[data-preview-viewport="mobile"] .previewSurface {
-  width: min(390px, 100%);
+  transform-origin: top left;
+  transition: transform 160ms ease;
 }
 
 .previewHero {
@@ -1046,7 +1054,7 @@
   grid-column: auto;
 }
 
-@container design-settings (max-width: 1180px) {
+@container design-settings (max-width: 1340px) {
   .layout {
     grid-template-columns: minmax(210px, 0.72fr) minmax(0, 1.28fr);
     grid-template-areas:
@@ -1060,6 +1068,11 @@
 }
 
 @container design-settings (max-width: 760px) {
+  .mobileWorkspaceTabs {
+    display: flex;
+    margin-top: 14px;
+  }
+
   .hero,
   .previewHeader {
     align-items: stretch;
@@ -1068,10 +1081,27 @@
 
   .layout {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-areas:
-      "preview"
-      "navigation"
-      "fields";
+    grid-template-areas: "workspace";
+  }
+
+  .previewPane,
+  .customizePane {
+    display: none;
+    grid-area: workspace;
+  }
+
+  .previewPane[data-phone-active="true"] {
+    display: block;
+  }
+
+  .customizePane[data-phone-active="true"] {
+    display: grid;
+    gap: 12px;
+  }
+
+  .inspectorNavigation,
+  .inspectorContent {
+    grid-area: auto;
   }
 
   .previewControls {

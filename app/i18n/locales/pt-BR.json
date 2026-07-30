@@ -119,6 +119,11 @@
     "preview": {
       "heading": "Prévia ao vivo",
       "unsaved": "As alterações não salvas aparecem aqui.",
+      "workspace": {
+        "label": "Visualização do espaço de design",
+        "preview": "Prévia",
+        "customize": "Personalizar"
+      },
       "surface": {
         "description": "Escolha produtos para montar seu pacote.",
         "stepOne": "1. Escolher produtos",

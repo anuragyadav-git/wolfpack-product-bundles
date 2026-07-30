@@ -1202,12 +1202,17 @@
   margin-bottom: 24px;
 }
 
+.templateDialogIntro > div {
+  min-width: 0;
+}
+
 .templateDialogDescription,
 .templateReadyText {
   margin: 4px 0 0;
   color: #6d7175;
   font-size: 14px;
   line-height: 1.4;
+  overflow-wrap: break-word;
 }
 
 .templateDialogError {
@@ -1266,6 +1271,7 @@
   color: #202223;
   font-size: 14px;
   font-weight: 650;
+  overflow-wrap: break-word;
 }
 
 .templateCustomizationCard p {
@@ -1273,6 +1279,7 @@
   color: #6d7175;
   font-size: 13px;
   line-height: 1.45;
+  overflow-wrap: break-word;
 }
 
 .templateOptionCard {
@@ -1316,7 +1323,8 @@
 }
 
 .templateOptionFooter {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 10px;
   padding: 12px 14px;
@@ -1324,12 +1332,12 @@
 }
 
 .templateOptionLabel {
-  flex: 1 1 auto;
   min-width: 0;
   color: #202223;
   font-size: 14px;
   font-weight: 650;
   line-height: 1.3;
+  overflow-wrap: break-word;
 }
 
 .templateOptionAction {
@@ -3028,6 +3036,37 @@
 }
 
 @media (max-width: 767px) {
+  .templateDialogContent {
+    min-height: calc(100vh - 112px);
+  }
+
+  .templateDialogBody {
+    padding: 16px;
+  }
+
+  .templateDialogIntro {
+    flex-direction: column;
+  }
+
+  .templateDialogGrid,
+  .templateCustomizationGrid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  .templateReadyPanel {
+    max-width: 100%;
+    padding: 36px 24px;
+  }
+
+  .templateOptionAction {
+    min-width: 64px;
+  }
+
+  .templateDialogFooter {
+    padding: 16px;
+  }
+
   .editGrid {
     flex-direction: column;
   }

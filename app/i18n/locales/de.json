@@ -119,6 +119,11 @@
     "preview": {
       "heading": "Live-Vorschau",
       "unsaved": "Nicht gespeicherte Änderungen werden hier angezeigt.",
+      "workspace": {
+        "label": "Ansicht des Design-Arbeitsbereichs",
+        "preview": "Vorschau",
+        "customize": "Anpassen"
+      },
       "surface": {
         "description": "Wählen Sie Produkte für Ihr Bundle aus.",
         "stepOne": "1. Produkte auswählen",

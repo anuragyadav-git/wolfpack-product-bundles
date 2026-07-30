@@ -119,6 +119,11 @@
     "preview": {
       "heading": "Vista previa en directo",
       "unsaved": "Los cambios sin guardar aparecen aquí.",
+      "workspace": {
+        "label": "Vista del espacio de diseño",
+        "preview": "Vista previa",
+        "customize": "Personalizar"
+      },
       "surface": {
         "description": "Elige productos para crear tu paquete.",
         "stepOne": "1. Elegir productos",

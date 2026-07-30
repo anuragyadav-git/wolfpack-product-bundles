@@ -181,9 +181,10 @@ Primary action:
 - The complete Design, Language, and Controls cards are the actions; they do not render separate `Configure` affordances.
 - Selecting Design opens the Settings -> Design subpage.
 - While the lazy Settings workspace loads after any card selection, the route shows three skeleton cards instead of a spinner.
-- The Design Control Panel lazy-loads after entry and uses a responsive three-column workspace: section navigation on the left, the largest app-owned preview in the middle, and active fields on the right. At medium widths the preview spans the first row; at phone widths preview, navigation, and fields stack in that order.
+- The Design Control Panel lazy-loads after entry and uses a responsive three-column workspace: section navigation on the left, the largest app-owned preview in the middle, and active fields on the right. At medium widths the preview spans the first row; at phone widths a Preview / Customize segmented control shows one workspace pane at a time.
 - Preview-only Bundle Type and Template selectors cover Landing Page Standard, Classic, Compact, and Horizontal plus Product Page Product List, Product Grid, Horizontal Slots, and Vertical Slots.
 - The template-aware Preview surface control exposes only valid local scenes: Builder, Cart / summary, Loading, Validation, and Upsell for every template, plus Product picker for the two slot templates. Desktop/mobile switching preserves the selected surface when it remains valid.
+- Builder and Cart / summary use storefront-matched scenes inside fixed logical 1280×800 desktop and 390×844 mobile canvases that scale to fit the Admin panel. Product picker, Loading, Validation, and Upsell remain representative.
 - Editing a preview-relevant field selects the scene where its effect is visible. Slot product-card fields reveal Product picker, cart/footer fields reveal Cart / summary, and loading, toast, and upsell fields reveal their matching surfaces.
 - Unsaved design values are applied through the normalized storefront Design runtime and a semantic field-target contract; arbitrary CSS, remote preview requests, and cart mutations are rejected.
 - Local Design controls and template previews remain available without a storefront-ready bundle. Only the separate Preview Bundle action requires a storefront URL.
@@ -524,6 +525,7 @@ On tablet and phone containers, configure section changes use the compact curren
 /app/settings
   └── Click Design card → Settings -> Design panel opens
       ├── Existing Design sections and fields render in one inspector pane
+      ├── Phone width → switch between Preview and Customize panes
       ├── Select preview-only bundle type, template, surface, and desktop/mobile viewport
       ├── Change setting → app-owned live preview updates immediately (no persistence)
       ├── Slot product-card field → Product picker modal/bottom sheet is revealed

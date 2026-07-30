@@ -119,6 +119,11 @@
     "preview": {
       "heading": "Aperçu en direct",
       "unsaved": "Les modifications non enregistrées apparaissent ici.",
+      "workspace": {
+        "label": "Affichage de l’espace de conception",
+        "preview": "Aperçu",
+        "customize": "Personnaliser"
+      },
       "surface": {
         "description": "Choisissez des produits pour créer votre bundle.",
         "stepOne": "1. Choisir les produits",

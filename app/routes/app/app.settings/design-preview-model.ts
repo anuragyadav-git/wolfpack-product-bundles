@@ -18,6 +18,7 @@ export type DesignPreviewSurface =
   | "upsell";
 export type DesignPreviewFamily = "full-page" | "product-page";
 export type DesignPreviewViewport = "desktop" | "mobile";
+export type DesignPreviewSurfaceFidelity = "storefront" | "representative";
 export type DesignPreviewNavigation =
   | "timeline"
   | "compact-timeline"
@@ -84,6 +85,33 @@ export interface DesignPreviewScene {
 }
 
 export type DesignPreviewTheme = CSSProperties & Record<`--preview-${string}`, string>;
+
+export const DESIGN_PREVIEW_VIEWPORTS: Readonly<
+  Record<DesignPreviewViewport, { width: number; height: number }>
+> = {
+  desktop: { width: 1280, height: 800 },
+  mobile: { width: 390, height: 844 },
+};
+
+export function calculateDesignPreviewFitScale(
+  hostWidth: number,
+  viewport: DesignPreviewViewport,
+) {
+  if (!Number.isFinite(hostWidth) || hostWidth <= 0) return 1;
+  const logicalWidth = viewport === "desktop"
+    ? DESIGN_PREVIEW_VIEWPORTS.desktop.width
+    : DESIGN_PREVIEW_VIEWPORTS.mobile.width;
+  return Math.min(1, Math.max(0.5, hostWidth / logicalWidth));
+}
+
+export function getDesignPreviewSurfaceFidelity(
+  _templateKey: TemplateKey,
+  surface: DesignPreviewSurface,
+): DesignPreviewSurfaceFidelity {
+  return surface === "builder" || surface === "cart-summary"
+    ? "storefront"
+    : "representative";
+}
 
 type RuntimeTemplateConfig = {
   productCard?: {

@@ -134,15 +134,20 @@ The Settings workspace owns the Design inspector/preview layout and the
 eight-template representative preview. Wide containers use three columns for
 section navigation, the larger preview surface, and the active fields. Medium
 containers place the preview across the first row with navigation and fields
-beneath it; phone containers stack preview, navigation, then fields. All
+beneath it. Phone containers expose Preview and Customize as a two-state
+segmented control so only one dense workspace pane renders at a time. All
 breakpoints are container-driven because the usable width of a Shopify Admin
 iframe is independent of the browser's top-level viewport.
 
 The preview uses local fixture markup and media, canonical template descriptors
 derived from the storefront registries, and theme values from the normalized
 storefront Design runtime. Builder, Product Picker, Cart / Summary, Loading,
-Validation, and Upsell are deterministic representative surfaces rather than
-storefront interactions. Only slot templates include Product Picker. It does not
+Validation, and Upsell are deterministic local surfaces rather than storefront
+interactions. Builder and Cart / Summary are the storefront-matched surfaces;
+the other states remain representative. Preview scenes use fixed logical
+1280×800 desktop and 390×844 mobile canvases that scale as a whole to fit their
+Admin host, preserving the storefront breakpoint under test. Only slot templates
+include Product Picker. The preview does not
 fetch bundle data, load remote media, embed a storefront iframe, duplicate the
 widget runtime, mutate a cart, or persist preview state. Local Design editing and
 preview rendering therefore remain available when the shop has no storefront-ready

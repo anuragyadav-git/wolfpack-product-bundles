@@ -156,6 +156,11 @@
     "preview": {
       "heading": "Live preview",
       "unsaved": "Unsaved changes appear here.",
+      "workspace": {
+        "label": "Design workspace view",
+        "preview": "Preview",
+        "customize": "Customize"
+      },
       "bundleType": {
         "label": "Bundle type",
         "landingPage": "Landing Page",

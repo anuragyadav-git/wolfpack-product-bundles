@@ -988,6 +988,9 @@ Live invalid-default evidence captured on 2026-07-30 confirms:
 Live FPB Select Template evidence captured on 2026-07-30 confirms:
 
 - Select Template opens in Shopify's App Bridge host-level `max` modal shell
+- The modal body is rendered in a projected `/app` iframe outside the configure
+  page's named container. Responsive modal rules therefore need viewport media
+  queries; configure-container queries alone do not apply to this surface.
   with the heading `Customization`; at a 1280px by 800px viewport, the dialog
   starts at x=8px and y=64px and measures 1264px by 736px. An iframe-local
   Polaris `large` modal does not match this Admin-surface shell.

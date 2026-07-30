@@ -5,7 +5,7 @@ title: Widget Architecture
 type: architecture
 status: authoritative
 summary: FPB and PPB bootstrap, hydration, extension-asset, and widget runtime architecture.
-last_audited: 2026-07-23
+last_audited: 2026-07-30
 owners:
   - engineering
 domains:
@@ -61,6 +61,13 @@ embed an iframe, mutate a cart, or persist preview state. Public template images
 are reference evidence only. This boundary lets template IDs and runtime design
 tokens stay canonical without coupling the Settings chunk to the storefront
 runtime.
+
+Builder and Cart / Summary are the storefront-matched key surfaces. They render
+inside fixed logical 1280×800 desktop and 390×844 mobile canvases, then scale as
+a whole to fit the available Admin panel; the scale must not change the
+storefront breakpoint being represented. Product Picker, Loading, Validation,
+and Upsell remain deterministic representative states and must not be described
+as exact storefront matches.
 
 Source module names should describe their storefront responsibility. Avoid mechanical names such as `chunk-01.js` or `part-01.css`; those hide ownership and make stale widget code harder to spot.
 
