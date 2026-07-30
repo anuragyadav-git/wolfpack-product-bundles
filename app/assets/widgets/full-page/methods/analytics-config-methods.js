@@ -423,6 +423,7 @@ async _handleCheckoutIntegrationProvider(checkout) {
 async _handlePostAddToCartAction(actionConfig) {
   const checkout = actionConfig || this._getLandingPageControls()?.checkout || {};
 
+  this._runControlsScript(checkout.executeScript);
   const target = checkout.action === 'checkout' ? '/checkout' : '/cart';
   const providerId = checkout.providerId || 'native';
   this._emitStorefrontEvent('checkout-clicked', { target, providerId });

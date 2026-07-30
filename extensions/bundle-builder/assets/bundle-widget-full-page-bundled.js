@@ -1,7 +1,7 @@
 /*!
  * Wolfpack Bundle Widget — Full Page
  * Version : 5.0.222
- * Built   : 2026-07-29
+ * Built   : 2026-07-30
  *
  * Cache note: Shopify CDN cache is busted automatically by shopify app deploy.
  * After deploying, allow 2-10 minutes for propagation before testing.
@@ -4946,6 +4946,7 @@ async _handleCheckoutIntegrationProvider(checkout) {
 async _handlePostAddToCartAction(actionConfig) {
   const checkout = actionConfig || this._getLandingPageControls()?.checkout || {};
 
+  this._runControlsScript(checkout.executeScript);
   const target = checkout.action === 'checkout' ? '/checkout' : '/cart';
   const providerId = checkout.providerId || 'native';
   this._emitStorefrontEvent('checkout-clicked', { target, providerId });

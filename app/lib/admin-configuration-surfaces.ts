@@ -614,6 +614,7 @@ export const CONTROL_LAYOUTS: ControlsLayout[] = [
             description: "Select the checkout app installed on this store.",
             options: CHECKOUT_INTEGRATION_OPTIONS,
           },
+          { label: "Execute Script", kind: "script", group: "Checkout Settings" },
           { label: "Font Settings", kind: "text", group: "Font Settings", description: "Customize the font of the bundle builder." },
           { label: "Custom Font", kind: "text", group: "Font Settings", description: "Note: By default, your storefront theme font will be picked." },
         ],

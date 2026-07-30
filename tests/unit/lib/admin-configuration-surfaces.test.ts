@@ -159,6 +159,7 @@ describe("recovered admin surfaces contract", () => {
       "Discount format",
       "Checkout Settings",
       "Checkout Integration",
+      "Execute Script",
       "Font Settings",
       "Custom Font",
     ]);
@@ -177,6 +178,7 @@ describe("recovered admin surfaces contract", () => {
       "Cart Messaging",
       "Cart Messaging",
       "Cart Messaging",
+      "Checkout Settings",
       "Checkout Settings",
       "Checkout Settings",
       "Font Settings",

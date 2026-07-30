@@ -15,6 +15,7 @@ const controlsPayload = {
   "Discount format": "Percentage only (Eg: \"You save 19%\")",
   "Checkout Settings": "Redirect to Checkout",
   "Checkout Integration": "GoKwik",
+  "Execute Script": "window.__fpbPostAddRuns = true;",
   "Custom Font": "Inter",
   "Custom CSS for bundle builder pages": ".wpbBundle-HTML .builder { color: red; }",
   "Custom CSS for bundle dummy product page": ".wpbBundle-HTML .dummy { color: blue; }",
@@ -66,6 +67,7 @@ describe("Settings Controls runtime mapping", () => {
       checkout: {
         action: "checkout",
         providerId: "gokwik",
+        executeScript: "window.__fpbPostAddRuns = true;",
       },
       font: {
         customFont: "Inter",
@@ -100,7 +102,7 @@ describe("Settings Controls runtime mapping", () => {
       redirectCollectionQuickAddToBundle: true,
       redirect: {
         action: "cart",
-        executeScript: "",
+        executeScript: "window.__fpbPostAddRuns = true;",
       },
       css: {
         mixAndMatchBundles: ".wpbMixBundle { color: purple; }",
@@ -162,6 +164,7 @@ describe("Settings Controls runtime mapping", () => {
     expect(runtime.settingsControls.landingPage.checkout).toEqual({
       action: "checkout",
       providerId: "native",
+      executeScript: "window.__fpbPostAddRuns = true;",
     });
   });
 
