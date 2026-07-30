@@ -1137,7 +1137,7 @@
     .fpb-mobile-summary-count-badge {
     cursor: pointer;
     top: 0;
-    min-width: max-content;
+    min-width: 48px;
     height: auto;
     min-height: 0;
     line-height: 1.8;

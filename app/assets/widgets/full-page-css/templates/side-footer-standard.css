@@ -3044,7 +3044,7 @@ body:has([data-fpb-design-preset]) {
     --fpb-mobile-additional-offers-bg: #55bd47;
     cursor: pointer;
     top: -0.75rem;
-    min-width: max-content;
+    min-width: 48px;
     min-height: 0;
     height: auto;
     line-height: 1.8;

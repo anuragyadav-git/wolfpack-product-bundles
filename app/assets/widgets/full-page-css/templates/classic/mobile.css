@@ -682,7 +682,7 @@
     --fpb-mobile-additional-offers-bg: #55bd47;
     cursor: pointer;
     top: calc(var(--classic-mobile-footer-block-padding) * -2);
-    min-width: max-content;
+    min-width: 48px;
     min-height: 0;
     height: auto;
     line-height: 1.8;
