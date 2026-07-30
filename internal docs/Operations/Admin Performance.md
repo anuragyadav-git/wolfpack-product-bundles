@@ -198,7 +198,7 @@ analytics provider route-scoped until a shared runtime consumer exists.
 ## Admin Mobile and First-Load Contract
 
 The authenticated `/app` index must render a route-shaped skeleton while the
-client resolves auth parameters and the onboarding/dashboard destination. It
+client resolves auth parameters and the dashboard destination. It
 must not return a blank iframe during that interval. The skeleton reserves
 stable hero and card geometry, exposes an accessible busy state, and disables
 its shimmer under `prefers-reduced-motion`.
@@ -212,7 +212,7 @@ helpers may reference that chunk.
 Merchant workflow roots should use descriptive `s-query-container` names when
 their responsive behavior depends on embedded app width. Current shared roots
 include `dashboard-bundles`, `settings-landing`, `design-settings`,
-`pricing-page`, `billing-page`, `events-page`, `onboarding-page`,
+`pricing-page`, `billing-page`, `events-page`, `storefront-setup-card`,
 `integrations-page`, `analytics-page`, `file-picker`, and
 `bundle-configure`. Page shells remain shrinkable, use responsive inline
 padding, and keep horizontal scrolling inside labelled data regions rather than
@@ -241,8 +241,11 @@ non-Analytics routes avoided `vendor-charts`, and embedded Admin routes avoided
 the legacy Polaris chunk and stylesheet. Analytics continued to request its
 lazy dashboard JavaScript and CSS in the same import boundary.
 
-The `/app` layout queries `firstCreateTourEligible` only for the exact `/app`
-destination decision. Settings returns its established `settingsPage` and
+The standalone onboarding route has been removed. Authenticated `/app` entries
+always continue to the dashboard, so the shared layout no longer queries
+`firstCreateTourEligible`. The create handler still claims that flag atomically
+after required creation succeeds and uses it only to open the post-create
+configure tour. Settings returns its established `settingsPage` and
 `previewBundles` loader fields as deferred promises; the landing cards paint
 without awaiting them, and the selected workspace owns the route-shaped
 loading and error states.

@@ -9,7 +9,10 @@ import { validatePpbWidgetPlacementBeforePreview } from "../../../lib/ppb-widget
 import { openThemeEditorInNewTab } from "../../../lib/theme-editor-navigation.client";
 import { blockUnsavedAdminNavigation } from "../../../lib/admin-unsaved-navigation";
 import type { BundleReadinessItem } from "../../../components/bundle-configure/BundleReadinessOverlay";
-import type { TourStep } from "../../../components/bundle-configure/tourSteps";
+import {
+  getGuidedTourTransition,
+  type TourStep,
+} from "../../../components/bundle-configure/tourSteps";
 
 function recordBundlePreview(bundleLink: string) {
   const formData = new FormData();
@@ -352,12 +355,11 @@ export function usePpbPreviewReadinessHandlers({
   );
   const handleGuidedTourStepChange = useCallback(
     (step: TourStep) => {
-      if (step.sectionId) {
-        base.setActiveSection(step.sectionId);
+      const transition = getGuidedTourTransition(step);
+      if (transition.sectionId) {
+        base.setActiveSection(transition.sectionId);
       }
-      templateState.setReadinessOpen(
-        step.targetSection === "fpb-readiness-score",
-      );
+      templateState.setReadinessOpen(transition.readinessOpen);
     },
     [base, templateState],
   );

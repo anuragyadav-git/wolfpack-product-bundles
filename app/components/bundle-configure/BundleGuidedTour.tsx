@@ -21,6 +21,7 @@ interface Props {
 const TOOLTIP_WIDTH = 420;
 const TOOLTIP_HEIGHT = 220;
 const SPOTLIGHT_PAD = 8;
+const VIEWPORT_PAD = 12;
 const MAX_TARGET_LOOKUP_FRAMES = 30;
 const STABLE_FRAME_COUNT = 4;
 
@@ -58,6 +59,11 @@ export function BundleGuidedTour({
   } | null>(null);
 
   const storageKey = getBundleGuidedTourStorageKey(shop);
+
+  const getTooltipHeight = useCallback(() => {
+    const measuredHeight = dialogRef.current?.getBoundingClientRect().height ?? TOOLTIP_HEIGHT;
+    return Math.min(measuredHeight, Math.max(120, window.innerHeight - VIEWPORT_PAD * 2));
+  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -99,12 +105,17 @@ export function BundleGuidedTour({
   }, []);
 
   const centeredBottomStyle = useCallback((): CSSProperties => ({
-    top: window.innerHeight - 280,
-    left: Math.max(12, (window.innerWidth - getTooltipWidth()) / 2),
+    top: Math.max(
+      VIEWPORT_PAD,
+      window.innerHeight - getTooltipHeight() - VIEWPORT_PAD,
+    ),
+    left: Math.max(VIEWPORT_PAD, (window.innerWidth - getTooltipWidth()) / 2),
     width: getTooltipWidth(),
+    maxHeight: Math.max(120, window.innerHeight - VIEWPORT_PAD * 2),
+    overflowY: "auto",
     transform: "none",
     bottom: "auto",
-  }), []);
+  }), [getTooltipHeight]);
 
   const showFallbackPosition = useCallback(() => {
     setSpotlightRect(null);
@@ -133,6 +144,7 @@ export function BundleGuidedTour({
     const rect = el.getBoundingClientRect();
     const vw = window.innerWidth;
     const vh = window.innerHeight;
+    const tooltipHeight = getTooltipHeight();
 
     setSpotlightRect({
       x: rect.left - SPOTLIGHT_PAD,
@@ -141,14 +153,35 @@ export function BundleGuidedTour({
       height: rect.height + SPOTLIGHT_PAD * 2,
     });
 
-    const belowFits = rect.bottom + TOOLTIP_HEIGHT + 12 < vh;
-    const top = belowFits ? rect.bottom + 12 : Math.max(12, rect.top - TOOLTIP_HEIGHT - 12);
+    const belowTop = rect.bottom + VIEWPORT_PAD;
+    const aboveTop = rect.top - tooltipHeight - VIEWPORT_PAD;
+    const belowFits = belowTop + tooltipHeight <= vh - VIEWPORT_PAD;
+    const aboveFits = aboveTop >= VIEWPORT_PAD;
+    const top = belowFits
+      ? belowTop
+      : aboveFits
+        ? aboveTop
+        : Math.max(
+            VIEWPORT_PAD,
+            Math.min(rect.top, vh - tooltipHeight - VIEWPORT_PAD),
+          );
     const tooltipWidth = getTooltipWidth();
     let left = rect.left + rect.width / 2 - tooltipWidth / 2;
-    left = Math.max(12, Math.min(left, vw - tooltipWidth - 12));
+    left = Math.max(
+      VIEWPORT_PAD,
+      Math.min(left, vw - tooltipWidth - VIEWPORT_PAD),
+    );
 
-    setTooltipStyle({ top, left, width: tooltipWidth, transform: "none", bottom: "auto" });
-  }, []);
+    setTooltipStyle({
+      top,
+      left,
+      width: tooltipWidth,
+      maxHeight: Math.max(120, vh - VIEWPORT_PAD * 2),
+      overflowY: "auto",
+      transform: "none",
+      bottom: "auto",
+    });
+  }, [getTooltipHeight]);
 
   const waitForStableTarget = useCallback((el: HTMLElement) => {
     let lastTop = -Infinity;
@@ -239,6 +272,28 @@ export function BundleGuidedTour({
       cleanupHighlightedTarget();
     };
   }, [cancelPendingFrame, cleanupHighlightedTarget]);
+
+  useEffect(() => {
+    if (!visible) return;
+    const reposition = () => {
+      const targetSection = steps[currentStep]?.targetSection;
+      const target = targetSection ? queryTarget(targetSection) : null;
+      if (target) {
+        updatePositions(target);
+      } else {
+        showFallbackPosition();
+      }
+    };
+    window.addEventListener("resize", reposition);
+    return () => window.removeEventListener("resize", reposition);
+  }, [
+    currentStep,
+    queryTarget,
+    showFallbackPosition,
+    steps,
+    updatePositions,
+    visible,
+  ]);
 
   const closeTour = useCallback((callback?: () => void) => {
     localStorage.setItem(storageKey, "1");

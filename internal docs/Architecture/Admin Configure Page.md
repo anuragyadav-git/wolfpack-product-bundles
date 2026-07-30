@@ -75,3 +75,8 @@ before looking up its target, retries while a lazy target arrives, and falls
 back to a centered dialog when the target is unavailable. Completion,
 dismissal, and Escape persist the existing shop-keyed local-storage value,
 restore the previously focused control, and release the body scroll lock.
+The dialog measures its rendered height before choosing an above-target,
+below-target, or viewport-contained position. It recomputes that position after
+viewport changes and uses a bounded internal scroll region for long copy on
+short desktop and mobile viewports. Guided transitions keep the readiness modal
+closed so it cannot cover the tour while the readiness trigger is highlighted.

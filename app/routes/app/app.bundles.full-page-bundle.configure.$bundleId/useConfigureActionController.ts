@@ -7,7 +7,10 @@ import { verifyAppEmbedEnabledBeforePreview } from "../../../lib/app-embed-statu
 import { prepareStorefrontPreviewForOpen } from "../../../lib/storefront-sync-preview.client";
 import { blockUnsavedAdminNavigation } from "../../../lib/admin-unsaved-navigation";
 import { useSharedBundleHandlers } from "../../../hooks/useSharedBundleHandlers";
-import { type TourStep } from "../../../components/bundle-configure/tourSteps";
+import {
+  getGuidedTourTransition,
+  type TourStep,
+} from "../../../components/bundle-configure/tourSteps";
 import type { ConfigureBundleFlowDraft } from "./configure-flow-types";
 import { useConfigureAddonActionHandlers } from "./useConfigureAddonActionHandlers";
 import { useConfigureVisibilityActionHandlers } from "./useConfigureVisibilityActionHandlers";
@@ -274,10 +277,11 @@ export function useConfigureActionController(flow: ConfigureBundleFlowDraft) {
   );
   const handleGuidedTourStepChange = useCallback(
     (step: TourStep) => {
-      if (step.sectionId) {
-        flow.setActiveSection(step.sectionId);
+      const transition = getGuidedTourTransition(step);
+      if (transition.sectionId) {
+        flow.setActiveSection(transition.sectionId);
       }
-      flow.setReadinessOpen(step.targetSection === "fpb-readiness-score");
+      flow.setReadinessOpen(transition.readinessOpen);
     },
     [flow],
   );

@@ -144,8 +144,7 @@ describe("app layout loader bootstrap performance", () => {
     );
   });
 
-  it("queries first-create tour eligibility only for the exact /app destination", async () => {
-    prisma.shop.findUnique.mockResolvedValue({ firstCreateTourEligible: true });
+  it("does not query first-create tour eligibility from the shared app loader", async () => {
     const { loader } = await import("../../../app/routes/app/app");
 
     const appResult = await loader({
@@ -153,10 +152,9 @@ describe("app layout loader bootstrap performance", () => {
       params: {},
       context: {},
     } as any);
-    expect(prisma.shop.findUnique).toHaveBeenCalledTimes(1);
-    expect(appResult).toMatchObject({ firstCreateTourEligible: true });
+    expect(prisma.shop.findUnique).not.toHaveBeenCalled();
+    expect(appResult).not.toHaveProperty("firstCreateTourEligible");
 
-    prisma.shop.findUnique.mockClear();
     const dashboardResult = await loader({
       request: new Request("https://test-app.example.com/app/dashboard"),
       params: {},

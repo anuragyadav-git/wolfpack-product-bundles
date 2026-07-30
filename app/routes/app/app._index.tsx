@@ -1,11 +1,10 @@
 import { json } from "@remix-run/node";
-import { useNavigate, useRouteLoaderData } from "@remix-run/react";
+import { useNavigate } from "@remix-run/react";
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import styles from "../../styles/routes/app-index.module.css";
 import { navigateBackOrFallback } from "../../lib/navigation";
 import { openSupportChat } from "../../lib/support-chat.client";
-import type { loader as appLoader } from "./app";
 
 // This route handles /app → shows the Welcome landing screen for intentional visits,
 // and silently redirects to the dashboard when Shopify's auth flow lands here.
@@ -30,10 +29,9 @@ export const loader = async () => {
 
 export function getInitialAppDestination(
   isAuthFlow: boolean,
-  firstCreateTourEligible: boolean,
-): "/app/onboarding" | "/app/dashboard" | null {
+): "/app/dashboard" | null {
   if (!isAuthFlow) return null;
-  return firstCreateTourEligible ? "/app/onboarding" : "/app/dashboard";
+  return "/app/dashboard";
 }
 
 export function AppRouteSkeleton() {
@@ -104,7 +102,6 @@ const FEATURES = [
 
 export default function AppIndex() {
   const navigate = useNavigate();
-  const appData = useRouteLoaderData<typeof appLoader>("routes/app/app");
   // Start false so the server renders nothing (no SSR flash during auth bounces).
   // The useEffect below flips this to true only for intentional /app visits.
   const [showLanding, setShowLanding] = useState(false);
@@ -116,16 +113,13 @@ export default function AppIndex() {
     const isAuthFlow =
       params.has("id_token") || params.has("host") || params.has("shop");
 
-    const destination = getInitialAppDestination(
-      isAuthFlow,
-      appData?.firstCreateTourEligible === true,
-    );
+    const destination = getInitialAppDestination(isAuthFlow);
     if (destination) {
       navigate(destination, { replace: true });
     } else {
       setShowLanding(true);
     }
-  }, [appData?.firstCreateTourEligible, navigate]);
+  }, [navigate]);
 
   if (!showLanding) return <AppRouteSkeleton />;
 
@@ -153,7 +147,7 @@ export default function AppIndex() {
           <div className={styles.ctaRow}>
             <button
               className={styles.btnPrimary}
-              onClick={() => navigate("/app/onboarding")}
+              onClick={() => navigate("/app/bundles/create")}
             >
               ✦ Get Started
             </button>

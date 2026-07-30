@@ -16,7 +16,7 @@ describe("admin web vitals diagnostics", () => {
     const storage = new Map<string, string>();
     const win = {
       location: {
-        pathname: "/app/onboarding",
+        pathname: "/app/bundles/create",
         search: "?wpbWebVitalsDebug=1",
       },
       shopify: {
@@ -37,7 +37,7 @@ describe("admin web vitals diagnostics", () => {
     onReportCallback?.({ metrics: [{ name: "LCP", id: "lcp-2499", value: 2499 }] });
 
     expect((win as any).__wpbAdminWebVitals.getLcpP75Summary()).toEqual({
-      "/app/onboarding": {
+      "/app/bundles/create": {
         p75: 2499,
         sampleCount: 1,
         targetPass: true,
@@ -49,7 +49,7 @@ describe("admin web vitals diagnostics", () => {
     onReportCallback?.({ metrics: [{ name: "LCP", id: "lcp-2500", value: 2500 }] });
 
     expect((win as any).__wpbAdminWebVitals.getLcpP75Summary()).toEqual({
-      "/app/onboarding": {
+      "/app/bundles/create": {
         p75: 2500,
         sampleCount: 1,
         targetPass: false,

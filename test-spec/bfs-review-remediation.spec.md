@@ -5,7 +5,7 @@ title: Built for Shopify Review Remediation Test Spec
 type: test-spec
 status: active
 summary: Behavior acceptance criteria for the July 2026 Built for Shopify review remediation.
-last_audited: 2026-07-29
+last_audited: 2026-07-30
 owners:
   - engineering
 domains:
@@ -16,7 +16,7 @@ systems:
   - Shopify Admin
   - App Bridge
 source_paths:
-  - app/routes/app/app.onboarding.tsx
+  - app/routes/app/app._index.tsx
   - app/routes/app/app.dashboard/DashboardPage.tsx
   - app/routes/app/app.settings/SettingsRoute.tsx
 related_docs:

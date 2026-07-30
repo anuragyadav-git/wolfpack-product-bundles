@@ -27,25 +27,12 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
   const idToken = url.searchParams.get("id_token");
   ensureExpiringOfflineSessionInBackground(session.shop, idToken);
-  const shouldLoadFirstCreateTourEligibility =
-    url.pathname === "/app" || url.pathname === "/app/";
-  const [locale, shopRecord] = await Promise.all([
-    loadShopAdminLocale(session.shop),
-    shouldLoadFirstCreateTourEligibility
-      ? prisma.shop.findUnique({
-          where: { shopDomain: session.shop },
-          select: { firstCreateTourEligible: true },
-        })
-      : Promise.resolve(null),
-  ]);
+  const locale = await loadShopAdminLocale(session.shop);
   await loadAdminLocaleResources(locale);
   return {
     apiKey: process.env.SHOPIFY_API_KEY || "",
     locale,
     shop: session.shop,
-    ...(shouldLoadFirstCreateTourEligibility
-      ? { firstCreateTourEligible: shopRecord?.firstCreateTourEligible === true }
-      : {}),
   };
 };
 

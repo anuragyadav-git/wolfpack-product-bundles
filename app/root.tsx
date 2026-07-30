@@ -38,7 +38,13 @@ export function ErrorBoundary() {
         />
         <title>Error — Wolfpack Bundles</title>
       </head>
-      <body style={{ margin: 0 }}>
+      <body
+        style={{
+          margin: 0,
+          fontFamily:
+            "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+        }}
+      >
         <ErrorPage error={error} />
         <Scripts />
       </body>
@@ -106,7 +112,12 @@ export default function App() {
         <Meta />
         <Links />
       </head>
-      <body>
+      <body
+        style={{
+          fontFamily:
+            "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+        }}
+      >
         <Outlet />
         <CrispChat />
         <ScrollRestoration />

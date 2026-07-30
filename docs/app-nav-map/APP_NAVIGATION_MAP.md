@@ -41,16 +41,17 @@ The app runs inside the Shopify Admin embedded iframe. The outer Shopify Admin s
 provides a persistent left-nav with the app's registered nav items.
 
 The authenticated `/app` entry renders a stable route-shaped loading shell while
-client-side auth parameters resolve. New shops continue to onboarding and returning
-shops continue to the dashboard without exposing a blank iframe.
+client-side auth parameters resolve. Authenticated shops continue to the dashboard
+without exposing a blank iframe. First-create guidance begins only after a successful
+bundle creation.
 
 Destination flow:
 ```
 /app with Shopify auth parameters
-├── firstCreateTourEligible = true  → /app/onboarding
-└── returning shop                 → /app/dashboard
+└── /app/dashboard
 
 /app without auth parameters       → intentional app landing
+└── [Get Started]                   → /app/bundles/create
 ```
 
 ### Shopify Admin Left Nav (app section)
@@ -84,7 +85,9 @@ Dashboard
 ├── [Button] "Create Bundle"  → opens Create Bundle Modal
 ├── Language selector → persists one shop-wide embedded Admin UI language for all staff accounts on change
 ├── Metrics: active bundle count
-├── Storefront setup status grid → all five theme blocks/embeds with Theme Editor action when needed
+├── Storefront setup card → action-first core readiness and active-bundle summary
+│   └── [Finish setup / View details] → Storefront setup modal
+│       └── all five theme blocks/embeds with Theme Editor action when needed
 ├── Section: "Your Bundles"
 │   └── DataTable of bundles (empty state if none exist)
 │       └── Per bundle row:
@@ -500,11 +503,6 @@ Billing Page
 
 ### Flow B: Create & Configure Bundle
 ```
-/app/onboarding
-  ├── select Product-page or Full-page bundle
-  ├── [Create your first bundle] → /app/bundles/create?bundleType={validatedType}
-  └── [Go to dashboard] → /app/dashboard
-
 /app/dashboard
   └── [Create Bundle] → /app/bundles/create → select type + enter name → POST
       └── redirect → /app/bundles/{type}/configure/{bundleId}?mode=create

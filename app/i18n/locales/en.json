@@ -113,6 +113,43 @@
       "save": "Save",
       "saveSuccess": "Admin language saved",
       "saveError": "Unable to save Admin language"
+    },
+    "storefrontSetup": {
+      "loadingTitle": "Checking storefront setup",
+      "loadingDescription": "Checking your published theme components and app embed.",
+      "errorTitle": "Storefront status needs attention",
+      "errorDescription": "We couldn't check your published theme. Open details to review the next step.",
+      "incompleteTitle": "Finish storefront setup",
+      "incompleteDescription_one": "{{count}} core component still needs attention.",
+      "incompleteDescription_other": "{{count}} core components still need attention.",
+      "completeTitle": "Your storefront is ready",
+      "completeDescription": "All core bundle components are enabled in your published theme.",
+      "finishSetup": "Finish setup",
+      "viewDetails": "View details",
+      "ready": "Ready",
+      "checking": "Checking setup",
+      "actionNeeded": "Action needed",
+      "coreComponents": "Core components enabled",
+      "activeBundles": "Active bundles",
+      "modalHeading": "Storefront setup",
+      "modalDescription": "These components control how Wolfpack bundles appear on your storefront.",
+      "modalError": "Status unavailable. Reload to try again.",
+      "coreHeading": "Core bundle components",
+      "optionalHeading": "Optional placements",
+      "openThemeEditor": "Open Theme Editor",
+      "close": "Close",
+      "resources": {
+        "appEmbed": "App embed",
+        "fullPage": "Full-page widget",
+        "productPage": "Product-page widget",
+        "upsellBlock": "Upsell block",
+        "upsellButton": "Upsell button"
+      },
+      "status": {
+        "enabled": "Enabled",
+        "ready": "Ready to enable",
+        "unavailable": "Not available"
+      }
     }
   },
   "settingsDcp": {
