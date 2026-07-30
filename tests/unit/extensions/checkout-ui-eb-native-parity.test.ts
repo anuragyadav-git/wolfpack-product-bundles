@@ -79,6 +79,77 @@ describe("TotalSavingsExtension EB checkout parity", () => {
     ).toBe(82.9);
   });
 
+  it("derives bundle savings from the public retail price and native line cost", () => {
+    expect(
+      calculateCheckoutTotalSavings({
+        lines: [
+          {
+            attributes: [
+              { key: "Retail Price", value: "$2,606.00" },
+            ],
+            cost: {
+              totalAmount: { amount: 2596, currencyCode: "USD" },
+            },
+            discountAllocations: [],
+          },
+        ],
+        discountAllocations: [],
+      }),
+    ).toBe(10);
+  });
+
+  it("does not double count the public retail price fallback and native discounts", () => {
+    expect(
+      calculateCheckoutTotalSavings({
+        lines: [
+          {
+            attributes: [
+              { key: "Retail Price", value: "$100.00" },
+            ],
+            cost: {
+              totalAmount: { amount: 90, currencyCode: "USD" },
+            },
+            discountAllocations: [
+              { discountedAmount: { amount: 10, currencyCode: "USD" } },
+            ],
+          },
+        ],
+        discountAllocations: [],
+      }),
+    ).toBe(10);
+  });
+
+  it("uses native checkout discounts without adding parent bundle price savings", () => {
+    expect(
+      calculateCheckoutTotalSavings({
+        lines: [
+          {
+            attributes: [
+              { key: "_bundle_total_savings_cents", value: "1000" },
+              { key: "Retail Price", value: "$2,606.00" },
+            ],
+            cost: {
+              totalAmount: { amount: 2596, currencyCode: "USD" },
+            },
+            discountAllocations: [],
+          },
+          {
+            attributes: [{ key: "Add On", value: "" }],
+            cost: {
+              totalAmount: { amount: 0, currencyCode: "USD" },
+            },
+            discountAllocations: [
+              { discountedAmount: { amount: 30, currencyCode: "USD" } },
+            ],
+          },
+        ],
+        discountAllocations: [
+          { discountedAmount: { amount: 30, currencyCode: "USD" } },
+        ],
+      }),
+    ).toBe(30);
+  });
+
   it("includes free add-on bundle savings attributes when native allocations are absent", () => {
     expect(
       calculateCheckoutTotalSavings({
@@ -98,5 +169,9 @@ describe("TotalSavingsExtension EB checkout parity", () => {
 
   it("formats savings with the active checkout currency", () => {
     expect(formatCheckoutMoney(82.9, "INR")).toBe("₹82.90");
+  });
+
+  it("uses the currency's native fraction digits", () => {
+    expect(formatCheckoutMoney(1000, "JPY")).toBe("¥1,000");
   });
 });

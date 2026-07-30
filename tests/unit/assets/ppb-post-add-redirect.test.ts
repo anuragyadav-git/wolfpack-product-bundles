@@ -87,6 +87,27 @@ describe('Product Page post-add redirect handling', () => {
     expect(currentPathname()).toBe('/products/test-bundle');
   });
 
+  it('uses Shopify standard actions before selector-based side-cart handling', async () => {
+    const updateCart = jest.fn(async () => ({ cart: { id: 'cart-1' } }));
+    const openCart = jest.fn(async () => undefined);
+    (global as any).window.Shopify = {
+      actions: {
+        updateCart,
+        openCart,
+      },
+    };
+
+    await ProductPageConfigLifecycleMethods._handlePostAddToCartAction.call(
+      makeContext(),
+      { action: 'side_cart' },
+      'ppb-session-1',
+    );
+
+    expect(updateCart).toHaveBeenCalledTimes(1);
+    expect(openCart).toHaveBeenCalledTimes(1);
+    expect((global as any).document.querySelector).not.toHaveBeenCalled();
+  });
+
   it('runs redirect and custom scripts before applying the post-add action', () => {
     ProductPageConfigLifecycleMethods._handlePostAddToCartAction.call(
       makeContext({

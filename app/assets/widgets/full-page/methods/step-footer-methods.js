@@ -248,7 +248,10 @@ async addBundleToCart(clickedButton = null) {
 
       // Show success message
       ToastManager.show('Bundle added to cart successfully!');
-      await this._handlePostAddToCartAction(this._getLandingPageControls()?.checkout);
+      await this._handlePostAddToCartAction(
+        this._getLandingPageControls()?.checkout,
+        baseOfferId,
+      );
 
     } catch (fetchError) {
       this._emitStorefrontEvent('bundle-add-to-cart-failed', { reason: 'fetch-error', message: String(fetchError && fetchError.message || fetchError) });

@@ -19,6 +19,7 @@ describe("checkout integration provider registry", () => {
       "Monster cart",
       "Upcart",
       "Kaching Cart",
+      "Custom script",
     ]);
   });
 

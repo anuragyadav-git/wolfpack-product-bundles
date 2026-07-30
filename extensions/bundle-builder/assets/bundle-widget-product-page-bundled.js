@@ -1,7 +1,7 @@
 /*!
  * Wolfpack Bundle Widget — Product Page
  * Version : 5.0.222
- * Built   : 2026-07-29
+ * Built   : 2026-07-30
  *
  * Cache note: Shopify CDN cache is busted automatically by shopify app deploy.
  * After deploying, allow 2-10 minutes for propagation before testing.
@@ -4516,9 +4516,17 @@ _runControlsScript(script) {
   }
 },
 
-_handlePostAddToCartAction(actionConfig) {
+async _handlePostAddToCartAction(actionConfig, lifecycleKey) {
   const controls = this._getProductPageControls();
   const redirect = actionConfig || controls?.redirect || {};
+
+  if (lifecycleKey) {
+    this._checkoutIntegrationInvocations ||= new Set();
+    if (!claimCheckoutIntegrationInvocation(this._checkoutIntegrationInvocations, lifecycleKey)) {
+      return;
+    }
+  }
+
   this._runControlsScript(redirect.executeScript);
   this._runControlsScript(controls?.scripts?.executeCustomScript);
 
@@ -4537,13 +4545,20 @@ _handlePostAddToCartAction(actionConfig) {
     const selector = redirect.selectors?.sideCartOpenButton
       || controls?.selectors?.sideCartOpenButton
       || controls?.selectors?.sideCart;
-    if (selector) {
-      const sideCartTrigger = document.querySelector(selector);
-      if (sideCartTrigger) {
-        setTimeout(() => sideCartTrigger.click(), 300);
-        return;
-      }
-    }
+    const invocation = await invokeCheckoutIntegrationProvider(
+      'theme_cart_drawer',
+      getWindow(),
+      {
+        openThemeCartDrawer: () => {
+          if (!selector) return false;
+          const sideCartTrigger = document.querySelector(selector);
+          if (!sideCartTrigger) return false;
+          setTimeout(() => sideCartTrigger.click(), 300);
+          return true;
+        },
+      },
+    );
+    if (invocation.ok) return;
   }
 
   setTimeout(() => {
@@ -9887,7 +9902,10 @@ const ProductPageCartMethods = {
       }
 
       ToastManager.show('Bundle added to cart successfully!');
-      this._handlePostAddToCartAction(this._getProductPageControls()?.redirect);
+      await this._handlePostAddToCartAction(
+        this._getProductPageControls()?.redirect,
+        `${offerId}_${sessionKey}`,
+      );
     } catch (error) {
       ToastManager.show('Failed to add bundle to cart: ' + error.message);
     } finally {

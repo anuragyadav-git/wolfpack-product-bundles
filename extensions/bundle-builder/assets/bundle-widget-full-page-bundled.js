@@ -47,19 +47,6 @@ const ConditionValidator = (function () {
     return total;
   }
 
-  /**
-   * Determine whether a proposed quantity update is permitted by the step's condition.
-   *
-   * Only blocks INCREASES that would violate an upper-bound operator.
-   * Decreases are always permitted regardless of the condition state (so the
-   * customer can switch products without getting permanently stuck).
-   *
-   * @param {object}  step              Step config object (conditionType, conditionOperator, conditionValue)
-   * @param {Record<string, number>} currentSelections  Current selections for this step
-   * @param {string}  targetProductId   Product being updated
-   * @param {number}  newQuantity       Proposed quantity (0 = remove)
-   * @returns {{ allowed: boolean, limitText: string|null }}
-   */
   function canUpdateQuantity(step, currentSelections, targetProductId, newQuantity, targetValues) {
 
     if (!step || !step.conditionType || !step.conditionOperator || !_isPositiveConditionValue(step.conditionValue)) {
@@ -407,15 +394,6 @@ const BUNDLE_WIDGET = {
   PLACEHOLDER_IMAGE: INLINE_PLACEHOLDER_IMAGE,
   PLACEHOLDER_IMAGE_FALLBACK: INLINE_PLACEHOLDER_IMAGE
 };
-
-/**
- * Bundle Widget - Currency Management System
- *
- * Handles multi-currency detection, conversion, and formatting.
- * Integrates with Shopify Markets for automatic currency handling.
- *
- * @version 4.0.0
- */
 
 class CurrencyManager {
   static getShopify() {
@@ -3086,13 +3064,6 @@ function escapeAttribute(value) {
   return escapeHtml(value).replace(/`/g, '&#96;');
 }
 
-/**
- * Shared selected product row renderer.
- *
- * Renders prepared display data only; selection rules, default-product rules,
- * and free-gift lock state stay in the caller until templates migrate.
- */
-
 const SELECTED_ROW_PLACEHOLDER_IMAGE = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96"%3E%3Crect width="96" height="96" fill="%23f3f4f6"/%3E%3C/svg%3E';
 
 function renderSelectedProductRow(product = null, options = {}) {
@@ -4730,19 +4701,7 @@ _runControlsScript(script) {
 },
 
 _getCheckoutIntegrationProvider(providerId) {
-  const providers = {
-    native: { id: 'native', callbackMode: 'native', requiresDiscountCode: false },
-    theme_cart_drawer: { id: 'theme_cart_drawer', callbackMode: 'side_cart', requiresDiscountCode: false },
-    gokwik: { id: 'gokwik', callbackMode: 'checkout', requiresDiscountCode: true },
-    shopflo: { id: 'shopflo', callbackMode: 'checkout', requiresDiscountCode: true },
-    zecpay: { id: 'zecpay', callbackMode: 'checkout', requiresDiscountCode: true },
-    rebuy: { id: 'rebuy', callbackMode: 'cart_refresh', requiresDiscountCode: false },
-    shiprocket_fastrr: { id: 'shiprocket_fastrr', callbackMode: 'checkout', requiresDiscountCode: true },
-    monster_cart: { id: 'monster_cart', callbackMode: 'side_cart', requiresDiscountCode: false },
-    upcart: { id: 'upcart', callbackMode: 'side_cart', requiresDiscountCode: false },
-    kaching_cart: { id: 'kaching_cart', callbackMode: 'side_cart', requiresDiscountCode: false },
-  };
-  return providers[providerId] || providers.native;
+  return getCheckoutIntegrationProvider(providerId);
 },
 
 _isCheckoutIntegrationProvider(providerId) {
@@ -4750,7 +4709,7 @@ _isCheckoutIntegrationProvider(providerId) {
 },
 
 _getCheckoutIntegrationFallbackTarget(provider) {
-  return provider.callbackMode === 'checkout' ? '/checkout' : '/cart';
+  return provider.fallbackAction === 'checkout' ? '/checkout' : '/cart';
 },
 
 async _openThemeCartDrawer() {
@@ -4840,73 +4799,25 @@ async _applyCheckoutIntegrationDiscountCode(code) {
   return response.ok;
 },
 
-async _invokeCheckoutIntegrationProvider(providerId) {
-  if (providerId === 'theme_cart_drawer' || providerId === 'monster_cart') {
-    return await this._openThemeCartDrawer();
+async _invokeCheckoutIntegrationProvider(providerId, options = {}) {
+  const adapterOptions = {
+    ...options,
+    openThemeCartDrawer: () => this._openThemeCartDrawer(),
+  };
+  const capability = await waitForCheckoutIntegrationCapability(
+    providerId,
+    window,
+    adapterOptions,
+  );
+  if (!capability.available) {
+    return {
+      ok: false,
+      phase: 'capability',
+      reason: capability.reason || 'capability-unavailable',
+      provider: capability.provider,
+    };
   }
-
-  if (providerId === 'gokwik') {
-    const sdk = window.gokwikSdk;
-    if (sdk && typeof sdk.initCheckout === 'function') {
-      sdk.initCheckout(window.merchantInfo || window.gokwikMerchantInfo || undefined);
-      return true;
-    }
-  }
-
-  if (providerId === 'shopflo') {
-    const shopflo = window.Shopflo;
-    if (shopflo && typeof shopflo.openCheckout === 'function') {
-      shopflo.openCheckout();
-      return true;
-    }
-  }
-
-  if (providerId === 'zecpay') {
-    if (typeof window.zecpeCheckFunctionAndCall === 'function') {
-      window.zecpeCheckFunctionAndCall('handleOcc');
-      return true;
-    }
-  }
-
-  if (providerId === 'rebuy') {
-    const cart = window.Cart;
-    if (cart && typeof cart.getCart === 'function') {
-      cart.getCart();
-      window.location.reload();
-      return true;
-    }
-  }
-
-  if (providerId === 'shiprocket_fastrr') {
-    if (typeof window.shiprocketCheckoutBuyCartHandler === 'function') {
-      window.shiprocketCheckoutBuyCartHandler();
-      return true;
-    }
-  }
-
-  if (providerId === 'upcart') {
-    if (typeof window.upcartOpenCart === 'function') {
-      window.upcartOpenCart();
-      return true;
-    }
-  }
-
-  if (providerId === 'kaching_cart') {
-    const cart = window.kachingCartApi;
-    if (!cart) return false;
-    let invoked = false;
-    if (typeof cart.openCart === 'function') {
-      cart.openCart();
-      invoked = true;
-    }
-    if (typeof cart.refreshCart === 'function') {
-      cart.refreshCart();
-      invoked = true;
-    }
-    return invoked;
-  }
-
-  return false;
+  return invokeCheckoutIntegrationProvider(providerId, window, adapterOptions);
 },
 
 async _handleCheckoutIntegrationProvider(checkout) {
@@ -4930,12 +4841,20 @@ async _handleCheckoutIntegrationProvider(checkout) {
     });
   }
 
-  if (await this._invokeCheckoutIntegrationProvider(providerId)) {
+  const invocation = await this._invokeCheckoutIntegrationProvider(providerId, {
+    checkoutUrl: checkout?.checkoutUrl,
+    executeScript: () => this._runControlsScript(checkout?.executeScript),
+  });
+  if (invocation.ok) {
     this._emitStorefrontEvent('checkout-integration-provider-invoked', { providerId });
     return;
   }
 
-  this._emitStorefrontEvent('checkout-integration-provider-fallback', { providerId, reason: 'sdk-missing' });
+  this._emitStorefrontEvent('checkout-integration-provider-fallback', {
+    providerId,
+    reason: invocation.reason,
+    phase: invocation.phase,
+  });
   if (payload?.code) {
     window.location.href = `/discount/${encodeURIComponent(payload.code)}?redirect=/checkout`;
     return;
@@ -4943,12 +4862,22 @@ async _handleCheckoutIntegrationProvider(checkout) {
   window.location.href = this._getCheckoutIntegrationFallbackTarget(provider);
 },
 
-async _handlePostAddToCartAction(actionConfig) {
+async _handlePostAddToCartAction(actionConfig, lifecycleKey) {
   const checkout = actionConfig || this._getLandingPageControls()?.checkout || {};
+  const provider = getCheckoutIntegrationProvider(checkout.providerId || 'native');
 
-  this._runControlsScript(checkout.executeScript);
+  if (lifecycleKey) {
+    this._checkoutIntegrationInvocations ||= new Set();
+    if (!claimCheckoutIntegrationInvocation(this._checkoutIntegrationInvocations, lifecycleKey)) {
+      return;
+    }
+  }
+
+  if (provider.id !== 'custom_script') {
+    this._runControlsScript(checkout.executeScript);
+  }
   const target = checkout.action === 'checkout' ? '/checkout' : '/cart';
-  const providerId = checkout.providerId || 'native';
+  const providerId = provider.id;
   this._emitStorefrontEvent('checkout-clicked', { target, providerId });
 
   if (this._isCheckoutIntegrationProvider(providerId)) {
@@ -11219,7 +11148,10 @@ async addBundleToCart(clickedButton = null) {
       this._emitStorefrontEvent('bundle-add-to-cart-success', { itemCount: items.length, lineCount: selectedLines.length });
 
       ToastManager.show('Bundle added to cart successfully!');
-      await this._handlePostAddToCartAction(this._getLandingPageControls()?.checkout);
+      await this._handlePostAddToCartAction(
+        this._getLandingPageControls()?.checkout,
+        baseOfferId,
+      );
 
     } catch (fetchError) {
       this._emitStorefrontEvent('bundle-add-to-cart-failed', { reason: 'fetch-error', message: String(fetchError && fetchError.message || fetchError) });
@@ -12953,13 +12885,6 @@ processProductsForStep(products, step) {
   });
 },
 
-/**
- * Look up real stock for a variant in a step's product data.
- * Returns:
- *   - available: positive numeric remaining stock, or null when uncapped
- *   - outOfStock: true only when Shopify marks the variant unavailable
- *   - acceptsBackorder: true when Shopify marks the variant as backorderable
- */
 isVariantOutOfStock(product) {
   if (!product) {
     return false;

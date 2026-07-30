@@ -21,10 +21,14 @@ type CheckoutDiscountAllocation = {
 
 type CheckoutLine = {
   attributes?: CheckoutAttribute[];
+  cost?: {
+    totalAmount?: CheckoutMoney;
+  };
   discountAllocations?: CheckoutDiscountAllocation[];
 };
 
 const BUNDLE_TOTAL_SAVINGS_ATTRIBUTE = '_bundle_total_savings_cents';
+const BUNDLE_RETAIL_PRICE_ATTRIBUTE = 'Retail Price';
 
 function sumDiscountAllocations(allocations: CheckoutDiscountAllocation[] = []) {
   return allocations.reduce((sum, allocation) => {
@@ -40,6 +44,38 @@ function getLineAttributeValue(attributes: CheckoutAttribute[] = [], key: string
 function getBundleAttributeSavings(line: CheckoutLine) {
   const cents = Number(getLineAttributeValue(line.attributes, BUNDLE_TOTAL_SAVINGS_ATTRIBUTE));
   return Number.isFinite(cents) && cents > 0 ? cents / 100 : 0;
+}
+
+function parseFormattedMoney(value: string, currencyCode: string) {
+  const parts = new Intl.NumberFormat(undefined, {
+    style: 'currency',
+    currency: currencyCode,
+  }).formatToParts(12345.6);
+  const group = parts.find((part) => part.type === 'group')?.value;
+  const decimal = parts.find((part) => part.type === 'decimal')?.value;
+  let normalized = value;
+
+  if (group) {
+    normalized = normalized.split(group).join('');
+  }
+  if (decimal && decimal !== '.') {
+    normalized = normalized.replace(decimal, '.');
+  }
+
+  const amount = Number(normalized.replace(/[^\d.-]/g, ''));
+  return Number.isFinite(amount) ? amount : 0;
+}
+
+function getPublicRetailSavings(line: CheckoutLine) {
+  const totalAmount = Number(line.cost?.totalAmount?.amount);
+  const currencyCode = line.cost?.totalAmount?.currencyCode ?? 'USD';
+  const retailPrice = parseFormattedMoney(
+    getLineAttributeValue(line.attributes, BUNDLE_RETAIL_PRICE_ATTRIBUTE) ?? '',
+    currencyCode,
+  );
+  const savings = retailPrice - totalAmount;
+
+  return Number.isFinite(savings) && savings > 0 ? savings : 0;
 }
 
 function getCurrencyCode(
@@ -66,21 +102,28 @@ export function calculateCheckoutTotalSavings({
   lines?: CheckoutLine[];
   discountAllocations?: CheckoutDiscountAllocation[];
 } = {}) {
-  const lineSavings = lines.reduce((sum, line) => {
-    const nativeSavings = sumDiscountAllocations(line.discountAllocations);
-    const bundleSavings = getBundleAttributeSavings(line);
-    return sum + Math.max(nativeSavings, bundleSavings);
-  }, 0);
+  const checkoutNativeSavings = sumDiscountAllocations(discountAllocations);
+  const lineNativeSavings = lines.reduce(
+    (sum, line) => sum + sumDiscountAllocations(line.discountAllocations),
+    0,
+  );
+  const nativeSavings = Math.max(checkoutNativeSavings, lineNativeSavings);
 
-  return lineSavings > 0 ? lineSavings : sumDiscountAllocations(discountAllocations);
+  if (nativeSavings > 0) {
+    return nativeSavings;
+  }
+
+  return lines.reduce((sum, line) => {
+    const bundleSavings = getBundleAttributeSavings(line);
+    const publicRetailSavings = getPublicRetailSavings(line);
+    return sum + Math.max(bundleSavings, publicRetailSavings);
+  }, 0);
 }
 
 export function formatCheckoutMoney(amount: number, currencyCode = 'USD') {
   return new Intl.NumberFormat(undefined, {
     style: 'currency',
     currency: currencyCode,
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
   }).format(amount);
 }
 
