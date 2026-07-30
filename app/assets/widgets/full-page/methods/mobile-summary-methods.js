@@ -100,7 +100,8 @@ function normalizeStepContentSubtext(value) {
 const MOBILE_ADDITIONAL_OFFERS_GREEN_DELAY_MS = 550;
 const MOBILE_ADDITIONAL_OFFERS_MESSAGE_DELAY_MS = 800;
 const MOBILE_ADDITIONAL_OFFERS_DURATION_MS = 3000;
-const MOBILE_SUMMARY_TRAY_ANIMATION_MS = 300;
+const MOBILE_SUMMARY_TOGGLE_ANIMATION_MS = 300;
+const MOBILE_SUMMARY_TRAY_TRANSITION_MS = 700;
 
 export const fullPageMobileSummaryMethods = {
 _populateCompactMobileSummaryTray(sheet) {
@@ -406,10 +407,51 @@ _syncMobileAdditionalOffersPulse(pulseState = {}) {
 
 _toggleCompactMobileSummaryTray(sheet) {
   const nextExpanded = !this.compactMobileSummaryTrayExpanded;
+  const productsSection = sheet.querySelector?.('.fpb-mobile-summary-products-section');
+  const startTrayHeight = sheet.getBoundingClientRect?.().height;
+  const startHeight = productsSection?.getBoundingClientRect?.().height;
+  this.compactMobileSummaryTrayAnimation?.cancel?.();
+  this.compactMobileSummaryContentAnimation?.cancel?.();
   this.compactMobileSummaryTrayExpanded = nextExpanded;
   sheet.classList.toggle('fpb-mobile-summary-tray-expanded', nextExpanded);
   sheet.querySelector?.('.fpb-mobile-summary-count-badge')
     ?.setAttribute('aria-expanded', nextExpanded ? 'true' : 'false');
+  const endTrayHeight = sheet.getBoundingClientRect?.().height;
+  const endHeight = productsSection?.getBoundingClientRect?.().height;
+  if (
+    sheet.animate
+    && Number.isFinite(startTrayHeight)
+    && Number.isFinite(endTrayHeight)
+    && startTrayHeight !== endTrayHeight
+  ) {
+    this.compactMobileSummaryTrayAnimation = sheet.animate(
+      [
+        { height: `${startTrayHeight}px` },
+        { height: `${endTrayHeight}px` },
+      ],
+      {
+        duration: MOBILE_SUMMARY_TRAY_TRANSITION_MS,
+        easing: 'ease',
+      }
+    );
+  }
+  if (
+    productsSection?.animate
+    && Number.isFinite(startHeight)
+    && Number.isFinite(endHeight)
+    && startHeight !== endHeight
+  ) {
+    this.compactMobileSummaryContentAnimation = productsSection.animate(
+      [
+        { height: `${startHeight}px` },
+        { height: `${endHeight}px` },
+      ],
+      {
+        duration: MOBILE_SUMMARY_TRAY_TRANSITION_MS,
+        easing: 'ease',
+      }
+    );
+  }
   this._syncCompactMobileSummaryScrollLock();
 
   sheet.classList.remove(
@@ -430,7 +472,7 @@ _toggleCompactMobileSummaryTray(sheet) {
       'fpb-mobile-summary-tray-animating-open',
       'fpb-mobile-summary-tray-animating-closed'
     );
-  }, MOBILE_SUMMARY_TRAY_ANIMATION_MS);
+  }, MOBILE_SUMMARY_TOGGLE_ANIMATION_MS);
 },
 
 _syncCompactMobileSummaryScrollLock() {

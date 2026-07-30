@@ -2289,10 +2289,7 @@ body:has([data-fpb-design-preset]) {
     box-shadow: none;
     background: #fff;
     z-index: 9999;
-    transition:
-      height var(--fpb-mobile-footer-eb-duration) var(--fpb-mobile-footer-eb-easing),
-      grid-template-rows var(--fpb-mobile-footer-eb-duration) var(--fpb-mobile-footer-eb-easing);
-    will-change: height, grid-template-rows;
+    transition: none;
   }
   .fpb-mobile-bottom-sheet.fpb-preset-standard.fpb-mobile-bottom-sheet.fpb-mobile-summary-tray.fpb-mobile-summary-tray--has-discount-summary {
     --standard-mobile-footer-summary-row: auto;
@@ -3093,14 +3090,6 @@ body:has([data-fpb-design-preset]) {
   .fpb-mobile-summary-tray.fpb-preset-standard.fpb-mobile-summary-tray.fpb-mobile-summary-tray-expanded.fpb-mobile-summary-tray--slots {
     min-height: 0;
   }
-  .fpb-mobile-bottom-sheet.fpb-preset-standard.fpb-mobile-summary-tray-animating-closed
-    .fpb-mobile-summary-products-section {
-    grid-template-rows:
-      minmax(0, 1fr)
-      var(--standard-mobile-footer-action-row);
-    height: 100%;
-    overflow: hidden;
-  }
   .fpb-mobile-bottom-sheet.fpb-mobile-bottom-sheet.fpb-mobile-summary-tray
     .side-panel-discount-message {
   display: grid;
@@ -3188,10 +3177,7 @@ body:has([data-fpb-design-preset]) {
     overflow: hidden;
     background: #fff;
     box-sizing: border-box;
-    transition:
-      height var(--fpb-mobile-footer-eb-duration) var(--fpb-mobile-footer-eb-easing),
-      grid-template-rows var(--fpb-mobile-footer-eb-duration) var(--fpb-mobile-footer-eb-easing);
-    will-change: height, grid-template-rows;
+    transition: none;
   }
   .fpb-mobile-bottom-sheet.fpb-preset-standard.fpb-mobile-summary-tray.fpb-mobile-summary-tray-expanded:not(
       .fpb-mobile-summary-tray--has-discount-summary

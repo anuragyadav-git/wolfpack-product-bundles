@@ -537,13 +537,42 @@ describe('FPB Standard mobile summary action', () => {
   });
 
   it('allows the compact mobile summary tray to expand with no selected products', () => {
+    let expanded = false;
+    const productsSectionAnimation = {
+      cancel: jest.fn(),
+    };
+    const trayAnimation = {
+      cancel: jest.fn(),
+    };
+    const productsSection = {
+      animate: jest.fn(() => productsSectionAnimation),
+      getBoundingClientRect: jest.fn(() => ({
+        height: expanded ? 200 : 58,
+      })),
+    };
     const classList = {
       add: jest.fn(),
       remove: jest.fn(),
-      toggle: jest.fn(),
+      toggle: jest.fn((className: string, force?: boolean) => {
+        if (className === 'fpb-mobile-summary-tray-expanded') {
+          expanded = force === true;
+        }
+      }),
     };
     const countBadge = {
       setAttribute: jest.fn(),
+    };
+    const tray = {
+      animate: jest.fn(() => trayAnimation),
+      classList,
+      getBoundingClientRect: jest.fn(() => ({
+        height: expanded ? 259 : 117,
+      })),
+      querySelector: jest.fn((selector: string) => (
+        selector === '.fpb-mobile-summary-products-section'
+          ? productsSection
+          : countBadge
+      )),
     };
     const context = {
       compactMobileSummaryTrayExpanded: false,
@@ -555,28 +584,40 @@ describe('FPB Standard mobile summary action', () => {
 
     fullPageMobileSummaryMethods._toggleCompactMobileSummaryTray.call(
       context,
-      {
-        classList,
-        querySelector: jest.fn(() => countBadge),
-      },
+      tray,
     );
 
     expect(context.compactMobileSummaryTrayExpanded).toBe(true);
     expect(context._populateCompactMobileSummaryTray).not.toHaveBeenCalled();
     expect(countBadge.setAttribute).toHaveBeenCalledWith('aria-expanded', 'true');
+    expect(productsSection.animate).toHaveBeenCalledWith(
+      [{ height: '58px' }, { height: '200px' }],
+      { duration: 700, easing: 'ease' },
+    );
+    expect(tray.animate).toHaveBeenCalledWith(
+      [{ height: '117px' }, { height: '259px' }],
+      { duration: 700, easing: 'ease' },
+    );
 
     fullPageMobileSummaryMethods._toggleCompactMobileSummaryTray.call(
       context,
-      {
-        classList,
-        querySelector: jest.fn(() => countBadge),
-      },
+      tray,
     );
 
     expect(context.compactMobileSummaryTrayExpanded).toBe(false);
     expect(context._populateCompactMobileSummaryTray).not.toHaveBeenCalled();
     expect(countBadge.setAttribute).toHaveBeenLastCalledWith('aria-expanded', 'false');
     expect(context.compactMobileSummaryTrayAnimationTimeout).not.toBeNull();
+    expect(productsSectionAnimation.cancel).toHaveBeenCalledTimes(1);
+    expect(trayAnimation.cancel).toHaveBeenCalledTimes(1);
+    expect(productsSection.animate).toHaveBeenLastCalledWith(
+      [{ height: '200px' }, { height: '58px' }],
+      { duration: 700, easing: 'ease' },
+    );
+    expect(tray.animate).toHaveBeenLastCalledWith(
+      [{ height: '259px' }, { height: '117px' }],
+      { duration: 700, easing: 'ease' },
+    );
   });
 
   it('does not lock page scroll when Standard or Classic mobile summary trays expand', () => {

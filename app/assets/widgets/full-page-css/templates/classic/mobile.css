@@ -659,10 +659,7 @@
     overflow: visible;
     z-index: 9999;
     transform: none;
-    transition:
-      height var(--fpb-mobile-footer-eb-duration) var(--fpb-mobile-footer-eb-easing),
-      grid-template-rows var(--fpb-mobile-footer-eb-duration) var(--fpb-mobile-footer-eb-easing);
-    will-change: height, grid-template-rows;
+    transition: none;
   }
 
   .fpb-mobile-bottom-sheet.fpb-mobile-summary-tray.fpb-mobile-classic-footer.fpb-mobile-summary-tray--has-discount-summary {
@@ -707,17 +704,6 @@
     .fpb-mobile-summary-count-badge--additional-offers-message {
     min-width: min(244px, calc(var(--fpb-mobile-footer-inner-width) - 64px));
   }
-
-
-  .fpb-mobile-bottom-sheet.fpb-mobile-classic-footer.fpb-mobile-summary-tray-animating-closed
-    .fpb-mobile-summary-products-section {
-    grid-template-rows:
-      minmax(0, 1fr)
-      var(--classic-mobile-footer-action-row);
-    height: 100%;
-    overflow: hidden;
-  }
-
   .fpb-mobile-classic-footer .side-panel-discount-message {
     display: grid;
     grid-template-columns: var(--fpb-mobile-footer-inner-width);
@@ -848,10 +834,7 @@
     overflow: hidden;
     background: var(--bundle-side-panel-bg, var(--bundle-full-page-bg-color));
     box-sizing: border-box;
-    transition:
-      height var(--fpb-mobile-footer-eb-duration) var(--fpb-mobile-footer-eb-easing),
-      grid-template-rows var(--fpb-mobile-footer-eb-duration) var(--fpb-mobile-footer-eb-easing);
-    will-change: height, grid-template-rows;
+    transition: none;
   }
 
   .fpb-mobile-classic-footer .fpb-mobile-summary-bundle-items {
