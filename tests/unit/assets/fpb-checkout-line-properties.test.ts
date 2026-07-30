@@ -43,6 +43,10 @@ describe("FPB checkout cart-line properties", () => {
     );
     const body = JSON.parse(tokenRequest[1].body);
 
+    expect(tokenRequest[1]).toMatchObject({
+      method: "POST",
+      credentials: "same-origin",
+    });
     expect(body.components).toEqual([{
       variantId: "501",
       productId: "gid://shopify/Product/5",

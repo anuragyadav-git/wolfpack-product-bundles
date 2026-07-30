@@ -19,6 +19,19 @@ export function OPTIONS() {
   return new Response(null, { status: 204, headers: CORS_HEADERS });
 }
 
+export function loader() {
+  return json(
+    { ok: false, error: "Method not allowed" },
+    {
+      status: 405,
+      headers: {
+        ...CORS_HEADERS,
+        Allow: "POST, OPTIONS",
+      },
+    },
+  );
+}
+
 function sanitizeString(value: unknown) {
   if (typeof value !== "string") return null;
   const trimmed = value.trim();

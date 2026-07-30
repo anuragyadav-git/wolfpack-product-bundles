@@ -34,8 +34,6 @@ declare global {
       SHOPIFY_API_SECRET: string;
       /** Public URL where the app is hosted */
       SHOPIFY_APP_URL: string;
-      /** OAuth scopes required by the app (comma-separated) */
-      SCOPES: string;
       /** Custom domain for the shop (if applicable) */
       SHOP_CUSTOM_DOMAIN?: string;
 

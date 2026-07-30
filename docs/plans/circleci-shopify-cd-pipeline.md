@@ -1,3 +1,27 @@
+---
+schema_version: 1
+id: circleci-shopify-cd-pipeline
+title: CircleCI Shopify CI/CD Pipeline Plan
+type: plan
+status: planned
+summary: Planned CircleCI deployment pipeline for Render and Shopify app releases.
+last_audited: 2026-07-31
+owners:
+  - engineering
+domains:
+  - operations
+systems:
+  - circleci
+source_paths:
+  - package.json
+related_docs:
+  - internal docs/Operations/Deployment General Sync.md
+tags:
+  - deployment
+keywords:
+  - CircleCI
+---
+
 # CircleCI Shopify CI/CD Pipeline Plan
 
 **Created:** 2026-07-11  
@@ -10,7 +34,7 @@
 - Deploy SIT from `STAGING` and production from `PROD`.
 - Trigger Render deploys for both the app server and webhook worker before releasing Shopify app versions.
 - Use Shopify App Automation Tokens for non-interactive `shopify app deploy`.
-- Keep deployment backfill disabled in CI.
+- Keep deployment general sync controlled by its single true or false flag.
 - Add a 1Password-backed rotation process for `SHOPIFY_APP_AUTOMATION_TOKEN`.
 
 ## Current Repo Facts
@@ -19,8 +43,8 @@
 - Shopify deploy scripts already exist:
   - `npm run deploy:sit`
   - `npm run deploy:prod`
-- Those deploy scripts call `deployment:backfill`, then build Rust extensions, then run Shopify CLI deploy.
-- `deployment:backfill` is disabled unless explicit environment flags enable it.
+- Those deploy scripts build Rust extensions, run Shopify CLI deploy, and then call `deployment:general-sync`.
+- `deployment:general-sync` is disabled unless `WPB_DEPLOYMENT_GENERAL_SYNC=true`.
 - App server health check exists at `/health` and verifies database connectivity.
 - Webhook worker health check also exists at `/health`.
 - Current GitHub Actions only enforce branch merge direction. They do not build, test, or deploy.
@@ -228,11 +252,8 @@ Read `expires_at` from 1Password and fail when the token is within the configure
 
 ## Guardrails
 
-- CI must not set:
-  - `WPB_DEPLOYMENT_BACKFILL_ENABLED=true`
-  - `WPB_DEPLOYMENT_BACKFILL_APPLY=true`
-  - `WPB_CART_TRANSFORM_REPAIR_APPLY=true`
-- CI must not run deployment backfill apply mode.
+- CI must set `WPB_DEPLOYMENT_GENERAL_SYNC` explicitly to `true` or `false`.
+- CI must not set `WPB_CART_TRANSFORM_REPAIR_APPLY=true`.
 - CI must not run cart transform repair apply mode.
 - Normal Shopify deploy must use `--allow-updates`, not `--allow-deletes`.
 - Production deploys should only happen from `PROD`.

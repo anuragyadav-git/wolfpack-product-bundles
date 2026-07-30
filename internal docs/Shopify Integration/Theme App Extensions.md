@@ -5,7 +5,7 @@ title: Theme App Extensions
 type: shopify-integration
 status: authoritative
 summary: Theme extension handles, activation status, and App Bridge status source for Wolfpack storefront resources.
-last_audited: 2026-07-29
+last_audited: 2026-07-31
 owners:
   - engineering
 domains:
@@ -40,18 +40,21 @@ The server-side MAIN-theme `settings_data.json` checker remains available for le
 
 Configure pages must also reconcile their initial server state with `shopify.app.extensions()` after mount. Shopify app embeds are activated per theme, so a development-theme preview can have the embed active while the published MAIN theme checker reports inactive. Keeping only the loader result produces a false enablement banner even though the same preview theme is already executing the embed. FPB and PPB both use the App Bridge result for their visible banner and Bundle Visibility state. While that result is pending, the configure UI suppresses the disabled banner to avoid flashing stale MAIN-theme state; if the client lookup fails, it falls back to the loader result.
 
-App embed detection depends on the app handle and app embed block handle in Shopify's settings data, not the extension UID alone. For production, the expected app embed type is:
+Server-side app embed detection depends on the app handle and app embed block handle in Shopify's settings data, not the extension UID alone. The app handle is fetched only from:
 
-```text
-shopify://apps/wolfpack-product-bundles-4/blocks/bundle-app-embed/<theme-extension-uid>
+```graphql
+currentAppInstallation {
+  app {
+    handle
+  }
+}
 ```
 
-Current production identifiers:
+No environment or hardcoded app-handle fallback is allowed. The detected theme
+block must start with `shopify://apps/{current-app-handle}/blocks/` and contain
+the requested block handle. Missing or mismatched handles fail closed.
 
-- App handle: `wolfpack-product-bundles-4`
-- Legacy app handle retained in some active theme settings: `wolfpack-product-bundles`
-- Theme extension handle: `bundle-builder`
-- App embed block handle: `bundle-app-embed`
-- Theme extension UID: `23b807f7-472d-4f93-e241-5a1e079d6b51548daaf2`
-
-2026-07-10 production proof on `wolfpackdemostore.myshopify.com`: MAIN theme `wolfpack-dawn-branded` (`gid://shopify/OnlineStoreTheme/150981345468`) had an enabled `bundle-app-embed` block stored as `shopify://apps/wolfpack-product-bundles/blocks/bundle-app-embed/...`, while Shopify reported the current app installation handle as `wolfpack-product-bundles-4`. App embed detection must include the legacy handle or the Admin banner will falsely report that the app embed is disabled.
+An earlier production capture found a mismatch between the queried current app
+handle and a legacy handle persisted in theme settings. The detector no longer
+masks that configuration mismatch; the Shopify app identity or theme embed must
+be corrected instead.

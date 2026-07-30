@@ -5,7 +5,7 @@ title: Wolfpack Product Bundles App Navigation and UI Map
 type: navigation-map
 status: authoritative
 summary: Routes, screens, actions, modals, and storefront-preview flows for the embedded app.
-last_audited: 2026-07-30
+last_audited: 2026-07-31
 owners:
   - engineering
 domains:
@@ -599,17 +599,6 @@ Storefront bundle add
           ├── success → transformed parent line proceeds to cart / checkout
           └── timeout, resource limit, or execution failure
               └── CartTransform blockOnFailure=true → cart / checkout error; unmodified pricing is not accepted
-```
-
-### Flow F: Deployment Backfill Apply
-```
-Selected installed shops
-  └── acquire one compliant offline Admin client per shop
-      └── delete current CartTransform and verify deletedId
-          └── recreate with blockOnFailure=true
-              └── restore runtime-token secret
-                  ├── success → migrate/sync that shop's FPB and PPB bundles
-                  └── failure → skip that shop's bundles and exit non-zero
 ```
 
 ---
