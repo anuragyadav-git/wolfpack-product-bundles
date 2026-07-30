@@ -1,8 +1,69 @@
-import {
-  getCheckoutIntegrationProvider,
-} from '../../../lib/checkout-integrations.ts';
+const CHECKOUT_INTEGRATION_PROVIDERS = [
+  {
+    id: 'native',
+    label: 'Shopify checkout',
+    callbackMode: 'native',
+    strategy: 'native_redirect',
+    requiresDiscountCode: false,
+    requiresCartRefresh: false,
+    timeoutMs: 0,
+    fallbackAction: 'checkout',
+  },
+  {
+    id: 'theme_cart_drawer',
+    label: 'Theme cart drawer',
+    callbackMode: 'side_cart',
+    strategy: 'shopify_standard_actions',
+    requiresDiscountCode: false,
+    requiresCartRefresh: true,
+    timeoutMs: 1500,
+    fallbackAction: 'cart',
+  },
+];
 
-export { getCheckoutIntegrationProvider };
+const CHECKOUT_INTEGRATION_PROVIDER_IDS = CHECKOUT_INTEGRATION_PROVIDERS.map((provider) => provider.id);
+
+const CHECKOUT_INTEGRATION_PROVIDER_OPTIONS = CHECKOUT_INTEGRATION_PROVIDERS.map((provider) => provider.label);
+
+const CHECKOUT_INTEGRATION_PROVIDER_LABELS = Object.fromEntries(
+  CHECKOUT_INTEGRATION_PROVIDERS.map((provider) => [provider.id, provider.label]),
+);
+
+const PROVIDERS_BY_ID = new Map(
+  CHECKOUT_INTEGRATION_PROVIDERS.map((provider) => [provider.id, provider]),
+);
+
+const LABEL_TO_PROVIDER = new Map(
+  Object.entries(CHECKOUT_INTEGRATION_PROVIDER_LABELS).map(([id, label]) => [
+    String(label).toLowerCase(),
+    id,
+  ]),
+);
+
+export { CHECKOUT_INTEGRATION_PROVIDERS };
+export { CHECKOUT_INTEGRATION_PROVIDER_OPTIONS };
+export { CHECKOUT_INTEGRATION_PROVIDER_LABELS };
+
+export function normalizeCheckoutIntegrationProvider(value) {
+  if (typeof value !== 'string') return 'native';
+  const normalized = value.trim().toLowerCase();
+  if (!normalized) return 'native';
+  if (CHECKOUT_INTEGRATION_PROVIDER_IDS.includes(normalized)) return normalized;
+  return LABEL_TO_PROVIDER.get(normalized) ?? 'native';
+}
+
+export function getCheckoutIntegrationProvider(value) {
+  return PROVIDERS_BY_ID.get(normalizeCheckoutIntegrationProvider(value))
+    ?? CHECKOUT_INTEGRATION_PROVIDERS[0];
+}
+
+export function isDiscountCodeCheckoutIntegrationProvider(value) {
+  return getCheckoutIntegrationProvider(value).requiresDiscountCode;
+}
+
+export function isSupportedCheckoutIntegrationProvider(value) {
+  return isDiscountCodeCheckoutIntegrationProvider(value);
+}
 
 function getCapability(providerId, runtimeWindow, options = {}) {
   const provider = getCheckoutIntegrationProvider(providerId);
@@ -12,15 +73,7 @@ function getCapability(providerId, runtimeWindow, options = {}) {
     return { available: true, capability: 'native_redirect', provider };
   }
 
-  if (provider.id === 'custom_script') {
-    return {
-      available: typeof options.executeScript === 'function',
-      capability: 'merchant_script',
-      provider,
-    };
-  }
-
-  if (provider.id === 'theme_cart_drawer' || provider.id === 'monster_cart') {
+  if (provider.id === 'theme_cart_drawer') {
     if (
       typeof shopifyActions?.updateCart === 'function'
       && typeof shopifyActions?.openCart === 'function'
@@ -30,67 +83,6 @@ function getCapability(providerId, runtimeWindow, options = {}) {
     return {
       available: typeof options.openThemeCartDrawer === 'function',
       capability: 'theme_cart_callback',
-      provider,
-    };
-  }
-
-  if (provider.id === 'gokwik') {
-    return {
-      available: typeof runtimeWindow?.gokwikSdk?.initCheckout === 'function',
-      capability: 'installed_sdk',
-      provider,
-    };
-  }
-
-  if (provider.id === 'shopflo') {
-    return {
-      available:
-      typeof runtimeWindow?.Shopflo?.openFloCheckout === 'function'
-      && typeof options.checkoutUrl === 'string'
-      && options.checkoutUrl.length > 0,
-      capability: 'token_checkout_url',
-      provider,
-    };
-  }
-
-  if (provider.id === 'zecpay') {
-    return {
-      available: typeof runtimeWindow?.zecpeCheckFunctionAndCall === 'function',
-      capability: 'installed_sdk',
-      provider,
-    };
-  }
-
-  if (provider.id === 'rebuy') {
-    return {
-      available: typeof runtimeWindow?.Rebuy?.init === 'function'
-        || typeof runtimeWindow?.Cart?.getCart === 'function',
-      capability: 'installed_sdk',
-      provider,
-    };
-  }
-
-  if (provider.id === 'shiprocket_fastrr') {
-    return {
-      available: typeof runtimeWindow?.shiprocketCheckoutBuyCartHandler === 'function',
-      capability: 'installed_sdk',
-      provider,
-    };
-  }
-
-  if (provider.id === 'upcart') {
-    return {
-      available: typeof runtimeWindow?.upcartOpenCart === 'function',
-      capability: 'installed_sdk',
-      provider,
-    };
-  }
-
-  if (provider.id === 'kaching_cart') {
-    return {
-      available: typeof runtimeWindow?.kachingCartApi?.openCart === 'function'
-        || typeof runtimeWindow?.kachingCartApi?.refreshCart === 'function',
-      capability: 'installed_sdk',
       provider,
     };
   }
@@ -137,9 +129,6 @@ async function runProviderInvocation(provider, runtimeWindow, options, capabilit
     return true;
   }
 
-  if (provider.id === 'custom_script') {
-    return options.executeScript();
-  }
   if (capability === 'shopify_standard_actions') {
     const updateResult = await runtimeWindow.Shopify.actions.updateCart({});
     if (updateResult?.userErrors?.length) {
@@ -153,37 +142,6 @@ async function runProviderInvocation(provider, runtimeWindow, options, capabilit
   }
   if (capability === 'theme_cart_callback') {
     return options.openThemeCartDrawer();
-  }
-  if (provider.id === 'gokwik') {
-    return runtimeWindow.gokwikSdk.initCheckout(
-      runtimeWindow.merchantInfo || runtimeWindow.gokwikMerchantInfo || undefined,
-    );
-  }
-  if (provider.id === 'shopflo' && capability === 'token_checkout_url') {
-    return runtimeWindow.Shopflo.openFloCheckout(options.checkoutUrl);
-  }
-  if (provider.id === 'zecpay') {
-    return runtimeWindow.zecpeCheckFunctionAndCall('handleOcc');
-  }
-  if (provider.id === 'rebuy') {
-    if (typeof runtimeWindow.Rebuy?.init === 'function') {
-      return runtimeWindow.Rebuy.init();
-    }
-    return runtimeWindow.Cart.getCart();
-  }
-  if (provider.id === 'shiprocket_fastrr') {
-    return runtimeWindow.shiprocketCheckoutBuyCartHandler();
-  }
-  if (provider.id === 'upcart') {
-    return runtimeWindow.upcartOpenCart();
-  }
-  if (provider.id === 'kaching_cart') {
-    if (typeof runtimeWindow.kachingCartApi.refreshCart === 'function') {
-      await runtimeWindow.kachingCartApi.refreshCart();
-    }
-    if (typeof runtimeWindow.kachingCartApi.openCart === 'function') {
-      return runtimeWindow.kachingCartApi.openCart();
-    }
   }
   return true;
 }

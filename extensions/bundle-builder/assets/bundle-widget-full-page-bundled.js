@@ -1,13 +1,13 @@
 /*!
  * Wolfpack Bundle Widget — Full Page
- * Version : 5.0.223
+ * Version : 5.0.226
  * Built   : 2026-07-30
  *
  * Cache note: Shopify CDN cache is busted automatically by shopify app deploy.
  * After deploying, allow 2-10 minutes for propagation before testing.
  * Verify live version: console.log(window.__BUNDLE_WIDGET_VERSION__)
  */
-window.__BUNDLE_WIDGET_VERSION__ = '5.0.223';
+window.__BUNDLE_WIDGET_VERSION__ = '5.0.226';
 (function() {
   'use strict';
 
@@ -2012,6 +2012,234 @@ function hideLoadingOverlayElement(overlay, timeoutMs = DEFAULT_HIDE_TIMEOUT_MS)
     ? window.setTimeout.bind(window)
     : setTimeout;
   scheduler(finish, timeoutMs);
+}
+
+const CHECKOUT_INTEGRATION_PROVIDERS = [
+  {
+    id: 'native',
+    label: 'Shopify checkout',
+    callbackMode: 'native',
+    strategy: 'native_redirect',
+    requiresDiscountCode: false,
+    requiresCartRefresh: false,
+    timeoutMs: 0,
+    fallbackAction: 'checkout',
+  },
+  {
+    id: 'theme_cart_drawer',
+    label: 'Theme cart drawer',
+    callbackMode: 'side_cart',
+    strategy: 'shopify_standard_actions',
+    requiresDiscountCode: false,
+    requiresCartRefresh: true,
+    timeoutMs: 1500,
+    fallbackAction: 'cart',
+  },
+];
+
+const CHECKOUT_INTEGRATION_PROVIDER_IDS = CHECKOUT_INTEGRATION_PROVIDERS.map((provider) => provider.id);
+
+const CHECKOUT_INTEGRATION_PROVIDER_OPTIONS = CHECKOUT_INTEGRATION_PROVIDERS.map((provider) => provider.label);
+
+const CHECKOUT_INTEGRATION_PROVIDER_LABELS = Object.fromEntries(
+  CHECKOUT_INTEGRATION_PROVIDERS.map((provider) => [provider.id, provider.label]),
+);
+
+const PROVIDERS_BY_ID = new Map(
+  CHECKOUT_INTEGRATION_PROVIDERS.map((provider) => [provider.id, provider]),
+);
+
+const LABEL_TO_PROVIDER = new Map(
+  Object.entries(CHECKOUT_INTEGRATION_PROVIDER_LABELS).map(([id, label]) => [
+    String(label).toLowerCase(),
+    id,
+  ]),
+);
+
+function normalizeCheckoutIntegrationProvider(value) {
+  if (typeof value !== 'string') return 'native';
+  const normalized = value.trim().toLowerCase();
+  if (!normalized) return 'native';
+  if (CHECKOUT_INTEGRATION_PROVIDER_IDS.includes(normalized)) return normalized;
+  return LABEL_TO_PROVIDER.get(normalized) ?? 'native';
+}
+
+function getCheckoutIntegrationProvider(value) {
+  return PROVIDERS_BY_ID.get(normalizeCheckoutIntegrationProvider(value))
+    ?? CHECKOUT_INTEGRATION_PROVIDERS[0];
+}
+
+function isDiscountCodeCheckoutIntegrationProvider(value) {
+  return getCheckoutIntegrationProvider(value).requiresDiscountCode;
+}
+
+function isSupportedCheckoutIntegrationProvider(value) {
+  return isDiscountCodeCheckoutIntegrationProvider(value);
+}
+
+function getCapability(providerId, runtimeWindow, options = {}) {
+  const provider = getCheckoutIntegrationProvider(providerId);
+  const shopifyActions = runtimeWindow?.Shopify?.actions;
+
+  if (provider.id === 'native') {
+    return { available: true, capability: 'native_redirect', provider };
+  }
+
+  if (provider.id === 'theme_cart_drawer') {
+    if (
+      typeof shopifyActions?.updateCart === 'function'
+      && typeof shopifyActions?.openCart === 'function'
+    ) {
+      return { available: true, capability: 'shopify_standard_actions', provider };
+    }
+    return {
+      available: typeof options.openThemeCartDrawer === 'function',
+      capability: 'theme_cart_callback',
+      provider,
+    };
+  }
+
+  return { available: false, capability: 'unknown', provider };
+}
+
+function detectCheckoutIntegrationCapability(providerId, runtimeWindow, options = {}) {
+  return getCapability(providerId, runtimeWindow, options);
+}
+
+async function waitForCheckoutIntegrationCapability(
+  providerId,
+  runtimeWindow,
+  options = {},
+) {
+  const provider = getCheckoutIntegrationProvider(providerId);
+  const timeoutMs = options.timeoutMs ?? provider.timeoutMs;
+  const pollIntervalMs = options.pollIntervalMs ?? 50;
+  const startedAt = Date.now();
+  let capability = getCapability(provider.id, runtimeWindow, options);
+
+  while (!capability.available && Date.now() - startedAt < timeoutMs) {
+    await new Promise((resolve) => setTimeout(resolve, pollIntervalMs));
+    capability = getCapability(provider.id, runtimeWindow, options);
+  }
+
+  return capability.available
+    ? capability
+    : { ...capability, reason: 'capability-timeout' };
+}
+
+function claimCheckoutIntegrationInvocation(state, lifecycleKey) {
+  if (!state || typeof state.has !== 'function' || typeof state.add !== 'function') {
+    return false;
+  }
+  if (state.has(lifecycleKey)) return false;
+  state.add(lifecycleKey);
+  return true;
+}
+
+async function runProviderInvocation(provider, runtimeWindow, options, capability) {
+  if (provider.id === 'native') {
+    return true;
+  }
+
+  if (capability === 'shopify_standard_actions') {
+    const updateResult = await runtimeWindow.Shopify.actions.updateCart({});
+    if (updateResult?.userErrors?.length) {
+      return {
+        ok: false,
+        phase: 'cart-refresh',
+        reason: 'cart-update-rejected',
+      };
+    }
+    return runtimeWindow.Shopify.actions.openCart();
+  }
+  if (capability === 'theme_cart_callback') {
+    return options.openThemeCartDrawer();
+  }
+  return true;
+}
+
+function runProviderInvocationWithTimeout(invocationPromise, timeoutMs) {
+  if (timeoutMs <= 0) return invocationPromise;
+
+  return new Promise((resolve, reject) => {
+    const timeoutId = setTimeout(() => resolve({ timedOut: true }), timeoutMs);
+    invocationPromise.then(
+      (result) => {
+        clearTimeout(timeoutId);
+        resolve(result);
+      },
+      (error) => {
+        clearTimeout(timeoutId);
+        reject(error);
+      },
+    );
+  });
+}
+
+async function invokeCheckoutIntegrationProvider(
+  providerId,
+  runtimeWindow,
+  options = {},
+) {
+  const capability = getCapability(providerId, runtimeWindow, options);
+  const provider = capability.provider;
+
+  if (!capability.available) {
+    return {
+      ok: false,
+      phase: 'capability',
+      reason: 'capability-unavailable',
+      capability: capability.capability,
+      provider,
+    };
+  }
+
+  try {
+    const timeoutMs = options.timeoutMs ?? provider.timeoutMs;
+    const invocationPromise = runProviderInvocation(
+      provider,
+      runtimeWindow,
+      options,
+      capability.capability,
+    );
+    const invocationResult = await runProviderInvocationWithTimeout(invocationPromise, timeoutMs);
+
+    if (invocationResult?.timedOut) {
+      return {
+        ok: false,
+        phase: 'invoke',
+        reason: 'invocation-timeout',
+        capability: capability.capability,
+        provider,
+      };
+    }
+    if (invocationResult?.ok === false) {
+      return {
+        ...invocationResult,
+        capability: capability.capability,
+        provider,
+      };
+    }
+    if (invocationResult === false) {
+      return {
+        ok: false,
+        phase: 'invoke',
+        reason: 'invocation-blocked',
+        capability: capability.capability,
+        provider,
+      };
+    }
+
+    return { ok: true, capability: capability.capability, provider };
+  } catch {
+    return {
+      ok: false,
+      phase: 'invoke',
+      reason: 'callback-error',
+      capability: capability.capability,
+      provider,
+    };
+  }
 }
 
 const bundleLevelCssMethods = {
@@ -10951,26 +11179,117 @@ getSummarySidebarEmptyStateMode() {
 },
 };
 
-function isFullPageCartLineOutOfStock(context, product) {
-  if (!product) return false;
-  if (typeof context?.isVariantOutOfStock === 'function') {
-    return context.isVariantOutOfStock(product);
-  }
-  if (product.available === false) return true;
-
-  const controls = typeof context?._getLandingPageControls === 'function'
-    ? context._getLandingPageControls()
-    : null;
-  return controls?.trackInventoryOnAddToCart === true
-    && product.quantityAvailable === 0
-    && product.currentlyNotInStock !== true;
-}
-
 function shouldIncludeBundleQuantityCartProperties(context) {
   const pricing = context?.selectedBundle?.pricing || {};
   const method = String(pricing.method || '').toLowerCase();
   const bundleQuantityOptions = pricing.messages?.displayOptions?.bundleQuantityOptions;
   return !(method === 'buy_x_get_y' && bundleQuantityOptions?.enabled === false);
+}
+
+function extractNumericFullPageId(value, extractId) {
+  if (value === null || value === undefined || value === '') return '';
+  if (typeof extractId === 'function') return extractId(value);
+  const raw = String(value || '');
+  const gidMatch = raw.match(/gid:\/\/shopify\/\w+\/(\d+)/);
+  if (gidMatch) return gidMatch[1];
+  return raw.includes('/') ? raw.split('/').pop() : raw;
+}
+
+function resolveCartVariantId(product, selectionId, extractId) {
+  const hasVariants = Array.isArray(product?.variants);
+
+  const candidateVariantFromSelection = (() => {
+    if (!product) return '';
+    const variants = Array.isArray(product.variants) ? product.variants : [];
+    const selected = String(selectionId || '');
+    if (!selected) return '';
+
+    const matchingVariant = variants.find((candidate) => {
+      const candidateId = extractNumericFullPageId(
+        candidate?.selectionId || candidate?.variantId || candidate?.id,
+        extractId
+      );
+      return String(candidateId || '') === String(selected);
+    });
+
+    if (!matchingVariant) return '';
+    return extractNumericFullPageId(
+      matchingVariant.variantId || matchingVariant.selectionId || matchingVariant.id,
+      extractId
+    );
+  })();
+  if (candidateVariantFromSelection) return candidateVariantFromSelection;
+
+  if (hasVariants && product.variants.length === 0) {
+    return '';
+  }
+
+  if (product?.variants && product.variants.length === 1) {
+    const singleVariant = product.variants[0];
+    const singleVariantId = extractNumericFullPageId(
+      singleVariant?.selectionId || singleVariant?.variantId || singleVariant?.id,
+      extractId
+    );
+    if (singleVariantId) return singleVariantId;
+  }
+
+  return extractNumericFullPageId(
+    product?.variantId,
+    product?.selectionId,
+    extractId
+  ) || '';
+}
+
+function toAddonLineType(properties = {}) {
+  if (properties._addon_product === 'true') return 'addon';
+  if (properties._bundle_step_type === 'free_gift') return 'free_gift';
+  return 'component';
+}
+
+function mergeDuplicateCartLines(lines = []) {
+  const grouped = new Map();
+
+  lines.forEach((line) => {
+    const variantId = String(line?.id || '').trim();
+    if (!variantId) {
+      grouped.set(Symbol(), line);
+      return;
+    }
+
+    const properties = line.properties || {};
+    const mergeKey = `${variantId}`;
+    const existing = grouped.get(mergeKey);
+
+    if (!existing) {
+      grouped.set(mergeKey, line);
+      return;
+    }
+
+    const quantity = Number(existing.quantity || 0) + Number(line.quantity || 0);
+    existing.quantity = quantity;
+    const existingProperties = existing.properties || {};
+    const incomingProperties = properties || {};
+    const hasExistingAddon = existingProperties._addon_product === 'true'
+      || (existingProperties._bundle_step_type === 'addon' || String(existingProperties._bundle_step_type || '').startsWith('addon:'));
+    const hasIncomingAddon = incomingProperties._addon_product === 'true'
+      || (incomingProperties._bundle_step_type === 'addon' || String(incomingProperties._bundle_step_type || '').startsWith('addon:'));
+    const hasExistingFreeGift = existingProperties._bundle_step_type === 'free_gift';
+    const hasIncomingFreeGift = incomingProperties._bundle_step_type === 'free_gift';
+    if (hasIncomingAddon || hasExistingAddon) {
+      existing.properties = { ...existingProperties, ...incomingProperties };
+      existing.properties._bundle_step_type = hasIncomingAddon
+        ? (incomingProperties._bundle_step_type || existingProperties._bundle_step_type)
+        : existingProperties._bundle_step_type;
+    } else if (hasIncomingFreeGift && !hasExistingFreeGift) {
+      existing.properties = { ...existingProperties, ...incomingProperties };
+      existing.properties._bundle_step_type = 'free_gift';
+    }
+    if (existing.properties && Object.prototype.hasOwnProperty.call(existing.properties, '_wolfpackProductBundle:prodQty')) {
+      existing.properties['_wolfpackProductBundle:prodQty'] = String(quantity);
+    }
+  });
+
+  return Array.from(grouped.values());
 }
 
 const fullPageStepFooterMethods = {
@@ -11031,11 +11350,11 @@ const fullPageStepFooterMethods = {
     return sourceProperties;
   },
 
-buildCartLineDisplayProperties(displayProperties) {
-  return buildSharedCartLineDisplayProperties(displayProperties, this.getCartLineLabels());
-},
+  buildCartLineDisplayProperties(displayProperties) {
+    return buildSharedCartLineDisplayProperties(displayProperties, this.getCartLineLabels());
+  },
 
-async addBundleToCart(clickedButton = null) {
+  async addBundleToCart(clickedButton = null) {
   if (this._isWidgetActionBusy) return;
   const actionButton = clickedButton || this.container?.querySelector('.footer-btn-next');
 
@@ -11047,7 +11366,7 @@ async addBundleToCart(clickedButton = null) {
       return;
     }
 
-    const items = [];
+    let items = [];
 
     const bundleName = this.selectedBundle.name || 'Bundle';
     const sessionKey = this.generateBundleSessionKey();
@@ -11059,6 +11378,7 @@ async addBundleToCart(clickedButton = null) {
     const hasAddonStepConfigured = (this.selectedBundle?.steps || []).some((candidateStep) => {
       return fullPageStepFooterMethods.isSelectedAddonCartLine.call(this, candidateStep);
     });
+
     let hasSelectedAddonLine = false;
 
     this.selectedBundle.steps.forEach((step, stepIndex) => {
@@ -11067,12 +11387,45 @@ async addBundleToCart(clickedButton = null) {
 
       Object.entries(stepSelections).forEach(([variantId, quantity]) => {
         if (quantity > 0) {
-          const numericVariantId = String(variantId || '');
-          const product = productsInStep.find(p => String(p.selectionId || '') === String(variantId))
-            || { id: variantId, title: variantId };
+          const requestedQuantity = Number(quantity || 0);
+          const resolvedSelectionId = extractNumericFullPageId(
+            variantId,
+            typeof this.extractId === 'function' ? this.extractId : null
+          );
+          const product = productsInStep.find((candidate) => {
+            const candidateSelectionId = extractNumericFullPageId(
+              candidate?.selectionId || candidate?.variantId || candidate?.id,
+              typeof this.extractId === 'function' ? this.extractId : null
+            );
+            return String(candidateSelectionId || '') === String(resolvedSelectionId || '');
+          });
+          if (!product) {
+            unavailableLines.push('Unable to resolve selected product variant.');
+            return;
+          }
+          const numericVariantId = extractNumericFullPageId(
+            resolveCartVariantId(product, resolvedSelectionId, typeof this.extractId === 'function' ? this.extractId : null),
+            typeof this.extractId === 'function' ? this.extractId : null
+          );
+          if (!numericVariantId || !/^\d+$/.test(numericVariantId)) {
+            unavailableLines.push(`${product?.title || variantId} is not available.`);
+            return;
+          }
 
-          if (isFullPageCartLineOutOfStock(this, product)) {
-            unavailableLines.push(product.title || variantId);
+          const availability = typeof this.getVariantAvailable === 'function'
+            ? this.getVariantAvailable(stepIndex, resolvedSelectionId)
+            : { available: null, outOfStock: false, acceptsBackorder: false };
+          if (availability?.outOfStock) {
+            unavailableLines.push(`${product?.title || variantId} is out of stock.`);
+            return;
+          }
+          if (
+            typeof availability?.available === 'number'
+            && requestedQuantity > availability.available
+          ) {
+            unavailableLines.push(
+              `${product?.title || variantId} only has ${availability.available} in stock.`
+            );
             return;
           }
 
@@ -11126,8 +11479,10 @@ async addBundleToCart(clickedButton = null) {
       });
     });
 
+    const itemsForRuntimeToken = items;
+
     if (unavailableLines.length > 0) {
-      ToastManager.show(`${unavailableLines[0]} is out of stock.`);
+      ToastManager.show(unavailableLines[0]);
       return;
     }
 
@@ -11155,6 +11510,7 @@ async addBundleToCart(clickedButton = null) {
         offerGroupId: baseOfferId,
         bundleType: 'full_page',
       });
+      items = mergeDuplicateCartLines(itemsForRuntimeToken);
       items.forEach(item => {
         item.properties._wolfpack_bundle_runtime = runtimeToken;
         delete item._runtimeProductId;
@@ -11169,7 +11525,17 @@ async addBundleToCart(clickedButton = null) {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to add to cart');
+        const responseText = await response.text();
+        let errorMessage = `Failed to add bundle to cart (${response.status})`;
+        try {
+          const payload = JSON.parse(responseText);
+          errorMessage = payload?.message || payload?.description || errorMessage;
+        } catch {
+          if (responseText) {
+            errorMessage = responseText;
+          }
+        }
+        throw new Error(errorMessage);
       }
 
       await response.json();
@@ -11187,7 +11553,9 @@ async addBundleToCart(clickedButton = null) {
 
     } catch (fetchError) {
       this._emitStorefrontEvent('bundle-add-to-cart-failed', { reason: 'fetch-error', message: String(fetchError && fetchError.message || fetchError) });
-      ToastManager.show('Failed to add bundle to cart. Please try again.');
+      ToastManager.show(
+        String(fetchError && fetchError.message) || 'Failed to add bundle to cart. Please try again.'
+      );
     } finally {
       this.hideLoadingOverlay();
       this._setWidgetBusy(false, actionButton);
@@ -15091,11 +15459,9 @@ if (document.readyState === 'loading') {
 function initializeFullPageWidget() {
   const containers = document.querySelectorAll('#bundle-builder-app');
   containers.forEach(container => {
-    if (!container.dataset.initialized) {
-      const bundleType = container.dataset.bundleType || 'full_page';
-      if (bundleType === 'full_page') {
-        new BundleWidgetFullPage(container);
-      }
+    const bundleType = container.dataset.bundleType || 'full_page';
+    if (bundleType === 'full_page' && !container.dataset.initialized) {
+      new BundleWidgetFullPage(container);
     }
   });
 }
