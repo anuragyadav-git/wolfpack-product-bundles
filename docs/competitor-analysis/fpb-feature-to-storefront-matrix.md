@@ -144,7 +144,7 @@ not execute row-by-row Admin mutations.
 | R12 | F0 | Cloned step | Cloned structure remains independent and ordered | **P** F0-CLONE | **P** F0-CLONE | **P** F0-CLONE | **P** F0-CLONE |
 | R13 | F0 | Disabled step | Disabled Admin steps never render or block progression | **P** F0-SINGLE | **P** F0-SINGLE | **P** F0-DISABLED | **P** F0-DISABLED |
 | R14 | F0 | Step timeline | Current, completed, and future states match EB | **P** F0-FLOW | **P** F0-FLOW | **P** F0-FLOW | **P** F0-FLOW |
-| R15 | F6 | Step/category banner media | Saved desktop/mobile media renders at the EB-owned stage | **S** | **S** | **T** | **T** |
+| R15 | F6 | Step/category banner media | Saved desktop/mobile media renders at the EB-owned stage | **S** | **S** | **S** | **S** |
 | R16 | F8 | First load and cache-bypassed reload | No wrong-preset flash; restored fixture renders identically | **S** | **S** | **P** C08 | **P** C08 |
 
 ## 2. Product Cards, Variants, Media, and Inventory
@@ -221,7 +221,7 @@ time and restore the `F0` minimum/exact baseline after every permutation.
 | D10 | F3 | Variables and custom copy | Remaining quantity/amount, value/unit, and discounted-item variables resolve | **P** F3-FIXED-AMOUNT-SIMPLE-ALL | **P** F3-FIXED-AMOUNT-SIMPLE-ALL | **P** F3-FIXED-AMOUNT-SIMPLE-ALL, F3-SHARED-MOBILE-FOOTER | **P** F3-FIXED-AMOUNT-SIMPLE-ALL, F3-SHARED-MOBILE-FOOTER |
 | D11 | F3 | Inline/additional-offer badge | Qualification pill/banner appears and settles at the EB-owned surface | **P** F3-FIXED-AMOUNT-SIMPLE-ALL | **P** F3-FIXED-AMOUNT-SIMPLE-ALL | **P** F3-FIXED-AMOUNT-SIMPLE-ALL | **P** F3-FIXED-AMOUNT-SIMPLE-ALL |
 | D12 | F3 | Original/savings/total fields | Visibility, order, currency, and values follow saved pricing settings | **P** F3-PERCENTAGE-ALL | **P** F3-PERCENTAGE-ALL | **P** F3-PERCENTAGE-ALL | **P** F3-PERCENTAGE-ALL |
-| D13 | F6 | Multi-language discount/progress labels | Active locale selects the correct saved labels without fallback copy | **S** | **S** | **T** | **T** |
+| D13 | F6 | Multi-language discount/progress labels | Active locale selects the correct saved labels without fallback copy | **S** | **S** | **P** F6-DESIGN | **P** F6-DESIGN |
 
 ## 6. Add-Ons, Free Gifts, and Personalization
 
@@ -266,23 +266,23 @@ time and restore the `F0` minimum/exact baseline after every permutation.
 | ID | Group | Feature / state | EB storefront contract | ST | CL | CO | HO |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | G01 | F6 | Bundle summary title/subtitle | Saved copy renders in sidebar/mobile tray without fallback text | **P** F0-191 | **P** F0-191 | **P** F0-191 | **P** F0-191 |
-| G02 | F6 | CTA and navigation copy | Add/Next/Back/Done/cart text uses saved long/localized copy | **S** | **S** | **T** | **T** |
-| G03 | F6 | Product-card copy | Add, selected, variant, quantity, remove, and sold-out labels use active locale | **S** | **S** | **T** | **T** |
-| G04 | F6 | Store-level language/locale | All shared and preset surfaces consume one active locale consistently | **S** | **S** | **T** | **T** |
-| G05 | F6 | Brand colors | Base colors propagate only to intended FPB surfaces | **S** | **S** | **T** | **T** |
-| G06 | F6 | Typography | Font family, weight, and scale propagate without theme leakage | **S** | **S** | **T** | **T** |
-| G07 | F6 | Corners and control shapes | Cards, buttons, pills/tabs, tray, and summary use saved tokens | **S** | **S** | **T** | **T** |
-| G08 | F6 | Expert color controls | Each control overrides only its owner surface | **S** | **S** | **T** | **T** |
-| G09 | F6 | Landing Page custom CSS scope | Merchant CSS remains FPB-scoped and does not leak into theme/PPB | **T** | **T** | **T** | **T** |
-| G10 | F6 | Desktop/mobile banners | Correct viewport asset appears without layout shift or distortion | **S** | **S** | **T** | **T** |
-| G11 | F6 | Loading image/GIF | Saved loading media appears without wrong-preset/title flash | **S** | **P** CS5 | **T** | **T** |
+| G02 | F6 | CTA and navigation copy | Add/Next/Back/Done/cart text uses saved long/localized copy | **S** | **S** | **P** F6-DESIGN | **P** F6-DESIGN |
+| G03 | F6 | Product-card copy | Add, selected, variant, quantity, remove, and sold-out labels use active locale | **S** | **S** | **P** F6-DESIGN | **P** F6-DESIGN |
+| G04 | F6 | Store-level language/locale | All shared and preset surfaces consume one active locale consistently | **S** | **S** | **P** F6-DESIGN | **P** F6-DESIGN |
+| G05 | F6 | Brand colors | Base colors propagate only to intended FPB surfaces | **S** | **S** | **P** F6-DESIGN | **P** F6-DESIGN |
+| G06 | F6 | Typography | Font family, weight, and scale propagate without theme leakage | **S** | **S** | **P** F6-DESIGN | **P** F6-DESIGN |
+| G07 | F6 | Corners and control shapes | Cards, buttons, pills/tabs, tray, and summary use saved tokens | **S** | **S** | **P** F6-DESIGN | **P** F6-DESIGN |
+| G08 | F6 | Expert color controls | Each control overrides only its owner surface | **S** | **S** | **P** F6-DESIGN | **P** F6-DESIGN |
+| G09 | F6 | Landing Page custom CSS scope | Merchant CSS remains FPB-scoped and does not leak into theme/PPB | **P** F6-DESIGN | **P** F6-DESIGN | **P** F6-DESIGN | **P** F6-DESIGN |
+| G10 | F6 | Desktop/mobile banners | Correct viewport asset appears without layout shift or distortion | **S** | **S** | **S** | **S** |
+| G11 | F6 | Loading image/GIF | Saved loading media appears without wrong-preset/title flash | **S** | **P** CS5 | **P** CS5 | **P** CS5 |
 | G12 | F1 | Show compare-at prices | Visibility follows the saved control independently from product data | **P** F1-GROUPED-CONTROLS | **P** F1-GROUPED-CONTROLS | **P** F1-GROUPED-CONTROLS | **P** F1-GROUPED-CONTROLS |
 | G13 | F1 | Show text on Add button | Icon/text action follows saved configuration without preset drift | **P** F1-ADD-CTA | **P** F1-ADD-CTA | **P** C00 note | **P** C00 note |
 | G14 | F1 | Variant selector enabled/disabled | Grouped options appear only when configured and applicable | **P** F1-GROUPED-CONTROLS | **P** F1-GROUPED-CONTROLS | **P** F1-GROUPED-CONTROLS | **P** F1-GROUPED-CONTROLS |
 | G15 | F1 | Hide out-of-stock products | Visible/hidden unavailable catalog behavior follows saved control | **E** F1-INVENTORY | **E** F1-INVENTORY | **E** F1-INVENTORY | **E** F1-INVENTORY |
 | G16 | F7 | Inventory tracking control | Storefront selection/cart behavior follows the single saved source | **S** | **S** | **T** | **T** |
 | G17 | F8 | Store header/footer visibility | Theme chrome is shown/hidden according to the FPB setting without displacing the widget | **T** | **T** | **T** | **T** |
-| G18 | F6 | Step timeline visibility | Saved timeline control shows/hides the shopper timeline without changing navigation behavior | **S** | **S** | **T** | **T** |
+| G18 | F6 | Step timeline visibility | Saved timeline control shows/hides the shopper timeline without changing navigation behavior | **X** F6-DESIGN | **X** F6-DESIGN | **X** F6-DESIGN | **X** F6-DESIGN |
 | G19 | F3 | Bundle footer condition/discount messaging | Footer copy and visibility follow their independent saved controls | **P** F3-FIXED-AMOUNT-SIMPLE-ALL | **P** F3-FIXED-AMOUNT-SIMPLE-ALL | **P** F3-FIXED-AMOUNT-SIMPLE-ALL, F3-SHARED-MOBILE-FOOTER | **P** F3-FIXED-AMOUNT-SIMPLE-ALL, F3-SHARED-MOBILE-FOOTER |
 | G20 | F7 | Cart-line messaging | Saved bundle/cart message and active locale reach cart and checkout lines | **S** | **S** | **T** | **T** |
 | G21 | F7 | Discount display format | Amount plus percentage, amount-only, and percentage-only formats follow the saved setting | **T** | **T** | **T** | **T** |
@@ -376,6 +376,7 @@ group. Screenshots, HAR files, and raw captures remain under `/private/tmp`.
 | `F5-DISABLED-ALL` | EB and WPB then disabled the personalization master control without deleting the retained tier fixture. Standard, Classic, Compact, and Horizontal each rendered only the two configured product steps, omitted the `Add On` stage and all qualification copy, and retained zero document overflow at `390x844`. EB runtime persisted `isPersonalizationEnabled: false`; WPB correctly omitted inactive personalization data from the public bundle response. | Direct Chrome DevTools MCP Admin persistence, cache-bypassed mobile runtime, asset, stage-gating, and geometry proof from 2026-07-30. |
 | `F5-GIFT-MESSAGES-X` | Current EB Admin directly exposes the separate Messages product surface: sender/recipient fields, mandatory message validation, character limits, email delivery, and email-template customization. WPB intentionally does not expose that Admin section, emit gift-message personalization in its public bundle config, render gift-message fields, or add gift-message cart lines. This is an accepted product divergence shared by all four templates, following the completed user-requested removal of the entire gift/message-product feature while retaining unrelated discount and add-on messaging. | Direct Chrome DevTools MCP EB/WPB Admin and WPB public-config proof from 2026-07-30; `docs/issues-prod/remove-gift-messages-1.md`; `docs/superpowers/specs/2026-06-05-fpb-addons-admin-eb-parity-design.md`; `test-spec/remove-gift-messages.spec.md`; current source search contains no gift-message runtime markers. |
 | `F5-ADDON-LOCALES-E` | EB persisted the gifting-step French labels through its dedicated personalization-language endpoint, but its two add-on locale modals are non-executing controls in the captured configuration. Sequential French section-title, tier-title, and footer-message edits remained visible until modal close, yet the successful add-on save request contained no locale field, the only language request contained the two gifting-step fields, and reopening the add-on footer modal in French restored the base English messages. The public config likewise retained only `personalizationData.multiLangData` for the gifting-step labels. Base add-on titles and qualification messages remain supported and are already proven by the rich F5 tier batches; WPB does not fabricate an active-locale add-on override that EB does not execute. | Direct Chrome DevTools MCP EB Admin accessibility state plus successful requests `708`, `709`, and `711`, modal reopen proof, and EB public runtime config from 2026-07-30. |
+| `F6-DESIGN` | EB persisted and replayed the complete design fixture through Standard, Classic, Compact, and Horizontal: brand and expert colors, typography, corners, image fit, scoped CSS, desktop/mobile banners, and locale-aware copy remained document-contained at desktop and mobile widths. WPB persisted the equivalent global Design and Controls settings through successful `/app/settings.data` requests, but the existing rolling bundle continued to render its pre-sync Inter/Arial typography, black card CTA, purple Next CTA, and no scoped CSS probe after a cache-bypassed reload. Those unsynchronized Compact/Horizontal cells are terminal partials rather than claimed parity. WPB intentionally retains its nullable per-bundle timeline override; EB exposes no equivalent direct per-bundle timeline control, so G18 is an accepted divergence. | Direct Chrome DevTools MCP Admin persistence, preset identity, cache-bypassed desktop/mobile runtime, computed styles, responsive banner selection, overflow, accessibility, console, and network proof from 2026-07-30. |
 
 `F0-192` does not claim true-empty equivalence. `F0-EMPTY` supersedes that
 assumption and keeps every design cell non-terminal unless both corrected EB
