@@ -1,13 +1,13 @@
 /*!
  * Wolfpack Bundle Widget — Full Page
- * Version : 5.0.222
+ * Version : 5.0.223
  * Built   : 2026-07-30
  *
  * Cache note: Shopify CDN cache is busted automatically by shopify app deploy.
  * After deploying, allow 2-10 minutes for propagation before testing.
  * Verify live version: console.log(window.__BUNDLE_WIDGET_VERSION__)
  */
-window.__BUNDLE_WIDGET_VERSION__ = '5.0.222';
+window.__BUNDLE_WIDGET_VERSION__ = '5.0.223';
 (function() {
   'use strict';
 
@@ -47,6 +47,19 @@ const ConditionValidator = (function () {
     return total;
   }
 
+  /**
+   * Determine whether a proposed quantity update is permitted by the step's condition.
+   *
+   * Only blocks INCREASES that would violate an upper-bound operator.
+   * Decreases are always permitted regardless of the condition state (so the
+   * customer can switch products without getting permanently stuck).
+   *
+   * @param {object}  step              Step config object (conditionType, conditionOperator, conditionValue)
+   * @param {Record<string, number>} currentSelections  Current selections for this step
+   * @param {string}  targetProductId   Product being updated
+   * @param {number}  newQuantity       Proposed quantity (0 = remove)
+   * @returns {{ allowed: boolean, limitText: string|null }}
+   */
   function canUpdateQuantity(step, currentSelections, targetProductId, newQuantity, targetValues) {
 
     if (!step || !step.conditionType || !step.conditionOperator || !_isPositiveConditionValue(step.conditionValue)) {
@@ -394,6 +407,15 @@ const BUNDLE_WIDGET = {
   PLACEHOLDER_IMAGE: INLINE_PLACEHOLDER_IMAGE,
   PLACEHOLDER_IMAGE_FALLBACK: INLINE_PLACEHOLDER_IMAGE
 };
+
+/**
+ * Bundle Widget - Currency Management System
+ *
+ * Handles multi-currency detection, conversion, and formatting.
+ * Integrates with Shopify Markets for automatic currency handling.
+ *
+ * @version 4.0.0
+ */
 
 class CurrencyManager {
   static getShopify() {
@@ -3063,6 +3085,13 @@ function escapeHtml(value) {
 function escapeAttribute(value) {
   return escapeHtml(value).replace(/`/g, '&#96;');
 }
+
+/**
+ * Shared selected product row renderer.
+ *
+ * Renders prepared display data only; selection rules, default-product rules,
+ * and free-gift lock state stay in the caller until templates migrate.
+ */
 
 const SELECTED_ROW_PLACEHOLDER_IMAGE = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96"%3E%3Crect width="96" height="96" fill="%23f3f4f6"/%3E%3C/svg%3E';
 
@@ -11082,7 +11111,9 @@ async addBundleToCart(clickedButton = null) {
           const cartItem = {
             id: numericVariantId,
             quantity: quantity,
-            properties
+            properties,
+            _runtimeProductId: [product?.productId, product?.graphqlId, product?.id]
+              .find(value => String(value || '').includes('/Product/')) || null,
           };
           const sellingPlanAllocationId = this.getSelectedSellingPlanAllocationId(product, variantId);
           if (sellingPlanAllocationId) {
@@ -11126,6 +11157,7 @@ async addBundleToCart(clickedButton = null) {
       });
       items.forEach(item => {
         item.properties._wolfpack_bundle_runtime = runtimeToken;
+        delete item._runtimeProductId;
       });
 
       const response = await fetch('/cart/add.js', {
@@ -11190,6 +11222,7 @@ async requestCartTransformRuntimeToken(items, { offerGroupId, bundleType }) {
     const isAddon = stepType === 'addon' || (typeof stepType === 'string' && stepType.startsWith('addon:'));
     const line = {
       variantId: item.id,
+      productId: item._runtimeProductId || item.productId || undefined,
       quantity: item.quantity,
     };
     if (isAddon) {
@@ -12885,6 +12918,13 @@ processProductsForStep(products, step) {
   });
 },
 
+/**
+ * Look up real stock for a variant in a step's product data.
+ * Returns:
+ *   - available: positive numeric remaining stock, or null when uncapped
+ *   - outOfStock: true only when Shopify marks the variant unavailable
+ *   - acceptsBackorder: true when Shopify marks the variant as backorderable
+ */
 isVariantOutOfStock(product) {
   if (!product) {
     return false;

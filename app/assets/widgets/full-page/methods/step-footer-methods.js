@@ -179,7 +179,9 @@ async addBundleToCart(clickedButton = null) {
           const cartItem = {
             id: numericVariantId,
             quantity: quantity,
-            properties
+            properties,
+            _runtimeProductId: [product?.productId, product?.graphqlId, product?.id]
+              .find(value => String(value || '').includes('/Product/')) || null,
           };
           const sellingPlanAllocationId = this.getSelectedSellingPlanAllocationId(product, variantId);
           if (sellingPlanAllocationId) {
@@ -223,6 +225,7 @@ async addBundleToCart(clickedButton = null) {
       });
       items.forEach(item => {
         item.properties._wolfpack_bundle_runtime = runtimeToken;
+        delete item._runtimeProductId;
       });
 
       // Add to Shopify cart
@@ -290,6 +293,7 @@ async requestCartTransformRuntimeToken(items, { offerGroupId, bundleType }) {
     const isAddon = stepType === 'addon' || (typeof stepType === 'string' && stepType.startsWith('addon:'));
     const line = {
       variantId: item.id,
+      productId: item._runtimeProductId || item.productId || undefined,
       quantity: item.quantity,
     };
     if (isAddon) {

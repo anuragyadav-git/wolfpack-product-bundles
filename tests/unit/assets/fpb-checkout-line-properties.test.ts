@@ -18,6 +18,38 @@ function createCartAddFetchMock() {
 }
 
 describe("FPB checkout cart-line properties", () => {
+  it("includes the configured product identity when requesting a runtime token", async () => {
+    const fetchMock = createCartAddFetchMock();
+    const originalFetch = (global as any).fetch;
+    (global as any).fetch = fetchMock;
+
+    try {
+      await fullPageStepFooterMethods.requestCartTransformRuntimeToken.call(
+        { selectedBundle: { id: "bundle-1" } },
+        [{
+          id: "501",
+          quantity: 1,
+          productId: "gid://shopify/Product/5",
+          properties: {},
+        }],
+        { offerGroupId: "FBP-1_ABC", bundleType: "full_page" },
+      );
+    } finally {
+      (global as any).fetch = originalFetch;
+    }
+
+    const tokenRequest = fetchMock.mock.calls.find(
+      ([url]) => url === "/apps/product-bundles/api/cart-transform-runtime-token",
+    );
+    const body = JSON.parse(tokenRequest[1].body);
+
+    expect(body.components).toEqual([{
+      variantId: "501",
+      productId: "gid://shopify/Product/5",
+      quantity: 1,
+    }]);
+  });
+
   it("keeps paid add-on savings out of parent bundle display metadata", () => {
     const originalWindow = (global as any).window;
     let sourceProperties;
