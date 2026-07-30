@@ -1206,6 +1206,50 @@ mod tests {
     }
 
     #[test]
+    fn test_merge_uses_amount_only_cart_line_savings_format() {
+        let settings = serde_json::json!({
+            "isEnabled": true,
+            "showBundleContains": true,
+            "showOriginalPrice": true,
+            "discountDisplay": {
+                "isEnabled": true,
+                "format": "amount_only"
+            }
+        })
+        .to_string();
+        let input = messaging_merge_input(&format!(
+            r#""cartTransform": {{ "bundleCartLineMessaging": {{ "value": {settings:?} }} }},"#
+        ));
+
+        let output: schema::FunctionRunResult = run_cart_transform(&input);
+        let attributes = merge_attributes(&output);
+
+        assert_eq!(attributes.get("You Save").map(String::as_str), Some("₹10"));
+    }
+
+    #[test]
+    fn test_merge_uses_percentage_only_cart_line_savings_format() {
+        let settings = serde_json::json!({
+            "isEnabled": true,
+            "showBundleContains": true,
+            "showOriginalPrice": true,
+            "discountDisplay": {
+                "isEnabled": true,
+                "format": "percentage_only"
+            }
+        })
+        .to_string();
+        let input = messaging_merge_input(&format!(
+            r#""cartTransform": {{ "bundleCartLineMessaging": {{ "value": {settings:?} }} }},"#
+        ));
+
+        let output: schema::FunctionRunResult = run_cart_transform(&input);
+        let attributes = merge_attributes(&output);
+
+        assert_eq!(attributes.get("You Save").map(String::as_str), Some("20%"));
+    }
+
+    #[test]
     fn test_merge_duplicate_name_unique_title() {
         let cp = serde_json::json!([{
             "id": "gid://shopify/ProductVariant/999",
