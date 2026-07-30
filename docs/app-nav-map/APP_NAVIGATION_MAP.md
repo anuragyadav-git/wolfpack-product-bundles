@@ -174,13 +174,13 @@ Settings
 ├── Card: Language
 │   └── Shows multilanguage mode, supported languages, shared Cart & Checkout strings, Landing Page Layout strings, and Product Page Layout strings
 └── Card: Controls
-    └── Shows recovered Additional Configurations facts split by Landing Page Layout and Product Page Layout
+    └── Navigates to /app/additional-configurations
 ```
 
 Primary action:
 - The complete Design, Language, and Controls cards are the actions; they do not render separate `Configure` affordances.
 - Selecting Design opens the Settings -> Design subpage.
-- While the lazy Settings workspace loads after any card selection, the route shows three skeleton cards instead of a spinner.
+- While the lazy Design or Language workspace loads after selection, the route shows three skeleton cards instead of a spinner.
 - The Design Control Panel lazy-loads after entry and uses a responsive three-column workspace: section navigation on the left, the largest app-owned preview in the middle, and active fields on the right. At medium widths the preview spans the first row; at phone widths a Preview / Customize segmented control shows one workspace pane at a time.
 - Preview-only Bundle Type and Template selectors cover Landing Page Standard, Classic, Compact, and Horizontal plus Product Page Product List, Product Grid, Horizontal Slots, and Vertical Slots.
 - The template-aware Preview surface control exposes only valid local scenes: Builder, Cart / summary, Loading, Validation, and Upsell for every template, plus Product picker for the two slot templates. Desktop/mobile switching preserves the selected surface when it remains valid.
@@ -196,6 +196,30 @@ Primary action:
 
 ---
 
+### 2.2a Additional Configurations — `/app/additional-configurations`
+
+**Route file:** `app/routes/app/app.additional-configurations.tsx`
+
+Dedicated Controls workspace:
+```
+Additional Configurations
+├── Landing Page Layout
+│   ├── Configuration
+│   ├── CSS & Scripts
+│   ├── Integrations
+│   └── Advanced
+└── Product Page Layout
+    ├── Configuration
+    └── CSS & Scripts
+```
+
+- Reuses the Settings controls loader, action, persistence, save bar, and discard behavior.
+- Deep-links layout, tab, and nested group through `layout`, `tab`, and `group` query parameters.
+- Invalid query combinations resolve to the first valid visible tab and group.
+- Back navigation returns to `/app/settings` after App Bridge save-bar leave confirmation.
+
+---
+
 ### 2.2b Integrations — `/app/integrations`
 
 **Route file:** `app/routes/app/app.integrations.tsx`
@@ -204,15 +228,28 @@ Recovered Admin Integrations hub:
 ```
 Integrations Hub
 ├── Request Integration action → https://wolfpackapps.com
+├── Pre-orders, Pickup & Delivery
+│   ├── Stoq → View Setup
+│   └── Zapiet → View Setup
+├── Subscriptions
+│   ├── Skio → View Setup
+│   ├── Appstle → View Setup
+│   └── Bold → View Setup
+├── Reviews
+│   └── Judge.me → View Setup
+├── Page Builders
+│   ├── PageFly → View Setup
+│   └── GemPages → View Setup
 └── Checkout
-    ├── Gokwik → View Setup
+    ├── GoKwik → View Setup
     └── Shopflo → View Setup
 ```
 
 All setup actions currently open `https://wolfpackapps.com` until WPB-owned quick setup guides are published.
 
 Setup behavior:
-- `View Setup` expands an internal recovered setup summary for guide-based integrations.
+- Cards display Planned, Guided setup, or Assisted setup without claiming connection state.
+- `View Setup` opens the WPB-owned setup/support destination in a new browsing context.
 - External competitor help URLs are intentionally not embedded in source code; sanitized evidence remains in `docs/competitor-analysis/18-eb-settings-integrations-replication-evidence.md`.
 
 ---

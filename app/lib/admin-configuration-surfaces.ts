@@ -13,7 +13,7 @@ export type SettingsField = {
   key?: string;
   label: string;
   value?: string;
-  kind?: "color" | "text" | "number" | "select" | "radio" | "toggle" | "css" | "script" | "image" | "file" | "button" | "loadingSpinner";
+  kind?: "color" | "text" | "number" | "select" | "radio" | "toggle" | "css" | "script" | "secret" | "image" | "file" | "button" | "loadingSpinner";
   note?: string;
   description?: string;
   guideUrl?: string;
@@ -69,7 +69,7 @@ export type IntegrationCard = {
   description: string;
   logoLabel: string;
   logoUrl?: string;
-  status: "Setup guide" | "Chat setup" | "Custom request";
+  status: "Supported" | "Guided setup" | "Assisted setup" | "Planned";
   ctaLabel: string;
   ctaType: "guide" | "chat" | "request";
   setupUrl: string;
@@ -615,7 +615,6 @@ export const CONTROL_LAYOUTS: ControlsLayout[] = [
             options: CHECKOUT_INTEGRATION_OPTIONS,
           },
           { label: "Execute Script", kind: "script", group: "Checkout Settings" },
-          { label: "Font Settings", kind: "text", group: "Font Settings", description: "Customize the font of the bundle builder." },
           { label: "Custom Font", kind: "text", group: "Font Settings", description: "Note: By default, your storefront theme font will be picked." },
         ],
       },
@@ -647,7 +646,12 @@ export const CONTROL_LAYOUTS: ControlsLayout[] = [
         contentDescription: "The script written here will exclusively apply to theme pages and will not affect bundle pages. Please refer to our internal Notion document(Easy Bundles Custom CSS and JS Requests).",
         fields: [
           { label: "Enable Custom Theme Integration Script", kind: "toggle", group: "Integrate JS with custom elements from the store theme" },
-          { label: "Custom Theme Integration Script", kind: "script", group: "Integrate JS with custom elements from the store theme" },
+          {
+            label: "Custom Theme Integration Script",
+            kind: "script",
+            group: "Integrate JS with custom elements from the store theme",
+            note: "This script runs globally on theme pages. Review and test it before enabling.",
+          },
           {
             label: "Enable Cart Integration",
             kind: "toggle",
@@ -660,7 +664,7 @@ export const CONTROL_LAYOUTS: ControlsLayout[] = [
           { label: "Cart Item Quantity Button Selectors", kind: "text", group: "Integrate JS bundle script with Cart page" },
           { label: "Custom Cart Integration Script", kind: "script", group: "Integrate JS bundle script with Cart page" },
           { label: "Enable Judge Me Integration", kind: "toggle", group: "Integrate with Judge Me", description: "Show reviews on product cards through integration with judgeme" },
-          { label: "Public token", kind: "text", group: "Integrate with Judge Me" },
+          { label: "Public token", kind: "secret", group: "Integrate with Judge Me" },
         ],
       },
       {
@@ -750,6 +754,155 @@ export const CONTROL_LAYOUTS: ControlsLayout[] = [
 
 export const INTEGRATION_CATEGORIES: IntegrationCategory[] = [
   {
+    id: "inventory-preorders",
+    title: "Pre-orders, Pickup & Delivery",
+    description: "Let customers pre-order or schedule pickup and delivery for bundled products.",
+    cards: [
+      {
+        id: "stoq",
+        title: "Stoq",
+        description: "Pre-order out-of-stock items within your bundles",
+        logoLabel: "Stoq",
+        logoUrl: "/icons/Stoq.avif",
+        status: "Planned",
+        ctaLabel: "View Setup",
+        ctaType: "guide",
+        setupUrl: "https://wolfpackapps.com",
+        guideSummary: [
+          "Configure products in preorder plans and enable continued selling in the preorder app.",
+          "Sync the bundle catalog, then select the applicable selling plan in bundle settings.",
+          "Storefront preorder labels and stock-gated plan selection require runtime support before connection is claimed.",
+        ],
+      },
+      {
+        id: "zapiet",
+        title: "Zapiet",
+        description: "Schedule store pickup & delivery for bundle orders",
+        logoLabel: "Zapiet",
+        logoUrl: "/icons/Zapiet.avif",
+        status: "Assisted setup",
+        ctaLabel: "View Setup",
+        ctaType: "chat",
+        setupUrl: "https://wolfpackapps.com",
+        guideSummary: [
+          "Setup is merchant-specific because pickup and delivery routing depends on the store configuration.",
+          "The setup action opens Wolfpack support only after the merchant explicitly selects it.",
+        ],
+      },
+    ],
+  },
+  {
+    id: "subscriptions",
+    title: "Subscriptions",
+    description: "Enable recurring purchases so customers can subscribe to their favorite bundles.",
+    cards: [
+      {
+        id: "skio",
+        title: "Skio",
+        description: "Add subscription selling plans to bundled products",
+        logoLabel: "Skio",
+        logoUrl: "/icons/Skio.avif",
+        status: "Guided setup",
+        ctaLabel: "View Setup",
+        ctaType: "guide",
+        setupUrl: "https://wolfpackapps.com",
+        guideSummary: [
+          "Create one selling plan that includes every product available in the bundle.",
+          "Sync the bundle catalog, choose the selling plan in bundle settings, and save.",
+        ],
+      },
+      {
+        id: "appstle",
+        title: "Appstle",
+        description: "Enable subscribe-and-save options on your bundles",
+        logoLabel: "Appstle",
+        logoUrl: "/icons/Appstle.avif",
+        status: "Guided setup",
+        ctaLabel: "View Setup",
+        ctaType: "guide",
+        setupUrl: "https://wolfpackapps.com",
+        guideSummary: [
+          "Create one selling plan that includes every product available in the bundle.",
+          "Sync the bundle catalog, choose the selling plan in bundle settings, and save.",
+        ],
+      },
+      {
+        id: "bold",
+        title: "Bold",
+        description: "Set up recurring bundle subscriptions via Bold",
+        logoLabel: "Bold",
+        logoUrl: "/icons/Bold.avif",
+        status: "Guided setup",
+        ctaLabel: "View Setup",
+        ctaType: "guide",
+        setupUrl: "https://wolfpackapps.com",
+        guideSummary: [
+          "Create one selling plan that includes every product available in the bundle.",
+          "Sync the bundle catalog, choose the selling plan in bundle settings, and save.",
+        ],
+      },
+    ],
+  },
+  {
+    id: "reviews",
+    title: "Reviews",
+    description: "Show social proof by displaying product ratings within your bundles.",
+    cards: [
+      {
+        id: "judgeme",
+        title: "Judge.me",
+        description: "Display star ratings and reviews on your bundles",
+        logoLabel: "Judge.me",
+        logoUrl: "/icons/Judgeme.avif",
+        status: "Guided setup",
+        ctaLabel: "View Setup",
+        ctaType: "guide",
+        setupUrl: "https://wolfpackapps.com",
+        guideSummary: [
+          "Configure the authenticated public token in Additional Configurations.",
+          "Apply any required review badge visibility override through theme-page CSS.",
+        ],
+      },
+    ],
+  },
+  {
+    id: "page-builders",
+    title: "Page Builders",
+    description: "Build custom landing pages and sections to showcase your bundles.",
+    cards: [
+      {
+        id: "pagefly",
+        title: "PageFly",
+        description: "Create custom landing pages to showcase bundles",
+        logoLabel: "PageFly",
+        logoUrl: "/icons/Pagefly.avif",
+        status: "Guided setup",
+        ctaLabel: "View Setup",
+        ctaType: "guide",
+        setupUrl: "https://wolfpackapps.com",
+        guideSummary: [
+          "Embed the product-page bundle wrapper and load the WPB storefront assets.",
+          "Provide the parent product handle before loading assets on non-product pages.",
+        ],
+      },
+      {
+        id: "gempages",
+        title: "GemPages",
+        description: "Build high-converting pages for your bundle store",
+        logoLabel: "GemPages",
+        logoUrl: "/icons/Gempages.avif",
+        status: "Guided setup",
+        ctaLabel: "View Setup",
+        ctaType: "guide",
+        setupUrl: "https://wolfpackapps.com",
+        guideSummary: [
+          "Embed the product-page bundle wrapper and load the WPB storefront assets.",
+          "Provide the parent product handle before loading assets on non-product pages.",
+        ],
+      },
+    ],
+  },
+  {
     id: "checkout-side-cart",
     title: "Checkout",
     description: "Ensure bundles work smoothly through native and third-party checkout flows.",
@@ -760,7 +913,7 @@ export const INTEGRATION_CATEGORIES: IntegrationCategory[] = [
         description: "Streamlined Indian checkout experience for bundles",
         logoLabel: "Gokwik",
         logoUrl: "/icons/Gokwik.avif",
-        status: "Setup guide",
+        status: "Guided setup",
         ctaLabel: "View Setup",
         ctaType: "guide",
         setupUrl: "https://wolfpackapps.com",
@@ -776,7 +929,7 @@ export const INTEGRATION_CATEGORIES: IntegrationCategory[] = [
         description: "Optimized Indian checkout flow with bundle support",
         logoLabel: "Shopflo",
         logoUrl: "/icons/Shopflo.avif",
-        status: "Setup guide",
+        status: "Guided setup",
         ctaLabel: "View Setup",
         ctaType: "guide",
         setupUrl: "https://wolfpackapps.com",

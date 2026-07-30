@@ -160,7 +160,6 @@ describe("recovered admin surfaces contract", () => {
       "Checkout Settings",
       "Checkout Integration",
       "Execute Script",
-      "Font Settings",
       "Custom Font",
     ]);
     expect(landingConfiguration?.fields.find((field) => field.label === "Discount format")?.options).toEqual([
@@ -182,7 +181,6 @@ describe("recovered admin surfaces contract", () => {
       "Checkout Settings",
       "Checkout Settings",
       "Font Settings",
-      "Font Settings",
     ]);
     expect(landingConfiguration?.fields.find((field) => field.label === "Checkout Integration")).toMatchObject({
       kind: "select",
@@ -197,6 +195,7 @@ describe("recovered admin surfaces contract", () => {
         "Monster cart",
         "Upcart",
         "Kaching Cart",
+        "Custom script",
       ],
     });
 
@@ -243,20 +242,39 @@ describe("recovered admin surfaces contract", () => {
   });
 
   it("keeps the recovered integrations inventory and action types", () => {
-    expect(INTEGRATION_CATEGORIES.map((category) => category.title)).toEqual(["Checkout"]);
-    expect(getIntegrationCardCount()).toBe(2);
+    expect(INTEGRATION_CATEGORIES.map((category) => category.title)).toEqual([
+      "Pre-orders, Pickup & Delivery",
+      "Subscriptions",
+      "Reviews",
+      "Page Builders",
+      "Checkout",
+    ]);
+    expect(getIntegrationCardCount()).toBe(10);
 
     const cards = INTEGRATION_CATEGORIES.flatMap((category) => category.cards);
-    expect(cards.map((card) => card.id)).toEqual(["gokwik", "shopflo"]);
-    expect(cards.filter((card) => card.ctaType === "guide")).toHaveLength(2);
+    expect(cards.map((card) => card.id)).toEqual([
+      "stoq",
+      "zapiet",
+      "skio",
+      "appstle",
+      "bold",
+      "judgeme",
+      "pagefly",
+      "gempages",
+      "gokwik",
+      "shopflo",
+    ]);
+    expect(cards.filter((card) => card.ctaType === "guide")).toHaveLength(9);
+    expect(cards.filter((card) => card.ctaType === "chat")).toHaveLength(1);
     expect(cards.every((card) => card.ctaLabel === "View Setup")).toBe(true);
     expect(cards.every((card) => card.setupUrl === "https://wolfpackapps.com")).toBe(true);
-    expect(cards.map((card) => card.description)).toEqual([
-      "Streamlined Indian checkout experience for bundles",
-      "Optimized Indian checkout flow with bundle support",
-    ]);
+    expect(new Set(cards.map((card) => card.status))).toEqual(new Set([
+      "Guided setup",
+      "Assisted setup",
+      "Planned",
+    ]));
     expect(JSON.stringify(INTEGRATION_CATEGORIES)).not.toMatch(
-      /theme_cart_drawer|zecpay|rebuy|shiprocket|monster|upcart|kaching|stoq|zapiet|skio|appstle|bold|judge\.?me|pagefly|gempages|easybundles|skailama|id_token|hmac|session=/i,
+      /easybundles|skailama|id_token|hmac|session=/i,
     );
   });
 

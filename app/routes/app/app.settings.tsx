@@ -1,5 +1,5 @@
 import { defer, json, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/node";
-import { Await, useLoaderData } from "@remix-run/react";
+import { Await, useLoaderData, useNavigate } from "@remix-run/react";
 import { lazy, Suspense, useMemo, useState } from "react";
 import type { Prisma } from "@prisma/client";
 import { BundleType } from "../../constants/bundle";
@@ -252,6 +252,7 @@ export async function action({ request }: ActionFunctionArgs) {
     if (!syncResult.success) {
       return json({
         success: false,
+        intent,
         message: syncResult.error
           ? `Settings saved, but cart transform messaging sync failed: ${syncResult.error}`
           : "Settings saved, but cart transform messaging sync failed",
@@ -259,7 +260,11 @@ export async function action({ request }: ActionFunctionArgs) {
     }
   }
 
-  return json({ success: true, message: "Settings saved successfully" });
+  return json({
+    success: true,
+    intent,
+    message: "Settings saved successfully",
+  });
 }
 
 export default function SettingsRouteDefault() {
@@ -269,10 +274,17 @@ export default function SettingsRouteDefault() {
     [previewBundles, settingsPage],
   );
   const [workspaceView, setWorkspaceView] = useState<SettingsWorkspaceView | null>(null);
+  const navigate = useNavigate();
   if (!workspaceView) {
     return (
       <SettingsLandingShell
-        onSelect={setWorkspaceView}
+        onSelect={(view) => {
+          if (view === "controls") {
+            navigate("/app/additional-configurations");
+            return;
+          }
+          setWorkspaceView(view);
+        }}
         onIntent={() => {
           void loadSettingsWorkspace();
         }}

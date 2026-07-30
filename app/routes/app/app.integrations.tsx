@@ -49,7 +49,10 @@ export default function IntegrationsRoute() {
                     </span>
                   )}
                   <div className={styles.integrationContent}>
-                    <h3 className={styles.integrationName}>{integration.title}</h3>
+                    <div className={styles.integrationTitleRow}>
+                      <h3 className={styles.integrationName}>{integration.title}</h3>
+                      <span className={styles.integrationStatus}>{integration.status}</span>
+                    </div>
                     <p className={styles.integrationDescription}>{integration.description}</p>
                     <a
                       className={styles.integrationButton}
