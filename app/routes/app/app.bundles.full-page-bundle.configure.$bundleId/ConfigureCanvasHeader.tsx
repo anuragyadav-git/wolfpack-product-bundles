@@ -76,17 +76,19 @@ export function ConfigureCanvasHeader({
         onEnableClick={openThemeEditorForAppEmbed}
       />
       {parentProductStatusUi.showUnlistedBanner && (
-        <UnlistedBundleBanner
-          shop={shop}
-          bundleProductId={bundleProduct?.id ?? bundle.shopifyProductId ?? null}
-          onManage={() => {
-            const productId =
-              bundleProduct?.legacyResourceId ||
-              bundleProduct?.id?.split("/").pop() ||
-              bundle.shopifyProductId?.split("/").pop();
-            if (productId) openProductInAdmin(productId);
-          }}
-        />
+        <div className={fullPageBundleStyles.unlistedBannerGap}>
+          <UnlistedBundleBanner
+            shop={shop}
+            bundleProductId={bundleProduct?.id ?? bundle.shopifyProductId ?? null}
+            onManage={() => {
+              const productId =
+                bundleProduct?.legacyResourceId ||
+                bundleProduct?.id?.split("/").pop() ||
+                bundle.shopifyProductId?.split("/").pop();
+              if (productId) openProductInAdmin(productId);
+            }}
+          />
+        </div>
       )}
     </>
   );

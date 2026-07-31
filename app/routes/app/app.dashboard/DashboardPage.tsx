@@ -607,25 +607,24 @@ export function DashboardPage() {
             </div>
           </div>
 
-          {/* Banners - deferred with a fixed-height CLS guard. */}
+          {/* Banners + app-embed setup card share one loading state guard. */}
           <Suspense fallback={<DashboardBannerSkeleton />}>
             <Await resolve={banners}>
               {(b) => (
                 <>
+                  <DashboardStatusGrid
+                    resources={themeExtensionStatus.resources}
+                    loading={themeExtensionStatus.loading}
+                    error={themeExtensionStatus.error}
+                    themeEditorUrl={currentThemeEditorUrl}
+                    appEmbedEnabled={appEmbedEnabled}
+                    onOpenThemeEditor={handleOpenThemeEditor}
+                  />
                   {!b.proxyHealthy && <ProxyHealthBanner shop={shop} appUrl={appUrl} />}
                 </>
               )}
             </Await>
           </Suspense>
-
-          <DashboardStatusGrid
-            resources={themeExtensionStatus.resources}
-            loading={themeExtensionStatus.loading}
-            error={themeExtensionStatus.error}
-            themeEditorUrl={currentThemeEditorUrl}
-            appEmbedEnabled={appEmbedEnabled}
-            onOpenThemeEditor={handleOpenThemeEditor}
-          />
 
           {/* Bundles panel */}
           <div className={dashboardStyles.bundlesQueryContainer}>
