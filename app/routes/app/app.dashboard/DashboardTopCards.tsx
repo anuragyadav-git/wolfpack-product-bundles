@@ -57,10 +57,6 @@ export function DashboardTopCards({
         <s-stack direction="block" gap="small-100">
           <s-stack direction="inline" alignItems="center" gap="small-100">
             <s-icon type="question-circle" color="subdued" />
-            <s-text>{t("dashboard.supportIssues.featureNotWorking")}</s-text>
-          </s-stack>
-          <s-stack direction="inline" alignItems="center" gap="small-100">
-            <s-icon type="question-circle" color="subdued" />
             <s-text>{t("dashboard.supportIssues.bundleNotShowing")}</s-text>
           </s-stack>
           <s-stack direction="inline" alignItems="center" gap="small-100">
@@ -70,10 +66,6 @@ export function DashboardTopCards({
           <s-stack direction="inline" alignItems="center" gap="small-100">
             <s-icon type="question-circle" color="subdued" />
             <s-text>{t("dashboard.supportIssues.storeDesignHelp")}</s-text>
-          </s-stack>
-          <s-stack direction="inline" alignItems="center" gap="small-100">
-            <s-icon type="question-circle" color="subdued" />
-            <s-text>{t("dashboard.supportIssues.analyticsNotWorking")}</s-text>
           </s-stack>
         </s-stack>
         <div className={dashboardStyles.supportIssuesCta}>

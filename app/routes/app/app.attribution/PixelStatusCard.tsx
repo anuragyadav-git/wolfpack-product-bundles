@@ -91,7 +91,12 @@ export function PixelStatusCard({ pixelActive }: { pixelActive: boolean }) {
           </s-button>
 
           <s-stack direction="block" gap="base">
-            <s-banner tone="info">
+            <s-banner
+              tone="info"
+              heading="UTM pixel status"
+              dismissible={false}
+              hidden={false}
+            >
               {UTM_PIXEL_PRIVACY_MESSAGE}
             </s-banner>
             <s-stack direction="block" gap="small">

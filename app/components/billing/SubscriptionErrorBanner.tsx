@@ -27,7 +27,12 @@ export function SubscriptionErrorBanner({
   const { t } = useTranslation();
 
   return (
-    <s-banner tone="critical" heading={t("billing.error.heading")}>
+    <s-banner
+      tone="critical"
+      heading={t("billing.error.heading")}
+      dismissible={false}
+      hidden={false}
+    >
       <s-button slot="primary-action" onClick={onRetry}>
         {t("billing.actions.tryAgain")}
       </s-button>
