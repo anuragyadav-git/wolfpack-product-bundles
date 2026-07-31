@@ -293,7 +293,12 @@ export default function BillingPage() {
                 </s-stack>
                 <CustomProgressBar progress={usagePercentage} tone={progressBarTone} />
                 {!data.subscription?.canCreateBundle && (
-                  <s-banner tone="warning">
+                  <s-banner
+                    tone="warning"
+                    heading="Bundle limit reached"
+                    dismissible={false}
+                    hidden={false}
+                  >
                     {t("billing.route.limitReached")}
                     {isFreePlan && ` ${t("billing.route.limitUpgrade")}`}
                   </s-banner>
@@ -353,7 +358,12 @@ export default function BillingPage() {
               {showCancelConfirm && (
                 <>
                   <s-divider />
-                  <s-banner tone="warning" heading={t("billing.route.cancelHeading")}>
+                  <s-banner
+                    tone="warning"
+                    heading={t("billing.route.cancelHeading")}
+                    dismissible={false}
+                    hidden={false}
+                  >
                     <s-stack direction="block" gap="small">
                       <p style={{ margin: 0, fontSize: 14 }}>
                         {t("billing.route.downgradeBody", { limit: PLANS.free.bundleLimit })}

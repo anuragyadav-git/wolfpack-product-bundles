@@ -1,4 +1,34 @@
-import { getStorefrontSetupSummary } from "../../../app/routes/app/app.dashboard/DashboardStatusGrid";
+import {
+  getStorefrontSetupSummary,
+  getStorefrontStatusRows,
+} from "../../../app/routes/app/app.dashboard/DashboardStatusGrid";
+
+const APP_EMBED_RESOURCE = {
+  handle: "bundle-app-embed",
+  label: "Wolfpack Bundle",
+  kind: "embed",
+  status: "unavailable" as const,
+  enabled: false,
+  target: null,
+};
+
+const FULL_PAGE_RESOURCE = {
+  handle: "bundle-full-page",
+  label: "Wolfpack Bundle Full Page",
+  kind: "block",
+  status: "unavailable" as const,
+  enabled: false,
+  target: null,
+};
+
+const AVAILABLE_RESOURCE = {
+  handle: "bundle-product-page",
+  label: "Bundle Builder",
+  kind: "block",
+  status: "available" as const,
+  enabled: true,
+  target: null,
+};
 
 describe("dashboard storefront setup card", () => {
   it("keeps loading and failed checks distinct from a completed setup", () => {
@@ -33,7 +63,6 @@ describe("dashboard storefront setup card", () => {
       state: "incomplete",
       titleKey: "dashboard.storefrontSetup.incompleteTitle",
       descriptionKey: "dashboard.storefrontSetup.incompleteDescription",
-      actionKey: "dashboard.storefrontSetup.finishSetup",
       remainingCoreCount: 2,
     });
   });
@@ -48,8 +77,31 @@ describe("dashboard storefront setup card", () => {
       state: "complete",
       titleKey: "dashboard.storefrontSetup.completeTitle",
       descriptionKey: "dashboard.storefrontSetup.completeDescription",
-      actionKey: "dashboard.storefrontSetup.viewDetails",
       remainingCoreCount: 0,
     });
+  });
+
+  it("keeps summary output coupled only to core completion state", () => {
+    expect(getStorefrontSetupSummary({
+      enabledCoreCount: 3,
+      totalCoreCount: 3,
+      loading: false,
+      error: false,
+    })).toEqual({
+      state: "complete",
+      titleKey: "dashboard.storefrontSetup.completeTitle",
+      descriptionKey: "dashboard.storefrontSetup.completeDescription",
+      remainingCoreCount: 0,
+    });
+
+    const { core } = getStorefrontStatusRows([APP_EMBED_RESOURCE]);
+    expect(core).toHaveLength(1);
+  });
+
+  it("returns only core storefront rows from configured status resources", () => {
+    expect(getStorefrontStatusRows([APP_EMBED_RESOURCE, FULL_PAGE_RESOURCE, AVAILABLE_RESOURCE]))
+      .toEqual({
+        core: [APP_EMBED_RESOURCE, FULL_PAGE_RESOURCE, AVAILABLE_RESOURCE],
+      });
   });
 });

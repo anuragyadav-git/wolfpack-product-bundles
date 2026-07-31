@@ -6,7 +6,6 @@ const { fullPageStepFooterMethods } =
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { fullPageValidationAddonsMethods } =
   require("../../../app/assets/widgets/full-page/methods/validation-addons-methods.js");
-
 function createCartAddFetchMock() {
   return jest.fn(async (url: string) => ({
     ok: true,
@@ -18,6 +17,93 @@ function createCartAddFetchMock() {
 }
 
 describe("FPB checkout cart-line properties", () => {
+  it("aborts add-to-cart when storefront preflight reports deleted variant", async () => {
+    const fetchMock = jest.fn(async (url: string) => {
+      if (url === "/variants/111.js") {
+        return {
+          ok: false,
+          status: 404,
+          json: async () => ({ available: false }),
+        };
+      }
+      throw new Error(`Unexpected fetch: ${url}`);
+    });
+    const originalFetch = (global as any).fetch;
+    const originalWindow = (global as any).window;
+    const originalDocument = (global as any).document;
+    const originalGetComputedStyle = (global as any).getComputedStyle;
+    const originalSetTimeout = (global as any).setTimeout;
+    (global as any).fetch = fetchMock;
+    (global as any).window = {
+      Shopify: {
+        currency: { active: "USD", format: ["$", "{{amount}}"].join("") },
+      },
+    };
+    (global as any).document = {
+      documentElement: {},
+      getElementById: () => null,
+      createElement: () => ({
+        id: "",
+        className: "",
+        innerHTML: "",
+        remove: jest.fn(),
+        querySelector: () => ({ addEventListener: jest.fn() }),
+      }),
+      body: { appendChild: jest.fn() },
+    };
+    (global as any).getComputedStyle = () => ({ getPropertyValue: () => "" });
+    (global as any).setTimeout = jest.fn();
+
+    try {
+      await fullPageStepFooterMethods.addBundleToCart.call({
+        _isWidgetActionBusy: false,
+        container: null,
+        selectedBundle: {
+          name: "Daily Essentials",
+          steps: [{ id: "paid-step", isFreeGift: false }],
+        },
+        selectedProducts: [{ "gid://shopify/ProductVariant/111": 1 }],
+        stepProductData: [[{
+          selectionId: "gid://shopify/ProductVariant/111",
+          variantId: "gid://shopify/ProductVariant/111",
+          id: "gid://shopify/Product/111",
+          variants: [{ selectionId: "gid://shopify/ProductVariant/111", id: "gid://shopify/ProductVariant/111" }],
+          title: "14k Interlinked Earrings",
+          price: 82900,
+        }]],
+        areBundleConditionsMet: () => true,
+        expandProductsByVariant: (products: unknown[]) => products,
+        extractId: (value: string) => value.split("/").pop(),
+        getVariantAvailable: () => ({ available: null, outOfStock: false, acceptsBackorder: false }),
+        generateBundleSessionKey: () => "ABC",
+        resolveFullPageOfferId: () => "FBP-1",
+        getAddonTierEvaluation: () => ({}),
+        getAddonLineDiscount: () => null,
+        getSelectedSellingPlanAllocationId: () => null,
+        buildCartLineSourceProperties: () => ({}),
+        _setWidgetBusy: jest.fn(),
+        showLoadingOverlay: jest.fn(),
+        hideLoadingOverlay: jest.fn(),
+        syncBundleDetailsCartMetafield: jest.fn(),
+        _emitStorefrontEvent: jest.fn(),
+        _handlePostAddToCartAction: jest.fn(),
+        _getLandingPageControls: () => ({ checkout: null }),
+      });
+    } finally {
+      (global as any).fetch = originalFetch;
+      (global as any).window = originalWindow;
+      (global as any).document = originalDocument;
+      (global as any).getComputedStyle = originalGetComputedStyle;
+      (global as any).setTimeout = originalSetTimeout;
+    }
+
+    expect(fetchMock).toHaveBeenCalledWith("/variants/111.js", expect.objectContaining({
+      method: "GET",
+    }));
+    expect(fetchMock).not.toHaveBeenCalledWith("/apps/product-bundles/api/cart-transform-runtime-token", expect.any(Object));
+    expect(fetchMock).not.toHaveBeenCalledWith("/cart/add.js", expect.any(Object));
+  });
+
   it("includes the configured product identity when requesting a runtime token", async () => {
     const fetchMock = createCartAddFetchMock();
     const originalFetch = (global as any).fetch;

@@ -15,7 +15,6 @@ export function ConfigureCanvasHeader({
     handleBackClick,
     handlePreviewBundle,
     isPreviewBundleLoading,
-    appEmbedBannerFeedbackTrigger,
     openThemeEditorForAppEmbed,
     openProductInAdmin,
     parentProductStatusUi,
@@ -74,7 +73,6 @@ export function ConfigureCanvasHeader({
       <AppEmbedBanner
         appEmbedEnabled={appEmbedEnabled}
         themeEditorUrl={themeEditorUrl}
-        feedbackTrigger={appEmbedBannerFeedbackTrigger}
         onEnableClick={openThemeEditorForAppEmbed}
       />
       {parentProductStatusUi.showUnlistedBanner && (

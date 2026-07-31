@@ -88,6 +88,39 @@ jest.mock("../../../app/services/theme-template.server", () => ({
   ThemeTemplateService: { ensureTemplates: jest.fn() },
 }));
 
+jest.mock("../../../app/lib/variant-existence.server", () => ({
+  validateVariantIdFromShopify: jest.fn(async (rawVariantId: string | number) => {
+    const normalized = String(rawVariantId || "").trim();
+    if (!normalized) {
+      return {
+        numericId: "",
+        isValidFormat: false,
+        reason: "Variant id is required.",
+      };
+    }
+
+    const gidMatch = /^gid:\/\/shopify\/ProductVariant\/(\d+)$/.exec(normalized);
+    if (gidMatch) {
+      return { numericId: gidMatch[1], isValidFormat: true };
+    }
+
+    if (/^\d+$/.test(normalized)) {
+      return { numericId: normalized, isValidFormat: true };
+    }
+
+    return {
+      numericId: "",
+      isValidFormat: false,
+      reason: "Variant id format is invalid. Expected numeric or gid://shopify/ProductVariant/<id>.",
+    };
+  }),
+  isVariantExistsOnShopifyStorefront: jest.fn(async () => ({
+    ok: true,
+    id: "",
+    status: 200,
+  })),
+}));
+
 jest.mock("../../../app/lib/css-sanitizer", () => ({
   processCss: jest.fn((css: string) => ({
     sanitizedCss: css,
@@ -257,6 +290,113 @@ describe("PPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
     expect(body.message).toBe("Updated Successfully!");
   });
 
+  it("rejects save when quantity condition is equal_to and conditionValue is above maxQuantity", async () => {
+    const stepConditions = {
+      "step-1": [
+        {
+          type: "quantity",
+          operator: "equal_to",
+          value: "6",
+        },
+      ],
+    };
+    const res = await handleSaveBundle(
+      MOCK_ADMIN,
+      MOCK_SESSION,
+      "bundle-1",
+      makeFormData({
+        stepsData: JSON.stringify([makeStep({ maxQuantity: "5" })]),
+        stepConditions: JSON.stringify(stepConditions),
+      }),
+    );
+
+    expect(res.status).toBe(400);
+    const body = await res.json() as any;
+    expect(body.success).toBe(false);
+    expect(body.error).toContain("outside quantity range [1, 5]");
+    expect(getDb().bundle.update).not.toHaveBeenCalled();
+  });
+
+  it("rejects save when quantity condition is greater_than_or_equal_to and conditionValue is above maxQuantity", async () => {
+    const stepConditions = {
+      "step-1": [
+        {
+          type: "quantity",
+          operator: "greater_than_or_equal_to",
+          value: "8",
+        },
+      ],
+    };
+    const res = await handleSaveBundle(
+      MOCK_ADMIN,
+      MOCK_SESSION,
+      "bundle-1",
+      makeFormData({
+        stepsData: JSON.stringify([makeStep({ minQuantity: "2", maxQuantity: "5" })]),
+        stepConditions: JSON.stringify(stepConditions),
+      }),
+    );
+
+    expect(res.status).toBe(400);
+    const body = await res.json() as any;
+    expect(body.success).toBe(false);
+    expect(body.error).toContain("outside quantity range [2, 5]");
+    expect(getDb().bundle.update).not.toHaveBeenCalled();
+  });
+
+  it("rejects save when quantity condition is less_than_or_equal_to and conditionValue is below minQuantity", async () => {
+    const stepConditions = {
+      "step-1": [
+        {
+          type: "quantity",
+          operator: "less_than_or_equal_to",
+          value: "0",
+        },
+      ],
+    };
+    const res = await handleSaveBundle(
+      MOCK_ADMIN,
+      MOCK_SESSION,
+      "bundle-1",
+      makeFormData({
+        stepsData: JSON.stringify([makeStep({ minQuantity: "1", maxQuantity: "5" })]),
+        stepConditions: JSON.stringify(stepConditions),
+      }),
+    );
+
+    expect(res.status).toBe(400);
+    const body = await res.json() as any;
+    expect(body.success).toBe(false);
+    expect(body.error).toContain("outside quantity range [1, 5]");
+    expect(getDb().bundle.update).not.toHaveBeenCalled();
+  });
+
+  it("allows save when quantity condition falls within min/max range", async () => {
+    const stepConditions = {
+      "step-1": [
+        {
+          type: "quantity",
+          operator: "equal_to",
+          value: "4",
+        },
+      ],
+    };
+    const res = await handleSaveBundle(
+      MOCK_ADMIN,
+      MOCK_SESSION,
+      "bundle-1",
+      makeFormData({
+        stepsData: JSON.stringify([makeStep({ minQuantity: "1", maxQuantity: "5" })]),
+        stepConditions: JSON.stringify(stepConditions),
+      }),
+    );
+
+    const body = await res.json() as any;
+    expect(res.status).toBe(200);
+    expect(body.success).toBe(true);
+    expect(getDb().bundle.update).toHaveBeenCalled();
+  });
+
   it("returns 400 before Prisma when bundle status is empty", async () => {
     const res = await handleSaveBundle(
       MOCK_ADMIN,
@@ -363,6 +503,72 @@ describe("PPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
         data: expect.objectContaining({ status: "draft" }),
       })
     );
+  });
+
+  it("rejects save when a persisted variant reference has an invalid format", async () => {
+    const stepsData = [
+      makeStep({
+        StepProduct: [
+          {
+            id: "gid://shopify/Product/111",
+            title: "Invalid Variant Product",
+            variants: [{ variantId: "bad-variant-format" }],
+          },
+        ],
+      }),
+    ];
+
+    const res = await handleSaveBundle(
+      MOCK_ADMIN,
+      MOCK_SESSION,
+      "bundle-1",
+      makeFormData({ stepsData: JSON.stringify(stepsData) }),
+    );
+
+    expect(res.status).toBe(400);
+    const body = await res.json() as any;
+    expect(body.success).toBe(false);
+    expect(body.context?.route).toBe("ppb-save");
+    expect(body.error).toContain("ppb-save blocked on step 1");
+    expect(body.context?.reason).toBe("invalid-format");
+    expect(getDb().bundle.update).not.toHaveBeenCalled();
+  });
+
+  it("rejects save when a persisted variant does not exist on Shopify", async () => {
+    const { isVariantExistsOnShopifyStorefront } = require("../../../app/lib/variant-existence.server");
+    (isVariantExistsOnShopifyStorefront as jest.Mock).mockResolvedValueOnce({
+      ok: false,
+      id: "999",
+      status: 404,
+      message: "Variant lookup failed with status 404",
+    });
+
+    const stepsData = [
+      makeStep({
+        StepProduct: [
+          {
+            id: "gid://shopify/Product/111",
+            title: "Missing Variant Product",
+            variants: [{ variantId: "gid://shopify/ProductVariant/999" }],
+          },
+        ],
+      }),
+    ];
+
+    const res = await handleSaveBundle(
+      MOCK_ADMIN,
+      MOCK_SESSION,
+      "bundle-1",
+      makeFormData({ stepsData: JSON.stringify(stepsData) }),
+    );
+
+    expect(res.status).toBe(400);
+    const body = await res.json() as any;
+    expect(body.success).toBe(false);
+    expect(body.context?.route).toBe("ppb-save");
+    expect(body.error).toContain("is not available on storefront (404)");
+    expect(body.context?.status).toBe(404);
+    expect(getDb().bundle.update).not.toHaveBeenCalled();
   });
 
   it("passes variantSelectorEnabled=false to DB when form has false", async () => {

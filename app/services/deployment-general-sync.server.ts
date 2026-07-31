@@ -1,3 +1,8 @@
+import {
+  isVariantExistsOnShopifyStorefront,
+  validateVariantIdFromShopify,
+} from "../lib/variant-existence.server";
+
 type BundleType = "full_page" | "product_page";
 
 export interface DeploymentGeneralSyncOptions {
@@ -14,6 +19,20 @@ export interface DeploymentGeneralSyncSummary {
   metafieldDefinitionShopsSynced: number;
   metaobjectValuesSynced: number;
   addonDiscountShopsSynced: number;
+  variantRemediation: {
+    scannedBundles: number;
+    scannedStepProducts: number;
+    scannedVariants: number;
+    removedVariants: number;
+    updatedBundles: number;
+    failures: Array<{
+      shopDomain: string;
+      bundleId: string;
+      stepProductId: string;
+      variantId: string;
+      error: string;
+    }>;
+  };
   failures: Array<{ shopDomain: string; bundleId: string; error: string }>;
   shopFailures: Array<{ shopDomain: string; error: string }>;
 }
@@ -23,6 +42,13 @@ interface GeneralSyncBundle {
   shopId: string;
   bundleType: string;
   personalizationData: unknown;
+  steps: Array<{
+    id: string;
+    StepProduct: Array<{
+      id: string;
+      variants: unknown;
+    }>;
+  }>;
 }
 
 interface GeneralSyncPrisma {
@@ -31,6 +57,16 @@ interface GeneralSyncPrisma {
   };
   bundle: {
     findMany: (args: unknown) => Promise<GeneralSyncBundle[]>;
+  };
+  stepProduct: {
+    update: (args: {
+      where: {
+        id: string;
+      };
+      data: {
+        variants: unknown;
+      };
+    }) => Promise<unknown>;
   };
 }
 
@@ -54,6 +90,10 @@ export interface DeploymentGeneralSyncDependencies {
     shopDomain: string;
     bundle: GeneralSyncBundle;
   }) => Promise<number>;
+  updateStepProductVariants: (input: {
+    stepProductId: string;
+    variants: unknown;
+  }) => Promise<unknown>;
   logger?: Pick<Console, "info" | "warn" | "error">;
 }
 
@@ -106,9 +146,149 @@ function emptySummary(mode: "disabled" | "apply"): DeploymentGeneralSyncSummary 
     metafieldDefinitionShopsSynced: 0,
     metaobjectValuesSynced: 0,
     addonDiscountShopsSynced: 0,
+    variantRemediation: {
+      scannedBundles: 0,
+      scannedStepProducts: 0,
+      scannedVariants: 0,
+      removedVariants: 0,
+      updatedBundles: 0,
+      failures: [],
+    },
     failures: [],
     shopFailures: [],
   };
+}
+
+function toVariantReference(rawVariant: unknown): string | number | null {
+  if (rawVariant === null || rawVariant === undefined) {
+    return null;
+  }
+  if (typeof rawVariant === "string" || typeof rawVariant === "number") {
+    return rawVariant;
+  }
+  if (typeof rawVariant !== "object") {
+    return null;
+  }
+
+  const candidate = rawVariant as Record<string, unknown>;
+  const directReference = candidate.variantId
+    || candidate.variantGraphqlId
+    || candidate.id
+    || candidate.variant_gid
+    || candidate.variantGraphql;
+
+  if (typeof directReference === "string" || typeof directReference === "number") {
+    return directReference;
+  }
+
+  return null;
+}
+
+async function runBundleVariantRemediation(
+  shopDomain: string,
+  bundle: GeneralSyncBundle,
+  deps: DeploymentGeneralSyncDependencies,
+  summary: DeploymentGeneralSyncSummary["variantRemediation"],
+) {
+  const resolvedVariantsByShop = new Map<string, Awaited<ReturnType<typeof isVariantExistsOnShopifyStorefront>>>();
+  let bundleUpdated = false;
+
+  for (const step of bundle.steps) {
+    for (const stepProduct of step.StepProduct) {
+      const refs = Array.isArray(stepProduct.variants) ? stepProduct.variants : [];
+      summary.scannedStepProducts += 1;
+      summary.scannedVariants += refs.length;
+
+      if (refs.length === 0) {
+        continue;
+      }
+
+      const validRefs: unknown[] = [];
+      let hasInvalidRef = false;
+
+      for (const variantRef of refs) {
+        const rawVariantId = toVariantReference(variantRef);
+        if (rawVariantId === null) {
+          hasInvalidRef = true;
+          summary.failures.push({
+            shopDomain,
+            bundleId: bundle.id,
+            stepProductId: stepProduct.id,
+            variantId: "",
+            error: "Missing or invalid variant reference",
+          });
+          continue;
+        }
+
+        const parsed = await validateVariantIdFromShopify(rawVariantId);
+        if (!parsed.isValidFormat) {
+          hasInvalidRef = true;
+          summary.failures.push({
+            shopDomain,
+            bundleId: bundle.id,
+            stepProductId: stepProduct.id,
+            variantId: String(rawVariantId),
+            error: parsed.reason || "Invalid variant format",
+          });
+          continue;
+        }
+
+        const cachedLookup = resolvedVariantsByShop.get(parsed.numericId);
+        const lookup = cachedLookup
+          || (await isVariantExistsOnShopifyStorefront(shopDomain, parsed.numericId));
+        resolvedVariantsByShop.set(parsed.numericId, lookup);
+        if (!lookup.ok) {
+          hasInvalidRef = true;
+          summary.failures.push({
+            shopDomain,
+            bundleId: bundle.id,
+            stepProductId: stepProduct.id,
+            variantId: String(rawVariantId),
+            error: `${lookup.message || "variant not found"} (${lookup.status})`,
+          });
+          continue;
+        }
+
+        validRefs.push(variantRef);
+      }
+
+      if (hasInvalidRef && validRefs.length !== refs.length) {
+        const removedCount = refs.length - validRefs.length;
+        if (removedCount <= 0) {
+          continue;
+        }
+        try {
+          await deps.updateStepProductVariants({
+            stepProductId: stepProduct.id,
+            variants: validRefs,
+          });
+          bundleUpdated = true;
+          summary.removedVariants += removedCount;
+          deps.logger?.info?.(
+            "[VARIANT_REMEDIATION] Removed invalid StepProduct variant refs from persisted bundle config.",
+            {
+              shopDomain,
+              bundleId: bundle.id,
+              stepProductId: stepProduct.id,
+              removedCount,
+            },
+          );
+        } catch (error) {
+          summary.failures.push({
+            shopDomain,
+            bundleId: bundle.id,
+            stepProductId: stepProduct.id,
+            variantId: "",
+            error: errorMessage(error),
+          });
+        }
+      }
+    }
+  }
+
+  if (bundleUpdated) {
+    summary.updatedBundles += 1;
+  }
 }
 
 export async function syncPersistedBundleMetaobjects() {
@@ -141,6 +321,17 @@ export async function runDeploymentGeneralSync(
         shopId: true,
         bundleType: true,
         personalizationData: true,
+        steps: {
+          select: {
+            id: true,
+            StepProduct: {
+              select: {
+                id: true,
+                variants: true,
+              },
+            },
+          },
+        },
       },
       orderBy: [
         { shopId: "asc" },
@@ -150,6 +341,7 @@ export async function runDeploymentGeneralSync(
   const summary = emptySummary("apply");
   summary.scannedShops = shopDomains.length;
   summary.scannedBundles = bundles.length;
+  summary.variantRemediation.scannedBundles = bundles.length;
 
   const adminByShop = new Map<string, unknown>();
   const failedShops = new Set<string>();
@@ -206,6 +398,12 @@ export async function runDeploymentGeneralSync(
       ) {
         addonShops.add(bundle.shopId);
       }
+      await runBundleVariantRemediation(
+        bundle.shopId,
+        bundle,
+        deps,
+        summary.variantRemediation,
+      );
     } catch (error) {
       const message = errorMessage(error);
       summary.failedBundles += 1;

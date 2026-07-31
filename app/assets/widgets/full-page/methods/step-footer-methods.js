@@ -10,6 +10,7 @@ import {
   buildCartLineSourceProperties as buildSharedCartLineSourceProperties,
 } from '../../shared/engine/cart-lines.js';
 import { shouldDisplayClassicFixedBundleRawTotal } from '../shared/summary-pricing-display.js';
+import { preflightVariantOnStorefront } from '../../shared/variant-preflight.js';
 
 function shouldIncludeBundleQuantityCartProperties(context) {
   const pricing = context?.selectedBundle?.pricing || {};
@@ -28,8 +29,6 @@ function extractNumericFullPageId(value, extractId) {
 }
 
 function resolveCartVariantId(product, selectionId, extractId) {
-  const hasVariants = Array.isArray(product?.variants);
-
   const candidateVariantFromSelection = (() => {
     if (!product) return '';
     const variants = Array.isArray(product.variants) ? product.variants : [];
@@ -50,26 +49,15 @@ function resolveCartVariantId(product, selectionId, extractId) {
       extractId
     );
   })();
-  if (candidateVariantFromSelection) return candidateVariantFromSelection;
 
-  if (hasVariants && product.variants.length === 0) {
-    return '';
-  }
-
-  if (product?.variants && product.variants.length === 1) {
-    const singleVariant = product.variants[0];
-    const singleVariantId = extractNumericFullPageId(
-      singleVariant?.selectionId || singleVariant?.variantId || singleVariant?.id,
-      extractId
-    );
-    if (singleVariantId) return singleVariantId;
+  if (candidateVariantFromSelection) {
+    return candidateVariantFromSelection;
   }
 
   return extractNumericFullPageId(
-    product?.variantId,
-    product?.selectionId,
-    extractId
-  ) || '';
+    product?.variantId || product?.selectionId || product?.id,
+    extractId,
+  );
 }
 
 function toAddonLineType(properties = {}) {
@@ -214,6 +202,7 @@ export const fullPageStepFooterMethods = {
     const offerId = this.resolveFullPageOfferId();
     const baseOfferId = `${offerId}_${sessionKey}`;
     const selectedLines = [];
+    const variantPreflightCache = new Map();
     const unavailableLines = [];
     let itemNumber = 0;
     const hasAddonStepConfigured = (this.selectedBundle?.steps || []).some((candidateStep) => {
@@ -223,104 +212,118 @@ export const fullPageStepFooterMethods = {
     let hasSelectedAddonLine = false;
 
 
-    this.selectedBundle.steps.forEach((step, stepIndex) => {
+    for (let stepIndex = 0; stepIndex < this.selectedBundle.steps.length; stepIndex += 1) {
+      const step = this.selectedBundle.steps[stepIndex];
       const stepSelections = this.selectedProducts[stepIndex] || {};
       const productsInStep = this.expandProductsByVariant(this.stepProductData[stepIndex] || []);
 
-
-      Object.entries(stepSelections).forEach(([variantId, quantity]) => {
-        if (quantity > 0) {
-          const requestedQuantity = Number(quantity || 0);
-          const resolvedSelectionId = extractNumericFullPageId(
-            variantId,
-            typeof this.extractId === 'function' ? this.extractId : null
+      for (const [variantId, quantity] of Object.entries(stepSelections)) {
+        if (quantity <= 0) continue;
+        const requestedQuantity = Number(quantity || 0);
+        const resolvedSelectionId = extractNumericFullPageId(
+          variantId,
+          typeof this.extractId === 'function' ? this.extractId : null,
+        );
+        const product = productsInStep.find((candidate) => {
+          const candidateSelectionId = extractNumericFullPageId(
+            candidate?.selectionId || candidate?.variantId || candidate?.id,
+            typeof this.extractId === 'function' ? this.extractId : null,
           );
-          const product = productsInStep.find((candidate) => {
-            const candidateSelectionId = extractNumericFullPageId(
-              candidate?.selectionId || candidate?.variantId || candidate?.id,
-              typeof this.extractId === 'function' ? this.extractId : null
-            );
-            return String(candidateSelectionId || '') === String(resolvedSelectionId || '');
-          });
-          if (!product) {
-            unavailableLines.push('Unable to resolve selected product variant.');
-            return;
-          }
-          const numericVariantId = extractNumericFullPageId(
-            resolveCartVariantId(product, resolvedSelectionId, typeof this.extractId === 'function' ? this.extractId : null),
-            typeof this.extractId === 'function' ? this.extractId : null
-          );
-          if (!numericVariantId || !/^\d+$/.test(numericVariantId)) {
-            unavailableLines.push(`${product?.title || variantId} is not available.`);
-            return;
-          }
-
-          const availability = typeof this.getVariantAvailable === 'function'
-            ? this.getVariantAvailable(stepIndex, resolvedSelectionId)
-            : { available: null, outOfStock: false, acceptsBackorder: false };
-          if (availability?.outOfStock) {
-            unavailableLines.push(`${product?.title || variantId} is out of stock.`);
-            return;
-          }
-          if (
-            typeof availability?.available === 'number'
-            && requestedQuantity > availability.available
-          ) {
-            unavailableLines.push(
-              `${product?.title || variantId} only has ${availability.available} in stock.`
-            );
-            return;
-          }
-
-          itemNumber += 1;
-          const properties = {
-            '_bundleName': bundleName,
-            '_wolfpackProductBundle:prodQty': String(quantity),
-            '_wolfpackProductBundle:OfferId': `${offerId}_${sessionKey}_${itemNumber}`
-          };
-          if (shouldIncludeBundleQuantityCartProperties(this)) {
-            properties.Box = String(itemNumber);
-          }
-          const addonEval = this.getAddonTierEvaluation?.(step) || {};
-          const addonDiscount = typeof this.getAddonLineDiscount === 'function'
-            ? this.getAddonLineDiscount(step)
-            : null;
-          const isAddonCartLine = fullPageStepFooterMethods.isSelectedAddonCartLine.call(this, step);
-          if (isAddonCartLine && addonEval?.tier) {
-            hasSelectedAddonLine = true;
-            properties.Box = '1';
-            properties._addon_product = 'true';
-            properties._addon_offer_id = baseOfferId;
-            properties._boxProduct = 'addonProduct';
-            if (addonEval?.tier?.tierId) {
-              properties._addonTierId = String(addonEval.tier.tierId);
-            }
-            properties._uniqueWpbItemKey = `${numericVariantId}_pageId:addonProduct`;
-            properties._bundle_step_type = addonDiscount
-              ? `addon:${addonDiscount.type}:${addonDiscount.value}`
-              : 'addon';
-          } else if (step?.isFreeGift && step?.addonDisplayFree === true) {
-            properties['_bundle_step_type'] = 'free_gift';
-          }
-          if (step?.isDefault) properties['_bundle_step_type'] = 'default';
-
-          const cartItem = {
-            id: numericVariantId,
-            quantity: quantity,
-            properties,
-            _runtimeProductId: [product?.productId, product?.graphqlId, product?.id]
-              .find(value => String(value || '').includes('/Product/')) || null,
-          };
-          const sellingPlanAllocationId = this.getSelectedSellingPlanAllocationId(product, variantId);
-          if (sellingPlanAllocationId) {
-            cartItem.selling_plan = parseInt(sellingPlanAllocationId);
-          }
-
-          items.push(cartItem);
-          selectedLines.push({ product, quantity, step });
+          return String(candidateSelectionId || '') === String(resolvedSelectionId || '');
+        });
+        if (!product) {
+          unavailableLines.push(`runtime-preflight blocked: unable to resolve selected product variant for step ${stepIndex + 1}.`);
+          continue;
         }
-      });
-    });
+        const numericVariantId = extractNumericFullPageId(
+          resolveCartVariantId(product, resolvedSelectionId, typeof this.extractId === 'function' ? this.extractId : null),
+          typeof this.extractId === 'function' ? this.extractId : null,
+        );
+        if (!numericVariantId || !/^\d+$/.test(numericVariantId)) {
+          unavailableLines.push(`runtime-preflight blocked: invalid variant id ${String(product?.title || variantId || resolvedSelectionId)} in step ${stepIndex + 1}.`);
+          continue;
+        }
+
+        let preflightResult = variantPreflightCache.get(numericVariantId);
+        if (!preflightResult) {
+          preflightResult = await preflightVariantOnStorefront(
+            numericVariantId,
+            typeof fetch === 'function' ? fetch : null,
+          );
+        }
+        variantPreflightCache.set(numericVariantId, preflightResult);
+        if (!preflightResult.ok) {
+          unavailableLines.push(
+            `runtime-preflight blocked: step ${stepIndex + 1} product ${productsInStep.indexOf(product) + 1} variant ${numericVariantId} (status ${preflightResult.status})`,
+          );
+          continue;
+        }
+
+        const availability = typeof this.getVariantAvailable === 'function'
+          ? this.getVariantAvailable(stepIndex, resolvedSelectionId)
+          : { available: null, outOfStock: false, acceptsBackorder: false };
+        if (availability?.outOfStock) {
+          unavailableLines.push(`${product?.title || variantId} is out of stock.`);
+          continue;
+        }
+        if (
+          typeof availability?.available === 'number'
+          && requestedQuantity > availability.available
+        ) {
+          unavailableLines.push(
+            `${product?.title || variantId} only has ${availability.available} in stock.`,
+          );
+          continue;
+        }
+
+        itemNumber += 1;
+        const properties = {
+          '_bundleName': bundleName,
+          '_wolfpackProductBundle:prodQty': String(quantity),
+          '_wolfpackProductBundle:OfferId': `${offerId}_${sessionKey}_${itemNumber}`,
+        };
+        if (shouldIncludeBundleQuantityCartProperties(this)) {
+          properties.Box = String(itemNumber);
+        }
+        const addonEval = this.getAddonTierEvaluation?.(step) || {};
+        const addonDiscount = typeof this.getAddonLineDiscount === 'function'
+          ? this.getAddonLineDiscount(step)
+          : null;
+        const isAddonCartLine = fullPageStepFooterMethods.isSelectedAddonCartLine.call(this, step);
+        if (isAddonCartLine && addonEval?.tier) {
+          hasSelectedAddonLine = true;
+          properties.Box = '1';
+          properties._addon_product = 'true';
+          properties._addon_offer_id = baseOfferId;
+          properties._boxProduct = 'addonProduct';
+          if (addonEval?.tier?.tierId) {
+            properties._addonTierId = String(addonEval.tier.tierId);
+          }
+          properties._uniqueWpbItemKey = `${numericVariantId}_pageId:addonProduct`;
+          properties._bundle_step_type = addonDiscount
+            ? `addon:${addonDiscount.type}:${addonDiscount.value}`
+            : 'addon';
+        } else if (step?.isFreeGift && step?.addonDisplayFree === true) {
+          properties._bundle_step_type = 'free_gift';
+        }
+        if (step?.isDefault) properties._bundle_step_type = 'default';
+
+        const cartItem = {
+          id: numericVariantId,
+          quantity: quantity,
+          properties,
+          _runtimeProductId: [product?.productId, product?.graphqlId, product?.id]
+            .find(value => String(value || '').includes('/Product/')) || null,
+        };
+        const sellingPlanAllocationId = this.getSelectedSellingPlanAllocationId(product, variantId);
+        if (sellingPlanAllocationId) {
+          cartItem.selling_plan = parseInt(sellingPlanAllocationId);
+        }
+
+        items.push(cartItem);
+        selectedLines.push({ product, quantity, step });
+      }
+    }
 
     const itemsForRuntimeToken = items;
 

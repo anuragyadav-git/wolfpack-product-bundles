@@ -196,13 +196,18 @@ export function DesignSettingsView({
               </div>
             ) : null}
           </section>
-          <s-button variant="tertiary" tone="critical" onClick={resetSelectedDesignTab}>
+            <s-button variant="tertiary" tone="critical" onClick={resetSelectedDesignTab}>
             Reset to default
           </s-button>
             </aside>
             <section className={styles.inspectorContent}>
           {isBrandColorsPanelGated || designGateMessage ? (
-            <s-banner tone="warning">
+            <s-banner
+              heading="Brand colors unavailable"
+              tone="warning"
+              dismissible={false}
+              hidden={false}
+            >
               {designGateMessage ?? "Disable Expert Color Controls to access brand colors."}
             </s-banner>
           ) : null}

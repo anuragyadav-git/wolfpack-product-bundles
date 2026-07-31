@@ -1288,14 +1288,6 @@
   accent-color: #303030;
 }
 
-.visibilityInfoBanner {
-  border-radius: 7px;
-  background: #eaf4ff;
-  color: #21527c;
-  padding: 10px 12px;
-  font-size: 13px;
-}
-
 .visibilityPanelSection {
   display: flex;
   flex-direction: column;

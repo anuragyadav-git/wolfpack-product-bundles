@@ -106,10 +106,15 @@ export function PpbBundleWidgetSection() {
                   </label>
                 </div>
               </div>
-              <div className={productPageBundleStyles.visibilityInfoBanner}>
+              <s-banner
+                tone="info"
+                heading="Widget visibility tip"
+                dismissible={false}
+                hidden={false}
+              >
                 Select if you want the upsell block or button to appear on
                 product pages.
-              </div>
+              </s-banner>
               <div className={productPageBundleStyles.visibilityPanelSection}>
                 <div
                   className={productPageBundleStyles.visibilitySectionHeader}
