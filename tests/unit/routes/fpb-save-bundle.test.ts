@@ -298,6 +298,113 @@ describe("FPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
     expect(body.message).toBe("Updated Successfully!");
   });
 
+  it("rejects save when quantity condition is equal_to and conditionValue is above maxQuantity", async () => {
+    const stepConditions = {
+      "step-1": [
+        {
+          type: "quantity",
+          operator: "equal_to",
+          value: "6",
+        },
+      ],
+    };
+    const res = await handleSaveBundle(
+      MOCK_ADMIN,
+      MOCK_SESSION,
+      "bundle-1",
+      makeFormData({
+        stepsData: JSON.stringify(makeStepsData({ maxQuantity: "5" })),
+        stepConditions: JSON.stringify(stepConditions),
+      }),
+    );
+
+    expect(res.status).toBe(400);
+    const body = await res.json() as any;
+    expect(body.success).toBe(false);
+    expect(body.error).toContain("outside quantity range [1, 5]");
+    expect(getDb().bundle.update).not.toHaveBeenCalled();
+  });
+
+  it("rejects save when quantity condition is greater_than_or_equal_to and conditionValue is above maxQuantity", async () => {
+    const stepConditions = {
+      "step-1": [
+        {
+          type: "quantity",
+          operator: "greater_than_or_equal_to",
+          value: "8",
+        },
+      ],
+    };
+    const res = await handleSaveBundle(
+      MOCK_ADMIN,
+      MOCK_SESSION,
+      "bundle-1",
+      makeFormData({
+        stepsData: JSON.stringify(makeStepsData({ minQuantity: "2", maxQuantity: "5" })),
+        stepConditions: JSON.stringify(stepConditions),
+      }),
+    );
+
+    expect(res.status).toBe(400);
+    const body = await res.json() as any;
+    expect(body.success).toBe(false);
+    expect(body.error).toContain("outside quantity range [2, 5]");
+    expect(getDb().bundle.update).not.toHaveBeenCalled();
+  });
+
+  it("rejects save when quantity condition is less_than_or_equal_to and conditionValue is below minQuantity", async () => {
+    const stepConditions = {
+      "step-1": [
+        {
+          type: "quantity",
+          operator: "less_than_or_equal_to",
+          value: "0",
+        },
+      ],
+    };
+    const res = await handleSaveBundle(
+      MOCK_ADMIN,
+      MOCK_SESSION,
+      "bundle-1",
+      makeFormData({
+        stepsData: JSON.stringify(makeStepsData({ minQuantity: "1", maxQuantity: "5" })),
+        stepConditions: JSON.stringify(stepConditions),
+      }),
+    );
+
+    expect(res.status).toBe(400);
+    const body = await res.json() as any;
+    expect(body.success).toBe(false);
+    expect(body.error).toContain("outside quantity range [1, 5]");
+    expect(getDb().bundle.update).not.toHaveBeenCalled();
+  });
+
+  it("allows save when quantity condition falls within min/max range", async () => {
+    const stepConditions = {
+      "step-1": [
+        {
+          type: "quantity",
+          operator: "equal_to",
+          value: "4",
+        },
+      ],
+    };
+    const res = await handleSaveBundle(
+      MOCK_ADMIN,
+      MOCK_SESSION,
+      "bundle-1",
+      makeFormData({
+        stepsData: JSON.stringify(makeStepsData({ minQuantity: "1", maxQuantity: "5" })),
+        stepConditions: JSON.stringify(stepConditions),
+      }),
+    );
+
+    const body = await res.json() as any;
+    expect(res.status).toBe(200);
+    expect(body.success).toBe(true);
+    expect(getDb().bundle.update).toHaveBeenCalled();
+  });
+
   it("calls db.bundle.update with the correct name and description", async () => {
     await handleSaveBundle(MOCK_ADMIN, MOCK_SESSION, "bundle-1", makeFormData());
     expect(getDb().bundle.update).toHaveBeenCalledWith(

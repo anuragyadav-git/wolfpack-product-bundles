@@ -15,6 +15,10 @@ import {
 import { parseConditionValue } from "../../../../lib/parse-condition-value";
 import { ERROR_MESSAGES } from "../../../../constants/errors";
 import { AddOnDiscountFunctionService } from "../../../../services/addon-discount-function-service.server";
+import {
+  formatStepConditionErrors,
+  validateStepConditionFeasibility,
+} from "../../../../lib/step-condition-validation";
 import { parseFpbSaveBundleForm } from "./save-bundle-form.server";
 import {
   compactBundleForConfigureResponse,
@@ -157,6 +161,7 @@ export async function handleSaveBundle(
     // VALIDATION + NORMALISATION: Validate and normalise all product IDs in one pass at the boundary.
     // normaliseShopifyProductId rejects UUIDs (corrupted browser state) and converts numeric IDs to GIDs.
     // IDs are mutated in place so the Prisma .map() below can use product.id directly.
+    const stepValidationErrors = [];
     for (const step of stepsData) {
       if (!step.StepProduct || !Array.isArray(step.StepProduct)) continue;
       for (const product of step.StepProduct) {
@@ -165,6 +170,33 @@ export async function handleSaveBundle(
           stepName: step.name,
         });
       }
+
+      const stepConditions = stepConditionsData[step.id] || [];
+      const firstCondition = stepConditions.length > 0 ? stepConditions[0] : null;
+      const secondCondition = stepConditions.length > 1 ? stepConditions[1] : null;
+      stepValidationErrors.push(
+        ...validateStepConditionFeasibility({
+          stepId: step.id,
+          stepName: step.name,
+          minQuantity: normalizeMinQuantity(step.minQuantity),
+          maxQuantity: normalizeMaxQuantity(step.maxQuantity),
+          conditionType: firstCondition?.type || null,
+          conditionOperator: firstCondition?.operator || null,
+          conditionValue: parseConditionValue(firstCondition?.value),
+          conditionOperator2: secondCondition?.operator || null,
+          conditionValue2: parseConditionValue(secondCondition?.value),
+        }),
+      );
+    }
+
+    if (stepValidationErrors.length > 0) {
+      return json(
+        {
+          success: false,
+          error: formatStepConditionErrors(stepValidationErrors),
+        },
+        { status: 400 },
+      );
     }
 
     AppLogger.debug("[VALIDATION] All product IDs are valid Shopify GIDs");
