@@ -119,13 +119,14 @@
       "loadingDescription": "Checking your published theme components and app embed.",
       "errorTitle": "Storefront status needs attention",
       "errorDescription": "We couldn't check your published theme. Open details to review the next step.",
-      "incompleteTitle": "Finish storefront setup",
-      "incompleteDescription_one": "{{count}} core component still needs attention.",
-      "incompleteDescription_other": "{{count}} core components still need attention.",
+      "incompleteTitle": "App Embed Status",
+      "incompleteDescription_one": "App embed is not enabled in your theme editor.",
+      "incompleteDescription_other": "App embed is not enabled in your theme editor.",
       "completeTitle": "Your storefront is ready",
-      "completeDescription": "All core bundle components are enabled in your published theme.",
+      "completeDescription": "App embed is enabled in your theme editor",
       "finishSetup": "Finish setup",
-      "viewDetails": "View details",
+      "viewDetails": "Show status",
+      "activate": "Enable",
       "ready": "Ready",
       "checking": "Checking setup",
       "actionNeeded": "Action needed",
@@ -309,7 +310,7 @@
     },
     "unlistedBundle": {
       "title": "Your bundle is Unlisted",
-      "body": "Bundle is hidden from your store's search results and collection pages. For discoverability, change the bundle product's status to Active in Shopify Products."
+      "body": "For discoverability, change the bundle product's status to Active in Shopify Products."
     },
     "proxyHealth": {
       "title": "App proxy not connected",

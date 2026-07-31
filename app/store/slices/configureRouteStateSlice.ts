@@ -35,7 +35,7 @@ export const defaultConfigureRouteState: ConfigureRouteState = {
   availablePages: [],
   selectedPage: null,
   bundleProduct: null,
-  productStatus: "ACTIVE",
+  productStatus: "",
   productTitle: "",
   productImageUrl: "",
   selectedCollections: {},
@@ -68,7 +68,7 @@ export const configureRouteStateSlice = createSlice({
       >>>,
     ) {
       state.bundleProduct = action.payload.bundleProduct ?? null;
-      state.productStatus = action.payload.productStatus ?? "ACTIVE";
+      state.productStatus = action.payload.productStatus ?? "";
       state.productTitle = action.payload.productTitle ?? "";
       state.productImageUrl = action.payload.productImageUrl ?? "";
       state.selectedCollections = action.payload.selectedCollections ?? {};

@@ -339,7 +339,12 @@ export function FilePicker({
         </s-text>
       )}
       {!open && uploadStatus === "error" && uploadError && (
-        <s-banner heading="Upload failed" tone="critical">
+        <s-banner
+          heading="Upload failed"
+          tone="critical"
+          dismissible={false}
+          hidden={false}
+        >
           <s-paragraph>{uploadError}</s-paragraph>
         </s-banner>
       )}

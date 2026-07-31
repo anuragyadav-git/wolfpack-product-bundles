@@ -50,7 +50,12 @@ export function PpbSubscriptionsSection() {
                     Allow customers to purchase the bundle as a subscription
                   </p>
                   {subscriptionsBlocked && (
-                    <s-banner tone="warning">
+                    <s-banner
+                      tone="warning"
+                      heading="Subscriptions unavailable"
+                      dismissible={false}
+                      hidden={false}
+                    >
                       <span>
                         Subscriptions cannot be enabled on bundles with Buy X,
                         Get Y discounts. Use a different discount type to enable
@@ -59,7 +64,12 @@ export function PpbSubscriptionsSection() {
                     </s-banner>
                   )}
                   {showSubscriptionSetupGuide && (
-                    <s-banner tone="info">
+                    <s-banner
+                      tone="info"
+                      heading="Subscription setup guide"
+                      dismissible={false}
+                      hidden={false}
+                    >
                       <s-stack direction="block" gap="small-400">
                         <span>
                           Create a subscription plan, name it, select all bundle
@@ -74,7 +84,12 @@ export function PpbSubscriptionsSection() {
                     </s-banner>
                   )}
                   {validationMessage && (
-                    <s-banner tone="warning">
+                    <s-banner
+                      tone="warning"
+                      heading="Action required"
+                      dismissible={false}
+                      hidden={false}
+                    >
                       <s-stack direction="block" gap="small-400">
                         <span>{validationMessage}</span>
                         <s-button variant="tertiary">Learn More</s-button>

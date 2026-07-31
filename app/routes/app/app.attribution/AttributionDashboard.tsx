@@ -219,8 +219,13 @@ export function BackfillWindowModal({
         Close
       </s-button>
 
-      <s-stack direction="block" gap="base">
-        <s-banner heading={`Selected window: ${selectedWindow}`} tone="info">
+        <s-stack direction="block" gap="base">
+        <s-banner
+          heading={`Selected window: ${selectedWindow}`}
+          tone="info"
+          dismissible={false}
+          hidden={false}
+        >
           This queries Shopify orders for the selected period and creates attribution records that Analytics may have missed.
         </s-banner>
         <s-unordered-list>
@@ -262,7 +267,12 @@ function NoDataBanner({
       <Await resolve={pixelStatus}>
         {(status) => (
           shouldRenderAnalyticsNoDataBanner({ hasNoData, pixelActive: Boolean(status.active) }) ? (
-            <s-banner heading={ANALYTICS_NO_DATA_BANNER_COPY.heading} tone="info">
+            <s-banner
+              heading={ANALYTICS_NO_DATA_BANNER_COPY.heading}
+              tone="info"
+              dismissible={false}
+              hidden={false}
+            >
               <s-stack direction="block" gap="small-100">
                 <p className={styles.bodyText}>
                   {ANALYTICS_NO_DATA_BANNER_COPY.body}
@@ -471,7 +481,12 @@ export function CustomUtmTrackingCard({
               When a shopper reaches checkout from a matching link, the saved values are stored with the order attribution record and included in analytics exports.
             </p>
           </div>
-          <s-banner tone="warning">
+          <s-banner
+            heading="Privacy check"
+            tone="warning"
+            dismissible={false}
+            hidden={false}
+          >
             Do not track shopper identifiers such as email addresses, phone numbers, customer IDs, or any value that can identify a person.
           </s-banner>
         </s-stack>
@@ -623,9 +638,23 @@ function AttributionDashboardContent({
             onConfirm={handleBackfillConfirm}
           />
           {backfillFetcher.data?.message ? (
-            <s-banner tone="success">{backfillFetcher.data.message}</s-banner>
+            <s-banner
+              tone="success"
+              heading="Backfill completed"
+              dismissible={false}
+              hidden={false}
+            >
+              {backfillFetcher.data.message}
+            </s-banner>
           ) : backfillFetcher.data?.error ? (
-            <s-banner tone="critical">{backfillFetcher.data.error}</s-banner>
+            <s-banner
+              tone="critical"
+              heading="Backfill failed"
+              dismissible={false}
+              hidden={false}
+            >
+              {backfillFetcher.data.error}
+            </s-banner>
           ) : null}
 
           {/* ────────── Revamped analytics sections (wpb-analytics-revamp-1) ─────── */}

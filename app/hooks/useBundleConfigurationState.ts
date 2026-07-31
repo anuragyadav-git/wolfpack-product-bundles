@@ -303,7 +303,7 @@ export function useBundleConfigurationState({
   useEffect(() => {
     dispatch(initializeConfigureRouteState({
       bundleProduct: loadedBundleProduct || null,
-      productStatus: loadedBundleProduct?.status || "ACTIVE",
+      productStatus: loadedBundleProduct?.status || "",
       productTitle: loadedBundleProduct?.title || "",
       productImageUrl: getBundleProductImageUrl(loadedBundleProduct),
       selectedCollections: initialSelectedCollections,
@@ -377,7 +377,7 @@ export function useBundleConfigurationState({
     ruleMessages: JSON.stringify(initialRuleMessages),
     stepConditions: JSON.stringify(conditionsState.stepConditions),
     bundleProduct: loadedBundleProduct || null,
-    productStatus: loadedBundleProduct?.status || "ACTIVE",
+    productStatus: loadedBundleProduct?.status || "",
   });
 
   // ===== DISCARD HANDLER =====

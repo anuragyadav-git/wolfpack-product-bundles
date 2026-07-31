@@ -92,7 +92,12 @@ export function SettingsWorkspaceSkeleton() {
 export function SettingsWorkspaceError({ onExit }: { onExit: () => void }) {
   return (
     <s-page heading="Settings" inlineSize="large">
-      <s-banner heading="Settings could not be loaded" tone="critical">
+      <s-banner
+        heading="Settings could not be loaded"
+        tone="critical"
+        dismissible={false}
+        hidden={false}
+      >
         <s-stack direction="block" gap="small">
           <s-paragraph>
             Reload the page or return to Settings and try again.

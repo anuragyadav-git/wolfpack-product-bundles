@@ -8,7 +8,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const ROOT_DIR = join(__dirname, '..');
 
-const WIDGET_VERSION = '5.0.226';
+const WIDGET_VERSION = '5.0.227';
 
 // Shared component modules (in dependency order)
 const SHARED_MODULES = [
@@ -19,6 +19,7 @@ const SHARED_MODULES = [
   join(ROOT_DIR, 'app/assets/widgets/shared/pricing-calculator.js'),
   join(ROOT_DIR, 'app/assets/widgets/shared/toast-manager.js'),
   join(ROOT_DIR, 'app/assets/widgets/shared/template-manager.js'),
+  join(ROOT_DIR, 'app/assets/widgets/shared/variant-preflight.js'),
   join(ROOT_DIR, 'app/assets/widgets/shared/component-generator.js'),
   join(ROOT_DIR, 'app/assets/widgets/shared/default-loading-animation.js'),
   join(ROOT_DIR, 'app/assets/widgets/shared/loading-overlay.js'),

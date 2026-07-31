@@ -7,6 +7,7 @@ import {
   runDeploymentGeneralSync,
   syncPersistedBundleMetaobjects,
 } from "../app/services/deployment-general-sync.server";
+import { runStepConditionRemediation } from "../app/services/step-condition-remediation.server";
 import { syncBundleStorefrontNow } from "../app/services/bundles/storefront-sync.server";
 import { ensureVariantBundleMetafieldDefinitions } from "../app/services/bundles/metafield-sync.server";
 import { AddOnDiscountFunctionService } from "../app/services/addon-discount-function-service.server";
@@ -23,6 +24,12 @@ async function main() {
       ensureMetafieldDefinitions: (admin) =>
         ensureVariantBundleMetafieldDefinitions(admin),
       syncBundle: syncBundleStorefrontNow as any,
+      updateStepProductVariants: async ({ stepProductId, variants }) => {
+        await db.stepProduct.update({
+          where: { id: stepProductId },
+          data: { variants },
+        });
+      },
       setupAddonDiscount: (admin, shopDomain) =>
         AddOnDiscountFunctionService.completeSetup(admin as any, shopDomain),
       syncBundleMetaobjects: syncPersistedBundleMetaobjects,
@@ -30,8 +37,33 @@ async function main() {
     },
   );
 
-  console.log(JSON.stringify(summary, null, 2));
-  if (summary.failedShops > 0 || summary.failedBundles > 0) {
+  const remediationSummary =
+    summary.mode === "disabled"
+      ? {
+        mode: "skipped",
+        scannedBundles: 0,
+        scannedSteps: 0,
+        impossibleSteps: 0,
+        fixedSteps: 0,
+        updatedBundles: 0,
+        failures: [],
+      }
+      : await runStepConditionRemediation({
+        prisma: db as any,
+        logger: console,
+      });
+
+  const combinedSummary = {
+    deploymentGeneralSync: summary,
+    stepConditionRemediation: remediationSummary,
+  };
+
+  console.log(JSON.stringify(combinedSummary, null, 2));
+  if (
+    summary.failedShops > 0 ||
+    summary.failedBundles > 0 ||
+    ("failures" in remediationSummary && remediationSummary.failures.length > 0)
+  ) {
     process.exitCode = 1;
   }
 }

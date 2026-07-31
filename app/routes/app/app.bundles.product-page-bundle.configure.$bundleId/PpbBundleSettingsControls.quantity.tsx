@@ -74,12 +74,22 @@ export function PpbQuantityAndSellingPlanSettings() {
           }}
           autocomplete="off"
         />
-        <s-banner tone="info">
+        <s-banner
+          tone="info"
+          heading="Search filters"
+          dismissible={false}
+          hidden={false}
+        >
           Bundles with 3+ products see 24% higher conversion rates when search
           filters are enabled.
         </s-banner>
         {individualSellingPlanBlocked && (
-          <s-banner tone="warning">
+          <s-banner
+            tone="warning"
+            heading="Action required"
+            dismissible={false}
+            hidden={false}
+          >
             {INDIVIDUAL_SELLING_PLAN_BLOCKED_MESSAGE}
           </s-banner>
         )}
