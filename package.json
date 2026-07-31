@@ -87,7 +87,7 @@
   },
   "devDependencies": {
     "@remix-run/eslint-config": "^2.16.1",
-    "@shopify/polaris-types": "^1.0.7",
+    "@shopify/polaris-types": "latest",
     "@types/eslint": "^9.6.1",
     "@types/jest": "^29.5.12",
     "@types/node": "^22.2.0",

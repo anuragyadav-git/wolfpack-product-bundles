@@ -24,6 +24,12 @@ async function main() {
       ensureMetafieldDefinitions: (admin) =>
         ensureVariantBundleMetafieldDefinitions(admin),
       syncBundle: syncBundleStorefrontNow as any,
+      updateStepProductVariants: async ({ stepProductId, variants }) => {
+        await db.stepProduct.update({
+          where: { id: stepProductId },
+          data: { variants },
+        });
+      },
       setupAddonDiscount: (admin, shopDomain) =>
         AddOnDiscountFunctionService.completeSetup(admin as any, shopDomain),
       syncBundleMetaobjects: syncPersistedBundleMetaobjects,

@@ -58,6 +58,7 @@ Full evidence record: `docs/competitor-analysis/16-eb-full-data-flow-investigati
 - [[Architecture/FPB Host Evaluation]] — accepted signed app-proxy FPB document host, preview-token contract, and Page retirement sequence
 - [[Architecture/State Management]] — Redux Toolkit slices, RTK Query endpoint boundaries, and AppStateService migration rules
 - [[Architecture/Diagrams/index|Architecture Diagram Catalog]] — indexed Mermaid diagrams for Cart Transform, metafield ownership/consumption, storefront runtime, backend layers, and embedded Admin UI
+- [[Shopify Integration/Polaris Web Components Reference]] — source-of-truth link and policy for using `s-*` Admin web components
 - [[Shopify Integration/Admin API]] — Rate limits, GraphQL patterns, session handling
 - [[Shopify Integration/Storefront API]] — Storefront GraphQL field gotchas, including product description HTML handling
 - [[Shopify Integration/Cart Transform API]] — Operations, targets, API versions (2025-10)
