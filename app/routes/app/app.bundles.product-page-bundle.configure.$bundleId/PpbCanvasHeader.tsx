@@ -73,19 +73,21 @@ export function PpbCanvasHeader() {
         onEnableClick={openThemeEditorForAppEmbed}
       />
       {parentProductStatusUi.showUnlistedBanner && (
-        <UnlistedBundleBanner
-          shop={shop}
-          bundleProductId={
-            loadedBundleProduct?.id ?? (bundle as any).shopifyProductId ?? null
-          }
-          onManage={() => {
-            const productId =
-              bundleProduct?.legacyResourceId ||
-              bundleProduct?.id?.split("/").pop() ||
-              (bundle as any).shopifyProductId?.split("/").pop();
-            if (productId) openProductInAdmin(productId);
-          }}
-        />
+        <div className={productPageBundleStyles.unlistedBannerGap}>
+          <UnlistedBundleBanner
+            shop={shop}
+            bundleProductId={
+              loadedBundleProduct?.id ?? (bundle as any).shopifyProductId ?? null
+            }
+            onManage={() => {
+              const productId =
+                bundleProduct?.legacyResourceId ||
+                bundleProduct?.id?.split("/").pop() ||
+                (bundle as any).shopifyProductId?.split("/").pop();
+              if (productId) openProductInAdmin(productId);
+            }}
+          />
+        </div>
       )}
     </>
   );
