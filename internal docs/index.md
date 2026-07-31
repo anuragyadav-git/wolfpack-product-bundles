@@ -80,3 +80,4 @@ Full evidence record: `docs/competitor-analysis/16-eb-full-data-flow-investigati
 - [[Operations/Knip Prune Guardrails]] — known Knip false positives, convention-loaded runtime assets, and required skip rules for future dead-code pruning
 - [[Operations/Knip Candidate Inventory]] — exhaustive current Knip candidate list from the 2026-07-13 report; use with the guardrails before pruning
 - [[Operations/Storefront Parity Placement Board]] — Chrome DevTools MCP placement-board method for EB/WPB storefront responsiveness proof across narrow, column, mobile, and wide widget contexts
+- [[Operations/Local Dev Process and Runtime Logs]] — safe runtime process-tree tracing for local dev shells and where to capture logs when output is TTY-bound

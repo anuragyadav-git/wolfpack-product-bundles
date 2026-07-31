@@ -11443,6 +11443,9 @@ const fullPageStepFooterMethods = {
   async addBundleToCart(clickedButton = null) {
   if (this._isWidgetActionBusy) return;
   const actionButton = clickedButton || this.container?.querySelector('.footer-btn-next');
+  this._setWidgetBusy(true, actionButton);
+  this.showLoadingOverlay(this.selectedBundle?.loadingGif || null);
+  await Promise.resolve();
 
   try {
 
@@ -11585,9 +11588,6 @@ const fullPageStepFooterMethods = {
       }
     });
 
-    this._setWidgetBusy(true, actionButton);
-    this.showLoadingOverlay(this.selectedBundle?.loadingGif || null);
-
     try {
       const requestRuntimeToken = typeof this.requestCartTransformRuntimeToken === 'function'
         ? this.requestCartTransformRuntimeToken
@@ -11642,14 +11642,14 @@ const fullPageStepFooterMethods = {
       ToastManager.show(
         String(fetchError && fetchError.message) || 'Failed to add bundle to cart. Please try again.'
       );
-    } finally {
-      this.hideLoadingOverlay();
-      this._setWidgetBusy(false, actionButton);
     }
 
   } catch (error) {
     this._emitStorefrontEvent('bundle-add-to-cart-failed', { reason: 'validation-error', message: String(error && error.message || error) });
     ToastManager.show('Failed to add bundle to cart. Please try again.');
+  } finally {
+    this.hideLoadingOverlay();
+    this._setWidgetBusy(false, actionButton);
   }
 },
 
