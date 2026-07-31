@@ -316,30 +316,28 @@
   align-items: center;
   gap: 6px;
   min-height: 28px;
-  padding: 4px 12px;
-  border: 1px solid #303030;
-  border-radius: 999px;
-  background: #303030;
-  color: #ffffff;
+  padding: 4px 8px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: #303030;
   font: inherit;
   font-size: 12px;
   font-weight: 600;
   line-height: 1;
   cursor: pointer;
-  transition:
-    background-color 0.15s ease,
-    box-shadow 0.15s ease,
-    transform 0.15s ease;
+  transition: background-color 0.15s ease;
 }
 
-.videoHelpButton:hover,
-.videoHelpButton:focus-visible {
-  background: #1a1a1a;
-  border-color: #1a1a1a;
-  color: #ffffff;
+.videoHelpButton:hover {
+  background: #f1f1f1;
   text-decoration: none;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
-  outline: none;
+}
+
+.videoHelpButton:focus-visible {
+  background: #f1f1f1;
+  outline: 2px solid #005bd3;
+  outline-offset: 1px;
 }
 
 .videoHelpIcon {
@@ -607,10 +605,7 @@
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition:
-    border-color 0.15s,
-    background 0.15s,
-    box-shadow 0.15s;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
 }
 
 .stepChip:hover,
@@ -672,9 +667,7 @@
   font-size: 13px;
   font-weight: 650;
   cursor: pointer;
-  transition:
-    background 0.15s,
-    border-color 0.15s;
+  transition: background 0.15s, border-color 0.15s;
 }
 
 .addStepBtn:hover {
@@ -732,9 +725,7 @@
 
 .stepCardDragOver {
   transform: translateY(-4px);
-  box-shadow:
-    0 8px 16px rgba(0, 0, 0, 0.15),
-    0 0 0 2px rgba(33, 150, 243, 0.3);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15), 0 0 0 2px rgba(33, 150, 243, 0.3);
   border: 2px dashed rgba(33, 150, 243, 0.5);
   background: rgba(33, 150, 243, 0.05);
 }
@@ -1397,54 +1388,22 @@
   composes: optionNote from "./bundle-configure-shared.module.css";
 }
 
-.templateDialogBackdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 2147483000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-  padding: clamp(16px, 4vw, 40px);
-  background: rgba(17, 24, 39, 0.42);
-}
-
-.templateDialog {
+.templateDialogContent {
   display: flex;
   flex-direction: column;
-  width: min(1080px, 100%);
-  height: min(760px, 100%);
-  max-height: 100%;
-  overflow: hidden;
-  border-radius: 16px;
+  min-height: min(612px, calc(100vh - 180px));
   background: #ffffff;
-  outline: none;
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.24);
-  animation: templateModalEnter 180ms ease-out both;
+  font-family:
+    Inter,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
 }
 
-@keyframes templateModalEnter {
-  from {
-    opacity: 0;
-    transform: scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-.templateDialogHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  min-height: 56px;
-  padding: 14px 20px;
-  border-bottom: 1px solid #e3e3e3;
-}
-
-.templateDialogHeading,
 .templateDialogSubheading,
 .templateReadyTitle {
   margin: 0;
@@ -1453,42 +1412,9 @@
   line-height: 1.25;
 }
 
-.templateDialogHeading {
-  font-size: 18px;
-}
-
 .templateDialogSubheading,
 .templateReadyTitle {
   font-size: 20px;
-}
-
-.templateDialogHandle {
-  display: none;
-}
-
-.templateDialogClose {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border: 0;
-  border-radius: 8px;
-  background: transparent;
-  color: #303030;
-  cursor: pointer;
-  flex-shrink: 0;
-}
-
-.templateDialogClose svg {
-  display: block;
-  color: #303030;
-}
-
-.templateDialogClose:hover,
-.templateDialogClose:focus-visible {
-  background: #f1f1f1;
-  outline: none;
 }
 
 .templateDialogBody {
@@ -1505,12 +1431,17 @@
   margin-bottom: 24px;
 }
 
+.templateDialogIntro > div {
+  min-width: 0;
+}
+
 .templateDialogDescription,
 .templateReadyText {
   margin: 4px 0 0;
   color: #6d7175;
   font-size: 14px;
   line-height: 1.4;
+  overflow-wrap: break-word;
 }
 
 .templateDialogError {
@@ -1569,6 +1500,7 @@
   color: #202223;
   font-size: 14px;
   font-weight: 650;
+  overflow-wrap: break-word;
 }
 
 .templateCustomizationCard p {
@@ -1576,6 +1508,7 @@
   color: #6d7175;
   font-size: 13px;
   line-height: 1.45;
+  overflow-wrap: break-word;
 }
 
 .templateOptionCard {
@@ -1619,7 +1552,8 @@
 }
 
 .templateOptionFooter {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 10px;
   padding: 12px 14px;
@@ -1627,12 +1561,12 @@
 }
 
 .templateOptionLabel {
-  flex: 1 1 auto;
   min-width: 0;
   color: #202223;
   font-size: 14px;
   font-weight: 650;
   line-height: 1.3;
+  overflow-wrap: break-word;
 }
 
 .templateOptionAction {
@@ -1776,9 +1710,7 @@
   color: #303030;
   cursor: pointer;
   flex-shrink: 0;
-  transition:
-    background 0.12s,
-    color 0.12s;
+  transition: background 0.12s, color 0.12s;
 }
 
 .categoryChevron:hover {
@@ -2058,9 +1990,7 @@
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition:
-    background 0.12s,
-    border-color 0.12s;
+  transition: background 0.12s, border-color 0.12s;
   margin-top: 8px;
 }
 
@@ -2407,6 +2337,37 @@
 }
 
 @media (max-width: 767px) {
+  .templateDialogContent {
+    min-height: calc(100vh - 112px);
+  }
+
+  .templateDialogBody {
+    padding: 16px;
+  }
+
+  .templateDialogIntro {
+    flex-direction: column;
+  }
+
+  .templateDialogGrid,
+  .templateCustomizationGrid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  .templateReadyPanel {
+    max-width: 100%;
+    padding: 36px 24px;
+  }
+
+  .templateOptionAction {
+    min-width: 64px;
+  }
+
+  .templateDialogFooter {
+    padding: 16px;
+  }
+
   .editGrid {
     flex-direction: column;
   }
@@ -2490,14 +2451,8 @@
     grid-template-columns: 1fr;
   }
 
-  .templateDialogBackdrop {
-    padding: 12px;
-  }
-
-  .templateDialog {
-    width: 100%;
-    height: 100%;
-    border-radius: 12px;
+  .templateDialogContent {
+    min-height: calc(100vh - 112px);
   }
 
   .templateDialogIntro {

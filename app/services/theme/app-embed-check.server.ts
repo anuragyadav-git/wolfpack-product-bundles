@@ -7,8 +7,6 @@ export interface AppEmbedCheckResult {
 }
 
 interface AppEmbedCheckOptions {
-  appHandle?: string;
-  appHandles?: string[];
   blockHandles?: string[];
 }
 
@@ -152,30 +150,19 @@ function isDisabledAppEmbedSetting(disabled: unknown) {
 
 function isWolfpackEmbedBlock(
   value: { disabled?: unknown; type?: string } | undefined,
-  options: AppEmbedCheckOptions,
+  currentAppHandle: string,
+  blockHandles: string[] | undefined,
 ) {
   if (isDisabledAppEmbedSetting(value?.disabled)) return false;
   if (typeof value?.type !== "string") return false;
 
-  const appHandles = [
-    options.appHandle,
-    ...(options.appHandles ?? []),
-  ]
-    .map((handle) => handle?.trim())
-    .filter((handle): handle is string => Boolean(handle));
-
-  if (appHandles.length) {
-    const matchesKnownApp = appHandles.some((handle) =>
-      value.type?.startsWith(`shopify://apps/${handle}/blocks/`),
-    );
-    if (!matchesKnownApp) return false;
-  } else if (!value.type.startsWith("shopify://apps/")) {
+  if (!value.type.startsWith(`shopify://apps/${currentAppHandle}/blocks/`)) {
     return false;
   }
 
-  if (!options.blockHandles?.length) return true;
+  if (!blockHandles?.length) return true;
   const blockType = value.type;
-  return options.blockHandles.some((handle) =>
+  return blockHandles.some((handle) =>
     blockType.includes(`/blocks/${handle}/`),
   );
 }
@@ -288,14 +275,10 @@ export async function checkAppEmbedEnabled(
       return { enabled: false, themeId: null };
     }
 
-    const effectiveOptions = {
-      ...options,
-      appHandles: [
-        options.appHandle,
-        ...(options.appHandles ?? []),
-        currentAppHandle,
-      ].filter((handle): handle is string => Boolean(handle?.trim())),
-    };
+    const normalizedAppHandle = currentAppHandle?.trim();
+    if (!normalizedAppHandle) {
+      return { enabled: false, themeId: theme.id };
+    }
 
     const fileContent = await getThemeSettingsFileContent(
       await getThemeSettingsBody(admin, theme),
@@ -323,7 +306,8 @@ export async function checkAppEmbedEnabled(
           disabled: value.disabled,
           type: typeof value.type === "string" ? value.type : undefined,
         } : undefined,
-        effectiveOptions,
+        normalizedAppHandle,
+        options.blockHandles,
       ),
     );
 

@@ -1,6 +1,21 @@
-import { useState, useEffect, useCallback, type KeyboardEvent } from "react";
+import {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  type KeyboardEvent,
+  type MouseEvent,
+} from "react";
 import { useTranslation } from "react-i18next";
 import styles from "./BundleReadinessOverlay.module.css";
+
+const READINESS_TRIGGER_COLLAPSE_DELAY_MS = 5_000;
+
+export function scheduleReadinessTriggerCollapse(
+  collapse: () => void,
+): ReturnType<typeof setTimeout> {
+  return setTimeout(collapse, READINESS_TRIGGER_COLLAPSE_DELAY_MS);
+}
 
 export interface BundleReadinessItem {
   key: string;
@@ -21,17 +36,57 @@ interface Props {
 
 function scoreColor(score: number) {
   if (score >= 80) return "#008060";
-  if (score >= 40) return "#005bd3";
-  return "#b98900";
+  return "#f49300";
 }
 
 export function BundleReadinessOverlay({ items, open, onOpenChange, hideCollapsedTrigger = false, onItemClick }: Props) {
   const { t } = useTranslation();
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(open ?? false);
+  const [showTriggerDetails, setShowTriggerDetails] = useState(true);
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
+  const wasExpandedRef = useRef(expanded);
+
+  useEffect(() => {
+    const timeout = scheduleReadinessTriggerCollapse(() => {
+      setShowTriggerDetails(false);
+    });
+
+    return () => clearTimeout(timeout);
+  }, []);
 
   useEffect(() => {
     if (open !== undefined) setExpanded(open);
   }, [open]);
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog || !expanded) return;
+
+    previousFocusRef.current =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : triggerRef.current;
+
+    if (!dialog.open && typeof dialog.showModal === "function") {
+      dialog.showModal();
+    }
+
+    const firstTarget = dialog.querySelector<HTMLElement>(
+      '[data-readiness-incomplete="true"], s-button, button:not([disabled])',
+    );
+    firstTarget?.focus();
+  }, [expanded]);
+
+  useEffect(() => {
+    if (wasExpandedRef.current && !expanded) {
+      window.requestAnimationFrame(() => {
+        (previousFocusRef.current ?? triggerRef.current)?.focus();
+      });
+    }
+    wasExpandedRef.current = expanded;
+  }, [expanded]);
 
   const score = items.reduce((sum, i) => sum + (i.done ? i.points : 0), 0);
   const color = scoreColor(score);
@@ -41,21 +96,33 @@ export function BundleReadinessOverlay({ items, open, onOpenChange, hideCollapse
   const arcLength = circumference * 0.75;
   const progressLength = (score / 100) * arcLength;
 
-  const toggle = useCallback(() => {
-    setExpanded((e) => {
-      onOpenChange?.(!e);
-      return !e;
+  const closeChecklist = useCallback(() => {
+    setExpanded(false);
+    onOpenChange?.(false);
+
+    window.requestAnimationFrame(() => {
+      (previousFocusRef.current ?? triggerRef.current)?.focus();
     });
   }, [onOpenChange]);
 
+  const toggle = useCallback(() => {
+    if (expanded) {
+      closeChecklist();
+      return;
+    }
+
+    setExpanded(true);
+    onOpenChange?.(true);
+  }, [closeChecklist, expanded, onOpenChange]);
+
   const allDone = items.every((i) => i.done);
+  const showTriggerContext = showTriggerDetails || expanded;
 
   const activateItem = useCallback((key: string) => {
     if (!onItemClick) return;
-    setExpanded(false);
-    onOpenChange?.(false);
+    closeChecklist();
     onItemClick(key);
-  }, [onItemClick, onOpenChange]);
+  }, [closeChecklist, onItemClick]);
 
   const handleItemKeyDown = useCallback(
     (event: KeyboardEvent<HTMLButtonElement>, key: string) => {
@@ -69,8 +136,43 @@ export function BundleReadinessOverlay({ items, open, onOpenChange, hideCollapse
 
   if (hideCollapsedTrigger && !expanded) return null;
 
+  const handleDialogKeyDown = (event: KeyboardEvent<HTMLDialogElement>) => {
+    if (event.key !== "Tab") return;
+
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+
+    const focusable = Array.from(
+      dialog.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), s-button, [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      ),
+    ).filter((element) => !element.hasAttribute("hidden"));
+    if (focusable.length === 0) return;
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  };
+
+  const handleDialogBackdropClick = (event: MouseEvent<HTMLDialogElement>) => {
+    if (event.target !== event.currentTarget) return;
+    const rect = event.currentTarget.getBoundingClientRect();
+    const outside =
+      event.clientX < rect.left ||
+      event.clientX > rect.right ||
+      event.clientY < rect.top ||
+      event.clientY > rect.bottom;
+    if (outside) closeChecklist();
+  };
+
   const donut = (
-    <svg width="56" height="56" viewBox="0 0 56 56" className={styles.arc}>
+    <svg width="48" height="48" viewBox="0 0 56 56" className={styles.arc}>
       <circle
         cx="28" cy="28" r={radius}
         fill="none" stroke="#e8e8e8" strokeWidth="4.5"
@@ -102,11 +204,32 @@ export function BundleReadinessOverlay({ items, open, onOpenChange, hideCollapse
 
   return (
     <>
-      {expanded && <div className={styles.dimOverlay} onClick={toggle} />}
-      <div className={styles.container}>
-        <div className={`${styles.panelWrapper} ${expanded ? styles.panelWrapperOpen : ""}`}>
-          <div className={styles.panelInner}>
-            <div className={styles.panel}>
+      {expanded && (
+        <dialog
+          id="bundle-readiness-dialog"
+          ref={dialogRef}
+          className={styles.dialog}
+          aria-modal="true"
+          aria-labelledby="bundle-readiness-title"
+          onCancel={(event) => {
+            event.preventDefault();
+            closeChecklist();
+          }}
+          onClick={handleDialogBackdropClick}
+          onKeyDown={handleDialogKeyDown}
+        >
+          <div className={styles.sheetHeader}>
+            <span id="bundle-readiness-title" className={styles.sheetTitle}>
+              {t("common.readiness.title")}
+            </span>
+            <s-button
+              variant="tertiary"
+              icon="x"
+              accessibilityLabel={t("common.actions.close")}
+              onClick={closeChecklist}
+            />
+          </div>
+          <div className={styles.panel}>
               <div className={styles.panelItems}>
                 {items.map((item) => {
                   const showActionHint = !item.done && Boolean(item.description);
@@ -116,6 +239,7 @@ export function BundleReadinessOverlay({ items, open, onOpenChange, hideCollapse
                     <button
                         key={item.key}
                         type="button"
+                        data-readiness-incomplete={!item.done || undefined}
                         className={`${styles.panelItem} ${item.done ? styles.panelItemDone : ""} ${showActionChevron ? styles.panelItemClickable : ""}`}
                         onClick={() => {
                           activateItem(item.key);
@@ -126,8 +250,8 @@ export function BundleReadinessOverlay({ items, open, onOpenChange, hideCollapse
                         <div className={styles.itemIndicator}>
                           {item.done ? (
                             <svg width="18" height="18" viewBox="0 0 20 20">
-                              <circle cx="10" cy="10" r="10" fill="#008060" />
-                              <path d="M6 10.5l2.5 2.5L14 8" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                              <circle cx="10" cy="10" r="7.5" fill="none" stroke="#008f65" strokeWidth="1.8" />
+                              <path d="M6.5 10.5l2.2 2.2L14 7.8" stroke="#008f65" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none" />
                             </svg>
                           ) : (
                             <svg width="18" height="18" viewBox="0 0 20 20">
@@ -138,12 +262,19 @@ export function BundleReadinessOverlay({ items, open, onOpenChange, hideCollapse
                         <div className={styles.itemContent}>
                           <div className={styles.itemMainRow}>
                             <span className={styles.itemLabel}>{item.label}</span>
-                            <span className={`${styles.itemPoints} ${item.done ? styles.itemPointsDone : ""}`}>
-                              {t("common.readiness.points", { points: item.points })}
-                            </span>
+                            {item.done && (
+                              <span className={`${styles.itemPoints} ${styles.itemPointsDone}`}>
+                                {t("common.readiness.points", { points: item.points })}
+                              </span>
+                            )}
                           </div>
                           {showActionHint && (
                             <span className={styles.itemDesc}>{item.description}</span>
+                          )}
+                          {!item.done && (
+                            <span className={`${styles.itemPoints} ${styles.itemPointsPending}`}>
+                              {t("common.readiness.points", { points: item.points })}
+                            </span>
                           )}
                         </div>
                         {showActionChevron && (
@@ -160,28 +291,49 @@ export function BundleReadinessOverlay({ items, open, onOpenChange, hideCollapse
               <div className={allDone ? styles.statusReady : styles.statusNotReady}>
                 {allDone ? t("common.readiness.ready") : t("common.readiness.notReady")}
               </div>
-            </div>
           </div>
-        </div>
+        </dialog>
+      )}
 
-        {(!hideCollapsedTrigger || expanded) && (
+      <div
+        className={`${styles.container} ${
+          showTriggerContext ? styles.containerIntro : styles.containerCollapsed
+        }`}
+      >
+        {!hideCollapsedTrigger && (
           <button
+            ref={triggerRef}
             type="button"
             data-tour-target="fpb-readiness-score"
-            className={`${styles.collapsed} ${expanded ? styles.collapsedOpen : ""}`}
+            className={`${styles.collapsed} ${
+              showTriggerContext
+                ? styles.collapsedExpanded
+                : styles.collapsedMinimal
+            }`}
+            data-readiness-trigger-state={
+              showTriggerContext ? "expanded" : "collapsed"
+            }
             onClick={toggle}
             aria-label={t("common.readiness.toggleAccessibility")}
+            aria-expanded={expanded}
+            aria-controls={expanded ? "bundle-readiness-dialog" : undefined}
           >
             {donut}
-            {expanded && (
-              <div className={styles.scoreLabel}>
-                <span className={styles.scoreLabelTitle}>{t("common.readiness.title")}</span>
-                <span className={styles.scoreLabelSub}>
-                  {t("common.readiness.helper")}
-                </span>
-              </div>
-            )}
-            {chevron}
+            <div
+              className={styles.scoreLabel}
+              aria-hidden={!showTriggerContext}
+            >
+              <span className={styles.scoreLabelTitle}>{t("common.readiness.title")}</span>
+              <span className={styles.scoreLabelSub}>
+                {t("common.readiness.helper")}
+              </span>
+            </div>
+            <span
+              className={styles.chevronWrapper}
+              aria-hidden="true"
+            >
+              {chevron}
+            </span>
           </button>
         )}
       </div>

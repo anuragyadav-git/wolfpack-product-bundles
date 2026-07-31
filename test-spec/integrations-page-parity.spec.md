@@ -1,32 +1,67 @@
+---
+schema_version: 1
+id: integrations-page-parity
+title: Integrations Page Parity Test Spec
+type: test-spec
+status: active
+summary: Verifies the complete ten-card integration inventory, support statuses, and safe setup actions.
+last_audited: 2026-07-30
+owners:
+  - Wolfpack Product Bundles
+domains:
+  - integrations
+systems:
+  - admin-integrations
+source_paths:
+  - app/lib/admin-configuration-surfaces.ts
+  - app/routes/app/app.integrations.tsx
+related_docs:
+  - internal docs/EB Integrations Reference.md
+  - docs/competitor-analysis/checkout-integrations-additional-configurations-parity-plan.md
+tags:
+  - admin
+  - integrations
+keywords:
+  - integration-inventory
+  - support-status
+  - setup-actions
+---
+
 # Test Spec: Integrations Page Parity
-**Spec ID:** integrations-page-parity  **Issue:** [eb-integrations-page-parity-1]  **Created:** 2026-06-04
+
+**Spec ID:** integrations-page-parity  **Created:** 2026-06-04
 
 ## Purpose
-Lock the Checkout-only Integrations page inventory, setup-link behavior, and browser-verified visible layout contract before updating the WPB Admin route.
+
+Keep the merchant guidance hub aligned with the complete ten-card integration
+inventory while distinguishing runtime support from guided, assisted, and
+planned setup.
 
 ## Test Cases
+
 ### IntegrationsData
+
 | # | Scenario | Input | Expected Output | Notes |
-|---|---|---|---|---|
-| 1 | Checkout integration inventory is exposed | `INTEGRATION_CATEGORIES` | 1 category, 2 cards | Gokwik and Shopflo only |
-| 2 | Setup actions route to temporary WPB guide destination | All cards | `setupUrl` is `https://wolfpackapps.com` | WPB guides will be authored later |
-| 3 | Non-Checkout integrations stay out of source inventory | `INTEGRATION_CATEGORIES` | No Stoq, Zapiet, Skio, Appstle, Bold, Judge.me, PageFly, or GemPages records | Prevents reintroducing removed cards |
+| --- | --- | --- | --- | --- |
+| 1 | Complete inventory | `INTEGRATION_CATEGORIES` | Five categories and ten cards | Uses live Admin evidence |
+| 2 | Stable order | All categories | Pre-orders, Subscriptions, Reviews, Page Builders, Checkout | Optimized for the source layout |
+| 3 | Supportability | Every card | Supported, Guided setup, Assisted setup, or Planned | Card presence never implies connection |
+| 4 | Setup actions | Every card | WPB-owned safe destination | No competitor guide URL |
+| 5 | Assisted setup | Zapiet | Assisted setup status and action | No chat notification until merchant clicks |
 
 ### IntegrationsRoute
-| # | Scenario | Input | Expected Output | Notes |
-|---|---|---|---|---|
-| 1 | Route renders Checkout cards only | Chrome DevTools MCP snapshot | Checkout panel, Gokwik tile, Shopflo tile, logo slots, CTA arrow | No inline guide expansion |
-| 2 | Request Integration mirrors EB action shape | Chrome DevTools MCP click/inspection | Single CTA link opens the interim WPB support destination | EB chat request errored in audited store |
-| 3 | External links are safe | Browser element attributes | External setup/request actions use a new browsing context without leaking session tokens | Applies to setup and request actions |
 
-### UtmPixelTrackingBanner
 | # | Scenario | Input | Expected Output | Notes |
-|---|---|---|---|---|
-| 1 | Active tracker is slim | `getUtmPixelStatusBannerModel(true)` | Active chip, online dot, no disclosure action | Banner spacing verified in Chrome |
-| 2 | Disabled tracker stays slim | `getUtmPixelStatusBannerModel(false)` | Not active chip, Learn more action, modal disclosure enabled | Activate Tracking lives inside modal |
-| 3 | Trust copy is grounded in Shopify privacy behavior | `UTM_PIXEL_PRIVACY_MESSAGE` | Plain-language consent/privacy message | Based on Shopify pixel privacy and compliance docs |
+| --- | --- | --- | --- | --- |
+| 1 | Complete route | Render | All categories, cards, statuses, and setup actions appear | Uses Polaris-compatible semantics |
+| 2 | Request Integration | Explicit click | Opens WPB-owned contact destination | No automatic vendor intent |
+| 3 | External-link safety | Setup and request actions | New browsing context with `noreferrer` | No session leakage |
+| 4 | Responsive traversal | Desktop and mobile | One predictable card order | Visual proof via direct DevTools |
 
 ## Acceptance Criteria
-- [ ] All listed test cases pass
-- [ ] Chrome screenshot confirms WPB page follows EB visible layout
-- [ ] UTM Pixel Tracking banner has compact active/disabled states and a disabled-state modal with enabled Activate Tracking action
+
+- [x] Five categories and ten cards are present.
+- [x] Every card has an accurate visible support status.
+- [x] Every setup action uses a WPB-owned destination.
+- [x] Focused behavior tests pass.
+- [x] Desktop and mobile Chrome proof is recorded.

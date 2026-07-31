@@ -251,12 +251,6 @@ export async function handleCreateBundle(
   }
 
   try {
-    const shopRecord = await db.shop.findUnique({
-      where: { shopDomain: session.shop },
-      select: { firstCreateTourEligible: true },
-    });
-    const showFirstLoadTour = shopRecord?.firstCreateTourEligible === true;
-
     // Check if this is the first bundle (for auto-placement)
     const existingBundleCount = await db.bundle.count({
       where: {
@@ -289,12 +283,14 @@ export async function handleCreateBundle(
       bundle: newBundle,
     });
 
-    if (showFirstLoadTour) {
-      await db.shop.update({
-        where: { shopDomain: session.shop },
-        data: { firstCreateTourEligible: false },
-      });
-    }
+    const eligibilityClaim = await db.shop.updateMany({
+      where: {
+        shopDomain: session.shop,
+        firstCreateTourEligible: true,
+      },
+      data: { firstCreateTourEligible: false },
+    });
+    const showFirstLoadTour = eligibilityClaim.count === 1;
 
     // Check widget installation status for product bundles (production mode)
     let widgetCheckResult = null;
@@ -306,21 +302,33 @@ export async function handleCreateBundle(
         bundleId: newBundle.id
       });
 
-      widgetCheckResult = await WidgetInstallationService.validateProductBundleWidgetSetup(
-        admin,
-        session.shop,
-        apiKey,
-        newBundle.id,
-        parent.productId
-      );
+      try {
+        widgetCheckResult = await WidgetInstallationService.validateProductBundleWidgetSetup(
+          admin,
+          session.shop,
+          apiKey,
+          newBundle.id,
+          parent.productId
+        );
 
-      AppLogger.info('Widget check result', {
-        component: 'app.dashboard',
-        operation: 'create-bundle',
-        widgetInstalled: widgetCheckResult.widgetInstalled,
-        requiresOneTimeSetup: widgetCheckResult.requiresOneTimeSetup,
-        message: widgetCheckResult.message
-      });
+        AppLogger.info('Widget check result', {
+          component: 'app.dashboard',
+          operation: 'create-bundle',
+          widgetInstalled: widgetCheckResult.widgetInstalled,
+          requiresOneTimeSetup: widgetCheckResult.requiresOneTimeSetup,
+          message: widgetCheckResult.message
+        });
+      } catch (error) {
+        AppLogger.warn(
+          "Widget installation check failed after bundle creation",
+          {
+            component: "app.dashboard",
+            operation: "create-bundle",
+            bundleId: newBundle.id,
+          },
+          error,
+        );
+      }
     }
 
     const redirectUrl = `${getBundleEditPath(newBundle.id, bundleType)}?mode=create`;

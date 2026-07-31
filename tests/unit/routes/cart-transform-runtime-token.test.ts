@@ -1,5 +1,5 @@
 import { createHmac } from "node:crypto";
-import { action } from "../../../app/routes/api/api.cart-transform-runtime-token";
+import { action, loader } from "../../../app/routes/api/api.cart-transform-runtime-token";
 import prisma from "../../../app/db.server";
 import {
   generateCartTransformRuntimeTokenSecret,
@@ -101,6 +101,17 @@ describe("cart transform runtime token route", () => {
 
   afterAll(() => {
     process.env.SHOPIFY_API_SECRET = originalSecret;
+  });
+
+  it("rejects GET without exposing a Remix missing-loader error", async () => {
+    const response = loader();
+
+    expect(response.status).toBe(405);
+    expect(response.headers.get("Allow")).toBe("POST, OPTIONS");
+    await expect(response.json()).resolves.toEqual({
+      ok: false,
+      error: "Method not allowed",
+    });
   });
 
   it("rejects invalid app-proxy signatures", async () => {

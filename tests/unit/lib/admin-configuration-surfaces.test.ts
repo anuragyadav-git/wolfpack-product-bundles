@@ -159,7 +159,7 @@ describe("recovered admin surfaces contract", () => {
       "Discount format",
       "Checkout Settings",
       "Checkout Integration",
-      "Font Settings",
+      "Execute Script",
       "Custom Font",
     ]);
     expect(landingConfiguration?.fields.find((field) => field.label === "Discount format")?.options).toEqual([
@@ -179,7 +179,7 @@ describe("recovered admin surfaces contract", () => {
       "Cart Messaging",
       "Checkout Settings",
       "Checkout Settings",
-      "Font Settings",
+      "Checkout Settings",
       "Font Settings",
     ]);
     expect(landingConfiguration?.fields.find((field) => field.label === "Checkout Integration")).toMatchObject({
@@ -189,12 +189,6 @@ describe("recovered admin surfaces contract", () => {
         "Theme cart drawer",
         "GoKwik",
         "Shopflo",
-        "Zecpay",
-        "Rebuy",
-        "Shiprocket / Fastrr",
-        "Monster cart",
-        "Upcart",
-        "Kaching Cart",
       ],
     });
 
@@ -241,27 +235,63 @@ describe("recovered admin surfaces contract", () => {
   });
 
   it("keeps the recovered integrations inventory and action types", () => {
-    expect(INTEGRATION_CATEGORIES.map((category) => category.title)).toEqual(["Checkout"]);
-    expect(getIntegrationCardCount()).toBe(2);
+    expect(INTEGRATION_CATEGORIES.map((category) => category.title)).toEqual([
+      "Reviews",
+      "Checkout",
+    ]);
+    expect(getIntegrationCardCount()).toBe(5);
 
     const cards = INTEGRATION_CATEGORIES.flatMap((category) => category.cards);
-    expect(cards.map((card) => card.id)).toEqual(["gokwik", "shopflo"]);
-    expect(cards.filter((card) => card.ctaType === "guide")).toHaveLength(2);
-    expect(cards.every((card) => card.ctaLabel === "View Setup")).toBe(true);
-    expect(cards.every((card) => card.setupUrl === "https://wolfpackapps.com")).toBe(true);
-    expect(cards.map((card) => card.description)).toEqual([
-      "Streamlined Indian checkout experience for bundles",
-      "Optimized Indian checkout flow with bundle support",
+    expect(cards.map((card) => card.id)).toEqual([
+      "judgeme",
+      "gokwik",
+      "shopflo",
+      "native-checkout",
+      "theme_cart_drawer",
     ]);
+    expect(cards.filter((card) => card.ctaType === "guide")).toHaveLength(5);
+    expect(cards.filter((card) => card.ctaType === "chat")).toHaveLength(0);
+    expect(cards.every((card) => card.ctaLabel === "View Setup")).toBe(true);
+    expect(cards.map((card) => card.id)).toEqual(expect.arrayContaining([
+      "judgeme",
+      "native-checkout",
+      "gokwik",
+      "shopflo",
+      "theme_cart_drawer",
+    ]));
+    expect(cards).toContainEqual(expect.objectContaining({
+      id: "judgeme",
+      setupUrl: "https://wolfpackapps.com",
+    }));
+    expect(cards).toContainEqual(expect.objectContaining({
+      id: "theme_cart_drawer",
+      setupUrl: "https://wolfpackapps.com",
+    }));
+    expect(cards).toContainEqual(expect.objectContaining({
+      id: "gokwik",
+      setupUrl: "https://wolfpackapps.com",
+    }));
+    expect(cards).toContainEqual(expect.objectContaining({
+      id: "shopflo",
+      setupUrl: "https://wolfpackapps.com",
+    }));
+    expect(cards).toContainEqual(expect.objectContaining({
+      id: "native-checkout",
+      setupUrl: "https://help.shopify.com/manual/checkout",
+    }));
+    expect(new Set(cards.map((card) => card.status))).toEqual(new Set([
+      "Supported",
+      "Guided setup",
+    ]));
     expect(JSON.stringify(INTEGRATION_CATEGORIES)).not.toMatch(
-      /theme_cart_drawer|zecpay|rebuy|shiprocket|monster|upcart|kaching|stoq|zapiet|skio|appstle|bold|judge\.?me|pagefly|gempages|easybundles|skailama|id_token|hmac|session=/i,
+      /easybundles|skailama|id_token|hmac|session=/i,
     );
   });
 
   it("preserves setup behavior summaries from help evidence", () => {
     const cards = INTEGRATION_CATEGORIES.flatMap((category) => category.cards);
-    const checkout = cards.find((card) => card.id === "gokwik");
+    const checkout = cards.find((card) => card.id === "native-checkout");
 
-    expect(checkout?.guideSummary.join(" ")).toContain("discount state");
+    expect(checkout?.guideSummary.join(" ")).toContain("Shopify-native flow");
   });
 });

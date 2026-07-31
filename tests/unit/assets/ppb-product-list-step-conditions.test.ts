@@ -24,11 +24,7 @@ function makeConditionContext(overrides: Record<string, unknown> = {}) {
     selectedProducts: [],
     stepProductData: [],
     findProductBySelectionKey(products: Array<Record<string, unknown>>, selectionKey: string) {
-      return products.find(product => (
-        product.variantId === selectionKey
-        || product.id === selectionKey
-        || product.parentProductId === selectionKey
-      )) ?? null;
+      return products.find(product => product.selectionId === selectionKey) ?? null;
     },
     ...overrides,
   };
@@ -41,14 +37,14 @@ describe('PPB Product List step conditions', () => {
         steps: [{
           categories: [{
             categoryId: 'category-1',
-            products: [{ id: 'gid://shopify/Product/9001' }],
+            products: [{ selectionId: '9001' }],
             conditions: [{ type: 'amount', condition: 'greaterThanOrEqualTo', value: 100 }],
           }],
         }],
       },
       selectedProducts: [{ 'gid://shopify/ProductVariant/7001': 1 }],
       stepProductData: [[{
-        id: 'gid://shopify/Product/9001',
+        selectionId: 'gid://shopify/ProductVariant/7001',
         parentProductId: '9001',
         variantId: 'gid://shopify/ProductVariant/7001',
         price: 61900,
@@ -64,14 +60,14 @@ describe('PPB Product List step conditions', () => {
         steps: [{
           categories: [{
             categoryId: 'category-1',
-            products: [{ id: 'gid://shopify/Product/9001' }],
+            products: [{ selectionId: '9001' }],
             conditions: [{ type: 'amount', condition: 'greaterThanOrEqualTo', value: 100 }],
           }],
         }],
       },
       selectedProducts: [{ 'gid://shopify/ProductVariant/7001': 1 }],
       stepProductData: [[{
-        id: 'gid://shopify/Product/9001',
+        selectionId: 'gid://shopify/ProductVariant/7001',
         parentProductId: '9001',
         variantId: 'gid://shopify/ProductVariant/7001',
         price: 6360,

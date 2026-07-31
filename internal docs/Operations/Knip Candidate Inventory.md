@@ -1,7 +1,25 @@
 ---
+schema_version: 1
+id: knip-candidate-inventory
 title: Knip Candidate Inventory
 type: operations
-last_audited: 2026-07-13
+status: active
+summary: Snapshot of Knip candidates that require manual validation before removal.
+last_audited: 2026-07-31
+owners:
+  - engineering
+domains:
+  - operations
+systems:
+  - knip
+source_paths:
+  - package.json
+related_docs:
+  - Operations/Knip Prune Guardrails.md
+tags:
+  - maintenance
+keywords:
+  - knip
 ---
 
 # Knip Candidate Inventory
@@ -401,9 +419,6 @@ Generated from `./node_modules/.bin/knip --reporter json --no-exit-code --no-pro
 - app/services/cart-transform-repair.server.ts: CartTransformRepairOptions
 - app/services/cart-transform-repair.server.ts: CartTransformRepairSummary
 - app/services/cart-transform-repair.server.ts: CartTransformRepairDependencies
-- app/services/deployment-backfill.server.ts: DeploymentBackfillOptions
-- app/services/deployment-backfill.server.ts: DeploymentBackfillSummary
-- app/services/deployment-backfill.server.ts: DeploymentBackfillDependencies
 - app/services/pixel-activation.server.ts: PixelActivationResult
 - app/services/pixel-activation.server.ts: PixelStatus
 - app/services/pixel-activation.server.ts: PixelDeactivationResult

@@ -111,6 +111,24 @@ export default defineConfig({
           if (id.includes('node_modules/recharts/') || id.includes('node_modules/d3-') || id.includes('node_modules/victory-vendor/')) {
             return 'vendor-charts';
           }
+          if (
+            id.includes('node_modules/@reduxjs/toolkit/') ||
+            id.includes('node_modules/react-redux/') ||
+            id.includes('node_modules/redux/') ||
+            id.includes('node_modules/reselect/') ||
+            id.includes('node_modules/immer/')
+          ) {
+            return 'vendor-state';
+          }
+          if (
+            id.includes('node_modules/@shopify/polaris/') ||
+            id.includes('node_modules/@shopify/polaris-icons/')
+          ) {
+            return 'vendor-polaris-react';
+          }
+          if (id.includes('node_modules/@shopify/app-bridge-react/')) {
+            return 'vendor-app-bridge-react';
+          }
           if (id.includes('node_modules/@shopify/')) {
             return 'vendor-shopify';
           }

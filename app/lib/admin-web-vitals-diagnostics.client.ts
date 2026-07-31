@@ -191,7 +191,7 @@ function buildLcpP75Summary(samples: LcpSample[]): Record<string, LcpP75Summary>
       return [route, {
         p75,
         sampleCount: values.length,
-        targetPass: p75 !== null && p75 <= LCP_TARGET_MS,
+        targetPass: p75 !== null && p75 < LCP_TARGET_MS,
         threshold: LCP_TARGET_MS,
       }];
     }),
@@ -258,7 +258,7 @@ function recordDebugLcpSample({
     candidateType: candidateMetadata?.type ?? null,
     candidateResource: candidateMetadata?.resource ?? null,
     blockingTime: candidateMetadata?.blockingTime ?? null,
-    targetPass: p75 !== null && p75 <= LCP_TARGET_MS,
+    targetPass: p75 !== null && p75 < LCP_TARGET_MS,
     threshold: LCP_TARGET_MS,
   });
 }

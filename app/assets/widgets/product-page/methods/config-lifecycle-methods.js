@@ -1,4 +1,8 @@
 import { TemplateManager } from '../../../bundle-widget-components.js';
+import {
+  claimCheckoutIntegrationInvocation,
+  invokeCheckoutIntegrationProvider,
+} from '../../shared/checkout-integration-adapters.js';
 
 function getWindow() {
   return typeof window === 'undefined' ? null : window;
@@ -63,9 +67,17 @@ _runControlsScript(script) {
   }
 },
 
-_handlePostAddToCartAction(actionConfig) {
+async _handlePostAddToCartAction(actionConfig, lifecycleKey) {
   const controls = this._getProductPageControls();
   const redirect = actionConfig || controls?.redirect || {};
+
+  if (lifecycleKey) {
+    this._checkoutIntegrationInvocations ||= new Set();
+    if (!claimCheckoutIntegrationInvocation(this._checkoutIntegrationInvocations, lifecycleKey)) {
+      return;
+    }
+  }
+
   this._runControlsScript(redirect.executeScript);
   this._runControlsScript(controls?.scripts?.executeCustomScript);
 
@@ -84,13 +96,20 @@ _handlePostAddToCartAction(actionConfig) {
     const selector = redirect.selectors?.sideCartOpenButton
       || controls?.selectors?.sideCartOpenButton
       || controls?.selectors?.sideCart;
-    if (selector) {
-      const sideCartTrigger = document.querySelector(selector);
-      if (sideCartTrigger) {
-        setTimeout(() => sideCartTrigger.click(), 300);
-        return;
-      }
-    }
+    const invocation = await invokeCheckoutIntegrationProvider(
+      'theme_cart_drawer',
+      getWindow(),
+      {
+        openThemeCartDrawer: () => {
+          if (!selector) return false;
+          const sideCartTrigger = document.querySelector(selector);
+          if (!sideCartTrigger) return false;
+          setTimeout(() => sideCartTrigger.click(), 300);
+          return true;
+        },
+      },
+    );
+    if (invocation.ok) return;
   }
 
   setTimeout(() => {

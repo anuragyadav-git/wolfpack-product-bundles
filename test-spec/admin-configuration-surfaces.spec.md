@@ -11,7 +11,7 @@ Lock the recovered Settings and Integrations Admin contracts so route UI stays a
 | 1 | Settings landing card order | Settings surface config | Design, Language, Controls | Matches captured Settings landing |
 | 2 | Language configuration support | Language panel config | Multilanguage enabled, English selected, supported language list includes captured values | Prevents flattening the language model |
 | 3 | Controls layout split | Controls panel config | Landing Page Layout and Product Page Layout both exist | Prevents merging distinct EB branches |
-| 4 | Integrations categories | Integration config | One Checkout category and two integration cards | Keeps the Integrations page source Checkout-only |
+| 4 | Integrations categories | Integration config | One Checkout category and four integration cards (GoKwik, Shopflo, Shopify checkout, Theme cart drawer) plus Reviews | Keeps the Integrations page source complete |
 | 5 | Setup actions | Integration config | Checkout cards expose internal guide summaries | Avoids external competitor URLs in code |
 | 6 | Detailed Settings fields | Settings detail config | Design tabs, shared language fields, template sections, controls tabs, and per-layout control fields are present | Moves route beyond summary-only parity |
 | 7 | Request Integration flow | Integrations route source | Request Integration reveals sanitized request guidance and does not route to unrelated app events | Captured deployed bundle behavior is request/chat-backed |

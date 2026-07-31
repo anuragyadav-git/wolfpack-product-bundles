@@ -110,6 +110,11 @@ interface SyncResult {
   error?: string;
 }
 
+function normalizeStepMinQuantity(value: unknown): number {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
 // --- Pure Calculation ---
 
 /**
@@ -273,7 +278,7 @@ export async function syncBundleInventory(
       for (const sp of step.StepProduct) {
         componentProducts.push({
           productId: sp.productId,
-          quantity: sp.minQuantity || 1,
+          quantity: normalizeStepMinQuantity(sp.minQuantity),
         });
       }
 
@@ -303,15 +308,15 @@ export async function syncBundleInventory(
 
           for (const edge of edges) {
             const productId = edge.node?.id;
-            if (productId) {
-              const alreadyAdded = componentProducts.some(cp => cp.productId === productId);
-              if (!alreadyAdded) {
-                componentProducts.push({
-                  productId,
-                  quantity: step.minQuantity || 1,
-                });
+              if (productId) {
+                const alreadyAdded = componentProducts.some(cp => cp.productId === productId);
+                if (!alreadyAdded) {
+                  componentProducts.push({
+                    productId,
+                    quantity: normalizeStepMinQuantity(step.minQuantity),
+                  });
+                }
               }
-            }
           }
         } catch (_err) {
           AppLogger.warn("Could not fetch collection products for inventory sync", {

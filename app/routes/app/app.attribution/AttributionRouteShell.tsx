@@ -120,11 +120,16 @@ export default function AttributionRouteShell() {
           Dashboard
         </button>
       </ui-title-bar>
-      <AttributionCriticalFunnelHeader />
-      <AttributionCriticalStatus pixelStatus={pixelStatus} />
-      <Suspense fallback={<AttributionDashboardSkeleton />}>
-        <AttributionDashboard />
-      </Suspense>
+      <s-query-container
+        containerName="analytics-page"
+        className={styles.analyticsQueryContainer}
+      >
+        <AttributionCriticalFunnelHeader />
+        <AttributionCriticalStatus pixelStatus={pixelStatus} />
+        <Suspense fallback={<AttributionDashboardSkeleton />}>
+          <AttributionDashboard />
+        </Suspense>
+      </s-query-container>
     </>
   );
 }

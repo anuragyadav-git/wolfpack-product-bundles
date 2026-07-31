@@ -113,7 +113,7 @@ export function CommonStepCategoryAccordion({
         imageUrl:
           product.images?.[0]?.originalSrc || product.images?.[0]?.url || null,
         variants: product.variants || null,
-        minQuantity: 1,
+        minQuantity: 0,
         maxQuantity: 10,
       })),
     }));

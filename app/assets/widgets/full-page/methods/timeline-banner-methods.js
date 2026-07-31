@@ -395,7 +395,7 @@ ensureBundleBannerRuntimeStyles() {
 getStepQuantityHint(step) {
   if (!step) return null;
 
-  const { conditionOperator, conditionValue, conditionOperator2, conditionValue2, minQuantity, maxQuantity } = step;
+  const { conditionOperator, conditionValue, conditionOperator2, conditionValue2 } = step;
   const OPERATORS = ConditionValidator.OPERATORS;
 
   if (conditionOperator && conditionValue != null) {
@@ -419,12 +419,6 @@ getStepQuantityHint(step) {
     }
   }
 
-  // Fallback to minQuantity / maxQuantity
-  const min = minQuantity != null ? Number(minQuantity) : null;
-  const max = maxQuantity != null ? Number(maxQuantity) : null;
-  if (min && max && min !== max) return `Pick ${min}–${max}`;
-  if (min && min > 1) return `Pick ${min}+`;
-  if (max && max > 1) return `Up to ${max}`;
   return null;
 },
 
@@ -435,7 +429,7 @@ getStepProductImages(stepIndex) {
 
   Object.entries(selectedProducts).forEach(([variantId, quantity]) => {
     if (quantity > 0) {
-      const product = this.stepProductData[stepIndex]?.find(p => (p.variantId || p.id) === variantId);
+      const product = this.stepProductData[stepIndex]?.find(p => String(p.selectionId || '') === String(variantId));
       if (product && product.imageUrl && !productImages.find(img => img.url === product.imageUrl)) {
         productImages.push({
           url: product.imageUrl,

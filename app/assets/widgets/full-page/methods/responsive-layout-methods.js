@@ -24,14 +24,13 @@ import {
 
 export function getMobileBottomBarActionState({
   conditionlessMobile,
-  hasSelectionMobile,
   isLastStep,
   isComplete,
   boxSelectionValidMobile,
 }) {
   const shouldAddToCart = conditionlessMobile || isLastStep;
   const disabled = conditionlessMobile
-    ? (!hasSelectionMobile || !boxSelectionValidMobile)
+    ? !boxSelectionValidMobile
     : (isLastStep ? (!isComplete || !boxSelectionValidMobile) : false);
 
   return { shouldAddToCart, disabled };
@@ -319,11 +318,9 @@ _renderMobileBottomBar({ preserveOpen = false } = {}) {
   totalEl.textContent = CurrencyManager.convertAndFormat(finalPrice, currencyInfo);
 
   const conditionlessMobile = this.bundleHasNoConditions();
-  const hasSelectionMobile = conditionlessMobile && this.getAllSelectedProductsData().filter(p => !p.isDefault).length > 0;
   const boxSelectionValidMobile = this.canCheckoutWithBoxSelection();
   const mobileActionState = getMobileBottomBarActionState({
     conditionlessMobile,
-    hasSelectionMobile,
     isLastStep,
     isComplete,
     boxSelectionValidMobile,

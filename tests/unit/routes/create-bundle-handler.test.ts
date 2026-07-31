@@ -12,6 +12,7 @@ jest.mock("../../../app/db.server", () => ({
     shop: {
       findUnique: jest.fn(),
       update: jest.fn(),
+      updateMany: jest.fn(),
     },
     bundle: {
       count: jest.fn(),
@@ -92,6 +93,7 @@ describe("handleCreateBundle", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (mockDb.shop.findUnique as jest.Mock).mockResolvedValue({ firstCreateTourEligible: false });
+    (mockDb.shop.updateMany as jest.Mock).mockResolvedValue({ count: 0 });
     (mockDb.bundle.count as jest.Mock).mockResolvedValue(1);
     (mockDb.bundle.create as jest.Mock).mockResolvedValue({
       id: "bundle-1",
@@ -131,6 +133,72 @@ describe("handleCreateBundle", () => {
         bundleDesignPresetId: "STANDARD",
       }),
     }));
+  });
+
+  it("atomically claims first-create eligibility after required creation succeeds", async () => {
+    (mockDb.shop.updateMany as jest.Mock).mockResolvedValue({ count: 1 });
+
+    const response = await handleCreateBundle(
+      makeAdmin() as any,
+      { shop: "test-shop.myshopify.com" },
+      makeForm({
+        bundleName: "First Bundle",
+        bundleType: "product_page",
+      }),
+    );
+
+    await expect(response.json()).resolves.toMatchObject({
+      success: true,
+      showFirstLoadTour: true,
+    });
+    expect(mockDb.shop.updateMany).toHaveBeenCalledWith({
+      where: {
+        shopDomain: "test-shop.myshopify.com",
+        firstCreateTourEligible: true,
+      },
+      data: { firstCreateTourEligible: false },
+    });
+  });
+
+  it("keeps successful creation successful when the noncritical widget check fails", async () => {
+    (mockDb.bundle.count as jest.Mock).mockResolvedValue(0);
+    (mockDb.shop.updateMany as jest.Mock).mockResolvedValue({ count: 1 });
+    (WidgetInstallationService.validateProductBundleWidgetSetup as jest.Mock)
+      .mockRejectedValue(new Error("theme API unavailable"));
+
+    const response = await handleCreateBundle(
+      makeAdmin() as any,
+      { shop: "test-shop.myshopify.com" },
+      makeForm({
+        bundleName: "First Bundle",
+        bundleType: "product_page",
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toMatchObject({
+      success: true,
+      showFirstLoadTour: true,
+      widgetStatus: { checked: false },
+    });
+  });
+
+  it("does not consume first-create eligibility when required creation fails", async () => {
+    (ensureBundleParentProduct as jest.Mock).mockRejectedValue(
+      new Error("product creation failed"),
+    );
+
+    const response = await handleCreateBundle(
+      makeAdmin() as any,
+      { shop: "test-shop.myshopify.com" },
+      makeForm({
+        bundleName: "First Bundle",
+        bundleType: "product_page",
+      }),
+    );
+
+    expect(response.status).toBe(500);
+    expect(mockDb.shop.updateMany).not.toHaveBeenCalled();
   });
 });
 

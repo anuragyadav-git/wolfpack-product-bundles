@@ -140,7 +140,10 @@ export const modalSlotTemplateMethods = {
       return;
     }
 
-    const rawRequired = Number(step?.conditionValue) || 1;
+    const parsedRequired = Number.parseFloat(step?.conditionValue);
+    const rawRequired = Number.isFinite(parsedRequired) && parsedRequired >= 0
+      ? parsedRequired
+      : 0;
     const operator = String(step?.conditionOperator || '').toLowerCase();
     const requiredCount = ['greater_than', 'gt', '>'].includes(operator)
       ? rawRequired + 1

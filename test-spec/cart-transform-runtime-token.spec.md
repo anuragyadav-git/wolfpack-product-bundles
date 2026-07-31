@@ -18,11 +18,14 @@ Verify the EB-style runtime cart contract uses a server-signed token for merge a
 | 1 | Invalid app-proxy signature | POST without valid signature | 400 | No DB lookup |
 | 2 | Unknown selected variant | Signed POST with variant outside bundle | 400 | Validation blocks token |
 | 3 | Valid FPB/PPB payload | Signed POST with valid selected variants | `{ token }` | Token verifies with shop secret |
+| 4 | Direct or stale GET | GET without a request body | 405 JSON with `Allow: POST, OPTIONS` | Never exposes a Remix missing-loader stack |
 
 ### WidgetCartPayload
 | # | Scenario | Input | Expected Output | Notes |
 |---|---|---|---|---|
 | 1 | Product-page FormData runtime token | Cart items + runtime token | `_wolfpack_bundle_runtime` on each line | Keeps OfferId unchanged |
+| 2 | FPB runtime-token transport | Full-page selected lines | Signed app-proxy request uses POST | Prevents body loss |
+| 3 | PPB runtime-token transport | Product-page selected lines | Signed app-proxy request uses POST | Same contract as FPB |
 
 ### RustFunctions
 | # | Scenario | Input | Expected Output | Notes |

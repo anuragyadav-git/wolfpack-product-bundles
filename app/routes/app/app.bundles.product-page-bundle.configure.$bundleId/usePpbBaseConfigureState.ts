@@ -10,8 +10,7 @@ import { getParentProductStatusUi } from "../../../lib/parent-product-status-ui"
 import { handleAdminSaveLockedEvent } from "../../../lib/admin-save-lock";
 import { openThemeEditorInNewTab } from "../../../lib/theme-editor-navigation.client";
 import {
-  checkAppEmbedStatusFromCurrentRoute,
-  resolveAppEmbedStatusThemeEditorUrl,
+  getThemeExtensionStatusFromAppBridge,
 } from "../../../lib/app-embed-status-check.client";
 import { useBundleConfigurationState } from "../../../hooks/useBundleConfigurationState";
 import type { LoaderData } from "./types";
@@ -52,7 +51,7 @@ export function usePpbBaseConfigureState() {
   const fetcher = useFetcher<any>();
   const subscriptionFetcher = useFetcher<SubscriptionValidationResponse>();
   const [currentAppEmbedEnabled, setCurrentAppEmbedEnabled] =
-    useState(appEmbedEnabled);
+    useState<boolean | null>(null);
   const [currentThemeEditorUrl, setCurrentThemeEditorUrl] =
     useState(themeEditorUrl);
   const [appEmbedBannerFeedbackTrigger, setAppEmbedBannerFeedbackTrigger] =
@@ -60,7 +59,9 @@ export function usePpbBaseConfigureState() {
   const [showSubscriptionSetupGuide, setShowSubscriptionSetupGuide] =
     useState(false);
   const revalidator = useRevalidator();
-  const isBundleVisibilityPending = !currentAppEmbedEnabled;
+  const presentedAppEmbedEnabled =
+    currentAppEmbedEnabled ?? true;
+  const isBundleVisibilityPending = !presentedAppEmbedEnabled;
   const isSaveInFlight = fetcher.state !== "idle";
   const saveBarRef = useRef<UISaveBarElement | null>(null);
   const triggerSaveBarIrritation = useCallback(() => {
@@ -131,9 +132,22 @@ export function usePpbBaseConfigureState() {
     productStatus || bundleProduct?.status || loadedBundleProduct?.status,
   );
   useEffect(() => {
-    setCurrentAppEmbedEnabled(appEmbedEnabled);
+    let active = true;
+    setCurrentAppEmbedEnabled(null);
     setCurrentThemeEditorUrl(themeEditorUrl);
-  }, [appEmbedEnabled, themeEditorUrl]);
+    void getThemeExtensionStatusFromAppBridge(shopify)
+      .then((status) => {
+        if (active) {
+          setCurrentAppEmbedEnabled(status.appEmbedEnabled);
+        }
+      })
+      .catch(() => {
+        if (active) setCurrentAppEmbedEnabled(appEmbedEnabled);
+      });
+    return () => {
+      active = false;
+    };
+  }, [appEmbedEnabled, shopify, themeEditorUrl]);
   const refreshParentProductStatusFromShopify = useCallback(() => {
     const revalidateNow = () => {
       revalidator.revalidate();
@@ -168,13 +182,11 @@ export function usePpbBaseConfigureState() {
     setAppEmbedBannerFeedbackTrigger((value) => value + 1);
   }, []);
   const checkAppEmbedStatusBeforePreview = useCallback(async () => {
-    const status = await checkAppEmbedStatusFromCurrentRoute();
-    setCurrentAppEmbedEnabled(status.appEmbedEnabled);
-    setCurrentThemeEditorUrl((currentUrl: string | null) =>
-      resolveAppEmbedStatusThemeEditorUrl(currentUrl, status.themeEditorUrl),
-    );
-    return status.appEmbedEnabled;
-  }, []);
+    const status = await getThemeExtensionStatusFromAppBridge(shopify);
+    const appEmbedEnabled = status?.appEmbedEnabled ?? false;
+    setCurrentAppEmbedEnabled(appEmbedEnabled);
+    return appEmbedEnabled;
+  }, [shopify]);
   const [loadingGif, setLoadingGif] = useState<string | null>(
     bundle.loadingGif ?? null,
   );
@@ -240,7 +252,7 @@ export function usePpbBaseConfigureState() {
     blockHandle,
     shopLocales,
     appEmbedBannerFeedbackTrigger,
-    appEmbedEnabled: currentAppEmbedEnabled,
+    appEmbedEnabled: presentedAppEmbedEnabled,
     themeEditorUrl: currentThemeEditorUrl,
     openThemeEditorForAppEmbed,
     checkAppEmbedStatusBeforePreview,

@@ -26,6 +26,7 @@ function createContext(overrides = {}) {
       {
         id: 'product-1',
         variantId: 'variant-1',
+        selectionId: 'variant-1',
         title: 'Selected list product',
         imageUrl: 'https://cdn.shopify.com/product.jpg',
         price: 1299,
@@ -33,6 +34,7 @@ function createContext(overrides = {}) {
       {
         id: 'product-2',
         variantId: 'variant-2',
+        selectionId: 'variant-2',
         title: 'Sold out list product',
         imageUrl: 'https://cdn.shopify.com/sold-out.jpg',
         price: 1599,
@@ -118,6 +120,7 @@ describe('PPB List shared product cards', () => {
       stepProductData: [[{
         id: 'product-sale',
         variantId: 'variant-sale',
+        selectionId: 'variant-sale',
         title: 'Sale list product',
         imageUrl: 'https://cdn.shopify.com/sale.jpg',
         price: 1299,

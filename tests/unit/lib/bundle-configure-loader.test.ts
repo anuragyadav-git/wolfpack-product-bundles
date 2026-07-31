@@ -31,22 +31,11 @@ jest.mock("../../../app/db.server", () => ({
 const THEME_GID = "gid://shopify/OnlineStoreTheme/123456";
 const SHOP = "test.myshopify.com";
 const API_KEY = "test-api-key";
-const originalShopifyAppHandle = process.env.SHOPIFY_APP_HANDLE;
-
 describe("fetchEmbedData — live Shopify app embed status", () => {
   const mockAdmin = {};
 
   beforeEach(() => {
     jest.clearAllMocks();
-    delete process.env.SHOPIFY_APP_HANDLE;
-  });
-
-  afterEach(() => {
-    if (originalShopifyAppHandle) {
-      process.env.SHOPIFY_APP_HANDLE = originalShopifyAppHandle;
-    } else {
-      delete process.env.SHOPIFY_APP_HANDLE;
-    }
   });
 
   it("does not read app embed cache from DB", async () => {
@@ -103,89 +92,25 @@ describe("fetchEmbedData — live Shopify app embed status", () => {
     );
   });
 
-  it("passes the configured Shopify app handle to the embed checker", async () => {
+  it("delegates app identity to the embed checker's Shopify query", async () => {
     (checkAppEmbedEnabled as jest.Mock).mockResolvedValue({
       enabled: false,
       themeId: THEME_GID,
     });
-    process.env.SHOPIFY_APP_HANDLE = "configured-app-handle";
-
     const result = await fetchEmbedData(mockAdmin, SHOP, API_KEY, "bundle-app-embed");
 
-    expect(checkAppEmbedEnabled).toHaveBeenCalledTimes(1);
     expect(checkAppEmbedEnabled).toHaveBeenCalledWith(
       mockAdmin,
       SHOP,
-      expect.objectContaining({
-        appHandles: [
-          "bundle-builder",
-          "configured-app-handle",
-          "wolfpack-product-bundles",
-          "wolfpack-product-bundles-4",
-          "wolfpack-product-bundles-sit",
-        ],
+      {
         blockHandles: ["bundle-app-embed"],
-      }),
-    );
-    expect(checkAppEmbedEnabled).toHaveBeenCalledWith(
-      mockAdmin,
-      SHOP,
-      expect.any(Object),
-    );
-    expect((checkAppEmbedEnabled as jest.Mock).mock.calls[0][2]).not.toHaveProperty(
-      "appHandle",
+      },
     );
     expect(mockShopFindUnique).not.toHaveBeenCalled();
     expect(mockShopUpdate).not.toHaveBeenCalled();
     expect(result.appEmbedEnabled).toBe(false);
   });
 
-  it("includes stable deployed app handles when no Shopify app handle is configured", async () => {
-    (checkAppEmbedEnabled as jest.Mock).mockResolvedValue({
-      enabled: true,
-      themeId: THEME_GID,
-    });
-
-    await fetchEmbedData(mockAdmin, SHOP, API_KEY, "bundle-app-embed");
-
-    expect(checkAppEmbedEnabled).toHaveBeenCalledWith(
-      mockAdmin,
-      SHOP,
-      expect.objectContaining({
-        appHandles: [
-          "bundle-builder",
-          "wolfpack-product-bundles",
-          "wolfpack-product-bundles-4",
-          "wolfpack-product-bundles-sit",
-        ],
-        blockHandles: ["bundle-app-embed"],
-      }),
-    );
-  });
-
-  it("deduplicates configured app handles against imported deployed handles", async () => {
-    (checkAppEmbedEnabled as jest.Mock).mockResolvedValue({
-      enabled: true,
-      themeId: THEME_GID,
-    });
-    process.env.SHOPIFY_APP_HANDLE = "wolfpack-product-bundles-4";
-
-    await fetchEmbedData(mockAdmin, SHOP, API_KEY, "bundle-app-embed");
-
-    expect(checkAppEmbedEnabled).toHaveBeenCalledWith(
-      mockAdmin,
-      SHOP,
-      expect.objectContaining({
-        appHandles: [
-          "bundle-builder",
-          "wolfpack-product-bundles-4",
-          "wolfpack-product-bundles",
-          "wolfpack-product-bundles-sit",
-        ],
-        blockHandles: ["bundle-app-embed"],
-      }),
-    );
-  });
 });
 
 describe("buildThemeAppEmbedEditorUrl", () => {

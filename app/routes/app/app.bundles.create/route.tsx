@@ -1,10 +1,11 @@
 import { json, redirect, type ActionFunctionArgs, type HeadersFunction, type LinksFunction, type LoaderFunctionArgs } from "@remix-run/node";
-import { Form, useActionData, useNavigate, useNavigation } from "@remix-run/react";
+import { Form, useActionData, useNavigate, useNavigation, useSearchParams } from "@remix-run/react";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { requireAdminSession } from "../../../lib/auth-guards.server";
 import { handleCreateBundle } from "../app.dashboard/handlers/handlers.server";
 import { BundleType } from "../../../constants/bundle";
+import { parseOnboardingBundleType } from "../../../lib/onboarding-bundle-type";
 import { showPolarisModal } from "../_shared/bundle-configure/modal-utils";
 import styles from "./create-bundle.module.css";
 import { ensureShopIdentity, recordBusinessEvent } from "../../../services/app-events.server";
@@ -137,12 +138,17 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
 export default function CreateBundleEntry() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
   const { t } = useTranslation();
   const isSubmitting = navigation.state === "submitting";
 
-  const [bundleType, setBundleType] = useState<string | null>(null);
+  const [bundleType, setBundleType] = useState<string | null>(() =>
+    searchParams.has("bundleType")
+      ? parseOnboardingBundleType(searchParams.get("bundleType"))
+      : null,
+  );
   const [bundleTypeError, setBundleTypeError] = useState<string | null>(null);
   const [bundleNameError, setBundleNameError] = useState<string | null>(null);
 

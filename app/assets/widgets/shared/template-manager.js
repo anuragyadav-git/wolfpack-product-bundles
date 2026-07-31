@@ -193,11 +193,6 @@ export class TemplateManager {
 
     if (!rule) return fallbackTemplate || '';
 
-    if (messageType === 'success') {
-      const tierMessage = this.getRuleTierMessage(bundle, rule);
-      if (tierMessage) return tierMessage;
-    }
-
     const ruleId = rule?.id ? String(rule.id) : '';
     const ruleMessages = this.getRuleMessages(bundle, locale);
     const ruleMessage = ruleId ? ruleMessages?.[ruleId] : null;

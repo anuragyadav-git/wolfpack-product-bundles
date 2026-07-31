@@ -27,13 +27,17 @@ import {
   buildCartLineSourceProperties,
 } from '../../shared/engine/cart-lines.js';
 
+function getSelectionId(item = {}) {
+  return String(item?.selectionId || '');
+}
+
 
 export const fullPageProductCardFooterMethods = {
 createProductCard(product, stepIndex, options = {}) {
-  const productId = product.variantId || product.id;
+  const productId = getSelectionId(product);
   const selectedQuantity = this.selectedProducts[stepIndex]?.[productId] || 0;
   const directDefaultQuantity = product?.isDirectDefaultProduct
-    ? Number(product.defaultRequiredQuantity || 1) || 1
+    ? Math.max(0, Number.parseFloat(product.defaultRequiredQuantity) || 0)
     : 0;
   const currentQuantity = Math.max(0, selectedQuantity - directDefaultQuantity);
 
@@ -337,7 +341,7 @@ attachProductCardListeners(cardElement, product, stepIndex, options = {}) {
 
   // Prefer the clicked control's data key; variant selector updates the DOM before
   // subsequent quantity clicks, while the captured product object can lag behind.
-  const getProductId = () => product.variantId || product.id;
+  const getProductId = () => getSelectionId(product);
   const getClickedProductId = (element) => element?.dataset?.productId || getProductId();
 
   cardElement.addEventListener('click', (e) => {
@@ -414,7 +418,18 @@ attachProductCardListeners(cardElement, product, stepIndex, options = {}) {
     const productId = getClickedProductId(addBtn);
     const currentQty = this.selectedProducts[stepIndex]?.[productId] || 0;
     if (currentQty === 0) {
-      this.updateProductSelection(stepIndex, productId, 1);
+      const directDefaultQuantities = this._getDirectDefaultSelectionQuantities?.(stepIndex) || {};
+      const hasDirectDefaultQuantity = Object.prototype.hasOwnProperty.call(
+        directDefaultQuantities,
+        String(productId),
+      );
+      const directDefaultQuantity = hasDirectDefaultQuantity
+        ? Number(directDefaultQuantities[String(productId)] || 0)
+        : null;
+      const nextQuantity = directDefaultQuantity ?? 1;
+      if (nextQuantity > 0) {
+        this.updateProductSelection(stepIndex, productId, nextQuantity);
+      }
     }
   });
 
@@ -559,11 +574,10 @@ renderFullPageFooter() {
 
 
 
-  // Total required quantity across paid steps only (free gift and default steps are non-blocking)
-  const totalRequired = (this.selectedBundle.steps || []).reduce((sum, step) => {
-    if (step.isFreeGift || step.isDefault) return sum;
-    return sum + (Number(step.conditionValue) || Number(step.minQuantity) || 1);
-  }, 0);
+  // Total required quantity across paid steps only (free gift/default steps are non-blocking)
+  const totalRequired = typeof this.getSummarySidebarMaxItemCount === 'function'
+    ? this.getSummarySidebarMaxItemCount()
+    : 0;
 
   const isLastStep = this.currentStepIndex === this.selectedBundle.steps.length - 1;
 

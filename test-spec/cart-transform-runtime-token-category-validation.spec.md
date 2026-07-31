@@ -10,6 +10,7 @@ Ensure runtime token validation accepts buyer-selected variants from every persi
 | 1 | Category selectedProducts variant | StepCategory.selectedProducts with variant id | Selection validates | Mirrors persisted FPB category contract |
 | 2 | Runtime category alias variant with gid | step.categories product variant.gid | Selection validates | Mirrors public runtime bundle config shape |
 | 3 | Invalid outside variant | Unknown selected variant | Validation throws | Keeps Shopify-safe signed-token boundary |
+| 4 | Hydrated collection product token request | Widget cart item includes variant and configured product identity | Runtime-token request includes both IDs | Lets the server validate a live collection variant against its configured product |
 
 ## Acceptance Criteria
 - [ ] All listed test cases pass

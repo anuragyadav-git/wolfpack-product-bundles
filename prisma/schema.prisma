@@ -185,7 +185,7 @@ model BundleStep {
   name                        String
   icon                        String?        @default("box")
   position                    Int            @default(0)
-  minQuantity                 Int            @default(1)
+  minQuantity                 Int            @default(0)
   maxQuantity                 Int            @default(1)
   enabled                     Boolean        @default(true)
   collections                 Json?
@@ -264,7 +264,7 @@ model StepProduct {
   title       String
   imageUrl    String?
   variants    Json?
-  minQuantity Int        @default(1)
+  minQuantity Int        @default(0)
   maxQuantity Int        @default(1)
   position    Int        @default(0)
   createdAt   DateTime   @default(now())

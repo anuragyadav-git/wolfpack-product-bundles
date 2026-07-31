@@ -1,5 +1,10 @@
 
 export const ProductPageDefaultProductMethods = {
+  _normalizeRequiredQuantity(value) {
+    const parsed = Number.parseFloat(value);
+    return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0;
+  },
+
 initializeDataStructures() {
   const stepsCount = this.selectedBundle.steps.length;
 
@@ -19,7 +24,8 @@ initializeDataStructures() {
     if (step.isDefault && step.defaultVariantId) {
       const normalizedDefaultVariantId = this.normalizeSelectionKey(step.defaultVariantId);
       if (normalizedDefaultVariantId) {
-        this.setSelectedQuantity(i, normalizedDefaultVariantId, 1);
+        const initialDefaultQuantity = this._normalizeRequiredQuantity(step.defaultRequiredQuantity);
+        this.setSelectedQuantity(i, normalizedDefaultVariantId, initialDefaultQuantity);
       }
     }
   });
@@ -33,9 +39,9 @@ _getDirectDefaultProductsData() {
   return data;
 },
 
-_normalizeDirectDefaultProduct(product) {
+  _normalizeDirectDefaultProduct(product) {
   const variant = Array.isArray(product.variants) ? product.variants[0] : null;
-  const variantId = this.extractId(variant?.variantGraphqlId || variant?.variantId);
+  const variantId = this.extractId(variant?.selectionId);
   if (!variantId) return null;
 
   const imageUrl = product.images?.[0]?.originalSrc || product.imageUrl || BUNDLE_WIDGET.PLACEHOLDER_IMAGE;
@@ -43,13 +49,14 @@ _normalizeDirectDefaultProduct(product) {
     ? variant.inventoryQuantity
     : null;
   const price = Number.parseFloat(variant?.price || '0') * 100;
-  const requiredQuantity = Number(product.requiredQuantity || 1) || 1;
+  const requiredQuantity = this._normalizeRequiredQuantity(product.requiredQuantity);
   const explicitlyUnavailable = variant?.availableForSale === false || variant?.available === false;
   const available = !explicitlyUnavailable;
   const quantityAvailable = inventoryQuantity;
 
   return {
-    id: this.extractId(product.graphqlId || product.productId) || product.productId || variantId,
+    id: variantId,
+    selectionId: variantId,
     title: product.title || '',
     handle: product.handle || '',
     imageUrl,
@@ -62,6 +69,7 @@ _normalizeDirectDefaultProduct(product) {
     defaultRequiredQuantity: requiredQuantity,
     variants: [{
       id: variantId,
+      selectionId: variantId,
       title: variant?.title || '',
       price,
       compareAtPrice: null,
@@ -87,7 +95,7 @@ _initDirectDefaultProducts() {
   if (this.directDefaultProducts.length === 0 || !this.selectedProducts[0]) return;
 
   this.directDefaultProducts.forEach(product => {
-    this.setSelectedQuantity(0, product.variantId, product.defaultRequiredQuantity || 1);
+    this.setSelectedQuantity(0, product.variantId, this._normalizeRequiredQuantity(product.defaultRequiredQuantity));
   });
 },
 
@@ -109,7 +117,7 @@ _isDirectDefaultVariant(variantId) {
 _getDirectDefaultRequiredQuantity(variantId) {
   const normalizedVariantId = this.extractId(variantId);
   const product = this.directDefaultProducts.find(item => item.variantId === normalizedVariantId);
-  return product ? (product.defaultRequiredQuantity || 1) : null;
+  return product ? this._normalizeRequiredQuantity(product.defaultRequiredQuantity) : null;
 },
 
 /**

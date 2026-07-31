@@ -273,16 +273,6 @@
 
   .bundle-widget-full-page
     .layout-sidebar[data-fpb-design-preset="CLASSIC"]
-    .full-page-side-panel--has-addon-summary
-    .side-panel-discount-message,
-  .fpb-preset-classic
-    .full-page-side-panel--has-addon-summary
-    .side-panel-discount-message {
-    display: none;
-  }
-
-  .bundle-widget-full-page
-    .layout-sidebar[data-fpb-design-preset="CLASSIC"]
     .side-panel-summary-content
     > .side-panel-item-count,
   .fpb-preset-classic .side-panel-summary-content > .side-panel-item-count {

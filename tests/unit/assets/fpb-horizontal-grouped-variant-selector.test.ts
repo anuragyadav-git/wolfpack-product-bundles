@@ -12,11 +12,12 @@ describe('FPB Horizontal grouped variant selector', () => {
     id: 'product-1',
     title: 'Fragrance Candle',
     variantId: 'variant-cherry',
+    selectionId: 'variant-cherry',
     options: ['Scent'],
     variants: [
-      { id: 'variant-cherry', title: 'Cherry', option1: 'Cherry', price: 3000, available: true },
-      { id: 'variant-vanilla', title: 'Vanilla', option1: 'Vanilla', price: 3000, available: true },
-      { id: 'variant-peach', title: 'Peach', option1: 'Peach', price: 3000, available: false },
+      { id: 'variant-cherry', selectionId: 'variant-cherry', title: 'Cherry', option1: 'Cherry', price: 3000, available: true },
+      { id: 'variant-vanilla', selectionId: 'variant-vanilla', title: 'Vanilla', option1: 'Vanilla', price: 3000, available: true },
+      { id: 'variant-peach', selectionId: 'variant-peach', title: 'Peach', option1: 'Peach', price: 3000, available: false },
     ],
   };
 

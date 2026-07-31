@@ -1,6 +1,4 @@
 import type { KeyboardEvent, MouseEvent } from "react";
-import { BlockStack, Button, InlineStack, Spinner, Text } from "@shopify/polaris";
-import { XCircleIcon } from "@shopify/polaris-icons";
 import { MobileIcon, MonitorIcon } from "./FilePickerIcons";
 import { truncateStoreFileText } from "./utils";
 
@@ -97,7 +95,7 @@ export function FilePickerTrigger({
           background: "#fafbfb",
         }}
       >
-        <InlineStack gap="200" blockAlign="start">
+        <s-stack direction="inline" gap="small" alignItems="start">
           <img
             src={value}
             alt={currentFilename ?? "Background image"}
@@ -110,20 +108,20 @@ export function FilePickerTrigger({
               border: "1px solid #e1e3e5",
             }}
           />
-          <BlockStack gap="100">
-            <Text as="p" variant="bodyXs" tone="subdued">
+          <s-stack direction="block" gap="small-100">
+            <s-text color="subdued">
               {truncateStoreFileText(currentFilename ?? value, 24)}
-            </Text>
-            <InlineStack gap="200">
-              <Button variant="plain" size="slim" onClick={handleOpen}>
+            </s-text>
+            <s-stack direction="inline" gap="small">
+              <s-button variant="tertiary" onClick={handleOpen}>
                 Change
-              </Button>
-              <Button variant="plain" tone="critical" size="slim" icon={XCircleIcon} onClick={handleRemove}>
+              </s-button>
+              <s-button variant="tertiary" tone="critical" icon="delete" onClick={handleRemove}>
                 Remove
-              </Button>
-            </InlineStack>
-          </BlockStack>
-        </InlineStack>
+              </s-button>
+            </s-stack>
+          </s-stack>
+        </s-stack>
       </div>
     );
   }
@@ -156,24 +154,24 @@ export function FilePickerTrigger({
     >
       {triggerIsUploading ? (
         <>
-          <Spinner size="small" />
-          <Text as="p" variant="bodyXs" tone="subdued">
+          <s-spinner size="small" accessibilityLabel="Uploading image" />
+          <s-text color="subdued">
             {uploadStatus === "uploading" ? "Uploading…" : "Processing…"}
-          </Text>
+          </s-text>
         </>
       ) : (
         <>
           {triggerIcon === "mobile" ? <MobileIcon /> : <MonitorIcon />}
-          <Text as="p" variant="bodySm" fontWeight="semibold">
+          <s-text type="strong">
             {label}
-          </Text>
+          </s-text>
           {hint && (
-            <Text as="p" variant="bodyXs" tone="subdued">
+            <s-text color="subdued">
               {hint}
-            </Text>
+            </s-text>
           )}
-          <button
-            type="button"
+          <s-button
+            variant="secondary"
             onClick={(event) => {
               event.stopPropagation();
               if (uploadButtonAction === "openPicker") {
@@ -182,21 +180,9 @@ export function FilePickerTrigger({
               }
               handleTriggerUpload(event);
             }}
-            style={{
-              marginTop: "4px",
-              padding: "6px 20px",
-              border: "1px solid #c9cccf",
-              borderRadius: "20px",
-              background: "#fff",
-              cursor: "pointer",
-              fontSize: "13px",
-              fontWeight: "500",
-              color: "#303030",
-              lineHeight: "1.4",
-            }}
           >
             {uploadLabel}
-          </button>
+          </s-button>
         </>
       )}
     </div>

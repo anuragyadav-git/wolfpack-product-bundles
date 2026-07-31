@@ -1,6 +1,11 @@
 import { BUNDLE_WIDGET } from '../../../bundle-widget-components.js';
 
 export const ProductPageProductDataMethods = {
+  normalizeProductSelectionId(product = {}) {
+    const candidate = this.extractId(product?.selectionId);
+    return candidate || '';
+  },
+
 resolveStorefrontApiBase() {
   const appProxyPrefix = '/apps/product-bundles';
   if (window.location?.pathname?.startsWith(`${appProxyPrefix}/`)) {
@@ -35,7 +40,7 @@ resolveStorefrontApiBase() {
 collectStepProductIds(step) {
   const productIds = [];
   const addProductId = (product) => {
-    const id = product?.id || product?.graphqlId || product?.productId;
+    const id = this.normalizeProductSelectionId(product);
     if (id && !productIds.includes(id)) productIds.push(id);
   };
 
@@ -70,7 +75,7 @@ async loadStepProducts(stepIndex) {
 
   const cachedProducts = this.stepProductData[stepIndex] || [];
   const hasHydratedProducts = cachedProducts.some(product =>
-    product?.variantId
+    product?.selectionId
     || product?.imageUrl
     || (Array.isArray(product?.variants) && product.variants.length > 0)
     || typeof product?.price === 'number'
@@ -129,7 +134,7 @@ async loadStepProducts(stepIndex) {
   // Remove duplicates
   const seen = new Set();
   this.stepProductData[stepIndex] = processedProducts.filter(product => {
-    const key = product.variantId || product.id;
+    const key = this.normalizeProductSelectionId(product);
     if (seen.has(key)) {
       return false;
     }
@@ -163,6 +168,7 @@ processProductsForStep(products, step) {
   const toCents = (value) => Math.round(parseFloat(value || '0') * 100);
   const normalizeVariant = (v) => ({
     id: this.extractId(v.id),
+    selectionId: this.extractId(v.id),
     title: v.title,
     price: toCents(v.price),
     compareAtPrice: v.compareAtPrice ? toCents(v.compareAtPrice) : null,
@@ -205,6 +211,7 @@ processProductsForStep(products, step) {
 
           return {
             id: this.extractId(variant.id),
+            selectionId: this.extractId(variant.id),
             title: `${product.title} - ${variant.title}`,
             imageUrl,
             price: toCents(variant.price),
@@ -245,7 +252,7 @@ processProductsForStep(products, step) {
         return opt.name || opt;
       });
 
-        return [{
+      return [{
           id: this.extractId(product.id),
           title: product.title,
           imageUrl,
@@ -254,6 +261,7 @@ processProductsForStep(products, step) {
             : toCents(product.price),
           compareAtPrice: defaultVariant?.compareAtPrice ? toCents(defaultVariant.compareAtPrice) : null,
           variantId: this.extractId(defaultVariant?.id || product.id),
+          selectionId: this.extractId(defaultVariant?.id || product.id),
           sellingPlanAllocations: defaultVariant?.sellingPlanAllocations || [],
           available: defaultVariant ? isVariantSelectableForInventory(defaultVariant) : false,
           quantityAvailable: typeof defaultVariant?.quantityAvailable === 'number' ? defaultVariant.quantityAvailable : null,

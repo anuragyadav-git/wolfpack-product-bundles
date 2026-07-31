@@ -352,11 +352,11 @@ describe("updateBundleProductMetafields", () => {
         categoryRank: 1,
         products: [
           {
-            id: "gid://shopify/Product/9427287703811",
+            selectionId: "gid://shopify/Product/9427287703811",
             title: "123Luxury Armor Matte Case",
             variants: [
               {
-                id: "gid://shopify/ProductVariant/48191691456771",
+                selectionId: "gid://shopify/ProductVariant/48191691456771",
                 price: "123.00",
               },
             ],
@@ -576,7 +576,7 @@ describe("updateBundleProductMetafields", () => {
       "gid://shopify/ProductVariant/222",
       "gid://shopify/ProductVariant/ADDON",
     ]));
-    expect(JSON.parse(metafields.find((field: any) => field.key === "component_quantities").value)).toEqual([1, 1]);
+    expect(JSON.parse(metafields.find((field: any) => field.key === "component_quantities").value)).toEqual([0, 1]);
 
     const componentPricing = JSON.parse(metafields.find((field: any) => field.key === "component_pricing").value);
     expect(componentPricing).toEqual(

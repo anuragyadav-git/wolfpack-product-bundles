@@ -1,8 +1,27 @@
 ---
+schema_version: 1
+id: deployment
 title: Deployment
 type: operations
-audited: 2026-07-10
-sources: docs/DEPLOYMENT.md (largely current as of Jan 14 2026)
+status: active
+summary: Deployment commands, environment configuration, and Shopify-managed installation rules.
+last_audited: 2026-07-31
+owners:
+  - engineering
+domains:
+  - operations
+systems:
+  - deployment
+source_paths:
+  - package.json
+  - shopify.app.toml
+  - shopify.app.wolfpack-product-bundles-sit.toml
+related_docs:
+  - Operations/Deployment General Sync.md
+tags:
+  - deployment
+keywords:
+  - Shopify-managed-installation
 ---
 
 # Deployment
@@ -11,7 +30,7 @@ sources: docs/DEPLOYMENT.md (largely current as of Jan 14 2026)
 
 | Environment | App | Command |
 |---|---|---|
-| Production | `wolfpack-product-bundles-4` | `npm run deploy:prod` |
+| Production | `wolfpack-product-bundles` | `npm run deploy:prod` |
 | SIT | `wolfpack-product-bundles-sit` | `npm run deploy:sit` |
 
 **Never run `shopify app deploy` directly.** The npm scripts run `scripts/generate-extension-templates.js` first to stamp the correct app handle into extension template JSON files.
@@ -65,6 +84,13 @@ npx prisma migrate deploy # production
 - App server env: Render dashboard
 - Prisma dev env: `prisma/.env` (not project root)
 - Extension env: `shopify.app.toml` + Shopify Partner Dashboard
+- Required access scopes come only from each environment's
+  `[access_scopes].scopes` TOML value. Shopify-managed installation applies
+  required scope changes during app deployment. Do not add a Render `SCOPES`
+  variable or a runtime `shopifyApp({ scopes })` duplicate.
+- `currentAppInstallation.accessScopes` reports scopes already granted to an
+  authenticated installation. It is a verification source, not a bootstrap
+  source for required scopes.
 
 ## Note on vercel.json
 

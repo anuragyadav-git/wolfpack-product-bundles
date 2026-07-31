@@ -35,6 +35,7 @@
   (function () {
     var fullPageScriptUrl = {{ 'bundle-widget-full-page-bundled.js' | asset_url | json }};
     var fullPageStyleUrl = {{ 'bundle-widget-full-page.css' | asset_url | json }};
+    var fullPageMobileSummaryStyleUrl = {{ 'bundle-widget-full-page-mobile-summary.css' | asset_url | json }};
     window.__WOLFPACK_FPB_TEMPLATE_CSS_URLS__ = Object.assign(
       {},
       window.__WOLFPACK_FPB_TEMPLATE_CSS_URLS__ || {},
@@ -132,6 +133,7 @@
       marker.dataset.wpbHydrated = 'true';
 
       ensureStylesheet(fullPageStyleUrl);
+      ensureStylesheet(fullPageMobileSummaryStyleUrl);
       ensureStylesheet(getTemplateStylesheetUrl(initialPreset));
       ensureScript(fullPageScriptUrl);
       initializeHydratedFullPageBundle();

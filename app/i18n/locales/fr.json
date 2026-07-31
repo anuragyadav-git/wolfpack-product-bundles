@@ -119,6 +119,11 @@
     "preview": {
       "heading": "Aperçu en direct",
       "unsaved": "Les modifications non enregistrées apparaissent ici.",
+      "workspace": {
+        "label": "Affichage de l’espace de conception",
+        "preview": "Aperçu",
+        "customize": "Personnaliser"
+      },
       "surface": {
         "description": "Choisissez des produits pour créer votre bundle.",
         "stepOne": "1. Choisir les produits",
@@ -189,6 +194,10 @@
       "maybeLater": "Peut-être plus tard", "setUpVisibility": "Configurer la visibilité", "reinstallApp": "Réinstaller l'application",
       "upgradeNow": "Mettre à niveau", "viewPlans": "Voir les forfaits", "discardChanges": "Ignorer les modifications",
       "continueEditing": "Continuer la modification"
+    },
+    "loading": {
+      "appLabel": "Chargement de Wolfpack Product Bundles",
+      "workspace": "Chargement de votre espace de travail"
     },
     "appEmbed": {
       "body": "Activez l'extension d'application de thème Wolfpack Bundles pour placer et prévisualiser le lot.",

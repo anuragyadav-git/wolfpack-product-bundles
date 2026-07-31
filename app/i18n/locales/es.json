@@ -119,6 +119,11 @@
     "preview": {
       "heading": "Vista previa en directo",
       "unsaved": "Los cambios sin guardar aparecen aquí.",
+      "workspace": {
+        "label": "Vista del espacio de diseño",
+        "preview": "Vista previa",
+        "customize": "Personalizar"
+      },
       "surface": {
         "description": "Elige productos para crear tu paquete.",
         "stepOne": "1. Elegir productos",
@@ -188,6 +193,10 @@
       "close": "Cerrar", "dismiss": "Descartar", "manage": "Gestionar", "enable": "Activar", "enableHere": "Activar aquí", "learnMore": "Más información",
       "maybeLater": "Quizás más tarde", "setUpVisibility": "Configurar visibilidad", "reinstallApp": "Reinstalar aplicación",
       "upgradeNow": "Mejorar ahora", "viewPlans": "Ver planes", "discardChanges": "Descartar cambios", "continueEditing": "Seguir editando"
+    },
+    "loading": {
+      "appLabel": "Cargando Wolfpack Product Bundles",
+      "workspace": "Cargando tu espacio de trabajo"
     },
     "appEmbed": {
       "body": "Activa la extensión de aplicación del tema para Wolfpack Bundles para colocar y previsualizar el paquete.",

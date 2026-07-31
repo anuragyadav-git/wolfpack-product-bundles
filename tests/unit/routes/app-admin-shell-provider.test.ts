@@ -9,20 +9,11 @@ jest.mock("@remix-run/react", () => ({
   isRouteErrorResponse: jest.fn(),
 }));
 
-jest.mock("@shopify/app-bridge-react", () => ({
-  useAppBridge: () => ({ saveBar: { leaveConfirmation: jest.fn() } }),
-}));
-
 jest.mock("@shopify/shopify-app-remix/server", () => ({
   boundary: {
     error: jest.fn(),
     headers: jest.fn(),
   },
-}));
-
-jest.mock("@shopify/shopify-app-remix/react", () => ({
-  AppProvider: ({ children }: { children: React.ReactNode }) =>
-    React.createElement("section", { "data-shopify-app-provider": "true" }, children),
 }));
 
 jest.mock("../../../app/shopify.server", () => ({
@@ -51,10 +42,6 @@ jest.mock("../../../app/services/admin-locale.server", () => ({
   loadShopAdminLocale: jest.fn(),
 }));
 
-jest.mock("../../../app/i18n/polaris-locales.server", () => ({
-  getPolarisLocale: jest.fn(),
-}));
-
 jest.mock("react-i18next", () => ({
   I18nextProvider: ({ children }: { children: React.ReactNode }) => React.createElement(React.Fragment, null, children),
   useTranslation: () => ({ t: (key: string) => key }),
@@ -73,10 +60,6 @@ jest.mock("../../../app/components/ErrorPage", () => ({
   ErrorPage: () => null,
 }));
 
-jest.mock("@shopify/polaris/build/esm/styles.css?url", () => "polaris.css", {
-  virtual: true,
-});
-
 const { useLoaderData } = require("@remix-run/react");
 
 describe("app Admin shell provider", () => {
@@ -84,17 +67,17 @@ describe("app Admin shell provider", () => {
     jest.clearAllMocks();
   });
 
-  it("renders the Admin tree without a global Mantle provider", async () => {
+  it("renders the Admin tree without global React Polaris or Redux providers", async () => {
     useLoaderData.mockReturnValue({
       apiKey: "shopify-api-key",
       locale: "en",
-      polarisTranslations: {},
       shop: "test-shop.myshopify.com",
     });
     const { default: App } = await import("../../../app/routes/app/app");
 
     const markup = renderToStaticMarkup(React.createElement(App));
-    expect(markup).toContain('data-shopify-app-provider="true"');
+    expect(markup).not.toContain("data-shopify-app-provider");
+    expect(markup).not.toContain("data-redux-provider");
     expect(markup).not.toContain("data-mantle-provider");
     expect(markup).toContain("<main>outlet</main>");
   });

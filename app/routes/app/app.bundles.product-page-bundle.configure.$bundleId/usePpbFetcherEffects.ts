@@ -1,4 +1,8 @@
 import { useEffect } from "react";
+import {
+  resolveTemplateReadyStep,
+  shouldProcessTemplateResponse,
+} from "../../../lib/template-ready-step";
 
 export function usePpbFetcherEffects({
   base,
@@ -14,8 +18,12 @@ export function usePpbFetcherEffects({
   sharedHandlers: any;
 }) {
   const { fetcher } = base;
-  const { templateFetcher, lastTemplateRequestRef, lastTemplateResponseRef } =
-    templateState;
+  const {
+    templateFetcher,
+    lastTemplateRequestRef,
+    lastTemplateResponseRef,
+    templateSubmissionStartedRef,
+  } = templateState;
 
   useEffect(() => {
     if (fetcher.data && fetcher.state === "idle") {
@@ -124,15 +132,29 @@ export function usePpbFetcherEffects({
   }, [fetcher.data, fetcher.state]);
 
   useEffect(() => {
-    if (templateFetcher.state !== "idle" || !lastTemplateRequestRef.current) {
+    if (!lastTemplateRequestRef.current) {
+      return;
+    }
+    if (templateFetcher.state !== "idle") {
+      templateSubmissionStartedRef.current = true;
+      return;
+    }
+    if (
+      !shouldProcessTemplateResponse({
+        fetcherState: templateFetcher.state,
+        hasRequest: true,
+        submissionStarted: templateSubmissionStartedRef.current,
+      })
+    ) {
       return;
     }
     if (templateFetcher.data === null || templateFetcher.data === undefined) {
-      if (lastTemplateRequestRef.current) {
-        templateState.setTemplateSaveError(
-          "Unable to save template. Please try again.",
-        );
-      }
+      templateState.setTemplateSaveError(
+        "Unable to save template. Please try again.",
+      );
+      templateState.setTemplateModalStep("templates");
+      lastTemplateRequestRef.current = null;
+      templateSubmissionStartedRef.current = false;
       return;
     }
     if (templateFetcher.data === lastTemplateResponseRef.current) {
@@ -149,19 +171,24 @@ export function usePpbFetcherEffects({
         templateState.setBundleDesignTemplate(request.template);
         templateState.setBundleDesignPresetId(request.presetId);
         templateState.setTemplateModalStep(
-          base.appEmbedEnabled ? "confirm" : "enableThemeExtension",
+          resolveTemplateReadyStep(base.appEmbedEnabled),
         );
       }
       templateState.setTemplateSaveError(null);
       lastTemplateRequestRef.current = null;
+      templateSubmissionStartedRef.current = false;
       return;
     }
     const errorMessage = response.error || "Failed to save template settings.";
+    templateState.setTemplateModalStep("templates");
     templateState.setTemplateSaveError(errorMessage);
+    lastTemplateRequestRef.current = null;
+    templateSubmissionStartedRef.current = false;
   }, [
     base.appEmbedEnabled,
     lastTemplateRequestRef,
     lastTemplateResponseRef,
+    templateSubmissionStartedRef,
     templateFetcher.data,
     templateFetcher.formData,
     templateFetcher.state,
