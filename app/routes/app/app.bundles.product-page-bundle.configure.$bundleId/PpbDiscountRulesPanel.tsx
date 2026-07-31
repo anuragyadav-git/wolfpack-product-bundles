@@ -37,7 +37,12 @@ export function PpbDiscountRulesPanel() {
             Set up discount rules, applied from lowest to highest.
           </p>
         </s-stack>
-        <s-banner tone="info">
+        <s-banner
+          tone="info"
+          heading="Discount tip"
+          dismissible={false}
+          hidden={false}
+        >
           Tip: Discounts are calculated based on the products in cart, make sure
           to add the &quot;Default Product&quot; quantity or amount while
           configuring discounts.

@@ -22,6 +22,128 @@ import {
   formatStepConditionErrors,
   validateStepConditionFeasibility,
 } from "../../../../lib/step-condition-validation";
+import {
+  isVariantExistsOnShopifyStorefront,
+  validateVariantIdFromShopify,
+  type ShopifyStorefrontVariantLookupResult,
+} from "../../../../lib/variant-existence.server";
+
+type ParsedVariantRef = string | number;
+
+function extractStepProductVariantReference(rawVariant: unknown): ParsedVariantRef | null {
+  if (rawVariant === null || rawVariant === undefined) {
+    return null;
+  }
+
+  if (typeof rawVariant === "string" || typeof rawVariant === "number") {
+    return rawVariant;
+  }
+
+  if (typeof rawVariant !== "object") {
+    return null;
+  }
+
+  const candidate = rawVariant as Record<string, unknown>;
+  const directReference =
+    candidate.variantId ??
+    candidate.variantGraphqlId ??
+    candidate.id ??
+    candidate.variant_gid ??
+    candidate.variantGraphql;
+
+  if (typeof directReference === "string" || typeof directReference === "number") {
+    return directReference;
+  }
+
+  return null;
+}
+
+function toStringVariant(rawVariant: unknown): string {
+  return String(rawVariant ?? "");
+}
+
+async function validatePersistedStepProductVariants(
+  shopDomain: string,
+  stepsData: Array<Record<string, unknown>>,
+): Promise<Response | null> {
+  const seen = new Map<string, ShopifyStorefrontVariantLookupResult>();
+
+  for (let stepIndex = 0; stepIndex < stepsData.length; stepIndex += 1) {
+    const step = stepsData[stepIndex];
+    const products = Array.isArray(step.StepProduct) ? step.StepProduct : [];
+
+    for (let productIndex = 0; productIndex < products.length; productIndex += 1) {
+      const product = products[productIndex] as Record<string, unknown>;
+      const variantRefs = Array.isArray(product.variants) ? product.variants : [];
+
+      for (let variantIndex = 0; variantIndex < variantRefs.length; variantIndex += 1) {
+        const rawVariantId = extractStepProductVariantReference(variantRefs[variantIndex]);
+        if (rawVariantId === null) {
+          return json(
+            {
+              success: false,
+              error: `ppb-save blocked on step ${stepIndex + 1}, product ${productIndex + 1}: empty variant reference at position ${variantIndex + 1}.`,
+              context: {
+                route: "ppb-save",
+                stepIndex: stepIndex + 1,
+                productIndex: productIndex + 1,
+                variantIndex: variantIndex + 1,
+                variantId: "",
+                reason: "invalid-format",
+              },
+            },
+            { status: 400 },
+          );
+        }
+        const parsed = await validateVariantIdFromShopify(rawVariantId);
+
+        if (!parsed.isValidFormat) {
+          return json(
+            {
+              success: false,
+              error: `ppb-save blocked on step ${stepIndex + 1}, product ${productIndex + 1}: invalid variant format for "${toStringVariant(rawVariantId)}".`,
+              context: {
+                route: "ppb-save",
+                stepIndex: stepIndex + 1,
+                productIndex: productIndex + 1,
+                variantIndex: variantIndex + 1,
+                variantId: toStringVariant(rawVariantId),
+                reason: "invalid-format",
+              },
+            },
+            { status: 400 },
+          );
+        }
+
+        const variantLookup =
+          seen.get(parsed.numericId)
+          || await isVariantExistsOnShopifyStorefront(shopDomain, parsed.numericId);
+        seen.set(parsed.numericId, variantLookup);
+
+        if (!variantLookup.ok) {
+          return json(
+            {
+              success: false,
+              error: `ppb-save blocked variant in step ${stepIndex + 1}, product ${productIndex + 1}: ${toStringVariant(rawVariantId)} is not available on storefront (${variantLookup.status}).`,
+              context: {
+                route: "ppb-save",
+                stepIndex: stepIndex + 1,
+                productIndex: productIndex + 1,
+                variantIndex: variantIndex + 1,
+                variantId: toStringVariant(rawVariantId),
+                status: variantLookup.status,
+                reason: variantLookup.message || "not-found",
+              },
+            },
+            { status: 400 },
+          );
+        }
+      }
+    }
+  }
+
+  return null;
+}
 
 function normalizeMinQuantity(value: unknown): number {
   const parsed = Number.parseInt(String(value), 10);
@@ -167,6 +289,14 @@ export async function handleSaveBundle(
         },
         { status: 400 },
       );
+    }
+
+    const variantValidationResponse = await validatePersistedStepProductVariants(
+      session.shop,
+      stepsData,
+    );
+    if (variantValidationResponse) {
+      return variantValidationResponse;
     }
 
     AppLogger.debug("[VALIDATION] All product IDs are valid Shopify GIDs");

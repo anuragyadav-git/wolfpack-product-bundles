@@ -2,6 +2,7 @@ import { buildCartLineSourceProperties } from '../../shared/engine/cart-lines.js
 import { buildProductPageCartFormData } from '../../shared/engine/cart-submit.js';
 import { ToastManager, CurrencyManager, PricingCalculator } from '../../../bundle-widget-components.js';
 import { areRequiredProductPageStepsValid } from './step-validation.js';
+import { preflightVariantOnStorefront, resolveRuntimeVariantNumericId } from '../../shared/variant-preflight.js';
 
 function getProductPageSelectedQuantityTotal(selectedProducts = []) {
   return selectedProducts.reduce((sum, stepSelections) => {
@@ -72,6 +73,25 @@ export const ProductPageCartMethods = {
       const sessionKey = this.generateBundleSessionKey();
       const bundleName = this.selectedBundle?.name || '';
       const cartItems = this.buildCartItems(offerId, sessionKey);
+      const variantPreflightCache = new Map();
+      for (let itemIndex = 0; itemIndex < cartItems.length; itemIndex += 1) {
+        const cartItem = cartItems[itemIndex];
+        const numericId = resolveRuntimeVariantNumericId(cartItem.id);
+        if (!numericId) {
+          throw new Error(`runtime-preflight blocked: invalid variant id for cart item ${itemIndex + 1}.`);
+        }
+
+        const preflightResult = variantPreflightCache.get(numericId)
+          || await preflightVariantOnStorefront(numericId, fetch);
+        variantPreflightCache.set(numericId, preflightResult);
+        if (!preflightResult?.ok) {
+          throw new Error(
+            `runtime-preflight blocked: variant ${numericId} in cart item ${itemIndex + 1} (status ${preflightResult?.status || 0}).`,
+          );
+        }
+
+        cartItem.id = numericId;
+      }
 
       this.elements.addToCartButton.disabled = true;
       this.elements.addToCartButton.textContent = this._resolveText('addingToCart', 'Adding to Cart...');

@@ -121,7 +121,12 @@ export function FpbSummaryTextSettings({
             </s-stack>
           )}
           {individualSellingPlanBlocked && (
-            <s-banner tone="warning">
+            <s-banner
+              tone="warning"
+              heading="Action required"
+              dismissible={false}
+              hidden={false}
+            >
               {INDIVIDUAL_SELLING_PLAN_BLOCKED_MESSAGE}
             </s-banner>
           )}

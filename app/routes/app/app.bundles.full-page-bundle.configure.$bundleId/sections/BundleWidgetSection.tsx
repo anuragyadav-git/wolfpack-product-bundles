@@ -99,10 +99,15 @@ export function BundleWidgetSection({
                   </label>
                 </div>
               </div>
-              <div className={fullPageBundleStyles.visibilityInfoBanner}>
+              <s-banner
+                tone="info"
+                heading="Widget visibility tip"
+                dismissible={false}
+                hidden={false}
+              >
                 Select if you want the upsell block or button to appear on
                 product pages.
-              </div>
+              </s-banner>
               <div className={fullPageBundleStyles.visibilityPanelSection}>
                 <div className={fullPageBundleStyles.visibilitySectionHeader}>
                   <h4 className={fullPageBundleStyles.visibilitySectionTitle}>

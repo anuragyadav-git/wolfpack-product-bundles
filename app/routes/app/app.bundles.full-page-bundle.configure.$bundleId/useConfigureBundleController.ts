@@ -116,7 +116,7 @@ export function useConfigureBundleController(): ConfigureBundleFlowDraft {
     originalValuesRef,
   } = configState;
   const parentProductStatusUi = getParentProductStatusUi(
-    productStatus || bundleProduct?.status || loadedBundleProduct?.status,
+    loadedBundleProduct?.status || bundleProduct?.status || productStatus,
   );
   useEffect(() => {
     let active = true;

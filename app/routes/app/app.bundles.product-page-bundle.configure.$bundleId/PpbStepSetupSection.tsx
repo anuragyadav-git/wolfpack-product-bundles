@@ -37,7 +37,12 @@ export function PpbStepSetupSection() {
                   {step.StepProduct &&
                     step.StepProduct.length > 0 &&
                     getStepCategories(step).length === 0 && (
-                      <s-banner tone="warning">
+                      <s-banner
+                        tone="warning"
+                        heading="Action required"
+                        dismissible={false}
+                        hidden={false}
+                      >
                         <p style={{ margin: 0, fontSize: 14 }}>
                           <strong>Action needed:</strong> This step has
                           {step.StepProduct.length} product

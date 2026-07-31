@@ -36,8 +36,9 @@ function createButton() {
 
 function createFooterContext(overrides: Record<string, unknown> = {}) {
   return {
-    selectedProducts: [{ v1: 1 }],
-    stepProductData: [[{ selectionId: 'v1', price: 1200 }]],
+    selectedProducts: [{ '111': 1 }],
+    stepProductData: [[{ selectionId: '111', price: 1200 }]],
+    expandProductsByVariant: (products: unknown[]) => products,
     selectedBundle: {
       steps: [{
         conditionType: 'quantity',
@@ -94,14 +95,16 @@ describe('PPB validation control disables cart gating when disabled', () => {
     const toastSpy = jest.spyOn(ToastManager, 'show').mockImplementation(() => {});
     const fetchSpy = jest.spyOn(global, 'fetch' as any).mockResolvedValue({
       ok: true,
+      status: 200,
+      json: async () => ({ available: true }),
       text: async () => '{}',
     } as any);
 
     try {
       const context = {
         ...ProductPageCartMethods,
-        selectedProducts: [{ v1: 1 }],
-        stepProductData: [[{ selectionId: 'v1', price: 1200, available: true }]],
+        selectedProducts: [{ '111': 1 }],
+        stepProductData: [[{ selectionId: '111', price: 1200, available: true }]],
         hideLoadingOverlay: jest.fn(),
         showLoadingOverlay: jest.fn(),
         updateAddToCartButton: jest.fn(),
@@ -116,6 +119,7 @@ describe('PPB validation control disables cart gating when disabled', () => {
         validateStep: () => false,
         _isConditionValidationEnabled: () => false,
         validateProductPageBoxSelectionCheckout: () => ({ valid: true, totalQuantity: 1, targetQuantity: 1, difference: 0 }),
+        expandProductsByVariant: (products: unknown[]) => products,
         updateAddToCartButton: jest.fn(),
         buildCartItems: () => [{ id: 101, quantity: 1, properties: {} }],
         getDiscountInfoWithSelectedAddonDiscount(value: Record<string, unknown>) {
@@ -143,7 +147,10 @@ describe('PPB validation control disables cart gating when disabled', () => {
 
       await ProductPageCartMethods.addToCart.call(context);
 
-      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith('/variants/101.js', expect.objectContaining({
+        method: 'GET',
+        headers: { 'Accept': 'application/json' },
+      }));
       expect(context.syncBundleDetailsCartMetafield).toHaveBeenCalled();
       expect(context.requestCartTransformRuntimeToken).toHaveBeenCalled();
       expect(toastSpy).not.toHaveBeenCalledWith('Please complete all bundle steps before adding to cart.');
@@ -157,14 +164,16 @@ describe('PPB validation control disables cart gating when disabled', () => {
     const toastSpy = jest.spyOn(ToastManager, 'show').mockImplementation(() => {});
     const fetchSpy = jest.spyOn(global, 'fetch' as any).mockResolvedValue({
       ok: true,
+      status: 200,
+      json: async () => ({ available: true }),
       text: async () => '{}',
     } as any);
 
     try {
       const context = {
         ...ProductPageCartMethods,
-        selectedProducts: [{ v1: 1 }],
-        stepProductData: [[{ selectionId: 'v1', price: 1200, available: true }]],
+        selectedProducts: [{ '111': 1 }],
+        stepProductData: [[{ selectionId: '111', price: 1200, available: true }]],
         hideLoadingOverlay: jest.fn(),
         showLoadingOverlay: jest.fn(),
         updateAddToCartButton: jest.fn(),
@@ -179,6 +188,7 @@ describe('PPB validation control disables cart gating when disabled', () => {
         validateStep: () => false,
         _isConditionValidationEnabled: () => true,
         validateProductPageBoxSelectionCheckout: () => ({ valid: true, totalQuantity: 1, targetQuantity: 1, difference: 0 }),
+        expandProductsByVariant: (products: unknown[]) => products,
         hideLoadingOverlay: jest.fn(),
         showLoadingOverlay: jest.fn(),
         updateAddToCartButton: jest.fn(),
@@ -208,9 +218,9 @@ describe('PPB validation control disables cart gating when disabled', () => {
     try {
       const context = {
         ...ProductPageCartMethods,
-        selectedProducts: [{ v1: 1 }, {}],
+        selectedProducts: [{ '111': 1 }, {}],
         stepProductData: [
-          [{ selectionId: 'v1', price: 1200, available: true }],
+          [{ selectionId: '111', price: 1200, available: true }],
           [],
         ],
         selectedBundle: {
@@ -225,6 +235,7 @@ describe('PPB validation control disables cart gating when disabled', () => {
         validateStep: (index: number) => index === 0,
         _isConditionValidationEnabled: () => true,
         validateProductPageBoxSelectionCheckout: () => ({ valid: true, totalQuantity: 1, targetQuantity: 1, difference: 0 }),
+        expandProductsByVariant: (products: unknown[]) => products,
         buildCartItems: () => [{ id: 101, quantity: 1, properties: {} }],
         getDiscountInfoWithSelectedAddonDiscount(value: Record<string, unknown>) {
           return value;
@@ -253,7 +264,10 @@ describe('PPB validation control disables cart gating when disabled', () => {
 
       await ProductPageCartMethods.addToCart.call(context);
 
-      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith('/variants/101.js', expect.objectContaining({
+        method: 'GET',
+        headers: { 'Accept': 'application/json' },
+      }));
       expect(toastSpy).not.toHaveBeenCalledWith('Please complete all bundle steps before adding to cart.');
     } finally {
       toastSpy.mockRestore();
@@ -270,7 +284,7 @@ describe('PPB validation control affects modal step progression', () => {
       selectedBundle: {
         steps: [{}, {}],
       },
-      selectedProducts: [{ v1: 1 }, {}],
+      selectedProducts: [{ '111': 1 }, {}],
       currentStepIndex: 0,
       elements: {
         modal: {
@@ -310,7 +324,7 @@ describe('PPB validation control affects modal step progression', () => {
       selectedBundle: {
         steps: [{}, {}],
       },
-      selectedProducts: [{ v1: 1 }, {}],
+      selectedProducts: [{ '111': 1 }, {}],
       currentStepIndex: 0,
       elements: {
         modal: {
@@ -359,7 +373,7 @@ describe('PPB validation control affects auto-add-after-last-step behavior', () 
           products: [{ id: 'p1' }],
         }],
       },
-      selectedProducts: [{ v1: 0 }],
+      selectedProducts: [{ '111': 0 }],
       _autoAddingFromControls: false,
       _isConditionValidationEnabled: () => false,
       _getProductPageControls() {
@@ -390,7 +404,7 @@ describe('PPB validation control affects auto-add-after-last-step behavior', () 
           products: [{ id: 'p1' }],
         }],
       },
-      selectedProducts: [{ v1: 0 }],
+      selectedProducts: [{ '111': 0 }],
       _autoAddingFromControls: false,
       _isConditionValidationEnabled: () => true,
       _getProductPageControls() {
@@ -415,7 +429,7 @@ describe('PPB validation control affects auto-add-after-last-step behavior', () 
       selectedBundle: {
         steps: [{ conditionType: 'quantity', isDefault: false, isFreeGift: false, conditionValue: 1 }],
       },
-      selectedProducts: [{ v1: 1 }],
+      selectedProducts: [{ '111': 1 }],
       _autoAddingFromControls: false,
       _isConditionValidationEnabled: () => false,
       _getProductPageControls() {

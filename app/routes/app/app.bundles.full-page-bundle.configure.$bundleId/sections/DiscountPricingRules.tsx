@@ -57,7 +57,12 @@ export function FpbDiscountRulesSection({
               }
             />
           </div>
-          <s-banner tone="info">
+          <s-banner
+            tone="info"
+            heading="Discount setup tip"
+            dismissible={false}
+            hidden={false}
+          >
             Tip: Discounts are calculated based on the products in cart, make
             sure to add the &quot;Default Product&quot; quantity or amount while
             configuring discounts.

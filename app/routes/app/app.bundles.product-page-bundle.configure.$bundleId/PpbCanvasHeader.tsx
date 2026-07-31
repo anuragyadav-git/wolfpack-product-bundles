@@ -4,7 +4,6 @@ import { usePpbConfigureContext } from "./PpbConfigureContext";
 export function PpbCanvasHeader() {
   const {
     UnlistedBundleBanner,
-    appEmbedBannerFeedbackTrigger,
     appEmbedEnabled,
     bundle,
     bundleProduct,
@@ -71,7 +70,6 @@ export function PpbCanvasHeader() {
       <AppEmbedBanner
         appEmbedEnabled={appEmbedEnabled}
         themeEditorUrl={themeEditorUrl}
-        feedbackTrigger={appEmbedBannerFeedbackTrigger}
         onEnableClick={openThemeEditorForAppEmbed}
       />
       {parentProductStatusUi.showUnlistedBanner && (

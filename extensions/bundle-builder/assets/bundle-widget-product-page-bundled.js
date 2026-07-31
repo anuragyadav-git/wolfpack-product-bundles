@@ -1,13 +1,13 @@
 /*!
  * Wolfpack Bundle Widget — Product Page
- * Version : 5.0.226
+ * Version : 5.0.227
  * Built   : 2026-07-31
  *
  * Cache note: Shopify CDN cache is busted automatically by shopify app deploy.
  * After deploying, allow 2-10 minutes for propagation before testing.
  * Verify live version: console.log(window.__BUNDLE_WIDGET_VERSION__)
  */
-window.__BUNDLE_WIDGET_VERSION__ = '5.0.226';
+window.__BUNDLE_WIDGET_VERSION__ = '5.0.227';
 (function() {
   'use strict';
 
@@ -1754,6 +1754,79 @@ class TemplateManager {
       currencyCode: currencyInfo.display.code,
 
       isQualified: 'false'
+    };
+  }
+}
+
+function resolveRuntimeVariantNumericId(rawVariantId) {
+  const normalizedRawId = String(rawVariantId ?? "").trim();
+  if (!normalizedRawId) return "";
+
+  const match = /^gid:\/\/shopify\/ProductVariant\/(\d+)$/i.exec(normalizedRawId);
+  if (match?.[1]) return match[1];
+
+  const candidate = normalizedRawId.includes("/")
+    ? normalizedRawId.split("/").pop() || ""
+    : normalizedRawId;
+  return /^\d+$/.test(candidate) ? candidate : "";
+}
+
+async function preflightVariantOnStorefront(
+  rawVariantId,
+  fetchImpl = typeof fetch === "function" ? fetch : null,
+) {
+  const variantNumericId = resolveRuntimeVariantNumericId(rawVariantId);
+  if (!variantNumericId) {
+    return {
+      ok: false,
+      id: String(rawVariantId ?? ""),
+      status: 0,
+      message: "Variant id format is invalid. Expected numeric or gid://shopify/ProductVariant/<id>.",
+    };
+  }
+
+  if (typeof fetchImpl !== "function") {
+    return {
+      ok: false,
+      id: variantNumericId,
+      status: 0,
+      message: "Browser fetch is not available for storefront variant preflight.",
+    };
+  }
+
+  try {
+    const response = await fetchImpl(`/variants/${encodeURIComponent(variantNumericId)}.js`, {
+      method: "GET",
+      headers: { Accept: "application/json" },
+    });
+
+    if (!response?.ok) {
+      return {
+        ok: false,
+        id: variantNumericId,
+        status: response?.status || 0,
+        message: response?.status
+          ? `Variant lookup failed with status ${response.status}`
+          : "Variant lookup failed.",
+      };
+    }
+
+    const payload = await response.json().catch(() => null);
+    const available = typeof payload?.available === "boolean" ? payload.available : undefined;
+
+    return {
+      ok: true,
+      id: variantNumericId,
+      status: response.status,
+      message: available === false ? "Variant lookup returned available:false." : undefined,
+      available,
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      id: variantNumericId,
+      status: 0,
+      message: error instanceof Error ? error.message : "Variant lookup request failed.",
     };
   }
 }
@@ -10151,6 +10224,25 @@ const ProductPageCartMethods = {
       const sessionKey = this.generateBundleSessionKey();
       const bundleName = this.selectedBundle?.name || '';
       const cartItems = this.buildCartItems(offerId, sessionKey);
+      const variantPreflightCache = new Map();
+      for (let itemIndex = 0; itemIndex < cartItems.length; itemIndex += 1) {
+        const cartItem = cartItems[itemIndex];
+        const numericId = resolveRuntimeVariantNumericId(cartItem.id);
+        if (!numericId) {
+          throw new Error(`runtime-preflight blocked: invalid variant id for cart item ${itemIndex + 1}.`);
+        }
+
+        const preflightResult = variantPreflightCache.get(numericId)
+          || await preflightVariantOnStorefront(numericId, fetch);
+        variantPreflightCache.set(numericId, preflightResult);
+        if (!preflightResult?.ok) {
+          throw new Error(
+            `runtime-preflight blocked: variant ${numericId} in cart item ${itemIndex + 1} (status ${preflightResult?.status || 0}).`,
+          );
+        }
+
+        cartItem.id = numericId;
+      }
 
       this.elements.addToCartButton.disabled = true;
       this.elements.addToCartButton.textContent = this._resolveText('addingToCart', 'Adding to Cart...');

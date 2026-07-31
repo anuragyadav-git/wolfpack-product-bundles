@@ -81,7 +81,12 @@ export function PpbDefaultProductsSettings() {
             />
           </span>
         </div>
-        <s-banner tone="info">
+        <s-banner
+          tone="info"
+          heading="Discount tip"
+          dismissible={false}
+          hidden={false}
+        >
           Tip: Discounts are based on all items in your cart. Don&apos;t forget
           to include the Pre Selected Product&apos;s quantity or amount when
           setting up discounts.
