@@ -111,6 +111,7 @@ export function DashboardPage() {
   const [activeActionMenuBundleId, setActiveActionMenuBundleId] = useState<string | null>(null);
   const [hasMainContentSettled, setHasMainContentSettled] = useState(false);
   const [resolvedAppEmbedStatus, setResolvedAppEmbedStatus] = useState<DashboardAppEmbedStatus>(DEFAULT_APP_EMBED_STATUS);
+  const [appEmbedOpenOptimism, setAppEmbedOpenOptimism] = useState(false);
   const [currentThemeEditorUrl, setCurrentThemeEditorUrl] = useState<string | null>(null);
   const [currentAppEmbedEnabled, setCurrentAppEmbedEnabled] = useState<boolean | null>(null);
 
@@ -118,25 +119,47 @@ export function DashboardPage() {
     setResolvedAppEmbedStatus(status);
   }, []);
 
+  const refreshAppEmbedFromBridge = useCallback(async () => {
+    try {
+      const status = await getThemeExtensionStatusFromAppBridge(shopify);
+      setCurrentAppEmbedEnabled(status.appEmbedEnabled);
+    } catch {
+      setCurrentAppEmbedEnabled((current) => (
+        current ?? resolvedAppEmbedStatus.appEmbedEnabled ?? true
+      ));
+    }
+  }, [resolvedAppEmbedStatus.appEmbedEnabled, shopify]);
+
+  const refreshAppEmbedFromBridgeAndClearOptimism = useCallback(async () => {
+    await refreshAppEmbedFromBridge();
+    setAppEmbedOpenOptimism(false);
+  }, [refreshAppEmbedFromBridge]);
+
   useEffect(() => {
-    let active = true;
     setCurrentThemeEditorUrl(resolvedAppEmbedStatus.themeEditorUrl);
     setCurrentAppEmbedEnabled(null);
-    void getThemeExtensionStatusFromAppBridge(shopify)
-      .then((status) => {
-        if (active) {
-          setCurrentAppEmbedEnabled(status.appEmbedEnabled);
-        }
-      })
-      .catch(() => {
-        if (active) {
-          setCurrentAppEmbedEnabled(resolvedAppEmbedStatus.appEmbedEnabled);
-        }
-      });
-    return () => {
-      active = false;
+    void refreshAppEmbedFromBridge();
+  }, [resolvedAppEmbedStatus.appEmbedEnabled, resolvedAppEmbedStatus.themeEditorUrl, refreshAppEmbedFromBridge]);
+
+  useEffect(() => {
+    if (!appEmbedOpenOptimism) return;
+    const onWindowFocus = () => {
+      void refreshAppEmbedFromBridgeAndClearOptimism();
     };
-  }, [resolvedAppEmbedStatus.appEmbedEnabled, resolvedAppEmbedStatus.themeEditorUrl, shopify]);
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        void refreshAppEmbedFromBridgeAndClearOptimism();
+      }
+    };
+
+    window.addEventListener("focus", onWindowFocus);
+    document.addEventListener("visibilitychange", onVisibilityChange);
+
+    return () => {
+      window.removeEventListener("focus", onWindowFocus);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
+  }, [appEmbedOpenOptimism, refreshAppEmbedFromBridgeAndClearOptimism]);
 
   useEffect(() => {
     if (typeof window.requestIdleCallback === "function") {
@@ -259,6 +282,7 @@ export function DashboardPage() {
 
   const handleOpenThemeEditor = useCallback(() => {
     if (!currentThemeEditorUrl) return;
+    setAppEmbedOpenOptimism(true);
     setCurrentAppEmbedEnabled(true);
     openThemeEditorInNewTab(currentThemeEditorUrl);
   }, [currentThemeEditorUrl]);
