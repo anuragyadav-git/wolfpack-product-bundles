@@ -21,13 +21,42 @@ import {
   buildCartLineDisplayProperties,
   buildCartLineSourceProperties,
 } from '../../shared/engine/cart-lines.js';
-import { shouldDisplayClassicFixedBundleRawTotal } from '../shared/summary-pricing-display.js';
+import { getSummaryDiscountBadgeLabel } from '../shared/summary-discount-badge.js';
+import { getRemainingSummarySkeletonCount } from './side-panel-methods.js';
+
+function getSummarySlotQuantity(item = {}) {
+  const quantity = Number(item?.quantity);
+  return Number.isFinite(quantity) ? Math.max(0, Math.floor(quantity)) : 0;
+}
+
+function expandSelectedItemsForSummarySlots(allSelectedProducts = []) {
+  const selectedProducts = Array.isArray(allSelectedProducts) ? allSelectedProducts : [];
+  const expanded = [];
+
+  selectedProducts.forEach((item) => {
+    const normalizedQuantity = getSummarySlotQuantity(item);
+    for (let index = 0; index < normalizedQuantity; index += 1) {
+      expanded.push({ ...item, quantity: 1 });
+    }
+  });
+
+  return expanded;
+}
+
+function getSelectionId(item = {}) {
+  return String(item?.selectionId || '');
+}
 
 export function shouldUseMobileSummarySlotTiles({ designPreset, productSlotsEnabled } = {}) {
   if (productSlotsEnabled !== true) return false;
 
   const preset = typeof designPreset === 'string' ? designPreset.trim().toUpperCase() : '';
   return ['STANDARD', 'CLASSIC', 'COMPACT', 'HORIZONTAL'].includes(preset);
+}
+
+export function shouldUseFluidMobileSummaryFooter(designPreset) {
+  const preset = typeof designPreset === 'string' ? designPreset.trim().toUpperCase() : '';
+  return preset === 'COMPACT' || preset === 'HORIZONTAL';
 }
 
 export function getMobileAdditionalOffersPulseState({
@@ -71,7 +100,8 @@ function normalizeStepContentSubtext(value) {
 const MOBILE_ADDITIONAL_OFFERS_GREEN_DELAY_MS = 550;
 const MOBILE_ADDITIONAL_OFFERS_MESSAGE_DELAY_MS = 800;
 const MOBILE_ADDITIONAL_OFFERS_DURATION_MS = 3000;
-const MOBILE_SUMMARY_TRAY_ANIMATION_MS = 720;
+const MOBILE_SUMMARY_TOGGLE_ANIMATION_MS = 300;
+const MOBILE_SUMMARY_TRAY_TRANSITION_MS = 700;
 
 export const fullPageMobileSummaryMethods = {
 _populateCompactMobileSummaryTray(sheet) {
@@ -91,18 +121,31 @@ _populateCompactMobileSummaryTray(sheet) {
   const combinedDiscountInfo = this.getDiscountInfoWithSelectedAddonDiscount(discountInfo, totalPrice);
   const currencyInfo = CurrencyManager.getCurrencyInfo();
   const finalPrice = combinedDiscountInfo.hasDiscount ? combinedDiscountInfo.finalPrice : totalPrice;
-  const displayFinalPrice = shouldDisplayClassicFixedBundleRawTotal(this, combinedDiscountInfo)
-    ? totalPrice
-    : finalPrice;
-  const nextRule = PricingCalculator.getNextDiscountRule?.(this.selectedBundle, totalQuantity, totalPrice) || null;
-  const selectedFooterQuantity = this.getAllSelectedProductsData().reduce(
-    (sum, item) => sum + (Number(item.quantity) || 1),
-    0
+  const discountBadgeLabel = getSummaryDiscountBadgeLabel(
+    combinedDiscountInfo,
+    CurrencyManager.convertAndFormat(combinedDiscountInfo.discountAmount, currencyInfo)
   );
+  const nextRule = PricingCalculator.getNextDiscountRule?.(this.selectedBundle, totalQuantity, totalPrice) || null;
+  const allSelectedProducts = this.getAllSelectedProductsData();
+  const shouldRenderSlotTiles = shouldUseMobileSummarySlotTiles({
+    designPreset: this.getFullPageDesignPreset(),
+    productSlotsEnabled: this._shouldRenderProductSlots(),
+  });
+  const selectedSlotItems = shouldRenderSlotTiles
+    ? expandSelectedItemsForSummarySlots(allSelectedProducts)
+    : [];
+  const selectedFooterQuantity = shouldRenderSlotTiles
+    ? selectedSlotItems.length
+    : allSelectedProducts.reduce((sum, item) => {
+      const quantity = Number(item.quantity);
+      return sum + (Number.isFinite(quantity) ? quantity : 0);
+    }, 0);
   const designPreset = this.getFullPageDesignPreset?.();
-  const isClassicPreset = designPreset === 'CLASSIC';
-  const usesAnimatedSummarySection = isClassicPreset || designPreset === 'STANDARD';
-  const summaryToggleLabel = isClassicPreset ? 'View Selected Products' : 'Review your bundle';
+  sheet.classList.toggle(
+    'fpb-mobile-summary-fluid-footer',
+    shouldUseFluidMobileSummaryFooter(designPreset)
+  );
+  const summaryToggleLabel = 'Review your bundle';
   const addonStep = (this.selectedBundle?.steps || []).find(step => step?.isFreeGift === true) || null;
   const addonStates = addonStep && typeof this.getAddonSummaryEligibilityStates === 'function'
     ? this.getAddonSummaryEligibilityStates(addonStep)
@@ -118,15 +161,9 @@ _populateCompactMobileSummaryTray(sheet) {
   const toggleSummaryTray = () => {
     this._toggleCompactMobileSummaryTray(sheet);
   };
-  const handleSummaryToggleKeydown = (event) => {
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-      toggleSummaryTray();
-    }
-  };
-
-  const countBadge = document.createElement('div');
+  const countBadge = document.createElement('button');
   countBadge.className = 'fpb-mobile-summary-count-badge';
+  countBadge.setAttribute('type', 'button');
   if (countBadge.dataset) {
     countBadge.dataset.summaryQuantity = String(selectedFooterQuantity);
   } else {
@@ -145,41 +182,42 @@ _populateCompactMobileSummaryTray(sheet) {
   if (additionalOffersBadgeState.showMessage) {
     countBadge.classList.add('fpb-mobile-summary-count-badge--additional-offers-message');
   }
-  countBadge.textContent = additionalOffersBadgeState.showMessage
+  const toggleIcon = document.createElement('span');
+  toggleIcon.className = 'fpb-mobile-summary-toggle-icon';
+  toggleIcon.setAttribute('aria-hidden', 'true');
+  toggleIcon.innerHTML = `
+    <svg width="20" height="20" viewBox="0 0 20 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M6.07827 11.2095C6.36662 11.4773 6.81745 11.4606 7.0852 11.1722L9.65059 8.4095L12.216 11.1722C12.4837 11.4606 12.9346 11.4773 13.2229 11.2095C13.5113 10.9418 13.528 10.4909 13.2602 10.2026L10.1727 6.87758C10.0379 6.73239 9.84871 6.6499 9.65059 6.6499C9.45247 6.6499 9.26329 6.73239 9.12847 6.87758L6.04097 10.2026C5.77321 10.4909 5.78991 10.9418 6.07827 11.2095Z" fill="currentColor"></path>
+    </svg>
+  `;
+  const toggleValue = document.createElement('span');
+  toggleValue.setAttribute('data-mobile-summary-toggle-value', '');
+  toggleValue.textContent = additionalOffersBadgeState.showMessage
     ? additionalOffersPulseState.message
     : String(selectedFooterQuantity);
-  countBadge.setAttribute('role', 'button');
-  countBadge.setAttribute('tabindex', '0');
+  countBadge.append(toggleIcon, toggleValue);
   countBadge.setAttribute('aria-label', summaryToggleLabel);
   countBadge.setAttribute('aria-expanded', this.compactMobileSummaryTrayExpanded ? 'true' : 'false');
   countBadge.addEventListener('click', toggleSummaryTray);
-  countBadge.addEventListener('keydown', handleSummaryToggleKeydown);
   sheet.appendChild(countBadge);
 
   sheet.classList.toggle('fpb-mobile-summary-tray-expanded', this.compactMobileSummaryTrayExpanded);
   this._syncCompactMobileSummaryScrollLock();
   sheet.classList.toggle(
     'fpb-mobile-summary-tray--slots',
-    shouldUseMobileSummarySlotTiles({
-      designPreset: this.getFullPageDesignPreset(),
-      productSlotsEnabled: this._shouldRenderProductSlots(),
-    })
+    shouldRenderSlotTiles
   );
   sheet.classList.remove('fpb-mobile-summary-tray--has-discount-summary');
-
-  if (isClassicPreset) {
-    const toggleRow = document.createElement('button');
-    toggleRow.className = 'fpb-mobile-summary-toggle-row';
-    toggleRow.type = 'button';
-    toggleRow.setAttribute('aria-expanded', this.compactMobileSummaryTrayExpanded ? 'true' : 'false');
-    toggleRow.textContent = summaryToggleLabel;
-    toggleRow.addEventListener('click', toggleSummaryTray);
-    sheet.appendChild(toggleRow);
-  }
 
   if (this.selectedBundle?.pricing?.enabled) {
     const discountBlock = document.createElement('div');
     discountBlock.className = 'side-panel-discount-message';
+    if (discountBadgeLabel) {
+      const discountBadge = document.createElement('span');
+      discountBadge.className = 'fpb-summary-discount-badge';
+      discountBadge.textContent = discountBadgeLabel;
+      discountBlock.appendChild(discountBadge);
+    }
     if (this.config.showDiscountMessaging) {
       const variables = TemplateManager.createDiscountVariables(
         this.selectedBundle,
@@ -204,7 +242,10 @@ _populateCompactMobileSummaryTray(sheet) {
           progressTemplate,
           variables
         );
-      } else if (combinedDiscountInfo.hasDiscount) {
+      } else if (
+        combinedDiscountInfo.hasDiscount
+        || combinedDiscountInfo.qualifiesForDiscount
+      ) {
         const successTemplate = TemplateManager.getDiscountMessageTemplate({
           bundle: this.selectedBundle,
           totalQuantity,
@@ -251,25 +292,19 @@ _populateCompactMobileSummaryTray(sheet) {
   navSection.className = 'side-panel-nav';
   const isLastStep = this.currentStepIndex === (this.selectedBundle?.steps?.length || 1) - 1;
   const conditionlessMobile = this.bundleHasNoConditions();
-  const hasSelectionMobile = conditionlessMobile && this.getAllSelectedProductsData().filter(p => !p.isDefault).length > 0;
   const actionButton = this._createMobileSummaryActionButton({
-    finalPrice: displayFinalPrice,
+      finalPrice,
     currencyInfo,
     conditionlessMobile,
-    hasSelectionMobile,
     isLastStep,
     isComplete: this.areBundleConditionsMet()
   });
   navSection.appendChild(actionButton);
-  if (usesAnimatedSummarySection || this.compactMobileSummaryTrayExpanded) {
-    const productsSection = document.createElement('div');
-    productsSection.className = 'fpb-mobile-summary-products-section';
-    productsSection.appendChild(this._renderCompactMobileSummaryBundleItems(currencyInfo, totalQuantity));
-    productsSection.appendChild(navSection);
-    sheet.appendChild(productsSection);
-  } else {
-    sheet.appendChild(navSection);
-  }
+  const productsSection = document.createElement('div');
+  productsSection.className = 'fpb-mobile-summary-products-section';
+  productsSection.appendChild(this._renderCompactMobileSummaryBundleItems(currencyInfo, totalQuantity));
+  productsSection.appendChild(navSection);
+  sheet.appendChild(productsSection);
 },
 
 _syncMobileAdditionalOffersPulse(pulseState = {}) {
@@ -295,11 +330,16 @@ _syncMobileAdditionalOffersPulse(pulseState = {}) {
       || '';
     const quantity = badge.dataset?.summaryQuantity
       || badge.getAttribute?.('data-summary-quantity')
-      || badge.textContent
       || '';
     badge.classList.toggle('fpb-mobile-summary-count-badge--additional-offers', active);
     badge.classList.toggle('fpb-mobile-summary-count-badge--additional-offers-message', showMessage);
-    badge.textContent = showMessage && message ? message : quantity;
+    const valueElement = badge.querySelector?.('[data-mobile-summary-toggle-value]');
+    const nextValue = showMessage && message ? message : quantity;
+    if (valueElement) {
+      valueElement.textContent = nextValue;
+    } else {
+      badge.textContent = nextValue;
+    }
   };
 
   const clearTimers = () => {
@@ -367,8 +407,51 @@ _syncMobileAdditionalOffersPulse(pulseState = {}) {
 
 _toggleCompactMobileSummaryTray(sheet) {
   const nextExpanded = !this.compactMobileSummaryTrayExpanded;
+  const productsSection = sheet.querySelector?.('.fpb-mobile-summary-products-section');
+  const startTrayHeight = sheet.getBoundingClientRect?.().height;
+  const startHeight = productsSection?.getBoundingClientRect?.().height;
+  this.compactMobileSummaryTrayAnimation?.cancel?.();
+  this.compactMobileSummaryContentAnimation?.cancel?.();
   this.compactMobileSummaryTrayExpanded = nextExpanded;
-  this._populateCompactMobileSummaryTray(sheet);
+  sheet.classList.toggle('fpb-mobile-summary-tray-expanded', nextExpanded);
+  sheet.querySelector?.('.fpb-mobile-summary-count-badge')
+    ?.setAttribute('aria-expanded', nextExpanded ? 'true' : 'false');
+  const endTrayHeight = sheet.getBoundingClientRect?.().height;
+  const endHeight = productsSection?.getBoundingClientRect?.().height;
+  if (
+    sheet.animate
+    && Number.isFinite(startTrayHeight)
+    && Number.isFinite(endTrayHeight)
+    && startTrayHeight !== endTrayHeight
+  ) {
+    this.compactMobileSummaryTrayAnimation = sheet.animate(
+      [
+        { height: `${startTrayHeight}px` },
+        { height: `${endTrayHeight}px` },
+      ],
+      {
+        duration: MOBILE_SUMMARY_TRAY_TRANSITION_MS,
+        easing: 'ease',
+      }
+    );
+  }
+  if (
+    productsSection?.animate
+    && Number.isFinite(startHeight)
+    && Number.isFinite(endHeight)
+    && startHeight !== endHeight
+  ) {
+    this.compactMobileSummaryContentAnimation = productsSection.animate(
+      [
+        { height: `${startHeight}px` },
+        { height: `${endHeight}px` },
+      ],
+      {
+        duration: MOBILE_SUMMARY_TRAY_TRANSITION_MS,
+        easing: 'ease',
+      }
+    );
+  }
   this._syncCompactMobileSummaryScrollLock();
 
   sheet.classList.remove(
@@ -389,7 +472,7 @@ _toggleCompactMobileSummaryTray(sheet) {
       'fpb-mobile-summary-tray-animating-open',
       'fpb-mobile-summary-tray-animating-closed'
     );
-  }, MOBILE_SUMMARY_TRAY_ANIMATION_MS);
+  }, MOBILE_SUMMARY_TOGGLE_ANIMATION_MS);
 },
 
 _syncCompactMobileSummaryScrollLock() {
@@ -437,13 +520,11 @@ _renderCompactMobileSummaryBundleItems(currencyInfo, totalQuantity) {
   }
   bundleItems.appendChild(header);
 
-  if (this.getFullPageDesignPreset() === 'CLASSIC') {
-    const selectedBoxSelectionQuantity = this.getSelectedBoxSelectionQuantity();
-    const boxSelection = this.renderBoxSelectionOptions(selectedBoxSelectionQuantity);
-    if (boxSelection) {
-      boxSelection.classList.add('fpb-mobile-summary-box-selection');
-      bundleItems.appendChild(boxSelection);
-    }
+  const selectedBoxSelectionQuantity = this.getSelectedBoxSelectionQuantity();
+  const boxSelection = this.renderBoxSelectionOptions(selectedBoxSelectionQuantity);
+  if (boxSelection) {
+    boxSelection.classList.add('fpb-mobile-summary-box-selection');
+    bundleItems.appendChild(boxSelection);
   }
 
   const productsList = document.createElement('div');
@@ -510,7 +591,22 @@ _renderCompactMobileSummaryBundleItems(currencyInfo, totalQuantity) {
     productsList.appendChild(row);
   });
 
+  const remainingSummarySkeletonCount = getRemainingSummarySkeletonCount({
+    designPreset: this.getFullPageDesignPreset(),
+    productSlotsEnabled: this._shouldRenderProductSlots(),
+    requiredQuantity: typeof this.getSummarySidebarMaxItemCount === 'function'
+      ? this.getSummarySidebarMaxItemCount()
+      : 0,
+    selectedQuantity: totalQuantity,
+  });
+
   if (
+    remainingSummarySkeletonCount > 0
+    && typeof this._renderSidebarProductSkeletons === 'function'
+  ) {
+    productsList.classList.add('fpb-mobile-summary-products-list--skeletons');
+    this._renderSidebarProductSkeletons(productsList, remainingSummarySkeletonCount);
+  } else if (
     allSelectedProducts.length === 0
     && !this._shouldRenderProductSlots()
     && typeof this._renderSidebarProductSkeletons === 'function'
@@ -520,8 +616,8 @@ _renderCompactMobileSummaryBundleItems(currencyInfo, totalQuantity) {
   }
 
   const requiredSlots = Math.max(
-    allSelectedProducts.length + 1,
-    activeStep?.maxQuantity || activeStep?.minQuantity || totalQuantity + 1,
+    allSelectedProducts.length,
+    totalQuantity,
     2
   );
   if (this._shouldRenderProductSlots()) {
@@ -551,14 +647,14 @@ _renderCompactMobileSummaryBundleItems(currencyInfo, totalQuantity) {
 },
 
 _renderCompactMobileSummarySlotTiles(container, allSelectedProducts = [], activeStep = null, totalQuantity = 0) {
-  const selectedItems = Array.isArray(allSelectedProducts) ? allSelectedProducts : [];
+  const selectedItems = expandSelectedItemsForSummarySlots(allSelectedProducts);
+  const selectedCount = selectedItems.length;
   const sharedTargetCount = typeof this.getSummarySidebarMaxItemCount === 'function'
-    ? this.getSummarySidebarMaxItemCount(selectedItems.length)
+    ? this.getSummarySidebarMaxItemCount(selectedCount)
     : 0;
   const slotCount = Math.max(
     sharedTargetCount,
-    selectedItems.length + 1,
-    activeStep?.maxQuantity || activeStep?.minQuantity || totalQuantity + 1,
+    selectedCount,
     2
   );
   const emptyStateIconUrl = this._escapeHTML(this.selectedBundle?.productSlotIconUrl || '');
@@ -590,7 +686,6 @@ _createMobileSummaryActionButton({
   finalPrice,
   currencyInfo,
   conditionlessMobile,
-  hasSelectionMobile,
   isLastStep,
   isComplete
 }) {
@@ -617,7 +712,7 @@ _createMobileSummaryActionButton({
   if (
     shouldAddToCart
     && !shouldKeepClassicValidationClickable
-    && (conditionlessMobile ? (!hasSelectionMobile || !this.canCheckoutWithBoxSelection()) : (!isComplete || !this.canCheckoutWithBoxSelection()))
+    && (conditionlessMobile ? !this.canCheckoutWithBoxSelection() : (!isComplete || !this.canCheckoutWithBoxSelection()))
   ) ctaBtn.disabled = true;
   ctaBtn.addEventListener('click', async () => {
     if (shouldAddToCart) {
@@ -727,7 +822,7 @@ createStandardSidebarSelectedRow(item, currencyInfo) {
   const wrapper = document.createElement('div');
 
   wrapper.innerHTML = renderSelectedProductRow({
-    id: item.variantId || item.productId || item.id,
+    id: getSelectionId(item),
     title: summaryTitle,
     variantTitle: variantInfo,
     imageUrl: this._getSelectedProductImageSrc(item),

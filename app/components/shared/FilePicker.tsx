@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useId, useRef, useState, type ChangeEvent, type MouseEvent } from "react";
-import { Banner, BlockStack, Text } from "@shopify/polaris";
 import {
   useLazyGetUploadStoreFileStatusQuery,
   useLazyListStoreFilesQuery,
@@ -314,7 +313,7 @@ export function FilePicker({
   const triggerIsUploading = uploadFromTrigger && isBlocked;
 
   return (
-    <BlockStack gap="200">
+    <s-stack direction="block" gap="small">
       {!autoOpen && (
         <FilePickerTrigger
           value={value}
@@ -335,14 +334,14 @@ export function FilePicker({
       )}
 
       {!open && sizeError && (
-        <Text as="p" variant="bodySm" tone="critical">
+        <s-text tone="critical">
           {sizeError}
-        </Text>
+        </s-text>
       )}
       {!open && uploadStatus === "error" && uploadError && (
-        <Banner title="Upload failed" tone="critical">
-          <p>{uploadError}</p>
-        </Banner>
+        <s-banner heading="Upload failed" tone="critical">
+          <s-paragraph>{uploadError}</s-paragraph>
+        </s-banner>
       )}
 
       <input
@@ -377,6 +376,6 @@ export function FilePicker({
         handleLoadMore={handleLoadMore}
         handleSelect={handleSelect}
       />
-    </BlockStack>
+    </s-stack>
   );
 }

@@ -26,9 +26,8 @@ function validateStep(stepId, state, ConditionValidator) {
   }
 
   var condVal = Number(step.conditionValue);
-  if (!Number.isFinite(condVal) || condVal < 1) {
-    condVal = 1;
-  }
+  if (!Number.isFinite(condVal) || condVal < 0) condVal = 0;
+  if (condVal === 0) return { valid: true };
   var op = step.conditionOperator || 'equal_to';
   var opLabels = {
     'equal_to': 'exactly ' + condVal,

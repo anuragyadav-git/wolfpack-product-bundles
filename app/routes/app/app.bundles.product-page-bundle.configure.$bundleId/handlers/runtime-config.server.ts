@@ -73,8 +73,12 @@ export function buildBundleBaseConfig(
     pageTitle: step.pageTitle ?? null,
     multiLangData: step.multiLangData ?? {},
     stepImage: step.stepImage ?? null,
-    minQuantity: parseInt(step.minQuantity) || 1,
-    maxQuantity: parseInt(step.maxQuantity) || 1,
+    minQuantity: Number.isFinite(Number.parseInt(step.minQuantity, 10))
+      ? Number.parseInt(step.minQuantity, 10)
+      : 0,
+    maxQuantity: Number.isFinite(Number.parseInt(step.maxQuantity, 10))
+      ? Number.parseInt(step.maxQuantity, 10)
+      : null,
     enabled: step.enabled !== false,
     conditionType: stepConditionsData[step.id]?.[0]?.type || null,
     conditionOperator: stepConditionsData[step.id]?.[0]?.operator || null,
@@ -333,8 +337,8 @@ function buildSyncOptimizedSteps(steps: any[]): Array<Record<string, unknown>> {
       name: step.name,
       position: step.position,
       stepImage: step.timelineIconUrl ?? null,
-      minQuantity: step.minQuantity || 1,
-      maxQuantity: step.maxQuantity || 1,
+      minQuantity: Number.isFinite(Number(step.minQuantity)) ? Number(step.minQuantity) : 0,
+      maxQuantity: step.maxQuantity ?? null,
       enabled: step.enabled !== false,
       conditionType: step.conditionType,
       conditionOperator: step.conditionOperator,

@@ -253,7 +253,7 @@ export class BundleDataManager {
       compareAtPrice: sp.product?.compareAtPrice || null,
       variants: sp.product?.variants || [],
       variantId: sp.variantId || null,
-      quantity: sp.quantity || 1
+      quantity: Number.isFinite(Number(sp.quantity)) ? Number(sp.quantity) : 0,
     }));
   }
 

@@ -15,7 +15,7 @@ describe("Full Page widget direct Add-ons contract", () => {
     expect(source).toContain("const addonProducts = personalizationData?.addonProducts;");
     expect(source).toContain("selectedAddonProducts");
     expect(source).toContain("displayVariantsAsIndividualProducts_addons");
-    expect(source).toContain("this.selectedBundle.steps = [...(this.selectedBundle.steps || []), addonStep];");
+    expect(source).toContain("this.selectedBundle.steps = [...this.selectedBundle.steps, addonStep];");
   });
 
   it("renders direct add-on eligibility messages with tier variables", () => {
@@ -117,8 +117,8 @@ describe("Full Page widget direct Add-ons contract", () => {
       { addonVariant: 1 },
     ];
     const stepProductData = [
-      [{ variantId: "paidVariant", price: 10000 }],
-      [{ variantId: "addonVariant", price: 6000 }],
+      [{ selectionId: "paidVariant", price: 10000 }],
+      [{ selectionId: "addonVariant", price: 6000 }],
     ];
 
     expect(PricingCalculator.calculateBundleTotal(

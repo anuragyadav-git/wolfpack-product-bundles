@@ -5,7 +5,10 @@ const { fullPageMobileSummaryMethods } = require('../../../app/assets/widgets/fu
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { PricingCalculator, ToastManager } = require('../../../app/assets/bundle-widget-components.js');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const { shouldUseMobileSummarySlotTiles } = require('../../../app/assets/widgets/full-page/methods/mobile-summary-methods.js');
+const {
+  shouldUseFluidMobileSummaryFooter,
+  shouldUseMobileSummarySlotTiles,
+} = require('../../../app/assets/widgets/full-page/methods/mobile-summary-methods.js');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { shouldUseSharedDesktopSummarySlotTiles } = require('../../../app/assets/widgets/full-page/methods/side-panel-methods.js');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -17,7 +20,9 @@ const { shouldCategoryTabActivateProducts } = require('../../../app/assets/widge
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const {
   fullPageProductProcessingMethods,
+  filterFullPageProductsByInvalidDefaultVariants,
   normalizeFullPageDirectDefaultProduct,
+  reconcileFullPageDirectDefaultProducts,
 } = require('../../../app/assets/widgets/full-page/methods/product-processing-methods.js');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const {
@@ -26,6 +31,7 @@ const {
 } = require('../../../app/assets/widgets/full-page/methods/selection-navigation-methods.js');
 
 class FakeElement {
+  tagName = '';
   className = '';
   disabled = false;
   innerHTML = '';
@@ -103,6 +109,25 @@ class FakeElement {
   }
 }
 
+function locateFakeElementByClass(root: FakeElement, className: string): FakeElement | null {
+  if (root.classList.contains(className)) return root;
+  for (const child of root.getChildren()) {
+    const match = locateFakeElementByClass(child, className);
+    if (match) return match;
+  }
+  return null;
+}
+
+function locateInteractiveElements(root: FakeElement): FakeElement[] {
+  const matches = root.tagName === 'BUTTON' || root.attributes.role === 'button'
+    ? [root]
+    : [];
+  return [
+    ...matches,
+    ...root.getChildren().flatMap((child) => locateInteractiveElements(child)),
+  ];
+}
+
 const originalDocument = global.document;
 
 beforeEach(() => {
@@ -117,7 +142,11 @@ beforeEach(() => {
     shopMoneyFormat,
   };
   global.document = {
-    createElement: () => new FakeElement(),
+    createElement: (tagName: string) => {
+      const element = new FakeElement();
+      element.tagName = tagName.toUpperCase();
+      return element;
+    },
   } as unknown as Document;
 });
 
@@ -248,7 +277,7 @@ describe('FPB Standard mobile summary action', () => {
     expect(renderProgress).not.toHaveBeenCalled();
   });
 
-  it('uses the raw Classic total in compact mobile fixed bundle price action display', () => {
+  it('uses the qualified Classic fixed bundle price in compact mobile action display', () => {
     const sheet = new FakeElement();
     const context = {
       ...createContext(),
@@ -307,7 +336,75 @@ describe('FPB Standard mobile summary action', () => {
     }
 
     expect(sheet.textContent).toContain('Add To Cart');
-    expect(sheet.textContent).not.toContain('$5.00');
+    expect(sheet.textContent).toContain('$5.00');
+  });
+
+  it('renders qualified BOGO success copy when pricing qualifies without hasDiscount', () => {
+    const sheet = new FakeElement();
+    const context = {
+      ...createContext(),
+      selectedProducts: [{}, {}, {}],
+      stepProductData: [[]],
+      selectedBundle: {
+        bundleDesignPresetId: 'HORIZONTAL',
+        steps: [{ id: 'step-1', enabled: true }],
+        pricing: {
+          enabled: true,
+          method: 'buy_x_get_y',
+          rules: [{
+            id: 'rule-1',
+            conditionType: 'quantity',
+            conditionOperator: 'gte',
+            conditionValue: 3,
+            discountValue: 100,
+          }],
+          messages: {
+            ruleMessages: {
+              'rule-1': {
+                successMessage: 'Success! You got 1 product(s) at 100% off',
+              },
+            },
+          },
+        },
+      },
+      config: {
+        showDiscountMessaging: true,
+        showDiscountProgressBar: false,
+      },
+      compactMobileSummaryTrayExpanded: false,
+      currentStepIndex: 0,
+      getDiscountInfoWithSelectedAddonDiscount: (discountInfo: unknown) => discountInfo,
+      getAllSelectedProductsData: () => [{}, {}, {}],
+      _shouldRenderProductSlots: () => false,
+      _syncCompactMobileSummaryScrollLock: jest.fn(),
+      _renderDiscountProgress: jest.fn(),
+      _createMobileSummaryActionButton: fullPageMobileSummaryMethods._createMobileSummaryActionButton,
+      bundleHasNoConditions: () => false,
+      getFullPageDesignPreset: () => 'HORIZONTAL',
+    };
+    const totalSpy = jest.spyOn(PricingCalculator, 'calculateBundleTotal').mockReturnValue({
+      totalPrice: 177700,
+      totalQuantity: 3,
+      unitPrices: [82900, 61900, 32900],
+    });
+    const discountSpy = jest.spyOn(PricingCalculator, 'calculateDiscount').mockReturnValue({
+      hasDiscount: false,
+      finalPrice: 144800,
+      discountAmount: 32900,
+      discountPercentage: 19,
+      qualifiesForDiscount: true,
+      applicableRule: context.selectedBundle.pricing.rules[0],
+    });
+
+    try {
+      fullPageMobileSummaryMethods._populateCompactMobileSummaryTray.call(context, sheet);
+    } finally {
+      totalSpy.mockRestore();
+      discountSpy.mockRestore();
+    }
+
+    expect(locateFakeElementByClass(sheet, 'fpb-mobile-summary-discount-text')?.innerHTML)
+      .toContain('Success! You got 1 product(s) at 100% off');
   });
 
   it('keeps the final-step action as add to cart even when conditions are not complete', () => {
@@ -440,9 +537,42 @@ describe('FPB Standard mobile summary action', () => {
   });
 
   it('allows the compact mobile summary tray to expand with no selected products', () => {
+    let expanded = false;
+    const productsSectionAnimation = {
+      cancel: jest.fn(),
+    };
+    const trayAnimation = {
+      cancel: jest.fn(),
+    };
+    const productsSection = {
+      animate: jest.fn(() => productsSectionAnimation),
+      getBoundingClientRect: jest.fn(() => ({
+        height: expanded ? 200 : 58,
+      })),
+    };
     const classList = {
       add: jest.fn(),
       remove: jest.fn(),
+      toggle: jest.fn((className: string, force?: boolean) => {
+        if (className === 'fpb-mobile-summary-tray-expanded') {
+          expanded = force === true;
+        }
+      }),
+    };
+    const countBadge = {
+      setAttribute: jest.fn(),
+    };
+    const tray = {
+      animate: jest.fn(() => trayAnimation),
+      classList,
+      getBoundingClientRect: jest.fn(() => ({
+        height: expanded ? 259 : 117,
+      })),
+      querySelector: jest.fn((selector: string) => (
+        selector === '.fpb-mobile-summary-products-section'
+          ? productsSection
+          : countBadge
+      )),
     };
     const context = {
       compactMobileSummaryTrayExpanded: false,
@@ -454,12 +584,40 @@ describe('FPB Standard mobile summary action', () => {
 
     fullPageMobileSummaryMethods._toggleCompactMobileSummaryTray.call(
       context,
-      { classList },
+      tray,
     );
 
     expect(context.compactMobileSummaryTrayExpanded).toBe(true);
-    expect(context._populateCompactMobileSummaryTray).toHaveBeenCalledTimes(1);
-    expect(classList.add).toHaveBeenCalledWith('fpb-mobile-summary-tray-animating-open');
+    expect(context._populateCompactMobileSummaryTray).not.toHaveBeenCalled();
+    expect(countBadge.setAttribute).toHaveBeenCalledWith('aria-expanded', 'true');
+    expect(productsSection.animate).toHaveBeenCalledWith(
+      [{ height: '58px' }, { height: '200px' }],
+      { duration: 700, easing: 'ease' },
+    );
+    expect(tray.animate).toHaveBeenCalledWith(
+      [{ height: '117px' }, { height: '259px' }],
+      { duration: 700, easing: 'ease' },
+    );
+
+    fullPageMobileSummaryMethods._toggleCompactMobileSummaryTray.call(
+      context,
+      tray,
+    );
+
+    expect(context.compactMobileSummaryTrayExpanded).toBe(false);
+    expect(context._populateCompactMobileSummaryTray).not.toHaveBeenCalled();
+    expect(countBadge.setAttribute).toHaveBeenLastCalledWith('aria-expanded', 'false');
+    expect(context.compactMobileSummaryTrayAnimationTimeout).not.toBeNull();
+    expect(productsSectionAnimation.cancel).toHaveBeenCalledTimes(1);
+    expect(trayAnimation.cancel).toHaveBeenCalledTimes(1);
+    expect(productsSection.animate).toHaveBeenLastCalledWith(
+      [{ height: '200px' }, { height: '58px' }],
+      { duration: 700, easing: 'ease' },
+    );
+    expect(tray.animate).toHaveBeenLastCalledWith(
+      [{ height: '259px' }, { height: '117px' }],
+      { duration: 700, easing: 'ease' },
+    );
   });
 
   it('does not lock page scroll when Standard or Classic mobile summary trays expand', () => {
@@ -484,7 +642,7 @@ describe('FPB Standard mobile summary action', () => {
     expect(classList.toggle).toHaveBeenCalledTimes(2);
   });
 
-  it('lets the Classic compact summary count toggle use the same interaction path as Standard', async () => {
+  it('renders one Classic compact-summary toggle using the shared interaction path', async () => {
     const sheet = new FakeElement();
     const toggleTray = jest.fn();
     const context = {
@@ -511,8 +669,12 @@ describe('FPB Standard mobile summary action', () => {
     };
 
     fullPageMobileSummaryMethods._populateCompactMobileSummaryTray.call(context, sheet);
-    await sheet.getChildren()[0].click();
+    const summaryToggles = locateInteractiveElements(sheet)
+      .filter((element) => element.attributes['aria-expanded'] !== undefined);
+    await summaryToggles[0].click();
 
+    expect(summaryToggles).toHaveLength(1);
+    expect(summaryToggles[0].tagName).toBe('BUTTON');
     expect(toggleTray).toHaveBeenCalledWith(sheet);
   });
 
@@ -609,6 +771,11 @@ describe('FPB Standard mobile summary action', () => {
       productSlotsEnabled: true,
     })).toBe(true);
 
+    expect(shouldUseFluidMobileSummaryFooter('COMPACT')).toBe(true);
+    expect(shouldUseFluidMobileSummaryFooter('HORIZONTAL')).toBe(true);
+    expect(shouldUseFluidMobileSummaryFooter('STANDARD')).toBe(false);
+    expect(shouldUseFluidMobileSummaryFooter('CLASSIC')).toBe(false);
+
     expect(shouldUseSharedDesktopSummarySlotTiles({
       designPreset: 'CLASSIC',
       productSlotsEnabled: true,
@@ -664,11 +831,9 @@ describe('FPB Standard mobile summary action', () => {
       handle: '14k-dangling-obsidian-earrings',
       images: [{ originalSrc: 'https://cdn.shopify.com/default.jpg' }],
       graphqlId: 'gid://shopify/Product/9506413773059',
-      productId: '9506413773059',
       requiredQuantity: 1,
       variants: [{
         variantGraphqlId: 'gid://shopify/ProductVariant/48720141091075',
-        variantId: '48720141091075',
         price: '829.00',
         inventoryQuantity: 0,
       }],
@@ -689,10 +854,8 @@ describe('FPB Standard mobile summary action', () => {
     const product = normalizeFullPageDirectDefaultProduct({
       title: 'Inventory Unknown Earrings',
       graphqlId: 'gid://shopify/Product/9506413773059',
-      productId: '9506413773059',
       variants: [{
         variantGraphqlId: 'gid://shopify/ProductVariant/48720141091075',
-        variantId: '48720141091075',
         price: '829.00',
       }],
     });
@@ -704,9 +867,52 @@ describe('FPB Standard mobile summary action', () => {
     }));
   });
 
+  it('drops direct defaults that are absent from Storefront API hydration', () => {
+    const directDefault = normalizeFullPageDirectDefaultProduct({
+      title: 'Draft Earrings',
+      graphqlId: 'gid://shopify/Product/9506413773059',
+      requiredQuantity: 1,
+      variants: [{
+        variantGraphqlId: 'gid://shopify/ProductVariant/48720141091075',
+        price: '829.00',
+      }],
+    });
+
+    expect(reconcileFullPageDirectDefaultProducts([directDefault], [{
+      id: '9506413773060',
+      selectionId: '48720141091076',
+      variantId: '48720141091076',
+      title: 'Published Earrings',
+      available: true,
+    }])).toEqual([]);
+  });
+
+  it('removes stale direct-default cards from cached step products', () => {
+    expect(filterFullPageProductsByInvalidDefaultVariants([{
+      selectionId: 'gid://shopify/Product/9506413773059',
+      title: 'Draft Earrings',
+      variants: [{
+        variantGraphqlId: 'gid://shopify/ProductVariant/48720141091075',
+      }],
+    }, {
+      selectionId: 'gid://shopify/Product/9506413773060',
+      title: 'Published Earrings',
+      variants: [{
+        variantGraphqlId: 'gid://shopify/ProductVariant/48720141091076',
+      }],
+    }], new Set(['48720141091075']))).toEqual([{
+      selectionId: 'gid://shopify/Product/9506413773060',
+      title: 'Published Earrings',
+      variants: [{
+        variantGraphqlId: 'gid://shopify/ProductVariant/48720141091076',
+      }],
+    }]);
+  });
+
   it('preserves direct default metadata on matching grid products', () => {
     const directDefault = {
       variantId: '48720141091075',
+      selectionId: '48720141091075',
       defaultRequiredQuantity: 1,
       isDirectDefaultProduct: true,
     };
@@ -720,6 +926,7 @@ describe('FPB Standard mobile summary action', () => {
       [{
         id: '9506413773059',
         variantId: '48720141091075',
+        selectionId: '48720141091075',
         title: '14k Dangling Obsidian Earrings',
       }],
     );

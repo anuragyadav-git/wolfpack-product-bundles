@@ -8,26 +8,6 @@
 
 import { AppLogger } from "./logger";
 import { checkAppEmbedEnabled } from "../services/theme/app-embed-check.server";
-import {
-  deployed_shopify_app_handles,
-  theme_app_extension_handle,
-} from "../config/shopify-app-handles.js";
-
-function getThemeAppEmbedHandles() {
-  const handles = [
-    theme_app_extension_handle,
-    process.env.SHOPIFY_APP_HANDLE,
-    ...deployed_shopify_app_handles,
-  ];
-
-  return Array.from(
-    new Set(
-      handles
-        .map((handle) => handle?.trim())
-        .filter((handle): handle is string => Boolean(handle)),
-    ),
-  );
-}
 
 const GET_BUNDLE_PRODUCT = `
   query GetBundleProduct($id: ID!) {
@@ -137,7 +117,6 @@ export async function fetchEmbedData(
   embedBlockHandle = "bundle-app-embed",
 ): Promise<{ appEmbedEnabled: boolean; themeEditorUrl: string | null }> {
   const embedCheck = await checkAppEmbedEnabled(admin, shop, {
-    appHandles: getThemeAppEmbedHandles(),
     blockHandles: [embedBlockHandle],
   });
 

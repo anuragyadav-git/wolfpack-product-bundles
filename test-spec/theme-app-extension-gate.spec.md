@@ -26,6 +26,9 @@ Match EB's configure-page app embed gate for FPB and PPB: show a persistent warn
 | 16 | Shopify serializes disabled state | `current.blocks` contains `disabled="true"` for `bundle-app-embed` | `appEmbedEnabled: false` | Treats serialized disabled states as disabled |
 | 17 | Theme file result contains extra nodes | Returned theme files include another file before `config/settings_data.json` | Parser ignores the other file and reads `config/settings_data.json` | Keeps the checker tied to the Shopify settings source |
 | 18 | Shopify theme settings file contains generated comments | `settings_data.json` starts with Shopify's generated block comment and then valid settings JSON | `appEmbedEnabled: true` when `bundle-app-embed` is active | Prevents false disabled state from treating commented Shopify theme JSON as malformed |
+| 19 | App Bridge reports active after the server reports the MAIN theme inactive | Server state is `false`; App Bridge status is active | Configure state resolves to `true` | Development-theme previews must not retain a false warning banner |
+| 20 | App Bridge status lookup fails | Current configure state is `true`; App Bridge result is unavailable | Configure state remains `true` | A transient client lookup failure must not overwrite known state |
+| 21 | App Bridge status is still loading | Client status is unresolved | Configure UI presents the embed as enabled until resolution | Prevents the disabled banner from flashing for an enabled development theme |
 
 ### PreviewGate
 | # | Scenario | Input | Expected Output | Notes |

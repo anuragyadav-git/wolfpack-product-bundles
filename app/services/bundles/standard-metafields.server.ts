@@ -24,6 +24,11 @@ type ConversionResult = {
   errors: MetafieldError[];
 };
 
+function normalizeStepMinQuantity(value: unknown): number {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
 /**
  * Convert bundle configuration to standard Shopify metafields
  * Returns { metafields, errors } where errors contains detailed information about failures
@@ -54,7 +59,7 @@ export async function convertBundleToStandardMetafields(
           const result = await getFirstVariantId(admin, stepProduct.productId);
           if (result.success && result.variantId) {
             componentReferences.push(result.variantId);
-            componentQuantities.push(step.minQuantity || 1);
+            componentQuantities.push(normalizeStepMinQuantity(step.minQuantity));
             successfulProducts++;
           } else {
             errors.push({
@@ -74,7 +79,7 @@ export async function convertBundleToStandardMetafields(
           const result = await getFirstVariantId(admin, product.id);
           if (result.success && result.variantId) {
             componentReferences.push(result.variantId);
-            componentQuantities.push(step.minQuantity || 1);
+            componentQuantities.push(normalizeStepMinQuantity(step.minQuantity));
             successfulProducts++;
           } else {
             errors.push({

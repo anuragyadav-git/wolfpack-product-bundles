@@ -23,6 +23,34 @@ import {
 } from '../../shared/engine/cart-lines.js';
 
 
+function getSummarySlotQuantity(item = {}) {
+  const quantity = Number(item?.quantity);
+  return Number.isFinite(quantity) ? Math.max(0, Math.floor(quantity)) : 0;
+}
+
+function expandSelectedItemsForSummarySlots(allSelectedProducts = []) {
+  const selectedProducts = Array.isArray(allSelectedProducts) ? allSelectedProducts : [];
+  const expanded = [];
+
+  selectedProducts.forEach((item) => {
+    const normalizedQuantity = getSummarySlotQuantity(item);
+    for (let index = 0; index < normalizedQuantity; index += 1) {
+      expanded.push({ ...item, quantity: 1 });
+    }
+  });
+
+  return expanded;
+}
+
+function getSelectionId(item = {}) {
+  return String(item?.selectionId || '');
+}
+
+export function canSwitchBoxSelectionRule(selectedQuantity, targetQuantity) {
+  return Number(selectedQuantity || 0) <= Number(targetQuantity || 0);
+}
+
+
 export const fullPageBoxSelectionSidebarMethods = {
 getSidebarTierCtaContent(nextRule) {
   const pricing = this.selectedBundle?.pricing;
@@ -172,6 +200,9 @@ renderBoxSelectionOptions(totalQuantity = 0) {
     }
 
     option.addEventListener('click', () => {
+      const selectedQuantity = this.getSelectedBoxSelectionQuantity();
+      if (!canSwitchBoxSelectionRule(selectedQuantity, rule.boxQuantity)) return;
+
       this.selectedBoxSelectionRuleId = rule.ruleId;
       this.reRenderFullPage();
     });
@@ -191,8 +222,7 @@ getClassicSidebarSlotCount(allSelectedProducts = [], activeStep = null) {
   );
 
   const activeBoxQuantity = Number(activeBoxRule?.boxQuantity || 0);
-  const stepQuantity = Number(activeStep?.maxQuantity || activeStep?.minQuantity || 0);
-  const selectedCount = Array.isArray(allSelectedProducts) ? allSelectedProducts.length : 0;
+  const selectedCount = expandSelectedItemsForSummarySlots(allSelectedProducts).length;
 
   if (activeBoxQuantity > 0) {
     return Math.max(activeBoxQuantity, selectedCount);
@@ -202,24 +232,25 @@ getClassicSidebarSlotCount(allSelectedProducts = [], activeStep = null) {
     return this.getSummarySidebarMaxItemCount(selectedCount);
   }
 
-  return Math.max(stepQuantity, selectedCount + 1, 2);
+  return Math.max(selectedCount, 2);
 },
 
 renderClassicSidebarSlots(allSelectedProducts = [], slotCount = 0) {
   const safeSlotCount = Math.max(0, Number(slotCount || 0));
+  const selectedSlotItems = expandSelectedItemsForSummarySlots(allSelectedProducts);
   const slotData = [];
 
   for (let slotIndex = 0; slotIndex < safeSlotCount; slotIndex += 1) {
-    const item = allSelectedProducts[slotIndex];
+    const item = selectedSlotItems[slotIndex];
 
     if (item) {
       const summaryTitle = this.getSummaryProductDisplayTitle(item);
-      const productId = item.variantId || item.productId || item.id;
+      const productId = getSelectionId(item);
       slotData.push({
         id: `classic-slot-${slotIndex}`,
         label: summaryTitle,
         product: {
-          id: productId,
+          selectionId: productId,
           title: summaryTitle,
           variantTitle: this.getSummaryProductVariantDisplay(item),
           imageUrl: this._getSelectedProductImageSrc(item) || BUNDLE_WIDGET.PLACEHOLDER_IMAGE,
@@ -249,20 +280,34 @@ renderClassicSidebarSlots(allSelectedProducts = [], slotCount = 0) {
     removeBtn.addEventListener('click', (event) => {
       event.stopPropagation();
       const productId = removeBtn.dataset.variantId;
-      const item = allSelectedProducts.find(selectedItem =>
-        String(selectedItem.variantId || selectedItem.productId || selectedItem.id) === String(productId)
-      );
-      if (!item || !productId) return;
+      const slotNode = typeof removeBtn.closest === 'function'
+        ? removeBtn.closest('[data-slot-id]')
+        : null;
+      const slotId = slotNode?.dataset?.slotId
+        || slotNode?.getAttribute?.('data-slot-id')
+        || null;
 
-      const summaryTitle = this.getSummaryProductDisplayTitle(item);
+      let product = slotId
+        ? slotData.find((item) => item.id === slotId)?.product
+        : undefined;
+      if (!product && productId) {
+        product = slotData.find((item) => item.product?.selectionId === productId)?.product;
+      }
+      if (!product || !product.selectionId) return;
+
+      const selectedQty = Number(this.selectedProducts?.[product.stepIndex]?.[product.selectionId] || 0);
+      const nextQuantity = Math.max(0, selectedQty - 1);
+      if (nextQuantity === selectedQty) return;
+
+      const summaryTitle = this.getSummaryProductDisplayTitle(product);
       const removedItem = {
-        stepIndex: item.stepIndex,
-        variantId: productId,
-        quantity: item.quantity,
-        title: summaryTitle,
+        stepIndex: product.stepIndex,
+        selectionId: product.selectionId,
+        quantity: selectedQty,
+        title: product.title || summaryTitle || 'Product',
       };
 
-      this.updateProductSelection(item.stepIndex, productId, 0);
+      this.updateProductSelection(product.stepIndex, product.selectionId, nextQuantity);
 
       const truncated = summaryTitle && summaryTitle.length > 25
         ? summaryTitle.substring(0, 25) + '...'
@@ -273,7 +318,7 @@ renderClassicSidebarSlots(allSelectedProducts = [], slotCount = 0) {
         () => {
           this.updateProductSelection(
             removedItem.stepIndex,
-            removedItem.variantId,
+            removedItem.selectionId,
             removedItem.quantity
           );
         },
@@ -355,7 +400,7 @@ _getStepSelectedQuantity(stepIndex) {
 },
 
 _getStepRequiredQuantity(step) {
-  if (!step) return 1;
+  if (!step) return 0;
 
   const toNumber = (value) => {
     const parsed = Number(value);
@@ -364,8 +409,6 @@ _getStepRequiredQuantity(step) {
 
   const primaryValue = toNumber(step.conditionValue);
   const secondaryValue = toNumber(step.conditionValue2);
-  const minQuantity = toNumber(step.minQuantity);
-  const maxQuantity = toNumber(step.maxQuantity);
   const OPERATORS = ConditionValidator.OPERATORS;
 
   const targetForOperator = (operator, value) => {
@@ -374,7 +417,7 @@ _getStepRequiredQuantity(step) {
       case OPERATORS.GREATER_THAN:
         return value + 1;
       case OPERATORS.LESS_THAN:
-        return Math.max(1, value - 1);
+        return Math.max(0, value - 1);
       case OPERATORS.LESS_THAN_OR_EQUAL_TO:
       case OPERATORS.EQUAL_TO:
       case OPERATORS.GREATER_THAN_OR_EQUAL_TO:
@@ -387,11 +430,9 @@ _getStepRequiredQuantity(step) {
   const targets = [
     targetForOperator(step.conditionOperator, primaryValue),
     targetForOperator(step.conditionOperator2, secondaryValue),
-    minQuantity,
-    maxQuantity,
   ].filter((value) => value != null && value > 0);
 
-  return targets.length > 0 ? Math.max(...targets) : 1;
+  return targets.length > 0 ? Math.max(...targets) : 0;
 },
 
 _getStepProgressRatio(stepIndex) {
@@ -400,6 +441,7 @@ _getStepProgressRatio(stepIndex) {
   if (this.isStepCompleted(stepIndex)) return 1;
 
   const requiredQuantity = this._getStepRequiredQuantity(step);
+  if (!Number.isFinite(requiredQuantity) || requiredQuantity <= 0) return 0;
   const selectedQuantity = this._getStepSelectedQuantity(stepIndex);
   return Math.max(0, Math.min(1, selectedQuantity / requiredQuantity));
 },

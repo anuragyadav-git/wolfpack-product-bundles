@@ -42,6 +42,13 @@ describe('validateStep', () => {
     expect(result.message).toBeTruthy();
   });
 
+  it('allows an empty step when its required quantity is 0', () => {
+    const steps = [makeStep('step_1', 'equal_to', 0)];
+    const state = makeState(steps, { step_1: {} });
+    const result = validateStep('step_1', state, ConditionValidator);
+    expect(result.valid).toBe(true);
+  });
+
   it('returns error for unknown stepId', () => {
     const steps = [makeStep('step_1', 'equal_to', 1)];
     const state = makeState(steps, {});

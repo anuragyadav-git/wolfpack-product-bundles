@@ -3,13 +3,16 @@ import { AppLogger } from "../../../lib/logger";
 import { navigateBackOrFallback } from "../../../lib/navigation";
 import productPageBundleStyles from "../../../styles/routes/product-page-bundle-configure.module.css";
 import { markBundlePreviewComplete } from "../../../lib/bundle-preview-readiness";
-import { verifyAppEmbedEnabledBeforePreview } from "../../../lib/app-embed-status-check.client";
 import { pickPpbPreviewUrl } from "../../../lib/ppb-preview-url";
 import { prepareStorefrontPreviewForOpen } from "../../../lib/storefront-sync-preview.client";
 import { validatePpbWidgetPlacementBeforePreview } from "../../../lib/ppb-widget-placement.client";
 import { openThemeEditorInNewTab } from "../../../lib/theme-editor-navigation.client";
+import { blockUnsavedAdminNavigation } from "../../../lib/admin-unsaved-navigation";
 import type { BundleReadinessItem } from "../../../components/bundle-configure/BundleReadinessOverlay";
-import type { TourStep } from "../../../components/bundle-configure/tourSteps";
+import {
+  getGuidedTourTransition,
+  type TourStep,
+} from "../../../components/bundle-configure/tourSteps";
 
 function recordBundlePreview(bundleLink: string) {
   const formData = new FormData();
@@ -46,18 +49,6 @@ export function usePpbPreviewReadinessHandlers({
       );
       return false;
     }
-    const appEmbedEnabled = await verifyAppEmbedEnabledBeforePreview(
-      base.appEmbedEnabled,
-      base.checkAppEmbedStatusBeforePreview,
-      {
-        onValidationStart: () => setIsPreviewBundleLoading(true),
-        onValidationBlocked: () => setIsPreviewBundleLoading(false),
-      },
-    );
-    if (!appEmbedEnabled) {
-      base.triggerAppEmbedBannerFeedback();
-      return false;
-    }
     setIsPreviewBundleLoading(true);
     try {
       await prepareStorefrontPreviewForOpen();
@@ -65,7 +56,7 @@ export function usePpbPreviewReadinessHandlers({
         (base.bundle as any).status ?? "",
       ).toLowerCase();
       let productUrl = pickPpbPreviewUrl({
-        appEmbedEnabled: base.appEmbedEnabled,
+        appEmbedEnabled: true,
         bundleStatus: bundleStatusForPreview,
         productHandle: base.bundle.shopifyProductHandle,
         bundleProduct: base.bundleProduct,
@@ -244,12 +235,12 @@ export function usePpbPreviewReadinessHandlers({
         : productPageBundleStyles.readinessButtonLow;
   const handleSectionChange = useCallback(
     (section: string) => {
-      if (base.isDirty) {
-        base.shopify.toast.show(
-          "Please save or discard your changes before switching sections",
-          { isError: true, duration: 4000 },
-        );
-        void base.shopify.saveBar.leaveConfirmation();
+      if (
+        blockUnsavedAdminNavigation(
+          base.isDirty,
+          base.triggerSaveBarIrritation,
+        )
+      ) {
         return;
       }
       base.setActiveSection(section);
@@ -311,12 +302,12 @@ export function usePpbPreviewReadinessHandlers({
     [base],
   );
   const handleBackClick = useCallback(() => {
-    if (base.isDirty && !base.forceNavigation) {
-      base.shopify.toast.show(
-        "Save or discard your changes before moving to another section.",
-        { isError: true, duration: 5000 },
-      );
-      void base.shopify.saveBar.leaveConfirmation();
+    if (
+      blockUnsavedAdminNavigation(
+        base.isDirty && !base.forceNavigation,
+        base.triggerSaveBarIrritation,
+      )
+    ) {
       return;
     }
     navigateBackOrFallback(base.navigate, "/app/dashboard", { replaceFallback: true });
@@ -364,12 +355,11 @@ export function usePpbPreviewReadinessHandlers({
   );
   const handleGuidedTourStepChange = useCallback(
     (step: TourStep) => {
-      if (step.sectionId) {
-        base.setActiveSection(step.sectionId);
+      const transition = getGuidedTourTransition(step);
+      if (transition.sectionId) {
+        base.setActiveSection(transition.sectionId);
       }
-      templateState.setReadinessOpen(
-        step.targetSection === "fpb-readiness-score",
-      );
+      templateState.setReadinessOpen(transition.readinessOpen);
     },
     [base, templateState],
   );

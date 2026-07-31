@@ -80,10 +80,10 @@ export function getCascadeSelectedDrawerHeight({
 export function prepareCascadeSelectedProductDisplay({
   product = {},
   variantId = '',
-  quantity = 1,
+  quantity = 0,
   formatPrice = null,
 } = {}) {
-  const normalizedQuantity = Math.max(1, Number(quantity || 1));
+  const normalizedQuantity = Number.isFinite(Number(quantity)) ? Math.max(0, Number(quantity)) : 0;
   const title = product.title || product.parentTitle || '';
   const variantTitle = normalizeSelectedRowVariantTitle(product, title);
   const amount = Number(product.price);

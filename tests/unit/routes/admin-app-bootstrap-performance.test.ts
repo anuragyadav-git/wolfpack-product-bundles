@@ -29,19 +29,11 @@ jest.mock("../../../app/services/admin-locale.server", () => ({
   loadShopAdminLocale: jest.fn(),
 }));
 
-jest.mock("../../../app/i18n/polaris-locales.server", () => ({
-  getPolarisLocale: jest.fn(),
-}));
-
 jest.mock("@shopify/shopify-app-remix/server", () => ({
   boundary: {
     error: jest.fn(),
     headers: jest.fn(),
   },
-}));
-
-jest.mock("@shopify/shopify-app-remix/react", () => ({
-  AppProvider: ({ children }: { children: unknown }) => children,
 }));
 
 jest.mock("react-i18next", () => ({
@@ -62,14 +54,9 @@ jest.mock("../../../app/components/ErrorPage", () => ({
   ErrorPage: () => null,
 }));
 
-jest.mock("@shopify/polaris/build/esm/styles.css?url", () => "polaris.css", {
-  virtual: true,
-});
-
 const { authenticate } = require("../../../app/shopify.server");
 const { ensureShopHasExpiringOfflineSession } = require("../../../app/services/offline-token.server");
 const { loadShopAdminLocale } = require("../../../app/services/admin-locale.server");
-const { getPolarisLocale } = require("../../../app/i18n/polaris-locales.server");
 const { AppLogger } = require("../../../app/lib/logger");
 const prisma = require("../../../app/db.server").default;
 
@@ -93,9 +80,9 @@ describe("app layout loader bootstrap performance", () => {
   beforeEach(() => {
     authenticate.admin.mockResolvedValue({ session: mockSession });
     loadShopAdminLocale.mockResolvedValue("en");
-    getPolarisLocale.mockReturnValue({ locale: "en" });
     prisma.shop.findUnique.mockResolvedValue(null);
     ensureShopHasExpiringOfflineSession.mockReset();
+    ensureShopHasExpiringOfflineSession.mockResolvedValue(null);
     AppLogger.error.mockReset();
   });
 
@@ -155,5 +142,25 @@ describe("app layout loader bootstrap performance", () => {
       }),
       expect.any(Error),
     );
+  });
+
+  it("does not query first-create tour eligibility from the shared app loader", async () => {
+    const { loader } = await import("../../../app/routes/app/app");
+
+    const appResult = await loader({
+      request: new Request("https://test-app.example.com/app?embedded=1"),
+      params: {},
+      context: {},
+    } as any);
+    expect(prisma.shop.findUnique).not.toHaveBeenCalled();
+    expect(appResult).not.toHaveProperty("firstCreateTourEligible");
+
+    const dashboardResult = await loader({
+      request: new Request("https://test-app.example.com/app/dashboard"),
+      params: {},
+      context: {},
+    } as any);
+    expect(prisma.shop.findUnique).not.toHaveBeenCalled();
+    expect(dashboardResult).not.toHaveProperty("firstCreateTourEligible");
   });
 });

@@ -1,11 +1,11 @@
 /*!
  * Wolfpack Bundles SDK
- * Version : 5.0.202
- * Built   : 2026-07-22
+ * Version : 5.0.226
+ * Built   : 2026-07-31
  *
  * Verify live version: console.log(window.__WOLFPACK_BUNDLES_SDK_VERSION__)
  */
-window.__WOLFPACK_BUNDLES_SDK_VERSION__ = '5.0.202';
+window.__WOLFPACK_BUNDLES_SDK_VERSION__ = '5.0.226';
 (function (window) {
   'use strict';
 
@@ -195,11 +195,9 @@ const ConditionValidator = (function () {
     const ids = new Set();
     const products = Array.isArray(category && category.products) ? category.products : [];
     for (const product of products) {
-      const raw = product && (product.id || product.productId || product.graphqlId);
+      const raw = product && product.selectionId;
       if (raw == null || raw === '') continue;
-      // Strip GID prefix (e.g. "gid://shopify/Product/123" → "123") so that the
-      // Set matches numeric IDs used as widget selection keys.
-      const id = String(raw).replace(new RegExp('^gid://shopify/[^/]+/'), '');
+      const id = String(raw);
       if (id) ids.add(id);
     }
     return ids;
@@ -316,10 +314,9 @@ const ConditionValidator = (function () {
     // describe the retired rule and must not recreate it at navigation time.
     if (!step.conditionType) return true;
 
-    // An incomplete active condition keeps the existing minimum guard.
+    // No positive configured requirement means the step is optional.
     if (!step.conditionOperator || !_isPositiveConditionValue(step.conditionValue)) {
-      const min = step.minQuantity != null ? Number(step.minQuantity) : 1;
-      return total >= min;
+      return true;
     }
 
     // Primary condition
@@ -926,7 +923,7 @@ class BundleDataManager {
       compareAtPrice: sp.product?.compareAtPrice || null,
       variants: sp.product?.variants || [],
       variantId: sp.variantId || null,
-      quantity: sp.quantity || 1
+      quantity: Number.isFinite(Number(sp.quantity)) ? Number(sp.quantity) : 0,
     }));
   }
 
@@ -1047,8 +1044,7 @@ class PricingCalculator {
       const productsInStep = stepProductData[stepIndex] || [];
 
       Object.entries(stepSelections).forEach(([variantId, quantity]) => {
-        // First try direct match on variantId or id
-        let product = productsInStep.find(p => String(p.variantId || p.id) === String(variantId));
+        let product = productsInStep.find(p => String(p.selectionId || '') === String(variantId));
         let matchedVariant = null;
 
         // If not found, search within nested variants array of each product
@@ -1057,7 +1053,7 @@ class PricingCalculator {
         if (!product) {
           for (const p of productsInStep) {
             if (p.variants && Array.isArray(p.variants)) {
-              const variant = p.variants.find(v => String(v.id) === String(variantId));
+              const variant = p.variants.find(v => String(v.selectionId || '') === String(variantId));
               if (variant) {
                 product = p;
                 matchedVariant = variant;
@@ -1650,11 +1646,6 @@ class TemplateManager {
     });
 
     if (!rule) return fallbackTemplate || '';
-
-    if (messageType === 'success') {
-      const tierMessage = this.getRuleTierMessage(bundle, rule);
-      if (tierMessage) return tierMessage;
-    }
 
     const ruleId = rule?.id ? String(rule.id) : '';
     const ruleMessages = this.getRuleMessages(bundle, locale);
@@ -2280,6 +2271,300 @@ function hideLoadingOverlayElement(overlay, timeoutMs = DEFAULT_HIDE_TIMEOUT_MS)
     ? window.setTimeout.bind(window)
     : setTimeout;
   scheduler(finish, timeoutMs);
+}
+
+
+const CHECKOUT_INTEGRATION_PROVIDERS = [
+  {
+    id: 'native',
+    label: 'Shopify checkout',
+    callbackMode: 'native',
+    strategy: 'native_redirect',
+    requiresDiscountCode: false,
+    requiresCartRefresh: false,
+    timeoutMs: 0,
+    fallbackAction: 'checkout',
+  },
+  {
+    id: 'theme_cart_drawer',
+    label: 'Theme cart drawer',
+    callbackMode: 'side_cart',
+    strategy: 'shopify_standard_actions',
+    requiresDiscountCode: false,
+    requiresCartRefresh: true,
+    timeoutMs: 1500,
+    fallbackAction: 'cart',
+  },
+  {
+    id: 'gokwik',
+    label: 'GoKwik',
+    callbackMode: 'checkout_handoff',
+    strategy: 'third_party_checkout',
+    requiresDiscountCode: true,
+    requiresCartRefresh: false,
+    timeoutMs: 1500,
+    fallbackAction: 'checkout',
+  },
+  {
+    id: 'shopflo',
+    label: 'Shopflo',
+    callbackMode: 'checkout_handoff',
+    strategy: 'third_party_checkout',
+    requiresDiscountCode: true,
+    requiresCartRefresh: false,
+    timeoutMs: 1500,
+    fallbackAction: 'checkout',
+  },
+];
+
+const CHECKOUT_INTEGRATION_PROVIDER_IDS = CHECKOUT_INTEGRATION_PROVIDERS.map((provider) => provider.id);
+
+const CHECKOUT_INTEGRATION_PROVIDER_OPTIONS = CHECKOUT_INTEGRATION_PROVIDERS.map((provider) => provider.label);
+
+const CHECKOUT_INTEGRATION_PROVIDER_LABELS = Object.fromEntries(
+  CHECKOUT_INTEGRATION_PROVIDERS.map((provider) => [provider.id, provider.label]),
+);
+
+const PROVIDERS_BY_ID = new Map(
+  CHECKOUT_INTEGRATION_PROVIDERS.map((provider) => [provider.id, provider]),
+);
+
+const LABEL_TO_PROVIDER = new Map(
+  Object.entries(CHECKOUT_INTEGRATION_PROVIDER_LABELS).map(([id, label]) => [
+    String(label).toLowerCase(),
+    id,
+  ]),
+);
+
+
+
+
+function normalizeCheckoutIntegrationProvider(value) {
+  if (typeof value !== 'string') return 'native';
+  const normalized = value.trim().toLowerCase();
+  if (!normalized) return 'native';
+  if (CHECKOUT_INTEGRATION_PROVIDER_IDS.includes(normalized)) return normalized;
+  return LABEL_TO_PROVIDER.get(normalized) ?? 'native';
+}
+
+function getCheckoutIntegrationProvider(value) {
+  return PROVIDERS_BY_ID.get(normalizeCheckoutIntegrationProvider(value))
+    ?? CHECKOUT_INTEGRATION_PROVIDERS[0];
+}
+
+function isDiscountCodeCheckoutIntegrationProvider(value) {
+  return getCheckoutIntegrationProvider(value).requiresDiscountCode;
+}
+
+function isSupportedCheckoutIntegrationProvider(value) {
+  return isDiscountCodeCheckoutIntegrationProvider(value);
+}
+
+function getCapability(providerId, runtimeWindow, options = {}) {
+  const provider = getCheckoutIntegrationProvider(providerId);
+  const shopifyActions = runtimeWindow?.Shopify?.actions;
+
+  if (provider.id === 'native') {
+    return { available: true, capability: 'native_redirect', provider };
+  }
+
+  if (provider.id === 'theme_cart_drawer') {
+    if (
+      typeof shopifyActions?.updateCart === 'function'
+      && typeof shopifyActions?.openCart === 'function'
+    ) {
+      return { available: true, capability: 'shopify_standard_actions', provider };
+    }
+    return {
+      available: typeof options.openThemeCartDrawer === 'function',
+      capability: 'theme_cart_callback',
+      provider,
+    };
+  }
+
+  if (provider.id === 'gokwik') {
+    if (typeof runtimeWindow?.gokwikSdk?.initCheckout === 'function') {
+      return {
+        available: true,
+        capability: 'gokwik_sdk_callback',
+        provider,
+      };
+    }
+    return {
+      available: typeof options.openGokwikCheckout === 'function',
+      capability: 'gokwik_callback',
+      provider,
+    };
+  }
+
+  if (provider.id === 'shopflo') {
+    if (typeof runtimeWindow?.Shopflo?.openCheckout === 'function') {
+      return {
+        available: true,
+        capability: 'shopflo_sdk_callback',
+        provider,
+      };
+    }
+    return {
+      available: typeof options.openShopfloCheckout === 'function',
+      capability: 'shopflo_callback',
+      provider,
+    };
+  }
+
+  return { available: false, capability: 'unknown', provider };
+}
+
+function detectCheckoutIntegrationCapability(providerId, runtimeWindow, options = {}) {
+  return getCapability(providerId, runtimeWindow, options);
+}
+
+async function waitForCheckoutIntegrationCapability(
+  providerId,
+  runtimeWindow,
+  options = {},
+) {
+  const provider = getCheckoutIntegrationProvider(providerId);
+  const timeoutMs = options.timeoutMs ?? provider.timeoutMs;
+  const pollIntervalMs = options.pollIntervalMs ?? 50;
+  const startedAt = Date.now();
+  let capability = getCapability(provider.id, runtimeWindow, options);
+
+  while (!capability.available && Date.now() - startedAt < timeoutMs) {
+    await new Promise((resolve) => setTimeout(resolve, pollIntervalMs));
+    capability = getCapability(provider.id, runtimeWindow, options);
+  }
+
+  return capability.available
+    ? capability
+    : { ...capability, reason: 'capability-timeout' };
+}
+
+function claimCheckoutIntegrationInvocation(state, lifecycleKey) {
+  if (!state || typeof state.has !== 'function' || typeof state.add !== 'function') {
+    return false;
+  }
+  if (state.has(lifecycleKey)) return false;
+  state.add(lifecycleKey);
+  return true;
+}
+
+async function runProviderInvocation(provider, runtimeWindow, options, capability) {
+  if (provider.id === 'native') {
+    return true;
+  }
+
+  if (capability === 'shopify_standard_actions') {
+    const updateResult = await runtimeWindow.Shopify.actions.updateCart({});
+    if (updateResult?.userErrors?.length) {
+      return {
+        ok: false,
+        phase: 'cart-refresh',
+        reason: 'cart-update-rejected',
+      };
+    }
+    return runtimeWindow.Shopify.actions.openCart();
+  }
+  if (capability === 'theme_cart_callback') {
+    return options.openThemeCartDrawer();
+  }
+  if (capability === 'gokwik_sdk_callback') {
+    return runtimeWindow?.gokwikSdk?.initCheckout?.(options.checkoutUrl);
+  }
+  if (capability === 'gokwik_callback') {
+    return options.openGokwikCheckout();
+  }
+  if (capability === 'shopflo_sdk_callback') {
+    return runtimeWindow?.Shopflo?.openCheckout?.();
+  }
+  if (capability === 'shopflo_callback') {
+    return options.openShopfloCheckout();
+  }
+  return true;
+}
+
+function runProviderInvocationWithTimeout(invocationPromise, timeoutMs) {
+  if (timeoutMs <= 0) return invocationPromise;
+
+  return new Promise((resolve, reject) => {
+    const timeoutId = setTimeout(() => resolve({ timedOut: true }), timeoutMs);
+    invocationPromise.then(
+      (result) => {
+        clearTimeout(timeoutId);
+        resolve(result);
+      },
+      (error) => {
+        clearTimeout(timeoutId);
+        reject(error);
+      },
+    );
+  });
+}
+
+async function invokeCheckoutIntegrationProvider(
+  providerId,
+  runtimeWindow,
+  options = {},
+) {
+  const capability = getCapability(providerId, runtimeWindow, options);
+  const provider = capability.provider;
+
+  if (!capability.available) {
+    return {
+      ok: false,
+      phase: 'capability',
+      reason: 'capability-unavailable',
+      capability: capability.capability,
+      provider,
+    };
+  }
+
+  try {
+    const timeoutMs = options.timeoutMs ?? provider.timeoutMs;
+    const invocationPromise = runProviderInvocation(
+      provider,
+      runtimeWindow,
+      options,
+      capability.capability,
+    );
+    const invocationResult = await runProviderInvocationWithTimeout(invocationPromise, timeoutMs);
+
+    if (invocationResult?.timedOut) {
+      return {
+        ok: false,
+        phase: 'invoke',
+        reason: 'invocation-timeout',
+        capability: capability.capability,
+        provider,
+      };
+    }
+    if (invocationResult?.ok === false) {
+      return {
+        ...invocationResult,
+        capability: capability.capability,
+        provider,
+      };
+    }
+    if (invocationResult === false) {
+      return {
+        ok: false,
+        phase: 'invoke',
+        reason: 'invocation-blocked',
+        capability: capability.capability,
+        provider,
+      };
+    }
+
+    return { ok: true, capability: capability.capability, provider };
+  } catch {
+    return {
+      ok: false,
+      phase: 'invoke',
+      reason: 'callback-error',
+      capability: capability.capability,
+      provider,
+    };
+  }
 }
 
 
@@ -3419,9 +3704,8 @@ function validateStep(stepId, state, ConditionValidator) {
   }
 
   var condVal = Number(step.conditionValue);
-  if (!Number.isFinite(condVal) || condVal < 1) {
-    condVal = 1;
-  }
+  if (!Number.isFinite(condVal) || condVal < 0) condVal = 0;
+  if (condVal === 0) return { valid: true };
   var op = step.conditionOperator || 'equal_to';
   var opLabels = {
     'equal_to': 'exactly ' + condVal,

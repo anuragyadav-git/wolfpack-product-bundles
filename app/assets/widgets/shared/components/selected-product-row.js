@@ -12,10 +12,10 @@ const SELECTED_ROW_PLACEHOLDER_IMAGE = 'data:image/svg+xml,%3Csvg xmlns="http://
 export function renderSelectedProductRow(product = null, options = {}) {
   if (!product) return renderEmptyRow(options);
 
-  const selectionKey = product.variantId || product.id || product.productId || '';
+  const selectionKey = String(product.selectionId || '');
   const title = product.title || product.parentTitle || '';
   const variantTitle = product.variantTitle || product.variant || '';
-  const quantity = Math.max(1, Number(product.quantity || 1));
+  const quantity = Math.max(0, Number(product.quantity || 0));
   const quantityLabel = product.quantityLabel || options.quantityLabel || `x${quantity}`;
   const imageUrl = product.imageUrl || product.image?.src || SELECTED_ROW_PLACEHOLDER_IMAGE;
   const removable = product.isDefault !== true && product.isLocked !== true && options.removable !== false;

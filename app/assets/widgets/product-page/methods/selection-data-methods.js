@@ -39,14 +39,9 @@ findProductBySelectionKey(products, selectionKey) {
   const normalized = this.normalizeSelectionKey(selectionKey);
   if (!normalized) return null;
 
-  return products.find((product) => {
-    const ids = [product.variantId, product.id, product.productId];
-    if (Array.isArray(product.variants)) {
-      ids.push(...product.variants.map((variant) => variant.id));
-    }
-
-    return ids.some((id) => this.normalizeSelectionKey(id) === normalized);
-  }) || null;
+  return products.find((product) => (
+    String(product?.selectionId || '') === normalized
+  )) || null;
 },
 
 shouldApplyIndividualSellingPlanSelection() {
@@ -63,9 +58,11 @@ shouldApplyIndividualSellingPlanSelectionForProduct(product, variantId) {
     return true;
   }
 
-  const normalizedSelectedId = this.extractId(variantId) || String(variantId || "");
+  const normalizedSelectedId = this.normalizeSelectionKey(variantId);
   const variant = Array.isArray(product?.variants)
-    ? product.variants.find((candidate) => this.extractId(candidate.id) === normalizedSelectedId)
+    ? product.variants.find((candidate) => (
+      this.normalizeSelectionKey(candidate?.selectionId || '') === normalizedSelectedId
+    ))
     : null;
 
   const target = variant ?? product;
@@ -81,9 +78,11 @@ getSelectedSellingPlanAllocationId(product, variantId) {
     return null;
   }
 
-  const normalizedSelectedId = this.extractId(variantId) || String(variantId || '');
+  const normalizedSelectedId = this.normalizeSelectionKey(variantId);
   const variant = Array.isArray(product?.variants)
-    ? product.variants.find((candidate) => this.extractId(candidate.id) === normalizedSelectedId)
+    ? product.variants.find((candidate) => (
+      this.normalizeSelectionKey(candidate?.selectionId || '') === normalizedSelectedId
+    ))
     : null;
 
   const normalizedProduct = (variant?.sellingPlanAllocations !== undefined ? variant : product) || {};
@@ -127,10 +126,7 @@ getSelectedQuantity(stepIndex, variantId) {
     return Number(selectedProducts[normalized]) || 0;
   }
 
-  const alias = Object.entries(selectedProducts).find(([productId]) =>
-    this.normalizeSelectionKey(productId) === normalized
-  );
-  return alias ? Number(alias[1]) || 0 : 0;
+  return 0;
 },
 
 setSelectedQuantity(stepIndex, variantId, quantity) {
@@ -140,19 +136,8 @@ setSelectedQuantity(stepIndex, variantId, quantity) {
   const normalized = this.normalizeSelectionKey(variantId);
   if (!normalized) return;
 
-  Object.keys(selectedProducts).forEach((productId) => {
-    if (this.normalizeSelectionKey(productId) === normalized) {
-      delete selectedProducts[productId];
-    }
-  });
-
   this.selectedProductCategoryIndexes ||= [];
   this.selectedProductCategoryIndexes[stepIndex] ||= {};
-  Object.keys(this.selectedProductCategoryIndexes[stepIndex]).forEach((productId) => {
-    if (this.normalizeSelectionKey(productId) === normalized) {
-      delete this.selectedProductCategoryIndexes[stepIndex][productId];
-    }
-  });
 
   if (quantity > 0) {
     selectedProducts[normalized] = quantity;
@@ -237,9 +222,9 @@ getAddonTierEvaluation(step) {
 getAddonProductSelectionKeys(step) {
   const keys = new Set();
   const addKey = (value) => {
-    if (value === null || value === undefined || value === '') return;
-    const normalized = this.extractId(value) || value;
-    keys.add(String(normalized));
+    const selectionId = String(value?.selectionId || '');
+    if (!selectionId) return;
+    keys.add(selectionId);
   };
   const products = [
     ...(Array.isArray(step?.StepProduct) ? step.StepProduct : []),
@@ -248,19 +233,8 @@ getAddonProductSelectionKeys(step) {
   ];
 
   products.forEach(product => {
-    addKey(product.id);
-    addKey(product.productId);
-    addKey(product.graphqlId);
-    addKey(product.variantId);
-    addKey(product.variantGraphqlId);
-    addKey(product.title);
-    (Array.isArray(product.variants) ? product.variants : []).forEach(variant => {
-      addKey(variant.id);
-      addKey(variant.variantId);
-      addKey(variant.variantGraphqlId);
-      addKey(variant.admin_graphql_api_id);
-      addKey(variant.title);
-    });
+    addKey(product);
+    (Array.isArray(product.variants) ? product.variants : []).forEach(addKey);
   });
 
   return keys;
@@ -274,10 +248,7 @@ calculateSelectedAddonDiscountAmount() {
 
   return this.getAllSelectedProductsData().reduce((total, item) => {
     const isChargeableAddonItem = Number(item.stepIndex) === chargeableAddonStepIndex || (item.isFreeGift === true && item.addonDisplayFree !== true);
-    const isChargeableAddonProduct = chargeableAddonProductKeys.has(String(this.extractId(item.variantId) || item.variantId))
-      || chargeableAddonProductKeys.has(String(this.extractId(item.productId) || item.productId))
-      || chargeableAddonProductKeys.has(String(item.title || ''))
-      || chargeableAddonProductKeys.has(String(item.parentTitle || ''));
+    const isChargeableAddonProduct = chargeableAddonProductKeys.has(String(item.selectionId || ''));
     if (!isChargeableAddonItem && !isChargeableAddonProduct) return total;
     const step = steps[item.stepIndex];
     const addonDiscount = this.getAddonLineDiscount(step) || this.getAddonLineDiscount(chargeableAddonStep);
@@ -308,8 +279,8 @@ getDiscountInfoWithSelectedAddonDiscount(discountInfo, totalPrice) {
   };
 },
 
-getAllSelectedProductsData() {
-  const allProducts = [];
+  getAllSelectedProductsData() {
+    const allProducts = [];
 
   this.selectedBundle.steps.forEach((step, stepIndex) => {
     const stepSelections = this.selectedProducts[stepIndex] || {};
@@ -318,27 +289,17 @@ getAllSelectedProductsData() {
     Object.entries(stepSelections).forEach(([variantId, quantity]) => {
       if (quantity > 0) {
         const normalizedVariantId = this.normalizeSelectionKey(variantId);
-        let product = this.findProductBySelectionKey(productsInStep, normalizedVariantId);
-        if (!product && normalizedVariantId) {
-          product = this.findProductBySelectionKey(productsInStep, variantId);
+        const product = this.findProductBySelectionKey(productsInStep, normalizedVariantId);
+        if (!product) {
+          return;
         }
 
-        let matchedVariant = null;
-        if (!product) {
-          for (const p of productsInStep) {
-            if (p.variants && Array.isArray(p.variants)) {
-              const variant = p.variants.find(v =>
-                this.normalizeSelectionKey(v.id) === normalizedVariantId
-                || String(v.id) === String(variantId)
-              );
-              if (variant) {
-                product = p;
-                matchedVariant = variant;
-                break;
-              }
-            }
-          }
-        }
+        const matchedVariant = Array.isArray(product.variants)
+          ? product.variants.find((candidateVariant) => (
+              this.normalizeSelectionKey(candidateVariant?.selectionId || '')
+              === normalizedVariantId
+            ))
+          : null;
 
         if (product) {
           const variantData = matchedVariant || product;
@@ -356,6 +317,7 @@ getAllSelectedProductsData() {
           allProducts.push({
             stepIndex,
             variantId,
+            selectionId: String(variantId || ''),
             quantity,
             title: isVariantMatch
               ? (variantTitle ? `${product.title} - ${variantTitle}` : product.title)
@@ -404,7 +366,8 @@ expandProductsByVariant(products) {
             imageUrl,
             price: typeof variant.price === 'number' ? variant.price : (parseFloat(variant.price || '0') * 100),
             compareAtPrice: variant.compareAtPrice ? (typeof variant.compareAtPrice === 'number' ? variant.compareAtPrice : parseFloat(variant.compareAtPrice) * 100) : null,
-            variantId: variant.id,
+            variantId: variant.selectionId,
+            selectionId: variant.selectionId,
             available: variant.available !== false,
             parentProductId: product.id,
             parentTitle: product.title,

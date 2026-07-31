@@ -13,7 +13,7 @@ export type SettingsField = {
   key?: string;
   label: string;
   value?: string;
-  kind?: "color" | "text" | "number" | "select" | "radio" | "toggle" | "css" | "script" | "image" | "file" | "button" | "loadingSpinner";
+  kind?: "color" | "text" | "number" | "select" | "radio" | "toggle" | "css" | "script" | "secret" | "image" | "file" | "button" | "loadingSpinner";
   note?: string;
   description?: string;
   guideUrl?: string;
@@ -69,7 +69,7 @@ export type IntegrationCard = {
   description: string;
   logoLabel: string;
   logoUrl?: string;
-  status: "Setup guide" | "Chat setup" | "Custom request";
+  status: "Supported" | "Guided setup" | "Assisted setup" | "Planned";
   ctaLabel: string;
   ctaType: "guide" | "chat" | "request";
   setupUrl: string;
@@ -614,7 +614,7 @@ export const CONTROL_LAYOUTS: ControlsLayout[] = [
             description: "Select the checkout app installed on this store.",
             options: CHECKOUT_INTEGRATION_OPTIONS,
           },
-          { label: "Font Settings", kind: "text", group: "Font Settings", description: "Customize the font of the bundle builder." },
+          { label: "Execute Script", kind: "script", group: "Checkout Settings" },
           { label: "Custom Font", kind: "text", group: "Font Settings", description: "Note: By default, your storefront theme font will be picked." },
         ],
       },
@@ -646,7 +646,12 @@ export const CONTROL_LAYOUTS: ControlsLayout[] = [
         contentDescription: "The script written here will exclusively apply to theme pages and will not affect bundle pages. Please refer to our internal Notion document(Easy Bundles Custom CSS and JS Requests).",
         fields: [
           { label: "Enable Custom Theme Integration Script", kind: "toggle", group: "Integrate JS with custom elements from the store theme" },
-          { label: "Custom Theme Integration Script", kind: "script", group: "Integrate JS with custom elements from the store theme" },
+          {
+            label: "Custom Theme Integration Script",
+            kind: "script",
+            group: "Integrate JS with custom elements from the store theme",
+            note: "This script runs globally on theme pages. Review and test it before enabling.",
+          },
           {
             label: "Enable Cart Integration",
             kind: "toggle",
@@ -659,7 +664,7 @@ export const CONTROL_LAYOUTS: ControlsLayout[] = [
           { label: "Cart Item Quantity Button Selectors", kind: "text", group: "Integrate JS bundle script with Cart page" },
           { label: "Custom Cart Integration Script", kind: "script", group: "Integrate JS bundle script with Cart page" },
           { label: "Enable Judge Me Integration", kind: "toggle", group: "Integrate with Judge Me", description: "Show reviews on product cards through integration with judgeme" },
-          { label: "Public token", kind: "text", group: "Integrate with Judge Me" },
+          { label: "Public token", kind: "secret", group: "Integrate with Judge Me" },
         ],
       },
       {
@@ -749,40 +754,88 @@ export const CONTROL_LAYOUTS: ControlsLayout[] = [
 
 export const INTEGRATION_CATEGORIES: IntegrationCategory[] = [
   {
-    id: "checkout-side-cart",
-    title: "Checkout",
-    description: "Ensure bundles work smoothly through native and third-party checkout flows.",
+    id: "reviews",
+    title: "Reviews",
+    description: "Show social proof by displaying product ratings within your bundles.",
     cards: [
       {
-        id: "gokwik",
-        title: "GoKwik",
-        description: "Streamlined Indian checkout experience for bundles",
-        logoLabel: "Gokwik",
-        logoUrl: "/icons/Gokwik.avif",
-        status: "Setup guide",
+        id: "judgeme",
+        title: "Judge.me",
+        description: "Display star ratings and reviews on your bundles",
+        logoLabel: "Judge.me",
+        logoUrl: "/icons/Judgeme.avif",
+        status: "Guided setup",
         ctaLabel: "View Setup",
         ctaType: "guide",
         setupUrl: "https://wolfpackapps.com",
         guideSummary: [
-          "Configure a checkout callback that runs after bundle add-to-cart succeeds.",
-          "Use the callback to pass control to the downstream checkout app instead of the default checkout redirect.",
-          "If the downstream checkout needs discount state, persist the discount before opening the checkout app.",
+          "Configure the authenticated public token in Additional Configurations.",
+          "Apply any required review badge visibility override through theme-page CSS.",
+        ],
+      },
+    ],
+  },
+  {
+    id: "checkout-side-cart",
+    title: "Checkout",
+    description: "Use Shopify-native checkout and cart flows for bundle conversion.",
+    cards: [
+      {
+        id: "gokwik",
+        title: "GoKwik",
+        description: "Use a third-party checkout handoff flow with GoKwik.",
+        logoLabel: "GoKwik",
+        logoUrl: "/icons/Gokwik.avif",
+        status: "Supported",
+        ctaLabel: "View Setup",
+        ctaType: "guide",
+        setupUrl: "https://wolfpackapps.com",
+        guideSummary: [
+          "Use your store's GoKwik checkout configuration and keep native fallback routing enabled.",
+          "Verify callback setup for GoKwik checkout handoff in theme script tags.",
         ],
       },
       {
         id: "shopflo",
         title: "Shopflo",
-        description: "Optimized Indian checkout flow with bundle support",
+        description: "Use a third-party checkout handoff flow with Shopflo.",
         logoLabel: "Shopflo",
         logoUrl: "/icons/Shopflo.avif",
-        status: "Setup guide",
+        status: "Supported",
         ctaLabel: "View Setup",
         ctaType: "guide",
         setupUrl: "https://wolfpackapps.com",
         guideSummary: [
-          "Configure a checkout callback that runs after bundle add-to-cart succeeds.",
-          "Use the callback to pass control to the downstream checkout app instead of the default checkout redirect.",
-          "Side-cart integrations should refresh or open the cart drawer after bundle add-to-cart succeeds.",
+          "Enable the Shopflo checkout integration and confirm SDK loading on storefront pages.",
+          "Use discount-code handoff flow so order discounting continues through checkout.",
+        ],
+      },
+      {
+        id: "native-checkout",
+        title: "Shopify Checkout",
+        description: "Route bundle checkout through Shopify's native checkout flow.",
+        logoLabel: "Shopify",
+        status: "Supported",
+        ctaLabel: "View Setup",
+        ctaType: "guide",
+        setupUrl: "https://help.shopify.com/manual/checkout",
+        guideSummary: [
+          "Keep checkout routing on Shopify-native flow so inventory and discounts remain consistent.",
+          "Use bundle token metadata and Storefront/cart transforms only for runtime behavior you control.",
+        ],
+      },
+      {
+        id: "theme_cart_drawer",
+        title: "Theme Cart Drawer",
+        description: "Keep buyers in Shopify's cart drawer flow.",
+        logoLabel: "Shopify",
+        status: "Supported",
+        ctaLabel: "View Setup",
+        ctaType: "guide",
+        setupUrl: "https://wolfpackapps.com",
+        guideSummary: [
+          "Enable theme-cart handoff and keep standard cart flow active after bundle line-item updates.",
+          "Use storefront side-drawer callbacks when available to preserve conversion.",
         ],
       },
     ],

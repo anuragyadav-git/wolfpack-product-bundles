@@ -1,11 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type KeyboardEvent,
-  type MouseEvent,
-} from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   hidePolarisModal,
   showPolarisModal,
@@ -16,6 +9,7 @@ import {
   resolveProductPageTemplateSelection,
 } from "./ConfigureBundleFlow.helpers";
 import { runAfterSaveBarLeaveConfirmation } from "../../../lib/admin-savebar-navigation.client";
+import { resolveTemplateReadyStep } from "../../../lib/template-ready-step";
 
 export function usePpbModalAndTemplateController({
   base,
@@ -74,102 +68,43 @@ export function usePpbModalAndTemplateController({
       : hidePolarisModal(display.discountVariablesModalRef);
   }, [display.discountVariablesModalRef, display.isDiscountVariablesModalOpen]);
   useModalHideListener(syncModalRef, () =>
-    templateState.setIsSyncModalOpen(false),
+    templateState.setIsSyncModalOpen(false)
   );
   useModalHideListener(productsModalRef, placement.handleCloseProductsModal);
   useModalHideListener(
     collectionsModalRef,
-    placement.handleCloseCollectionsModal,
+    placement.handleCloseCollectionsModal
   );
   useModalHideListener(display.progressBarMultiLangModalRef, () =>
-    display.setIsProgressBarMultiLangModalOpen(false),
+    display.setIsProgressBarMultiLangModalOpen(false)
   );
   useModalHideListener(display.bundleQuantityMultiLangModalRef, () =>
-    display.setIsBundleQuantityMultiLangModalOpen(false),
+    display.setIsBundleQuantityMultiLangModalOpen(false)
   );
   useModalHideListener(display.discountVariablesModalRef, () =>
-    display.setIsDiscountVariablesModalOpen(false),
+    display.setIsDiscountVariablesModalOpen(false)
   );
   const closeDiscardModal = useCallback(() => {
     setShowDiscardModal(false);
   }, []);
-  const closeSelectTemplateDialog = useCallback(() => {
+  const resetSelectTemplateDialog = useCallback(() => {
     templateState.setIsSelectTemplateModalOpen(false);
     templateState.setTemplateModalStep("templates");
     templateState.setTemplateSaveError(null);
     templateState.lastTemplateRequestRef.current = null;
     templateState.lastTemplateResponseRef.current = null;
+    templateState.templateSubmissionStartedRef.current = false;
     requestAnimationFrame(() => {
       templateState.selectTemplateOpenButtonRef.current?.focus();
     });
   }, [templateState]);
-  const getSelectTemplateDialogFocusableElements =
-    useCallback((): HTMLElement[] => {
-      if (!templateState.selectTemplateDialogRef.current) {
-        return [];
-      }
-      const dialogElement =
-        templateState.selectTemplateDialogRef.current as HTMLElement;
-      return Array.from(
-        dialogElement.querySelectorAll<HTMLElement>(
-          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
-        ),
-      ).filter(
-        (element) =>
-          !element.hasAttribute("disabled") &&
-          element.tabIndex >= 0 &&
-          window.getComputedStyle(element).display !== "none" &&
-          window.getComputedStyle(element).visibility !== "hidden",
-      );
-    }, [templateState.selectTemplateDialogRef]);
-  const handleSelectTemplateDialogKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLDivElement>) => {
-      if (event.key === "Escape") {
-        event.stopPropagation();
-        closeSelectTemplateDialog();
-        return;
-      }
-      if (event.key !== "Tab") {
-        return;
-      }
-      const focusableElements = getSelectTemplateDialogFocusableElements();
-      if (focusableElements.length === 0) {
-        event.preventDefault();
-        return;
-      }
-      const activeElement = document.activeElement as HTMLElement | null;
-      const activeElementIndex = activeElement
-        ? focusableElements.indexOf(activeElement)
-        : -1;
-      const first = focusableElements[0];
-      const last = focusableElements[focusableElements.length - 1];
-      if (activeElementIndex === -1) {
-        event.preventDefault();
-        first.focus();
-        return;
-      }
-      if (event.shiftKey && activeElementIndex === 0) {
-        event.preventDefault();
-        last.focus();
-        return;
-      }
-      if (
-        !event.shiftKey &&
-        activeElementIndex === focusableElements.length - 1
-      ) {
-        event.preventDefault();
-        first.focus();
-      }
-    },
-    [closeSelectTemplateDialog, getSelectTemplateDialogFocusableElements],
-  );
-  const handleSelectTemplateBackdropClick = useCallback(
-    (event: MouseEvent<HTMLDivElement>) => {
-      if (event.target === event.currentTarget) {
-        closeSelectTemplateDialog();
-      }
-    },
-    [closeSelectTemplateDialog],
+  const closeSelectTemplateDialog = useCallback(() => {
+    hidePolarisModal(templateState.selectTemplateDialogRef);
+    resetSelectTemplateDialog();
+  }, [resetSelectTemplateDialog, templateState.selectTemplateDialogRef]);
+  useModalHideListener(
+    templateState.selectTemplateDialogRef,
+    resetSelectTemplateDialog
   );
   const openSelectTemplateModal = useCallback(() => {
     const selectedTemplate = resolveProductPageTemplateSelection({
@@ -182,15 +117,18 @@ export function usePpbModalAndTemplateController({
     templateState.setTemplateSaveError(null);
     templateState.lastTemplateRequestRef.current = null;
     templateState.lastTemplateResponseRef.current = null;
+    templateState.templateSubmissionStartedRef.current = false;
     templateState.setIsSelectTemplateModalOpen(true);
   }, [templateState]);
   const openDesignControlPanel = useCallback(() => {
-    void runAfterSaveBarLeaveConfirmation(base.shopify, () => base.navigate(PPB_DESIGN_CONTROL_PANEL_URL));
+    void runAfterSaveBarLeaveConfirmation(base.shopify, () =>
+      base.navigate(PPB_DESIGN_CONTROL_PANEL_URL)
+    );
   }, [base]);
   useEffect(() => {
-    if (templateState.isSelectTemplateModalOpen) {
-      templateState.selectTemplateDialogRef.current?.focus();
-    }
+    templateState.isSelectTemplateModalOpen
+      ? showPolarisModal(templateState.selectTemplateDialogRef)
+      : hidePolarisModal(templateState.selectTemplateDialogRef);
   }, [
     templateState.isSelectTemplateModalOpen,
     templateState.selectTemplateDialogRef,
@@ -208,18 +146,22 @@ export function usePpbModalAndTemplateController({
       presetId: templateState.pendingDesignPresetId,
     };
     templateState.lastTemplateResponseRef.current = null;
+    templateState.templateSubmissionStartedRef.current = false;
     const fd = new FormData();
     fd.append("intent", "updateBundleDesignTemplate");
     fd.append(
       "bundleDesignTemplate",
-      templateState.pendingDesignTemplate ?? "",
+      templateState.pendingDesignTemplate ?? ""
     );
     fd.append(
       "bundleDesignPresetId",
-      templateState.pendingDesignPresetId ?? "",
+      templateState.pendingDesignPresetId ?? ""
     );
     templateState.templateFetcher.submit(fd, { method: "POST" });
-  }, [templateState]);
+    templateState.setTemplateModalStep(
+      resolveTemplateReadyStep(base.appEmbedEnabled),
+    );
+  }, [base.appEmbedEnabled, templateState]);
   const handleTemplatePreview = useCallback(() => {
     const previewStarted = previewReadiness.handlePreviewBundle();
     if (previewStarted instanceof Promise) {
@@ -247,9 +189,6 @@ export function usePpbModalAndTemplateController({
     setShowDiscardModal,
     closeDiscardModal,
     closeSelectTemplateDialog,
-    getSelectTemplateDialogFocusableElements,
-    handleSelectTemplateDialogKeyDown,
-    handleSelectTemplateBackdropClick,
     openSelectTemplateModal,
     openDesignControlPanel,
     handleTemplateNext,

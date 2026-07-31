@@ -113,7 +113,10 @@ export const ProductPageCartMethods = {
       }
 
       ToastManager.show('Bundle added to cart successfully!');
-      this._handlePostAddToCartAction(this._getProductPageControls()?.redirect);
+      await this._handlePostAddToCartAction(
+        this._getProductPageControls()?.redirect,
+        `${offerId}_${sessionKey}`,
+      );
     } catch (error) {
       ToastManager.show('Failed to add bundle to cart: ' + error.message);
     } finally {

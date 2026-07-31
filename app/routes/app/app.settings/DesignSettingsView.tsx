@@ -1,4 +1,5 @@
 import { useState, type Dispatch, type SetStateAction } from "react";
+import { useTranslation } from "react-i18next";
 import { DESIGN_CONFIGURATION, EXPERT_COLOR_CONTROLS } from "../../../lib/admin-configuration-surfaces";
 import { BundlePreviewModal, DesignFields, getDesignIconKey } from "./SettingsDesignFields";
 import { DesignLivePreview } from "./DesignLivePreview";
@@ -54,6 +55,8 @@ export function DesignSettingsView({
   discardActiveSettingsChanges,
   saveActiveSettingsChanges,
 }: DesignSettingsViewProps) {
+  const { t } = useTranslation();
+  const [workspacePane, setWorkspacePane] = useState<"preview" | "customize">("preview");
   const selectedDesignFields = isExpertColorControls && selectedDesignTab.title === "Brand Colors" && isExpertScopeActive
     ? EXPERT_COLOR_CONTROLS[activeDesignScope] ?? EXPERT_COLOR_CONTROLS.General
     : selectedDesignTab.fields;
@@ -68,7 +71,8 @@ export function DesignSettingsView({
   };
 
   return (
-    <main className={styles.page}>
+    <s-query-container containerName="design-settings">
+      <main className={styles.page}>
       <header className={styles.hero}>
         <s-stack direction="inline" gap="small" alignItems="center">
           <s-button
@@ -84,8 +88,43 @@ export function DesignSettingsView({
         </s-button>
       </header>
 
-      <section className={styles.layout} aria-label="Design">
-        <aside className={styles.inspectorNavigation}>
+        <div
+          className={styles.mobileWorkspaceTabs}
+          role="group"
+          aria-label={t("settingsDcp.preview.workspace.label")}
+        >
+          <s-button
+            variant={workspacePane === "preview" ? "primary" : "secondary"}
+            aria-pressed={workspacePane === "preview" ? "true" : "false"}
+            onClick={() => setWorkspacePane("preview")}
+          >
+            {t("settingsDcp.preview.workspace.preview")}
+          </s-button>
+          <s-button
+            variant={workspacePane === "customize" ? "primary" : "secondary"}
+            aria-pressed={workspacePane === "customize" ? "true" : "false"}
+            onClick={() => setWorkspacePane("customize")}
+          >
+            {t("settingsDcp.preview.workspace.customize")}
+          </s-button>
+        </div>
+
+        <section className={styles.layout} aria-label="Design">
+          <div
+            className={styles.previewPane}
+            data-phone-active={workspacePane === "preview" || undefined}
+          >
+            <DesignLivePreview
+              fieldValues={designFieldValues}
+              isExpertControlsEnabled={isExpertColorControls}
+              activeFieldKey={activePreviewFieldKey}
+            />
+          </div>
+          <div
+            className={styles.customizePane}
+            data-phone-active={workspacePane === "customize" || undefined}
+          >
+            <aside className={styles.inspectorNavigation}>
           <section className={styles.navigationSection}>
             <h2>Bundle Design</h2>
             <p>Customize your bundle in a few clicks</p>
@@ -160,13 +199,8 @@ export function DesignSettingsView({
           <s-button variant="tertiary" tone="critical" onClick={resetSelectedDesignTab}>
             Reset to default
           </s-button>
-        </aside>
-        <DesignLivePreview
-          fieldValues={designFieldValues}
-          isExpertControlsEnabled={isExpertColorControls}
-          activeFieldKey={activePreviewFieldKey}
-        />
-        <section className={styles.inspectorContent}>
+            </aside>
+            <section className={styles.inspectorContent}>
           {isBrandColorsPanelGated || designGateMessage ? (
             <s-banner tone="warning">
               {designGateMessage ?? "Disable Expert Color Controls to access brand colors."}
@@ -186,15 +220,17 @@ export function DesignSettingsView({
               }}
             />
           </div>
+            </section>
+          </div>
         </section>
-      </section>
-      <SettingsContextualSaveBar isOpen={isActiveSubpageDirty} onDiscard={discardActiveSettingsChanges} onSave={saveActiveSettingsChanges} />
-      <BundlePreviewModal
-        isOpen={isPreviewModalOpen}
-        bundles={previewBundles}
-        onClose={() => setIsPreviewModalOpen(false)}
-      />
-      <SettingsToast message={saveMessage} onDismiss={() => setSaveMessage(null)} />
-    </main>
+        <SettingsContextualSaveBar isOpen={isActiveSubpageDirty} onDiscard={discardActiveSettingsChanges} onSave={saveActiveSettingsChanges} />
+        <BundlePreviewModal
+          isOpen={isPreviewModalOpen}
+          bundles={previewBundles}
+          onClose={() => setIsPreviewModalOpen(false)}
+        />
+        <SettingsToast message={saveMessage} onDismiss={() => setSaveMessage(null)} />
+      </main>
+    </s-query-container>
   );
 }

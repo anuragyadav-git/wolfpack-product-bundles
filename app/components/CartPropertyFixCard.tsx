@@ -1,5 +1,4 @@
 import { useState, useCallback } from "react";
-import { BlockStack, InlineStack, Text } from "@shopify/polaris";
 
 const LIQUID_SNIPPET = `or property.first contains '_'`;
 
@@ -39,10 +38,10 @@ export function CartPropertyFixContent() {
   }, []);
 
   return (
-    <BlockStack gap="500">
+    <s-stack direction="block" gap="large">
 
       {/* ── Description ───────────────────────────────────────────── */}
-      <Text variant="bodySm" tone="subdued" as="p">
+      <s-paragraph color="subdued">
         If your cart page shows internal properties like{' '}
         <code style={{
           fontFamily: '"SFMono-Regular", Consolas, monospace',
@@ -60,12 +59,12 @@ export function CartPropertyFixContent() {
           fontSize: '0.88em',
         }}>_is_bundle_parent</code>
         , your theme needs a one-line fix.
-      </Text>
+      </s-paragraph>
 
       {/* ── Numbered steps ────────────────────────────────────────── */}
-      <BlockStack gap="300">
+      <s-stack direction="block" gap="base">
         {STEPS.map(({ n, title, desc }) => (
-          <InlineStack key={n} gap="300" blockAlign="start" wrap={false}>
+          <s-stack key={n} direction="inline" gap="base" alignItems="start">
             <div style={{
               width: 26,
               height: 26,
@@ -83,14 +82,14 @@ export function CartPropertyFixContent() {
               {n}
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <BlockStack gap="050">
-                <Text variant="bodySm" fontWeight="semibold" as="p">{title}</Text>
-                <Text variant="bodySm" tone="subdued" as="p">{desc}</Text>
-              </BlockStack>
+              <s-stack direction="block" gap="small-100">
+                <s-text type="strong">{title}</s-text>
+                <s-text color="subdued">{desc}</s-text>
+              </s-stack>
             </div>
-          </InlineStack>
+          </s-stack>
         ))}
-      </BlockStack>
+      </s-stack>
 
       {/* ── Code block ────────────────────────────────────────────── */}
       <div style={{
@@ -158,7 +157,7 @@ export function CartPropertyFixContent() {
       </div>
 
       {/* ── Context label ─────────────────────────────────────────── */}
-      <Text variant="bodySm" tone="subdued" as="p">
+      <s-paragraph color="subdued">
         Append this to the existing{' '}
         <code style={{
           fontFamily: '"SFMono-Regular", Consolas, monospace',
@@ -175,7 +174,7 @@ export function CartPropertyFixContent() {
           borderRadius: 3,
           fontSize: '0.88em',
         }}>unless property.last == empty or property.first contains '_'</code>
-      </Text>
+      </s-paragraph>
 
       {/* ── Footer note ───────────────────────────────────────────── */}
       <div style={{
@@ -185,13 +184,13 @@ export function CartPropertyFixContent() {
         borderRadius: '0 6px 6px 0',
         padding: '10px 14px',
       }}>
-        <Text variant="bodySm" tone="subdued" as="p">
+        <s-paragraph color="subdued">
           <strong>Most themes don't need this.</strong>{' '}
           Dawn, Refresh, and other modern Shopify themes hide underscore-prefixed properties automatically.
           Only apply this fix if you can visibly see internal properties on your cart page.
-        </Text>
+        </s-paragraph>
       </div>
 
-    </BlockStack>
+    </s-stack>
   );
 }

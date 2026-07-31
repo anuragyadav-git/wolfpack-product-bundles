@@ -327,7 +327,7 @@ formatPromoDiscountTierLabel(rule, pricing, currencyInfo) {
 collectStepProductIds(step) {
   const productIds = [];
   const addProductId = (product) => {
-    const id = product?.id || product?.graphqlId || product?.productId;
+    const id = product?.selectionId;
     if (id && !productIds.includes(id)) productIds.push(id);
   };
 
@@ -373,7 +373,7 @@ getStepCategoryTabEntries(step) {
         if (handle && !handles.includes(handle)) handles.push(handle);
       };
       const addProductId = (product) => {
-        const productId = product?.id || product?.graphqlId || product?.productId;
+        const productId = product?.selectionId;
         if (productId && !productIds.includes(productId)) productIds.push(productId);
       };
 

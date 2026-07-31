@@ -1,6 +1,95 @@
+import { useRef, useState } from "react";
 import type { SettingsField } from "../../../lib/admin-configuration-surfaces";
+import {
+  getDisabledAdditionalConfigurationFields,
+  isAdditionalConfigurationActionDisabled,
+} from "../../../lib/additional-configurations-behavior";
 import styles from "../../../styles/routes/admin-configuration-surfaces.module.css";
 import { getFieldValueKey } from "./settings-state";
+
+function AdditionalConfigurationFileUpload({
+  value,
+  disabled,
+  onChange,
+}: {
+  value: string;
+  disabled: boolean;
+  onChange: (value: string) => void;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [status, setStatus] = useState<"idle" | "uploading" | "success" | "error">("idle");
+
+  const uploadFile = async (file: File) => {
+    setStatus("uploading");
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const uploadResponse = await fetch("/app/upload-store-file", {
+        method: "POST",
+        body: formData,
+      });
+      const uploadResult = await uploadResponse.json() as {
+        ok?: boolean;
+        fileId?: string;
+      };
+      if (!uploadResponse.ok || !uploadResult.ok || !uploadResult.fileId) {
+        setStatus("error");
+        return;
+      }
+
+      for (let pollCount = 0; pollCount < 15; pollCount += 1) {
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        const statusResponse = await fetch(
+          `/app/upload-store-file?fileId=${encodeURIComponent(uploadResult.fileId)}`,
+        );
+        const statusResult = await statusResponse.json() as {
+          fileStatus?: string;
+          file?: { url?: string };
+        };
+        if (statusResult.fileStatus === "READY" && statusResult.file?.url) {
+          onChange(statusResult.file.url);
+          setStatus("success");
+          return;
+        }
+        if (!statusResponse.ok || statusResult.fileStatus === "FAILED") {
+          setStatus("error");
+          return;
+        }
+      }
+      setStatus("error");
+    } catch {
+      setStatus("error");
+    }
+  };
+
+  return (
+    <div className={styles.ebFieldStack}>
+      {value ? <img className={styles.ebPreviewImage} src={value} alt="Selected video player logo" /> : null}
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml,image/avif"
+        hidden
+        disabled={disabled || status === "uploading"}
+        onChange={(event) => {
+          const file = event.currentTarget.files?.[0];
+          event.currentTarget.value = "";
+          if (file) void uploadFile(file);
+        }}
+      />
+      <s-button
+        variant="secondary"
+        loading={status === "uploading" || undefined}
+        disabled={disabled || status === "uploading" || undefined}
+        onClick={() => inputRef.current?.click()}
+      >
+        {value ? "Replace file" : "Upload file"}
+      </s-button>
+      {status === "success" ? <s-badge tone="success">Upload complete</s-badge> : null}
+      {status === "error" ? <s-badge tone="critical">Upload failed. Please try again.</s-badge> : null}
+    </div>
+  );
+}
 
 export function ControlsContentCards({
   title,
@@ -17,6 +106,7 @@ export function ControlsContentCards({
   onFieldChange: (label: string, value: string) => void;
   onFieldAction?: (label: string) => void;
 }) {
+  const disabledFields = getDisabledAdditionalConfigurationFields(values);
   const fieldGroups = fields.reduce<Array<{ title: string; fields: SettingsField[] }>>((groups, field) => {
     const groupTitle = field.group || title;
     const existingGroup = groups.find((group) => group.title === groupTitle);
@@ -41,6 +131,7 @@ export function ControlsContentCards({
               <button
                 type="button"
                 className={styles.controlsEditLanguageButton}
+                disabled={isAdditionalConfigurationActionDisabled("Cart Messaging", values)}
                 onClick={() => onFieldAction?.("Cart Messaging")}
               >
                 Edit Language
@@ -58,6 +149,7 @@ export function ControlsContentCards({
                   key={`${title}-${field.label}`}
                   field={displayField}
                   value={values[field.label] ?? ""}
+                  disabled={disabledFields.has(field.label)}
                   onChange={(value) => onFieldChange(field.label, value)}
                   onAction={onFieldAction ? () => onFieldAction(field.label) : undefined}
                 />
@@ -183,11 +275,13 @@ export function ControlsFormGroup({
 export function ControlsField({
   field,
   value,
+  disabled = false,
   onChange,
   onAction,
 }: {
   field: SettingsField;
   value: string;
+  disabled?: boolean;
   onChange: (value: string) => void;
   onAction?: () => void;
 }) {
@@ -204,6 +298,7 @@ export function ControlsField({
           className={styles.ebSwitchInput}
           type="checkbox"
           checked={isChecked}
+          disabled={disabled}
           onChange={(event) => onChange(event.currentTarget.checked ? "Checked" : "")}
         />
         <span className={styles.ebSwitchVisual} aria-hidden="true">
@@ -216,6 +311,7 @@ export function ControlsField({
             <button
               type="button"
               className={styles.ebInlineAction}
+              disabled={disabled}
               onClick={(event) => {
                 event.preventDefault();
                 event.stopPropagation();
@@ -246,12 +342,14 @@ export function ControlsField({
             className={styles.ebTextInput}
             aria-label={`${field.label} Hex Code`}
             value={value}
+            disabled={disabled}
             onChange={(event) => onChange(event.currentTarget.value)}
           />
           <input
             className={styles.ebColorWell}
             type="color"
             value={colorValue}
+            disabled={disabled}
             onChange={(event) => onChange(event.currentTarget.value)}
           />
         </span>
@@ -264,7 +362,7 @@ export function ControlsField({
       <label className={styles.ebFieldStack}>
         <span>{field.label}</span>
             <span className={styles.ebSelectWrap}>
-              <select className={styles.ebSelect} value={value || field.options?.[0] || ""} onChange={(event) => onChange(event.currentTarget.value)}>
+              <select className={styles.ebSelect} value={value || field.options?.[0] || ""} disabled={disabled} onChange={(event) => onChange(event.currentTarget.value)}>
                 {(field.options?.length ? field.options : [field.value ?? ""]).map((option) => (
                   <option key={option} value={option}>
                     {option}
@@ -279,7 +377,7 @@ export function ControlsField({
 
   if (field.kind === "radio") {
     return (
-      <fieldset className={styles.ebRadioGroup}>
+      <fieldset className={styles.ebRadioGroup} disabled={disabled}>
         <legend>{field.label}</legend>
         {field.description && <span className={styles.ebSettingHelp}>{field.description}</span>}
         {(field.options?.length ? field.options : [field.value ?? ""]).map((option) => (
@@ -301,7 +399,7 @@ export function ControlsField({
     return (
       <label className={styles.ebFieldStack}>
         <span>{field.label}</span>
-        <textarea className={styles.ebTextArea} value={value} rows={4} onChange={(event) => onChange(event.currentTarget.value)} />
+        <textarea className={styles.ebTextArea} value={value} rows={4} disabled={disabled} onChange={(event) => onChange(event.currentTarget.value)} />
         {field.description && <span className={styles.ebSettingHelp}>{field.description}</span>}
         {field.note && <span className={styles.ebFieldNote}>Note: {field.note}</span>}
       </label>
@@ -333,18 +431,22 @@ export function ControlsField({
 
   if (field.kind === "file") {
     return (
-      <label className={styles.ebFieldStack}>
+      <div className={styles.ebFieldStack}>
         <span>{field.label}</span>
-        <input className={styles.ebTextInput} type="file" onChange={() => onChange("Selected")} />
+        <AdditionalConfigurationFileUpload
+          value={value}
+          disabled={disabled}
+          onChange={onChange}
+        />
         {field.description && <span className={styles.ebSettingHelp}>{field.description}</span>}
-      </label>
+      </div>
     );
   }
 
   if (field.kind === "button") {
     return (
       <div className={styles.ebFieldStack}>
-        <button type="button" className={styles.settingsSecondaryButton} onClick={onAction}>
+        <button type="button" className={styles.settingsSecondaryButton} disabled={disabled} onClick={onAction}>
           {field.value || field.label}
         </button>
         {field.description && <span className={styles.ebSettingHelp}>{field.description}</span>}
@@ -352,10 +454,27 @@ export function ControlsField({
     );
   }
 
+  if (field.kind === "secret") {
+    return (
+      <label className={styles.ebFieldStack}>
+        <span>{field.label}</span>
+        <input
+          className={styles.ebTextInput}
+          type="password"
+          autoComplete="off"
+          value={value}
+          disabled={disabled}
+          onChange={(event) => onChange(event.currentTarget.value)}
+        />
+        {field.description && <span className={styles.ebSettingHelp}>{field.description}</span>}
+      </label>
+    );
+  }
+
   return (
     <label className={styles.ebFieldStack}>
       <span>{field.label}</span>
-      <input className={styles.ebTextInput} value={value} onChange={(event) => onChange(event.currentTarget.value)} />
+      <input className={styles.ebTextInput} value={value} disabled={disabled} onChange={(event) => onChange(event.currentTarget.value)} />
       {field.description && <span className={styles.ebSettingHelp}>{field.description}</span>}
       {field.note && <span className={styles.ebFieldNote}>Note: {field.note}</span>}
     </label>

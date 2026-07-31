@@ -6,7 +6,7 @@ const { renderSelectedProductSlots } = require('../../../app/assets/widgets/shar
 describe('shared selected product row contract', () => {
   it('renders a removable selected row from prepared data', () => {
     const html = renderSelectedProductRow({
-      id: 'variant-1',
+      selectionId: 'variant-1',
       title: 'The Complete Snowboard',
       variantTitle: 'Ice',
       imageUrl: 'https://cdn.example.com/snowboard.jpg',
@@ -25,7 +25,7 @@ describe('shared selected product row contract', () => {
 
   it('marks default rows as included and non-removable', () => {
     const html = renderSelectedProductRow({
-      id: 'variant-1',
+      selectionId: 'variant-1',
       title: 'Included product',
       quantity: 1,
       isDefault: true,
@@ -44,7 +44,7 @@ describe('shared selected product row contract', () => {
 
   it('escapes row text', () => {
     const html = renderSelectedProductRow({
-      id: 'variant-1',
+      selectionId: 'variant-1',
       title: '<strong>Snowboard</strong>',
       quantity: 1,
     });
@@ -58,9 +58,9 @@ describe('shared selected product slots contract', () => {
   it('renders empty, filled, default, and locked free-gift slots', () => {
     const html = renderSelectedProductSlots([
       { id: 'slot-1', label: 'Choose first item' },
-      { id: 'slot-2', label: 'Selected item', product: { id: 'variant-2', title: 'Selected Snowboard', quantity: 1 } },
-      { id: 'slot-3', label: 'Included item', product: { id: 'variant-3', title: 'Default Wax', isDefault: true } },
-      { id: 'slot-4', label: 'Gift item', product: { id: 'variant-4', title: 'Free Gift', isFreeGift: true, isLocked: true } },
+      { id: 'slot-2', label: 'Selected item', product: { selectionId: 'variant-2', title: 'Selected Snowboard', quantity: 1 } },
+      { id: 'slot-3', label: 'Included item', product: { selectionId: 'variant-3', title: 'Default Wax', isDefault: true } },
+      { id: 'slot-4', label: 'Gift item', product: { selectionId: 'variant-4', title: 'Free Gift', isFreeGift: true, isLocked: true } },
     ]);
 
     expect(html).toContain('data-action="select-slot"');

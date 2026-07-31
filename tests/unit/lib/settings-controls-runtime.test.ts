@@ -14,7 +14,8 @@ const controlsPayload = {
   "Discount Display": "Checked",
   "Discount format": "Percentage only (Eg: \"You save 19%\")",
   "Checkout Settings": "Redirect to Checkout",
-  "Checkout Integration": "GoKwik",
+  "Checkout Integration": "Shopify checkout",
+  "Execute Script": "window.__fpbPostAddRuns = true;",
   "Custom Font": "Inter",
   "Custom CSS for bundle builder pages": ".wpbBundle-HTML .builder { color: red; }",
   "Custom CSS for bundle dummy product page": ".wpbBundle-HTML .dummy { color: blue; }",
@@ -65,7 +66,8 @@ describe("Settings Controls runtime mapping", () => {
       redirectCollectionQuickAddToBundle: true,
       checkout: {
         action: "checkout",
-        providerId: "gokwik",
+        providerId: "native",
+        executeScript: "window.__fpbPostAddRuns = true;",
       },
       font: {
         customFont: "Inter",
@@ -100,7 +102,7 @@ describe("Settings Controls runtime mapping", () => {
       redirectCollectionQuickAddToBundle: true,
       redirect: {
         action: "cart",
-        executeScript: "",
+        executeScript: "window.__fpbPostAddRuns = true;",
       },
       css: {
         mixAndMatchBundles: ".wpbMixBundle { color: purple; }",
@@ -162,6 +164,7 @@ describe("Settings Controls runtime mapping", () => {
     expect(runtime.settingsControls.landingPage.checkout).toEqual({
       action: "checkout",
       providerId: "native",
+      executeScript: "window.__fpbPostAddRuns = true;",
     });
   });
 
@@ -170,10 +173,32 @@ describe("Settings Controls runtime mapping", () => {
 
     const runtime = buildSettingsControlsRuntime({
       ...controlsPayload,
-      "Checkout Integration": "Kaching Cart",
+      "Checkout Integration": "Theme cart drawer",
     });
 
-    expect(runtime.settingsControls.landingPage.checkout.providerId).toBe("kaching_cart");
+    expect(runtime.settingsControls.landingPage.checkout.providerId).toBe("theme_cart_drawer");
+  });
+
+  it("maps GoKwik provider label to provider ID", async () => {
+    const { buildSettingsControlsRuntime } = await import("../../../app/lib/settings-controls-runtime");
+
+    const runtime = buildSettingsControlsRuntime({
+      ...controlsPayload,
+      "Checkout Integration": "GoKwik",
+    });
+
+    expect(runtime.settingsControls.landingPage.checkout.providerId).toBe("gokwik");
+  });
+
+  it("maps Shopflo provider label to provider ID", async () => {
+    const { buildSettingsControlsRuntime } = await import("../../../app/lib/settings-controls-runtime");
+
+    const runtime = buildSettingsControlsRuntime({
+      ...controlsPayload,
+      "Checkout Integration": "Shopflo",
+    });
+
+    expect(runtime.settingsControls.landingPage.checkout.providerId).toBe("shopflo");
   });
 
   it("defaults missing validate-conditions control to enabled", async () => {

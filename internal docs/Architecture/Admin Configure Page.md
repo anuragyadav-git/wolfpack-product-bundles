@@ -5,7 +5,7 @@ title: Admin Configure Page
 type: architecture
 status: authoritative
 summary: Defines the shared FPB and PPB configure-page boundary and direct create, clone, edit, and save flows.
-last_audited: 2026-07-23
+last_audited: 2026-07-30
 owners:
   - engineering
 domains:
@@ -45,3 +45,38 @@ Step Setup uses the same section rhythm for both bundle types:
 PPB-only controls are explicit slots inside the shared rhythm. Category-level variant display controls update PPB `StepCategory.displayVariantsAsIndividualProducts` and `StepCategory.displayVariantsAsSwatches` fields; they are not step-wide FPB controls. Bundle Settings follows the same rule: shared rows cover overlapping settings, while FPB-only Product Slots / Slot Icon and PPB-only Variant Selector, discount display, banner, CSS, subscriptions, Bundle Embed, and Place Widget controls remain route-owned slots.
 
 SaveBar semantics remain route-owned. Shared configure UI should mark drafts dirty through the adapter but must not introduce autosave, wrap the canvas in a broad form, or make Enter keypresses submit the configure page.
+
+## Mobile Configure Contract
+
+`CommonConfigureShell` owns the named `bundle-configure` query container. FPB
+remains the canonical visual source while PPB supplies route-owned state and
+controls through adapters and slots. Narrow containers stack the editor into one
+column, keep fields shrinkable with `min-width: 0`, expose 44px action targets,
+and reserve bottom space for Shopify's contextual save bar.
+
+The existing compact `BundleReadinessOverlay` trigger and external props remain
+unchanged. Its checklist is a native modal dialog: desktop uses a bounded
+floating panel and phone containers use a full-width bottom sheet above the safe
+area. Escape, safe backdrop dismissal, focus trapping, internal scrolling, and
+focus restoration are shared behavior. `LocalAppModal` applies the same native
+dialog contract to app-owned discard and multi-language workflows; documented
+Polaris modal workflows continue to use `s-modal`.
+
+## First-Create Tour and State Boundary
+
+Both type-specific configure routes mount `ReduxProvider` locally; the shared
+`/app` layout does not. Hidden save inputs and route-owned configure controllers
+remain mounted for the full route lifetime, so section changes and deferred
+overlays must not discard unsaved values.
+
+The create route signals the guided edit experience only with
+`mode=create&first_load=true`. The tour changes the active configure section
+before looking up its target, retries while a lazy target arrives, and falls
+back to a centered dialog when the target is unavailable. Completion,
+dismissal, and Escape persist the existing shop-keyed local-storage value,
+restore the previously focused control, and release the body scroll lock.
+The dialog measures its rendered height before choosing an above-target,
+below-target, or viewport-contained position. It recomputes that position after
+viewport changes and uses a bounded internal scroll region for long copy on
+short desktop and mobile viewports. Guided transitions keep the readiness modal
+closed so it cannot cover the tour while the readiness trigger is highlighted.

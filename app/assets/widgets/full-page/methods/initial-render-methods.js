@@ -150,6 +150,7 @@ normalizePersonalizationAddonProduct(product) {
   return {
     productId: productGid,
     id: productGid,
+    selectionId: productGid,
     title: product?.title || '',
     handle: product?.handle || '',
     imageUrl,
@@ -158,7 +159,9 @@ normalizePersonalizationAddonProduct(product) {
     variants: variants.map(variant => {
       const variantGid = variant.variantGraphqlId || variant.id || (variant.variantId ? `gid://shopify/ProductVariant/${variant.variantId}` : productGid);
       return {
+        variantId: variantGid,
         id: variantGid,
+        selectionId: variantGid,
         title: variant.variantTitle || variant.title || 'Default Title',
         price: variant.price || '0',
         compareAtPrice: variant.compareAtPrice || null,

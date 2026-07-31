@@ -4,6 +4,36 @@ import {
 } from "../../../app/lib/bundle-config/default-products";
 
 describe("default products direct contract", () => {
+  it("maps canonical App Bridge picker id fields", () => {
+    const entry = buildDefaultProductEntryFromPicker({
+      id: "gid://shopify/Product/9506413773059",
+      title: "14k Dangling Obsidian Earrings",
+      handle: "14k-dangling-obsidian-earrings",
+      images: [{ originalSrc: "https://cdn.example/obsidian.jpg" }],
+      variants: [
+        {
+          id: "gid://shopify/ProductVariant/48720141091075",
+          title: "Default Title",
+          price: "829.00",
+          availableForSale: true,
+        },
+      ],
+      hasOnlyDefaultVariant: true,
+    });
+
+    expect(entry).toMatchObject({
+      productId: "9506413773059",
+      graphqlId: "gid://shopify/Product/9506413773059",
+      requiredQuantity: 1,
+      variants: [
+        {
+          variantId: "48720141091075",
+          variantGraphqlId: "gid://shopify/ProductVariant/48720141091075",
+        },
+      ],
+    });
+  });
+
   it("maps Shopify product-picker output to the direct defaultProductsData shape", () => {
     const entry = buildDefaultProductEntryFromPicker({
       id: "gid://shopify/Product/8322625700036",
@@ -97,7 +127,7 @@ describe("default products direct contract", () => {
     expect(normalizeDefaultProductsData({
       isDefaultProductsEnabled: false,
       defaultProductsTitle: "Preselected audit products",
-      products: [{ productId: "8322625700036" }],
+      products: [{ graphqlId: "gid://shopify/Product/8322625700036" }],
     })).toEqual({});
   });
 
@@ -107,12 +137,10 @@ describe("default products direct contract", () => {
       defaultProductsTitle: "Preselected audit products",
       products: [
         {
-          productId: "8322625700036",
           graphqlId: "gid://shopify/Product/8322625700036",
           title: "18k Bloom Earrings",
           variants: [
             {
-              variantId: "45038876459204",
               variantGraphqlId: "gid://shopify/ProductVariant/45038876459204",
               price: "579.00",
             },

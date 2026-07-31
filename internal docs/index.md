@@ -5,7 +5,7 @@ title: Wolfpack Product Bundles Internal Docs
 type: index
 status: authoritative
 summary: Index of durable Wolfpack Product Bundles architecture, integration, feature, and operations documentation.
-last_audited: 2026-07-14
+last_audited: 2026-07-26
 owners:
   - engineering
 domains:
@@ -14,7 +14,8 @@ systems:
   - internal-docs
 source_paths:
   - internal docs/
-related_docs: []
+related_docs:
+  - docs/README.md
 tags:
   - index
 keywords:
@@ -26,7 +27,7 @@ keywords:
 
 This vault contains audited, authoritative documentation for the Wolfpack Product Bundles app. All files have been cross-referenced against the actual codebase, Prisma schema, extension TOMLs, and the Shopify Dev MCP before writing.
 
-> **Not for version control.** This vault is gitignored. It is a living reference for Claude Code and the development team.
+This tracked vault is the authoritative architecture and operations reference for the application. The broader feature, audit, and implementation-record index is [`docs/README.md`](../docs/README.md).
 
 ---
 
@@ -63,14 +64,14 @@ Full evidence record: `docs/competitor-analysis/16-eb-full-data-flow-investigati
 - [[Shopify Integration/Cart Transform API]] — Operations, targets, API versions (2025-10)
 - [[Shopify Integration/Checkout UI Extension]] — Preact targets, build rules
 - [[Shopify Integration/Metafields]] — Bundle config metafield sync strategy
-- [[Shopify Integration/Theme App Extensions]] — Theme app extension handles, app embed detection, and MAIN-theme status rules
+- [[Shopify Integration/Theme App Extensions]] — Theme app extension handles, App Bridge status normalization, preview gates, and legacy MAIN-theme diagnostics
 - [[Shopify Integration/Web Pixels]] — UTM Web Pixel settings payload rules, including nonblank custom-parameter sentinel behavior
 - [[Shopify Integration/Webhooks]] — Subscribed webhook topics, removed broad topics, and delivery-volume rationale
 - [[Features/Bundle Types]] — FPB vs PDP, layout modes, step config
 - [[Features/Pricing Pipeline]] — UI → DB → Metafield → Cart Transform units
 - [[Features/Bundle Instance Tracking]] — EB `_wolfpackProductBundle:OfferId`, MERGE dedup, unique titles
 - [[Operations/Deployment]] — Render + Shopify deploy process
-- [[Operations/Deployment Backfill]] — guarded deploy-time DB-to-Shopify resync script and approval rules
+- [[Operations/Deployment General Sync]] — post-deploy persisted-bundle and custom-data replay behind one true or false flag
 - [[Operations/Development]] — SIT Shopify dev command and direct configure sync flow
 - [[Operations/Build Process]] — Widget bundles, WASM, CSS size limits
 - [[Operations/App Events Taxonomy]] — Shopify App Events taxonomy, flow tracing, feature usage, error events, and `wpb:*` migration boundaries
@@ -78,5 +79,6 @@ Full evidence record: `docs/competitor-analysis/16-eb-full-data-flow-investigati
 - [[Operations/Admin Performance]] — App Bridge Web Vitals source, retired custom telemetry, Admin loader critical path
 - [[Operations/LCP and CLS Playbook]] — Home bootstrap strategy, CLS stabilization order, and Knip-guided dead-code cleanup
 - [[Operations/Knip Prune Guardrails]] — known Knip false positives, convention-loaded runtime assets, and required skip rules for future dead-code pruning
-- [[Operations/Knip Candidate Inventory]] — exhaustive current Knip candidate list from the 2026-07-13 report; use with the guardrails before pruning
+- [[Operations/Knip Candidate Inventory]] — dated Knip candidate snapshot from 2026-07-13; rerun Knip before using it for a current prune decision
 - [[Operations/Storefront Parity Placement Board]] — Chrome DevTools MCP placement-board method for EB/WPB storefront responsiveness proof across narrow, column, mobile, and wide widget contexts
+- [[Operations/Local Dev Process and Runtime Logs]] — safe runtime process-tree tracing for local dev shells and where to capture logs when output is TTY-bound

@@ -10,9 +10,18 @@ import { FPB_DESIGN_CONTROL_PANEL_URL } from "./configure-constants";
 import { buildVisibilityDisplayConfiguration } from "./visibility-helpers";
 import type { ConfigureBundleFlowDraft } from "./configure-flow-types";
 import { runAfterSaveBarLeaveConfirmation } from "../../../lib/admin-savebar-navigation.client";
+import {
+  resolveTemplateReadyStep,
+  shouldProcessTemplateResponse,
+} from "../../../lib/template-ready-step";
+import {
+  hidePolarisModal,
+  showPolarisModal,
+  useModalHideListener,
+} from "../_shared/bundle-configure/modal-utils";
 
 export function useConfigureTemplatePricingController(
-  flow: ConfigureBundleFlowDraft,
+  flow: ConfigureBundleFlowDraft
 ) {
   const {
     appEmbedEnabled,
@@ -42,6 +51,7 @@ export function useConfigureTemplatePricingController(
     setTemplateModalStep,
     setTemplateSaveError,
     stepsState,
+    templateSubmissionStartedRef,
     templateFetcher,
     upsellWidgetButtonText,
     upsellWidgetCollectionsSelectedData,
@@ -56,12 +66,13 @@ export function useConfigureTemplatePricingController(
     upsellWidgetTitle,
   } = flow;
 
-  const closeSelectTemplateModal = useCallback(() => {
+  const resetSelectTemplateModal = useCallback(() => {
     setIsSelectTemplateModalOpen(false);
     setTemplateModalStep("templates");
     setTemplateSaveError(null);
     lastTemplateRequestRef.current = null;
     lastTemplateResponseRef.current = null;
+    templateSubmissionStartedRef.current = false;
     requestAnimationFrame(() => {
       selectTemplateOpenButtonRef.current?.focus();
     });
@@ -72,73 +83,13 @@ export function useConfigureTemplatePricingController(
     setIsSelectTemplateModalOpen,
     setTemplateModalStep,
     setTemplateSaveError,
+    templateSubmissionStartedRef,
   ]);
-  const getTemplateDialogFocusableElements = useCallback((): HTMLElement[] => {
-    if (!selectTemplateModalRef.current) {
-      return [];
-    }
-    const modalElement = selectTemplateModalRef.current as HTMLElement;
-    return Array.from(
-      modalElement.querySelectorAll<HTMLElement>(
-        'button, s-button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
-      ),
-    ).filter(
-      (element) =>
-        !element.hasAttribute("disabled") &&
-        (element.tagName === "S-BUTTON" || element.tabIndex >= 0) &&
-        window.getComputedStyle(element).display !== "none" &&
-        window.getComputedStyle(element).visibility !== "hidden",
-    );
-  }, [selectTemplateModalRef]);
-  const handleSelectTemplateDialogKeyDown = useCallback(
-    (event: React.KeyboardEvent<HTMLDivElement>) => {
-      if (event.key === "Escape") {
-        event.stopPropagation();
-        closeSelectTemplateModal();
-        return;
-      }
-      if (event.key !== "Tab") {
-        return;
-      }
-      const focusableElements = getTemplateDialogFocusableElements();
-      if (focusableElements.length === 0) {
-        event.preventDefault();
-        return;
-      }
-      const activeElement = document.activeElement as HTMLElement | null;
-      const activeElementIndex = activeElement
-        ? focusableElements.indexOf(activeElement)
-        : -1;
-      const first = focusableElements[0];
-      const last = focusableElements[focusableElements.length - 1];
-      if (activeElementIndex === -1) {
-        event.preventDefault();
-        first.focus();
-        return;
-      }
-      if (event.shiftKey && activeElementIndex === 0) {
-        event.preventDefault();
-        last.focus();
-        return;
-      }
-      if (
-        !event.shiftKey &&
-        activeElementIndex === focusableElements.length - 1
-      ) {
-        event.preventDefault();
-        first.focus();
-      }
-    },
-    [closeSelectTemplateModal, getTemplateDialogFocusableElements],
-  );
-  const handleSelectTemplateBackdropClick = useCallback(
-    (event: React.MouseEvent<HTMLDivElement>) => {
-      if (event.target === event.currentTarget) {
-        closeSelectTemplateModal();
-      }
-    },
-    [closeSelectTemplateModal],
-  );
+  const closeSelectTemplateModal = useCallback(() => {
+    hidePolarisModal(selectTemplateModalRef);
+    resetSelectTemplateModal();
+  }, [resetSelectTemplateModal, selectTemplateModalRef]);
+  useModalHideListener(selectTemplateModalRef, resetSelectTemplateModal);
   const openSelectTemplateModal = useCallback(() => {
     setPendingDesignTemplate(bundleDesignTemplate);
     setPendingDesignPresetId(bundleDesignPresetId);
@@ -146,6 +97,7 @@ export function useConfigureTemplatePricingController(
     setTemplateSaveError(null);
     lastTemplateRequestRef.current = null;
     lastTemplateResponseRef.current = null;
+    templateSubmissionStartedRef.current = false;
     setIsSelectTemplateModalOpen(true);
   }, [
     bundleDesignPresetId,
@@ -157,25 +109,42 @@ export function useConfigureTemplatePricingController(
     setPendingDesignTemplate,
     setTemplateModalStep,
     setTemplateSaveError,
+    templateSubmissionStartedRef,
   ]);
   const openDesignControlPanel = useCallback(() => {
-    void runAfterSaveBarLeaveConfirmation(flow.shopify, () => navigate(FPB_DESIGN_CONTROL_PANEL_URL));
+    void runAfterSaveBarLeaveConfirmation(flow.shopify, () =>
+      navigate(FPB_DESIGN_CONTROL_PANEL_URL)
+    );
   }, [flow.shopify, navigate]);
 
   useEffect(() => {
-    if (isSelectTemplateModalOpen) {
-      selectTemplateModalRef.current?.focus();
-    }
+    isSelectTemplateModalOpen
+      ? showPolarisModal(selectTemplateModalRef)
+      : hidePolarisModal(selectTemplateModalRef);
   }, [isSelectTemplateModalOpen, selectTemplateModalRef]);
 
   useEffect(() => {
-    if (templateFetcher.state !== "idle" || !lastTemplateRequestRef.current) {
+    if (!lastTemplateRequestRef.current) {
+      return;
+    }
+    if (templateFetcher.state !== "idle") {
+      templateSubmissionStartedRef.current = true;
+      return;
+    }
+    if (
+      !shouldProcessTemplateResponse({
+        fetcherState: templateFetcher.state,
+        hasRequest: true,
+        submissionStarted: templateSubmissionStartedRef.current,
+      })
+    ) {
       return;
     }
     if (templateFetcher.data == null) {
-      if (lastTemplateRequestRef.current) {
-        setTemplateSaveError("Unable to save template. Please try again.");
-      }
+      setTemplateSaveError("Unable to save template. Please try again.");
+      setTemplateModalStep("templates");
+      lastTemplateRequestRef.current = null;
+      templateSubmissionStartedRef.current = false;
       return;
     }
     if (templateFetcher.data === lastTemplateResponseRef.current) {
@@ -191,15 +160,17 @@ export function useConfigureTemplatePricingController(
       if (request) {
         setBundleDesignTemplate(request.template);
         setBundleDesignPresetId(request.presetId);
-        setTemplateModalStep(
-          appEmbedEnabled ? "confirm" : "enableThemeExtension",
-        );
+        setTemplateModalStep(resolveTemplateReadyStep(appEmbedEnabled));
       }
       setTemplateSaveError(null);
       lastTemplateRequestRef.current = null;
+      templateSubmissionStartedRef.current = false;
       return;
     }
+    setTemplateModalStep("templates");
     setTemplateSaveError(response.error || "Failed to save template settings.");
+    lastTemplateRequestRef.current = null;
+    templateSubmissionStartedRef.current = false;
   }, [
     appEmbedEnabled,
     lastTemplateRequestRef,
@@ -208,6 +179,7 @@ export function useConfigureTemplatePricingController(
     setBundleDesignTemplate,
     setTemplateModalStep,
     setTemplateSaveError,
+    templateSubmissionStartedRef,
     templateFetcher.data,
     templateFetcher.formData,
     templateFetcher.state,
@@ -223,17 +195,22 @@ export function useConfigureTemplatePricingController(
       presetId: pendingDesignPresetId,
     };
     lastTemplateResponseRef.current = null;
+    templateSubmissionStartedRef.current = false;
     const fd = new FormData();
     fd.append("intent", "updateBundleDesignTemplate");
     fd.append("bundleDesignTemplate", pendingDesignTemplate ?? "");
     fd.append("bundleDesignPresetId", pendingDesignPresetId ?? "");
     templateFetcher.submit(fd, { method: "POST" });
+    setTemplateModalStep(resolveTemplateReadyStep(appEmbedEnabled));
   }, [
+    appEmbedEnabled,
     lastTemplateRequestRef,
     lastTemplateResponseRef,
     pendingDesignPresetId,
     pendingDesignTemplate,
+    setTemplateModalStep,
     setTemplateSaveError,
+    templateSubmissionStartedRef,
     templateFetcher,
   ]);
   function buildBundleUpsellConfig() {
@@ -252,7 +229,7 @@ export function useConfigureTemplatePricingController(
           upsellWidgetSelectedProducts,
           upsellWidgetSpecificProductPages,
           upsellWidgetCollectionsSelectedData,
-          upsellWidgetSpecificCollectionPages,
+          upsellWidgetSpecificCollectionPages
         ),
         useLinkProductAsDefaultProduct: autoSelectBrowsedProduct,
         languageMode: upsellWidgetLanguageMode,
@@ -276,7 +253,7 @@ export function useConfigureTemplatePricingController(
       pricingState.pricingDisplayOptions,
       pricingState.showDiscountProgressBar,
       stepsState.steps,
-    ],
+    ]
   );
   const normalizedRuleMessages = useMemo(
     () =>
@@ -285,13 +262,13 @@ export function useConfigureTemplatePricingController(
         messages: { ruleMessages },
         method: pricingState.discountType,
       }),
-    [pricingState.discountRules, pricingState.discountType, ruleMessages],
+    [pricingState.discountRules, pricingState.discountType, ruleMessages]
   );
   const bundleQuantityOptionsEligible =
     pricingState.discountType !== DiscountMethod.BUY_X_GET_Y &&
     pricingState.discountRules.length > 0 &&
     pricingState.discountRules.every(
-      (rule: any) => rule.conditionType === "quantity",
+      (rule: any) => rule.conditionType === "quantity"
     );
   const displayOptionsInactive =
     !pricingState.discountEnabled || pricingState.discountRules.length === 0;
@@ -322,7 +299,7 @@ export function useConfigureTemplatePricingController(
                 (Array.isArray(category?.products)
                   ? category.products.length
                   : 0),
-              0,
+              0
             )
           : 0;
         return totalProducts + legacyProducts + categoryProductCount;
@@ -330,11 +307,11 @@ export function useConfigureTemplatePricingController(
     const hasBundleVisibility = Boolean(
       bundle.shopifyPageId ||
         bundle.shopifyPageHandle ||
-        formState.bundleStatus === "active",
+        formState.bundleStatus === "active"
     );
     const parentProductActive =
       String(
-        productStatus || loadedBundleProduct?.status || "",
+        productStatus || loadedBundleProduct?.status || ""
       ).toLowerCase() === "active";
     return [
       {
@@ -393,14 +370,14 @@ export function useConfigureTemplatePricingController(
   ]);
   const readinessScore = readinessItems.reduce(
     (sum, item) => sum + (item.done ? item.points : 0),
-    0,
+    0
   );
   const readinessClassName =
     readinessScore >= 80
       ? fullPageBundleStyles.readinessButtonHigh
       : readinessScore >= 40
-        ? fullPageBundleStyles.readinessButtonMedium
-        : fullPageBundleStyles.readinessButtonLow;
+      ? fullPageBundleStyles.readinessButtonMedium
+      : fullPageBundleStyles.readinessButtonLow;
 
   Object.assign(flow, {
     buildBundleUpsellConfig,
@@ -410,9 +387,6 @@ export function useConfigureTemplatePricingController(
     displayOptionsInactive,
     FPB_DESIGN_CONTROL_PANEL_URL,
     fullPageBundleStyles,
-    getTemplateDialogFocusableElements,
-    handleSelectTemplateBackdropClick,
-    handleSelectTemplateDialogKeyDown,
     handleTemplateNext,
     normalizedPricingDisplayOptions,
     normalizedRuleMessages,

@@ -1,7 +1,4 @@
-import { useEffect } from "react";
-import { json, type LoaderFunctionArgs, redirect } from "@remix-run/node";
-import { useLoaderData, useNavigate } from "@remix-run/react";
-import { Page, Card, BlockStack, Text, Spinner, Banner } from "@shopify/polaris";
+import { type LoaderFunctionArgs, redirect } from "@remix-run/node";
 import { requireAdminSession } from "../../lib/auth-guards.server";
 import { BillingService } from "../../services/billing.server";
 import { AppLogger } from "../../lib/logger";
@@ -76,18 +73,18 @@ export default function BillingCallback() {
   // This component should rarely render because loader redirects immediately
   // But if it does render (during loading), show a nice loading state
   return (
-    <Page title="Confirming Subscription">
-      <Card>
-        <BlockStack gap="400" align="center">
-          <Spinner size="large" />
-          <Text as="p" variant="bodyMd" alignment="center">
+    <s-page heading="Confirming Subscription">
+      <s-section>
+        <s-stack direction="block" gap="base" alignItems="center">
+          <s-spinner size="large" accessibilityLabel="Confirming subscription" />
+          <s-paragraph>
             Please wait while we confirm your subscription...
-          </Text>
-          <Text as="p" variant="bodyMd" tone="subdued" alignment="center">
+          </s-paragraph>
+          <s-paragraph color="subdued">
             You will be redirected momentarily.
-          </Text>
-        </BlockStack>
-      </Card>
-    </Page>
+          </s-paragraph>
+        </s-stack>
+      </s-section>
+    </s-page>
   );
 }

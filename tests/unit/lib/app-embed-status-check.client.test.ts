@@ -1,6 +1,7 @@
 import {
   checkAppEmbedStatusFromCurrentRoute,
   resolveAppEmbedStatusThemeEditorUrl,
+  resolveConfiguredAppEmbedEnabled,
   verifyAppEmbedEnabledBeforePreview,
 } from "../../../app/lib/app-embed-status-check.client";
 
@@ -70,6 +71,20 @@ describe("resolveAppEmbedStatusThemeEditorUrl", () => {
       "https://shop.myshopify.com/admin/themes/1/editor",
       "https://shop.myshopify.com/admin/themes/2/editor",
     )).toBe("https://shop.myshopify.com/admin/themes/2/editor");
+  });
+});
+
+describe("resolveConfiguredAppEmbedEnabled", () => {
+  it("uses the authoritative App Bridge result over stale MAIN-theme loader state", () => {
+    expect(resolveConfiguredAppEmbedEnabled(false, { appEmbedEnabled: true })).toBe(true);
+  });
+
+  it("keeps current state when App Bridge status is unavailable", () => {
+    expect(resolveConfiguredAppEmbedEnabled(true, null)).toBe(true);
+  });
+
+  it("keeps the setup banner hidden while App Bridge status is unresolved", () => {
+    expect(resolveConfiguredAppEmbedEnabled(null, null)).toBe(true);
   });
 });
 

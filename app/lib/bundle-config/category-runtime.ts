@@ -51,6 +51,15 @@ function compactImages(value: unknown): Record<string, unknown>[] {
     .slice(0, 1);
 }
 
+function normalizeId(value: unknown): string | null {
+  if (typeof value === "number" && Number.isFinite(value)) return String(value);
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    return trimmed || null;
+  }
+  return null;
+}
+
 function compactOptions(value: unknown): Array<string | Record<string, unknown>> {
   return asArray(value)
     .map((option) => {
@@ -100,11 +109,13 @@ function compactVariants(value: unknown): Record<string, unknown>[] {
 
       const source = variant as Record<string, unknown>;
       const compact: Record<string, unknown> = {};
-      for (const key of ["id", "variantId", "variantGraphqlId", "graphqlId", "title", "price", "compareAtPrice", "weight"]) {
+      const selectionId = normalizeId(source.id);
+      if (selectionId) compact.selectionId = selectionId;
+      ["title", "price", "compareAtPrice", "weight"].forEach((key) => {
         const fieldValue = source[key];
         if (typeof fieldValue === "string" && fieldValue.trim()) compact[key] = fieldValue;
         if (typeof fieldValue === "number" && Number.isFinite(fieldValue)) compact[key] = fieldValue;
-      }
+      });
       if (typeof source.weightUnit === "string" && source.weightUnit.trim()) {
         compact.weightUnit = source.weightUnit;
       }
@@ -144,11 +155,7 @@ function productReferenceKey(value: unknown): string | null {
   if (!value || typeof value !== "object" || Array.isArray(value)) return null;
 
   const product = value as Record<string, unknown>;
-  for (const key of ["productId", "graphqlId", "id"]) {
-    const fieldValue = product[key];
-    if (typeof fieldValue === "string" && fieldValue.trim()) return fieldValue;
-  }
-  return null;
+  return normalizeId(product.id);
 }
 
 function normalizeReferenceKey(value: string | null): string | null {
@@ -162,7 +169,7 @@ function compactProductReference(
   value: unknown,
   productSourceByKey: Map<string, Record<string, unknown>> = new Map(),
 ): Record<string, unknown> | null {
-  if (typeof value === "string" && value.trim()) return { id: value };
+  if (typeof value === "string" && value.trim()) return { selectionId: value };
   if (!value || typeof value !== "object" || Array.isArray(value)) return null;
 
   const product = value as Record<string, unknown>;
@@ -172,12 +179,14 @@ function compactProductReference(
     : null;
   const mergedProduct = source ? { ...source, ...product } : product;
   const reference: Record<string, unknown> = {};
-  for (const key of ["id", "productId", "graphqlId", "handle", "title"]) {
+  const selectionId = normalizeId(product.id);
+  if (selectionId) reference.selectionId = selectionId;
+  ["handle", "title"].forEach((key) => {
     const fieldValue = mergedProduct[key];
     if (typeof fieldValue === "string" && fieldValue.trim()) {
       reference[key] = fieldValue;
     }
-  }
+  });
 
   for (const key of ["imageUrl", "description", "descriptionHtml"]) {
     const fieldValue = mergedProduct[key];
@@ -237,7 +246,7 @@ function buildProductSourceMap(productSources: unknown[] = []): Map<string, Reco
   for (const source of productSources) {
     if (!source || typeof source !== "object" || Array.isArray(source)) continue;
     const sourceRecord = source as Record<string, unknown>;
-    const sourceKey = productReferenceKey(sourceRecord);
+    const sourceKey = normalizeId(sourceRecord.productId);
     if (!sourceKey) continue;
     sourceMap.set(sourceKey, sourceRecord);
     const normalizedKey = normalizeReferenceKey(sourceKey);
@@ -256,7 +265,12 @@ function compactProductReferences(
 }
 
 export function formatProductReferencesForRuntime(value: unknown, productSources: unknown[] = []) {
-  return compactProductReferences(value, buildProductSourceMap(productSources));
+  const productReferences = asArray(value).map((product) => {
+    if (!product || typeof product !== "object" || Array.isArray(product)) return product;
+    const source = product as Record<string, unknown>;
+    return { ...source, id: source.productId };
+  });
+  return compactProductReferences(productReferences, buildProductSourceMap(productSources));
 }
 
 function compactCollectionReferences(value: unknown): Record<string, unknown>[] {

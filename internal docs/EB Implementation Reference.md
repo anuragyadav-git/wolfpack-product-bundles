@@ -5,7 +5,7 @@ title: EB Implementation Reference
 type: reference
 status: authoritative
 summary: Records directly verified reference-app contracts used for Wolfpack bundle implementation and parity decisions.
-last_audited: 2026-07-22
+last_audited: 2026-07-30
 owners:
   - engineering
 domains:
@@ -36,17 +36,35 @@ When implementing a feature that mirrors EB behaviour — data shapes, admin flo
 
 ---
 
+## Admin Bundle Readiness Checklist
+
+Live EB Landing Page configure evidence captured on 2026-07-30:
+
+- The checklist is fixed 16px from the embedded app viewport's left and bottom edges.
+- Its resting collapsed card is approximately 100px wide by 64px high and contains a 48px three-quarter score gauge plus an upward chevron.
+- On initial page load, the trigger temporarily expands to approximately 320px and shows `Readiness Score` plus its helper text before collapsing.
+- Opening from either the header score or floating trigger expands one integrated approximately 320px card; the checklist and score footer are not separate floating cards.
+- The open state dims the configure canvas with a light neutral overlay.
+- Completed items use an outlined green check, green border, and points aligned at the right.
+- Pending items use an empty neutral circle, optional help copy, green points below the copy, and a right chevron when actionable.
+- The footer remains attached to the checklist, separated by a hairline border, and shows the score gauge, title, helper text, and collapse chevron.
+- The live 60-point example uses orange for both the header score and gauge; the completed 100-point example uses green.
+
+No `How to setup`, `Learn More`, or other help link is present inside the readiness checklist itself. Checklist item actions navigate to the corresponding configure section.
+
+---
+
 ## Admin API Endpoints
 
 All requests go to `https://prod.backend.giftbox.giftkart.app` with `?shopName={shop}` query param.
 
-| Operation | Method | Path |
-|---|---|---|
-| FPB — create bundle | `POST` | `/api/stepsConfiguration/create` |
-| FPB — save step categories | `POST` | `/api/stepsConfiguration/saveMultipleCategoriesData?bundleId={id}` |
-| FPB — full update (wrapper) | `POST` | `/api/stepsConfiguration/update?bundleId={id}` |
-| PPB — create bundle | `POST` | `/api/mixAndMatch/create` |
-| PPB — update | `POST` | `/api/mixAndMatch/update?offerId={MIX-XXXXXX}` |
+| Operation                   | Method | Path                                                               |
+| --------------------------- | ------ | ------------------------------------------------------------------ |
+| FPB — create bundle         | `POST` | `/api/stepsConfiguration/create`                                   |
+| FPB — save step categories  | `POST` | `/api/stepsConfiguration/saveMultipleCategoriesData?bundleId={id}` |
+| FPB — full update (wrapper) | `POST` | `/api/stepsConfiguration/update?bundleId={id}`                     |
+| PPB — create bundle         | `POST` | `/api/mixAndMatch/create`                                          |
+| PPB — update                | `POST` | `/api/mixAndMatch/update?offerId={MIX-XXXXXX}`                     |
 
 ---
 
@@ -74,10 +92,12 @@ Step Rules apply to the total number of products selected in a step, regardless 
 Use Step Rules when the merchant needs a total count for the step, such as selecting any 3 products from the available products.
 
 Supported configuration:
+
 - Range, such as select between 3 and 6 products.
 - Exact match, such as select exactly 3 products.
 
 Auto-next behavior:
+
 - EB exposes "Auto next when condition is met" for Step Rules.
 - When enabled for an exact-match rule, the storefront advances to the next step as soon as the customer satisfies the condition.
 - Example: if the rule requires exactly 3 items, selecting the 3rd item advances automatically.
@@ -87,6 +107,7 @@ Auto-next behavior:
 Category Rules apply specific constraints to individual categories inside one step.
 
 Prerequisite:
+
 - Category Rules are only available when the current step has multiple categories assigned.
 - A single-category step must not expose Category Rules.
 - In the WPB configure UI, this must be based on the current draft category list, not only the saved database state. Adding a second unsaved category should show Category Rules immediately; discarding that unsaved category should hide Category Rules again.
@@ -94,6 +115,7 @@ Prerequisite:
 Use Category Rules when the merchant needs a specific mix across categories, such as 2 products from Women's and 2 products from Men's.
 
 Supported metrics in the current PPB Admin:
+
 - Quantity: number of selected items.
 - Amount: total selected item value.
 
@@ -105,11 +127,13 @@ live Admin capture proves that the control has returned. This correction does
 not invalidate earlier FPB-specific Weight evidence.
 
 Supported conditions:
+
 - Equal to.
 - Greater than or equal to.
 - Less than or equal to.
 
 Unsupported conditions:
+
 - Strict greater than.
 - Strict less than.
 
@@ -136,6 +160,7 @@ Step -> Category -> Products
 Steps are the parent level. Categories are the child level inside a step.
 
 Step behavior:
+
 - A Step is a distinct stage in the bundle-building journey.
 - Each Step creates a separate page or view.
 - Steps control navigation flow, such as Step 1 -> Step 2 -> Step 3.
@@ -143,12 +168,14 @@ Step behavior:
 - Use Steps when the bundle should be broken into clear milestones.
 
 Category behavior:
+
 - A Category is a product group displayed within a Step.
 - Categories organize products on the same page or view without forcing a reload.
 - Customers can browse multiple categories within the same step.
 - Use Categories when customers should mix and match items from different collections on the same screen.
 
 Scenario guidance:
+
 - Outfit Builder: use 1 Step named Build Your Look with 2 Categories, such as Shirts and Pants, when customers should choose both on the same screen.
 - Gift Box: use 2 Steps when customers should first pick a box and then fill it. Step 1 contains 1 Category for Boxes. Step 2 contains multiple Categories such as Candles, Soaps, and Candy.
 
@@ -157,15 +184,18 @@ Scenario guidance:
 The merchant first chooses the bundle experience and flow structure.
 
 Bundle experiences:
+
 - Mix-and-Match Bundle: customers select product variants while satisfying a total quantity requirement.
 - Landing Page Bundle Builder: creates a dedicated bundle-building page.
 - Product Page Bundle Builder: embeds the builder into the product discovery flow on a standard product page.
 
 Flow structures:
+
 - Single-Step: customers select items from one interface, optionally using multiple categories or filters. This is used for bulk-buy flows such as a box of 6. Mix-and-match bundles can define required total quantities such as 3, 6, or 9 items.
 - Multi-Step: customers proceed through a sequence, such as Step 1 choosing a bag and Step 2 choosing accessories.
 
 Creation flow:
+
 1. Click Create Bundle.
 2. Select the template for the chosen experience.
 3. Select the design.
@@ -173,6 +203,7 @@ Creation flow:
 5. Click Create.
 
 Backend requirement:
+
 - Creating the bundle automatically creates a virtual parent bundle product.
 - The virtual parent product is required for inventory, cart, and checkout behavior.
 - Deleting or altering the virtual parent product directly in Shopify outside the app can break the bundle.
@@ -182,6 +213,7 @@ Backend requirement:
 Step 1 starts with one default category. The merchant must add products to that category.
 
 Supported step/category actions:
+
 - Add additional categories inside a step, such as Savory and Sweet.
 - Rename steps directly in the interface.
 - Rename categories directly in the interface.
@@ -193,6 +225,7 @@ Supported step/category actions:
 Product Slots configuration is scoped to EB Landing Page Bundles, also called FPB in WPB. It is not a PPB configuration surface.
 
 Scope:
+
 - Exposed only in FPB Bundle Settings.
 - Applies to empty slots shown in the summary/sidebar area of FPB templates.
 - Replaces the default empty slot plus icon with the merchant-uploaded Slot Icon when an FPB template renders empty slots.
@@ -200,6 +233,7 @@ Scope:
 - Does not apply to PPB modal or in-page slot templates.
 
 Asset behavior:
+
 - The uploaded Slot Icon is stored in the merchant's Shopify store assets.
 - The practical upload limit is smaller than Shopify's general store asset maximum.
 - If no Slot Icon is configured, FPB empty slots fall back to the default plus icon.
@@ -209,16 +243,19 @@ Asset behavior:
 Rules control valid customer selections and whether customers may proceed or check out.
 
 Step-level rules:
+
 - Apply to the total product count in a step.
 - If the customer selection is below the minimum requirement, the Next action is disabled or produces an error.
 - Example: Step 1 requires at least 2 products total.
 
 Category-level rules:
+
 - Apply to specific categories inside a step.
 - If a category selection does not satisfy its requirement, the customer cannot proceed.
 - Example: require exactly 1 product from Category 1 and exactly 1 product from Category 2.
 
 Blocking and skip behavior:
+
 - If a category rule limits selection to exactly 1, adding a second product from that category is blocked.
 - If a step rule requires a minimum of 2 products and the customer has selected only 1, moving to the next step is blocked.
 - If a customer tries to skip a step with unmet minimum requirements, EB shows an error describing the missing criteria, such as needing one more product.
@@ -228,12 +265,14 @@ Blocking and skip behavior:
 Discounts incentivize higher quantity purchases and can use multiple tiers.
 
 Supported discount types:
+
 - Fixed amount.
 - Percentage.
 - Fixed price bundle.
 - Tier-based offers such as buy 3 at a fixed price and get 1 free, or buy 5 at a fixed price and get 2 free.
 
 Tier behavior:
+
 - Example: if product count is 2, apply 5% off.
 - Example: if product count is 4, apply 10% off.
 - Example: if product count is 6, apply 15% off.
@@ -246,6 +285,7 @@ Tier behavior:
 Preview Bundle triggers the design selection flow the first time.
 
 Design flow:
+
 - Choose the layout template for Landing Page or Product Page.
 - Customize brand colors, including primary and secondary colors.
 - Customize styling such as corners, font sizes, and related visual settings.
@@ -253,11 +293,11 @@ Design flow:
 
 ### FPB Bundle Identifiers
 
-| Field | Type | Notes |
-|---|---|---|
-| `bundleId` | numeric string | Used in all FPB URLs and step save params |
-| `bundleType` | `"FULLPAGE_BUNDLE"` | Set at creation |
-| `offerId` (FPB) | `"FBP-{bundleId}"` | Used in cart properties; derived at runtime, not stored separately |
+| Field           | Type                | Notes                                                              |
+| --------------- | ------------------- | ------------------------------------------------------------------ |
+| `bundleId`      | numeric string      | Used in all FPB URLs and step save params                          |
+| `bundleType`    | `"FULLPAGE_BUNDLE"` | Set at creation                                                    |
+| `offerId` (FPB) | `"FBP-{bundleId}"`  | Used in cart properties; derived at runtime, not stored separately |
 
 ### FPB Step/Category Admin Payload
 
@@ -284,7 +324,11 @@ Sent to `saveMultipleCategoriesData`. The captured Admin save payload preserves 
           "productId": "8322626126020",
           "graphqlId": "gid://shopify/Product/8322626126020",
           "handle": "14k-dangling-obsidian-earrings",
-          "variants": [{ "variantGraphqlId": "gid://shopify/ProductVariant/45038877868228" }],
+          "variants": [
+            {
+              "variantGraphqlId": "gid://shopify/ProductVariant/45038877868228"
+            }
+          ],
           "title": "14k Dangling Obsidian Earrings"
         }
       ],
@@ -314,6 +358,7 @@ Sent to `saveMultipleCategoriesData`. The captured Admin save payload preserves 
 ```
 
 **Key distinctions:**
+
 - Step key is always `productsData{N}` (1-indexed string, not an array index).
 - FPB category save records include `products`, `selectedProducts`, `collectionsData`, and `collectionsSelectedData`; the source tab is inferred from which arrays are populated, not from a persisted `categoryType` field in the captured save.
 - Products in the captured Admin save payload are hydrated product objects with product GIDs, handles, variants, images, and titles. The public storefront DTO may be normalized later, but the Admin save proof is hydrated.
@@ -338,8 +383,8 @@ Captured from `network-934-savePersonalization-addonProducts.request.network-req
 
 Save endpoint:
 
-| Operation | Method | Path |
-|---|---|---|
+| Operation                            | Method | Path                                          |
+| ------------------------------------ | ------ | --------------------------------------------- |
 | FPB — save Add-ons / personalization | `POST` | `/api/stepsConfiguration/savePersonalization` |
 
 Payload shape:
@@ -434,8 +479,8 @@ Captured from `network-1548-savePersonalization-giftMessage.request.network-requ
 
 Save endpoint:
 
-| Operation | Method | Path |
-|---|---|---|
+| Operation                             | Method | Path                                          |
+| ------------------------------------- | ------ | --------------------------------------------- |
 | FPB - save Messages / personalization | `POST` | `/api/stepsConfiguration/savePersonalization` |
 
 Payload shape:
@@ -494,21 +539,23 @@ Scope gate: Emails and Customize Emails are out of scope for the clone rewrite. 
 
 ### PPB Bundle Identifiers
 
-| Field | Type | Notes |
-|---|---|---|
-| `offerId` | `"MIX-{6-digit-number}"` | Used in all PPB URLs and cart properties |
-| `bundleDesignTemplate` | `"PDP_INPAGE" \| "PDP_MODAL"` | Set at creation |
-| `bundleDesignTemplateData.templateId` | string | Visual preset within the layout mode |
+| Field                                 | Type                          | Notes                                    |
+| ------------------------------------- | ----------------------------- | ---------------------------------------- |
+| `offerId`                             | `"MIX-{6-digit-number}"`      | Used in all PPB URLs and cart properties |
+| `bundleDesignTemplate`                | `"PDP_INPAGE" \| "PDP_MODAL"` | Set at creation                          |
+| `bundleDesignTemplateData.templateId` | string                        | Visual preset within the layout mode     |
 
 ### EB Parent Bundle Product Visibility
 
 Verified on 2026-07-12 with Chrome DevTools MCP and saved network/storefront evidence:
+
 - PPB storefront product-page proof: `/private/tmp/ppb-parent-product-eb-storefront-global-probe.json`
 - PPB Admin/API proof: `/private/tmp/eb-ppb-mixandmatch-read.response.network-response`
 - FPB Admin/API proof: `/private/tmp/eb-fpb-stepsconfiguration-read.response.network-response`
 - FPB app-proxy probe: `/private/tmp/fpb-parent-product-eb-app-proxy-probe.json`
 
 EB creates both Product Page Bundle and Full Page Bundle parent Shopify products with:
+
 - `parentProductShopifyData.status: "unlisted"`
 - `parentProductShopifyData.isPublishedOnOnlineStore: true`
 - default parent product image `ParentProduct...avif`
@@ -516,6 +563,7 @@ EB creates both Product Page Bundle and Full Page Bundle parent Shopify products
 - one default parent variant with `inventory_policy: "continue"` / `availableForSale: true`
 
 The parent product `body_html` is the same contract for PPB and FPB. It starts with:
+
 - `Your Bundle is Unlisted`
 - `This product is automatically created with its Status set to "Unlisted".`
 - `The bundle is active and discounts will apply, but it is hidden from your store's search results and collection pages. Customers can still purchase it using a direct link.`
@@ -523,6 +571,7 @@ The parent product `body_html` is the same contract for PPB and FPB. It starts w
 - `Do Not Delete: Deleting this product will break the bundle's functionality.`
 
 Implications for Wolfpack (implemented 2026-07-14):
+
 - FPB and PPB first-time parent product creation both default the Shopify product to `UNLISTED`, not `DRAFT`.
 - Both bundle types use the same neutral default variant: `0.00`, continue selling, non-taxable, and `requiresComponents: true`.
 - The parent is published to Online Store without publishing it to incompatible sales channels.
@@ -549,29 +598,47 @@ Sent to `mixAndMatch/update`. The captured Admin update payload preserves hydrat
     "conditions": {
       "isEnabled": true,
       "rules": [
-        { "type": "quantity", "condition": "greaterThanOrEqualTo", "value": "02" },
-        { "type": "amount",   "condition": "greaterThanOrEqualTo", "value": "01000" }
+        {
+          "type": "quantity",
+          "condition": "greaterThanOrEqualTo",
+          "value": "02"
+        },
+        {
+          "type": "amount",
+          "condition": "greaterThanOrEqualTo",
+          "value": "01000"
+        }
       ]
     },
     "categories": {
       "category69520": {
         "categoryId": "category69520",
         "conditions": [
-          { "type": "quantity", "condition": "greaterThanOrEqualTo", "value": "01" }
+          {
+            "type": "quantity",
+            "condition": "greaterThanOrEqualTo",
+            "value": "01"
+          }
         ],
         "autoNextStepOnConditionMet": false,
         "title": "Featured products",
         "subTitle": "",
         "name": "Category 1 Direct Product Category",
         "categoryRank": 1,
-        "products": [{
-          "id": "gid://shopify/Product/8322626126020",
-          "productId": "8322626126020",
-          "graphqlId": "gid://shopify/Product/8322626126020",
-          "handle": "14k-dangling-obsidian-earrings",
-          "variants": [{ "variantGraphqlId": "gid://shopify/ProductVariant/45038877868228" }],
-          "title": "14k Dangling Obsidian Earrings"
-        }],
+        "products": [
+          {
+            "id": "gid://shopify/Product/8322626126020",
+            "productId": "8322626126020",
+            "graphqlId": "gid://shopify/Product/8322626126020",
+            "handle": "14k-dangling-obsidian-earrings",
+            "variants": [
+              {
+                "variantGraphqlId": "gid://shopify/ProductVariant/45038877868228"
+              }
+            ],
+            "title": "14k Dangling Obsidian Earrings"
+          }
+        ],
         "collectionsData": [],
         "collectionsSelectedData": [],
         "categoryBanner": "",
@@ -588,7 +655,9 @@ Sent to `mixAndMatch/update`. The captured Admin update payload preserves hydrat
         "categoryRank": 2,
         "products": [],
         "collectionsData": [],
-        "collectionsSelectedData": [{ "id": "gid://shopify/Collection/309961654468" }],
+        "collectionsSelectedData": [
+          { "id": "gid://shopify/Collection/309961654468" }
+        ],
         "categoryBanner": "",
         "displayVariantsAsIndividualProducts": false,
         "displayVariantsAsSwatches": false,
@@ -600,6 +669,7 @@ Sent to `mixAndMatch/update`. The captured Admin update payload preserves hydrat
 ```
 
 **PPB vs FPB category shape differences:**
+
 - Both captured FPB and PPB category saves use `products`, `collectionsData`, and `collectionsSelectedData` arrays with hydrated product/collection objects from the picker.
 - FPB additionally preserves a `selectedProducts` array in the captured category object; it was empty in the step-setup proof.
 - PPB stores `displayVariantsAsIndividualProducts` and `displayVariantsAsSwatches` per **category** — confirmed at category level
@@ -609,6 +679,7 @@ Sent to `mixAndMatch/update`. The captured Admin update payload preserves hydrat
 Verified on 2026-07-12 against EB Product Page Bundle Product List (`PDP_INPAGE` + `CASCADE`) for offer `MIX-156854`.
 
 Admin behavior:
+
 - Selecting the `Step rules` label exposes an `Add Rule` control.
 - A newly added rule exposes:
   - metric options: `Quantity`, `Amount`
@@ -622,7 +693,11 @@ Admin behavior:
     "conditions": {
       "isEnabled": true,
       "rules": [
-        { "type": "quantity", "condition": "greaterThanOrEqualTo", "value": "02" }
+        {
+          "type": "quantity",
+          "condition": "greaterThanOrEqualTo",
+          "value": "02"
+        }
       ]
     }
   }
@@ -630,12 +705,14 @@ Admin behavior:
 ```
 
 Storefront Product List behavior:
+
 - With one selected product, the footer `Add Bundle to Cart` element keeps the class `gbbMixCascadeAddToCartBtn--disabled-conditionsNotMet`, has `pointer-events: none`, and opacity `0.5`.
 - Under the same one-product state, no cart line is added.
 - With two selected products, EB removes the disabled condition class, sets `pointer-events: auto`, opacity `1`, and the bundle add-to-cart succeeds.
 - The successful cart line uses the parent bundle product and properties including `_EasyBundleId`, `_originalOfferId`, `Box`, and `Items`.
 
 2026-07-13 multi-step Product List behavior:
+
 - `PDP_INPAGE + CASCADE` renders only the active step's categories and products; it does not stack all configured steps into one list.
 - Intermediate steps use `Next`. The final step uses a separate Back control plus `Add Bundle to Cart`.
 - Step rules gate forward navigation. In the captured fixture, Step 1 required quantity greater than or equal to `2` before Next could transition to Step 2.
@@ -645,6 +722,7 @@ Storefront Product List behavior:
 - Evidence: `/private/tmp/ppb-product-list-agentic-parity/PL02-step-conditions/eb-desktop-step1-condition-met-2026-07-13.json`, `/private/tmp/ppb-product-list-agentic-parity/PL02-step-conditions/eb-desktop-step2-exact-one-2026-07-13.json`, `/private/tmp/ppb-product-list-agentic-parity/PL02-step-conditions/eb-desktop-step2-over-attempt-2026-07-13.json`, and `/private/tmp/ppb-product-list-agentic-parity/PL02-step-conditions/eb-mobile-step-parts-390-2026-07-13.json`.
 
 2026-07-13 PPB Product List quantity-validation gotcha:
+
 - EB Admin can show `Bundle Settings -> Enable Quantity Validation` as checked for a Product Page Bundle Product List bundle while the saved `mixAndMatch/update` payload still contains `boxSelection.isEnabled: false` and `boxSelection.validateBoxSelectionQuantity: false`.
 - The same cache-bypassed storefront then emits `boxSelection.isEnabled: false`, `boxSelection.validateBoxSelectionQuantity: false`, and no quantity-option wrapper DOM.
 - Discount & Pricing exposed `Bundle Quantity Options`, but the accessibility checkbox did not toggle through direct checkbox click, wrapper click, Space, Enter, or form fill during the MCP pass.
@@ -652,6 +730,7 @@ Storefront Product List behavior:
 - Evidence: `/private/tmp/ppb-product-list-agentic-parity/PL06-quantity-validation/eb-validation-save.request.network-request`, `/private/tmp/ppb-product-list-agentic-parity/PL06-quantity-validation/eb-validation-save.response.network-response`, and `/private/tmp/ppb-product-list-agentic-parity/PL06-quantity-validation/eb-runtime-after-validation-save-2026-07-13.json`.
 
 2026-07-13 PPB Product List mixed-inventory behavior:
+
 - With one sellable variant and two unavailable variants, Product List renders one grouped product row, shows the sole sellable variant title as plain text, and does not render a variant selector.
 - Unavailable variants are omitted rather than disabled or labelled out of stock. A fully unavailable configured product is omitted entirely.
 - Product List does not render sold-out copy for these filtered states.
@@ -665,14 +744,18 @@ Storefront Product List behavior:
     "isDiscountEnabled": true,
     "discountMode": "PERCENTAGE",
     "rules": [
-      { "value": "2",     "discountValue": "5",   "type": "quantity" },
-      { "value": "21500", "discountValue": "510",  "type": "amount"   }
+      { "value": "2", "discountValue": "5", "type": "quantity" },
+      { "value": "21500", "discountValue": "510", "type": "amount" }
     ],
     "isShowDiscountsEnabled": true,
     "discountTextBody": {
       "percentageAndFixed": {
-        "rule1": { "text": "Add {{discountConditionDiff}} product(s) to save {{discountValue}}{{discountValueUnit}}!" },
-        "rule2": { "text": "Congrats! Spend {{discountUnit}}{{discountConditionDiff}} more to get {{discountValue}}{{discountValueUnit}} off." }
+        "rule1": {
+          "text": "Add {{discountConditionDiff}} product(s) to save {{discountValue}}{{discountValueUnit}}!"
+        },
+        "rule2": {
+          "text": "Congrats! Spend {{discountUnit}}{{discountConditionDiff}} more to get {{discountValue}}{{discountValueUnit}} off."
+        }
       }
     },
     "discountTextForSuccess": {
@@ -682,8 +765,8 @@ Storefront Product List behavior:
   "metafieldData": {
     "discount": {
       "rules": [
-        { "value": "2",     "discountValue": "5",   "type": "quantity" },
-        { "value": "21500", "discountValue": "510",  "type": "amount"   }
+        { "value": "2", "discountValue": "5", "type": "quantity" },
+        { "value": "21500", "discountValue": "510", "type": "amount" }
       ],
       "discountMode": "PERCENTAGE"
     }
@@ -702,6 +785,7 @@ next-rule progress lookup on the master enabled flag.
 The display-option and rule-field observations below were rechecked in the live PPB configure flow on 2026-05-25. Verify FPB visually before treating the layout as identical there.
 
 **Discount Type dropdown options (top-level `discountMode`):**
+
 - `"Fixed Amount Off"` → `discountMode: "FIXED_AMOUNT"`
 - `"Percentage Off"` → `discountMode: "PERCENTAGE"`
 - `"Fixed Bundle Price"` → `discountMode: "FIXED_BUNDLE_PRICE"`
@@ -709,29 +793,29 @@ The display-option and rule-field observations below were rechecked in the live 
 
 **Rule fields for Percentage Off / Fixed Amount Off:**
 
-| Field | UI Label | Notes |
-|---|---|---|
-| `rule.type` | "Discount on" (quantity / amount) | Condition type |
-| `rule.value` | "is greater than or equal to" | Quantity count or currency-prefixed amount threshold |
-| `rule.discountValue` (Percentage Off) | "Percentage Off" | Percentage-suffixed value |
-| `rule.discountValue` (Fixed Amount Off) | "Fixed Amount Off" | Currency-prefixed value |
+| Field                                   | UI Label                          | Notes                                                |
+| --------------------------------------- | --------------------------------- | ---------------------------------------------------- |
+| `rule.type`                             | "Discount on" (quantity / amount) | Condition type                                       |
+| `rule.value`                            | "is greater than or equal to"     | Quantity count or currency-prefixed amount threshold |
+| `rule.discountValue` (Percentage Off)   | "Percentage Off"                  | Percentage-suffixed value                            |
+| `rule.discountValue` (Fixed Amount Off) | "Fixed Amount Off"                | Currency-prefixed value                              |
 
 **Rule fields for Fixed Bundle Price:**
 
-| Field | UI Label | Notes |
-|---|---|---|
-| `rule.value` | "Number of Products in Bundle" | Product-count condition |
-| `rule.discountValue` | "Price" | Currency-prefixed price input |
+| Field                | UI Label                       | Notes                         |
+| -------------------- | ------------------------------ | ----------------------------- |
+| `rule.value`         | "Number of Products in Bundle" | Product-count condition       |
+| `rule.discountValue` | "Price"                        | Currency-prefixed price input |
 
 **Rule fields for Buy X, Get Y (`discountMode: "BOGO"`):**
 
-| Field | UI Label | Default | Notes |
-|---|---|---|---|
-| `rule.value` | "Minimum quantity of items" | 2 | Customer-buys quantity |
-| `rule.getsQuantity` | "Quantity" | 1 | Customer-gets / discounted item count |
-| `rule.discountValue` | "Discount value" | 100 | Numeric value |
-| `rule.discountType` | "Discount type" | `"percentage"` | UI shows `"% off"` or `"₹ off"` |
-| `rule.applyDiscountTo` | "Apply Discount to" | `"lowest_priced"` | UI shows `"The lowest priced items"` or `"The latest added items"` |
+| Field                  | UI Label                    | Default           | Notes                                                              |
+| ---------------------- | --------------------------- | ----------------- | ------------------------------------------------------------------ |
+| `rule.value`           | "Minimum quantity of items" | 2                 | Customer-buys quantity                                             |
+| `rule.getsQuantity`    | "Quantity"                  | 1                 | Customer-gets / discounted item count                              |
+| `rule.discountValue`   | "Discount value"            | 100               | Numeric value                                                      |
+| `rule.discountType`    | "Discount type"             | `"percentage"`    | UI shows `"% off"` or `"₹ off"`                                    |
+| `rule.applyDiscountTo` | "Apply Discount to"         | `"lowest_priced"` | UI shows `"The lowest priced items"` or `"The latest added items"` |
 
 UI note: "Customer must add the quantity of items specified above to their cart" appears as help text under Customer gets.
 
@@ -750,6 +834,7 @@ the rule object for the BXY threshold semantics.
 ### Discount Display Options — Bundle Quantity Options
 
 **Section layout:**
+
 - Not rendered for Buy X, Get Y.
 - Non-BXY states show the toggle, "Multi Language" action, and note: "Note: Bundle Quantity Options can only be enabled when discount rules are based on quantity."
 - When enabled for quantity-based rules, each rule renders "Box Label" and "Box Subtext" fields plus a "Make this rule default" star action.
@@ -763,6 +848,7 @@ and to the cart-transform merged parent attributes.
 **"Multi Language" button:**
 
 Opens modal "Customize Text for Multiple Languages":
+
 - "Select Language" dropdown
 - Per-rule card: "Rule #1" → Box Label textbox | Box Subtext textbox
 - "Save and close" button
@@ -770,6 +856,7 @@ Opens modal "Customize Text for Multiple Languages":
 ### Discount Display Options — Progress Bar
 
 **Section layout:**
+
 - Toggle: `isShowDiscountsEnabled` / Progress Bar on/off
 - "Multi Language" button: **disabled** when Simple Bar selected; **enabled** when Step-Based Bar selected
 - Radio group: `"Simple Bar"` | `"Step-Based Bar"`
@@ -779,19 +866,23 @@ Opens modal "Customize Text for Multiple Languages":
 **Classic C05 progress gate note (2026-07-05):** In the current EB Admin state, switching the Discount Type combobox from `Fixed Bundle Price` to `Fixed Amount Off` is not sufficient to create a discount-enabled/progress-enabled storefront fixture when the master Discount & Pricing checkbox is off. The save payload still carried `isDiscountEnabled: false`, `discountMode: "FIXED"`, `isDiscountProgressBarEnabled: false`, `isShowDiscountsEnabled: false`, and a disabled `discountProgressBar`; cache-cleared desktop/mobile storefront proof continued to show the add-on/box fixture with no visible discount-progress component. Treat visible progress-bar-on Classic parity as gated until EB exposes an interactable master discount toggle/progress UI path or a backend shortcut is explicitly approved.
 
 **Classic C05 fixed bundle price storefront/cart note (2026-07-04):** After EB Admin saved `Fixed Bundle Price` through `/api/discount/updateFixedBundle`, the current Classic storefront still kept the existing Bundle Quantity Options label/subtext (`Box of 2` / `₹5 off`). With two products selected, the Classic desktop sidebar and mobile footer showed the raw selected-products total (`₹1158.00`) and did not render the fixed bundle price as a separate final summary total. Fresh cart proof for the same Classic fixed-price path posted two component items, then checkout/cart showed one `Daily Essentials` parent line at the raw selected-products total (`₹1158.00`) with no native discount allocation, no `You Save` cart-line property, and no fixed final price. Treat this fixture's Classic fixed-bundle-price value as display-only for summary/cart presentation, not as a cart-price override.
+
 - When Simple Bar is selected, no per-rule tier-text fields appear.
 
 **When Step-Based Bar is selected, per-rule fields appear:**
+
 ```
 Rule #1
   Tier Text:    "Add 3"                   ← auto-computed: customerBuys + customerGets = total
   Tier Subtext: "1 Product(s) @ 100% off" ← auto-computed: customerGets + discountValue + discountType
 ```
+
 These are merchant-editable text fields (not fixed computed values).
 
 **Progress Bar "Multi Language" button (enabled only with Step-Based Bar):**
 
 Opens modal "Customize Text for Multiple Languages":
+
 - "Select Language" dropdown (same 38 languages as Discount Messaging)
 - Per-rule card: "Rule #1" → Tier Text textbox | Tier Subtext textbox (side by side)
 - "Save and close" button
@@ -801,6 +892,7 @@ This modal allows translating per-rule tier labels into any of the 38 supported 
 ### Discount Display Options — Discount Messaging
 
 **Section layout:**
+
 - Toggle: `discountMessagingEnabled`
 - "Enable multi-language" checkbox (top right of section)
 - "Edit how discount messages appear above the subtotal."
@@ -815,15 +907,18 @@ English, Arabic, Bulgarian (BG), Catalan, Chinese (CN), Chinese (TW), Croatian, 
 **Default discount message texts by discount type:**
 
 Percentage Off:
+
 - Rule 1 Discount Text: `"Add {{discountConditionDiff}} product(s) to save {{discountValue}}{{discountValueUnit}}!"`
 - Success Message: `"Success! Your {{discountValue}}{{discountValueUnit}} discount has been applied to your cart."`
 
 Buy X, Get Y:
+
 - Rule 1 Discount Text: `"Add {{discountConditionDiff}} product(s) to get {{discountedItems}} of them at {{discountValue}}{{discountValueUnit}} off!"`
 - Rule 2+ Discount Text: `"Add {{discountConditionDiff}} more to get {{discountedItems}} product(s) at {{discountValue}}{{discountValueUnit}} off!"`
 - Success Message: `"Success! You got {{discountedItems}} product(s) at {{discountValue}}{{discountValueUnit}} off"`
 
 **Template variables confirmed:**
+
 - `{{discountConditionDiff}}` — remaining quantity/amount to add to unlock discount
 - `{{discountUnit}}` — currency symbol for amount-based rules
 - `{{discountValue}}` — numerical discount reward value
@@ -877,20 +972,58 @@ Reference URLs:
 }
 ```
 
+Live invalid-default evidence captured on 2026-07-30 confirms:
+
+- EB retains a configured product and variant in `defaultProductsData` after the Shopify product becomes Draft.
+- The shopper runtime treats Storefront API availability as authoritative: the stale default is omitted from the catalog, initial selection, summary, and cart state.
+- The widget still mounts normally without an error or document overflow in Standard, Classic, Compact, and Horizontal on desktop and mobile.
+- Restoring the Shopify product to Active makes it eligible again without rewriting the saved default configuration.
+
 ---
 
 ## Template System
+
+### Admin Select Template completion screen
+
+Live FPB Select Template evidence captured on 2026-07-30 confirms:
+
+- Select Template opens in Shopify's App Bridge host-level `max` modal shell
+- The modal body is rendered in a projected `/app` iframe outside the configure
+  page's named container. Responsive modal rules therefore need viewport media
+  queries; configure-container queries alone do not apply to this surface. The
+  projected document also does not inherit the app root's body font, so the
+  modal content shell must own the Admin font stack explicitly.
+  with the heading `Customization`; at a 1280px by 800px viewport, the dialog
+  starts at x=8px and y=64px and measures 1264px by 736px. An iframe-local
+  Polaris `large` modal does not match this Admin-surface shell.
+- App Bridge projects the modal body into a host iframe where nested Polaris
+  web components do not hydrate reliably. The completion screen must use
+  semantic projected markup for its stack, icon, and action so they do not
+  collapse into unstyled inline text.
+- The completion state begins with a 72px white internal header containing
+  `View your bundle` and `View your bundle with your customizations`.
+- Its neutral body centers a 480px by 224px success card with 40px padding,
+  12px corner radius, a 32px success icon, and the 24px
+  `Your bundle is ready` heading.
+- `Preview bundle` opens the storefront preview in a new browser tab and closes
+  the customization modal after preview navigation begins.
+- No `How to setup`, `Learn More`, or equivalent help link is present in the
+  Select Template modal or its completion state.
+
+The same App Bridge `max` modal and shared completion-state contract should be
+used by Wolfpack FPB and PPB; bundle-specific template selection and preview
+handlers remain separate.
 
 ### FPB Templates (Two-Field System)
 
 `bundleDesignTemplate` is **always `FBP_SIDE_FOOTER`** for all four FPB presets — confirmed via CSS attribute selectors in `easy-bundle-full-page-min.css` and `insertWrapperIntoBody` logic in `easy-bundle-full-page-min.js`. The preset is selected via `bundleDesignPresetId`.
 
-| Display Name | `bundleDesignTemplate` | `bundleDesignPresetId` | Body CSS class added |
-|---|---|---|---|
-| Standard Design | `FBP_SIDE_FOOTER` | `DEFAULT_FBP` | `gbbMinimilisticLayout` + `gbbProductsCardLayoutV2` |
-| Classic Design | `FBP_SIDE_FOOTER` | `CLASSIC` | `gbbMinimilisticLayout` + `gbbProductsCardLayoutV2` |
-| Compact Design | `FBP_SIDE_FOOTER` | `COMPACT` | `gbbMinimilisticLayout` + `gbbProductsCardLayoutV2` |
-| Horizontal Design | `FBP_SIDE_FOOTER` | `HORIZONTAL` | `gbbMinimilisticLayout` + `gbbProductsCardLayoutV2` |
+| Display Name      | `bundleDesignTemplate` | `bundleDesignPresetId` | Body CSS class added                                |
+| ----------------- | ---------------------- | ---------------------- | --------------------------------------------------- |
+| Standard Design   | `FBP_SIDE_FOOTER`      | `DEFAULT_FBP`          | `gbbMinimilisticLayout` + `gbbProductsCardLayoutV2` |
+| Classic Design    | `FBP_SIDE_FOOTER`      | `CLASSIC`              | `gbbMinimilisticLayout` + `gbbProductsCardLayoutV2` |
+| Compact Design    | `FBP_SIDE_FOOTER`      | `COMPACT`              | `gbbMinimilisticLayout` + `gbbProductsCardLayoutV2` |
+| Horizontal Design | `FBP_SIDE_FOOTER`      | `HORIZONTAL`           | `gbbMinimilisticLayout` + `gbbProductsCardLayoutV2` |
 
 Rendering logic applies `DEFAULT_FBP`/`CLASSIC`/`COMPACT`/`HORIZONTAL` via the body attribute `gbb-bundle-design-preset-id="{presetId}"` — CSS scopes design differences under that selector. Older captured notes used `DEFAULT` for Standard Design, but a 2026-06-05 live reset of `WPB Research Landing Bundle 2026-05-22` confirmed EB storefront runtime now exposes Standard Design as `stepsConfigurationData.bundleDesignPresetId: "DEFAULT_FBP"` and body attribute `gbb-bundle-design-preset-id="DEFAULT_FBP"`.
 
@@ -902,12 +1035,12 @@ live EB proof shows a Classic-only content or presentation difference.
 
 ### PPB Templates (Two-Field System)
 
-| Display Name | `bundleDesignTemplate` | `templateId` | Storefront module |
-|---|---|---|---|
-| Product List | `PDP_INPAGE` | `CASCADE` | `gbbMix.templates.CASCADE.init()` |
-| Product Grid | `PDP_INPAGE` | `COGNIVE` | `gbbMix.templates.COGNIVE` (lightweight override) |
-| Horizontal Slots | `PDP_MODAL` | `MODAL` | `gbbMix.gbbMixAndMatchBundle.initialize()` |
-| Vertical Slots | `PDP_MODAL` | `SIMPLIFIED` | same as MODAL (admin-only label; CSS-class differentiated) |
+| Display Name     | `bundleDesignTemplate` | `templateId` | Storefront module                                          |
+| ---------------- | ---------------------- | ------------ | ---------------------------------------------------------- |
+| Product List     | `PDP_INPAGE`           | `CASCADE`    | `gbbMix.templates.CASCADE.init()`                          |
+| Product Grid     | `PDP_INPAGE`           | `COGNIVE`    | `gbbMix.templates.COGNIVE` (lightweight override)          |
+| Horizontal Slots | `PDP_MODAL`            | `MODAL`      | `gbbMix.gbbMixAndMatchBundle.initialize()`                 |
+| Vertical Slots   | `PDP_MODAL`            | `SIMPLIFIED` | same as MODAL (admin-only label; CSS-class differentiated) |
 
 `PDP_INPAGE` vs `PDP_MODAL` is a binary dispatch: inpage uses `gbbMix.templates`, modal uses `gbbMix.gbbMixAndMatchBundle`. `SIMPLIFIED` has zero occurrences in widget JS — its visual differentiation from `MODAL` is driven by `renderFilledSlotsAsHorizontalStacked` → CSS class `gbbMixProductPageCategoriesWrapperHStacked` / `VStacked`.
 
@@ -1025,14 +1158,14 @@ forces the storefront flag to false.
 
 ### FPB Global Namespace
 
-| Global | Purpose |
-|---|---|
-| `window.gbb` | Main FPB state + function container |
+| Global                                       | Purpose                                                                                                                                        |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `window.gbb`                                 | Main FPB state + function container                                                                                                            |
 | `window.gbb.settings.stepsConfigurationData` | Inline-embedded bundle config (all steps, categories, product IDs, template IDs, box selection, text config) — primary source of truth on load |
-| `window.gbb.state` | Widget runtime state (current step, navigation items, selected items) |
-| `window.gbb.gbbBoxSelection` | Box-selection module (`.state` + `.f` sub-namespaces) |
-| `window.easybundles_ext_data` | Storefront data blob with 6 top-level keys (see below) |
-| `window.easybundle_user_ext_data` | User-level tokens — **never copy to docs** |
+| `window.gbb.state`                           | Widget runtime state (current step, navigation items, selected items)                                                                          |
+| `window.gbb.gbbBoxSelection`                 | Box-selection module (`.state` + `.f` sub-namespaces)                                                                                          |
+| `window.easybundles_ext_data`                | Storefront data blob with 6 top-level keys (see below)                                                                                         |
+| `window.easybundle_user_ext_data`            | User-level tokens — **never copy to docs**                                                                                                     |
 
 `stepsConfigurationData` is embedded as a JSON script in the app-proxy HTML response — not fetched asynchronously. Products are ID-only in this payload; widget fetches full product data via Storefront API `nodes(ids:[...])` on init.
 
@@ -1040,10 +1173,13 @@ forces the storefront flag to false.
 
 ```html
 <html class="js bundle-{id} gbbBundle-HTML">
-<div id="gbbBundle"
-     class="gbbPageBody gbbMinimilisticLayout gbbProductsCardLayoutV2"
-     data-template-id="FBP_SIDE_FOOTER"
-     data-is-last-page="true | false">
+  <div
+    id="gbbBundle"
+    class="gbbPageBody gbbMinimilisticLayout gbbProductsCardLayoutV2"
+    data-template-id="FBP_SIDE_FOOTER"
+    data-is-last-page="true | false"
+  ></div>
+</html>
 ```
 
 Body attribute: `gbb-bundle-design-preset-id="{DEFAULT_FBP | CLASSIC | COMPACT | HORIZONTAL}"`
@@ -1058,6 +1194,10 @@ Per-category attribute: `categoryid="{categoryId}"`
 
 Evidence: `/private/tmp/fpb-classic-agentic-parity/CS4-mobile-footer-scroll-lock/eb-cs4-before-toggle-runtime-20260704.json`, `eb-cs4-empty-expanded-runtime-20260704.json`, and `eb-cs4-empty-expanded-scroll-probe-20260704.json`.
 
+2026-07-30 current selected/BQO Classic evidence clarifies that the operable expand/collapse control is one centered black quantity pill, not a separate visible toggle row. The pill measured approximately `47.5 x 25.2`, used a real filled `20 x 20` SVG child with `10px` inline pill padding, pointed up while collapsed and down while expanded, and rotated the SVG over `300ms`. The older empty-fixture `View Selected Products` text is therefore state-specific evidence and must not be implemented as a second always-present control.
+
+2026-07-30 selected Horizontal evidence confirms the same pill remains one connected DOM control throughout both directions of the interaction. EB expanded the selected fixture footer from approximately `174px` to `462px` over `300ms` while the caret rotated, then reversed both animations on collapse. Rebuilding the footer at toggle time breaks this contract because the new expanded layout is painted immediately even if the replacement caret still animates.
+
 2026-07-06 selected-product Classic mobile footer evidence confirms the expanded selected slot strip does not render per-slot trash, delete, or remove controls. With two products selected, the visible removal affordance is the footer header `Clear` control; slot cells contain only the product images. Evidence: `/private/tmp/fpb-classic-agentic-parity/mobile-footer-remove-control/eb-mobile-selected-expanded-remove-probe-20260706.json` and `eb-mobile-selected-expanded-remove-20260706.png`.
 
 2026-07-06 Classic mobile additional-offers badge evidence confirms the `Additional offers to be unlocked` state appears as a transient footer count-badge state after the shopper has unlocked at least one add-on tier while another add-on tier remains locked. The badge turns green (`rgb(85, 189, 71)`) with white `14px` regular text, expands from the normal count badge to the message width, then returns to the normal black quantity badge. Evidence: `/private/tmp/fpb-classic-agentic-parity/mobile-additional-offers-pill/eb-mobile-one-select-pill-timeline-refresh-20260706.json`, `eb-mobile-one-select-pill-cycle-20260706.json`, and `eb-mobile-collapsed-additional-offers-flash-20260706.png`.
@@ -1067,6 +1207,7 @@ Evidence: `/private/tmp/fpb-classic-agentic-parity/CS4-mobile-footer-scroll-lock
 For Standard Design (`FBP_SIDE_FOOTER` + `DEFAULT_FBP`), grouped variant products render an inline `Choose Options` dropdown on desktop when variants are not displayed as individual products.
 
 Observed desktop behavior:
+
 - The selected row uses the EB Standard card dropdown style: one row tall, `1.5px` light border, `5px` radius, Assistant text, and option rows with product images where available.
 - Long option lists use a short scrolling dropdown viewport with a `max-height` transition when opening and closing.
 - The dropdown paints above later product cards in the grid when expanded.
@@ -1093,12 +1234,12 @@ Evidence: `/private/tmp/fpb-feature-parity/F1/grouped-variants.md`.
 
 ### PPB Global Namespace
 
-| Global | Purpose |
-|---|---|
-| `window.gbbMix` | Main PPB widget container |
-| `window.gbbMix.gbbMixAndMatchBundle.state` | PPB runtime state (offerId, selectedProducts, categories, cartData, pagination counts) |
-| `window.gbbMix.settings.pageCustomizationSettings.mixAndMatchBundleSettings` | Processed store-level PPB settings (25+ fields) |
-| `window.GbbMixState` | Alias / secondary state accessor |
+| Global                                                                       | Purpose                                                                                |
+| ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `window.gbbMix`                                                              | Main PPB widget container                                                              |
+| `window.gbbMix.gbbMixAndMatchBundle.state`                                   | PPB runtime state (offerId, selectedProducts, categories, cartData, pagination counts) |
+| `window.gbbMix.settings.pageCustomizationSettings.mixAndMatchBundleSettings` | Processed store-level PPB settings (25+ fields)                                        |
+| `window.GbbMixState`                                                         | Alias / secondary state accessor                                                       |
 
 PPB is entirely separate from FPB — `window.gbb` does **not** exist on PPB storefront pages.
 
@@ -1134,7 +1275,10 @@ PPB is entirely separate from FPB — `window.gbb` does **not** exist on PPB sto
   "validateQuantityPerProduct": { "isEnabled": false, "allowedQuantity": 1 },
   "cartData": {
     "selectedCategoriesProducts": { "category69520": [], "category19687": [] },
-    "items": [], "item_count": 0, "total_price": 0, "discounted_price": 0
+    "items": [],
+    "item_count": 0,
+    "total_price": 0,
+    "discounted_price": 0
   }
 }
 ```
@@ -1258,13 +1402,13 @@ Metafield key per bundle add: `{offerId}_{sessionKey}` (without item index). Mul
 
 ### FPB vs PPB Cart Add Comparison
 
-| Aspect | FPB | PPB |
-|---|---|---|
-| Endpoint | `POST /cart/add.js` | `POST /cart/add` |
-| Content-Type | `application/json` | `multipart/form-data` |
-| Cart Transform operation | EXPAND / MERGE | OVERWRITE_LINE_ITEM |
-| Step data in cart | Not present (client-only) | Not present |
-| `bundle_details` key format | `{offerId}_{sessionKey}` | `{offerId}_{sessionKey}` |
+| Aspect                      | FPB                       | PPB                      |
+| --------------------------- | ------------------------- | ------------------------ |
+| Endpoint                    | `POST /cart/add.js`       | `POST /cart/add`         |
+| Content-Type                | `application/json`        | `multipart/form-data`    |
+| Cart Transform operation    | EXPAND / MERGE            | OVERWRITE_LINE_ITEM      |
+| Step data in cart           | Not present (client-only) | Not present              |
+| `bundle_details` key format | `{offerId}_{sessionKey}`  | `{offerId}_{sessionKey}` |
 
 Step information (`_boxProduct`, `_Category`, `_CategoryName`) is tracked client-side only — it is **never sent** to `/cart/add.js`.
 
@@ -1307,7 +1451,13 @@ Admin: FPB configure → Bundle Settings → "Bundle Quantity Options" checkbox 
     "isEnabled": false,
     "validateBoxSelectionQuantity": false,
     "rules": [
-      { "ruleId": "134", "boxQuantity": 2, "boxLabel": "Box of 2", "boxSubtext": "5% off", "isDefaultSelected": true }
+      {
+        "ruleId": "134",
+        "boxQuantity": 2,
+        "boxLabel": "Box of 2",
+        "boxSubtext": "5% off",
+        "isDefaultSelected": true
+      }
     ],
     "textConfig": {
       "isEnabled": false,
@@ -1323,9 +1473,11 @@ Admin: FPB configure → Bundle Settings → "Bundle Quantity Options" checkbox 
 
 ```javascript
 function validateBoxSelectionOnCheckout() {
-  const { activeRule, validateBoxSelectionQuantity } = gbb.gbbBoxSelection.state;
+  const { activeRule, validateBoxSelectionQuantity } =
+    gbb.gbbBoxSelection.state;
   if (!validateBoxSelectionQuantity) return true; // never blocked when validation disabled
-  const { items_quantity } = gbb.gbbBoxSelection.f.getFilteredCartItemsForBoxSelection();
+  const { items_quantity } =
+    gbb.gbbBoxSelection.f.getFilteredCartItemsForBoxSelection();
   return items_quantity == activeRule?.boxQuantity; // exact match required
 }
 ```
@@ -1339,11 +1491,17 @@ When `validateBoxSelectionQuantity: false` (the default), the ATC button is **ne
 **Box tier selector DOM:**
 
 ```html
-<div class="gbbBoxSelectionWrapper" data-total-rules="1" data-active-rule-id="652">
-  <div class="gbbBoxSelectionItem gbbBoxSelectionItemActive"
-       data-box-quantity="3"
-       data-rule-id="652"
-       data-is-active="true">
+<div
+  class="gbbBoxSelectionWrapper"
+  data-total-rules="1"
+  data-active-rule-id="652"
+>
+  <div
+    class="gbbBoxSelectionItem gbbBoxSelectionItemActive"
+    data-box-quantity="3"
+    data-rule-id="652"
+    data-is-active="true"
+  >
     Box of 3
   </div>
 </div>
@@ -1385,7 +1543,10 @@ A 29-product collection triggers two parallel `nodes()` calls: 24 products + 5 p
 When `true` for a category, each variant of a multi-variant product renders as its own product card:
 
 ```html
-<div class="gbbMixCascadeProductWrapper" data-current-selected-variant-id="{variantId}">
+<div
+  class="gbbMixCascadeProductWrapper"
+  data-current-selected-variant-id="{variantId}"
+>
   <div class="gbbMixCascadeCurrentVariantTitle">{variantTitle}</div>
 </div>
 ```
@@ -1414,19 +1575,19 @@ JS state transition (Step 1 → Step 2): `currentPageId: "addProductsPage1"` →
 
 ### DB Model Alignment
 
-| EB field | Wolfpack model | Notes |
-|---|---|---|
-| `productsData{N}` | `Step` | Keep stable step key; rank is N |
-| `categories.{categoryId}` | `StepCategory` | Stable ID as primary key |
-| `category.products[].graphqlId` | `CategoryProduct.productGid` | Admin save payload preserves hydrated picker objects; DB/storage may normalize GIDs for app ownership |
-| `category.collectionsSelectedData[].id` | `CategoryCollection.collectionGid` | Admin save payload preserves hydrated collection objects; DB/storage may normalize GIDs for app ownership |
-| `displayVariantsAsIndividualProducts` | `StepCategory.displayVariantsAsIndividualProducts` | Per-category boolean |
-| `displayVariantsAsSwatches` | `StepCategory.displayVariantsAsSwatches` | Per-category boolean |
-| `conditions.rules[]` | `StepCondition[]` | Per-step or per-category |
-| `discountConfiguration` | `Bundle.discountConfig` | Admin-only; compact version → metafield |
-| `defaultProductsData` | `BundleDefaultProduct[]` | Per-bundle preselected product list |
-| `boxSelection` | `Bundle.boxSelection` | FPB-only; nullable |
-| `bundleTextConfig.bundleSummary` | `Bundle.cartTitle / Bundle.cartSubtitle` | Two string fields only |
+| EB field                                | Wolfpack model                                     | Notes                                                                                                     |
+| --------------------------------------- | -------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `productsData{N}`                       | `Step`                                             | Keep stable step key; rank is N                                                                           |
+| `categories.{categoryId}`               | `StepCategory`                                     | Stable ID as primary key                                                                                  |
+| `category.products[].graphqlId`         | `CategoryProduct.productGid`                       | Admin save payload preserves hydrated picker objects; DB/storage may normalize GIDs for app ownership     |
+| `category.collectionsSelectedData[].id` | `CategoryCollection.collectionGid`                 | Admin save payload preserves hydrated collection objects; DB/storage may normalize GIDs for app ownership |
+| `displayVariantsAsIndividualProducts`   | `StepCategory.displayVariantsAsIndividualProducts` | Per-category boolean                                                                                      |
+| `displayVariantsAsSwatches`             | `StepCategory.displayVariantsAsSwatches`           | Per-category boolean                                                                                      |
+| `conditions.rules[]`                    | `StepCondition[]`                                  | Per-step or per-category                                                                                  |
+| `discountConfiguration`                 | `Bundle.discountConfig`                            | Admin-only; compact version → metafield                                                                   |
+| `defaultProductsData`                   | `BundleDefaultProduct[]`                           | Per-bundle preselected product list                                                                       |
+| `boxSelection`                          | `Bundle.boxSelection`                              | FPB-only; nullable                                                                                        |
+| `bundleTextConfig.bundleSummary`        | `Bundle.cartTitle / Bundle.cartSubtitle`           | Two string fields only                                                                                    |
 
 Do NOT add backwards-compatibility shims. New fields get direct DB columns with sensible defaults.
 
@@ -1444,16 +1605,23 @@ type PublicBundleConfig = {
     rank: number;
     title: string;
     subtitle: string;
-    categories: Record<string, {
-      categoryId: string;
-      rank: number;
-      title: string;
-      products: Array<{ gid: string; numericId: string; variants: Variant[] }>;
-      collectionsData: Array<{ gid: string; handle: string }>;
-      displayVariantsAsIndividualProducts: boolean;
-      displayVariantsAsSwatches: boolean;
-      conditions: Condition[];
-    }>;
+    categories: Record<
+      string,
+      {
+        categoryId: string;
+        rank: number;
+        title: string;
+        products: Array<{
+          gid: string;
+          numericId: string;
+          variants: Variant[];
+        }>;
+        collectionsData: Array<{ gid: string; handle: string }>;
+        displayVariantsAsIndividualProducts: boolean;
+        displayVariantsAsSwatches: boolean;
+        conditions: Condition[];
+      }
+    >;
     conditions: Condition[];
   }>;
 };

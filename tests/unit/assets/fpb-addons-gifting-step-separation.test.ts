@@ -254,7 +254,7 @@ describe("FPB add-ons / gifting step separation", () => {
     const state = getAddonEligibilityState.call(
       {
         selectedProducts: [{ paidVariant: 6 }],
-        stepProductData: [[{ variantId: "paidVariant", price: 1000 }]],
+        stepProductData: [[{ selectionId: "paidVariant", price: 1000 }]],
         selectedBundle: { steps: [{ id: "paid" }, step] },
       },
       step,
@@ -294,7 +294,7 @@ describe("FPB add-ons / gifting step separation", () => {
     };
     const ctx = {
       selectedProducts: [{ paidVariant: 6 }],
-      stepProductData: [[{ variantId: "paidVariant", price: 1000 }]],
+      stepProductData: [[{ selectionId: "paidVariant", price: 1000 }]],
       selectedBundle: { steps: [{ id: "paid" }, step] },
     };
 
@@ -327,7 +327,7 @@ describe("FPB add-ons / gifting step separation", () => {
       ],
     };
     const baseCtx = {
-      stepProductData: [[{ variantId: "paidVariant", price: 1000 }]],
+      stepProductData: [[{ selectionId: "paidVariant", price: 1000 }]],
       selectedBundle: { steps: [{ id: "paid" }, step] },
     };
 
@@ -372,7 +372,7 @@ describe("FPB add-ons / gifting step separation", () => {
       ],
     };
     const baseCtx = {
-      stepProductData: [[{ variantId: "paidVariant", price: 1000 }]],
+      stepProductData: [[{ selectionId: "paidVariant", price: 1000 }]],
       selectedBundle: { steps: [{ id: "paid" }, step] },
     };
 
@@ -426,7 +426,7 @@ describe("FPB add-ons / gifting step separation", () => {
     };
     const ctx = {
       selectedProducts: [{ paidVariant: 1 }],
-      stepProductData: [[{ variantId: "paidVariant", price: 1000 }]],
+      stepProductData: [[{ selectionId: "paidVariant", price: 1000 }]],
       selectedBundle: { steps: [{ id: "paid" }, step] },
     };
 
@@ -464,7 +464,7 @@ describe("FPB add-ons / gifting step separation", () => {
     };
     const ctx = {
       selectedProducts: [{ paidVariant: 1 }],
-      stepProductData: [[{ variantId: "paidVariant", price: 1000 }]],
+      stepProductData: [[{ selectionId: "paidVariant", price: 1000 }]],
       selectedBundle: { steps: [{ id: "paid" }, step] },
     };
 
@@ -479,7 +479,46 @@ describe("FPB add-ons / gifting step separation", () => {
     });
   });
 
-  it("renders every configured add-on tier message into the summary section", () => {
+  it("suppresses lower eligible add-on tiers after a higher tier qualifies", () => {
+    (global as any).window = {
+      Shopify: { currency: { active: "USD", format: "${{amount}}" } },
+      shopMoneyFormat: "${{amount}}",
+    };
+    const step = {
+      isFreeGift: true,
+      addonTiers: [
+        {
+          eligibilityCondition: { type: "QUANTITY", value: 1 },
+          discount: { type: "PERCENTAGE", value: 10 },
+          selectedAddonProducts: [makeProduct("gid://shopify/Product/1")],
+        },
+        {
+          eligibilityCondition: { type: "QUANTITY", value: 2 },
+          discount: { type: "PERCENTAGE", value: 100 },
+          selectedAddonProducts: [makeProduct("gid://shopify/Product/2")],
+        },
+      ],
+    };
+    const ctx = {
+      selectedProducts: [{ paidVariant: 2 }],
+      stepProductData: [[{ selectionId: "paidVariant", price: 1000 }]],
+      selectedBundle: { steps: [{ id: "paid" }, step] },
+    };
+
+    const summaryStates = getAddonSummaryEligibilityStates.call(ctx, step);
+
+    expect(summaryStates).toHaveLength(1);
+    expect(summaryStates[0]).toMatchObject({
+      tierIndex: 1,
+      isEligible: true,
+    });
+    expect(getAddonLineDiscount.call(ctx, step)).toEqual({
+      type: "PERCENTAGE",
+      value: 100,
+    });
+  });
+
+  it("renders only the active highest eligible add-on tier message", () => {
     (global as any).window = {
       Shopify: { currency: { active: "USD", format: "${{amount}}" } },
       shopMoneyFormat: "${{amount}}",
@@ -518,8 +557,8 @@ describe("FPB add-ons / gifting step separation", () => {
     const messageTexts: string[] = [];
     const ctx = {
       ...fullPageValidationAddonsMethods,
-      selectedProducts: [{ paidVariant: 1 }],
-      stepProductData: [[{ variantId: "paidVariant", price: 1000 }]],
+      selectedProducts: [{ paidVariant: 2 }],
+      stepProductData: [[{ selectionId: "paidVariant", price: 1000 }]],
       selectedBundle: { steps: [{ id: "paid" }, step] },
       freeGiftStep: step,
       isFreeGiftUnlocked: true,
@@ -539,10 +578,10 @@ describe("FPB add-ons / gifting step separation", () => {
       (global as any).document = originalDocument;
     }
 
-    expect(messageTexts).toEqual(["Tier 1 unlocked", "Tier 2 locked"]);
+    expect(messageTexts).toEqual(["Tier 2 unlocked"]);
     expect(container.children).toHaveLength(1);
     expect(container.children[0].children).toHaveLength(2);
-    expect(container.children[0].children[1].children).toHaveLength(2);
+    expect(container.children[0].children[1].children).toHaveLength(1);
   });
 
   it("does not return an add-on line discount before the active tier is eligible", () => {
@@ -565,7 +604,7 @@ describe("FPB add-ons / gifting step separation", () => {
       getAddonLineDiscount.call(
         {
           selectedProducts: [{ paidVariant: 1 }],
-          stepProductData: [[{ variantId: "paidVariant", price: 1000 }]],
+          stepProductData: [[{ selectionId: "paidVariant", price: 1000 }]],
           selectedBundle: { steps: [{ id: "paid" }, step] },
         },
         step,
@@ -591,12 +630,12 @@ describe("FPB add-ons / gifting step separation", () => {
     const ctx = {
       ...fullPageValidationAddonsMethods,
       selectedProducts: [{ paidVariant: 1 }, {}],
-      stepProductData: [[{ variantId: "paidVariant", price: 82900 }], []],
+      stepProductData: [[{ selectionId: "paidVariant", price: 82900 }], []],
       selectedBundle: { steps: [{ id: "paid" }, addonStep] },
       getAllSelectedProductsData: () => [
         {
           stepIndex: 0,
-          variantId: "paidVariant",
+          selectionId: "paidVariant",
           productId: addonProduct.graphqlId,
           title: addonProduct.title,
           parentTitle: addonProduct.title,
@@ -631,14 +670,14 @@ describe("FPB add-ons / gifting step separation", () => {
       ...fullPageValidationAddonsMethods,
       selectedProducts: [{ paidVariant: 1 }, { addonVariant: 1 }],
       stepProductData: [
-        [{ variantId: "paidVariant", price: 82900 }],
-        [{ variantId: "addonVariant", price: 82900 }],
+        [{ selectionId: "paidVariant", price: 82900 }],
+        [{ selectionId: "addonVariant", price: 82900 }],
       ],
       selectedBundle: { steps: [{ id: "paid" }, addonStep] },
       getAllSelectedProductsData: () => [
         {
           stepIndex: 1,
-          variantId: "addonVariant",
+          selectionId: "addonVariant",
           quantity: 1,
           price: 82900,
           isFreeGift: true,
@@ -669,12 +708,12 @@ describe("FPB add-ons / gifting step separation", () => {
     const ctx = {
       ...fullPageValidationAddonsMethods,
       selectedProducts: [{ paidVariant: 1 }, { addonVariant: 1 }],
-      stepProductData: [[{ variantId: "paidVariant", price: 82900 }], [{ variantId: "addonVariant", price: 82900 }]],
+      stepProductData: [[{ selectionId: "paidVariant", price: 82900 }], [{ selectionId: "addonVariant", price: 82900 }]],
       selectedBundle: { steps: [{ id: "paid" }, addonStep] },
       getAllSelectedProductsData: () => [
         {
           stepIndex: 1,
-          variantId: "addonVariant",
+          selectionId: "addonVariant",
           quantity: 1,
           price: 82900,
           isFreeGift: true,
@@ -708,14 +747,14 @@ describe("FPB add-ons / gifting step separation", () => {
       ...fullPageValidationAddonsMethods,
       selectedProducts: [{ paidVariant: 1 }, { addonVariant: 1 }],
       stepProductData: [
-        [{ variantId: "paidVariant", price: 82900 }],
-        [{ variantId: "addonVariant", price: 82900 }],
+        [{ selectionId: "paidVariant", price: 82900 }],
+        [{ selectionId: "addonVariant", price: 82900 }],
       ],
       selectedBundle: { steps: [{ id: "paid" }, addonStep] },
       getAllSelectedProductsData: () => [
         {
           stepIndex: 1,
-          variantId: "addonVariant",
+          selectionId: "addonVariant",
           quantity: 1,
           price: 82900,
           isFreeGift: true,
@@ -878,7 +917,7 @@ describe("FPB add-ons / gifting step separation", () => {
       getAddonTierEvaluation.call(
         {
           selectedProducts: [{ paidVariant: 6 }],
-          stepProductData: [[{ variantId: "paidVariant", price: 1000 }]],
+          stepProductData: [[{ selectionId: "paidVariant", price: 1000 }]],
           selectedBundle: { steps: [{ id: "paid" }, step] },
         },
         step,
@@ -924,7 +963,7 @@ describe("FPB add-ons / gifting step separation", () => {
       ...fullPageInitialRenderMethods,
       ...fullPageProductProcessingMethods,
       selectedProducts: [{ paidVariant: 2 }, { "11": 1 }],
-      stepProductData: [[{ variantId: "paidVariant", price: 1000 }], []],
+      stepProductData: [[{ selectionId: "paidVariant", price: 1000 }], []],
       selectedBundle: { steps: [{ id: "paid" }, addonStep] },
       directDefaultProducts: [],
       stepCollectionProductIds: {},

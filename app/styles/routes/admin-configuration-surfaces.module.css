@@ -1597,6 +1597,15 @@
   align-items: flex-start;
 }
 
+.integrationTitleRow {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
 .integrationName {
   display: flex;
   min-height: 34px;
@@ -1606,6 +1615,18 @@
   font-size: 12px;
   font-weight: 700;
   line-height: 16px;
+}
+
+.integrationStatus {
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: #e3e3e3;
+  color: #4a4a4a;
+  padding: 2px 7px;
+  font-size: 10px;
+  font-weight: 650;
+  line-height: 14px;
+  white-space: nowrap;
 }
 
 .integrationDescription {

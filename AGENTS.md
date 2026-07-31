@@ -81,6 +81,15 @@ npm test | npm run test:unit | npm run test:watch | npm run test:coverage
 
 TDD does NOT apply to: one-line config changes, CSS-only changes, docs changes, route annotation comments.
 
+### Parity Fixture Transitions
+
+For parity matrix testing, do not fully restore the fixture after every item. Each
+new parity pass must remove only configuration that is incompatible or no longer
+required, add only the configuration needed for the current item or fixture
+group, and carry compatible state forward. Perform a full restoration only at a
+fixture-group boundary or when malformed or contaminated state makes the
+evidence unreliable.
+
 ### 🚫 No UI Styling or Placement Unit Tests
 
 **A unit test must verify a component's BEHAVIOUR, never its CSS, class names, or where it sits on the screen.** These tests are useless: they fail on harmless cosmetic refactors, never catch real bugs, and ossify implementation details.
@@ -221,27 +230,22 @@ Let me know once it completes.
 
 The npm scripts run `scripts/generate-extension-templates.js` first — never call `shopify app deploy` directly.
 
-## ⚠️ Deployment Backfill Rule
+## 🔄 Deployment General Sync Rule
 
-`npm run deploy`, `npm run deploy:prod`, and `npm run deploy:sit` invoke `npm run deployment:backfill` before Shopify deploy. The backfill script is disabled by default unless environment flags enable it.
-
-**NEVER enable or run deployment backfill apply mode autonomously.** Always stop and ask for explicit user approval before using:
-
-```bash
-WPB_DEPLOYMENT_BACKFILL_ENABLED=true
-WPB_DEPLOYMENT_BACKFILL_APPLY=true
-WPB_DEPLOYMENT_BACKFILL_CONFIRM=I_UNDERSTAND_THIS_CAN_MUTATE_PRODUCTION
-```
-
-Warn the user first: this is a dangerous operation. Running it against production can mutate Shopify products, pages, metafields, cart transform setup, and bundle sync state across live merchant shops, and the effects may be irreversible from the app database alone.
-
-Dry-run still requires deliberate operator intent:
+Deployment scripts run `npm run deployment:general-sync` after Shopify deploy.
+It is disabled by default and accepts one primary true/false flag:
 
 ```bash
-WPB_DEPLOYMENT_BACKFILL_ENABLED=true npm run deployment:backfill
+WPB_DEPLOYMENT_GENERAL_SYNC=true
 ```
 
-Apply mode requires explicit approval for the exact environment and scope. Prefer narrowing with `WPB_DEPLOYMENT_BACKFILL_SHOP` or `WPB_DEPLOYMENT_BACKFILL_LIMIT` when possible.
+When true, it reads installed shops and saved bundles from Prisma, ensures
+current metafield definitions, replays the normal save-time storefront sync,
+attempts registered metaobject value sync, and ensures FPB add-on discounts.
+Update `scripts/deployment-general-sync.ts` and its service/tests **only when**
+the Prisma schema changes or the app's metafield/metaobject definitions or
+value-writing contracts change. Do not edit it for routine feature, UI, or
+deployment changes.
 
 ## ⚠️ Cart Transform Repair Rule
 
@@ -253,6 +257,20 @@ WPB_CART_TRANSFORM_REPAIR_APPLY=true
 ```
 
 Never set both flags. Dry-run scans installed shops without mutating Shopify. Apply mode runs `CartTransformService.completeSetup` through the app's offline Admin context for every installed shop.
+
+---
+
+## 🧪 Local Process & Log Attachment Note
+
+When a local dev command is launched from a shell session:
+
+- Shell PID may be a wrapper (for example `/bin/zsh -il`), with the actual `shopify app dev` process as a child Node PID.
+- In our environment, Node logging is attached to the parent terminal (`/dev/ttys006`) and local terminal I/O pipes; there is no dedicated rotating log file opened by default.
+- For process troubleshooting, inspect the process tree first:
+  - `ps -p <shell_pid>`
+  - `pgrep -P <shell_pid>` (or equivalent child-process discovery)
+  - `lsof -p <node_pid>`
+- Avoid attempting unsafe TTY reads (`/dev/ttys*`) for background log capture.
 
 **NEVER run repair apply mode autonomously.** Stop and ask for explicit user approval first. Warn the user that production apply mode can create or replace CartTransform objects and overwrite the `$app.runtime_token_secret` owner metafield across live merchant shops.
 
@@ -596,6 +614,10 @@ For any "parity", "compare", "match competitor" request — conduct a full audit
 
 The Shopify Admin embeds the app in a cross-origin OOPIF — `contentDocument` is null from the outer page.
 
+### Page Switching
+
+When switching Chrome DevTools pages with `select_page`, omit `bringToFront` or set it to `false`. Never use `bringToFront: true`.
+
 ### PRIMARY METHOD — Keyboard Tab Navigation
 
 Try Tab navigation BEFORE `evaluate_script`. The CDP accessibility tree traverses cross-origin iframes.
@@ -622,5 +644,5 @@ Always `select_page` to the **iframe target** before `evaluate_script`. For thir
 
 ---
 
-**Last Updated:** 2026-05-24
+**Last Updated:** 2026-07-29
 **Author:** Aditya Awasthi

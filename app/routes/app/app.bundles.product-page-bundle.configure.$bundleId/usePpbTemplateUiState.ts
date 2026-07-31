@@ -27,15 +27,16 @@ export function usePpbTemplateUiState({ bundle }: { bundle: any }) {
     | "confirm"
   >("templates");
   const templateFetcher = useFetcher();
-  const selectTemplateDialogRef = useRef<HTMLDivElement>(null);
+  const selectTemplateDialogRef = useRef<any>(null);
   const selectTemplateOpenButtonRef = useRef<HTMLButtonElement>(null);
   const [templateSaveError, setTemplateSaveError] = useState<string | null>(
-    null,
+    null
   );
   const lastTemplateRequestRef = useRef<{
     template: string | null;
     presetId: string | null;
   } | null>(null);
+  const templateSubmissionStartedRef = useRef(false);
   const lastTemplateResponseRef = useRef<unknown>(null);
   const [isSyncModalOpen, setIsSyncModalOpen] = useState(false);
   const [activeAssetTabIndex, setActiveAssetTabIndex] = useState(0);
@@ -49,12 +50,12 @@ export function usePpbTemplateUiState({ bundle }: { bundle: any }) {
   const [slideKey, setSlideKey] = useState(0);
   const [slideDir, setSlideDir] = useState<"forward" | "backward" | null>(null);
   const [widgetInstalled, setWidgetInstalled] = useState(
-    !!bundle.shopifyProductId,
+    !!bundle.shopifyProductId
   );
 
   useEffect(() => {
     setHasPreview(
-      !!localStorage.getItem(getPreviewReadinessStorageKey(bundle.id)),
+      !!localStorage.getItem(getPreviewReadinessStorageKey(bundle.id))
     );
   }, [bundle.id]);
 
@@ -78,6 +79,7 @@ export function usePpbTemplateUiState({ bundle }: { bundle: any }) {
     setTemplateSaveError,
     lastTemplateRequestRef,
     lastTemplateResponseRef,
+    templateSubmissionStartedRef,
     isSyncModalOpen,
     setIsSyncModalOpen,
     activeAssetTabIndex,

@@ -23,6 +23,10 @@ import {
   buildCartLineSourceProperties,
 } from '../../shared/engine/cart-lines.js';
 
+function getSelectionId(item = {}) {
+  return String(item?.selectionId || '');
+}
+
 
 export const fullPageModalProductMethods = {
 getSelectedSellingPlanAllocationId(product, variantId) {
@@ -30,9 +34,9 @@ getSelectedSellingPlanAllocationId(product, variantId) {
     return null;
   }
 
-  const normalizedSelectedId = this.extractId(variantId) || String(variantId || '');
+  const normalizedSelectedId = getSelectionId({ selectionId: variantId });
   const variant = Array.isArray(product?.variants)
-    ? product.variants.find((candidate) => this.extractId(candidate.id) === normalizedSelectedId)
+    ? product.variants.find((candidate) => getSelectionId(candidate) === normalizedSelectedId)
     : null;
 
   const normalizedProduct = (variant?.sellingPlanAllocations !== undefined ? variant : product) || {};
@@ -148,7 +152,7 @@ renderModalProducts(stepIndex, productsToRender = null) {
   }
 
   productGrid.innerHTML = products.map(product => {
-    const selectionKey = product.variantId || product.id;
+    const selectionKey = getSelectionId(product);
     const currentQuantity = selectedProducts[selectionKey] || 0;
     const currencyInfo = CurrencyManager.getCurrencyInfo();
 
@@ -217,7 +221,7 @@ attachProductEventHandlers(productGrid, stepIndex) {
   // Helper to find product by ID
   const findProduct = (productId) => {
     return this.stepProductData[stepIndex]?.find(p => {
-      const selectionKey = p.variantId || p.id;
+      const selectionKey = getSelectionId(p);
       return String(selectionKey) === String(productId);
     });
   };
@@ -259,13 +263,21 @@ attachProductEventHandlers(productGrid, stepIndex) {
       e.stopPropagation();
       const productId = e.target.dataset.productId;
       const currentQuantity = this.selectedProducts[stepIndex][productId] || 0;
+      const directDefaultQuantities = this._getDirectDefaultSelectionQuantities?.(stepIndex) || {};
+      const hasDirectDefaultQuantity = Object.prototype.hasOwnProperty.call(
+        directDefaultQuantities,
+        String(productId),
+      );
+      const directDefaultQuantity = hasDirectDefaultQuantity
+        ? Number(directDefaultQuantities[String(productId)] || 0)
+        : null;
+      const nextQuantity = currentQuantity > 0
+        ? 0
+        : (directDefaultQuantity ?? 1);
 
       // Toggle: If already added, remove; otherwise add with quantity 1
-      if (currentQuantity > 0) {
-        this.updateProductSelection(stepIndex, productId, 0);
-      } else {
-        // Add product directly to bundle (modal opens only on card image/title click)
-        this.updateProductSelection(stepIndex, productId, 1);
+      if (nextQuantity > 0 || currentQuantity > 0) {
+        this.updateProductSelection(stepIndex, productId, nextQuantity);
       }
     }
   });
@@ -314,9 +326,9 @@ attachProductEventHandlers(productGrid, stepIndex) {
       const baseProductId = e.target.dataset.baseProductId;
 
       // Find the product and update its variant
-      const product = this.stepProductData[stepIndex].find(p => p.id === baseProductId);
+      const product = this.stepProductData[stepIndex].find(p => getSelectionId(p) === String(baseProductId));
       if (product) {
-        const variantData = product.variants.find(v => v.id === newVariantId);
+        const variantData = product.variants.find(v => getSelectionId(v) === String(newVariantId));
         if (variantData) {
           // Sync the new variant's stock fields onto the product so
           // getVariantAvailable() reflects post-swap state.
@@ -329,9 +341,10 @@ attachProductEventHandlers(productGrid, stepIndex) {
           // Move quantity from old variant to new variant, re-clamping against
           // the new variant's quantityAvailable. If the new variant can't hold
           // the old quantity, reduce it and surface a toast.
-          const oldQuantity = this.selectedProducts[stepIndex][product.variantId] || 0;
+          const productSelectionKey = getSelectionId(product);
+          const oldQuantity = this.selectedProducts[stepIndex][productSelectionKey] || 0;
           if (oldQuantity > 0) {
-            delete this.selectedProducts[stepIndex][product.variantId];
+            delete this.selectedProducts[stepIndex][productSelectionKey];
 
             const newQtyAvail = product.quantityAvailable;
             const newOOS = this.isVariantOutOfStock(product);
@@ -353,6 +366,7 @@ attachProductEventHandlers(productGrid, stepIndex) {
 
           // Update product properties
           product.variantId = newVariantId;
+          product.selectionId = newVariantId;
           product.price = variantData.price;
 
           // Update UI without full re-render

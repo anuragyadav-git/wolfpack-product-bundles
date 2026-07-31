@@ -1,24 +1,20 @@
-import { useActionData, useLoaderData, useSubmit } from "@remix-run/react";
+import { useActionData, useSubmit } from "@remix-run/react";
 import { useEffect, useRef, useState } from "react";
 import { useAppBridge } from "@shopify/app-bridge-react";
 import {
   CONTROL_LAYOUTS,
   DESIGN_CONFIGURATION,
   LANGUAGE_CONFIGURATION,
-  SETTINGS_CARDS,
   SUPPORTED_LANGUAGE_LABELS,
 } from "../../../lib/admin-configuration-surfaces";
 import styles from "../../../styles/routes/admin-configuration-surfaces.module.css";
-import type { action, loader } from "../app.settings";
+import type { action } from "../app.settings";
 import {
   getInitialControlFieldValues,
   getInitialDesignFieldValues,
   getInitialLanguageFieldValues,
 } from "./settings-state";
-import {
-  SettingsCardIcon,
-  getControlTabIcon,
-} from "./SettingsDesignFields";
+import { getControlTabIcon } from "./SettingsDesignFields";
 import {
   ControlsContentCards,
   ControlsFormGroup,
@@ -32,14 +28,41 @@ import {
 import { runAfterSaveBarLeaveConfirmation } from "../../../lib/admin-savebar-navigation.client";
 import { createSettingsDesignState, type SettingsDesignPayload } from "../../../lib/settings-design-contract";
 import { DesignSettingsView } from "./DesignSettingsView";
+import type { AdditionalConfigurationsNavigation } from "../../../lib/additional-configurations-navigation";
+import {
+  applyAdditionalConfigurationAction,
+  createDeferredSettingsNavigation,
+} from "../../../lib/additional-configurations-behavior";
 
-export function SettingsRoute({ initialView = "landing" }: { initialView?: "landing" | "design" | "language" | "controls" }) {
-  const { settingsPage, previewBundles } = useLoaderData<typeof loader>();
+type SettingsRouteProps = {
+  initialView?: "design" | "language" | "controls";
+  initialControlNavigation?: AdditionalConfigurationsNavigation;
+  onControlNavigationChange?: (navigation: AdditionalConfigurationsNavigation) => void;
+  onExit: () => void;
+  settingsPage: Record<string, unknown> | null;
+  previewBundles: Array<{
+    id: string;
+    name: string;
+    type: string;
+    viewUrl: string | null;
+  }>;
+};
+
+export function SettingsRoute({
+  initialView = "design",
+  initialControlNavigation,
+  onControlNavigationChange,
+  onExit,
+  settingsPage,
+  previewBundles,
+}: SettingsRouteProps) {
   const actionData = useActionData<typeof action>();
   const submit = useSubmit();
   const shopify = useAppBridge();
   const languageNavigationRef = useRef<HTMLDetailsElement>(null);
   const controlsNavigationRef = useRef<HTMLDetailsElement>(null);
+  const deferredControlsNavigationRef = useRef(createDeferredSettingsNavigation());
+  const pendingSavedControlValuesRef = useRef<Record<string, string> | null>(null);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const [settingsHelpArticle, setSettingsHelpArticle] = useState<"inventory" | null>(null);
   const [settingsVariablesModal, setSettingsVariablesModal] = useState<{ title: string; variables: string[] } | null>(null);
@@ -91,9 +114,16 @@ export function SettingsRoute({ initialView = "landing" }: { initialView?: "land
     ...getInitialDesignFieldValues(),
     ...persistedDesignState.fieldValues,
   });
-  const [activeControlLayout, setActiveControlLayout] = useState(CONTROL_LAYOUTS[0].label);
-  const [activeControlTab, setActiveControlTab] = useState(CONTROL_LAYOUTS[0].tabs[0].title);
-  const [activeControlGroup, setActiveControlGroup] = useState("");
+  const [activeControlLayout, setActiveControlLayout] = useState(
+    initialControlNavigation?.layout ?? CONTROL_LAYOUTS[0].label,
+  );
+  const [activeControlTab, setActiveControlTab] = useState(
+    initialControlNavigation?.tab ?? CONTROL_LAYOUTS[0].tabs[0].title,
+  );
+  const [activeControlGroup, setActiveControlGroup] = useState(
+    initialControlNavigation?.group ?? "",
+  );
+  const [isControlsNavigationOpen, setIsControlsNavigationOpen] = useState(true);
   const [isExpertColorControls, setIsExpertColorControls] = useState(persistedDesignState.isExpertControlsEnabled);
   const [savedIsExpertColorControls, setSavedIsExpertColorControls] = useState(persistedDesignState.isExpertControlsEnabled);
   const [activeDesignScope, setActiveDesignScope] = useState("General");
@@ -122,8 +152,34 @@ export function SettingsRoute({ initialView = "landing" }: { initialView?: "land
     (settingsView === "design" && isDesignDirty) ||
     (settingsView === "language" && isLanguageDirty) ||
     (settingsView === "controls" && isControlsDirty);
+  const closeControlsNavigationOnMobile = () => {
+    if (window.matchMedia("(max-width: 767px)").matches) {
+      setIsControlsNavigationOpen(false);
+    }
+  };
+  const navigateWithinControls = (navigate: () => void) => {
+    deferredControlsNavigationRef.current.request(isControlsDirty, navigate);
+  };
   const returnToSettingsLanding = () => {
-    void runAfterSaveBarLeaveConfirmation(shopify, () => setSettingsView("landing"));
+    if (settingsView === "controls") {
+      navigateWithinControls(onExit);
+      return;
+    }
+    void runAfterSaveBarLeaveConfirmation(shopify, onExit);
+  };
+
+  const navigateToSettingsView = (nextView: "design" | "language" | "controls") => {
+    if (settingsView === "controls") {
+      navigateWithinControls(() => {
+        setSettingsView(nextView);
+        if (nextView === "language") setActiveLanguagePanel("cartCheckout");
+      });
+      return;
+    }
+    void runAfterSaveBarLeaveConfirmation(shopify, () => {
+      setSettingsView(nextView);
+      if (nextView === "language") setActiveLanguagePanel("cartCheckout");
+    });
   };
 
   const discardActiveSettingsChanges = () => {
@@ -142,6 +198,7 @@ export function SettingsRoute({ initialView = "landing" }: { initialView?: "land
     }
     if (settingsView === "controls") {
       setControlFieldValues(savedControlFieldValues);
+      deferredControlsNavigationRef.current.complete();
     }
   };
 
@@ -163,11 +220,12 @@ export function SettingsRoute({ initialView = "landing" }: { initialView?: "land
       return;
     }
     if (settingsView === "controls") {
+      const submittedControlValues = { ...controlFieldValues };
+      pendingSavedControlValuesRef.current = submittedControlValues;
       submit({
         intent: "saveSettingsControls",
-        payload: JSON.stringify(controlFieldValues),
+        payload: JSON.stringify(submittedControlValues),
       }, { method: "post" });
-      setSavedControlFieldValues(controlFieldValues);
     }
   };
 
@@ -185,8 +243,37 @@ export function SettingsRoute({ initialView = "landing" }: { initialView?: "land
       setSavedDesignFieldValues(confirmedState.fieldValues);
       setSavedIsExpertColorControls(confirmedState.isExpertControlsEnabled);
     }
+    if (
+      actionData.success
+      && "intent" in actionData
+      && actionData.intent === "saveSettingsControls"
+    ) {
+      const confirmedValues = pendingSavedControlValuesRef.current;
+      if (confirmedValues) {
+        setSavedControlFieldValues(confirmedValues);
+        pendingSavedControlValuesRef.current = null;
+        if (JSON.stringify(controlFieldValues) === JSON.stringify(confirmedValues)) {
+          deferredControlsNavigationRef.current.complete();
+        }
+      }
+    }
     setSaveMessage(actionData.success ? "Settings saved successfully" : actionData.message || "Something went wrong");
-  }, [actionData]);
+  }, [actionData, controlFieldValues]);
+
+  useEffect(() => {
+    if (settingsView !== "controls") return;
+    onControlNavigationChange?.({
+      layout: selectedControlLayout.label,
+      tab: selectedControlTab.title,
+      group: selectedControlGroupTitle,
+    });
+  }, [
+    onControlNavigationChange,
+    selectedControlGroupTitle,
+    selectedControlLayout.label,
+    selectedControlTab.title,
+    settingsView,
+  ]);
 
   if (settingsView === "design") {
     return (
@@ -389,7 +476,12 @@ export function SettingsRoute({ initialView = "landing" }: { initialView?: "land
           </header>
 
           <section className={styles.controlsLayout} aria-label="Additional Configurations">
-            <details ref={controlsNavigationRef} className={styles.responsiveSectionDisclosure}>
+            <details
+              ref={controlsNavigationRef}
+              className={styles.responsiveSectionDisclosure}
+              open={isControlsNavigationOpen}
+              onToggle={(event) => setIsControlsNavigationOpen(event.currentTarget.open)}
+            >
               <summary className={styles.responsiveSectionSummary}>
                 <span>
                   <span className={styles.responsiveSectionEyebrow}>Configuration section</span>
@@ -408,10 +500,12 @@ export function SettingsRoute({ initialView = "landing" }: { initialView?: "land
                   onChange={(event) => {
                     const nextLayoutLabel = event.target.value;
                     const nextLayout = CONTROL_LAYOUTS.find((layout) => layout.label === nextLayoutLabel) ?? CONTROL_LAYOUTS[0];
-                    setActiveControlLayout(nextLayout.label);
-                    setActiveControlTab(nextLayout.tabs[0]?.title ?? CONTROL_LAYOUTS[0].tabs[0].title);
-                    setActiveControlGroup("");
-                    controlsNavigationRef.current?.removeAttribute("open");
+                    navigateWithinControls(() => {
+                      setActiveControlLayout(nextLayout.label);
+                      setActiveControlTab(nextLayout.tabs[0]?.title ?? CONTROL_LAYOUTS[0].tabs[0].title);
+                      setActiveControlGroup("");
+                      closeControlsNavigationOnMobile();
+                    });
                   }}
                 >
                   {CONTROL_LAYOUTS.map((layout) => (
@@ -428,9 +522,11 @@ export function SettingsRoute({ initialView = "landing" }: { initialView?: "land
                     type="button"
                     className={selectedControlTab.title === tab.title ? styles.controlsNavActive : styles.controlsNavButton}
                     onClick={() => {
-                      setActiveControlTab(tab.title);
-                      setActiveControlGroup("");
-                      controlsNavigationRef.current?.removeAttribute("open");
+                      navigateWithinControls(() => {
+                        setActiveControlTab(tab.title);
+                        setActiveControlGroup("");
+                        closeControlsNavigationOnMobile();
+                      });
                     }}
                   >
                     <s-icon type={getControlTabIcon(tab.title)} size="small"></s-icon>
@@ -446,8 +542,10 @@ export function SettingsRoute({ initialView = "landing" }: { initialView?: "land
                       type="button"
                       className={selectedControlGroupTitle === groupTitle ? styles.controlsSubNavActive : styles.controlsSubNavButton}
                       onClick={() => {
-                        setActiveControlGroup(groupTitle);
-                        controlsNavigationRef.current?.removeAttribute("open");
+                        navigateWithinControls(() => {
+                          setActiveControlGroup(groupTitle);
+                          closeControlsNavigationOnMobile();
+                        });
                       }}
                     >
                       {groupTitle}
@@ -466,13 +564,14 @@ export function SettingsRoute({ initialView = "landing" }: { initialView?: "land
                 onFieldChange={(label, value) => setControlFieldValues((current) => ({ ...current, [label]: value }))}
                 onFieldAction={(label) => {
                   if (label === "Cart Messaging") {
-                    setSettingsView("language");
-                    setActiveLanguagePanel("cartCheckout");
+                    navigateToSettingsView("language");
                     return;
                   }
                   if (label === "Track inventory on Add To Cart (in beta)") {
                     setSettingsHelpArticle("inventory");
+                    return;
                   }
+                  setControlFieldValues((current) => applyAdditionalConfigurationAction(label, current));
                 }}
               />
             </section>
@@ -486,35 +585,5 @@ export function SettingsRoute({ initialView = "landing" }: { initialView?: "land
     );
   }
 
-  return (
-    <>
-      <ui-title-bar title="Settings" />
-      <main className={styles.page}>
-        <header className={styles.hero}>
-          <div>
-            <h1 className={styles.title}>Settings</h1>
-          </div>
-        </header>
-
-        <section className={styles.cardGrid} aria-label="Settings sections">
-          {SETTINGS_CARDS.map((card) => (
-            <button
-              key={card.id}
-              type="button"
-              className={styles.settingCard}
-              aria-label={`Open ${card.title} settings`}
-              onClick={() => setSettingsView(card.id)}
-            >
-              <span className={styles.settingsCardContent}>
-                <SettingsCardIcon icon={card.icon} />
-                <h2 className={styles.cardTitle}>{card.title}</h2>
-                <p className={styles.cardDescription}>{card.description}</p>
-              </span>
-            </button>
-          ))}
-        </section>
-        <SettingsToast message={saveMessage} onDismiss={() => setSaveMessage(null)} />
-      </main>
-    </>
-  );
+  return null;
 }

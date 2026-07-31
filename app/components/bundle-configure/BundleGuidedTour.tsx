@@ -21,8 +21,21 @@ interface Props {
 const TOOLTIP_WIDTH = 420;
 const TOOLTIP_HEIGHT = 220;
 const SPOTLIGHT_PAD = 8;
+const VIEWPORT_PAD = 12;
 const MAX_TARGET_LOOKUP_FRAMES = 30;
 const STABLE_FRAME_COUNT = 4;
+
+export function getBundleGuidedTourStorageKey(shop: string) {
+  return `wpb_first_bundle_tour_seen_${shop}`;
+}
+
+export function isBundleGuidedTourDismissKey(key: string) {
+  return key === "Escape";
+}
+
+function getTooltipWidth() {
+  return Math.min(TOOLTIP_WIDTH, Math.max(240, window.innerWidth - 24));
+}
 
 export function BundleGuidedTour({
   steps,
@@ -37,13 +50,20 @@ export function BundleGuidedTour({
   const [spotlightRect, setSpotlightRect] = useState<SpotlightRect | null>(null);
   const [tooltipStyle, setTooltipStyle] = useState<CSSProperties>({});
   const rafRef = useRef<number | null>(null);
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  const previouslyFocusedRef = useRef<HTMLElement | null>(null);
   const highlightedTargetRef = useRef<{
     el: HTMLElement;
     position: string;
     zIndex: string;
   } | null>(null);
 
-  const storageKey = `wpb_first_bundle_tour_seen_${shop}`;
+  const storageKey = getBundleGuidedTourStorageKey(shop);
+
+  const getTooltipHeight = useCallback(() => {
+    const measuredHeight = dialogRef.current?.getBoundingClientRect().height ?? TOOLTIP_HEIGHT;
+    return Math.min(measuredHeight, Math.max(120, window.innerHeight - VIEWPORT_PAD * 2));
+  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -56,8 +76,14 @@ export function BundleGuidedTour({
   useEffect(() => {
     if (!visible) return;
     const prev = document.body.style.overflow;
+    previouslyFocusedRef.current =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
     document.body.style.overflow = "hidden";
+    const focusFrame = requestAnimationFrame(() => dialogRef.current?.focus());
     return () => {
+      cancelAnimationFrame(focusFrame);
       document.body.style.overflow = prev;
     };
   }, [visible]);
@@ -79,11 +105,17 @@ export function BundleGuidedTour({
   }, []);
 
   const centeredBottomStyle = useCallback((): CSSProperties => ({
-    top: window.innerHeight - 280,
-    left: Math.max(12, window.innerWidth / 2 - TOOLTIP_WIDTH / 2),
+    top: Math.max(
+      VIEWPORT_PAD,
+      window.innerHeight - getTooltipHeight() - VIEWPORT_PAD,
+    ),
+    left: Math.max(VIEWPORT_PAD, (window.innerWidth - getTooltipWidth()) / 2),
+    width: getTooltipWidth(),
+    maxHeight: Math.max(120, window.innerHeight - VIEWPORT_PAD * 2),
+    overflowY: "auto",
     transform: "none",
     bottom: "auto",
-  }), []);
+  }), [getTooltipHeight]);
 
   const showFallbackPosition = useCallback(() => {
     setSpotlightRect(null);
@@ -112,6 +144,7 @@ export function BundleGuidedTour({
     const rect = el.getBoundingClientRect();
     const vw = window.innerWidth;
     const vh = window.innerHeight;
+    const tooltipHeight = getTooltipHeight();
 
     setSpotlightRect({
       x: rect.left - SPOTLIGHT_PAD,
@@ -120,13 +153,35 @@ export function BundleGuidedTour({
       height: rect.height + SPOTLIGHT_PAD * 2,
     });
 
-    const belowFits = rect.bottom + TOOLTIP_HEIGHT + 12 < vh;
-    const top = belowFits ? rect.bottom + 12 : Math.max(12, rect.top - TOOLTIP_HEIGHT - 12);
-    let left = rect.left + rect.width / 2 - TOOLTIP_WIDTH / 2;
-    left = Math.max(12, Math.min(left, vw - TOOLTIP_WIDTH - 12));
+    const belowTop = rect.bottom + VIEWPORT_PAD;
+    const aboveTop = rect.top - tooltipHeight - VIEWPORT_PAD;
+    const belowFits = belowTop + tooltipHeight <= vh - VIEWPORT_PAD;
+    const aboveFits = aboveTop >= VIEWPORT_PAD;
+    const top = belowFits
+      ? belowTop
+      : aboveFits
+        ? aboveTop
+        : Math.max(
+            VIEWPORT_PAD,
+            Math.min(rect.top, vh - tooltipHeight - VIEWPORT_PAD),
+          );
+    const tooltipWidth = getTooltipWidth();
+    let left = rect.left + rect.width / 2 - tooltipWidth / 2;
+    left = Math.max(
+      VIEWPORT_PAD,
+      Math.min(left, vw - tooltipWidth - VIEWPORT_PAD),
+    );
 
-    setTooltipStyle({ top, left, transform: "none", bottom: "auto" });
-  }, []);
+    setTooltipStyle({
+      top,
+      left,
+      width: tooltipWidth,
+      maxHeight: Math.max(120, vh - VIEWPORT_PAD * 2),
+      overflowY: "auto",
+      transform: "none",
+      bottom: "auto",
+    });
+  }, [getTooltipHeight]);
 
   const waitForStableTarget = useCallback((el: HTMLElement) => {
     let lastTop = -Infinity;
@@ -218,21 +273,59 @@ export function BundleGuidedTour({
     };
   }, [cancelPendingFrame, cleanupHighlightedTarget]);
 
-  const handleDismiss = useCallback(() => {
+  useEffect(() => {
+    if (!visible) return;
+    const reposition = () => {
+      const targetSection = steps[currentStep]?.targetSection;
+      const target = targetSection ? queryTarget(targetSection) : null;
+      if (target) {
+        updatePositions(target);
+      } else {
+        showFallbackPosition();
+      }
+    };
+    window.addEventListener("resize", reposition);
+    return () => window.removeEventListener("resize", reposition);
+  }, [
+    currentStep,
+    queryTarget,
+    showFallbackPosition,
+    steps,
+    updatePositions,
+    visible,
+  ]);
+
+  const closeTour = useCallback((callback?: () => void) => {
     localStorage.setItem(storageKey, "1");
     setVisible(false);
-    onDismiss?.();
-  }, [storageKey, onDismiss]);
+    const previouslyFocused = previouslyFocusedRef.current;
+    requestAnimationFrame(() => previouslyFocused?.focus());
+    callback?.();
+  }, [storageKey]);
+
+  const handleDismiss = useCallback(() => {
+    closeTour(onDismiss);
+  }, [closeTour, onDismiss]);
+
+  useEffect(() => {
+    if (!visible) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (!isBundleGuidedTourDismissKey(event.key)) return;
+      event.preventDefault();
+      event.stopPropagation();
+      handleDismiss();
+    };
+    document.addEventListener("keydown", handleKeyDown, true);
+    return () => document.removeEventListener("keydown", handleKeyDown, true);
+  }, [handleDismiss, visible]);
 
   const handleNext = useCallback(() => {
     if (currentStep === steps.length - 1) {
-      localStorage.setItem(storageKey, "1");
-      setVisible(false);
-      onComplete?.();
+      closeTour(onComplete);
       return;
     }
     setCurrentStep((i) => i + 1);
-  }, [currentStep, steps.length, storageKey, onComplete]);
+  }, [closeTour, currentStep, steps.length, onComplete]);
 
   if (!visible) return null;
 
@@ -277,7 +370,15 @@ export function BundleGuidedTour({
         )}
       </svg>
 
-      <div className={styles.overlay} style={tooltipStyle}>
+      <div
+        ref={dialogRef}
+        className={styles.overlay}
+        style={tooltipStyle}
+        role="dialog"
+        aria-modal="true"
+        aria-label={`Guided tour step ${currentStep + 1} of ${steps.length}`}
+        tabIndex={-1}
+      >
         <div className={styles.tourHeader}>
           <button type="button" className={styles.dismissTourLink} onClick={handleDismiss}>
             Dismiss guided tour
