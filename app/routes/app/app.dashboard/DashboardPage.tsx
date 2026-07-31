@@ -16,6 +16,7 @@ import {
 import { openSupportChat } from "../../../lib/support-chat.client";
 import { useEnablePreviewGate } from "../../../hooks/useEnablePreviewGate";
 import { useThemeExtensionStatus } from "../../../hooks/useThemeExtensionStatus";
+import { openThemeEditorInNewTab } from "../../../lib/theme-editor-navigation.client";
 import {
   changeAdminI18nLanguage,
   normalizeAdminLocale,
@@ -107,6 +108,7 @@ export function DashboardPage() {
   const [activeActionMenuBundleId, setActiveActionMenuBundleId] = useState<string | null>(null);
   const [hasMainContentSettled, setHasMainContentSettled] = useState(false);
   const [resolvedAppEmbedStatus, setResolvedAppEmbedStatus] = useState<DashboardAppEmbedStatus>(DEFAULT_APP_EMBED_STATUS);
+  const [appEmbedOpenOptimism, setAppEmbedOpenOptimism] = useState(false);
 
   const handleAppEmbedStatusResolved = useCallback((status: DashboardAppEmbedStatus) => {
     setResolvedAppEmbedStatus(status);
@@ -222,12 +224,26 @@ export function DashboardPage() {
     deleteModalRef.current?.show?.();
   }, [bundleToDelete]);
 
+  const appEmbedEnabled = appEmbedOpenOptimism
+    || (themeExtensionStatus.loading
+      ? true
+      : themeExtensionStatus.error
+        ? resolvedAppEmbedStatus.appEmbedEnabled
+        : themeExtensionStatus.appEmbedEnabled);
+
   const enablePreviewGate = useEnablePreviewGate({
-    appEmbedEnabled: themeExtensionStatus.appEmbedEnabled,
+    appEmbedEnabled,
     themeEditorUrl: resolvedAppEmbedStatus.themeEditorUrl,
     refreshStatus: themeExtensionStatus.refresh,
     onSilentBlock: () => shopify.toast.show(t("dashboard.actions.themeEditorUnavailable"), { isError: true }),
   });
+
+  const handleOpenThemeEditor = useCallback(() => {
+    if (!resolvedAppEmbedStatus.themeEditorUrl) return;
+    setAppEmbedOpenOptimism(true);
+    openThemeEditorInNewTab(resolvedAppEmbedStatus.themeEditorUrl);
+  }, [resolvedAppEmbedStatus.themeEditorUrl]);
+
   const renderDeleteModal = shouldRenderDashboardDeleteModal({ bundleToDelete });
   const renderPreviewModal = shouldRenderDashboardPreviewModal({
     isOpen: enablePreviewGate.modalProps.open,
@@ -253,7 +269,7 @@ export function DashboardPage() {
         bundleId: bundle.id,
         shopifyProductHandle: bundle.shopifyProductHandle,
         shop,
-        appEmbedEnabled: themeExtensionStatus.appEmbedEnabled,
+        appEmbedEnabled,
         bundleStatus: bundle.status,
       });
 
@@ -285,7 +301,7 @@ export function DashboardPage() {
     }
 
     executePreviewAction();
-  }, [shop, shopify, fetcher, enablePreviewGate, recordDashboardPreview]);
+  }, [appEmbedEnabled, shop, shopify, fetcher, enablePreviewGate, recordDashboardPreview]);
 
   const getStatusDisplay = (status: string) => {
     const tone = STATUS_TONE_MAP[status as keyof typeof STATUS_TONE_MAP] ?? 'info';
@@ -560,16 +576,12 @@ export function DashboardPage() {
           </Suspense>
 
           <DashboardStatusGrid
-            activeBundleCount={bundles.filter((bundle) => bundle.status === "active").length}
             resources={themeExtensionStatus.resources}
             loading={themeExtensionStatus.loading}
             error={themeExtensionStatus.error}
             themeEditorUrl={resolvedAppEmbedStatus.themeEditorUrl}
-            onOpenThemeEditor={() => {
-              if (resolvedAppEmbedStatus.themeEditorUrl) {
-                window.open(resolvedAppEmbedStatus.themeEditorUrl, "_blank", "noopener,noreferrer");
-              }
-            }}
+            appEmbedEnabled={appEmbedEnabled}
+            onOpenThemeEditor={handleOpenThemeEditor}
           />
 
           {/* Bundles panel */}
