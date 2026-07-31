@@ -5,7 +5,7 @@ title: Admin Performance
 type: operations
 status: authoritative
 summary: Embedded Admin Web Vitals instrumentation, route-level LCP findings, and critical-path constraints.
-last_audited: 2026-07-23
+last_audited: 2026-07-30
 owners:
   - engineering
 domains:
@@ -84,7 +84,7 @@ using the local console API above as the data source, then remove it before
 shipping.
 
 Use the summary after repeated route loads to prove local p75. A route passes
-the local target only when its p75 is `<= 2500` ms. For field proof, collect
+the local target only when its p75 is strictly below `2500` ms. For field proof, collect
 enough real Shopify Web Vitals samples by route and device class; a single
 Chrome session or dev tunnel run is not field p75 proof.
 
@@ -134,15 +134,20 @@ The Settings workspace owns the Design inspector/preview layout and the
 eight-template representative preview. Wide containers use three columns for
 section navigation, the larger preview surface, and the active fields. Medium
 containers place the preview across the first row with navigation and fields
-beneath it; phone containers stack preview, navigation, then fields. All
+beneath it. Phone containers expose Preview and Customize as a two-state
+segmented control so only one dense workspace pane renders at a time. All
 breakpoints are container-driven because the usable width of a Shopify Admin
 iframe is independent of the browser's top-level viewport.
 
 The preview uses local fixture markup and media, canonical template descriptors
 derived from the storefront registries, and theme values from the normalized
 storefront Design runtime. Builder, Product Picker, Cart / Summary, Loading,
-Validation, and Upsell are deterministic representative surfaces rather than
-storefront interactions. Only slot templates include Product Picker. It does not
+Validation, and Upsell are deterministic local surfaces rather than storefront
+interactions. Builder and Cart / Summary are the storefront-matched surfaces;
+the other states remain representative. Preview scenes use fixed logical
+1280×800 desktop and 390×844 mobile canvases that scale as a whole to fit their
+Admin host, preserving the storefront breakpoint under test. Only slot templates
+include Product Picker. The preview does not
 fetch bundle data, load remote media, embed a storefront iframe, duplicate the
 widget runtime, mutate a cart, or persist preview state. Local Design editing and
 preview rendering therefore remain available when the shop has no storefront-ready
@@ -162,7 +167,7 @@ target in SIT.
 For local acceptance, collect at least ten cache-bypassed loads of
 `/app/settings?wpbWebVitalsDebug=1`, enter Design on each pass, and inspect the
 app-owned sample set. The planned Design target is LCP p75 at or below `2000ms`,
-with a hard failure above `2500ms`, and CLS below `0.1`. Shopify/App Bridge field
+with a hard failure at or above `2500ms`, and CLS below `0.1`. Shopify/App Bridge field
 metrics after a manual SIT deployment remain the final p75 source of truth.
 
 ## Removed Custom Telemetry
@@ -194,6 +199,69 @@ and server-side Mantle identify call were removed from the app shell after an
 audit found no `@heymantle/react` hook usage in Admin routes. Billing still uses
 the Shopify billing service directly. Keep any future third-party billing or
 analytics provider route-scoped until a shared runtime consumer exists.
+
+## Admin Mobile and First-Load Contract
+
+The authenticated `/app` index must render a route-shaped skeleton while the
+client resolves auth parameters and the dashboard destination. It
+must not return a blank iframe during that interval. The skeleton reserves
+stable hero and card geometry, exposes an accessible busy state, and disables
+its shimmer under `prefers-reduced-motion`.
+
+Redux Toolkit, React Redux, Redux, Reselect, and Immer are isolated in
+`vendor-state`. Chart-only dependencies remain in `vendor-charts`. Production
+manifest verification must show that the app layout and every non-analytics
+route avoid `vendor-charts`; only the lazy attribution dashboard and its chart
+helpers may reference that chunk.
+
+Merchant workflow roots should use descriptive `s-query-container` names when
+their responsive behavior depends on embedded app width. Current shared roots
+include `dashboard-bundles`, `settings-landing`, `design-settings`,
+`pricing-page`, `billing-page`, `events-page`, `storefront-setup-card`,
+`integrations-page`, `analytics-page`, `file-picker`, and
+`bundle-configure`. Page shells remain shrinkable, use responsive inline
+padding, and keep horizontal scrolling inside labelled data regions rather than
+on the document.
+
+Analytics keeps shell styles with `AttributionRouteShell` and dashboard styles
+with the lazy `AttributionDashboard` chunk. This ensures dashboard markup and
+CSS resolve atomically behind the existing skeleton rather than painting
+unstyled analytics content.
+
+## 2026-07-30 Shared Shell and Onboarding Completion
+
+The authenticated Admin layout uses the App Bridge global and Polaris web
+components. `app/root.tsx` loads the unversioned `polaris.js` script immediately
+after the required unversioned App Bridge script. The shared `/app` route no
+longer loads the React Polaris provider, Polaris translation JSON, the 444KB
+legacy stylesheet, or a global Redux provider. The standalone auth login route
+retains its route-local React Polaris styling.
+
+The production chunk graph keeps legacy React Polaris in
+`vendor-polaris-react`, App Bridge React hooks in
+`vendor-app-bridge-react`, Redux in `vendor-state`, and charts in
+`vendor-charts`. The 2026-07-30 production manifest showed no shared shell CSS
+and no Admin route violations: non-state routes avoided `vendor-state`,
+non-Analytics routes avoided `vendor-charts`, and embedded Admin routes avoided
+the legacy Polaris chunk and stylesheet. Analytics continued to request its
+lazy dashboard JavaScript and CSS in the same import boundary.
+
+The standalone onboarding route has been removed. Authenticated `/app` entries
+always continue to the dashboard, so the shared layout no longer queries
+`firstCreateTourEligible`. The create handler still claims that flag atomically
+after required creation succeeds and uses it only to open the post-create
+configure tour. Settings returns its established `settingsPage` and
+`previewBundles` loader fields as deferred promises; the landing cards paint
+without awaiting them, and the selected workspace owns the route-shaped
+loading and error states.
+
+First-create eligibility is claimed with one conditional `updateMany` only
+after the bundle and required Shopify parent product exist. A later widget
+installation status failure is logged as noncritical and returns
+`widgetStatus.checked = false`; it cannot convert the already-created bundle
+into a failed create response. Guided-tour dismissal and completion remain
+shop-keyed, and Escape now follows the same persistence, focus restoration, and
+body-scroll cleanup path.
 
 ## 2026-07-06 Attribution LCP Follow-up
 

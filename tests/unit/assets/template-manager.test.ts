@@ -264,7 +264,7 @@ describe('TemplateManager.getDiscountMessageTemplate', () => {
     expect(template).toBe('Tier 2 reached');
   });
 
-  it('prefers configured tier text for qualified adaptive messages', () => {
+  it('keeps configured tier text separate from the qualified success message', () => {
     const template = TemplateManager.getDiscountMessageTemplate({
       bundle: {
         pricing: {
@@ -291,6 +291,6 @@ describe('TemplateManager.getDiscountMessageTemplate', () => {
       fallbackTemplate: 'Fallback success',
     });
 
-    expect(template).toBe('Nice! You are saving today<br>Add one more to save more');
+    expect(template).toBe('Tier 2 reached');
   });
 });

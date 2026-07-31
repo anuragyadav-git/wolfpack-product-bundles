@@ -5,7 +5,7 @@ title: FPB App Proxy Host
 type: architecture-decision
 status: accepted
 summary: Full Page Bundles use the signed app proxy as their sole storefront document host.
-last_audited: 2026-07-14
+last_audited: 2026-07-31
 owners:
   - engineering
 domains:
@@ -18,7 +18,6 @@ source_paths:
   - extensions/bundle-builder/blocks/bundle-app-embed.liquid
 related_docs:
   - Architecture/Widget Architecture.md
-  - Operations/Deployment Backfill.md
 tags:
   - architecture
   - fpb

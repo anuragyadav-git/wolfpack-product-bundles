@@ -1,5 +1,6 @@
-import { json, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/node";
-import { lazy, Suspense, useState } from "react";
+import { defer, json, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/node";
+import { Await, useLoaderData, useNavigate } from "@remix-run/react";
+import { lazy, Suspense, useMemo, useState } from "react";
 import type { Prisma } from "@prisma/client";
 import { BundleType } from "../../constants/bundle";
 import { prisma } from "../../db.server";
@@ -12,6 +13,7 @@ import { CartTransformService } from "../../services/cart-transform-service.serv
 import { buildFpbStorefrontUrl } from "../../lib/fpb-storefront-url";
 import {
   SettingsLandingShell,
+  SettingsWorkspaceError,
   SettingsWorkspaceSkeleton,
   type SettingsWorkspaceView,
 } from "./app.settings/SettingsLandingShell";
@@ -25,14 +27,20 @@ const SettingsWorkspace = lazy(loadSettingsWorkspace);
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const { session } = await requireAdminSession(request);
-  const [settings, previewBundles] = await Promise.all([
-    prisma.designSettings.findUnique({
+  const settingsPage = prisma.designSettings.findUnique({
       where: { shopId_bundleType: { shopId: session.shop, bundleType: "product_page" } },
       select: {
         generalSettings: true,
       },
-    }),
-    prisma.bundle.findMany({
+    }).then((settings) => {
+      const generalSettings = settings?.generalSettings && typeof settings.generalSettings === "object"
+        ? settings.generalSettings as Record<string, unknown>
+        : {};
+      return generalSettings.settingsPage && typeof generalSettings.settingsPage === "object"
+        ? generalSettings.settingsPage as Record<string, unknown>
+        : null;
+    });
+  const previewBundles = prisma.bundle.findMany({
       where: {
         shopId: session.shop,
         OR: [
@@ -48,16 +56,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
         bundleType: true,
         shopifyProductHandle: true,
       },
-    }),
-  ]);
-  const generalSettings = settings?.generalSettings && typeof settings.generalSettings === "object"
-    ? settings.generalSettings as Record<string, unknown>
-    : {};
-  return json({
-    settingsPage: generalSettings.settingsPage && typeof generalSettings.settingsPage === "object"
-      ? generalSettings.settingsPage as Record<string, unknown>
-      : null,
-    previewBundles: previewBundles.map((bundle) => ({
+    }).then((bundles) => bundles.map((bundle) => ({
       id: bundle.id,
       name: bundle.name,
       type: bundle.bundleType === "full_page" ? "Landing Page" : "Product Page",
@@ -66,7 +65,10 @@ export async function loader({ request }: LoaderFunctionArgs) {
         : bundle.shopifyProductHandle
           ? `https://${session.shop}/products/${bundle.shopifyProductHandle}`
           : null,
-    })),
+    })));
+  return defer({
+    settingsPage,
+    previewBundles,
   });
 }
 
@@ -250,6 +252,7 @@ export async function action({ request }: ActionFunctionArgs) {
     if (!syncResult.success) {
       return json({
         success: false,
+        intent,
         message: syncResult.error
           ? `Settings saved, but cart transform messaging sync failed: ${syncResult.error}`
           : "Settings saved, but cart transform messaging sync failed",
@@ -257,15 +260,31 @@ export async function action({ request }: ActionFunctionArgs) {
     }
   }
 
-  return json({ success: true, message: "Settings saved successfully" });
+  return json({
+    success: true,
+    intent,
+    message: "Settings saved successfully",
+  });
 }
 
 export default function SettingsRouteDefault() {
+  const { settingsPage, previewBundles } = useLoaderData<typeof loader>();
+  const workspaceData = useMemo(
+    () => Promise.all([settingsPage, previewBundles]),
+    [previewBundles, settingsPage],
+  );
   const [workspaceView, setWorkspaceView] = useState<SettingsWorkspaceView | null>(null);
+  const navigate = useNavigate();
   if (!workspaceView) {
     return (
       <SettingsLandingShell
-        onSelect={setWorkspaceView}
+        onSelect={(view) => {
+          if (view === "controls") {
+            navigate("/app/additional-configurations");
+            return;
+          }
+          setWorkspaceView(view);
+        }}
         onIntent={() => {
           void loadSettingsWorkspace();
         }}
@@ -275,7 +294,19 @@ export default function SettingsRouteDefault() {
 
   return (
     <Suspense fallback={<SettingsWorkspaceSkeleton />}>
-      <SettingsWorkspace initialView={workspaceView} />
+      <Await
+        resolve={workspaceData}
+        errorElement={<SettingsWorkspaceError onExit={() => setWorkspaceView(null)} />}
+      >
+        {([resolvedSettingsPage, resolvedPreviewBundles]) => (
+          <SettingsWorkspace
+            initialView={workspaceView}
+            onExit={() => setWorkspaceView(null)}
+            settingsPage={resolvedSettingsPage}
+            previewBundles={resolvedPreviewBundles}
+          />
+        )}
+      </Await>
     </Suspense>
   );
 }

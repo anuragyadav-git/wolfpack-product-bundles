@@ -37,6 +37,7 @@ describe("FPB category collection rule validation", () => {
         [
           {
             variantId: "variant1",
+            selectionId: "variant1",
             parentProductId: "product1",
             price: 15000,
           },

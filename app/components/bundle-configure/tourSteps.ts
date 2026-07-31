@@ -5,6 +5,13 @@ export interface TourStep {
   sectionId?: string;
 }
 
+export function getGuidedTourTransition(step: TourStep) {
+  return {
+    sectionId: step.sectionId,
+    readinessOpen: false,
+  };
+}
+
 export const FPB_TOUR_STEPS: TourStep[] = [
   {
     title: "Add products",

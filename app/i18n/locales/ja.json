@@ -119,6 +119,11 @@
     "preview": {
       "heading": "ライブプレビュー",
       "unsaved": "未保存の変更がここに表示されます。",
+      "workspace": {
+        "label": "デザインワークスペース表示",
+        "preview": "プレビュー",
+        "customize": "カスタマイズ"
+      },
       "surface": {
         "description": "商品を選んでバンドルを作成します。",
         "stepOne": "1. 商品を選択",
@@ -188,6 +193,10 @@
       "close": "閉じる", "dismiss": "閉じる", "manage": "管理", "enable": "有効にする", "enableHere": "ここで有効にする", "learnMore": "詳しく見る",
       "maybeLater": "後で行う", "setUpVisibility": "公開設定を行う", "reinstallApp": "アプリを再インストール",
       "upgradeNow": "今すぐアップグレード", "viewPlans": "プランを見る", "discardChanges": "変更を破棄", "continueEditing": "編集を続ける"
+    },
+    "loading": {
+      "appLabel": "Wolfpack Product Bundles を読み込んでいます",
+      "workspace": "ワークスペースを読み込んでいます"
     },
     "appEmbed": {
       "body": "バンドルを配置してプレビューするには、Wolfpack Bundles のテーマアプリ拡張機能を有効にしてください。",

@@ -82,7 +82,9 @@ clearStepSelections(stepIndex) {
   }
   if (stepIndex === 0 && this.directDefaultProducts.length > 0) {
     this.directDefaultProducts.forEach(product => {
-      this.setSelectedQuantity(0, product.variantId, product.defaultRequiredQuantity || 1);
+      const defaultQuantity = Number.parseFloat(product.defaultRequiredQuantity);
+      const normalizedDefaultQuantity = Number.isFinite(defaultQuantity) && defaultQuantity >= 0 ? defaultQuantity : 0;
+      this.setSelectedQuantity(0, product.variantId, normalizedDefaultQuantity);
     });
   }
   this._persistSessionSelections?.();

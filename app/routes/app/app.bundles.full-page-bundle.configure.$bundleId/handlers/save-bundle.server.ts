@@ -43,6 +43,16 @@ function hasEnabledAddonProducts(personalizationData: unknown) {
   return (addonProducts as Record<string, unknown>).isEnabled === true;
 }
 
+function normalizeMinQuantity(value: unknown): number {
+  const parsed = Number.parseInt(String(value), 10);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function normalizeMaxQuantity(value: unknown): number {
+  const parsed = Number.parseInt(String(value), 10);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
 /**
  * Handle saving bundle configuration
  */
@@ -342,8 +352,8 @@ export async function handleSaveBundle(
                 collections: step.collections || [],
                 displayVariantsAsIndividual:
                   step.displayVariantsAsIndividual ?? false,
-                minQuantity: parseInt(step.minQuantity) || 1,
-                maxQuantity: parseInt(step.maxQuantity) || 1,
+                minQuantity: normalizeMinQuantity(step.minQuantity),
+                maxQuantity: normalizeMaxQuantity(step.maxQuantity),
                 enabled: step.enabled !== false, // Default to true unless explicitly false
                 multiLangData: step.multiLangData ?? null,
                 // Free gift / add-on step fields
@@ -395,7 +405,7 @@ export async function handleSaveBundle(
                           product.image?.url ||
                           null,
                         variants: product.variants || null,
-                        minQuantity: parseInt(product.minQuantity) || 1,
+                        minQuantity: normalizeMinQuantity(product.minQuantity),
                         maxQuantity: parseInt(product.maxQuantity) || 10,
                         position: productIndex + 1,
                       };

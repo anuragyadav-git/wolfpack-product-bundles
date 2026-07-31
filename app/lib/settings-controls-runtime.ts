@@ -45,6 +45,7 @@ export type SettingsControlsRuntime = {
     checkout: {
       action: Exclude<ControlsRedirectAction, "side_cart">;
       providerId: CheckoutIntegrationProviderId;
+      executeScript: string;
     };
     font: {
       customFont: string;
@@ -167,6 +168,7 @@ export function buildSettingsControlsRuntime(payload: ControlsPayload): Settings
       checkout: {
         action: getLandingCheckoutAction(payload),
         providerId: getLandingCheckoutProvider(payload),
+        executeScript: value(payload, "Execute Script"),
       },
       font: {
         customFont: value(payload, "Custom Font"),

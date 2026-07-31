@@ -16,6 +16,11 @@ import { collectAddonComponentVariants } from "../utils/addon-components";
 
 const METAFIELDS_SET_BATCH_SIZE = 25;
 
+function normalizeStepMinQuantity(value: unknown): number {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
 function normalizeProductVariantGid(value: unknown): string | null {
   if (typeof value !== "string" && typeof value !== "number") return null;
 
@@ -120,14 +125,14 @@ export async function updateComponentProductMetafields(
             if (variantId && !isUUID(variantId)) {
               componentVariantIds.add(variantId);
               componentReferences.push(variantId);
-              componentQuantities.push(step.minQuantity || 1);
+              componentQuantities.push(normalizeStepMinQuantity(step.minQuantity));
             }
           }
         } else {
           // No variants cached in DB — fall back to fetching the first variant from Shopify
           productIdMap.push({
             productId: stepProduct.productId,
-            stepMinQuantity: step.minQuantity || 1,
+            stepMinQuantity: normalizeStepMinQuantity(step.minQuantity),
             source: 'StepProduct-fallback'
           });
         }
@@ -145,13 +150,13 @@ export async function updateComponentProductMetafields(
               if (variantId && !isUUID(variantId)) {
                 componentVariantIds.add(variantId);
                 componentReferences.push(variantId);
-                componentQuantities.push(step.minQuantity || 1);
+                componentQuantities.push(normalizeStepMinQuantity(step.minQuantity));
               }
             }
           } else {
             productIdMap.push({
               productId: product.id,
-              stepMinQuantity: step.minQuantity || 1,
+              stepMinQuantity: normalizeStepMinQuantity(step.minQuantity),
               source: 'products'
             });
           }
@@ -192,7 +197,7 @@ export async function updateComponentProductMetafields(
             if (productId && !isUUID(productId) && !handledProductIds.has(productId)) {
               productIdMap.push({
                 productId,
-                stepMinQuantity: step.minQuantity || 1,
+                stepMinQuantity: normalizeStepMinQuantity(step.minQuantity),
                 source: `collection:${handle}`,
               });
               handledProductIds.add(productId);
@@ -228,11 +233,15 @@ export async function updateComponentProductMetafields(
               if (variantId && !isUUID(variantId)) {
                 componentVariantIds.add(variantId);
                 componentReferences.push(variantId);
-                componentQuantities.push(step.minQuantity || 1);
+                componentQuantities.push(normalizeStepMinQuantity(step.minQuantity));
               }
             }
           } else {
-            productIdMap.push({ productId: p.id, stepMinQuantity: step.minQuantity || 1, source: `StepCategory:${cat.name}` });
+            productIdMap.push({
+              productId: p.id,
+              stepMinQuantity: normalizeStepMinQuantity(step.minQuantity),
+              source: `StepCategory:${cat.name}`,
+            });
           }
 
           handledProductIds.add(p.id);
@@ -258,7 +267,11 @@ export async function updateComponentProductMetafields(
           for (const edge of edges) {
             const productId = edge.node?.id;
             if (productId && !isUUID(productId) && !handledProductIds.has(productId)) {
-              productIdMap.push({ productId, stepMinQuantity: step.minQuantity || 1, source: `StepCategory:${cat.name}:collection:${handle}` });
+              productIdMap.push({
+                productId,
+                stepMinQuantity: normalizeStepMinQuantity(step.minQuantity),
+                source: `StepCategory:${cat.name}:collection:${handle}`,
+              });
               handledProductIds.add(productId);
             }
           }
@@ -277,7 +290,7 @@ export async function updateComponentProductMetafields(
       if (!componentVariantIds.has(addonVariant.variantId)) {
         componentVariantIds.add(addonVariant.variantId);
         componentReferences.push(addonVariant.variantId);
-        componentQuantities.push(1);
+        componentQuantities.push(0);
       }
       if (addonVariant.productId) handledProductIds.add(addonVariant.productId);
       continue;
@@ -286,7 +299,7 @@ export async function updateComponentProductMetafields(
     if (addonVariant.productId && !handledProductIds.has(addonVariant.productId)) {
       productIdMap.push({
         productId: addonVariant.productId,
-        stepMinQuantity: 1,
+        stepMinQuantity: 0,
         source: "addonProducts",
       });
       handledProductIds.add(addonVariant.productId);

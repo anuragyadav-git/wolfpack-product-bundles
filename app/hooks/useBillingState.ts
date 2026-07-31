@@ -6,18 +6,7 @@
  * - Success/Error banner visibility
  */
 
-import { useCallback, useEffect } from "react";
-import { useAppDispatch, useAppSelector } from "../store/hooks";
-import {
-  closeBillingCancelConfirm,
-  dismissBillingErrorBanner,
-  dismissBillingSuccessBanner,
-  initializeBillingFeedback,
-  openBillingCancelConfirm,
-  showBillingErrorBanner,
-  showBillingSuccessBanner,
-} from "../store/slices/adminRouteStateSlice";
-import { closeModal, openModal } from "../store/slices/uiSlice";
+import { useCallback, useEffect, useState } from "react";
 
 // ============================================
 // TYPES
@@ -33,49 +22,45 @@ export interface BillingLoaderData {
 // ============================================
 
 export function useBillingState(loaderData: BillingLoaderData) {
-  const dispatch = useAppDispatch();
   const { callbackError, upgraded } = loaderData;
-  const {
-    showCancelConfirm,
-    showSuccessBanner,
-    showErrorBanner,
-  } = useAppSelector((state) => state.adminRouteState.billing);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [showSuccessBanner, setShowSuccessBanner] = useState(upgraded);
+  const [showErrorBanner, setShowErrorBanner] = useState(Boolean(callbackError));
 
   useEffect(() => {
-    dispatch(initializeBillingFeedback({ upgraded, callbackError }));
-  }, [callbackError, dispatch, upgraded]);
+    setShowSuccessBanner(upgraded);
+    setShowErrorBanner(Boolean(callbackError));
+  }, [callbackError, upgraded]);
 
   // Open cancel confirmation
   const openCancelConfirm = useCallback(() => {
-    dispatch(openBillingCancelConfirm());
-    dispatch(openModal("billing_cancelConfirm"));
-  }, [dispatch]);
+    setShowCancelConfirm(true);
+  }, []);
 
   // Close cancel confirmation
   const closeCancelConfirm = useCallback(() => {
-    dispatch(closeBillingCancelConfirm());
-    dispatch(closeModal("billing_cancelConfirm"));
-  }, [dispatch]);
+    setShowCancelConfirm(false);
+  }, []);
 
   // Dismiss success banner
   const dismissSuccessBanner = useCallback(() => {
-    dispatch(dismissBillingSuccessBanner());
-  }, [dispatch]);
+    setShowSuccessBanner(false);
+  }, []);
 
   // Dismiss error banner
   const dismissErrorBanner = useCallback(() => {
-    dispatch(dismissBillingErrorBanner());
-  }, [dispatch]);
+    setShowErrorBanner(false);
+  }, []);
 
   // Show success banner (for programmatic use)
   const showSuccess = useCallback(() => {
-    dispatch(showBillingSuccessBanner());
-  }, [dispatch]);
+    setShowSuccessBanner(true);
+  }, []);
 
   // Show error banner (for programmatic use)
   const showError = useCallback(() => {
-    dispatch(showBillingErrorBanner());
-  }, [dispatch]);
+    setShowErrorBanner(true);
+  }, []);
 
   return {
     // Cancel confirmation state

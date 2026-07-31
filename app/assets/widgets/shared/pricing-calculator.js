@@ -31,8 +31,7 @@ export class PricingCalculator {
       const productsInStep = stepProductData[stepIndex] || [];
 
       Object.entries(stepSelections).forEach(([variantId, quantity]) => {
-        // First try direct match on variantId or id
-        let product = productsInStep.find(p => String(p.variantId || p.id) === String(variantId));
+        let product = productsInStep.find(p => String(p.selectionId || '') === String(variantId));
         let matchedVariant = null;
 
         // If not found, search within nested variants array of each product
@@ -41,7 +40,7 @@ export class PricingCalculator {
         if (!product) {
           for (const p of productsInStep) {
             if (p.variants && Array.isArray(p.variants)) {
-              const variant = p.variants.find(v => String(v.id) === String(variantId));
+              const variant = p.variants.find(v => String(v.selectionId || '') === String(variantId));
               if (variant) {
                 product = p;
                 matchedVariant = variant;

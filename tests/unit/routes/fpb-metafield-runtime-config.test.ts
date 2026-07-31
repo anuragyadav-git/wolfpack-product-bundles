@@ -5,7 +5,7 @@ import {
 
 describe("FPB runtime metafield config", () => {
   const product = {
-    id: "gid://shopify/Product/123",
+    productId: "gid://shopify/Product/123",
     title: "Runtime Product",
     imageUrl: "https://cdn.shopify.com/product.jpg",
     price: 1999,
@@ -55,20 +55,12 @@ describe("FPB runtime metafield config", () => {
       pricing: null,
     } as any) as any;
 
-    expect(config.steps[0].products[0]).toMatchObject({
-      id: "gid://shopify/Product/123",
-      price: 1999,
-      compareAtPrice: 2499,
-      variants: expect.arrayContaining([
-        expect.objectContaining({ id: "gid://shopify/ProductVariant/111", price: 1999 }),
-        expect.objectContaining({ id: "gid://shopify/ProductVariant/222", price: 2199 }),
-      ]),
-    });
+    expect(config.steps[0].products).toEqual([]);
     expect(config.steps[0].categories[0].products[0]).toMatchObject({
-      id: "gid://shopify/Product/123",
+      selectionId: "gid://shopify/Product/123",
       price: 1999,
       variants: expect.arrayContaining([
-        expect.objectContaining({ id: "gid://shopify/ProductVariant/111", price: 1999 }),
+        expect.objectContaining({ selectionId: "gid://shopify/ProductVariant/111", price: 1999 }),
       ]),
     });
   });
@@ -111,10 +103,10 @@ describe("FPB runtime metafield config", () => {
     ) as any;
 
     expect(config.steps[0].products[0]).toMatchObject({
-      id: "gid://shopify/Product/123",
+      selectionId: "gid://shopify/Product/123",
       price: 1999,
       variants: expect.arrayContaining([
-        expect.objectContaining({ id: "gid://shopify/ProductVariant/111", price: 1999 }),
+        expect.objectContaining({ selectionId: "gid://shopify/ProductVariant/111", price: 1999 }),
       ]),
     });
     expect(config.pricing.rules[0]).toMatchObject({

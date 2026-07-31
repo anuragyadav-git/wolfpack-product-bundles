@@ -56,6 +56,19 @@ function getAddonDiscountForStepTier(step, tier) {
   return normalizeAddonPercentageDiscount(tier?.discount, tier, step?.addonDiscount);
 }
 
+function getSelectionId(item = {}) {
+  return String(item?.selectionId || '');
+}
+
+function getDefaultVariantQuantity(variant = {}) {
+  return normalizeDefaultRequiredQuantity(variant.defaultRequiredQuantity);
+}
+
+function normalizeDefaultRequiredQuantity(value = 0) {
+  const rawQuantity = Number.parseFloat(value);
+  return Number.isFinite(rawQuantity) && rawQuantity >= 0 ? rawQuantity : 0;
+}
+
 function createFreeGiftStatusIcon(state) {
   const icon = document.createElement('span');
   icon.className = `side-panel-free-gift-icon side-panel-free-gift-icon--${state}`;
@@ -302,8 +315,21 @@ getAddonSummaryEligibilityStates(step) {
   const getEligibilityState = typeof this.getAddonEligibilityState === 'function'
     ? this.getAddonEligibilityState
     : fullPageValidationAddonsMethods.getAddonEligibilityState;
+  const compareTierProgression = (left, right) => (
+    (left.threshold - right.threshold) || (left.index - right.index)
+  );
+  const eligible = withState
+    .filter(candidate => candidate.isEligible)
+    .sort(compareTierProgression);
+  const activeEligible = eligible[eligible.length - 1] || null;
+  const visibleCandidates = activeEligible
+    ? withState.filter(candidate => (
+        candidate === activeEligible
+        || (!candidate.isEligible && compareTierProgression(candidate, activeEligible) > 0)
+      ))
+    : withState;
 
-  return withState.map(candidate => getEligibilityState.call(this, step, {
+  return visibleCandidates.map(candidate => getEligibilityState.call(this, step, {
     tier: candidate.tier,
     tierIndex: candidate.index,
     isEligible: candidate.isEligible === true,
@@ -326,12 +352,20 @@ _getFreeGiftRemainingCount() {
 
   if (paidStepsComplete) return 0;
 
-  const total = this.paidSteps.reduce((sum, s) =>
-    sum + (Number(s.conditionValue) || Number(s.minQuantity) || 1), 0);
+  const total = this.paidSteps.reduce((sum, s) => {
+      const required = typeof this._getSummarySidebarRequiredQuantity === 'function'
+        ? this._getSummarySidebarRequiredQuantity(s)
+        : null;
+      return sum + (Number.isFinite(required) && required > 0 ? required : 0);
+    },
+    0);
   const selected = this.paidSteps.reduce((sum, paidStep) => {
     const globalIndex = steps.indexOf(paidStep);
     const stepSel = this.selectedProducts[globalIndex] ?? {};
-    return sum + Object.values(stepSel).reduce((s, p) => s + (typeof p === 'number' ? p : (p.quantity || 1)), 0);
+    return sum + Object.values(stepSel).reduce((s, p) => {
+      const quantity = typeof p === 'number' ? p : Number(p?.quantity);
+      return s + (Number.isFinite(quantity) ? quantity : 0);
+    }, 0);
   }, 0);
   return Math.max(0, total - selected);
 },
@@ -403,8 +437,9 @@ getAddonProductSelectionKeys(step) {
   const keys = new Set();
   const addKey = (value) => {
     if (value === null || value === undefined || value === '') return;
-    const normalized = this.extractId(value) || value;
-    keys.add(String(normalized));
+    const selectionId = String(value?.selectionId || '');
+    if (!selectionId) return;
+    keys.add(selectionId);
   };
   const products = [
     ...(Array.isArray(step?.StepProduct) ? step.StepProduct : []),
@@ -412,19 +447,10 @@ getAddonProductSelectionKeys(step) {
   ];
 
   products.forEach(product => {
-    addKey(product.id);
-    addKey(product.productId);
-    addKey(product.graphqlId);
-    addKey(product.variantId);
-    addKey(product.variantGraphqlId);
-    addKey(product.title);
-    (Array.isArray(product.variants) ? product.variants : []).forEach(variant => {
-      addKey(variant.id);
-      addKey(variant.variantId);
-      addKey(variant.variantGraphqlId);
-      addKey(variant.admin_graphql_api_id);
-      addKey(variant.title);
-    });
+    addKey(product);
+    if (Array.isArray(product.variants)) {
+      product.variants.forEach(addKey);
+    }
   });
 
   return keys;
@@ -546,26 +572,65 @@ createAddonTierMessageElement(message, isEligible) {
 },
 
 _initDefaultProducts() {
-  const steps = this.selectedBundle?.steps || [];
+    const steps = this.selectedBundle?.steps || [];
+    const normalizeId = (value = '') => this.extractId(value);
+    const normalizeSelectionId = (candidate) => getSelectionId(candidate);
+    const canSelectDefault = (variant) => {
+      if (!variant) return false;
+      if (typeof this.isVariantSelectableForInventory === 'function') {
+        return this.isVariantSelectableForInventory(variant);
+      }
+      return variant.available !== false;
+  };
+
   steps.forEach((step, stepIndex) => {
     if (!step.isDefault || !step.defaultVariantId) return;
-    // Canonicalize variant identifiers before matching and storing selection state.
-    const targetId = this.extractId(step.defaultVariantId);
+    const targetId = normalizeId(step.defaultVariantId);
     if (!targetId) return;
     const allProducts = [...(step.products || []), ...(step.StepProduct || [])];
-    const product = allProducts.find(p =>
-      this.extractId(p.variantId) === targetId ||
-      this.extractId(p.id) === targetId ||
-      this.extractId(p.gid) === targetId ||
-      (p.variants || []).some(v =>
-        this.extractId(v.id) === targetId || this.extractId(v.gid) === targetId
-      )
-    );
-    if (product) {
-      if (!this.selectedProducts[stepIndex]) this.selectedProducts[stepIndex] = {};
-      this.selectedProducts[stepIndex][targetId] = 1;
+    const isMatchingDefault = (candidate) => normalizeSelectionId(candidate) === targetId;
+    const product = allProducts.find((product) => {
+      if (isMatchingDefault(product)) return true;
+      if (!Array.isArray(product.variants)) return false;
+      return product.variants.some(isMatchingDefault);
+    });
+    if (!product) return;
+    let selectedVariant = null;
+    if (Array.isArray(product.variants) && product.variants.length > 0) {
+      selectedVariant = product.variants.find(isMatchingDefault);
+      if (!selectedVariant) return;
+    } else {
+      selectedVariant = product;
     }
+
+    if (!canSelectDefault(selectedVariant)) return;
+    if (!this.selectedProducts[stepIndex]) this.selectedProducts[stepIndex] = {};
+    this.selectedProducts[stepIndex][targetId] = getDefaultVariantQuantity(selectedVariant);
   });
+},
+
+_initDirectDefaultProducts() {
+  const canSelectDirectDefault = (product = {}) => {
+    const firstVariant = Array.isArray(product.variants) ? product.variants[0] : null;
+    if (!firstVariant) return false;
+    if (typeof this.isVariantSelectableForInventory === 'function') {
+      return this.isVariantSelectableForInventory(firstVariant);
+    }
+    return firstVariant.available !== false;
+  };
+
+  this.directDefaultProducts = this._getDirectDefaultProductItems();
+  if (this.directDefaultProducts.length === 0 || !this.selectedProducts[0]) return;
+
+    this.directDefaultProducts = this.directDefaultProducts.filter(canSelectDirectDefault);
+    this.directDefaultProducts.forEach(product => {
+      const selectionId = getSelectionId(product);
+      if (!selectionId) return;
+      const defaultQuantity = Number.parseFloat(product.defaultRequiredQuantity);
+      this.selectedProducts[0][selectionId] = Number.isFinite(defaultQuantity) && defaultQuantity >= 0
+        ? defaultQuantity
+        : 0;
+    });
 },
 
 // Re-lock free gift if paid items no longer satisfy the unlock condition
@@ -692,8 +757,10 @@ _renderStandardSidebarEmptySlots(container, options = {}) {
 },
 
 // Render empty-summary skeleton rows that match selected product rows.
-_renderSidebarProductSkeletons(container) {
-  const slotCount = this.getSummarySidebarMaxItemCount();
+_renderSidebarProductSkeletons(container, slotCountOverride) {
+  const slotCount = Number.isFinite(Number(slotCountOverride))
+    ? Math.max(0, Number(slotCountOverride))
+    : this.getSummarySidebarMaxItemCount();
   for (let i = 0; i < slotCount; i++) {
     const slot = document.createElement('div');
     slot.className = 'side-panel-product-row side-panel-skeleton-slot';
@@ -763,7 +830,7 @@ getSummarySidebarMaxItemCount(selectedCount = 0) {
     : null;
   const activeBoxQuantity = Number(activeBoxRule?.boxQuantity || 0);
   if (activeBoxQuantity > 0) {
-    return Math.max(activeBoxQuantity, selected, 1);
+    return Math.max(activeBoxQuantity, selected);
   }
 
   let totalRequired = 0;
@@ -775,7 +842,7 @@ getSummarySidebarMaxItemCount(selectedCount = 0) {
     }
   }
 
-  return Math.max(totalRequired, selected, 1);
+  return Math.max(totalRequired, selected);
 },
 
 getSummarySidebarEmptyStateMode() {

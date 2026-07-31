@@ -119,6 +119,11 @@
     "preview": {
       "heading": "Live-Vorschau",
       "unsaved": "Nicht gespeicherte Änderungen werden hier angezeigt.",
+      "workspace": {
+        "label": "Ansicht des Design-Arbeitsbereichs",
+        "preview": "Vorschau",
+        "customize": "Anpassen"
+      },
       "surface": {
         "description": "Wählen Sie Produkte für Ihr Bundle aus.",
         "stepOne": "1. Produkte auswählen",
@@ -188,6 +193,10 @@
       "close": "Schließen", "dismiss": "Ausblenden", "manage": "Verwalten", "enable": "Aktivieren", "enableHere": "Hier aktivieren", "learnMore": "Mehr erfahren",
       "maybeLater": "Vielleicht später", "setUpVisibility": "Sichtbarkeit einrichten", "reinstallApp": "App neu installieren",
       "upgradeNow": "Jetzt upgraden", "viewPlans": "Tarife anzeigen", "discardChanges": "Änderungen verwerfen", "continueEditing": "Weiter bearbeiten"
+    },
+    "loading": {
+      "appLabel": "Wolfpack Product Bundles wird geladen",
+      "workspace": "Arbeitsbereich wird geladen"
     },
     "appEmbed": {
       "body": "Aktiviere die Theme-App-Erweiterung für Wolfpack Bundles, um das Bundle zu platzieren und in der Vorschau anzuzeigen.",

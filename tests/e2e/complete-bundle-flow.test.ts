@@ -15,6 +15,7 @@ jest.mock("../../app/db.server", () => ({
     shop: {
       findUnique: jest.fn(),
       update: jest.fn(),
+      updateMany: jest.fn(),
     },
     bundle: {
       count: jest.fn(),
@@ -363,6 +364,7 @@ describe("FPB create + configure parity flow (scaffolded E2E path)", () => {
       id: "bundle-1",
     });
     db.shop.update.mockResolvedValue({});
+    db.shop.updateMany.mockResolvedValue({ count: 0 });
     createAdmin.graphql = buildCreateAdmin().graphql;
   });
 

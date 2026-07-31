@@ -5,7 +5,7 @@ title: Test Spec for FPB Standard Mobile Summary Action
 type: test-spec
 status: active
 summary: Covers mobile summary actions, category switching, defaults, validation, and navigation behavior for FPB storefronts.
-last_audited: 2026-07-21
+last_audited: 2026-07-30
 owners:
   - Wolfpack Product Bundles
 domains:
@@ -13,6 +13,7 @@ domains:
 systems:
   - full-page-bundle-widget
 source_paths:
+  - app/assets/widgets/full-page/methods/mobile-summary-methods.js
   - app/assets/widgets/full-page/methods/product-grid-methods.js
   - tests/unit/assets/fpb-standard-mobile-summary-action.test.ts
 related_docs:
@@ -45,7 +46,7 @@ Lock the storefront behavior observed in EB Standard and Classic: a one-step FPB
 | 3 | Non-final step | `isLastStep=false`, no add-on step | Button label is `Next` | Preserves multi-step navigation behavior. |
 | 4 | Alternate bottom bar final step with unmet conditions | `isLastStep=true`, `isComplete=false`, `conditionlessMobile=false` | Action state resolves to add-to-cart and disabled | Prevents the same final-step mismatch in the non-summary mobile bar path. |
 | 5 | Alternate bottom bar non-final step | `isLastStep=false`, `conditionlessMobile=false` | Action state resolves to next and enabled | Preserves multi-step navigation behavior in the non-summary mobile bar path. |
-| 6 | Compact summary empty state toggle | No selected products and collapsed summary tray | Summary tray state changes to expanded and open animation is scheduled | EB allows opening the mobile summary before product selection. |
+| 6 | Compact summary empty state toggle | No selected products and collapsed summary tray | Existing summary tray expands and collapses, updates `aria-expanded`, and keeps the transition lifecycle active through the full footer motion without rebuilding the toggle | EB animates one stable footer and caret; the caret finishes before the footer without forcing the footer to snap. |
 | 7 | Standard mobile category tab click | `STANDARD`, mobile width, category-backed step | Tab click activates the selected category and its product body | Current corrected EB Standard mobile evidence switches from 80 populated cards to the native empty state. |
 | 8 | Desktop or non-Standard category tab click | Desktop Standard or mobile Compact | Tab click activates the selected category normally | Preserves existing non-target behavior. |
 | 9 | Direct default product normalization | EB-style `defaultProductsData` with selected product | Normalized default item contains product id, variant id, title, price, image, quantity | Seeds full-page direct defaults from the durable runtime payload. |
@@ -55,6 +56,9 @@ Lock the storefront behavior observed in EB Standard and Classic: a one-step FPB
 | 13 | Add-on step after multiple paid steps | Current mobile step is before another paid step and an add-on step exists later | Summary CTA targets the next paid step, not the add-on step | Prevents the visible mobile footer from skipping locked paid steps. |
 | 14 | Standard and Classic expanded tray scroll | Expanded compact mobile summary tray for `STANDARD` or `CLASSIC` | Body scroll-lock class is toggled off | Matches EB evidence that expanded Standard/Classic footer remains sticky without locking page scroll. |
 | 15 | Timestamped Chrome async subtitle leak | Step `pageTitle` is `Chrome async 08:17:02` | Content subtitle is suppressed | Prevents accidental debug text from rendering in the storefront header. |
+| 16 | Shared fluid mobile footer ownership | Compact, Horizontal, Standard, and Classic presets | Compact and Horizontal opt into the shared fluid footer; Standard and Classic retain their animated footer variants | Keeps common footer structure reusable without erasing evidence-backed preset deltas. |
+| 17 | Shared mobile footer toggle | Classic mobile summary | Exactly one semantic button count-pill expands and collapses the tray | Matches current EB behavior and avoids duplicate controls in one footer. |
+| 18 | Unpublished direct default recovery | Configured direct default is absent from Storefront API hydration | Default is removed from first-load selection and product output | A stale Draft or deleted product must not block or contaminate storefront load. |
 
 ## Acceptance Criteria
 

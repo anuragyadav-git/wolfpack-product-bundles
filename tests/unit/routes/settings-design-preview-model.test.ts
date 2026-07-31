@@ -5,9 +5,12 @@ import {
 import {
   DESIGN_PREVIEW_FIXTURE,
   DESIGN_PREVIEW_TEMPLATES,
+  DESIGN_PREVIEW_VIEWPORTS,
   buildDesignPreviewTheme,
+  calculateDesignPreviewFitScale,
   getDesignPreviewFieldTarget,
   getDesignPreviewScene,
+  getDesignPreviewSurfaceFidelity,
   getSupportedDesignPreviewSurfaces,
   isDesignPreviewFieldApplicable,
 } from "../../../app/routes/app/app.settings/design-preview-model";
@@ -15,6 +18,29 @@ import { existsSync } from "node:fs";
 import { join } from "node:path";
 
 describe("Settings Design preview model", () => {
+  it("uses the storefront parity viewports and fits them without changing their logical width", () => {
+    expect(DESIGN_PREVIEW_VIEWPORTS).toEqual({
+      desktop: { width: 1280, height: 800 },
+      mobile: { width: 390, height: 844 },
+    });
+    expect(calculateDesignPreviewFitScale(1280, "desktop")).toBe(1);
+    expect(calculateDesignPreviewFitScale(960, "desktop")).toBe(0.75);
+    expect(calculateDesignPreviewFitScale(780, "mobile")).toBe(1);
+    expect(calculateDesignPreviewFitScale(312, "mobile")).toBe(0.8);
+    expect(calculateDesignPreviewFitScale(0, "desktop")).toBe(1);
+  });
+
+  it("limits storefront-match claims to Builder and Cart / Summary", () => {
+    for (const template of DESIGN_PREVIEW_TEMPLATES) {
+      expect(getDesignPreviewSurfaceFidelity(template.key, "builder")).toBe("storefront");
+      expect(getDesignPreviewSurfaceFidelity(template.key, "cart-summary")).toBe("storefront");
+      expect(getDesignPreviewSurfaceFidelity(template.key, "loading")).toBe("representative");
+      expect(getDesignPreviewSurfaceFidelity(template.key, "validation")).toBe("representative");
+      expect(getDesignPreviewSurfaceFidelity(template.key, "upsell")).toBe("representative");
+    }
+    expect(getDesignPreviewSurfaceFidelity("horizontal-slots", "product-picker")).toBe("representative");
+  });
+
   it("derives all eight descriptors from canonical storefront contracts", () => {
     expect(DESIGN_PREVIEW_TEMPLATES.map((template) => ({
       key: template.key,

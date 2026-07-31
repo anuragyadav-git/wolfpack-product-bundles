@@ -114,7 +114,10 @@ _renderDirectDefaultProducts() {
   const currencyInfo = CurrencyManager.getCurrencyInfo();
 
   products.forEach(product => {
-    const quantity = this.getSelectedQuantity(0, product.variantId) || product.defaultRequiredQuantity || 1;
+    const selectedQuantity = Number(this.getSelectedQuantity(0, product.variantId));
+    const defaultQuantity = Number.parseFloat(product.defaultRequiredQuantity);
+    const resolvedDefaultQuantity = Number.isFinite(defaultQuantity) && defaultQuantity >= 0 ? defaultQuantity : 0;
+    const quantity = Number.isFinite(selectedQuantity) ? selectedQuantity : resolvedDefaultQuantity;
     const line = document.createElement('div');
     line.className = 'bw-default-products__line';
 

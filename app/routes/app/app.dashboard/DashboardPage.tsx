@@ -15,6 +15,7 @@ import {
 } from "../../../lib/dashboard-preview-window";
 import { openSupportChat } from "../../../lib/support-chat.client";
 import { useEnablePreviewGate } from "../../../hooks/useEnablePreviewGate";
+import { useThemeExtensionStatus } from "../../../hooks/useThemeExtensionStatus";
 import {
   changeAdminI18nLanguage,
   normalizeAdminLocale,
@@ -29,6 +30,7 @@ import {
 } from "../../../store/slices/adminRouteStateSlice";
 import type { action, DashboardAppEmbedStatus, loader } from "./route";
 import { DashboardTopCards } from "./DashboardTopCards";
+import { DashboardStatusGrid } from "./DashboardStatusGrid";
 import {
   shouldRenderDashboardResourceCard,
 } from "./dashboard-media-state";
@@ -84,6 +86,7 @@ export function DashboardPage() {
   const { t, i18n } = useTranslation();
 
   const dashboardState = useDashboardState();
+  const themeExtensionStatus = useThemeExtensionStatus();
   const {
     bundleToDelete, openDeleteModal, closeDeleteModal,
   } = dashboardState;
@@ -220,8 +223,9 @@ export function DashboardPage() {
   }, [bundleToDelete]);
 
   const enablePreviewGate = useEnablePreviewGate({
-    appEmbedEnabled: resolvedAppEmbedStatus.appEmbedEnabled,
+    appEmbedEnabled: themeExtensionStatus.appEmbedEnabled,
     themeEditorUrl: resolvedAppEmbedStatus.themeEditorUrl,
+    refreshStatus: themeExtensionStatus.refresh,
     onSilentBlock: () => shopify.toast.show(t("dashboard.actions.themeEditorUnavailable"), { isError: true }),
   });
   const renderDeleteModal = shouldRenderDashboardDeleteModal({ bundleToDelete });
@@ -249,7 +253,7 @@ export function DashboardPage() {
         bundleId: bundle.id,
         shopifyProductHandle: bundle.shopifyProductHandle,
         shop,
-        appEmbedEnabled: resolvedAppEmbedStatus.appEmbedEnabled,
+        appEmbedEnabled: themeExtensionStatus.appEmbedEnabled,
         bundleStatus: bundle.status,
       });
 
@@ -276,12 +280,12 @@ export function DashboardPage() {
     };
 
     if (bundle.bundleType === "full_page") {
-      executePreviewAction();
+      void enablePreviewGate.requestPreview(executePreviewAction);
       return;
     }
 
-    enablePreviewGate.requestPreview(executePreviewAction);
-  }, [shop, shopify, fetcher, enablePreviewGate, resolvedAppEmbedStatus.appEmbedEnabled, recordDashboardPreview]);
+    executePreviewAction();
+  }, [shop, shopify, fetcher, enablePreviewGate, recordDashboardPreview]);
 
   const getStatusDisplay = (status: string) => {
     const tone = STATUS_TONE_MAP[status as keyof typeof STATUS_TONE_MAP] ?? 'info';
@@ -555,8 +559,17 @@ export function DashboardPage() {
             </Await>
           </Suspense>
 
-          <DashboardTopCards
-            handleDirectChat={handleDirectChat}
+          <DashboardStatusGrid
+            activeBundleCount={bundles.filter((bundle) => bundle.status === "active").length}
+            resources={themeExtensionStatus.resources}
+            loading={themeExtensionStatus.loading}
+            error={themeExtensionStatus.error}
+            themeEditorUrl={resolvedAppEmbedStatus.themeEditorUrl}
+            onOpenThemeEditor={() => {
+              if (resolvedAppEmbedStatus.themeEditorUrl) {
+                window.open(resolvedAppEmbedStatus.themeEditorUrl, "_blank", "noopener,noreferrer");
+              }
+            }}
           />
 
           {/* Bundles panel */}
@@ -723,6 +736,10 @@ export function DashboardPage() {
               </s-section>
             </s-query-container>
           </div>
+
+          <DashboardTopCards
+            handleDirectChat={handleDirectChat}
+          />
 
           {/* Resources card */}
           {renderResourceCard && (

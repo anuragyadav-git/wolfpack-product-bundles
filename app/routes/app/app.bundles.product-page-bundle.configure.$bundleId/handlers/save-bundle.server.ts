@@ -19,6 +19,16 @@ import {
   syncBundleStorefrontNow,
 } from "../../../../services/bundles/storefront-sync.server";
 
+function normalizeMinQuantity(value: unknown): number {
+  const parsed = Number.parseInt(String(value), 10);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function normalizeMaxQuantity(value: unknown): number {
+  const parsed = Number.parseInt(String(value), 10);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
 export async function handleSaveBundle(
   admin: ShopifyAdmin,
   session: Session,
@@ -267,8 +277,8 @@ export async function handleSaveBundle(
                 collections: step.collections || [],
                 displayVariantsAsIndividual:
                   step.displayVariantsAsIndividualProducts || false,
-                minQuantity: parseInt(step.minQuantity) || 1,
-                maxQuantity: parseInt(step.maxQuantity) || 1,
+                minQuantity: normalizeMinQuantity(step.minQuantity),
+                maxQuantity: normalizeMaxQuantity(step.maxQuantity),
                 enabled: step.enabled !== false, // Default to true unless explicitly false
                 // Free gift / add-on step fields
                 isFreeGift: step.isFreeGift === true,
@@ -309,7 +319,7 @@ export async function handleSaveBundle(
                           product.image?.url ||
                           null,
                         variants: product.variants || null,
-                        minQuantity: parseInt(product.minQuantity) || 1,
+                        minQuantity: normalizeMinQuantity(product.minQuantity),
                         maxQuantity: parseInt(product.maxQuantity) || 10,
                         position: productIndex + 1,
                       };

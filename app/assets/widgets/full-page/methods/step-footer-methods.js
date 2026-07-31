@@ -11,26 +11,117 @@ import {
 } from '../../shared/engine/cart-lines.js';
 import { shouldDisplayClassicFixedBundleRawTotal } from '../shared/summary-pricing-display.js';
 
-function isFullPageCartLineOutOfStock(context, product) {
-  if (!product) return false;
-  if (typeof context?.isVariantOutOfStock === 'function') {
-    return context.isVariantOutOfStock(product);
-  }
-  if (product.available === false) return true;
-
-  const controls = typeof context?._getLandingPageControls === 'function'
-    ? context._getLandingPageControls()
-    : null;
-  return controls?.trackInventoryOnAddToCart === true
-    && product.quantityAvailable === 0
-    && product.currentlyNotInStock !== true;
-}
-
 function shouldIncludeBundleQuantityCartProperties(context) {
   const pricing = context?.selectedBundle?.pricing || {};
   const method = String(pricing.method || '').toLowerCase();
   const bundleQuantityOptions = pricing.messages?.displayOptions?.bundleQuantityOptions;
   return !(method === 'buy_x_get_y' && bundleQuantityOptions?.enabled === false);
+}
+
+function extractNumericFullPageId(value, extractId) {
+  if (value === null || value === undefined || value === '') return '';
+  if (typeof extractId === 'function') return extractId(value);
+  const raw = String(value || '');
+  const gidMatch = raw.match(/gid:\/\/shopify\/\w+\/(\d+)/);
+  if (gidMatch) return gidMatch[1];
+  return raw.includes('/') ? raw.split('/').pop() : raw;
+}
+
+function resolveCartVariantId(product, selectionId, extractId) {
+  const hasVariants = Array.isArray(product?.variants);
+
+  const candidateVariantFromSelection = (() => {
+    if (!product) return '';
+    const variants = Array.isArray(product.variants) ? product.variants : [];
+    const selected = String(selectionId || '');
+    if (!selected) return '';
+
+    const matchingVariant = variants.find((candidate) => {
+      const candidateId = extractNumericFullPageId(
+        candidate?.selectionId || candidate?.variantId || candidate?.id,
+        extractId
+      );
+      return String(candidateId || '') === String(selected);
+    });
+
+    if (!matchingVariant) return '';
+    return extractNumericFullPageId(
+      matchingVariant.variantId || matchingVariant.selectionId || matchingVariant.id,
+      extractId
+    );
+  })();
+  if (candidateVariantFromSelection) return candidateVariantFromSelection;
+
+  if (hasVariants && product.variants.length === 0) {
+    return '';
+  }
+
+  if (product?.variants && product.variants.length === 1) {
+    const singleVariant = product.variants[0];
+    const singleVariantId = extractNumericFullPageId(
+      singleVariant?.selectionId || singleVariant?.variantId || singleVariant?.id,
+      extractId
+    );
+    if (singleVariantId) return singleVariantId;
+  }
+
+  return extractNumericFullPageId(
+    product?.variantId,
+    product?.selectionId,
+    extractId
+  ) || '';
+}
+
+function toAddonLineType(properties = {}) {
+  if (properties._addon_product === 'true') return 'addon';
+  if (properties._bundle_step_type === 'free_gift') return 'free_gift';
+  return 'component';
+}
+
+function mergeDuplicateCartLines(lines = []) {
+  const grouped = new Map();
+
+  lines.forEach((line) => {
+    const variantId = String(line?.id || '').trim();
+    if (!variantId) {
+      grouped.set(Symbol(), line);
+      return;
+    }
+
+    const properties = line.properties || {};
+    const mergeKey = `${variantId}`;
+    const existing = grouped.get(mergeKey);
+
+    if (!existing) {
+      grouped.set(mergeKey, line);
+      return;
+    }
+
+    const quantity = Number(existing.quantity || 0) + Number(line.quantity || 0);
+    existing.quantity = quantity;
+    const existingProperties = existing.properties || {};
+    const incomingProperties = properties || {};
+    const hasExistingAddon = existingProperties._addon_product === 'true'
+      || (existingProperties._bundle_step_type === 'addon' || String(existingProperties._bundle_step_type || '').startsWith('addon:'));
+    const hasIncomingAddon = incomingProperties._addon_product === 'true'
+      || (incomingProperties._bundle_step_type === 'addon' || String(incomingProperties._bundle_step_type || '').startsWith('addon:'));
+    const hasExistingFreeGift = existingProperties._bundle_step_type === 'free_gift';
+    const hasIncomingFreeGift = incomingProperties._bundle_step_type === 'free_gift';
+    if (hasIncomingAddon || hasExistingAddon) {
+      existing.properties = { ...existingProperties, ...incomingProperties };
+      existing.properties._bundle_step_type = hasIncomingAddon
+        ? (incomingProperties._bundle_step_type || existingProperties._bundle_step_type)
+        : existingProperties._bundle_step_type;
+    } else if (hasIncomingFreeGift && !hasExistingFreeGift) {
+      existing.properties = { ...existingProperties, ...incomingProperties };
+      existing.properties._bundle_step_type = 'free_gift';
+    }
+    if (existing.properties && Object.prototype.hasOwnProperty.call(existing.properties, '_wolfpackProductBundle:prodQty')) {
+      existing.properties['_wolfpackProductBundle:prodQty'] = String(quantity);
+    }
+  });
+
+  return Array.from(grouped.values());
 }
 
 export const fullPageStepFooterMethods = {
@@ -91,14 +182,17 @@ export const fullPageStepFooterMethods = {
     return sourceProperties;
   },
 
-buildCartLineDisplayProperties(displayProperties) {
-  return buildSharedCartLineDisplayProperties(displayProperties, this.getCartLineLabels());
-},
+  buildCartLineDisplayProperties(displayProperties) {
+    return buildSharedCartLineDisplayProperties(displayProperties, this.getCartLineLabels());
+  },
 
-// Add bundle to cart
-async addBundleToCart(clickedButton = null) {
+  // Add bundle to cart
+  async addBundleToCart(clickedButton = null) {
   if (this._isWidgetActionBusy) return;
   const actionButton = clickedButton || this.container?.querySelector('.footer-btn-next');
+  this._setWidgetBusy(true, actionButton);
+  this.showLoadingOverlay(this.selectedBundle?.loadingGif || null);
+  await Promise.resolve();
 
   try {
     // Final validation: all paid steps must be satisfied.
@@ -110,7 +204,7 @@ async addBundleToCart(clickedButton = null) {
       return;
     }
     // Build cart items from selected products
-    const items = [];
+    let items = [];
 
     // Generate unique bundle instance ID for this add-to-cart action
     // This allows cart transform to group components and prevents Shopify from
@@ -125,6 +219,7 @@ async addBundleToCart(clickedButton = null) {
     const hasAddonStepConfigured = (this.selectedBundle?.steps || []).some((candidateStep) => {
       return fullPageStepFooterMethods.isSelectedAddonCartLine.call(this, candidateStep);
     });
+
     let hasSelectedAddonLine = false;
 
 
@@ -135,13 +230,45 @@ async addBundleToCart(clickedButton = null) {
 
       Object.entries(stepSelections).forEach(([variantId, quantity]) => {
         if (quantity > 0) {
-          // Ensure we're using a numeric variant ID (extract from GID if needed)
-          const numericVariantId = this.extractId(variantId) || variantId;
-          const product = productsInStep.find(p => String(p.variantId || p.id) === String(variantId))
-            || { id: variantId, title: variantId };
+          const requestedQuantity = Number(quantity || 0);
+          const resolvedSelectionId = extractNumericFullPageId(
+            variantId,
+            typeof this.extractId === 'function' ? this.extractId : null
+          );
+          const product = productsInStep.find((candidate) => {
+            const candidateSelectionId = extractNumericFullPageId(
+              candidate?.selectionId || candidate?.variantId || candidate?.id,
+              typeof this.extractId === 'function' ? this.extractId : null
+            );
+            return String(candidateSelectionId || '') === String(resolvedSelectionId || '');
+          });
+          if (!product) {
+            unavailableLines.push('Unable to resolve selected product variant.');
+            return;
+          }
+          const numericVariantId = extractNumericFullPageId(
+            resolveCartVariantId(product, resolvedSelectionId, typeof this.extractId === 'function' ? this.extractId : null),
+            typeof this.extractId === 'function' ? this.extractId : null
+          );
+          if (!numericVariantId || !/^\d+$/.test(numericVariantId)) {
+            unavailableLines.push(`${product?.title || variantId} is not available.`);
+            return;
+          }
 
-          if (isFullPageCartLineOutOfStock(this, product)) {
-            unavailableLines.push(product.title || variantId);
+          const availability = typeof this.getVariantAvailable === 'function'
+            ? this.getVariantAvailable(stepIndex, resolvedSelectionId)
+            : { available: null, outOfStock: false, acceptsBackorder: false };
+          if (availability?.outOfStock) {
+            unavailableLines.push(`${product?.title || variantId} is out of stock.`);
+            return;
+          }
+          if (
+            typeof availability?.available === 'number'
+            && requestedQuantity > availability.available
+          ) {
+            unavailableLines.push(
+              `${product?.title || variantId} only has ${availability.available} in stock.`
+            );
             return;
           }
 
@@ -168,8 +295,7 @@ async addBundleToCart(clickedButton = null) {
             if (addonEval?.tier?.tierId) {
               properties._addonTierId = String(addonEval.tier.tierId);
             }
-            const addonVariantId = this.extractId(variantId);
-            properties._uniqueWpbItemKey = `${addonVariantId || numericVariantId}_pageId:addonProduct`;
+            properties._uniqueWpbItemKey = `${numericVariantId}_pageId:addonProduct`;
             properties._bundle_step_type = addonDiscount
               ? `addon:${addonDiscount.type}:${addonDiscount.value}`
               : 'addon';
@@ -181,7 +307,9 @@ async addBundleToCart(clickedButton = null) {
           const cartItem = {
             id: numericVariantId,
             quantity: quantity,
-            properties
+            properties,
+            _runtimeProductId: [product?.productId, product?.graphqlId, product?.id]
+              .find(value => String(value || '').includes('/Product/')) || null,
           };
           const sellingPlanAllocationId = this.getSelectedSellingPlanAllocationId(product, variantId);
           if (sellingPlanAllocationId) {
@@ -194,8 +322,10 @@ async addBundleToCart(clickedButton = null) {
       });
     });
 
+    const itemsForRuntimeToken = items;
+
     if (unavailableLines.length > 0) {
-      ToastManager.show(`${unavailableLines[0]} is out of stock.`);
+      ToastManager.show(unavailableLines[0]);
       return;
     }
 
@@ -212,9 +342,6 @@ async addBundleToCart(clickedButton = null) {
       }
     });
 
-    this._setWidgetBusy(true, actionButton);
-    this.showLoadingOverlay(this.selectedBundle?.loadingGif || null);
-
     try {
       const requestRuntimeToken = typeof this.requestCartTransformRuntimeToken === 'function'
         ? this.requestCartTransformRuntimeToken
@@ -223,8 +350,10 @@ async addBundleToCart(clickedButton = null) {
         offerGroupId: baseOfferId,
         bundleType: 'full_page',
       });
+      items = mergeDuplicateCartLines(itemsForRuntimeToken);
       items.forEach(item => {
         item.properties._wolfpack_bundle_runtime = runtimeToken;
+        delete item._runtimeProductId;
       });
 
       // Add to Shopify cart
@@ -237,7 +366,17 @@ async addBundleToCart(clickedButton = null) {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to add to cart');
+        const responseText = await response.text();
+        let errorMessage = `Failed to add bundle to cart (${response.status})`;
+        try {
+          const payload = JSON.parse(responseText);
+          errorMessage = payload?.message || payload?.description || errorMessage;
+        } catch {
+          if (responseText) {
+            errorMessage = responseText;
+          }
+        }
+        throw new Error(errorMessage);
       }
 
       await response.json();
@@ -250,19 +389,24 @@ async addBundleToCart(clickedButton = null) {
 
       // Show success message
       ToastManager.show('Bundle added to cart successfully!');
-      await this._handlePostAddToCartAction(this._getLandingPageControls()?.checkout);
+      await this._handlePostAddToCartAction(
+        this._getLandingPageControls()?.checkout,
+        baseOfferId,
+      );
 
     } catch (fetchError) {
       this._emitStorefrontEvent('bundle-add-to-cart-failed', { reason: 'fetch-error', message: String(fetchError && fetchError.message || fetchError) });
-      ToastManager.show('Failed to add bundle to cart. Please try again.');
-    } finally {
-      this.hideLoadingOverlay();
-      this._setWidgetBusy(false, actionButton);
+      ToastManager.show(
+        String(fetchError && fetchError.message) || 'Failed to add bundle to cart. Please try again.'
+      );
     }
 
   } catch (error) {
     this._emitStorefrontEvent('bundle-add-to-cart-failed', { reason: 'validation-error', message: String(error && error.message || error) });
     ToastManager.show('Failed to add bundle to cart. Please try again.');
+  } finally {
+    this.hideLoadingOverlay();
+    this._setWidgetBusy(false, actionButton);
   }
 },
 
@@ -289,6 +433,7 @@ async requestCartTransformRuntimeToken(items, { offerGroupId, bundleType }) {
     const isAddon = stepType === 'addon' || (typeof stepType === 'string' && stepType.startsWith('addon:'));
     const line = {
       variantId: item.id,
+      productId: item._runtimeProductId || item.productId || undefined,
       quantity: item.quantity,
     };
     if (isAddon) {
@@ -413,7 +558,7 @@ getStepProductImages(stepIndex) {
 
   Object.entries(selectedProducts).forEach(([variantId, quantity]) => {
     if (quantity > 0) {
-      const product = this.stepProductData[stepIndex].find(p => (p.variantId || p.id) === variantId);
+      const product = this.stepProductData[stepIndex].find(p => String(p.selectionId || '') === String(variantId));
       if (product && product.imageUrl && !productImages.find(img => img.url === product.imageUrl)) {
         productImages.push({
           url: product.imageUrl,

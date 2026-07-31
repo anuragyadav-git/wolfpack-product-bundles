@@ -1,74 +1,107 @@
+import type { ApiVersion } from "@shopify/shopify-api";
 import type { authenticate } from "~/shopify.server";
 import { AppLogger } from "../lib/logger";
 
 type AdminApiContext = Awaited<ReturnType<typeof authenticate.admin>>["admin"];
 
+export type AddOnDiscountSetupOutcome =
+  | "created"
+  | "reactivated"
+  | "already_active";
+
 export interface AddOnDiscountActivationResult {
   success: boolean;
   discountId?: string;
   functionId?: string;
+  functionHandle?: string;
+  outcome?: AddOnDiscountSetupOutcome;
   error?: string;
-  alreadyExists?: boolean;
 }
 
-const ADDON_DISCOUNT_FUNCTION_TITLE = "bundle-discount-function";
+type AddOnDiscountFunction = {
+  id: string;
+  handle: string;
+};
+
+type ExistingAddOnDiscount = {
+  id: string;
+  status: string;
+};
+
+const ADDON_DISCOUNT_FUNCTION_HANDLE = "bundle-discount-function";
 const ADDON_DISCOUNT_TITLE = "Add On";
+const ADDON_DISCOUNT_API_VERSION = "2026-07" as ApiVersion;
+
+function formatGraphQLErrors(errors: Array<{ message?: string }> = []) {
+  return errors
+    .map((error) => error.message)
+    .filter(Boolean)
+    .join(", ");
+}
+
+function formatUserErrors(
+  errors: Array<{ field?: string[]; message?: string }> = [],
+) {
+  return errors
+    .map((error) => {
+      const field = error.field?.length ? `${error.field.join(".")}: ` : "";
+      return `${field}${error.message ?? "Unknown Shopify user error"}`;
+    })
+    .join(", ");
+}
 
 export class AddOnDiscountFunctionService {
-  private static async getFunctionId(admin: AdminApiContext): Promise<string | null> {
+  private static async getFunction(
+    admin: AdminApiContext,
+  ): Promise<AddOnDiscountFunction | null> {
     const QUERY = `
       query GetAddOnDiscountFunction {
         shopifyFunctions(first: 50) {
-          edges {
-            node {
-              id
-              title
-              apiType
-              description
-            }
+          nodes {
+            id
+            handle
           }
         }
       }
     `;
 
-    try {
-      const response = await admin.graphql(QUERY);
-      const data = await response.json() as any;
-      const edges = data.data?.shopifyFunctions?.edges ?? [];
-      const match = edges.find((edge: any) => {
-        const fn = edge.node;
-        return fn.title === ADDON_DISCOUNT_FUNCTION_TITLE
-          || fn.description === ADDON_DISCOUNT_FUNCTION_TITLE;
-      });
-
-      return match?.node?.id ?? null;
-    } catch (error) {
-      AppLogger.warn("Failed to resolve add-on discount function", {
-        component: "addon-discount-function",
-        operation: "resolve-function",
-      }, error);
-      return null;
+    const response = await admin.graphql(QUERY, {
+      apiVersion: ADDON_DISCOUNT_API_VERSION,
+    });
+    const data = await response.json() as any;
+    if (data.errors?.length) {
+      throw new Error(`GraphQL errors: ${formatGraphQLErrors(data.errors)}`);
     }
+
+    const match = data.data?.shopifyFunctions?.nodes?.find(
+      (shopifyFunction: any) =>
+        shopifyFunction?.handle === ADDON_DISCOUNT_FUNCTION_HANDLE,
+    );
+
+    return match
+      ? {
+          id: match.id,
+          handle: match.handle,
+        }
+      : null;
   }
 
-  private static async findExistingDiscount(
+  private static async findExistingDiscounts(
     admin: AdminApiContext,
     functionId: string,
-  ): Promise<{ id?: string; functionId?: string }> {
+  ): Promise<ExistingAddOnDiscount[]> {
     const QUERY = `
-      query FindAddOnAutomaticDiscount {
+      query FindAddOnAutomaticDiscounts {
         discountNodes(first: 50) {
-          edges {
-            node {
-              id
-              discount {
-                __typename
-                ... on DiscountAutomaticApp {
-                  title
-                  status
-                  appDiscountType {
-                    functionId
-                  }
+          nodes {
+            id
+            discount {
+              __typename
+              ... on DiscountAutomaticApp {
+                title
+                status
+                appDiscountType {
+                  functionId
                 }
               }
             }
@@ -77,47 +110,42 @@ export class AddOnDiscountFunctionService {
       }
     `;
 
-    try {
-      const response = await admin.graphql(QUERY);
-      const data = await response.json() as any;
-      const match = data.data?.discountNodes?.edges?.find((edge: any) => {
-        const discount = edge.node?.discount;
+    const response = await admin.graphql(QUERY, {
+      apiVersion: ADDON_DISCOUNT_API_VERSION,
+    });
+    const data = await response.json() as any;
+    if (data.errors?.length) {
+      throw new Error(`GraphQL errors: ${formatGraphQLErrors(data.errors)}`);
+    }
+
+    return (data.data?.discountNodes?.nodes ?? [])
+      .filter((node: any) => {
+        const discount = node?.discount;
         return discount?.__typename === "DiscountAutomaticApp"
           && discount?.title === ADDON_DISCOUNT_TITLE
           && discount?.appDiscountType?.functionId === functionId;
-      });
-
-      return {
-        id: match?.node?.id,
-        functionId: match?.node?.discount?.appDiscountType?.functionId,
-      };
-    } catch (error) {
-      AppLogger.warn("Failed to check existing add-on automatic discounts", {
-        component: "addon-discount-function",
-        operation: "check-existing",
-      }, error);
-      return {};
-    }
+      })
+      .map((node: any) => ({
+        id: node.id,
+        status: node.discount.status,
+      }));
   }
 
-  private static async createAutomaticDiscount(
+  private static async activateAutomaticDiscount(
     admin: AdminApiContext,
-    functionId: string,
+    discount: ExistingAddOnDiscount,
+    shopifyFunction: AddOnDiscountFunction,
   ): Promise<AddOnDiscountActivationResult> {
     const MUTATION = `
-      mutation CreateAddOnAutomaticDiscount($automaticAppDiscount: DiscountAutomaticAppInput!) {
-        discountAutomaticAppCreate(automaticAppDiscount: $automaticAppDiscount) {
-          automaticAppDiscount {
-            discountId
-            title
-            status
-            appDiscountType {
-              functionId
-            }
-            combinesWith {
-              orderDiscounts
-              productDiscounts
-              shippingDiscounts
+      mutation ActivateAddOnAutomaticDiscount($id: ID!) {
+        discountAutomaticActivate(id: $id) {
+          automaticDiscountNode {
+            id
+            automaticDiscount {
+              __typename
+              ... on DiscountAutomaticApp {
+                status
+              }
             }
           }
           userErrors {
@@ -129,54 +157,130 @@ export class AddOnDiscountFunctionService {
       }
     `;
 
-    try {
-      const response = await admin.graphql(MUTATION, {
-        variables: {
-          automaticAppDiscount: {
-            title: ADDON_DISCOUNT_TITLE,
-            functionId,
-            startsAt: new Date().toISOString(),
-            discountClasses: ["PRODUCT"],
-            combinesWith: {
-              orderDiscounts: true,
-              productDiscounts: true,
-              shippingDiscounts: false,
-            },
-          },
-        },
-      });
-      const data = await response.json() as any;
-
-      if (data.errors) {
-        return {
-          success: false,
-          functionId,
-          error: `GraphQL errors: ${data.errors.map((error: any) => error.message).join(", ")}`,
-        };
-      }
-
-      const payload = data.data?.discountAutomaticAppCreate;
-      const userErrors = payload?.userErrors ?? [];
-      if (userErrors.length > 0) {
-        return {
-          success: false,
-          functionId,
-          error: `User errors: ${userErrors.map((error: any) => error.message).join(", ")}`,
-        };
-      }
-
-      return {
-        success: true,
-        functionId,
-        discountId: payload?.automaticAppDiscount?.discountId,
-      };
-    } catch (error) {
+    const response = await admin.graphql(MUTATION, {
+      apiVersion: ADDON_DISCOUNT_API_VERSION,
+      variables: { id: discount.id },
+    });
+    const data = await response.json() as any;
+    if (data.errors?.length) {
       return {
         success: false,
-        functionId,
-        error: error instanceof Error ? error.message : "Unknown add-on discount activation error",
+        functionId: shopifyFunction.id,
+        functionHandle: shopifyFunction.handle,
+        discountId: discount.id,
+        error: `GraphQL errors: ${formatGraphQLErrors(data.errors)}`,
       };
     }
+
+    const payload = data.data?.discountAutomaticActivate;
+    const userErrors = payload?.userErrors ?? [];
+    if (userErrors.length) {
+      return {
+        success: false,
+        functionId: shopifyFunction.id,
+        functionHandle: shopifyFunction.handle,
+        discountId: discount.id,
+        error: `User errors: ${formatUserErrors(userErrors)}`,
+      };
+    }
+
+    const activated = payload?.automaticDiscountNode;
+    const status = activated?.automaticDiscount?.status;
+    if (!activated?.id || status !== "ACTIVE") {
+      return {
+        success: false,
+        functionId: shopifyFunction.id,
+        functionHandle: shopifyFunction.handle,
+        discountId: discount.id,
+        error: `Shopify did not activate add-on discount '${discount.id}' (status: ${status ?? "unknown"})`,
+      };
+    }
+
+    return {
+      success: true,
+      functionId: shopifyFunction.id,
+      functionHandle: shopifyFunction.handle,
+      discountId: activated.id,
+      outcome: "reactivated",
+    };
+  }
+
+  private static async createAutomaticDiscount(
+    admin: AdminApiContext,
+    shopifyFunction: AddOnDiscountFunction,
+  ): Promise<AddOnDiscountActivationResult> {
+    const MUTATION = `
+      mutation CreateAddOnAutomaticDiscount($automaticAppDiscount: DiscountAutomaticAppInput!) {
+        discountAutomaticAppCreate(automaticAppDiscount: $automaticAppDiscount) {
+          automaticAppDiscount {
+            discountId
+            status
+          }
+          userErrors {
+            field
+            message
+            code
+          }
+        }
+      }
+    `;
+
+    const response = await admin.graphql(MUTATION, {
+      apiVersion: ADDON_DISCOUNT_API_VERSION,
+      variables: {
+        automaticAppDiscount: {
+          title: ADDON_DISCOUNT_TITLE,
+          functionHandle: shopifyFunction.handle,
+          startsAt: new Date().toISOString(),
+          discountClasses: ["PRODUCT"],
+          combinesWith: {
+            orderDiscounts: true,
+            productDiscounts: true,
+            shippingDiscounts: false,
+          },
+        },
+      },
+    });
+    const data = await response.json() as any;
+
+    if (data.errors?.length) {
+      return {
+        success: false,
+        functionId: shopifyFunction.id,
+        functionHandle: shopifyFunction.handle,
+        error: `GraphQL errors: ${formatGraphQLErrors(data.errors)}`,
+      };
+    }
+
+    const payload = data.data?.discountAutomaticAppCreate;
+    const userErrors = payload?.userErrors ?? [];
+    if (userErrors.length) {
+      return {
+        success: false,
+        functionId: shopifyFunction.id,
+        functionHandle: shopifyFunction.handle,
+        error: `User errors: ${formatUserErrors(userErrors)}`,
+      };
+    }
+
+    const created = payload?.automaticAppDiscount;
+    if (!created?.discountId || created.status !== "ACTIVE") {
+      return {
+        success: false,
+        functionId: shopifyFunction.id,
+        functionHandle: shopifyFunction.handle,
+        discountId: created?.discountId,
+        error: `Shopify did not create an active add-on discount (status: ${created?.status ?? "unknown"})`,
+      };
+    }
+
+    return {
+      success: true,
+      functionId: shopifyFunction.id,
+      functionHandle: shopifyFunction.handle,
+      discountId: created.discountId,
+      outcome: "created",
+    };
   }
 
   static async completeSetup(
@@ -188,34 +292,63 @@ export class AddOnDiscountFunctionService {
       operation: "complete-setup",
     }, { shopDomain });
 
-    const functionId = await this.getFunctionId(admin);
-    if (!functionId) {
-      const error = `Discount function '${ADDON_DISCOUNT_FUNCTION_TITLE}' not found - has the app been deployed?`;
-      AppLogger.warn(error, {
-        component: "addon-discount-function",
-        operation: "complete-setup",
-      }, { shopDomain });
-      return { success: false, error };
-    }
+    try {
+      const shopifyFunction = await this.getFunction(admin);
+      if (!shopifyFunction) {
+        const error = `Discount function '${ADDON_DISCOUNT_FUNCTION_HANDLE}' not found - has the app been deployed?`;
+        AppLogger.warn(error, {
+          component: "addon-discount-function",
+          operation: "complete-setup",
+        }, { shopDomain });
+        return { success: false, error };
+      }
 
-    const existing = await this.findExistingDiscount(admin, functionId);
-    if (existing.id) {
-      return {
-        success: true,
-        functionId,
-        discountId: existing.id,
-        alreadyExists: true,
-      };
-    }
+      const existingDiscounts = await this.findExistingDiscounts(
+        admin,
+        shopifyFunction.id,
+      );
+      const activeDiscount = existingDiscounts.find(
+        (discount) => discount.status === "ACTIVE",
+      );
+      if (activeDiscount) {
+        return {
+          success: true,
+          functionId: shopifyFunction.id,
+          functionHandle: shopifyFunction.handle,
+          discountId: activeDiscount.id,
+          outcome: "already_active",
+        };
+      }
 
-    const result = await this.createAutomaticDiscount(admin, functionId);
-    if (!result.success) {
+      const inactiveDiscount = existingDiscounts[0];
+      const result = inactiveDiscount
+        ? await this.activateAutomaticDiscount(
+            admin,
+            inactiveDiscount,
+            shopifyFunction,
+          )
+        : await this.createAutomaticDiscount(admin, shopifyFunction);
+
+      if (!result.success) {
+        AppLogger.warn("Add-on automatic discount setup failed", {
+          component: "addon-discount-function",
+          operation: "complete-setup",
+        }, { shopDomain, error: result.error });
+      }
+
+      return result;
+    } catch (error) {
+      const message = error instanceof Error
+        ? error.message
+        : "Unknown add-on discount activation error";
       AppLogger.warn("Add-on automatic discount setup failed", {
         component: "addon-discount-function",
         operation: "complete-setup",
-      }, { shopDomain, error: result.error });
+      }, { shopDomain, error: message });
+      return {
+        success: false,
+        error: message,
+      };
     }
-
-    return result;
   }
 }

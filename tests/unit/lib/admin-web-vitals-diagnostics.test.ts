@@ -11,6 +11,53 @@ describe("admin web vitals diagnostics", () => {
     expect(calculateP75([1200])).toBe(1200);
   });
 
+  it("requires route p75 to be strictly below 2500ms", () => {
+    let onReportCallback: ((payload: any) => void) | null = null;
+    const storage = new Map<string, string>();
+    const win = {
+      location: {
+        pathname: "/app/bundles/create",
+        search: "?wpbWebVitalsDebug=1",
+      },
+      shopify: {
+        webVitals: {
+          onReport: jest.fn((callback) => {
+            onReportCallback = callback;
+          }),
+        },
+      },
+      localStorage: {
+        getItem: jest.fn((key: string) => storage.get(key) ?? null),
+        setItem: jest.fn((key: string, value: string) => storage.set(key, value)),
+        removeItem: jest.fn((key: string) => storage.delete(key)),
+      },
+    };
+
+    installAdminWebVitalsDiagnostics({ windowLike: win as any });
+    onReportCallback?.({ metrics: [{ name: "LCP", id: "lcp-2499", value: 2499 }] });
+
+    expect((win as any).__wpbAdminWebVitals.getLcpP75Summary()).toEqual({
+      "/app/bundles/create": {
+        p75: 2499,
+        sampleCount: 1,
+        targetPass: true,
+        threshold: 2500,
+      },
+    });
+
+    (win as any).__wpbAdminWebVitals.clearLcpSamples();
+    onReportCallback?.({ metrics: [{ name: "LCP", id: "lcp-2500", value: 2500 }] });
+
+    expect((win as any).__wpbAdminWebVitals.getLcpP75Summary()).toEqual({
+      "/app/bundles/create": {
+        p75: 2500,
+        sampleCount: 1,
+        targetPass: false,
+        threshold: 2500,
+      },
+    });
+  });
+
   it("registers and unregisters Shopify App Bridge Web Vitals reports", () => {
     const onReport = jest.fn();
     const win = {

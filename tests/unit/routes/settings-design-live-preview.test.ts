@@ -40,6 +40,11 @@ describe("DesignSettingsView live preview", () => {
     );
 
     expect(view).not.toContain("<iframe");
+    expect(view).toContain('<s-query-container containerName="design-settings">');
+    expect(view).toContain('aria-label="settingsDcp.preview.workspace.label"');
+    expect(view).toContain("settingsDcp.preview.workspace.preview");
+    expect(view).toContain("settingsDcp.preview.workspace.customize");
+    expect(view).toContain('aria-pressed="true"');
     expect(view).toContain('aria-label="Live bundle preview"');
     expect(view).toContain('aria-label="settingsDcp.preview.previewOnly"');
     expect(view).toContain("disabled");

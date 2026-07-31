@@ -10,8 +10,7 @@ import { handleAdminSaveLockedEvent } from "../../../lib/admin-save-lock";
 import { getParentProductStatusUi } from "../../../lib/parent-product-status-ui";
 import { openThemeEditorInNewTab } from "../../../lib/theme-editor-navigation.client";
 import {
-  checkAppEmbedStatusFromCurrentRoute,
-  resolveAppEmbedStatusThemeEditorUrl,
+  getThemeExtensionStatusFromAppBridge,
 } from "../../../lib/app-embed-status-check.client";
 import { useBundleConfigurationState } from "../../../hooks/useBundleConfigurationState";
 import { useEnsureProductTemplateMutation } from "../../../store/api/adminApi";
@@ -41,7 +40,7 @@ export function useConfigureBundleController(): ConfigureBundleFlowDraft {
   const fetcher = useFetcher<any>();
   const revalidator = useRevalidator();
   const [currentAppEmbedEnabled, setCurrentAppEmbedEnabled] =
-    useState(appEmbedEnabled);
+    useState<boolean | null>(null);
   const [currentThemeEditorUrl, setCurrentThemeEditorUrl] =
     useState(themeEditorUrl);
   const [appEmbedBannerFeedbackTrigger, setAppEmbedBannerFeedbackTrigger] =
@@ -120,9 +119,22 @@ export function useConfigureBundleController(): ConfigureBundleFlowDraft {
     productStatus || bundleProduct?.status || loadedBundleProduct?.status,
   );
   useEffect(() => {
-    setCurrentAppEmbedEnabled(appEmbedEnabled);
+    let active = true;
+    setCurrentAppEmbedEnabled(null);
     setCurrentThemeEditorUrl(themeEditorUrl);
-  }, [appEmbedEnabled, themeEditorUrl]);
+    void getThemeExtensionStatusFromAppBridge(shopify)
+      .then((status) => {
+        if (active) {
+          setCurrentAppEmbedEnabled(status.appEmbedEnabled);
+        }
+      })
+      .catch(() => {
+        if (active) setCurrentAppEmbedEnabled(appEmbedEnabled);
+      });
+    return () => {
+      active = false;
+    };
+  }, [appEmbedEnabled, shopify, themeEditorUrl]);
   const refreshParentProductStatusFromShopify = useCallback(() => {
     const revalidateNow = () => {
       revalidator.revalidate();
@@ -157,20 +169,18 @@ export function useConfigureBundleController(): ConfigureBundleFlowDraft {
     setAppEmbedBannerFeedbackTrigger((value) => value + 1);
   }, []);
   const checkAppEmbedStatusBeforePreview = useCallback(async () => {
-    const status = await checkAppEmbedStatusFromCurrentRoute();
-    setCurrentAppEmbedEnabled(status.appEmbedEnabled);
-    setCurrentThemeEditorUrl((currentUrl: string | null) =>
-      resolveAppEmbedStatusThemeEditorUrl(currentUrl, status.themeEditorUrl),
-    );
-    return status.appEmbedEnabled;
-  }, []);
+    const status = await getThemeExtensionStatusFromAppBridge(shopify);
+    const appEmbedEnabled = status?.appEmbedEnabled ?? false;
+    setCurrentAppEmbedEnabled(appEmbedEnabled);
+    return appEmbedEnabled;
+  }, [shopify]);
 
   return {
     activeSection,
     activeTabIndex,
     apiKey,
     appEmbedBannerFeedbackTrigger,
-    appEmbedEnabled: currentAppEmbedEnabled,
+    appEmbedEnabled: currentAppEmbedEnabled ?? true,
     availableBundles,
     availablePages,
     blockConfigurationChangeWhileSaving,

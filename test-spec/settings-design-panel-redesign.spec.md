@@ -4,8 +4,8 @@ id: settings-design-panel-redesign-spec
 title: Settings Design Panel Redesign Test Spec
 type: test-spec
 status: active
-summary: Behavior coverage for the three-column Settings Design workspace, canonical storefront template scenes, and local colour guides.
-last_audited: 2026-07-24
+summary: Behavior coverage for the responsive Settings Design workspace, storefront-matched key preview surfaces, and local colour guides.
+last_audited: 2026-07-30
 owners:
   - engineering
 domains:
@@ -32,7 +32,11 @@ keywords:
 
 ## Purpose
 
-Verify that the Design subpage keeps its existing settings behavior while the local preview models the real structure of every landing-page and product-page template, responds to every previewable setting, and exposes the relevant local colour guides.
+Verify that the Design subpage keeps its existing settings behavior while the
+local preview matches the Builder and Cart / Summary structure of every
+landing-page and product-page template, preserves representative secondary
+states, responds to every previewable setting, and remains usable across Admin
+container sizes.
 
 ## Test Cases
 
@@ -48,6 +52,8 @@ Verify that the Design subpage keeps its existing settings behavior while the lo
 | 6 | Change preview surface | Any surface supported by the selected template | Only preview surface changes | Template and viewport remain intact |
 | 7 | Reject unsupported surface | Product Picker on Product List | State remains on Builder | Template-aware surface contract |
 | 8 | Change template with incompatible surface | Product Picker, then Product List | Surface falls back to Builder | Valid state is always preserved |
+| 9 | Resolve logical viewport | Desktop or mobile selector | Desktop uses 1280×800 and mobile uses 390×844 | Matches storefront parity evidence viewports |
+| 10 | Fit logical viewport | Host width and selected logical viewport | Scale is capped at 1 and never drops below the minimum usable scale | Preview retains storefront breakpoints while fitting the Admin surface |
 
 ### DesignPreviewModel
 
@@ -59,6 +65,7 @@ Verify that the Design subpage keeps its existing settings behavior while the lo
 | 4 | Resolve applicability | Field and selected template | Unsupported template-specific controls return a clear inapplicable result | No fabricated visual effect |
 | 5 | Build deterministic fixture | Local fixture registry | Multiple products, selections, slots, steps, categories, tiers, validation, and upsell data are present | Local media only |
 | 6 | Resolve scene regions | Template, surface, and viewport | Required storefront-owned regions are returned for all valid combinations | No merchant-theme chrome |
+| 7 | Resolve fidelity boundary | Every template and surface | Builder and Cart / Summary are storefront-matched; secondary states remain representative | Prevents false parity claims |
 
 ### DesignLivePreview
 
@@ -71,6 +78,9 @@ Verify that the Design subpage keeps its existing settings behavior while the lo
 | 5 | Images and GIFs preview | Images & GIFs active | Image Fit updates fixture media and loading mode remains local | No asynchronous preview work exists |
 | 6 | Missing real bundle | Empty preview-bundle list | Design controls and local fixture preview remain available | Only Preview Bundle needs a real URL |
 | 7 | Local preview media | Any Builder or Product Picker surface | Images use `OptimisedImage` with local PNG sources and generated-format siblings | CI owns AVIF/WebP generation |
+| 8 | Responsive workspace controls | Narrow Admin container | Preview and Customize actions are exposed as one accessible segmented control | Preview is selected by default |
+| 9 | Phone workspace state | Switch between Preview and Customize | Active template, surface, viewport, active field, and unsaved values remain unchanged | Pane selection is preview-only UI state |
+| 10 | Logical preview canvas | Desktop or mobile preview | Scene renders at the selected storefront viewport and scales only to fit its host | Storefront breakpoints do not depend on the center-column width |
 
 ### ColourGuideLinks
 
@@ -91,3 +101,6 @@ Verify that the Design subpage keeps its existing settings behavior while the lo
 - [x] All five relevant Expert groups expose local AVIF colour-guide links.
 - [ ] Entering Design crosses one lazy workspace boundary and reaches a usable preview within 750ms p75 in SIT.
 - [x] Existing save, discard, and reset behavior remains unchanged; Preview Bundle remains separate and requires a real storefront URL.
+- [ ] Builder and Cart / Summary match the current storefront structure for all eight templates at 1280×800 and 390×844.
+- [x] Phone-sized Admin containers expose Preview and Customize panes without losing local preview or unsaved Design state.
+- [x] Unit tests verify behavior and model outputs only; visual placement and styling are verified with Chrome, not source or CSS assertions.

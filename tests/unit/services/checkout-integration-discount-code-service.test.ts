@@ -126,21 +126,21 @@ describe("CheckoutIntegrationDiscountCodeService", () => {
     const result = await CheckoutIntegrationDiscountCodeService.createForProvider(
       mockShopifyAdmin,
       shopDomain,
-      "shopflo",
+      "gokwik",
     );
 
     expect(result.success).toBe(false);
     expect(result.error).toContain("Function not found");
   });
 
-  it("creates deterministic discount metadata for Shiprocket and Fastrr handoff", async () => {
+  it("creates deterministic discount metadata for Shopflo handoff", async () => {
     mockShopifyAdmin.graphql
       .mockResolvedValueOnce(discountFunctionMock())
       .mockResolvedValueOnce(createMockGraphQLResponse({
         discountCodeAppCreate: {
           codeAppDiscount: {
             discountId: "gid://shopify/DiscountCodeNode/2",
-            codes: { nodes: [{ code: "WPB-SHIPROCKET_FASTRR-12345678" }] },
+            codes: { nodes: [{ code: "WPB-SHOPFLO-12345678" }] },
             endsAt: "2026-07-02T10:30:00.000Z",
           },
           userErrors: [],
@@ -150,16 +150,16 @@ describe("CheckoutIntegrationDiscountCodeService", () => {
     await CheckoutIntegrationDiscountCodeService.createForProvider(
       mockShopifyAdmin,
       shopDomain,
-      "shiprocket_fastrr",
+      "shopflo",
     );
 
     const createCall = mockShopifyAdmin.graphql.mock.calls[1];
     expect(createCall[1].variables.codeAppDiscount).toMatchObject({
-      title: "WPB checkout integration - Shiprocket / Fastrr",
-      code: "WPB-SHIPROCKET_FASTRR-12345678",
+      title: "WPB checkout integration - Shopflo",
+      code: "WPB-SHOPFLO-12345678",
     });
     expect(JSON.parse(createCall[1].variables.codeAppDiscount.metafields[0].value)).toMatchObject({
-      providerId: "shiprocket_fastrr",
+      providerId: "shopflo",
     });
   });
 });

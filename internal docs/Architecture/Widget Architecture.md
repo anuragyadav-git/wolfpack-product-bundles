@@ -5,7 +5,7 @@ title: Widget Architecture
 type: architecture
 status: authoritative
 summary: FPB and PPB bootstrap, hydration, extension-asset, and widget runtime architecture.
-last_audited: 2026-07-23
+last_audited: 2026-07-31
 owners:
   - engineering
 domains:
@@ -62,6 +62,13 @@ are reference evidence only. This boundary lets template IDs and runtime design
 tokens stay canonical without coupling the Settings chunk to the storefront
 runtime.
 
+Builder and Cart / Summary are the storefront-matched key surfaces. They render
+inside fixed logical 1280×800 desktop and 390×844 mobile canvases, then scale as
+a whole to fit the available Admin panel; the scale must not change the
+storefront breakpoint being represented. Product Picker, Loading, Validation,
+and Upsell remain deterministic representative states and must not be described
+as exact storefront matches.
+
 Source module names should describe their storefront responsibility. Avoid mechanical names such as `chunk-01.js` or `part-01.css`; those hide ownership and make stale widget code harder to spot.
 
 The shared Bundle Product Modal is intentionally a single-image product details modal: product image, name, description, variant controls when needed, quantity, and Add To Box. Do not reintroduce modal thumbnails, image counters, or carousel/gallery controls; EB's landing-page quick-view modal does not use a gallery.
@@ -77,7 +84,7 @@ Product Page inventory normalization preserves `sourceVariantCount` after unavai
 ## Storefront Surfaces
 
 - Theme Editor now exposes one body app embed: `bundle-app-embed` (`Wolfpack Bundle`). It is the activation/status surface and hydrates app-created full-page bundle page markers only when a dedicated full-page app block has not already rendered a widget container. Those hidden page-body markers must also carry only the compact bootstrap pointer, never a formatted full bundle payload.
-- Shopify stores enabled app embed blocks in `config/settings_data.json` under `current.blocks`. Per Shopify's Theme app extension configuration docs, an app embed appears there only after first enable; if the merchant disables it later, the block remains and has `disabled: true`. App embed status detection must therefore read the active theme settings file, support `OnlineStoreThemeFileBodyText.content`, `OnlineStoreThemeFileBodyBase64.contentBase64`, and `OnlineStoreThemeFileBodyUrl.url`, tolerate Shopify's generated comment header before parsing the settings JSON, match the block `type` shape `shopify://apps/{app-or-extension-handle}/blocks/{block-handle}/{unique-id}`, and treat `disabled: true` as inactive. The configured theme extension handle is `bundle-builder`; also include the known deployed app handles (`wolfpack-product-bundles-4`, `wolfpack-product-bundles-sit`), `SHOPIFY_APP_HANDLE` when set, and Shopify Admin `currentAppInstallation.app.handle` so the checker remains aligned with the installed app identity. Do not use client/API keys for status detection. If `settings_data.json` is missing, malformed after comment normalization, or truncated, fail closed so merchants see the enable banner instead of a false Active state.
+- Shopify stores enabled app embed blocks in `config/settings_data.json` under `current.blocks`. Per Shopify's Theme app extension configuration docs, an app embed appears there only after first enable; if the merchant disables it later, the block remains and has `disabled: true`. App embed status detection reads the active theme settings file, supports `OnlineStoreThemeFileBodyText.content`, `OnlineStoreThemeFileBodyBase64.contentBase64`, and `OnlineStoreThemeFileBodyUrl.url`, tolerates Shopify's generated comment header before parsing the settings JSON, matches the block `type` shape `shopify://apps/{app-handle}/blocks/{block-handle}/{unique-id}`, and treats `disabled: true` as inactive. Shopify Admin `currentAppInstallation.app.handle` is the sole app-identity source; environment, client-key, and hardcoded handle fallbacks are prohibited. A missing handle or unreadable settings file fails closed so merchants see the enable banner instead of a false Active state.
 - The embedded Admin enable flow opens Theme Editor in a new tab and hides the configure warning plus updates Bundle Visibility status optimistically after the merchant clicks `Enable here`. Configure page-load status comes from the server loader's parallel Shopify theme settings read. Every FPB preview action requests a new stateless signed URL; the token is required for drafts and harmless for public statuses.
 - Product-page builder placement uses the `bundle-product-page` app block. The app embed does not inject PPB markup because the merchant controls the widget's product-page position through this section block.
 - Before opening a PPB storefront preview, the preview flow first synchronizes the selected product template, then posts to the dedicated authenticated `/validate-widget-placement` JSON resource route. That route reads the parent product's effective `templateSuffix`, inspects that product JSON template in the MAIN theme, and verifies an app block owned by the current app with handle `bundle-product-page`. The placement check must not post to the rendered configure document route because an embedded document response can be HTML rather than the JSON contract expected by the client. Missing, malformed, or unreadable template data fails closed and opens Shopify's Theme Editor deep link for that exact template and product. A parent product alone is not evidence that the PPB widget is installed.

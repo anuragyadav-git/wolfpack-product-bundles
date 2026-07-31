@@ -15,6 +15,7 @@ const GENERATED_FILES = new Set([
   "extensions/bundle-builder/assets/bundle-widget-product-page-bundled.js",
   "extensions/bundle-builder/assets/wolfpack-bundles-sdk.js",
   "extensions/bundle-builder/assets/bundle-widget-full-page.css",
+  "extensions/bundle-builder/assets/bundle-widget-full-page-mobile-summary.css",
   "extensions/bundle-builder/assets/bundle-widget-full-page-standard.css",
   "extensions/bundle-builder/assets/bundle-widget-full-page-classic.css",
   "extensions/bundle-builder/assets/bundle-widget-full-page-compact.css",

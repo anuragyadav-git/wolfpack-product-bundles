@@ -73,14 +73,7 @@ const EMBED_KEY =
   "shopify://apps/current-test-app/blocks/bundle-full-page-embed/uid-abc";
 const SINGLE_EMBED_KEY =
   "shopify://apps/current-test-app/blocks/bundle-app-embed/uid-single";
-const EXTENSION_HANDLE_EMBED_KEY =
-  "shopify://apps/bundle-builder/blocks/bundle-app-embed/uid-single";
-
 describe("checkAppEmbedEnabled", () => {
-  const currentAppOptions = {
-    appHandle: "current-test-app",
-  };
-
   afterEach(() => {
     global.fetch = originalFetch;
   });
@@ -147,7 +140,6 @@ describe("checkAppEmbedEnabled", () => {
     ]);
 
     const result = await checkAppEmbedEnabled(admin as any, "test.myshopify.com", {
-      ...currentAppOptions,
       blockHandles: ["bundle-app-embed"],
     });
 
@@ -176,7 +168,6 @@ describe("checkAppEmbedEnabled", () => {
     ]);
 
     const result = await checkAppEmbedEnabled(admin as any, "test.myshopify.com", {
-      ...currentAppOptions,
       blockHandles: ["bundle-app-embed"],
     });
 
@@ -192,7 +183,6 @@ describe("checkAppEmbedEnabled", () => {
     ]);
 
     const result = await checkAppEmbedEnabled(admin as any, "test.myshopify.com", {
-      ...currentAppOptions,
       blockHandles: ["bundle-app-embed"],
     });
 
@@ -216,7 +206,7 @@ describe("checkAppEmbedEnabled", () => {
     expect(result.enabled).toBe(false);
   });
 
-  it("uses Shopify's current app handle when an optional configured handle does not match", async () => {
+  it("uses Shopify's current app installation handle as the sole app identity", async () => {
     const admin = makeAdmin([
       THEME_LIST_RESPONSE,
       makeSettingsResponse({
@@ -225,30 +215,48 @@ describe("checkAppEmbedEnabled", () => {
     ]);
 
     const result = await checkAppEmbedEnabled(admin as any, "test.myshopify.com", {
-      appHandle: "stale-configured-handle",
       blockHandles: ["bundle-app-embed"],
     });
 
     expect(result.enabled).toBe(true);
   });
 
-  it("preserves configured app handles when matching Shopify's settings_data block type", async () => {
+  it("fails closed when Shopify does not return the current app handle", async () => {
+    const admin = makeAdmin([
+      {
+        data: {
+          currentAppInstallation: { app: { handle: null } },
+          themes: THEME_LIST_RESPONSE.data.themes,
+        },
+      },
+    ]);
+
+    const result = await checkAppEmbedEnabled(admin as any, "test.myshopify.com", {
+      blockHandles: ["bundle-app-embed"],
+    });
+
+    expect(result).toEqual({
+      enabled: false,
+      themeId: "gid://shopify/OnlineStoreTheme/123456",
+    });
+  });
+
+  it("rejects a matching block handle owned by a different app", async () => {
     const admin = makeAdmin([
       THEME_LIST_RESPONSE,
       makeSettingsResponse({
         "17878678986028907411": {
-          type: EXTENSION_HANDLE_EMBED_KEY,
+          type: "shopify://apps/different-app/blocks/bundle-app-embed/uid-single",
           disabled: false,
         },
       }),
     ]);
 
     const result = await checkAppEmbedEnabled(admin as any, "test.myshopify.com", {
-      appHandles: ["bundle-builder"],
       blockHandles: ["bundle-app-embed"],
     });
 
-    expect(result.enabled).toBe(true);
+    expect(result.enabled).toBe(false);
   });
 
   it("returns false when no Wolfpack embed block key is in settings_data.json", async () => {

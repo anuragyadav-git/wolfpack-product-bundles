@@ -131,8 +131,10 @@ describe('FPB Standard variant availability', () => {
     const context: any = {
       stepProductData: [[{
         id: 'gid://shopify/Product/9506421735683',
+        selectionId: '9506421735683',
         variants: [{
           id: 'gid://shopify/ProductVariant/48720397271299',
+          selectionId: '48720397271299',
           available: true,
         }],
       }]],
@@ -342,6 +344,7 @@ describe('FPB Standard variant availability', () => {
         resolveStorefrontApiBase: () => '/apps/product-bundles',
       }, [{
         id: 'gid://shopify/Product/123',
+        selectionId: 'gid://shopify/Product/123',
         title: 'Cached product',
       }]);
 
@@ -388,12 +391,14 @@ describe('FPB Standard variant availability', () => {
         steps: [{
           StepProduct: [{
             productId: 'gid://shopify/Product/123',
+            selectionId: 'gid://shopify/Product/123',
             title: 'Tracked zero-stock product',
             imageUrl: 'https://cdn.example.test/product.jpg',
             price: 3000,
             description: 'Cached description.',
             variants: [{
               id: 'gid://shopify/ProductVariant/456',
+              selectionId: 'gid://shopify/ProductVariant/456',
               title: 'Default Title',
               price: 3000,
               available: true,
@@ -465,9 +470,11 @@ describe('FPB Standard variant availability', () => {
           categories: [{
             products: [{
               id: 'gid://shopify/Product/123',
+              selectionId: 'gid://shopify/Product/123',
               title: 'Tracked category product',
               variants: [{
                 id: 'gid://shopify/ProductVariant/456',
+                selectionId: 'gid://shopify/ProductVariant/456',
                 title: 'Default Title',
                 available: true,
               }],
@@ -603,6 +610,7 @@ describe('FPB Standard variant availability', () => {
 
     expect(fullPageProductProcessingMethods.isVariantSelectableForInventory.call(context, {
       id: 'gid://shopify/ProductVariant/456',
+      selectionId: '456',
       available: true,
     })).toBe(false);
   });

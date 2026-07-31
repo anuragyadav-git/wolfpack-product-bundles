@@ -12,7 +12,7 @@ type StepState = {
   id: string;
   isFreeGift: boolean;
   addonUnlockAfterCompletion: boolean;
-  minQuantity: number;
+  minQuantity?: number;
   selectedQuantity: number;
 };
 
@@ -77,12 +77,12 @@ describe("isAddonStepLocked", () => {
     expect(isAddonStepLocked(addonStep, 2, allSteps)).toBe(true);
   });
 
-  it("treats a missing minQuantity as 1", () => {
-    const step1 = makeStep({ id: "step-1", selectedQuantity: 0 }); // minQuantity defaults to 1
+  it("treats a missing minQuantity as 0", () => {
+    const step1: StepState = { ...makeStep({ id: "step-1", selectedQuantity: 0 }), minQuantity: undefined };
     const addonStep = makeStep({ id: "addon", isFreeGift: true, addonUnlockAfterCompletion: true });
     const allSteps = [step1, addonStep];
 
-    expect(isAddonStepLocked(addonStep, 1, allSteps)).toBe(true);
+    expect(isAddonStepLocked(addonStep, 1, allSteps)).toBe(false);
   });
 
   it("only checks steps before the addon (not the addon itself)", () => {

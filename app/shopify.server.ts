@@ -24,7 +24,6 @@ const shopify = shopifyApp({
   apiKey: process.env.SHOPIFY_API_KEY,
   apiSecretKey: process.env.SHOPIFY_API_SECRET || "",
   apiVersion: ApiVersion.October25, // 2025-10: Required for functionHandle support in cart transforms
-  scopes: process.env.SCOPES?.split(","),
   appUrl: process.env.SHOPIFY_APP_URL || "",
   authPathPrefix: "/auth",
   sessionStorage,
@@ -232,7 +231,8 @@ const shopify = shopifyApp({
             attributes: {
               discount_id: result.discountId ?? null,
               function_id: result.functionId ?? null,
-              already_exists: result.alreadyExists ?? false,
+              function_handle: result.functionHandle ?? null,
+              setup_outcome: result.outcome ?? null,
             },
           });
         } else {

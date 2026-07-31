@@ -1,7 +1,25 @@
 ---
+schema_version: 1
+id: knip-prune-guardrails
 title: Knip Prune Guardrails
 type: operations
-last_audited: 2026-07-13
+status: active
+summary: Guardrails for validating Knip candidates before removing dependencies or files.
+last_audited: 2026-07-31
+owners:
+  - engineering
+domains:
+  - operations
+systems:
+  - knip
+source_paths:
+  - package.json
+related_docs:
+  - Operations/Knip Candidate Inventory.md
+tags:
+  - maintenance
+keywords:
+  - knip
 ---
 
 # Knip Prune Guardrails
@@ -193,7 +211,7 @@ Removed on 2026-07-13 after source search, focused tests, lint, `npm run build-d
 - Knip reports: binaries `shopify`, `rustup`, `graphql-codegen`
 - Stable identifiers:
   - `"dev": "shopify app dev"`
-  - `"deploy:prod": "npm run deployment:backfill && cd extensions/bundle-cart-transform-rs && rustup run stable cargo build`
+  - `"deploy:prod": "cd extensions/bundle-cart-transform-rs && rustup run stable cargo build`
   - `"graphql-codegen": "graphql-codegen"`
 - Why to skip: these are CLI commands invoked through npm scripts. They are not importable dependencies and should not be pruned just because Knip reports them as binaries.
 - Verification: validate the exact npm script that uses the binary. Never run deploy scripts autonomously.

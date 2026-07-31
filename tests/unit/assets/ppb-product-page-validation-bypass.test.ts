@@ -37,7 +37,7 @@ function createButton() {
 function createFooterContext(overrides: Record<string, unknown> = {}) {
   return {
     selectedProducts: [{ v1: 1 }],
-    stepProductData: [[{ variantId: 'v1', price: 1200 }]],
+    stepProductData: [[{ selectionId: 'v1', price: 1200 }]],
     selectedBundle: {
       steps: [{
         conditionType: 'quantity',
@@ -101,7 +101,7 @@ describe('PPB validation control disables cart gating when disabled', () => {
       const context = {
         ...ProductPageCartMethods,
         selectedProducts: [{ v1: 1 }],
-        stepProductData: [[{ variantId: 'v1', price: 1200, available: true }]],
+        stepProductData: [[{ selectionId: 'v1', price: 1200, available: true }]],
         hideLoadingOverlay: jest.fn(),
         showLoadingOverlay: jest.fn(),
         updateAddToCartButton: jest.fn(),
@@ -164,7 +164,7 @@ describe('PPB validation control disables cart gating when disabled', () => {
       const context = {
         ...ProductPageCartMethods,
         selectedProducts: [{ v1: 1 }],
-        stepProductData: [[{ variantId: 'v1', price: 1200, available: true }]],
+        stepProductData: [[{ selectionId: 'v1', price: 1200, available: true }]],
         hideLoadingOverlay: jest.fn(),
         showLoadingOverlay: jest.fn(),
         updateAddToCartButton: jest.fn(),
@@ -210,7 +210,7 @@ describe('PPB validation control disables cart gating when disabled', () => {
         ...ProductPageCartMethods,
         selectedProducts: [{ v1: 1 }, {}],
         stepProductData: [
-          [{ variantId: 'v1', price: 1200, available: true }],
+          [{ selectionId: 'v1', price: 1200, available: true }],
           [],
         ],
         selectedBundle: {

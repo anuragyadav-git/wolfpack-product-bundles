@@ -449,14 +449,13 @@ describe('Product Page widget product-level inventory tracking', () => {
   it('preserves explicit zero inventory on direct default products', () => {
     const product = ProductPageDefaultProductMethods._normalizeDirectDefaultProduct.call({
       extractId,
+      _normalizeRequiredQuantity: ProductPageDefaultProductMethods._normalizeRequiredQuantity,
     }, {
       title: 'Default Product',
       imageUrl: 'https://cdn.example/default.jpg',
-      graphqlId: 'gid://shopify/Product/9506413773059',
-      productId: '9506413773059',
+      selectionId: 'gid://shopify/Product/9506413773059',
       variants: [{
-        variantGraphqlId: 'gid://shopify/ProductVariant/48720141091075',
-        variantId: '48720141091075',
+        selectionId: 'gid://shopify/ProductVariant/48720141091075',
         price: '829.00',
         inventoryQuantity: 0,
       }],
@@ -472,14 +471,13 @@ describe('Product Page widget product-level inventory tracking', () => {
   it('keeps missing direct default inventory unbounded', () => {
     const product = ProductPageDefaultProductMethods._normalizeDirectDefaultProduct.call({
       extractId,
+      _normalizeRequiredQuantity: ProductPageDefaultProductMethods._normalizeRequiredQuantity,
     }, {
       title: 'Default Product',
       imageUrl: 'https://cdn.example/default.jpg',
-      graphqlId: 'gid://shopify/Product/9506413773059',
-      productId: '9506413773059',
+      selectionId: 'gid://shopify/Product/9506413773059',
       variants: [{
-        variantGraphqlId: 'gid://shopify/ProductVariant/48720141091075',
-        variantId: '48720141091075',
+        selectionId: 'gid://shopify/ProductVariant/48720141091075',
         price: '829.00',
       }],
     });

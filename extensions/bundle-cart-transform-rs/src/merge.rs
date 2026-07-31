@@ -473,8 +473,8 @@ fn select_you_save_value(
     percentage: Option<String>,
 ) -> Option<String> {
     match format {
-        "amount" => amount.or(combined),
-        "percentage" => percentage.or(combined),
+        "amount_only" => amount.or(combined),
+        "percentage_only" => percentage.or(combined),
         _ => combined.or_else(|| match (amount, percentage) {
             (Some(amount), Some(percentage)) => Some(format!("{amount} ({percentage})")),
             (Some(amount), None) => Some(amount),

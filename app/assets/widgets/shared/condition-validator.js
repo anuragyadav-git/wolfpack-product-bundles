@@ -181,11 +181,9 @@ const ConditionValidator = (function () {
     const ids = new Set();
     const products = Array.isArray(category && category.products) ? category.products : [];
     for (const product of products) {
-      const raw = product && (product.id || product.productId || product.graphqlId);
+      const raw = product && product.selectionId;
       if (raw == null || raw === '') continue;
-      // Strip GID prefix (e.g. "gid://shopify/Product/123" → "123") so that the
-      // Set matches numeric IDs used as widget selection keys.
-      const id = String(raw).replace(new RegExp('^gid://shopify/[^/]+/'), '');
+      const id = String(raw);
       if (id) ids.add(id);
     }
     return ids;
@@ -302,10 +300,9 @@ const ConditionValidator = (function () {
     // describe the retired rule and must not recreate it at navigation time.
     if (!step.conditionType) return true;
 
-    // An incomplete active condition keeps the existing minimum guard.
+    // No positive configured requirement means the step is optional.
     if (!step.conditionOperator || !_isPositiveConditionValue(step.conditionValue)) {
-      const min = step.minQuantity != null ? Number(step.minQuantity) : 1;
-      return total >= min;
+      return true;
     }
 
     // Primary condition

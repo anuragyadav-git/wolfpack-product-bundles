@@ -1,9 +1,48 @@
-.dimOverlay {
+.container {
   position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.35);
-  z-index: 499;
-  animation: fadeInOverlay 0.22s ease forwards;
+  left: 16px;
+  bottom: 16px;
+  z-index: 500;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100px;
+  overflow: hidden;
+  border: 1px solid #e1e3e5;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.16);
+  transition: width 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.containerCollapsed {
+  width: 100px;
+}
+
+.containerIntro {
+  width: min(320px, calc(100vw - 32px));
+}
+
+.dialog {
+  position: fixed;
+  inset: auto auto 88px 16px;
+  box-sizing: border-box;
+  width: min(320px, calc(100vw - 32px));
+  max-width: none;
+  max-height: min(68dvh, 520px);
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid #e1e3e5;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+  color: inherit;
+}
+
+.dialog::backdrop {
+  background: rgba(0, 0, 0, 0.18);
+  animation: fadeInOverlay 0.2s ease forwards;
 }
 
 @keyframes fadeInOverlay {
@@ -15,45 +54,63 @@
   }
 }
 
-.container {
-  position: fixed;
-  left: 20px;
-  bottom: 20px;
-  z-index: 500;
+.sheetHeader {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  min-height: 52px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 10px 8px 16px;
+  border-bottom: 1px solid #e1e3e5;
+}
+
+.sheetTitle {
+  font-size: 14px;
+  font-weight: 650;
+  color: #202223;
 }
 
 /* Collapsed trigger — gauge, score label, and chevron */
 .collapsed {
   appearance: none;
   font: inherit;
+  box-sizing: border-box;
   display: flex;
   align-items: center;
-  gap: 10px;
-  width: min(360px, calc(100vw - 40px));
+  gap: 8px;
+  width: 100%;
+  height: 64px;
   background: white;
-  border: 1px solid #e0e0e0;
-  border-radius: 16px;
-  padding: 6px 14px 6px 6px;
+  border: 0;
+  border-radius: 0;
+  padding: 8px 10px;
   cursor: pointer;
   user-select: none;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.14);
+  box-shadow: none;
+  overflow: hidden;
   transition:
-    box-shadow 0.15s,
+    background-color 0.15s,
     border-color 0.15s;
   color: inherit;
   text-align: left;
   text-decoration: none;
 }
 
+.collapsedExpanded {
+  width: 100%;
+}
+
+.collapsedMinimal {
+  width: 100%;
+}
+
 .collapsed:hover {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-  border-color: #ccc;
+  background: #f7f7f7;
 }
 
 .arc {
+  width: 48px;
+  height: 48px;
   flex-shrink: 0;
 }
 
@@ -62,6 +119,19 @@
   flex-direction: column;
   gap: 1px;
   flex: 1;
+  min-width: 0;
+  max-width: 270px;
+  overflow: hidden;
+  opacity: 1;
+  transition:
+    max-width 0.32s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.18s ease;
+}
+
+.collapsedMinimal .scoreLabel {
+  max-width: 0;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .scoreLabelTitle {
@@ -79,52 +149,48 @@
 
 .chevron {
   flex-shrink: 0;
-  margin-left: 2px;
   display: flex;
   align-items: center;
   transform: rotate(0deg);
   transition: transform 0.28s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
+.chevronWrapper {
+  display: flex;
+  align-items: center;
+  width: 16px;
+  margin-left: 2px;
+  overflow: hidden;
+  opacity: 1;
+  transition:
+    width 0.32s cubic-bezier(0.16, 1, 0.3, 1),
+    margin-left 0.32s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.18s ease;
+}
+
+.chevronHidden {
+  width: 0;
+  margin-left: 0;
+  opacity: 0;
+}
+
 .chevronExpanded {
   transform: rotate(180deg);
 }
 
-.panelWrapper {
-  display: grid;
-  grid-template-rows: 0fr;
-  opacity: 0;
-  transition:
-    grid-template-rows 0.32s cubic-bezier(0.16, 1, 0.3, 1),
-    opacity 0.22s ease,
-    margin-bottom 0.32s cubic-bezier(0.16, 1, 0.3, 1);
-  width: min(360px, calc(100vw - 40px));
-  margin-bottom: 0;
-}
-
-.panelWrapperOpen {
-  grid-template-rows: 1fr;
-  opacity: 1;
-  margin-bottom: 8px;
-}
-
-.panelInner {
-  overflow: hidden;
-}
-
 .panel {
   background: white;
-  border: 1px solid #e0e0e0;
-  border-radius: 12px;
-  padding: 10px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border: 0;
+  border-radius: 0;
+  padding: 14px 12px max(10px, env(safe-area-inset-bottom));
+  box-shadow: none;
 }
 
 .panelItems {
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  margin-bottom: 8px;
+  gap: 8px;
+  margin-bottom: 10px;
   max-height: 380px;
   overflow-y: auto;
   scrollbar-width: thin;
@@ -136,10 +202,11 @@
   font: inherit;
   display: flex;
   align-items: center;
-  gap: 9px;
-  padding: 9px 10px;
+  gap: 10px;
+  min-height: 46px;
+  padding: 9px 12px;
   border-radius: 8px;
-  border: 1px solid #d9e9e1;
+  border: 1px solid #d9d9d9;
   background: #ffffff;
   color: inherit;
   text-align: left;
@@ -147,7 +214,7 @@
 }
 
 .panelItemDone {
-  border-color: #008060;
+  border-color: #008f65;
   background: #ffffff;
 }
 
@@ -186,14 +253,14 @@
 }
 
 .itemLabel {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   color: #202223;
   line-height: 1.2;
 }
 
 .itemDesc {
-  font-size: 11px;
+  font-size: 12px;
   color: #6d7175;
   line-height: 1.25;
 }
@@ -206,7 +273,12 @@
 }
 
 .itemPointsDone {
-  color: #008060;
+  color: #005b4a;
+}
+
+.itemPointsPending {
+  margin-top: 2px;
+  color: #005b4a;
 }
 
 .itemChevron {
@@ -219,14 +291,14 @@
 }
 
 .statusNotReady {
-  padding: 4px 2px 0;
+  padding: 2px 0 8px;
   font-size: 12px;
   font-weight: 500;
   color: #5c5f62;
 }
 
 .statusReady {
-  padding: 4px 2px 0;
+  padding: 2px 0 8px;
   font-size: 12px;
   font-weight: 500;
   color: #008060;
@@ -236,11 +308,31 @@
   .container {
     left: 12px;
     bottom: 12px;
-    transform: scale(0.82);
-    transform-origin: left bottom;
+  }
+
+  .containerIntro {
+    width: min(320px, calc(100vw - 24px));
+  }
+
+  .dialog {
+    inset: auto 0 0;
+    width: 100%;
+    max-height: min(78dvh, 680px);
+    border-width: 1px 0 0;
+    border-radius: 16px 16px 0 0;
   }
 
   .panelItems {
-    max-height: min(46dvh, 380px);
+    max-height: min(58dvh, 520px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dialog::backdrop,
+  .collapsed,
+  .scoreLabel,
+  .chevron,
+  .chevronWrapper {
+    transition: none;
   }
 }

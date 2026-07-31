@@ -260,7 +260,6 @@ class BundleWidgetFullPage {
       // Render floating promo badge (if enabled and not session-dismissed)
       this._initFloatingBadge();
 
-      // Mark as initialized
       this.container.dataset.initialized = 'true';
       this.isInitialized = true;
 
@@ -327,11 +326,9 @@ if (document.readyState === 'loading') {
 function initializeFullPageWidget() {
   const containers = document.querySelectorAll('#bundle-builder-app');
   containers.forEach(container => {
-    if (!container.dataset.initialized) {
-      const bundleType = container.dataset.bundleType || 'full_page';
-      if (bundleType === 'full_page') {
-        new BundleWidgetFullPage(container);
-      }
+    const bundleType = container.dataset.bundleType || 'full_page';
+    if (bundleType === 'full_page' && !container.dataset.initialized) {
+      new BundleWidgetFullPage(container);
     }
   });
 }

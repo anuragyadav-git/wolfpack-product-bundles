@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { OptimisedImage } from "../../../components/OptimisedImage";
 import type {
@@ -8,8 +8,11 @@ import type {
 import {
   DESIGN_PREVIEW_FIXTURE,
   DESIGN_PREVIEW_TEMPLATES,
+  DESIGN_PREVIEW_VIEWPORTS,
   buildDesignPreviewTheme,
+  calculateDesignPreviewFitScale,
   getDesignPreviewFieldTarget,
+  getDesignPreviewSurfaceFidelity,
   getSupportedDesignPreviewSurfaces,
   isDesignPreviewFieldApplicable,
   type DesignPreviewFixtureProduct,
@@ -339,11 +342,6 @@ function FullPageBuilder({
 }) {
   return (
     <div className={styles.previewFullPage} data-full-page-template={descriptor.key}>
-      <header className={styles.previewHero}>
-        <small>{t("settingsDcp.preview.bundleType.landingPage")}</small>
-        <h3>{t("settingsDcp.preview.surface.bundleName")}</h3>
-        <p>{t("settingsDcp.preview.surface.description")}</p>
-      </header>
       <StepNavigation descriptor={descriptor} t={t} />
       <div className={styles.previewFullPageShell}>
         <main>
@@ -547,9 +545,11 @@ export function DesignLivePreview({
   initialState?: DesignPreviewState;
 }) {
   const { t } = useTranslation();
+  const previewStageRef = useRef<HTMLDivElement>(null);
   const [previewState, setPreviewState] = useState<DesignPreviewState>(
     initialState ?? createDesignPreviewState(),
   );
+  const [fitScale, setFitScale] = useState(1);
   const availableTemplates = DESIGN_PREVIEW_TEMPLATES.filter(
     (template) => template.bundleType === previewState.bundleType,
   );
@@ -566,11 +566,39 @@ export function DesignLivePreview({
     () => buildDesignPreviewTheme(fieldValues, isExpertControlsEnabled, activeTemplate.key),
     [activeTemplate.key, fieldValues, isExpertControlsEnabled],
   );
+  const previewViewport = DESIGN_PREVIEW_VIEWPORTS[previewState.viewport];
+  const surfaceFidelity = getDesignPreviewSurfaceFidelity(
+    activeTemplate.key,
+    previewState.surface,
+  );
 
   useEffect(() => {
     if (!fieldTargetSurface || !isApplicable) return;
     setPreviewState((current) => setDesignPreviewSurface(current, fieldTargetSurface));
   }, [activeFieldKey, fieldTargetSurface, isApplicable]);
+
+  useEffect(() => {
+    const stage = previewStageRef.current;
+    if (!stage || typeof ResizeObserver === "undefined") return;
+
+    const updateFitScale = () => {
+      const computedStyle = window.getComputedStyle(stage);
+      const horizontalPadding =
+        Number.parseFloat(computedStyle.paddingLeft) +
+        Number.parseFloat(computedStyle.paddingRight);
+      setFitScale(
+        calculateDesignPreviewFitScale(
+          Math.max(0, stage.clientWidth - horizontalPadding),
+          previewState.viewport,
+        ),
+      );
+    };
+
+    updateFitScale();
+    const observer = new ResizeObserver(updateFitScale);
+    observer.observe(stage);
+    return () => observer.disconnect();
+  }, [previewState.viewport]);
 
   return (
     <section className={styles.previewPanel} aria-label="Live bundle preview">
@@ -645,19 +673,37 @@ export function DesignLivePreview({
         </div>
       ) : null}
 
-      <div className={styles.previewStage} data-preview-viewport={previewState.viewport}>
+      <div
+        ref={previewStageRef}
+        className={styles.previewStage}
+        data-preview-viewport={previewState.viewport}
+      >
         <div
-          className={styles.previewSurface}
-          data-template-key={previewState.templateKey}
-          data-preview-surface={previewState.surface}
-          style={previewTheme}
+          className={styles.previewCanvas}
+          style={{
+            width: `${previewViewport.width * fitScale}px`,
+            height: `${previewViewport.height * fitScale}px`,
+          }}
         >
-          <PreviewSurface
-            descriptor={activeTemplate}
-            surface={previewState.surface}
-            viewport={previewState.viewport}
-            t={t}
-          />
+          <div
+            className={styles.previewSurface}
+            data-template-key={previewState.templateKey}
+            data-preview-surface={previewState.surface}
+            data-fidelity={surfaceFidelity}
+            style={{
+              ...previewTheme,
+              width: `${previewViewport.width}px`,
+              height: `${previewViewport.height}px`,
+              transform: `scale(${fitScale})`,
+            }}
+          >
+            <PreviewSurface
+              descriptor={activeTemplate}
+              surface={previewState.surface}
+              viewport={previewState.viewport}
+              t={t}
+            />
+          </div>
         </div>
       </div>
     </section>

@@ -21,8 +21,6 @@ jest.mock("../../../app/lib/checkout-integrations", () => ({
   isSupportedCheckoutIntegrationProvider: (value: unknown) => (
     value === "gokwik"
     || value === "shopflo"
-    || value === "zecpay"
-    || value === "shiprocket_fastrr"
   ),
 }));
 
@@ -136,9 +134,9 @@ describe("checkout integration discount code route", () => {
     expect(mockUnauthenticatedAdmin).not.toHaveBeenCalled();
   });
 
-  it("accepts article-listed checkout handoff providers that require discount codes", async () => {
+  it("accepts GoKwik as a supported checkout integration provider", async () => {
     const response = await action({
-      request: makeSignedRequest({ providerId: "shiprocket_fastrr" }),
+      request: makeSignedRequest({ providerId: "gokwik" }),
       params: {},
       context: {},
     } as any) as Response;
@@ -147,7 +145,37 @@ describe("checkout integration discount code route", () => {
     expect(mockCreateForProvider).toHaveBeenCalledWith(
       { graphql: expect.any(Function) },
       "test-shop.myshopify.com",
-      "shiprocket_fastrr",
+      "gokwik",
+    );
+  });
+
+  it("accepts Shopflo as a supported checkout integration provider", async () => {
+    mockCreateForProvider.mockResolvedValue({
+      success: true,
+      providerId: "shopflo",
+      discountId: "gid://shopify/DiscountCodeNode/2",
+      code: "WPB-SHOPFLO-87654321",
+      expiresAt: "2026-07-02T10:30:00.000Z",
+    });
+
+    const response = await action({
+      request: makeSignedRequest({ providerId: "shopflo" }),
+      params: {},
+      context: {},
+    } as any) as Response;
+
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body).toMatchObject({
+      ok: true,
+      providerId: "shopflo",
+      code: "WPB-SHOPFLO-87654321",
+    });
+    expect(mockCreateForProvider).toHaveBeenCalledWith(
+      { graphql: expect.any(Function) },
+      "test-shop.myshopify.com",
+      "shopflo",
     );
   });
 });

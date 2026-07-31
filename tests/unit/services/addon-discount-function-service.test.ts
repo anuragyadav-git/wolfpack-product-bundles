@@ -2,26 +2,48 @@ import { AddOnDiscountFunctionService } from "../../../app/services/addon-discou
 import { createMockGraphQLResponse, mockShopifyAdmin } from "../../setup";
 
 const MOCK_DISCOUNT_FUNCTION_ID = "gid://shopify/ShopifyFunction/addon-discount-1";
+const MOCK_DISCOUNT_FUNCTION_HANDLE = "bundle-discount-function";
+const MOCK_DISCOUNT_ID = "gid://shopify/DiscountAutomaticNode/1";
 
 function addOnFunctionsMock() {
   return createMockGraphQLResponse({
     shopifyFunctions: {
-      edges: [{
-        node: {
+      nodes: [
+        {
           id: MOCK_DISCOUNT_FUNCTION_ID,
-          title: "bundle-discount-function",
+          handle: MOCK_DISCOUNT_FUNCTION_HANDLE,
+          title: "Translated Add-on Discount",
           apiType: "discount",
-          description: "bundle-discount-function",
         },
-      }],
+      ],
     },
   });
 }
 
 function addOnFunctionsEmptyMock() {
   return createMockGraphQLResponse({
-    shopifyFunctions: { edges: [] },
+    shopifyFunctions: { nodes: [] },
   });
+}
+
+function automaticDiscountMock({
+  id = MOCK_DISCOUNT_ID,
+  status = "ACTIVE",
+  functionId = MOCK_DISCOUNT_FUNCTION_ID,
+}: {
+  id?: string;
+  status?: string;
+  functionId?: string;
+} = {}) {
+  return {
+    id,
+    discount: {
+      __typename: "DiscountAutomaticApp",
+      title: "Add On",
+      status,
+      appDiscountType: { functionId },
+    },
+  };
 }
 
 describe("AddOnDiscountFunctionService", () => {
@@ -31,24 +53,18 @@ describe("AddOnDiscountFunctionService", () => {
     jest.clearAllMocks();
   });
 
-  it("creates the automatic app discount when none exists", async () => {
+  it("creates the automatic app discount by stable function handle when none exists", async () => {
     mockShopifyAdmin.graphql
       .mockResolvedValueOnce(addOnFunctionsMock())
       .mockResolvedValueOnce(createMockGraphQLResponse({
-        discountNodes: { edges: [] },
+        discountNodes: { nodes: [] },
       }))
       .mockResolvedValueOnce(createMockGraphQLResponse({
         discountAutomaticAppCreate: {
           automaticAppDiscount: {
-            discountId: "gid://shopify/DiscountAutomaticNode/1",
+            discountId: MOCK_DISCOUNT_ID,
             title: "Add On",
             status: "ACTIVE",
-            appDiscountType: { functionId: MOCK_DISCOUNT_FUNCTION_ID },
-            combinesWith: {
-              orderDiscounts: true,
-              productDiscounts: true,
-              shippingDiscounts: false,
-            },
           },
           userErrors: [],
         },
@@ -60,15 +76,20 @@ describe("AddOnDiscountFunctionService", () => {
     );
 
     expect(result.success).toBe(true);
-    expect(result.discountId).toBe("gid://shopify/DiscountAutomaticNode/1");
-    expect(result.alreadyExists).toBeFalsy();
+    expect(result.discountId).toBe(MOCK_DISCOUNT_ID);
+    expect(result.outcome).toBe("created");
     expect(mockShopifyAdmin.graphql).toHaveBeenCalledTimes(3);
+
+    expect(mockShopifyAdmin.graphql.mock.calls[0][0]).toContain("handle");
+    expect(mockShopifyAdmin.graphql.mock.calls[0][1]).toMatchObject({
+      apiVersion: "2026-07",
+    });
 
     const createCall = mockShopifyAdmin.graphql.mock.calls[2];
     expect(createCall[0]).toContain("discountAutomaticAppCreate");
     expect(createCall[1].variables.automaticAppDiscount).toMatchObject({
       title: "Add On",
-      functionId: MOCK_DISCOUNT_FUNCTION_ID,
+      functionHandle: MOCK_DISCOUNT_FUNCTION_HANDLE,
       discountClasses: ["PRODUCT"],
       combinesWith: {
         orderDiscounts: true,
@@ -76,25 +97,16 @@ describe("AddOnDiscountFunctionService", () => {
         shippingDiscounts: false,
       },
     });
+    expect(createCall[1].variables.automaticAppDiscount).not.toHaveProperty("functionId");
     expect(createCall[1].variables.automaticAppDiscount.startsAt).toEqual(expect.any(String));
   });
 
-  it("does not create a duplicate when the automatic app discount already exists", async () => {
+  it("returns already active without mutating a matching active discount", async () => {
     mockShopifyAdmin.graphql
       .mockResolvedValueOnce(addOnFunctionsMock())
       .mockResolvedValueOnce(createMockGraphQLResponse({
         discountNodes: {
-          edges: [{
-            node: {
-              id: "gid://shopify/DiscountAutomaticNode/existing-node",
-              discount: {
-                __typename: "DiscountAutomaticApp",
-                title: "Add On",
-                status: "ACTIVE",
-                appDiscountType: { functionId: MOCK_DISCOUNT_FUNCTION_ID },
-              },
-            },
-          }],
+          nodes: [automaticDiscountMock()],
         },
       }));
 
@@ -104,9 +116,80 @@ describe("AddOnDiscountFunctionService", () => {
     );
 
     expect(result.success).toBe(true);
-    expect(result.discountId).toBe("gid://shopify/DiscountAutomaticNode/existing-node");
-    expect(result.alreadyExists).toBe(true);
+    expect(result.discountId).toBe(MOCK_DISCOUNT_ID);
+    expect(result.outcome).toBe("already_active");
     expect(mockShopifyAdmin.graphql).toHaveBeenCalledTimes(2);
+  });
+
+  it.each(["DISABLED", "EXPIRED"])(
+    "reactivates a matching %s automatic discount",
+    async (status) => {
+      mockShopifyAdmin.graphql
+        .mockResolvedValueOnce(addOnFunctionsMock())
+        .mockResolvedValueOnce(createMockGraphQLResponse({
+          discountNodes: {
+            nodes: [automaticDiscountMock({ status })],
+          },
+        }))
+        .mockResolvedValueOnce(createMockGraphQLResponse({
+          discountAutomaticActivate: {
+            automaticDiscountNode: {
+              id: MOCK_DISCOUNT_ID,
+              automaticDiscount: {
+                __typename: "DiscountAutomaticApp",
+                status: "ACTIVE",
+              },
+            },
+            userErrors: [],
+          },
+        }));
+
+      const result = await AddOnDiscountFunctionService.completeSetup(
+        mockShopifyAdmin,
+        shopDomain,
+      );
+
+      expect(result).toMatchObject({
+        success: true,
+        discountId: MOCK_DISCOUNT_ID,
+        outcome: "reactivated",
+      });
+      expect(mockShopifyAdmin.graphql.mock.calls[2][0]).toContain(
+        "discountAutomaticActivate",
+      );
+      expect(mockShopifyAdmin.graphql.mock.calls[2][1].variables).toEqual({
+        id: MOCK_DISCOUNT_ID,
+      });
+    },
+  );
+
+  it("does not reuse an Add On discount owned by a different function", async () => {
+    mockShopifyAdmin.graphql
+      .mockResolvedValueOnce(addOnFunctionsMock())
+      .mockResolvedValueOnce(createMockGraphQLResponse({
+        discountNodes: {
+          nodes: [automaticDiscountMock({
+            functionId: "gid://shopify/ShopifyFunction/wrong-function",
+          })],
+        },
+      }))
+      .mockResolvedValueOnce(createMockGraphQLResponse({
+        discountAutomaticAppCreate: {
+          automaticAppDiscount: {
+            discountId: MOCK_DISCOUNT_ID,
+            status: "ACTIVE",
+          },
+          userErrors: [],
+        },
+      }));
+
+    const result = await AddOnDiscountFunctionService.completeSetup(
+      mockShopifyAdmin,
+      shopDomain,
+    );
+
+    expect(result.outcome).toBe("created");
+    expect(mockShopifyAdmin.graphql).toHaveBeenCalledTimes(3);
   });
 
   it("returns failure when the add-on discount function is not deployed", async () => {
@@ -126,12 +209,12 @@ describe("AddOnDiscountFunctionService", () => {
     mockShopifyAdmin.graphql
       .mockResolvedValueOnce(addOnFunctionsMock())
       .mockResolvedValueOnce(createMockGraphQLResponse({
-        discountNodes: { edges: [] },
+        discountNodes: { nodes: [] },
       }))
       .mockResolvedValueOnce(createMockGraphQLResponse({
         discountAutomaticAppCreate: {
           automaticAppDiscount: null,
-          userErrors: [{ field: ["functionId"], message: "Function not found" }],
+          userErrors: [{ field: ["functionHandle"], message: "Function not found" }],
         },
       }));
 
@@ -142,5 +225,50 @@ describe("AddOnDiscountFunctionService", () => {
 
     expect(result.success).toBe(false);
     expect(result.error).toContain("Function not found");
+    expect(result.outcome).toBeUndefined();
+  });
+
+  it("surfaces automatic discount activation user errors", async () => {
+    mockShopifyAdmin.graphql
+      .mockResolvedValueOnce(addOnFunctionsMock())
+      .mockResolvedValueOnce(createMockGraphQLResponse({
+        discountNodes: {
+          nodes: [automaticDiscountMock({ status: "EXPIRED" })],
+        },
+      }))
+      .mockResolvedValueOnce(createMockGraphQLResponse({
+        discountAutomaticActivate: {
+          automaticDiscountNode: null,
+          userErrors: [{ field: ["id"], message: "Discount cannot be activated" }],
+        },
+      }));
+
+    const result = await AddOnDiscountFunctionService.completeSetup(
+      mockShopifyAdmin,
+      shopDomain,
+    );
+
+    expect(result.success).toBe(false);
+    expect(result.error).toContain("Discount cannot be activated");
+    expect(result.outcome).toBeUndefined();
+  });
+
+  it("does not create a discount when the existing-discount query fails", async () => {
+    mockShopifyAdmin.graphql
+      .mockResolvedValueOnce(addOnFunctionsMock())
+      .mockResolvedValueOnce({
+        json: async () => ({
+          errors: [{ message: "Discount lookup failed" }],
+        }),
+      });
+
+    const result = await AddOnDiscountFunctionService.completeSetup(
+      mockShopifyAdmin,
+      shopDomain,
+    );
+
+    expect(result.success).toBe(false);
+    expect(result.error).toContain("Discount lookup failed");
+    expect(mockShopifyAdmin.graphql).toHaveBeenCalledTimes(2);
   });
 });
