@@ -19,8 +19,8 @@ jest.mock("../../../app/services/checkout-integration-discount-code-service.serv
 
 jest.mock("../../../app/lib/checkout-integrations", () => ({
   isSupportedCheckoutIntegrationProvider: (value: unknown) => (
-    value === "theme_cart_drawer"
-    || value === "native"
+    value === "gokwik"
+    || value === "shopflo"
   ),
 }));
 
@@ -68,7 +68,7 @@ describe("checkout integration discount code route", () => {
     mockUnauthenticatedAdmin.mockResolvedValue({ admin: { graphql: jest.fn() } });
     mockCreateForProvider.mockResolvedValue({
       success: true,
-      providerId: "theme_cart_drawer",
+      providerId: "gokwik",
       discountId: "gid://shopify/DiscountCodeNode/1",
       code: "WPB-GOKWIK-12345678",
       expiresAt: "2026-07-02T10:30:00.000Z",
@@ -81,7 +81,7 @@ describe("checkout integration discount code route", () => {
 
   it("creates a discount code for a signed storefront request", async () => {
     const response = await action({
-      request: makeSignedRequest({ providerId: "theme_cart_drawer" }),
+      request: makeSignedRequest({ providerId: "gokwik" }),
       params: {},
       context: {},
     } as any) as Response;
@@ -91,7 +91,7 @@ describe("checkout integration discount code route", () => {
     expect(response.status).toBe(200);
     expect(body).toEqual({
       ok: true,
-      providerId: "theme_cart_drawer",
+      providerId: "gokwik",
       code: "WPB-GOKWIK-12345678",
       expiresAt: "2026-07-02T10:30:00.000Z",
     });
@@ -99,7 +99,7 @@ describe("checkout integration discount code route", () => {
     expect(mockCreateForProvider).toHaveBeenCalledWith(
       { graphql: expect.any(Function) },
       "test-shop.myshopify.com",
-      "theme_cart_drawer",
+      "gokwik",
     );
   });
 
@@ -116,7 +116,7 @@ describe("checkout integration discount code route", () => {
   });
 
   it("rejects unsigned storefront requests", async () => {
-    const request = makeSignedRequest({ providerId: "theme_cart_drawer" });
+    const request = makeSignedRequest({ providerId: "gokwik" });
     const url = new URL(request.url);
     url.searchParams.set("signature", "bad-signature");
 
@@ -124,7 +124,7 @@ describe("checkout integration discount code route", () => {
       request: new Request(url.toString(), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ providerId: "theme_cart_drawer" }),
+        body: JSON.stringify({ providerId: "gokwik" }),
       }),
       params: {},
       context: {},
@@ -134,9 +134,9 @@ describe("checkout integration discount code route", () => {
     expect(mockUnauthenticatedAdmin).not.toHaveBeenCalled();
   });
 
-  it("accepts native checkout as a supported checkout integration provider", async () => {
+  it("accepts GoKwik as a supported checkout integration provider", async () => {
     const response = await action({
-      request: makeSignedRequest({ providerId: "native" }),
+      request: makeSignedRequest({ providerId: "gokwik" }),
       params: {},
       context: {},
     } as any) as Response;
@@ -145,7 +145,37 @@ describe("checkout integration discount code route", () => {
     expect(mockCreateForProvider).toHaveBeenCalledWith(
       { graphql: expect.any(Function) },
       "test-shop.myshopify.com",
-      "native",
+      "gokwik",
+    );
+  });
+
+  it("accepts Shopflo as a supported checkout integration provider", async () => {
+    mockCreateForProvider.mockResolvedValue({
+      success: true,
+      providerId: "shopflo",
+      discountId: "gid://shopify/DiscountCodeNode/2",
+      code: "WPB-SHOPFLO-87654321",
+      expiresAt: "2026-07-02T10:30:00.000Z",
+    });
+
+    const response = await action({
+      request: makeSignedRequest({ providerId: "shopflo" }),
+      params: {},
+      context: {},
+    } as any) as Response;
+
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body).toMatchObject({
+      ok: true,
+      providerId: "shopflo",
+      code: "WPB-SHOPFLO-87654321",
+    });
+    expect(mockCreateForProvider).toHaveBeenCalledWith(
+      { graphql: expect.any(Function) },
+      "test-shop.myshopify.com",
+      "shopflo",
     );
   });
 });

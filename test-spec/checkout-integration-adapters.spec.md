@@ -44,9 +44,9 @@ invocation per completed cart-add lifecycle.
 | # | Scenario | Input | Expected Output | Notes |
 | --- | --- | --- | --- | --- |
 | 1 | Provider contract | Every provider ID | Mode, strategy, timeout, fallback, discount and refresh requirements are present | Shared by Admin and storefront |
-| 2 | Shopflo canonical strategy | `shopflo` | Token checkout URL strategy is required | Undocumented legacy callbacks are not invoked |
+| 2 | Checkout handoff providers | `gokwik`, `shopflo` | Third-party checkout strategy is required | Handoff providers use provider callbacks |
 | 3 | Native cart strategy | Theme cart drawer | Shopify standard storefront actions are primary | `/cart` remains final fallback |
-| 4 | Custom script | `custom_script` | Merchant script mode with native checkout fallback | Script remains one-shot and non-blocking |
+| 4 | Checkout callback execution | `shopflo`, `gokwik` | SDK callback or explicit callback path is detected | No legacy fallback into unrelated callbacks |
 
 ### CheckoutIntegrationCapability
 
@@ -55,7 +55,7 @@ invocation per completed cart-add lifecycle.
 | 1 | Standard cart actions | `Shopify.actions.openCart` | Theme cart capability available | No provider-specific global |
 | 2 | Delayed provider SDK | SDK appears before timeout | Capability wait resolves available | Polling is bounded |
 | 3 | Missing provider SDK | SDK never appears | Capability wait resolves unavailable | Buyer can fall back |
-| 4 | Shopflo token URL | URL plus `openFloCheckout` | Canonical capability available | No token is logged |
+| 4 | Shopflo token URL | URL plus `openShopfloCheckout` | Canonical callback capability available | No token is logged |
 
 ### CheckoutIntegrationInvocation
 

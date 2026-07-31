@@ -179,6 +179,28 @@ describe("Settings Controls runtime mapping", () => {
     expect(runtime.settingsControls.landingPage.checkout.providerId).toBe("theme_cart_drawer");
   });
 
+  it("maps GoKwik provider label to provider ID", async () => {
+    const { buildSettingsControlsRuntime } = await import("../../../app/lib/settings-controls-runtime");
+
+    const runtime = buildSettingsControlsRuntime({
+      ...controlsPayload,
+      "Checkout Integration": "GoKwik",
+    });
+
+    expect(runtime.settingsControls.landingPage.checkout.providerId).toBe("gokwik");
+  });
+
+  it("maps Shopflo provider label to provider ID", async () => {
+    const { buildSettingsControlsRuntime } = await import("../../../app/lib/settings-controls-runtime");
+
+    const runtime = buildSettingsControlsRuntime({
+      ...controlsPayload,
+      "Checkout Integration": "Shopflo",
+    });
+
+    expect(runtime.settingsControls.landingPage.checkout.providerId).toBe("shopflo");
+  });
+
   it("defaults missing validate-conditions control to enabled", async () => {
     const { buildSettingsControlsRuntime } = await import("../../../app/lib/settings-controls-runtime");
 

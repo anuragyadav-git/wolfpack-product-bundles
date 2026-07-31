@@ -1,7 +1,7 @@
 /*!
  * Wolfpack Bundle Widget — Full Page
  * Version : 5.0.226
- * Built   : 2026-07-30
+ * Built   : 2026-07-31
  *
  * Cache note: Shopify CDN cache is busted automatically by shopify app deploy.
  * After deploying, allow 2-10 minutes for propagation before testing.
@@ -2035,6 +2035,26 @@ const CHECKOUT_INTEGRATION_PROVIDERS = [
     timeoutMs: 1500,
     fallbackAction: 'cart',
   },
+  {
+    id: 'gokwik',
+    label: 'GoKwik',
+    callbackMode: 'checkout_handoff',
+    strategy: 'third_party_checkout',
+    requiresDiscountCode: true,
+    requiresCartRefresh: false,
+    timeoutMs: 1500,
+    fallbackAction: 'checkout',
+  },
+  {
+    id: 'shopflo',
+    label: 'Shopflo',
+    callbackMode: 'checkout_handoff',
+    strategy: 'third_party_checkout',
+    requiresDiscountCode: true,
+    requiresCartRefresh: false,
+    timeoutMs: 1500,
+    fallbackAction: 'checkout',
+  },
 ];
 
 const CHECKOUT_INTEGRATION_PROVIDER_IDS = CHECKOUT_INTEGRATION_PROVIDERS.map((provider) => provider.id);
@@ -2099,6 +2119,36 @@ function getCapability(providerId, runtimeWindow, options = {}) {
     };
   }
 
+  if (provider.id === 'gokwik') {
+    if (typeof runtimeWindow?.gokwikSdk?.initCheckout === 'function') {
+      return {
+        available: true,
+        capability: 'gokwik_sdk_callback',
+        provider,
+      };
+    }
+    return {
+      available: typeof options.openGokwikCheckout === 'function',
+      capability: 'gokwik_callback',
+      provider,
+    };
+  }
+
+  if (provider.id === 'shopflo') {
+    if (typeof runtimeWindow?.Shopflo?.openCheckout === 'function') {
+      return {
+        available: true,
+        capability: 'shopflo_sdk_callback',
+        provider,
+      };
+    }
+    return {
+      available: typeof options.openShopfloCheckout === 'function',
+      capability: 'shopflo_callback',
+      provider,
+    };
+  }
+
   return { available: false, capability: 'unknown', provider };
 }
 
@@ -2154,6 +2204,18 @@ async function runProviderInvocation(provider, runtimeWindow, options, capabilit
   }
   if (capability === 'theme_cart_callback') {
     return options.openThemeCartDrawer();
+  }
+  if (capability === 'gokwik_sdk_callback') {
+    return runtimeWindow?.gokwikSdk?.initCheckout?.(options.checkoutUrl);
+  }
+  if (capability === 'gokwik_callback') {
+    return options.openGokwikCheckout();
+  }
+  if (capability === 'shopflo_sdk_callback') {
+    return runtimeWindow?.Shopflo?.openCheckout?.();
+  }
+  if (capability === 'shopflo_callback') {
+    return options.openShopfloCheckout();
   }
   return true;
 }
@@ -5015,6 +5077,28 @@ async _openThemeCartDrawer() {
   return cart !== null;
 },
 
+_openGokwikCheckout(checkoutUrl) {
+  try {
+    if (typeof window.gokwikSdk?.initCheckout !== 'function') return false;
+    window.gokwikSdk.initCheckout({
+      checkoutUrl,
+    });
+    return true;
+  } catch {
+    return false;
+  }
+},
+
+_openShopfloCheckout() {
+  try {
+    if (typeof window.Shopflo?.openCheckout !== 'function') return false;
+    window.Shopflo.openCheckout();
+    return true;
+  } catch {
+    return false;
+  }
+},
+
 _setCheckoutIntegrationDiscountState(code) {
   if (!code) return;
   try {
@@ -5060,6 +5144,8 @@ async _invokeCheckoutIntegrationProvider(providerId, options = {}) {
   const adapterOptions = {
     ...options,
     openThemeCartDrawer: () => this._openThemeCartDrawer(),
+    openGokwikCheckout: (checkoutUrl) => this._openGokwikCheckout(checkoutUrl),
+    openShopfloCheckout: () => this._openShopfloCheckout(),
   };
   const capability = await waitForCheckoutIntegrationCapability(
     providerId,

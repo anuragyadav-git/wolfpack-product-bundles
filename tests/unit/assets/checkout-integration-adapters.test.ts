@@ -34,6 +34,16 @@ describe("checkout integration adapter contract", () => {
       fallbackAction: "cart",
       requiresCartRefresh: true,
     });
+    expect(getCheckoutIntegrationProvider("gokwik")).toMatchObject({
+      strategy: "third_party_checkout",
+      callbackMode: "checkout_handoff",
+      requiresDiscountCode: true,
+    });
+    expect(getCheckoutIntegrationProvider("shopflo")).toMatchObject({
+      strategy: "third_party_checkout",
+      callbackMode: "checkout_handoff",
+      requiresDiscountCode: true,
+    });
   });
 });
 
@@ -72,6 +82,56 @@ describe("checkout integration capability detection", () => {
     expect(detectCheckoutIntegrationCapability("theme_cart_drawer", runtimeWindow, options)).toMatchObject({
       available: true,
       capability: "theme_cart_callback",
+    });
+  });
+
+  it("prefers GoKwik checkout SDK callback when available", () => {
+    const runtimeWindow = {
+      gokwikSdk: {
+        initCheckout: jest.fn(),
+      },
+    };
+
+    expect(detectCheckoutIntegrationCapability("gokwik", runtimeWindow)).toMatchObject({
+      available: true,
+      capability: "gokwik_sdk_callback",
+    });
+  });
+
+  it("falls back to an explicit GoKwik callback when SDK is unavailable", () => {
+    const runtimeWindow = {};
+    const options = {
+      openGokwikCheckout: jest.fn(),
+    };
+
+    expect(detectCheckoutIntegrationCapability("gokwik", runtimeWindow, options)).toMatchObject({
+      available: true,
+      capability: "gokwik_callback",
+    });
+  });
+
+  it("prefers Shopflo checkout SDK callback when available", () => {
+    const runtimeWindow = {
+      Shopflo: {
+        openCheckout: jest.fn(),
+      },
+    };
+
+    expect(detectCheckoutIntegrationCapability("shopflo", runtimeWindow)).toMatchObject({
+      available: true,
+      capability: "shopflo_sdk_callback",
+    });
+  });
+
+  it("falls back to an explicit Shopflo callback when SDK is unavailable", () => {
+    const runtimeWindow = {};
+    const options = {
+      openShopfloCheckout: jest.fn(),
+    };
+
+    expect(detectCheckoutIntegrationCapability("shopflo", runtimeWindow, options)).toMatchObject({
+      available: true,
+      capability: "shopflo_callback",
     });
   });
 
@@ -198,6 +258,62 @@ describe("checkout integration invocation lifecycle", () => {
       ok: false,
       phase: "invoke",
       reason: "invocation-blocked",
+    });
+  });
+
+  it("invokes GoKwik through explicit callbacks", async () => {
+    const runtimeWindow = {};
+    const options = {
+      openGokwikCheckout: jest.fn(() => true),
+    };
+
+    await expect(invokeCheckoutIntegrationProvider("gokwik", runtimeWindow, options)).resolves.toMatchObject({
+      ok: true,
+      capability: "gokwik_callback",
+    });
+    expect(options.openGokwikCheckout).toHaveBeenCalledTimes(1);
+  });
+
+  it("invokes Shopflo through explicit callbacks", async () => {
+    const runtimeWindow = {};
+    const options = {
+      openShopfloCheckout: jest.fn(() => true),
+    };
+
+    await expect(invokeCheckoutIntegrationProvider("shopflo", runtimeWindow, options)).resolves.toMatchObject({
+      ok: true,
+      capability: "shopflo_callback",
+    });
+    expect(options.openShopfloCheckout).toHaveBeenCalledTimes(1);
+  });
+
+  it("returns invocation errors when GoKwik callback throws", async () => {
+    const runtimeWindow = {};
+    const options = {
+      openGokwikCheckout: jest.fn(() => {
+        throw new Error("blocked");
+      }),
+    };
+
+    await expect(invokeCheckoutIntegrationProvider("gokwik", runtimeWindow, options)).resolves.toMatchObject({
+      ok: false,
+      phase: "invoke",
+      reason: "callback-error",
+    });
+  });
+
+  it("returns invocation errors when Shopflo callback rejects", async () => {
+    const runtimeWindow = {};
+    const options = {
+      openShopfloCheckout: jest.fn(async () => {
+        throw new Error("blocked");
+      }),
+    };
+
+    await expect(invokeCheckoutIntegrationProvider("shopflo", runtimeWindow, options)).resolves.toMatchObject({
+      ok: false,
+      phase: "invoke",
+      reason: "callback-error",
     });
   });
 });

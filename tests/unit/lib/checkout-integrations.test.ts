@@ -11,6 +11,8 @@ describe("checkout integration provider registry", () => {
     expect(CHECKOUT_INTEGRATION_PROVIDER_OPTIONS).toEqual([
       "Shopify checkout",
       "Theme cart drawer",
+      "GoKwik",
+      "Shopflo",
     ]);
   });
 
@@ -19,19 +21,22 @@ describe("checkout integration provider registry", () => {
     expect(normalizeCheckoutIntegrationProvider("theme_cart_drawer")).toBe("theme_cart_drawer");
     expect(normalizeCheckoutIntegrationProvider("Shopify checkout")).toBe("native");
     expect(normalizeCheckoutIntegrationProvider("native")).toBe("native");
-    expect(normalizeCheckoutIntegrationProvider("GoKwik")).toBe("native");
+    expect(normalizeCheckoutIntegrationProvider("GoKwik")).toBe("gokwik");
+    expect(normalizeCheckoutIntegrationProvider("Shopflo")).toBe("shopflo");
   });
 
   it("marks no legacy providers as discount-code providers", () => {
     expect(isDiscountCodeCheckoutIntegrationProvider("native")).toBe(false);
     expect(isDiscountCodeCheckoutIntegrationProvider("theme_cart_drawer")).toBe(false);
-    expect(isDiscountCodeCheckoutIntegrationProvider("gokwik")).toBe(false);
+    expect(isDiscountCodeCheckoutIntegrationProvider("gokwik")).toBe(true);
+    expect(isDiscountCodeCheckoutIntegrationProvider("shopflo")).toBe(true);
   });
 
   it("keeps app-proxy discount code creation closed to checkout handoff providers", () => {
     expect(isSupportedCheckoutIntegrationProvider("native")).toBe(false);
     expect(isSupportedCheckoutIntegrationProvider("theme_cart_drawer")).toBe(false);
-    expect(isSupportedCheckoutIntegrationProvider("shopflo")).toBe(false);
+    expect(isSupportedCheckoutIntegrationProvider("gokwik")).toBe(true);
+    expect(isSupportedCheckoutIntegrationProvider("shopflo")).toBe(true);
     expect(isSupportedCheckoutIntegrationProvider("monster_cart")).toBe(false);
   });
 
@@ -48,7 +53,19 @@ describe("checkout integration provider registry", () => {
       requiresDiscountCode: false,
       requiresCartRefresh: true,
     });
-    expect(getCheckoutIntegrationProvider("rebuy")).toMatchObject({
+    expect(getCheckoutIntegrationProvider("gokwik")).toMatchObject({
+      id: "gokwik",
+      callbackMode: "checkout_handoff",
+      requiresDiscountCode: true,
+      requiresCartRefresh: false,
+    });
+    expect(getCheckoutIntegrationProvider("Shopflo")).toMatchObject({
+      id: "shopflo",
+      callbackMode: "checkout_handoff",
+      requiresDiscountCode: true,
+      requiresCartRefresh: false,
+    });
+    expect(getCheckoutIntegrationProvider("monster_cart")).toMatchObject({
       id: "native",
       callbackMode: "native",
       requiresDiscountCode: false,

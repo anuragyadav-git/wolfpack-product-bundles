@@ -781,6 +781,36 @@ export const INTEGRATION_CATEGORIES: IntegrationCategory[] = [
     description: "Use Shopify-native checkout and cart flows for bundle conversion.",
     cards: [
       {
+        id: "gokwik",
+        title: "GoKwik",
+        description: "Use a third-party checkout handoff flow with GoKwik.",
+        logoLabel: "GoKwik",
+        logoUrl: "/icons/Gokwik.avif",
+        status: "Supported",
+        ctaLabel: "View Setup",
+        ctaType: "guide",
+        setupUrl: "https://wolfpackapps.com",
+        guideSummary: [
+          "Use your store's GoKwik checkout configuration and keep native fallback routing enabled.",
+          "Verify callback setup for GoKwik checkout handoff in theme script tags.",
+        ],
+      },
+      {
+        id: "shopflo",
+        title: "Shopflo",
+        description: "Use a third-party checkout handoff flow with Shopflo.",
+        logoLabel: "Shopflo",
+        logoUrl: "/icons/Shopflo.avif",
+        status: "Supported",
+        ctaLabel: "View Setup",
+        ctaType: "guide",
+        setupUrl: "https://wolfpackapps.com",
+        guideSummary: [
+          "Enable the Shopflo checkout integration and confirm SDK loading on storefront pages.",
+          "Use discount-code handoff flow so order discounting continues through checkout.",
+        ],
+      },
+      {
         id: "native-checkout",
         title: "Shopify Checkout",
         description: "Route bundle checkout through Shopify's native checkout flow.",
@@ -792,6 +822,20 @@ export const INTEGRATION_CATEGORIES: IntegrationCategory[] = [
         guideSummary: [
           "Keep checkout routing on Shopify-native flow so inventory and discounts remain consistent.",
           "Use bundle token metadata and Storefront/cart transforms only for runtime behavior you control.",
+        ],
+      },
+      {
+        id: "theme_cart_drawer",
+        title: "Theme Cart Drawer",
+        description: "Keep buyers in Shopify's cart drawer flow.",
+        logoLabel: "Shopify",
+        status: "Supported",
+        ctaLabel: "View Setup",
+        ctaType: "guide",
+        setupUrl: "https://wolfpackapps.com",
+        guideSummary: [
+          "Enable theme-cart handoff and keep standard cart flow active after bundle line-item updates.",
+          "Use storefront side-drawer callbacks when available to preserve conversion.",
         ],
       },
     ],

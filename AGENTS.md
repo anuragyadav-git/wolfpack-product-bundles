@@ -258,6 +258,20 @@ WPB_CART_TRANSFORM_REPAIR_APPLY=true
 
 Never set both flags. Dry-run scans installed shops without mutating Shopify. Apply mode runs `CartTransformService.completeSetup` through the app's offline Admin context for every installed shop.
 
+---
+
+## 🧪 Local Process & Log Attachment Note
+
+When a local dev command is launched from a shell session:
+
+- Shell PID may be a wrapper (for example `/bin/zsh -il`), with the actual `shopify app dev` process as a child Node PID.
+- In our environment, Node logging is attached to the parent terminal (`/dev/ttys006`) and local terminal I/O pipes; there is no dedicated rotating log file opened by default.
+- For process troubleshooting, inspect the process tree first:
+  - `ps -p <shell_pid>`
+  - `pgrep -P <shell_pid>` (or equivalent child-process discovery)
+  - `lsof -p <node_pid>`
+- Avoid attempting unsafe TTY reads (`/dev/ttys*`) for background log capture.
+
 **NEVER run repair apply mode autonomously.** Stop and ask for explicit user approval first. Warn the user that production apply mode can create or replace CartTransform objects and overwrite the `$app.runtime_token_secret` owner metafield across live merchant shops.
 
 ---

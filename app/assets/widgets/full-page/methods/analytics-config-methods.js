@@ -270,6 +270,28 @@ async _openThemeCartDrawer() {
   return cart !== null;
 },
 
+_openGokwikCheckout(checkoutUrl) {
+  try {
+    if (typeof window.gokwikSdk?.initCheckout !== 'function') return false;
+    window.gokwikSdk.initCheckout({
+      checkoutUrl,
+    });
+    return true;
+  } catch {
+    return false;
+  }
+},
+
+_openShopfloCheckout() {
+  try {
+    if (typeof window.Shopflo?.openCheckout !== 'function') return false;
+    window.Shopflo.openCheckout();
+    return true;
+  } catch {
+    return false;
+  }
+},
+
 _setCheckoutIntegrationDiscountState(code) {
   if (!code) return;
   try {
@@ -315,6 +337,8 @@ async _invokeCheckoutIntegrationProvider(providerId, options = {}) {
   const adapterOptions = {
     ...options,
     openThemeCartDrawer: () => this._openThemeCartDrawer(),
+    openGokwikCheckout: (checkoutUrl) => this._openGokwikCheckout(checkoutUrl),
+    openShopfloCheckout: () => this._openShopfloCheckout(),
   };
   const capability = await waitForCheckoutIntegrationCapability(
     providerId,

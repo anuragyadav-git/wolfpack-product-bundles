@@ -187,6 +187,8 @@ describe("recovered admin surfaces contract", () => {
       options: [
         "Shopify checkout",
         "Theme cart drawer",
+        "GoKwik",
+        "Shopflo",
       ],
     });
 
@@ -237,22 +239,40 @@ describe("recovered admin surfaces contract", () => {
       "Reviews",
       "Checkout",
     ]);
-    expect(getIntegrationCardCount()).toBe(2);
+    expect(getIntegrationCardCount()).toBe(5);
 
     const cards = INTEGRATION_CATEGORIES.flatMap((category) => category.cards);
     expect(cards.map((card) => card.id)).toEqual([
       "judgeme",
+      "gokwik",
+      "shopflo",
       "native-checkout",
+      "theme_cart_drawer",
     ]);
-    expect(cards.filter((card) => card.ctaType === "guide")).toHaveLength(2);
+    expect(cards.filter((card) => card.ctaType === "guide")).toHaveLength(5);
     expect(cards.filter((card) => card.ctaType === "chat")).toHaveLength(0);
     expect(cards.every((card) => card.ctaLabel === "View Setup")).toBe(true);
     expect(cards.map((card) => card.id)).toEqual(expect.arrayContaining([
       "judgeme",
       "native-checkout",
+      "gokwik",
+      "shopflo",
+      "theme_cart_drawer",
     ]));
     expect(cards).toContainEqual(expect.objectContaining({
       id: "judgeme",
+      setupUrl: "https://wolfpackapps.com",
+    }));
+    expect(cards).toContainEqual(expect.objectContaining({
+      id: "theme_cart_drawer",
+      setupUrl: "https://wolfpackapps.com",
+    }));
+    expect(cards).toContainEqual(expect.objectContaining({
+      id: "gokwik",
+      setupUrl: "https://wolfpackapps.com",
+    }));
+    expect(cards).toContainEqual(expect.objectContaining({
+      id: "shopflo",
       setupUrl: "https://wolfpackapps.com",
     }));
     expect(cards).toContainEqual(expect.objectContaining({

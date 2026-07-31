@@ -8,7 +8,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const ROOT_DIR = join(__dirname, '..');
 
-const WIDGET_VERSION = '5.0.223';
+const WIDGET_VERSION = '5.0.226';
 
 // Shared component modules (in dependency order)
 const SHARED_MODULES = [
@@ -22,6 +22,7 @@ const SHARED_MODULES = [
   join(ROOT_DIR, 'app/assets/widgets/shared/component-generator.js'),
   join(ROOT_DIR, 'app/assets/widgets/shared/default-loading-animation.js'),
   join(ROOT_DIR, 'app/assets/widgets/shared/loading-overlay.js'),
+  join(ROOT_DIR, 'app/assets/widgets/shared/checkout-integration-adapters.js'),
   join(ROOT_DIR, 'app/assets/widgets/shared/bundle-level-css-methods.js'),
   join(ROOT_DIR, 'app/assets/widgets/shared/variant-selector.js'),
   join(ROOT_DIR, 'app/assets/widgets/shared/full-page-preset.js'),

@@ -19,6 +19,26 @@ export const CHECKOUT_INTEGRATION_PROVIDERS = [
     timeoutMs: 1500,
     fallbackAction: "cart",
   },
+  {
+    id: "gokwik",
+    label: "GoKwik",
+    callbackMode: "checkout_handoff",
+    strategy: "third_party_checkout",
+    requiresDiscountCode: true,
+    requiresCartRefresh: false,
+    timeoutMs: 1500,
+    fallbackAction: "checkout",
+  },
+  {
+    id: "shopflo",
+    label: "Shopflo",
+    callbackMode: "checkout_handoff",
+    strategy: "third_party_checkout",
+    requiresDiscountCode: true,
+    requiresCartRefresh: false,
+    timeoutMs: 1500,
+    fallbackAction: "checkout",
+  },
 ] as const;
 
 export type CheckoutIntegrationProvider = typeof CHECKOUT_INTEGRATION_PROVIDERS[number];

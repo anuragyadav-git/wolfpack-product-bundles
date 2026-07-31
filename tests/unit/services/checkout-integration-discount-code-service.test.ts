@@ -42,7 +42,7 @@ describe("CheckoutIntegrationDiscountCodeService", () => {
         discountCodeAppCreate: {
           codeAppDiscount: {
             discountId: "gid://shopify/DiscountCodeNode/1",
-            codes: { nodes: [{ code: "WPB-THEME_CART_DRAWER-12345678" }] },
+            codes: { nodes: [{ code: "WPB-GOKWIK-12345678" }] },
             endsAt: "2026-07-02T10:30:00.000Z",
           },
           userErrors: [],
@@ -52,22 +52,22 @@ describe("CheckoutIntegrationDiscountCodeService", () => {
     const result = await CheckoutIntegrationDiscountCodeService.createForProvider(
       mockShopifyAdmin,
       shopDomain,
-      "theme_cart_drawer",
+      "gokwik",
     );
 
     expect(result).toMatchObject({
       success: true,
-      providerId: "theme_cart_drawer",
+      providerId: "gokwik",
       discountId: "gid://shopify/DiscountCodeNode/1",
-      code: "WPB-THEME_CART_DRAWER-12345678",
+      code: "WPB-GOKWIK-12345678",
       expiresAt: "2026-07-02T10:30:00.000Z",
     });
 
     const createCall = mockShopifyAdmin.graphql.mock.calls[1];
     expect(createCall[0]).toContain("discountCodeAppCreate");
     expect(createCall[1].variables.codeAppDiscount).toMatchObject({
-      title: "WPB checkout integration - Theme cart drawer",
-      code: `${CHECKOUT_INTEGRATION_DISCOUNT_PREFIX}THEME_CART_DRAWER-12345678`,
+      title: "WPB checkout integration - GoKwik",
+      code: `${CHECKOUT_INTEGRATION_DISCOUNT_PREFIX}GOKWIK-12345678`,
       functionId: MOCK_DISCOUNT_FUNCTION_ID,
       usageLimit: 1,
       appliesOncePerCustomer: false,
@@ -89,7 +89,7 @@ describe("CheckoutIntegrationDiscountCodeService", () => {
         type: "json",
         value: JSON.stringify({
           mode: "checkout_integration",
-          providerId: "theme_cart_drawer",
+          providerId: "gokwik",
           shopDomain,
           ttlMs: CHECKOUT_INTEGRATION_DISCOUNT_CODE_TTL_MS,
         }),
@@ -105,7 +105,7 @@ describe("CheckoutIntegrationDiscountCodeService", () => {
     const result = await CheckoutIntegrationDiscountCodeService.createForProvider(
       mockShopifyAdmin,
       shopDomain,
-      "theme_cart_drawer",
+      "shopflo",
     );
 
     expect(result.success).toBe(false);
@@ -126,21 +126,21 @@ describe("CheckoutIntegrationDiscountCodeService", () => {
     const result = await CheckoutIntegrationDiscountCodeService.createForProvider(
       mockShopifyAdmin,
       shopDomain,
-      "theme_cart_drawer",
+      "gokwik",
     );
 
     expect(result.success).toBe(false);
     expect(result.error).toContain("Function not found");
   });
 
-  it("creates deterministic discount metadata for theme cart drawer handoff", async () => {
+  it("creates deterministic discount metadata for Shopflo handoff", async () => {
     mockShopifyAdmin.graphql
       .mockResolvedValueOnce(discountFunctionMock())
       .mockResolvedValueOnce(createMockGraphQLResponse({
         discountCodeAppCreate: {
           codeAppDiscount: {
             discountId: "gid://shopify/DiscountCodeNode/2",
-            codes: { nodes: [{ code: "WPB-THEME_CART_DRAWER-12345678" }] },
+            codes: { nodes: [{ code: "WPB-SHOPFLO-12345678" }] },
             endsAt: "2026-07-02T10:30:00.000Z",
           },
           userErrors: [],
@@ -150,16 +150,16 @@ describe("CheckoutIntegrationDiscountCodeService", () => {
     await CheckoutIntegrationDiscountCodeService.createForProvider(
       mockShopifyAdmin,
       shopDomain,
-      "theme_cart_drawer",
+      "shopflo",
     );
 
     const createCall = mockShopifyAdmin.graphql.mock.calls[1];
     expect(createCall[1].variables.codeAppDiscount).toMatchObject({
-      title: "WPB checkout integration - Theme cart drawer",
-      code: "WPB-THEME_CART_DRAWER-12345678",
+      title: "WPB checkout integration - Shopflo",
+      code: "WPB-SHOPFLO-12345678",
     });
     expect(JSON.parse(createCall[1].variables.codeAppDiscount.metafields[0].value)).toMatchObject({
-      providerId: "theme_cart_drawer",
+      providerId: "shopflo",
     });
   });
 });
