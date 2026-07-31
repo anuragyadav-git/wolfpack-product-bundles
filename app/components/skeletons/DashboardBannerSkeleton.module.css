@@ -1,19 +1,20 @@
 .row {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: stretch;
   width: 100%;
   min-height: 56px;
+  padding: 0;
 }
 
-.iconPlaceholder {
-  width: 24px;
-  height: 24px;
-  border-radius: 999px;
-  border: 2px solid #dfe3e8;
+.bannerPlaceholder {
+  width: 100%;
+  min-height: 56px;
+  border-radius: 12px;
+  border: 1px solid #dbe1e6;
+  box-sizing: border-box;
   background:
-    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0)),
-    linear-gradient(90deg, #f7f8f9 0%, #eceff3 50%, #f7f8f9 100%);
+    linear-gradient(90deg, #f7f8f9 0%, #e5eaf0 45%, #f7f8f9 100%);
   background-size: 200% 100%;
   animation: shimmer 1.6s linear infinite;
 }

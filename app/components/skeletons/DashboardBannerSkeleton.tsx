@@ -18,7 +18,7 @@ import styles from "./DashboardBannerSkeleton.module.css";
 export function DashboardBannerSkeleton() {
   return (
     <div className={styles.row} role="status" aria-label="Loading dashboard banner">
-      <div className={styles.iconPlaceholder} aria-hidden="true" />
+      <div className={styles.bannerPlaceholder} aria-hidden="true" />
     </div>
   );
 }
