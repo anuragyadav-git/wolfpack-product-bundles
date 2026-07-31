@@ -14,7 +14,7 @@ const controlsPayload = {
   "Discount Display": "Checked",
   "Discount format": "Percentage only (Eg: \"You save 19%\")",
   "Checkout Settings": "Redirect to Checkout",
-  "Checkout Integration": "GoKwik",
+  "Checkout Integration": "Shopify checkout",
   "Execute Script": "window.__fpbPostAddRuns = true;",
   "Custom Font": "Inter",
   "Custom CSS for bundle builder pages": ".wpbBundle-HTML .builder { color: red; }",
@@ -66,7 +66,7 @@ describe("Settings Controls runtime mapping", () => {
       redirectCollectionQuickAddToBundle: true,
       checkout: {
         action: "checkout",
-        providerId: "gokwik",
+        providerId: "native",
         executeScript: "window.__fpbPostAddRuns = true;",
       },
       font: {
@@ -173,10 +173,10 @@ describe("Settings Controls runtime mapping", () => {
 
     const runtime = buildSettingsControlsRuntime({
       ...controlsPayload,
-      "Checkout Integration": "Kaching Cart",
+      "Checkout Integration": "Theme cart drawer",
     });
 
-    expect(runtime.settingsControls.landingPage.checkout.providerId).toBe("kaching_cart");
+    expect(runtime.settingsControls.landingPage.checkout.providerId).toBe("theme_cart_drawer");
   });
 
   it("defaults missing validate-conditions control to enabled", async () => {

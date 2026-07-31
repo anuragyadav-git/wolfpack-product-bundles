@@ -24,9 +24,9 @@ describe("checkout integration adapter contract", () => {
     }
   });
 
-  it("uses current canonical strategies for Shopflo and theme carts", () => {
-    expect(getCheckoutIntegrationProvider("shopflo")).toMatchObject({
-      strategy: "token_checkout_url",
+  it("uses canonical strategies for native and theme-cart providers", () => {
+    expect(getCheckoutIntegrationProvider("native")).toMatchObject({
+      strategy: "native_redirect",
       fallbackAction: "checkout",
     });
     expect(getCheckoutIntegrationProvider("theme_cart_drawer")).toMatchObject({
@@ -35,18 +35,19 @@ describe("checkout integration adapter contract", () => {
       requiresCartRefresh: true,
     });
   });
-
-  it("models the merchant callback as a bounded custom provider", () => {
-    expect(getCheckoutIntegrationProvider("custom_script")).toMatchObject({
-      callbackMode: "custom",
-      strategy: "merchant_script",
-      fallbackAction: "checkout",
-    });
-  });
 });
 
 describe("checkout integration capability detection", () => {
-  it("prefers Shopify standard cart actions for the theme cart", () => {
+  it("prefers native redirect for the native checkout provider", () => {
+    const runtimeWindow = {};
+
+    expect(detectCheckoutIntegrationCapability("native", runtimeWindow)).toMatchObject({
+      available: true,
+      capability: "native_redirect",
+    });
+  });
+
+  it("prefers Shopify standard cart actions for the theme cart drawer", () => {
     const runtimeWindow = {
       Shopify: {
         actions: {
@@ -62,51 +63,36 @@ describe("checkout integration capability detection", () => {
     });
   });
 
-  it("detects the canonical Shopflo checkout URL capability", () => {
-    const runtimeWindow = {
-      Shopflo: {
-        openFloCheckout: jest.fn(),
-      },
+  it("falls back to an explicit theme-cart callback when actions are missing", () => {
+    const runtimeWindow = {};
+    const options = {
+      openThemeCartDrawer: jest.fn(),
     };
 
-    expect(detectCheckoutIntegrationCapability("shopflo", runtimeWindow, {
-      checkoutUrl: "https://checkout.example.test/session",
-    })).toMatchObject({
+    expect(detectCheckoutIntegrationCapability("theme_cart_drawer", runtimeWindow, options)).toMatchObject({
       available: true,
-      capability: "token_checkout_url",
+      capability: "theme_cart_callback",
     });
   });
 
-  it("does not treat the undocumented Shopflo callback as an available capability", () => {
-    const runtimeWindow = {
-      Shopflo: {
-        openCheckout: jest.fn(),
-      },
-    };
-
-    expect(detectCheckoutIntegrationCapability("shopflo", runtimeWindow)).toMatchObject({
-      available: false,
-      capability: "token_checkout_url",
-    });
-  });
-
-  it("waits for a delayed provider SDK within the bounded timeout", async () => {
+  it("waits for delayed callback availability within the bounded timeout", async () => {
     const runtimeWindow: Record<string, unknown> = {};
-    setTimeout(() => {
-      runtimeWindow.upcartOpenCart = jest.fn();
-    }, 5);
-
-    await expect(waitForCheckoutIntegrationCapability("upcart", runtimeWindow, {
+    const options = {
       timeoutMs: 50,
       pollIntervalMs: 2,
-    })).resolves.toMatchObject({
+    } as Record<string, unknown>;
+    setTimeout(() => {
+      options.openThemeCartDrawer = jest.fn();
+    }, 5);
+
+    await expect(waitForCheckoutIntegrationCapability("theme_cart_drawer", runtimeWindow, options)).resolves.toMatchObject({
       available: true,
-      capability: "installed_sdk",
+      capability: "theme_cart_callback",
     });
   });
 
-  it("returns unavailable when the SDK does not appear", async () => {
-    await expect(waitForCheckoutIntegrationCapability("upcart", {}, {
+  it("returns unavailable when the callback does not appear", async () => {
+    await expect(waitForCheckoutIntegrationCapability("theme_cart_drawer", {}, {
       timeoutMs: 5,
       pollIntervalMs: 1,
     })).resolves.toMatchObject({
@@ -145,14 +131,26 @@ describe("checkout integration invocation lifecycle", () => {
     expect(openCart).toHaveBeenCalledTimes(1);
   });
 
+  it("returns capability-unavailable when theme cart actions and callbacks are absent", async () => {
+    const runtimeWindow = {};
+
+    await expect(invokeCheckoutIntegrationProvider("theme_cart_drawer", runtimeWindow)).resolves.toMatchObject({
+      ok: false,
+      phase: "capability",
+      reason: "capability-unavailable",
+      capability: "theme_cart_callback",
+    });
+  });
+
   it("returns a typed failure when a provider callback throws", async () => {
-    const runtimeWindow = {
-      upcartOpenCart: jest.fn(() => {
+    const runtimeWindow = {};
+    const options = {
+      openThemeCartDrawer: jest.fn(() => {
         throw new Error("blocked");
       }),
     };
 
-    await expect(invokeCheckoutIntegrationProvider("upcart", runtimeWindow)).resolves.toMatchObject({
+    await expect(invokeCheckoutIntegrationProvider("theme_cart_drawer", runtimeWindow, options)).resolves.toMatchObject({
       ok: false,
       phase: "invoke",
       reason: "callback-error",
@@ -160,13 +158,14 @@ describe("checkout integration invocation lifecycle", () => {
   });
 
   it("returns a typed failure when a provider callback rejects", async () => {
-    const runtimeWindow = {
-      upcartOpenCart: jest.fn(async () => {
+    const runtimeWindow = {};
+    const options = {
+      openThemeCartDrawer: jest.fn(async () => {
         throw new Error("rejected");
       }),
     };
 
-    await expect(invokeCheckoutIntegrationProvider("upcart", runtimeWindow)).resolves.toMatchObject({
+    await expect(invokeCheckoutIntegrationProvider("theme_cart_drawer", runtimeWindow, options)).resolves.toMatchObject({
       ok: false,
       phase: "invoke",
       reason: "callback-error",
@@ -174,11 +173,13 @@ describe("checkout integration invocation lifecycle", () => {
   });
 
   it("bounds provider invocation time", async () => {
-    const runtimeWindow = {
-      upcartOpenCart: jest.fn(() => new Promise(() => undefined)),
+    const runtimeWindow = {};
+    const options = {
+      openThemeCartDrawer: jest.fn(() => new Promise(() => undefined)),
     };
 
-    await expect(invokeCheckoutIntegrationProvider("upcart", runtimeWindow, {
+    await expect(invokeCheckoutIntegrationProvider("theme_cart_drawer", runtimeWindow, {
+      ...options,
       timeoutMs: 5,
     })).resolves.toMatchObject({
       ok: false,
@@ -188,11 +189,12 @@ describe("checkout integration invocation lifecycle", () => {
   });
 
   it("reports provider-declared blocked navigation", async () => {
-    const runtimeWindow = {
-      upcartOpenCart: jest.fn(async () => false),
+    const runtimeWindow = {};
+    const options = {
+      openThemeCartDrawer: jest.fn(async () => false),
     };
 
-    await expect(invokeCheckoutIntegrationProvider("upcart", runtimeWindow)).resolves.toMatchObject({
+    await expect(invokeCheckoutIntegrationProvider("theme_cart_drawer", runtimeWindow, options)).resolves.toMatchObject({
       ok: false,
       phase: "invoke",
       reason: "invocation-blocked",

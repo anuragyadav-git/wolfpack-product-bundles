@@ -19,10 +19,8 @@ jest.mock("../../../app/services/checkout-integration-discount-code-service.serv
 
 jest.mock("../../../app/lib/checkout-integrations", () => ({
   isSupportedCheckoutIntegrationProvider: (value: unknown) => (
-    value === "gokwik"
-    || value === "shopflo"
-    || value === "zecpay"
-    || value === "shiprocket_fastrr"
+    value === "theme_cart_drawer"
+    || value === "native"
   ),
 }));
 
@@ -70,7 +68,7 @@ describe("checkout integration discount code route", () => {
     mockUnauthenticatedAdmin.mockResolvedValue({ admin: { graphql: jest.fn() } });
     mockCreateForProvider.mockResolvedValue({
       success: true,
-      providerId: "gokwik",
+      providerId: "theme_cart_drawer",
       discountId: "gid://shopify/DiscountCodeNode/1",
       code: "WPB-GOKWIK-12345678",
       expiresAt: "2026-07-02T10:30:00.000Z",
@@ -83,7 +81,7 @@ describe("checkout integration discount code route", () => {
 
   it("creates a discount code for a signed storefront request", async () => {
     const response = await action({
-      request: makeSignedRequest({ providerId: "gokwik" }),
+      request: makeSignedRequest({ providerId: "theme_cart_drawer" }),
       params: {},
       context: {},
     } as any) as Response;
@@ -93,7 +91,7 @@ describe("checkout integration discount code route", () => {
     expect(response.status).toBe(200);
     expect(body).toEqual({
       ok: true,
-      providerId: "gokwik",
+      providerId: "theme_cart_drawer",
       code: "WPB-GOKWIK-12345678",
       expiresAt: "2026-07-02T10:30:00.000Z",
     });
@@ -101,7 +99,7 @@ describe("checkout integration discount code route", () => {
     expect(mockCreateForProvider).toHaveBeenCalledWith(
       { graphql: expect.any(Function) },
       "test-shop.myshopify.com",
-      "gokwik",
+      "theme_cart_drawer",
     );
   });
 
@@ -118,7 +116,7 @@ describe("checkout integration discount code route", () => {
   });
 
   it("rejects unsigned storefront requests", async () => {
-    const request = makeSignedRequest({ providerId: "gokwik" });
+    const request = makeSignedRequest({ providerId: "theme_cart_drawer" });
     const url = new URL(request.url);
     url.searchParams.set("signature", "bad-signature");
 
@@ -126,7 +124,7 @@ describe("checkout integration discount code route", () => {
       request: new Request(url.toString(), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ providerId: "gokwik" }),
+        body: JSON.stringify({ providerId: "theme_cart_drawer" }),
       }),
       params: {},
       context: {},
@@ -136,9 +134,9 @@ describe("checkout integration discount code route", () => {
     expect(mockUnauthenticatedAdmin).not.toHaveBeenCalled();
   });
 
-  it("accepts article-listed checkout handoff providers that require discount codes", async () => {
+  it("accepts native checkout as a supported checkout integration provider", async () => {
     const response = await action({
-      request: makeSignedRequest({ providerId: "shiprocket_fastrr" }),
+      request: makeSignedRequest({ providerId: "native" }),
       params: {},
       context: {},
     } as any) as Response;
@@ -147,7 +145,7 @@ describe("checkout integration discount code route", () => {
     expect(mockCreateForProvider).toHaveBeenCalledWith(
       { graphql: expect.any(Function) },
       "test-shop.myshopify.com",
-      "shiprocket_fastrr",
+      "native",
     );
   });
 });

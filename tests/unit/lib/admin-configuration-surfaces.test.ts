@@ -187,15 +187,6 @@ describe("recovered admin surfaces contract", () => {
       options: [
         "Shopify checkout",
         "Theme cart drawer",
-        "GoKwik",
-        "Shopflo",
-        "Zecpay",
-        "Rebuy",
-        "Shiprocket / Fastrr",
-        "Monster cart",
-        "Upcart",
-        "Kaching Cart",
-        "Custom script",
       ],
     });
 
@@ -243,35 +234,34 @@ describe("recovered admin surfaces contract", () => {
 
   it("keeps the recovered integrations inventory and action types", () => {
     expect(INTEGRATION_CATEGORIES.map((category) => category.title)).toEqual([
-      "Pre-orders, Pickup & Delivery",
-      "Subscriptions",
       "Reviews",
-      "Page Builders",
       "Checkout",
     ]);
-    expect(getIntegrationCardCount()).toBe(10);
+    expect(getIntegrationCardCount()).toBe(2);
 
     const cards = INTEGRATION_CATEGORIES.flatMap((category) => category.cards);
     expect(cards.map((card) => card.id)).toEqual([
-      "stoq",
-      "zapiet",
-      "skio",
-      "appstle",
-      "bold",
       "judgeme",
-      "pagefly",
-      "gempages",
-      "gokwik",
-      "shopflo",
+      "native-checkout",
     ]);
-    expect(cards.filter((card) => card.ctaType === "guide")).toHaveLength(9);
-    expect(cards.filter((card) => card.ctaType === "chat")).toHaveLength(1);
+    expect(cards.filter((card) => card.ctaType === "guide")).toHaveLength(2);
+    expect(cards.filter((card) => card.ctaType === "chat")).toHaveLength(0);
     expect(cards.every((card) => card.ctaLabel === "View Setup")).toBe(true);
-    expect(cards.every((card) => card.setupUrl === "https://wolfpackapps.com")).toBe(true);
+    expect(cards.map((card) => card.id)).toEqual(expect.arrayContaining([
+      "judgeme",
+      "native-checkout",
+    ]));
+    expect(cards).toContainEqual(expect.objectContaining({
+      id: "judgeme",
+      setupUrl: "https://wolfpackapps.com",
+    }));
+    expect(cards).toContainEqual(expect.objectContaining({
+      id: "native-checkout",
+      setupUrl: "https://help.shopify.com/manual/checkout",
+    }));
     expect(new Set(cards.map((card) => card.status))).toEqual(new Set([
+      "Supported",
       "Guided setup",
-      "Assisted setup",
-      "Planned",
     ]));
     expect(JSON.stringify(INTEGRATION_CATEGORIES)).not.toMatch(
       /easybundles|skailama|id_token|hmac|session=/i,
@@ -280,8 +270,8 @@ describe("recovered admin surfaces contract", () => {
 
   it("preserves setup behavior summaries from help evidence", () => {
     const cards = INTEGRATION_CATEGORIES.flatMap((category) => category.cards);
-    const checkout = cards.find((card) => card.id === "gokwik");
+    const checkout = cards.find((card) => card.id === "native-checkout");
 
-    expect(checkout?.guideSummary.join(" ")).toContain("discount state");
+    expect(checkout?.guideSummary.join(" ")).toContain("Shopify-native flow");
   });
 });
