@@ -1,0 +1,1071 @@
+{
+  "schema_version": 1,
+  "job_id": "fpb-classic-summary-20260804",
+  "revision": 1,
+  "status": "approved",
+  "chrome_mcp_required": true,
+  "environment": "staging",
+  "base_url": "https://agent-5sfidg3m.myshopify.com",
+  "fixture": "/apps/product-bundles/wpb/cmse8sp170000v0ytaqqzsvtw",
+  "authentication_mode": "connected-default-chrome-profile-and-storefront-password-if-prompted",
+  "setup": {
+    "profile_policy": "default-profile-only",
+    "allow_isolated_context": false,
+    "zoom_percent": 100,
+    "artifact_directory": "qa",
+    "max_retries": 2,
+    "locale": "en",
+    "currency": "fixture-configured",
+    "theme": "Agent published test theme",
+    "feature_flags": [
+      "fpb-classic"
+    ],
+    "random_time_control": "none; record capture timestamp",
+    "device_pixel_ratio_policy": "record-actual",
+    "waits": [
+      "hard reload with ignoreCache true",
+      "clear Cache Storage when available",
+      "document.fonts.ready",
+      "images-complete",
+      "widget hydration and bundle data ready",
+      "target state and totals stable for two animation frames"
+    ],
+    "asset_freshness_checks": [
+      "Record the exact active bundle-widget-full-page.css asset URL.",
+      "Verify an expected changed Classic rule in the loaded stylesheet before visual judgment.",
+      "Record window.__BUNDLE_WIDGET_VERSION__ and match it to the built asset."
+    ],
+    "scroll": {
+      "x": 0,
+      "y": 0
+    },
+    "disable_nonessential_animation": true,
+    "hide_caret_and_transient_cursors": true,
+    "dynamic_region_policy": "no masks; stabilize fixture data and exclude browser chrome by viewport capture"
+  },
+  "viewports": [
+    {
+      "id": "mobile-320",
+      "mode": "mobile",
+      "width": 320,
+      "height": 720
+    },
+    {
+      "id": "mobile-360",
+      "mode": "mobile",
+      "width": 360,
+      "height": 800
+    },
+    {
+      "id": "mobile-390",
+      "mode": "mobile",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "mobile-414",
+      "mode": "mobile",
+      "width": 414,
+      "height": 896
+    },
+    {
+      "id": "tablet-768",
+      "mode": "mobile",
+      "width": 768,
+      "height": 1024
+    },
+    {
+      "id": "desktop-1024",
+      "mode": "desktop",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "id": "desktop-1280",
+      "mode": "desktop",
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "id": "desktop-1440",
+      "mode": "desktop",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "id": "desktop-1536",
+      "mode": "desktop",
+      "width": 1536,
+      "height": 960
+    }
+  ],
+  "states": [
+    {
+      "id": "empty",
+      "purpose": "Desktop empty plus collapsed and expanded mobile empty states.",
+      "matrix_ids": [
+        "desktop-empty",
+        "mobile-collapsed-empty",
+        "mobile-expanded-empty"
+      ]
+    },
+    {
+      "id": "partial",
+      "purpose": "One-selected and partially filled desktop plus collapsed and expanded mobile partial states.",
+      "matrix_ids": [
+        "desktop-one-selected-product",
+        "desktop-partially-filled",
+        "mobile-collapsed-partial",
+        "mobile-expanded-partial"
+      ]
+    },
+    {
+      "id": "complete",
+      "purpose": "Minimum reached and complete desktop/mobile states.",
+      "matrix_ids": [
+        "desktop-minimum-reached",
+        "mobile-collapsed-complete",
+        "mobile-expanded-complete"
+      ]
+    },
+    {
+      "id": "discount",
+      "purpose": "Between-tier, reached-tier, final-tier, and discounted-total states.",
+      "matrix_ids": [
+        "desktop-between-discount-tiers",
+        "desktop-discount-tier-reached",
+        "desktop-final-tier-reached",
+        "desktop-discounted-total"
+      ]
+    },
+    {
+      "id": "long-content",
+      "purpose": "Long title, variant, wide currency, translated copy, and missing-image stress.",
+      "matrix_ids": [
+        "desktop-long-product-title",
+        "desktop-product-with-variant",
+        "mobile-narrow-width",
+        "mobile-wide-width"
+      ]
+    },
+    {
+      "id": "quantity",
+      "purpose": "Quantity greater than one and two-digit quantity stress.",
+      "matrix_ids": [
+        "desktop-quantity-greater-than-one"
+      ]
+    },
+    {
+      "id": "long-list",
+      "purpose": "Desktop and expanded-mobile list-only scrolling.",
+      "matrix_ids": [
+        "desktop-long-list-scroll",
+        "mobile-expanded-long-list"
+      ]
+    },
+    {
+      "id": "loading",
+      "purpose": "Reserved geometry and duplicate-submit protection during delayed loading.",
+      "matrix_ids": [
+        "desktop-loading-skeleton"
+      ]
+    },
+    {
+      "id": "cta-disabled",
+      "purpose": "Desktop and mobile disabled action with perceivable recovery.",
+      "matrix_ids": [
+        "desktop-cta-disabled",
+        "mobile-cta-disabled"
+      ]
+    },
+    {
+      "id": "cta-enabled",
+      "purpose": "Desktop and mobile enabled action single-invocation behavior.",
+      "matrix_ids": [
+        "desktop-cta-enabled",
+        "mobile-cta-enabled"
+      ]
+    },
+    {
+      "id": "remove-clear",
+      "purpose": "Remove, Clear cancel/confirm, focus recovery, and recomputation.",
+      "matrix_ids": [
+        "desktop-remove-product",
+        "desktop-clear-all"
+      ]
+    },
+    {
+      "id": "safe-area",
+      "purpose": "Bottom inset, focus ring, and action clearance.",
+      "matrix_ids": [
+        "mobile-safe-area-inset"
+      ]
+    },
+    {
+      "id": "collapse",
+      "purpose": "Expanded tray collapse without overlay or page lock.",
+      "matrix_ids": [
+        "mobile-backdrop-or-close"
+      ]
+    },
+    {
+      "id": "responsive-boundaries",
+      "purpose": "Component and legacy boundary ownership with no duplicate or missing summary.",
+      "matrix_ids": []
+    },
+    {
+      "id": "sibling-baseline",
+      "purpose": "Standard, Compact, and Horizontal remain unchanged.",
+      "matrix_ids": []
+    }
+  ],
+  "interactions": [
+    {
+      "id": "mobile-320-empty-and-overflow",
+      "purpose": "Prove the supported minimum width, empty tray behavior, 200 percent zoom-equivalent reflow, and no horizontal overflow.",
+      "precondition": "Classic fixture is empty at 320x720; long-copy fixture is available for the second capture.",
+      "viewport": "mobile-320",
+      "state": "empty",
+      "steps": [
+        "Hard reload and capture the collapsed empty tray.",
+        "Open the tray with keyboard and capture expanded empty state.",
+        "Apply long title, variant, wide currency, and translated-copy stress, then repeat at the same width.",
+        "Inspect document and component scroll widths and tab through every control."
+      ],
+      "expected_semantic_result": "One disclosure tray exposes valid empty meaning and recovery; all content and controls remain operable without horizontal page scroll.",
+      "dom_assertions": [
+        "Exactly one visible summary semantic tree.",
+        "Disclosure aria-expanded changes false to true.",
+        "Empty guidance is not represented as a product row.",
+        "Every interactive control is keyboard reachable."
+      ],
+      "style_geometry_assertions": [
+        "document.scrollWidth equals document.clientWidth.",
+        "No summary descendant crosses viewport bounds.",
+        "All action targets are at least 44px.",
+        "Geometry follows design-tokens.json tolerances."
+      ],
+      "screenshot_path": "qa/screenshots/mobile-320-empty-and-overflow.png",
+      "baseline_path": "qa/baselines/mobile-320-empty-and-overflow.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "violations": 0
+      },
+      "network_expectations": {
+        "unexpected_failures": 0,
+        "duplicate_mutations": 0
+      },
+      "cleanup": [
+        "Restore the approved six-product fixture and collapsed tray.",
+        "Remove transient capture styles."
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "mobile-360-quantity-and-variant",
+      "purpose": "Verify quantity, variant identity, total recomputation, and row operability at baseline mobile width.",
+      "precondition": "One variant-bearing product is selected and quantity changes are allowed.",
+      "viewport": "mobile-360",
+      "state": "quantity",
+      "steps": [
+        "Open the tray.",
+        "Increment to quantity 12 using the supported fixture path.",
+        "Capture the row and total.",
+        "Decrement once and inspect one recomputation."
+      ],
+      "expected_semantic_result": "Variant and two-digit quantity remain identifiable; each action updates shared state and price exactly once.",
+      "dom_assertions": [
+        "Quantity controls have unique accessible names and correct boundary state.",
+        "Variant label remains in product accessible identity.",
+        "Collapsed count and expanded row use the same selection state."
+      ],
+      "style_geometry_assertions": [
+        "Quantity, price, and remove control do not collide.",
+        "Long variant wraps inside row bounds.",
+        "Action row remains outside list scroll."
+      ],
+      "screenshot_path": "qa/screenshots/mobile-360-quantity-and-variant.png",
+      "baseline_path": "qa/baselines/mobile-360-quantity-and-variant.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "violations": 0
+      },
+      "network_expectations": {
+        "unexpected_failures": 0,
+        "duplicate_mutations": 0
+      },
+      "cleanup": [
+        "Restore quantity to one and approved partial selection."
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "mobile-390-partial-disclosure",
+      "purpose": "Primary mobile comparison for collapsed and expanded partial review.",
+      "precondition": "The first two approved products are selected and the tray is collapsed.",
+      "viewport": "mobile-390",
+      "state": "partial",
+      "steps": [
+        "Capture collapsed storefront-only viewport.",
+        "Activate disclosure with keyboard.",
+        "Capture expanded tray and accessibility snapshot.",
+        "Scroll the page and selected list independently."
+      ],
+      "expected_semantic_result": "The same selection, count, total, validator state, and one semantic tree persist through disclosure without page scroll lock.",
+      "dom_assertions": [
+        "aria-expanded and focus state follow the toggle.",
+        "Expanded state does not mutate selection.",
+        "Header, list, total, and CTA appear in logical order."
+      ],
+      "style_geometry_assertions": [
+        "Collapsed bar is stable and expanded list owns overflow only when needed.",
+        "Page remains scrollable.",
+        "No duplicated title row or horizontal overflow."
+      ],
+      "screenshot_path": "qa/screenshots/mobile-390-partial-disclosure.png",
+      "baseline_path": "references/current/fpb-classic-summary-20260804__current-mobile__summary-tray__partially-filled__390x844__r1.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "violations": 0
+      },
+      "network_expectations": {
+        "unexpected_failures": 0,
+        "duplicate_mutations": 0
+      },
+      "cleanup": [
+        "Collapse the tray and restore scroll to zero."
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "mobile-390-disabled-loading-recovery",
+      "purpose": "Verify disabled reason, delayed loading reservation, recovery, and no duplicate submit.",
+      "precondition": "Minimum-not-reached validation and the approved 3000ms loading fixture can be activated reversibly.",
+      "viewport": "mobile-390",
+      "state": "loading",
+      "steps": [
+        "Open the tray with conditions unmet and inspect the disabled reason.",
+        "Activate delayed loading.",
+        "Attempt a repeated CTA activation.",
+        "Allow completion or failure and verify recovery."
+      ],
+      "expected_semantic_result": "Busy and blocked states are perceivable, preserve action identity, prevent duplicate submission, and recover to a usable state.",
+      "dom_assertions": [
+        "Disabled or busy state is programmatically exposed with a perceivable reason.",
+        "Decorative skeletons are absent from semantic content.",
+        "Only one submit/mutation is observed."
+      ],
+      "style_geometry_assertions": [
+        "Reserved geometry prevents footer jump.",
+        "Recovery explanation remains visible in expanded tray.",
+        "No layout shift beyond approved tolerance."
+      ],
+      "screenshot_path": "qa/screenshots/mobile-390-disabled-loading-recovery.png",
+      "baseline_path": "qa/baselines/mobile-390-disabled-loading-recovery.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "violations": 0
+      },
+      "network_expectations": {
+        "unexpected_failures": 0,
+        "duplicate_mutations": 0
+      },
+      "cleanup": [
+        "Disable delay and restore approved partial fixture."
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "mobile-414-complete-discount",
+      "purpose": "Verify complete, final pricing, long translation, and wide currency at wide mobile size.",
+      "precondition": "Completion and approved discounted/high-price locale stress data are configured reversibly.",
+      "viewport": "mobile-414",
+      "state": "discount",
+      "steps": [
+        "Reach the minimum and a discount boundary.",
+        "Capture collapsed complete state.",
+        "Open and capture expanded final pricing with long translated copy.",
+        "Remove one item and verify return to partial state."
+      ],
+      "expected_semantic_result": "Completion, original/final totals, savings, and post-removal partial state are textually clear and computed once.",
+      "dom_assertions": [
+        "Savings and original/final total meanings are programmatic and not color-only.",
+        "Removal recomputes completion and action availability once.",
+        "Action accessible name remains stable."
+      ],
+      "style_geometry_assertions": [
+        "Wide currency and long action/title copy wrap without overlap.",
+        "Collapsed and expanded totals agree.",
+        "CTA remains above safe area."
+      ],
+      "screenshot_path": "qa/screenshots/mobile-414-complete-discount.png",
+      "baseline_path": "qa/baselines/mobile-414-complete-discount.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "violations": 0
+      },
+      "network_expectations": {
+        "unexpected_failures": 0,
+        "duplicate_mutations": 0
+      },
+      "cleanup": [
+        "Restore en locale, fixture pricing, and first-two-product partial state."
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "tablet-768-long-list",
+      "purpose": "Prove tray ownership, long-list internal scrolling, focus visibility, and legacy-boundary stability on tablet.",
+      "precondition": "Twelve selected lines are available; viewport is 768x1024.",
+      "viewport": "tablet-768",
+      "state": "long-list",
+      "steps": [
+        "Hard reload at 768px.",
+        "Open tray and tab to the last removable line.",
+        "Scroll the list and then the page.",
+        "Repeat at 767px and 769px."
+      ],
+      "expected_semantic_result": "One tray owns summary behavior through the legacy boundary; all off-screen items remain counted, reachable, and removable without trapping page scroll.",
+      "dom_assertions": [
+        "Exactly one summary tree at 767, 768, and 769px.",
+        "Focused off-screen remove control scrolls into view.",
+        "Header and footer remain outside list scroll."
+      ],
+      "style_geometry_assertions": [
+        "Only selected list scrolls.",
+        "No body scroll lock or tray/sidebar gap.",
+        "No horizontal overflow at each boundary."
+      ],
+      "screenshot_path": "qa/screenshots/tablet-768-long-list.png",
+      "baseline_path": "qa/baselines/tablet-768-long-list.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "violations": 0
+      },
+      "network_expectations": {
+        "unexpected_failures": 0,
+        "duplicate_mutations": 0
+      },
+      "cleanup": [
+        "Restore two selected lines, viewport, focus, and scroll."
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "desktop-1024-boundary",
+      "purpose": "Prove the first valid desktop sidebar composition and precise component boundary ownership.",
+      "precondition": "Partial fixture is stable; component can be measured at 1023, 1024, and 1025px available width and in a 600px host.",
+      "viewport": "desktop-1024",
+      "state": "responsive-boundaries",
+      "steps": [
+        "Measure visible summary ownership at 1023px.",
+        "Repeat at 1024px and 1025px.",
+        "Constrain the component to 600px in the wider viewport and inspect ownership.",
+        "Record accessibility trees and geometry each time."
+      ],
+      "expected_semantic_result": "Tray alone owns widths below 1024px; sidebar alone owns 1024px and above; the constrained host uses the tray without state loss.",
+      "dom_assertions": [
+        "One and only one summary tree is exposed in each condition.",
+        "Selection and focus identity survive transformation.",
+        "No hidden duplicate controls remain accessibility-exposed."
+      ],
+      "style_geometry_assertions": [
+        "No unstyled 768\u20131023px gap.",
+        "No sidebar/tray overlap or transformation flicker after stable wait.",
+        "600px host chooses tray independent of viewport width."
+      ],
+      "screenshot_path": "qa/screenshots/desktop-1024-boundary.png",
+      "baseline_path": "qa/baselines/desktop-1024-boundary.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "violations": 0
+      },
+      "network_expectations": {
+        "unexpected_failures": 0,
+        "duplicate_mutations": 0
+      },
+      "cleanup": [
+        "Remove constrained-host test style and restore 1024x768."
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "desktop-1280-interactions",
+      "purpose": "Verify quantity, variant, remove, Clear cancel/confirm, focus recovery, and CTA states on desktop.",
+      "precondition": "Variant-bearing products and removable current-step selections are present.",
+      "viewport": "desktop-1280",
+      "state": "remove-clear",
+      "steps": [
+        "Increment quantity and inspect one update.",
+        "Remove a permitted row and inspect focus/recomputation.",
+        "Open Clear, cancel, then reopen and confirm.",
+        "Restore selections and cross the CTA enabled boundary with keyboard."
+      ],
+      "expected_semantic_result": "Existing handlers preserve protected items, cancel safely, clear once, restore logical focus, and invoke enabled CTA once.",
+      "dom_assertions": [
+        "Remove names include product identity.",
+        "Cancel preserves state and confirm clears once.",
+        "Enabled and disabled states use the existing validator.",
+        "Keyboard activation invokes one handler."
+      ],
+      "style_geometry_assertions": [
+        "Footer remains stable through state changes.",
+        "Variant and quantity stay readable.",
+        "Focus ring is not clipped."
+      ],
+      "screenshot_path": "qa/screenshots/desktop-1280-interactions.png",
+      "baseline_path": "qa/baselines/desktop-1280-interactions.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "violations": 0
+      },
+      "network_expectations": {
+        "unexpected_failures": 0,
+        "duplicate_mutations": 0
+      },
+      "cleanup": [
+        "Restore first-two-product partial fixture and close dialogs."
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "desktop-1440-primary-partial",
+      "purpose": "Primary desktop visual and semantic comparison against approved Calm Review Panel evidence.",
+      "precondition": "First two products are selected; active asset URL/rule and widget version are verified.",
+      "viewport": "desktop-1440",
+      "state": "partial",
+      "steps": [
+        "Hard reload and wait for deterministic readiness.",
+        "Capture storefront-only viewport and summary element PNGs.",
+        "Record accessibility snapshot, bounding boxes, and computed styles.",
+        "Generate side-by-side and pixel-diff summaries against approved references."
+      ],
+      "expected_semantic_result": "A calm review hierarchy presents the same two selections, count, total, validator state, and existing CTA behavior.",
+      "dom_assertions": [
+        "Review header, list, total, and action follow approved logical order.",
+        "Exactly two selected product identities match fixture state.",
+        "No duplicate event or semantic tree is present."
+      ],
+      "style_geometry_assertions": [
+        "Low-chrome rows, restrained divider, stable total/action footer, and intrinsic sidebar match design-tokens tolerances.",
+        "Header and footer remain outside list scroll.",
+        "Product region and sidebar do not overlap."
+      ],
+      "screenshot_path": "qa/screenshots/desktop-1440-primary-partial.png",
+      "baseline_path": "references/target/fpb-classic-summary-20260804__target-desktop__summary-sidebar__partially-filled__1440x900__r1.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "violations": 0
+      },
+      "network_expectations": {
+        "unexpected_failures": 0,
+        "duplicate_mutations": 0
+      },
+      "cleanup": [
+        "Restore scroll to zero and remove transient capture styles."
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "desktop-1440-tier-boundaries",
+      "purpose": "Verify completion, between-tier, reached-tier, and final-tier presentation without business-rule change.",
+      "precondition": "A reversible pricing fixture exposes minimum and discount boundaries.",
+      "viewport": "desktop-1440",
+      "state": "complete",
+      "steps": [
+        "Capture below minimum.",
+        "Reach minimum and capture.",
+        "Move between tiers, onto a tier, and onto the final tier.",
+        "Inspect totals, progress, CTA, announcements, and mutation counts at each boundary."
+      ],
+      "expected_semantic_result": "Existing pricing and validation predicates produce clear, non-color-only progress, completion, savings, and CTA states without duplicate work.",
+      "dom_assertions": [
+        "Current and target progress values are textual.",
+        "Final tier has no misleading next-tier prompt.",
+        "Original/final totals match PricingCalculator output.",
+        "One action causes one recalculation."
+      ],
+      "style_geometry_assertions": [
+        "Progress changes do not shift footer width or overlap rows.",
+        "Original and final totals remain grouped.",
+        "CTA geometry remains stable."
+      ],
+      "screenshot_path": "qa/screenshots/desktop-1440-tier-boundaries.png",
+      "baseline_path": "qa/baselines/desktop-1440-tier-boundaries.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "violations": 0
+      },
+      "network_expectations": {
+        "unexpected_failures": 0,
+        "duplicate_mutations": 0
+      },
+      "cleanup": [
+        "Restore no-discount approved fixture and partial selections."
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "desktop-1536-long-content",
+      "purpose": "Verify wide desktop composition with all required content stress values.",
+      "precondition": "Long title/variant, missing image, high price, long German copy, and wide EUR fixtures are active.",
+      "viewport": "desktop-1536",
+      "state": "long-content",
+      "steps": [
+        "Capture stressed partial state.",
+        "Inspect full accessible product identity and image alternative.",
+        "Measure header, row, total, and action bounds.",
+        "Tab through recovery controls."
+      ],
+      "expected_semantic_result": "Stress content remains complete and understandable while the Calm Review Panel retains its intrinsic hierarchy.",
+      "dom_assertions": [
+        "Full product and variant identity remains available to assistive technology.",
+        "Missing image uses stable nonredundant alternative behavior.",
+        "All recovery controls remain reachable."
+      ],
+      "style_geometry_assertions": [
+        "Text wraps without control overlap.",
+        "Missing image does not collapse row geometry.",
+        "Wide total stays inside footer and does not force page overflow."
+      ],
+      "screenshot_path": "qa/screenshots/desktop-1536-long-content.png",
+      "baseline_path": "qa/baselines/desktop-1536-long-content.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "violations": 0
+      },
+      "network_expectations": {
+        "unexpected_failures": 0,
+        "duplicate_mutations": 0
+      },
+      "cleanup": [
+        "Restore en locale, standard product media, prices, and copy."
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "mobile-safe-area-and-collapse",
+      "purpose": "Verify bottom safe-area clearance, collapse focus, reduced motion, orientation, and page scrolling.",
+      "precondition": "Partial fixture is open at mobile-390 with safe-area emulation and reduced-motion emulation available.",
+      "viewport": "mobile-390",
+      "state": "safe-area",
+      "steps": [
+        "Open tray and inspect bottom action bounds with safe-area inset.",
+        "Collapse using the disclosure and inspect focus return.",
+        "Repeat under prefers-reduced-motion.",
+        "Rotate to landscape and back, then inspect selection and focus identity."
+      ],
+      "expected_semantic_result": "The persistent action clears the inset; collapse updates state and returns focus; motion preference and orientation do not lose selection or trap scroll.",
+      "dom_assertions": [
+        "aria-expanded returns to false and focus remains on or returns to disclosure.",
+        "No blocking overlay or page-scroll lock appears.",
+        "Selection and total persist across orientation."
+      ],
+      "style_geometry_assertions": [
+        "CTA and focus ring remain inside visual viewport above safe area.",
+        "Reduced motion removes nonessential animation.",
+        "No permanent keyboard/orientation obstruction."
+      ],
+      "screenshot_path": "qa/screenshots/mobile-safe-area-and-collapse.png",
+      "baseline_path": "qa/baselines/mobile-safe-area-and-collapse.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "violations": 0
+      },
+      "network_expectations": {
+        "unexpected_failures": 0,
+        "duplicate_mutations": 0
+      },
+      "cleanup": [
+        "Restore portrait orientation, motion preference, safe-area emulation, and collapsed state."
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "desktop-long-list-and-loading",
+      "purpose": "Verify desktop long-list scroll ownership and loading geometry.",
+      "precondition": "Twelve selected lines and delayed loading are available at desktop-1280.",
+      "viewport": "desktop-1280",
+      "state": "long-list",
+      "steps": [
+        "Populate twelve lines and tab to the final row.",
+        "Inspect list, shell, and page scroll containers.",
+        "Activate delayed loading and record layout shifts.",
+        "Recover and verify total includes every line."
+      ],
+      "expected_semantic_result": "All rows remain counted and reachable; loading blocks duplicates and recovers without moving the persistent footer.",
+      "dom_assertions": [
+        "Focused final-row control scrolls into view.",
+        "Total includes off-screen lines.",
+        "Busy state prevents duplicate action and clears on recovery."
+      ],
+      "style_geometry_assertions": [
+        "Selected list alone scrolls.",
+        "Header and footer remain visible.",
+        "Loading reservation avoids an action/footer jump."
+      ],
+      "screenshot_path": "qa/screenshots/desktop-long-list-and-loading.png",
+      "baseline_path": "qa/baselines/desktop-long-list-and-loading.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "violations": 0
+      },
+      "network_expectations": {
+        "unexpected_failures": 0,
+        "duplicate_mutations": 0
+      },
+      "cleanup": [
+        "Disable delay and restore two selected lines."
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "mobile-cta-enabled-and-collapse",
+      "purpose": "Verify enabled CTA single invocation and ordinary collapse behavior.",
+      "precondition": "Completion conditions are satisfied and tray is expanded at mobile-390.",
+      "viewport": "mobile-390",
+      "state": "cta-enabled",
+      "steps": [
+        "Activate the CTA once with keyboard in a non-destructive intercepted test path.",
+        "Inspect busy transition and request count.",
+        "Return to the fixture and collapse the tray.",
+        "Inspect focus and page scrolling."
+      ],
+      "expected_semantic_result": "The existing CTA handler runs once, busy state is exposed, and tray collapse preserves usable focus without an overlay.",
+      "dom_assertions": [
+        "One CTA activation produces one intercepted request.",
+        "Busy state retains accessible action identity.",
+        "Collapse updates aria-expanded and focus logically."
+      ],
+      "style_geometry_assertions": [
+        "CTA remains at least 44px and above safe area.",
+        "No backdrop or body lock is introduced.",
+        "Collapsed height remains stable."
+      ],
+      "screenshot_path": "qa/screenshots/mobile-cta-enabled-and-collapse.png",
+      "baseline_path": "qa/baselines/mobile-cta-enabled-and-collapse.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "violations": 0
+      },
+      "network_expectations": {
+        "unexpected_failures": 0,
+        "duplicate_mutations": 0,
+        "destructive_requests": 0
+      },
+      "cleanup": [
+        "Restore intercepted path, partial selection, and collapsed tray."
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "desktop-cta-disabled",
+      "purpose": "Verify desktop validator-owned disabled action and recovery.",
+      "precondition": "Conditions are unmet at desktop-1024.",
+      "viewport": "desktop-1024",
+      "state": "cta-disabled",
+      "steps": [
+        "Inspect disabled action and associated reason.",
+        "Add the exact required selection.",
+        "Inspect the transition to enabled without layout shift."
+      ],
+      "expected_semantic_result": "Existing validation governs availability and exposes a clear recovery path before enabling once the condition is met.",
+      "dom_assertions": [
+        "Disabled state and reason are perceivable.",
+        "Recovery controls remain enabled.",
+        "Validator transition occurs once."
+      ],
+      "style_geometry_assertions": [
+        "Footer geometry stays stable.",
+        "Reason wraps without overlapping CTA.",
+        "No horizontal overflow."
+      ],
+      "screenshot_path": "qa/screenshots/desktop-cta-disabled.png",
+      "baseline_path": "qa/baselines/desktop-cta-disabled.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "violations": 0
+      },
+      "network_expectations": {
+        "unexpected_failures": 0,
+        "duplicate_mutations": 0
+      },
+      "cleanup": [
+        "Restore partial selection."
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "sibling-template-non-regression",
+      "purpose": "Ensure shared summary changes do not alter Standard, Compact, or Horizontal presets.",
+      "precondition": "Reversible sibling-template fixtures or saved control baselines are available with equivalent partial selection.",
+      "viewport": "desktop-1440",
+      "state": "sibling-baseline",
+      "steps": [
+        "Capture Standard desktop/mobile control states.",
+        "Capture Compact desktop/mobile control states.",
+        "Capture Horizontal desktop/mobile control states.",
+        "Compare semantics, interactions, geometry, console, and network to their controls."
+      ],
+      "expected_semantic_result": "All sibling presets preserve their existing summary structure, behavior, merchant tokens, and responsive disclosure.",
+      "dom_assertions": [
+        "No sibling semantic structure or event behavior changes.",
+        "Selection, totals, remove, disclosure, and CTA remain operable once per action."
+      ],
+      "style_geometry_assertions": [
+        "No unapproved sibling geometry or visual-token differences.",
+        "No new overflow or visibility changes."
+      ],
+      "screenshot_path": "qa/screenshots/sibling-template-non-regression.png",
+      "baseline_path": "qa/baselines/sibling-template-non-regression.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "violations": 0
+      },
+      "network_expectations": {
+        "unexpected_failures": 0,
+        "duplicate_mutations": 0
+      },
+      "cleanup": [
+        "Restore Classic fixture and every sibling fixture to its pre-test saved state."
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "desktop-1536-enabled-action",
+      "purpose": "Verify enabled desktop CTA semantics and single invocation at wide desktop.",
+      "precondition": "Completion conditions are satisfied and a non-destructive request interception is active.",
+      "viewport": "desktop-1536",
+      "state": "cta-enabled",
+      "steps": [
+        "Focus the CTA by keyboard.",
+        "Activate once and record handler/request count.",
+        "Inspect busy state and recovery."
+      ],
+      "expected_semantic_result": "The existing enabled CTA remains dominant, named, keyboard operable, and single-invocation safe.",
+      "dom_assertions": [
+        "Accessible name reflects existing Next or Add to cart copy.",
+        "Exactly one intercepted handler/request occurs.",
+        "Busy state is programmatically exposed."
+      ],
+      "style_geometry_assertions": [
+        "CTA target is at least 44px.",
+        "Long label can wrap without total collision.",
+        "Focus ring is fully visible."
+      ],
+      "screenshot_path": "qa/screenshots/desktop-1536-enabled-action.png",
+      "baseline_path": "qa/baselines/desktop-1536-enabled-action.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "violations": 0
+      },
+      "network_expectations": {
+        "unexpected_failures": 0,
+        "duplicate_mutations": 0,
+        "destructive_requests": 0
+      },
+      "cleanup": [
+        "Remove request interception and restore partial selection."
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "mobile-414-collapse",
+      "purpose": "Verify ordinary expanded-to-collapsed tray behavior at wide mobile width.",
+      "precondition": "Partial tray is expanded at mobile-414.",
+      "viewport": "mobile-414",
+      "state": "collapse",
+      "steps": [
+        "Collapse using the disclosure control.",
+        "Inspect focus, aria-expanded, page scroll, and visible action state.",
+        "Reopen and verify selection did not change."
+      ],
+      "expected_semantic_result": "The same tray collapses and reopens without a second overlay, duplicated controls, lost selection, or page lock.",
+      "dom_assertions": [
+        "aria-expanded alternates correctly.",
+        "Focus returns logically.",
+        "Selection count and total remain unchanged."
+      ],
+      "style_geometry_assertions": [
+        "No backdrop appears.",
+        "Collapsed bar remains within viewport and safe area.",
+        "Page scroll remains enabled."
+      ],
+      "screenshot_path": "qa/screenshots/mobile-414-collapse.png",
+      "baseline_path": "qa/baselines/mobile-414-collapse.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "violations": 0
+      },
+      "network_expectations": {
+        "unexpected_failures": 0,
+        "duplicate_mutations": 0
+      },
+      "cleanup": [
+        "Return tray to collapsed partial state."
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    }
+  ],
+  "assertions": {
+    "library": "references/chrome-devtools-test-protocol.md",
+    "require_json_serializable_results": true,
+    "geometry_tolerances": "design-tokens.json#/geometry_assertions",
+    "accessibility": [
+      "fresh accessibility snapshot per critical state",
+      "keyboard order and names",
+      "focus visibility and return",
+      "reduced motion"
+    ],
+    "responsive": [
+      "1023/1024/1025 available width",
+      "767/768/769 legacy boundary",
+      "600px constrained component",
+      "319/320 narrow boundary"
+    ],
+    "asset_freshness": [
+      "active stylesheet URL",
+      "expected loaded rule",
+      "widget version"
+    ]
+  },
+  "screenshots": {
+    "format": "png",
+    "index_path": "qa/screenshot-index.json",
+    "element_required": true,
+    "viewport_required": true,
+    "before_after_critical_interactions": true,
+    "full_page_only_when_needed": true,
+    "exclude_browser_chrome": true,
+    "do_not_commit_investigation_screenshots": true,
+    "metadata_required": [
+      "viewport",
+      "available-component-width",
+      "dpr",
+      "zoom",
+      "state",
+      "revision",
+      "asset-url",
+      "widget-version"
+    ]
+  },
+  "console_policy": {
+    "fail_on": [
+      "uncaught-exception",
+      "unhandled-promise-rejection",
+      "severe-application-error",
+      "failed-resource-parse",
+      "new-repeated-warning",
+      "accessibility-runtime-error",
+      "hydration-error",
+      "duplicate-key-warning",
+      "change-caused-csp-violation",
+      "tested-interaction-error"
+    ],
+    "allowlist": [],
+    "compare_to_control_baseline": true
+  },
+  "network_policy": {
+    "fail_on": [
+      "unexpected-4xx-5xx",
+      "blocked-required-asset",
+      "implementation-caused-abort",
+      "cors-error",
+      "duplicate-mutation",
+      "missing-product-media",
+      "missing-translation",
+      "local-to-production-request",
+      "real-order-or-destructive-action"
+    ],
+    "expected_analytics": [],
+    "redact_secrets_and_private_bodies": true,
+    "intercept_destructive_cart_or_order_paths": true
+  },
+  "lighthouse": {
+    "required": true,
+    "devices": [
+      "desktop",
+      "mobile"
+    ],
+    "modes": [
+      "snapshot",
+      "navigation"
+    ],
+    "categories": [
+      "accessibility",
+      "best-practices"
+    ],
+    "performance_excluded": true,
+    "performance_exclusion_reason": "Performance is captured with targeted DevTools traces so component attribution is not conflated with Shopify theme/navigation scoring.",
+    "report_paths": {
+      "desktop": "qa/lighthouse/desktop.json",
+      "mobile": "qa/lighthouse/mobile.json"
+    },
+    "classification": "Distinguish pre-existing theme/page findings from component-introduced findings."
+  },
+  "performance": {
+    "required": true,
+    "triggers": [
+      "responsive layout ownership changed",
+      "sticky and internal scroll geometry changed",
+      "loading reservation changed",
+      "interactive disclosure and action layout changed"
+    ],
+    "not_applicable_reason": "",
+    "trace_paths": [
+      "qa/performance/desktop-1440.trace.json",
+      "qa/performance/mobile-390.trace.json"
+    ],
+    "metrics": [
+      "LCP",
+      "CLS",
+      "interaction-findings",
+      "long-tasks",
+      "layout-shift-sources",
+      "image-font-loading"
+    ],
+    "pass_condition": "No attributable regression outside approved geometry tolerances; record candidates and shift sources."
+  },
+  "visual_diff": {
+    "format": "png",
+    "comparison": ".agents/skills/storefront-design-director/scripts/compare_images.py",
+    "diff_required": true,
+    "json_summary_required": true,
+    "approved_reference_and_actual_side_by_side": true,
+    "reference_policy": "Compare like-sized cohorts separately; do not treat mobile and desktop references as one same-size set.",
+    "allowed_masks": []
+  },
+  "non_regression": {
+    "required": true,
+    "cases": [
+      "desktop-1440-primary-partial",
+      "mobile-390-partial-disclosure",
+      "desktop-1024-boundary",
+      "sibling-template-non-regression"
+    ]
+  },
+  "cleanup": [
+    "Remove injected capture, constrained-container, request-interception, loading-delay, locale, safe-area, and motion test state.",
+    "Restore scroll position, orientation, zoom, focus, and collapsed tray state.",
+    "Restore Agent Classic and every sibling fixture to its pre-test saved configuration.",
+    "Delete temporary sensitive or transient evidence and verify retained artifacts contain no browser chrome, credentials, tokens, cookies, or private response bodies."
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "images": [
+    {
+      "path": "design-jobs/fpb-classic-summary-20260804/references/current/fpb-classic-summary-20260804__current-desktop__summary-sidebar__partially-filled__1440x900__r1.png",
+      "filename": "fpb-classic-summary-20260804__current-desktop__summary-sidebar__partially-filled__1440x900__r1.png",
+      "format": "PNG",
+      "pixel_width": 1440,
+      "pixel_height": 900,
+      "aspect_ratio": 1.6,
+      "file_size": 200754,
+      "sha256": "ed76e3199636dc2ec3949ab7286efdbf53a1dfc27458405bd7e581025dcad124",
+      "viewport": {
+        "status": "estimated",
+        "width": null,
+        "height": null
+      },
+      "quality_issues": []
+    },
+    {
+      "path": "design-jobs/fpb-classic-summary-20260804/references/current/fpb-classic-summary-20260804__current-mobile__summary-tray__partially-filled__390x844__r1.png",
+      "filename": "fpb-classic-summary-20260804__current-mobile__summary-tray__partially-filled__390x844__r1.png",
+      "format": "PNG",
+      "pixel_width": 390,
+      "pixel_height": 844,
+      "aspect_ratio": 0.462085,
+      "file_size": 64501,
+      "sha256": "216b7de15a1d04d6480fb3aaccb809e4b6a10181ae150bd4f37b7287827e57df",
+      "viewport": {
+        "status": "estimated",
+        "width": null,
+        "height": null
+      },
+      "quality_issues": [
+        "low-resolution"
+      ]
+    },
+    {
+      "path": "design-jobs/fpb-classic-summary-20260804/references/target/fpb-classic-summary-20260804__target-desktop__summary-sidebar__partially-filled__1440x900__r1.png",
+      "filename": "fpb-classic-summary-20260804__target-desktop__summary-sidebar__partially-filled__1440x900__r1.png",
+      "format": "PNG",
+      "pixel_width": 1440,
+      "pixel_height": 900,
+      "aspect_ratio": 1.6,
+      "file_size": 187094,
+      "sha256": "a10323d2356501fae80bf3f6a7bc9d84d205f65a2932f3a7a322b0a8bf8776ce",
+      "viewport": {
+        "status": "estimated",
+        "width": null,
+        "height": null
+      },
+      "quality_issues": []
+    }
+  ],
+  "comparability": {
+    "width_mismatch": true,
+    "comparable_geometry": false,
+    "note": "Pixel dimensions do not prove CSS viewport dimensions; record viewport and zoom separately."
+  }
+}

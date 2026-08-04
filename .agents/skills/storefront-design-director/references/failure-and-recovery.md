@@ -38,6 +38,8 @@ Before writing remediation, reconcile every measured failure into the case resul
 - Stale snapshot IDs: take a fresh snapshot and retry once.
 - Console or network error: preserve logs and fail affected cases.
 - Dimension mismatch: select or capture a comparable baseline; never resize silently.
+- Mixed-dimension inventory: split validation into explicit comparable cohorts; do not fail an otherwise valid same-size pair because contextual desktop/mobile images were inspected together.
+- Chrome screenshot path rejected: if the tool result contains the complete PNG, persist those exact bytes to the approved artifact path and verify dimensions/hash; otherwise recover an approved writable path and remain blocked. Never silently recapture with another browser.
 - Missing pixel dependency: install with authorization or use PPM; remain blocked.
 - Dynamic instability: stabilize fixture data and media first; only if that is unavailable, use an explicitly approved narrow mask and rerun.
 - Declared pass contradicts raw console, network, accessibility, Lighthouse, or comparison JSON: fail the affected gate, preserve sanitized evidence, and rerun after remediation.

@@ -65,3 +65,7 @@ Use:
 ## Comparability decision
 
 If width, state, zoom, crop, or content differs, list what remains safely inferable, what is uncertain, which comparison would mislead, and the smallest corrected capture needed. Block exact geometry approval when the missing data could change the judgment.
+
+Treat an inventory as a set of comparison cohorts, not as one all-or-nothing image set. Group exact-comparison candidates by intended use, component/state, CSS viewport or known capture size, zoom, crop, and fixture content. Run `inspect_reference_images.py` separately for each exact-comparison cohort when the inventory intentionally contains desktop, mobile, context, or inspiration images with different dimensions. A valid mobile contextual reference must not make a same-size desktop current/target pair incomparable, and a valid desktop pair must not be used as a false mobile target.
+
+When Chrome DevTools MCP rejects a requested screenshot `filePath`, first check whether the same tool result still returned the complete PNG. If it did, persist those exact returned bytes to the approved design-job artifact path without resizing or recompression, verify PNG dimensions and hash, and remove any transient encoded representation. If no complete image was returned, do not invent a browser or filesystem substitute: preserve the capture intent, record the path restriction, and request or recover an approved writable capture path. In both cases, retain only storefront pixels; never persist browser chrome, credentials, tokens, cookies, or private response bodies.

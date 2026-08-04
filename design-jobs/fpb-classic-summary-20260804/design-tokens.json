@@ -1,0 +1,397 @@
+{
+  "schema_version": 1,
+  "job_id": "fpb-classic-summary-20260804",
+  "revision": 1,
+  "status": "complete",
+  "groups": {
+    "color": [
+      {
+        "name": "--bundle-side-panel-bg",
+        "value": "existing merchant value",
+        "unit": "",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": true,
+        "owner": "app/lib/css-generators/css-variables-generator.ts",
+        "notes": "Calm Review Panel surface; never replace with a captured literal."
+      },
+      {
+        "name": "--bundle-side-panel-text-color",
+        "value": "existing merchant value",
+        "unit": "",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": true,
+        "owner": "app/lib/css-generators/css-variables-generator.ts",
+        "notes": "Primary and supporting summary text."
+      },
+      {
+        "name": "--bundle-sidebar-button-bg",
+        "value": "existing merchant value",
+        "unit": "",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": true,
+        "owner": "app/lib/css-generators/css-variables-generator.ts",
+        "notes": "Primary summary action and selected tier."
+      },
+      {
+        "name": "--bundle-sidebar-button-text",
+        "value": "existing merchant value",
+        "unit": "",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": true,
+        "owner": "app/lib/css-generators/css-variables-generator.ts",
+        "notes": "Text/icon color on primary action."
+      },
+      {
+        "name": "--bundle-side-panel-divider-color",
+        "value": "existing semantic divider or side-panel border",
+        "unit": "",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": true,
+        "owner": "existing design CSS variable bridge",
+        "notes": "Use for footer separation; retain accessible contrast without making it a dominant border."
+      },
+      {
+        "name": "--bundle-side-panel-clear-color",
+        "value": "existing destructive/recovery color",
+        "unit": "",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": true,
+        "owner": "existing design CSS variable bridge",
+        "notes": "Clear remains textual and icon-supported, never color-only."
+      }
+    ],
+    "typography": [
+      {
+        "name": "--classic-summary-title-size",
+        "value": 25,
+        "unit": "px",
+        "source": "reference-observed",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "classic/desktop-sidebar.css",
+        "notes": "Observed in current and target; use existing font family inheritance."
+      },
+      {
+        "name": "--classic-summary-title-line-height",
+        "value": 30,
+        "unit": "px",
+        "source": "reference-observed",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "classic/desktop-sidebar.css",
+        "notes": "Allows predictable two-line wrapping."
+      },
+      {
+        "name": "--classic-summary-body-size",
+        "value": 14,
+        "unit": "px",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "classic/desktop-sidebar.css and classic/mobile.css",
+        "notes": "Minimum ordinary summary copy size; high zoom must reflow."
+      },
+      {
+        "name": "--classic-summary-count-size",
+        "value": 16,
+        "unit": "px",
+        "source": "reference-observed",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "classic/desktop-sidebar.css",
+        "notes": "Count remains subordinate to title but readable."
+      },
+      {
+        "name": "--classic-summary-action-weight",
+        "value": 700,
+        "unit": "",
+        "source": "reference-observed",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "Classic template CSS",
+        "notes": "Primary action emphasis."
+      }
+    ],
+    "spacing": [
+      {
+        "name": "--classic-sidebar-panel-padding",
+        "value": 20,
+        "unit": "px",
+        "source": "reference-observed",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "classic/desktop-sidebar.css",
+        "notes": "Observed in current and target desktop."
+      },
+      {
+        "name": "--classic-summary-section-gap",
+        "value": "clamp(0.5rem, 1.2cqi, 0.75rem)",
+        "unit": "",
+        "source": "recommendation",
+        "confidence": "medium",
+        "merchant_configurable": false,
+        "owner": "Classic template CSS",
+        "notes": "Content-driven vertical rhythm; do not copy target panel height."
+      },
+      {
+        "name": "--classic-summary-row-gap",
+        "value": 10,
+        "unit": "px",
+        "source": "reference-observed",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "classic/desktop-sidebar.css and classic/mobile.css",
+        "notes": "Current and target use approximately this row/list cadence."
+      },
+      {
+        "name": "--classic-summary-safe-area-gap",
+        "value": "max(0.75rem, env(safe-area-inset-bottom))",
+        "unit": "",
+        "source": "recommendation",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "classic/mobile.css",
+        "notes": "Required for mobile persistent action edge."
+      }
+    ],
+    "size": [
+      {
+        "name": "--classic-summary-action-min-block-size",
+        "value": 44,
+        "unit": "px",
+        "source": "user-defined",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "Classic desktop/mobile CSS",
+        "notes": "Applies to primary, clear, disclosure, and row actions through appropriate hit areas."
+      },
+      {
+        "name": "--classic-desktop-sidebar-min-width",
+        "value": "min(20rem, 100%)",
+        "unit": "",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "classic/base.css",
+        "notes": "Keep intrinsic grid track; never set captured 408px or 414px as a fixed width."
+      },
+      {
+        "name": "--classic-summary-thumbnail-size",
+        "value": "clamp(3.5rem, 18cqi, 4.5rem)",
+        "unit": "",
+        "source": "recommendation",
+        "confidence": "medium",
+        "merchant_configurable": false,
+        "owner": "Classic summary presentation",
+        "notes": "Retains product recognition while allowing text/action space."
+      },
+      {
+        "name": "--classic-summary-list-max-block-size",
+        "value": "available dynamic viewport after header, feedback, footer, and safe-area",
+        "unit": "",
+        "source": "recommendation",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "Classic desktop/mobile CSS",
+        "notes": "Content-driven calculation; list is the only summary scroll owner."
+      }
+    ],
+    "radius": [
+      {
+        "name": "--bundle-side-panel-btn-radius",
+        "value": "existing merchant value with current Classic fallback",
+        "unit": "",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": true,
+        "owner": "app/lib/css-generators/css-variables-generator.ts",
+        "notes": "Reuse for panel/button/row aliases where semantically appropriate."
+      },
+      {
+        "name": "--classic-summary-panel-radius-fallback",
+        "value": 10,
+        "unit": "px",
+        "source": "reference-observed",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "classic/desktop-sidebar.css",
+        "notes": "Current and target desktop surface radius."
+      },
+      {
+        "name": "--classic-summary-row-radius",
+        "value": "min(var(--bundle-side-panel-btn-radius), 0.5rem)",
+        "unit": "",
+        "source": "recommendation",
+        "confidence": "medium",
+        "merchant_configurable": false,
+        "owner": "Classic template CSS",
+        "notes": "Rows remain quieter than the outer surface."
+      }
+    ],
+    "border": [
+      {
+        "name": "--classic-summary-divider-width",
+        "value": 1,
+        "unit": "px",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "Classic and base summary CSS",
+        "notes": "True hairline primitive separating review from action."
+      },
+      {
+        "name": "--classic-summary-row-border",
+        "value": "1px solid color-mix(in srgb, currentColor 8%, transparent)",
+        "unit": "",
+        "source": "recommendation",
+        "confidence": "medium",
+        "merchant_configurable": false,
+        "owner": "Classic template CSS",
+        "notes": "Optional low-chrome containment; remove when surface contrast is sufficient."
+      }
+    ],
+    "shadow": [
+      {
+        "name": "--classic-summary-shadow",
+        "value": "none",
+        "unit": "",
+        "source": "reference-observed",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "Classic template CSS",
+        "notes": "Current and target rely on surface contrast, not elevation shadow."
+      }
+    ],
+    "z_index": [
+      {
+        "name": "--classic-summary-tray-layer",
+        "value": "existing mobile portal layer",
+        "unit": "",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "existing mobile summary CSS",
+        "notes": "Do not introduce a larger arbitrary z-index; preserve modal and theme overlays above the tray."
+      }
+    ],
+    "motion": [
+      {
+        "name": "--classic-summary-disclosure-duration",
+        "value": 240,
+        "unit": "ms",
+        "source": "recommendation",
+        "confidence": "medium",
+        "merchant_configurable": false,
+        "owner": "Classic mobile CSS and existing toggle animation owner",
+        "notes": "Calm but responsive; state and aria update immediately."
+      },
+      {
+        "name": "--classic-summary-feedback-duration",
+        "value": 180,
+        "unit": "ms",
+        "source": "recommendation",
+        "confidence": "medium",
+        "merchant_configurable": false,
+        "owner": "Classic template CSS",
+        "notes": "For nonessential row/state feedback only."
+      },
+      {
+        "name": "--classic-summary-reduced-motion-duration",
+        "value": 1,
+        "unit": "ms",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "base/sidebar-totals-discounts.css",
+        "notes": "Existing reduced-motion pattern; behavior remains immediate."
+      }
+    ],
+    "breakpoint": [
+      {
+        "name": "--classic-summary-desktop-min-width",
+        "value": 64,
+        "unit": "rem",
+        "source": "user-defined",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "Classic responsive presentation and responsive layout owner",
+        "notes": "Approved available-widget-width boundary; test 1023/1024/1025px at a 16px root."
+      }
+    ],
+    "component_alias": [
+      {
+        "name": "--classic-summary-footer-layout",
+        "value": "minmax(0, auto) minmax(min-content, 1fr), with stacked fallback",
+        "unit": "",
+        "source": "recommendation",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "classic/desktop-sidebar.css",
+        "notes": "Prevents total and CTA collision without fixed captured widths."
+      },
+      {
+        "name": "--classic-summary-list-overflow",
+        "value": "auto block-axis; contained overscroll; visible focus",
+        "unit": "",
+        "source": "recommendation",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "Classic desktop/mobile CSS",
+        "notes": "Header and action footer remain outside the list scroll owner."
+      },
+      {
+        "name": "--classic-summary-state-shift-budget",
+        "value": 4,
+        "unit": "px",
+        "source": "recommendation",
+        "confidence": "medium",
+        "merchant_configurable": false,
+        "owner": "visual QA contract",
+        "notes": "Maximum unapproved boundary shift for stable header/footer regions between equivalent states."
+      }
+    ]
+  },
+  "geometry_assertions": [
+    {
+      "id": "geo-summary-boundary",
+      "expected": "Sidebar/tray stays within its allocated component track and viewport.",
+      "tolerance_css_px": 4
+    },
+    {
+      "id": "geo-action-target",
+      "expected": "Primary, disclosure, clear, and effective remove targets are at least 44px in both axes where the control is touch-facing.",
+      "tolerance_css_px": 0
+    },
+    {
+      "id": "geo-footer-separation",
+      "expected": "Total and CTA never overlap; divider spans the action region.",
+      "tolerance_css_px": 2
+    },
+    {
+      "id": "geo-scroll-owner",
+      "expected": "Only the selected-list region scrolls inside the summary while header and action remain visible.",
+      "tolerance_css_px": 4
+    },
+    {
+      "id": "geo-horizontal-overflow",
+      "expected": "Component scroll width does not exceed client width at required viewports.",
+      "tolerance_css_px": 0
+    }
+  ],
+  "token_shape": {
+    "name": "",
+    "value": null,
+    "unit": "",
+    "source": "recommendation",
+    "confidence": "low",
+    "merchant_configurable": false,
+    "owner": "",
+    "notes": ""
+  }
+}
