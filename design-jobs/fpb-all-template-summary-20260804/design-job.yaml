@@ -4,10 +4,10 @@
     "id": "fpb-all-template-summary-20260804",
     "title": "FPB all-template summary sidebars and mobile trays",
     "status": "active",
-    "stage": "RESPONSIVE_CONTRACT",
+    "stage": "HANDOFF_VALIDATION",
     "revision": 2,
     "created_at": "2026-08-04T17:25:02Z",
-    "updated_at": "2026-08-04T19:11:49Z",
+    "updated_at": "2026-08-04T19:27:33Z",
     "owner": "Aditya Awasthi",
     "product": "Wolfpack Product Bundles",
     "repository": "/Users/adityaawasthi/Developer/wolfpack-product-bundles",
@@ -266,6 +266,28 @@
           "design-tokens.json",
           "implementation-handoff.md"
         ]
+      },
+      {
+        "id": "decision-007",
+        "question": "At what measured FPB widget-container width should the desktop summary sidebar become the shared mobile/tablet tray?",
+        "selected_value": "Sidebar at 1024px and above; shared tray below 1024px, based on measured FPB widget-container width",
+        "rationale": "The user approved the recommended RD-001 responsive boundary.",
+        "evidence_ids": [
+          "RD-001",
+          "B-01",
+          "B-02"
+        ],
+        "status": "locked",
+        "approver": "Aditya Awasthi",
+        "approved_at": "2026-08-04T19:15:56Z",
+        "revision": 2,
+        "affected_artifacts": [
+          "responsive-contract.md",
+          "interaction-contract.md",
+          "browser-test-plan.yaml",
+          "acceptance-criteria.md",
+          "implementation-handoff.md"
+        ]
       }
     ],
     "assumptions": [
@@ -288,37 +310,22 @@
         "affected_artifacts": [
           "screenshot-inventory.yaml"
         ]
-      }
-    ],
-    "rejected": [],
-    "open": [
+      },
       {
-        "id": "decision-007",
-        "question": "At what measured FPB widget-container width should the desktop summary sidebar become the shared mobile/tablet tray?",
-        "options_considered": [
-          "Direction-A recommendation: sidebar at 1024px and above; tray below 1024px",
-          "Legacy narrow boundary: sidebar at 769px and above; tray at 768px and below"
-        ],
-        "recommendation": "Direction-A recommendation: sidebar at 1024px and above; tray below 1024px",
-        "selected_value": "",
-        "rationale": "The supplied screenshots prove 390px mobile and 1440px desktop but do not directly prove tablet behavior. Explicit approval is required for this responsive default.",
-        "evidence_ids": [
-          "RD-001",
-          "B-01",
-          "B-02"
-        ],
-        "status": "open",
-        "approver": "",
-        "revision": 1,
+        "id": "assumption-003",
+        "value": "Use the named responsive inset, expanded-height, and 44px hit-target recommendations as conservative implementation starting points; visual QA may tune them within the approved anatomy, responsive behavior, accessibility minimums, and recorded tolerances.",
+        "basis": "Repository-observed and accessibility-guided recommendation",
+        "status": "accepted-conservative-default",
         "affected_artifacts": [
+          "design-tokens.json",
           "responsive-contract.md",
           "interaction-contract.md",
-          "browser-test-plan.yaml",
-          "acceptance-criteria.md",
-          "implementation-handoff.md"
+          "browser-test-plan.yaml"
         ]
       }
     ],
+    "rejected": [],
+    "open": [],
     "recommendation_delegation": {
       "status": "not-granted",
       "scope": [],
@@ -335,27 +342,33 @@
   },
   "states": {
     "required": [
-      "empty rows with Product Slots disabled",
-      "empty slots with Product Slots enabled",
-      "partial, exact, full, and overflow selections",
-      "clear and step-gated remove behavior",
-      "mobile collapsed and expanded disclosure",
-      "Bundle Quantity Options disabled, enabled, switched, underfilled, exact, and overfilled",
-      "discount disabled and every supported pricing family",
-      "progress and messaging independently disabled and enabled",
-      "add-on and free-gift locked, eligible, selected, and active-step placement",
-      "custom title and subtitle, long copy, locale, and currency",
-      "loading, delayed hydration, invalid default, unavailable item, and missing image",
-      "responsive boundary, constrained host, safe area, reload, and cross-template regression",
-      "control hover, focus-visible, pressed, disabled, busy, submit failure, and recovery",
-      "long localized content, large currency, missing or slow media, 200 percent zoom, and reduced motion"
+      "SUM-01",
+      "SUM-02",
+      "SUM-03",
+      "SUM-04",
+      "SUM-05",
+      "SUM-06",
+      "SUM-07",
+      "SUM-08",
+      "SUM-09",
+      "SUM-10",
+      "SUM-11",
+      "SUM-12",
+      "SUM-13",
+      "SUM-14",
+      "SUM-15",
+      "SUM-16",
+      "SUM-17",
+      "SUM-18",
+      "SUM-19",
+      "SUM-20"
     ],
     "optional": [],
     "not_applicable": [],
     "coverage_status": "complete"
   },
   "responsive": {
-    "contract_status": "decision-ready",
+    "contract_status": "complete",
     "breakpoints": [
       "Proposed container boundary: 1023px tray; 1024px and above sidebar",
       "Diagnostic legacy conflict boundary: 767px, 768px, and 769px",
@@ -381,7 +394,7 @@
       "step-gated removal appearing enabled",
       "overflowing lists obscuring totals or actions"
     ],
-    "validation_status": "not-started"
+    "validation_status": "complete"
   },
   "handoff": {
     "status": "not-started",
@@ -412,7 +425,7 @@
       "1536x960"
     ],
     "required_states": [
-      "SUM-01 through SUM-16 for every applicable preset"
+      "SUM-01 through SUM-20 for every applicable preset"
     ],
     "console_status": "not-started",
     "network_status": "not-started",
@@ -457,17 +470,17 @@
       "acceptance-criteria.md": {
         "path": "acceptance-criteria.md",
         "status": "complete",
-        "revision": 1,
-        "sha256": "7cb2f60bce79871964b8566a53770ad45adc31e51d004559069b2bb6481eccb0",
+        "revision": 2,
+        "sha256": "f476c2aa35e3688cf7f3ea5cf0493e60e4bd54b12dcfde22a3fdd75b80358bc5",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
       },
       "accessibility-checklist.md": {
         "path": "accessibility-checklist.md",
-        "status": "draft",
-        "revision": 1,
-        "sha256": "9682b89cbc36ae9bdceb494f95fe8474b428f6fe42294ea9343c84f4266c88c5",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "8bda194aef2deafce5f837c0cd4e03e3ad2d165b873f99d3c4ba35b3b20149a3",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -475,17 +488,17 @@
       "approval-record.yaml": {
         "path": "approval-record.yaml",
         "status": "complete",
-        "revision": 1,
-        "sha256": "f5c504cf206f1588341631f4a848eee7f25f5520ff3729e27767ef6865964b0b",
+        "revision": 2,
+        "sha256": "6d6506f25966291d3e89aa8b123c893535f2265976783c0caa4ba1e0374eb86d",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
       },
       "browser-test-plan.yaml": {
         "path": "browser-test-plan.yaml",
-        "status": "draft",
-        "revision": 1,
-        "sha256": "9665c326f082abdf62cfbb2411eb1e0c3e9615f0a710b35c359d6f095d87e0b9",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "8e5388aee2d2575b5238f7797cc62aafbe768bd44e163f40f2b0f82a557f4f0a",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -510,9 +523,9 @@
       },
       "codex-task.md": {
         "path": "codex-task.md",
-        "status": "draft",
-        "revision": 1,
-        "sha256": "127bbca7db1f3626e7317fbb83d7ad3752d053d6ed627c23876fbcfe834d9a4f",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "3744e8f4270c1abb2d2bd88cbfa9d0add79a6c78ad53937e0eadd12b531aa170",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -520,8 +533,8 @@
       "component-anatomy.md": {
         "path": "component-anatomy.md",
         "status": "complete",
-        "revision": 1,
-        "sha256": "f2a294a1d3962c6759b9592f11a017abced60e4db4177425eaba4249b48a9eef",
+        "revision": 2,
+        "sha256": "f863a67ebce204fa2aff44a2e066256b75664bc8280c8503bd805058a013e8f5",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -529,26 +542,26 @@
       "component-brief.md": {
         "path": "component-brief.md",
         "status": "complete",
-        "revision": 1,
-        "sha256": "452b1daa5d0a965dd97bcd01cee0ccbf2aade6e65ce13a0217ac7a61db930fec",
+        "revision": 2,
+        "sha256": "da2aa6212cc29ddcedc81aa63d667229761d175f89f27452362fb573810cef57",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
       },
       "content-stress-cases.yaml": {
         "path": "content-stress-cases.yaml",
-        "status": "draft",
-        "revision": 1,
-        "sha256": "6ea3817ba648353680d4000390f387b0bb56880b0b817245360e30f3a0ec4a3d",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "2972e7884e680fb47ac308663488a1b1306bf06a79378b1713cbb41371f4e5f4",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
       },
       "design-tokens.json": {
         "path": "design-tokens.json",
-        "status": "draft",
-        "revision": 1,
-        "sha256": "135dd304ebe41a1b4ff613588edfcc85a11387631f22e234b4f8d9ef86a2eb4c",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "5028f4f1763ad7415b74ea0182feb39ba6ca17c346a8db3dfbd2665f4f7e9031",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -566,18 +579,18 @@
       },
       "implementation-handoff.md": {
         "path": "implementation-handoff.md",
-        "status": "draft",
-        "revision": 1,
-        "sha256": "da5af118d00f6d9bc9eceee022f84ee299a2575db60687cd39588852e627ed77",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "bf17c1d6f56277121ed79e8fb26027a30aa71246a7bda1ca3190934c61c4279d",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
       },
       "interaction-contract.md": {
         "path": "interaction-contract.md",
-        "status": "draft",
-        "revision": 1,
-        "sha256": "c7629107dd908b482dcf4640824852b0158a8fe1e6d6eb7434e27735980fce22",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "c3a82506ec9f368931e17de7206ca0e2e6c967158daf8e04f2ace1c05ad989b7",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -586,7 +599,7 @@
         "path": "locked-decisions.yaml",
         "status": "complete",
         "revision": 2,
-        "sha256": "36ba7853138afb90c94be67c672686461676bc2d59831b71209e10f3b8b1beb3",
+        "sha256": "5c2a79d40056980b481f28f595f022f8356f3eee3146c5a406a2d9377b038d81",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -602,9 +615,9 @@
       },
       "responsive-contract.md": {
         "path": "responsive-contract.md",
-        "status": "draft",
+        "status": "complete",
         "revision": 2,
-        "sha256": "6d55cf7ad776df045461004de3494528e9d38efe25b9fbef6692aaf7e805005f",
+        "sha256": "8653ffe5da15e618a567a25e6ba47b1dcf41c400c2ea32d9d96ee5f59d1f5b19",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -612,8 +625,8 @@
       "screenshot-inventory.yaml": {
         "path": "screenshot-inventory.yaml",
         "status": "complete",
-        "revision": 1,
-        "sha256": "dcd99078e89ad659b2d26b0cc951a4c333a888b5f4c022420ff113aedc320afb",
+        "revision": 2,
+        "sha256": "e44e06b1f1582c30c6ef005297bebd4c3712f7ad65ffc914b7e7ed90388a9f75",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -621,8 +634,8 @@
       "state-matrix.md": {
         "path": "state-matrix.md",
         "status": "complete",
-        "revision": 1,
-        "sha256": "7c07a9a0a362b996a45c5eba911dc76706d88515d7b057eff8512ab46cb01d20",
+        "revision": 2,
+        "sha256": "5524c91818b486022d6fb4985725ba3bb68705b4a1de6d67b32d2d4ec7fa8574",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -630,8 +643,8 @@
       "visual-audit.md": {
         "path": "visual-audit.md",
         "status": "complete",
-        "revision": 1,
-        "sha256": "c25963162fe221e0dbe3160f33e43432ecb364c7b3ca119fbfc41b17cd433c01",
+        "revision": 2,
+        "sha256": "127ffc8a6df417bb6ad54aa6e975b620bd4cb37c403f6d2af80e3bc0ce4d6295",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -799,6 +812,79 @@
       "event": "artifact-superseded",
       "affected_artifacts": [
         "locked-decisions.yaml"
+      ]
+    },
+    {
+      "sequence": 12,
+      "at": "2026-08-04T19:17:13Z",
+      "from": "RESPONSIVE_CONTRACT",
+      "to": "INTERACTION_ACCESSIBILITY",
+      "revision": 2,
+      "reason": "RD-001 approved: measured FPB container width below 1024px uses the shared tray; 1024px and above uses the desktop sidebar",
+      "evidence": [
+        "responsive-contract.md",
+        "locked-decisions.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 13,
+      "at": "2026-08-04T19:18:45Z",
+      "from": "INTERACTION_ACCESSIBILITY",
+      "to": "TOKENS_GEOMETRY",
+      "revision": 2,
+      "reason": "Semantic, keyboard, focus, announcement, dialog, responsive replacement, error recovery, and reduced-motion contracts are complete",
+      "evidence": [
+        "interaction-contract.md",
+        "accessibility-checklist.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 14,
+      "at": "2026-08-04T19:21:43Z",
+      "from": "TOKENS_GEOMETRY",
+      "to": "PROTOTYPE_OPTIONAL",
+      "revision": 2,
+      "reason": "Merchant, repository, responsive geometry, accessibility, motion, and visual tolerance ownership are complete with a deterministic stress corpus",
+      "evidence": [
+        "design-tokens.json",
+        "content-stress-cases.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 15,
+      "at": "2026-08-04T19:22:07Z",
+      "from": "PROTOTYPE_OPTIONAL",
+      "to": "HANDOFF_ASSEMBLY",
+      "revision": 2,
+      "reason": "Prototype not applicable: no unresolved interaction, responsive, state, or geometry ambiguity remains, and an isolated prototype would duplicate the production semantic tree and defer the real shared-renderer integration risk",
+      "evidence": [
+        "component-anatomy.md",
+        "responsive-contract.md",
+        "interaction-contract.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 16,
+      "at": "2026-08-04T19:27:33Z",
+      "from": "HANDOFF_ASSEMBLY",
+      "to": "HANDOFF_VALIDATION",
+      "revision": 2,
+      "reason": "Revision 2 handoff packet is complete; validator is blocked only on explicit handoff approval",
+      "evidence": [
+        "implementation-handoff.md",
+        "codex-task.md",
+        "acceptance-criteria.md",
+        "browser-test-plan.yaml"
+      ],
+      "affected_artifacts": [
+        "implementation-handoff.md",
+        "codex-task.md",
+        "acceptance-criteria.md",
+        "browser-test-plan.yaml"
       ]
     }
   ]

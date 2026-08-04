@@ -29,7 +29,7 @@ keywords:
 # State Matrix
 
 Artifact job ID: fpb-all-template-summary-20260804
-Artifact revision: 1
+Artifact revision: 2
 Artifact status: complete
 
 | State ID | Trigger | Data precondition | Visible result | Available interaction | Accessibility | Desktop | Mobile | Fresh evidence required | Automated assertion | Approval |

@@ -30,7 +30,7 @@ keywords:
 # Component Brief
 
 Artifact job ID: fpb-all-template-summary-20260804
-Artifact revision: 1
+Artifact revision: 2
 Artifact status: complete
 
 ## Identity

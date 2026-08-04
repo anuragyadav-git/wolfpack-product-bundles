@@ -144,11 +144,7 @@
         "design-tokens.json",
         "implementation-handoff.md"
       ]
-    }
-  ],
-  "assumptions": [],
-  "rejected": [],
-  "open": [
+    },
     {
       "id": "decision-007",
       "question": "At what measured FPB widget-container width should the desktop summary sidebar become the shared mobile/tablet tray?",
@@ -157,17 +153,17 @@
         "Legacy narrow boundary: sidebar at 769px and above; tray at 768px and below"
       ],
       "recommendation": "Direction-A recommendation: sidebar at 1024px and above; tray below 1024px",
-      "selected_value": "",
-      "rationale": "The supplied screenshots prove 390px mobile and 1440px desktop but do not directly prove tablet behavior. Explicit approval is required for this responsive default.",
+      "selected_value": "Sidebar at 1024px and above; shared tray below 1024px, based on measured FPB widget-container width",
+      "rationale": "The user approved the recommended RD-001 responsive boundary.",
       "evidence_ids": [
         "RD-001",
         "B-01",
         "B-02"
       ],
-      "status": "open",
-      "approved_by": "",
-      "approved_at": "",
-      "revision_introduced": 1,
+      "status": "locked",
+      "approved_by": "Aditya Awasthi",
+      "approved_at": "2026-08-04T19:15:56Z",
+      "revision_introduced": 2,
       "affected_artifacts": [
         "responsive-contract.md",
         "interaction-contract.md",
@@ -177,6 +173,22 @@
       ]
     }
   ],
+  "assumptions": [
+    {
+      "id": "assumption-003",
+      "value": "Use the named responsive inset, expanded-height, and 44px hit-target recommendations as conservative implementation starting points; visual QA may tune them within the approved anatomy, responsive behavior, accessibility minimums, and recorded tolerances.",
+      "basis": "Repository-observed and accessibility-guided recommendation",
+      "status": "accepted-conservative-default",
+      "affected_artifacts": [
+        "design-tokens.json",
+        "responsive-contract.md",
+        "interaction-contract.md",
+        "browser-test-plan.yaml"
+      ]
+    }
+  ],
+  "rejected": [],
+  "open": [],
   "superseded": [],
   "decision_shape": {
     "id": "",

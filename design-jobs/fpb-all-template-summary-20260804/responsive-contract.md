@@ -3,7 +3,7 @@ schema_version: 1
 id: storefront-design-director-responsive-contract-template
 title: Responsive Contract Template
 type: design-job-template
-status: decision-ready
+status: complete
 summary: Defines the Direction-A sidebar-to-tray transformation, overflow, safe-area, content-stress, zoom, and opposite-viewport behavior for every required FPB width.
 last_audited: 2026-08-05
 owners:
@@ -27,7 +27,7 @@ keywords:
 
 Artifact job ID: fpb-all-template-summary-20260804
 Artifact revision: 2
-Artifact status: draft
+Artifact status: complete
 
 ## Required viewports and container widths
 
@@ -76,7 +76,7 @@ Record one pixel below, at, and one pixel above.
 | B-03 | Viewport 319 / 320 / 321 | 320 is the minimum supported proof width; 319 is a diagnostic overflow probe and must fail gracefully without hiding the primary action. |
 | B-04 | Constrained container 599 / 600 / 601 | Container width, not a wide outer viewport, controls replacement. A 600px host inside a desktop theme still uses the tray. |
 
-Recommendation RD-001: use the measured FPB widget container width, with desktop sidebar at `>= 1024px` and shared tray below `1024px`. Rationale: this preserves the current Standard/Classic usable boundary, resolves the present 768/1024 conflict, supports constrained themes and 200% zoom, and avoids forcing a two-column sidebar into tablet portrait. This breakpoint is not directly observed in the supplied screenshots and requires explicit approval before the job advances.
+Approved RD-001: use the measured FPB widget container width, with desktop sidebar at `>= 1024px` and shared tray below `1024px`. Rationale: this preserves the current Standard/Classic usable boundary, resolves the present 768/1024 conflict, supports constrained themes and 200% zoom, and avoids forcing a two-column sidebar into tablet portrait. Aditya Awasthi approved this screenshot-unobserved responsive default at 2026-08-04T19:15:56Z.
 
 ## Orientation, high zoom, and opposite-viewport non-regression
 
