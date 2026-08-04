@@ -37,6 +37,7 @@ Artifact status: active
 ## Infrastructure blockers and product failures
 
 - REM-001 is a product failure, not an infrastructure blocker. Chrome, route, fixture, and evidence capture remain available.
+- INFRA-001: after the remediation build and three successful sibling-preset reruns, the supplied Shopify SIT process exited. The canonical app-proxy document and JSON routes now return HTTP 500, and a read-only process audit finds no `shopify app dev` or `cloudflared` process. This blocks Compact and downstream Chrome gates; it does not invalidate earlier evidence or indicate a product regression.
 
 ## Approved waivers
 
@@ -48,3 +49,4 @@ Artifact status: active
 | Case | Attempt | Failure class | Evidence | Fast checks | Full matrix | Result |
 |---|---|---|---|---|---|---|
 | qa-disclosure-responsive-mobile-390 | 1 | Product responsive ownership | `qa/results/qa-disclosure-responsive-mobile-390.result.json` | 1024 viewport / 1013 container | Pending | Failed |
+| qa-disclosure-responsive-mobile-390 | 2 | Infrastructure: supplied SIT process unavailable | Canonical storefront document request returned HTTP 500; process audit found no dev/tunnel process | Standard, Classic, Horizontal passed at 1024/1013 before outage | Compact and full matrix pending | Blocked |

@@ -3,18 +3,18 @@
   "job": {
     "id": "fpb-all-template-summary-20260804",
     "title": "FPB all-template summary sidebars and mobile trays",
-    "status": "active",
-    "stage": "VISUAL_REMEDIATION",
+    "status": "blocked",
+    "stage": "BLOCKED",
     "revision": 2,
     "created_at": "2026-08-04T17:25:02Z",
-    "updated_at": "2026-08-04T20:08:50Z",
+    "updated_at": "2026-08-04T20:17:49Z",
     "owner": "Aditya Awasthi",
     "product": "Wolfpack Product Bundles",
     "repository": "/Users/adityaawasthi/Developer/wolfpack-product-bundles",
     "branch": "feature/26.05-UI-changes",
     "commit": "6f4c03ee3fb31060a7cdb33595a29ca9215ff656",
     "artifact_root": "/Users/adityaawasthi/Developer/wolfpack-product-bundles/design-jobs",
-    "resume_stage": null
+    "resume_stage": "VISUAL_REMEDIATION"
   },
   "scope": {
     "product_family": "FPB",
@@ -421,7 +421,7 @@
       "references/target/fpb-all-template-summary-20260804__target-standard-mobile__partial-expanded__390x844__r1.png"
     ],
     "summary_path": "qa/browser-artifact-summary.json",
-    "execution_status": "failed",
+    "execution_status": "blocked",
     "required_viewports": [
       "320x720",
       "360x800",
@@ -450,10 +450,19 @@
         "status": "failed",
         "classification": "product-responsive-ownership",
         "evidence": "qa/results/qa-disclosure-responsive-mobile-390.result.json"
+      },
+      {
+        "case_id": "qa-disclosure-responsive-mobile-390",
+        "attempt": 2,
+        "status": "blocked",
+        "classification": "infrastructure-sit-process-unavailable",
+        "evidence": "qa/results/qa-disclosure-responsive-mobile-390.result.json"
       }
     ],
     "artifacts_path": "qa",
-    "blockers": []
+    "blockers": [
+      "INFRA-001: supplied Shopify SIT dev and tunnel processes are not running; canonical app-proxy routes return HTTP 500"
+    ]
   },
   "approvals": {
     "design": {
@@ -956,6 +965,18 @@
       "to": "VISUAL_REMEDIATION",
       "revision": 2,
       "reason": "Chrome found a runtime-mode versus viewport-CSS ownership mismatch at the 1024px critical boundary",
+      "evidence": [
+        "qa/results/qa-disclosure-responsive-mobile-390.result.json"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 21,
+      "at": "2026-08-04T20:17:49Z",
+      "from": "VISUAL_REMEDIATION",
+      "to": "BLOCKED",
+      "revision": 2,
+      "reason": "Supplied Shopify SIT dev and tunnel processes exited; app-proxy document and bundle JSON routes return HTTP 500",
       "evidence": [
         "qa/results/qa-disclosure-responsive-mobile-390.result.json"
       ],

@@ -92,6 +92,13 @@
       "classification": "product-responsive-ownership",
       "result": "failed",
       "evidence": "1024 viewport / 1013 container: mode tray, panel flex, tray none"
+    },
+    {
+      "attempt": 2,
+      "at": "2026-08-04T20:17:00Z",
+      "classification": "infrastructure-sit-process-unavailable",
+      "result": "blocked",
+      "evidence": "Canonical app-proxy document and bundle JSON returned HTTP 500; no Shopify dev or cloudflared process was running"
     }
   ]
 }

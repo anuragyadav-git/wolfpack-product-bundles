@@ -88,6 +88,9 @@ No blanket warning suppression.
 
 ## Network observations and expected analytics
 
+- Product assets and API requests returned 200 before remediation.
+- After the remediation build, the supplied SIT process exited. The canonical app-proxy document request returned 500, and the bundle JSON app-proxy route also returned 500. Shopify theme and telemetry requests remained available. This is recorded as INFRA-001 and requires the user-owned SIT process to be started; Codex did not restart it.
+
 ## Lighthouse desktop and mobile reports
 
 Separate page-level pre-existing findings from component-introduced findings. Lighthouse excludes performance.
@@ -101,5 +104,6 @@ Record LCP, CLS, interaction findings, long tasks, layout-shift sources, image o
 | Case | Attempt | Classification | Status | Evidence | Remediation | Cleanup confirmed |
 |---|---|---|---|---|---|---|
 | qa-disclosure-responsive-mobile-390 | 1 | Product responsive ownership | Failed | `qa/results/qa-disclosure-responsive-mobile-390.result.json` | REM-001 | Yes; selection remained empty |
+| qa-disclosure-responsive-mobile-390 | 2 | Infrastructure | Blocked | Canonical route HTTP 500; no Shopify dev or tunnel process present | Start the user-owned SIT process, then hard reload and rerun | Yes; selection remained empty |
 
 ## Final approval status
