@@ -43,6 +43,19 @@ function expandSelectedItemsForSummarySlots(allSelectedProducts = []) {
   return expanded;
 }
 
+function syncCompactMobileSummaryDisclosureState(sheet, expanded) {
+  const bundleItems = sheet.querySelector?.('.fpb-mobile-summary-bundle-items');
+  if (!bundleItems) return;
+
+  bundleItems.inert = !expanded;
+  if (expanded) {
+    bundleItems.removeAttribute?.('aria-hidden');
+    return;
+  }
+
+  bundleItems.setAttribute?.('aria-hidden', 'true');
+}
+
 function getSelectionId(item = {}) {
   return String(item?.selectionId || '');
 }
@@ -305,6 +318,10 @@ _populateCompactMobileSummaryTray(sheet) {
   productsSection.appendChild(this._renderCompactMobileSummaryBundleItems(currencyInfo, totalQuantity));
   productsSection.appendChild(navSection);
   sheet.appendChild(productsSection);
+  syncCompactMobileSummaryDisclosureState(
+    sheet,
+    this.compactMobileSummaryTrayExpanded === true
+  );
 },
 
 _syncMobileAdditionalOffersPulse(pulseState = {}) {
@@ -416,6 +433,7 @@ _toggleCompactMobileSummaryTray(sheet) {
   sheet.classList.toggle('fpb-mobile-summary-tray-expanded', nextExpanded);
   sheet.querySelector?.('.fpb-mobile-summary-count-badge')
     ?.setAttribute('aria-expanded', nextExpanded ? 'true' : 'false');
+  syncCompactMobileSummaryDisclosureState(sheet, nextExpanded);
   const endTrayHeight = sheet.getBoundingClientRect?.().height;
   const endHeight = productsSection?.getBoundingClientRect?.().height;
   if (
@@ -473,6 +491,10 @@ _toggleCompactMobileSummaryTray(sheet) {
       'fpb-mobile-summary-tray-animating-closed'
     );
   }, MOBILE_SUMMARY_TOGGLE_ANIMATION_MS);
+},
+
+_syncCompactMobileSummaryDisclosureState(sheet, expanded) {
+  syncCompactMobileSummaryDisclosureState(sheet, expanded);
 },
 
 _syncCompactMobileSummaryScrollLock() {

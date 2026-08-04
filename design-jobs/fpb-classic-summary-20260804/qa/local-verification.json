@@ -1,0 +1,67 @@
+{
+  "job_id": "fpb-classic-summary-20260804",
+  "revision": 1,
+  "recorded_at": "2026-08-04T16:45:32Z",
+  "status": "passed",
+  "scope": "FPB Classic summary responsive ownership and Calm Review Panel presentation",
+  "checks": [
+    {
+      "name": "focused_behavior_tests",
+      "command": "npx jest --selectProjects unit --runInBand tests/unit/assets/fpb-classic-summary-responsive.test.ts tests/unit/assets/fpb-standard-mobile-summary-action.test.ts tests/unit/assets/fpb-summary-sidebar-slots.test.ts tests/unit/assets/fpb-mobile-portal-theme.test.ts tests/unit/assets/fpb-summary-discount-badge.test.ts tests/unit/assets/fpb-summary-current-step-removal.test.ts",
+      "status": "passed",
+      "result": "6 suites, 65 tests passed"
+    },
+    {
+      "name": "syntax",
+      "command": "node --check app/assets/widgets/full-page/methods/responsive-layout-methods.js && node --check app/assets/widgets/full-page/methods/mobile-summary-methods.js",
+      "status": "passed"
+    },
+    {
+      "name": "lint",
+      "command": "npx eslint --max-warnings 9999 app/assets/widgets/full-page/methods/responsive-layout-methods.js app/assets/widgets/full-page/methods/mobile-summary-methods.js tests/unit/assets/fpb-classic-summary-responsive.test.ts tests/unit/assets/fpb-standard-mobile-summary-action.test.ts",
+      "status": "passed",
+      "result": "0 errors; ignored raw widget source and existing test warnings reported"
+    },
+    {
+      "name": "widget_build",
+      "command": "npm run build:widgets:full-page",
+      "status": "passed"
+    },
+    {
+      "name": "css_minification",
+      "command": "npm run minify:assets css",
+      "status": "passed",
+      "result": "Classic generated CSS is 98693 bytes, below the 100000-byte Shopify limit"
+    },
+    {
+      "name": "graph_rebuild",
+      "command": "npm run graphify:rebuild",
+      "status": "passed",
+      "result": "44895 nodes, 53468 edges, 4320 communities"
+    },
+    {
+      "name": "diff_check",
+      "command": "git diff --check",
+      "status": "passed"
+    }
+  ],
+  "known_unrelated_failures": [
+    {
+      "command": "npm run test:unit -- --runInBand ...",
+      "result": "1867 of 1872 repository unit tests passed; five pre-existing Admin route source-contract assertions failed outside this storefront slice",
+      "scope_decision": "No unrelated Admin code or tests changed"
+    }
+  ],
+  "source_paths": [
+    "app/assets/widgets/full-page/methods/responsive-layout-methods.js",
+    "app/assets/widgets/full-page/methods/mobile-summary-methods.js",
+    "app/assets/widgets/full-page-css/templates/classic/base.css",
+    "app/assets/widgets/full-page-css/templates/classic/desktop-sidebar.css",
+    "app/assets/widgets/full-page-css/templates/classic/mobile.css",
+    "app/assets/widgets/full-page-css/templates/side-footer-classic.css"
+  ],
+  "generated_paths": [
+    "extensions/bundle-builder/assets/bundle-widget-full-page-bundled.js",
+    "extensions/bundle-builder/assets/bundle-widget-full-page-classic.css"
+  ]
+}

@@ -6,8 +6,9 @@
 @import "./classic/variant-selector.css";
 @import "./standard-step-timeline.css";
 
-@media (min-width: 769px) {
-  .layout-sidebar[data-fpb-design-preset="CLASSIC"] .sidebar-layout-wrapper {
+@media (min-width: 1024px) {
+  .layout-sidebar[data-fpb-design-preset="CLASSIC"][data-fpb-summary-mode="sidebar"]
+    .sidebar-layout-wrapper {
     grid-template-columns:
       minmax(0, var(--classic-desktop-content-fr))
       minmax(
@@ -17,7 +18,8 @@
     align-items: start;
   }
 
-  .layout-sidebar[data-fpb-design-preset="CLASSIC"] .full-page-side-panel {
+  .layout-sidebar[data-fpb-design-preset="CLASSIC"][data-fpb-summary-mode="sidebar"]
+    .full-page-side-panel {
     width: 100%;
     max-width: none;
     flex-basis: auto;
@@ -27,7 +29,8 @@
     overflow: hidden;
   }
 
-  .layout-sidebar[data-fpb-design-preset="CLASSIC"] .side-panel-products {
+  .layout-sidebar[data-fpb-design-preset="CLASSIC"][data-fpb-summary-mode="sidebar"]
+    .side-panel-products {
     max-width: 100%;
     overflow-x: hidden;
     overflow-y: auto;
@@ -35,7 +38,8 @@
     scrollbar-gutter: stable;
   }
 
-  .layout-sidebar[data-fpb-design-preset="CLASSIC"] .side-panel-product-row {
+  .layout-sidebar[data-fpb-design-preset="CLASSIC"][data-fpb-summary-mode="sidebar"]
+    .side-panel-product-row {
     max-width: 100%;
     min-width: 0;
     box-sizing: border-box;

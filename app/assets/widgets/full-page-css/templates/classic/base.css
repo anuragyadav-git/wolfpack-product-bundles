@@ -29,6 +29,17 @@
   --classic-desktop-sidebar-fr: 3fr;
   --classic-desktop-sidebar-min-width: min(20rem, 100%);
 
+  --classic-review-panel-padding: clamp(1rem, 1.5vw, 1.25rem);
+  --classic-review-section-gap: clamp(0.75rem, 1.1vw, 1rem);
+  --classic-review-row-gap: clamp(0.75rem, 1vw, 0.875rem);
+  --classic-review-divider: 1px solid
+    var(
+      --bundle-side-panel-divider-color,
+      var(--bundle-side-panel-border, #e3e3e3)
+    );
+  --classic-review-action-min-height: 3.5rem;
+  --classic-review-scroll-max-height: calc(100dvh - 22rem);
+
   --classic-mobile-shell-gutter: var(--bundle-product-card-spacing, 0.75rem);
   --classic-mobile-content-bottom-padding: 0;
 
@@ -51,6 +62,7 @@
   max-width: none;
   margin-inline: 0;
   padding: 0;
+  container-type: inline-size;
 }
 
 .fpb-preset-classic .fpb-category-section-rows {

@@ -3,11 +3,11 @@
   "job": {
     "id": "fpb-classic-summary-20260804",
     "title": "FPB Classic summary sidebar and mobile tray redesign",
-    "status": "ready-for-handoff",
-    "stage": "IMPLEMENTATION_AWAITED",
+    "status": "qa-running",
+    "stage": "CHROME_QA_EXECUTION",
     "revision": 1,
     "created_at": "2026-08-04T07:57:48Z",
-    "updated_at": "2026-08-04T13:57:29Z",
+    "updated_at": "2026-08-04T16:47:52Z",
     "owner": "Aditya Awasthi",
     "product": "Wolfpack Product Bundles",
     "repository": "/Users/adityaawasthi/Developer/wolfpack-product-bundles",
@@ -361,7 +361,7 @@
     "chrome_mcp_required": true,
     "profile_policy": "default-profile-only",
     "allow_isolated_context": false,
-    "preflight_status": "not-started",
+    "preflight_status": "passed",
     "preflight_result_path": "qa/preflight.json",
     "baseline_status": "not-started",
     "baseline_paths": [],
@@ -453,7 +453,7 @@
         "path": "browser-test-report.md",
         "status": "draft",
         "revision": 1,
-        "sha256": "7cf3f40ff85a71e134dd29b2f7ee5ad5a51f2fde8571e4f99134ebdf33a237e3",
+        "sha256": "3a1c6c1b8e5dd61338468f6de6b7df6c496da8c95fca8db11e98abaa4cd2bb03",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -606,7 +606,7 @@
         "path": "visual-qa-report.md",
         "status": "draft",
         "revision": 1,
-        "sha256": "62c479ab2816f2ad35fbc932d0742384302871d8a710bf7289858e6722a00d15",
+        "sha256": "3b3765f65271e1f814ba3588a0c33dd7cf90ff436058105ad2fee7daf864d09e",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -838,6 +838,31 @@
         "implementation-handoff.md",
         "approval-record.yaml",
         "browser-test-plan.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 19,
+      "at": "2026-08-04T14:14:41Z",
+      "from": "IMPLEMENTATION_AWAITED",
+      "to": "CHROME_QA_PREFLIGHT",
+      "revision": 1,
+      "reason": "Authorized Classic summary implementation passes focused behavior tests, syntax, lint, widget build, CSS minification, diff checks, and graph rebuild.",
+      "evidence": [
+        "qa/local-verification.json"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 20,
+      "at": "2026-08-04T16:22:32Z",
+      "from": "CHROME_QA_PREFLIGHT",
+      "to": "CHROME_QA_EXECUTION",
+      "revision": 1,
+      "reason": "Chrome preflight passed and the cache-bypassed Agent fixture now serves the exact final 98132-byte Classic CSS with responsive ownership and footer-reflow rules.",
+      "evidence": [
+        "qa/preflight.json",
+        "qa/asset-freshness.json"
       ],
       "affected_artifacts": []
     }

@@ -36,6 +36,23 @@ export function getMobileBottomBarActionState({
   return { shouldAddToCart, disabled };
 }
 
+export function getClassicSummaryPresentationMode({
+  designPreset,
+  layout,
+  availableWidth,
+} = {}) {
+  const preset = typeof designPreset === 'string'
+    ? designPreset.trim().toUpperCase()
+    : '';
+  const width = Number(availableWidth);
+
+  if (preset !== 'CLASSIC' || layout !== 'footer_side' || !Number.isFinite(width)) {
+    return null;
+  }
+
+  return width < 1024 ? 'tray' : 'sidebar';
+}
+
 export const fullPageResponsiveLayoutMethods = {
 renderProductPageLayout() {
   this.selectedBundle.steps.forEach((step, index) => {
@@ -224,6 +241,7 @@ async renderFullPageLayoutWithSidebar() {
   twoColWrapper.appendChild(sidePanel);
 
   this.elements.stepsContainer.appendChild(twoColWrapper);
+  this._observeClassicSummaryPresentationMode();
 
   // Load products.
   try {
@@ -288,7 +306,9 @@ _renderMobileBottomBar({ preserveOpen = false } = {}) {
     this._populateCompactMobileSummaryTray(sheet);
     sheet.classList.add('is-open');
     document.body.classList.add('fpb-compact-mobile-summary-active');
+    this.mobileSummaryTrayElement = sheet;
     this._mountCompactMobileSummaryTray(sheet);
+    this._syncClassicSummaryPresentationMode();
     return;
   }
 
@@ -368,12 +388,49 @@ _renderMobileBottomBar({ preserveOpen = false } = {}) {
 },
 
 _mountCompactMobileSummaryTray(sheet) {
-  if (this.container?.parentNode) {
-    this.container.insertAdjacentElement('afterend', sheet);
+  if (this.container) {
+    this.container.appendChild(sheet);
     return;
   }
 
   document.body.appendChild(sheet);
+},
+
+_syncClassicSummaryPresentationMode() {
+  const measuredWidth = Number(
+    this.container?.getBoundingClientRect?.().width
+      ?? this.elements?.stepsContainer?.getBoundingClientRect?.().width
+      ?? (typeof window !== 'undefined' ? window.innerWidth : Number.NaN)
+  );
+  const mode = getClassicSummaryPresentationMode({
+    designPreset: this.getFullPageDesignPreset?.(),
+    layout: this.resolveFullPageLayout?.(),
+    availableWidth: measuredWidth,
+  });
+
+  if (!mode) return null;
+
+  [
+    this.container,
+    this.elements?.stepsContainer,
+    this.mobileSummaryTrayElement,
+  ].filter(Boolean).forEach((element) => {
+    element.setAttribute?.('data-fpb-summary-mode', mode);
+  });
+
+  return mode;
+},
+
+_observeClassicSummaryPresentationMode() {
+  const mode = this._syncClassicSummaryPresentationMode();
+  if (!mode || typeof ResizeObserver !== 'function' || !this.container) return;
+
+  if (!this._classicSummaryResizeObserver) {
+    this._classicSummaryResizeObserver = new ResizeObserver(() => {
+      this._syncClassicSummaryPresentationMode();
+    });
+    this._classicSummaryResizeObserver.observe(this.container);
+  }
 },
 
 _populateMobileSheet(sheet) {

@@ -562,17 +562,23 @@ describe('FPB Standard mobile summary action', () => {
     const countBadge = {
       setAttribute: jest.fn(),
     };
+    const bundleItems = {
+      inert: false,
+      removeAttribute: jest.fn(),
+      setAttribute: jest.fn(),
+    };
     const tray = {
       animate: jest.fn(() => trayAnimation),
       classList,
       getBoundingClientRect: jest.fn(() => ({
         height: expanded ? 259 : 117,
       })),
-      querySelector: jest.fn((selector: string) => (
-        selector === '.fpb-mobile-summary-products-section'
-          ? productsSection
-          : countBadge
-      )),
+      querySelector: jest.fn((selector: string) => {
+        if (selector === '.fpb-mobile-summary-products-section') return productsSection;
+        if (selector === '.fpb-mobile-summary-count-badge') return countBadge;
+        if (selector === '.fpb-mobile-summary-bundle-items') return bundleItems;
+        return null;
+      }),
     };
     const context = {
       compactMobileSummaryTrayExpanded: false,
@@ -618,6 +624,35 @@ describe('FPB Standard mobile summary action', () => {
       [{ height: '259px' }, { height: '117px' }],
       { duration: 700, easing: 'ease' },
     );
+  });
+
+  it('keeps collapsed compact-summary details out of the accessibility tree', () => {
+    const bundleItems = {
+      inert: false,
+      removeAttribute: jest.fn(),
+      setAttribute: jest.fn(),
+    };
+    const sheet = {
+      querySelector: jest.fn(() => bundleItems),
+    };
+
+    fullPageMobileSummaryMethods._syncCompactMobileSummaryDisclosureState.call(
+      {},
+      sheet,
+      false,
+    );
+
+    expect(bundleItems.inert).toBe(true);
+    expect(bundleItems.setAttribute).toHaveBeenCalledWith('aria-hidden', 'true');
+
+    fullPageMobileSummaryMethods._syncCompactMobileSummaryDisclosureState.call(
+      {},
+      sheet,
+      true,
+    );
+
+    expect(bundleItems.inert).toBe(false);
+    expect(bundleItems.removeAttribute).toHaveBeenCalledWith('aria-hidden');
   });
 
   it('does not lock page scroll when Standard or Classic mobile summary trays expand', () => {

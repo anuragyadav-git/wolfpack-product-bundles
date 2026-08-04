@@ -1,0 +1,25 @@
+{
+  "job_id": "fpb-classic-summary-20260804",
+  "revision": 1,
+  "checked_at": "2026-08-04T16:45:32Z",
+  "status": "passed",
+  "environment": "staging",
+  "fixture": "Agent bundle cmse8sp170000v0ytaqqzsvtw",
+  "widget_version": "5.0.227",
+  "local": {
+    "asset": "extensions/bundle-builder/assets/bundle-widget-full-page-classic.css",
+    "bytes": 98693,
+    "required_rule": "@container (max-width:24rem)"
+  },
+  "live": {
+    "asset_host": "cdn.shopify.com",
+    "asset_name": "bundle-widget-full-page-classic.css",
+    "status": 200,
+    "bytes": 98693,
+    "responsive_mode_rule_present": true,
+    "review_token_present": true,
+    "required_footer_reflow_rule_present": true
+  },
+  "blocker": "",
+  "recovery_action": "Hard-reload the canonical storefront route with cache bypass after future asset builds; restart the user-owned SIT process only if the dev CDN remains stale after direct freshness checks."
+}
