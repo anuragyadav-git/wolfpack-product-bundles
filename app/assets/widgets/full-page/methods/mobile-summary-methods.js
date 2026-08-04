@@ -69,7 +69,7 @@ export function shouldUseMobileSummarySlotTiles({ designPreset, productSlotsEnab
 
 export function shouldUseFluidMobileSummaryFooter(designPreset) {
   const preset = typeof designPreset === 'string' ? designPreset.trim().toUpperCase() : '';
-  return preset === 'COMPACT' || preset === 'HORIZONTAL';
+  return ['STANDARD', 'CLASSIC', 'COMPACT', 'HORIZONTAL'].includes(preset);
 }
 
 export function getMobileAdditionalOffersPulseState({
@@ -498,14 +498,9 @@ _syncCompactMobileSummaryDisclosureState(sheet, expanded) {
 },
 
 _syncCompactMobileSummaryScrollLock() {
-  const preset = this.getFullPageDesignPreset?.();
-  const shouldLockScroll = this.compactMobileSummaryTrayExpanded === true
-    && preset !== 'STANDARD'
-    && preset !== 'CLASSIC';
-
   document.body.classList.toggle(
     'fpb-mobile-summary-scroll-locked',
-    shouldLockScroll
+    false
   );
 },
 

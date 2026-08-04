@@ -36,7 +36,7 @@ export function getMobileBottomBarActionState({
   return { shouldAddToCart, disabled };
 }
 
-export function getClassicSummaryPresentationMode({
+export function getSummaryPresentationMode({
   designPreset,
   layout,
   availableWidth,
@@ -46,7 +46,8 @@ export function getClassicSummaryPresentationMode({
     : '';
   const width = Number(availableWidth);
 
-  if (preset !== 'CLASSIC' || layout !== 'footer_side' || !Number.isFinite(width)) {
+  const supportedPresets = ['STANDARD', 'CLASSIC', 'COMPACT', 'HORIZONTAL'];
+  if (!supportedPresets.includes(preset) || layout !== 'footer_side' || !Number.isFinite(width)) {
     return null;
   }
 
@@ -241,7 +242,7 @@ async renderFullPageLayoutWithSidebar() {
   twoColWrapper.appendChild(sidePanel);
 
   this.elements.stepsContainer.appendChild(twoColWrapper);
-  this._observeClassicSummaryPresentationMode();
+  this._observeSummaryPresentationMode();
 
   // Load products.
   try {
@@ -308,7 +309,7 @@ _renderMobileBottomBar({ preserveOpen = false } = {}) {
     document.body.classList.add('fpb-compact-mobile-summary-active');
     this.mobileSummaryTrayElement = sheet;
     this._mountCompactMobileSummaryTray(sheet);
-    this._syncClassicSummaryPresentationMode();
+    this._syncSummaryPresentationMode();
     return;
   }
 
@@ -396,13 +397,13 @@ _mountCompactMobileSummaryTray(sheet) {
   document.body.appendChild(sheet);
 },
 
-_syncClassicSummaryPresentationMode() {
+_syncSummaryPresentationMode() {
   const measuredWidth = Number(
     this.container?.getBoundingClientRect?.().width
       ?? this.elements?.stepsContainer?.getBoundingClientRect?.().width
       ?? (typeof window !== 'undefined' ? window.innerWidth : Number.NaN)
   );
-  const mode = getClassicSummaryPresentationMode({
+  const mode = getSummaryPresentationMode({
     designPreset: this.getFullPageDesignPreset?.(),
     layout: this.resolveFullPageLayout?.(),
     availableWidth: measuredWidth,
@@ -421,15 +422,15 @@ _syncClassicSummaryPresentationMode() {
   return mode;
 },
 
-_observeClassicSummaryPresentationMode() {
-  const mode = this._syncClassicSummaryPresentationMode();
+_observeSummaryPresentationMode() {
+  const mode = this._syncSummaryPresentationMode();
   if (!mode || typeof ResizeObserver !== 'function' || !this.container) return;
 
-  if (!this._classicSummaryResizeObserver) {
-    this._classicSummaryResizeObserver = new ResizeObserver(() => {
-      this._syncClassicSummaryPresentationMode();
+  if (!this._summaryResizeObserver) {
+    this._summaryResizeObserver = new ResizeObserver(() => {
+      this._syncSummaryPresentationMode();
     });
-    this._classicSummaryResizeObserver.observe(this.container);
+    this._summaryResizeObserver.observe(this.container);
   }
 },
 

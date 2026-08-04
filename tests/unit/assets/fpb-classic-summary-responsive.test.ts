@@ -1,7 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const {
   fullPageResponsiveLayoutMethods,
-  getClassicSummaryPresentationMode,
+  getSummaryPresentationMode,
 } = require('../../../app/assets/widgets/full-page/methods/responsive-layout-methods.js');
 
 type AttributeTarget = {
@@ -31,27 +31,31 @@ function createAttributeTarget(width?: number): AttributeTarget & {
   return target;
 }
 
-describe('FPB Classic summary responsive ownership', () => {
-  it.each([
-    [1023, 'tray'],
-    [600, 'tray'],
-    [1024, 'sidebar'],
-    [1440, 'sidebar'],
-  ])('uses available widget width %ipx to choose %s', (availableWidth, expected) => {
-    expect(getClassicSummaryPresentationMode({
-      designPreset: 'CLASSIC',
-      layout: 'footer_side',
-      availableWidth,
-    })).toBe(expected);
-  });
+describe('FPB all-template summary responsive ownership', () => {
+  it.each(['STANDARD', 'CLASSIC', 'COMPACT', 'HORIZONTAL'])(
+    'uses the measured 1024px boundary for %s',
+    (designPreset) => {
+      expect(getSummaryPresentationMode({
+        designPreset,
+        layout: 'footer_side',
+        availableWidth: 1023,
+      })).toBe('tray');
+      expect(getSummaryPresentationMode({
+        designPreset,
+        layout: 'footer_side',
+        availableWidth: 1024,
+      })).toBe('sidebar');
+    },
+  );
 
   it.each([
-    ['STANDARD', 'footer_side'],
-    ['COMPACT', 'footer_side'],
-    ['HORIZONTAL', 'footer_side'],
+    ['STANDARD', 'footer_bottom'],
     ['CLASSIC', 'footer_bottom'],
+    ['COMPACT', 'footer_bottom'],
+    ['HORIZONTAL', 'footer_bottom'],
+    ['UNKNOWN', 'footer_side'],
   ])('does not override %s with %s layout', (designPreset, layout) => {
-    expect(getClassicSummaryPresentationMode({
+    expect(getSummaryPresentationMode({
       designPreset,
       layout,
       availableWidth: 600,
@@ -63,11 +67,11 @@ describe('FPB Classic summary responsive ownership', () => {
     const stepsContainer = createAttributeTarget();
     const tray = createAttributeTarget();
 
-    const mode = fullPageResponsiveLayoutMethods._syncClassicSummaryPresentationMode.call({
+    const mode = fullPageResponsiveLayoutMethods._syncSummaryPresentationMode.call({
       container,
       elements: { stepsContainer },
       mobileSummaryTrayElement: tray,
-      getFullPageDesignPreset: () => 'CLASSIC',
+      getFullPageDesignPreset: () => 'COMPACT',
       resolveFullPageLayout: () => 'footer_side',
     });
 

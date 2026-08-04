@@ -655,7 +655,7 @@ describe('FPB Standard mobile summary action', () => {
     expect(bundleItems.removeAttribute).toHaveBeenCalledWith('aria-hidden');
   });
 
-  it('does not lock page scroll when Standard or Classic mobile summary trays expand', () => {
+  it('does not lock page scroll when any FPB mobile summary tray expands', () => {
     const classList = {
       toggle: jest.fn(),
     };
@@ -663,7 +663,7 @@ describe('FPB Standard mobile summary action', () => {
       body: { classList },
     } as unknown as Document;
 
-    ['STANDARD', 'CLASSIC'].forEach((preset) => {
+    ['STANDARD', 'CLASSIC', 'COMPACT', 'HORIZONTAL'].forEach((preset) => {
       fullPageMobileSummaryMethods._syncCompactMobileSummaryScrollLock.call({
         compactMobileSummaryTrayExpanded: true,
         getFullPageDesignPreset: () => preset,
@@ -674,8 +674,15 @@ describe('FPB Standard mobile summary action', () => {
       'fpb-mobile-summary-scroll-locked',
       false,
     );
-    expect(classList.toggle).toHaveBeenCalledTimes(2);
+    expect(classList.toggle).toHaveBeenCalledTimes(4);
   });
+
+  it.each(['STANDARD', 'CLASSIC', 'COMPACT', 'HORIZONTAL'])(
+    'uses the shared fluid mobile summary footer for %s',
+    (preset) => {
+      expect(shouldUseFluidMobileSummaryFooter(preset)).toBe(true);
+    },
+  );
 
   it('renders one Classic compact-summary toggle using the shared interaction path', async () => {
     const sheet = new FakeElement();
@@ -808,8 +815,8 @@ describe('FPB Standard mobile summary action', () => {
 
     expect(shouldUseFluidMobileSummaryFooter('COMPACT')).toBe(true);
     expect(shouldUseFluidMobileSummaryFooter('HORIZONTAL')).toBe(true);
-    expect(shouldUseFluidMobileSummaryFooter('STANDARD')).toBe(false);
-    expect(shouldUseFluidMobileSummaryFooter('CLASSIC')).toBe(false);
+    expect(shouldUseFluidMobileSummaryFooter('STANDARD')).toBe(true);
+    expect(shouldUseFluidMobileSummaryFooter('CLASSIC')).toBe(true);
 
     expect(shouldUseSharedDesktopSummarySlotTiles({
       designPreset: 'CLASSIC',
