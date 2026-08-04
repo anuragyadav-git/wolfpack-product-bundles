@@ -5,7 +5,7 @@ title: Widget Architecture
 type: architecture
 status: authoritative
 summary: FPB and PPB bootstrap, hydration, extension-asset, and widget runtime architecture.
-last_audited: 2026-07-31
+last_audited: 2026-08-04
 owners:
   - engineering
 domains:
@@ -14,9 +14,14 @@ systems:
   - widget-runtime
 source_paths:
   - app/assets/bundle-widget-full-page.js
+  - app/assets/widgets/full-page/initialization-guard.js
+  - app/assets/widgets/full-page-css/base/bootstrap-reservation.css
   - app/assets/bundle-widget-product-page.js
   - app/routes/app/app.settings/design-preview-model.ts
   - app/routes/root/wpb.$bundleId.tsx
+  - extensions/bundle-builder/blocks/bundle-app-embed.liquid
+  - scripts/build-widget-bundles.js
+  - scripts/minify-assets/targets.js
 related_docs:
   - Architecture/FPB Host Evaluation.md
 tags:
@@ -88,6 +93,14 @@ Product Page inventory normalization preserves `sourceVariantCount` after unavai
 - The embedded Admin enable flow opens Theme Editor in a new tab and hides the configure warning plus updates Bundle Visibility status optimistically after the merchant clicks `Enable here`. Configure page-load status comes from the server loader's parallel Shopify theme settings read. Every FPB preview action requests a new stateless signed URL; the token is required for drafts and harmless for public statuses.
 - Product-page builder placement uses the `bundle-product-page` app block. The app embed does not inject PPB markup because the merchant controls the widget's product-page position through this section block.
 - Before opening a PPB storefront preview, the preview flow first synchronizes the selected product template, then posts to the dedicated authenticated `/validate-widget-placement` JSON resource route. That route reads the parent product's effective `templateSuffix`, inspects that product JSON template in the MAIN theme, and verifies an app block owned by the current app with handle `bundle-product-page`. The placement check must not post to the rendered configure document route because an embedded document response can be HTML rather than the JSON contract expected by the client. Missing, malformed, or unreadable template data fails closed and opens Shopify's Theme Editor deep link for that exact template and product. A parent product alone is not evidence that the PPB widget is installed.
+
+### FPB Bootstrap Idempotency and First-Paint Reservation
+
+The app embed and the FPB bundle have two legitimate initialization triggers: the embed's script-load callback and the bundle's own DOM-ready bootstrap. They can overlap on app-proxy pages. The FPB entry point must synchronously claim the container with `data-initializing` before constructing a controller, set `data-initialized` only after successful initialization, and release the in-progress claim in `finally` so a failed attempt remains retryable.
+
+The app-proxy marker is server-rendered with `hidden` and is hydrated near the end of the document. Without earlier geometry, the theme footer can paint in the future widget area and then leave the viewport when the controller renders. `bundle-widget-bootstrap.css` is therefore loaded from the app embed's schema into the document head. It reserves `100svh` for the unhydrated marker, transfers that reservation to the FPB root during the same hydration mutation, and lets the completed widget grow intrinsically. Keep this asset small and marker/root-specific because the enabled app embed loads it across storefront pages.
+
+The widget build is an ordered concatenation, not an import-resolving bundler. Every new full-page source module must be registered in `FULL_PAGE_MODULES` in `scripts/build-widget-bundles.js`; otherwise its entry-file import is stripped while the implementation is absent from the generated IIFE.
 - Product-page upsell placement uses `bundle-upsell-block` or `bundle-upsell-button`.
 - Full-page bundle public links use the signed app-proxy document URL (`/apps/product-bundles/wpb/{bundleId}`). Shopify wraps `application/liquid` in the active theme layout and the app embed loads extension assets through `asset_url`.
 - Storefront JS/CSS must be loaded from Shopify theme-extension assets with Liquid `asset_url`. App proxy routes are only for API/data responses, not widget asset hosting.

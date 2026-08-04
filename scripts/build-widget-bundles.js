@@ -96,6 +96,7 @@ const MODAL_MODULES = [
 ];
 
 const FULL_PAGE_MODULES = [
+  join(ROOT_DIR, 'app/assets/widgets/full-page/initialization-guard.js'),
   join(ROOT_DIR, 'app/assets/widgets/full-page/templates/standard.config.js'),
   join(ROOT_DIR, 'app/assets/widgets/full-page/templates/classic.config.js'),
   join(ROOT_DIR, 'app/assets/widgets/full-page/templates/compact.config.js'),

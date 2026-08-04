@@ -1,7 +1,7 @@
 /*!
  * Wolfpack Bundle Widget — Full Page
  * Version : 5.0.227
- * Built   : 2026-07-31
+ * Built   : 2026-08-04
  *
  * Cache note: Shopify CDN cache is busted automatically by shopify app deploy.
  * After deploying, allow 2-10 minutes for propagation before testing.
@@ -4757,6 +4757,17 @@ Object.assign(
 );
 
   window.BundleProductModal = BundleProductModal;
+
+function claimFullPageWidgetInitialization(container) {
+  const dataset = container?.dataset;
+
+  if (!dataset || dataset.initialized || dataset.initializing) {
+    return false;
+  }
+
+  dataset.initializing = 'true';
+  return true;
+}
 
 const FPB_STANDARD_TEMPLATE_CONFIG = {
   id: 'STANDARD',
@@ -15582,6 +15593,8 @@ class BundleWidgetFullPage {
 
       this._reportError(error);
       this.showErrorUI(error);
+    } finally {
+      delete this.container.dataset.initializing;
     }
   }
 
@@ -15622,7 +15635,7 @@ function initializeFullPageWidget() {
   const containers = document.querySelectorAll('#bundle-builder-app');
   containers.forEach(container => {
     const bundleType = container.dataset.bundleType || 'full_page';
-    if (bundleType === 'full_page' && !container.dataset.initialized) {
+    if (bundleType === 'full_page' && claimFullPageWidgetInitialization(container)) {
       new BundleWidgetFullPage(container);
     }
   });

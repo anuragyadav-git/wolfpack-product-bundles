@@ -115,6 +115,7 @@ import { fullPageModalProductMethods } from './widgets/full-page/methods/modal-p
 import { fullPageSelectionNavigationMethods } from './widgets/full-page/methods/selection-navigation-methods.js';
 import { fullPageRuntimeCartSettingsMethods } from './widgets/full-page/methods/runtime-cart-settings-methods.js';
 import { fullPageTierFloatingRuntimeMethods } from './widgets/full-page/methods/tier-floating-runtime-methods.js';
+import { claimFullPageWidgetInitialization } from './widgets/full-page/initialization-guard.js';
 
 
 class BundleWidgetFullPage {
@@ -275,6 +276,8 @@ class BundleWidgetFullPage {
       // Fire-and-forget: send error to server for AppLogger tracking
       this._reportError(error);
       this.showErrorUI(error);
+    } finally {
+      delete this.container.dataset.initializing;
     }
   }
 
@@ -327,7 +330,7 @@ function initializeFullPageWidget() {
   const containers = document.querySelectorAll('#bundle-builder-app');
   containers.forEach(container => {
     const bundleType = container.dataset.bundleType || 'full_page';
-    if (bundleType === 'full_page' && !container.dataset.initialized) {
+    if (bundleType === 'full_page' && claimFullPageWidgetInitialization(container)) {
       new BundleWidgetFullPage(container);
     }
   });

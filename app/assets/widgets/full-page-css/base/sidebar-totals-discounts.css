@@ -195,6 +195,12 @@
   outline-offset: 2px;
 }
 
+.bundle-widget-full-page
+  .inline-quantity-controls
+  .inline-qty-btn:focus-visible {
+  outline-offset: calc(var(--bundle-focus-outline-width, 2px) * -1);
+}
+
 .full-page-side-panel .side-panel-summary-content {
   display: flex;
   flex-direction: column;
