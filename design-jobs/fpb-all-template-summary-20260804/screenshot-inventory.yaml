@@ -2,34 +2,937 @@
   "schema_version": 1,
   "job_id": "fpb-all-template-summary-20260804",
   "revision": 1,
-  "status": "draft",
+  "status": "complete",
+  "capture_environment": {
+    "browser": "Chrome DevTools MCP connected default profile",
+    "environment": "development and test stores",
+    "browser_zoom": 100,
+    "device_pixel_ratio": 1,
+    "browser_chrome_included": false,
+    "cache_policy": "Cache Storage cleared and hard reload with ignoreCache before every storefront capture",
+    "fixture_notes": "Agent current captures use the authorized Wolfpack FPB fixture; Yash-wolfpack target captures use EB bundle 2 with two selected products persisted. Different selection states make most pairs structural references rather than exact pixel baselines."
+  },
+  "comparison_cohorts": [
+    {
+      "id": "cohort-desktop-1440",
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "status": "known"
+      },
+      "members": [
+        "current-standard-desktop-empty",
+        "target-standard-desktop-partial",
+        "current-classic-desktop-empty",
+        "current-classic-desktop-partial",
+        "target-classic-desktop-partial",
+        "current-compact-desktop-empty",
+        "target-compact-desktop-partial",
+        "current-horizontal-desktop-empty",
+        "target-horizontal-desktop-partial"
+      ],
+      "comparability": "Pixel dimensions, CSS viewport, zoom, DPR, crop, and storefront-only framing match. Current/target fixture state and currency differ, so use for structure, hierarchy, responsive ownership, and measured geometry with state-aware caveats."
+    },
+    {
+      "id": "cohort-mobile-390-collapsed",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "status": "known"
+      },
+      "members": [
+        "current-standard-mobile-empty-collapsed",
+        "target-standard-mobile-partial-collapsed",
+        "current-classic-mobile-empty-collapsed",
+        "target-classic-mobile-partial-collapsed",
+        "current-compact-mobile-empty-collapsed",
+        "target-compact-mobile-partial-collapsed",
+        "current-horizontal-mobile-empty-collapsed",
+        "target-horizontal-mobile-partial-collapsed"
+      ],
+      "comparability": "CSS viewport, zoom, DPR, disclosure state, crop, and storefront-only framing match. The inspection script flags 390px files as low resolution, but this is the intentional CSS viewport and not an image-quality defect."
+    },
+    {
+      "id": "cohort-mobile-390-expanded",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "status": "known"
+      },
+      "members": [
+        "current-standard-mobile-empty-expanded",
+        "target-standard-mobile-partial-expanded",
+        "current-classic-mobile-empty-expanded",
+        "target-classic-mobile-partial-expanded",
+        "current-compact-mobile-empty-expanded",
+        "target-compact-mobile-partial-expanded",
+        "current-horizontal-mobile-empty-expanded",
+        "target-horizontal-mobile-partial-expanded"
+      ],
+      "comparability": "CSS viewport, zoom, DPR, disclosure state, crop, and storefront-only framing match. Content differences are intentional evidence of empty and partial states."
+    }
+  ],
   "items": [
     {
-      "id": "",
-      "original_filename": "",
-      "artifact_path": "",
-      "roles": [],
-      "component": "",
-      "state": "",
+      "id": "current-standard-desktop-empty",
+      "original_filename": "fpb-all-template-summary-20260804__current-standard-desktop__empty__1440x900__r1.png",
+      "artifact_path": "references/current/fpb-all-template-summary-20260804__current-standard-desktop__empty__1440x900__r1.png",
+      "roles": [
+        "CURRENT",
+        "DESKTOP",
+        "STATE"
+      ],
+      "component": "Standard desktop summary sidebar",
+      "state": "empty",
       "viewport": {
-        "width": null,
-        "height": null,
-        "status": "unknown"
+        "width": 1440,
+        "height": 900,
+        "status": "known"
       },
-      "browser_zoom": "unknown",
+      "browser_zoom": 100,
       "pixel_dimensions": {
-        "width": null,
-        "height": null
+        "width": 1440,
+        "height": 900
       },
-      "crop_status": "unknown",
-      "surrounding_context_included": false,
-      "source": "",
-      "provenance": "",
-      "intended_use": "",
+      "crop_status": "viewport-only",
+      "surrounding_context_included": true,
+      "source": "Agent storefront",
+      "provenance": "Captured by Codex after selecting Standard and hard reloading the authorized Wolfpack fixture.",
+      "intended_use": "structural reference",
       "quality_issues": [],
-      "comparable_counterparts": [],
-      "permissions_or_usage_notes": "",
-      "approval_status": "unreviewed"
+      "comparable_counterparts": [
+        "target-standard-desktop-partial"
+      ],
+      "permissions_or_usage_notes": "User authorized fixture mutation and storefront-only capture; never commit the PNG.",
+      "approval_status": "approved-source"
+    },
+    {
+      "id": "target-standard-desktop-partial",
+      "original_filename": "fpb-all-template-summary-20260804__target-standard-desktop__partial__1440x900__r1.png",
+      "artifact_path": "references/target/fpb-all-template-summary-20260804__target-standard-desktop__partial__1440x900__r1.png",
+      "roles": [
+        "TARGET",
+        "DESKTOP",
+        "STATE"
+      ],
+      "component": "Standard desktop summary sidebar",
+      "state": "partial",
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "status": "known"
+      },
+      "browser_zoom": 100,
+      "pixel_dimensions": {
+        "width": 1440,
+        "height": 900
+      },
+      "crop_status": "viewport-only",
+      "surrounding_context_included": true,
+      "source": "Yash-wolfpack EB storefront",
+      "provenance": "Captured by Codex after confirming DEFAULT_FBP and hard reloading EB bundle 2.",
+      "intended_use": "structural reference",
+      "quality_issues": [],
+      "comparable_counterparts": [
+        "current-standard-desktop-empty"
+      ],
+      "permissions_or_usage_notes": "User explicitly designated Yash-wolfpack as target inspiration; never commit the PNG.",
+      "approval_status": "approved-source"
+    },
+    {
+      "id": "current-classic-desktop-empty",
+      "original_filename": "fpb-all-template-summary-20260804__current-classic-desktop__empty__1440x900__r1.png",
+      "artifact_path": "references/current/fpb-all-template-summary-20260804__current-classic-desktop__empty__1440x900__r1.png",
+      "roles": [
+        "CURRENT",
+        "DESKTOP",
+        "STATE"
+      ],
+      "component": "Classic desktop summary sidebar",
+      "state": "empty",
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "status": "known"
+      },
+      "browser_zoom": 100,
+      "pixel_dimensions": {
+        "width": 1440,
+        "height": 900
+      },
+      "crop_status": "viewport-only",
+      "surrounding_context_included": true,
+      "source": "Agent storefront",
+      "provenance": "Captured by Codex from the approved Classic fixture before selection.",
+      "intended_use": "structural reference",
+      "quality_issues": [],
+      "comparable_counterparts": [
+        "target-classic-desktop-partial"
+      ],
+      "permissions_or_usage_notes": "User authorized storefront-only capture; never commit the PNG.",
+      "approval_status": "approved-source"
+    },
+    {
+      "id": "current-classic-desktop-partial",
+      "original_filename": "fpb-all-template-summary-20260804__current-classic-desktop__partial__1440x900__r1.png",
+      "artifact_path": "references/current/fpb-all-template-summary-20260804__current-classic-desktop__partial__1440x900__r1.png",
+      "roles": [
+        "CURRENT",
+        "DESKTOP",
+        "STATE",
+        "APPROVED_BASELINE"
+      ],
+      "component": "Classic desktop summary sidebar",
+      "state": "partial",
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "status": "known"
+      },
+      "browser_zoom": 100,
+      "pixel_dimensions": {
+        "width": 1440,
+        "height": 900
+      },
+      "crop_status": "viewport-only",
+      "surrounding_context_included": true,
+      "source": "Agent storefront",
+      "provenance": "Inherited from the approved fpb-classic-summary-20260804 implementation baseline.",
+      "intended_use": "structural reference",
+      "quality_issues": [],
+      "comparable_counterparts": [
+        "target-classic-desktop-partial"
+      ],
+      "permissions_or_usage_notes": "Approved predecessor evidence; never commit the PNG.",
+      "approval_status": "approved"
+    },
+    {
+      "id": "target-classic-desktop-partial",
+      "original_filename": "fpb-all-template-summary-20260804__target-classic-desktop__partial__1440x900__r1.png",
+      "artifact_path": "references/target/fpb-all-template-summary-20260804__target-classic-desktop__partial__1440x900__r1.png",
+      "roles": [
+        "TARGET",
+        "DESKTOP",
+        "STATE"
+      ],
+      "component": "Classic desktop summary sidebar",
+      "state": "partial",
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "status": "known"
+      },
+      "browser_zoom": 100,
+      "pixel_dimensions": {
+        "width": 1440,
+        "height": 900
+      },
+      "crop_status": "viewport-only",
+      "surrounding_context_included": true,
+      "source": "Yash-wolfpack EB storefront",
+      "provenance": "Captured by Codex after confirming CLASSIC and hard reloading EB bundle 2.",
+      "intended_use": "structural reference",
+      "quality_issues": [],
+      "comparable_counterparts": [
+        "current-classic-desktop-empty",
+        "current-classic-desktop-partial"
+      ],
+      "permissions_or_usage_notes": "User explicitly designated Yash-wolfpack as target inspiration; never commit the PNG.",
+      "approval_status": "approved-source"
+    },
+    {
+      "id": "current-compact-desktop-empty",
+      "original_filename": "fpb-all-template-summary-20260804__current-compact-desktop__empty__1440x900__r1.png",
+      "artifact_path": "references/current/fpb-all-template-summary-20260804__current-compact-desktop__empty__1440x900__r1.png",
+      "roles": [
+        "CURRENT",
+        "DESKTOP",
+        "STATE"
+      ],
+      "component": "Compact desktop summary sidebar",
+      "state": "empty",
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "status": "known"
+      },
+      "browser_zoom": 100,
+      "pixel_dimensions": {
+        "width": 1440,
+        "height": 900
+      },
+      "crop_status": "viewport-only",
+      "surrounding_context_included": true,
+      "source": "Agent storefront",
+      "provenance": "Captured by Codex after selecting Compact and hard reloading the authorized Wolfpack fixture.",
+      "intended_use": "structural reference",
+      "quality_issues": [],
+      "comparable_counterparts": [
+        "target-compact-desktop-partial"
+      ],
+      "permissions_or_usage_notes": "User authorized fixture mutation and storefront-only capture; never commit the PNG.",
+      "approval_status": "approved-source"
+    },
+    {
+      "id": "target-compact-desktop-partial",
+      "original_filename": "fpb-all-template-summary-20260804__target-compact-desktop__partial__1440x900__r1.png",
+      "artifact_path": "references/target/fpb-all-template-summary-20260804__target-compact-desktop__partial__1440x900__r1.png",
+      "roles": [
+        "TARGET",
+        "DESKTOP",
+        "STATE"
+      ],
+      "component": "Compact desktop summary sidebar",
+      "state": "partial",
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "status": "known"
+      },
+      "browser_zoom": 100,
+      "pixel_dimensions": {
+        "width": 1440,
+        "height": 900
+      },
+      "crop_status": "viewport-only",
+      "surrounding_context_included": true,
+      "source": "Yash-wolfpack EB storefront",
+      "provenance": "Captured by Codex after confirming COMPACT and hard reloading EB bundle 2.",
+      "intended_use": "structural reference",
+      "quality_issues": [],
+      "comparable_counterparts": [
+        "current-compact-desktop-empty"
+      ],
+      "permissions_or_usage_notes": "User explicitly designated Yash-wolfpack as target inspiration; never commit the PNG.",
+      "approval_status": "approved-source"
+    },
+    {
+      "id": "current-horizontal-desktop-empty",
+      "original_filename": "fpb-all-template-summary-20260804__current-horizontal-desktop__empty__1440x900__r1.png",
+      "artifact_path": "references/current/fpb-all-template-summary-20260804__current-horizontal-desktop__empty__1440x900__r1.png",
+      "roles": [
+        "CURRENT",
+        "DESKTOP",
+        "STATE"
+      ],
+      "component": "Horizontal desktop summary sidebar",
+      "state": "empty",
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "status": "known"
+      },
+      "browser_zoom": 100,
+      "pixel_dimensions": {
+        "width": 1440,
+        "height": 900
+      },
+      "crop_status": "viewport-only",
+      "surrounding_context_included": true,
+      "source": "Agent storefront",
+      "provenance": "Captured by Codex after selecting Horizontal and hard reloading the authorized Wolfpack fixture.",
+      "intended_use": "structural reference",
+      "quality_issues": [],
+      "comparable_counterparts": [
+        "target-horizontal-desktop-partial"
+      ],
+      "permissions_or_usage_notes": "User authorized fixture mutation and storefront-only capture; never commit the PNG.",
+      "approval_status": "approved-source"
+    },
+    {
+      "id": "target-horizontal-desktop-partial",
+      "original_filename": "fpb-all-template-summary-20260804__target-horizontal-desktop__partial__1440x900__r1.png",
+      "artifact_path": "references/target/fpb-all-template-summary-20260804__target-horizontal-desktop__partial__1440x900__r1.png",
+      "roles": [
+        "TARGET",
+        "DESKTOP",
+        "STATE"
+      ],
+      "component": "Horizontal desktop summary sidebar",
+      "state": "partial",
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "status": "known"
+      },
+      "browser_zoom": 100,
+      "pixel_dimensions": {
+        "width": 1440,
+        "height": 900
+      },
+      "crop_status": "viewport-only",
+      "surrounding_context_included": true,
+      "source": "Yash-wolfpack EB storefront",
+      "provenance": "Captured by Codex after confirming HORIZONTAL and hard reloading EB bundle 2.",
+      "intended_use": "structural reference",
+      "quality_issues": [],
+      "comparable_counterparts": [
+        "current-horizontal-desktop-empty"
+      ],
+      "permissions_or_usage_notes": "User explicitly designated Yash-wolfpack as target inspiration; never commit the PNG.",
+      "approval_status": "approved-source"
+    },
+    {
+      "id": "current-standard-mobile-empty-collapsed",
+      "original_filename": "fpb-all-template-summary-20260804__current-standard-mobile__empty-collapsed__390x844__r1.png",
+      "artifact_path": "references/current/fpb-all-template-summary-20260804__current-standard-mobile__empty-collapsed__390x844__r1.png",
+      "roles": [
+        "CURRENT",
+        "MOBILE",
+        "STATE"
+      ],
+      "component": "Standard mobile summary tray",
+      "state": "empty-collapsed",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "status": "known"
+      },
+      "browser_zoom": 100,
+      "pixel_dimensions": {
+        "width": 390,
+        "height": 844
+      },
+      "crop_status": "viewport-only",
+      "surrounding_context_included": true,
+      "source": "Agent storefront",
+      "provenance": "Captured by Codex after a hard reload at the required mobile viewport.",
+      "intended_use": "structural reference",
+      "quality_issues": [
+        "Automated low-resolution heuristic is expected for the intentional 390px CSS viewport."
+      ],
+      "comparable_counterparts": [
+        "target-standard-mobile-partial-collapsed"
+      ],
+      "permissions_or_usage_notes": "Storefront pixels only; never commit the PNG.",
+      "approval_status": "approved-source"
+    },
+    {
+      "id": "current-standard-mobile-empty-expanded",
+      "original_filename": "fpb-all-template-summary-20260804__current-standard-mobile__empty-expanded__390x844__r1.png",
+      "artifact_path": "references/current/fpb-all-template-summary-20260804__current-standard-mobile__empty-expanded__390x844__r1.png",
+      "roles": [
+        "CURRENT",
+        "MOBILE",
+        "STATE"
+      ],
+      "component": "Standard mobile summary tray",
+      "state": "empty-expanded",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "status": "known"
+      },
+      "browser_zoom": 100,
+      "pixel_dimensions": {
+        "width": 390,
+        "height": 844
+      },
+      "crop_status": "viewport-only",
+      "surrounding_context_included": true,
+      "source": "Agent storefront",
+      "provenance": "Captured by Codex after opening the connected summary disclosure.",
+      "intended_use": "structural reference",
+      "quality_issues": [
+        "Automated low-resolution heuristic is expected for the intentional 390px CSS viewport."
+      ],
+      "comparable_counterparts": [
+        "target-standard-mobile-partial-expanded"
+      ],
+      "permissions_or_usage_notes": "Storefront pixels only; never commit the PNG.",
+      "approval_status": "approved-source"
+    },
+    {
+      "id": "target-standard-mobile-partial-collapsed",
+      "original_filename": "fpb-all-template-summary-20260804__target-standard-mobile__partial-collapsed__390x844__r1.png",
+      "artifact_path": "references/target/fpb-all-template-summary-20260804__target-standard-mobile__partial-collapsed__390x844__r1.png",
+      "roles": [
+        "TARGET",
+        "MOBILE",
+        "STATE"
+      ],
+      "component": "Standard mobile summary tray",
+      "state": "partial-collapsed",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "status": "known"
+      },
+      "browser_zoom": 100,
+      "pixel_dimensions": {
+        "width": 390,
+        "height": 844
+      },
+      "crop_status": "viewport-only",
+      "surrounding_context_included": true,
+      "source": "Yash-wolfpack EB storefront",
+      "provenance": "Captured by Codex from the user-designated target store after hard reload.",
+      "intended_use": "structural reference",
+      "quality_issues": [
+        "Automated low-resolution heuristic is expected for the intentional 390px CSS viewport."
+      ],
+      "comparable_counterparts": [
+        "current-standard-mobile-empty-collapsed"
+      ],
+      "permissions_or_usage_notes": "Target inspiration only; never commit the PNG.",
+      "approval_status": "approved-source"
+    },
+    {
+      "id": "target-standard-mobile-partial-expanded",
+      "original_filename": "fpb-all-template-summary-20260804__target-standard-mobile__partial-expanded__390x844__r1.png",
+      "artifact_path": "references/target/fpb-all-template-summary-20260804__target-standard-mobile__partial-expanded__390x844__r1.png",
+      "roles": [
+        "TARGET",
+        "MOBILE",
+        "STATE"
+      ],
+      "component": "Standard mobile summary tray",
+      "state": "partial-expanded",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "status": "known"
+      },
+      "browser_zoom": 100,
+      "pixel_dimensions": {
+        "width": 390,
+        "height": 844
+      },
+      "crop_status": "viewport-only",
+      "surrounding_context_included": true,
+      "source": "Yash-wolfpack EB storefront",
+      "provenance": "Captured by Codex after opening the target summary disclosure.",
+      "intended_use": "structural reference",
+      "quality_issues": [
+        "Automated low-resolution heuristic is expected for the intentional 390px CSS viewport."
+      ],
+      "comparable_counterparts": [
+        "current-standard-mobile-empty-expanded"
+      ],
+      "permissions_or_usage_notes": "Target inspiration only; never commit the PNG.",
+      "approval_status": "approved-source"
+    },
+    {
+      "id": "current-classic-mobile-empty-collapsed",
+      "original_filename": "fpb-all-template-summary-20260804__current-classic-mobile__empty-collapsed__390x844__r1.png",
+      "artifact_path": "references/current/fpb-all-template-summary-20260804__current-classic-mobile__empty-collapsed__390x844__r1.png",
+      "roles": [
+        "CURRENT",
+        "MOBILE",
+        "STATE",
+        "APPROVED_BASELINE"
+      ],
+      "component": "Classic mobile summary tray",
+      "state": "empty-collapsed",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "status": "known"
+      },
+      "browser_zoom": 100,
+      "pixel_dimensions": {
+        "width": 390,
+        "height": 844
+      },
+      "crop_status": "viewport-only",
+      "surrounding_context_included": true,
+      "source": "Agent storefront",
+      "provenance": "Captured from the approved Classic implementation baseline.",
+      "intended_use": "structural reference",
+      "quality_issues": [
+        "Automated low-resolution heuristic is expected for the intentional 390px CSS viewport."
+      ],
+      "comparable_counterparts": [
+        "target-classic-mobile-partial-collapsed"
+      ],
+      "permissions_or_usage_notes": "Approved predecessor evidence; never commit the PNG.",
+      "approval_status": "approved"
+    },
+    {
+      "id": "current-classic-mobile-empty-expanded",
+      "original_filename": "fpb-all-template-summary-20260804__current-classic-mobile__empty-expanded__390x844__r1.png",
+      "artifact_path": "references/current/fpb-all-template-summary-20260804__current-classic-mobile__empty-expanded__390x844__r1.png",
+      "roles": [
+        "CURRENT",
+        "MOBILE",
+        "STATE",
+        "APPROVED_BASELINE"
+      ],
+      "component": "Classic mobile summary tray",
+      "state": "empty-expanded",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "status": "known"
+      },
+      "browser_zoom": 100,
+      "pixel_dimensions": {
+        "width": 390,
+        "height": 844
+      },
+      "crop_status": "viewport-only",
+      "surrounding_context_included": true,
+      "source": "Agent storefront",
+      "provenance": "Captured from the approved Classic implementation baseline after opening disclosure.",
+      "intended_use": "structural reference",
+      "quality_issues": [
+        "Automated low-resolution heuristic is expected for the intentional 390px CSS viewport."
+      ],
+      "comparable_counterparts": [
+        "target-classic-mobile-partial-expanded"
+      ],
+      "permissions_or_usage_notes": "Approved predecessor evidence; never commit the PNG.",
+      "approval_status": "approved"
+    },
+    {
+      "id": "target-classic-mobile-partial-collapsed",
+      "original_filename": "fpb-all-template-summary-20260804__target-classic-mobile__partial-collapsed__390x844__r1.png",
+      "artifact_path": "references/target/fpb-all-template-summary-20260804__target-classic-mobile__partial-collapsed__390x844__r1.png",
+      "roles": [
+        "TARGET",
+        "MOBILE",
+        "STATE"
+      ],
+      "component": "Classic mobile summary tray",
+      "state": "partial-collapsed",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "status": "known"
+      },
+      "browser_zoom": 100,
+      "pixel_dimensions": {
+        "width": 390,
+        "height": 844
+      },
+      "crop_status": "viewport-only",
+      "surrounding_context_included": true,
+      "source": "Yash-wolfpack EB storefront",
+      "provenance": "Captured by Codex after confirming CLASSIC and hard reloading the target storefront.",
+      "intended_use": "structural reference",
+      "quality_issues": [
+        "Automated low-resolution heuristic is expected for the intentional 390px CSS viewport."
+      ],
+      "comparable_counterparts": [
+        "current-classic-mobile-empty-collapsed"
+      ],
+      "permissions_or_usage_notes": "Target inspiration only; never commit the PNG.",
+      "approval_status": "approved-source"
+    },
+    {
+      "id": "target-classic-mobile-partial-expanded",
+      "original_filename": "fpb-all-template-summary-20260804__target-classic-mobile__partial-expanded__390x844__r1.png",
+      "artifact_path": "references/target/fpb-all-template-summary-20260804__target-classic-mobile__partial-expanded__390x844__r1.png",
+      "roles": [
+        "TARGET",
+        "MOBILE",
+        "STATE"
+      ],
+      "component": "Classic mobile summary tray",
+      "state": "partial-expanded",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "status": "known"
+      },
+      "browser_zoom": 100,
+      "pixel_dimensions": {
+        "width": 390,
+        "height": 844
+      },
+      "crop_status": "viewport-only",
+      "surrounding_context_included": true,
+      "source": "Yash-wolfpack EB storefront",
+      "provenance": "Captured by Codex after opening the target Classic summary disclosure.",
+      "intended_use": "structural reference",
+      "quality_issues": [
+        "Automated low-resolution heuristic is expected for the intentional 390px CSS viewport."
+      ],
+      "comparable_counterparts": [
+        "current-classic-mobile-empty-expanded"
+      ],
+      "permissions_or_usage_notes": "Target inspiration only; never commit the PNG.",
+      "approval_status": "approved-source"
+    },
+    {
+      "id": "current-compact-mobile-empty-collapsed",
+      "original_filename": "fpb-all-template-summary-20260804__current-compact-mobile__empty-collapsed__390x844__r1.png",
+      "artifact_path": "references/current/fpb-all-template-summary-20260804__current-compact-mobile__empty-collapsed__390x844__r1.png",
+      "roles": [
+        "CURRENT",
+        "MOBILE",
+        "STATE"
+      ],
+      "component": "Compact mobile summary tray",
+      "state": "empty-collapsed",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "status": "known"
+      },
+      "browser_zoom": 100,
+      "pixel_dimensions": {
+        "width": 390,
+        "height": 844
+      },
+      "crop_status": "viewport-only",
+      "surrounding_context_included": true,
+      "source": "Agent storefront",
+      "provenance": "Captured by Codex after selecting Compact and hard reloading at mobile viewport.",
+      "intended_use": "structural reference",
+      "quality_issues": [
+        "Automated low-resolution heuristic is expected for the intentional 390px CSS viewport."
+      ],
+      "comparable_counterparts": [
+        "target-compact-mobile-partial-collapsed"
+      ],
+      "permissions_or_usage_notes": "Storefront pixels only; never commit the PNG.",
+      "approval_status": "approved-source"
+    },
+    {
+      "id": "current-compact-mobile-empty-expanded",
+      "original_filename": "fpb-all-template-summary-20260804__current-compact-mobile__empty-expanded__390x844__r1.png",
+      "artifact_path": "references/current/fpb-all-template-summary-20260804__current-compact-mobile__empty-expanded__390x844__r1.png",
+      "roles": [
+        "CURRENT",
+        "MOBILE",
+        "STATE"
+      ],
+      "component": "Compact mobile summary tray",
+      "state": "empty-expanded",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "status": "known"
+      },
+      "browser_zoom": 100,
+      "pixel_dimensions": {
+        "width": 390,
+        "height": 844
+      },
+      "crop_status": "viewport-only",
+      "surrounding_context_included": true,
+      "source": "Agent storefront",
+      "provenance": "Captured by Codex after opening the current Compact summary disclosure.",
+      "intended_use": "structural reference",
+      "quality_issues": [
+        "Automated low-resolution heuristic is expected for the intentional 390px CSS viewport."
+      ],
+      "comparable_counterparts": [
+        "target-compact-mobile-partial-expanded"
+      ],
+      "permissions_or_usage_notes": "Storefront pixels only; never commit the PNG.",
+      "approval_status": "approved-source"
+    },
+    {
+      "id": "target-compact-mobile-partial-collapsed",
+      "original_filename": "fpb-all-template-summary-20260804__target-compact-mobile__partial-collapsed__390x844__r1.png",
+      "artifact_path": "references/target/fpb-all-template-summary-20260804__target-compact-mobile__partial-collapsed__390x844__r1.png",
+      "roles": [
+        "TARGET",
+        "MOBILE",
+        "STATE"
+      ],
+      "component": "Compact mobile summary tray",
+      "state": "partial-collapsed",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "status": "known"
+      },
+      "browser_zoom": 100,
+      "pixel_dimensions": {
+        "width": 390,
+        "height": 844
+      },
+      "crop_status": "viewport-only",
+      "surrounding_context_included": true,
+      "source": "Yash-wolfpack EB storefront",
+      "provenance": "Captured by Codex after confirming COMPACT and hard reloading the target storefront.",
+      "intended_use": "structural reference",
+      "quality_issues": [
+        "Automated low-resolution heuristic is expected for the intentional 390px CSS viewport."
+      ],
+      "comparable_counterparts": [
+        "current-compact-mobile-empty-collapsed"
+      ],
+      "permissions_or_usage_notes": "Target inspiration only; never commit the PNG.",
+      "approval_status": "approved-source"
+    },
+    {
+      "id": "target-compact-mobile-partial-expanded",
+      "original_filename": "fpb-all-template-summary-20260804__target-compact-mobile__partial-expanded__390x844__r1.png",
+      "artifact_path": "references/target/fpb-all-template-summary-20260804__target-compact-mobile__partial-expanded__390x844__r1.png",
+      "roles": [
+        "TARGET",
+        "MOBILE",
+        "STATE"
+      ],
+      "component": "Compact mobile summary tray",
+      "state": "partial-expanded",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "status": "known"
+      },
+      "browser_zoom": 100,
+      "pixel_dimensions": {
+        "width": 390,
+        "height": 844
+      },
+      "crop_status": "viewport-only",
+      "surrounding_context_included": true,
+      "source": "Yash-wolfpack EB storefront",
+      "provenance": "Captured by Codex after opening the target Compact summary disclosure.",
+      "intended_use": "structural reference",
+      "quality_issues": [
+        "Automated low-resolution heuristic is expected for the intentional 390px CSS viewport."
+      ],
+      "comparable_counterparts": [
+        "current-compact-mobile-empty-expanded"
+      ],
+      "permissions_or_usage_notes": "Target inspiration only; never commit the PNG.",
+      "approval_status": "approved-source"
+    },
+    {
+      "id": "current-horizontal-mobile-empty-collapsed",
+      "original_filename": "fpb-all-template-summary-20260804__current-horizontal-mobile__empty-collapsed__390x844__r1.png",
+      "artifact_path": "references/current/fpb-all-template-summary-20260804__current-horizontal-mobile__empty-collapsed__390x844__r1.png",
+      "roles": [
+        "CURRENT",
+        "MOBILE",
+        "STATE"
+      ],
+      "component": "Horizontal mobile summary tray",
+      "state": "empty-collapsed",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "status": "known"
+      },
+      "browser_zoom": 100,
+      "pixel_dimensions": {
+        "width": 390,
+        "height": 844
+      },
+      "crop_status": "viewport-only",
+      "surrounding_context_included": true,
+      "source": "Agent storefront",
+      "provenance": "Captured by Codex after selecting Horizontal and hard reloading at mobile viewport.",
+      "intended_use": "structural reference",
+      "quality_issues": [
+        "Automated low-resolution heuristic is expected for the intentional 390px CSS viewport."
+      ],
+      "comparable_counterparts": [
+        "target-horizontal-mobile-partial-collapsed"
+      ],
+      "permissions_or_usage_notes": "Storefront pixels only; never commit the PNG.",
+      "approval_status": "approved-source"
+    },
+    {
+      "id": "current-horizontal-mobile-empty-expanded",
+      "original_filename": "fpb-all-template-summary-20260804__current-horizontal-mobile__empty-expanded__390x844__r1.png",
+      "artifact_path": "references/current/fpb-all-template-summary-20260804__current-horizontal-mobile__empty-expanded__390x844__r1.png",
+      "roles": [
+        "CURRENT",
+        "MOBILE",
+        "STATE"
+      ],
+      "component": "Horizontal mobile summary tray",
+      "state": "empty-expanded",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "status": "known"
+      },
+      "browser_zoom": 100,
+      "pixel_dimensions": {
+        "width": 390,
+        "height": 844
+      },
+      "crop_status": "viewport-only",
+      "surrounding_context_included": true,
+      "source": "Agent storefront",
+      "provenance": "Captured by Codex after opening the current Horizontal summary disclosure.",
+      "intended_use": "structural reference",
+      "quality_issues": [
+        "Automated low-resolution heuristic is expected for the intentional 390px CSS viewport."
+      ],
+      "comparable_counterparts": [
+        "target-horizontal-mobile-partial-expanded"
+      ],
+      "permissions_or_usage_notes": "Storefront pixels only; never commit the PNG.",
+      "approval_status": "approved-source"
+    },
+    {
+      "id": "target-horizontal-mobile-partial-collapsed",
+      "original_filename": "fpb-all-template-summary-20260804__target-horizontal-mobile__partial-collapsed__390x844__r1.png",
+      "artifact_path": "references/target/fpb-all-template-summary-20260804__target-horizontal-mobile__partial-collapsed__390x844__r1.png",
+      "roles": [
+        "TARGET",
+        "MOBILE",
+        "STATE"
+      ],
+      "component": "Horizontal mobile summary tray",
+      "state": "partial-collapsed",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "status": "known"
+      },
+      "browser_zoom": 100,
+      "pixel_dimensions": {
+        "width": 390,
+        "height": 844
+      },
+      "crop_status": "viewport-only",
+      "surrounding_context_included": true,
+      "source": "Yash-wolfpack EB storefront",
+      "provenance": "Captured by Codex after confirming HORIZONTAL and hard reloading the target storefront.",
+      "intended_use": "structural reference",
+      "quality_issues": [
+        "Automated low-resolution heuristic is expected for the intentional 390px CSS viewport."
+      ],
+      "comparable_counterparts": [
+        "current-horizontal-mobile-empty-collapsed"
+      ],
+      "permissions_or_usage_notes": "Target inspiration only; never commit the PNG.",
+      "approval_status": "approved-source"
+    },
+    {
+      "id": "target-horizontal-mobile-partial-expanded",
+      "original_filename": "fpb-all-template-summary-20260804__target-horizontal-mobile__partial-expanded__390x844__r1.png",
+      "artifact_path": "references/target/fpb-all-template-summary-20260804__target-horizontal-mobile__partial-expanded__390x844__r1.png",
+      "roles": [
+        "TARGET",
+        "MOBILE",
+        "STATE"
+      ],
+      "component": "Horizontal mobile summary tray",
+      "state": "partial-expanded",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "status": "known"
+      },
+      "browser_zoom": 100,
+      "pixel_dimensions": {
+        "width": 390,
+        "height": 844
+      },
+      "crop_status": "viewport-only",
+      "surrounding_context_included": true,
+      "source": "Yash-wolfpack EB storefront",
+      "provenance": "Captured by Codex after opening the target Horizontal summary disclosure.",
+      "intended_use": "structural reference",
+      "quality_issues": [
+        "Automated low-resolution heuristic is expected for the intentional 390px CSS viewport."
+      ],
+      "comparable_counterparts": [
+        "current-horizontal-mobile-empty-expanded"
+      ],
+      "permissions_or_usage_notes": "Target inspiration only; never commit the PNG.",
+      "approval_status": "approved-source"
     }
   ]
 }

@@ -119,7 +119,37 @@
   ],
   "assumptions": [],
   "rejected": [],
-  "open": [],
+  "open": [
+    {
+      "id": "decision-006",
+      "question": "Which all-template summary direction should govern Standard, Compact, Horizontal, and the shared mobile tray?",
+      "options_considered": [
+        "Direction A - Unified Calm Review System",
+        "Direction B - Preset-Pure Target Mirroring",
+        "Direction C - Guided Qualification System"
+      ],
+      "recommendation": "Direction A - Unified Calm Review System",
+      "selected_value": "",
+      "rationale": "Awaiting explicit user approval for the expanded all-template scope.",
+      "evidence_ids": [
+        "VA-01 through VA-15",
+        "GAP-01 through GAP-08"
+      ],
+      "status": "open",
+      "approved_by": "",
+      "approved_at": "",
+      "revision_introduced": 1,
+      "affected_artifacts": [
+        "direction-comparison.md",
+        "component-anatomy.md",
+        "state-matrix.md",
+        "responsive-contract.md",
+        "interaction-contract.md",
+        "design-tokens.json",
+        "implementation-handoff.md"
+      ]
+    }
+  ],
   "superseded": [],
   "decision_shape": {
     "id": "",

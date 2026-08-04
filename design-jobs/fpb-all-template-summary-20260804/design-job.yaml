@@ -4,10 +4,10 @@
     "id": "fpb-all-template-summary-20260804",
     "title": "FPB all-template summary sidebars and mobile trays",
     "status": "active",
-    "stage": "REFERENCE_INTAKE",
+    "stage": "DIRECTION_APPROVAL",
     "revision": 1,
     "created_at": "2026-08-04T17:25:02Z",
-    "updated_at": "2026-08-04T17:28:40Z",
+    "updated_at": "2026-08-04T17:57:18Z",
     "owner": "Aditya Awasthi",
     "product": "Wolfpack Product Bundles",
     "repository": "/Users/adityaawasthi/Developer/wolfpack-product-bundles",
@@ -117,13 +117,55 @@
     "reduced_motion": false
   },
   "references": {
-    "current": [],
-    "target": [],
+    "current": [
+      "references/current/fpb-all-template-summary-20260804__current-standard-desktop__empty__1440x900__r1.png",
+      "references/current/fpb-all-template-summary-20260804__current-standard-mobile__empty-collapsed__390x844__r1.png",
+      "references/current/fpb-all-template-summary-20260804__current-standard-mobile__empty-expanded__390x844__r1.png",
+      "references/current/fpb-all-template-summary-20260804__current-classic-desktop__empty__1440x900__r1.png",
+      "references/current/fpb-all-template-summary-20260804__current-classic-desktop__partial__1440x900__r1.png",
+      "references/current/fpb-all-template-summary-20260804__current-classic-mobile__empty-collapsed__390x844__r1.png",
+      "references/current/fpb-all-template-summary-20260804__current-classic-mobile__empty-expanded__390x844__r1.png",
+      "references/current/fpb-all-template-summary-20260804__current-compact-desktop__empty__1440x900__r1.png",
+      "references/current/fpb-all-template-summary-20260804__current-compact-mobile__empty-collapsed__390x844__r1.png",
+      "references/current/fpb-all-template-summary-20260804__current-compact-mobile__empty-expanded__390x844__r1.png",
+      "references/current/fpb-all-template-summary-20260804__current-horizontal-desktop__empty__1440x900__r1.png",
+      "references/current/fpb-all-template-summary-20260804__current-horizontal-mobile__empty-collapsed__390x844__r1.png",
+      "references/current/fpb-all-template-summary-20260804__current-horizontal-mobile__empty-expanded__390x844__r1.png"
+    ],
+    "target": [
+      "references/target/fpb-all-template-summary-20260804__target-standard-desktop__partial__1440x900__r1.png",
+      "references/target/fpb-all-template-summary-20260804__target-standard-mobile__partial-collapsed__390x844__r1.png",
+      "references/target/fpb-all-template-summary-20260804__target-standard-mobile__partial-expanded__390x844__r1.png",
+      "references/target/fpb-all-template-summary-20260804__target-classic-desktop__partial__1440x900__r1.png",
+      "references/target/fpb-all-template-summary-20260804__target-classic-mobile__partial-collapsed__390x844__r1.png",
+      "references/target/fpb-all-template-summary-20260804__target-classic-mobile__partial-expanded__390x844__r1.png",
+      "references/target/fpb-all-template-summary-20260804__target-compact-desktop__partial__1440x900__r1.png",
+      "references/target/fpb-all-template-summary-20260804__target-compact-mobile__partial-collapsed__390x844__r1.png",
+      "references/target/fpb-all-template-summary-20260804__target-compact-mobile__partial-expanded__390x844__r1.png",
+      "references/target/fpb-all-template-summary-20260804__target-horizontal-desktop__partial__1440x900__r1.png",
+      "references/target/fpb-all-template-summary-20260804__target-horizontal-mobile__partial-collapsed__390x844__r1.png",
+      "references/target/fpb-all-template-summary-20260804__target-horizontal-mobile__partial-expanded__390x844__r1.png"
+    ],
     "context": [
       "component-brief.md",
       "state-matrix.md"
     ],
-    "approved": [],
+    "approved": [
+      "screenshot-inventory.yaml",
+      "references/current/fpb-all-template-summary-20260804__current-classic-desktop__partial__1440x900__r1.png",
+      "references/target/fpb-all-template-summary-20260804__target-standard-desktop__partial__1440x900__r1.png",
+      "references/target/fpb-all-template-summary-20260804__target-standard-mobile__partial-collapsed__390x844__r1.png",
+      "references/target/fpb-all-template-summary-20260804__target-standard-mobile__partial-expanded__390x844__r1.png",
+      "references/target/fpb-all-template-summary-20260804__target-classic-desktop__partial__1440x900__r1.png",
+      "references/target/fpb-all-template-summary-20260804__target-classic-mobile__partial-collapsed__390x844__r1.png",
+      "references/target/fpb-all-template-summary-20260804__target-classic-mobile__partial-expanded__390x844__r1.png",
+      "references/target/fpb-all-template-summary-20260804__target-compact-desktop__partial__1440x900__r1.png",
+      "references/target/fpb-all-template-summary-20260804__target-compact-mobile__partial-collapsed__390x844__r1.png",
+      "references/target/fpb-all-template-summary-20260804__target-compact-mobile__partial-expanded__390x844__r1.png",
+      "references/target/fpb-all-template-summary-20260804__target-horizontal-desktop__partial__1440x900__r1.png",
+      "references/target/fpb-all-template-summary-20260804__target-horizontal-mobile__partial-collapsed__390x844__r1.png",
+      "references/target/fpb-all-template-summary-20260804__target-horizontal-mobile__partial-expanded__390x844__r1.png"
+    ],
     "implementation": [],
     "provenance": [
       "The user authorized all FPB fixture changes, screenshot capture, design, implementation, handoff, testing, and intermediate commits."
@@ -203,9 +245,61 @@
         ]
       }
     ],
-    "assumptions": [],
+    "assumptions": [
+      {
+        "id": "assumption-001",
+        "value": "Use the Yash-wolfpack captures as structural target references rather than exact pixel baselines because storefront theme, currency, copy, and selection state differ from Agent.",
+        "basis": "Repository-observed and screenshot-observed",
+        "status": "accepted-conservative-default",
+        "affected_artifacts": [
+          "screenshot-inventory.yaml",
+          "visual-audit.md",
+          "direction-comparison.md"
+        ]
+      },
+      {
+        "id": "assumption-002",
+        "value": "The inspect script's low-resolution warning for 390px images is an expected heuristic result because 390px is the intentional CSS mobile viewport at DPR 1.",
+        "basis": "Chrome-observed and script-observed",
+        "status": "accepted-conservative-default",
+        "affected_artifacts": [
+          "screenshot-inventory.yaml"
+        ]
+      }
+    ],
     "rejected": [],
-    "open": [],
+    "open": [
+      {
+        "id": "decision-006",
+        "question": "Which all-template summary direction should govern Standard, Compact, Horizontal, and the shared mobile tray?",
+        "options_considered": [
+          "Direction A - Unified Calm Review System",
+          "Direction B - Preset-Pure Target Mirroring",
+          "Direction C - Guided Qualification System"
+        ],
+        "recommendation": "Direction A - Unified Calm Review System",
+        "selected_value": "",
+        "rationale": "Awaiting the mandatory explicit direction approval for the expanded all-template scope.",
+        "evidence_ids": [
+          "VA-01 through VA-15",
+          "GAP-01 through GAP-08"
+        ],
+        "status": "open",
+        "approver": "",
+        "revision": 1,
+        "affected_artifacts": [
+          "direction-comparison.md",
+          "locked-decisions.yaml",
+          "approval-record.yaml",
+          "component-anatomy.md",
+          "state-matrix.md",
+          "responsive-contract.md",
+          "interaction-contract.md",
+          "design-tokens.json",
+          "implementation-handoff.md"
+        ]
+      }
+    ],
     "recommendation_delegation": {
       "status": "not-granted",
       "scope": [],
@@ -432,9 +526,9 @@
       },
       "direction-comparison.md": {
         "path": "direction-comparison.md",
-        "status": "draft",
+        "status": "complete",
         "revision": 1,
-        "sha256": "79393b05d68f005181023441d0b7149e54d3236fc6d283ef76065bd18bd87db0",
+        "sha256": "a166ab54178d0bcd891641fd82affd96d04d6e5c34ba7362ba9a7eb551f3b2fd",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -461,7 +555,7 @@
         "path": "locked-decisions.yaml",
         "status": "complete",
         "revision": 1,
-        "sha256": "ba20f96705878f8bcdc77f8337d24386b56c6c0ebbc79d2b51c0d4f59780fe7b",
+        "sha256": "445d700a97d12a69592e12f196b10f6f2f1cc737c1c55dce1fe4fdba8d3753e8",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -486,9 +580,9 @@
       },
       "screenshot-inventory.yaml": {
         "path": "screenshot-inventory.yaml",
-        "status": "draft",
+        "status": "complete",
         "revision": 1,
-        "sha256": "ecc4817b4b356871099f348e77babf4f48ddea777c9f7d8abfebc0eb76079b9b",
+        "sha256": "dcd99078e89ad659b2d26b0cc951a4c333a888b5f4c022420ff113aedc320afb",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -504,9 +598,9 @@
       },
       "visual-audit.md": {
         "path": "visual-audit.md",
-        "status": "draft",
+        "status": "complete",
         "revision": 1,
-        "sha256": "c14f045be92619180eaf5ce201000facd712d7b97540388b8047d43a58647cc5",
+        "sha256": "c25963162fe221e0dbe3160f33e43432ecb364c7b3ca119fbfc41b17cd433c01",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -561,6 +655,54 @@
       "affected_artifacts": [
         "screenshot-inventory.yaml"
       ]
+    },
+    {
+      "sequence": 4,
+      "at": "2026-08-04T17:50:54Z",
+      "from": "REFERENCE_INTAKE",
+      "to": "REFERENCE_VALIDATION",
+      "revision": 1,
+      "reason": "All 25 current and target captures have stable IDs, provenance, known CSS viewports, state labels, and cohort mappings",
+      "evidence": [
+        "screenshot-inventory.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 5,
+      "at": "2026-08-04T17:50:59Z",
+      "from": "REFERENCE_VALIDATION",
+      "to": "VISUAL_ANALYSIS",
+      "revision": 1,
+      "reason": "Desktop and mobile cohorts are comparable for structural analysis; fixture, currency, copy, and state differences are explicitly limited to structural reference use",
+      "evidence": [
+        "screenshot-inventory.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 6,
+      "at": "2026-08-04T17:56:48Z",
+      "from": "VISUAL_ANALYSIS",
+      "to": "DIRECTION_EXPLORATION",
+      "revision": 1,
+      "reason": "Confidence-labeled visual audit identifies shared anatomy, preset-specific shell ownership, and mobile consistency gaps",
+      "evidence": [
+        "visual-audit.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 7,
+      "at": "2026-08-04T17:57:18Z",
+      "from": "DIRECTION_EXPLORATION",
+      "to": "DIRECTION_APPROVAL",
+      "revision": 1,
+      "reason": "Three behavior-equivalent directions are decision-ready; explicit expanded-scope approval is now required",
+      "evidence": [
+        "direction-comparison.md"
+      ],
+      "affected_artifacts": []
     }
   ]
 }
