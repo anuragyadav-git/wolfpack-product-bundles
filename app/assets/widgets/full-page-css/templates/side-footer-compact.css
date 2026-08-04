@@ -846,11 +846,12 @@
     grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
   }
 
-  .layout-sidebar[data-fpb-design-preset="COMPACT"] .full-page-side-panel {
+  .layout-sidebar[data-fpb-design-preset="COMPACT"][data-fpb-summary-mode="sidebar"]
+    .full-page-side-panel {
     width: 100%;
     max-width: none;
     flex-basis: auto;
-    display: flex !important;
+    display: flex;
     flex-direction: column;
     gap: var(--compact-desktop-grid-inner-gap);
     height: auto;

@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "case_id": "qa-disclosure-responsive-mobile-390",
+  "viewport": "desktop-1024",
+  "state": "disclosure-responsive",
+  "required": true,
+  "gates": {
+    "functional": "passed",
+    "visual": "failed",
+    "geometry": "failed",
+    "responsive": "failed",
+    "console": "passed",
+    "network": "passed",
+    "accessibility": "passed",
+    "performance": "not-run",
+    "non_regression": "failed"
+  },
+  "performance_reason": "Deferred until responsive ownership remediation is applied and rerun.",
+  "evidence": {
+    "snapshot": "Chrome accessibility snapshot after 1024x768 emulation",
+    "screenshots": {
+      "before": "",
+      "after": "",
+      "element": {
+        "actual": "",
+        "baseline": "",
+        "diff": "",
+        "comparison_summary": ""
+      },
+      "viewport": {
+        "actual": "",
+        "baseline": "",
+        "diff": "",
+        "comparison_summary": ""
+      }
+    },
+    "console": "Chrome list_console_messages: no widget runtime error",
+    "network": "Chrome request 20436: mobile-summary CSS 200",
+    "accessibility": "One visible summary surface, but DOM ownership contradicted runtime mode.",
+    "lighthouse": {
+      "desktop": "",
+      "mobile": ""
+    },
+    "performance_trace": null
+  },
+  "assertions": [
+    {
+      "id": "measured-mode",
+      "status": "passed",
+      "expected": "Container width 1013 selects tray",
+      "actual": "data-fpb-summary-mode=tray"
+    },
+    {
+      "id": "one-summary-surface",
+      "status": "passed",
+      "expected": "Exactly one visible summary surface",
+      "actual": "One desktop panel visible"
+    },
+    {
+      "id": "mode-owner-match",
+      "status": "failed",
+      "expected": "Tray visible and desktop panel hidden when measured mode is tray",
+      "actual": "Tray display none; desktop panel display flex at viewport 1024 / container 1013"
+    },
+    {
+      "id": "no-horizontal-overflow",
+      "status": "passed",
+      "expected": false,
+      "actual": false
+    }
+  ],
+  "observations": {
+    "console": {
+      "violations": [],
+      "allowlisted": [
+        "Shopify theme preload warning",
+        "Shopify theme form-field label issue"
+      ]
+    },
+    "network": {
+      "violations": [],
+      "expected_analytics": [
+        "Shopify telemetry"
+      ]
+    }
+  },
+  "waivers": [],
+  "retry_history": [
+    {
+      "attempt": 1,
+      "at": "2026-08-04T20:08:00Z",
+      "classification": "product-responsive-ownership",
+      "result": "failed",
+      "evidence": "1024 viewport / 1013 container: mode tray, panel flex, tray none"
+    }
+  ]
+}

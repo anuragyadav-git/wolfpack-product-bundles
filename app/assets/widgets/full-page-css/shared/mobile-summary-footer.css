@@ -1,4 +1,3 @@
-@media (max-width: 1023px) {
   #bundle-builder-app
     .layout-sidebar[data-fpb-summary-mode="tray"]
     .full-page-side-panel {
@@ -400,9 +399,7 @@
     color: var(--bundle-side-panel-remove-color, #d92d20);
   }
 
-}
-
-@media (max-width: 1023px) and (prefers-reduced-motion: reduce) {
+@media (prefers-reduced-motion: reduce) {
   .fpb-mobile-summary-fluid-footer,
   .fpb-mobile-summary-fluid-footer *,
   .fpb-mobile-summary-toggle-icon {

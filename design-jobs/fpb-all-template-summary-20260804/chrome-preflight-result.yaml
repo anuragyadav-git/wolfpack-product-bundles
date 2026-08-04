@@ -1,145 +1,163 @@
 {
   "schema_version": 1,
   "job_id": "fpb-all-template-summary-20260804",
-  "revision": 1,
-  "status": "draft",
-  "checked_at": "",
-  "environment": "",
+  "revision": 2,
+  "status": "complete",
+  "checked_at": "2026-08-04T20:04:59Z",
+  "environment": "development",
   "selected_page": {
-    "page_id": null,
-    "url": "",
-    "title": ""
+    "page_id": 13,
+    "url": "https://agent-5sfidg3m.myshopify.com/apps/product-bundles/wpb/cmse8sp170000v0ytaqqzsvtw",
+    "title": "agent"
   },
   "checks": {
     "chrome_mcp_connected": {
       "mandatory": true,
-      "status": "not-run",
-      "evidence": "",
+      "status": "passed",
+      "evidence": "list_pages returned live authenticated Shopify storefront and Admin pages.",
       "blocker": "",
       "recovery_action": ""
     },
     "supported_chrome_available": {
       "mandatory": true,
-      "status": "not-run",
-      "evidence": "",
+      "status": "passed",
+      "evidence": "Navigator user agent reports Chrome 150.0.0.0 on macOS.",
       "blocker": "",
       "recovery_action": ""
     },
     "intended_page_selected": {
       "mandatory": true,
-      "status": "not-run",
-      "evidence": "",
+      "status": "passed",
+      "evidence": "Page 13 selected with bringToFront false; URL matches the approved Agent FPB fixture.",
       "blocker": "",
       "recovery_action": ""
     },
     "app_server_reachable": {
       "mandatory": true,
-      "status": "not-run",
-      "evidence": "",
+      "status": "passed",
+      "evidence": "Canonical storefront hard reload completed and the widget hydrated with data-initialized=true.",
       "blocker": "",
       "recovery_action": ""
     },
     "environment_confirmed": {
       "mandatory": true,
-      "status": "not-run",
-      "evidence": "",
+      "status": "passed",
+      "evidence": "Shopify CLI development theme-extension asset URLs and Wolfpack Bundles SIT Admin session confirm development/SIT.",
       "blocker": "",
       "recovery_action": ""
     },
     "fixture_route_exists": {
       "mandatory": true,
-      "status": "not-run",
-      "evidence": "",
+      "status": "passed",
+      "evidence": "Bundle cmse8sp170000v0ytaqqzsvtw rendered six deterministic products and all four saved presets.",
       "blocker": "",
       "recovery_action": ""
     },
     "authentication_intentional": {
       "mandatory": true,
-      "status": "not-run",
-      "evidence": "",
+      "status": "passed",
+      "evidence": "Used only the connected default Chrome profile with existing Agent and Yash-wolfpack sessions; no isolatedContext.",
       "blocker": "",
       "recovery_action": ""
     },
     "sensitive_tabs_avoided": {
       "mandatory": true,
-      "status": "not-run",
-      "evidence": "",
+      "status": "passed",
+      "evidence": "Only approved Agent/Yash storefront and bundle Admin tabs were selected; screenshots contain storefront viewport pixels only.",
       "blocker": "",
       "recovery_action": ""
     },
     "viewport_resize_supported": {
       "mandatory": true,
-      "status": "not-run",
-      "evidence": "",
+      "status": "passed",
+      "evidence": "emulate succeeded at 390x844, 1034x900, 1035x900, and 1440x900; measured container boundary changed at 1023/1024.",
       "blocker": "",
       "recovery_action": ""
     },
     "accessibility_snapshot_supported": {
       "mandatory": true,
-      "status": "not-run",
-      "evidence": "",
+      "status": "passed",
+      "evidence": "Fresh accessibility snapshots exposed product actions, one Review your bundle disclosure, totals, Clear, remove, and CTA semantics.",
       "blocker": "",
       "recovery_action": ""
     },
     "screenshot_write_supported": {
       "mandatory": true,
-      "status": "not-run",
-      "evidence": "",
+      "status": "passed",
+      "evidence": "Chrome returned complete PNG bytes; exact bytes persisted per recovery protocol to qa/screenshots/standard-mobile-expanded.png (390x844, sha256 9d9a4d490edc27131b8c45b96a5a154f791596bf0e0c8cf91a8082dfa2f2218a).",
       "blocker": "",
       "recovery_action": ""
     },
     "console_inspection_supported": {
       "mandatory": true,
-      "status": "not-run",
-      "evidence": "",
+      "status": "passed",
+      "evidence": "list_console_messages returned six messages; get_console_message(1080) returned safe Bugsnag debug detail.",
       "blocker": "",
       "recovery_action": ""
     },
     "network_inspection_supported": {
       "mandatory": true,
-      "status": "not-run",
-      "evidence": "",
+      "status": "passed",
+      "evidence": "list_network_requests returned 190 requests; get_network_request(20436) confirmed the live mobile-summary CSS 200 response without persisting headers or bodies.",
       "blocker": "",
       "recovery_action": ""
     },
     "repository_identity_recorded": {
       "mandatory": true,
-      "status": "not-run",
-      "evidence": "",
+      "status": "passed",
+      "evidence": "/Users/adityaawasthi/Developer/wolfpack-product-bundles, feature/26.05-UI-changes, 6f4c03ee3fb31060a7cdb33595a29ca9215ff656.",
       "blocker": "",
       "recovery_action": ""
     },
     "job_revision_recorded": {
       "mandatory": true,
-      "status": "not-run",
-      "evidence": "",
+      "status": "passed",
+      "evidence": "Design job fpb-all-template-summary-20260804 revision 2.",
       "blocker": "",
       "recovery_action": ""
     },
     "baseline_identified": {
       "mandatory": true,
-      "status": "not-run",
-      "evidence": "",
+      "status": "passed",
+      "evidence": "Approved reference baseline fpb-all-template-summary-20260804__target-standard-mobile__partial-expanded__390x844__r1.png exists at revision 1.",
       "blocker": "",
       "recovery_action": ""
     }
   },
-  "tool_inventory": [],
+  "tool_inventory": [
+    "mcp__chrome_devtools__list_pages",
+    "mcp__chrome_devtools__select_page",
+    "mcp__chrome_devtools__navigate_page",
+    "mcp__chrome_devtools__emulate",
+    "mcp__chrome_devtools__take_snapshot",
+    "mcp__chrome_devtools__evaluate_script",
+    "mcp__chrome_devtools__click",
+    "mcp__chrome_devtools__press_key",
+    "mcp__chrome_devtools__take_screenshot",
+    "mcp__chrome_devtools__list_console_messages",
+    "mcp__chrome_devtools__get_console_message",
+    "mcp__chrome_devtools__list_network_requests",
+    "mcp__chrome_devtools__get_network_request",
+    "mcp__chrome_devtools__lighthouse_audit",
+    "mcp__chrome_devtools__performance_start_trace",
+    "mcp__chrome_devtools__performance_stop_trace",
+    "mcp__chrome_devtools__performance_analyze_insight"
+  ],
   "browser": {
-    "product": "",
-    "version": "",
+    "product": "Google Chrome",
+    "version": "150.0.0.0",
     "profile_policy": "default-profile-only",
     "isolated_context_used": false
   },
   "repository": {
-    "path": "",
-    "branch": "",
-    "commit": ""
+    "path": "/Users/adityaawasthi/Developer/wolfpack-product-bundles",
+    "branch": "feature/26.05-UI-changes",
+    "commit": "6f4c03ee3fb31060a7cdb33595a29ca9215ff656"
   },
   "baseline": {
-    "id": "",
-    "revision": null,
-    "path": ""
+    "id": "target-standard-mobile-partial-expanded",
+    "revision": 1,
+    "path": "references/target/fpb-all-template-summary-20260804__target-standard-mobile__partial-expanded__390x844__r1.png"
   },
   "artifact_directory": "qa",
   "blockers": []

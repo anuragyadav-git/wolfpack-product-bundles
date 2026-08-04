@@ -705,9 +705,6 @@
     top: var(--bundle-sticky-offset, 1rem);
   }
 
-  .fpb-mobile-bottom-sheet.fpb-mobile-summary-tray {
-    display: none !important;
-  }
 }
 
 @media (max-width: 1023px) {

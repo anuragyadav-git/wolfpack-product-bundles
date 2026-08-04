@@ -1,11 +1,11 @@
 ---
 schema_version: 1
-id: storefront-design-director-browser-report-template
-title: Browser Test Report Template
-type: design-job-template
+id: fpb-all-template-summary-browser-report
+title: FPB All-Template Summary Browser Test Report
+type: browser-qa-report
 status: active
-summary: Records Chrome capability, deterministic setup, per-case evidence, gate status, and retries.
-last_audited: 2026-08-03
+summary: Records direct Chrome QA for every FPB summary preset, required viewport, and configurable state family.
+last_audited: 2026-08-05
 owners:
   - Aditya Awasthi
 domains:
@@ -26,8 +26,8 @@ keywords:
 # Browser Test Report
 
 Artifact job ID: fpb-all-template-summary-20260804
-Artifact revision: 1
-Artifact status: draft
+Artifact revision: 2
+Artifact status: remediation-required
 
 ## Job, implementation, and Chrome QA preflight
 
@@ -61,7 +61,7 @@ Artifact status: draft
 | Functional |  |  |  |
 | Visual |  |  |  |
 | Geometry |  |  |  |
-| Responsive |  |  |  |
+| Responsive | Failed on attempt 1 | At viewport 1024px the widget measured 1013px and reported `tray`, while CSS displayed the desktop panel | None |
 | Console |  |  |  |
 | Network |  |  |  |
 | Accessibility |  |  |  |
@@ -72,6 +72,7 @@ Artifact status: draft
 
 | Case | Viewport | State | Semantic | DOM | Geometry | Console | Network | Accessibility | Performance | Result |
 |---|---|---|---|---|---|---|---|---|---|---|
+| qa-disclosure-responsive-mobile-390 | 1024x768 (widget 1013px) | disclosure-responsive | Pass | Fail: runtime/CSS owner mismatch | Fail | Pass | Pass | Pass with ownership mismatch | Deferred | Fail |
 
 ## Screenshot index
 
@@ -99,5 +100,6 @@ Record LCP, CLS, interaction findings, long tasks, layout-shift sources, image o
 
 | Case | Attempt | Classification | Status | Evidence | Remediation | Cleanup confirmed |
 |---|---|---|---|---|---|---|
+| qa-disclosure-responsive-mobile-390 | 1 | Product responsive ownership | Failed | `qa/results/qa-disclosure-responsive-mobile-390.result.json` | REM-001 | Yes; selection remained empty |
 
 ## Final approval status
