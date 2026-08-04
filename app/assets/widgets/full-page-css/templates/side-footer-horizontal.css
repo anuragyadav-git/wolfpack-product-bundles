@@ -676,7 +676,7 @@
   min-height: var(--bundle-control-hit-target, 2.5rem);
 }
 
-@media (min-width: 769px) {
+@media (min-width: 1024px) {
   .layout-sidebar[data-fpb-design-preset="HORIZONTAL"] {
     --horizontal-card-content-min-height: calc(
       var(--horizontal-control-size) + var(--horizontal-control-size) +
@@ -710,7 +710,7 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1023px) {
   .layout-sidebar[data-fpb-design-preset="HORIZONTAL"] {
     padding: var(--bundle-product-card-padding, 0.625rem);
   }
@@ -843,7 +843,7 @@
   }
 }
 
-@media (min-width: 769px) {
+@media (min-width: 1024px) {
   .layout-sidebar[data-fpb-design-preset="HORIZONTAL"]
     .full-page-side-panel--horizontal-fixed-price
     .side-panel-discount-message {

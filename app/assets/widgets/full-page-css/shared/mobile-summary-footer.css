@@ -1,9 +1,50 @@
-@media (max-width: 768px) {
+@media (max-width: 1023px) {
+  #bundle-builder-app
+    .layout-sidebar[data-fpb-summary-mode="tray"]
+    .full-page-side-panel {
+    display: none;
+  }
+
+  #bundle-builder-app
+    > .fpb-mobile-bottom-sheet.fpb-mobile-summary-tray[data-fpb-summary-mode="sidebar"] {
+    display: none;
+  }
+
+  #bundle-builder-app
+    > .fpb-mobile-bottom-sheet.fpb-mobile-summary-tray[data-fpb-summary-mode="tray"] {
+    --fpb-mobile-summary-inset: clamp(0.625rem, 2.5cqi, 1rem);
+    --fpb-mobile-summary-max-width: 52rem;
+
+    display: grid;
+    position: sticky;
+    bottom: max(var(--fpb-mobile-summary-inset), env(safe-area-inset-bottom));
+    left: auto;
+    right: auto;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto;
+    width: calc(100% - (var(--fpb-mobile-summary-inset) * 2));
+    max-width: var(--fpb-mobile-summary-max-width);
+    min-width: 0;
+    height: auto;
+    min-height: 0;
+    max-height: min(75dvh, 42rem);
+    margin-inline: auto;
+    padding: var(--bundle-summary-shell-padding, 0.625rem);
+    border: 1px solid var(--bundle-side-panel-border-color, #e3e3e3);
+    border-radius: var(--bundle-side-panel-border-radius, 0.625rem);
+    background: var(--bundle-side-panel-bg, #fff);
+    box-shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 12%);
+    box-sizing: border-box;
+    overflow: visible;
+    transform: none;
+    z-index: var(--bundle-mobile-summary-z-index, 9999);
+  }
+
   .fpb-mobile-summary-tray
     .fpb-mobile-summary-count-badge {
     appearance: none;
     min-width: 48px;
-    min-height: 0;
+    min-height: var(--bundle-control-hit-target, 2.75rem);
     height: auto;
     padding: 0 10px;
     border: 0;
@@ -131,9 +172,7 @@
   }
 
   .fpb-mobile-summary-fluid-footer.fpb-mobile-summary-tray-expanded {
-    max-height: 100dvh;
-    overflow-y: auto;
-    overscroll-behavior: contain;
+    overflow: visible;
   }
 
   .fpb-mobile-summary-fluid-footer
@@ -275,7 +314,11 @@
     grid-auto-rows: auto;
     gap: var(--fpb-mobile-summary-gap);
     padding: 0;
-    overflow: visible;
+    max-height: clamp(8rem, 35dvh, 24rem);
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
   }
 
   .fpb-mobile-summary-fluid-footer
@@ -355,5 +398,17 @@
     border-radius: 50%;
     background: transparent;
     color: var(--bundle-side-panel-remove-color, #d92d20);
+  }
+
+}
+
+@media (max-width: 1023px) and (prefers-reduced-motion: reduce) {
+  .fpb-mobile-summary-fluid-footer,
+  .fpb-mobile-summary-fluid-footer *,
+  .fpb-mobile-summary-toggle-icon {
+    scroll-behavior: auto;
+    animation-duration: 0.01ms;
+    animation-iteration-count: 1;
+    transition-duration: 0.01ms;
   }
 }

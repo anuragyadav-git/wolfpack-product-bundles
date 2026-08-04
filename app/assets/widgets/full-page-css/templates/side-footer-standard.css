@@ -2203,7 +2203,7 @@ body:has([data-fpb-design-preset]) {
   overflow-wrap: anywhere;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 1023px) {
   .layout-sidebar[data-fpb-design-preset="STANDARD"] .step-timeline--standard {
     width: calc(100% - (var(--standard-mobile-shell-gutter) * 2));
     max-width: calc(100% - (var(--standard-mobile-shell-gutter) * 2));
@@ -3036,7 +3036,7 @@ body:has([data-fpb-design-preset]) {
 }
 
 /* mobileFooterStyles */
-@media (max-width: 767px) {
+@media (max-width: 1023px) {
   .fpb-mobile-summary-count-badge {
     --fpb-mobile-additional-offers-bg: #55bd47;
     cursor: pointer;

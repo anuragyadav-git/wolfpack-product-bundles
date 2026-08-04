@@ -841,7 +841,7 @@
   }
 }
 
-@media (min-width: 769px) {
+@media (min-width: 1024px) {
   .layout-sidebar[data-fpb-design-preset="COMPACT"] .sidebar-layout-wrapper {
     grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
   }
@@ -1105,7 +1105,7 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1023px) {
   .fpb-mobile-bottom-sheet.fpb-preset-compact.fpb-mobile-bottom-sheet.fpb-mobile-summary-tray {
     --fpb-mobile-footer-shell-width: 100%;
     --fpb-mobile-footer-inner-width: 100%;
