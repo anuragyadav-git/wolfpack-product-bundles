@@ -1,0 +1,566 @@
+{
+  "schema_version": 1,
+  "job": {
+    "id": "fpb-all-template-summary-20260804",
+    "title": "FPB all-template summary sidebars and mobile trays",
+    "status": "active",
+    "stage": "REFERENCE_INTAKE",
+    "revision": 1,
+    "created_at": "2026-08-04T17:25:02Z",
+    "updated_at": "2026-08-04T17:28:40Z",
+    "owner": "Aditya Awasthi",
+    "product": "Wolfpack Product Bundles",
+    "repository": "/Users/adityaawasthi/Developer/wolfpack-product-bundles",
+    "branch": "feature/26.05-UI-changes",
+    "commit": "c0cb2300882d73b426194269d624d003fbd6b634",
+    "artifact_root": "/Users/adityaawasthi/Developer/wolfpack-product-bundles/design-jobs",
+    "resume_stage": null
+  },
+  "scope": {
+    "product_family": "FPB",
+    "template": "Standard, Classic, Compact, Horizontal",
+    "component": "Desktop summary sidebar and responsive mobile summary tray/footer",
+    "implementation_mode": "design-director",
+    "design_goal": "Design, implement, and freshly verify one coherent all-template FPB summary system with complete configurable-state coverage.",
+    "user_problem": "Every FPB template needs an intentionally designed summary sidebar and mobile counterpart across all merchant-configurable states, not isolated happy-path styling.",
+    "primary_user_action": "Review selection, progress, pricing, qualification, and completion state before navigating or adding the bundle to cart.",
+    "out_of_scope": [
+      "unrelated product-card redesign",
+      "PPB",
+      "Admin UI redesign",
+      "deployment",
+      "development server restart",
+      "FPB configuration-loading priority changes"
+    ],
+    "merchant_configurability": [
+      "bundle summary title and subtitle",
+      "Product Slots and slot icon",
+      "Bundle Quantity Options",
+      "discount progress and messages",
+      "add-ons and free gifts",
+      "locale and currency",
+      "existing storefront design tokens"
+    ],
+    "business_logic_constraints": [
+      "Preserve selection identity, pricing, inventory, validation, navigation, add-on, and cart semantics.",
+      "Use content-driven responsive CSS and keep exactly one active summary surface.",
+      "Treat the canonical FPB feature matrix as requirements, but require fresh post-redesign proof.",
+      "Protect every sibling FPB preset and PPB from shared-source regressions."
+    ]
+  },
+  "viewports": {
+    "reference": [
+      {
+        "width": 1440,
+        "height": 900,
+        "role": "desktop-summary"
+      },
+      {
+        "width": 390,
+        "height": 844,
+        "role": "mobile-summary"
+      }
+    ],
+    "required": [
+      {
+        "width": 320,
+        "height": 720
+      },
+      {
+        "width": 360,
+        "height": 800
+      },
+      {
+        "width": 390,
+        "height": 844
+      },
+      {
+        "width": 414,
+        "height": 896
+      },
+      {
+        "width": 768,
+        "height": 1024
+      },
+      {
+        "width": 1024,
+        "height": 768
+      },
+      {
+        "width": 1280,
+        "height": 800
+      },
+      {
+        "width": 1440,
+        "height": 900
+      },
+      {
+        "width": 1536,
+        "height": 960
+      }
+    ],
+    "edge_cases": [
+      "319 to 320 boundary",
+      "767 to 769 boundary",
+      "1023 to 1025 component boundary",
+      "600px constrained host",
+      "safe-area inset",
+      "long selected-product list",
+      "long localized copy",
+      "no horizontal overflow"
+    ],
+    "browser_zoom": 100,
+    "device_pixel_ratio_policy": "record-actual",
+    "locale": "",
+    "currency": "",
+    "color_scheme": "",
+    "reduced_motion": false
+  },
+  "references": {
+    "current": [],
+    "target": [],
+    "context": [
+      "component-brief.md",
+      "state-matrix.md"
+    ],
+    "approved": [],
+    "implementation": [],
+    "provenance": [
+      "The user authorized all FPB fixture changes, screenshot capture, design, implementation, handoff, testing, and intermediate commits."
+    ],
+    "permissions_or_usage_notes": [
+      "Capture storefront viewport only without browser chrome.",
+      "Never commit Chrome DevTools screenshots, diffs, HARs, or raw investigation artifacts."
+    ]
+  },
+  "decisions": {
+    "locked": [
+      {
+        "id": "decision-001",
+        "question": "Which FPB templates are in scope?",
+        "selected_value": "Standard, Classic, Compact, and Horizontal",
+        "rationale": "The user explicitly required all FPB design templates.",
+        "status": "locked",
+        "approver": "Aditya Awasthi",
+        "revision": 1,
+        "affected_artifacts": [
+          "component-brief.md",
+          "state-matrix.md",
+          "acceptance-criteria.md"
+        ]
+      },
+      {
+        "id": "decision-002",
+        "question": "What defines configurable-state coverage?",
+        "selected_value": "Use the earlier FPB matrix as requirements and require fresh post-redesign proof.",
+        "rationale": "This preserves the requested matrix scope without treating stale evidence as current proof.",
+        "status": "locked",
+        "approver": "Aditya Awasthi",
+        "revision": 1,
+        "affected_artifacts": [
+          "state-matrix.md",
+          "browser-test-plan.yaml"
+        ]
+      },
+      {
+        "id": "decision-003",
+        "question": "How are storefront changes refreshed?",
+        "selected_value": "Clear or bypass cache and hard reload; never restart the supplied dev server.",
+        "rationale": "The user explicitly requested this workflow.",
+        "status": "locked",
+        "approver": "Aditya Awasthi",
+        "revision": 1,
+        "affected_artifacts": [
+          "browser-test-plan.yaml",
+          "acceptance-criteria.md"
+        ]
+      },
+      {
+        "id": "decision-004",
+        "question": "How does the Classic redesign relate to this program?",
+        "selected_value": "Preserve the approved Classic job and inherit it as the Classic baseline.",
+        "rationale": "Material scope expansion requires a successor job rather than overwritten history.",
+        "status": "locked",
+        "approver": "Aditya Awasthi",
+        "revision": 1,
+        "affected_artifacts": [
+          "component-brief.md",
+          "direction-comparison.md",
+          "implementation-handoff.md"
+        ]
+      },
+      {
+        "id": "decision-005",
+        "question": "How is implementation committed?",
+        "selected_value": "Commit each verified template and state slice with impact analysis.",
+        "rationale": "The user explicitly requested intermediate commits.",
+        "status": "locked",
+        "approver": "Aditya Awasthi",
+        "revision": 1,
+        "affected_artifacts": [
+          "acceptance-criteria.md",
+          "implementation-handoff.md"
+        ]
+      }
+    ],
+    "assumptions": [],
+    "rejected": [],
+    "open": [],
+    "recommendation_delegation": {
+      "status": "not-granted",
+      "scope": [],
+      "exclusions": [
+        "business-behavior",
+        "accessibility",
+        "data-semantics",
+        "approval-scope"
+      ],
+      "approved_by": "",
+      "approved_at": "",
+      "expires_at_stage": "FINAL_APPROVAL"
+    }
+  },
+  "states": {
+    "required": [
+      "empty rows with Product Slots disabled",
+      "empty slots with Product Slots enabled",
+      "partial, exact, full, and overflow selections",
+      "clear and step-gated remove behavior",
+      "mobile collapsed and expanded disclosure",
+      "Bundle Quantity Options disabled, enabled, switched, underfilled, exact, and overfilled",
+      "discount disabled and every supported pricing family",
+      "progress and messaging independently disabled and enabled",
+      "add-on and free-gift locked, eligible, selected, and active-step placement",
+      "custom title and subtitle, long copy, locale, and currency",
+      "loading, delayed hydration, invalid default, unavailable item, and missing image",
+      "responsive boundary, constrained host, safe area, reload, and cross-template regression"
+    ],
+    "optional": [],
+    "not_applicable": [],
+    "coverage_status": "requirements-mapped"
+  },
+  "responsive": {
+    "contract_status": "not-started",
+    "breakpoints": [],
+    "transformations": []
+  },
+  "accessibility": {
+    "requirements": [
+      "one connected disclosure control with accurate aria-expanded",
+      "collapsed content inert and aria-hidden",
+      "keyboard-operable clear, remove, box selection, back, next, and cart controls",
+      "usable names and disabled-state explanation",
+      "visible focus and reduced-motion behavior"
+    ],
+    "known_risks": [
+      "duplicate mobile toggle controls",
+      "hidden tray content remaining focusable",
+      "step-gated removal appearing enabled",
+      "overflowing lists obscuring totals or actions"
+    ],
+    "validation_status": "not-started"
+  },
+  "handoff": {
+    "status": "not-started",
+    "package_path": "",
+    "implementation_owner": "",
+    "implementation_branch": "",
+    "implementation_commit": ""
+  },
+  "qa": {
+    "chrome_mcp_required": true,
+    "profile_policy": "default-profile-only",
+    "allow_isolated_context": false,
+    "preflight_status": "not-started",
+    "preflight_result_path": "qa/preflight.json",
+    "baseline_status": "not-started",
+    "baseline_paths": [],
+    "summary_path": "qa/browser-artifact-summary.json",
+    "execution_status": "not-started",
+    "required_viewports": [
+      "320x720",
+      "360x800",
+      "390x844",
+      "414x896",
+      "768x1024",
+      "1024x768",
+      "1280x800",
+      "1440x900",
+      "1536x960"
+    ],
+    "required_states": [
+      "SUM-01 through SUM-16 for every applicable preset"
+    ],
+    "console_status": "not-started",
+    "network_status": "not-started",
+    "accessibility_status": "not-started",
+    "lighthouse_status": "not-started",
+    "performance_status": "not-started",
+    "visual_diff_status": "not-started",
+    "non_regression_status": "not-started",
+    "retry_history": [],
+    "artifacts_path": "qa",
+    "blockers": []
+  },
+  "approvals": {
+    "design": {
+      "status": "not-started",
+      "approver": "",
+      "at": "",
+      "revision": null
+    },
+    "handoff": {
+      "status": "not-started",
+      "approver": "",
+      "at": "",
+      "revision": null
+    },
+    "implementation": {
+      "status": "authorized",
+      "approver": "Aditya Awasthi",
+      "at": "2026-08-04T17:25:02Z",
+      "revision": 1
+    },
+    "final": {
+      "status": "not-started",
+      "approver": "",
+      "at": "",
+      "revision": null
+    }
+  },
+  "artifacts": {
+    "immutable_after_approval": true,
+    "current": {
+      "acceptance-criteria.md": {
+        "path": "acceptance-criteria.md",
+        "status": "complete",
+        "revision": 1,
+        "sha256": "7cb2f60bce79871964b8566a53770ad45adc31e51d004559069b2bb6481eccb0",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "accessibility-checklist.md": {
+        "path": "accessibility-checklist.md",
+        "status": "draft",
+        "revision": 1,
+        "sha256": "9682b89cbc36ae9bdceb494f95fe8474b428f6fe42294ea9343c84f4266c88c5",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "approval-record.yaml": {
+        "path": "approval-record.yaml",
+        "status": "draft",
+        "revision": 1,
+        "sha256": "bfab94f3e3ac7331ea723a740c484847821edcecb5e4c3c89cc1f0fd36e47bbc",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "browser-test-plan.yaml": {
+        "path": "browser-test-plan.yaml",
+        "status": "draft",
+        "revision": 1,
+        "sha256": "9665c326f082abdf62cfbb2411eb1e0c3e9615f0a710b35c359d6f095d87e0b9",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "browser-test-report.md": {
+        "path": "browser-test-report.md",
+        "status": "draft",
+        "revision": 1,
+        "sha256": "9b8950d5431f8951cb4257fb251f8b02226caf832b2a8c2db48b3d27da6e6e5d",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "chrome-preflight-result.yaml": {
+        "path": "chrome-preflight-result.yaml",
+        "status": "draft",
+        "revision": 1,
+        "sha256": "e6118d07591265a272e1e6fb10b420845d59ce22c3fde0c48567dacf4729638a",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "codex-task.md": {
+        "path": "codex-task.md",
+        "status": "draft",
+        "revision": 1,
+        "sha256": "127bbca7db1f3626e7317fbb83d7ad3752d053d6ed627c23876fbcfe834d9a4f",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "component-anatomy.md": {
+        "path": "component-anatomy.md",
+        "status": "draft",
+        "revision": 1,
+        "sha256": "ed6ed43570ce1e8b266a0ed7a68072cc1cc850b63e94ea01c4133ca69dfd9ae7",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "component-brief.md": {
+        "path": "component-brief.md",
+        "status": "complete",
+        "revision": 1,
+        "sha256": "452b1daa5d0a965dd97bcd01cee0ccbf2aade6e65ce13a0217ac7a61db930fec",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "content-stress-cases.yaml": {
+        "path": "content-stress-cases.yaml",
+        "status": "draft",
+        "revision": 1,
+        "sha256": "6ea3817ba648353680d4000390f387b0bb56880b0b817245360e30f3a0ec4a3d",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "design-tokens.json": {
+        "path": "design-tokens.json",
+        "status": "draft",
+        "revision": 1,
+        "sha256": "135dd304ebe41a1b4ff613588edfcc85a11387631f22e234b4f8d9ef86a2eb4c",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "direction-comparison.md": {
+        "path": "direction-comparison.md",
+        "status": "draft",
+        "revision": 1,
+        "sha256": "79393b05d68f005181023441d0b7149e54d3236fc6d283ef76065bd18bd87db0",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "implementation-handoff.md": {
+        "path": "implementation-handoff.md",
+        "status": "draft",
+        "revision": 1,
+        "sha256": "da5af118d00f6d9bc9eceee022f84ee299a2575db60687cd39588852e627ed77",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "interaction-contract.md": {
+        "path": "interaction-contract.md",
+        "status": "draft",
+        "revision": 1,
+        "sha256": "c7629107dd908b482dcf4640824852b0158a8fe1e6d6eb7434e27735980fce22",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "locked-decisions.yaml": {
+        "path": "locked-decisions.yaml",
+        "status": "complete",
+        "revision": 1,
+        "sha256": "ba20f96705878f8bcdc77f8337d24386b56c6c0ebbc79d2b51c0d4f59780fe7b",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "remediation-list.md": {
+        "path": "remediation-list.md",
+        "status": "draft",
+        "revision": 1,
+        "sha256": "d7e3793cbbd8e687cc36fd4ce173668908753cfbaf0ce67f3ac6d13782d850f0",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "responsive-contract.md": {
+        "path": "responsive-contract.md",
+        "status": "draft",
+        "revision": 1,
+        "sha256": "bf29afa1d75403188354e7f3984d4b7dc184639b9f7c1f1d40f3f849a02f85ac",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "screenshot-inventory.yaml": {
+        "path": "screenshot-inventory.yaml",
+        "status": "draft",
+        "revision": 1,
+        "sha256": "ecc4817b4b356871099f348e77babf4f48ddea777c9f7d8abfebc0eb76079b9b",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "state-matrix.md": {
+        "path": "state-matrix.md",
+        "status": "complete",
+        "revision": 1,
+        "sha256": "ec405eedc93e4251df19092479210df733bb8868ab88f61e00deedbbd44c051a",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "visual-audit.md": {
+        "path": "visual-audit.md",
+        "status": "draft",
+        "revision": 1,
+        "sha256": "c14f045be92619180eaf5ce201000facd712d7b97540388b8047d43a58647cc5",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "visual-qa-report.md": {
+        "path": "visual-qa-report.md",
+        "status": "draft",
+        "revision": 1,
+        "sha256": "274ebb531f1216a6bff4f4b30f176405877ef58a4883bb56621acd14658f2de2",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      }
+    },
+    "superseded": []
+  },
+  "history": [
+    {
+      "sequence": 1,
+      "at": "2026-08-04T17:25:02Z",
+      "from": null,
+      "to": "DISCOVERY",
+      "revision": 1,
+      "reason": "Design job created",
+      "evidence": []
+    },
+    {
+      "sequence": 2,
+      "at": "2026-08-04T17:28:32Z",
+      "from": "DISCOVERY",
+      "to": "SCOPE",
+      "revision": 1,
+      "reason": "Discovery recorded from the user objective, canonical matrix, and current shared summary architecture.",
+      "evidence": [
+        "component-brief.md"
+      ],
+      "affected_artifacts": [
+        "component-brief.md"
+      ]
+    },
+    {
+      "sequence": 3,
+      "at": "2026-08-04T17:28:40Z",
+      "from": "SCOPE",
+      "to": "REFERENCE_INTAKE",
+      "revision": 1,
+      "reason": "Scope and non-goals are explicit, with matrix-derived state coverage and current source ownership recorded.",
+      "evidence": [
+        "component-brief.md",
+        "state-matrix.md"
+      ],
+      "affected_artifacts": [
+        "screenshot-inventory.yaml"
+      ]
+    }
+  ]
+}

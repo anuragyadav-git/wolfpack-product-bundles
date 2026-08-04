@@ -1,0 +1,98 @@
+{
+  "schema_version": 1,
+  "job_id": "fpb-all-template-summary-20260804",
+  "revision": 1,
+  "status": "draft",
+  "cases": [
+    {
+      "id": "long-product-title",
+      "data": {},
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "short-product-title",
+      "data": {},
+      "required_in_browser_qa": false
+    },
+    {
+      "id": "high-price",
+      "data": {},
+      "required_in_browser_qa": false
+    },
+    {
+      "id": "discounted-price",
+      "data": {},
+      "required_in_browser_qa": false
+    },
+    {
+      "id": "zero-discount",
+      "data": {},
+      "required_in_browser_qa": false
+    },
+    {
+      "id": "long-variant-name",
+      "data": {},
+      "required_in_browser_qa": false
+    },
+    {
+      "id": "multiple-variant-dimensions",
+      "data": {},
+      "required_in_browser_qa": false
+    },
+    {
+      "id": "missing-image",
+      "data": {},
+      "required_in_browser_qa": false
+    },
+    {
+      "id": "portrait-image",
+      "data": {},
+      "required_in_browser_qa": false
+    },
+    {
+      "id": "landscape-image",
+      "data": {},
+      "required_in_browser_qa": false
+    },
+    {
+      "id": "quantity-one",
+      "data": {},
+      "required_in_browser_qa": false
+    },
+    {
+      "id": "quantity-ten-plus",
+      "data": {},
+      "required_in_browser_qa": false
+    },
+    {
+      "id": "zero-selected-products",
+      "data": {},
+      "required_in_browser_qa": false
+    },
+    {
+      "id": "many-selected-products",
+      "data": {},
+      "required_in_browser_qa": false
+    },
+    {
+      "id": "long-translated-copy",
+      "data": {},
+      "required_in_browser_qa": false
+    },
+    {
+      "id": "wide-currency-format",
+      "data": {},
+      "required_in_browser_qa": false
+    },
+    {
+      "id": "validation-error",
+      "data": {},
+      "required_in_browser_qa": false
+    },
+    {
+      "id": "slow-loading-state",
+      "data": {},
+      "required_in_browser_qa": false
+    }
+  ]
+}

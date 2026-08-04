@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "job_id": "fpb-all-template-summary-20260804",
+  "revision": 1,
+  "status": "draft",
+  "groups": {
+    "color": [],
+    "typography": [],
+    "spacing": [],
+    "size": [],
+    "radius": [],
+    "border": [],
+    "shadow": [],
+    "z_index": [],
+    "motion": [],
+    "breakpoint": [],
+    "component_alias": []
+  },
+  "token_shape": {
+    "name": "",
+    "value": null,
+    "unit": "",
+    "source": "recommendation",
+    "confidence": "low",
+    "merchant_configurable": false,
+    "owner": "",
+    "notes": ""
+  }
+}
