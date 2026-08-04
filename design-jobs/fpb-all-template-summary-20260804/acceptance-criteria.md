@@ -29,7 +29,7 @@ keywords:
 
 Artifact job ID: fpb-all-template-summary-20260804
 Artifact revision: 2
-Artifact status: complete
+Artifact status: approved
 
 - [ ] Every `SUM-01` through `SUM-20` state is terminally proven at its required templates and viewports.
 - [ ] Direction A reads as one calm review hierarchy while Standard, Classic, Compact, and Horizontal retain their approved desktop identities.

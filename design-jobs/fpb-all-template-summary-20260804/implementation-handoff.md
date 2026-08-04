@@ -3,7 +3,7 @@ schema_version: 1
 id: fpb-all-template-summary-implementation-handoff
 title: FPB All-Template Summary Implementation Handoff
 type: implementation-handoff
-status: complete
+status: approved
 summary: Defines the bounded production contract for Direction A across every FPB summary preset and responsive tray state.
 last_audited: 2026-08-05
 owners:
@@ -33,7 +33,7 @@ keywords:
 
 Artifact job ID: fpb-all-template-summary-20260804
 Artifact revision: 2
-Artifact status: complete
+Artifact status: approved
 
 ## Identity and approved references
 

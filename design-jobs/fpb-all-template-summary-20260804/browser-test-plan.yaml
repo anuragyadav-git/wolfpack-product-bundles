@@ -2,7 +2,7 @@
   "schema_version": 1,
   "job_id": "fpb-all-template-summary-20260804",
   "revision": 2,
-  "status": "complete",
+  "status": "approved",
   "chrome_mcp_required": true,
   "environment": "development",
   "base_url": "https://agent-5sfidg3m.myshopify.com/apps/product-bundles/wpb/cmse8sp170000v0ytaqqzsvtw",

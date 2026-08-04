@@ -3,7 +3,7 @@ schema_version: 1
 id: fpb-all-template-summary-codex-task
 title: Implement FPB Unified Calm Review System
 type: implementation-task
-status: complete
+status: approved
 summary: Provides a bounded task for implementing and proving Direction A across every FPB summary preset.
 last_audited: 2026-08-05
 owners:
@@ -28,7 +28,7 @@ keywords:
 
 Artifact job ID: fpb-all-template-summary-20260804
 Artifact revision: 2
-Artifact status: complete
+Artifact status: approved
 
 ## Job, revision, goal, and non-goals
 
