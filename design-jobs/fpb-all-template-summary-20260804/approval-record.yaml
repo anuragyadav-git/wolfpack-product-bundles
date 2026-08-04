@@ -2,12 +2,15 @@
   "schema_version": 1,
   "job_id": "fpb-all-template-summary-20260804",
   "revision": 1,
-  "status": "draft",
+  "status": "complete",
   "design": {
-    "status": "not-started",
-    "approver": "",
-    "at": "",
-    "evidence": [],
+    "status": "approved",
+    "approver": "Aditya Awasthi",
+    "at": "2026-08-04T19:05:46Z",
+    "evidence": [
+      "direction-comparison.md",
+      "decision-006"
+    ],
     "waivers": []
   },
   "handoff": {

@@ -4,10 +4,10 @@
     "id": "fpb-all-template-summary-20260804",
     "title": "FPB all-template summary sidebars and mobile trays",
     "status": "active",
-    "stage": "DIRECTION_APPROVAL",
-    "revision": 1,
+    "stage": "RESPONSIVE_CONTRACT",
+    "revision": 2,
     "created_at": "2026-08-04T17:25:02Z",
-    "updated_at": "2026-08-04T17:57:18Z",
+    "updated_at": "2026-08-04T19:11:49Z",
     "owner": "Aditya Awasthi",
     "product": "Wolfpack Product Bundles",
     "repository": "/Users/adityaawasthi/Developer/wolfpack-product-bundles",
@@ -243,6 +243,29 @@
           "acceptance-criteria.md",
           "implementation-handoff.md"
         ]
+      },
+      {
+        "id": "decision-006",
+        "question": "Which all-template summary direction should govern Standard, Compact, Horizontal, and the shared mobile tray?",
+        "selected_value": "Direction A - Unified Calm Review System",
+        "rationale": "The user explicitly approved Direction A for the expanded all-template scope.",
+        "evidence_ids": [
+          "VA-01 through VA-15",
+          "GAP-01 through GAP-08"
+        ],
+        "status": "locked",
+        "approver": "Aditya Awasthi",
+        "approved_at": "2026-08-04T19:05:46Z",
+        "revision": 1,
+        "affected_artifacts": [
+          "direction-comparison.md",
+          "component-anatomy.md",
+          "state-matrix.md",
+          "responsive-contract.md",
+          "interaction-contract.md",
+          "design-tokens.json",
+          "implementation-handoff.md"
+        ]
       }
     ],
     "assumptions": [
@@ -270,32 +293,28 @@
     "rejected": [],
     "open": [
       {
-        "id": "decision-006",
-        "question": "Which all-template summary direction should govern Standard, Compact, Horizontal, and the shared mobile tray?",
+        "id": "decision-007",
+        "question": "At what measured FPB widget-container width should the desktop summary sidebar become the shared mobile/tablet tray?",
         "options_considered": [
-          "Direction A - Unified Calm Review System",
-          "Direction B - Preset-Pure Target Mirroring",
-          "Direction C - Guided Qualification System"
+          "Direction-A recommendation: sidebar at 1024px and above; tray below 1024px",
+          "Legacy narrow boundary: sidebar at 769px and above; tray at 768px and below"
         ],
-        "recommendation": "Direction A - Unified Calm Review System",
+        "recommendation": "Direction-A recommendation: sidebar at 1024px and above; tray below 1024px",
         "selected_value": "",
-        "rationale": "Awaiting the mandatory explicit direction approval for the expanded all-template scope.",
+        "rationale": "The supplied screenshots prove 390px mobile and 1440px desktop but do not directly prove tablet behavior. Explicit approval is required for this responsive default.",
         "evidence_ids": [
-          "VA-01 through VA-15",
-          "GAP-01 through GAP-08"
+          "RD-001",
+          "B-01",
+          "B-02"
         ],
         "status": "open",
         "approver": "",
         "revision": 1,
         "affected_artifacts": [
-          "direction-comparison.md",
-          "locked-decisions.yaml",
-          "approval-record.yaml",
-          "component-anatomy.md",
-          "state-matrix.md",
           "responsive-contract.md",
           "interaction-contract.md",
-          "design-tokens.json",
+          "browser-test-plan.yaml",
+          "acceptance-criteria.md",
           "implementation-handoff.md"
         ]
       }
@@ -327,16 +346,26 @@
       "add-on and free-gift locked, eligible, selected, and active-step placement",
       "custom title and subtitle, long copy, locale, and currency",
       "loading, delayed hydration, invalid default, unavailable item, and missing image",
-      "responsive boundary, constrained host, safe area, reload, and cross-template regression"
+      "responsive boundary, constrained host, safe area, reload, and cross-template regression",
+      "control hover, focus-visible, pressed, disabled, busy, submit failure, and recovery",
+      "long localized content, large currency, missing or slow media, 200 percent zoom, and reduced motion"
     ],
     "optional": [],
     "not_applicable": [],
-    "coverage_status": "requirements-mapped"
+    "coverage_status": "complete"
   },
   "responsive": {
-    "contract_status": "not-started",
-    "breakpoints": [],
-    "transformations": []
+    "contract_status": "decision-ready",
+    "breakpoints": [
+      "Proposed container boundary: 1023px tray; 1024px and above sidebar",
+      "Diagnostic legacy conflict boundary: 767px, 768px, and 769px",
+      "Minimum supported proof width: 320px"
+    ],
+    "transformations": [
+      "One preset-owned desktop sidebar becomes one shared inset sticky tray",
+      "Expanded review owns bounded internal scroll while page scroll remains available",
+      "Selection, pricing, step, box, add-on, and disclosure state survive resize and orientation changes"
+    ]
   },
   "accessibility": {
     "requirements": [
@@ -398,10 +427,10 @@
   },
   "approvals": {
     "design": {
-      "status": "not-started",
-      "approver": "",
-      "at": "",
-      "revision": null
+      "status": "approved",
+      "approver": "Aditya Awasthi",
+      "at": "2026-08-04T19:05:46Z",
+      "revision": 1
     },
     "handoff": {
       "status": "not-started",
@@ -445,9 +474,9 @@
       },
       "approval-record.yaml": {
         "path": "approval-record.yaml",
-        "status": "draft",
+        "status": "complete",
         "revision": 1,
-        "sha256": "bfab94f3e3ac7331ea723a740c484847821edcecb5e4c3c89cc1f0fd36e47bbc",
+        "sha256": "f5c504cf206f1588341631f4a848eee7f25f5520ff3729e27767ef6865964b0b",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -490,9 +519,9 @@
       },
       "component-anatomy.md": {
         "path": "component-anatomy.md",
-        "status": "draft",
+        "status": "complete",
         "revision": 1,
-        "sha256": "ed6ed43570ce1e8b266a0ed7a68072cc1cc850b63e94ea01c4133ca69dfd9ae7",
+        "sha256": "f2a294a1d3962c6759b9592f11a017abced60e4db4177425eaba4249b48a9eef",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -526,12 +555,14 @@
       },
       "direction-comparison.md": {
         "path": "direction-comparison.md",
-        "status": "complete",
+        "status": "approved",
         "revision": 1,
-        "sha256": "a166ab54178d0bcd891641fd82affd96d04d6e5c34ba7362ba9a7eb551f3b2fd",
-        "approved_by": "",
-        "approved_at": "",
-        "evidence": []
+        "sha256": "ab5bd3bd6597fbe4083d9f858ce3b327868f3c49aaba34553c8e07333cee837d",
+        "approved_by": "Aditya Awasthi",
+        "approved_at": "2026-08-04T19:07:04Z",
+        "evidence": [
+          "approval-record.yaml"
+        ]
       },
       "implementation-handoff.md": {
         "path": "implementation-handoff.md",
@@ -554,8 +585,8 @@
       "locked-decisions.yaml": {
         "path": "locked-decisions.yaml",
         "status": "complete",
-        "revision": 1,
-        "sha256": "445d700a97d12a69592e12f196b10f6f2f1cc737c1c55dce1fe4fdba8d3753e8",
+        "revision": 2,
+        "sha256": "36ba7853138afb90c94be67c672686461676bc2d59831b71209e10f3b8b1beb3",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -572,8 +603,8 @@
       "responsive-contract.md": {
         "path": "responsive-contract.md",
         "status": "draft",
-        "revision": 1,
-        "sha256": "bf29afa1d75403188354e7f3984d4b7dc184639b9f7c1f1d40f3f849a02f85ac",
+        "revision": 2,
+        "sha256": "6d55cf7ad776df045461004de3494528e9d38efe25b9fbef6692aaf7e805005f",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -591,7 +622,7 @@
         "path": "state-matrix.md",
         "status": "complete",
         "revision": 1,
-        "sha256": "ec405eedc93e4251df19092479210df733bb8868ab88f61e00deedbbd44c051a",
+        "sha256": "7c07a9a0a362b996a45c5eba911dc76706d88515d7b057eff8512ab46cb01d20",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -615,7 +646,22 @@
         "evidence": []
       }
     },
-    "superseded": []
+    "superseded": [
+      {
+        "path": "locked-decisions.yaml",
+        "status": "approved",
+        "revision": 1,
+        "sha256": "4c077a8b918c894b847f8c3761cf9fd845d2fc9511bfc12f168288a7e6b08ff3",
+        "approved_by": "Aditya Awasthi",
+        "approved_at": "2026-08-04T19:07:04Z",
+        "evidence": [
+          "approval-record.yaml"
+        ],
+        "superseded_at": "2026-08-04T19:11:49Z",
+        "superseded_by": "",
+        "superseded_reason": "Added the downstream responsive breakpoint decision without changing approved Direction A"
+      }
+    ]
   },
   "history": [
     {
@@ -703,6 +749,57 @@
         "direction-comparison.md"
       ],
       "affected_artifacts": []
+    },
+    {
+      "sequence": 8,
+      "at": "2026-08-04T19:07:09Z",
+      "from": "DIRECTION_APPROVAL",
+      "to": "COMPONENT_ANATOMY",
+      "revision": 1,
+      "reason": "Aditya Awasthi explicitly approved Direction A - Unified Calm Review System for the expanded all-template scope",
+      "evidence": [
+        "direction-comparison.md",
+        "locked-decisions.yaml",
+        "approval-record.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 9,
+      "at": "2026-08-04T19:09:20Z",
+      "from": "COMPONENT_ANATOMY",
+      "to": "STATE_CONTRACT",
+      "revision": 1,
+      "reason": "Every visible, interactive, responsive, and merchant-configurable summary region now has one repository-observed owner",
+      "evidence": [
+        "component-anatomy.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 10,
+      "at": "2026-08-04T19:10:10Z",
+      "from": "STATE_CONTRACT",
+      "to": "RESPONSIVE_CONTRACT",
+      "revision": 1,
+      "reason": "All matrix-derived summary states and universal interaction, recovery, content-stress, zoom, and reduced-motion states have explicit desktop/mobile contracts",
+      "evidence": [
+        "state-matrix.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 11,
+      "at": "2026-08-04T19:11:49Z",
+      "from": "RESPONSIVE_CONTRACT",
+      "to": "RESPONSIVE_CONTRACT",
+      "revision": 2,
+      "reason": "Added the downstream responsive breakpoint decision without changing approved Direction A",
+      "evidence": [],
+      "event": "artifact-superseded",
+      "affected_artifacts": [
+        "locked-decisions.yaml"
+      ]
     }
   ]
 }

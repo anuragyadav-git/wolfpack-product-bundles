@@ -3,9 +3,9 @@ schema_version: 1
 id: fpb-all-template-summary-state-matrix
 title: FPB All-Template Summary State Matrix
 type: design-state-matrix
-status: active
+status: complete
 summary: Maps every required FPB summary state to desktop and mobile behavior across all four templates.
-last_audited: 2026-08-04
+last_audited: 2026-08-05
 owners:
   - Aditya Awasthi
 domains:
@@ -50,6 +50,10 @@ Artifact status: complete
 | SUM-14 | Loading/recovery | Delayed hydration, missing image, invalid default, unavailable item | Reserved shell avoids layout jump; bad items/images recover safely | Retry through normal reload/state correction | Busy/hidden states do not trap focus | ST/CL/CO/HO | No title/Standard flash | Yes, representative shared path plus preset first-paint smoke | Normalizer/error behavior | Required |
 | SUM-15 | Responsive boundary | 319/320/360/390/414/600/767/768/769/1023/1024/1025/1280/1440/1536 widths | Exactly one summary surface; no page overflow; content-driven sizing | Resize/rotate/scroll | Reading and focus order stay coherent | Sidebar at component width >=1024 | Tray below 1024 | Yes, boundary sweep | Responsive mode predicate | Required |
 | SUM-16 | Reload/session | Selected state then cache-bypassed hard reload | Persist/reset behavior matches EB and correct preset assets render | Hard reload only | No duplicate controls after re-init | ST/CL/CO/HO | ST/CL/CO/HO | Yes, every preset | Bootstrap idempotency | Required |
+| SUM-17 | Control interaction | Default, hover, focus-visible, pressed, disabled, or busy clear/remove/box/disclosure/back/next/cart control | Geometry stays stable; state is visible without color alone; action fires once | Native keyboard and pointer activation when available | Usable name, visible focus, exposed disabled/busy/expanded/selected state, minimum target contract | ST/CL/CO/HO | ST/CL/CO/HO | Yes, shared keyboard path plus every preset focus smoke | Event fires once; disabled/busy guards | Required |
+| SUM-18 | Submit and recovery | Qualified Add to Cart, slow request, rejected request, or recoverable validation failure | CTA enters busy state without layout shift; duplicate submit is blocked; failure leaves selections intact and exposes recovery | Wait, correct state, or retry through the same action | `aria-busy`/disabled state is exposed; error or toast is perceivable; focus is not lost | ST/CL/CO/HO | Persistent CTA remains visible and non-overlapping | Yes, shared success/failure path plus preset smoke | Single cart call, busy guard, preserved selection | Required |
+| SUM-19 | Content/media stress | Long localized title/subtitle/message/product/variant; large currency; missing/slow image; 200% zoom | Text wraps or truncates only at documented owners; prices/actions remain reachable; media fallback does not alter identity | Existing actions remain usable | Reflow works at 200%; image alternatives and names remain correct; no clipped focus | ST/CL/CO/HO | Expanded/collapsed tray at 320 and 390 widths | Yes, every preset stress fixture | Resolver, fallback, and overflow invariants | Required |
+| SUM-20 | Motion preference | Disclosure, offer pulse, progress, or loading transition with reduced motion requested | State changes complete without decorative movement or delayed access to content | Same controls and final state | No essential information depends on animation; focus and announcements remain stable | ST/CL/CO/HO | ST/CL/CO/HO | Yes, shared reduced-motion case plus preset smoke | Preference branch and final state | Required |
 
 ## Not applicable
 
@@ -57,10 +61,14 @@ Artifact status: complete
 |---|---|
 | Drag/reorder | Summary order follows bundle selection order; shopper reordering is not an FPB capability. |
 | Inline editing | Summary copy and configuration are merchant-owned Admin settings, not storefront-editable fields. |
+| Drag dismissal or swipe gesture | The approved tray uses an explicit disclosure button; gesture-only dismissal would create an additional interaction path and accessibility burden. |
+| Modal focus trap | The mobile tray is a sticky responsive replacement, not a modal or dialog, and background page scroll remains available. |
+| Image carousel | Summary rows and slots use one selected-product image; gallery behavior belongs to the separate product details modal. |
 
 ## Coverage
 
-- Required: 16 state families across Standard, Classic, Compact, and Horizontal, with desktop/mobile applicability as listed.
-- Covered: Requirements and current source ownership mapped. Classic has a new implementation with partial post-change QA; other presets only have historical pre-program evidence.
-- Missing: Fresh all-template visual baselines, direction artifacts, post-change browser proof, stress fixtures, and acceptance approval.
-- Status: Discovery complete; implementation completion unproven.
+- Required: 20 state families across Standard, Classic, Compact, and Horizontal, with desktop/mobile applicability as listed.
+- Matrix traceability: SUM-01 through SUM-16 cover canonical matrix groups M01-M12, D01-D13, A01-A15, S01-S11, N01-N12, and R16 wherever they alter the summary. SUM-17 through SUM-20 close the universal interaction, failure, content-stress, zoom, and reduced-motion obligations from the state catalog.
+- Covered: Every selected state now records its trigger, precondition, visible result, interaction, accessibility requirement, desktop/mobile behavior, fresh evidence, assertion family, and approval requirement.
+- Missing downstream evidence: post-implementation browser results, screenshots, console/network records, accessibility snapshots, and approval of any waiver. These are execution evidence, not missing state semantics.
+- Status: state contract complete; implementation completion remains unproven.

@@ -3,9 +3,9 @@ schema_version: 1
 id: fpb-all-template-summary-direction-comparison
 title: FPB All-Template Summary Direction Comparison
 type: design-decision
-status: decision-ready
+status: approved
 summary: Compares three behavior-equivalent directions for one coherent summary system across all four FPB presets.
-last_audited: 2026-08-04
+last_audited: 2026-08-05
 owners:
   - Aditya Awasthi
 domains:
@@ -33,7 +33,7 @@ keywords:
 
 Artifact job ID: fpb-all-template-summary-20260804
 Artifact revision: 1
-Artifact status: complete
+Artifact status: approved
 
 ## Shared functional requirements
 
@@ -80,7 +80,7 @@ Artifact status: complete
 
 - Recommended direction and rationale: Direction A - Unified Calm Review System. It extends the explicitly approved Classic direction, matches the evidence that desktop widths vary but summary anatomy is shared, and minimizes the risk of inconsistent behavior across hundreds of matrix permutations.
 - Assumptions and stress cases: Long merchant title/subtitle, 320px viewport, safe areas, 10+ selected rows, Product Slots, switched box target, progress and messages independently toggled, compare-at and savings, add-on/gift rows, unavailable items, missing image, loading/delayed hydration, long locale, large currency values, and disabled/recoverable actions.
-- Selected direction: Awaiting explicit approval for Standard, Compact, Horizontal, and the shared mobile system. Classic remains locked to the predecessor's approved Direction A.
-- Approved by and at: Not yet approved for the expanded all-template scope.
+- Selected direction: Direction A - Unified Calm Review System for Standard, Classic, Compact, Horizontal, and the shared mobile system.
+- Approved by and at: Aditya Awasthi at 2026-08-04T19:05:46Z.
 - Evidence IDs: VA-01 through VA-15; GAP-01 through GAP-08; comparison cohorts in `screenshot-inventory.yaml`.
-- Rejections and reasons: None until the user approves a direction.
+- Rejections and reasons: Direction B was not selected because it duplicates presentation and accessibility ownership across presets. Direction C was not selected because it overemphasizes qualification for simple bundles.

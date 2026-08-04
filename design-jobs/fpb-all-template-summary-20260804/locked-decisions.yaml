@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "job_id": "fpb-all-template-summary-20260804",
-  "revision": 1,
+  "revision": 2,
   "status": "complete",
   "locked": [
     {
@@ -115,11 +115,7 @@
         "acceptance-criteria.md",
         "implementation-handoff.md"
       ]
-    }
-  ],
-  "assumptions": [],
-  "rejected": [],
-  "open": [
+    },
     {
       "id": "decision-006",
       "question": "Which all-template summary direction should govern Standard, Compact, Horizontal, and the shared mobile tray?",
@@ -129,15 +125,15 @@
         "Direction C - Guided Qualification System"
       ],
       "recommendation": "Direction A - Unified Calm Review System",
-      "selected_value": "",
-      "rationale": "Awaiting explicit user approval for the expanded all-template scope.",
+      "selected_value": "Direction A - Unified Calm Review System",
+      "rationale": "The user explicitly approved Direction A for the expanded all-template scope.",
       "evidence_ids": [
         "VA-01 through VA-15",
         "GAP-01 through GAP-08"
       ],
-      "status": "open",
-      "approved_by": "",
-      "approved_at": "",
+      "status": "locked",
+      "approved_by": "Aditya Awasthi",
+      "approved_at": "2026-08-04T19:05:46Z",
       "revision_introduced": 1,
       "affected_artifacts": [
         "direction-comparison.md",
@@ -146,6 +142,37 @@
         "responsive-contract.md",
         "interaction-contract.md",
         "design-tokens.json",
+        "implementation-handoff.md"
+      ]
+    }
+  ],
+  "assumptions": [],
+  "rejected": [],
+  "open": [
+    {
+      "id": "decision-007",
+      "question": "At what measured FPB widget-container width should the desktop summary sidebar become the shared mobile/tablet tray?",
+      "options_considered": [
+        "Direction-A recommendation: sidebar at 1024px and above; tray below 1024px",
+        "Legacy narrow boundary: sidebar at 769px and above; tray at 768px and below"
+      ],
+      "recommendation": "Direction-A recommendation: sidebar at 1024px and above; tray below 1024px",
+      "selected_value": "",
+      "rationale": "The supplied screenshots prove 390px mobile and 1440px desktop but do not directly prove tablet behavior. Explicit approval is required for this responsive default.",
+      "evidence_ids": [
+        "RD-001",
+        "B-01",
+        "B-02"
+      ],
+      "status": "open",
+      "approved_by": "",
+      "approved_at": "",
+      "revision_introduced": 1,
+      "affected_artifacts": [
+        "responsive-contract.md",
+        "interaction-contract.md",
+        "browser-test-plan.yaml",
+        "acceptance-criteria.md",
         "implementation-handoff.md"
       ]
     }
