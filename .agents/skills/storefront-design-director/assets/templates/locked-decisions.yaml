@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "job_id": "",
+  "revision": 1,
+  "status": "draft",
+  "locked": [],
+  "assumptions": [],
+  "rejected": [],
+  "open": [],
+  "superseded": [],
+  "decision_shape": {
+    "id": "",
+    "question": "",
+    "options_considered": [],
+    "recommendation": "",
+    "selected_value": "",
+    "rationale": "",
+    "evidence_ids": [],
+    "status": "open",
+    "approved_by": "",
+    "approved_at": "",
+    "revision_introduced": 1,
+    "affected_artifacts": []
+  }
+}

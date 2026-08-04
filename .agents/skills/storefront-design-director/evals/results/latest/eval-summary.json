@@ -1,0 +1,687 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-08-04T06:56:55Z",
+  "skill_name": "storefront-design-director",
+  "deterministic_status": "passed",
+  "model_status": "passed",
+  "overall_status": "passed",
+  "case_counts": {
+    "invocation": 37,
+    "workflow": 30,
+    "browser_qa": 7,
+    "model_dependent_total": 74
+  },
+  "deterministic_checks": [
+    {
+      "id": "invocation-corpus",
+      "status": "passed",
+      "evidence": "{\"categories\": {\"ambiguous\": 7, \"should_invoke\": 17, \"should_not_invoke\": 13}, \"total\": 37}"
+    },
+    {
+      "id": "workflow-corpus",
+      "status": "passed",
+      "evidence": "{\"severities\": {\"critical\": 17, \"high\": 12, \"medium\": 1}, \"total\": 30}"
+    },
+    {
+      "id": "browser-corpus",
+      "status": "passed",
+      "evidence": "{\"total\": 7}"
+    },
+    {
+      "id": "rubric-contract",
+      "status": "passed",
+      "evidence": "{\"concrete_checks\": 13, \"critical_failures\": 10, \"qualitative_dimensions\": 12}"
+    },
+    {
+      "id": "jsonl-validation",
+      "status": "passed",
+      "evidence": "Every non-empty JSONL row parsed as an object."
+    }
+  ],
+  "model_results": {
+    "provided": true,
+    "expected": 74,
+    "executed": 74,
+    "passed": 74,
+    "failed": 0,
+    "blocked": 0,
+    "unexecuted": 0,
+    "invalid": 0,
+    "critical": 0,
+    "threshold_failed": 0
+  },
+  "unexecuted_case_ids": [],
+  "invocation_metrics": {
+    "tp": 17,
+    "fp": 0,
+    "fn": 0,
+    "tn": 13,
+    "precision": 1.0,
+    "recall": 1.0
+  },
+  "scenario_results": [
+    {
+      "case_id": "ambiguous-copy-this",
+      "suite": "invocation",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "ambiguous-figma-like-component",
+      "suite": "invocation",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "ambiguous-fix-mobile",
+      "suite": "invocation",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "ambiguous-footer-broken",
+      "suite": "invocation",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "ambiguous-page-better",
+      "suite": "invocation",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "ambiguous-review-screenshot",
+      "suite": "invocation",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "ambiguous-test-chrome",
+      "suite": "invocation",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "chrome-missing",
+      "suite": "browser_qa",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "console-network-failure",
+      "suite": "browser_qa",
+      "status": "passed",
+      "workflow_outcome": "blocked",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "default-profile-only",
+      "suite": "browser_qa",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "invoke-approved-design-handoff",
+      "suite": "invocation",
+      "status": "passed",
+      "workflow_outcome": "blocked",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "invoke-bundle-progress-audit",
+      "suite": "invocation",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "invoke-chrome-component-qa",
+      "suite": "invocation",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "invoke-controlled-alternatives",
+      "suite": "invocation",
+      "status": "passed",
+      "workflow_outcome": "blocked",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "invoke-current-target-comparison",
+      "suite": "invocation",
+      "status": "passed",
+      "workflow_outcome": "blocked",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "invoke-footer-qa",
+      "suite": "invocation",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "invoke-interactive-promotion",
+      "suite": "invocation",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "invoke-mobile-bundle-tray",
+      "suite": "invocation",
+      "status": "passed",
+      "workflow_outcome": "blocked",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "invoke-product-card-screenshots",
+      "suite": "invocation",
+      "status": "passed",
+      "workflow_outcome": "blocked",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "invoke-product-card-states",
+      "suite": "invocation",
+      "status": "passed",
+      "workflow_outcome": "blocked",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "invoke-product-details-modal",
+      "suite": "invocation",
+      "status": "passed",
+      "workflow_outcome": "blocked",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "invoke-responsive-state-board",
+      "suite": "invocation",
+      "status": "passed",
+      "workflow_outcome": "blocked",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "invoke-resume-job",
+      "suite": "invocation",
+      "status": "passed",
+      "workflow_outcome": "blocked",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "invoke-storefront-selector",
+      "suite": "invocation",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "invoke-storefront-tabs",
+      "suite": "invocation",
+      "status": "passed",
+      "workflow_outcome": "blocked",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "invoke-summary-sidebar",
+      "suite": "invocation",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "invoke-visual-regression",
+      "suite": "invocation",
+      "status": "passed",
+      "workflow_outcome": "blocked",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "measured-remediation",
+      "suite": "browser_qa",
+      "status": "passed",
+      "workflow_outcome": "blocked",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "mismatched-captures",
+      "suite": "browser_qa",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "performance-scope",
+      "suite": "browser_qa",
+      "status": "passed",
+      "workflow_outcome": "blocked",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "production-safety",
+      "suite": "browser_qa",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "reject-admin-ui",
+      "suite": "invocation",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "reject-approved-css-implementation",
+      "suite": "invocation",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "reject-backend-graphql",
+      "suite": "invocation",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "reject-database-migration",
+      "suite": "invocation",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "reject-direct-bug-fix",
+      "suite": "invocation",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "reject-legal-document",
+      "suite": "invocation",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "reject-logo",
+      "suite": "invocation",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "reject-product-research",
+      "suite": "invocation",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "reject-pure-performance",
+      "suite": "invocation",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "reject-shopify-function",
+      "suite": "invocation",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "reject-social-poster",
+      "suite": "invocation",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "reject-spreadsheet-analysis",
+      "suite": "invocation",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "reject-unrelated-browsing",
+      "suite": "invocation",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "workflow-01",
+      "suite": "workflow",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "workflow-02",
+      "suite": "workflow",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "workflow-03",
+      "suite": "workflow",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "workflow-04",
+      "suite": "workflow",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "workflow-05",
+      "suite": "workflow",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "workflow-06",
+      "suite": "workflow",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "workflow-07",
+      "suite": "workflow",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "workflow-08",
+      "suite": "workflow",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "workflow-09",
+      "suite": "workflow",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "workflow-10",
+      "suite": "workflow",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "workflow-11",
+      "suite": "workflow",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "workflow-12",
+      "suite": "workflow",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "workflow-13",
+      "suite": "workflow",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "workflow-14",
+      "suite": "workflow",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "workflow-15",
+      "suite": "workflow",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "workflow-16",
+      "suite": "workflow",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "workflow-17",
+      "suite": "workflow",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "workflow-18",
+      "suite": "workflow",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "workflow-19",
+      "suite": "workflow",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "workflow-20",
+      "suite": "workflow",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "workflow-21",
+      "suite": "workflow",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "workflow-22",
+      "suite": "workflow",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "workflow-23",
+      "suite": "workflow",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "workflow-24",
+      "suite": "workflow",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "workflow-25",
+      "suite": "workflow",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "workflow-26",
+      "suite": "workflow",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "workflow-27",
+      "suite": "workflow",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "workflow-28",
+      "suite": "workflow",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "workflow-29",
+      "suite": "workflow",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    },
+    {
+      "case_id": "workflow-30",
+      "suite": "workflow",
+      "status": "passed",
+      "workflow_outcome": "passed",
+      "failure_reasons": [],
+      "threshold_failures": []
+    }
+  ],
+  "rubric_scores": {
+    "accessibility_rigor": 4.065,
+    "browser_test_specificity": 4.333,
+    "completeness_without_overwhelming": 4.552,
+    "consistency_across_turns": 4.452,
+    "design_reasoning_quality": 4.067,
+    "evidence_discipline": 4.784,
+    "handoff_implementability": 4.067,
+    "recovery_from_incomplete_inputs": 4.527,
+    "remediation_precision": 4.273,
+    "repository_ownership_reasoning": 4.129,
+    "responsive_rigor": 4.152,
+    "state_coverage": 4.097
+  },
+  "rubric_mean": 4.373,
+  "rubric_gate": {
+    "aggregate_threshold_failures": []
+  },
+  "workflow_outcomes": {
+    "blocked": 14,
+    "passed": 60
+  },
+  "baseline_results": {
+    "provided": true,
+    "executed": 74,
+    "passed": 47,
+    "failed": 27,
+    "blocked": 0
+  },
+  "critical_failures": [],
+  "remaining_risks": []
+}

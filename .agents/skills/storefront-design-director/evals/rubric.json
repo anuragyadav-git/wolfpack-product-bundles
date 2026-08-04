@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "skill_name": "storefront-design-director",
+  "concrete_checks": {
+    "correct_skill_invocation": "The skill invokes, defers, or asks one routing question as specified by the invocation case.",
+    "status_block_present": "Every response after invocation begins with all required status fields.",
+    "correct_stage": "The response and manifest use the expected legal stage or recorded special state.",
+    "question_limit": "The response asks no more than three questions, or the stricter case limit.",
+    "recommendation_supplied": "Every genuine design choice includes a recommendation and short rationale.",
+    "artifacts_updated": "Material progress is persisted in the named artifacts and manifest.",
+    "legal_state_transition": "Stage changes use the state machine and transition script.",
+    "blocking_evidence_identified": "Missing mandatory evidence is named and never converted to a pass.",
+    "required_reference_loaded": "The stage-specific reference set is loaded before acting.",
+    "no_production_code_change": "Design-director mode does not modify production storefront code.",
+    "correct_chrome_gate_behavior": "Chrome QA blocks without preflight, deterministic fixture, and required evidence.",
+    "no_false_pass": "Contradictory, missing, failed, or blocked evidence cannot be reported as passed.",
+    "expected_output_exists": "Every case-required output exists at the recorded safe path."
+  },
+  "qualitative_dimensions": {
+    "design_reasoning_quality": "Recommendations connect user goals, evidence, constraints, and tradeoffs.",
+    "completeness_without_overwhelming": "The response covers the active gate without preloading later-stage detail.",
+    "evidence_discipline": "Claims distinguish observed facts, recommendations, assumptions, and missing proof.",
+    "responsive_rigor": "Viewport transformations, overflow, safe areas, content stress, and non-regression are explicit.",
+    "state_coverage": "Applicable success, loading, empty, error, unavailable, selection, and long-content states are covered.",
+    "accessibility_rigor": "Semantics, names, keyboard, focus, announcements, contrast risk, zoom, and motion are addressed.",
+    "repository_ownership_reasoning": "Canonical owners, shared blast radius, generated assets, and prohibited areas are grounded in repository evidence.",
+    "handoff_implementability": "The packet is specific enough for implementation without inventing design or ownership decisions.",
+    "browser_test_specificity": "Cases name fixtures, states, viewports, assertions, evidence, cleanup, and gate outcomes.",
+    "remediation_precision": "Failures have measured deltas, owners, expected results, risks, and bounded rerun scope.",
+    "recovery_from_incomplete_inputs": "The workflow preserves progress and requests only the smallest missing evidence.",
+    "consistency_across_turns": "Resume, revision, approval, and interruption behavior remains faithful to durable artifacts."
+  },
+  "score_scale": {
+    "minimum": 1,
+    "maximum": 5,
+    "anchors": {
+      "1": "Unsafe, incorrect, or unusable.",
+      "2": "Major gaps require substantial rework.",
+      "3": "Usable with material omissions or ambiguity.",
+      "4": "Complete and evidence-led with only minor improvements possible.",
+      "5": "Exceptional, precise, durable, and immediately implementable."
+    }
+  },
+  "passing_thresholds": {
+    "mean_score": 4.0,
+    "minimum_dimension": 3,
+    "critical_dimensions_minimum": 4,
+    "critical_dimensions": [
+      "evidence_discipline",
+      "responsive_rigor",
+      "state_coverage",
+      "accessibility_rigor",
+      "repository_ownership_reasoning",
+      "browser_test_specificity"
+    ],
+    "require_all_concrete_checks": true,
+    "require_no_critical_failures": true
+  },
+  "critical_failures": [
+    {"id": "chrome-pass-without-evidence", "condition": "Claims Chrome QA passed without direct Chrome evidence."},
+    {"id": "production-code-modified", "condition": "Modifies production code while acting in design-director mode."},
+    {"id": "direction-approval-skipped", "condition": "Advances beyond direction approval without explicit approval evidence."},
+    {"id": "state-or-responsive-contract-omitted", "condition": "Omits an applicable state or responsive contract from handoff."},
+    {"id": "existing-answer-reasked", "condition": "Ignores a durable existing answer and asks it again."},
+    {"id": "blocked-evidence-passed", "condition": "Marks missing, blocked, contradictory, or failed evidence as passed."},
+    {"id": "resume-state-lost", "condition": "Loses saved job state, history, or approval context on resume."},
+    {"id": "unmeasured-remediation", "condition": "Gives vague remediation without measured evidence and a target result."},
+    {"id": "ownership-free-specific-patch", "condition": "Recommends a high-specificity code patch without repository ownership analysis."},
+    {"id": "secret-or-browser-data-exposed", "condition": "Exposes secrets, credentials, cookies, private response bodies, or unrelated personal browser data."}
+  ],
+  "severity_policy": {
+    "critical": "Fail the run immediately and require a fixed rerun.",
+    "high": "Fail the scenario and require a fixed rerun before reporting completion.",
+    "medium": "Record the gap and include it in remaining risks if not fixed."
+  }
+}

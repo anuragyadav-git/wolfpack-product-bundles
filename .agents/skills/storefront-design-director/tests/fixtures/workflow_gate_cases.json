@@ -1,0 +1,32 @@
+{
+  "approved_direction": {
+    "stage": "DIRECTION_APPROVAL",
+    "design_approval": "approved",
+    "open_decisions": []
+  },
+  "complete_handoff": {
+    "stage": "HANDOFF_VALIDATION",
+    "handoff_approval": "approved",
+    "coverage_status": "complete"
+  },
+  "blocked_chrome_qa": {
+    "stage": "CHROME_QA_PREFLIGHT",
+    "preflight_status": "blocked",
+    "blockers": ["Chrome DevTools MCP unavailable"]
+  },
+  "passing_chrome_qa": {
+    "stage": "CHROME_QA_EXECUTION",
+    "preflight_status": "passed",
+    "execution_status": "passed"
+  },
+  "failed_visual_diff": {
+    "visual": "failed",
+    "mismatch_ratio": 0.08,
+    "threshold": 0.01
+  },
+  "failed_console_network": {
+    "console": "failed",
+    "network": "failed",
+    "errors": ["uncaught exception", "required image returned 404"]
+  }
+}
