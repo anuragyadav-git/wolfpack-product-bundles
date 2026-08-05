@@ -1,7 +1,7 @@
 /*!
  * Wolfpack Bundle Widget — Full Page
  * Version : 5.0.227
- * Built   : 2026-08-04
+ * Built   : 2026-08-05
  *
  * Cache note: Shopify CDN cache is busted automatically by shopify app deploy.
  * After deploying, allow 2-10 minutes for propagation before testing.
@@ -12402,6 +12402,7 @@ const DELETE_ICON = createIconButtonSvg(
 const fullPageClearCartConfirmationMethods = {
 showClearCartConfirmation() {
   this.hideClearCartConfirmation?.();
+  this._clearCartConfirmationFocusOrigin = document.activeElement;
 
   const modal = this.createClearCartConfirmationModal();
   this._clearCartConfirmationModal = modal;
@@ -12411,6 +12412,23 @@ showClearCartConfirmation() {
   const keydownHandler = (event) => {
     if (event.key === 'Escape') {
       this.hideClearCartConfirmation();
+      return;
+    }
+
+    if (event.key === 'Tab') {
+      const focusable = [
+        modal.querySelector('.wpb-clear-cart-confirmation__close'),
+        modal.querySelector('.wpb-clear-cart-confirmation__cancel'),
+        modal.querySelector('.wpb-clear-cart-confirmation__confirm'),
+      ].filter(Boolean);
+      const activeIndex = focusable.indexOf(document.activeElement);
+      const wrapsBackward = event.shiftKey && activeIndex === 0;
+      const wrapsForward = !event.shiftKey && activeIndex === focusable.length - 1;
+
+      if (wrapsBackward || wrapsForward) {
+        event.preventDefault();
+        focusable[wrapsBackward ? focusable.length - 1 : 0]?.focus();
+      }
     }
   };
   this._clearCartConfirmationKeydownHandler = keydownHandler;
@@ -12422,7 +12440,9 @@ showClearCartConfirmation() {
   }
 },
 
-hideClearCartConfirmation() {
+hideClearCartConfirmation({ restoreFocus = true } = {}) {
+  const focusOrigin = this._clearCartConfirmationFocusOrigin;
+
   if (this._clearCartConfirmationModal) {
     this._clearCartConfirmationModal.remove();
     this._clearCartConfirmationModal = null;
@@ -12434,11 +12454,33 @@ hideClearCartConfirmation() {
   }
 
   document.body.classList?.remove('wpb-clear-cart-confirmation-open');
+
+  this._clearCartConfirmationFocusOrigin = null;
+  if (restoreFocus && typeof focusOrigin?.focus === 'function') {
+    focusOrigin.focus();
+  }
 },
 
 confirmClearCartSelection() {
-  this.hideClearCartConfirmation();
+  const focusOrigin = this._clearCartConfirmationFocusOrigin;
+  this.hideClearCartConfirmation({ restoreFocus: false });
   this.clearFullPageSelections();
+
+  const restoreFocus = () => {
+    const focusTarget = document.querySelector('.fpb-mobile-summary-count-badge')
+      || document.querySelector('.side-panel-btn-next');
+    if (typeof focusTarget?.focus === 'function') {
+      focusTarget.focus();
+    } else if (typeof focusOrigin?.focus === 'function') {
+      focusOrigin.focus();
+    }
+  };
+
+  if (typeof requestAnimationFrame === 'function') {
+    requestAnimationFrame(() => requestAnimationFrame(restoreFocus));
+  } else {
+    restoreFocus();
+  }
 },
 
 clearFullPageSelections() {

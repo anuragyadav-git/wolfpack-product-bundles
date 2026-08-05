@@ -888,6 +888,11 @@
     height: auto;
     margin: 0;
     padding: 0;
+    color: color-mix(
+      in srgb,
+      var(--bundle-side-panel-text-color, #6b7280) 70%,
+      #000
+    );
   }
 
   .layout-sidebar[data-fpb-design-preset="COMPACT"]
@@ -944,6 +949,11 @@
     width: 100%;
     height: auto;
     margin: 0 0 10px;
+    color: color-mix(
+      in srgb,
+      var(--bundle-side-panel-text-color, #6b7280) 70%,
+      #000
+    );
   }
 
   .layout-sidebar[data-fpb-design-preset="COMPACT"]
@@ -985,6 +995,15 @@
     height: auto;
     margin: 0;
     padding: 0;
+  }
+
+  .layout-sidebar[data-fpb-design-preset="COMPACT"]
+    .side-panel-total-final {
+    color: color-mix(
+      in srgb,
+      var(--bundle-side-panel-total-final-color, #b33a00) 70%,
+      #000
+    );
   }
 
   .layout-sidebar[data-fpb-design-preset="COMPACT"] .side-panel-nav {
