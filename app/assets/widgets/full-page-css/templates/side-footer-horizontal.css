@@ -778,6 +778,33 @@
   transform: none !important;
 }
 
+#bundle-builder-app
+  > .fpb-mobile-bottom-sheet.fpb-preset-horizontal.fpb-mobile-summary-tray[data-fpb-summary-mode="tray"] {
+  /* Keep the centered disclosure's 44px hit target clear of the full-width CTA. */
+  padding-block-start: calc(
+    var(--bundle-summary-shell-padding, 0.625rem) + 1.375rem
+  );
+}
+
+#bundle-builder-app
+  > .fpb-mobile-bottom-sheet.fpb-preset-horizontal.fpb-mobile-summary-tray.fpb-mobile-summary-tray-expanded[data-fpb-summary-mode="tray"] {
+  height: min(75dvh, 42rem);
+  max-height: min(75dvh, 42rem);
+  overflow: hidden;
+}
+
+#bundle-builder-app
+  > .fpb-mobile-bottom-sheet.fpb-preset-horizontal.fpb-mobile-summary-tray.fpb-mobile-summary-tray-expanded.fpb-mobile-summary-tray--has-discount-summary[data-fpb-summary-mode="tray"] {
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+#bundle-builder-app
+  > .fpb-mobile-bottom-sheet.fpb-preset-horizontal.fpb-mobile-summary-tray.fpb-mobile-summary-tray-expanded:not(
+    .fpb-mobile-summary-tray--has-discount-summary
+  )[data-fpb-summary-mode="tray"] {
+  grid-template-rows: minmax(0, 1fr);
+}
+
 #bundle-builder-app .full-page-product-grid .product-card,
 #bundle-builder-app .fpb-mobile-summary-tray .product-card,
 #bundle-builder-app

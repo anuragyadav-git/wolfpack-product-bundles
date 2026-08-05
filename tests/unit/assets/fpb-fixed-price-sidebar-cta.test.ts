@@ -99,6 +99,37 @@ describe('fullPageBoxSelectionSidebarMethods.getSidebarTierCtaContent', () => {
     });
   });
 
+  it('uses the shopper-selected bundle quantity option before the configured default', () => {
+    const context = makeContext({
+      enabled: true,
+      method: 'percentage_off',
+      rules: [
+        { id: 'rule-2', conditionType: 'quantity', conditionValue: 2, discountValue: 5 },
+        { id: 'rule-4', conditionType: 'quantity', conditionValue: 4, discountValue: 15 },
+      ],
+      messages: {
+        displayOptions: {
+          bundleQuantityOptions: {
+            enabled: true,
+            defaultRuleId: 'rule-2',
+            optionsByRuleId: {
+              'rule-2': { label: 'Box of 2', subtext: '5% off' },
+              'rule-4': { label: 'Box of 4', subtext: '15% off' },
+            },
+          },
+        },
+      },
+    });
+    context.selectedBoxSelectionRuleId = 'rule-4';
+
+    const content = fullPageBoxSelectionSidebarMethods.getSidebarTierCtaContent.call(context);
+
+    expect(content).toEqual({
+      label: 'Box of 4',
+      subtext: '15% off',
+    });
+  });
+
   it('does not render tier CTA content when bundle quantity option display is disabled', () => {
     const content = fullPageBoxSelectionSidebarMethods.getSidebarTierCtaContent.call(
       makeContext({

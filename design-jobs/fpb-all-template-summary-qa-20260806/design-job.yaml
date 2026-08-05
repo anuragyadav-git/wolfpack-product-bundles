@@ -3,11 +3,11 @@
   "job": {
     "id": "fpb-all-template-summary-qa-20260806",
     "title": "FPB all-template summary QA completion",
-    "status": "qa-running",
-    "stage": "CHROME_QA_EXECUTION",
+    "status": "active",
+    "stage": "VISUAL_REMEDIATION",
     "revision": 3,
     "created_at": "2026-08-05T19:21:59Z",
-    "updated_at": "2026-08-05T19:26:00Z",
+    "updated_at": "2026-08-05T19:34:36Z",
     "owner": "Aditya Awasthi",
     "product": "Wolfpack Product Bundles",
     "repository": "/Users/adityaawasthi/Developer/wolfpack-product-bundles",
@@ -911,6 +911,18 @@
       "reason": "Fresh default-profile Chrome preflight passed on canonical Agent storefront with widget 5.0.227",
       "evidence": [
         "chrome-preflight-result.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 19,
+      "at": "2026-08-05T19:34:36Z",
+      "from": "CHROME_QA_EXECUTION",
+      "to": "VISUAL_REMEDIATION",
+      "revision": 3,
+      "reason": "Horizontal 320px six-selection stress showed the disclosure hit target intercepted by the full-width cart CTA",
+      "evidence": [
+        "browser-test-plan.yaml"
       ],
       "affected_artifacts": []
     }

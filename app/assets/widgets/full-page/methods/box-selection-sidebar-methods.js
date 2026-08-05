@@ -62,7 +62,12 @@ getSidebarTierCtaContent(nextRule) {
   const optionsByRuleId = bundleQuantityOptions.optionsByRuleId || {};
   const tierTextByRuleId = pricing.messages?.tierTextByRuleId || {};
   const rules = Array.isArray(pricing.rules) ? pricing.rules : [];
-  const ruleId = bundleQuantityOptions.defaultRuleId || nextRule?.id || rules[0]?.id;
+  const selectedRuleId = rules.some(
+    item => String(item?.id || '') === String(this.selectedBoxSelectionRuleId || '')
+  )
+    ? this.selectedBoxSelectionRuleId
+    : null;
+  const ruleId = selectedRuleId || bundleQuantityOptions.defaultRuleId || nextRule?.id || rules[0]?.id;
   const rule = ruleId ? rules.find(item => String(item?.id || '') === String(ruleId)) : null;
   const option = ruleId ? (optionsByRuleId[ruleId] || tierTextByRuleId[ruleId]) : null;
   const label = typeof option?.label === 'string' && option.label.trim()

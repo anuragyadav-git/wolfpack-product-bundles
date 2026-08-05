@@ -171,7 +171,18 @@
   }
 
   .fpb-mobile-summary-fluid-footer.fpb-mobile-summary-tray-expanded {
-    overflow: visible;
+    height: min(75dvh, 42rem);
+    overflow: hidden;
+  }
+
+  .fpb-mobile-summary-fluid-footer.fpb-mobile-summary-tray-expanded.fpb-mobile-summary-tray--has-discount-summary {
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  .fpb-mobile-summary-fluid-footer.fpb-mobile-summary-tray-expanded:not(
+      .fpb-mobile-summary-tray--has-discount-summary
+    ) {
+    grid-template-rows: minmax(0, 1fr);
   }
 
   .fpb-mobile-summary-fluid-footer
@@ -247,13 +258,24 @@
 
   .fpb-mobile-summary-fluid-footer.fpb-mobile-summary-tray-expanded
     .fpb-mobile-summary-products-section {
-    grid-template-rows: 1fr auto;
+    grid-template-rows: minmax(0, 1fr) auto;
+    height: 100%;
     padding-block: var(--bundle-summary-section-spacing, 0.625rem);
+    overflow: hidden;
   }
 
   .fpb-mobile-summary-fluid-footer.fpb-mobile-summary-tray-expanded
     .fpb-mobile-summary-bundle-items {
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
     opacity: 1;
+  }
+
+  .fpb-mobile-summary-fluid-footer.fpb-mobile-summary-tray-expanded
+    .fpb-mobile-summary-products-list {
+    min-height: min(8rem, 35dvh);
   }
 
   .fpb-mobile-summary-fluid-footer
