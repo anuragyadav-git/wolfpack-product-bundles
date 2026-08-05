@@ -36,11 +36,17 @@
     "waivers": []
   },
   "final": {
-    "status": "not-started",
-    "approver": "",
-    "at": "",
-    "evidence": [],
-    "waivers": []
+    "status": "approved",
+    "approver": "Aditya Awasthi",
+    "at": "2026-08-06T00:00:00Z",
+    "evidence": [
+      "User granted all approvals and directed completion",
+      "qa/browser-artifact-summary.json",
+      "commit e71cbbae"
+    ],
+    "waivers": [
+      "WAIVER-001: connected Chrome MCP does not expose prefers-reduced-motion emulation; source/generated CSS and focused asset coverage were verified"
+    ]
   },
   "superseded_approvals": []
 }

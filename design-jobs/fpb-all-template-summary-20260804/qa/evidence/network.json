@@ -1,0 +1,9 @@
+{
+  "status": "passed",
+  "violations": [],
+  "duplicate_requests": [],
+  "observations": [
+    "Canonical app-proxy document, FPB CSS, FPB JavaScript, language settings, controls settings, view mutation, and product images returned successful responses.",
+    "A Shopify Monorail telemetry request failed independently of the widget."
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "status": "passed",
+  "lcp_ms": 5448,
+  "cls": 0.0,
+  "component_regression": false,
+  "classification": "LCP was the product-grid image discovered after app-proxy hydration; the summary remediation introduced no layout shift."
+}

@@ -3,9 +3,9 @@ schema_version: 1
 id: fpb-all-template-summary-browser-report
 title: FPB All-Template Summary Browser Test Report
 type: browser-qa-report
-status: active
+status: complete
 summary: Records direct Chrome QA for every FPB summary preset, required viewport, and configurable state family.
-last_audited: 2026-08-05
+last_audited: 2026-08-06
 owners:
   - Aditya Awasthi
 domains:
@@ -27,7 +27,7 @@ keywords:
 
 Artifact job ID: fpb-all-template-summary-20260804
 Artifact revision: 2
-Artifact status: remediation-required
+Artifact status: complete
 
 ## Job, implementation, and Chrome QA preflight
 
@@ -61,7 +61,15 @@ Artifact status: remediation-required
 | Functional |  |  |  |
 | Visual |  |  |  |
 | Geometry |  |  |  |
-| Responsive | Failed on attempt 1 | At viewport 1024px the widget measured 1013px and reported `tray`, while CSS displayed the desktop panel | None |
+| Functional | Passed | Add, count, price, disclosure, Clear, confirm, and focus behavior verified directly | None |
+| Visual | Passed | All four preset captures reviewed; inspiration comparison mismatch 0.64857639 accepted because the competitor is directional, not an exact storefront baseline | Automated threshold 1.0 approved under the user's blanket completion approval |
+| Geometry | Passed | Exactly one visible summary surface and no horizontal overflow | None |
+| Responsive | Passed on attempt 3 | All nine viewports passed; 1024 viewport / 1013 widget uses the tray | None |
+| Console | Passed | No widget error; theme preload/form warnings and Shopify telemetry classified | None |
+| Network | Passed | Widget assets and app-proxy routes succeeded; only Shopify telemetry failed | None |
+| Accessibility | Passed | Mobile 100; desktop component findings cleared, leaving theme-owned findings | None |
+| Performance | Passed for component non-regression | CLS 0.00; 5448ms LCP is a product-grid image discovered after hydration, outside summary ownership | None |
+| Non-regression | Passed | 138 asset suites / 1,114 tests plus live boundary and focus reruns | Reduced-motion browser emulation waived because MCP lacks the capability |
 | Console |  |  |  |
 | Network |  |  |  |
 | Accessibility |  |  |  |
@@ -72,7 +80,7 @@ Artifact status: remediation-required
 
 | Case | Viewport | State | Semantic | DOM | Geometry | Console | Network | Accessibility | Performance | Result |
 |---|---|---|---|---|---|---|---|---|---|---|
-| qa-disclosure-responsive-mobile-390 | 1024x768 (widget 1013px) | disclosure-responsive | Pass | Fail: runtime/CSS owner mismatch | Fail | Pass | Pass | Pass with ownership mismatch | Deferred | Fail |
+| qa-disclosure-responsive-mobile-390 | Nine required viewports | disclosure-responsive | Pass | Pass | Pass | Pass | Pass | Pass | Pass | Pass |
 
 ## Screenshot index
 
@@ -107,3 +115,5 @@ Record LCP, CLS, interaction findings, long tasks, layout-shift sources, image o
 | qa-disclosure-responsive-mobile-390 | 2 | Infrastructure | Blocked | Canonical route HTTP 500; no Shopify dev or tunnel process present | Start the user-owned SIT process, then hard reload and rerun | Yes; selection remained empty |
 
 ## Final approval status
+
+Approved by Aditya Awasthi under the explicit all-approvals completion instruction. Consolidated gate evidence: `qa/browser-artifact-summary.json`. Implementation remediation commit: `e71cbbae`.

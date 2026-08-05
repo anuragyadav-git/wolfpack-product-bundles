@@ -1,0 +1,12 @@
+{
+  "status": "passed",
+  "categories": {
+    "accessibility": { "score": 1.0 },
+    "best-practices": { "score": 0.77 },
+    "seo": { "score": 0.92 },
+    "agentic-browsing": { "score": 0.75 }
+  },
+  "component_findings": [],
+  "page_score": 0.96,
+  "classification": "The raw page score includes theme-owned cart label, menu-list, and agent-tree findings; component-owned Compact contrast findings were remediated and absent on rerun."
+}

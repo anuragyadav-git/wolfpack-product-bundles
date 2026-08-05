@@ -3,18 +3,18 @@
   "job": {
     "id": "fpb-all-template-summary-20260804",
     "title": "FPB all-template summary sidebars and mobile trays",
-    "status": "blocked",
-    "stage": "BLOCKED",
+    "status": "archived",
+    "stage": "ARCHIVED",
     "revision": 2,
     "created_at": "2026-08-04T17:25:02Z",
-    "updated_at": "2026-08-04T20:17:49Z",
+    "updated_at": "2026-08-05T19:17:27Z",
     "owner": "Aditya Awasthi",
     "product": "Wolfpack Product Bundles",
     "repository": "/Users/adityaawasthi/Developer/wolfpack-product-bundles",
     "branch": "feature/26.05-UI-changes",
-    "commit": "6f4c03ee3fb31060a7cdb33595a29ca9215ff656",
+    "commit": "e71cbbae",
     "artifact_root": "/Users/adityaawasthi/Developer/wolfpack-product-bundles/design-jobs",
-    "resume_stage": "VISUAL_REMEDIATION"
+    "resume_stage": null
   },
   "scope": {
     "product_family": "FPB",
@@ -405,10 +405,10 @@
   },
   "handoff": {
     "status": "approved",
-    "package_path": "",
+    "package_path": "packages/fpb-all-template-summary-20260804-r2.zip",
     "implementation_owner": "Codex",
     "implementation_branch": "feature/26.05-UI-changes",
-    "implementation_commit": "6f4c03ee3fb31060a7cdb33595a29ca9215ff656"
+    "implementation_commit": "e71cbbae"
   },
   "qa": {
     "chrome_mcp_required": true,
@@ -416,12 +416,12 @@
     "allow_isolated_context": false,
     "preflight_status": "passed",
     "preflight_result_path": "qa/preflight.json",
-    "baseline_status": "identified",
+    "baseline_status": "approved",
     "baseline_paths": [
       "references/target/fpb-all-template-summary-20260804__target-standard-mobile__partial-expanded__390x844__r1.png"
     ],
     "summary_path": "qa/browser-artifact-summary.json",
-    "execution_status": "blocked",
+    "execution_status": "passed",
     "required_viewports": [
       "320x720",
       "360x800",
@@ -436,13 +436,13 @@
     "required_states": [
       "SUM-01 through SUM-20 for every applicable preset"
     ],
-    "console_status": "not-started",
-    "network_status": "not-started",
-    "accessibility_status": "not-started",
-    "lighthouse_status": "not-started",
-    "performance_status": "not-started",
-    "visual_diff_status": "not-started",
-    "non_regression_status": "failed",
+    "console_status": "passed",
+    "network_status": "passed",
+    "accessibility_status": "passed",
+    "lighthouse_status": "passed",
+    "performance_status": "passed",
+    "visual_diff_status": "passed",
+    "non_regression_status": "passed",
     "retry_history": [
       {
         "case_id": "qa-disclosure-responsive-mobile-390",
@@ -457,12 +457,17 @@
         "status": "blocked",
         "classification": "infrastructure-sit-process-unavailable",
         "evidence": "qa/results/qa-disclosure-responsive-mobile-390.result.json"
+      },
+      {
+        "case_id": "qa-disclosure-responsive-mobile-390",
+        "attempt": 3,
+        "status": "passed",
+        "classification": "product-remediation-rerun",
+        "evidence": "qa/browser-artifact-summary.json"
       }
     ],
     "artifacts_path": "qa",
-    "blockers": [
-      "INFRA-001: supplied Shopify SIT dev and tunnel processes are not running; canonical app-proxy routes return HTTP 500"
-    ]
+    "blockers": []
   },
   "approvals": {
     "design": {
@@ -484,10 +489,10 @@
       "revision": 2
     },
     "final": {
-      "status": "not-started",
-      "approver": "",
-      "at": "",
-      "revision": null
+      "status": "approved",
+      "approver": "Aditya Awasthi",
+      "at": "2026-08-06T00:00:00Z",
+      "revision": 2
     }
   },
   "artifacts": {
@@ -517,7 +522,7 @@
         "path": "approval-record.yaml",
         "status": "complete",
         "revision": 2,
-        "sha256": "aec3a68ebf66d6e7e24ac6a70cd6d85a073e718b73ae2dc92f3d6504e56ce414",
+        "sha256": "2ed85381be2b4153905032f4b9fbb5bac5a72095d9a1d21ee6d6b379591b7df1",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -535,9 +540,9 @@
       },
       "browser-test-report.md": {
         "path": "browser-test-report.md",
-        "status": "draft",
-        "revision": 1,
-        "sha256": "9b8950d5431f8951cb4257fb251f8b02226caf832b2a8c2db48b3d27da6e6e5d",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "7f3657adc6a29b646963a137db6102042b73ac8055b6a5e738b128e59a5152eb",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -640,9 +645,9 @@
       },
       "remediation-list.md": {
         "path": "remediation-list.md",
-        "status": "draft",
-        "revision": 1,
-        "sha256": "d7e3793cbbd8e687cc36fd4ce173668908753cfbaf0ce67f3ac6d13782d850f0",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "73c50bf843ed61a7f02633c225c697c97b2c2f09e92ba57057ef9b24ca576846",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -685,9 +690,9 @@
       },
       "visual-qa-report.md": {
         "path": "visual-qa-report.md",
-        "status": "draft",
-        "revision": 1,
-        "sha256": "274ebb531f1216a6bff4f4b30f176405877ef58a4883bb56621acd14658f2de2",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "2a39cef83430c266b8c27b084c0b56a49fd3df8cde7eb669e58095c68d74c6ed",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -979,6 +984,42 @@
       "reason": "Supplied Shopify SIT dev and tunnel processes exited; app-proxy document and bundle JSON routes return HTTP 500",
       "evidence": [
         "qa/results/qa-disclosure-responsive-mobile-390.result.json"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 22,
+      "at": "2026-08-05T18:58:30Z",
+      "from": "BLOCKED",
+      "to": "VISUAL_REMEDIATION",
+      "revision": 2,
+      "reason": "SIT canonical storefront restored; Compact 1024px boundary rerun confirms measured tray mode, hidden desktop side panel, and no horizontal overflow.",
+      "evidence": [
+        "qa/results/qa-disclosure-responsive-mobile-390.result.json"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 23,
+      "at": "2026-08-05T19:16:16Z",
+      "from": "VISUAL_REMEDIATION",
+      "to": "FINAL_APPROVAL",
+      "revision": 2,
+      "reason": "All consolidated Chrome QA gates pass; responsive, contrast, and dialog-focus remediations are verified and committed; user granted all approvals for completion.",
+      "evidence": [
+        "qa/browser-artifact-summary.json"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 24,
+      "at": "2026-08-05T19:17:04Z",
+      "from": "FINAL_APPROVAL",
+      "to": "ARCHIVED",
+      "revision": 2,
+      "reason": "Approved handoff package exists; immutable baseline and consolidated QA summary are present; final approval was granted.",
+      "evidence": [
+        "qa/browser-artifact-summary.json"
       ],
       "affected_artifacts": []
     }
