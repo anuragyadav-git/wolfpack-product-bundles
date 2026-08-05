@@ -3,11 +3,11 @@
   "job": {
     "id": "fpb-all-template-summary-qa-20260806",
     "title": "FPB all-template summary QA completion",
-    "status": "active",
-    "stage": "VISUAL_REMEDIATION",
-    "revision": 3,
+    "status": "archived",
+    "stage": "ARCHIVED",
+    "revision": 4,
     "created_at": "2026-08-05T19:21:59Z",
-    "updated_at": "2026-08-05T19:34:36Z",
+    "updated_at": "2026-08-05T20:01:18Z",
     "owner": "Aditya Awasthi",
     "product": "Wolfpack Product Bundles",
     "repository": "/Users/adityaawasthi/Developer/wolfpack-product-bundles",
@@ -404,11 +404,11 @@
     "validation_status": "complete"
   },
   "handoff": {
-    "status": "implemented",
-    "package_path": "packages/fpb-all-template-summary-20260804-r2.zip",
+    "status": "approved",
+    "package_path": "packages/fpb-all-template-summary-qa-20260806-r3.zip",
     "implementation_owner": "Codex",
     "implementation_branch": "feature/26.05-UI-changes",
-    "implementation_commit": "a7fe63459ecbd3210c773fbe36f6a09c8cc722ea"
+    "implementation_commit": "124517e6"
   },
   "qa": {
     "chrome_mcp_required": true,
@@ -416,10 +416,17 @@
     "allow_isolated_context": false,
     "preflight_status": "passed",
     "preflight_result_path": "chrome-preflight-result.yaml",
-    "baseline_status": "inherited-approved",
-    "baseline_paths": [],
+    "baseline_status": "approved",
+    "baseline_paths": [
+      "references/target/fpb-all-template-summary-qa-20260806__target-standard-desktop__partial__1440x900__r3.png",
+      "references/target/fpb-all-template-summary-qa-20260806__target-standard-mobile__partial-expanded__390x844__r3.png",
+      "references/target/fpb-all-template-summary-qa-20260806__target-classic-desktop__partial__1440x900__r3.png",
+      "references/target/fpb-all-template-summary-qa-20260806__target-compact-desktop__partial__1440x900__r3.png",
+      "references/target/fpb-all-template-summary-qa-20260806__target-horizontal-desktop__partial__1440x900__r3.png",
+      "references/target/fpb-all-template-summary-qa-20260806__target-horizontal-mobile__partial-expanded__390x844__r3.png"
+    ],
     "summary_path": "qa/browser-artifact-summary.json",
-    "execution_status": "not-started",
+    "execution_status": "passed",
     "required_viewports": [
       "320x720",
       "360x800",
@@ -434,14 +441,29 @@
     "required_states": [
       "SUM-01 through SUM-20 for every applicable preset"
     ],
-    "console_status": "not-started",
-    "network_status": "not-started",
-    "accessibility_status": "not-started",
-    "lighthouse_status": "not-started",
-    "performance_status": "not-started",
-    "visual_diff_status": "not-started",
-    "non_regression_status": "not-started",
-    "retry_history": [],
+    "console_status": "passed",
+    "network_status": "passed",
+    "accessibility_status": "passed",
+    "lighthouse_status": "passed",
+    "performance_status": "passed",
+    "visual_diff_status": "passed",
+    "non_regression_status": "passed",
+    "retry_history": [
+      {
+        "attempt": 1,
+        "status": "failed",
+        "classification": "product",
+        "evidence": "remediation-list.md",
+        "outcome": "Horizontal minimum-width disclosure, selected tier CTA, and rich-tray reachability defects found."
+      },
+      {
+        "attempt": 2,
+        "status": "passed",
+        "classification": "retest",
+        "evidence": "qa/browser-artifact-summary.json",
+        "outcome": "All nine browser gates passed after commit 124517e6."
+      }
+    ],
     "artifacts_path": "qa",
     "blockers": []
   },
@@ -459,16 +481,16 @@
       "revision": 2
     },
     "implementation": {
-      "status": "authorized",
+      "status": "approved",
       "approver": "Aditya Awasthi",
-      "at": "2026-08-04T19:44:50Z",
-      "revision": 2
+      "at": "2026-08-05T20:00:18Z",
+      "revision": 3
     },
     "final": {
-      "status": "not-started",
-      "approver": "",
-      "at": "",
-      "revision": null
+      "status": "approved",
+      "approver": "Aditya Awasthi",
+      "at": "2026-08-05T20:00:18Z",
+      "revision": 3
     }
   },
   "artifacts": {
@@ -498,32 +520,36 @@
       },
       "approval-record.yaml": {
         "path": "approval-record.yaml",
-        "status": "draft",
-        "revision": 3,
-        "sha256": "6ff9605c20a709e4b3e856ef39eaabcc5ee11f3f51f2751db386bc1390228c9c",
-        "approved_by": "",
-        "approved_at": "",
-        "evidence": []
+        "status": "approved",
+        "revision": 4,
+        "sha256": "7b679196d4e284a4ae3980165fc680d76d88d3ed4f87980bedfadc562cbb5a8a",
+        "approved_by": "Aditya Awasthi",
+        "approved_at": "2026-08-05T20:00:18Z",
+        "evidence": [
+          "qa/browser-artifact-summary.json"
+        ]
       },
       "browser-test-plan.yaml": {
         "path": "browser-test-plan.yaml",
         "status": "approved",
-        "revision": 3,
-        "sha256": "ae53836bbc5cedc8fa2cf48c24f5bd0dd399d66ed1ca673e11afcd610d1417a1",
+        "revision": 4,
+        "sha256": "d0ffe78df61d375905ffc60489eae82064c899fdeab55bd460701e23c2476020",
         "approved_by": "Aditya Awasthi",
-        "approved_at": "2026-08-05T19:25:46Z",
+        "approved_at": "2026-08-05T20:00:11Z",
         "evidence": [
-          "predecessor-design-job.yaml"
+          "qa/browser-artifact-summary.json"
         ]
       },
       "browser-test-report.md": {
         "path": "browser-test-report.md",
-        "status": "draft",
-        "revision": 3,
-        "sha256": "9bfb6fde1a249a074ea7d38f19863e1d6950cbbb90e354a58d82321875f54fa7",
-        "approved_by": "",
-        "approved_at": "",
-        "evidence": []
+        "status": "approved",
+        "revision": 4,
+        "sha256": "c51f10567b81afb165bc972c21ab93c2cb001401d813a4a69f292dcf313d1470",
+        "approved_by": "Aditya Awasthi",
+        "approved_at": "2026-08-05T20:00:11Z",
+        "evidence": [
+          "qa/browser-artifact-summary.json"
+        ]
       },
       "chrome-preflight-result.yaml": {
         "path": "chrome-preflight-result.yaml",
@@ -635,12 +661,14 @@
       },
       "remediation-list.md": {
         "path": "remediation-list.md",
-        "status": "draft",
-        "revision": 3,
-        "sha256": "3fa2fef16dc4e8f2217ff771d4997e0509d732903400cd6a199d5247c2875469",
-        "approved_by": "",
-        "approved_at": "",
-        "evidence": []
+        "status": "approved",
+        "revision": 4,
+        "sha256": "fd22876289ddf6bc74b0bc63009975b4c169d2063933bacf67fbc29b7fd150b3",
+        "approved_by": "Aditya Awasthi",
+        "approved_at": "2026-08-05T20:00:18Z",
+        "evidence": [
+          "browser-test-report.md"
+        ]
       },
       "responsive-contract.md": {
         "path": "responsive-contract.md",
@@ -688,15 +716,32 @@
       },
       "visual-qa-report.md": {
         "path": "visual-qa-report.md",
-        "status": "draft",
-        "revision": 3,
-        "sha256": "12ff675177ab0c5aa533d0f2527d4c7156a7eefacad2f3704e084d13fbaba33c",
-        "approved_by": "",
-        "approved_at": "",
-        "evidence": []
+        "status": "approved",
+        "revision": 4,
+        "sha256": "63656db444350aac00881010e42bf81e2220a87870a7f8c181d90b437df77f54",
+        "approved_by": "Aditya Awasthi",
+        "approved_at": "2026-08-05T20:00:12Z",
+        "evidence": [
+          "qa/browser-artifact-summary.json"
+        ]
       }
     },
-    "superseded": []
+    "superseded": [
+      {
+        "path": "browser-test-plan.yaml",
+        "status": "approved",
+        "revision": 3,
+        "sha256": "ae53836bbc5cedc8fa2cf48c24f5bd0dd399d66ed1ca673e11afcd610d1417a1",
+        "approved_by": "Aditya Awasthi",
+        "approved_at": "2026-08-05T19:25:46Z",
+        "evidence": [
+          "predecessor-design-job.yaml"
+        ],
+        "superseded_at": "2026-08-05T20:00:11Z",
+        "superseded_by": "Aditya Awasthi",
+        "superseded_reason": "Executed matrix statuses and evidence links recorded after fresh Chrome QA"
+      }
+    ]
   },
   "history": [
     {
@@ -923,6 +968,49 @@
       "reason": "Horizontal 320px six-selection stress showed the disclosure hit target intercepted by the full-width cart CTA",
       "evidence": [
         "browser-test-plan.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 20,
+      "at": "2026-08-05T20:00:11Z",
+      "from": "VISUAL_REMEDIATION",
+      "to": "VISUAL_REMEDIATION",
+      "revision": 4,
+      "reason": "Executed matrix statuses and evidence links recorded after fresh Chrome QA",
+      "evidence": [
+        "qa/browser-artifact-summary.json"
+      ],
+      "event": "artifact-superseded",
+      "affected_artifacts": [
+        "browser-test-plan.yaml"
+      ]
+    },
+    {
+      "sequence": 21,
+      "at": "2026-08-05T20:01:09Z",
+      "from": "VISUAL_REMEDIATION",
+      "to": "FINAL_APPROVAL",
+      "revision": 4,
+      "reason": "All browser QA gates passed after canonical remediation and focused regression coverage",
+      "evidence": [
+        "qa/browser-artifact-summary.json"
+      ],
+      "affected_artifacts": [
+        "browser-test-report.md",
+        "visual-qa-report.md",
+        "remediation-list.md"
+      ]
+    },
+    {
+      "sequence": 22,
+      "at": "2026-08-05T20:01:18Z",
+      "from": "FINAL_APPROVAL",
+      "to": "ARCHIVED",
+      "revision": 4,
+      "reason": "Final approval recorded; immutable baselines, approved handoff package, and complete QA summary are present",
+      "evidence": [
+        "qa/browser-artifact-summary.json"
       ],
       "affected_artifacts": []
     }

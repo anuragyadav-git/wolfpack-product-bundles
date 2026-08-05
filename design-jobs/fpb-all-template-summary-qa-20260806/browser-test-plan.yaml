@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "job_id": "fpb-all-template-summary-qa-20260806",
-  "revision": 3,
+  "revision": 4,
   "status": "approved",
   "chrome_mcp_required": true,
   "environment": "development",
@@ -196,8 +196,11 @@
       "cleanup": [
         "Return fixture to slots-off empty state at the fixture-group boundary."
       ],
-      "status": "not-run",
-      "evidence_links": []
+      "status": "passed",
+      "evidence_links": [
+        "qa/browser-artifact-summary.json",
+        "browser-test-report.md"
+      ]
     },
     {
       "id": "qa-selection-flow-mobile-360",
@@ -237,8 +240,11 @@
       "cleanup": [
         "Clear selections through the normal confirmation path."
       ],
-      "status": "not-run",
-      "evidence_links": []
+      "status": "passed",
+      "evidence_links": [
+        "qa/browser-artifact-summary.json",
+        "browser-test-report.md"
+      ]
     },
     {
       "id": "qa-disclosure-responsive-mobile-390",
@@ -278,8 +284,11 @@
       "cleanup": [
         "Restore 390x844 viewport and collapsed tray."
       ],
-      "status": "not-run",
-      "evidence_links": []
+      "status": "passed",
+      "evidence_links": [
+        "qa/browser-artifact-summary.json",
+        "browser-test-report.md"
+      ]
     },
     {
       "id": "qa-quantity-pricing-mobile-414",
@@ -319,8 +328,11 @@
       "cleanup": [
         "Restore default quantity and pricing fixture at group boundary."
       ],
-      "status": "not-run",
-      "evidence_links": []
+      "status": "passed",
+      "evidence_links": [
+        "qa/browser-artifact-summary.json",
+        "browser-test-report.md"
+      ]
     },
     {
       "id": "qa-offers-copy-tablet-768",
@@ -362,8 +374,11 @@
         "currency",
         "and offer configuration."
       ],
-      "status": "not-run",
-      "evidence_links": []
+      "status": "passed",
+      "evidence_links": [
+        "qa/browser-artifact-summary.json",
+        "browser-test-report.md"
+      ]
     },
     {
       "id": "qa-loading-recovery-desktop-1024",
@@ -403,8 +418,11 @@
       "cleanup": [
         "Remove request controls and restore a valid available fixture."
       ],
-      "status": "not-run",
-      "evidence_links": []
+      "status": "passed",
+      "evidence_links": [
+        "qa/browser-artifact-summary.json",
+        "browser-test-report.md"
+      ]
     },
     {
       "id": "qa-controls-submit-desktop-1280",
@@ -444,8 +462,11 @@
       "cleanup": [
         "Remove interception and keep cart/order unmodified."
       ],
-      "status": "not-run",
-      "evidence_links": []
+      "status": "passed",
+      "evidence_links": [
+        "qa/browser-artifact-summary.json",
+        "browser-test-report.md"
+      ]
     },
     {
       "id": "qa-content-stress-desktop-1440",
@@ -485,8 +506,11 @@
       "cleanup": [
         "Restore zoom to 100 percent and default content fixture."
       ],
-      "status": "not-run",
-      "evidence_links": []
+      "status": "passed",
+      "evidence_links": [
+        "qa/browser-artifact-summary.json",
+        "browser-test-report.md"
+      ]
     },
     {
       "id": "qa-reduced-motion-regression-desktop-1536",

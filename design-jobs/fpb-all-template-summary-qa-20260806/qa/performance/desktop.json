@@ -1,0 +1,7 @@
+{
+  "status": "passed",
+  "url": "https://agent-5sfidg3m.myshopify.com/apps/product-bundles/wpb/cmse8sp170000v0ytaqqzsvtw",
+  "observed": {"lcp_ms": 5547, "cls": 0.0, "ttfb_ms": 17, "lcp_render_delay_ms": 5531},
+  "component_acceptance": "No layout shift was introduced by the summary remediation; page-level LCP remains a separate performance concern.",
+  "source": "Chrome DevTools performance trace NAVIGATION_0, 2026-08-06"
+}

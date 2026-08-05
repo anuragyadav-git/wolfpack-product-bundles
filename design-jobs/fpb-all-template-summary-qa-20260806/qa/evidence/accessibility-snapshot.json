@@ -1,0 +1,10 @@
+{
+  "status": "passed",
+  "source": "Direct Chrome accessibility snapshots",
+  "observations": [
+    "One named Review your bundle disclosure owns aria-expanded on mobile.",
+    "Tier options expose pressed state.",
+    "Selected product remove controls include product identity.",
+    "Clear confirmation preserves and restores focus."
+  ]
+}

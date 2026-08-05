@@ -1,0 +1,6 @@
+{
+  "status": "passed",
+  "findings": [],
+  "page_level_findings": ["Shopify theme email input label association remains outside the FPB component owner."],
+  "component_findings": []
+}
