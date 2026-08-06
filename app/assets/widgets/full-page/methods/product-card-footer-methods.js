@@ -34,6 +34,9 @@ function getSelectionId(item = {}) {
 
 export const fullPageProductCardFooterMethods = {
 createProductCard(product, stepIndex, options = {}) {
+  const resolveText = (key, fallback) => (
+    typeof this._resolveText === 'function' ? this._resolveText(key, fallback) : fallback
+  );
   const productId = getSelectionId(product);
   const selectedQuantity = this.selectedProducts[stepIndex]?.[productId] || 0;
   const directDefaultQuantity = product?.isDirectDefaultProduct
@@ -76,14 +79,14 @@ createProductCard(product, stepIndex, options = {}) {
     && displayVariantsAsIndividualProducts === false
     && selectableVariantCount > 1;
   const addButtonText = openVariantModalOnAdd
-    ? this._resolveText('chooseOptionsButton', 'Choose Options')
+    ? resolveText('chooseOptionsButton', 'Choose Options')
     : this.getProductCardAddButtonText(step);
   const variantSelectorHtml = shouldRenderVariantSelector
     ? usesDropdownVariantSelector
       ? VariantSelectorComponent.renderDropdownHtml(product, primaryOptionName, {
         placeholder: designPreset === 'HORIZONTAL'
           ? ''
-          : this._resolveText('chooseOptionsButton', 'Choose Options'),
+          : resolveText('chooseOptionsButton', 'Choose Options'),
         mobileMode: variantSelectorPresentation.mobileMode,
         hideUnavailable: true,
       })
@@ -98,6 +101,18 @@ createProductCard(product, stepIndex, options = {}) {
     this.selectedBundle?.validateQuantityPerProduct,
     currentQuantity,
   );
+  const normalizedStepName = typeof step?.name === 'string' && step?.name.trim().length > 0
+    ? step.name
+    : typeof step?.title === 'string' && step.title.trim().length > 0
+      ? step.title
+      : 'step';
+  const removeLabelSource = resolveText(
+    'removeProductFromFooterText',
+    'Remove this product from step',
+  );
+  const removeActionLabel = removeLabelSource
+    .replace('{{stepName}}', normalizedStepName)
+    .replace('{{quantity}}', String(currentQuantity));
   const supportsAddonDiscountBadge = ['STANDARD', 'CLASSIC'].includes(designPreset);
   const hasAddonDiscountBadge = supportsAddonDiscountBadge && displayProduct.addonDiscountBadgeText;
   const stockBadgeHtml = hasAddonDiscountBadge
@@ -115,6 +130,19 @@ createProductCard(product, stepIndex, options = {}) {
         mode: designPreset === 'HORIZONTAL' ? 'row' : 'grid',
         className: outOfStock ? 'is-out-of-stock' : '',
         showCompareAtPrice: this.selectedBundle?.showProductComparedAtPrice === true,
+        openImageLabel: resolveText('productImageLabel', 'Open product details'),
+        openTitleLabel: resolveText('productTitleLabel', 'Open product details'),
+        imageNavPreviousLabel: resolveText('productImagePreviousLabel', 'Previous image'),
+        imageNavNextLabel: resolveText('productImageNextLabel', 'Next image'),
+        seeMoreText: resolveText('productDescriptionSeeMoreText', 'See more'),
+        decreaseLabel: resolveText('decreaseQuantityText', 'Decrease quantity'),
+        increaseLabel: resolveText('increaseQuantityText', 'Increase quantity'),
+        selectedStateLabel: resolveText('addedLabel', 'Added'),
+        quantityAriaLabel: resolveText('quantityLabel', 'Quantity'),
+        variantAriaLabel: resolveText('variantLabel', 'Variant'),
+        removeAriaLabel: removeActionLabel,
+        soldOutAriaLabel: resolveText('noProductsAvailableText', 'No Products Available'),
+        addButtonAriaLabel: resolveText('addButtonText', 'Add'),
         addButtonText,
         increaseDisabled,
         cardBadgeHtml: stockBadgeHtml,
@@ -163,7 +191,7 @@ createProductCard(product, stepIndex, options = {}) {
         img.className = 'fpb-included-badge-img';
         badge.appendChild(img);
       } else {
-        badge.textContent = this._resolveText('includedBadge', 'Included');
+        badge.textContent = resolveText('includedBadge', 'Included');
 }
       imgEl.parentElement.appendChild(badge);
     }
@@ -189,7 +217,7 @@ createProductCard(product, stepIndex, options = {}) {
         img.className = 'fpb-free-badge-img';
         badge.appendChild(img);
       } else {
-        badge.textContent = this._resolveText('freeBadge', 'Free');
+        badge.textContent = resolveText('freeBadge', 'Free');
       }
       imgEl.parentElement.appendChild(badge);
     }
@@ -343,6 +371,20 @@ attachProductCardListeners(cardElement, product, stepIndex, options = {}) {
   // subsequent quantity clicks, while the captured product object can lag behind.
   const getProductId = () => getSelectionId(product);
   const getClickedProductId = (element) => element?.dataset?.productId || getProductId();
+  const openCardDetails = () => {
+    if (!this.productModal && window.BundleProductModal) {
+      this.productModal = new window.BundleProductModal(this);
+    }
+    if (!this.productModal) return;
+
+    const initialImageIndex = Number(cardElement.dataset.bwCardImageIndex || 0);
+    const isClassicQuickView = this.getFullPageDesignPreset?.() === 'CLASSIC';
+    this.productModal.open(product, step, {
+      initialImageIndex,
+      readOnly: isClassicQuickView,
+    });
+  };
+  const isActivationKey = (event) => event.key === 'Enter' || event.key === ' ';
 
   cardElement.addEventListener('click', (e) => {
     const imageNav = e.target.closest('.bw-product-card__image-nav');
@@ -365,18 +407,20 @@ attachProductCardListeners(cardElement, product, stepIndex, options = {}) {
 
     if (!e.target.closest('.product-image, .product-title')) return;
     e.stopPropagation();
+    openCardDetails();
+  });
 
-    if (!this.productModal && window.BundleProductModal) {
-      this.productModal = new window.BundleProductModal(this);
-    }
-    if (!this.productModal) return;
-
-    const initialImageIndex = Number(cardElement.dataset.bwCardImageIndex || 0);
-    const isClassicQuickView = this.getFullPageDesignPreset?.() === 'CLASSIC';
-    this.productModal.open(product, step, {
-      initialImageIndex,
-      readOnly: isClassicQuickView,
-    });
+  cardElement.addEventListener('keydown', (event) => {
+    if (!isActivationKey(event)) return;
+    const { target } = event;
+    if (
+      !target
+      || target.closest('.inline-qty-btn, .product-add-btn, .bw-product-card__image-nav')
+    ) return;
+    if (!target.closest('.product-image, .product-title')) return;
+    event.preventDefault();
+    event.stopPropagation();
+    openCardDetails();
   });
 
   // Inline quantity increase/decrease buttons (delegated via card element)

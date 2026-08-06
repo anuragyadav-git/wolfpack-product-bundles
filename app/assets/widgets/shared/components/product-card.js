@@ -33,6 +33,21 @@ export function renderSharedProductCard(product = {}, currentQuantity = 0, curre
     ? formatPrice(product.compareAtPrice, currencyInfo)
     : '';
   const variantSelectorBeforePrice = options.variantSelectorPlacement === 'beforePrice';
+  const addButtonText = options.addButtonText || '+';
+  const resolvedAddButtonLabel = options.addButtonAriaLabel || addButtonText;
+  const resolvedSelectedLabel = options.selectedStateLabel || options.addedLabel || 'Added';
+  const quantityControlLabel = options.quantityAriaLabel || options.quantityLabel || 'Quantity';
+  const variantLabel = options.variantAriaLabel || 'Variant';
+  const removeLabel = options.removeAriaLabel || 'Remove';
+  const soldOutLabel = options.soldOutAriaLabel || 'Out of stock';
+  const openImageLabel = options.openImageLabel || 'Open product details';
+  const openTitleLabel = options.openTitleLabel || 'Open product details';
+  const imageNavPrevLabel = options.imageNavPreviousLabel || options.imageNavLabel || 'Previous image';
+  const imageNavNextLabel = options.imageNavNextLabel || 'Next image';
+  const seeMoreLabel = options.seeMoreText || 'See more';
+  const decreaseQuantityLabel = options.decreaseQuantityAriaLabel || options.decreaseLabel || 'Decrease quantity';
+  const increaseQuantityLabel = options.increaseQuantityAriaLabel || options.increaseLabel || 'Increase quantity';
+  const activationLabel = openImageLabel || openTitleLabel || title;
   const rootClasses = [
     'bw-product-card',
     'product-card',
@@ -46,11 +61,11 @@ export function renderSharedProductCard(product = {}, currentQuantity = 0, curre
   ].filter(Boolean).join(' ');
 
   return `
-    <div class="${rootClasses}" data-bw-product-card="true" data-product-id="${escapeAttribute(selectionKey)}" data-current-selected-variant-id="${escapeAttribute(selectionKey)}" data-bw-card-image-count="${imageUrls.length}" data-bw-card-image-index="0"${isIndividualVariantCard ? ' data-bw-card-individual-variant="true"' : ''}${hasMultipleImages ? ' data-bw-card-has-multiple-images="true"' : ''}>
-      <div class="bw-product-card__media product-image" data-bw-product-media="true">
+    <div class="${rootClasses}" data-bw-product-card="true" data-product-id="${escapeAttribute(selectionKey)}" data-current-selected-variant-id="${escapeAttribute(selectionKey)}" data-bw-card-image-count="${imageUrls.length}" data-bw-card-image-index="0"${isIndividualVariantCard ? ' data-bw-card-individual-variant="true"' : ''}${hasMultipleImages ? ' data-bw-card-has-multiple-images="true"' : ''} tabindex="0" role="group" aria-label="${escapeAttribute(activationLabel)}" aria-pressed="${isSelected ? 'true' : 'false'}">
+      <div class="bw-product-card__media product-image" data-bw-product-media="true" role="button" tabindex="0" aria-label="${escapeAttribute(openImageLabel)}">
         <img class="bw-product-card__image" src="${escapeAttribute(imageUrl)}" alt="${escapeAttribute(title)}" loading="lazy">
-        ${hasMultipleImages ? renderImageNavButton('prev') : ''}
-        ${hasMultipleImages ? renderImageNavButton('next') : ''}
+        ${hasMultipleImages ? renderImageNavButton('prev', imageNavPrevLabel) : ''}
+        ${hasMultipleImages ? renderImageNavButton('next', imageNavNextLabel) : ''}
         <span class="bw-product-card__image-overlay product-image-overlay" aria-hidden="true">
           <span class="bw-product-card__magnifier"></span>
         </span>
@@ -59,15 +74,16 @@ export function renderSharedProductCard(product = {}, currentQuantity = 0, curre
       ${options.cardBadgeHtml || ''}
       <div class="bw-product-card__body product-content-wrapper">
       <div class="bw-product-card__text product-text-container ${variantText ? 'bw-product-card__text--has-variant product-text-container--has-variant' : ''}">
-          <div class="bw-product-card__title product-title">${escapeHtml(title)}</div>
-          ${variantText ? `<div class="bw-product-card__variant product-variant-row" data-bw-card-variant-row="true">${escapeHtml(variantText)}</div>` : ''}
+          <div class="bw-product-card__title product-title" role="button" tabindex="0" aria-label="${escapeAttribute(openTitleLabel)}">${escapeHtml(title)}</div>
+          ${variantText ? `<div class="bw-product-card__variant product-variant-row" data-bw-card-variant-row="true" aria-label="${escapeAttribute(`${variantLabel}: ${variantText}`)}">${escapeHtml(variantText)}</div>` : ''}
           ${renderProductDescription({
             description: descriptionText,
             displaySeeMoreLink: options.displaySeeMoreLink === true,
             descriptionMaxLength: options.descriptionMaxLength,
+            seeMoreText: seeMoreLabel,
           })}
         </div>
-        <div class="product-card-price-action">
+        <div class="product-card-price-action" role="group" aria-label="${escapeAttribute(`${quantityControlLabel} controls`)}" aria-expanded="${isSelected ? 'true' : 'false'}">
           ${variantSelectorBeforePrice ? options.variantSelectorHtml || '' : ''}
           ${price ? `
             <div class="bw-product-card__price product-price-row">
@@ -78,18 +94,30 @@ export function renderSharedProductCard(product = {}, currentQuantity = 0, curre
           ${variantSelectorBeforePrice ? '' : options.variantSelectorHtml || ''}
           <div class="bw-product-card__action product-card-action ${isSelected ? 'is-expanded' : ''}">
             ${isSelected && options.selectedAction === 'button'
-              ? renderAddButton(selectionKey, {
+            ? renderAddButton(selectionKey, {
                 ...options,
                 addButtonText: options.selectedButtonText || options.addButtonText,
+                addButtonAriaLabel: `${resolvedSelectedLabel} ${title}`,
+                isPressed: true,
               })
               : isSelected
               ? renderQuantityControl({
                 selectionId: selectionKey,
                 quantity,
+                productName: title,
+                quantityAriaLabel: quantityControlLabel,
+                decreaseLabel: decreaseQuantityLabel,
+                increaseLabel: increaseQuantityLabel,
+                removeLabel,
+                soldOutAriaLabel: soldOutLabel,
                 decreaseDisabled: options.decreaseDisabled === true,
                 increaseDisabled: options.increaseDisabled === true,
               })
-              : renderAddButton(selectionKey, options)}
+              : renderAddButton(selectionKey, {
+                ...options,
+                addButtonText,
+                addButtonAriaLabel: `${resolvedAddButtonLabel} ${title}`,
+              })}
           </div>
         </div>
       </div>
@@ -155,22 +183,21 @@ function getVariantDisplayText(product) {
 function renderAddButton(selectionKey, options) {
   const disabled = options.addDisabled === true;
   const text = options.addButtonText || '+';
-  const accessibleLabel = text.trim() === '+'
-    ? 'aria-label="Add"'
-    : '';
+  const addLabel = options.addButtonAriaLabel || 'Add';
+  const isPressed = options.isPressed === true ? 'true' : 'false';
 
   return `
-    <button type="button" class="bw-product-card__add-button product-add-btn" data-product-id="${escapeAttribute(selectionKey)}" ${accessibleLabel} ${disabled ? 'disabled aria-disabled="true"' : ''}>
+    <button type="button" class="bw-product-card__add-button product-add-btn" data-product-id="${escapeAttribute(selectionKey)}" aria-label="${escapeAttribute(addLabel)}" aria-pressed="${isPressed}" ${disabled ? 'disabled aria-disabled="true"' : ''}>
       ${escapeHtml(text)}
     </button>
   `;
 }
 
-function renderImageNavButton(direction) {
-  const label = direction === 'prev' ? 'Previous image' : 'Next image';
+function renderImageNavButton(direction, label) {
+  const safeLabel = String(label || (direction === 'prev' ? 'Previous image' : 'Next image'));
   const symbol = direction === 'prev' ? '&#10094;' : '&#10095;';
   return `
-    <button type="button" class="bw-product-card__image-nav bw-product-card__image-nav--${direction}" data-bw-image-nav="${direction}" aria-label="${label}">
+    <button type="button" class="bw-product-card__image-nav bw-product-card__image-nav--${direction}" data-bw-image-nav="${direction}" aria-label="${escapeAttribute(safeLabel)}">
       ${symbol}
     </button>
   `;
@@ -180,6 +207,7 @@ function renderProductDescription({
   description = '',
   displaySeeMoreLink = false,
   descriptionMaxLength = PRODUCT_DESCRIPTION_PREVIEW_LENGTH,
+  seeMoreText = 'See more',
 }) {
   const descriptionText = resolveProductDescriptionText(description);
   if (!descriptionText) return '';
@@ -201,7 +229,7 @@ function renderProductDescription({
     <div class="bw-product-card__description" data-bw-card-description="true" data-bw-card-description-expanded="false">
       <span class="bw-product-card__description-short"${isClamped ? '' : ' hidden'}>${escapeHtml(shortDescription)}</span>
       <span class="bw-product-card__description-full"${isClamped ? ' hidden' : ''}>${escapeHtml(descriptionText)}</span>
-      ${isClamped ? '<button type="button" class="bw-product-card__see-more" aria-expanded="false">See more</button>' : ''}
+      ${isClamped ? `<button type="button" class="bw-product-card__see-more" aria-expanded="false">${escapeHtml(seeMoreText)}</button>` : ''}
     </div>
   `;
 }

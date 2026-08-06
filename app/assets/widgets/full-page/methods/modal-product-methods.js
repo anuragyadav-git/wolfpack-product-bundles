@@ -105,6 +105,12 @@ renderModalProducts(stepIndex, productsToRender = null) {
   const selectedProducts = this.selectedProducts[stepIndex];
   const productGrid = this.elements.modal.querySelector('.product-grid');
   const step = this.selectedBundle?.steps?.[stepIndex] || {};
+  const resolveText = (key, fallback) => (
+    typeof this._resolveText === 'function' ? this._resolveText(key, fallback) : fallback
+  );
+  const escapeText = (value) => (
+    typeof this._escapeHTML === 'function' ? this._escapeHTML(value) : String(value)
+  );
 
   if (products.length === 0) {
     if (!this._shouldRenderProductSlots()) {
@@ -171,12 +177,15 @@ renderModalProducts(stepIndex, productsToRender = null) {
     const lowStock = available !== null && available > 0 && available <= 3;
     const increaseDisabled = outOfStock || atMaxStock;
     const addDisabled = outOfStock;
+    const outOfStockLabel = resolveText('outOfStockText', 'Out of stock');
+    const lowStockTemplate = resolveText('lowStockText', 'Only {{count}} left');
+    const lowStockLabel = lowStockTemplate.replace('{{count}}', String(available));
 
     // Low-stock / out-of-stock badge — shown on the image, not in the CTA.
     const stockBadge = outOfStock
-      ? `<div class="product-stock-badge product-stock-badge--out">Out of stock</div>`
+      ? `<div class="product-stock-badge product-stock-badge--out">${escapeText(outOfStockLabel)}</div>`
       : lowStock
-        ? `<div class="product-stock-badge product-stock-badge--low">Only ${available} left</div>`
+        ? `<div class="product-stock-badge product-stock-badge--low">${escapeText(lowStockLabel)}</div>`
         : '';
 
     return renderSharedProductCard(
@@ -190,7 +199,20 @@ renderModalProducts(stepIndex, productsToRender = null) {
         variantSelectorHtml,
         stockBadgeHtml: stockBadge,
         showCompareAtPrice: this.selectedBundle?.showProductComparedAtPrice === true,
-        addButtonText: outOfStock ? 'Out of stock' : this.getProductAddButtonText(),
+        openImageLabel: resolveText('productImageLabel', 'Open product details'),
+        openTitleLabel: resolveText('productTitleLabel', 'Open product details'),
+        imageNavPreviousLabel: resolveText('productImagePreviousLabel', 'Previous image'),
+        imageNavNextLabel: resolveText('productImageNextLabel', 'Next image'),
+        seeMoreText: resolveText('productDescriptionSeeMoreText', 'See more'),
+        decreaseLabel: resolveText('decreaseQuantityText', 'Decrease quantity'),
+        increaseLabel: resolveText('increaseQuantityText', 'Increase quantity'),
+        selectedStateLabel: resolveText('addedLabel', 'Added'),
+        quantityAriaLabel: resolveText('quantityLabel', 'Quantity'),
+        variantAriaLabel: resolveText('variantLabel', 'Variant'),
+        removeAriaLabel: resolveText('removeProductFromFooterText', 'Remove this product from step'),
+        soldOutAriaLabel: resolveText('noProductsAvailableText', 'No Products Available'),
+        addButtonAriaLabel: resolveText('addButtonText', 'Add'),
+        addButtonText: outOfStock ? outOfStockLabel : this.getProductAddButtonText(),
         addDisabled,
         decreaseDisabled: currentQuantity <= 0,
         increaseDisabled,
@@ -308,6 +330,19 @@ attachProductEventHandlers(productGrid, stepIndex) {
     if (e.target.closest('.product-image, .product-title')) {
       openProductModalForCard(e.target.closest('.product-card'));
     }
+  });
+
+  newProductGrid.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') {
+      return;
+    }
+
+    const target = e.target.closest('.product-image, .product-title');
+    if (!target) return;
+    if (target.closest('.bw-product-card__image-nav')) return;
+    e.preventDefault();
+    e.stopPropagation();
+    openProductModalForCard(target.closest('.product-card'));
   });
 
   newProductGrid.querySelectorAll('.product-image, .product-title').forEach((element) => {

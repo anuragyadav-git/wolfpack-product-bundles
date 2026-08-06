@@ -1,7 +1,7 @@
 /*!
  * Wolfpack Bundle Widget — Product Page
  * Version : 5.0.227
- * Built   : 2026-07-31
+ * Built   : 2026-08-06
  *
  * Cache note: Shopify CDN cache is busted automatically by shopify app deploy.
  * After deploying, allow 2-10 minutes for propagation before testing.
@@ -3194,18 +3194,32 @@ function renderQuantityControl({
   decreaseDisabled = false,
   increaseDisabled = false,
   className = '',
+  productName = '',
+  quantityAriaLabel = 'Quantity',
+  decreaseLabel = 'Decrease quantity',
+  increaseLabel = 'Increase quantity',
+  removeLabel = 'Remove',
+  soldOutAriaLabel = 'Out of stock',
 } = {}) {
   const key = escapeHtml(selectionId || '');
   const normalizedQuantity = Math.max(0, Number(quantity || 0));
+  const safeProductName = String(productName || '').trim();
+  const baseAriaTarget = safeProductName ? `${safeProductName}` : 'product';
+  const quantityLabel = `${quantityAriaLabel}: ${normalizedQuantity}`;
+  const decreaseAriaLabel = `${normalizedQuantity <= 1 ? `${removeLabel} ${baseAriaTarget}` : `${decreaseLabel} ${baseAriaTarget}`}`;
+  const increaseAriaLabel = `${increaseLabel} ${baseAriaTarget}`;
+  const stockAriaState = normalizedQuantity === 0 && (decreaseDisabled || increaseDisabled)
+    ? soldOutAriaLabel
+    : quantityLabel;
   const classes = ['bw-quantity-control', 'inline-quantity-controls', className]
     .filter(Boolean)
     .join(' ');
 
   return `
-    <div class="${classes}" data-product-id="${key}">
-      <button type="button" class="bw-quantity-control__button inline-qty-btn qty-decrease" data-product-id="${key}" ${decreaseDisabled ? 'disabled aria-disabled="true"' : ''}>−</button>
-      <span class="bw-quantity-control__value inline-qty-display">${normalizedQuantity}</span>
-      <button type="button" class="bw-quantity-control__button inline-qty-btn qty-increase" data-product-id="${key}" ${increaseDisabled ? 'disabled aria-disabled="true"' : ''}>+</button>
+    <div class="${classes}" data-product-id="${key}" role="group" aria-label="${escapeHtml(quantityAriaLabel)} controls" aria-live="polite">
+      <button type="button" class="bw-quantity-control__button inline-qty-btn qty-decrease" data-product-id="${key}" aria-label="${escapeAttribute(decreaseAriaLabel)}" ${decreaseDisabled || normalizedQuantity === 0 ? 'disabled aria-disabled="true"' : ''}>−</button>
+      <span class="bw-quantity-control__value inline-qty-display" aria-label="${escapeAttribute(stockAriaState)}" aria-live="polite">${normalizedQuantity}</span>
+      <button type="button" class="bw-quantity-control__button inline-qty-btn qty-increase" data-product-id="${key}" aria-label="${escapeAttribute(increaseAriaLabel)}" ${increaseDisabled ? 'disabled aria-disabled="true"' : ''}>+</button>
     </div>
   `;
 }
@@ -3218,6 +3232,17 @@ function escapeHtml(value) {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
 }
+
+function escapeAttribute(value) {
+  return escapeHtml(value).replace(/`/g, '&#96;');
+}
+
+/**
+ * Shared product card renderer.
+ *
+ * The DOM contract reserves a stable action area so selected state swaps the
+ * add button for quantity controls without changing the surrounding layout.
+ */
 
 const DEFAULT_PLACEHOLDER_IMAGE = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400"%3E%3Crect width="400" height="400" fill="%23f3f4f6"/%3E%3C/svg%3E';
 const PRODUCT_DESCRIPTION_PREVIEW_LENGTH = 110;
@@ -3243,6 +3268,21 @@ function renderSharedProductCard(product = {}, currentQuantity = 0, currencyInfo
     ? formatPrice(product.compareAtPrice, currencyInfo)
     : '';
   const variantSelectorBeforePrice = options.variantSelectorPlacement === 'beforePrice';
+  const addButtonText = options.addButtonText || '+';
+  const resolvedAddButtonLabel = options.addButtonAriaLabel || addButtonText;
+  const resolvedSelectedLabel = options.selectedStateLabel || options.addedLabel || 'Added';
+  const quantityControlLabel = options.quantityAriaLabel || options.quantityLabel || 'Quantity';
+  const variantLabel = options.variantAriaLabel || 'Variant';
+  const removeLabel = options.removeAriaLabel || 'Remove';
+  const soldOutLabel = options.soldOutAriaLabel || 'Out of stock';
+  const openImageLabel = options.openImageLabel || 'Open product details';
+  const openTitleLabel = options.openTitleLabel || 'Open product details';
+  const imageNavPrevLabel = options.imageNavPreviousLabel || options.imageNavLabel || 'Previous image';
+  const imageNavNextLabel = options.imageNavNextLabel || 'Next image';
+  const seeMoreLabel = options.seeMoreText || 'See more';
+  const decreaseQuantityLabel = options.decreaseQuantityAriaLabel || options.decreaseLabel || 'Decrease quantity';
+  const increaseQuantityLabel = options.increaseQuantityAriaLabel || options.increaseLabel || 'Increase quantity';
+  const activationLabel = openImageLabel || openTitleLabel || title;
   const rootClasses = [
     'bw-product-card',
     'product-card',
@@ -3256,11 +3296,11 @@ function renderSharedProductCard(product = {}, currentQuantity = 0, currencyInfo
   ].filter(Boolean).join(' ');
 
   return `
-    <div class="${rootClasses}" data-bw-product-card="true" data-product-id="${escapeAttribute(selectionKey)}" data-current-selected-variant-id="${escapeAttribute(selectionKey)}" data-bw-card-image-count="${imageUrls.length}" data-bw-card-image-index="0"${isIndividualVariantCard ? ' data-bw-card-individual-variant="true"' : ''}${hasMultipleImages ? ' data-bw-card-has-multiple-images="true"' : ''}>
-      <div class="bw-product-card__media product-image" data-bw-product-media="true">
+    <div class="${rootClasses}" data-bw-product-card="true" data-product-id="${escapeAttribute(selectionKey)}" data-current-selected-variant-id="${escapeAttribute(selectionKey)}" data-bw-card-image-count="${imageUrls.length}" data-bw-card-image-index="0"${isIndividualVariantCard ? ' data-bw-card-individual-variant="true"' : ''}${hasMultipleImages ? ' data-bw-card-has-multiple-images="true"' : ''} tabindex="0" role="group" aria-label="${escapeAttribute(activationLabel)}" aria-pressed="${isSelected ? 'true' : 'false'}">
+      <div class="bw-product-card__media product-image" data-bw-product-media="true" role="button" tabindex="0" aria-label="${escapeAttribute(openImageLabel)}">
         <img class="bw-product-card__image" src="${escapeAttribute(imageUrl)}" alt="${escapeAttribute(title)}" loading="lazy">
-        ${hasMultipleImages ? renderImageNavButton('prev') : ''}
-        ${hasMultipleImages ? renderImageNavButton('next') : ''}
+        ${hasMultipleImages ? renderImageNavButton('prev', imageNavPrevLabel) : ''}
+        ${hasMultipleImages ? renderImageNavButton('next', imageNavNextLabel) : ''}
         <span class="bw-product-card__image-overlay product-image-overlay" aria-hidden="true">
           <span class="bw-product-card__magnifier"></span>
         </span>
@@ -3269,15 +3309,16 @@ function renderSharedProductCard(product = {}, currentQuantity = 0, currencyInfo
       ${options.cardBadgeHtml || ''}
       <div class="bw-product-card__body product-content-wrapper">
       <div class="bw-product-card__text product-text-container ${variantText ? 'bw-product-card__text--has-variant product-text-container--has-variant' : ''}">
-          <div class="bw-product-card__title product-title">${escapeHtml(title)}</div>
-          ${variantText ? `<div class="bw-product-card__variant product-variant-row" data-bw-card-variant-row="true">${escapeHtml(variantText)}</div>` : ''}
+          <div class="bw-product-card__title product-title" role="button" tabindex="0" aria-label="${escapeAttribute(openTitleLabel)}">${escapeHtml(title)}</div>
+          ${variantText ? `<div class="bw-product-card__variant product-variant-row" data-bw-card-variant-row="true" aria-label="${escapeAttribute(`${variantLabel}: ${variantText}`)}">${escapeHtml(variantText)}</div>` : ''}
           ${renderProductDescription({
             description: descriptionText,
             displaySeeMoreLink: options.displaySeeMoreLink === true,
             descriptionMaxLength: options.descriptionMaxLength,
+            seeMoreText: seeMoreLabel,
           })}
         </div>
-        <div class="product-card-price-action">
+        <div class="product-card-price-action" role="group" aria-label="${escapeAttribute(`${quantityControlLabel} controls`)}" aria-expanded="${isSelected ? 'true' : 'false'}">
           ${variantSelectorBeforePrice ? options.variantSelectorHtml || '' : ''}
           ${price ? `
             <div class="bw-product-card__price product-price-row">
@@ -3288,18 +3329,30 @@ function renderSharedProductCard(product = {}, currentQuantity = 0, currencyInfo
           ${variantSelectorBeforePrice ? '' : options.variantSelectorHtml || ''}
           <div class="bw-product-card__action product-card-action ${isSelected ? 'is-expanded' : ''}">
             ${isSelected && options.selectedAction === 'button'
-              ? renderAddButton(selectionKey, {
+            ? renderAddButton(selectionKey, {
                 ...options,
                 addButtonText: options.selectedButtonText || options.addButtonText,
+                addButtonAriaLabel: `${resolvedSelectedLabel} ${title}`,
+                isPressed: true,
               })
               : isSelected
               ? renderQuantityControl({
                 selectionId: selectionKey,
                 quantity,
+                productName: title,
+                quantityAriaLabel: quantityControlLabel,
+                decreaseLabel: decreaseQuantityLabel,
+                increaseLabel: increaseQuantityLabel,
+                removeLabel,
+                soldOutAriaLabel: soldOutLabel,
                 decreaseDisabled: options.decreaseDisabled === true,
                 increaseDisabled: options.increaseDisabled === true,
               })
-              : renderAddButton(selectionKey, options)}
+              : renderAddButton(selectionKey, {
+                ...options,
+                addButtonText,
+                addButtonAriaLabel: `${resolvedAddButtonLabel} ${title}`,
+              })}
           </div>
         </div>
       </div>
@@ -3365,22 +3418,21 @@ function getVariantDisplayText(product) {
 function renderAddButton(selectionKey, options) {
   const disabled = options.addDisabled === true;
   const text = options.addButtonText || '+';
-  const accessibleLabel = text.trim() === '+'
-    ? 'aria-label="Add"'
-    : '';
+  const addLabel = options.addButtonAriaLabel || 'Add';
+  const isPressed = options.isPressed === true ? 'true' : 'false';
 
   return `
-    <button type="button" class="bw-product-card__add-button product-add-btn" data-product-id="${escapeAttribute(selectionKey)}" ${accessibleLabel} ${disabled ? 'disabled aria-disabled="true"' : ''}>
+    <button type="button" class="bw-product-card__add-button product-add-btn" data-product-id="${escapeAttribute(selectionKey)}" aria-label="${escapeAttribute(addLabel)}" aria-pressed="${isPressed}" ${disabled ? 'disabled aria-disabled="true"' : ''}>
       ${escapeHtml(text)}
     </button>
   `;
 }
 
-function renderImageNavButton(direction) {
-  const label = direction === 'prev' ? 'Previous image' : 'Next image';
+function renderImageNavButton(direction, label) {
+  const safeLabel = String(label || (direction === 'prev' ? 'Previous image' : 'Next image'));
   const symbol = direction === 'prev' ? '&#10094;' : '&#10095;';
   return `
-    <button type="button" class="bw-product-card__image-nav bw-product-card__image-nav--${direction}" data-bw-image-nav="${direction}" aria-label="${label}">
+    <button type="button" class="bw-product-card__image-nav bw-product-card__image-nav--${direction}" data-bw-image-nav="${direction}" aria-label="${escapeAttribute(safeLabel)}">
       ${symbol}
     </button>
   `;
@@ -3390,6 +3442,7 @@ function renderProductDescription({
   description = '',
   displaySeeMoreLink = false,
   descriptionMaxLength = PRODUCT_DESCRIPTION_PREVIEW_LENGTH,
+  seeMoreText = 'See more',
 }) {
   const descriptionText = resolveProductDescriptionText(description);
   if (!descriptionText) return '';
@@ -3411,7 +3464,7 @@ function renderProductDescription({
     <div class="bw-product-card__description" data-bw-card-description="true" data-bw-card-description-expanded="false">
       <span class="bw-product-card__description-short"${isClamped ? '' : ' hidden'}>${escapeHtml(shortDescription)}</span>
       <span class="bw-product-card__description-full"${isClamped ? ' hidden' : ''}>${escapeHtml(descriptionText)}</span>
-      ${isClamped ? '<button type="button" class="bw-product-card__see-more" aria-expanded="false">See more</button>' : ''}
+      ${isClamped ? `<button type="button" class="bw-product-card__see-more" aria-expanded="false">${escapeHtml(seeMoreText)}</button>` : ''}
     </div>
   `;
 }
@@ -3448,13 +3501,6 @@ function escapeHtml(value) {
 function escapeAttribute(value) {
   return escapeHtml(value).replace(/`/g, '&#96;');
 }
-
-/**
- * Shared selected product row renderer.
- *
- * Renders prepared display data only; selection rules, default-product rules,
- * and free-gift lock state stay in the caller until templates migrate.
- */
 
 const SELECTED_ROW_PLACEHOLDER_IMAGE = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96"%3E%3Crect width="96" height="96" fill="%23f3f4f6"/%3E%3C/svg%3E';
 
@@ -3679,6 +3725,13 @@ function escapeAttribute(value) {
   return escapeHtml(value).replace(/`/g, '&#96;');
 }
 
+/**
+ * Shared bundle state skeleton.
+ *
+ * This module is intentionally data-only. Renderers keep owning DOM updates
+ * while the refactor moves selection math into shared selectors/actions.
+ */
+
 function createBundleState(input = {}) {
   const bundle = input.bundle || null;
   const steps = Array.isArray(input.steps)
@@ -3702,6 +3755,13 @@ function cloneSelectedProducts(selectedProducts) {
     return { ...stepSelections };
   });
 }
+
+/**
+ * Shared bundle selectors.
+ *
+ * Selectors accept the current widget-shaped state so FPB and PPB can adopt
+ * them gradually without changing render ownership.
+ */
 
 function getCurrentStep(state) {
   const steps = Array.isArray(state?.steps) ? state.steps : [];
@@ -3839,6 +3899,13 @@ function findProductByVariantId(state, variantId) {
   return null;
 }
 
+/**
+ * Shared bundle actions.
+ *
+ * Actions return a new state object and cloned selection arrays so migration
+ * loops can adopt them without mutating legacy widget state by accident.
+ */
+
 function addSelectedProduct(state, { stepIndex, variantId, quantity = 1 }) {
   const selectedProducts = cloneSelectedProducts(state?.selectedProducts);
   ensureStep(selectedProducts, stepIndex);
@@ -3881,6 +3948,14 @@ function ensureStep(selectedProducts, stepIndex) {
     selectedProducts[stepIndex] = {};
   }
 }
+
+/**
+ * Shared cart-line metadata helpers.
+ *
+ * These helpers build the display metadata used by FPB and PPB cart lines.
+ * Cart submission, variant IDs, selling plans, and post-add behavior stay owned
+ * by the widget controllers for now.
+ */
 
 const DEFAULT_CART_LINE_LABELS = {
   items: 'Items',
@@ -3948,6 +4023,13 @@ function buildCartLineDisplayProperties(displayProperties = {}, labels = DEFAULT
 
   return properties;
 }
+
+/**
+ * Shared cart submission payload helpers.
+ *
+ * Transport remains owned by each widget. These helpers only build payload
+ * structures that must stay consistent across controller refactors.
+ */
 
 function extractBundleDetailsSourceProperties(cartItems = []) {
   const firstItem = cartItems.find(item => item?.properties?._bundle_display_properties);
@@ -4105,6 +4187,10 @@ function ppbExpandSingleStepCategoriesAsSteps(bundle) {
   };
 }
 
+/**
+ * PPB Grid config. Legacy identifier: PDP_INPAGE + COGNIVE.
+ */
+
 const PPB_GRID_TEMPLATE_CONFIG = {
   id: 'GRID',
   templateType: 'PDP_INPAGE',
@@ -4121,6 +4207,10 @@ const PPB_GRID_TEMPLATE_CONFIG = {
     placement: ['footer', 'drawer'],
   },
 };
+
+/**
+ * PPB List config. Legacy identifier: PDP_INPAGE + CASCADE.
+ */
 
 const PPB_LIST_TEMPLATE_CONFIG = {
   id: 'LIST',
@@ -4139,6 +4229,10 @@ const PPB_LIST_TEMPLATE_CONFIG = {
   },
 };
 
+/**
+ * PPB Horizontal Slots config. Legacy identifier: PDP_MODAL horizontal branch.
+ */
+
 const PPB_HORIZONTAL_SLOTS_TEMPLATE_CONFIG = {
   id: 'HORIZONTAL_SLOTS',
   templateType: 'PDP_MODAL',
@@ -4156,6 +4250,11 @@ const PPB_HORIZONTAL_SLOTS_TEMPLATE_CONFIG = {
   },
 };
 
+/**
+ * PPB Vertical Slots config. Legacy identifier: PDP_MODAL + SIMPLIFIED or
+ * PDP_MODAL with renderFilledSlotsAsHorizontalStacked set false.
+ */
+
 const PPB_VERTICAL_SLOTS_TEMPLATE_CONFIG = {
   id: 'VERTICAL_SLOTS',
   templateType: 'PDP_MODAL',
@@ -4172,6 +4271,12 @@ const PPB_VERTICAL_SLOTS_TEMPLATE_CONFIG = {
     placement: ['bottomSheet', 'modal'],
   },
 };
+
+/**
+ * Product-page template registry.
+ *
+ * Normalizes legacy-compatible identifiers to the four PPB target templates.
+ */
 
 const PPB_TEMPLATE_CONFIGS = {
   GRID: PPB_GRID_TEMPLATE_CONFIG,
@@ -7043,7 +7148,7 @@ _recordView() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ shop }),
       keepalive: true,
-    }).catch(() => { /* best-effort */ });
+    }).catch(() => {  });
   } catch (_) {
 
   }

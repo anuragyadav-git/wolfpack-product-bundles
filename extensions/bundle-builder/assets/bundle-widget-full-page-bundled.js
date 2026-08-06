@@ -1,7 +1,7 @@
 /*!
  * Wolfpack Bundle Widget — Full Page
  * Version : 5.0.227
- * Built   : 2026-08-05
+ * Built   : 2026-08-06
  *
  * Cache note: Shopify CDN cache is busted automatically by shopify app deploy.
  * After deploying, allow 2-10 minutes for propagation before testing.
@@ -47,19 +47,6 @@ const ConditionValidator = (function () {
     return total;
   }
 
-  /**
-   * Determine whether a proposed quantity update is permitted by the step's condition.
-   *
-   * Only blocks INCREASES that would violate an upper-bound operator.
-   * Decreases are always permitted regardless of the condition state (so the
-   * customer can switch products without getting permanently stuck).
-   *
-   * @param {object}  step              Step config object (conditionType, conditionOperator, conditionValue)
-   * @param {Record<string, number>} currentSelections  Current selections for this step
-   * @param {string}  targetProductId   Product being updated
-   * @param {number}  newQuantity       Proposed quantity (0 = remove)
-   * @returns {{ allowed: boolean, limitText: string|null }}
-   */
   function canUpdateQuantity(step, currentSelections, targetProductId, newQuantity, targetValues) {
 
     if (!step || !step.conditionType || !step.conditionOperator || !_isPositiveConditionValue(step.conditionValue)) {
@@ -407,15 +394,6 @@ const BUNDLE_WIDGET = {
   PLACEHOLDER_IMAGE: INLINE_PLACEHOLDER_IMAGE,
   PLACEHOLDER_IMAGE_FALLBACK: INLINE_PLACEHOLDER_IMAGE
 };
-
-/**
- * Bundle Widget - Currency Management System
- *
- * Handles multi-currency detection, conversion, and formatting.
- * Integrates with Shopify Markets for automatic currency handling.
- *
- * @version 4.0.0
- */
 
 class CurrencyManager {
   static getShopify() {
@@ -3194,18 +3172,32 @@ function renderQuantityControl({
   decreaseDisabled = false,
   increaseDisabled = false,
   className = '',
+  productName = '',
+  quantityAriaLabel = 'Quantity',
+  decreaseLabel = 'Decrease quantity',
+  increaseLabel = 'Increase quantity',
+  removeLabel = 'Remove',
+  soldOutAriaLabel = 'Out of stock',
 } = {}) {
   const key = escapeHtml(selectionId || '');
   const normalizedQuantity = Math.max(0, Number(quantity || 0));
+  const safeProductName = String(productName || '').trim();
+  const baseAriaTarget = safeProductName ? `${safeProductName}` : 'product';
+  const quantityLabel = `${quantityAriaLabel}: ${normalizedQuantity}`;
+  const decreaseAriaLabel = `${normalizedQuantity <= 1 ? `${removeLabel} ${baseAriaTarget}` : `${decreaseLabel} ${baseAriaTarget}`}`;
+  const increaseAriaLabel = `${increaseLabel} ${baseAriaTarget}`;
+  const stockAriaState = normalizedQuantity === 0 && (decreaseDisabled || increaseDisabled)
+    ? soldOutAriaLabel
+    : quantityLabel;
   const classes = ['bw-quantity-control', 'inline-quantity-controls', className]
     .filter(Boolean)
     .join(' ');
 
   return `
-    <div class="${classes}" data-product-id="${key}">
-      <button type="button" class="bw-quantity-control__button inline-qty-btn qty-decrease" data-product-id="${key}" ${decreaseDisabled ? 'disabled aria-disabled="true"' : ''}>−</button>
-      <span class="bw-quantity-control__value inline-qty-display">${normalizedQuantity}</span>
-      <button type="button" class="bw-quantity-control__button inline-qty-btn qty-increase" data-product-id="${key}" ${increaseDisabled ? 'disabled aria-disabled="true"' : ''}>+</button>
+    <div class="${classes}" data-product-id="${key}" role="group" aria-label="${escapeHtml(quantityAriaLabel)} controls" aria-live="polite">
+      <button type="button" class="bw-quantity-control__button inline-qty-btn qty-decrease" data-product-id="${key}" aria-label="${escapeAttribute(decreaseAriaLabel)}" ${decreaseDisabled || normalizedQuantity === 0 ? 'disabled aria-disabled="true"' : ''}>−</button>
+      <span class="bw-quantity-control__value inline-qty-display" aria-label="${escapeAttribute(stockAriaState)}" aria-live="polite">${normalizedQuantity}</span>
+      <button type="button" class="bw-quantity-control__button inline-qty-btn qty-increase" data-product-id="${key}" aria-label="${escapeAttribute(increaseAriaLabel)}" ${increaseDisabled ? 'disabled aria-disabled="true"' : ''}>+</button>
     </div>
   `;
 }
@@ -3217,6 +3209,10 @@ function escapeHtml(value) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
+}
+
+function escapeAttribute(value) {
+  return escapeHtml(value).replace(/`/g, '&#96;');
 }
 
 const DEFAULT_PLACEHOLDER_IMAGE = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400"%3E%3Crect width="400" height="400" fill="%23f3f4f6"/%3E%3C/svg%3E';
@@ -3243,6 +3239,21 @@ function renderSharedProductCard(product = {}, currentQuantity = 0, currencyInfo
     ? formatPrice(product.compareAtPrice, currencyInfo)
     : '';
   const variantSelectorBeforePrice = options.variantSelectorPlacement === 'beforePrice';
+  const addButtonText = options.addButtonText || '+';
+  const resolvedAddButtonLabel = options.addButtonAriaLabel || addButtonText;
+  const resolvedSelectedLabel = options.selectedStateLabel || options.addedLabel || 'Added';
+  const quantityControlLabel = options.quantityAriaLabel || options.quantityLabel || 'Quantity';
+  const variantLabel = options.variantAriaLabel || 'Variant';
+  const removeLabel = options.removeAriaLabel || 'Remove';
+  const soldOutLabel = options.soldOutAriaLabel || 'Out of stock';
+  const openImageLabel = options.openImageLabel || 'Open product details';
+  const openTitleLabel = options.openTitleLabel || 'Open product details';
+  const imageNavPrevLabel = options.imageNavPreviousLabel || options.imageNavLabel || 'Previous image';
+  const imageNavNextLabel = options.imageNavNextLabel || 'Next image';
+  const seeMoreLabel = options.seeMoreText || 'See more';
+  const decreaseQuantityLabel = options.decreaseQuantityAriaLabel || options.decreaseLabel || 'Decrease quantity';
+  const increaseQuantityLabel = options.increaseQuantityAriaLabel || options.increaseLabel || 'Increase quantity';
+  const activationLabel = openImageLabel || openTitleLabel || title;
   const rootClasses = [
     'bw-product-card',
     'product-card',
@@ -3256,11 +3267,11 @@ function renderSharedProductCard(product = {}, currentQuantity = 0, currencyInfo
   ].filter(Boolean).join(' ');
 
   return `
-    <div class="${rootClasses}" data-bw-product-card="true" data-product-id="${escapeAttribute(selectionKey)}" data-current-selected-variant-id="${escapeAttribute(selectionKey)}" data-bw-card-image-count="${imageUrls.length}" data-bw-card-image-index="0"${isIndividualVariantCard ? ' data-bw-card-individual-variant="true"' : ''}${hasMultipleImages ? ' data-bw-card-has-multiple-images="true"' : ''}>
-      <div class="bw-product-card__media product-image" data-bw-product-media="true">
+    <div class="${rootClasses}" data-bw-product-card="true" data-product-id="${escapeAttribute(selectionKey)}" data-current-selected-variant-id="${escapeAttribute(selectionKey)}" data-bw-card-image-count="${imageUrls.length}" data-bw-card-image-index="0"${isIndividualVariantCard ? ' data-bw-card-individual-variant="true"' : ''}${hasMultipleImages ? ' data-bw-card-has-multiple-images="true"' : ''} tabindex="0" role="group" aria-label="${escapeAttribute(activationLabel)}" aria-pressed="${isSelected ? 'true' : 'false'}">
+      <div class="bw-product-card__media product-image" data-bw-product-media="true" role="button" tabindex="0" aria-label="${escapeAttribute(openImageLabel)}">
         <img class="bw-product-card__image" src="${escapeAttribute(imageUrl)}" alt="${escapeAttribute(title)}" loading="lazy">
-        ${hasMultipleImages ? renderImageNavButton('prev') : ''}
-        ${hasMultipleImages ? renderImageNavButton('next') : ''}
+        ${hasMultipleImages ? renderImageNavButton('prev', imageNavPrevLabel) : ''}
+        ${hasMultipleImages ? renderImageNavButton('next', imageNavNextLabel) : ''}
         <span class="bw-product-card__image-overlay product-image-overlay" aria-hidden="true">
           <span class="bw-product-card__magnifier"></span>
         </span>
@@ -3269,15 +3280,16 @@ function renderSharedProductCard(product = {}, currentQuantity = 0, currencyInfo
       ${options.cardBadgeHtml || ''}
       <div class="bw-product-card__body product-content-wrapper">
       <div class="bw-product-card__text product-text-container ${variantText ? 'bw-product-card__text--has-variant product-text-container--has-variant' : ''}">
-          <div class="bw-product-card__title product-title">${escapeHtml(title)}</div>
-          ${variantText ? `<div class="bw-product-card__variant product-variant-row" data-bw-card-variant-row="true">${escapeHtml(variantText)}</div>` : ''}
+          <div class="bw-product-card__title product-title" role="button" tabindex="0" aria-label="${escapeAttribute(openTitleLabel)}">${escapeHtml(title)}</div>
+          ${variantText ? `<div class="bw-product-card__variant product-variant-row" data-bw-card-variant-row="true" aria-label="${escapeAttribute(`${variantLabel}: ${variantText}`)}">${escapeHtml(variantText)}</div>` : ''}
           ${renderProductDescription({
             description: descriptionText,
             displaySeeMoreLink: options.displaySeeMoreLink === true,
             descriptionMaxLength: options.descriptionMaxLength,
+            seeMoreText: seeMoreLabel,
           })}
         </div>
-        <div class="product-card-price-action">
+        <div class="product-card-price-action" role="group" aria-label="${escapeAttribute(`${quantityControlLabel} controls`)}" aria-expanded="${isSelected ? 'true' : 'false'}">
           ${variantSelectorBeforePrice ? options.variantSelectorHtml || '' : ''}
           ${price ? `
             <div class="bw-product-card__price product-price-row">
@@ -3288,18 +3300,30 @@ function renderSharedProductCard(product = {}, currentQuantity = 0, currencyInfo
           ${variantSelectorBeforePrice ? '' : options.variantSelectorHtml || ''}
           <div class="bw-product-card__action product-card-action ${isSelected ? 'is-expanded' : ''}">
             ${isSelected && options.selectedAction === 'button'
-              ? renderAddButton(selectionKey, {
+            ? renderAddButton(selectionKey, {
                 ...options,
                 addButtonText: options.selectedButtonText || options.addButtonText,
+                addButtonAriaLabel: `${resolvedSelectedLabel} ${title}`,
+                isPressed: true,
               })
               : isSelected
               ? renderQuantityControl({
                 selectionId: selectionKey,
                 quantity,
+                productName: title,
+                quantityAriaLabel: quantityControlLabel,
+                decreaseLabel: decreaseQuantityLabel,
+                increaseLabel: increaseQuantityLabel,
+                removeLabel,
+                soldOutAriaLabel: soldOutLabel,
                 decreaseDisabled: options.decreaseDisabled === true,
                 increaseDisabled: options.increaseDisabled === true,
               })
-              : renderAddButton(selectionKey, options)}
+              : renderAddButton(selectionKey, {
+                ...options,
+                addButtonText,
+                addButtonAriaLabel: `${resolvedAddButtonLabel} ${title}`,
+              })}
           </div>
         </div>
       </div>
@@ -3365,22 +3389,21 @@ function getVariantDisplayText(product) {
 function renderAddButton(selectionKey, options) {
   const disabled = options.addDisabled === true;
   const text = options.addButtonText || '+';
-  const accessibleLabel = text.trim() === '+'
-    ? 'aria-label="Add"'
-    : '';
+  const addLabel = options.addButtonAriaLabel || 'Add';
+  const isPressed = options.isPressed === true ? 'true' : 'false';
 
   return `
-    <button type="button" class="bw-product-card__add-button product-add-btn" data-product-id="${escapeAttribute(selectionKey)}" ${accessibleLabel} ${disabled ? 'disabled aria-disabled="true"' : ''}>
+    <button type="button" class="bw-product-card__add-button product-add-btn" data-product-id="${escapeAttribute(selectionKey)}" aria-label="${escapeAttribute(addLabel)}" aria-pressed="${isPressed}" ${disabled ? 'disabled aria-disabled="true"' : ''}>
       ${escapeHtml(text)}
     </button>
   `;
 }
 
-function renderImageNavButton(direction) {
-  const label = direction === 'prev' ? 'Previous image' : 'Next image';
+function renderImageNavButton(direction, label) {
+  const safeLabel = String(label || (direction === 'prev' ? 'Previous image' : 'Next image'));
   const symbol = direction === 'prev' ? '&#10094;' : '&#10095;';
   return `
-    <button type="button" class="bw-product-card__image-nav bw-product-card__image-nav--${direction}" data-bw-image-nav="${direction}" aria-label="${label}">
+    <button type="button" class="bw-product-card__image-nav bw-product-card__image-nav--${direction}" data-bw-image-nav="${direction}" aria-label="${escapeAttribute(safeLabel)}">
       ${symbol}
     </button>
   `;
@@ -3390,6 +3413,7 @@ function renderProductDescription({
   description = '',
   displaySeeMoreLink = false,
   descriptionMaxLength = PRODUCT_DESCRIPTION_PREVIEW_LENGTH,
+  seeMoreText = 'See more',
 }) {
   const descriptionText = resolveProductDescriptionText(description);
   if (!descriptionText) return '';
@@ -3411,7 +3435,7 @@ function renderProductDescription({
     <div class="bw-product-card__description" data-bw-card-description="true" data-bw-card-description-expanded="false">
       <span class="bw-product-card__description-short"${isClamped ? '' : ' hidden'}>${escapeHtml(shortDescription)}</span>
       <span class="bw-product-card__description-full"${isClamped ? ' hidden' : ''}>${escapeHtml(descriptionText)}</span>
-      ${isClamped ? '<button type="button" class="bw-product-card__see-more" aria-expanded="false">See more</button>' : ''}
+      ${isClamped ? `<button type="button" class="bw-product-card__see-more" aria-expanded="false">${escapeHtml(seeMoreText)}</button>` : ''}
     </div>
   `;
 }
@@ -3448,13 +3472,6 @@ function escapeHtml(value) {
 function escapeAttribute(value) {
   return escapeHtml(value).replace(/`/g, '&#96;');
 }
-
-/**
- * Shared selected product row renderer.
- *
- * Renders prepared display data only; selection rules, default-product rules,
- * and free-gift lock state stay in the caller until templates migrate.
- */
 
 const SELECTED_ROW_PLACEHOLDER_IMAGE = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96"%3E%3Crect width="96" height="96" fill="%23f3f4f6"/%3E%3C/svg%3E';
 
@@ -4088,12 +4105,6 @@ const BundleModalVariantMethods = {
     this.updateSelectedVariant();
   },
 
-  /**
-   * Check if option is likely a color option
-   * @param {string} optionName - Option name
-   * @param {string[]} values - Option values
-   * @returns {boolean}
-   */
   isColorOption(optionName, values) {
     const colorKeywords = ['color', 'colour', 'colors', 'colours'];
     if (colorKeywords.some(keyword => optionName.toLowerCase().includes(keyword))) {
@@ -4105,11 +4116,6 @@ const BundleModalVariantMethods = {
     return colorMatches.length > values.length / 2;
   },
 
-  /**
-   * Get CSS style for color swatch
-   * @param {string} colorName - Color name
-   * @returns {string} CSS style string
-   */
   getColorStyle(colorName) {
 
     const colorMap = {
@@ -4134,11 +4140,6 @@ const BundleModalVariantMethods = {
     return 'background: linear-gradient(135deg, #f0f0f0, #e0e0e0)';
   },
 
-  /**
-   * Select a variant option
-   * @param {number} optionIndex - Index of the option (0, 1, or 2)
-   * @param {string} value - Selected value
-   */
   selectVariantOption(optionIndex, value) {
 
     this.selectedOptions[optionIndex] = value;
@@ -4158,9 +4159,6 @@ const BundleModalVariantMethods = {
     this.updateSelectedVariant();
   },
 
-  /**
-   * Update selected variant based on button selections
-   */
   updateSelectedVariant() {
     const variants = this.currentProduct.variants || [];
 
@@ -4190,10 +4188,6 @@ const BundleModalVariantMethods = {
     this.updateOptionAvailability();
   },
 
-  /**
-   * Update selection summary display
-   * Shows current selection like "Blue / Medium"
-   */
   updateSelectionSummary() {
     const summaryContainer = document.getElementById('modal-selection-summary');
     const summaryText = document.getElementById('modal-selection-text');
@@ -4214,10 +4208,6 @@ const BundleModalVariantMethods = {
     summaryContainer.hidden = false;
   },
 
-  /**
-   * Update availability state of variant option buttons
-   * Marks options as unavailable if no variant exists with that combination
-   */
   updateOptionAvailability() {
     const variants = this.currentProduct.variants || [];
     if (!this.selectedOptions) return;
@@ -4249,9 +4239,6 @@ const BundleModalVariantMethods = {
     });
   },
 
-  /**
-   * Update main image when variant changes (if variant has specific image)
-   */
   updateVariantImage() {
     if (!this.selectedVariant) return;
 
@@ -4272,9 +4259,6 @@ const BundleModalVariantMethods = {
     }
   },
 
-  /**
-   * Update price display
-   */
   updatePrice() {
     const priceEl = document.getElementById('modal-product-price');
     const variant = this.selectedVariant || this.currentProduct;
@@ -4307,9 +4291,6 @@ const BundleModalVariantMethods = {
     return `$${dollars}`;
   },
 
-  /**
-   * Update availability status
-   */
   updateAvailability() {
     const addBtn = document.getElementById('modal-add-to-box');
     const variant = this.selectedVariant || this.currentProduct;
@@ -4328,27 +4309,7 @@ const BundleModalVariantMethods = {
     }
   },
 
-  /**
-   * Update quantity
-   * @param {number} quantity - New quantity
-   */
 };
-
-/**
- * Bundle Product Modal Component
- *
- * Handles the product variant selection modal for full-page bundles.
- * Opens when user clicks "Choose Options" on a product card.
- *
- * Features:
- * - Product image, title, and description
- * - Variant selection dropdowns
- * - Quantity controls
- * - Add To Box functionality
- * - Responsive mobile layout
- *
- * @version 1.0.0
- */
 
 class BundleProductModal {
   constructor(widget) {
@@ -4364,17 +4325,11 @@ class BundleProductModal {
     this.init();
   }
 
-  /**
-   * Initialize modal
-   */
   init() {
     this.createModalHTML();
     this.attachEventListeners();
   }
 
-  /**
-   * Create modal DOM structure
-   */
   createModalHTML() {
     const modalHTML = `
       <div class="bundle-modal-overlay" id="bundle-product-modal">
@@ -4440,9 +4395,6 @@ class BundleProductModal {
     this.modalElement = document.getElementById('bundle-product-modal');
   }
 
-  /**
-   * Attach event listeners
-   */
   attachEventListeners() {
 
     const closeBtn = this.modalElement.querySelector('.bundle-modal-close');
@@ -4483,10 +4435,6 @@ class BundleProductModal {
     this.setupSwipeGestures();
   }
 
-  /**
-   * Setup swipe gestures for mobile
-   * - Swipe down on container to dismiss
-   */
   setupSwipeGestures() {
     const modalContainer = this.modalElement.querySelector('.bundle-modal-container');
 
@@ -4540,11 +4488,6 @@ class BundleProductModal {
     }
   }
 
-  /**
-   * Open modal with product data
-   * @param {Object} product - Product data
-   * @param {Object} step - Step data
-   */
   open(product, step, options = {}) {
 
     this.currentProduct = product;
@@ -4566,9 +4509,6 @@ class BundleProductModal {
     document.body.classList.add('modal-open');
   }
 
-  /**
-   * Close modal
-   */
   close() {
     this.modalElement.classList.remove('active');
     document.body.classList.remove('modal-open');
@@ -4582,9 +4522,6 @@ class BundleProductModal {
     this.updateReadOnlyState();
   }
 
-  /**
-   * Populate modal with product data
-   */
   populateModal() {
 
     const displayTitle = this.currentProduct.parentTitle || this.currentProduct.title;
@@ -4628,11 +4565,6 @@ class BundleProductModal {
     });
   }
 
-  /**
-   * Get normalized product image.
-   * Handles imageUrl, image.src, images array, and featuredImage.url.
-   * @returns {string} Image URL
-   */
   getProductImages() {
     const product = this.currentProduct;
     if (!product) return [BUNDLE_WIDGET.PLACEHOLDER_IMAGE];
@@ -4694,9 +4626,6 @@ class BundleProductModal {
     document.getElementById('modal-qty-display').textContent = this.selectedQuantity;
   }
 
-  /**
-   * Add product to bundle
-   */
   addToBundle() {
     if (this.readOnly) {
       return;
@@ -4739,9 +4668,6 @@ class BundleProductModal {
     this.showSuccessFeedback();
   }
 
-  /**
-   * Show success feedback after adding product
-   */
   showSuccessFeedback() {
 
     if (this.widget && this.widget.showToast) {
@@ -5019,10 +4945,6 @@ hidePageLoadingContent() {
   }
 },
 
-/**
- * Load Settings design CSS
- * Injects custom CSS from Settings -> Design into the page
- */
 loadDesignSettingsCSS() {
   try {
 
@@ -5377,9 +5299,6 @@ parseConfiguration() {
   this.applyCardLayoutSettings();
 },
 
-/**
- * Apply card layout settings from Theme Editor as CSS variables
- */
 applyCardLayoutSettings() {
   document.documentElement.style.setProperty(
     '--bundle-product-card-spacing',
@@ -5705,9 +5624,6 @@ initializeDataStructures() {
   this.stepProductData = Array(stepsCount).fill(null).map(() => ([]));
 },
 
-/**
- * Show a helpful preview in theme editor when testing on non-bundle products
- */
 showThemeEditorPreview(bundleId) {
 
   this.container.innerHTML = `
@@ -9664,6 +9580,9 @@ function getSelectionId(item = {}) {
 
 const fullPageProductCardFooterMethods = {
 createProductCard(product, stepIndex, options = {}) {
+  const resolveText = (key, fallback) => (
+    typeof this._resolveText === 'function' ? this._resolveText(key, fallback) : fallback
+  );
   const productId = getSelectionId(product);
   const selectedQuantity = this.selectedProducts[stepIndex]?.[productId] || 0;
   const directDefaultQuantity = product?.isDirectDefaultProduct
@@ -9702,14 +9621,14 @@ createProductCard(product, stepIndex, options = {}) {
     && displayVariantsAsIndividualProducts === false
     && selectableVariantCount > 1;
   const addButtonText = openVariantModalOnAdd
-    ? this._resolveText('chooseOptionsButton', 'Choose Options')
+    ? resolveText('chooseOptionsButton', 'Choose Options')
     : this.getProductCardAddButtonText(step);
   const variantSelectorHtml = shouldRenderVariantSelector
     ? usesDropdownVariantSelector
       ? VariantSelectorComponent.renderDropdownHtml(product, primaryOptionName, {
         placeholder: designPreset === 'HORIZONTAL'
           ? ''
-          : this._resolveText('chooseOptionsButton', 'Choose Options'),
+          : resolveText('chooseOptionsButton', 'Choose Options'),
         mobileMode: variantSelectorPresentation.mobileMode,
         hideUnavailable: true,
       })
@@ -9724,6 +9643,18 @@ createProductCard(product, stepIndex, options = {}) {
     this.selectedBundle?.validateQuantityPerProduct,
     currentQuantity,
   );
+  const normalizedStepName = typeof step?.name === 'string' && step?.name.trim().length > 0
+    ? step.name
+    : typeof step?.title === 'string' && step.title.trim().length > 0
+      ? step.title
+      : 'step';
+  const removeLabelSource = resolveText(
+    'removeProductFromFooterText',
+    'Remove this product from step',
+  );
+  const removeActionLabel = removeLabelSource
+    .replace('{{stepName}}', normalizedStepName)
+    .replace('{{quantity}}', String(currentQuantity));
   const supportsAddonDiscountBadge = ['STANDARD', 'CLASSIC'].includes(designPreset);
   const hasAddonDiscountBadge = supportsAddonDiscountBadge && displayProduct.addonDiscountBadgeText;
   const stockBadgeHtml = hasAddonDiscountBadge
@@ -9741,6 +9672,19 @@ createProductCard(product, stepIndex, options = {}) {
         mode: designPreset === 'HORIZONTAL' ? 'row' : 'grid',
         className: outOfStock ? 'is-out-of-stock' : '',
         showCompareAtPrice: this.selectedBundle?.showProductComparedAtPrice === true,
+        openImageLabel: resolveText('productImageLabel', 'Open product details'),
+        openTitleLabel: resolveText('productTitleLabel', 'Open product details'),
+        imageNavPreviousLabel: resolveText('productImagePreviousLabel', 'Previous image'),
+        imageNavNextLabel: resolveText('productImageNextLabel', 'Next image'),
+        seeMoreText: resolveText('productDescriptionSeeMoreText', 'See more'),
+        decreaseLabel: resolveText('decreaseQuantityText', 'Decrease quantity'),
+        increaseLabel: resolveText('increaseQuantityText', 'Increase quantity'),
+        selectedStateLabel: resolveText('addedLabel', 'Added'),
+        quantityAriaLabel: resolveText('quantityLabel', 'Quantity'),
+        variantAriaLabel: resolveText('variantLabel', 'Variant'),
+        removeAriaLabel: removeActionLabel,
+        soldOutAriaLabel: resolveText('noProductsAvailableText', 'No Products Available'),
+        addButtonAriaLabel: resolveText('addButtonText', 'Add'),
         addButtonText,
         increaseDisabled,
         cardBadgeHtml: stockBadgeHtml,
@@ -9787,7 +9731,7 @@ createProductCard(product, stepIndex, options = {}) {
         img.className = 'fpb-included-badge-img';
         badge.appendChild(img);
       } else {
-        badge.textContent = this._resolveText('includedBadge', 'Included');
+        badge.textContent = resolveText('includedBadge', 'Included');
 }
       imgEl.parentElement.appendChild(badge);
     }
@@ -9812,7 +9756,7 @@ createProductCard(product, stepIndex, options = {}) {
         img.className = 'fpb-free-badge-img';
         badge.appendChild(img);
       } else {
-        badge.textContent = this._resolveText('freeBadge', 'Free');
+        badge.textContent = resolveText('freeBadge', 'Free');
       }
       imgEl.parentElement.appendChild(badge);
     }
@@ -9962,6 +9906,20 @@ attachProductCardListeners(cardElement, product, stepIndex, options = {}) {
 
   const getProductId = () => getSelectionId(product);
   const getClickedProductId = (element) => element?.dataset?.productId || getProductId();
+  const openCardDetails = () => {
+    if (!this.productModal && window.BundleProductModal) {
+      this.productModal = new window.BundleProductModal(this);
+    }
+    if (!this.productModal) return;
+
+    const initialImageIndex = Number(cardElement.dataset.bwCardImageIndex || 0);
+    const isClassicQuickView = this.getFullPageDesignPreset?.() === 'CLASSIC';
+    this.productModal.open(product, step, {
+      initialImageIndex,
+      readOnly: isClassicQuickView,
+    });
+  };
+  const isActivationKey = (event) => event.key === 'Enter' || event.key === ' ';
 
   cardElement.addEventListener('click', (e) => {
     const imageNav = e.target.closest('.bw-product-card__image-nav');
@@ -9984,18 +9942,20 @@ attachProductCardListeners(cardElement, product, stepIndex, options = {}) {
 
     if (!e.target.closest('.product-image, .product-title')) return;
     e.stopPropagation();
+    openCardDetails();
+  });
 
-    if (!this.productModal && window.BundleProductModal) {
-      this.productModal = new window.BundleProductModal(this);
-    }
-    if (!this.productModal) return;
-
-    const initialImageIndex = Number(cardElement.dataset.bwCardImageIndex || 0);
-    const isClassicQuickView = this.getFullPageDesignPreset?.() === 'CLASSIC';
-    this.productModal.open(product, step, {
-      initialImageIndex,
-      readOnly: isClassicQuickView,
-    });
+  cardElement.addEventListener('keydown', (event) => {
+    if (!isActivationKey(event)) return;
+    const { target } = event;
+    if (
+      !target
+      || target.closest('.inline-qty-btn, .product-add-btn, .bw-product-card__image-nav')
+    ) return;
+    if (!target.closest('.product-image, .product-title')) return;
+    event.preventDefault();
+    event.stopPropagation();
+    openCardDetails();
   });
 
   cardElement.addEventListener('click', (e) => {
@@ -10497,6 +10457,10 @@ groupVariantsByProduct(selectedProducts) {
   return Array.from(productMap.values());
 },
 
+/**
+ * Show variant breakdown popup for a product with multiple variants
+ * @param {Object} productGroup - Product group with multiple variants
+ */
 showVariantBreakdown(productGroup) {
   const overlay = document.createElement('div');
   overlay.className = "variant-breakdown-overlay";
@@ -13813,6 +13777,12 @@ renderModalProducts(stepIndex, productsToRender = null) {
   const selectedProducts = this.selectedProducts[stepIndex];
   const productGrid = this.elements.modal.querySelector('.product-grid');
   const step = this.selectedBundle?.steps?.[stepIndex] || {};
+  const resolveText = (key, fallback) => (
+    typeof this._resolveText === 'function' ? this._resolveText(key, fallback) : fallback
+  );
+  const escapeText = (value) => (
+    typeof this._escapeHTML === 'function' ? this._escapeHTML(value) : String(value)
+  );
 
   if (products.length === 0) {
     if (!this._shouldRenderProductSlots()) {
@@ -13877,11 +13847,14 @@ renderModalProducts(stepIndex, productsToRender = null) {
     const lowStock = available !== null && available > 0 && available <= 3;
     const increaseDisabled = outOfStock || atMaxStock;
     const addDisabled = outOfStock;
+    const outOfStockLabel = resolveText('outOfStockText', 'Out of stock');
+    const lowStockTemplate = resolveText('lowStockText', 'Only {{count}} left');
+    const lowStockLabel = lowStockTemplate.replace('{{count}}', String(available));
 
     const stockBadge = outOfStock
-      ? `<div class="product-stock-badge product-stock-badge--out">Out of stock</div>`
+      ? `<div class="product-stock-badge product-stock-badge--out">${escapeText(outOfStockLabel)}</div>`
       : lowStock
-        ? `<div class="product-stock-badge product-stock-badge--low">Only ${available} left</div>`
+        ? `<div class="product-stock-badge product-stock-badge--low">${escapeText(lowStockLabel)}</div>`
         : '';
 
     return renderSharedProductCard(
@@ -13895,7 +13868,20 @@ renderModalProducts(stepIndex, productsToRender = null) {
         variantSelectorHtml,
         stockBadgeHtml: stockBadge,
         showCompareAtPrice: this.selectedBundle?.showProductComparedAtPrice === true,
-        addButtonText: outOfStock ? 'Out of stock' : this.getProductAddButtonText(),
+        openImageLabel: resolveText('productImageLabel', 'Open product details'),
+        openTitleLabel: resolveText('productTitleLabel', 'Open product details'),
+        imageNavPreviousLabel: resolveText('productImagePreviousLabel', 'Previous image'),
+        imageNavNextLabel: resolveText('productImageNextLabel', 'Next image'),
+        seeMoreText: resolveText('productDescriptionSeeMoreText', 'See more'),
+        decreaseLabel: resolveText('decreaseQuantityText', 'Decrease quantity'),
+        increaseLabel: resolveText('increaseQuantityText', 'Increase quantity'),
+        selectedStateLabel: resolveText('addedLabel', 'Added'),
+        quantityAriaLabel: resolveText('quantityLabel', 'Quantity'),
+        variantAriaLabel: resolveText('variantLabel', 'Variant'),
+        removeAriaLabel: resolveText('removeProductFromFooterText', 'Remove this product from step'),
+        soldOutAriaLabel: resolveText('noProductsAvailableText', 'No Products Available'),
+        addButtonAriaLabel: resolveText('addButtonText', 'Add'),
+        addButtonText: outOfStock ? outOfStockLabel : this.getProductAddButtonText(),
         addDisabled,
         decreaseDisabled: currentQuantity <= 0,
         increaseDisabled,
@@ -14006,6 +13992,19 @@ attachProductEventHandlers(productGrid, stepIndex) {
     if (e.target.closest('.product-image, .product-title')) {
       openProductModalForCard(e.target.closest('.product-card'));
     }
+  });
+
+  newProductGrid.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') {
+      return;
+    }
+
+    const target = e.target.closest('.product-image, .product-title');
+    if (!target) return;
+    if (target.closest('.bw-product-card__image-nav')) return;
+    e.preventDefault();
+    e.stopPropagation();
+    openProductModalForCard(target.closest('.product-card'));
   });
 
   newProductGrid.querySelectorAll('.product-image, .product-title').forEach((element) => {
@@ -14287,12 +14286,42 @@ updateProductQuantityDisplay(stepIndex, productId, quantity) {
 
   const productCard = this.container.querySelector('[data-product-id="' + productId + '"]');
   if (!productCard) return;
+  const step = this.selectedBundle?.steps?.[stepIndex] || {};
+  const sanitizeAria = (value, fallback) => String(value ?? fallback ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/`/g, '&#96;');
+  const quantityLabel = this._resolveText?.('quantityLabel', 'Quantity') || 'Quantity';
+  const addButtonAriaLabel = sanitizeAria(this._resolveText?.('addButtonText', 'Add'), 'Add');
+  const removeLabelTemplate = this._resolveText?.(
+    'removeProductFromFooterText',
+    'Remove this product',
+  ) || 'Remove this product';
+  const removeLabel = removeLabelTemplate
+    .replace('{{stepName}}', step?.title || 'step')
+    .replace('{{quantity}}', String(quantity));
+  const decreaseLabel = sanitizeAria(
+    this._resolveText?.('quantityDecreaseText', 'Decrease quantity') || 'Decrease quantity',
+  );
+  const increaseLabel = sanitizeAria(
+    this._resolveText?.('quantityIncreaseText', 'Increase quantity') || 'Increase quantity',
+  );
+  const productTitleText = String(
+    productCard.querySelector('.product-title')?.textContent?.trim() || '',
+  );
+  const productTargetName = sanitizeAria(productTitleText || productId, 'product');
 
   const contentWrapper = productCard.querySelector('.product-content-wrapper');
   const actionWrapper = productCard.querySelector('.product-card-action');
   if (!contentWrapper && !actionWrapper) return;
 
   const actionContainer = actionWrapper || contentWrapper;
+  actionContainer.setAttribute('role', 'group');
+  actionContainer.setAttribute('aria-label', sanitizeAria(`${quantityLabel} controls`, `${quantityLabel} controls`));
+  actionContainer.setAttribute('aria-expanded', String(quantity > 0));
   const existingAddBtn = productCard.querySelector('.product-add-btn');
   const existingQuantityControls = productCard.querySelector('.inline-quantity-controls');
 
@@ -14309,6 +14338,20 @@ updateProductQuantityDisplay(stepIndex, productId, quantity) {
       const qtyDisplay = existingQuantityControls.querySelector('.inline-qty-display');
       if (qtyDisplay) {
         qtyDisplay.textContent = quantity;
+        qtyDisplay.setAttribute('aria-label', sanitizeAria(`${quantityLabel}: ${quantity}`));
+      }
+      const decreaseButton = existingQuantityControls.querySelector('.qty-decrease');
+      if (decreaseButton) {
+        const removeOrDecreaseAria = sanitizeAria(
+          quantity <= 1
+            ? `${removeLabel} ${productTargetName}`
+            : `${decreaseLabel} ${productTargetName}`,
+        );
+        decreaseButton.setAttribute('aria-label', removeOrDecreaseAria);
+      }
+      const increaseButton = existingQuantityControls.querySelector('.qty-increase');
+      if (increaseButton) {
+        increaseButton.setAttribute('aria-label', sanitizeAria(`${increaseLabel} ${productTargetName}`));
       }
       this.syncProductQuantityIncreaseState(
         existingQuantityControls.querySelector('.qty-increase'),
@@ -14320,11 +14363,42 @@ updateProductQuantityDisplay(stepIndex, productId, quantity) {
       }
 
       const quantityControls = document.createElement('div');
+      const decreaseButton = document.createElement('button');
+      const increaseButton = document.createElement('button');
+      const quantityDisplay = document.createElement('span');
+
       quantityControls.className = 'inline-quantity-controls';
-      quantityControls.innerHTML =
-        '<button class="inline-qty-btn qty-decrease" data-product-id="' + productId + '">−</button>' +
-        '<span class="inline-qty-display">' + quantity + '</span>' +
-        '<button class="inline-qty-btn qty-increase" data-product-id="' + productId + '">+</button>';
+      quantityControls.setAttribute('role', 'group');
+      quantityControls.setAttribute('aria-label', sanitizeAria(`${quantityLabel} controls`, `${quantityLabel} controls`));
+      quantityControls.setAttribute('aria-live', 'polite');
+
+      decreaseButton.type = 'button';
+      decreaseButton.className = 'inline-qty-btn qty-decrease';
+      decreaseButton.dataset.productId = productId;
+      decreaseButton.textContent = '−';
+      decreaseButton.setAttribute(
+        'aria-label',
+        sanitizeAria(
+          quantity <= 1
+            ? `${removeLabel} ${productTargetName}`
+            : `${decreaseLabel} ${productTargetName}`,
+        ),
+      );
+
+      quantityDisplay.className = 'inline-qty-display';
+      quantityDisplay.textContent = quantity;
+      quantityDisplay.setAttribute('aria-label', sanitizeAria(`${quantityLabel}: ${quantity}`));
+      quantityDisplay.setAttribute('aria-live', 'polite');
+
+      increaseButton.type = 'button';
+      increaseButton.className = 'inline-qty-btn qty-increase';
+      increaseButton.dataset.productId = productId;
+      increaseButton.textContent = '+';
+      increaseButton.setAttribute('aria-label', sanitizeAria(`${increaseLabel} ${productTargetName}`));
+
+      quantityControls.appendChild(decreaseButton);
+      quantityControls.appendChild(quantityDisplay);
+      quantityControls.appendChild(increaseButton);
       actionContainer.appendChild(quantityControls);
 
       const increaseBtn = quantityControls.querySelector('.qty-increase');
@@ -14366,6 +14440,9 @@ updateProductQuantityDisplay(stepIndex, productId, quantity) {
         const addButton = document.createElement('button');
         addButton.className = 'product-add-btn';
         addButton.dataset.productId = productId;
+        addButton.type = 'button';
+        addButton.setAttribute('aria-label', addButtonAriaLabel);
+        addButton.setAttribute('aria-pressed', 'false');
         addButton.textContent = this.getProductAddButtonText();
         actionContainer.appendChild(addButton);
 

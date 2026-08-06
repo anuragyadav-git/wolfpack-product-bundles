@@ -249,6 +249,33 @@ updateProductQuantityDisplay(stepIndex, productId, quantity) {
   // Update quantity display without full re-render
   const productCard = this.container.querySelector('[data-product-id="' + productId + '"]');
   if (!productCard) return;
+  const step = this.selectedBundle?.steps?.[stepIndex] || {};
+  const sanitizeAria = (value, fallback) => String(value ?? fallback ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/`/g, '&#96;');
+  const quantityLabel = this._resolveText?.('quantityLabel', 'Quantity') || 'Quantity';
+  const addButtonAriaLabel = sanitizeAria(this._resolveText?.('addButtonText', 'Add'), 'Add');
+  const removeLabelTemplate = this._resolveText?.(
+    'removeProductFromFooterText',
+    'Remove this product',
+  ) || 'Remove this product';
+  const removeLabel = removeLabelTemplate
+    .replace('{{stepName}}', step?.title || 'step')
+    .replace('{{quantity}}', String(quantity));
+  const decreaseLabel = sanitizeAria(
+    this._resolveText?.('quantityDecreaseText', 'Decrease quantity') || 'Decrease quantity',
+  );
+  const increaseLabel = sanitizeAria(
+    this._resolveText?.('quantityIncreaseText', 'Increase quantity') || 'Increase quantity',
+  );
+  const productTitleText = String(
+    productCard.querySelector('.product-title')?.textContent?.trim() || '',
+  );
+  const productTargetName = sanitizeAria(productTitleText || productId, 'product');
 
   // Find existing action elements
   const contentWrapper = productCard.querySelector('.product-content-wrapper');
@@ -256,6 +283,9 @@ updateProductQuantityDisplay(stepIndex, productId, quantity) {
   if (!contentWrapper && !actionWrapper) return;
 
   const actionContainer = actionWrapper || contentWrapper;
+  actionContainer.setAttribute('role', 'group');
+  actionContainer.setAttribute('aria-label', sanitizeAria(`${quantityLabel} controls`, `${quantityLabel} controls`));
+  actionContainer.setAttribute('aria-expanded', String(quantity > 0));
   const existingAddBtn = productCard.querySelector('.product-add-btn');
   const existingQuantityControls = productCard.querySelector('.inline-quantity-controls');
 
@@ -273,6 +303,20 @@ updateProductQuantityDisplay(stepIndex, productId, quantity) {
       const qtyDisplay = existingQuantityControls.querySelector('.inline-qty-display');
       if (qtyDisplay) {
         qtyDisplay.textContent = quantity;
+        qtyDisplay.setAttribute('aria-label', sanitizeAria(`${quantityLabel}: ${quantity}`));
+      }
+      const decreaseButton = existingQuantityControls.querySelector('.qty-decrease');
+      if (decreaseButton) {
+        const removeOrDecreaseAria = sanitizeAria(
+          quantity <= 1
+            ? `${removeLabel} ${productTargetName}`
+            : `${decreaseLabel} ${productTargetName}`,
+        );
+        decreaseButton.setAttribute('aria-label', removeOrDecreaseAria);
+      }
+      const increaseButton = existingQuantityControls.querySelector('.qty-increase');
+      if (increaseButton) {
+        increaseButton.setAttribute('aria-label', sanitizeAria(`${increaseLabel} ${productTargetName}`));
       }
       this.syncProductQuantityIncreaseState(
         existingQuantityControls.querySelector('.qty-increase'),
@@ -284,11 +328,42 @@ updateProductQuantityDisplay(stepIndex, productId, quantity) {
       }
       // Create quantity controls
       const quantityControls = document.createElement('div');
+      const decreaseButton = document.createElement('button');
+      const increaseButton = document.createElement('button');
+      const quantityDisplay = document.createElement('span');
+
       quantityControls.className = 'inline-quantity-controls';
-      quantityControls.innerHTML =
-        '<button class="inline-qty-btn qty-decrease" data-product-id="' + productId + '">−</button>' +
-        '<span class="inline-qty-display">' + quantity + '</span>' +
-        '<button class="inline-qty-btn qty-increase" data-product-id="' + productId + '">+</button>';
+      quantityControls.setAttribute('role', 'group');
+      quantityControls.setAttribute('aria-label', sanitizeAria(`${quantityLabel} controls`, `${quantityLabel} controls`));
+      quantityControls.setAttribute('aria-live', 'polite');
+
+      decreaseButton.type = 'button';
+      decreaseButton.className = 'inline-qty-btn qty-decrease';
+      decreaseButton.dataset.productId = productId;
+      decreaseButton.textContent = '−';
+      decreaseButton.setAttribute(
+        'aria-label',
+        sanitizeAria(
+          quantity <= 1
+            ? `${removeLabel} ${productTargetName}`
+            : `${decreaseLabel} ${productTargetName}`,
+        ),
+      );
+
+      quantityDisplay.className = 'inline-qty-display';
+      quantityDisplay.textContent = quantity;
+      quantityDisplay.setAttribute('aria-label', sanitizeAria(`${quantityLabel}: ${quantity}`));
+      quantityDisplay.setAttribute('aria-live', 'polite');
+
+      increaseButton.type = 'button';
+      increaseButton.className = 'inline-qty-btn qty-increase';
+      increaseButton.dataset.productId = productId;
+      increaseButton.textContent = '+';
+      increaseButton.setAttribute('aria-label', sanitizeAria(`${increaseLabel} ${productTargetName}`));
+
+      quantityControls.appendChild(decreaseButton);
+      quantityControls.appendChild(quantityDisplay);
+      quantityControls.appendChild(increaseButton);
       actionContainer.appendChild(quantityControls);
 
       // Attach event listeners to the new buttons
@@ -332,6 +407,9 @@ updateProductQuantityDisplay(stepIndex, productId, quantity) {
         const addButton = document.createElement('button');
         addButton.className = 'product-add-btn';
         addButton.dataset.productId = productId;
+        addButton.type = 'button';
+        addButton.setAttribute('aria-label', addButtonAriaLabel);
+        addButton.setAttribute('aria-pressed', 'false');
         addButton.textContent = this.getProductAddButtonText();
         actionContainer.appendChild(addButton);
 
