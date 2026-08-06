@@ -1,0 +1,383 @@
+{
+  "schema_version": 1,
+  "job": {
+    "id": "fpb-all-template-product-card-parity-20260806",
+    "title": "FPB all template product card parity",
+    "status": "active",
+    "stage": "SCOPE",
+    "revision": 1,
+    "created_at": "2026-08-06T05:32:38Z",
+    "updated_at": "2026-08-06T05:49:55Z",
+    "owner": "",
+    "product": "Wolfpack Product Bundles",
+    "repository": "/Users/adityaawasthi/Developer/wolfpack-product-bundles",
+    "branch": "feature/26.05-UI-changes",
+    "commit": "c0b826b942a7d8581ce60ed133ffcdd7ae2ca0b8",
+    "artifact_root": "/Users/adityaawasthi/Developer/wolfpack-product-bundles/design-jobs",
+    "resume_stage": null
+  },
+  "scope": {
+    "product_family": "FPB",
+    "template": "ALL",
+    "component": "product-card",
+    "implementation_mode": "design-director",
+    "design_goal": "Make all FPB template product cards match the selected target visual and behavioral reference.",
+    "user_problem": "FPB product cards in the Agent store need parity and implementation-ready design direction for all templates.",
+    "primary_user_action": "Shopper selects variants, adds/removes cards, and changes quantity in FPB product grids.",
+    "out_of_scope": [],
+    "merchant_configurability": [],
+    "business_logic_constraints": []
+  },
+  "viewports": {
+    "reference": [],
+    "required": [],
+    "edge_cases": [],
+    "browser_zoom": 100,
+    "device_pixel_ratio_policy": "record-actual",
+    "locale": "",
+    "currency": "",
+    "color_scheme": "",
+    "reduced_motion": false
+  },
+  "references": {
+    "current": [
+      {
+        "type": "storefront",
+        "store": "Agent",
+        "role": "current",
+        "surfaces": [
+          "desktop",
+          "mobile"
+        ]
+      }
+    ],
+    "target": [
+      {
+        "type": "storefront",
+        "store": "Yash-wolfpack",
+        "role": "target",
+        "surfaces": [
+          "desktop"
+        ]
+      }
+    ],
+    "context": [],
+    "approved": [],
+    "implementation": [],
+    "provenance": [],
+    "permissions_or_usage_notes": []
+  },
+  "decisions": {
+    "locked": [],
+    "assumptions": [],
+    "rejected": [],
+    "open": [],
+    "recommendation_delegation": {
+      "status": "granted",
+      "scope": [
+        "visual-structure",
+        "spacing-geometry-variants",
+        "responsive-breakpoints",
+        "content-wrapping",
+        "spacing-and-density"
+      ],
+      "exclusions": [
+        "business-behavior",
+        "accessibility",
+        "data-semantics",
+        "approval-scope"
+      ],
+      "approved_by": "Aditya Awasthi",
+      "approved_at": "2026-08-06T05:36:00Z",
+      "expires_at_stage": "FINAL_APPROVAL"
+    }
+  },
+  "states": {
+    "required": [],
+    "optional": [],
+    "not_applicable": [],
+    "coverage_status": "not-started"
+  },
+  "responsive": {
+    "contract_status": "not-started",
+    "breakpoints": [],
+    "transformations": []
+  },
+  "accessibility": {
+    "requirements": [],
+    "known_risks": [],
+    "validation_status": "not-started"
+  },
+  "handoff": {
+    "status": "not-started",
+    "package_path": "",
+    "implementation_owner": "",
+    "implementation_branch": "",
+    "implementation_commit": ""
+  },
+  "qa": {
+    "chrome_mcp_required": true,
+    "profile_policy": "default-profile-only",
+    "allow_isolated_context": false,
+    "preflight_status": "not-started",
+    "preflight_result_path": "qa/preflight.json",
+    "baseline_status": "not-started",
+    "baseline_paths": [],
+    "summary_path": "qa/browser-artifact-summary.json",
+    "execution_status": "not-started",
+    "required_viewports": [],
+    "required_states": [],
+    "console_status": "not-started",
+    "network_status": "not-started",
+    "accessibility_status": "not-started",
+    "lighthouse_status": "not-started",
+    "performance_status": "not-started",
+    "visual_diff_status": "not-started",
+    "non_regression_status": "not-started",
+    "retry_history": [],
+    "artifacts_path": "qa",
+    "blockers": []
+  },
+  "approvals": {
+    "design": {
+      "status": "not-started",
+      "approver": "",
+      "at": "",
+      "revision": null
+    },
+    "handoff": {
+      "status": "not-started",
+      "approver": "",
+      "at": "",
+      "revision": null
+    },
+    "implementation": {
+      "status": "not-started",
+      "approver": "",
+      "at": "",
+      "revision": null
+    },
+    "final": {
+      "status": "not-started",
+      "approver": "",
+      "at": "",
+      "revision": null
+    }
+  },
+  "artifacts": {
+    "immutable_after_approval": true,
+    "current": {
+      "acceptance-criteria.md": {
+        "path": "acceptance-criteria.md",
+        "status": "draft",
+        "revision": 1,
+        "sha256": "ddffbbc8dcd1fb9ffe6e105c76a09433689cdb803d79285d9e68eb057e5c2aac",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "accessibility-checklist.md": {
+        "path": "accessibility-checklist.md",
+        "status": "draft",
+        "revision": 1,
+        "sha256": "14f8e6db58ab0b8b458695ca7480c53d1412e3a6dd381abf292ddc1b2595db5b",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "approval-record.yaml": {
+        "path": "approval-record.yaml",
+        "status": "draft",
+        "revision": 1,
+        "sha256": "1b21459e9c122bdb4b2c6e3264757af9a6183685bef8356e462e149532e9060d",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "browser-test-plan.yaml": {
+        "path": "browser-test-plan.yaml",
+        "status": "draft",
+        "revision": 1,
+        "sha256": "b80dc00dc71113bef44d3b2be1cd346b3fefec9109e7e219dab33b9a1305f9f5",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "browser-test-report.md": {
+        "path": "browser-test-report.md",
+        "status": "draft",
+        "revision": 1,
+        "sha256": "b1c92a1e537da702996f8663e184add16e211e47934b01c51767dfc221849654",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "chrome-preflight-result.yaml": {
+        "path": "chrome-preflight-result.yaml",
+        "status": "draft",
+        "revision": 1,
+        "sha256": "137a20a51847a62428c298dbb91b455e7612b458e48c332a7877cf9e356378da",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "codex-task.md": {
+        "path": "codex-task.md",
+        "status": "draft",
+        "revision": 1,
+        "sha256": "9fa0d57f8993e08e5a58841d0809e033ab6ff71a0b964e8843bc700153abafde",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "component-anatomy.md": {
+        "path": "component-anatomy.md",
+        "status": "draft",
+        "revision": 1,
+        "sha256": "8eebaff7e167d9cb412f830a3eccd143636f5dc929c3f25b289d8d94f18354cd",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "component-brief.md": {
+        "path": "component-brief.md",
+        "status": "draft",
+        "revision": 1,
+        "sha256": "ec10e128237743dbff7900e48e2bc0a9c68534c052dc5af34f0848e0a04de2fb",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "content-stress-cases.yaml": {
+        "path": "content-stress-cases.yaml",
+        "status": "draft",
+        "revision": 1,
+        "sha256": "8de1c4eddedeee09fd0b39943bcf8a5d208fb680f2c7f3123b252f2844eedc68",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "design-tokens.json": {
+        "path": "design-tokens.json",
+        "status": "draft",
+        "revision": 1,
+        "sha256": "f0dca8722977e4b0cee1013448a5ee61afe73b103f08e5f2621f3380eb3118dc",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "direction-comparison.md": {
+        "path": "direction-comparison.md",
+        "status": "draft",
+        "revision": 1,
+        "sha256": "58beb4145b1f98c52ab429c45e4ddfa4fb9d74163fca8119ea57262ed066c068",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "implementation-handoff.md": {
+        "path": "implementation-handoff.md",
+        "status": "draft",
+        "revision": 1,
+        "sha256": "24193ae37646ee2756915b2422ba606248109040bccd2a39fa51e0bc54113901",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "interaction-contract.md": {
+        "path": "interaction-contract.md",
+        "status": "draft",
+        "revision": 1,
+        "sha256": "57b74841b3d4d19cffb63efaed5f28afb7ed6ac3e104ef2c61ebb19ef40e923f",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "locked-decisions.yaml": {
+        "path": "locked-decisions.yaml",
+        "status": "draft",
+        "revision": 1,
+        "sha256": "12a204c344386a300ffd116342be78889d110a950386a8381bc97d07c9fb5e8e",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "remediation-list.md": {
+        "path": "remediation-list.md",
+        "status": "draft",
+        "revision": 1,
+        "sha256": "db20ab03da77a7e5921318a827304e7bcd181d6b75d4cad2f0461ca45f032146",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "responsive-contract.md": {
+        "path": "responsive-contract.md",
+        "status": "draft",
+        "revision": 1,
+        "sha256": "1e4548d874693eca6ecf4591dd8e33874dc1e2f08490f1ad4a449a18cb113291",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "screenshot-inventory.yaml": {
+        "path": "screenshot-inventory.yaml",
+        "status": "draft",
+        "revision": 1,
+        "sha256": "92b8642519a0b81a98444a5e919c08c7f399f15c0a4c01a08307106e4b7ae469",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "state-matrix.md": {
+        "path": "state-matrix.md",
+        "status": "draft",
+        "revision": 1,
+        "sha256": "392e5a0f0d73982bfc40d5e72a6f04db6453dc6ab5989b11b84cb338e25fb9ca",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "visual-audit.md": {
+        "path": "visual-audit.md",
+        "status": "draft",
+        "revision": 1,
+        "sha256": "322f34477af4b8a8eb9c40632739a25b766584784213615cb54e127e96120571",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "visual-qa-report.md": {
+        "path": "visual-qa-report.md",
+        "status": "draft",
+        "revision": 1,
+        "sha256": "d08aa6c5873e3fdae9bb51e16db4069cdde17d3c22c60c41f2b9d4246d6317a4",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      }
+    },
+    "superseded": []
+  },
+  "history": [
+    {
+      "sequence": 1,
+      "at": "2026-08-06T05:32:38Z",
+      "from": null,
+      "to": "DISCOVERY",
+      "revision": 1,
+      "reason": "Design job created",
+      "evidence": []
+    },
+    {
+      "sequence": 2,
+      "at": "2026-08-06T05:49:46Z",
+      "from": "DISCOVERY",
+      "to": "SCOPE",
+      "revision": 1,
+      "reason": "Populate scope from user requirements and set target/reference plan for product-card parity.",
+      "evidence": [],
+      "affected_artifacts": []
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "job_id": "fpb-all-template-product-card-parity-20260806",
+  "revision": 1,
+  "status": "draft",
+  "items": [
+    {
+      "id": "",
+      "original_filename": "",
+      "artifact_path": "",
+      "roles": [],
+      "component": "",
+      "state": "",
+      "viewport": {
+        "width": null,
+        "height": null,
+        "status": "unknown"
+      },
+      "browser_zoom": "unknown",
+      "pixel_dimensions": {
+        "width": null,
+        "height": null
+      },
+      "crop_status": "unknown",
+      "surrounding_context_included": false,
+      "source": "",
+      "provenance": "",
+      "intended_use": "",
+      "quality_issues": [],
+      "comparable_counterparts": [],
+      "permissions_or_usage_notes": "",
+      "approval_status": "unreviewed"
+    }
+  ]
+}
