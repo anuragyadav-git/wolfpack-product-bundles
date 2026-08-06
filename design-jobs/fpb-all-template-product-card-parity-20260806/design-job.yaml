@@ -7,14 +7,14 @@
     "stage": "BLOCKED",
     "revision": 1,
     "created_at": "2026-08-06T05:32:38Z",
-    "updated_at": "2026-08-06T05:52:24Z",
+    "updated_at": "2026-08-06T06:15:30Z",
     "owner": "",
     "product": "Wolfpack Product Bundles",
     "repository": "/Users/adityaawasthi/Developer/wolfpack-product-bundles",
     "branch": "feature/26.05-UI-changes",
     "commit": "c0b826b942a7d8581ce60ed133ffcdd7ae2ca0b8",
     "artifact_root": "/Users/adityaawasthi/Developer/wolfpack-product-bundles/design-jobs",
-    "resume_stage": "SCOPE"
+    "resume_stage": "REFERENCE_INTAKE"
   },
   "scope": {
     "product_family": "FPB",
@@ -386,6 +386,36 @@
       "to": "BLOCKED",
       "revision": 1,
       "reason": "Cannot capture references because no exposed Chrome DevTools/CDP target list is available in this environment.",
+      "evidence": [],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 4,
+      "at": "2026-08-06T06:15:04Z",
+      "from": "BLOCKED",
+      "to": "SCOPE",
+      "revision": 1,
+      "reason": "Retrying capture flow per user request",
+      "evidence": [],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 5,
+      "at": "2026-08-06T06:15:12Z",
+      "from": "SCOPE",
+      "to": "REFERENCE_INTAKE",
+      "revision": 1,
+      "reason": "Retry to advance scope, but no reference captures available in this run",
+      "evidence": [],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 6,
+      "at": "2026-08-06T06:15:30Z",
+      "from": "REFERENCE_INTAKE",
+      "to": "BLOCKED",
+      "revision": 1,
+      "reason": "Reference capture cannot proceed in this run because Chrome DevTools MCP list_pages timing out after 300s; no store tabs could be enumerated for deterministic capture. Resume after list_pages/select_page/select_page->snapshot/take_screenshot are functional and pages for Agent store current + Yash-wolfpack target are open in default profile.",
       "evidence": [],
       "affected_artifacts": []
     }
