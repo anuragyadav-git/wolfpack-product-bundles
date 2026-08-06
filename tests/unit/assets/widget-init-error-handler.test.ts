@@ -10,8 +10,8 @@ function readAsset(relativePath: string) {
 
 describe('widget init error handlers', () => {
   it.each([
-    'app/assets/bundle-widget-product-page.js',
-    'app/assets/bundle-widget-full-page.js',
+    'app/assets/bundle-widget-product-page.ts',
+    'app/assets/bundle-widget-full-page.ts',
   ])('%s constructor catch uses the existing error UI method', (relativePath) => {
     const source = readAsset(relativePath);
     expect(source).not.toContain('this.showError(error.message)');

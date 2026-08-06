@@ -28,13 +28,13 @@ The hidden `data-wpb-full-page-bundle` marker written by `app/services/widget-in
 FPB runtime layout is template/preset-driven. `bundleDesignTemplate: "FBP_SIDE_FOOTER"` selects the full-page side-footer renderer and `bundleDesignPresetId` selects Standard, Classic, Compact, or Horizontal styling. The older `Bundle.fullPageLayout` database column is legacy storage only until a future schema migration; it must not be emitted in Admin save transport, app-proxy widget payloads, or FPB runtime metafield configs.
 
 ### Reader (Widget JS)
-`app/assets/bundle-widget-full-page.js` → `loadBundleData()`
+`app/assets/bundle-widget-full-page.ts` -> `loadBundleData()`
 
 ## Sync Rule
 
 If the bundle config structure changes:
 1. Update the **server writer** (`bundle-config-metafield.server.ts`)
-2. Update the **widget parser** (`bundle-widget-full-page.js`)
+2. Update the **widget parser** (`bundle-widget-full-page.ts`)
 3. Both must be updated in the same change — never one without the other
 4. Bump `WIDGET_VERSION` and show a sync prompt banner so merchants re-sync
 

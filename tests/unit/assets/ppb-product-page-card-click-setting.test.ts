@@ -43,36 +43,6 @@ describe('PPB product page card click setting', () => {
     expect(context._isProductCardClickAddEnabled()).toBe(true);
   });
 
-  it('falls back to the EB-mapped camelCase path', () => {
-    const context = {
-      ...ProductPageConfigLifecycleMethods,
-      config: {
-        controlsSettings: {
-          activeControls: {
-            addToBundleOnProductCardClicked: true,
-          },
-        },
-      },
-    };
-
-    expect(context._isProductCardClickAddEnabled()).toBe(true);
-  });
-
-  it('accepts singular admin alias and truthy string values', () => {
-    const context = {
-      ...ProductPageConfigLifecycleMethods,
-      config: {
-        controlsSettings: {
-          activeControls: {
-            addToBundleOnProductCardClick: 'true',
-          },
-        },
-      },
-    };
-
-    expect(context._isProductCardClickAddEnabled()).toBe(true);
-  });
-
   it('parses validateConditionsBeforeAddToCart string flags correctly', () => {
     const context = {
       ...ProductPageConfigLifecycleMethods,

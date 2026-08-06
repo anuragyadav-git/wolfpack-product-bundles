@@ -43,7 +43,7 @@ source_paths:
   - extensions/bundle-builder/blocks/bundle-app-embed.liquid
   - extensions/bundle-builder/blocks/bundle-full-page.liquid
   - extensions/bundle-builder/blocks/bundle-product-page.liquid
-  - app/assets/bundle-widget-full-page.js
+  - app/assets/bundle-widget-full-page.ts
   - app/assets/bundle-widget-product-page.js
   - app/assets/widgets/shared/
   - app/assets/sdk/
@@ -64,7 +64,7 @@ graphify:
     - Bundle Data Manager Shared
     - Widget Theme Template Service
   god_nodes:
-    - bundle-widget-full-page.js Widget Source
+    - bundle-widget-full-page.ts Widget Source
 tags:
   - architecture
   - mermaid

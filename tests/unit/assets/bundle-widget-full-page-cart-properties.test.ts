@@ -6,7 +6,7 @@ describe("Full Page widget cart display properties", () => {
   it("keeps compact source JSON while adding public cart line properties", () => {
     const source = readFullPageWidgetSources();
     const sharedCartLinesSource = readFileSync(
-      join(process.cwd(), "app/assets/widgets/shared/engine/cart-lines.js"),
+      join(process.cwd(), "app/assets/widgets/shared/engine/cart-lines.ts"),
       "utf8",
     );
 

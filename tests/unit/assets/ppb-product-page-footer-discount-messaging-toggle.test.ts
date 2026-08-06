@@ -95,7 +95,7 @@ describe('PPB product-page discount messaging rendering', () => {
       },
       getDiscountInfoWithSelectedAddonDiscount: (info: Record<string, unknown>) => info as Record<string, unknown>,
       _isProductPageGridTemplate: () => false,
-      _renderCogniveFooter: () => {},
+      _renderGridFooter: () => {},
       _isProductPageCascadeTemplate: () => false,
     } as any;
   }

@@ -5,7 +5,7 @@
 export {};
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const ConditionValidator = require('../../../app/assets/widgets/shared/condition-validator.js');
+const { ConditionValidator } = require('../../../app/assets/widgets/shared/condition-validator.js');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { createState, addItem, removeItem, clearStep } = require('../../../app/assets/sdk/state.js');
 

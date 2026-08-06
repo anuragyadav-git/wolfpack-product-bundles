@@ -137,36 +137,29 @@
   </style>
   {% endif %}
 
-  <script>
-    if (!window.bundleWidgetContext) {
-      window.shopCurrency = {{ shop.currency | json }};
-      window.shopMoneyFormat = {{ shop.money_format | json }};
-      window.shopifyMultiCurrency = {
-        shopBaseCurrency: {{ shop.currency | json }},
-        shopMoneyFormat: {{ shop.money_format | json }},
-        customerCurrency: {{ cart.currency.iso_code | json }},
-        customerMoneyFormat: {{ shop.money_format | json }},
-        isMultiCurrencyEnabled: {% if shop.enabled_currencies.size > 1 %}true{% else %}false{% endif %}
-      };
-      window.bundleWidgetContext = true;
-    }
-  </script>
-
-  <script>
-    {% assign app_namespace = '$app' %}
-    {% assign server_url_field = shop.metafields[app_namespace]['serverUrl'] %}
-    window.__BUNDLE_APP_URL__ = {% if server_url_field %}{{ server_url_field.value | json }}{% else %}null{% endif %};
-    window.__WOLFPACK_FPB_TEMPLATE_CSS_URLS__ = Object.assign(
-      {},
-      window.__WOLFPACK_FPB_TEMPLATE_CSS_URLS__ || {},
-      {
-        DEFAULT: {{ 'bundle-widget-full-page-standard.css' | asset_url | json }},
-        STANDARD: {{ 'bundle-widget-full-page-standard.css' | asset_url | json }},
-        CLASSIC: {{ 'bundle-widget-full-page-classic.css' | asset_url | json }},
-        COMPACT: {{ 'bundle-widget-full-page-compact.css' | asset_url | json }},
-        HORIZONTAL: {{ 'bundle-widget-full-page-horizontal.css' | asset_url | json }}
+  {% assign app_namespace = '$app' %}
+  {% assign server_url_field = shop.metafields[app_namespace]['serverUrl'] %}
+  <script type="application/json" data-wpb-context="full-page">
+    {
+      "shopCurrency": {{ shop.currency | json }},
+      "shopMoneyFormat": {{ shop.money_format | json }},
+      "shopifyMultiCurrency": {
+        "shopBaseCurrency": {{ shop.currency | json }},
+        "shopMoneyFormat": {{ shop.money_format | json }},
+        "customerCurrency": {{ cart.currency.iso_code | json }},
+        "customerMoneyFormat": {{ shop.money_format | json }},
+        "isMultiCurrencyEnabled": {% if shop.enabled_currencies.size > 1 %}true{% else %}false{% endif %}
+      },
+      "bundleWidgetContext": true,
+      "__BUNDLE_APP_URL__": {% if server_url_field %}{{ server_url_field.value | json }}{% else %}null{% endif %},
+      "__WOLFPACK_FPB_TEMPLATE_CSS_URLS__": {
+        "DEFAULT": {{ 'bundle-widget-full-page-standard.css' | asset_url | json }},
+        "STANDARD": {{ 'bundle-widget-full-page-standard.css' | asset_url | json }},
+        "CLASSIC": {{ 'bundle-widget-full-page-classic.css' | asset_url | json }},
+        "COMPACT": {{ 'bundle-widget-full-page-compact.css' | asset_url | json }},
+        "HORIZONTAL": {{ 'bundle-widget-full-page-horizontal.css' | asset_url | json }}
       }
-    );
+    }
   </script>
 
   {% # theme-check-disable RemoteAsset %}

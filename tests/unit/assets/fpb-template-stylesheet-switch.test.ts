@@ -90,4 +90,18 @@ describe('FPB preset stylesheet switching', () => {
     expect(standard.disabled).toBe(false);
     expect(classic.disabled).toBe(true);
   });
+
+  it('does nothing when preset is missing', async () => {
+    const standard = new FakeLink('https://cdn.example.test/bundle-widget-full-page-standard.css', 'STANDARD');
+    const classic = new FakeLink('https://cdn.example.test/bundle-widget-full-page-classic.css', 'CLASSIC');
+    classic.disabled = false;
+    standard.disabled = false;
+    installDocument([standard, classic]);
+
+    await makeRuntime().ensureFullPageTemplateStylesheet('');
+    await makeRuntime().ensureFullPageTemplateStylesheet(null);
+
+    expect(standard.disabled).toBe(false);
+    expect(classic.disabled).toBe(false);
+  });
 });

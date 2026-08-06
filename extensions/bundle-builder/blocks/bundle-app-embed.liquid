@@ -1,10 +1,5 @@
 {% comment %}
-  Wolfpack Bundle — Single App Embed
-  ==================================
-  Global activation surface used by the app to confirm the theme is connected.
-  App-created full-page bundle pages also carry a hidden marker in the page
-  body. The embed hydrates that marker only when a dedicated full-page app block
-  has not already rendered the widget container.
+  Wolfpack Bundle app embed. Liquid provides data; the compiled runtime owns behavior.
 {% endcomment %}
 
 {% assign app_namespace = '$app' %}
@@ -22,132 +17,24 @@
   {% endif %}
 {% endif %}
 
+{% assign fpb_proxy_path = nil %}
 {% if fpb_parent_bundle_id != blank and request.design_mode == false %}
   {% assign fpb_proxy_path = '/apps/product-bundles/wpb/' | append: fpb_parent_bundle_id %}
-  <script>
-    window.location.replace({{ fpb_proxy_path | json }});
-  </script>
 {% endif %}
 
-<script>
-  window.__WOLFPACK_BUNDLE_EMBED_ACTIVE__ = true;
-
-  (function () {
-    var fullPageScriptUrl = {{ 'bundle-widget-full-page-bundled.js' | asset_url | json }};
-    var fullPageStyleUrl = {{ 'bundle-widget-full-page.css' | asset_url | json }};
-    var fullPageMobileSummaryStyleUrl = {{ 'bundle-widget-full-page-mobile-summary.css' | asset_url | json }};
-    window.__WOLFPACK_FPB_TEMPLATE_CSS_URLS__ = Object.assign(
-      {},
-      window.__WOLFPACK_FPB_TEMPLATE_CSS_URLS__ || {},
-      {
-        DEFAULT: {{ 'bundle-widget-full-page-standard.css' | asset_url | json }},
-        STANDARD: {{ 'bundle-widget-full-page-standard.css' | asset_url | json }},
-        CLASSIC: {{ 'bundle-widget-full-page-classic.css' | asset_url | json }},
-        COMPACT: {{ 'bundle-widget-full-page-compact.css' | asset_url | json }},
-        HORIZONTAL: {{ 'bundle-widget-full-page-horizontal.css' | asset_url | json }}
-      }
-    );
-
-    function ensureStylesheet(href) {
-      if (!href || document.querySelector('link[href="' + href + '"]')) return;
-
-      var link = document.createElement('link');
-      link.rel = 'stylesheet';
-      link.href = href;
-      document.head.appendChild(link);
-    }
-
-    function parseBundleConfig(value) {
-      if (!value || value === 'null' || value === 'undefined') return {};
-
-      try {
-        return JSON.parse(value);
-      } catch (error) {
-        return {};
-      }
-    }
-
-    function normalizePreset(value) {
-      var preset = String(value || 'STANDARD').trim().toUpperCase();
-      if (preset === 'DEFAULT' || preset === 'DEFAULT_FBP') return 'STANDARD';
-      if (preset === 'CLASSIC' || preset === 'COMPACT' || preset === 'HORIZONTAL') return preset;
-      return 'STANDARD';
-    }
-
-    function getTemplateStylesheetUrl(preset) {
-      var urls = window.__WOLFPACK_FPB_TEMPLATE_CSS_URLS__ || {};
-      return urls[preset] || urls.STANDARD || urls.DEFAULT;
-    }
-
-    function initializeHydratedFullPageBundle() {
-      if (
-        window.WolfpackFullPageBundle &&
-        typeof window.WolfpackFullPageBundle.init === 'function'
-      ) {
-        window.WolfpackFullPageBundle.init();
-      }
-    }
-
-    function ensureScript(src) {
-      if (!src) return;
-      if (document.querySelector('script[src="' + src + '"]')) {
-        initializeHydratedFullPageBundle();
-        return;
-      }
-
-      var script = document.createElement('script');
-      script.src = src;
-      script.defer = true;
-      script.addEventListener('load', initializeHydratedFullPageBundle, { once: true });
-      document.body.appendChild(script);
-    }
-
-    function hydrateFullPageBundleMarker() {
-      var marker = document.querySelector('[data-wpb-full-page-bundle][data-bundle-id]');
-      if (!marker || marker.dataset.wpbHydrated === 'true') return;
-      if (document.querySelector('#bundle-builder-app, .bundle-widget-full-page[data-bundle-id]')) return;
-
-      var bundleId = marker.dataset.bundleId;
-      if (!bundleId) return;
-      var bundleConfig = parseBundleConfig(marker.dataset.bundleConfig);
-      var initialTemplate = marker.dataset.fpbTemplateType || bundleConfig.bundleDesignTemplate || 'FBP_SIDE_FOOTER';
-      var initialPreset = normalizePreset(marker.dataset.fpbDesignPreset || bundleConfig.bundleDesignPresetId);
-      var initialTabStyle = initialPreset === 'CLASSIC' || initialPreset === 'COMPACT' ? 'pill' : 'underline';
-      var presetClass = 'fpb-preset-' + initialPreset.toLowerCase();
-
-      var container = document.createElement('div');
-      container.id = 'bundle-builder-app';
-      container.className = 'bundle-widget-container bundle-widget-full-page ' + presetClass;
-      container.dataset.bundleId = bundleId;
-      container.dataset.bundleType = marker.dataset.bundleType || 'full_page';
-      container.dataset.fpbTemplateType = initialTemplate;
-      container.dataset.fpbDesignPreset = initialPreset;
-      container.dataset.fpbTabStyle = initialTabStyle;
-      container.dataset.bundleConfig = marker.dataset.bundleConfig || 'null';
-      container.dataset.bundleConfigSource = marker.dataset.bundleConfigSource || '';
-      container.dataset.bundleSettings = marker.dataset.bundleSettings || 'null';
-      container.dataset.shop = marker.dataset.shop || '';
-      container.innerHTML = '<div class="bundle-loading"><div class="loading-spinner"></div></div>';
-
-      marker.parentNode.insertBefore(container, marker);
-      marker.dataset.wpbHydrated = 'true';
-
-      ensureStylesheet(fullPageStyleUrl);
-      ensureStylesheet(fullPageMobileSummaryStyleUrl);
-      ensureStylesheet(getTemplateStylesheetUrl(initialPreset));
-      ensureScript(fullPageScriptUrl);
-      initializeHydratedFullPageBundle();
-    }
-
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', hydrateFullPageBundleMarker);
-    } else {
-      hydrateFullPageBundleMarker();
-    }
-
-    document.addEventListener('shopify:section:load', hydrateFullPageBundleMarker);
-  })();
-</script>
+<div
+  hidden
+  data-wpb-app-embed
+  data-redirect-path="{{ fpb_proxy_path }}"
+  data-full-page-script-url="{{ 'bundle-widget-full-page-bundled.js' | asset_url }}"
+  data-full-page-style-url="{{ 'bundle-widget-full-page.css' | asset_url }}"
+  data-mobile-summary-style-url="{{ 'bundle-widget-full-page-mobile-summary.css' | asset_url }}"
+  data-preset-standard="{{ 'bundle-widget-full-page-standard.css' | asset_url }}"
+  data-preset-classic="{{ 'bundle-widget-full-page-classic.css' | asset_url }}"
+  data-preset-compact="{{ 'bundle-widget-full-page-compact.css' | asset_url }}"
+  data-preset-horizontal="{{ 'bundle-widget-full-page-horizontal.css' | asset_url }}"
+></div>
+<script src="{{ 'bundle-app-embed.js' | asset_url }}" defer></script>
 
 {% schema %}
 {

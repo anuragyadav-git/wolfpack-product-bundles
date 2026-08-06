@@ -18,7 +18,7 @@
 export {};
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const ConditionValidator = require('../../../app/assets/widgets/shared/condition-validator.js');
+const { ConditionValidator } = require('../../../app/assets/widgets/shared/condition-validator.js');
 
 const {
   calculateStepTotalAfterUpdate,

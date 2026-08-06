@@ -32,9 +32,7 @@ describe("FPB product modal read-only quick view", () => {
   }
 
   async function createModal(widget: ReturnType<typeof buildWidget>) {
-    await import("../../../app/assets/bundle-modal-component.js");
-    const Modal = ((globalThis as typeof globalThis & { window: { BundleProductModal: new (widget: unknown) => any } }).window)
-      .BundleProductModal;
+    const { BundleProductModal: Modal } = await import("../../../app/assets/bundle-modal-component.js");
     class TestModal extends Modal {
       init() {
         this.modalElement = {
@@ -53,9 +51,7 @@ describe("FPB product modal read-only quick view", () => {
   }
 
   async function createModalForPopulate(widget: ReturnType<typeof buildWidget>) {
-    await import("../../../app/assets/bundle-modal-component.js");
-    const Modal = ((globalThis as typeof globalThis & { window: { BundleProductModal: new (widget: unknown) => any } }).window)
-      .BundleProductModal;
+    const { BundleProductModal: Modal } = await import("../../../app/assets/bundle-modal-component.js");
     const elements: Record<string, any> = {
       "modal-product-title": { textContent: "" },
       "modal-product-description": { textContent: "", innerHTML: "" },

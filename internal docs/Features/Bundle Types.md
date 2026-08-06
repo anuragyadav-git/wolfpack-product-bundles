@@ -11,7 +11,7 @@ sources: prisma/schema.prisma, CLAUDE.md
 
 A dedicated bundle-builder page hosted on a Shopify page (not a product page). The customer configures the bundle by selecting from each step.
 
-- **Widget**: `bundle-widget-full-page.js` → `bundle-full-page.liquid` block
+- **Widget**: `bundle-widget-full-page.ts` -> `bundle-full-page.liquid` block
 - **Layouts** (`FullPageLayout` enum):
   - `CLASSIC` — standard step-by-step layout
   - `EDITORIAL` — rich media / editorial style

@@ -1,5 +1,9 @@
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const { FPB_STANDARD_TEMPLATE_CONFIG } = require('../../../app/assets/widgets/full-page/templates/standard.config.js');
+const {
+  TemplateDesignSystem: { fpb: { contracts: FPB_TEMPLATE_CONTRACTS } = {} } = {},
+} = require('../../../app/assets/widgets/shared/template-design-system.js');
+
+const FPB_STANDARD_TEMPLATE_CONFIG = FPB_TEMPLATE_CONTRACTS?.STANDARD || null;
 
 describe('FPB Standard template config contract', () => {
   it('uses STANDARD as the only Standard preset identity', () => {

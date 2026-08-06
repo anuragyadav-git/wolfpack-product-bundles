@@ -71,7 +71,6 @@ function makeBundle(overrides: Record<string, any> = {}) {
     productSlotsEnabled: false,
     productSlotIconUrl: null,
     useSingleStepCategoriesAsBundleSteps: false,
-    renderFilledSlotsAsHorizontalStacked: null,
     shopifyProductId: null,
     steps: [],
     pricing: null,
@@ -397,13 +396,13 @@ describe('refreshFullPageBundlePageBody', () => {
     expect((body.match(/data-wpb-full-page-bundle/g) ?? []).length).toBe(1);
     expect(body).toContain(`data-bundle-id="${bundleId}"`);
     expect(body).toContain('data-bundle-config="{&quot;v&quot;:2,&quot;type&quot;:&quot;full_page&quot;,&quot;bundleType&quot;:&quot;full_page&quot;,&quot;id&quot;:&quot;bundle-abc123&quot;');
-    expect(body).toContain('&quot;bundleDesignTemplate&quot;:&quot;FBP_SIDE_FOOTER&quot;');
-    expect(body).toContain('&quot;bundleDesignPresetId&quot;:&quot;STANDARD&quot;');
+    expect(body).toContain('&quot;bundleDesignTemplate&quot;:null');
+    expect(body).toContain('&quot;bundleDesignPresetId&quot;:null');
     expect(body).toContain('&quot;bundleType&quot;:&quot;full_page&quot;');
     expect(body).not.toContain('&quot;name&quot;:&quot;My Kit&quot;');
     expect(body).not.toContain('&quot;steps&quot;:');
-    expect(body).toContain('data-fpb-template-type="FBP_SIDE_FOOTER"');
-    expect(body).toContain('data-fpb-design-preset="STANDARD"');
+    expect(body).not.toContain('data-fpb-template-type="');
+    expect(body).not.toContain('data-fpb-design-preset="');
     expect(body).toContain('data-bundle-settings="{');
     expect(body).not.toContain('hidden\n>');
     expect(body).not.toContain('/apps/product-bundles/assets/');
@@ -438,22 +437,26 @@ describe('refreshFullPageBundlePageBody', () => {
 describe('full-page app embed marker hydration contract', () => {
   it('hydrates marker pages without duplicating a dedicated full-page app block', () => {
     const embedSource = readFileSync(join(process.cwd(), 'extensions/bundle-builder/blocks/bundle-app-embed.liquid'), 'utf8');
+    const runtimeSource = readFileSync(join(process.cwd(), 'app/storefront/app-embed.ts'), 'utf8');
 
-    expect(embedSource).toContain('window.__WOLFPACK_BUNDLE_EMBED_ACTIVE__ = true;');
+    expect(embedSource).toContain('data-wpb-app-embed');
+    expect(embedSource).toContain('bundle-app-embed.js');
     expect(embedSource).toContain('bundle-widget-full-page-bundled.js');
     expect(embedSource).toContain('bundle-widget-full-page.css');
-    expect(embedSource).toContain('[data-wpb-full-page-bundle][data-bundle-id]');
-    expect(embedSource).toContain("document.querySelector('#bundle-builder-app, .bundle-widget-full-page[data-bundle-id]')");
-    expect(embedSource).toContain('WolfpackFullPageBundle.init()');
+    expect(runtimeSource).toContain('[data-wpb-full-page-bundle][data-bundle-id]');
+    expect(runtimeSource).toContain("document.querySelector('#bundle-builder-app, .bundle-widget-full-page[data-bundle-id]')");
+    expect(runtimeSource).toContain('loadFullPageRuntime(embed.dataset.fullPageScriptUrl)');
   });
 
   it('redirects full-page parent product documents to the canonical proxy outside Theme Editor', () => {
     const embedSource = readFileSync(join(process.cwd(), 'extensions/bundle-builder/blocks/bundle-app-embed.liquid'), 'utf8');
+    const runtimeSource = readFileSync(join(process.cwd(), 'app/storefront/app-embed.ts'), 'utf8');
 
     expect(embedSource).toContain("product.variants.first.metafields[app_namespace]");
     expect(embedSource).toContain("bundle_ui_config.bundleType == 'full_page'");
     expect(embedSource).toContain("request.design_mode == false");
     expect(embedSource).toContain("'/apps/product-bundles/wpb/'");
-    expect(embedSource).toContain('window.location.replace');
+    expect(embedSource).toContain('data-redirect-path="{{ fpb_proxy_path }}"');
+    expect(runtimeSource).toContain('window.location.replace');
   });
 });

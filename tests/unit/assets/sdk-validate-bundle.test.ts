@@ -5,7 +5,7 @@
 export {};
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const ConditionValidator = require('../../../app/assets/widgets/shared/condition-validator.js');
+const { ConditionValidator } = require('../../../app/assets/widgets/shared/condition-validator.js');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { validateStep, validateBundle } = require('../../../app/assets/sdk/validate-bundle.js');
 

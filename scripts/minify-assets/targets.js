@@ -42,18 +42,14 @@ export function createTargets(rootDir) {
         target: join(rootDir, 'extensions/bundle-builder/assets/bundle-widget-product-page-cascade.css'),
       },
       {
-        source: join(rootDir, 'app/assets/widgets/product-page-css/templates/inpage-cognive.css'),
-        target: join(rootDir, 'extensions/bundle-builder/assets/bundle-widget-product-page-cognive.css'),
+        source: join(rootDir, 'app/assets/widgets/product-page-css/templates/inpage-grid.css'),
+        target: join(rootDir, 'extensions/bundle-builder/assets/bundle-widget-product-page-grid.css'),
       },
       {
         source: join(rootDir, 'app/assets/widgets/product-page-css/templates/modal-slots.css'),
         target: join(rootDir, 'extensions/bundle-builder/assets/bundle-widget-product-page-modal.css'),
       },
       join(rootDir, 'extensions/bundle-builder/assets/modal-discount-bar.css'),
-    ],
-    js: [
-      join(rootDir, 'extensions/bundle-builder/assets/bundle-widget-full-page-bundled.js'),
-      join(rootDir, 'extensions/bundle-builder/assets/bundle-widget-product-page-bundled.js'),
     ],
   };
 }

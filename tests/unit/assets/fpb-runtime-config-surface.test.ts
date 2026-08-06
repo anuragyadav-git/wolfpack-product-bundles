@@ -2,11 +2,11 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 
 const source = readFileSync(
-  path.join(process.cwd(), "app/assets/bundle-widget-full-page.js"),
+  path.join(process.cwd(), "app/assets/bundle-widget-full-page.ts"),
   "utf8",
 );
 const modalSource = readFileSync(
-  path.join(process.cwd(), "app/assets/bundle-modal-component.js"),
+  path.join(process.cwd(), "app/assets/bundle-modal-component.ts"),
   "utf8",
 );
 

@@ -8,9 +8,9 @@
 export {};
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const { applyMethodMixins } = require('../../../app/assets/widgets/shared/mixin-descriptors.js');
+const { installControllerMethods } = require('../../../app/assets/widgets/shared/controller-methods.ts');
 
-describe('applyMethodMixins', () => {
+describe('installControllerMethods', () => {
   it('preserves getter descriptors instead of flattening getter values', () => {
     const target: Record<string, unknown> = {};
     const source: { steps?: Array<{ isFreeGift?: boolean }>; readonly freeGiftStepIndex: number } = {
@@ -21,7 +21,7 @@ describe('applyMethodMixins', () => {
       },
     };
 
-    applyMethodMixins(target, source);
+    installControllerMethods(target, source);
 
     const descriptor = Object.getOwnPropertyDescriptor(target, 'freeGiftStepIndex');
     expect(typeof descriptor?.get).toBe('function');

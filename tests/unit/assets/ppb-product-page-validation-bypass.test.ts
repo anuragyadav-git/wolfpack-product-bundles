@@ -421,7 +421,7 @@ describe('PPB validation control affects auto-add-after-last-step behavior', () 
     expect(addToCart).not.toHaveBeenCalled();
   });
 
-  it('supports EB alias addBundleToCartOnDone for auto-add gate', async () => {
+  it('allows auto-add when the canonical control is true', async () => {
     const addToCart = jest.fn().mockResolvedValue(undefined);
     const context = {
       ...ProductPageSelectionMethods,
@@ -433,7 +433,7 @@ describe('PPB validation control affects auto-add-after-last-step behavior', () 
       _autoAddingFromControls: false,
       _isConditionValidationEnabled: () => false,
       _getProductPageControls() {
-        return { addBundleToCartOnDone: true };
+        return { addBundleToCartAfterLastStepCompleted: true };
       },
       validateStep: () => true,
       addToCart,

@@ -5,7 +5,7 @@ title: Widget Architecture
 type: architecture
 status: authoritative
 summary: FPB and PPB bootstrap, hydration, extension-asset, and widget runtime architecture.
-last_audited: 2026-08-04
+last_audited: 2026-08-07
 owners:
   - engineering
 domains:
@@ -13,14 +13,14 @@ domains:
 systems:
   - widget-runtime
 source_paths:
-  - app/assets/bundle-widget-full-page.js
+  - app/assets/bundle-widget-full-page.ts
   - app/assets/widgets/full-page/initialization-guard.js
   - app/assets/widgets/full-page-css/base/bootstrap-reservation.css
   - app/assets/bundle-widget-product-page.js
   - app/routes/app/app.settings/design-preview-model.ts
   - app/routes/root/wpb.$bundleId.tsx
   - extensions/bundle-builder/blocks/bundle-app-embed.liquid
-  - scripts/build-widget-bundles.js
+  - scripts/build-storefront.mjs
   - scripts/minify-assets/targets.js
 related_docs:
   - Architecture/FPB Host Evaluation.md
@@ -38,10 +38,10 @@ keywords:
 
 | Widget | Source file | Bundle output | Shopify block |
 |---|---|---|---|
-| Full-Page Bundle (FPB) | `app/assets/bundle-widget-full-page.js` | `extensions/bundle-builder/assets/bundle-widget-full-page-bundled.js` | `bundle-full-page.liquid` |
+| Full-Page Bundle (FPB) | `app/assets/bundle-widget-full-page.ts` | `extensions/bundle-builder/assets/bundle-widget-full-page-bundled.js` | `bundle-full-page.liquid` |
 | Product-Page (PDP) | `app/assets/bundle-widget-product-page.js` | `extensions/bundle-builder/assets/bundle-widget-product-page-bundled.js` | `bundle-product-page.liquid` |
 
-Shared runtime modules live under `app/assets/widgets/shared/`. The build script inlines them into both storefront bundles. `app/assets/bundle-widget-components.js` remains a source-level import barrel only; storefronts do not load it as a separate asset.
+Shared runtime modules live under `app/assets/widgets/shared/`. TypeScript entry points under `app/storefront/` import the required runtime graph, and esbuild resolves, tree-shakes, minifies, and emits browser IIFEs. Storefronts never load raw ESM source files.
 
 Template behavior is resolved through plain config modules and method modules:
 
@@ -100,7 +100,7 @@ The app embed and the FPB bundle have two legitimate initialization triggers: th
 
 The app-proxy marker is server-rendered with `hidden` and is hydrated near the end of the document. Without earlier geometry, the theme footer can paint in the future widget area and then leave the viewport when the controller renders. `bundle-widget-bootstrap.css` is therefore loaded from the app embed's schema into the document head. It reserves `100svh` for the unhydrated marker, transfers that reservation to the FPB root during the same hydration mutation, and lets the completed widget grow intrinsically. Keep this asset small and marker/root-specific because the enabled app embed loads it across storefront pages.
 
-The widget build is an ordered concatenation, not an import-resolving bundler. Every new full-page source module must be registered in `FULL_PAGE_MODULES` in `scripts/build-widget-bundles.js`; otherwise its entry-file import is stripped while the implementation is absent from the generated IIFE.
+The app embed is a separate small entry. It handles redirects and marker hydration, then loads the FPB asset only when a full-page marker exists. It must not import the FPB controller graph because the embed is enabled globally.
 - Product-page upsell placement uses `bundle-upsell-block` or `bundle-upsell-button`.
 - Full-page bundle public links use the signed app-proxy document URL (`/apps/product-bundles/wpb/{bundleId}`). Shopify wraps `application/liquid` in the active theme layout and the app embed loads extension assets through `asset_url`.
 - Storefront JS/CSS must be loaded from Shopify theme-extension assets with Liquid `asset_url`. App proxy routes are only for API/data responses, not widget asset hosting.
@@ -183,7 +183,7 @@ npm run build:widgets:product-page
 
 ## Widget Version
 
-`WIDGET_VERSION` is at the top of `scripts/build-widget-bundles.js`.
+`widgetVersion` is defined in `scripts/build-storefront.mjs`.
 Embedded as `window.__BUNDLE_WIDGET_VERSION__` in every bundled file.
 
 Verify live version in DevTools:
