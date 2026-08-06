@@ -3,18 +3,18 @@
   "job": {
     "id": "fpb-all-template-product-card-parity-20260806",
     "title": "FPB all template product card parity",
-    "status": "active",
-    "stage": "SCOPE",
+    "status": "blocked",
+    "stage": "BLOCKED",
     "revision": 1,
     "created_at": "2026-08-06T05:32:38Z",
-    "updated_at": "2026-08-06T05:49:55Z",
+    "updated_at": "2026-08-06T05:52:24Z",
     "owner": "",
     "product": "Wolfpack Product Bundles",
     "repository": "/Users/adityaawasthi/Developer/wolfpack-product-bundles",
     "branch": "feature/26.05-UI-changes",
     "commit": "c0b826b942a7d8581ce60ed133ffcdd7ae2ca0b8",
     "artifact_root": "/Users/adityaawasthi/Developer/wolfpack-product-bundles/design-jobs",
-    "resume_stage": null
+    "resume_stage": "SCOPE"
   },
   "scope": {
     "product_family": "FPB",
@@ -376,6 +376,16 @@
       "to": "SCOPE",
       "revision": 1,
       "reason": "Populate scope from user requirements and set target/reference plan for product-card parity.",
+      "evidence": [],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 3,
+      "at": "2026-08-06T05:52:24Z",
+      "from": "SCOPE",
+      "to": "BLOCKED",
+      "revision": 1,
+      "reason": "Cannot capture references because no exposed Chrome DevTools/CDP target list is available in this environment.",
       "evidence": [],
       "affected_artifacts": []
     }
