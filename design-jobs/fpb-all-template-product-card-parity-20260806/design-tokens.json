@@ -2,20 +2,363 @@
   "schema_version": 1,
   "job_id": "fpb-all-template-product-card-parity-20260806",
   "revision": 1,
-  "status": "draft",
+  "status": "approved",
   "groups": {
-    "color": [],
-    "typography": [],
-    "spacing": [],
-    "size": [],
-    "radius": [],
-    "border": [],
-    "shadow": [],
-    "z_index": [],
-    "motion": [],
-    "breakpoint": [],
-    "component_alias": []
+    "color": [
+      {
+        "name": "--bundle-sidebar-card-bg",
+        "value": "runtime merchant value; repository default #FFFFFF",
+        "unit": "color",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": true,
+        "owner": "app/lib/css-generators/css-variables-generator.ts",
+        "notes": "Owns desktop sidebar and shared tray surface; do not replace with target-store literals."
+      },
+      {
+        "name": "--bundle-sidebar-card-text",
+        "value": "runtime merchant value; defaults to global primary text",
+        "unit": "color",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": true,
+        "owner": "app/lib/css-generators/css-variables-generator.ts",
+        "notes": "Primary summary copy and inherited icon color."
+      },
+      {
+        "name": "--bundle-sidebar-card-border-color",
+        "value": "runtime merchant value; repository default #E5E7EB",
+        "unit": "color",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": true,
+        "owner": "app/lib/css-generators/css-variables-generator.ts",
+        "notes": "Used where the preset surface contract includes a border."
+      },
+      {
+        "name": "--bundle-sidebar-button-bg / --bundle-sidebar-button-text",
+        "value": "runtime merchant values inherited from sidebar or global primary button settings",
+        "unit": "color",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": true,
+        "owner": "app/lib/css-generators/css-variables-generator.ts",
+        "notes": "Persistent primary action and disclosure badge must preserve contrast under merchant configuration."
+      },
+      {
+        "name": "--bundle-focus-outline-color",
+        "value": "runtime merchant value; defaults to global primary button",
+        "unit": "color",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": true,
+        "owner": "app/lib/css-generators/css-variables-generator.ts",
+        "notes": "If merchant color fails contrast against a given surface, use existing contrast-safe focus fallback logic rather than hiding the outline."
+      }
+    ],
+    "typography": [
+      {
+        "name": "--bundle-summary-title-font-size",
+        "value": "1.25",
+        "unit": "rem",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "shared summary CSS",
+        "notes": "Title remains content-driven and wraps; no viewport-specific font copy."
+      },
+      {
+        "name": "--bundle-summary-subtitle-font-size",
+        "value": "0.75",
+        "unit": "rem",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "shared summary CSS",
+        "notes": "Subtitle uses a readable 1.5 line-height and wraps long localization."
+      },
+      {
+        "name": "summary-price-numeric-alignment",
+        "value": "tabular-nums where supported",
+        "unit": "font-feature",
+        "source": "recommendation",
+        "confidence": "medium",
+        "merchant_configurable": false,
+        "owner": "shared summary CSS",
+        "notes": "Improves stable total alignment without changing the merchant font family."
+      }
+    ],
+    "spacing": [
+      {
+        "name": "--bundle-sidebar-card-padding",
+        "value": "runtime merchant value; repository default 20",
+        "unit": "px",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": true,
+        "owner": "app/lib/css-generators/css-variables-generator.ts",
+        "notes": "Evidence confirms 20px across target desktop presets; preserve merchant override and use as shell inset."
+      },
+      {
+        "name": "--bundle-summary-section-spacing",
+        "value": "0.625",
+        "unit": "rem",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "shared summary CSS",
+        "notes": "Default shared vertical rhythm between semantic regions."
+      },
+      {
+        "name": "--bundle-summary-row-gap",
+        "value": "0.625",
+        "unit": "rem",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "shared summary CSS",
+        "notes": "Shared row/slot spacing; preset CSS may vary density only through a named alias."
+      },
+      {
+        "name": "--bundle-summary-control-gap",
+        "value": "0.5",
+        "unit": "rem",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "shared summary CSS",
+        "notes": "Controls and compact status composition."
+      },
+      {
+        "name": "--bundle-summary-copy-gap",
+        "value": "0.3125",
+        "unit": "rem",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "shared summary CSS",
+        "notes": "Small title/subtitle and price-stack relationship."
+      },
+      {
+        "name": "--fpb-mobile-summary-inset",
+        "value": "clamp(0.625rem, 3vw, 1.25rem)",
+        "unit": "responsive-length",
+        "source": "recommendation",
+        "confidence": "medium",
+        "merchant_configurable": false,
+        "owner": "app/assets/widgets/full-page-css/shared/mobile-summary-footer.css",
+        "notes": "Creates an inset tray at 320px through tablet portrait without fixed screenshot widths."
+      }
+    ],
+    "size": [
+      {
+        "name": "--bundle-sidebar-card-width",
+        "value": "runtime merchant preference; repository default 360",
+        "unit": "px",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": true,
+        "owner": "app/lib/css-generators/css-variables-generator.ts",
+        "notes": "Treat as a preferred standard width inside responsive constraints, not an unconditional fixed track."
+      },
+      {
+        "name": "--bundle-sidebar-products-max-height",
+        "value": "runtime merchant preference; repository default 320",
+        "unit": "px",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": true,
+        "owner": "app/lib/css-generators/css-variables-generator.ts",
+        "notes": "Clamp against available dynamic viewport/container space so totals and actions remain reachable."
+      },
+      {
+        "name": "--bundle-summary-thumbnail-size",
+        "value": "4",
+        "unit": "rem",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "shared summary CSS",
+        "notes": "Square summary media primitive; may shrink through a narrow-width clamp, never stretch."
+      },
+      {
+        "name": "--bundle-control-hit-target",
+        "value": "2.75",
+        "unit": "rem",
+        "source": "recommendation",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "shared storefront control CSS",
+        "notes": "44px minimum target for disclosure, clear, remove, box, Back, Next, and cart controls."
+      },
+      {
+        "name": "--fpb-mobile-summary-expanded-max-block-size",
+        "value": "min(80dvh, calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 1rem))",
+        "unit": "responsive-length",
+        "source": "recommendation",
+        "confidence": "medium",
+        "merchant_configurable": false,
+        "owner": "app/assets/widgets/full-page-css/shared/mobile-summary-footer.css",
+        "notes": "Caps expanded tray while leaving the page non-modal and the persistent action reachable."
+      }
+    ],
+    "radius": [
+      {
+        "name": "--bundle-sidebar-card-radius",
+        "value": "runtime merchant value; repository default 10",
+        "unit": "px",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": true,
+        "owner": "app/lib/css-generators/css-variables-generator.ts",
+        "notes": "Reference measurement confirms 10px shell radius; Classic may remain visually borderless while retaining clipping radius."
+      },
+      {
+        "name": "--bundle-sidebar-button-radius",
+        "value": "runtime merchant values inherited from configured footer/action radius",
+        "unit": "px",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": true,
+        "owner": "app/lib/css-generators/css-variables-generator.ts",
+        "notes": "Applies to primary action without overriding merchant corner style."
+      }
+    ],
+    "border": [
+      {
+        "name": "--bundle-sidebar-card-border-width",
+        "value": "runtime merchant value; repository default 1",
+        "unit": "px",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": true,
+        "owner": "app/lib/css-generators/css-variables-generator.ts",
+        "notes": "Standard and Horizontal surface identity may show it; Classic remains borderless."
+      }
+    ],
+    "shadow": [
+      {
+        "name": "--bundle-sidebar-card-shadow",
+        "value": "none unless existing merchant/preset configuration supplies a shadow",
+        "unit": "shadow",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": true,
+        "owner": "preset/shared summary CSS",
+        "notes": "Direction A does not introduce a new floating-card shadow."
+      }
+    ],
+    "z_index": [
+      {
+        "name": "--bundle-mobile-summary-z-index",
+        "value": "existing storefront layer token",
+        "unit": "integer",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "shared mobile summary CSS",
+        "notes": "Must remain below product/confirmation dialogs and above ordinary page content."
+      }
+    ],
+    "motion": [
+      {
+        "name": "--fpb-mobile-summary-disclosure-duration",
+        "value": "300",
+        "unit": "ms",
+        "source": "reference-observed",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "shared mobile summary CSS and mobile-summary-methods.js",
+        "notes": "One connected tray/caret transition; keeps expansion consistent across presets."
+      },
+      {
+        "name": "--fpb-mobile-summary-disclosure-easing",
+        "value": "ease",
+        "unit": "timing-function",
+        "source": "reference-observed",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "shared mobile summary CSS",
+        "notes": "Both directions use the same reversible easing."
+      },
+      {
+        "name": "reduced-motion-duration",
+        "value": "0",
+        "unit": "ms",
+        "source": "user-agent-preference",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "shared summary reduced-motion media query",
+        "notes": "All final state and accessibility attributes update synchronously."
+      }
+    ],
+    "breakpoint": [
+      {
+        "name": "--fpb-summary-sidebar-min-container-width",
+        "value": "64",
+        "unit": "rem",
+        "source": "user-defined",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "responsive-layout-methods.js plus summary CSS boundary",
+        "notes": "RD-001: sidebar at 1024px and above; tray below, based on measured widget-container width."
+      }
+    ],
+    "component_alias": [
+      {
+        "name": "fpb-summary-desktop-track-by-preset",
+        "value": "preserve current measured preset relationships: Standard narrow bordered, Classic airier borderless, Compact wide, Horizontal intermediate bordered",
+        "unit": "relationship",
+        "source": "reference-observed",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "side-footer-{standard,classic,compact,horizontal}.css",
+        "notes": "Do not replace all desktop tracks with one fixed width; at 1440x900 target boundaries must remain close to approved baselines unless content forces growth."
+      },
+      {
+        "name": "fpb-summary-mobile-tray-track",
+        "value": "one inset width: calc(100% - 2 * var(--fpb-mobile-summary-inset))",
+        "unit": "responsive-relationship",
+        "source": "recommendation",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "app/assets/widgets/full-page-css/shared/mobile-summary-footer.css",
+        "notes": "Same geometry for Standard, Classic, Compact, and Horizontal below RD-001."
+      }
+    ]
   },
+  "tolerances": [
+    {
+      "id": "TOL-01",
+      "assertion": "major desktop sidebar and mobile tray boundaries",
+      "budget": "4 CSS px",
+      "failure": "Any larger unexplained delta or dimension mismatch"
+    },
+    {
+      "id": "TOL-02",
+      "assertion": "RD-001 replacement",
+      "budget": "exact at measured container widths 1023, 1024, and 1025",
+      "failure": "Both surfaces, neither surface, wrong accessibility exposure, or state loss"
+    },
+    {
+      "id": "TOL-03",
+      "assertion": "horizontal overflow and clipped focus/control",
+      "budget": "zero unintended pixels",
+      "failure": "Any page-level overflow, clipped focus indicator, or hidden primary action"
+    },
+    {
+      "id": "TOL-04",
+      "assertion": "state-transition layout stability",
+      "budget": "no unapproved shift outside summary expansion region",
+      "failure": "Catalog/page jump, fixed inline height after animation, or action displacement"
+    },
+    {
+      "id": "TOL-05",
+      "assertion": "text wrapping",
+      "budget": "content-dependent wrapping only",
+      "failure": "Unexpected truncation, overlap, or semantic copy hidden at required fixtures"
+    }
+  ],
   "token_shape": {
     "name": "",
     "value": null,

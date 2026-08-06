@@ -3,18 +3,18 @@
   "job": {
     "id": "fpb-all-template-product-card-parity-20260806",
     "title": "FPB all template product card parity",
-    "status": "blocked",
-    "stage": "BLOCKED",
+    "status": "active",
+    "stage": "IMPLEMENTATION",
     "revision": 1,
     "created_at": "2026-08-06T05:32:38Z",
-    "updated_at": "2026-08-06T06:15:30Z",
+    "updated_at": "2026-08-06T13:41:45Z",
     "owner": "",
     "product": "Wolfpack Product Bundles",
     "repository": "/Users/adityaawasthi/Developer/wolfpack-product-bundles",
     "branch": "feature/26.05-UI-changes",
     "commit": "c0b826b942a7d8581ce60ed133ffcdd7ae2ca0b8",
     "artifact_root": "/Users/adityaawasthi/Developer/wolfpack-product-bundles/design-jobs",
-    "resume_stage": "REFERENCE_INTAKE"
+    "resume_stage": null
   },
   "scope": {
     "product_family": "FPB",
@@ -93,15 +93,51 @@
     }
   },
   "states": {
-    "required": [],
+    "required": [
+      "SUM-01",
+      "SUM-02",
+      "SUM-03",
+      "SUM-04",
+      "SUM-05",
+      "SUM-06",
+      "SUM-07",
+      "SUM-08",
+      "SUM-09",
+      "SUM-10",
+      "SUM-11",
+      "SUM-12",
+      "SUM-13",
+      "SUM-14",
+      "SUM-15",
+      "SUM-16",
+      "SUM-17",
+      "SUM-18",
+      "SUM-19",
+      "SUM-20"
+    ],
     "optional": [],
     "not_applicable": [],
-    "coverage_status": "not-started"
+    "coverage_status": "complete"
   },
   "responsive": {
-    "contract_status": "not-started",
-    "breakpoints": [],
-    "transformations": []
+    "contract_status": "complete",
+    "breakpoints": [
+      "320",
+      "360",
+      "390",
+      "414",
+      "768",
+      "1024",
+      "1280",
+      "1440",
+      "1536",
+      "CW-01",
+      "ZM-01"
+    ],
+    "transformations": [
+      "desktop-to-tray replacement at >=1024px and <1024px boundary",
+      "inset tray geometry with bounded tray expansion"
+    ]
   },
   "accessibility": {
     "requirements": [],
@@ -417,6 +453,38 @@
       "revision": 1,
       "reason": "Reference capture cannot proceed in this run because Chrome DevTools MCP list_pages timing out after 300s; no store tabs could be enumerated for deterministic capture. Resume after list_pages/select_page/select_page->snapshot/take_screenshot are functional and pages for Agent store current + Yash-wolfpack target are open in default profile.",
       "evidence": [],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 7,
+      "at": "2026-08-06T13:34:55Z",
+      "from": "BLOCKED",
+      "to": "REFERENCE_INTAKE",
+      "revision": 1,
+      "reason": "Chrome DevTools availability restored; capture and validation can resume at reference-intake.",
+      "evidence": [],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 8,
+      "at": "2026-08-06T13:36:47Z",
+      "from": "REFERENCE_INTAKE",
+      "to": "REFERENCE_VALIDATION",
+      "revision": 1,
+      "reason": "Chrome DevTools MCP tabs were enumerated and current/target storefront states were re-captured for product-card parity reference continuity.",
+      "evidence": [],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 9,
+      "at": "2026-08-06T13:41:45Z",
+      "from": "REFERENCE_VALIDATION",
+      "to": "VISUAL_ANALYSIS",
+      "revision": 1,
+      "reason": "Reference image validation completed for copied Yash/Agent references; inspection output captured and reviewed for 25 paired desktop/mobile current/target states.",
+      "evidence": [
+        "references/reference-inspection.json"
+      ],
       "affected_artifacts": []
     }
   ]
