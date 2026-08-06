@@ -385,6 +385,9 @@ attachProductCardListeners(cardElement, product, stepIndex, options = {}) {
     });
   };
   const isActivationKey = (event) => event.key === 'Enter' || event.key === ' ';
+  const isProductCardControl = (element) => element.closest(
+    '.inline-qty-btn, .product-add-btn, .bw-product-card__image-nav, .product-card-action, .vs-wrapper',
+  );
 
   cardElement.addEventListener('click', (e) => {
     const imageNav = e.target.closest('.bw-product-card__image-nav');
@@ -413,11 +416,9 @@ attachProductCardListeners(cardElement, product, stepIndex, options = {}) {
   cardElement.addEventListener('keydown', (event) => {
     if (!isActivationKey(event)) return;
     const { target } = event;
-    if (
-      !target
-      || target.closest('.inline-qty-btn, .product-add-btn, .bw-product-card__image-nav')
-    ) return;
-    if (!target.closest('.product-image, .product-title')) return;
+    const normalizedTarget = target || cardElement;
+    if (!normalizedTarget || isProductCardControl(normalizedTarget)) return;
+    if (!cardElement.contains(normalizedTarget)) return;
     event.preventDefault();
     event.stopPropagation();
     openCardDetails();

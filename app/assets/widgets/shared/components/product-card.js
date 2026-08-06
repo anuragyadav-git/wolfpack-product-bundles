@@ -60,8 +60,10 @@ export function renderSharedProductCard(product = {}, currentQuantity = 0, curre
     options.className || '',
   ].filter(Boolean).join(' ');
 
+  const rootAriaLabel = `${activationLabel}${isSelected ? ' (selected)' : ' (not selected)'}`;
+
   return `
-    <div class="${rootClasses}" data-bw-product-card="true" data-product-id="${escapeAttribute(selectionKey)}" data-current-selected-variant-id="${escapeAttribute(selectionKey)}" data-bw-card-image-count="${imageUrls.length}" data-bw-card-image-index="0"${isIndividualVariantCard ? ' data-bw-card-individual-variant="true"' : ''}${hasMultipleImages ? ' data-bw-card-has-multiple-images="true"' : ''} tabindex="0" role="group" aria-label="${escapeAttribute(activationLabel)}" aria-pressed="${isSelected ? 'true' : 'false'}">
+    <div class="${rootClasses}" data-bw-product-card="true" data-product-id="${escapeAttribute(selectionKey)}" data-current-selected-variant-id="${escapeAttribute(selectionKey)}" data-bw-card-image-count="${imageUrls.length}" data-bw-card-image-index="0"${isIndividualVariantCard ? ' data-bw-card-individual-variant="true"' : ''}${hasMultipleImages ? ' data-bw-card-has-multiple-images="true"' : ''} tabindex="0" role="group" aria-label="${escapeAttribute(rootAriaLabel)}" aria-pressed="${isSelected ? 'true' : 'false'}">
       <div class="bw-product-card__media product-image" data-bw-product-media="true" role="button" tabindex="0" aria-label="${escapeAttribute(openImageLabel)}">
         <img class="bw-product-card__image" src="${escapeAttribute(imageUrl)}" alt="${escapeAttribute(title)}" loading="lazy">
         ${hasMultipleImages ? renderImageNavButton('prev', imageNavPrevLabel) : ''}

@@ -332,14 +332,17 @@ attachProductEventHandlers(productGrid, stepIndex) {
     }
   });
 
-  newProductGrid.addEventListener('keydown', (e) => {
-    if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') {
-      return;
-    }
+  const isActivationKey = (event) => event.key === 'Enter' || event.key === ' ' || event.key === 'Spacebar';
+  const isProductCardControl = (element) => element.closest(
+    '.inline-qty-btn, .product-add-btn, .bw-product-card__image-nav, .product-card-action, .variant-selector, .vs-wrapper',
+  );
 
-    const target = e.target.closest('.product-image, .product-title');
-    if (!target) return;
-    if (target.closest('.bw-product-card__image-nav')) return;
+  newProductGrid.addEventListener('keydown', (e) => {
+    if (!isActivationKey(e)) return;
+
+    const target = e.target || newProductGrid;
+    if (!target || isProductCardControl(target)) return;
+    if (!target.closest('.product-image, .product-title') && !target.closest('.product-card')) return;
     e.preventDefault();
     e.stopPropagation();
     openProductModalForCard(target.closest('.product-card'));

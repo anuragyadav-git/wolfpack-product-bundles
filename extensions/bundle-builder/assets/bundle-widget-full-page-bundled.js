@@ -3266,8 +3266,10 @@ function renderSharedProductCard(product = {}, currentQuantity = 0, currencyInfo
     options.className || '',
   ].filter(Boolean).join(' ');
 
+  const rootAriaLabel = `${activationLabel}${isSelected ? ' (selected)' : ' (not selected)'}`;
+
   return `
-    <div class="${rootClasses}" data-bw-product-card="true" data-product-id="${escapeAttribute(selectionKey)}" data-current-selected-variant-id="${escapeAttribute(selectionKey)}" data-bw-card-image-count="${imageUrls.length}" data-bw-card-image-index="0"${isIndividualVariantCard ? ' data-bw-card-individual-variant="true"' : ''}${hasMultipleImages ? ' data-bw-card-has-multiple-images="true"' : ''} tabindex="0" role="group" aria-label="${escapeAttribute(activationLabel)}" aria-pressed="${isSelected ? 'true' : 'false'}">
+    <div class="${rootClasses}" data-bw-product-card="true" data-product-id="${escapeAttribute(selectionKey)}" data-current-selected-variant-id="${escapeAttribute(selectionKey)}" data-bw-card-image-count="${imageUrls.length}" data-bw-card-image-index="0"${isIndividualVariantCard ? ' data-bw-card-individual-variant="true"' : ''}${hasMultipleImages ? ' data-bw-card-has-multiple-images="true"' : ''} tabindex="0" role="group" aria-label="${escapeAttribute(rootAriaLabel)}" aria-pressed="${isSelected ? 'true' : 'false'}">
       <div class="bw-product-card__media product-image" data-bw-product-media="true" role="button" tabindex="0" aria-label="${escapeAttribute(openImageLabel)}">
         <img class="bw-product-card__image" src="${escapeAttribute(imageUrl)}" alt="${escapeAttribute(title)}" loading="lazy">
         ${hasMultipleImages ? renderImageNavButton('prev', imageNavPrevLabel) : ''}
@@ -9920,6 +9922,9 @@ attachProductCardListeners(cardElement, product, stepIndex, options = {}) {
     });
   };
   const isActivationKey = (event) => event.key === 'Enter' || event.key === ' ';
+  const isProductCardControl = (element) => element.closest(
+    '.inline-qty-btn, .product-add-btn, .bw-product-card__image-nav, .product-card-action, .vs-wrapper',
+  );
 
   cardElement.addEventListener('click', (e) => {
     const imageNav = e.target.closest('.bw-product-card__image-nav');
@@ -9948,11 +9953,9 @@ attachProductCardListeners(cardElement, product, stepIndex, options = {}) {
   cardElement.addEventListener('keydown', (event) => {
     if (!isActivationKey(event)) return;
     const { target } = event;
-    if (
-      !target
-      || target.closest('.inline-qty-btn, .product-add-btn, .bw-product-card__image-nav')
-    ) return;
-    if (!target.closest('.product-image, .product-title')) return;
+    const normalizedTarget = target || cardElement;
+    if (!normalizedTarget || isProductCardControl(normalizedTarget)) return;
+    if (!cardElement.contains(normalizedTarget)) return;
     event.preventDefault();
     event.stopPropagation();
     openCardDetails();
@@ -13994,14 +13997,17 @@ attachProductEventHandlers(productGrid, stepIndex) {
     }
   });
 
-  newProductGrid.addEventListener('keydown', (e) => {
-    if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') {
-      return;
-    }
+  const isActivationKey = (event) => event.key === 'Enter' || event.key === ' ' || event.key === 'Spacebar';
+  const isProductCardControl = (element) => element.closest(
+    '.inline-qty-btn, .product-add-btn, .bw-product-card__image-nav, .product-card-action, .variant-selector, .vs-wrapper',
+  );
 
-    const target = e.target.closest('.product-image, .product-title');
-    if (!target) return;
-    if (target.closest('.bw-product-card__image-nav')) return;
+  newProductGrid.addEventListener('keydown', (e) => {
+    if (!isActivationKey(e)) return;
+
+    const target = e.target || newProductGrid;
+    if (!target || isProductCardControl(target)) return;
+    if (!target.closest('.product-image, .product-title') && !target.closest('.product-card')) return;
     e.preventDefault();
     e.stopPropagation();
     openProductModalForCard(target.closest('.product-card'));
@@ -14274,7 +14280,7 @@ syncProductQuantityIncreaseState(increaseButton, quantity) {
   }
 },
 
-updateProductQuantityDisplay(stepIndex, productId, quantity) {
+  updateProductQuantityDisplay(stepIndex, productId, quantity) {
   if (this.usesSelectedQuantityBadge()) {
     this.refreshCurrentProductGrid(stepIndex);
     if (this.elements?.modal?.querySelector('.product-grid')) {
@@ -14313,6 +14319,14 @@ updateProductQuantityDisplay(stepIndex, productId, quantity) {
     productCard.querySelector('.product-title')?.textContent?.trim() || '',
   );
   const productTargetName = sanitizeAria(productTitleText || productId, 'product');
+
+  if (productCard) {
+    productCard.setAttribute('aria-pressed', quantity > 0 ? 'true' : 'false');
+    productCard.setAttribute('aria-expanded', String(quantity > 0));
+    const activationAria = productCard.getAttribute('aria-label') || `${sanitizeAria('Open product details')}`;
+    const stateSuffix = quantity > 0 ? 'selected' : 'not selected';
+    productCard.setAttribute('aria-label', `${activationAria.replace(/\s+\((not )?selected\)$/, '')} (${stateSuffix})`);
+  }
 
   const contentWrapper = productCard.querySelector('.product-content-wrapper');
   const actionWrapper = productCard.querySelector('.product-card-action');

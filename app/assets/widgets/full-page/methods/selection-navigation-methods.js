@@ -236,7 +236,7 @@ syncProductQuantityIncreaseState(increaseButton, quantity) {
   }
 },
 
-updateProductQuantityDisplay(stepIndex, productId, quantity) {
+  updateProductQuantityDisplay(stepIndex, productId, quantity) {
   if (this.usesSelectedQuantityBadge()) {
     this.refreshCurrentProductGrid(stepIndex);
     if (this.elements?.modal?.querySelector('.product-grid')) {
@@ -276,6 +276,14 @@ updateProductQuantityDisplay(stepIndex, productId, quantity) {
     productCard.querySelector('.product-title')?.textContent?.trim() || '',
   );
   const productTargetName = sanitizeAria(productTitleText || productId, 'product');
+
+  if (productCard) {
+    productCard.setAttribute('aria-pressed', quantity > 0 ? 'true' : 'false');
+    productCard.setAttribute('aria-expanded', String(quantity > 0));
+    const activationAria = productCard.getAttribute('aria-label') || `${sanitizeAria('Open product details')}`;
+    const stateSuffix = quantity > 0 ? 'selected' : 'not selected';
+    productCard.setAttribute('aria-label', `${activationAria.replace(/\s+\((not )?selected\)$/, '')} (${stateSuffix})`);
+  }
 
   // Find existing action elements
   const contentWrapper = productCard.querySelector('.product-content-wrapper');
