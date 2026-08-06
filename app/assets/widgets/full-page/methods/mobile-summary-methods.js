@@ -153,12 +153,13 @@ _populateCompactMobileSummaryTray(sheet) {
       const quantity = Number(item.quantity);
       return sum + (Number.isFinite(quantity) ? quantity : 0);
     }, 0);
+  const summaryText = this.getBundleSummaryText?.();
   const designPreset = this.getFullPageDesignPreset?.();
   sheet.classList.toggle(
     'fpb-mobile-summary-fluid-footer',
     shouldUseFluidMobileSummaryFooter(designPreset)
   );
-  const summaryToggleLabel = 'Review your bundle';
+  const summaryToggleLabel = summaryText?.title || 'Review your bundle';
   const addonStep = (this.selectedBundle?.steps || []).find(step => step?.isFreeGift === true) || null;
   const addonStates = addonStep && typeof this.getAddonSummaryEligibilityStates === 'function'
     ? this.getAddonSummaryEligibilityStates(addonStep)

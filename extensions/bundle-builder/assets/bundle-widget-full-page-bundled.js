@@ -47,6 +47,19 @@ const ConditionValidator = (function () {
     return total;
   }
 
+  /**
+   * Determine whether a proposed quantity update is permitted by the step's condition.
+   *
+   * Only blocks INCREASES that would violate an upper-bound operator.
+   * Decreases are always permitted regardless of the condition state (so the
+   * customer can switch products without getting permanently stuck).
+   *
+   * @param {object}  step              Step config object (conditionType, conditionOperator, conditionValue)
+   * @param {Record<string, number>} currentSelections  Current selections for this step
+   * @param {string}  targetProductId   Product being updated
+   * @param {number}  newQuantity       Proposed quantity (0 = remove)
+   * @returns {{ allowed: boolean, limitText: string|null }}
+   */
   function canUpdateQuantity(step, currentSelections, targetProductId, newQuantity, targetValues) {
 
     if (!step || !step.conditionType || !step.conditionOperator || !_isPositiveConditionValue(step.conditionValue)) {
@@ -394,6 +407,15 @@ const BUNDLE_WIDGET = {
   PLACEHOLDER_IMAGE: INLINE_PLACEHOLDER_IMAGE,
   PLACEHOLDER_IMAGE_FALLBACK: INLINE_PLACEHOLDER_IMAGE
 };
+
+/**
+ * Bundle Widget - Currency Management System
+ *
+ * Handles multi-currency detection, conversion, and formatting.
+ * Integrates with Shopify Markets for automatic currency handling.
+ *
+ * @version 4.0.0
+ */
 
 class CurrencyManager {
   static getShopify() {
@@ -3215,6 +3237,13 @@ function escapeAttribute(value) {
   return escapeHtml(value).replace(/`/g, '&#96;');
 }
 
+/**
+ * Shared product card renderer.
+ *
+ * The DOM contract reserves a stable action area so selected state swaps the
+ * add button for quantity controls without changing the surrounding layout.
+ */
+
 const DEFAULT_PLACEHOLDER_IMAGE = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400"%3E%3Crect width="400" height="400" fill="%23f3f4f6"/%3E%3C/svg%3E';
 const PRODUCT_DESCRIPTION_PREVIEW_LENGTH = 110;
 
@@ -3698,6 +3727,13 @@ function escapeAttribute(value) {
   return escapeHtml(value).replace(/`/g, '&#96;');
 }
 
+/**
+ * Shared bundle state skeleton.
+ *
+ * This module is intentionally data-only. Renderers keep owning DOM updates
+ * while the refactor moves selection math into shared selectors/actions.
+ */
+
 function createBundleState(input = {}) {
   const bundle = input.bundle || null;
   const steps = Array.isArray(input.steps)
@@ -3721,6 +3757,13 @@ function cloneSelectedProducts(selectedProducts) {
     return { ...stepSelections };
   });
 }
+
+/**
+ * Shared bundle selectors.
+ *
+ * Selectors accept the current widget-shaped state so FPB and PPB can adopt
+ * them gradually without changing render ownership.
+ */
 
 function getCurrentStep(state) {
   const steps = Array.isArray(state?.steps) ? state.steps : [];
@@ -3858,6 +3901,13 @@ function findProductByVariantId(state, variantId) {
   return null;
 }
 
+/**
+ * Shared bundle actions.
+ *
+ * Actions return a new state object and cloned selection arrays so migration
+ * loops can adopt them without mutating legacy widget state by accident.
+ */
+
 function addSelectedProduct(state, { stepIndex, variantId, quantity = 1 }) {
   const selectedProducts = cloneSelectedProducts(state?.selectedProducts);
   ensureStep(selectedProducts, stepIndex);
@@ -3900,6 +3950,14 @@ function ensureStep(selectedProducts, stepIndex) {
     selectedProducts[stepIndex] = {};
   }
 }
+
+/**
+ * Shared cart-line metadata helpers.
+ *
+ * These helpers build the display metadata used by FPB and PPB cart lines.
+ * Cart submission, variant IDs, selling plans, and post-add behavior stay owned
+ * by the widget controllers for now.
+ */
 
 const DEFAULT_CART_LINE_LABELS = {
   items: 'Items',
@@ -3967,6 +4025,13 @@ function buildCartLineDisplayProperties(displayProperties = {}, labels = DEFAULT
 
   return properties;
 }
+
+/**
+ * Shared cart submission payload helpers.
+ *
+ * Transport remains owned by each widget. These helpers only build payload
+ * structures that must stay consistent across controller refactors.
+ */
 
 function extractBundleDetailsSourceProperties(cartItems = []) {
   const firstItem = cartItems.find(item => item?.properties?._bundle_display_properties);
@@ -4107,6 +4172,12 @@ const BundleModalVariantMethods = {
     this.updateSelectedVariant();
   },
 
+  /**
+   * Check if option is likely a color option
+   * @param {string} optionName - Option name
+   * @param {string[]} values - Option values
+   * @returns {boolean}
+   */
   isColorOption(optionName, values) {
     const colorKeywords = ['color', 'colour', 'colors', 'colours'];
     if (colorKeywords.some(keyword => optionName.toLowerCase().includes(keyword))) {
@@ -4118,6 +4189,11 @@ const BundleModalVariantMethods = {
     return colorMatches.length > values.length / 2;
   },
 
+  /**
+   * Get CSS style for color swatch
+   * @param {string} colorName - Color name
+   * @returns {string} CSS style string
+   */
   getColorStyle(colorName) {
 
     const colorMap = {
@@ -4142,6 +4218,11 @@ const BundleModalVariantMethods = {
     return 'background: linear-gradient(135deg, #f0f0f0, #e0e0e0)';
   },
 
+  /**
+   * Select a variant option
+   * @param {number} optionIndex - Index of the option (0, 1, or 2)
+   * @param {string} value - Selected value
+   */
   selectVariantOption(optionIndex, value) {
 
     this.selectedOptions[optionIndex] = value;
@@ -4161,6 +4242,9 @@ const BundleModalVariantMethods = {
     this.updateSelectedVariant();
   },
 
+  /**
+   * Update selected variant based on button selections
+   */
   updateSelectedVariant() {
     const variants = this.currentProduct.variants || [];
 
@@ -4190,6 +4274,10 @@ const BundleModalVariantMethods = {
     this.updateOptionAvailability();
   },
 
+  /**
+   * Update selection summary display
+   * Shows current selection like "Blue / Medium"
+   */
   updateSelectionSummary() {
     const summaryContainer = document.getElementById('modal-selection-summary');
     const summaryText = document.getElementById('modal-selection-text');
@@ -4210,6 +4298,10 @@ const BundleModalVariantMethods = {
     summaryContainer.hidden = false;
   },
 
+  /**
+   * Update availability state of variant option buttons
+   * Marks options as unavailable if no variant exists with that combination
+   */
   updateOptionAvailability() {
     const variants = this.currentProduct.variants || [];
     if (!this.selectedOptions) return;
@@ -4241,6 +4333,9 @@ const BundleModalVariantMethods = {
     });
   },
 
+  /**
+   * Update main image when variant changes (if variant has specific image)
+   */
   updateVariantImage() {
     if (!this.selectedVariant) return;
 
@@ -4261,6 +4356,9 @@ const BundleModalVariantMethods = {
     }
   },
 
+  /**
+   * Update price display
+   */
   updatePrice() {
     const priceEl = document.getElementById('modal-product-price');
     const variant = this.selectedVariant || this.currentProduct;
@@ -4283,6 +4381,11 @@ const BundleModalVariantMethods = {
     priceEl.innerHTML = priceHTML;
   },
 
+  /**
+   * Format price with currency
+   * @param {number} price - Price in cents
+   * @returns {string} Formatted price
+   */
   formatPrice(price) {
 
     if (this.widget && this.widget.formatPrice) {
@@ -4293,6 +4396,9 @@ const BundleModalVariantMethods = {
     return `$${dollars}`;
   },
 
+  /**
+   * Update availability status
+   */
   updateAvailability() {
     const addBtn = document.getElementById('modal-add-to-box');
     const variant = this.selectedVariant || this.currentProduct;
@@ -4311,7 +4417,27 @@ const BundleModalVariantMethods = {
     }
   },
 
+  /**
+   * Update quantity
+   * @param {number} quantity - New quantity
+   */
 };
+
+/**
+ * Bundle Product Modal Component
+ *
+ * Handles the product variant selection modal for full-page bundles.
+ * Opens when user clicks "Choose Options" on a product card.
+ *
+ * Features:
+ * - Product image, title, and description
+ * - Variant selection dropdowns
+ * - Quantity controls
+ * - Add To Box functionality
+ * - Responsive mobile layout
+ *
+ * @version 1.0.0
+ */
 
 class BundleProductModal {
   constructor(widget) {
@@ -4327,11 +4453,17 @@ class BundleProductModal {
     this.init();
   }
 
+  /**
+   * Initialize modal
+   */
   init() {
     this.createModalHTML();
     this.attachEventListeners();
   }
 
+  /**
+   * Create modal DOM structure
+   */
   createModalHTML() {
     const modalHTML = `
       <div class="bundle-modal-overlay" id="bundle-product-modal">
@@ -4397,6 +4529,9 @@ class BundleProductModal {
     this.modalElement = document.getElementById('bundle-product-modal');
   }
 
+  /**
+   * Attach event listeners
+   */
   attachEventListeners() {
 
     const closeBtn = this.modalElement.querySelector('.bundle-modal-close');
@@ -4437,6 +4572,10 @@ class BundleProductModal {
     this.setupSwipeGestures();
   }
 
+  /**
+   * Setup swipe gestures for mobile
+   * - Swipe down on container to dismiss
+   */
   setupSwipeGestures() {
     const modalContainer = this.modalElement.querySelector('.bundle-modal-container');
 
@@ -4490,6 +4629,11 @@ class BundleProductModal {
     }
   }
 
+  /**
+   * Open modal with product data
+   * @param {Object} product - Product data
+   * @param {Object} step - Step data
+   */
   open(product, step, options = {}) {
 
     this.currentProduct = product;
@@ -4511,6 +4655,9 @@ class BundleProductModal {
     document.body.classList.add('modal-open');
   }
 
+  /**
+   * Close modal
+   */
   close() {
     this.modalElement.classList.remove('active');
     document.body.classList.remove('modal-open');
@@ -4524,6 +4671,9 @@ class BundleProductModal {
     this.updateReadOnlyState();
   }
 
+  /**
+   * Populate modal with product data
+   */
   populateModal() {
 
     const displayTitle = this.currentProduct.parentTitle || this.currentProduct.title;
@@ -4567,6 +4717,11 @@ class BundleProductModal {
     });
   }
 
+  /**
+   * Get normalized product image.
+   * Handles imageUrl, image.src, images array, and featuredImage.url.
+   * @returns {string} Image URL
+   */
   getProductImages() {
     const product = this.currentProduct;
     if (!product) return [BUNDLE_WIDGET.PLACEHOLDER_IMAGE];
@@ -4628,6 +4783,9 @@ class BundleProductModal {
     document.getElementById('modal-qty-display').textContent = this.selectedQuantity;
   }
 
+  /**
+   * Add product to bundle
+   */
   addToBundle() {
     if (this.readOnly) {
       return;
@@ -4670,6 +4828,9 @@ class BundleProductModal {
     this.showSuccessFeedback();
   }
 
+  /**
+   * Show success feedback after adding product
+   */
   showSuccessFeedback() {
 
     if (this.widget && this.widget.showToast) {
@@ -4697,6 +4858,13 @@ function claimFullPageWidgetInitialization(container) {
   return true;
 }
 
+/**
+ * FPB Standard template config.
+ *
+ * This is the migration contract for the Standard preset.
+ * Renderers still use legacy paths until the Standard migration completes.
+ */
+
 const FPB_STANDARD_TEMPLATE_CONFIG = {
   id: 'STANDARD',
   presetId: 'STANDARD',
@@ -4721,6 +4889,13 @@ const FPB_STANDARD_TEMPLATE_CONFIG = {
     mode: 'standard',
   },
 };
+
+/**
+ * FPB Classic template config.
+ *
+ * The existing CLASSIC preset stays on legacy rendering until the template
+ * migration replaces the installer with config-driven renderers.
+ */
 
 const FPB_CLASSIC_TEMPLATE_CONFIG = {
   id: 'CLASSIC',
@@ -4747,6 +4922,13 @@ const FPB_CLASSIC_TEMPLATE_CONFIG = {
   },
 };
 
+/**
+ * FPB Compact template config.
+ *
+ * This maps the existing COMPACT preset to shared primitives before the
+ * runtime CSS installer is replaced.
+ */
+
 const FPB_COMPACT_TEMPLATE_CONFIG = {
   id: 'COMPACT',
   presetId: 'COMPACT',
@@ -4772,6 +4954,13 @@ const FPB_COMPACT_TEMPLATE_CONFIG = {
   },
 };
 
+/**
+ * FPB Horizontal template config.
+ *
+ * This maps the existing HORIZONTAL preset to shared row primitives before the
+ * runtime CSS installer is replaced.
+ */
+
 const FPB_HORIZONTAL_TEMPLATE_CONFIG = {
   id: 'HORIZONTAL',
   presetId: 'HORIZONTAL',
@@ -4796,6 +4985,13 @@ const FPB_HORIZONTAL_TEMPLATE_CONFIG = {
     mode: 'horizontal',
   },
 };
+
+/**
+ * Full-page template registry.
+ *
+ * Resolves full-page preset identifiers to the four FPB target
+ * templates while current installer files are still being retired.
+ */
 
 const FPB_TEMPLATE_CONFIGS = {
   STANDARD: FPB_STANDARD_TEMPLATE_CONFIG,
@@ -4918,12 +5114,16 @@ _sendEngagementBeacon(eventName) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
       keepalive: true,
-    }).catch(() => {  });
+    }).catch(() => { /* fire-and-forget */ });
   } catch (_e) {
 
   }
 },
 
+/**
+ * Hide the page body loading content
+ * This hides the "Loading bundle builder..." text that was added to the Shopify page body
+ */
 hidePageLoadingContent() {
   try {
 
@@ -4947,6 +5147,10 @@ hidePageLoadingContent() {
   }
 },
 
+/**
+ * Load Settings design CSS
+ * Injects custom CSS from Settings -> Design into the page
+ */
 loadDesignSettingsCSS() {
   try {
 
@@ -5301,6 +5505,9 @@ parseConfiguration() {
   this.applyCardLayoutSettings();
 },
 
+/**
+ * Apply card layout settings from Theme Editor as CSS variables
+ */
 applyCardLayoutSettings() {
   document.documentElement.style.setProperty(
     '--bundle-product-card-spacing',
@@ -5626,6 +5833,9 @@ initializeDataStructures() {
   this.stepProductData = Array(stepsCount).fill(null).map(() => ([]));
 },
 
+/**
+ * Show a helpful preview in theme editor when testing on non-bundle products
+ */
 showThemeEditorPreview(bundleId) {
 
   this.container.innerHTML = `
@@ -6455,12 +6665,13 @@ _populateCompactMobileSummaryTray(sheet) {
       const quantity = Number(item.quantity);
       return sum + (Number.isFinite(quantity) ? quantity : 0);
     }, 0);
+  const summaryText = this.getBundleSummaryText?.();
   const designPreset = this.getFullPageDesignPreset?.();
   sheet.classList.toggle(
     'fpb-mobile-summary-fluid-footer',
     shouldUseFluidMobileSummaryFooter(designPreset)
   );
-  const summaryToggleLabel = 'Review your bundle';
+  const summaryToggleLabel = summaryText?.title || 'Review your bundle';
   const addonStep = (this.selectedBundle?.steps || []).find(step => step?.isFreeGift === true) || null;
   const addonStates = addonStep && typeof this.getAddonSummaryEligibilityStates === 'function'
     ? this.getAddonSummaryEligibilityStates(addonStep)
