@@ -15,9 +15,9 @@ items:
     supports_rich_text: false
     sanitization: text
     affected_states: [product card button]
-    fixture_ids: []
+    fixture_ids: [fpb-all-templates]
     test_case_ids: [fpb-all-template-summary]
-    status: confirmed_current
+    status: CONFIRMED_CURRENT
     evidence: app/assets/widgets/full-page/methods/runtime-cart-settings-methods.js
     notes: Shared across FPB presets.
 
@@ -37,9 +37,9 @@ items:
     supports_rich_text: false
     sanitization: text
     affected_states: [summary drawer title]
-    fixture_ids: []
+    fixture_ids: [ppb-all-templates]
     test_case_ids: [product-page-bundle-template-design-verification]
-    status: confirmed_current
+    status: CONFIRMED_CURRENT
     evidence: app/assets/widgets/full-page/methods/mobile-summary-methods.js
     notes: Shared locale-aware text in runtime helper.
 
@@ -59,7 +59,7 @@ items:
     supports_rich_text: false
     sanitization: text
     affected_states: [selection flow, CTA label]
-    fixture_ids: []
+    fixture_ids: [fpb-all-templates]
     test_case_ids: [fpb-all-template-summary]
     status: DISCOVERED_CURRENT
     evidence: app/assets/widgets/full-page/methods/responsive-layout-methods.js
@@ -81,7 +81,7 @@ items:
     supports_rich_text: false
     sanitization: text
     affected_states: [empty catalog state]
-    fixture_ids: []
+    fixture_ids: [fpb-all-templates]
     test_case_ids: [fpb-all-template-summary]
     status: DISCOVERED_CURRENT
     evidence: app/assets/widgets/full-page/methods/product-grid-methods.js
@@ -103,7 +103,7 @@ items:
     supports_rich_text: false
     sanitization: text
     affected_states: [variant selection]
-    fixture_ids: []
+    fixture_ids: [fpb-all-templates]
     test_case_ids: [fpb-all-template-summary]
     status: DISCOVERED_CURRENT
     evidence: app/lib/settings-language-runtime.ts
@@ -125,7 +125,7 @@ items:
     supports_rich_text: false
     sanitization: text
     affected_states: [add-to-cart state]
-    fixture_ids: []
+    fixture_ids: [fpb-all-templates]
     test_case_ids: [fpb-all-template-summary]
     status: DISCOVERED_CURRENT
     evidence: app/assets/widgets/product-page/methods/cart-methods.js
@@ -147,7 +147,7 @@ items:
     supports_rich_text: false
     sanitization: text
     affected_states: [card status badge]
-    fixture_ids: []
+    fixture_ids: [fpb-all-templates]
     test_case_ids: [fpb-all-template-summary]
     status: DISCOVERED_CURRENT
     evidence: app/lib/bundle-formatter.server.ts
@@ -169,7 +169,7 @@ items:
     supports_rich_text: false
     sanitization: text
     affected_states: [summary actions]
-    fixture_ids: []
+    fixture_ids: [fpb-all-templates]
     test_case_ids: [fpb-all-template-summary]
     status: DISCOVERED_CURRENT
     evidence: app/lib/settings-language-runtime.ts
@@ -191,7 +191,7 @@ items:
     supports_rich_text: false
     sanitization: text
     affected_states: [product card controls]
-    fixture_ids: []
+    fixture_ids: [fpb-all-templates]
     test_case_ids: [fpb-all-template-summary]
     status: DISCOVERED_CURRENT
     evidence: app/lib/settings-language-runtime.ts
@@ -213,7 +213,7 @@ items:
     supports_rich_text: false
     sanitization: text
     affected_states: [pagination state]
-    fixture_ids: []
+    fixture_ids: [fpb-all-templates]
     test_case_ids: [fpb-all-template-summary]
     status: DISCOVERED_CURRENT
     evidence: app/lib/settings-language-runtime.ts
@@ -235,7 +235,7 @@ items:
     supports_rich_text: false
     sanitization: text
     affected_states: [variant control]
-    fixture_ids: []
+    fixture_ids: [fpb-all-templates]
     test_case_ids: [fpb-all-template-summary]
     status: DISCOVERED_CURRENT
     evidence: app/assets/widgets/full-page/methods/product-card-footer-methods.js
@@ -257,7 +257,7 @@ items:
     supports_rich_text: false
     sanitization: text
     affected_states: [step navigation]
-    fixture_ids: []
+    fixture_ids: [ppb-all-templates]
     test_case_ids: [product-page-bundle-template-design-verification]
     status: DISCOVERED_CURRENT
     evidence: app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/runtime-config.server.ts
@@ -279,7 +279,7 @@ items:
     supports_rich_text: false
     sanitization: text
     affected_states: [final step CTA]
-    fixture_ids: []
+    fixture_ids: [ppb-all-templates]
     test_case_ids: [product-page-bundle-template-design-verification]
     status: DISCOVERED_CURRENT
     evidence: app/lib/settings-language-runtime.ts
@@ -301,7 +301,7 @@ items:
     supports_rich_text: false
     sanitization: text
     affected_states: [add-to-cart state]
-    fixture_ids: []
+    fixture_ids: [ppb-all-templates]
     test_case_ids: [product-page-bundle-template-design-verification]
     status: DISCOVERED_CURRENT
     evidence: app/assets/widgets/product-page/methods/cart-methods.js
@@ -323,7 +323,7 @@ items:
     supports_rich_text: false
     sanitization: text
     affected_states: [product card controls]
-    fixture_ids: []
+    fixture_ids: [ppb-all-templates]
     test_case_ids: [product-page-bundle-template-design-verification]
     status: DISCOVERED_CURRENT
     evidence: app/lib/settings-language-runtime.ts
@@ -345,7 +345,7 @@ items:
     supports_rich_text: false
     sanitization: text
     affected_states: [inline add controls]
-    fixture_ids: []
+    fixture_ids: [ppb-all-templates]
     test_case_ids: [product-page-bundle-template-design-verification]
     status: DISCOVERED_CURRENT
     evidence: app/lib/settings-language-runtime.ts
@@ -367,7 +367,7 @@ items:
     supports_rich_text: false
     sanitization: text
     affected_states: [cart drawer state]
-    fixture_ids: []
+    fixture_ids: [ppb-all-templates]
     test_case_ids: [product-page-bundle-template-design-verification]
     status: DISCOVERED_CURRENT
     evidence: app/assets/widgets/product-page/templates/cascade-template.js
@@ -389,7 +389,7 @@ items:
     supports_rich_text: false
     sanitization: text
     affected_states: [cart summary]
-    fixture_ids: []
+    fixture_ids: [ppb-all-templates]
     test_case_ids: [product-page-bundle-template-design-verification]
     status: DISCOVERED_CURRENT
     evidence: app/assets/widgets/product-page/methods/footer-modal-state-methods.js
@@ -411,7 +411,7 @@ items:
     supports_rich_text: false
     sanitization: text
     affected_states: [variant controls]
-    fixture_ids: []
+    fixture_ids: [ppb-all-templates]
     test_case_ids: [product-page-bundle-template-design-verification]
     status: DISCOVERED_CURRENT
     evidence: app/lib/settings-language-runtime.ts
@@ -433,7 +433,7 @@ items:
     supports_rich_text: false
     sanitization: text
     affected_states: [badging]
-    fixture_ids: []
+    fixture_ids: [ppb-all-templates]
     test_case_ids: [product-page-bundle-template-design-verification]
     status: DISCOVERED_CURRENT
     evidence: app/lib/bundle-formatter.server.ts

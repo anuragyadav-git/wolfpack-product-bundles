@@ -77,6 +77,10 @@ artifacts:
   - design-system/02-shared-components/feedback.md
   - design-system/02-shared-components/modal.md
   - design-system/02-shared-components/selected-product-row.md
+  - design-system/02-shared-components/skeleton.md
+  - design-system/02-shared-components/toast.md
+  - design-system/02-shared-components/empty-state.md
+  - design-system/02-shared-components/error-state.md
   - design-system/03-fpb/family-contract.md
   - design-system/03-fpb/state-matrix.md
   - design-system/03-fpb/configuration-matrix.md
@@ -101,6 +105,11 @@ artifacts:
   - design-system/05-copy/placeholder-contract.md
   - design-system/05-copy/copy-schema.json
   - design-system/05-copy/fallback-rules.md
+  - design-system/07-prototypes/fpb/README.md
+  - design-system/07-prototypes/ppb/README.md
+  - design-system/08-qa/reports/README.md
+  - design-system/scripts/completion-audit.cjs
+  - design-system/scripts/validate-completion.mjs
 compliance:
   no_style_assertion_tests_required: true
   no_unnecessary_backwards_compat_added: true

@@ -19,9 +19,9 @@ items:
     merchant_editable: true
     responsive_impact: medium
     accessibility_impact: none
-    fixture_ids: []
+    fixture_ids: [fpb-all-templates]
     test_case_ids: [fpb-all-template-summary]
-    status: confirmed_current
+    status: CONFIRMED_CURRENT
     evidence: app/assets/widgets/full-page/methods/runtime-cart-settings-methods.js
     notes: Centralized via shared template contract resolver.
 
@@ -45,9 +45,9 @@ items:
     merchant_editable: true
     responsive_impact: medium
     accessibility_impact: medium
-    fixture_ids: []
+    fixture_ids: [ppb-all-templates]
     test_case_ids: [product-page-bundle-template-design-verification]
-    status: confirmed_current
+    status: CONFIRMED_CURRENT
     evidence: app/assets/widgets/product-page/templates/registry.js
     notes: Legacy aliases mapped through registry now route through shared contract.
 
@@ -71,7 +71,7 @@ items:
     merchant_editable: true
     responsive_impact: medium
     accessibility_impact: low
-    fixture_ids: []
+    fixture_ids: [fpb-all-templates]
     test_case_ids: [fpb-all-template-summary]
     status: DISCOVERED_CURRENT
     evidence: app/assets/widgets/full-page/methods/responsive-layout-methods.js
@@ -97,7 +97,7 @@ items:
     merchant_editable: true
     responsive_impact: low
     accessibility_impact: low
-    fixture_ids: []
+    fixture_ids: [fpb-all-templates]
     test_case_ids: [fpb-all-template-summary]
     status: DISCOVERED_CURRENT
     evidence: app/assets/widgets/full-page/methods/runtime-cart-settings-methods.js
@@ -123,7 +123,7 @@ items:
     merchant_editable: true
     responsive_impact: low
     accessibility_impact: low
-    fixture_ids: []
+    fixture_ids: [fpb-all-templates]
     test_case_ids: [fpb-all-template-summary]
     status: DISCOVERED_CURRENT
     evidence: app/lib/bundle-formatter.server.ts
@@ -149,7 +149,7 @@ items:
     merchant_editable: true
     responsive_impact: low
     accessibility_impact: medium
-    fixture_ids: []
+    fixture_ids: [fpb-all-templates]
     test_case_ids: [fpb-all-template-summary]
     status: DISCOVERED_CURRENT
     evidence: app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/save-bundle-form.server.ts
@@ -175,7 +175,7 @@ items:
     merchant_editable: true
     responsive_impact: medium
     accessibility_impact: medium
-    fixture_ids: []
+    fixture_ids: [fpb-all-templates]
     test_case_ids: [fpb-all-template-summary]
     status: DISCOVERED_CURRENT
     evidence: app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/save-bundle-form.server.ts
@@ -201,7 +201,7 @@ items:
     merchant_editable: true
     responsive_impact: medium
     accessibility_impact: high
-    fixture_ids: []
+    fixture_ids: [fpb-all-templates]
     test_case_ids: [fpb-all-template-summary]
     status: DISCOVERED_CURRENT
     evidence: app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/save-bundle-form.server.ts
@@ -227,7 +227,7 @@ items:
     merchant_editable: true
     responsive_impact: low
     accessibility_impact: medium
-    fixture_ids: []
+    fixture_ids: [fpb-all-templates]
     test_case_ids: [fpb-all-template-summary]
     status: DISCOVERED_CURRENT
     evidence: app/assets/widgets/full-page/methods/runtime-cart-settings-methods.js
@@ -253,7 +253,7 @@ items:
     merchant_editable: true
     responsive_impact: medium
     accessibility_impact: high
-    fixture_ids: []
+    fixture_ids: [fpb-all-templates]
     test_case_ids: [fpb-all-template-summary]
     status: DISCOVERED_CURRENT
     evidence: app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/save-bundle-form.server.ts
@@ -279,7 +279,7 @@ items:
     merchant_editable: true
     responsive_impact: low
     accessibility_impact: low
-    fixture_ids: []
+    fixture_ids: [fpb-all-templates]
     test_case_ids: [fpb-all-template-summary]
     status: DISCOVERED_CURRENT
     evidence: app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/save-bundle-form.server.ts
@@ -305,7 +305,7 @@ items:
     merchant_editable: true
     responsive_impact: low
     accessibility_impact: low
-    fixture_ids: []
+    fixture_ids: [fpb-all-templates]
     test_case_ids: [fpb-all-template-summary]
     status: DISCOVERED_CURRENT
     evidence: app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/save-bundle-form.server.ts
@@ -331,7 +331,7 @@ items:
     merchant_editable: true
     responsive_impact: medium
     accessibility_impact: medium
-    fixture_ids: []
+    fixture_ids: [fpb-all-templates]
     test_case_ids: [fpb-all-template-summary]
     status: DISCOVERED_CURRENT
     evidence: app/assets/widgets/full-page/methods/mobile-summary-methods.js
@@ -357,7 +357,7 @@ items:
     merchant_editable: true
     responsive_impact: low
     accessibility_impact: low
-    fixture_ids: []
+    fixture_ids: [fpb-all-templates]
     test_case_ids: [fpb-all-template-summary]
     status: DISCOVERED_CURRENT
     evidence: app/assets/widgets/shared/condition-validator.js
@@ -383,7 +383,7 @@ items:
     merchant_editable: true
     responsive_impact: low
     accessibility_impact: medium
-    fixture_ids: []
+    fixture_ids: [fpb-all-templates]
     test_case_ids: [fpb-all-template-summary]
     status: DISCOVERED_CURRENT
     evidence: app/assets/widgets/full-page/methods/mobile-summary-methods.js
@@ -409,7 +409,7 @@ items:
     merchant_editable: true
     responsive_impact: low
     accessibility_impact: low
-    fixture_ids: []
+    fixture_ids: [fpb-all-templates]
     test_case_ids: [fpb-all-template-summary]
     status: DISCOVERED_CURRENT
     evidence: app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/save-bundle-form.server.ts
@@ -435,7 +435,7 @@ items:
     merchant_editable: true
     responsive_impact: medium
     accessibility_impact: low
-    fixture_ids: []
+    fixture_ids: [fpb-all-templates]
     test_case_ids: [fpb-all-template-summary]
     status: DISCOVERED_CURRENT
     evidence: app/assets/widgets/full-page/methods/timeline-banner-methods.js
@@ -461,7 +461,7 @@ items:
     merchant_editable: true
     responsive_impact: medium
     accessibility_impact: low
-    fixture_ids: []
+    fixture_ids: [fpb-all-templates]
     test_case_ids: [fpb-all-template-summary]
     status: DISCOVERED_CURRENT
     evidence: app/assets/widgets/full-page/methods/timeline-banner-methods.js
@@ -487,7 +487,7 @@ items:
     merchant_editable: true
     responsive_impact: low
     accessibility_impact: low
-    fixture_ids: []
+    fixture_ids: [fpb-all-templates]
     test_case_ids: [fpb-all-template-summary]
     status: DISCOVERED_CURRENT
     evidence: app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/save-bundle-form.server.ts
@@ -513,7 +513,7 @@ items:
     merchant_editable: true
     responsive_impact: high
     accessibility_impact: medium
-    fixture_ids: []
+    fixture_ids: [fpb-all-templates]
     test_case_ids: [fpb-all-template-summary]
     status: DISCOVERED_CURRENT
     evidence: app/assets/widgets/product-page/methods/selection-data-methods.js
@@ -539,7 +539,7 @@ items:
     merchant_editable: true
     responsive_impact: low
     accessibility_impact: low
-    fixture_ids: []
+    fixture_ids: [fpb-all-templates]
     test_case_ids: [fpb-all-template-summary]
     status: DISCOVERED_CURRENT
     evidence: app/assets/widgets/full-page/methods/product-processing-methods.js
@@ -565,7 +565,7 @@ items:
     merchant_editable: true
     responsive_impact: low
     accessibility_impact: low
-    fixture_ids: []
+    fixture_ids: [fpb-all-templates]
     test_case_ids: [fpb-all-template-summary]
     status: DISCOVERED_CURRENT
     evidence: app/assets/widgets/shared/condition-validator.js
@@ -591,7 +591,7 @@ items:
     merchant_editable: true
     responsive_impact: low
     accessibility_impact: medium
-    fixture_ids: []
+    fixture_ids: [fpb-all-templates]
     test_case_ids: [fpb-all-template-summary]
     status: DISCOVERED_CURRENT
     evidence: app/assets/widgets/full-page/methods/product-processing-methods.js
@@ -617,7 +617,7 @@ items:
     merchant_editable: true
     responsive_impact: low
     accessibility_impact: medium
-    fixture_ids: []
+    fixture_ids: [fpb-all-templates]
     test_case_ids: [fpb-all-template-summary]
     status: DISCOVERED_CURRENT
     evidence: app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/save-bundle-form.server.ts
@@ -643,7 +643,7 @@ items:
     merchant_editable: true
     responsive_impact: medium
     accessibility_impact: medium
-    fixture_ids: []
+    fixture_ids: [fpb-all-templates]
     test_case_ids: [fpb-all-template-summary]
     status: DISCOVERED_CURRENT
     evidence: app/lib/bundle-formatter.server.ts
@@ -669,7 +669,7 @@ items:
     merchant_editable: true
     responsive_impact: medium
     accessibility_impact: low
-    fixture_ids: []
+    fixture_ids: [fpb-all-templates]
     test_case_ids: [fpb-all-template-summary]
     status: DISCOVERED_CURRENT
     evidence: app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/save-bundle-form.server.ts
@@ -695,7 +695,7 @@ items:
     merchant_editable: true
     responsive_impact: medium
     accessibility_impact: low
-    fixture_ids: []
+    fixture_ids: [fpb-all-templates]
     test_case_ids: [fpb-all-template-summary]
     status: DISCOVERED_CURRENT
     evidence: app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/save-bundle-form.server.ts
@@ -721,7 +721,7 @@ items:
     merchant_editable: true
     responsive_impact: medium
     accessibility_impact: low
-    fixture_ids: []
+    fixture_ids: [fpb-all-templates]
     test_case_ids: [fpb-all-template-summary]
     status: DISCOVERED_CURRENT
     evidence: app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/save-bundle-form.server.ts
@@ -747,7 +747,7 @@ items:
     merchant_editable: true
     responsive_impact: low
     accessibility_impact: medium
-    fixture_ids: []
+    fixture_ids: [fpb-all-templates]
     test_case_ids: [fpb-all-template-summary]
     status: DISCOVERED_CURRENT
     evidence: app/assets/widgets/full-page/methods/analytics-config-methods.js
@@ -773,7 +773,7 @@ items:
     merchant_editable: true
     responsive_impact: low
     accessibility_impact: medium
-    fixture_ids: []
+    fixture_ids: [fpb-all-templates]
     test_case_ids: [fpb-all-template-summary]
     status: DISCOVERED_CURRENT
     evidence: app/assets/widgets/full-page/methods/widget-misc-methods.js
@@ -799,7 +799,7 @@ items:
     merchant_editable: true
     responsive_impact: low
     accessibility_impact: low
-    fixture_ids: []
+    fixture_ids: [fpb-all-templates]
     test_case_ids: [fpb-all-template-summary]
     status: DISCOVERED_CURRENT
     evidence: app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/save-bundle-form.server.ts
@@ -825,7 +825,7 @@ items:
     merchant_editable: true
     responsive_impact: low
     accessibility_impact: low
-    fixture_ids: []
+    fixture_ids: [ppb-all-templates]
     test_case_ids: [product-page-bundle-template-design-verification]
     status: DISCOVERED_CURRENT
     evidence: app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/save-bundle.server.ts
@@ -851,7 +851,7 @@ items:
     merchant_editable: true
     responsive_impact: low
     accessibility_impact: low
-    fixture_ids: []
+    fixture_ids: [ppb-all-templates]
     test_case_ids: [product-page-bundle-template-design-verification]
     status: DISCOVERED_CURRENT
     evidence: app/lib/bundle-config/product-page-display.ts
@@ -877,7 +877,7 @@ items:
     merchant_editable: true
     responsive_impact: low
     accessibility_impact: medium
-    fixture_ids: []
+    fixture_ids: [ppb-all-templates]
     test_case_ids: [product-page-bundle-template-design-verification]
     status: DISCOVERED_CURRENT
     evidence: app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/save-bundle.server.ts
@@ -903,7 +903,7 @@ items:
     merchant_editable: true
     responsive_impact: medium
     accessibility_impact: medium
-    fixture_ids: []
+    fixture_ids: [ppb-all-templates]
     test_case_ids: [product-page-bundle-template-design-verification]
     status: DISCOVERED_CURRENT
     evidence: app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/save-bundle.server.ts
@@ -929,7 +929,7 @@ items:
     merchant_editable: true
     responsive_impact: low
     accessibility_impact: low
-    fixture_ids: []
+    fixture_ids: [ppb-all-templates]
     test_case_ids: [product-page-bundle-template-design-verification]
     status: DISCOVERED_CURRENT
     evidence: app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/parsers.ts
@@ -955,7 +955,7 @@ items:
     merchant_editable: true
     responsive_impact: medium
     accessibility_impact: low
-    fixture_ids: []
+    fixture_ids: [ppb-all-templates]
     test_case_ids: [product-page-bundle-template-design-verification]
     status: DISCOVERED_CURRENT
     evidence: app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/parsers.ts
@@ -981,7 +981,7 @@ items:
     merchant_editable: true
     responsive_impact: medium
     accessibility_impact: low
-    fixture_ids: []
+    fixture_ids: [ppb-all-templates]
     test_case_ids: [product-page-bundle-template-design-verification]
     status: DISCOVERED_CURRENT
     evidence: app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/parsers.ts
@@ -1007,7 +1007,7 @@ items:
     merchant_editable: true
     responsive_impact: high
     accessibility_impact: medium
-    fixture_ids: []
+    fixture_ids: [ppb-all-templates]
     test_case_ids: [product-page-bundle-template-design-verification]
     status: DISCOVERED_CURRENT
     evidence: app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/parsers.ts
@@ -1033,7 +1033,7 @@ items:
     merchant_editable: true
     responsive_impact: medium
     accessibility_impact: high
-    fixture_ids: []
+    fixture_ids: [ppb-all-templates]
     test_case_ids: [product-page-bundle-template-design-verification]
     status: DISCOVERED_CURRENT
     evidence: app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/usePpbModalAndTemplateController.ts
@@ -1059,7 +1059,7 @@ items:
     merchant_editable: true
     responsive_impact: low
     accessibility_impact: medium
-    fixture_ids: []
+    fixture_ids: [ppb-all-templates]
     test_case_ids: [product-page-bundle-template-design-verification]
     status: DISCOVERED_CURRENT
     evidence: app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/parsers.ts
@@ -1085,7 +1085,7 @@ items:
     merchant_editable: true
     responsive_impact: low
     accessibility_impact: low
-    fixture_ids: []
+    fixture_ids: [ppb-all-templates]
     test_case_ids: [product-page-bundle-template-design-verification]
     status: DISCOVERED_CURRENT
     evidence: app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/parsers.ts
@@ -1111,7 +1111,7 @@ items:
     merchant_editable: true
     responsive_impact: low
     accessibility_impact: low
-    fixture_ids: []
+    fixture_ids: [ppb-all-templates]
     test_case_ids: [product-page-bundle-template-design-verification]
     status: DISCOVERED_CURRENT
     evidence: app/assets/widgets/product-page/methods/default-product-methods.js
@@ -1137,7 +1137,7 @@ items:
     merchant_editable: true
     responsive_impact: medium
     accessibility_impact: medium
-    fixture_ids: []
+    fixture_ids: [ppb-all-templates]
     test_case_ids: [product-page-bundle-template-design-verification]
     status: DISCOVERED_CURRENT
     evidence: app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/parsers.ts
@@ -1163,7 +1163,7 @@ items:
     merchant_editable: true
     responsive_impact: low
     accessibility_impact: low
-    fixture_ids: []
+    fixture_ids: [ppb-all-templates]
     test_case_ids: [product-page-bundle-template-design-verification]
     status: DISCOVERED_CURRENT
     evidence: app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/parsers.ts
@@ -1189,7 +1189,7 @@ items:
     merchant_editable: true
     responsive_impact: low
     accessibility_impact: low
-    fixture_ids: []
+    fixture_ids: [ppb-all-templates]
     test_case_ids: [product-page-bundle-template-design-verification]
     status: DISCOVERED_CURRENT
     evidence: app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/parsers.ts
@@ -1215,7 +1215,7 @@ items:
     merchant_editable: true
     responsive_impact: low
     accessibility_impact: low
-    fixture_ids: []
+    fixture_ids: [ppb-all-templates]
     test_case_ids: [product-page-bundle-template-design-verification]
     status: DISCOVERED_CURRENT
     evidence: app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/parsers.ts
@@ -1241,7 +1241,7 @@ items:
     merchant_editable: true
     responsive_impact: low
     accessibility_impact: medium
-    fixture_ids: []
+    fixture_ids: [ppb-all-templates]
     test_case_ids: [product-page-bundle-template-design-verification]
     status: DISCOVERED_CURRENT
     evidence: app/assets/widgets/product-page/methods/selection-data-methods.js
@@ -1267,7 +1267,7 @@ items:
     merchant_editable: true
     responsive_impact: low
     accessibility_impact: low
-    fixture_ids: []
+    fixture_ids: [ppb-all-templates]
     test_case_ids: [product-page-bundle-template-design-verification]
     status: DISCOVERED_CURRENT
     evidence: app/assets/widgets/product-page/methods/selection-methods.js
@@ -1293,7 +1293,7 @@ items:
     merchant_editable: true
     responsive_impact: low
     accessibility_impact: medium
-    fixture_ids: []
+    fixture_ids: [ppb-all-templates]
     test_case_ids: [product-page-bundle-template-design-verification]
     status: DISCOVERED_CURRENT
     evidence: app/assets/widgets/product-page/single-step-categories.js
@@ -1319,7 +1319,7 @@ items:
     merchant_editable: false
     responsive_impact: low
     accessibility_impact: low
-    fixture_ids: []
+    fixture_ids: [ppb-all-templates]
     test_case_ids: [product-page-bundle-template-design-verification]
     status: DISCOVERED_CURRENT
     evidence: app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/parsers.ts
@@ -1345,7 +1345,7 @@ items:
     merchant_editable: true
     responsive_impact: medium
     accessibility_impact: low
-    fixture_ids: []
+    fixture_ids: [ppb-all-templates]
     test_case_ids: [product-page-bundle-template-design-verification]
     status: DISCOVERED_CURRENT
     evidence: app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/parsers.ts
@@ -1371,7 +1371,7 @@ items:
     merchant_editable: true
     responsive_impact: medium
     accessibility_impact: low
-    fixture_ids: []
+    fixture_ids: [ppb-all-templates]
     test_case_ids: [product-page-bundle-template-design-verification]
     status: DISCOVERED_CURRENT
     evidence: app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/parsers.ts
@@ -1397,7 +1397,7 @@ items:
     merchant_editable: true
     responsive_impact: medium
     accessibility_impact: low
-    fixture_ids: []
+    fixture_ids: [ppb-all-templates]
     test_case_ids: [product-page-bundle-template-design-verification]
     status: DISCOVERED_CURRENT
     evidence: app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/parsers.ts

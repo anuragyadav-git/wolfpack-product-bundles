@@ -1,3 +1,9 @@
+suites:
+  - id: fpb-all-template-summary
+    family: FPB
+  - id: product-page-bundle-template-design-verification
+    family: PPB
+
 tests:
   - template: STANDARD
     family: FPB

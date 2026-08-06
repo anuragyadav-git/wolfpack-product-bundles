@@ -15,7 +15,11 @@ items:
       - getSummaryPresentationMode returns null|tray|sidebar
       - data-fpb-summary-mode propagates to owners
     screenshot_requirement: required
-    approval_status: not_started
+    approval_status: NOT_STARTED
+    fixture_ids: [fpb-all-templates]
+    test_case_ids: [fpb-all-template-summary]
+    status: DISCOVERED_CURRENT
+    evidence: app/assets/widgets/full-page/methods/responsive-layout-methods.js
     runtime: app/assets/widgets/full-page/methods/responsive-layout-methods.js
 
   - id: fpb-selection-flow
@@ -34,7 +38,11 @@ items:
       - step progression increments only when required validation is met
       - selected products persist across step transitions
     screenshot_requirement: required
-    approval_status: not_started
+    approval_status: NOT_STARTED
+    fixture_ids: [fpb-all-templates]
+    test_case_ids: [fpb-all-template-summary]
+    status: DISCOVERED_CURRENT
+    evidence: app/assets/widgets/full-page/methods/selection-navigation-methods.js
     runtime: app/assets/widgets/full-page/methods/selection-navigation-methods.js
 
   - id: fpb-skeleton-loading
@@ -53,7 +61,11 @@ items:
       - product placeholders render while products are loading
       - placeholders disappear once product data is present
     screenshot_requirement: required
-    approval_status: not_started
+    approval_status: NOT_STARTED
+    fixture_ids: [fpb-all-templates]
+    test_case_ids: [fpb-all-template-summary]
+    status: DISCOVERED_CURRENT
+    evidence: app/assets/widgets/full-page/methods/product-grid-methods.js
     runtime: app/assets/widgets/full-page/methods/product-grid-methods.js
 
   - id: fpb-validation-messaging
@@ -72,7 +84,11 @@ items:
       - invalid constraints set selection blocked flag
       - fixing constraints clears validation message
     screenshot_requirement: required
-    approval_status: not_started
+    approval_status: NOT_STARTED
+    fixture_ids: [fpb-all-templates]
+    test_case_ids: [fpb-all-template-summary]
+    status: DISCOVERED_CURRENT
+    evidence: app/assets/widgets/full-page/methods/validation-addons-methods.js
     runtime: app/assets/widgets/full-page/methods/validation-addons-methods.js
 
   - id: fpb-discount-messaging
@@ -91,7 +107,11 @@ items:
       - discount summary updates as selections change
       - discount tier state maps to visible messaging
     screenshot_requirement: required
-    approval_status: not_started
+    approval_status: NOT_STARTED
+    fixture_ids: [fpb-all-templates]
+    test_case_ids: [fpb-all-template-summary]
+    status: DISCOVERED_CURRENT
+    evidence: app/assets/widgets/full-page/methods/discount-modal-methods.js
     runtime: app/assets/widgets/full-page/methods/discount-modal-methods.js
 
   - id: fpb-mobile-slot-rendering
@@ -110,7 +130,11 @@ items:
       - selected products render in slot list when mobile summary is active
       - edits in slot list propagate to main selection state
     screenshot_requirement: required
-    approval_status: not_started
+    approval_status: NOT_STARTED
+    fixture_ids: [fpb-all-templates]
+    test_case_ids: [fpb-all-template-summary]
+    status: DISCOVERED_CURRENT
+    evidence: app/assets/widgets/full-page/methods/mobile-summary-methods.js
     runtime: app/assets/widgets/full-page/methods/mobile-summary-methods.js
 
   - id: fpb-sidebar-progress
@@ -129,7 +153,11 @@ items:
       - computed completion ratio matches progress rendering
       - progress UI updates after selection changes
     screenshot_requirement: required
-    approval_status: not_started
+    approval_status: NOT_STARTED
+    fixture_ids: [fpb-all-templates]
+    test_case_ids: [fpb-all-template-summary]
+    status: DISCOVERED_CURRENT
+    evidence: app/assets/widgets/full-page/methods/side-panel-methods.js
     runtime: app/assets/widgets/full-page/methods/side-panel-methods.js
 
   - id: ppb-template-selection
@@ -147,7 +175,11 @@ items:
     automated_assertions:
       - TemplateDesignSystem.ppb.resolveByRuntimeContext returns contract for known type/preset combos
     screenshot_requirement: required
-    approval_status: not_started
+    approval_status: NOT_STARTED
+    fixture_ids: [ppb-all-templates]
+    test_case_ids: [product-page-bundle-template-design-verification]
+    status: DISCOVERED_CURRENT
+    evidence: app/assets/widgets/product-page/templates/registry.js
     runtime: app/assets/widgets/product-page/templates/registry.js
 
   - id: ppb-inpage-vs-modal-mode
@@ -166,7 +198,11 @@ items:
       - contract resolves to PDP_INPAGE when configured
       - contract resolves to PDP_MODAL when configured
     screenshot_requirement: required
-    approval_status: not_started
+    approval_status: NOT_STARTED
+    fixture_ids: [ppb-all-templates]
+    test_case_ids: [product-page-bundle-template-design-verification]
+    status: DISCOVERED_CURRENT
+    evidence: app/assets/widgets/product-page/methods/config-lifecycle-methods.js
     runtime: app/assets/widgets/product-page/methods/config-lifecycle-methods.js
 
   - id: ppb-slot-orientation
@@ -185,7 +221,11 @@ items:
       - selected template contract drives horizontal vs vertical slot layout
       - slot items remain reachable in configured orientation
     screenshot_requirement: required
-    approval_status: not_started
+    approval_status: NOT_STARTED
+    fixture_ids: [ppb-all-templates]
+    test_case_ids: [product-page-bundle-template-design-verification]
+    status: DISCOVERED_CURRENT
+    evidence: app/assets/widgets/product-page/templates/registry.js
     runtime: app/assets/widgets/product-page/templates/registry.js
 
   - id: ppb-selection-drawer-state
@@ -204,7 +244,11 @@ items:
       - drawer state flag toggles UI visibility
       - close action does not drop selected products
     screenshot_requirement: required
-    approval_status: not_started
+    approval_status: NOT_STARTED
+    fixture_ids: [ppb-all-templates]
+    test_case_ids: [product-page-bundle-template-design-verification]
+    status: DISCOVERED_CURRENT
+    evidence: app/assets/widgets/product-page/methods/footer-modal-state-methods.js
     runtime: app/assets/widgets/product-page/methods/footer-modal-state-methods.js
 
   - id: ppb-footer-messaging
@@ -223,7 +267,11 @@ items:
       - footer copy updates after selection and total changes
       - CTA state aligns with readiness requirements
     screenshot_requirement: required
-    approval_status: not_started
+    approval_status: NOT_STARTED
+    fixture_ids: [ppb-all-templates]
+    test_case_ids: [product-page-bundle-template-design-verification]
+    status: DISCOVERED_CURRENT
+    evidence: app/assets/widgets/product-page/methods/footer-modal-state-methods.js
     runtime: app/assets/widgets/product-page/methods/footer-modal-state-methods.js
 
   - id: ppb-error-feedback
@@ -242,5 +290,9 @@ items:
       - blocking errors inhibit add-to-bundle action
       - recoverable errors expose retry path
     screenshot_requirement: required
-    approval_status: not_started
+    approval_status: NOT_STARTED
+    fixture_ids: [ppb-all-templates]
+    test_case_ids: [product-page-bundle-template-design-verification]
+    status: DISCOVERED_CURRENT
+    evidence: app/assets/widgets/product-page/methods/modal-state-methods.js
     runtime: app/assets/widgets/product-page/methods/modal-state-methods.js
