@@ -115,8 +115,14 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   }
 
   const formattedBundle = formatBundleForWidget(bundle);
+  const templateTypeAttr = formattedBundle.bundleDesignTemplate
+    ? ` data-fpb-template-type="${escapeHtmlAttribute(formattedBundle.bundleDesignTemplate)}"`
+    : "";
+  const designPresetAttr = formattedBundle.bundleDesignPresetId
+    ? ` data-fpb-design-preset="${escapeHtmlAttribute(formattedBundle.bundleDesignPresetId)}"`
+    : "";
   const config = escapeHtmlAttribute(JSON.stringify(formattedBundle));
-  const liquid = `<div data-wpb-full-page-bundle data-bundle-id="${escapeHtmlAttribute(bundle.id)}" data-bundle-type="full_page" data-bundle-config-source="app_proxy" data-shop="${escapeHtmlAttribute(shopDomain)}" data-fpb-template-type="${escapeHtmlAttribute(formattedBundle.bundleDesignTemplate ?? "FBP_SIDE_FOOTER")}" data-fpb-design-preset="${escapeHtmlAttribute(formattedBundle.bundleDesignPresetId ?? "STANDARD")}" data-bundle-config='${config}' hidden></div>`;
+  const liquid = `<div data-wpb-full-page-bundle data-bundle-id="${escapeHtmlAttribute(bundle.id)}" data-bundle-type="full_page" data-bundle-config-source="app_proxy" data-shop="${escapeHtmlAttribute(shopDomain)}"${templateTypeAttr}${designPresetAttr} data-bundle-config='${config}' hidden></div>`;
 
   AppLogger.info("FPB proxy page rendered", {
     component: "wpb.proxy",

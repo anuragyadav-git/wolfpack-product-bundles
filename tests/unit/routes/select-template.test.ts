@@ -73,47 +73,47 @@ describe("parseBundleDesignTemplate", () => {
 
   // --- valid PPB templates ---
 
-  it("parses PPB Product List (PDP_INPAGE + CASCADE)", () => {
+  it("parses PPB Product List (PDP_INPAGE + LIST)", () => {
     const result = parseBundleDesignTemplate(makeForm({
       bundleDesignTemplate: "PDP_INPAGE",
-      bundleDesignPresetId: "CASCADE",
+      bundleDesignPresetId: "LIST",
     }));
     expect(result.bundleDesignTemplate).toBe("PDP_INPAGE");
-    expect(result.bundleDesignPresetId).toBe("CASCADE");
+    expect(result.bundleDesignPresetId).toBe("LIST");
   });
 
-  it("parses PPB Product Grid (PDP_INPAGE + COGNIVE)", () => {
+  it("parses PPB Product Grid (PDP_INPAGE + GRID)", () => {
     const result = parseBundleDesignTemplate(makeForm({
       bundleDesignTemplate: "PDP_INPAGE",
-      bundleDesignPresetId: "COGNIVE",
+      bundleDesignPresetId: "GRID",
     }));
     expect(result.bundleDesignTemplate).toBe("PDP_INPAGE");
-    expect(result.bundleDesignPresetId).toBe("COGNIVE");
+    expect(result.bundleDesignPresetId).toBe("GRID");
   });
 
-  it("parses PPB Horizontal Slots (PDP_MODAL + MODAL)", () => {
+  it("parses PPB Horizontal Slots (PDP_MODAL + HORIZONTAL_SLOTS)", () => {
     const result = parseBundleDesignTemplate(makeForm({
       bundleDesignTemplate: "PDP_MODAL",
-      bundleDesignPresetId: "MODAL",
+      bundleDesignPresetId: "HORIZONTAL_SLOTS",
     }));
     expect(result.bundleDesignTemplate).toBe("PDP_MODAL");
-    expect(result.bundleDesignPresetId).toBe("MODAL");
+    expect(result.bundleDesignPresetId).toBe("HORIZONTAL_SLOTS");
   });
 
-  it("parses PPB Vertical Slots (PDP_MODAL + SIMPLIFIED)", () => {
+  it("parses PPB Vertical Slots (PDP_MODAL + VERTICAL_SLOTS)", () => {
     const result = parseBundleDesignTemplate(makeForm({
       bundleDesignTemplate: "PDP_MODAL",
-      bundleDesignPresetId: "SIMPLIFIED",
+      bundleDesignPresetId: "VERTICAL_SLOTS",
     }));
     expect(result.bundleDesignTemplate).toBe("PDP_MODAL");
-    expect(result.bundleDesignPresetId).toBe("SIMPLIFIED");
+    expect(result.bundleDesignPresetId).toBe("VERTICAL_SLOTS");
   });
 
   // --- presetId present, template absent ---
 
   it("parses bundleDesignPresetId independently when bundleDesignTemplate is absent", () => {
-    const result = parseBundleDesignTemplate(makeForm({ bundleDesignPresetId: "CASCADE" }));
+    const result = parseBundleDesignTemplate(makeForm({ bundleDesignPresetId: "LIST" }));
     expect(result.bundleDesignTemplate).toBeNull();
-    expect(result.bundleDesignPresetId).toBe("CASCADE");
+    expect(result.bundleDesignPresetId).toBe("LIST");
   });
 });

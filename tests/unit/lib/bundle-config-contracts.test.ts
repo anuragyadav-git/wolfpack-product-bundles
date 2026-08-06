@@ -1,7 +1,6 @@
 import {
   getStorefrontConfigLoadPlan,
   mapTemplateSelection,
-  resolveProductPageRenderFilledSlotsAsHorizontalStacked,
 } from "../../../app/lib/bundle-config/template-selection";
 import { deriveControlDependencies } from "../../../app/lib/bundle-config/control-dependencies";
 import { buildCategoryContract } from "../../../app/lib/bundle-config/category-contracts";
@@ -13,47 +12,31 @@ import { serializeCartLineDisplayProperties } from "../../../app/lib/bundle-conf
 
 describe("mapTemplateSelection", () => {
   it.each([
-    ["standard", "FBP_SIDE_FOOTER", "STANDARD", null],
-    ["classic", "FBP_SIDE_FOOTER", "CLASSIC", null],
-    ["compact", "FBP_SIDE_FOOTER", "COMPACT", null],
-    ["horizontal", "FBP_SIDE_FOOTER", "HORIZONTAL", null],
-  ])("maps full-page %s", (templateKey, bundleDesignTemplate, bundleDesignPresetId, templateId) => {
+    ["standard", "FBP_SIDE_FOOTER", "STANDARD"],
+    ["classic", "FBP_SIDE_FOOTER", "CLASSIC"],
+    ["compact", "FBP_SIDE_FOOTER", "COMPACT"],
+    ["horizontal", "FBP_SIDE_FOOTER", "HORIZONTAL"],
+  ])("maps full-page %s", (templateKey, bundleDesignTemplate, bundleDesignPresetId) => {
     expect(mapTemplateSelection("full_page", templateKey as any)).toEqual({
       bundleDesignTemplate,
       bundleDesignPresetId,
-      templateId,
     });
   });
 
   it.each([
-    ["product-list", "PDP_INPAGE", "CASCADE", "CASCADE"],
-    ["product-grid", "PDP_INPAGE", "COGNIVE", "COGNIVE"],
-    ["horizontal-slots", "PDP_MODAL", "MODAL", "MODAL"],
-    ["vertical-slots", "PDP_MODAL", "SIMPLIFIED", "SIMPLIFIED"],
-  ])("maps product-page %s", (templateKey, bundleDesignTemplate, bundleDesignPresetId, templateId) => {
+    ["product-list", "PDP_INPAGE", "LIST"],
+    ["product-grid", "PDP_INPAGE", "GRID"],
+    ["horizontal-slots", "PDP_MODAL", "HORIZONTAL_SLOTS"],
+    ["vertical-slots", "PDP_MODAL", "VERTICAL_SLOTS"],
+  ])("maps product-page %s", (templateKey, bundleDesignTemplate, bundleDesignPresetId) => {
     expect(mapTemplateSelection("product_page", templateKey as any)).toEqual({
       bundleDesignTemplate,
       bundleDesignPresetId,
-      templateId,
     });
   });
 
   it("rejects a template key that is not valid for the bundle type", () => {
     expect(() => mapTemplateSelection("full_page", "product-grid")).toThrow(/template/i);
-  });
-});
-
-describe("resolveProductPageRenderFilledSlotsAsHorizontalStacked", () => {
-  it("maps EB horizontal modal slots to horizontally stacked selected slots", () => {
-    expect(resolveProductPageRenderFilledSlotsAsHorizontalStacked("PDP_MODAL", "MODAL")).toBe(true);
-  });
-
-  it("maps EB vertical modal slots to vertically stacked selected slots", () => {
-    expect(resolveProductPageRenderFilledSlotsAsHorizontalStacked("PDP_MODAL", "SIMPLIFIED")).toBe(false);
-  });
-
-  it("does not emit a modal slot orientation for in-page templates", () => {
-    expect(resolveProductPageRenderFilledSlotsAsHorizontalStacked("PDP_INPAGE", "CASCADE")).toBeNull();
   });
 });
 

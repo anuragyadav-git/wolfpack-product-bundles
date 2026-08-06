@@ -603,7 +603,7 @@
 #bundle-builder-app[data-ppb-template-type="PDP_INPAGE"]:not([data-ppb-design-preset="PDP_MODAL"])
   .bw-ppb-cascade-product-row--has-variant-selector
   .variant-selector-wrapper,
-.bundle-steps[data-ppb-template-type="PDP_INPAGE"][data-ppb-design-preset="CASCADE"]
+.bundle-steps[data-ppb-template-type="PDP_INPAGE"][data-ppb-design-preset="LIST"]
   .bw-ppb-cascade-product-row--has-variant-selector
   .variant-selector-wrapper {
   text-align: left;
@@ -613,7 +613,7 @@
 #bundle-builder-app[data-ppb-template-type="PDP_INPAGE"]:not([data-ppb-design-preset="PDP_MODAL"])
   .bw-ppb-cascade-product-row--has-variant-selector
   .variant-selector,
-.bundle-steps[data-ppb-template-type="PDP_INPAGE"][data-ppb-design-preset="CASCADE"]
+.bundle-steps[data-ppb-template-type="PDP_INPAGE"][data-ppb-design-preset="LIST"]
   .bw-ppb-cascade-product-row--has-variant-selector
   .variant-selector {
   grid-column: 1;

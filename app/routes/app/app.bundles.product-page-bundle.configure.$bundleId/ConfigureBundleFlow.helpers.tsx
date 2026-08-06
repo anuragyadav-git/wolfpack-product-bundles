@@ -52,7 +52,7 @@ export const bundleVisibilityChildItems =
   buildBundleVisibilityChildItems("product_page");
 
 export const PRODUCT_PAGE_DEFAULT_TEMPLATE_SELECTION = {
-  presetId: "CASCADE",
+  presetId: "LIST",
   layoutTemplate: "PDP_INPAGE",
 } as const;
 
@@ -63,19 +63,19 @@ export const productPageTemplateOptions = [
     image: "/PPB-List.avif",
   },
   {
-    presetId: "MODAL",
+    presetId: "HORIZONTAL_SLOTS",
     layoutTemplate: "PDP_MODAL",
     label: "Horizontal Slots",
     image: "/PPB-HorizontalSlots.avif",
   },
   {
-    presetId: "COGNIVE",
+    presetId: "GRID",
     layoutTemplate: "PDP_INPAGE",
     label: "Product Grid",
     image: "/PPB-Grid.avif",
   },
   {
-    presetId: "SIMPLIFIED",
+    presetId: "VERTICAL_SLOTS",
     layoutTemplate: "PDP_MODAL",
     label: "Vertical Slots",
     image: "/PPB-VerticalSlots.avif",

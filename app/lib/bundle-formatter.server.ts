@@ -11,7 +11,6 @@
 
 import { formatStepCategoriesForRuntime } from "./bundle-config/category-runtime";
 import { resolveShowProductComparedAtPrice } from "./bundle-config/product-page-display";
-import { resolveProductPageRenderFilledSlotsAsHorizontalStacked } from "./bundle-config/template-selection";
 
 /** Convert a Shopify GID to its numeric ID for storefront cart operations. */
 function extractNumericId(gid: string): string {
@@ -27,7 +26,6 @@ export interface FormattedBundle {
   bundleType: string;
   bundleDesignTemplate: string | null;
   bundleDesignPresetId: string | null;
-  bundleDesignTemplateData: { templateId: string } | null;
   loadingGif: string | null;
   defaultProductsData: Record<string, unknown>;
   boxSelection: Record<string, unknown> | null;
@@ -44,7 +42,6 @@ export interface FormattedBundle {
   productSlotIconUrl: string | null;
   variantSelectorEnabled: boolean;
   useSingleStepCategoriesAsBundleSteps: boolean;
-  renderFilledSlotsAsHorizontalStacked: boolean | null;
   shopifyProductId: string | null;
   steps: FormattedStep[];
   pricing: FormattedPricing | null;
@@ -167,13 +164,13 @@ function getProductId(product: any): string {
 }
 
 function resolveBundleDesignTemplate(bundle: any): string | null {
-  if (bundle.bundleDesignTemplate) return bundle.bundleDesignTemplate;
-  return bundle.bundleType === "full_page" ? "FBP_SIDE_FOOTER" : null;
+  if (bundle?.bundleDesignTemplate) return bundle.bundleDesignTemplate;
+  return null;
 }
 
 function resolveBundleDesignPresetId(bundle: any): string | null {
-  if (bundle.bundleDesignPresetId) return bundle.bundleDesignPresetId;
-  return bundle.bundleType === "full_page" ? "STANDARD" : null;
+  if (bundle?.bundleDesignPresetId) return bundle.bundleDesignPresetId;
+  return null;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -255,9 +252,6 @@ export function formatBundleForWidget(bundle: any): FormattedBundle {
 
   const bundleDesignTemplate = resolveBundleDesignTemplate(bundle);
   const bundleDesignPresetId = resolveBundleDesignPresetId(bundle);
-  const bundleDesignTemplateData = bundle.bundleType === "product_page" && bundleDesignPresetId
-    ? { templateId: bundleDesignPresetId }
-    : null;
 
   return {
     id: bundle.id,
@@ -267,7 +261,6 @@ export function formatBundleForWidget(bundle: any): FormattedBundle {
     bundleType: bundle.bundleType,
     bundleDesignTemplate,
     bundleDesignPresetId,
-    bundleDesignTemplateData,
     loadingGif: bundle.loadingGif ?? null,
     defaultProductsData: (bundle.defaultProductsData as Record<string, unknown> | null) ?? {},
     boxSelection: (bundle.boxSelection as Record<string, unknown> | null) ?? null,
@@ -290,13 +283,9 @@ export function formatBundleForWidget(bundle: any): FormattedBundle {
     },
     productSlotsEnabled: bundle.bundleType === "full_page" ? bundle.productSlotsEnabled ?? false : false,
     productSlotIconUrl: bundle.bundleType === "full_page" ? bundle.productSlotIconUrl ?? null : null,
-    variantSelectorEnabled: bundle.variantSelectorEnabled ?? true,
-    useSingleStepCategoriesAsBundleSteps: bundle.useSingleStepCategoriesAsBundleSteps ?? false,
-    renderFilledSlotsAsHorizontalStacked: resolveProductPageRenderFilledSlotsAsHorizontalStacked(
-      bundle.bundleDesignTemplate,
-      bundleDesignTemplateData?.templateId,
-    ),
-    shopifyProductId: bundle.shopifyProductId,
+  variantSelectorEnabled: bundle.variantSelectorEnabled ?? true,
+  useSingleStepCategoriesAsBundleSteps: bundle.useSingleStepCategoriesAsBundleSteps ?? false,
+  shopifyProductId: bundle.shopifyProductId,
     steps,
     pricing: bundle.pricing
       ? {

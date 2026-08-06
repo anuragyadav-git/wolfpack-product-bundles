@@ -19,12 +19,12 @@ export function FpbSummaryTextSettings({
     setIndividualSellingPlanEnabled,
     setIndividualSellingPlanShowFor,
     setShowCompareAtPrices,
-    setShowTextOnPlusEnabled,
+    setShowTextOnAddButton,
     setTextOverrides,
     SettingsRow,
     setVariantSelectorEnabled,
     showCompareAtPrices,
-    showTextOnPlusEnabled,
+    showTextOnAddButton,
     stepsState,
     textOverrides,
     variantSelectorEnabled,
@@ -74,10 +74,10 @@ export function FpbSummaryTextSettings({
           >
             <s-switch
               accessibilityLabel="Show text on plus button"
-              checked={showTextOnPlusEnabled || undefined}
+              checked={showTextOnAddButton || undefined}
               onChange={(e) => {
                 const enabled = (e.target as HTMLInputElement).checked;
-                setShowTextOnPlusEnabled(enabled);
+                setShowTextOnAddButton(enabled);
                 if (!enabled) {
                   setTextOverrides((prev) => ({
                     ...prev,
@@ -88,7 +88,7 @@ export function FpbSummaryTextSettings({
               }}
             />
           </SettingsRow>
-          {showTextOnPlusEnabled && (
+          {showTextOnAddButton && (
             <s-stack direction="inline" gap="small" alignItems="end">
               <s-text-field
                 label="Button text"

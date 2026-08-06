@@ -14,7 +14,6 @@ import { buildPriceAdjustmentConfig } from "../utils/price-adjustment";
 import { collectAddonComponentVariants } from "../utils/addon-components";
 import type { BundleUiConfig, ComponentPricing } from "../types";
 import { BundleStatus, BundleType } from "../../../../constants/bundle";
-import { resolveProductPageRenderFilledSlotsAsHorizontalStacked } from "../../../../lib/bundle-config/template-selection";
 import { formatStepCategoriesForRuntime } from "../../../../lib/bundle-config/category-runtime";
 import { resolveShowProductComparedAtPrice } from "../../../../lib/bundle-config/product-page-display";
 
@@ -432,11 +431,6 @@ export async function updateBundleProductMetafields(
   );
 
   // Build bundle_ui_config for widget
-  const bundleDesignTemplateData = bundleConfiguration.bundleDesignTemplateData
-    ?? (bundleConfiguration.bundleType === BundleType.PRODUCT_PAGE && bundleConfiguration.bundleDesignPresetId
-      ? { templateId: bundleConfiguration.bundleDesignPresetId }
-      : null);
-
   const bundleUiConfig: BundleUiConfig = {
     id: bundleConfiguration.id || bundleConfiguration.bundleId, // Widget expects 'id' field
     bundleId: bundleConfiguration.id || bundleConfiguration.bundleId, // Keep for backwards compatibility
@@ -447,7 +441,6 @@ export async function updateBundleProductMetafields(
     shopifyProductId: bundleConfiguration.shopifyProductId || null, // Product ID for matching
     bundleDesignTemplate: bundleConfiguration.bundleDesignTemplate ?? null,
     bundleDesignPresetId: bundleConfiguration.bundleDesignPresetId ?? null,
-    bundleDesignTemplateData,
     defaultProductsData: bundleConfiguration.defaultProductsData ?? {},
     boxSelection: bundleConfiguration.boxSelection ?? null,
     bundleUpsellConfig: bundleConfiguration.bundleUpsellConfig ?? null,
@@ -466,14 +459,9 @@ export async function updateBundleProductMetafields(
       allowedQuantity: 0,
     },
     productSlotsEnabled: bundleConfiguration.bundleType === "full_page" ? bundleConfiguration.productSlotsEnabled ?? false : false,
-    productSlotIconUrl: bundleConfiguration.bundleType === "full_page" ? bundleConfiguration.productSlotIconUrl ?? null : null,
-    useSingleStepCategoriesAsBundleSteps: bundleConfiguration.useSingleStepCategoriesAsBundleSteps ?? false,
-    renderFilledSlotsAsHorizontalStacked: bundleConfiguration.renderFilledSlotsAsHorizontalStacked
-      ?? resolveProductPageRenderFilledSlotsAsHorizontalStacked(
-        bundleConfiguration.bundleDesignTemplate,
-        bundleDesignTemplateData?.templateId,
-      ),
-    showProductComparedAtPrice: resolveShowProductComparedAtPrice(bundleConfiguration),
+  productSlotIconUrl: bundleConfiguration.bundleType === "full_page" ? bundleConfiguration.productSlotIconUrl ?? null : null,
+  useSingleStepCategoriesAsBundleSteps: bundleConfiguration.useSingleStepCategoriesAsBundleSteps ?? false,
+  showProductComparedAtPrice: resolveShowProductComparedAtPrice(bundleConfiguration),
     bundleVariantId: bundleVariantId, // Bundle parent variant ID for cart transform EXPAND operation
     steps: (bundleConfiguration.steps || []).map((step: any) => ({
       id: step.id,

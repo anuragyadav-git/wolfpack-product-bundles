@@ -1,0 +1,33 @@
+tests:
+  - template: STANDARD
+    family: FPB
+    aliases: [STANDARD]
+    viewports: ["desktop", "mobile"]
+  - template: CLASSIC
+    family: FPB
+    aliases: [CLASSIC]
+    viewports: ["desktop", "mobile"]
+  - template: COMPACT
+    family: FPB
+    aliases: [COMPACT]
+    viewports: ["desktop", "mobile"]
+  - template: HORIZONTAL
+    family: FPB
+    aliases: [HORIZONTAL]
+    viewports: ["desktop", "mobile"]
+  - template: GRID
+    family: PPB
+    aliases: [GRID]
+    viewports: ["desktop", "mobile"]
+  - template: LIST
+    family: PPB
+    aliases: [LIST]
+    viewports: ["desktop", "mobile"]
+  - template: HORIZONTAL_SLOTS
+    family: PPB
+    aliases: [HORIZONTAL_SLOTS]
+    viewports: ["desktop", "mobile"]
+  - template: VERTICAL_SLOTS
+    family: PPB
+    aliases: [VERTICAL_SLOTS]
+    viewports: ["desktop", "mobile"]

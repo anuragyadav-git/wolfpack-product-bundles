@@ -1,6 +1,6 @@
 /*
  * FPB Classic Design - scoped static CSS for the CLASSIC preset.
- * Runtime geometry previously lived in classic-template.js; keep rules scoped to
+ * Runtime geometry migrated from legacy runtime adapter files; keep rules scoped to
  * .fpb-preset-classic or CLASSIC root attributes.
  */
 

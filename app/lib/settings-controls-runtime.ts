@@ -26,16 +26,6 @@ function asBoolean(payload: ControlsPayload, label: string, fallback = false) {
   return fallback;
 }
 
-function asBooleanFromAlternates(payload: ControlsPayload, labels: string[], fallback: boolean) {
-  for (const label of labels) {
-    const directValue = payload[label];
-    if (directValue !== undefined) {
-      return asBoolean(payload, label, fallback);
-    }
-  }
-  return fallback;
-}
-
 export type SettingsControlsRuntime = {
   landingPage: {
     showCompareAtPrice: boolean;
@@ -198,40 +188,16 @@ export function buildSettingsControlsRuntime(payload: ControlsPayload): Settings
     productPage: {
       hideOutOfStockProducts: checked(payload, "Hide Out Of Stock Products"),
       trackInventoryOnAddToCart: checked(payload, "Track inventory on Add To Cart (in beta)"),
-      showCompareAtPrices: asBooleanFromAlternates(
+      showCompareAtPrices: asBoolean(payload, "showCompareAtPrices", false),
+      addBundleToCartAfterLastStepCompleted: asBoolean(
         payload,
-        [
-          "showCompareAtPrices",
-          "Show Compare At Price",
-          "Display Compare At Price",
-        ],
-        false,
-      ),
-      addBundleToCartAfterLastStepCompleted: asBooleanFromAlternates(
-        payload,
-        [
-          "Add bundle to cart after the last step is completed",
-          "addBundleToCartAfterLastStepCompleted",
-          "addBundleToCartOnDone",
-        ],
+        "addBundleToCartAfterLastStepCompleted",
         false,
       ),
       displayEmptyStateBoxesBasedOnBundleCondition: checked(payload, "Display empty state boxes based on bundle condition"),
       hideStepTitlesInCompletedState: checked(payload, "Hide Step Titles in completed state"),
-      validateConditionsBeforeAddToCart: asBooleanFromAlternates(
-        payload,
-        ["Validate conditions before add to cart", "validateConditionsBeforeAddToCart"],
-        true,
-      ),
-      addToCartWhenProductCardClicked: asBooleanFromAlternates(
-        payload,
-        [
-          "Add to cart when product card is clicked",
-          "addToBundleOnProductCardClick",
-          "addToBundleOnProductCardClicked",
-        ],
-        false,
-      ),
+      validateConditionsBeforeAddToCart: asBoolean(payload, "validateConditionsBeforeAddToCart", true),
+      addToCartWhenProductCardClicked: asBoolean(payload, "addToCartWhenProductCardClicked", false),
       redirectCollectionQuickAddToBundle: checked(payload, "Redirect Collection Page 'Quick Add' to Bundle"),
       redirect: {
         action: getProductPageRedirectAction(payload),

@@ -1,0 +1,440 @@
+items:
+  - id: addToCartButton
+    family: FPB
+    templates: [STANDARD, CLASSIC, COMPACT, HORIZONTAL]
+    surface: product card and side sheet CTA
+    admin_label: Add to Cart Button
+    field_name: addToCartButton
+    fallback: Add +
+    required: false
+    merchant_editable: true
+    localizable: true
+    allowed_placeholders: []
+    character_guidance: Keep short for narrow cards
+    supports_pluralization: false
+    supports_rich_text: false
+    sanitization: text
+    affected_states: [product card button]
+    fixture_ids: []
+    test_case_ids: [fpb-all-template-summary]
+    status: confirmed_current
+    evidence: app/assets/widgets/full-page/methods/runtime-cart-settings-methods.js
+    notes: Shared across FPB presets.
+
+  - id: summaryTitle
+    family: PPB
+    templates: [GRID, LIST, HORIZONTAL_SLOTS, VERTICAL_SLOTS]
+    surface: bundle summary drawer
+    admin_label: Summary title
+    field_name: summaryTitle
+    fallback: Review your bundle
+    required: false
+    merchant_editable: true
+    localizable: true
+    allowed_placeholders: []
+    character_guidance: Plain text, concise
+    supports_pluralization: false
+    supports_rich_text: false
+    sanitization: text
+    affected_states: [summary drawer title]
+    fixture_ids: []
+    test_case_ids: [product-page-bundle-template-design-verification]
+    status: confirmed_current
+    evidence: app/assets/widgets/full-page/methods/mobile-summary-methods.js
+    notes: Shared locale-aware text in runtime helper.
+
+  - id: fpb-nextButton
+    family: FPB
+    templates: [STANDARD, CLASSIC, COMPACT, HORIZONTAL]
+    surface: step control
+    admin_label: Next Button
+    field_name: nextButton
+    fallback: Next
+    required: false
+    merchant_editable: true
+    localizable: true
+    allowed_placeholders: []
+    character_guidance: Keep short and imperative
+    supports_pluralization: false
+    supports_rich_text: false
+    sanitization: text
+    affected_states: [selection flow, CTA label]
+    fixture_ids: []
+    test_case_ids: [fpb-all-template-summary]
+    status: DISCOVERED_CURRENT
+    evidence: app/assets/widgets/full-page/methods/responsive-layout-methods.js
+    notes: FPB flow label for multi-step progression.
+
+  - id: fpb-noProductsAvailable
+    family: FPB
+    templates: [STANDARD, CLASSIC, COMPACT, HORIZONTAL]
+    surface: product search/picker
+    admin_label: No Products Available Label
+    field_name: noProductsAvailable
+    fallback: No products available
+    required: false
+    merchant_editable: true
+    localizable: true
+    allowed_placeholders: []
+    character_guidance: Empty state copy should remain short
+    supports_pluralization: false
+    supports_rich_text: false
+    sanitization: text
+    affected_states: [empty catalog state]
+    fixture_ids: []
+    test_case_ids: [fpb-all-template-summary]
+    status: DISCOVERED_CURRENT
+    evidence: app/assets/widgets/full-page/methods/product-grid-methods.js
+    notes: Presented when a step has no products matching filters.
+
+  - id: fpb-chooseOptionsButton
+    family: FPB
+    templates: [STANDARD, CLASSIC, COMPACT, HORIZONTAL]
+    surface: variant picker action
+    admin_label: Choose Options Button Text
+    field_name: chooseOptionsButton
+    fallback: Choose Options
+    required: false
+    merchant_editable: true
+    localizable: true
+    allowed_placeholders: []
+    character_guidance: Keep short for button labels
+    supports_pluralization: false
+    supports_rich_text: false
+    sanitization: text
+    affected_states: [variant selection]
+    fixture_ids: []
+    test_case_ids: [fpb-all-template-summary]
+    status: DISCOVERED_CURRENT
+    evidence: app/lib/settings-language-runtime.ts
+    notes: FPB option-trigger text used in full-page storefront copy overrides.
+
+  - id: fpb-addingToCart
+    family: FPB
+    templates: [STANDARD, CLASSIC, COMPACT, HORIZONTAL]
+    surface: product card CTA
+    admin_label: Adding To Cart Label
+    field_name: addingToCart
+    fallback: Adding to Cart...
+    required: false
+    merchant_editable: true
+    localizable: true
+    allowed_placeholders: []
+    character_guidance: Imperative state text
+    supports_pluralization: false
+    supports_rich_text: false
+    sanitization: text
+    affected_states: [add-to-cart state]
+    fixture_ids: []
+    test_case_ids: [fpb-all-template-summary]
+    status: DISCOVERED_CURRENT
+    evidence: app/assets/widgets/product-page/methods/cart-methods.js
+    notes: Temporary loading label while bundle add flow executes.
+
+  - id: fpb-includedBadge
+    family: FPB
+    templates: [STANDARD, CLASSIC, COMPACT, HORIZONTAL]
+    surface: card badge
+    admin_label: Included Badge
+    field_name: includedBadge
+    fallback: Included
+    required: false
+    merchant_editable: true
+    localizable: true
+    allowed_placeholders: []
+    character_guidance: Preserve short all-caps intent
+    supports_pluralization: false
+    supports_rich_text: false
+    sanitization: text
+    affected_states: [card status badge]
+    fixture_ids: []
+    test_case_ids: [fpb-all-template-summary]
+    status: DISCOVERED_CURRENT
+    evidence: app/lib/bundle-formatter.server.ts
+    notes: FPB preselected badge text.
+
+  - id: fpb-reviewButton
+    family: FPB
+    templates: [STANDARD, CLASSIC, COMPACT, HORIZONTAL]
+    surface: footer / summary action
+    admin_label: Review Button
+    field_name: reviewButton
+    fallback: Review
+    required: false
+    merchant_editable: true
+    localizable: true
+    allowed_placeholders: []
+    character_guidance: Keep concise
+    supports_pluralization: false
+    supports_rich_text: false
+    sanitization: text
+    affected_states: [summary actions]
+    fixture_ids: []
+    test_case_ids: [fpb-all-template-summary]
+    status: DISCOVERED_CURRENT
+    evidence: app/lib/settings-language-runtime.ts
+    notes: Final review-step CTA copy.
+
+  - id: fpb-productAddButton
+    family: FPB
+    templates: [STANDARD, CLASSIC, COMPACT, HORIZONTAL]
+    surface: product card add control
+    admin_label: Product Add Button Text
+    field_name: productAddButton
+    fallback: Add
+    required: false
+    merchant_editable: true
+    localizable: true
+    allowed_placeholders: []
+    character_guidance: Keep concise for inline add controls
+    supports_pluralization: false
+    supports_rich_text: false
+    sanitization: text
+    affected_states: [product card controls]
+    fixture_ids: []
+    test_case_ids: [fpb-all-template-summary]
+    status: DISCOVERED_CURRENT
+    evidence: app/lib/settings-language-runtime.ts
+    notes: FPB add action copy for product card context.
+
+  - id: fpb-loadMoreProductsButton
+    family: FPB
+    templates: [STANDARD, CLASSIC, COMPACT, HORIZONTAL]
+    surface: product picker footer
+    admin_label: Load More Products Button
+    field_name: loadMoreProductsButton
+    fallback: Load More
+    required: false
+    merchant_editable: true
+    localizable: true
+    allowed_placeholders: []
+    character_guidance: Keep short
+    supports_pluralization: false
+    supports_rich_text: false
+    sanitization: text
+    affected_states: [pagination state]
+    fixture_ids: []
+    test_case_ids: [fpb-all-template-summary]
+    status: DISCOVERED_CURRENT
+    evidence: app/lib/settings-language-runtime.ts
+    notes: FPB load-more control label.
+
+  - id: fpb-productVariantLabel
+    family: FPB
+    templates: [STANDARD, CLASSIC, COMPACT, HORIZONTAL]
+    surface: variant selector
+    admin_label: Product Variant Label
+    field_name: productVariantLabel
+    fallback: Variant
+    required: false
+    merchant_editable: true
+    localizable: true
+    allowed_placeholders: []
+    character_guidance: Keep terse
+    supports_pluralization: false
+    supports_rich_text: false
+    sanitization: text
+    affected_states: [variant control]
+    fixture_ids: []
+    test_case_ids: [fpb-all-template-summary]
+    status: DISCOVERED_CURRENT
+    evidence: app/assets/widgets/full-page/methods/product-card-footer-methods.js
+    notes: Used as fallback product variant heading label.
+
+  - id: ppb-nextButton
+    family: PPB
+    templates: [GRID, LIST, VERTICAL_SLOTS, HORIZONTAL_SLOTS]
+    surface: footer action
+    admin_label: Next Button Text
+    field_name: nextButton
+    fallback: Next
+    required: false
+    merchant_editable: true
+    localizable: true
+    allowed_placeholders: []
+    character_guidance: Keep short and imperative
+    supports_pluralization: false
+    supports_rich_text: false
+    sanitization: text
+    affected_states: [step navigation]
+    fixture_ids: []
+    test_case_ids: [product-page-bundle-template-design-verification]
+    status: DISCOVERED_CURRENT
+    evidence: app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/runtime-config.server.ts
+    notes: PPB step progression CTA text.
+
+  - id: ppb-doneButton
+    family: PPB
+    templates: [GRID, LIST, VERTICAL_SLOTS, HORIZONTAL_SLOTS]
+    surface: footer action
+    admin_label: Done Button Text
+    field_name: doneButton
+    fallback: Done
+    required: false
+    merchant_editable: true
+    localizable: true
+    allowed_placeholders: []
+    character_guidance: Keep concise and terminal
+    supports_pluralization: false
+    supports_rich_text: false
+    sanitization: text
+    affected_states: [final step CTA]
+    fixture_ids: []
+    test_case_ids: [product-page-bundle-template-design-verification]
+    status: DISCOVERED_CURRENT
+    evidence: app/lib/settings-language-runtime.ts
+    notes: Final-step CTA copy in PPB footer flow.
+
+  - id: ppb-addingToCart
+    family: PPB
+    templates: [GRID, LIST, VERTICAL_SLOTS, HORIZONTAL_SLOTS]
+    surface: footer add-to-cart
+    admin_label: Adding To Cart Label
+    field_name: addingToCart
+    fallback: Adding to Cart...
+    required: false
+    merchant_editable: true
+    localizable: true
+    allowed_placeholders: []
+    character_guidance: Loading-state text
+    supports_pluralization: false
+    supports_rich_text: false
+    sanitization: text
+    affected_states: [add-to-cart state]
+    fixture_ids: []
+    test_case_ids: [product-page-bundle-template-design-verification]
+    status: DISCOVERED_CURRENT
+    evidence: app/assets/widgets/product-page/methods/cart-methods.js
+    notes: PPB loading label while bundle submission is in progress.
+
+  - id: ppb-productCardAddButton
+    family: PPB
+    templates: [GRID, LIST, VERTICAL_SLOTS, HORIZONTAL_SLOTS]
+    surface: product card
+    admin_label: Product Card Add Button
+    field_name: productCardAddButton
+    fallback: Add
+    required: false
+    merchant_editable: true
+    localizable: true
+    allowed_placeholders: []
+    character_guidance: Keep concise for card action
+    supports_pluralization: false
+    supports_rich_text: false
+    sanitization: text
+    affected_states: [product card controls]
+    fixture_ids: []
+    test_case_ids: [product-page-bundle-template-design-verification]
+    status: DISCOVERED_CURRENT
+    evidence: app/lib/settings-language-runtime.ts
+    notes: PPB product card call-to-action text.
+
+  - id: ppb-productCardInlineAddButton
+    family: PPB
+    templates: [GRID, LIST, VERTICAL_SLOTS, HORIZONTAL_SLOTS]
+    surface: in-page card
+    admin_label: Product Card Inline Add Button
+    field_name: productCardInlineAddButton
+    fallback: Add
+    required: false
+    merchant_editable: true
+    localizable: true
+    allowed_placeholders: []
+    character_guidance: Keep concise for inline mode
+    supports_pluralization: false
+    supports_rich_text: false
+    sanitization: text
+    affected_states: [inline add controls]
+    fixture_ids: []
+    test_case_ids: [product-page-bundle-template-design-verification]
+    status: DISCOVERED_CURRENT
+    evidence: app/lib/settings-language-runtime.ts
+    notes: PPB in-page variant of product card CTA.
+
+  - id: ppb-viewBundleItems
+    family: PPB
+    templates: [GRID, LIST, VERTICAL_SLOTS, HORIZONTAL_SLOTS]
+    surface: footer actions
+    admin_label: View Bundle Items Button
+    field_name: viewBundleItems
+    fallback: View Bundle Items
+    required: false
+    merchant_editable: true
+    localizable: true
+    allowed_placeholders: []
+    character_guidance: Clear action wording
+    supports_pluralization: false
+    supports_rich_text: false
+    sanitization: text
+    affected_states: [cart drawer state]
+    fixture_ids: []
+    test_case_ids: [product-page-bundle-template-design-verification]
+    status: DISCOVERED_CURRENT
+    evidence: app/assets/widgets/product-page/templates/cascade-template.js
+    notes: PPB footer toggle copy for bundle item drawer.
+
+  - id: ppb-bundleCartSelectedProductsText
+    family: PPB
+    templates: [GRID, LIST, VERTICAL_SLOTS, HORIZONTAL_SLOTS]
+    surface: cart summary drawer
+    admin_label: Bundle Cart Selected Products Label
+    field_name: bundleCartSelectedProductsText
+    fallback: Items
+    required: false
+    merchant_editable: true
+    localizable: true
+    allowed_placeholders: []
+    character_guidance: Keep short
+    supports_pluralization: false
+    supports_rich_text: false
+    sanitization: text
+    affected_states: [cart summary]
+    fixture_ids: []
+    test_case_ids: [product-page-bundle-template-design-verification]
+    status: DISCOVERED_CURRENT
+    evidence: app/assets/widgets/product-page/methods/footer-modal-state-methods.js
+    notes: PPB header text for selected bundle rows.
+
+  - id: ppb-productVariantLabel
+    family: PPB
+    templates: [GRID, LIST, VERTICAL_SLOTS, HORIZONTAL_SLOTS]
+    surface: variant selector
+    admin_label: Product Variant Label
+    field_name: productVariantLabel
+    fallback: Variant
+    required: false
+    merchant_editable: true
+    localizable: true
+    allowed_placeholders: []
+    character_guidance: Preserve short product context
+    supports_pluralization: false
+    supports_rich_text: false
+    sanitization: text
+    affected_states: [variant controls]
+    fixture_ids: []
+    test_case_ids: [product-page-bundle-template-design-verification]
+    status: DISCOVERED_CURRENT
+    evidence: app/lib/settings-language-runtime.ts
+    notes: PPB label for variant selector controls.
+
+  - id: ppb-includedBadge
+    family: PPB
+    templates: [GRID, LIST, VERTICAL_SLOTS, HORIZONTAL_SLOTS]
+    surface: product card badge
+    admin_label: Included Badge
+    field_name: includedBadge
+    fallback: Included
+    required: false
+    merchant_editable: true
+    localizable: true
+    allowed_placeholders: []
+    character_guidance: Maintain concise badge text
+    supports_pluralization: false
+    supports_rich_text: false
+    sanitization: text
+    affected_states: [badging]
+    fixture_ids: []
+    test_case_ids: [product-page-bundle-template-design-verification]
+    status: DISCOVERED_CURRENT
+    evidence: app/lib/bundle-formatter.server.ts
+    notes: PPB badge text for already-added products.

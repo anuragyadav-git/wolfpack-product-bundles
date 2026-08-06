@@ -58,7 +58,6 @@ export interface BundleUiConfig {
   shopifyProductId: string | null;
   bundleDesignTemplate?: string | null;
   bundleDesignPresetId?: string | null;
-  bundleDesignTemplateData?: { templateId: string } | null;
   defaultProductsData?: Record<string, unknown>;
   boxSelection?: Record<string, unknown> | null;
   bundleUpsellConfig?: Record<string, unknown> | null;
@@ -71,7 +70,6 @@ export interface BundleUiConfig {
   productSlotsEnabled?: boolean;
   productSlotIconUrl?: string | null;
   useSingleStepCategoriesAsBundleSteps?: boolean;
-  renderFilledSlotsAsHorizontalStacked?: boolean | null;
   showProductComparedAtPrice?: boolean;
   bundleVariantId: string;
   steps: BundleUiStep[];

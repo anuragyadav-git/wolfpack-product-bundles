@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
-import { FPB_TEMPLATE_CONFIGS } from "../../../assets/widgets/full-page/templates/registry.js";
-import { PPB_TEMPLATE_CONFIGS } from "../../../assets/widgets/product-page/templates/registry.js";
+import { FPB_TEMPLATE_CONFIGS } from "../../../assets/widgets/full-page/templates/registry";
+import { PPB_TEMPLATE_CONFIGS } from "../../../assets/widgets/product-page/templates/registry";
 import {
   mapTemplateSelection,
   type BundleContractType,
@@ -23,11 +23,11 @@ export type DesignPreviewNavigation =
   | "timeline"
   | "compact-timeline"
   | "horizontal-timeline"
-  | "cascade-steps"
-  | "cognive-steps"
+  | "list-steps"
+  | "grid-steps"
   | "none";
 export type DesignPreviewCategories = "accordion" | "pills" | "underline" | "tabs" | "none";
-export type DesignPreviewSummary = "rows" | "slot-grid" | "compact-slots" | "cascade-drawer" | "pdp-footer" | "modal-footer";
+export type DesignPreviewSummary = "rows" | "slot-grid" | "compact-slots" | "list-selected-drawer" | "pdp-footer" | "modal-footer";
 
 export interface DesignPreviewProductCardContract {
   mode: "grid" | "compact" | "row";
@@ -144,13 +144,13 @@ function resolveFullPageSummary(mode: string | undefined): DesignPreviewSummary 
 }
 
 function resolveProductPageNavigation(selection: TemplateSelection): DesignPreviewNavigation {
-  if (selection.bundleDesignPresetId === "CASCADE") return "cascade-steps";
-  if (selection.bundleDesignPresetId === "COGNIVE") return "cognive-steps";
+  if (selection.bundleDesignPresetId === "LIST") return "list-steps";
+  if (selection.bundleDesignPresetId === "GRID") return "grid-steps";
   return "none";
 }
 
 function resolveProductPageSummary(mode: string | undefined): DesignPreviewSummary {
-  if (mode === "drawerRows") return "cascade-drawer";
+  if (mode === "drawerRows") return "list-selected-drawer";
   if (mode === "drawer") return "pdp-footer";
   return "modal-footer";
 }
@@ -254,15 +254,15 @@ export const DESIGN_PREVIEW_TEMPLATES: readonly DesignPreviewTemplateDescriptor[
   productPageDescriptor("product-list", "settingsDcp.preview.templates.productList", PPB_TEMPLATE_CONFIGS.LIST, {
     categories: "tabs",
     sceneRegions: {
-      desktop: ["neutral-pdp-shell", "cascade-step-flow", "category-tabs", "product-rows", "pdp-footer"],
-      mobile: ["neutral-pdp-shell", "cascade-step-flow", "category-tabs", "product-rows", "pdp-footer"],
+      desktop: ["neutral-pdp-shell", "product-list-step-flow", "category-tabs", "product-rows", "pdp-footer"],
+      mobile: ["neutral-pdp-shell", "product-list-step-flow", "category-tabs", "product-rows", "pdp-footer"],
     },
   }),
   productPageDescriptor("product-grid", "settingsDcp.preview.templates.productGrid", PPB_TEMPLATE_CONFIGS.GRID, {
     categories: "tabs",
     sceneRegions: {
-      desktop: ["neutral-pdp-shell", "cognive-step-headers", "category-tabs", "product-grid", "pdp-footer"],
-      mobile: ["neutral-pdp-shell", "cognive-step-headers", "category-tabs", "product-grid", "pdp-footer"],
+      desktop: ["neutral-pdp-shell", "product-grid-step-headers", "category-tabs", "product-grid", "pdp-footer"],
+      mobile: ["neutral-pdp-shell", "product-grid-step-headers", "category-tabs", "product-grid", "pdp-footer"],
     },
   }),
   productPageDescriptor("horizontal-slots", "settingsDcp.preview.templates.horizontalSlots", PPB_TEMPLATE_CONFIGS.HORIZONTAL_SLOTS, {
@@ -432,7 +432,7 @@ export function getDesignPreviewScene(
   if (surface === "product-picker" && descriptor.slotOrientation) {
     regions.push(viewport === "mobile" ? "product-picker-bottom-sheet" : "product-picker-modal");
   } else if (surface === "cart-summary") {
-    if (templateKey === "product-list") regions.push("cascade-selected-drawer", "pdp-footer");
+    if (templateKey === "product-list") regions.push("product-list-selected-drawer", "pdp-footer");
     else if (descriptor.family === "product-page") regions.push(descriptor.summary);
     else regions.push(viewport === "mobile" ? descriptor.sceneRegions.mobile.at(-1) ?? "sticky-summary-tray" : "summary-sidebar");
   } else if (surface !== "builder") {

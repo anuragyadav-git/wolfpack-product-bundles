@@ -68,15 +68,15 @@ describe("formatBundleForWidget", () => {
     expect(result).not.toHaveProperty("fullPageLayout");
   });
 
-  it("defaults full-page bundles to Standard Design when template fields are absent", () => {
+  it("preserves null full-page template fields when template values are absent", () => {
     const result = formatBundleForWidget(makeBundle({
       bundleDesignTemplate: null,
       bundleDesignPresetId: null,
     }) as any);
 
-    expect(result.bundleDesignTemplate).toBe("FBP_SIDE_FOOTER");
-    expect(result.bundleDesignPresetId).toBe("STANDARD");
-    expect(result.bundleDesignTemplateData).toBeNull();
+    expect(result.bundleDesignTemplate).toBeNull();
+    expect(result.bundleDesignPresetId).toBeNull();
+    expect(result).not.toHaveProperty("bundleDesignTemplateData");
   });
 
   it("emits the saved product slot icon URL for storefront empty slots", () => {
@@ -416,41 +416,39 @@ describe("formatBundleForWidget", () => {
 
     expect(result.bundleDesignTemplate).toBe("FBP_SIDE_FOOTER");
     expect(result.bundleDesignPresetId).toBe("STANDARD");
-    expect(result.bundleDesignTemplateData).toBeNull();
+    expect(result).not.toHaveProperty("bundleDesignTemplateData");
   });
 
   it("bridges product-page design preset into runtime template data", () => {
     const result = formatBundleForWidget(makeBundle({
       bundleType: "product_page",
       bundleDesignTemplate: "PDP_INPAGE",
-      bundleDesignPresetId: "CASCADE",
+      bundleDesignPresetId: "LIST",
     }) as any);
 
     expect(result.bundleDesignTemplate).toBe("PDP_INPAGE");
-    expect(result.bundleDesignPresetId).toBe("CASCADE");
-    expect(result.bundleDesignTemplateData).toEqual({ templateId: "CASCADE" });
+    expect(result.bundleDesignPresetId).toBe("LIST");
+    expect(result).not.toHaveProperty("bundleDesignTemplateData");
   });
 
-  it("exposes reference modal slot orientation for product-page horizontal slots", () => {
+  it("maps product-page horizontal slot preset into template contract", () => {
     const result = formatBundleForWidget(makeBundle({
       bundleType: "product_page",
       bundleDesignTemplate: "PDP_MODAL",
-      bundleDesignPresetId: "MODAL",
+      bundleDesignPresetId: "HORIZONTAL_SLOTS",
     }) as any);
 
-    expect(result.bundleDesignTemplateData).toEqual({ templateId: "MODAL" });
-    expect(result.renderFilledSlotsAsHorizontalStacked).toBe(true);
+    expect(result).not.toHaveProperty("bundleDesignTemplateData");
   });
 
-  it("exposes reference modal slot orientation for product-page vertical slots", () => {
+  it("maps product-page vertical slot preset into template contract", () => {
     const result = formatBundleForWidget(makeBundle({
       bundleType: "product_page",
       bundleDesignTemplate: "PDP_MODAL",
-      bundleDesignPresetId: "SIMPLIFIED",
+      bundleDesignPresetId: "VERTICAL_SLOTS",
     }) as any);
 
-    expect(result.bundleDesignTemplateData).toEqual({ templateId: "SIMPLIFIED" });
-    expect(result.renderFilledSlotsAsHorizontalStacked).toBe(false);
+    expect(result).not.toHaveProperty("bundleDesignTemplateData");
   });
 
   it("includes direct product-page bundle settings contracts without FPB Product Slots", () => {

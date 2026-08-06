@@ -117,7 +117,7 @@ export function useConfigureContentState(flow: ConfigureBundleFlowDraft) {
   const originalDefaultProductsDataRef = useRef<DefaultProductsData>(
     initialDefaultProductsData,
   );
-  const [showTextOnPlusEnabled, setShowTextOnPlusEnabled] = useState<boolean>(
+  const [showTextOnAddButton, setShowTextOnAddButton] = useState<boolean>(
     ((bundle as any).showTextOnAddButton ?? false) === true ||
       !!(bundle as any).textOverrides?.addToCartButton,
   );
@@ -243,7 +243,7 @@ export function useConfigureContentState(flow: ConfigureBundleFlowDraft) {
     setShowProductPrices,
     setShowSlotIconPicker,
     setShowStepTimeline,
-    setShowTextOnPlusEnabled,
+    setShowTextOnAddButton,
     setTextOverrides,
     setTextOverridesByLocale,
     setTextOverridesLocale,
@@ -253,7 +253,7 @@ export function useConfigureContentState(flow: ConfigureBundleFlowDraft) {
     showProductPrices,
     showSlotIconPicker,
     showStepTimeline,
-    showTextOnPlusEnabled,
+    showTextOnAddButton,
     slugify,
     textOverrides,
     textOverridesByLocale,

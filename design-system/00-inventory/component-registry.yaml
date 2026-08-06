@@ -1,0 +1,30 @@
+items:
+  - id: product-card
+    family: shared
+    component: product-card
+    source: app/assets/widgets/shared/components/product-card.js
+    owners: [runtime]
+    states:
+      - selected
+      - loading
+      - error
+
+  - id: selected-product-slot-row
+    family: shared
+    component: selected-product-row
+    source: app/assets/widgets/shared/components/selected-product-row.js
+    owners: [runtime]
+    states:
+      - normal
+      - remove
+      - loading
+
+  - id: side-panel-summary
+    family: FPB
+    component: side panel
+    source: app/assets/widgets/full-page/methods/side-panel-methods.js
+    owners: [runtime]
+    states:
+      - horizontal
+      - standard
+      - compact

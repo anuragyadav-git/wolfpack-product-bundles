@@ -176,13 +176,13 @@ function StepNavigation({
   t: Translate;
 }) {
   if (descriptor.navigation === "none") return null;
-  const region = descriptor.navigation === "cascade-steps"
-    ? "cascade-step-flow"
-    : descriptor.navigation === "cognive-steps"
-      ? "cognive-step-headers"
+  const region = descriptor.navigation === "list-steps"
+    ? "product-list-step-flow"
+    : descriptor.navigation === "grid-steps"
+      ? "product-grid-step-headers"
       : descriptor.navigation;
 
-  if (descriptor.navigation === "cascade-steps" || descriptor.navigation === "cognive-steps") {
+  if (descriptor.navigation === "list-steps" || descriptor.navigation === "grid-steps") {
     return (
       <div className={styles.previewStepHeaders} data-preview-region={region}>
         {DESIGN_PREVIEW_FIXTURE.steps.map((step, index) => (
@@ -274,7 +274,7 @@ function BundleSummary({
     : descriptor.sceneRegions.desktop;
   const region = descriptor.family === "full-page"
     ? viewportRegions.at(-1) ?? "summary-sidebar"
-    : descriptor.summary === "cascade-drawer" ? "cascade-selected-drawer" : descriptor.summary;
+    : descriptor.summary === "list-selected-drawer" ? "product-list-selected-drawer" : descriptor.summary;
 
   return (
     <aside className={styles.previewSummary} data-summary={descriptor.summary} data-preview-region={region}>
@@ -421,7 +421,7 @@ function ProductPageBuilder({
           <span><small>{t("settingsDcp.preview.surface.totalLabel")}</small><strong>{t("settingsDcp.preview.surface.totalPrice")}</strong></span>
           <button type="button" disabled>{t("settingsDcp.preview.surface.addBundle")}</button>
         </footer>
-        {descriptor.summary === "cascade-drawer" && viewport === "desktop" ? (
+        {descriptor.summary === "list-selected-drawer" && viewport === "desktop" ? (
           <BundleSummary descriptor={descriptor} viewport={viewport} t={t} />
         ) : null}
       </section>

@@ -1,5 +1,5 @@
 {
-  "include": ["env.d.ts", "**/*.ts", "**/*.tsx", "graphql.config.js"],
+  "include": ["env.d.ts", "**/*.ts", "**/*.tsx", "graphql.config.js", "design-system/scripts/**/*.mjs"],
   "compilerOptions": {
     "lib": ["DOM", "DOM.Iterable", "ES2022"],
     "strict": true,

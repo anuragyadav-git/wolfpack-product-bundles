@@ -1,0 +1,1404 @@
+items:
+  - id: fpb-standard-summary-mode
+    family: FPB
+    templates: [STANDARD]
+    admin_label: Standard Preset
+    admin_location: Bundle Settings
+    field_name: bundleDesignPresetId
+    persisted_location: bundle_design
+    runtime_location: data-fpb-design-preset
+    type: enum
+    allowed_values: [STANDARD, CLASSIC, COMPACT, HORIZONTAL]
+    default: STANDARD
+    nullable: false
+    dependencies: [template config]
+    mutual_exclusions: []
+    visibility_condition: always
+    affected_components: [full-page template renderer, side panel, mobile summary]
+    affected_states: [summary mode, slot rendering]
+    merchant_editable: true
+    responsive_impact: medium
+    accessibility_impact: none
+    fixture_ids: []
+    test_case_ids: [fpb-all-template-summary]
+    status: confirmed_current
+    evidence: app/assets/widgets/full-page/methods/runtime-cart-settings-methods.js
+    notes: Centralized via shared template contract resolver.
+
+  - id: ppb-template-selection
+    family: PPB
+    templates: [GRID, LIST, HORIZONTAL_SLOTS, VERTICAL_SLOTS]
+    admin_label: PPB Template
+    admin_location: Widget Settings
+    field_name: bundleDesignTemplate
+    persisted_location: bundle_data
+    runtime_location: template-type/data attrs
+    type: enum
+    allowed_values: [PDP_INPAGE, PDP_MODAL]
+    default: PDP_MODAL
+    nullable: false
+    dependencies: [template configuration]
+    mutual_exclusions: []
+    visibility_condition: always
+    affected_components: [product-page layout, modal/inline renderers]
+    affected_states: [selection flow, drawer behavior]
+    merchant_editable: true
+    responsive_impact: medium
+    accessibility_impact: medium
+    fixture_ids: []
+    test_case_ids: [product-page-bundle-template-design-verification]
+    status: confirmed_current
+    evidence: app/assets/widgets/product-page/templates/registry.js
+    notes: Legacy aliases mapped through registry now route through shared contract.
+
+  - id: fpb-show-step-timeline
+    family: FPB
+    templates: [STANDARD, CLASSIC, COMPACT, HORIZONTAL]
+    admin_label: Show Step Timeline
+    admin_location: Widget Steps
+    field_name: showStepTimeline
+    persisted_location: bundle_data
+    runtime_location: selectedBundle.showStepTimeline
+    type: boolean
+    allowed_values: [true, false]
+    default: true
+    nullable: false
+    dependencies: [step navigation]
+    mutual_exclusions: []
+    visibility_condition: always
+    affected_components: [step timeline, step navigation]
+    affected_states: [summary mode]
+    merchant_editable: true
+    responsive_impact: medium
+    accessibility_impact: low
+    fixture_ids: []
+    test_case_ids: [fpb-all-template-summary]
+    status: DISCOVERED_CURRENT
+    evidence: app/assets/widgets/full-page/methods/responsive-layout-methods.js
+    notes: Controls whether step timeline chrome renders across viewport modes.
+
+  - id: fpb-show-product-prices
+    family: FPB
+    templates: [STANDARD, CLASSIC, COMPACT, HORIZONTAL]
+    admin_label: Show Product Prices
+    admin_location: Bundle Settings
+    field_name: showProductPrices
+    persisted_location: bundle_data
+    runtime_location: this.config.showProductPrices
+    type: boolean
+    allowed_values: [true, false]
+    default: true
+    nullable: false
+    dependencies: [pricing display]
+    mutual_exclusions: []
+    visibility_condition: always
+    affected_components: [product card, cart footer]
+    affected_states: [pricing rendering]
+    merchant_editable: true
+    responsive_impact: low
+    accessibility_impact: low
+    fixture_ids: []
+    test_case_ids: [fpb-all-template-summary]
+    status: DISCOVERED_CURRENT
+    evidence: app/assets/widgets/full-page/methods/runtime-cart-settings-methods.js
+    notes: Admin toggle drives FPB card price visibility and fallback state.
+
+  - id: fpb-show-compare-at-prices
+    family: FPB
+    templates: [STANDARD, CLASSIC, COMPACT, HORIZONTAL]
+    admin_label: Show Compare At Prices
+    admin_location: Bundle Settings
+    field_name: showCompareAtPrices
+    persisted_location: bundle_data
+    runtime_location: this.config.showCompareAtPrices
+    type: boolean
+    allowed_values: [true, false]
+    default: false
+    nullable: false
+    dependencies: [price display]
+    mutual_exclusions: []
+    visibility_condition: always
+    affected_components: [product card, discount badge]
+    affected_states: [pricing rendering]
+    merchant_editable: true
+    responsive_impact: low
+    accessibility_impact: low
+    fixture_ids: []
+    test_case_ids: [fpb-all-template-summary]
+    status: DISCOVERED_CURRENT
+    evidence: app/lib/bundle-formatter.server.ts
+    notes: Optional compare-at price line in card and summary presentations.
+
+  - id: fpb-cart-redirect-to-checkout
+    family: FPB
+    templates: [STANDARD, CLASSIC, COMPACT, HORIZONTAL]
+    admin_label: Redirect Cart to Checkout
+    admin_location: Bundle Settings
+    field_name: cartRedirectToCheckout
+    persisted_location: bundle_data
+    runtime_location: storefront config runtime
+    type: boolean
+    allowed_values: [true, false]
+    default: false
+    nullable: false
+    dependencies: [checkout flow]
+    mutual_exclusions: []
+    visibility_condition: always
+    affected_components: [add-to-cart workflow]
+    affected_states: [checkout handoff]
+    merchant_editable: true
+    responsive_impact: low
+    accessibility_impact: medium
+    fixture_ids: []
+    test_case_ids: [fpb-all-template-summary]
+    status: DISCOVERED_CURRENT
+    evidence: app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/save-bundle-form.server.ts
+    notes: Toggles post-bundle action from cart to checkout when enabled.
+
+  - id: fpb-allow-quantity-changes
+    family: FPB
+    templates: [STANDARD, CLASSIC, COMPACT, HORIZONTAL]
+    admin_label: Allow Quantity Changes
+    admin_location: Bundle Settings
+    field_name: allowQuantityChanges
+    persisted_location: bundle_data
+    runtime_location: widget quantity controls
+    type: boolean
+    allowed_values: [true, false]
+    default: true
+    nullable: false
+    dependencies: [quantity control]
+    mutual_exclusions: []
+    visibility_condition: always
+    affected_components: [quantity stepper]
+    affected_states: [selection enforcement]
+    merchant_editable: true
+    responsive_impact: medium
+    accessibility_impact: medium
+    fixture_ids: []
+    test_case_ids: [fpb-all-template-summary]
+    status: DISCOVERED_CURRENT
+    evidence: app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/save-bundle-form.server.ts
+    notes: Global guard for whether user-editable per-product quantities remain interactive.
+
+  - id: fpb-search-bar-enabled
+    family: FPB
+    templates: [STANDARD, CLASSIC, COMPACT, HORIZONTAL]
+    admin_label: Show Search Bar
+    admin_location: Bundle Settings
+    field_name: searchBarEnabled
+    persisted_location: bundle_data
+    runtime_location: storefront config runtime
+    type: boolean
+    allowed_values: [true, false]
+    default: false
+    nullable: false
+    dependencies: [product filtering]
+    mutual_exclusions: []
+    visibility_condition: always
+    affected_components: [product list]
+    affected_states: [search/filter behavior]
+    merchant_editable: true
+    responsive_impact: medium
+    accessibility_impact: high
+    fixture_ids: []
+    test_case_ids: [fpb-all-template-summary]
+    status: DISCOVERED_CURRENT
+    evidence: app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/save-bundle-form.server.ts
+    notes: Controls visibility of bundle product search input when supported by template.
+
+  - id: fpb-show-text-on-add-button
+    family: FPB
+    templates: [STANDARD, CLASSIC, COMPACT, HORIZONTAL]
+    admin_label: Show Text on Add Button
+    admin_location: Widget Settings
+    field_name: showTextOnAddButton
+    persisted_location: bundle_data
+    runtime_location: runtime-cart-settings-methods.js
+    type: boolean
+    allowed_values: [true, false]
+    default: false
+    nullable: false
+    dependencies: [CTA rendering]
+    mutual_exclusions: []
+    visibility_condition: always
+    affected_components: [product card add button]
+    affected_states: [add button mode]
+    merchant_editable: true
+    responsive_impact: low
+    accessibility_impact: medium
+    fixture_ids: []
+    test_case_ids: [fpb-all-template-summary]
+    status: DISCOVERED_CURRENT
+    evidence: app/assets/widgets/full-page/methods/runtime-cart-settings-methods.js
+    notes: Switches CTA from icon-only to text label when possible.
+
+  - id: fpb-variant-selector-enabled
+    family: FPB
+    templates: [STANDARD, CLASSIC, COMPACT, HORIZONTAL]
+    admin_label: Enable Variant Selector
+    admin_location: Widget Settings
+    field_name: variantSelectorEnabled
+    persisted_location: bundle_data
+    runtime_location: full-page/product-card-footer-methods.js
+    type: boolean
+    allowed_values: [true, false]
+    default: true
+    nullable: false
+    dependencies: [variant rendering]
+    mutual_exclusions: []
+    visibility_condition: always
+    affected_components: [product card variants]
+    affected_states: [variant selection flow]
+    merchant_editable: true
+    responsive_impact: medium
+    accessibility_impact: high
+    fixture_ids: []
+    test_case_ids: [fpb-all-template-summary]
+    status: DISCOVERED_CURRENT
+    evidence: app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/save-bundle-form.server.ts
+    notes: Allows hiding or exposing inline variant controls.
+
+  - id: fpb-floating-badge-enabled
+    family: FPB
+    templates: [STANDARD, CLASSIC, COMPACT, HORIZONTAL]
+    admin_label: Floating Badge Enabled
+    admin_location: Bundle Settings
+    field_name: floatingBadgeEnabled
+    persisted_location: bundle_data
+    runtime_location: full-page/tier-floating-runtime-methods.js
+    type: boolean
+    allowed_values: [true, false]
+    default: false
+    nullable: false
+    dependencies: [floating badge]
+    mutual_exclusions: []
+    visibility_condition: always
+    affected_components: [floating badge]
+    affected_states: [floating promotional state]
+    merchant_editable: true
+    responsive_impact: low
+    accessibility_impact: low
+    fixture_ids: []
+    test_case_ids: [fpb-all-template-summary]
+    status: DISCOVERED_CURRENT
+    evidence: app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/save-bundle-form.server.ts
+    notes: Enables fixed-position promo badge for FPB storefront rendering.
+
+  - id: fpb-floating-badge-text
+    family: FPB
+    templates: [STANDARD, CLASSIC, COMPACT, HORIZONTAL]
+    admin_label: Floating Badge Text
+    admin_location: Bundle Settings
+    field_name: floatingBadgeText
+    persisted_location: bundle_data
+    runtime_location: full-page/tier-floating-runtime-methods.js
+    type: string
+    allowed_values: []
+    default: ""
+    nullable: true
+    dependencies: [floating badge]
+    mutual_exclusions: []
+    visibility_condition: floatingBadgeEnabled === true
+    affected_components: [floating badge]
+    affected_states: [floating promotional state]
+    merchant_editable: true
+    responsive_impact: low
+    accessibility_impact: low
+    fixture_ids: []
+    test_case_ids: [fpb-all-template-summary]
+    status: DISCOVERED_CURRENT
+    evidence: app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/save-bundle-form.server.ts
+    notes: Plain text label used by floating badge overlay (trimmed to fit constraints).
+
+  - id: fpb-product-slots-enabled
+    family: FPB
+    templates: [STANDARD, CLASSIC, COMPACT, HORIZONTAL]
+    admin_label: Enable Product Slots
+    admin_location: Bundle Settings
+    field_name: productSlotsEnabled
+    persisted_location: bundle_data
+    runtime_location: this.selectedBundle.productSlotsEnabled
+    type: boolean
+    allowed_values: [true, false]
+    default: false
+    nullable: false
+    dependencies: [summary slot layout]
+    mutual_exclusions: []
+    visibility_condition: always
+    affected_components: [mobile summary, side panel]
+    affected_states: [summary mode]
+    merchant_editable: true
+    responsive_impact: medium
+    accessibility_impact: medium
+    fixture_ids: []
+    test_case_ids: [fpb-all-template-summary]
+    status: DISCOVERED_CURRENT
+    evidence: app/assets/widgets/full-page/methods/mobile-summary-methods.js
+    notes: Activates per-step selected product slot chips in summary surfaces.
+
+  - id: fpb-max-qty-per-product
+    family: FPB
+    templates: [STANDARD, CLASSIC, COMPACT, HORIZONTAL]
+    admin_label: Maximum Qty Per Product
+    admin_location: Bundle Settings
+    field_name: maxQtyPerProduct
+    persisted_location: bundle_data
+    runtime_location: shared/condition-validator.js
+    type: integer
+    allowed_values: []
+    default: null
+    nullable: true
+    dependencies: [quantity validation]
+    mutual_exclusions: []
+    visibility_condition: always
+    affected_components: [quantity controls]
+    affected_states: [quantity validation]
+    merchant_editable: true
+    responsive_impact: low
+    accessibility_impact: low
+    fixture_ids: []
+    test_case_ids: [fpb-all-template-summary]
+    status: DISCOVERED_CURRENT
+    evidence: app/assets/widgets/shared/condition-validator.js
+    notes: Enforces per-product max on quantity controls when validation is active.
+
+  - id: fpb-product-slot-icon-url
+    family: FPB
+    templates: [STANDARD, CLASSIC, COMPACT, HORIZONTAL]
+    admin_label: Product Slot Icon
+    admin_location: Bundle Settings
+    field_name: productSlotIconUrl
+    persisted_location: bundle_data
+    runtime_location: full-page/mobile-summary-methods.js
+    type: string
+    allowed_values: []
+    default: ""
+    nullable: true
+    dependencies: [productSlotsEnabled]
+    mutual_exclusions: []
+    visibility_condition: productSlotsEnabled === true
+    affected_components: [mobile summary slots]
+    affected_states: [summary mode]
+    merchant_editable: true
+    responsive_impact: low
+    accessibility_impact: medium
+    fixture_ids: []
+    test_case_ids: [fpb-all-template-summary]
+    status: DISCOVERED_CURRENT
+    evidence: app/assets/widgets/full-page/methods/mobile-summary-methods.js
+    notes: Optional icon used for empty slot placeholders in summary state.
+
+  - id: fpb-auto-select-browsed-product
+    family: FPB
+    templates: [STANDARD, CLASSIC, COMPACT, HORIZONTAL]
+    admin_label: Auto Select Browsed Product
+    admin_location: Bundle Settings
+    field_name: autoSelectBrowsedProduct
+    persisted_location: bundle_data
+    runtime_location: storefront runtime flow
+    type: boolean
+    allowed_values: [true, false]
+    default: false
+    nullable: false
+    dependencies: [default browsing]
+    mutual_exclusions: []
+    visibility_condition: always
+    affected_components: [initial selected products]
+    affected_states: [initialization defaults]
+    merchant_editable: true
+    responsive_impact: low
+    accessibility_impact: low
+    fixture_ids: []
+    test_case_ids: [fpb-all-template-summary]
+    status: DISCOVERED_CURRENT
+    evidence: app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/save-bundle-form.server.ts
+    notes: Preloads current product context into bundle state when present.
+
+  - id: fpb-bundle-banner-desktop-url
+    family: FPB
+    templates: [STANDARD, CLASSIC, COMPACT, HORIZONTAL]
+    admin_label: Bundle Banner Desktop URL
+    admin_location: Widget Timeline
+    field_name: bundleBannerDesktopUrl
+    persisted_location: bundle_data
+    runtime_location: full-page/timeline-banner-methods.js
+    type: string
+    allowed_values: []
+    default: ""
+    nullable: true
+    dependencies: [timeline banner]
+    mutual_exclusions: []
+    visibility_condition: always
+    affected_components: [timeline banner]
+    affected_states: [summary mode]
+    merchant_editable: true
+    responsive_impact: medium
+    accessibility_impact: low
+    fixture_ids: []
+    test_case_ids: [fpb-all-template-summary]
+    status: DISCOVERED_CURRENT
+    evidence: app/assets/widgets/full-page/methods/timeline-banner-methods.js
+    notes: Image source for desktop variant of timeline banner section.
+
+  - id: fpb-bundle-banner-mobile-url
+    family: FPB
+    templates: [STANDARD, CLASSIC, COMPACT, HORIZONTAL]
+    admin_label: Bundle Banner Mobile URL
+    admin_location: Widget Timeline
+    field_name: bundleBannerMobileUrl
+    persisted_location: bundle_data
+    runtime_location: full-page/timeline-banner-methods.js
+    type: string
+    allowed_values: []
+    default: ""
+    nullable: true
+    dependencies: [timeline banner]
+    mutual_exclusions: []
+    visibility_condition: always
+    affected_components: [timeline banner]
+    affected_states: [summary mode]
+    merchant_editable: true
+    responsive_impact: medium
+    accessibility_impact: low
+    fixture_ids: []
+    test_case_ids: [fpb-all-template-summary]
+    status: DISCOVERED_CURRENT
+    evidence: app/assets/widgets/full-page/methods/timeline-banner-methods.js
+    notes: Image source for mobile variant of timeline banner section.
+
+  - id: fpb-loading-gif
+    family: FPB
+    templates: [STANDARD, CLASSIC, COMPACT, HORIZONTAL]
+    admin_label: Loading GIF
+    admin_location: Bundle Settings
+    field_name: loadingGif
+    persisted_location: bundle_data
+    runtime_location: full-page/runtime behavior
+    type: string
+    allowed_values: []
+    default: ""
+    nullable: true
+    dependencies: [loading state]
+    mutual_exclusions: []
+    visibility_condition: always
+    affected_components: [adding state]
+    affected_states: [loading]
+    merchant_editable: true
+    responsive_impact: low
+    accessibility_impact: low
+    fixture_ids: []
+    test_case_ids: [fpb-all-template-summary]
+    status: DISCOVERED_CURRENT
+    evidence: app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/save-bundle-form.server.ts
+    notes: Optional loading media override for add-to-cart feedback path.
+
+  - id: fpb-bundle-level-css
+    family: FPB
+    templates: [STANDARD, CLASSIC, COMPACT, HORIZONTAL]
+    admin_label: Bundle Level CSS
+    admin_location: Theme Styling
+    field_name: bundleLevelCss
+    persisted_location: bundle_data
+    runtime_location: widget custom CSS payload
+    type: string
+    allowed_values: []
+    default: ""
+    nullable: true
+    dependencies: [custom styling]
+    mutual_exclusions: []
+    visibility_condition: always
+    affected_components: [all storefront components]
+    affected_states: [rendering]
+    merchant_editable: true
+    responsive_impact: high
+    accessibility_impact: medium
+    fixture_ids: []
+    test_case_ids: [fpb-all-template-summary]
+    status: DISCOVERED_CURRENT
+    evidence: app/assets/widgets/product-page/methods/selection-data-methods.js
+    notes: Admin-provided CSS injected into bundle widget runtime scope.
+
+  - id: fpb-default-products-data
+    family: FPB
+    templates: [STANDARD, CLASSIC, COMPACT, HORIZONTAL]
+    admin_label: Default Products Data
+    admin_location: Widget Settings
+    field_name: defaultProductsData
+    persisted_location: bundle_data
+    runtime_location: full-page/product-processing-methods.js
+    type: object
+    allowed_values: []
+    default: {}
+    nullable: true
+    dependencies: [default product preload]
+    mutual_exclusions: []
+    visibility_condition: always
+    affected_components: [initial state]
+    affected_states: [initialization]
+    merchant_editable: true
+    responsive_impact: low
+    accessibility_impact: low
+    fixture_ids: []
+    test_case_ids: [fpb-all-template-summary]
+    status: DISCOVERED_CURRENT
+    evidence: app/assets/widgets/full-page/methods/product-processing-methods.js
+    notes: Serialized default/preselected product payload used to hydrate selection state.
+
+  - id: fpb-validate-quantity-per-product
+    family: FPB
+    templates: [STANDARD, CLASSIC, COMPACT, HORIZONTAL]
+    admin_label: Validate Quantity Per Product
+    admin_location: Widget Settings
+    field_name: validateQuantityPerProduct
+    persisted_location: bundle_data
+    runtime_location: shared/condition-validator.js
+    type: object
+    allowed_values: []
+    default: {}
+    nullable: true
+    dependencies: [maxQtyPerProduct]
+    mutual_exclusions: []
+    visibility_condition: always
+    affected_components: [quantity controls]
+    affected_states: [quantity validation]
+    merchant_editable: true
+    responsive_impact: low
+    accessibility_impact: low
+    fixture_ids: []
+    test_case_ids: [fpb-all-template-summary]
+    status: DISCOVERED_CURRENT
+    evidence: app/assets/widgets/shared/condition-validator.js
+    notes: Object flag driving allowIncrease/disablity for per-product quantity caps.
+
+  - id: fpb-individual-selling-plan-selection
+    family: FPB
+    templates: [STANDARD, CLASSIC, COMPACT, HORIZONTAL]
+    admin_label: Individual Selling Plan Selection
+    admin_location: Bundle Settings
+    field_name: individualSellingPlanSelection
+    persisted_location: bundle_data
+    runtime_location: full-page/selection-data-methods.js
+    type: object
+    allowed_values: []
+    default: {}
+    nullable: true
+    dependencies: [subscription settings]
+    mutual_exclusions: []
+    visibility_condition: always
+    affected_components: [product card variant options]
+    affected_states: [selection behavior]
+    merchant_editable: true
+    responsive_impact: low
+    accessibility_impact: medium
+    fixture_ids: []
+    test_case_ids: [fpb-all-template-summary]
+    status: DISCOVERED_CURRENT
+    evidence: app/assets/widgets/full-page/methods/product-processing-methods.js
+    notes: Stores per-product subscription-plan toggle behavior for selection lifecycle.
+
+  - id: fpb-bundle-text-config
+    family: FPB
+    templates: [STANDARD, CLASSIC, COMPACT, HORIZONTAL]
+    admin_label: Bundle Text Config
+    admin_location: Widget Settings
+    field_name: bundleTextConfig
+    persisted_location: bundle_data
+    runtime_location: full-page/analytics-config-methods.js
+    type: object
+    allowed_values: []
+    default: {}
+    nullable: true
+    dependencies: [text overrides]
+    mutual_exclusions: []
+    visibility_condition: always
+    affected_components: [copy output]
+    affected_states: [render text]
+    merchant_editable: true
+    responsive_impact: low
+    accessibility_impact: medium
+    fixture_ids: []
+    test_case_ids: [fpb-all-template-summary]
+    status: DISCOVERED_CURRENT
+    evidence: app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/save-bundle-form.server.ts
+    notes: Admin-authored optional bundle text JSON merged into widget text overrides.
+
+  - id: fpb-bundle-upsell-config
+    family: FPB
+    templates: [STANDARD, CLASSIC, COMPACT, HORIZONTAL]
+    admin_label: Bundle Upsell Config
+    admin_location: Widget Settings
+    field_name: bundleUpsellConfig
+    persisted_location: bundle_data
+    runtime_location: bundle formatter
+    type: object
+    allowed_values: []
+    default: {}
+    nullable: true
+    dependencies: [upsell widget]
+    mutual_exclusions: []
+    visibility_condition: upsellWidgetEnabled === true
+    affected_components: [upsell widgets]
+    affected_states: [upsell render state]
+    merchant_editable: true
+    responsive_impact: medium
+    accessibility_impact: medium
+    fixture_ids: []
+    test_case_ids: [fpb-all-template-summary]
+    status: DISCOVERED_CURRENT
+    evidence: app/lib/bundle-formatter.server.ts
+    notes: Optional upsell configuration payload persisted and surfaced to storefront runtime.
+
+  - id: fpb-upsell-widget-enabled
+    family: FPB
+    templates: [STANDARD, CLASSIC, COMPACT, HORIZONTAL]
+    admin_label: Upsell Widget Enabled
+    admin_location: Widget Settings
+    field_name: upsellWidgetEnabled
+    persisted_location: bundle_data
+    runtime_location: storefront runtime flow
+    type: boolean
+    allowed_values: [true, false]
+    default: false
+    nullable: false
+    dependencies: [bundleUpsellConfig]
+    mutual_exclusions: []
+    visibility_condition: always
+    affected_components: [upsell blocks]
+    affected_states: [upsell render state]
+    merchant_editable: true
+    responsive_impact: medium
+    accessibility_impact: low
+    fixture_ids: []
+    test_case_ids: [fpb-all-template-summary]
+    status: DISCOVERED_CURRENT
+    evidence: app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/save-bundle-form.server.ts
+    notes: Global toggle that gates upsell widget rendering and data use.
+
+  - id: fpb-upsell-widget-display-mode
+    family: FPB
+    templates: [STANDARD, CLASSIC, COMPACT, HORIZONTAL]
+    admin_label: Upsell Widget Display Mode
+    admin_location: Widget Settings
+    field_name: upsellWidgetDisplayMode
+    persisted_location: bundle_data
+    runtime_location: storefront runtime flow
+    type: string
+    allowed_values: [block, inline]
+    default: block
+    nullable: true
+    dependencies: [upsellWidgetEnabled]
+    mutual_exclusions: []
+    visibility_condition: upsellWidgetEnabled === true
+    affected_components: [upsell blocks]
+    affected_states: [upsell render state]
+    merchant_editable: true
+    responsive_impact: medium
+    accessibility_impact: low
+    fixture_ids: []
+    test_case_ids: [fpb-all-template-summary]
+    status: DISCOVERED_CURRENT
+    evidence: app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/save-bundle-form.server.ts
+    notes: Controls whether upsell content renders as block or inline in the bundle flow.
+
+  - id: fpb-upsell-widget-display-on
+    family: FPB
+    templates: [STANDARD, CLASSIC, COMPACT, HORIZONTAL]
+    admin_label: Upsell Widget Display On
+    admin_location: Widget Settings
+    field_name: upsellWidgetDisplayOn
+    persisted_location: bundle_data
+    runtime_location: storefront runtime flow
+    type: string
+    allowed_values: [all, some]
+    default: all
+    nullable: true
+    dependencies: [upsellWidgetEnabled]
+    mutual_exclusions: []
+    visibility_condition: upsellWidgetEnabled === true
+    affected_components: [upsell blocks]
+    affected_states: [upsell render state]
+    merchant_editable: true
+    responsive_impact: medium
+    accessibility_impact: low
+    fixture_ids: []
+    test_case_ids: [fpb-all-template-summary]
+    status: DISCOVERED_CURRENT
+    evidence: app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/save-bundle-form.server.ts
+    notes: Limits where upsell blocks are injected by storefront location.
+
+  - id: fpb-text-overrides
+    family: FPB
+    templates: [STANDARD, CLASSIC, COMPACT, HORIZONTAL]
+    admin_label: Text Overrides
+    admin_location: Widget Settings
+    field_name: textOverrides
+    persisted_location: bundle_data
+    runtime_location: full-page/analytics-config-methods.js
+    type: object
+    allowed_values: []
+    default: {}
+    nullable: true
+    dependencies: [copy overrides]
+    mutual_exclusions: []
+    visibility_condition: always
+    affected_components: [all text surfaces]
+    affected_states: [render text]
+    merchant_editable: true
+    responsive_impact: low
+    accessibility_impact: medium
+    fixture_ids: []
+    test_case_ids: [fpb-all-template-summary]
+    status: DISCOVERED_CURRENT
+    evidence: app/assets/widgets/full-page/methods/analytics-config-methods.js
+    notes: Primary localized key/value map for storefront copy overrides.
+
+  - id: fpb-text-overrides-by-locale
+    family: FPB
+    templates: [STANDARD, CLASSIC, COMPACT, HORIZONTAL]
+    admin_label: Text Overrides by Locale
+    admin_location: Widget Settings
+    field_name: textOverridesByLocale
+    persisted_location: bundle_data
+    runtime_location: full-page/analytics-config-methods.js
+    type: object
+    allowed_values: []
+    default: {}
+    nullable: true
+    dependencies: [textOverrides]
+    mutual_exclusions: []
+    visibility_condition: always
+    affected_components: [localized text surfaces]
+    affected_states: [render text]
+    merchant_editable: true
+    responsive_impact: low
+    accessibility_impact: medium
+    fixture_ids: []
+    test_case_ids: [fpb-all-template-summary]
+    status: DISCOVERED_CURRENT
+    evidence: app/assets/widgets/full-page/methods/widget-misc-methods.js
+    notes: Locale partition of text overrides for multi-language storefront rendering.
+
+  - id: fpb-personalization-data
+    family: FPB
+    templates: [STANDARD, CLASSIC, COMPACT, HORIZONTAL]
+    admin_label: Personalization Data
+    admin_location: Widget Settings
+    field_name: personalizationData
+    persisted_location: bundle_data
+    runtime_location: full-page product page flow
+    type: object
+    allowed_values: []
+    default: {}
+    nullable: true
+    dependencies: [personalization mode]
+    mutual_exclusions: []
+    visibility_condition: always
+    affected_components: [personalization screens]
+    affected_states: [message flow]
+    merchant_editable: true
+    responsive_impact: low
+    accessibility_impact: low
+    fixture_ids: []
+    test_case_ids: [fpb-all-template-summary]
+    status: DISCOVERED_CURRENT
+    evidence: app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/save-bundle-form.server.ts
+    notes: Payload for personalize flow options such as message cards and gifting metadata.
+
+  - id: ppb-show-product-prices
+    family: PPB
+    templates: [GRID, LIST, VERTICAL_SLOTS, HORIZONTAL_SLOTS]
+    admin_label: Show Product Prices
+    admin_location: Bundle Settings
+    field_name: showProductPrices
+    persisted_location: bundle_data
+    runtime_location: product-page/config-lifecycle-methods.js
+    type: boolean
+    allowed_values: [true, false]
+    default: true
+    nullable: false
+    dependencies: [pricing display]
+    mutual_exclusions: []
+    visibility_condition: always
+    affected_components: [product card, footer totals]
+    affected_states: [pricing rendering]
+    merchant_editable: true
+    responsive_impact: low
+    accessibility_impact: low
+    fixture_ids: []
+    test_case_ids: [product-page-bundle-template-design-verification]
+    status: DISCOVERED_CURRENT
+    evidence: app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/save-bundle.server.ts
+    notes: Shared numeric visibility flag for product pricing in PPB storefront.
+
+  - id: ppb-show-compare-at-prices
+    family: PPB
+    templates: [GRID, LIST, VERTICAL_SLOTS, HORIZONTAL_SLOTS]
+    admin_label: Show Compare At Prices
+    admin_location: Bundle Settings
+    field_name: showCompareAtPrices
+    persisted_location: bundle_data
+    runtime_location: app/lib/bundle-config/product-page-display.ts
+    type: boolean
+    allowed_values: [true, false]
+    default: false
+    nullable: false
+    dependencies: [price display]
+    mutual_exclusions: []
+    visibility_condition: always
+    affected_components: [product card, footer totals]
+    affected_states: [pricing rendering]
+    merchant_editable: true
+    responsive_impact: low
+    accessibility_impact: low
+    fixture_ids: []
+    test_case_ids: [product-page-bundle-template-design-verification]
+    status: DISCOVERED_CURRENT
+    evidence: app/lib/bundle-config/product-page-display.ts
+    notes: PPB compare-at line visibility toggle resolved from controls layer.
+
+  - id: ppb-cart-redirect-to-checkout
+    family: PPB
+    templates: [GRID, LIST, VERTICAL_SLOTS, HORIZONTAL_SLOTS]
+    admin_label: Redirect Cart to Checkout
+    admin_location: Bundle Settings
+    field_name: cartRedirectToCheckout
+    persisted_location: bundle_data
+    runtime_location: product-page runtime workflow
+    type: boolean
+    allowed_values: [true, false]
+    default: false
+    nullable: false
+    dependencies: [checkout flow]
+    mutual_exclusions: []
+    visibility_condition: always
+    affected_components: [add-to-cart action]
+    affected_states: [checkout handoff]
+    merchant_editable: true
+    responsive_impact: low
+    accessibility_impact: medium
+    fixture_ids: []
+    test_case_ids: [product-page-bundle-template-design-verification]
+    status: DISCOVERED_CURRENT
+    evidence: app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/save-bundle.server.ts
+    notes: Same behavior flag as FPB but applied in PPB add-on workflow.
+
+  - id: ppb-allow-quantity-changes
+    family: PPB
+    templates: [GRID, LIST, VERTICAL_SLOTS, HORIZONTAL_SLOTS]
+    admin_label: Allow Quantity Changes
+    admin_location: Bundle Settings
+    field_name: allowQuantityChanges
+    persisted_location: bundle_data
+    runtime_location: product-page/selection-methods.js
+    type: boolean
+    allowed_values: [true, false]
+    default: true
+    nullable: false
+    dependencies: [quantity controls]
+    mutual_exclusions: []
+    visibility_condition: always
+    affected_components: [quantity controls]
+    affected_states: [selection behavior]
+    merchant_editable: true
+    responsive_impact: medium
+    accessibility_impact: medium
+    fixture_ids: []
+    test_case_ids: [product-page-bundle-template-design-verification]
+    status: DISCOVERED_CURRENT
+    evidence: app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/save-bundle.server.ts
+    notes: Toggles quantity-editability across in-page and modal PPB flows.
+
+  - id: ppb-auto-select-browsed-product
+    family: PPB
+    templates: [GRID, LIST, VERTICAL_SLOTS, HORIZONTAL_SLOTS]
+    admin_label: Auto Select Browsed Product
+    admin_location: Bundle Settings
+    field_name: autoSelectBrowsedProduct
+    persisted_location: bundle_data
+    runtime_location: product-page runtime flow
+    type: boolean
+    allowed_values: [true, false]
+    default: false
+    nullable: false
+    dependencies: [default selection]
+    mutual_exclusions: []
+    visibility_condition: always
+    affected_components: [initial selected products]
+    affected_states: [initialization defaults]
+    merchant_editable: true
+    responsive_impact: low
+    accessibility_impact: low
+    fixture_ids: []
+    test_case_ids: [product-page-bundle-template-design-verification]
+    status: DISCOVERED_CURRENT
+    evidence: app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/parsers.ts
+    notes: Uses current PDP context to seed selection where supported.
+
+  - id: ppb-bundle-banner-desktop-url
+    family: PPB
+    templates: [GRID, LIST, VERTICAL_SLOTS, HORIZONTAL_SLOTS]
+    admin_label: Bundle Banner Desktop URL
+    admin_location: Widget Settings
+    field_name: bundleBannerDesktopUrl
+    persisted_location: bundle_data
+    runtime_location: theme/banner sections
+    type: string
+    allowed_values: []
+    default: ""
+    nullable: true
+    dependencies: [banner]
+    mutual_exclusions: []
+    visibility_condition: always
+    affected_components: [bundle banner]
+    affected_states: [banner rendering]
+    merchant_editable: true
+    responsive_impact: medium
+    accessibility_impact: low
+    fixture_ids: []
+    test_case_ids: [product-page-bundle-template-design-verification]
+    status: DISCOVERED_CURRENT
+    evidence: app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/parsers.ts
+    notes: Desktop media source for PPB banner presentation.
+
+  - id: ppb-bundle-banner-mobile-url
+    family: PPB
+    templates: [GRID, LIST, VERTICAL_SLOTS, HORIZONTAL_SLOTS]
+    admin_label: Bundle Banner Mobile URL
+    admin_location: Widget Settings
+    field_name: bundleBannerMobileUrl
+    persisted_location: bundle_data
+    runtime_location: theme/banner sections
+    type: string
+    allowed_values: []
+    default: ""
+    nullable: true
+    dependencies: [banner]
+    mutual_exclusions: []
+    visibility_condition: always
+    affected_components: [bundle banner]
+    affected_states: [banner rendering]
+    merchant_editable: true
+    responsive_impact: medium
+    accessibility_impact: low
+    fixture_ids: []
+    test_case_ids: [product-page-bundle-template-design-verification]
+    status: DISCOVERED_CURRENT
+    evidence: app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/parsers.ts
+    notes: Mobile media source for PPB banner presentation.
+
+  - id: ppb-bundle-level-css
+    family: PPB
+    templates: [GRID, LIST, VERTICAL_SLOTS, HORIZONTAL_SLOTS]
+    admin_label: Bundle Level CSS
+    admin_location: Theme Styling
+    field_name: bundleLevelCss
+    persisted_location: bundle_data
+    runtime_location: full-page/runtime CSS injection
+    type: string
+    allowed_values: []
+    default: ""
+    nullable: true
+    dependencies: [custom styling]
+    mutual_exclusions: []
+    visibility_condition: always
+    affected_components: [all storefront components]
+    affected_states: [rendering]
+    merchant_editable: true
+    responsive_impact: high
+    accessibility_impact: medium
+    fixture_ids: []
+    test_case_ids: [product-page-bundle-template-design-verification]
+    status: DISCOVERED_CURRENT
+    evidence: app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/parsers.ts
+    notes: Per-bundle CSS injection path for PPB variants.
+
+  - id: ppb-variant-selector-enabled
+    family: PPB
+    templates: [GRID, LIST, VERTICAL_SLOTS, HORIZONTAL_SLOTS]
+    admin_label: Enable Variant Selector
+    admin_location: Widget Settings
+    field_name: variantSelectorEnabled
+    persisted_location: bundle_data
+    runtime_location: product-page/methods/inpage-render-methods.js
+    type: boolean
+    allowed_values: [true, false]
+    default: true
+    nullable: false
+    dependencies: [variant controls]
+    mutual_exclusions: []
+    visibility_condition: always
+    affected_components: [product card variants]
+    affected_states: [variant selection flow]
+    merchant_editable: true
+    responsive_impact: medium
+    accessibility_impact: high
+    fixture_ids: []
+    test_case_ids: [product-page-bundle-template-design-verification]
+    status: DISCOVERED_CURRENT
+    evidence: app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/usePpbModalAndTemplateController.ts
+    notes: Governs whether PPB cards expose inline variant selection UI.
+
+  - id: ppb-show-text-on-add-button
+    family: PPB
+    templates: [GRID, LIST, VERTICAL_SLOTS, HORIZONTAL_SLOTS]
+    admin_label: Show Text on Add Button
+    admin_location: Widget Settings
+    field_name: showTextOnAddButton
+    persisted_location: bundle_data
+    runtime_location: product-page/methods/config-lifecycle-methods.js
+    type: boolean
+    allowed_values: [true, false]
+    default: false
+    nullable: false
+    dependencies: [cta rendering]
+    mutual_exclusions: []
+    visibility_condition: always
+    affected_components: [add button]
+    affected_states: [cta mode]
+    merchant_editable: true
+    responsive_impact: low
+    accessibility_impact: medium
+    fixture_ids: []
+    test_case_ids: [product-page-bundle-template-design-verification]
+    status: DISCOVERED_CURRENT
+    evidence: app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/parsers.ts
+    notes: PPB CTA copy mode for product add controls.
+
+  - id: ppb-max-qty-per-product
+    family: PPB
+    templates: [GRID, LIST, VERTICAL_SLOTS, HORIZONTAL_SLOTS]
+    admin_label: Maximum Qty Per Product
+    admin_location: Bundle Settings
+    field_name: maxQtyPerProduct
+    persisted_location: bundle_data
+    runtime_location: product-page/selection-methods.js
+    type: integer
+    allowed_values: []
+    default: null
+    nullable: true
+    dependencies: [quantity validation]
+    mutual_exclusions: []
+    visibility_condition: always
+    affected_components: [quantity controls]
+    affected_states: [quantity validation]
+    merchant_editable: true
+    responsive_impact: low
+    accessibility_impact: low
+    fixture_ids: []
+    test_case_ids: [product-page-bundle-template-design-verification]
+    status: DISCOVERED_CURRENT
+    evidence: app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/parsers.ts
+    notes: Per-product cap used in PPB quantity limit logic.
+
+  - id: ppb-default-products-data
+    family: PPB
+    templates: [GRID, LIST, VERTICAL_SLOTS, HORIZONTAL_SLOTS]
+    admin_label: Default Products Data
+    admin_location: Widget Settings
+    field_name: defaultProductsData
+    persisted_location: bundle_data
+    runtime_location: product-page/default-product-methods.js
+    type: object
+    allowed_values: []
+    default: {}
+    nullable: true
+    dependencies: [default product prefill]
+    mutual_exclusions: []
+    visibility_condition: always
+    affected_components: [initial state]
+    affected_states: [initialization]
+    merchant_editable: true
+    responsive_impact: low
+    accessibility_impact: low
+    fixture_ids: []
+    test_case_ids: [product-page-bundle-template-design-verification]
+    status: DISCOVERED_CURRENT
+    evidence: app/assets/widgets/product-page/methods/default-product-methods.js
+    notes: Shared payload for default/preselected product hydration.
+
+  - id: ppb-box-selection
+    family: PPB
+    templates: [GRID, LIST, VERTICAL_SLOTS, HORIZONTAL_SLOTS]
+    admin_label: Box Selection
+    admin_location: Widget Settings
+    field_name: boxSelection
+    persisted_location: bundle_data
+    runtime_location: product-page config payload
+    type: object
+    allowed_values: []
+    default: {}
+    nullable: true
+    dependencies: [box/tiers feature]
+    mutual_exclusions: []
+    visibility_condition: always
+    affected_components: [box selection UI]
+    affected_states: [box selection]
+    merchant_editable: true
+    responsive_impact: medium
+    accessibility_impact: medium
+    fixture_ids: []
+    test_case_ids: [product-page-bundle-template-design-verification]
+    status: DISCOVERED_CURRENT
+    evidence: app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/parsers.ts
+    notes: Persisted configuration for PPB box/tier selection behavior.
+
+  - id: ppb-bundle-cart-title
+    family: PPB
+    templates: [GRID, LIST, VERTICAL_SLOTS, HORIZONTAL_SLOTS]
+    admin_label: Bundle Cart Title
+    admin_location: Widget Settings
+    field_name: bundleCartTitle
+    persisted_location: bundle_data
+    runtime_location: product-page/cart summary methods
+    type: string
+    allowed_values: []
+    default: ""
+    nullable: true
+    dependencies: [summary content]
+    mutual_exclusions: []
+    visibility_condition: always
+    affected_components: [bundle cart header]
+    affected_states: [cart summary]
+    merchant_editable: true
+    responsive_impact: low
+    accessibility_impact: low
+    fixture_ids: []
+    test_case_ids: [product-page-bundle-template-design-verification]
+    status: DISCOVERED_CURRENT
+    evidence: app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/parsers.ts
+    notes: Overrides PPB cart drawer/title text for the selected bundle section.
+
+  - id: ppb-bundle-cart-subtitle
+    family: PPB
+    templates: [GRID, LIST, VERTICAL_SLOTS, HORIZONTAL_SLOTS]
+    admin_label: Bundle Cart Subtitle
+    admin_location: Widget Settings
+    field_name: bundleCartSubtitle
+    persisted_location: bundle_data
+    runtime_location: product-page/cart summary methods
+    type: string
+    allowed_values: []
+    default: ""
+    nullable: true
+    dependencies: [summary content]
+    mutual_exclusions: []
+    visibility_condition: always
+    affected_components: [bundle cart header]
+    affected_states: [cart summary]
+    merchant_editable: true
+    responsive_impact: low
+    accessibility_impact: low
+    fixture_ids: []
+    test_case_ids: [product-page-bundle-template-design-verification]
+    status: DISCOVERED_CURRENT
+    evidence: app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/parsers.ts
+    notes: Optional supporting copy for PPB cart summary header.
+
+  - id: ppb-discount-display-override
+    family: PPB
+    templates: [GRID, LIST, VERTICAL_SLOTS, HORIZONTAL_SLOTS]
+    admin_label: Discount Display Override
+    admin_location: Widget Settings
+    field_name: discountDisplayOverride
+    persisted_location: bundle_data
+    runtime_location: bundle-formatter runtime
+    type: object
+    allowed_values: []
+    default: {}
+    nullable: true
+    dependencies: [discount messaging]
+    mutual_exclusions: []
+    visibility_condition: always
+    affected_components: [discount badges]
+    affected_states: [discount messaging]
+    merchant_editable: true
+    responsive_impact: low
+    accessibility_impact: low
+    fixture_ids: []
+    test_case_ids: [product-page-bundle-template-design-verification]
+    status: DISCOVERED_CURRENT
+    evidence: app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/parsers.ts
+    notes: Structured override used by PPB discount messaging and ribbon formatting.
+
+  - id: ppb-individual-selling-plan-selection
+    family: PPB
+    templates: [GRID, LIST, VERTICAL_SLOTS, HORIZONTAL_SLOTS]
+    admin_label: Individual Selling Plan Selection
+    admin_location: Widget Settings
+    field_name: individualSellingPlanSelection
+    persisted_location: bundle_data
+    runtime_location: product-page/selection-data-methods.js
+    type: object
+    allowed_values: []
+    default: {}
+    nullable: true
+    dependencies: [subscription options]
+    mutual_exclusions: []
+    visibility_condition: always
+    affected_components: [subscription controls]
+    affected_states: [selection behavior]
+    merchant_editable: true
+    responsive_impact: low
+    accessibility_impact: medium
+    fixture_ids: []
+    test_case_ids: [product-page-bundle-template-design-verification]
+    status: DISCOVERED_CURRENT
+    evidence: app/assets/widgets/product-page/methods/selection-data-methods.js
+    notes: Stores whether individual subscription plan selection is enabled and for which scope.
+
+  - id: ppb-validate-quantity-per-product
+    family: PPB
+    templates: [GRID, LIST, VERTICAL_SLOTS, HORIZONTAL_SLOTS]
+    admin_label: Validate Quantity Per Product
+    admin_location: Widget Settings
+    field_name: validateQuantityPerProduct
+    persisted_location: bundle_data
+    runtime_location: product-page/selection-methods.js
+    type: object
+    allowed_values: []
+    default: {}
+    nullable: true
+    dependencies: [maxQtyPerProduct]
+    mutual_exclusions: []
+    visibility_condition: always
+    affected_components: [quantity controls]
+    affected_states: [quantity validation]
+    merchant_editable: true
+    responsive_impact: low
+    accessibility_impact: low
+    fixture_ids: []
+    test_case_ids: [product-page-bundle-template-design-verification]
+    status: DISCOVERED_CURRENT
+    evidence: app/assets/widgets/product-page/methods/selection-methods.js
+    notes: PPB equivalent of FPB per-product quantity validation policy.
+
+  - id: ppb-use-single-step-categories
+    family: PPB
+    templates: [GRID, LIST, VERTICAL_SLOTS, HORIZONTAL_SLOTS]
+    admin_label: Single Step Categories as Bundle Steps
+    admin_location: Widget Settings
+    field_name: useSingleStepCategoriesAsBundleSteps
+    persisted_location: bundle_data
+    runtime_location: product-page/single-step-categories.js
+    type: boolean
+    allowed_values: [true, false]
+    default: false
+    nullable: false
+    dependencies: [category rendering]
+    mutual_exclusions: []
+    visibility_condition: always
+    affected_components: [category navigator]
+    affected_states: [step mapping]
+    merchant_editable: true
+    responsive_impact: low
+    accessibility_impact: medium
+    fixture_ids: []
+    test_case_ids: [product-page-bundle-template-design-verification]
+    status: DISCOVERED_CURRENT
+    evidence: app/assets/widgets/product-page/single-step-categories.js
+    notes: Flattens single-step categories into top-level bundle step flow.
+
+  - id: ppb-preselected-product-variant-id
+    family: PPB
+    templates: [GRID, LIST, VERTICAL_SLOTS, HORIZONTAL_SLOTS]
+    admin_label: Preselected Product Variant
+    admin_location: Widget Settings
+    field_name: preSelectedProductVariantId
+    persisted_location: bundle_data
+    runtime_location: product-page runtime state
+    type: string
+    allowed_values: []
+    default: ""
+    nullable: true
+    dependencies: [variant defaults]
+    mutual_exclusions: []
+    visibility_condition: always
+    affected_components: [preselected variants]
+    affected_states: [initialization]
+    merchant_editable: false
+    responsive_impact: low
+    accessibility_impact: low
+    fixture_ids: []
+    test_case_ids: [product-page-bundle-template-design-verification]
+    status: DISCOVERED_CURRENT
+    evidence: app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/parsers.ts
+    notes: Internal variant ID used for initial product selection context.
+
+  - id: ppb-upsell-widget-enabled
+    family: PPB
+    templates: [GRID, LIST, VERTICAL_SLOTS, HORIZONTAL_SLOTS]
+    admin_label: Upsell Widget Enabled
+    admin_location: Widget Settings
+    field_name: upsellWidgetEnabled
+    persisted_location: bundle_data
+    runtime_location: product-page config lifecycle
+    type: boolean
+    allowed_values: [true, false]
+    default: false
+    nullable: false
+    dependencies: [upsell config]
+    mutual_exclusions: []
+    visibility_condition: always
+    affected_components: [upsell blocks]
+    affected_states: [upsell render state]
+    merchant_editable: true
+    responsive_impact: medium
+    accessibility_impact: low
+    fixture_ids: []
+    test_case_ids: [product-page-bundle-template-design-verification]
+    status: DISCOVERED_CURRENT
+    evidence: app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/parsers.ts
+    notes: Feature toggle for PPB upsell block rendering.
+
+  - id: ppb-upsell-widget-display-mode
+    family: PPB
+    templates: [GRID, LIST, VERTICAL_SLOTS, HORIZONTAL_SLOTS]
+    admin_label: Upsell Widget Display Mode
+    admin_location: Widget Settings
+    field_name: upsellWidgetDisplayMode
+    persisted_location: bundle_data
+    runtime_location: product-page config lifecycle
+    type: string
+    allowed_values: [block, inline]
+    default: block
+    nullable: true
+    dependencies: [upsellWidgetEnabled]
+    mutual_exclusions: []
+    visibility_condition: upsellWidgetEnabled === true
+    affected_components: [upsell blocks]
+    affected_states: [upsell render state]
+    merchant_editable: true
+    responsive_impact: medium
+    accessibility_impact: low
+    fixture_ids: []
+    test_case_ids: [product-page-bundle-template-design-verification]
+    status: DISCOVERED_CURRENT
+    evidence: app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/parsers.ts
+    notes: Modifies placement style for PPB upsell content.
+
+  - id: ppb-upsell-widget-display-on
+    family: PPB
+    templates: [GRID, LIST, VERTICAL_SLOTS, HORIZONTAL_SLOTS]
+    admin_label: Upsell Widget Display On
+    admin_location: Widget Settings
+    field_name: upsellWidgetDisplayOn
+    persisted_location: bundle_data
+    runtime_location: product-page config lifecycle
+    type: string
+    allowed_values: [all, some]
+    default: all
+    nullable: true
+    dependencies: [upsellWidgetEnabled]
+    mutual_exclusions: []
+    visibility_condition: upsellWidgetEnabled === true
+    affected_components: [upsell blocks]
+    affected_states: [upsell render state]
+    merchant_editable: true
+    responsive_impact: medium
+    accessibility_impact: low
+    fixture_ids: []
+    test_case_ids: [product-page-bundle-template-design-verification]
+    status: DISCOVERED_CURRENT
+    evidence: app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/parsers.ts
+    notes: Restricts where PPB upsell widgets are visible in the page.

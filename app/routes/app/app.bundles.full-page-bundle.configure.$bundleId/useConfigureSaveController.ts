@@ -103,7 +103,7 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
       );
       formData.append(
         "showTextOnAddButton",
-        String(flow.showTextOnPlusEnabled),
+        String(flow.showTextOnAddButton),
       );
       formData.append(
         "textOverrides",

@@ -97,7 +97,7 @@ describe("PPB Select Template metafield sync", () => {
       bundleType: "product_page",
       shopifyProductId: "gid://shopify/Product/123",
       bundleDesignTemplate: "PDP_INPAGE",
-      bundleDesignPresetId: "CASCADE",
+      bundleDesignPresetId: "LIST",
       defaultProductsData: { isDefaultProductsEnabled: true },
       bundleTextConfig: { bundleSummary: { title: "Summary", subTitle: "Sub" } },
       validateQuantityPerProduct: { isEnabled: true, allowedQuantity: 1 },
@@ -129,7 +129,7 @@ describe("PPB Select Template metafield sync", () => {
       "bundle-1",
       makeForm({
         bundleDesignTemplate: "PDP_INPAGE",
-        bundleDesignPresetId: "CASCADE",
+        bundleDesignPresetId: "LIST",
       }),
     );
     const body = await response.json();
@@ -139,7 +139,7 @@ describe("PPB Select Template metafield sync", () => {
       where: { id: "bundle-1", shopId: "test-shop.myshopify.com" },
       data: {
         bundleDesignTemplate: "PDP_INPAGE",
-        bundleDesignPresetId: "CASCADE",
+        bundleDesignPresetId: "LIST",
       },
     }));
 
@@ -153,17 +153,15 @@ describe("PPB Select Template metafield sync", () => {
       "gid://shopify/Product/123",
       expect.objectContaining({
         bundleDesignTemplate: "PDP_INPAGE",
-        bundleDesignPresetId: "CASCADE",
-        bundleDesignTemplateData: { templateId: "CASCADE" },
+        bundleDesignPresetId: "LIST",
         defaultProductsData: { isDefaultProductsEnabled: true },
         bundleTextConfig: { bundleSummary: { title: "Summary", subTitle: "Sub" } },
         validateQuantityPerProduct: { isEnabled: true, allowedQuantity: 1 },
-        renderFilledSlotsAsHorizontalStacked: null,
       }),
     );
   });
 
-  it("rewrites PPB modal slot orientation into bundle product metafields", async () => {
+  it("rewrites PPB modal preset into bundle product metafields", async () => {
     getDb().bundle.update.mockResolvedValue({
       id: "bundle-1",
       name: "Product Page Bundle",
@@ -173,7 +171,7 @@ describe("PPB Select Template metafield sync", () => {
       bundleType: "product_page",
       shopifyProductId: "gid://shopify/Product/123",
       bundleDesignTemplate: "PDP_MODAL",
-      bundleDesignPresetId: "MODAL",
+      bundleDesignPresetId: "HORIZONTAL_SLOTS",
       defaultProductsData: {},
       bundleTextConfig: {},
       validateQuantityPerProduct: { isEnabled: false, allowedQuantity: 1 },
@@ -189,7 +187,7 @@ describe("PPB Select Template metafield sync", () => {
       "bundle-1",
       makeForm({
         bundleDesignTemplate: "PDP_MODAL",
-        bundleDesignPresetId: "MODAL",
+        bundleDesignPresetId: "HORIZONTAL_SLOTS",
       }),
     );
     const body = await response.json();
@@ -200,9 +198,7 @@ describe("PPB Select Template metafield sync", () => {
       "gid://shopify/Product/123",
       expect.objectContaining({
         bundleDesignTemplate: "PDP_MODAL",
-        bundleDesignPresetId: "MODAL",
-        bundleDesignTemplateData: { templateId: "MODAL" },
-        renderFilledSlotsAsHorizontalStacked: true,
+        bundleDesignPresetId: "HORIZONTAL_SLOTS",
       }),
     );
   });

@@ -156,7 +156,7 @@
   max-width: 100%;
 }
 
-#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="SIMPLIFIED"][data-ppb-slot-orientation="vertical"]
+#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="VERTICAL_SLOTS"][data-ppb-slot-orientation="vertical"]
   .bundle-steps {
   display: flex;
   flex-direction: column;
@@ -168,7 +168,7 @@
   align-items: stretch;
 }
 
-#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="SIMPLIFIED"][data-ppb-slot-orientation="vertical"]
+#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="VERTICAL_SLOTS"][data-ppb-slot-orientation="vertical"]
   .bw-ppb-modal-slot-section {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -177,7 +177,7 @@
   max-width: 100%;
 }
 
-#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="SIMPLIFIED"][data-ppb-slot-orientation="vertical"]
+#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="VERTICAL_SLOTS"][data-ppb-slot-orientation="vertical"]
   .bw-ppb-modal-slot-title {
   color: #000000;
   font-size: 16px;
@@ -188,7 +188,7 @@
   margin: 0;
 }
 
-#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="SIMPLIFIED"][data-ppb-slot-orientation="vertical"]
+#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="VERTICAL_SLOTS"][data-ppb-slot-orientation="vertical"]
   .bw-ppb-modal-slot-grid.bw-ppb-modal-slot-grid--simplified {
   display: grid;
   grid-template-columns: 1fr;
@@ -199,7 +199,7 @@
   justify-items: stretch;
 }
 
-#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="SIMPLIFIED"][data-ppb-slot-orientation="vertical"]
+#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="VERTICAL_SLOTS"][data-ppb-slot-orientation="vertical"]
   .bw-ppb-modal-slot-grid.bw-ppb-modal-slot-grid--simplified
   .bw-slot-card--empty {
   display: grid;
@@ -217,7 +217,7 @@
   box-shadow: none;
 }
 
-#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="SIMPLIFIED"][data-ppb-slot-orientation="vertical"]
+#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="VERTICAL_SLOTS"][data-ppb-slot-orientation="vertical"]
   .bw-ppb-modal-slot-grid.bw-ppb-modal-slot-grid--simplified
   .bw-slot-card__empty-visual {
   display: block;
@@ -234,13 +234,13 @@
   background-position: center;
 }
 
-#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="SIMPLIFIED"][data-ppb-slot-orientation="vertical"]
+#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="VERTICAL_SLOTS"][data-ppb-slot-orientation="vertical"]
   .bw-ppb-modal-slot-grid.bw-ppb-modal-slot-grid--simplified
   .bw-slot-card__plus-icon--plain {
   display: none;
 }
 
-#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="SIMPLIFIED"][data-ppb-slot-orientation="vertical"]
+#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="VERTICAL_SLOTS"][data-ppb-slot-orientation="vertical"]
   .bw-ppb-modal-slot-grid.bw-ppb-modal-slot-grid--simplified
   .bw-slot-card__label {
   grid-column: 1;
@@ -257,7 +257,7 @@
   white-space: normal;
 }
 
-#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="SIMPLIFIED"][data-ppb-slot-orientation="vertical"]
+#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="VERTICAL_SLOTS"][data-ppb-slot-orientation="vertical"]
   .bw-ppb-modal-slot-grid.bw-ppb-modal-slot-grid--simplified
   .bw-slot-card--filled {
   display: flex;
@@ -271,7 +271,7 @@
   overflow: hidden;
 }
 
-#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="SIMPLIFIED"][data-ppb-slot-orientation="vertical"]
+#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="VERTICAL_SLOTS"][data-ppb-slot-orientation="vertical"]
   .bw-ppb-modal-slot-grid.bw-ppb-modal-slot-grid--simplified
   .bw-slot-card--filled
   .step-clear-badge {
@@ -283,7 +283,7 @@
   margin: 0;
 }
 
-#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="SIMPLIFIED"][data-ppb-slot-orientation="vertical"]
+#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="VERTICAL_SLOTS"][data-ppb-slot-orientation="vertical"]
   .bw-ppb-modal-slot-grid.bw-ppb-modal-slot-grid--simplified
   .bw-slot-card--filled
   .step-clear-badge
@@ -292,7 +292,7 @@
   height: 20px;
 }
 
-#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="SIMPLIFIED"][data-ppb-slot-orientation="vertical"]
+#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="VERTICAL_SLOTS"][data-ppb-slot-orientation="vertical"]
   .bw-ppb-modal-slot-grid.bw-ppb-modal-slot-grid--simplified
   .bw-slot-card--filled
   .bw-slot-card__image-wrapper {
@@ -304,7 +304,7 @@
   border-radius: 0;
 }
 
-#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="SIMPLIFIED"][data-ppb-slot-orientation="vertical"]
+#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="VERTICAL_SLOTS"][data-ppb-slot-orientation="vertical"]
   .bw-ppb-modal-slot-grid.bw-ppb-modal-slot-grid--simplified
   .bw-slot-card--filled
   .bw-slot-card__image-wrapper
@@ -314,7 +314,7 @@
   border-radius: 0;
 }
 
-#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="SIMPLIFIED"][data-ppb-slot-orientation="vertical"]
+#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="VERTICAL_SLOTS"][data-ppb-slot-orientation="vertical"]
   .bw-ppb-modal-slot-grid.bw-ppb-modal-slot-grid--simplified
   .bw-slot-card--filled
   .step-name {
@@ -337,9 +337,9 @@
   -webkit-line-clamp: 2;
 }
 
-#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="SIMPLIFIED"][data-ppb-slot-orientation="vertical"]
+#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="VERTICAL_SLOTS"][data-ppb-slot-orientation="vertical"]
   .add-bundle-to-cart,
-#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="SIMPLIFIED"][data-ppb-slot-orientation="vertical"]
+#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="VERTICAL_SLOTS"][data-ppb-slot-orientation="vertical"]
   .add-bundle-to-cart:hover {
   height: 45px;
   margin: 14px 0 0;
@@ -348,15 +348,15 @@
   opacity: 1;
 }
 
-#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="SIMPLIFIED"][data-ppb-slot-orientation="vertical"]
+#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="VERTICAL_SLOTS"][data-ppb-slot-orientation="vertical"]
   .add-bundle-to-cart:disabled,
-#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="SIMPLIFIED"][data-ppb-slot-orientation="vertical"]
+#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="VERTICAL_SLOTS"][data-ppb-slot-orientation="vertical"]
   .add-bundle-to-cart.disabled {
   background: #000000 !important;
   opacity: 0.5;
 }
 
-#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="SIMPLIFIED"][data-ppb-slot-orientation="vertical"]
+#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="VERTICAL_SLOTS"][data-ppb-slot-orientation="vertical"]
   .bw-ppb-dynamic-checkout-visual {
   width: 100%;
   max-width: 100%;
@@ -371,7 +371,7 @@
 }
 
 @media (max-width: 480px) {
-  #bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="SIMPLIFIED"][data-ppb-slot-orientation="vertical"]
+  #bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="VERTICAL_SLOTS"][data-ppb-slot-orientation="vertical"]
     .bw-ppb-modal-slot-grid.bw-ppb-modal-slot-grid--simplified
     .bw-slot-card__label {
     font-size: 10px;
@@ -499,13 +499,13 @@
   white-space: normal;
 }
 
-#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="MODAL"][data-ppb-slot-orientation="horizontal"]
+#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="HORIZONTAL_SLOTS"][data-ppb-slot-orientation="horizontal"]
   .bundle-steps {
   gap: 10px;
   margin: 20px 0 12px;
 }
 
-#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="MODAL"][data-ppb-slot-orientation="horizontal"]
+#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="HORIZONTAL_SLOTS"][data-ppb-slot-orientation="horizontal"]
   .bw-ppb-modal-slot-section {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -514,7 +514,7 @@
   max-width: 100%;
 }
 
-#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="MODAL"][data-ppb-slot-orientation="horizontal"]
+#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="HORIZONTAL_SLOTS"][data-ppb-slot-orientation="horizontal"]
   .bw-ppb-modal-slot-title {
   color: #000000;
   font-size: 16px;
@@ -523,7 +523,7 @@
   text-align: left;
 }
 
-#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="MODAL"][data-ppb-slot-orientation="horizontal"]
+#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="HORIZONTAL_SLOTS"][data-ppb-slot-orientation="horizontal"]
   .bw-ppb-modal-slot-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -534,10 +534,10 @@
   justify-items: stretch;
 }
 
-#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="MODAL"][data-ppb-slot-orientation="horizontal"]
+#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="HORIZONTAL_SLOTS"][data-ppb-slot-orientation="horizontal"]
   .bw-ppb-modal-slot-grid
   .step-box.add-more-card,
-#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="MODAL"][data-ppb-slot-orientation="horizontal"]
+#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="HORIZONTAL_SLOTS"][data-ppb-slot-orientation="horizontal"]
   .bw-ppb-modal-slot-grid
   .bw-slot-card--empty {
   display: grid;
@@ -557,7 +557,7 @@
   box-shadow: none;
 }
 
-#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="MODAL"][data-ppb-slot-orientation="horizontal"]
+#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="HORIZONTAL_SLOTS"][data-ppb-slot-orientation="horizontal"]
   .bw-ppb-modal-slot-grid
   .bw-slot-card__empty-visual {
   width: 100%;
@@ -570,7 +570,7 @@
   background-position: center;
 }
 
-#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="MODAL"][data-ppb-slot-orientation="horizontal"]
+#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="HORIZONTAL_SLOTS"][data-ppb-slot-orientation="horizontal"]
   .bw-ppb-modal-slot-grid
   .bw-slot-card__label {
   width: 100%;
@@ -651,7 +651,7 @@
   transform: none;
 }
 
-#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="MODAL"][data-ppb-slot-orientation="horizontal"]
+#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="HORIZONTAL_SLOTS"][data-ppb-slot-orientation="horizontal"]
   .add-bundle-to-cart {
   border-radius: 5px;
 }

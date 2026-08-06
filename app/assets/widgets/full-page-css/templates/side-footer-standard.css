@@ -252,7 +252,7 @@ body:has([data-fpb-design-preset]) {
   border-bottom-color: #000;
 }
 
-/* Runtime CSS moved from standard-template.js. Keep scoped to Standard FPB. */
+/* Runtime CSS migrated into scoped Standard FPB stylesheet. */
 
 /* baseStyles */
 .bundle-widget-full-page.fpb-preset-standard {

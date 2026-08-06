@@ -89,25 +89,25 @@ describe("Settings Design preview model", () => {
       },
       {
         key: "product-list",
-        preset: "CASCADE",
+        preset: "LIST",
         productCard: { mode: "row", columns: { desktop: 1, mobile: 1 } },
-        navigation: "cascade-steps",
+        navigation: "list-steps",
         categories: "tabs",
-        summary: "cascade-drawer",
+        summary: "list-selected-drawer",
         surfaces: ["builder", "cart-summary", "loading", "validation", "upsell"],
       },
       {
         key: "product-grid",
-        preset: "COGNIVE",
+        preset: "GRID",
         productCard: { mode: "grid", columns: { desktop: 4, mobile: 2 } },
-        navigation: "cognive-steps",
+        navigation: "grid-steps",
         categories: "tabs",
         summary: "pdp-footer",
         surfaces: ["builder", "cart-summary", "loading", "validation", "upsell"],
       },
       {
         key: "horizontal-slots",
-        preset: "MODAL",
+        preset: "HORIZONTAL_SLOTS",
         productCard: { mode: "grid", columns: { desktop: 3, mobile: 2 } },
         navigation: "none",
         categories: "none",
@@ -116,7 +116,7 @@ describe("Settings Design preview model", () => {
       },
       {
         key: "vertical-slots",
-        preset: "SIMPLIFIED",
+        preset: "VERTICAL_SLOTS",
         productCard: { mode: "grid", columns: { desktop: 3, mobile: 2 } },
         navigation: "none",
         categories: "none",
@@ -257,10 +257,10 @@ describe("Settings Design preview model", () => {
       expect.arrayContaining(["underline-categories", "product-rows", "summary-sidebar"]),
     );
     expect(getDesignPreviewScene("product-list", "cart-summary", "desktop").regions).toEqual(
-      expect.arrayContaining(["cascade-selected-drawer", "pdp-footer"]),
+      expect.arrayContaining(["product-list-selected-drawer", "pdp-footer"]),
     );
     expect(getDesignPreviewScene("product-grid", "builder", "mobile").regions).toEqual(
-      expect.arrayContaining(["cognive-step-headers", "product-grid", "pdp-footer"]),
+      expect.arrayContaining(["product-grid-step-headers", "product-grid", "pdp-footer"]),
     );
     expect(getDesignPreviewScene("horizontal-slots", "product-picker", "desktop").regions).toEqual(
       expect.arrayContaining(["horizontal-slots", "product-picker-modal"]),

@@ -6,7 +6,6 @@ import {
 } from "../../../../services/bundles/metafield-sync.server";
 import { parseConditionValue } from "../../../../lib/parse-condition-value";
 import { formatStepCategoryForRuntime } from "../../../../lib/bundle-config/category-runtime";
-import { resolveProductPageRenderFilledSlotsAsHorizontalStacked } from "../../../../lib/bundle-config/template-selection";
 import { BundleStatus, BundleType } from "../../../../constants/bundle";
 import { safeJsonParse } from "../../../../services/bundles/bundle-configure-handlers.server";
 
@@ -130,12 +129,6 @@ export function buildBundleBaseConfig(
     discountData.discountRules?.[0]?.id ?? Object.keys(pricingRuleMessages)[0];
   const firstRuleMsg = firstRuleId && pricingRuleMessages?.[firstRuleId];
 
-  const bundleDesignTemplateData =
-    updatedBundle.bundleType === "product_page" &&
-    updatedBundle.bundleDesignPresetId
-      ? { templateId: updatedBundle.bundleDesignPresetId }
-      : null;
-
   return {
     bundleId: updatedBundle.id,
     id: updatedBundle.id,
@@ -146,7 +139,6 @@ export function buildBundleBaseConfig(
     templateName: updatedBundle.templateName,
     bundleDesignTemplate: updatedBundle.bundleDesignTemplate ?? null,
     bundleDesignPresetId: updatedBundle.bundleDesignPresetId ?? null,
-    bundleDesignTemplateData,
     defaultProductsData: updatedBundle.defaultProductsData ?? {},
     boxSelection: updatedBundle.boxSelection ?? null,
     bundleUpsellConfig: updatedBundle.bundleUpsellConfig ?? null,
@@ -161,13 +153,8 @@ export function buildBundleBaseConfig(
       isEnabled: false,
       allowedQuantity: 1,
     },
-    useSingleStepCategoriesAsBundleSteps:
+  useSingleStepCategoriesAsBundleSteps:
       updatedBundle.useSingleStepCategoriesAsBundleSteps ?? false,
-    renderFilledSlotsAsHorizontalStacked:
-      resolveProductPageRenderFilledSlotsAsHorizontalStacked(
-        updatedBundle.bundleDesignTemplate,
-        bundleDesignTemplateData?.templateId,
-      ),
     steps: optimizedSteps,
     pricing: {
       enabled: discountData.discountEnabled,
@@ -409,11 +396,6 @@ export function buildSyncBundleConfiguration(
   extra: Record<string, unknown> = {},
 ): Record<string, unknown> {
   const bundleDesignPresetId = bundle.bundleDesignPresetId ?? null;
-  const bundleDesignTemplateData =
-    bundle.bundleType === BundleType.PRODUCT_PAGE && bundleDesignPresetId
-      ? { templateId: bundleDesignPresetId }
-      : null;
-
   return {
     bundleId: bundle.id,
     id: bundle.id,
@@ -426,7 +408,6 @@ export function buildSyncBundleConfiguration(
     type: "cart_transform",
     bundleDesignTemplate: bundle.bundleDesignTemplate ?? null,
     bundleDesignPresetId,
-    bundleDesignTemplateData,
     defaultProductsData: bundle.defaultProductsData ?? {},
     boxSelection: bundle.boxSelection ?? null,
     bundleUpsellConfig: bundle.bundleUpsellConfig ?? null,
@@ -441,13 +422,8 @@ export function buildSyncBundleConfiguration(
       isEnabled: false,
       allowedQuantity: 1,
     },
-    useSingleStepCategoriesAsBundleSteps:
+  useSingleStepCategoriesAsBundleSteps:
       bundle.useSingleStepCategoriesAsBundleSteps ?? false,
-    renderFilledSlotsAsHorizontalStacked:
-      resolveProductPageRenderFilledSlotsAsHorizontalStacked(
-        bundle.bundleDesignTemplate,
-        bundleDesignTemplateData?.templateId,
-      ),
     steps: buildSyncOptimizedSteps(bundle.steps || []),
     pricing: buildSyncPricingConfig(bundle.pricing),
     loadingGif: bundle.loadingGif ?? null,

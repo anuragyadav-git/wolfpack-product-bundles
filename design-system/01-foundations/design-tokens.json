@@ -1,0 +1,348 @@
+{
+  "schema_version": 1,
+  "id": "wolfpack-bundle-token-registry",
+  "title": "Wolfpack Bundle Semantic Design Tokens",
+  "status": "active",
+  "last_audited": "2026-08-06",
+  "scope": {
+    "families": ["FPB", "PPB"],
+    "surfaces": ["storefront", "admin-preview"]
+  },
+  "families": {
+    "canvas": {
+      "background": {
+        "token": "--bundle-full-page-bg-color",
+        "fallback": "#ffffff",
+        "merchant_editable": false,
+        "contrast_pair": "text.primary",
+        "disabled_transform": "reduce_alpha_70",
+        "high_contrast_fallback": "#ffffff"
+      },
+      "surface": {
+        "token": "--bundle-bg-color",
+        "fallback": "transparent",
+        "merchant_editable": false,
+        "contrast_pair": "text.primary",
+        "disabled_transform": "reduce_alpha_70",
+        "high_contrast_fallback": "#ffffff"
+      }
+    },
+    "surface": {
+      "default": {
+        "token": "--bundle-surface-color",
+        "fallback": "#ffffff",
+        "merchant_editable": false,
+        "contrast_pair": "text.primary",
+        "disabled_transform": "reduce_chroma",
+        "high_contrast_fallback": "#ffffff"
+      },
+      "elevated": {
+        "token": "--bundle-side-panel-bg",
+        "fallback": "#ffffff",
+        "merchant_editable": false,
+        "contrast_pair": "text.primary",
+        "disabled_transform": "reduce_chroma",
+        "high_contrast_fallback": "#ffffff"
+      }
+    },
+    "text": {
+      "primary": {
+        "token": "--bundle-text-primary",
+        "fallback": "#111111",
+        "merchant_editable": false,
+        "contrast_pair": "surface",
+        "disabled_transform": "reduce_alpha_65",
+        "high_contrast_fallback": "#000000"
+      },
+      "secondary": {
+        "token": "--bundle-text-secondary",
+        "fallback": "#4b5563",
+        "merchant_editable": false,
+        "contrast_pair": "surface",
+        "disabled_transform": "reduce_alpha_60",
+        "high_contrast_fallback": "#374151"
+      },
+      "muted": {
+        "token": "--bundle-text-color",
+        "fallback": "#6b7280",
+        "merchant_editable": false,
+        "contrast_pair": "surface",
+        "disabled_transform": "reduce_alpha_55",
+        "high_contrast_fallback": "#374151"
+      }
+    },
+    "border": {
+      "default": {
+        "token": "--bundle-border-color",
+        "fallback": "rgba(17,24,39,0.2)",
+        "merchant_editable": false,
+        "contrast_pair": "surface",
+        "disabled_transform": "reduce_alpha_60",
+        "high_contrast_fallback": "#d1d5db"
+      },
+      "divider": {
+        "token": "--bundle-sidebar",
+        "fallback": "rgba(148,163,184,0.4)",
+        "merchant_editable": false,
+        "contrast_pair": "surface",
+        "disabled_transform": "reduce_alpha_60",
+        "high_contrast_fallback": "#e5e7eb"
+      },
+      "focus": {
+        "token": "--bundle-focus-outline-color",
+        "fallback": "rgba(56,189,248,0.95)",
+        "merchant_editable": false,
+        "contrast_pair": "surface",
+        "disabled_transform": "retain_color",
+        "high_contrast_fallback": "#0f172a"
+      }
+    },
+    "action": {
+      "primary": {
+        "token": "--bundle-button-bg",
+        "fallback": "var(--bundle-global-primary-button, #111111)",
+        "merchant_editable": true,
+        "contrast_pair": "text.on-primary",
+        "disabled_transform": "reduce_alpha_55",
+        "high_contrast_fallback": "#000000"
+      },
+      "primary_text": {
+        "token": "--bundle-button-text-color",
+        "fallback": "var(--bundle-global-button-text, #ffffff)",
+        "merchant_editable": true,
+        "contrast_pair": "text.on-primary",
+        "disabled_transform": "reduce_alpha_65",
+        "high_contrast_fallback": "#ffffff"
+      },
+      "secondary": {
+        "token": "--bundle-sidebar-button-bg",
+        "fallback": "var(--bundle-side-panel-bg, #ffffff)",
+        "merchant_editable": true,
+        "contrast_pair": "text.primary",
+        "disabled_transform": "reduce_alpha_60",
+        "high_contrast_fallback": "#ffffff"
+      },
+      "secondary_text": {
+        "token": "--bundle-sidebar-button-text",
+        "fallback": "var(--bundle-text-primary, #111111)",
+        "merchant_editable": true,
+        "contrast_pair": "text.primary",
+        "disabled_transform": "reduce_alpha_60",
+        "high_contrast_fallback": "#111111"
+      },
+      "destructive": {
+        "token": "--bundle-side-panel-remove-color",
+        "fallback": "#b42318",
+        "merchant_editable": false,
+        "contrast_pair": "surface-elevated",
+        "disabled_transform": "reduce_alpha_55",
+        "high_contrast_fallback": "#7f1d1d"
+      }
+    },
+    "state": {
+      "success": {
+        "token": "--bundle-success-color",
+        "fallback": "#16a34a",
+        "merchant_editable": false,
+        "contrast_pair": "text.primary",
+        "disabled_transform": "reduce_alpha_55",
+        "high_contrast_fallback": "#166534"
+      },
+      "warning": {
+        "token": "--bundle-toast-border-color",
+        "fallback": "#d97706",
+        "merchant_editable": false,
+        "contrast_pair": "text.primary",
+        "disabled_transform": "reduce_alpha_55",
+        "high_contrast_fallback": "#92400e"
+      },
+      "error": {
+        "token": "--bundle-side-panel-remove-hover",
+        "fallback": "#b91c1c",
+        "merchant_editable": false,
+        "contrast_pair": "surface",
+        "disabled_transform": "reduce_alpha_50",
+        "high_contrast_fallback": "#991b1b"
+      },
+      "disabled": {
+        "token": "--bundle-surface-muted",
+        "fallback": "#f5f5f5",
+        "merchant_editable": false,
+        "contrast_pair": "text.muted",
+        "disabled_transform": "opacity_45",
+        "high_contrast_fallback": "#f3f4f6"
+      }
+    },
+    "overlay": {
+      "backdrop": {
+        "token": "--bundle-bottom-sheet-overlay-opacity",
+        "fallback": "rgba(0,0,0,0.55)",
+        "merchant_editable": false,
+        "contrast_pair": "surface-elevated",
+        "disabled_transform": "reduce_alpha_20",
+        "high_contrast_fallback": "rgba(0,0,0,0.75)"
+      }
+    },
+    "price": {
+      "original": {
+        "token": "--bundle-product-strike-price-color",
+        "fallback": "#6b7280",
+        "merchant_editable": false,
+        "contrast_pair": "text.primary",
+        "disabled_transform": "reduce_alpha_65",
+        "high_contrast_fallback": "#4b5563"
+      },
+      "discount": {
+        "token": "--bundle-product-final-price-color",
+        "fallback": "#111827",
+        "merchant_editable": false,
+        "contrast_pair": "text.primary",
+        "disabled_transform": "reduce_alpha_55",
+        "high_contrast_fallback": "#111827"
+      },
+      "free": {
+        "token": "--bundle-free-gift-unlocked-text",
+        "fallback": "#166534",
+        "merchant_editable": false,
+        "contrast_pair": "surface",
+        "disabled_transform": "reduce_alpha_60",
+        "high_contrast_fallback": "#14532d"
+      }
+    },
+    "selection": {
+      "badge": {
+        "token": "--bundle-variant-badge-bg",
+        "fallback": "#16a34a",
+        "merchant_editable": false,
+        "contrast_pair": "text.primary",
+        "disabled_transform": "reduce_alpha_60",
+        "high_contrast_fallback": "#14532d"
+      },
+      "selected_product": {
+        "token": "--bundle-state-card-selected-bg",
+        "fallback": "#f0fdf4",
+        "merchant_editable": false,
+        "contrast_pair": "text.primary",
+        "disabled_transform": "reduce_alpha_55",
+        "high_contrast_fallback": "#ecfccb"
+      },
+      "included_product": {
+        "token": "--bundle-included-badge-bottom",
+        "fallback": "rgba(22,163,74,0.95)",
+        "merchant_editable": false,
+        "contrast_pair": "text.primary",
+        "disabled_transform": "reduce_alpha_60",
+        "high_contrast_fallback": "#166534"
+      }
+    },
+    "badge": {
+      "base": {
+        "token": "--bundle-discount-banner-bg",
+        "fallback": "rgba(30,30,30,0.9)",
+        "merchant_editable": false,
+        "contrast_pair": "text.primary",
+        "disabled_transform": "reduce_alpha_60",
+        "high_contrast_fallback": "#111827"
+      },
+      "text": {
+        "token": "--bundle-discount-banner-text",
+        "fallback": "#ffffff",
+        "merchant_editable": false,
+        "contrast_pair": "badge.base",
+        "disabled_transform": "reduce_alpha_60",
+        "high_contrast_fallback": "#ffffff"
+      }
+    },
+    "toast": {
+      "background": {
+        "token": "--bundle-toast-bg",
+        "fallback": "#111111",
+        "merchant_editable": false,
+        "contrast_pair": "text.primary",
+        "disabled_transform": "reduce_alpha_65",
+        "high_contrast_fallback": "#000000"
+      },
+      "text": {
+        "token": "--bundle-toast-text",
+        "fallback": "#ffffff",
+        "merchant_editable": false,
+        "contrast_pair": "toast.background",
+        "disabled_transform": "reduce_alpha_60",
+        "high_contrast_fallback": "#ffffff"
+      }
+    },
+    "progress": {
+      "track": {
+        "token": "--bundle-border-color",
+        "fallback": "#e5e7eb",
+        "merchant_editable": false,
+        "contrast_pair": "surface",
+        "disabled_transform": "reduce_alpha_60",
+        "high_contrast_fallback": "#d1d5db"
+      },
+      "fill": {
+        "token": "--bundle-discount-banner-bg",
+        "fallback": "#111111",
+        "merchant_editable": false,
+        "contrast_pair": "text.primary",
+        "disabled_transform": "reduce_alpha_55",
+        "high_contrast_fallback": "#000000"
+      }
+    },
+    "discount": {
+      "pill_background": {
+        "token": "--bundle-discount-pill-bg",
+        "fallback": "#f0fdf4",
+        "merchant_editable": false,
+        "contrast_pair": "discount.pill_text",
+        "disabled_transform": "reduce_alpha_55",
+        "high_contrast_fallback": "#dcfce7"
+      },
+      "pill_text": {
+        "token": "--bundle-discount-pill-text",
+        "fallback": "#166534",
+        "merchant_editable": false,
+        "contrast_pair": "discount.pill_background",
+        "disabled_transform": "reduce_alpha_60",
+        "high_contrast_fallback": "#14532d"
+      }
+    },
+    "skeleton": {
+      "base": {
+        "token": "--bundle-skeleton-base-bg",
+        "fallback": "#eeeeee",
+        "merchant_editable": false,
+        "contrast_pair": "surface",
+        "disabled_transform": "desaturate_20",
+        "high_contrast_fallback": "#e5e7eb"
+      },
+      "highlight": {
+        "token": "--bundle-skeleton-highlight",
+        "fallback": "#f7f7f7",
+        "merchant_editable": false,
+        "contrast_pair": "surface",
+        "disabled_transform": "desaturate_20",
+        "high_contrast_fallback": "#f3f4f6"
+      }
+    },
+    "product": {
+      "card_background": {
+        "token": "--bundle-product-card-bg",
+        "fallback": "#ffffff",
+        "merchant_editable": false,
+        "contrast_pair": "text.primary",
+        "disabled_transform": "reduce_alpha_55",
+        "high_contrast_fallback": "#ffffff"
+      },
+      "card_title": {
+        "token": "--bundle-product-card-font-color",
+        "fallback": "#111827",
+        "merchant_editable": false,
+        "contrast_pair": "surface",
+        "disabled_transform": "reduce_alpha_60",
+        "high_contrast_fallback": "#0f172a"
+      }
+    }
+  },
+  "notes": "Seed semantic token contract derived from live --bundle-* runtime variables and reduced to stable families required by the plan. Keep this file synchronized with future token deprecations."
+}
