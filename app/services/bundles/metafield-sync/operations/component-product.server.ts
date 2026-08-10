@@ -13,13 +13,9 @@ import { METAFIELD_NAMESPACE, METAFIELD_KEYS } from "../../../../constants/metaf
 import type { ComponentParentsData } from "../types";
 import { buildPriceAdjustmentConfig } from "../utils/price-adjustment";
 import { collectAddonComponentVariants } from "../utils/addon-components";
+import { normalizeShopifyComponentQuantity } from "../utils/component-quantity";
 
 const METAFIELDS_SET_BATCH_SIZE = 25;
-
-function normalizeStepMinQuantity(value: unknown): number {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : 0;
-}
 
 function normalizeProductVariantGid(value: unknown): string | null {
   if (typeof value !== "string" && typeof value !== "number") return null;
@@ -125,14 +121,14 @@ export async function updateComponentProductMetafields(
             if (variantId && !isUUID(variantId)) {
               componentVariantIds.add(variantId);
               componentReferences.push(variantId);
-              componentQuantities.push(normalizeStepMinQuantity(step.minQuantity));
+              componentQuantities.push(normalizeShopifyComponentQuantity(step.minQuantity));
             }
           }
         } else {
           // No variants cached in DB — fall back to fetching the first variant from Shopify
           productIdMap.push({
             productId: stepProduct.productId,
-            stepMinQuantity: normalizeStepMinQuantity(step.minQuantity),
+            stepMinQuantity: normalizeShopifyComponentQuantity(step.minQuantity),
             source: 'StepProduct-fallback'
           });
         }
@@ -150,13 +146,13 @@ export async function updateComponentProductMetafields(
               if (variantId && !isUUID(variantId)) {
                 componentVariantIds.add(variantId);
                 componentReferences.push(variantId);
-                componentQuantities.push(normalizeStepMinQuantity(step.minQuantity));
+                componentQuantities.push(normalizeShopifyComponentQuantity(step.minQuantity));
               }
             }
           } else {
             productIdMap.push({
               productId: product.id,
-              stepMinQuantity: normalizeStepMinQuantity(step.minQuantity),
+              stepMinQuantity: normalizeShopifyComponentQuantity(step.minQuantity),
               source: 'products'
             });
           }
@@ -197,7 +193,7 @@ export async function updateComponentProductMetafields(
             if (productId && !isUUID(productId) && !handledProductIds.has(productId)) {
               productIdMap.push({
                 productId,
-                stepMinQuantity: normalizeStepMinQuantity(step.minQuantity),
+                stepMinQuantity: normalizeShopifyComponentQuantity(step.minQuantity),
                 source: `collection:${handle}`,
               });
               handledProductIds.add(productId);
@@ -233,13 +229,13 @@ export async function updateComponentProductMetafields(
               if (variantId && !isUUID(variantId)) {
                 componentVariantIds.add(variantId);
                 componentReferences.push(variantId);
-                componentQuantities.push(normalizeStepMinQuantity(step.minQuantity));
+                componentQuantities.push(normalizeShopifyComponentQuantity(step.minQuantity));
               }
             }
           } else {
             productIdMap.push({
               productId: p.id,
-              stepMinQuantity: normalizeStepMinQuantity(step.minQuantity),
+              stepMinQuantity: normalizeShopifyComponentQuantity(step.minQuantity),
               source: `StepCategory:${cat.name}`,
             });
           }
@@ -269,7 +265,7 @@ export async function updateComponentProductMetafields(
             if (productId && !isUUID(productId) && !handledProductIds.has(productId)) {
               productIdMap.push({
                 productId,
-                stepMinQuantity: normalizeStepMinQuantity(step.minQuantity),
+                stepMinQuantity: normalizeShopifyComponentQuantity(step.minQuantity),
                 source: `StepCategory:${cat.name}:collection:${handle}`,
               });
               handledProductIds.add(productId);

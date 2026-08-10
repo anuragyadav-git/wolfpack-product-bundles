@@ -20,7 +20,7 @@ export function createBundleStep(
     products: [],
     StepProduct: [],
     displayVariantsAsIndividual: false,
-    minQuantity: 1,
+    minQuantity: 0,
     maxQuantity: 10,
   };
 }

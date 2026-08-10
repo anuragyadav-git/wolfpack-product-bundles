@@ -397,10 +397,10 @@ describe("PPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
     expect(getDb().bundle.update).toHaveBeenCalled();
   });
 
-  it("rejects component-bearing steps below Shopify's minimum quantity", async () => {
+  it("preserves an optional category step without forcing a shopper selection", async () => {
     const stepsData = [
       makeStep({
-        minQuantity: undefined,
+        minQuantity: "0",
         StepCategory: [
           {
             id: "category-1",
@@ -417,12 +417,19 @@ describe("PPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
       makeFormData({ stepsData: JSON.stringify(stepsData) }),
     );
 
-    expect(res.status).toBe(400);
-    expect(await res.json()).toMatchObject({
-      success: false,
-      error: expect.stringMatching(/minimum quantity.*at least 1/i),
-    });
-    expect(getDb().bundle.update).not.toHaveBeenCalled();
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({ success: true });
+    expect(getDb().bundle.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          steps: expect.objectContaining({
+            create: expect.arrayContaining([
+              expect.objectContaining({ minQuantity: 0 }),
+            ]),
+          }),
+        }),
+      }),
+    );
     expect(updateBundleProductMetafields).not.toHaveBeenCalled();
   });
 

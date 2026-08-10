@@ -111,6 +111,30 @@ describe("updateBundleProductMetafields", () => {
     );
   });
 
+  it("keeps optional step semantics while writing Shopify-valid component quantities", async () => {
+    const admin = makeAdmin();
+    const config = makeBundleConfig(BundleType.PRODUCT_PAGE, {
+      steps: [
+        {
+          id: "step-optional",
+          name: "Optional step",
+          position: 0,
+          minQuantity: 0,
+          maxQuantity: 10,
+          StepProduct: [{ productId: "gid://shopify/Product/123" }],
+          collections: [],
+        },
+      ],
+    });
+
+    await updateBundleProductMetafields(admin, "gid://shopify/Product/999", config);
+
+    const metafields = getMetafieldsSetPayload(admin);
+    expect(JSON.parse(metafields.find((field: any) => field.key === "component_quantities").value)).toEqual([1]);
+    const uiConfig = JSON.parse(metafields.find((field: any) => field.key === "bundle_ui_config").value);
+    expect(uiConfig.steps[0].minQuantity).toBe(0);
+  });
+
   it("passes imageUrl through to step map when present", async () => {
     const admin = makeAdmin();
     const config = makeBundleConfig(BundleType.FULL_PAGE, {
@@ -576,7 +600,7 @@ describe("updateBundleProductMetafields", () => {
       "gid://shopify/ProductVariant/222",
       "gid://shopify/ProductVariant/ADDON",
     ]));
-    expect(JSON.parse(metafields.find((field: any) => field.key === "component_quantities").value)).toEqual([0, 1]);
+    expect(JSON.parse(metafields.find((field: any) => field.key === "component_quantities").value)).toEqual([1, 1]);
 
     const componentPricing = JSON.parse(metafields.find((field: any) => field.key === "component_pricing").value);
     expect(componentPricing).toEqual(

@@ -16,6 +16,7 @@ import type { BundleUiConfig, ComponentPricing } from "../types";
 import { BundleStatus, BundleType } from "../../../../constants/bundle";
 import { formatStepCategoriesForRuntime } from "../../../../lib/bundle-config/category-runtime";
 import { resolveShowProductComparedAtPrice } from "../../../../lib/bundle-config/product-page-display";
+import { normalizeShopifyComponentQuantity } from "../utils/component-quantity";
 
 async function ensureBundleParentVariantRequiresComponents(
   admin: ShopifyAdmin,
@@ -355,14 +356,15 @@ export async function updateBundleProductMetafields(
   ) => {
     if (componentReferences.includes(variantId)) return;
 
+    const componentQuantity = normalizeShopifyComponentQuantity(quantity);
     componentReferences.push(variantId);
-    componentQuantities.push(quantity);
+    componentQuantities.push(componentQuantity);
 
     if (priceCents !== null) {
       componentPricingData.push({
         variantId,
         priceCents,
-        quantity,
+        quantity: componentQuantity,
         title,
         imageUrl,
       });

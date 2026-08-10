@@ -124,6 +124,30 @@ describe("updateComponentProductMetafields", () => {
     expect(mockBatchGetProductVariants).not.toHaveBeenCalled();
   });
 
+  it("writes Shopify-valid component metadata for an optional step", async () => {
+    const admin = makeAdmin();
+    const config = {
+      steps: [
+        {
+          minQuantity: 0,
+          StepProduct: [
+            {
+              productId: "gid://shopify/Product/123",
+              variants: [{ id: "gid://shopify/ProductVariant/OPTIONAL" }],
+            },
+          ],
+        },
+      ],
+      pricing: { enabled: false },
+    };
+
+    await updateComponentProductMetafields(admin as any, "gid://shopify/Product/999", config);
+
+    const writes = getMetafieldSetCalls(admin);
+    const componentParents = JSON.parse(writes[0].value);
+    expect(componentParents[0].component_quantities.value).toEqual([1]);
+  });
+
   it("normalizes numeric cached StepProduct variant IDs before writing component_parents", async () => {
     const admin = makeAdmin();
     const config = {

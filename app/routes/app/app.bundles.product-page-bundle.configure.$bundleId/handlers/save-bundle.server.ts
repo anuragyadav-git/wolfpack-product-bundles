@@ -155,27 +155,6 @@ function normalizeMaxQuantity(value: unknown): number {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
-function stepHasComponentCandidates(step: Record<string, unknown>): boolean {
-  if (Array.isArray(step.StepProduct) && step.StepProduct.length > 0) return true;
-  if (Array.isArray(step.products) && step.products.length > 0) return true;
-  if (Array.isArray(step.collections) && step.collections.length > 0) return true;
-
-  const categories = Array.isArray(step.StepCategory) ? step.StepCategory : [];
-  return categories.some((category) => {
-    if (!category || typeof category !== "object" || Array.isArray(category)) {
-      return false;
-    }
-    const record = category as Record<string, unknown>;
-    return [
-      record.products,
-      record.selectedProducts,
-      record.collections,
-      record.collectionsData,
-      record.collectionsSelectedData,
-    ].some((value) => Array.isArray(value) && value.length > 0);
-  });
-}
-
 export async function handleSaveBundle(
   admin: ShopifyAdmin,
   session: Session,
@@ -283,16 +262,6 @@ export async function handleSaveBundle(
             stepName: step.name,
           });
         }
-      }
-
-      if (stepHasComponentCandidates(step) && normalizeMinQuantity(step.minQuantity) < 1) {
-        return json(
-          {
-            success: false,
-            error: `Step "${step.name || "Untitled step"}" minimum quantity must be at least 1 when products or collections are configured.`,
-          },
-          { status: 400 },
-        );
       }
 
       const stepConditions = stepConditionsData[step.id] || [];

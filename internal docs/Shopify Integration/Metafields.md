@@ -17,6 +17,8 @@ systems:
 source_paths:
   - extensions/bundle-builder/blocks/bundle-full-page.liquid
   - app/services/bundles/metafield-sync/
+  - app/services/bundles/metafield-sync/operations/bundle-product.server.ts
+  - app/services/bundles/metafield-sync/operations/component-product.server.ts
   - app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/save-bundle.server.ts
 related_docs:
   - internal docs/Architecture/Widget Architecture.md
@@ -87,9 +89,11 @@ Admin save transport should follow the same compact-field policy before posting 
 
 ## PPB Component Quantity Invariant
 
-Shopify rejects PPB component metafield values when a component-bearing step resolves to a minimum quantity below `1`, returning `Value has a minimum of 1.` Category-only steps are component-bearing even when `StepProduct` is empty, so save validation must not skip them.
+Shopify's fixed-bundle `component_quantities` metafield has a minimum value of `1`. That constraint describes the quantity of a component when it participates in a bundle; it does not determine whether a shopper must select from a PPB step.
 
-New PPB steps start with `minQuantity: 1` and `maxQuantity: 10`. The save route independently rejects any component-bearing step whose normalized minimum is below `1` before database persistence or Shopify synchronization. Category-product `minQuantity: 0` remains valid because it represents an optional product within a step; it must not be promoted to the step-level minimum.
+New PPB steps therefore start with `minQuantity: 0` and `maxQuantity: 10`, preserving optional-step semantics. The runtime `bundle_ui_config` and database keep that merchant-authored step minimum unchanged. At the Shopify metadata boundary, parent `component_quantities` and matching component `component_parents` quantities normalize each candidate component to at least `1`. Buyer-selected PPB components and quantities remain validated by the signed runtime-token Cart Transform flow.
+
+Do not reject an optional step or promote its persisted minimum merely to satisfy the Shopify metafield definition. Category-product `minQuantity: 0` likewise remains valid because it represents an optional product within a step.
 
 ## FPB Preview Cache Contract
 
