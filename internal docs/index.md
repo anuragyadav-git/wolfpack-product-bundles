@@ -5,7 +5,7 @@ title: Wolfpack Product Bundles Internal Docs
 type: index
 status: authoritative
 summary: Index of durable Wolfpack Product Bundles architecture, integration, feature, and operations documentation.
-last_audited: 2026-07-14
+last_audited: 2026-08-10
 owners:
   - engineering
 domains:
@@ -63,7 +63,7 @@ Full evidence record: `docs/competitor-analysis/16-eb-full-data-flow-investigati
 - [[Shopify Integration/Storefront API]] — Storefront GraphQL field gotchas, including product description HTML handling
 - [[Shopify Integration/Cart Transform API]] — Operations, targets, API versions (2025-10)
 - [[Shopify Integration/Checkout UI Extension]] — Preact targets, build rules
-- [[Shopify Integration/Metafields]] — Bundle config metafield sync strategy
+- [[Shopify Integration/Metafields]] — Bundle config sync, payload limits, and PPB component quantity validation constraints
 - [[Shopify Integration/Theme App Extensions]] — Theme app extension handles, App Bridge status normalization, preview gates, and legacy MAIN-theme diagnostics
 - [[Shopify Integration/Web Pixels]] — UTM Web Pixel settings payload rules, including nonblank custom-parameter sentinel behavior
 - [[Shopify Integration/Webhooks]] — Subscribed webhook topics, removed broad topics, and delivery-volume rationale

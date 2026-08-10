@@ -10,6 +10,7 @@
 
 import { useState, useCallback } from "react";
 import { ERROR_MESSAGES } from "../constants/errors";
+import { createBundleStep } from "../lib/bundle-config/step-defaults";
 
 interface BundleStep {
   id: string;
@@ -52,14 +53,7 @@ export function useBundleSteps({ initialSteps, shopify, onStateChange }: UseBund
 
   // Add a new step - returns new step ID for scroll targeting
   const addStep = useCallback((): string => {
-    const newStep: BundleStep = {
-      id: `step-${Date.now()}`,
-      name: `Step ${steps.length + 1}`,
-      collections: [],
-      products: [],
-      StepProduct: [],
-      displayVariantsAsIndividual: false
-    };
+    const newStep: BundleStep = createBundleStep(steps.length + 1);
     setSteps(prev => [...prev, newStep]);
     setExpandedSteps(prev => new Set([...prev, newStep.id]));
     shopify.toast.show("Step added successfully", { isError: false });

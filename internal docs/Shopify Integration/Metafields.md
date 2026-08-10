@@ -1,8 +1,33 @@
 ---
+schema_version: 1
+id: shopify-metafields
 title: Metafields
 type: shopify-integration
-audited: 2026-04-16
-sources: extensions/bundle-builder/blocks/bundle-full-page.liquid, app/services/bundles/metafield-sync/
+status: authoritative
+summary: Storefront bundle metafield ownership, synchronization, payload limits, and Shopify validation constraints.
+last_audited: 2026-08-10
+owners:
+  - engineering
+domains:
+  - storefront
+  - shopify-integration
+systems:
+  - bundle-config-metafields
+  - widget-runtime
+source_paths:
+  - extensions/bundle-builder/blocks/bundle-full-page.liquid
+  - app/services/bundles/metafield-sync/
+  - app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/save-bundle.server.ts
+related_docs:
+  - internal docs/Architecture/Widget Architecture.md
+tags:
+  - metafields
+  - storefront
+  - ppb
+keywords:
+  - bundle config
+  - component quantity
+  - minimum quantity
 ---
 
 # Metafields
@@ -59,6 +84,12 @@ Shopify metafield values have a 64KB hard limit. The bundle variant `$app.bundle
 Runtime category payloads must be compacted at `app/lib/bundle-config/category-runtime.ts` before they are written by `app/services/bundles/metafield-sync/operations/bundle-product.server.ts`. Preserve storefront-required fields only: product IDs/title/handle/image/price/weight, compact product options, and compact variants with ID/title/price/compare-at/weight/availability/inventory/options/image/selling-plan data. Strip admin/cache-only fields such as metafields, SKU, selectedOptions blobs, inventory policy, timestamps, and extra image metadata.
 
 Admin save transport should follow the same compact-field policy before posting `stepsData`. The route-level FPB save serializer is responsible for stripping picker/Admin graph data while preserving the product, variant, collection, category, and rule fields needed by persistence and storefront runtime generation.
+
+## PPB Component Quantity Invariant
+
+Shopify rejects PPB component metafield values when a component-bearing step resolves to a minimum quantity below `1`, returning `Value has a minimum of 1.` Category-only steps are component-bearing even when `StepProduct` is empty, so save validation must not skip them.
+
+New PPB steps start with `minQuantity: 1` and `maxQuantity: 10`. The save route independently rejects any component-bearing step whose normalized minimum is below `1` before database persistence or Shopify synchronization. Category-product `minQuantity: 0` remains valid because it represents an optional product within a step; it must not be promoted to the step-level minimum.
 
 ## FPB Preview Cache Contract
 

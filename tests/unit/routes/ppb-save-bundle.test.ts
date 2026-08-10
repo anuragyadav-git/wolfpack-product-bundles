@@ -397,6 +397,35 @@ describe("PPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
     expect(getDb().bundle.update).toHaveBeenCalled();
   });
 
+  it("rejects component-bearing steps below Shopify's minimum quantity", async () => {
+    const stepsData = [
+      makeStep({
+        minQuantity: undefined,
+        StepCategory: [
+          {
+            id: "category-1",
+            products: [{ id: "gid://shopify/Product/123", variants: [] }],
+          },
+        ],
+      }),
+    ];
+
+    const res = await handleSaveBundle(
+      MOCK_ADMIN,
+      MOCK_SESSION,
+      "bundle-1",
+      makeFormData({ stepsData: JSON.stringify(stepsData) }),
+    );
+
+    expect(res.status).toBe(400);
+    expect(await res.json()).toMatchObject({
+      success: false,
+      error: expect.stringMatching(/minimum quantity.*at least 1/i),
+    });
+    expect(getDb().bundle.update).not.toHaveBeenCalled();
+    expect(updateBundleProductMetafields).not.toHaveBeenCalled();
+  });
+
   it("returns 400 before Prisma when bundle status is empty", async () => {
     const res = await handleSaveBundle(
       MOCK_ADMIN,
