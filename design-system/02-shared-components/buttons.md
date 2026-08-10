@@ -5,7 +5,7 @@ title: Shared Component - Buttons
 type: component-contract
 status: active
 summary: Shared button behavior and states for FPB/PPB storefront templates.
-last_audited: 2026-08-06
+last_audited: 2026-08-10
 owners:
   - Wolfpack Product Bundles
 domains:
@@ -14,9 +14,11 @@ systems:
   - full-page-widget
   - product-page-widget
 source_paths:
-  - app/assets/widgets/shared/template-design-system.js
-  - app/assets/widgets/full-page/methods/selection-navigation-methods.js
-  - app/assets/widgets/full-page/methods/selection-methods.js
+  - app/assets/widgets/shared/template-design-system.ts
+  - app/assets/widgets/full-page/methods/selection-navigation-methods.ts
+  - app/assets/widgets/full-page/methods/selection-methods.ts
+  - app/assets/widgets/product-page-css/base/inpage-shared-footer.css
+  - app/assets/widgets/product-page-css/templates/inpage-cascade.css
 related_docs:
   - design-system/01-foundations/color.md
   - design-system/01-foundations/typography.md
@@ -41,8 +43,11 @@ keywords:
 - Disabled and loading states
 - Selected-state styling without size shift
 - Icon + label combinations
+- A minimum 44px interactive block size for product actions, quantity controls,
+  navigation controls, and primary checkout actions
 
 ## Contract
 
 - Families share behavior and state semantics.
 - Template adapters may adjust density and arrangement, not business behavior.
+- Compact visual treatment must not reduce the interactive target below 44px.
