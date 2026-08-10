@@ -18,10 +18,10 @@ import {
   handleSyncProduct,
   handleUpdateBundleProduct,
   handleUpdateBundleDesignTemplate,
-  handleSyncBundle,
 } from "./handlers";
-import { handleCreateFpbPreview, handleRecordBundlePreview } from "../shared/bundle-preview-action.server";
+import { handleRecordBundlePreview } from "../shared/bundle-preview-action.server";
 import {
+  handleSyncStorefrontNow,
   handlePrepareStorefrontPreview,
 } from "../shared/storefront-sync-action.server";
 import ConfigureBundleFlow from "./ConfigureBundleFlow";
@@ -66,9 +66,6 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   // Per Shopify docs: addAppBlockId={api_key}/{handle}
   // Reference: https://shopify.dev/docs/apps/build/online-store/theme-app-extensions/configuration
   const apiKey = process.env.SHOPIFY_API_KEY || "";
-  // Block handle must match the liquid filename (without .liquid extension)
-  // File: extensions/bundle-builder/blocks/bundle-full-page.liquid
-  const blockHandle = "bundle-full-page";
 
   const [bundleProduct, shopLocales, availableBundles, embedData] =
     await Promise.all([
@@ -96,7 +93,6 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
     configureMode,
     showFirstLoadTour,
     apiKey,
-    blockHandle,
     shopLocales,
     appEmbedEnabled: embedData.appEmbedEnabled,
     themeEditorUrl: embedData.themeEditorUrl,
@@ -144,12 +140,10 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
           bundleId,
           formData,
         );
-      case "createFpbPreview":
-        return await handleCreateFpbPreview(admin, session, bundleId);
       case "recordBundlePreview":
         return await handleRecordBundlePreview(admin, session, bundleId, formData);
       case "syncBundle":
-        return await handleSyncBundle(admin, session, bundleId);
+        return await handleSyncStorefrontNow(admin, session, bundleId, "full_page", "sync_bundle");
       case "preparePreviewBundle":
         return await handlePrepareStorefrontPreview(admin, session, bundleId, "full_page");
       case "updateBundleDesignTemplate":

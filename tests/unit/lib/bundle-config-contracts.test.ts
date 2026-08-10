@@ -159,28 +159,26 @@ describe("buildCategoryContract", () => {
   it("builds a full-page direct-products category", () => {
     expect(buildCategoryContract({
       bundleType: "full_page",
-      categoryId: "category1",
+      id: "category1",
       name: "Rings",
       title: "Rings",
       subTitle: "Pick one",
       products: [product],
-      collectionsSelectedData: [collection],
+      collections: [collection],
       conditions: [condition],
       categoryBanner: "https://cdn.example/banner.png",
       categoryImg: "https://cdn.example/icon.png",
       autoNextStepOnConditionMet: true,
       multiLangData: { en: { title: "Rings" } },
     })).toEqual({
-      categoryId: "category1",
+      id: "category1",
       title: "Rings",
       subTitle: "Pick one",
       categoryImg: "https://cdn.example/icon.png",
       conditions: [condition],
       autoNextStepOnConditionMet: true,
       products: [product],
-      selectedProducts: [],
-      collectionsData: [],
-      collectionsSelectedData: [collection],
+      collections: [collection],
       categoryBanner: "https://cdn.example/banner.png",
       multiLangData: { en: { title: "Rings" } },
     });
@@ -189,21 +187,19 @@ describe("buildCategoryContract", () => {
   it("builds a full-page collection category", () => {
     expect(buildCategoryContract({
       bundleType: "full_page",
-      categoryId: "category2",
+      id: "category2",
       name: "Sets",
       products: [],
-      collectionsSelectedData: [collection],
+      collections: [collection],
     })).toEqual({
-      categoryId: "category2",
+      id: "category2",
       title: "Sets",
       subTitle: "",
       categoryImg: "",
       conditions: [],
       autoNextStepOnConditionMet: false,
       products: [],
-      selectedProducts: [],
-      collectionsData: [],
-      collectionsSelectedData: [collection],
+      collections: [collection],
       categoryBanner: "",
       multiLangData: {},
     });
@@ -212,13 +208,13 @@ describe("buildCategoryContract", () => {
   it("builds a product-page direct-products category with variant flags", () => {
     expect(buildCategoryContract({
       bundleType: "product_page",
-      categoryId: "category3",
+      id: "category3",
       title: "Featured",
       subTitle: "Pick featured items",
       name: "Featured products",
-      rank: 2,
+      sortOrder: 2,
       products: [product],
-      collectionsSelectedData: [collection],
+      collections: [collection],
       conditions: [condition],
       categoryBanner: "https://cdn.example/category.png",
       displayVariantsAsIndividualProducts: true,
@@ -226,16 +222,15 @@ describe("buildCategoryContract", () => {
       autoNextStepOnConditionMet: true,
       multiLangData: { en: { name: "Featured products" } },
     })).toEqual({
-      categoryId: "category3",
+      id: "category3",
       title: "Featured",
       subTitle: "Pick featured items",
       name: "Featured products",
-      categoryRank: 2,
+      sortOrder: 2,
       conditions: [condition],
       autoNextStepOnConditionMet: true,
       products: [product],
-      collectionsData: [],
-      collectionsSelectedData: [collection],
+      collections: [collection],
       categoryBanner: "https://cdn.example/category.png",
       displayVariantsAsIndividualProducts: true,
       displayVariantsAsSwatches: true,
@@ -246,14 +241,13 @@ describe("buildCategoryContract", () => {
   it("builds a product-page collection category", () => {
     expect(buildCategoryContract({
       bundleType: "product_page",
-      categoryId: "category4",
+      id: "category4",
       name: "Collections",
       products: [],
-      collectionsSelectedData: [collection],
+      collections: [collection],
     })).toMatchObject({
       products: [],
-      collectionsData: [],
-      collectionsSelectedData: [collection],
+      collections: [collection],
       conditions: [],
       subTitle: "",
       categoryBanner: "",
@@ -317,7 +311,6 @@ describe("formatStepCategoryForRuntime", () => {
       id: "category-db-1",
       name: "Rings",
       products: [hydratedProduct],
-      selectedProducts: [hydratedProduct],
     }, 0);
 
     expect(runtime.products).toEqual([
@@ -354,7 +347,10 @@ describe("formatStepCategoryForRuntime", () => {
     expect(JSON.stringify(runtime.products[0])).not.toContain("metafields");
     expect(JSON.stringify(runtime.products[0])).not.toContain("inventoryPolicy");
     expect(Buffer.byteLength(JSON.stringify(runtime.products[0]), "utf8")).toBeLessThan(6500);
-    expect(runtime.selectedProducts).toEqual(runtime.products);
+    expect(runtime).not.toHaveProperty("selectedProducts");
+    expect(runtime).not.toHaveProperty("collectionsData");
+    expect(runtime).not.toHaveProperty("collectionsSelectedData");
+    expect(runtime).not.toHaveProperty("categoryRank");
   });
 
   it("derives compact option fields from selectedOptions without exposing the raw array", () => {

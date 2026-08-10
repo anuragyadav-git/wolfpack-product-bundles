@@ -5,7 +5,6 @@ import { unauthenticated } from "../app/shopify.server";
 import {
   parseDeploymentGeneralSyncEnv,
   runDeploymentGeneralSync,
-  syncPersistedBundleMetaobjects,
 } from "../app/services/deployment-general-sync.server";
 import { runStepConditionRemediation } from "../app/services/step-condition-remediation.server";
 import { syncBundleStorefrontNow } from "../app/services/bundles/storefront-sync.server";
@@ -32,7 +31,6 @@ async function main() {
       },
       setupAddonDiscount: (admin, shopDomain) =>
         AddOnDiscountFunctionService.completeSetup(admin as any, shopDomain),
-      syncBundleMetaobjects: syncPersistedBundleMetaobjects,
       logger: console,
     },
   );

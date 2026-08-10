@@ -365,7 +365,6 @@ export async function handleSaveBundle(
       ruleMessages: discountData.ruleMessages || {},
       successMessage: discountData.successMessage ?? null,
       successMessageByLocale: discountData.successMessageByLocale ?? null,
-      displayOptions: discountData.displayOptions ?? null,
       tierTextByRuleId: discountData.tierTextByRuleId ?? null,
       tierTextByLocaleByRuleId: discountData.tierTextByLocaleByRuleId ?? null,
     };

@@ -13,9 +13,6 @@ describe("buildClonedStepPayload", () => {
             { id: "gid://shopify/ProductVariant/21", title: "S" },
           ],
           collections: [{ id: "collection-1", title: "Summer" }],
-          collectionsData: [{ id: "collection-data-1", title: "Summer" }],
-          collectionsSelectedData: [{ id: "selected-collection-data-1", title: "Summer" }],
-          selectedProducts: [{ id: "product-selected-1", title: "Selected" }],
           multiLangData: { en: { title: "Standard" } },
         },
       ],
@@ -24,10 +21,7 @@ describe("buildClonedStepPayload", () => {
           id: "cat-1",
           title: "Category 1",
           products: [{ id: "product-1" }],
-          selectedProducts: [{ id: "selected-product-1" }],
           collections: [{ id: "collection-1" }],
-          collectionsData: [{ id: "collection-data-1" }],
-          collectionsSelectedData: [{ id: "collection-selected-data-1" }],
           conditions: [{ condition: "greaterThanOrEqualTo", value: 2 }],
           multiLangData: { en: { title: "Category 1" } },
         },
@@ -43,12 +37,8 @@ describe("buildClonedStepPayload", () => {
     expect(cloned.StepProduct[0]).not.toBe(sourceStep.StepProduct[0]);
     expect(cloned.StepProduct[0].variants).not.toBe(sourceStep.StepProduct[0].variants);
     expect(cloned.StepProduct[0].variants[0]).not.toBe(sourceStep.StepProduct[0].variants[0]);
-    expect(cloned.StepProduct[0].selectedProducts).not.toBe(sourceStep.StepProduct[0].selectedProducts);
-    expect(cloned.StepProduct[0].selectedProducts[0]).not.toBe(sourceStep.StepProduct[0].selectedProducts[0]);
     expect(cloned.StepProduct[0].collections).not.toBe(sourceStep.StepProduct[0].collections);
     expect(cloned.StepProduct[0].collections[0]).not.toBe(sourceStep.StepProduct[0].collections[0]);
-    expect(cloned.StepProduct[0].collectionsData).not.toBe(sourceStep.StepProduct[0].collectionsData);
-    expect(cloned.StepProduct[0].collectionsSelectedData).not.toBe(sourceStep.StepProduct[0].collectionsSelectedData);
     expect(cloned.StepProduct[0].multiLangData).toEqual(sourceStep.StepProduct[0].multiLangData);
     expect(cloned.StepProduct[0].multiLangData).not.toBe(sourceStep.StepProduct[0].multiLangData);
     expect(cloned.StepProduct[0].multiLangData.en).not.toBe(sourceStep.StepProduct[0].multiLangData.en);
@@ -58,9 +48,7 @@ describe("buildClonedStepPayload", () => {
     expect(cloned.StepCategory[0].id).toBe("cat-1720000000000-0");
     expect(cloned.StepCategory[0].products).not.toBe(sourceStep.StepCategory[0].products);
     expect(cloned.StepCategory[0].products[0]).not.toBe(sourceStep.StepCategory[0].products[0]);
-    expect(cloned.StepCategory[0].selectedProducts).not.toBe(sourceStep.StepCategory[0].selectedProducts);
     expect(cloned.StepCategory[0].collections).not.toBe(sourceStep.StepCategory[0].collections);
-    expect(cloned.StepCategory[0].collectionsSelectedData).not.toBe(sourceStep.StepCategory[0].collectionsSelectedData);
     expect(cloned.StepCategory[0].conditions).not.toBe(sourceStep.StepCategory[0].conditions);
     expect(cloned.StepCategory[0].conditions[0]).not.toBe(sourceStep.StepCategory[0].conditions[0]);
     expect(cloned.StepCategory[0].multiLangData).not.toBe(sourceStep.StepCategory[0].multiLangData);

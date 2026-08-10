@@ -11,7 +11,7 @@ import type { ShopifyAdmin } from "../../../../lib/auth-guards.server";
 import { AppLogger } from "../../../../lib/logger";
 import { MetafieldCleanupService } from "../../../../services/metafield-cleanup.server";
 import { WidgetInstallationService } from "../../../../services/widget-installation.server";
-import { BundleStatus, BundleType, FullPageLayout } from "../../../../constants/bundle";
+import { BundleStatus, BundleType } from "../../../../constants/bundle";
 import { ERROR_MESSAGES } from "../../../../constants/errors";
 import { getBundleEditPath } from "../../../../lib/bundle-navigation";
 import { ensureBundleParentProduct } from "../../../../services/bundles/bundle-parent-product.server";
@@ -43,6 +43,52 @@ const UPDATE_PRODUCT_STATUS = `
     }
   }
 `;
+
+const DELETE_PAGE = `#graphql
+  mutation DeleteBundlePage($id: ID!) {
+    pageDelete(id: $id) {
+      deletedPageId
+      userErrors { code field message }
+    }
+  }
+`;
+
+type DeletePageResponse = {
+  errors?: Array<{ message?: string }>;
+  data?: {
+    pageDelete?: {
+      deletedPageId?: string | null;
+      userErrors?: Array<{ code?: string; message?: string }>;
+    } | null;
+  };
+};
+
+async function deleteBundlePage(admin: ShopifyAdmin, pageId: string) {
+  const response = await admin.graphql(DELETE_PAGE, {
+    variables: { id: pageId },
+  });
+  const data = await response.json() as DeletePageResponse;
+  if (data.errors?.length) {
+    throw new Error(
+      `Failed to delete Shopify Page ${pageId}: ${data.errors[0]?.message ?? "unknown error"}`,
+    );
+  }
+
+  const payload = data.data?.pageDelete;
+  const errors = payload?.userErrors ?? [];
+  const alreadyDeleted = errors.length > 0 && errors.every(
+    (error: { code?: string; message?: string }) =>
+      error.code === "NOT_FOUND" || /not found|does not exist/i.test(error.message ?? ""),
+  );
+  if (errors.length > 0 && !alreadyDeleted) {
+    throw new Error(
+      `Failed to delete Shopify Page ${pageId}: ${errors[0]?.message ?? "unknown error"}`,
+    );
+  }
+  if (!payload?.deletedPageId && !alreadyDeleted) {
+    throw new Error(`Failed to delete Shopify Page ${pageId}: Shopify returned no deleted Page ID`);
+  }
+}
 
 /**
  * Discover all available sales channel publication IDs for a shop.
@@ -202,6 +248,17 @@ export async function handleDeleteBundle(
       return json({ success: false, error: ERROR_MESSAGES.BUNDLE_NOT_FOUND }, { status: 404 });
     }
 
+    if (bundle.bundleType === BundleType.FULL_PAGE) {
+      const pageIds = new Set(
+        [bundle.shopifyPageId, bundle.shopifyPreviewPageId].filter(
+          (pageId): pageId is string => Boolean(pageId),
+        ),
+      );
+      for (const pageId of pageIds) {
+        await deleteBundlePage(admin, pageId);
+      }
+    }
+
     // Clean up metafields and set product to draft
     if (bundle.shopifyProductId) {
       await MetafieldCleanupService.updateShopMetafieldsAfterDeletion(admin, bundleId);
@@ -268,7 +325,6 @@ export async function handleCreateBundle(
         name: bundleName,
         shopId: session.shop,
         bundleType: bundleType as any,
-        fullPageLayout: bundleType === BundleType.FULL_PAGE ? FullPageLayout.FOOTER_BOTTOM : null,
         bundleDesignTemplate: bundleType === BundleType.FULL_PAGE ? "FBP_SIDE_FOOTER" : null,
         bundleDesignPresetId: bundleType === BundleType.FULL_PAGE ? "STANDARD" : null,
         status: BundleStatus.DRAFT,

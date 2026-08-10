@@ -5,7 +5,7 @@ title: Widget Architecture
 type: architecture
 status: authoritative
 summary: FPB and PPB bootstrap, hydration, extension-asset, and widget runtime architecture.
-last_audited: 2026-08-10
+last_audited: 2026-08-11
 owners:
   - engineering
 domains:
@@ -39,7 +39,7 @@ keywords:
 
 | Widget | Source file | Bundle output | Shopify block |
 |---|---|---|---|
-| Full-Page Bundle (FPB) | `app/assets/bundle-widget-full-page.ts` | `extensions/bundle-builder/assets/bundle-widget-full-page-bundled.js` | `bundle-full-page.liquid` |
+| Full-Page Bundle (FPB) | `app/assets/bundle-widget-full-page.ts` | `extensions/bundle-builder/assets/bundle-widget-full-page-bundled.js` | `bundle-app-embed.liquid` on the app-proxy document |
 | Product-Page (PDP) | `app/assets/bundle-widget-product-page.ts` | `extensions/bundle-builder/assets/bundle-widget-product-page-bundled.js` | `bundle-product-page.liquid` |
 
 Shared runtime modules live under `app/assets/widgets/shared/`. Controllers, method modules, and template modules import each shared primitive directly from its owning module. The removed `bundle-widget-components` compatibility barrel must not be recreated: direct ownership lets esbuild close every method over real lexical bindings and prevents browser-only free-global failures. TypeScript entry points under `app/storefront/` import the required runtime graph, and esbuild resolves, tree-shakes, minifies, and emits browser IIFEs. Storefronts never load raw ESM source files.
@@ -89,9 +89,9 @@ Product Page inventory normalization preserves `sourceVariantCount` after unavai
 
 ## Storefront Surfaces
 
-- Theme Editor now exposes one body app embed: `bundle-app-embed` (`Wolfpack Bundle`). It is the activation/status surface and hydrates app-created full-page bundle page markers only when a dedicated full-page app block has not already rendered a widget container. Those hidden page-body markers must also carry only the compact bootstrap pointer, never a formatted full bundle payload.
+- Theme Editor exposes one FPB body app embed: `bundle-app-embed` (`Wolfpack Bundle`). It is the activation/status surface and hydrates the canonical app-proxy marker. The retired `bundle-full-page` Page block is not part of the extension contract.
 - Shopify stores enabled app embed blocks in `config/settings_data.json` under `current.blocks`. Per Shopify's Theme app extension configuration docs, an app embed appears there only after first enable; if the merchant disables it later, the block remains and has `disabled: true`. App embed status detection reads the active theme settings file, supports `OnlineStoreThemeFileBodyText.content`, `OnlineStoreThemeFileBodyBase64.contentBase64`, and `OnlineStoreThemeFileBodyUrl.url`, tolerates Shopify's generated comment header before parsing the settings JSON, matches the block `type` shape `shopify://apps/{app-handle}/blocks/{block-handle}/{unique-id}`, and treats `disabled: true` as inactive. Shopify Admin `currentAppInstallation.app.handle` is the sole app-identity source; environment, client-key, and hardcoded handle fallbacks are prohibited. A missing handle or unreadable settings file fails closed so merchants see the enable banner instead of a false Active state.
-- The embedded Admin enable flow opens Theme Editor in a new tab and hides the configure warning plus updates Bundle Visibility status optimistically after the merchant clicks `Enable here`. Configure page-load status comes from the server loader's parallel Shopify theme settings read. Every FPB preview action requests a new stateless signed URL; the token is required for drafts and harmless for public statuses.
+- The embedded Admin enable flow opens Theme Editor in a new tab and hides the configure warning plus updates Bundle Visibility status optimistically after the merchant clicks `Enable here`. Configure page-load status comes from the server loader's parallel Shopify theme settings read. Every FPB preview action synchronously reserves a tab, requests a new stateless signed URL, and navigates the reserved tab after the response; the token is required for drafts and harmless for public statuses.
 - Product-page builder placement uses the `bundle-product-page` app block. The app embed does not inject PPB markup because the merchant controls the widget's product-page position through this section block.
 - Before opening a PPB storefront preview, the preview flow first synchronizes the selected product template, then posts to the dedicated authenticated `/validate-widget-placement` JSON resource route. That route reads the parent product's effective `templateSuffix`, inspects that product JSON template in the MAIN theme, and verifies an app block owned by the current app with handle `bundle-product-page`. The placement check must not post to the rendered configure document route because an embedded document response can be HTML rather than the JSON contract expected by the client. Missing, malformed, or unreadable template data fails closed and opens Shopify's Theme Editor deep link for that exact template and product. A parent product alone is not evidence that the PPB widget is installed.
 
@@ -110,22 +110,18 @@ The app embed is a separate small entry. It handles redirects and marker hydrati
 
 > **Do not modify the load order** — see `CLAUDE.md` → "Do Not Touch" section.
 
-### Shopify Page Block / Marker Stage — Bootstrap Pointer
-The Liquid block and app-embed page-body marker both write a compact bootstrap marker as JSON into `data-bundle-config`:
-```liquid
-data-bundle-config='{"v":2,"type":"full_page","bundleType":"full_page","id":"{{ bundle_id }}"}'
-```
-Widget currently loads in API-first mode for full-page bundles:
-1. Compact bootstrap marker (`v`, `type`, `bundleType`, `id`) is treated as a stable pointer.
-2. If marker is missing or invalid → API fetch.
+### App-Proxy Marker and API Fallback
 
-`data-bundle-config` is not used to transport full bundle payload for first paint in this path. A legacy full payload marker is not required and is not relied upon for initialization. This applies to both the section app block and the hidden `data-wpb-full-page-bundle` marker written by `app/services/widget-installation/widget-full-page-bundle.server.ts`.
+The app-proxy document writes the complete source-marked configuration into
+`data-bundle-config`. If that primary marker is absent or malformed, the widget
+uses the existing bundle API fallback. There is no Page block or Page-body
+marker stage.
 
 ### App Proxy Document — Public FPB Route
 
 The public FPB route is `GET /apps/product-bundles/wpb/{bundleId}`. Shopify forwards it to Remix as `/wpb/{bundleId}` and app-proxy HMAC verification is required before lookup.
 
-The route returns an escaped full `formatBundleForWidget()` payload in the existing marker, marks it with `data-bundle-config-source="app_proxy"`, and responds with `Content-Type: application/liquid` and `Cache-Control: no-store`. The widget treats only this source-marked, bundle-ID-matched full payload as authoritative and renders it without requesting bundle JSON. Unmarked legacy Page payloads and compact theme markers continue through API hydration. Active and unlisted bundles render publicly; drafts require a 15-minute shop-and-bundle-bound `wpb_preview` token. The route never emits `/apps/product-bundles/assets/...` URLs.
+The route returns an escaped full `formatBundleForWidget()` payload in the existing marker, marks it with `data-bundle-config-source="app_proxy"`, and responds with `Content-Type: application/liquid` and `Cache-Control: no-store`. The widget treats only this source-marked, bundle-ID-matched full payload as authoritative and renders it without requesting bundle JSON. If the app-proxy marker is absent or malformed, the widget uses the bundle JSON fallback. Active and unlisted bundles render publicly; drafts require a 15-minute shop-and-bundle-bound `wpb_preview` token. The route never emits `/apps/product-bundles/assets/...` URLs.
 
 ### API Fallback
 If metafield cache is absent/malformed → `GET /apps/product-bundles/api/bundle/{id}.json`

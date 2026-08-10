@@ -523,7 +523,7 @@ export async function updateBundleProductMetafields(
       showDiscountMessaging: bundleConfiguration.pricing?.messages?.showDiscountMessaging || false,
       showFooter: bundleConfiguration.pricing?.display?.showFooter !== false && bundleConfiguration.messaging?.showFooter !== false,
       showDiscountProgressBar: bundleConfiguration.pricing?.display?.showDiscountProgressBar === true || bundleConfiguration.pricing?.showProgressBar === true,
-      displayOptions: bundleConfiguration.pricing?.displayOptions ?? bundleConfiguration.pricing?.messages?.displayOptions ?? null
+      displayOptions: bundleConfiguration.pricing?.displayOptions ?? null
     },
     promoBannerBgImage: bundleConfiguration.promoBannerBgImage ?? null,
     bundleBannerDesktopUrl: bundleConfiguration.bundleBannerDesktopUrl ?? null,

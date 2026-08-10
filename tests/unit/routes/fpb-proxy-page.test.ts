@@ -56,7 +56,6 @@ describe("FPB app proxy page", () => {
       shopId: "test-shop.myshopify.com",
       bundleType: "full_page",
       status: "active",
-      shopifyPageHandle: "build-a-box",
       steps: [],
       pricing: null,
     });
@@ -105,7 +104,6 @@ describe("FPB app proxy page", () => {
       shopId: "test-shop.myshopify.com",
       bundleType: "full_page",
       status: "active",
-      shopifyPageHandle: null,
       steps: [],
       pricing: null,
     });
@@ -121,7 +119,7 @@ describe("FPB app proxy page", () => {
     expect(text).not.toContain("/apps/product-bundles/assets/");
   });
 
-  it("still loads ordered step categories before legacy page-link handling", async () => {
+  it("loads ordered step categories before status authorization", async () => {
     const category = {
       id: "category-1",
       name: "Phones",
@@ -136,7 +134,6 @@ describe("FPB app proxy page", () => {
       shopId: "test-shop.myshopify.com",
       bundleType: "full_page",
       status: "draft",
-      shopifyPageHandle: null,
       steps: [
         {
           id: "step-1",

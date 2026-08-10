@@ -332,7 +332,6 @@ collectStepProductIds(step) {
   (step.products || []).forEach(addProductId);
   (step.categories || []).forEach(category => {
     (category.products || []).forEach(addProductId);
-    (category.selectedProducts || []).forEach(addProductId);
   });
 
   return productIds;
@@ -348,8 +347,6 @@ collectStepCollectionHandles(step) {
   (step.collections || []).forEach(addCollectionHandle);
   (step.categories || []).forEach(category => {
     (category.collections || []).forEach(addCollectionHandle);
-    (category.collectionsData || []).forEach(addCollectionHandle);
-    (category.collectionsSelectedData || []).forEach(addCollectionHandle);
   });
 
   return handles;
@@ -360,7 +357,7 @@ getStepCategoryTabEntries(step) {
 
   return step.categories
     .map((category, index) => {
-      const id = category.categoryId || category.id || `category-${index}`;
+      const id = category.id || `category-${index}`;
       const title = category.title || category.name;
       if (!id || !title) return null;
 
@@ -376,10 +373,7 @@ getStepCategoryTabEntries(step) {
       };
 
       (category.collections || []).forEach(addHandle);
-      (category.collectionsData || []).forEach(addHandle);
-      (category.collectionsSelectedData || []).forEach(addHandle);
       (category.products || []).forEach(addProductId);
-      (category.selectedProducts || []).forEach(addProductId);
 
       return {
         id,

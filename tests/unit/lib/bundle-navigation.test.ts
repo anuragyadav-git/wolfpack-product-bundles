@@ -1,9 +1,17 @@
 import {
+  buildDashboardCloneFormData,
   getBundleEditPath,
   resolveCloneConfigureRedirect,
 } from "../../../app/lib/bundle-navigation";
 
 describe("bundle navigation helpers", () => {
+  it("builds the immediate dashboard clone submission", () => {
+    const formData = buildDashboardCloneFormData("bundle-123");
+
+    expect(formData.get("intent")).toBe("cloneBundle");
+    expect(formData.get("bundleId")).toBe("bundle-123");
+  });
+
   it.each([
     ["full_page", "/app/bundles/full-page-bundle/configure/bundle-123"],
     ["product_page", "/app/bundles/product-page-bundle/configure/bundle-123"],

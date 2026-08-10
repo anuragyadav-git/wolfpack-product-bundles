@@ -1,15 +1,10 @@
 import db from "../../db.server";
-import { StorefrontSyncStatus, BundleType } from "../../constants/bundle";
-import { AppLogger } from "../../lib/logger";
+import { BundleType } from "../../constants/bundle";
 import type { ShopifyAdmin } from "../../lib/auth-guards.server";
 import { CartTransformService } from "../cart-transform-service.server";
 import {
   updateBundleProductMetafields,
 } from "./metafield-sync.server";
-import {
-  convertBundleToStandardMetafields,
-  updateProductStandardMetafields,
-} from "./standard-metafields.server";
 import { syncThemeColors } from "../theme-colors.server";
 import { buildFullPageBundleMetafieldConfig } from "../../routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/shared.server";
 import {
@@ -17,58 +12,6 @@ import {
 } from "../../routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/runtime-config.server";
 
 export type StorefrontSyncReason = "save" | "retry" | "sync_bundle" | "preview";
-
-export type BundleStorefrontSyncState = {
-  status: StorefrontSyncStatus;
-  attemptId: string | null;
-  error: string | null;
-  queuedAt: Date | string | null;
-  startedAt: Date | string | null;
-  syncedAt: Date | string | null;
-  failedAt: Date | string | null;
-  stats: unknown;
-};
-
-function getErrorMessage(error: unknown) {
-  return error instanceof Error ? error.message : "Storefront sync failed";
-}
-
-export function createStorefrontSyncAttemptId(bundleId: string) {
-  return `${bundleId}:${Date.now()}`;
-}
-
-export function formatBundleStorefrontSync(bundle: any): BundleStorefrontSyncState {
-  return {
-    status: bundle.storefrontSyncStatus ?? StorefrontSyncStatus.SYNCED,
-    attemptId: bundle.storefrontSyncAttemptId ?? null,
-    error: bundle.storefrontSyncLastError ?? null,
-    queuedAt: bundle.storefrontSyncQueuedAt ?? null,
-    startedAt: bundle.storefrontSyncStartedAt ?? null,
-    syncedAt: bundle.storefrontSyncedAt ?? null,
-    failedAt: bundle.storefrontSyncFailedAt ?? null,
-    stats: bundle.storefrontSyncStats ?? null,
-  };
-}
-
-export async function getBundleStorefrontSyncState(
-  shopDomain: string,
-  bundleId: string,
-) {
-  const bundle = await (db.bundle as any).findUnique({
-    where: { id: bundleId, shopId: shopDomain },
-    select: {
-      storefrontSyncStatus: true,
-      storefrontSyncAttemptId: true,
-      storefrontSyncQueuedAt: true,
-      storefrontSyncStartedAt: true,
-      storefrontSyncedAt: true,
-      storefrontSyncFailedAt: true,
-      storefrontSyncLastError: true,
-      storefrontSyncStats: true,
-    },
-  });
-  return formatBundleStorefrontSync(bundle ?? {});
-}
 
 async function loadBundleForStorefrontSync(shopDomain: string, bundleId: string) {
   return (db.bundle as any).findUnique({
@@ -84,86 +27,6 @@ async function loadBundleForStorefrontSync(shopDomain: string, bundleId: string)
       pricing: true,
     },
   });
-}
-
-async function markStorefrontSyncingNow(input: {
-  shopDomain: string;
-  bundleId: string;
-  attemptId: string;
-}) {
-  await (db.bundle as any).update({
-    where: { id: input.bundleId, shopId: input.shopDomain },
-    data: {
-      storefrontSyncStatus: StorefrontSyncStatus.SYNCING,
-      storefrontSyncQueuedAt: null,
-      storefrontSyncStartedAt: new Date(),
-      storefrontSyncedAt: null,
-      storefrontSyncFailedAt: null,
-      storefrontSyncLastError: null,
-      storefrontSyncAttemptId: input.attemptId,
-      storefrontSyncStats: null,
-    },
-  });
-}
-
-async function markStorefrontSynced(input: {
-  shopDomain: string;
-  bundleId: string;
-  attemptId: string;
-  stats: Record<string, unknown>;
-}) {
-  await (db.bundle as any).updateMany({
-    where: {
-      id: input.bundleId,
-      shopId: input.shopDomain,
-      storefrontSyncAttemptId: input.attemptId,
-    },
-    data: {
-      storefrontSyncStatus: StorefrontSyncStatus.SYNCED,
-      storefrontSyncedAt: new Date(),
-      storefrontSyncFailedAt: null,
-      storefrontSyncLastError: null,
-      storefrontSyncStats: input.stats,
-    },
-  });
-}
-
-async function markStorefrontSyncFailed(input: {
-  shopDomain: string;
-  bundleId: string;
-  attemptId: string;
-  error: string;
-}) {
-  await (db.bundle as any).updateMany({
-    where: {
-      id: input.bundleId,
-      shopId: input.shopDomain,
-      storefrontSyncAttemptId: input.attemptId,
-    },
-    data: {
-      storefrontSyncStatus: StorefrontSyncStatus.FAILED,
-      storefrontSyncFailedAt: new Date(),
-      storefrontSyncLastError: input.error,
-    },
-  });
-}
-
-async function updateStandardMetafields(
-  admin: ShopifyAdmin,
-  shopifyProductId: string,
-  bundleConfig: Record<string, unknown>,
-) {
-  const { metafields: standardMetafields, errors } =
-    await convertBundleToStandardMetafields(admin, bundleConfig);
-  if (errors.length > 0) {
-    AppLogger.warn("[STOREFRONT_SYNC] Standard metafield conversion warnings", {
-      component: "storefront-sync",
-      shopifyProductId,
-    }, errors);
-  }
-  if (Object.keys(standardMetafields).length > 0) {
-    await updateProductStandardMetafields(admin, shopifyProductId, standardMetafields);
-  }
 }
 
 async function syncFullPageBundleFromDb(
@@ -183,7 +46,6 @@ async function syncFullPageBundleFromDb(
   }
 
   const bundleConfig = buildFullPageBundleMetafieldConfig(bundle);
-  await updateStandardMetafields(admin, bundle.shopifyProductId, bundleConfig);
   await updateBundleProductMetafields(admin, bundle.shopifyProductId, bundleConfig);
   stats.productMetafields = true;
   syncThemeColors(admin, shopDomain).catch(() => {});
@@ -210,7 +72,6 @@ async function syncProductPageBundleFromDb(
   stats.productState = true;
 
   const bundleConfig = buildSyncBundleConfiguration(bundle, bundle.shopifyProductId);
-  await updateStandardMetafields(admin, bundle.shopifyProductId, bundleConfig);
   await updateBundleProductMetafields(admin, bundle.shopifyProductId, bundleConfig);
   stats.productMetafields = true;
   syncThemeColors(admin, shopDomain).catch(() => {});
@@ -225,7 +86,6 @@ async function performBundleStorefrontSync(
     bundleId: string;
     bundleType: "full_page" | "product_page";
     reason: StorefrontSyncReason;
-    attemptId: string;
   },
 ) {
   const bundle = await loadBundleForStorefrontSync(input.shopDomain, input.bundleId);
@@ -246,17 +106,6 @@ async function performBundleStorefrontSync(
       ? await syncFullPageBundleFromDb(admin, input.shopDomain, bundle)
       : await syncProductPageBundleFromDb(admin, input.shopDomain, bundle);
 
-  await markStorefrontSynced({
-    shopDomain: input.shopDomain,
-    bundleId: input.bundleId,
-    attemptId: input.attemptId,
-    stats: {
-      ...stats,
-      cartTransformId: activation.cartTransformId ?? null,
-      reason: input.reason,
-    },
-  });
-
   return { skipped: false, synced: true, stats };
 }
 
@@ -267,28 +116,12 @@ export async function syncBundleStorefrontNow(input: {
   bundleType: "full_page" | "product_page";
   reason: StorefrontSyncReason;
 }) {
-  const attemptId = createStorefrontSyncAttemptId(input.bundleId);
-  const syncInput = {
+  return performBundleStorefrontSync(input.admin, {
     shopDomain: input.shopDomain,
     bundleId: input.bundleId,
     bundleType: input.bundleType,
     reason: input.reason,
-    attemptId,
-  };
-
-  await markStorefrontSyncingNow(syncInput);
-
-  try {
-    return await performBundleStorefrontSync(input.admin, syncInput);
-  } catch (error) {
-    await markStorefrontSyncFailed({
-      shopDomain: input.shopDomain,
-      bundleId: input.bundleId,
-      attemptId,
-      error: getErrorMessage(error),
-    });
-    throw error;
-  }
+  });
 }
 
 export function compactBundleForConfigureResponse(bundle: any) {
@@ -300,9 +133,5 @@ export function compactBundleForConfigureResponse(bundle: any) {
     description: bundle.description ?? null,
     shopifyProductId: bundle.shopifyProductId ?? null,
     shopifyProductHandle: bundle.shopifyProductHandle ?? null,
-    shopifyPageId: bundle.shopifyPageId ?? null,
-    shopifyPageHandle: bundle.shopifyPageHandle ?? null,
-    shopifyPreviewPageId: bundle.shopifyPreviewPageId ?? null,
-    shopifyPreviewPageHandle: bundle.shopifyPreviewPageHandle ?? null,
   };
 }

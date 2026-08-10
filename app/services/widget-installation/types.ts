@@ -17,18 +17,6 @@ export interface ThemeEditorDeepLink {
   bundleId?: string;
 }
 
-export interface FullPageBundleResult {
-  success: boolean;
-  pageId?: string;
-  pageHandle?: string;
-  pageUrl?: string;
-  widgetInstallationRequired?: boolean;
-  widgetInstallationLink?: string;
-  slugAdjusted?: boolean;
-  error?: string;
-  errorType?: 'page_creation_failed' | 'metafield_failed' | 'widget_not_installed' | 'unknown';
-}
-
 export interface ProductBundleWidgetStatus {
   widgetInstalled: boolean;
   installationLink?: string;
@@ -37,4 +25,3 @@ export interface ProductBundleWidgetStatus {
   message: string;
   requiresOneTimeSetup: boolean;
 }
-

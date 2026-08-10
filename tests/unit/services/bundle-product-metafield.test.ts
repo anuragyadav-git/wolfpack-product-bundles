@@ -334,11 +334,8 @@ describe("updateBundleProductMetafields", () => {
               title: "Pick audit items",
               subTitle: "Choose products",
               sortOrder: 1,
-              categoryRank: 1,
               conditions: [condition],
               collections: [selectedCollection],
-              collectionsData: [],
-              collectionsSelectedData: [selectedCollection],
               categoryBanner: "https://cdn.example/category.png",
               displayVariantsAsIndividualProducts: true,
               displayVariantsAsSwatches: false,
@@ -368,12 +365,11 @@ describe("updateBundleProductMetafields", () => {
     expect(parsed.steps[0].collections).toEqual([]);
     expect(parsed.steps[0].categories).toEqual([
       {
-        categoryId: "category98476",
+        id: "category98476",
         name: "Category 1 Direct Product Category",
         title: "Pick audit items",
         subTitle: "Choose products",
-        rank: 1,
-        categoryRank: 1,
+        sortOrder: 1,
         products: [
           {
             selectionId: "gid://shopify/Product/9427287703811",
@@ -386,10 +382,7 @@ describe("updateBundleProductMetafields", () => {
             ],
           },
         ],
-        selectedProducts: [],
         collections: [selectedCollection],
-        collectionsData: [],
-        collectionsSelectedData: [selectedCollection],
         conditions: [condition],
         categoryBanner: "https://cdn.example/category.png",
         categoryImg: "",

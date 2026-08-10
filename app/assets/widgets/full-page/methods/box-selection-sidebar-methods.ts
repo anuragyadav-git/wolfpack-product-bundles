@@ -55,7 +55,7 @@ getSidebarTierCtaContent(nextRule) {
   const pricing = this.selectedBundle?.pricing;
   if (!pricing?.enabled) return null;
 
-  const displayOptions = pricing.messages?.displayOptions || {};
+  const displayOptions = pricing.displayOptions || {};
   const bundleQuantityOptions = displayOptions.bundleQuantityOptions || {};
   if (bundleQuantityOptions.enabled !== true) return null;
   const optionsByRuleId = bundleQuantityOptions.optionsByRuleId || {};

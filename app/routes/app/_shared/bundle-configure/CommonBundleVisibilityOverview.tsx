@@ -59,14 +59,7 @@ interface CommonBundleVisibilityOverviewProps {
   link: BundleLinkModel;
   onCopyLink: () => void;
   onOpenLink: () => void;
-  onCreatePage?: () => void;
   onEnableEmbed?: () => void;
-  pageSlug?: string;
-  pageSlugError?: string | null;
-  setPageSlug?: (slug: string) => void;
-  onPageSlugEdited?: () => void;
-  onPageSlugBlur?: () => void;
-  creatingPage?: boolean;
   styles: Record<string, string>;
   themeEditorUrl?: string | null;
   placementOptions: VisibilityPlacementOption[];
@@ -74,19 +67,12 @@ interface CommonBundleVisibilityOverviewProps {
 
 export function CommonBundleVisibilityOverview({
   active,
-  creatingPage,
   embedStatus,
   link,
   onCopyLink,
-  onCreatePage,
   onEnableEmbed,
   onOpenLink,
-  onPageSlugBlur,
-  onPageSlugEdited,
-  pageSlug,
-  pageSlugError,
   placementOptions,
-  setPageSlug,
   styles,
   themeEditorUrl,
 }: CommonBundleVisibilityOverviewProps) {
@@ -191,43 +177,6 @@ export function CommonBundleVisibilityOverview({
               View on Storefront
             </button>
           </div>
-        ) : link.kind === "page" && onCreatePage ? (
-          <>
-            <div className={styles.visibilityLinkRow}>
-              <input
-                className={styles.visibilityTextInput}
-                aria-label="Bundle link"
-                value={link.url}
-                disabled
-                readOnly
-              />
-              <button
-                type="button"
-                className={styles.visibilityPrimaryAction}
-                onClick={onCreatePage}
-                disabled={Boolean(pageSlugError) || creatingPage}
-              >
-                {creatingPage ? "Creating..." : "Create Page"}
-              </button>
-            </div>
-            {pageSlug !== undefined && setPageSlug && (
-              <label className={styles.visibilityFieldLabel}>
-                <span>Page URL slug</span>
-                <input
-                  className={styles.visibilityTextInput}
-                  value={pageSlug}
-                  onChange={(event) => {
-                    setPageSlug(event.target.value);
-                    onPageSlugEdited?.();
-                  }}
-                  onBlur={onPageSlugBlur}
-                />
-              </label>
-            )}
-            {pageSlugError && (
-              <p className={styles.visibilityCardText}>{pageSlugError}</p>
-            )}
-          </>
         ) : (
           <p className={styles.visibilityCardText}>{link.emptyMessage}</p>
         )}

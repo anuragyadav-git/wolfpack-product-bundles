@@ -84,10 +84,6 @@ jest.mock("../../../app/services/admin-locale.server", () => ({
   saveShopAdminLocale: jest.fn(),
 }));
 
-jest.mock("../../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/handlers.server", () => ({
-  handleCreatePreviewPage: jest.fn(),
-}));
-
 jest.mock("../../../app/routes/app/app.dashboard/handlers", () => ({
   handleCloneBundle: jest.fn(),
   handleDeleteBundle: jest.fn(),

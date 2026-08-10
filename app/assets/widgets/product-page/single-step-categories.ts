@@ -94,7 +94,6 @@ export function ppbExpandSingleStepCategoriesAsSteps(bundle) {
         || category?.name
         || `${step.pageTitle || step.name || 'Step'} ${categoryIndex + 1}`;
       const categoryKey = category?.id
-        || category?.categoryId
         || category?.title
         || category?.name
         || categoryIndex + 1;
@@ -107,7 +106,7 @@ export function ppbExpandSingleStepCategoriesAsSteps(bundle) {
         categories: [category],
         ...cloneConditionFields(category?.conditions, step.conditions, step),
         _sourceStepId: step.id || null,
-        _sourceCategoryId: category?.id || category?.categoryId || null,
+        _sourceCategoryId: category?.id || null,
         _sourceCategoryIndex: categoryIndex,
       };
     }),

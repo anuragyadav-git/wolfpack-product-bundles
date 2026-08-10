@@ -13,7 +13,7 @@ import { preflightVariantOnStorefront } from '../../shared/variant-preflight.js'
 function shouldIncludeBundleQuantityCartProperties(context) {
   const pricing = context?.selectedBundle?.pricing || {};
   const method = String(pricing.method || '').toLowerCase();
-  const bundleQuantityOptions = pricing.messages?.displayOptions?.bundleQuantityOptions;
+  const bundleQuantityOptions = pricing.displayOptions?.bundleQuantityOptions;
   return !(method === 'buy_x_get_y' && bundleQuantityOptions?.enabled === false);
 }
 

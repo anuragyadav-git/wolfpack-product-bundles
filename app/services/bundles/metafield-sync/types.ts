@@ -186,17 +186,3 @@ export interface BundleTextOverrides {
   /** PDP incomplete-steps state — "Complete All Steps to Continue" */
   completeSteps?: string;
 }
-
-/**
- * Component parents data for MERGE operation
- */
-export interface ComponentParentsData {
-  id: string;
-  component_reference: {
-    value: string[];
-  };
-  component_quantities: {
-    value: number[];
-  };
-  price_adjustment: PriceAdjustment;
-}

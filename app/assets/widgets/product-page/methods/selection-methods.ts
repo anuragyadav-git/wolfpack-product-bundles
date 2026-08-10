@@ -79,7 +79,6 @@ function collectCategoryAutoNextProductIds(category) {
   };
 
   (category?.products || []).forEach(addProduct);
-  (category?.selectedProducts || []).forEach(addProduct);
   return ids;
 }
 

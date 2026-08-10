@@ -55,8 +55,7 @@ describe("serializeFpbSaveSteps", () => {
             subTitle: "Sub",
             sortOrder: 0,
             products: [{ id: "gid://shopify/Product/123" }],
-            selectedProducts: [{ id: "gid://shopify/Product/123", title: "Test Product" }],
-            collectionsSelectedData: [
+            collections: [
               {
                 id: "gid://shopify/Collection/222",
                 collectionId: "222",
@@ -128,8 +127,7 @@ describe("serializeFpbSaveSteps", () => {
       id: "category-1",
       title: "Category",
       products: [{ id: "gid://shopify/Product/123" }],
-      selectedProducts: [{ id: "gid://shopify/Product/123", title: "Test Product" }],
-      collectionsSelectedData: [
+      collections: [
         {
           id: "gid://shopify/Collection/222",
           collectionId: "222",

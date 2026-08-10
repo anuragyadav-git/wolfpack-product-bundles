@@ -6,7 +6,11 @@ import { OptimisedImage } from "../../../components/OptimisedImage";
 import { ProxyHealthBanner } from "../../../components/ProxyHealthBanner";
 import { DashboardBannerSkeleton } from "../../../components/skeletons/DashboardBannerSkeleton";
 import { useDashboardState } from "../../../hooks/useDashboardState";
-import { getBundleEditPath, resolveCloneConfigureRedirect } from "../../../lib/bundle-navigation";
+import {
+  buildDashboardCloneFormData,
+  getBundleEditPath,
+  resolveCloneConfigureRedirect,
+} from "../../../lib/bundle-navigation";
 import { decideDashboardPreviewAction } from "../../../lib/dashboard-preview-action";
 import {
   closePendingDashboardPreview,
@@ -221,14 +225,9 @@ export function DashboardPage() {
   }, [navigate]);
 
   const handleCloneBundle = useCallback((bundleId: string) => {
-    if (confirm(t("dashboard.actions.confirmClone"))) {
-      fetcherIntentRef.current = 'cloneBundle';
-      const formData = new FormData();
-      formData.append("intent", "cloneBundle");
-      formData.append("bundleId", bundleId);
-      fetcher.submit(formData, { method: "post" });
-    }
-  }, [fetcher, bundles, t]);
+    fetcherIntentRef.current = 'cloneBundle';
+    fetcher.submit(buildDashboardCloneFormData(bundleId), { method: "post" });
+  }, [fetcher]);
 
   const handleDeleteBundle = useCallback((bundleId: string) => {
     openDeleteModal(bundleId);

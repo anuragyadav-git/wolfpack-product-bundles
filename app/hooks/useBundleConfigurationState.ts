@@ -56,8 +56,6 @@ export interface BundleData {
   bundleType: string;
   templateName?: string;
   shopifyProductId?: string;
-  shopifyPageHandle?: string;
-  shopifyPageId?: string;
   steps: any[];
   pricing?: any;
 }

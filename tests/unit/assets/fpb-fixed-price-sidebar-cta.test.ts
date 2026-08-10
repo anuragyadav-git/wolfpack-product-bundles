@@ -38,16 +38,14 @@ describe('fullPageBoxSelectionSidebarMethods.getSidebarTierCtaContent', () => {
             discountValue: 500000,
           },
         ],
-        messages: {
-          displayOptions: {
-            bundleQuantityOptions: {
-              enabled: true,
-              defaultRuleId: 'rule-5',
-              optionsByRuleId: {
-                'rule-5': {
-                  label: 'Box of 5',
-                  subtext: '500000% off',
-                },
+        displayOptions: {
+          bundleQuantityOptions: {
+            enabled: true,
+            defaultRuleId: 'rule-5',
+            optionsByRuleId: {
+              'rule-5': {
+                label: 'Box of 5',
+                subtext: '500000% off',
               },
             },
           },
@@ -75,16 +73,14 @@ describe('fullPageBoxSelectionSidebarMethods.getSidebarTierCtaContent', () => {
             discountValue: 10,
           },
         ],
-        messages: {
-          displayOptions: {
-            bundleQuantityOptions: {
-              enabled: true,
-              defaultRuleId: 'rule-3',
-              optionsByRuleId: {
-                'rule-3': {
-                  label: 'Box of 3',
-                  subtext: '10% off',
-                },
+        displayOptions: {
+          bundleQuantityOptions: {
+            enabled: true,
+            defaultRuleId: 'rule-3',
+            optionsByRuleId: {
+              'rule-3': {
+                label: 'Box of 3',
+                subtext: '10% off',
               },
             },
           },
@@ -107,15 +103,13 @@ describe('fullPageBoxSelectionSidebarMethods.getSidebarTierCtaContent', () => {
         { id: 'rule-2', conditionType: 'quantity', conditionValue: 2, discountValue: 5 },
         { id: 'rule-4', conditionType: 'quantity', conditionValue: 4, discountValue: 15 },
       ],
-      messages: {
-        displayOptions: {
-          bundleQuantityOptions: {
-            enabled: true,
-            defaultRuleId: 'rule-2',
-            optionsByRuleId: {
-              'rule-2': { label: 'Box of 2', subtext: '5% off' },
-              'rule-4': { label: 'Box of 4', subtext: '15% off' },
-            },
+      displayOptions: {
+        bundleQuantityOptions: {
+          enabled: true,
+          defaultRuleId: 'rule-2',
+          optionsByRuleId: {
+            'rule-2': { label: 'Box of 2', subtext: '5% off' },
+            'rule-4': { label: 'Box of 4', subtext: '15% off' },
           },
         },
       },
@@ -143,16 +137,14 @@ describe('fullPageBoxSelectionSidebarMethods.getSidebarTierCtaContent', () => {
             discountValue: 500000,
           },
         ],
-        messages: {
-          displayOptions: {
-            bundleQuantityOptions: {
-              enabled: false,
-              defaultRuleId: 'rule-5',
-              optionsByRuleId: {
-                'rule-5': {
-                  label: 'Box of 5',
-                  subtext: '500000% off',
-                },
+        displayOptions: {
+          bundleQuantityOptions: {
+            enabled: false,
+            defaultRuleId: 'rule-5',
+            optionsByRuleId: {
+              'rule-5': {
+                label: 'Box of 5',
+                subtext: '500000% off',
               },
             },
           },

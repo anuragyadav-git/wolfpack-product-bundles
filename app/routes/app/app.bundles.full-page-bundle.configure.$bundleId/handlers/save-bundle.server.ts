@@ -404,14 +404,8 @@ export async function handleSaveBundle(
             (category: any) =>
               (Array.isArray(category.products) &&
                 category.products.length > 0) ||
-              (Array.isArray(category.selectedProducts) &&
-                category.selectedProducts.length > 0) ||
               (Array.isArray(category.collections) &&
-                category.collections.length > 0) ||
-              (Array.isArray(category.collectionsData) &&
-                category.collectionsData.length > 0) ||
-              (Array.isArray(category.collectionsSelectedData) &&
-                category.collectionsSelectedData.length > 0),
+                category.collections.length > 0),
           );
 
         return (
@@ -598,12 +592,12 @@ export async function handleSaveBundle(
                 rules: discountData.discountRules || [],
                 showFooter: discountData.showFooter !== false,
                 showProgressBar: discountData.showDiscountProgressBar === true,
+                displayOptions: canonicalPricingDisplayOptions,
                 messages: {
                   showDiscountDisplay: true,
                   showDiscountMessaging:
                     discountData.discountMessagingEnabled || false,
                   ruleMessages: discountData.ruleMessages || {},
-                  displayOptions: canonicalPricingDisplayOptions,
                   tierTextByRuleId: discountData.tierTextByRuleId || null,
                   tierTextByLocaleByRuleId:
                     discountData.tierTextByLocaleByRuleId || null,
@@ -616,12 +610,12 @@ export async function handleSaveBundle(
                 rules: discountData.discountRules || [],
                 showFooter: discountData.showFooter !== false,
                 showProgressBar: discountData.showDiscountProgressBar === true,
+                displayOptions: canonicalPricingDisplayOptions,
                 messages: {
                   showDiscountDisplay: true,
                   showDiscountMessaging:
                     discountData.discountMessagingEnabled || false,
                   ruleMessages: discountData.ruleMessages || {},
-                  displayOptions: canonicalPricingDisplayOptions,
                   tierTextByRuleId: discountData.tierTextByRuleId || null,
                   tierTextByLocaleByRuleId:
                     discountData.tierTextByLocaleByRuleId || null,

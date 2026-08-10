@@ -210,12 +210,10 @@ function compactCategory(value: unknown): Record<string, unknown> | null {
   const compact: Record<string, unknown> = {};
   keepStringOrNumber(compact, source, [
     "id",
-    "categoryId",
     "name",
     "title",
     "subTitle",
     "sortOrder",
-    "categoryRank",
     "categoryBanner",
     "categoryImg",
   ]);
@@ -226,10 +224,7 @@ function compactCategory(value: unknown): Record<string, unknown> | null {
   ]);
 
   compact.products = compactProducts(source.products);
-  compact.selectedProducts = compactProducts(source.selectedProducts);
   compact.collections = compactCollections(source.collections);
-  compact.collectionsData = compactCollections(source.collectionsData);
-  compact.collectionsSelectedData = compactCollections(source.collectionsSelectedData);
   compact.conditions = asArray(source.conditions);
 
   const multiLangData = asRecord(source.multiLangData);

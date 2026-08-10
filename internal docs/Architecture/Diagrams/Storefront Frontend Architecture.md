@@ -4,81 +4,34 @@ id: wpb-storefront-frontend
 title: Storefront Frontend Architecture
 type: architecture-diagram
 status: authoritative
-last_audited: 2026-07-14
-summary: Theme-extension bootstrap, metafield context, API-first runtime hydration, widget composition, asset loading, and cart submission architecture.
+summary: Maps the Page-free FPB app-proxy host and the PPB product-block host to their shared storefront runtime.
+last_audited: 2026-08-11
 owners:
-  - Engineering
+  - engineering
 domains:
   - storefront
   - frontend
-  - widgets
 systems:
   - Shopify theme
-  - Theme app extension
-  - Shopify CDN
-  - FPB widget
-  - PPB widget
-  - Wolfpack SDK
-  - Remix app proxy
-  - Shopify Cart
-operations:
-  - Liquid render
-  - asset_url load
-  - bundle hydration
-  - template resolution
-  - product selection
-  - add to cart
-  - cart metafield sync
-data_entities:
-  - compact bootstrap marker
-  - bundle_ui_config
-  - bundle runtime payload
-  - widget selection state
-  - cart line properties
-data_classification:
-  - public storefront configuration
-  - signed cart authorization
-  - customer selections
+  - theme-extension
+  - app-proxy
 source_paths:
   - extensions/bundle-builder/blocks/bundle-app-embed.liquid
-  - extensions/bundle-builder/blocks/bundle-full-page.liquid
   - extensions/bundle-builder/blocks/bundle-product-page.liquid
+  - app/routes/root/wpb.$bundleId.tsx
   - app/assets/bundle-widget-full-page.ts
-  - app/assets/bundle-widget-product-page.js
-  - app/assets/widgets/shared/
-  - app/assets/sdk/
-  - app/routes/api/api.bundle.$bundleId[.]json.tsx
-  - app/routes/api/api.cart-transform-runtime-token.tsx
-  - app/routes/api/api.cart-bundle-details.tsx
+  - app/assets/bundle-widget-product-page.ts
 related_docs:
   - ../Widget Architecture.md
-  - ../../Shopify Integration/Metafields.md
-related_diagrams:
   - Metafield Design and Consumption.md
-  - Cart Transform Runtime Architecture.md
-  - Backend Architecture.md
-graphify:
-  communities:
-    - Full-Page Bundle Widget Source
-    - Product-Page Bundle Widget Source
-    - Bundle Data Manager Shared
-    - Widget Theme Template Service
-  god_nodes:
-    - bundle-widget-full-page.ts Widget Source
 tags:
   - architecture
-  - mermaid
   - storefront
-  - frontend
-  - widgets
 keywords:
   - FPB
   - PPB
-  - Liquid
   - asset_url
-  - data-bundle-config
   - app proxy
-  - bundle_ui_config
 ---
 
 # Storefront Frontend Architecture
@@ -87,82 +40,49 @@ keywords:
 flowchart TD
     Customer[Customer browser]
 
-    subgraph Theme[Shopify theme and theme app extension]
+    subgraph Theme[Shopify theme and extension]
         Embed[Wolfpack app embed]
-        FPB[Full-page app block]
         PPB[Product-page app block]
-        PageMeta[(Page metafield context)]
-        VariantMeta[(Bundle ProductVariant bundle_ui_config)]
-        Marker[Compact data-bundle-config marker]
-        Assets[Shopify asset_url JS and CSS URLs]
+        Assets[Shopify asset_url JS and CSS]
     end
 
-    subgraph CDN[Shopify CDN assets]
-        FpbBundle[FPB bundled controller]
-        PpbBundle[PPB bundled controller]
-        SDK[Optional Wolfpack SDK]
-        Shared[Inlined shared engine and template modules]
-        CSS[Base and template CSS assets]
+    subgraph Proxy[Signed Remix app proxy]
+        FpbDocument[FPB Liquid document and complete marker]
+        BundleAPI[Bundle JSON fallback]
+        TokenAPI[Runtime token]
+        DetailsAPI[Cart bundle details]
     end
 
     subgraph Runtime[Browser runtime]
-        Detect[Detect bundle type and validate marker]
-        Hydrate[Fetch current bundle payload]
-        Resolve[Resolve canonical template and methods]
-        State[Selection, pricing, validation, locale, and modal state]
-        Render[Content-driven responsive renderer]
-        Submit[Cart submission engine]
-    end
-
-    subgraph AppProxy[Signed Remix app-proxy APIs]
-        BundleAPI[GET bundle JSON with cache validators]
-        TokenAPI[POST runtime token]
-        DetailsAPI[POST cart bundle details]
-        ViewAPI[POST bundle view analytics]
+        Detect[Detect bundle type]
+        Hydrate[Hydrate configuration]
+        Render[Responsive widget renderer]
+        Submit[Cart submission]
     end
 
     Cart[Shopify Cart]
 
-    Customer --> Embed
-    Customer --> FPB
+    Customer --> FpbDocument
     Customer --> PPB
-    PageMeta -. FPB placement and bootstrap context .-> FPB
-    VariantMeta -. PPB identity and bundle-type context .-> PPB
-    Embed --> Marker
-    FPB --> Marker
-    PPB --> Marker
+    FpbDocument --> Embed
     Embed --> Assets
-    FPB --> Assets
     PPB --> Assets
-    Assets --> FpbBundle
-    Assets --> PpbBundle
-    Assets --> SDK
-    Assets --> CSS
-    Shared --> FpbBundle
-    Shared --> PpbBundle
-    FpbBundle --> Detect
-    PpbBundle --> Detect
-    SDK --> Detect
-    Marker --> Detect
+    FpbDocument --> Detect
+    PPB --> Detect
     Detect --> Hydrate
-    Hydrate --> BundleAPI
-    BundleAPI -->|current full runtime payload; retry only 503 or 504| Hydrate
-    Hydrate --> Resolve
-    Resolve --> State
-    CSS --> Render
-    State --> Render
+    Hydrate -. malformed or absent marker .-> BundleAPI
+    Assets --> Render
+    Hydrate --> Render
     Render --> Submit
     Submit --> TokenAPI
-    TokenAPI -->|signed runtime token| Submit
-    Submit --> Cart
     Submit --> DetailsAPI
-    Render -. non-blocking view event .-> ViewAPI
+    Submit --> Cart
 ```
 
 ## Runtime boundaries
 
-- Liquid owns placement, compact identity/bootstrap context, and Shopify CDN asset URLs.
-- The app-proxy bundle endpoint owns current full runtime configuration for both FPB and PPB.
-- Widget entry files compose shared engine modules and template-specific method/config modules into the active renderer.
-- Browser state is storefront-local; it does not use the Admin Redux store.
-- The cart submission path requests authorization immediately before adding lines, then synchronizes `bundle_details` separately for order metadata.
+- FPB is hosted only by the signed app-proxy Liquid document; it does not require a Shopify Page or Page block.
+- The FPB app-proxy marker contains the complete current configuration. The bundle JSON API is the existing fallback when that marker is absent or malformed.
+- PPB remains product-hosted and merchant-positioned through `bundle-product-page.liquid`.
+- The app embed and product-page block load deployable JS and CSS through Shopify `asset_url`.
+- Browser selection state is storefront-local. Cart authorization is requested immediately before adding lines.

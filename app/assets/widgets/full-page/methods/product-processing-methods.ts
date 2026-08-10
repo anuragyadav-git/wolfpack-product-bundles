@@ -153,7 +153,6 @@ function collectCategoryProducts(step) {
   step.categories.forEach(category => {
     if (!category || typeof category !== 'object') return;
     if (Array.isArray(category.products)) products.push(...category.products);
-    if (Array.isArray(category.selectedProducts)) products.push(...category.selectedProducts);
   });
   return products;
 }
@@ -545,9 +544,6 @@ async loadStepProducts(stepIndex) {
       (category.products || []).forEach(product => {
         if (hasRenderableCachedProductData(product)) allProducts.push(product);
       });
-      (category.selectedProducts || []).forEach(product => {
-        if (hasRenderableCachedProductData(product)) allProducts.push(product);
-      });
     });
   }
 
@@ -829,10 +825,7 @@ _getStepConditionSelections(stepIndex, selections = this.selectedProducts?.[step
 shouldExpandStepProductsDuringLoad(step) {
   const hasCategoryProducts = Array.isArray(step?.categories) && step.categories.some(category =>
     (Array.isArray(category.products) && category.products.length > 0)
-    || (Array.isArray(category.selectedProducts) && category.selectedProducts.length > 0)
     || (Array.isArray(category.collections) && category.collections.length > 0)
-    || (Array.isArray(category.collectionsData) && category.collectionsData.length > 0)
-    || (Array.isArray(category.collectionsSelectedData) && category.collectionsSelectedData.length > 0)
   );
 
   if (hasCategoryProducts) {

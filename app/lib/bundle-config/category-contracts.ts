@@ -28,15 +28,13 @@ export interface CategoryCollectionContract {
 
 export interface CategoryContractInput {
   bundleType: CategoryBundleType;
-  categoryId: string;
+  id: string;
   name: string;
   title?: string;
   subTitle?: string;
-  rank?: number;
+  sortOrder?: number;
   products?: CategoryProductContract[];
-  collectionsData?: CategoryCollectionContract[];
-  collectionsSelectedData?: CategoryCollectionContract[];
-  selectedProducts?: CategoryProductContract[];
+  collections?: CategoryCollectionContract[];
   conditions?: CategoryConditionContract[];
   categoryBanner?: string;
   categoryImg?: string;
@@ -48,8 +46,7 @@ export interface CategoryContractInput {
 
 export function buildCategoryContract(input: CategoryContractInput) {
   const products = input.products ?? [];
-  const collectionsData = input.collectionsData ?? [];
-  const collectionsSelectedData = input.collectionsSelectedData ?? [];
+  const collections = input.collections ?? [];
   const conditions = input.conditions ?? [];
   const subTitle = input.subTitle ?? "";
   const categoryBanner = input.categoryBanner ?? "";
@@ -58,32 +55,29 @@ export function buildCategoryContract(input: CategoryContractInput) {
 
   if (input.bundleType === "full_page") {
     return {
-      categoryId: input.categoryId,
+      id: input.id,
       title: input.title ?? input.name,
       subTitle,
       categoryImg: input.categoryImg ?? "",
       conditions,
       autoNextStepOnConditionMet,
       products,
-      selectedProducts: input.selectedProducts ?? [],
-      collectionsData,
-      collectionsSelectedData,
+      collections,
       categoryBanner,
       multiLangData,
     };
   }
 
   return {
-    categoryId: input.categoryId,
+    id: input.id,
     ...(input.title ? { title: input.title } : {}),
     subTitle,
     name: input.name,
-    categoryRank: input.rank ?? 1,
+    sortOrder: input.sortOrder ?? 0,
     conditions,
     autoNextStepOnConditionMet,
     products,
-    collectionsData,
-    collectionsSelectedData,
+    collections,
     categoryBanner,
     displayVariantsAsIndividualProducts: input.displayVariantsAsIndividualProducts === true,
     displayVariantsAsSwatches: input.displayVariantsAsSwatches === true,

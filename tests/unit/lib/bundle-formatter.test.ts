@@ -340,12 +340,8 @@ describe("formatBundleForWidget", () => {
           title: "Pick audit items",
           subTitle: "Choose audit products",
           sortOrder: 1,
-          categoryRank: 1,
           products: [categoryProduct],
-          selectedProducts: [],
           collections: [selectedCollection],
-          collectionsData: [],
-          collectionsSelectedData: [selectedCollection],
           conditions: [condition],
           categoryBanner: "https://cdn.example/category.png",
           categoryImg: "https://cdn.example/icon.png",
@@ -361,12 +357,11 @@ describe("formatBundleForWidget", () => {
 
     expect(result.steps[0].categories).toEqual([
       {
-        categoryId: "category98476",
+        id: "category98476",
         name: "Category 1 Direct Product Category",
         title: "Pick audit items",
         subTitle: "Choose audit products",
-        rank: 1,
-        categoryRank: 1,
+        sortOrder: 1,
         products: [
           {
             selectionId: "gid://shopify/Product/9427287703811",
@@ -379,10 +374,7 @@ describe("formatBundleForWidget", () => {
             ],
           },
         ],
-        selectedProducts: [],
         collections: [selectedCollection],
-        collectionsData: [],
-        collectionsSelectedData: [selectedCollection],
         conditions: [condition],
         categoryBanner: "https://cdn.example/category.png",
         categoryImg: "https://cdn.example/icon.png",

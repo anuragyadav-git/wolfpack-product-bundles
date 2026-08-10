@@ -3,10 +3,7 @@
  */
 
 import { handleUpdateBundleDesignTemplate } from "../../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/handlers.server";
-import {
-  updateBundleProductMetafields,
-  updateComponentProductMetafields,
-} from "../../../app/services/bundles/metafield-sync.server";
+import { updateBundleProductMetafields } from "../../../app/services/bundles/metafield-sync.server";
 
 jest.mock("../../../app/db.server", () => ({
   __esModule: true,
@@ -35,18 +32,12 @@ jest.mock("../../../app/services/bundles/pricing-calculation.server", () => ({
   updateBundleProductPrice: jest.fn().mockResolvedValue(undefined),
 }));
 
-jest.mock("../../../app/services/bundles/standard-metafields.server", () => ({
-  convertBundleToStandardMetafields: jest.fn().mockResolvedValue({ metafields: {}, errors: [] }),
-  updateProductStandardMetafields: jest.fn().mockResolvedValue(undefined),
-}));
-
 jest.mock("../../../app/services/theme-colors.server", () => ({
   syncThemeColors: jest.fn().mockResolvedValue(undefined),
 }));
 
 jest.mock("../../../app/services/widget-installation.server", () => ({
   WidgetInstallationService: {
-    createFullPageBundle: jest.fn(),
     validateProductBundleWidgetSetup: jest.fn(),
   },
 }));
@@ -143,11 +134,6 @@ describe("PPB Select Template metafield sync", () => {
       },
     }));
 
-    expect(updateComponentProductMetafields).toHaveBeenCalledWith(
-      MOCK_ADMIN,
-      "gid://shopify/Product/123",
-      expect.any(Object),
-    );
     expect(updateBundleProductMetafields).toHaveBeenCalledWith(
       MOCK_ADMIN,
       "gid://shopify/Product/123",

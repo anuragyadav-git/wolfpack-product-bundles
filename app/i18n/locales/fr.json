@@ -84,7 +84,6 @@
       "previewUnavailable": "Enregistrez le bundle pour l'aperçu",
       "cloneBundle": "Dupliquer le bundle",
       "deleteBundle": "Supprimer le bundle",
-      "confirmClone": "Êtes-vous sûr de vouloir dupliquer ce bundle ?",
       "cloneSuccess": "Bundle dupliqué avec succès",
       "deleteSuccess": "Bundle supprimé",
       "themeEditorUnavailable": "Le lien de l'éditeur de thème est indisponible."

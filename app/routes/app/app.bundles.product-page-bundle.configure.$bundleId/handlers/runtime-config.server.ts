@@ -2,7 +2,6 @@ import type { ShopifyAdmin } from "../../../../lib/auth-guards.server";
 import { AppLogger } from "../../../../lib/logger";
 import {
   updateBundleProductMetafields,
-  updateComponentProductMetafields,
 } from "../../../../services/bundles/metafield-sync.server";
 import { parseConditionValue } from "../../../../lib/parse-condition-value";
 import { formatStepCategoryForRuntime } from "../../../../lib/bundle-config/category-runtime";
@@ -120,9 +119,7 @@ export function buildBundleBaseConfig(
   );
   const pricingDisplayOptions =
     updatedBundle.pricing?.displayOptions ??
-    discountData.displayOptions ??
-    savedPricingMessages.displayOptions ??
-    null;
+    discountData.displayOptions ?? null;
   const pricingRuleMessages =
     savedPricingMessages.ruleMessages ?? discountData.ruleMessages ?? {};
   const firstRuleId =
@@ -382,11 +379,11 @@ function buildSyncPricingConfig(pricing: any): Record<string, unknown> | null {
       ruleMessages: syncRuleMessages,
       successMessage: syncMsgs.successMessage ?? null,
       successMessageByLocale: syncMsgs.successMessageByLocale ?? null,
-      displayOptions: pricing.displayOptions ?? syncMsgs.displayOptions ?? null,
+      displayOptions: pricing.displayOptions ?? null,
       tierTextByRuleId: syncMsgs.tierTextByRuleId ?? null,
       tierTextByLocaleByRuleId: syncMsgs.tierTextByLocaleByRuleId ?? null,
     },
-    displayOptions: pricing.displayOptions ?? syncMsgs.displayOptions ?? null,
+    displayOptions: pricing.displayOptions ?? null,
   };
 }
 
@@ -455,21 +452,7 @@ export async function updateSyncMetafields(
     `${configSize} chars`,
   );
 
-  const [componentResult, variantResult] = await Promise.allSettled([
-    updateComponentProductMetafields(admin, productId, bundleConfiguration),
-    updateBundleProductMetafields(admin, productId, bundleConfiguration),
-  ]);
-
-  if (componentResult.status === "rejected") {
-    throw new Error(
-      `Failed to update component metafields: ${componentResult.reason}`,
-    );
-  }
-  if (variantResult.status === "rejected") {
-    throw new Error(
-      `Failed to update bundle variant metafields: ${variantResult.reason}`,
-    );
-  }
+  await updateBundleProductMetafields(admin, productId, bundleConfiguration);
 
   return bundleConfiguration;
 }

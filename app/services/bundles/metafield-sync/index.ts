@@ -5,12 +5,11 @@
  * This module is organized into:
  * - types.ts - Type definitions
  * - utils/ - Utility functions (size checking, pricing calculations)
- * - operations/ - Core operations (definitions, bundle product, cart transform, component product)
+ * - operations/ - Core operations (definitions and bundle product)
  *
  * Usage:
  * import {
  *   updateBundleProductMetafields,
- *   updateComponentProductMetafields,
  *   ensureVariantBundleMetafieldDefinitions,
  *   calculateComponentPricing,
  *   safeJsonParse
@@ -26,8 +25,7 @@ export type {
   BundleUiStep,
   BundleUiPricing,
   BundleUiPricingRule,
-  BundleUiMessaging,
-  ComponentParentsData
+  BundleUiMessaging
 } from "./types";
 
 // Export utilities
@@ -42,8 +40,6 @@ export {
 export { calculateComponentPricing } from "./utils/pricing";
 
 // Export operations
-export { ensureVariantBundleMetafieldDefinitions, ensurePageBundleIdMetafieldDefinition, ensureCustomPageBundleIdDefinition, ensureCustomPageBundleConfigDefinition } from "./operations/definitions.server";
+export { ensureVariantBundleMetafieldDefinitions } from "./operations/definitions.server";
 
 export { updateBundleProductMetafields } from "./operations/bundle-product.server";
-
-export { updateComponentProductMetafields } from "./operations/component-product.server";

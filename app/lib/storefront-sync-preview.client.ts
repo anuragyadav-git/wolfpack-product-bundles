@@ -2,6 +2,7 @@ type PrepareStorefrontPreviewResponse = {
   success?: boolean;
   ready?: boolean;
   previewToken?: string;
+  shareablePreviewUrl?: string;
   error?: string | null;
 };
 

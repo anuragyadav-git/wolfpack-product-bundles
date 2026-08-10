@@ -5,7 +5,7 @@ title: Wolfpack Product Bundles App Navigation and UI Map
 type: navigation-map
 status: authoritative
 summary: Routes, screens, actions, modals, and storefront-preview flows for the embedded app.
-last_audited: 2026-07-31
+last_audited: 2026-08-11
 owners:
   - engineering
 domains:
@@ -29,7 +29,7 @@ keywords:
 > Any time a new page, modal, tab, sidebar section, or user flow is added or removed,
 > this document **must** be updated. See CLAUDE.md for the enforcement rule.
 
-**Last Updated:** 2026-07-30
+**Last Updated:** 2026-08-11
 **Environment mapped:** SIT (`wolfpack-product-bundles-sit`)
 **Test store:** `wolfpack-store-test-1.myshopify.com`
 
@@ -87,12 +87,12 @@ Dashboard
 ├── Metrics: active bundle count
 ├── Storefront setup card → action-first core readiness and active-bundle summary
 │   └── [Finish setup / View details] → Storefront setup modal
-│       └── all five theme blocks/embeds with Theme Editor action when needed
+│       └── current theme blocks/embeds with Theme Editor action when needed
 ├── Section: "Your Bundles"
 │   └── DataTable of bundles (empty state if none exist)
 │       └── Per bundle row:
 │           ├── [Button] "Bundle Settings" → /app/bundles/{type}/configure/{bundleId}
-│           ├── [Button] "Clone"
+│           ├── [Button] "Clone" → immediately clones and opens the new draft
 │           ├── [Button] "Preview"
 │           └── [Button] "Delete" → opens Delete Confirmation Modal
 ├── Existing founder support card → direct support chat
@@ -149,7 +149,7 @@ Configure page storefront sync status:
 - Full-page and product-page configure pages do not show a separate Storefront sync status or retry banner.
 - Save persists DB changes and publishes Shopify storefront data synchronously before returning a compact success response.
 - Existing Sync Bundle actions run the same direct storefront sync path.
-- Preview Bundle posts one compact `/prepare-preview` request before opening storefront preview; failed checks surface through the preview error toast while the button spinner is active.
+- Preview Bundle reserves a tab synchronously and posts one compact `/prepare-preview` request; FPB receives a fresh signed app-proxy URL in that response, while PPB receives its preview token. The reserved tab navigates after the response so popup protection does not discard it. Failed checks close the blank tab and surface through the preview error toast while the button spinner is active.
 - Bundle creation and cloning route directly to the bundle type's configure page; there is no intermediate configuration wizard route.
 
 #### Modal: Delete Bundle Confirmation
@@ -365,7 +365,7 @@ FPB Configure Page
 │   │   ├── Bundle name / description
 │   │   ├── Status selector → opens Status Modal
 │   │   ├── Product selector → opens Product Picker Modal
-│   │   └── Bundle Visibility → read-only proxy URL + Copy Link
+│   │   └── Bundle Visibility → app-embed status + read-only proxy URL + Copy Link
 │   │
 │   ├── Steps
 │   │   ├── List of configured steps
@@ -381,6 +381,8 @@ FPB Configure Page
 │   │
 │   ├── Sync Bundle
 │   │   └── [Button] "Sync Now" → ensure parent + metafields; returns canonical proxy URL
+│   ├── Bundle Widget
+│   │   └── [Button] "Embed Upsell Block/Button" → opens the product-template Theme Editor directly
 │   │
 │   └── Select Template        → select_template section
 │       ├── Heading: "Customize your bundle"
@@ -398,6 +400,11 @@ FPB Configure Page
     ├── Bundle Quantity Options Multi Language Modal (Box Label / Box Subtext)
     └── Progress Bar Multi Language Modal (Tier Text / Tier Subtext)
 ```
+
+FPB configure has no Shopify Page selector, Page slug editor, Page creation,
+Page publishing, or Page-backed preview. The app embed is the only FPB theme
+activation prerequisite and `/apps/product-bundles/wpb/{bundleId}` is the only
+FPB document URL.
 
 Responsive configure behavior:
 - FPB and PPB keep the full Bundle Product and Bundle Setup sidebar on wide screens.
@@ -551,7 +558,7 @@ Billing Page
           └── [Save] → [Sync Bundle tab → Sync Now]
 
 /app/dashboard
-  └── [Clone] → POST
+  └── [Clone] → immediate POST (no confirmation)
       └── follow response redirectTo → /app/bundles/{type}/configure/{bundleId}?mode=create
 ```
 
@@ -609,7 +616,7 @@ Storefront bundle add
 
 | URL Pattern | Purpose |
 |---|---|
-| `/apps/product-bundles/api/bundle/:id.json` | Storefront bundle config (HMAC verified) |
+| `/apps/product-bundles/api/bundle/:id.json` | HMAC-verified canonical storefront bundle response: exact `{ success, bundle }`; field-projection queries do not change the response shape |
 | `/apps/product-bundles/api/bundles.json` | All active bundles for shop |
 | `/apps/product-bundles/api/cart-bundle-details` | Signed storefront route that merges EB-style cart `bundle_details` metafield entries |
 | `/apps/product-bundles/api/cart-transform-runtime-token` | Signed storefront route that validates selected bundle lines and returns `_wolfpack_bundle_runtime` for Cart Transform / Discount Function verification |

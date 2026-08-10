@@ -114,15 +114,14 @@ describe("cart transform runtime token service", () => {
     ]);
   });
 
-  it("validates selected components from persisted category selectedProducts", () => {
+  it("validates selected components from persisted category products", () => {
     const selection = validateRuntimeTokenSelection(makeBundle({
       steps: [
         {
           StepProduct: [],
           StepCategory: [
             {
-              products: [],
-              selectedProducts: [
+              products: [
                 {
                   id: "gid://shopify/Product/3",
                   variants: [{ id: "gid://shopify/ProductVariant/301" }],
@@ -142,12 +141,12 @@ describe("cart transform runtime token service", () => {
     ]);
   });
 
-  it("validates selected components from runtime category products with variant gid fields", () => {
+  it("validates selected components from persisted category products with variant gid fields", () => {
     const selection = validateRuntimeTokenSelection(makeBundle({
       steps: [
         {
           StepProduct: [],
-          categories: [
+          StepCategory: [
             {
               products: [
                 {

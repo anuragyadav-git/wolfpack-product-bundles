@@ -1,36 +1,49 @@
-# Test Spec: decideDashboardPreviewAction
+---
+schema_version: 1
+id: dashboard-preview-action
+title: "Test Spec: Dashboard Preview Action"
+type: test-spec
+status: active
+summary: Verifies fresh signed FPB preview generation and direct PPB product preview navigation.
+last_audited: 2026-08-11
+owners:
+  - engineering
+domains:
+  - admin
+systems:
+  - dashboard
+source_paths:
+  - app/lib/dashboard-preview-action.ts
+  - app/routes/app/app.dashboard/DashboardPage.tsx
+related_docs:
+  - internal docs/Architecture/FPB Host Evaluation.md
+tags:
+  - tdd
+  - preview
+keywords:
+  - create_fpb_preview
+  - signed preview
+---
 
-**Spec ID:** dashboard-preview-action  **Issue:** [feedback-jun26-5]  **Created:** 2026-05-29
+# Test Spec: Dashboard Preview Action
+
+**Spec ID:** dashboard-preview-action  **Created:** 2026-05-29
 
 ## Purpose
 
-`decideDashboardPreviewAction` is a pure helper that maps a dashboard bundle's state to the next preview action. Used by the dashboard Preview button.
-
-Contract:
-
-```ts
-decideDashboardPreviewAction({
-  bundleType: "full_page" | "product_page",
-  bundleId: string,
-  shopifyProductHandle: string | null,
-  shopifyPageHandle: string | null,
-  shop: string,
-}): { kind: "open_url"; url: string }
- | { kind: "create_preview_page" }
- | { kind: "error"; toast: string }
-```
+Map dashboard bundle state to either a fresh signed FPB preview request or the PPB parent-product URL.
 
 ## Test Cases
 
 | # | Scenario | Input | Expected Output |
 |---|---|---|---|
-| 1 | FPB with Shopify Page already published | `{ bundleType: "full_page", bundleId: "abc", pageHandle: "build-your-box", productHandle: null, shop: "s.myshopify.com" }` | `{ kind: "open_url", url: "https://s.myshopify.com/pages/build-your-box" }` |
-| 2 | FPB without Shopify Page | `{ ..., pageHandle: null }` | `{ kind: "create_preview_page" }` |
-| 3 | PPB with product handle | `{ bundleType: "product_page", productHandle: "summer-bundle", shop: "s.myshopify.com" }` | `{ kind: "open_url", url: "https://s.myshopify.com/products/summer-bundle" }` |
-| 4 | PPB without product handle | `{ bundleType: "product_page", productHandle: null, shop: "s.myshopify.com" }` | `{ kind: "error", toast: "Save and place the bundle on a product first to preview it." }` |
-| 5 | Shop with https:// prefix normalized | `{ bundleType: "full_page", pageHandle: "x", shop: "https://s.myshopify.com" }` | URL exactly `https://s.myshopify.com/pages/x` |
+| 1 | Preview any FPB | Valid FPB bundle ID | `{ kind: "create_fpb_preview" }` |
+| 2 | Preview PPB with product handle | Product handle and shop | Product storefront URL |
+| 3 | Preview PPB without product handle | Missing handle | Merchant error message |
+| 4 | FPB with app embed state | Enabled or disabled | Signed preview action remains independent of Page data |
 
 ## Acceptance Criteria
 
-- [ ] All 5 test cases pass
-- [ ] Helper is pure (no DOM, no network)
+- [x] FPB never requires a Shopify Page handle.
+- [x] Every FPB preview click requests a fresh signed URL.
+- [x] PPB preview behavior remains product-hosted.

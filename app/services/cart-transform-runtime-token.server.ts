@@ -102,15 +102,9 @@ function collectAllowedSelectionIds(bundle: any): { variantIds: Set<string>; pro
     for (const product of Array.isArray(step?.products) ? step.products : []) {
       addProduct(product);
     }
-    const categories = [
-      ...(Array.isArray(step?.StepCategory) ? step.StepCategory : []),
-      ...(Array.isArray(step?.categories) ? step.categories : []),
-    ];
+    const categories = Array.isArray(step?.StepCategory) ? step.StepCategory : [];
     for (const category of categories) {
-      const categoryProducts = [
-        ...(Array.isArray(category?.products) ? category.products : []),
-        ...(Array.isArray(category?.selectedProducts) ? category.selectedProducts : []),
-      ];
+      const categoryProducts = Array.isArray(category?.products) ? category.products : [];
       for (const product of categoryProducts) {
         addProduct(product);
       }

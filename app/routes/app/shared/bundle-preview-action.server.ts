@@ -6,7 +6,10 @@ import { ERROR_MESSAGES } from "../../../constants/errors";
 import { BundleType } from "../../../constants/bundle";
 import { recordFirstBundlePreviewEvent } from "../../../services/bundles/bundle-preview-event.server";
 import { createBundlePreviewToken } from "../../../lib/bundle-preview-token.server";
-import { appendFpbPreviewToken, buildFpbStorefrontUrl } from "../../../lib/fpb-storefront-url";
+import {
+  appendFpbPreviewToken,
+  buildFpbStorefrontUrl,
+} from "../../../lib/fpb-storefront-url";
 
 export async function handleCreateFpbPreview(
   admin: ShopifyAdmin,

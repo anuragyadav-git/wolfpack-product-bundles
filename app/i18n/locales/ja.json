@@ -84,7 +84,6 @@
       "previewUnavailable": "プレビューするにはバンドルを保存してください",
       "cloneBundle": "バンドルを複製",
       "deleteBundle": "バンドルを削除",
-      "confirmClone": "このバンドルを複製してよろしいですか？",
       "cloneSuccess": "バンドルが複製されました",
       "deleteSuccess": "バンドルが削除されました",
       "themeEditorUnavailable": "このストアではテーマエディターのリンクを利用できません。"

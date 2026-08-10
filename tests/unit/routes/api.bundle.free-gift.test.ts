@@ -270,8 +270,8 @@ describe('api.bundle.$bundleId.json — free gift & default product fields', () 
   });
 });
 
-describe('api.bundle.$bundleId.json — bootstrap projection and cache headers', () => {
-  it('returns bootstrap projection when requested via fields=bootstrap', async () => {
+describe('api.bundle.$bundleId.json — canonical response and cache headers', () => {
+  it('ignores the retired sparse field query and returns the full canonical response', async () => {
     mockFindFirst().mockResolvedValue(makeBundle([makeBaseStep()]));
 
     const res = await loader({
@@ -284,15 +284,12 @@ describe('api.bundle.$bundleId.json — bootstrap projection and cache headers',
 
     expect(res.status).toBe(200);
     expect(data.success).toBe(true);
-    expect(data.bootstrap).toMatchObject({
-      v: 2,
-      type: 'full_page',
-      bundleType: 'full_page',
+    expect(data.bundle).toMatchObject({
       id: 'bundle-abc',
+      bundleType: 'full_page',
     });
-    expect(data.bundle).toBeUndefined();
-    expect(data.bootstrap.bundleDesignTemplate).toBeUndefined();
-    expect(data.bootstrap.bundleDesignPresetId).toBeUndefined();
+    expect(data).not.toHaveProperty('timestamp');
+    expect(data).not.toHaveProperty('bootstrap');
   });
 
   it('returns 304 and empty body for fresh cache validators', async () => {

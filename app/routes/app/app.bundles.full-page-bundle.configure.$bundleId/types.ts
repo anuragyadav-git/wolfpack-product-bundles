@@ -18,7 +18,6 @@ export type {
   BundleStatusSectionProps,
   ActionResponse,
   SyncProductResponse,
-  PagesResponse,
   ThemeTemplatesResponse,
   WidgetValidationResponse,
 } from "../../../types/bundle-configure";
@@ -40,8 +39,6 @@ export interface BundleData {
   shopId: string;
   shopifyProductId?: string;
   shopifyProductHandle?: string;
-  shopifyPageHandle?: string;
-  shopifyPageId?: string;
   bundleType: string;
   status: BundleStatus;
   templateName?: string;

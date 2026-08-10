@@ -17,7 +17,6 @@ export function FpbBundleVisibilityPanel({
 
   return CommonBundleVisibilityOverview({
     active: flow.activeSection === "bundle_visibility",
-    creatingPage: flow.isInstallingWidget,
     embedStatus: buildEmbedStatusModel("full_page", flow.appEmbedEnabled),
     link,
     onCopyLink: () => {

@@ -304,11 +304,7 @@ export function useConfigureTemplatePricingController(
           : 0;
         return totalProducts + legacyProducts + categoryProductCount;
       }, 0) >= 3;
-    const hasBundleVisibility = Boolean(
-      bundle.shopifyPageId ||
-        bundle.shopifyPageHandle ||
-        formState.bundleStatus === "active"
-    );
+    const hasBundleVisibility = formState.bundleStatus === "active";
     const parentProductActive =
       String(
         productStatus || loadedBundleProduct?.status || ""
@@ -359,8 +355,6 @@ export function useConfigureTemplatePricingController(
     ];
   }, [
     appEmbedEnabled,
-    bundle.shopifyPageHandle,
-    bundle.shopifyPageId,
     flow.hasPreview,
     formState.bundleStatus,
     loadedBundleProduct?.status,

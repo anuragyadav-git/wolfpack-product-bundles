@@ -8,7 +8,6 @@
 import { handleSaveBundle } from "../../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/handlers.server";
 import {
   updateBundleProductMetafields,
-  updateComponentProductMetafields,
 } from "../../../app/services/bundles/metafield-sync.server";
 import { syncBundleStorefrontNow } from "../../../app/services/bundles/storefront-sync.server";
 
@@ -55,13 +54,6 @@ jest.mock("../../../app/services/bundles/storefront-sync.server", () => ({
   }),
 }));
 
-jest.mock("../../../app/services/bundles/standard-metafields.server", () => ({
-  convertBundleToStandardMetafields: jest
-    .fn()
-    .mockResolvedValue({ metafields: {}, errors: [] }),
-  updateProductStandardMetafields: jest.fn().mockResolvedValue(undefined),
-}));
-
 jest.mock("../../../app/utils/variant-lookup.server", () => ({
   getBundleProductVariantId: jest
     .fn()
@@ -74,7 +66,6 @@ jest.mock("../../../app/services/theme-colors.server", () => ({
 
 jest.mock("../../../app/services/widget-installation.server", () => ({
   WidgetInstallationService: {
-    createFullPageBundle: jest.fn(),
     validateProductBundleWidgetSetup: jest.fn(),
   },
 }));
@@ -451,7 +442,6 @@ describe("PPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
   it("does NOT call metafield services when shopifyProductId is absent", async () => {
     await handleSaveBundle(MOCK_ADMIN, MOCK_SESSION, "bundle-1", makeFormData());
     expect(updateBundleProductMetafields).not.toHaveBeenCalled();
-    expect(updateComponentProductMetafields).not.toHaveBeenCalled();
     expect(syncBundleStorefrontNow).toHaveBeenCalledWith({
       admin: MOCK_ADMIN,
       shopDomain: MOCK_SESSION.shop,
@@ -637,17 +627,15 @@ describe("PPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
       makeStep({
         StepCategory: [
           {
-            categoryId: "category98476",
+            id: "category98476",
             name: "Cat B",
             title: "Pick audit items",
             subTitle: "Choose products",
-            categoryRank: 1,
+            sortOrder: 1,
             conditions: [categoryCondition],
             autoNextStepOnConditionMet: true,
             products: [categoryProduct],
-            collections: [],
-            collectionsData: [],
-            collectionsSelectedData: [selectedCollection],
+            collections: [selectedCollection],
             categoryBanner: "https://cdn.example/category.png",
             displayVariantsAsIndividualProducts: true,
             displayVariantsAsSwatches: true,
@@ -670,13 +658,10 @@ describe("PPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
       title: "Pick audit items",
       subTitle: "Choose products",
       sortOrder: 1,
-      categoryRank: 1,
       conditions: [categoryCondition],
       autoNextStepOnConditionMet: true,
       products: [categoryProduct],
       collections: [selectedCollection],
-      collectionsData: [],
-      collectionsSelectedData: [selectedCollection],
       categoryBanner: "https://cdn.example/category.png",
       displayVariantsAsIndividualProducts: true,
       displayVariantsAsSwatches: true,
@@ -1062,10 +1047,10 @@ describe("PPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
       ruleMessages: discountData.ruleMessages,
       successMessage: (discountData as any).successMessage,
       successMessageByLocale: (discountData as any).successMessageByLocale,
-      displayOptions: discountData.displayOptions,
       tierTextByRuleId: (discountData as any).tierTextByRuleId,
       tierTextByLocaleByRuleId: (discountData as any).tierTextByLocaleByRuleId,
     });
+    expect(updateCall.data.pricing.upsert.create.displayOptions).toEqual(discountData.displayOptions);
     expect(updateCall.data.pricing.upsert.create.ruleMessagesByLocale).toEqual((discountData as any).ruleMessagesByLocale);
     expect(updateCall.data.pricing.upsert.update.messages).toEqual(updateCall.data.pricing.upsert.create.messages);
     expect(updateCall.data.pricing.upsert.update.ruleMessagesByLocale).toEqual((discountData as any).ruleMessagesByLocale);
@@ -1138,7 +1123,6 @@ describe("PPB handleSaveBundle — with shopifyProductId (direct storefront sync
       bundleType: "product_page",
       reason: "save",
     });
-    expect(updateComponentProductMetafields).not.toHaveBeenCalled();
     expect(updateBundleProductMetafields).not.toHaveBeenCalled();
     expect(MOCK_ADMIN.graphql).not.toHaveBeenCalled();
   });

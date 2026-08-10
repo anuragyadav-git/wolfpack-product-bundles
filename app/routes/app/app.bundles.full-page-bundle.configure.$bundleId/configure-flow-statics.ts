@@ -7,7 +7,6 @@ import {
 } from "@remix-run/react";
 import { SaveBar, useAppBridge } from "@shopify/app-bridge-react";
 import { AppLogger } from "../../../lib/logger";
-import { slugify, validateSlug } from "../../../lib/slug-utils";
 import {
   getDefaultDiscountRuleSuccessMessage,
   getDefaultDiscountRuleText,
@@ -166,7 +165,6 @@ const configureFlowStaticValues = {
   serializePricingDisplayOptions,
   SettingsRow,
   showPolarisModal,
-  slugify,
   STEP_CONDITION_OPERATOR_OPTIONS,
   STEP_CONDITION_TYPE_OPTIONS,
   StepSetupSection,
@@ -188,7 +186,6 @@ const configureFlowStaticValues = {
   useRevalidator,
   useSharedBundleHandlers,
   useState,
-  validateSlug,
   VisibilityBadge,
 };
 

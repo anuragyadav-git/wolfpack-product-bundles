@@ -5,7 +5,7 @@ title: Wolfpack Product Bundles Internal Docs
 type: index
 status: authoritative
 summary: Index of durable Wolfpack Product Bundles architecture, integration, feature, and operations documentation.
-last_audited: 2026-08-10
+last_audited: 2026-08-11
 owners:
   - engineering
 domains:
@@ -55,6 +55,7 @@ Full evidence record: `docs/competitor-analysis/16-eb-full-data-flow-investigati
 - [[Architecture/Product Card Layout Contract]] — Hard rule for row-level card size behavior across all templates and interaction states
 - [[Architecture/Admin Configure Page]] — shared FPB/PPB Admin configure-page adapter boundary, section rhythm, route-owned save semantics
 - [[Architecture/Bundle Parent Product]] — shared neutral FPB/PPB Shopify parent contract, merchant metadata ownership, sync invariants, and host separation
+- [[Architecture/Bundle Field Ownership]] — canonical persistence/runtime ownership ledger, retired aliases, and the gated FPB Page-removal boundary
 - [[Architecture/FPB Host Evaluation]] — accepted signed app-proxy FPB document host, preview-token contract, and Page retirement sequence
 - [[Architecture/Storefront Draft Preview Authorization]] — shared stateless FPB/PPB draft-preview token, app-proxy authorization, and no-store caching contract
 - [[Architecture/State Management]] — Redux Toolkit slices, RTK Query endpoint boundaries, and AppStateService migration rules

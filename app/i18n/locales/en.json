@@ -84,7 +84,6 @@
       "previewUnavailable": "Save bundle to preview",
       "cloneBundle": "Clone bundle",
       "deleteBundle": "Delete bundle",
-      "confirmClone": "Are you sure you want to clone this bundle?",
       "cloneSuccess": "Bundle cloned successfully",
       "deleteSuccess": "Bundle deleted",
       "themeEditorUnavailable": "Theme editor link is unavailable for this store."

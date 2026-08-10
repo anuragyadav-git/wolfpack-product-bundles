@@ -3,7 +3,6 @@
  *
  * Used by:
  *  - app/routes/api/api.bundle.$bundleId[.]json.tsx  (proxy API response)
- *  - app/services/widget-installation/widget-full-page-bundle.server.ts (page metafield cache)
  *
  * Converts a Prisma bundle (with steps + StepProduct + pricing) into the
  * JSON shape the widget expects.
@@ -108,6 +107,7 @@ interface FormattedPricing {
   rules: unknown[];
   showFooter: boolean;
   messages: unknown;
+  displayOptions: unknown;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -119,9 +119,7 @@ function getCategorySourceProducts(step: any): any[] {
   if (!Array.isArray(step.StepCategory)) return [];
 
   return step.StepCategory.flatMap((category: any) => {
-    const categoryProducts = Array.isArray(category?.products) ? category.products : [];
-    const selectedProducts = Array.isArray(category?.selectedProducts) ? category.selectedProducts : [];
-    return [...categoryProducts, ...selectedProducts];
+    return Array.isArray(category?.products) ? category.products : [];
   });
 }
 
@@ -294,6 +292,7 @@ export function formatBundleForWidget(bundle: any): FormattedBundle {
           rules: bundle.pricing.rules ?? [],
           showFooter: bundle.pricing.showFooter,
           messages: bundle.pricing.messages ?? {},
+          displayOptions: bundle.pricing.displayOptions ?? null,
         }
       : null,
     showProductPrices: bundle.showProductPrices ?? true,

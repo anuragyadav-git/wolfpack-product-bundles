@@ -37,6 +37,7 @@ interface UseBundlePricingProps {
     showFooter?: boolean;
     showDiscountProgressBar?: boolean;
     messages?: any;
+    displayOptions?: any;
   } | null;
   onStateChange?: () => void;
 }
@@ -44,7 +45,7 @@ interface UseBundlePricingProps {
 function createInitialPricingDisplayOptions(initialPricing: UseBundlePricingProps["initialPricing"]): PricingDisplayOptions {
   const normalized = normalizePricingDisplayOptions({
     rules: Array.isArray(initialPricing?.rules) ? initialPricing?.rules : [],
-    messages: initialPricing?.messages || {},
+    messages: { displayOptions: initialPricing?.displayOptions || null },
     showProgressBar: initialPricing?.showDiscountProgressBar === true,
   });
 

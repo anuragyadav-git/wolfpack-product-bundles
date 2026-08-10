@@ -1,10 +1,7 @@
 import { syncBundleStorefrontNow } from "../../../app/services/bundles/storefront-sync.server";
 import db from "../../../app/db.server";
 import { CartTransformService } from "../../../app/services/cart-transform-service.server";
-import {
-  updateBundleProductMetafields,
-  updateComponentProductMetafields,
-} from "../../../app/services/bundles/metafield-sync.server";
+import { updateBundleProductMetafields } from "../../../app/services/bundles/metafield-sync.server";
 
 jest.mock("../../../app/db.server", () => ({
   bundle: {
@@ -43,16 +40,6 @@ jest.mock("../../../app/services/bundles/metafield-sync.server", () => ({
   updateComponentProductMetafields: jest.fn(),
 }));
 
-jest.mock("../../../app/services/bundles/standard-metafields.server", () => ({
-  convertBundleToStandardMetafields: jest.fn().mockResolvedValue({ metafields: {}, errors: [] }),
-  updateProductStandardMetafields: jest.fn(),
-}));
-
-jest.mock("../../../app/services/widget-installation/widget-full-page-bundle.server", () => ({
-  refreshFullPageBundlePageBody: jest.fn(),
-  writeBundleConfigPageMetafield: jest.fn(),
-}));
-
 jest.mock("../../../app/services/theme-colors.server", () => ({
   syncThemeColors: jest.fn().mockResolvedValue(undefined),
 }));
@@ -71,7 +58,6 @@ jest.mock("../../../app/routes/app/app.bundles.product-page-bundle.configure.$bu
 const mockDb = db as any;
 const mockCompleteSetup = CartTransformService.completeSetup as jest.Mock;
 const mockUpdateBundleProductMetafields = updateBundleProductMetafields as jest.Mock;
-const mockUpdateComponentProductMetafields = updateComponentProductMetafields as jest.Mock;
 
 describe("storefront sync runtime token contract", () => {
   beforeEach(() => {
@@ -94,7 +80,6 @@ describe("storefront sync runtime token contract", () => {
       cartTransformId: "gid://shopify/CartTransform/1",
     });
     mockUpdateBundleProductMetafields.mockResolvedValue(undefined);
-    mockUpdateComponentProductMetafields.mockResolvedValue(undefined);
   });
 
   it("does not write component_parents from direct storefront sync", async () => {
@@ -107,6 +92,6 @@ describe("storefront sync runtime token contract", () => {
     });
 
     expect(mockUpdateBundleProductMetafields).toHaveBeenCalled();
-    expect(mockUpdateComponentProductMetafields).not.toHaveBeenCalled();
+    expect(mockUpdateBundleProductMetafields).toHaveBeenCalledTimes(1);
   });
 });

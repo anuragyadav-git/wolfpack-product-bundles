@@ -15,10 +15,6 @@ jest.mock("../../../app/services/bundles/metafield-sync.server", () => ({
   updateBundleProductMetafields: jest.fn(),
   updateComponentProductMetafields: jest.fn(),
 }));
-jest.mock("../../../app/services/bundles/standard-metafields.server", () => ({
-  convertBundleToStandardMetafields: jest.fn().mockResolvedValue({ metafields: {}, errors: [] }),
-  updateProductStandardMetafields: jest.fn(),
-}));
 jest.mock("../../../app/services/theme-template.server", () => ({
   ThemeTemplateService: { ensureTemplates: jest.fn() },
 }));

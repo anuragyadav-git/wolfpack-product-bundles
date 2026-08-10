@@ -9,13 +9,8 @@ import { handleSaveBundle } from "../../../app/routes/app/app.bundles.full-page-
 import { AddOnDiscountFunctionService } from "../../../app/services/addon-discount-function-service.server";
 import {
   updateBundleProductMetafields,
-  updateComponentProductMetafields,
 } from "../../../app/services/bundles/metafield-sync.server";
 import { syncBundleStorefrontNow } from "../../../app/services/bundles/storefront-sync.server";
-import {
-  refreshFullPageBundlePageBody,
-  writeBundleConfigPageMetafield,
-} from "../../../app/services/widget-installation/widget-full-page-bundle.server";
 
 jest.mock("../../../app/db.server", () => ({
   __esModule: true,
@@ -48,10 +43,6 @@ jest.mock("../../../app/services/bundles/storefront-sync.server", () => ({
     description: bundle.description ?? null,
     shopifyProductId: bundle.shopifyProductId ?? null,
     shopifyProductHandle: bundle.shopifyProductHandle ?? null,
-    shopifyPageId: bundle.shopifyPageId ?? null,
-    shopifyPageHandle: bundle.shopifyPageHandle ?? null,
-    shopifyPreviewPageId: bundle.shopifyPreviewPageId ?? null,
-    shopifyPreviewPageHandle: bundle.shopifyPreviewPageHandle ?? null,
   })),
   syncBundleStorefrontNow: jest.fn().mockResolvedValue({
     skipped: false,
@@ -64,13 +55,6 @@ jest.mock("../../../app/services/addon-discount-function-service.server", () => 
   AddOnDiscountFunctionService: {
     completeSetup: jest.fn().mockResolvedValue({ success: true }),
   },
-}));
-
-jest.mock("../../../app/services/bundles/standard-metafields.server", () => ({
-  convertBundleToStandardMetafields: jest
-    .fn()
-    .mockResolvedValue({ metafields: {}, errors: [] }),
-  updateProductStandardMetafields: jest.fn().mockResolvedValue(undefined),
 }));
 
 jest.mock("../../../app/utils/variant-lookup.server", () => ({
@@ -129,20 +113,8 @@ jest.mock("../../../app/services/theme-colors.server", () => ({
   syncThemeColors: jest.fn().mockResolvedValue(undefined),
 }));
 
-jest.mock(
-  "../../../app/services/widget-installation/widget-full-page-bundle.server",
-  () => ({
-    writeBundleConfigPageMetafield: jest.fn().mockResolvedValue(undefined),
-    refreshFullPageBundlePageBody: jest.fn().mockResolvedValue({ success: true }),
-    renamePageHandle: jest.fn(),
-    publishPreviewPage: jest.fn(),
-    getPreviewPageUrl: jest.fn(),
-  })
-);
-
 jest.mock("../../../app/services/widget-installation.server", () => ({
   WidgetInstallationService: {
-    createFullPageBundle: jest.fn(),
     validateProductBundleWidgetSetup: jest.fn(),
   },
 }));
@@ -247,7 +219,6 @@ function makeUpdatedBundle(overrides: Record<string, unknown> = {}) {
     description: "A test bundle",
     status: "draft",
     shopifyProductId: null,
-    shopifyPageId: null,
     bundleType: "full_page",
     fullPageLayout: "footer_bottom",
     templateName: null,
@@ -581,7 +552,6 @@ describe("FPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
   it("does NOT call metafield services when shopifyProductId is absent", async () => {
     await handleSaveBundle(MOCK_ADMIN, MOCK_SESSION, "bundle-1", makeFormData());
     expect(updateBundleProductMetafields).not.toHaveBeenCalled();
-    expect(updateComponentProductMetafields).not.toHaveBeenCalled();
     expect(syncBundleStorefrontNow).toHaveBeenCalledWith({
       admin: MOCK_ADMIN,
       shopDomain: MOCK_SESSION.shop,
@@ -593,16 +563,12 @@ describe("FPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
 
   it("syncs storefront data directly through the shared sync service", async () => {
     const updatedBundle = makeUpdatedBundle({
-      shopifyPageId: "gid://shopify/Page/123",
-      shopifyPageHandle: "test-bundle",
       bundleDesignPresetId: "CLASSIC",
     });
     getDb().bundle.update.mockResolvedValue(updatedBundle);
 
     await handleSaveBundle(MOCK_ADMIN, MOCK_SESSION, "bundle-1", makeFormData());
 
-    expect(refreshFullPageBundlePageBody).not.toHaveBeenCalled();
-    expect(writeBundleConfigPageMetafield).not.toHaveBeenCalled();
     expect(syncBundleStorefrontNow).toHaveBeenCalledWith({
       admin: MOCK_ADMIN,
       shopDomain: MOCK_SESSION.shop,
@@ -758,16 +724,13 @@ describe("FPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
       },
       StepCategory: [
         {
-          categoryId: "category21087",
+          id: "category21087",
           title: "Category A",
           subTitle: "Pick FPB products",
           categoryImg: "https://cdn.example/category-icon.png",
           sortOrder: 0,
           products: [categoryProduct],
-          selectedProducts: [],
-          collectionsData: [],
-          collectionsSelectedData: [selectedCollection],
-          collections: [],
+          collections: [selectedCollection],
           categoryBanner: "https://cdn.example/banner.png",
           conditions: [condition],
           autoNextStepOnConditionMet: true,
@@ -793,12 +756,8 @@ describe("FPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
       subTitle: "Pick FPB products",
       categoryImg: "https://cdn.example/category-icon.png",
       sortOrder: 0,
-      categoryRank: null,
       products: [categoryProduct],
-      selectedProducts: [],
       collections: [selectedCollection],
-      collectionsData: [],
-      collectionsSelectedData: [selectedCollection],
       categoryBanner: "https://cdn.example/banner.png",
       conditions: [condition],
       autoNextStepOnConditionMet: true,
@@ -1014,7 +973,7 @@ describe("FPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
 
     const updateCall = getDb().bundle.update.mock.calls[0][0];
     expect(
-      updateCall.data.pricing.upsert.update.messages.displayOptions.progressBar.enabled,
+      updateCall.data.pricing.upsert.update.displayOptions.progressBar.enabled,
     ).toBe(false);
   });
 
@@ -1242,10 +1201,7 @@ describe("FPB handleSaveBundle — with shopifyProductId (direct storefront sync
       bundleType: "full_page",
       reason: "save",
     });
-    expect(updateComponentProductMetafields).not.toHaveBeenCalled();
     expect(updateBundleProductMetafields).not.toHaveBeenCalled();
-    expect(refreshFullPageBundlePageBody).not.toHaveBeenCalled();
-    expect(writeBundleConfigPageMetafield).not.toHaveBeenCalled();
     expect(MOCK_ADMIN.graphql).not.toHaveBeenCalled();
   });
 

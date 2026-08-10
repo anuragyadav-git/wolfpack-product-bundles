@@ -12,15 +12,6 @@ const APP_EMBED_RESOURCE = {
   target: null,
 };
 
-const FULL_PAGE_RESOURCE = {
-  handle: "bundle-full-page",
-  label: "Wolfpack Bundle Full Page",
-  kind: "block",
-  status: "unavailable" as const,
-  enabled: false,
-  target: null,
-};
-
 const AVAILABLE_RESOURCE = {
   handle: "bundle-product-page",
   label: "Bundle Builder",
@@ -34,7 +25,7 @@ describe("dashboard storefront setup card", () => {
   it("keeps loading and failed checks distinct from a completed setup", () => {
     expect(getStorefrontSetupSummary({
       enabledCoreCount: 0,
-      totalCoreCount: 3,
+      totalCoreCount: 2,
       loading: true,
       error: false,
     })).toMatchObject({
@@ -44,7 +35,7 @@ describe("dashboard storefront setup card", () => {
 
     expect(getStorefrontSetupSummary({
       enabledCoreCount: 0,
-      totalCoreCount: 3,
+      totalCoreCount: 2,
       loading: false,
       error: true,
     })).toMatchObject({
@@ -56,21 +47,21 @@ describe("dashboard storefront setup card", () => {
   it("reports the exact remaining core setup work", () => {
     expect(getStorefrontSetupSummary({
       enabledCoreCount: 1,
-      totalCoreCount: 3,
+      totalCoreCount: 2,
       loading: false,
       error: false,
     })).toEqual({
       state: "incomplete",
       titleKey: "dashboard.storefrontSetup.incompleteTitle",
       descriptionKey: "dashboard.storefrontSetup.incompleteDescription",
-      remainingCoreCount: 2,
+      remainingCoreCount: 1,
     });
   });
 
   it("reports readiness only when every core component is enabled", () => {
     expect(getStorefrontSetupSummary({
-      enabledCoreCount: 3,
-      totalCoreCount: 3,
+      enabledCoreCount: 2,
+      totalCoreCount: 2,
       loading: false,
       error: false,
     })).toEqual({
@@ -83,8 +74,8 @@ describe("dashboard storefront setup card", () => {
 
   it("keeps summary output coupled only to core completion state", () => {
     expect(getStorefrontSetupSummary({
-      enabledCoreCount: 3,
-      totalCoreCount: 3,
+      enabledCoreCount: 2,
+      totalCoreCount: 2,
       loading: false,
       error: false,
     })).toEqual({
@@ -99,9 +90,9 @@ describe("dashboard storefront setup card", () => {
   });
 
   it("returns only core storefront rows from configured status resources", () => {
-    expect(getStorefrontStatusRows([APP_EMBED_RESOURCE, FULL_PAGE_RESOURCE, AVAILABLE_RESOURCE]))
+    expect(getStorefrontStatusRows([APP_EMBED_RESOURCE, AVAILABLE_RESOURCE]))
       .toEqual({
-        core: [APP_EMBED_RESOURCE, FULL_PAGE_RESOURCE, AVAILABLE_RESOURCE],
+        core: [APP_EMBED_RESOURCE, AVAILABLE_RESOURCE],
       });
   });
 });

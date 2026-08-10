@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { slugify, validateSlug } from "../../../lib/slug-utils";
 import {
   buildDefaultProductEntryFromPicker,
   normalizeDefaultProductsData,
@@ -9,7 +8,7 @@ import type { IndividualSellingPlanShowFor } from "./configure-constants";
 import type { ConfigureBundleFlowDraft } from "./configure-flow-types";
 
 export function useConfigureContentState(flow: ConfigureBundleFlowDraft) {
-  const { bundle, formState, shop } = flow;
+  const { bundle, shop } = flow;
   const shopDomain = useMemo(
     () =>
       shop.includes(".myshopify.com")
@@ -17,29 +16,10 @@ export function useConfigureContentState(flow: ConfigureBundleFlowDraft) {
         : shop,
     [shop],
   );
-  const [pageSlug, setPageSlug] = useState<string>(
-    bundle.shopifyPageHandle ?? slugify(bundle.name ?? ""),
-  );
-  const [hasManuallyEditedSlug, setHasManuallyEditedSlug] = useState<boolean>(
-    Boolean(bundle.shopifyPageHandle),
-  );
-  const originalPageSlugRef = useRef<string>(
-    bundle.shopifyPageHandle ?? slugify(bundle.name ?? ""),
-  );
-  const normalizedPageSlug = useMemo(() => slugify(pageSlug), [pageSlug]);
-  const pageSlugError = useMemo(
-    () => validateSlug(normalizedPageSlug),
-    [normalizedPageSlug],
-  );
   const bundlePageUrl = useMemo(
     () => `https://${shopDomain}.myshopify.com/apps/product-bundles/wpb/${encodeURIComponent(bundle.id)}`,
     [shopDomain, bundle.id],
   );
-
-  useEffect(() => {
-    if (bundle.shopifyPageHandle || hasManuallyEditedSlug) return;
-    setPageSlug(slugify(formState.bundleName || ""));
-  }, [bundle.shopifyPageHandle, formState.bundleName, hasManuallyEditedSlug]);
 
   const [promoBannerBgImage, setPromoBannerBgImage] = useState<string | null>(
     bundle.promoBannerBgImage ?? null,
@@ -194,7 +174,6 @@ export function useConfigureContentState(flow: ConfigureBundleFlowDraft) {
     directBundleSummary,
     floatingBadgeEnabled,
     floatingBadgeText,
-    hasManuallyEditedSlug,
     individualSellingPlanEnabled,
     individualSellingPlanShowFor,
     initialDefaultProductsData,
@@ -203,22 +182,18 @@ export function useConfigureContentState(flow: ConfigureBundleFlowDraft) {
     loadingGif,
     maxQtyPerProduct,
     normalizeDefaultProductsData,
-    normalizedPageSlug,
     originalAllowQuantityChangesRef,
     originalCartRedirectToCheckoutRef,
     originalDefaultProductsDataRef,
     originalFloatingBadgeEnabledRef,
     originalFloatingBadgeTextRef,
     originalLoadingGifRef,
-    originalPageSlugRef,
     originalPromoBannerBgImageRef,
     originalShowCompareAtPricesRef,
     originalShowProductPricesRef,
     originalShowStepTimelineRef,
     originalTextOverridesByLocaleRef,
     originalTextOverridesRef,
-    pageSlug,
-    pageSlugError,
     productSlotIconUrl,
     productSlotsEnabled,
     promoBannerBgImage,
@@ -229,12 +204,10 @@ export function useConfigureContentState(flow: ConfigureBundleFlowDraft) {
     setDefaultProductsData,
     setFloatingBadgeEnabled,
     setFloatingBadgeText,
-    setHasManuallyEditedSlug,
     setIndividualSellingPlanEnabled,
     setIndividualSellingPlanShowFor,
     setLoadingGif,
     setMaxQtyPerProduct,
-    setPageSlug,
     setProductSlotIconUrl,
     setProductSlotsEnabled,
     setPromoBannerBgImage,
@@ -254,11 +227,9 @@ export function useConfigureContentState(flow: ConfigureBundleFlowDraft) {
     showSlotIconPicker,
     showStepTimeline,
     showTextOnAddButton,
-    slugify,
     textOverrides,
     textOverridesByLocale,
     textOverridesLocale,
-    validateSlug,
     variantSelectorEnabled,
   });
 }

@@ -38,6 +38,7 @@
     "bulk-sync": "tsx scripts/bulk-sync-bundles.ts",
     "deployment:general-sync": "tsx scripts/deployment-general-sync.ts",
     "cart-transform:repair": "tsx scripts/cart-transform-repair.ts",
+    "bundle-config:record": "tsx scripts/record-bundle-configuration.ts",
     "test": "ts-node tests/test-runner.ts",
     "test:unit": "ts-node tests/test-runner.ts unit",
     "test:integration": "ts-node tests/test-runner.ts integration",

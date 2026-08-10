@@ -4,10 +4,7 @@ import { AppLogger } from "../../lib/logger";
 import { buildBundleProductDescriptionHtml } from "../../lib/bundle-product-description.server";
 import { buildGeneratedBundleProductMetadata } from "../../lib/bundle-product-data.server";
 import { buildBundleProductPlaceholderMediaInput } from "../../lib/bundle-product-media.server";
-import {
-  buildFpbInternalParentHandle,
-  ensureFpbParentProductHost,
-} from "./fpb-page-host-migration.server";
+import { buildFpbStorefrontUrl } from "../../lib/fpb-storefront-url";
 
 type BundleParentProductRecord = {
   id: string;
@@ -39,6 +36,182 @@ export type BundleParentProductResult = {
   status: string;
   created: boolean;
 };
+
+const FIND_REDIRECT = `#graphql
+  query FindUrlRedirect($query: String!) {
+    urlRedirects(first: 10, query: $query) {
+      nodes { id path target }
+    }
+  }
+`;
+
+const CREATE_REDIRECT = `#graphql
+  mutation CreateUrlRedirect($urlRedirect: UrlRedirectInput!) {
+    urlRedirectCreate(urlRedirect: $urlRedirect) {
+      urlRedirect { id path target }
+      userErrors { code field message }
+    }
+  }
+`;
+
+const UPDATE_REDIRECT = `#graphql
+  mutation UpdateUrlRedirect($id: ID!, $urlRedirect: UrlRedirectInput!) {
+    urlRedirectUpdate(id: $id, urlRedirect: $urlRedirect) {
+      urlRedirect { id path target }
+      userErrors { code field message }
+    }
+  }
+`;
+
+const UPDATE_PARENT_PRODUCT_HANDLE = `#graphql
+  mutation UpdateFpbParentProductHandle($product: ProductUpdateInput!) {
+    productUpdate(product: $product) {
+      product { id handle }
+      userErrors { field message }
+    }
+  }
+`;
+
+function buildFpbInternalParentHandle(bundleId: string): string {
+  const normalizedBundleId = bundleId
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return `wpb-parent-${normalizedBundleId}`;
+}
+
+function isInternalParentHandle(handle: string, canonicalHandle: string): boolean {
+  return handle === canonicalHandle || handle.startsWith(`${canonicalHandle}-`);
+}
+
+function normalizeRedirectPath(path: string): string {
+  return new URL(path, "https://shop.invalid").pathname.replace(
+    /%[0-9A-F]{2}/g,
+    (escape) => escape.toLowerCase(),
+  );
+}
+
+async function findRedirect(admin: ShopifyAdmin, path: string) {
+  const normalizedPath = normalizeRedirectPath(path);
+  const response = await admin.graphql(FIND_REDIRECT, {
+    variables: { query: `path:${JSON.stringify(normalizedPath)}` },
+  });
+  const data = await response.json() as {
+    data?: {
+      urlRedirects?: {
+        nodes?: Array<{ id: string; path: string; target: string }>;
+      };
+    };
+    errors?: Array<{ message?: string }>;
+  };
+  if (data.errors?.length) {
+    throw new Error(
+      `Failed to inspect redirect ${path}: ${data.errors[0]?.message ?? "unknown error"}`,
+    );
+  }
+  return data.data?.urlRedirects?.nodes?.find(
+    (redirect) => normalizeRedirectPath(redirect.path) === normalizedPath,
+  ) ?? null;
+}
+
+async function ensureRedirect(
+  admin: ShopifyAdmin,
+  path: string,
+  target: string,
+): Promise<void> {
+  const existing = await findRedirect(admin, path);
+  if (existing?.target === target) return;
+
+  const response = existing
+    ? await admin.graphql(UPDATE_REDIRECT, {
+        variables: { id: existing.id, urlRedirect: { path, target } },
+      })
+    : await admin.graphql(CREATE_REDIRECT, {
+        variables: { urlRedirect: { path, target } },
+      });
+  const data = await response.json() as {
+    data?: {
+      urlRedirectUpdate?: {
+        urlRedirect?: { id: string } | null;
+        userErrors?: ShopifyUserError[];
+      };
+      urlRedirectCreate?: {
+        urlRedirect?: { id: string } | null;
+        userErrors?: ShopifyUserError[];
+      };
+    };
+  };
+  const payload = existing
+    ? data.data?.urlRedirectUpdate
+    : data.data?.urlRedirectCreate;
+  const errors = payload?.userErrors ?? [];
+  if (errors.length > 0 || !payload?.urlRedirect) {
+    throw new Error(
+      `Failed to ensure redirect ${path}: ${errors[0]?.message ?? "unknown error"}`,
+    );
+  }
+}
+
+async function ensureFpbParentProductHost(input: {
+  admin: ShopifyAdmin;
+  bundleId: string;
+  shopId: string;
+  productId: string;
+  storedHandle: string | null;
+  liveHandle: string;
+}) {
+  const target = new URL(buildFpbStorefrontUrl(input.shopId, input.bundleId)).pathname;
+  const canonicalHandle = buildFpbInternalParentHandle(input.bundleId);
+  const legacyHandles = [...new Set([input.storedHandle, input.liveHandle])]
+    .filter((handle): handle is string =>
+      Boolean(handle) && !isInternalParentHandle(handle as string, canonicalHandle));
+
+  for (const handle of legacyHandles) {
+    await ensureRedirect(input.admin, `/products/${handle}`, target);
+  }
+
+  if (isInternalParentHandle(input.liveHandle, canonicalHandle)) {
+    return input.liveHandle;
+  }
+
+  const response = await input.admin.graphql(UPDATE_PARENT_PRODUCT_HANDLE, {
+    variables: {
+      product: {
+        id: input.productId,
+        handle: canonicalHandle,
+        redirectNewHandle: false,
+      },
+    },
+  });
+  const data = await response.json() as {
+    data?: {
+      productUpdate?: {
+        product?: { id: string; handle: string } | null;
+        userErrors?: ShopifyUserError[];
+      };
+    };
+    errors?: Array<{ message?: string }>;
+  };
+  const payload = data.data?.productUpdate;
+  const errors = [...(data.errors ?? []), ...(payload?.userErrors ?? [])];
+  const updatedHandle = payload?.product?.handle;
+  if (
+    errors.length > 0
+    || typeof updatedHandle !== "string"
+    || !isInternalParentHandle(updatedHandle, canonicalHandle)
+  ) {
+    throw new Error(
+      `Failed to move FPB parent product: ${errors[0]?.message ?? "Shopify returned an unexpected handle"}`,
+    );
+  }
+
+  for (const handle of legacyHandles) {
+    await ensureRedirect(input.admin, `/products/${handle}`, target);
+  }
+
+  return updatedHandle;
+}
 
 export class BundleParentProductError extends Error {
   operation: string;
@@ -320,7 +493,7 @@ export async function ensureBundleParentProduct(input: {
         storedHandle: input.bundle.shopifyProductHandle ?? null,
         liveHandle: product.handle,
       });
-      if (host.handle) product.handle = host.handle;
+      product.handle = host;
     }
     if (product.handle !== input.bundle.shopifyProductHandle) {
       await db.bundle.update({

@@ -46,17 +46,16 @@ describe("common configure page model", () => {
     ]);
   });
 
-  it("returns FPB page links and PPB product links", () => {
+  it("returns FPB proxy links and PPB product links", () => {
     expect(
       buildBundleLinkModel({
         bundleType: "full_page",
-        fullPageUrl: "https://shop.test/pages/build-a-box",
-        pageHandle: "build-a-box",
+        fullPageUrl: "https://shop.test/apps/product-bundles/wpb/bundle-1",
       }),
     ).toMatchObject({
-      kind: "page",
+      kind: "proxy",
       isLinked: true,
-      url: "https://shop.test/pages/build-a-box",
+      url: "https://shop.test/apps/product-bundles/wpb/bundle-1",
     });
 
     expect(

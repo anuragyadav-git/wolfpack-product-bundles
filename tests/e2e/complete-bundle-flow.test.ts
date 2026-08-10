@@ -39,7 +39,6 @@ jest.mock("../../app/lib/logger", () => ({
 
 jest.mock("../../app/services/widget-installation.server", () => ({
   WidgetInstallationService: {
-    createFullPageBundle: jest.fn(),
     validateProductBundleWidgetSetup: jest.fn().mockResolvedValue({
       widgetInstalled: false,
       requiresOneTimeSetup: false,
@@ -66,14 +65,6 @@ jest.mock("../../app/services/bundles/bundle-parent-product.server", () => ({
   }),
 }));
 
-jest.mock("../../app/services/bundles/standard-metafields.server", () => ({
-  convertBundleToStandardMetafields: jest.fn().mockResolvedValue({
-    metafields: {},
-    errors: [],
-  }),
-  updateProductStandardMetafields: jest.fn().mockResolvedValue(undefined),
-}));
-
 jest.mock("../../app/utils/variant-lookup.server", () => ({
   getBundleProductVariantId: jest.fn().mockResolvedValue("gid://shopify/ProductVariant/999"),
 }));
@@ -94,16 +85,6 @@ jest.mock("../../app/lib/css-sanitizer", () => ({
 jest.mock("../../app/services/theme-colors.server", () => ({
   syncThemeColors: jest.fn().mockResolvedValue(undefined),
 }));
-
-jest.mock(
-  "../../app/services/widget-installation/widget-full-page-bundle.server",
-  () => ({
-    writeBundleConfigPageMetafield: jest.fn().mockResolvedValue(undefined),
-    renamePageHandle: jest.fn(),
-    publishPreviewPage: jest.fn(),
-    getPreviewPageUrl: jest.fn(),
-  }),
-);
 
 jest.mock("../../app/services/bundles/pricing-calculation.server", () => ({
   calculateBundlePrice: jest.fn().mockResolvedValue("99.99"),

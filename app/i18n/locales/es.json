@@ -84,7 +84,6 @@
       "previewUnavailable": "Guardar bundle para vista previa",
       "cloneBundle": "Clonar bundle",
       "deleteBundle": "Eliminar bundle",
-      "confirmClone": "¿Está seguro de que desea clonar este bundle?",
       "cloneSuccess": "Bundle clonado exitosamente",
       "deleteSuccess": "Bundle eliminado",
       "themeEditorUnavailable": "El enlace del editor de temas no está disponible para esta tienda."

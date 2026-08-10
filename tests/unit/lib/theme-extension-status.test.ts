@@ -21,8 +21,7 @@ describe("theme extension status normalization", () => {
     expect(result.find((item) => item.handle === "bundle-app-embed")?.enabled).toBe(true);
     expect(result.find((item) => item.handle === "bundle-product-page")?.status).toBe("available");
     expect(result.find((item) => item.handle === "bundle-product-page")?.enabled).toBe(false);
-    expect(result.find((item) => item.handle === "bundle-full-page")?.status).toBe("unavailable");
-    expect(result.find((item) => item.handle === "bundle-full-page")?.enabled).toBe(false);
+    expect(result.some((item) => item.handle === "bundle-full-page")).toBe(false);
   });
 
   it("does not treat unrelated extensions as Wolfpack resources", () => {

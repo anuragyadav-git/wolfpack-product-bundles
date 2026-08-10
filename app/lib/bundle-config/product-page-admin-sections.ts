@@ -100,9 +100,6 @@ export function extractSellingPlanValidationSources(bundle: any): SellingPlanVal
       for (const collection of asArray(category.collections)) {
         addUnique(collectionIds, normalizeCollectionId(collection.id ?? collection.collectionGid));
       }
-      for (const collection of asArray(category.collectionsSelectedData)) {
-        addUnique(collectionIds, normalizeCollectionId(collection.id ?? collection.collectionGid));
-      }
     }
   }
 

@@ -87,7 +87,7 @@ export function buildEmbedStatusModel(
 }
 
 export interface BundleLinkModel {
-  kind: "page" | "product";
+  kind: "proxy" | "product";
   isLinked: boolean;
   url: string;
   emptyMessage: string;
@@ -96,13 +96,12 @@ export interface BundleLinkModel {
 export function buildBundleLinkModel(input: {
   bundleType: ConfigureBundleType;
   fullPageUrl?: string | null;
-  pageHandle?: string | null;
   shop?: string | null;
   productHandle?: string | null;
 }): BundleLinkModel {
   if (input.bundleType === "full_page") {
     return {
-      kind: "page",
+      kind: "proxy",
       isLinked: Boolean(input.fullPageUrl),
       url: input.fullPageUrl ?? "",
       emptyMessage: "Bundle link is unavailable.",

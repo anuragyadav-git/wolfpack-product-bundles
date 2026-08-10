@@ -16,7 +16,6 @@ type DashboardStatusGridProps = {
 
 const CORE_STORE_FRONT_RESOURCES = [
   "bundle-app-embed",
-  "bundle-full-page",
   "bundle-product-page",
 ] as const;
 

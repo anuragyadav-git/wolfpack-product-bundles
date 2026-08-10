@@ -3,6 +3,13 @@ export function getBundleEditPath(bundleId: string, bundleType: string) {
   return `/app/bundles/${routeBase}/configure/${bundleId}`;
 }
 
+export function buildDashboardCloneFormData(bundleId: string) {
+  const formData = new FormData();
+  formData.append("intent", "cloneBundle");
+  formData.append("bundleId", bundleId);
+  return formData;
+}
+
 export function resolveCloneConfigureRedirect(response: {
   success?: unknown;
   redirectTo?: unknown;

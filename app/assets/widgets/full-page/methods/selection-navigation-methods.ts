@@ -98,8 +98,6 @@ function buildCategoryRuleValidationStep(step, stepIndex, stepCollectionProductI
       };
 
       (category.collections || []).forEach(addCollectionHandle);
-      (category.collectionsData || []).forEach(addCollectionHandle);
-      (category.collectionsSelectedData || []).forEach(addCollectionHandle);
 
       return { ...category, products };
     }),
