@@ -101,6 +101,14 @@ The app embed and the FPB bundle have two legitimate initialization triggers: th
 
 The app-proxy marker is server-rendered with `hidden` and is hydrated near the end of the document. Without earlier geometry, the theme footer can paint in the future widget area and then leave the viewport when the controller renders. The marker contains a decorative, responsive card-and-summary skeleton so slow document or asset loading never presents a blank reserved viewport. `bundle-widget-bootstrap.css` is loaded from the app embed's schema into the document head. It reserves `100svh` for the unhydrated marker and renders that skeleton without depending on the main widget stylesheet. During hydration, the app embed moves the same skeleton into the FPB root instead of replacing it with a generic spinner and marks the root `aria-busy="true"`; widget initialization removes the skeleton and clears the busy state after rendered bundle content is ready. The canonical app-proxy marker is required to contain this skeleton and missing markup fails fast rather than invoking a compatibility path. Keep the bootstrap asset small and marker/root-specific because the enabled app embed loads it across storefront pages.
 
+Rendered FPB summaries have a separate empty-selection contract. When Product
+Slots is disabled, Standard, Classic, Compact, and Horizontal all render the
+same responsive product-row skeleton behavior on desktop and mobile. The
+baseline target is two rows for a new bundle; an explicit larger quantity
+requirement becomes the target, and each selected unit removes one skeleton.
+When Product Slots is enabled, slot tiles own the empty state and summary
+skeleton rows are not rendered.
+
 The app embed is a separate small entry. It handles redirects and marker hydration, then loads the FPB asset only when a full-page marker exists. It must not import the FPB controller graph because the embed is enabled globally.
 - Product-page upsell placement uses `bundle-upsell-block` or `bundle-upsell-button`.
 - Full-page bundle public links use the signed app-proxy document URL (`/apps/product-bundles/wpb/{bundleId}`). Shopify wraps `application/liquid` in the active theme layout and the app embed loads extension assets through `asset_url`.

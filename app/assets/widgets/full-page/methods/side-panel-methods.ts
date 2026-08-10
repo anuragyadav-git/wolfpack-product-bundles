@@ -101,16 +101,13 @@ export function getRemainingSummarySkeletonCount({
   if (productSlotsEnabled === true) return 0;
   if (!isSupportedFpbPreset(designPreset)) return 0;
 
-  const contract = getFpbPresetContract(designPreset);
-  const compactMode = contract?.summary?.mode === 'compactSlots';
-  const horizontalMode = contract?.summary?.mode === 'rows' && isHorizontalFpbPreset(designPreset);
-  if (!compactMode && !horizontalMode) return 0;
-
   const required = Number(requiredQuantity);
   const selected = Number(selectedQuantity);
-  if (!Number.isFinite(required) || required <= 0) return 0;
+  const target = Number.isFinite(required) && required > 0
+    ? Math.max(2, required)
+    : 2;
 
-  return Math.max(0, required - (Number.isFinite(selected) ? Math.max(0, selected) : 0));
+  return Math.max(0, target - (Number.isFinite(selected) ? Math.max(0, selected) : 0));
 }
 
 export const fullPageSidePanelMethods: Record<string, any> & ThisType<any> = {
@@ -445,10 +442,6 @@ renderSidePanel(panel) {
         }
 
         productsContainer.appendChild(row);
-      });
-    } else if (isStandardDesktopSidebar) {
-      this._renderStandardSidebarEmptySlots(productsContainer, {
-        mode: summaryEmptyStateMode,
       });
     }
     if (isHorizontalPreset && !useSharedDesktopSummarySlotTiles) {

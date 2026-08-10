@@ -5,7 +5,7 @@ title: EB Implementation Reference
 type: reference
 status: authoritative
 summary: Records directly verified reference-app contracts used for Wolfpack bundle implementation and parity decisions.
-last_audited: 2026-07-30
+last_audited: 2026-08-11
 owners:
   - engineering
 domains:
@@ -237,6 +237,12 @@ Asset behavior:
 - The uploaded Slot Icon is stored in the merchant's Shopify store assets.
 - The practical upload limit is smaller than Shopify's general store asset maximum.
 - If no Slot Icon is configured, FPB empty slots fall back to the default plus icon.
+
+Product Slots-off reference behavior verified on 2026-08-11:
+
+- The Standard summary renders two product-row skeletons before any selection.
+- The same two-row skeleton baseline is present in the desktop sidebar and the expanded mobile footer tray.
+- The skeletons use a thumbnail block plus title, variant, price, and action bars; they are summary placeholders, not loading-state ownership.
 
 ### Selection Rules and Blocking Behavior
 
