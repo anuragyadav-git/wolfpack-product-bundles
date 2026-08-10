@@ -1155,13 +1155,25 @@
 
   .fpb-mobile-bottom-sheet.fpb-mobile-bottom-sheet.fpb-preset-compact
     .fpb-mobile-summary-count-badge {
+    position: absolute;
+    inset-inline-start: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
     top: 0;
+    width: auto;
+    max-width: calc(100% - 2rem);
     min-width: 48px;
     height: auto;
     min-height: 0;
     line-height: 1.8;
     padding-inline: 0.625rem;
+    border-radius: 999px;
+    background: var(
+      --bundle-sidebar-button-bg,
+      var(--bundle-global-button-bg, #000)
+    );
     transform: translate(-50%, -50%);
   }
 
