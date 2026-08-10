@@ -144,8 +144,11 @@ setSelectedQuantity(stepIndex, variantId, quantity) {
     selectedProducts[normalized] = quantity;
     this.selectedProductCategoryIndexes[stepIndex][normalized] =
       this.activeInpageCategoryIndexes?.[stepIndex] ?? 0;
-  } else if (this.selectedProductCategoryIndexes?.[stepIndex]) {
-    delete this.selectedProductCategoryIndexes[stepIndex][normalized];
+  } else {
+    delete selectedProducts[normalized];
+    if (this.selectedProductCategoryIndexes?.[stepIndex]) {
+      delete this.selectedProductCategoryIndexes[stepIndex][normalized];
+    }
   }
 
   this._persistSessionSelections?.();

@@ -103,8 +103,8 @@
   .step-clear-badge {
   grid-column: 3;
   position: static;
-  width: 24px;
-  height: 24px;
+  width: var(--bundle-product-card-action-min-height, 44px);
+  height: var(--bundle-product-card-action-min-height, 44px);
   margin: 0;
 }
 
@@ -277,9 +277,9 @@
   .step-clear-badge {
   position: static;
   order: 3;
-  flex: 0 0 20px;
-  width: 20px;
-  height: 22px;
+  flex: 0 0 var(--bundle-product-card-action-min-height, 44px);
+  width: var(--bundle-product-card-action-min-height, 44px);
+  height: var(--bundle-product-card-action-min-height, 44px);
   margin: 0;
 }
 

@@ -245,7 +245,7 @@
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
-  min-height: 38px;
+  min-height: var(--bundle-product-card-action-min-height, 44px);
   min-width: 100px;
   border: none;
   outline: none;
@@ -291,9 +291,9 @@
 
 @media (max-width: 768px) {
   .tab-arrow {
-    width: 36px;
-    height: 36px;
-    min-width: 36px;
+    width: var(--bundle-product-card-action-min-height, 44px);
+    height: var(--bundle-product-card-action-min-height, 44px);
+    min-width: var(--bundle-product-card-action-min-height, 44px);
     font-size: 24px;
   }
 
@@ -313,15 +313,15 @@
   .bundle-header-tab {
     font-size: 13px;
     padding: 8px 20px;
-    min-height: 36px;
+    min-height: var(--bundle-product-card-action-min-height, 44px);
   }
 }
 
 @media (max-width: 480px) {
   .tab-arrow {
-    width: 32px;
-    height: 32px;
-    min-width: 32px;
+    width: var(--bundle-product-card-action-min-height, 44px);
+    height: var(--bundle-product-card-action-min-height, 44px);
+    min-width: var(--bundle-product-card-action-min-height, 44px);
     font-size: 20px;
   }
 
@@ -341,7 +341,7 @@
   .bundle-header-tab {
     font-size: 12px;
     padding: 8px 16px;
-    min-height: 32px;
+    min-height: var(--bundle-product-card-action-min-height, 44px);
     min-width: 100px;
   }
 }
@@ -356,8 +356,8 @@
   right: 16px;
   z-index: 1000001;
   background: var(--bundle-modal-close-bg, rgba(255, 255, 255, 0.9));
-  width: 32px;
-  height: 32px;
+  width: var(--bundle-product-card-action-min-height, 44px);
+  height: var(--bundle-product-card-action-min-height, 44px);
   border-radius: 50%;
   display: flex;
   align-items: center;

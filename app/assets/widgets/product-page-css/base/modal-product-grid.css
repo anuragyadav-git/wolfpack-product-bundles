@@ -249,7 +249,8 @@
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
-  min-width: 36px;
+  min-width: var(--bundle-product-card-action-min-height, 44px);
+  min-height: var(--bundle-product-card-action-min-height, 44px);
 }
 
 .modal-body .product-card .qty-btn:hover {
@@ -289,7 +290,7 @@
   box-shadow: none;
   letter-spacing: 0;
   text-transform: none;
-  min-height: 40px;
+  min-height: var(--bundle-product-card-action-min-height, 44px);
   margin-top: auto;
 }
 

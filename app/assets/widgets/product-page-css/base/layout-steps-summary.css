@@ -323,8 +323,8 @@
   position: absolute;
   top: 6px;
   right: 6px;
-  width: 24px;
-  height: 24px;
+  width: var(--bundle-product-card-action-min-height, 44px);
+  height: var(--bundle-product-card-action-min-height, 44px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -339,8 +339,8 @@
 }
 
 .step-clear-badge svg {
-  width: 100%;
-  height: 100%;
+  width: 24px;
+  height: 24px;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
 }
 

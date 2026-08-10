@@ -44,7 +44,7 @@ keywords:
 - Selected-state styling without size shift
 - Icon + label combinations
 - A minimum 44px interactive block size for product actions, quantity controls,
-  navigation controls, and primary checkout actions
+  navigation controls, icon-only remove controls, and primary checkout actions
 
 ## Contract
 
