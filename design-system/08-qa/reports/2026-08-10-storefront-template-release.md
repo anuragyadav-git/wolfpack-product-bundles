@@ -114,7 +114,7 @@ Template-specific matrix evidence was captured before the final `6.0.9` patch bu
 - `tests/unit/routes/fpb-proxy-page.test.ts`: proxy marker, skeleton cardinality, escaping, status, signature, and preview authorization.
 - `tests/unit/assets/fpb-bootstrap-skeleton-handoff.test.ts`: required skeleton transfer, fail-fast missing-markup behavior, and render-boundary cleanup.
 - Focused final result: 11 tests passed.
-- Full unit run during the same release cycle: 1,886 tests passed with zero failures.
+- Full repository run: 1,919 tests passed across unit, integration, and end-to-end suites with zero failures.
 - `npm run build:widgets`: passed for full-page, product-page, SDK, and app embed bundles.
 - `npm run minify:assets css`: passed all Shopify asset-size limits.
 - Modified-file ESLint: zero errors.
