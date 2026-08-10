@@ -17,7 +17,9 @@ source_paths:
   - app/assets/widgets/shared/full-page-preset.ts
   - app/assets/widgets/full-page/templates/registry.ts
   - app/assets/widgets/product-page/templates/registry.ts
+  - app/lib/admin-configuration-surfaces.ts
   - app/lib/settings-language-runtime.ts
+  - design-system/scripts/extract-config-registry.mjs
   - design-system/scripts/extract-copy-registry.mjs
 related_docs:
   - wolfpack-bundle-template-design-system-plan.md
@@ -41,4 +43,5 @@ auditable configuration, copy, state, fixture, and QA inventories.
 - Primary shared source: `app/assets/widgets/shared/template-design-system.ts`
 - Runtime contract adapters: template registries and full-page preset helpers
 - Runtime copy extraction: `design-system/scripts/extract-copy-registry.mjs` derives exact IDs, labels, paths, defaults, and placeholders from `app/lib/settings-language-runtime.ts`
+- Admin Design extraction: `design-system/scripts/extract-config-registry.mjs` derives every base, expert, and expert-mode control from `app/lib/admin-configuration-surfaces.ts`
 - Artifact set: foundations, shared components, family contracts, templates, copy, fixtures, and QA matrix

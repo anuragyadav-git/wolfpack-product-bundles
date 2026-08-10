@@ -31,6 +31,8 @@ keywords:
 - Replaced the seeded storefront-copy inventory with source-backed extraction from `settings-language-runtime.ts`.
 - Expanded canonical runtime copy coverage from 20 manually maintained rows to 88 FPB, PPB, and shared fields.
 - Added deterministic default, placeholder, duplicate-ID, registry, JSON, and coverage generation checks.
+- Added source-backed extraction for all 49 base, expert, disabled-placeholder, and expert-mode Admin Design controls.
+- Expanded configuration coverage from 54 bundle settings to 103 bundle and store-level Design settings.
 
 ## 2026-08-06
 
