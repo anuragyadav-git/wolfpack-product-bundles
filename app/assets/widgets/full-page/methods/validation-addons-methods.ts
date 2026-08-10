@@ -1,7 +1,5 @@
-import {
-  CurrencyManager,
-  PricingCalculator,
-} from '../../../bundle-widget-components.js';
+import { CurrencyManager } from '../../shared/currency-manager.js';
+import { PricingCalculator } from '../../shared/pricing-calculator.js';
 import { ConditionValidator } from '../../shared/condition-validator.js';
 
 function getAddonTiersForStep(step) {

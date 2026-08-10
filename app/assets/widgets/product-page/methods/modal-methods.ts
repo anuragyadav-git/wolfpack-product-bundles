@@ -1,5 +1,7 @@
 import { ConditionValidator } from '../../shared/condition-validator.js';
-import { CurrencyManager, ToastManager, ComponentGenerator } from '../../../bundle-widget-components.js';
+import { CurrencyManager } from '../../shared/currency-manager.js';
+import { ToastManager } from '../../shared/toast-manager.js';
+import { ComponentGenerator } from '../../shared/component-generator.js';
 
 export function resolveProductPageCardButtonText({
   currentQuantity = 0,

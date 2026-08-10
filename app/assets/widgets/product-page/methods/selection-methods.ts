@@ -1,5 +1,5 @@
 import { ConditionValidator } from '../../shared/condition-validator.js';
-import { ToastManager } from '../../../bundle-widget-components.js';
+import { ToastManager } from '../../shared/toast-manager.js';
 import { resolveProductPageCardButtonText, resolveProductPageInlineAddText } from './modal-methods.js';
 import { areRequiredProductPageStepsValid } from './step-validation.js';
 

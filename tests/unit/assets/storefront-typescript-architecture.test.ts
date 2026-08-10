@@ -8,7 +8,6 @@ const runtimeRoots = [
 ];
 const runtimeEntries = [
   'app/assets/bundle-modal-component.ts',
-  'app/assets/bundle-widget-components.ts',
   'app/assets/bundle-widget-full-page.ts',
   'app/assets/bundle-widget-product-page.ts',
 ];

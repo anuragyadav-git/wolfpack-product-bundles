@@ -1,4 +1,6 @@
 
+import { BUNDLE_WIDGET } from '../../shared/constants.js';
+
 export const ProductPageDefaultProductMethods: Record<string, any> & ThisType<any> = {
   _normalizeRequiredQuantity(value) {
     const parsed = Number.parseFloat(value);

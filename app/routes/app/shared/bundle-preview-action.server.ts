@@ -5,7 +5,7 @@ import db from "../../../db.server";
 import { ERROR_MESSAGES } from "../../../constants/errors";
 import { BundleType } from "../../../constants/bundle";
 import { recordFirstBundlePreviewEvent } from "../../../services/bundles/bundle-preview-event.server";
-import { createFpbPreviewToken } from "../../../lib/fpb-preview-token.server";
+import { createBundlePreviewToken } from "../../../lib/bundle-preview-token.server";
 import { appendFpbPreviewToken, buildFpbStorefrontUrl } from "../../../lib/fpb-storefront-url";
 
 export async function handleCreateFpbPreview(
@@ -28,7 +28,7 @@ export async function handleCreateFpbPreview(
 
   const shareablePreviewUrl = appendFpbPreviewToken(
     buildFpbStorefrontUrl(session.shop, bundleId),
-    createFpbPreviewToken({ shop: session.shop, bundleId }),
+    createBundlePreviewToken({ shop: session.shop, bundleId }),
   );
 
   await recordFirstBundlePreviewEvent({

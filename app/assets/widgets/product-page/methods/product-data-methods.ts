@@ -1,4 +1,4 @@
-import { BUNDLE_WIDGET } from '../../../bundle-widget-components.js';
+import { BUNDLE_WIDGET } from '../../shared/constants.js';
 
 export const ProductPageProductDataMethods: Record<string, any> & ThisType<any> = {
   normalizeProductSelectionId(product = {}) {

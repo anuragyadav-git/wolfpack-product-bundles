@@ -1,6 +1,4 @@
-import {
-  BUNDLE_WIDGET,
-} from '../../../bundle-widget-components.js';
+import { BUNDLE_WIDGET } from '../../shared/constants.js';
 
 function extractFullPageId(idString) {
   if (!idString) return null;

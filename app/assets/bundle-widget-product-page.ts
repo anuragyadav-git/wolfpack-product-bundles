@@ -2,14 +2,14 @@
  * Bundle Widget - Product Page Version
  *
  * This widget is specifically for product page bundles with vertical step boxes layout.
- * It imports shared components and utilities from bundle-widget-components.js.
+ * It imports shared components and utilities from their owning modules.
  *
  * ============================================================================
  * ARCHITECTURE ROLE
  * ============================================================================
  * This is the THIRD file loaded for PRODUCT PAGE bundles:
  * 1. bundle-widget.js (loader) - Detects bundle type as 'product_page'
- * 2. bundle-widget-components.js - Provides shared utilities
+ * 2. widgets/shared modules - Provide shared utilities
  * 3. THIS FILE (product-page widget) - Implements product page UI/UX
  *
  * ============================================================================
@@ -35,7 +35,7 @@
  * ============================================================================
  * SHARED CODE IMPORTS
  * ============================================================================
- * All business logic is imported from bundle-widget-components.js:
+ * Shared business logic is imported from its owning modules:
  * - Currency formatting
  * - Price calculations
  * - Discount logic
@@ -95,15 +95,13 @@ if (typeof window !== 'undefined') {
 }
 
 // Import shared components and utilities
-import {
-  BUNDLE_WIDGET,
-  CurrencyManager,
-  BundleDataManager,
-  PricingCalculator,
-  ToastManager,
-  TemplateManager,
-  ComponentGenerator
-} from './bundle-widget-components.js';
+import { BUNDLE_WIDGET } from './widgets/shared/constants.js';
+import { CurrencyManager } from './widgets/shared/currency-manager.js';
+import { BundleDataManager } from './widgets/shared/bundle-data-manager.js';
+import { PricingCalculator } from './widgets/shared/pricing-calculator.js';
+import { ToastManager } from './widgets/shared/toast-manager.js';
+import { TemplateManager } from './widgets/shared/template-manager.js';
+import { ComponentGenerator } from './widgets/shared/component-generator.js';
 import { ConditionValidator } from './widgets/shared/condition-validator.js';
 import { createDefaultLoadingAnimation } from './widgets/shared/default-loading-animation.js';
 import { hideLoadingOverlayElement, markLoadingOverlayVisible } from './widgets/shared/loading-overlay.js';

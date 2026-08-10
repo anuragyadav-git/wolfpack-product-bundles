@@ -1,12 +1,10 @@
-import {
-  BUNDLE_WIDGET,
-  CurrencyManager,
-  BundleDataManager,
-  PricingCalculator,
-  ToastManager,
-  TemplateManager,
-  ComponentGenerator
-} from '../../../bundle-widget-components.js';
+import { BUNDLE_WIDGET } from '../../shared/constants.js';
+import { CurrencyManager } from '../../shared/currency-manager.js';
+import { BundleDataManager } from '../../shared/bundle-data-manager.js';
+import { PricingCalculator } from '../../shared/pricing-calculator.js';
+import { ToastManager } from '../../shared/toast-manager.js';
+import { TemplateManager } from '../../shared/template-manager.js';
+import { ComponentGenerator } from '../../shared/component-generator.js';
 import { ConditionValidator } from '../../shared/condition-validator.js';
 import { createDefaultLoadingAnimation } from '../../shared/default-loading-animation.js';
 import { hideLoadingOverlayElement, markLoadingOverlayVisible } from '../../shared/loading-overlay.js';

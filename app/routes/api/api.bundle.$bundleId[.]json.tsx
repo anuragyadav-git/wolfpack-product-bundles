@@ -6,6 +6,8 @@ import { BundleStatus } from "../../constants/bundle";
 import { ERROR_MESSAGES } from "../../constants/errors";
 import { formatBundleForWidget } from "../../lib/bundle-formatter.server";
 import { verifyAppProxyRequest } from "../../lib/app-proxy.server";
+import { verifyBundlePreviewToken } from "../../lib/bundle-preview-token.server";
+import { BUNDLE_PREVIEW_QUERY_PARAM } from "../../lib/bundle-preview-url";
 
 /**
  * Public API endpoint to fetch a single bundle by ID
@@ -174,16 +176,13 @@ export const loader: LoaderFunction = async ({ request, params }) => {
       bundleId
     });
 
-    // Public storefront surface — only ACTIVE and UNLISTED bundles are served.
-    // Unlisted: hidden from search/collections/sitemap but accessible via direct URL.
-    // Draft and Archived are excluded; merchants preview drafts inside the admin.
+    // Load by the signed app-proxy shop and bundle identity before applying status
+    // authorization. Public requests serve ACTIVE/UNLISTED. DRAFT requires a
+    // short-lived Admin-minted token bound to this shop and bundle.
     const bundle = await db.bundle.findFirst({
       where: {
         id: bundleId,
         shopId: shopDomain,
-        status: {
-          in: [BundleStatus.ACTIVE, BundleStatus.UNLISTED]
-        }
       },
       include: {
         steps: {
@@ -203,7 +202,16 @@ export const loader: LoaderFunction = async ({ request, params }) => {
       }
     });
 
-    if (!bundle) {
+    const isPublic = bundle?.status === BundleStatus.ACTIVE
+      || bundle?.status === BundleStatus.UNLISTED;
+    const isAuthorizedDraftPreview = bundle?.status === BundleStatus.DRAFT
+      && verifyBundlePreviewToken({
+        token: url.searchParams.get(BUNDLE_PREVIEW_QUERY_PARAM),
+        shop: shopDomain,
+        bundleId,
+      });
+
+    if (!bundle || (!isPublic && !isAuthorizedDraftPreview)) {
       AppLogger.warn(ERROR_MESSAGES.BUNDLE_NOT_FOUND, {
         component: "api.bundle",
         operation: "loader",
@@ -235,13 +243,15 @@ export const loader: LoaderFunction = async ({ request, params }) => {
     const etag = `bundle:${bundle.id}:${updatedAt ? updatedAt.getTime() : 0}`;
     const commonHeaders = {
       ...CORS_HEADERS,
-      'Cache-Control': 'public, max-age=10, s-maxage=30, must-revalidate',
+      'Cache-Control': isAuthorizedDraftPreview
+        ? 'private, no-store'
+        : 'public, max-age=10, s-maxage=30, must-revalidate',
       'Vary': 'Accept-Encoding',
       'Last-Modified': lastModified ? lastModified.toUTCString() : new Date(0).toUTCString(),
       'ETag': `"${etag}"`
     };
 
-    if (isFreshByCacheHeaders(request, `"${etag}"`, lastModified)) {
+    if (!isAuthorizedDraftPreview && isFreshByCacheHeaders(request, `"${etag}"`, lastModified)) {
       return new Response(null, {
         status: 304,
         headers: commonHeaders,

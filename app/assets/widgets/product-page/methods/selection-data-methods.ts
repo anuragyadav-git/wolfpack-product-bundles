@@ -1,4 +1,5 @@
-import { BUNDLE_WIDGET, PricingCalculator } from '../../../bundle-widget-components.js';
+import { BUNDLE_WIDGET } from '../../shared/constants.js';
+import { PricingCalculator } from '../../shared/pricing-calculator.js';
 
 export const ProductPageSelectionDataMethods: Record<string, any> & ThisType<any> = {
 isInventoryTrackingOnAddToCartEnabled() {

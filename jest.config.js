@@ -1,7 +1,7 @@
 const storefrontTypeScriptMapper = {
   '^(\\.{1,2}/.*)\\.js$': '$1',
   '^(.*app/assets/(?:widgets|sdk)/.*)\\.js$': '$1.ts',
-  '^(.*app/assets/(?:bundle-modal-component|bundle-widget-components|bundle-widget-full-page|bundle-widget-product-page))\\.js$': '$1.ts',
+  '^(.*app/assets/(?:bundle-modal-component|bundle-widget-full-page|bundle-widget-product-page))\\.js$': '$1.ts',
 };
 
 /** @type {import('jest').Config} */

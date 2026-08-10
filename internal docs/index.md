@@ -56,6 +56,7 @@ Full evidence record: `docs/competitor-analysis/16-eb-full-data-flow-investigati
 - [[Architecture/Admin Configure Page]] — shared FPB/PPB Admin configure-page adapter boundary, section rhythm, route-owned save semantics
 - [[Architecture/Bundle Parent Product]] — shared neutral FPB/PPB Shopify parent contract, merchant metadata ownership, sync invariants, and host separation
 - [[Architecture/FPB Host Evaluation]] — accepted signed app-proxy FPB document host, preview-token contract, and Page retirement sequence
+- [[Architecture/Storefront Draft Preview Authorization]] — shared stateless FPB/PPB draft-preview token, app-proxy authorization, and no-store caching contract
 - [[Architecture/State Management]] — Redux Toolkit slices, RTK Query endpoint boundaries, and AppStateService migration rules
 - [[Architecture/Diagrams/index|Architecture Diagram Catalog]] — indexed Mermaid diagrams for Cart Transform, metafield ownership/consumption, storefront runtime, backend layers, and embedded Admin UI
 - [[Shopify Integration/Polaris Web Components Reference]] — source-of-truth link and policy for using `s-*` Admin web components

@@ -1,6 +1,6 @@
 import { createDefaultLoadingAnimation } from '../../shared/default-loading-animation.js';
 import { hideLoadingOverlayElement, markLoadingOverlayVisible } from '../../shared/loading-overlay.js';
-import { ToastManager } from '../../../bundle-widget-components.js';
+import { ToastManager } from '../../shared/toast-manager.js';
 import {
   formatProductPageStepValidationToast,
   getProductPageModalValidationToastOptions,

@@ -4,6 +4,7 @@ import { navigateBackOrFallback } from "../../../lib/navigation";
 import productPageBundleStyles from "../../../styles/routes/product-page-bundle-configure.module.css";
 import { markBundlePreviewComplete } from "../../../lib/bundle-preview-readiness";
 import { pickPpbPreviewUrl } from "../../../lib/ppb-preview-url";
+import { appendBundlePreviewToken } from "../../../lib/bundle-preview-url";
 import { prepareStorefrontPreviewForOpen } from "../../../lib/storefront-sync-preview.client";
 import { validatePpbWidgetPlacementBeforePreview } from "../../../lib/ppb-widget-placement.client";
 import { openThemeEditorInNewTab } from "../../../lib/theme-editor-navigation.client";
@@ -51,7 +52,7 @@ export function usePpbPreviewReadinessHandlers({
     }
     setIsPreviewBundleLoading(true);
     try {
-      await prepareStorefrontPreviewForOpen();
+      const preview = await prepareStorefrontPreviewForOpen();
       const bundleStatusForPreview = String(
         (base.bundle as any).status ?? "",
       ).toLowerCase();
@@ -120,7 +121,15 @@ export function usePpbPreviewReadinessHandlers({
           return false;
         }
       }
-      window.open(productUrl, "_blank", "noopener,noreferrer");
+      const previewUrl = isStorefrontUrl
+        ? appendBundlePreviewToken(
+            productUrl,
+            preview.previewToken ?? (() => {
+              throw new Error("Preview authorization is unavailable. Please try preview again.");
+            })(),
+          )
+        : productUrl;
+      window.open(previewUrl, "_blank", "noopener,noreferrer");
       recordBundlePreview(productUrl);
       const isPreviewUrl =
         base.bundleProduct &&

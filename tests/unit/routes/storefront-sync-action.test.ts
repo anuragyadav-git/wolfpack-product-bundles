@@ -3,6 +3,7 @@ import {
   handleSyncStorefrontNow,
 } from "../../../app/routes/app/shared/storefront-sync-action.server";
 import { syncBundleStorefrontNow } from "../../../app/services/bundles/storefront-sync.server";
+import { verifyBundlePreviewToken } from "../../../app/lib/bundle-preview-token.server";
 
 jest.mock("../../../app/services/bundles/storefront-sync.server", () => ({
   syncBundleStorefrontNow: jest.fn().mockResolvedValue({
@@ -56,7 +57,7 @@ describe("storefront sync action handlers", () => {
     expect(body).not.toHaveProperty("stats");
   });
 
-  it("prepares preview with one direct sync and no status payload", async () => {
+  it("prepares PPB preview with one direct sync and a bound authorization token", async () => {
     const response = await handlePrepareStorefrontPreview(
       admin,
       session,
@@ -77,7 +78,13 @@ describe("storefront sync action handlers", () => {
       statusCode: 200,
       ready: true,
       message: "success",
+      previewToken: expect.any(String),
     });
+    expect(verifyBundlePreviewToken({
+      token: body.previewToken,
+      shop: "test.myshopify.com",
+      bundleId: "bundle-1",
+    })).toBe(true);
     expect(body).not.toHaveProperty("storefrontSync");
     expect(body).not.toHaveProperty("queued");
     expect(body).not.toHaveProperty("stats");

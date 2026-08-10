@@ -3,7 +3,9 @@ export {};
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { fullPageMobileSummaryMethods } = require('../../../app/assets/widgets/full-page/methods/mobile-summary-methods.js');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const { PricingCalculator, ToastManager } = require('../../../app/assets/bundle-widget-components.js');
+const { PricingCalculator } = require('../../../app/assets/widgets/shared/pricing-calculator.js');
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { ToastManager } = require('../../../app/assets/widgets/shared/toast-manager.js');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const {
   shouldUseFluidMobileSummaryFooter,

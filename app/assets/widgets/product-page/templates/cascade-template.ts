@@ -1,10 +1,8 @@
-import {
-  ComponentGenerator,
-  CurrencyManager,
-  PricingCalculator,
-  TemplateManager,
-  ToastManager,
-} from '../../../bundle-widget-components.js';
+import { ComponentGenerator } from '../../shared/component-generator.js';
+import { CurrencyManager } from '../../shared/currency-manager.js';
+import { PricingCalculator } from '../../shared/pricing-calculator.js';
+import { TemplateManager } from '../../shared/template-manager.js';
+import { ToastManager } from '../../shared/toast-manager.js';
 import { renderSelectedProductRow } from '../../shared/components/selected-product-row.js';
 import { getSelectedProductEntries } from '../../shared/engine/bundle-selectors.js';
 export function getCascadeSelectedDrawerState(selectedEntries = [], isOpen = false) {

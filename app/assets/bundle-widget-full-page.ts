@@ -2,14 +2,14 @@
  * Bundle Widget - Full Page Version
  *
  * This widget is specifically for full page bundles with horizontal tabs layout.
- * It imports shared components and utilities from bundle-widget-components.js.
+ * It imports shared components and utilities from their owning modules.
  *
  * ============================================================================
  * ARCHITECTURE ROLE
  * ============================================================================
  * This is the THIRD file loaded for FULL PAGE bundles:
  * 1. bundle-widget.js (loader) - Detects bundle type as 'full_page'
- * 2. bundle-widget-components.js - Provides shared utilities
+ * 2. widgets/shared modules - Provide shared utilities
  * 3. THIS FILE (full-page widget) - Implements full page UI/UX
  *
  * ============================================================================
@@ -36,7 +36,7 @@
  * ============================================================================
  * SHARED CODE IMPORTS
  * ============================================================================
- * All business logic is imported from bundle-widget-components.js:
+ * Shared business logic is imported from its owning modules:
  * - Currency formatting
  * - Price calculations
  * - Discount logic
@@ -54,7 +54,7 @@
  * ============================================================================
  * Both widgets:
  * - Use the same CSS variables (from unified design settings API)
- * - Import the same utilities (from bundle-widget-components.js)
+ * - Import the same utilities from their owning shared modules
  * - Implement the same business logic (pricing, discounts, cart)
  * - Differ ONLY in UI layout and interaction patterns
  *
@@ -67,15 +67,13 @@
 'use strict';
 
 // Import shared components and utilities
-import {
-  BUNDLE_WIDGET,
-  CurrencyManager,
-  BundleDataManager,
-  PricingCalculator,
-  ToastManager,
-  TemplateManager,
-  ComponentGenerator
-} from './bundle-widget-components.js';
+import { BUNDLE_WIDGET } from './widgets/shared/constants.js';
+import { CurrencyManager } from './widgets/shared/currency-manager.js';
+import { BundleDataManager } from './widgets/shared/bundle-data-manager.js';
+import { PricingCalculator } from './widgets/shared/pricing-calculator.js';
+import { ToastManager } from './widgets/shared/toast-manager.js';
+import { TemplateManager } from './widgets/shared/template-manager.js';
+import { ComponentGenerator } from './widgets/shared/component-generator.js';
 import { ConditionValidator } from './widgets/shared/condition-validator.js';
 import { createDefaultLoadingAnimation } from './widgets/shared/default-loading-animation.js';
 import { hideLoadingOverlayElement, markLoadingOverlayVisible } from './widgets/shared/loading-overlay.js';

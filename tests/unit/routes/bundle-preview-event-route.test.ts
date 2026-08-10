@@ -13,7 +13,7 @@ jest.mock("../../../app/services/bundles/bundle-preview-event.server", () => ({
 }));
 
 import { handleCreateFpbPreview, handleRecordBundlePreview } from "../../../app/routes/app/shared/bundle-preview-action.server";
-import { verifyFpbPreviewToken } from "../../../app/lib/fpb-preview-token.server";
+import { verifyBundlePreviewToken } from "../../../app/lib/bundle-preview-token.server";
 import { recordFirstBundlePreviewEvent } from "../../../app/services/bundles/bundle-preview-event.server";
 
 const getDb = () => require("../../../app/db.server").default;
@@ -117,7 +117,7 @@ describe("handleCreateFpbPreview", () => {
 
     expect(firstUrl.pathname).toBe("/apps/product-bundles/wpb/bundle-1");
     expect(firstUrl.searchParams.get("wpb_preview")).not.toBe(secondUrl.searchParams.get("wpb_preview"));
-    expect(verifyFpbPreviewToken({
+    expect(verifyBundlePreviewToken({
       token: firstUrl.searchParams.get("wpb_preview"),
       shop: mockSession.shop,
       bundleId: "bundle-1",

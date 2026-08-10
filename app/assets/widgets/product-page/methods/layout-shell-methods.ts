@@ -1,4 +1,7 @@
-import { CurrencyManager, ComponentGenerator, ToastManager } from '../../../bundle-widget-components.js';
+import { CurrencyManager } from '../../shared/currency-manager.js';
+import { ComponentGenerator } from '../../shared/component-generator.js';
+import { ToastManager } from '../../shared/toast-manager.js';
+import { BUNDLE_WIDGET } from '../../shared/constants.js';
 import { getDiscountProgressData } from '../../shared/engine/bundle-selectors.js';
 import { renderDiscountProgress } from '../../shared/components/discount-progress.js';
 import { renderSharedProductCard } from '../../shared/components/product-card.js';

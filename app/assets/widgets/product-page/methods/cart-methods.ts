@@ -1,6 +1,8 @@
 import { buildCartLineSourceProperties } from '../../shared/engine/cart-lines.js';
 import { buildProductPageCartFormData } from '../../shared/engine/cart-submit.js';
-import { ToastManager, CurrencyManager, PricingCalculator } from '../../../bundle-widget-components.js';
+import { ToastManager } from '../../shared/toast-manager.js';
+import { CurrencyManager } from '../../shared/currency-manager.js';
+import { PricingCalculator } from '../../shared/pricing-calculator.js';
 import { areRequiredProductPageStepsValid } from './step-validation.js';
 import { preflightVariantOnStorefront, resolveRuntimeVariantNumericId } from '../../shared/variant-preflight.js';
 

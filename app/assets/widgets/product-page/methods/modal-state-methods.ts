@@ -1,4 +1,7 @@
-import { CurrencyManager, PricingCalculator, TemplateManager, ToastManager } from '../../../bundle-widget-components.js';
+import { CurrencyManager } from '../../shared/currency-manager.js';
+import { PricingCalculator } from '../../shared/pricing-calculator.js';
+import { TemplateManager } from '../../shared/template-manager.js';
+import { ToastManager } from '../../shared/toast-manager.js';
 import { ConditionValidator } from '../../shared/condition-validator.js';
 
 export function formatCascadeStepLimitToast(limitText, required) {

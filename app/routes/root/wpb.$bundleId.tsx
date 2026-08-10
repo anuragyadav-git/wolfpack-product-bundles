@@ -4,7 +4,7 @@ import { AppLogger } from "../../lib/logger";
 import { verifyAppProxyRequest } from "../../lib/app-proxy.server";
 import { BundleStatus } from "../../constants/bundle";
 import { formatBundleForWidget } from "../../lib/bundle-formatter.server";
-import { verifyFpbPreviewToken } from "../../lib/fpb-preview-token.server";
+import { verifyBundlePreviewToken } from "../../lib/bundle-preview-token.server";
 
 function escapeHtmlAttribute(value: string): string {
   return value
@@ -93,7 +93,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   const isPublic = bundle.status === BundleStatus.ACTIVE
     || bundle.status === BundleStatus.UNLISTED;
   const hasValidDraftPreview = bundle.status === BundleStatus.DRAFT
-    && verifyFpbPreviewToken({
+    && verifyBundlePreviewToken({
       token: url.searchParams.get("wpb_preview"),
       shop: shopDomain,
       bundleId,

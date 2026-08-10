@@ -5,7 +5,7 @@ title: Build Process
 type: operations
 status: authoritative
 summary: Build, minification, lint, and pre-commit requirements for deployable application and storefront assets.
-last_audited: 2026-08-07
+last_audited: 2026-08-10
 owners:
   - engineering
 domains:
@@ -48,7 +48,7 @@ npm run build:widgets:product-page # PDP only
 
 **Both source AND bundled files must be committed.**
 
-`scripts/build-storefront.mjs` is the only JavaScript asset producer. esbuild follows ESM imports from each entry and emits minified IIFEs; `scripts/minify-assets.js` owns CSS only. Do not add manual module arrays, import stripping, source concatenation, or a second JS minification pass.
+`scripts/build-storefront.mjs` is the only JavaScript asset producer. esbuild follows ESM imports from each entry and emits minified IIFEs; `scripts/minify-assets.js` owns CSS only. Widget controllers and method modules import shared primitives directly from `app/assets/widgets/shared/`; do not introduce compatibility barrels or rely on browser globals to satisfy module dependencies. Do not add manual module arrays, import stripping, source concatenation, or a second JS minification pass.
 
 Keep split source modules semantically named by responsibility. Mechanical split names such as `chunk-01.js` or `part-01.css` are not acceptable long-term source structure.
 

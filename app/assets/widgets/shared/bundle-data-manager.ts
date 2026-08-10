@@ -268,7 +268,6 @@ export class BundleDataManager {
 
       return (
         bundle.status === 'draft' &&
-        bundle.bundleType === BUNDLE_WIDGET.BUNDLE_TYPES.FULL_PAGE &&
         config.bundleId &&
         bundle.id === config.bundleId
       );

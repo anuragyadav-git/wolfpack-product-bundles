@@ -1,9 +1,12 @@
-import { TemplateManager } from '../../../bundle-widget-components.js';
+import { BundleDataManager } from '../../shared/bundle-data-manager.js';
+import { TemplateManager } from '../../shared/template-manager.js';
 import {
   claimCheckoutIntegrationInvocation,
   invokeCheckoutIntegrationProvider,
 } from '../../shared/checkout-integration-adapters.js';
 import { TemplateDesignSystem } from '../../shared/template-design-system.js';
+import { buildBundleConfigApiUrl } from '../../../../lib/bundle-preview-url.js';
+import { ppbExpandSingleStepCategoriesAsSteps } from '../single-step-categories.js';
 
 function getWindow() {
   return typeof window === 'undefined' ? null : window;
@@ -226,7 +229,10 @@ _parseBundleConfigPayload(rawValue) {
       const RETRYABLE_STATUSES = new Set([503, 504]);
 
       const fetchBundleData = async () => {
-        const apiUrl = `/apps/product-bundles/api/bundle/${encodeURIComponent(configValue.id)}.json`;
+        const apiUrl = buildBundleConfigApiUrl(
+          configValue.id,
+          getWindow()?.location?.search || '',
+        );
         const response = await fetch(apiUrl);
 
         if (!response.ok) {

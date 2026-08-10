@@ -5,7 +5,7 @@ title: Widget Architecture
 type: architecture
 status: authoritative
 summary: FPB and PPB bootstrap, hydration, extension-asset, and widget runtime architecture.
-last_audited: 2026-08-07
+last_audited: 2026-08-10
 owners:
   - engineering
 domains:
@@ -14,9 +14,10 @@ systems:
   - widget-runtime
 source_paths:
   - app/assets/bundle-widget-full-page.ts
+  - app/assets/widgets/shared
   - app/assets/widgets/full-page/initialization-guard.js
   - app/assets/widgets/full-page-css/base/bootstrap-reservation.css
-  - app/assets/bundle-widget-product-page.js
+  - app/assets/bundle-widget-product-page.ts
   - app/routes/app/app.settings/design-preview-model.ts
   - app/routes/root/wpb.$bundleId.tsx
   - extensions/bundle-builder/blocks/bundle-app-embed.liquid
@@ -39,14 +40,14 @@ keywords:
 | Widget | Source file | Bundle output | Shopify block |
 |---|---|---|---|
 | Full-Page Bundle (FPB) | `app/assets/bundle-widget-full-page.ts` | `extensions/bundle-builder/assets/bundle-widget-full-page-bundled.js` | `bundle-full-page.liquid` |
-| Product-Page (PDP) | `app/assets/bundle-widget-product-page.js` | `extensions/bundle-builder/assets/bundle-widget-product-page-bundled.js` | `bundle-product-page.liquid` |
+| Product-Page (PDP) | `app/assets/bundle-widget-product-page.ts` | `extensions/bundle-builder/assets/bundle-widget-product-page-bundled.js` | `bundle-product-page.liquid` |
 
-Shared runtime modules live under `app/assets/widgets/shared/`. TypeScript entry points under `app/storefront/` import the required runtime graph, and esbuild resolves, tree-shakes, minifies, and emits browser IIFEs. Storefronts never load raw ESM source files.
+Shared runtime modules live under `app/assets/widgets/shared/`. Controllers, method modules, and template modules import each shared primitive directly from its owning module. The removed `bundle-widget-components` compatibility barrel must not be recreated: direct ownership lets esbuild close every method over real lexical bindings and prevents browser-only free-global failures. TypeScript entry points under `app/storefront/` import the required runtime graph, and esbuild resolves, tree-shakes, minifies, and emits browser IIFEs. Storefronts never load raw ESM source files.
 
 Template behavior is resolved through plain config modules and method modules:
 
-- FPB configs: `app/assets/widgets/full-page/templates/{standard,classic,compact,horizontal}.config.js`
-- PPB configs: `app/assets/widgets/product-page/templates/{grid,list,horizontal-slots,vertical-slots}.config.js`
+- FPB configs: `app/assets/widgets/full-page/templates/{standard,classic,compact,horizontal}.config.ts`
+- PPB configs: `app/assets/widgets/product-page/templates/{grid,list,horizontal-slots,vertical-slots}.config.ts`
 - Registries resolve canonical app template identifiers to those target template configs. FPB Standard is stored and emitted as `STANDARD`.
 
 Template installer/prototype patch functions have been removed. Widget entry files compose exported template method objects in the same central `Object.assign` used for controller method modules.

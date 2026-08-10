@@ -5,6 +5,7 @@ import {
   syncBundleStorefrontNow,
   type StorefrontSyncReason,
 } from "../../../services/bundles/storefront-sync.server";
+import { createBundlePreviewToken } from "../../../lib/bundle-preview-token.server";
 
 function getErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : "Storefront sync failed";
@@ -59,11 +60,16 @@ export async function handlePrepareStorefrontPreview(
       reason: "preview",
     });
 
+    const previewToken = bundleType === "product_page"
+      ? createBundlePreviewToken({ shop: session.shop, bundleId })
+      : null;
+
     return json({
       success: true,
       statusCode: 200,
       ready: true,
       message: "success",
+      ...(previewToken ? { previewToken } : {}),
     });
   } catch (error) {
     return json(

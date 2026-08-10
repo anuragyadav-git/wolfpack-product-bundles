@@ -1,10 +1,8 @@
-import {
-  BUNDLE_WIDGET,
-  CurrencyManager,
-  PricingCalculator,
-  ToastManager,
-  TemplateManager,
-} from '../../../bundle-widget-components.js';
+import { BUNDLE_WIDGET } from '../../shared/constants.js';
+import { CurrencyManager } from '../../shared/currency-manager.js';
+import { PricingCalculator } from '../../shared/pricing-calculator.js';
+import { ToastManager } from '../../shared/toast-manager.js';
+import { TemplateManager } from '../../shared/template-manager.js';
 import {
   buildCartLineDisplayProperties as buildSharedCartLineDisplayProperties,
   buildCartLineSourceProperties as buildSharedCartLineSourceProperties,

@@ -3,7 +3,7 @@ const { ProductPageSelectionDataMethods } = require('../../../app/assets/widgets
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { ProductPageSelectionMethods } = require('../../../app/assets/widgets/product-page/methods/selection-methods.js');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const { ToastManager } = require('../../../app/assets/bundle-widget-components.js');
+const { ToastManager } = require('../../../app/assets/widgets/shared/toast-manager.js');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { shouldDisableProductPageVariantOption } = require('../../../app/assets/widgets/product-page/methods/modal-methods.js');
 // eslint-disable-next-line @typescript-eslint/no-require-imports

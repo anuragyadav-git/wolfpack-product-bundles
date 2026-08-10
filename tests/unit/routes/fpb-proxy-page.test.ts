@@ -1,6 +1,6 @@
 import { createHmac } from "node:crypto";
 import { loader } from "../../../app/routes/root/wpb.$bundleId";
-import { createFpbPreviewToken } from "../../../app/lib/fpb-preview-token.server";
+import { createBundlePreviewToken } from "../../../app/lib/bundle-preview-token.server";
 
 jest.mock("../../../app/lib/logger", () => ({
   AppLogger: {
@@ -248,7 +248,7 @@ describe("FPB app proxy page", () => {
 
     const request = makeSignedRequest();
     const url = new URL(request.url);
-    url.searchParams.set("wpb_preview", createFpbPreviewToken({
+    url.searchParams.set("wpb_preview", createBundlePreviewToken({
       shop: "test-shop.myshopify.com",
       bundleId: "bundle-1",
       apiSecret: "test_api_secret",
