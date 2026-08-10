@@ -1,5 +1,6 @@
 import { ConditionValidator } from '../../shared/condition-validator.js';
 import { ToastManager } from '../../shared/toast-manager.js';
+import { resolveProductCardSelectionAriaLabel } from '../../shared/components/product-card.js';
 import { resolveProductPageCardButtonText, resolveProductPageInlineAddText } from './modal-methods.js';
 import { areRequiredProductPageStepsValid } from './step-validation.js';
 
@@ -430,6 +431,16 @@ updateProductQuantityDisplay(stepIndex, productId, quantity) {
       productCard.classList.add('bw-product-card--selected');
     } else {
       productCard.classList.remove('bw-product-card--selected');
+    }
+
+    const isSelected = quantity > 0;
+    productCard.setAttribute('aria-pressed', String(isSelected));
+    const currentAriaLabel = productCard.getAttribute('aria-label');
+    if (currentAriaLabel) {
+      productCard.setAttribute(
+        'aria-label',
+        resolveProductCardSelectionAriaLabel(currentAriaLabel, isSelected),
+      );
     }
   }
 }

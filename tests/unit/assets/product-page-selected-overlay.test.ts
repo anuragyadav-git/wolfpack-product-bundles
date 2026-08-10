@@ -6,6 +6,10 @@ const {
 } = require('../../../app/assets/widgets/product-page/methods/selection-methods.js');
 
 function createContext(marker: { remove: jest.Mock } | null = null) {
+  const attributes = new Map([
+    ['aria-label', 'Open product details (not selected)'],
+    ['aria-pressed', 'false'],
+  ]);
   const productCard = {
     classList: {
       contains: jest.fn(() => false),
@@ -18,6 +22,8 @@ function createContext(marker: { remove: jest.Mock } | null = null) {
     ownerDocument: {
       createElement: jest.fn(() => ({ style: {} })),
     },
+    getAttribute: jest.fn((name: string) => attributes.get(name) ?? null),
+    setAttribute: jest.fn((name: string, value: string) => attributes.set(name, value)),
     prepend: jest.fn(),
   };
   const context = {

@@ -60,7 +60,7 @@ export function renderSharedProductCard(product = {}, currentQuantity = 0, curre
     options.className || '',
   ].filter(Boolean).join(' ');
 
-  const rootAriaLabel = `${activationLabel}${isSelected ? ' (selected)' : ' (not selected)'}`;
+  const rootAriaLabel = resolveProductCardSelectionAriaLabel(activationLabel, isSelected);
 
   return `
     <div class="${rootClasses}" data-bw-product-card="true" data-product-id="${escapeAttribute(selectionKey)}" data-current-selected-variant-id="${escapeAttribute(selectionKey)}" data-bw-card-image-count="${imageUrls.length}" data-bw-card-image-index="0"${isIndividualVariantCard ? ' data-bw-card-individual-variant="true"' : ''}${hasMultipleImages ? ' data-bw-card-has-multiple-images="true"' : ''} tabindex="0" role="group" aria-label="${escapeAttribute(rootAriaLabel)}" aria-pressed="${isSelected ? 'true' : 'false'}">
@@ -125,6 +125,13 @@ export function renderSharedProductCard(product = {}, currentQuantity = 0, curre
       </div>
     </div>
   `;
+}
+
+export function resolveProductCardSelectionAriaLabel(label = '', isSelected = false) {
+  const baseLabel = String(label).replace(/\s+\((?:not )?selected\)$/, '');
+  if (!baseLabel) return '';
+
+  return `${baseLabel} (${isSelected ? 'selected' : 'not selected'})`;
 }
 
 export function getProductImageUrls(product = {}) {

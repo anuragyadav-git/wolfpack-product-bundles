@@ -69,6 +69,10 @@ class FakeElement {
     this.attributes.set(name, value);
   }
 
+  getAttribute(name: string) {
+    return this.attributes.get(name) ?? null;
+  }
+
   removeAttribute(name: string) {
     this.attributes.delete(name);
   }
@@ -113,6 +117,8 @@ function createSharedProductCard() {
   const scope = new FakeElement('div');
   const card = new FakeElement('div', 'bw-product-card');
   card.dataset.productId = 'variant-1';
+  card.setAttribute('aria-label', 'Open product details (not selected)');
+  card.setAttribute('aria-pressed', 'false');
 
   const action = new FakeElement('div', 'bw-product-card__action product-card-action');
   const addButton = new FakeElement('button', 'bw-product-card__add-button product-add-btn');
@@ -159,6 +165,29 @@ describe('PPB shared card quantity selector state', () => {
     expect(quantityControls).not.toBeNull();
     expect(quantityDisplay?.textContent).toBe('2');
     expect(card.classList.contains('bw-product-card--selected')).toBe(true);
+    expect(card.attributes.get('aria-pressed')).toBe('true');
+    expect(card.attributes.get('aria-label')).toBe('Open product details (selected)');
+  });
+
+  it('restores the accessible unselected state when quantity returns to zero', () => {
+    const { scope, card } = createSharedProductCard();
+    card.setAttribute('aria-label', 'Open product details (selected)');
+    card.setAttribute('aria-pressed', 'true');
+
+    ProductPageSelectionMethods.updateProductQuantityDisplay.call({
+      container: scope,
+      elements: {
+        modal: {
+          classList: { contains: () => false },
+        },
+      },
+      selectedBundle: {},
+      _resolveText: (_key: string, fallback: string) => fallback,
+      getVariantAvailable: () => ({ available: null, outOfStock: false }),
+    }, 0, 'variant-1', 0);
+
+    expect(card.attributes.get('aria-pressed')).toBe('false');
+    expect(card.attributes.get('aria-label')).toBe('Open product details (not selected)');
   });
 
   it('delegates inline quantity button clicks to the quantity update path', () => {
