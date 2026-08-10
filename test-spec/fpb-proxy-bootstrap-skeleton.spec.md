@@ -48,5 +48,6 @@ Verify that Shopify receives a decorative, server-rendered FPB loading structure
 - [ ] The focused FPB proxy route tests pass.
 - [ ] The skeleton is present in the server-rendered Liquid response.
 - [ ] The skeleton is decorative and excluded from the accessibility tree.
+- [ ] The widget container exposes `aria-busy="true"` until rendering completes.
 - [ ] Hydration preserves the skeleton inside the widget container.
 - [ ] Slow-network desktop and mobile hard reloads show the skeleton before widget hydration.

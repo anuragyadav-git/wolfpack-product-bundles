@@ -11,12 +11,14 @@ describe("FPB bootstrap skeleton handoff", () => {
     };
     const container = {
       replaceChildren: jest.fn(),
+      setAttribute: jest.fn(),
     };
 
     transferBootstrapSkeleton(marker, container);
 
     expect(marker.querySelector).toHaveBeenCalledWith("[data-wpb-bootstrap-skeleton]");
     expect(container.replaceChildren).toHaveBeenCalledWith(skeleton);
+    expect(container.setAttribute).toHaveBeenCalledWith("aria-busy", "true");
   });
 
   it("fails fast when canonical proxy markup has no skeleton", () => {
@@ -25,6 +27,7 @@ describe("FPB bootstrap skeleton handoff", () => {
     };
     const container = {
       replaceChildren: jest.fn(),
+      setAttribute: jest.fn(),
     };
 
     expect(() => transferBootstrapSkeleton(marker, container)).toThrow(
@@ -39,10 +42,12 @@ describe("FPB bootstrap skeleton handoff", () => {
     };
     const container = {
       querySelector: jest.fn().mockReturnValue(skeleton),
+      setAttribute: jest.fn(),
     };
 
     removeBootstrapSkeleton(container);
 
     expect(skeleton.remove).toHaveBeenCalledTimes(1);
+    expect(container.setAttribute).toHaveBeenCalledWith("aria-busy", "false");
   });
 });

@@ -3,8 +3,8 @@ schema_version: 1
 id: design-system-gaps-decisions
 title: Design System Gaps and Decisions
 type: design-system
-status: active
-summary: Tracks unresolved gaps while the full FPB/PPB design-system migration proceeds.
+status: resolved
+summary: Records the evidence-backed closure of the FPB and PPB design-system migration gaps.
 last_audited: 2026-08-10
 owners:
   - Wolfpack Product Bundles
@@ -17,6 +17,7 @@ source_paths:
   - wolfpack-bundle-template-design-system-plan.md
 related_docs:
   - wolfpack-bundle-template-design-system-plan.md
+  - design-system/08-qa/reports/2026-08-10-storefront-template-release.md
 tags:
   - gaps
   - decisions
@@ -28,6 +29,6 @@ keywords:
 
 # Gaps and Decisions
 
-1. Default, selected, and quantity desktop/mobile Chrome coverage is complete across all 8 templates; loading, validation, discount, error, keyboard, and content-stress evidence remains pending.
-2. Template family contracts are centralized but selector-heavy renderers still contain some legacy preset-branch behavior that should be reduced in later passes.
-3. The 88-field FPB/PPB/shared storefront language inventory is generated from runtime source. Non-language merchant content fields such as bundle, step, category, box, and banner text still require source-backed classification.
+1. Desktop and mobile Chrome coverage is complete across all 8 templates for loading, empty, selected, quantity, validation, discount, modal/drawer, recoverable error, accessibility, and content-stress states. The release evidence is recorded in `design-system/08-qa/reports/2026-08-10-storefront-template-release.md`.
+2. Template-family decisions resolve through `template-design-system.ts` contracts. Remaining literal template IDs are adapter entry points or registry accessors rather than parallel rendering policy.
+3. The runtime language inventory remains generated from source, and the copy registry now also classifies current merchant-authored bundle, step, category, gift, add-on, and summary content fields. Schema-only fields without a current storefront surface are not presented as visible copy.

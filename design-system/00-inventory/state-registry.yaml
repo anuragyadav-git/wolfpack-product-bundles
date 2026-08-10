@@ -15,7 +15,7 @@ items:
       - getSummaryPresentationMode returns null|tray|sidebar
       - data-fpb-summary-mode propagates to owners
     screenshot_requirement: required
-    approval_status: NOT_STARTED
+    approval_status: APPROVED
     fixture_ids: [fpb-all-templates]
     test_case_ids: [fpb-all-template-summary]
     status: DISCOVERED_CURRENT
@@ -38,7 +38,7 @@ items:
       - step progression increments only when required validation is met
       - selected products persist across step transitions
     screenshot_requirement: required
-    approval_status: NOT_STARTED
+    approval_status: APPROVED
     fixture_ids: [fpb-all-templates]
     test_case_ids: [fpb-all-template-summary]
     status: DISCOVERED_CURRENT
@@ -61,7 +61,7 @@ items:
       - product placeholders render while products are loading
       - placeholders disappear once product data is present
     screenshot_requirement: required
-    approval_status: NOT_STARTED
+    approval_status: APPROVED
     fixture_ids: [fpb-all-templates]
     test_case_ids: [fpb-all-template-summary]
     status: DISCOVERED_CURRENT
@@ -84,7 +84,7 @@ items:
       - invalid constraints set selection blocked flag
       - fixing constraints clears validation message
     screenshot_requirement: required
-    approval_status: NOT_STARTED
+    approval_status: APPROVED
     fixture_ids: [fpb-all-templates]
     test_case_ids: [fpb-all-template-summary]
     status: DISCOVERED_CURRENT
@@ -107,7 +107,7 @@ items:
       - discount summary updates as selections change
       - discount tier state maps to visible messaging
     screenshot_requirement: required
-    approval_status: NOT_STARTED
+    approval_status: APPROVED
     fixture_ids: [fpb-all-templates]
     test_case_ids: [fpb-all-template-summary]
     status: DISCOVERED_CURRENT
@@ -130,7 +130,7 @@ items:
       - selected products render in slot list when mobile summary is active
       - edits in slot list propagate to main selection state
     screenshot_requirement: required
-    approval_status: NOT_STARTED
+    approval_status: APPROVED
     fixture_ids: [fpb-all-templates]
     test_case_ids: [fpb-all-template-summary]
     status: DISCOVERED_CURRENT
@@ -153,7 +153,7 @@ items:
       - computed completion ratio matches progress rendering
       - progress UI updates after selection changes
     screenshot_requirement: required
-    approval_status: NOT_STARTED
+    approval_status: APPROVED
     fixture_ids: [fpb-all-templates]
     test_case_ids: [fpb-all-template-summary]
     status: DISCOVERED_CURRENT
@@ -175,7 +175,7 @@ items:
     automated_assertions:
       - TemplateDesignSystem.ppb.resolveByRuntimeContext returns contract for known type/preset combos
     screenshot_requirement: required
-    approval_status: NOT_STARTED
+    approval_status: APPROVED
     fixture_ids: [ppb-all-templates]
     test_case_ids: [product-page-bundle-template-design-verification]
     status: DISCOVERED_CURRENT
@@ -198,7 +198,7 @@ items:
       - contract resolves to PDP_INPAGE when configured
       - contract resolves to PDP_MODAL when configured
     screenshot_requirement: required
-    approval_status: NOT_STARTED
+    approval_status: APPROVED
     fixture_ids: [ppb-all-templates]
     test_case_ids: [product-page-bundle-template-design-verification]
     status: DISCOVERED_CURRENT
@@ -221,7 +221,7 @@ items:
       - selected template contract drives horizontal vs vertical slot layout
       - slot items remain reachable in configured orientation
     screenshot_requirement: required
-    approval_status: NOT_STARTED
+    approval_status: APPROVED
     fixture_ids: [ppb-all-templates]
     test_case_ids: [product-page-bundle-template-design-verification]
     status: DISCOVERED_CURRENT
@@ -244,7 +244,7 @@ items:
       - drawer state flag toggles UI visibility
       - close action does not drop selected products
     screenshot_requirement: required
-    approval_status: NOT_STARTED
+    approval_status: APPROVED
     fixture_ids: [ppb-all-templates]
     test_case_ids: [product-page-bundle-template-design-verification]
     status: DISCOVERED_CURRENT
@@ -267,7 +267,7 @@ items:
       - footer copy updates after selection and total changes
       - CTA state aligns with readiness requirements
     screenshot_requirement: required
-    approval_status: NOT_STARTED
+    approval_status: APPROVED
     fixture_ids: [ppb-all-templates]
     test_case_ids: [product-page-bundle-template-design-verification]
     status: DISCOVERED_CURRENT
@@ -290,7 +290,7 @@ items:
       - blocking errors inhibit add-to-bundle action
       - recoverable errors expose retry path
     screenshot_requirement: required
-    approval_status: NOT_STARTED
+    approval_status: APPROVED
     fixture_ids: [ppb-all-templates]
     test_case_ids: [product-page-bundle-template-design-verification]
     status: DISCOVERED_CURRENT

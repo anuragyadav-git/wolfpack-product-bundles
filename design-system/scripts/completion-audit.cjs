@@ -9,6 +9,7 @@ const REQUIRED_ARTIFACTS = [
   '07-prototypes/fpb/README.md',
   '07-prototypes/ppb/README.md',
   '08-qa/reports/README.md',
+  '08-qa/reports/2026-08-10-storefront-template-release.md',
 ];
 
 const TEMPLATE_IDS = [

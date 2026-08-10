@@ -1,4 +1,277 @@
 items:
+  - id: "shared-bundle-name"
+    family: "SHARED"
+    templates: ["STANDARD", "CLASSIC", "COMPACT", "HORIZONTAL", "GRID", "LIST", "VERTICAL_SLOTS", "HORIZONTAL_SLOTS"]
+    surface: "Primary bundle heading and summary fallback"
+    admin_label: "Bundle Name"
+    field_name: "Bundle.name"
+    fallback: "Bundle"
+    required: true
+    merchant_editable: true
+    localizable: false
+    allowed_placeholders: []
+    character_guidance: "Use a concise product-facing bundle name."
+    supports_pluralization: false
+    supports_rich_text: false
+    sanitization: "Rendered through textContent or escaped HTML."
+    affected_states: ["initial render", "summary"]
+    fixture_ids: ["fpb-all-templates", "ppb-all-templates"]
+    test_case_ids: ["fpb-all-template-summary", "product-page-bundle-template-design-verification"]
+    status: "CONFIRMED_CURRENT"
+    evidence: "app/lib/bundle-formatter.server.ts"
+
+  - id: "shared-bundle-description"
+    family: "FPB"
+    templates: ["STANDARD", "CLASSIC", "COMPACT", "HORIZONTAL"]
+    surface: "Bundle supporting description"
+    admin_label: "Bundle Description"
+    field_name: "Bundle.description"
+    fallback: ""
+    required: false
+    merchant_editable: true
+    localizable: false
+    allowed_placeholders: []
+    character_guidance: "Keep supporting copy scannable on narrow storefronts."
+    supports_pluralization: false
+    supports_rich_text: false
+    sanitization: "Rendered through textContent or escaped HTML."
+    affected_states: ["initial render"]
+    fixture_ids: ["fpb-all-templates"]
+    test_case_ids: ["fpb-all-template-summary"]
+    status: "CONFIRMED_CURRENT"
+    evidence: "app/assets/widgets/full-page/methods/initial-render-methods.ts"
+
+  - id: "shared-step-name"
+    family: "SHARED"
+    templates: ["STANDARD", "CLASSIC", "COMPACT", "HORIZONTAL", "GRID", "LIST", "VERTICAL_SLOTS", "HORIZONTAL_SLOTS"]
+    surface: "Step navigation, heading, card context, and accessible image fallback"
+    admin_label: "Step Name"
+    field_name: "BundleStep.name"
+    fallback: "Step"
+    required: true
+    merchant_editable: true
+    localizable: true
+    allowed_placeholders: []
+    character_guidance: "Use a short action-oriented step name."
+    supports_pluralization: false
+    supports_rich_text: false
+    sanitization: "Rendered through textContent or ComponentGenerator.escapeHtml."
+    affected_states: ["step navigation", "selection flow", "modal"]
+    fixture_ids: ["fpb-all-templates", "ppb-all-templates"]
+    test_case_ids: ["fpb-all-template-summary", "product-page-bundle-template-design-verification"]
+    status: "CONFIRMED_CURRENT"
+    evidence: "app/assets/widgets/product-page/methods/layout-shell-methods.ts"
+
+  - id: "shared-step-page-title"
+    family: "SHARED"
+    templates: ["STANDARD", "CLASSIC", "COMPACT", "HORIZONTAL", "GRID", "LIST", "VERTICAL_SLOTS", "HORIZONTAL_SLOTS"]
+    surface: "Step content heading"
+    admin_label: "Step Title"
+    field_name: "BundleStep.pageTitle"
+    fallback: "BundleStep.name"
+    required: false
+    merchant_editable: true
+    localizable: true
+    allowed_placeholders: []
+    character_guidance: "Use a descriptive heading that remains readable on mobile."
+    supports_pluralization: false
+    supports_rich_text: false
+    sanitization: "Rendered through textContent or ComponentGenerator.escapeHtml."
+    affected_states: ["step navigation", "selection flow"]
+    fixture_ids: ["fpb-all-templates", "ppb-all-templates"]
+    test_case_ids: ["fpb-all-template-summary", "product-page-bundle-template-design-verification"]
+    status: "CONFIRMED_CURRENT"
+    evidence: "app/assets/widgets/product-page/templates/modal-slot-template.ts"
+
+  - id: "shared-category-name"
+    family: "SHARED"
+    templates: ["STANDARD", "CLASSIC", "COMPACT", "HORIZONTAL", "GRID", "LIST", "VERTICAL_SLOTS", "HORIZONTAL_SLOTS"]
+    surface: "Category tab and section fallback"
+    admin_label: "Category Name"
+    field_name: "StepCategory.name"
+    fallback: "Category"
+    required: true
+    merchant_editable: true
+    localizable: true
+    allowed_placeholders: []
+    character_guidance: "Use a concise category label."
+    supports_pluralization: false
+    supports_rich_text: false
+    sanitization: "Rendered through textContent or escaped HTML."
+    affected_states: ["category navigation", "selection flow"]
+    fixture_ids: ["fpb-all-templates", "ppb-all-templates"]
+    test_case_ids: ["fpb-all-template-summary", "product-page-bundle-template-design-verification"]
+    status: "CONFIRMED_CURRENT"
+    evidence: "app/assets/widgets/full-page/methods/search-category-methods.ts"
+
+  - id: "shared-category-title"
+    family: "SHARED"
+    templates: ["STANDARD", "CLASSIC", "COMPACT", "HORIZONTAL", "GRID", "LIST", "VERTICAL_SLOTS", "HORIZONTAL_SLOTS"]
+    surface: "Category section heading"
+    admin_label: "Category Title"
+    field_name: "StepCategory.title"
+    fallback: "StepCategory.name"
+    required: false
+    merchant_editable: true
+    localizable: true
+    allowed_placeholders: []
+    character_guidance: "Use a short storefront heading."
+    supports_pluralization: false
+    supports_rich_text: false
+    sanitization: "Rendered through textContent or escaped HTML."
+    affected_states: ["category navigation", "selection flow"]
+    fixture_ids: ["fpb-all-templates", "ppb-all-templates"]
+    test_case_ids: ["fpb-all-template-summary", "product-page-bundle-template-design-verification"]
+    status: "CONFIRMED_CURRENT"
+    evidence: "app/assets/widgets/product-page/methods/layout-shell-methods.ts"
+
+  - id: "shared-free-gift-name"
+    family: "SHARED"
+    templates: ["STANDARD", "CLASSIC", "COMPACT", "HORIZONTAL", "GRID", "LIST", "VERTICAL_SLOTS", "HORIZONTAL_SLOTS"]
+    surface: "Free-gift unlock and validation messaging"
+    admin_label: "Free Gift Name"
+    field_name: "BundleStep.freeGiftName"
+    fallback: "gift"
+    required: false
+    merchant_editable: true
+    localizable: false
+    allowed_placeholders: []
+    character_guidance: "Use the shopper-facing gift name."
+    supports_pluralization: false
+    supports_rich_text: false
+    sanitization: "Normalized to a plain string before message interpolation."
+    affected_states: ["gift locked", "gift unlocked", "validation"]
+    fixture_ids: ["fpb-all-templates", "ppb-all-templates"]
+    test_case_ids: ["fpb-all-template-summary", "product-page-bundle-template-design-verification"]
+    status: "CONFIRMED_CURRENT"
+    evidence: "app/assets/widgets/full-page/methods/validation-addons-methods.ts"
+
+  - id: "shared-addon-label"
+    family: "SHARED"
+    templates: ["STANDARD", "CLASSIC", "COMPACT", "HORIZONTAL", "GRID", "LIST", "VERTICAL_SLOTS", "HORIZONTAL_SLOTS"]
+    surface: "Add-on navigation label"
+    admin_label: "Add-on Label"
+    field_name: "BundleStep.addonLabel"
+    fallback: "BundleStep.name"
+    required: false
+    merchant_editable: true
+    localizable: false
+    allowed_placeholders: []
+    character_guidance: "Use a short add-on label."
+    supports_pluralization: false
+    supports_rich_text: false
+    sanitization: "Rendered through textContent."
+    affected_states: ["add-on locked", "add-on available"]
+    fixture_ids: ["fpb-all-templates", "ppb-all-templates"]
+    test_case_ids: ["fpb-all-template-summary", "product-page-bundle-template-design-verification"]
+    status: "CONFIRMED_CURRENT"
+    evidence: "app/assets/widgets/product-page/methods/modal-methods.ts"
+
+  - id: "shared-addon-title"
+    family: "SHARED"
+    templates: ["STANDARD", "CLASSIC", "COMPACT", "HORIZONTAL", "GRID", "LIST", "VERTICAL_SLOTS", "HORIZONTAL_SLOTS"]
+    surface: "Add-on section title"
+    admin_label: "Add-on Title"
+    field_name: "BundleStep.addonTitle"
+    fallback: ""
+    required: false
+    merchant_editable: true
+    localizable: false
+    allowed_placeholders: []
+    character_guidance: "Use a concise add-on heading."
+    supports_pluralization: false
+    supports_rich_text: false
+    sanitization: "Rendered as plain text."
+    affected_states: ["add-on locked", "add-on available"]
+    fixture_ids: ["fpb-all-templates", "ppb-all-templates"]
+    test_case_ids: ["fpb-all-template-summary", "product-page-bundle-template-design-verification"]
+    status: "CONFIRMED_CURRENT"
+    evidence: "prisma/schema.prisma"
+
+  - id: "shared-addon-add-text"
+    family: "SHARED"
+    templates: ["STANDARD", "CLASSIC", "COMPACT", "HORIZONTAL", "GRID", "LIST", "VERTICAL_SLOTS", "HORIZONTAL_SLOTS"]
+    surface: "Add-on add action"
+    admin_label: "Add-on Add Text"
+    field_name: "BundleStep.addonAddText"
+    fallback: "Add"
+    required: false
+    merchant_editable: true
+    localizable: false
+    allowed_placeholders: []
+    character_guidance: "Use a short action label."
+    supports_pluralization: false
+    supports_rich_text: false
+    sanitization: "Rendered as plain text."
+    affected_states: ["add-on available"]
+    fixture_ids: ["fpb-all-templates", "ppb-all-templates"]
+    test_case_ids: ["fpb-all-template-summary", "product-page-bundle-template-design-verification"]
+    status: "CONFIRMED_CURRENT"
+    evidence: "prisma/schema.prisma"
+
+  - id: "shared-addon-replace-text"
+    family: "SHARED"
+    templates: ["STANDARD", "CLASSIC", "COMPACT", "HORIZONTAL", "GRID", "LIST", "VERTICAL_SLOTS", "HORIZONTAL_SLOTS"]
+    surface: "Add-on replace action"
+    admin_label: "Add-on Replace Text"
+    field_name: "BundleStep.addonReplaceText"
+    fallback: "Replace"
+    required: false
+    merchant_editable: true
+    localizable: false
+    allowed_placeholders: []
+    character_guidance: "Use a short action label."
+    supports_pluralization: false
+    supports_rich_text: false
+    sanitization: "Rendered as plain text."
+    affected_states: ["add-on selected"]
+    fixture_ids: ["fpb-all-templates", "ppb-all-templates"]
+    test_case_ids: ["fpb-all-template-summary", "product-page-bundle-template-design-verification"]
+    status: "CONFIRMED_CURRENT"
+    evidence: "prisma/schema.prisma"
+
+  - id: "shared-summary-title"
+    family: "SHARED"
+    templates: ["STANDARD", "CLASSIC", "COMPACT", "HORIZONTAL", "GRID", "LIST", "VERTICAL_SLOTS", "HORIZONTAL_SLOTS"]
+    surface: "Bundle summary heading"
+    admin_label: "Bundle Summary Title"
+    field_name: "bundleTextConfig.bundleSummary.title"
+    fallback: "Bundle.name"
+    required: false
+    merchant_editable: true
+    localizable: true
+    allowed_placeholders: []
+    character_guidance: "Use a concise summary heading."
+    supports_pluralization: false
+    supports_rich_text: false
+    sanitization: "Rendered through textContent."
+    affected_states: ["summary"]
+    fixture_ids: ["fpb-all-templates", "ppb-all-templates"]
+    test_case_ids: ["fpb-all-template-summary", "product-page-bundle-template-design-verification"]
+    status: "CONFIRMED_CURRENT"
+    evidence: "app/assets/widgets/full-page/methods/mobile-summary-methods.ts"
+
+  - id: "shared-summary-subtitle"
+    family: "SHARED"
+    templates: ["STANDARD", "CLASSIC", "COMPACT", "HORIZONTAL", "GRID", "LIST", "VERTICAL_SLOTS", "HORIZONTAL_SLOTS"]
+    surface: "Bundle summary supporting copy"
+    admin_label: "Bundle Summary Subtitle"
+    field_name: "bundleTextConfig.bundleSummary.subTitle"
+    fallback: ""
+    required: false
+    merchant_editable: true
+    localizable: true
+    allowed_placeholders: []
+    character_guidance: "Keep supporting copy readable in compact summaries."
+    supports_pluralization: false
+    supports_rich_text: false
+    sanitization: "Rendered through textContent."
+    affected_states: ["summary"]
+    fixture_ids: ["fpb-all-templates", "ppb-all-templates"]
+    test_case_ids: ["fpb-all-template-summary", "product-page-bundle-template-design-verification"]
+    status: "CONFIRMED_CURRENT"
+    evidence: "app/assets/widgets/full-page/methods/mobile-summary-methods.ts"
+
   - id: "shared-bundle-contains-label"
     family: "SHARED"
     templates: ["STANDARD", "CLASSIC", "COMPACT", "HORIZONTAL", "GRID", "LIST", "VERTICAL_SLOTS", "HORIZONTAL_SLOTS"]
