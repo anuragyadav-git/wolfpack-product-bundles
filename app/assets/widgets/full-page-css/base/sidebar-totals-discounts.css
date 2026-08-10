@@ -75,6 +75,7 @@
   justify-content: center;
   gap: 2px;
   width: 100%;
+  min-height: var(--bundle-control-hit-target, 2.75rem);
   padding: 12px 16px;
   border: none;
   border-radius: var(--bundle-side-panel-btn-radius, 8px);
@@ -793,12 +794,16 @@
   z-index: 2;
   display: grid;
   place-items: center;
-  width: 1rem;
-  height: 1rem;
+  width: var(--bundle-control-hit-target, 2.75rem);
+  height: var(--bundle-control-hit-target, 2.75rem);
   padding: 0;
   border: 0;
   border-radius: 50%;
-  background: var(--bundle-side-panel-remove-icon-bg, #000);
+  background: radial-gradient(
+    circle at 0.5rem 0.5rem,
+    var(--bundle-side-panel-remove-icon-bg, #000) 0 0.5rem,
+    transparent calc(0.5rem + 0.5px)
+  );
   color: var(--bundle-side-panel-remove-icon-color, #fff);
   cursor: pointer;
 }
@@ -815,7 +820,9 @@
   .side-panel-inline-slot-remove::after {
   content: "";
   position: absolute;
-  width: 50%;
+  inset-block-start: 0.5rem;
+  inset-inline-start: 0.5rem;
+  width: 0.5rem;
   height: 1px;
   background: currentColor;
 }
@@ -825,7 +832,7 @@
     [data-fpb-design-preset="HORIZONTAL"]
   )
   .side-panel-inline-slot-remove::before {
-  transform: rotate(45deg);
+  transform: translate(-50%, -50%) rotate(45deg);
 }
 
 .layout-sidebar:is(
@@ -833,5 +840,5 @@
     [data-fpb-design-preset="HORIZONTAL"]
   )
   .side-panel-inline-slot-remove::after {
-  transform: rotate(-45deg);
+  transform: translate(-50%, -50%) rotate(-45deg);
 }

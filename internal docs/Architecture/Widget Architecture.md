@@ -223,6 +223,14 @@ Keep base CSS below the limit by moving template-specific rules into separate ex
 
 The Liquid blocks expose template CSS URL maps and the widget runtime loads the active template stylesheet. Do not solve the limit by minifying readable source into one-line CSS; remove redundant/conflicting rules or split template CSS by ownership.
 
+The app embed must map canonical uppercase FPB preset IDs to explicit
+`DOMStringMap` properties: `presetStandard`, `presetClassic`, `presetCompact`,
+and `presetHorizontal`. Do not derive a dataset property as
+``preset${preset}``; an uppercase preset such as `STANDARD` would look for the
+nonexistent `presetSTANDARD` property and silently leave the widget with only
+base CSS. A base-only render can appear functional, so live verification must
+also confirm that the expected dedicated template stylesheet is loaded.
+
 ---
 
 ## Cache Busting

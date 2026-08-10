@@ -227,13 +227,13 @@
   }
 
   .layout-sidebar[data-fpb-design-preset="COMPACT"][data-fpb-card-cta-mode="icon"]
-    .sidebar-content
-    .product-title {
+  .sidebar-content
+  .product-title {
     grid-row: 1;
     grid-column: 1 / -1;
     width: 100% !important;
     height: auto !important;
-    min-height: 0 !important;
+    min-height: var(--bundle-control-hit-target) !important;
     margin: 0 !important;
     padding: 0 !important;
     color: var(
@@ -257,7 +257,7 @@
     grid-row: 1;
     grid-column: 1;
     height: auto !important;
-    min-height: 0 !important;
+    min-height: var(--bundle-control-hit-target) !important;
     padding: 0 0 5px !important;
     overflow: visible !important;
     overflow-wrap: anywhere;
@@ -745,7 +745,7 @@
     .product-title {
     width: 100% !important;
     height: auto !important;
-    min-height: 0 !important;
+    min-height: var(--bundle-control-hit-target) !important;
     padding: 0 !important;
     color: #252525;
     font-size: 14px !important;

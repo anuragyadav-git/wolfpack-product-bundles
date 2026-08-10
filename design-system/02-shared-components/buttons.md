@@ -15,6 +15,10 @@ systems:
   - product-page-widget
 source_paths:
   - app/assets/widgets/shared/template-design-system.ts
+  - app/assets/widgets/full-page-css/base/bootstrap-reservation.css
+  - app/assets/widgets/full-page-css/base/product-actions-loading.css
+  - app/assets/widgets/full-page-css/base/toast-sidebar-shell.css
+  - app/assets/widgets/full-page-css/base/sidebar-totals-discounts.css
   - app/assets/widgets/full-page/methods/selection-navigation-methods.ts
   - app/assets/widgets/full-page/methods/selection-methods.ts
   - app/assets/widgets/product-page-css/base/inpage-shared-footer.css

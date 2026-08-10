@@ -120,16 +120,19 @@
 .inline-quantity-controls {
   display: grid;
   grid-template-columns:
-    var(--fpb-card-quantity-button-width, 20px)
-    minmax(8px, 1fr)
-    var(--fpb-card-quantity-button-width, 20px);
+    var(--bundle-control-hit-target, 2.75rem)
+    minmax(1.5rem, 1fr)
+    var(--bundle-control-hit-target, 2.75rem);
   align-items: center;
   justify-content: center;
   gap: 0;
-  width: var(--fpb-card-quantity-selector-width, 68px);
-  min-width: var(--fpb-card-quantity-selector-width, 68px);
+  width: auto;
+  min-width: calc(
+    var(--bundle-control-hit-target, 2.75rem) +
+      var(--bundle-control-hit-target, 2.75rem) + 1.5rem
+  );
   height: var(--fpb-card-quantity-selector-height, 35px);
-  padding: 0 10px;
+  padding: 0;
   box-sizing: border-box;
   background: var(--bundle-inline-qty-bg, #000000);
   border-radius: var(--fpb-card-quantity-selector-radius, 5px);
@@ -138,7 +141,8 @@
 }
 
 .inline-qty-btn {
-  width: var(--fpb-card-quantity-button-width, 20px);
+  width: var(--bundle-control-hit-target, 2.75rem);
+  min-width: var(--bundle-control-hit-target, 2.75rem);
   height: var(
     --fpb-card-quantity-selector-height,
     var(--fpb-card-action-size, 35px)

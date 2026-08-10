@@ -394,7 +394,9 @@
     inset: 0 auto auto 0;
     display: grid;
     place-items: center;
-    min-width: 0;
+    width: var(--bundle-control-hit-target, 2.75rem);
+    min-width: var(--bundle-control-hit-target, 2.75rem);
+    height: var(--bundle-control-hit-target, 2.75rem);
     z-index: 2;
   }
 
@@ -410,14 +412,18 @@
     .bw-selected-slot--filled
     .bw-selected-row__remove {
     position: relative;
-    width: var(--classic-sidebar-slot-remove-size);
-    height: var(--classic-sidebar-slot-remove-size);
+    width: var(--bundle-control-hit-target, 2.75rem);
+    height: var(--bundle-control-hit-target, 2.75rem);
     border: 0;
     border-radius: 50%;
     padding: 0;
     display: grid;
     place-items: center;
-    background: var(--bundle-side-panel-remove-icon-bg, #000);
+    background: radial-gradient(
+      circle at 0.5rem 0.5rem,
+      var(--bundle-side-panel-remove-icon-bg, #000) 0 0.5rem,
+      transparent calc(0.5rem + 0.5px)
+    );
     color: var(--bundle-side-panel-remove-icon-color, #fff);
     font-size: 0;
     line-height: 1;
@@ -442,6 +448,8 @@
     .bw-selected-row__remove::after {
     content: "";
     position: absolute;
+    inset-block-start: 0.5rem;
+    inset-inline-start: 0.5rem;
     width: 0.5rem;
     height: 0.125rem;
     border-radius: 999px;
@@ -452,14 +460,14 @@
     .classic-sidebar-slots
     .bw-selected-slot--filled
     .bw-selected-row__remove::before {
-    transform: rotate(45deg);
+    transform: translate(-50%, -50%) rotate(45deg);
   }
 
   .fpb-preset-classic
     .classic-sidebar-slots
     .bw-selected-slot--filled
     .bw-selected-row__remove::after {
-    transform: rotate(-45deg);
+    transform: translate(-50%, -50%) rotate(-45deg);
   }
 
   .fpb-preset-classic
@@ -1073,13 +1081,6 @@
     .bw-selected-row__action {
     min-width: 3.5rem;
     align-self: stretch;
-  }
-
-  .bundle-widget-full-page.fpb-preset-classic[data-fpb-summary-mode="sidebar"]
-    .side-panel-products
-    .bw-selected-row__remove {
-    width: 2.75rem;
-    height: 2.75rem;
   }
 
   .bundle-widget-full-page.fpb-preset-classic[data-fpb-summary-mode="sidebar"]

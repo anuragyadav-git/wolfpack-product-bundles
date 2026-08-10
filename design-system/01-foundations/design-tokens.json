@@ -173,6 +173,16 @@
         "high_contrast_fallback": "#f3f4f6"
       }
     },
+    "geometry": {
+      "control_minimum": {
+        "token": "--bundle-control-hit-target",
+        "fallback": "2.75rem",
+        "merchant_editable": false,
+        "contrast_pair": "not_applicable",
+        "disabled_transform": "retain_geometry",
+        "high_contrast_fallback": "2.75rem"
+      }
+    },
     "overlay": {
       "backdrop": {
         "token": "--bundle-bottom-sheet-overlay-opacity",

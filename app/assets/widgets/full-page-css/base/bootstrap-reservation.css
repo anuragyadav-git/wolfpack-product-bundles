@@ -1,4 +1,10 @@
 #bundle-builder-app[data-bundle-type="full_page"] {
+  --bundle-control-hit-target: 2.75rem;
+  --fpb-card-action-size: var(--bundle-control-hit-target);
+  --fpb-card-quantity-selector-height: var(--bundle-control-hit-target);
+  --fpb-card-quantity-selector-width: calc(
+    var(--bundle-control-hit-target) + var(--bundle-control-hit-target) + 1.5rem
+  );
   min-block-size: 100svh;
 }
 

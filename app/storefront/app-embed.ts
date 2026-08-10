@@ -1,3 +1,8 @@
+import {
+  getFpbPresetStylesheetUrl,
+  type FpbDesignPreset,
+} from './fpb-template-assets.js';
+
 const embed = document.querySelector<HTMLElement>('[data-wpb-app-embed]');
 
 function ensureStylesheet(href: string | undefined): void {
@@ -8,7 +13,7 @@ function ensureStylesheet(href: string | undefined): void {
   document.head.append(link);
 }
 
-function normalizePreset(value: string | undefined): 'STANDARD' | 'CLASSIC' | 'COMPACT' | 'HORIZONTAL' {
+function normalizePreset(value: string | undefined): FpbDesignPreset {
   const preset = String(value || 'STANDARD').trim().toUpperCase();
   if (preset === 'CLASSIC' || preset === 'COMPACT' || preset === 'HORIZONTAL') return preset;
   return 'STANDARD';
@@ -55,7 +60,7 @@ function hydrateMarker(): void {
 
   ensureStylesheet(embed.dataset.fullPageStyleUrl);
   ensureStylesheet(embed.dataset.mobileSummaryStyleUrl);
-  ensureStylesheet(embed.dataset[`preset${preset}`]);
+  ensureStylesheet(getFpbPresetStylesheetUrl(embed.dataset, preset));
   loadFullPageRuntime(embed.dataset.fullPageScriptUrl);
 }
 

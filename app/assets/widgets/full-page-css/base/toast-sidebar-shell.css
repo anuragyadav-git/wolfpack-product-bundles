@@ -244,6 +244,8 @@
   background: none;
   border: 1px solid currentColor;
   color: var(--bundle-side-panel-clear-color, #bd0000);
+  min-height: var(--bundle-control-hit-target, 2.75rem);
+  padding-inline: var(--bundle-summary-control-inline-padding, 0.875rem);
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
@@ -292,6 +294,7 @@
   justify-content: space-between;
   gap: 10px;
   width: 100%;
+  min-height: var(--bundle-control-hit-target, 2.75rem);
   border: 1px solid var(--bundle-sidebar-button-bg, #111111);
   background: #ffffff;
   color: #111111;
