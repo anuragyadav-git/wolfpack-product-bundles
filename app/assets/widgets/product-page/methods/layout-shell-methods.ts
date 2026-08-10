@@ -473,36 +473,26 @@ _getInpageCategoryLabel(category, categoryIndex) {
 _getCategoryProductIds(category) {
   const ids = new Set();
   const addProductId = (product) => {
-    const id = product?.id || product?.graphqlId || product?.productId;
+    const id = product?.selectionId;
     if (id) ids.add(this.extractId(id));
   };
 
   (category?.products || []).forEach(addProductId);
-  (category?.selectedProducts || []).forEach(addProductId);
   return ids;
 },
 
 _categoryHasCollections(category) {
-  return Boolean(
-    category?.collections?.length
-    || category?.collectionsData?.length
-    || category?.collectionsSelectedData?.length
-  );
+  return Boolean(category?.collections?.length);
 },
 
 _filterProductsForInpageCategory(step, products, stepIndex) {
-  const categories = Array.isArray(step?.categories)
-    ? step.categories
-    : Object.values(step?.categories || {});
+  const categories = Array.isArray(step?.categories) ? step.categories : [];
   if (categories.length === 0) return products;
 
   const activeIndex = this.activeInpageCategoryIndexes[stepIndex] || 0;
   const category = categories[activeIndex];
   const categoryProductIds = this._getCategoryProductIds(category);
-  const configuredProducts = [
-    ...(Array.isArray(category?.products) ? category.products : []),
-    ...(Array.isArray(category?.selectedProducts) ? category.selectedProducts : []),
-  ];
+  const configuredProducts = Array.isArray(category?.products) ? category.products : [];
 
   if (categoryProductIds.size === 0) {
     return this._categoryHasCollections(category) ? products : [];
@@ -518,11 +508,11 @@ _filterProductsForInpageCategory(step, products, stepIndex) {
   return categoryProducts.flatMap(product => {
     const productId = this.extractId(product.parentProductId || product.id);
     const configuredProduct = configuredProducts.find(candidate => (
-      this.extractId(candidate?.id || candidate?.graphqlId || candidate?.productId) === productId
+      this.extractId(candidate?.selectionId) === productId
     ));
     const configuredVariantIds = new Set(
       (Array.isArray(configuredProduct?.variants) ? configuredProduct.variants : [])
-        .map(variant => this.extractId(variant?.id || variant?.variantId))
+        .map(variant => this.extractId(variant?.selectionId))
         .filter(Boolean)
     );
 

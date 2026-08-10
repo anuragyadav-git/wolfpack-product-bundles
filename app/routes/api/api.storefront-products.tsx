@@ -36,6 +36,15 @@ const SELLING_PLAN_ALLOCATION_FIELDS = `
                     }
                   }
                 }`;
+const PRODUCT_GID_PATTERN = /^gid:\/\/shopify\/Product\/(\d+)$/;
+
+function normalizeProductId(productId: string): string | null {
+  if (/^\d+$/.test(productId)) {
+    return `gid://shopify/Product/${productId}`;
+  }
+
+  return PRODUCT_GID_PATTERN.test(productId) ? productId : null;
+}
 
 function mapStorefrontVariant(edge: any) {
   return {
@@ -218,11 +227,17 @@ export async function loader({ request }: LoaderFunctionArgs) {
     return json({ error: "Missing shop parameter" }, { status: 400, headers: CORS_HEADERS });
   }
 
-  const ids = productIds.split(",").map(id => id.trim()).filter(Boolean);
+  const requestedIds = productIds.split(",").map(id => id.trim()).filter(Boolean);
 
-  if (ids.length === 0) {
+  if (requestedIds.length === 0) {
     return json({ error: "No valid product IDs provided" }, { status: 400, headers: CORS_HEADERS });
   }
+
+  const normalizedIds = requestedIds.map(normalizeProductId);
+  if (normalizedIds.some(id => id === null)) {
+    return json({ error: "Invalid product IDs" }, { status: 400, headers: CORS_HEADERS });
+  }
+  const ids = normalizedIds as string[];
 
   try {
     // Storefront token is created at install time (lifecycle webhook / auth callback).

@@ -44,6 +44,38 @@ describe("api.storefront-products loader", () => {
     delete (global as any).fetch;
   });
 
+  it("normalizes numeric product IDs to Shopify product GIDs", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ data: { nodes: [] } }),
+    });
+
+    const response = await loader({
+      request: new Request("https://app.example/api/storefront-products?ids=111,222&shop=test.myshopify.com"),
+      params: {},
+      context: {},
+    } as any);
+    const requestBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+
+    expect(response.status).toBe(200);
+    expect(requestBody.variables.ids).toEqual([
+      "gid://shopify/Product/111",
+      "gid://shopify/Product/222",
+    ]);
+  });
+
+  it("rejects malformed product IDs before calling Shopify", async () => {
+    const response = await loader({
+      request: new Request("https://app.example/api/storefront-products?ids=111,not-a-product&shop=test.myshopify.com"),
+      params: {},
+      context: {},
+    } as any);
+
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toEqual({ error: "Invalid product IDs" });
+    expect(mockFetch).not.toHaveBeenCalled();
+  });
+
   it("normalizes sellable zero-quantity fallback variants as unbounded inventory", async () => {
     mockFetch
       .mockResolvedValueOnce({

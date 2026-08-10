@@ -47,7 +47,6 @@ collectStepProductIds(step) {
   (step.products || []).forEach(addProductId);
   (step.categories || []).forEach(category => {
     (category.products || []).forEach(addProductId);
-    (category.selectedProducts || []).forEach(addProductId);
   });
 
   return productIds;
@@ -63,8 +62,6 @@ collectStepCollectionHandles(step) {
   (step.collections || []).forEach(addCollectionHandle);
   (step.categories || []).forEach(category => {
     (category.collections || []).forEach(addCollectionHandle);
-    (category.collectionsData || []).forEach(addCollectionHandle);
-    (category.collectionsSelectedData || []).forEach(addCollectionHandle);
   });
 
   return handles;

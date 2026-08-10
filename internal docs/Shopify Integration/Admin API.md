@@ -146,4 +146,6 @@ Used by `bundle-config-metafield.server.ts` to cache bundle config for zero-late
 - Rate limit: ~4 req/sec unauthenticated (higher for authenticated/private tokens)
 - Used by widgets for product data when metafield cache is absent
 - Proxy route: `/apps/product-bundles/` (Shopify app proxy)
+- `/api/storefront-products` accepts numeric Shopify product IDs at the browser boundary, converts them to canonical `gid://shopify/Product/...` values before the Storefront API `nodes` query, and rejects malformed IDs before calling Shopify.
+- Product Page category runtime configuration identifies configured products and variants with `selectionId`; category filtering must compare those values with hydrated Storefront API IDs after transport-only normalization.
 - Variant `quantityAvailable` and `currentlyNotInStock` require the `unauthenticated_read_product_inventory` Storefront scope. Public proxy routes must include those fields only when the stored offline session scope contains that grant; otherwise Shopify rejects the whole query. When the scope is absent, map missing inventory quantity to `null` and treat it as unbounded in widgets.
