@@ -2,6 +2,7 @@ import {
   getFpbPresetStylesheetUrl,
   type FpbDesignPreset,
 } from './fpb-template-assets.js';
+import { transferBootstrapSkeleton } from '../assets/widgets/full-page/bootstrap-skeleton.js';
 
 const embed = document.querySelector<HTMLElement>('[data-wpb-app-embed]');
 
@@ -54,7 +55,7 @@ function hydrateMarker(): void {
     bundleSettings: marker.dataset.bundleSettings || 'null',
     shop: marker.dataset.shop || '',
   });
-  container.innerHTML = '<div class="bundle-loading"><div class="loading-spinner"></div></div>';
+  transferBootstrapSkeleton(marker, container);
   marker.before(container);
   marker.dataset.wpbHydrated = 'true';
 

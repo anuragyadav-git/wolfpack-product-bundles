@@ -75,6 +75,29 @@ describe("FPB app proxy page", () => {
     expect(text).not.toContain("/apps/product-bundles/assets/");
   });
 
+  it("renders a decorative first-paint skeleton inside the proxy marker", async () => {
+    getDb().bundle.findFirst.mockResolvedValue({
+      id: "bundle-1",
+      name: "Build a Box",
+      shopId: "test-shop.myshopify.com",
+      bundleType: "full_page",
+      status: "active",
+      steps: [],
+      pricing: null,
+    });
+
+    const response = (await loader({
+      request: makeSignedRequest(),
+      params: { bundleId: "bundle-1" },
+      context: {},
+    } as any)) as Response;
+    const text = await response.text();
+
+    expect(text).toContain("data-wpb-bootstrap-skeleton");
+    expect(text).toContain('aria-hidden="true"');
+    expect(text.match(/data-wpb-bootstrap-card(?=[\s>])/g)).toHaveLength(4);
+  });
+
   it("does not require a linked Shopify page", async () => {
     getDb().bundle.findFirst.mockResolvedValue({
       id: "bundle-1",

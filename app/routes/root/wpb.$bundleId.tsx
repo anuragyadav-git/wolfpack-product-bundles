@@ -122,7 +122,32 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     ? ` data-fpb-design-preset="${escapeHtmlAttribute(formattedBundle.bundleDesignPresetId)}"`
     : "";
   const config = escapeHtmlAttribute(JSON.stringify(formattedBundle));
-  const liquid = `<div data-wpb-full-page-bundle data-bundle-id="${escapeHtmlAttribute(bundle.id)}" data-bundle-type="full_page" data-bundle-config-source="app_proxy" data-shop="${escapeHtmlAttribute(shopDomain)}"${templateTypeAttr}${designPresetAttr} data-bundle-config='${config}' hidden></div>`;
+  const bootstrapSkeleton = `
+    <div data-wpb-bootstrap-skeleton aria-hidden="true">
+      <div data-wpb-bootstrap-heading></div>
+      <div data-wpb-bootstrap-layout>
+        <div data-wpb-bootstrap-main>
+          <div data-wpb-bootstrap-title></div>
+          <div data-wpb-bootstrap-cards>
+            ${Array.from({ length: 4 }, () => `
+              <div data-wpb-bootstrap-card>
+                <div data-wpb-bootstrap-media></div>
+                <div data-wpb-bootstrap-line="wide"></div>
+                <div data-wpb-bootstrap-line="short"></div>
+                <div data-wpb-bootstrap-action></div>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+        <div data-wpb-bootstrap-summary>
+          <div data-wpb-bootstrap-line="wide"></div>
+          <div data-wpb-bootstrap-summary-row></div>
+          <div data-wpb-bootstrap-summary-row></div>
+          <div data-wpb-bootstrap-action></div>
+        </div>
+      </div>
+    </div>`;
+  const liquid = `<div data-wpb-full-page-bundle data-bundle-id="${escapeHtmlAttribute(bundle.id)}" data-bundle-type="full_page" data-bundle-config-source="app_proxy" data-shop="${escapeHtmlAttribute(shopDomain)}"${templateTypeAttr}${designPresetAttr} data-bundle-config='${config}' hidden>${bootstrapSkeleton}</div>`;
 
   AppLogger.info("FPB proxy page rendered", {
     component: "wpb.proxy",

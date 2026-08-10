@@ -88,6 +88,7 @@ import { renderSharedProductCard } from './widgets/shared/components/product-car
 import { renderSelectedProductRow } from './widgets/shared/components/selected-product-row.js';
 import { renderSelectedProductSlots } from './widgets/shared/components/selected-product-slots.js';
 import { renderStepTimelineEntry } from './widgets/shared/components/step-timeline.js';
+import { removeBootstrapSkeleton } from './widgets/full-page/bootstrap-skeleton.js';
 import { installControllerMethods } from './widgets/shared/controller-methods.js';
 import {
   buildCartLineDisplayProperties as buildSharedCartLineDisplayProperties,
@@ -208,9 +209,6 @@ export class BundleWidgetFullPage {
         this.hidePageTitle();
       }
 
-      // Show spinner overlay immediately (no gif url yet — bundle data not loaded)
-      this.showLoadingOverlay(null);
-
       // Load design settings CSS (sync — sets up error listener for proxy fallback)
       this.loadDesignSettingsCSS();
       await this.loadLanguageSettings();
@@ -262,6 +260,8 @@ export class BundleWidgetFullPage {
       // Render initial UI (async for full-page bundles to load products)
       await this.renderUI();
 
+      removeBootstrapSkeleton(this.container);
+
       // Hide overlay now that UI is fully rendered
       this.hideLoadingOverlay();
 
@@ -290,6 +290,7 @@ export class BundleWidgetFullPage {
       }
 
     } catch (error) {
+      removeBootstrapSkeleton(this.container);
       this.hideLoadingOverlay();
       // Log full error to browser console for developer debugging
       console.error('[BundleWidget] Initialization failed:', error);
