@@ -1,621 +1,2346 @@
 {
-  "count": 20,
+  "count": 88,
   "families": [
+    "SHARED",
     "FPB",
     "PPB"
   ],
   "items": [
     {
-      "id": "addToCartButton",
-      "family": "FPB",
+      "id": "shared-bundle-contains-label",
+      "family": "SHARED",
       "templates": [
         "STANDARD",
         "CLASSIC",
         "COMPACT",
-        "HORIZONTAL"
-      ],
-      "surface": "product card and side sheet CTA",
-      "admin_label": "Add to Cart Button",
-      "field_name": "addToCartButton",
-      "fallback": "Add +",
-      "required": false,
-      "merchant_editable": true,
-      "localizable": true,
-      "allowed_placeholders": [],
-      "character_guidance": "Keep short for narrow cards",
-      "supports_pluralization": false,
-      "supports_rich_text": false,
-      "sanitization": "text",
-      "affected_states": [
-        "product card button"
-      ],
-      "fixture_ids": [],
-      "test_case_ids": [
-        "fpb-all-template-summary"
-      ],
-      "status": "confirmed_current",
-      "evidence": "app/assets/widgets/full-page/methods/runtime-cart-settings-methods.js",
-      "notes": "Shared across FPB presets."
-    },
-    {
-      "id": "summaryTitle",
-      "family": "PPB",
-      "templates": [
-        "GRID",
-        "LIST",
-        "HORIZONTAL_SLOTS",
-        "VERTICAL_SLOTS"
-      ],
-      "surface": "bundle summary drawer",
-      "admin_label": "Summary title",
-      "field_name": "summaryTitle",
-      "fallback": "Review your bundle",
-      "required": false,
-      "merchant_editable": true,
-      "localizable": true,
-      "allowed_placeholders": [],
-      "character_guidance": "Plain text, concise",
-      "supports_pluralization": false,
-      "supports_rich_text": false,
-      "sanitization": "text",
-      "affected_states": [
-        "summary drawer title"
-      ],
-      "fixture_ids": [],
-      "test_case_ids": [
-        "product-page-bundle-template-design-verification"
-      ],
-      "status": "confirmed_current",
-      "evidence": "app/assets/widgets/full-page/methods/mobile-summary-methods.js",
-      "notes": "Shared locale-aware text in runtime helper."
-    },
-    {
-      "id": "fpb-nextButton",
-      "family": "FPB",
-      "templates": [
-        "STANDARD",
-        "CLASSIC",
-        "COMPACT",
-        "HORIZONTAL"
-      ],
-      "surface": "step control",
-      "admin_label": "Next Button",
-      "field_name": "nextButton",
-      "fallback": "Next",
-      "required": false,
-      "merchant_editable": true,
-      "localizable": true,
-      "allowed_placeholders": [],
-      "character_guidance": "Keep short and imperative",
-      "supports_pluralization": false,
-      "supports_rich_text": false,
-      "sanitization": "text",
-      "affected_states": [
-        "selection flow",
-        "CTA label"
-      ],
-      "fixture_ids": [],
-      "test_case_ids": [
-        "fpb-all-template-summary"
-      ],
-      "status": "DISCOVERED_CURRENT",
-      "evidence": "app/assets/widgets/full-page/methods/responsive-layout-methods.js",
-      "notes": "FPB flow label for multi-step progression."
-    },
-    {
-      "id": "fpb-noProductsAvailable",
-      "family": "FPB",
-      "templates": [
-        "STANDARD",
-        "CLASSIC",
-        "COMPACT",
-        "HORIZONTAL"
-      ],
-      "surface": "product search/picker",
-      "admin_label": "No Products Available Label",
-      "field_name": "noProductsAvailable",
-      "fallback": "No products available",
-      "required": false,
-      "merchant_editable": true,
-      "localizable": true,
-      "allowed_placeholders": [],
-      "character_guidance": "Empty state copy should remain short",
-      "supports_pluralization": false,
-      "supports_rich_text": false,
-      "sanitization": "text",
-      "affected_states": [
-        "empty catalog state"
-      ],
-      "fixture_ids": [],
-      "test_case_ids": [
-        "fpb-all-template-summary"
-      ],
-      "status": "DISCOVERED_CURRENT",
-      "evidence": "app/assets/widgets/full-page/methods/product-grid-methods.js",
-      "notes": "Presented when a step has no products matching filters."
-    },
-    {
-      "id": "fpb-chooseOptionsButton",
-      "family": "FPB",
-      "templates": [
-        "STANDARD",
-        "CLASSIC",
-        "COMPACT",
-        "HORIZONTAL"
-      ],
-      "surface": "variant picker action",
-      "admin_label": "Choose Options Button Text",
-      "field_name": "chooseOptionsButton",
-      "fallback": "Choose Options",
-      "required": false,
-      "merchant_editable": true,
-      "localizable": true,
-      "allowed_placeholders": [],
-      "character_guidance": "Keep short for button labels",
-      "supports_pluralization": false,
-      "supports_rich_text": false,
-      "sanitization": "text",
-      "affected_states": [
-        "variant selection"
-      ],
-      "fixture_ids": [],
-      "test_case_ids": [
-        "fpb-all-template-summary"
-      ],
-      "status": "DISCOVERED_CURRENT",
-      "evidence": "app/lib/settings-language-runtime.ts",
-      "notes": "FPB option-trigger text used in full-page storefront copy overrides."
-    },
-    {
-      "id": "fpb-addingToCart",
-      "family": "FPB",
-      "templates": [
-        "STANDARD",
-        "CLASSIC",
-        "COMPACT",
-        "HORIZONTAL"
-      ],
-      "surface": "product card CTA",
-      "admin_label": "Adding To Cart Label",
-      "field_name": "addingToCart",
-      "fallback": "Adding to Cart...",
-      "required": false,
-      "merchant_editable": true,
-      "localizable": true,
-      "allowed_placeholders": [],
-      "character_guidance": "Imperative state text",
-      "supports_pluralization": false,
-      "supports_rich_text": false,
-      "sanitization": "text",
-      "affected_states": [
-        "add-to-cart state"
-      ],
-      "fixture_ids": [],
-      "test_case_ids": [
-        "fpb-all-template-summary"
-      ],
-      "status": "DISCOVERED_CURRENT",
-      "evidence": "app/assets/widgets/product-page/methods/cart-methods.js",
-      "notes": "Temporary loading label while bundle add flow executes."
-    },
-    {
-      "id": "fpb-includedBadge",
-      "family": "FPB",
-      "templates": [
-        "STANDARD",
-        "CLASSIC",
-        "COMPACT",
-        "HORIZONTAL"
-      ],
-      "surface": "card badge",
-      "admin_label": "Included Badge",
-      "field_name": "includedBadge",
-      "fallback": "Included",
-      "required": false,
-      "merchant_editable": true,
-      "localizable": true,
-      "allowed_placeholders": [],
-      "character_guidance": "Preserve short all-caps intent",
-      "supports_pluralization": false,
-      "supports_rich_text": false,
-      "sanitization": "text",
-      "affected_states": [
-        "card status badge"
-      ],
-      "fixture_ids": [],
-      "test_case_ids": [
-        "fpb-all-template-summary"
-      ],
-      "status": "DISCOVERED_CURRENT",
-      "evidence": "app/lib/bundle-formatter.server.ts",
-      "notes": "FPB preselected badge text."
-    },
-    {
-      "id": "fpb-reviewButton",
-      "family": "FPB",
-      "templates": [
-        "STANDARD",
-        "CLASSIC",
-        "COMPACT",
-        "HORIZONTAL"
-      ],
-      "surface": "footer / summary action",
-      "admin_label": "Review Button",
-      "field_name": "reviewButton",
-      "fallback": "Review",
-      "required": false,
-      "merchant_editable": true,
-      "localizable": true,
-      "allowed_placeholders": [],
-      "character_guidance": "Keep concise",
-      "supports_pluralization": false,
-      "supports_rich_text": false,
-      "sanitization": "text",
-      "affected_states": [
-        "summary actions"
-      ],
-      "fixture_ids": [],
-      "test_case_ids": [
-        "fpb-all-template-summary"
-      ],
-      "status": "DISCOVERED_CURRENT",
-      "evidence": "app/lib/settings-language-runtime.ts",
-      "notes": "Final review-step CTA copy."
-    },
-    {
-      "id": "fpb-productAddButton",
-      "family": "FPB",
-      "templates": [
-        "STANDARD",
-        "CLASSIC",
-        "COMPACT",
-        "HORIZONTAL"
-      ],
-      "surface": "product card add control",
-      "admin_label": "Product Add Button Text",
-      "field_name": "productAddButton",
-      "fallback": "Add",
-      "required": false,
-      "merchant_editable": true,
-      "localizable": true,
-      "allowed_placeholders": [],
-      "character_guidance": "Keep concise for inline add controls",
-      "supports_pluralization": false,
-      "supports_rich_text": false,
-      "sanitization": "text",
-      "affected_states": [
-        "product card controls"
-      ],
-      "fixture_ids": [],
-      "test_case_ids": [
-        "fpb-all-template-summary"
-      ],
-      "status": "DISCOVERED_CURRENT",
-      "evidence": "app/lib/settings-language-runtime.ts",
-      "notes": "FPB add action copy for product card context."
-    },
-    {
-      "id": "fpb-loadMoreProductsButton",
-      "family": "FPB",
-      "templates": [
-        "STANDARD",
-        "CLASSIC",
-        "COMPACT",
-        "HORIZONTAL"
-      ],
-      "surface": "product picker footer",
-      "admin_label": "Load More Products Button",
-      "field_name": "loadMoreProductsButton",
-      "fallback": "Load More",
-      "required": false,
-      "merchant_editable": true,
-      "localizable": true,
-      "allowed_placeholders": [],
-      "character_guidance": "Keep short",
-      "supports_pluralization": false,
-      "supports_rich_text": false,
-      "sanitization": "text",
-      "affected_states": [
-        "pagination state"
-      ],
-      "fixture_ids": [],
-      "test_case_ids": [
-        "fpb-all-template-summary"
-      ],
-      "status": "DISCOVERED_CURRENT",
-      "evidence": "app/lib/settings-language-runtime.ts",
-      "notes": "FPB load-more control label."
-    },
-    {
-      "id": "fpb-productVariantLabel",
-      "family": "FPB",
-      "templates": [
-        "STANDARD",
-        "CLASSIC",
-        "COMPACT",
-        "HORIZONTAL"
-      ],
-      "surface": "variant selector",
-      "admin_label": "Product Variant Label",
-      "field_name": "productVariantLabel",
-      "fallback": "Variant",
-      "required": false,
-      "merchant_editable": true,
-      "localizable": true,
-      "allowed_placeholders": [],
-      "character_guidance": "Keep terse",
-      "supports_pluralization": false,
-      "supports_rich_text": false,
-      "sanitization": "text",
-      "affected_states": [
-        "variant control"
-      ],
-      "fixture_ids": [],
-      "test_case_ids": [
-        "fpb-all-template-summary"
-      ],
-      "status": "DISCOVERED_CURRENT",
-      "evidence": "app/assets/widgets/full-page/methods/product-card-footer-methods.js",
-      "notes": "Used as fallback product variant heading label."
-    },
-    {
-      "id": "ppb-nextButton",
-      "family": "PPB",
-      "templates": [
+        "HORIZONTAL",
         "GRID",
         "LIST",
         "VERTICAL_SLOTS",
         "HORIZONTAL_SLOTS"
       ],
-      "surface": "footer action",
-      "admin_label": "Next Button Text",
-      "field_name": "nextButton",
-      "fallback": "Next",
-      "required": false,
-      "merchant_editable": true,
-      "localizable": true,
-      "allowed_placeholders": [],
-      "character_guidance": "Keep short and imperative",
-      "supports_pluralization": false,
-      "supports_rich_text": false,
-      "sanitization": "text",
-      "affected_states": [
-        "step navigation"
-      ],
-      "fixture_ids": [],
-      "test_case_ids": [
-        "product-page-bundle-template-design-verification"
-      ],
-      "status": "DISCOVERED_CURRENT",
-      "evidence": "app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/runtime-config.server.ts",
-      "notes": "PPB step progression CTA text."
-    },
-    {
-      "id": "ppb-doneButton",
-      "family": "PPB",
-      "templates": [
-        "GRID",
-        "LIST",
-        "VERTICAL_SLOTS",
-        "HORIZONTAL_SLOTS"
-      ],
-      "surface": "footer action",
-      "admin_label": "Done Button Text",
-      "field_name": "doneButton",
-      "fallback": "Done",
-      "required": false,
-      "merchant_editable": true,
-      "localizable": true,
-      "allowed_placeholders": [],
-      "character_guidance": "Keep concise and terminal",
-      "supports_pluralization": false,
-      "supports_rich_text": false,
-      "sanitization": "text",
-      "affected_states": [
-        "final step CTA"
-      ],
-      "fixture_ids": [],
-      "test_case_ids": [
-        "product-page-bundle-template-design-verification"
-      ],
-      "status": "DISCOVERED_CURRENT",
-      "evidence": "app/lib/settings-language-runtime.ts",
-      "notes": "Final-step CTA copy in PPB footer flow."
-    },
-    {
-      "id": "ppb-addingToCart",
-      "family": "PPB",
-      "templates": [
-        "GRID",
-        "LIST",
-        "VERTICAL_SLOTS",
-        "HORIZONTAL_SLOTS"
-      ],
-      "surface": "footer add-to-cart",
-      "admin_label": "Adding To Cart Label",
-      "field_name": "addingToCart",
-      "fallback": "Adding to Cart...",
-      "required": false,
-      "merchant_editable": true,
-      "localizable": true,
-      "allowed_placeholders": [],
-      "character_guidance": "Loading-state text",
-      "supports_pluralization": false,
-      "supports_rich_text": false,
-      "sanitization": "text",
-      "affected_states": [
-        "add-to-cart state"
-      ],
-      "fixture_ids": [],
-      "test_case_ids": [
-        "product-page-bundle-template-design-verification"
-      ],
-      "status": "DISCOVERED_CURRENT",
-      "evidence": "app/assets/widgets/product-page/methods/cart-methods.js",
-      "notes": "PPB loading label while bundle submission is in progress."
-    },
-    {
-      "id": "ppb-productCardAddButton",
-      "family": "PPB",
-      "templates": [
-        "GRID",
-        "LIST",
-        "VERTICAL_SLOTS",
-        "HORIZONTAL_SLOTS"
-      ],
-      "surface": "product card",
-      "admin_label": "Product Card Add Button",
-      "field_name": "productCardAddButton",
-      "fallback": "Add",
-      "required": false,
-      "merchant_editable": true,
-      "localizable": true,
-      "allowed_placeholders": [],
-      "character_guidance": "Keep concise for card action",
-      "supports_pluralization": false,
-      "supports_rich_text": false,
-      "sanitization": "text",
-      "affected_states": [
-        "product card controls"
-      ],
-      "fixture_ids": [],
-      "test_case_ids": [
-        "product-page-bundle-template-design-verification"
-      ],
-      "status": "DISCOVERED_CURRENT",
-      "evidence": "app/lib/settings-language-runtime.ts",
-      "notes": "PPB product card call-to-action text."
-    },
-    {
-      "id": "ppb-productCardInlineAddButton",
-      "family": "PPB",
-      "templates": [
-        "GRID",
-        "LIST",
-        "VERTICAL_SLOTS",
-        "HORIZONTAL_SLOTS"
-      ],
-      "surface": "in-page card",
-      "admin_label": "Product Card Inline Add Button",
-      "field_name": "productCardInlineAddButton",
-      "fallback": "Add",
-      "required": false,
-      "merchant_editable": true,
-      "localizable": true,
-      "allowed_placeholders": [],
-      "character_guidance": "Keep concise for inline mode",
-      "supports_pluralization": false,
-      "supports_rich_text": false,
-      "sanitization": "text",
-      "affected_states": [
-        "inline add controls"
-      ],
-      "fixture_ids": [],
-      "test_case_ids": [
-        "product-page-bundle-template-design-verification"
-      ],
-      "status": "DISCOVERED_CURRENT",
-      "evidence": "app/lib/settings-language-runtime.ts",
-      "notes": "PPB in-page variant of product card CTA."
-    },
-    {
-      "id": "ppb-viewBundleItems",
-      "family": "PPB",
-      "templates": [
-        "GRID",
-        "LIST",
-        "VERTICAL_SLOTS",
-        "HORIZONTAL_SLOTS"
-      ],
-      "surface": "footer actions",
-      "admin_label": "View Bundle Items Button",
-      "field_name": "viewBundleItems",
-      "fallback": "View Bundle Items",
-      "required": false,
-      "merchant_editable": true,
-      "localizable": true,
-      "allowed_placeholders": [],
-      "character_guidance": "Clear action wording",
-      "supports_pluralization": false,
-      "supports_rich_text": false,
-      "sanitization": "text",
-      "affected_states": [
-        "cart drawer state"
-      ],
-      "fixture_ids": [],
-      "test_case_ids": [
-        "product-page-bundle-template-design-verification"
-      ],
-      "status": "DISCOVERED_CURRENT",
-      "evidence": "app/assets/widgets/product-page/templates/cascade-template.js",
-      "notes": "PPB footer toggle copy for bundle item drawer."
-    },
-    {
-      "id": "ppb-bundleCartSelectedProductsText",
-      "family": "PPB",
-      "templates": [
-        "GRID",
-        "LIST",
-        "VERTICAL_SLOTS",
-        "HORIZONTAL_SLOTS"
-      ],
-      "surface": "cart summary drawer",
-      "admin_label": "Bundle Cart Selected Products Label",
-      "field_name": "bundleCartSelectedProductsText",
+      "surface": "cartCheckout",
+      "admin_label": "Bundle Contains Label",
+      "field_name": "bundleContainsLabel",
+      "runtime_path": "shared.cartCheckout.bundleContainsLabel",
       "fallback": "Items",
       "required": false,
       "merchant_editable": true,
       "localizable": true,
       "allowed_placeholders": [],
-      "character_guidance": "Keep short",
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
       "supports_pluralization": false,
       "supports_rich_text": false,
       "sanitization": "text",
       "affected_states": [
-        "cart summary"
+        "fpb-selection-flow",
+        "ppb-footer-messaging"
       ],
-      "fixture_ids": [],
+      "fixture_ids": [
+        "fpb-all-templates",
+        "ppb-all-templates"
+      ],
       "test_case_ids": [
+        "fpb-all-template-summary",
         "product-page-bundle-template-design-verification"
       ],
-      "status": "DISCOVERED_CURRENT",
-      "evidence": "app/assets/widgets/product-page/methods/footer-modal-state-methods.js",
-      "notes": "PPB header text for selected bundle rows."
-    },
-    {
-      "id": "ppb-productVariantLabel",
-      "family": "PPB",
-      "templates": [
-        "GRID",
-        "LIST",
-        "VERTICAL_SLOTS",
-        "HORIZONTAL_SLOTS"
-      ],
-      "surface": "variant selector",
-      "admin_label": "Product Variant Label",
-      "field_name": "productVariantLabel",
-      "fallback": "Variant",
-      "required": false,
-      "merchant_editable": true,
-      "localizable": true,
-      "allowed_placeholders": [],
-      "character_guidance": "Preserve short product context",
-      "supports_pluralization": false,
-      "supports_rich_text": false,
-      "sanitization": "text",
-      "affected_states": [
-        "variant controls"
-      ],
-      "fixture_ids": [],
-      "test_case_ids": [
-        "product-page-bundle-template-design-verification"
-      ],
-      "status": "DISCOVERED_CURRENT",
+      "status": "CONFIRMED_CURRENT",
       "evidence": "app/lib/settings-language-runtime.ts",
-      "notes": "PPB label for variant selector controls."
+      "notes": "Generated from the canonical storefront language runtime."
     },
     {
-      "id": "ppb-includedBadge",
+      "id": "shared-bundle-original-price-label",
+      "family": "SHARED",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL",
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "surface": "cartCheckout",
+      "admin_label": "Bundle Original Price Label",
+      "field_name": "bundleOriginalPriceLabel",
+      "runtime_path": "shared.cartCheckout.bundleOriginalPriceLabel",
+      "fallback": "Retail Price",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "ppb-footer-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates",
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary",
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "shared-bundle-discount-display-label",
+      "family": "SHARED",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL",
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "surface": "cartCheckout",
+      "admin_label": "Bundle Cart Discount Display Label",
+      "field_name": "bundleDiscountDisplayLabel",
+      "runtime_path": "shared.cartCheckout.bundleDiscountDisplayLabel",
+      "fallback": "You Save",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "ppb-footer-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates",
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary",
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-add-to-box-button-text",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "general",
+      "admin_label": "Add Product to Bundle Button",
+      "field_name": "addToBoxButtonText",
+      "runtime_path": "fpb.general.addToBoxButtonText",
+      "fallback": "Add To Box",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-next-button-text",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "general",
+      "admin_label": "Next Button Text",
+      "field_name": "nextButtonText",
+      "runtime_path": "fpb.general.nextButtonText",
+      "fallback": "Next",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-add-to-cart-button-text",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "general",
+      "admin_label": "Add Bundle to Cart Button",
+      "field_name": "addToCartButtonText",
+      "runtime_path": "fpb.general.addToCartButtonText",
+      "fallback": "Add To Cart",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-total-label-text",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "general",
+      "admin_label": "Total Label",
+      "field_name": "totalLabelText",
+      "runtime_path": "fpb.general.totalLabelText",
+      "fallback": "Total",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-view-cart-products-label",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "general",
+      "admin_label": "View Cart Products Label",
+      "field_name": "viewCartProductsLabel",
+      "runtime_path": "fpb.general.viewCartProductsLabel",
+      "fallback": "View Selected Products",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-discount-badge-suffix",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "general",
+      "admin_label": "Discount Badge Suffix",
+      "field_name": "discountBadgeSuffix",
+      "runtime_path": "fpb.general.discountBadgeSuffix",
+      "fallback": "off",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-cart-inclusion-title",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "general",
+      "admin_label": "Cart Inclusion Title",
+      "field_name": "cartInclusionTitle",
+      "runtime_path": "fpb.general.cartInclusionTitle",
+      "fallback": "item(s)",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-subscription-selection-label",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "general",
+      "admin_label": "Subscription Selection Label",
+      "field_name": "subscriptionSelectionLabel",
+      "runtime_path": "fpb.general.subscriptionSelectionLabel",
+      "fallback": "Select Subscription Plan",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-no-products-available-text",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "general",
+      "admin_label": "No Products Available label",
+      "field_name": "noProductsAvailableText",
+      "runtime_path": "fpb.general.noProductsAvailableText",
+      "fallback": "No Products Available",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-choose-options-button-text",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "general",
+      "admin_label": "Choose Options Button",
+      "field_name": "chooseOptionsButtonText",
+      "runtime_path": "fpb.general.chooseOptionsButtonText",
+      "fallback": "Choose Options",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-load-more-products-button-text",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "general",
+      "admin_label": "Load More Products Button",
+      "field_name": "loadMoreProductsButtonText",
+      "runtime_path": "fpb.general.loadMoreProductsButtonText",
+      "fallback": "Load More Products",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-preparing-bundle-label",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "general",
+      "admin_label": "Preparing Bundle Label",
+      "field_name": "preparingBundleLabel",
+      "runtime_path": "fpb.general.preparingBundleLabel",
+      "fallback": "Preparing Bundle...",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-redirecting-label",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "general",
+      "admin_label": "Redirecting label",
+      "field_name": "redirectingLabel",
+      "runtime_path": "fpb.general.redirectingLabel",
+      "fallback": "Redirecting...",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-added-label",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "general",
+      "admin_label": "Added Label",
+      "field_name": "addedLabel",
+      "runtime_path": "fpb.general.addedLabel",
+      "fallback": "Added",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-add-button-text",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "general",
+      "admin_label": "Add Button Text",
+      "field_name": "addButtonText",
+      "runtime_path": "fpb.general.addButtonText",
+      "fallback": "Add",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-review-button-text",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "general",
+      "admin_label": "Review Button Text",
+      "field_name": "reviewButtonText",
+      "runtime_path": "fpb.general.reviewButtonText",
+      "fallback": "Review",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-select-bundle-products-label",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "general",
+      "admin_label": "Select Bundle Products label",
+      "field_name": "selectBundleProductsLabel",
+      "runtime_path": "fpb.general.selectBundleProductsLabel",
+      "fallback": "Select Bundle Products",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-quantity-label",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "modals",
+      "admin_label": "Quantity Label",
+      "field_name": "quantityLabel",
+      "runtime_path": "fpb.modals.quantityLabel",
+      "fallback": "Quantity",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-clear-cart-modal-title",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "modals",
+      "admin_label": "Modal - Title",
+      "field_name": "clearCartModalTitle",
+      "runtime_path": "fpb.modals.clearCartModalTitle",
+      "fallback": "Are you sure?",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-clear-cart-modal-description",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "modals",
+      "admin_label": "Modal - Description",
+      "field_name": "clearCartModalDescription",
+      "runtime_path": "fpb.modals.clearCartModalDescription",
+      "fallback": "Are you sure you want to clear all items from your cart? This action cannot be undone...",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-clear-cart-button-text",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "modals",
+      "admin_label": "Clear Cart Button Text",
+      "field_name": "clearCartButtonText",
+      "runtime_path": "fpb.modals.clearCartButtonText",
+      "fallback": "Clear",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-clear-cart-cancel-button-text",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "modals",
+      "admin_label": "Modal - Cancel Button Text",
+      "field_name": "clearCartCancelButtonText",
+      "runtime_path": "fpb.modals.clearCartCancelButtonText",
+      "fallback": "Cancel",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-clear-cart-confirm-button-text",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "modals",
+      "admin_label": "Modal - Confirm Button Text",
+      "field_name": "clearCartConfirmButtonText",
+      "runtime_path": "fpb.modals.clearCartConfirmButtonText",
+      "fallback": "Clear Cart",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-greater-than-rule-message-quantity",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "conditions / quantity",
+      "admin_label": "Greater than rule message (Quantity)",
+      "field_name": "greater_than_rule_message_quantity",
+      "runtime_path": "fpb.conditions.quantity.greaterThanOrEqualTo",
+      "fallback": "Add at least {{conditionQuantity}} products on this step",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [
+        "conditionQuantity"
+      ],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": true,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-less-than-rule-message-quantity",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "conditions / quantity",
+      "admin_label": "Less than rule message (Quantity)",
+      "field_name": "less_than_rule_message_quantity",
+      "runtime_path": "fpb.conditions.quantity.lessThanOrEqualTo",
+      "fallback": "Add a maximum of {{conditionQuantity}} products to continue",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [
+        "conditionQuantity"
+      ],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": true,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-equal-to-rule-message-quantity",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "conditions / quantity",
+      "admin_label": "Equal to rule message (Quantity)",
+      "field_name": "equal_to_rule_message_quantity",
+      "runtime_path": "fpb.conditions.quantity.equalTo",
+      "fallback": "Add exactly {{conditionQuantity}} products on this step",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [
+        "conditionQuantity"
+      ],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": true,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-greater-than-rule-message-amount",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "conditions / amount",
+      "admin_label": "Greater than rule message (Amount)",
+      "field_name": "greater_than_rule_message_amount",
+      "runtime_path": "fpb.conditions.amount.greaterThanOrEqualTo",
+      "fallback": "Add products worth at least {{conditionAmount}} on this step",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [
+        "conditionAmount"
+      ],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-less-than-rule-message-amount",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "conditions / amount",
+      "admin_label": "Less than rule message (Amount)",
+      "field_name": "less_than_rule_message_amount",
+      "runtime_path": "fpb.conditions.amount.lessThanOrEqualTo",
+      "fallback": "Add products worth maximum of {{conditionAmount}} on this step",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [
+        "conditionAmount"
+      ],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-equal-to-rule-message-amount",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "conditions / amount",
+      "admin_label": "Equal to rule message (Amount)",
+      "field_name": "equal_to_rule_message_amount",
+      "runtime_path": "fpb.conditions.amount.equalTo",
+      "fallback": "Add products worth {{conditionAmount}} on this step",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [
+        "conditionAmount"
+      ],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-greater-than-rule-message-weight",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "conditions / weight",
+      "admin_label": "Greater than rule message (Weight)",
+      "field_name": "greater_than_rule_message_weight",
+      "runtime_path": "fpb.conditions.weight.greaterThanOrEqualTo",
+      "fallback": "Add products weighing at least {{conditionWeight}} on this step",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [
+        "conditionWeight"
+      ],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-less-than-rule-message-weight",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "conditions / weight",
+      "admin_label": "Less than rule message (Weight)",
+      "field_name": "less_than_rule_message_weight",
+      "runtime_path": "fpb.conditions.weight.lessThanOrEqualTo",
+      "fallback": "Add products weighing maximum of {{conditionWeight}} on this step",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [
+        "conditionWeight"
+      ],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-equal-to-rule-message-weight",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "conditions / weight",
+      "admin_label": "Equal to rule message (Weight)",
+      "field_name": "equal_to_rule_message_weight",
+      "runtime_path": "fpb.conditions.weight.equalTo",
+      "fallback": "Add products weighing {{conditionWeight}} on this step",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [
+        "conditionWeight"
+      ],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-permission-denied",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "videoMessage",
+      "admin_label": "Permission Denied",
+      "field_name": "permissionDenied",
+      "runtime_path": "fpb.videoMessage.permissionDenied",
+      "fallback": "Permission Denied",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-upload-confirmation",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "videoMessage",
+      "admin_label": "Upload Confirmation",
+      "field_name": "uploadConfirmation",
+      "runtime_path": "fpb.videoMessage.uploadConfirmation",
+      "fallback": "Your video has been successfully uploaded!",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-press-to-record",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "videoMessage",
+      "admin_label": "Press to record",
+      "field_name": "pressToRecord",
+      "runtime_path": "fpb.videoMessage.pressToRecord",
+      "fallback": "Press to record",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-recording",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "videoMessage",
+      "admin_label": "Recording",
+      "field_name": "recording",
+      "runtime_path": "fpb.videoMessage.recording",
+      "fallback": "Recording....",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-video-error-message",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "videoMessage",
+      "admin_label": "Error Message",
+      "field_name": "videoErrorMessage",
+      "runtime_path": "fpb.videoMessage.videoErrorMessage",
+      "fallback": "An error occured, Please try again!",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-video-loading",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "videoMessage",
+      "admin_label": "Loading",
+      "field_name": "videoLoading",
+      "runtime_path": "fpb.videoMessage.videoLoading",
+      "fallback": "Loading....",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-uploading",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "videoMessage",
+      "admin_label": "Uploading",
+      "field_name": "uploading",
+      "runtime_path": "fpb.videoMessage.uploading",
+      "fallback": "Uploading....",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-send-video-message-text",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "videoMessage",
+      "admin_label": "Send Video Message Text",
+      "field_name": "sendVideoMessageText",
+      "runtime_path": "fpb.videoMessage.sendVideoMessageText",
+      "fallback": "Send Video Message",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-message-delivery-info",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "videoMessage",
+      "admin_label": "Message Delivery Info",
+      "field_name": "messageDeliveryInfo",
+      "runtime_path": "fpb.videoMessage.messageDeliveryInfo",
+      "fallback": "The message will be sent to the recipient via email as soon as the order is placed",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-save-video-text",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "videoMessage",
+      "admin_label": "Save Video Text",
+      "field_name": "saveVideoText",
+      "runtime_path": "fpb.videoMessage.saveVideoText",
+      "fallback": "Save Video",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-re-record-video-text",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "videoMessage",
+      "admin_label": "Re-Record Video Text",
+      "field_name": "reRecordVideoText",
+      "runtime_path": "fpb.videoMessage.reRecordVideoText",
+      "fallback": "Re-Record Video",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-message-label",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "personalizePage",
+      "admin_label": "Message Label",
+      "field_name": "messageLabel",
+      "runtime_path": "fpb.personalizePage.messageLabel",
+      "fallback": "Message",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-sender-name-placeholder",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "personalizePage",
+      "admin_label": "Sender Name Placeholder",
+      "field_name": "senderNamePlaceholder",
+      "runtime_path": "fpb.personalizePage.senderNamePlaceholder",
+      "fallback": "From",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-recipient-name-placeholder",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "personalizePage",
+      "admin_label": "Recipient Name Placeholder",
+      "field_name": "recipientNamePlaceholder",
+      "runtime_path": "fpb.personalizePage.recipientNamePlaceholder",
+      "fallback": "To",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-message-placeholder",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "personalizePage",
+      "admin_label": "Message Placeholder",
+      "field_name": "messagePlaceholder",
+      "runtime_path": "fpb.personalizePage.messagePlaceholder",
+      "fallback": "Enter a message here...",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-recipient-email-address-label",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "personalizePage",
+      "admin_label": "Recipient Email Address Label",
+      "field_name": "recipientEmailAddressLabel",
+      "runtime_path": "fpb.personalizePage.recipientEmailAddressLabel",
+      "fallback": "Recipient Email Address",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-recipient-email-address-placeholder",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "personalizePage",
+      "admin_label": "Recipient Email Address Placeholder",
+      "field_name": "recipientEmailAddressPlaceholder",
+      "runtime_path": "fpb.personalizePage.recipientEmailAddressPlaceholder",
+      "fallback": "Enter a recipient email address here...",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-email-validation-message",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "personalizePage",
+      "admin_label": "Email Validation Message",
+      "field_name": "emailValidationMessage",
+      "runtime_path": "fpb.personalizePage.emailValidationMessage",
+      "fallback": "Please enter a valid email address",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-send-now-label",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "personalizePage",
+      "admin_label": "Send Now Label",
+      "field_name": "sendNowLabel",
+      "runtime_path": "fpb.personalizePage.sendNowLabel",
+      "fallback": "Send Now",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-send-later-label",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "personalizePage",
+      "admin_label": "Send Later Label",
+      "field_name": "sendLaterLabel",
+      "runtime_path": "fpb.personalizePage.sendLaterLabel",
+      "fallback": "Send Later",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-personalize-page-subtext",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "personalizePage",
+      "admin_label": "Personalize Page Subtext",
+      "field_name": "personalizePageSubtext",
+      "runtime_path": "fpb.personalizePage.personalizePageSubtext",
+      "fallback": "",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-message-required-warning",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "personalizePage",
+      "admin_label": "Message is required warning",
+      "field_name": "messageRequiredWarning",
+      "runtime_path": "fpb.personalizePage.messageRequiredWarning",
+      "fallback": "Please enter a message",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-max-addon-products-allowed",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "addons",
+      "admin_label": "Max Addon Products Allowed message",
+      "field_name": "maxAddonProductsAllowed",
+      "runtime_path": "fpb.addons.maxAddonProductsAllowed",
+      "fallback": "Add a maximum of {{maxAllowedAddons}} addon products on this step",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [
+        "maxAllowedAddons"
+      ],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-addon-products-mandatory",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "addons",
+      "admin_label": "Addon Products Mandatory message",
+      "field_name": "addonProductsMandatory",
+      "runtime_path": "fpb.addons.addonProductsMandatory",
+      "fallback": "Addon product is mandatory on this step",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-mobile-addon-notification",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "addons",
+      "admin_label": "Mobile Add On Notification",
+      "field_name": "mobileAddonNotification",
+      "runtime_path": "fpb.addons.mobileAddonNotification",
+      "fallback": "Additional offers to be unlocked",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-box-selection-eligibility-toast",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "toasts",
+      "admin_label": "Box Selection Eligibility Toast",
+      "field_name": "boxSelectionEligibilityToast",
+      "runtime_path": "fpb.toasts.boxSelectionEligibilityToast",
+      "fallback": "Remove {{boxSelectionDifference}} item(s) to select this box",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [
+        "boxSelectionDifference"
+      ],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "fpb-remove-product-from-footer-text",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "surface": "toasts",
+      "admin_label": "Remove Product from Footer Text",
+      "field_name": "removeProductFromFooterText",
+      "runtime_path": "fpb.toasts.removeProductFromFooterText",
+      "fallback": "Remove This Product From {{stepName}}",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [
+        "stepName"
+      ],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "fpb-selection-flow",
+        "fpb-validation-messaging",
+        "fpb-discount-messaging"
+      ],
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "ppb-product-card-add-btn-text",
       "family": "PPB",
       "templates": [
         "GRID",
@@ -623,28 +2348,950 @@
         "VERTICAL_SLOTS",
         "HORIZONTAL_SLOTS"
       ],
-      "surface": "product card badge",
-      "admin_label": "Included Badge",
-      "field_name": "includedBadge",
-      "fallback": "Included",
+      "surface": "productCard",
+      "admin_label": "Product Add to Cart Button",
+      "field_name": "productCardAddBtnText",
+      "runtime_path": "ppb.productCard.productCardAddBtnText",
+      "fallback": "Add to Cart",
       "required": false,
       "merchant_editable": true,
       "localizable": true,
       "allowed_placeholders": [],
-      "character_guidance": "Maintain concise badge text",
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
       "supports_pluralization": false,
       "supports_rich_text": false,
       "sanitization": "text",
       "affected_states": [
-        "badging"
+        "ppb-footer-messaging",
+        "ppb-error-feedback"
       ],
-      "fixture_ids": [],
+      "fixture_ids": [
+        "ppb-all-templates"
+      ],
       "test_case_ids": [
         "product-page-bundle-template-design-verification"
       ],
-      "status": "DISCOVERED_CURRENT",
-      "evidence": "app/lib/bundle-formatter.server.ts",
-      "notes": "PPB badge text for already-added products."
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "ppb-product-variant-label-text",
+      "family": "PPB",
+      "templates": [
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "surface": "productCard",
+      "admin_label": "Product Variant Label",
+      "field_name": "productVariantLabelText",
+      "runtime_path": "ppb.productCard.productVariantLabelText",
+      "fallback": "Select variant",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "ppb-footer-messaging",
+        "ppb-error-feedback"
+      ],
+      "fixture_ids": [
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "ppb-product-added-btn-text",
+      "family": "PPB",
+      "templates": [
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "surface": "productCard",
+      "admin_label": "Product Added label",
+      "field_name": "productAddedBtnText",
+      "runtime_path": "ppb.productCard.productAddedBtnText",
+      "fallback": "Added x{{allowedQuantity}}",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [
+        "allowedQuantity"
+      ],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": true,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "ppb-footer-messaging",
+        "ppb-error-feedback"
+      ],
+      "fixture_ids": [
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "ppb-product-card-add-btn-text-in-page",
+      "family": "PPB",
+      "templates": [
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "surface": "productCard",
+      "admin_label": "Inline Product - Add Button Text",
+      "field_name": "productCardAddBtnText_inPage",
+      "runtime_path": "ppb.productCard.productCardAddBtnText_inPage",
+      "fallback": "Add +",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "ppb-footer-messaging",
+        "ppb-error-feedback"
+      ],
+      "fixture_ids": [
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "ppb-discount-ribbon-suffix",
+      "family": "PPB",
+      "templates": [
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "surface": "general",
+      "admin_label": "Discount Badge Suffix",
+      "field_name": "discountRibbonSuffix",
+      "runtime_path": "ppb.general.discountRibbonSuffix",
+      "fallback": "off",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "ppb-footer-messaging",
+        "ppb-error-feedback"
+      ],
+      "fixture_ids": [
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "ppb-select-subscription-plan-button-text",
+      "family": "PPB",
+      "templates": [
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "surface": "general",
+      "admin_label": "Subscription Selection Label",
+      "field_name": "selectSubscriptionPlanButtonText",
+      "runtime_path": "ppb.general.selectSubscriptionPlanButtonText",
+      "fallback": "Select Subscription Plan",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "ppb-footer-messaging",
+        "ppb-error-feedback"
+      ],
+      "fixture_ids": [
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "ppb-box-condition-initial-text-in-page",
+      "family": "PPB",
+      "templates": [
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "surface": "general",
+      "admin_label": "Inline Add To Cart Button - Quantity Selection message",
+      "field_name": "boxConditionInitialText_inPage",
+      "runtime_path": "ppb.general.boxConditionInitialText_inPage",
+      "fallback": "Select {{quantityDifference}} Items",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [
+        "quantityDifference"
+      ],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": true,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "ppb-footer-messaging",
+        "ppb-error-feedback"
+      ],
+      "fixture_ids": [
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "ppb-bundle-cart-drawer-btn-text-in-page",
+      "family": "PPB",
+      "templates": [
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "surface": "general",
+      "admin_label": "Inline Cart Drawer Button Text",
+      "field_name": "bundleCartDrawerBtnText_inPage",
+      "runtime_path": "ppb.general.bundleCartDrawerBtnText_inPage",
+      "fallback": "View Bundle Items",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "ppb-footer-messaging",
+        "ppb-error-feedback"
+      ],
+      "fixture_ids": [
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "ppb-bundle-cart-selected-products-text-in-page",
+      "family": "PPB",
+      "templates": [
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "surface": "general",
+      "admin_label": "Inline Cart Selected Products Label",
+      "field_name": "bundleCartSelectedProductsText_inPage",
+      "runtime_path": "ppb.general.bundleCartSelectedProductsText_inPage",
+      "fallback": "Selected Products",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "ppb-footer-messaging",
+        "ppb-error-feedback"
+      ],
+      "fixture_ids": [
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "ppb-subtotal-label-text",
+      "family": "PPB",
+      "templates": [
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "surface": "general",
+      "admin_label": "Subtotal Text",
+      "field_name": "subtotalLabelText",
+      "runtime_path": "ppb.general.subtotalLabelText",
+      "fallback": "Subtotal",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "ppb-footer-messaging",
+        "ppb-error-feedback"
+      ],
+      "fixture_ids": [
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "ppb-add-bundle-to-cart-btn-text",
+      "family": "PPB",
+      "templates": [
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "surface": "general",
+      "admin_label": "Add Bundle Cart label",
+      "field_name": "addBundleToCartBtnText",
+      "runtime_path": "ppb.general.addBundleToCartBtnText",
+      "fallback": "Add Bundle to Cart",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "ppb-footer-messaging",
+        "ppb-error-feedback"
+      ],
+      "fixture_ids": [
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "ppb-no-products-available",
+      "family": "PPB",
+      "templates": [
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "surface": "general",
+      "admin_label": "No Products Available label",
+      "field_name": "noProductsAvailable",
+      "runtime_path": "ppb.general.noProductsAvailable",
+      "fallback": "No Products Available",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "ppb-footer-messaging",
+        "ppb-error-feedback"
+      ],
+      "fixture_ids": [
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "ppb-add-to-cart-bundle-btn-loading-text",
+      "family": "PPB",
+      "templates": [
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "surface": "general",
+      "admin_label": "Add Bundle Loading label",
+      "field_name": "addToCartBundleBtnLoadingText",
+      "runtime_path": "ppb.general.addToCartBundleBtnLoadingText",
+      "fallback": "Adding Bundle...",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "ppb-footer-messaging",
+        "ppb-error-feedback"
+      ],
+      "fixture_ids": [
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "ppb-empty-card-text",
+      "family": "PPB",
+      "templates": [
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "surface": "general",
+      "admin_label": "Add Empty Product Card Text",
+      "field_name": "emptyCardText",
+      "runtime_path": "ppb.general.emptyCardText",
+      "fallback": "Product",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "ppb-footer-messaging",
+        "ppb-error-feedback"
+      ],
+      "fixture_ids": [
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "ppb-steps-drawer-pill-text",
+      "family": "PPB",
+      "templates": [
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "surface": "general",
+      "admin_label": "Steps Drawer Pill Text",
+      "field_name": "stepsDrawerPillText",
+      "runtime_path": "ppb.general.stepsDrawerPillText",
+      "fallback": "Show all steps",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "ppb-footer-messaging",
+        "ppb-error-feedback"
+      ],
+      "fixture_ids": [
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "ppb-inventory-limit-reached-text",
+      "family": "PPB",
+      "templates": [
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "surface": "general",
+      "admin_label": "Inventory Limit Reached Label",
+      "field_name": "inventoryLimitReachedText",
+      "runtime_path": "ppb.general.inventoryLimitReachedText",
+      "fallback": "No More Stock",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "ppb-footer-messaging",
+        "ppb-error-feedback"
+      ],
+      "fixture_ids": [
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "ppb-box-selection-eligibility-toast-in-page",
+      "family": "PPB",
+      "templates": [
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "surface": "general",
+      "admin_label": "Box Selection Eligibility Toast",
+      "field_name": "boxSelectionEligibilityToast_inPage",
+      "runtime_path": "ppb.general.boxSelectionEligibilityToast_inPage",
+      "fallback": "Remove {{boxSelectionDifference}} item(s) to select this box",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [
+        "boxSelectionDifference"
+      ],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "ppb-footer-messaging",
+        "ppb-error-feedback"
+      ],
+      "fixture_ids": [
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "ppb-footer-prev-btn-text",
+      "family": "PPB",
+      "templates": [
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "surface": "footer",
+      "admin_label": "Footer Previous Button",
+      "field_name": "footerPrevBtnText",
+      "runtime_path": "ppb.footer.footerPrevBtnText",
+      "fallback": "Prev",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "ppb-footer-messaging",
+        "ppb-error-feedback"
+      ],
+      "fixture_ids": [
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "ppb-footer-next-btn-text",
+      "family": "PPB",
+      "templates": [
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "surface": "footer",
+      "admin_label": "Footer Next Button",
+      "field_name": "footerNextBtnText",
+      "runtime_path": "ppb.footer.footerNextBtnText",
+      "fallback": "Next",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "ppb-footer-messaging",
+        "ppb-error-feedback"
+      ],
+      "fixture_ids": [
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "ppb-footer-finish-btn-text",
+      "family": "PPB",
+      "templates": [
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "surface": "footer",
+      "admin_label": "Footer Finish Button",
+      "field_name": "footerFinishBtnText",
+      "runtime_path": "ppb.footer.footerFinishBtnText",
+      "fallback": "Done",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "ppb-footer-messaging",
+        "ppb-error-feedback"
+      ],
+      "fixture_ids": [
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "ppb-greater-than-rule-message-amount",
+      "family": "PPB",
+      "templates": [
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "surface": "conditions / amount",
+      "admin_label": "Greater than rule message (Amount)",
+      "field_name": "greater_than_rule_message_amount",
+      "runtime_path": "ppb.conditions.amount.greaterThanOrEqualTo",
+      "fallback": "Add products worth at least {{conditionAmount}} on this step",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [
+        "conditionAmount"
+      ],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "ppb-footer-messaging",
+        "ppb-error-feedback"
+      ],
+      "fixture_ids": [
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "ppb-less-than-rule-message-amount",
+      "family": "PPB",
+      "templates": [
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "surface": "conditions / amount",
+      "admin_label": "Less than rule message (Amount)",
+      "field_name": "less_than_rule_message_amount",
+      "runtime_path": "ppb.conditions.amount.lessThanOrEqualTo",
+      "fallback": "Add products worth maximum of {{conditionAmount}} on this step",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [
+        "conditionAmount"
+      ],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "ppb-footer-messaging",
+        "ppb-error-feedback"
+      ],
+      "fixture_ids": [
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "ppb-equal-to-rule-message-amount",
+      "family": "PPB",
+      "templates": [
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "surface": "conditions / amount",
+      "admin_label": "Equal to rule message (Amount)",
+      "field_name": "equal_to_rule_message_amount",
+      "runtime_path": "ppb.conditions.amount.equalTo",
+      "fallback": "Add products worth {{conditionAmount}} on this step",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [
+        "conditionAmount"
+      ],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": false,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "ppb-footer-messaging",
+        "ppb-error-feedback"
+      ],
+      "fixture_ids": [
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "ppb-greater-than-rule-message-quantity",
+      "family": "PPB",
+      "templates": [
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "surface": "conditions / quantity",
+      "admin_label": "Greater than rule message (Quantity)",
+      "field_name": "greater_than_rule_message_quantity",
+      "runtime_path": "ppb.conditions.quantity.greaterThanOrEqualTo",
+      "fallback": "Add at least {{conditionQuantity}} products on this step",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [
+        "conditionQuantity"
+      ],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": true,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "ppb-footer-messaging",
+        "ppb-error-feedback"
+      ],
+      "fixture_ids": [
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "ppb-less-than-rule-message-quantity",
+      "family": "PPB",
+      "templates": [
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "surface": "conditions / quantity",
+      "admin_label": "Less than rule message (Quantity)",
+      "field_name": "less_than_rule_message_quantity",
+      "runtime_path": "ppb.conditions.quantity.lessThanOrEqualTo",
+      "fallback": "Add a maximum of {{conditionQuantity}} products to continue",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [
+        "conditionQuantity"
+      ],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": true,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "ppb-footer-messaging",
+        "ppb-error-feedback"
+      ],
+      "fixture_ids": [
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
+    },
+    {
+      "id": "ppb-equal-to-rule-message-quantity",
+      "family": "PPB",
+      "templates": [
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "surface": "conditions / quantity",
+      "admin_label": "Equal to rule message (Quantity)",
+      "field_name": "equal_to_rule_message_quantity",
+      "runtime_path": "ppb.conditions.quantity.equalTo",
+      "fallback": "Add exactly {{conditionQuantity}} products on this step",
+      "required": false,
+      "merchant_editable": true,
+      "localizable": true,
+      "allowed_placeholders": [
+        "conditionQuantity"
+      ],
+      "character_guidance": "Plain text; validate at narrow mobile width and two times English length",
+      "supports_pluralization": true,
+      "supports_rich_text": false,
+      "sanitization": "text",
+      "affected_states": [
+        "ppb-footer-messaging",
+        "ppb-error-feedback"
+      ],
+      "fixture_ids": [
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-language-runtime.ts",
+      "notes": "Generated from the canonical storefront language runtime."
     }
   ]
 }

@@ -5,7 +5,7 @@ title: Design System Changelog
 type: changelog
 status: active
 summary: Tracks design-system implementation milestones for template-family contract work.
-last_audited: 2026-08-06
+last_audited: 2026-08-10
 owners:
   - Wolfpack Product Bundles
 domains:
@@ -25,6 +25,12 @@ keywords:
 ---
 
 # Design System Changelog
+
+## 2026-08-10
+
+- Replaced the seeded storefront-copy inventory with source-backed extraction from `settings-language-runtime.ts`.
+- Expanded canonical runtime copy coverage from 20 manually maintained rows to 88 FPB, PPB, and shared fields.
+- Added deterministic default, placeholder, duplicate-ID, registry, JSON, and coverage generation checks.
 
 ## 2026-08-06
 

@@ -1,9 +1,9 @@
 schema_version: 1
 id: wolfpack-design-system-manifest
 created: 2026-08-06
-version: 0.1.0
+version: 0.2.0
 status: active
-status_description: Foundation and shared component documentation pass, plus additional plan-aligned artifacts.
+status_description: Runtime-backed copy inventory plus implemented foundation, family, template, fixture, and QA contracts.
 families:
   - FPB
   - PPB
@@ -47,6 +47,7 @@ artifacts:
   - design-system/scripts/_helpers.mjs
   - design-system/scripts/extract-config-registry.mjs
   - design-system/scripts/extract-copy-registry.mjs
+  - design-system/scripts/copy-runtime-inventory.cjs
   - design-system/scripts/validate-registry.mjs
   - design-system/scripts/generate-fixtures.mjs
   - design-system/scripts/validate-token-coverage.mjs
