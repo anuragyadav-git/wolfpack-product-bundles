@@ -960,8 +960,21 @@
 
   .bundle-widget-full-page.fpb-preset-classic[data-fpb-summary-mode="sidebar"]
     .side-panel-subtitle {
-    order: 1;
+    order: 2;
     margin: 0;
+    color: var(
+      --bundle-side-panel-text-color,
+      var(--bundle-global-primary-text, currentColor)
+    );
+    font-size: 0.875rem;
+    line-height: 1.4;
+    font-weight: 400;
+    overflow-wrap: anywhere;
+  }
+
+  .bundle-widget-full-page.fpb-preset-classic[data-fpb-summary-mode="sidebar"]
+    .side-panel-title {
+    order: 1;
     color: var(
       --bundle-side-panel-title-color,
       var(--bundle-global-primary-text, currentColor)
@@ -973,16 +986,8 @@
   }
 
   .bundle-widget-full-page.fpb-preset-classic[data-fpb-summary-mode="sidebar"]
-    .side-panel-title {
-    order: 2;
-    color: var(
-      --bundle-side-panel-text-color,
-      var(--bundle-global-primary-text, currentColor)
-    );
-    font-size: 0.875rem;
-    line-height: 1.4;
-    font-weight: 400;
-    overflow-wrap: anywhere;
+    .side-panel-total-prices {
+    justify-content: flex-start;
   }
 
   .bundle-widget-full-page.fpb-preset-classic[data-fpb-summary-mode="sidebar"]

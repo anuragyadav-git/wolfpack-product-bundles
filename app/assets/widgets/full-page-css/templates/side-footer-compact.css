@@ -900,13 +900,15 @@
     display: grid;
     flex: 1 1 auto;
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-rows: none;
+    grid-auto-rows: max-content;
     gap: var(--compact-desktop-grid-inner-gap);
     width: 100%;
     height: auto;
     min-height: 0;
     margin: 0;
     padding: 0;
+    align-content: start;
     align-self: start;
   }
 
@@ -919,7 +921,7 @@
   .layout-sidebar[data-fpb-design-preset="COMPACT"]
     .side-panel-summary-content
     > .side-panel-discount-message {
-    grid-row: 1;
+    grid-row: auto;
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto auto;
@@ -934,8 +936,8 @@
   .layout-sidebar[data-fpb-design-preset="COMPACT"]
     .side-panel-summary-content
     > .fpb-discount-progress.fpb-dp-sidebar {
-    grid-row: 1;
-    align-self: end;
+    grid-row: auto;
+    align-self: start;
     width: 100%;
     height: var(--bundle-discount-progress-track-size, 0.4375rem);
     margin: 0;
@@ -944,7 +946,7 @@
   .layout-sidebar[data-fpb-design-preset="COMPACT"]
     .side-panel-summary-content
     > .side-panel-item-count {
-    grid-row: 2;
+    grid-row: auto;
     align-self: start;
     width: 100%;
     height: auto;
@@ -959,8 +961,8 @@
   .layout-sidebar[data-fpb-design-preset="COMPACT"]
     .side-panel-summary-content
     > :is(.side-panel-products, .side-panel-skeleton-slots) {
-    grid-row: 2;
-    align-self: end;
+    grid-row: auto;
+    align-self: start;
     width: 100%;
     height: auto;
     max-height: none;

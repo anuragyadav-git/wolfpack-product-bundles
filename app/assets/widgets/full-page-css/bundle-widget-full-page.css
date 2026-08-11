@@ -13,6 +13,13 @@
 
 #bundle-builder-app.bundle-widget-full-page[data-bundle-type="full_page"] {
   --fpb-shell-gutter: calc(100% / 24);
+  --fpb-shell-top-spacing: clamp(0.5rem, 1vw, 1rem);
+}
+
+#bundle-builder-app.bundle-widget-full-page[data-bundle-type="full_page"]
+  .layout-sidebar {
+  padding-block-start: var(--fpb-shell-top-spacing);
+  box-sizing: border-box;
 }
 
 #bundle-builder-app.bundle-widget-full-page[data-bundle-type="full_page"]

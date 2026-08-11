@@ -1,3 +1,5 @@
+@import url("./summary-product-skeleton.css");
+
   #bundle-builder-app
     .layout-sidebar[data-fpb-summary-mode="tray"]
     .full-page-side-panel {
@@ -42,6 +44,10 @@
   .fpb-mobile-summary-tray
     .fpb-mobile-summary-count-badge {
     appearance: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--bundle-summary-copy-gap, 0.3125rem);
     min-width: 48px;
     min-height: var(--bundle-control-hit-target, 2.75rem);
     height: auto;
@@ -176,13 +182,13 @@
   }
 
   .fpb-mobile-summary-fluid-footer.fpb-mobile-summary-tray-expanded.fpb-mobile-summary-tray--has-discount-summary {
-    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
   }
 
   .fpb-mobile-summary-fluid-footer.fpb-mobile-summary-tray-expanded:not(
       .fpb-mobile-summary-tray--has-discount-summary
     ) {
-    grid-template-rows: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
   }
 
   .fpb-mobile-summary-fluid-footer
@@ -235,6 +241,13 @@
     .side-panel-btn-next {
     width: 100%;
     min-height: var(--bundle-control-hit-target, 2.5rem);
+  }
+
+  .fpb-mobile-summary-fluid-footer
+    .side-panel-btn-next:not(.side-panel-btn-has-tier-cta) {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: var(--bundle-summary-control-gap, 0.5rem);
   }
 
   .fpb-mobile-summary-fluid-footer
@@ -340,6 +353,94 @@
     overflow-y: auto;
     overscroll-behavior: contain;
     scrollbar-gutter: stable;
+  }
+
+  .fpb-mobile-summary-products-list--skeletons .side-panel-skeleton-slot {
+    display: grid;
+    grid-template-columns:
+      var(--bundle-summary-thumbnail-size, 4rem)
+      minmax(0, 1fr)
+      minmax(2.75rem, 4.375rem);
+    grid-template-rows: auto auto;
+    align-items: center;
+    column-gap: var(--bundle-summary-row-gap, 0.625rem);
+    row-gap: var(--bundle-summary-copy-gap, 0.3125rem);
+    width: 100%;
+    min-width: 0;
+    min-height: var(--bundle-summary-thumbnail-size, 4rem);
+    pointer-events: none;
+  }
+
+  .fpb-mobile-summary-products-list--skeletons
+    .side-panel-product-img-wrap {
+    grid-column: 1;
+    grid-row: 1 / 3;
+    width: var(--bundle-summary-thumbnail-size, 4rem);
+    height: var(--bundle-summary-thumbnail-size, 4rem);
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-sizing: border-box;
+  }
+
+  .fpb-mobile-summary-products-list--skeletons
+    .side-panel-skeleton-lines {
+    grid-column: 2;
+    grid-row: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: var(--bundle-summary-copy-gap, 0.3125rem);
+    width: 100%;
+    min-width: 0;
+  }
+
+  .fpb-mobile-summary-products-list--skeletons .side-panel-skeleton-thumb,
+  .fpb-mobile-summary-products-list--skeletons .side-panel-skeleton-line,
+  .fpb-mobile-summary-products-list--skeletons .side-panel-skeleton-remove {
+    display: block;
+    background: var(--bundle-skeleton-base-bg, #e5e7eb);
+    border-radius: 0.375rem;
+    color: transparent;
+    animation: fpb-shimmer var(--bundle-summary-skeleton-pulse-duration, 1.5s)
+      ease-in-out infinite;
+  }
+
+  .fpb-mobile-summary-products-list--skeletons .side-panel-skeleton-thumb {
+    width: 100%;
+    height: 100%;
+    border: 0.125rem dashed var(--bundle-side-panel-product-border, #a6a3a3);
+    box-sizing: border-box;
+  }
+
+  .fpb-mobile-summary-products-list--skeletons .line-name {
+    width: 80%;
+    height: 0.75rem;
+    min-height: 0.75rem;
+  }
+
+  .fpb-mobile-summary-products-list--skeletons .line-variant {
+    width: 60%;
+    height: 0.75rem;
+    min-height: 0.75rem;
+  }
+
+  .fpb-mobile-summary-products-list--skeletons .line-price {
+    grid-column: 3;
+    grid-row: 1 / 3;
+    width: 100%;
+    height: 1.25rem;
+    min-height: 1.25rem;
+    align-self: center;
+  }
+
+  .fpb-mobile-summary-products-list--skeletons .side-panel-skeleton-remove {
+    grid-column: 2;
+    grid-row: 2;
+    width: 25%;
+    height: 0.75rem;
+    min-height: 0.75rem;
+    align-self: start;
   }
 
   .fpb-mobile-summary-fluid-footer
