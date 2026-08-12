@@ -2215,7 +2215,10 @@ body:has([data-fpb-design-preset]) {
 .layout-sidebar[data-fpb-design-preset="STANDARD"] .side-panel-header {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 8px;
+  grid-template-rows: auto auto;
+  column-gap: 8px;
+  row-gap: 5px;
+  align-items: center;
   margin: 0;
   grid-row: 1;
   grid-column: 1;
@@ -2225,18 +2228,25 @@ body:has([data-fpb-design-preset]) {
   display: contents;
 }
 .layout-sidebar[data-fpb-design-preset="STANDARD"] .side-panel-header-copy {
-  display: grid;
-  grid-template-rows: auto auto;
-  gap: 5px;
+  display: contents;
+}
+.layout-sidebar[data-fpb-design-preset="STANDARD"] .side-panel-title {
+  grid-column: 1;
+  grid-row: 1;
   min-width: 0;
 }
 .layout-sidebar[data-fpb-design-preset="STANDARD"] .side-panel-subtitle {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  justify-self: stretch;
   font-size: 14px;
   line-height: 20px;
   margin: 0;
   color: #000;
 }
 .layout-sidebar[data-fpb-design-preset="STANDARD"] .side-panel-clear-btn {
+  grid-column: 2;
+  grid-row: 1;
   display: grid;
   grid-template-columns: auto auto;
   grid-template-rows: auto;
