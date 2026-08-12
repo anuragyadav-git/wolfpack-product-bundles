@@ -1287,10 +1287,6 @@ body:has([data-fpb-design-preset]) {
     margin: 0 var(--standard-mobile-shell-gutter) 14px;
     box-sizing: border-box;
   }
-  .layout-sidebar[data-fpb-design-preset="STANDARD"]
-    .standard-navigation-items-container {
-    margin-inline: 0;
-  }
   .layout-sidebar[data-fpb-design-preset="STANDARD"] .category-tabs {
     width: calc(100% - (var(--standard-mobile-shell-gutter) * 2));
     max-width: 100%;
