@@ -64,6 +64,10 @@ This is a hard requirement:
 - Avoid state transitions that change intrinsic card height (for example by showing additional in-card fields, tall selected chips, or expanding rows inside the card).
 - Keep hover/focus feedback non-expanding (outline, border, iconography, color) so cards do not visually overlap neighbors while hovered.
 - Keep selection/hover feedback on the existing card frame via overlays, borders, iconography, text color, opacity, and icon badges.
+- On pointer-capable desktop viewports, hovering the product image reveals a
+  circular magnifying-glass affordance at the image's top-right corner. Render
+  the icon with CSS geometry so it does not depend on a theme-root asset URL;
+  touch/mobile cards do not show this hover-only affordance.
 - Replace a product card's Add To Box button with its inline quantity selector immediately; do not animate width, radius, opacity, or geometry during that state swap.
 - Prefer fixed row contracts (`min-height`, `height`, flex stretch, consistent padding/line-clamp) so selected/unselected variants stay layout-stable.
 - Keep PPB/inpage and PPB/modal states non-expanding on `selected` and hover-expanded transitions.
