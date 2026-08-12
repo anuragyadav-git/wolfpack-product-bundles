@@ -52,7 +52,7 @@ container sizes.
 | 6 | Change preview surface | Any surface supported by the selected template | Only preview surface changes | Template and viewport remain intact |
 | 7 | Reject unsupported surface | Product Picker on Product List | State remains on Builder | Template-aware surface contract |
 | 8 | Change template with incompatible surface | Product Picker, then Product List | Surface falls back to Builder | Valid state is always preserved |
-| 9 | Resolve logical viewport | Desktop or mobile selector | Desktop uses 1280×960 and mobile uses 390×844 | The taller desktop canvas consumes the available preview workspace |
+| 9 | Resolve logical viewport | Desktop or mobile selector | Desktop uses 1280×1136 and mobile uses 390×844 | Both canvases fill the stable preview stage at wide Admin widths |
 | 10 | Fit logical viewport | Host width and selected logical viewport | Scale is capped at 1 and never drops below the minimum usable scale | Preview retains storefront breakpoints while fitting the Admin surface |
 
 ### DesignPreviewModel
@@ -103,7 +103,7 @@ container sizes.
 - [x] All five relevant Expert groups expose local AVIF colour-guide links.
 - [ ] Entering Design crosses one lazy workspace boundary and reaches a usable preview within 750ms p75 in SIT.
 - [x] Existing save, discard, and reset behavior remains unchanged; Preview Bundle remains separate and requires a real storefront URL.
-- [ ] Builder and Cart / Summary match the current storefront structure for all eight templates at 1280×960 and 390×844.
+- [ ] Builder and Cart / Summary match the current storefront structure for all eight templates at 1280×1136 and 390×844.
 - [x] Phone-sized Admin containers expose Preview and Customize panes without losing local preview or unsaved Design state.
 - [x] Loading disables Image Fit, keeps loading controls active, and presents one clickable GIF drop zone without a nested button.
 - [x] Unit tests verify behavior and model outputs only; visual placement and styling are verified with Chrome, not source or CSS assertions.

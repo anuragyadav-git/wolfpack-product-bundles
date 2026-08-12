@@ -89,7 +89,7 @@ export type DesignPreviewTheme = CSSProperties & Record<`--preview-${string}`, s
 export const DESIGN_PREVIEW_VIEWPORTS: Readonly<
   Record<DesignPreviewViewport, { width: number; height: number }>
 > = {
-  desktop: { width: 1280, height: 960 },
+  desktop: { width: 1280, height: 1136 },
   mobile: { width: 390, height: 844 },
 };
 

@@ -20,7 +20,7 @@ import { join } from "node:path";
 describe("Settings Design preview model", () => {
   it("uses the storefront parity viewports and fits them without changing their logical width", () => {
     expect(DESIGN_PREVIEW_VIEWPORTS).toEqual({
-      desktop: { width: 1280, height: 960 },
+      desktop: { width: 1280, height: 1136 },
       mobile: { width: 390, height: 844 },
     });
     expect(calculateDesignPreviewFitScale(1280, "desktop")).toBe(1);

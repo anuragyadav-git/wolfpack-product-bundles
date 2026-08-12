@@ -69,7 +69,7 @@ tokens stay canonical without coupling the Settings chunk to the storefront
 runtime.
 
 Builder and Cart / Summary are the storefront-matched key surfaces. They render
-inside fixed logical 1280×960 desktop and 390×844 mobile canvases, then scale as
+inside fixed logical 1280×1136 desktop and 390×844 mobile canvases, then scale as
 a whole to fit the available Admin panel; the scale must not change the
 storefront breakpoint being represented. Product Picker, Loading, Validation,
 and Upsell remain deterministic representative states and must not be described

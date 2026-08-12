@@ -212,7 +212,9 @@
 
 .previewStage {
   display: grid;
-  min-height: min(720px, 72vh);
+  box-sizing: border-box;
+  block-size: clamp(640px, calc(100dvh - 160px), 884px);
+  min-height: 0;
   place-items: start center;
   overflow: auto;
   background: #f1f2f3;
