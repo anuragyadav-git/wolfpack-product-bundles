@@ -113,6 +113,16 @@ The app embed owns stylesheet loading. Runtime code may set only validated or
 measured data values through CSS custom properties; it must not inject static
 layout declarations or maintain a second stylesheet-switching path.
 
+### Standard card rows
+
+The Standard FPB card uses one explicit grid for media, title, reserved variant,
+price, and action rows. The variant track remains present when a product has no
+selector so titles, prices, and actions align across the catalog row. Outer
+content transitions use the shared card gap, while the price-to-action gap is a
+smaller dedicated token. Media height remains fluid and catalog-container
+driven. The action row retains the shared accessible control hit target even
+when a measured visual reference uses a smaller button.
+
 ## Acceptance
 
 - Any template parity or CSS change touching product cards should preserve equal card height within the row under all shopper states in every template.

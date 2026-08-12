@@ -218,6 +218,11 @@ Keep base CSS below the limit by moving template-specific rules into separate ex
 - PPB base: `bundle-widget.css`
 - PPB templates: `bundle-widget-product-page-{cascade,cognive,modal}.css`
 
+The current CSS minifier does not preserve the descendant combinator before a
+leading `:is(...)` selector. Write those rules as explicit comma-separated
+selectors and verify the generated asset; otherwise `.parent :is(.child-a,
+.child-b)` can be emitted as `.parent:is(...)` and silently stop matching.
+
 ## Placeholder Media Strategy
 
 - Bundle product placeholders now render from a local AVIF artifact:

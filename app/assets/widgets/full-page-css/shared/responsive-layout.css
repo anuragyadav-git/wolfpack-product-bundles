@@ -184,7 +184,7 @@
   .sidebar-content
   .product-image {
   width: 100%;
-  height: clamp(10rem, 24cqi, 15rem);
+  height: var(--fpb-vertical-card-media-height, clamp(10rem, 24cqi, 15rem));
   min-height: 0;
   max-height: none;
   aspect-ratio: auto;

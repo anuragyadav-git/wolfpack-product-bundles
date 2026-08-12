@@ -3682,3 +3682,113 @@ body:has([data-fpb-design-preset]) {
 .fpb-mobile-summary-tray.fpb-preset-standard .side-panel-btn-next {
   height: auto;
 }
+
+/* Standard product cards use one explicit row contract. The reserved variant
+   row keeps titles, prices, and actions aligned when a product has no selector. */
+.layout-sidebar[data-fpb-design-preset="STANDARD"]:not([data-fpb-card-cta-mode="icon"]) {
+  --fpb-vertical-card-media-height: clamp(9.375rem, 40cqi, 15rem);
+  --standard-card-row-gap: 0.5rem;
+  --standard-card-inner-action-gap: 0.3125rem;
+  --standard-card-title-row-height: 2.75rem;
+  --standard-card-price-row-height: 1.125rem;
+}
+
+.layout-sidebar[data-fpb-design-preset="STANDARD"]:not([data-fpb-card-cta-mode="icon"])
+  .sidebar-content
+  .product-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows:
+    var(--fpb-vertical-card-media-height)
+    calc(var(--standard-card-title-row-height) + var(--standard-card-row-gap))
+    calc(
+      var(--standard-variant-selector-row-height, 2.375rem) +
+        var(--standard-card-row-gap)
+    )
+    calc(var(--standard-card-price-row-height) + var(--standard-card-row-gap))
+    calc(
+      var(--ih-action-size, 2.75rem) +
+        var(--standard-card-inner-action-gap)
+    );
+  gap: 0;
+  height: auto;
+  padding: 0.5rem;
+  overflow: visible;
+}
+
+.layout-sidebar[data-fpb-design-preset="STANDARD"]:not([data-fpb-card-cta-mode="icon"])
+  .sidebar-content
+  .product-content-wrapper,
+.layout-sidebar[data-fpb-design-preset="STANDARD"]:not([data-fpb-card-cta-mode="icon"])
+  .sidebar-content
+  .product-text-container,
+.layout-sidebar[data-fpb-design-preset="STANDARD"]:not([data-fpb-card-cta-mode="icon"])
+  .sidebar-content
+  .product-card-price-action {
+  display: contents;
+}
+
+.layout-sidebar[data-fpb-design-preset="STANDARD"]:not([data-fpb-card-cta-mode="icon"])
+  .sidebar-content
+  .product-image {
+  grid-row: 1;
+  width: 100%;
+  height: var(--fpb-vertical-card-media-height);
+  border-radius: 0.5rem;
+}
+
+.layout-sidebar[data-fpb-design-preset="STANDARD"]:not([data-fpb-card-cta-mode="icon"])
+  .sidebar-content
+  .product-title {
+  grid-row: 2;
+  align-self: end;
+  width: 100%;
+  height: var(--standard-card-title-row-height);
+  min-height: var(--standard-card-title-row-height);
+  margin: 0;
+  padding: 0 0 0.3125rem;
+  text-align: left;
+}
+
+.layout-sidebar[data-fpb-design-preset="STANDARD"]:not([data-fpb-card-cta-mode="icon"])
+  .sidebar-content
+  .vs-wrapper--standard,
+.layout-sidebar[data-fpb-design-preset="STANDARD"]:not([data-fpb-card-cta-mode="icon"])
+  .sidebar-content
+  .product-variant-row {
+  grid-row: 3;
+  align-self: end;
+  width: 100%;
+  height: var(--standard-variant-selector-row-height, 2.375rem);
+  min-height: var(--standard-variant-selector-row-height, 2.375rem);
+  margin: 0;
+}
+
+.layout-sidebar[data-fpb-design-preset="STANDARD"]:not([data-fpb-card-cta-mode="icon"])
+  .sidebar-content
+  .product-price-row {
+  grid-row: 4;
+  align-self: end;
+  width: 100%;
+  height: var(--standard-card-price-row-height);
+  min-height: var(--standard-card-price-row-height);
+  margin: 0;
+}
+
+.layout-sidebar[data-fpb-design-preset="STANDARD"]:not([data-fpb-card-cta-mode="icon"])
+  .sidebar-content
+  .product-card-action {
+  grid-row: 5;
+  align-self: end;
+  width: 100%;
+  height: var(--ih-action-size, 2.75rem);
+  min-height: var(--ih-action-size, 2.75rem);
+  margin: 0;
+}
+
+@container fpb-shell (min-width: 800px) {
+  .layout-sidebar[data-fpb-design-preset="STANDARD"]:not([data-fpb-card-cta-mode="icon"]) {
+    --standard-card-title-row-height: 3rem;
+    --standard-card-price-row-height: 1.3125rem;
+  }
+}
