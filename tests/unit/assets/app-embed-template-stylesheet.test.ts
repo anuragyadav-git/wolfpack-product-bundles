@@ -20,4 +20,39 @@ describe('FPB app-embed template stylesheet resolution', () => {
   it('returns undefined when the preset asset is absent', () => {
     expect(getFpbPresetStylesheetUrl({} as DOMStringMap, 'STANDARD')).toBeUndefined();
   });
+
+  it('does not append a duplicate stylesheet link while an existing link is still loading', () => {
+    const originalDocument = global.document;
+    const originalWindow = global.window;
+    const existingHref = 'https://cdn.example.test/fpb-standard.css';
+    const links = [{
+      href: existingHref,
+      getAttribute: (name: string) => name === 'href' ? existingHref : null,
+    }];
+    const append = jest.fn();
+
+    try {
+      global.document = {
+        querySelector: jest.fn(() => null),
+        querySelectorAll: jest.fn(() => links),
+        createElement: jest.fn(() => ({ dataset: {} })),
+        head: { append },
+        body: { append: jest.fn() },
+        readyState: 'complete',
+        addEventListener: jest.fn(),
+      } as unknown as Document;
+      global.window = {} as Window & typeof globalThis;
+      jest.resetModules();
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const { ensureStylesheet } = require('../../../app/storefront/app-embed');
+
+      ensureStylesheet(existingHref);
+
+      expect(append).not.toHaveBeenCalled();
+    } finally {
+      global.document = originalDocument;
+      global.window = originalWindow;
+      jest.resetModules();
+    }
+  });
 });

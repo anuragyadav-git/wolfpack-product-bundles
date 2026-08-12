@@ -1,47 +1,33 @@
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const {
-  fullPageInitialRenderMethods,
-} = require('../../../app/assets/widgets/full-page/methods/initial-render-methods.js');
+import { fullPageInitialRenderMethods } from '../../../app/assets/widgets/full-page/methods/initial-render-methods';
 
-describe('FPB title flash prevention', () => {
-  beforeEach(() => {
-    (global as unknown as { document: { createElement: (tagName: string) => unknown } }).document = {
-      createElement: (tagName: string) => ({
-        tagName: tagName.toUpperCase(),
-        className: '',
-        innerHTML: '',
-        style: {},
+describe('FPB canonical DOM setup', () => {
+  it('creates only the steps owner and modal for the full-page runtime', () => {
+    const stepsContainer = { kind: 'steps' };
+    const modal = { kind: 'modal' };
+    const appended: unknown[] = [];
+    const createHeader = jest.fn(() => ({ kind: 'header' }));
+    const createFooter = jest.fn(() => ({ kind: 'footer' }));
+    const container = {
+      querySelector: jest.fn(() => null),
+      appendChild: jest.fn((element) => {
+        appended.push(element);
+        return element;
       }),
     };
-  });
-
-  function createContext(bundleType: string) {
-    return {
-      selectedBundle: {
-        bundleType,
-        name: 'Daily Essentials',
-        description: 'Build a set',
-      },
-      config: {
-        customTitle: null,
-        customDescription: null,
-        showDescription: true,
-      },
+    const context = {
+      container,
+      elements: {},
+      createHeader,
+      createFooter,
+      createStepsContainer: () => stepsContainer,
+      ensureModal: () => modal,
     };
-  }
 
-  it('does not emit widget-owned bundle title markup for full-page bundles', () => {
-    const header = fullPageInitialRenderMethods.createHeader.call(createContext('full_page'));
+    fullPageInitialRenderMethods.setupDOMElements.call(context);
 
-    expect(header.className).toBe('bundle-header');
-    expect(header.style.display).toBe('none');
-    expect(header.innerHTML).toBe('');
-  });
-
-  it('preserves title header markup for non-full-page contexts', () => {
-    const header = fullPageInitialRenderMethods.createHeader.call(createContext('product_page'));
-
-    expect(header.innerHTML).toContain('bundle-title');
-    expect(header.innerHTML).toContain('Daily Essentials');
+    expect(createHeader).not.toHaveBeenCalled();
+    expect(createFooter).not.toHaveBeenCalled();
+    expect(appended).toEqual([stepsContainer]);
+    expect(context.elements).toEqual({ stepsContainer, modal });
   });
 });

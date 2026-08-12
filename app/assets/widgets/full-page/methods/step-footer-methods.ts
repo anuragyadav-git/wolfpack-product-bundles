@@ -2,7 +2,6 @@ import { BUNDLE_WIDGET } from '../../shared/constants.js';
 import { CurrencyManager } from '../../shared/currency-manager.js';
 import { PricingCalculator } from '../../shared/pricing-calculator.js';
 import { ToastManager } from '../../shared/toast-manager.js';
-import { TemplateManager } from '../../shared/template-manager.js';
 import {
   buildCartLineDisplayProperties as buildSharedCartLineDisplayProperties,
   buildCartLineSourceProperties as buildSharedCartLineSourceProperties,
@@ -56,12 +55,6 @@ function resolveCartVariantId(product, selectionId, extractId) {
     product?.variantId || product?.selectionId || product?.id,
     extractId,
   );
-}
-
-function toAddonLineType(properties = {}) {
-  if (properties._addon_product === 'true') return 'addon';
-  if (properties._bundle_step_type === 'free_gift') return 'free_gift';
-  return 'component';
 }
 
 function mergeDuplicateCartLines(lines = []) {
@@ -583,111 +576,9 @@ clearStepSelections(stepIndex) {
 
   // Update UI
   this.renderSteps();
-  this.updateFooterMessaging();
 
   // Show toast notification
   ToastManager.show('All selections cleared from this step');
-},
-
-renderFooter() {
-  const bundleType = this.container.dataset.bundleType;
-
-  // Full-page bundles: sidebar layout handles its own panel, skip bottom footer entirely
-  if (bundleType === 'full_page') {
-    const layout = this.resolveFullPageLayout();
-    if (layout === 'footer_side') {
-      // Sidebar layout — footer is hidden; side panel handles navigation
-      if (this.elements.footer) {
-        this.elements.footer.style.display = 'none';
-      }
-      return;
-    }
-    this.renderFullPageFooter();
-    return;
-  }
-
-  // Product-page bundles use discount messaging footer
-  if (!this.config.showFooterMessaging) {
-    this.elements.footer.style.display = 'none';
-    return;
-  }
-
-  this.updateFooterMessaging();
-  this.elements.footer.style.display = 'block';
-},
-
-updateFooterMessaging() {
-  // Check if discount is enabled before showing messaging
-  if (!this.selectedBundle?.pricing?.enabled) {
-    this.elements.footer.style.display = 'none';
-    return;
-  }
-
-  const { totalPrice, totalQuantity, unitPrices } = PricingCalculator.calculateBundleTotal(
-    this.selectedProducts,
-    this.stepProductData,
-    this.selectedBundle?.steps
-  );
-
-  const discountInfo = PricingCalculator.calculateDiscount(
-    this.selectedBundle,
-    totalPrice,
-    totalQuantity,
-    unitPrices
-  );
-  const combinedDiscountInfo = this.getDiscountInfoWithSelectedAddonDiscount(discountInfo, totalPrice);
-  const nextRule = PricingCalculator.getNextDiscountRule?.(this.selectedBundle, totalQuantity, totalPrice) || null;
-
-  const currencyInfo = CurrencyManager.getCurrencyInfo();
-  const variables = TemplateManager.createDiscountVariables(
-    this.selectedBundle,
-    totalPrice,
-    totalQuantity,
-    combinedDiscountInfo,
-    currencyInfo,
-    { messageType: nextRule ? 'progress' : 'success' }
-  );
-
-  const footerDiscountText = this.elements.footer.querySelector('.footer-discount-text');
-
-  if (nextRule) {
-    const progressTemplate = TemplateManager.getDiscountMessageTemplate({
-      bundle: this.selectedBundle,
-      totalQuantity,
-      totalPrice,
-      discountInfo: combinedDiscountInfo,
-      messageType: 'progress',
-      fallbackTemplate: this.config.discountTextTemplate,
-      locale: window.Shopify?.locale,
-    });
-    const progressMessage = TemplateManager.replaceVariables(
-      progressTemplate,
-      variables
-    );
-    footerDiscountText.innerHTML = progressMessage;
-    this.elements.footer.classList.remove('qualified');
-  } else if (combinedDiscountInfo.qualifiesForDiscount) {
-    const successTemplate = TemplateManager.getDiscountMessageTemplate({
-      bundle: this.selectedBundle,
-      totalQuantity,
-      totalPrice,
-      discountInfo: combinedDiscountInfo,
-      messageType: 'success',
-      fallbackTemplate: this.config.successMessageTemplate,
-      locale: window.Shopify?.locale,
-    });
-    const successMessage = TemplateManager.replaceVariables(
-      successTemplate,
-      variables
-    );
-    footerDiscountText.innerHTML = successMessage;
-    this.elements.footer.classList.add('qualified');
-  } else {
-    footerDiscountText.innerHTML = '';
-    this.elements.footer.classList.remove('qualified');
-  }
-
-  this._updateDiscountProgressBanner();
 },
 
 getDiscountProgressMilestones(totalPrice = 0, totalQuantity = 0) {

@@ -158,7 +158,7 @@
   background: #ccc;
   color: #666;
   cursor: not-allowed;
-  transform: none !important;
+  transform: none;
 }
 
 .bundle-modal-description {

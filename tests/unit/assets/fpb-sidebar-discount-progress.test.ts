@@ -181,7 +181,7 @@ function makeContext(preset: string, progressType: 'simple' | 'step_based'): any
     showBoxSelectionValidationMessage: () => undefined,
     addBundleToCart: () => undefined,
     canNavigateToStep: () => true,
-    renderFullPageLayoutWithSidebar: () => undefined,
+    renderFullPageLayout: () => undefined,
   };
 }
 

@@ -1,99 +1,16 @@
 /**
- * Bundle Widget - Full Page Version
+ * Full-page bundle controller entry point.
  *
- * This widget is specifically for full page bundles with horizontal tabs layout.
- * It imports shared components and utilities from their owning modules.
- *
- * ============================================================================
- * ARCHITECTURE ROLE
- * ============================================================================
- * This is the THIRD file loaded for FULL PAGE bundles:
- * 1. bundle-widget.js (loader) - Detects bundle type as 'full_page'
- * 2. widgets/shared modules - Provide shared utilities
- * 3. THIS FILE (full-page widget) - Implements full page UI/UX
- *
- * ============================================================================
- * WHEN THIS FILE IS LOADED
- * ============================================================================
- * This file loads when:
- * - Container explicitly has data-bundle-type="full_page"
- *
- * Example container:
- * <div id="bundle-builder-app" data-bundle-type="full_page"></div>
- *
- * NOTE: This is OPT-IN only. Without the attribute, product-page widget loads instead.
- *
- * ============================================================================
- * UI LAYOUT: HORIZONTAL TABS
- * ============================================================================
- * - Steps displayed as horizontal tabs at the top
- * - All tabs visible simultaneously (overview of all steps)
- * - Click any tab to jump between steps
- * - Modal overlay for product selection
- * - Progress tracked with tab completion indicators
- * - Best for: Dedicated bundle pages with full horizontal space
- *
- * ============================================================================
- * SHARED CODE IMPORTS
- * ============================================================================
- * Shared business logic is imported from its owning modules:
- * - Currency formatting
- * - Price calculations
- * - Discount logic
- * - Product card rendering
- * - Toast notifications
- *
- * This file ONLY contains:
- * - Full page specific UI rendering
- * - Horizontal tabs layout management
- * - Modal-based product selection
- * - Event handlers for full page flow
- *
- * ============================================================================
- * UNIFIED DESIGN WITH PRODUCT PAGE WIDGET
- * ============================================================================
- * Both widgets:
- * - Use the same CSS variables (from unified design settings API)
- * - Import the same utilities from their owning shared modules
- * - Implement the same business logic (pricing, discounts, cart)
- * - Differ ONLY in UI layout and interaction patterns
- *
- * Result: Merchants configure design ONCE, applies to BOTH bundle types
- *
- * @version 1.0.0
- * @author Wolfpack Team
+ * The app embed creates the canonical full-page container and loads its assets.
+ * This module composes the controller methods shared by all four FPB presets.
  */
 
 'use strict';
 
-// Import shared components and utilities
-import { BUNDLE_WIDGET } from './widgets/shared/constants.js';
-import { CurrencyManager } from './widgets/shared/currency-manager.js';
-import { BundleDataManager } from './widgets/shared/bundle-data-manager.js';
-import { PricingCalculator } from './widgets/shared/pricing-calculator.js';
-import { ToastManager } from './widgets/shared/toast-manager.js';
-import { TemplateManager } from './widgets/shared/template-manager.js';
-import { ComponentGenerator } from './widgets/shared/component-generator.js';
-import { ConditionValidator } from './widgets/shared/condition-validator.js';
-import { createDefaultLoadingAnimation } from './widgets/shared/default-loading-animation.js';
-import { hideLoadingOverlayElement, markLoadingOverlayVisible } from './widgets/shared/loading-overlay.js';
 import { bundleLevelCssMethods } from './widgets/shared/bundle-level-css-methods.js';
-import { getDiscountProgressData, getSelectedQuantity, getTimelineEntryState } from './widgets/shared/engine/bundle-selectors.js';
-import { renderDiscountProgress } from './widgets/shared/components/discount-progress.js';
-import {
-  createBundleBannerElement,
-  createStepBannerImageElement,
-} from './widgets/shared/components/bundle-banners.js';
-import { renderSharedProductCard } from './widgets/shared/components/product-card.js';
-import { renderSelectedProductRow } from './widgets/shared/components/selected-product-row.js';
-import { renderSelectedProductSlots } from './widgets/shared/components/selected-product-slots.js';
-import { renderStepTimelineEntry } from './widgets/shared/components/step-timeline.js';
+import { getSelectedQuantity } from './widgets/shared/engine/bundle-selectors.js';
 import { removeBootstrapSkeleton } from './widgets/full-page/bootstrap-skeleton.js';
 import { installControllerMethods } from './widgets/shared/controller-methods.js';
-import {
-  buildCartLineDisplayProperties as buildSharedCartLineDisplayProperties,
-  buildCartLineSourceProperties as buildSharedCartLineSourceProperties,
-} from './widgets/shared/engine/cart-lines.js';
 import { fullPageAnalyticsConfigMethods } from './widgets/full-page/methods/analytics-config-methods.js';
 import { fullPageInitialRenderMethods } from './widgets/full-page/methods/initial-render-methods.js';
 import { fullPageResponsiveLayoutMethods } from './widgets/full-page/methods/responsive-layout-methods.js';
@@ -196,21 +113,8 @@ export class BundleWidgetFullPage {
         return;
       }
 
-      // Hide page body loading content (if it exists)
-      this.hidePageLoadingContent();
-
       // Parse configuration
       this.parseConfiguration();
-
-      // For full-page bundles, hide the page title immediately to prevent flash
-      // This runs before any async operations to ensure smooth UX
-      const bundleType = this.container.dataset.bundleType;
-      if (bundleType === 'full_page') {
-        this.hidePageTitle();
-      }
-
-      // Load design settings CSS (sync — sets up error listener for proxy fallback)
-      this.loadDesignSettingsCSS();
       await this.loadLanguageSettings();
       await this.loadControlsSettings();
 
@@ -225,8 +129,6 @@ export class BundleWidgetFullPage {
         this.showFallbackUI();
         return;
       }
-
-      await this.hydrateCurrentFullPageBundleBeforeRender();
 
       // Merge bundle_settings metafield into selectedBundle (Settings design display settings)
       this._mergeBundleSettings(this.bundleSettings);
@@ -254,7 +156,6 @@ export class BundleWidgetFullPage {
       // Mark template/preset before first render so full-page selectors can
       // resolve immediately for both render paths.
       this.applyFullPageDesignPresetMarker();
-      await this.ensureFullPageTemplateStylesheet(this.getFullPageDesignPreset());
       this.applyBundleLevelCss(this.selectedBundle);
 
       // Render initial UI (async for full-page bundles to load products)
@@ -267,13 +168,6 @@ export class BundleWidgetFullPage {
 
       // Storefront analytics: signal that the bundle has rendered and is interactive.
       this._emitStorefrontEvent('bundle-ready', { stepCount: this.selectedBundle?.steps?.length || 0 });
-
-      // For full-page bundles using cached config: schedule a background layout
-      // refresh so any layout change saved by the merchant since the CDN-cached
-      // page HTML was last built is picked up within seconds of page load.
-      if (!window.Shopify?.designMode) {
-        this._scheduleLayoutRefresh().catch(() => {});
-      }
 
       // Attach event listeners
       this.attachEventListeners();

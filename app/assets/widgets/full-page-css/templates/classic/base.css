@@ -22,13 +22,7 @@
   --classic-card-padding: var(--bundle-product-card-padding, 0.5rem);
   --classic-card-gap: var(--bundle-product-card-spacing, 0.5rem);
 
-  --classic-desktop-layout-left: var(--bundle-sidebar-layout-gap, 1.5rem);
-  --classic-desktop-layout-right: var(--bundle-sidebar-layout-gap, 1.5rem);
   --classic-desktop-layout-inner-max: 100%;
-  --classic-desktop-content-fr: 7fr;
-  --classic-desktop-sidebar-fr: 3fr;
-  --classic-desktop-sidebar-min-width: min(20rem, 100%);
-
   --classic-review-panel-padding: clamp(1rem, 1.5vw, 1.25rem);
   --classic-review-section-gap: clamp(0.75rem, 1.1vw, 1rem);
   --classic-review-row-gap: clamp(0.75rem, 1vw, 0.875rem);

@@ -18,6 +18,10 @@ export function createTargets(rootDir) {
         target: join(rootDir, 'extensions/bundle-builder/assets/bundle-widget-full-page-mobile-summary.css'),
       },
       {
+        source: join(rootDir, 'app/assets/widgets/full-page-css/shared/responsive-layout.css'),
+        target: join(rootDir, 'extensions/bundle-builder/assets/bundle-widget-full-page-responsive.css'),
+      },
+      {
         source: join(rootDir, 'app/assets/widgets/full-page-css/templates/side-footer-standard.css'),
         target: join(rootDir, 'extensions/bundle-builder/assets/bundle-widget-full-page-standard.css'),
       },

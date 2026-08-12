@@ -1,27 +1,36 @@
-import { readFileSync } from "node:fs";
-import path from "node:path";
-
-const source = readFileSync(
-  path.join(process.cwd(), "app/assets/bundle-widget-full-page.ts"),
-  "utf8",
-);
-const modalSource = readFileSync(
-  path.join(process.cwd(), "app/assets/bundle-modal-component.ts"),
-  "utf8",
-);
+import { fullPageAnalyticsConfigMethods } from '../../../app/assets/widgets/full-page/methods/analytics-config-methods';
 
 describe("FPB runtime config surface", () => {
-  it("does not emit text banner defaults for image-only FPB banners", () => {
-    expect(source).not.toContain("promoBannerSubtitle");
-    expect(source).not.toContain("promoBannerTagline");
-    expect(source).not.toContain("promoBannerNote");
-    expect(source).not.toContain("Mix & Match");
-    expect(source).not.toContain("Create Your Perfect Bundle");
-    expect(source).not.toContain("Mix & Match Your Favorites");
-  });
+  it("parses only supported storefront display settings", () => {
+    const originalWindow = global.window;
+    global.window = {} as Window & typeof globalThis;
+    const context = {
+      container: {
+        dataset: {
+          bundleId: 'bundle-1',
+          promoBannerSubtitle: 'unsupported',
+          promoBannerTagline: 'unsupported',
+          promoBannerNote: 'unsupported',
+          showQuantitySelectorInModal: 'true',
+          productCardSpacing: '24',
+          productCardsPerRow: '6',
+        },
+      },
+      config: {},
+      parseTierConfig: jest.fn(() => []),
+    };
 
-  it("does not expose modal quantity selector config for FPB templates", () => {
-    expect(source).not.toContain("showQuantitySelectorInModal");
-    expect(modalSource).not.toContain("showQuantitySelectorInModal");
+    try {
+      fullPageAnalyticsConfigMethods.parseConfiguration.call(context);
+
+      expect(context.config).not.toHaveProperty('promoBannerSubtitle');
+      expect(context.config).not.toHaveProperty('promoBannerTagline');
+      expect(context.config).not.toHaveProperty('promoBannerNote');
+      expect(context.config).not.toHaveProperty('showQuantitySelectorInModal');
+      expect(context.config).not.toHaveProperty('productCardSpacing');
+      expect(context.config).not.toHaveProperty('productCardsPerRow');
+    } finally {
+      global.window = originalWindow;
+    }
   });
 });

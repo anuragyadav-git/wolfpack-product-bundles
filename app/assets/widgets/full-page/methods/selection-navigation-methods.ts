@@ -1,24 +1,7 @@
-import { BUNDLE_WIDGET } from '../../shared/constants.js';
 import { CurrencyManager } from '../../shared/currency-manager.js';
-import { BundleDataManager } from '../../shared/bundle-data-manager.js';
 import { PricingCalculator } from '../../shared/pricing-calculator.js';
 import { ToastManager } from '../../shared/toast-manager.js';
-import { TemplateManager } from '../../shared/template-manager.js';
-import { ComponentGenerator } from '../../shared/component-generator.js';
 import { ConditionValidator } from '../../shared/condition-validator.js';
-import { createDefaultLoadingAnimation } from '../../shared/default-loading-animation.js';
-import { hideLoadingOverlayElement, markLoadingOverlayVisible } from '../../shared/loading-overlay.js';
-import { getDiscountProgressData, getSelectedQuantity, getTimelineEntryState } from '../../shared/engine/bundle-selectors.js';
-import { renderDiscountProgress } from '../../shared/components/discount-progress.js';
-import { createBundleBannerElement, createStepBannerImageElement } from '../../shared/components/bundle-banners.js';
-import { renderSharedProductCard } from '../../shared/components/product-card.js';
-import { renderSelectedProductRow } from '../../shared/components/selected-product-row.js';
-import { renderSelectedProductSlots } from '../../shared/components/selected-product-slots.js';
-import { renderStepTimelineEntry } from '../../shared/components/step-timeline.js';
-import {
-  buildCartLineDisplayProperties,
-  buildCartLineSourceProperties,
-} from '../../shared/engine/cart-lines.js';
 
 function getSelectionId(item = {}) {
   return String(item?.selectionId || '');
@@ -170,15 +153,10 @@ updateProductSelection(stepIndex, productId, newQuantity) {
   // For full-page bundles, re-render the footer/sidebar to show selected products
   const bundleType = this.container.dataset.bundleType;
   if (bundleType === 'full_page') {
-    const layout = this.resolveFullPageLayout();
-    if (layout === 'footer_side') {
-      const sidePanel = this.elements.stepsContainer.querySelector('.full-page-side-panel');
-      this.renderSidePanel(sidePanel);
-      if (window.matchMedia?.('(max-width: 767px)').matches) {
-        this._renderMobileBottomBar({ preserveOpen: true });
-      }
-    } else {
-      this.renderFullPageFooter();
+    const sidePanel = this.elements.stepsContainer.querySelector('.full-page-side-panel');
+    this.renderSidePanel(sidePanel);
+    if (this._syncSummaryPresentationMode?.() === 'tray') {
+      this._renderMobileSummaryTray({ preserveOpen: true });
     }
     // Update step timeline tabs so completion state, images, counts, and
     // click listeners all reflect the new selection immediately.
@@ -198,18 +176,11 @@ updateProductSelection(stepIndex, productId, newQuantity) {
             this.activeCollectionId = null;
             this.searchQuery = '';
             this.currentStepIndex++;
-            const layout = this.resolveFullPageLayout();
-            if (layout === 'footer_side') {
-              this._sidebarAdvanceToNextStep();
-            } else {
-              this.reRenderFullPage();
-            }
+            this._sidebarAdvanceToNextStep();
           }
         }, 120);
       }
     }
-  } else {
-    this.updateFooterMessaging();
   }
 },
 
@@ -635,7 +606,7 @@ updateModalNavigation() {
 
 updateModalFooterMessaging() {
   // Skip if modal is not active (full-page mode uses inline footer instead)
-  if (!this.elements.modal || this.elements.modal.style.display === 'none') return;
+  if (!this.elements.modal || this.elements.modal.hidden) return;
 
   const { totalPrice, totalQuantity, unitPrices } = PricingCalculator.calculateBundleTotal(
     this.selectedProducts,

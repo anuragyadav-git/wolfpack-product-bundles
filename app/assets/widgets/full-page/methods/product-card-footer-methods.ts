@@ -1,29 +1,14 @@
 import { BUNDLE_WIDGET } from '../../shared/constants.js';
 import { CurrencyManager } from '../../shared/currency-manager.js';
-import { BundleDataManager } from '../../shared/bundle-data-manager.js';
-import { PricingCalculator } from '../../shared/pricing-calculator.js';
 import { ToastManager } from '../../shared/toast-manager.js';
-import { TemplateManager } from '../../shared/template-manager.js';
 import { ComponentGenerator } from '../../shared/component-generator.js';
 import { ConditionValidator } from '../../shared/condition-validator.js';
-import { createDefaultLoadingAnimation } from '../../shared/default-loading-animation.js';
-import { hideLoadingOverlayElement, markLoadingOverlayVisible } from '../../shared/loading-overlay.js';
-import { getDiscountProgressData, getSelectedQuantity, getTimelineEntryState } from '../../shared/engine/bundle-selectors.js';
-import { renderDiscountProgress } from '../../shared/components/discount-progress.js';
-import { createBundleBannerElement, createStepBannerImageElement } from '../../shared/components/bundle-banners.js';
 import { getProductImageUrls, renderSharedProductCard } from '../../shared/components/product-card.js';
-import { renderSelectedProductRow } from '../../shared/components/selected-product-row.js';
-import { renderSelectedProductSlots } from '../../shared/components/selected-product-slots.js';
-import { renderStepTimelineEntry } from '../../shared/components/step-timeline.js';
 import { VariantSelectorComponent } from '../../shared/variant-selector.js';
 import {
   getInlineVariantSelectorPresentation,
   shouldRenderInlineVariantSelector,
 } from '../../shared/variant-selector-policy.js';
-import {
-  buildCartLineDisplayProperties,
-  buildCartLineSourceProperties,
-} from '../../shared/engine/cart-lines.js';
 import { BundleProductModal } from '../../../bundle-modal-component.js';
 import { TemplateDesignSystem } from '../../shared/template-design-system.js';
 
@@ -555,7 +540,11 @@ attachProductCardListeners(cardElement, product, stepIndex, options = {}) {
       });
       this.updateProductCardVariantDisplay(cardElement, product, step);
 
-      this.updateFooterMessaging?.();
+      const sidePanel = this.elements.stepsContainer.querySelector('.full-page-side-panel');
+      this.renderSidePanel(sidePanel);
+      if (this._syncSummaryPresentationMode?.() === 'tray') {
+        this._renderMobileSummaryTray({ preserveOpen: true });
+      }
       this.updateStepTimeline?.();
       this._refreshSiblingDimState?.(stepIndex);
     });
@@ -607,88 +596,4 @@ updateStepTimeline() {
   existing.parentNode.replaceChild(fresh, existing);
 },
 
-// Render floating footer card with selected products and navigation
-renderFullPageFooter() {
-  if (!this.elements.footer) {
-    return;
-  }
-
-  // Safety guard: sidebar layout uses the side panel, not the bottom footer
-  const layout = this.resolveFullPageLayout();
-  if (layout === 'footer_side') {
-    this.elements.footer.style.display = 'none';
-    return;
-  }
-
-  const allSelectedProducts = this.getAllSelectedProductsData();
-
-  // Preserve open state across re-renders
-  const wasOpen = this.elements.footer.classList.contains('is-open');
-
-  this.elements.footer.innerHTML = '';
-  this.elements.footer.className = 'full-page-footer floating-card';
-  if (wasOpen) this.elements.footer.classList.add('is-open');
-  this.elements.footer.style.display = 'block';
-
-  // Pricing data
-  const { totalPrice, totalQuantity, unitPrices } = PricingCalculator.calculateBundleTotal(
-    this.selectedProducts,
-    this.stepProductData,
-    this.selectedBundle?.steps
-  );
-  const discountInfo = PricingCalculator.calculateDiscount(
-    this.selectedBundle,
-    totalPrice,
-    totalQuantity,
-    unitPrices
-  );
-  const combinedDiscountInfo = this.getDiscountInfoWithSelectedAddonDiscount(discountInfo, totalPrice);
-  const currencyInfo = CurrencyManager.getCurrencyInfo();
-  const finalPrice = combinedDiscountInfo.hasDiscount ? combinedDiscountInfo.finalPrice : totalPrice;
-
-
-
-  // Total required quantity across paid steps only (free gift/default steps are non-blocking)
-  const totalRequired = typeof this.getSummarySidebarMaxItemCount === 'function'
-    ? this.getSummarySidebarMaxItemCount()
-    : 0;
-
-  const isLastStep = this.currentStepIndex === this.selectedBundle.steps.length - 1;
-
-  // Discount progress bar — visual fill bar at top of card, shown only when toggle is on
-  if (this.config.showDiscountProgressBar) {
-    const progressBar = this._renderDiscountProgress({
-      combinedDiscountInfo,
-      totalPrice,
-      totalQuantity,
-      unitPrices,
-    });
-    if (progressBar) this.elements.footer.appendChild(progressBar);
-  }
-
-  // Inner wrapper carries the padding so the banner above sits edge-to-edge
-  const inner = document.createElement('div');
-  inner.className = 'footer-inner';
-
-  const panel = this._createFooterPanel(allSelectedProducts, currencyInfo);
-  const backdrop = document.createElement('button');
-  backdrop.className = 'footer-backdrop';
-  backdrop.setAttribute('type', 'button');
-  backdrop.setAttribute('aria-label', 'Close product list');
-  backdrop.addEventListener('click', () => {
-    this.elements.footer.classList.remove('is-open');
-  });
-  const bar = this._createFooterBar(
-    allSelectedProducts, totalQuantity, totalRequired,
-    totalPrice, finalPrice, combinedDiscountInfo, currencyInfo, isLastStep
-  );
-
-  // Stack inside inner: panel → backdrop → bar
-  inner.appendChild(panel);
-  inner.appendChild(backdrop);
-  inner.appendChild(bar);
-  this.elements.footer.appendChild(inner);
-},
-
-// Creates the expandable product-list panel (callout banner is rendered separately above)
 };

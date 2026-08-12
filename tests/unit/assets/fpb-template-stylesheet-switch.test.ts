@@ -1,107 +1,29 @@
-export {};
+import { fullPageRuntimeCartSettingsMethods } from '../../../app/assets/widgets/full-page/methods/runtime-cart-settings-methods';
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const { fullPageRuntimeCartSettingsMethods } = require('../../../app/assets/widgets/full-page/methods/runtime-cart-settings-methods.js');
-
-class FakeLink {
-  rel = 'stylesheet';
-  href: string;
-  disabled = false;
-  dataset: Record<string, string> = {};
-  sheet = {};
-
-  constructor(href: string, templateKey: string) {
-    this.href = href;
-    this.dataset.wpbFpbTemplateCss = templateKey;
-  }
-
-  getAttribute(name: string) {
-    if (name === 'href') return this.href;
-    if (name === 'rel') return this.rel;
-    return null;
-  }
-
-  addEventListener(_eventName: string, callback: () => void) {
-    callback();
-  }
-}
-
-function installDocument(links: FakeLink[]) {
-  (global as any).HTMLLinkElement = FakeLink;
-  (global as any).document = {
-    querySelectorAll: (selector: string) => {
-      if (selector === 'link[rel="stylesheet"]') return links;
-      return [];
-    },
-    createElement: (tagName: string) => {
-      if (tagName !== 'link') throw new Error(`Unexpected element: ${tagName}`);
-      const link = new FakeLink('', '');
-      links.push(link);
-      return link;
-    },
-    head: {
-      appendChild: (link: FakeLink) => link,
-    },
-  };
-}
-
-function makeRuntime() {
+function createClassList() {
   return {
-    _fpbTemplateStylesheetPromises: new Map(),
-    ...fullPageRuntimeCartSettingsMethods,
+    add: jest.fn(),
+    remove: jest.fn(),
+    toggle: jest.fn(),
   };
 }
 
-describe('FPB preset stylesheet switching', () => {
-  beforeEach(() => {
-    (global as any).window = {
-      __WOLFPACK_FPB_TEMPLATE_CSS_URLS__: {
-        STANDARD: 'https://cdn.example.test/bundle-widget-full-page-standard.css',
-        CLASSIC: 'https://cdn.example.test/bundle-widget-full-page-classic.css',
-      },
+describe('FPB preset stylesheet ownership', () => {
+  it('does not ask the widget runtime to load or switch stylesheets during marker updates', () => {
+    const ensureFullPageTemplateStylesheet = jest.fn();
+    const container = { dataset: {} as Record<string, string>, classList: createClassList() };
+    const stepsContainer = { dataset: {} as Record<string, string>, classList: createClassList() };
+    const context = {
+      container,
+      elements: { stepsContainer },
+      getFullPageTemplate: () => 'FBP_SIDE_FOOTER',
+      getFullPageDesignPreset: () => 'STANDARD',
+      resolveFullPageCardCtaMode: () => 'icon',
+      ensureFullPageTemplateStylesheet,
     };
-  });
 
-  afterEach(() => {
-    delete (global as any).document;
-    delete (global as any).window;
-    delete (global as any).HTMLLinkElement;
-  });
+    fullPageRuntimeCartSettingsMethods.applyFullPageDesignPresetMarker.call(context);
 
-  it('disables a stale Standard stylesheet after Classic is active', async () => {
-    const standard = new FakeLink('https://cdn.example.test/bundle-widget-full-page-standard.css', 'STANDARD');
-    const classic = new FakeLink('https://cdn.example.test/bundle-widget-full-page-classic.css', 'CLASSIC');
-    installDocument([standard, classic]);
-
-    await makeRuntime().ensureFullPageTemplateStylesheet('CLASSIC');
-
-    expect(classic.disabled).toBe(false);
-    expect(standard.disabled).toBe(true);
-  });
-
-  it('re-enables Standard when Standard becomes active again', async () => {
-    const standard = new FakeLink('https://cdn.example.test/bundle-widget-full-page-standard.css', 'STANDARD');
-    const classic = new FakeLink('https://cdn.example.test/bundle-widget-full-page-classic.css', 'CLASSIC');
-    standard.disabled = true;
-    installDocument([standard, classic]);
-
-    await makeRuntime().ensureFullPageTemplateStylesheet('STANDARD');
-
-    expect(standard.disabled).toBe(false);
-    expect(classic.disabled).toBe(true);
-  });
-
-  it('does nothing when preset is missing', async () => {
-    const standard = new FakeLink('https://cdn.example.test/bundle-widget-full-page-standard.css', 'STANDARD');
-    const classic = new FakeLink('https://cdn.example.test/bundle-widget-full-page-classic.css', 'CLASSIC');
-    classic.disabled = false;
-    standard.disabled = false;
-    installDocument([standard, classic]);
-
-    await makeRuntime().ensureFullPageTemplateStylesheet('');
-    await makeRuntime().ensureFullPageTemplateStylesheet(null);
-
-    expect(standard.disabled).toBe(false);
-    expect(classic.disabled).toBe(false);
+    expect(ensureFullPageTemplateStylesheet).not.toHaveBeenCalled();
   });
 });

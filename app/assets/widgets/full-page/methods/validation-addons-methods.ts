@@ -87,7 +87,7 @@ async _sidebarAdvanceToNextStep() {
   const contentSection = this.elements.stepsContainer.querySelector('.sidebar-content');
   if (!contentSection) {
     // Fallback: full re-render if DOM structure is unexpected
-    this.renderFullPageLayoutWithSidebar();
+    this.renderFullPageLayout();
     return;
   }
 
@@ -146,7 +146,7 @@ async _sidebarAdvanceToNextStep() {
   // 4. Show product-grid loading state
   const productGridContainer = contentSection.querySelector('.full-page-product-grid-container');
   if (!productGridContainer) {
-    this.renderFullPageLayoutWithSidebar();
+    this.renderFullPageLayout();
     return;
   }
   this.renderProductGridLoadingState(productGridContainer);
@@ -164,11 +164,11 @@ async _sidebarAdvanceToNextStep() {
     if (sidePanel) this.renderSidePanel(sidePanel);
     this.hideLoadingOverlay();
     this.preloadNextStep();
-    this._renderMobileBottomBar();
+    this._renderMobileSummaryTray();
   } catch (error) {
     this.hideLoadingOverlay();
     productGridContainer.innerHTML = '<p class="error-message">Failed to load products. Please try again.</p>';
-    this._renderMobileBottomBar();
+    this._renderMobileSummaryTray();
   }
 },
 

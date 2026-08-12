@@ -1,24 +1,10 @@
-import { BUNDLE_WIDGET } from '../../shared/constants.js';
 import { CurrencyManager } from '../../shared/currency-manager.js';
-import { BundleDataManager } from '../../shared/bundle-data-manager.js';
 import { PricingCalculator } from '../../shared/pricing-calculator.js';
 import { ToastManager } from '../../shared/toast-manager.js';
 import { TemplateManager } from '../../shared/template-manager.js';
-import { ComponentGenerator } from '../../shared/component-generator.js';
-import { ConditionValidator } from '../../shared/condition-validator.js';
-import { createDefaultLoadingAnimation } from '../../shared/default-loading-animation.js';
-import { hideLoadingOverlayElement, markLoadingOverlayVisible } from '../../shared/loading-overlay.js';
-import { getDiscountProgressData, getSelectedQuantity, getTimelineEntryState } from '../../shared/engine/bundle-selectors.js';
+import { getDiscountProgressData } from '../../shared/engine/bundle-selectors.js';
 import { renderDiscountProgress } from '../../shared/components/discount-progress.js';
-import { createBundleBannerElement, createStepBannerImageElement } from '../../shared/components/bundle-banners.js';
-import { renderSharedProductCard } from '../../shared/components/product-card.js';
 import { renderSelectedProductRow } from '../../shared/components/selected-product-row.js';
-import { renderSelectedProductSlots } from '../../shared/components/selected-product-slots.js';
-import { renderStepTimelineEntry } from '../../shared/components/step-timeline.js';
-import {
-  buildCartLineDisplayProperties,
-  buildCartLineSourceProperties,
-} from '../../shared/engine/cart-lines.js';
 import { getSummaryDiscountBadgeLabel } from '../shared/summary-discount-badge.js';
 import { getRemainingSummarySkeletonCount } from './side-panel-methods.js';
 import { TemplateDesignSystem } from '../../shared/template-design-system.js';
@@ -144,7 +130,21 @@ export function getMobileAdditionalOffersPulseState({
 function normalizeStepContentSubtext(value) {
   if (typeof value !== 'string') return '';
   const text = value.trim();
-  return /^chrome\s+async(?:\s+(?:text|\d{1,2}:\d{2}(?::\d{2})?))?$/i.test(text) ? '' : text;
+  const normalized = text.toLowerCase();
+  if (normalized === 'chrome async' || normalized === 'chrome async text') return '';
+  if (!normalized.startsWith('chrome async ')) return text;
+
+  const timestampParts = normalized.slice('chrome async '.length).split(':');
+  const isTimestamp = (timestampParts.length === 2 || timestampParts.length === 3)
+    && timestampParts.every((part, index) => {
+      if (!part || part.length > 2 || !Array.from(part).every(character => character >= '0' && character <= '9')) {
+        return false;
+      }
+      const number = Number(part);
+      return index === 0 ? number <= 23 : number <= 59;
+    });
+
+  return isTimestamp ? '' : text;
 }
 
 const MOBILE_ADDITIONAL_OFFERS_GREEN_DELAY_MS = 550;
@@ -253,7 +253,6 @@ _populateCompactMobileSummaryTray(sheet) {
   sheet.appendChild(countBadge);
 
   sheet.classList.toggle('fpb-mobile-summary-tray-expanded', this.compactMobileSummaryTrayExpanded);
-  this._syncCompactMobileSummaryScrollLock();
   sheet.classList.toggle(
     'fpb-mobile-summary-tray--slots',
     shouldRenderSlotTiles
@@ -508,8 +507,6 @@ _toggleCompactMobileSummaryTray(sheet) {
       }
     );
   }
-  this._syncCompactMobileSummaryScrollLock();
-
   sheet.classList.remove(
     'fpb-mobile-summary-tray-animating-open',
     'fpb-mobile-summary-tray-animating-closed'
@@ -533,13 +530,6 @@ _toggleCompactMobileSummaryTray(sheet) {
 
 _syncCompactMobileSummaryDisclosureState(sheet, expanded) {
   syncCompactMobileSummaryDisclosureState(sheet, expanded);
-},
-
-_syncCompactMobileSummaryScrollLock() {
-  document.body.classList.toggle(
-    'fpb-mobile-summary-scroll-locked',
-    false
-  );
 },
 
 _renderCompactMobileSummaryBundleItems(currencyInfo, totalQuantity) {
@@ -789,7 +779,7 @@ _createMobileSummaryActionButton({
         this.currentStepIndex = targetStepIndex;
         this._emitStorefrontEvent('step-changed', { previousStepIndex, currentStepIndex: targetStepIndex, direction: 'next' });
         await this._withWidgetActionBusy(async () => {
-          await this.renderFullPageLayoutWithSidebar();
+          await this.renderFullPageLayout();
         }, { actionButton: ctaBtn });
       } else if (!this.canNavigateToStep(targetStepIndex)) {
         ToastManager.show(this.freeGiftStep?.addonLabel || this.freeGiftStep?.freeGiftName ? `Complete all steps to unlock the free ${this.freeGiftStep?.addonLabel || this.freeGiftStep?.freeGiftName}!` : 'Complete all steps first.');

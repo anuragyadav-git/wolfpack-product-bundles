@@ -1,30 +1,10 @@
-@media (min-width: 1024px) {
+@container fpb-shell (min-width: 800px) {
   .fpb-preset-classic .sidebar-layout-wrapper {
     display: grid;
-    grid-template-columns:
-      minmax(0, var(--classic-desktop-content-fr))
-      minmax(
-        var(--classic-desktop-sidebar-min-width),
-        var(--classic-desktop-sidebar-fr)
-      );
     gap: var(--classic-grid-gap);
     max-width: var(--classic-desktop-layout-inner-max, 100%);
     padding: 0;
     align-items: start;
-  }
-
-  .fpb-preset-classic
-    > :is(.bundle-banners, .category-tabs, .sidebar-layout-wrapper) {
-    width: calc(
-      100% -
-        (
-          var(--classic-desktop-layout-left) +
-            var(--classic-desktop-layout-right)
-        )
-    );
-    max-width: var(--classic-shell-max-width, none);
-    margin-left: auto;
-    margin-right: auto;
   }
 
   .fpb-preset-classic .sidebar-content {
@@ -67,18 +47,6 @@
     overflow-x: auto;
     overflow-y: hidden;
     scrollbar-width: none;
-  }
-
-  .fpb-preset-classic > .category-tabs {
-    width: calc(
-      100% -
-        (
-          var(--classic-desktop-layout-left) +
-            var(--classic-desktop-layout-right)
-        )
-    );
-    margin-left: auto;
-    margin-right: auto;
   }
 
   .fpb-preset-classic .category-tabs::-webkit-scrollbar {
@@ -139,7 +107,6 @@
   .fpb-preset-classic .sidebar-content .full-page-product-grid {
     container-type: inline-size;
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
     grid-auto-rows: minmax(0, 1fr);
     align-items: stretch;
     gap: var(--classic-grid-gap);

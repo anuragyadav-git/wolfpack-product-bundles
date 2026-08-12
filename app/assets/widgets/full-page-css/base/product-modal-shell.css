@@ -326,6 +326,10 @@
 }
 
 .bundle-modal-variant-btn.color-swatch {
+  background: var(
+    --bundle-modal-swatch-color,
+    linear-gradient(135deg, #f0f0f0, #e0e0e0)
+  );
   width: 36px;
   height: 36px;
   min-width: 36px;

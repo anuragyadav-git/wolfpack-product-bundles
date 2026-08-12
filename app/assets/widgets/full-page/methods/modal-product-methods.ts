@@ -1,25 +1,8 @@
 import { BUNDLE_WIDGET } from '../../shared/constants.js';
 import { CurrencyManager } from '../../shared/currency-manager.js';
-import { BundleDataManager } from '../../shared/bundle-data-manager.js';
-import { PricingCalculator } from '../../shared/pricing-calculator.js';
 import { ToastManager } from '../../shared/toast-manager.js';
-import { TemplateManager } from '../../shared/template-manager.js';
-import { ComponentGenerator } from '../../shared/component-generator.js';
-import { ConditionValidator } from '../../shared/condition-validator.js';
-import { createDefaultLoadingAnimation } from '../../shared/default-loading-animation.js';
-import { hideLoadingOverlayElement, markLoadingOverlayVisible } from '../../shared/loading-overlay.js';
-import { getDiscountProgressData, getSelectedQuantity, getTimelineEntryState } from '../../shared/engine/bundle-selectors.js';
-import { renderDiscountProgress } from '../../shared/components/discount-progress.js';
-import { createBundleBannerElement, createStepBannerImageElement } from '../../shared/components/bundle-banners.js';
 import { getProductImageUrls, renderSharedProductCard } from '../../shared/components/product-card.js';
-import { renderSelectedProductRow } from '../../shared/components/selected-product-row.js';
-import { renderSelectedProductSlots } from '../../shared/components/selected-product-slots.js';
-import { renderStepTimelineEntry } from '../../shared/components/step-timeline.js';
 import { VariantSelectorComponent } from '../../shared/variant-selector.js';
-import {
-  buildCartLineDisplayProperties,
-  buildCartLineSourceProperties,
-} from '../../shared/engine/cart-lines.js';
 import { BundleProductModal } from '../../../bundle-modal-component.js';
 import { TemplateDesignSystem } from '../../shared/template-design-system.js';
 
@@ -422,9 +405,5 @@ attachProductEventHandlers(productGrid, stepIndex) {
     }
   });
 
-  // Add cursor pointer styles to product images and titles
-  newProductGrid.querySelectorAll('.product-image, .product-title').forEach(el => {
-    el.style.cursor = 'pointer';
-  });
 },
 };

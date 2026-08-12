@@ -5,6 +5,8 @@
   --fpb-card-quantity-selector-width: calc(
     var(--bundle-control-hit-target) + var(--bundle-control-hit-target) + 1.5rem
   );
+  container-name: fpb-bootstrap;
+  container-type: inline-size;
   min-block-size: 100svh;
 }
 
@@ -133,7 +135,7 @@
   }
 }
 
-@media (max-width: 48rem) {
+@container fpb-bootstrap (max-width: 48rem) {
   [data-wpb-bootstrap-skeleton] {
     padding: 1rem;
   }

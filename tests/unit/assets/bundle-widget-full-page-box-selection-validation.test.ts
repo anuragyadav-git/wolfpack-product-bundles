@@ -1,21 +1,29 @@
-import { readFullPageWidgetSources } from './widget-source-helpers';
+import { fullPageBoxSelectionSidebarMethods } from '../../../app/assets/widgets/full-page/methods/box-selection-sidebar-methods';
 
-describe("FPB box selection quantity validation runtime contract", () => {
-  let source: string;
+function createContext(selectedQuantity: number) {
+  return {
+    selectedBoxSelectionRuleId: 'rule-1',
+    selectedBundle: {
+      boxSelection: {
+        isEnabled: true,
+        validateBoxSelectionQuantity: true,
+        rules: [{ ruleId: 'rule-1', boxQuantity: 3, boxLabel: 'Three pack' }],
+      },
+    },
+    getAllSelectedProductsData: () => [{ quantity: selectedQuantity }],
+    ...fullPageBoxSelectionSidebarMethods,
+  };
+}
 
-  beforeAll(() => {
-    source = readFullPageWidgetSources();
+describe('FPB box selection quantity validation runtime contract', () => {
+  it('requires the active box quantity exactly', () => {
+    expect(createContext(2).getBoxSelectionValidationState()).toMatchObject({ isEnabled: true, isValid: false });
+    expect(createContext(3).getBoxSelectionValidationState()).toMatchObject({ isEnabled: true, isValid: true });
+    expect(createContext(4).getBoxSelectionValidationState()).toMatchObject({ isEnabled: true, isValid: false });
   });
 
-  it("uses EB-style exact active box quantity validation", () => {
-    expect(source).toContain("getBoxSelectionValidationState");
-    expect(source).toContain("boxSelection?.validateBoxSelectionQuantity === true");
-    expect(source).toContain("Number(totalQuantity || 0) === Number(activeRule.boxQuantity || 0)");
-  });
-
-  it("gates all FPB add-to-cart CTA paths with box selection validation", () => {
-    expect(source).toContain("canCheckoutWithBoxSelection");
-    expect(source).toContain("if (!this.canCheckoutWithBoxSelection())");
-    expect(source.match(/this\.canCheckoutWithBoxSelection\(\)/g)?.length ?? 0).toBeGreaterThanOrEqual(6);
+  it('uses validation state to gate checkout', () => {
+    expect(createContext(2).canCheckoutWithBoxSelection()).toBe(false);
+    expect(createContext(3).canCheckoutWithBoxSelection()).toBe(true);
   });
 });

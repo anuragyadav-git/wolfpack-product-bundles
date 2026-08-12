@@ -1,4 +1,3 @@
-import { readFullPageWidgetSources, readProductPageWidgetSources } from './widget-source-helpers';
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const {
   buildCartLineDisplayProperties,
@@ -79,14 +78,4 @@ describe('shared cart-line metadata helpers', () => {
     });
   });
 
-  it('is used by both storefront widget controllers', () => {
-    const fullPageSource = readFullPageWidgetSources();
-    const productPageSource = readProductPageWidgetSources();
-
-    expect(fullPageSource).toContain("from './widgets/shared/engine/cart-lines.js';");
-    expect(productPageSource).toContain("from '../../shared/engine/cart-lines.js';");
-    expect(fullPageSource).toContain('buildSharedCartLineSourceProperties({');
-    expect(fullPageSource).toContain('buildSharedCartLineDisplayProperties(displayProperties, this.getCartLineLabels())');
-    expect(productPageSource).toContain('buildCartLineSourceProperties({');
-  });
 });

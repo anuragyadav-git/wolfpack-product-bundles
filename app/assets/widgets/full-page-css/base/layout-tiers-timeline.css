@@ -1,4 +1,4 @@
-@media (max-width: 767px) {
+@container fpb-shell (max-width: 799px) {
   .bundle-builder-modal .modal-footer-discount-messaging,
   .discount-progress-banner,
   .fpb-discount-progress:not(.fpb-dp-sidebar) {
@@ -68,7 +68,7 @@
   pointer-events: none;
 }
 
-@media (max-width: 768px) {
+@container fpb-shell (max-width: 799px) {
   .bundle-tier-pill-bar {
     overflow-x: auto;
     justify-content: flex-start;
@@ -104,13 +104,13 @@
   box-sizing: border-box;
 }
 
-@media (max-width: 768px) {
+@container fpb-shell (max-width: 799px) {
   .full-page-content-section {
     padding: 16px 16px 120px;
   }
 }
 
-@media (max-width: 400px) {
+@container fpb-shell (max-width: 400px) {
   .full-page-content-section {
     padding: 8px 8px 100px;
   }
@@ -219,7 +219,7 @@
   flex-shrink: 0;
 }
 
-@media (min-width: 640px) {
+@container fpb-shell (min-width: 640px) {
   .timeline-icon-wrapper {
     width: 40px;
     height: 40px;
@@ -231,7 +231,7 @@
   }
 }
 
-@media (min-width: 1024px) {
+@container fpb-shell (min-width: 1024px) {
   .timeline-icon-wrapper {
     width: var(--bundle-step-timeline-circle-size, 44px);
     height: var(--bundle-step-timeline-circle-size, 44px);
@@ -313,14 +313,14 @@
   transition: color 300ms ease;
 }
 
-@media (min-width: 640px) {
+@container fpb-shell (min-width: 640px) {
   .timeline-step-name {
     font-size: 12px;
     margin-top: 10px;
   }
 }
 
-@media (min-width: 1024px) {
+@container fpb-shell (min-width: 1024px) {
   .timeline-step-name {
     font-size: var(--bundle-step-timeline-name-font-size, 13px);
     margin-top: 12px;
@@ -341,15 +341,19 @@
 }
 
 .timeline-connector-fill {
-  display: block !important;
+  display: block;
   height: 100%;
-  width: 0%;
+  width: var(--fpb-timeline-progress, 0%);
   background: var(
     --bundle-step-timeline-line-completed,
     var(--bundle-primary-color, #1e1e1e)
   );
   border-radius: 2px;
   transition: width 400ms ease;
+}
+
+.timeline-step--interactive {
+  cursor: pointer;
 }
 
 .timeline-step--inactive .timeline-icon-wrapper {
@@ -644,7 +648,7 @@
   right: -12px;
 }
 
-@media (max-width: 767px) {
+@container fpb-shell (max-width: 799px) {
   .layout-sidebar:is(
       [data-fpb-design-preset="STANDARD"],
       [data-fpb-design-preset="CLASSIC"],
@@ -711,7 +715,7 @@
   max-width: 100%;
 }
 
-@media (min-width: 640px) {
+@container fpb-shell (min-width: 640px) {
   .step-tabs-container {
     gap: 10px;
     margin: 0 auto 20px;
@@ -719,7 +723,7 @@
   }
 }
 
-@media (min-width: 1024px) {
+@container fpb-shell (min-width: 1024px) {
   .step-tabs-container {
     gap: 12px;
     margin: 0 auto 24px;
@@ -743,7 +747,7 @@
   position: relative;
 }
 
-@media (min-width: 640px) {
+@container fpb-shell (min-width: 640px) {
   .step-tab {
     gap: 10px;
     padding: 11px 16px;
@@ -752,7 +756,7 @@
   }
 }
 
-@media (min-width: 1024px) {
+@container fpb-shell (min-width: 1024px) {
   .step-tab {
     gap: 12px;
     padding: 12px 20px;

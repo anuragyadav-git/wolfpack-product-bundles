@@ -1,30 +1,11 @@
-import { BUNDLE_WIDGET } from '../../shared/constants.js';
-import { CurrencyManager } from '../../shared/currency-manager.js';
-import { BundleDataManager } from '../../shared/bundle-data-manager.js';
-import { PricingCalculator } from '../../shared/pricing-calculator.js';
 import { ToastManager } from '../../shared/toast-manager.js';
-import { TemplateManager } from '../../shared/template-manager.js';
-import { ComponentGenerator } from '../../shared/component-generator.js';
 import { ConditionValidator } from '../../shared/condition-validator.js';
-import { createDefaultLoadingAnimation } from '../../shared/default-loading-animation.js';
-import { hideLoadingOverlayElement, markLoadingOverlayVisible } from '../../shared/loading-overlay.js';
 import {
-  getDiscountProgressData,
-  getSelectedQuantity,
   getTimelineEntryState,
   shouldShowTimelineCompletedState,
 } from '../../shared/engine/bundle-selectors.js';
-import { renderDiscountProgress } from '../../shared/components/discount-progress.js';
 import { createBundleBannerElement, createStepBannerImageElement } from '../../shared/components/bundle-banners.js';
-import { renderSharedProductCard } from '../../shared/components/product-card.js';
-import { renderSelectedProductRow } from '../../shared/components/selected-product-row.js';
-import { renderSelectedProductSlots } from '../../shared/components/selected-product-slots.js';
 import { renderStepTimelineEntry } from '../../shared/components/step-timeline.js';
-import {
-  buildCartLineDisplayProperties,
-  buildCartLineSourceProperties,
-} from '../../shared/engine/cart-lines.js';
-
 
 export const fullPageTimelineBannerMethods: Record<string, any> & ThisType<any> = {
 getStandardTimelineVisibleEntries(timelineEntries, activeEntryIndex) {
@@ -67,10 +48,6 @@ getStandardTimelineVisibleEntries(timelineEntries, activeEntryIndex) {
   };
 },
 
-ensureTimelinePagingStyles() {
-  return true;
-},
-
 shouldRenderMultipleCategoryTimelineEntry() {
   return false;
 },
@@ -109,9 +86,6 @@ createStepTimeline() {
   } = this.getStandardTimelineVisibleEntries(timelineEntries, activeEntryIndex);
   const visibleEntryCount = Math.max(visibleEntries.length, 1);
 
-  if (isPaged) {
-    this.ensureTimelinePagingStyles();
-  }
   timeline.classList.toggle('step-timeline--paged', isPaged);
   timeline.dataset.windowStart = String(windowStart);
   timeline.dataset.pageSize = String(pageSize);
@@ -183,7 +157,7 @@ createStepTimeline() {
 
     // Click handler — accessible steps only
     if (entry.type === 'step' && timelineState.isAccessible && !timelineState.isDefaultStep) {
-      stepEl.style.cursor = 'pointer';
+      stepEl.classList.add('timeline-step--interactive');
       stepEl.addEventListener('click', () => {
         if (!this.isStepAccessible(index)) {
           ToastManager.show('Please complete the previous steps first.');
@@ -208,8 +182,10 @@ createStepTimeline() {
       connectorEl.className = 'timeline-connector';
       const connectorFill = document.createElement('div');
       connectorFill.className = 'timeline-connector-fill';
-      connectorFill.style.display = 'block';
-      connectorFill.style.width = `${Math.round(this._getStepProgressRatio(index) * 100)}%`;
+      connectorFill.style.setProperty(
+        '--fpb-timeline-progress',
+        `${Math.round(this._getStepProgressRatio(index) * 100)}%`
+      );
       connectorEl.appendChild(connectorFill);
       timeline.appendChild(connectorEl);
     }
@@ -337,7 +313,7 @@ createStandardStepTimeline() {
     `;
 
     if (entry.type === 'step' && timelineState.isAccessible && !timelineState.isDefaultStep) {
-      itemEl.style.cursor = 'pointer';
+      itemEl.classList.add('timeline-step--interactive');
       itemEl.addEventListener('click', () => {
         if (!this.isStepAccessible(index)) {
           ToastManager.show('Please complete the previous steps first.');
@@ -383,10 +359,6 @@ createBundleBanners() {
     desktopBannerUrl: this.selectedBundle?.bundleBannerDesktopUrl,
     mobileBannerUrl: this.selectedBundle?.bundleBannerMobileUrl,
   }, document);
-},
-
-ensureBundleBannerRuntimeStyles() {
-  return true;
 },
 
 // Get a compact quantity hint string for a step tab (e.g. "Pick 2" or "Pick 2–5")

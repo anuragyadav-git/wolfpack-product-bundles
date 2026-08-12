@@ -1,24 +1,8 @@
-import { BUNDLE_WIDGET } from '../../shared/constants.js';
 import { CurrencyManager } from '../../shared/currency-manager.js';
-import { BundleDataManager } from '../../shared/bundle-data-manager.js';
 import { PricingCalculator } from '../../shared/pricing-calculator.js';
-import { ToastManager } from '../../shared/toast-manager.js';
 import { TemplateManager } from '../../shared/template-manager.js';
-import { ComponentGenerator } from '../../shared/component-generator.js';
-import { ConditionValidator } from '../../shared/condition-validator.js';
 import { createDefaultLoadingAnimation } from '../../shared/default-loading-animation.js';
 import { hideLoadingOverlayElement, markLoadingOverlayVisible } from '../../shared/loading-overlay.js';
-import { getDiscountProgressData, getSelectedQuantity, getTimelineEntryState } from '../../shared/engine/bundle-selectors.js';
-import { renderDiscountProgress } from '../../shared/components/discount-progress.js';
-import { createBundleBannerElement, createStepBannerImageElement } from '../../shared/components/bundle-banners.js';
-import { renderSharedProductCard } from '../../shared/components/product-card.js';
-import { renderSelectedProductRow } from '../../shared/components/selected-product-row.js';
-import { renderSelectedProductSlots } from '../../shared/components/selected-product-slots.js';
-import { renderStepTimelineEntry } from '../../shared/components/step-timeline.js';
-import {
-  buildCartLineDisplayProperties,
-  buildCartLineSourceProperties,
-} from '../../shared/engine/cart-lines.js';
 import { TemplateDesignSystem } from '../../shared/template-design-system.js';
 
 const runtimeCartTemplateSystem = TemplateDesignSystem;
@@ -131,7 +115,7 @@ updateModalDiscountMessaging(totalPrice, totalQuantity, discountInfo, currencyIn
 
   // Show/hide discount section based on config
   if (discountSection) {
-    discountSection.style.display = this.config.showDiscountMessaging ? 'block' : 'none';
+    discountSection.hidden = !this.config.showDiscountMessaging;
   }
 },
 
@@ -144,11 +128,11 @@ updateFooterTotalPrices(totalPrice, discountInfo, currencyInfo) {
   if (discountInfo.qualifiesForDiscount && discountInfo.finalPrice < totalPrice) {
     // Show strike-through original price and discounted price
     strikePriceEl.textContent = CurrencyManager.convertAndFormat(totalPrice, currencyInfo);
-    strikePriceEl.style.display = 'inline';
+    strikePriceEl.hidden = false;
     finalPriceEl.textContent = CurrencyManager.convertAndFormat(discountInfo.finalPrice, currencyInfo);
   } else {
     // Show only regular price
-    strikePriceEl.style.display = 'none';
+    strikePriceEl.hidden = true;
     finalPriceEl.textContent = CurrencyManager.convertAndFormat(totalPrice, currencyInfo);
   }
 },
@@ -159,11 +143,6 @@ updateFooterTotalPrices(totalPrice, discountInfo, currencyInfo) {
 
 showLoadingOverlay(gifUrl) {
   if (!this.container) return;
-  // Ensure container is positioned so absolute overlay works
-  const pos = getComputedStyle(this.container).position;
-  if (pos !== 'relative' && pos !== 'absolute' && pos !== 'fixed' && pos !== 'sticky') {
-    this.container.style.position = 'relative';
-  }
   // Remove any existing overlay (idempotent)
   this.container.querySelector('.bundle-loading-overlay')?.remove();
 
@@ -446,128 +425,6 @@ resolveFullPageCardCtaMode(bundle = this.selectedBundle) {
   return showTextOnAddButton ? 'text' : 'icon';
 },
 
-syncFullPageTemplateStylesheets(activeTemplateKey, activeHref) {
-  if (typeof document === 'undefined' || typeof window === 'undefined') return;
-
-  const normalizedActiveKey = typeof activeTemplateKey === 'string'
-    ? activeTemplateKey.trim().toUpperCase()
-    : '';
-
-  if (!normalizedActiveKey && !activeHref) return;
-
-  const urls = window.__WOLFPACK_FPB_TEMPLATE_CSS_URLS__ || {};
-  const knownTemplateEntries = Object.entries(urls)
-    .map(([key, href]) => [String(key).trim().toUpperCase(), href])
-    .filter(([, href]) => typeof href === 'string' && href !== '');
-
-  Array.from(document.querySelectorAll('link[rel="stylesheet"]')).forEach((link) => {
-    if (!(link instanceof HTMLLinkElement)) return;
-
-    const linkTemplateKey = String(link.dataset.wpbFpbTemplateCss || '').trim().toUpperCase();
-    const linkedTemplateKey = linkTemplateKey || knownTemplateEntries.find(([, href]) =>
-      link.getAttribute('href') === href || link.href === href
-    )?.[0];
-
-    if (!linkedTemplateKey) return;
-
-    const isActive =
-      (normalizedActiveKey !== '' && linkedTemplateKey === normalizedActiveKey)
-      || link.getAttribute('href') === activeHref
-      || link.href === activeHref;
-
-    link.disabled = !isActive;
-  });
-},
-
-ensureFullPageTemplateStylesheet(preset) {
-  const presetKey = typeof preset === 'string' ? preset.trim().toUpperCase() : '';
-  const templateKey = presetKey;
-  const urls = window.__WOLFPACK_FPB_TEMPLATE_CSS_URLS__ || {};
-  if (!presetKey) return Promise.resolve();
-
-  const href = urls[presetKey];
-
-  if (!href || typeof document === 'undefined') return Promise.resolve();
-
-  if (!this._fpbTemplateStylesheetPromises) {
-    this._fpbTemplateStylesheetPromises = new Map();
-  }
-
-  const pendingPromise = this._fpbTemplateStylesheetPromises.get(href);
-  if (pendingPromise) {
-    return pendingPromise;
-  }
-
-  const existingLink = Array.from(document.querySelectorAll('link[rel="stylesheet"]')).find((link) =>
-    link.getAttribute('href') === href
-    || link.href === href
-    || link.dataset.wpbFpbTemplateCss === templateKey
-  );
-
-  const markLoaded = (link) => {
-    if (link instanceof HTMLLinkElement) {
-      link.dataset.wpbFpbTemplateCssLoaded = '1';
-    }
-  };
-
-  const isStylesheetLoaded = (link) => {
-    if (!link) return false;
-    if (link.dataset?.wpbFpbTemplateCssLoaded === '1') return true;
-
-    try {
-      return !!link.sheet;
-    } catch (_error) {
-      return false;
-    }
-  };
-
-  if (existingLink) {
-    existingLink.disabled = false;
-    if (isStylesheetLoaded(existingLink)) {
-      markLoaded(existingLink);
-      this.syncFullPageTemplateStylesheets(templateKey, href);
-      return Promise.resolve();
-    }
-
-    const promise = new Promise((resolve) => {
-      const done = () => {
-        markLoaded(existingLink);
-        this.syncFullPageTemplateStylesheets(templateKey, href);
-        this._fpbTemplateStylesheetPromises.delete(href);
-        resolve();
-      };
-
-      existingLink.addEventListener('load', done, { once: true });
-      existingLink.addEventListener('error', done, { once: true });
-    });
-
-    this._fpbTemplateStylesheetPromises.set(href, promise);
-    return promise;
-  }
-
-  const link = document.createElement('link');
-  link.rel = 'stylesheet';
-  link.href = href;
-  link.dataset.wpbFpbTemplateCss = templateKey;
-
-  const promise = new Promise((resolve) => {
-    const done = () => {
-      markLoaded(link);
-      this.syncFullPageTemplateStylesheets(templateKey, href);
-      this._fpbTemplateStylesheetPromises.delete(href);
-      resolve();
-    };
-
-    link.addEventListener('load', done, { once: true });
-    link.addEventListener('error', done, { once: true });
-  });
-
-  this._fpbTemplateStylesheetPromises.set(href, promise);
-  document.head.appendChild(link);
-
-  return promise;
-},
-
 getProductAddButtonText() {
   if (this.resolveFullPageCardCtaMode() !== 'text') return '+';
 
@@ -614,7 +471,6 @@ applyFullPageDesignPresetMarker() {
   this.elements.stepsContainer.classList.toggle('fpb-h', isHorizontalFpbPreset(fullPageDesignPreset));
   this.elements.stepsContainer.classList.toggle('fpb-d', isStandardFpbPreset(fullPageDesignPreset));
   this.elements.stepsContainer.classList.toggle('fpb-i', cardCtaMode === 'icon');
-  void this.ensureFullPageTemplateStylesheet(fullPageDesignPreset);
 },
 
 /** Returns true if the given tier index is the currently active one. */

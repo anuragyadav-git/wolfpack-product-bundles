@@ -33,17 +33,17 @@ function createAttributeTarget(width?: number): AttributeTarget & {
 
 describe('FPB all-template summary responsive ownership', () => {
   it.each(['STANDARD', 'CLASSIC', 'COMPACT', 'HORIZONTAL'])(
-    'uses the measured 1024px boundary for %s',
+    'uses the measured 800px boundary for %s',
     (designPreset) => {
       expect(getSummaryPresentationMode({
         designPreset,
         layout: 'footer_side',
-        availableWidth: 1023,
+        availableWidth: 799,
       })).toBe('tray');
       expect(getSummaryPresentationMode({
         designPreset,
         layout: 'footer_side',
-        availableWidth: 1024,
+        availableWidth: 800,
       })).toBe('sidebar');
     },
   );
@@ -81,15 +81,50 @@ describe('FPB all-template summary responsive ownership', () => {
     expect(tray.attributes['data-fpb-summary-mode']).toBe('tray');
   });
 
-  it('mounts the compact summary tray inside the widget root', () => {
+  it('propagates measured mode changes through the existing ResizeObserver', () => {
+    const originalResizeObserver = global.ResizeObserver;
+    let availableWidth = 799;
+    let resizeCallback: ResizeObserverCallback | undefined;
+    const observe = jest.fn();
+
+    global.ResizeObserver = class ResizeObserver {
+      constructor(callback: ResizeObserverCallback) {
+        resizeCallback = callback;
+      }
+
+      observe = observe;
+      disconnect = jest.fn();
+      unobserve = jest.fn();
+    };
+
     const container = createAttributeTarget();
+    container.getBoundingClientRect = () => ({ width: availableWidth });
+    const stepsContainer = createAttributeTarget();
     const tray = createAttributeTarget();
+    const context = {
+      container,
+      elements: { stepsContainer },
+      mobileSummaryTrayElement: tray,
+      getFullPageDesignPreset: () => 'HORIZONTAL',
+      resolveFullPageLayout: () => 'footer_side',
+      _syncSummaryPresentationMode: fullPageResponsiveLayoutMethods._syncSummaryPresentationMode,
+      _summaryResizeObserver: undefined,
+    };
 
-    fullPageResponsiveLayoutMethods._mountCompactMobileSummaryTray.call(
-      { container },
-      tray,
-    );
+    try {
+      fullPageResponsiveLayoutMethods._observeSummaryPresentationMode.call(context);
 
-    expect(container.appendChild).toHaveBeenCalledWith(tray);
+      expect(observe).toHaveBeenCalledWith(container);
+      expect(container.attributes['data-fpb-summary-mode']).toBe('tray');
+
+      availableWidth = 800;
+      resizeCallback?.([], context._summaryResizeObserver as ResizeObserver);
+
+      expect(container.attributes['data-fpb-summary-mode']).toBe('sidebar');
+      expect(stepsContainer.attributes['data-fpb-summary-mode']).toBe('sidebar');
+      expect(tray.attributes['data-fpb-summary-mode']).toBe('sidebar');
+    } finally {
+      global.ResizeObserver = originalResizeObserver;
+    }
   });
 });

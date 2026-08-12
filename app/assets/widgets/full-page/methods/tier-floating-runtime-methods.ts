@@ -1,26 +1,4 @@
-import { BUNDLE_WIDGET } from '../../shared/constants.js';
-import { CurrencyManager } from '../../shared/currency-manager.js';
-import { BundleDataManager } from '../../shared/bundle-data-manager.js';
-import { PricingCalculator } from '../../shared/pricing-calculator.js';
 import { ToastManager } from '../../shared/toast-manager.js';
-import { TemplateManager } from '../../shared/template-manager.js';
-import { ComponentGenerator } from '../../shared/component-generator.js';
-import { ConditionValidator } from '../../shared/condition-validator.js';
-import { createDefaultLoadingAnimation } from '../../shared/default-loading-animation.js';
-import { hideLoadingOverlayElement, markLoadingOverlayVisible } from '../../shared/loading-overlay.js';
-import { getDiscountProgressData, getSelectedQuantity, getTimelineEntryState } from '../../shared/engine/bundle-selectors.js';
-import { renderDiscountProgress } from '../../shared/components/discount-progress.js';
-import { createBundleBannerElement, createStepBannerImageElement } from '../../shared/components/bundle-banners.js';
-import { renderSharedProductCard } from '../../shared/components/product-card.js';
-import { renderSelectedProductRow } from '../../shared/components/selected-product-row.js';
-import { renderSelectedProductSlots } from '../../shared/components/selected-product-slots.js';
-import { renderStepTimelineEntry } from '../../shared/components/step-timeline.js';
-import {
-  buildCartLineDisplayProperties,
-  buildCartLineSourceProperties,
-} from '../../shared/engine/cart-lines.js';
-
-
 export const fullPageTierFloatingRuntimeMethods: Record<string, any> & ThisType<any> = {
 initTierPills(tiers) {
   if (tiers.length < 2) return;
@@ -128,33 +106,6 @@ _mergeBundleSettings(settings) {
   }
 },
 
-async hydrateCurrentFullPageBundleBeforeRender() {
-  const bundleId = this.container?.dataset?.bundleId;
-  if (!bundleId || this._bundleConfigCacheMode !== 'full') return false;
-
-  try {
-    const apiUrl = `/apps/product-bundles/api/bundle/${encodeURIComponent(bundleId)}.json`;
-    const response = await fetch(apiUrl, {
-      cache: 'no-store',
-      credentials: 'same-origin',
-    });
-    if (!response.ok) return false;
-
-    const data = await response.json();
-    if (!data?.bundle?.id) return false;
-
-    this.bundleData = {
-      ...(this.bundleData || {}),
-      [data.bundle.id]: data.bundle,
-    };
-    this.selectedBundle = data.bundle;
-    this._bundleConfigCacheMode = 'proxy';
-    return true;
-  } catch (_error) {
-    return false;
-  }
-},
-
 _initFloatingBadge() {
   const enabled = this.selectedBundle && this.selectedBundle.floatingBadgeEnabled;
   const text = this.selectedBundle && this.selectedBundle.floatingBadgeText;
@@ -224,7 +175,7 @@ attachEventListeners() {
 
   // Keyboard handlers
   document.addEventListener('keydown', (e) => {
-    if (modal.style.display === 'block' && e.key === 'Escape') {
+    if (!modal.hidden && e.key === 'Escape') {
       this.closeModal();
     }
   });
@@ -314,48 +265,6 @@ showErrorUI(_error) {
  * Fire-and-forget error report to the server so AppLogger can track widget failures.
  * Does NOT await — never blocks the render path.
  */
-
-/**
- * Background layout refresh — runs after initial render.
- *
- * In compact-marker mode, we always fetch the bundle via API before render,
- * so this refresh path is effectively a no-op for initialized API loads.
- * It is preserved for legacy cached payload paths and exits early when not needed.
- *
- * Fire-and-forget: all errors are silently swallowed.
- */
-async _scheduleLayoutRefresh() {
-  const bundleId = this.container.dataset.bundleId;
-  if (!bundleId) return;
-
-  if (this._bundleConfigCacheMode !== 'full') return;
-
-  try {
-    const apiUrl = `/apps/product-bundles/api/bundle/${encodeURIComponent(bundleId)}.json`;
-    const response = await fetch(apiUrl);
-    if (!response.ok) return;
-
-    const data = await response.json();
-    if (!data?.bundle) return;
-
-    const freshTemplate = data.bundle.bundleDesignTemplate ?? null;
-    const currentTemplate = this.selectedBundle?.bundleDesignTemplate ?? null;
-    const freshPreset = data.bundle.bundleDesignPresetId ?? null;
-    const currentPreset = this.selectedBundle?.bundleDesignPresetId ?? null;
-
-    if ((freshTemplate !== currentTemplate || freshPreset !== currentPreset) && this.selectedBundle) {
-      this.selectedBundle.bundleDesignTemplate = data.bundle.bundleDesignTemplate ?? this.selectedBundle.bundleDesignTemplate;
-      this.selectedBundle.bundleDesignPresetId = data.bundle.bundleDesignPresetId ?? this.selectedBundle.bundleDesignPresetId;
-      if (this.bundleData?.[bundleId]) {
-        this.bundleData[bundleId].bundleDesignTemplate = data.bundle.bundleDesignTemplate ?? this.bundleData[bundleId].bundleDesignTemplate;
-        this.bundleData[bundleId].bundleDesignPresetId = data.bundle.bundleDesignPresetId ?? this.bundleData[bundleId].bundleDesignPresetId;
-      }
-      await this.renderSteps();
-    }
-  } catch (_e) {
-    // Best-effort: silently ignore all errors
-  }
-},
 
 _reportError(error) {
   try {

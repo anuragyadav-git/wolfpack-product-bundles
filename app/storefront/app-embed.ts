@@ -6,11 +6,15 @@ import { transferBootstrapSkeleton } from '../assets/widgets/full-page/bootstrap
 
 const embed = document.querySelector<HTMLElement>('[data-wpb-app-embed]');
 
-function ensureStylesheet(href: string | undefined): void {
-  if (!href || Array.from(document.styleSheets).some((sheet) => sheet.href === href)) return;
+export function ensureStylesheet(href: string | undefined): void {
+  if (!href) return;
+  const existing = Array.from(document.querySelectorAll<HTMLLinkElement>('link[rel="stylesheet"]'))
+    .some((link) => link.href === href || link.getAttribute('href') === href);
+  if (existing) return;
   const link = document.createElement('link');
   link.rel = 'stylesheet';
   link.href = href;
+  link.dataset.wpbFpbStyle = 'true';
   document.head.append(link);
 }
 
@@ -62,6 +66,7 @@ function hydrateMarker(): void {
   ensureStylesheet(embed.dataset.fullPageStyleUrl);
   ensureStylesheet(embed.dataset.mobileSummaryStyleUrl);
   ensureStylesheet(getFpbPresetStylesheetUrl(embed.dataset, preset));
+  ensureStylesheet(embed.dataset.responsiveStyleUrl);
   loadFullPageRuntime(embed.dataset.fullPageScriptUrl);
 }
 

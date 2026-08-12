@@ -1,24 +1,7 @@
-import { BUNDLE_WIDGET } from '../../shared/constants.js';
 import { CurrencyManager } from '../../shared/currency-manager.js';
-import { BundleDataManager } from '../../shared/bundle-data-manager.js';
 import { PricingCalculator } from '../../shared/pricing-calculator.js';
 import { ToastManager } from '../../shared/toast-manager.js';
 import { TemplateManager } from '../../shared/template-manager.js';
-import { ComponentGenerator } from '../../shared/component-generator.js';
-import { ConditionValidator } from '../../shared/condition-validator.js';
-import { createDefaultLoadingAnimation } from '../../shared/default-loading-animation.js';
-import { hideLoadingOverlayElement, markLoadingOverlayVisible } from '../../shared/loading-overlay.js';
-import { getDiscountProgressData, getSelectedQuantity, getTimelineEntryState } from '../../shared/engine/bundle-selectors.js';
-import { renderDiscountProgress } from '../../shared/components/discount-progress.js';
-import { createBundleBannerElement, createStepBannerImageElement } from '../../shared/components/bundle-banners.js';
-import { renderSharedProductCard } from '../../shared/components/product-card.js';
-import { renderSelectedProductRow } from '../../shared/components/selected-product-row.js';
-import { renderSelectedProductSlots } from '../../shared/components/selected-product-slots.js';
-import { renderStepTimelineEntry } from '../../shared/components/step-timeline.js';
-import {
-  buildCartLineDisplayProperties,
-  buildCartLineSourceProperties,
-} from '../../shared/engine/cart-lines.js';
 import { getSummaryDiscountBadgeLabel } from '../shared/summary-discount-badge.js';
 import { TemplateDesignSystem } from '../../shared/template-design-system.js';
 
@@ -559,7 +542,7 @@ renderSidePanel(panel) {
           currentStepIndex: this.currentStepIndex,
           direction: 'back',
         });
-        await this.renderFullPageLayoutWithSidebar();
+        await this.renderFullPageLayout();
       }, { actionButton: backBtn });
     });
     navSection.appendChild(backBtn);
@@ -607,7 +590,7 @@ renderSidePanel(panel) {
         this.activeCollectionId = null;
         this.searchQuery = '';
         this.currentStepIndex++;
-        await this.renderFullPageLayoutWithSidebar();
+        await this.renderFullPageLayout();
       }, { actionButton: nextBtn });
     } else {
       ToastManager.show(this.getStepConditionValidationMessage?.() || 'Please meet the quantity conditions for the current step before proceeding.');

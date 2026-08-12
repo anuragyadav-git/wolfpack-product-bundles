@@ -16,8 +16,6 @@ const { shouldUseSharedDesktopSummarySlotTiles } = require('../../../app/assets/
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { getMobileAdditionalOffersPulseState } = require('../../../app/assets/widgets/full-page/methods/mobile-summary-methods.js');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const { getMobileBottomBarActionState } = require('../../../app/assets/widgets/full-page/methods/responsive-layout-methods.js');
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { shouldCategoryTabActivateProducts } = require('../../../app/assets/widgets/full-page/methods/product-grid-methods.js');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const {
@@ -174,7 +172,7 @@ function createContext() {
     showBoxSelectionValidationMessage: jest.fn(),
     _emitStorefrontEvent: jest.fn(),
     _withWidgetActionBusy: jest.fn(),
-    renderFullPageLayoutWithSidebar: jest.fn(),
+    renderFullPageLayout: jest.fn(),
     _renderCompactMobileSummaryBundleItems: () => new FakeElement(),
   };
 }
@@ -266,7 +264,6 @@ describe('FPB Standard mobile summary action', () => {
       currentStepIndex: 0,
       getDiscountInfoWithSelectedAddonDiscount: (discountInfo: unknown) => discountInfo,
       getAllSelectedProductsData: () => [],
-      usesCompactMobileSummaryTray: () => true,
       _shouldRenderProductSlots: () => false,
       _syncCompactMobileSummaryScrollLock: jest.fn(),
       _renderDiscountProgress: renderProgress,
@@ -511,31 +508,7 @@ describe('FPB Standard mobile summary action', () => {
       currentStepIndex: 1,
       direction: 'next',
     });
-    expect(context.renderFullPageLayoutWithSidebar).toHaveBeenCalledTimes(1);
-  });
-
-  it('keeps the alternate mobile bottom bar final-step action as add to cart when conditions are not complete', () => {
-    const actionState = getMobileBottomBarActionState({
-      conditionlessMobile: false,
-      hasSelectionMobile: false,
-      isLastStep: true,
-      isComplete: false,
-      boxSelectionValidMobile: true,
-    });
-
-    expect(actionState).toEqual({ shouldAddToCart: true, disabled: true });
-  });
-
-  it('keeps the alternate mobile bottom bar non-final action as next', () => {
-    const actionState = getMobileBottomBarActionState({
-      conditionlessMobile: false,
-      hasSelectionMobile: false,
-      isLastStep: false,
-      isComplete: false,
-      boxSelectionValidMobile: true,
-    });
-
-    expect(actionState).toEqual({ shouldAddToCart: false, disabled: false });
+    expect(context.renderFullPageLayout).toHaveBeenCalledTimes(1);
   });
 
   it('allows the compact mobile summary tray to expand with no selected products', () => {
@@ -587,8 +560,9 @@ describe('FPB Standard mobile summary action', () => {
       compactMobileSummaryTrayAnimationTimeout: null,
       getAllSelectedProductsData: () => [],
       _populateCompactMobileSummaryTray: jest.fn(),
-      _syncCompactMobileSummaryScrollLock: jest.fn(),
     };
+    const bodyClassList = { add: jest.fn(), remove: jest.fn(), toggle: jest.fn() };
+    global.document = { body: { classList: bodyClassList } } as unknown as Document;
 
     fullPageMobileSummaryMethods._toggleCompactMobileSummaryTray.call(
       context,
@@ -626,6 +600,9 @@ describe('FPB Standard mobile summary action', () => {
       [{ height: '259px' }, { height: '117px' }],
       { duration: 700, easing: 'ease' },
     );
+    expect(bodyClassList.add).not.toHaveBeenCalled();
+    expect(bodyClassList.remove).not.toHaveBeenCalled();
+    expect(bodyClassList.toggle).not.toHaveBeenCalled();
   });
 
   it('keeps collapsed compact-summary details out of the accessibility tree', () => {
@@ -655,28 +632,6 @@ describe('FPB Standard mobile summary action', () => {
 
     expect(bundleItems.inert).toBe(false);
     expect(bundleItems.removeAttribute).toHaveBeenCalledWith('aria-hidden');
-  });
-
-  it('does not lock page scroll when any FPB mobile summary tray expands', () => {
-    const classList = {
-      toggle: jest.fn(),
-    };
-    global.document = {
-      body: { classList },
-    } as unknown as Document;
-
-    ['STANDARD', 'CLASSIC', 'COMPACT', 'HORIZONTAL'].forEach((preset) => {
-      fullPageMobileSummaryMethods._syncCompactMobileSummaryScrollLock.call({
-        compactMobileSummaryTrayExpanded: true,
-        getFullPageDesignPreset: () => preset,
-      });
-    });
-
-    expect(classList.toggle).toHaveBeenCalledWith(
-      'fpb-mobile-summary-scroll-locked',
-      false,
-    );
-    expect(classList.toggle).toHaveBeenCalledTimes(4);
   });
 
   it.each(['STANDARD', 'CLASSIC', 'COMPACT', 'HORIZONTAL'])(

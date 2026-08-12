@@ -198,7 +198,7 @@
   grid-column: 2;
 }
 
-@media (max-width: 767px) {
+@container fpb-shell (max-width: 799px) {
   .vs-mobile-drawer--standard {
     position: fixed;
     inset: 0;

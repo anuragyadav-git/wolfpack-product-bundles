@@ -1,5 +1,27 @@
 'use strict';
 
+function isRgbColorValue(value) {
+  const lowerValue = value.toLowerCase();
+  const isRgba = lowerValue.startsWith('rgba(');
+  const isRgb = lowerValue.startsWith('rgb(');
+  if ((!isRgb && !isRgba) || !lowerValue.endsWith(')')) return false;
+
+  const prefixLength = isRgba ? 5 : 4;
+  const components = lowerValue.slice(prefixLength, -1).split(',');
+  if (components.length !== (isRgba ? 4 : 3)) return false;
+
+  return components.every((component, index) => {
+    const trimmed = component.trim();
+    const isPercent = trimmed.endsWith('%');
+    const rawNumber = isPercent ? trimmed.slice(0, -1) : trimmed;
+    if (!rawNumber || rawNumber.includes(' ')) return false;
+    const number = Number(rawNumber);
+    if (!Number.isFinite(number) || number < 0) return false;
+    if (index === 3) return isPercent ? number <= 100 : number <= 1;
+    return isPercent ? number <= 100 : number <= 255;
+  });
+}
+
 export const BundleModalVariantMethods: Record<string, any> & ThisType<any> = {
   resetVariantSelectionState() {
     this.selectedOptions = {};
@@ -79,13 +101,13 @@ export const BundleModalVariantMethods: Record<string, any> & ThisType<any> = {
           <div class="bundle-modal-variant-options ${isColorOption ? 'color-options' : ''}" data-option-index="${optionIndex}">
             ${optionValues.map((value) => {
               const isSelected = value === preSelectedValue;
-              const colorStyle = isColorOption ? this.getColorStyle(value) : '';
+              const colorValue = isColorOption ? this.getColorValue(value) : '';
               return `
                 <button type="button"
                   class="bundle-modal-variant-btn ${isSelected ? 'selected' : ''} ${isColorOption ? 'color-swatch' : ''}"
                   data-option-index="${optionIndex}"
                   data-value="${value}"
-                  ${isColorOption && colorStyle ? `style="${colorStyle}"` : ''}
+                  ${isColorOption && colorValue ? `style="--bundle-modal-swatch-color: ${colorValue}"` : ''}
                   title="${value}">
                   ${isColorOption ? '' : value}
                 </button>
@@ -128,11 +150,11 @@ export const BundleModalVariantMethods: Record<string, any> & ThisType<any> = {
   },
 
   /**
-   * Get CSS style for color swatch
+   * Get a validated CSS color value for a swatch custom property.
    * @param {string} colorName - Color name
    * @returns {string} CSS style string
    */
-  getColorStyle(colorName) {
+  getColorValue(colorName) {
     // Map common color names to CSS colors
     const colorMap = {
       'red': '#DC2626', 'blue': '#2563EB', 'green': '#16A34A', 'black': '#000000',
@@ -145,17 +167,16 @@ export const BundleModalVariantMethods: Record<string, any> & ThisType<any> = {
     const lowerName = colorName.toLowerCase();
     for (const [key, value] of Object.entries(colorMap)) {
       if (lowerName.includes(key)) {
-        return `background-color: ${value}`;
+        return value;
       }
     }
 
     // If no match, try to use the value directly as a color
-    if (lowerName.startsWith('#') || lowerName.startsWith('rgb')) {
-      return `background-color: ${colorName}`;
+    if (/^#[0-9a-f]{3,8}$/i.test(colorName) || isRgbColorValue(colorName)) {
+      return colorName;
     }
 
-    // Default gradient for unknown colors
-    return 'background: linear-gradient(135deg, #f0f0f0, #e0e0e0)';
+    return '';
   },
 
   /**

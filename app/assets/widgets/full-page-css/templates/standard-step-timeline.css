@@ -225,7 +225,7 @@
   right: -12px;
 }
 
-@media (max-width: 767px) {
+@container fpb-shell (max-width: 799px) {
   .layout-sidebar:is(
     [data-fpb-design-preset="STANDARD"],
     [data-fpb-design-preset="CLASSIC"]

@@ -1,33 +1,12 @@
 import { BUNDLE_WIDGET } from '../../shared/constants.js';
-import { CurrencyManager } from '../../shared/currency-manager.js';
 import { BundleDataManager } from '../../shared/bundle-data-manager.js';
-import { PricingCalculator } from '../../shared/pricing-calculator.js';
 import { ToastManager } from '../../shared/toast-manager.js';
-import { TemplateManager } from '../../shared/template-manager.js';
-import { ComponentGenerator } from '../../shared/component-generator.js';
-import { ConditionValidator } from '../../shared/condition-validator.js';
-import { createDefaultLoadingAnimation } from '../../shared/default-loading-animation.js';
-import { hideLoadingOverlayElement, markLoadingOverlayVisible } from '../../shared/loading-overlay.js';
-import { getDiscountProgressData, getSelectedQuantity, getTimelineEntryState } from '../../shared/engine/bundle-selectors.js';
-import { renderDiscountProgress } from '../../shared/components/discount-progress.js';
-import { createBundleBannerElement, createStepBannerImageElement } from '../../shared/components/bundle-banners.js';
-import { renderSharedProductCard } from '../../shared/components/product-card.js';
-import { renderSelectedProductRow } from '../../shared/components/selected-product-row.js';
-import { renderSelectedProductSlots } from '../../shared/components/selected-product-slots.js';
-import { renderStepTimelineEntry } from '../../shared/components/step-timeline.js';
-import {
-  buildCartLineDisplayProperties,
-  buildCartLineSourceProperties,
-} from '../../shared/engine/cart-lines.js';
 import {
   claimCheckoutIntegrationInvocation,
   getCheckoutIntegrationProvider,
   invokeCheckoutIntegrationProvider,
   waitForCheckoutIntegrationCapability,
 } from '../../shared/checkout-integration-adapters.js';
-
-const buildSharedCartLineDisplayProperties = buildCartLineDisplayProperties;
-const buildSharedCartLineSourceProperties = buildCartLineSourceProperties;
 
 export const fullPageAnalyticsConfigMethods: Record<string, any> & ThisType<any> = {
 _ensureWpbSessionId() {
@@ -92,68 +71,6 @@ _sendEngagementBeacon(eventName) {
     }).catch(() => { /* fire-and-forget */ });
   } catch (_e) {
     // Beacon failures must never break the widget.
-  }
-},
-
-/**
- * Hide the page body loading content
- * This hides the "Loading bundle builder..." text that was added to the Shopify page body
- */
-hidePageLoadingContent() {
-  try {
-    // Find the parent page element that contains the loading text
-    const pageContent = this.container.parentElement;
-
-    if (pageContent) {
-      // Hide all sibling divs that contain loading text
-      const siblings = Array.from(pageContent.children);
-      siblings.forEach(sibling => {
-        // Check if this is not the widget container and contains "Loading" text
-        if (sibling !== this.container &&
-            (sibling.textContent.includes('Loading bundle builder') ||
-             sibling.textContent.includes('Loading...'))) {
-          sibling.style.display = 'none';
-        }
-      });
-    }
-
-  } catch (error) {
-    // Don't throw - this is not critical
-  }
-},
-
-/**
- * Load Settings design CSS
- * Injects custom CSS from Settings -> Design into the page
- */
-loadDesignSettingsCSS() {
-  try {
-    // The Liquid template injects a <link> pointing to the design-settings app proxy URL.
-    // On non-production environments the app proxy may not be configured and Shopify
-    // returns an HTML error page instead of CSS, causing a MIME-type console error.
-    // Register an error listener: if the proxy link fails, fall back to the direct
-    // app server URL via window.__BUNDLE_APP_URL__.
-    const existingLink = document.querySelector('link[href*="design-settings"]');
-    if (!existingLink) return;
-
-    const appUrl = window.__BUNDLE_APP_URL__;
-    if (!appUrl) return;
-
-    const shop = window.Shopify?.shop || this.container.dataset.shop;
-    if (!shop) return;
-
-    existingLink.addEventListener('error', () => {
-      const directUrl = `${appUrl}/api/design-settings/${encodeURIComponent(shop)}?bundleType=full_page`;
-      const fallback = document.createElement('link');
-      fallback.rel = 'stylesheet';
-      fallback.type = 'text/css';
-      fallback.href = directUrl;
-      document.head.appendChild(fallback);
-      existingLink.remove();
-    }, { once: true });
-
-  } catch (_e) {
-    // Non-critical — widget works without design settings CSS
   }
 },
 
@@ -450,13 +367,8 @@ parseConfiguration() {
     // Custom content from theme editor
     customTitle: dataset.customTitle || null,
     customDescription: dataset.customDescription || null,
-    // Card layout settings from theme editor
-    productCardSpacing: parseInt(dataset.productCardSpacing) || 20,
-    productCardsPerRow: parseInt(dataset.productCardsPerRow) || 4,
     // Quantity selector visibility settings (default: show on both)
     showQuantitySelectorOnCard: dataset.showQuantitySelectorOnCard !== 'false',
-    // Promo banner settings from theme editor
-    showPromoBanner: dataset.showPromoBanner !== 'false',
     // Messages will be set from bundle.pricing.messages after bundle loads
     discountTextTemplate: 'Add {conditionText} to get {discountText}',
     successMessageTemplate: 'Congratulations! You got {discountText}!',
@@ -481,23 +393,6 @@ parseConfiguration() {
   }
 
   this._bundleConfigCacheMode = 'none';
-
-  // Apply card layout settings as CSS variables
-  this.applyCardLayoutSettings();
-},
-
-/**
- * Apply card layout settings from Theme Editor as CSS variables
- */
-applyCardLayoutSettings() {
-  document.documentElement.style.setProperty(
-    '--bundle-product-card-spacing',
-    `${this.config.productCardSpacing}px`
-  );
-  document.documentElement.style.setProperty(
-    '--bundle-product-cards-per-row',
-    this.config.productCardsPerRow
-  );
 },
 
 _parseBundleConfigPayload(rawValue) {
@@ -527,14 +422,14 @@ _isBundleConfigBootstrapPayload(payload) {
 async loadBundleData() {
   let bundleData = null;
 
-  // Check if this is a full-page bundle (needs to fetch from API)
-  const bundleType = this.container.dataset.bundleType;
   const bundleId = this.container.dataset.bundleId;
 
-  if (bundleType === 'full_page' && bundleId) {
+  if (!bundleId) {
+    throw new Error('Full-page bundle ID is required');
+  }
 
-    // Full-page bundle markers should be compact pointers. Legacy page HTML can
-    // still contain a full stale payload, so never render that payload directly.
+  {
+    // Only a source-marked, bundle-ID-matched app-proxy payload is authoritative.
     const cachedConfig = this.container.dataset.bundleConfig;
     const cachedPayload = this._parseBundleConfigPayload(cachedConfig);
     if (cachedPayload) {
@@ -549,13 +444,10 @@ async loadBundleData() {
         this._bundleConfigCacheMode = 'app-proxy-inline';
       } else if (this._isBundleConfigBootstrapPayload(cachedPayload)) {
         this._bundleConfigCacheMode = 'bootstrap';
-      } else if (typeof cachedPayload.id === 'string' && cachedPayload.id.trim() !== '') {
-        this._bundleConfigCacheMode = 'legacy-full';
       }
     }
 
-    // Hydrate current bundle data through the app proxy when the marker is
-    // compact, absent, or a legacy full payload.
+    // Hydrate through the app proxy when the authoritative payload is unavailable.
     if (!bundleData) {
       this._bundleConfigCacheMode = 'proxy';
 
@@ -610,42 +502,6 @@ async loadBundleData() {
       } catch (error) {
         throw error;
       }
-    }
-  } else {
-    // Product-page bundle: load from data-bundle-config attribute
-    const configValue = this.container.dataset.bundleConfig;
-    if (configValue && configValue.trim() !== '' && configValue !== 'null' && configValue !== 'undefined') {
-      try {
-        const singleBundle = JSON.parse(configValue);
-        // Validate parsed result is a valid object with an id
-        if (singleBundle && typeof singleBundle === 'object' && singleBundle.id) {
-          bundleData = { [singleBundle.id]: singleBundle };
-        } else {
-        }
-      } catch (error) {
-      }
-    } else {
-    }
-
-    // Widget only works on container products with bundleConfig metafield
-    if (!bundleData || (typeof bundleData === 'object' && Object.keys(bundleData).length === 0)) {
-      // Check if we're in theme editor mode
-      const isThemeEditor = window.Shopify?.designMode ||
-                           window.isThemeEditorContext ||
-                           window.location.pathname.includes('/editor') ||
-                           window.location.search.includes('preview_theme_id');
-
-      const bundleIdFromDataset = this.container.dataset.bundleId;
-
-      // Show helpful preview in theme editor instead of error
-      if (isThemeEditor && bundleIdFromDataset) {
-        this.showThemeEditorPreview(bundleIdFromDataset);
-        return; // Don't throw error, just show preview
-      }
-
-      // For production/storefront: show proper error
-      const errorMsg = 'This widget can only be used on bundle container products. Please ensure:\n1. This product is a bundle container product\n2. Bundle has been saved and published\n3. Product has bundleConfig metafield set';
-      throw new Error(errorMsg);
     }
   }
 

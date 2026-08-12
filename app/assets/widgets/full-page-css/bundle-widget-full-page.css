@@ -10,34 +10,3 @@
 @import "./base/floating-badge-sidebar-progress.css";
 @import "./base/loading-spinner-keyframes.css";
 @import "./base/clear-cart-confirmation.css";
-
-#bundle-builder-app.bundle-widget-full-page[data-bundle-type="full_page"] {
-  --fpb-shell-gutter: calc(100% / 24);
-  --fpb-shell-top-spacing: clamp(0.5rem, 1vw, 1rem);
-}
-
-#bundle-builder-app.bundle-widget-full-page[data-bundle-type="full_page"]
-  .layout-sidebar {
-  padding-block-start: var(--fpb-shell-top-spacing);
-  box-sizing: border-box;
-}
-
-#bundle-builder-app.bundle-widget-full-page[data-bundle-type="full_page"]
-  .layout-sidebar
-  > :is(.bundle-banners, .category-tabs, .sidebar-layout-wrapper) {
-  width: calc(100% - var(--fpb-shell-gutter) - var(--fpb-shell-gutter));
-  max-width: none;
-  margin-inline: auto;
-}
-
-@media (min-width: 1024px) {
-  #bundle-builder-app.bundle-widget-full-page[data-bundle-type="full_page"] {
-    --fpb-shell-gutter: calc(100% / 12);
-  }
-}
-
-@media (min-width: 1440px) {
-  #bundle-builder-app.bundle-widget-full-page[data-bundle-type="full_page"] {
-    --fpb-shell-gutter: calc(100% / 6);
-  }
-}

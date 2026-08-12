@@ -1,21 +1,21 @@
 {
-  "timestamp": "2026-08-10T23:17:19.201Z",
+  "timestamp": "2026-08-12T14:24:46.964Z",
   "summary": {
-    "totalSuites": 6,
-    "totalTests": 1852,
-    "totalPassed": 1852,
+    "totalSuites": 4,
+    "totalTests": 1783,
+    "totalPassed": 1783,
     "totalFailed": 0,
     "totalSkipped": 0,
-    "totalDuration": 10131
+    "totalDuration": 7499
   },
-  "totalDuration": 10131,
+  "totalDuration": 7501,
   "suites": [
     {
       "suite": "Unit Tests - Services",
       "passed": 262,
       "failed": 0,
       "skipped": 0,
-      "duration": 2239,
+      "duration": 2025,
       "commandFailed": false
     },
     {
@@ -23,7 +23,7 @@
       "passed": 22,
       "failed": 0,
       "skipped": 0,
-      "duration": 1007,
+      "duration": 1040,
       "commandFailed": false
     },
     {
@@ -31,31 +31,15 @@
       "passed": 409,
       "failed": 0,
       "skipped": 0,
-      "duration": 2392,
+      "duration": 2355,
       "commandFailed": false
     },
     {
       "suite": "Unit Tests - Assets",
-      "passed": 1129,
+      "passed": 1090,
       "failed": 0,
       "skipped": 0,
-      "duration": 2217,
-      "commandFailed": false
-    },
-    {
-      "suite": "Integration Tests",
-      "passed": 28,
-      "failed": 0,
-      "skipped": 0,
-      "duration": 1274,
-      "commandFailed": false
-    },
-    {
-      "suite": "End-to-End Tests",
-      "passed": 2,
-      "failed": 0,
-      "skipped": 0,
-      "duration": 1002,
+      "duration": 2079,
       "commandFailed": false
     }
   ],

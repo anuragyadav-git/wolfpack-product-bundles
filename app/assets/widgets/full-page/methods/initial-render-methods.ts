@@ -1,24 +1,3 @@
-import { BUNDLE_WIDGET } from '../../shared/constants.js';
-import { CurrencyManager } from '../../shared/currency-manager.js';
-import { BundleDataManager } from '../../shared/bundle-data-manager.js';
-import { PricingCalculator } from '../../shared/pricing-calculator.js';
-import { ToastManager } from '../../shared/toast-manager.js';
-import { TemplateManager } from '../../shared/template-manager.js';
-import { ComponentGenerator } from '../../shared/component-generator.js';
-import { ConditionValidator } from '../../shared/condition-validator.js';
-import { createDefaultLoadingAnimation } from '../../shared/default-loading-animation.js';
-import { hideLoadingOverlayElement, markLoadingOverlayVisible } from '../../shared/loading-overlay.js';
-import { getDiscountProgressData, getSelectedQuantity, getTimelineEntryState } from '../../shared/engine/bundle-selectors.js';
-import { renderDiscountProgress } from '../../shared/components/discount-progress.js';
-import { createBundleBannerElement, createStepBannerImageElement } from '../../shared/components/bundle-banners.js';
-import { renderSharedProductCard } from '../../shared/components/product-card.js';
-import { renderSelectedProductRow } from '../../shared/components/selected-product-row.js';
-import { renderSelectedProductSlots } from '../../shared/components/selected-product-slots.js';
-import { renderStepTimelineEntry } from '../../shared/components/step-timeline.js';
-import {
-  buildCartLineDisplayProperties,
-  buildCartLineSourceProperties,
-} from '../../shared/engine/cart-lines.js';
 import { FullPagePreset } from '../../shared/full-page-preset.js';
 
 export function getEnabledFullPageSteps(steps) {
@@ -187,153 +166,25 @@ initializeDataStructures() {
   this.stepProductData = Array(stepsCount).fill(null).map(() => ([]));
 },
 
-/**
- * Show a helpful preview in theme editor when testing on non-bundle products
- */
-showThemeEditorPreview(bundleId) {
-
-  this.container.innerHTML = `
-    <div style="
-      padding: 32px 24px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      border: 2px dashed #667eea;
-      border-radius: 12px;
-      text-align: center;
-      color: white;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    ">
-      <div style="
-        font-size: 48px;
-        margin-bottom: 16px;
-      ">📦</div>
-      <h3 style="
-        margin: 0 0 12px 0;
-        font-size: 20px;
-        font-weight: 600;
-      ">Bundle Widget Preview</h3>
-      <p style="
-        margin: 0 0 8px 0;
-        font-size: 14px;
-        opacity: 0.9;
-      ">
-        Bundle ID: <code style="
-          background: rgba(255, 255, 255, 0.2);
-          padding: 4px 8px;
-          border-radius: 4px;
-          font-family: monospace;
-        ">${bundleId}</code>
-      </p>
-      <div style="
-        margin: 20px auto 0;
-        padding: 16px;
-        background: rgba(255, 255, 255, 0.15);
-        border-radius: 8px;
-        max-width: 400px;
-        text-align: left;
-        font-size: 13px;
-        line-height: 1.6;
-      ">
-        <div style="
-          font-weight: 600;
-          margin-bottom: 8px;
-        ">✅ Widget Configured Successfully</div>
-        <div style="
-          opacity: 0.9;
-        ">
-          This widget will automatically display on <strong>bundle container products</strong>.
-          <br><br>
-          <strong>To see it in action:</strong>
-          <ol style="
-            margin: 8px 0;
-            padding-left: 20px;
-          ">
-            <li>Save your theme</li>
-            <li>Navigate to a bundle product page</li>
-            <li>The widget will appear with product selection steps</li>
-          </ol>
-        </div>
-      </div>
-      <div style="
-        margin-top: 20px;
-        padding: 12px;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 6px;
-        font-size: 12px;
-        opacity: 0.8;
-      ">
-        💡 <strong>Tip:</strong> You're currently previewing on a regular product. The widget only activates on products configured as bundle containers.
-      </div>
-    </div>
-  `;
-},
-
 // ========================================================================
 // DOM SETUP
 // ========================================================================
 
 setupDOMElements() {
-  // Get or create main UI elements
   this.elements = {
-    header: this.container.querySelector('.bundle-header') || this.createHeader(),
     stepsContainer: this.container.querySelector('.bundle-steps') || this.createStepsContainer(),
-    footer: this.container.querySelector('.bundle-footer-messaging') || this.createFooter(),
     modal: this.ensureModal()
   };
 
-  // Append elements if they were created
-  if (!this.container.querySelector('.bundle-header')) {
-    this.container.appendChild(this.elements.header);
-  }
   if (!this.container.querySelector('.bundle-steps')) {
     this.container.appendChild(this.elements.stepsContainer);
   }
-  if (!this.container.querySelector('.bundle-footer-messaging')) {
-    this.container.appendChild(this.elements.footer);
-  }
-},
-
-createHeader() {
-  const header = document.createElement('div');
-  header.className = 'bundle-header';
-
-  if (this.selectedBundle?.bundleType === BUNDLE_WIDGET.BUNDLE_TYPES.FULL_PAGE) {
-    header.style.display = 'none';
-    return header;
-  }
-
-  // Use custom title if provided, otherwise use bundle name
-  const title = this.config.customTitle || this.selectedBundle.name;
-
-  // Use custom description if provided, otherwise use bundle description
-  const description = this.config.customDescription || this.selectedBundle.description;
-
-  // Build header HTML (escape user-provided content)
-  const titleHTML = `<h2 class="bundle-title">${ComponentGenerator.escapeHtml(title)}</h2>`;
-  const descriptionHTML = (description && this.config.showDescription)
-    ? `<p class="bundle-description">${ComponentGenerator.escapeHtml(description)}</p>`
-    : '';
-
-  header.innerHTML = `
-    ${titleHTML}
-    ${descriptionHTML}
-  `;
-  return header;
 },
 
 createStepsContainer() {
   const container = document.createElement('div');
   container.className = 'bundle-steps';
   return container;
-},
-
-createFooter() {
-  const footer = document.createElement('div');
-  footer.className = 'bundle-footer-messaging';
-  footer.style.display = 'none';
-  footer.innerHTML = `
-    <div class="footer-discount-text"></div>
-  `;
-  return footer;
 },
 
 ensureModal() {
@@ -343,7 +194,7 @@ ensureModal() {
     modal = document.createElement('div');
     modal.id = 'bundle-builder-modal';
     modal.className = 'bundle-builder-modal';
-    modal.style.display = 'none';
+    modal.hidden = true;
     modal.innerHTML = `
       <div class="modal-overlay"></div>
       <div class="modal-content">
@@ -424,8 +275,8 @@ setupTabScrollArrows(modal) {
   const updateArrowVisibility = () => {
     const { scrollLeft, scrollWidth, clientWidth } = tabsContainer;
 
-    leftArrow.style.display = scrollLeft > 0 ? 'flex' : 'none';
-    rightArrow.style.display = scrollLeft + clientWidth < scrollWidth - 1 ? 'flex' : 'none';
+    leftArrow.hidden = scrollLeft <= 0;
+    rightArrow.hidden = scrollLeft + clientWidth >= scrollWidth - 1;
   };
 
   // Listen to scroll events
@@ -442,25 +293,7 @@ setupTabScrollArrows(modal) {
 // ========================================================================
 
 async renderUI() {
-  this.renderHeader();
   await this.renderSteps();
-  this.renderFooter();
-},
-
-renderHeader() {
-  // For full-page bundles, always hide the main header (promo banner handles the display)
-  const bundleType = this.selectedBundle?.bundleType || BUNDLE_WIDGET.BUNDLE_TYPES.PRODUCT_PAGE;
-  if (bundleType === BUNDLE_WIDGET.BUNDLE_TYPES.FULL_PAGE) {
-    this.elements.header.style.display = 'none';
-    return;
-  }
-
-  if (!this.config.showTitle) {
-    this.elements.header.style.display = 'none';
-    return;
-  }
-
-  this.elements.header.style.display = 'block';
 },
 
 async renderSteps() {
@@ -471,17 +304,7 @@ async renderSteps() {
     return;
   }
 
-  // Check bundle type and render accordingly
-  const bundleType = this.selectedBundle.bundleType || BUNDLE_WIDGET.BUNDLE_TYPES.PRODUCT_PAGE;
-
-  if (bundleType === BUNDLE_WIDGET.BUNDLE_TYPES.FULL_PAGE) {
-    // Wire the preset + template data attributes so the preset-scoped CSS
-    // rules in bundle-widget-full-page.css activate.
-    FullPagePreset.markContainer(this.container, this.selectedBundle);
-    await this.renderFullPageLayoutWithSidebar();
-    return;
-  }
+  FullPagePreset.markContainer(this.container, this.selectedBundle);
+  await this.renderFullPageLayout();
 },
-
-// Product-page bundle layout (original vertical step boxes)
 };

@@ -1,4 +1,4 @@
-@media (min-width: 1024px) {
+@container fpb-shell (min-width: 800px) {
   .bundle-widget-full-page
     .layout-sidebar[data-fpb-design-preset="CLASSIC"][data-fpb-summary-mode="sidebar"]
     .full-page-side-panel,
@@ -183,7 +183,7 @@
     );
   }
 
-  @media (min-width: 769px) {
+  @container fpb-shell (min-width: 800px) {
     .bundle-widget-full-page
       .layout-sidebar[data-fpb-design-preset="CLASSIC"]
       .fpb-box-selection-wrapper[data-total-rules="4"],
@@ -938,7 +938,7 @@
   }
 }
 
-@media (min-width: 1024px) {
+@container fpb-shell (min-width: 800px) {
   .bundle-widget-full-page
     .layout-sidebar[data-fpb-design-preset="CLASSIC"][data-fpb-summary-mode="sidebar"]
     .full-page-side-panel,

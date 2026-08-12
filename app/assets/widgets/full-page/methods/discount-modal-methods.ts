@@ -1,25 +1,9 @@
-import { BUNDLE_WIDGET } from '../../shared/constants.js';
 import { CurrencyManager } from '../../shared/currency-manager.js';
-import { BundleDataManager } from '../../shared/bundle-data-manager.js';
 import { PricingCalculator } from '../../shared/pricing-calculator.js';
 import { ToastManager } from '../../shared/toast-manager.js';
 import { TemplateManager } from '../../shared/template-manager.js';
-import { ComponentGenerator } from '../../shared/component-generator.js';
-import { ConditionValidator } from '../../shared/condition-validator.js';
-import { createDefaultLoadingAnimation } from '../../shared/default-loading-animation.js';
-import { hideLoadingOverlayElement, markLoadingOverlayVisible } from '../../shared/loading-overlay.js';
-import { getDiscountProgressData, getSelectedQuantity, getTimelineEntryState } from '../../shared/engine/bundle-selectors.js';
+import { getDiscountProgressData } from '../../shared/engine/bundle-selectors.js';
 import { renderDiscountProgress } from '../../shared/components/discount-progress.js';
-import { createBundleBannerElement, createStepBannerImageElement } from '../../shared/components/bundle-banners.js';
-import { renderSharedProductCard } from '../../shared/components/product-card.js';
-import { renderSelectedProductRow } from '../../shared/components/selected-product-row.js';
-import { renderSelectedProductSlots } from '../../shared/components/selected-product-slots.js';
-import { renderStepTimelineEntry } from '../../shared/components/step-timeline.js';
-import {
-  buildCartLineDisplayProperties,
-  buildCartLineSourceProperties,
-} from '../../shared/engine/cart-lines.js';
-
 
 export const fullPageDiscountModalMethods: Record<string, any> & ThisType<any> = {
 _renderDiscountProgress(options = {}) {
@@ -116,74 +100,6 @@ _renderDiscountProgress(options = {}) {
   return bar;
 },
 
-// Returns a new .discount-progress-banner DOM element, or null when no discount is configured.
-// Used by both the footer and the sidebar panel.
-_renderDiscountProgressBanner() {
-  if (!this.selectedBundle?.pricing?.enabled) return null;
-
-  const { totalPrice, totalQuantity, unitPrices } = PricingCalculator.calculateBundleTotal(
-    this.selectedProducts,
-    this.stepProductData,
-    this.selectedBundle?.steps
-  );
-  const discountInfo = this.getDiscountInfoWithSelectedAddonDiscount(
-    PricingCalculator.calculateDiscount(
-      this.selectedBundle, totalPrice, totalQuantity, unitPrices
-    ),
-    totalPrice
-  );
-  const currencyInfo = CurrencyManager.getCurrencyInfo();
-  const nextRule = PricingCalculator.getNextDiscountRule?.(this.selectedBundle, totalQuantity, totalPrice) || null;
-  const variables = TemplateManager.createDiscountVariables(
-    this.selectedBundle,
-    totalPrice,
-    totalQuantity,
-    discountInfo,
-    currencyInfo,
-    { messageType: nextRule ? 'progress' : 'success' }
-  );
-
-  let message = '';
-  let isReached = false;
-
-  if (nextRule) {
-    message = TemplateManager.replaceVariables(
-      this.config.discountTextTemplate || 'Add {{conditionText}} to get {{discountText}}',
-      variables
-    );
-  } else if (discountInfo.hasDiscount) {
-    isReached = true;
-    message = TemplateManager.replaceVariables(
-      this.config.successMessageTemplate || '🎉 You\'ve unlocked {{discountText}}!',
-      variables
-    );
-  } else {
-    return null;
-  }
-
-  const banner = document.createElement('div');
-  banner.className = 'discount-progress-banner' + (isReached ? ' reached' : '');
-  banner.innerHTML = message;
-  return banner;
-},
-
-// Updates the .discount-progress-banner already in the footer in-place (avoids full footer re-render).
-_updateDiscountProgressBanner() {
-  if (!this.elements.footer) return;
-  const existing = this.elements.footer.querySelector('.discount-progress-banner');
-  const fresh = this._renderDiscountProgressBanner();
-
-  if (fresh && existing) {
-    existing.className = fresh.className;
-    existing.innerHTML = fresh.innerHTML;
-  } else if (fresh && !existing) {
-    // Insert as first child (full-width slim banner before footer-inner)
-    this.elements.footer.insertBefore(fresh, this.elements.footer.firstChild);
-  } else if (!fresh && existing) {
-    existing.remove();
-  }
-},
-
 // ========================================================================
 // MODAL FUNCTIONALITY
 // ========================================================================
@@ -241,22 +157,21 @@ openModal(stepIndex) {
     this.updateModalFooterMessaging();
 
     // Show modal
-    modal.style.display = 'block';
+    modal.hidden = false;
     modal.classList.add('active');
-    document.body.style.overflow = 'hidden';
+    document.body.classList.add('modal-open');
   }).catch(error => {
     ToastManager.show('Failed to load products for this step');
   });
 },
 
 closeModal() {
-  this.elements.modal.style.display = 'none';
+  this.elements.modal.hidden = true;
   this.elements.modal.classList.remove('active');
-  document.body.style.overflow = '';
+  document.body.classList.remove('modal-open');
 
   // Update main UI
   this.renderSteps();
-  this.updateFooterMessaging();
 },
 
 resolveStorefrontApiBase() {
