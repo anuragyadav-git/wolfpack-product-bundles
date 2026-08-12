@@ -141,13 +141,13 @@ iframe is independent of the browser's top-level viewport.
 
 The preview uses local fixture markup and media, canonical template descriptors
 derived from the storefront registries, and theme values from the normalized
-storefront Design runtime. Builder, Product Picker, Cart / Summary, Loading,
-Validation, and Upsell are deterministic local surfaces rather than storefront
-interactions. Builder and Cart / Summary are the storefront-matched surfaces;
-the other states remain representative. Preview scenes use fixed logical
-1280×800 desktop and 390×844 mobile canvases that scale as a whole to fit their
+storefront Design runtime. It renders Bundle header, Navigation, Categories,
+Product cards, Product slots, Product picker, Cart / Summary, Loading,
+Validation, and Upsell as separate deterministic local surfaces. It does not
+compose or claim parity for a whole builder. Preview scenes use fixed logical
+1280×1136 desktop and 390×844 mobile canvases that scale as a whole to fit their
 Admin host, preserving the storefront breakpoint under test. Only slot templates
-include Product Picker. The preview does not
+include Product slots and Product picker. The preview does not
 fetch bundle data, load remote media, embed a storefront iframe, duplicate the
 widget runtime, mutate a cart, or persist preview state. Local Design editing and
 preview rendering therefore remain available when the shop has no storefront-ready

@@ -198,11 +198,13 @@ structures.
 
 The preview consumes the normalized output of `buildSettingsDesignRuntime`
 rather than maintaining a separate partial color mapper. A field-target registry
-associates every editable preview-relevant control with its semantic surface,
-applicable template set, and representative Builder, Product Picker, Cart /
-Summary, Loading, Validation, or Upsell surface. The surface selector exposes
-only scenes supported by the selected template. A template change preserves a
-valid surface and otherwise returns to Builder. The Images & GIFs section owns
+associates every editable preview-relevant control with its semantic component
+surface and applicable template set. The selector exposes Bundle header,
+Navigation, Categories, Product cards, Product slots, Product picker, Cart /
+Summary, Loading, Validation, and Upsell only where the selected template owns
+that component. There is no synthetic whole-builder surface. A template change
+preserves a valid component and otherwise selects Product cards, or Product
+slots for a slot template. The Images & GIFs section owns
 the store-level FPB loading GIF and background controls; either control selects
 the pure Loading surface, which renders the merchant GIF or the default spinner
 without provisional bundle content. While Loading is selected, Image Fit is

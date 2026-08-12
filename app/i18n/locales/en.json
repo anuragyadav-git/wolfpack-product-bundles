@@ -169,7 +169,11 @@
       "templateLabel": "Template",
       "surfaceSelector": {
         "label": "Preview surface",
-        "builder": "Builder",
+        "bundle-header": "Bundle header",
+        "navigation": "Navigation",
+        "categories": "Categories",
+        "product-card": "Product cards",
+        "product-slots": "Product slots",
         "product-picker": "Product picker",
         "cart-summary": "Cart / summary",
         "loading": "Loading",

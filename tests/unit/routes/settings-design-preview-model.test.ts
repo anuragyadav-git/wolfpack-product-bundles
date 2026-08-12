@@ -30,9 +30,9 @@ describe("Settings Design preview model", () => {
     expect(calculateDesignPreviewFitScale(0, "desktop")).toBe(1);
   });
 
-  it("limits storefront-match claims to Builder and Cart / Summary", () => {
+  it("does not expose or claim fidelity for a synthetic Builder surface", () => {
     for (const template of DESIGN_PREVIEW_TEMPLATES) {
-      expect(getDesignPreviewSurfaceFidelity(template.key, "builder")).toBe("storefront");
+      expect(template.supportedSurfaces).not.toContain("builder");
       expect(getDesignPreviewSurfaceFidelity(template.key, "cart-summary")).toBe("storefront");
       expect(getDesignPreviewSurfaceFidelity(template.key, "loading")).toBe("representative");
       expect(getDesignPreviewSurfaceFidelity(template.key, "validation")).toBe("representative");
@@ -58,7 +58,7 @@ describe("Settings Design preview model", () => {
         navigation: "timeline",
         categories: "accordion",
         summary: "rows",
-        surfaces: ["builder", "cart-summary", "loading", "validation", "upsell"],
+        surfaces: ["navigation", "categories", "product-card", "cart-summary", "loading", "validation", "upsell"],
       },
       {
         key: "classic",
@@ -67,7 +67,7 @@ describe("Settings Design preview model", () => {
         navigation: "timeline",
         categories: "pills",
         summary: "slot-grid",
-        surfaces: ["builder", "cart-summary", "loading", "validation", "upsell"],
+        surfaces: ["navigation", "categories", "product-card", "cart-summary", "loading", "validation", "upsell"],
       },
       {
         key: "compact",
@@ -76,7 +76,7 @@ describe("Settings Design preview model", () => {
         navigation: "compact-timeline",
         categories: "pills",
         summary: "compact-slots",
-        surfaces: ["builder", "cart-summary", "loading", "validation", "upsell"],
+        surfaces: ["navigation", "categories", "product-card", "cart-summary", "loading", "validation", "upsell"],
       },
       {
         key: "horizontal",
@@ -85,7 +85,7 @@ describe("Settings Design preview model", () => {
         navigation: "horizontal-timeline",
         categories: "underline",
         summary: "rows",
-        surfaces: ["builder", "cart-summary", "loading", "validation", "upsell"],
+        surfaces: ["navigation", "categories", "product-card", "cart-summary", "loading", "validation", "upsell"],
       },
       {
         key: "product-list",
@@ -94,7 +94,7 @@ describe("Settings Design preview model", () => {
         navigation: "list-steps",
         categories: "tabs",
         summary: "list-selected-drawer",
-        surfaces: ["builder", "cart-summary", "loading", "validation", "upsell"],
+        surfaces: ["bundle-header", "navigation", "categories", "product-card", "cart-summary", "loading", "validation", "upsell"],
       },
       {
         key: "product-grid",
@@ -103,7 +103,7 @@ describe("Settings Design preview model", () => {
         navigation: "grid-steps",
         categories: "tabs",
         summary: "pdp-footer",
-        surfaces: ["builder", "cart-summary", "loading", "validation", "upsell"],
+        surfaces: ["bundle-header", "navigation", "categories", "product-card", "cart-summary", "loading", "validation", "upsell"],
       },
       {
         key: "horizontal-slots",
@@ -112,7 +112,7 @@ describe("Settings Design preview model", () => {
         navigation: "none",
         categories: "none",
         summary: "modal-footer",
-        surfaces: ["builder", "product-picker", "cart-summary", "loading", "validation", "upsell"],
+        surfaces: ["bundle-header", "product-slots", "product-picker", "cart-summary", "loading", "validation", "upsell"],
       },
       {
         key: "vertical-slots",
@@ -121,7 +121,7 @@ describe("Settings Design preview model", () => {
         navigation: "none",
         categories: "none",
         summary: "modal-footer",
-        surfaces: ["builder", "product-picker", "cart-summary", "loading", "validation", "upsell"],
+        surfaces: ["bundle-header", "product-slots", "product-picker", "cart-summary", "loading", "validation", "upsell"],
       },
     ]);
   });
@@ -247,26 +247,19 @@ describe("Settings Design preview model", () => {
   });
 
   it("resolves required storefront-owned regions for representative scenes", () => {
-    expect(getDesignPreviewScene("standard", "builder", "desktop").regions).toEqual(
-      expect.arrayContaining(["timeline", "category-accordion", "product-grid", "summary-sidebar"]),
-    );
-    expect(getDesignPreviewScene("classic", "builder", "mobile").regions).toEqual(
-      expect.arrayContaining(["pill-categories", "product-grid", "expandable-summary-tray"]),
-    );
-    expect(getDesignPreviewScene("horizontal", "builder", "desktop").regions).toEqual(
-      expect.arrayContaining(["underline-categories", "product-rows", "summary-sidebar"]),
-    );
+    expect(getDesignPreviewScene("standard", "navigation", "desktop").regions).toEqual(["timeline"]);
+    expect(getDesignPreviewScene("classic", "categories", "mobile").regions).toEqual(["pill-categories"]);
+    expect(getDesignPreviewScene("horizontal", "product-card", "desktop").regions).toEqual(["product-rows"]);
     expect(getDesignPreviewScene("product-list", "cart-summary", "desktop").regions).toEqual(
       expect.arrayContaining(["product-list-selected-drawer", "pdp-footer"]),
     );
-    expect(getDesignPreviewScene("product-grid", "builder", "mobile").regions).toEqual(
-      expect.arrayContaining(["product-grid-step-headers", "product-grid", "pdp-footer"]),
-    );
+    expect(getDesignPreviewScene("product-grid", "navigation", "mobile").regions).toEqual(["product-grid-step-headers"]);
+    expect(getDesignPreviewScene("horizontal-slots", "product-slots", "desktop").regions).toEqual(["horizontal-slots"]);
     expect(getDesignPreviewScene("horizontal-slots", "product-picker", "desktop").regions).toEqual(
-      expect.arrayContaining(["horizontal-slots", "product-picker-modal"]),
+      ["product-picker-modal"],
     );
     expect(getDesignPreviewScene("vertical-slots", "product-picker", "mobile").regions).toEqual(
-      expect.arrayContaining(["vertical-slots", "product-picker-bottom-sheet"]),
+      ["product-picker-bottom-sheet"],
     );
   });
 

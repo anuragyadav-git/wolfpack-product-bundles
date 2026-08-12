@@ -64,7 +64,7 @@ export function DesignSettingsView({
   const isBrandColorsPanelGated = isExpertColorControls && selectedDesignTab.title === "Brand Colors" && !isExpertScopeActive;
   const hasPreviewableBundle = previewBundles.some((bundle) => Boolean(bundle.viewUrl));
   const [activePreviewFieldKey, setActivePreviewFieldKey] = useState<string | null>(null);
-  const [activePreviewSurface, setActivePreviewSurface] = useState<DesignPreviewSurface>("builder");
+  const [activePreviewSurface, setActivePreviewSurface] = useState<DesignPreviewSurface>("product-card");
   const resetSelectedDesignTab = () => {
     setDesignFieldValues((current) => ({
       ...current,

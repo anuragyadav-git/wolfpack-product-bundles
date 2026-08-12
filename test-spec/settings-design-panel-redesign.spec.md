@@ -4,7 +4,7 @@ id: settings-design-panel-redesign-spec
 title: Settings Design Panel Redesign Test Spec
 type: test-spec
 status: active
-summary: Behavior coverage for the responsive Settings Design workspace, storefront-matched key preview surfaces, and local colour guides.
+summary: Behavior coverage for the responsive Settings Design workspace, isolated component preview surfaces, and local colour guides.
 last_audited: 2026-08-13
 owners:
   - engineering
@@ -32,11 +32,11 @@ keywords:
 
 ## Purpose
 
-Verify that the Design subpage keeps its existing settings behavior while the
-local preview matches the Builder and Cart / Summary structure of every
-landing-page and product-page template, preserves representative secondary
-states, responds to every previewable setting, and remains usable across Admin
-container sizes.
+Verify that the Design subpage keeps its existing settings behavior while each
+major bundle component has its own preview surface for every applicable
+landing-page and product-page template, responds to every previewable setting,
+and remains usable across Admin container sizes. The preview must not present a
+synthetic whole-builder surface.
 
 ## Test Cases
 
@@ -50,8 +50,8 @@ container sizes.
 | 4 | Reject invalid combination | Landing Page with Product Grid | Combination is rejected | Uses existing template identifiers |
 | 5 | Change viewport | Mobile, then desktop | Only viewport changes | Type, template, and unsaved settings remain intact |
 | 6 | Change preview surface | Any surface supported by the selected template | Only preview surface changes | Template and viewport remain intact |
-| 7 | Reject unsupported surface | Product Picker on Product List | State remains on Builder | Template-aware surface contract |
-| 8 | Change template with incompatible surface | Product Picker, then Product List | Surface falls back to Builder | Valid state is always preserved |
+| 7 | Reject unsupported surface | Product Picker on Product List | State remains on Product card | Template-aware surface contract |
+| 8 | Change template with incompatible surface | Product Picker, then Product List | Surface falls back to Product card | Valid state is always preserved |
 | 9 | Resolve logical viewport | Desktop or mobile selector | Desktop uses 1280×1136 and mobile uses 390×844 | Both canvases fill the stable preview stage at wide Admin widths |
 | 10 | Fit logical viewport | Host width and selected logical viewport | Scale is capped at 1 and never drops below the minimum usable scale | Preview retains storefront breakpoints while fitting the Admin surface |
 
@@ -64,8 +64,8 @@ container sizes.
 | 3 | Build preview themes | Valid FPB and PPB Design state | Semantic tokens come from the correct normalized runtime family | Includes weights, radii, image fit, quantity, toast, footer, empty slot, and upsell tokens |
 | 4 | Resolve applicability | Field and selected template | Unsupported template-specific controls return a clear inapplicable result | No fabricated visual effect |
 | 5 | Build deterministic fixture | Local fixture registry | Multiple products, selections, slots, steps, categories, tiers, validation, and upsell data are present | Local media only |
-| 6 | Resolve scene regions | Template, surface, and viewport | Required storefront-owned regions are returned for all valid combinations | No merchant-theme chrome |
-| 7 | Resolve fidelity boundary | Every template and surface | Builder and Cart / Summary are storefront-matched; secondary states remain representative | Prevents false parity claims |
+| 6 | Resolve scene regions | Template, component surface, and viewport | Only the storefront-owned region for the selected component is returned | No whole-builder composition or merchant-theme chrome |
+| 7 | Resolve fidelity boundary | Every template and surface | Structural component previews and representative transient states are distinguished | Prevents false whole-builder parity claims |
 
 ### DesignLivePreview
 
@@ -73,11 +73,11 @@ container sizes.
 | --- | --- | --- | --- | --- |
 | 1 | Render selectors | Default state | Both bundle types and all valid templates are selectable | Preview-only controls |
 | 2 | Render viewport controls | Desktop state | Desktop and mobile buttons have labels and tooltips; desktop is active | One-click buttons |
-| 3 | Render each template | Eight valid initial states | The matching storefront-faithful fixture structure renders | No iframe or remote media |
-| 4 | Render template-aware surfaces | Product Picker, Cart / Summary, Loading, Validation, and Upsell | Only surfaces supported by the selected template are selectable and rendered | Deterministic local fixtures |
+| 3 | Render each template | Eight valid initial states | The matching default Product card or Product slots component renders | No iframe, remote media, or whole-builder surface |
+| 4 | Render template-aware surfaces | Bundle header, Navigation, Categories, Product card, Product slots, Product picker, Cart / summary, Loading, Validation, and Upsell | Only component surfaces supported by the selected template are selectable and rendered | Deterministic local fixtures |
 | 5 | Images and GIFs preview | Images & GIFs active | Image Fit updates fixture media; FPB GIF and background controls update a pure local loading-screen preview | No asynchronous preview work exists |
 | 6 | Missing real bundle | Empty preview-bundle list | Design controls and local fixture preview remain available | Only Preview Bundle needs a real URL |
-| 7 | Local preview media | Any Builder or Product Picker surface | Images use `OptimisedImage` with local PNG sources and generated-format siblings | CI owns AVIF/WebP generation |
+| 7 | Local preview media | Any Product card, Product slots, or Product picker surface | Images use `OptimisedImage` with local PNG sources and generated-format siblings | CI owns AVIF/WebP generation |
 | 8 | Responsive workspace controls | Narrow Admin container | Preview and Customize actions are exposed as one accessible segmented control | Preview is selected by default |
 | 9 | Phone workspace state | Switch between Preview and Customize | Active template, surface, viewport, active field, and unsaved values remain unchanged | Pane selection is preview-only UI state |
 | 10 | Logical preview canvas | Desktop or mobile preview | Scene renders at the selected storefront viewport and scales only to fit its host | Storefront breakpoints do not depend on the center-column width |
@@ -103,7 +103,7 @@ container sizes.
 - [x] All five relevant Expert groups expose local AVIF colour-guide links.
 - [ ] Entering Design crosses one lazy workspace boundary and reaches a usable preview within 750ms p75 in SIT.
 - [x] Existing save, discard, and reset behavior remains unchanged; Preview Bundle remains separate and requires a real storefront URL.
-- [ ] Builder and Cart / Summary match the current storefront structure for all eight templates at 1280×1136 and 390×844.
+- [x] The synthetic Builder surface is removed; every applicable major component has an isolated preview surface at 1280×1136 and 390×844.
 - [x] Phone-sized Admin containers expose Preview and Customize panes without losing local preview or unsaved Design state.
 - [x] Loading disables Image Fit, keeps loading controls active, and presents one clickable GIF drop zone without a nested button.
 - [x] Unit tests verify behavior and model outputs only; visual placement and styling are verified with Chrome, not source or CSS assertions.

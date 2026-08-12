@@ -68,12 +68,15 @@ are reference evidence only. This boundary lets template IDs and runtime design
 tokens stay canonical without coupling the Settings chunk to the storefront
 runtime.
 
-Builder and Cart / Summary are the storefront-matched key surfaces. They render
-inside fixed logical 1280×1136 desktop and 390×844 mobile canvases, then scale as
-a whole to fit the available Admin panel; the scale must not change the
-storefront breakpoint being represented. Product Picker, Loading, Validation,
-and Upsell remain deterministic representative states and must not be described
-as exact storefront matches.
+The Admin preview does not compose a synthetic whole builder. It renders each
+applicable major component independently: Bundle header, Navigation, Categories,
+Product cards, Product slots, Product picker, Cart / Summary, Loading,
+Validation, and Upsell. Component surfaces render inside fixed logical
+1280×1136 desktop and 390×844 mobile canvases, then scale as a whole to fit the
+available Admin panel; the scale must not change the storefront breakpoint
+being represented. Transient Product picker, Loading, Validation, and Upsell
+states remain deterministic representations and must not be described as exact
+storefront interactions.
 
 Source module names should describe their storefront responsibility. Avoid mechanical names such as `chunk-01.js` or `part-01.css`; those hide ownership and make stale widget code harder to spot.
 

@@ -11,6 +11,7 @@ import {
   DESIGN_PREVIEW_VIEWPORTS,
   buildDesignPreviewTheme,
   calculateDesignPreviewFitScale,
+  getDefaultDesignPreviewSurface,
   getDesignPreviewFieldTarget,
   getDesignPreviewSurfaceFidelity,
   getSupportedDesignPreviewSurfaces,
@@ -57,11 +58,12 @@ export function isDesignPreviewSurfaceSupported(
 export function createDesignPreviewState(
   bundleType: BundleContractType = "full_page",
 ): DesignPreviewState {
+  const templateKey = getDefaultTemplateKey(bundleType);
   return {
     bundleType,
-    templateKey: getDefaultTemplateKey(bundleType),
+    templateKey,
     viewport: "desktop",
-    surface: "builder",
+    surface: getDefaultDesignPreviewSurface(templateKey),
   };
 }
 
@@ -69,11 +71,12 @@ export function setDesignPreviewBundleType(
   state: DesignPreviewState,
   bundleType: BundleContractType,
 ): DesignPreviewState {
+  const templateKey = getDefaultTemplateKey(bundleType);
   return {
     ...state,
     bundleType,
-    templateKey: getDefaultTemplateKey(bundleType),
-    surface: "builder",
+    templateKey,
+    surface: getDefaultDesignPreviewSurface(templateKey),
   };
 }
 
@@ -89,7 +92,7 @@ export function setDesignPreviewTemplate(
     templateKey,
     surface: isDesignPreviewSurfaceSupported(templateKey, state.surface)
       ? state.surface
-      : "builder",
+      : getDefaultDesignPreviewSurface(templateKey),
   };
 }
 
@@ -331,33 +334,6 @@ function ProductGrid({
   );
 }
 
-function FullPageBuilder({
-  descriptor,
-  viewport,
-  t,
-}: {
-  descriptor: DesignPreviewTemplateDescriptor;
-  viewport: DesignPreviewViewport;
-  t: Translate;
-}) {
-  return (
-    <div className={styles.previewFullPage} data-full-page-template={descriptor.key}>
-      <StepNavigation descriptor={descriptor} t={t} />
-      <div className={styles.previewFullPageShell}>
-        <main>
-          <div className={styles.previewSectionHeading}>
-            <span><strong>{t("settingsDcp.preview.surface.categoryOne")}</strong><small>{t("settingsDcp.preview.surface.selectionRule")}</small></span>
-            <span>{t("settingsDcp.preview.surface.progressCount")}</span>
-          </div>
-          <CategoryNavigation descriptor={descriptor} t={t} />
-          <ProductGrid descriptor={descriptor} t={t} />
-        </main>
-        <BundleSummary descriptor={descriptor} viewport={viewport} t={t} />
-      </div>
-    </div>
-  );
-}
-
 function Slot({
   index,
   filled,
@@ -382,65 +358,63 @@ function Slot({
   );
 }
 
-function ProductPageBuilder({
-  descriptor,
-  viewport,
-  t,
-}: {
-  descriptor: DesignPreviewTemplateDescriptor;
-  viewport: DesignPreviewViewport;
-  t: Translate;
-}) {
-  const slotsRegion = descriptor.slotOrientation ? `${descriptor.slotOrientation}-slots` : null;
+function BundleHeaderPreview({ t }: { t: Translate }) {
   return (
-    <div className={styles.previewProductPage} data-product-page-template={descriptor.key} data-preview-region="neutral-pdp-shell">
-      <section className={styles.previewPdpMedia}>
-        <ProductImage product={DESIGN_PREVIEW_FIXTURE.products[0]} />
-        <div>{DESIGN_PREVIEW_FIXTURE.products.slice(1).map((product) => <ProductImage key={product.id} product={product} compact />)}</div>
-      </section>
-      <section className={styles.previewPdpDetails}>
+    <section className={styles.previewComponentSurface} data-preview-region="bundle-header">
+      <div className={styles.previewBundleHeader}>
         <small>{t("settingsDcp.preview.bundleType.productPage")}</small>
         <h3>{t("settingsDcp.preview.surface.bundleName")}</h3>
         <p>{t("settingsDcp.preview.surface.description")}</p>
         <DiscountProgress t={t} />
-        <StepNavigation descriptor={descriptor} t={t} />
-        <CategoryNavigation descriptor={descriptor} t={t} />
-        {descriptor.slotOrientation && slotsRegion ? (
-          <div className={styles.previewSlots} data-slot-direction={descriptor.slotOrientation} data-preview-region={slotsRegion}>
-            <Slot index={1} filled orientation={descriptor.slotOrientation} t={t} />
-            <Slot index={2} orientation={descriptor.slotOrientation} t={t} />
-            <Slot index={3} orientation={descriptor.slotOrientation} t={t} />
-          </div>
-        ) : (
-          <ProductGrid descriptor={descriptor} t={t} />
-        )}
-        <footer
-          className={styles.previewPdpFooter}
-          data-preview-region={descriptor.summary === "modal-footer" ? "modal-footer" : "pdp-footer"}
-        >
-          <span><small>{t("settingsDcp.preview.surface.totalLabel")}</small><strong>{t("settingsDcp.preview.surface.totalPrice")}</strong></span>
-          <button type="button" disabled>{t("settingsDcp.preview.surface.addBundle")}</button>
-        </footer>
-        {descriptor.summary === "list-selected-drawer" && viewport === "desktop" ? (
-          <BundleSummary descriptor={descriptor} viewport={viewport} t={t} />
-        ) : null}
-      </section>
-    </div>
+      </div>
+    </section>
   );
 }
 
-function BuilderPreview({
-  descriptor,
-  viewport,
-  t,
-}: {
-  descriptor: DesignPreviewTemplateDescriptor;
-  viewport: DesignPreviewViewport;
-  t: Translate;
-}) {
-  return descriptor.family === "full-page"
-    ? <FullPageBuilder descriptor={descriptor} viewport={viewport} t={t} />
-    : <ProductPageBuilder descriptor={descriptor} viewport={viewport} t={t} />;
+function NavigationPreview({ descriptor, t }: { descriptor: DesignPreviewTemplateDescriptor; t: Translate }) {
+  return (
+    <section className={styles.previewComponentSurface} data-preview-component="navigation">
+      <div className={styles.previewComponentContent}><StepNavigation descriptor={descriptor} t={t} /></div>
+    </section>
+  );
+}
+
+function CategoriesPreview({ descriptor, t }: { descriptor: DesignPreviewTemplateDescriptor; t: Translate }) {
+  return (
+    <section className={styles.previewComponentSurface} data-preview-component="categories">
+      <div className={styles.previewComponentContent}>
+        <div className={styles.previewSectionHeading}>
+          <span><strong>{t("settingsDcp.preview.surface.categoryOne")}</strong><small>{t("settingsDcp.preview.surface.selectionRule")}</small></span>
+          <span>{t("settingsDcp.preview.surface.progressCount")}</span>
+        </div>
+        <CategoryNavigation descriptor={descriptor} t={t} />
+      </div>
+    </section>
+  );
+}
+
+function ProductCardsPreview({ descriptor, t }: { descriptor: DesignPreviewTemplateDescriptor; t: Translate }) {
+  return (
+    <section className={styles.previewComponentSurface} data-preview-component="product-card">
+      <div className={styles.previewProductComponent}><ProductGrid descriptor={descriptor} t={t} /></div>
+    </section>
+  );
+}
+
+function ProductSlotsPreview({ descriptor, t }: { descriptor: DesignPreviewTemplateDescriptor; t: Translate }) {
+  if (!descriptor.slotOrientation) return null;
+  const slotsRegion = `${descriptor.slotOrientation}-slots`;
+  return (
+    <section className={styles.previewComponentSurface} data-preview-component="product-slots">
+      <div className={styles.previewComponentContent}>
+        <div className={styles.previewSlots} data-slot-direction={descriptor.slotOrientation} data-preview-region={slotsRegion}>
+          <Slot index={1} filled orientation={descriptor.slotOrientation} t={t} />
+          <Slot index={2} orientation={descriptor.slotOrientation} t={t} />
+          <Slot index={3} orientation={descriptor.slotOrientation} t={t} />
+        </div>
+      </div>
+    </section>
+  );
 }
 
 function ProductPicker({
@@ -455,7 +429,10 @@ function ProductPicker({
   const region = viewport === "mobile" ? "product-picker-bottom-sheet" : "product-picker-modal";
   return (
     <section className={styles.previewProductPicker} data-preview-region={region}>
-      <header><strong>{t("settingsDcp.preview.surface.chooseProduct")}</strong><button type="button" disabled>×</button></header>
+      <header>
+        <strong>{t("settingsDcp.preview.surface.chooseProduct")}</strong>
+        {viewport === "desktop" ? <button type="button" disabled>×</button> : null}
+      </header>
       <ProductGrid descriptor={descriptor} limit={3} t={t} />
     </section>
   );
@@ -471,7 +448,11 @@ function CartSummarySurface({
   t: Translate;
 }) {
   if (descriptor.family === "full-page") {
-    return <FullPageBuilder descriptor={descriptor} viewport={viewport} t={t} />;
+    return (
+      <div className={styles.previewCartFocus}>
+        <BundleSummary descriptor={descriptor} viewport={viewport} t={t} />
+      </div>
+    );
   }
   return (
     <div className={styles.previewCartFocus} data-preview-region="neutral-pdp-shell">
@@ -512,6 +493,12 @@ function PreviewSurface({
   loadingGifUrl: string;
   t: Translate;
 }) {
+  if (surface === "bundle-header") return <BundleHeaderPreview t={t} />;
+  if (surface === "navigation") return <NavigationPreview descriptor={descriptor} t={t} />;
+  if (surface === "categories") return <CategoriesPreview descriptor={descriptor} t={t} />;
+  if (surface === "product-card") return <ProductCardsPreview descriptor={descriptor} t={t} />;
+  if (surface === "product-slots") return <ProductSlotsPreview descriptor={descriptor} t={t} />;
+  if (surface === "product-picker") return <ProductPicker descriptor={descriptor} viewport={viewport} t={t} />;
   if (surface === "upsell") return <UpsellPreview t={t} />;
   if (surface === "cart-summary") return <CartSummarySurface descriptor={descriptor} viewport={viewport} t={t} />;
   if (surface === "loading") {
@@ -527,15 +514,9 @@ function PreviewSurface({
   }
 
   return (
-    <>
-      <BuilderPreview descriptor={descriptor} viewport={viewport} t={t} />
-      {surface === "product-picker" ? <ProductPicker descriptor={descriptor} viewport={viewport} t={t} /> : null}
-      {surface === "validation" ? (
-        <div className={styles.previewValidationToast} data-preview-region="validation-overlay" role="alert">
-          {t(DESIGN_PREVIEW_FIXTURE.validationMessage)}
-        </div>
-      ) : null}
-    </>
+    <div className={styles.previewValidationToast} data-preview-region="validation-overlay" role="alert">
+      {t(DESIGN_PREVIEW_FIXTURE.validationMessage)}
+    </div>
   );
 }
 
