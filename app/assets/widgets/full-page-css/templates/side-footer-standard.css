@@ -2524,14 +2524,16 @@ body:has([data-fpb-design-preset]) {
   align-self: center;
 }
 .layout-sidebar[data-fpb-design-preset="STANDARD"] .side-panel-total {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: auto auto;
-  gap: 8px;
-  align-items: center;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  column-gap: 0.25rem;
+  row-gap: 0;
+  align-items: baseline;
   justify-content: start;
 }
 .layout-sidebar[data-fpb-design-preset="STANDARD"] .side-panel-total-label {
+  order: 1;
   font-size: 14px;
   font-weight: 700;
   line-height: normal;
@@ -2545,7 +2547,29 @@ body:has([data-fpb-design-preset]) {
 }
 .layout-sidebar[data-fpb-design-preset="STANDARD"]
   .side-panel-total-prices {
-  justify-content: flex-start;
+  display: contents;
+}
+.layout-sidebar[data-fpb-design-preset="STANDARD"]
+  .side-panel-total-prices::before {
+  content: "";
+  flex: 0 0 100%;
+  height: 0;
+  order: 3;
+}
+.layout-sidebar[data-fpb-design-preset="STANDARD"]
+  .side-panel-total-prices
+  .fpb-summary-discount-badge {
+  order: 2;
+}
+.layout-sidebar[data-fpb-design-preset="STANDARD"]
+  .side-panel-total-original {
+  order: 5;
+  margin-top: 0.5rem;
+}
+.layout-sidebar[data-fpb-design-preset="STANDARD"]
+  .side-panel-total-final {
+  order: 4;
+  margin-top: 0.5rem;
 }
 .layout-sidebar[data-fpb-design-preset="STANDARD"] .side-panel-nav {
   display: grid;
