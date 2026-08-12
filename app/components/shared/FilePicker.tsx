@@ -14,7 +14,15 @@ import {
   MAX_POLLS,
   filenameFromUrl,
 } from "./file-picker/utils";
-import { shouldApplyUploadMutationResult } from "../../lib/file-picker-upload-state";
+import {
+  resolveFilePickerInitialOpen,
+  shouldApplyUploadMutationResult,
+} from "../../lib/file-picker-upload-state";
+import {
+  hidePolarisModal,
+  showPolarisModal,
+  useModalHideListener,
+} from "../../routes/app/_shared/bundle-configure/modal-utils";
 
 export function FilePicker({
   value,
@@ -30,7 +38,7 @@ export function FilePicker({
   autoOpen = false,
   onClose,
 }: FilePickerProps) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(() => resolveFilePickerInitialOpen(autoOpen));
   const previewActionsMenuId = `file-picker-preview-actions-${useId().replace(/:/g, "")}`;
   const dialogRef = useRef<any>(null);
   const [files, setFiles] = useState<StoreFile[]>([]);
@@ -56,13 +64,6 @@ export function FilePicker({
 
   const filesLoading = filesQuery.isFetching;
   const isBlocked = uploadStatus === "uploading" || uploadStatus === "polling";
-
-  useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog) return;
-    if (open) dialog.show?.();
-    if (!open) dialog.hide?.();
-  }, [open]);
 
   useEffect(() => {
     if (open && files.length === 0) {
@@ -199,6 +200,16 @@ export function FilePicker({
     onClose?.();
   }, [resetUploadState, onClose]);
 
+  useModalHideListener(dialogRef, handleClose);
+
+  useEffect(() => {
+    if (open) {
+      showPolarisModal(dialogRef);
+      return;
+    }
+    hidePolarisModal(dialogRef);
+  }, [open]);
+
   useEffect(() => {
     if (!open) return;
     const handler = (event: KeyboardEvent) => {
@@ -225,10 +236,6 @@ export function FilePicker({
     setSearch("");
     resetUploadState();
   }, [isBlocked, resetUploadState]);
-
-  useEffect(() => {
-    if (autoOpen) handleOpen();
-  }, [autoOpen, handleOpen]);
 
   const handleSelect = useCallback(() => {
     if (selectedUrl) onChange(selectedUrl);

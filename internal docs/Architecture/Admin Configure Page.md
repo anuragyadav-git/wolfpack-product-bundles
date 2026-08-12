@@ -52,6 +52,13 @@ separate cards below.
 
 PPB-only controls are explicit slots inside the shared rhythm. Category-level variant display controls update PPB `StepCategory.displayVariantsAsIndividualProducts` and `StepCategory.displayVariantsAsSwatches` fields; they are not step-wide FPB controls. Bundle Settings follows the same rule: shared rows cover overlapping settings, while FPB-only Product Slots / Slot Icon and PPB-only Variant Selector, discount display, banner, CSS, subscriptions, Bundle Embed, and Place Widget controls remain route-owned slots.
 
+Step Config uses the shared square step-image control beside the Step Title
+fields, with an explicit gap between those columns. Its Upload file and Replace
+actions mount `FilePicker` in auto-open mode. Auto-open pickers begin in the open
+state and use the shared Polaris modal utilities (`showOverlay()` plus native
+hide listeners); React custom-element `onHide` props and `show()` alone are not
+the supported lifecycle contract inside the embedded Admin iframe.
+
 SaveBar semantics remain route-owned. Shared configure UI should mark drafts dirty through the adapter but must not introduce autosave, wrap the canvas in a broad form, or make Enter keypresses submit the configure page.
 
 Successful fetcher saves trigger normal Remix loader revalidation. Rehydrating
