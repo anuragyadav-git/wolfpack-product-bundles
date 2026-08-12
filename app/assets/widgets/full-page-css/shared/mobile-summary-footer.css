@@ -259,7 +259,7 @@ body.fpb-mobile-summary-scroll-locked {
   .fpb-mobile-summary-dialog
   .fpb-mobile-summary-bundle-header {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: start;
   gap: var(--fpb-mobile-summary-gap);
   width: 100%;
@@ -291,26 +291,12 @@ body.fpb-mobile-summary-scroll-locked {
 
 #bundle-builder-app
   .fpb-mobile-summary-dialog
-  .fpb-mobile-summary-clear-btn,
-#bundle-builder-app
-  .fpb-mobile-summary-dialog
-  .fpb-mobile-summary-close-btn {
+  .fpb-mobile-summary-clear-btn {
   display: inline-grid;
   place-items: center;
   min-width: 44px;
   min-height: 44px;
   margin: 0;
-}
-
-#bundle-builder-app .fpb-mobile-summary-close-btn {
-  padding: 0;
-  border: 0;
-  border-radius: 50%;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  font-size: 28px;
-  cursor: pointer;
 }
 
 #bundle-builder-app

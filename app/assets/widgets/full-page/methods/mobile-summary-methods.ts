@@ -265,6 +265,7 @@ _populateCompactMobileSummaryTray(sheet) {
   dialog.setAttribute('aria-label', summaryToggleLabel);
   const dialogPanel = document.createElement('div');
   dialogPanel.className = 'fpb-mobile-summary-dialog-panel';
+  dialogPanel.tabIndex = -1;
   const dragHandle = document.createElement('div');
   dragHandle.className = 'fpb-mobile-summary-drag-handle';
   dragHandle.setAttribute('aria-hidden', 'true');
@@ -380,16 +381,6 @@ _populateCompactMobileSummaryTray(sheet) {
   const productsSection = document.createElement('div');
   productsSection.className = 'fpb-mobile-summary-products-section';
   const bundleItems = this._renderCompactMobileSummaryBundleItems(currencyInfo, totalQuantity);
-  const bundleHeader = bundleItems.querySelector?.('.fpb-mobile-summary-bundle-header');
-  if (bundleHeader) {
-    const closeButton = document.createElement('button');
-    closeButton.className = 'fpb-mobile-summary-close-btn';
-    closeButton.type = 'button';
-    closeButton.setAttribute('aria-label', 'Close bundle summary');
-    closeButton.textContent = '×';
-    closeButton.addEventListener('click', () => this._setCompactMobileSummaryOpen(sheet, false));
-    bundleHeader.appendChild(closeButton);
-  }
   productsSection.appendChild(bundleItems);
   dialogPanel.appendChild(productsSection);
 
@@ -464,7 +455,7 @@ _setCompactMobileSummaryOpen(sheet, expanded, { restoreFocus = true } = {}) {
   if (expanded) {
     if (dialog && !dialog.open) dialog.showModal?.();
     document.body?.classList?.add('fpb-mobile-summary-scroll-locked');
-    dialog?.querySelector?.('.fpb-mobile-summary-close-btn')?.focus?.();
+    dialog?.querySelector?.('.fpb-mobile-summary-dialog-panel')?.focus?.();
     return;
   }
 

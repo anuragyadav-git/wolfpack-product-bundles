@@ -93,9 +93,10 @@ the summary trigger and primary action. The trigger opens a modal bottom sheet
 that grows with its content up to `80dvh`; its header, totals, and action remain
 stationary while the selected-products region shows up to three rows and
 scrolls from the fourth row onward. Opening the sheet locks background scroll.
-Close, backdrop, Escape, trigger-toggle, and intentional downward-swipe paths
-all dismiss it and restore focus. Presets may change visual tokens, but must not
-fork this anatomy or interaction contract.
+Backdrop, Escape, trigger-toggle, and intentional downward-swipe paths all
+dismiss it and restore focus. The sheet does not render a separate close
+control. Presets may change visual tokens, but must not fork this anatomy or
+interaction contract.
 
 The shared FPB shell is the only owner of horizontal gutters. It mirrors the
 fluid EB shell contract with three direct rules: the outer shell fills the host

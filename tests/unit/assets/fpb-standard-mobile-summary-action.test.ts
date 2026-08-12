@@ -517,11 +517,14 @@ describe('FPB Standard mobile summary action', () => {
       setAttribute: jest.fn(),
       focus: jest.fn(),
     };
+    const dialogPanel = { focus: jest.fn() };
     const dialog = {
       open: false,
       showModal: jest.fn(function showModal(this: { open: boolean }) { this.open = true; }),
       close: jest.fn(function close(this: { open: boolean }) { this.open = false; }),
-      querySelector: jest.fn(() => ({ focus: jest.fn() })),
+      querySelector: jest.fn((selector: string) => (
+        selector === '.fpb-mobile-summary-dialog-panel' ? dialogPanel : null
+      )),
     };
     const tray = {
       classList,
@@ -546,6 +549,7 @@ describe('FPB Standard mobile summary action', () => {
     expect(countBadge.setAttribute).toHaveBeenCalledWith('aria-expanded', 'true');
     expect(dialog.showModal).toHaveBeenCalledTimes(1);
     expect(bodyClassList.add).toHaveBeenCalledWith('fpb-mobile-summary-scroll-locked');
+    expect(dialogPanel.focus).toHaveBeenCalledTimes(1);
 
     fullPageMobileSummaryMethods._toggleCompactMobileSummaryTray.call(
       context,

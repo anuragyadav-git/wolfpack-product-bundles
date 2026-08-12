@@ -42,7 +42,7 @@ gesture-driven paths across every FPB preset.
 | # | Scenario | Input | Expected Output | Notes |
 |---|---|---|---|---|
 | 1 | Open review sheet | Collapsed footer trigger | Dialog opens, page scrolling locks, and expanded state is exposed | Shared by all presets |
-| 2 | Explicit dismissal | Close, backdrop, Escape, or trigger | Dialog closes, scroll lock clears, and focus returns to trigger | Escape may use native dialog cancellation |
+| 2 | Explicit dismissal | Backdrop, Escape, or trigger | Dialog closes, scroll lock clears, and focus returns to trigger | No separate close control is rendered |
 | 3 | Swipe dismissal | Downward drag above distance threshold or velocity threshold | Dialog closes | Gesture starts from handle only |
 | 4 | Cancelled gesture | Short, slow, or primarily horizontal drag | Dialog remains open | Sheet returns to rest position |
 | 5 | Responsive cleanup | Open sheet changes to sidebar mode | Dialog closes and scroll lock clears | Desktop sidebar remains authoritative |
