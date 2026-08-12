@@ -42,6 +42,17 @@
   }
 }
 
+@container fpb-shell (min-width: 800px) {
+  #bundle-builder-app.bundle-widget-full-page[data-bundle-type="full_page"]
+    .layout-sidebar[data-fpb-summary-mode="sidebar"]
+    .full-page-side-panel
+    .side-panel-discount-message {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    line-height: 1.4;
+  }
+}
+
 #bundle-builder-app.bundle-widget-full-page[data-bundle-type="full_page"]
   .layout-sidebar[data-fpb-summary-mode="tray"]
   .fpb-full-page-content-header {
