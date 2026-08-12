@@ -20,7 +20,7 @@ import { join } from "node:path";
 describe("Settings Design preview model", () => {
   it("uses the storefront parity viewports and fits them without changing their logical width", () => {
     expect(DESIGN_PREVIEW_VIEWPORTS).toEqual({
-      desktop: { width: 1280, height: 800 },
+      desktop: { width: 1280, height: 960 },
       mobile: { width: 390, height: 844 },
     });
     expect(calculateDesignPreviewFitScale(1280, "desktop")).toBe(1);
@@ -154,7 +154,7 @@ describe("Settings Design preview model", () => {
       "product-list",
     )?.surface).toBe("cart-summary");
     expect(getDesignPreviewFieldTarget(
-      "expert.generalSettings.loadingBgColor",
+      "generalSettings.loadingBgColor",
       "standard",
     )?.surface).toBe("loading");
     expect(getDesignPreviewFieldTarget(
@@ -193,7 +193,7 @@ describe("Settings Design preview model", () => {
       "Product Card & Cart Base": "11px",
       "Image Fit": "Contain",
       "expert.navigationBanner.navigationCheckColor": "#010101",
-      "expert.generalSettings.loadingBgColor": "#020202",
+      "generalSettings.loadingBgColor": "#020202",
       "expert.generalSettings.conditionToastBgColor": "#070707",
       "expert.productCard.productCardButtonColor": "#112233",
       "expert.emptyStateCard.emptyStateCardBorderColor": "#080808",

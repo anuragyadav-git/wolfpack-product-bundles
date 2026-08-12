@@ -69,7 +69,7 @@ tokens stay canonical without coupling the Settings chunk to the storefront
 runtime.
 
 Builder and Cart / Summary are the storefront-matched key surfaces. They render
-inside fixed logical 1280×800 desktop and 390×844 mobile canvases, then scale as
+inside fixed logical 1280×960 desktop and 390×844 mobile canvases, then scale as
 a whole to fit the available Admin panel; the scale must not change the
 storefront breakpoint being represented. Product Picker, Loading, Validation,
 and Upsell remain deterministic representative states and must not be described
@@ -109,9 +109,12 @@ Product Page inventory normalization preserves `sourceVariantCount` after unavai
 
 The app embed and the FPB bundle have two legitimate initialization triggers: the embed's script-load callback and the bundle's own DOM-ready bootstrap. They can overlap on app-proxy pages. The FPB entry point must synchronously claim the container with `data-initializing` before constructing a controller, set `data-initialized` only after successful initialization, and release the in-progress claim in `finally` so a failed attempt remains retryable.
 
-The app-proxy marker is server-rendered with `hidden` and is hydrated near the end of the document. Without earlier geometry, the theme footer can paint in the future widget area and then leave the viewport when the controller renders. The marker contains a decorative, responsive card-and-summary skeleton so slow document or asset loading never presents a blank reserved viewport. `bundle-widget-bootstrap.css` is loaded from the app embed's schema into the document head. It reserves `100svh` for the unhydrated marker and renders that skeleton without depending on the main widget stylesheet. During hydration, the app embed moves the same skeleton into the FPB root instead of replacing it with a generic spinner and marks the root `aria-busy="true"`; widget initialization removes the skeleton and clears the busy state after rendered bundle content is ready. The canonical app-proxy marker is required to contain this skeleton and missing markup fails fast rather than invoking a compatibility path. Keep the bootstrap asset small and marker/root-specific because the enabled app embed loads it across storefront pages.
+The app-proxy marker is server-rendered with `hidden` and is hydrated near the end of the document. Without earlier geometry, the theme footer can paint in the future widget area and then leave the viewport when the controller renders. The marker therefore contains one pure loading screen that reserves `100svh`; it never renders provisional product cards, summary content, or layout skeletons. `bundle-widget-bootstrap.css` is loaded from the app embed's schema into the document head so the screen does not depend on the main widget stylesheet. During hydration, the app embed moves the same loading screen into the FPB root and marks the root `aria-busy="true"`; widget initialization removes it and clears the busy state only after rendered bundle content is ready. The canonical app-proxy marker must contain this loading screen, and missing markup fails fast rather than invoking a compatibility path. Keep the bootstrap asset small and marker/root-specific because the enabled app embed loads it across storefront pages.
 
-Rendered FPB summaries have a separate empty-selection contract. When Product
+Settings -> Design owns the store-level FPB loading appearance. `generalSettings.loadingScreen` carries an optional HTTPS GIF URL and a validated background color. The app-proxy route reads those settings before first paint, renders the merchant GIF when present, and otherwise renders the default CSS spinner. The app embed also transfers these values to the controller so later product-grid and step transitions use the same full-screen overlay. All four FPB presets use this loading screen; no preset may restore transient card or sidebar skeletons.
+
+Rendered FPB summaries have a separate empty-selection contract and are not a
+loading state. When Product
 Slots is disabled, Standard, Classic, Compact, and Horizontal all render the
 same responsive product-row skeleton behavior on desktop and mobile. The
 baseline target is two rows for a new bundle; an explicit larger quantity

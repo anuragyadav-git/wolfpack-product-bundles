@@ -13,6 +13,7 @@ import {
   MAX_BYTES,
   MAX_POLLS,
   filenameFromUrl,
+  isAcceptedFileType,
 } from "./file-picker/utils";
 import {
   resolveFilePickerInitialOpen,
@@ -30,11 +31,14 @@ export function FilePicker({
   label = "Choose background image",
   hint,
   uploadLabel = "Upload image",
+  showUploadButton = true,
   triggerIcon = "desktop",
   uploadButtonAction = "upload",
   fitPreviewToTrigger = false,
   maxUploadBytes = MAX_BYTES,
   maxUploadErrorMessage = "File must be under 20 MB.",
+  acceptedTypes = ACCEPTED_TYPES,
+  invalidTypeErrorMessage = "Choose a supported image file.",
   autoOpen = false,
   onClose,
 }: FilePickerProps) {
@@ -283,6 +287,12 @@ export function FilePicker({
         return;
       }
 
+      if (!isAcceptedFileType(file.type, acceptedTypes)) {
+        setSizeError(invalidTypeErrorMessage);
+        setUploadFromTrigger(false);
+        return;
+      }
+
       if (file.size > maxUploadBytes) {
         setSizeError(maxUploadErrorMessage);
         setUploadFromTrigger(false);
@@ -300,7 +310,7 @@ export function FilePicker({
       form.append("file", file);
       void uploadStoreFile(form);
     },
-    [maxUploadBytes, maxUploadErrorMessage, uploadStoreFile],
+    [acceptedTypes, invalidTypeErrorMessage, maxUploadBytes, maxUploadErrorMessage, uploadStoreFile],
   );
 
   const filteredFiles = search
@@ -328,6 +338,7 @@ export function FilePicker({
           label={label}
           hint={hint}
           uploadLabel={uploadLabel}
+          showUploadButton={showUploadButton}
           triggerIcon={triggerIcon}
           uploadButtonAction={uploadButtonAction}
           fitPreviewToTrigger={fitPreviewToTrigger}
@@ -359,7 +370,7 @@ export function FilePicker({
       <input
         ref={fileInputRef}
         type="file"
-        accept={ACCEPTED_TYPES}
+        accept={acceptedTypes}
         style={{ display: "none" }}
         onChange={handleFileInputChange}
       />

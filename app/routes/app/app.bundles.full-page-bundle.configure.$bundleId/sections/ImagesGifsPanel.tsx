@@ -8,19 +8,15 @@ export function FpbImagesGifsPanel({
   const {
     activeAssetTabIndex,
     activeSection,
-    bundle,
     FilePicker,
     floatingBadgeEnabled,
     floatingBadgeText,
     fullPageBundleStyles,
-    loadingGif,
     markAsDirty,
     promoBannerBgImage,
-    RichHelpTooltip,
     setActiveAssetTabIndex,
     setFloatingBadgeEnabled,
     setFloatingBadgeText,
-    setLoadingGif,
     setPromoBannerBgImage,
     stepsState,
   } = flow;
@@ -248,110 +244,6 @@ export function FpbImagesGifsPanel({
               </s-stack>
             </s-section>
           )}
-          <s-section>
-            <s-stack direction="block" gap="base">
-              <s-stack direction="inline">
-                <s-stack direction="inline" gap="small" inlineSize="100%">
-                  <s-icon type="clock" />
-                  <s-stack direction="block" gap="small-400">
-                    <p style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>
-                      Loading Animation
-                    </p>
-                    <p
-                      style={{
-                        margin: 0,
-                        fontSize: 12,
-                        color: "#6d7175",
-                      }}
-                    >
-                      Overlay shown while bundle content is loading
-                    </p>
-                  </s-stack>
-                </s-stack>
-                <RichHelpTooltip
-                  label="Storefront"
-                  tooltipKey="loadingAnimation"
-                />
-              </s-stack>
-              <div
-                style={{
-                  padding: "var(--s-space-400)",
-                  background: "var(--s-color-bg-surface-secondary, #f6f6f7)",
-                  borderRadius: 8,
-                }}
-              >
-                <s-stack direction="inline" gap="large">
-                  <s-stack direction="block" gap="small-400">
-                    <p
-                      style={{
-                        margin: 0,
-                        fontSize: 11,
-                        fontWeight: 600,
-                        color: "#6d7175",
-                      }}
-                    >
-                      FORMAT
-                    </p>
-                    <p style={{ margin: 0, fontSize: 14 }}>GIF only</p>
-                  </s-stack>
-                  <s-stack direction="block" gap="small-400">
-                    <p
-                      style={{
-                        margin: 0,
-                        fontSize: 11,
-                        fontWeight: 600,
-                        color: "#6d7175",
-                      }}
-                    >
-                      RECOMMENDED SIZE
-                    </p>
-                    <p style={{ margin: 0, fontSize: 14 }}>Max 150 × 150 px</p>
-                  </s-stack>
-                </s-stack>
-              </div>
-              <s-divider />
-              <FilePicker
-                label="Choose loading GIF"
-                value={loadingGif}
-                onChange={(url) => {
-                  setLoadingGif(url);
-                  markAsDirty();
-                }}
-              />
-              <s-stack direction="block" gap="small-100">
-                <p
-                  style={{
-                    margin: 0,
-                    fontSize: 11,
-                    fontWeight: 600,
-                    color: "#6d7175",
-                  }}
-                >
-                  PREVIEW
-                </p>
-                <div
-                  className={fullPageBundleStyles.loadingAnimationPreview}
-                  role="img"
-                  aria-label={
-                    loadingGif
-                      ? "Loading animation preview"
-                      : "Default loading spinner preview"
-                  }
-                >
-                  {loadingGif ? (
-                    <img src={loadingGif} alt="" />
-                  ) : (
-                    <span
-                      className={
-                        fullPageBundleStyles.loadingAnimationPreviewSpinner
-                      }
-                      aria-hidden="true"
-                    />
-                  )}
-                </div>
-              </s-stack>
-            </s-stack>
-          </s-section>
           <s-section>
             <s-stack direction="block" gap="base">
               <s-stack direction="inline">

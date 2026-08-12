@@ -2,6 +2,7 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { DESIGN_CONFIGURATION } from "../../../app/lib/admin-configuration-surfaces";
 import { DesignSettingsView } from "../../../app/routes/app/app.settings/DesignSettingsView";
+import { DesignFields } from "../../../app/routes/app/app.settings/SettingsDesignFields";
 
 jest.mock("react-i18next", () => ({
   useTranslation: () => ({ t: (key: string) => key }),
@@ -11,7 +12,28 @@ jest.mock("@shopify/app-bridge-react", () => ({
   useAppBridge: () => ({ saveBar: { show: jest.fn(), hide: jest.fn() } }),
 }));
 
+jest.mock("../../../app/components/shared/FilePicker", () => ({
+  FilePicker: ({ label }: { label: string }) => React.createElement("div", null, label),
+}));
+
 describe("DesignSettingsView live preview", () => {
+  it("disables Image Fit while the Loading preview surface is active", () => {
+    const imageFields = DESIGN_CONFIGURATION.find((tab) => tab.title === "Images & GIFs")?.fields ?? [];
+    const view = renderToStaticMarkup(
+      React.createElement(DesignFields, {
+        title: "Images & GIFs",
+        fields: imageFields,
+        values: {},
+        disabledFieldKeys: ["Image Fit"],
+        onFieldChange: jest.fn(),
+      }),
+    );
+
+    expect(view).toContain('<s-select label="Image Fit" name="Image Fit" value="Cover" disabled="true">');
+    expect(view).toContain("FPB Loading GIF");
+    expect(view).toContain("Loading Screen Background Color");
+  });
+
   it("renders live feedback inside the existing design settings view", () => {
     const view = renderToStaticMarkup(
       React.createElement(DesignSettingsView, {
@@ -85,7 +107,7 @@ describe("DesignSettingsView live preview", () => {
     expect(view).toContain('<s-button icon="view" disabled="true">Preview Bundle</s-button>');
   });
 
-  it("keeps Images & GIFs preview content usable without a loading status", () => {
+  it("exposes FPB loading controls and the loading preview surface", () => {
     const imagesTab = DESIGN_CONFIGURATION.find((tab) => tab.title === "Images & GIFs");
     expect(imagesTab).toBeDefined();
 
@@ -116,7 +138,8 @@ describe("DesignSettingsView live preview", () => {
     );
 
     expect(view).toContain('aria-label="Live bundle preview"');
-    expect(view).not.toContain('role="status"');
-    expect(view).not.toContain("settingsDcp.preview.loading");
+    expect(view).toContain("FPB Loading GIF");
+    expect(view).toContain("Loading Screen Background Color");
+    expect(view).toContain('<s-option value="loading">');
   });
 });

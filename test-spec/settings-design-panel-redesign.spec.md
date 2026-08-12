@@ -5,7 +5,7 @@ title: Settings Design Panel Redesign Test Spec
 type: test-spec
 status: active
 summary: Behavior coverage for the responsive Settings Design workspace, storefront-matched key preview surfaces, and local colour guides.
-last_audited: 2026-07-30
+last_audited: 2026-08-13
 owners:
   - engineering
 domains:
@@ -52,7 +52,7 @@ container sizes.
 | 6 | Change preview surface | Any surface supported by the selected template | Only preview surface changes | Template and viewport remain intact |
 | 7 | Reject unsupported surface | Product Picker on Product List | State remains on Builder | Template-aware surface contract |
 | 8 | Change template with incompatible surface | Product Picker, then Product List | Surface falls back to Builder | Valid state is always preserved |
-| 9 | Resolve logical viewport | Desktop or mobile selector | Desktop uses 1280×800 and mobile uses 390×844 | Matches storefront parity evidence viewports |
+| 9 | Resolve logical viewport | Desktop or mobile selector | Desktop uses 1280×960 and mobile uses 390×844 | The taller desktop canvas consumes the available preview workspace |
 | 10 | Fit logical viewport | Host width and selected logical viewport | Scale is capped at 1 and never drops below the minimum usable scale | Preview retains storefront breakpoints while fitting the Admin surface |
 
 ### DesignPreviewModel
@@ -75,12 +75,14 @@ container sizes.
 | 2 | Render viewport controls | Desktop state | Desktop and mobile buttons have labels and tooltips; desktop is active | One-click buttons |
 | 3 | Render each template | Eight valid initial states | The matching storefront-faithful fixture structure renders | No iframe or remote media |
 | 4 | Render template-aware surfaces | Product Picker, Cart / Summary, Loading, Validation, and Upsell | Only surfaces supported by the selected template are selectable and rendered | Deterministic local fixtures |
-| 5 | Images and GIFs preview | Images & GIFs active | Image Fit updates fixture media and loading mode remains local | No asynchronous preview work exists |
+| 5 | Images and GIFs preview | Images & GIFs active | Image Fit updates fixture media; FPB GIF and background controls update a pure local loading-screen preview | No asynchronous preview work exists |
 | 6 | Missing real bundle | Empty preview-bundle list | Design controls and local fixture preview remain available | Only Preview Bundle needs a real URL |
 | 7 | Local preview media | Any Builder or Product Picker surface | Images use `OptimisedImage` with local PNG sources and generated-format siblings | CI owns AVIF/WebP generation |
 | 8 | Responsive workspace controls | Narrow Admin container | Preview and Customize actions are exposed as one accessible segmented control | Preview is selected by default |
 | 9 | Phone workspace state | Switch between Preview and Customize | Active template, surface, viewport, active field, and unsaved values remain unchanged | Pane selection is preview-only UI state |
 | 10 | Logical preview canvas | Desktop or mobile preview | Scene renders at the selected storefront viewport and scales only to fit its host | Storefront breakpoints do not depend on the center-column width |
+| 11 | Loading surface field relevance | Loading surface with Images & GIFs active | Image Fit is disabled while GIF and background controls remain interactive | Image Fit does not affect a loading screen |
+| 12 | Empty loading GIF picker | No saved GIF | The whole drop zone is clickable, says `Click to upload a loading GIF`, and has no nested upload button | One clear upload action |
 
 ### ColourGuideLinks
 
@@ -101,6 +103,7 @@ container sizes.
 - [x] All five relevant Expert groups expose local AVIF colour-guide links.
 - [ ] Entering Design crosses one lazy workspace boundary and reaches a usable preview within 750ms p75 in SIT.
 - [x] Existing save, discard, and reset behavior remains unchanged; Preview Bundle remains separate and requires a real storefront URL.
-- [ ] Builder and Cart / Summary match the current storefront structure for all eight templates at 1280×800 and 390×844.
+- [ ] Builder and Cart / Summary match the current storefront structure for all eight templates at 1280×960 and 390×844.
 - [x] Phone-sized Admin containers expose Preview and Customize panes without losing local preview or unsaved Design state.
+- [x] Loading disables Image Fit, keeps loading controls active, and presents one clickable GIF drop zone without a nested button.
 - [x] Unit tests verify behavior and model outputs only; visual placement and styling are verified with Chrome, not source or CSS assertions.

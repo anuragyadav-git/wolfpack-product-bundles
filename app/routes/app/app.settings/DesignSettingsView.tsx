@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { DESIGN_CONFIGURATION, EXPERT_COLOR_CONTROLS } from "../../../lib/admin-configuration-surfaces";
 import { BundlePreviewModal, DesignFields, getDesignIconKey } from "./SettingsDesignFields";
 import { DesignLivePreview } from "./DesignLivePreview";
+import type { DesignPreviewSurface } from "./design-preview-model";
 import styles from "./DesignSettingsView.module.css";
 import { SettingsContextualSaveBar, SettingsToast } from "./SettingsFeedback";
 
@@ -63,6 +64,7 @@ export function DesignSettingsView({
   const isBrandColorsPanelGated = isExpertColorControls && selectedDesignTab.title === "Brand Colors" && !isExpertScopeActive;
   const hasPreviewableBundle = previewBundles.some((bundle) => Boolean(bundle.viewUrl));
   const [activePreviewFieldKey, setActivePreviewFieldKey] = useState<string | null>(null);
+  const [activePreviewSurface, setActivePreviewSurface] = useState<DesignPreviewSurface>("builder");
   const resetSelectedDesignTab = () => {
     setDesignFieldValues((current) => ({
       ...current,
@@ -118,6 +120,7 @@ export function DesignSettingsView({
               fieldValues={designFieldValues}
               isExpertControlsEnabled={isExpertColorControls}
               activeFieldKey={activePreviewFieldKey}
+              onSurfaceChange={setActivePreviewSurface}
             />
           </div>
           <div
@@ -216,6 +219,7 @@ export function DesignSettingsView({
               title={isExpertColorControls && selectedDesignTab.title === "Brand Colors" && isExpertScopeActive ? activeDesignScope : selectedDesignTab.title}
               fields={selectedDesignFields}
               values={designFieldValues}
+              disabledFieldKeys={activePreviewSurface === "loading" ? ["Image Fit"] : []}
               onFieldChange={(label, value) => {
                 if (isBrandColorsPanelGated) {
                   return;

@@ -89,7 +89,7 @@ export type DesignPreviewTheme = CSSProperties & Record<`--preview-${string}`, s
 export const DESIGN_PREVIEW_VIEWPORTS: Readonly<
   Record<DesignPreviewViewport, { width: number; height: number }>
 > = {
-  desktop: { width: 1280, height: 800 },
+  desktop: { width: 1280, height: 960 },
   mobile: { width: 390, height: 844 },
 };
 
@@ -338,12 +338,13 @@ export const DESIGN_PREVIEW_FIELD_TARGETS: Readonly<Record<string, DesignPreview
   "Product Card & Cart Corner Style": productTarget("product cards", "cart"),
   "Product Card & Cart Base": productTarget("product cards", "cart", "product images"),
   "Image Fit": productTarget("product images"),
+  "generalSettings.loadingGifUrl": target("loading", ["loading animation"]),
+  "generalSettings.loadingBgColor": target("loading", ["loading screen background"]),
   "expert.navigationBanner.navigationBannerStepCompletionColor": target("builder", ["completed steps"], { templates: ALL_FPB_TEMPLATES }),
   "expert.navigationBanner.navigationCheckColor": target("builder", ["completed step checks"], { templates: ALL_FPB_TEMPLATES }),
   "expert.navigationBanner.navigationBannerStepTextColor": target("builder", ["step labels"], { templates: ALL_FPB_TEMPLATES }),
   "expert.generalSettings.productPageTitleColor": target("builder", ["product-page title"], { templates: PRODUCT_PAGE_TEMPLATES }),
   "expert.navigationBanner.navigationBannerStepProgressBarEmptyColor": target("builder", ["step progress"], { templates: ALL_FPB_TEMPLATES }),
-  "expert.generalSettings.loadingBgColor": target("loading", ["loading overlay"]),
   "expert.generalSettings.conditionToastBgColor": target("validation", ["condition toast"]),
   "expert.generalSettings.conditionToastTextColor": target("validation", ["condition toast text"]),
   "expert.navigationBanner.tabsActiveBgColor": target("builder", ["active categories"], { templates: CATEGORY_TEMPLATES }),

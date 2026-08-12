@@ -51,6 +51,15 @@ function isNonNegativeSize(value: string) {
 
 function validateFieldValue(field: SettingsField, value: string) {
   if (field.kind === "color") return isCssColor(value);
+  if (field.kind === "loadingGif") {
+    if (value === "") return true;
+    try {
+      const url = new URL(value);
+      return url.protocol === "https:" && value.length <= 2048;
+    } catch {
+      return false;
+    }
+  }
   if (field.kind === "number") return isNonNegativeSize(value);
   if (field.kind === "select") {
     const options = field.options?.length ? field.options : [field.value ?? ""];

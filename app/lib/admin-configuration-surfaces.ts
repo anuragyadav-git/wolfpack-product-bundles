@@ -13,7 +13,7 @@ export type SettingsField = {
   key?: string;
   label: string;
   value?: string;
-  kind?: "color" | "text" | "number" | "select" | "radio" | "toggle" | "css" | "script" | "secret" | "image" | "file" | "button" | "loadingSpinner";
+  kind?: "color" | "text" | "number" | "select" | "radio" | "toggle" | "css" | "script" | "secret" | "image" | "file" | "button" | "loadingGif" | "loadingSpinner";
   note?: string;
   description?: string;
   guideUrl?: string;
@@ -214,10 +214,11 @@ export const DESIGN_CONFIGURATION: SettingsTab[] = [
   },
   {
     title: "Images & GIFs",
-    description: "Image-fit and loading-media controls.",
+    description: "Image-fit and full-page bundle loading screen controls.",
     fields: [
       { label: "Image Fit", value: "Cover", kind: "select", options: ["Cover", "Contain", "Fill"] },
-      { label: "Bundle Loading GIF", value: "Default spinner", kind: "loadingSpinner", description: "Displayed on the initial bundle load unless a merchant GIF is configured on the bundle." },
+      { key: "generalSettings.loadingGifUrl", label: "FPB Loading GIF", value: "", kind: "loadingGif", description: "Optional GIF displayed instead of the default spinner on the full-page bundle loading screen." },
+      { key: "generalSettings.loadingBgColor", label: "Loading Screen Background Color", value: "#ffffff", kind: "color", description: "Background color of the full-page bundle loading screen." },
       { label: "Checkout GIF", value: "Default spinner", kind: "loadingSpinner", description: "Displayed during checkout loading unless a merchant GIF is configured." },
     ],
   },
@@ -230,7 +231,6 @@ export const EXPERT_COLOR_CONTROLS: Record<string, SettingsField[]> = {
     { key: "expert.navigationBanner.navigationBannerStepTextColor", label: "Step Text Color", value: "#000000", kind: "color", description: "Text color for step names and navigation labels" },
     { key: "expert.generalSettings.productPageTitleColor", label: "Product Page Title Color", value: "#000000", kind: "color", description: "Title text color on the bundle builder page" },
     { key: "expert.navigationBanner.navigationBannerStepProgressBarEmptyColor", label: "Step Progress Bar Empty Color", value: "#cccccc", kind: "color", description: "Background color for incomplete sections of progress bars" },
-    { key: "expert.generalSettings.loadingBgColor", label: "Loading Screen Background Color", value: "transparent", kind: "color", description: "Background color bundle loading screen" },
     { key: "expert.generalSettings.conditionToastBgColor", label: "Condition Toast Background Color", value: "#000000", kind: "color", description: "Background color for condition toast" },
     { key: "expert.generalSettings.conditionToastTextColor", label: "Condition Toast Text Color", value: "#ffffff", kind: "color", description: "Text color for condition toast" },
     { key: "expert.navigationBanner.tabsActiveBgColor", label: "Active Tab Background Color", value: "#000000", kind: "color", description: "Background color for the currently selected category tab", group: "Categories", guideUrl: "/design-color-guide-categories.avif" },

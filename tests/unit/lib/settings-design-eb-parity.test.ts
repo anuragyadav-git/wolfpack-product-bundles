@@ -24,6 +24,8 @@ function makePayload(overrides: Record<string, string> = {}, isExpertControlsEna
       "Product Card & Cart Base": "11px",
       "Product Card & Cart Corner Style": "Base",
       "Image Fit": "Contain",
+      "generalSettings.loadingGifUrl": "",
+      "generalSettings.loadingBgColor": "#ffffff",
       ...overrides,
     },
   };
@@ -129,6 +131,22 @@ describe("buildSettingsDesignRuntime", () => {
     expect(pageCustomization.productCard.productImageFit).toBe("fill");
     expect(pageCustomization.mixAndMatchConfig.productCard.productCardImageFit).toBe("fill");
     expect((runtime.designSettings as any).productCardImageFit).toBe("fill");
+  });
+
+  it("maps the store-level FPB loading screen into Design runtime settings", () => {
+    const runtime = buildSettingsDesignRuntime(makePayload({
+      "generalSettings.loadingGifUrl": "https://cdn.example.test/loading.gif",
+      "generalSettings.loadingBgColor": "#f4f1eb",
+    }));
+    const pageCustomization = runtime.pageCustomization as any;
+    const generalSettings = (runtime.designSettings as any).generalSettings;
+
+    expect(pageCustomization.generalSettings.loadingGifUrl).toBe("https://cdn.example.test/loading.gif");
+    expect(pageCustomization.generalSettings.loadingBgColor).toBe("#f4f1eb");
+    expect(generalSettings.loadingScreen).toEqual({
+      gifUrl: "https://cdn.example.test/loading.gif",
+      backgroundColor: "#f4f1eb",
+    });
   });
 
   it("uses expert fields as component-specific overrides", () => {

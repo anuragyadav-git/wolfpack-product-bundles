@@ -956,24 +956,14 @@
   display: grid;
   place-content: center;
   justify-items: center;
-  gap: 10px;
   background: var(--preview-loading-bg, rgba(255, 255, 255, 0.92));
-  color: var(--preview-primary-text, #202223);
-  text-align: center;
 }
 
-.previewLoadingSkeleton {
-  display: grid;
-  width: min(320px, 72vw);
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-}
-
-.previewLoadingSkeleton i {
-  aspect-ratio: 0.78;
-  border-radius: var(--preview-card-radius, 10px);
-  background: linear-gradient(100deg, rgba(0, 0, 0, 0.05) 20%, rgba(255, 255, 255, 0.72) 45%, rgba(0, 0, 0, 0.05) 70%);
-  background-size: 220% 100%;
+.previewLoadingGif {
+  display: block;
+  max-width: 150px;
+  max-height: 150px;
+  object-fit: contain;
 }
 
 .previewValidationToast {

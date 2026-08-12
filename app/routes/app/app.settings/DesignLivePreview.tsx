@@ -503,27 +503,33 @@ function PreviewSurface({
   descriptor,
   surface,
   viewport,
+  loadingGifUrl,
   t,
 }: {
   descriptor: DesignPreviewTemplateDescriptor;
   surface: DesignPreviewSurface;
   viewport: DesignPreviewViewport;
+  loadingGifUrl: string;
   t: Translate;
 }) {
   if (surface === "upsell") return <UpsellPreview t={t} />;
   if (surface === "cart-summary") return <CartSummarySurface descriptor={descriptor} viewport={viewport} t={t} />;
+  if (surface === "loading") {
+    return (
+      <div className={styles.previewLoadingState} data-preview-region="loading-screen">
+        {loadingGifUrl ? (
+          <img className={styles.previewLoadingGif} src={loadingGifUrl} alt="" />
+        ) : (
+          <s-spinner size="large" accessibilityLabel={t("settingsDcp.preview.loading")} />
+        )}
+      </div>
+    );
+  }
 
   return (
     <>
       <BuilderPreview descriptor={descriptor} viewport={viewport} t={t} />
       {surface === "product-picker" ? <ProductPicker descriptor={descriptor} viewport={viewport} t={t} /> : null}
-      {surface === "loading" ? (
-        <div className={styles.previewLoadingState} data-preview-region="loading-overlay">
-          <div className={styles.previewLoadingSkeleton}><i /><i /><i /></div>
-          <s-spinner size="base" accessibilityLabel={t("settingsDcp.preview.loading")} />
-          <strong>{t("settingsDcp.preview.surface.loadingBody")}</strong>
-        </div>
-      ) : null}
       {surface === "validation" ? (
         <div className={styles.previewValidationToast} data-preview-region="validation-overlay" role="alert">
           {t(DESIGN_PREVIEW_FIXTURE.validationMessage)}
@@ -538,11 +544,13 @@ export function DesignLivePreview({
   isExpertControlsEnabled,
   activeFieldKey,
   initialState,
+  onSurfaceChange,
 }: {
   fieldValues: Record<string, string>;
   isExpertControlsEnabled: boolean;
   activeFieldKey?: string | null;
   initialState?: DesignPreviewState;
+  onSurfaceChange?: (surface: DesignPreviewSurface) => void;
 }) {
   const { t } = useTranslation();
   const previewStageRef = useRef<HTMLDivElement>(null);
@@ -576,6 +584,10 @@ export function DesignLivePreview({
     if (!fieldTargetSurface || !isApplicable) return;
     setPreviewState((current) => setDesignPreviewSurface(current, fieldTargetSurface));
   }, [activeFieldKey, fieldTargetSurface, isApplicable]);
+
+  useEffect(() => {
+    onSurfaceChange?.(previewState.surface);
+  }, [onSurfaceChange, previewState.surface]);
 
   useEffect(() => {
     const stage = previewStageRef.current;
@@ -701,6 +713,7 @@ export function DesignLivePreview({
               descriptor={activeTemplate}
               surface={previewState.surface}
               viewport={previewState.viewport}
+              loadingGifUrl={fieldValues["generalSettings.loadingGifUrl"] ?? ""}
               t={t}
             />
           </div>
