@@ -449,6 +449,18 @@ body.fpb-mobile-summary-scroll-locked {
 
 #bundle-builder-app
   .fpb-mobile-summary-products-list--skeletons
+  .side-panel-skeleton-thumb,
+#bundle-builder-app
+  .fpb-mobile-summary-products-list--skeletons
+  .side-panel-skeleton-line,
+#bundle-builder-app
+  .fpb-mobile-summary-products-list--skeletons
+  .side-panel-skeleton-remove {
+  animation: none;
+}
+
+#bundle-builder-app
+  .fpb-mobile-summary-products-list--skeletons
   .side-panel-skeleton-lines {
   grid-column: 2;
   grid-row: 1;
