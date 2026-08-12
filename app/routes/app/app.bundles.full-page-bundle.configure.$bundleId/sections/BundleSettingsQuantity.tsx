@@ -67,37 +67,40 @@ export function FpbQuantitySettings({
           />
           {/* Product Slots sub-section */}
           {settingsStep && (
-            <s-stack direction="block" gap="small-400">
-              <s-stack direction="inline" alignItems="center" gap="small">
-                <p
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 6,
-                    margin: 0,
-                    fontSize: 14,
-                    fontWeight: 600,
-                    flex: 1,
-                  }}
-                >
-                  Product Slots
-                  <QuestionHelpTooltip tooltipKey="productSlots" />
+            <>
+              <s-divider />
+              <s-stack direction="block" gap="small-400">
+                <s-stack direction="inline" alignItems="center" gap="small">
+                  <p
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 6,
+                      margin: 0,
+                      fontSize: 14,
+                      fontWeight: 600,
+                      flex: 1,
+                    }}
+                  >
+                    Product Slots
+                    <QuestionHelpTooltip tooltipKey="productSlots" />
+                  </p>
+                  <s-switch
+                    accessibilityLabel="Enable product slots display"
+                    checked={productSlotsEnabled || undefined}
+                    onChange={(e) => {
+                      setProductSlotsEnabled(
+                        (e.target as HTMLInputElement).checked,
+                      );
+                      markAsDirty();
+                    }}
+                  />
+                </s-stack>
+                <p style={{ margin: 0, fontSize: 13, color: "#6d7175" }}>
+                  This feature displays empty slots on the storefront.
                 </p>
-                <s-switch
-                  accessibilityLabel="Enable product slots display"
-                  checked={productSlotsEnabled || undefined}
-                  onChange={(e) => {
-                    setProductSlotsEnabled(
-                      (e.target as HTMLInputElement).checked,
-                    );
-                    markAsDirty();
-                  }}
-                />
               </s-stack>
-              <p style={{ margin: 0, fontSize: 13, color: "#6d7175" }}>
-                This feature displays empty slots on the storefront.
-              </p>
-            </s-stack>
+            </>
           )}
           {/* Slot Icon — nested inside EQV section */}
           <s-stack direction="block" gap="small-400">
