@@ -1,5 +1,5 @@
 import {
-  getFpbPresetStylesheetUrl,
+  getFpbStylesheetUrls,
   type FpbDesignPreset,
 } from './fpb-template-assets.js';
 import { transferBootstrapSkeleton } from '../assets/widgets/full-page/bootstrap-skeleton.js';
@@ -63,10 +63,9 @@ function hydrateMarker(): void {
   marker.before(container);
   marker.dataset.wpbHydrated = 'true';
 
-  ensureStylesheet(embed.dataset.fullPageStyleUrl);
-  ensureStylesheet(getFpbPresetStylesheetUrl(embed.dataset, preset));
-  ensureStylesheet(embed.dataset.mobileSummaryStyleUrl);
-  ensureStylesheet(embed.dataset.responsiveStyleUrl);
+  getFpbStylesheetUrls(embed.dataset, preset).forEach((href) => {
+    ensureStylesheet(href);
+  });
   loadFullPageRuntime(embed.dataset.fullPageScriptUrl);
 }
 

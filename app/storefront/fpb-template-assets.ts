@@ -15,3 +15,15 @@ export function getFpbPresetStylesheetUrl(
       return dataset.presetHorizontal;
   }
 }
+
+export function getFpbStylesheetUrls(
+  dataset: DOMStringMap,
+  preset: FpbDesignPreset,
+): string[] {
+  return [
+    dataset.fullPageStyleUrl,
+    dataset.mobileSummaryStyleUrl,
+    dataset.responsiveStyleUrl,
+    getFpbPresetStylesheetUrl(dataset, preset),
+  ].filter((href): href is string => Boolean(href));
+}

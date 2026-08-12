@@ -37,10 +37,10 @@ keywords:
 
 ## Two Widgets
 
-| Widget | Source file | Bundle output | Shopify block |
-|---|---|---|---|
-| Full-Page Bundle (FPB) | `app/assets/bundle-widget-full-page.ts` | `extensions/bundle-builder/assets/bundle-widget-full-page-bundled.js` | `bundle-app-embed.liquid` on the app-proxy document |
-| Product-Page (PDP) | `app/assets/bundle-widget-product-page.ts` | `extensions/bundle-builder/assets/bundle-widget-product-page-bundled.js` | `bundle-product-page.liquid` |
+| Widget                 | Source file                                | Bundle output                                                            | Shopify block                                       |
+| ---------------------- | ------------------------------------------ | ------------------------------------------------------------------------ | --------------------------------------------------- |
+| Full-Page Bundle (FPB) | `app/assets/bundle-widget-full-page.ts`    | `extensions/bundle-builder/assets/bundle-widget-full-page-bundled.js`    | `bundle-app-embed.liquid` on the app-proxy document |
+| Product-Page (PDP)     | `app/assets/bundle-widget-product-page.ts` | `extensions/bundle-builder/assets/bundle-widget-product-page-bundled.js` | `bundle-product-page.liquid`                        |
 
 Shared runtime modules live under `app/assets/widgets/shared/`. Controllers, method modules, and template modules import each shared primitive directly from its owning module. The removed `bundle-widget-components` compatibility barrel must not be recreated: direct ownership lets esbuild close every method over real lexical bindings and prevents browser-only free-global failures. TypeScript entry points under `app/storefront/` import the required runtime graph, and esbuild resolves, tree-shakes, minifies, and emits browser IIFEs. Storefronts never load raw ESM source files.
 
@@ -122,8 +122,10 @@ skeleton rows are not rendered.
 The app embed is a separate small entry. It handles redirects and marker hydration, then loads the FPB asset only when a full-page marker exists. It must not import the FPB controller graph because the embed is enabled globally.
 
 The app embed is also the sole FPB stylesheet loader. It loads the base,
-mobile-summary, active-preset, and shared responsive assets before starting the
-widget runtime, and deduplicates links by resolved URL. The controller only
+mobile-summary, shared responsive, and active-preset assets in that order before
+starting the widget runtime, and deduplicates links by resolved URL. This makes
+the shared gutter, sidebar, and mobile-footer components the common default and
+keeps each preset asset as the final visual override layer. The controller only
 applies preset and summary markers; it does not create, disable, or switch
 stylesheets during rendering.
 
@@ -154,19 +156,25 @@ The public FPB route is `GET /apps/product-bundles/wpb/{bundleId}`. Shopify forw
 The route returns an escaped full `formatBundleForWidget()` payload in the existing marker, marks it with `data-bundle-config-source="app_proxy"`, and responds with `Content-Type: application/liquid` and `Cache-Control: no-store`. The widget treats only this source-marked, bundle-ID-matched full payload as authoritative and renders it without requesting bundle JSON. If the app-proxy marker is absent or malformed, the widget uses the bundle JSON fallback. Active and unlisted bundles render publicly; drafts require a 15-minute shop-and-bundle-bound `wpb_preview` token. The route never emits `/apps/product-bundles/assets/...` URLs.
 
 ### API Fallback
+
 If metafield cache is absent/malformed → `GET /apps/product-bundles/api/bundle/{id}.json`
+
 - Single retry after 3s for `503`/`504` responses (Render cold-start tolerance)
 
 ## PPB Load Strategy
 
 ### Product-Page Block Stage — Marker Bootstrap
+
 The PPB app block writes only a compact pointer into `data-bundle-config`:
+
 ```liquid
 data-bundle-config='{"v":2,"type":"product_page","bundleType":"product_page","id":"{{ bundle_id }}"}'
 ```
+
 `bundle_ui_config` is still read to validate bundle-type context for container detection, but it is no longer serialized as a full bundle payload into the DOM.
 
 Runtime behavior in `app/assets/widgets/product-page/methods/config-lifecycle-methods.js`:
+
 1. Parse `data-bundle-config` as a bootstrap marker only when `data-bundle-type="product_page"`.
 2. If marker is valid, fetch from:
    - `GET /apps/product-bundles/api/bundle/{bundleId}.json`
@@ -177,6 +185,7 @@ Runtime behavior in `app/assets/widgets/product-page/methods/config-lifecycle-me
 4. Preserve transient retry for `503`/`504` only (3-second delay).
 
 ### Migration intent (PPB)
+
 - Remove full-bundle payload writes into PPB HTML attributes.
 - Keep API as source of truth for runtime hydration.
 - Keep non-bundle and theme-editor behavior stable.
@@ -203,8 +212,9 @@ npm run build:widgets:product-page
 Embedded as `window.__BUNDLE_WIDGET_VERSION__` in every bundled file.
 
 Verify live version in DevTools:
+
 ```javascript
-console.log(window.__BUNDLE_WIDGET_VERSION__)
+console.log(window.__BUNDLE_WIDGET_VERSION__);
 ```
 
 Version bump rules:
@@ -217,12 +227,15 @@ Version bump rules:
 **Mandatory before every deploy**: increment version → build → check CSS file sizes → deploy.
 
 ### CSS Size Limit
+
 Shopify enforces **100,000 B** on app block CSS assets.
+
 ```bash
 wc -c extensions/bundle-builder/assets/*.css
 ```
 
 Keep base CSS below the limit by moving template-specific rules into separate extension assets:
+
 - FPB base: `bundle-widget-full-page.css`
 - FPB templates: `bundle-widget-full-page-{standard,classic,compact,horizontal}.css`
 - PPB base: `bundle-widget.css`
@@ -250,7 +263,7 @@ boundaries.
 The app embed must map canonical uppercase FPB preset IDs to explicit
 `DOMStringMap` properties: `presetStandard`, `presetClassic`, `presetCompact`,
 and `presetHorizontal`. Do not derive a dataset property as
-``preset${preset}``; an uppercase preset such as `STANDARD` would look for the
+`preset${preset}`; an uppercase preset such as `STANDARD` would look for the
 nonexistent `presetSTANDARD` property and silently leave the widget with only
 base CSS. A base-only render can appear functional, so live verification must
 also confirm that the expected dedicated template stylesheet is loaded.
@@ -280,6 +293,7 @@ Do not trust `window.__BUNDLE_WIDGET_VERSION__` by itself for CSS-only or CSS-he
 Observed 2026-07-13 in SIT: the storefront served `bundle-widget-product-page-bundled.js` with `window.__BUNDLE_WIDGET_VERSION__ = "5.0.145"` while the exact Shopify CDN `bundle-widget-product-page-cascade.css` still lacked `--bw-ppb-cascade-action-radius` and still contained the older `border-radius:100px` Product List quantity-wrapper rule. The local generated CSS asset was correct.
 
 For storefront visual proof after CSS changes:
+
 - Hard reload after clearing Cache Storage.
 - Record `window.__BUNDLE_WIDGET_VERSION__`.
 - Record the exact active CSS asset URL.
@@ -291,6 +305,7 @@ For storefront visual proof after CSS changes:
 When a Shopify CLI dev preview asset hash expires or points at a missing theme-extension build, the storefront can still emit normal Liquid `asset_url` script/link tags while the referenced `https://cdn.shopify.com/extensions/.../dev-.../assets/...` URLs return Shopify `404` HTML. Chrome then reports the subresource loads as `net::ERR_BLOCKED_BY_ORB` or CORB because the browser requested CSS/JS but received `text/html`.
 
 Do not diagnose that state as a widget boot or Classic template bug until the asset URL is checked directly. Required proof:
+
 - Hard reload the storefront with cache bypass after clearing Cache Storage.
 - Verify `window.__BUNDLE_WIDGET_VERSION__`; a missing value means the widget JS did not execute.
 - Open or fetch the exact blocked asset URL. If it returns Shopify `404: Page not found` with `content-type: text/html`, the live proof is blocked by the dev-extension asset state, not by storefront source.
