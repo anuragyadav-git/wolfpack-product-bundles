@@ -52,6 +52,14 @@ separate cards below.
 
 PPB-only controls are explicit slots inside the shared rhythm. Category-level variant display controls update PPB `StepCategory.displayVariantsAsIndividualProducts` and `StepCategory.displayVariantsAsSwatches` fields; they are not step-wide FPB controls. Bundle Settings follows the same rule: shared rows cover overlapping settings, while FPB-only Product Slots / Slot Icon and PPB-only Variant Selector, discount display, banner, CSS, subscriptions, Bundle Embed, and Place Widget controls remain route-owned slots.
 
+FPB Product Slots is available only when every enabled, non-default step has at
+least one step-level rule and every one of those rules uses the exact
+`quantity` type. No-rule steps, Amount or Weight rules, and category-rule mode
+make Product Slots unavailable because the storefront cannot derive a single
+step slot capacity from those configurations. The Product Slots and Slot Icon
+controls remain visible but disabled, and the Admin save payload forces
+`productSlotsEnabled=false` while the configuration is incompatible.
+
 Step Config uses the shared square step-image control beside the Step Title
 fields, with an explicit gap between those columns. Its Upload file and Replace
 actions mount `FilePicker` in auto-open mode. Auto-open pickers begin in the open

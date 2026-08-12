@@ -2,6 +2,7 @@ import { useCallback, useEffect } from "react";
 import { AppLogger } from "../../../lib/logger";
 import { serializePricingDisplayOptions } from "../../../lib/pricing-display-options";
 import { markBundlePreviewComplete } from "../../../lib/bundle-preview-readiness";
+import { resolveFpbProductSlotsEnabled } from "../../../lib/fpb-product-slots-availability";
 import { DiscountMethod } from "../../../types/pricing";
 import { ADDON_MESSAGE_KEY } from "./configure-constants";
 import type { ConfigureBundleFlowDraft } from "./configure-flow-types";
@@ -148,7 +149,16 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
       formData.append("bundleBannerDesktopUrl", flow.bundleBannerDesktopUrl);
       formData.append("bundleBannerMobileUrl", flow.bundleBannerMobileUrl);
       formData.append("bundleLevelCss", flow.bundleLevelCss);
-      formData.append("productSlotsEnabled", String(flow.productSlotsEnabled));
+      formData.append(
+        "productSlotsEnabled",
+        String(
+          resolveFpbProductSlotsEnabled(
+            flow.productSlotsEnabled,
+            flow.stepsState.steps,
+            flow.conditionsState.stepConditions,
+          ),
+        ),
+      );
       formData.append("maxQtyPerProduct", flow.maxQtyPerProduct);
       formData.append("productSlotIconUrl", flow.productSlotIconUrl);
       formData.append(
