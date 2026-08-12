@@ -407,16 +407,10 @@
     visibility 0.3s ease;
 }
 
-@container fpb-shell (min-width: 640px) {
+@media (min-width: 640px) {
   .bundle-modal-overlay {
     align-items: center;
-    padding: 16px;
-  }
-}
-
-@container fpb-shell (min-width: 1024px) {
-  .bundle-modal-overlay {
-    padding: 20px;
+    padding: clamp(1rem, 3vw, 2rem);
   }
 }
 
@@ -431,9 +425,11 @@
   border-radius: 16px 16px 0 0;
   max-width: 100%;
   width: 100%;
-  max-height: 92vh;
-  max-height: 92dvh;
+  max-height: 88vh;
+  max-height: 88dvh;
+  overflow-x: hidden;
   overflow-y: auto;
+  overscroll-behavior-y: contain;
   box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.3);
   position: relative;
   transform: translateY(100%);
@@ -441,20 +437,15 @@
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-@container fpb-shell (min-width: 640px) {
+@media (min-width: 640px) {
   .bundle-modal-container {
     border-radius: 10px;
-    max-width: min(1280px, calc(100vw - 40px));
-    max-height: 90vh;
+    width: min(56rem, 100%);
+    max-width: 56rem;
+    max-height: min(46rem, calc(100dvh - 2rem));
     transform: scale(0.9);
     box-shadow: none;
     padding: 20px;
-  }
-}
-
-@container fpb-shell (min-width: 1024px) {
-  .bundle-modal-container {
-    width: min(1280px, calc(100vw - 40px));
   }
 }
 
