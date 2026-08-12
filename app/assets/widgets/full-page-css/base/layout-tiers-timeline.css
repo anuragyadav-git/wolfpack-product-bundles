@@ -452,6 +452,7 @@
     [data-fpb-design-preset="HORIZONTAL"]
   )
   .standard-navigation-items-container {
+  --standard-timeline-icon-size: 44px;
   width: min(
     100%,
     calc(var(--standard-timeline-count, 2) * 18rem)
@@ -482,7 +483,7 @@
   height: 76.8px;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: 40px 36.8px;
+  grid-template-rows: var(--standard-timeline-icon-size) 32.8px;
   place-items: start center;
   justify-items: center;
   align-items: start;
@@ -497,17 +498,18 @@
     [data-fpb-design-preset="HORIZONTAL"]
   )
   .standard-navigation-step-img-container {
-  width: 40px;
-  height: 40px;
+  width: var(--standard-timeline-icon-size);
+  height: var(--standard-timeline-icon-size);
   box-sizing: border-box;
   display: grid;
   place-items: center;
   border-radius: 50%;
   background: #fff;
-  padding: 4px;
+  padding: 0;
   border: 2px solid #d4d5d6;
   position: relative;
   z-index: 2;
+  overflow: hidden;
   filter: none;
   opacity: 1;
 }
@@ -534,7 +536,7 @@
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: fill;
   opacity: 1;
   filter: none;
 }
@@ -576,7 +578,7 @@
   )
   .standard-steps-progress-bar-container {
   position: absolute;
-  top: 17px;
+  top: 19px;
   left: var(--standard-timeline-progress-left, 25%);
   width: var(--standard-timeline-progress-width, 50%);
   height: 6px;

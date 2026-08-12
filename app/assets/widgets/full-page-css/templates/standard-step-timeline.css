@@ -18,7 +18,7 @@
   [data-fpb-design-preset="STANDARD"],
   [data-fpb-design-preset="CLASSIC"]
 ) .standard-navigation-items-container {
-  --standard-timeline-icon-size: 40px;
+  --standard-timeline-icon-size: 44px;
   min-height: 4.75rem;
   margin: 0 auto;
   display: grid;
@@ -68,7 +68,7 @@
   place-items: center;
   border-radius: 50%;
   background: #fff;
-  padding: 4px;
+  padding: 0;
   border: 2px solid #d4d5d6;
   position: relative;
   z-index: 2;
@@ -164,7 +164,7 @@
   [data-fpb-design-preset="CLASSIC"]
 ) .standard-steps-progress-bar-container {
   position: absolute;
-  top: 17px;
+  top: 19px;
   left: var(--standard-timeline-progress-left, 25%);
   width: var(--standard-timeline-progress-width, 50%);
   height: 6px;

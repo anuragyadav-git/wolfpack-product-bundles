@@ -85,7 +85,7 @@ While product details are open, the storefront document root and body are both
 scroll-locked. The modal or drawer remains the only vertical scroll owner, and
 overscroll must not chain into the storefront page behind it.
 
-The shared multi-step FPB timeline sizes its navigation track from the rendered step count and caps it to the available shell width, so additional steps remain evenly spaced without pushing a two-step timeline to opposite page edges. Active icon emphasis is painted as an inset ring over the same reserved border box used by inactive icons; changing timeline state must not resize the inner icon.
+The shared multi-step FPB timeline sizes its navigation track from the rendered step count and caps it to the available shell width, so additional steps remain evenly spaced without pushing a two-step timeline to opposite page edges. Its 44px circular icon frame has no inner padding: the step image fills and clips to the circle instead of using `object-fit: contain`. Active icon emphasis is painted as an inset ring over the same reserved border box used by inactive icons; changing timeline state must not resize the inner icon.
 
 PPB Product List (`PDP_INPAGE + CASCADE`) owns its multi-step navigation in the Product Page layout, footer, and validation method modules. A multi-step Product List renders only `currentStepIndex`; intermediate primary actions navigate Next after current-step validation, the final step uses Add Bundle to Cart, and Back preserves selections across steps. Single-step Product List and the other PPB templates keep their existing rendering paths. Product List exact-rule over-selection is blocked before state mutation so the current step and selected-items drawer remain stable.
 
