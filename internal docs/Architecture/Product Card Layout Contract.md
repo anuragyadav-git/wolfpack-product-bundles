@@ -15,6 +15,7 @@ systems:
 source_paths:
   - app/assets/widgets/full-page
   - app/assets/widgets/full-page-css/shared/responsive-layout.css
+  - app/assets/widgets/full-page-css/templates/standard/overrides.css
   - app/assets/widgets/full-page-css/base/product-modal-shell.css
   - app/assets/widgets/shared/variant-selector.ts
   - app/assets/bundle-modal-component.ts
@@ -69,6 +70,8 @@ This is a hard requirement:
   the icon with CSS geometry so it does not depend on a theme-root asset URL;
   touch/mobile cards do not show this hover-only affordance.
 - Replace a product card's Add To Box button with its inline quantity selector immediately; do not animate width, radius, opacity, or geometry during that state swap.
+- Standard FPB cards use the same card, media, title, price, and sizing rules in text and icon CTA modes. Icon mode may override only the compact action geometry and place that action beside the price.
+- Reserve the Standard FPB variant-selector row only when the runtime renders `.vs-wrapper--standard`. The runtime renders that wrapper only when Bundle Settings enables variant selectors and the grouped product has more than one variant.
 - Prefer fixed row contracts (`min-height`, `height`, flex stretch, consistent padding/line-clamp) so selected/unselected variants stay layout-stable.
 - Keep PPB/inpage and PPB/modal states non-expanding on `selected` and hover-expanded transitions.
 - Keep merchant product descriptions out of compact FPB and PPB product cards. Preserve `description` and `descriptionHtml` in runtime product data for the product-details modal only.
