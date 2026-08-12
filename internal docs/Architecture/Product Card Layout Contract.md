@@ -87,12 +87,13 @@ summary tray, while widths of `800px` or more use the sticky sidebar. The
 existing `ResizeObserver` propagates mode changes to the widget root, layout,
 and tray.
 
-The shared FPB shell is the only owner of horizontal gutters. Its content width
-transitions from half of one four-column grid column per side on narrow hosts,
-through one column per side on smaller desktops, to two columns per side on wide
-desktops without a breakpoint jump. The shared responsive stylesheet is loaded
-after the active preset stylesheet so preset-local viewport rules cannot retake
-structural ownership.
+The shared FPB shell is the only owner of horizontal gutters. It mirrors the
+fluid EB shell contract with three direct rules: the outer shell fills the host
+up to `96rem`, uses `0.625rem` padding, and centers each banner, category row,
+and sidebar layout at `96%` width. Do not add gutter `clamp()` formulas,
+piecewise breakpoints, or duplicate preset-level gutter tokens. The shared
+responsive stylesheet is loaded after the active preset stylesheet so
+preset-local viewport rules cannot retake structural ownership.
 
 The catalog track is a named inline-size container. Product grids reflow by
 catalog width: Standard and Compact cap at three columns, Classic caps at four,
@@ -101,6 +102,11 @@ height, while Horizontal preserves its 30/70 media/content split and contained
 imagery. Sidebar proportions remain preset-owned: Standard and Classic move
 from 59/41 toward 69/31 on wide hosts, Compact uses 60/40, and Horizontal uses
 65/35. Only the selected-products region inside the sidebar scrolls.
+
+Desktop summary sidebars use a fluid `10dvh` sticky inset, matching EB's
+viewport-relative `10%` sticky start. This lets the summary engage before the
+product-card row reaches the top of the viewport while preserving bounded
+sidebar height.
 
 Preset structural rules use the named FPB shell container rather than viewport
 media queries. This keeps a constrained host and a same-width browser viewport

@@ -64,10 +64,10 @@
   min-width: 0;
   max-width: none;
   height: fit-content;
-  max-height: calc(100dvh - var(--bundle-sidebar-sticky-offset, 1rem) - 1rem);
+  max-height: calc(100dvh - var(--fpb-sidebar-sticky-offset, 10dvh) - 1rem);
   flex-basis: auto;
   position: sticky;
-  top: var(--bundle-sidebar-sticky-offset, 1rem);
+  top: var(--fpb-sidebar-sticky-offset, 10dvh);
   overflow: hidden;
   box-sizing: border-box;
 }
@@ -91,7 +91,11 @@
 
 #bundle-builder-app.bundle-widget-full-page[data-bundle-type="full_page"]
   .layout-sidebar[data-fpb-summary-mode="sidebar"]
-  :is(.side-panel-header, .side-panel-summary-content, .side-panel-action-container) {
+  :is(
+    .side-panel-header,
+    .side-panel-summary-content,
+    .side-panel-action-container
+  ) {
   min-width: 0;
   max-width: 100%;
 }
@@ -190,50 +194,27 @@
   aspect-ratio: auto;
 }
 #bundle-builder-app.bundle-widget-full-page[data-bundle-type="full_page"] {
-  --fpb-shell-top-spacing: clamp(0.5rem, 1vw, 1rem);
+  --fpb-sidebar-sticky-offset: 10dvh;
   container: fpb-shell / inline-size;
 }
 
 #bundle-builder-app.bundle-widget-full-page[data-bundle-type="full_page"]
   .layout-sidebar {
+  width: 100%;
+  max-width: 96rem;
   min-height: 100vh;
-  padding-block-start: var(--fpb-shell-top-spacing);
+  margin-inline: auto;
+  padding: 0.625rem;
   box-sizing: border-box;
-  container: fpb-shell / inline-size;
 }
 
 #bundle-builder-app.bundle-widget-full-page[data-bundle-type="full_page"]
   .layout-sidebar
   > :is(.bundle-banners, .category-tabs, .sidebar-layout-wrapper) {
-  --fpb-shell-gutter: calc(100cqi / 24);
-  width: calc(100% - (var(--fpb-shell-gutter) * 2));
+  width: 96%;
   max-width: none;
   margin-inline: auto;
   box-sizing: border-box;
-}
-
-@container fpb-shell (min-width: 40rem) and (max-width: 63.999rem) {
-  #bundle-builder-app.bundle-widget-full-page[data-bundle-type="full_page"]
-    .layout-sidebar
-    > :is(.bundle-banners, .category-tabs, .sidebar-layout-wrapper) {
-    --fpb-shell-gutter: clamp(
-      calc(100cqi / 24),
-      calc(15.2778cqi - 4.4444rem),
-      calc(100cqi / 12)
-    );
-  }
-}
-
-@container fpb-shell (min-width: 64rem) {
-  #bundle-builder-app.bundle-widget-full-page[data-bundle-type="full_page"]
-    .layout-sidebar
-    > :is(.bundle-banners, .category-tabs, .sidebar-layout-wrapper) {
-    --fpb-shell-gutter: clamp(
-      calc(100cqi / 12),
-      calc(37.1795cqi - 18.4615rem),
-      calc(100cqi / 6)
-    );
-  }
 }
 
 #bundle-builder-app.bundle-widget-full-page[data-bundle-type="full_page"]
