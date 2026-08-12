@@ -103,6 +103,11 @@ imagery. Sidebar proportions remain preset-owned: Standard and Classic move
 from 59/41 toward 69/31 on wide hosts, Compact uses 60/40, and Horizontal uses
 65/35. Only the selected-products region inside the sidebar scrolls.
 
+The Standard desktop summary reserves a three-row product viewport. Each row is
+`75px` with a `15px` gap, and the products region begins vertical scrolling when
+a fourth line item is present. This capacity rule does not apply to inline slots
+or the mobile summary tray.
+
 Desktop summary sidebars use a fluid `10dvh` sticky inset, matching EB's
 viewport-relative `10%` sticky start. This lets the summary engage before the
 product-card row reaches the top of the viewport while preserving bounded

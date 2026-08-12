@@ -259,6 +259,12 @@ body:has([data-fpb-design-preset]) {
   --standard-sidebar-action-button-width: 152px;
   --standard-sidebar-back-size: 43px;
   --standard-side-panel-products-offset: calc(28px + 10px);
+  --standard-summary-product-row-height: 75px;
+  --standard-summary-product-row-gap: 15px;
+  --standard-summary-products-viewport-height: calc(
+    (var(--standard-summary-product-row-height) * 3) +
+      (var(--standard-summary-product-row-gap) * 2)
+  );
   --standard-summary-slot-width: 75px;
   --standard-summary-slot-height: 70px;
   --standard-summary-slot-remove-size: 16px;
@@ -2280,18 +2286,18 @@ body:has([data-fpb-design-preset]) {
   align-self: stretch;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  grid-auto-rows: 75px;
-  gap: 15px;
+  grid-auto-rows: var(--standard-summary-product-row-height);
+  gap: var(--standard-summary-product-row-gap);
   width: 100%;
-  height: calc(100% - var(--standard-side-panel-products-offset));
-  min-height: 0;
-  max-height: none;
+  height: var(--standard-summary-products-viewport-height);
+  min-height: var(--standard-summary-products-viewport-height);
+  max-height: var(--standard-summary-products-viewport-height);
   padding: 0;
   margin: var(--standard-side-panel-products-offset) 0 0;
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
-  scrollbar-gutter: stable;
+  scrollbar-gutter: auto;
   box-sizing: border-box;
 }
 
