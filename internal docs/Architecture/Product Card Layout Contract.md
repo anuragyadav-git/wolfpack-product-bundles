@@ -93,11 +93,16 @@ the summary trigger and primary action. The trigger opens a modal bottom sheet
 that grows with its content up to `80dvh`; its header, totals, and action remain
 stationary while the selected-products region shows up to three rows and
 scrolls from the fourth row onward. Empty capacity is represented by enough
-line-item skeletons to maintain three visible rows. Opening the sheet locks background scroll.
+line-item skeletons to maintain three visible rows. Opening the sheet locks
+background scroll.
 Backdrop, Escape, trigger-toggle, and intentional downward-swipe paths all
 dismiss it and restore focus. The sheet does not render a separate close
 control. Presets may change visual tokens, but must not fork this anatomy or
 interaction contract.
+
+Mobile add-to-cart actions show the active discount label badge beside the
+merchant-authored action label and do not repeat the bundle price. Price remains
+owned by the collapsed summary row and the sheet totals.
 
 The shared FPB shell is the only owner of horizontal gutters. It mirrors the
 fluid EB shell contract with three direct rules: the outer shell fills the host

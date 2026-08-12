@@ -425,6 +425,24 @@ describe('FPB Standard mobile summary action', () => {
     expect(button.disabled).toBe(true);
   });
 
+  it('shows the discount label instead of the price in the mobile add-to-cart action', () => {
+    const button = fullPageMobileSummaryMethods._createMobileSummaryActionButton.call(
+      createContext(),
+      {
+        finalPrice: 829,
+        currencyInfo,
+        discountBadgeLabel: '5% off',
+        conditionlessMobile: false,
+        isLastStep: true,
+        isComplete: true,
+      },
+    );
+
+    expect(button.textContent).toContain('Add To Cart');
+    expect(button.textContent).toContain('5% off');
+    expect(button.textContent).not.toContain('$8.29');
+  });
+
   it('keeps Classic final-step underfilled add-to-cart clickable and validates on press', async () => {
     const toastSpy = jest.spyOn(ToastManager, 'show').mockImplementation(() => {});
     const context = {

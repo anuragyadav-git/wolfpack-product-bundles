@@ -376,8 +376,7 @@ _populateCompactMobileSummaryTray(sheet) {
   const isLastStep = this.currentStepIndex === (this.selectedBundle?.steps?.length || 1) - 1;
   const conditionlessMobile = this.bundleHasNoConditions();
   const actionArgs = {
-    finalPrice,
-    currencyInfo,
+    discountBadgeLabel,
     conditionlessMobile,
     isLastStep,
     isComplete: this.areBundleConditionsMet()
@@ -728,8 +727,7 @@ _renderCompactMobileSummarySlotTiles(container, allSelectedProducts = [], active
 },
 
 _createMobileSummaryActionButton({
-  finalPrice,
-  currencyInfo,
+  discountBadgeLabel,
   conditionlessMobile,
   isLastStep,
   isComplete
@@ -741,17 +739,16 @@ _createMobileSummaryActionButton({
   const actionText = shouldAddToCart
     ? this._resolveText('addToCartButton', 'Add to Cart')
     : this._resolveText('nextButton', 'Next');
-  const priceText = CurrencyManager.convertAndFormat(finalPrice, currencyInfo);
   const labelSpan = document.createElement('span');
   labelSpan.className = 'fpb-mobile-summary-action-label';
   labelSpan.textContent = actionText;
-  const separatorSpan = document.createElement('span');
-  separatorSpan.className = 'fpb-mobile-summary-action-separator';
-  separatorSpan.textContent = '•';
-  const priceSpan = document.createElement('span');
-  priceSpan.className = 'fpb-mobile-summary-action-price';
-  priceSpan.textContent = priceText;
-  ctaBtn.append(labelSpan, separatorSpan, priceSpan);
+  ctaBtn.appendChild(labelSpan);
+  if (shouldAddToCart && discountBadgeLabel) {
+    const discountBadge = document.createElement('span');
+    discountBadge.className = 'fpb-summary-discount-badge fpb-mobile-summary-action-discount-badge';
+    discountBadge.textContent = discountBadgeLabel;
+    ctaBtn.appendChild(discountBadge);
+  }
   const isClassicPreset = isClassicFpbPreset(this.getFullPageDesignPreset?.());
   const shouldKeepClassicValidationClickable = isClassicPreset && shouldAddToCart && !conditionlessMobile && !isComplete;
   if (
