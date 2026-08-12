@@ -546,7 +546,6 @@ attachProductCardListeners(cardElement, product, stepIndex, options = {}) {
         this._renderMobileSummaryTray({ preserveOpen: true });
       }
       this.updateStepTimeline?.();
-      this._refreshSiblingDimState?.(stepIndex);
     });
   }
 },

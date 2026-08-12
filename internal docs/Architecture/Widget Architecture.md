@@ -5,7 +5,7 @@ title: Widget Architecture
 type: architecture
 status: authoritative
 summary: FPB and PPB bootstrap, hydration, extension-asset, and widget runtime architecture.
-last_audited: 2026-08-12
+last_audited: 2026-08-13
 owners:
   - engineering
 domains:
@@ -80,6 +80,8 @@ Source module names should describe their storefront responsibility. Avoid mecha
 The shared Bundle Product Modal is intentionally a single-image product details modal: product image, name, description, variant controls when needed, quantity, and Add To Box. Do not reintroduce modal thumbnails, image counters, or carousel/gallery controls; EB's landing-page quick-view modal does not use a gallery.
 
 PPB Product List (`PDP_INPAGE + CASCADE`) owns its multi-step navigation in the Product Page layout, footer, and validation method modules. A multi-step Product List renders only `currentStepIndex`; intermediate primary actions navigate Next after current-step validation, the final step uses Add Bundle to Cart, and Back preserves selections across steps. Single-step Product List and the other PPB templates keep their existing rendering paths. Product List exact-rule over-selection is blocked before state mutation so the current step and selected-items drawer remain stable.
+
+FPB product grids do not pre-disable or dim unselected cards when a step reaches its exact or maximum quantity. Returning to a completed step keeps the full product set interactive; an attempted increase beyond the configured rule is rejected by `validateStepCondition` before selection state changes, and the rule toast explains the limit.
 
 Before PPB category-as-step expansion, the runtime removes steps whose persisted `enabled` value is `false`. This visibility normalization also applies when category expansion is off, so a disabled Admin step can never render or prevent a single enabled multi-category step from expanding into navigable category steps.
 

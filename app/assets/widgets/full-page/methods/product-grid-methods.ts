@@ -5,7 +5,6 @@ import { PricingCalculator } from '../../shared/pricing-calculator.js';
 import { ToastManager } from '../../shared/toast-manager.js';
 import { TemplateManager } from '../../shared/template-manager.js';
 import { ComponentGenerator } from '../../shared/component-generator.js';
-import { ConditionValidator } from '../../shared/condition-validator.js';
 import { createDefaultLoadingAnimation } from '../../shared/default-loading-animation.js';
 import { hideLoadingOverlayElement, markLoadingOverlayVisible } from '../../shared/loading-overlay.js';
 import { getDiscountProgressData, getSelectedQuantity, getTimelineEntryState } from '../../shared/engine/bundle-selectors.js';
@@ -300,24 +299,11 @@ createFullPageProductGrid(stepIndex) {
     return grid;
   }
 
-
-  // Check if step is at capacity (adding 1 more item would be blocked)
-  // When at capacity, unselected cards are dimmed
-  const stepSelections = this.selectedProducts[stepIndex] || {};
-  const capacityCheck = ConditionValidator.canUpdateQuantity(step, stepSelections, '__new__', 1);
-  const isStepAtCapacity = !capacityCheck.allowed;
-
   // Create product cards using ComponentGenerator
   expandedProducts.forEach(product => {
     const productCard = this.createProductCard(product, stepIndex, {
       displayVariantsAsIndividualProducts: shouldDisplayVariantsAsIndividual,
     });
-    const productId = getSelectionId(product);
-    const currentQty = productId ? (stepSelections[productId] || 0) : 0;
-    // Dim unselected cards when step quota is full
-    if (isStepAtCapacity && currentQty === 0) {
-      productCard.classList.add('dimmed');
-    }
     grid.appendChild(productCard);
   });
 

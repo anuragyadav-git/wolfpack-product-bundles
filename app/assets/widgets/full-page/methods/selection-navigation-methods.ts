@@ -209,7 +209,6 @@ syncProductQuantityIncreaseState(increaseButton, quantity) {
     if (this.elements?.modal?.querySelector('.product-grid')) {
       this.renderModalProducts(stepIndex);
     }
-    this._refreshSiblingDimState(stepIndex);
     return;
   }
 
@@ -409,9 +408,6 @@ syncProductQuantityIncreaseState(increaseButton, quantity) {
 
     productCard.classList.remove('bw-product-card--selected');
   }
-
-  // Refresh dimmed state on all sibling cards now that the selection has changed
-  this._refreshSiblingDimState(stepIndex);
 },
 
 refreshCurrentProductGrid(stepIndex) {
@@ -424,35 +420,6 @@ refreshCurrentProductGrid(stepIndex) {
   const replacementGrid = this.createFullPageProductGrid(stepIndex);
   currentGrid.replaceWith(replacementGrid);
   return true;
-},
-
-// Refresh the .dimmed class on every card in the current step's product grid.
-// Called after every real-time selection change so cards gray out (or un-gray)
-// immediately when the step quota is filled or freed — not only on full re-renders.
-_refreshSiblingDimState(stepIndex) {
-  // Only update the DOM if this step's grid is currently visible.
-  // When a product is removed via the footer while on a different step,
-  // skip the DOM update — createFullPageProductGrid will apply the correct
-  // dim state when the user navigates to that step.
-  if (stepIndex !== this.currentStepIndex) return;
-  const step = this.selectedBundle?.steps?.[stepIndex];
-  if (!step) return;
-  const stepSelections = this.selectedProducts[stepIndex] || {};
-  const capacityCheck = ConditionValidator.canUpdateQuantity(step, stepSelections, '__new__', 1);
-  const isAtCapacity = !capacityCheck.allowed;
-  // Only one step's grid is visible at a time; navigate up from any card in it
-  const anyCard = this.container.querySelector('.product-grid .product-card');
-  const grid = anyCard?.closest('.product-grid');
-  if (!grid) return;
-  grid.querySelectorAll('.product-card').forEach(card => {
-    const cardProductId = card.dataset.productId;
-    const currentQty = cardProductId ? (stepSelections[cardProductId] || 0) : 0;
-    if (isAtCapacity && currentQty === 0) {
-      card.classList.add('dimmed');
-    } else {
-      card.classList.remove('dimmed');
-    }
-  });
 },
 
 // Helper to find product by ID across all step data
