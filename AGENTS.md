@@ -437,6 +437,8 @@ Two-stage load strategy:
 
 ## 🧭 Chrome DevTools App Verification
 
+Use only direct Chrome DevTools MCP tools (`mcp__chrome_devtools__*`) for all browser investigation, interaction, evidence gathering, responsive testing, and implementation verification. Do not use browser plugins, browser-control wrappers, Playwright, Puppeteer, Selenium, or alternate browser automation tools as substitutes. If direct Chrome DevTools MCP is unavailable or stalls, report the browser verification as blocked rather than switching tools.
+
 Access embedded app via Shopify Admin URL:
 ```
 https://admin.shopify.com/store/wolfpack-store-test-1/apps/wolfpack-product-bundles-sit/app/...
