@@ -5,7 +5,7 @@ title: Test Spec - Dashboard Storefront Setup Card
 type: test-spec
 status: active
 summary: Covers the action-first dashboard setup card and its retained detail modal.
-last_audited: 2026-07-30
+last_audited: 2026-08-13
 owners:
   - engineering
 domains:
@@ -39,9 +39,11 @@ Provide a clear, action-first storefront setup summary while retaining the detai
 | 3 | Setup incomplete | One or more core resources are disabled | Card reports the remaining count and offers setup action | Action opens the existing modal |
 | 4 | Setup complete | All core resources are enabled | Card reports storefront readiness | Details remain available in the modal |
 | 5 | Active bundle summary | Any non-negative active bundle count | Card reports the supplied count | Zero and plural counts remain accurate |
+| 6 | Banner dismissed | Merchant clicks the banner close control | Banner is removed for the current dashboard mount | Uses the Polaris banner dismiss event |
 
 ## Acceptance Criteria
 - [x] The card has distinct loading, error, incomplete, and complete states.
 - [x] The primary card action opens the detailed storefront setup modal.
 - [x] The modal retains core and optional resource statuses and Theme Editor action.
 - [x] The card and modal have no document-level clipping or horizontal overflow at desktop and mobile widths.
+- [x] The banner close control removes the banner for the current dashboard mount.

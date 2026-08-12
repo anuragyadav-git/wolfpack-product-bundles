@@ -2,6 +2,7 @@ import {
   THEME_EXTENSION_RESOURCES,
   type NormalizedThemeExtensionResource,
 } from "../../../lib/theme-extension-status";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { DashboardBannerSkeleton } from "../../../components/skeletons/DashboardBannerSkeleton";
 
@@ -105,12 +106,15 @@ export function DashboardStatusGrid({
   themeEditorUrl,
 }: DashboardStatusGridProps) {
   const { t } = useTranslation();
+  const [dismissed, setDismissed] = useState(false);
 
   if (loading) {
     return (
       <DashboardBannerSkeleton />
     );
   }
+
+  if (dismissed) return null;
 
   const {
     core: coreResources,
@@ -143,6 +147,7 @@ export function DashboardStatusGrid({
       heading={title}
       dismissible={true}
       hidden={false}
+      onDismiss={() => setDismissed(true)}
     >
       {!setupComplete ? (
         <s-stack direction="inline" justifyContent="space-between" alignItems="start" gap="base">

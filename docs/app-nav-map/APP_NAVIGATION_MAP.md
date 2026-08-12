@@ -113,6 +113,7 @@ Dashboard preview behavior:
 - First successful preview records the Admin `bundle_previewed` event with bundle id, type, status, and link.
 - The bundle table uses Polaris automatic table/list presentation: desktop keeps Name, Status, Type, and Actions columns, while phone containers expose the same record fields and row actions as a stacked list.
 - Core bundle work stays above support and education content: create actions, unresolved storefront setup, filters, and bundle actions render before the support cards.
+- The App Embed Status banner can be dismissed with its close control for the current dashboard mount.
 
 #### "Create Bundle" Button
 Navigates to: `/app/bundles/create` (bundle type selection entry)
