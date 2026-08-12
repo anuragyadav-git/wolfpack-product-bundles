@@ -177,8 +177,17 @@
   cursor: not-allowed;
 }
 
+html.modal-open,
 body.modal-open {
   overflow: hidden;
+  overscroll-behavior: none;
+}
+
+body.modal-open {
+  position: fixed;
+  inset-inline: 0;
+  top: var(--bundle-modal-scroll-offset, 0);
+  width: 100%;
 }
 
 .existing-variants-notice {

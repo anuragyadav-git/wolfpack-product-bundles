@@ -10,13 +10,35 @@ describe("FPB product modal read-only quick view", () => {
     };
   }
 
+  function createStyleDeclaration() {
+    const values = new Map<string, string>();
+    return {
+      setProperty: (name: string, value: string) => values.set(name, value),
+      removeProperty: (name: string) => values.delete(name),
+    };
+  }
+
   beforeEach(() => {
     jest.resetModules();
     const bodyClassList = createClassList();
-    (globalThis as any).window = {};
+    const rootClassList = createClassList();
+    (globalThis as any).window = {
+      scrollY: 240,
+      scrollBy: (_x: number, y: number) => {
+        if (!rootClassList.contains("modal-open")) {
+          (globalThis as any).window.scrollY += y;
+        }
+      },
+    };
     (globalThis as any).document = {
       body: {
         classList: bodyClassList as any,
+        style: createStyleDeclaration(),
+        scrollTop: 240,
+      },
+      documentElement: {
+        classList: rootClassList as any,
+        scrollTop: 240,
       },
     };
   });
@@ -60,6 +82,12 @@ describe("FPB product modal read-only quick view", () => {
     (globalThis as typeof globalThis & { document: any }).document = {
       body: {
         classList: createClassList(),
+        style: createStyleDeclaration(),
+        scrollTop: 0,
+      },
+      documentElement: {
+        classList: createClassList(),
+        scrollTop: 0,
       },
       getElementById: (id: string) => elements[id] ?? null,
     };
@@ -125,6 +153,21 @@ describe("FPB product modal read-only quick view", () => {
     expect(widget.updateProductSelection).toHaveBeenCalledWith(0, "variant-1", 1);
     const isActive = modal.modalElement.classList.contains("active");
     expect(isActive).toBe(false);
+  });
+
+  it("prevents the storefront behind the product modal from scrolling", async () => {
+    const widget = buildWidget();
+    const modal = await createModal(widget);
+
+    modal.open(product, { id: "step-1" }, { readOnly: true });
+    window.scrollBy(0, 100);
+
+    expect(window.scrollY).toBe(240);
+
+    modal.close();
+    window.scrollBy(0, 100);
+
+    expect(window.scrollY).toBe(340);
   });
 
   it("renders Shopify product descriptionHtml as modal HTML", async () => {

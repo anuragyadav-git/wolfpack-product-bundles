@@ -33,8 +33,35 @@ export class BundleProductModal {
     this.selectedQuantity = 1;
     this.currentImageIndex = 0;
     this.readOnly = false;
+    this.lockedScrollY = 0;
+    this.isDocumentScrollLocked = false;
 
     this.init();
+  }
+
+  lockDocumentScroll() {
+    if (this.isDocumentScrollLocked) return;
+
+    this.lockedScrollY = Math.max(0, Number(window.scrollY) || 0);
+    document.documentElement.classList.add('modal-open');
+    document.body.classList.add('modal-open');
+    document.body.style.setProperty(
+      '--bundle-modal-scroll-offset',
+      `-${this.lockedScrollY}px`,
+    );
+    this.isDocumentScrollLocked = true;
+  }
+
+  unlockDocumentScroll() {
+    if (!this.isDocumentScrollLocked) return;
+
+    document.documentElement.classList.remove('modal-open');
+    document.body.classList.remove('modal-open');
+    document.body.style.removeProperty('--bundle-modal-scroll-offset');
+    document.documentElement.scrollTop = this.lockedScrollY;
+    document.body.scrollTop = this.lockedScrollY;
+    this.lockedScrollY = 0;
+    this.isDocumentScrollLocked = false;
   }
 
   /**
@@ -248,7 +275,7 @@ export class BundleProductModal {
 
     // Show modal
     this.modalElement.classList.add('active');
-    document.body.classList.add('modal-open');
+    this.lockDocumentScroll();
   }
 
   /**
@@ -256,7 +283,7 @@ export class BundleProductModal {
    */
   close() {
     this.modalElement.classList.remove('active');
-    document.body.classList.remove('modal-open');
+    this.unlockDocumentScroll();
 
     // Reset state
     this.currentProduct = null;
