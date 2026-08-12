@@ -94,7 +94,8 @@ that grows with its content up to `80dvh`; its header, totals, and action remain
 stationary while the selected-products region shows up to three rows and
 scrolls from the fourth row onward. Empty capacity is represented by enough
 line-item skeletons to maintain three visible rows. Opening the sheet locks
-background scroll.
+background scroll. Each mobile skeleton uses one row: its image and text group
+share the same vertical bounds rather than creating nested product rows.
 Backdrop, Escape, trigger-toggle, and intentional downward-swipe paths all
 dismiss it and restore focus. The sheet does not render a separate close
 control. Presets may change visual tokens, but must not fork this anatomy or
