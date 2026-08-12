@@ -1,6 +1,7 @@
+import type { ReactNode } from "react";
 import { usePpbConfigureContext } from "./PpbConfigureContext";
 
-export function PpbStepFlowCard() {
+export function PpbStepFlowCard({ children }: { children: ReactNode }) {
   const {
     activeTabIndex,
     handleAddNewStep,
@@ -75,6 +76,7 @@ export function PpbStepFlowCard() {
           <span aria-hidden="true">+</span> <span>Add Step</span>
         </button>
       </div>
+      {children}
     </div>
   );
 }

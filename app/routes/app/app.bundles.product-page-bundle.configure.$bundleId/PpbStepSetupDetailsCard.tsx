@@ -11,7 +11,7 @@ export function PpbStepSetupDetailsCard({ step }: { step: any }) {
   } = usePpbConfigureContext();
 
   return (
-    <div className={productPageBundleStyles.card}>
+    <div className={productPageBundleStyles.stepSetupDetails}>
       <div className={productPageBundleStyles.stepSetupHeader}>
         <div className={productPageBundleStyles.stepSetupTitleGroup}>
           <h3 className={productPageBundleStyles.stepSetupTitle}>Step Setup</h3>

@@ -551,6 +551,10 @@
   composes: stepSetupDescription from "./bundle-configure-shared.module.css";
 }
 
+.stepSetupDetails {
+  composes: stepSetupDetails from "./bundle-configure-shared.module.css";
+}
+
 .visibilityGuideMedia {
   composes: visibilityGuideMedia from "./bundle-configure-shared.module.css";
 }
@@ -1658,7 +1662,6 @@
 /* ── Step Chip Navigation ─────────────────────────────────────── */
 .stepFlowCard {
   overflow: visible;
-  padding-bottom: 8px;
 }
 
 .stepNav {

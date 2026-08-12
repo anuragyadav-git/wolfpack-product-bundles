@@ -90,6 +90,23 @@ export function StepSetupSection({
             <span aria-hidden="true">+</span> <span>Add Step</span>
           </button>
         </div>
+        {stepsState.steps.map(
+          (step, index) =>
+            activeTabIndex === index && (
+              <div
+                key={`${step.id}-${slideKey}-details`}
+                className={
+                  slideDir === "forward"
+                    ? fullPageBundleStyles.slideForward
+                    : slideDir === "backward"
+                      ? fullPageBundleStyles.slideBackward
+                      : ""
+                }
+              >
+                <FpbStepSetupDetailsCard flow={flow} step={step} />
+              </div>
+            ),
+        )}
       </div>
       {stepsState.steps.map(
         (step, index) =>
@@ -104,7 +121,6 @@ export function StepSetupSection({
                     : ""
               }
             >
-              <FpbStepSetupDetailsCard flow={flow} step={step} />
               <FpbStepCategoryCard flow={flow} step={step} />
               <FpbStepRulesCard flow={flow} step={step} />
               <FpbStepConfigCard flow={flow} step={step} />

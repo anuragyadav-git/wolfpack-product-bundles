@@ -60,6 +60,10 @@
   line-height: 1.35;
 }
 
+.stepSetupDetails {
+  padding-top: 24px;
+}
+
 .pendingBadge {
   display: inline-flex;
   align-items: center;

@@ -561,10 +561,12 @@
   composes: stepSetupDescription from "./bundle-configure-shared.module.css";
 }
 
+.stepSetupDetails {
+  composes: stepSetupDetails from "./bundle-configure-shared.module.css";
+}
+
 .stepFlowCard {
   overflow: visible;
-  margin-bottom: 0;
-  padding-bottom: 0;
 }
 
 .stepFlowTitleRow {
