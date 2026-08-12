@@ -1,27 +1,27 @@
 const {
-  removeBootstrapSkeleton,
-  transferBootstrapSkeleton,
+  removeBootstrapLoadingScreen,
+  transferBootstrapLoadingScreen,
 } = require("../../../app/assets/widgets/full-page/bootstrap-skeleton");
 
-describe("FPB bootstrap skeleton handoff", () => {
-  it("moves the required proxy skeleton into the widget container", () => {
-    const skeleton = { ariaHidden: true };
+describe("FPB bootstrap loading screen handoff", () => {
+  it("moves the required proxy loading screen into the widget container", () => {
+    const loadingScreen = { ariaHidden: false };
     const marker = {
-      querySelector: jest.fn().mockReturnValue(skeleton),
+      querySelector: jest.fn().mockReturnValue(loadingScreen),
     };
     const container = {
       replaceChildren: jest.fn(),
       setAttribute: jest.fn(),
     };
 
-    transferBootstrapSkeleton(marker, container);
+    transferBootstrapLoadingScreen(marker, container);
 
-    expect(marker.querySelector).toHaveBeenCalledWith("[data-wpb-bootstrap-skeleton]");
-    expect(container.replaceChildren).toHaveBeenCalledWith(skeleton);
+    expect(marker.querySelector).toHaveBeenCalledWith("[data-wpb-loading-screen]");
+    expect(container.replaceChildren).toHaveBeenCalledWith(loadingScreen);
     expect(container.setAttribute).toHaveBeenCalledWith("aria-busy", "true");
   });
 
-  it("fails fast when canonical proxy markup has no skeleton", () => {
+  it("fails fast when canonical proxy markup has no loading screen", () => {
     const marker = {
       querySelector: jest.fn().mockReturnValue(null),
     };
@@ -30,24 +30,24 @@ describe("FPB bootstrap skeleton handoff", () => {
       setAttribute: jest.fn(),
     };
 
-    expect(() => transferBootstrapSkeleton(marker, container)).toThrow(
-      "FPB bootstrap skeleton is required",
+    expect(() => transferBootstrapLoadingScreen(marker, container)).toThrow(
+      "FPB bootstrap loading screen is required",
     );
     expect(container.replaceChildren).not.toHaveBeenCalled();
   });
 
-  it("removes the transferred skeleton when widget rendering finishes", () => {
-    const skeleton = {
+  it("removes the transferred loading screen when widget rendering finishes", () => {
+    const loadingScreen = {
       remove: jest.fn(),
     };
     const container = {
-      querySelector: jest.fn().mockReturnValue(skeleton),
+      querySelector: jest.fn().mockReturnValue(loadingScreen),
       setAttribute: jest.fn(),
     };
 
-    removeBootstrapSkeleton(container);
+    removeBootstrapLoadingScreen(container);
 
-    expect(skeleton.remove).toHaveBeenCalledTimes(1);
+    expect(loadingScreen.remove).toHaveBeenCalledTimes(1);
     expect(container.setAttribute).toHaveBeenCalledWith("aria-busy", "false");
   });
 });

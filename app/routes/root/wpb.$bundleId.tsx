@@ -5,6 +5,10 @@ import { verifyAppProxyRequest } from "../../lib/app-proxy.server";
 import { BundleStatus } from "../../constants/bundle";
 import { formatBundleForWidget } from "../../lib/bundle-formatter.server";
 import { verifyBundlePreviewToken } from "../../lib/bundle-preview-token.server";
+import {
+  renderFpbLoadingScreen,
+  resolveFpbLoadingScreenSettings,
+} from "../../lib/fpb-loading-screen";
 
 function escapeHtmlAttribute(value: string): string {
   return value
@@ -51,29 +55,40 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     });
   }
 
-  const bundle = await db.bundle.findFirst({
-    where: {
-      id: bundleId,
-      shopId: shopDomain,
-      bundleType: "full_page",
-    },
-    include: {
-      steps: {
-        include: {
-          StepProduct: { orderBy: { position: "asc" } },
-          StepCategory: {
-            orderBy: {
-              sortOrder: "asc",
+  const [bundle, designSettings] = await Promise.all([
+    db.bundle.findFirst({
+      where: {
+        id: bundleId,
+        shopId: shopDomain,
+        bundleType: "full_page",
+      },
+      include: {
+        steps: {
+          include: {
+            StepProduct: { orderBy: { position: "asc" } },
+            StepCategory: {
+              orderBy: {
+                sortOrder: "asc",
+              },
             },
           },
+          orderBy: {
+            position: "asc",
+          },
         },
-        orderBy: {
-          position: "asc",
+        pricing: true,
+      },
+    }),
+    db.designSettings.findUnique({
+      where: {
+        shopId_bundleType: {
+          shopId: shopDomain,
+          bundleType: "full_page",
         },
       },
-      pricing: true,
-    },
-  });
+      select: { generalSettings: true },
+    }),
+  ]);
 
   if (!bundle) {
     AppLogger.info("FPB proxy page not found", {
@@ -122,32 +137,12 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     ? ` data-fpb-design-preset="${escapeHtmlAttribute(formattedBundle.bundleDesignPresetId)}"`
     : "";
   const config = escapeHtmlAttribute(JSON.stringify(formattedBundle));
-  const bootstrapSkeleton = `
-    <div data-wpb-bootstrap-skeleton aria-hidden="true">
-      <div data-wpb-bootstrap-heading></div>
-      <div data-wpb-bootstrap-layout>
-        <div data-wpb-bootstrap-main>
-          <div data-wpb-bootstrap-title></div>
-          <div data-wpb-bootstrap-cards>
-            ${Array.from({ length: 4 }, () => `
-              <div data-wpb-bootstrap-card>
-                <div data-wpb-bootstrap-media></div>
-                <div data-wpb-bootstrap-line="wide"></div>
-                <div data-wpb-bootstrap-line="short"></div>
-                <div data-wpb-bootstrap-action></div>
-              </div>
-            `).join("")}
-          </div>
-        </div>
-        <div data-wpb-bootstrap-summary>
-          <div data-wpb-bootstrap-line="wide"></div>
-          <div data-wpb-bootstrap-summary-row></div>
-          <div data-wpb-bootstrap-summary-row></div>
-          <div data-wpb-bootstrap-action></div>
-        </div>
-      </div>
-    </div>`;
-  const liquid = `<div data-wpb-full-page-bundle data-bundle-id="${escapeHtmlAttribute(bundle.id)}" data-bundle-type="full_page" data-bundle-config-source="app_proxy" data-shop="${escapeHtmlAttribute(shopDomain)}"${templateTypeAttr}${designPresetAttr} data-bundle-config='${config}' hidden>${bootstrapSkeleton}</div>`;
+  const loadingScreen = resolveFpbLoadingScreenSettings(designSettings?.generalSettings);
+  const loadingScreenMarkup = renderFpbLoadingScreen(loadingScreen);
+  const loadingGifAttr = loadingScreen.gifUrl
+    ? ` data-fpb-loading-gif="${escapeHtmlAttribute(loadingScreen.gifUrl)}"`
+    : "";
+  const liquid = `<div data-wpb-full-page-bundle data-bundle-id="${escapeHtmlAttribute(bundle.id)}" data-bundle-type="full_page" data-bundle-config-source="app_proxy" data-shop="${escapeHtmlAttribute(shopDomain)}" data-fpb-loading-background="${escapeHtmlAttribute(loadingScreen.backgroundColor)}"${loadingGifAttr}${templateTypeAttr}${designPresetAttr} data-bundle-config='${config}' hidden>${loadingScreenMarkup}</div>`;
 
   AppLogger.info("FPB proxy page rendered", {
     component: "wpb.proxy",

@@ -9,7 +9,7 @@
 
 import { bundleLevelCssMethods } from './widgets/shared/bundle-level-css-methods.js';
 import { getSelectedQuantity } from './widgets/shared/engine/bundle-selectors.js';
-import { removeBootstrapSkeleton } from './widgets/full-page/bootstrap-skeleton.js';
+import { removeBootstrapLoadingScreen } from './widgets/full-page/bootstrap-skeleton.js';
 import { installControllerMethods } from './widgets/shared/controller-methods.js';
 import { fullPageAnalyticsConfigMethods } from './widgets/full-page/methods/analytics-config-methods.js';
 import { fullPageInitialRenderMethods } from './widgets/full-page/methods/initial-render-methods.js';
@@ -161,7 +161,7 @@ export class BundleWidgetFullPage {
       // Render initial UI (async for full-page bundles to load products)
       await this.renderUI();
 
-      removeBootstrapSkeleton(this.container);
+      removeBootstrapLoadingScreen(this.container);
 
       // Hide overlay now that UI is fully rendered
       this.hideLoadingOverlay();
@@ -184,7 +184,7 @@ export class BundleWidgetFullPage {
       }
 
     } catch (error) {
-      removeBootstrapSkeleton(this.container);
+      removeBootstrapLoadingScreen(this.container);
       this.hideLoadingOverlay();
       // Log full error to browser console for developer debugging
       console.error('[BundleWidget] Initialization failed:', error);

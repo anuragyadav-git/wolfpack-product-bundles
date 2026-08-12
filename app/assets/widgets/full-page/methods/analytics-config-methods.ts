@@ -381,6 +381,10 @@ parseConfiguration() {
     currentProductHandle: window.currentProductHandle,
     currentProductCollections: window.currentProductCollections,
     tierConfig: this.parseTierConfig(dataset.tierConfig || '[]'),
+    loadingScreen: {
+      gifUrl: dataset.fpbLoadingGif || '',
+      backgroundColor: dataset.fpbLoadingBackground || '#ffffff',
+    },
   };
 
   this.tierConfig = this.config.tierConfig;

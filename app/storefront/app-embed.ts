@@ -2,7 +2,7 @@ import {
   getFpbStylesheetUrls,
   type FpbDesignPreset,
 } from './fpb-template-assets.js';
-import { transferBootstrapSkeleton } from '../assets/widgets/full-page/bootstrap-skeleton.js';
+import { transferBootstrapLoadingScreen } from '../assets/widgets/full-page/bootstrap-skeleton.js';
 
 const embed = document.querySelector<HTMLElement>('[data-wpb-app-embed]');
 
@@ -58,8 +58,10 @@ function hydrateMarker(): void {
     bundleConfigSource: marker.dataset.bundleConfigSource || '',
     bundleSettings: marker.dataset.bundleSettings || 'null',
     shop: marker.dataset.shop || '',
+    fpbLoadingGif: marker.dataset.fpbLoadingGif || '',
+    fpbLoadingBackground: marker.dataset.fpbLoadingBackground || '#ffffff',
   });
-  transferBootstrapSkeleton(marker, container);
+  transferBootstrapLoadingScreen(marker, container);
   marker.before(container);
   marker.dataset.wpbHydrated = 'true';
 

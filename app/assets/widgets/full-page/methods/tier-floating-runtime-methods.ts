@@ -46,7 +46,7 @@ async switchTier(bundleId, tierIndex) {
   pills.forEach(p => p.classList.add('bundle-tier-pill--disabled'));
   if (pills[tierIndex]) pills[tierIndex].classList.add('bundle-tier-pill--loading');
 
-  this.showLoadingOverlay(null);
+  this.showLoadingOverlay();
 
   try {
     // Reset mutable widget state
@@ -98,7 +98,7 @@ _mergeBundleSettings(settings) {
   if (!settings || !this.selectedBundle) return;
   const keys = [
     'promoBannerBgImage',
-    'bundleBannerDesktopUrl', 'bundleBannerMobileUrl', 'loadingGif',
+    'bundleBannerDesktopUrl', 'bundleBannerMobileUrl',
     'showStepTimeline', 'floatingBadgeEnabled', 'floatingBadgeText', 'tierConfig',
   ];
   for (const key of keys) {

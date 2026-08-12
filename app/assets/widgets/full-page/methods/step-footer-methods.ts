@@ -170,7 +170,7 @@ export const fullPageStepFooterMethods: Record<string, any> & ThisType<any> = {
   if (this._isWidgetActionBusy) return;
   const actionButton = clickedButton || this.container?.querySelector('.footer-btn-next');
   this._setWidgetBusy(true, actionButton);
-  this.showLoadingOverlay(this.selectedBundle?.loadingGif || null);
+  this.showLoadingOverlay();
   await Promise.resolve();
 
   try {

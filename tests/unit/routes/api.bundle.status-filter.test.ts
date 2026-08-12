@@ -32,6 +32,9 @@ jest.mock('../../../app/db.server', () => ({
     bundle: {
       findFirst: jest.fn(),
     },
+    designSettings: {
+      findUnique: jest.fn(),
+    },
   },
 }));
 
@@ -44,6 +47,7 @@ import { createBundlePreviewToken } from '../../../app/lib/bundle-preview-token.
 
 const getDb = () => require('../../../app/db.server').default;
 const mockFindFirst = () => getDb().bundle.findFirst as jest.MockedFunction<any>;
+const mockFindDesignSettings = () => getDb().designSettings.findUnique as jest.MockedFunction<any>;
 const mockAppProxy = authenticate.public.appProxy as jest.MockedFunction<any>;
 
 function makeApiRequest(bundleId: string, previewToken?: string) {
@@ -179,6 +183,7 @@ describe('wpb.$bundleId (FPB proxy page) — draft access control', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     process.env.SHOPIFY_API_SECRET = 'test_api_secret';
+    mockFindDesignSettings().mockResolvedValue(null);
   });
 
   afterAll(() => {

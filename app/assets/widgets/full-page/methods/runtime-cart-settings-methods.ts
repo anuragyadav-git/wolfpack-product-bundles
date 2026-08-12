@@ -141,14 +141,20 @@ updateFooterTotalPrices(totalPrice, discountInfo, currencyInfo) {
 // LOADING OVERLAY
 // ========================================================================
 
-showLoadingOverlay(gifUrl) {
+showLoadingOverlay() {
   if (!this.container) return;
+  if (this.container.querySelector('[data-wpb-loading-screen]')) return;
   // Remove any existing overlay (idempotent)
   this.container.querySelector('.bundle-loading-overlay')?.remove();
 
   const overlay = document.createElement('div');
   overlay.className = 'bundle-loading-overlay';
+  overlay.style.setProperty(
+    '--wpb-loading-screen-bg',
+    this.config?.loadingScreen?.backgroundColor || '#ffffff',
+  );
 
+  const gifUrl = this.config?.loadingScreen?.gifUrl || '';
   if (gifUrl) {
     const img = document.createElement('img');
     img.className = 'bundle-loading-overlay__gif';

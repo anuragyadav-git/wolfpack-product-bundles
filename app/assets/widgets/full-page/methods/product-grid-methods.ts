@@ -37,11 +37,6 @@ function supportsCategorySectionRows(designPreset) {
   return contract?.summary?.mode === 'slots';
 }
 
-function shouldUseProductGridSpinnerOnly(designPreset) {
-  const contract = getFpbPresetContract(designPreset);
-  return contract?.summary?.mode === 'slots';
-}
-
 function getSelectionId(item = {}) {
   return String(item?.selectionId || '');
 }
@@ -387,7 +382,7 @@ expandProductsByVariant(products, shouldExpand = true) {
 },
 
 shouldUseProductGridSpinnerOnly() {
-  return shouldUseProductGridSpinnerOnly(this.getFullPageDesignPreset?.());
+  return true;
 },
 
 renderProductGridLoadingState(productGridContainer) {
@@ -395,26 +390,12 @@ renderProductGridLoadingState(productGridContainer) {
 
   productGridContainer.innerHTML = this.createProductGridLoadingState();
 
-  const loadingGif = this.selectedBundle?.loadingGif || null;
-  if (this.shouldUseProductGridSpinnerOnly() || loadingGif) {
-    this.showLoadingOverlay(loadingGif);
-  }
+  this.showLoadingOverlay();
 },
 
-// Create loading skeleton for product grid - solid pulsating cards.
-// Classic uses the overlay spinner only until product data is populated.
+// Product loading is owned by the widget-level loading screen.
 createProductGridLoadingState() {
-  if (this.shouldUseProductGridSpinnerOnly()) return '';
-
-  return `
-    <div class="full-page-product-grid">
-      ${Array(6).fill(0).map(() => `
-        <div class="product-card skeleton-loading">
-          <div class="skeleton-card-content"></div>
-        </div>
-      `).join('')}
-    </div>
-  `;
+  return '';
 },
 
 // Preload ALL remaining steps' products in the background (parallel).

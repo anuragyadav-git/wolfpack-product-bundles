@@ -415,7 +415,7 @@ body.modal-open {
   inset: 0;
   width: 100vw;
   height: 100vh;
-  background: transparent;
+  background: var(--wpb-loading-screen-bg, #ffffff);
   display: flex;
   align-items: center;
   justify-content: center;

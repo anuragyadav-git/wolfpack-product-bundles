@@ -16,6 +16,9 @@ jest.mock("../../../app/db.server", () => ({
     bundle: {
       findFirst: jest.fn(),
     },
+    designSettings: {
+      findUnique: jest.fn(),
+    },
   },
 }));
 
@@ -43,6 +46,7 @@ describe("FPB app proxy page", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     process.env.SHOPIFY_API_SECRET = "test_api_secret";
+    getDb().designSettings.findUnique.mockResolvedValue(null);
   });
 
   afterAll(() => {
@@ -74,7 +78,7 @@ describe("FPB app proxy page", () => {
     expect(text).not.toContain("/apps/product-bundles/assets/");
   });
 
-  it("renders a decorative first-paint skeleton inside the proxy marker", async () => {
+  it("renders a customizable first-paint loading screen without skeleton cards", async () => {
     getDb().bundle.findFirst.mockResolvedValue({
       id: "bundle-1",
       name: "Build a Box",
@@ -84,6 +88,14 @@ describe("FPB app proxy page", () => {
       steps: [],
       pricing: null,
     });
+    getDb().designSettings.findUnique.mockResolvedValue({
+      generalSettings: {
+        loadingScreen: {
+          gifUrl: "https://cdn.example.test/loading.gif",
+          backgroundColor: "#f4f1eb",
+        },
+      },
+    });
 
     const response = (await loader({
       request: makeSignedRequest(),
@@ -92,9 +104,12 @@ describe("FPB app proxy page", () => {
     } as any)) as Response;
     const text = await response.text();
 
-    expect(text).toContain("data-wpb-bootstrap-skeleton");
-    expect(text).toContain('aria-hidden="true"');
-    expect(text.match(/data-wpb-bootstrap-card(?=[\s>])/g)).toHaveLength(4);
+    expect(text).toContain("data-wpb-loading-screen");
+    expect(text).toContain('role="status"');
+    expect(text).toContain("https://cdn.example.test/loading.gif");
+    expect(text).toContain("#f4f1eb");
+    expect(text).not.toContain("data-wpb-bootstrap-card");
+    expect(text).not.toContain("skeleton");
   });
 
   it("does not require a linked Shopify page", async () => {
