@@ -102,6 +102,13 @@
 
 #bundle-builder-app.bundle-widget-full-page[data-bundle-type="full_page"]
   .layout-sidebar[data-fpb-summary-mode="sidebar"]
+  .side-panel-clear-btn {
+  min-height: 2.25rem;
+  padding-block: 0.1875rem;
+}
+
+#bundle-builder-app.bundle-widget-full-page[data-bundle-type="full_page"]
+  .layout-sidebar[data-fpb-summary-mode="sidebar"]
   :is(.side-panel-title, .side-panel-subtitle, .side-panel-product-title) {
   white-space: normal;
   overflow-wrap: anywhere;
