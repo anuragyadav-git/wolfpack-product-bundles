@@ -64,8 +64,8 @@ function hydrateMarker(): void {
   marker.dataset.wpbHydrated = 'true';
 
   ensureStylesheet(embed.dataset.fullPageStyleUrl);
-  ensureStylesheet(embed.dataset.mobileSummaryStyleUrl);
   ensureStylesheet(getFpbPresetStylesheetUrl(embed.dataset, preset));
+  ensureStylesheet(embed.dataset.mobileSummaryStyleUrl);
   ensureStylesheet(embed.dataset.responsiveStyleUrl);
   loadFullPageRuntime(embed.dataset.fullPageScriptUrl);
 }

@@ -88,6 +88,15 @@ summary tray, while widths of `800px` or more use the sticky sidebar. The
 existing `ResizeObserver` propagates mode changes to the widget root, layout,
 and tray.
 
+On the mobile path, the shared summary owner renders an edge-to-edge dock with
+the summary trigger and primary action. The trigger opens a modal bottom sheet
+that grows with its content up to `80dvh`; its header, totals, and action remain
+stationary while the selected-products region shows up to three rows and
+scrolls from the fourth row onward. Opening the sheet locks background scroll.
+Close, backdrop, Escape, trigger-toggle, and intentional downward-swipe paths
+all dismiss it and restore focus. Presets may change visual tokens, but must not
+fork this anatomy or interaction contract.
+
 The shared FPB shell is the only owner of horizontal gutters. It mirrors the
 fluid EB shell contract with three direct rules: the outer shell fills the host
 up to `96rem`, uses `0.625rem` padding, and centers each banner, category row,
