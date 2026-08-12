@@ -87,7 +87,6 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
       );
       formData.append("floatingBadgeText", flow.floatingBadgeText);
       formData.append("showProductPrices", String(flow.showProductPrices));
-      formData.append("showCompareAtPrices", String(flow.showCompareAtPrices));
       formData.append(
         "cartRedirectToCheckout",
         String(flow.cartRedirectToCheckout),
@@ -227,8 +226,6 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
           flow.originalFloatingBadgeTextRef.current = flow.floatingBadgeText;
           flow.originalSearchBarEnabledRef.current = flow.searchBarEnabled;
           flow.originalShowProductPricesRef.current = flow.showProductPrices;
-          flow.originalShowCompareAtPricesRef.current =
-            flow.showCompareAtPrices;
           flow.originalCartRedirectToCheckoutRef.current =
             flow.cartRedirectToCheckout;
           flow.originalAllowQuantityChangesRef.current =
@@ -318,7 +315,6 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
     flow.setFloatingBadgeText(flow.originalFloatingBadgeTextRef.current);
     flow.setSearchBarEnabled(flow.originalSearchBarEnabledRef.current);
     flow.setShowProductPrices(flow.originalShowProductPricesRef.current);
-    flow.setShowCompareAtPrices(flow.originalShowCompareAtPricesRef.current);
     flow.setCartRedirectToCheckout(
       flow.originalCartRedirectToCheckoutRef.current,
     );

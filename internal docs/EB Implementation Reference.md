@@ -5,7 +5,7 @@ title: EB Implementation Reference
 type: reference
 status: authoritative
 summary: Records directly verified reference-app contracts used for Wolfpack bundle implementation and parity decisions.
-last_audited: 2026-08-11
+last_audited: 2026-08-12
 owners:
   - engineering
 domains:
@@ -1157,6 +1157,16 @@ while the storefront DTO key intentionally remains EB-compatible
 `showProductComparedAtPrice`. The metafield writer must map between those names;
 reading `showProductComparedAtPrice` directly from the persisted bundle silently
 forces the storefront flag to false.
+
+### FPB compare-at price ownership
+
+Live EB Admin and Standard storefront evidence on 2026-08-12 confirms that FPB
+has no `Show Compare At Price` control in its bundle configuration. Product
+cards render compare-at price data whenever it is present: the verified sale
+product rendered its original price with a line-through beside the current
+price, while a product without compare-at data rendered only its current price.
+FPB compare-at visibility is therefore product-driven and must not be gated by
+the persisted PPB visibility setting.
 
 ---
 

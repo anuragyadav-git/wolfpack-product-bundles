@@ -25,7 +25,7 @@ describe("FPB compare-at price setting control", () => {
     return null;
   };
 
-  const createFlow = (showCompareAtPrices: boolean) => ({
+  const createFlow = () => ({
     activeTabIndex: 0,
     bundle: {},
     DiscountMethod: { BUY_X_GET_Y: "BUY_X_GET_Y" },
@@ -37,46 +37,25 @@ describe("FPB compare-at price setting control", () => {
     pricingState: { discountType: "PERCENTAGE" },
     setIndividualSellingPlanEnabled: jest.fn(),
     setIndividualSellingPlanShowFor: jest.fn(),
-    setShowCompareAtPrices: jest.fn(),
     setShowTextOnAddButton: jest.fn(),
     setTextOverrides: jest.fn(),
     SettingsRow: ({ title, children }: any) =>
       createElement("section", null, title, children),
     setVariantSelectorEnabled: jest.fn(),
-    showCompareAtPrices,
     showTextOnAddButton: false,
     stepsState: { steps: [{}] },
     textOverrides: {},
     variantSelectorEnabled: true,
   });
 
-  it.each([
-    [true, true],
-    [false, false],
-  ])("renders the persisted %s state", (showCompareAtPrices, expectedChecked) => {
-    const flow = createFlow(showCompareAtPrices) as any;
-
-    const markup = renderToStaticMarkup(
-      createElement(FpbSummaryTextSettings, { flow }),
-    );
-    const control = markup.match(
-      /<s-switch accessibilityLabel="Show compare-at prices"[^>]*>/,
-    )?.[0];
-
-    expect(markup).toContain("Show Compare At Price");
-    expect(control).toBeDefined();
-    expect(control?.includes('checked="true"')).toBe(expectedChecked);
-  });
-
-  it("updates the canonical state and marks the configure flow dirty", () => {
-    const flow = createFlow(true);
+  it("does not expose a compare-at visibility control", () => {
+    const flow = createFlow();
     const view = FpbSummaryTextSettings({ flow: flow as any });
     const control = findCompareAtSwitch(view);
 
-    expect(control).not.toBeNull();
-    control?.props.onChange({ target: { checked: false } });
-
-    expect(flow.setShowCompareAtPrices).toHaveBeenCalledWith(false);
-    expect(flow.markAsDirty).toHaveBeenCalledTimes(1);
+    expect(control).toBeNull();
+    expect(
+      renderToStaticMarkup(createElement(FpbSummaryTextSettings, { flow })),
+    ).not.toContain("Show Compare At Price");
   });
 });

@@ -71,7 +71,6 @@ export function parseFpbSaveBundleForm(formData: FormData) {
     (formData.get("floatingBadgeText") as string) ?? "";
   const floatingBadgeText = floatingBadgeTextRaw.slice(0, 60);
   const showProductPrices = formData.get("showProductPrices") !== "false";
-  const showCompareAtPrices = formData.get("showCompareAtPrices") === "true";
   const cartRedirectToCheckout =
     formData.get("cartRedirectToCheckout") === "true";
   const allowQuantityChanges =
@@ -188,7 +187,6 @@ export function parseFpbSaveBundleForm(formData: FormData) {
     promoBannerBgImage,
     quantityValidationEnabled,
     searchBarEnabled,
-    showCompareAtPrices,
     showProductPrices,
     showStepTimelineParsed,
     showTextOnAddButton,

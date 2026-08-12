@@ -143,7 +143,7 @@ createProductCard(product, stepIndex, options = {}) {
         variantSelectorHtml,
         mode: getFpbProductCardMode(designPreset) || 'grid',
         className: outOfStock ? 'is-out-of-stock' : '',
-        showCompareAtPrice: this.selectedBundle?.showProductComparedAtPrice === true,
+        showCompareAtPrice: true,
         openImageLabel: resolveText('productImageLabel', 'Open product details'),
         openTitleLabel: resolveText('productTitleLabel', 'Open product details'),
         imageNavPreviousLabel: resolveText('productImagePreviousLabel', 'Previous image'),
@@ -563,8 +563,7 @@ updateProductCardVariantDisplay(cardElement, product, step) {
 
   const priceRow = cardElement.querySelector('.product-price-row');
   let compareEl = cardElement.querySelector('.product-price-strike');
-  const showCompareAtPrice = this.selectedBundle?.showProductComparedAtPrice === true;
-  if (showCompareAtPrice && displayProduct.compareAtPrice) {
+  if (displayProduct.compareAtPrice) {
     if (!compareEl && priceRow && priceEl) {
       compareEl = document.createElement('span');
       compareEl.className = 'bw-product-card__compare-price product-price-strike';

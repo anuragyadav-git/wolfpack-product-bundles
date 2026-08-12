@@ -188,7 +188,7 @@ renderModalProducts(stepIndex, productsToRender = null) {
       {
         variantSelectorHtml,
         stockBadgeHtml: stockBadge,
-        showCompareAtPrice: this.selectedBundle?.showProductComparedAtPrice === true,
+        showCompareAtPrice: true,
         openImageLabel: resolveText('productImageLabel', 'Open product details'),
         openTitleLabel: resolveText('productTitleLabel', 'Open product details'),
         imageNavPreviousLabel: resolveText('productImagePreviousLabel', 'Previous image'),

@@ -54,9 +54,6 @@ export function useConfigureContentState(flow: ConfigureBundleFlowDraft) {
   const [showProductPrices, setShowProductPrices] = useState<boolean>(
     (bundle as any).showProductPrices ?? true,
   );
-  const [showCompareAtPrices, setShowCompareAtPrices] = useState<boolean>(
-    (bundle as any).showCompareAtPrices ?? false,
-  );
   const [cartRedirectToCheckout, setCartRedirectToCheckout] = useState<boolean>(
     (bundle as any).cartRedirectToCheckout ?? false,
   );
@@ -122,9 +119,6 @@ export function useConfigureContentState(flow: ConfigureBundleFlowDraft) {
   const originalShowProductPricesRef = useRef<boolean>(
     (bundle as any).showProductPrices ?? true,
   );
-  const originalShowCompareAtPricesRef = useRef<boolean>(
-    (bundle as any).showCompareAtPrices ?? false,
-  );
   const originalCartRedirectToCheckoutRef = useRef<boolean>(
     (bundle as any).cartRedirectToCheckout ?? false,
   );
@@ -189,7 +183,6 @@ export function useConfigureContentState(flow: ConfigureBundleFlowDraft) {
     originalFloatingBadgeTextRef,
     originalLoadingGifRef,
     originalPromoBannerBgImageRef,
-    originalShowCompareAtPricesRef,
     originalShowProductPricesRef,
     originalShowStepTimelineRef,
     originalTextOverridesByLocaleRef,
@@ -212,7 +205,6 @@ export function useConfigureContentState(flow: ConfigureBundleFlowDraft) {
     setProductSlotsEnabled,
     setPromoBannerBgImage,
     setQuantityValidationEnabled,
-    setShowCompareAtPrices,
     setShowProductPrices,
     setShowSlotIconPicker,
     setShowStepTimeline,
@@ -222,7 +214,6 @@ export function useConfigureContentState(flow: ConfigureBundleFlowDraft) {
     setTextOverridesLocale,
     setVariantSelectorEnabled,
     shopDomain,
-    showCompareAtPrices,
     showProductPrices,
     showSlotIconPicker,
     showStepTimeline,

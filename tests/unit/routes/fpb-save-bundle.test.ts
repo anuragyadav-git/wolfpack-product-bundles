@@ -203,7 +203,6 @@ function makeFormData(overrides: Record<string, string | null> = {}): FormData {
   fd.set("searchBarEnabled", "false");
   fd.set("floatingBadgeEnabled", "false");
   fd.set("floatingBadgeText", "");
-  fd.set("showCompareAtPrices", "false");
   fd.set("cartRedirectToCheckout", "false");
   for (const [k, v] of Object.entries(overrides)) {
     if (v === null) fd.delete(k);
@@ -491,6 +490,18 @@ describe("FPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
 
     const updateArgs = getDb().bundle.update.mock.calls[0][0];
     expect(updateArgs.data).not.toHaveProperty("fullPageLayout");
+  });
+
+  it("ignores compare-at visibility fields in FPB save payloads", async () => {
+    await handleSaveBundle(
+      MOCK_ADMIN,
+      MOCK_SESSION,
+      "bundle-1",
+      makeFormData({ showCompareAtPrices: "false" }),
+    );
+
+    const updateArgs = getDb().bundle.update.mock.calls[0][0];
+    expect(updateArgs.data).not.toHaveProperty("showCompareAtPrices");
   });
 
   it("persists direct bundleUpsellConfig from current full-page visibility controls", async () => {
