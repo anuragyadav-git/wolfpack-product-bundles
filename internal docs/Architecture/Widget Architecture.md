@@ -5,7 +5,7 @@ title: Widget Architecture
 type: architecture
 status: authoritative
 summary: FPB and PPB bootstrap, hydration, extension-asset, and widget runtime architecture.
-last_audited: 2026-08-11
+last_audited: 2026-08-12
 owners:
   - engineering
 domains:
@@ -110,6 +110,18 @@ When Product Slots is enabled, slot tiles own the empty state and summary
 skeleton rows are not rendered.
 
 The app embed is a separate small entry. It handles redirects and marker hydration, then loads the FPB asset only when a full-page marker exists. It must not import the FPB controller graph because the embed is enabled globally.
+
+The app embed is also the sole FPB stylesheet loader. It loads the base,
+mobile-summary, active-preset, and shared responsive assets before starting the
+widget runtime, and deduplicates links by resolved URL. The controller only
+applies preset and summary markers; it does not create, disable, or switch
+stylesheets during rendering.
+
+Keep the embed runtime as an explicit deferred `asset_url` script after the
+body marker unless initialization is redesigned. A schema-level `javascript`
+asset is injected asynchronously into the document head and can execute before
+the marker exists.
+
 - Product-page upsell placement uses `bundle-upsell-block` or `bundle-upsell-button`.
 - Full-page bundle public links use the signed app-proxy document URL (`/apps/product-bundles/wpb/{bundleId}`). Shopify wraps `application/liquid` in the active theme layout and the app embed loads extension assets through `asset_url`.
 - Storefront JS/CSS must be loaded from Shopify theme-extension assets with Liquid `asset_url`. App proxy routes are only for API/data responses, not widget asset hosting.
@@ -134,17 +146,6 @@ The route returns an escaped full `formatBundleForWidget()` payload in the exist
 ### API Fallback
 If metafield cache is absent/malformed → `GET /apps/product-bundles/api/bundle/{id}.json`
 - Single retry after 3s for `503`/`504` responses (Render cold-start tolerance)
-
-The full-page Liquid block and app-embed marker write only a compact bootstrap marker into `data-bundle-config`:
-```liquid
-{"v":2,"type":"full_page","bundleType":"full_page","id":"..."}
-```
-The widget hydrates current bundle data from `/api/bundle/{id}.json`. The route also supports a bootstrap projection via `?fields=bootstrap`; projection response returns compact marker shape (`v`, `type`, `bundleType`, `id`, and timestamps/template defaults) while default response remains full bundle payload.
-
-Response headers include `Cache-Control`, `ETag`, and `Last-Modified`; unchanged bundles return `304` when validators match.
-
-**Metafield writer**: `app/services/bundles/metafield-sync/bundle-config-metafield.server.ts`
-If bundle config structure changes → update both the server writer AND the widget parser.
 
 ## PPB Load Strategy
 
@@ -225,7 +226,11 @@ Keep base CSS below the limit by moving template-specific rules into separate ex
 - The fallback is applied at image render time (`onerror`), so the UI keeps working in all supported storefront clients without regressing existing media URLs.
 - `public/bundle-product-placeholder.svg` has been decommissioned and should not be used anymore.
 
-The Liquid blocks expose template CSS URL maps and the widget runtime loads the active template stylesheet. Do not solve the limit by minifying readable source into one-line CSS; remove redundant/conflicting rules or split template CSS by ownership.
+The app embed exposes the extension asset URLs and loads exactly one active
+preset stylesheet. The widget runtime must not take over stylesheet ownership.
+Do not solve the limit by minifying readable source into one-line CSS; remove
+redundant or conflicting rules and split assets only along real ownership
+boundaries.
 
 The app embed must map canonical uppercase FPB preset IDs to explicit
 `DOMStringMap` properties: `presetStandard`, `presetClassic`, `presetCompact`,
@@ -234,6 +239,16 @@ and `presetHorizontal`. Do not derive a dataset property as
 nonexistent `presetSTANDARD` property and silently leave the widget with only
 base CSS. A base-only render can appear functional, so live verification must
 also confirm that the expected dedicated template stylesheet is loaded.
+
+### FPB Runtime Styling Boundary
+
+Static layout and presentation belong in source CSS. Runtime styling is limited
+to values that are inherently data-driven, such as measured timeline progress,
+timeline entry counts, validated variant swatch color, and merchant-authored
+Custom CSS. The runtime must not inject structural widths, heights, spacing,
+display state, or template stylesheets. Native attributes such as `hidden` and
+state markers such as `data-fpb-summary-mode` own visibility and responsive
+branching.
 
 ---
 

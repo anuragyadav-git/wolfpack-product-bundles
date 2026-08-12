@@ -5,7 +5,7 @@ title: Product Card Layout Contract
 type: architecture
 status: authoritative
 summary: Defines stable and display-safe storefront product-card layout and content boundaries.
-last_audited: 2026-07-14
+last_audited: 2026-08-12
 owners:
   - engineering
 domains:
@@ -14,6 +14,8 @@ systems:
   - bundle-widgets
 source_paths:
   - app/assets/widgets/full-page
+  - app/assets/widgets/full-page-css/shared/responsive-layout.css
+  - app/storefront/app-embed.ts
   - app/assets/widgets/product-page
 related_docs:
   - Architecture/Bundle Parent Product.md
@@ -75,6 +77,41 @@ This is a hard requirement:
   - `app/assets/widgets/full-page-css/templates/side-footer-horizontal.css`
   - `app/assets/widgets/product-page-css/base/modal-product-grid.css`
   - `app/assets/widgets/product-page-css/base/bottom-sheet-modal.css`
+
+## FPB responsive ownership
+
+The full-page widget uses its measured container width, not the browser viewport,
+to choose its summary surface. Standard, Classic, Compact, and Horizontal use
+the shared `data-fpb-summary-mode` contract: widths below `800px` use the sticky
+summary tray, while widths of `800px` or more use the sticky sidebar. The
+existing `ResizeObserver` propagates mode changes to the widget root, layout,
+and tray.
+
+The shared FPB shell is the only owner of horizontal gutters. Its content width
+transitions from half of one four-column grid column per side on narrow hosts,
+through one column per side on smaller desktops, to two columns per side on wide
+desktops without a breakpoint jump. The shared responsive stylesheet is loaded
+after the active preset stylesheet so preset-local viewport rules cannot retake
+structural ownership.
+
+The catalog track is a named inline-size container. Product grids reflow by
+catalog width: Standard and Compact cap at three columns, Classic caps at four,
+and Horizontal caps at two. Vertical preset media uses one shared fluid bounded
+height, while Horizontal preserves its 30/70 media/content split and contained
+imagery. Sidebar proportions remain preset-owned: Standard and Classic move
+from 59/41 toward 69/31 on wide hosts, Compact uses 60/40, and Horizontal uses
+65/35. Only the selected-products region inside the sidebar scrolls.
+
+Preset structural rules use the named FPB shell container rather than viewport
+media queries. This keeps a constrained host and a same-width browser viewport
+on the same layout path. The shared responsive asset owns shell gutters,
+summary tracks, sidebar/tray visibility, catalog column counts, and bounded
+vertical-card media. Preset assets own only their visual treatment and
+preset-specific card anatomy.
+
+The app embed owns stylesheet loading. Runtime code may set only validated or
+measured data values through CSS custom properties; it must not inject static
+layout declarations or maintain a second stylesheet-switching path.
 
 ## Acceptance
 
