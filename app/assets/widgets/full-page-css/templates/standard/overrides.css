@@ -2166,6 +2166,34 @@ body:has([data-fpb-design-preset]) {
   max-height: none;
 }
 
+/* Let price items wrap without clipping and allow the card to grow with them. */
+.layout-sidebar[data-fpb-design-preset="STANDARD"]
+  .sidebar-content
+  .product-price-row {
+  flex-wrap: wrap;
+  height: auto;
+  min-height: 0;
+  overflow: visible;
+  white-space: normal;
+}
+
+.layout-sidebar[data-fpb-design-preset="STANDARD"]
+  .sidebar-content
+  .product-price-row
+  .product-price,
+.layout-sidebar[data-fpb-design-preset="STANDARD"]
+  .sidebar-content
+  .product-price-row
+  .product-price-strike {
+  flex: 0 0 auto;
+  width: max-content;
+  max-width: 100%;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
 /* Shared design-system interaction geometry. Keep Standard's compact visuals,
    but never reduce the interactive box below the storefront control target. */
 .layout-sidebar[data-fpb-design-preset="STANDARD"] {
@@ -2201,7 +2229,8 @@ body:has([data-fpb-design-preset]) {
    the price and uses compact button geometry. */
 .layout-sidebar[data-fpb-design-preset="STANDARD"][data-fpb-card-cta-mode="icon"]
   .sidebar-content {
-  --fpb-icon-cta-size: var(--bundle-control-hit-target, 2.75rem);
+  --fpb-icon-cta-size: 35px;
+  --fpb-card-quantity-selector-height: var(--fpb-icon-cta-size);
   --fpb-icon-quantity-width: 7rem;
 }
 
@@ -2209,7 +2238,7 @@ body:has([data-fpb-design-preset]) {
   .sidebar-content
   .product-card-price-action {
   grid-template-columns: minmax(0, 1fr) auto;
-  grid-template-rows: var(--fpb-icon-cta-size);
+  grid-template-rows: auto;
   align-items: center;
   column-gap: 0.5rem;
 }
@@ -2219,7 +2248,7 @@ body:has([data-fpb-design-preset]) {
   .product-card-price-action:has(.vs-wrapper--standard) {
   grid-template-rows:
     var(--standard-variant-selector-row-height, 2.375rem)
-    var(--fpb-icon-cta-size);
+    auto;
 }
 
 .layout-sidebar[data-fpb-design-preset="STANDARD"][data-fpb-card-cta-mode="icon"]
@@ -2257,6 +2286,7 @@ body:has([data-fpb-design-preset]) {
   min-width: var(--fpb-icon-cta-size);
   height: var(--fpb-icon-cta-size);
   min-height: var(--fpb-icon-cta-size);
+  margin: 0;
 }
 
 .layout-sidebar[data-fpb-design-preset="STANDARD"][data-fpb-card-cta-mode="icon"]
