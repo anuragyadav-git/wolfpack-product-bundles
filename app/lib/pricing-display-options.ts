@@ -8,6 +8,11 @@ import {
 export interface PricingDisplayStep {
   id: string;
   enabled?: boolean;
+  conditionType?: string | null;
+  conditionOperator?: string | null;
+  conditionValue?: number | null;
+  conditionOperator2?: string | null;
+  conditionValue2?: number | null;
   maxQuantity?: number | null;
 }
 
@@ -176,9 +181,28 @@ function canUseSavedBundleQuantitySubtext(
 function getStepQuantityCapacity(steps?: PricingDisplayStep[]): number | null {
   if (!Array.isArray(steps) || steps.length === 0) return null;
 
-  return steps
-    .filter((step) => step.enabled !== false)
-    .reduce((sum, step) => sum + Math.max(0, Number(step.maxQuantity ?? 0) || 0), 0);
+  let capacity = 0;
+  for (const step of steps.filter((candidate) => candidate.enabled !== false)) {
+    if (step.conditionType && step.conditionType !== "quantity") return null;
+
+    const upperBounds = [
+      { operator: step.conditionOperator, value: step.conditionValue },
+      { operator: step.conditionOperator2, value: step.conditionValue2 },
+    ]
+      .filter(
+        (condition) =>
+          condition.operator === "equal_to" ||
+          condition.operator === "less_than_or_equal_to",
+      )
+      .map((condition) => condition.value)
+      .filter((value): value is number => Number.isFinite(value) && Number(value) >= 0)
+      .map(Number);
+
+    if (upperBounds.length === 0) return null;
+    capacity += Math.min(...upperBounds);
+  }
+
+  return capacity;
 }
 
 function getCompatibility(quantity: number, steps?: PricingDisplayStep[]): NormalizedBundleQuantityOption["compatibility"] {

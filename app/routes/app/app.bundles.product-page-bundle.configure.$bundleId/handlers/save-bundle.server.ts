@@ -145,16 +145,6 @@ async function validatePersistedStepProductVariants(
   return null;
 }
 
-function normalizeMinQuantity(value: unknown): number {
-  const parsed = Number.parseInt(String(value), 10);
-  return Number.isFinite(parsed) ? parsed : 0;
-}
-
-function normalizeMaxQuantity(value: unknown): number {
-  const parsed = Number.parseInt(String(value), 10);
-  return Number.isFinite(parsed) ? parsed : 0;
-}
-
 export async function handleSaveBundle(
   admin: ShopifyAdmin,
   session: Session,
@@ -271,8 +261,6 @@ export async function handleSaveBundle(
         ...validateStepConditionFeasibility({
           stepId: step.id,
           stepName: step.name,
-          minQuantity: normalizeMinQuantity(step.minQuantity),
-          maxQuantity: normalizeMaxQuantity(step.maxQuantity),
           conditionType: firstCondition?.type || null,
           conditionOperator: firstCondition?.operator || null,
           conditionValue: parseConditionValue(firstCondition?.value),
@@ -439,8 +427,8 @@ export async function handleSaveBundle(
                 collections: step.collections || [],
                 displayVariantsAsIndividual:
                   step.displayVariantsAsIndividualProducts || false,
-                minQuantity: normalizeMinQuantity(step.minQuantity),
-                maxQuantity: normalizeMaxQuantity(step.maxQuantity),
+                minQuantity: step.minQuantity,
+                maxQuantity: step.maxQuantity,
                 enabled: step.enabled !== false, // Default to true unless explicitly false
                 // Free gift / add-on step fields
                 isFreeGift: step.isFreeGift === true,
@@ -481,8 +469,8 @@ export async function handleSaveBundle(
                           product.image?.url ||
                           null,
                         variants: product.variants || null,
-                        minQuantity: normalizeMinQuantity(product.minQuantity),
-                        maxQuantity: parseInt(product.maxQuantity) || 10,
+                        minQuantity: product.minQuantity,
+                        maxQuantity: product.maxQuantity,
                         position: productIndex + 1,
                       };
                     },

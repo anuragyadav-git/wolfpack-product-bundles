@@ -71,16 +71,6 @@ function collectStepProductReferences(step: any): Array<{ id: string }> {
   return productIds.map((id) => ({ id }));
 }
 
-function normalizeStepMinQuantity(value: unknown): number {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : 0;
-}
-
-function normalizeStepMaxQuantity(value: unknown): number {
-  const parsed = Number.parseInt(String(value), 10);
-  return Number.isFinite(parsed) ? parsed : 0;
-}
-
 function normalizeShopifyGid(value: unknown, resource: "ProductVariant"): string | null {
   if (typeof value !== "string" && typeof value !== "number") return null;
 
@@ -138,7 +128,7 @@ function collectCachedStepVariants(
   };
 
   for (const step of Array.isArray(steps) ? steps : []) {
-    const quantity = normalizeStepMinQuantity(step.minQuantity);
+    const quantity = step.minQuantity;
 
     for (const stepProduct of Array.isArray(step.StepProduct) ? step.StepProduct : []) {
       appendProductVariants(stepProduct, quantity);
@@ -206,7 +196,7 @@ export async function updateBundleProductMetafields(
           if (stepProduct.productId && !isUUID(stepProduct.productId)) {
             productIdMap.push({
               productId: stepProduct.productId,
-              stepMinQuantity: normalizeStepMinQuantity(step.minQuantity),
+              stepMinQuantity: step.minQuantity,
               source: 'StepProduct'
             });
           } else if (stepProduct.productId) {
@@ -222,7 +212,7 @@ export async function updateBundleProductMetafields(
           if (product.id && !isUUID(product.id)) {
             productIdMap.push({
               productId: product.id,
-              stepMinQuantity: normalizeStepMinQuantity(step.minQuantity),
+              stepMinQuantity: step.minQuantity,
               source: 'products'
             });
           }
@@ -269,7 +259,7 @@ export async function updateBundleProductMetafields(
                 if (!alreadyAdded) {
                   productIdMap.push({
                     productId,
-                    stepMinQuantity: normalizeStepMinQuantity(step.minQuantity),
+                    stepMinQuantity: step.minQuantity,
                     source: `collection:${handle}`
                   });
                 }
@@ -300,7 +290,7 @@ export async function updateBundleProductMetafields(
           if (p.id && !isUUID(p.id) && !productIdMap.some(item => item.productId === p.id)) {
             productIdMap.push({
               productId: p.id,
-              stepMinQuantity: normalizeStepMinQuantity(step.minQuantity),
+              stepMinQuantity: step.minQuantity,
               source: `StepCategory:${cat.name}`,
             });
           }
@@ -328,7 +318,7 @@ export async function updateBundleProductMetafields(
               if (productId && !isUUID(productId) && !productIdMap.some(item => item.productId === productId)) {
                 productIdMap.push({
                   productId,
-                  stepMinQuantity: normalizeStepMinQuantity(step.minQuantity),
+                  stepMinQuantity: step.minQuantity,
                   source: `StepCategory:${cat.name}:collection:${handle}`,
                 });
               }
@@ -471,8 +461,8 @@ export async function updateBundleProductMetafields(
       pageTitle: step.pageTitle ?? null,
       multiLangData: step.multiLangData ?? {},
       position: step.position || 0,
-      minQuantity: normalizeStepMinQuantity(step.minQuantity),
-      maxQuantity: normalizeStepMaxQuantity(step.maxQuantity),
+      minQuantity: step.minQuantity,
+      maxQuantity: step.maxQuantity,
       products: collectStepProductReferences(step),
       collections: Array.isArray(step.collections) ? step.collections : [],
       categories: formatStepCategoriesForRuntime(step, Array.isArray(step.StepProduct) ? step.StepProduct : []),

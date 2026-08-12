@@ -156,8 +156,8 @@ function buildSaveFormData(personalizationDataFixture: ReturnType<typeof buildPe
     {
       id: "step-1",
       name: "Bundle Product",
-      minQuantity: "1",
-      maxQuantity: "4",
+      minQuantity: 1,
+      maxQuantity: 4,
       enabled: true,
       StepProduct: [
         {
@@ -173,8 +173,8 @@ function buildSaveFormData(personalizationDataFixture: ReturnType<typeof buildPe
     {
       id: "step-2",
       name: "Add On",
-      minQuantity: "1",
-      maxQuantity: "1",
+      minQuantity: 1,
+      maxQuantity: 1,
       enabled: true,
       isFreeGift: true,
       addonLabel: "Add On",

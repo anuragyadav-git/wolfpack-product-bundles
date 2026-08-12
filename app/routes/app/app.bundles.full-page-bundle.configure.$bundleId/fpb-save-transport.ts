@@ -2,16 +2,6 @@ function asArray(value: unknown): unknown[] {
   return Array.isArray(value) ? value : [];
 }
 
-function normalizeStepMinQuantity(value: unknown): number {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : 0;
-}
-
-function normalizeStepMaxQuantity(value: unknown): number {
-  const parsed = Number.parseInt(String(value), 10);
-  return Number.isFinite(parsed) ? parsed : 0;
-}
-
 function asRecord(value: unknown): Record<string, unknown> | null {
   if (!value || typeof value !== "object" || Array.isArray(value)) return null;
   return value as Record<string, unknown>;
@@ -255,8 +245,8 @@ export function serializeFpbSaveSteps(
       pageTitle: source.pageTitle ?? null,
       multiLangData: asRecord(source.multiLangData) ?? {},
       stepImage: source.stepImage ?? source.timelineIconUrl ?? null,
-      minQuantity: normalizeStepMinQuantity(source.minQuantity),
-      maxQuantity: normalizeStepMaxQuantity(source.maxQuantity),
+      minQuantity: source.minQuantity,
+      maxQuantity: source.maxQuantity,
       enabled: source.enabled !== false,
       displayVariantsAsIndividual: source.displayVariantsAsIndividual ?? false,
       products: compactProducts(source.products),

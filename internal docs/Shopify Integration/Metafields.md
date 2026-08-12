@@ -5,7 +5,7 @@ title: Metafields
 type: shopify-integration
 status: authoritative
 summary: Storefront bundle metafield ownership, synchronization, payload limits, and Shopify validation constraints.
-last_audited: 2026-08-11
+last_audited: 2026-08-13
 owners:
   - engineering
 domains:
@@ -95,6 +95,24 @@ Shopify's fixed-bundle `component_quantities` metafield has a minimum value of `
 New PPB steps therefore start with `minQuantity: 0` and `maxQuantity: 10`, preserving optional-step semantics. The runtime `bundle_ui_config` and database keep that merchant-authored step minimum unchanged. At the Shopify metadata boundary, parent `component_quantities` normalize each candidate component to at least `1`. Buyer-selected PPB components and quantities remain validated by the signed runtime-token Cart Transform flow.
 
 Do not reject an optional step or promote its persisted minimum merely to satisfy the Shopify metafield definition. Category-product `minQuantity: 0` likewise remains valid because it represents an optional product within a step.
+
+## Step Quantity Ownership
+
+Admin step rules are the authoritative shopper-selection constraints. A rule
+such as `equal_to 2` must not be compared with legacy or hidden
+`minQuantity`/`maxQuantity` fields during save. When two step rules exist, save
+validation checks whether those merchant-authored rules can both be satisfied.
+
+Quantity-based discount tiers are separate bundle-total rules. For example,
+two steps that each require exactly two items can validly coexist with discount
+tiers at total quantities two and four.
+
+Admin save transport, database persistence, and widget runtime serialization
+preserve canonical quantity values without parsing, coercing, or supplying
+zero defaults. Conversion is allowed only at an external contract boundary
+that requires a different representation. The Shopify
+`component_quantities` writer is such a boundary and enforces Shopify's
+minimum component quantity there, without changing Admin or runtime state.
 
 ## Bundle Details Order Attribution
 

@@ -125,14 +125,51 @@ describe("normalizePricingDisplayOptions", () => {
         },
       },
       steps: [
-        { id: "step-1", enabled: true, maxQuantity: 2 },
-        { id: "step-2", enabled: true, maxQuantity: 2 },
+        { id: "step-1", enabled: true, conditionOperator: "equal_to", conditionValue: 2 },
+        { id: "step-2", enabled: true, conditionOperator: "equal_to", conditionValue: 2 },
       ],
     });
 
     expect(result.bundleQuantityOptions.options[0].compatibility).toEqual({
       status: "blocked",
       reason: "Configured steps allow up to 4 items, below this 5 item option.",
+    });
+  });
+
+  it("ignores stale hidden maxQuantity values when step rules define capacity", () => {
+    const result = normalizePricingDisplayOptions({
+      rules: [quantityRule("rule-4", 4, 15)],
+      messages: {
+        displayOptions: {
+          bundleQuantityOptions: { enabled: true },
+        },
+      },
+      steps: [
+        { id: "step-1", maxQuantity: 0, conditionOperator: "equal_to", conditionValue: 2 },
+        { id: "step-2", maxQuantity: 0, conditionOperator: "equal_to", conditionValue: 2 },
+      ],
+    });
+
+    expect(result.bundleQuantityOptions.options[0].compatibility).toEqual({
+      status: "compatible",
+    });
+  });
+
+  it("leaves compatibility unchecked when a step rule has no upper bound", () => {
+    const result = normalizePricingDisplayOptions({
+      rules: [quantityRule("rule-4", 4, 15)],
+      messages: {
+        displayOptions: {
+          bundleQuantityOptions: { enabled: true },
+        },
+      },
+      steps: [
+        { id: "step-1", conditionOperator: "greater_than_or_equal_to", conditionValue: 2 },
+      ],
+    });
+
+    expect(result.bundleQuantityOptions.options[0].compatibility).toEqual({
+      status: "unchecked",
     });
   });
 

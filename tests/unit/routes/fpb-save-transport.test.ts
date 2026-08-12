@@ -7,8 +7,8 @@ describe("serializeFpbSaveSteps", () => {
         id: "step-1",
         name: "Pick one",
         pageTitle: "Choose your product",
-        minQuantity: "1",
-        maxQuantity: "3",
+        minQuantity: 1,
+        maxQuantity: 3,
         enabled: true,
         displayVariantsAsIndividual: true,
         multiLangData: { en: { name: "Pick one" } },
@@ -138,5 +138,19 @@ describe("serializeFpbSaveSteps", () => {
       ],
     });
     expect(result[0].StepCategory[0]).not.toHaveProperty("productsConnection");
+  });
+
+  it("does not invent zero quantity bounds when Admin state has no bounds", () => {
+    const [serialized] = serializeFpbSaveSteps([
+      {
+        id: "step-1",
+        name: "Pick two",
+        minQuantity: null,
+        maxQuantity: null,
+      },
+    ]);
+
+    expect(serialized.minQuantity).toBeNull();
+    expect(serialized.maxQuantity).toBeNull();
   });
 });

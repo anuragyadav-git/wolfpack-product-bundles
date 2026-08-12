@@ -29,6 +29,7 @@ export function useConfigureTemplatePricingController(
     bundle,
     bundleDesignPresetId,
     bundleDesignTemplate,
+    conditionsState,
     formState,
     isSelectTemplateModalOpen,
     lastTemplateRequestRef,
@@ -242,16 +243,29 @@ export function useConfigureTemplatePricingController(
         rules: pricingState.discountRules,
         messages: { displayOptions: pricingState.pricingDisplayOptions },
         showProgressBar: pricingState.showDiscountProgressBar,
-        steps: stepsState.steps.map((step: any) => ({
-          id: step.id,
-          enabled: step.enabled,
-          maxQuantity: step.maxQuantity,
-        })),
+        steps: stepsState.steps.map((step: any) => {
+          const [firstCondition, secondCondition] =
+            conditionsState.stepConditions[step.id] || [];
+          return {
+            id: step.id,
+            enabled: step.enabled,
+            conditionType: firstCondition?.type ?? null,
+            conditionOperator: firstCondition?.operator ?? null,
+            conditionValue: firstCondition
+              ? Number(firstCondition.value)
+              : null,
+            conditionOperator2: secondCondition?.operator ?? null,
+            conditionValue2: secondCondition
+              ? Number(secondCondition.value)
+              : null,
+          };
+        }),
       }),
     [
       pricingState.discountRules,
       pricingState.pricingDisplayOptions,
       pricingState.showDiscountProgressBar,
+      conditionsState.stepConditions,
       stepsState.steps,
     ]
   );

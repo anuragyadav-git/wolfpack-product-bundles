@@ -144,6 +144,8 @@ const MOCK_ADMIN = {
 function makeStep(
   overrides: Partial<{
     id: string;
+    minQuantity: number | string | null;
+    maxQuantity: number | string | null;
     pageTitle: string;
     stepImage: string | null;
     multiLangData: Record<string, Record<string, string>>;
@@ -156,8 +158,8 @@ function makeStep(
     id: "step-1",
     name: "Step 1",
     pageTitle: "",
-    minQuantity: "1",
-    maxQuantity: "5",
+    minQuantity: 1,
+    maxQuantity: 5,
     enabled: true,
     products: [],
     collections: [],
@@ -281,13 +283,13 @@ describe("PPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
     expect(body.message).toBe("Updated Successfully!");
   });
 
-  it("rejects save when quantity condition is equal_to and conditionValue is above maxQuantity", async () => {
+  it("allows an exact step rule with bundle-total discount tiers and stale hidden bounds", async () => {
     const stepConditions = {
       "step-1": [
         {
           type: "quantity",
           operator: "equal_to",
-          value: "6",
+          value: "2",
         },
       ],
     };
@@ -296,89 +298,15 @@ describe("PPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
       MOCK_SESSION,
       "bundle-1",
       makeFormData({
-        stepsData: JSON.stringify([makeStep({ maxQuantity: "5" })]),
+        stepsData: JSON.stringify([makeStep({ minQuantity: 0, maxQuantity: 0 })]),
         stepConditions: JSON.stringify(stepConditions),
-      }),
-    );
-
-    expect(res.status).toBe(400);
-    const body = await res.json() as any;
-    expect(body.success).toBe(false);
-    expect(body.error).toContain("outside quantity range [1, 5]");
-    expect(getDb().bundle.update).not.toHaveBeenCalled();
-  });
-
-  it("rejects save when quantity condition is greater_than_or_equal_to and conditionValue is above maxQuantity", async () => {
-    const stepConditions = {
-      "step-1": [
-        {
-          type: "quantity",
-          operator: "greater_than_or_equal_to",
-          value: "8",
-        },
-      ],
-    };
-    const res = await handleSaveBundle(
-      MOCK_ADMIN,
-      MOCK_SESSION,
-      "bundle-1",
-      makeFormData({
-        stepsData: JSON.stringify([makeStep({ minQuantity: "2", maxQuantity: "5" })]),
-        stepConditions: JSON.stringify(stepConditions),
-      }),
-    );
-
-    expect(res.status).toBe(400);
-    const body = await res.json() as any;
-    expect(body.success).toBe(false);
-    expect(body.error).toContain("outside quantity range [2, 5]");
-    expect(getDb().bundle.update).not.toHaveBeenCalled();
-  });
-
-  it("rejects save when quantity condition is less_than_or_equal_to and conditionValue is below minQuantity", async () => {
-    const stepConditions = {
-      "step-1": [
-        {
-          type: "quantity",
-          operator: "less_than_or_equal_to",
-          value: "0",
-        },
-      ],
-    };
-    const res = await handleSaveBundle(
-      MOCK_ADMIN,
-      MOCK_SESSION,
-      "bundle-1",
-      makeFormData({
-        stepsData: JSON.stringify([makeStep({ minQuantity: "1", maxQuantity: "5" })]),
-        stepConditions: JSON.stringify(stepConditions),
-      }),
-    );
-
-    expect(res.status).toBe(400);
-    const body = await res.json() as any;
-    expect(body.success).toBe(false);
-    expect(body.error).toContain("outside quantity range [1, 5]");
-    expect(getDb().bundle.update).not.toHaveBeenCalled();
-  });
-
-  it("allows save when quantity condition falls within min/max range", async () => {
-    const stepConditions = {
-      "step-1": [
-        {
-          type: "quantity",
-          operator: "equal_to",
-          value: "4",
-        },
-      ],
-    };
-    const res = await handleSaveBundle(
-      MOCK_ADMIN,
-      MOCK_SESSION,
-      "bundle-1",
-      makeFormData({
-        stepsData: JSON.stringify([makeStep({ minQuantity: "1", maxQuantity: "5" })]),
-        stepConditions: JSON.stringify(stepConditions),
+        discountData: JSON.stringify(makeDiscountData({
+          discountEnabled: true,
+          discountRules: [
+            { conditionType: "quantity", conditionValue: 2, discountValue: 5 },
+            { conditionType: "quantity", conditionValue: 4, discountValue: 15 },
+          ],
+        })),
       }),
     );
 
@@ -388,10 +316,42 @@ describe("PPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
     expect(getDb().bundle.update).toHaveBeenCalled();
   });
 
+  it("rejects contradictory merchant-authored step rules", async () => {
+    const stepConditions = {
+      "step-1": [
+        {
+          type: "quantity",
+          operator: "greater_than_or_equal_to",
+          value: "4",
+        },
+        {
+          type: "quantity",
+          operator: "less_than_or_equal_to",
+          value: "2",
+        },
+      ],
+    };
+    const res = await handleSaveBundle(
+      MOCK_ADMIN,
+      MOCK_SESSION,
+      "bundle-1",
+      makeFormData({
+        stepsData: JSON.stringify([makeStep({ minQuantity: 0, maxQuantity: 0 })]),
+        stepConditions: JSON.stringify(stepConditions),
+      }),
+    );
+
+    expect(res.status).toBe(400);
+    const body = await res.json() as any;
+    expect(body.success).toBe(false);
+    expect(body.error).toContain("cannot both be satisfied");
+    expect(getDb().bundle.update).not.toHaveBeenCalled();
+  });
+
   it("preserves an optional category step without forcing a shopper selection", async () => {
     const stepsData = [
       makeStep({
-        minQuantity: "0",
+        minQuantity: 0,
         StepCategory: [
           {
             id: "category-1",

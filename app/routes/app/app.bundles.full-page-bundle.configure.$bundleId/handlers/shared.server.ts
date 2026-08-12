@@ -124,7 +124,7 @@ function buildFullPageBundleMetafieldSteps(steps: any[] = []) {
       multiLangData: step.multiLangData ?? {},
       stepImage: step.stepImage ?? step.timelineIconUrl ?? null,
       position: step.position ?? index + 1,
-      minQuantity: Number.isFinite(Number(step.minQuantity)) ? Number(step.minQuantity) : 0,
+      minQuantity: step.minQuantity,
       maxQuantity: step.maxQuantity ?? null,
       enabled: step.enabled !== false,
       conditionType: step.conditionType ?? null,
@@ -284,12 +284,8 @@ export function buildFpbBaseConfig(
       pageTitle: step.pageTitle ?? null,
       multiLangData: step.multiLangData ?? {},
       stepImage: step.stepImage ?? null,
-      minQuantity: Number.isFinite(Number.parseInt(step.minQuantity, 10))
-        ? Number.parseInt(step.minQuantity, 10)
-        : 0,
-      maxQuantity: Number.isFinite(Number.parseInt(step.maxQuantity, 10))
-        ? Number.parseInt(step.maxQuantity, 10)
-        : null,
+      minQuantity: step.minQuantity,
+      maxQuantity: step.maxQuantity,
       enabled: step.enabled !== false,
       conditionType: stepConditionsData[step.id]?.[0]?.type || null,
       conditionOperator: stepConditionsData[step.id]?.[0]?.operator || null,
