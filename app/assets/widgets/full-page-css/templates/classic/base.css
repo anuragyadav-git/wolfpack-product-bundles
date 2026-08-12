@@ -6,11 +6,6 @@
 
 .fpb-preset-classic,
 [data-bundle-type="full_page"][data-fpb-design-preset="CLASSIC"] {
-  width: 100%;
-  max-width: none;
-  margin-inline: 0;
-  padding: 0;
-  box-sizing: border-box;
   background: var(--bundle-full-page-bg-color);
 }
 

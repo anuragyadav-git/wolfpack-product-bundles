@@ -33,10 +33,6 @@ function isSupportedFpbPreset(rawValue) {
   return getFpbPresetContract(rawValue) !== null;
 }
 
-function isClassicFpbPreset(rawValue) {
-  return getFpbPresetContract(rawValue)?.summary?.mode === 'slots';
-}
-
 export function getSummaryPresentationMode({
   designPreset,
   layout,
@@ -153,9 +149,6 @@ _renderMobileSummaryTray({ preserveOpen = false } = {}) {
   const preset = this.getFullPageDesignPreset();
   if (preset) {
     sheet.classList.add(`fpb-preset-${preset.toLowerCase()}`);
-  }
-  if (isClassicFpbPreset(preset)) {
-    sheet.classList.add('fpb-mobile-classic-footer');
   }
   this.compactMobileSummaryTrayExpanded = wasCompactSummaryExpanded
     || this.compactMobileSummaryTrayExpanded === true;

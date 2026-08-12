@@ -132,9 +132,25 @@ The shared FPB shell is the only owner of horizontal gutters. It mirrors the
 fluid EB shell contract with three direct rules: the outer shell fills the host
 up to `96rem`, uses `0.625rem` padding, and centers each banner, category row,
 and sidebar layout at `96%` width. Do not add gutter `clamp()` formulas,
-piecewise breakpoints, or duplicate preset-level gutter tokens. The shared
-responsive stylesheet is loaded after the active preset stylesheet so
-preset-local viewport rules cannot retake structural ownership.
+piecewise breakpoints, or duplicate preset-level gutter tokens. The app embed
+composes storefront stylesheets in one fixed order: base widget, mobile-summary
+component, responsive shell/sidebar component, then the active preset
+entrypoint. Shared components define the default structural contract once,
+while the final preset layer may override visual treatment or an explicitly
+documented design exception. Preset entrypoints must not reimplement the shared
+gutter, sticky/scroll, summary-mode, or mobile-sheet algorithms.
+
+The four preset entrypoints are intentionally thin:
+
+- `templates/side-footer-standard.css` imports Standard timeline and visual overrides.
+- `templates/side-footer-classic.css` imports Classic visual component files.
+- `templates/side-footer-compact.css` imports Compact visual overrides.
+- `templates/side-footer-horizontal.css` imports Horizontal visual overrides.
+
+The app embed is the importer for `shared/mobile-summary-footer.css` and
+`shared/responsive-layout.css`. They remain separate generated Shopify assets
+instead of being expanded into all four preset files, which avoids duplicate
+downloads and keeps every generated asset below Shopify's 100,000-byte limit.
 
 The catalog track is a named inline-size container. Product grids reflow by
 catalog width: Standard and Compact cap at three columns, Classic caps at four,
@@ -144,10 +160,10 @@ imagery. Sidebar proportions remain preset-owned: Standard and Classic move
 from 59/41 toward 69/31 on wide hosts, Compact uses 60/40, and Horizontal uses
 65/35. Only the selected-products region inside the sidebar scrolls.
 
-The Standard desktop summary reserves a three-row product viewport. Each row is
-`75px` with a `15px` gap, and the products region begins vertical scrolling when
-a fourth line item is present. This capacity rule does not apply to inline slots
-or the mobile summary tray.
+Every FPB desktop summary reserves the same three-row product viewport. Each row
+is `4.6875rem` with a `0.9375rem` gap, and the products region begins vertical
+scrolling when a fourth line item is present. This capacity rule does not apply
+to inline slots or the mobile summary tray.
 
 Discount qualification messages remain on one unbroken line in desktop
 sidebars and mobile summary trays. Presets may own their typography, but must

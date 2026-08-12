@@ -5,14 +5,6 @@
   .fpb-preset-classic .full-page-side-panel {
     --classic-sidebar-summary-inset: 0.5rem;
     --classic-sidebar-slot-remove-size: 1rem;
-    width: 100%;
-    flex: initial;
-    height: auto;
-    min-height: 0;
-    max-height: none;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto auto auto auto;
     gap: var(--classic-sidebar-section-gap, 5px);
     margin-top: 0;
     padding: var(--classic-sidebar-panel-padding, 20px);
@@ -23,8 +15,6 @@
       --bundle-side-panel-text-color,
       var(--bundle-global-primary-text, currentColor)
     );
-    top: 80px;
-    box-sizing: border-box;
     box-shadow: none;
     font-family: Assistant, sans-serif;
   }
@@ -944,12 +934,8 @@
     .full-page-side-panel,
   .bundle-widget-full-page.fpb-preset-classic[data-fpb-summary-mode="sidebar"]
     .full-page-side-panel {
-    height: fit-content;
-    max-height: calc(100dvh - 6rem);
-    grid-template-rows: auto auto minmax(0, 1fr) auto;
     gap: var(--classic-review-section-gap);
     padding: var(--classic-review-panel-padding);
-    overflow: hidden;
     container-type: inline-size;
   }
 
@@ -1018,13 +1004,8 @@
     grid-template-columns: minmax(0, 1fr);
     grid-auto-rows: max-content;
     gap: var(--classic-review-row-gap);
-    max-height: max(9rem, var(--classic-review-scroll-max-height));
     margin: 0;
     padding: 0.125rem 0;
-    overflow-x: hidden;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    scrollbar-gutter: stable;
   }
 
   .bundle-widget-full-page.fpb-preset-classic[data-fpb-summary-mode="sidebar"]
@@ -1032,7 +1013,6 @@
     .bw-selected-row {
     grid-template-columns: 4rem minmax(0, 1fr) auto;
     gap: 0.75rem;
-    min-height: 4rem;
     padding: 0;
     border: 0;
     border-radius: 0;
@@ -1043,7 +1023,6 @@
     .side-panel-products
     .bw-selected-row__media {
     width: 4rem;
-    height: 4rem;
     border-radius: var(--bundle-side-panel-btn-radius, 0.375rem);
   }
 
