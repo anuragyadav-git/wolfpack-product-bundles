@@ -10,6 +10,7 @@ import { normaliseShopifyProductId } from "../../../../services/bundles/bundle-c
 import { BundleStatus } from "../../../../constants/bundle";
 import { ERROR_MESSAGES } from "../../../../constants/errors";
 import { buildStepCategoryCreateInput } from "../../../../lib/bundle-config/category-persistence";
+import { resolveBundleStepEnabled } from "../../../../lib/bundle-config/step-enablement";
 import {
   normalizePricingDisplayOptions,
   serializeBoxSelectionFromPricingDisplayOptions,
@@ -429,7 +430,7 @@ export async function handleSaveBundle(
                   step.displayVariantsAsIndividualProducts || false,
                 minQuantity: step.minQuantity,
                 maxQuantity: step.maxQuantity,
-                enabled: step.enabled !== false, // Default to true unless explicitly false
+                enabled: resolveBundleStepEnabled(index, step.enabled),
                 // Free gift / add-on step fields
                 isFreeGift: step.isFreeGift === true,
                 freeGiftName: step.freeGiftName || null,

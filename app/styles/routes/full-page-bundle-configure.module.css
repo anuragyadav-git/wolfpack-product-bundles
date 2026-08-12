@@ -555,6 +555,10 @@
   composes: stepSetupDetails from "./bundle-configure-shared.module.css";
 }
 
+.stepDisabledContent {
+  composes: stepDisabledContent from "./bundle-configure-shared.module.css";
+}
+
 .visibilityGuideMedia {
   composes: visibilityGuideMedia from "./bundle-configure-shared.module.css";
 }

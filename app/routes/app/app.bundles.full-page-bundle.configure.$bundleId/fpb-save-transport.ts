@@ -1,3 +1,5 @@
+import { resolveBundleStepEnabled } from "../../../lib/bundle-config/step-enablement";
+
 function asArray(value: unknown): unknown[] {
   return Array.isArray(value) ? value : [];
 }
@@ -233,7 +235,7 @@ export function serializeFpbSaveSteps(
   steps: unknown[] = [],
   selectedCollectionsByStepId: Record<string, unknown[]> = {},
 ) {
-  return steps.map((step) => {
+  return steps.map((step, stepIndex) => {
     const source = asRecord(step) ?? {};
     const stepId = typeof source.id === "string" ? source.id : "";
     const selectedCollections = stepId ? selectedCollectionsByStepId[stepId] : undefined;
@@ -247,7 +249,10 @@ export function serializeFpbSaveSteps(
       stepImage: source.stepImage ?? source.timelineIconUrl ?? null,
       minQuantity: source.minQuantity,
       maxQuantity: source.maxQuantity,
-      enabled: source.enabled !== false,
+      enabled: resolveBundleStepEnabled(
+        stepIndex,
+        typeof source.enabled === "boolean" ? source.enabled : undefined,
+      ),
       displayVariantsAsIndividual: source.displayVariantsAsIndividual ?? false,
       products: compactProducts(source.products),
       collections: compactCollections(collections),

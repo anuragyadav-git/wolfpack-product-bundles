@@ -1,6 +1,12 @@
 import { usePpbConfigureContext } from "./PpbConfigureContext";
 
-export function PpbStepSetupDetailsCard({ step }: { step: any }) {
+export function PpbStepSetupDetailsCard({
+  step,
+  isFirstStep,
+}: {
+  step: any;
+  isFirstStep: boolean;
+}) {
   const {
     cloneStep,
     deleteStep,
@@ -17,7 +23,8 @@ export function PpbStepSetupDetailsCard({ step }: { step: any }) {
           <h3 className={productPageBundleStyles.stepSetupTitle}>Step Setup</h3>
           <s-switch
             accessibilityLabel="Enable step"
-            checked={step.enabled !== false || undefined}
+            checked={isFirstStep || step.enabled !== false || undefined}
+            disabled={isFirstStep || undefined}
             onChange={(event) => {
               stepsState.updateStepField(
                 step.id,
@@ -56,25 +63,34 @@ export function PpbStepSetupDetailsCard({ step }: { step: any }) {
           </span>
         </div>
       </div>
-      <p className={productPageBundleStyles.stepSetupDescription}>
-        Edit your step name (Only visible if more than one step is present)
-      </p>
-      <s-stack direction="block" gap="small">
-        <s-text-field
-          label="Step Name"
-          placeholder="Eg:- Add product"
-          value={step.name ?? ""}
-          onInput={(event) => {
-            stepsState.updateStepField(
-              step.id,
-              "name",
-              (event.target as HTMLInputElement).value,
-            );
-            markAsDirty();
-          }}
-          autocomplete="off"
-        />
-      </s-stack>
+      <div
+        className={
+          step.enabled === false && !isFirstStep
+            ? productPageBundleStyles.stepDisabledContent
+            : undefined
+        }
+        inert={step.enabled === false && !isFirstStep ? "" : undefined}
+      >
+        <p className={productPageBundleStyles.stepSetupDescription}>
+          Edit your step name (Only visible if more than one step is present)
+        </p>
+        <s-stack direction="block" gap="small">
+          <s-text-field
+            label="Step Name"
+            placeholder="Eg:- Add product"
+            value={step.name ?? ""}
+            onInput={(event) => {
+              stepsState.updateStepField(
+                step.id,
+                "name",
+                (event.target as HTMLInputElement).value,
+              );
+              markAsDirty();
+            }}
+            autocomplete="off"
+          />
+        </s-stack>
+      </div>
     </div>
   );
 }

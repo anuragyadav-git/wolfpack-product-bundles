@@ -3,9 +3,11 @@ import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
 export function FpbStepSetupDetailsCard({
   flow,
   step,
+  isFirstStep,
 }: {
   flow: ConfigureBundleFlowContext;
   step: any;
+  isFirstStep: boolean;
 }) {
   const {
     cloneStep,
@@ -23,7 +25,8 @@ export function FpbStepSetupDetailsCard({
           <h3 className={fullPageBundleStyles.stepSetupTitle}>Step Setup</h3>
           <s-switch
             accessibilityLabel="Enable step"
-            checked={step.enabled !== false || undefined}
+            checked={isFirstStep || step.enabled !== false || undefined}
+            disabled={isFirstStep || undefined}
             onChange={(e) => {
               stepsState.updateStepField(
                 step.id,
@@ -62,25 +65,34 @@ export function FpbStepSetupDetailsCard({
           </span>
         </div>
       </div>
-      <p className={fullPageBundleStyles.stepSetupDescription}>
-        Edit your step name (Only visible if more than one step is present)
-      </p>
-      <s-stack direction="block" gap="small">
-        <s-text-field
-          label="Step Name"
-          placeholder="Eg:- Add product"
-          value={step.name ?? ""}
-          onInput={(e) => {
-            stepsState.updateStepField(
-              step.id,
-              "name",
-              (e.target as HTMLInputElement).value,
-            );
-            markAsDirty();
-          }}
-          autocomplete="off"
-        />
-      </s-stack>
+      <div
+        className={
+          step.enabled === false && !isFirstStep
+            ? fullPageBundleStyles.stepDisabledContent
+            : undefined
+        }
+        inert={step.enabled === false && !isFirstStep ? "" : undefined}
+      >
+        <p className={fullPageBundleStyles.stepSetupDescription}>
+          Edit your step name (Only visible if more than one step is present)
+        </p>
+        <s-stack direction="block" gap="small">
+          <s-text-field
+            label="Step Name"
+            placeholder="Eg:- Add product"
+            value={step.name ?? ""}
+            onInput={(e) => {
+              stepsState.updateStepField(
+                step.id,
+                "name",
+                (e.target as HTMLInputElement).value,
+              );
+              markAsDirty();
+            }}
+            autocomplete="off"
+          />
+        </s-stack>
+      </div>
     </div>
   );
 }

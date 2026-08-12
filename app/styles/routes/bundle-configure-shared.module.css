@@ -64,6 +64,13 @@
   padding-top: 24px;
 }
 
+.stepDisabledContent {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+  user-select: none;
+}
+
 .pendingBadge {
   display: inline-flex;
   align-items: center;

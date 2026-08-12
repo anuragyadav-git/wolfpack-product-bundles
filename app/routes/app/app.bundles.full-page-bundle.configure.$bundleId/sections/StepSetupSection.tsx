@@ -103,7 +103,11 @@ export function StepSetupSection({
                       : ""
                 }
               >
-                <FpbStepSetupDetailsCard flow={flow} step={step} />
+                <FpbStepSetupDetailsCard
+                  flow={flow}
+                  step={step}
+                  isFirstStep={index === 0}
+                />
               </div>
             ),
         )}
@@ -121,9 +125,18 @@ export function StepSetupSection({
                     : ""
               }
             >
-              <FpbStepCategoryCard flow={flow} step={step} />
-              <FpbStepRulesCard flow={flow} step={step} />
-              <FpbStepConfigCard flow={flow} step={step} />
+              <div
+                className={
+                  index > 0 && step.enabled === false
+                    ? fullPageBundleStyles.stepDisabledContent
+                    : undefined
+                }
+                inert={index > 0 && step.enabled === false ? "" : undefined}
+              >
+                <FpbStepCategoryCard flow={flow} step={step} />
+                <FpbStepRulesCard flow={flow} step={step} />
+                <FpbStepConfigCard flow={flow} step={step} />
+              </div>
             </div>
           ),
       )}

@@ -153,6 +153,7 @@ function makeStepsData(
     id: string;
     minQuantity: number | string | null;
     maxQuantity: number | string | null;
+    enabled: boolean;
     stepImage: string | null;
     multiLangData: Record<string, Record<string, string>>;
     products: any[];
@@ -301,6 +302,23 @@ describe("FPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
     const body = await res.json() as any;
     expect(body.success).toBe(true);
     expect(body.message).toBe("Updated Successfully!");
+  });
+
+  it("persists Step 1 as enabled and allows a later step to be disabled", async () => {
+    const steps = [
+      makeStepsData({ id: "step-1", enabled: false })[0],
+      makeStepsData({ id: "step-2", enabled: false })[0],
+    ];
+
+    await handleSaveBundle(
+      MOCK_ADMIN,
+      MOCK_SESSION,
+      "bundle-1",
+      makeFormData({ stepsData: JSON.stringify(steps) }),
+    );
+
+    const savedSteps = getDb().bundle.update.mock.calls[0][0].data.steps.create;
+    expect(savedSteps.map((step: any) => step.enabled)).toEqual([true, false]);
   });
 
   it("allows exact step rules and bundle-total discount tiers without hidden quantity bounds", async () => {

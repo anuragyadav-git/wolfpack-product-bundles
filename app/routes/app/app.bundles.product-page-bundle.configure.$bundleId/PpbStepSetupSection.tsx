@@ -52,7 +52,10 @@ export function PpbStepSetupSection() {
                           </p>
                         </s-banner>
                       )}
-                    <PpbStepSetupDetailsCard step={step} />
+                    <PpbStepSetupDetailsCard
+                      step={step}
+                      isFirstStep={index === 0}
+                    />
                   </div>
                 ),
             )}
@@ -70,9 +73,18 @@ export function PpbStepSetupSection() {
                         : ""
                   }
                 >
-                  <PpbStepCategoriesCard step={step} />
-                  <PpbRulesConfigurationCard step={step} />
-                  <PpbStepConfigCard step={step} />
+                  <div
+                    className={
+                      index > 0 && step.enabled === false
+                        ? productPageBundleStyles.stepDisabledContent
+                        : undefined
+                    }
+                    inert={index > 0 && step.enabled === false ? "" : undefined}
+                  >
+                    <PpbStepCategoriesCard step={step} />
+                    <PpbRulesConfigurationCard step={step} />
+                    <PpbStepConfigCard step={step} />
+                  </div>
                 </div>
               ),
           )}

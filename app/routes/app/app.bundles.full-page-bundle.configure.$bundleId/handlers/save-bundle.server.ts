@@ -7,6 +7,7 @@ import { mapDiscountMethod } from "../../../../utils/discount-mappers";
 import { normaliseShopifyProductId } from "../../../../services/bundles/bundle-configure-handlers.server";
 import { BundleStatus } from "../../../../constants/bundle";
 import { buildStepCategoryCreateInput } from "../../../../lib/bundle-config/category-persistence";
+import { resolveBundleStepEnabled } from "../../../../lib/bundle-config/step-enablement";
 import {
   normalizePricingDisplayOptions,
   serializeBoxSelectionFromPricingDisplayOptions,
@@ -497,7 +498,7 @@ export async function handleSaveBundle(
                   step.displayVariantsAsIndividual ?? false,
                 minQuantity: step.minQuantity,
                 maxQuantity: step.maxQuantity,
-                enabled: step.enabled !== false, // Default to true unless explicitly false
+                enabled: resolveBundleStepEnabled(index, step.enabled),
                 multiLangData: step.multiLangData ?? null,
                 // Free gift / add-on step fields
                 isFreeGift: step.isFreeGift === true,

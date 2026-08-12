@@ -153,4 +153,13 @@ describe("serializeFpbSaveSteps", () => {
     expect(serialized.minQuantity).toBeNull();
     expect(serialized.maxQuantity).toBeNull();
   });
+
+  it("forces Step 1 enabled while preserving a disabled later step", () => {
+    const serialized = serializeFpbSaveSteps([
+      { id: "step-1", enabled: false },
+      { id: "step-2", enabled: false },
+    ]);
+
+    expect(serialized.map((step) => step.enabled)).toEqual([true, false]);
+  });
 });
