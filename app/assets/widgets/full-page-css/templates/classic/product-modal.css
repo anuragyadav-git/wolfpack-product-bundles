@@ -133,23 +133,6 @@ body:has(.layout-sidebar[data-fpb-design-preset="CLASSIC"], .fpb-preset-classic)
 
   body:has(.layout-sidebar[data-fpb-design-preset="CLASSIC"], .fpb-preset-classic)
     .bundle-modal-overlay[data-read-only="true"]
-    .bundle-modal-drag-handle {
-    display: none;
-  }
-
-  body:has(.layout-sidebar[data-fpb-design-preset="CLASSIC"], .fpb-preset-classic)
-    .bundle-modal-overlay[data-read-only="true"]
-    .bundle-modal-close {
-    top: max(0.3125rem, env(safe-area-inset-top));
-    right: 0;
-    width: 2.8125rem;
-    height: 2.425rem;
-    font-size: 2.25rem;
-    color: #b2b5b9;
-  }
-
-  body:has(.layout-sidebar[data-fpb-design-preset="CLASSIC"], .fpb-preset-classic)
-    .bundle-modal-overlay[data-read-only="true"]
     .bundle-modal-content {
     display: grid;
     grid-template-columns: minmax(0, 1fr);

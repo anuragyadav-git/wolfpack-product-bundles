@@ -1,4 +1,4 @@
-@media (min-width: 640px) {
+@media (min-width: 768px) {
   .bundle-modal-overlay.active .bundle-modal-container {
     transform: scale(1);
   }
@@ -25,7 +25,7 @@
   background: rgba(0, 0, 0, 0.4);
 }
 
-@media (min-width: 640px) {
+@media (min-width: 768px) {
   .bundle-modal-drag-handle {
     display: none;
   }
@@ -51,7 +51,13 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-@media (min-width: 640px) {
+@media (max-width: 767px) {
+  .bundle-modal-close {
+    display: none;
+  }
+}
+
+@media (min-width: 768px) {
   .bundle-modal-close {
     top: 5px;
     right: 0;
@@ -74,11 +80,11 @@
   flex-direction: column;
   gap: 16px;
   padding: 16px;
-  padding-top: 56px;
+  padding-top: 16px;
   align-items: stretch;
 }
 
-@media (min-width: 640px) {
+@media (min-width: 768px) {
   .bundle-modal-content {
     gap: 24px;
     padding: 0;

@@ -148,9 +148,6 @@ class VariantSelectorComponent {
     return `
       <div class="vs-mobile-drawer vs-mobile-drawer--standard" data-vs-mobile-drawer>
         <div class="vs-mobile-drawer-sheet" role="dialog" aria-modal="true">
-          <button type="button" class="vs-mobile-drawer-close" data-vs-mobile-close aria-label="Close">
-            <span aria-hidden="true">x</span>
-          </button>
           <div class="vs-mobile-drawer-header">
             ${productImageUrl ? `<img class="vs-mobile-drawer-product-image" src="${VariantSelectorComponent._esc(productImageUrl)}" alt="">` : ''}
             <div class="vs-mobile-drawer-product-info">
@@ -435,8 +432,7 @@ class VariantSelectorComponent {
     };
 
     drawer.addEventListener('click', (event) => {
-      const closeTarget = event.target.closest('[data-vs-mobile-close]');
-      if (closeTarget || event.target === drawer) {
+      if (event.target === drawer) {
         event.stopPropagation();
         close();
         return;

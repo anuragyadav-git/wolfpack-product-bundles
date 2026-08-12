@@ -407,7 +407,7 @@
     visibility 0.3s ease;
 }
 
-@media (min-width: 640px) {
+@media (min-width: 768px) {
   .bundle-modal-overlay {
     align-items: center;
     padding: clamp(1rem, 3vw, 2rem);
@@ -437,7 +437,7 @@
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-@media (min-width: 640px) {
+@media (min-width: 768px) {
   .bundle-modal-container {
     border-radius: 10px;
     width: min(56rem, 100%);

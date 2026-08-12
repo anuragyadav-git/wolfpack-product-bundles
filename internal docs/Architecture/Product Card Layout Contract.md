@@ -5,7 +5,7 @@ title: Product Card Layout Contract
 type: architecture
 status: authoritative
 summary: Defines stable and display-safe storefront product-card layout and content boundaries.
-last_audited: 2026-08-12
+last_audited: 2026-08-13
 owners:
   - engineering
 domains:
@@ -15,6 +15,9 @@ systems:
 source_paths:
   - app/assets/widgets/full-page
   - app/assets/widgets/full-page-css/shared/responsive-layout.css
+  - app/assets/widgets/full-page-css/base/product-modal-shell.css
+  - app/assets/widgets/shared/variant-selector.ts
+  - app/assets/bundle-modal-component.ts
   - app/storefront/app-embed.ts
   - app/assets/widgets/product-page
 related_docs:
@@ -101,6 +104,14 @@ Backdrop, Escape, trigger-toggle, and intentional downward-swipe paths all
 dismiss it and restore focus. The sheet does not render a separate close
 control. Presets may change visual tokens, but must not fork this anatomy or
 interaction contract.
+
+All storefront mobile drawers follow the same close-control boundary. At widths
+below `768px`, product details use the bottom-sheet anatomy with a drag handle,
+swipe dismissal, backdrop dismissal, and no cross button. The mobile variant
+selector also omits a cross and dismisses from its backdrop or after a variant
+choice. At `768px` and wider, product details use the centered desktop modal and
+retain its cross button. Desktop modal controls must not be copied into mobile
+drawer markup.
 
 Mobile add-to-cart actions show the active discount label badge beside the
 merchant-authored action label and do not repeat the bundle price. Price remains

@@ -220,27 +220,6 @@
     border-radius: 1.25rem 1.25rem 0 0;
   }
 
-  .vs-mobile-drawer--standard .vs-mobile-drawer-close {
-    position: absolute;
-    inset-block-start: -3.125rem;
-    inset-inline-start: 50%;
-    display: grid;
-    width: 2.1875rem;
-    height: 2.1875rem;
-    place-items: center;
-    padding: 0;
-    transform: translateX(-50%);
-    background: #000;
-    border: 0;
-    border-radius: 50%;
-    color: #fff;
-    font: inherit;
-    font-size: 1.25rem;
-    line-height: 1;
-    text-transform: uppercase;
-    cursor: pointer;
-  }
-
   .vs-mobile-drawer--standard .vs-mobile-drawer-header {
     display: grid;
     grid-template-columns: 7.25rem minmax(0, 1fr);
