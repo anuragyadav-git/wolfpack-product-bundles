@@ -90,9 +90,10 @@
   [data-fpb-design-preset="CLASSIC"]
 ) .standard-navigation-image {
   display: block;
-  width: 100%;
+  width: auto;
   height: 100%;
-  object-fit: fill;
+  max-width: 100%;
+  object-fit: contain;
   border-radius: 0;
   opacity: 1;
   filter: none;

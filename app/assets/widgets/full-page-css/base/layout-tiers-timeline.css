@@ -245,7 +245,7 @@
   }
 }
 
-.timeline-step-icon {
+.timeline-step-icon:not(.standard-navigation-image) {
   width: 58%;
   height: 58%;
   object-fit: cover;
@@ -534,9 +534,10 @@
   )
   .standard-navigation-image {
   display: block;
-  width: 100%;
+  width: auto;
   height: 100%;
-  object-fit: fill;
+  max-width: 100%;
+  object-fit: contain;
   opacity: 1;
   filter: none;
 }
