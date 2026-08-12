@@ -50,7 +50,7 @@ gesture-driven paths across every FPB preset.
 | 7 | Selection update | Sheet is open and products change | Open state and product-list scroll position are restored | Shell stays connected |
 | 8 | Existing actions | Next, add to cart, clear, remove, BQO, slots | Existing validation and action paths remain unchanged | No duplicate submissions |
 | 9 | Empty product list | Fewer than three selected line items | Skeletons fill the list to three rows; higher rule requirements remain authoritative | Fourth row onward scrolls |
-| 10 | Add-to-cart content | Qualified mobile discount | CTA shows action label plus discount badge and omits price | Applies to collapsed and expanded mobile actions |
+| 10 | Add-to-cart content | Qualified mobile discount | CTA shows action label plus discount badge and omits price | CTA is the sole badge owner across collapsed and expanded states |
 
 ## Acceptance Criteria
 

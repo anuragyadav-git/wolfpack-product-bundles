@@ -290,12 +290,6 @@ _populateCompactMobileSummaryTray(sheet) {
   if (this.selectedBundle?.pricing?.enabled) {
     const discountBlock = document.createElement('div');
     discountBlock.className = 'side-panel-discount-message';
-    if (discountBadgeLabel) {
-      const discountBadge = document.createElement('span');
-      discountBadge.className = 'fpb-summary-discount-badge';
-      discountBadge.textContent = discountBadgeLabel;
-      discountBlock.appendChild(discountBadge);
-    }
     if (this.config.showDiscountMessaging) {
       const variables = TemplateManager.createDiscountVariables(
         this.selectedBundle,
@@ -400,12 +394,6 @@ _populateCompactMobileSummaryTray(sheet) {
   totalLabel.className = 'side-panel-total-label';
   totalLabel.textContent = 'Total';
   totalHeading.appendChild(totalLabel);
-  if (discountBadgeLabel) {
-    const totalsDiscountBadge = document.createElement('span');
-    totalsDiscountBadge.className = 'fpb-summary-discount-badge';
-    totalsDiscountBadge.textContent = discountBadgeLabel;
-    totalHeading.appendChild(totalsDiscountBadge);
-  }
   const totalPrices = document.createElement('div');
   totalPrices.className = 'fpb-mobile-summary-total-prices';
   const finalTotal = document.createElement('span');

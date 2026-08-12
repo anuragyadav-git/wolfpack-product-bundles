@@ -102,7 +102,9 @@ interaction contract.
 
 Mobile add-to-cart actions show the active discount label badge beside the
 merchant-authored action label and do not repeat the bundle price. Price remains
-owned by the collapsed summary row and the sheet totals.
+owned by the collapsed summary row and the sheet totals. Across collapsed and
+expanded mobile states, the add-to-cart action is the sole discount-badge owner;
+the progress message and Total row do not repeat it.
 
 The shared FPB shell is the only owner of horizontal gutters. It mirrors the
 fluid EB shell contract with three direct rules: the outer shell fills the host
