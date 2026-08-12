@@ -71,10 +71,10 @@ function isStandardOrClassicFpbPreset(rawValue) {
   return isStandardFpbPreset(rawValue) || isClassicFpbPreset(rawValue);
 }
 
-function supportsAdditionalOfferPulse(rawValue) {
+function supportsAdditionalOfferStatus(rawValue) {
   const contract = getFpbPresetContract(rawValue);
-  if (contract?.mobileSummary?.pulseOffers != null) {
-    return contract.mobileSummary.pulseOffers === true;
+  if (contract?.mobileSummary?.showAdditionalOfferStatus != null) {
+    return contract.mobileSummary.showAdditionalOfferStatus === true;
   }
 
   const summary = typeof mobileSummaryTemplateSystem?.getSummary === 'function'
@@ -82,8 +82,8 @@ function supportsAdditionalOfferPulse(rawValue) {
     : null;
   const preset = typeof rawValue === 'string' ? rawValue.trim().toUpperCase() : '';
   if (!preset) return false;
-  return Array.isArray(summary?.fpb?.presetsSupportingAdditionalOfferPulse)
-    ? summary.fpb.presetsSupportingAdditionalOfferPulse.includes(preset)
+  return Array.isArray(summary?.fpb?.presetsSupportingAdditionalOfferStatus)
+    ? summary.fpb.presetsSupportingAdditionalOfferStatus.includes(preset)
     : false;
 }
 
@@ -96,35 +96,40 @@ export function shouldUseFluidMobileSummaryFooter(designPreset) {
   return isSupportedFpbPreset(designPreset);
 }
 
-export function getMobileAdditionalOffersPulseState({
+export function getMobileAdditionalOffersStatus({
   designPreset,
   currentStepIndex = 0,
   steps = [],
   addonStates = [],
 } = {}) {
-  if (!supportsAdditionalOfferPulse(designPreset)) return { shouldPulse: false, signature: '' };
+  if (!supportsAdditionalOfferStatus(designPreset)) return { visible: false, message: '' };
 
   const bundleSteps = Array.isArray(steps) ? steps : [];
   const currentStep = bundleSteps[currentStepIndex] || null;
-  if (currentStep?.isFreeGift === true) return { shouldPulse: false, signature: '' };
+  if (currentStep?.isFreeGift === true) return { visible: false, message: '' };
 
   const states = Array.isArray(addonStates) ? addonStates.filter(Boolean) : [];
   const hasEligibleOffer = states.some(state => state.isEligible === true);
   const hasLockedOffer = states.some(state => state.isEligible !== true);
-  if (!hasEligibleOffer || !hasLockedOffer) return { shouldPulse: false, signature: '' };
-
-  const signature = states
-    .map((state, index) => {
-      const tierId = state.tier?.tierId || state.tier?.id || index;
-      return `${tierId}:${state.isEligible === true ? 'eligible' : 'locked'}`;
-    })
-    .join('|');
+  if (!hasEligibleOffer || !hasLockedOffer) return { visible: false, message: '' };
 
   return {
-    shouldPulse: true,
-    signature,
+    visible: true,
     message: 'Additional offers to be unlocked',
   };
+}
+
+export function shouldDismissMobileSummarySwipe({
+  distanceY = 0,
+  distanceX = 0,
+  velocityY = 0,
+} = {}) {
+  const verticalDistance = Number(distanceY);
+  const horizontalDistance = Math.abs(Number(distanceX));
+  const downwardVelocity = Number(velocityY);
+  if (!Number.isFinite(verticalDistance) || verticalDistance <= 0) return false;
+  if (horizontalDistance > verticalDistance) return false;
+  return verticalDistance >= 96 || downwardVelocity >= 0.6;
 }
 
 function normalizeStepContentSubtext(value) {
@@ -147,14 +152,11 @@ function normalizeStepContentSubtext(value) {
   return isTimestamp ? '' : text;
 }
 
-const MOBILE_ADDITIONAL_OFFERS_GREEN_DELAY_MS = 550;
-const MOBILE_ADDITIONAL_OFFERS_MESSAGE_DELAY_MS = 800;
-const MOBILE_ADDITIONAL_OFFERS_DURATION_MS = 3000;
-const MOBILE_SUMMARY_TOGGLE_ANIMATION_MS = 300;
-const MOBILE_SUMMARY_TRAY_TRANSITION_MS = 700;
+const MOBILE_SUMMARY_DIALOG_ID = 'fpb-mobile-summary-dialog';
 
 export const fullPageMobileSummaryMethods: Record<string, any> & ThisType<any> = {
 _populateCompactMobileSummaryTray(sheet) {
+  const previousListScrollTop = sheet.querySelector?.('.fpb-mobile-summary-products-list')?.scrollTop || 0;
   sheet.innerHTML = '';
 
   const { totalPrice, totalQuantity, unitPrices } = PricingCalculator.calculateBundleTotal(
@@ -201,37 +203,47 @@ _populateCompactMobileSummaryTray(sheet) {
   const addonStates = addonStep && typeof this.getAddonSummaryEligibilityStates === 'function'
     ? this.getAddonSummaryEligibilityStates(addonStep)
     : [];
-  const additionalOffersPulseState = getMobileAdditionalOffersPulseState({
+  const additionalOffersStatus = getMobileAdditionalOffersStatus({
     designPreset: this.getFullPageDesignPreset?.(),
     currentStepIndex: this.currentStepIndex,
     steps: this.selectedBundle?.steps || [],
     addonStates,
   });
-  const additionalOffersBadgeState = this._syncMobileAdditionalOffersPulse?.(additionalOffersPulseState)
-    || { active: false, showMessage: false };
   const toggleSummaryTray = () => {
     this._toggleCompactMobileSummaryTray(sheet);
   };
+  const dock = document.createElement('div');
+  dock.className = 'fpb-mobile-summary-dock';
   const countBadge = document.createElement('button');
   countBadge.className = 'fpb-mobile-summary-count-badge';
   countBadge.setAttribute('type', 'button');
+  countBadge.setAttribute('aria-controls', MOBILE_SUMMARY_DIALOG_ID);
   if (countBadge.dataset) {
     countBadge.dataset.summaryQuantity = String(selectedFooterQuantity);
   } else {
     countBadge.setAttribute('data-summary-quantity', String(selectedFooterQuantity));
   }
-  if (additionalOffersPulseState.message) {
-    if (countBadge.dataset) {
-      countBadge.dataset.additionalOffersMessage = additionalOffersPulseState.message;
-    } else {
-      countBadge.setAttribute('data-additional-offers-message', additionalOffersPulseState.message);
-    }
-  }
-  if (additionalOffersBadgeState.active) {
-    countBadge.classList.add('fpb-mobile-summary-count-badge--additional-offers');
-  }
-  if (additionalOffersBadgeState.showMessage) {
-    countBadge.classList.add('fpb-mobile-summary-count-badge--additional-offers-message');
+  const toggleCopy = document.createElement('span');
+  toggleCopy.className = 'fpb-mobile-summary-toggle-copy';
+  const toggleTitle = document.createElement('span');
+  toggleTitle.className = 'fpb-mobile-summary-toggle-title';
+  toggleTitle.textContent = summaryToggleLabel;
+  const toggleValue = document.createElement('span');
+  toggleValue.className = 'fpb-mobile-summary-toggle-count';
+  toggleValue.setAttribute('data-mobile-summary-toggle-value', '');
+  toggleValue.textContent = String(selectedFooterQuantity);
+  toggleCopy.append(toggleTitle, toggleValue);
+  const togglePrices = document.createElement('span');
+  togglePrices.className = 'fpb-mobile-summary-toggle-prices';
+  const toggleFinalPrice = document.createElement('span');
+  toggleFinalPrice.className = 'fpb-mobile-summary-toggle-final-price';
+  toggleFinalPrice.textContent = CurrencyManager.convertAndFormat(finalPrice, currencyInfo);
+  togglePrices.appendChild(toggleFinalPrice);
+  if (combinedDiscountInfo.hasDiscount && finalPrice < totalPrice) {
+    const toggleComparePrice = document.createElement('span');
+    toggleComparePrice.className = 'fpb-mobile-summary-toggle-compare-price';
+    toggleComparePrice.textContent = CurrencyManager.convertAndFormat(totalPrice, currencyInfo);
+    togglePrices.appendChild(toggleComparePrice);
   }
   const toggleIcon = document.createElement('span');
   toggleIcon.className = 'fpb-mobile-summary-toggle-icon';
@@ -241,16 +253,22 @@ _populateCompactMobileSummaryTray(sheet) {
       <path fill-rule="evenodd" clip-rule="evenodd" d="M6.07827 11.2095C6.36662 11.4773 6.81745 11.4606 7.0852 11.1722L9.65059 8.4095L12.216 11.1722C12.4837 11.4606 12.9346 11.4773 13.2229 11.2095C13.5113 10.9418 13.528 10.4909 13.2602 10.2026L10.1727 6.87758C10.0379 6.73239 9.84871 6.6499 9.65059 6.6499C9.45247 6.6499 9.26329 6.73239 9.12847 6.87758L6.04097 10.2026C5.77321 10.4909 5.78991 10.9418 6.07827 11.2095Z" fill="currentColor"></path>
     </svg>
   `;
-  const toggleValue = document.createElement('span');
-  toggleValue.setAttribute('data-mobile-summary-toggle-value', '');
-  toggleValue.textContent = additionalOffersBadgeState.showMessage
-    ? additionalOffersPulseState.message
-    : String(selectedFooterQuantity);
-  countBadge.append(toggleIcon, toggleValue);
+  countBadge.append(toggleCopy, togglePrices, toggleIcon);
   countBadge.setAttribute('aria-label', summaryToggleLabel);
   countBadge.setAttribute('aria-expanded', this.compactMobileSummaryTrayExpanded ? 'true' : 'false');
   countBadge.addEventListener('click', toggleSummaryTray);
-  sheet.appendChild(countBadge);
+  dock.appendChild(countBadge);
+
+  const dialog = document.createElement('dialog');
+  dialog.className = 'fpb-mobile-summary-dialog';
+  dialog.id = MOBILE_SUMMARY_DIALOG_ID;
+  dialog.setAttribute('aria-label', summaryToggleLabel);
+  const dialogPanel = document.createElement('div');
+  dialogPanel.className = 'fpb-mobile-summary-dialog-panel';
+  const dragHandle = document.createElement('div');
+  dragHandle.className = 'fpb-mobile-summary-drag-handle';
+  dragHandle.setAttribute('aria-hidden', 'true');
+  dialogPanel.appendChild(dragHandle);
 
   sheet.classList.toggle('fpb-mobile-summary-tray-expanded', this.compactMobileSummaryTrayExpanded);
   sheet.classList.toggle(
@@ -334,198 +352,183 @@ _populateCompactMobileSummaryTray(sheet) {
 
     if (discountBlock.childElementCount > 0) {
       sheet.classList.add('fpb-mobile-summary-tray--has-discount-summary');
-      sheet.appendChild(discountBlock);
+      dialogPanel.appendChild(discountBlock);
     }
   }
 
-  const navSection = document.createElement('div');
-  navSection.className = 'side-panel-nav';
+  if (additionalOffersStatus.visible) {
+    const offerStatus = document.createElement('div');
+    offerStatus.className = 'fpb-mobile-summary-offer-status';
+    offerStatus.textContent = additionalOffersStatus.message;
+    dialogPanel.appendChild(offerStatus);
+  }
+
   const isLastStep = this.currentStepIndex === (this.selectedBundle?.steps?.length || 1) - 1;
   const conditionlessMobile = this.bundleHasNoConditions();
-  const actionButton = this._createMobileSummaryActionButton({
-      finalPrice,
+  const actionArgs = {
+    finalPrice,
     currencyInfo,
     conditionlessMobile,
     isLastStep,
     isComplete: this.areBundleConditionsMet()
-  });
-  navSection.appendChild(actionButton);
+  };
+  const dockNav = document.createElement('div');
+  dockNav.className = 'side-panel-nav fpb-mobile-summary-dock-nav';
+  dockNav.appendChild(this._createMobileSummaryActionButton(actionArgs));
+  dock.appendChild(dockNav);
+
   const productsSection = document.createElement('div');
   productsSection.className = 'fpb-mobile-summary-products-section';
-  productsSection.appendChild(this._renderCompactMobileSummaryBundleItems(currencyInfo, totalQuantity));
-  productsSection.appendChild(navSection);
-  sheet.appendChild(productsSection);
-  syncCompactMobileSummaryDisclosureState(
-    sheet,
-    this.compactMobileSummaryTrayExpanded === true
-  );
-},
+  const bundleItems = this._renderCompactMobileSummaryBundleItems(currencyInfo, totalQuantity);
+  const bundleHeader = bundleItems.querySelector?.('.fpb-mobile-summary-bundle-header');
+  if (bundleHeader) {
+    const closeButton = document.createElement('button');
+    closeButton.className = 'fpb-mobile-summary-close-btn';
+    closeButton.type = 'button';
+    closeButton.setAttribute('aria-label', 'Close bundle summary');
+    closeButton.textContent = '×';
+    closeButton.addEventListener('click', () => this._setCompactMobileSummaryOpen(sheet, false));
+    bundleHeader.appendChild(closeButton);
+  }
+  productsSection.appendChild(bundleItems);
+  dialogPanel.appendChild(productsSection);
 
-_syncMobileAdditionalOffersPulse(pulseState = {}) {
-  const now = Date.now();
-  const currentPulse = this.mobileAdditionalOffersPulse;
-  const timerKeys = [
-    'mobileAdditionalOffersGreenTimer',
-    'mobileAdditionalOffersMessageTimer',
-    'mobileAdditionalOffersEndTimer',
-  ];
+  const totals = document.createElement('div');
+  totals.className = 'fpb-mobile-summary-totals';
+  const totalHeading = document.createElement('div');
+  totalHeading.className = 'fpb-mobile-summary-total-heading';
+  const totalLabel = document.createElement('span');
+  totalLabel.className = 'side-panel-total-label';
+  totalLabel.textContent = 'Total';
+  totalHeading.appendChild(totalLabel);
+  if (discountBadgeLabel) {
+    const totalsDiscountBadge = document.createElement('span');
+    totalsDiscountBadge.className = 'fpb-summary-discount-badge';
+    totalsDiscountBadge.textContent = discountBadgeLabel;
+    totalHeading.appendChild(totalsDiscountBadge);
+  }
+  const totalPrices = document.createElement('div');
+  totalPrices.className = 'fpb-mobile-summary-total-prices';
+  const finalTotal = document.createElement('span');
+  finalTotal.className = 'side-panel-total';
+  finalTotal.textContent = CurrencyManager.convertAndFormat(finalPrice, currencyInfo);
+  totalPrices.appendChild(finalTotal);
+  if (combinedDiscountInfo.hasDiscount && finalPrice < totalPrice) {
+    const compareTotal = document.createElement('span');
+    compareTotal.className = 'side-panel-compare-price';
+    compareTotal.textContent = CurrencyManager.convertAndFormat(totalPrice, currencyInfo);
+    totalPrices.appendChild(compareTotal);
+  }
+  totals.append(totalHeading, totalPrices);
+  dialogPanel.appendChild(totals);
 
-  const getBadge = () => document.querySelector?.(
-    '.fpb-mobile-summary-tray .fpb-mobile-summary-count-badge'
-  ) || null;
-
-  const applyBadgeState = ({ active = false, showMessage = false } = {}) => {
-    const badge = getBadge();
-    if (!badge || badge.isConnected === false) return;
-
-    const message = pulseState.message
-      || badge.dataset?.additionalOffersMessage
-      || badge.getAttribute?.('data-additional-offers-message')
-      || '';
-    const quantity = badge.dataset?.summaryQuantity
-      || badge.getAttribute?.('data-summary-quantity')
-      || '';
-    badge.classList.toggle('fpb-mobile-summary-count-badge--additional-offers', active);
-    badge.classList.toggle('fpb-mobile-summary-count-badge--additional-offers-message', showMessage);
-    const valueElement = badge.querySelector?.('[data-mobile-summary-toggle-value]');
-    const nextValue = showMessage && message ? message : quantity;
-    if (valueElement) {
-      valueElement.textContent = nextValue;
-    } else {
-      badge.textContent = nextValue;
-    }
-  };
-
-  const clearTimers = () => {
-    timerKeys.forEach((timerKey) => {
-      if (this[timerKey]) {
-        clearTimeout(this[timerKey]);
-        this[timerKey] = null;
-      }
-    });
-  };
-
-  if (pulseState.shouldPulse !== true || !pulseState.signature) {
-    clearTimers();
-    this.mobileAdditionalOffersPulse = null;
-    this.mobileAdditionalOffersCompletedSignature = null;
-    return { active: false, showMessage: false };
+  const dialogNav = document.createElement('div');
+  dialogNav.className = 'side-panel-nav fpb-mobile-summary-dialog-nav';
+  dialogNav.appendChild(this._createMobileSummaryActionButton(actionArgs));
+  dialogPanel.appendChild(dialogNav);
+  dialog.appendChild(dialogPanel);
+  sheet.append(dock, dialog);
+  if (this._bindCompactMobileSummaryDialog) {
+    this._bindCompactMobileSummaryDialog(sheet, dialog, dragHandle);
+  } else {
+    fullPageMobileSummaryMethods._bindCompactMobileSummaryDialog.call(
+      this,
+      sheet,
+      dialog,
+      dragHandle
+    );
   }
 
-  if (
-    currentPulse
-    && currentPulse.signature === pulseState.signature
-    && currentPulse.expiresAt > now
-  ) {
-    return {
-      active: now >= currentPulse.greenAt,
-      showMessage: now >= currentPulse.messageAt,
-    };
+  const productsList = dialog.querySelector?.('.fpb-mobile-summary-products-list');
+  if (productsList) productsList.scrollTop = previousListScrollTop;
+  if (this.compactMobileSummaryTrayExpanded === true) {
+    this._setCompactMobileSummaryOpen(sheet, true, { restoreFocus: false });
   }
-
-  if (currentPulse?.signature === pulseState.signature && currentPulse.expiresAt <= now) {
-    this.mobileAdditionalOffersCompletedSignature = pulseState.signature;
-    this.mobileAdditionalOffersPulse = null;
-    return { active: false, showMessage: false };
-  }
-
-  if (this.mobileAdditionalOffersCompletedSignature === pulseState.signature) {
-    return { active: false, showMessage: false };
-  }
-
-  clearTimers();
-  const nextPulse = {
-    signature: pulseState.signature,
-    greenAt: now + MOBILE_ADDITIONAL_OFFERS_GREEN_DELAY_MS,
-    messageAt: now + MOBILE_ADDITIONAL_OFFERS_MESSAGE_DELAY_MS,
-    expiresAt: now + MOBILE_ADDITIONAL_OFFERS_DURATION_MS,
-  };
-  this.mobileAdditionalOffersPulse = nextPulse;
-
-  this.mobileAdditionalOffersGreenTimer = setTimeout(
-    () => applyBadgeState({ active: true, showMessage: false }),
-    MOBILE_ADDITIONAL_OFFERS_GREEN_DELAY_MS
-  );
-  this.mobileAdditionalOffersMessageTimer = setTimeout(
-    () => applyBadgeState({ active: true, showMessage: true }),
-    MOBILE_ADDITIONAL_OFFERS_MESSAGE_DELAY_MS
-  );
-  this.mobileAdditionalOffersEndTimer = setTimeout(() => {
-    this.mobileAdditionalOffersCompletedSignature = nextPulse.signature;
-    this.mobileAdditionalOffersPulse = null;
-    applyBadgeState({ active: false, showMessage: false });
-  }, MOBILE_ADDITIONAL_OFFERS_DURATION_MS);
-
-  return { active: false, showMessage: false };
 },
 
 _toggleCompactMobileSummaryTray(sheet) {
   const nextExpanded = !this.compactMobileSummaryTrayExpanded;
-  const productsSection = sheet.querySelector?.('.fpb-mobile-summary-products-section');
-  const startTrayHeight = sheet.getBoundingClientRect?.().height;
-  const startHeight = productsSection?.getBoundingClientRect?.().height;
-  this.compactMobileSummaryTrayAnimation?.cancel?.();
-  this.compactMobileSummaryContentAnimation?.cancel?.();
-  this.compactMobileSummaryTrayExpanded = nextExpanded;
-  sheet.classList.toggle('fpb-mobile-summary-tray-expanded', nextExpanded);
-  sheet.querySelector?.('.fpb-mobile-summary-count-badge')
-    ?.setAttribute('aria-expanded', nextExpanded ? 'true' : 'false');
-  syncCompactMobileSummaryDisclosureState(sheet, nextExpanded);
-  const endTrayHeight = sheet.getBoundingClientRect?.().height;
-  const endHeight = productsSection?.getBoundingClientRect?.().height;
-  if (
-    sheet.animate
-    && Number.isFinite(startTrayHeight)
-    && Number.isFinite(endTrayHeight)
-    && startTrayHeight !== endTrayHeight
-  ) {
-    this.compactMobileSummaryTrayAnimation = sheet.animate(
-      [
-        { height: `${startTrayHeight}px` },
-        { height: `${endTrayHeight}px` },
-      ],
-      {
-        duration: MOBILE_SUMMARY_TRAY_TRANSITION_MS,
-        easing: 'ease',
-      }
-    );
+  this._setCompactMobileSummaryOpen?.(sheet, nextExpanded);
+  if (!this._setCompactMobileSummaryOpen) {
+    fullPageMobileSummaryMethods._setCompactMobileSummaryOpen.call(this, sheet, nextExpanded);
   }
-  if (
-    productsSection?.animate
-    && Number.isFinite(startHeight)
-    && Number.isFinite(endHeight)
-    && startHeight !== endHeight
-  ) {
-    this.compactMobileSummaryContentAnimation = productsSection.animate(
-      [
-        { height: `${startHeight}px` },
-        { height: `${endHeight}px` },
-      ],
-      {
-        duration: MOBILE_SUMMARY_TRAY_TRANSITION_MS,
-        easing: 'ease',
-      }
-    );
-  }
-  sheet.classList.remove(
-    'fpb-mobile-summary-tray-animating-open',
-    'fpb-mobile-summary-tray-animating-closed'
-  );
-  sheet.classList.add(
-    nextExpanded
-      ? 'fpb-mobile-summary-tray-animating-open'
-      : 'fpb-mobile-summary-tray-animating-closed'
-  );
+},
 
-  if (this.compactMobileSummaryTrayAnimationTimeout) {
-    clearTimeout(this.compactMobileSummaryTrayAnimationTimeout);
+_setCompactMobileSummaryOpen(sheet, expanded, { restoreFocus = true } = {}) {
+  const dialog = sheet.querySelector?.('.fpb-mobile-summary-dialog');
+  const trigger = sheet.querySelector?.('.fpb-mobile-summary-count-badge');
+  this.compactMobileSummaryTrayExpanded = expanded === true;
+  sheet.classList.toggle('fpb-mobile-summary-tray-expanded', expanded === true);
+  trigger?.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+
+  if (expanded) {
+    if (dialog && !dialog.open) dialog.showModal?.();
+    document.body?.classList?.add('fpb-mobile-summary-scroll-locked');
+    dialog?.querySelector?.('.fpb-mobile-summary-close-btn')?.focus?.();
+    return;
   }
-  this.compactMobileSummaryTrayAnimationTimeout = setTimeout(() => {
-    sheet.classList.remove(
-      'fpb-mobile-summary-tray-animating-open',
-      'fpb-mobile-summary-tray-animating-closed'
-    );
-  }, MOBILE_SUMMARY_TOGGLE_ANIMATION_MS);
+
+  if (dialog?.open) dialog.close?.();
+  document.body?.classList?.remove('fpb-mobile-summary-scroll-locked');
+  if (restoreFocus) trigger?.focus?.();
+},
+
+_bindCompactMobileSummaryDialog(sheet, dialog, dragHandle) {
+  if (!dialog || dialog.dataset?.fpbSummaryBound === 'true') return;
+  if (dialog.dataset) dialog.dataset.fpbSummaryBound = 'true';
+
+  dialog.addEventListener?.('cancel', (event) => {
+    event.preventDefault?.();
+    this._setCompactMobileSummaryOpen(sheet, false);
+  });
+  dialog.addEventListener?.('click', (event) => {
+    if (event.target === dialog) this._setCompactMobileSummaryOpen(sheet, false);
+  });
+  dialog.addEventListener?.('close', () => {
+    if (this.compactMobileSummaryTrayExpanded) {
+      this.compactMobileSummaryTrayExpanded = false;
+      sheet.classList.toggle('fpb-mobile-summary-tray-expanded', false);
+      sheet.querySelector?.('.fpb-mobile-summary-count-badge')
+        ?.setAttribute('aria-expanded', 'false');
+      document.body?.classList?.remove('fpb-mobile-summary-scroll-locked');
+    }
+  });
+
+  let gesture = null;
+  dragHandle?.addEventListener?.('pointerdown', (event) => {
+    gesture = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      startedAt: performance.now(),
+    };
+    dragHandle.setPointerCapture?.(event.pointerId);
+  });
+  dragHandle?.addEventListener?.('pointermove', (event) => {
+    if (!gesture || event.pointerId !== gesture.pointerId) return;
+    const distanceY = Math.max(0, event.clientY - gesture.startY);
+    dialog.style?.setProperty?.('--fpb-mobile-summary-drag-y', `${distanceY}px`);
+  });
+  const finishGesture = (event) => {
+    if (!gesture || event.pointerId !== gesture.pointerId) return;
+    const elapsed = Math.max(1, performance.now() - gesture.startedAt);
+    const distanceY = event.clientY - gesture.startY;
+    const distanceX = event.clientX - gesture.startX;
+    gesture = null;
+    dialog.style?.removeProperty?.('--fpb-mobile-summary-drag-y');
+    if (shouldDismissMobileSummarySwipe({
+      distanceY,
+      distanceX,
+      velocityY: distanceY / elapsed,
+    })) {
+      this._setCompactMobileSummaryOpen(sheet, false);
+    }
+  };
+  dragHandle?.addEventListener?.('pointerup', finishGesture);
+  dragHandle?.addEventListener?.('pointercancel', () => {
+    gesture = null;
+    dialog.style?.removeProperty?.('--fpb-mobile-summary-drag-y');
+  });
 },
 
 _syncCompactMobileSummaryDisclosureState(sheet, expanded) {

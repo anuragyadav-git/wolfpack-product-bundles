@@ -148,10 +148,7 @@ _renderMobileSummaryTray({ preserveOpen = false } = {}) {
   const previousSheet = document.querySelector('.fpb-mobile-bottom-sheet');
   const wasCompactSummaryExpanded = preserveOpen
     && previousSheet?.classList.contains('fpb-mobile-summary-tray-expanded');
-
-  document.querySelector('.fpb-mobile-bottom-sheet')?.remove();
-
-  const sheet = document.createElement('div');
+  const sheet = previousSheet || document.createElement('div');
   sheet.className = 'fpb-mobile-bottom-sheet fpb-mobile-summary-tray';
   const preset = this.getFullPageDesignPreset();
   if (preset) {
@@ -165,7 +162,7 @@ _renderMobileSummaryTray({ preserveOpen = false } = {}) {
   this._populateCompactMobileSummaryTray(sheet);
   sheet.classList.add('is-open');
   this.mobileSummaryTrayElement = sheet;
-  this.container.appendChild(sheet);
+  if (!previousSheet) this.container.appendChild(sheet);
   this._syncSummaryPresentationMode();
 },
 
@@ -190,6 +187,14 @@ _syncSummaryPresentationMode() {
   ].filter(Boolean).forEach((element) => {
     element.setAttribute?.('data-fpb-summary-mode', mode);
   });
+
+  if (mode === 'sidebar' && this.compactMobileSummaryTrayExpanded === true) {
+    this._setCompactMobileSummaryOpen?.(
+      this.mobileSummaryTrayElement,
+      false,
+      { restoreFocus: false }
+    );
+  }
 
   return mode;
 },

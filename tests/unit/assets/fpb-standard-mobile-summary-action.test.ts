@@ -10,11 +10,11 @@ const { ToastManager } = require('../../../app/assets/widgets/shared/toast-manag
 const {
   shouldUseFluidMobileSummaryFooter,
   shouldUseMobileSummarySlotTiles,
+  getMobileAdditionalOffersStatus,
+  shouldDismissMobileSummarySwipe,
 } = require('../../../app/assets/widgets/full-page/methods/mobile-summary-methods.js');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { shouldUseSharedDesktopSummarySlotTiles } = require('../../../app/assets/widgets/full-page/methods/side-panel-methods.js');
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const { getMobileAdditionalOffersPulseState } = require('../../../app/assets/widgets/full-page/methods/mobile-summary-methods.js');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { shouldCategoryTabActivateProducts } = require('../../../app/assets/widgets/full-page/methods/product-grid-methods.js');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -512,56 +512,29 @@ describe('FPB Standard mobile summary action', () => {
   });
 
   it('allows the compact mobile summary tray to expand with no selected products', () => {
-    let expanded = false;
-    const productsSectionAnimation = {
-      cancel: jest.fn(),
-    };
-    const trayAnimation = {
-      cancel: jest.fn(),
-    };
-    const productsSection = {
-      animate: jest.fn(() => productsSectionAnimation),
-      getBoundingClientRect: jest.fn(() => ({
-        height: expanded ? 200 : 58,
-      })),
-    };
-    const classList = {
-      add: jest.fn(),
-      remove: jest.fn(),
-      toggle: jest.fn((className: string, force?: boolean) => {
-        if (className === 'fpb-mobile-summary-tray-expanded') {
-          expanded = force === true;
-        }
-      }),
-    };
+    const classList = { add: jest.fn(), remove: jest.fn(), toggle: jest.fn() };
     const countBadge = {
       setAttribute: jest.fn(),
+      focus: jest.fn(),
     };
-    const bundleItems = {
-      inert: false,
-      removeAttribute: jest.fn(),
-      setAttribute: jest.fn(),
+    const dialog = {
+      open: false,
+      showModal: jest.fn(function showModal(this: { open: boolean }) { this.open = true; }),
+      close: jest.fn(function close(this: { open: boolean }) { this.open = false; }),
+      querySelector: jest.fn(() => ({ focus: jest.fn() })),
     };
     const tray = {
-      animate: jest.fn(() => trayAnimation),
       classList,
-      getBoundingClientRect: jest.fn(() => ({
-        height: expanded ? 259 : 117,
-      })),
       querySelector: jest.fn((selector: string) => {
-        if (selector === '.fpb-mobile-summary-products-section') return productsSection;
         if (selector === '.fpb-mobile-summary-count-badge') return countBadge;
-        if (selector === '.fpb-mobile-summary-bundle-items') return bundleItems;
+        if (selector === '.fpb-mobile-summary-dialog') return dialog;
         return null;
       }),
     };
     const context = {
       compactMobileSummaryTrayExpanded: false,
-      compactMobileSummaryTrayAnimationTimeout: null,
-      getAllSelectedProductsData: () => [],
-      _populateCompactMobileSummaryTray: jest.fn(),
     };
-    const bodyClassList = { add: jest.fn(), remove: jest.fn(), toggle: jest.fn() };
+    const bodyClassList = { add: jest.fn(), remove: jest.fn() };
     global.document = { body: { classList: bodyClassList } } as unknown as Document;
 
     fullPageMobileSummaryMethods._toggleCompactMobileSummaryTray.call(
@@ -570,16 +543,9 @@ describe('FPB Standard mobile summary action', () => {
     );
 
     expect(context.compactMobileSummaryTrayExpanded).toBe(true);
-    expect(context._populateCompactMobileSummaryTray).not.toHaveBeenCalled();
     expect(countBadge.setAttribute).toHaveBeenCalledWith('aria-expanded', 'true');
-    expect(productsSection.animate).toHaveBeenCalledWith(
-      [{ height: '58px' }, { height: '200px' }],
-      { duration: 700, easing: 'ease' },
-    );
-    expect(tray.animate).toHaveBeenCalledWith(
-      [{ height: '117px' }, { height: '259px' }],
-      { duration: 700, easing: 'ease' },
-    );
+    expect(dialog.showModal).toHaveBeenCalledTimes(1);
+    expect(bodyClassList.add).toHaveBeenCalledWith('fpb-mobile-summary-scroll-locked');
 
     fullPageMobileSummaryMethods._toggleCompactMobileSummaryTray.call(
       context,
@@ -587,22 +553,10 @@ describe('FPB Standard mobile summary action', () => {
     );
 
     expect(context.compactMobileSummaryTrayExpanded).toBe(false);
-    expect(context._populateCompactMobileSummaryTray).not.toHaveBeenCalled();
     expect(countBadge.setAttribute).toHaveBeenLastCalledWith('aria-expanded', 'false');
-    expect(context.compactMobileSummaryTrayAnimationTimeout).not.toBeNull();
-    expect(productsSectionAnimation.cancel).toHaveBeenCalledTimes(1);
-    expect(trayAnimation.cancel).toHaveBeenCalledTimes(1);
-    expect(productsSection.animate).toHaveBeenLastCalledWith(
-      [{ height: '200px' }, { height: '58px' }],
-      { duration: 700, easing: 'ease' },
-    );
-    expect(tray.animate).toHaveBeenLastCalledWith(
-      [{ height: '259px' }, { height: '117px' }],
-      { duration: 700, easing: 'ease' },
-    );
-    expect(bodyClassList.add).not.toHaveBeenCalled();
-    expect(bodyClassList.remove).not.toHaveBeenCalled();
-    expect(bodyClassList.toggle).not.toHaveBeenCalled();
+    expect(dialog.close).toHaveBeenCalledTimes(1);
+    expect(bodyClassList.remove).toHaveBeenCalledWith('fpb-mobile-summary-scroll-locked');
+    expect(countBadge.focus).toHaveBeenCalledTimes(1);
   });
 
   it('keeps collapsed compact-summary details out of the accessibility tree', () => {
@@ -677,10 +631,10 @@ describe('FPB Standard mobile summary action', () => {
     expect(toggleTray).toHaveBeenCalledWith(sheet);
   });
 
-  it('enables the mobile additional-offers pulse for Standard and Classic when add-on tiers are mixed', () => {
+  it('returns a stable mobile additional-offers status for mixed eligible tiers', () => {
     const paidStep = { id: 'paid-step' };
     const addonStep = { id: 'addon-step', isFreeGift: true };
-    const mixedState = getMobileAdditionalOffersPulseState({
+    const mixedState = getMobileAdditionalOffersStatus({
       designPreset: 'CLASSIC',
       currentStepIndex: 0,
       steps: [paidStep, addonStep],
@@ -690,10 +644,10 @@ describe('FPB Standard mobile summary action', () => {
       ],
     });
 
-    expect(mixedState.shouldPulse).toBe(true);
+    expect(mixedState.visible).toBe(true);
     expect(mixedState.message).toBe('Additional offers to be unlocked');
 
-    expect(getMobileAdditionalOffersPulseState({
+    expect(getMobileAdditionalOffersStatus({
       designPreset: 'STANDARD',
       currentStepIndex: 0,
       steps: [paidStep, addonStep],
@@ -701,9 +655,9 @@ describe('FPB Standard mobile summary action', () => {
         { tier: { tierId: 'tier-1' }, isEligible: true },
         { tier: { tierId: 'tier-2' }, isEligible: false },
       ],
-    }).shouldPulse).toBe(true);
+    }).visible).toBe(true);
 
-    expect(getMobileAdditionalOffersPulseState({
+    expect(getMobileAdditionalOffersStatus({
       designPreset: 'CLASSIC',
       currentStepIndex: 0,
       steps: [paidStep, addonStep],
@@ -711,9 +665,9 @@ describe('FPB Standard mobile summary action', () => {
         { tier: { tierId: 'tier-1' }, isEligible: true },
         { tier: { tierId: 'tier-2' }, isEligible: true },
       ],
-    }).shouldPulse).toBe(false);
+    }).visible).toBe(false);
 
-    expect(getMobileAdditionalOffersPulseState({
+    expect(getMobileAdditionalOffersStatus({
       designPreset: 'CLASSIC',
       currentStepIndex: 1,
       steps: [paidStep, addonStep],
@@ -721,9 +675,9 @@ describe('FPB Standard mobile summary action', () => {
         { tier: { tierId: 'tier-1' }, isEligible: true },
         { tier: { tierId: 'tier-2' }, isEligible: false },
       ],
-    }).shouldPulse).toBe(false);
+    }).visible).toBe(false);
 
-    expect(getMobileAdditionalOffersPulseState({
+    expect(getMobileAdditionalOffersStatus({
       designPreset: 'COMPACT',
       currentStepIndex: 0,
       steps: [paidStep, addonStep],
@@ -731,7 +685,15 @@ describe('FPB Standard mobile summary action', () => {
         { tier: { tierId: 'tier-1' }, isEligible: true },
         { tier: { tierId: 'tier-2' }, isEligible: false },
       ],
-    }).shouldPulse).toBe(false);
+    }).visible).toBe(false);
+  });
+
+  it('dismisses the mobile summary only for an intentional downward swipe', () => {
+    expect(shouldDismissMobileSummarySwipe({ distanceY: 110, distanceX: 8, velocityY: 0.2 })).toBe(true);
+    expect(shouldDismissMobileSummarySwipe({ distanceY: 42, distanceX: 4, velocityY: 0.7 })).toBe(true);
+    expect(shouldDismissMobileSummarySwipe({ distanceY: 60, distanceX: 8, velocityY: 0.2 })).toBe(false);
+    expect(shouldDismissMobileSummarySwipe({ distanceY: 110, distanceX: 140, velocityY: 0.8 })).toBe(false);
+    expect(shouldDismissMobileSummarySwipe({ distanceY: -120, distanceX: 0, velocityY: -0.8 })).toBe(false);
   });
 
   it('uses slot tiles for every slot-enabled FPB summary preset', () => {

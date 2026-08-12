@@ -36,7 +36,7 @@ const TemplateDesignSystem = (function () {
       },
       mobileSummary: {
         compactFooter: true,
-        pulseOffers: true,
+        showAdditionalOfferStatus: true,
       },
     },
     CLASSIC: {
@@ -65,7 +65,7 @@ const TemplateDesignSystem = (function () {
       },
       mobileSummary: {
         compactFooter: true,
-        pulseOffers: true,
+        showAdditionalOfferStatus: true,
       },
     },
     COMPACT: {
@@ -94,7 +94,7 @@ const TemplateDesignSystem = (function () {
       },
       mobileSummary: {
         compactFooter: true,
-        pulseOffers: false,
+        showAdditionalOfferStatus: false,
       },
     },
     HORIZONTAL: {
@@ -123,7 +123,7 @@ const TemplateDesignSystem = (function () {
       },
       mobileSummary: {
         compactFooter: true,
-        pulseOffers: false,
+        showAdditionalOfferStatus: false,
       },
     },
   };
@@ -265,7 +265,7 @@ const TemplateDesignSystem = (function () {
       fpb: {
         presetIds: FPB_PRESET_IDS.slice(),
         presetsWithMobileSummary: FPB_PRESET_IDS.slice(),
-        presetsSupportingAdditionalOfferPulse: ['STANDARD', 'CLASSIC'],
+        presetsSupportingAdditionalOfferStatus: ['STANDARD', 'CLASSIC'],
       },
       ppb: {
         templateIds: PPB_TEMPLATE_IDS.slice(),
