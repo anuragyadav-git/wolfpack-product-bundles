@@ -3,13 +3,7 @@
   [data-fpb-design-preset="STANDARD"],
   [data-fpb-design-preset="CLASSIC"]
 ) .step-timeline--standard {
-  width: calc(
-    100% - (var(--standard-desktop-layout-left, 2rem) +
-      var(--standard-desktop-layout-right, 2rem))
-  );
-  max-width: var(--standard-desktop-layout-inner-max, 100%);
-  margin: 24px var(--standard-desktop-layout-right, 2rem) 24px
-    var(--standard-desktop-layout-left, 2rem);
+  margin-block: 24px;
   padding: 0;
   display: block;
 }
@@ -217,10 +211,9 @@
     [data-fpb-design-preset="STANDARD"],
     [data-fpb-design-preset="CLASSIC"]
   ) .step-timeline--standard {
-    width: 100%;
     min-height: 5rem;
     height: auto;
-    margin: 0 0 14px;
+    margin-block: 0 14px;
   }
 
   .layout-sidebar:is(

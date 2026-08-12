@@ -5,12 +5,6 @@
     --fpb-card-quantity-selector-width: 100%;
   }
 
-  .bundle-widget-full-page[data-fpb-design-preset="CLASSIC"],
-  .layout-sidebar[data-fpb-design-preset="CLASSIC"],
-  .fpb-preset-classic {
-    padding-inline: 0;
-  }
-
   .fpb-preset-classic .sidebar-layout-wrapper .sidebar-content {
     width: 100%;
     max-width: none;
@@ -25,9 +19,7 @@
     gap: 20px;
     align-items: center;
     justify-content: center;
-    width: 100%;
-    margin: 20px auto;
-    padding: 0;
+    margin-block: 20px;
     overflow-x: auto;
     overflow-y: hidden;
     scrollbar-width: none;

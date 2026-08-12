@@ -1,12 +1,4 @@
 @container fpb-shell (min-width: 800px) {
-  .fpb-preset-classic .sidebar-layout-wrapper {
-    display: grid;
-    gap: var(--classic-grid-gap);
-    max-width: var(--classic-desktop-layout-inner-max, 100%);
-    padding: 0;
-    align-items: start;
-  }
-
   .fpb-preset-classic .sidebar-content {
     width: 100%;
     max-width: none;
@@ -17,7 +9,6 @@
   }
 
   .fpb-preset-classic .bundle-banners {
-    width: 100%;
     margin: 0 0 18px;
     border-radius: var(--bundle-promo-banner-radius);
     overflow: hidden;
