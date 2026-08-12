@@ -148,6 +148,7 @@ export function FilePickerTrigger({
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
+        justifyContent: "center",
         gap: "8px",
         textAlign: "center",
         boxSizing: "border-box",
