@@ -229,6 +229,15 @@
   margin-bottom: 12px;
   font-weight: 700;
   text-align: center;
+  white-space: nowrap;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+.side-panel-discount-message .fpb-mobile-summary-discount-text {
+  white-space: nowrap;
+  overflow-wrap: normal;
+  word-break: normal;
 }
 
 .fpb-box-selection-wrapper {

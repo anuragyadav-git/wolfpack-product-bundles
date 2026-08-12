@@ -108,6 +108,10 @@ The Standard desktop summary reserves a three-row product viewport. Each row is
 a fourth line item is present. This capacity rule does not apply to inline slots
 or the mobile summary tray.
 
+Discount qualification messages remain on one unbroken line in desktop
+sidebars and mobile summary trays. Presets may own their typography, but must
+not re-enable wrapping for `.side-panel-discount-message` or its mobile text.
+
 Desktop summary sidebars use a fluid `10dvh` sticky inset, matching EB's
 viewport-relative `10%` sticky start. This lets the summary engage before the
 product-card row reaches the top of the viewport while preserving bounded
