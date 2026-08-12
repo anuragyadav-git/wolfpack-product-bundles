@@ -33,6 +33,8 @@ class FakeElement {
   public classList = new FakeClassList();
   public listeners = new Map<string, Listener[]>();
   public focused = false;
+  public inert = false;
+  public open = false;
 
   constructor(public tagName: string) {}
 
@@ -78,6 +80,14 @@ class FakeElement {
   focus() {
     this.focused = true;
     (global as unknown as { document: { activeElement: FakeElement } }).document.activeElement = this;
+  }
+
+  showModal() {
+    this.open = true;
+  }
+
+  close() {
+    this.open = false;
   }
 
   dispatch(type: string, event: { key?: string; shiftKey?: boolean; target?: FakeElement; preventDefault?: () => void } = {}) {
@@ -159,6 +169,47 @@ describe('fullPageClearCartConfirmationMethods', () => {
     expect(document.body.children).toHaveLength(1);
     expect(widget._clearCartConfirmationModal?.getAttribute('aria-modal')).toBe('true');
     expect(JSON.stringify(widget.selectedProducts)).toBe(before);
+  });
+
+  it('opens a native mobile confirmation above and disables the expanded summary', () => {
+    const widget = createWidget();
+    const mobileSummary = document.createElement('dialog') as unknown as FakeElement;
+    mobileSummary.className = 'fpb-mobile-summary-dialog';
+    mobileSummary.showModal();
+    document.body.appendChild(mobileSummary as unknown as Node);
+
+    widget.showClearCartConfirmation();
+
+    const modal = widget._clearCartConfirmationModal;
+    expect(modal?.tagName).toBe('dialog');
+    expect(modal?.open).toBe(true);
+    expect(modal?.getAttribute('data-wpb-clear-cart-mode')).toBe('mobile');
+    expect(mobileSummary.inert).toBe(true);
+    expect(modal?.querySelector('.wpb-clear-cart-confirmation__cancel')?.textContent).toBe('Go Back');
+    expect(modal?.querySelector('.wpb-clear-cart-confirmation__confirm')?.innerHTML).toContain('Clear All');
+
+    modal?.querySelector('.wpb-clear-cart-confirmation__cancel')?.click();
+
+    expect(mobileSummary.inert).toBe(false);
+    expect(mobileSummary.open).toBe(true);
+    expect(widget._clearCartConfirmationModal).toBeNull();
+  });
+
+  it('treats Escape as Go Back without allowing the underlying drawer to close', () => {
+    const widget = createWidget();
+    const mobileSummary = document.createElement('dialog') as unknown as FakeElement;
+    mobileSummary.className = 'fpb-mobile-summary-dialog';
+    mobileSummary.showModal();
+    document.body.appendChild(mobileSummary as unknown as Node);
+    const preventDefault = jest.fn();
+
+    widget.showClearCartConfirmation();
+    document.dispatch('keydown', { key: 'Escape', preventDefault });
+
+    expect(preventDefault).toHaveBeenCalledTimes(1);
+    expect(widget._clearCartConfirmationModal).toBeNull();
+    expect(mobileSummary.open).toBe(true);
+    expect(mobileSummary.inert).toBe(false);
   });
 
   it('closes from cancel without clearing selections', () => {

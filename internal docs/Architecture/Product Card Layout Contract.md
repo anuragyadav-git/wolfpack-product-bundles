@@ -107,6 +107,11 @@ owned by the collapsed summary row and the sheet totals. Across collapsed and
 expanded mobile states, the add-to-cart action is the sole discount-badge owner;
 the progress message and Total row do not repeat it.
 
+When Clear is triggered from the expanded mobile summary, confirmation uses a
+second native modal dialog above the summary. The summary remains open but inert
+until Go Back restores it; Clear All resets selections and collapses the mobile
+summary. Desktop Clear retains the existing centered confirmation dialog.
+
 The shared FPB shell is the only owner of horizontal gutters. It mirrors the
 fluid EB shell contract with three direct rules: the outer shell fills the host
 up to `96rem`, uses `0.625rem` padding, and centers each banner, category row,

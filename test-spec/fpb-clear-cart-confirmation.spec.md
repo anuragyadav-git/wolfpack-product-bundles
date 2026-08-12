@@ -4,8 +4,8 @@ id: fpb-clear-cart-confirmation
 title: FPB Clear Cart Confirmation Test Spec
 type: test-spec
 status: active
-summary: Verifies clear-cart confirmation and reset behavior, including restoration of configured default products.
-last_audited: 2026-08-06
+summary: Verifies desktop and mobile clear-cart confirmation behavior, including restoration of configured default products.
+last_audited: 2026-08-12
 owners:
   - Wolfpack Bundles
 domains:
@@ -13,7 +13,7 @@ domains:
 systems:
   - full-page-bundle-widget
 source_paths:
-  - app/assets/widgets/full-page/methods/clear-cart-confirmation-methods.js
+  - app/assets/widgets/full-page/methods/clear-cart-confirmation-methods.ts
 related_docs:
   - docs/competitor-analysis/fpb-feature-to-storefront-matrix.md
 tags:
@@ -30,7 +30,9 @@ keywords:
 **Spec ID:** fpb-clear-cart-confirmation  **Created:** 2026-06-12
 
 ## Purpose
-Verify that the full-page bundle clear-cart action opens a confirmation dialog on desktop and mobile, preserves selections when dismissed, and uses the existing clear/reset behavior only after confirmation.
+Verify that the full-page bundle clear-cart action preserves the desktop dialog,
+opens a dedicated native confirmation above the expanded mobile summary, and
+uses the existing clear/reset behavior only after confirmation.
 
 ## Test Cases
 ### ClearCartConfirmationMethods
@@ -43,11 +45,13 @@ Verify that the full-page bundle clear-cart action opens a confirmation dialog o
 | 5 | Cancel focus restoration | Open from Clear, click Cancel | Focus returns to the Clear trigger | Preserves keyboard position |
 | 6 | Confirm focus recovery | Confirm clear from the mobile tray | Focus moves to the persistent mobile disclosure after rerender | Avoids a stale removed node |
 | 7 | Contained Tab order | Focus the final dialog control and press Tab | Focus wraps to the first dialog control | Keeps keyboard focus inside the modal |
+| 8 | Expanded mobile confirmation | Clear from an open mobile summary | Native confirmation opens above it, summary becomes inert, and Go Back restores the still-open summary | Mobile uses Clear All and Go Back actions |
+| 9 | Mobile Escape | Press Escape while mobile confirmation is open | Confirmation closes as Go Back and the underlying summary remains open | Native default is prevented |
 
 ## Acceptance Criteria
 - [x] All listed test cases pass
 - [x] Desktop sidebar Clear uses the shared confirmation
-- [x] Mobile summary Clear uses the shared confirmation
+- [x] Mobile summary Clear uses a native confirmation above the disabled drawer
 - [x] Widget source builds and minified assets are refreshed
 - [x] Configured default products are restored after confirmation
 - [x] Bundles without configured defaults still clear to zero selections
