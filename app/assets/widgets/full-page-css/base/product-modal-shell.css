@@ -8,6 +8,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  min-height: 44px;
+  box-sizing: border-box;
   padding: 12px 0 8px;
   cursor: grab;
   touch-action: none;
@@ -173,7 +175,7 @@
 
 @media (max-width: 640px) {
   .bundle-modal-details {
-    padding-bottom: 80px;
+    padding-bottom: 4px;
   }
 }
 

@@ -429,7 +429,9 @@
   max-height: 88dvh;
   overflow-x: hidden;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
+  touch-action: pan-y;
   box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.3);
   position: relative;
   transform: translateY(100%);

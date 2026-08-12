@@ -23,6 +23,19 @@ export interface BundleProductModal {
   [key: string]: any;
 }
 
+export function shouldDismissProductDrawerSwipe({
+  distanceY = 0,
+  distanceX = 0,
+  velocityY = 0,
+} = {}) {
+  const verticalDistance = Number(distanceY);
+  const horizontalDistance = Math.abs(Number(distanceX));
+  const downwardVelocity = Number(velocityY);
+  if (!Number.isFinite(verticalDistance) || verticalDistance <= 0) return false;
+  if (horizontalDistance > verticalDistance) return false;
+  return verticalDistance >= 96 || downwardVelocity >= 0.6;
+}
+
 export class BundleProductModal {
   constructor(widget) {
     this.widget = widget;
@@ -195,59 +208,66 @@ export class BundleProductModal {
    */
   setupSwipeGestures() {
     const modalContainer = this.modalElement.querySelector('.bundle-modal-container');
-
-    // Swipe state
-    let touchStartY = 0;
-    let touchStartTime = 0;
-    let isSwiping = false;
-
-    // Swipe-to-dismiss on modal container (drag handle area)
     const dragHandle = this.modalElement.querySelector('.bundle-modal-drag-handle');
-    if (dragHandle) {
-      dragHandle.addEventListener('touchstart', (e) => {
-        touchStartY = e.touches[0].clientY;
-        touchStartTime = Date.now();
-        isSwiping = true;
-        modalContainer.style.transition = 'none';
-      }, { passive: true });
+    if (!dragHandle || !modalContainer) return;
 
-      dragHandle.addEventListener('touchmove', (e) => {
-        if (!isSwiping) return;
-        const currentY = e.touches[0].clientY;
-        const deltaY = currentY - touchStartY;
+    let gesture = null;
+    const resetDrawerPosition = () => {
+      modalContainer.style.transform = '';
+      modalContainer.style.opacity = '';
+    };
 
-        // Only allow downward swipe
-        if (deltaY > 0) {
-          modalContainer.style.transform = `translateY(${deltaY}px)`;
-          modalContainer.style.opacity = Math.max(0.5, 1 - deltaY / 300);
-        }
-      }, { passive: true });
+    dragHandle.addEventListener('pointerdown', (event) => {
+      gesture = {
+        pointerId: event.pointerId,
+        startX: event.clientX,
+        startY: event.clientY,
+        startedAt: performance.now(),
+      };
+      modalContainer.style.transition = 'none';
+      dragHandle.setPointerCapture?.(event.pointerId);
+    });
 
-      dragHandle.addEventListener('touchend', (e) => {
-        if (!isSwiping) return;
-        isSwiping = false;
+    dragHandle.addEventListener('pointermove', (event) => {
+      if (!gesture || event.pointerId !== gesture.pointerId) return;
+      const distanceX = event.clientX - gesture.startX;
+      const distanceY = Math.max(0, event.clientY - gesture.startY);
+      if (Math.abs(distanceX) > distanceY) return;
+      modalContainer.style.transform = `translateY(${distanceY}px)`;
+      modalContainer.style.opacity = String(Math.max(0.5, 1 - distanceY / 300));
+    });
 
-        const deltaY = e.changedTouches[0].clientY - touchStartY;
-        const deltaTime = Date.now() - touchStartTime;
+    const finishGesture = (event) => {
+      if (!gesture || event.pointerId !== gesture.pointerId) return;
+      const elapsed = Math.max(1, performance.now() - gesture.startedAt);
+      const distanceY = event.clientY - gesture.startY;
+      const distanceX = event.clientX - gesture.startX;
+      gesture = null;
+      modalContainer.style.transition = 'transform 0.24s ease, opacity 0.24s ease';
 
-        modalContainer.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+      if (shouldDismissProductDrawerSwipe({
+        distanceY,
+        distanceX,
+        velocityY: distanceY / elapsed,
+      })) {
+        modalContainer.style.transform = 'translateY(100%)';
+        modalContainer.style.opacity = '0';
+        setTimeout(() => {
+          this.close();
+          resetDrawerPosition();
+        }, 240);
+        return;
+      }
 
-        // Close if swiped down > 100px within 300ms (quick swipe) or > 150px (slow swipe)
-        if ((deltaY > 100 && deltaTime < 300) || deltaY > 150) {
-          modalContainer.style.transform = 'translateY(100%)';
-          modalContainer.style.opacity = '0';
-          setTimeout(() => {
-            this.close();
-            modalContainer.style.transform = '';
-            modalContainer.style.opacity = '';
-          }, 300);
-        } else {
-          // Reset position
-          modalContainer.style.transform = '';
-          modalContainer.style.opacity = '';
-        }
-      }, { passive: true });
-    }
+      resetDrawerPosition();
+    };
+
+    dragHandle.addEventListener('pointerup', finishGesture);
+    dragHandle.addEventListener('pointercancel', () => {
+      gesture = null;
+      modalContainer.style.transition = 'transform 0.24s ease, opacity 0.24s ease';
+      resetDrawerPosition();
+    });
   }
 
   /**

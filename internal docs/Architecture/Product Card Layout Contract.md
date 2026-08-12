@@ -120,6 +120,13 @@ choice. At `768px` and wider, product details use the centered desktop modal and
 retain its cross button. Desktop modal controls must not be copied into mobile
 drawer markup.
 
+The product-details drag handle is a 44px touch target and uses pointer capture
+for mouse, pen, and touch input. Only a downward, vertically dominant drag or
+flick dismisses the drawer; horizontal, upward, and short slow movement resets
+the sheet. The content surface keeps native momentum scrolling and contained
+vertical overscroll. Mobile details reserve only 4px below Add To Box, with
+device safe-area spacing owned separately by the drawer container.
+
 Mobile add-to-cart actions show the active discount label badge beside the
 merchant-authored action label and do not repeat the bundle price. Price remains
 owned by the collapsed summary row and the sheet totals. Across collapsed and
