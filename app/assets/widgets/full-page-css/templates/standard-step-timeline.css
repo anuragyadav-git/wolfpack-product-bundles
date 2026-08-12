@@ -88,20 +88,6 @@
 .layout-sidebar:is(
   [data-fpb-design-preset="STANDARD"],
   [data-fpb-design-preset="CLASSIC"]
-) .standard-navigation-image {
-  display: block;
-  width: auto;
-  height: 100%;
-  max-width: 100%;
-  object-fit: contain;
-  border-radius: 0;
-  opacity: 1;
-  filter: none;
-}
-
-.layout-sidebar:is(
-  [data-fpb-design-preset="STANDARD"],
-  [data-fpb-design-preset="CLASSIC"]
 ) .standard-navigation-item.timeline-step--completed:not(
   .timeline-step--active
 ) .standard-navigation-step-img-container {
