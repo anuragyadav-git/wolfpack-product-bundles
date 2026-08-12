@@ -49,6 +49,7 @@ gesture-driven paths across every FPB preset.
 | 6 | Static offer state | Eligible and locked add-on tiers coexist | Stable offer status is returned without timers | No temporary count replacement |
 | 7 | Selection update | Sheet is open and products change | Open state and product-list scroll position are restored | Shell stays connected |
 | 8 | Existing actions | Next, add to cart, clear, remove, BQO, slots | Existing validation and action paths remain unchanged | No duplicate submissions |
+| 9 | Empty product list | Fewer than three selected line items | Skeletons fill the list to three rows; higher rule requirements remain authoritative | Fourth row onward scrolls |
 
 ## Acceptance Criteria
 

@@ -415,10 +415,65 @@ body.fpb-mobile-summary-scroll-locked {
   .side-panel-skeleton-slot {
   display: grid;
   grid-template-columns: var(--fpb-mobile-summary-thumbnail-size)
-    minmax(0, 1fr) minmax(44px, 64px);
+    minmax(0, 1fr) 44px;
+  grid-template-rows: repeat(2, minmax(0, 1fr));
   align-items: center;
   gap: var(--fpb-mobile-summary-gap);
+  width: 100%;
+  height: var(--fpb-mobile-summary-row-height);
+  min-width: 0;
   min-height: var(--fpb-mobile-summary-row-height);
+  padding: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+#bundle-builder-app
+  .fpb-mobile-summary-products-list--skeletons
+  .side-panel-product-img-wrap {
+  grid-column: 1;
+  grid-row: 1 / 3;
+  width: var(--fpb-mobile-summary-thumbnail-size);
+  height: var(--fpb-mobile-summary-thumbnail-size);
+  padding: 0;
+}
+
+#bundle-builder-app
+  .fpb-mobile-summary-products-list--skeletons
+  .side-panel-skeleton-thumb {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+#bundle-builder-app
+  .fpb-mobile-summary-products-list--skeletons
+  .side-panel-skeleton-lines {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: end;
+  width: 100%;
+  min-width: 0;
+}
+
+#bundle-builder-app
+  .fpb-mobile-summary-products-list--skeletons
+  .line-price {
+  grid-column: 2;
+  grid-row: 2;
+  align-self: start;
+  width: 42px;
+  height: 12px;
+}
+
+#bundle-builder-app
+  .fpb-mobile-summary-products-list--skeletons
+  .side-panel-skeleton-remove {
+  grid-column: 3;
+  grid-row: 1 / 3;
+  place-self: center;
+  width: 18px;
+  height: 18px;
 }
 
 #bundle-builder-app .fpb-mobile-summary-totals {

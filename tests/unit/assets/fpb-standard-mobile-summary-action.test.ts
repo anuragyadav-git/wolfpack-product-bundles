@@ -11,6 +11,7 @@ const {
   shouldUseFluidMobileSummaryFooter,
   shouldUseMobileSummarySlotTiles,
   getMobileAdditionalOffersStatus,
+  getMobileSummarySkeletonCount,
   shouldDismissMobileSummarySwipe,
 } = require('../../../app/assets/widgets/full-page/methods/mobile-summary-methods.js');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -690,6 +691,21 @@ describe('FPB Standard mobile summary action', () => {
         { tier: { tierId: 'tier-2' }, isEligible: false },
       ],
     }).visible).toBe(false);
+  });
+
+  it('fills the mobile summary to three product line item rows by default', () => {
+    expect(getMobileSummarySkeletonCount({
+      remainingRequiredCount: 2,
+      selectedLineItemCount: 0,
+    })).toBe(3);
+    expect(getMobileSummarySkeletonCount({
+      remainingRequiredCount: 1,
+      selectedLineItemCount: 1,
+    })).toBe(2);
+    expect(getMobileSummarySkeletonCount({
+      remainingRequiredCount: 4,
+      selectedLineItemCount: 1,
+    })).toBe(4);
   });
 
   it('dismisses the mobile summary only for an intentional downward swipe', () => {

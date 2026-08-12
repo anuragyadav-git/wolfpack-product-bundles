@@ -132,6 +132,15 @@ export function shouldDismissMobileSummarySwipe({
   return verticalDistance >= 96 || downwardVelocity >= 0.6;
 }
 
+export function getMobileSummarySkeletonCount({
+  remainingRequiredCount = 0,
+  selectedLineItemCount = 0,
+} = {}) {
+  const remaining = Math.max(0, Number(remainingRequiredCount) || 0);
+  const selectedRows = Math.max(0, Number(selectedLineItemCount) || 0);
+  return Math.max(remaining, 3 - selectedRows);
+}
+
 function normalizeStepContentSubtext(value) {
   if (typeof value !== 'string') return '';
   const text = value.trim();
@@ -638,20 +647,17 @@ _renderCompactMobileSummaryBundleItems(currencyInfo, totalQuantity) {
       : 0,
     selectedQuantity: totalQuantity,
   });
+  const mobileSummarySkeletonCount = getMobileSummarySkeletonCount({
+    remainingRequiredCount: remainingSummarySkeletonCount,
+    selectedLineItemCount: allSelectedProducts.length,
+  });
 
   if (
-    remainingSummarySkeletonCount > 0
+    mobileSummarySkeletonCount > 0
     && typeof this._renderSidebarProductSkeletons === 'function'
   ) {
     productsList.classList.add('fpb-mobile-summary-products-list--skeletons');
-    this._renderSidebarProductSkeletons(productsList, remainingSummarySkeletonCount);
-  } else if (
-    allSelectedProducts.length === 0
-    && !this._shouldRenderProductSlots()
-    && typeof this._renderSidebarProductSkeletons === 'function'
-  ) {
-    productsList.classList.add('fpb-mobile-summary-products-list--skeletons');
-    this._renderSidebarProductSkeletons(productsList);
+    this._renderSidebarProductSkeletons(productsList, mobileSummarySkeletonCount);
   }
 
   const requiredSlots = Math.max(

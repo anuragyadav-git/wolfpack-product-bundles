@@ -92,7 +92,8 @@ On the mobile path, the shared summary owner renders an edge-to-edge dock with
 the summary trigger and primary action. The trigger opens a modal bottom sheet
 that grows with its content up to `80dvh`; its header, totals, and action remain
 stationary while the selected-products region shows up to three rows and
-scrolls from the fourth row onward. Opening the sheet locks background scroll.
+scrolls from the fourth row onward. Empty capacity is represented by enough
+line-item skeletons to maintain three visible rows. Opening the sheet locks background scroll.
 Backdrop, Escape, trigger-toggle, and intentional downward-swipe paths all
 dismiss it and restore focus. The sheet does not render a separate close
 control. Presets may change visual tokens, but must not fork this anatomy or
