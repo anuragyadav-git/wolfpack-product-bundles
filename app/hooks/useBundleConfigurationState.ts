@@ -18,6 +18,7 @@ import {
   initializeConfigureRouteState,
   markConfigureRouteDirty,
   openConfigureModal,
+  resetConfigureRouteNavigation,
   setActiveConfigureSection,
   setActiveConfigureTabIndex,
   setAvailablePages as setAvailablePagesAction,
@@ -91,6 +92,13 @@ export function getBundleProductImageUrl(loadedBundleProduct?: any): string {
   );
 }
 
+export function shouldResetConfigureNavigation(
+  previousBundleId: string | null,
+  currentBundleId: string,
+): boolean {
+  return previousBundleId !== currentBundleId;
+}
+
 export function useBundleConfigurationState({
   bundle,
   bundleProduct: loadedBundleProduct,
@@ -102,6 +110,7 @@ export function useBundleConfigurationState({
   const isDirty = configureRouteState.isDirty;
   const isResettingRef = useRef(false);
   const lastProcessedFetcherDataRef = useRef<any>(null);
+  const configuredBundleIdRef = useRef<string | null>(null);
 
   const markAsDirty = useCallback(() => {
     if (!isResettingRef.current) {
@@ -299,6 +308,10 @@ export function useBundleConfigurationState({
   );
 
   useEffect(() => {
+    if (shouldResetConfigureNavigation(configuredBundleIdRef.current, bundle.id)) {
+      dispatch(resetConfigureRouteNavigation());
+      configuredBundleIdRef.current = bundle.id;
+    }
     dispatch(initializeConfigureRouteState({
       bundleProduct: loadedBundleProduct || null,
       productStatus: loadedBundleProduct?.status || "",

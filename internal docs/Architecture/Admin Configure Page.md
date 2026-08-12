@@ -5,7 +5,7 @@ title: Admin Configure Page
 type: architecture
 status: authoritative
 summary: Defines the shared FPB and PPB configure-page boundary and direct create, clone, edit, and save flows.
-last_audited: 2026-07-30
+last_audited: 2026-08-13
 owners:
   - engineering
 domains:
@@ -16,6 +16,8 @@ source_paths:
   - app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/
   - app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/
   - app/routes/app/_shared/bundle-configure/
+  - app/hooks/useBundleConfigurationState.ts
+  - app/store/slices/configureRouteStateSlice.ts
 related_docs:
   - docs/app-nav-map/APP_NAVIGATION_MAP.md
 tags:
@@ -45,6 +47,13 @@ Step Setup uses the same section rhythm for both bundle types:
 PPB-only controls are explicit slots inside the shared rhythm. Category-level variant display controls update PPB `StepCategory.displayVariantsAsIndividualProducts` and `StepCategory.displayVariantsAsSwatches` fields; they are not step-wide FPB controls. Bundle Settings follows the same rule: shared rows cover overlapping settings, while FPB-only Product Slots / Slot Icon and PPB-only Variant Selector, discount display, banner, CSS, subscriptions, Bundle Embed, and Place Widget controls remain route-owned slots.
 
 SaveBar semantics remain route-owned. Shared configure UI should mark drafts dirty through the adapter but must not introduce autosave, wrap the canvas in a broad form, or make Enter keypresses submit the configure page.
+
+Successful fetcher saves trigger normal Remix loader revalidation. Rehydrating
+loader-backed bundle data must preserve the current configure section and
+active step because the merchant is still editing the same bundle. Navigation
+reset is a separate route-session operation and runs only when the bundle ID
+changes. Do not place active-step or active-section defaults inside general
+configure-state hydration.
 
 ## Mobile Configure Contract
 
