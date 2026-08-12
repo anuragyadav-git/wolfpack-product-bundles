@@ -2093,7 +2093,6 @@ body:has([data-fpb-design-preset]) {
   }
   .layout-sidebar[data-fpb-design-preset="STANDARD"]
     .standard-navigation-items-container {
-    width: 100%;
     margin-inline: 0;
   }
   .layout-sidebar[data-fpb-design-preset="STANDARD"] .category-tabs {

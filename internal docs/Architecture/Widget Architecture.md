@@ -81,6 +81,8 @@ The shared Bundle Product Modal is intentionally a single-image product details 
 
 Because the shared product-details overlay is mounted under `document.body`, its responsive surface is viewport-owned rather than widget-container-owned. Product image activation opens a bounded, centered modal on desktop and a bounded bottom drawer on mobile. Both surfaces suppress horizontal overflow and keep excess content scrollable only on the vertical axis.
 
+The shared multi-step FPB timeline sizes its navigation track from the rendered step count and caps it to the available shell width, so additional steps remain evenly spaced without pushing a two-step timeline to opposite page edges. Active icon emphasis is painted as an inset ring over the same reserved border box used by inactive icons; changing timeline state must not resize the inner icon.
+
 PPB Product List (`PDP_INPAGE + CASCADE`) owns its multi-step navigation in the Product Page layout, footer, and validation method modules. A multi-step Product List renders only `currentStepIndex`; intermediate primary actions navigate Next after current-step validation, the final step uses Add Bundle to Cart, and Back preserves selections across steps. Single-step Product List and the other PPB templates keep their existing rendering paths. Product List exact-rule over-selection is blocked before state mutation so the current step and selected-items drawer remain stable.
 
 FPB product grids do not pre-disable or dim unselected cards when a step reaches its exact or maximum quantity. Returning to a completed step keeps the full product set interactive; an attempted increase beyond the configured rule is rejected by `validateStepCondition` before selection state changes, and the rule toast explains the limit.

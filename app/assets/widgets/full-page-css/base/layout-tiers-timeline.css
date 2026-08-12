@@ -452,7 +452,10 @@
     [data-fpb-design-preset="HORIZONTAL"]
   )
   .standard-navigation-items-container {
-  width: var(--standard-timeline-width, 60%);
+  width: min(
+    100%,
+    calc(var(--standard-timeline-count, 2) * 18rem)
+  );
   height: 76.8px;
   margin: 24px auto 0;
   display: grid;
@@ -517,7 +520,8 @@
   )
   .timeline-step--active
   .standard-navigation-step-img-container {
-  border: 4px solid #000;
+  border: 2px solid transparent;
+  box-shadow: inset 0 0 0 2px #000;
 }
 
 .layout-sidebar:is(
@@ -666,7 +670,10 @@
       [data-fpb-design-preset="HORIZONTAL"]
     )
     .standard-navigation-items-container {
-    width: calc(100% - 15px);
+    width: min(
+      calc(100% - 15px),
+      calc(var(--standard-timeline-count, 2) * 8rem)
+    );
     height: 61.6px;
     margin: 7.5px auto 0;
     grid-template-rows: 61.6px;
