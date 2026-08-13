@@ -828,6 +828,7 @@
 
 .visibilityTextInput,
 .visibilityTextarea {
+  box-sizing: border-box;
   width: 100%;
   min-width: 0;
   border: 1px solid #8a8a8a;
