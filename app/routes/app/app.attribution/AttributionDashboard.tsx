@@ -11,10 +11,7 @@ import {
 import { LazyEngagementPulse, LazyRevenueAttribution } from "../../../components/analytics/lazy";
 import styles from "../../../styles/routes/app-attribution.module.css";
 import type { AttributionDashboardData, loader } from "../app.attribution";
-import {
-  AttributionAnalyticsSkeletonCard,
-  AttributionDashboardSkeleton,
-} from "./AttributionDashboardSkeleton";
+import { AdminRouteLoadingBar } from "../../../components/AdminRouteLoadingBar";
 import {
   ANALYTICS_NO_DATA_BANNER_COPY,
   shouldRenderAnalyticsNoDataBanner,
@@ -668,21 +665,17 @@ function AttributionDashboardContent({
           />
 
           <div className={styles.dashboardChartGrid}>
-            <Suspense fallback={<AttributionAnalyticsSkeletonCard size="chart" />}>
-              <LazyEngagementPulse
-                engagedSessions={engagedSessions}
-                prevEngagedSessions={prevEngagedSessions}
-                engagementToOrderPct={engagementToOrderPct}
-                trend={engagementTrend}
-              />
-            </Suspense>
-            <Suspense fallback={<AttributionAnalyticsSkeletonCard size="chart" />}>
-              <LazyRevenueAttribution
-                summary={bundleRevenueSummary}
-                trend={bundleRevenueTrend}
-                formatRevenue={formatRevenue}
-              />
-            </Suspense>
+            <LazyEngagementPulse
+              engagedSessions={engagedSessions}
+              prevEngagedSessions={prevEngagedSessions}
+              engagementToOrderPct={engagementToOrderPct}
+              trend={engagementTrend}
+            />
+            <LazyRevenueAttribution
+              summary={bundleRevenueSummary}
+              trend={bundleRevenueTrend}
+              formatRevenue={formatRevenue}
+            />
           </div>
 
           <BundlePerformanceMatrix
@@ -708,7 +701,7 @@ export default function AttributionDashboard() {
 
   return (
     <>
-      <Suspense fallback={<AttributionDashboardSkeleton />}>
+      <Suspense fallback={<AdminRouteLoadingBar label="Loading Analytics" />}>
         <Await resolve={analytics}>
           {(data) => <AttributionDashboardContent data={data} pixelStatus={pixelStatus} />}
         </Await>

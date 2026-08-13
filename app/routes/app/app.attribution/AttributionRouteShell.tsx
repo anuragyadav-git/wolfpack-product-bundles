@@ -3,7 +3,7 @@ import { useLoaderData, useNavigate } from "@remix-run/react";
 import { navigateBackOrFallback } from "../../../lib/navigation";
 import type { loader } from "../app.attribution";
 import styles from "./AttributionRouteShell.module.css";
-import { AttributionDashboardSkeleton } from "./AttributionDashboardSkeleton";
+import { AdminRouteLoadingBar } from "../../../components/AdminRouteLoadingBar";
 
 const AttributionDashboard = lazy(() => import("./AttributionDashboard"));
 const PixelStatusCard = lazy(() =>
@@ -126,7 +126,7 @@ export default function AttributionRouteShell() {
       >
         <AttributionCriticalFunnelHeader />
         <AttributionCriticalStatus pixelStatus={pixelStatus} />
-        <Suspense fallback={<AttributionDashboardSkeleton />}>
+        <Suspense fallback={<AdminRouteLoadingBar label="Loading Analytics" />}>
           <AttributionDashboard />
         </Suspense>
       </s-query-container>

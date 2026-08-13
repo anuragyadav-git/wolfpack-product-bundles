@@ -5,7 +5,7 @@ title: Admin Performance
 type: operations
 status: authoritative
 summary: Embedded Admin Web Vitals instrumentation, route-level LCP findings, and critical-path constraints.
-last_audited: 2026-07-30
+last_audited: 2026-08-13
 owners:
   - engineering
 domains:
@@ -15,6 +15,7 @@ systems:
   - app-bridge
   - remix
 source_paths:
+  - app/components/AdminRouteLoadingBar.tsx
   - app/lib/admin-web-vitals-diagnostics.client.ts
   - app/routes/app/app.settings/SettingsRoute.tsx
   - app/routes/app/app.settings/DesignSettingsView.tsx
@@ -125,10 +126,12 @@ does not wait for a second sequential JavaScript request. The workspace chunk is
 not required for the first Settings paint.
 
 The three landing cards are the complete interactive targets and do not render
-separate button-like `Configure` labels. After a card is selected, the Suspense
-boundary preserves the three-card footprint with lightweight local skeletons;
-do not replace this transition with a centered spinner because that collapses
-the established layout while the workspace chunk resolves.
+separate button-like `Configure` labels. Their desktop content area uses the
+same two-of-twelve-column gutter on each side as the template selection surface,
+and the card group is centered in the available viewport. After a card is
+selected, the Suspense boundary shows the shared top-edge loading bar until the
+workspace chunk and deferred Settings data are both ready. It does not use a
+timer, spinner, or card skeleton.
 
 The Settings workspace owns the Design inspector/preview layout and the
 eight-template representative preview. Wide containers use three columns for
@@ -224,9 +227,10 @@ padding, and keep horizontal scrolling inside labelled data regions rather than
 on the document.
 
 Analytics keeps shell styles with `AttributionRouteShell` and dashboard styles
-with the lazy `AttributionDashboard` chunk. This ensures dashboard markup and
-CSS resolve atomically behind the existing skeleton rather than painting
-unstyled analytics content.
+with the lazy `AttributionDashboard` chunk. The route and dashboard data
+boundaries use the same top-edge loading bar, while lazy chart suspension bubbles
+to the dashboard boundary. Dashboard markup and CSS therefore resolve atomically
+without skeleton cards or partially assembled chart panels.
 
 ## 2026-07-30 Shared Shell and Onboarding Completion
 
