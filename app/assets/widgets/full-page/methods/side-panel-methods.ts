@@ -93,6 +93,15 @@ export function getRemainingSummarySkeletonCount({
   return Math.max(0, target - (Number.isFinite(selected) ? Math.max(0, selected) : 0));
 }
 
+export function createSummaryClearButton(onClear) {
+  const clearButton = document.createElement('button');
+  clearButton.className = 'side-panel-clear-btn';
+  clearButton.type = 'button';
+  clearButton.innerHTML = `<svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" aria-hidden="true"><path d="M6 2h8a1 1 0 0 1 1 1v1H5V3a1 1 0 0 1 1-1Zm-2 3h12l-1 13H5L4 5Zm4 2v9m4-9v9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg><span>Clear</span>`;
+  clearButton.addEventListener('click', onClear);
+  return clearButton;
+}
+
 export const fullPageSidePanelMethods: Record<string, any> & ThisType<any> = {
 renderSidePanel(panel) {
   if (!panel) return;
@@ -183,13 +192,7 @@ renderSidePanel(panel) {
   }
 
   if (isStandardDesktopSidebar || allSelectedProducts.length > 0) {
-    const clearBtn = document.createElement('button');
-    clearBtn.className = 'side-panel-clear-btn';
-    clearBtn.innerHTML = `<svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor"><path d="M6 2h8a1 1 0 0 1 1 1v1H5V3a1 1 0 0 1 1-1Zm-2 3h12l-1 13H5L4 5Zm4 2v9m4-9v9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg> Clear`;
-    clearBtn.addEventListener('click', () => {
-      this.showClearCartConfirmation();
-    });
-    header.appendChild(clearBtn);
+    header.appendChild(createSummaryClearButton(() => this.showClearCartConfirmation()));
   }
   panel.appendChild(header);
 

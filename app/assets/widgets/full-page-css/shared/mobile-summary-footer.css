@@ -319,16 +319,6 @@ body.fpb-mobile-summary-scroll-locked {
 
 #bundle-builder-app
   .fpb-mobile-summary-dialog
-  .fpb-mobile-summary-clear-btn {
-  display: inline-grid;
-  place-items: center;
-  min-width: 44px;
-  min-height: 44px;
-  margin: 0;
-}
-
-#bundle-builder-app
-  .fpb-mobile-summary-dialog
   .fpb-mobile-summary-products-list {
   display: grid;
   grid-template-columns: minmax(0, 1fr);

@@ -1,7 +1,10 @@
 export {};
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const { fullPageSidePanelMethods } = require('../../../app/assets/widgets/full-page/methods/side-panel-methods.js');
+const {
+  createSummaryClearButton,
+  fullPageSidePanelMethods,
+} = require('../../../app/assets/widgets/full-page/methods/side-panel-methods.js');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { fullPageMobileSummaryMethods } = require('../../../app/assets/widgets/full-page/methods/mobile-summary-methods.js');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -365,6 +368,18 @@ describe('FPB summary sidebar discount progress', () => {
 });
 
 describe('FPB configured summary header', () => {
+  it('creates one shared clear action for desktop and mobile summaries', async () => {
+    const showClearCartConfirmation = jest.fn();
+    const desktopButton = createSummaryClearButton(showClearCartConfirmation);
+    const mobileButton = createSummaryClearButton(showClearCartConfirmation);
+
+    await desktopButton.click();
+    await mobileButton.click();
+
+    expect(desktopButton.innerHTML).toBe(mobileButton.innerHTML);
+    expect(showClearCartConfirmation).toHaveBeenCalledTimes(2);
+  });
+
   it('renders the configured summary title in the desktop sidebar', () => {
     const panel = document.createElement('aside') as unknown as FakeElement;
     const context = makeContext('CLASSIC', 'simple');

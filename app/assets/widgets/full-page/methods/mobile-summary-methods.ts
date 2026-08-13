@@ -6,7 +6,10 @@ import { getDiscountProgressData } from '../../shared/engine/bundle-selectors.js
 import { renderDiscountProgress } from '../../shared/components/discount-progress.js';
 import { renderSelectedProductRow } from '../../shared/components/selected-product-row.js';
 import { getSummaryDiscountBadgeLabel } from '../shared/summary-discount-badge.js';
-import { getRemainingSummarySkeletonCount } from './side-panel-methods.js';
+import {
+  createSummaryClearButton,
+  getRemainingSummarySkeletonCount,
+} from './side-panel-methods.js';
 import { TemplateDesignSystem } from '../../shared/template-design-system.js';
 
 const mobileSummaryTemplateSystem = TemplateDesignSystem;
@@ -545,13 +548,7 @@ _renderCompactMobileSummaryBundleItems(currencyInfo, totalQuantity) {
   header.appendChild(headerCopy);
 
   if (allSelectedProducts.length > 0) {
-    const clearBtn = document.createElement('button');
-    clearBtn.className = 'fpb-mobile-summary-clear-btn';
-    clearBtn.innerHTML = `<svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor"><path d="M6 2h8a1 1 0 0 1 1 1v1H5V3a1 1 0 0 1 1-1Zm-2 3h12l-1 13H5L4 5Zm4 2v9m4-9v9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg><span>Clear</span>`;
-    clearBtn.addEventListener('click', () => {
-      this.showClearCartConfirmation();
-    });
-    header.appendChild(clearBtn);
+    header.appendChild(createSummaryClearButton(() => this.showClearCartConfirmation()));
   }
   bundleItems.appendChild(header);
 

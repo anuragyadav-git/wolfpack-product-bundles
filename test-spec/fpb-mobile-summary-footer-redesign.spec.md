@@ -51,6 +51,7 @@ gesture-driven paths across every FPB preset.
 | 8 | Existing actions | Next, add to cart, clear, remove, BQO, slots | Existing validation and action paths remain unchanged | No duplicate submissions |
 | 9 | Empty product list | Fewer than three selected line items | Skeletons fill the list to three rows; higher rule requirements remain authoritative | Fourth row onward scrolls |
 | 10 | Add-to-cart content | Qualified mobile discount | CTA shows action label plus discount badge and omits price | CTA is the sole badge owner across collapsed and expanded states |
+| 11 | Shared clear control | Desktop sidebar or expanded mobile summary | Both surfaces create the same clear action and invoke the same confirmation behavior | Visual treatment is CSS-owned |
 
 ## Acceptance Criteria
 
