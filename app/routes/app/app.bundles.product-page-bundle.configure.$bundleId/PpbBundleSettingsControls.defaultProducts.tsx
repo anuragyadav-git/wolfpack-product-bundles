@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 import { usePpbConfigureContext } from "./PpbConfigureContext";
 
 type DefaultProductSelection = {
@@ -11,6 +13,7 @@ function isString(value: string | undefined): value is string {
 }
 
 export function PpbDefaultProductsSettings() {
+  const [discountTipDismissed, setDiscountTipDismissed] = useState(false);
   const {
     buildDefaultProductEntryFromPicker,
     defaultProductsData,
@@ -84,16 +87,18 @@ export function PpbDefaultProductsSettings() {
             />
           </span>
         </div>
-        <s-banner
-          tone="info"
-          heading="Discount tip"
-          dismissible={false}
-          hidden={false}
-        >
-          Tip: Discounts are based on all items in your cart. Don&apos;t forget
-          to include the Pre Selected Product&apos;s quantity or amount when
-          setting up discounts.
-        </s-banner>
+        {!discountTipDismissed && (
+          <s-banner
+            tone="info"
+            heading="Discount tip"
+            dismissible
+            onDismiss={() => setDiscountTipDismissed(true)}
+          >
+            Tip: Discounts are based on all items in your cart. Don&apos;t forget
+            to include the Pre Selected Product&apos;s quantity or amount when
+            setting up discounts.
+          </s-banner>
+        )}
         <s-text-field
           label="Default products title"
           value={defaultProductsData.defaultProductsTitle ?? ""}
