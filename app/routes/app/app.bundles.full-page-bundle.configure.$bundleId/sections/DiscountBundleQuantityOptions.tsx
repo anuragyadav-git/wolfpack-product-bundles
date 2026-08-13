@@ -117,13 +117,12 @@ export function FpbBundleQuantityOptions({
                                 )
                               }
                             >
-                              {option.isDefault ? (
-                                <s-text tone="success">
-                                  {"\u2605"} Make this rule default
-                                </s-text>
-                              ) : (
-                                <>{"\u2606"} Make this rule default</>
-                              )}
+                              <s-text
+                                tone={option.isDefault ? "success" : "neutral"}
+                              >
+                                {option.isDefault ? "\u2605" : "\u2606"} Make
+                                this rule default
+                              </s-text>
                             </s-press-button>
                           </s-stack>
                           {option.compatibility.status === "blocked" && (

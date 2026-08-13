@@ -137,13 +137,18 @@ function PpbBundleQuantityOptions() {
                             markAsDirty();
                           }}
                         >
-                          {rule.id === qtyOptionsDefaultRuleId ? (
-                            <s-text tone="success">
-                              {"\u2605"} Make this rule default
-                            </s-text>
-                          ) : (
-                            <>{"\u2606"} Make this rule default</>
-                          )}
+                          <s-text
+                            tone={
+                              rule.id === qtyOptionsDefaultRuleId
+                                ? "success"
+                                : "neutral"
+                            }
+                          >
+                            {rule.id === qtyOptionsDefaultRuleId
+                              ? "\u2605"
+                              : "\u2606"}{" "}
+                            Make this rule default
+                          </s-text>
                         </s-press-button>
                       </s-stack>
                       <s-stack direction="inline" gap="small">
