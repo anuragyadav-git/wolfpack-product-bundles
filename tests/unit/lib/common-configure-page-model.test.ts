@@ -36,6 +36,14 @@ describe("common configure page model", () => {
     ]);
   });
 
+  it("uses the Polaris discount icon for Discount & Pricing", () => {
+    expect(
+      buildConfigureSetupItems("full_page").find(
+        (item) => item.id === "discount_pricing",
+      )?.iconType,
+    ).toBe("discount");
+  });
+
   it("keeps Bundle Embed as a PPB-only visibility child", () => {
     expect(buildBundleVisibilityChildItems("full_page")).toEqual([
       { id: "bundle_widget", label: "Bundle Widget" },

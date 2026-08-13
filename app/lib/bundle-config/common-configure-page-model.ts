@@ -24,7 +24,7 @@ export interface BundleSettingsSlotModel {
 
 const COMMON_SETUP_ITEMS: ConfigureSetupItem[] = [
   { id: "step_setup", label: "Step Setup", iconType: "note" },
-  { id: "discount_pricing", label: "Discount & Pricing", iconType: "filter" },
+  { id: "discount_pricing", label: "Discount & Pricing", iconType: "discount" },
   { id: "bundle_visibility", label: "Bundle Visibility", iconType: "view" },
   { id: "bundle_settings", label: "Bundle Settings", iconType: "edit" },
 ];
