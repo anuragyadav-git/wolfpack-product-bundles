@@ -748,7 +748,6 @@ _renderStandardSidebarEmptySlots(container, options = {}) {
         <span class="side-panel-product-variant side-panel-skeleton-line line-variant"></span>
         <span class="side-panel-product-price side-panel-skeleton-line line-price"></span>
       </div>
-      <span class="side-panel-product-remove side-panel-skeleton-remove"></span>
     `;
     container.appendChild(slot);
   }
@@ -771,7 +770,6 @@ _renderSidebarProductSkeletons(container, slotCountOverride) {
         <span class="side-panel-product-variant side-panel-skeleton-line line-variant"></span>
       </div>
       <span class="side-panel-product-price side-panel-skeleton-line line-price"></span>
-      <span class="side-panel-product-remove side-panel-skeleton-remove"></span>
     `;
     container.appendChild(slot);
   }

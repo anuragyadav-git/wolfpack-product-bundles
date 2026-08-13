@@ -13,6 +13,7 @@ export function renderDiscountProgress(progressData = {}, options = {}) {
   const message = progressData.message || '';
   const shouldRenderMessage = options.messagePlacement !== 'external' && message;
   const milestones = Array.isArray(progressData.milestones) ? progressData.milestones : [];
+  const trackMarkup = renderTrack(progressPercent, options);
   const rootClasses = [
     'bw-discount-progress',
     `bw-discount-progress--mode-${escapeAttribute(mode)}`,
@@ -23,42 +24,55 @@ export function renderDiscountProgress(progressData = {}, options = {}) {
   return `
     <div class="${rootClasses}" data-bw-discount-progress="true" style="--bw-discount-progress-width:${progressPercent}%">
       ${shouldRenderMessage ? `<div class="bw-discount-progress__message ${escapeAttribute(options.messageClassName || '')}">${escapeHtml(message)}</div>` : ''}
-      ${renderMilestones(milestones, options)}
-      <div class="bw-discount-progress__track ${escapeAttribute(options.trackClassName || '')}" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progressPercent}">
-        <div class="bw-discount-progress__fill ${escapeAttribute(options.fillClassName || '')}"></div>
-      </div>
+      ${renderMilestones(milestones, options, options.milestonesOnTrack ? trackMarkup : '')}
+      ${options.milestonesOnTrack && milestones.length ? '' : trackMarkup}
       ${options.renderSubtitleList ? renderMilestoneSubtitleList(milestones, options) : ''}
     </div>
   `;
 }
 
-function renderMilestones(milestones, options) {
+function renderTrack(progressPercent, options) {
+  return `<div class="bw-discount-progress__track ${escapeAttribute(options.trackClassName || '')}" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progressPercent}">
+    <div class="bw-discount-progress__fill ${escapeAttribute(options.fillClassName || '')}" data-bw-discount-progress-fill="true"></div>
+  </div>`;
+}
+
+function renderMilestones(milestones, options, trackMarkup = '') {
   if (!milestones.length) return '';
 
   const listClassName = escapeAttribute(options.milestoneListClassName || 'bw-discount-progress__milestones');
   const itemClassName = options.milestoneClassName || 'bw-discount-progress__milestone';
   const reachedClassName = options.milestoneReachedClassName || 'bw-discount-progress__milestone--reached';
+  const activeClassName = options.milestoneActiveClassName || 'bw-discount-progress__milestone--active';
+  const pendingClassName = options.milestonePendingClassName || 'bw-discount-progress__milestone--pending';
   const titleClassName = escapeAttribute(options.milestoneTitleClassName || 'bw-discount-progress__milestone-title');
   const subtitleClassName = escapeAttribute(options.milestoneSubtitleClassName || 'bw-discount-progress__milestone-subtitle');
+  const markerClassName = escapeAttribute(options.milestoneMarkerClassName || 'bw-discount-progress__milestone-marker');
   const includeInlineSubtitle = options.renderInlineSubtitles !== false;
 
-  const items = milestones.map((milestone) => {
+  const items = milestones.map((milestone, index) => {
+    const state = normalizeMilestoneState(milestone);
+    const position = normalizePercent(milestone?.position);
     const classes = [
       itemClassName,
-      milestone?.isReached ? reachedClassName : '',
+      state === 'reached' ? reachedClassName : '',
+      state === 'active' ? activeClassName : '',
+      state === 'pending' ? pendingClassName : '',
     ].filter(Boolean).map(escapeAttribute).join(' ');
     const title = escapeHtml(milestone?.title || '');
     const subtitle = escapeHtml(milestone?.subTitle || '');
+    const markerContent = state === 'reached' ? '&#10003;' : '';
 
     return `
-      <div class="${classes}">
+      <div class="${classes}" data-state="${state}" style="--bw-discount-milestone-index:${index + 1};--bw-discount-milestone-position:${position}%">
         <span class="${titleClassName}">${title}</span>
+        <span class="${markerClassName}" aria-hidden="true">${markerContent}</span>
         ${includeInlineSubtitle && subtitle ? `<span class="${subtitleClassName}">${subtitle}</span>` : ''}
       </div>
     `;
   }).join('');
 
-  return `<div class="${listClassName}">${items}</div>`;
+  return `<div class="${listClassName}" style="--bw-discount-milestone-count:${milestones.length}">${trackMarkup}${items}</div>`;
 }
 
 function renderMilestoneSubtitleList(milestones, options) {
@@ -83,6 +97,51 @@ function normalizePercent(value) {
   const numericValue = Number(value || 0);
   if (!Number.isFinite(numericValue)) return 0;
   return Math.max(0, Math.min(100, Math.round(numericValue)));
+}
+
+function normalizeMilestoneState(milestone) {
+  if (milestone?.state === 'reached' || milestone?.isReached === true) return 'reached';
+  if (milestone?.state === 'active') return 'active';
+  return 'pending';
+}
+
+export function readRenderedDiscountProgressPercent(root) {
+  const track = root?.querySelector?.('[role="progressbar"]');
+  if (!track) return null;
+  const fill = root?.querySelector?.('[data-bw-discount-progress-fill="true"]');
+  const trackWidth = Number(track?.getBoundingClientRect?.().width || 0);
+  const fillWidth = Number(fill?.getBoundingClientRect?.().width || 0);
+
+  if (trackWidth > 0 && Number.isFinite(fillWidth)) {
+    return normalizePercent((fillWidth / trackWidth) * 100);
+  }
+
+  return normalizePercent(track?.getAttribute?.('aria-valuenow'));
+}
+
+export function applyDiscountProgressTransition(progressElement, fromPercent, toPercent, options = {}) {
+  if (!progressElement?.style?.setProperty) return;
+
+  const from = normalizePercent(fromPercent);
+  const target = normalizePercent(toPercent);
+  const setProgress = (value) => {
+    progressElement.style.setProperty('--bw-discount-progress-width', `${value}%`);
+    progressElement.style.setProperty('--fpb-discount-progress-width', `${value}%`);
+  };
+  const prefersReducedMotion = typeof options.prefersReducedMotion === 'boolean'
+    ? options.prefersReducedMotion
+    : globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches === true;
+  const scheduleFrame = options.requestAnimationFrame || globalThis.requestAnimationFrame;
+
+  if (prefersReducedMotion || from === target || typeof scheduleFrame !== 'function') {
+    setProgress(target);
+    return;
+  }
+
+  setProgress(from);
+  scheduleFrame(() => {
+    scheduleFrame(() => setProgress(target));
+  });
 }
 
 function escapeHtml(value) {

@@ -4,6 +4,7 @@ import { ToastManager } from '../../shared/toast-manager.js';
 import { TemplateManager } from '../../shared/template-manager.js';
 import { getSummaryDiscountBadgeLabel } from '../shared/summary-discount-badge.js';
 import { TemplateDesignSystem } from '../../shared/template-design-system.js';
+import { readRenderedDiscountProgressPercent } from '../../shared/components/discount-progress.js';
 
 const sidePanelTemplateSystem = TemplateDesignSystem;
 
@@ -105,6 +106,9 @@ export function createSummaryClearButton(onClear) {
 export const fullPageSidePanelMethods: Record<string, any> & ThisType<any> = {
 renderSidePanel(panel) {
   if (!panel) return;
+  const previousProgressPercent = readRenderedDiscountProgressPercent(
+    panel.querySelector?.('.fpb-dp-step_based')
+  );
   panel.innerHTML = '';
 
   const { totalPrice, totalQuantity, unitPrices } = PricingCalculator.calculateBundleTotal(
@@ -283,6 +287,7 @@ renderSidePanel(panel) {
         totalPrice,
         totalQuantity,
         unitPrices,
+        previousProgressPercent,
       });
       if (progressBar) {
         progressBar.classList.add('fpb-dp-sidebar');

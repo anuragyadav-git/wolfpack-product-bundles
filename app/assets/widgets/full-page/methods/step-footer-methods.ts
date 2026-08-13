@@ -576,16 +576,29 @@ clearStepSelections(stepIndex) {
   ToastManager.show('All selections cleared from this step');
 },
 
-getDiscountProgressMilestones(totalPrice = 0, totalQuantity = 0) {
+getDiscountProgressState(totalPrice = 0, totalQuantity = 0) {
   const pricing = this.selectedBundle?.pricing;
   const rules = Array.isArray(pricing?.rules) ? pricing.rules : [];
   const tierTextByRuleId = pricing?.messages?.tierTextByRuleId || {};
   const boxRules = this.getBoxSelectionRules();
-
-  return rules
+  const eligibleRules = rules
     .filter(rule => rule && (rule.conditionType === 'quantity' || rule.conditionType === 'amount'))
-    .sort((a, b) => (Number(a.conditionValue || 0) || 0) - (Number(b.conditionValue || 0) || 0))
-    .map(rule => {
+    .sort((a, b) => (Number(a.conditionValue || 0) || 0) - (Number(b.conditionValue || 0) || 0));
+  const reachedByIndex = eligibleRules.map((rule) => {
+    const threshold = Number(rule.conditionValue || 0) || 0;
+    const currentValue = rule.conditionType === 'amount'
+      ? Number(totalPrice || 0)
+      : Number(totalQuantity || 0);
+    return PricingCalculator.checkCondition(
+      currentValue,
+      rule.conditionOperator,
+      threshold
+    );
+  });
+  const activeIndex = reachedByIndex.findIndex(isReached => !isReached);
+  const milestoneCount = eligibleRules.length;
+  const milestones = eligibleRules
+    .map((rule, index) => {
       const ruleId = String(rule.id || '');
       const threshold = Number(rule.conditionValue || 0) || 0;
       const tierText = tierTextByRuleId?.[ruleId] || {};
@@ -603,18 +616,59 @@ getDiscountProgressMilestones(totalPrice = 0, totalQuantity = 0) {
           fallbackSubTitle = `Save ${CurrencyManager.convertAndFormat(discountValue, CurrencyManager.getCurrencyInfo())}`;
         }
       }
-      const isReached = rule.conditionType === 'amount'
-        ? Number(totalPrice || 0) >= threshold
-        : Number(totalQuantity || 0) >= threshold;
+      const isReached = reachedByIndex[index];
+      const state = isReached ? 'reached' : index === activeIndex ? 'active' : 'pending';
 
       return {
         ruleId,
         title: tierText.tierText || boxRule?.boxLabel || fallbackTitle,
         subTitle: tierText.tierSubtext || boxRule?.boxSubtext || fallbackSubTitle,
+        threshold,
+        conditionType: rule.conditionType,
+        position: milestoneCount > 0 ? Math.round(((index + 1) / milestoneCount) * 100) : 0,
+        state,
         isReached,
       };
     })
     .filter(milestone => milestone.ruleId && milestone.title);
+
+  if (!milestones.length) {
+    return { milestones: [], progressPercent: 0 };
+  }
+
+  const activeMilestoneIndex = milestones.findIndex(milestone => milestone.state === 'active');
+  if (activeMilestoneIndex === -1) {
+    return { milestones, progressPercent: 100 };
+  }
+
+  const activeMilestone = milestones[activeMilestoneIndex];
+  let previousMatchingMilestone = null;
+  for (let index = activeMilestoneIndex - 1; index >= 0; index -= 1) {
+    if (milestones[index].conditionType === activeMilestone.conditionType) {
+      previousMatchingMilestone = milestones[index];
+      break;
+    }
+  }
+
+  const currentValue = activeMilestone.conditionType === 'amount'
+    ? Number(totalPrice || 0)
+    : Number(totalQuantity || 0);
+  const segmentStartValue = previousMatchingMilestone?.threshold || 0;
+  const segmentStartPosition = previousMatchingMilestone?.position || 0;
+  const segmentRange = activeMilestone.threshold - segmentStartValue;
+  const segmentRatio = segmentRange > 0
+    ? Math.max(0, Math.min(1, (currentValue - segmentStartValue) / segmentRange))
+    : 0;
+  const progressPercent = Math.round(
+    segmentStartPosition
+      + ((activeMilestone.position - segmentStartPosition) * segmentRatio)
+  );
+
+  return { milestones, progressPercent };
+},
+
+getDiscountProgressMilestones(totalPrice = 0, totalQuantity = 0) {
+  return this.getDiscountProgressState(totalPrice, totalQuantity).milestones;
 },
 
 // Returns a .fpb-discount-progress fill-bar element, or null when pricing is disabled.

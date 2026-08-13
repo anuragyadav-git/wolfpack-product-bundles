@@ -3,7 +3,10 @@ import { PricingCalculator } from '../../shared/pricing-calculator.js';
 import { ToastManager } from '../../shared/toast-manager.js';
 import { TemplateManager } from '../../shared/template-manager.js';
 import { getDiscountProgressData } from '../../shared/engine/bundle-selectors.js';
-import { renderDiscountProgress } from '../../shared/components/discount-progress.js';
+import {
+  applyDiscountProgressTransition,
+  renderDiscountProgress,
+} from '../../shared/components/discount-progress.js';
 
 export const fullPageDiscountModalMethods: Record<string, any> & ThisType<any> = {
 _renderDiscountProgress(options = {}) {
@@ -44,12 +47,16 @@ _renderDiscountProgress(options = {}) {
   );
 
   const isReached = discountInfo.hasDiscount && !nextRule;
-  const progressPct = isReached ? 100 : Math.min(100, Math.max(0, parseInt(variables.progressPercentage, 10) || 0));
-
   const progressBarType = this.config.discountProgressBarType === 'simple' ? 'simple' : 'step_based';
-  const milestones = progressBarType === 'step_based'
-    ? this.getDiscountProgressMilestones(totalPrice, totalQuantity)
-    : [];
+  const steppedProgressState = progressBarType === 'step_based'
+    ? this.getDiscountProgressState(totalPrice, totalQuantity)
+    : null;
+  const milestones = steppedProgressState?.milestones || [];
+  const progressPct = progressBarType === 'step_based' && milestones.length > 0
+    ? steppedProgressState.progressPercent
+    : isReached
+      ? 100
+      : Math.min(100, Math.max(0, parseInt(variables.progressPercentage, 10) || 0));
 
   let message = '';
   if (progressBarType === 'step_based' && milestones.length > 0) {
@@ -89,14 +96,27 @@ _renderDiscountProgress(options = {}) {
     milestoneListClassName: 'fpb-discount-step-list',
     milestoneClassName: 'fpb-discount-step',
     milestoneReachedClassName: 'fpb-discount-step-reached',
+    milestoneActiveClassName: 'fpb-discount-step-active',
+    milestonePendingClassName: 'fpb-discount-step-pending',
     milestoneTitleClassName: 'fpb-discount-step-title',
     milestoneSubtitleClassName: 'fpb-discount-step-subtitle',
-    renderInlineSubtitles: placement !== 'sidebar',
-    renderSubtitleList: placement === 'sidebar' && milestones.some(milestone => milestone.subTitle),
-    subtitleListClassName: placement === 'sidebar' ? 'fpb-discount-step-subtitle-list' : '',
+    milestoneMarkerClassName: 'fpb-discount-step-marker',
+    milestonesOnTrack: progressBarType === 'step_based',
+    renderInlineSubtitles: true,
+    renderSubtitleList: false,
   }).trim();
   const bar = wrapper.firstElementChild;
-  bar?.style?.setProperty('--fpb-discount-progress-width', progressPct + '%');
+  const previousProgressPercent = Number(options.previousProgressPercent);
+  if (
+    progressBarType === 'step_based'
+    && options.previousProgressPercent !== null
+    && options.previousProgressPercent !== undefined
+    && Number.isFinite(previousProgressPercent)
+  ) {
+    applyDiscountProgressTransition(bar, previousProgressPercent, progressPct);
+  } else {
+    applyDiscountProgressTransition(bar, progressPct, progressPct);
+  }
   return bar;
 },
 

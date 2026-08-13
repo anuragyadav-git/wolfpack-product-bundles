@@ -3,7 +3,10 @@ import { PricingCalculator } from '../../shared/pricing-calculator.js';
 import { ToastManager } from '../../shared/toast-manager.js';
 import { TemplateManager } from '../../shared/template-manager.js';
 import { getDiscountProgressData } from '../../shared/engine/bundle-selectors.js';
-import { renderDiscountProgress } from '../../shared/components/discount-progress.js';
+import {
+  readRenderedDiscountProgressPercent,
+  renderDiscountProgress,
+} from '../../shared/components/discount-progress.js';
 import { renderSelectedProductRow } from '../../shared/components/selected-product-row.js';
 import { getSummaryDiscountBadgeLabel } from '../shared/summary-discount-badge.js';
 import {
@@ -169,6 +172,9 @@ const MOBILE_SUMMARY_DIALOG_ID = 'fpb-mobile-summary-dialog';
 export const fullPageMobileSummaryMethods: Record<string, any> & ThisType<any> = {
 _populateCompactMobileSummaryTray(sheet) {
   const previousListScrollTop = sheet.querySelector?.('.fpb-mobile-summary-products-list')?.scrollTop || 0;
+  const previousProgressPercent = readRenderedDiscountProgressPercent(
+    sheet.querySelector?.('.fpb-dp-step_based')
+  );
   sheet.innerHTML = '';
 
   const { totalPrice, totalQuantity, unitPrices } = PricingCalculator.calculateBundleTotal(
@@ -350,6 +356,7 @@ _populateCompactMobileSummaryTray(sheet) {
         totalPrice,
         totalQuantity,
         unitPrices,
+        previousProgressPercent,
       });
       if (progressBar) {
         progressBar.classList.add('fpb-dp-sidebar');
