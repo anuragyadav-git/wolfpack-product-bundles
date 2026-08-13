@@ -171,6 +171,8 @@ Delete Confirmation Modal (centered, small)
 Admin Settings hub:
 ```
 Settings
+├── App Bridge breadcrumb: Dashboard back action + Settings title
+├── App-owned header: arrow-only back action + Settings title
 ├── Card: Design
 │   └── Shows Settings -> Design controls: brand colors, typography, corners, images and GIFs
 ├── Card: Language

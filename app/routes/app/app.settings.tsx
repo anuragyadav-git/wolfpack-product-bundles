@@ -17,6 +17,7 @@ import { parseSettingsDesignPayload } from "../../lib/settings-design-contract";
 import { SETTINGS_LANGUAGE_BUNDLE_TYPES, buildSettingsLanguageRuntime } from "../../lib/settings-language-runtime";
 import { CartTransformService } from "../../services/cart-transform-service.server";
 import { buildFpbStorefrontUrl } from "../../lib/fpb-storefront-url";
+import { navigateBackOrFallback } from "../../lib/navigation";
 import { ReduxProvider } from "../../store/ReduxProvider";
 import {
   SettingsLandingShell,
@@ -314,18 +315,37 @@ export default function SettingsRouteDefault() {
         {([resolvedSettingsPage, resolvedPreviewBundles]) => {
           if (!workspaceView) {
             return (
-              <SettingsLandingShell
-                onSelect={(view) => {
-                  if (view === "controls") {
-                    navigate("/app/additional-configurations");
-                    return;
+              <>
+                <ui-title-bar title="Settings">
+                  <button
+                    variant="breadcrumb"
+                    onClick={() =>
+                      navigateBackOrFallback(navigate, "/app/dashboard", {
+                        replaceFallback: true,
+                      })
                   }
-                  setWorkspaceView(view);
-                }}
-                onIntent={() => {
-                  void loadSettingsWorkspace();
-                }}
-              />
+                  >
+                    Dashboard
+                  </button>
+                </ui-title-bar>
+                <SettingsLandingShell
+                  onBack={() =>
+                    navigateBackOrFallback(navigate, "/app/dashboard", {
+                      replaceFallback: true,
+                    })
+                  }
+                  onSelect={(view) => {
+                    if (view === "controls") {
+                      navigate("/app/additional-configurations");
+                      return;
+                    }
+                    setWorkspaceView(view);
+                  }}
+                  onIntent={() => {
+                    void loadSettingsWorkspace();
+                  }}
+                />
+              </>
             );
           }
 

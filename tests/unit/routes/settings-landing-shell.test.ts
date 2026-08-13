@@ -11,7 +11,10 @@ import {
 describe("Settings landing shell", () => {
   it("renders three actionable Polaris cards without loading a settings workspace", () => {
     const view = renderToStaticMarkup(
-      React.createElement(SettingsLandingShell, { onSelect: jest.fn() }),
+      React.createElement(SettingsLandingShell, {
+        onBack: jest.fn(),
+        onSelect: jest.fn(),
+      }),
     );
 
     expect(view.match(/<s-clickable/g)).toHaveLength(3);

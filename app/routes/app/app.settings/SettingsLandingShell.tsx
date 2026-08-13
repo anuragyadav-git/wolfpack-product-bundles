@@ -27,19 +27,30 @@ const SETTINGS_SECTIONS: Array<{
 ];
 
 export function SettingsLandingShell({
+  onBack,
   onSelect,
   onIntent,
 }: {
+  onBack: () => void;
   onSelect: (view: SettingsWorkspaceView) => void;
   onIntent?: () => void;
 }) {
   return (
-    <s-page heading="Settings" inlineSize="large">
+    <s-page inlineSize="large">
       <s-query-container
         containerName="settings-landing"
         className="settingsLandingViewport"
       >
         <div className="settingsLandingContent">
+          <s-stack direction="inline" gap="small" alignItems="center">
+            <s-button
+              variant="tertiary"
+              icon="arrow-left"
+              accessibilityLabel="Back to previous page"
+              onClick={onBack}
+            />
+            <s-heading>Settings</s-heading>
+          </s-stack>
           <s-grid
             gridTemplateColumns="@container settings-landing (inline-size > 840px) 1fr 1fr 1fr, 1fr"
             gap="large"
