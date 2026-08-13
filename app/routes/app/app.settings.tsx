@@ -29,6 +29,14 @@ const loadSettingsWorkspace = async () => {
 
 const SettingsWorkspace = lazy(loadSettingsWorkspace);
 
+export function waitForSettingsRouteReady<TSettings, TPreviewBundles>(
+  settingsPage: Promise<TSettings>,
+  previewBundles: Promise<TPreviewBundles>,
+  loadingBar: Promise<void> = waitForAdminRouteLoadingBar(),
+) {
+  return Promise.all([settingsPage, previewBundles, loadingBar]);
+}
+
 export async function loader({ request }: LoaderFunctionArgs) {
   const { session } = await requireAdminSession(request);
   const settingsPage = prisma.designSettings.findUnique({
@@ -274,6 +282,10 @@ export async function action({ request }: ActionFunctionArgs) {
 export default function SettingsRouteDefault() {
   const { settingsPage, previewBundles } = useLoaderData<typeof loader>();
   const [workspaceView, setWorkspaceView] = useState<SettingsWorkspaceView | null>(null);
+  const routeData = useMemo(
+    () => waitForSettingsRouteReady(settingsPage, previewBundles),
+    [previewBundles, settingsPage],
+  );
   const workspaceData = useMemo(
     () => workspaceView
       ? Promise.all([settingsPage, previewBundles, waitForAdminRouteLoadingBar()])
@@ -281,40 +293,46 @@ export default function SettingsRouteDefault() {
     [previewBundles, settingsPage, workspaceView],
   );
   const navigate = useNavigate();
-  if (!workspaceView) {
-    return (
-      <SettingsLandingShell
-        onSelect={(view) => {
-          if (view === "controls") {
-            navigate("/app/additional-configurations");
-            return;
-          }
-          setWorkspaceView(view);
-        }}
-        onIntent={() => {
-          void loadSettingsWorkspace();
-        }}
-      />
-    );
-  }
 
   return (
     <Suspense fallback={<AdminRouteLoadingBar label="Loading Settings" />}>
       <Await
-        resolve={workspaceData as NonNullable<typeof workspaceData>}
+        resolve={routeData}
         errorElement={<SettingsWorkspaceError onExit={() => setWorkspaceView(null)} />}
       >
-        {(resolvedWorkspaceData: Awaited<NonNullable<typeof workspaceData>>) => {
-          const [resolvedSettingsPage, resolvedPreviewBundles] = resolvedWorkspaceData;
-          return (
-            <ReduxProvider>
-              <SettingsWorkspace
-                initialView={workspaceView}
-                onExit={() => setWorkspaceView(null)}
-                settingsPage={resolvedSettingsPage}
-                previewBundles={resolvedPreviewBundles}
+        {([resolvedSettingsPage, resolvedPreviewBundles]) => {
+          if (!workspaceView) {
+            return (
+              <SettingsLandingShell
+                onSelect={(view) => {
+                  if (view === "controls") {
+                    navigate("/app/additional-configurations");
+                    return;
+                  }
+                  setWorkspaceView(view);
+                }}
+                onIntent={() => {
+                  void loadSettingsWorkspace();
+                }}
               />
-            </ReduxProvider>
+            );
+          }
+
+          return (
+            <Suspense fallback={<AdminRouteLoadingBar label="Loading Settings" />}>
+              <Await resolve={workspaceData as NonNullable<typeof workspaceData>}>
+                {() => (
+                  <ReduxProvider>
+                    <SettingsWorkspace
+                      initialView={workspaceView}
+                      onExit={() => setWorkspaceView(null)}
+                      settingsPage={resolvedSettingsPage}
+                      previewBundles={resolvedPreviewBundles}
+                    />
+                  </ReduxProvider>
+                )}
+              </Await>
+            </Suspense>
           );
         }}
       </Await>

@@ -117,8 +117,10 @@ first-render JavaScript instead.
 
 ## Settings Design Control Panel
 
-The Settings landing route renders a small Polaris card shell and keeps the
-workspace implementation behind one React lazy boundary. The 2026-07-23 local
+The Settings landing route keeps its small Polaris card shell behind the shared
+top-edge loading boundary until deferred Settings data and the minimum bar fill
+are complete. It keeps the workspace implementation behind a separate React
+lazy boundary. The 2026-07-23 local
 production build split the initial Settings route (`app.settings`, 2.99 kB /
 1.27 kB gzip) from the complete `SettingsRoute` workspace (81.39 kB / 18.60 kB
 gzip, plus 22.22 kB / 4.30 kB gzip CSS). The template-specific scene registry,
@@ -130,11 +132,11 @@ not required for the first Settings paint.
 The three landing cards are the complete interactive targets and do not render
 separate button-like `Configure` labels. Their desktop content area uses the
 same two-of-twelve-column gutter on each side as the template selection surface,
-and the card group is centered in the available viewport. After a card is
-selected, the Suspense boundary shows the shared top-edge loading bar until the
-workspace chunk and deferred Settings data are both ready. The black bar fills
-for a minimum of 800 milliseconds before content can replace it. It does not use
-a spinner or card skeleton.
+and the card group is centered in the available viewport. The same shared
+top-edge loading bar is used for initial Settings route readiness and after a
+card is selected while the workspace chunk becomes ready. The black bar fills
+for a minimum of 800 milliseconds before content can replace it. It does not
+use a spinner or card skeleton.
 
 The Settings workspace owns the Design inspector/preview layout and the
 eight-template representative preview. Wide containers use three columns for
