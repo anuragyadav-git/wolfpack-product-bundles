@@ -227,32 +227,24 @@ Additional Configurations
 
 **Route file:** `app/routes/app/app.integrations.tsx`
 
-Recovered Admin Integrations hub:
+Compact Admin Integrations catalog:
 ```
 Integrations Hub
-├── Request Integration action → https://wolfpackapps.com
-├── Pre-orders, Pickup & Delivery
-│   ├── Stoq → View Setup
-│   └── Zapiet → View Setup
-├── Subscriptions
-│   ├── Skio → View Setup
-│   ├── Appstle → View Setup
-│   └── Bold → View Setup
+├── Request Integration → opens Crisp with an unsent prefilled request
 ├── Reviews
 │   └── Judge.me → View Setup
-├── Page Builders
-│   ├── PageFly → View Setup
-│   └── GemPages → View Setup
 └── Checkout
     ├── GoKwik → View Setup
     └── Shopflo → View Setup
 ```
 
-All setup actions currently open `https://wolfpackapps.com` until WPB-owned quick setup guides are published.
+Shopify Checkout and Theme Cart Drawer are configured in Settings and are not duplicated in this catalog. All setup actions currently open `https://wolfpackapps.com` until WPB-owned quick setup guides are published.
 
 Setup behavior:
-- Cards display Planned, Guided setup, or Assisted setup without claiming connection state.
+- The shared top-edge loading bar is the only route content shown while the compact catalog prepares.
+- Cards display Supported or Guided setup without claiming connection state.
 - `View Setup` opens the WPB-owned setup/support destination in a new browsing context.
+- `Request Integration` opens Crisp and pre-fills the composer; the merchant must send the message.
 - External competitor help URLs are intentionally not embedded in source code; sanitized evidence remains in `docs/competitor-analysis/18-eb-settings-integrations-replication-evidence.md`.
 
 ---
