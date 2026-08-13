@@ -20,6 +20,8 @@ source_paths:
   - app/routes/app/app.settings/SettingsRoute.tsx
   - app/routes/app/app.settings/DesignSettingsView.tsx
   - app/routes/app/app.settings/DesignLivePreview.tsx
+  - app/routes/app/app.attribution/AttributionRouteShell.tsx
+  - app/routes/app/app.attribution/AttributionDashboard.tsx
 related_docs:
   - internal docs/Operations/LCP and CLS Playbook.md
 tags:

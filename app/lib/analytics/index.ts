@@ -36,6 +36,14 @@ export type {
 
 export { filterAndSortBundleResults } from "./bundle-results";
 
+export type {
+  CampaignResultRow,
+  CampaignResultSortKey,
+  CampaignResultSortDirection,
+} from "./campaign-results";
+
+export { filterAndSortCampaignResults } from "./campaign-results";
+
 export {
   computeBundleFunnel,
   buildEngagementTrendSeries,

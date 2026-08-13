@@ -10,11 +10,7 @@ import { requireAdminSession } from "../../lib/auth-guards.server";
 import { getPixelStatus, activateUtmPixel, deactivateUtmPixel } from "../../services/pixel-activation.server";
 import { backfillOrderAttribution } from "../../services/analytics/order-backfill.server";
 import {
-  computeBundleRevenueSummary,
-  buildBundleLeaderboard,
-  buildBundleTrendSeries,
   computeBundleFunnel,
-  buildEngagementTrendSeries,
   buildBundlePerformanceMatrix,
   buildBundleMetricTrendSeries,
   type OrderAttributionRow,
@@ -233,7 +229,7 @@ async function loadAttributionDashboardData({
   const prevFromStr = prevSince.toISOString().split("T")[0];
   const prevToStr   = prevUntil.toISOString().split("T")[0];
 
-  const [shop, currentAttributions, previousAttributions, viewEvents, prevViewEvents, engagementRows, prevEngagementRows, recentActivity] = await Promise.all([
+  const [shop, currentAttributions, previousAttributions, viewEvents, prevViewEvents, engagementRows] = await Promise.all([
     db.shop.findUnique({
       where: { shopDomain: shopId },
       select: { customUtmParameters: true },
@@ -257,16 +253,6 @@ async function loadAttributionDashboardData({
       where: { shopId, createdAt: { gte: since, lte: until } },
       select: { bundleId: true, sessionId: true, presetId: true, eventName: true, createdAt: true },
     }),
-    db.bundleEngagement.findMany({
-      where: { shopId, eventName: "wpb:session-engaged", createdAt: { gte: prevSince, lt: since } },
-      select: { sessionId: true },
-    }),
-    db.bundleEngagement.findMany({
-      where: { shopId, eventName: "wpb:session-engaged" },
-      orderBy: { createdAt: "desc" },
-      take: 25,
-      select: { id: true, bundleId: true, sessionId: true, presetId: true, createdAt: true },
-    }),
   ]);
 
   // Issue: admin-lcp-phase4-loaders-1.
@@ -278,12 +264,10 @@ async function loadAttributionDashboardData({
     .map(a => a.bundleId!);
   const viewBundleIds = viewEvents.filter(v => v.bundleId).map(v => v.bundleId!);
   const engagementBundleIds = engagementRows.map(r => r.bundleId);
-  const activityBundleIds = recentActivity.map(r => r.bundleId);
   const allBundleIds = [...new Set([
     ...attributionBundleIds,
     ...viewBundleIds,
     ...engagementBundleIds,
-    ...activityBundleIds,
   ])];
 
   const allBundles = allBundleIds.length > 0
@@ -296,7 +280,6 @@ async function loadAttributionDashboardData({
   for (const b of allBundles) fullBundleMap[b.id] = { name: b.name, status: b.status };
   const bundleIds = [...new Set(attributionBundleIds)];
   const bundleNameMap = Object.fromEntries(allBundles.map(b => [b.id, b.name]));
-  const bundleStatusMap = Object.fromEntries(allBundles.map(b => [b.id, b.status]));
 
   const totalRevenue = currentAttributions.reduce((s, a) => s + a.revenue, 0);
   const totalOrders = currentAttributions.length;
@@ -400,21 +383,6 @@ async function loadAttributionDashboardData({
     revenue: a.revenue,
     createdAt: a.createdAt,
   }));
-  const prevAttrRows: OrderAttributionRow[] = previousAttributions.map(a => ({
-    bundleId: a.bundleId,
-    revenue: a.revenue,
-    createdAt: a.createdAt,
-  }));
-
-  const prevTotalRevForPercent = previousAttributions.reduce((s, a) => s + a.revenue, 0);
-  const bundleRevenueSummary = computeBundleRevenueSummary(
-    attrRows,
-    prevAttrRows,
-    totalRevenue,
-    prevTotalRevForPercent,
-  );
-  const bundleLeaderboard = buildBundleLeaderboard(attrRows, bundleNameMap, bundleStatusMap, 10);
-  const bundleRevenueTrend = buildBundleTrendSeries(attrRows, since, days, until);
   const bundleMetricTrend = buildBundleMetricTrendSeries(attrRows, viewEvents, since, until);
 
   const totalViews = viewEvents.length;
@@ -445,16 +413,13 @@ async function loadAttributionDashboardData({
     engagementRowsTyped,
     currentAttributions.map(a => ({ bundleId: a.bundleId, revenue: a.revenue, createdAt: a.createdAt })),
   );
-  const engagementTrend = buildEngagementTrendSeries(engagementRowsTyped, since, until);
-  const prevEngagedUnique = new Set(prevEngagementRows.map(r => r.sessionId)).size;
 
-  // fullBundleMap already covers every bundle id from engagement + activity + attributions
+  // fullBundleMap already covers every bundle id from views + engagement + attributions
   // (built in the single consolidated findMany above). Just compute the matrix id set.
   const matrixBundleIds = [...new Set([
     ...bundleIds,
     ...viewBundleIds,
     ...engagementRows.map(r => r.bundleId),
-    ...recentActivity.map(r => r.bundleId),
   ])];
 
   const matrixBundles = matrixBundleIds.map(id => {
@@ -480,16 +445,6 @@ async function loadAttributionDashboardData({
     .slice(0, 5)
     .map(c => ({ utmCampaign: c.campaign, revenueCents: c.revenue, orders: c.orders }));
 
-  // Live activity feed — newest first.
-  const activityFeed = recentActivity.map(r => ({
-    id: r.id,
-    bundleName: fullBundleMap[r.bundleId]?.name ?? "Unknown Bundle",
-    presetId: r.presetId ?? null,
-    sessionId: r.sessionId,
-    createdAt: r.createdAt.toISOString(),
-  }));
-
-  // Engagement → checkout rate (cross-bundle).
   const engagementToOrderPct = funnelSnapshot.engaged > 0
     ? Math.round((funnelSnapshot.checkedOut / funnelSnapshot.engaged) * 100)
     : null;
@@ -510,20 +465,13 @@ async function loadAttributionDashboardData({
     byCampaign,
     byBundle,
     byLandingPage,
-    bundleRevenueSummary,
-    bundleLeaderboard,
-    bundleRevenueTrend,
     bundleMetricTrend,
     views: { totalViews, prevTotalViews, viewsByBundle },
     // wpb-analytics-revamp-1 additions
     funnelSnapshot,
-    engagementTrend,
-    engagedSessions: funnelSnapshot.engaged,
-    prevEngagedSessions: prevEngagedUnique,
     engagementToOrderPct,
     bundleMatrix,
     topCampaignsRows,
-    activityFeed,
     customUtmParameters: normalizeSavedCustomUtmParameters(shop?.customUtmParameters),
   };
 }

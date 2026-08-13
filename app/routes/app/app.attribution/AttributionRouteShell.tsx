@@ -52,18 +52,26 @@ function AttributionCriticalStatus({
   );
 }
 
+export function waitForAnalyticsRouteReady<TAnalytics, TPixelStatus>(
+  analytics: Promise<TAnalytics>,
+  pixelStatus: Promise<TPixelStatus>,
+  loadingBar: Promise<void> = waitForAdminRouteLoadingBar(),
+) {
+  return Promise.all([analytics, pixelStatus, loadingBar]);
+}
+
 export default function AttributionRouteShell() {
   const { analytics, pixelStatus } = useLoaderData<typeof loader>();
   const navigate = useNavigate();
   const routeReady = useMemo(
-    () => Promise.all([analytics, pixelStatus, waitForAdminRouteLoadingBar()]),
+    () => waitForAnalyticsRouteReady(analytics, pixelStatus),
     [analytics, pixelStatus],
   );
 
   return (
     <Suspense fallback={<AdminRouteLoadingBar label="Loading Analytics" />}>
       <Await resolve={routeReady}>
-        {([, resolvedPixelStatus]) => (
+        {([resolvedAnalytics, resolvedPixelStatus]) => (
           <>
             <ui-title-bar title="Analytics">
               <button
@@ -81,7 +89,10 @@ export default function AttributionRouteShell() {
             >
               <AttributionCriticalFunnelHeader />
               <AttributionCriticalStatus status={resolvedPixelStatus} />
-              <AttributionDashboard />
+              <AttributionDashboard
+                data={resolvedAnalytics}
+                pixelStatus={resolvedPixelStatus}
+              />
             </s-query-container>
           </>
         )}

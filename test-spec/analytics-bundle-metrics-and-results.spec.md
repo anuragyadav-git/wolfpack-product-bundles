@@ -59,10 +59,27 @@ Verify the data behavior behind the selectable Analytics graph and bundle search
 | 2 | Metric sort | Bundle Views plus Highest | Descending view count | Mirrors the dropdown contract |
 | 3 | Direction sort | Total Bundle Value plus Lowest | Ascending revenue | Direction applies to selected metric |
 
+### AnalyticsReadiness
+
+| # | Scenario | Input | Expected Output | Notes |
+|---|---|---|---|---|
+| 1 | Pixel status remains pending | Analytics data is ready | Route readiness remains pending | Only the loading bar may render |
+| 2 | All route data is ready | Analytics, pixel status, and loading-bar minimum resolve | Entire Analytics page may reveal | No partial top banners |
+
+### CampaignResultControls
+
+| # | Scenario | Input | Expected Output | Notes |
+|---|---|---|---|---|
+| 1 | Campaign search | Mixed-case campaign query | Matching campaign rows only | Case-insensitive |
+| 2 | Campaign sort | No. of Orders plus Highest | Descending order count | Uses the card's own controls |
+| 3 | Empty campaign result | No orders or no search matches | Centered icon and empty copy | Controls remain available |
+
 ## Acceptance Criteria
 
 - [ ] Every graph metric is derived from the selected Analytics window.
 - [ ] Search is case-insensitive and matches bundle names.
 - [ ] Every requested sort metric supports Highest and Lowest direction.
 - [ ] View-only bundles remain available in results.
+- [ ] Analytics content reveals only after every page data dependency is ready.
+- [ ] Top Campaigns supports search, metric sorting, and a centered empty state.
 - [ ] All listed test cases pass.

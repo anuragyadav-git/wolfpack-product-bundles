@@ -48,4 +48,31 @@ describe("app.attribution route shell", () => {
     expect(view).not.toContain("UTM Pixel Tracking");
     expect(view).not.toContain("analyticsSkeletonCard");
   });
+
+  it("keeps the shared readiness boundary pending until analytics and pixel status are both ready", async () => {
+    const { waitForAnalyticsRouteReady } = await import(
+      "../../../app/routes/app/app.attribution/AttributionRouteShell"
+    );
+    let resolvePixelStatus!: (value: { active: boolean }) => void;
+    const pixelStatus = new Promise<{ active: boolean }>((resolve) => {
+      resolvePixelStatus = resolve;
+    });
+    const ready = waitForAnalyticsRouteReady(
+      Promise.resolve({ bundleMetricTrend: [] }),
+      pixelStatus,
+      Promise.resolve(),
+    );
+    const settled = jest.fn();
+    void ready.then(settled);
+
+    await Promise.resolve();
+    expect(settled).not.toHaveBeenCalled();
+
+    resolvePixelStatus({ active: true });
+    await expect(ready).resolves.toEqual([
+      { bundleMetricTrend: [] },
+      { active: true },
+      undefined,
+    ]);
+  });
 });
