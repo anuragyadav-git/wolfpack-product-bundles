@@ -46,7 +46,11 @@ function IntegrationsCatalog() {
                 Connect the tools that support your bundle workflow.
               </s-paragraph>
             </s-stack>
-            <s-button variant="primary" onClick={handleRequestIntegration}>
+            <s-button
+              variant="primary"
+              icon="apps"
+              onClick={handleRequestIntegration}
+            >
               Request Integration
             </s-button>
           </header>
@@ -62,40 +66,46 @@ function IntegrationsCatalog() {
                   padding="base"
                 >
                   <article className={styles.card}>
-                    <div className={styles.cardHeader}>
-                      <div className={styles.identity}>
-                        <span className={styles.logoFrame}>
-                          {integration.logoUrl ? (
-                            <img
-                              className={styles.logoImage}
-                              src={integration.logoUrl}
-                              alt={`${integration.title} logo`}
-                            />
-                          ) : (
-                            <s-icon type="product" size="large" />
-                          )}
-                        </span>
-                        <s-stack gap="small-100">
-                          <s-heading>{integration.title}</s-heading>
-                          <s-text color="subdued">{integration.category}</s-text>
-                        </s-stack>
-                      </div>
+                    <div className={`${styles.cardRow} ${styles.mediaRow}`}>
+                      <span className={styles.logoFrame}>
+                        {integration.logoUrl ? (
+                          <img
+                            className={styles.logoImage}
+                            src={integration.logoUrl}
+                            alt={`${integration.title} logo`}
+                          />
+                        ) : (
+                          <s-icon type="product" size="large" />
+                        )}
+                      </span>
                       <s-badge tone={integration.status === "Supported" ? "success" : "info"}>
                         {integration.status}
                       </s-badge>
                     </div>
 
-                    <s-paragraph color="subdued">
-                      {integration.description}
-                    </s-paragraph>
+                    <div className={styles.cardRow}>
+                      <s-heading>{integration.title}</s-heading>
+                    </div>
 
-                    <s-button
-                      href={integration.setupUrl}
-                      target="_blank"
-                      inlineSize="fill"
-                    >
-                      {integration.ctaLabel}
-                    </s-button>
+                    <div className={styles.cardRow}>
+                      <s-text color="subdued">{integration.category}</s-text>
+                    </div>
+
+                    <div className={`${styles.cardRow} ${styles.descriptionRow}`}>
+                      <s-paragraph color="subdued">
+                        {integration.description}
+                      </s-paragraph>
+                    </div>
+
+                    <div className={`${styles.cardRow} ${styles.actionRow}`}>
+                      <s-button
+                        href={integration.setupUrl}
+                        target="_blank"
+                        inlineSize="fill"
+                      >
+                        {integration.ctaLabel}
+                      </s-button>
+                    </div>
                   </article>
                 </s-box>
               ))}
