@@ -1,3 +1,5 @@
+import styles from "./SettingsLandingShell.module.css";
+
 export type SettingsWorkspaceView = "design" | "language" | "controls";
 
 const SETTINGS_SECTIONS: Array<{
@@ -39,9 +41,9 @@ export function SettingsLandingShell({
     <s-page inlineSize="large">
       <s-query-container
         containerName="settings-landing"
-        className="settingsLandingViewport"
+        className={styles.settingsLandingViewport}
       >
-        <div className="settingsLandingContent">
+        <div className={styles.settingsLandingContent}>
           <s-stack direction="inline" gap="small" alignItems="center">
             <s-button
               variant="tertiary"
@@ -58,7 +60,7 @@ export function SettingsLandingShell({
             {SETTINGS_SECTIONS.map((section) => (
               <s-clickable
                 key={section.id}
-                className="settingsLandingTile"
+                className={styles.settingsLandingTile}
                 accessibilityLabel={`Open ${section.title} settings`}
                 background="base"
                 padding="large"
@@ -90,7 +92,7 @@ export function SettingsLandingShell({
                       </s-stack>
                     </s-box>
                     <s-icon
-                      className="settingsLandingTileArrow"
+                      className={styles.settingsLandingTileArrow}
                       type="arrow-right"
                       size="base"
                     />

@@ -2,7 +2,6 @@ import {
   defer,
   json,
   type ActionFunctionArgs,
-  type LinksFunction,
   type LoaderFunctionArgs,
 } from "@remix-run/node";
 import { Await, useLoaderData, useNavigate } from "@remix-run/react";
@@ -28,11 +27,6 @@ import {
   AdminRouteLoadingBar,
   waitForAdminRouteLoadingBar,
 } from "../../components/AdminRouteLoadingBar";
-import settingsLandingStyles from "./app.settings/SettingsLandingShell.css?url";
-
-export const links: LinksFunction = () => [
-  { rel: "stylesheet", href: settingsLandingStyles },
-];
 
 const loadSettingsWorkspace = async () => {
   const module = await import("./app.settings/SettingsRoute");

@@ -18,7 +18,7 @@ source_paths:
   - app/components/AdminRouteLoadingBar.tsx
   - app/lib/admin-web-vitals-diagnostics.client.ts
   - app/routes/app/app.settings.tsx
-  - app/routes/app/app.settings/SettingsLandingShell.css
+  - app/routes/app/app.settings/SettingsLandingShell.module.css
   - app/routes/app/app.settings/SettingsRoute.tsx
   - app/routes/app/app.settings/DesignSettingsView.tsx
   - app/routes/app/app.settings/DesignLivePreview.tsx
@@ -138,9 +138,13 @@ Design is statically part of that post-click workspace chunk, so entering Design
 does not wait for a second sequential JavaScript request. The workspace chunk is
 not required for the first Settings paint.
 
-The landing stylesheet is emitted by the Settings route as a document-head link,
-so its centering geometry is present before streamed landing markup can paint;
-do not move this CSS back behind the component JavaScript boundary. The three
+The landing stylesheet is a CSS-module dependency of `SettingsLandingShell` and
+is declared as a Settings-route CSS dependency in the production build manifest.
+Do not expose it as an independent route `links()` URL: during client-side Admin
+navigation, that separate request can finish after the landing component renders
+and cause an unstyled first paint followed by a second styled layout. Keeping the
+CSS in the component dependency graph lets Remix preload it with the route module
+without adding a render delay or loading-state workaround. The three
 landing cards are the complete interactive targets and do not render
 separate button-like `Configure` labels. Each card uses a framed section icon,
 clear title and description hierarchy, and a trailing directional affordance;
