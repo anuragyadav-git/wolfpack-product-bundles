@@ -1,13 +1,11 @@
-import { useState } from "react";
-
 import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
+import { DefaultProductDiscountTipBanner } from "../../_shared/bundle-configure/DefaultProductDiscountTipBanner";
 
 export function FpbDefaultProductsSettings({
   flow,
 }: {
   flow: ConfigureBundleFlowContext;
 }) {
-  const [discountTipDismissed, setDiscountTipDismissed] = useState(false);
   const {
     buildDefaultProductEntryFromPicker,
     defaultProductsData,
@@ -90,18 +88,7 @@ export function FpbDefaultProductsSettings({
               <p style={{ margin: 0, fontSize: 13, color: "#6d7175" }}>
                 Choose products that should be added to bundle by default
               </p>
-              {!discountTipDismissed && (
-                <s-banner
-                  tone="info"
-                  title="Discount tip"
-                  dismissible
-                  onDismiss={() => setDiscountTipDismissed(true)}
-                >
-                  Tip: Discounts are based on all items in your cart. Don&apos;t
-                  forget to include the Pre Selected Product&apos;s quantity or
-                  amount when setting up discounts.
-                </s-banner>
-              )}
+              <DefaultProductDiscountTipBanner />
               {!defaultProductsEnabled && (
                 <p
                   style={{

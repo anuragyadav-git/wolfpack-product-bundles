@@ -7,6 +7,7 @@ import {
   getBogoDiscountInputValue,
   getBogoDiscountStoredValue,
 } from "../../../../lib/pricing-progress-tier-defaults";
+import { DiscountPricingTipBanner } from "../../_shared/bundle-configure/DiscountPricingTipBanner";
 
 export function fixedBundlePriceInputToCents(value: string): number {
   return amountToCents(Number(value) || 0);
@@ -61,16 +62,7 @@ export function FpbDiscountRulesSection({
               }
             />
           </div>
-          <s-banner
-            tone="info"
-            heading="Discount setup tip"
-            dismissible={false}
-            hidden={false}
-          >
-            Tip: Discounts are calculated based on the products in cart, make
-            sure to add the &quot;Default Product&quot; quantity or amount while
-            configuring discounts.
-          </s-banner>
+          <DiscountPricingTipBanner />
           {/* Q2: Discount Type — always visible, grayed when disabled */}
           <div
             style={{

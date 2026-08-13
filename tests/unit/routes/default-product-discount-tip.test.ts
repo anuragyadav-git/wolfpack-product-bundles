@@ -1,5 +1,6 @@
 import React from "react";
 
+import { DefaultProductDiscountTipBanner } from "../../../app/routes/app/_shared/bundle-configure/DefaultProductDiscountTipBanner";
 import { FpbDefaultProductsSettings } from "../../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/sections/BundleSettingsDefaultProducts";
 import { PpbDefaultProductsSettings } from "../../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/PpbBundleSettingsControls.defaultProducts";
 
@@ -19,7 +20,7 @@ jest.mock(
 
 function findElement(
   node: React.ReactNode,
-  type: string,
+  type: React.ElementType,
 ): React.ReactElement<any> | null {
   if (!React.isValidElement(node)) return null;
   if (node.type === type) return node;
@@ -57,14 +58,11 @@ describe("Pre Selected Product discount tip", () => {
     mockUsePpbConfigureContext.mockReturnValue(ppbContext);
   });
 
-  it.each([
-    ["FPB", () => FpbDefaultProductsSettings({ flow: baseFlow as any })],
-    ["PPB", () => PpbDefaultProductsSettings()],
-  ])("dismisses the %s Polaris banner without dirtying the bundle", (_, render) => {
+  it("dismisses the shared FPB Polaris banner without dirtying the bundle", () => {
     const setDismissed = jest.fn();
     (React.useState as jest.Mock).mockReturnValueOnce([false, setDismissed]);
 
-    const banner = findElement(render(), "s-banner");
+    const banner = findElement(DefaultProductDiscountTipBanner(), "s-banner");
 
     expect(banner?.props.dismissible).toBe(true);
     expect(banner?.props.title).toBe("Discount tip");
@@ -77,9 +75,17 @@ describe("Pre Selected Product discount tip", () => {
   it.each([
     ["FPB", () => FpbDefaultProductsSettings({ flow: baseFlow as any })],
     ["PPB", () => PpbDefaultProductsSettings()],
-  ])("hides the %s discount tip after dismissal", (_, render) => {
-    (React.useState as jest.Mock).mockReturnValueOnce([true, jest.fn()]);
+  ])("renders the shared banner in %s", (_, render) => {
+    expect(findElement(render(), DefaultProductDiscountTipBanner)).not.toBeNull();
+  });
 
-    expect(findElement(render(), "s-banner")).toBeNull();
+  it.each([
+    { dismissed: false, expected: "renders" },
+    { dismissed: true, expected: "hides" },
+  ])("$expected the shared discount tip after dismissal state changes", ({ dismissed }) => {
+    (React.useState as jest.Mock).mockReturnValueOnce([dismissed, jest.fn()]);
+
+    const banner = findElement(DefaultProductDiscountTipBanner(), "s-banner");
+    expect(Boolean(banner)).toBe(!dismissed);
   });
 });
