@@ -50,15 +50,6 @@ export function PpbQuantitySettings() {
           }}
           autocomplete="off"
         />
-        <s-banner
-          tone="info"
-          heading="Search filters"
-          dismissible={false}
-          hidden={false}
-        >
-          Bundles with 3+ products see 24% higher conversion rates when search
-          filters are enabled.
-        </s-banner>
         <div className={productPageBundleStyles.settingTitleRow}>
           <div>
             <h3 className={productPageBundleStyles.settingTitle}>

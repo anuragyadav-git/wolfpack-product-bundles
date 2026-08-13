@@ -79,4 +79,31 @@ describe("Admin Bundle Settings integration removal", () => {
     expect(markup).toContain("Variant Selector");
     removedCopy.forEach((copy) => expect(markup).not.toContain(copy));
   });
+
+  it("omits the promotional Search filters banner from PPB settings", () => {
+    mockUsePpbConfigureContext.mockReturnValue({
+      markAsDirty: jest.fn(),
+      maxQtyPerProduct: "2",
+      productPageBundleStyles: {
+        settingInlineSwitch: "settingInlineSwitch",
+        settingTitle: "settingTitle",
+        settingTitleRow: "settingTitleRow",
+      },
+      quantityValidationEnabled: true,
+      QuestionHelpTooltip: () => null,
+      setMaxQtyPerProduct: jest.fn(),
+      setQuantityValidationEnabled: jest.fn(),
+      setVariantSelectorEnabled: jest.fn(),
+      variantSelectorEnabled: true,
+      validationErrors: {},
+      clearValidationError: jest.fn(),
+    });
+
+    const markup = renderToStaticMarkup(createElement(PpbQuantitySettings));
+
+    expect(markup).not.toContain("Search filters");
+    expect(markup).not.toContain("24% higher conversion rates");
+    expect(markup).toContain("Enable Quantity Validation");
+    expect(markup).toContain("Variant Selector");
+  });
 });
