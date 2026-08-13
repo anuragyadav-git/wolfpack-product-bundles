@@ -6,6 +6,7 @@ import {
   HELP_TOOLTIPS,
   type HelpTooltipKey,
 } from "../../../constants/help-tooltips";
+import { suppressInfoIconPointerActivation } from "../../../lib/admin-info-icon-interaction";
 import productPageBundleStyles from "../../../styles/routes/product-page-bundle-configure.module.css";
 import type { BundleProductCardProps } from "./types";
 
@@ -128,6 +129,8 @@ export function QuestionHelpTooltip({
         role="img"
         tabIndex={0}
         aria-label={title || description}
+        onPointerDown={suppressInfoIconPointerActivation}
+        onClick={suppressInfoIconPointerActivation}
       >
         <s-icon type="info" />
       </span>
