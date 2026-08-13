@@ -442,10 +442,6 @@ export async function updateBundleProductMetafields(
       : null,
     personalizationData: bundleConfiguration.personalizationData ?? null,
     discountDisplayOverride: bundleConfiguration.discountDisplayOverride ?? null,
-    individualSellingPlanSelection: bundleConfiguration.individualSellingPlanSelection ?? {
-      isEnabled: false,
-      showFor: "ALL_PRODUCTS",
-    },
     validateQuantityPerProduct: bundleConfiguration.validateQuantityPerProduct ?? {
       isEnabled: false,
       allowedQuantity: 0,

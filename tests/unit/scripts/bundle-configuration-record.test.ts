@@ -60,10 +60,6 @@ function makeBundle(overrides: Record<string, unknown> = {}) {
     },
     personalizationData: null,
     discountDisplayOverride: null,
-    individualSellingPlanSelection: {
-      isEnabled: false,
-      showFor: "ALL_PRODUCTS",
-    },
     validateQuantityPerProduct: { isEnabled: true, allowedQuantity: 1 },
     useSingleStepCategoriesAsBundleSteps: false,
     shopifyProductId: "gid://shopify/Product/999",

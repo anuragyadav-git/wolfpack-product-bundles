@@ -25,10 +25,6 @@ export function buildProductPageCartFormData(cartItems = [], {
     formData.append(`items[${index}][id]`, String(item.id));
     formData.append(`items[${index}][quantity]`, String(item.quantity));
 
-    if (item.selling_plan) {
-      formData.append(`items[${index}][selling_plan]`, String(item.selling_plan));
-    }
-
     Object.entries(item.properties || {}).forEach(([key, value]) => {
       if (value === undefined || value === null) return;
       formData.append(`items[${index}][properties][${key}]`, String(value));

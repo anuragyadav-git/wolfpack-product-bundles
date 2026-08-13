@@ -131,7 +131,6 @@ model Bundle {
   bundleTextConfig                     Json?
   personalizationData                  Json?
   discountDisplayOverride              Json?
-  individualSellingPlanSelection       Json?
   validateQuantityPerProduct           Json?
   useSingleStepCategoriesAsBundleSteps Boolean           @default(false)
   // Select Template field names

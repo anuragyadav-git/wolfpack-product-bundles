@@ -3,7 +3,6 @@ import { AppLogger } from "../../../lib/logger";
 import { serializePricingDisplayOptions } from "../../../lib/pricing-display-options";
 import { markBundlePreviewComplete } from "../../../lib/bundle-preview-readiness";
 import { resolveFpbProductSlotsEnabled } from "../../../lib/fpb-product-slots-availability";
-import { DiscountMethod } from "../../../types/pricing";
 import { ADDON_MESSAGE_KEY } from "./configure-constants";
 import type { ConfigureBundleFlowDraft } from "./configure-flow-types";
 import { serializeFpbSaveSteps } from "./fpb-save-transport";
@@ -167,16 +166,6 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
           isEnabled: flow.quantityValidationEnabled,
           allowedQuantity:
             Number.parseInt(flow.maxQtyPerProduct || "1", 10) || 1,
-        }),
-      );
-      formData.append(
-        "individualSellingPlanSelection",
-        JSON.stringify({
-          isEnabled:
-            flow.pricingState.discountType === DiscountMethod.BUY_X_GET_Y
-              ? false
-              : flow.individualSellingPlanEnabled,
-          showFor: flow.individualSellingPlanShowFor,
         }),
       );
       formData.append(

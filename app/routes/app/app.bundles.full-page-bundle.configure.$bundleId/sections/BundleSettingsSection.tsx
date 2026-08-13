@@ -2,7 +2,7 @@ import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
 import { FpbBundleCssSettings } from "./BundleSettingsCss";
 import { FpbDefaultProductsSettings } from "./BundleSettingsDefaultProducts";
 import { FpbQuantitySettings } from "./BundleSettingsQuantity";
-import { FpbSellingPlanSettings } from "./BundleSettingsSellingPlan";
+import { FpbBundleCartSettings } from "./BundleSettingsBundleCart";
 import { FpbSummaryTextSettings } from "./BundleSettingsSummaryText";
 import { FpbBundleTemplateSettings } from "./BundleSettingsTemplate";
 import { FpbTimelineSettings } from "./BundleSettingsTimeline";
@@ -22,7 +22,7 @@ export function BundleSettingsSection({
         <FpbDefaultProductsSettings flow={flow} />
         <FpbQuantitySettings flow={flow} />
         <FpbSummaryTextSettings flow={flow} />
-        <FpbSellingPlanSettings flow={flow} />
+        <FpbBundleCartSettings flow={flow} />
         <FpbBundleTemplateSettings flow={flow} />
         <FpbTimelineSettings flow={flow} />
         <FpbBundleCssSettings flow={flow} />

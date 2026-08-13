@@ -1,5 +1,4 @@
 import { processCss } from "../../../../lib/css-sanitizer";
-import { parseIndividualSellingPlanSelection } from "./shared.server";
 
 function normalizePersonalizationData(personalizationData: any) {
   if (
@@ -142,8 +141,6 @@ export function parseFpbSaveBundleForm(formData: FormData) {
   const validateQuantityPerProduct = validateQuantityPerProductRaw
     ? JSON.parse(validateQuantityPerProductRaw)
     : { isEnabled: false, allowedQuantity: 1 };
-  const individualSellingPlanSelection =
-    parseIndividualSellingPlanSelection(formData);
   const defaultProductsDataRaw = formData.get("defaultProductsData") as
     | string
     | null;
@@ -178,7 +175,6 @@ export function parseFpbSaveBundleForm(formData: FormData) {
     discountData,
     floatingBadgeEnabled,
     floatingBadgeText,
-    individualSellingPlanSelection,
     loadingGif,
     maxQtyPerProduct,
     personalizationData,

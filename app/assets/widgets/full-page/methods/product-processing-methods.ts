@@ -911,9 +911,6 @@ processProductsForStep(products, step) {
       title: v.title,
       price: toCents(v.price),
       compareAtPrice: v.compareAtPrice ? toCents(v.compareAtPrice) : null,
-      sellingPlanAllocations: Array.isArray(v.sellingPlanAllocations)
-        ? v.sellingPlanAllocations
-        : [],
       available: v.available === true && (
         !fullPageProductProcessingMethods.isInventoryTrackingOnAddToCartEnabled.call(this)
         || !(quantityAvailable === 0 && currentlyNotInStock !== true)
@@ -973,7 +970,6 @@ processProductsForStep(products, step) {
             currentlyNotInStock: variant.currentlyNotInStock === true,
             weight: normalizeWeightToGrams(variant.weight, variant.weightUnit),
             weightUnit: 'GRAMS',
-            sellingPlanAllocations: variant.sellingPlanAllocations || [],
             // Preserve parent product data for variant selection in modal
             parentProductId: normalizeProductLookupId(product),
             parentTitle: product.title,
@@ -1026,7 +1022,6 @@ processProductsForStep(products, step) {
         compareAtPrice: defaultVariant?.compareAtPrice ? toCents(defaultVariant.compareAtPrice) : null,
         variantId: selectionId,
         selectionId,
-        sellingPlanAllocations: defaultVariant?.sellingPlanAllocations || [],
         available: defaultVariant ? this.isVariantSelectableForInventory(defaultVariant) : product.available === true,
         quantityAvailable: typeof defaultVariant?.quantityAvailable === 'number' ? defaultVariant.quantityAvailable : null,
         currentlyNotInStock: defaultVariant?.currentlyNotInStock === true,
@@ -1115,36 +1110,6 @@ extractId(idString) {
 
 getProductSelectionId(product = {}) {
   return String(product?.selectionId || '');
-},
-
-shouldApplyIndividualSellingPlanSelection() {
-  return this.selectedBundle?.individualSellingPlanSelection?.isEnabled === true;
-},
-
-shouldApplyIndividualSellingPlanSelectionForProduct(product, variantId) {
-  if (!this.shouldApplyIndividualSellingPlanSelection()) {
-    return false;
-  }
-
-  const showFor = this.selectedBundle?.individualSellingPlanSelection?.showFor;
-  if (showFor !== "OOS_PRODUCTS") {
-    return true;
-  }
-
-  const normalizedSelectedId = this.getProductSelectionId({ selectionId: variantId });
-  const variant = Array.isArray(product?.variants)
-    ? product.variants.find((candidate) => {
-      const candidateId = variantLookupKey(candidate);
-      return candidateId === normalizedSelectedId;
-    })
-    : null;
-
-  const target = variant ?? product;
-  if (!target) {
-    return false;
-  }
-
-  return target.available === false;
 },
 
 async enrichMissingProductDescriptions(products) {

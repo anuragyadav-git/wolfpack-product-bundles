@@ -35,7 +35,6 @@ export interface FormattedBundle {
   bundleBannerMobileUrl: string | null;
   personalizationData: Record<string, unknown> | null;
   discountDisplayOverride: Record<string, unknown> | null;
-  individualSellingPlanSelection: Record<string, unknown>;
   validateQuantityPerProduct: Record<string, unknown>;
   productSlotsEnabled: boolean;
   productSlotIconUrl: string | null;
@@ -271,10 +270,6 @@ export function formatBundleForWidget(bundle: any): FormattedBundle {
     bundleBannerMobileUrl: bundle.bundleBannerMobileUrl ?? null,
     personalizationData: (bundle.personalizationData as Record<string, unknown> | null) ?? null,
     discountDisplayOverride: (bundle.discountDisplayOverride as Record<string, unknown> | null) ?? null,
-    individualSellingPlanSelection: (bundle.individualSellingPlanSelection as Record<string, unknown> | null) ?? {
-      isEnabled: false,
-      showFor: "ALL_PRODUCTS",
-    },
     validateQuantityPerProduct: (bundle.validateQuantityPerProduct as Record<string, unknown> | null) ?? {
       isEnabled: false,
       allowedQuantity: 1,

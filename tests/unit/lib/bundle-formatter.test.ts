@@ -467,7 +467,6 @@ describe("formatBundleForWidget", () => {
       ],
     };
     const validateQuantityPerProduct = { isEnabled: true, allowedQuantity: 1 };
-    const individualSellingPlanSelection = { isEnabled: false, showFor: "ALL_PRODUCTS" };
     const bundleTextConfig = {
       bundleSummary: {
         title: "Your Bundle",
@@ -481,7 +480,6 @@ describe("formatBundleForWidget", () => {
       validateQuantityPerProduct,
       productSlotsEnabled: true,
       productSlotIconUrl: "https://cdn.example.test/slot-icon.png",
-      individualSellingPlanSelection,
       bundleTextConfig,
     }) as any);
 
@@ -489,7 +487,6 @@ describe("formatBundleForWidget", () => {
     expect(result.validateQuantityPerProduct).toEqual(validateQuantityPerProduct);
     expect(result.productSlotsEnabled).toBe(false);
     expect(result.productSlotIconUrl).toBeNull();
-    expect(result.individualSellingPlanSelection).toEqual(individualSellingPlanSelection);
     expect(result.bundleTextConfig).toEqual(bundleTextConfig);
   });
 

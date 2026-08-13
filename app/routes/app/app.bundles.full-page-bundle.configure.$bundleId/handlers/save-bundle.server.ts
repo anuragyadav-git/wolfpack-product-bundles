@@ -212,7 +212,6 @@ export async function handleSaveBundle(
       discountData,
       floatingBadgeEnabled,
       floatingBadgeText,
-      individualSellingPlanSelection,
       loadingGif,
       maxQtyPerProduct,
       personalizationData,
@@ -464,7 +463,6 @@ export async function handleSaveBundle(
         maxQtyPerProduct,
         productSlotIconUrl,
         validateQuantityPerProduct,
-        individualSellingPlanSelection,
         ...(defaultProductsData !== null && { defaultProductsData }),
         // Update steps if provided
         ...(stepsData && {

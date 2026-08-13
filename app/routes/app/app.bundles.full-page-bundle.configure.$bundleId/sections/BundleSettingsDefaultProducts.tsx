@@ -6,20 +6,12 @@ export function FpbDefaultProductsSettings({
   flow: ConfigureBundleFlowContext;
 }) {
   const {
-    activeTabIndex,
     buildDefaultProductEntryFromPicker,
-    bundle,
     defaultProductsData,
-    DiscountMethod,
     markAsDirty,
-    pricingState,
     setDefaultProductsData,
     shopify,
-    stepsState,
   } = flow;
-  const settingsStep = stepsState.steps[activeTabIndex] || stepsState.steps[0];
-  const individualSellingPlanBlocked =
-    pricingState.discountType === DiscountMethod.BUY_X_GET_Y;
 
   return (
     <>

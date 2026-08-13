@@ -52,7 +52,6 @@ export function buildBundleBaseConfig(
     bundleUpsellConfig?: unknown;
     bundleTextConfig?: unknown;
     discountDisplayOverride?: unknown;
-    individualSellingPlanSelection?: unknown;
     validateQuantityPerProduct?: unknown;
     useSingleStepCategoriesAsBundleSteps?: boolean | null;
     pricing?: {
@@ -137,11 +136,6 @@ export function buildBundleBaseConfig(
     bundleUpsellConfig: updatedBundle.bundleUpsellConfig ?? null,
     bundleTextConfig: updatedBundle.bundleTextConfig ?? null,
     discountDisplayOverride: updatedBundle.discountDisplayOverride ?? null,
-    individualSellingPlanSelection:
-      updatedBundle.individualSellingPlanSelection ?? {
-        isEnabled: false,
-        showFor: "ALL_PRODUCTS",
-      },
     validateQuantityPerProduct: updatedBundle.validateQuantityPerProduct ?? {
       isEnabled: false,
       allowedQuantity: 1,
@@ -407,10 +401,6 @@ export function buildSyncBundleConfiguration(
     bundleTextConfig: bundle.bundleTextConfig ?? null,
     personalizationData: bundle.personalizationData ?? null,
     discountDisplayOverride: bundle.discountDisplayOverride ?? null,
-    individualSellingPlanSelection: bundle.individualSellingPlanSelection ?? {
-      isEnabled: false,
-      showFor: "ALL_PRODUCTS",
-    },
     validateQuantityPerProduct: bundle.validateQuantityPerProduct ?? {
       isEnabled: false,
       allowedQuantity: 1,

@@ -40,7 +40,6 @@ describe("parsePPBBundleSettings", () => {
     expect(result.bundleLevelCss).toBeNull();
     expect(result.defaultProductsData).toEqual({});
     expect(result.validateQuantityPerProduct).toEqual({ isEnabled: false, allowedQuantity: 1 });
-    expect(result.individualSellingPlanSelection).toEqual({ isEnabled: false, showFor: "ALL_PRODUCTS" });
     expect(result.bundleTextConfig).toBeNull();
     expect(result.useSingleStepCategoriesAsBundleSteps).toBe(false);
   });
@@ -170,39 +169,14 @@ describe("parsePPBBundleSettings", () => {
     expect(result.defaultProductsData).toEqual(defaultProductsData);
   });
 
-  it("parses direct quantity validation and selling-plan contracts", () => {
+  it("parses the direct quantity validation contract", () => {
     const validateQuantityPerProduct = { isEnabled: true, allowedQuantity: 1 };
-    const individualSellingPlanSelection = { isEnabled: false, showFor: "ALL_PRODUCTS" };
 
     const result = parsePPBBundleSettings(makeForm({
       validateQuantityPerProduct: JSON.stringify(validateQuantityPerProduct),
-      individualSellingPlanSelection: JSON.stringify(individualSellingPlanSelection),
     }));
 
     expect(result.validateQuantityPerProduct).toEqual(validateQuantityPerProduct);
-    expect(result.individualSellingPlanSelection).toEqual(individualSellingPlanSelection);
-  });
-
-  it("parses individual selling-plan showFor as OOS only when explicitly provided", () => {
-    const result = parsePPBBundleSettings(makeForm({
-      individualSellingPlanSelection: JSON.stringify({ isEnabled: true, showFor: "OOS_PRODUCTS" }),
-    }));
-
-    expect(result.individualSellingPlanSelection).toEqual({
-      isEnabled: true,
-      showFor: "OOS_PRODUCTS",
-    });
-  });
-
-  it("normalizes invalid selling-plan showFor values back to ALL_PRODUCTS", () => {
-    const result = parsePPBBundleSettings(makeForm({
-      individualSellingPlanSelection: JSON.stringify({ isEnabled: true, showFor: "INVALID_VALUE" }),
-    }));
-
-    expect(result.individualSellingPlanSelection).toEqual({
-      isEnabled: true,
-      showFor: "ALL_PRODUCTS",
-    });
   });
 
   it("parses direct bundle summary text contract", () => {

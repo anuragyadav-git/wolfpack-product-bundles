@@ -27,14 +27,10 @@ describe("Admin Bundle Settings integration removal", () => {
       activeTabIndex: 0,
       bundle: {},
       DiscountMethod: { BUY_X_GET_Y: "BUY_X_GET_Y" },
-      INDIVIDUAL_SELLING_PLAN_BLOCKED_MESSAGE: "Blocked",
-      individualSellingPlanEnabled: true,
-      individualSellingPlanShowFor: "ALL_PRODUCTS",
       markAsDirty: jest.fn(),
       openMultiLanguageModal: jest.fn(),
       pricingState: { discountType: "BUY_X_GET_Y" },
       setIndividualSellingPlanEnabled: jest.fn(),
-      setIndividualSellingPlanShowFor: jest.fn(),
       setShowTextOnAddButton: jest.fn(),
       setTextOverrides: jest.fn(),
       SettingsRow: ({ title, children }: any) =>
@@ -57,9 +53,6 @@ describe("Admin Bundle Settings integration removal", () => {
   it("omits pre-order and subscription controls from PPB settings", () => {
     mockUsePpbConfigureContext.mockReturnValue({
       DiscountMethod: { BUY_X_GET_Y: "BUY_X_GET_Y" },
-      INDIVIDUAL_SELLING_PLAN_BLOCKED_MESSAGE: "Blocked",
-      individualSellingPlanEnabled: true,
-      individualSellingPlanShowFor: "ALL_PRODUCTS",
       markAsDirty: jest.fn(),
       maxQtyPerProduct: "2",
       pricingState: { discountType: "BUY_X_GET_Y" },
@@ -72,7 +65,6 @@ describe("Admin Bundle Settings integration removal", () => {
       quantityValidationEnabled: true,
       QuestionHelpTooltip: () => null,
       setIndividualSellingPlanEnabled: jest.fn(),
-      setIndividualSellingPlanShowFor: jest.fn(),
       setMaxQtyPerProduct: jest.fn(),
       setQuantityValidationEnabled: jest.fn(),
       setVariantSelectorEnabled: jest.fn(),

@@ -46,7 +46,6 @@ import {
 } from "../_shared/bundle-configure/modal-utils";
 import { BundleStatusSection } from "../_shared/bundle-configure/BundleStatusSection";
 import { useSharedBundleHandlers } from "../../../hooks/useSharedBundleHandlers";
-import { INDIVIDUAL_SELLING_PLAN_BLOCKED_MESSAGE } from "../../../lib/bundle-config/product-page-admin-sections";
 import {
   buildDefaultProductEntryFromPicker,
   normalizeDefaultProductsData,
@@ -148,7 +147,6 @@ const configureFlowStaticValues = {
   getVisibilityPickerSelection,
   hidePolarisModal,
   ImagesVisibilitySection,
-  INDIVIDUAL_SELLING_PLAN_BLOCKED_MESSAGE,
   MultiLanguageTextModal,
   normalizeAddonPickerProduct,
   normalizeDefaultProductsData,

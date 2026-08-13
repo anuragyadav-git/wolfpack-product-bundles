@@ -1,3 +1,31 @@
+---
+schema_version: 1
+id: eb-ui-clone-rewrite
+title: EB Evidence UI Clone Rewrite
+type: test-spec
+status: active
+summary: Defines evidence-backed Admin, persistence, storefront, and cart behavior contracts for EB-derived implementation work.
+last_audited: 2026-08-13
+owners:
+  - engineering
+domains:
+  - bundles
+systems:
+  - admin-configure
+  - storefront-runtime
+source_paths:
+  - app/routes/app/
+  - app/assets/widgets/
+related_docs:
+  - internal docs/EB Implementation Reference.md
+tags:
+  - eb-evidence
+  - parity
+keywords:
+  - bundle contracts
+  - storefront runtime
+---
+
 # Test Spec: EB Evidence UI Clone Rewrite
 **Spec ID:** eb-ui-clone-rewrite  **Issue:** eb-ui-clone-rewrite-1  **Created:** 2026-05-26
 
@@ -179,14 +207,14 @@ Define the TDD surface for evidence-backed Admin, persistence, storefront, and c
 | 1 | No preselected products | no default-products field | `defaultProductsData: {}` | Captured unset save shape. |
 | 2 | Preselected products enabled | captured default-products JSON | product GID, numeric ID, handle, variant GID, numeric variant ID, required quantity | |
 | 3 | Quantity validation | captured validation JSON | `validateQuantityPerProduct.isEnabled`, `allowedQuantity` | |
-| 4 | Selling-plan selection | captured selling-plan JSON | `individualSellingPlanSelection.isEnabled`, `showFor` | |
+| 4 | Selling-plan selection | captured selling-plan JSON | Removed from WPB Bundle Settings persistence and runtime on 2026-08-13 | Historical EB evidence only |
 | 5 | Bundle summary text | captured text-config JSON | `bundleTextConfig.bundleSummary.title`, `subTitle` | |
 | 6 | Runtime formatter | DB row with direct JSON fields | public widget DTO includes the same direct fields | |
 | 7 | Category-backed save validation | PPB step has `StepCategory.products` and parent product | save/metafield validation treats the bundle as populated | Matches live Product Page picker payload. |
 | 8 | Category-backed storefront config | PPB step has `StepCategory.products` | metafield/runtime config emits selectable products for the widget | Storefront proof showed empty `steps[0].products`. |
 | 9 | Sync Product preserves category products | PPB Sync Product with `StepCategory.products` | product metafield sync payload keeps products, variants, and collections | Live Sync Product rewrote runtime config empty. |
 | 10 | Sync Product selected variants | flattened `products[]` include cached variants | component metafields are written to every cached variant | Same config must support storefront runtime and Cart Transform. |
-| 11 | Save-to-metafield direct contracts | Product Page save includes direct Bundle Settings fields | `updateBundleProductMetafields` receives `defaultProductsData`, `validateQuantityPerProduct`, `individualSellingPlanSelection`, and `bundleTextConfig` | Live runtime proof omitted saved fields. |
+| 11 | Save-to-metafield direct contracts | Product Page save includes retained direct Bundle Settings fields | `updateBundleProductMetafields` receives `defaultProductsData`, `validateQuantityPerProduct`, and `bundleTextConfig`; removed selling-plan integration data is omitted | Live runtime proof omitted saved fields. |
 | 12 | Bundle variant UI config direct contracts | Bundle variant metafield writer receives direct Bundle Settings fields | `$app.bundle_ui_config` includes the same direct contracts for storefront runtime | App block reads this JSON. |
 | 13 | Default-products picker direct contract | Shopify product picker selection | Admin serializes `defaultProductsData.products[]` with product ID, GraphQL ID, handle, title, image, one selected/available variant ID pair, price, inventory, and `requiredQuantity: 1` without mutating step products | EB save payload is direct `defaultProductsData` with one selected variant, not a step default. |
 | 14 | Product Page direct default-products runtime | Product Page widget receives enabled `defaultProductsData` | Widget seeds selected products, renders default-products title/line, contributes to subtotal/progress/cart, and does not mark EB-style `inventoryQuantity: 0` defaults unavailable unless an explicit availability flag is false | Desktop/mobile proof row requires preselected line and cart proof. |

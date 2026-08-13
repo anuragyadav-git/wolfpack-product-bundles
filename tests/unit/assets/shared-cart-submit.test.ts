@@ -11,7 +11,6 @@ describe('shared cart-submit helpers', () => {
       {
         id: 123,
         quantity: 2,
-        selling_plan: 456,
         properties: {
           _bundle_display_properties: '{"box":"1"}',
           _custom: 'value',
@@ -33,7 +32,6 @@ describe('shared cart-submit helpers', () => {
     expect(Array.from(context.formData.entries())).toEqual([
       ['items[0][id]', '123'],
       ['items[0][quantity]', '2'],
-      ['items[0][selling_plan]', '456'],
       ['items[0][properties][_bundle_display_properties]', '{"box":"1"}'],
       ['items[0][properties][_custom]', 'value'],
       ['items[0][properties][Box]', '1'],

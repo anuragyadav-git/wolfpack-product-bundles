@@ -4,7 +4,7 @@ id: fpb-bundle-settings-admin-parity
 title: FPB Bundle Settings Admin Parity
 type: test-spec
 status: active
-summary: Covers the current FPB Bundle Settings surface and direct settings save contracts.
+summary: Covers the current FPB Bundle Settings surface and retained direct settings save contracts after selling-plan integration removal.
 last_audited: 2026-08-13
 owners:
   - engineering
@@ -39,7 +39,7 @@ Lock the EB-observed FPB Bundle Settings Admin surface and direct configuration 
 ### BundleSettingsSaveContract
 | # | Scenario | Input | Expected Output | Notes |
 |---|---|---|---|---|
-| 1 | Individual selling plan config saves through FPB | `individualSellingPlanSelection` form data | DB update and bundle product metafield sync receive the same direct config | Mirrors EB direct Bundle Settings config |
+| 1 | Removed individual selling plan config is ignored | `individualSellingPlanSelection` form data | FPB parsing, persistence, metafield sync, and storefront runtime omit the field | Current WPB product decision 2026-08-13 |
 | 2 | Quantity validation and product slots keep existing contract | Existing direct settings form data | Metafield sync still receives `validateQuantityPerProduct` and `productSlotsEnabled` | Regression guard |
 
 ## Acceptance Criteria

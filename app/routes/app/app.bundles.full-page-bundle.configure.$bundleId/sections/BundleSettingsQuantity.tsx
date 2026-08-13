@@ -9,11 +9,9 @@ export function FpbQuantitySettings({
   const {
     activeTabIndex,
     conditionsState,
-    DiscountMethod,
     FilePicker,
     markAsDirty,
     maxQtyPerProduct,
-    pricingState,
     productSlotIconUrl,
     productSlotsEnabled,
     quantityValidationEnabled,
@@ -31,8 +29,6 @@ export function FpbQuantitySettings({
     stepsState.steps,
     conditionsState.stepConditions,
   );
-  const individualSellingPlanBlocked =
-    pricingState.discountType === DiscountMethod.BUY_X_GET_Y;
 
   return (
     <>

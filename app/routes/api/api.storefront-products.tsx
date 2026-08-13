@@ -27,15 +27,6 @@ const CORS_HEADERS = {
  * Storefront API rejects the whole query with "Access denied".
  */
 const INVENTORY_FIELDS = "quantityAvailable currentlyNotInStock";
-const SELLING_PLAN_ALLOCATION_FIELDS = `
-                sellingPlanAllocations(first: 100) {
-                  edges {
-                    node {
-                      priceAdjustments { price { amount currencyCode } }
-                      sellingPlan { id name }
-                    }
-                  }
-                }`;
 const PRODUCT_GID_PATTERN = /^gid:\/\/shopify\/Product\/(\d+)$/;
 
 function normalizeProductId(productId: string): string | null {
@@ -52,13 +43,6 @@ function mapStorefrontVariant(edge: any) {
     title: edge.node.title,
     price: edge.node.price?.amount || '0',
     compareAtPrice: edge.node.compareAtPrice?.amount || null,
-    sellingPlanAllocations: (edge.node.sellingPlanAllocations?.edges || [])
-      .map((allocationEdge: any) => allocationEdge?.node)
-      .map((allocation: any) => ({
-        ...allocation,
-        id: allocation?.id ?? allocation?.sellingPlan?.id ?? null,
-      }))
-      .filter((allocation: any) => Boolean(allocation)),
     available: edge.node.availableForSale,
     quantityAvailable: normalizeStorefrontQuantityAvailable(edge.node),
     currentlyNotInStock: edge.node.currentlyNotInStock === true,
@@ -80,11 +64,9 @@ async function fetchAllVariants(
   productId: string,
   country: string | null,
   hasInventoryScope: boolean,
-  hasSellingPlanScope: boolean,
   cursor?: string
 ): Promise<any[]> {
   const inventoryFields = hasInventoryScope ? ` ${INVENTORY_FIELDS}` : "";
-  const sellingPlanAllocationFields = hasSellingPlanScope ? SELLING_PLAN_ALLOCATION_FIELDS : "";
 
   const VARIANT_QUERY = country
     ? `query getProductVariants($id: ID!, $cursor: String, $country: CountryCode!) @inContext(country: $country) {
@@ -99,7 +81,6 @@ async function fetchAllVariants(
                 weight
                 weightUnit
                 image { url }
-${sellingPlanAllocationFields}
               }
             }
           }
@@ -117,7 +98,6 @@ ${sellingPlanAllocationFields}
                 weight
                 weightUnit
                 image { url }
-${sellingPlanAllocationFields}
               }
             }
           }
@@ -162,7 +142,6 @@ ${sellingPlanAllocationFields}
       productId,
       country,
       hasInventoryScope,
-      hasSellingPlanScope,
       endCursor
     );
     return [...variants, ...nextPageVariants];
@@ -296,7 +275,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
     // Scope is synced from Shopify on install and on every app/scopes_update webhook
     // (see handleScopesUpdate in lifecycle.server.ts), so session.scope is authoritative.
     const hasInventoryScope = (session.scope ?? "").includes("unauthenticated_read_product_inventory");
-    const hasSellingPlanScope = (session.scope ?? "").includes("unauthenticated_read_selling_plans");
     const STOREFRONT_QUERY = buildProductsQuery(country, hasInventoryScope);
     const storefrontUrl = `https://${shop}/api/${SHOPIFY_REST_API_VERSION}/graphql.json`;
 
@@ -339,8 +317,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
             storefrontAccessToken,
             product.id,
             country,
-            hasInventoryScope,
-            hasSellingPlanScope
+            hasInventoryScope
           );
 
           return {

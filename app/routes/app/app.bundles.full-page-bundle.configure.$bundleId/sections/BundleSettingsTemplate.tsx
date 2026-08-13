@@ -6,20 +6,12 @@ export function FpbBundleTemplateSettings({
   flow: ConfigureBundleFlowContext;
 }) {
   const {
-    activeTabIndex,
-    bundle,
-    DiscountMethod,
     handleSectionChange,
     markAsDirty,
-    pricingState,
     QuestionHelpTooltip,
     setTextOverrides,
-    stepsState,
     textOverrides,
   } = flow;
-  const settingsStep = stepsState.steps[activeTabIndex] || stepsState.steps[0];
-  const individualSellingPlanBlocked =
-    pricingState.discountType === DiscountMethod.BUY_X_GET_Y;
 
   return (
     <>

@@ -15,23 +15,6 @@ import {
 const DEFAULT_PROGRESS_MESSAGE = "Add {conditionText} to get {discountText}";
 const DEFAULT_SUCCESS_MESSAGE = "Congratulations! You got {discountText}";
 
-export function parseIndividualSellingPlanSelection(formData: FormData) {
-  const raw = safeJsonParse(
-    formData.get("individualSellingPlanSelection") as string | null,
-    {
-      isEnabled: false,
-      showFor: "ALL_PRODUCTS",
-    },
-  ) as { isEnabled?: unknown; showFor?: unknown };
-  const showFor =
-    raw.showFor === "OOS_PRODUCTS" ? "OOS_PRODUCTS" : "ALL_PRODUCTS";
-
-  return {
-    isEnabled: raw.isEnabled === true,
-    showFor,
-  };
-}
-
 function buildFullPageBundlePricing(pricing: any) {
   if (!pricing) {
     return null;
@@ -264,7 +247,6 @@ export function buildFpbBaseConfig(
     personalizationData?: unknown;
     boxSelection?: unknown;
     bundleUpsellConfig?: unknown;
-    individualSellingPlanSelection?: unknown;
   },
   stepsData: any[],
   stepConditionsData: Record<string, any[]>,
@@ -390,11 +372,6 @@ export function buildFpbBaseConfig(
       .validateQuantityPerProduct ?? {
       isEnabled: false,
       allowedQuantity: 1,
-    },
-    individualSellingPlanSelection: (updatedBundle as any)
-      .individualSellingPlanSelection ?? {
-      isEnabled: false,
-      showFor: "ALL_PRODUCTS",
     },
     personalizationData: (updatedBundle as any).personalizationData ?? null,
     shopifyProductId: updatedBundle.shopifyProductId,

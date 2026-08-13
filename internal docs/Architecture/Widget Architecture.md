@@ -52,6 +52,12 @@ Template behavior is resolved through plain config modules and method modules:
 
 Template installer/prototype patch functions have been removed. Widget entry files compose exported template method objects in the same central `Object.assign` used for controller method modules.
 
+The widgets do not accept `individualSellingPlanSelection`, hydrate
+`sellingPlanAllocations`, or add `selling_plan` to cart lines. Those fields
+belonged to the removed Bundle Settings `Pre-order & Subscription Integration`
+contract. Any future subscription storefront behavior requires a new explicit
+contract owned by the separate PPB Subscriptions feature.
+
 ## Admin Design Preview Adapter
 
 Settings -> Design resolves its eight local preview descriptors from

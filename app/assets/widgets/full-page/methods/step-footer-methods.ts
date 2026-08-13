@@ -306,11 +306,6 @@ export const fullPageStepFooterMethods: Record<string, any> & ThisType<any> = {
           _runtimeProductId: [product?.productId, product?.graphqlId, product?.id]
             .find(value => String(value || '').includes('/Product/')) || null,
         };
-        const sellingPlanAllocationId = this.getSelectedSellingPlanAllocationId(product, variantId);
-        if (sellingPlanAllocationId) {
-          cartItem.selling_plan = parseInt(sellingPlanAllocationId);
-        }
-
         items.push(cartItem);
         selectedLines.push({ product, quantity, step });
       }

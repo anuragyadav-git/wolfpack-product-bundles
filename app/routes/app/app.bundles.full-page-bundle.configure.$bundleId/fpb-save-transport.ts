@@ -114,10 +114,6 @@ function compactVariant(value: unknown): Record<string, unknown> | null {
 
   const image = compactVariantImage(source.image) ?? compactVariantImage(source.imageUrl);
   if (image) compact.image = image;
-  if (Array.isArray(source.sellingPlanAllocations) && source.sellingPlanAllocations.length > 0) {
-    compact.sellingPlanAllocations = source.sellingPlanAllocations;
-  }
-
   return Object.keys(compact).length > 0 ? compact : null;
 }
 

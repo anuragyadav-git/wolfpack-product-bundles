@@ -252,11 +252,6 @@ export const ProductPageCartMethods: Record<string, any> & ThisType<any> = {
           properties,
           _wpbProductId: resolveRuntimeTokenProductId(product)
         };
-        const sellingPlanAllocationId = this.getSelectedSellingPlanAllocationId(product, variantId);
-        if (sellingPlanAllocationId) {
-          cartItem.selling_plan = parseInt(sellingPlanAllocationId);
-        }
-
         cartItems.push(cartItem);
         selectedLines.push({ product, quantity });
       });

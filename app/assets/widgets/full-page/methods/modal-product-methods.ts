@@ -19,29 +19,6 @@ function getSelectionId(item = {}) {
 
 
 export const fullPageModalProductMethods: Record<string, any> & ThisType<any> = {
-getSelectedSellingPlanAllocationId(product, variantId) {
-  if (!this.shouldApplyIndividualSellingPlanSelectionForProduct(product, variantId)) {
-    return null;
-  }
-
-  const normalizedSelectedId = getSelectionId({ selectionId: variantId });
-  const variant = Array.isArray(product?.variants)
-    ? product.variants.find((candidate) => getSelectionId(candidate) === normalizedSelectedId)
-    : null;
-
-  const normalizedProduct = (variant?.sellingPlanAllocations !== undefined ? variant : product) || {};
-  const allocations = Array.isArray(normalizedProduct.sellingPlanAllocations)
-    ? normalizedProduct.sellingPlanAllocations
-    : [];
-
-  if (allocations.length === 0) {
-    return null;
-  }
-
-  const firstAllocationId = this.extractId(allocations[0]?.id);
-  return firstAllocationId || null;
-},
-
 renderModalTabs() {
   const tabsContainer = this.elements.modal?.querySelector('.modal-tabs');
   if (!tabsContainer) return; // Modal not active (full-page mode)

@@ -460,10 +460,6 @@ describe("updateBundleProductMetafields", () => {
         isEnabled: true,
         allowedQuantity: 1,
       },
-      individualSellingPlanSelection: {
-        isEnabled: false,
-        showFor: "ALL_PRODUCTS",
-      },
       bundleTextConfig: {
         bundleSummary: {
           title: "Your Bundle",

@@ -192,9 +192,6 @@ processProductsForStep(products, step) {
     title: v.title,
     price: toCents(v.price),
     compareAtPrice: v.compareAtPrice ? toCents(v.compareAtPrice) : null,
-    sellingPlanAllocations: Array.isArray(v.sellingPlanAllocations)
-      ? v.sellingPlanAllocations
-      : [],
     available: isVariantSelectableForInventory(v),
     quantityAvailable: typeof v.quantityAvailable === 'number' ? v.quantityAvailable : null,
     currentlyNotInStock: v.currentlyNotInStock === true,
@@ -244,7 +241,6 @@ processProductsForStep(products, step) {
             currentlyNotInStock: variant.currentlyNotInStock === true,
             weight: normalizeWeightToGrams(variant.weight, variant.weightUnit),
             weightUnit: 'GRAMS',
-            sellingPlanAllocations: variant.sellingPlanAllocations || [],
             // Preserve parent product data for variant selection in modal
             parentProductId: this.extractId(product.id),
             parentTitle: product.title,
@@ -286,7 +282,6 @@ processProductsForStep(products, step) {
           compareAtPrice: defaultVariant?.compareAtPrice ? toCents(defaultVariant.compareAtPrice) : null,
           variantId: this.extractId(defaultVariant?.id || product.id),
           selectionId: this.extractId(defaultVariant?.id || product.id),
-          sellingPlanAllocations: defaultVariant?.sellingPlanAllocations || [],
           available: defaultVariant ? isVariantSelectableForInventory(defaultVariant) : false,
           quantityAvailable: typeof defaultVariant?.quantityAvailable === 'number' ? defaultVariant.quantityAvailable : null,
           currentlyNotInStock: defaultVariant?.currentlyNotInStock === true,

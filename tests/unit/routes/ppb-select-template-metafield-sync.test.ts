@@ -92,7 +92,6 @@ describe("PPB Select Template metafield sync", () => {
       defaultProductsData: { isDefaultProductsEnabled: true },
       bundleTextConfig: { bundleSummary: { title: "Summary", subTitle: "Sub" } },
       validateQuantityPerProduct: { isEnabled: true, allowedQuantity: 1 },
-      individualSellingPlanSelection: { isEnabled: false, showFor: "ALL_PRODUCTS" },
       useSingleStepCategoriesAsBundleSteps: false,
       steps: [
         {
@@ -161,7 +160,6 @@ describe("PPB Select Template metafield sync", () => {
       defaultProductsData: {},
       bundleTextConfig: {},
       validateQuantityPerProduct: { isEnabled: false, allowedQuantity: 1 },
-      individualSellingPlanSelection: { isEnabled: false, showFor: "ALL_PRODUCTS" },
       useSingleStepCategoriesAsBundleSteps: false,
       steps: [],
       pricing: null,

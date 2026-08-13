@@ -4,7 +4,6 @@ import {
   normalizeDefaultProductsData,
   type DefaultProductsData,
 } from "../../../lib/bundle-config/default-products";
-import type { IndividualSellingPlanShowFor } from "./configure-constants";
 import type { ConfigureBundleFlowDraft } from "./configure-flow-types";
 
 export function useConfigureContentState(flow: ConfigureBundleFlowDraft) {
@@ -98,24 +97,6 @@ export function useConfigureContentState(flow: ConfigureBundleFlowDraft) {
     ((bundle as any).showTextOnAddButton ?? false) === true ||
       !!(bundle as any).textOverrides?.addToCartButton,
   );
-  const [individualSellingPlanEnabled, setIndividualSellingPlanEnabled] =
-    useState<boolean>(
-      (
-        (bundle as any).individualSellingPlanSelection as {
-          isEnabled?: boolean;
-        } | null
-      )?.isEnabled === true,
-    );
-  const [individualSellingPlanShowFor, setIndividualSellingPlanShowFor] =
-    useState<IndividualSellingPlanShowFor>(
-      (
-        (bundle as any).individualSellingPlanSelection as {
-          showFor?: unknown;
-        } | null
-      )?.showFor === "OOS_PRODUCTS"
-        ? "OOS_PRODUCTS"
-        : "ALL_PRODUCTS",
-    );
   const originalShowProductPricesRef = useRef<boolean>(
     (bundle as any).showProductPrices ?? true,
   );
@@ -168,8 +149,6 @@ export function useConfigureContentState(flow: ConfigureBundleFlowDraft) {
     directBundleSummary,
     floatingBadgeEnabled,
     floatingBadgeText,
-    individualSellingPlanEnabled,
-    individualSellingPlanShowFor,
     initialDefaultProductsData,
     initialTextOverrides,
     initialValidateQuantityPerProduct,
@@ -197,8 +176,6 @@ export function useConfigureContentState(flow: ConfigureBundleFlowDraft) {
     setDefaultProductsData,
     setFloatingBadgeEnabled,
     setFloatingBadgeText,
-    setIndividualSellingPlanEnabled,
-    setIndividualSellingPlanShowFor,
     setLoadingGif,
     setMaxQtyPerProduct,
     setProductSlotIconUrl,

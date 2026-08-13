@@ -232,7 +232,7 @@ describe("api.storefront-products loader", () => {
     expect(body.products[0].variants.map((variant) => variant.title)).toEqual(["6", "7"]);
   });
 
-  it("hydrates selling plan allocation IDs from selling plan IDs when scope is granted", async () => {
+  it("does not request or expose selling plan allocations when the obsolete integration scope is granted", async () => {
     (getOfflineSessionForShop as jest.Mock).mockResolvedValue({
       accessToken: "admin-token",
       storefrontAccessToken: "storefront-token",
@@ -322,14 +322,9 @@ describe("api.storefront-products loader", () => {
     const body = await response.json() as { products: any[] };
     const variantsRequestBody = JSON.parse(mockFetch.mock.calls[1][1].body);
 
-    expect(variantsRequestBody.query).toContain("sellingPlanAllocations");
-    expect(variantsRequestBody.query).not.toMatch(/sellingPlanAllocations[\s\S]*node\s*{\s*id\b/);
-    expect(body.products[0].variants[0].sellingPlanAllocations[0]).toMatchObject({
-      id: "gid://shopify/SellingPlan/333",
-      sellingPlan: {
-        id: "gid://shopify/SellingPlan/333",
-        name: "Monthly",
-      },
-    });
+    expect(variantsRequestBody.query).not.toContain("sellingPlanAllocations");
+    expect(body.products[0].variants[0]).not.toHaveProperty(
+      "sellingPlanAllocations",
+    );
   });
 });

@@ -5,7 +5,7 @@ title: Bundle Field Ownership
 type: architecture
 status: authoritative
 summary: Canonical ownership ledger for persisted bundle fields, public runtime fields, Shopify custom data, and retired aliases.
-last_audited: 2026-08-11
+last_audited: 2026-08-13
 owners:
   - engineering
 domains:
@@ -54,7 +54,22 @@ second persisted owner. The app's Sync Bundle action is the upgrade path.
 | `DERIVED` | Public `bundle_ui_config`, runtime `messaging`, compact product/category records, component references/quantities/pricing, signed runtime token payload | Generated at the server/Shopify boundary. Never write these shapes back as a second bundle source. |
 | `CONSOLIDATE_DUPLICATE` | Pricing display options | `BundlePricing.displayOptions` is the only persisted owner. `messages.displayOptions` is removed; runtime `messaging.displayOptions` is derived from the direct field. |
 | `REMOVE_LEGACY` | `Bundle.fullPageLayout`; `StepCategory.categoryRank`, `selectedProducts`, `collectionsData`, `collectionsSelectedData`; sparse `fields=bootstrap`; response timestamp; `$app.component_parents`; duplicate standard/camel-case metafield writers | Superseded aliases or abandoned contracts with no current owner. They are migrated once and removed, not read through fallbacks. |
-| `REMOVE_DEAD` | Storefront sync status/attempt/timestamp/error columns; `BundleCustomField`; `DesignSettings.productPriceVisibility`, `loadingOverlayBgColor`, `loadingOverlayTextColor`, `emptySlotBorderColor`; empty metaobject replay hook | No current merchant, runtime, platform, or operational reader. |
+| `REMOVE_DEAD` | Storefront sync status/attempt/timestamp/error columns; `BundleCustomField`; `DesignSettings.productPriceVisibility`, `loadingOverlayBgColor`, `loadingOverlayTextColor`, `emptySlotBorderColor`; `Bundle.individualSellingPlanSelection`; empty metaobject replay hook | No current merchant, runtime, platform, or operational reader. |
+
+## Removed Pre-order and Subscription Integration Contract
+
+The FPB and PPB Bundle Settings control named `Pre-order & Subscription
+Integration` is fully retired. Its direct database field
+`Bundle.individualSellingPlanSelection`, FPB/PPB form entries, save parsers,
+metafield and proxy DTO fields, Storefront API selling-plan allocations, widget
+selection helpers, and cart `selling_plan` output are not part of the current
+bundle contract. A database migration drops the obsolete column; stale incoming
+form or runtime objects do not restore it.
+
+This removal does not delete Shopify app billing or PPB's separately owned
+`Subscriptions` setup section and shared-selling-plan validation flow. Those
+features have different owners and must not reuse the retired Bundle Settings
+field implicitly.
 
 ## Canonical Category Contract
 

@@ -48,60 +48,6 @@ findProductBySelectionKey(products, selectionKey) {
   )) || null;
 },
 
-shouldApplyIndividualSellingPlanSelection() {
-  return this.selectedBundle?.individualSellingPlanSelection?.isEnabled === true;
-},
-
-shouldApplyIndividualSellingPlanSelectionForProduct(product, variantId) {
-  if (!this.shouldApplyIndividualSellingPlanSelection()) {
-    return false;
-  }
-
-  const showFor = this.selectedBundle?.individualSellingPlanSelection?.showFor;
-  if (showFor !== "OOS_PRODUCTS") {
-    return true;
-  }
-
-  const normalizedSelectedId = this.normalizeSelectionKey(variantId);
-  const variant = Array.isArray(product?.variants)
-    ? product.variants.find((candidate) => (
-      this.normalizeSelectionKey(candidate?.selectionId || '') === normalizedSelectedId
-    ))
-    : null;
-
-  const target = variant ?? product;
-  if (!target) {
-    return false;
-  }
-
-  return target.available === false;
-},
-
-getSelectedSellingPlanAllocationId(product, variantId) {
-  if (!this.shouldApplyIndividualSellingPlanSelectionForProduct(product, variantId)) {
-    return null;
-  }
-
-  const normalizedSelectedId = this.normalizeSelectionKey(variantId);
-  const variant = Array.isArray(product?.variants)
-    ? product.variants.find((candidate) => (
-      this.normalizeSelectionKey(candidate?.selectionId || '') === normalizedSelectedId
-    ))
-    : null;
-
-  const normalizedProduct = (variant?.sellingPlanAllocations !== undefined ? variant : product) || {};
-  const allocations = Array.isArray(normalizedProduct.sellingPlanAllocations)
-    ? normalizedProduct.sellingPlanAllocations
-    : [];
-
-  if (allocations.length === 0) {
-    return null;
-  }
-
-  const firstAllocationId = this.extractId(allocations[0]?.id);
-  return firstAllocationId || null;
-},
-
 extractId(idString) {
   if (!idString) return null;
 

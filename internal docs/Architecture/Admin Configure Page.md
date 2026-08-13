@@ -59,6 +59,12 @@ also enforces Step 1 as enabled rather than relying only on the Admin control.
 
 PPB-only controls are explicit slots inside the shared rhythm. Category-level variant display controls update PPB `StepCategory.displayVariantsAsIndividualProducts` and `StepCategory.displayVariantsAsSwatches` fields; they are not step-wide FPB controls. Bundle Settings follows the same rule: shared rows cover overlapping settings, while FPB-only Product Slots / Slot Icon and PPB-only Variant Selector, discount display, banner, CSS, subscriptions, Bundle Embed, and Place Widget controls remain route-owned slots.
 
+The former `Pre-order & Subscription Integration` Bundle Settings row is absent
+from both FPB and PPB. Its `individualSellingPlanSelection` state and form field
+must not be reintroduced. PPB's separate `Subscriptions` rail section remains a
+distinct feature for validating shared selling plans; it does not imply or
+persist the removed per-product integration behavior.
+
 FPB Product Slots is available only when every enabled, non-default step has at
 least one step-level rule and every one of those rules uses the exact
 `quantity` type. No-rule steps, Amount or Weight rules, and category-rule mode

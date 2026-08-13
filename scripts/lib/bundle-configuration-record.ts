@@ -218,7 +218,6 @@ export function normalizeFpbConfiguration(bundleValue: unknown): NormalizedFpbCo
         enabled: bundle.productSlotsEnabled ?? false,
         icon: bundle.productSlotIconUrl ?? null,
       },
-      individualSellingPlan: canonicalize(bundle.individualSellingPlanSelection ?? null),
       boxSelection: canonicalize(bundle.boxSelection ?? null),
     },
     pricing: pricing === null ? null : canonicalize({
@@ -448,7 +447,6 @@ export function renderConfigurationMarkdown(input: MarkdownInput): string {
     `| Quantity validation | ${state(selection.quantityValidation)} |`,
     `| Product slots | ${state(selection.productSlots)} |`,
     `| Box selection | ${state(selection.boxSelection)} |`,
-    `| Individual selling plan | ${state(selection.individualSellingPlan)} |`,
     `| Default products | ${state(defaults.products)} |`,
     `| Preselected variant | ${state(defaults.preselectedVariantId)} |`,
     "",
