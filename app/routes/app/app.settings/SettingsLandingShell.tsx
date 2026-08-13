@@ -4,7 +4,7 @@ const SETTINGS_SECTIONS: Array<{
   id: SettingsWorkspaceView;
   title: string;
   description: string;
-  icon: "edit" | "globe" | "filter";
+  icon: "edit" | "language-translate" | "filter";
 }> = [
   {
     id: "design",
@@ -16,7 +16,7 @@ const SETTINGS_SECTIONS: Array<{
     id: "language",
     title: "Language",
     description: "Configure all text, labels, and translations for your bundle here",
-    icon: "globe",
+    icon: "language-translate",
   },
   {
     id: "controls",

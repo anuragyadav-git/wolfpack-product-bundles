@@ -236,7 +236,7 @@ export function PpbSubscriptionsSection() {
                               >
                                 Subscription text and translations
                               </h5>
-                              <s-button variant="secondary" icon="globe">
+                              <s-button variant="secondary" icon="language-translate">
                                 Multi Language
                               </s-button>
                             </s-stack>

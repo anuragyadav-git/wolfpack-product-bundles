@@ -61,7 +61,7 @@ export function PpbBundleEmbedSection() {
                 <span title="Multi Language">
                   <s-button
                     variant="tertiary"
-                    icon="globe"
+                    icon="language-translate"
                     accessibilityLabel="Multi Language"
                     onClick={() =>
                       openMultiLanguageModal("Bundle Embed", [

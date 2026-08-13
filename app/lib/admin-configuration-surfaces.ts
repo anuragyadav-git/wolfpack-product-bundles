@@ -94,7 +94,7 @@ export const SETTINGS_CARDS: SettingsCard[] = [
     id: "language",
     title: "Language",
     description: "Configure all text, labels, and translations for your bundle here",
-    icon: "globe",
+    icon: "language-translate",
   },
   {
     id: "controls",

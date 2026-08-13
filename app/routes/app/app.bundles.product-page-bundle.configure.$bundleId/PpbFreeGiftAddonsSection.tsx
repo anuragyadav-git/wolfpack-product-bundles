@@ -131,7 +131,7 @@ export function PpbFreeGiftAddonsSection() {
                       </s-button>
                     </div>
                     <s-stack direction="block" gap="small">
-                      <s-button variant="secondary" icon="globe" disabled>
+                      <s-button variant="secondary" icon="language-translate" disabled>
                         Multi Language
                       </s-button>
                       <s-text-field
@@ -247,7 +247,7 @@ export function PpbFreeGiftAddonsSection() {
                         </svg>
                         How to setup?
                       </button>
-                      <s-button variant="secondary" icon="globe" disabled>
+                      <s-button variant="secondary" icon="language-translate" disabled>
                         Multi Language
                       </s-button>
                     </s-stack>
@@ -363,7 +363,7 @@ export function PpbFreeGiftAddonsSection() {
                       >
                         Show Variables
                       </s-button>
-                      <s-button variant="secondary" icon="globe" disabled>
+                      <s-button variant="secondary" icon="language-translate" disabled>
                         Multi Language
                       </s-button>
                     </s-stack>

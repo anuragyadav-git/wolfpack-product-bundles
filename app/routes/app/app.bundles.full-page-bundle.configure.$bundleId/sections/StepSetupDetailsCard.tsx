@@ -41,7 +41,7 @@ export function FpbStepSetupDetailsCard({
           <span title="Multi Language">
             <s-button
               variant="tertiary"
-              icon="globe"
+              icon="language-translate"
               accessibilityLabel="Multi Language"
               onClick={() => openStepMultiLanguageModal(step.id)}
             />
