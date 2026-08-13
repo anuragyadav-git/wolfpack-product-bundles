@@ -1,4 +1,6 @@
 import { defer, json, type ActionFunctionArgs, type HeadersFunction, type LinksFunction, type LoaderFunctionArgs } from "@remix-run/node";
+import { Await, useLoaderData } from "@remix-run/react";
+import { Suspense, useMemo } from "react";
 import { ServerTiming } from "../../../lib/server-timing.server";
 import { requireAdminSession } from "../../../lib/auth-guards.server";
 import db from "../../../db.server";
@@ -13,6 +15,11 @@ import { DashboardPage } from "./DashboardPage";
 import { ReduxProvider } from "../../../store/ReduxProvider";
 import { getDashboardInitialImagePreloads } from "./dashboard-media-state";
 import { queueDashboardBackgroundTask } from "./dashboard-background-tasks.server";
+import {
+  DashboardLoadingWorkspace,
+  waitForDashboardRouteReady,
+} from "./dashboard-route-readiness";
+import dashboardRouteLoadingStyles from "./dashboard-route-loading.css?url";
 
 export type DashboardAppEmbedStatus = {
   appEmbedEnabled: boolean;
@@ -25,6 +32,7 @@ export type DashboardAppEmbedStatus = {
  * The app embed card image is the measured embedded-app LCP candidate.
  */
 export const links: LinksFunction = () => [
+  { rel: "stylesheet", href: dashboardRouteLoadingStyles },
   ...getDashboardInitialImagePreloads().map((image) => ({
     rel: "preload",
     as: "image",
@@ -128,9 +136,10 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     previewHandle: bundle.bundleType === BundleType.PRODUCT_PAGE ? bundle.shopifyProductHandle : bundle.id
   }));
 
-  // billing + proxy-health are kicked off concurrently here and surfaced via
-  // a deferred `banners` promise so the bundles table can paint without
-  // blocking on the 3-second proxy-health abort timeout.
+  // Billing + proxy-health run concurrently and stream through the deferred
+  // response. The Dashboard route readiness boundary keeps the workspace
+  // loading surface visible until both are resolved, then reveals all visible
+  // Dashboard content together.
   const billingPromise = (async () => {
     try {
       return await getSubscriptionInfoFromCache(session.shop);
@@ -233,9 +242,24 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 };
 
 export default function Dashboard() {
+  const { appEmbedStatus, banners } = useLoaderData<typeof loader>();
+  const dashboardReady = useMemo(
+    () => waitForDashboardRouteReady(appEmbedStatus, banners),
+    [appEmbedStatus, banners],
+  );
+
   return (
-    <ReduxProvider>
-      <DashboardPage />
-    </ReduxProvider>
+    <Suspense fallback={<DashboardLoadingWorkspace />}>
+      <Await resolve={dashboardReady}>
+        {(resolved) => (
+          <ReduxProvider>
+            <DashboardPage
+              appEmbedStatus={resolved.appEmbedStatus}
+              banners={resolved.banners}
+            />
+          </ReduxProvider>
+        )}
+      </Await>
+    </Suspense>
   );
 }

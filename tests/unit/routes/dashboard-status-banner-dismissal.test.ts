@@ -28,7 +28,6 @@ describe("dashboard status banner dismissal", () => {
     const useStateMock = React.useState as jest.Mock;
     const props = {
       resources: [APP_EMBED_RESOURCE],
-      loading: false,
       error: false,
       appEmbedEnabled: true,
       themeEditorUrl: "https://theme-editor.test",

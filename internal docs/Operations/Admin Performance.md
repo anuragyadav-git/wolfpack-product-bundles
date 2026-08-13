@@ -22,6 +22,9 @@ source_paths:
   - app/routes/app/app.settings/SettingsRoute.tsx
   - app/routes/app/app.settings/DesignSettingsView.tsx
   - app/routes/app/app.settings/DesignLivePreview.tsx
+  - app/routes/app/app.dashboard/route.tsx
+  - app/routes/app/app.dashboard/dashboard-route-readiness.tsx
+  - app/routes/app/app.dashboard/DashboardPage.tsx
   - app/routes/app/app.attribution/AttributionRouteShell.tsx
   - app/routes/app/app.attribution/AttributionDashboard.tsx
 related_docs:
@@ -100,7 +103,7 @@ Measured in the Shopify Admin chrome on `wolfpack-store-test-1` / SIT using
 
 | Route | Iframe LCP candidate / source-audited candidate | Fix status |
 |---|---|---|
-| `/app/dashboard` | Current local app candidate: support card content text; historical candidates: `/bundleGallery.avif`, `/appEmbed.avif` | Keep only the above-the-fold support avatar preload; render the top cards immediately; do not load decorative dashboard guide screenshots in the initial viewport; use CSS-only thumbnail placeholders for app-embed and resources-card previews. Keep the support card outside delayed Polaris custom-element wrappers; defer the lower resources card until the main content has settled; render row action-menu content only after a row menu is opened. App-embed theme detection is deferred from the initial loader payload and hydrated via a deferred promise; the app-embed card can still run an on-demand status check before opening the theme editor. |
+| `/app/dashboard` | Loading workspace message during readiness; historical content candidate: support card text | Keep the complete visible Dashboard behind one readiness boundary until App Embed status, banner data, the Dashboard module, and the shared black loading-bar interval are ready. During that interval render only the top-edge bar and centered `Loading your workspace` message. Reveal the header, App Embed banner, bundle panel, top cards, and resources card together. Do not restore banner skeletons or idle-delayed visible cards. Keep row action-menu content lazy until merchant intent because closed overlays are not Dashboard page content. |
 | `/app/bundles/create` | Measured: bundle type thumbnail rendered via `/ppb.avif` | Preloaded in route `links()` and HTTP `Link`; adjacent `/fpb.avif` also preloaded. The thumbnail is now a CSS background with stable dimensions, and local candidate paint was under target. |
 | `/app/integrations` | Measured: text subtitle (`p._subtitle...`) | No image preload fix; page LCP is text/bootstrap-bound |
 | `/app/events` | Source audit: no first-viewport owned image | No image preload fix |
@@ -210,8 +213,11 @@ The `/app` layout loader must keep Shopify authentication on the critical path, 
 The `/app/dashboard` loader must also keep non-critical Admin checks off the
 response path. App-embed refresh/status checks and web-pixel reconciliation are
 deferred or scheduled as post-response background tasks; the first dashboard
-payload should come from the shop, bundle summary, and subscription data needed
-to render above the fold.
+payload should come from the shop and bundle summary. The client readiness
+boundary keeps the loading workspace surface visible until deferred App Embed
+and banner data resolve; this preserves a prompt streamed response without
+revealing partial Dashboard content. Web-pixel reconciliation remains a
+post-response background task.
 
 The shared `/app` shell must not import or await providers that do not have
 runtime consumers on every Admin page. On 2026-07-10, the global Mantle provider

@@ -1,0 +1,20 @@
+.dashboardLoadingWorkspace {
+  box-sizing: border-box;
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  text-align: center;
+}
+
+.dashboardLoadingWorkspaceMessage {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+@media (max-width: 767px) {
+  .dashboardLoadingWorkspaceMessage {
+    font-size: 24px;
+  }
+}

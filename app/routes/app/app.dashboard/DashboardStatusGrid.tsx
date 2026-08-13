@@ -4,11 +4,9 @@ import {
 } from "../../../lib/theme-extension-status";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { DashboardBannerSkeleton } from "../../../components/skeletons/DashboardBannerSkeleton";
 
 type DashboardStatusGridProps = {
   resources: NormalizedThemeExtensionResource[];
-  loading: boolean;
   error: boolean;
   appEmbedEnabled?: boolean;
   themeEditorUrl: string | null;
@@ -99,7 +97,6 @@ export function getStorefrontStatusRows(
 
 export function DashboardStatusGrid({
   error,
-  loading,
   appEmbedEnabled = false,
   onOpenThemeEditor,
   resources,
@@ -107,12 +104,6 @@ export function DashboardStatusGrid({
 }: DashboardStatusGridProps) {
   const { t } = useTranslation();
   const [dismissed, setDismissed] = useState(false);
-
-  if (loading) {
-    return (
-      <DashboardBannerSkeleton />
-    );
-  }
 
   if (dismissed) return null;
 
