@@ -20,6 +20,7 @@ body.fpb-mobile-summary-scroll-locked {
   --fpb-mobile-summary-control-height: 48px;
   --fpb-mobile-summary-row-height: 72px;
   --fpb-mobile-summary-thumbnail-size: 52px;
+  --fpb-mobile-summary-count-pill-height: 30px;
 
   display: block;
   position: sticky;
@@ -42,7 +43,9 @@ body.fpb-mobile-summary-scroll-locked {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: var(--fpb-mobile-summary-gap);
-  padding: var(--fpb-mobile-summary-block-space)
+  padding: calc(
+      var(--fpb-mobile-summary-block-space) + 15px
+    )
     var(--fpb-mobile-summary-inline-space)
     max(var(--fpb-mobile-summary-block-space), env(safe-area-inset-bottom));
 }
@@ -87,17 +90,42 @@ body.fpb-mobile-summary-scroll-locked {
 }
 
 #bundle-builder-app .fpb-mobile-summary-toggle-count {
-  display: inline-grid;
-  flex: 0 0 auto;
-  place-items: center;
-  min-width: 24px;
-  height: 24px;
-  padding-inline: 6px;
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 50%;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-width: 58px;
+  height: var(--fpb-mobile-summary-count-pill-height);
+  padding-inline: 10px;
+  border: 1px solid var(--bundle-side-panel-bg, #fff);
   border-radius: 999px;
   background: var(--bundle-global-primary-text, #000);
   color: var(--bundle-global-button-text, #fff);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 18%);
   font-size: 12px;
+  font-weight: 700;
   line-height: 1;
+  transform: translate(-50%, -50%);
+}
+
+#bundle-builder-app .fpb-mobile-summary-toggle-count::before {
+  content: "";
+  width: 21px;
+  height: 14px;
+  padding-inline-end: 7px;
+  border-inline-end: 1px solid currentcolor;
+  background:
+    radial-gradient(circle at 4px 12px, currentcolor 1.5px, transparent 1.7px),
+    radial-gradient(circle at 11px 12px, currentcolor 1.5px, transparent 1.7px),
+    linear-gradient(currentcolor, currentcolor) 3px 3px / 10px 1.5px no-repeat,
+    linear-gradient(currentcolor, currentcolor) 4px 8px / 8px 1.5px no-repeat,
+    linear-gradient(65deg, transparent 42%, currentcolor 44% 55%, transparent 57%)
+      0 0 / 5px 9px no-repeat;
+  box-sizing: border-box;
 }
 
 #bundle-builder-app .fpb-mobile-summary-toggle-prices {
