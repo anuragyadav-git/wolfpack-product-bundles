@@ -43,23 +43,48 @@ export function SettingsLandingShell({
       >
         <div className={styles.landingContent}>
           <s-grid
-            gridTemplateColumns="@container settings-landing (inline-size > 720px) 1fr 1fr 1fr, 1fr"
-            gap="base"
+            gridTemplateColumns="@container settings-landing (inline-size > 840px) 1fr 1fr 1fr, 1fr"
+            gap="large"
           >
             {SETTINGS_SECTIONS.map((section) => (
               <s-clickable
                 key={section.id}
+                className={styles.settingsTile}
                 accessibilityLabel={`Open ${section.title} settings`}
-                padding="base"
+                background="base"
+                padding="large"
                 border="base"
-                borderRadius="base"
+                borderRadius="large"
                 onFocus={onIntent}
                 onClick={() => onSelect(section.id)}
               >
-                <s-stack gap="base">
-                  <s-icon type={section.icon} size="base" />
-                  <s-heading>{section.title}</s-heading>
-                  <s-paragraph color="subdued">{section.description}</s-paragraph>
+                <s-stack gap="large">
+                  <s-stack
+                    direction="inline"
+                    justifyContent="space-between"
+                    alignItems="center"
+                  >
+                    <s-box
+                      className={styles.tileIcon}
+                      background="subdued"
+                      borderRadius="base"
+                      inlineSize="48px"
+                      blockSize="48px"
+                    >
+                      <s-icon type={section.icon} size="base" />
+                    </s-box>
+                    <s-icon
+                      className={styles.tileArrow}
+                      type="arrow-right"
+                      size="base"
+                    />
+                  </s-stack>
+                  <s-stack gap="small">
+                    <s-heading>{section.title}</s-heading>
+                    <s-paragraph color="subdued">
+                      {section.description}
+                    </s-paragraph>
+                  </s-stack>
                 </s-stack>
               </s-clickable>
             ))}

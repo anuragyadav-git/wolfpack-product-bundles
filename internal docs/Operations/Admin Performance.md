@@ -133,9 +133,13 @@ does not wait for a second sequential JavaScript request. The workspace chunk is
 not required for the first Settings paint.
 
 The three landing cards are the complete interactive targets and do not render
-separate button-like `Configure` labels. Their desktop content area uses the
-same two-of-twelve-column gutter on each side as the template selection surface,
-and the card group is centered in the available viewport. The same shared
+separate button-like `Configure` labels. Each card uses a framed section icon,
+clear title and description hierarchy, and a trailing directional affordance;
+hover, keyboard-focus, and reduced-motion states are owned by the landing shell.
+Their desktop content area uses the same two-of-twelve-column gutter on each
+side as the template selection surface, and the card group is centered in the
+available viewport. The grid uses three columns at wide widths and one column
+when the embedded app surface is narrow. The same shared
 top-edge loading bar is used for initial Settings route readiness and after a
 card is selected while the workspace chunk becomes ready. The black bar fills
 for a minimum of 800 milliseconds before content can replace it. It does not
