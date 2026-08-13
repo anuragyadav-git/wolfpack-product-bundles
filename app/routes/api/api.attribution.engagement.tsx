@@ -8,8 +8,8 @@
  *
  * Called via fetch() from `bundle-widget-full-page.js -> _sendEngagementBeacon`.
  * The endpoint sits behind the Shopify App Proxy at
- *   /apps/onlybundles/api/attribution/engagement
- * which strips the /apps/onlybundles prefix before forwarding here.
+ *   /apps/product-bundles/api/attribution/engagement
+ * which strips the /apps/product-bundles prefix before forwarding here.
  *
  * Powers funnel metrics independent of OrderAttribution (which only fires on
  * checkout). Issue: docs/issues-prod/wpb-storefront-analytics-events-1.md.

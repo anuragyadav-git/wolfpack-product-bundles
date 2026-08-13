@@ -20,7 +20,7 @@ describe("api.widget-error App Events instrumentation", () => {
 
   it("records a redacted widget runtime error event", async () => {
     const response = await action({
-      request: new Request("https://app.example.com/apps/onlybundles/api/widget-error", {
+      request: new Request("https://app.example.com/apps/product-bundles/api/widget-error", {
         method: "POST",
         body: JSON.stringify({
           message: "TypeError: failed at https://shop.myshopify.com/products/private?customer=1",

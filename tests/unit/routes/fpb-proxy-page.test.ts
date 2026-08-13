@@ -27,7 +27,7 @@ const getDb = () => require("../../../app/db.server").default;
 function makeSignedRequest(bundleId = "1") {
   const params = new URLSearchParams({
     shop: "test-shop.myshopify.com",
-    path_prefix: "/apps/onlybundles",
+    path_prefix: "/apps/product-bundles",
     timestamp: "1770000000",
   });
 
@@ -37,7 +37,7 @@ function makeSignedRequest(bundleId = "1") {
     .join("");
   params.set("signature", createHmac("sha256", "test_api_secret").update(message).digest("hex"));
 
-  return new Request(`https://test-shop.myshopify.com/apps/onlybundles/wpb/${bundleId}?${params.toString()}`);
+  return new Request(`https://test-shop.myshopify.com/apps/product-bundles/wpb/${bundleId}?${params.toString()}`);
 }
 
 describe("FPB app proxy page", () => {
@@ -75,7 +75,7 @@ describe("FPB app proxy page", () => {
     expect(response.headers.get("Cache-Control")).toBe("no-store");
     expect(text).toContain("data-wpb-full-page-bundle");
     expect(text).toContain("data-bundle-id=\"bundle-1\"");
-    expect(text).not.toContain("/apps/onlybundles/assets/");
+    expect(text).not.toContain("/apps/product-bundles/assets/");
   });
 
   it("renders a customizable first-paint loading screen without skeleton cards", async () => {
@@ -131,7 +131,7 @@ describe("FPB app proxy page", () => {
     const text = await response.text();
 
     expect(response.status).toBe(200);
-    expect(text).not.toContain("/apps/onlybundles/assets/");
+    expect(text).not.toContain("/apps/product-bundles/assets/");
   });
 
   it("loads ordered step categories before status authorization", async () => {

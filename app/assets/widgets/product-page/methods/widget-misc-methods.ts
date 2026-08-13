@@ -283,7 +283,7 @@ _recordView() {
     const bundleId = this.container?.dataset?.bundleId;
     const shop = window.Shopify?.shop;
     if (!bundleId || !shop) return;
-    fetch(`/apps/onlybundles/api/bundle/${bundleId}/view`, {
+    fetch(`/apps/product-bundles/api/bundle/${bundleId}/view`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ shop }),

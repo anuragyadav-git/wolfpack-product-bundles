@@ -10,7 +10,7 @@ function createCartAddFetchMock() {
   return jest.fn(async (url: string) => ({
     ok: true,
     json: async () =>
-      url === "/apps/onlybundles/api/cart-transform-runtime-token"
+      url === "/apps/product-bundles/api/cart-transform-runtime-token"
         ? { token: "runtime-token" }
         : {},
   }));
@@ -100,7 +100,7 @@ describe("FPB checkout cart-line properties", () => {
     expect(fetchMock).toHaveBeenCalledWith("/variants/111.js", expect.objectContaining({
       method: "GET",
     }));
-    expect(fetchMock).not.toHaveBeenCalledWith("/apps/onlybundles/api/cart-transform-runtime-token", expect.any(Object));
+    expect(fetchMock).not.toHaveBeenCalledWith("/apps/product-bundles/api/cart-transform-runtime-token", expect.any(Object));
     expect(fetchMock).not.toHaveBeenCalledWith("/cart/add.js", expect.any(Object));
   });
 
@@ -125,7 +125,7 @@ describe("FPB checkout cart-line properties", () => {
     }
 
     const tokenRequest = fetchMock.mock.calls.find(
-      ([url]) => url === "/apps/onlybundles/api/cart-transform-runtime-token",
+      ([url]) => url === "/apps/product-bundles/api/cart-transform-runtime-token",
     );
     const body = JSON.parse(tokenRequest[1].body);
 
@@ -196,7 +196,7 @@ describe("FPB checkout cart-line properties", () => {
 
   it("uses resolved selected variant id even if product.variantId is not the selected variant", async () => {
     const fetchMock = jest.fn(async (url: string) => {
-      if (url === "/apps/onlybundles/api/cart-transform-runtime-token") {
+      if (url === "/apps/product-bundles/api/cart-transform-runtime-token") {
         return {
           ok: true,
           json: async () => ({ token: "runtime-token" }),
@@ -717,7 +717,7 @@ describe("FPB checkout cart-line properties", () => {
 
   it("surfaces Shopify sold-out message when /cart/add.js returns 422", async () => {
     const fetchMock = jest.fn(async (url: string) => {
-      if (url === "/apps/onlybundles/api/cart-transform-runtime-token") {
+      if (url === "/apps/product-bundles/api/cart-transform-runtime-token") {
         return {
           ok: true,
           json: async () => ({ token: "runtime-token" }),

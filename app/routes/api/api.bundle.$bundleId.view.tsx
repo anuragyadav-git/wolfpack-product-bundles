@@ -19,7 +19,7 @@ export async function OPTIONS() {
  * Called on widget first-render (once per page load).
  * No auth required — widget fires this via the Shopify App Proxy.
  *
- * POST /apps/onlybundles/api/bundle/:bundleId/view
+ * POST /apps/product-bundles/api/bundle/:bundleId/view
  * Body: { shop: string }
  */
 export const action: ActionFunction = async ({ request, params }: { request: Request; params: Params }) => {

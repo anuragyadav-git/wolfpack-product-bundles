@@ -61,13 +61,13 @@ function makeApiRequest(bundleId: string, previewToken?: string) {
     .sort()
     .join('');
   params.set('signature', createHmac('sha256', 'test_api_secret').update(message).digest('hex'));
-  return new Request(`https://test.myshopify.com/apps/onlybundles/api/bundle/${bundleId}.json?${params.toString()}`);
+  return new Request(`https://test.myshopify.com/apps/product-bundles/api/bundle/${bundleId}.json?${params.toString()}`);
 }
 
 function makeProxyRequest(bundleId: string) {
   const params = new URLSearchParams({
     shop: 'test-shop.myshopify.com',
-    path_prefix: '/apps/onlybundles',
+    path_prefix: '/apps/product-bundles',
     timestamp: '1770000000',
   });
   const message = [...params.entries()]
@@ -75,7 +75,7 @@ function makeProxyRequest(bundleId: string) {
     .sort()
     .join('');
   params.set('signature', createHmac('sha256', 'test_api_secret').update(message).digest('hex'));
-  return new Request(`https://test-shop.myshopify.com/apps/onlybundles/wpb/${bundleId}?${params.toString()}`);
+  return new Request(`https://test-shop.myshopify.com/apps/product-bundles/wpb/${bundleId}?${params.toString()}`);
 }
 
 describe('api.bundle.$bundleId.json — status filtering', () => {

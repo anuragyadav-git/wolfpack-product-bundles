@@ -18,7 +18,7 @@ export async function OPTIONS() {
  * Called by the FPB/PDP bundle widget when an unhandled init error occurs.
  * No auth required — carries no sensitive data, just error telemetry.
  *
- * POST /apps/onlybundles/api/widget-error
+ * POST /apps/product-bundles/api/widget-error
  * Body: { message, bundleId, bundleType, shop, url }
  */
 export const action: ActionFunction = async ({ request }) => {

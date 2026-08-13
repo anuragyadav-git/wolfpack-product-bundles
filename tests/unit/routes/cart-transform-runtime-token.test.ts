@@ -37,7 +37,7 @@ const mockDb = prisma as any;
 function makeSignedRequest(body: Record<string, unknown>, shop = "test-shop.myshopify.com") {
   const params = new URLSearchParams({
     shop,
-    path_prefix: "/apps/onlybundles",
+    path_prefix: "/apps/product-bundles",
     timestamp: "1770000000",
   });
 
@@ -52,7 +52,7 @@ function makeSignedRequest(body: Record<string, unknown>, shop = "test-shop.mysh
   );
 
   return new Request(
-    `https://${shop}/apps/onlybundles/api/cart-transform-runtime-token?${params.toString()}`,
+    `https://${shop}/apps/product-bundles/api/cart-transform-runtime-token?${params.toString()}`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },

@@ -18,13 +18,13 @@ describe("bundle preview URL", () => {
       "bundle/1",
       "?preview_theme_id=123&wpb_preview=signed.token",
     )).toBe(
-      "/apps/onlybundles/api/bundle/bundle%2F1.json?wpb_preview=signed.token",
+      "/apps/product-bundles/api/bundle/bundle%2F1.json?wpb_preview=signed.token",
     );
   });
 
   it("keeps public bundle config requests token-free", () => {
     expect(buildBundleConfigApiUrl("bundle-1", "?preview_theme_id=123")).toBe(
-      "/apps/onlybundles/api/bundle/bundle-1.json",
+      "/apps/product-bundles/api/bundle/bundle-1.json",
     );
   });
 });

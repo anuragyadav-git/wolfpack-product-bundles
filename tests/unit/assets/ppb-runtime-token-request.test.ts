@@ -33,7 +33,7 @@ describe("PPB runtime-token request", () => {
     }
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "/apps/onlybundles/api/cart-transform-runtime-token",
+      "/apps/product-bundles/api/cart-transform-runtime-token",
       expect.objectContaining({
         method: "POST",
         credentials: "same-origin",

@@ -18,7 +18,7 @@ export function useConfigureContentState(flow: ConfigureBundleFlowDraft) {
   const bundlePageUrl = useMemo(
     () => typeof bundle.publicNumber !== "number"
       ? ""
-      : `https://${shopDomain}.myshopify.com/apps/onlybundles/wpb/${bundle.publicNumber}`,
+      : `https://${shopDomain}.myshopify.com/apps/product-bundles/wpb/${bundle.publicNumber}`,
     [shopDomain, bundle.publicNumber],
   );
 

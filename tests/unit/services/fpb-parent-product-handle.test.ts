@@ -240,7 +240,7 @@ describe("FPB parent product handle ownership", () => {
       expect.objectContaining({ variables: expect.objectContaining({
         id: "gid://shopify/UrlRedirect/1",
         urlRedirect: expect.objectContaining({
-          target: "/apps/onlybundles/wpb/1",
+          target: "/apps/product-bundles/wpb/1",
         }),
       }) }),
     );

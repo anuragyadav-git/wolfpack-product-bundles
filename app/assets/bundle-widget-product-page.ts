@@ -306,7 +306,7 @@ export class BundleWidgetProductPage {
       if (!shop) return;
 
       const locale = window.Shopify?.locale || 'en';
-      const endpoint = `/apps/onlybundles/api/language-settings/${encodeURIComponent(shop)}?bundleType=product_page&locale=${encodeURIComponent(locale)}`;
+      const endpoint = `/apps/product-bundles/api/language-settings/${encodeURIComponent(shop)}?bundleType=product_page&locale=${encodeURIComponent(locale)}`;
       const response = await fetch(endpoint, { credentials: 'same-origin' });
       if (!response.ok) return;
 
@@ -329,7 +329,7 @@ export class BundleWidgetProductPage {
       const shop = window.Shopify?.shop || this.container.dataset.shop;
       if (!shop) return;
 
-      const endpoint = `/apps/onlybundles/api/controls-settings/${encodeURIComponent(shop)}?bundleType=product_page`;
+      const endpoint = `/apps/product-bundles/api/controls-settings/${encodeURIComponent(shop)}?bundleType=product_page`;
       const response = await fetch(endpoint, { credentials: 'same-origin' });
       if (!response.ok) return;
 

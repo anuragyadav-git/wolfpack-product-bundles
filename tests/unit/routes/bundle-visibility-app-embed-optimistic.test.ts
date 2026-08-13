@@ -39,7 +39,7 @@ function makeFpbFlow(overrides: Record<string, unknown> = {}) {
     activeSection: "bundle_visibility",
     appEmbedEnabled: false,
     bundle: {},
-    bundlePageUrl: "https://shop.test/apps/onlybundles/wpb/bundle-1",
+    bundlePageUrl: "https://shop.test/apps/product-bundles/wpb/bundle-1",
     fullPageBundleStyles: visibilityStyles,
     handleSectionChange: jest.fn(),
     markAsDirty: jest.fn(),

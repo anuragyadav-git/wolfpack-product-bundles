@@ -4,7 +4,7 @@ id: fpb-public-bundle-number
 title: FPB Public Bundle Number Test Spec
 type: test-spec
 status: active
-summary: Verifies that FPB storefront URLs use the onlybundles app-proxy root and per-shop serial numbers while internal bundle IDs remain private runtime identifiers.
+summary: Verifies that FPB storefront URLs use the product-bundles app-proxy root and per-shop serial numbers while internal bundle IDs remain private runtime identifiers.
 last_audited: 2026-08-13
 owners:
   - engineering
@@ -33,7 +33,7 @@ keywords:
 
 ## Purpose
 
-Keep internal bundle IDs out of FPB storefront URLs by assigning each shop a monotonic public number and resolving the signed `/apps/onlybundles` app-proxy route through that number.
+Keep internal bundle IDs out of FPB storefront URLs by assigning each shop a monotonic public number and resolving the signed `/apps/product-bundles` app-proxy route through that number.
 
 ## Test Cases
 
@@ -48,7 +48,7 @@ Keep internal bundle IDs out of FPB storefront URLs by assigning each shop a mon
 
 | # | Scenario | Input | Expected Output | Notes |
 |---|---|---|---|---|
-| 1 | Build an FPB URL | Shop plus public number 1 | URL is rooted at `/apps/onlybundles/wpb/1` | Internal CUID is not accepted as the public path |
+| 1 | Build an FPB URL | Shop plus public number 1 | URL is rooted at `/apps/product-bundles/wpb/1` | Internal CUID is not accepted as the public path |
 | 2 | Parse a proxy path number | Positive integer text | Positive integer | Zero, negative, fractional, and opaque IDs are rejected |
 
 ### FpbProxyResolution
@@ -69,7 +69,7 @@ Keep internal bundle IDs out of FPB storefront URLs by assigning each shop a mon
 - [ ] Existing FPBs receive deterministic per-shop public numbers.
 - [ ] New and cloned FPBs receive an atomically reserved number.
 - [ ] All FPB public and preview URLs use the number.
-- [ ] Storefront proxy requests use `/apps/onlybundles`.
+- [ ] Storefront proxy requests use `/apps/product-bundles`.
 - [ ] Proxy lookup rejects opaque internal IDs and resolves by shop plus public number.
 - [ ] Preview tokens and widget configuration continue using internal bundle IDs.
 - [ ] PPB product URLs remain unchanged.

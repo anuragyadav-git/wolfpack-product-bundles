@@ -275,7 +275,7 @@ async syncBundleDetailsCartMetafield(bundleDetailsKey, sourceProperties) {
     const cartToken = await this.getBundleDetailsCartToken();
     if (!cartToken) return;
 
-    const response = await fetch('/apps/onlybundles/api/cart-bundle-details', {
+    const response = await fetch('/apps/product-bundles/api/cart-bundle-details', {
       method: 'POST',
       credentials: 'same-origin',
       headers: {

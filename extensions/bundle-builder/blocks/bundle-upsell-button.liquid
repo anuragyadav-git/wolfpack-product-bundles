@@ -2,7 +2,7 @@
 {% assign target_url = block.settings.target_url %}
 
 {% if target_url == blank and public_number != blank %}
-  {% assign target_url = '/apps/onlybundles/wpb/' | append: public_number %}
+  {% assign target_url = '/apps/product-bundles/wpb/' | append: public_number %}
 {% endif %}
 
 {% if target_url != blank or request.design_mode %}

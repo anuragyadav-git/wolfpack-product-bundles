@@ -375,7 +375,7 @@ describe('Full Page widget category hydration behavior', () => {
       stepProductData: [[]],
       stepCollectionProductIds: {},
       selectedProducts: [{}],
-      resolveStorefrontApiBase: () => '/apps/onlybundles',
+      resolveStorefrontApiBase: () => '/apps/product-bundles',
       collectStepProductIds: fullPageSearchCategoryMethods.collectStepProductIds,
       collectStepCollectionHandles: () => [],
       shouldExpandStepProductsDuringLoad: () => false,

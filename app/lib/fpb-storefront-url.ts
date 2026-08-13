@@ -1,4 +1,4 @@
-const FPB_PROXY_PATH = "/apps/onlybundles/wpb";
+const FPB_PROXY_PATH = "/apps/product-bundles/wpb";
 
 function normalizeShopDomain(shop: string): string {
   return shop.replace(/^https?:\/\//, "").replace(/\/+$/, "");

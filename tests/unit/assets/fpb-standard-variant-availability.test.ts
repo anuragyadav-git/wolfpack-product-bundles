@@ -341,7 +341,7 @@ describe('FPB Standard variant availability', () => {
 
     try {
       const enriched = await fullPageProductProcessingMethods.enrichMissingProductDescriptions.call({
-        resolveStorefrontApiBase: () => '/apps/onlybundles',
+        resolveStorefrontApiBase: () => '/apps/product-bundles',
       }, [{
         id: 'gid://shopify/Product/123',
         selectionId: 'gid://shopify/Product/123',
@@ -349,7 +349,7 @@ describe('FPB Standard variant availability', () => {
       }]);
 
       expect((global as any).fetch).toHaveBeenCalledWith(
-        expect.stringContaining('/apps/onlybundles/api/storefront-products'),
+        expect.stringContaining('/apps/product-bundles/api/storefront-products'),
       );
       expect(enriched[0].description).toBe('Fetched product description.');
       expect(enriched[0].descriptionHtml).toBe('<p>Fetched <strong>product</strong> description.</p>');
@@ -409,7 +409,7 @@ describe('FPB Standard variant availability', () => {
       stepProductData: [[]],
       stepCollectionProductIds: {},
       selectedProducts: [{}],
-      resolveStorefrontApiBase: () => '/apps/onlybundles',
+      resolveStorefrontApiBase: () => '/apps/product-bundles',
       collectStepProductIds: fullPageSearchCategoryMethods.collectStepProductIds,
       collectStepCollectionHandles: () => [],
       shouldExpandStepProductsDuringLoad: () => false,
@@ -428,7 +428,7 @@ describe('FPB Standard variant availability', () => {
       await fullPageProductProcessingMethods.loadStepProducts.call(context, 0);
 
       expect((global as any).fetch).toHaveBeenCalledWith(
-        expect.stringContaining('/apps/onlybundles/api/storefront-products'),
+        expect.stringContaining('/apps/product-bundles/api/storefront-products'),
       );
       expect(context.stepProductData[0]).toEqual([]);
     } finally {
@@ -485,7 +485,7 @@ describe('FPB Standard variant availability', () => {
       stepProductData: [[]],
       stepCollectionProductIds: {},
       selectedProducts: [{}],
-      resolveStorefrontApiBase: () => '/apps/onlybundles',
+      resolveStorefrontApiBase: () => '/apps/product-bundles',
       collectStepProductIds: fullPageSearchCategoryMethods.collectStepProductIds,
       collectStepCollectionHandles: () => [],
       shouldExpandStepProductsDuringLoad: () => false,
@@ -504,7 +504,7 @@ describe('FPB Standard variant availability', () => {
       await fullPageProductProcessingMethods.loadStepProducts.call(context, 0);
 
       expect((global as any).fetch).toHaveBeenCalledWith(
-        expect.stringContaining('/apps/onlybundles/api/storefront-products'),
+        expect.stringContaining('/apps/product-bundles/api/storefront-products'),
       );
       expect(context.stepProductData[0]).toEqual([]);
     } finally {

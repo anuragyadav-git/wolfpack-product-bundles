@@ -7,14 +7,14 @@ import {
 describe("FPB storefront URL", () => {
   it("builds the canonical default app-proxy URL", () => {
     expect(buildFpbStorefrontUrl("https://test-shop.myshopify.com/", 1))
-      .toBe("https://test-shop.myshopify.com/apps/onlybundles/wpb/1");
+      .toBe("https://test-shop.myshopify.com/apps/product-bundles/wpb/1");
   });
 
   it("adds a draft preview token", () => {
     expect(appendFpbPreviewToken(
       buildFpbStorefrontUrl("test-shop.myshopify.com", 27),
       "preview-token",
-    )).toBe("https://test-shop.myshopify.com/apps/onlybundles/wpb/27?wpb_preview=preview-token");
+    )).toBe("https://test-shop.myshopify.com/apps/product-bundles/wpb/27?wpb_preview=preview-token");
   });
 
   it.each([

@@ -156,7 +156,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     try {
       const controller = new AbortController();
       const proxyTimer = setTimeout(() => controller.abort(), 3000);
-      const proxyRes = await fetch(`https://${session.shop}/apps/onlybundles/api/proxy-health`, { signal: controller.signal });
+      const proxyRes = await fetch(`https://${session.shop}/apps/product-bundles/api/proxy-health`, { signal: controller.signal });
       clearTimeout(proxyTimer);
       if (proxyRes.status === 404) {
         const ct = proxyRes.headers.get("content-type") ?? "";

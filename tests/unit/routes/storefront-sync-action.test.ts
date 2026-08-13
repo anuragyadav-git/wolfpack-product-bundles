@@ -60,7 +60,7 @@ describe("storefront sync action handlers", () => {
     const previewUrl = new URL(body.shareablePreviewUrl);
 
     expect(mockSyncBundleStorefrontNow).toHaveBeenCalledTimes(1);
-    expect(previewUrl.pathname).toBe("/apps/onlybundles/wpb/1");
+    expect(previewUrl.pathname).toBe("/apps/product-bundles/wpb/1");
     expect(verifyBundlePreviewToken({
       token: previewUrl.searchParams.get("wpb_preview"),
       shop: session.shop,

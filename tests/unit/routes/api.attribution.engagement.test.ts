@@ -34,7 +34,7 @@ function makeSignedRequest(
 ) {
   const params = new URLSearchParams({
     shop,
-    path_prefix: "/apps/onlybundles",
+    path_prefix: "/apps/product-bundles",
     timestamp: "1770000000",
   });
 
@@ -50,7 +50,7 @@ function makeSignedRequest(
   params.set("signature", signature);
 
   return new Request(
-    `https://${shop}/apps/onlybundles/api/attribution/engagement?${params.toString()}`,
+    `https://${shop}/apps/product-bundles/api/attribution/engagement?${params.toString()}`,
     {
       method: options.method ?? "POST",
       headers: {
