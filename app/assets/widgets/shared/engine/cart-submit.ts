@@ -12,6 +12,12 @@ export function extractBundleDetailsSourceProperties(cartItems = []) {
   return firstItem?.properties || {};
 }
 
+export function normalizeSellingPlanIdForCart(value = '') {
+  const raw = String(value).trim();
+  const match = raw.match(/^gid:\/\/shopify\/SellingPlan\/(\d+)$/);
+  return match ? match[1] : raw;
+}
+
 export function buildProductPageCartFormData(cartItems = [], {
   bundleName = '',
   offerId = '',
@@ -20,13 +26,14 @@ export function buildProductPageCartFormData(cartItems = [], {
   sellingPlanId = '',
 } = {}) {
   const formData = new FormData();
+  const cartSellingPlanId = normalizeSellingPlanIdForCart(sellingPlanId);
 
   cartItems.forEach((item, index) => {
     const itemNumber = index + 1;
     formData.append(`items[${index}][id]`, String(item.id));
     formData.append(`items[${index}][quantity]`, String(item.quantity));
     if (sellingPlanId) {
-      formData.append(`items[${index}][selling_plan]`, String(sellingPlanId));
+      formData.append(`items[${index}][selling_plan]`, cartSellingPlanId);
     }
 
     Object.entries(item.properties || {}).forEach(([key, value]) => {

@@ -28,6 +28,10 @@ export function getDefaultSellingPlanId(subscription: StorefrontSubscription) {
   return null;
 }
 
+export function isPurchaseOptionSelected(value: string, selectedSellingPlanId?: string | null) {
+  return value === 'one_time' ? !selectedSellingPlanId : Boolean(selectedSellingPlanId);
+}
+
 export function renderPpbPurchaseOptions(controller: PurchaseOptionsController) {
   const subscription = controller?.selectedBundle?.subscription;
   controller.elements.purchaseOptions?.remove?.();
@@ -62,7 +66,7 @@ export function renderPpbPurchaseOptions(controller: PurchaseOptionsController) 
     input.type = 'radio';
     input.name = `wpb-purchase-option-${bundleId}`;
     input.value = value;
-    input.checked = value === (controller.selectedSellingPlanId || 'one_time');
+    input.checked = isPurchaseOptionSelected(value, controller.selectedSellingPlanId);
     input.addEventListener('change', () => {
       controller.selectedSellingPlanId = value === 'one_time'
         ? null

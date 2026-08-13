@@ -15,6 +15,7 @@ Define the provider-neutral Shopify selling-plan contract for Product Page Bundl
 | 3 | Variant lacks group allocation | Product has group membership but one selectable variant does not | No common group | Variant-level fail closed |
 | 4 | Multiple common groups | All variants share multiple groups | Groups and plans are returned in position then ID order | Stable Admin rendering |
 | 5 | Wrong shop or bundle type | Foreign-shop, FPB, or missing bundle | 404 | PPB isolation |
+| 6 | Provider assigns the whole product | Selling-plan group applies to a product rather than explicit variants | Every selectable variant of that product is eligible | Shopify Subscriptions compatibility |
 
 ### SubscriptionConfig
 | # | Scenario | Input | Expected Output | Notes |
@@ -56,5 +57,5 @@ Define the provider-neutral Shopify selling-plan contract for Product Page Bundl
 - [ ] Generated widget assets and GraphQL schemas validate
 - [ ] Modified files have zero ESLint errors
 - [ ] Widget, CSS, development, and graph builds succeed
-- [ ] Live SIT proof confirms `/cart/add`, `/cart.js`, checkout cadence, pricing, and absence of Cart Transform rejection before the POC gate is removed
+- [x] Live development-store proof confirms `/cart/add`, `/cart.js`, checkout cadence, pricing, and absence of Cart Transform rejection
 - [ ] No deployment or dev-tunnel restart is performed by the implementation agent

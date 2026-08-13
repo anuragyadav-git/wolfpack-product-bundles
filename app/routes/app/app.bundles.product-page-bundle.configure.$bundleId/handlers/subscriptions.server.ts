@@ -62,8 +62,8 @@ async function fetchProductsWithSellingPlanGroups(
   }> = [];
 
   const query = `
-    query ProductsWithSellingPlanGroups($ids: [ID!]!) {
-      nodes(ids: $ids) {
+    query ProductWithSellingPlanGroups($id: ID!) {
+      node(id: $id) {
         ... on Product {
           id
           title
@@ -73,6 +73,7 @@ async function fetchProductsWithSellingPlanGroups(
               name
               options
               position
+              appliesToProduct(productId: $id)
               productVariants(first: 250) { nodes { id } }
               sellingPlans(first: 50) {
                 nodes {
@@ -107,28 +108,28 @@ async function fetchProductsWithSellingPlanGroups(
     }
   `;
 
-  for (let index = 0; index < productIds.length; index += 50) {
-    const ids = productIds.slice(index, index + 50);
-    const response = await admin.graphql(query, { variables: { ids } });
+  for (const id of productIds) {
+    const response = await admin.graphql(query, { variables: { id } });
     const data = (await response.json()) as {
       data?: {
-        nodes?: Array<{
+        node?: {
           id?: string;
           title?: string;
           variants?: { nodes?: Array<{ id?: string }> };
           sellingPlanGroups?: { nodes?: any[] };
-        } | null>;
+        } | null;
       };
     };
 
-    for (const product of data.data?.nodes ?? []) {
-      if (!product?.id) continue;
-      products.push({
+    const product = data.data?.node;
+    if (!product?.id) continue;
+    const variantIds = variantIdsByProductId[product.id] ?? (product.variants?.nodes ?? [])
+      .map((variant) => variant?.id)
+      .filter((variantId): variantId is string => typeof variantId === "string");
+    products.push({
         id: product.id,
         title: product.title ?? "",
-        variantIds: (variantIdsByProductId[product.id] ?? (product.variants?.nodes ?? [])
-          .map((variant) => variant?.id)
-          .filter((id): id is string => typeof id === "string")),
+        variantIds,
         sellingPlanGroups: {
           nodes: (product.sellingPlanGroups?.nodes ?? []).filter(
             (group): group is any =>
@@ -138,9 +139,11 @@ async function fetchProductsWithSellingPlanGroups(
             name: group.name,
             options: Array.isArray(group.options) ? group.options.filter((option: unknown) => typeof option === "string") : [],
             position: Number(group.position ?? 0),
-            eligibleVariantIds: (group.productVariants?.nodes ?? [])
-              .map((variant: any) => variant?.id)
-              .filter((id: unknown): id is string => typeof id === "string"),
+            eligibleVariantIds: group.appliesToProduct === true
+              ? variantIds
+              : (group.productVariants?.nodes ?? [])
+                .map((variant: any) => variant?.id)
+                .filter((variantId: unknown): variantId is string => typeof variantId === "string"),
             plans: (group.sellingPlans?.nodes ?? []).map((plan: any) => ({
               id: plan.id,
               sourceName: plan.name ?? "",
@@ -153,7 +156,6 @@ async function fetchProductsWithSellingPlanGroups(
           })),
         },
       });
-    }
   }
 
   return products;

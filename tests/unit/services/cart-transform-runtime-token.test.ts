@@ -5,8 +5,49 @@ import {
   signRuntimeCartToken,
   type RuntimeTokenPayload,
   validateRuntimeTokenSelection,
+  validateLiveSellingPlanSelection,
   verifyRuntimeCartToken,
 } from "../../../app/services/cart-transform-runtime-token.server";
+
+it("accepts native whole-product selling-plan assignments after resolving the exact variant product", async () => {
+  const graphql = jest.fn()
+    .mockResolvedValueOnce({
+      json: async () => ({
+        data: { node: { product: { id: "gid://shopify/Product/1" } } },
+      }),
+    })
+    .mockResolvedValueOnce({
+      json: async () => ({
+        data: {
+          node: {
+            sellingPlans: { nodes: [{ id: "gid://shopify/SellingPlan/1" }] },
+            appliesToProduct: true,
+            appliesToProductVariant: false,
+          },
+        },
+      }),
+    });
+
+  await expect(validateLiveSellingPlanSelection(
+    { graphql },
+    {
+      sellingPlanGroupId: "gid://shopify/SellingPlanGroup/1",
+      sellingPlanId: "gid://shopify/SellingPlan/1",
+      recurringBundleDiscount: false,
+    },
+    [{ variantId: "gid://shopify/ProductVariant/101", quantity: 1 }],
+  )).resolves.toBeUndefined();
+
+  expect(graphql.mock.calls[0][0]).toContain("ProductVariant");
+  expect(graphql.mock.calls[1][0]).toContain("appliesToProduct");
+  expect(graphql.mock.calls[1][1]).toEqual({
+    variables: {
+      id: "gid://shopify/SellingPlanGroup/1",
+      variantId: "gid://shopify/ProductVariant/101",
+      productId: "gid://shopify/Product/1",
+    },
+  });
+});
 
 function makeBundle(overrides: Record<string, unknown> = {}) {
   return {

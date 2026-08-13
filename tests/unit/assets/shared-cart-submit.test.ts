@@ -64,8 +64,8 @@ describe('shared cart-submit helpers', () => {
       sellingPlanId: 'gid://shopify/SellingPlan/55',
     });
 
-    expect(formData.get('items[0][selling_plan]')).toBe('gid://shopify/SellingPlan/55');
-    expect(formData.get('items[1][selling_plan]')).toBe('gid://shopify/SellingPlan/55');
+    expect(formData.get('items[0][selling_plan]')).toBe('55');
+    expect(formData.get('items[1][selling_plan]')).toBe('55');
     expect(formData.has('items[0][properties][Box]')).toBe(false);
     expect(formData.get('items[0][properties][_wolfpack_bundle_runtime]')).toBe('signed-token');
   });

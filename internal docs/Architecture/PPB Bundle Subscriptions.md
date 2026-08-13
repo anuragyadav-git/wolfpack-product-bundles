@@ -48,6 +48,8 @@ Subscriptions belong only to Product Page Bundles. Wolfpack discovers Shopify se
 
 Discovery must paginate every configured collection and inspect every selectable variant. Product-level group membership alone is insufficient: every selectable variant must expose the same compatible group and plan IDs. Returned groups include deterministic group/plan ordering, option names, positions, and normalized pricing policies.
 
+Shopify supports both whole-product and explicit-variant selling-plan assignments. A group for which `SellingPlanGroup.appliesToProduct(productId:)` is true covers every selectable variant of that product. Otherwise, Wolfpack requires every selectable variant to be explicitly eligible. This distinction is required for Shopify Subscriptions, which creates whole-product assignments.
+
 The initial release blocks subscriptions when PPB pricing is Buy X Get Y or when enabled free-gift, add-on, or personalization branches are present. These exclusions keep the exact signed component group and discount ownership unambiguous.
 
 ## Runtime contract
@@ -67,3 +69,11 @@ Automatic app-discount nodes are role-tagged. The subscription initial-order nod
 ## Release gate
 
 The implementation is contained by the development and SIT release workflow rather than a second runtime environment flag. Production release still requires cache-cleared SIT evidence for the request to `/cart/add`, `/cart.js`, cart pricing, checkout cadence, and absence of Cart Transform rejection. If recurring billing cannot be proven, production exposes first-order-only bundle pricing and does not render the recurring-discount control. No autonomous deploy or tunnel restart is part of this workflow.
+
+## Development-store evidence
+
+On 2026-08-14, Shopify Subscriptions was installed on the agent development store and a monthly 10%-off plan was assigned to the four products in the PPB matrix fixture. The first discovery request returned no common plan because the validator considered only explicit variant assignments. After adding whole-product applicability handling, the same live request discovered the provider-owned group and plan. The saved configuration survived a hard Admin reload after the SIT schema migration and tunnel restart.
+
+Cache-cleared Chrome verification then proved the provider-neutral slice on widget version `11.1.0`. The public proxy payload exposed only the normalized subscription configuration. The subscription request sent the numeric selling-plan transport ID on every component line, omitted public `Box` metadata, and retained the signed private runtime token. `/cart.js` returned a separate component line with selling-plan allocation `11986764035`, the provider cadence `Deliver every month, 10% off`, and the adjusted price `$746.10` from `$829.00`. Checkout showed the automatically renewing disclosure and `$746.10 every month`. No Cart Transform rejection occurred. A separate one-time request omitted `selling_plan` and still produced the existing merged parent line at `$829.00`.
+
+Two Shopify behaviors were established by the live fixture. `appliesToProductVariant` can be false when Shopify Subscriptions assigns the whole product, even though that exact variant is eligible. Runtime validation must therefore resolve each selected variant's product and accept the group only when `appliesToProduct(productId:)` or `appliesToProductVariant(productVariantId:)` is true. Also, Admin contracts retain selling-plan GIDs, while the AJAX Cart `selling_plan` field requires the numeric selling-plan ID.

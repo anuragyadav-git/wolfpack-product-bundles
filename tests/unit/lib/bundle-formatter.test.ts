@@ -52,6 +52,56 @@ const makeStepProduct = (overrides: Record<string, unknown> = {}) => ({
 });
 
 describe("formatBundleForWidget", () => {
+  it("emits only a valid enabled PPB subscription config for proxy-loaded widgets", () => {
+    const subscription = {
+      version: 1,
+      enabled: true,
+      selectedGroup: {
+        id: "gid://shopify/SellingPlanGroup/1",
+        name: "Subscribe and save",
+        options: ["Delivery every"],
+        plans: [{
+          id: "gid://shopify/SellingPlan/1",
+          sourceName: "Monthly",
+          options: ["1 month"],
+          pricingPolicies: [{ kind: "percentage", value: 10, afterCycle: 0 }],
+        }],
+      },
+      selectedPlanIds: ["gid://shopify/SellingPlan/1"],
+      defaultPurchaseOption: {
+        kind: "selling_plan",
+        sellingPlanId: "gid://shopify/SellingPlan/1",
+      },
+      oneTimePurchase: { enabled: true, title: "One-time purchase", description: "" },
+      copy: { title: "Purchase options", subtitle: "", unavailableMessage: "Unavailable" },
+      planCopy: {
+        "gid://shopify/SellingPlan/1": {
+          displayName: "Monthly",
+          discountPill: "10% off",
+          description: "",
+        },
+      },
+      showDiscountOnProductCards: false,
+      recurringBundleDiscount: false,
+      translations: {},
+    };
+
+    const enabled = formatBundleForWidget(makeBundle({
+      bundleType: "product_page",
+      bundleSubscriptionConfig: subscription,
+    }) as any);
+    const disabled = formatBundleForWidget(makeBundle({
+      bundleType: "product_page",
+      bundleSubscriptionConfig: { ...subscription, enabled: false },
+    }) as any);
+
+    expect(enabled.subscription).toMatchObject({
+      enabled: true,
+      selectedPlanIds: ["gid://shopify/SellingPlan/1"],
+    });
+    expect(disabled.subscription).toBeNull();
+  });
+
   it("returns top-level bundle fields", () => {
     const result = formatBundleForWidget(makeBundle() as any);
     expect(result.id).toBe("bundle-1");

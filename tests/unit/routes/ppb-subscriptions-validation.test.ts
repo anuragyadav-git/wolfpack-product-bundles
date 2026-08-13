@@ -13,6 +13,7 @@ type ProductRecord = {
     id: string;
     name: string;
     eligibleVariantIds: string[];
+    appliesToWholeProduct?: boolean;
   }>;
 };
 
@@ -45,7 +46,7 @@ function makeBundleResponse(overrides: Partial<{
   const collectionId = "gid://shopify/Collection/555";
   const productIdsFromCollection = overrides.collectionProductIds ?? [];
 
-  return (query: string) => {
+  return (query: string, options?: { variables?: { id?: string } }) => {
     if (query.includes("CollectionProductsForSellingPlanValidation")) {
       return Promise.resolve({
         json: async () => ({
@@ -62,11 +63,12 @@ function makeBundleResponse(overrides: Partial<{
       } as any);
     }
 
-    if (query.includes("ProductsWithSellingPlanGroups")) {
+    if (query.includes("ProductWithSellingPlanGroups")) {
+      const product = (overrides.products ?? []).find(({ id }) => id === options?.variables?.id);
       return Promise.resolve({
         json: async () => ({
           data: {
-            nodes: (overrides.products ?? []).map((product) => ({
+            node: product ? {
               id: product.id,
               title: product.title,
               variants: { nodes: product.variants.map((id) => ({ id })) },
@@ -75,6 +77,7 @@ function makeBundleResponse(overrides: Partial<{
                 name: group.name,
                 options: ["Delivery every"],
                 position: 1,
+                appliesToProduct: group.appliesToWholeProduct ?? false,
                 productVariants: { nodes: group.eligibleVariantIds.map((id) => ({ id })) },
                 sellingPlans: { nodes: [{
                   id: "gid://shopify/SellingPlan/monthly",
@@ -87,7 +90,7 @@ function makeBundleResponse(overrides: Partial<{
                   }],
                 }] },
               })) },
-            })),
+            } : null,
           },
         }),
       } as any);
@@ -231,5 +234,31 @@ describe("PPB subscription validation handler", () => {
     const body = await response.json() as any;
     expect(body.isValid).toBe(false);
     expect(body.groups).toEqual([]);
+  });
+
+  it("accepts all selectable variants when the provider assigns the whole product", async () => {
+    const admin = {
+      graphql: jest.fn(makeBundleResponse({
+        collectionProductIds: [],
+        products: [{
+          id: "gid://shopify/Product/111",
+          title: "Direct Product",
+          variants: ["gid://shopify/ProductVariant/1111", "gid://shopify/ProductVariant/1112"],
+          sellingPlanGroups: [{
+            id: "gid://shopify/SellingPlanGroup/monthly",
+            name: "Monthly",
+            eligibleVariantIds: [],
+            appliesToWholeProduct: true,
+          }],
+        }],
+      })),
+    } as any;
+    getDb().bundle.findFirst.mockResolvedValue({ ...baseBundle, steps: [{ ...baseBundle.steps[0], StepCategory: [] }] });
+
+    const response = await handleValidateSellingPlanGroups(admin, SESSION, "bundle-1");
+    const body = await response.json() as any;
+
+    expect(body.isValid).toBe(true);
+    expect(body.groups).toHaveLength(1);
   });
 });
