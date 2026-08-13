@@ -140,28 +140,14 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  min-height: 32px;
-  padding: 5px 10px;
+  height: 28px;
+  min-height: 28px;
+  padding: 3px 10px;
   border: 1px solid transparent;
   border-radius: 8px;
-  color: #202223;
+  color: #ffffff;
   font: inherit;
   cursor: pointer;
-}
-
-.readinessButtonLow {
-  background: #fff8e6;
-  border-color: #e8c56d;
-}
-
-.readinessButtonMedium {
-  background: #eef5ff;
-  border-color: #cfe2ff;
-}
-
-.readinessButtonHigh {
-  background: #eaf7f0;
-  border-color: #b7ead2;
 }
 
 .readinessScore {

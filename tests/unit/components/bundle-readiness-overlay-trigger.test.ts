@@ -3,6 +3,7 @@ import {renderToStaticMarkup} from "react-dom/server";
 
 import {
   BundleReadinessOverlay,
+  getReadinessScoreColor,
   scheduleReadinessTriggerCollapse,
 } from "../../../app/components/bundle-configure/BundleReadinessOverlay";
 
@@ -21,6 +22,16 @@ jest.mock("react-i18next", () => ({
 }));
 
 describe("BundleReadinessOverlay trigger", () => {
+  it.each([
+    [0, "#f49300"],
+    [65, "#f49300"],
+    [79, "#f49300"],
+    [80, "#008060"],
+    [100, "#008060"],
+  ])("uses the shared gauge color for a score of %s", (score, color) => {
+    expect(getReadinessScoreColor(score)).toBe(color);
+  });
+
   it("includes the full readiness context in the initial DOM", () => {
     const Overlay = BundleReadinessOverlay as React.ComponentType<
       Record<string, unknown>

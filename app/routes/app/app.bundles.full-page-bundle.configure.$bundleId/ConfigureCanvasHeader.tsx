@@ -1,5 +1,6 @@
 import type { ConfigureBundleFlowContext } from "./useConfigureBundleFlow";
 import { AdminPageTitleBar } from "../../../components/AdminPageNavigation";
+import { getReadinessScoreColor } from "../../../components/bundle-configure/BundleReadinessOverlay";
 
 export function ConfigureCanvasHeader({
   flow,
@@ -19,7 +20,6 @@ export function ConfigureCanvasHeader({
     openThemeEditorForAppEmbed,
     openProductInAdmin,
     parentProductStatusUi,
-    readinessClassName,
     readinessScore,
     setReadinessOpen,
     shop,
@@ -53,7 +53,11 @@ export function ConfigureCanvasHeader({
         <div className={fullPageBundleStyles.canvasActions}>
           <button
             type="button"
-            className={`${fullPageBundleStyles.readinessButton} ${readinessClassName}`}
+            className={fullPageBundleStyles.readinessButton}
+            style={{
+              backgroundColor: getReadinessScoreColor(readinessScore),
+              borderColor: getReadinessScoreColor(readinessScore),
+            }}
             onClick={() => setReadinessOpen(true)}
           >
             <span className={fullPageBundleStyles.readinessScore}>

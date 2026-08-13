@@ -391,13 +391,6 @@ export function useConfigureTemplatePricingController(
     (sum, item) => sum + (item.done ? item.points : 0),
     0
   );
-  const readinessClassName =
-    readinessScore >= 80
-      ? fullPageBundleStyles.readinessButtonHigh
-      : readinessScore >= 40
-      ? fullPageBundleStyles.readinessButtonMedium
-      : fullPageBundleStyles.readinessButtonLow;
-
   Object.assign(flow, {
     buildBundleUpsellConfig,
     buildVisibilityDisplayConfiguration,
@@ -413,7 +406,6 @@ export function useConfigureTemplatePricingController(
     normalizePricingRuleMessages,
     openDesignControlPanel,
     openSelectTemplateModal,
-    readinessClassName,
     readinessItems,
     readinessScore,
   });

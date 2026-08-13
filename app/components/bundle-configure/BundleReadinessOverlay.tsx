@@ -34,7 +34,7 @@ interface Props {
   onItemClick?: (key: string) => void;
 }
 
-function scoreColor(score: number) {
+export function getReadinessScoreColor(score: number) {
   if (score >= 80) return "#008060";
   return "#f49300";
 }
@@ -91,7 +91,7 @@ export function BundleReadinessOverlay({ items, open, onOpenChange, hideCollapse
   }, [expanded]);
 
   const score = items.reduce((sum, i) => sum + (i.done ? i.points : 0), 0);
-  const color = scoreColor(score);
+  const color = getReadinessScoreColor(score);
 
   useEffect(() => {
     if (expanded && !gaugeWasExpandedRef.current) {

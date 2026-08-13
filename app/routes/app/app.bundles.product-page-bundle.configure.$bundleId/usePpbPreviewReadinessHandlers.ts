@@ -236,12 +236,6 @@ export function usePpbPreviewReadinessHandlers({
     (sum, item) => sum + (item.done ? item.points : 0),
     0,
   );
-  const readinessClassName =
-    readinessScore >= 80
-      ? productPageBundleStyles.readinessButtonHigh
-      : readinessScore >= 40
-        ? productPageBundleStyles.readinessButtonMedium
-        : productPageBundleStyles.readinessButtonLow;
   const handleSectionChange = useCallback(
     (section: string) => {
       if (
@@ -385,7 +379,6 @@ export function usePpbPreviewReadinessHandlers({
     isPreviewBundleLoading,
     readinessItems,
     readinessScore,
-    readinessClassName,
     handleSectionChange,
     openProductInAdmin,
     handleBackClick,
