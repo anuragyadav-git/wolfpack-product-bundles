@@ -48,22 +48,27 @@ export function PpbCanvasHeader() {
           </div>
         </div>
         <div className={productPageBundleStyles.canvasActions}>
-          <button
-            type="button"
+          <span
             className={productPageBundleStyles.readinessButton}
             style={{
               backgroundColor: getReadinessScoreColor(readinessScore),
               borderColor: getReadinessScoreColor(readinessScore),
             }}
-            onClick={() => setReadinessOpen(true)}
           >
-            <span className={productPageBundleStyles.readinessScore}>
-              {readinessScore}
-            </span>
-            <span className={productPageBundleStyles.readinessLabel}>
-              Readiness Score
-            </span>
-          </button>
+            <s-press-button
+              variant="tertiary"
+              tone="neutral"
+              accessibilityLabel={`${readinessScore} Readiness Score`}
+              onClick={() => setReadinessOpen(true)}
+            >
+              <span className={productPageBundleStyles.readinessScore}>
+                {readinessScore}
+              </span>
+              <span className={productPageBundleStyles.readinessLabel}>
+                Readiness Score
+              </span>
+            </s-press-button>
+          </span>
           <s-button
             variant="secondary"
             icon="view"

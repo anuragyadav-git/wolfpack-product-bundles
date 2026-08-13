@@ -51,22 +51,27 @@ export function ConfigureCanvasHeader({
           </div>
         </div>
         <div className={fullPageBundleStyles.canvasActions}>
-          <button
-            type="button"
+          <span
             className={fullPageBundleStyles.readinessButton}
             style={{
               backgroundColor: getReadinessScoreColor(readinessScore),
               borderColor: getReadinessScoreColor(readinessScore),
             }}
-            onClick={() => setReadinessOpen(true)}
           >
-            <span className={fullPageBundleStyles.readinessScore}>
-              {readinessScore}
-            </span>
-            <span className={fullPageBundleStyles.readinessLabel}>
-              Readiness Score
-            </span>
-          </button>
+            <s-press-button
+              variant="tertiary"
+              tone="neutral"
+              accessibilityLabel={`${readinessScore} Readiness Score`}
+              onClick={() => setReadinessOpen(true)}
+            >
+              <span className={fullPageBundleStyles.readinessScore}>
+                {readinessScore}
+              </span>
+              <span className={fullPageBundleStyles.readinessLabel}>
+                Readiness Score
+              </span>
+            </s-press-button>
+          </span>
           <s-button
             variant="secondary"
             icon="view"

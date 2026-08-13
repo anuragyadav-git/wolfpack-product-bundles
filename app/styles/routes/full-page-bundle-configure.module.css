@@ -139,23 +139,27 @@
   box-sizing: border-box;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
   height: 28px;
   min-height: 28px;
-  padding: 3px 10px;
   border: 1px solid transparent;
   border-radius: 8px;
   color: #ffffff;
-  font: inherit;
-  cursor: pointer;
+  transition: filter 120ms ease;
+}
+
+.readinessButton:hover {
+  filter: brightness(0.9);
 }
 
 .readinessScore {
+  margin-right: 8px;
+  color: #ffffff;
   font-size: 14px;
   font-weight: 700;
 }
 
 .readinessLabel {
+  color: #ffffff;
   font-size: 12px;
   font-weight: 600;
 }
