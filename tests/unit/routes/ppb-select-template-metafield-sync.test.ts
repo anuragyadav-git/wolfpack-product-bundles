@@ -3,10 +3,7 @@
  */
 
 import { handleUpdateBundleDesignTemplate } from "../../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/handlers.server";
-import {
-  updateBundleProductMetafields,
-  updateComponentProductMetafields,
-} from "../../../app/services/bundles/metafield-sync.server";
+import { updateBundleProductMetafields } from "../../../app/services/bundles/metafield-sync.server";
 
 jest.mock("../../../app/db.server", () => ({
   __esModule: true,
@@ -35,18 +32,12 @@ jest.mock("../../../app/services/bundles/pricing-calculation.server", () => ({
   updateBundleProductPrice: jest.fn().mockResolvedValue(undefined),
 }));
 
-jest.mock("../../../app/services/bundles/standard-metafields.server", () => ({
-  convertBundleToStandardMetafields: jest.fn().mockResolvedValue({ metafields: {}, errors: [] }),
-  updateProductStandardMetafields: jest.fn().mockResolvedValue(undefined),
-}));
-
 jest.mock("../../../app/services/theme-colors.server", () => ({
   syncThemeColors: jest.fn().mockResolvedValue(undefined),
 }));
 
 jest.mock("../../../app/services/widget-installation.server", () => ({
   WidgetInstallationService: {
-    createFullPageBundle: jest.fn(),
     validateProductBundleWidgetSetup: jest.fn(),
   },
 }));
@@ -97,11 +88,10 @@ describe("PPB Select Template metafield sync", () => {
       bundleType: "product_page",
       shopifyProductId: "gid://shopify/Product/123",
       bundleDesignTemplate: "PDP_INPAGE",
-      bundleDesignPresetId: "CASCADE",
+      bundleDesignPresetId: "LIST",
       defaultProductsData: { isDefaultProductsEnabled: true },
       bundleTextConfig: { bundleSummary: { title: "Summary", subTitle: "Sub" } },
       validateQuantityPerProduct: { isEnabled: true, allowedQuantity: 1 },
-      individualSellingPlanSelection: { isEnabled: false, showFor: "ALL_PRODUCTS" },
       useSingleStepCategoriesAsBundleSteps: false,
       steps: [
         {
@@ -129,7 +119,7 @@ describe("PPB Select Template metafield sync", () => {
       "bundle-1",
       makeForm({
         bundleDesignTemplate: "PDP_INPAGE",
-        bundleDesignPresetId: "CASCADE",
+        bundleDesignPresetId: "LIST",
       }),
     );
     const body = await response.json();
@@ -139,31 +129,24 @@ describe("PPB Select Template metafield sync", () => {
       where: { id: "bundle-1", shopId: "test-shop.myshopify.com" },
       data: {
         bundleDesignTemplate: "PDP_INPAGE",
-        bundleDesignPresetId: "CASCADE",
+        bundleDesignPresetId: "LIST",
       },
     }));
 
-    expect(updateComponentProductMetafields).toHaveBeenCalledWith(
-      MOCK_ADMIN,
-      "gid://shopify/Product/123",
-      expect.any(Object),
-    );
     expect(updateBundleProductMetafields).toHaveBeenCalledWith(
       MOCK_ADMIN,
       "gid://shopify/Product/123",
       expect.objectContaining({
         bundleDesignTemplate: "PDP_INPAGE",
-        bundleDesignPresetId: "CASCADE",
-        bundleDesignTemplateData: { templateId: "CASCADE" },
+        bundleDesignPresetId: "LIST",
         defaultProductsData: { isDefaultProductsEnabled: true },
         bundleTextConfig: { bundleSummary: { title: "Summary", subTitle: "Sub" } },
         validateQuantityPerProduct: { isEnabled: true, allowedQuantity: 1 },
-        renderFilledSlotsAsHorizontalStacked: null,
       }),
     );
   });
 
-  it("rewrites PPB modal slot orientation into bundle product metafields", async () => {
+  it("rewrites PPB modal preset into bundle product metafields", async () => {
     getDb().bundle.update.mockResolvedValue({
       id: "bundle-1",
       name: "Product Page Bundle",
@@ -173,11 +156,10 @@ describe("PPB Select Template metafield sync", () => {
       bundleType: "product_page",
       shopifyProductId: "gid://shopify/Product/123",
       bundleDesignTemplate: "PDP_MODAL",
-      bundleDesignPresetId: "MODAL",
+      bundleDesignPresetId: "HORIZONTAL_SLOTS",
       defaultProductsData: {},
       bundleTextConfig: {},
       validateQuantityPerProduct: { isEnabled: false, allowedQuantity: 1 },
-      individualSellingPlanSelection: { isEnabled: false, showFor: "ALL_PRODUCTS" },
       useSingleStepCategoriesAsBundleSteps: false,
       steps: [],
       pricing: null,
@@ -189,7 +171,7 @@ describe("PPB Select Template metafield sync", () => {
       "bundle-1",
       makeForm({
         bundleDesignTemplate: "PDP_MODAL",
-        bundleDesignPresetId: "MODAL",
+        bundleDesignPresetId: "HORIZONTAL_SLOTS",
       }),
     );
     const body = await response.json();
@@ -200,9 +182,7 @@ describe("PPB Select Template metafield sync", () => {
       "gid://shopify/Product/123",
       expect.objectContaining({
         bundleDesignTemplate: "PDP_MODAL",
-        bundleDesignPresetId: "MODAL",
-        bundleDesignTemplateData: { templateId: "MODAL" },
-        renderFilledSlotsAsHorizontalStacked: true,
+        bundleDesignPresetId: "HORIZONTAL_SLOTS",
       }),
     );
   });

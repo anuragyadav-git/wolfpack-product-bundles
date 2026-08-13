@@ -1,35 +1,20 @@
 /*
  * FPB Classic Design - scoped static CSS for the CLASSIC preset.
- * Runtime geometry previously lived in classic-template.js; keep rules scoped to
+ * Runtime geometry migrated from legacy runtime adapter files; keep rules scoped to
  * .fpb-preset-classic or CLASSIC root attributes.
  */
 
 .fpb-preset-classic,
 [data-bundle-type="full_page"][data-fpb-design-preset="CLASSIC"] {
-  width: 100%;
-  max-width: none;
-  margin-inline: 0;
-  padding: 0;
-  box-sizing: border-box;
   background: var(--bundle-full-page-bg-color);
 }
 
 .fpb-preset-classic {
-  --classic-shell-max-width: none;
-  --classic-shell-padding: var(--bundle-product-card-spacing, 0.75rem);
   --classic-grid-gap: var(--bundle-product-card-spacing, 0.75rem);
   --classic-card-radius: var(--bundle-full-page-product-card-radius, 0.625rem);
   --classic-card-padding: var(--bundle-product-card-padding, 0.5rem);
   --classic-card-gap: var(--bundle-product-card-spacing, 0.5rem);
 
-  --classic-desktop-layout-left: var(--bundle-sidebar-layout-gap, 1.5rem);
-  --classic-desktop-layout-right: var(--bundle-sidebar-layout-gap, 1.5rem);
-  --classic-desktop-layout-inner-max: 100%;
-  --classic-desktop-content-fr: 7fr;
-  --classic-desktop-sidebar-fr: 3fr;
-  --classic-desktop-sidebar-min-width: min(20rem, 100%);
-
-  --classic-mobile-shell-gutter: var(--bundle-product-card-spacing, 0.75rem);
   --classic-mobile-content-bottom-padding: 0;
 
   --classic-icon-button-size: var(--fpb-card-action-size, 2.25rem);
@@ -44,13 +29,6 @@
     --bundle-product-card-button-text-color,
     #fff
   );
-}
-
-.bundle-widget-full-page.fpb-preset-classic {
-  width: 100%;
-  max-width: none;
-  margin-inline: 0;
-  padding: 0;
 }
 
 .fpb-preset-classic .fpb-category-section-rows {
@@ -73,35 +51,77 @@
   font-weight: 700;
 }
 
-.bundle-widget-full-page[data-fpb-design-preset="CLASSIC"]
+.layout-sidebar[data-fpb-design-preset="CLASSIC"]
   .sidebar-content
   .product-card.bw-product-card--selected
-  .product-card-action,
+  .product-content-wrapper {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows:
+    minmax(max-content, 1fr)
+    var(--fpb-card-quantity-selector-height, 2.75rem);
+  padding-block-start: 0;
+}
+
+.layout-sidebar[data-fpb-design-preset="CLASSIC"]
+  .sidebar-content
+  .product-card.bw-product-card--selected
+  .product-text-container {
+  grid-row: 1;
+  grid-column: 1;
+}
+
+.layout-sidebar[data-fpb-design-preset="CLASSIC"]
+  .sidebar-content
+  .product-card.bw-product-card--selected
+  .product-card-price-action {
+  grid-row: 2;
+  grid-column: 1;
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr)
+    var(--fpb-card-quantity-selector-width, 7rem);
+  grid-template-rows: var(--fpb-card-quantity-selector-height, 2.75rem);
+  align-items: center;
+  gap: 0.3125rem;
+  width: 100%;
+}
+
+.layout-sidebar[data-fpb-design-preset="CLASSIC"]
+  .sidebar-content
+  .product-card.bw-product-card--selected
+  .product-price-row {
+  grid-row: 1;
+  grid-column: 1;
+}
+
 .layout-sidebar[data-fpb-design-preset="CLASSIC"]
   .sidebar-content
   .product-card.bw-product-card--selected
   .product-card-action {
-  height: auto;
-  min-height: var(
-    --fpb-card-quantity-selector-height,
-    var(--classic-text-button-height)
-  );
+  grid-row: 1;
+  grid-column: 2;
+  width: var(--fpb-card-quantity-selector-width, 7rem);
+  min-width: var(--fpb-card-quantity-selector-width, 7rem);
+  height: var(--fpb-card-quantity-selector-height, 2.75rem);
+  min-height: var(--fpb-card-quantity-selector-height, 2.75rem);
+  justify-self: end;
+  justify-content: center;
+  align-self: center;
   overflow: visible;
 }
 
-.bundle-widget-full-page[data-fpb-design-preset="CLASSIC"]
-  .sidebar-content
-  .product-card.bw-product-card--selected
-  .product-card-action
-  .inline-quantity-controls,
 .layout-sidebar[data-fpb-design-preset="CLASSIC"]
   .sidebar-content
   .product-card.bw-product-card--selected
-  .product-card-action
   .inline-quantity-controls {
-  width: 100%;
-  min-width: 0;
-  max-width: 100%;
+  grid-template-columns:
+    var(--bundle-control-hit-target, 2.75rem)
+    minmax(1.5rem, 1fr)
+    var(--bundle-control-hit-target, 2.75rem);
+  width: var(--fpb-card-quantity-selector-width, 7rem);
+  min-width: var(--fpb-card-quantity-selector-width, 7rem);
+  max-width: none;
+  padding: 0;
   animation: none;
 }
 
@@ -159,21 +179,42 @@
   width: 1.875rem;
   height: 1.875rem;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.95) url("/magnifying-glass.avif")
-    center / 1rem 1rem no-repeat;
+  background: rgba(255, 255, 255, 0.95);
+  color: #111;
   box-shadow: 0 0.125rem 0.375rem rgba(0, 0, 0, 0.18);
 }
 
 .layout-sidebar[data-fpb-design-preset="CLASSIC"]
   .sidebar-content
   .product-card
-  .bw-product-card__magnifier::before,
+  .bw-product-card__magnifier::before {
+  content: "";
+  position: absolute;
+  top: 0.375rem;
+  left: 0.4375rem;
+  display: block;
+  width: 0.625rem;
+  height: 0.625rem;
+  box-sizing: border-box;
+  border: 0.125rem solid currentColor;
+  border-radius: 50%;
+}
+
 .layout-sidebar[data-fpb-design-preset="CLASSIC"]
   .sidebar-content
   .product-card
   .bw-product-card__magnifier::after {
   content: "";
-  display: none;
+  position: absolute;
+  top: 0.9375rem;
+  left: 0.9375rem;
+  display: block;
+  width: 0.5rem;
+  height: 0.125rem;
+  border-radius: 999px;
+  background: currentColor;
+  transform: rotate(45deg);
+  transform-origin: left center;
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -182,6 +223,6 @@
     .product-card
     .product-image:hover
     .bw-product-card__image-overlay {
-    opacity: 0.8;
+    opacity: 1;
   }
 }

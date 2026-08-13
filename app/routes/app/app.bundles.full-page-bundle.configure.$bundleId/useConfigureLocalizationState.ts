@@ -9,6 +9,7 @@ export function useConfigureLocalizationState(flow: ConfigureBundleFlowDraft) {
     addonDraft,
     bundle,
     markAsDirty,
+    pricingState,
     ruleMessages,
     setTextOverridesByLocale,
     setTextOverridesLocale,
@@ -17,6 +18,12 @@ export function useConfigureLocalizationState(flow: ConfigureBundleFlowDraft) {
     textOverridesByLocale,
     updateAddonDraft,
   } = flow;
+  const {
+    setTierTextByLocaleByRuleId,
+    setTierTextByRuleId,
+    tierTextByLocaleByRuleId,
+    tierTextByRuleId,
+  } = pricingState;
   const [multiLanguageFields, setMultiLanguageFields] = useState<
     MultiLanguageField[]
   >([]);
@@ -72,22 +79,6 @@ export function useConfigureLocalizationState(flow: ConfigureBundleFlowDraft) {
     ((bundle as any).pricing?.messages?.successMessageByLocale as Record<
       string,
       string
-    >) ?? {},
-  );
-  const [tierTextByRuleId, setTierTextByRuleId] = useState<
-    Record<string, { tierText: string; tierSubtext: string }>
-  >(
-    ((bundle as any).pricing?.messages?.tierTextByRuleId as Record<
-      string,
-      { tierText: string; tierSubtext: string }
-    >) ?? {},
-  );
-  const [tierTextByLocaleByRuleId, setTierTextByLocaleByRuleId] = useState<
-    Record<string, Record<string, { tierText: string; tierSubtext: string }>>
-  >(
-    ((bundle as any).pricing?.messages?.tierTextByLocaleByRuleId as Record<
-      string,
-      Record<string, { tierText: string; tierSubtext: string }>
     >) ?? {},
   );
   const progressBarMultiLangModalRef = useRef<any>(null);

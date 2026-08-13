@@ -5,8 +5,9 @@ const { ProductPageCartMethods } = require('../../../app/assets/widgets/product-
 const { ProductPageModalStateMethods, formatProductPageStepValidationToast } = require('../../../app/assets/widgets/product-page/methods/modal-state-methods.js');
 const { ProductPageWidgetMiscMethods } = require('../../../app/assets/widgets/product-page/methods/widget-misc-methods.js');
 const { ProductPageSelectionMethods } = require('../../../app/assets/widgets/product-page/methods/selection-methods.js');
-const { ToastManager } = require('../../../app/assets/bundle-widget-components.js');
-const { CurrencyManager, PricingCalculator } = require('../../../app/assets/widgets/shared/currency-manager.js');
+const { ToastManager } = require('../../../app/assets/widgets/shared/toast-manager.js');
+const { CurrencyManager } = require('../../../app/assets/widgets/shared/currency-manager.js');
+const { PricingCalculator } = require('../../../app/assets/widgets/shared/pricing-calculator.js');
 
 (globalThis as any).PricingCalculator = PricingCalculator;
 (globalThis as any).CurrencyManager = CurrencyManager;
@@ -421,7 +422,7 @@ describe('PPB validation control affects auto-add-after-last-step behavior', () 
     expect(addToCart).not.toHaveBeenCalled();
   });
 
-  it('supports EB alias addBundleToCartOnDone for auto-add gate', async () => {
+  it('allows auto-add when the canonical control is true', async () => {
     const addToCart = jest.fn().mockResolvedValue(undefined);
     const context = {
       ...ProductPageSelectionMethods,
@@ -433,7 +434,7 @@ describe('PPB validation control affects auto-add-after-last-step behavior', () 
       _autoAddingFromControls: false,
       _isConditionValidationEnabled: () => false,
       _getProductPageControls() {
-        return { addBundleToCartOnDone: true };
+        return { addBundleToCartAfterLastStepCompleted: true };
       },
       validateStep: () => true,
       addToCart,

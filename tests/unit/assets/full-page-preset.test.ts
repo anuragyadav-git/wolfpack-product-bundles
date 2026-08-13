@@ -6,13 +6,13 @@
 export {};
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const FullPagePreset = require('../../../app/assets/widgets/shared/full-page-preset.js');
+const { FullPagePreset } = require('../../../app/assets/widgets/shared/full-page-preset.js');
 
 describe('FullPagePreset.resolvePresetAttr', () => {
-  it('returns STANDARD when bundle has no preset fields', () => {
-    expect(FullPagePreset.resolvePresetAttr({})).toBe('STANDARD');
-    expect(FullPagePreset.resolvePresetAttr(null)).toBe('STANDARD');
-    expect(FullPagePreset.resolvePresetAttr(undefined)).toBe('STANDARD');
+  it('returns an empty preset when bundle has no preset fields', () => {
+    expect(FullPagePreset.resolvePresetAttr({})).toBe('');
+    expect(FullPagePreset.resolvePresetAttr(null)).toBe('');
+    expect(FullPagePreset.resolvePresetAttr(undefined)).toBe('');
   });
 
   it('keeps STANDARD as the canonical Standard preset', () => {
@@ -20,9 +20,9 @@ describe('FullPagePreset.resolvePresetAttr', () => {
     expect(FullPagePreset.resolvePresetAttr({ bundleDesignPresetId: 'standard' })).toBe('STANDARD');
   });
 
-  it('falls back to STANDARD for unsupported legacy Standard aliases', () => {
-    expect(FullPagePreset.resolvePresetAttr({ bundleDesignPresetId: 'DEFAULT' })).toBe('STANDARD');
-    expect(FullPagePreset.resolvePresetAttr({ bundleDesignPresetId: 'DEFAULT_FBP' })).toBe('STANDARD');
+  it('does not coerce unsupported legacy aliases', () => {
+    expect(FullPagePreset.resolvePresetAttr({ bundleDesignPresetId: 'DEFAULT' })).toBe('');
+    expect(FullPagePreset.resolvePresetAttr({ bundleDesignPresetId: 'DEFAULT_FBP' })).toBe('');
   });
 
   it('passes through CLASSIC / COMPACT / HORIZONTAL', () => {
@@ -35,25 +35,15 @@ describe('FullPagePreset.resolvePresetAttr', () => {
     expect(FullPagePreset.resolvePresetAttr({ bundleDesignPresetId: 'horizontal' })).toBe('HORIZONTAL');
   });
 
-  it('falls back through bundleDesignPreset and templateId', () => {
-    expect(FullPagePreset.resolvePresetAttr({ bundleDesignPreset: 'CLASSIC' })).toBe('CLASSIC');
-    expect(FullPagePreset.resolvePresetAttr({ templateId: 'COMPACT' })).toBe('COMPACT');
-  });
-
-  it('prefers bundleDesignPresetId over the fallbacks', () => {
-    const result = FullPagePreset.resolvePresetAttr({
-      bundleDesignPresetId: 'HORIZONTAL',
-      bundleDesignPreset: 'CLASSIC',
-      templateId: 'COMPACT',
-    });
-    expect(result).toBe('HORIZONTAL');
+  it('does not coerce unrelated fields', () => {
+    expect(FullPagePreset.resolvePresetAttr({ foo: 'CLASSIC' })).toBe('');
   });
 });
 
 describe('FullPagePreset.resolveTemplateAttr', () => {
-  it('returns FBP_SIDE_FOOTER when missing', () => {
-    expect(FullPagePreset.resolveTemplateAttr({})).toBe('FBP_SIDE_FOOTER');
-    expect(FullPagePreset.resolveTemplateAttr(null)).toBe('FBP_SIDE_FOOTER');
+  it('returns empty template when missing', () => {
+    expect(FullPagePreset.resolveTemplateAttr({})).toBe('');
+    expect(FullPagePreset.resolveTemplateAttr(null)).toBe('');
   });
 
   it('uppercases and trims the template value', () => {
@@ -73,11 +63,25 @@ describe('FullPagePreset.markContainer', () => {
     expect(container.dataset.fpbTemplate).toBe('FBP_SIDE_FOOTER');
   });
 
-  it('writes STANDARD + FBP_SIDE_FOOTER when bundle is empty', () => {
+  it('does not write preset/template attributes when bundle is empty', () => {
     const container = makeContainer();
     FullPagePreset.markContainer(container, {});
-    expect(container.dataset.fpbDesignPreset).toBe('STANDARD');
+    expect(container.dataset.fpbDesignPreset).toBeUndefined();
+    expect(container.dataset.fpbTemplate).toBeUndefined();
+  });
+
+  it('clears stale template/preset attributes when resolved values disappear', () => {
+    const container = makeContainer();
+    FullPagePreset.markContainer(container, {
+      bundleDesignPresetId: 'HORIZONTAL',
+      bundleDesignTemplate: 'FBP_SIDE_FOOTER',
+    });
+    expect(container.dataset.fpbDesignPreset).toBe('HORIZONTAL');
     expect(container.dataset.fpbTemplate).toBe('FBP_SIDE_FOOTER');
+
+    FullPagePreset.markContainer(container, {});
+    expect(container.dataset.fpbDesignPreset).toBeUndefined();
+    expect(container.dataset.fpbTemplate).toBeUndefined();
   });
 
   it('does nothing when container is null or has no dataset', () => {
@@ -105,11 +109,11 @@ describe('FullPagePreset.shouldUseReferenceStepBarTimeline', () => {
     },
   );
 
-  it('falls back from unsupported DEFAULT to the Standard preset', () => {
+  it('does not enable the reference step bar for unsupported legacy aliases', () => {
     expect(FullPagePreset.shouldUseReferenceStepBarTimeline({
       layout: 'footer_side',
       presetId: 'DEFAULT',
-    })).toBe(true);
+    })).toBe(false);
   });
 
   it('does not enable the reference step bar outside the footer-side FPB layout', () => {

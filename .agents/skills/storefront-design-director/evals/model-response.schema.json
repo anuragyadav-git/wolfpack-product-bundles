@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "storefront-design-director-model-response.schema.json",
+  "title": "Storefront Design Director Model Response",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "case_id",
+    "invocation_decision",
+    "claimed_stage",
+    "response_summary",
+    "artifact_files",
+    "evidence_notes"
+  ],
+  "properties": {
+    "case_id": {"type": "string", "minLength": 1},
+    "invocation_decision": {
+      "type": "string",
+      "description": "Use invoke, defer, or ask_minimal_scope only for invocation-suite routing. Use not_applicable after the skill is already active, including every workflow and browser-QA case.",
+      "enum": ["invoke", "defer", "ask_minimal_scope", "not_applicable"]
+    },
+    "claimed_stage": {"type": ["string", "null"]},
+    "response_summary": {"type": "string", "minLength": 1},
+    "artifact_files": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "evidence_notes": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1}
+    }
+  }
+}

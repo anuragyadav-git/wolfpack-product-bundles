@@ -89,19 +89,19 @@ describe('PPB List Cascade selected entries integration', () => {
       innerHTML: 'existing grid drawer',
       querySelector: jest.fn(() => openDrawer),
     };
-    const renderCogniveFooter = jest.fn();
+    const renderGridFooter = jest.fn();
     const context: {
       elements: { footer: typeof footer };
       cascadeSelectedDrawerState: { isOpen: boolean; height?: number };
       _isProductPageCascadeTemplate: () => boolean;
       _isProductPageGridTemplate: () => boolean;
-      _renderCogniveFooter: typeof renderCogniveFooter;
+      _renderGridFooter: typeof renderGridFooter;
     } = {
       elements: { footer },
       cascadeSelectedDrawerState: { isOpen: false },
       _isProductPageCascadeTemplate: () => false,
       _isProductPageGridTemplate: () => true,
-      _renderCogniveFooter: renderCogniveFooter,
+      _renderGridFooter: renderGridFooter,
     };
 
     ProductPageFooterModalStateMethods.renderFooter.call(context);
@@ -110,7 +110,7 @@ describe('PPB List Cascade selected entries integration', () => {
     expect(context.cascadeSelectedDrawerState.isOpen).toBe(true);
     expect(context.cascadeSelectedDrawerState.height).toBe(132);
     expect(footer.innerHTML).toBe('');
-    expect(renderCogniveFooter).toHaveBeenCalledWith(footer);
+    expect(renderGridFooter).toHaveBeenCalledWith(footer);
   });
 
   it('keeps the selected drawer collapsed by default when Cascade has selected entries', () => {

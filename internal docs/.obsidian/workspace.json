@@ -4,11 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "18dfe63b17afd66d",
+        "id": "c1ea076ac786d371",
         "type": "tabs",
         "children": [
           {
-            "id": "d16fb0cc37756cb9",
+            "id": "b185dac48fb3bd6a",
             "type": "leaf",
             "state": {
               "type": "empty",
@@ -176,8 +176,9 @@
       "bases:Create new base": false
     }
   },
-  "active": "d16fb0cc37756cb9",
+  "active": "b185dac48fb3bd6a",
   "lastOpenFiles": [
+    "Shopify Integration/Checkout UI Extension.md",
     "Untitled.canvas",
     "index.md",
     "Operations/Deployment.md",

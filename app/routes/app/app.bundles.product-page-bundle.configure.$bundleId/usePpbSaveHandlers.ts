@@ -1,6 +1,5 @@
 import { useCallback } from "react";
 import { AppLogger } from "../../../lib/logger";
-import { DiscountMethod } from "../../../types/pricing";
 import { normalizeDefaultProductsData } from "../../../lib/bundle-config/default-products";
 import { buildVisibilityDisplayConfiguration } from "./ConfigureBundleFlow.helpers";
 
@@ -227,16 +226,6 @@ export function usePpbSaveHandlers({
           isEnabled: settings.quantityValidationEnabled,
           allowedQuantity:
             Number.parseInt(settings.maxQtyPerProduct || "1", 10) || 1,
-        }),
-      );
-      formData.append(
-        "individualSellingPlanSelection",
-        JSON.stringify({
-          isEnabled:
-            base.pricingState.discountType === DiscountMethod.BUY_X_GET_Y
-              ? false
-              : settings.individualSellingPlanEnabled,
-          showFor: settings.individualSellingPlanShowFor,
         }),
       );
       formData.append(

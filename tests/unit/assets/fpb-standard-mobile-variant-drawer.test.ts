@@ -40,6 +40,7 @@ describe('FPB Standard mobile variant drawer', () => {
     expect(view).toContain('7 meals');
     expect(view).toContain('$111.30');
     expect(view).toContain('aria-disabled="true"');
+    expect(view).not.toContain('aria-label="Close"');
     expect(view).not.toContain('undefined');
   });
 });

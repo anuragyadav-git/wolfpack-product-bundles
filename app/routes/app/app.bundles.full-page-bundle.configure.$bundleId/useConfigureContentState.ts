@@ -1,15 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { slugify, validateSlug } from "../../../lib/slug-utils";
 import {
   buildDefaultProductEntryFromPicker,
   normalizeDefaultProductsData,
   type DefaultProductsData,
 } from "../../../lib/bundle-config/default-products";
-import type { IndividualSellingPlanShowFor } from "./configure-constants";
 import type { ConfigureBundleFlowDraft } from "./configure-flow-types";
+import { buildFpbStorefrontUrl } from "../../../lib/fpb-storefront-url";
 
 export function useConfigureContentState(flow: ConfigureBundleFlowDraft) {
-  const { bundle, formState, shop } = flow;
+  const { bundle, shop } = flow;
   const shopDomain = useMemo(
     () =>
       shop.includes(".myshopify.com")
@@ -17,29 +16,15 @@ export function useConfigureContentState(flow: ConfigureBundleFlowDraft) {
         : shop,
     [shop],
   );
-  const [pageSlug, setPageSlug] = useState<string>(
-    bundle.shopifyPageHandle ?? slugify(bundle.name ?? ""),
-  );
-  const [hasManuallyEditedSlug, setHasManuallyEditedSlug] = useState<boolean>(
-    Boolean(bundle.shopifyPageHandle),
-  );
-  const originalPageSlugRef = useRef<string>(
-    bundle.shopifyPageHandle ?? slugify(bundle.name ?? ""),
-  );
-  const normalizedPageSlug = useMemo(() => slugify(pageSlug), [pageSlug]);
-  const pageSlugError = useMemo(
-    () => validateSlug(normalizedPageSlug),
-    [normalizedPageSlug],
-  );
   const bundlePageUrl = useMemo(
-    () => `https://${shopDomain}.myshopify.com/apps/product-bundles/wpb/${encodeURIComponent(bundle.id)}`,
-    [shopDomain, bundle.id],
+    () => typeof bundle.publicNumber !== "number"
+      ? ""
+      : buildFpbStorefrontUrl(
+          `${shopDomain}.myshopify.com`,
+          bundle.publicNumber,
+        ),
+    [shopDomain, bundle.publicNumber],
   );
-
-  useEffect(() => {
-    if (bundle.shopifyPageHandle || hasManuallyEditedSlug) return;
-    setPageSlug(slugify(formState.bundleName || ""));
-  }, [bundle.shopifyPageHandle, formState.bundleName, hasManuallyEditedSlug]);
 
   const [promoBannerBgImage, setPromoBannerBgImage] = useState<string | null>(
     bundle.promoBannerBgImage ?? null,
@@ -73,9 +58,6 @@ export function useConfigureContentState(flow: ConfigureBundleFlowDraft) {
   );
   const [showProductPrices, setShowProductPrices] = useState<boolean>(
     (bundle as any).showProductPrices ?? true,
-  );
-  const [showCompareAtPrices, setShowCompareAtPrices] = useState<boolean>(
-    (bundle as any).showCompareAtPrices ?? false,
   );
   const [cartRedirectToCheckout, setCartRedirectToCheckout] = useState<boolean>(
     (bundle as any).cartRedirectToCheckout ?? false,
@@ -117,33 +99,12 @@ export function useConfigureContentState(flow: ConfigureBundleFlowDraft) {
   const originalDefaultProductsDataRef = useRef<DefaultProductsData>(
     initialDefaultProductsData,
   );
-  const [showTextOnPlusEnabled, setShowTextOnPlusEnabled] = useState<boolean>(
+  const [showTextOnAddButton, setShowTextOnAddButton] = useState<boolean>(
     ((bundle as any).showTextOnAddButton ?? false) === true ||
       !!(bundle as any).textOverrides?.addToCartButton,
   );
-  const [individualSellingPlanEnabled, setIndividualSellingPlanEnabled] =
-    useState<boolean>(
-      (
-        (bundle as any).individualSellingPlanSelection as {
-          isEnabled?: boolean;
-        } | null
-      )?.isEnabled === true,
-    );
-  const [individualSellingPlanShowFor, setIndividualSellingPlanShowFor] =
-    useState<IndividualSellingPlanShowFor>(
-      (
-        (bundle as any).individualSellingPlanSelection as {
-          showFor?: unknown;
-        } | null
-      )?.showFor === "OOS_PRODUCTS"
-        ? "OOS_PRODUCTS"
-        : "ALL_PRODUCTS",
-    );
   const originalShowProductPricesRef = useRef<boolean>(
     (bundle as any).showProductPrices ?? true,
-  );
-  const originalShowCompareAtPricesRef = useRef<boolean>(
-    (bundle as any).showCompareAtPrices ?? false,
   );
   const originalCartRedirectToCheckoutRef = useRef<boolean>(
     (bundle as any).cartRedirectToCheckout ?? false,
@@ -194,31 +155,23 @@ export function useConfigureContentState(flow: ConfigureBundleFlowDraft) {
     directBundleSummary,
     floatingBadgeEnabled,
     floatingBadgeText,
-    hasManuallyEditedSlug,
-    individualSellingPlanEnabled,
-    individualSellingPlanShowFor,
     initialDefaultProductsData,
     initialTextOverrides,
     initialValidateQuantityPerProduct,
     loadingGif,
     maxQtyPerProduct,
     normalizeDefaultProductsData,
-    normalizedPageSlug,
     originalAllowQuantityChangesRef,
     originalCartRedirectToCheckoutRef,
     originalDefaultProductsDataRef,
     originalFloatingBadgeEnabledRef,
     originalFloatingBadgeTextRef,
     originalLoadingGifRef,
-    originalPageSlugRef,
     originalPromoBannerBgImageRef,
-    originalShowCompareAtPricesRef,
     originalShowProductPricesRef,
     originalShowStepTimelineRef,
     originalTextOverridesByLocaleRef,
     originalTextOverridesRef,
-    pageSlug,
-    pageSlugError,
     productSlotIconUrl,
     productSlotsEnabled,
     promoBannerBgImage,
@@ -229,36 +182,28 @@ export function useConfigureContentState(flow: ConfigureBundleFlowDraft) {
     setDefaultProductsData,
     setFloatingBadgeEnabled,
     setFloatingBadgeText,
-    setHasManuallyEditedSlug,
-    setIndividualSellingPlanEnabled,
-    setIndividualSellingPlanShowFor,
     setLoadingGif,
     setMaxQtyPerProduct,
-    setPageSlug,
     setProductSlotIconUrl,
     setProductSlotsEnabled,
     setPromoBannerBgImage,
     setQuantityValidationEnabled,
-    setShowCompareAtPrices,
     setShowProductPrices,
     setShowSlotIconPicker,
     setShowStepTimeline,
-    setShowTextOnPlusEnabled,
+    setShowTextOnAddButton,
     setTextOverrides,
     setTextOverridesByLocale,
     setTextOverridesLocale,
     setVariantSelectorEnabled,
     shopDomain,
-    showCompareAtPrices,
     showProductPrices,
     showSlotIconPicker,
     showStepTimeline,
-    showTextOnPlusEnabled,
-    slugify,
+    showTextOnAddButton,
     textOverrides,
     textOverridesByLocale,
     textOverridesLocale,
-    validateSlug,
     variantSelectorEnabled,
   });
 }

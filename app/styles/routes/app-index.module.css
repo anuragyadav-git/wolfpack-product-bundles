@@ -10,115 +10,24 @@
   overflow-x: clip;
 }
 
-.routeSkeleton {
+.routeLoadingWorkspace {
   box-sizing: border-box;
   min-height: 100dvh;
-  min-width: 0;
-  padding: clamp(16px, 4vw, 40px);
-  overflow: hidden;
-  background: #f6f6f7;
-}
-
-.routeSkeletonHero {
   display: grid;
-  justify-items: center;
-  gap: 16px;
-  min-height: clamp(260px, 42dvh, 380px);
-  padding: clamp(40px, 8vw, 72px) 20px;
-  border-radius: 16px;
-  background: #e8e9eb;
+  place-items: center;
+  padding: 24px;
+  text-align: center;
 }
 
-.routeSkeletonBrand,
-.routeSkeletonTitle,
-.routeSkeletonCopy,
-.routeSkeletonActions,
-.routeSkeletonCard {
-  position: relative;
-  overflow: hidden;
-  border-radius: 8px;
-  background: #d8dadd;
+.routeLoadingWorkspaceMessage {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.2;
 }
 
-.routeSkeletonBrand::after,
-.routeSkeletonTitle::after,
-.routeSkeletonCopy::after,
-.routeSkeletonActions::after,
-.routeSkeletonCard::after {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.52), transparent);
-  content: "";
-  transform: translateX(-100%);
-  animation: routeSkeletonShimmer 1.4s ease-in-out infinite;
-}
-
-.routeSkeletonBrand {
-  width: min(180px, 58vw);
-  height: 28px;
-}
-
-.routeSkeletonTitle {
-  width: min(520px, 86vw);
-  height: clamp(52px, 10vw, 80px);
-}
-
-.routeSkeletonCopy {
-  width: min(440px, 76vw);
-  height: 42px;
-}
-
-.routeSkeletonActions {
-  width: min(300px, 72vw);
-  height: 44px;
-}
-
-.routeSkeletonCards {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-  width: min(100%, 1000px);
-  margin: 32px auto 0;
-}
-
-.routeSkeletonCard {
-  min-height: 150px;
-}
-
-.visuallyHidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-@keyframes routeSkeletonShimmer {
-  to {
-    transform: translateX(100%);
-  }
-}
-
-@media (max-width: 720px) {
-  .routeSkeletonCards {
-    grid-template-columns: 1fr;
-  }
-
-  .routeSkeletonCard:nth-child(n + 2) {
-    display: none;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .routeSkeletonBrand::after,
-  .routeSkeletonTitle::after,
-  .routeSkeletonCopy::after,
-  .routeSkeletonActions::after,
-  .routeSkeletonCard::after {
-    animation: none;
+@media (max-width: 767px) {
+  .routeLoadingWorkspaceMessage {
+    font-size: 24px;
   }
 }
 

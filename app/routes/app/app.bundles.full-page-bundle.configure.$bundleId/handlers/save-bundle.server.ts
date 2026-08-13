@@ -7,6 +7,7 @@ import { mapDiscountMethod } from "../../../../utils/discount-mappers";
 import { normaliseShopifyProductId } from "../../../../services/bundles/bundle-configure-handlers.server";
 import { BundleStatus } from "../../../../constants/bundle";
 import { buildStepCategoryCreateInput } from "../../../../lib/bundle-config/category-persistence";
+import { resolveBundleStepEnabled } from "../../../../lib/bundle-config/step-enablement";
 import {
   normalizePricingDisplayOptions,
   serializeBoxSelectionFromPricingDisplayOptions,
@@ -170,16 +171,6 @@ function hasEnabledAddonProducts(personalizationData: unknown) {
   return (addonProducts as Record<string, unknown>).isEnabled === true;
 }
 
-function normalizeMinQuantity(value: unknown): number {
-  const parsed = Number.parseInt(String(value), 10);
-  return Number.isFinite(parsed) ? parsed : 0;
-}
-
-function normalizeMaxQuantity(value: unknown): number {
-  const parsed = Number.parseInt(String(value), 10);
-  return Number.isFinite(parsed) ? parsed : 0;
-}
-
 /**
  * Handle saving bundle configuration
  */
@@ -221,7 +212,6 @@ export async function handleSaveBundle(
       discountData,
       floatingBadgeEnabled,
       floatingBadgeText,
-      individualSellingPlanSelection,
       loadingGif,
       maxQtyPerProduct,
       personalizationData,
@@ -230,7 +220,6 @@ export async function handleSaveBundle(
       promoBannerBgImage,
       quantityValidationEnabled,
       searchBarEnabled,
-      showCompareAtPrices,
       showProductPrices,
       showStepTimelineParsed,
       showTextOnAddButton,
@@ -301,8 +290,6 @@ export async function handleSaveBundle(
         ...validateStepConditionFeasibility({
           stepId: step.id,
           stepName: step.name,
-          minQuantity: normalizeMinQuantity(step.minQuantity),
-          maxQuantity: normalizeMaxQuantity(step.maxQuantity),
           conditionType: firstCondition?.type || null,
           conditionOperator: firstCondition?.operator || null,
           conditionValue: parseConditionValue(firstCondition?.value),
@@ -404,14 +391,8 @@ export async function handleSaveBundle(
             (category: any) =>
               (Array.isArray(category.products) &&
                 category.products.length > 0) ||
-              (Array.isArray(category.selectedProducts) &&
-                category.selectedProducts.length > 0) ||
               (Array.isArray(category.collections) &&
-                category.collections.length > 0) ||
-              (Array.isArray(category.collectionsData) &&
-                category.collectionsData.length > 0) ||
-              (Array.isArray(category.collectionsSelectedData) &&
-                category.collectionsSelectedData.length > 0),
+                category.collections.length > 0),
           );
 
         return (
@@ -460,7 +441,6 @@ export async function handleSaveBundle(
         floatingBadgeEnabled,
         floatingBadgeText,
         showProductPrices,
-        showCompareAtPrices,
         cartRedirectToCheckout,
         allowQuantityChanges,
         variantSelectorEnabled,
@@ -483,7 +463,6 @@ export async function handleSaveBundle(
         maxQtyPerProduct,
         productSlotIconUrl,
         validateQuantityPerProduct,
-        individualSellingPlanSelection,
         ...(defaultProductsData !== null && { defaultProductsData }),
         // Update steps if provided
         ...(stepsData && {
@@ -515,9 +494,9 @@ export async function handleSaveBundle(
                 collections: step.collections || [],
                 displayVariantsAsIndividual:
                   step.displayVariantsAsIndividual ?? false,
-                minQuantity: normalizeMinQuantity(step.minQuantity),
-                maxQuantity: normalizeMaxQuantity(step.maxQuantity),
-                enabled: step.enabled !== false, // Default to true unless explicitly false
+                minQuantity: step.minQuantity,
+                maxQuantity: step.maxQuantity,
+                enabled: resolveBundleStepEnabled(index, step.enabled),
                 multiLangData: step.multiLangData ?? null,
                 // Free gift / add-on step fields
                 isFreeGift: step.isFreeGift === true,
@@ -568,8 +547,8 @@ export async function handleSaveBundle(
                           product.image?.url ||
                           null,
                         variants: product.variants || null,
-                        minQuantity: normalizeMinQuantity(product.minQuantity),
-                        maxQuantity: parseInt(product.maxQuantity) || 10,
+                        minQuantity: product.minQuantity,
+                        maxQuantity: product.maxQuantity,
                         position: productIndex + 1,
                       };
                     },
@@ -598,12 +577,12 @@ export async function handleSaveBundle(
                 rules: discountData.discountRules || [],
                 showFooter: discountData.showFooter !== false,
                 showProgressBar: discountData.showDiscountProgressBar === true,
+                displayOptions: canonicalPricingDisplayOptions,
                 messages: {
                   showDiscountDisplay: true,
                   showDiscountMessaging:
                     discountData.discountMessagingEnabled || false,
                   ruleMessages: discountData.ruleMessages || {},
-                  displayOptions: canonicalPricingDisplayOptions,
                   tierTextByRuleId: discountData.tierTextByRuleId || null,
                   tierTextByLocaleByRuleId:
                     discountData.tierTextByLocaleByRuleId || null,
@@ -616,12 +595,12 @@ export async function handleSaveBundle(
                 rules: discountData.discountRules || [],
                 showFooter: discountData.showFooter !== false,
                 showProgressBar: discountData.showDiscountProgressBar === true,
+                displayOptions: canonicalPricingDisplayOptions,
                 messages: {
                   showDiscountDisplay: true,
                   showDiscountMessaging:
                     discountData.discountMessagingEnabled || false,
                   ruleMessages: discountData.ruleMessages || {},
-                  displayOptions: canonicalPricingDisplayOptions,
                   tierTextByRuleId: discountData.tierTextByRuleId || null,
                   tierTextByLocaleByRuleId:
                     discountData.tierTextByLocaleByRuleId || null,

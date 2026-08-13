@@ -1,0 +1,15 @@
+{
+  "incomplete_inventory": {
+    "items": [
+      {
+        "id": "target-card",
+        "role": ["TARGET", "DESKTOP"],
+        "path": "references/target-card.png",
+        "viewport": {"width": null, "height": null, "estimated": true},
+        "pixel_dimensions": {"width": 900, "height": 700},
+        "quality_issues": ["viewport unknown", "component cropped"],
+        "approval_status": "needs-recapture"
+      }
+    ]
+  }
+}

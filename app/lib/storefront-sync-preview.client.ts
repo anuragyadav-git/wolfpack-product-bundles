@@ -1,6 +1,8 @@
 type PrepareStorefrontPreviewResponse = {
   success?: boolean;
   ready?: boolean;
+  previewToken?: string;
+  shareablePreviewUrl?: string;
   error?: string | null;
 };
 
@@ -31,4 +33,6 @@ export async function prepareStorefrontPreviewForOpen() {
       data?.error ?? "Preview is not ready. Please try preview again.",
     );
   }
+
+  return data;
 }

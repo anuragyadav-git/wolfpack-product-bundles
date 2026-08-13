@@ -3,18 +3,19 @@ export {};
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { fullPageMobileSummaryMethods } = require('../../../app/assets/widgets/full-page/methods/mobile-summary-methods.js');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const { PricingCalculator, ToastManager } = require('../../../app/assets/bundle-widget-components.js');
+const { PricingCalculator } = require('../../../app/assets/widgets/shared/pricing-calculator.js');
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { ToastManager } = require('../../../app/assets/widgets/shared/toast-manager.js');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const {
   shouldUseFluidMobileSummaryFooter,
   shouldUseMobileSummarySlotTiles,
+  getMobileAdditionalOffersStatus,
+  getMobileSummarySkeletonCount,
+  shouldDismissMobileSummarySwipe,
 } = require('../../../app/assets/widgets/full-page/methods/mobile-summary-methods.js');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { shouldUseSharedDesktopSummarySlotTiles } = require('../../../app/assets/widgets/full-page/methods/side-panel-methods.js');
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const { getMobileAdditionalOffersPulseState } = require('../../../app/assets/widgets/full-page/methods/mobile-summary-methods.js');
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const { getMobileBottomBarActionState } = require('../../../app/assets/widgets/full-page/methods/responsive-layout-methods.js');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { shouldCategoryTabActivateProducts } = require('../../../app/assets/widgets/full-page/methods/product-grid-methods.js');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -172,7 +173,7 @@ function createContext() {
     showBoxSelectionValidationMessage: jest.fn(),
     _emitStorefrontEvent: jest.fn(),
     _withWidgetActionBusy: jest.fn(),
-    renderFullPageLayoutWithSidebar: jest.fn(),
+    renderFullPageLayout: jest.fn(),
     _renderCompactMobileSummaryBundleItems: () => new FakeElement(),
   };
 }
@@ -264,7 +265,6 @@ describe('FPB Standard mobile summary action', () => {
       currentStepIndex: 0,
       getDiscountInfoWithSelectedAddonDiscount: (discountInfo: unknown) => discountInfo,
       getAllSelectedProductsData: () => [],
-      usesCompactMobileSummaryTray: () => true,
       _shouldRenderProductSlots: () => false,
       _syncCompactMobileSummaryScrollLock: jest.fn(),
       _renderDiscountProgress: renderProgress,
@@ -425,6 +425,24 @@ describe('FPB Standard mobile summary action', () => {
     expect(button.disabled).toBe(true);
   });
 
+  it('shows the discount label instead of the price in the mobile add-to-cart action', () => {
+    const button = fullPageMobileSummaryMethods._createMobileSummaryActionButton.call(
+      createContext(),
+      {
+        finalPrice: 829,
+        currencyInfo,
+        discountBadgeLabel: '5% off',
+        conditionlessMobile: false,
+        isLastStep: true,
+        isComplete: true,
+      },
+    );
+
+    expect(button.textContent).toContain('Add To Cart');
+    expect(button.textContent).toContain('5% off');
+    expect(button.textContent).not.toContain('$8.29');
+  });
+
   it('keeps Classic final-step underfilled add-to-cart clickable and validates on press', async () => {
     const toastSpy = jest.spyOn(ToastManager, 'show').mockImplementation(() => {});
     const context = {
@@ -509,78 +527,37 @@ describe('FPB Standard mobile summary action', () => {
       currentStepIndex: 1,
       direction: 'next',
     });
-    expect(context.renderFullPageLayoutWithSidebar).toHaveBeenCalledTimes(1);
-  });
-
-  it('keeps the alternate mobile bottom bar final-step action as add to cart when conditions are not complete', () => {
-    const actionState = getMobileBottomBarActionState({
-      conditionlessMobile: false,
-      hasSelectionMobile: false,
-      isLastStep: true,
-      isComplete: false,
-      boxSelectionValidMobile: true,
-    });
-
-    expect(actionState).toEqual({ shouldAddToCart: true, disabled: true });
-  });
-
-  it('keeps the alternate mobile bottom bar non-final action as next', () => {
-    const actionState = getMobileBottomBarActionState({
-      conditionlessMobile: false,
-      hasSelectionMobile: false,
-      isLastStep: false,
-      isComplete: false,
-      boxSelectionValidMobile: true,
-    });
-
-    expect(actionState).toEqual({ shouldAddToCart: false, disabled: false });
+    expect(context.renderFullPageLayout).toHaveBeenCalledTimes(1);
   });
 
   it('allows the compact mobile summary tray to expand with no selected products', () => {
-    let expanded = false;
-    const productsSectionAnimation = {
-      cancel: jest.fn(),
-    };
-    const trayAnimation = {
-      cancel: jest.fn(),
-    };
-    const productsSection = {
-      animate: jest.fn(() => productsSectionAnimation),
-      getBoundingClientRect: jest.fn(() => ({
-        height: expanded ? 200 : 58,
-      })),
-    };
-    const classList = {
-      add: jest.fn(),
-      remove: jest.fn(),
-      toggle: jest.fn((className: string, force?: boolean) => {
-        if (className === 'fpb-mobile-summary-tray-expanded') {
-          expanded = force === true;
-        }
-      }),
-    };
+    const classList = { add: jest.fn(), remove: jest.fn(), toggle: jest.fn() };
     const countBadge = {
       setAttribute: jest.fn(),
+      focus: jest.fn(),
+    };
+    const dialogPanel = { focus: jest.fn() };
+    const dialog = {
+      open: false,
+      showModal: jest.fn(function showModal(this: { open: boolean }) { this.open = true; }),
+      close: jest.fn(function close(this: { open: boolean }) { this.open = false; }),
+      querySelector: jest.fn((selector: string) => (
+        selector === '.fpb-mobile-summary-dialog-panel' ? dialogPanel : null
+      )),
     };
     const tray = {
-      animate: jest.fn(() => trayAnimation),
       classList,
-      getBoundingClientRect: jest.fn(() => ({
-        height: expanded ? 259 : 117,
-      })),
-      querySelector: jest.fn((selector: string) => (
-        selector === '.fpb-mobile-summary-products-section'
-          ? productsSection
-          : countBadge
-      )),
+      querySelector: jest.fn((selector: string) => {
+        if (selector === '.fpb-mobile-summary-count-badge') return countBadge;
+        if (selector === '.fpb-mobile-summary-dialog') return dialog;
+        return null;
+      }),
     };
     const context = {
       compactMobileSummaryTrayExpanded: false,
-      compactMobileSummaryTrayAnimationTimeout: null,
-      getAllSelectedProductsData: () => [],
-      _populateCompactMobileSummaryTray: jest.fn(),
-      _syncCompactMobileSummaryScrollLock: jest.fn(),
     };
+    const bodyClassList = { add: jest.fn(), remove: jest.fn() };
+    global.document = { body: { classList: bodyClassList } } as unknown as Document;
 
     fullPageMobileSummaryMethods._toggleCompactMobileSummaryTray.call(
       context,
@@ -588,16 +565,10 @@ describe('FPB Standard mobile summary action', () => {
     );
 
     expect(context.compactMobileSummaryTrayExpanded).toBe(true);
-    expect(context._populateCompactMobileSummaryTray).not.toHaveBeenCalled();
     expect(countBadge.setAttribute).toHaveBeenCalledWith('aria-expanded', 'true');
-    expect(productsSection.animate).toHaveBeenCalledWith(
-      [{ height: '58px' }, { height: '200px' }],
-      { duration: 700, easing: 'ease' },
-    );
-    expect(tray.animate).toHaveBeenCalledWith(
-      [{ height: '117px' }, { height: '259px' }],
-      { duration: 700, easing: 'ease' },
-    );
+    expect(dialog.showModal).toHaveBeenCalledTimes(1);
+    expect(bodyClassList.add).toHaveBeenCalledWith('fpb-mobile-summary-scroll-locked');
+    expect(dialogPanel.focus).toHaveBeenCalledTimes(1);
 
     fullPageMobileSummaryMethods._toggleCompactMobileSummaryTray.call(
       context,
@@ -605,42 +576,47 @@ describe('FPB Standard mobile summary action', () => {
     );
 
     expect(context.compactMobileSummaryTrayExpanded).toBe(false);
-    expect(context._populateCompactMobileSummaryTray).not.toHaveBeenCalled();
     expect(countBadge.setAttribute).toHaveBeenLastCalledWith('aria-expanded', 'false');
-    expect(context.compactMobileSummaryTrayAnimationTimeout).not.toBeNull();
-    expect(productsSectionAnimation.cancel).toHaveBeenCalledTimes(1);
-    expect(trayAnimation.cancel).toHaveBeenCalledTimes(1);
-    expect(productsSection.animate).toHaveBeenLastCalledWith(
-      [{ height: '200px' }, { height: '58px' }],
-      { duration: 700, easing: 'ease' },
-    );
-    expect(tray.animate).toHaveBeenLastCalledWith(
-      [{ height: '259px' }, { height: '117px' }],
-      { duration: 700, easing: 'ease' },
-    );
+    expect(dialog.close).toHaveBeenCalledTimes(1);
+    expect(bodyClassList.remove).toHaveBeenCalledWith('fpb-mobile-summary-scroll-locked');
+    expect(countBadge.focus).toHaveBeenCalledTimes(1);
   });
 
-  it('does not lock page scroll when Standard or Classic mobile summary trays expand', () => {
-    const classList = {
-      toggle: jest.fn(),
+  it('keeps collapsed compact-summary details out of the accessibility tree', () => {
+    const bundleItems = {
+      inert: false,
+      removeAttribute: jest.fn(),
+      setAttribute: jest.fn(),
     };
-    global.document = {
-      body: { classList },
-    } as unknown as Document;
+    const sheet = {
+      querySelector: jest.fn(() => bundleItems),
+    };
 
-    ['STANDARD', 'CLASSIC'].forEach((preset) => {
-      fullPageMobileSummaryMethods._syncCompactMobileSummaryScrollLock.call({
-        compactMobileSummaryTrayExpanded: true,
-        getFullPageDesignPreset: () => preset,
-      });
-    });
-
-    expect(classList.toggle).toHaveBeenCalledWith(
-      'fpb-mobile-summary-scroll-locked',
+    fullPageMobileSummaryMethods._syncCompactMobileSummaryDisclosureState.call(
+      {},
+      sheet,
       false,
     );
-    expect(classList.toggle).toHaveBeenCalledTimes(2);
+
+    expect(bundleItems.inert).toBe(true);
+    expect(bundleItems.setAttribute).toHaveBeenCalledWith('aria-hidden', 'true');
+
+    fullPageMobileSummaryMethods._syncCompactMobileSummaryDisclosureState.call(
+      {},
+      sheet,
+      true,
+    );
+
+    expect(bundleItems.inert).toBe(false);
+    expect(bundleItems.removeAttribute).toHaveBeenCalledWith('aria-hidden');
   });
+
+  it.each(['STANDARD', 'CLASSIC', 'COMPACT', 'HORIZONTAL'])(
+    'uses the shared fluid mobile summary footer for %s',
+    (preset) => {
+      expect(shouldUseFluidMobileSummaryFooter(preset)).toBe(true);
+    },
+  );
 
   it('renders one Classic compact-summary toggle using the shared interaction path', async () => {
     const sheet = new FakeElement();
@@ -678,10 +654,10 @@ describe('FPB Standard mobile summary action', () => {
     expect(toggleTray).toHaveBeenCalledWith(sheet);
   });
 
-  it('enables the mobile additional-offers pulse for Standard and Classic when add-on tiers are mixed', () => {
+  it('returns a stable mobile additional-offers status for mixed eligible tiers', () => {
     const paidStep = { id: 'paid-step' };
     const addonStep = { id: 'addon-step', isFreeGift: true };
-    const mixedState = getMobileAdditionalOffersPulseState({
+    const mixedState = getMobileAdditionalOffersStatus({
       designPreset: 'CLASSIC',
       currentStepIndex: 0,
       steps: [paidStep, addonStep],
@@ -691,10 +667,10 @@ describe('FPB Standard mobile summary action', () => {
       ],
     });
 
-    expect(mixedState.shouldPulse).toBe(true);
+    expect(mixedState.visible).toBe(true);
     expect(mixedState.message).toBe('Additional offers to be unlocked');
 
-    expect(getMobileAdditionalOffersPulseState({
+    expect(getMobileAdditionalOffersStatus({
       designPreset: 'STANDARD',
       currentStepIndex: 0,
       steps: [paidStep, addonStep],
@@ -702,9 +678,9 @@ describe('FPB Standard mobile summary action', () => {
         { tier: { tierId: 'tier-1' }, isEligible: true },
         { tier: { tierId: 'tier-2' }, isEligible: false },
       ],
-    }).shouldPulse).toBe(true);
+    }).visible).toBe(true);
 
-    expect(getMobileAdditionalOffersPulseState({
+    expect(getMobileAdditionalOffersStatus({
       designPreset: 'CLASSIC',
       currentStepIndex: 0,
       steps: [paidStep, addonStep],
@@ -712,9 +688,9 @@ describe('FPB Standard mobile summary action', () => {
         { tier: { tierId: 'tier-1' }, isEligible: true },
         { tier: { tierId: 'tier-2' }, isEligible: true },
       ],
-    }).shouldPulse).toBe(false);
+    }).visible).toBe(false);
 
-    expect(getMobileAdditionalOffersPulseState({
+    expect(getMobileAdditionalOffersStatus({
       designPreset: 'CLASSIC',
       currentStepIndex: 1,
       steps: [paidStep, addonStep],
@@ -722,9 +698,9 @@ describe('FPB Standard mobile summary action', () => {
         { tier: { tierId: 'tier-1' }, isEligible: true },
         { tier: { tierId: 'tier-2' }, isEligible: false },
       ],
-    }).shouldPulse).toBe(false);
+    }).visible).toBe(false);
 
-    expect(getMobileAdditionalOffersPulseState({
+    expect(getMobileAdditionalOffersStatus({
       designPreset: 'COMPACT',
       currentStepIndex: 0,
       steps: [paidStep, addonStep],
@@ -732,7 +708,30 @@ describe('FPB Standard mobile summary action', () => {
         { tier: { tierId: 'tier-1' }, isEligible: true },
         { tier: { tierId: 'tier-2' }, isEligible: false },
       ],
-    }).shouldPulse).toBe(false);
+    }).visible).toBe(false);
+  });
+
+  it('fills the mobile summary to three product line item rows by default', () => {
+    expect(getMobileSummarySkeletonCount({
+      remainingRequiredCount: 2,
+      selectedLineItemCount: 0,
+    })).toBe(3);
+    expect(getMobileSummarySkeletonCount({
+      remainingRequiredCount: 1,
+      selectedLineItemCount: 1,
+    })).toBe(2);
+    expect(getMobileSummarySkeletonCount({
+      remainingRequiredCount: 4,
+      selectedLineItemCount: 1,
+    })).toBe(4);
+  });
+
+  it('dismisses the mobile summary only for an intentional downward swipe', () => {
+    expect(shouldDismissMobileSummarySwipe({ distanceY: 110, distanceX: 8, velocityY: 0.2 })).toBe(true);
+    expect(shouldDismissMobileSummarySwipe({ distanceY: 42, distanceX: 4, velocityY: 0.7 })).toBe(true);
+    expect(shouldDismissMobileSummarySwipe({ distanceY: 60, distanceX: 8, velocityY: 0.2 })).toBe(false);
+    expect(shouldDismissMobileSummarySwipe({ distanceY: 110, distanceX: 140, velocityY: 0.8 })).toBe(false);
+    expect(shouldDismissMobileSummarySwipe({ distanceY: -120, distanceX: 0, velocityY: -0.8 })).toBe(false);
   });
 
   it('uses slot tiles for every slot-enabled FPB summary preset', () => {
@@ -773,8 +772,8 @@ describe('FPB Standard mobile summary action', () => {
 
     expect(shouldUseFluidMobileSummaryFooter('COMPACT')).toBe(true);
     expect(shouldUseFluidMobileSummaryFooter('HORIZONTAL')).toBe(true);
-    expect(shouldUseFluidMobileSummaryFooter('STANDARD')).toBe(false);
-    expect(shouldUseFluidMobileSummaryFooter('CLASSIC')).toBe(false);
+    expect(shouldUseFluidMobileSummaryFooter('STANDARD')).toBe(true);
+    expect(shouldUseFluidMobileSummaryFooter('CLASSIC')).toBe(true);
 
     expect(shouldUseSharedDesktopSummarySlotTiles({
       designPreset: 'CLASSIC',

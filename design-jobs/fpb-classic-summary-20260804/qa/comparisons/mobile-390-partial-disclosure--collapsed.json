@@ -1,0 +1,25 @@
+{
+  "baseline": "design-jobs/fpb-classic-summary-20260804/references/current/fpb-classic-summary-20260804__current-mobile__summary-tray__partially-filled__390x844__r1.png",
+  "actual": "design-jobs/fpb-classic-summary-20260804/qa/screenshots/mobile-390-partial-disclosure--mobile-390--partial--collapsed--viewport.png",
+  "mask": null,
+  "approved_mask_regions": [],
+  "threshold": 0.01,
+  "pixel_tolerance": 8,
+  "status": "failed",
+  "reason": "threshold-exceeded",
+  "engine": "pillow",
+  "dimensions": {
+    "width": 390,
+    "height": 844
+  },
+  "compared_pixels": 329160,
+  "changed_pixels": 15917,
+  "mismatch_ratio": 0.04835642,
+  "difference_bounds": {
+    "x": 5,
+    "y": 55,
+    "width": 381,
+    "height": 789
+  },
+  "diff_path": "design-jobs/fpb-classic-summary-20260804/qa/diffs/mobile-390-partial-disclosure--collapsed--diff.png"
+}

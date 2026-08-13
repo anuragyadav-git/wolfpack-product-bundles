@@ -72,7 +72,6 @@ function makeDeps() {
     ensureMetafieldDefinitions: jest.fn().mockResolvedValue(true),
     syncBundle: jest.fn().mockResolvedValue({ synced: true }),
     setupAddonDiscount: jest.fn().mockResolvedValue({ success: true }),
-    syncBundleMetaobjects: jest.fn().mockResolvedValue(0),
     logger: {
       info: jest.fn(),
       warn: jest.fn(),
@@ -118,7 +117,6 @@ describe("deployment general sync", () => {
       failedBundles: 0,
       failedShops: 0,
       metafieldDefinitionShopsSynced: 2,
-      metaobjectValuesSynced: 0,
       addonDiscountShopsSynced: 1,
       variantRemediation: {
         scannedBundles: 2,
@@ -144,7 +142,6 @@ describe("deployment general sync", () => {
       bundleType: "product_page",
       reason: "sync_bundle",
     });
-    expect(deps.syncBundleMetaobjects).toHaveBeenCalledTimes(2);
     expect(deps.setupAddonDiscount).toHaveBeenCalledTimes(1);
     expect(deps.setupAddonDiscount).toHaveBeenCalledWith(
       expect.objectContaining({ graphql: expect.any(Function) }),
@@ -250,7 +247,6 @@ describe("deployment general sync", () => {
 
     expect(result.failedBundles).toBe(1);
     expect(deps.syncBundle).not.toHaveBeenCalled();
-    expect(deps.syncBundleMetaobjects).not.toHaveBeenCalled();
   });
 
   it("records shop setup failures and skips that shop's bundles", async () => {

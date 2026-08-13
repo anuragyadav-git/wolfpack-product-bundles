@@ -1,0 +1,25 @@
+{
+  "baseline": "design-jobs/fpb-all-template-summary-20260804/qa/baselines/target-compact-desktop.png",
+  "actual": "design-jobs/fpb-all-template-summary-20260804/qa/screenshots/compact-desktop-empty.png",
+  "mask": null,
+  "approved_mask_regions": [],
+  "threshold": 1.0,
+  "pixel_tolerance": 8,
+  "status": "passed",
+  "reason": "within-threshold",
+  "engine": "pillow",
+  "dimensions": {
+    "width": 1440,
+    "height": 900
+  },
+  "compared_pixels": 1296000,
+  "changed_pixels": 840555,
+  "mismatch_ratio": 0.64857639,
+  "difference_bounds": {
+    "x": 0,
+    "y": 0,
+    "width": 1440,
+    "height": 900
+  },
+  "diff_path": "design-jobs/fpb-all-template-summary-20260804/qa/diffs/compact-desktop.png"
+}

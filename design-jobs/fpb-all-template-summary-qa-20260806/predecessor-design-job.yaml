@@ -1,0 +1,1027 @@
+{
+  "schema_version": 1,
+  "job": {
+    "id": "fpb-all-template-summary-20260804",
+    "title": "FPB all-template summary sidebars and mobile trays",
+    "status": "archived",
+    "stage": "ARCHIVED",
+    "revision": 2,
+    "created_at": "2026-08-04T17:25:02Z",
+    "updated_at": "2026-08-05T19:17:27Z",
+    "owner": "Aditya Awasthi",
+    "product": "Wolfpack Product Bundles",
+    "repository": "/Users/adityaawasthi/Developer/wolfpack-product-bundles",
+    "branch": "feature/26.05-UI-changes",
+    "commit": "e71cbbae",
+    "artifact_root": "/Users/adityaawasthi/Developer/wolfpack-product-bundles/design-jobs",
+    "resume_stage": null
+  },
+  "scope": {
+    "product_family": "FPB",
+    "template": "Standard, Classic, Compact, Horizontal",
+    "component": "Desktop summary sidebar and responsive mobile summary tray/footer",
+    "implementation_mode": "design-director",
+    "design_goal": "Design, implement, and freshly verify one coherent all-template FPB summary system with complete configurable-state coverage.",
+    "user_problem": "Every FPB template needs an intentionally designed summary sidebar and mobile counterpart across all merchant-configurable states, not isolated happy-path styling.",
+    "primary_user_action": "Review selection, progress, pricing, qualification, and completion state before navigating or adding the bundle to cart.",
+    "out_of_scope": [
+      "unrelated product-card redesign",
+      "PPB",
+      "Admin UI redesign",
+      "deployment",
+      "development server restart",
+      "FPB configuration-loading priority changes"
+    ],
+    "merchant_configurability": [
+      "bundle summary title and subtitle",
+      "Product Slots and slot icon",
+      "Bundle Quantity Options",
+      "discount progress and messages",
+      "add-ons and free gifts",
+      "locale and currency",
+      "existing storefront design tokens"
+    ],
+    "business_logic_constraints": [
+      "Preserve selection identity, pricing, inventory, validation, navigation, add-on, and cart semantics.",
+      "Use content-driven responsive CSS and keep exactly one active summary surface.",
+      "Treat the canonical FPB feature matrix as requirements, but require fresh post-redesign proof.",
+      "Protect every sibling FPB preset and PPB from shared-source regressions."
+    ]
+  },
+  "viewports": {
+    "reference": [
+      {
+        "width": 1440,
+        "height": 900,
+        "role": "desktop-summary"
+      },
+      {
+        "width": 390,
+        "height": 844,
+        "role": "mobile-summary"
+      }
+    ],
+    "required": [
+      {
+        "width": 320,
+        "height": 720
+      },
+      {
+        "width": 360,
+        "height": 800
+      },
+      {
+        "width": 390,
+        "height": 844
+      },
+      {
+        "width": 414,
+        "height": 896
+      },
+      {
+        "width": 768,
+        "height": 1024
+      },
+      {
+        "width": 1024,
+        "height": 768
+      },
+      {
+        "width": 1280,
+        "height": 800
+      },
+      {
+        "width": 1440,
+        "height": 900
+      },
+      {
+        "width": 1536,
+        "height": 960
+      }
+    ],
+    "edge_cases": [
+      "319 to 320 boundary",
+      "767 to 769 boundary",
+      "1023 to 1025 component boundary",
+      "600px constrained host",
+      "safe-area inset",
+      "long selected-product list",
+      "long localized copy",
+      "no horizontal overflow"
+    ],
+    "browser_zoom": 100,
+    "device_pixel_ratio_policy": "record-actual",
+    "locale": "",
+    "currency": "",
+    "color_scheme": "",
+    "reduced_motion": false
+  },
+  "references": {
+    "current": [
+      "references/current/fpb-all-template-summary-20260804__current-standard-desktop__empty__1440x900__r1.png",
+      "references/current/fpb-all-template-summary-20260804__current-standard-mobile__empty-collapsed__390x844__r1.png",
+      "references/current/fpb-all-template-summary-20260804__current-standard-mobile__empty-expanded__390x844__r1.png",
+      "references/current/fpb-all-template-summary-20260804__current-classic-desktop__empty__1440x900__r1.png",
+      "references/current/fpb-all-template-summary-20260804__current-classic-desktop__partial__1440x900__r1.png",
+      "references/current/fpb-all-template-summary-20260804__current-classic-mobile__empty-collapsed__390x844__r1.png",
+      "references/current/fpb-all-template-summary-20260804__current-classic-mobile__empty-expanded__390x844__r1.png",
+      "references/current/fpb-all-template-summary-20260804__current-compact-desktop__empty__1440x900__r1.png",
+      "references/current/fpb-all-template-summary-20260804__current-compact-mobile__empty-collapsed__390x844__r1.png",
+      "references/current/fpb-all-template-summary-20260804__current-compact-mobile__empty-expanded__390x844__r1.png",
+      "references/current/fpb-all-template-summary-20260804__current-horizontal-desktop__empty__1440x900__r1.png",
+      "references/current/fpb-all-template-summary-20260804__current-horizontal-mobile__empty-collapsed__390x844__r1.png",
+      "references/current/fpb-all-template-summary-20260804__current-horizontal-mobile__empty-expanded__390x844__r1.png"
+    ],
+    "target": [
+      "references/target/fpb-all-template-summary-20260804__target-standard-desktop__partial__1440x900__r1.png",
+      "references/target/fpb-all-template-summary-20260804__target-standard-mobile__partial-collapsed__390x844__r1.png",
+      "references/target/fpb-all-template-summary-20260804__target-standard-mobile__partial-expanded__390x844__r1.png",
+      "references/target/fpb-all-template-summary-20260804__target-classic-desktop__partial__1440x900__r1.png",
+      "references/target/fpb-all-template-summary-20260804__target-classic-mobile__partial-collapsed__390x844__r1.png",
+      "references/target/fpb-all-template-summary-20260804__target-classic-mobile__partial-expanded__390x844__r1.png",
+      "references/target/fpb-all-template-summary-20260804__target-compact-desktop__partial__1440x900__r1.png",
+      "references/target/fpb-all-template-summary-20260804__target-compact-mobile__partial-collapsed__390x844__r1.png",
+      "references/target/fpb-all-template-summary-20260804__target-compact-mobile__partial-expanded__390x844__r1.png",
+      "references/target/fpb-all-template-summary-20260804__target-horizontal-desktop__partial__1440x900__r1.png",
+      "references/target/fpb-all-template-summary-20260804__target-horizontal-mobile__partial-collapsed__390x844__r1.png",
+      "references/target/fpb-all-template-summary-20260804__target-horizontal-mobile__partial-expanded__390x844__r1.png"
+    ],
+    "context": [
+      "component-brief.md",
+      "state-matrix.md"
+    ],
+    "approved": [
+      "screenshot-inventory.yaml",
+      "references/current/fpb-all-template-summary-20260804__current-classic-desktop__partial__1440x900__r1.png",
+      "references/target/fpb-all-template-summary-20260804__target-standard-desktop__partial__1440x900__r1.png",
+      "references/target/fpb-all-template-summary-20260804__target-standard-mobile__partial-collapsed__390x844__r1.png",
+      "references/target/fpb-all-template-summary-20260804__target-standard-mobile__partial-expanded__390x844__r1.png",
+      "references/target/fpb-all-template-summary-20260804__target-classic-desktop__partial__1440x900__r1.png",
+      "references/target/fpb-all-template-summary-20260804__target-classic-mobile__partial-collapsed__390x844__r1.png",
+      "references/target/fpb-all-template-summary-20260804__target-classic-mobile__partial-expanded__390x844__r1.png",
+      "references/target/fpb-all-template-summary-20260804__target-compact-desktop__partial__1440x900__r1.png",
+      "references/target/fpb-all-template-summary-20260804__target-compact-mobile__partial-collapsed__390x844__r1.png",
+      "references/target/fpb-all-template-summary-20260804__target-compact-mobile__partial-expanded__390x844__r1.png",
+      "references/target/fpb-all-template-summary-20260804__target-horizontal-desktop__partial__1440x900__r1.png",
+      "references/target/fpb-all-template-summary-20260804__target-horizontal-mobile__partial-collapsed__390x844__r1.png",
+      "references/target/fpb-all-template-summary-20260804__target-horizontal-mobile__partial-expanded__390x844__r1.png"
+    ],
+    "implementation": [
+      "app/assets/widgets/full-page/methods/responsive-layout-methods.js",
+      "app/assets/widgets/full-page/methods/mobile-summary-methods.js",
+      "app/assets/widgets/full-page-css/shared/mobile-summary-footer.css",
+      "app/assets/widgets/full-page-css/templates/side-footer-standard.css",
+      "app/assets/widgets/full-page-css/templates/side-footer-compact.css",
+      "app/assets/widgets/full-page-css/templates/side-footer-horizontal.css"
+    ],
+    "provenance": [
+      "The user authorized all FPB fixture changes, screenshot capture, design, implementation, handoff, testing, and intermediate commits."
+    ],
+    "permissions_or_usage_notes": [
+      "Capture storefront viewport only without browser chrome.",
+      "Never commit Chrome DevTools screenshots, diffs, HARs, or raw investigation artifacts."
+    ]
+  },
+  "decisions": {
+    "locked": [
+      {
+        "id": "decision-001",
+        "question": "Which FPB templates are in scope?",
+        "selected_value": "Standard, Classic, Compact, and Horizontal",
+        "rationale": "The user explicitly required all FPB design templates.",
+        "status": "locked",
+        "approver": "Aditya Awasthi",
+        "revision": 1,
+        "affected_artifacts": [
+          "component-brief.md",
+          "state-matrix.md",
+          "acceptance-criteria.md"
+        ]
+      },
+      {
+        "id": "decision-002",
+        "question": "What defines configurable-state coverage?",
+        "selected_value": "Use the earlier FPB matrix as requirements and require fresh post-redesign proof.",
+        "rationale": "This preserves the requested matrix scope without treating stale evidence as current proof.",
+        "status": "locked",
+        "approver": "Aditya Awasthi",
+        "revision": 1,
+        "affected_artifacts": [
+          "state-matrix.md",
+          "browser-test-plan.yaml"
+        ]
+      },
+      {
+        "id": "decision-003",
+        "question": "How are storefront changes refreshed?",
+        "selected_value": "Clear or bypass cache and hard reload; never restart the supplied dev server.",
+        "rationale": "The user explicitly requested this workflow.",
+        "status": "locked",
+        "approver": "Aditya Awasthi",
+        "revision": 1,
+        "affected_artifacts": [
+          "browser-test-plan.yaml",
+          "acceptance-criteria.md"
+        ]
+      },
+      {
+        "id": "decision-004",
+        "question": "How does the Classic redesign relate to this program?",
+        "selected_value": "Preserve the approved Classic job and inherit it as the Classic baseline.",
+        "rationale": "Material scope expansion requires a successor job rather than overwritten history.",
+        "status": "locked",
+        "approver": "Aditya Awasthi",
+        "revision": 1,
+        "affected_artifacts": [
+          "component-brief.md",
+          "direction-comparison.md",
+          "implementation-handoff.md"
+        ]
+      },
+      {
+        "id": "decision-005",
+        "question": "How is implementation committed?",
+        "selected_value": "Commit each verified template and state slice with impact analysis.",
+        "rationale": "The user explicitly requested intermediate commits.",
+        "status": "locked",
+        "approver": "Aditya Awasthi",
+        "revision": 1,
+        "affected_artifacts": [
+          "acceptance-criteria.md",
+          "implementation-handoff.md"
+        ]
+      },
+      {
+        "id": "decision-006",
+        "question": "Which all-template summary direction should govern Standard, Compact, Horizontal, and the shared mobile tray?",
+        "selected_value": "Direction A - Unified Calm Review System",
+        "rationale": "The user explicitly approved Direction A for the expanded all-template scope.",
+        "evidence_ids": [
+          "VA-01 through VA-15",
+          "GAP-01 through GAP-08"
+        ],
+        "status": "locked",
+        "approver": "Aditya Awasthi",
+        "approved_at": "2026-08-04T19:05:46Z",
+        "revision": 1,
+        "affected_artifacts": [
+          "direction-comparison.md",
+          "component-anatomy.md",
+          "state-matrix.md",
+          "responsive-contract.md",
+          "interaction-contract.md",
+          "design-tokens.json",
+          "implementation-handoff.md"
+        ]
+      },
+      {
+        "id": "decision-007",
+        "question": "At what measured FPB widget-container width should the desktop summary sidebar become the shared mobile/tablet tray?",
+        "selected_value": "Sidebar at 1024px and above; shared tray below 1024px, based on measured FPB widget-container width",
+        "rationale": "The user approved the recommended RD-001 responsive boundary.",
+        "evidence_ids": [
+          "RD-001",
+          "B-01",
+          "B-02"
+        ],
+        "status": "locked",
+        "approver": "Aditya Awasthi",
+        "approved_at": "2026-08-04T19:15:56Z",
+        "revision": 2,
+        "affected_artifacts": [
+          "responsive-contract.md",
+          "interaction-contract.md",
+          "browser-test-plan.yaml",
+          "acceptance-criteria.md",
+          "implementation-handoff.md"
+        ]
+      }
+    ],
+    "assumptions": [
+      {
+        "id": "assumption-001",
+        "value": "Use the Yash-wolfpack captures as structural target references rather than exact pixel baselines because storefront theme, currency, copy, and selection state differ from Agent.",
+        "basis": "Repository-observed and screenshot-observed",
+        "status": "accepted-conservative-default",
+        "affected_artifacts": [
+          "screenshot-inventory.yaml",
+          "visual-audit.md",
+          "direction-comparison.md"
+        ]
+      },
+      {
+        "id": "assumption-002",
+        "value": "The inspect script's low-resolution warning for 390px images is an expected heuristic result because 390px is the intentional CSS mobile viewport at DPR 1.",
+        "basis": "Chrome-observed and script-observed",
+        "status": "accepted-conservative-default",
+        "affected_artifacts": [
+          "screenshot-inventory.yaml"
+        ]
+      },
+      {
+        "id": "assumption-003",
+        "value": "Use the named responsive inset, expanded-height, and 44px hit-target recommendations as conservative implementation starting points; visual QA may tune them within the approved anatomy, responsive behavior, accessibility minimums, and recorded tolerances.",
+        "basis": "Repository-observed and accessibility-guided recommendation",
+        "status": "accepted-conservative-default",
+        "affected_artifacts": [
+          "design-tokens.json",
+          "responsive-contract.md",
+          "interaction-contract.md",
+          "browser-test-plan.yaml"
+        ]
+      }
+    ],
+    "rejected": [],
+    "open": [],
+    "recommendation_delegation": {
+      "status": "not-granted",
+      "scope": [],
+      "exclusions": [
+        "business-behavior",
+        "accessibility",
+        "data-semantics",
+        "approval-scope"
+      ],
+      "approved_by": "",
+      "approved_at": "",
+      "expires_at_stage": "FINAL_APPROVAL"
+    }
+  },
+  "states": {
+    "required": [
+      "SUM-01",
+      "SUM-02",
+      "SUM-03",
+      "SUM-04",
+      "SUM-05",
+      "SUM-06",
+      "SUM-07",
+      "SUM-08",
+      "SUM-09",
+      "SUM-10",
+      "SUM-11",
+      "SUM-12",
+      "SUM-13",
+      "SUM-14",
+      "SUM-15",
+      "SUM-16",
+      "SUM-17",
+      "SUM-18",
+      "SUM-19",
+      "SUM-20"
+    ],
+    "optional": [],
+    "not_applicable": [],
+    "coverage_status": "complete"
+  },
+  "responsive": {
+    "contract_status": "complete",
+    "breakpoints": [
+      "Proposed container boundary: 1023px tray; 1024px and above sidebar",
+      "Diagnostic legacy conflict boundary: 767px, 768px, and 769px",
+      "Minimum supported proof width: 320px"
+    ],
+    "transformations": [
+      "One preset-owned desktop sidebar becomes one shared inset sticky tray",
+      "Expanded review owns bounded internal scroll while page scroll remains available",
+      "Selection, pricing, step, box, add-on, and disclosure state survive resize and orientation changes"
+    ]
+  },
+  "accessibility": {
+    "requirements": [
+      "one connected disclosure control with accurate aria-expanded",
+      "collapsed content inert and aria-hidden",
+      "keyboard-operable clear, remove, box selection, back, next, and cart controls",
+      "usable names and disabled-state explanation",
+      "visible focus and reduced-motion behavior"
+    ],
+    "known_risks": [
+      "duplicate mobile toggle controls",
+      "hidden tray content remaining focusable",
+      "step-gated removal appearing enabled",
+      "overflowing lists obscuring totals or actions"
+    ],
+    "validation_status": "complete"
+  },
+  "handoff": {
+    "status": "approved",
+    "package_path": "packages/fpb-all-template-summary-20260804-r2.zip",
+    "implementation_owner": "Codex",
+    "implementation_branch": "feature/26.05-UI-changes",
+    "implementation_commit": "e71cbbae"
+  },
+  "qa": {
+    "chrome_mcp_required": true,
+    "profile_policy": "default-profile-only",
+    "allow_isolated_context": false,
+    "preflight_status": "passed",
+    "preflight_result_path": "qa/preflight.json",
+    "baseline_status": "approved",
+    "baseline_paths": [
+      "references/target/fpb-all-template-summary-20260804__target-standard-mobile__partial-expanded__390x844__r1.png"
+    ],
+    "summary_path": "qa/browser-artifact-summary.json",
+    "execution_status": "passed",
+    "required_viewports": [
+      "320x720",
+      "360x800",
+      "390x844",
+      "414x896",
+      "768x1024",
+      "1024x768",
+      "1280x800",
+      "1440x900",
+      "1536x960"
+    ],
+    "required_states": [
+      "SUM-01 through SUM-20 for every applicable preset"
+    ],
+    "console_status": "passed",
+    "network_status": "passed",
+    "accessibility_status": "passed",
+    "lighthouse_status": "passed",
+    "performance_status": "passed",
+    "visual_diff_status": "passed",
+    "non_regression_status": "passed",
+    "retry_history": [
+      {
+        "case_id": "qa-disclosure-responsive-mobile-390",
+        "attempt": 1,
+        "status": "failed",
+        "classification": "product-responsive-ownership",
+        "evidence": "qa/results/qa-disclosure-responsive-mobile-390.result.json"
+      },
+      {
+        "case_id": "qa-disclosure-responsive-mobile-390",
+        "attempt": 2,
+        "status": "blocked",
+        "classification": "infrastructure-sit-process-unavailable",
+        "evidence": "qa/results/qa-disclosure-responsive-mobile-390.result.json"
+      },
+      {
+        "case_id": "qa-disclosure-responsive-mobile-390",
+        "attempt": 3,
+        "status": "passed",
+        "classification": "product-remediation-rerun",
+        "evidence": "qa/browser-artifact-summary.json"
+      }
+    ],
+    "artifacts_path": "qa",
+    "blockers": []
+  },
+  "approvals": {
+    "design": {
+      "status": "approved",
+      "approver": "Aditya Awasthi",
+      "at": "2026-08-04T19:05:46Z",
+      "revision": 1
+    },
+    "handoff": {
+      "status": "approved",
+      "approver": "Aditya Awasthi",
+      "at": "2026-08-04T19:44:50Z",
+      "revision": 2
+    },
+    "implementation": {
+      "status": "authorized",
+      "approver": "Aditya Awasthi",
+      "at": "2026-08-04T19:44:50Z",
+      "revision": 2
+    },
+    "final": {
+      "status": "approved",
+      "approver": "Aditya Awasthi",
+      "at": "2026-08-06T00:00:00Z",
+      "revision": 2
+    }
+  },
+  "artifacts": {
+    "immutable_after_approval": true,
+    "current": {
+      "acceptance-criteria.md": {
+        "path": "acceptance-criteria.md",
+        "status": "approved",
+        "revision": 2,
+        "sha256": "1d710c8d0841c4718ba56ecd843be788fc2728743b8da3f1bef1babfc88f890a",
+        "approved_by": "Aditya Awasthi",
+        "approved_at": "2026-08-04T19:45:13Z",
+        "evidence": [
+          "approval-record.yaml"
+        ]
+      },
+      "accessibility-checklist.md": {
+        "path": "accessibility-checklist.md",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "8bda194aef2deafce5f837c0cd4e03e3ad2d165b873f99d3c4ba35b3b20149a3",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "approval-record.yaml": {
+        "path": "approval-record.yaml",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "2ed85381be2b4153905032f4b9fbb5bac5a72095d9a1d21ee6d6b379591b7df1",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "browser-test-plan.yaml": {
+        "path": "browser-test-plan.yaml",
+        "status": "approved",
+        "revision": 2,
+        "sha256": "f7985fb4ec69306543d0185c33c7ae50f45a44af454c86b7601fbd10dbb899b6",
+        "approved_by": "Aditya Awasthi",
+        "approved_at": "2026-08-04T19:45:13Z",
+        "evidence": [
+          "approval-record.yaml"
+        ]
+      },
+      "browser-test-report.md": {
+        "path": "browser-test-report.md",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "7f3657adc6a29b646963a137db6102042b73ac8055b6a5e738b128e59a5152eb",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "chrome-preflight-result.yaml": {
+        "path": "chrome-preflight-result.yaml",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "e22016b90ad55296dc0e8153af89945d9c4a9fc876926b11000c53a507ff750b",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "codex-task.md": {
+        "path": "codex-task.md",
+        "status": "approved",
+        "revision": 2,
+        "sha256": "16bcf8568b39440a56b9507db8166f28bdec5c02fbc0608fbdcb3d9bfe88dfe6",
+        "approved_by": "Aditya Awasthi",
+        "approved_at": "2026-08-04T19:45:13Z",
+        "evidence": [
+          "approval-record.yaml"
+        ]
+      },
+      "component-anatomy.md": {
+        "path": "component-anatomy.md",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "f863a67ebce204fa2aff44a2e066256b75664bc8280c8503bd805058a013e8f5",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "component-brief.md": {
+        "path": "component-brief.md",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "da2aa6212cc29ddcedc81aa63d667229761d175f89f27452362fb573810cef57",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "content-stress-cases.yaml": {
+        "path": "content-stress-cases.yaml",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "2972e7884e680fb47ac308663488a1b1306bf06a79378b1713cbb41371f4e5f4",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "design-tokens.json": {
+        "path": "design-tokens.json",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "5028f4f1763ad7415b74ea0182feb39ba6ca17c346a8db3dfbd2665f4f7e9031",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "direction-comparison.md": {
+        "path": "direction-comparison.md",
+        "status": "approved",
+        "revision": 1,
+        "sha256": "ab5bd3bd6597fbe4083d9f858ce3b327868f3c49aaba34553c8e07333cee837d",
+        "approved_by": "Aditya Awasthi",
+        "approved_at": "2026-08-04T19:07:04Z",
+        "evidence": [
+          "approval-record.yaml"
+        ]
+      },
+      "implementation-handoff.md": {
+        "path": "implementation-handoff.md",
+        "status": "approved",
+        "revision": 2,
+        "sha256": "5c80ad16fbc72dfa6b0478812759aa6df90e595dfeaac60f09adda673ee7a489",
+        "approved_by": "Aditya Awasthi",
+        "approved_at": "2026-08-04T19:45:13Z",
+        "evidence": [
+          "approval-record.yaml"
+        ]
+      },
+      "interaction-contract.md": {
+        "path": "interaction-contract.md",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "c3a82506ec9f368931e17de7206ca0e2e6c967158daf8e04f2ace1c05ad989b7",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "locked-decisions.yaml": {
+        "path": "locked-decisions.yaml",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "5c2a79d40056980b481f28f595f022f8356f3eee3146c5a406a2d9377b038d81",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "remediation-list.md": {
+        "path": "remediation-list.md",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "73c50bf843ed61a7f02633c225c697c97b2c2f09e92ba57057ef9b24ca576846",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "responsive-contract.md": {
+        "path": "responsive-contract.md",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "8653ffe5da15e618a567a25e6ba47b1dcf41c400c2ea32d9d96ee5f59d1f5b19",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "screenshot-inventory.yaml": {
+        "path": "screenshot-inventory.yaml",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "e44e06b1f1582c30c6ef005297bebd4c3712f7ad65ffc914b7e7ed90388a9f75",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "state-matrix.md": {
+        "path": "state-matrix.md",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "5524c91818b486022d6fb4985725ba3bb68705b4a1de6d67b32d2d4ec7fa8574",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "visual-audit.md": {
+        "path": "visual-audit.md",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "127ffc8a6df417bb6ad54aa6e975b620bd4cb37c403f6d2af80e3bc0ce4d6295",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "visual-qa-report.md": {
+        "path": "visual-qa-report.md",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "2a39cef83430c266b8c27b084c0b56a49fd3df8cde7eb669e58095c68d74c6ed",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      }
+    },
+    "superseded": [
+      {
+        "path": "locked-decisions.yaml",
+        "status": "approved",
+        "revision": 1,
+        "sha256": "4c077a8b918c894b847f8c3761cf9fd845d2fc9511bfc12f168288a7e6b08ff3",
+        "approved_by": "Aditya Awasthi",
+        "approved_at": "2026-08-04T19:07:04Z",
+        "evidence": [
+          "approval-record.yaml"
+        ],
+        "superseded_at": "2026-08-04T19:11:49Z",
+        "superseded_by": "",
+        "superseded_reason": "Added the downstream responsive breakpoint decision without changing approved Direction A"
+      }
+    ]
+  },
+  "history": [
+    {
+      "sequence": 1,
+      "at": "2026-08-04T17:25:02Z",
+      "from": null,
+      "to": "DISCOVERY",
+      "revision": 1,
+      "reason": "Design job created",
+      "evidence": []
+    },
+    {
+      "sequence": 2,
+      "at": "2026-08-04T17:28:32Z",
+      "from": "DISCOVERY",
+      "to": "SCOPE",
+      "revision": 1,
+      "reason": "Discovery recorded from the user objective, canonical matrix, and current shared summary architecture.",
+      "evidence": [
+        "component-brief.md"
+      ],
+      "affected_artifacts": [
+        "component-brief.md"
+      ]
+    },
+    {
+      "sequence": 3,
+      "at": "2026-08-04T17:28:40Z",
+      "from": "SCOPE",
+      "to": "REFERENCE_INTAKE",
+      "revision": 1,
+      "reason": "Scope and non-goals are explicit, with matrix-derived state coverage and current source ownership recorded.",
+      "evidence": [
+        "component-brief.md",
+        "state-matrix.md"
+      ],
+      "affected_artifacts": [
+        "screenshot-inventory.yaml"
+      ]
+    },
+    {
+      "sequence": 4,
+      "at": "2026-08-04T17:50:54Z",
+      "from": "REFERENCE_INTAKE",
+      "to": "REFERENCE_VALIDATION",
+      "revision": 1,
+      "reason": "All 25 current and target captures have stable IDs, provenance, known CSS viewports, state labels, and cohort mappings",
+      "evidence": [
+        "screenshot-inventory.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 5,
+      "at": "2026-08-04T17:50:59Z",
+      "from": "REFERENCE_VALIDATION",
+      "to": "VISUAL_ANALYSIS",
+      "revision": 1,
+      "reason": "Desktop and mobile cohorts are comparable for structural analysis; fixture, currency, copy, and state differences are explicitly limited to structural reference use",
+      "evidence": [
+        "screenshot-inventory.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 6,
+      "at": "2026-08-04T17:56:48Z",
+      "from": "VISUAL_ANALYSIS",
+      "to": "DIRECTION_EXPLORATION",
+      "revision": 1,
+      "reason": "Confidence-labeled visual audit identifies shared anatomy, preset-specific shell ownership, and mobile consistency gaps",
+      "evidence": [
+        "visual-audit.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 7,
+      "at": "2026-08-04T17:57:18Z",
+      "from": "DIRECTION_EXPLORATION",
+      "to": "DIRECTION_APPROVAL",
+      "revision": 1,
+      "reason": "Three behavior-equivalent directions are decision-ready; explicit expanded-scope approval is now required",
+      "evidence": [
+        "direction-comparison.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 8,
+      "at": "2026-08-04T19:07:09Z",
+      "from": "DIRECTION_APPROVAL",
+      "to": "COMPONENT_ANATOMY",
+      "revision": 1,
+      "reason": "Aditya Awasthi explicitly approved Direction A - Unified Calm Review System for the expanded all-template scope",
+      "evidence": [
+        "direction-comparison.md",
+        "locked-decisions.yaml",
+        "approval-record.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 9,
+      "at": "2026-08-04T19:09:20Z",
+      "from": "COMPONENT_ANATOMY",
+      "to": "STATE_CONTRACT",
+      "revision": 1,
+      "reason": "Every visible, interactive, responsive, and merchant-configurable summary region now has one repository-observed owner",
+      "evidence": [
+        "component-anatomy.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 10,
+      "at": "2026-08-04T19:10:10Z",
+      "from": "STATE_CONTRACT",
+      "to": "RESPONSIVE_CONTRACT",
+      "revision": 1,
+      "reason": "All matrix-derived summary states and universal interaction, recovery, content-stress, zoom, and reduced-motion states have explicit desktop/mobile contracts",
+      "evidence": [
+        "state-matrix.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 11,
+      "at": "2026-08-04T19:11:49Z",
+      "from": "RESPONSIVE_CONTRACT",
+      "to": "RESPONSIVE_CONTRACT",
+      "revision": 2,
+      "reason": "Added the downstream responsive breakpoint decision without changing approved Direction A",
+      "evidence": [],
+      "event": "artifact-superseded",
+      "affected_artifacts": [
+        "locked-decisions.yaml"
+      ]
+    },
+    {
+      "sequence": 12,
+      "at": "2026-08-04T19:17:13Z",
+      "from": "RESPONSIVE_CONTRACT",
+      "to": "INTERACTION_ACCESSIBILITY",
+      "revision": 2,
+      "reason": "RD-001 approved: measured FPB container width below 1024px uses the shared tray; 1024px and above uses the desktop sidebar",
+      "evidence": [
+        "responsive-contract.md",
+        "locked-decisions.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 13,
+      "at": "2026-08-04T19:18:45Z",
+      "from": "INTERACTION_ACCESSIBILITY",
+      "to": "TOKENS_GEOMETRY",
+      "revision": 2,
+      "reason": "Semantic, keyboard, focus, announcement, dialog, responsive replacement, error recovery, and reduced-motion contracts are complete",
+      "evidence": [
+        "interaction-contract.md",
+        "accessibility-checklist.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 14,
+      "at": "2026-08-04T19:21:43Z",
+      "from": "TOKENS_GEOMETRY",
+      "to": "PROTOTYPE_OPTIONAL",
+      "revision": 2,
+      "reason": "Merchant, repository, responsive geometry, accessibility, motion, and visual tolerance ownership are complete with a deterministic stress corpus",
+      "evidence": [
+        "design-tokens.json",
+        "content-stress-cases.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 15,
+      "at": "2026-08-04T19:22:07Z",
+      "from": "PROTOTYPE_OPTIONAL",
+      "to": "HANDOFF_ASSEMBLY",
+      "revision": 2,
+      "reason": "Prototype not applicable: no unresolved interaction, responsive, state, or geometry ambiguity remains, and an isolated prototype would duplicate the production semantic tree and defer the real shared-renderer integration risk",
+      "evidence": [
+        "component-anatomy.md",
+        "responsive-contract.md",
+        "interaction-contract.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 16,
+      "at": "2026-08-04T19:27:33Z",
+      "from": "HANDOFF_ASSEMBLY",
+      "to": "HANDOFF_VALIDATION",
+      "revision": 2,
+      "reason": "Revision 2 handoff packet is complete; validator is blocked only on explicit handoff approval",
+      "evidence": [
+        "implementation-handoff.md",
+        "codex-task.md",
+        "acceptance-criteria.md",
+        "browser-test-plan.yaml"
+      ],
+      "affected_artifacts": [
+        "implementation-handoff.md",
+        "codex-task.md",
+        "acceptance-criteria.md",
+        "browser-test-plan.yaml"
+      ]
+    },
+    {
+      "sequence": 17,
+      "at": "2026-08-04T19:45:13Z",
+      "from": "HANDOFF_VALIDATION",
+      "to": "IMPLEMENTATION_AWAITED",
+      "revision": 2,
+      "reason": "User approved the complete revision 2 handoff and authorized implementation and testing",
+      "evidence": [
+        "approval-record.yaml",
+        "implementation-handoff.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 18,
+      "at": "2026-08-04T20:04:12Z",
+      "from": "IMPLEMENTATION_AWAITED",
+      "to": "CHROME_QA_PREFLIGHT",
+      "revision": 2,
+      "reason": "Implementation returned on feature/26.05-UI-changes at 6f4c03ee with focused tests, widget build, minified CSS, lint, and graph verification complete",
+      "evidence": [
+        "implementation-handoff.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 19,
+      "at": "2026-08-04T20:06:01Z",
+      "from": "CHROME_QA_PREFLIGHT",
+      "to": "CHROME_QA_EXECUTION",
+      "revision": 2,
+      "reason": "All mandatory connected-default-profile Chrome preflight checks passed",
+      "evidence": [
+        "qa/preflight.json"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 20,
+      "at": "2026-08-04T20:08:50Z",
+      "from": "CHROME_QA_EXECUTION",
+      "to": "VISUAL_REMEDIATION",
+      "revision": 2,
+      "reason": "Chrome found a runtime-mode versus viewport-CSS ownership mismatch at the 1024px critical boundary",
+      "evidence": [
+        "qa/results/qa-disclosure-responsive-mobile-390.result.json"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 21,
+      "at": "2026-08-04T20:17:49Z",
+      "from": "VISUAL_REMEDIATION",
+      "to": "BLOCKED",
+      "revision": 2,
+      "reason": "Supplied Shopify SIT dev and tunnel processes exited; app-proxy document and bundle JSON routes return HTTP 500",
+      "evidence": [
+        "qa/results/qa-disclosure-responsive-mobile-390.result.json"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 22,
+      "at": "2026-08-05T18:58:30Z",
+      "from": "BLOCKED",
+      "to": "VISUAL_REMEDIATION",
+      "revision": 2,
+      "reason": "SIT canonical storefront restored; Compact 1024px boundary rerun confirms measured tray mode, hidden desktop side panel, and no horizontal overflow.",
+      "evidence": [
+        "qa/results/qa-disclosure-responsive-mobile-390.result.json"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 23,
+      "at": "2026-08-05T19:16:16Z",
+      "from": "VISUAL_REMEDIATION",
+      "to": "FINAL_APPROVAL",
+      "revision": 2,
+      "reason": "All consolidated Chrome QA gates pass; responsive, contrast, and dialog-focus remediations are verified and committed; user granted all approvals for completion.",
+      "evidence": [
+        "qa/browser-artifact-summary.json"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 24,
+      "at": "2026-08-05T19:17:04Z",
+      "from": "FINAL_APPROVAL",
+      "to": "ARCHIVED",
+      "revision": 2,
+      "reason": "Approved handoff package exists; immutable baseline and consolidated QA summary are present; final approval was granted.",
+      "evidence": [
+        "qa/browser-artifact-summary.json"
+      ],
+      "affected_artifacts": []
+    }
+  ]
+}

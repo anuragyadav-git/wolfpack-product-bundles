@@ -437,6 +437,8 @@ Two-stage load strategy:
 
 ## 🧭 Chrome DevTools App Verification
 
+Use only direct Chrome DevTools MCP tools (`mcp__chrome_devtools__*`) for all browser investigation, interaction, evidence gathering, responsive testing, and implementation verification. Do not use browser plugins, browser-control wrappers, Playwright, Puppeteer, Selenium, or alternate browser automation tools as substitutes. If direct Chrome DevTools MCP is unavailable or stalls, report the browser verification as blocked rather than switching tools.
+
 Access embedded app via Shopify Admin URL:
 ```
 https://admin.shopify.com/store/wolfpack-store-test-1/apps/wolfpack-product-bundles-sit/app/...
@@ -584,7 +586,7 @@ When auditing storefront UI, test **both viewports**:
 2. Mobile screenshot (emulate iPhone 14, 390×844)
 3. Report findings for both
 
-Before every storefront UI review after source, build, or deploy changes, empty/bypass browser cache and hard reload the storefront in Chrome (Chrome DevTools MCP: `navigate_page` reload with `ignoreCache: true`; also clear Cache Storage via `caches.keys()` when available). Do not trust a normal refresh for storefront parity checks.
+Before gathering evidence or verifying any storefront asset/UI implementation, empty/bypass the browser cache and hard reload the storefront in Chrome. This applies after source, build, or deploy changes and before every storefront UI review (Chrome DevTools MCP: `navigate_page` reload with `ignoreCache: true`; also clear Cache Storage via `caches.keys()` when available). Do not trust a normal refresh for storefront parity checks or implementation verification.
 
 Before testing any implemented storefront change in Chrome, always refresh the relevant storefront tab first, then verify the changed behaviour or appearance. Do not test against an already-open tab without refreshing after the implementation/build step.
 

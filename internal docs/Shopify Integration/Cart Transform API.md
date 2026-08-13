@@ -5,7 +5,7 @@ title: Cart Transform API
 type: shopify-integration
 status: authoritative
 summary: Shopify Cart Transform API target, activation, failure policy, inputs, and checkout-pricing boundaries.
-last_audited: 2026-07-14
+last_audited: 2026-08-13
 owners:
   - engineering
 domains:

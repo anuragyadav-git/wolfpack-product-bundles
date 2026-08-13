@@ -1,28 +1,56 @@
+---
+schema_version: 1
+id: storefront-asset-strategy
+title: "Test Spec: Storefront Asset Strategy"
+type: test-spec
+status: active
+summary: Verifies that storefront widgets load extension assets through Shopify asset URLs while app proxies carry documents and data only.
+last_audited: 2026-08-11
+owners:
+  - engineering
+domains:
+  - storefront
+systems:
+  - theme-extension
+source_paths:
+  - extensions/bundle-builder/blocks/bundle-app-embed.liquid
+  - extensions/bundle-builder/blocks/bundle-product-page.liquid
+  - app/routes/root/wpb.$bundleId.tsx
+related_docs:
+  - internal docs/Architecture/Widget Architecture.md
+tags:
+  - tdd
+  - assets
+keywords:
+  - asset_url
+  - app proxy
+---
+
 # Test Spec: Storefront Asset Strategy
-**Spec ID:** storefront-asset-strategy  **Issue:** [eb-configure-completion-parity-1]  **Created:** 2026-06-01
+
+**Spec ID:** storefront-asset-strategy  **Created:** 2026-06-01
 
 ## Purpose
-Align FPB and PPB storefront asset loading with EB practice: Shopify theme-extension assets via `asset_url`, app proxy for API/data only.
+
+Keep Shopify theme-extension assets on `asset_url` and reserve the app proxy for FPB documents and runtime data.
 
 ## Test Cases
-### FPBGeneratedPages
-| # | Scenario | Input | Expected Output | Notes |
-|---|---|---|---|---|
-| 1 | Create FPB page body | `createFullPageBundle` | Body has bundle page marker/metafield-compatible content and no `/apps/product-bundles/assets` JS/CSS | Theme app block loads assets |
-| 2 | Refresh preview page body | `getPreviewPageUrl(..., bundleId)` | Refreshed body has no app-proxy JS/CSS | Avoid proxy asset 500s |
 
-### LegacyProxy
+### FPB
+
 | # | Scenario | Input | Expected Output | Notes |
 |---|---|---|---|---|
-| 1 | Signed legacy FPB proxy URL with page handle | `/apps/product-bundles/wpb/:bundleId` | Redirects to `/pages/{handle}` | Storefront loads through Shopify theme |
-| 2 | Signed legacy FPB proxy URL without page handle | `/apps/product-bundles/wpb/:bundleId` | Returns non-rendering setup response | No proxy asset shell |
+| 1 | FPB app-proxy document | Signed `/apps/product-bundles/wpb/:bundleId` request | Liquid marker with bundle config and no proxy-hosted JS/CSS | App embed owns assets |
+| 2 | FPB extension resources | Theme extension manifest | `bundle-app-embed` exists and `bundle-full-page` Page block is absent | No Page host dependency |
 
 ### PPB
+
 | # | Scenario | Input | Expected Output | Notes |
 |---|---|---|---|---|
-| 1 | Product page block | `bundle-product-page.liquid` | Uses `asset_url` for CSS, SDK, and widget JS | Existing EB-aligned path remains |
+| 1 | Product page block | `bundle-product-page.liquid` | Uses `asset_url` for storefront assets | Merchant controls placement |
 
 ## Acceptance Criteria
-- [ ] No storefront page body path injects `/apps/product-bundles/assets/*.js` or `*.css`.
-- [ ] FPB and PPB Liquid blocks remain the storefront asset-loading source.
-- [ ] Raw widget JS changes are syntax-checked with `node --check` before commits.
+
+- [x] No storefront document injects `/apps/product-bundles/assets/*.js` or `*.css`.
+- [x] FPB uses the app embed and PPB uses its product-page block.
+- [x] The extension manifest contains no FPB Page block.

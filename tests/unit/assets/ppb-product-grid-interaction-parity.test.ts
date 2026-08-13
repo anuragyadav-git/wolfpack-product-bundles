@@ -1,5 +1,5 @@
 import { renderSharedProductCard } from "../../../app/assets/widgets/shared/components/product-card.js";
-import { getCogniveStepRenderSequence } from "../../../app/assets/widgets/product-page/methods/layout-shell-methods.js";
+import { getGridStepRenderSequence } from "../../../app/assets/widgets/product-page/methods/layout-shell-methods.js";
 import { shouldDisableIntermediateProductPageCta } from "../../../app/assets/widgets/product-page/methods/footer-modal-state-methods.js";
 import { resolveInpageProductSelection } from "../../../app/assets/widgets/product-page/methods/inpage-render-methods.js";
 
@@ -39,7 +39,7 @@ describe("PPB Product Grid interaction parity", () => {
   });
 
   it("places the active Grid body directly after its step header", () => {
-    expect(getCogniveStepRenderSequence({ stepCount: 3, currentStepIndex: 1 })).toEqual([
+    expect(getGridStepRenderSequence({ stepCount: 3, currentStepIndex: 1 })).toEqual([
       { type: "header", stepIndex: 0 },
       { type: "header", stepIndex: 1 },
       { type: "body", stepIndex: 1 },

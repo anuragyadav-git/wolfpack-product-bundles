@@ -60,10 +60,6 @@ jest.mock("../../../app/components/ProxyHealthBanner", () => ({
   ProxyHealthBanner: () => null,
 }));
 
-jest.mock("../../../app/components/skeletons/DashboardBannerSkeleton", () => ({
-  DashboardBannerSkeleton: () => null,
-}));
-
 jest.mock("../../../app/hooks/useDashboardState", () => ({
   useDashboardState: jest.fn(),
 }));
@@ -82,10 +78,6 @@ jest.mock("@shopify/app-bridge-react", () => ({
 
 jest.mock("../../../app/services/admin-locale.server", () => ({
   saveShopAdminLocale: jest.fn(),
-}));
-
-jest.mock("../../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/handlers.server", () => ({
-  handleCreatePreviewPage: jest.fn(),
 }));
 
 jest.mock("../../../app/routes/app/app.dashboard/handlers", () => ({
@@ -116,7 +108,7 @@ describe("admin root link warnings", () => {
 
   it("preloads only first-render dashboard media with React-safe responsive image attributes", async () => {
     const { headers, links } = await import("../../../app/routes/app/app.dashboard/route");
-    const preloads = links();
+    const preloads = links().filter((link) => link.rel === "preload");
 
     expect(preloads).toHaveLength(1);
     expect(preloads[0]).toMatchObject({

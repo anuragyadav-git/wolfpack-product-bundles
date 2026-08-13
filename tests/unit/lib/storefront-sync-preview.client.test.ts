@@ -38,7 +38,7 @@ describe("storefront sync preview client", () => {
     });
     global.fetch = fetchMock;
 
-    await prepareStorefrontPreviewForOpen();
+    const result = await prepareStorefrontPreviewForOpen();
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
     const [url, init] = fetchMock.mock.calls[0];
@@ -47,6 +47,7 @@ describe("storefront sync preview client", () => {
     );
     expect(init.method).toBe("POST");
     expect(init.body.get("intent")).toBe("preparePreviewBundle");
+    expect(result).toEqual({ success: true, ready: true });
   });
 
   it("throws the compact server error when preview preparation fails", async () => {

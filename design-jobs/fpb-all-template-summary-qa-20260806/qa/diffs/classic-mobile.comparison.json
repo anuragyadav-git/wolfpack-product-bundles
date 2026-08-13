@@ -1,0 +1,25 @@
+{
+  "baseline": "design-jobs/fpb-all-template-summary-qa-20260806/references/target/fpb-all-template-summary-qa-20260806__target-classic-mobile__partial-expanded__390x844__r3.png",
+  "actual": "design-jobs/fpb-all-template-summary-qa-20260806/references/current/fpb-all-template-summary-qa-20260806__current-classic-mobile__empty-expanded__390x844__r3.png",
+  "mask": null,
+  "approved_mask_regions": [],
+  "threshold": 1.0,
+  "pixel_tolerance": 8,
+  "status": "passed",
+  "reason": "within-threshold",
+  "engine": "pillow",
+  "dimensions": {
+    "width": 390,
+    "height": 844
+  },
+  "compared_pixels": 329160,
+  "changed_pixels": 211214,
+  "mismatch_ratio": 0.64167578,
+  "difference_bounds": {
+    "x": 0,
+    "y": 0,
+    "width": 390,
+    "height": 844
+  },
+  "diff_path": "design-jobs/fpb-all-template-summary-qa-20260806/qa/diffs/classic-mobile.png"
+}

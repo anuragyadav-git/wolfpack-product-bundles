@@ -19,7 +19,6 @@ export type ConfigureBundleFlowContextValue = ConfigureBundleFlowDraft & {
   FilePicker: ComponentType<FilePickerProps>;
   stepSetupChildItems: Array<{ id: string; label: string }>;
   useState: typeof useState;
-  availablePages: Array<Record<string, any>>;
   bundleBannerDesktopUrl: string;
   bundleBannerMobileUrl: string;
   bundleLevelCss: string;

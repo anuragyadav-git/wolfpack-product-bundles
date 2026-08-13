@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "job_id": "fpb-classic-summary-20260804",
+  "revision": 1,
+  "status": "complete",
+  "design": {
+    "status": "approved",
+    "approver": "Aditya Awasthi",
+    "at": "2026-08-04T09:33:44Z",
+    "evidence": [
+      "direction-comparison.md",
+      "visual-audit.md",
+      "screenshot-inventory.yaml"
+    ],
+    "waivers": []
+  },
+  "handoff": {
+    "status": "approved",
+    "approver": "Aditya Awasthi",
+    "at": "2026-08-04T13:57:06Z",
+    "evidence": [
+      "implementation-handoff.md",
+      "codex-task.md",
+      "acceptance-criteria.md",
+      "browser-test-plan.yaml",
+      "User explicit handoff approval"
+    ],
+    "waivers": []
+  },
+  "implementation": {
+    "status": "not-started",
+    "approver": "",
+    "at": "",
+    "evidence": [],
+    "waivers": []
+  },
+  "final": {
+    "status": "not-started",
+    "approver": "",
+    "at": "",
+    "evidence": [],
+    "waivers": []
+  },
+  "superseded_approvals": []
+}

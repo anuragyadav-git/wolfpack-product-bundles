@@ -31,7 +31,12 @@ describe("recovered admin surfaces contract", () => {
     expect(DESIGN_CONFIGURATION[0]?.fields.map((field) => field.label)).toContain("Primary Color");
     expect(DESIGN_CONFIGURATION.find((tab) => tab.title === "Images & GIFs")?.fields).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ label: "Bundle Loading GIF", kind: "loadingSpinner", value: "Default spinner" }),
+        expect.objectContaining({ label: "FPB Loading GIF", kind: "loadingGif", value: "" }),
+        expect.objectContaining({
+          label: "Loading Screen Background Color",
+          kind: "color",
+          value: "#ffffff",
+        }),
         expect.objectContaining({ label: "Checkout GIF", kind: "loadingSpinner", value: "Default spinner" }),
       ])
     );
@@ -239,32 +244,24 @@ describe("recovered admin surfaces contract", () => {
       "Reviews",
       "Checkout",
     ]);
-    expect(getIntegrationCardCount()).toBe(5);
+    expect(getIntegrationCardCount()).toBe(3);
 
     const cards = INTEGRATION_CATEGORIES.flatMap((category) => category.cards);
     expect(cards.map((card) => card.id)).toEqual([
       "judgeme",
       "gokwik",
       "shopflo",
-      "native-checkout",
-      "theme_cart_drawer",
     ]);
-    expect(cards.filter((card) => card.ctaType === "guide")).toHaveLength(5);
+    expect(cards.filter((card) => card.ctaType === "guide")).toHaveLength(3);
     expect(cards.filter((card) => card.ctaType === "chat")).toHaveLength(0);
     expect(cards.every((card) => card.ctaLabel === "View Setup")).toBe(true);
     expect(cards.map((card) => card.id)).toEqual(expect.arrayContaining([
       "judgeme",
-      "native-checkout",
       "gokwik",
       "shopflo",
-      "theme_cart_drawer",
     ]));
     expect(cards).toContainEqual(expect.objectContaining({
       id: "judgeme",
-      setupUrl: "https://wolfpackapps.com",
-    }));
-    expect(cards).toContainEqual(expect.objectContaining({
-      id: "theme_cart_drawer",
       setupUrl: "https://wolfpackapps.com",
     }));
     expect(cards).toContainEqual(expect.objectContaining({
@@ -274,10 +271,6 @@ describe("recovered admin surfaces contract", () => {
     expect(cards).toContainEqual(expect.objectContaining({
       id: "shopflo",
       setupUrl: "https://wolfpackapps.com",
-    }));
-    expect(cards).toContainEqual(expect.objectContaining({
-      id: "native-checkout",
-      setupUrl: "https://help.shopify.com/manual/checkout",
     }));
     expect(new Set(cards.map((card) => card.status))).toEqual(new Set([
       "Supported",
@@ -290,8 +283,8 @@ describe("recovered admin surfaces contract", () => {
 
   it("preserves setup behavior summaries from help evidence", () => {
     const cards = INTEGRATION_CATEGORIES.flatMap((category) => category.cards);
-    const checkout = cards.find((card) => card.id === "native-checkout");
+    const checkout = cards.find((card) => card.id === "gokwik");
 
-    expect(checkout?.guideSummary.join(" ")).toContain("Shopify-native flow");
+    expect(checkout?.guideSummary.join(" ")).toContain("GoKwik checkout handoff");
   });
 });

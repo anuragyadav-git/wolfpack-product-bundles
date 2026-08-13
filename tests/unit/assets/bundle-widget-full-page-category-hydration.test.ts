@@ -37,13 +37,13 @@ describe('Full Page widget category hydration behavior', () => {
     const entries = getStepCategoryTabEntries({
       categories: [
         {
-          categoryId: 'cat-manual',
+          id: 'cat-manual',
           title: 'Manual',
           products: [{ selectionId: 'gid://shopify/Product/1' }],
-          collectionsSelectedData: [],
+          collections: [],
         },
         {
-          categoryId: 'cat-collection',
+          id: 'cat-collection',
           title: 'Collection',
           products: [],
           collections: [{ handle: 'automated-collection' }],
@@ -75,11 +75,10 @@ describe('Full Page widget category hydration behavior', () => {
     const entries = getStepCategoryTabEntries({
       categories: [
         {
-          categoryId: 'cat-empty',
+          id: 'cat-empty',
           title: 'Empty Category',
           products: [],
-          selectedProducts: [],
-          collectionsSelectedData: [],
+          collections: [],
         },
       ],
     });
@@ -101,7 +100,7 @@ describe('Full Page widget category hydration behavior', () => {
       displayVariantsAsIndividual: true,
       categories: [
         {
-          categoryId: 'cat-collection',
+          id: 'cat-collection',
           title: 'Collection',
           displayVariantsAsIndividualProducts: false,
           collections: [{ handle: 'automated-collection' }],
@@ -124,7 +123,7 @@ describe('Full Page widget category hydration behavior', () => {
       displayVariantsAsIndividual: false,
       categories: [
         {
-          categoryId: 'cat-collection',
+          id: 'cat-collection',
           title: 'Collection',
           displayVariantsAsIndividualProducts: true,
           collections: [{ handle: 'automated-collection' }],
@@ -147,7 +146,7 @@ describe('Full Page widget category hydration behavior', () => {
       displayVariantsAsIndividual: false,
       categories: [
         {
-          categoryId: 'cat-collection',
+          id: 'cat-collection',
           title: 'Collection',
           displayVariantsAsIndividualProducts: false,
           collections: [{ handle: 'automated-collection' }],
@@ -263,7 +262,7 @@ describe('Full Page widget category hydration behavior', () => {
       productIds: [],
     };
     const context: any = {
-      selectedBundle: { steps: [{ categories: [{ categoryId: 'cat-empty', title: 'Empty Category' }] }] },
+      selectedBundle: { steps: [{ categories: [{ id: 'cat-empty', title: 'Empty Category' }] }] },
       stepProductData: [[{ id: 'gid://shopify/Product/1', title: 'Other category product' }]],
       selectedProducts: [{}],
       stepCollectionProductIds: {},

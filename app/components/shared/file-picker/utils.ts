@@ -2,6 +2,10 @@ export const ACCEPTED_TYPES = "image/jpeg,image/png,image/webp,image/gif,image/s
 export const MAX_BYTES = 20 * 1024 * 1024;
 export const MAX_POLLS = 15;
 
+export function isAcceptedFileType(fileType: string, acceptedTypes: string): boolean {
+  return acceptedTypes.split(",").map((type) => type.trim()).includes(fileType);
+}
+
 export function truncateStoreFileText(str: string, max: number): string {
   return str.length > max ? str.slice(0, max - 1) + "…" : str;
 }

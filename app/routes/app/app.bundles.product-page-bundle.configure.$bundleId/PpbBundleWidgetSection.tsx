@@ -126,7 +126,7 @@ export function PpbBundleWidgetSection() {
                   </h4>
                   <s-button
                     variant="secondary"
-                    icon="globe"
+                    icon="language-translate"
                     onClick={() =>
                       openMultiLanguageModal("Bundle Widget", [
                         {

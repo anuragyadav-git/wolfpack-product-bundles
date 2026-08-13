@@ -65,22 +65,12 @@ export function usePpbDisplayOptionsState({
     _savedDisplayOpts?.progressBar?.successText ??
       DEFAULT_PROGRESS_BAR_SUCCESS_TEXT,
   );
-  const [tierTextByRuleId, setTierTextByRuleId] = useState<
-    Record<string, { tierText: string; tierSubtext: string }>
-  >(
-    ((bundle as any).pricing?.messages?.tierTextByRuleId as Record<
-      string,
-      { tierText: string; tierSubtext: string }
-    >) ?? {},
-  );
-  const [tierTextByLocaleByRuleId, setTierTextByLocaleByRuleId] = useState<
-    Record<string, Record<string, { tierText: string; tierSubtext: string }>>
-  >(
-    ((bundle as any).pricing?.messages?.tierTextByLocaleByRuleId as Record<
-      string,
-      Record<string, { tierText: string; tierSubtext: string }>
-    >) ?? {},
-  );
+  const {
+    setTierTextByLocaleByRuleId,
+    setTierTextByRuleId,
+    tierTextByLocaleByRuleId,
+    tierTextByRuleId,
+  } = pricingState;
   const progressBarMultiLangModalRef = useRef<any>(null);
   const [isProgressBarMultiLangModalOpen, setIsProgressBarMultiLangModalOpen] =
     useState(false);

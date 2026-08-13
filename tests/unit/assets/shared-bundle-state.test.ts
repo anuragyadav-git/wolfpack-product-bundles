@@ -106,11 +106,11 @@ describe('shared bundle state skeleton', () => {
 describe('shared bundle state widget wiring', () => {
   it('wires selected count selector into FPB and PPB widgets without changing render paths', () => {
     const fullPageSource = fs.readFileSync(
-      path.join(process.cwd(), 'app/assets/bundle-widget-full-page.js'),
+      path.join(process.cwd(), 'app/assets/bundle-widget-full-page.ts'),
       'utf8',
     );
     const productPageSource = fs.readFileSync(
-      path.join(process.cwd(), 'app/assets/bundle-widget-product-page.js'),
+      path.join(process.cwd(), 'app/assets/bundle-widget-product-page.ts'),
       'utf8',
     );
 

@@ -1,5 +1,9 @@
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const { FPB_HORIZONTAL_TEMPLATE_CONFIG } = require('../../../app/assets/widgets/full-page/templates/horizontal.config.js');
+const {
+  TemplateDesignSystem: { fpb: { contracts: FPB_TEMPLATE_CONTRACTS } = {} } = {},
+} = require('../../../app/assets/widgets/shared/template-design-system.js');
+
+const FPB_HORIZONTAL_TEMPLATE_CONFIG = FPB_TEMPLATE_CONTRACTS?.HORIZONTAL || null;
 
 describe('FPB Horizontal template config contract', () => {
   it('keeps the HORIZONTAL preset mapping', () => {

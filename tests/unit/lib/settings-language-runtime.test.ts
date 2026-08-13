@@ -15,6 +15,8 @@ describe("settings language runtime", () => {
       "fpb.general.addToCartButtonText": "Checkout Bundle",
       "fpb.general.nextButtonText": "Continue",
       "fpb.general.noProductsAvailableText": "Nothing available",
+      "fpb.conditions.amount.greaterThanOrEqualTo": "Spend at least {{conditionAmount}}",
+      "fpb.conditions.weight.lessThanOrEqualTo": "Keep weight below {{conditionWeight}}",
       "ppb.productCard.productCardAddBtnText": "Pick Product",
       "ppb.productCard.productVariantLabelText": "Choose Variant",
       "ppb.productCard.productAddedBtnText": "Picked x{{allowedQuantity}}",
@@ -26,6 +28,7 @@ describe("settings language runtime", () => {
       "ppb.conditions.quantity.greaterThanOrEqualTo": "Choose at least {{conditionQuantity}} items",
       "ppb.conditions.quantity.equalTo": "Choose exactly {{conditionQuantity}} items",
       "ppb.conditions.amount.greaterThanOrEqualTo": "Choose products worth {{conditionAmount}}",
+      "ppb.conditions.weight.lessThanOrEqualTo": "Choose products weighing no more than {{conditionWeight}}",
       "ppb.footer.footerNextBtnText": "Next Slot",
       "ppb.footer.footerFinishBtnText": "Finish Pack",
     },
@@ -54,6 +57,8 @@ describe("settings language runtime", () => {
       addToCartButton: "Checkout Bundle",
       nextButton: "Continue",
       noProductsAvailable: "Nothing available",
+      conditionAmountGreaterThanOrEqualTo: "Spend at least {{conditionAmount}}",
+      conditionWeightLessThanOrEqualTo: "Keep weight below {{conditionWeight}}",
     });
     expect(response.sharedCartLabels).toEqual({
       bundleContainsLabel: "Bundle Items",
@@ -82,6 +87,9 @@ describe("settings language runtime", () => {
         amount: {
           greaterThanOrEqualTo: expect.objectContaining({ value: "Choose products worth {{conditionAmount}}" }),
         },
+        weight: {
+          lessThanOrEqualTo: expect.objectContaining({ value: "Choose products weighing no more than {{conditionWeight}}" }),
+        },
       },
       addToCartBundleBtnText: "Add Pack",
       addToCartBundleBtnLoadingText: "Adding Pack...",
@@ -102,6 +110,7 @@ describe("settings language runtime", () => {
       conditionQuantityGreaterThanOrEqualTo: "Choose at least {{conditionQuantity}} items",
       conditionQuantityEqualTo: "Choose exactly {{conditionQuantity}} items",
       conditionAmountGreaterThanOrEqualTo: "Choose products worth {{conditionAmount}}",
+      conditionWeightLessThanOrEqualTo: "Choose products weighing no more than {{conditionWeight}}",
     });
   });
 });

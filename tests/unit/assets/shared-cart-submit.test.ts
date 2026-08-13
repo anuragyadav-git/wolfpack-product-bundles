@@ -11,7 +11,6 @@ describe('shared cart-submit helpers', () => {
       {
         id: 123,
         quantity: 2,
-        selling_plan: 456,
         properties: {
           _bundle_display_properties: '{"box":"1"}',
           _custom: 'value',
@@ -33,7 +32,6 @@ describe('shared cart-submit helpers', () => {
     expect(Array.from(context.formData.entries())).toEqual([
       ['items[0][id]', '123'],
       ['items[0][quantity]', '2'],
-      ['items[0][selling_plan]', '456'],
       ['items[0][properties][_bundle_display_properties]', '{"box":"1"}'],
       ['items[0][properties][_custom]', 'value'],
       ['items[0][properties][Box]', '1'],
@@ -54,27 +52,7 @@ describe('shared cart-submit helpers', () => {
     });
   });
 
-  it('is included in shared widget modules before storefront widget sources', () => {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const fs = require('node:fs');
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const path = require('node:path');
-    const script = fs.readFileSync(path.join(process.cwd(), 'scripts/build-widget-bundles.js'), 'utf8');
-    const sharedModulesStart = script.indexOf('const WIDGET_SHARED_MODULES = [');
-    const sharedModulesEnd = script.indexOf('];', sharedModulesStart);
-    const sharedModules = script.slice(sharedModulesStart, sharedModulesEnd);
-
-    expect(sharedModules).toContain('app/assets/widgets/shared/engine/cart-submit.js');
-    expect(sharedModules.indexOf('app/assets/widgets/shared/engine/cart-lines.js')).toBeLessThan(
-      sharedModules.indexOf('app/assets/widgets/shared/engine/cart-submit.js'),
-    );
-  });
-
   it('is used by the product-page widget controller', () => {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const fs = require('node:fs');
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const path = require('node:path');
     const source = readProductPageWidgetSources();
 
     expect(source).toContain("import { buildProductPageCartFormData } from '../../shared/engine/cart-submit.js';");

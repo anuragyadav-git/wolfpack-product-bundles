@@ -33,12 +33,13 @@ const controlsPayload = {
   "Background Color": "#fefefe",
   "Logo": "https://cdn.example.com/logo.png",
   "Hide Out Of Stock Products": "Checked",
-  "Add bundle to cart after the last step is completed": "Checked",
+  "showCompareAtPrices": "true",
+  "addBundleToCartAfterLastStepCompleted": "true",
   "Display empty state boxes based on bundle condition": "",
   "Hide Step Titles in completed state": "Checked",
-  "Add to cart when product card is clicked": "",
+  "addToCartWhenProductCardClicked": "",
   "Redirect Settings": "Redirect to Cart",
-  "Validate conditions before add to cart": "Checked",
+  "validateConditionsBeforeAddToCart": "true",
   "Custom CSS for Mix And Match Bundles": ".wpbMixBundle { color: purple; }",
   "Execute Custom Script": "window.__ppbCustom = true;",
   "Side cart selector": ".side-cart",
@@ -205,38 +206,33 @@ describe("Settings Controls runtime mapping", () => {
     const { buildSettingsControlsRuntime } = await import("../../../app/lib/settings-controls-runtime");
 
     const payloadWithoutValidationControl = { ...controlsPayload };
-    delete payloadWithoutValidationControl["Validate conditions before add to cart"];
+    delete payloadWithoutValidationControl["validateConditionsBeforeAddToCart"];
     const runtime = buildSettingsControlsRuntime(payloadWithoutValidationControl);
 
     expect(runtime.settingsControls.productPage.validateConditionsBeforeAddToCart).toBe(true);
   });
 
-  it("supports EB-mapped alias controls for runtime toggles", async () => {
+  it("uses canonical product-page keys only", async () => {
     const { buildSettingsControlsRuntime } = await import("../../../app/lib/settings-controls-runtime");
 
-    const payloadWithoutDeprecatedAlias = { ...controlsPayload };
-    delete payloadWithoutDeprecatedAlias["Add to cart when product card is clicked"];
     const runtime = buildSettingsControlsRuntime({
-      ...payloadWithoutDeprecatedAlias,
-      "addToBundleOnProductCardClicked": "true",
-      "addBundleToCartAfterLastStepCompleted": "",
+      ...controlsPayload,
+      showCompareAtPrices: "false",
+      addToCartWhenProductCardClicked: "true",
+      addBundleToCartAfterLastStepCompleted: "false",
+      validateConditionsBeforeAddToCart: "false",
+      // legacy aliases should no longer be read
+      "Show Compare At Price": "Checked",
+      "Display Compare At Price": "true",
       "addBundleToCartOnDone": "true",
+      "addToBundleOnProductCardClicked": "true",
+      "Add to cart when product card is clicked": "Checked",
+      "Validate conditions before add to cart": "Checked",
     });
 
     expect(runtime.settingsControls.productPage.addToCartWhenProductCardClicked).toBe(true);
-    expect(runtime.settingsControls.productPage.addBundleToCartAfterLastStepCompleted).toBe(true);
-  });
-
-  it("supports compare-at visibility aliases for product-page runtime controls", async () => {
-    const { buildSettingsControlsRuntime } = await import("../../../app/lib/settings-controls-runtime");
-
-    const payload = {
-      ...controlsPayload,
-      "Show Compare At Price": "",
-      showCompareAtPrices: "true",
-    };
-    const runtime = buildSettingsControlsRuntime(payload);
-
-    expect(runtime.settingsControls.productPage.showCompareAtPrices).toBe(true);
+    expect(runtime.settingsControls.productPage.showCompareAtPrices).toBe(false);
+    expect(runtime.settingsControls.productPage.addBundleToCartAfterLastStepCompleted).toBe(false);
+    expect(runtime.settingsControls.productPage.validateConditionsBeforeAddToCart).toBe(false);
   });
 });

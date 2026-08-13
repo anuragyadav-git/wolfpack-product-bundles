@@ -36,35 +36,43 @@ jest.mock("../../../app/db.server", () => ({
 }));
 
 describe("app.attribution route shell", () => {
-  it("renders the Admin title bar before attribution dashboard content loads", async () => {
+  it("renders only the loading bar before attribution content is ready", async () => {
     const { default: AttributionRoute } = await import("../../../app/routes/app/app.attribution");
 
     const view = renderToStaticMarkup(React.createElement(AttributionRoute));
 
-    expect(view).toContain("<ui-title-bar");
-    expect(view).toContain("Analytics");
-    expect(view).toContain("How shoppers move through your bundles");
-    expect(view).not.toContain("Loading funnel summary");
-    expect(view).not.toContain("Loading tracking status");
+    expect(view).toContain('role="progressbar"');
+    expect(view).toContain('aria-label="Loading Analytics"');
+    expect(view).not.toContain("<ui-title-bar");
+    expect(view).not.toContain("How shoppers move through your bundles");
+    expect(view).not.toContain("UTM Pixel Tracking");
+    expect(view).not.toContain("analyticsSkeletonCard");
   });
 
-  it("renders the UTM pixel status card shell while the pixel check is pending", async () => {
-    const { default: AttributionRoute } = await import("../../../app/routes/app/app.attribution");
+  it("keeps the shared readiness boundary pending until analytics and pixel status are both ready", async () => {
+    const { waitForAnalyticsRouteReady } = await import(
+      "../../../app/routes/app/app.attribution/AttributionRouteShell"
+    );
+    let resolvePixelStatus!: (value: { active: boolean }) => void;
+    const pixelStatus = new Promise<{ active: boolean }>((resolve) => {
+      resolvePixelStatus = resolve;
+    });
+    const ready = waitForAnalyticsRouteReady(
+      Promise.resolve({ bundleMetricTrend: [] }),
+      pixelStatus,
+      Promise.resolve(),
+    );
+    const settled = jest.fn();
+    void ready.then(settled);
 
-    const view = renderToStaticMarkup(React.createElement(AttributionRoute));
+    await Promise.resolve();
+    expect(settled).not.toHaveBeenCalled();
 
-    expect(view).toContain("UTM Pixel Tracking");
-    expect(view).toContain("Checking");
-    expect(view).not.toContain("Not active");
-  });
-
-  it("renders spinner-only analytics skeleton cards while dashboard data is delayed", async () => {
-    const { default: AttributionRoute } = await import("../../../app/routes/app/app.attribution");
-
-    const view = renderToStaticMarkup(React.createElement(AttributionRoute));
-
-    expect(view).toContain("<s-spinner");
-    expect(view).not.toContain("Loading engagement chart");
-    expect(view).not.toContain("Loading revenue attribution chart");
+    resolvePixelStatus({ active: true });
+    await expect(ready).resolves.toEqual([
+      { bundleMetricTrend: [] },
+      { active: true },
+      undefined,
+    ]);
   });
 });

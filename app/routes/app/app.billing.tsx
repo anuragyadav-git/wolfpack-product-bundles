@@ -23,6 +23,10 @@ import {
 } from "../../utils/pricing";
 import { navigateBackOrFallback } from "../../lib/navigation";
 import { openSupportChat } from "../../lib/support-chat.client";
+import {
+  AdminPageBackTitle,
+  AdminPageTitleBar,
+} from "../../components/AdminPageNavigation";
 
 // Import shared billing components
 import {
@@ -215,22 +219,26 @@ export default function BillingPage() {
     : 0;
 
   const progressBarTone = getProgressBarTone(usagePercentage);
+  const handleBack = () =>
+    navigateBackOrFallback(navigate, "/app/dashboard", {
+      replaceFallback: true,
+    });
 
   return (
     <>
-      <ui-title-bar title={t("billing.route.title")}>
-        <button
-          variant="breadcrumb"
-          onClick={() =>
-            navigateBackOrFallback(navigate, "/app/dashboard", { replaceFallback: true })
-          }
-        >
-          {t("billing.route.dashboard")}
-        </button>
-      </ui-title-bar>
+      <AdminPageTitleBar
+        title={t("billing.route.title")}
+        breadcrumbLabel={t("billing.route.dashboard")}
+        onBack={handleBack}
+      />
 
       <s-query-container containerName="billing-page">
         <div className={billingStyles.pageShell}>
+          <AdminPageBackTitle
+            title={t("billing.route.title")}
+            backLabel="Back to previous page"
+            onBack={handleBack}
+          />
           <s-stack direction="block" gap="large">
 
           {showSuccessBanner && (

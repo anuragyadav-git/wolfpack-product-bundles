@@ -20,10 +20,10 @@ function readProductPageWidgetSources() {
     .map((file) => `app/assets/widgets/product-page/methods/${file}`);
 
   return [
-    'app/assets/bundle-widget-product-page.js',
-    'app/assets/widgets/product-page/templates/modal-slot-template.js',
-    'app/assets/widgets/product-page/templates/cascade-template.js',
-    'app/assets/widgets/product-page/templates/cognive-template.js',
+    'app/assets/bundle-widget-product-page.ts',
+    'app/assets/widgets/product-page/templates/modal-slot-template.ts',
+    'app/assets/widgets/product-page/templates/cascade-template.ts',
+    'app/assets/widgets/product-page/templates/grid-template.ts',
     ...methodFiles,
   ]
     .map((filePath) => readFileSync(join(process.cwd(), filePath), 'utf8'))
@@ -37,7 +37,7 @@ function readFullPageWidgetSources() {
     .map((file) => `app/assets/widgets/full-page/methods/${file}`);
 
   return [
-    'app/assets/bundle-widget-full-page.js',
+    'app/assets/bundle-widget-full-page.ts',
     ...methodFiles,
   ]
     .map((filePath) => readFileSync(join(process.cwd(), filePath), 'utf8'))
@@ -68,7 +68,7 @@ interface ParseResult {
 
 // ============================================================
 // Pure logic extracted from loadBundleData()
-// (must stay in sync with app/assets/bundle-widget-product-page.js)
+// (must stay in sync with app/assets/bundle-widget-product-page.ts)
 // ============================================================
 
 /**
@@ -310,9 +310,12 @@ describe('resolveProductPageStorefrontApiBase — storefront hydration URLs', ()
 
 describe('Product Page bundle cart add transport contract', () => {
   it('submits PPB cart adds as EB-style multipart fields to /cart/add', () => {
-    const source = readProductPageWidgetSources();
+    const source = readFileSync(
+      join(process.cwd(), 'app/assets/widgets/product-page/methods/cart-methods.ts'),
+      'utf8',
+    );
     const cartSubmitSource = readFileSync(
-      join(process.cwd(), 'app/assets/widgets/shared/engine/cart-submit.js'),
+      join(process.cwd(), 'app/assets/widgets/shared/engine/cart-submit.ts'),
       'utf8',
     );
 
@@ -333,7 +336,10 @@ describe('Product Page bundle cart add transport contract', () => {
   });
 
   it('keeps FPB cart adds on JSON /cart/add.js', () => {
-    const source = readFullPageWidgetSources();
+    const source = readFileSync(
+      join(process.cwd(), 'app/assets/widgets/full-page/methods/step-footer-methods.ts'),
+      'utf8',
+    );
 
     expect(source).toContain("fetch('/cart/add.js',");
     expect(source).toContain("'Content-Type': 'application/json'");
@@ -341,11 +347,17 @@ describe('Product Page bundle cart add transport contract', () => {
   });
 
   it('syncs EB-style bundle_details cart metafields for PPB and FPB through the signed app proxy', () => {
-    const ppbSource = readProductPageWidgetSources();
-    const fpbSource = readFullPageWidgetSources();
+    const ppbSource = readFileSync(
+      join(process.cwd(), 'app/assets/widgets/product-page/methods/cart-methods.ts'),
+      'utf8',
+    );
+    const fpbSource = [
+      readFileSync(join(process.cwd(), 'app/assets/widgets/full-page/methods/runtime-cart-settings-methods.ts'), 'utf8'),
+      readFileSync(join(process.cwd(), 'app/assets/widgets/full-page/methods/step-footer-methods.ts'), 'utf8'),
+    ].join('\n');
 
     [ppbSource, fpbSource].forEach((source) => {
-      expect(source).toContain("fetch('/apps/product-bundles/api/cart-bundle-details'");
+      expect(source).toContain("fetch(buildStorefrontApiPath('cart-bundle-details')");
       expect(source).toContain("if (data?.ok !== true)");
       expect(source).toContain("fetch('/cart.js?app=wolfpackProductBundles'");
       expect(source).toContain('Failed to sync bundle_details cart metafield');
@@ -354,7 +366,7 @@ describe('Product Page bundle cart add transport contract', () => {
       expect(source).not.toContain('fetch(`/api/${version}/graphql.json`');
     });
 
-    expect(readFileSync(join(process.cwd(), 'app/assets/widgets/shared/engine/cart-submit.js'), 'utf8')).toContain('bundleDetailsKey: `${offerId}_${sessionKey}`');
+    expect(readFileSync(join(process.cwd(), 'app/assets/widgets/shared/engine/cart-submit.ts'), 'utf8')).toContain('bundleDetailsKey: `${offerId}_${sessionKey}`');
     expect(ppbSource).toContain('await this.syncBundleDetailsCartMetafield(cartContext.bundleDetailsKey, cartContext.sourceProperties)');
     expect(fpbSource).toContain('await this.syncBundleDetailsCartMetafield(`${offerId}_${sessionKey}`, sourceProperties)');
   });

@@ -4,6 +4,7 @@ import {
   initializeConfigureRouteState,
   markConfigureRouteDirty,
   openConfigureModal,
+  resetConfigureRouteNavigation,
   setActiveConfigureSection,
   setActiveConfigureTabIndex,
   setAvailablePages,
@@ -42,6 +43,34 @@ describe("configureRouteStateSlice", () => {
     expect(state.activeSection).toBe("step_setup");
     expect(state.activeTabIndex).toBe(0);
     expect(state.isDirty).toBe(false);
+  });
+
+  it("preserves the current step and section when loader data is rehydrated after save", () => {
+    let state = configureRouteStateReducer(undefined, setActiveConfigureTabIndex(1));
+    state = configureRouteStateReducer(state, setActiveConfigureSection("discount_pricing"));
+
+    state = configureRouteStateReducer(
+      state,
+      initializeConfigureRouteState({
+        bundleProduct: { id: "product-1", title: "Updated bundle" },
+        productTitle: "Updated bundle",
+      }),
+    );
+
+    expect(state.activeTabIndex).toBe(1);
+    expect(state.activeSection).toBe("discount_pricing");
+  });
+
+  it("resets configure navigation explicitly for a different bundle", () => {
+    let state = configureRouteStateReducer(undefined, setActiveConfigureTabIndex(1));
+    state = configureRouteStateReducer(state, setActiveConfigureSection("discount_pricing"));
+    state = configureRouteStateReducer(state, setConfigureForceNavigation(true));
+
+    state = configureRouteStateReducer(state, resetConfigureRouteNavigation());
+
+    expect(state.activeTabIndex).toBe(0);
+    expect(state.activeSection).toBe("step_setup");
+    expect(state.forceNavigation).toBe(false);
   });
 
   it("tracks configure modal state and current modal step", () => {

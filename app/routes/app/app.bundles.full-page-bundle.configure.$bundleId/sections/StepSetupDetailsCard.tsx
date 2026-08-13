@@ -3,9 +3,11 @@ import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
 export function FpbStepSetupDetailsCard({
   flow,
   step,
+  isFirstStep,
 }: {
   flow: ConfigureBundleFlowContext;
   step: any;
+  isFirstStep: boolean;
 }) {
   const {
     cloneStep,
@@ -17,52 +19,60 @@ export function FpbStepSetupDetailsCard({
   } = flow;
 
   return (
-    <>
-      <div className={fullPageBundleStyles.card}>
-        <div className={fullPageBundleStyles.stepSetupHeader}>
-          <div className={fullPageBundleStyles.stepSetupTitleGroup}>
-            <h3 className={fullPageBundleStyles.stepSetupTitle}>Step Setup</h3>
-            <s-switch
-              accessibilityLabel="Enable step"
-              checked={step.enabled !== false || undefined}
-              onChange={(e) => {
-                stepsState.updateStepField(
-                  step.id,
-                  "enabled",
-                  (e.target as HTMLInputElement).checked,
-                );
-                markAsDirty();
-              }}
-            />
-          </div>
-          <div className={fullPageBundleStyles.stepSetupActions}>
-            <span title="Multi Language">
-              <s-button
-                variant="tertiary"
-                icon="globe"
-                accessibilityLabel="Multi Language"
-                onClick={() => openStepMultiLanguageModal(step.id)}
-              />
-            </span>
-            <span title="Clone current step">
-              <s-button
-                variant="tertiary"
-                icon="duplicate"
-                accessibilityLabel="Clone current step"
-                onClick={() => cloneStep(step.id)}
-              />
-            </span>
-            <span title="Delete current step">
-              <s-button
-                variant="tertiary"
-                icon="delete"
-                tone="critical"
-                accessibilityLabel="Delete current step"
-                onClick={() => deleteStep(step.id)}
-              />
-            </span>
-          </div>
+    <div className={fullPageBundleStyles.stepSetupDetails}>
+      <div className={fullPageBundleStyles.stepSetupHeader}>
+        <div className={fullPageBundleStyles.stepSetupTitleGroup}>
+          <h3 className={fullPageBundleStyles.stepSetupTitle}>Step Setup</h3>
+          <s-switch
+            accessibilityLabel="Enable step"
+            checked={isFirstStep || step.enabled !== false || undefined}
+            disabled={isFirstStep || undefined}
+            onChange={(e) => {
+              stepsState.updateStepField(
+                step.id,
+                "enabled",
+                (e.target as HTMLInputElement).checked,
+              );
+              markAsDirty();
+            }}
+          />
         </div>
+        <div className={fullPageBundleStyles.stepSetupActions}>
+          <span title="Multi Language">
+            <s-button
+              variant="tertiary"
+              icon="language-translate"
+              accessibilityLabel="Multi Language"
+              onClick={() => openStepMultiLanguageModal(step.id)}
+            />
+          </span>
+          <span title="Clone current step">
+            <s-button
+              variant="tertiary"
+              icon="duplicate"
+              accessibilityLabel="Clone current step"
+              onClick={() => cloneStep(step.id)}
+            />
+          </span>
+          <span title="Delete current step">
+            <s-button
+              variant="tertiary"
+              icon="delete"
+              tone="critical"
+              accessibilityLabel="Delete current step"
+              onClick={() => deleteStep(step.id)}
+            />
+          </span>
+        </div>
+      </div>
+      <div
+        className={
+          step.enabled === false && !isFirstStep
+            ? fullPageBundleStyles.stepDisabledContent
+            : undefined
+        }
+        inert={step.enabled === false && !isFirstStep ? "" : undefined}
+      >
         <p className={fullPageBundleStyles.stepSetupDescription}>
           Edit your step name (Only visible if more than one step is present)
         </p>
@@ -83,6 +93,6 @@ export function FpbStepSetupDetailsCard({
           />
         </s-stack>
       </div>
-    </>
+    </div>
   );
 }

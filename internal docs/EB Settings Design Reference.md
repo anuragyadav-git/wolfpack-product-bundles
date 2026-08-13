@@ -5,7 +5,7 @@ title: EB Settings Design Reference
 type: reference
 status: authoritative
 summary: Live EB Settings Design request, state, and storefront-mapping contract used to implement Wolfpack Design settings.
-last_audited: 2026-07-23
+last_audited: 2026-08-13
 owners:
   - engineering
 domains:
@@ -198,12 +198,18 @@ structures.
 
 The preview consumes the normalized output of `buildSettingsDesignRuntime`
 rather than maintaining a separate partial color mapper. A field-target registry
-associates every editable preview-relevant control with its semantic surface,
-applicable template set, and representative Builder, Product Picker, Cart /
-Summary, Loading, Validation, or Upsell surface. The surface selector exposes
-only scenes supported by the selected template. A template change preserves a
-valid surface and otherwise returns to Builder. Disabled loading-GIF placeholders
-are not treated as configurable preview fields.
+associates every editable preview-relevant control with its semantic component
+surface and applicable template set. The selector exposes Bundle header,
+Navigation, Categories, Product cards, Product slots, Product picker, Cart /
+Summary, Loading, Validation, and Upsell only where the selected template owns
+that component. There is no synthetic whole-builder surface. A template change
+preserves a valid component and otherwise selects Product cards, or Product
+slots for a slot template. The Images & GIFs section owns
+the store-level FPB loading GIF and background controls; either control selects
+the pure Loading surface, which renders the merchant GIF or the default spinner
+without provisional bundle content. While Loading is selected, Image Fit is
+disabled. The empty GIF control is one clickable drop zone with the instruction
+`Click to upload a loading GIF`; it does not render a nested upload button.
 
 Descriptor identity and layout modes come from `mapTemplateSelection` and the
 FPB/PPB storefront template registries. The Admin adapter owns only preview
@@ -222,6 +228,17 @@ The local preview deliberately does not import the storefront widget runtime,
 fetch bundle data, embed an iframe, or reproduce cart mutations. The separate
 Preview Bundle action remains the path to a real storefront bundle and is
 disabled when no storefront URL exists.
+
+The Design inspector is contextual rather than global. It filters navigation
+groups and fields through the selected bundle type, canonical template, and
+component surface, so a merchant never sees a control that has no target in the
+visible preview. Shared tokens may remain available on each component they
+actually affect; FPB-only loading controls are not exposed for PPB templates.
+
+Deterministic previews support local-only interaction for product add and
+quantity controls, discount-progress advancement, and the mobile summary
+footer disclosure. These interactions update preview state only and never call
+storefront APIs, mutate a cart, or alter persisted Design settings.
 
 ## Style Presets
 
@@ -315,6 +332,16 @@ body[gbb-mix-consolidated-design="true"][gbbmix-template-type="PDP_INPAGE"] {
 | Bundle Buttons Corner Style + Base | `productCard.buttonBorderRadius`, `productCard.quantitySelectorButtonBorderRadius`, `cartFooter.cartFooterButtonsBorderRadius`, `navigationBanner.tabsCornerRadius`, `mixAndMatchConfig.productCard.productCardButtonBorderRadius`, `mixAndMatchConfig.productCard.productCardQuantityButtonBorderRadius`, `mixAndMatchConfig.footer.footerButtonsBorderRadius`, `mixAndMatchConfig.addBundleBtn.addBundleBtnBorderRadius`, `mixAndMatchConfig.tabs.tabsBorderRadius` |
 | Product Card & Cart Corner Style + Base | `productCard.cardBorderRadius`, `cartFooter.cartFooterBorderRadius`, `mixAndMatchConfig.productCard.productCardBorderRadius`, `mixAndMatchConfig.footer.footerBorderRadius`; derived image radii at `productCard.cardImageBorderRadius`, `cartFooter.cartFooterProductImageBorderRadius`, `mixAndMatchConfig.productCard.productCardImageBorderRadius` |
 | Image Fit | `productCard.productImageFit`, `mixAndMatchConfig.productCard.productCardImageFit` |
+| FPB Loading GIF | `generalSettings.loadingGifUrl`; normalized runtime at `generalSettings.loadingScreen.gifUrl` |
+| Loading Screen Background Color | `generalSettings.loadingBgColor`; normalized runtime at `generalSettings.loadingScreen.backgroundColor` |
+
+The app-proxy route renders before the FPB controller can fetch or normalize
+bundle configuration. Loading appearance must therefore be persisted in the
+store-level `full_page` DesignSettings record and embedded into the proxy marker
+server-side. Deferring this value to widget initialization would flash the
+default screen before applying the merchant setting. The same embedded values
+are transferred to the controller for later product-grid and step-transition
+loading states.
 
 ## Expert Controls Mapping
 
@@ -327,7 +354,6 @@ When Expert Color Controls are enabled, EB keeps Brand Colors in `stylePresets` 
 | General | Step Text Color | `navigationBanner.navigationBannerStepTextColor` |
 | General | Product Page Title Color | `generalSettings.productPageTitleColor` |
 | General | Step Progress Bar Empty Color | `navigationBanner.navigationBannerStepProgressBarEmptyColor` |
-| General | Loading Screen Background Color | `generalSettings.loadingBgColor` |
 | General | Condition Toast Background Color | `generalSettings.conditionToastBgColor`, `mixAndMatchConfig.toast.toastBgColor` |
 | General | Condition Toast Text Color | `generalSettings.conditionToastTextColor`, `mixAndMatchConfig.toast.toastTextColor` |
 | Categories | Active Tab Background Color | `navigationBanner.tabsActiveBgColor`, `categoryBlock.tabActiveBgColor`, `mixAndMatchConfig.tabs.tabsActiveBgColor` |

@@ -6,6 +6,16 @@ export interface DashboardTableRow<TBundle, TStatusDisplay, TTypeDisplay> {
   type: TTypeDisplay;
 }
 
+const DASHBOARD_BUNDLES_PER_PAGE_CHOICES = new Set([10, 20, 50]);
+
+export function getDashboardBundlesPerPageChoice(
+  values: readonly string[],
+): number | null {
+  if (values.length !== 1) return null;
+  const value = Number(values[0]);
+  return DASHBOARD_BUNDLES_PER_PAGE_CHOICES.has(value) ? value : null;
+}
+
 export function buildDashboardTableRows<
   TBundle extends {
     id: string;

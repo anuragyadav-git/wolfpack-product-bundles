@@ -46,7 +46,7 @@ export function FpbProgressBarOptions({
           </s-stack>
           <s-button
             variant="secondary"
-            icon="globe"
+            icon="language-translate"
             disabled={
               !pricingState.showDiscountProgressBar ||
               (pricingState.pricingDisplayOptions.progressBar.type ||
@@ -62,26 +62,38 @@ export function FpbProgressBarOptions({
         {pricingState.showDiscountProgressBar && (
           <div className={fullPageBundleStyles.nestedDisplayOptions}>
             <s-stack direction="block" gap="small">
-              <s-choice-list
-                label="Progress bar type"
-                labelAccessibilityVisibility="exclusive"
-                values={[
-                  pricingState.pricingDisplayOptions.progressBar.type ||
-                    "step_based",
-                ]}
-                onChange={(e) => {
-                  const val = (
-                    (e.currentTarget as any).values as string[] | undefined
-                  )?.[0];
-                  if (val)
-                    pricingState.setProgressBarType(
-                      val as "simple" | "step_based",
-                    );
-                }}
-              >
-                <s-choice value="simple">Simple Bar</s-choice>
-                <s-choice value="step_based">Step-Based Bar</s-choice>
-              </s-choice-list>
+              <s-stack direction="inline" gap="small" alignItems="center">
+                <s-choice-list
+                  label="Simple progress bar"
+                  labelAccessibilityVisibility="exclusive"
+                  values={
+                    (pricingState.pricingDisplayOptions.progressBar.type ||
+                      "step_based") === "simple"
+                      ? ["simple"]
+                      : []
+                  }
+                  onChange={() => {
+                    pricingState.setProgressBarType("simple");
+                  }}
+                >
+                  <s-choice value="simple">Simple Bar</s-choice>
+                </s-choice-list>
+                <s-choice-list
+                  label="Step-based progress bar"
+                  labelAccessibilityVisibility="exclusive"
+                  values={
+                    (pricingState.pricingDisplayOptions.progressBar.type ||
+                      "step_based") === "step_based"
+                      ? ["step_based"]
+                      : []
+                  }
+                  onChange={() => {
+                    pricingState.setProgressBarType("step_based");
+                  }}
+                >
+                  <s-choice value="step_based">Step-Based Bar</s-choice>
+                </s-choice-list>
+              </s-stack>
               {(pricingState.pricingDisplayOptions.progressBar.type ||
                 "step_based") === "step_based" ? (
                 <s-stack direction="block" gap="small">
@@ -111,7 +123,10 @@ export function FpbProgressBarOptions({
                           >
                             Rule #{index + 1}
                           </p>
-                          <s-stack direction="inline" gap="small">
+                          <s-grid
+                            gridTemplateColumns="repeat(2, minmax(0, 1fr))"
+                            gap="small"
+                          >
                             <s-text-field
                               label="Tier Text"
                               value={tierTextByRuleId[rule.id]?.tierText ?? ""}
@@ -149,7 +164,7 @@ export function FpbProgressBarOptions({
                               }}
                               autocomplete="off"
                             />
-                          </s-stack>
+                          </s-grid>
                         </s-stack>
                       </div>
                     ))

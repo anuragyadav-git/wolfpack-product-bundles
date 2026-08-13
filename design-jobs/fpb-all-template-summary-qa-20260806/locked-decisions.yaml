@@ -1,0 +1,207 @@
+{
+  "schema_version": 1,
+  "job_id": "fpb-all-template-summary-qa-20260806",
+  "revision": 3,
+  "status": "approved",
+  "locked": [
+    {
+      "id": "decision-001",
+      "question": "Which FPB templates are in scope?",
+      "options_considered": [
+        "Classic only",
+        "All four FPB presets"
+      ],
+      "recommendation": "All four FPB presets",
+      "selected_value": "Standard, Classic, Compact, and Horizontal",
+      "rationale": "The user explicitly required all FPB design templates.",
+      "evidence_ids": [
+        "user-objective-2026-08-04"
+      ],
+      "status": "locked",
+      "approved_by": "Aditya Awasthi",
+      "approved_at": "2026-08-04T17:25:02Z",
+      "revision_introduced": 1,
+      "affected_artifacts": [
+        "component-brief.md",
+        "state-matrix.md",
+        "acceptance-criteria.md"
+      ]
+    },
+    {
+      "id": "decision-002",
+      "question": "What defines configurable-state coverage?",
+      "options_considered": [
+        "New ad hoc checklist",
+        "Canonical earlier FPB feature matrix plus current-state verification"
+      ],
+      "recommendation": "Canonical matrix plus fresh verification",
+      "selected_value": "Use the earlier FPB feature matrix as the requirement ledger, but require fresh post-redesign proof.",
+      "rationale": "The user explicitly named the earlier matrices, while current evidence must remain authoritative.",
+      "evidence_ids": [
+        "fpb-feature-to-storefront-matrix"
+      ],
+      "status": "locked",
+      "approved_by": "Aditya Awasthi",
+      "approved_at": "2026-08-04T17:25:02Z",
+      "revision_introduced": 1,
+      "affected_artifacts": [
+        "state-matrix.md",
+        "browser-test-plan.yaml"
+      ]
+    },
+    {
+      "id": "decision-003",
+      "question": "How should storefront changes be refreshed and verified?",
+      "options_considered": [
+        "Restart development server",
+        "Hard reload existing storefront"
+      ],
+      "recommendation": "Hard reload existing storefront",
+      "selected_value": "Never restart the supplied dev server; clear/bypass cache and hard reload before each storefront verification pass.",
+      "rationale": "The user explicitly requested hard reloads without dev-server restarts.",
+      "evidence_ids": [
+        "user-objective-2026-08-04"
+      ],
+      "status": "locked",
+      "approved_by": "Aditya Awasthi",
+      "approved_at": "2026-08-04T17:25:02Z",
+      "revision_introduced": 1,
+      "affected_artifacts": [
+        "browser-test-plan.yaml",
+        "acceptance-criteria.md"
+      ]
+    },
+    {
+      "id": "decision-004",
+      "question": "How is the approved Classic redesign related to this job?",
+      "options_considered": [
+        "Overwrite Classic history",
+        "Preserve Classic and use a successor program job"
+      ],
+      "recommendation": "Preserve Classic and use a successor program job",
+      "selected_value": "The approved Classic Calm Review Panel remains its own immutable design history and becomes the Classic baseline for this all-template program.",
+      "rationale": "The storefront design director requires a successor for material scope expansion.",
+      "evidence_ids": [
+        "fpb-classic-summary-20260804"
+      ],
+      "status": "locked",
+      "approved_by": "Aditya Awasthi",
+      "approved_at": "2026-08-04T17:25:02Z",
+      "revision_introduced": 1,
+      "affected_artifacts": [
+        "component-brief.md",
+        "direction-comparison.md",
+        "implementation-handoff.md"
+      ]
+    },
+    {
+      "id": "decision-005",
+      "question": "How should implementation be committed?",
+      "options_considered": [
+        "One final commit",
+        "Verified intermediate commits"
+      ],
+      "recommendation": "Verified intermediate commits",
+      "selected_value": "Commit each validated template/state slice with impact analysis.",
+      "rationale": "The user explicitly requested commits in between.",
+      "evidence_ids": [
+        "user-objective-2026-08-04"
+      ],
+      "status": "locked",
+      "approved_by": "Aditya Awasthi",
+      "approved_at": "2026-08-04T17:25:02Z",
+      "revision_introduced": 1,
+      "affected_artifacts": [
+        "acceptance-criteria.md",
+        "implementation-handoff.md"
+      ]
+    },
+    {
+      "id": "decision-006",
+      "question": "Which all-template summary direction should govern Standard, Compact, Horizontal, and the shared mobile tray?",
+      "options_considered": [
+        "Direction A - Unified Calm Review System",
+        "Direction B - Preset-Pure Target Mirroring",
+        "Direction C - Guided Qualification System"
+      ],
+      "recommendation": "Direction A - Unified Calm Review System",
+      "selected_value": "Direction A - Unified Calm Review System",
+      "rationale": "The user explicitly approved Direction A for the expanded all-template scope.",
+      "evidence_ids": [
+        "VA-01 through VA-15",
+        "GAP-01 through GAP-08"
+      ],
+      "status": "locked",
+      "approved_by": "Aditya Awasthi",
+      "approved_at": "2026-08-04T19:05:46Z",
+      "revision_introduced": 1,
+      "affected_artifacts": [
+        "direction-comparison.md",
+        "component-anatomy.md",
+        "state-matrix.md",
+        "responsive-contract.md",
+        "interaction-contract.md",
+        "design-tokens.json",
+        "implementation-handoff.md"
+      ]
+    },
+    {
+      "id": "decision-007",
+      "question": "At what measured FPB widget-container width should the desktop summary sidebar become the shared mobile/tablet tray?",
+      "options_considered": [
+        "Direction-A recommendation: sidebar at 1024px and above; tray below 1024px",
+        "Legacy narrow boundary: sidebar at 769px and above; tray at 768px and below"
+      ],
+      "recommendation": "Direction-A recommendation: sidebar at 1024px and above; tray below 1024px",
+      "selected_value": "Sidebar at 1024px and above; shared tray below 1024px, based on measured FPB widget-container width",
+      "rationale": "The user approved the recommended RD-001 responsive boundary.",
+      "evidence_ids": [
+        "RD-001",
+        "B-01",
+        "B-02"
+      ],
+      "status": "locked",
+      "approved_by": "Aditya Awasthi",
+      "approved_at": "2026-08-04T19:15:56Z",
+      "revision_introduced": 2,
+      "affected_artifacts": [
+        "responsive-contract.md",
+        "interaction-contract.md",
+        "browser-test-plan.yaml",
+        "acceptance-criteria.md",
+        "implementation-handoff.md"
+      ]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "assumption-003",
+      "value": "Use the named responsive inset, expanded-height, and 44px hit-target recommendations as conservative implementation starting points; visual QA may tune them within the approved anatomy, responsive behavior, accessibility minimums, and recorded tolerances.",
+      "basis": "Repository-observed and accessibility-guided recommendation",
+      "status": "accepted-conservative-default",
+      "affected_artifacts": [
+        "design-tokens.json",
+        "responsive-contract.md",
+        "interaction-contract.md",
+        "browser-test-plan.yaml"
+      ]
+    }
+  ],
+  "rejected": [],
+  "open": [],
+  "superseded": [],
+  "decision_shape": {
+    "id": "",
+    "question": "",
+    "options_considered": [],
+    "recommendation": "",
+    "selected_value": "",
+    "rationale": "",
+    "evidence_ids": [],
+    "status": "open",
+    "approved_by": "",
+    "approved_at": "",
+    "revision_introduced": 1,
+    "affected_artifacts": []
+  }
+}

@@ -8,21 +8,12 @@
  * @see https://shopify.dev/docs/apps/build/online-store/theme-app-extensions
  */
 
-import { AppLogger } from "../../lib/logger";
-// Import types
-import type {
-  ThemeEditorDeepLink,
-  FullPageBundleResult,
-  ProductBundleWidgetStatus,
-} from "./types";
-
 // Import module functions
 import {
   generateThemeEditorDeepLink,
   generateProductBundleInstallationLink,
   generateProductBundleConfigurationLink
 } from "./widget-theme-editor-links.server";
-import { createFullPageBundle } from "./widget-full-page-bundle.server";
 import { validateProductBundleWidgetSetup } from "./widget-product-bundle.server";
 /**
  * Widget Installation Service
@@ -30,7 +21,6 @@ import { validateProductBundleWidgetSetup } from "./widget-product-bundle.server
  * Static class that provides all widget installation functionality.
  * Methods are organized into categories:
  * - Deep Link Generation (Theme Editor Navigation)
- * - Full-Page Bundle Operations
  * - Product Bundle Operations
  */
 export class WidgetInstallationService {
@@ -53,15 +43,6 @@ export class WidgetInstallationService {
    * Generate configuration link for bundle on a specific product
    */
   static generateProductBundleConfigurationLink = generateProductBundleConfigurationLink;
-
-  // ==========================================================================
-  // Full-Page Bundle Operations (Production-Ready)
-  // ==========================================================================
-
-  /**
-   * Create a full-page bundle with production-ready, App Store compliant flow
-   */
-  static createFullPageBundle = createFullPageBundle;
 
   // ==========================================================================
   // Product Bundle Operations (Production-Ready)

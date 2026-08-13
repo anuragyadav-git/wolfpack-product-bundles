@@ -1,3 +1,5 @@
+import type { CheckoutOffer } from "../../checkout-bundle-offers.server";
+
 /**
  * Metafield Sync Types
  *
@@ -55,23 +57,22 @@ export interface BundleUiConfig {
   description: string;
   status: string;
   bundleType: string;
+  publicNumber?: number | null;
   shopifyProductId: string | null;
   bundleDesignTemplate?: string | null;
   bundleDesignPresetId?: string | null;
-  bundleDesignTemplateData?: { templateId: string } | null;
   defaultProductsData?: Record<string, unknown>;
   boxSelection?: Record<string, unknown> | null;
   bundleUpsellConfig?: Record<string, unknown> | null;
   bundleTextConfig?: Record<string, unknown> | null;
   bundleLevelCss?: string | null;
   personalizationData?: Record<string, unknown> | null;
+  checkoutOffers?: CheckoutOffer[];
   discountDisplayOverride?: Record<string, unknown> | null;
-  individualSellingPlanSelection?: Record<string, unknown>;
   validateQuantityPerProduct?: Record<string, unknown>;
   productSlotsEnabled?: boolean;
   productSlotIconUrl?: string | null;
   useSingleStepCategoriesAsBundleSteps?: boolean;
-  renderFilledSlotsAsHorizontalStacked?: boolean | null;
   showProductComparedAtPrice?: boolean;
   bundleVariantId: string;
   steps: BundleUiStep[];
@@ -125,6 +126,8 @@ export interface BundleUiStep {
   addonIconUrl?: string | null;
   /** Show products at $0.00 in this step. */
   addonDisplayFree?: boolean;
+  /** Tier, eligibility, discount, and quantity contract used by checkout offers. */
+  addonTiers?: Record<string, unknown>[];
   /** Lock this step tab until prior steps meet minQuantity. */
   addonUnlockAfterCompletion?: boolean;
   /** If true, this step is pre-filled and not shown in the bottom-sheet modal tabs. */
@@ -187,18 +190,4 @@ export interface BundleTextOverrides {
   addingToCart?: string;
   /** PDP incomplete-steps state — "Complete All Steps to Continue" */
   completeSteps?: string;
-}
-
-/**
- * Component parents data for MERGE operation
- */
-export interface ComponentParentsData {
-  id: string;
-  component_reference: {
-    value: string[];
-  };
-  component_quantities: {
-    value: number[];
-  };
-  price_adjustment: PriceAdjustment;
 }

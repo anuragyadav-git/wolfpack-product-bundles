@@ -5,7 +5,7 @@ title: Cart Transform Function
 type: architecture
 status: authoritative
 summary: Runtime-token-verified Shopify Cart Transform architecture and fail-closed bundle pricing contract.
-last_audited: 2026-07-31
+last_audited: 2026-08-13
 owners:
   - engineering
 domains:
@@ -121,6 +121,13 @@ The token payload contains:
 The HMAC covers the base64url payload string, so Rust verifies the signature before decoding JSON. If `runtime_token_secret` is configured on the CartTransform owner and a line token is missing, tampered, or mismatched against actual cart line variants/quantities, the function emits no merge or add-on discount.
 
 Parent bundle metafields are still written for EXPAND/display paths: `component_reference`, `component_quantities`, `price_adjustment`, and `component_pricing`. Component-variant `$app:component_parents` is no longer the configured MERGE source.
+
+MERGE output also preserves the verified `_wolfpack_bundle_runtime` token and the
+base `_wolfpackProductBundle:OfferId` on every parent line. The Checkout UI extension
+uses those two attributes as its authorization anchor and bundle-instance key; it
+still re-reads Shopify's unstable cart-line ID before each mutation. Add-on lines
+receive a freshly signed exact variant/quantity token from the authenticated checkout
+route whenever their selection or quantity changes.
 
 ### FPB add-on and free-gift pricing scenarios
 

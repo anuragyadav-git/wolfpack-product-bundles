@@ -45,4 +45,30 @@ describe("Settings loader critical path", () => {
     await expect((result as any).data.settingsPage).resolves.toBeNull();
     await expect((result as any).data.previewBundles).resolves.toEqual([]);
   });
+
+  it("keeps the Settings landing page pending until data and the loading bar are ready", async () => {
+    const settings = makeDeferred<Record<string, unknown> | null>();
+    const bundles = makeDeferred<unknown[]>();
+    const loadingBar = makeDeferred<void>();
+    const routeReady = jest.fn();
+    const { waitForSettingsRouteReady } = await import(
+      "../../../app/routes/app/app.settings"
+    );
+
+    void waitForSettingsRouteReady(
+      settings.promise,
+      bundles.promise,
+      loadingBar.promise,
+    ).then(routeReady);
+
+    settings.resolve(null);
+    bundles.resolve([]);
+    await Promise.resolve();
+    expect(routeReady).not.toHaveBeenCalled();
+
+    loadingBar.resolve();
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(routeReady).toHaveBeenCalledWith([null, [], undefined]);
+  });
 });

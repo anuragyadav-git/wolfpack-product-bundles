@@ -1,0 +1,30 @@
+{
+  "config": [
+    "fpb-all-templates",
+    "fpb-standard-summary-mode",
+    "ppb-all-templates",
+    "ppb-template-selection"
+  ],
+  "copy": [
+    "addToCartButton",
+    "fpb-all-templates",
+    "ppb-all-templates",
+    "summaryTitle"
+  ],
+  "template": [
+    "fpb-standard",
+    "fpb-classic",
+    "fpb-compact",
+    "fpb-horizontal",
+    "ppb-grid",
+    "ppb-list",
+    "ppb-horizontal-slots",
+    "ppb-vertical-slots"
+  ],
+  "state": [
+    "fpb-all-templates",
+    "fpb-summary-mode",
+    "ppb-all-templates",
+    "ppb-template-resolution"
+  ]
+}

@@ -1,45 +1,56 @@
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const {
   PPB_TEMPLATE_CONFIGS,
-  resolveProductPageTemplateConfig,
 } = require('../../../app/assets/widgets/product-page/templates/registry.js');
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { TemplateDesignSystem } = require('../../../app/assets/widgets/shared/template-design-system.js');
+const { resolvePpbTemplate } = TemplateDesignSystem;
 
 describe('PPB template registry resolver', () => {
-  it('maps PDP_INPAGE + COGNIVE to Grid', () => {
-    expect(resolveProductPageTemplateConfig({
+  it('maps PDP_INPAGE + GRID to Grid', () => {
+    expect(resolvePpbTemplate({
       templateType: 'PDP_INPAGE',
-      designPreset: 'COGNIVE',
+      designPreset: 'GRID',
     }).id).toBe('GRID');
   });
 
-  it('maps PDP_INPAGE + CASCADE to List', () => {
-    expect(resolveProductPageTemplateConfig({
+  it('maps PDP_INPAGE + LIST to List', () => {
+    expect(resolvePpbTemplate({
       templateType: 'PDP_INPAGE',
-      designPreset: 'CASCADE',
+      designPreset: 'LIST',
     }).id).toBe('LIST');
   });
 
-  it('maps modal stacked slots to Horizontal Slots', () => {
-    expect(resolveProductPageTemplateConfig({
+  it('maps modal horizontal slots to Horizontal Slots', () => {
+    expect(resolvePpbTemplate({
       templateType: 'PDP_MODAL',
-      designPreset: 'MODAL',
-      renderFilledSlotsAsHorizontalStacked: true,
+      designPreset: 'HORIZONTAL_SLOTS',
     }).id).toBe('HORIZONTAL_SLOTS');
   });
 
-  it('maps PDP_MODAL + SIMPLIFIED to Vertical Slots', () => {
-    expect(resolveProductPageTemplateConfig({
+  it('maps PDP_MODAL + VERTICAL_SLOTS to Vertical Slots', () => {
+    expect(resolvePpbTemplate({
       templateType: 'PDP_MODAL',
-      designPreset: 'SIMPLIFIED',
+      designPreset: 'VERTICAL_SLOTS',
     }).id).toBe('VERTICAL_SLOTS');
   });
 
-  it('maps modal non-stacked slots to Vertical Slots', () => {
-    expect(resolveProductPageTemplateConfig({
+  it('uses explicit preset IDs for PDP_MODAL templates', () => {
+    expect(resolvePpbTemplate({
       templateType: 'PDP_MODAL',
-      designPreset: 'MODAL',
-      renderFilledSlotsAsHorizontalStacked: false,
+      designPreset: 'VERTICAL_SLOTS',
     }).id).toBe('VERTICAL_SLOTS');
+    expect(resolvePpbTemplate({
+      templateType: 'PDP_MODAL',
+      designPreset: 'HORIZONTAL_SLOTS',
+    }).id).toBe('HORIZONTAL_SLOTS');
+  });
+
+  it('does not resolve legacy preset IDs', () => {
+    expect(resolvePpbTemplate({
+      templateType: 'PDP_INPAGE',
+      designPreset: 'MODAL',
+    })).toBeNull();
   });
 
   it('exports all four target PPB configs', () => {
@@ -49,30 +60,5 @@ describe('PPB template registry resolver', () => {
       'LIST',
       'VERTICAL_SLOTS',
     ]);
-  });
-});
-
-describe('PPB template registry build inclusion', () => {
-  it('inlines product-page configs and registry before template method modules', () => {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const fs = require('node:fs');
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const path = require('node:path');
-    const script = fs.readFileSync(path.join(process.cwd(), 'scripts/build-widget-bundles.js'), 'utf8');
-    const modulesStart = script.indexOf('const PRODUCT_PAGE_MODULES = [');
-    const modulesEnd = script.indexOf('];', modulesStart);
-    const modules = script.slice(modulesStart, modulesEnd);
-
-    const registryIndex = modules.indexOf('app/assets/widgets/product-page/templates/registry.js');
-    const cascadeIndex = modules.indexOf('app/assets/widgets/product-page/templates/cascade-template.js');
-    const modalIndex = modules.indexOf('app/assets/widgets/product-page/templates/modal-slot-template.js');
-
-    expect(modules).toContain('app/assets/widgets/product-page/templates/grid.config.js');
-    expect(modules).toContain('app/assets/widgets/product-page/templates/list.config.js');
-    expect(modules).toContain('app/assets/widgets/product-page/templates/horizontal-slots.config.js');
-    expect(modules).toContain('app/assets/widgets/product-page/templates/vertical-slots.config.js');
-    expect(registryIndex).toBeGreaterThanOrEqual(0);
-    expect(cascadeIndex).toBeGreaterThan(registryIndex);
-    expect(modalIndex).toBeGreaterThan(registryIndex);
   });
 });

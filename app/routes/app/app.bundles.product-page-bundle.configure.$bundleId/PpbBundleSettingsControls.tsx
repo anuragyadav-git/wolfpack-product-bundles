@@ -5,7 +5,7 @@ import { PpbCategoryStepSettings } from "./PpbBundleSettingsControls.categorySte
 import { PpbBundleLevelCssSettings } from "./PpbBundleSettingsControls.css";
 import { PpbCartDiscountDisplaySettings } from "./PpbBundleSettingsControls.discount";
 import { PpbDefaultProductsSettings } from "./PpbBundleSettingsControls.defaultProducts";
-import { PpbQuantityAndSellingPlanSettings } from "./PpbBundleSettingsControls.quantity";
+import { PpbQuantitySettings } from "./PpbBundleSettingsControls.quantity";
 
 export function PpbBundleSettingsControls() {
   return (
@@ -13,7 +13,7 @@ export function PpbBundleSettingsControls() {
       <s-stack direction="block" gap="base">
         <PpbDefaultProductsSettings />
         <PpbCompareAtPriceSettings />
-        <PpbQuantityAndSellingPlanSettings />
+        <PpbQuantitySettings />
         <PpbCategoryStepSettings />
         <PpbCartDiscountDisplaySettings />
         <PpbBundleBannerSettings />

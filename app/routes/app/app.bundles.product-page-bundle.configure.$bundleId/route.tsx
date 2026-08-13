@@ -23,6 +23,7 @@ import {
 } from "./handlers";
 import {
   fetchBundleProduct,
+  fetchShopCurrencyCode,
   fetchShopLocales,
   fetchEmbedData,
 } from "../../../lib/bundle-configure-loader.server";
@@ -77,10 +78,11 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   // File: extensions/bundle-builder/blocks/bundle-product-page.liquid
   const blockHandle = "bundle-product-page";
 
-  const [bundleProduct, shopLocales, embedData] = await Promise.all([
+  const [bundleProduct, shopCurrencyCode, shopLocales, embedData] = await Promise.all([
     bundle.shopifyProductId
       ? fetchBundleProduct(admin, bundle.shopifyProductId, bundleId)
       : Promise.resolve(null),
+    fetchShopCurrencyCode(admin),
     fetchShopLocales(admin),
     fetchEmbedData(admin, session.shop, apiKey, "bundle-app-embed"),
   ]);
@@ -94,6 +96,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
     apiKey,
     blockHandle,
     shopLocales,
+    shopCurrencyCode,
     appEmbedEnabled: embedData.appEmbedEnabled,
     themeEditorUrl: embedData.themeEditorUrl,
   });

@@ -1,0 +1,158 @@
+{
+  "schema_version": 1,
+  "job_id": "fpb-classic-summary-20260804",
+  "revision": 1,
+  "status": "complete",
+  "cases": [
+    {
+      "id": "long-product-title",
+      "data": {
+        "title": "14k Dangling Obsidian Earrings With Extended Limited Edition Presentation Case",
+        "expected": "wrap-or-clamp-with-full-accessible-name"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "short-product-title",
+      "data": {
+        "title": "Ring",
+        "expected": "no-artificial-row-stretch"
+      },
+      "required_in_browser_qa": false
+    },
+    {
+      "id": "high-price",
+      "data": {
+        "currency": "USD",
+        "amount": 1234567.89,
+        "expected": "total-stays-within-action-footer"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "discounted-price",
+      "data": {
+        "original": 1448,
+        "final": 1199,
+        "expected": "original-final-and-savings-remain-distinguishable"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "zero-discount",
+      "data": {
+        "original": 1448,
+        "final": 1448,
+        "expected": "no-false-savings-or-strike-through"
+      },
+      "required_in_browser_qa": false
+    },
+    {
+      "id": "long-variant-name",
+      "data": {
+        "variant": "Material: Recycled Sterling Silver / Finish: Midnight Black / Size: Extra Large",
+        "expected": "secondary-metadata-wraps"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "multiple-variant-dimensions",
+      "data": {
+        "variant": "Color: Black; Size: Large; Finish: Matte",
+        "expected": "dimensions-remain-readable-as-one-identity"
+      },
+      "required_in_browser_qa": false
+    },
+    {
+      "id": "missing-image",
+      "data": {
+        "image": null,
+        "expected": "stable-placeholder-with-nonredundant-alternative"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "portrait-image",
+      "data": {
+        "aspect_ratio": "2:3",
+        "expected": "contained-without-row-distortion"
+      },
+      "required_in_browser_qa": false
+    },
+    {
+      "id": "landscape-image",
+      "data": {
+        "aspect_ratio": "3:2",
+        "expected": "contained-without-row-distortion"
+      },
+      "required_in_browser_qa": false
+    },
+    {
+      "id": "quantity-one",
+      "data": {
+        "quantity": 1,
+        "expected": "single-quantity-identity"
+      },
+      "required_in_browser_qa": false
+    },
+    {
+      "id": "quantity-ten-plus",
+      "data": {
+        "quantity": 12,
+        "expected": "two-digit-count-and-price-do-not-collide"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "zero-selected-products",
+      "data": {
+        "selected": [],
+        "expected": "valid-empty-sidebar-and-expandable-mobile-tray"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "many-selected-products",
+      "data": {
+        "selected_line_count": 12,
+        "expected": "list-only-scroll-with-header-and-action-persistent"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "long-translated-copy",
+      "data": {
+        "locale": "de-DE",
+        "summary_title": "\u00dcberpr\u00fcfen Sie die f\u00fcr Ihr individuelles Paket ausgew\u00e4hlten Produkte",
+        "expected": "copy-wraps-without-control-overlap"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "wide-currency-format",
+      "data": {
+        "locale": "de-DE",
+        "currency": "EUR",
+        "amount": 1234567.89,
+        "expected": "localized-total-remains-readable"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "validation-error",
+      "data": {
+        "condition": "minimum-not-reached",
+        "expected": "cta-disabled-with-perceivable-recovery"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "slow-loading-state",
+      "data": {
+        "delay_ms": 3000,
+        "expected": "reserved-geometry-polite-status-and-no-duplicate-submit"
+      },
+      "required_in_browser_qa": true
+    }
+  ]
+}

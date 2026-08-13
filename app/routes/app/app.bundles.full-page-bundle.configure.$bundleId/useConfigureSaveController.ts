@@ -2,7 +2,7 @@ import { useCallback, useEffect } from "react";
 import { AppLogger } from "../../../lib/logger";
 import { serializePricingDisplayOptions } from "../../../lib/pricing-display-options";
 import { markBundlePreviewComplete } from "../../../lib/bundle-preview-readiness";
-import { DiscountMethod } from "../../../types/pricing";
+import { resolveFpbProductSlotsEnabled } from "../../../lib/fpb-product-slots-availability";
 import { ADDON_MESSAGE_KEY } from "./configure-constants";
 import type { ConfigureBundleFlowDraft } from "./configure-flow-types";
 import { serializeFpbSaveSteps } from "./fpb-save-transport";
@@ -87,7 +87,6 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
       );
       formData.append("floatingBadgeText", flow.floatingBadgeText);
       formData.append("showProductPrices", String(flow.showProductPrices));
-      formData.append("showCompareAtPrices", String(flow.showCompareAtPrices));
       formData.append(
         "cartRedirectToCheckout",
         String(flow.cartRedirectToCheckout),
@@ -103,7 +102,7 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
       );
       formData.append(
         "showTextOnAddButton",
-        String(flow.showTextOnPlusEnabled),
+        String(flow.showTextOnAddButton),
       );
       formData.append(
         "textOverrides",
@@ -149,7 +148,16 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
       formData.append("bundleBannerDesktopUrl", flow.bundleBannerDesktopUrl);
       formData.append("bundleBannerMobileUrl", flow.bundleBannerMobileUrl);
       formData.append("bundleLevelCss", flow.bundleLevelCss);
-      formData.append("productSlotsEnabled", String(flow.productSlotsEnabled));
+      formData.append(
+        "productSlotsEnabled",
+        String(
+          resolveFpbProductSlotsEnabled(
+            flow.productSlotsEnabled,
+            flow.stepsState.steps,
+            flow.conditionsState.stepConditions,
+          ),
+        ),
+      );
       formData.append("maxQtyPerProduct", flow.maxQtyPerProduct);
       formData.append("productSlotIconUrl", flow.productSlotIconUrl);
       formData.append(
@@ -158,16 +166,6 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
           isEnabled: flow.quantityValidationEnabled,
           allowedQuantity:
             Number.parseInt(flow.maxQtyPerProduct || "1", 10) || 1,
-        }),
-      );
-      formData.append(
-        "individualSellingPlanSelection",
-        JSON.stringify({
-          isEnabled:
-            flow.pricingState.discountType === DiscountMethod.BUY_X_GET_Y
-              ? false
-              : flow.individualSellingPlanEnabled,
-          showFor: flow.individualSellingPlanShowFor,
         }),
       );
       formData.append(
@@ -227,8 +225,6 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
           flow.originalFloatingBadgeTextRef.current = flow.floatingBadgeText;
           flow.originalSearchBarEnabledRef.current = flow.searchBarEnabled;
           flow.originalShowProductPricesRef.current = flow.showProductPrices;
-          flow.originalShowCompareAtPricesRef.current =
-            flow.showCompareAtPrices;
           flow.originalCartRedirectToCheckoutRef.current =
             flow.cartRedirectToCheckout;
           flow.originalAllowQuantityChangesRef.current =
@@ -262,54 +258,8 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
             ("message" in result ? result.message : null) ||
             "Product synced successfully";
           flow.shopify.toast.show(syncMessage, { isError: false });
-        } else if ("pages" in result && result.pages) {
-          const pages = (result as any).pages || [];
-          const formattedPages = pages.map((page: any) => ({
-            handle: page.handle,
-            title: page.title,
-            type: "page",
-            isPage: true,
-          }));
-          flow.setAvailablePages(formattedPages);
-          flow.setIsLoadingPages(false);
-        } else if ("templates" in result && result.templates) {
-          const rawTemplates = (result as any).templates || [];
-          const enhancedTemplates =
-            flow.enhanceTemplateListWithUserSelection(rawTemplates);
-          flow.setAvailablePages(enhancedTemplates);
-          flow.setIsLoadingPages(false);
         } else if ("themeId" in result && result.themeId) {
           // No-op: handled by individual callbacks.
-        } else if ("pageHandle" in result && result.pageHandle) {
-          const pageUrl = (result as any).pageUrl;
-          const createdHandle = (result as any).pageHandle as string;
-          const slugAdjusted = Boolean((result as any).slugAdjusted);
-          const installRequired = (result as any).widgetInstallationRequired;
-          const installLink = (result as any).widgetInstallationLink;
-          flow.setPageSlug(createdHandle);
-          flow.originalPageSlugRef.current = createdHandle;
-          flow.setHasManuallyEditedSlug(true);
-          if (slugAdjusted && createdHandle !== flow.normalizedPageSlug) {
-            flow.shopify.toast.show(
-              `The slug '${flow.normalizedPageSlug}' was taken - using '${createdHandle}' instead.`,
-              { duration: 6000 },
-            );
-          }
-          if (installRequired && installLink) {
-            flow.shopify.toast.show(
-              "Page created! Activate the Wolfpack Bundle embed in Theme Settings to go live.",
-              { isError: false, duration: 8000 },
-            );
-            window.open(installLink, "_blank");
-          } else {
-            flow.shopify.toast.show("Bundle page created successfully!", {
-              isError: false,
-            });
-            if (pageUrl) {
-              window.open(pageUrl, "_blank");
-            }
-          }
-          flow.revalidator.revalidate();
         } else if (
           "shareablePreviewUrl" in result &&
           result.shareablePreviewUrl
@@ -351,20 +301,12 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
           duration: 5000,
         });
         flow.finishPreviewBundleLoading?.();
-        if (
-          errorMessage.includes("pages") ||
-          errorMessage.includes("templates")
-        ) {
-          flow.setIsLoadingPages(false);
-        }
       }
     }
   }, [flow]);
 
   const handleDiscard = useCallback(() => {
     flow.hookHandleDiscard();
-    flow.setPageSlug(flow.originalPageSlugRef.current);
-    flow.setHasManuallyEditedSlug(Boolean(flow.bundle.shopifyPageHandle));
     flow.setPromoBannerBgImage(flow.originalPromoBannerBgImageRef.current);
     flow.setLoadingGif(flow.originalLoadingGifRef.current);
     flow.setShowStepTimeline(flow.originalShowStepTimelineRef.current);
@@ -372,7 +314,6 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
     flow.setFloatingBadgeText(flow.originalFloatingBadgeTextRef.current);
     flow.setSearchBarEnabled(flow.originalSearchBarEnabledRef.current);
     flow.setShowProductPrices(flow.originalShowProductPricesRef.current);
-    flow.setShowCompareAtPrices(flow.originalShowCompareAtPricesRef.current);
     flow.setCartRedirectToCheckout(
       flow.originalCartRedirectToCheckoutRef.current,
     );

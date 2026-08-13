@@ -1,0 +1,6 @@
+interface:
+  display_name: "Storefront Design Director"
+  short_description: "Direct storefront UI design, handoff, and Chrome QA"
+  default_prompt: "Use $storefront-design-director to create, resume, or QA a screenshot-led storefront component design job, produce an approved Codex-ready handoff, and enforce Chrome DevTools MCP QA in the connected default Chrome profile only."
+policy:
+  allow_implicit_invocation: true

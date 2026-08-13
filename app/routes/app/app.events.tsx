@@ -5,6 +5,10 @@ import { AccordionItem } from "../../components/AccordionItem";
 import styles from "../../styles/routes/app-events.module.css";
 import { CartPropertyFixContent } from "../../components/CartPropertyFixCard";
 import { navigateBackOrFallback } from "../../lib/navigation";
+import {
+  AdminPageBackTitle,
+  AdminPageTitleBar,
+} from "../../components/AdminPageNavigation";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   await authenticate.admin(request);
@@ -70,20 +74,26 @@ const FAQS_AND_TUTORIALS = [
 export default function EventsPage() {
   useLoaderData<typeof loader>();
   const navigate = useNavigate();
+  const handleBack = () =>
+    navigateBackOrFallback(navigate, "/app/dashboard", {
+      replaceFallback: true,
+    });
 
   return (
     <>
-      <ui-title-bar title="Updates &amp; FAQs">
-        <button
-          variant="breadcrumb"
-          onClick={() => navigateBackOrFallback(navigate, "/app/dashboard", { replaceFallback: true })}
-        >
-          Dashboard
-        </button>
-      </ui-title-bar>
+      <AdminPageTitleBar
+        title="Updates & FAQs"
+        breadcrumbLabel="Dashboard"
+        onBack={handleBack}
+      />
 
       <s-query-container containerName="events-page">
         <div className={styles.pageShell}>
+          <AdminPageBackTitle
+            title="Updates & FAQs"
+            backLabel="Back to previous page"
+            onBack={handleBack}
+          />
           <s-stack direction="block" gap="large">
 
           {/* Latest Updates */}

@@ -111,6 +111,30 @@ describe("updateBundleProductMetafields", () => {
     );
   });
 
+  it("keeps optional step semantics while writing Shopify-valid component quantities", async () => {
+    const admin = makeAdmin();
+    const config = makeBundleConfig(BundleType.PRODUCT_PAGE, {
+      steps: [
+        {
+          id: "step-optional",
+          name: "Optional step",
+          position: 0,
+          minQuantity: 0,
+          maxQuantity: 10,
+          StepProduct: [{ productId: "gid://shopify/Product/123" }],
+          collections: [],
+        },
+      ],
+    });
+
+    await updateBundleProductMetafields(admin, "gid://shopify/Product/999", config);
+
+    const metafields = getMetafieldsSetPayload(admin);
+    expect(JSON.parse(metafields.find((field: any) => field.key === "component_quantities").value)).toEqual([1]);
+    const uiConfig = JSON.parse(metafields.find((field: any) => field.key === "bundle_ui_config").value);
+    expect(uiConfig.steps[0].minQuantity).toBe(0);
+  });
+
   it("passes imageUrl through to step map when present", async () => {
     const admin = makeAdmin();
     const config = makeBundleConfig(BundleType.FULL_PAGE, {
@@ -134,6 +158,22 @@ describe("updateBundleProductMetafields", () => {
     const parsed = JSON.parse(metafields.find((f: any) => f.key === "bundle_ui_config").value);
 
     expect(parsed.steps[0].imageUrl).toBe("https://cdn.shopify.com/step-icon.png");
+  });
+
+  it("emits the FPB public number for storefront redirects", async () => {
+    const admin = makeAdmin();
+    const config = makeBundleConfig(BundleType.FULL_PAGE, {
+      publicNumber: 12,
+    });
+
+    await updateBundleProductMetafields(admin, "gid://shopify/Product/999", config);
+
+    const metafields = getMetafieldsSetPayload(admin);
+    const parsed = JSON.parse(
+      metafields.find((field: any) => field.key === "bundle_ui_config").value,
+    );
+
+    expect(parsed.publicNumber).toBe(12);
   });
 
   it("passes imageUrl as null when absent from step", async () => {
@@ -310,11 +350,8 @@ describe("updateBundleProductMetafields", () => {
               title: "Pick audit items",
               subTitle: "Choose products",
               sortOrder: 1,
-              categoryRank: 1,
               conditions: [condition],
               collections: [selectedCollection],
-              collectionsData: [],
-              collectionsSelectedData: [selectedCollection],
               categoryBanner: "https://cdn.example/category.png",
               displayVariantsAsIndividualProducts: true,
               displayVariantsAsSwatches: false,
@@ -344,12 +381,11 @@ describe("updateBundleProductMetafields", () => {
     expect(parsed.steps[0].collections).toEqual([]);
     expect(parsed.steps[0].categories).toEqual([
       {
-        categoryId: "category98476",
+        id: "category98476",
         name: "Category 1 Direct Product Category",
         title: "Pick audit items",
         subTitle: "Choose products",
-        rank: 1,
-        categoryRank: 1,
+        sortOrder: 1,
         products: [
           {
             selectionId: "gid://shopify/Product/9427287703811",
@@ -362,10 +398,7 @@ describe("updateBundleProductMetafields", () => {
             ],
           },
         ],
-        selectedProducts: [],
         collections: [selectedCollection],
-        collectionsData: [],
-        collectionsSelectedData: [selectedCollection],
         conditions: [condition],
         categoryBanner: "https://cdn.example/category.png",
         categoryImg: "",
@@ -442,10 +475,6 @@ describe("updateBundleProductMetafields", () => {
       validateQuantityPerProduct: {
         isEnabled: true,
         allowedQuantity: 1,
-      },
-      individualSellingPlanSelection: {
-        isEnabled: false,
-        showFor: "ALL_PRODUCTS",
       },
       bundleTextConfig: {
         bundleSummary: {
@@ -576,7 +605,7 @@ describe("updateBundleProductMetafields", () => {
       "gid://shopify/ProductVariant/222",
       "gid://shopify/ProductVariant/ADDON",
     ]));
-    expect(JSON.parse(metafields.find((field: any) => field.key === "component_quantities").value)).toEqual([0, 1]);
+    expect(JSON.parse(metafields.find((field: any) => field.key === "component_quantities").value)).toEqual([1, 1]);
 
     const componentPricing = JSON.parse(metafields.find((field: any) => field.key === "component_pricing").value);
     expect(componentPricing).toEqual(

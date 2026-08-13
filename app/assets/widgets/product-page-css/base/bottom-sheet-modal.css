@@ -191,7 +191,8 @@
 
 #bundle-builder-modal.bw-bs-panel .modal-body .product-card.selected,
 #bundle-builder-modal.bw-bs-panel .modal-body .product-card.bw-product-card--selected {
-  border: 2px solid #000000;
+  border-color: #000000;
+  box-shadow: inset 0 0 0 1px #000000;
 }
 
 .bw-bs-panel .modal-body .product-card.bw-product-card--free-gift {
@@ -370,7 +371,7 @@
   font-size: 13px;
   font-weight: 700;
   text-transform: uppercase;
-  height: 42px;
+  height: var(--bundle-product-card-action-min-height, 44px);
   width: 100%;
   cursor: pointer;
   display: flex;
@@ -386,10 +387,10 @@
   color: var(--bundle-button-text-color, rgba(18, 18, 18, 0.75));
   font-size: 16px;
   font-weight: 400;
-  height: 33px;
+  height: var(--bundle-product-card-action-min-height, 44px);
   letter-spacing: 0;
   line-height: normal;
-  min-height: 33px;
+  min-height: var(--bundle-product-card-action-min-height, 44px);
   margin-top: 8px;
   padding: 6px 10px;
   text-transform: none;
@@ -407,8 +408,8 @@
   background: #ffffff;
   border: 1px solid #000000;
   color: #000000;
-  height: 35px;
-  min-height: 35px;
+  height: var(--bundle-product-card-action-min-height, 44px);
+  min-height: var(--bundle-product-card-action-min-height, 44px);
   opacity: 1;
 }
 
@@ -649,7 +650,7 @@
 #bundle-builder-modal .bw-bs-nav-btn.next-button {
   justify-content: center;
   width: 100%;
-  height: 41px;
+  height: var(--bundle-product-card-action-min-height, 44px);
   border-radius: 10px;
   padding: 10px 8px;
   font-size: 16px;

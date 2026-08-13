@@ -5,7 +5,7 @@ title: EB Implementation Reference
 type: reference
 status: authoritative
 summary: Records directly verified reference-app contracts used for Wolfpack bundle implementation and parity decisions.
-last_audited: 2026-07-30
+last_audited: 2026-08-13
 owners:
   - engineering
 domains:
@@ -65,6 +65,19 @@ All requests go to `https://prod.backend.giftbox.giftkart.app` with `?shopName={
 | FPB — full update (wrapper) | `POST` | `/api/stepsConfiguration/update?bundleId={id}`                     |
 | PPB — create bundle         | `POST` | `/api/mixAndMatch/create`                                          |
 | PPB — update                | `POST` | `/api/mixAndMatch/update?offerId={MIX-XXXXXX}`                     |
+
+## Admin Analytics Controls
+
+Live EB Analytics evidence captured on 2026-08-13:
+
+- The primary graph card is titled `Bundle Split` and exposes one radio-button dropdown with `Bundle Revenue`, `Bundle Views`, `Bundle Orders`, `Conversion`, and `AOV`.
+- `Bundle Revenue` is the default graph metric.
+- The bundle results card has a `Search by bundle name` field and one sort dropdown.
+- Sort metric radio options are `Bundle Name`, `Bundle Views`, `No. of Orders`, `Total Bundle Value`, and `Overall conversions`.
+- Sort direction is selected separately with `Highest` or `Lowest`.
+- The empty state reads `No Items found` and `Try changing the filters or search term`.
+- No `How to setup`, `Learn More`, or other help link is present on the Analytics graph or bundle results surface.
+- The observed fixture had views but no orders, so the live UI did not expose enough evidence to confirm EB's conversion denominator. Wolfpack uses bundle orders divided by bundle views for this surface because those are the two measured funnel values presented by the same control group; this is an explicit implementation inference, not a captured EB formula.
 
 ---
 
@@ -237,6 +250,12 @@ Asset behavior:
 - The uploaded Slot Icon is stored in the merchant's Shopify store assets.
 - The practical upload limit is smaller than Shopify's general store asset maximum.
 - If no Slot Icon is configured, FPB empty slots fall back to the default plus icon.
+
+Product Slots-off reference behavior verified on 2026-08-11:
+
+- The Standard summary renders two product-row skeletons before any selection.
+- The same two-row skeleton baseline is present in the desktop sidebar and the expanded mobile footer tray.
+- The skeletons use a thumbnail block plus title, variant, price, and action bars; they are summary placeholders, not loading-state ownership.
 
 ### Selection Rules and Blocking Behavior
 
@@ -839,6 +858,14 @@ the rule object for the BXY threshold semantics.
 - Non-BXY states show the toggle, "Multi Language" action, and note: "Note: Bundle Quantity Options can only be enabled when discount rules are based on quantity."
 - When enabled for quantity-based rules, each rule renders "Box Label" and "Box Subtext" fields plus a "Make this rule default" star action.
 
+**Standard desktop storefront proof (2026-08-13):** The enabled box selector is
+the first row after the summary subtitle. In the verified two-rule fixture, the
+wrapper was a fluid two-column grid (`371.94px` wide with an `8px` gap) and sat
+`5px` below the subtitle. Each option was `55px` tall with `8px` padding and an
+`8px` radius. The active option used a black surface with white text; the
+inactive option used `rgb(238, 238, 238)` with black text. This is one shared
+summary component rather than a preset-specific card treatment.
+
 **Wolfpack implementation note (2026-07-04):** Because EB hides Bundle
 Quantity Options for BXY, Wolfpack storefront/cart code must not synthesize
 public `Box` cart display properties when the source `_bundle_display_properties`
@@ -878,6 +905,24 @@ Rule #1
 ```
 
 These are merchant-editable text fields (not fixed computed values).
+
+**Verified default generation matrix (2026-08-13):**
+
+- Quantity condition title: `{conditionValue} Pack`
+- Amount condition title: `Spend {currencySymbol}{conditionValue}`
+- Buy X, Get Y title: `Add {customerBuys + customerGets}`
+- Percentage Off subtext: `Save {discountValue}%`
+- Fixed Amount Off subtext: `Save {currencySymbol}{discountValue}`
+- Fixed Bundle Price subtext: `Save {currencySymbol}{discountValue}`
+- Buy X, Get Y percentage subtext: `{customerGets} Product(s) @ {discountValue}% off`
+- Buy X, Get Y fixed-amount subtext: `{customerGets} Product(s) @ {currencySymbol}{discountValue} off`
+
+EB regenerates the dependent field when its source rule changes, even when the
+merchant previously customized that field. Condition changes replace Tier Text;
+discount-value or reward-type changes replace Tier Subtext; changing the Buy X,
+Get Y `customerGets` value replaces both. Unaffected fields retain their current
+merchant value. Existing localized tier entries receive the same affected-field
+replacement.
 
 **Progress Bar "Multi Language" button (enabled only with Step-Based Bar):**
 
@@ -1151,6 +1196,16 @@ while the storefront DTO key intentionally remains EB-compatible
 `showProductComparedAtPrice`. The metafield writer must map between those names;
 reading `showProductComparedAtPrice` directly from the persisted bundle silently
 forces the storefront flag to false.
+
+### FPB compare-at price ownership
+
+Live EB Admin and Standard storefront evidence on 2026-08-12 confirms that FPB
+has no `Show Compare At Price` control in its bundle configuration. Product
+cards render compare-at price data whenever it is present: the verified sale
+product rendered its original price with a line-through beside the current
+price, while a product without compare-at data rendered only its current price.
+FPB compare-at visibility is therefore product-driven and must not be gated by
+the persisted PPB visibility setting.
 
 ---
 

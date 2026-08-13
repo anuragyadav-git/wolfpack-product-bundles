@@ -1,4 +1,3 @@
-import { readFullPageWidgetSources, readProductPageWidgetSources } from './widget-source-helpers';
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const {
   buildCartLineDisplayProperties,
@@ -79,31 +78,4 @@ describe('shared cart-line metadata helpers', () => {
     });
   });
 
-  it('is included in widget shared modules before widget sources', () => {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const fs = require('node:fs');
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const path = require('node:path');
-    const script = fs.readFileSync(path.join(process.cwd(), 'scripts/build-widget-bundles.js'), 'utf8');
-    const modulesStart = script.indexOf('const WIDGET_SHARED_MODULES = [');
-    const modulesEnd = script.indexOf('];', modulesStart);
-    const modules = script.slice(modulesStart, modulesEnd);
-
-    expect(modules).toContain('app/assets/widgets/shared/engine/cart-lines.js');
-  });
-
-  it('is used by both storefront widget controllers', () => {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const fs = require('node:fs');
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const path = require('node:path');
-    const fullPageSource = readFullPageWidgetSources();
-    const productPageSource = readProductPageWidgetSources();
-
-    expect(fullPageSource).toContain("from './widgets/shared/engine/cart-lines.js';");
-    expect(productPageSource).toContain("from '../../shared/engine/cart-lines.js';");
-    expect(fullPageSource).toContain('buildSharedCartLineSourceProperties({');
-    expect(fullPageSource).toContain('buildSharedCartLineDisplayProperties(displayProperties, this.getCartLineLabels())');
-    expect(productPageSource).toContain('buildCartLineSourceProperties({');
-  });
 });

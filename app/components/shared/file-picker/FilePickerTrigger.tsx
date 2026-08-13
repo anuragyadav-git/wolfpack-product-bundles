@@ -8,6 +8,7 @@ type FilePickerTriggerProps = {
   label: string;
   hint?: string;
   uploadLabel: string;
+  showUploadButton?: boolean;
   triggerIcon: "desktop" | "mobile";
   uploadButtonAction: "upload" | "openPicker";
   fitPreviewToTrigger: boolean;
@@ -25,6 +26,7 @@ export function FilePickerTrigger({
   label,
   hint,
   uploadLabel,
+  showUploadButton = true,
   triggerIcon,
   uploadButtonAction,
   fitPreviewToTrigger,
@@ -146,6 +148,7 @@ export function FilePickerTrigger({
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
+        justifyContent: "center",
         gap: "8px",
         textAlign: "center",
         boxSizing: "border-box",
@@ -170,19 +173,21 @@ export function FilePickerTrigger({
               {hint}
             </s-text>
           )}
-          <s-button
-            variant="secondary"
-            onClick={(event) => {
-              event.stopPropagation();
-              if (uploadButtonAction === "openPicker") {
-                handleOpen();
-                return;
-              }
-              handleTriggerUpload(event);
-            }}
-          >
-            {uploadLabel}
-          </s-button>
+          {showUploadButton ? (
+            <s-button
+              variant="secondary"
+              onClick={(event) => {
+                event.stopPropagation();
+                if (uploadButtonAction === "openPicker") {
+                  handleOpen();
+                  return;
+                }
+                handleTriggerUpload(event);
+              }}
+            >
+              {uploadLabel}
+            </s-button>
+          ) : null}
         </>
       )}
     </div>

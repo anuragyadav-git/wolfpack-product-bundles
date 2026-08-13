@@ -5,7 +5,7 @@ title: Wolfpack Product Bundles App Navigation and UI Map
 type: navigation-map
 status: authoritative
 summary: Routes, screens, actions, modals, and storefront-preview flows for the embedded app.
-last_audited: 2026-07-31
+last_audited: 2026-08-13
 owners:
   - engineering
 domains:
@@ -14,6 +14,7 @@ systems:
   - remix-routes
 source_paths:
   - app/routes/app/
+  - app/routes/api/
 related_docs:
   - internal docs/Architecture/FPB Host Evaluation.md
 tags:
@@ -29,9 +30,14 @@ keywords:
 > Any time a new page, modal, tab, sidebar section, or user flow is added or removed,
 > this document **must** be updated. See CLAUDE.md for the enforcement rule.
 
-**Last Updated:** 2026-07-30
+**Last Updated:** 2026-08-13
 **Environment mapped:** SIT (`wolfpack-product-bundles-sit`)
 **Test store:** `wolfpack-store-test-1.myshopify.com`
+
+All merchant-facing Admin pages expose both the Shopify Admin breadcrumb and an
+app-owned back arrow. Dashboard, the `/app` welcome/auth entry point, billing
+callbacks, and resource/API routes are excluded. Both controls share the same
+page callback so configure and Settings dirty-state guards cannot be bypassed.
 
 ---
 
@@ -87,12 +93,13 @@ Dashboard
 ├── Metrics: active bundle count
 ├── Storefront setup card → action-first core readiness and active-bundle summary
 │   └── [Finish setup / View details] → Storefront setup modal
-│       └── all five theme blocks/embeds with Theme Editor action when needed
+│       └── current theme blocks/embeds with Theme Editor action when needed
 ├── Section: "Your Bundles"
 │   └── DataTable of bundles (empty state if none exist)
+│       ├── Bundles per page dropdown → radio choices 10 / 20 / 50
 │       └── Per bundle row:
 │           ├── [Button] "Bundle Settings" → /app/bundles/{type}/configure/{bundleId}
-│           ├── [Button] "Clone"
+│           ├── [Button] "Clone" → immediately clones and opens the new draft
 │           ├── [Button] "Preview"
 │           └── [Button] "Delete" → opens Delete Confirmation Modal
 ├── Existing founder support card → direct support chat
@@ -113,6 +120,7 @@ Dashboard preview behavior:
 - First successful preview records the Admin `bundle_previewed` event with bundle id, type, status, and link.
 - The bundle table uses Polaris automatic table/list presentation: desktop keeps Name, Status, Type, and Actions columns, while phone containers expose the same record fields and row actions as a stacked list.
 - Core bundle work stays above support and education content: create actions, unresolved storefront setup, filters, and bundle actions render before the support cards.
+- The App Embed Status banner can be dismissed with its close control for the current dashboard mount.
 
 #### "Create Bundle" Button
 Navigates to: `/app/bundles/create` (bundle type selection entry)
@@ -149,7 +157,7 @@ Configure page storefront sync status:
 - Full-page and product-page configure pages do not show a separate Storefront sync status or retry banner.
 - Save persists DB changes and publishes Shopify storefront data synchronously before returning a compact success response.
 - Existing Sync Bundle actions run the same direct storefront sync path.
-- Preview Bundle posts one compact `/prepare-preview` request before opening storefront preview; failed checks surface through the preview error toast while the button spinner is active.
+- Preview Bundle reserves a tab synchronously and posts one compact `/prepare-preview` request; FPB receives a fresh signed app-proxy URL in that response, while PPB receives its preview token. The reserved tab navigates after the response so popup protection does not discard it. Failed checks close the blank tab and surface through the preview error toast while the button spinner is active.
 - Bundle creation and cloning route directly to the bundle type's configure page; there is no intermediate configuration wizard route.
 
 #### Modal: Delete Bundle Confirmation
@@ -169,6 +177,8 @@ Delete Confirmation Modal (centered, small)
 Admin Settings hub:
 ```
 Settings
+├── App Bridge breadcrumb: Dashboard back action + Settings title
+├── App-owned header: arrow-only back action + Settings title
 ├── Card: Design
 │   └── Shows Settings -> Design controls: brand colors, typography, corners, images and GIFs
 ├── Card: Language
@@ -183,8 +193,9 @@ Primary action:
 - While the lazy Design or Language workspace loads after selection, the route shows three skeleton cards instead of a spinner.
 - The Design Control Panel lazy-loads after entry and uses a responsive three-column workspace: section navigation on the left, the largest app-owned preview in the middle, and active fields on the right. At medium widths the preview spans the first row; at phone widths a Preview / Customize segmented control shows one workspace pane at a time.
 - Preview-only Bundle Type and Template selectors cover Landing Page Standard, Classic, Compact, and Horizontal plus Product Page Product List, Product Grid, Horizontal Slots, and Vertical Slots.
-- The template-aware Preview surface control exposes only valid local scenes: Builder, Cart / summary, Loading, Validation, and Upsell for every template, plus Product picker for the two slot templates. Desktop/mobile switching preserves the selected surface when it remains valid.
-- Builder and Cart / summary use storefront-matched scenes inside fixed logical 1280×800 desktop and 390×844 mobile canvases that scale to fit the Admin panel. Product picker, Loading, Validation, and Upsell remain representative.
+- The template-aware Preview surface control exposes individual components only: Bundle header, Navigation, Categories, Product cards, Product slots, Product picker, Cart / summary, Loading, Validation, and Upsell. Each template shows only the components it owns, and there is no whole-Builder option. Desktop/mobile switching preserves the selected surface when it remains valid.
+- Images & GIFs owns the store-level FPB loading screen: merchants can retain the default spinner or select an uploaded GIF through one clickable drop zone, change its background color, and see both choices in the local Loading preview. Image Fit is disabled on the Loading surface because it does not affect that screen. The former per-bundle FPB loading animation control is not exposed.
+- Component scenes use fixed logical 1280×1136 desktop and 390×844 mobile canvases that scale to fit the Admin panel. The stage keeps one viewport-responsive block size so desktop/mobile toggles do not move the surrounding page. Product picker, Loading, Validation, and Upsell remain representative transient states.
 - Editing a preview-relevant field selects the scene where its effect is visible. Slot product-card fields reveal Product picker, cart/footer fields reveal Cart / summary, and loading, toast, and upsell fields reveal their matching surfaces.
 - Unsaved design values are applied through the normalized storefront Design runtime and a semantic field-target contract; arbitrary CSS, remote preview requests, and cart mutations are rejected.
 - Local Design controls and template previews remain available without a storefront-ready bundle. Only the separate Preview Bundle action requires a storefront URL.
@@ -224,32 +235,26 @@ Additional Configurations
 
 **Route file:** `app/routes/app/app.integrations.tsx`
 
-Recovered Admin Integrations hub:
+Compact Admin Integrations catalog:
 ```
 Integrations Hub
-├── Request Integration action → https://wolfpackapps.com
-├── Pre-orders, Pickup & Delivery
-│   ├── Stoq → View Setup
-│   └── Zapiet → View Setup
-├── Subscriptions
-│   ├── Skio → View Setup
-│   ├── Appstle → View Setup
-│   └── Bold → View Setup
+├── App Bridge breadcrumb → previous page, with Dashboard fallback
+├── App-owned back action → previous page, with Dashboard fallback
+├── Request Integration → opens Crisp with an unsent prefilled request
 ├── Reviews
 │   └── Judge.me → View Setup
-├── Page Builders
-│   ├── PageFly → View Setup
-│   └── GemPages → View Setup
 └── Checkout
     ├── GoKwik → View Setup
     └── Shopflo → View Setup
 ```
 
-All setup actions currently open `https://wolfpackapps.com` until WPB-owned quick setup guides are published.
+Shopify Checkout and Theme Cart Drawer are configured in Settings and are not duplicated in this catalog. All setup actions currently open `https://wolfpackapps.com` until WPB-owned quick setup guides are published.
 
 Setup behavior:
-- Cards display Planned, Guided setup, or Assisted setup without claiming connection state.
+- The shared top-edge loading bar is the only route content shown while the compact catalog prepares.
+- Cards display Supported or Guided setup without claiming connection state.
 - `View Setup` opens the WPB-owned setup/support destination in a new browsing context.
+- `Request Integration` opens Crisp and pre-fills the composer; the merchant must send the message.
 - External competitor help URLs are intentionally not embedded in source code; sanitized evidence remains in `docs/competitor-analysis/18-eb-settings-integrations-replication-evidence.md`.
 
 ---
@@ -261,7 +266,7 @@ Setup behavior:
 
 ```
 Analytics Page (revamped — issue wpb-analytics-revamp-1)
-├── Header: "Analytics" (ui-title-bar) + breadcrumb to /app/dashboard
+├── Header: "Analytics" + App Bridge breadcrumb and app-owned back action
 ├── No-data banner (s-banner) — pixel-active vs not-enabled copy
 ├── Pixel toggle: Enable/disable UTM tracking pixel
 ├── Toolbar: Compare-period chip · [Export CSV] · [Compare on/off] · Date range selector
@@ -315,6 +320,7 @@ Responsive analytics behavior:
 
 ```
 Pricing Page
+├── App Bridge breadcrumb + app-owned back action → previous page, Dashboard fallback
 ├── Subscription quota card (current usage)
 │
 ├── Plan cards: Free vs Grow
@@ -342,6 +348,7 @@ disclosure and preserves the existing configure state.
 
 ```
 Updates & FAQs Page
+├── App Bridge breadcrumb + app-owned back action → previous page, Dashboard fallback
 ├── Section: "Latest Updates"
 │   └── Accordion items (release notes, e.g. "Landing Page Bundles Now Load Instantly")
 │
@@ -358,14 +365,15 @@ Updates & FAQs Page
 
 ```
 FPB Configure Page
-├── Header: Bundle name + status badge
+├── Header: guarded App Bridge breadcrumb + guarded app-owned back action
+├── Bundle name + status badge
 │
 ├── Tabs
 │   ├── Bundle Settings
 │   │   ├── Bundle name / description
 │   │   ├── Status selector → opens Status Modal
 │   │   ├── Product selector → opens Product Picker Modal
-│   │   └── Bundle Visibility → read-only proxy URL + Copy Link
+│   │   └── Bundle Visibility → app-embed status + read-only proxy URL + Copy Link
 │   │
 │   ├── Steps
 │   │   ├── List of configured steps
@@ -381,6 +389,8 @@ FPB Configure Page
 │   │
 │   ├── Sync Bundle
 │   │   └── [Button] "Sync Now" → ensure parent + metafields; returns canonical proxy URL
+│   ├── Bundle Widget
+│   │   └── [Button] "Embed Upsell Block/Button" → opens the product-template Theme Editor directly
 │   │
 │   └── Select Template        → select_template section
 │       ├── Heading: "Customize your bundle"
@@ -399,6 +409,12 @@ FPB Configure Page
     └── Progress Bar Multi Language Modal (Tier Text / Tier Subtext)
 ```
 
+FPB configure has no Shopify Page selector, Page slug editor, Page creation,
+Page publishing, or Page-backed preview. The app embed is the only FPB theme
+activation prerequisite and `/apps/product-bundles/wpb/{publicNumber}` is the
+only FPB document URL. The number is assigned serially per shop; internal bundle
+IDs remain confined to Admin routes, runtime data, and signed authorization.
+
 Responsive configure behavior:
 - FPB and PPB keep the full Bundle Product and Bundle Setup sidebar on wide screens.
 - Tablet and phone containers show Bundle Product first and replace the long setup sidebar with a compact native disclosure labelled with the active parent or nested section.
@@ -416,6 +432,7 @@ Responsive configure behavior:
 
 ```
 PPB Configure Page
+├── Header: guarded App Bridge breadcrumb + guarded app-owned back action
 ├── Sidebar Nav (6 sections — clone hierarchy)
 │   ├── [📝] Step Setup              → step_setup section
 │   ├── Discount & Pricing           → discount_pricing section
@@ -450,8 +467,8 @@ PPB Configure Page
 │
 ├── Bundle Visibility
 │   ├── App Embed Status (inline AppEmbedBanner when disabled)
-│   ├── Publishing Best Practices (2×2 card grid)
-│   ├── Your Bundle Link (copy + preview button)
+│   ├── Publishing Best Practices (responsive landscape placement cards with expandable setup guides)
+│   ├── Your Bundle Link (copy button)
 │   └── Bundle Widget sub-section
 │       ├── Toggle: upsellWidgetEnabled
 │       ├── Display Mode: radio (block / button)
@@ -473,8 +490,7 @@ PPB Configure Page
 │   │   ├── FPB only: Product Slots helper text
 │   │   ├── FPB only: Slot Icon [Change Icon] opens bundle-level image picker; [Reset] clears icon
 │   │   ├── FPB Slot Icon scope: per-bundle Bundle Settings control only; no Design Control Panel route
-│   │   ├── FPB only note: only applies when rules are quantity-based
-│   │   └── Pre-order & Subscription Integration blocked while Buy X, get Y is selected
+│   │   └── FPB only note: only applies when rules are quantity-based
 │   ├── Cart line item discount display
 │   │   └── [Button] "Edit Defaults" → /app/settings
 │   ├── Bundle Banners (bundleBannerDesktopUrl + bundleBannerMobileUrl)
@@ -521,6 +537,7 @@ items.
 
 ```
 Billing Page
+├── App Bridge breadcrumb + app-owned back action → previous page, Dashboard fallback
 ├── Success / Error banners (conditional on ?upgraded=true or error param)
 ├── Subscription quota card
 ├── Current plan display
@@ -551,7 +568,7 @@ Billing Page
           └── [Save] → [Sync Bundle tab → Sync Now]
 
 /app/dashboard
-  └── [Clone] → POST
+  └── [Clone] → immediate POST (no confirmation)
       └── follow response redirectTo → /app/bundles/{type}/configure/{bundleId}?mode=create
 ```
 
@@ -601,6 +618,21 @@ Storefront bundle add
               └── CartTransform blockOnFailure=true → cart / checkout error; unmodified pricing is not accepted
 ```
 
+### Flow F: Reactive Checkout Bundle Offers
+
+```
+Checkout order summary → Bundle & Save
+  └── group controls by signed parent offer-group ID
+      ├── gift check/uncheck → add/remove cart line
+      ├── add-on selection → add/replace cart line
+      └── quantity change → request exact signed token
+          └── POST /api/checkout-bundle-offer-token with checkout session token
+              ├── current merchant config authorizes tier, variant, quantity, and discount
+              └── one updateCartLine changes quantity/variant and signed attributes
+                  ├── native discount allocation refreshes → keep change
+                  └── API, inventory, or allocation failure → restore prior line state
+```
+
 ---
 
 ## 4. API Routes Reference
@@ -609,11 +641,12 @@ Storefront bundle add
 
 | URL Pattern | Purpose |
 |---|---|
-| `/apps/product-bundles/api/bundle/:id.json` | Storefront bundle config (HMAC verified) |
+| `/apps/product-bundles/api/bundle/:id.json` | HMAC-verified canonical storefront bundle response: exact `{ success, bundle }`; field-projection queries do not change the response shape |
 | `/apps/product-bundles/api/bundles.json` | All active bundles for shop |
 | `/apps/product-bundles/api/cart-bundle-details` | Signed storefront route that merges EB-style cart `bundle_details` metafield entries |
 | `/apps/product-bundles/api/cart-transform-runtime-token` | Signed storefront route that validates selected bundle lines and returns `_wolfpack_bundle_runtime` for Cart Transform / Discount Function verification |
 | `/apps/product-bundles/api/checkout-integration-discount-code` | Signed storefront route that creates short-lived app discount codes for third-party FPB checkout integrations |
+| `/api/checkout-bundle-offer-token` | Checkout-session-authenticated route that validates a signed parent and current merchant offer config, then authorizes one exact add-on variant and quantity |
 | `/apps/product-bundles/api/design-settings/:shop` | CSS vars for storefront widgets |
 | `/apps/product-bundles/api/language-settings/:shop` | Settings -> Language JSON for storefront widget text and cart labels |
 | `/api/billing/create` | Initiate subscription |

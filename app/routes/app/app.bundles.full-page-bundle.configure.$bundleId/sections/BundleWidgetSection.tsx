@@ -115,7 +115,7 @@ export function BundleWidgetSection({
                   </h4>
                   <s-button
                     variant="secondary"
-                    icon="globe"
+                    icon="language-translate"
                     disabled={
                       isMultiLanguageActionDisabled(shopLocales) || undefined
                     }

@@ -154,14 +154,17 @@ pub fn process_merge_operations(
             if !token_components_match(&payload, offer_group_id, &actual_components) {
                 return None;
             }
-            Some(ComponentParent {
-                id: payload.parent_variant_id,
-                price_adjustment: Some(payload.price_adjustment),
-            })
+            Some((
+                ComponentParent {
+                    id: payload.parent_variant_id,
+                    price_adjustment: Some(payload.price_adjustment),
+                },
+                token.to_string(),
+            ))
         });
 
-        let parent = if let Some(parent) = runtime_parent.as_ref() {
-            parent
+        let (parent, validated_runtime_token) = if let Some(parent) = runtime_parent.as_ref() {
+            (&parent.0, &parent.1)
         } else {
             continue;
         };
@@ -367,6 +370,14 @@ pub fn process_merge_operations(
             schema::AttributeOutput {
                 key: "_bundle_discount_percent".into(),
                 value: format!("{:.2}", discount_percentage),
+            },
+            schema::AttributeOutput {
+                key: "_wolfpackProductBundle:OfferId".into(),
+                value: offer_group_id.clone(),
+            },
+            schema::AttributeOutput {
+                key: "_wolfpack_bundle_runtime".into(),
+                value: validated_runtime_token.clone(),
             },
         ];
         if let Some(addon_offer_id) = bundle_addon_offer_id {

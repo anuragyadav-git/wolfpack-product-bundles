@@ -1,11 +1,7 @@
-import {
-  handleSyncBundle,
-  handleSyncProduct,
-} from "../../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/handlers.server";
+import { handleSyncProduct } from "../../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/handlers.server";
 import { ensureBundleParentProduct } from "../../../app/services/bundles/bundle-parent-product.server";
 import {
   updateBundleProductMetafields,
-  updateComponentProductMetafields,
 } from "../../../app/services/bundles/metafield-sync.server";
 
 jest.mock("../../../app/db.server", () => ({
@@ -22,10 +18,6 @@ jest.mock("../../../app/services/bundles/metafield-sync.server", () => ({
   updateBundleProductMetafields: jest.fn(),
   updateComponentProductMetafields: jest.fn(),
 }));
-jest.mock("../../../app/services/bundles/standard-metafields.server", () => ({
-  convertBundleToStandardMetafields: jest.fn().mockResolvedValue({ metafields: {}, errors: [] }),
-  updateProductStandardMetafields: jest.fn(),
-}));
 jest.mock("../../../app/services/theme-colors.server", () => ({
   syncThemeColors: jest.fn().mockResolvedValue(undefined),
 }));
@@ -40,7 +32,6 @@ jest.mock("../../../app/services/theme-template.server", () => ({
 const getDb = () => require("../../../app/db.server").default;
 const mockEnsure = ensureBundleParentProduct as jest.MockedFunction<typeof ensureBundleParentProduct>;
 const mockUpdateParent = updateBundleProductMetafields as jest.Mock;
-const mockUpdateComponents = updateComponentProductMetafields as jest.Mock;
 const session = { shop: "test-shop.myshopify.com" } as any;
 
 function makeBundle(overrides: Record<string, unknown> = {}) {
@@ -84,7 +75,6 @@ beforeEach(() => {
     created: false,
   });
   mockUpdateParent.mockResolvedValue(undefined);
-  mockUpdateComponents.mockResolvedValue(undefined);
 });
 
 describe("PPB parent-product sync", () => {
@@ -112,21 +102,6 @@ describe("PPB parent-product sync", () => {
     const runtimeConfig = mockUpdateParent.mock.calls[0][2];
     expect(runtimeConfig.steps[0].StepCategory[0].products[0]).toEqual(
       expect.objectContaining({ id: "gid://shopify/Product/3" }),
-    );
-  });
-
-  it("sync bundle reuses the parent instead of archiving or deleting it", async () => {
-    const admin = { graphql: jest.fn() } as any;
-    const response = await handleSyncBundle(admin, session, "bundle-1");
-    const body = await response.json() as any;
-
-    expect(body.success).toBe(true);
-    expect(mockEnsure).toHaveBeenCalledTimes(1);
-    expect(admin.graphql).not.toHaveBeenCalled();
-    expect(mockUpdateParent).toHaveBeenCalledWith(
-      admin,
-      "gid://shopify/Product/1",
-      expect.objectContaining({ shopifyProductId: "gid://shopify/Product/1" }),
     );
   });
 

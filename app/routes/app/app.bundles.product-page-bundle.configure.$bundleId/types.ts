@@ -55,6 +55,8 @@ export interface LoaderData {
   blockHandle: string;
   configureMode?: "create" | "edit";
   showFirstLoadTour?: boolean;
+  shopCurrencyCode: string;
+  shopLocales: { locale: string; name: string; primary: boolean }[];
 }
 
 export interface BundleProductCardProps {

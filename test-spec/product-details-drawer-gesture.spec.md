@@ -1,0 +1,50 @@
+---
+schema_version: 1
+id: product-details-drawer-gesture
+title: Product Details Drawer Gesture Test Spec
+type: test-spec
+status: active
+summary: Verifies intentional downward-swipe detection for the shared mobile product-details drawer.
+last_audited: 2026-08-13
+owners:
+  - storefront
+domains:
+  - storefront
+systems:
+  - bundle-product-modal
+source_paths:
+  - app/assets/bundle-modal-component.ts
+related_docs:
+  - internal docs/Architecture/Product Card Layout Contract.md
+tags:
+  - tdd
+  - mobile-drawer
+keywords:
+  - product drawer
+  - swipe dismissal
+---
+
+# Test Spec: Product Details Drawer Gesture
+
+**Spec ID:** product-details-drawer-gesture  **Created:** 2026-08-13
+
+## Purpose
+
+Dismiss the shared product-details drawer only for an intentional downward
+gesture, without treating vertical scrolling or horizontal movement as a close.
+
+## Test Cases
+
+### Downward Swipe Detection
+
+| # | Scenario | Input | Expected Output | Notes |
+|---|---|---|---|---|
+| 1 | Long downward drag | 110px vertical, 8px horizontal | dismiss | Deliberate drag |
+| 2 | Short fast downward flick | 42px vertical at 0.7px/ms | dismiss | Natural mobile gesture |
+| 3 | Short slow drag | 60px vertical at 0.2px/ms | remain open | Avoid accidental closure |
+| 4 | Horizontal or upward gesture | horizontal-dominant or negative vertical | remain open | Preserve scrolling/navigation intent |
+
+## Acceptance Criteria
+
+- [x] Long and fast downward swipes dismiss the drawer.
+- [x] Horizontal, upward, and slow short gestures do not dismiss it.

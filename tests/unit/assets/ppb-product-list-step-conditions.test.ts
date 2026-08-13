@@ -14,6 +14,9 @@ const {
 const {
   ProductPageSelectionMethods,
 } = require('../../../app/assets/widgets/product-page/methods/selection-methods.js');
+const {
+  ProductPageSelectionDataMethods,
+} = require('../../../app/assets/widgets/product-page/methods/selection-data-methods.js');
 
 function makeConditionContext(overrides: Record<string, unknown> = {}) {
   return {
@@ -31,6 +34,27 @@ function makeConditionContext(overrides: Record<string, unknown> = {}) {
 }
 
 describe('PPB Product List step conditions', () => {
+  it('builds Amount and Weight totals from a selected nested variant', () => {
+    const context = makeConditionContext({
+      normalizeSelectionKey: (value: unknown) => String(value || ''),
+      findProductBySelectionKey: ProductPageSelectionDataMethods.findProductBySelectionKey,
+    });
+    const totals = ProductPageModalStateMethods._buildConditionAwareStepSelections.call(
+      context,
+      [{
+        selectionId: 'variant-default',
+        price: 1000,
+        weight: 100,
+        variants: [{ selectionId: 'variant-heavy', price: 2500, weight: 400 }],
+      }],
+      { 'variant-heavy': 2 },
+    );
+
+    expect(totals).toEqual({
+      'variant-heavy': { quantity: 2, amount: 5000, weight: 800 },
+    });
+  });
+
   it('validates category amount rules from selected product value instead of selected quantity', () => {
     const context = makeConditionContext({
       selectedBundle: {
@@ -292,6 +316,18 @@ describe('PPB Product List step conditions', () => {
       conditionOperator: 'greater_than_or_equal_to',
       conditionValue: 300,
     }, resolveText)).toBe('Choose products worth 300');
+  });
+
+  it('uses active Product Page weight validation language when provided', () => {
+    const resolveText = jest.fn((key, fallback) => ({
+      conditionWeightLessThanOrEqualTo: 'Choose products weighing no more than {{conditionWeight}}',
+    }[key] || fallback));
+
+    expect(formatProductPageStepValidationToast({
+      conditionType: 'weight',
+      conditionOperator: 'less_than_or_equal_to',
+      conditionValue: 500,
+    }, resolveText)).toBe('Choose products weighing no more than 500');
   });
 });
 

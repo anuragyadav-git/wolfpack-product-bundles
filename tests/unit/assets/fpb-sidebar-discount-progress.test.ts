@@ -1,11 +1,16 @@
 export {};
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const { fullPageSidePanelMethods } = require('../../../app/assets/widgets/full-page/methods/side-panel-methods.js');
+const {
+  createSummaryClearButton,
+  fullPageSidePanelMethods,
+} = require('../../../app/assets/widgets/full-page/methods/side-panel-methods.js');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { fullPageMobileSummaryMethods } = require('../../../app/assets/widgets/full-page/methods/mobile-summary-methods.js');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const { PricingCalculator, ToastManager } = require('../../../app/assets/bundle-widget-components.js');
+const { PricingCalculator } = require('../../../app/assets/widgets/shared/pricing-calculator.js');
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { ToastManager } = require('../../../app/assets/widgets/shared/toast-manager.js');
 
 class FakeElement {
   tagName: string;
@@ -14,6 +19,8 @@ class FakeElement {
   innerHTML = '';
   children: FakeElement[] = [];
   style: Record<string, string> = {};
+  attributes: Record<string, string> = {};
+  width = 0;
   listeners: Record<string, Array<() => unknown>> = {};
 
   constructor(tagName: string) {
@@ -60,16 +67,27 @@ class FakeElement {
     }
   }
 
-  setAttribute() {}
+  setAttribute(name: string, value: string) {
+    this.attributes[name] = value;
+  }
+
+  getAttribute(name: string) {
+    return this.attributes[name] ?? null;
+  }
+
+  getBoundingClientRect() {
+    return { width: this.width };
+  }
 
   querySelector(selector: string): FakeElement | null {
-    const selectorClasses = selector
-      .split('.')
-      .filter(Boolean)
-      .map((part) => part.trim())
-      .filter(Boolean);
-    const matches = selectorClasses.length > 0
-      && selectorClasses.every((className) => this.className.split(/\s+/).includes(className));
+    const attributeMatch = selector.match(/^\[([^=]+)="([^"]+)"\]$/);
+    const selectorClasses = selector.startsWith('.')
+      ? selector.split('.').filter(Boolean).map((part) => part.trim()).filter(Boolean)
+      : [];
+    const matches = attributeMatch
+      ? this.getAttribute(attributeMatch[1]) === attributeMatch[2]
+      : selectorClasses.length > 0
+        && selectorClasses.every((className) => this.className.split(/\s+/).includes(className));
     if (matches) return this;
 
     for (const child of this.children) {
@@ -179,7 +197,7 @@ function makeContext(preset: string, progressType: 'simple' | 'step_based'): any
     showBoxSelectionValidationMessage: () => undefined,
     addBundleToCart: () => undefined,
     canNavigateToStep: () => true,
-    renderFullPageLayoutWithSidebar: () => undefined,
+    renderFullPageLayout: () => undefined,
   };
 }
 
@@ -200,6 +218,30 @@ describe('FPB summary sidebar discount progress', () => {
       expect(renderProgressCount).toBe(1);
     },
   );
+
+  it('passes the visible Simple Bar fill into the replacement render', () => {
+    const panel = document.createElement('aside') as unknown as FakeElement;
+    const previousProgress = document.createElement('div') as unknown as FakeElement;
+    previousProgress.className = 'fpb-discount-progress fpb-dp-simple';
+    const track = document.createElement('div') as unknown as FakeElement;
+    track.setAttribute('role', 'progressbar');
+    track.width = 200;
+    const fill = document.createElement('div') as unknown as FakeElement;
+    fill.setAttribute('data-bw-discount-progress-fill', 'true');
+    fill.width = 50;
+    previousProgress.append(track, fill);
+    panel.appendChild(previousProgress);
+
+    const context = makeContext('STANDARD', 'simple');
+    const renderProgress = jest.fn(() => document.createElement('div'));
+    context._renderDiscountProgress = renderProgress;
+
+    fullPageSidePanelMethods.renderSidePanel.call(context, panel);
+
+    expect(renderProgress).toHaveBeenCalledWith(expect.objectContaining({
+      previousProgressPercent: 25,
+    }));
+  });
 
   it.each(['STANDARD', 'CLASSIC', 'COMPACT', 'HORIZONTAL'])(
     'requests simple progress rendering in the %s summary sidebar',
@@ -363,6 +405,18 @@ describe('FPB summary sidebar discount progress', () => {
 });
 
 describe('FPB configured summary header', () => {
+  it('creates one shared clear action for desktop and mobile summaries', async () => {
+    const showClearCartConfirmation = jest.fn();
+    const desktopButton = createSummaryClearButton(showClearCartConfirmation);
+    const mobileButton = createSummaryClearButton(showClearCartConfirmation);
+
+    await desktopButton.click();
+    await mobileButton.click();
+
+    expect(desktopButton.innerHTML).toBe(mobileButton.innerHTML);
+    expect(showClearCartConfirmation).toHaveBeenCalledTimes(2);
+  });
+
   it('renders the configured summary title in the desktop sidebar', () => {
     const panel = document.createElement('aside') as unknown as FakeElement;
     const context = makeContext('CLASSIC', 'simple');
@@ -448,6 +502,62 @@ describe('FPB mobile bundle quantity options', () => {
 
     expect(context.renderBoxSelectionOptions).toHaveBeenCalledWith(0);
     expect(bundleItems.children).toHaveLength(2);
+  });
+});
+
+describe('FPB desktop bundle quantity options', () => {
+  it.each(['STANDARD', 'CLASSIC', 'COMPACT', 'HORIZONTAL'])(
+    'renders saved bundle quantity options in the %s desktop summary',
+    (preset) => {
+      const panel = document.createElement('aside') as unknown as FakeElement;
+      const context = makeContext(preset, 'simple');
+      const boxSelection = document.createElement('div') as unknown as FakeElement;
+      context.renderBoxSelectionOptions = jest.fn(() => boxSelection);
+
+      fullPageSidePanelMethods.renderSidePanel.call(context, panel);
+
+      expect(context.renderBoxSelectionOptions).toHaveBeenCalledWith(0);
+      expect(panel.children).toContain(boxSelection);
+    },
+  );
+
+  it('omits desktop bundle quantity options when none are configured', () => {
+    const panelWithoutOptions = document.createElement('aside') as unknown as FakeElement;
+    const contextWithoutOptions = makeContext('STANDARD', 'simple');
+    contextWithoutOptions.renderBoxSelectionOptions = jest.fn(() => null);
+
+    const panelWithOptions = document.createElement('aside') as unknown as FakeElement;
+    const contextWithOptions = makeContext('STANDARD', 'simple');
+    contextWithOptions.renderBoxSelectionOptions = jest.fn(() => document.createElement('div'));
+
+    fullPageSidePanelMethods.renderSidePanel.call(contextWithoutOptions, panelWithoutOptions);
+    fullPageSidePanelMethods.renderSidePanel.call(contextWithOptions, panelWithOptions);
+
+    expect(contextWithoutOptions.renderBoxSelectionOptions).toHaveBeenCalledWith(0);
+    expect(panelWithoutOptions.children).toHaveLength(panelWithOptions.children.length - 1);
+  });
+});
+
+describe('FPB shared bundle quantity option state', () => {
+  it('passes the same live selected quantity to desktop and mobile summary renderers', () => {
+    const desktopPanel = document.createElement('aside') as unknown as FakeElement;
+    const desktopContext = makeContext('STANDARD', 'simple');
+    desktopContext.getSelectedBoxSelectionQuantity = jest.fn(() => 3);
+    desktopContext.renderBoxSelectionOptions = jest.fn(() => document.createElement('div'));
+
+    const mobileContext = makeContext('STANDARD', 'simple');
+    mobileContext.getSelectedBoxSelectionQuantity = jest.fn(() => 3);
+    mobileContext.renderBoxSelectionOptions = jest.fn(() => document.createElement('div'));
+
+    fullPageSidePanelMethods.renderSidePanel.call(desktopContext, desktopPanel);
+    fullPageMobileSummaryMethods._renderCompactMobileSummaryBundleItems.call(
+      mobileContext,
+      { display: { format: '${{amount}}' } },
+      3,
+    );
+
+    expect(desktopContext.renderBoxSelectionOptions).toHaveBeenCalledWith(3);
+    expect(mobileContext.renderBoxSelectionOptions).toHaveBeenCalledWith(3);
   });
 });
 

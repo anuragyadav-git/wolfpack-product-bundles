@@ -28,7 +28,7 @@ export function FilePickerDialog({
   handleSelect,
 }: FilePickerDialogProps) {
   return (
-    <s-modal ref={dialogRef} id="store-file-picker-modal" heading={label} size="large" onHide={handleClose}>
+    <s-modal ref={dialogRef} id="store-file-picker-modal" heading={label} size="large">
       <s-button slot="primary-action" variant="primary" disabled={!selectedUrl || isBlocked || undefined} onClick={handleSelect}>
         Select
       </s-button>

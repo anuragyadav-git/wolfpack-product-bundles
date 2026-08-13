@@ -64,7 +64,8 @@
 }
 
 .canvasHeader {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
@@ -561,10 +562,16 @@
   composes: stepSetupDescription from "./bundle-configure-shared.module.css";
 }
 
+.stepSetupDetails {
+  composes: stepSetupDetails from "./bundle-configure-shared.module.css";
+}
+
+.stepDisabledContent {
+  composes: stepDisabledContent from "./bundle-configure-shared.module.css";
+}
+
 .stepFlowCard {
   overflow: visible;
-  margin-bottom: 0;
-  padding-bottom: 0;
 }
 
 .stepFlowTitleRow {
@@ -788,6 +795,10 @@
   composes: iconBox from "./bundle-configure-shared.module.css";
 }
 
+.stepConfigIconBox {
+  composes: stepConfigIconBox from "./bundle-configure-shared.module.css";
+}
+
 .iconUploadButton {
   composes: iconUploadButton from "./bundle-configure-shared.module.css";
 }
@@ -798,6 +809,10 @@
 
 .iconPlaceholder {
   composes: iconPlaceholder from "./bundle-configure-shared.module.css";
+}
+
+.defaultTimelineIcon {
+  composes: defaultTimelineIcon from "./bundle-configure-shared.module.css";
 }
 
 .iconRemoveButton {
@@ -930,6 +945,55 @@
 
 .visibilitySetupTime {
   composes: visibilitySetupTime from "./bundle-configure-shared.module.css";
+}
+
+/* Shared Publishing Best Practices card system. */
+.publishingGuideGrid {
+  composes: publishingGuideGrid from "./bundle-configure-shared.module.css";
+}
+
+.publishingGuideCard {
+  composes: publishingGuideCard from "./bundle-configure-shared.module.css";
+}
+
+.publishingGuideMedia {
+  composes: publishingGuideMedia from "./bundle-configure-shared.module.css";
+}
+
+.publishingGuideIndex {
+  composes: publishingGuideIndex from "./bundle-configure-shared.module.css";
+}
+
+.publishingGuideBody {
+  composes: publishingGuideBody from "./bundle-configure-shared.module.css";
+}
+
+.publishingGuideContent {
+  composes: publishingGuideContent from "./bundle-configure-shared.module.css";
+}
+
+.publishingGuideTitle {
+  composes: publishingGuideTitle from "./bundle-configure-shared.module.css";
+}
+
+.publishingGuideTime {
+  composes: publishingGuideTime from "./bundle-configure-shared.module.css";
+}
+
+.publishingGuideDescription {
+  composes: publishingGuideDescription from "./bundle-configure-shared.module.css";
+}
+
+.publishingGuideDetails {
+  composes: publishingGuideDetails from "./bundle-configure-shared.module.css";
+}
+
+.publishingGuideAction {
+  composes: publishingGuideAction from "./bundle-configure-shared.module.css";
+}
+
+.publishingGuideSteps {
+  composes: publishingGuideSteps from "./bundle-configure-shared.module.css";
 }
 
 .visibilityOverviewStack {
@@ -1136,6 +1200,7 @@
 
 .visibilityTextInput,
 .visibilityTextarea {
+  box-sizing: border-box;
   width: 100%;
   min-width: 0;
   border: 1px solid #8a8a8a;
@@ -1416,7 +1481,7 @@
 .templateDialogBody {
   flex: 1;
   overflow-y: auto;
-  padding: 24px;
+  padding: 24px calc(100% / 6);
 }
 
 .templateDialogIntro {
@@ -1590,7 +1655,7 @@
 .templateDialogFooter {
   display: flex;
   justify-content: flex-end;
-  padding: 16px 24px 24px;
+  padding: 16px calc(100% / 6) 24px;
 }
 
 .templateDialogConfirmHeader {

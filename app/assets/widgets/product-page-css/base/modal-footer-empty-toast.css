@@ -307,7 +307,7 @@
   animation: slideFromBottom var(--bundle-toast-animation-duration, 300ms) ease-out;
 }
 
-.bundle-toast.bundle-toast--cognive {
+.bundle-toast.bundle-toast--ppb-grid {
   position: fixed;
   top: auto;
   bottom: 0;
@@ -332,7 +332,7 @@
     padding: 14px 16px;
   }
 
-  .bundle-toast.bundle-toast--cognive {
+  .bundle-toast.bundle-toast--ppb-grid {
     width: 85%;
     max-width: 85%;
     padding: 14px 16px;

@@ -45,7 +45,7 @@ function createBaseContext(overrides: Record<string, unknown> = {}) {
 }
 
 describe('PPB card control setting parsing', () => {
-  it('prefers explicit controls for quantity-input visibility and defaults to dataset when absent', () => {
+  it('reads canonical controls for quantity-input visibility and defaults to dataset when absent', () => {
     const context = {
       ...ProductPageConfigLifecycleMethods,
       container: {
@@ -54,7 +54,7 @@ describe('PPB card control setting parsing', () => {
       config: {
         controlsSettings: {
           activeControls: {
-            displayQuantityInput: 'false',
+            showQuantitySelectorOnCard: 'false',
           },
         },
       },
@@ -63,12 +63,12 @@ describe('PPB card control setting parsing', () => {
     context.parseConfiguration();
     expect(context.config.showQuantitySelectorOnCard).toBe(false);
 
-    context.config.controlsSettings.activeControls.displayQuantityInput = 'true';
+    context.config.controlsSettings.activeControls.showQuantitySelectorOnCard = 'true';
     context.parseConfiguration();
     expect(context.config.showQuantitySelectorOnCard).toBe(true);
   });
 
-  it('maps displaySeeMore and hover aliases from active controls', () => {
+  it('reads canonical see-more and hover controls', () => {
     const context = {
       ...ProductPageConfigLifecycleMethods,
       container: {
@@ -77,8 +77,8 @@ describe('PPB card control setting parsing', () => {
       config: {
         controlsSettings: {
           activeControls: {
-            displaySeeMore: 'true',
-            productCardHoverExpansion: '1',
+            displaySeeMoreLink: 'true',
+            expandProductCardOnHover: '1',
           },
         },
       },
@@ -162,7 +162,7 @@ describe('PPB in-page rendering control wiring', () => {
     expect(target.innerHTML).not.toContain('&lt;p&gt;&lt;/p&gt;');
   });
 
-  it('omits row quantity selectors when the showQuantityInput control is disabled', () => {
+  it('omits row quantity selectors when the showQuantitySelectorOnCard control is disabled', () => {
     const target = createTarget();
     const context = {
       ...ProductPageInpageRenderMethods,
@@ -179,7 +179,7 @@ describe('PPB in-page rendering control wiring', () => {
     expect(target.innerHTML).not.toContain('product-quantity-wrapper');
   });
 
-  it('renders row quantity selectors when the showQuantityInput control is enabled', () => {
+  it('renders row quantity selectors when the showQuantitySelectorOnCard control is enabled', () => {
     const target = createTarget();
     const context = {
       ...ProductPageInpageRenderMethods,

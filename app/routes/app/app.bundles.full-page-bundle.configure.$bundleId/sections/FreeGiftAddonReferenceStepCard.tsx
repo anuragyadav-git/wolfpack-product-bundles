@@ -50,7 +50,7 @@ export function FpbAddonReferenceStepCard({
           <div className={fullPageBundleStyles.addonsHeaderActions}>
             <s-button
               variant="secondary"
-              icon="globe"
+              icon="language-translate"
               onClick={openAddonStepMultiLanguageModal}
             >
               Multi Language

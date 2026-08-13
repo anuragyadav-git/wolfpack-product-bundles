@@ -5,7 +5,7 @@ title: Wolfpack Product Bundles Internal Docs
 type: index
 status: authoritative
 summary: Index of durable Wolfpack Product Bundles architecture, integration, feature, and operations documentation.
-last_audited: 2026-07-26
+last_audited: 2026-08-11
 owners:
   - engineering
 domains:
@@ -56,7 +56,9 @@ Full evidence record: `docs/competitor-analysis/16-eb-full-data-flow-investigati
 - [[Architecture/Product Card Layout Contract]] — Hard rule for row-level card size behavior across all templates and interaction states
 - [[Architecture/Admin Configure Page]] — shared FPB/PPB Admin configure-page adapter boundary, section rhythm, route-owned save semantics
 - [[Architecture/Bundle Parent Product]] — shared neutral FPB/PPB Shopify parent contract, merchant metadata ownership, sync invariants, and host separation
+- [[Architecture/Bundle Field Ownership]] — canonical persistence/runtime ownership ledger, retired aliases, and the gated FPB Page-removal boundary
 - [[Architecture/FPB Host Evaluation]] — accepted signed app-proxy FPB document host, preview-token contract, and Page retirement sequence
+- [[Architecture/Storefront Draft Preview Authorization]] — shared stateless FPB/PPB draft-preview token, app-proxy authorization, and no-store caching contract
 - [[Architecture/State Management]] — Redux Toolkit slices, RTK Query endpoint boundaries, and AppStateService migration rules
 - [[Architecture/Diagrams/index|Architecture Diagram Catalog]] — indexed Mermaid diagrams for Cart Transform, metafield ownership/consumption, storefront runtime, backend layers, and embedded Admin UI
 - [[Shopify Integration/Polaris Web Components Reference]] — source-of-truth link and policy for using `s-*` Admin web components
@@ -64,7 +66,7 @@ Full evidence record: `docs/competitor-analysis/16-eb-full-data-flow-investigati
 - [[Shopify Integration/Storefront API]] — Storefront GraphQL field gotchas, including product description HTML handling
 - [[Shopify Integration/Cart Transform API]] — Operations, targets, API versions (2025-10)
 - [[Shopify Integration/Checkout UI Extension]] — Preact targets, build rules
-- [[Shopify Integration/Metafields]] — Bundle config metafield sync strategy
+- [[Shopify Integration/Metafields]] — Bundle config sync, payload limits, and PPB component quantity validation constraints
 - [[Shopify Integration/Theme App Extensions]] — Theme app extension handles, App Bridge status normalization, preview gates, and legacy MAIN-theme diagnostics
 - [[Shopify Integration/Web Pixels]] — UTM Web Pixel settings payload rules, including nonblank custom-parameter sentinel behavior
 - [[Shopify Integration/Webhooks]] — Subscribed webhook topics, removed broad topics, and delivery-volume rationale

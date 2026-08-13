@@ -17,7 +17,6 @@ export interface DeploymentGeneralSyncSummary {
   failedBundles: number;
   failedShops: number;
   metafieldDefinitionShopsSynced: number;
-  metaobjectValuesSynced: number;
   addonDiscountShopsSynced: number;
   variantRemediation: {
     scannedBundles: number;
@@ -85,11 +84,6 @@ export interface DeploymentGeneralSyncDependencies {
     admin: unknown,
     shopDomain: string,
   ) => Promise<{ success: boolean; error?: string }>;
-  syncBundleMetaobjects: (input: {
-    admin: unknown;
-    shopDomain: string;
-    bundle: GeneralSyncBundle;
-  }) => Promise<number>;
   updateStepProductVariants: (input: {
     stepProductId: string;
     variants: unknown;
@@ -144,7 +138,6 @@ function emptySummary(mode: "disabled" | "apply"): DeploymentGeneralSyncSummary 
     failedBundles: 0,
     failedShops: 0,
     metafieldDefinitionShopsSynced: 0,
-    metaobjectValuesSynced: 0,
     addonDiscountShopsSynced: 0,
     variantRemediation: {
       scannedBundles: 0,
@@ -291,12 +284,6 @@ async function runBundleVariantRemediation(
   }
 }
 
-export async function syncPersistedBundleMetaobjects() {
-  // No persisted app-owned metaobject value contract exists yet. Keep this
-  // explicit hook aligned when a Prisma or metaobject contract is introduced.
-  return 0;
-}
-
 export async function runDeploymentGeneralSync(
   options: DeploymentGeneralSyncOptions,
   deps: DeploymentGeneralSyncDependencies,
@@ -385,11 +372,6 @@ export async function runDeploymentGeneralSync(
         bundleId: bundle.id,
         bundleType: bundle.bundleType,
         reason: "sync_bundle",
-      });
-      summary.metaobjectValuesSynced += await deps.syncBundleMetaobjects({
-        admin,
-        shopDomain: bundle.shopId,
-        bundle,
       });
       summary.syncedBundles += 1;
       if (

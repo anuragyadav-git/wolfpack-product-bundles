@@ -8,6 +8,11 @@ import {
 export interface PricingDisplayStep {
   id: string;
   enabled?: boolean;
+  conditionType?: string | null;
+  conditionOperator?: string | null;
+  conditionValue?: number | null;
+  conditionOperator2?: string | null;
+  conditionValue2?: number | null;
   maxQuantity?: number | null;
 }
 
@@ -66,38 +71,44 @@ export interface NormalizedRuleMessageInput {
 
 export const DEFAULT_PROGRESS_BAR_PROGRESS_TEXT = "Add {{conditionText}} to unlock {{discountText}}";
 export const DEFAULT_PROGRESS_BAR_SUCCESS_TEXT = "{{discountText}} unlocked";
-export const DEFAULT_DISCOUNT_RULE_TEXT = "Add {{discountConditionDiff}} product(s) to save {{discountValue}}{{discountValueUnit}}!";
-export const DEFAULT_DISCOUNT_RULE_TEXT_MORE = "Congrats! Add {{discountConditionDiff}} more product(s) to save {{discountValue}}{{discountValueUnit}}!";
-export const DEFAULT_DISCOUNT_RULE_SUCCESS_MESSAGE = "Success! Your {{discountValue}}{{discountValueUnit}} discount has been applied to your cart.";
-export const DEFAULT_FIXED_AMOUNT_RULE_TEXT = "Add {{discountConditionDiff}} product(s) to save {{discountValueUnit}}{{discountValue}}!";
-export const DEFAULT_FIXED_AMOUNT_RULE_TEXT_MORE = "Congrats! Add {{discountConditionDiff}} more product(s) to save {{discountValueUnit}}{{discountValue}}!";
-export const DEFAULT_FIXED_AMOUNT_RULE_SUCCESS_MESSAGE = "Success! Your {{discountValueUnit}}{{discountValue}} discount has been applied to your cart.";
-export const DEFAULT_DISCOUNT_RULE_TEXT_BXY = "Add {{discountConditionDiff}} product(s) to get {{discountedItems}} of them at {{discountValue}}{{discountValueUnit}} off!";
-export const DEFAULT_DISCOUNT_RULE_TEXT_BXY_MORE = "Add {{discountConditionDiff}} more to get {{discountedItems}} of them at {{discountValue}}{{discountValueUnit}} off!";
-export const DEFAULT_DISCOUNT_RULE_SUCCESS_MESSAGE_BXY = "Success! You got {{discountedItems}} product(s) at {{discountValue}}{{discountValueUnit}} off";
+
+export const DISCOUNT_MESSAGE_TEMPLATES: Record<
+  DiscountMethod,
+  { firstRule: string; additionalRule: string; success: string }
+> = {
+  [DiscountMethod.PERCENTAGE_OFF]: {
+    firstRule: "Add {{discountConditionDiff}} product(s) to save {{discountValue}}{{discountValueUnit}}!",
+    additionalRule: "Congrats! Add {{discountConditionDiff}} more product(s) to save {{discountValue}}{{discountValueUnit}}!",
+    success: "Success! Your {{discountValue}}{{discountValueUnit}} discount has been applied to your cart.",
+  },
+  [DiscountMethod.FIXED_AMOUNT_OFF]: {
+    firstRule: "Add {{discountConditionDiff}} product(s) to save {{discountValueUnit}}{{discountValue}}!",
+    additionalRule: "Congrats! Add {{discountConditionDiff}} more product(s) to save {{discountValueUnit}}{{discountValue}}!",
+    success: "Success! Your {{discountValueUnit}}{{discountValue}} discount has been applied to your cart.",
+  },
+  [DiscountMethod.FIXED_BUNDLE_PRICE]: {
+    firstRule: "Add {{discountConditionDiff}} product(s) to get the bundle for {{discountValueUnit}}{{discountValue}}!",
+    additionalRule: "Congrats! Add {{discountConditionDiff}} more product(s) to get the bundle for {{discountValueUnit}}{{discountValue}}!",
+    success: "Success! Your bundle price is {{discountValueUnit}}{{discountValue}}.",
+  },
+  [DiscountMethod.BUY_X_GET_Y]: {
+    firstRule: "Add {{discountConditionDiff}} product(s) to get {{discountedItems}} of them at {{discountValue}}{{discountValueUnit}} off!",
+    additionalRule: "Add {{discountConditionDiff}} more to get {{discountedItems}} of them at {{discountValue}}{{discountValueUnit}} off!",
+    success: "Success! You got {{discountedItems}} product(s) at {{discountValue}}{{discountValueUnit}} off",
+  },
+};
 
 export function getDefaultDiscountRuleText(method?: DiscountMethod | string, ruleIndex = 0): string {
-  if (method === DiscountMethod.BUY_X_GET_Y) {
-    return ruleIndex === 0 ? DEFAULT_DISCOUNT_RULE_TEXT_BXY : DEFAULT_DISCOUNT_RULE_TEXT_BXY_MORE;
-  }
-
-  if (method === DiscountMethod.FIXED_AMOUNT_OFF) {
-    return ruleIndex === 0 ? DEFAULT_FIXED_AMOUNT_RULE_TEXT : DEFAULT_FIXED_AMOUNT_RULE_TEXT_MORE;
-  }
-
-  return ruleIndex === 0 ? DEFAULT_DISCOUNT_RULE_TEXT : DEFAULT_DISCOUNT_RULE_TEXT_MORE;
+  const templates = DISCOUNT_MESSAGE_TEMPLATES[method as DiscountMethod]
+    ?? DISCOUNT_MESSAGE_TEMPLATES[DiscountMethod.PERCENTAGE_OFF];
+  return ruleIndex === 0 ? templates.firstRule : templates.additionalRule;
 }
 
 export function getDefaultDiscountRuleSuccessMessage(method?: DiscountMethod | string): string {
-  if (method === DiscountMethod.BUY_X_GET_Y) {
-    return DEFAULT_DISCOUNT_RULE_SUCCESS_MESSAGE_BXY;
-  }
-
-  if (method === DiscountMethod.FIXED_AMOUNT_OFF) {
-    return DEFAULT_FIXED_AMOUNT_RULE_SUCCESS_MESSAGE;
-  }
-
-  return DEFAULT_DISCOUNT_RULE_SUCCESS_MESSAGE;
+  return (
+    DISCOUNT_MESSAGE_TEMPLATES[method as DiscountMethod]
+    ?? DISCOUNT_MESSAGE_TEMPLATES[DiscountMethod.PERCENTAGE_OFF]
+  ).success;
 }
 
 interface NormalizeInput {
@@ -176,9 +187,28 @@ function canUseSavedBundleQuantitySubtext(
 function getStepQuantityCapacity(steps?: PricingDisplayStep[]): number | null {
   if (!Array.isArray(steps) || steps.length === 0) return null;
 
-  return steps
-    .filter((step) => step.enabled !== false)
-    .reduce((sum, step) => sum + Math.max(0, Number(step.maxQuantity ?? 0) || 0), 0);
+  let capacity = 0;
+  for (const step of steps.filter((candidate) => candidate.enabled !== false)) {
+    if (step.conditionType && step.conditionType !== "quantity") return null;
+
+    const upperBounds = [
+      { operator: step.conditionOperator, value: step.conditionValue },
+      { operator: step.conditionOperator2, value: step.conditionValue2 },
+    ]
+      .filter(
+        (condition) =>
+          condition.operator === "equal_to" ||
+          condition.operator === "less_than_or_equal_to",
+      )
+      .map((condition) => condition.value)
+      .filter((value): value is number => Number.isFinite(value) && Number(value) >= 0)
+      .map(Number);
+
+    if (upperBounds.length === 0) return null;
+    capacity += Math.min(...upperBounds);
+  }
+
+  return capacity;
 }
 
 function getCompatibility(quantity: number, steps?: PricingDisplayStep[]): NormalizedBundleQuantityOption["compatibility"] {

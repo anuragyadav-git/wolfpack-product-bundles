@@ -1,18 +1,44 @@
-# Test Spec: Dashboard Media Deferral
+---
+schema_version: 1
+id: dashboard-media-deferral
+title: Dashboard Media Readiness
+type: test-spec
+status: active
+summary: Verifies Dashboard first-render image preloads while all visible cards render together after route readiness.
+last_audited: 2026-08-13
+owners:
+  - engineering
+domains:
+  - admin
+systems:
+  - dashboard
+source_paths:
+  - app/routes/app/app.dashboard/dashboard-media-state.ts
+  - app/routes/app/app.dashboard/DashboardPage.tsx
+related_docs:
+  - internal docs/Operations/Admin Performance.md
+tags:
+  - dashboard
+  - media
+keywords:
+  - Parth.avif
+  - resource-card
+---
+
+# Test Spec: Dashboard Media Readiness
 **Spec ID:** dashboard-media-deferral  **Created:** 2026-06-28
 
 ## Purpose
-Prevent non-critical Dashboard instructional media from becoming the first-load LCP candidate while preserving the visible card shell and loading the media after hydration.
+Preload only first-viewport Dashboard media while revealing every visible Dashboard card together after route readiness.
 
 ## Test Cases
 ### DashboardMediaState
 | # | Scenario | Input | Expected Output | Notes |
 |---|---|---|---|---|
-| 1 | Initial render before hydration | `isHydrated=false` | `loadAppEmbedImage=false` | The app-embed image should not be eligible as initial LCP. |
-| 2 | After hydration | `isHydrated=true` | `loadAppEmbedImage=true` | The instructional image should appear automatically after the first hydrated render so it does not look broken. |
+| 1 | Dashboard route links are built | Current Dashboard media registry | Only the first-viewport support avatar is preloaded | Avoid speculative image preloads |
+| 2 | Dashboard readiness resolves | Complete Dashboard module and data | Resources card renders with the rest of the Dashboard | No idle reveal point remains |
 
 ## Acceptance Criteria
-- [ ] Dashboard support avatar paints directly from the initial image markup without hydration-only skeleton state.
-- [ ] Dashboard app-embed image is not rendered before hydration.
-- [ ] Dashboard app-embed image is rendered after merchant preview intent.
+- [ ] Dashboard support avatar remains the only initial image preload.
+- [ ] Resources card renders in the same content reveal as the other Dashboard cards.
 - [ ] Existing Dashboard interactions remain unchanged.

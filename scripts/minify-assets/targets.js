@@ -6,12 +6,20 @@ export function createTargets(rootDir) {
   return {
     css: [
       {
+        source: join(rootDir, 'app/assets/widgets/full-page-css/base/bootstrap-reservation.css'),
+        target: join(rootDir, 'extensions/bundle-builder/assets/bundle-widget-bootstrap.css'),
+      },
+      {
         source: join(rootDir, 'app/assets/widgets/full-page-css/bundle-widget-full-page.css'),
         target: join(rootDir, 'extensions/bundle-builder/assets/bundle-widget-full-page.css'),
       },
       {
         source: join(rootDir, 'app/assets/widgets/full-page-css/shared/mobile-summary-footer.css'),
         target: join(rootDir, 'extensions/bundle-builder/assets/bundle-widget-full-page-mobile-summary.css'),
+      },
+      {
+        source: join(rootDir, 'app/assets/widgets/full-page-css/shared/responsive-layout.css'),
+        target: join(rootDir, 'extensions/bundle-builder/assets/bundle-widget-full-page-responsive.css'),
       },
       {
         source: join(rootDir, 'app/assets/widgets/full-page-css/templates/side-footer-standard.css'),
@@ -38,18 +46,14 @@ export function createTargets(rootDir) {
         target: join(rootDir, 'extensions/bundle-builder/assets/bundle-widget-product-page-cascade.css'),
       },
       {
-        source: join(rootDir, 'app/assets/widgets/product-page-css/templates/inpage-cognive.css'),
-        target: join(rootDir, 'extensions/bundle-builder/assets/bundle-widget-product-page-cognive.css'),
+        source: join(rootDir, 'app/assets/widgets/product-page-css/templates/inpage-grid.css'),
+        target: join(rootDir, 'extensions/bundle-builder/assets/bundle-widget-product-page-grid.css'),
       },
       {
         source: join(rootDir, 'app/assets/widgets/product-page-css/templates/modal-slots.css'),
         target: join(rootDir, 'extensions/bundle-builder/assets/bundle-widget-product-page-modal.css'),
       },
       join(rootDir, 'extensions/bundle-builder/assets/modal-discount-bar.css'),
-    ],
-    js: [
-      join(rootDir, 'extensions/bundle-builder/assets/bundle-widget-full-page-bundled.js'),
-      join(rootDir, 'extensions/bundle-builder/assets/bundle-widget-product-page-bundled.js'),
     ],
   };
 }

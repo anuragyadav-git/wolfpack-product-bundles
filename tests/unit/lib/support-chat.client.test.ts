@@ -2,6 +2,7 @@ import {
   installSupportChatLoader,
   installSupportChatPresentation,
   openSupportChat,
+  openSupportChatWithDraft,
   type SupportChatWindow,
 } from "../../../app/lib/support-chat.client";
 
@@ -83,6 +84,21 @@ describe("support chat client", () => {
       ["do", "chat:show"],
       ["do", "chat:open"],
     ]);
+  });
+
+  it("opens chat with a draft that remains unsent", () => {
+    const win: SupportChatWindow = {};
+
+    openSupportChatWithDraft("Please add an integration for Acme Checkout.", win);
+
+    expect(win.$crisp).toEqual([
+      ["set", "message:text", ["Please add an integration for Acme Checkout."]],
+      ["do", "chat:show"],
+      ["do", "chat:open"],
+    ]);
+    expect(win.$crisp).not.toContainEqual(
+      expect.arrayContaining(["message:send"]),
+    );
   });
 
   it("hides the floating launcher on narrow screens and after chat closes", () => {

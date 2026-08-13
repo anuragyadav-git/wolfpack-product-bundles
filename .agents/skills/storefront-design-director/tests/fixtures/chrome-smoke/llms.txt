@@ -1,0 +1,7 @@
+# Storefront Design Director Chrome Smoke Fixture
+
+Local deterministic fixture for Chrome DevTools MCP smoke testing.
+
+## Pages
+
+- [Chrome automation smoke fixture](http://127.0.0.1:8765/index.html): Reversible control used for direct browser automation checks.

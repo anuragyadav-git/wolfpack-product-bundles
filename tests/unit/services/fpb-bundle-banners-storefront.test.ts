@@ -1,6 +1,3 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
-
 import { BundleType } from "../../../app/constants/bundle";
 import { updateBundleProductMetafields } from "../../../app/services/bundles/metafield-sync/operations/bundle-product.server";
 import {
@@ -105,20 +102,6 @@ describe("FPB bundle banner storefront contract", () => {
     const bundleUiConfig = getBundleUiConfig(admin);
     expect(bundleUiConfig.bundleBannerDesktopUrl).toBe("https://cdn.shopify.com/desktop-banner.png");
     expect(bundleUiConfig.bundleBannerMobileUrl).toBe("https://cdn.shopify.com/mobile-banner.png");
-  });
-
-  it("keeps lightweight FPB bundle_settings aware of desktop and mobile bundle banners", () => {
-    const source = readFileSync(
-      join(process.cwd(), "app/services/widget-installation/widget-full-page-bundle.server.ts"),
-      "utf8",
-    );
-    const settingsBuilder = source.slice(
-      source.indexOf("function buildBundleSettings(bundle: any)"),
-      source.indexOf("async function writeBundleConfigPageMetafield", source.indexOf("function buildBundleSettings(bundle: any)")),
-    );
-
-    expect(settingsBuilder).toContain("bundleBannerDesktopUrl: bundle.bundleBannerDesktopUrl ?? null");
-    expect(settingsBuilder).toContain("bundleBannerMobileUrl: bundle.bundleBannerMobileUrl ?? null");
   });
 
 });

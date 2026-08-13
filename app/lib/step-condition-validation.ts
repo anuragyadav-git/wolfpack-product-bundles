@@ -10,8 +10,6 @@ export type SupportedStepConditionOperator =
 export interface StepConditionValidationContext {
   stepId: string;
   stepName?: string | null;
-  minQuantity: number;
-  maxQuantity: number;
   conditionType: string | null;
   conditionOperator: string | null;
   conditionValue: number | null;
@@ -35,27 +33,6 @@ export function isOperatorSupported(
   );
 }
 
-export function evaluateCondition(
-  operator: SupportedStepConditionOperator,
-  value: number,
-  minQuantity: number,
-  maxQuantity: number,
-): boolean {
-  if (!Number.isFinite(value) || !Number.isFinite(minQuantity) || !Number.isFinite(maxQuantity)) {
-    return false;
-  }
-
-  if (operator === "equal_to") {
-    return value >= minQuantity && value <= maxQuantity;
-  }
-
-  if (operator === "greater_than_or_equal_to") {
-    return value <= maxQuantity;
-  }
-
-  return value >= minQuantity;
-}
-
 function label(stepId: string, stepName?: string | null): string {
   return stepName ? `${stepName} (${stepId})` : stepId;
 }
@@ -69,43 +46,57 @@ export function validateStepConditionFeasibility(
 
   const errors: StepConditionValidationResult[] = [];
   const stepLabel = label(stepContext.stepId, stepContext.stepName);
-  const minQuantity = stepContext.minQuantity;
-  const maxQuantity = stepContext.maxQuantity;
+  const conditions = [
+    {
+      position: 1,
+      operator: stepContext.conditionOperator,
+      value: stepContext.conditionValue,
+    },
+    {
+      position: 2,
+      operator: stepContext.conditionOperator2,
+      value: stepContext.conditionValue2,
+    },
+  ].filter(
+    (condition): condition is {
+      position: number;
+      operator: SupportedStepConditionOperator;
+      value: number;
+    } => isOperatorSupported(condition.operator) && condition.value !== null,
+  );
 
-  if (
-    isOperatorSupported(stepContext.conditionOperator) &&
-    stepContext.conditionValue !== null
-  ) {
-    const isFeasible = evaluateCondition(
-      stepContext.conditionOperator,
-      stepContext.conditionValue,
-      minQuantity,
-      maxQuantity,
-    );
-    if (!isFeasible) {
+  for (const condition of conditions) {
+    if (!Number.isFinite(condition.value) || condition.value < 0) {
       errors.push({
         stepId: stepContext.stepId,
-        message: `Step "${stepLabel}" has an impossible condition (1): ${stepContext.conditionOperator} ${stepContext.conditionValue} outside quantity range [${minQuantity}, ${maxQuantity}]`,
+        message: `Step "${stepLabel}" has an impossible condition (${condition.position}): quantity must be a finite non-negative number`,
       });
     }
   }
 
-  if (
-    isOperatorSupported(stepContext.conditionOperator2) &&
-    stepContext.conditionValue2 !== null
-  ) {
-    const isFeasible = evaluateCondition(
-      stepContext.conditionOperator2,
-      stepContext.conditionValue2,
-      minQuantity,
-      maxQuantity,
-    );
-    if (!isFeasible) {
-      errors.push({
-        stepId: stepContext.stepId,
-        message: `Step "${stepLabel}" has an impossible condition (2): ${stepContext.conditionOperator2} ${stepContext.conditionValue2} outside quantity range [${minQuantity}, ${maxQuantity}]`,
-      });
+  if (errors.length > 0 || conditions.length < 2) {
+    return errors;
+  }
+
+  let lowerBound = 0;
+  let upperBound = Number.POSITIVE_INFINITY;
+  for (const condition of conditions) {
+    if (condition.operator === "equal_to") {
+      lowerBound = Math.max(lowerBound, condition.value);
+      upperBound = Math.min(upperBound, condition.value);
+    } else if (condition.operator === "greater_than_or_equal_to") {
+      lowerBound = Math.max(lowerBound, condition.value);
+    } else {
+      upperBound = Math.min(upperBound, condition.value);
     }
+  }
+
+  if (lowerBound > upperBound) {
+    const [first, second] = conditions;
+    errors.push({
+      stepId: stepContext.stepId,
+      message: `Step "${stepLabel}" has impossible quantity conditions: ${first.operator} ${first.value} and ${second.operator} ${second.value} cannot both be satisfied`,
+    });
   }
 
   return errors;

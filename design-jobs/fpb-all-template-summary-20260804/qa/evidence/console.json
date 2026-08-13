@@ -1,0 +1,9 @@
+{
+  "status": "passed",
+  "violations": [],
+  "allowlisted": [
+    "Shopify theme preload warning",
+    "Shopify theme form-field label issue",
+    "Shopify Monorail telemetry failure"
+  ]
+}

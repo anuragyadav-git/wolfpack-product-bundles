@@ -25,9 +25,6 @@ export const PRODUCT_PAGE_EDIT_DEFAULTS_HREF = "/app/settings";
 export const SUBSCRIPTION_NO_COMMON_PLAN_MESSAGE =
   "To offer this bundle as a subscription, all of its products must be part of the same subscription plan in your Shopify settings. Please update your product selling plans and try again.";
 
-export const INDIVIDUAL_SELLING_PLAN_BLOCKED_MESSAGE =
-  "Individual selling plans can't be enabled while a bundle-level subscription or BXGY discount is active. Disable it to use individual selling plans.";
-
 export const PRODUCT_PAGE_SETUP_ITEMS: ProductPageSetupItem[] = [
   { id: "step_setup",         label: "Step Setup",         iconType: "note" },
   { id: "discount_pricing",   label: "Discount & Pricing", iconType: "filter" },
@@ -98,9 +95,6 @@ export function extractSellingPlanValidationSources(bundle: any): SellingPlanVal
         addUnique(productIds, normalizeProductId(product.id ?? product.productId ?? product.graphqlId));
       }
       for (const collection of asArray(category.collections)) {
-        addUnique(collectionIds, normalizeCollectionId(collection.id ?? collection.collectionGid));
-      }
-      for (const collection of asArray(category.collectionsSelectedData)) {
         addUnique(collectionIds, normalizeCollectionId(collection.id ?? collection.collectionGid));
       }
     }

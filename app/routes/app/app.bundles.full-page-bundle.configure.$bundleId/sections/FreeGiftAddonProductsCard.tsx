@@ -64,7 +64,7 @@ export function FpbAddonProductsCard({
           <div className={fullPageBundleStyles.addonsHeaderActions}>
             <s-button
               variant="secondary"
-              icon="globe"
+              icon="language-translate"
               onClick={openAddonSectionMultiLanguageModal}
             >
               Multi Language

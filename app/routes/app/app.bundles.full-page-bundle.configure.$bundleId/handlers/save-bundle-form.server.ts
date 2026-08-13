@@ -1,5 +1,4 @@
 import { processCss } from "../../../../lib/css-sanitizer";
-import { parseIndividualSellingPlanSelection } from "./shared.server";
 
 function normalizePersonalizationData(personalizationData: any) {
   if (
@@ -71,7 +70,6 @@ export function parseFpbSaveBundleForm(formData: FormData) {
     (formData.get("floatingBadgeText") as string) ?? "";
   const floatingBadgeText = floatingBadgeTextRaw.slice(0, 60);
   const showProductPrices = formData.get("showProductPrices") !== "false";
-  const showCompareAtPrices = formData.get("showCompareAtPrices") === "true";
   const cartRedirectToCheckout =
     formData.get("cartRedirectToCheckout") === "true";
   const allowQuantityChanges =
@@ -143,8 +141,6 @@ export function parseFpbSaveBundleForm(formData: FormData) {
   const validateQuantityPerProduct = validateQuantityPerProductRaw
     ? JSON.parse(validateQuantityPerProductRaw)
     : { isEnabled: false, allowedQuantity: 1 };
-  const individualSellingPlanSelection =
-    parseIndividualSellingPlanSelection(formData);
   const defaultProductsDataRaw = formData.get("defaultProductsData") as
     | string
     | null;
@@ -179,7 +175,6 @@ export function parseFpbSaveBundleForm(formData: FormData) {
     discountData,
     floatingBadgeEnabled,
     floatingBadgeText,
-    individualSellingPlanSelection,
     loadingGif,
     maxQtyPerProduct,
     personalizationData,
@@ -188,7 +183,6 @@ export function parseFpbSaveBundleForm(formData: FormData) {
     promoBannerBgImage,
     quantityValidationEnabled,
     searchBarEnabled,
-    showCompareAtPrices,
     showProductPrices,
     showStepTimelineParsed,
     showTextOnAddButton,

@@ -4,7 +4,6 @@ import { useConfigureBundleController } from "./useConfigureBundleController";
 import { useConfigureContentState } from "./useConfigureContentState";
 import { useConfigureLocalizationState } from "./useConfigureLocalizationState";
 import { useConfigureModalController } from "./useConfigureModalController";
-import { useConfigurePageSelectionController } from "./useConfigurePageSelectionController";
 import { useConfigureSaveController } from "./useConfigureSaveController";
 import { useConfigureTemplatePricingController } from "./useConfigureTemplatePricingController";
 import { useConfigureVisibilityTemplateState } from "./useConfigureVisibilityTemplateState";
@@ -20,7 +19,6 @@ export function useConfigureBundleFlow() {
   useConfigureTemplatePricingController(flow);
   useConfigureModalController(flow);
   useConfigureActionController(flow);
-  useConfigurePageSelectionController(flow);
   useConfigureSaveController(flow);
 
   return buildConfigureBundleFlowContext(flow);

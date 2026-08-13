@@ -118,6 +118,20 @@ describe('calculateBundlePrice — all discount methods', () => {
     expect(result).toBe('30.00');
   });
 
+  it('should use the canonical step quantity without reparsing it', async () => {
+    const admin = createMockAdmin('10.00');
+    const bundle = {
+      steps: [{
+        StepProduct: [{ productId: 'gid://shopify/Product/1' }],
+        minQuantity: 2.5,
+      }],
+      pricing: null,
+    };
+
+    const result = await calculateBundlePrice(admin, bundle);
+    expect(result).toBe('25.00');
+  });
+
   it('should enforce minimum price of 0.01', async () => {
     // Product at $1.00, 100% discount → $0.00 → clamped to $0.01
     const admin = createMockAdmin('1.00');
