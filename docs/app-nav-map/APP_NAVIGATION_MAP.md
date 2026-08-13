@@ -5,7 +5,7 @@ title: Wolfpack Product Bundles App Navigation and UI Map
 type: navigation-map
 status: authoritative
 summary: Routes, screens, actions, modals, and storefront-preview flows for the embedded app.
-last_audited: 2026-08-13
+last_audited: 2026-08-14
 owners:
   - engineering
 domains:
@@ -30,7 +30,7 @@ keywords:
 > Any time a new page, modal, tab, sidebar section, or user flow is added or removed,
 > this document **must** be updated. See CLAUDE.md for the enforcement rule.
 
-**Last Updated:** 2026-08-13
+**Last Updated:** 2026-08-14
 **Environment mapped:** SIT (`wolfpack-product-bundles-sit`)
 **Test store:** `wolfpack-store-test-1.myshopify.com`
 
@@ -405,6 +405,7 @@ FPB Configure Page
 │               Persists: wpbLayoutTemplate (always FBP_SIDE_FOOTER) + wpbPresetId (STANDARD | CLASSIC | COMPACT | HORIZONTAL)
 │
 ├── Save Bar (App Bridge): [Discard] [Save]
+│   └── Save validates required fields for enabled persisted features; invalid drafts stay dirty, open/focus the first affected section, and show inline critical feedback without submitting
 │
 └── Modals:
     ├── Bundle Status Modal (Draft / Active / Unlisted)
@@ -434,6 +435,12 @@ Responsive configure behavior:
 
 **Route file:** `app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/route.tsx`
 **URL:** `/app/bundles/product-page-bundle/configure/:bundleId`
+
+PPB uses the same SaveBar validation flow as FPB. Required fields and resource
+selection are conditional on enabled persisted features; invalid Draft,
+Unlisted, and Active saves are blocked before the route action and displayed as
+inline critical field errors. Disabled branches and the non-persisted
+subscription placeholders are excluded.
 
 ```
 PPB Configure Page

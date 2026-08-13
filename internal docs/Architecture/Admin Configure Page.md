@@ -5,7 +5,7 @@ title: Admin Configure Page
 type: architecture
 status: authoritative
 summary: Defines the shared FPB and PPB configure-page boundary and direct create, clone, edit, and save flows.
-last_audited: 2026-08-13
+last_audited: 2026-08-14
 owners:
   - engineering
 domains:
@@ -81,6 +81,34 @@ hide listeners); React custom-element `onHide` props and `show()` alone are not
 the supported lifecycle contract inside the embedded Admin iframe.
 
 SaveBar semantics remain route-owned. Shared configure UI should mark drafts dirty through the adapter but must not introduce autosave, wrap the canvas in a broad form, or make Enter keypresses submit the configure page.
+
+## Configure Validation Boundary
+
+FPB and PPB use one feature-aware validation contract at both sides of the
+SaveBar request. The client validates the exact `FormData` that would be
+submitted; both route handlers run the same pure validator again before any
+normalisation, Prisma mutation, or storefront sync. Draft, Unlisted, and Active
+records use the same rules.
+
+Validation paths are stable semantic identifiers such as
+`steps.<stepId>.name`, `discount.rules.<ruleId>.discountValue`, and
+`widget.buttonText`. A failed route response uses HTTP 400 with `success:
+false`, a concise summary, and `fieldErrors: [{path, message}]`. Live Shopify
+variant validation maps its server-only failures into this shape as well.
+
+Save remains available while the draft is dirty. An invalid attempt keeps the
+SaveBar open, changes to the first affected section and step, opens its category
+when applicable, and focuses the first invalid control or section message.
+Polaris field `error` properties and critical text render feedback next to the
+affected control; validation failures never use transient toasts. Errors are
+not shown before the first Save attempt and clear as the merchant edits the
+affected value. Successful Save and Discard clear all validation state.
+
+Only persisted, enabled feature branches are validated. Step 1 is always
+enabled. Disabled later steps, disabled pricing/widget/embed/add-on features,
+inactive targeting branches, optional media and CSS, and optional localized
+translations do not block Save. PPB subscription placeholder controls remain
+outside this contract until they have a persistence path.
 
 Successful fetcher saves trigger normal Remix loader revalidation. Rehydrating
 loader-backed bundle data must preserve the current configure section and
