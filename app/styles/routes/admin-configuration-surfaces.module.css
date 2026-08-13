@@ -954,6 +954,11 @@
   justify-self: end;
 }
 
+.bundlePreviewViewButton:not(:disabled):hover {
+  border-color: #babfc3;
+  background: #f6f6f7;
+}
+
 .bundlePreviewViewButton:disabled {
   cursor: not-allowed;
   opacity: 0.45;
