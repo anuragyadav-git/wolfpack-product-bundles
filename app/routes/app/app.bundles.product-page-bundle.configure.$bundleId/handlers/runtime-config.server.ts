@@ -51,6 +51,7 @@ export function buildBundleBaseConfig(
     boxSelection?: unknown;
     bundleUpsellConfig?: unknown;
     bundleTextConfig?: unknown;
+    bundleSubscriptionConfig?: unknown;
     discountDisplayOverride?: unknown;
     validateQuantityPerProduct?: unknown;
     useSingleStepCategoriesAsBundleSteps?: boolean | null;
@@ -143,6 +144,7 @@ export function buildBundleBaseConfig(
     boxSelection: updatedBundle.boxSelection ?? null,
     bundleUpsellConfig: updatedBundle.bundleUpsellConfig ?? null,
     bundleTextConfig: updatedBundle.bundleTextConfig ?? null,
+    bundleSubscriptionConfig: updatedBundle.bundleSubscriptionConfig ?? null,
     discountDisplayOverride: updatedBundle.discountDisplayOverride ?? null,
     validateQuantityPerProduct: updatedBundle.validateQuantityPerProduct ?? {
       isEnabled: false,
@@ -415,6 +417,7 @@ export function buildSyncBundleConfiguration(
     bundleUpsellConfig: bundle.bundleUpsellConfig ?? null,
     bundleTextConfig: bundle.bundleTextConfig ?? null,
     personalizationData: bundle.personalizationData ?? null,
+    bundleSubscriptionConfig: bundle.bundleSubscriptionConfig ?? null,
     discountDisplayOverride: bundle.discountDisplayOverride ?? null,
     validateQuantityPerProduct: bundle.validateQuantityPerProduct ?? {
       isEnabled: false,

@@ -95,6 +95,81 @@ fn run_automatic_addon_lines(
     run_function_with_input(cart_lines_discounts_generate_run, input.as_str()).expect("should run")
 }
 
+fn run_subscription_lines(plan_ids: &[&str], component_count: usize) -> schema::CartLinesDiscountsGenerateRunResult {
+    let runtime_secret = test_runtime_secret();
+    let payload = serde_json::json!({
+        "version": 1,
+        "shop": "test-shop.myshopify.com",
+        "bundleId": "bundle-1",
+        "bundleType": "product_page",
+        "offerGroupId": "bundle-1_SESSION",
+        "parentVariantId": "gid://shopify/ProductVariant/999",
+        "bundleName": "Subscription Bundle",
+        "components": [
+            { "variantId": "gid://shopify/ProductVariant/101", "quantity": 1 },
+            { "variantId": "gid://shopify/ProductVariant/102", "quantity": 1 }
+        ],
+        "addons": [],
+        "priceAdjustment": { "method": "percentage_off", "value": 20 },
+        "subscription": {
+            "sellingPlanGroupId": "gid://shopify/SellingPlanGroup/1",
+            "sellingPlanId": "gid://shopify/SellingPlan/1",
+            "recurringBundleDiscount": false
+        }
+    }).to_string();
+    let runtime_token = sign_runtime_token_for_test(&payload, &runtime_secret);
+    let lines = plan_ids.iter().take(component_count).enumerate().map(|(index, plan_id)| serde_json::json!({
+        "id": format!("gid://shopify/CartLine/{index}"),
+        "quantity": 1,
+        "wolfpackProductBundleOfferId": { "value": format!("bundle-1_SESSION_{}", index + 1) },
+        "runtimeToken": { "value": runtime_token },
+        "stepType": null,
+        "sellingPlanAllocation": { "sellingPlan": { "id": plan_id } },
+        "merchandise": {
+            "__typename": "ProductVariant",
+            "id": format!("gid://shopify/ProductVariant/{}", 101 + index),
+            "component_parents": null
+        },
+        "cost": { "amountPerQuantity": { "amount": "50.00" } }
+    })).collect::<Vec<_>>();
+    let input = serde_json::json!({
+        "cart": { "lines": lines },
+        "discount": {
+            "discountClasses": ["PRODUCT"],
+            "runtimeTokenSecret": { "value": runtime_secret },
+            "discountRole": { "value": "subscription_initial" },
+            "checkoutIntegrationConfig": null
+        },
+        "enteredDiscountCodes": [],
+        "triggeringDiscountCode": null,
+        "presentmentCurrencyRate": "1.0"
+    }).to_string();
+    run_function_with_input(cart_lines_discounts_generate_run, &input).expect("should run")
+}
+
+#[test]
+fn subscription_initial_role_discounts_exact_signed_plan_group_once() {
+    let output = run_subscription_lines(
+        &["gid://shopify/SellingPlan/1", "gid://shopify/SellingPlan/1"],
+        2,
+    );
+    assert_eq!(output.operations.len(), 1);
+    let schema::CartOperation::ProductDiscountsAdd(operation) = &output.operations[0] else {
+        panic!("expected product discounts add operation")
+    };
+    assert_eq!(operation.candidates.len(), 1);
+    assert_eq!(operation.candidates[0].targets.len(), 2);
+}
+
+#[test]
+fn subscription_initial_role_rejects_mixed_plan_and_partial_groups() {
+    assert!(run_subscription_lines(
+        &["gid://shopify/SellingPlan/1", "gid://shopify/SellingPlan/2"],
+        2,
+    ).operations.is_empty());
+    assert!(run_subscription_lines(&["gid://shopify/SellingPlan/1"], 1).operations.is_empty());
+}
+
 #[test]
 fn parses_partial_percentage_addon_token() {
     assert_eq!(

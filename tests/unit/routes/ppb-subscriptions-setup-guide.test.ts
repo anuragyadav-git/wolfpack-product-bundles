@@ -1,38 +1,70 @@
-import { readPpbConfigureRouteFamilySource } from "./ppb-configure-route-source";
+import {
+  buildPublicPpbSubscriptionConfig,
+  normalizePpbSubscriptionConfig,
+  validatePpbSubscriptionConfig,
+} from "../../../app/lib/ppb-subscriptions";
 
-describe("Product Page Bundle Subscriptions setup guide", () => {
-  it("makes How to setup reveal sanitized setup guidance", () => {
-    const source = readPpbConfigureRouteFamilySource().replace(/\s+/g, " ");
+const validConfig = {
+  version: 1,
+  enabled: true,
+  selectedGroup: {
+    id: "gid://shopify/SellingPlanGroup/1",
+    name: "Subscribe",
+    options: ["Delivery every"],
+    plans: [{
+      id: "gid://shopify/SellingPlan/1",
+      sourceName: "Monthly",
+      options: ["Month"],
+      position: 1,
+      pricingPolicies: [],
+    }],
+  },
+  selectedPlanIds: ["gid://shopify/SellingPlan/1"],
+  defaultPurchaseOption: {
+    kind: "selling_plan",
+    sellingPlanId: "gid://shopify/SellingPlan/1",
+  },
+  oneTimePurchase: { enabled: true, title: "One time", description: "" },
+  copy: { title: "Purchase options", subtitle: "", unavailableMessage: "Unavailable" },
+  planCopy: {
+    "gid://shopify/SellingPlan/1": {
+      displayName: "Monthly",
+      discountPill: "",
+      description: "",
+    },
+  },
+  showDiscountOnProductCards: false,
+  recurringBundleDiscount: false,
+  translations: {},
+};
 
-    expect(source).toContain("showSubscriptionSetupGuide");
-    expect(source).toContain("setShowSubscriptionSetupGuide");
-    expect(source).toContain(
-      "Create a subscription plan, name it, select all bundle products, configure the purchase frequency, and save the plan.",
-    );
-    expect(source).toContain(
-      "Return here, then use Get Subscription Plans to fetch the shared selling plans available for this bundle.",
-    );
-    expect(source).toContain(
-      "Subscriptions cannot be enabled on bundles with Buy X, Get Y discounts.",
-    );
-    expect(source).toContain(
-      "Use a different discount type to enable subscriptions.",
-    );
-    expect(source).not.toMatch(/help\\.skailama|easybundles-help/i);
+describe("PPB subscription configuration behavior", () => {
+  it("preserves a valid provider-neutral plan selection for storefront sync", () => {
+    expect(validatePpbSubscriptionConfig(validConfig)).toEqual([]);
+    const publicConfig = buildPublicPpbSubscriptionConfig(validConfig);
+    expect(publicConfig).toMatchObject({
+      enabled: true,
+      selectedPlanIds: ["gid://shopify/SellingPlan/1"],
+    });
+    expect(publicConfig?.selectedGroup?.plans[0]).not.toHaveProperty("position");
   });
 
-  it("renders the recovered plan-management surface after a valid plan lookup", () => {
-    const source = readPpbConfigureRouteFamilySource();
+  it("preserves disabled draft values but omits subscription behavior publicly", () => {
+    const disabled = normalizePpbSubscriptionConfig({ ...validConfig, enabled: false });
 
-    expect(source).toContain("subscriptionPlans");
-    expect(source).toContain("Subscription Plans");
-    expect(source).toContain("Plan display name");
-    expect(source).toContain("Discount pill");
-    expect(source).toContain("Make plan default");
-    expect(source).toContain("One-time purchase");
-    expect(source).toContain("Make one-time purchase default");
-    expect(source).toContain("Recurring discount");
-    expect(source).toContain("Subscription text and translations");
-    expect(source).toContain("Save Selection");
+    expect(disabled.selectedPlanIds).toEqual(["gid://shopify/SellingPlan/1"]);
+    expect(buildPublicPpbSubscriptionConfig(disabled)).toBeNull();
+  });
+
+  it("rejects an enabled selection when its default plan is no longer selected", () => {
+    const issues = validatePpbSubscriptionConfig({
+      ...validConfig,
+      selectedPlanIds: [],
+    });
+
+    expect(issues.map((issue) => issue.path)).toEqual(expect.arrayContaining([
+      "subscriptions.selectedPlanIds",
+      "subscriptions.defaultPurchaseOption",
+    ]));
   });
 });

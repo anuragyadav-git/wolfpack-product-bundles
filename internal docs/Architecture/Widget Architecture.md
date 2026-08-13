@@ -5,7 +5,7 @@ title: Widget Architecture
 type: architecture
 status: authoritative
 summary: FPB and PPB bootstrap, hydration, extension-asset, and widget runtime architecture.
-last_audited: 2026-08-13
+last_audited: 2026-08-14
 owners:
   - engineering
 domains:
@@ -61,11 +61,12 @@ Template behavior is resolved through plain config modules and method modules:
 
 Template installer/prototype patch functions have been removed. Widget entry files compose exported template method objects in the same central `Object.assign` used for controller method modules.
 
-The widgets do not accept `individualSellingPlanSelection`, hydrate
-`sellingPlanAllocations`, or add `selling_plan` to cart lines. Those fields
-belonged to the removed Bundle Settings `Pre-order & Subscription Integration`
-contract. Any future subscription storefront behavior requires a new explicit
-contract owned by the separate PPB Subscriptions feature.
+The widgets do not accept the retired `individualSellingPlanSelection` field.
+PPB instead consumes the explicit public `subscription` object from
+`bundle_ui_config`. A shared purchase-options component renders the selected
+selling-plan group across every PPB template. Subscription submissions add the
+same `selling_plan` to every component line and omit the merged-path public
+`Box` metadata; one-time submissions retain the existing merged-parent flow.
 
 ## Admin Design Preview Adapter
 

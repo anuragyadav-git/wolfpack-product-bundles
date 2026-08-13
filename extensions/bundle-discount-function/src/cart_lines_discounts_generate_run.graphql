@@ -10,6 +10,7 @@ query Input {
       runtimeToken: attribute(key: "_wolfpack_bundle_runtime") {
         value
       }
+      sellingPlanAllocation { sellingPlan { id } }
       stepType: attribute(key: "_bundle_step_type") {
         value
       }
@@ -32,6 +33,9 @@ query Input {
   discount {
     discountClasses
     runtimeTokenSecret: metafield(namespace: "$app", key: "runtime_token_secret") {
+      value
+    }
+    discountRole: metafield(namespace: "$app", key: "discount_role") {
       value
     }
     checkoutIntegrationConfig: metafield(namespace: "$app", key: "checkout_integration_config") {

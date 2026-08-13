@@ -14,6 +14,10 @@ import {
 } from "../../../lib/app-embed-status-check.client";
 import { useBundleConfigurationState } from "../../../hooks/useBundleConfigurationState";
 import type { LoaderData } from "./types";
+import {
+  normalizePpbSubscriptionConfig,
+  type PpbSubscriptionConfigV1,
+} from "../../../lib/ppb-subscriptions";
 
 declare global {
   interface Window {
@@ -25,7 +29,7 @@ interface SubscriptionValidationResponse {
   success: boolean;
   isValid?: boolean;
   productCount?: number;
-  plans?: Array<{ id: string; name: string }>;
+  groups?: PpbSubscriptionConfigV1["selectedGroup"][];
   message?: string | null;
   error?: string;
 }
@@ -36,6 +40,7 @@ export function usePpbBaseConfigureState() {
     loaderData.bundle as unknown as import("../../../hooks/useBundleConfigurationState").BundleData & {
       loadingGif?: string | null;
       shopifyProductHandle?: string;
+      bundleSubscriptionConfig?: unknown;
     };
   const {
     bundleProduct: loadedBundleProduct,
@@ -59,6 +64,11 @@ export function usePpbBaseConfigureState() {
     useState(0);
   const [showSubscriptionSetupGuide, setShowSubscriptionSetupGuide] =
     useState(false);
+  const [subscriptionConfig, setSubscriptionConfigState] =
+    useState<PpbSubscriptionConfigV1>(() =>
+      normalizePpbSubscriptionConfig(bundle.bundleSubscriptionConfig),
+    );
+  const originalSubscriptionConfigRef = useRef(subscriptionConfig);
   const revalidator = useRevalidator();
   const presentedAppEmbedEnabled =
     currentAppEmbedEnabled ?? true;
@@ -130,6 +140,13 @@ export function usePpbBaseConfigureState() {
     forceNavigation,
     originalValuesRef,
   } = configState;
+  const setSubscriptionConfig = useCallback(
+    (updater: (current: PpbSubscriptionConfigV1) => PpbSubscriptionConfigV1) => {
+      setSubscriptionConfigState((current) => normalizePpbSubscriptionConfig(updater(current)));
+      markAsDirty();
+    },
+    [markAsDirty],
+  );
   const parentProductStatusUi = getParentProductStatusUi(
     loadedBundleProduct?.status || bundleProduct?.status || productStatus,
   );
@@ -266,6 +283,10 @@ export function usePpbBaseConfigureState() {
     subscriptionFetcher,
     showSubscriptionSetupGuide,
     setShowSubscriptionSetupGuide,
+    subscriptionConfig,
+    setSubscriptionConfig,
+    setSubscriptionConfigState,
+    originalSubscriptionConfigRef,
     revalidator,
     isBundleVisibilityPending,
     isSaveInFlight,

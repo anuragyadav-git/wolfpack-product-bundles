@@ -75,6 +75,7 @@ export const ProductPageCartMethods: Record<string, any> & ThisType<any> = {
       const offerId = this.resolveProductPageOfferId();
       const sessionKey = this.generateBundleSessionKey();
       const bundleName = this.selectedBundle?.name || '';
+      const sellingPlanId = this.selectedSellingPlanId || '';
       const cartItems = this.buildCartItems(offerId, sessionKey);
       const variantPreflightCache = new Map();
       for (let itemIndex = 0; itemIndex < cartItems.length; itemIndex += 1) {
@@ -103,12 +104,14 @@ export const ProductPageCartMethods: Record<string, any> & ThisType<any> = {
       const runtimeToken = await this.requestCartTransformRuntimeToken(cartItems, {
         offerGroupId: `${offerId}_${sessionKey}`,
         bundleType: 'product_page',
+        sellingPlanId,
       });
       const cartContext = this.buildProductPageCartFormData(cartItems, {
         bundleName,
         offerId,
         sessionKey,
         runtimeToken,
+        sellingPlanId,
       });
       await this.syncBundleDetailsCartMetafield(cartContext.bundleDetailsKey, cartContext.sourceProperties);
 
@@ -279,12 +282,14 @@ export const ProductPageCartMethods: Record<string, any> & ThisType<any> = {
     offerId = '',
     sessionKey = '',
     runtimeToken = '',
+    sellingPlanId = '',
   } = {}) {
     return buildProductPageCartFormData(cartItems, {
       bundleName,
       offerId,
       sessionKey,
       runtimeToken,
+      sellingPlanId,
     });
   },
 
@@ -299,7 +304,7 @@ export const ProductPageCartMethods: Record<string, any> & ThisType<any> = {
     return { type: 'PERCENTAGE', value: Math.min(100, value) };
   },
 
-  async requestCartTransformRuntimeToken(cartItems, { offerGroupId, bundleType }) {
+  async requestCartTransformRuntimeToken(cartItems, { offerGroupId, bundleType, sellingPlanId = '' }) {
     const components = [];
     const addons = [];
 
@@ -331,6 +336,13 @@ export const ProductPageCartMethods: Record<string, any> & ThisType<any> = {
         offerGroupId,
         components,
         addons,
+        ...(sellingPlanId ? {
+          subscription: {
+            sellingPlanGroupId: this.selectedBundle?.subscription?.selectedGroup?.id,
+            sellingPlanId,
+            recurringBundleDiscount: false,
+          },
+        } : {}),
       }),
     });
     const data = await response.json().catch(() => null);

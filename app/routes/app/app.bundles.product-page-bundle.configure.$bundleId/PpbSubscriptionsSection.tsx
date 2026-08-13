@@ -1,4 +1,3 @@
-import type React from "react";
 import { usePpbConfigureContext } from "./PpbConfigureContext";
 
 export function PpbSubscriptionsSection() {
@@ -8,320 +7,212 @@ export function PpbSubscriptionsSection() {
     pricingState,
     setShowSubscriptionSetupGuide,
     showSubscriptionSetupGuide,
+    subscriptionConfig,
+    setSubscriptionConfig,
     SUBSCRIPTION_NO_COMMON_PLAN_MESSAGE,
     subscriptionFetcher,
+    validationErrors,
   } = usePpbConfigureContext();
 
+  if (activeSection !== "subscriptions") return null;
+
+  const validation = subscriptionFetcher.data;
+  const groups = validation?.success === true && validation?.isValid === true
+    ? (validation.groups ?? []).filter(Boolean)
+    : [];
+  const subscriptionsBlocked =
+    pricingState.discountType === DiscountMethod.BUY_X_GET_Y;
+  const validationMessage = validation?.success === false
+    ? validation.error
+    : validation?.isValid === false
+      ? (validation.message ?? SUBSCRIPTION_NO_COMMON_PLAN_MESSAGE)
+      : null;
+  const setGroup = (groupId: string) => {
+    const selectedGroup = groups.find((group: any) => group?.id === groupId) ?? null;
+    setSubscriptionConfig((current: any) => ({
+      ...current,
+      selectedGroup,
+      selectedPlanIds: [],
+      defaultPurchaseOption: { kind: "one_time" },
+      planCopy: {},
+    }));
+  };
+
   return (
-    <>
-      {activeSection === "subscriptions" &&
-        (() => {
-          const validation = subscriptionFetcher.data;
-          const subscriptionsBlocked =
-            pricingState.discountType === DiscountMethod.BUY_X_GET_Y;
-          const subscriptionPlans =
-            validation?.success === true && validation?.isValid === true
-              ? (validation.plans ?? [])
-              : [];
-          const validationMessage =
-            validation?.success === false
-              ? validation.error
-              : validation?.isValid === false
-                ? (validation.message ?? SUBSCRIPTION_NO_COMMON_PLAN_MESSAGE)
-                : null;
-          return (
-            <div data-tour-target="ppb-subscriptions">
-              <s-section>
-                <s-stack direction="block" gap="base">
-                  <s-stack direction="inline" alignItems="center" gap="small">
-                    <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>
-                      Bundle Subscriptions
-                    </h3>
-                    <s-press-button
-                      variant="tertiary"
-                      tone="neutral"
-                      icon="play"
-                      accessibilityLabel="How to setup?"
-                      pressed={showSubscriptionSetupGuide}
-                      onClick={() =>
-                        setShowSubscriptionSetupGuide((visible) => !visible)
-                      }
-                    >
-                      How to setup?
-                    </s-press-button>
-                  </s-stack>
-                  <p style={{ margin: 0, fontSize: 14, color: "#6d7175" }}>
-                    Allow customers to purchase the bundle as a subscription
-                  </p>
-                  {subscriptionsBlocked && (
-                    <s-banner
-                      tone="warning"
-                      heading="Subscriptions unavailable"
-                      dismissible={false}
-                      hidden={false}
-                    >
-                      <span>
-                        Subscriptions cannot be enabled on bundles with Buy X,
-                        Get Y discounts. Use a different discount type to enable
-                        subscriptions.
-                      </span>
-                    </s-banner>
-                  )}
-                  {showSubscriptionSetupGuide && (
-                    <s-banner
-                      tone="info"
-                      heading="Subscription setup guide"
-                      dismissible={false}
-                      hidden={false}
-                    >
-                      <s-stack direction="block" gap="small-400">
-                        <span>
-                          Create a subscription plan, name it, select all bundle
-                          products, configure the purchase frequency, and save
-                          the plan.
-                        </span>
-                        <span>
-                          Return here, then use Get Subscription Plans to fetch
-                          the shared selling plans available for this bundle.
-                        </span>
-                      </s-stack>
-                    </s-banner>
-                  )}
-                  {validationMessage && (
-                    <s-banner
-                      tone="warning"
-                      heading="Action required"
-                      dismissible={false}
-                      hidden={false}
-                    >
-                      <s-stack direction="block" gap="small-400">
-                        <span>{validationMessage}</span>
-                        <s-button variant="tertiary">Learn More</s-button>
-                      </s-stack>
-                    </s-banner>
-                  )}
-                  {subscriptionPlans.length > 0 && (
-                    <s-section>
-                      <s-stack direction="block" gap="base">
-                        <div>
-                          <h4
-                            style={{ margin: 0, fontSize: 15, fontWeight: 650 }}
-                          >
-                            Subscription Plans
-                          </h4>
-                          <p
-                            style={{
-                              margin: "4px 0 0",
-                              fontSize: 13,
-                              color: "#6d7175",
-                            }}
-                          >
-                            Select the shared selling plans available for this
-                            bundle.
-                          </p>
-                        </div>
-                        <s-stack direction="block" gap="small">
-                          {subscriptionPlans.map((plan, index) => (
-                            <div
-                              key={plan.id}
-                              style={{
-                                border: "1px solid #e1e3e5",
-                                borderRadius: 8,
-                                padding: 16,
-                                background: "#ffffff",
-                              }}
-                            >
-                              <s-stack direction="block" gap="small">
-                                <s-stack
-                                  direction="inline"
-                                  alignItems="center"
-                                  gap="small"
-                                  justifyContent="space-between"
-                                >
-                                  <h5
-                                    style={{
-                                      margin: 0,
-                                      fontSize: 14,
-                                      fontWeight: 650,
-                                    }}
-                                  >
-                                    {plan.name}
-                                  </h5>
-                                  {index === 0 && (
-                                    <s-badge tone="success">
-                                      Newly added
-                                    </s-badge>
-                                  )}
-                                </s-stack>
-                                <div
-                                  style={{
-                                    display: "grid",
-                                    gridTemplateColumns:
-                                      "repeat(2, minmax(0, 1fr))",
-                                    gap: 12,
-                                  }}
-                                >
-                                  <s-text-field
-                                    label="Plan display name"
-                                    value={plan.name}
-                                    readOnly
-                                    autocomplete="off"
-                                  />
-                                  <s-text-field
-                                    label="Discount pill"
-                                    value=""
-                                    placeholder="Discount pill"
-                                    autocomplete="off"
-                                  />
-                                </div>
-                                <s-checkbox
-                                  accessibilityLabel={`Make ${plan.name} default plan`}
-                                  label="Make plan default"
-                                />
-                              </s-stack>
-                            </div>
-                          ))}
-                        </s-stack>
-                        <div
-                          style={{
-                            border: "1px solid #e1e3e5",
-                            borderRadius: 8,
-                            padding: 16,
-                            background: "#f6f6f7",
-                          }}
-                        >
-                          <s-stack direction="block" gap="small">
-                            <h5
-                              style={{
-                                margin: 0,
-                                fontSize: 14,
-                                fontWeight: 650,
-                              }}
-                            >
-                              Configurations
-                            </h5>
-                            <s-checkbox
-                              accessibilityLabel="One-time purchase"
-                              label="One-time purchase"
-                            />
-                            <s-checkbox
-                              accessibilityLabel="Make one-time purchase default"
-                              label="Make one-time purchase default"
-                            />
-                            <s-text-field
-                              label="Recurring discount"
-                              value=""
-                              placeholder="Recurring discount"
-                              autocomplete="off"
-                            />
-                          </s-stack>
-                        </div>
-                        <div
-                          style={{
-                            border: "1px solid #e1e3e5",
-                            borderRadius: 8,
-                            padding: 16,
-                            background: "#ffffff",
-                          }}
-                        >
-                          <s-stack direction="block" gap="small">
-                            <s-stack
-                              direction="inline"
-                              alignItems="center"
-                              gap="small"
-                              justifyContent="space-between"
-                            >
-                              <h5
-                                style={{
-                                  margin: 0,
-                                  fontSize: 14,
-                                  fontWeight: 650,
-                                }}
-                              >
-                                Subscription text and translations
-                              </h5>
-                              <s-button variant="secondary" icon="language-translate">
-                                Multi Language
-                              </s-button>
-                            </s-stack>
-                            <div
-                              style={{
-                                display: "grid",
-                                gridTemplateColumns:
-                                  "repeat(2, minmax(0, 1fr))",
-                                gap: 12,
-                              }}
-                            >
-                              <s-text-field
-                                label="Subscription title"
-                                value=""
-                                autocomplete="off"
-                              />
-                              <s-text-field
-                                label="Tier labels"
-                                value=""
-                                autocomplete="off"
-                              />
-                              <s-text-field
-                                label="Plan name in dropdown"
-                                value=""
-                                autocomplete="off"
-                              />
-                              <s-text-field
-                                label="Subscription option description"
-                                value=""
-                                autocomplete="off"
-                              />
-                              <s-text-field
-                                label="One-time purchase label"
-                                value=""
-                                autocomplete="off"
-                              />
-                              <s-text-field
-                                label="One-time purchase description"
-                                value=""
-                                autocomplete="off"
-                              />
-                            </div>
-                          </s-stack>
-                        </div>
-                        <s-stack
-                          direction="inline"
-                          gap="small"
-                          alignItems="center"
-                        >
-                          <s-button variant="primary">Save Selection</s-button>
-                        </s-stack>
-                      </s-stack>
-                    </s-section>
-                  )}
-                  <s-stack direction="inline" gap="small" alignItems="center">
-                    <s-button
-                      variant="primary"
-                      loading={
-                        subscriptionFetcher.state === "submitting" || undefined
-                      }
-                      disabled={
-                        subscriptionFetcher.state !== "idle" ||
-                        subscriptionsBlocked ||
-                        undefined
-                      }
-                      onClick={() => {
-                        const formData = new FormData();
-                        formData.append("intent", "validateSellingPlanGroups");
-                        subscriptionFetcher.submit(formData, {
-                          method: "post",
-                        });
-                      }}
-                    >
-                      Get Subscription Plans
-                    </s-button>
-                  </s-stack>
-                </s-stack>
-              </s-section>
-            </div>
-          );
-        })()}
-    </>
+    <div data-tour-target="ppb-subscriptions">
+      <s-section>
+        <s-stack direction="block" gap="base">
+          <s-stack direction="inline" alignItems="center" gap="small">
+            <s-heading>Bundle Subscriptions</s-heading>
+            <s-press-button
+              variant="tertiary"
+              tone="neutral"
+              icon="play"
+              accessibilityLabel="How to setup?"
+              pressed={showSubscriptionSetupGuide}
+              onClick={() => setShowSubscriptionSetupGuide((visible: boolean) => !visible)}
+            >
+              How to setup?
+            </s-press-button>
+          </s-stack>
+          <s-paragraph>Allow customers to purchase the bundle as a subscription</s-paragraph>
+
+          {subscriptionsBlocked ? (
+            <s-banner tone="warning" heading="Subscriptions unavailable" dismissible={false} hidden={false}>
+              Subscriptions cannot be enabled on bundles with Buy X, Get Y discounts. Use a different discount type to enable subscriptions.
+            </s-banner>
+          ) : null}
+          {showSubscriptionSetupGuide ? (
+            <s-banner tone="info" heading="Subscription setup guide" dismissible={false} hidden={false}>
+              Configure every bundle product and selectable variant in one selling-plan group in your subscription app, then return here and get the shared plans.
+            </s-banner>
+          ) : null}
+          {validationMessage ? (
+            <s-banner tone="warning" heading="Action required" dismissible={false} hidden={false}>
+              {validationMessage}
+            </s-banner>
+          ) : null}
+
+          <s-stack direction="inline" gap="small" alignItems="center">
+            <s-button
+              variant="primary"
+              loading={subscriptionFetcher.state === "submitting" || undefined}
+              disabled={subscriptionFetcher.state !== "idle" || subscriptionsBlocked || undefined}
+              onClick={() => {
+                const formData = new FormData();
+                formData.append("intent", "validateSellingPlanGroups");
+                subscriptionFetcher.submit(formData, { method: "post" });
+              }}
+            >
+              Get Subscription Plans
+            </s-button>
+          </s-stack>
+
+          {groups.length > 0 ? (
+            <s-stack direction="block" gap="base">
+              <s-stack direction="inline" alignItems="center" justifyContent="space-between" gap="small">
+                <s-heading>Subscription Plans</s-heading>
+                <s-switch
+                  accessibilityLabel="Enable bundle subscriptions"
+                  checked={subscriptionConfig.enabled || undefined}
+                  disabled={subscriptionsBlocked || undefined}
+                  onChange={(event) => setSubscriptionConfig((current: any) => ({
+                    ...current,
+                    enabled: (event.target as HTMLInputElement).checked,
+                  }))}
+                />
+              </s-stack>
+
+              <s-choice-list
+                label="Selling-plan group"
+                values={subscriptionConfig.selectedGroup ? [subscriptionConfig.selectedGroup.id] : []}
+                onChange={(event) => setGroup(((event.currentTarget as any).values as string[] | undefined)?.[0] ?? "")}
+              >
+                {groups.map((group: any) => (
+                  <s-choice key={group.id} value={group.id}>{group.name}</s-choice>
+                ))}
+              </s-choice-list>
+
+              {subscriptionConfig.selectedGroup?.plans.map((plan: any) => {
+                const checked = subscriptionConfig.selectedPlanIds.includes(plan.id);
+                return (
+                  <s-box key={plan.id} padding="base" border="base" borderRadius="base">
+                    <s-stack direction="block" gap="small">
+                      <s-checkbox
+                        label={plan.sourceName}
+                        checked={checked || undefined}
+                        onChange={(event) => setSubscriptionConfig((current: any) => {
+                          const isChecked = (event.target as HTMLInputElement).checked;
+                          const selectedPlanIds = isChecked
+                            ? [...current.selectedPlanIds, plan.id]
+                            : current.selectedPlanIds.filter((id: string) => id !== plan.id);
+                          return {
+                            ...current,
+                            selectedPlanIds,
+                            planCopy: {
+                              ...current.planCopy,
+                              ...(isChecked ? { [plan.id]: current.planCopy[plan.id] ?? { displayName: plan.sourceName, discountPill: "", description: "" } } : {}),
+                            },
+                          };
+                        })}
+                      />
+                      {checked ? (
+                        <s-text-field
+                          label="Plan display name"
+                          value={subscriptionConfig.planCopy[plan.id]?.displayName ?? ""}
+                          error={validationErrors[`subscriptions.planCopy.${plan.id}.displayName`]}
+                          onInput={(event) => setSubscriptionConfig((current: any) => ({
+                            ...current,
+                            planCopy: {
+                              ...current.planCopy,
+                              [plan.id]: { ...current.planCopy[plan.id], displayName: (event.target as HTMLInputElement).value },
+                            },
+                          }))}
+                        />
+                      ) : null}
+                    </s-stack>
+                  </s-box>
+                );
+              })}
+
+              <s-checkbox
+                label="One-time purchase"
+                checked={subscriptionConfig.oneTimePurchase.enabled || undefined}
+                onChange={(event) => setSubscriptionConfig((current: any) => ({
+                  ...current,
+                  oneTimePurchase: { ...current.oneTimePurchase, enabled: (event.target as HTMLInputElement).checked },
+                }))}
+              />
+              <s-text-field
+                label="Purchase options title"
+                value={subscriptionConfig.copy.title}
+                error={validationErrors["subscriptions.copy.title"]}
+                onInput={(event) => setSubscriptionConfig((current: any) => ({
+                  ...current,
+                  copy: { ...current.copy, title: (event.target as HTMLInputElement).value },
+                }))}
+              />
+              {subscriptionConfig.oneTimePurchase.enabled ? (
+                <s-text-field
+                  label="One-time purchase label"
+                  value={subscriptionConfig.oneTimePurchase.title}
+                  error={validationErrors["subscriptions.oneTimePurchase.title"]}
+                  onInput={(event) => setSubscriptionConfig((current: any) => ({
+                    ...current,
+                    oneTimePurchase: { ...current.oneTimePurchase, title: (event.target as HTMLInputElement).value },
+                  }))}
+                />
+              ) : null}
+              <s-choice-list
+                label="Default purchase option"
+                values={[
+                  subscriptionConfig.defaultPurchaseOption.kind === "one_time"
+                    ? "one_time"
+                    : subscriptionConfig.defaultPurchaseOption.sellingPlanId,
+                ]}
+                onChange={(event) => {
+                  const value = ((event.currentTarget as any).values as string[] | undefined)?.[0];
+                  if (!value) return;
+                  setSubscriptionConfig((current: any) => ({
+                    ...current,
+                    defaultPurchaseOption: value === "one_time"
+                      ? { kind: "one_time" }
+                      : { kind: "selling_plan", sellingPlanId: value },
+                  }));
+                }}
+              >
+                {subscriptionConfig.oneTimePurchase.enabled ? <s-choice value="one_time">One-time purchase</s-choice> : null}
+                {subscriptionConfig.selectedGroup?.plans
+                  .filter((plan: any) => subscriptionConfig.selectedPlanIds.includes(plan.id))
+                  .map((plan: any) => <s-choice key={plan.id} value={plan.id}>{plan.sourceName}</s-choice>)}
+              </s-choice-list>
+              {subscriptionConfig.enabled && Object.keys(validationErrors).some((path) => path.startsWith("subscriptions.")) ? (
+                <s-text tone="critical">Fix the subscription fields before saving.</s-text>
+              ) : null}
+            </s-stack>
+          ) : null}
+        </s-stack>
+      </s-section>
+    </div>
   );
 }

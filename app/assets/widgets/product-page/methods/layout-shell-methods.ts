@@ -64,6 +64,7 @@ export function getGridStepRenderSequence({ stepCount = 0, currentStepIndex = 0 
 export const ProductPageLayoutShellMethods: Record<string, any> & ThisType<any> = {
 renderUI() {
   this._renderDirectDefaultProducts();
+  this.renderPurchaseOptions?.();
   this.renderSteps();
   this.renderQuantityOptionPills();
   this.renderFooter();

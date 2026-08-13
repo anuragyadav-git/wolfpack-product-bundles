@@ -17,6 +17,7 @@ export function buildProductPageCartFormData(cartItems = [], {
   offerId = '',
   sessionKey = '',
   runtimeToken = '',
+  sellingPlanId = '',
 } = {}) {
   const formData = new FormData();
 
@@ -24,12 +25,17 @@ export function buildProductPageCartFormData(cartItems = [], {
     const itemNumber = index + 1;
     formData.append(`items[${index}][id]`, String(item.id));
     formData.append(`items[${index}][quantity]`, String(item.quantity));
+    if (sellingPlanId) {
+      formData.append(`items[${index}][selling_plan]`, String(sellingPlanId));
+    }
 
     Object.entries(item.properties || {}).forEach(([key, value]) => {
       if (value === undefined || value === null) return;
       formData.append(`items[${index}][properties][${key}]`, String(value));
     });
-    formData.append(`items[${index}][properties][Box]`, String(itemNumber));
+    if (!sellingPlanId) {
+      formData.append(`items[${index}][properties][Box]`, String(itemNumber));
+    }
     formData.append(`items[${index}][properties][_bundleName]`, bundleName);
     formData.append(`items[${index}][properties][_wolfpackProductBundle:OfferId]`, `${offerId}_${sessionKey}_${itemNumber}`);
     formData.append(`items[${index}][properties][_wolfpackProductBundle:prodQty]`, String(item.quantity));

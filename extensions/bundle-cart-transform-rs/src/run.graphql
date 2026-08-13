@@ -27,6 +27,7 @@ query Input {
       bundleDisplayProperties: attribute(key: "_bundle_display_properties") {
         value
       }
+      sellingPlanAllocation { sellingPlan { id } }
       merchandise {
         __typename
         ... on ProductVariant {

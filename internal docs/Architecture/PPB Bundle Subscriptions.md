@@ -4,7 +4,7 @@ id: ppb-bundle-subscriptions
 title: PPB Bundle Subscriptions
 type: architecture
 status: proposed
-summary: Defines the provider-neutral PPB selling-plan, cart, discount, and release-gate architecture.
+summary: Defines the provider-neutral PPB selling-plan, cart, discount, and release-validation architecture.
 last_audited: 2026-08-14
 owners:
   - engineering
@@ -66,4 +66,4 @@ Automatic app-discount nodes are role-tagged. The subscription initial-order nod
 
 ## Release gate
 
-The first implementation remains behind `WPB_PPB_SUBSCRIPTIONS_POC`. Removing the gate requires cache-cleared SIT evidence for the request to `/cart/add`, `/cart.js`, cart pricing, checkout cadence, and absence of Cart Transform rejection. If recurring billing cannot be proven, production exposes first-order-only bundle pricing and does not render the recurring-discount control. No autonomous deploy or tunnel restart is part of this workflow.
+The implementation is contained by the development and SIT release workflow rather than a second runtime environment flag. Production release still requires cache-cleared SIT evidence for the request to `/cart/add`, `/cart.js`, cart pricing, checkout cadence, and absence of Cart Transform rejection. If recurring billing cannot be proven, production exposes first-order-only bundle pricing and does not render the recurring-discount control. No autonomous deploy or tunnel restart is part of this workflow.

@@ -46,6 +46,8 @@ export function usePpbFetcherEffects({
           base.originalAllowQuantityChangesRef.current =
             base.allowQuantityChanges;
           base.originalSdkModeRef.current = base.sdkMode;
+          base.originalSubscriptionConfigRef.current =
+            base.subscriptionConfig;
           base.originalTextOverridesRef.current = base.textOverrides;
           base.originalTextOverridesByLocaleRef.current =
             base.textOverridesByLocale;

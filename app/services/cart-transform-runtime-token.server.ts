@@ -1,6 +1,7 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { buildPriceAdjustmentConfig } from "./bundles/metafield-sync/utils/price-adjustment";
 import { collectAddonComponentVariants } from "./bundles/metafield-sync/utils/addon-components";
+import { buildPublicPpbSubscriptionConfig } from "../lib/ppb-subscriptions";
 
 const RUNTIME_TOKEN_VERSION = 1;
 const RUNTIME_TOKEN_SECRET_CONTEXT = "wpb-runtime-token:";
@@ -30,12 +31,39 @@ export type RuntimeTokenPayload = {
   components: RuntimeTokenLine[];
   addons: RuntimeTokenAddonLine[];
   priceAdjustment: unknown;
+  subscription?: {
+    sellingPlanGroupId: string;
+    sellingPlanId: string;
+    recurringBundleDiscount: boolean;
+  };
 };
 
 type SelectionInput = {
   components?: Array<{ variantId?: unknown; productId?: unknown; quantity?: unknown }>;
   addons?: Array<{ variantId?: unknown; quantity?: unknown; discount?: unknown }>;
+  subscription?: {
+    sellingPlanGroupId?: unknown;
+    sellingPlanId?: unknown;
+    recurringBundleDiscount?: unknown;
+  };
 };
+
+function normalizeSubscriptionSelection(bundle: any, value: SelectionInput["subscription"]) {
+  if (!value) return undefined;
+  const config = buildPublicPpbSubscriptionConfig(bundle?.bundleSubscriptionConfig);
+  const sellingPlanGroupId = String(value.sellingPlanGroupId ?? "").trim();
+  const sellingPlanId = String(value.sellingPlanId ?? "").trim();
+  if (!config || config.selectedGroup?.id !== sellingPlanGroupId) {
+    throw new Error("Subscription selling-plan group is not enabled for this bundle");
+  }
+  if (!config.selectedPlanIds.includes(sellingPlanId)) {
+    throw new Error("Subscription selling plan is not enabled for this bundle");
+  }
+  if (value.recurringBundleDiscount === true) {
+    throw new Error("Recurring bundle discounts are not enabled in the subscription POC");
+  }
+  return { sellingPlanGroupId, sellingPlanId, recurringBundleDiscount: false };
+}
 
 export function normalizeProductVariantGid(value: unknown): string | null {
   if (typeof value !== "string" && typeof value !== "number") return null;
@@ -188,7 +216,54 @@ export function validateRuntimeTokenSelection(bundle: any, selection: SelectionI
   return {
     components: normalizeLines(selection.components, allowedIds),
     addons: normalizeAddonLines(selection.addons, allowedIds.variantIds),
+    subscription: normalizeSubscriptionSelection(bundle, selection.subscription),
   };
+}
+
+export async function validateLiveSellingPlanSelection(
+  admin: { graphql: (query: string, options: any) => Promise<{ json: () => Promise<any> }> },
+  selection: NonNullable<RuntimeTokenPayload["subscription"]>,
+  components: RuntimeTokenLine[],
+) {
+  const query = `
+    query ValidateRuntimeSellingPlan($id: ID!, $after: String) {
+      node(id: $id) {
+        ... on SellingPlanGroup {
+          sellingPlans(first: 50) { nodes { id } }
+          productVariants(first: 250, after: $after) {
+            nodes { id }
+            pageInfo { hasNextPage endCursor }
+          }
+        }
+      }
+    }
+  `;
+  const planIds = new Set<string>();
+  const variantIds = new Set<string>();
+  let after: string | null = null;
+  do {
+    const response = await admin.graphql(query, {
+      variables: { id: selection.sellingPlanGroupId, after },
+    });
+    const data = await response.json();
+    const group = data.data?.node;
+    if (!group) throw new Error("Saved subscription selling-plan group no longer exists");
+    for (const plan of group.sellingPlans?.nodes ?? []) {
+      if (typeof plan?.id === "string") planIds.add(plan.id);
+    }
+    for (const variant of group.productVariants?.nodes ?? []) {
+      if (typeof variant?.id === "string") variantIds.add(variant.id);
+    }
+    after = group.productVariants?.pageInfo?.hasNextPage
+      ? group.productVariants.pageInfo.endCursor ?? null
+      : null;
+  } while (after);
+  if (!planIds.has(selection.sellingPlanId)) {
+    throw new Error("Saved subscription selling plan no longer exists");
+  }
+  if (components.some((line) => !variantIds.has(line.variantId))) {
+    throw new Error("Selected variant does not support the saved selling plan");
+  }
 }
 
 export function buildRuntimeTokenPayload(input: {
@@ -222,6 +297,7 @@ export function buildRuntimeTokenPayload(input: {
     components: selection.components,
     addons: selection.addons,
     priceAdjustment: buildPriceAdjustmentConfig(input.bundle.pricing),
+    ...(selection.subscription ? { subscription: selection.subscription } : {}),
   };
 }
 

@@ -24,7 +24,13 @@ pub fn cart_transform_run(input: schema::run::Input) -> Result<schema::FunctionR
         0.0
     };
 
-    let mut processed_line_ids: HashSet<String> = HashSet::new();
+    let mut processed_line_ids: HashSet<String> = input
+        .cart()
+        .lines()
+        .iter()
+        .filter(|line| line.selling_plan_allocation().is_some())
+        .map(|line| line.id().clone())
+        .collect();
     let cart_line_messaging: CartLineMessagingSettings = parse_json_or_default(
         input
             .cart_transform()

@@ -675,4 +675,56 @@ describe("updateBundleProductMetafields", () => {
       }],
     });
   });
+
+  it("writes only the normalized public PPB subscription configuration", async () => {
+    const admin = makeAdmin();
+    const subscription = {
+      version: 1,
+      enabled: true,
+      selectedGroup: {
+        id: "gid://shopify/SellingPlanGroup/1",
+        name: "Subscribe",
+        options: [],
+        plans: [{ id: "gid://shopify/SellingPlan/1", sourceName: "Monthly", options: [], position: 1, pricingPolicies: [] }],
+      },
+      selectedPlanIds: ["gid://shopify/SellingPlan/1"],
+      defaultPurchaseOption: { kind: "selling_plan", sellingPlanId: "gid://shopify/SellingPlan/1" },
+      oneTimePurchase: { enabled: true, title: "One time", description: "" },
+      copy: { title: "Purchase options", subtitle: "", unavailableMessage: "Unavailable" },
+      planCopy: { "gid://shopify/SellingPlan/1": { displayName: "Monthly", discountPill: "", description: "" } },
+      showDiscountOnProductCards: false,
+      recurringBundleDiscount: false,
+      translations: {},
+    };
+
+    await updateBundleProductMetafields(
+      admin,
+      "gid://shopify/Product/999",
+      makeBundleConfig(BundleType.PRODUCT_PAGE, { bundleSubscriptionConfig: subscription }),
+    );
+
+    const metafields = getMetafieldsSetPayload(admin);
+    const uiConfig = JSON.parse(metafields.find((field: any) => field.key === "bundle_ui_config").value);
+    expect(uiConfig.subscription).toMatchObject({
+      enabled: true,
+      selectedPlanIds: ["gid://shopify/SellingPlan/1"],
+    });
+    expect(uiConfig.subscription.selectedGroup.plans[0]).not.toHaveProperty("position");
+  });
+
+  it("omits disabled PPB subscription drafts from bundle_ui_config", async () => {
+    const admin = makeAdmin();
+
+    await updateBundleProductMetafields(
+      admin,
+      "gid://shopify/Product/999",
+      makeBundleConfig(BundleType.PRODUCT_PAGE, {
+        bundleSubscriptionConfig: { enabled: false, selectedPlanIds: ["draft-plan"] },
+      }),
+    );
+
+    const metafields = getMetafieldsSetPayload(admin);
+    const uiConfig = JSON.parse(metafields.find((field: any) => field.key === "bundle_ui_config").value);
+    expect(uiConfig).not.toHaveProperty("subscription");
+  });
 });

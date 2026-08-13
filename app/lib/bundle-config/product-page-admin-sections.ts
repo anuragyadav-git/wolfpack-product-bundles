@@ -37,6 +37,7 @@ export const PRODUCT_PAGE_SETUP_ITEMS: ProductPageSetupItem[] = [
 export interface SellingPlanValidationSources {
   productIds: string[];
   collectionIds: string[];
+  variantIdsByProductId: Record<string, string[]>;
 }
 
 export interface SellingPlanGroupSummary {
@@ -68,6 +69,14 @@ function normalizeCollectionId(value: unknown): string | null {
   return null;
 }
 
+function normalizeVariantId(value: unknown): string | null {
+  if (typeof value !== "string" && typeof value !== "number") return null;
+  const raw = String(value).trim();
+  if (raw.startsWith("gid://shopify/ProductVariant/")) return raw;
+  if (/^\d+$/.test(raw)) return `gid://shopify/ProductVariant/${raw}`;
+  return null;
+}
+
 function addUnique(target: string[], value: string | null): void {
   if (value && !target.includes(value)) target.push(value);
 }
@@ -75,24 +84,43 @@ function addUnique(target: string[], value: string | null): void {
 export function extractSellingPlanValidationSources(bundle: any): SellingPlanValidationSources {
   const productIds: string[] = [];
   const collectionIds: string[] = [];
+  const variantIdsByProductId: Record<string, string[]> = {};
+  const addProduct = (product: any) => {
+    const productId = normalizeProductId(product?.graphqlId ?? product?.productId ?? product?.id);
+    addUnique(productIds, productId);
+    if (!productId) return;
+    const variants = asArray(product?.variants)
+      .map((variant) => normalizeVariantId(
+        typeof variant === "object"
+          ? variant?.id ?? variant?.variantId ?? variant?.variantGraphqlId
+          : variant,
+      ))
+      .filter((id): id is string => id !== null);
+    if (variants.length > 0) {
+      variantIdsByProductId[productId] = Array.from(new Set([
+        ...(variantIdsByProductId[productId] ?? []),
+        ...variants,
+      ]));
+    }
+  };
 
   for (const product of asArray(bundle?.defaultProductsData?.products)) {
-    addUnique(productIds, normalizeProductId(product.graphqlId ?? product.productId ?? product.id));
+    addProduct(product);
   }
 
   for (const step of asArray(bundle?.steps)) {
     for (const product of asArray(step.products)) {
-      addUnique(productIds, normalizeProductId(product.id ?? product.productId ?? product.graphqlId));
+      addProduct(product);
     }
     for (const product of asArray(step.StepProduct)) {
-      addUnique(productIds, normalizeProductId(product.productId ?? product.id ?? product.graphqlId));
+      addProduct(product);
     }
     for (const collection of asArray(step.collections)) {
       addUnique(collectionIds, normalizeCollectionId(collection.id ?? collection.collectionGid));
     }
     for (const category of asArray(step.StepCategory)) {
       for (const product of asArray(category.products)) {
-        addUnique(productIds, normalizeProductId(product.id ?? product.productId ?? product.graphqlId));
+        addProduct(product);
       }
       for (const collection of asArray(category.collections)) {
         addUnique(collectionIds, normalizeCollectionId(collection.id ?? collection.collectionGid));
@@ -100,7 +128,7 @@ export function extractSellingPlanValidationSources(bundle: any): SellingPlanVal
     }
   }
 
-  return { productIds, collectionIds };
+  return { productIds, collectionIds, variantIdsByProductId };
 }
 
 export function deriveCommonSellingPlanGroups(products: SellingPlanProduct[]): SellingPlanGroupSummary[] {

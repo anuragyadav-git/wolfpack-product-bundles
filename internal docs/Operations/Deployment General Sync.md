@@ -5,7 +5,7 @@ title: Deployment General Sync
 type: operations
 status: active
 summary: Post-deploy replay of the current persisted bundle storefront contract behind one true or false flag.
-last_audited: 2026-08-11
+last_audited: 2026-08-14
 owners:
   - engineering
 domains:
@@ -16,6 +16,7 @@ source_paths:
   - scripts/deployment-general-sync.ts
   - app/services/deployment-general-sync.server.ts
   - app/services/bundles/storefront-sync.server.ts
+  - app/services/addon-discount-function-service.server.ts
 related_docs:
   - Shopify Integration/Metafields.md
 tags:
@@ -47,6 +48,10 @@ When enabled, it:
 5. Remediates invalid saved variant references through the current persistence contract.
 6. Ensures the automatic add-on discount once for every shop with an enabled
    saved FPB add-on configuration.
+7. Ensures the role-tagged subscription initial-order automatic discount once
+   for every shop with an enabled saved PPB subscription configuration. This
+   node uses `recurringCycleLimit=1`; recurring bundle pricing is not enabled
+   until live recurring-order evidence exists.
 
 Any shop or bundle failure makes the command exit non-zero. This is the only
 deployment sync workflow and `WPB_DEPLOYMENT_GENERAL_SYNC` is its only flag.

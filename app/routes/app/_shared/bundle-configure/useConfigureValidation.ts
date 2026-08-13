@@ -7,6 +7,7 @@ import {
 } from "../../../../lib/bundle-config/configure-validation";
 
 function sectionForPath(path: string): string {
+  if (path.startsWith("subscriptions.")) return "subscriptions";
   if (path.startsWith("discount.")) return "discount_pricing";
   if (path.startsWith("settings.")) return "bundle_settings";
   if (path.startsWith("widget.")) return "bundle_widget";

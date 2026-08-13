@@ -25,11 +25,16 @@ async function main() {
       updateStepProductVariants: async ({ stepProductId, variants }) => {
         await db.stepProduct.update({
           where: { id: stepProductId },
-          data: { variants },
+          data: { variants: variants as any },
         });
       },
       setupAddonDiscount: (admin, shopDomain) =>
         AddOnDiscountFunctionService.completeSetup(admin as any, shopDomain),
+      setupSubscriptionDiscount: (admin, shopDomain) =>
+        AddOnDiscountFunctionService.completeSubscriptionInitialSetup(
+          admin as any,
+          shopDomain,
+        ),
       logger: console,
     },
   );

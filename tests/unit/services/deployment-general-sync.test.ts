@@ -42,6 +42,7 @@ function makeDeps() {
       personalizationData: {
         addonProducts: { isEnabled: true },
       },
+      bundleSubscriptionConfig: null,
       steps: [],
     },
     {
@@ -49,6 +50,7 @@ function makeDeps() {
       shopId: "beta.myshopify.com",
       bundleType: "product_page",
       personalizationData: null,
+      bundleSubscriptionConfig: { enabled: true },
       steps: [],
     },
   ];
@@ -72,6 +74,7 @@ function makeDeps() {
     ensureMetafieldDefinitions: jest.fn().mockResolvedValue(true),
     syncBundle: jest.fn().mockResolvedValue({ synced: true }),
     setupAddonDiscount: jest.fn().mockResolvedValue({ success: true }),
+    setupSubscriptionDiscount: jest.fn().mockResolvedValue({ success: true }),
     logger: {
       info: jest.fn(),
       warn: jest.fn(),
@@ -118,6 +121,7 @@ describe("deployment general sync", () => {
       failedShops: 0,
       metafieldDefinitionShopsSynced: 2,
       addonDiscountShopsSynced: 1,
+      subscriptionDiscountShopsSynced: 1,
       variantRemediation: {
         scannedBundles: 2,
         scannedStepProducts: 0,
@@ -146,6 +150,10 @@ describe("deployment general sync", () => {
     expect(deps.setupAddonDiscount).toHaveBeenCalledWith(
       expect.objectContaining({ graphql: expect.any(Function) }),
       "alpha.myshopify.com",
+    );
+    expect(deps.setupSubscriptionDiscount).toHaveBeenCalledWith(
+      expect.objectContaining({ graphql: expect.any(Function) }),
+      "beta.myshopify.com",
     );
   });
 

@@ -52,6 +52,24 @@ describe('shared cart-submit helpers', () => {
     });
   });
 
+  it('adds one selling plan to every subscription component and omits public Box metadata', () => {
+    const { formData } = buildProductPageCartFormData([
+      { id: 101, quantity: 1, properties: {} },
+      { id: 202, quantity: 2, properties: {} },
+    ], {
+      bundleName: 'Subscription bundle',
+      offerId: 'offer',
+      sessionKey: 'session',
+      runtimeToken: 'signed-token',
+      sellingPlanId: 'gid://shopify/SellingPlan/55',
+    });
+
+    expect(formData.get('items[0][selling_plan]')).toBe('gid://shopify/SellingPlan/55');
+    expect(formData.get('items[1][selling_plan]')).toBe('gid://shopify/SellingPlan/55');
+    expect(formData.has('items[0][properties][Box]')).toBe(false);
+    expect(formData.get('items[0][properties][_wolfpack_bundle_runtime]')).toBe('signed-token');
+  });
+
   it('is used by the product-page widget controller', () => {
     const source = readProductPageWidgetSources();
 

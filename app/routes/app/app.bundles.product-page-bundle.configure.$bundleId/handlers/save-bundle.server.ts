@@ -32,6 +32,11 @@ import {
   validateVariantIdFromShopify,
   type ShopifyStorefrontVariantLookupResult,
 } from "../../../../lib/variant-existence.server";
+import {
+  normalizePpbSubscriptionConfig,
+  validatePpbSubscriptionConfig,
+} from "../../../../lib/ppb-subscriptions";
+import { AddOnDiscountFunctionService } from "../../../../services/addon-discount-function-service.server";
 
 type ParsedVariantRef = string | number;
 
@@ -231,6 +236,36 @@ export async function handleSaveBundle(
     const bundleProductData = formData.get("bundleProduct")
       ? JSON.parse(formData.get("bundleProduct") as string)
       : null;
+    const subscriptionConfigRaw = formData.get("bundleSubscriptionConfig");
+    const subscriptionConfig =
+      typeof subscriptionConfigRaw === "string"
+        ? normalizePpbSubscriptionConfig(JSON.parse(subscriptionConfigRaw))
+        : null;
+    if (subscriptionConfig?.enabled) {
+      const subscriptionIssues = validatePpbSubscriptionConfig(subscriptionConfig);
+      if (discountData.discountType === "buy_x_get_y") {
+        subscriptionIssues.push({
+          path: "subscriptions.enabled",
+          message: "Subscriptions are unavailable with Buy X Get Y pricing.",
+        });
+      }
+      if (stepsData.some((step: any) => step?.isFreeGift === true)) {
+        subscriptionIssues.push({
+          path: "subscriptions.enabled",
+          message: "Subscriptions are unavailable while a free-gift or add-on step is enabled.",
+        });
+      }
+      if (subscriptionIssues.length > 0) {
+        return json(
+          {
+            success: false,
+            error: "Fix the subscription configuration before saving.",
+            fieldErrors: subscriptionIssues,
+          },
+          { status: 400 },
+        );
+      }
+    }
 
     AppLogger.debug("Parsed form data:", {
       bundleName,
@@ -393,8 +428,25 @@ export async function handleSaveBundle(
     // Get existing bundle to preserve shopifyProductId/Handle if not provided
     const existingBundle = await db.bundle.findUnique({
       where: { id: bundleId, shopId: session.shop },
-      select: { shopifyProductId: true, shopifyProductHandle: true },
+      select: {
+        shopifyProductId: true,
+        shopifyProductHandle: true,
+        personalizationData: true,
+      },
     });
+    if (subscriptionConfig?.enabled && existingBundle?.personalizationData) {
+      return json(
+        {
+          success: false,
+          error: "Fix the subscription configuration before saving.",
+          fieldErrors: [{
+            path: "subscriptions.enabled",
+            message: "Subscriptions are unavailable while personalization is enabled.",
+          }],
+        },
+        { status: 400 },
+      );
+    }
 
     // Update bundle in database
     AppLogger.debug("[BUNDLE_CONFIG] Updating bundle in database");
@@ -423,6 +475,7 @@ export async function handleSaveBundle(
         sdkMode,
         textOverrides,
         textOverridesByLocale,
+        ...(subscriptionConfig ? { bundleSubscriptionConfig: subscriptionConfig } : {}),
         ...parsePPBBundleVisibility(formData),
         ...parsedBundleSettings,
         boxSelection,
@@ -567,6 +620,21 @@ export async function handleSaveBundle(
       bundleType: "product_page",
       reason: "save",
     });
+    if (subscriptionConfig?.enabled) {
+      const activation =
+        await AddOnDiscountFunctionService.completeSubscriptionInitialSetup(
+          admin,
+          session.shop,
+        );
+      if (!activation.success) {
+        AppLogger.warn("Subscription initial-order discount setup failed during bundle save", {
+          component: "bundle-config",
+          operation: "save",
+          bundleId,
+          shopId: session.shop,
+        }, { error: activation.error });
+      }
+    }
 
     return json({
       success: true,

@@ -121,6 +121,34 @@ describe("AddOnDiscountFunctionService", () => {
     expect(mockShopifyAdmin.graphql).toHaveBeenCalledTimes(2);
   });
 
+  it("creates a role-tagged first-order subscription discount with one recurring cycle", async () => {
+    mockShopifyAdmin.graphql
+      .mockResolvedValueOnce(addOnFunctionsMock())
+      .mockResolvedValueOnce(createMockGraphQLResponse({ discountNodes: { nodes: [] } }))
+      .mockResolvedValueOnce(createMockGraphQLResponse({
+        discountAutomaticAppCreate: {
+          automaticAppDiscount: { discountId: MOCK_DISCOUNT_ID, status: "ACTIVE" },
+          userErrors: [],
+        },
+      }));
+
+    const result = await AddOnDiscountFunctionService.completeSubscriptionInitialSetup(
+      mockShopifyAdmin,
+      shopDomain,
+    );
+    expect(result.success).toBe(true);
+    expect(mockShopifyAdmin.graphql.mock.calls[2][1].variables.automaticAppDiscount).toMatchObject({
+      title: "Bundle Subscription - Initial Order",
+      recurringCycleLimit: 1,
+      metafields: [{
+        namespace: "$app",
+        key: "discount_role",
+        type: "single_line_text_field",
+        value: "subscription_initial",
+      }],
+    });
+  });
+
   it.each(["DISABLED", "EXPIRED"])(
     "reactivates a matching %s automatic discount",
     async (status) => {

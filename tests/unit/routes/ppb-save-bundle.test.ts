@@ -10,6 +10,7 @@ import {
   updateBundleProductMetafields,
 } from "../../../app/services/bundles/metafield-sync.server";
 import { syncBundleStorefrontNow } from "../../../app/services/bundles/storefront-sync.server";
+import { AddOnDiscountFunctionService } from "../../../app/services/addon-discount-function-service.server";
 
 jest.mock("../../../app/db.server", () => ({
   __esModule: true,
@@ -52,6 +53,12 @@ jest.mock("../../../app/services/bundles/storefront-sync.server", () => ({
     synced: true,
     stats: {},
   }),
+}));
+
+jest.mock("../../../app/services/addon-discount-function-service.server", () => ({
+  AddOnDiscountFunctionService: {
+    completeSubscriptionInitialSetup: jest.fn().mockResolvedValue({ success: true }),
+  },
 }));
 
 jest.mock("../../../app/utils/variant-lookup.server", () => ({
@@ -312,6 +319,69 @@ describe("PPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
     expect(body.message).toBe("Updated Successfully!");
   });
 
+  it("persists a normalized enabled subscription config and activates the initial-order role", async () => {
+    const config = {
+      version: 1,
+      enabled: true,
+      selectedGroup: {
+        id: "gid://shopify/SellingPlanGroup/1",
+        name: "Subscribe",
+        options: [],
+        plans: [{ id: "gid://shopify/SellingPlan/1", sourceName: "Monthly", options: [], position: 1, pricingPolicies: [] }],
+      },
+      selectedPlanIds: ["gid://shopify/SellingPlan/1"],
+      defaultPurchaseOption: { kind: "selling_plan", sellingPlanId: "gid://shopify/SellingPlan/1" },
+      oneTimePurchase: { enabled: true, title: "One time", description: "" },
+      copy: { title: "Purchase options", subtitle: "", unavailableMessage: "Unavailable" },
+      planCopy: { "gid://shopify/SellingPlan/1": { displayName: "Monthly", discountPill: "", description: "" } },
+      showDiscountOnProductCards: false,
+      recurringBundleDiscount: false,
+      translations: {},
+    };
+    const response = await handleSaveBundle(
+      MOCK_ADMIN,
+      MOCK_SESSION,
+      "bundle-1",
+      makeFormData({ bundleSubscriptionConfig: JSON.stringify(config) }),
+    );
+    expect(response.status).toBe(200);
+    const persisted = getDb().bundle.update.mock.calls[0][0].data.bundleSubscriptionConfig;
+    expect(persisted).toMatchObject({
+      enabled: true,
+      selectedPlanIds: ["gid://shopify/SellingPlan/1"],
+    });
+    expect(persisted.selectedGroup.plans[0]).not.toHaveProperty("position");
+    expect(AddOnDiscountFunctionService.completeSubscriptionInitialSetup).toHaveBeenCalledWith(
+      MOCK_ADMIN,
+      MOCK_SESSION.shop,
+    );
+  });
+
+  it("blocks enabled subscriptions for Buy X Get Y before persistence or sync", async () => {
+    const config = {
+      version: 1,
+      enabled: true,
+      selectedGroup: null,
+      selectedPlanIds: [],
+      defaultPurchaseOption: { kind: "one_time" },
+      oneTimePurchase: { enabled: true, title: "One time", description: "" },
+      copy: { title: "Purchase options", subtitle: "", unavailableMessage: "Unavailable" },
+      planCopy: {}, showDiscountOnProductCards: false, recurringBundleDiscount: false, translations: {},
+    };
+    const response = await handleSaveBundle(
+      MOCK_ADMIN,
+      MOCK_SESSION,
+      "bundle-1",
+      makeFormData({
+        bundleSubscriptionConfig: JSON.stringify(config),
+        discountData: JSON.stringify(makeDiscountData({ discountType: "buy_x_get_y" })),
+      }),
+    );
+    expect(response.status).toBe(400);
+    expect(getDb().bundle.update).not.toHaveBeenCalled();
+    expect(syncBundleStorefrontNow).not.toHaveBeenCalled();
+  });
+
   it("returns structured field errors and does not persist an invalid draft", async () => {
     const res = await handleSaveBundle(
       MOCK_ADMIN,
@@ -319,7 +389,7 @@ describe("PPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
       "bundle-1",
       makeFormData({
         bundleName: "",
-        stepsData: JSON.stringify([makeStep({ products: [], StepProduct: [], collections: [] })]),
+        stepsData: JSON.stringify([makeStep({ products: [], StepProduct: [], collections: [] } as any)]),
       }),
     );
     const body = await res.json() as any;

@@ -8,10 +8,12 @@ import { SUBSCRIPTION_NO_COMMON_PLAN_MESSAGE } from "../../../app/lib/bundle-con
 type ProductRecord = {
   id: string;
   title: string;
-  sellingPlanGroups: {
+  variants: string[];
+  sellingPlanGroups: Array<{
     id: string;
     name: string;
-  }[];
+    eligibleVariantIds: string[];
+  }>;
 };
 
 jest.mock("../../../app/db.server", () => ({
@@ -48,14 +50,13 @@ function makeBundleResponse(overrides: Partial<{
       return Promise.resolve({
         json: async () => ({
           data: {
-            nodes: [
-              {
+            node: {
                 id: collectionId,
                 products: {
                   edges: productIdsFromCollection.map((id) => ({ node: { id } })),
+                  pageInfo: { hasNextPage: false, endCursor: null },
                 },
               },
-            ],
           },
         }),
       } as any);
@@ -68,7 +69,24 @@ function makeBundleResponse(overrides: Partial<{
             nodes: (overrides.products ?? []).map((product) => ({
               id: product.id,
               title: product.title,
-              sellingPlanGroups: { nodes: product.sellingPlanGroups },
+              variants: { nodes: product.variants.map((id) => ({ id })) },
+              sellingPlanGroups: { nodes: product.sellingPlanGroups.map((group) => ({
+                id: group.id,
+                name: group.name,
+                options: ["Delivery every"],
+                position: 1,
+                productVariants: { nodes: group.eligibleVariantIds.map((id) => ({ id })) },
+                sellingPlans: { nodes: [{
+                  id: "gid://shopify/SellingPlan/monthly",
+                  name: "Monthly",
+                  options: ["1 month"],
+                  position: 1,
+                  pricingPolicies: [{
+                    adjustmentType: "PERCENTAGE",
+                    adjustmentValue: { percentage: 10 },
+                  }],
+                }] },
+              })) },
             })),
           },
         }),
@@ -112,12 +130,14 @@ describe("PPB subscription validation handler", () => {
             {
               id: "gid://shopify/Product/111",
               title: "Direct Product",
-              sellingPlanGroups: [{ id: "gid://shopify/SellingPlanGroup/monthly", name: "Monthly" }],
+              variants: ["gid://shopify/ProductVariant/1111"],
+              sellingPlanGroups: [{ id: "gid://shopify/SellingPlanGroup/monthly", name: "Monthly", eligibleVariantIds: ["gid://shopify/ProductVariant/1111"] }],
             },
             {
               id: "gid://shopify/Product/222",
               title: "Collection Product",
-              sellingPlanGroups: [{ id: "gid://shopify/SellingPlanGroup/monthly", name: "Monthly" }],
+              variants: ["gid://shopify/ProductVariant/2222"],
+              sellingPlanGroups: [{ id: "gid://shopify/SellingPlanGroup/monthly", name: "Monthly", eligibleVariantIds: ["gid://shopify/ProductVariant/2222"] }],
             },
           ],
         }),
@@ -134,8 +154,20 @@ describe("PPB subscription validation handler", () => {
       success: true,
       isValid: true,
       productCount: 2,
-      plans: [
-        { id: "gid://shopify/SellingPlanGroup/monthly", name: "Monthly" },
+      groups: [
+        {
+          id: "gid://shopify/SellingPlanGroup/monthly",
+          name: "Monthly",
+          options: ["Delivery every"],
+          position: 1,
+          plans: [{
+            id: "gid://shopify/SellingPlan/monthly",
+            sourceName: "Monthly",
+            options: ["1 month"],
+            position: 1,
+            pricingPolicies: [{ kind: "percentage", value: 10, afterCycle: 0 }],
+          }],
+        },
       ],
       message: null,
     });
@@ -150,12 +182,14 @@ describe("PPB subscription validation handler", () => {
             {
               id: "gid://shopify/Product/111",
               title: "Direct Product",
-              sellingPlanGroups: [{ id: "gid://shopify/SellingPlanGroup/monthly", name: "Monthly" }],
+              variants: ["gid://shopify/ProductVariant/1111"],
+              sellingPlanGroups: [{ id: "gid://shopify/SellingPlanGroup/monthly", name: "Monthly", eligibleVariantIds: ["gid://shopify/ProductVariant/1111"] }],
             },
             {
               id: "gid://shopify/Product/333",
               title: "Collection Product",
-              sellingPlanGroups: [{ id: "gid://shopify/SellingPlanGroup/weekly", name: "Weekly" }],
+              variants: ["gid://shopify/ProductVariant/3333"],
+              sellingPlanGroups: [{ id: "gid://shopify/SellingPlanGroup/weekly", name: "Weekly", eligibleVariantIds: ["gid://shopify/ProductVariant/3333"] }],
             },
           ],
         }),
@@ -171,7 +205,31 @@ describe("PPB subscription validation handler", () => {
     expect(body.success).toBe(true);
     expect(body.isValid).toBe(false);
     expect(body.productCount).toBe(2);
-    expect(body.plans).toEqual([]);
+    expect(body.groups).toEqual([]);
     expect(body.message).toBe(SUBSCRIPTION_NO_COMMON_PLAN_MESSAGE);
+  });
+
+  it("fails closed when a selectable variant is not assigned to the common group", async () => {
+    const admin = {
+      graphql: jest.fn(makeBundleResponse({
+        collectionProductIds: [],
+        products: [{
+          id: "gid://shopify/Product/111",
+          title: "Direct Product",
+          variants: ["gid://shopify/ProductVariant/1111", "gid://shopify/ProductVariant/1112"],
+          sellingPlanGroups: [{
+            id: "gid://shopify/SellingPlanGroup/monthly",
+            name: "Monthly",
+            eligibleVariantIds: ["gid://shopify/ProductVariant/1111"],
+          }],
+        }],
+      })),
+    } as any;
+    getDb().bundle.findFirst.mockResolvedValue({ ...baseBundle, steps: [{ ...baseBundle.steps[0], StepCategory: [] }] });
+
+    const response = await handleValidateSellingPlanGroups(admin, SESSION, "bundle-1");
+    const body = await response.json() as any;
+    expect(body.isValid).toBe(false);
+    expect(body.groups).toEqual([]);
   });
 });

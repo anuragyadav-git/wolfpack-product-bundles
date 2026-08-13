@@ -3,6 +3,7 @@ import { AppLogger } from "../../../lib/logger";
 import { normalizeDefaultProductsData } from "../../../lib/bundle-config/default-products";
 import { buildVisibilityDisplayConfiguration } from "./ConfigureBundleFlow.helpers";
 import { useConfigureValidation } from "../_shared/bundle-configure/useConfigureValidation";
+import { validatePpbSubscriptionConfig } from "../../../lib/ppb-subscriptions";
 
 export function usePpbSaveHandlers({
   base,
@@ -100,6 +101,27 @@ export function usePpbSaveHandlers({
 
   const handleSave = useCallback(async () => {
     try {
+      if (base.subscriptionConfig.enabled) {
+        const subscriptionIssues = validatePpbSubscriptionConfig(
+          base.subscriptionConfig,
+        );
+        if (base.pricingState.discountType === "buy_x_get_y") {
+          subscriptionIssues.push({
+            path: "subscriptions.enabled",
+            message: "Subscriptions are unavailable with Buy X Get Y pricing.",
+          });
+        }
+        if (base.stepsState.steps.some((step: any) => step?.isFreeGift === true)) {
+          subscriptionIssues.push({
+            path: "subscriptions.enabled",
+            message: "Subscriptions are unavailable while a free-gift or add-on step is enabled.",
+          });
+        }
+        if (subscriptionIssues.length > 0) {
+          validation.setServerFieldErrors(subscriptionIssues);
+          return;
+        }
+      }
       const formData = new FormData();
       formData.append("intent", "saveBundle");
       formData.append("bundleName", base.formState.bundleName);
@@ -190,6 +212,10 @@ export function usePpbSaveHandlers({
         String(base.allowQuantityChanges),
       );
       formData.append("sdkMode", String(base.sdkMode));
+      formData.append(
+        "bundleSubscriptionConfig",
+        JSON.stringify(base.subscriptionConfig),
+      );
       formData.append(
         "textOverrides",
         Object.keys(base.textOverrides).length > 0
@@ -318,6 +344,9 @@ export function usePpbSaveHandlers({
     );
     base.setAllowQuantityChanges(base.originalAllowQuantityChangesRef.current);
     base.setSdkMode(base.originalSdkModeRef.current);
+    base.setSubscriptionConfigState(
+      base.originalSubscriptionConfigRef.current,
+    );
     base.setTextOverrides(base.originalTextOverridesRef.current);
     base.setTextOverridesByLocale(
       base.originalTextOverridesByLocaleRef.current,

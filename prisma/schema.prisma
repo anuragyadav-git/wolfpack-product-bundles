@@ -131,6 +131,7 @@ model Bundle {
   bundleUpsellConfig                   Json?
   bundleTextConfig                     Json?
   personalizationData                  Json?
+  bundleSubscriptionConfig             Json? // PPB-only provider-neutral selling-plan configuration (V1); null means disabled
   discountDisplayOverride              Json?
   validateQuantityPerProduct           Json?
   useSingleStepCategoriesAsBundleSteps Boolean           @default(false)

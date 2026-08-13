@@ -266,6 +266,62 @@ describe("cart transform runtime token service", () => {
     });
   });
 
+  it("includes only a saved PPB selling plan and rejects recurring POC tampering", () => {
+    const bundleSubscriptionConfig = {
+      version: 1,
+      enabled: true,
+      selectedGroup: {
+        id: "gid://shopify/SellingPlanGroup/1",
+        name: "Subscribe",
+        options: [],
+        plans: [{ id: "gid://shopify/SellingPlan/1", sourceName: "Monthly", options: [], position: 1, pricingPolicies: [] }],
+      },
+      selectedPlanIds: ["gid://shopify/SellingPlan/1"],
+      defaultPurchaseOption: { kind: "selling_plan", sellingPlanId: "gid://shopify/SellingPlan/1" },
+      oneTimePurchase: { enabled: true, title: "One time", description: "" },
+      copy: { title: "Purchase options", subtitle: "", unavailableMessage: "Unavailable" },
+      planCopy: { "gid://shopify/SellingPlan/1": { displayName: "Monthly", discountPill: "", description: "" } },
+      showDiscountOnProductCards: false,
+      recurringBundleDiscount: false,
+      translations: {},
+    };
+    const payload = buildRuntimeTokenPayload({
+      shop: "test-shop.myshopify.com",
+      bundle: makeBundle({ bundleType: "product_page", bundleSubscriptionConfig }),
+      parentVariantId: "gid://shopify/ProductVariant/PARENT",
+      offerGroupId: "bundle-1_SESSION",
+      bundleType: "product_page",
+      selection: {
+        components: [{ variantId: "101", quantity: 1 }],
+        subscription: {
+          sellingPlanGroupId: "gid://shopify/SellingPlanGroup/1",
+          sellingPlanId: "gid://shopify/SellingPlan/1",
+          recurringBundleDiscount: false,
+        },
+      },
+    });
+    expect(payload.subscription).toEqual({
+      sellingPlanGroupId: "gid://shopify/SellingPlanGroup/1",
+      sellingPlanId: "gid://shopify/SellingPlan/1",
+      recurringBundleDiscount: false,
+    });
+    expect(() => buildRuntimeTokenPayload({
+      shop: "test-shop.myshopify.com",
+      bundle: makeBundle({ bundleType: "product_page", bundleSubscriptionConfig }),
+      parentVariantId: "gid://shopify/ProductVariant/PARENT",
+      offerGroupId: "bundle-1_SESSION",
+      bundleType: "product_page",
+      selection: {
+        components: [{ variantId: "101", quantity: 1 }],
+        subscription: {
+          sellingPlanGroupId: "gid://shopify/SellingPlanGroup/1",
+          sellingPlanId: "gid://shopify/SellingPlan/1",
+          recurringBundleDiscount: true,
+        },
+      },
+    })).toThrow(/recurring bundle discounts/i);
+  });
+
   it("omits validation-only product IDs from the signed runtime token payload", () => {
     const payload = buildRuntimeTokenPayload({
       shop: "test-shop.myshopify.com",

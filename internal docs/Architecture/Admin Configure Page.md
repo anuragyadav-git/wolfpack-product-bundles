@@ -62,8 +62,9 @@ PPB-only controls are explicit slots inside the shared rhythm. Category-level va
 The former `Pre-order & Subscription Integration` Bundle Settings row is absent
 from both FPB and PPB. Its `individualSellingPlanSelection` state and form field
 must not be reintroduced. PPB's separate `Subscriptions` rail section remains a
-distinct feature for validating shared selling plans; it does not imply or
-persist the removed per-product integration behavior.
+distinct feature for discovering, selecting, validating, and persisting one
+provider-neutral shared selling-plan group. It does not restore the removed
+per-product integration behavior.
 
 FPB Product Slots is available only when every enabled, non-default step has at
 least one step-level rule and every one of those rules uses the exact
@@ -107,8 +108,11 @@ affected value. Successful Save and Discard clear all validation state.
 Only persisted, enabled feature branches are validated. Step 1 is always
 enabled. Disabled later steps, disabled pricing/widget/embed/add-on features,
 inactive targeting branches, optional media and CSS, and optional localized
-translations do not block Save. PPB subscription placeholder controls remain
-outside this contract until they have a persistence path.
+translations do not block Save. Enabled PPB subscriptions require a title, a
+common group, at least one selected plan, a valid default option, a display
+name for each selected plan, and a one-time label when one-time purchase is
+enabled. Subscription validation failures use the same SaveBar field-error
+contract and block persistence and storefront sync atomically.
 
 Successful fetcher saves trigger normal Remix loader revalidation. Rehydrating
 loader-backed bundle data must preserve the current configure section and

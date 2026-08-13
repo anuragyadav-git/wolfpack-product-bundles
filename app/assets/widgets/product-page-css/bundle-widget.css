@@ -7,3 +7,29 @@
 @import "./base/bottom-sheet-modal.css";
 @import "./base/slot-cards-default-products.css";
 @import "./base/quantity-pills-skeletons.css";
+
+.wpb-purchase-options {
+  display: grid;
+  gap: clamp(0.5rem, 1.5cqi, 0.875rem);
+  margin: 0 0 clamp(0.75rem, 2cqi, 1.25rem);
+  padding: clamp(0.75rem, 2cqi, 1.25rem);
+  border: 1px solid var(--wpb-border-color, #d8d8d8);
+  border-radius: var(--wpb-card-radius, 0.5rem);
+}
+
+.wpb-purchase-options__title { font-weight: 650; }
+.wpb-purchase-options__subtitle,
+.wpb-purchase-options__group { margin: 0; }
+.wpb-purchase-options__option {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+}
+.wpb-purchase-options__option input { min-width: 20px; min-height: 20px; }
+.wpb-purchase-options__plan-select {
+  width: 100%;
+  min-height: 44px;
+  padding-inline: 0.75rem;
+}

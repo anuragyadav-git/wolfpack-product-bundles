@@ -430,6 +430,17 @@ mod tests {
     }
 
     #[test]
+    fn test_selling_plan_group_emits_no_cart_transform_operation() {
+        let input = messaging_merge_input("").replacen(
+            "\"merchandise\"",
+            "\"sellingPlanAllocation\":{\"sellingPlan\":{\"id\":\"gid://shopify/SellingPlan/1\"}},\"merchandise\"",
+            1,
+        );
+        let output = run_function_with_input(cart_transform_run, &input).unwrap();
+        assert!(output.operations.is_empty());
+    }
+
+    #[test]
     fn test_runtime_token_tamper_prevents_merge() {
         let runtime_secret = test_runtime_secret();
         let runtime_token = format!(
