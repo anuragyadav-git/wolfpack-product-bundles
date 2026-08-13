@@ -1,4 +1,5 @@
 import { AppEmbedBanner } from "../../../components/AppEmbedBanner";
+import { AdminPageTitleBar } from "../../../components/AdminPageNavigation";
 import { usePpbConfigureContext } from "./PpbConfigureContext";
 
 export function PpbCanvasHeader() {
@@ -25,6 +26,11 @@ export function PpbCanvasHeader() {
 
   return (
     <>
+      <AdminPageTitleBar
+        title="Configure Bundle Flow"
+        breadcrumbLabel="Dashboard"
+        onBack={handleBackClick}
+      />
       <div className={productPageBundleStyles.canvasHeader}>
         <div className={productPageBundleStyles.canvasTitleGroup}>
           <div className={productPageBundleStyles.canvasTitleRow}>

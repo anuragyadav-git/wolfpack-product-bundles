@@ -1,4 +1,5 @@
 import type { ConfigureBundleFlowContext } from "./useConfigureBundleFlow";
+import { AdminPageTitleBar } from "../../../components/AdminPageNavigation";
 
 export function ConfigureCanvasHeader({
   flow,
@@ -28,6 +29,11 @@ export function ConfigureCanvasHeader({
 
   return (
     <>
+      <AdminPageTitleBar
+        title="Configure Bundle Flow"
+        breadcrumbLabel="Dashboard"
+        onBack={handleBackClick}
+      />
       <div className={fullPageBundleStyles.canvasHeader}>
         <div className={fullPageBundleStyles.canvasTitleGroup}>
           <div className={fullPageBundleStyles.canvasTitleRow}>

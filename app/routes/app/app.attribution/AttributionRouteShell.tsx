@@ -7,6 +7,10 @@ import {
   AdminRouteLoadingBar,
   waitForAdminRouteLoadingBar,
 } from "../../../components/AdminRouteLoadingBar";
+import {
+  AdminPageBackTitle,
+  AdminPageTitleBar,
+} from "../../../components/AdminPageNavigation";
 
 const AttributionDashboard = lazy(() => import("./AttributionDashboard"));
 const PixelStatusCard = lazy(() =>
@@ -15,9 +19,14 @@ const PixelStatusCard = lazy(() =>
   }))
 );
 
-function AttributionCriticalFunnelHeader() {
+function AttributionCriticalFunnelHeader({ onBack }: { onBack: () => void }) {
   return (
     <div className={styles.criticalHeroShell}>
+      <AdminPageBackTitle
+        title="Analytics"
+        backLabel="Back to previous page"
+        onBack={onBack}
+      />
       <section
         className={styles.criticalHeroCard}
         aria-labelledby="wpb-critical-funnel-hero-title"
@@ -67,27 +76,26 @@ export default function AttributionRouteShell() {
     () => waitForAnalyticsRouteReady(analytics, pixelStatus),
     [analytics, pixelStatus],
   );
+  const handleBack = () =>
+    navigateBackOrFallback(navigate, "/app/dashboard", {
+      replaceFallback: true,
+    });
 
   return (
     <Suspense fallback={<AdminRouteLoadingBar label="Loading Analytics" />}>
       <Await resolve={routeReady}>
         {([resolvedAnalytics, resolvedPixelStatus]) => (
           <>
-            <ui-title-bar title="Analytics">
-              <button
-                variant="breadcrumb"
-                onClick={() =>
-                  navigateBackOrFallback(navigate, "/app/dashboard", { replaceFallback: true })
-                }
-              >
-                Dashboard
-              </button>
-            </ui-title-bar>
+            <AdminPageTitleBar
+              title="Analytics"
+              breadcrumbLabel="Dashboard"
+              onBack={handleBack}
+            />
             <s-query-container
               containerName="analytics-page"
               className={styles.analyticsQueryContainer}
             >
-              <AttributionCriticalFunnelHeader />
+              <AttributionCriticalFunnelHeader onBack={handleBack} />
               <AttributionCriticalStatus status={resolvedPixelStatus} />
               <AttributionDashboard
                 data={resolvedAnalytics}

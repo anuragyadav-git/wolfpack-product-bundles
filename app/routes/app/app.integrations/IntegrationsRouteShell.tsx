@@ -6,6 +6,7 @@ import {
 } from "../../../components/AdminRouteLoadingBar";
 import { INTEGRATION_CATEGORIES } from "../../../lib/admin-configuration-surfaces";
 import { openSupportChatWithDraft } from "../../../lib/support-chat.client";
+import { AdminPageTitleBar } from "../../../components/AdminPageNavigation";
 import styles from "./IntegrationsRouteShell.module.css";
 
 export function waitForIntegrationsRouteReady(
@@ -33,7 +34,11 @@ function IntegrationsCatalog({ onBack }: { onBack: () => void }) {
 
   return (
     <>
-      <ui-title-bar title="Integrations" />
+      <AdminPageTitleBar
+        title="Integrations"
+        breadcrumbLabel="Dashboard"
+        onBack={onBack}
+      />
       <s-query-container
         containerName="integrations-page"
         className={styles.queryContainer}

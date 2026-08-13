@@ -33,6 +33,11 @@ keywords:
 **Environment mapped:** SIT (`wolfpack-product-bundles-sit`)
 **Test store:** `wolfpack-store-test-1.myshopify.com`
 
+All merchant-facing Admin pages expose both the Shopify Admin breadcrumb and an
+app-owned back arrow. Dashboard, the `/app` welcome/auth entry point, billing
+callbacks, and resource/API routes are excluded. Both controls share the same
+page callback so configure and Settings dirty-state guards cannot be bypassed.
+
 ---
 
 ## 1. Top-Level Shell
@@ -232,6 +237,7 @@ Additional Configurations
 Compact Admin Integrations catalog:
 ```
 Integrations Hub
+├── App Bridge breadcrumb → previous page, with Dashboard fallback
 ├── App-owned back action → previous page, with Dashboard fallback
 ├── Request Integration → opens Crisp with an unsent prefilled request
 ├── Reviews
@@ -259,7 +265,7 @@ Setup behavior:
 
 ```
 Analytics Page (revamped — issue wpb-analytics-revamp-1)
-├── Header: "Analytics" (ui-title-bar) + breadcrumb to /app/dashboard
+├── Header: "Analytics" + App Bridge breadcrumb and app-owned back action
 ├── No-data banner (s-banner) — pixel-active vs not-enabled copy
 ├── Pixel toggle: Enable/disable UTM tracking pixel
 ├── Toolbar: Compare-period chip · [Export CSV] · [Compare on/off] · Date range selector
@@ -313,6 +319,7 @@ Responsive analytics behavior:
 
 ```
 Pricing Page
+├── App Bridge breadcrumb + app-owned back action → previous page, Dashboard fallback
 ├── Subscription quota card (current usage)
 │
 ├── Plan cards: Free vs Grow
@@ -340,6 +347,7 @@ disclosure and preserves the existing configure state.
 
 ```
 Updates & FAQs Page
+├── App Bridge breadcrumb + app-owned back action → previous page, Dashboard fallback
 ├── Section: "Latest Updates"
 │   └── Accordion items (release notes, e.g. "Landing Page Bundles Now Load Instantly")
 │
@@ -356,7 +364,8 @@ Updates & FAQs Page
 
 ```
 FPB Configure Page
-├── Header: Bundle name + status badge
+├── Header: guarded App Bridge breadcrumb + guarded app-owned back action
+├── Bundle name + status badge
 │
 ├── Tabs
 │   ├── Bundle Settings
@@ -421,6 +430,7 @@ Responsive configure behavior:
 
 ```
 PPB Configure Page
+├── Header: guarded App Bridge breadcrumb + guarded app-owned back action
 ├── Sidebar Nav (6 sections — clone hierarchy)
 │   ├── [📝] Step Setup              → step_setup section
 │   ├── Discount & Pricing           → discount_pricing section
@@ -525,6 +535,7 @@ items.
 
 ```
 Billing Page
+├── App Bridge breadcrumb + app-owned back action → previous page, Dashboard fallback
 ├── Success / Error banners (conditional on ?upgraded=true or error param)
 ├── Subscription quota card
 ├── Current plan display

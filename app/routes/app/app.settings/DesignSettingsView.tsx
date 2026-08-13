@@ -8,6 +8,7 @@ import { getDesignFieldsForPreviewContext } from "./design-preview-model";
 import type { TemplateKey } from "../../../lib/bundle-config/template-selection";
 import styles from "./DesignSettingsView.module.css";
 import { SettingsContextualSaveBar, SettingsToast } from "./SettingsFeedback";
+import { AdminPageTitleBar } from "../../../components/AdminPageNavigation";
 
 type PreviewBundle = { id: string; name: string; type: string; viewUrl: string | null };
 
@@ -112,7 +113,13 @@ export function DesignSettingsView({
   };
 
   return (
-    <s-query-container containerName="design-settings">
+    <>
+      <AdminPageTitleBar
+        title="Design Control Panel"
+        breadcrumbLabel="Settings"
+        onBack={() => setSettingsView("landing")}
+      />
+      <s-query-container containerName="design-settings">
       <main className={styles.page}>
       <header className={styles.hero}>
         <s-stack direction="inline" gap="small" alignItems="center">
@@ -280,6 +287,7 @@ export function DesignSettingsView({
         />
         <SettingsToast message={saveMessage} onDismiss={() => setSaveMessage(null)} />
       </main>
-    </s-query-container>
+      </s-query-container>
+    </>
   );
 }
