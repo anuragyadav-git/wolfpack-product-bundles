@@ -1,8 +1,25 @@
 ---
+schema_version: 1
+id: eb-integrations-reference
 title: EB Integrations Reference
 type: implementation-reference
-last_audited: 2026-07-02
-source: live EB Shopify Admin route and checkout functions help article
+status: authoritative
+summary: Records live EB integration setup evidence and Wolfpack support boundaries.
+last_audited: 2026-08-14
+owners:
+  - engineering
+domains:
+  - competitor-analysis
+systems:
+  - integrations
+source_paths:
+  - app/routes/app/app.integrations.tsx
+related_docs:
+  - internal docs/EB Implementation Reference.md
+tags:
+  - integrations
+keywords:
+  - selling plans
 ---
 
 # EB Integrations Reference
@@ -74,6 +91,7 @@ Setup requirements:
 WPB supportability:
 - Supportable if WPB continues to use Shopify selling plans as the source of truth and exposes the same plan selection flow for bundles.
 - Provider-specific API integrations are not required by the EB guide; the contract is product membership in a selling plan plus bundle-level plan selection.
+- The 2026-08-14 PPB subscription design therefore discovers provider-owned plans and never creates or mutates them. Exact EB successful-save transport remains unobserved, so WPB uses its own versioned persistence contract.
 
 ### Judge.me
 

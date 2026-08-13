@@ -5,7 +5,7 @@ title: Cart Transform API
 type: shopify-integration
 status: authoritative
 summary: Shopify Cart Transform API target, activation, failure policy, inputs, and checkout-pricing boundaries.
-last_audited: 2026-08-13
+last_audited: 2026-08-14
 owners:
   - engineering
 domains:
@@ -99,6 +99,14 @@ metafield(namespace: "$app", key: "component_parents") {
 Do not query app-owned component/pricing metafields by key only. The app writers define and write `component_reference`, `component_quantities`, `price_adjustment`, and `component_pricing` under `$app`; omitting the namespace makes EXPAND/display metadata unavailable.
 
 ## Checkout Discount Allocation Boundary
+
+Shopify's 2025-10 Cart Transform contract does not permit merge, expand, or
+update operations for cart lines that have a selling plan. PPB subscription
+component lines therefore remain separate and Cart Transform emits no operation
+for their group. A product Discount Function owns any signed Wolfpack bundle
+price adjustment on those lines. The initial-order automatic discount uses
+`recurringCycleLimit=1`; a recurring node may use `0` only after live recurring
+checkout proof.
 
 `lineUpdate` can set an adjusted fixed unit price, title, or image for a cart
 line, but it does not create a named Shopify discount allocation row in cart or

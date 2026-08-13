@@ -439,8 +439,9 @@ Responsive configure behavior:
 PPB uses the same SaveBar validation flow as FPB. Required fields and resource
 selection are conditional on enabled persisted features; invalid Draft,
 Unlisted, and Active saves are blocked before the route action and displayed as
-inline critical field errors. Disabled branches and the non-persisted
-subscription placeholders are excluded.
+inline critical field errors. Disabled branches are excluded. The feature-gated
+PPB subscription draft is validated only when enabled and remains unavailable
+to the storefront until the live SIT acceptance gate is complete.
 
 ```
 PPB Configure Page
@@ -517,8 +518,12 @@ PPB Configure Page
 │   ├── Bundle Subscriptions
 │   ├── How to setup?
 │   ├── Text: "Allow customers to purchase the bundle as a subscription"
+│   ├── Enable switch (POC-gated)
 │   ├── [Button] "Get Subscription Plans" → POST validateSellingPlanGroups
-│   └── No-common-plan warning when selected products do not share a selling plan group
+│   ├── One common selling-plan group and merchant-selected plan subset
+│   ├── Default purchase option, one-time copy, plan copy, and translations
+│   ├── Uses the global configure SaveBar; no section-specific save action
+│   └── No-common-plan warning when every selectable variant does not share a plan
 │
 ├── Select Template
 │   ├── Heading: "Customize your bundle"

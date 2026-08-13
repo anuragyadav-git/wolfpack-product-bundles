@@ -5,7 +5,7 @@ title: EB Implementation Reference
 type: reference
 status: authoritative
 summary: Records directly verified reference-app contracts used for Wolfpack bundle implementation and parity decisions.
-last_audited: 2026-08-13
+last_audited: 2026-08-14
 owners:
   - engineering
 domains:
@@ -33,6 +33,19 @@ keywords:
 When implementing a feature that mirrors EB behaviour — data shapes, admin flows, storefront runtime, cart integration, template IDs, widget settings — look here first. Every fact below was captured directly from live EB Admin/storefront inspection (Chrome DevTools MCP, authenticated `yash-wolfpack` store) and verified against EB's minified widget JS/CSS. No inferences are made; entries without direct evidence are labelled.
 
 **Full evidence record:** `docs/competitor-analysis/16-eb-full-data-flow-investigation.md`
+
+---
+
+## PPB Bundle Subscriptions
+
+The 2026-08-14 research pass established the following bounded EB evidence:
+
+- Every product in a subscription bundle must belong to one Shopify-compatible selling-plan group.
+- EB returns a no-common-plan state before it exposes subscription configuration when the selected products do not share a plan group.
+- The exposed configuration covers one-time purchase settings, selected and default plans, purchase-option copy, translations, product-card discount display, and an optional recurring bundle discount.
+- No positive common-plan fixture was available in the authenticated research store. The exact successful EB save endpoint and payload therefore remain unobserved. Wolfpack uses its own versioned, validated persistence contract and does not invent an EB request shape.
+
+Provider-specific APIs are not part of the observed contract. Shopify selling-plan compatibility and membership are the source of truth.
 
 ---
 
