@@ -1,0 +1,68 @@
+.settingsLandingViewport {
+  box-sizing: border-box;
+  min-height: calc(100dvh - 112px);
+  display: grid;
+  align-items: center;
+}
+
+.settingsLandingContent {
+  padding-inline: calc(100% / 6);
+}
+
+.settingsLandingTile {
+  min-block-size: 184px;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 6%);
+  transition:
+    border-color 140ms ease,
+    box-shadow 140ms ease,
+    transform 140ms ease;
+}
+
+.settingsLandingTile:hover {
+  border-color: rgb(0 0 0 / 24%);
+  box-shadow:
+    0 2px 4px rgb(0 0 0 / 8%),
+    0 8px 20px rgb(0 0 0 / 6%);
+  transform: translateY(-2px);
+}
+
+.settingsLandingTile:focus-within {
+  outline: 2px solid #005bd3;
+  outline-offset: 2px;
+}
+
+.settingsLandingTileArrow {
+  color: rgb(97 97 97);
+  transition: transform 140ms ease;
+}
+
+.settingsLandingTile:hover .settingsLandingTileArrow {
+  transform: translateX(3px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .settingsLandingTile,
+  .settingsLandingTileArrow {
+    transition: none;
+  }
+
+  .settingsLandingTile:hover,
+  .settingsLandingTile:hover .settingsLandingTileArrow {
+    transform: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .settingsLandingViewport {
+    min-height: auto;
+  }
+
+  .settingsLandingContent {
+    padding-inline: 0;
+    padding-block: 16px;
+  }
+
+  .settingsLandingTile {
+    min-block-size: 160px;
+  }
+}

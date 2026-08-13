@@ -46,6 +46,7 @@ export default {
   moduleNameMapper: {
     ...storefrontTypeScriptMapper,
     '^~/(.*)$': '<rootDir>/app/$1',
+    '\\.css\\?url$': '<rootDir>/tests/__mocks__/styleUrlMock.js',
   },
   testTimeout: 30000,
   verbose: true,
@@ -69,6 +70,7 @@ export default {
       moduleNameMapper: {
         ...storefrontTypeScriptMapper,
         '^~/(.*)$': '<rootDir>/app/$1',
+        '\\.css\\?url$': '<rootDir>/tests/__mocks__/styleUrlMock.js',
         '\\.module\\.css$': '<rootDir>/tests/__mocks__/styleMock.js',
         '\\.css$': '<rootDir>/tests/__mocks__/styleMock.js',
       },
@@ -93,6 +95,7 @@ export default {
       moduleNameMapper: {
         ...storefrontTypeScriptMapper,
         '^~/(.*)$': '<rootDir>/app/$1',
+        '\\.css\\?url$': '<rootDir>/tests/__mocks__/styleUrlMock.js',
         '\\.module\\.css$': '<rootDir>/tests/__mocks__/styleMock.js',
         '\\.css$': '<rootDir>/tests/__mocks__/styleMock.js',
       },
@@ -117,6 +120,7 @@ export default {
       moduleNameMapper: {
         ...storefrontTypeScriptMapper,
         '^~/(.*)$': '<rootDir>/app/$1',
+        '\\.css\\?url$': '<rootDir>/tests/__mocks__/styleUrlMock.js',
         '\\.module\\.css$': '<rootDir>/tests/__mocks__/styleMock.js',
         '\\.css$': '<rootDir>/tests/__mocks__/styleMock.js',
       },

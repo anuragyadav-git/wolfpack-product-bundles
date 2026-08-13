@@ -1,4 +1,10 @@
-import { defer, json, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/node";
+import {
+  defer,
+  json,
+  type ActionFunctionArgs,
+  type LinksFunction,
+  type LoaderFunctionArgs,
+} from "@remix-run/node";
 import { Await, useLoaderData, useNavigate } from "@remix-run/react";
 import { lazy, Suspense, useMemo, useState } from "react";
 import type { Prisma } from "@prisma/client";
@@ -21,6 +27,11 @@ import {
   AdminRouteLoadingBar,
   waitForAdminRouteLoadingBar,
 } from "../../components/AdminRouteLoadingBar";
+import settingsLandingStyles from "./app.settings/SettingsLandingShell.css?url";
+
+export const links: LinksFunction = () => [
+  { rel: "stylesheet", href: settingsLandingStyles },
+];
 
 const loadSettingsWorkspace = async () => {
   const module = await import("./app.settings/SettingsRoute");

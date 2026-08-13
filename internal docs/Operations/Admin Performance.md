@@ -17,6 +17,8 @@ systems:
 source_paths:
   - app/components/AdminRouteLoadingBar.tsx
   - app/lib/admin-web-vitals-diagnostics.client.ts
+  - app/routes/app/app.settings.tsx
+  - app/routes/app/app.settings/SettingsLandingShell.css
   - app/routes/app/app.settings/SettingsRoute.tsx
   - app/routes/app/app.settings/DesignSettingsView.tsx
   - app/routes/app/app.settings/DesignLivePreview.tsx
@@ -132,7 +134,10 @@ Design is statically part of that post-click workspace chunk, so entering Design
 does not wait for a second sequential JavaScript request. The workspace chunk is
 not required for the first Settings paint.
 
-The three landing cards are the complete interactive targets and do not render
+The landing stylesheet is emitted by the Settings route as a document-head link,
+so its centering geometry is present before streamed landing markup can paint;
+do not move this CSS back behind the component JavaScript boundary. The three
+landing cards are the complete interactive targets and do not render
 separate button-like `Configure` labels. Each card uses a framed section icon,
 clear title and description hierarchy, and a trailing directional affordance;
 hover, keyboard-focus, and reduced-motion states are owned by the landing shell.

@@ -1,5 +1,3 @@
-import styles from "./SettingsLandingShell.module.css";
-
 export type SettingsWorkspaceView = "design" | "language" | "controls";
 
 const SETTINGS_SECTIONS: Array<{
@@ -39,9 +37,9 @@ export function SettingsLandingShell({
     <s-page heading="Settings" inlineSize="large">
       <s-query-container
         containerName="settings-landing"
-        className={styles.landingViewport}
+        className="settingsLandingViewport"
       >
-        <div className={styles.landingContent}>
+        <div className="settingsLandingContent">
           <s-grid
             gridTemplateColumns="@container settings-landing (inline-size > 840px) 1fr 1fr 1fr, 1fr"
             gap="large"
@@ -49,7 +47,7 @@ export function SettingsLandingShell({
             {SETTINGS_SECTIONS.map((section) => (
               <s-clickable
                 key={section.id}
-                className={styles.settingsTile}
+                className="settingsLandingTile"
                 accessibilityLabel={`Open ${section.title} settings`}
                 background="base"
                 padding="large"
@@ -65,16 +63,23 @@ export function SettingsLandingShell({
                     alignItems="center"
                   >
                     <s-box
-                      className={styles.tileIcon}
                       background="subdued"
                       borderRadius="base"
                       inlineSize="48px"
                       blockSize="48px"
                     >
-                      <s-icon type={section.icon} size="base" />
+                      <s-stack
+                        direction="inline"
+                        justifyContent="center"
+                        alignItems="center"
+                        inlineSize="100%"
+                        blockSize="100%"
+                      >
+                        <s-icon type={section.icon} size="large" />
+                      </s-stack>
                     </s-box>
                     <s-icon
-                      className={styles.tileArrow}
+                      className="settingsLandingTileArrow"
                       type="arrow-right"
                       size="base"
                     />
