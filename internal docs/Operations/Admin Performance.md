@@ -103,7 +103,7 @@ Measured in the Shopify Admin chrome on `wolfpack-store-test-1` / SIT using
 | `/app/billing` | Source audit: no first-viewport owned image | No image preload fix |
 | `/app/pricing` | Source audit: no first-viewport owned image | No image preload fix |
 | `/app/bundles/cart-transform` | Source audit: no first-viewport owned image | No image preload fix |
-| `/app/attribution` | Current local app candidate: critical funnel heading; historical candidates: inactive tracking body copy, deferred funnel hero title | Render the funnel heading in the route shell before analytics resolves; keep inactive/no-data copy out of the critical first-paint path; render the deferred funnel metrics without duplicating the late heading. |
+| `/app/attribution` | Loading bar during readiness; historical candidates: critical funnel heading, inactive tracking body copy, deferred funnel hero title | Keep the entire Analytics surface, including the title bar, funnel heading, and pixel-status banner, behind one readiness boundary. Reveal it only after data, lazy modules, and the black loading-bar fill are complete. |
 | `/app/settings` | Source audit: dynamic settings preview images are not route hero content | The complete Settings workspace, including Design, is lazy-loaded through one post-click boundary. Its representative preview uses local markup and CSS with no remote media, storefront iframe, widget runtime, or fake Images & GIFs loading state. Do not add speculative preloads; use repeated `?wpbWebVitalsDebug=1` samples for concrete settings-subview evidence. |
 | `/app/store-files` / `/app/upload-store-file` | Source audit: images are picker/file content, not initial route hero content | No route preload |
 | Configure routes | Source audit: dynamic product/template images depend on loaded bundle state and active section/modal | Do not globally preload; measure concrete FPB/PPB configure URLs and preload only confirmed above-fold candidates |
@@ -130,8 +130,9 @@ separate button-like `Configure` labels. Their desktop content area uses the
 same two-of-twelve-column gutter on each side as the template selection surface,
 and the card group is centered in the available viewport. After a card is
 selected, the Suspense boundary shows the shared top-edge loading bar until the
-workspace chunk and deferred Settings data are both ready. It does not use a
-timer, spinner, or card skeleton.
+workspace chunk and deferred Settings data are both ready. The black bar fills
+for a minimum of 800 milliseconds before content can replace it. It does not use
+a spinner or card skeleton.
 
 The Settings workspace owns the Design inspector/preview layout and the
 eight-template representative preview. Wide containers use three columns for
@@ -227,10 +228,12 @@ padding, and keep horizontal scrolling inside labelled data regions rather than
 on the document.
 
 Analytics keeps shell styles with `AttributionRouteShell` and dashboard styles
-with the lazy `AttributionDashboard` chunk. The route and dashboard data
-boundaries use the same top-edge loading bar, while lazy chart suspension bubbles
-to the dashboard boundary. Dashboard markup and CSS therefore resolve atomically
-without skeleton cards or partially assembled chart panels.
+with the lazy `AttributionDashboard` chunk. One outer readiness boundary owns
+the title bar, funnel heading, pixel-status banner, dashboard data, and lazy
+chart suspension. Its only fallback is the black top-edge loading bar, which
+fills for at least 800 milliseconds. Analytics content therefore appears as one
+ready surface without skeleton cards, an early banner, or partially assembled
+chart panels.
 
 ## 2026-07-30 Shared Shell and Onboarding Completion
 

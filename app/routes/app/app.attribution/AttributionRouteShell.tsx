@@ -1,9 +1,12 @@
-import { lazy, Suspense, useEffect, useState } from "react";
-import { useLoaderData, useNavigate } from "@remix-run/react";
+import { lazy, Suspense, useMemo } from "react";
+import { Await, useLoaderData, useNavigate } from "@remix-run/react";
 import { navigateBackOrFallback } from "../../../lib/navigation";
 import type { loader } from "../app.attribution";
 import styles from "./AttributionRouteShell.module.css";
-import { AdminRouteLoadingBar } from "../../../components/AdminRouteLoadingBar";
+import {
+  AdminRouteLoadingBar,
+  waitForAdminRouteLoadingBar,
+} from "../../../components/AdminRouteLoadingBar";
 
 const AttributionDashboard = lazy(() => import("./AttributionDashboard"));
 const PixelStatusCard = lazy(() =>
@@ -11,32 +14,6 @@ const PixelStatusCard = lazy(() =>
     default: module.PixelStatusCard,
   }))
 );
-
-function AttributionStatusPending() {
-  return (
-    <div
-      className={styles.pixelStatusCard}
-      data-status="checking"
-      aria-busy="true"
-    >
-      <div className={styles.pixelStatusBody}>
-        <div className={styles.pixelStatusIcon} aria-hidden="true">
-          <s-icon type="globe" />
-        </div>
-        <div className={styles.pixelStatusContent}>
-          <div className={styles.pixelStatusHeading}>
-            <h2 className={styles.pixelStatusTitle}>UTM Pixel Tracking</h2>
-            <s-badge tone="neutral">Checking</s-badge>
-          </div>
-          <p className={styles.pixelStatusDescription}>Checking your campaign attribution status.</p>
-        </div>
-        <div className={styles.pixelStatusAction}>
-          <s-spinner size="base" />
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function AttributionCriticalFunnelHeader() {
   return (
@@ -62,74 +39,53 @@ function AttributionCriticalFunnelHeader() {
 }
 
 function AttributionCriticalStatus({
-  pixelStatus,
+  status,
 }: {
-  pixelStatus: Promise<{ active: boolean }>;
+  status: { active: boolean };
 }) {
-  const [status, setStatus] = useState<{ active: boolean } | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    setStatus(null);
-
-    void pixelStatus
-      .then((nextStatus) => {
-        if (!cancelled) {
-          setStatus({ active: Boolean(nextStatus.active) });
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setStatus({ active: false });
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [pixelStatus]);
-
   return (
     <div className={styles.pixelStatusBoundary}>
       <div className={styles.pixelStatusShell}>
-        {status ? (
-          <Suspense fallback={<AttributionStatusPending />}>
-            <PixelStatusCard pixelActive={status.active} />
-          </Suspense>
-        ) : (
-          <AttributionStatusPending />
-        )}
+        <PixelStatusCard pixelActive={Boolean(status.active)} />
       </div>
     </div>
   );
 }
 
 export default function AttributionRouteShell() {
-  const { pixelStatus } = useLoaderData<typeof loader>();
+  const { analytics, pixelStatus } = useLoaderData<typeof loader>();
   const navigate = useNavigate();
+  const routeReady = useMemo(
+    () => Promise.all([analytics, pixelStatus, waitForAdminRouteLoadingBar()]),
+    [analytics, pixelStatus],
+  );
 
   return (
-    <>
-      <ui-title-bar title="Analytics">
-        <button
-          variant="breadcrumb"
-          onClick={() =>
-            navigateBackOrFallback(navigate, "/app/dashboard", { replaceFallback: true })
-          }
-        >
-          Dashboard
-        </button>
-      </ui-title-bar>
-      <s-query-container
-        containerName="analytics-page"
-        className={styles.analyticsQueryContainer}
-      >
-        <AttributionCriticalFunnelHeader />
-        <AttributionCriticalStatus pixelStatus={pixelStatus} />
-        <Suspense fallback={<AdminRouteLoadingBar label="Loading Analytics" />}>
-          <AttributionDashboard />
-        </Suspense>
-      </s-query-container>
-    </>
+    <Suspense fallback={<AdminRouteLoadingBar label="Loading Analytics" />}>
+      <Await resolve={routeReady}>
+        {([, resolvedPixelStatus]) => (
+          <>
+            <ui-title-bar title="Analytics">
+              <button
+                variant="breadcrumb"
+                onClick={() =>
+                  navigateBackOrFallback(navigate, "/app/dashboard", { replaceFallback: true })
+                }
+              >
+                Dashboard
+              </button>
+            </ui-title-bar>
+            <s-query-container
+              containerName="analytics-page"
+              className={styles.analyticsQueryContainer}
+            >
+              <AttributionCriticalFunnelHeader />
+              <AttributionCriticalStatus status={resolvedPixelStatus} />
+              <AttributionDashboard />
+            </s-query-container>
+          </>
+        )}
+      </Await>
+    </Suspense>
   );
 }

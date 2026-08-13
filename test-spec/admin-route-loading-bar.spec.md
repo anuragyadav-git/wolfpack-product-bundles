@@ -46,7 +46,8 @@ Keep Settings and Analytics loading feedback tied to their real Suspense readine
 | # | Scenario | Input | Expected Output | Notes |
 | --- | --- | --- | --- | --- |
 | 1 | Settings workspace is pending | Settings data or workspace chunk is unresolved | One progressbar labelled Loading Settings | No timer or skeleton markup |
-| 2 | Analytics dashboard is pending | Analytics data or dashboard/chart chunk is unresolved | One progressbar labelled Loading Analytics | Dashboard stays behind one readiness boundary |
+| 2 | Loading bar fill is in progress | Fewer than 800 milliseconds elapsed | Content stays pending | Bar completes before content is revealed |
+| 3 | Analytics dashboard is pending | Analytics data, status, or dashboard/chart chunk is unresolved | Only one progressbar labelled Loading Analytics | Title, funnel header, status banner, and dashboard stay behind one readiness boundary |
 
 ## Acceptance Criteria
 

@@ -36,7 +36,7 @@ Keep the analytics route LCP path fast while preserving merchant feedback during
 ### AttributionRouteShell
 | # | Scenario | Input | Expected Output | Notes |
 |---|---|---|---|---|
-| 1 | Analytics payload is still loading | Pending analytics promise | Title bar and critical funnel heading render with the top-edge loading bar | Dashboard and chart skeletons are not rendered |
+| 1 | Analytics payload is still loading | Pending analytics promise | Only the black top-edge loading bar renders | Title, funnel, banner, dashboard, and chart skeletons are not rendered |
 
 ### computeBundleFunnel
 | # | Scenario | Input | Expected Output | Notes |
@@ -58,4 +58,4 @@ Keep the analytics route LCP path fast while preserving merchant feedback during
 - [ ] All listed test cases pass
 - [ ] `tsc` passes
 - [ ] Integration tests pass
-- [ ] LCP route shell still renders the critical heading before analytics content
+- [ ] Analytics reveals the critical heading only after the complete route is ready.
