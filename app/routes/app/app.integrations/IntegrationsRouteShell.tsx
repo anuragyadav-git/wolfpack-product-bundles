@@ -18,7 +18,7 @@ export function IntegrationsLoadingState() {
   return <AdminRouteLoadingBar label="Loading Integrations" />;
 }
 
-function IntegrationsCatalog() {
+function IntegrationsCatalog({ onBack }: { onBack: () => void }) {
   const { t } = useTranslation();
   const integrations = INTEGRATION_CATEGORIES.flatMap((category) =>
     category.cards.map((integration) => ({
@@ -41,7 +41,15 @@ function IntegrationsCatalog() {
         <main className={styles.page}>
           <header className={styles.header}>
             <s-stack gap="small">
-              <s-heading>Integrations Hub</s-heading>
+              <s-stack direction="inline" gap="small" alignItems="center">
+                <s-button
+                  variant="tertiary"
+                  icon="arrow-left"
+                  accessibilityLabel="Back to previous page"
+                  onClick={onBack}
+                />
+                <s-heading>Integrations Hub</s-heading>
+              </s-stack>
               <s-paragraph color="subdued">
                 Connect the tools that support your bundle workflow.
               </s-paragraph>
@@ -117,7 +125,7 @@ function IntegrationsCatalog() {
   );
 }
 
-export default function IntegrationsRouteShell() {
+export default function IntegrationsRouteShell({ onBack }: { onBack: () => void }) {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
@@ -131,5 +139,5 @@ export default function IntegrationsRouteShell() {
     };
   }, []);
 
-  return ready ? <IntegrationsCatalog /> : <IntegrationsLoadingState />;
+  return ready ? <IntegrationsCatalog onBack={onBack} /> : <IntegrationsLoadingState />;
 }

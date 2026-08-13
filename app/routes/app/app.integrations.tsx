@@ -1,5 +1,7 @@
 import { json, type LoaderFunctionArgs } from "@remix-run/node";
+import { useNavigate } from "@remix-run/react";
 import { requireAdminSession } from "../../lib/auth-guards.server";
+import { navigateBackOrFallback } from "../../lib/navigation";
 import IntegrationsRouteShell from "./app.integrations/IntegrationsRouteShell";
 
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -8,5 +10,15 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 export default function IntegrationsRoute() {
-  return <IntegrationsRouteShell />;
+  const navigate = useNavigate();
+
+  return (
+    <IntegrationsRouteShell
+      onBack={() =>
+        navigateBackOrFallback(navigate, "/app/dashboard", {
+          replaceFallback: true,
+        })
+      }
+    />
+  );
 }

@@ -232,6 +232,7 @@ Additional Configurations
 Compact Admin Integrations catalog:
 ```
 Integrations Hub
+├── App-owned back action → previous page, with Dashboard fallback
 ├── Request Integration → opens Crisp with an unsent prefilled request
 ├── Reviews
 │   └── Judge.me → View Setup
