@@ -26,8 +26,17 @@ import {
   type PricingDisplayOptions,
   type PricingProgressBarType,
   type PricingRule,
+  type PricingRuleTierText,
   createNewPricingRule,
 } from "../types/pricing";
+import {
+  applyProgressTierRuleUpdate,
+  ensureProgressTierDefaults,
+  getDefaultProgressTierText,
+  getShopCurrencySymbol,
+  removeProgressTierRule,
+  type ProgressTierState,
+} from "../lib/pricing-progress-tier-defaults";
 
 interface UseBundlePricingProps {
   initialPricing?: {
@@ -39,6 +48,7 @@ interface UseBundlePricingProps {
     messages?: any;
     displayOptions?: any;
   } | null;
+  currencyCode: string;
   onStateChange?: () => void;
 }
 
@@ -55,7 +65,11 @@ function createInitialPricingDisplayOptions(initialPricing: UseBundlePricingProp
   }).displayOptions as PricingDisplayOptions;
 }
 
-export function useBundlePricing({ initialPricing, onStateChange }: UseBundlePricingProps) {
+export function useBundlePricing({
+  initialPricing,
+  currencyCode,
+  onStateChange,
+}: UseBundlePricingProps) {
   const initialDiscountType = (initialPricing?.method as DiscountMethod) || DiscountMethod.PERCENTAGE_OFF;
   const initialDiscountRules = ensurePricingRulesForEnabledState({
     enabled: initialPricing?.enabled || false,
@@ -73,6 +87,23 @@ export function useBundlePricing({ initialPricing, onStateChange }: UseBundlePri
   const [pricingDisplayOptions, setPricingDisplayOptionsRaw] = useState<PricingDisplayOptions>(() =>
     createInitialPricingDisplayOptions(initialPricing)
   );
+  const [progressTierState, setProgressTierStateRaw] =
+    useState<ProgressTierState>(() => ({
+      tierTextByRuleId: ensureProgressTierDefaults(
+        initialDiscountRules,
+        initialDiscountType,
+        currencyCode,
+        (initialPricing?.messages?.tierTextByRuleId ?? {}) as Record<
+          string,
+          PricingRuleTierText
+        >,
+      ),
+      tierTextByLocaleByRuleId:
+        (initialPricing?.messages?.tierTextByLocaleByRuleId ?? {}) as Record<
+          string,
+          Record<string, PricingRuleTierText>
+        >,
+    }));
 
   // Rule messaging
   const [ruleMessages, setRuleMessages] = useState<Record<string, { discountText: string; successMessage: string }>>(
@@ -98,6 +129,15 @@ export function useBundlePricing({ initialPricing, onStateChange }: UseBundlePri
         rules: discountRules,
       });
       setDiscountRulesRaw(nextRules);
+      setProgressTierStateRaw((state) => ({
+        ...state,
+        tierTextByRuleId: ensureProgressTierDefaults(
+          nextRules,
+          discountType,
+          currencyCode,
+          state.tierTextByRuleId,
+        ),
+      }));
       setRuleMessages((messages) =>
         ensurePricingRuleMessagesForEnabledState({
           method: discountType,
@@ -108,7 +148,7 @@ export function useBundlePricing({ initialPricing, onStateChange }: UseBundlePri
     }
     setDiscountEnabledRaw(nextEnabled);
     onStateChange?.();
-  }, [discountEnabled, discountRules, discountType, onStateChange]);
+  }, [currencyCode, discountEnabled, discountRules, discountType, onStateChange]);
 
   const setDiscountType = useCallback((value: DiscountMethod | ((prev: DiscountMethod) => DiscountMethod)) => {
     setDiscountTypeRaw(value);
@@ -149,6 +189,42 @@ export function useBundlePricing({ initialPricing, onStateChange }: UseBundlePri
     setPricingDisplayOptionsRaw(value);
     onStateChange?.();
   }, [onStateChange]);
+
+  const setTierTextByRuleId = useCallback(
+    (
+      value:
+        | Record<string, PricingRuleTierText>
+        | ((previous: Record<string, PricingRuleTierText>) => Record<string, PricingRuleTierText>),
+    ) => {
+      setProgressTierStateRaw((state) => ({
+        ...state,
+        tierTextByRuleId:
+          typeof value === "function" ? value(state.tierTextByRuleId) : value,
+      }));
+      onStateChange?.();
+    },
+    [onStateChange],
+  );
+
+  const setTierTextByLocaleByRuleId = useCallback(
+    (
+      value:
+        | Record<string, Record<string, PricingRuleTierText>>
+        | ((
+            previous: Record<string, Record<string, PricingRuleTierText>>,
+          ) => Record<string, Record<string, PricingRuleTierText>>),
+    ) => {
+      setProgressTierStateRaw((state) => ({
+        ...state,
+        tierTextByLocaleByRuleId:
+          typeof value === "function"
+            ? value(state.tierTextByLocaleByRuleId)
+            : value,
+      }));
+      onStateChange?.();
+    },
+    [onStateChange],
+  );
 
   const setBundleQuantityOptionsEnabled = useCallback((enabled: boolean) => {
     setPricingDisplayOptions(prev => ({
@@ -213,6 +289,17 @@ export function useBundlePricing({ initialPricing, onStateChange }: UseBundlePri
   }, [setPricingDisplayOptions]);
 
   const setProgressBarType = useCallback((type: PricingProgressBarType) => {
+    if (type === "step_based") {
+      setProgressTierStateRaw((state) => ({
+        ...state,
+        tierTextByRuleId: ensureProgressTierDefaults(
+          discountRules,
+          discountType,
+          currencyCode,
+          state.tierTextByRuleId,
+        ),
+      }));
+    }
     setPricingDisplayOptions(prev => ({
       ...prev,
       progressBar: {
@@ -220,7 +307,7 @@ export function useBundlePricing({ initialPricing, onStateChange }: UseBundlePri
         type,
       },
     }));
-  }, [setPricingDisplayOptions]);
+  }, [currencyCode, discountRules, discountType, setPricingDisplayOptions]);
 
   const updateProgressBarOptions = useCallback((updates: Partial<PricingDisplayOptions["progressBar"]>) => {
     setPricingDisplayOptions(prev => ({
@@ -237,6 +324,17 @@ export function useBundlePricing({ initialPricing, onStateChange }: UseBundlePri
     const newRule = createNewPricingRule(discountType);
     const ruleIndex = discountRules.length;
     setDiscountRules(prev => [...prev, newRule]);
+    setProgressTierStateRaw((state) => ({
+      ...state,
+      tierTextByRuleId: {
+        ...state.tierTextByRuleId,
+        [newRule.id]: getDefaultProgressTierText(
+          newRule,
+          discountType,
+          currencyCode,
+        ),
+      },
+    }));
 
     // Initialize messaging for new rule
     setRuleMessages(prev => ({
@@ -246,11 +344,14 @@ export function useBundlePricing({ initialPricing, onStateChange }: UseBundlePri
         successMessage: getDefaultDiscountRuleSuccessMessage(discountType)
       }
     }));
-  }, [discountRules, discountType, setDiscountRules]);
+  }, [currencyCode, discountRules, discountType, setDiscountRules]);
 
   // Remove a discount rule
   const removeDiscountRule = useCallback((ruleId: string) => {
     setDiscountRules(prev => prev.filter(rule => rule.id !== ruleId));
+    setProgressTierStateRaw((state) =>
+      removeProgressTierRule(state, ruleId),
+    );
 
     // Clean up messaging for removed rule
     setRuleMessages(prev => {
@@ -262,12 +363,46 @@ export function useBundlePricing({ initialPricing, onStateChange }: UseBundlePri
 
   // Update a discount rule
   const updateDiscountRule = useCallback((ruleId: string, updates: Partial<PricingRule>) => {
-    setDiscountRules(prev =>
-      prev.map(rule =>
-        rule.id === ruleId ? { ...rule, ...updates } : rule
-      )
+    const currentRule = discountRules.find((rule) => rule.id === ruleId);
+    if (!currentRule) return;
+    const nextRule = { ...currentRule, ...updates };
+    setDiscountRulesRaw((rules) =>
+      rules.map((rule) => (rule.id === ruleId ? nextRule : rule)),
     );
-  }, [setDiscountRules]);
+    setProgressTierStateRaw((state) =>
+      applyProgressTierRuleUpdate({
+        state,
+        rule: nextRule,
+        updates,
+        method: discountType,
+        currencyCode,
+      }),
+    );
+    onStateChange?.();
+  }, [currencyCode, discountRules, discountType, onStateChange]);
+
+  const replaceDiscountMethod = useCallback((method: DiscountMethod) => {
+    const nextRule = createNewPricingRule(method);
+    setDiscountTypeRaw(method);
+    setDiscountRulesRaw([nextRule]);
+    setRuleMessages({
+      [nextRule.id]: {
+        discountText: getDefaultDiscountRuleText(method, 0),
+        successMessage: getDefaultDiscountRuleSuccessMessage(method),
+      },
+    });
+    setProgressTierStateRaw({
+      tierTextByRuleId: {
+        [nextRule.id]: getDefaultProgressTierText(
+          nextRule,
+          method,
+          currencyCode,
+        ),
+      },
+      tierTextByLocaleByRuleId: {},
+    });
+    onStateChange?.();
+  }, [currencyCode, onStateChange]);
 
   // Update rule message
   const updateRuleMessage = useCallback((ruleId: string, field: 'discountText' | 'successMessage', value: string) => {
@@ -310,9 +445,11 @@ export function useBundlePricing({ initialPricing, onStateChange }: UseBundlePri
       showDiscountProgressBar,
       discountMessagingEnabled,
       ruleMessages,
-      pricingDisplayOptions
+      pricingDisplayOptions,
+      tierTextByRuleId: progressTierState.tierTextByRuleId,
+      tierTextByLocaleByRuleId: progressTierState.tierTextByLocaleByRuleId,
     };
-  }, [discountEnabled, discountType, discountRules, showFooter, showDiscountProgressBar, discountMessagingEnabled, ruleMessages, pricingDisplayOptions]);
+  }, [discountEnabled, discountType, discountRules, showFooter, showDiscountProgressBar, discountMessagingEnabled, ruleMessages, pricingDisplayOptions, progressTierState]);
 
   return {
     // State
@@ -324,6 +461,10 @@ export function useBundlePricing({ initialPricing, onStateChange }: UseBundlePri
     discountMessagingEnabled,
     ruleMessages,
     pricingDisplayOptions,
+    tierTextByRuleId: progressTierState.tierTextByRuleId,
+    tierTextByLocaleByRuleId: progressTierState.tierTextByLocaleByRuleId,
+    currencyCode,
+    currencySymbol: getShopCurrencySymbol(currencyCode),
     showVariables,
 
     // Setters
@@ -335,12 +476,15 @@ export function useBundlePricing({ initialPricing, onStateChange }: UseBundlePri
     setDiscountMessagingEnabled,
     setPricingDisplayOptions,
     setRuleMessages,
+    setTierTextByRuleId,
+    setTierTextByLocaleByRuleId,
     setShowVariables,
 
     // Methods
     addDiscountRule,
     removeDiscountRule,
     updateDiscountRule,
+    replaceDiscountMethod,
     updateRuleMessage,
     setBundleQuantityOptionsEnabled,
     setBundleQuantityDefaultRule,

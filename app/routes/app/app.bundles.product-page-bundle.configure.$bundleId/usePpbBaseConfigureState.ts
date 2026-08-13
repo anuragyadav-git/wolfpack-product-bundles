@@ -43,6 +43,7 @@ export function usePpbBaseConfigureState() {
     apiKey,
     blockHandle,
     shopLocales = [],
+    shopCurrencyCode,
     appEmbedEnabled = true,
     themeEditorUrl = null,
   } = loaderData as any;
@@ -81,6 +82,7 @@ export function usePpbBaseConfigureState() {
     bundle,
     bundleProduct: loadedBundleProduct,
     shopify,
+    shopCurrencyCode,
   });
   const {
     isDirty,
@@ -251,6 +253,7 @@ export function usePpbBaseConfigureState() {
     apiKey,
     blockHandle,
     shopLocales,
+    shopCurrencyCode,
     appEmbedBannerFeedbackTrigger,
     appEmbedEnabled: presentedAppEmbedEnabled,
     themeEditorUrl: currentThemeEditorUrl,

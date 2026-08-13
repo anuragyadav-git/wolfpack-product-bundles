@@ -9,6 +9,7 @@ import { requireAdminSession } from "../../../lib/auth-guards.server";
 import db from "../../../db.server";
 import {
   fetchBundleProduct,
+  fetchShopCurrencyCode,
   fetchShopLocales,
   fetchEmbedData,
 } from "../../../lib/bundle-configure-loader.server";
@@ -67,11 +68,12 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   // Reference: https://shopify.dev/docs/apps/build/online-store/theme-app-extensions/configuration
   const apiKey = process.env.SHOPIFY_API_KEY || "";
 
-  const [bundleProduct, shopLocales, availableBundles, embedData] =
+  const [bundleProduct, shopCurrencyCode, shopLocales, availableBundles, embedData] =
     await Promise.all([
       bundle.shopifyProductId
         ? fetchBundleProduct(admin, bundle.shopifyProductId, bundleId)
         : Promise.resolve(null),
+      fetchShopCurrencyCode(admin),
       fetchShopLocales(admin),
       db.bundle.findMany({
         where: {
@@ -94,6 +96,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
     showFirstLoadTour,
     apiKey,
     shopLocales,
+    shopCurrencyCode,
     appEmbedEnabled: embedData.appEmbedEnabled,
     themeEditorUrl: embedData.themeEditorUrl,
   });

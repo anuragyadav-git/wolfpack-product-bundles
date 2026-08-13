@@ -31,6 +31,7 @@ export function useConfigureBundleController(): ConfigureBundleFlowDraft {
     shop,
     apiKey,
     shopLocales = [],
+    shopCurrencyCode,
     appEmbedEnabled = true,
     themeEditorUrl = null,
   } = loaderData as any;
@@ -64,6 +65,7 @@ export function useConfigureBundleController(): ConfigureBundleFlowDraft {
     bundle,
     bundleProduct: loadedBundleProduct,
     shopify,
+    shopCurrencyCode,
   });
   const {
     isDirty,
@@ -225,6 +227,7 @@ export function useConfigureBundleController(): ConfigureBundleFlowDraft {
     shop,
     shopify,
     shopLocales,
+    shopCurrencyCode,
     stepsState,
     themeEditorUrl: currentThemeEditorUrl,
     triggerAppEmbedBannerFeedback,

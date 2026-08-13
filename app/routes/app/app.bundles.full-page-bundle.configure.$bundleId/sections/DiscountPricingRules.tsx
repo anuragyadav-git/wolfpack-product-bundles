@@ -3,6 +3,10 @@ import {
   amountToCents,
   DiscountMethod,
 } from "../../../../types/pricing";
+import {
+  getBogoDiscountInputValue,
+  getBogoDiscountStoredValue,
+} from "../../../../lib/pricing-progress-tier-defaults";
 
 export function fixedBundlePriceInputToCents(value: string): number {
   return amountToCents(Number(value) || 0);
@@ -16,7 +20,6 @@ export function FpbDiscountRulesSection({
   const {
     amountToCents,
     centsToAmount,
-    createNewPricingRule,
     DISCOUNT_METHOD_OPTIONS,
     fullPageBundleStyles,
     pricingState,
@@ -80,9 +83,7 @@ export function FpbDiscountRulesSection({
               onChange={(e) => {
                 const nextDiscountType = (e.target as HTMLSelectElement)
                   .value as DiscountMethod;
-                const nextRule = createNewPricingRule(nextDiscountType);
-                pricingState.setDiscountType(nextDiscountType);
-                pricingState.setDiscountRules([nextRule]);
+                pricingState.replaceDiscountMethod(nextDiscountType);
                 setRuleMessages({});
                 setRuleMessagesByLocale({});
                 setGlobalSuccessMessage("");
@@ -180,7 +181,12 @@ export function FpbDiscountRulesSection({
                         <div className={fullPageBundleStyles.bxyRewardGrid}>
                           <s-number-field
                             label="Discount value"
-                            value={String(rule.discountValue ?? 0)}
+                            value={String(
+                              getBogoDiscountInputValue(
+                                rule.discountValue ?? 0,
+                                rule.bxyDiscountType ?? "percentage",
+                              ),
+                            )}
                             onInput={(e) =>
                               pricingState.updateDiscountRule(rule.id, {
                                 discountValue: (() => {
@@ -191,7 +197,10 @@ export function FpbDiscountRulesSection({
                                   return (rule.bxyDiscountType ??
                                     "percentage") === "percentage"
                                     ? Math.min(100, Math.max(0, nextValue))
-                                    : Math.max(0, nextValue);
+                                    : getBogoDiscountStoredValue(
+                                        Math.max(0, nextValue),
+                                        "fixed_amount",
+                                      );
                                 })(),
                               })
                             }
@@ -205,7 +214,7 @@ export function FpbDiscountRulesSection({
                             prefix={
                               (rule.bxyDiscountType ?? "percentage") ===
                               "fixed_amount"
-                                ? "₹"
+                                ? pricingState.currencySymbol
                                 : undefined
                             }
                             max={
@@ -222,19 +231,26 @@ export function FpbDiscountRulesSection({
                               const bxyDiscountType = (
                                 e.target as HTMLSelectElement
                               ).value as "percentage" | "fixed_amount";
-                              const currentValue =
-                                Number(rule.discountValue ?? 0) || 0;
+                              const currentValue = getBogoDiscountInputValue(
+                                Number(rule.discountValue ?? 0) || 0,
+                                rule.bxyDiscountType ?? "percentage",
+                              );
                               pricingState.updateDiscountRule(rule.id, {
                                 bxyDiscountType,
                                 discountValue:
                                   bxyDiscountType === "percentage"
                                     ? Math.min(100, Math.max(0, currentValue))
-                                    : Math.max(0, currentValue),
+                                    : getBogoDiscountStoredValue(
+                                        Math.max(0, currentValue),
+                                        "fixed_amount",
+                                      ),
                               });
                             }}
                           >
                             <s-option value="percentage">% off</s-option>
-                            <s-option value="fixed_amount">₹ off</s-option>
+                            <s-option value="fixed_amount">
+                              {pricingState.currencySymbol} off
+                            </s-option>
                           </s-select>
                           <s-select
                             label="Apply Discount to"
@@ -288,7 +304,7 @@ export function FpbDiscountRulesSection({
                                 })
                               }
                               min={0}
-                              prefix="₹"
+                              prefix={pricingState.currencySymbol}
                             />
                           </div>
                         ) : (
@@ -331,7 +347,7 @@ export function FpbDiscountRulesSection({
                               min={0}
                               prefix={
                                 rule.conditionType === "amount"
-                                  ? "₹"
+                                  ? pricingState.currencySymbol
                                   : undefined
                               }
                             />
@@ -383,7 +399,7 @@ export function FpbDiscountRulesSection({
                               prefix={
                                 pricingState.discountType !==
                                 DiscountMethod.PERCENTAGE_OFF
-                                  ? "₹"
+                                  ? pricingState.currencySymbol
                                   : undefined
                               }
                             />

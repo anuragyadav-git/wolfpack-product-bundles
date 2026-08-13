@@ -898,6 +898,24 @@ Rule #1
 
 These are merchant-editable text fields (not fixed computed values).
 
+**Verified default generation matrix (2026-08-13):**
+
+- Quantity condition title: `{conditionValue} Pack`
+- Amount condition title: `Spend {currencySymbol}{conditionValue}`
+- Buy X, Get Y title: `Add {customerBuys + customerGets}`
+- Percentage Off subtext: `Save {discountValue}%`
+- Fixed Amount Off subtext: `Save {currencySymbol}{discountValue}`
+- Fixed Bundle Price subtext: `Save {currencySymbol}{discountValue}`
+- Buy X, Get Y percentage subtext: `{customerGets} Product(s) @ {discountValue}% off`
+- Buy X, Get Y fixed-amount subtext: `{customerGets} Product(s) @ {currencySymbol}{discountValue} off`
+
+EB regenerates the dependent field when its source rule changes, even when the
+merchant previously customized that field. Condition changes replace Tier Text;
+discount-value or reward-type changes replace Tier Subtext; changing the Buy X,
+Get Y `customerGets` value replaces both. Unaffected fields retain their current
+merchant value. Existing localized tier entries receive the same affected-field
+replacement.
+
 **Progress Bar "Multi Language" button (enabled only with Step-Based Bar):**
 
 Opens modal "Customize Text for Multiple Languages":
