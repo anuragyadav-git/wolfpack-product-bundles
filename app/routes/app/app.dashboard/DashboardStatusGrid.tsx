@@ -140,20 +140,22 @@ export function DashboardStatusGrid({
       hidden={false}
       onDismiss={() => setDismissed(true)}
     >
-      {!setupComplete ? (
-        <s-stack direction="inline" justifyContent="space-between" alignItems="start" gap="base">
+      <s-box minBlockSize="28px">
+        {!setupComplete ? (
+          <s-stack direction="inline" justifyContent="space-between" alignItems="start" gap="base">
+            <s-text>{summaryDescription}</s-text>
+            <s-button
+              variant="tertiary"
+              onClick={onOpenThemeEditor}
+              disabled={!themeEditorUrl}
+            >
+              {t("dashboard.storefrontSetup.activate")}
+            </s-button>
+          </s-stack>
+        ) : (
           <s-text>{summaryDescription}</s-text>
-          <s-button
-            variant="secondary"
-            onClick={onOpenThemeEditor}
-            disabled={!themeEditorUrl}
-          >
-            {t("dashboard.storefrontSetup.activate")}
-          </s-button>
-        </s-stack>
-      ) : (
-        <s-text>{summaryDescription}</s-text>
-      )}
+        )}
+      </s-box>
     </s-banner>
   );
 }
