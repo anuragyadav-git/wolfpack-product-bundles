@@ -107,7 +107,7 @@ renderFooter() {
   const el = this.elements.footer;
   if (!el) return;
   if (this._isProductPageCascadeTemplate() || this._isProductPageGridTemplate?.()) {
-    const openDrawer = el.querySelector('.bw-ppb-cascade-selected-drawer--open, .gbbMixCascadeCartDrawerContainer--open');
+    const openDrawer = el.querySelector('.bw-ppb-cascade-selected-drawer--open, .wpbMixCascadeCartDrawerContainer--open');
     if (openDrawer) {
       const drawerHeight = openDrawer.getBoundingClientRect?.().height || 0;
       this.cascadeSelectedDrawerState = {
