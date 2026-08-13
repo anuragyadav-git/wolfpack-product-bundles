@@ -25,6 +25,7 @@ source_paths:
   - app/routes/app/app.dashboard/route.tsx
   - app/routes/app/app.dashboard/dashboard-route-readiness.tsx
   - app/routes/app/app.dashboard/DashboardPage.tsx
+  - app/routes/app/app._index.tsx
   - app/routes/app/app.attribution/AttributionRouteShell.tsx
   - app/routes/app/app.attribution/AttributionDashboard.tsx
 related_docs:
@@ -228,11 +229,12 @@ analytics provider route-scoped until a shared runtime consumer exists.
 
 ## Admin Mobile and First-Load Contract
 
-The authenticated `/app` index must render a route-shaped skeleton while the
-client resolves auth parameters and the dashboard destination. It
-must not return a blank iframe during that interval. The skeleton reserves
-stable hero and card geometry, exposes an accessible busy state, and disables
-its shimmer under `prefers-reduced-motion`.
+The authenticated `/app` index must render the shared top-edge loading bar and
+centered `Loading your workspace` message while the client resolves auth
+parameters and the Dashboard destination. It must not return a blank iframe or
+render a route-shaped skeleton during that interval. The `/app/dashboard`
+readiness boundary then retains the same loading treatment until all visible
+Dashboard content can be revealed together.
 
 Redux Toolkit, React Redux, Redux, Reselect, and Immer are isolated in
 `vendor-state`. Chart-only dependencies remain in `vendor-charts`. Production
