@@ -227,9 +227,11 @@ export function PpbFreeGiftAddonsSection() {
                   </div>
                   <s-stack direction="block" gap="small">
                     <s-stack direction="inline" gap="small">
-                      <button
-                        type="button"
-                        className={productPageBundleStyles.videoHelpButton}
+                      <s-press-button
+                        variant="tertiary"
+                        tone="neutral"
+                        icon="play"
+                        accessibilityLabel="How to setup?"
                         onClick={() =>
                           window.open(
                             "https://www.youtube.com/watch?v=5ClNNtFybHo",
@@ -238,15 +240,8 @@ export function PpbFreeGiftAddonsSection() {
                           )
                         }
                       >
-                        <svg
-                          className={productPageBundleStyles.videoHelpIcon}
-                          viewBox="0 0 10 10"
-                          aria-hidden="true"
-                        >
-                          <path d="M2 1 L9 5 L2 9 Z" />
-                        </svg>
                         How to setup?
-                      </button>
+                      </s-press-button>
                       <s-button variant="secondary" icon="language-translate" disabled>
                         Multi Language
                       </s-button>

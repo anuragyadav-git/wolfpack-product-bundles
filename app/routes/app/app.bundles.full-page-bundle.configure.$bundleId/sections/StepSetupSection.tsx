@@ -36,9 +36,11 @@ export function StepSetupSection({
               </h3>
               <QuestionHelpTooltip tooltipKey="stepFlow" />
             </span>
-            <button
-              type="button"
-              className={fullPageBundleStyles.videoHelpButton}
+            <s-press-button
+              variant="tertiary"
+              tone="neutral"
+              icon="play"
+              accessibilityLabel="How to setup?"
               onClick={() =>
                 window.open(
                   "https://www.youtube.com/watch?v=5p_B81I7tWE",
@@ -47,15 +49,8 @@ export function StepSetupSection({
                 )
               }
             >
-              <svg
-                className={fullPageBundleStyles.videoHelpIcon}
-                viewBox="0 0 10 10"
-                aria-hidden="true"
-              >
-                <path d="M2 1 L9 5 L2 9 Z" />
-              </svg>
               How to setup?
-            </button>
+            </s-press-button>
           </div>
           <p style={{ margin: 0, fontSize: 13, color: "#6d7175" }}>
             Create steps for your multi-step bundle here. Select product options

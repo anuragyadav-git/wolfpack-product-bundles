@@ -37,14 +37,18 @@ export function PpbSubscriptionsSection() {
                     <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>
                       Bundle Subscriptions
                     </h3>
-                    <s-button
+                    <s-press-button
                       variant="tertiary"
+                      tone="neutral"
+                      icon="play"
+                      accessibilityLabel="How to setup?"
+                      pressed={showSubscriptionSetupGuide}
                       onClick={() =>
                         setShowSubscriptionSetupGuide((visible) => !visible)
                       }
                     >
                       How to setup?
-                    </s-button>
+                    </s-press-button>
                   </s-stack>
                   <p style={{ margin: 0, fontSize: 14, color: "#6d7175" }}>
                     Allow customers to purchase the bundle as a subscription

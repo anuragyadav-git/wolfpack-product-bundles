@@ -281,42 +281,6 @@
   text-decoration: underline;
 }
 
-.videoHelpButton {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 28px;
-  padding: 4px 8px;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  background: transparent;
-  color: #303030;
-  font: inherit;
-  font-size: 12px;
-  font-weight: 600;
-  line-height: 1;
-  cursor: pointer;
-  transition: background-color 0.15s ease;
-}
-
-.videoHelpButton:hover {
-  background: #f1f1f1;
-  text-decoration: none;
-}
-
-.videoHelpButton:focus-visible {
-  background: #f1f1f1;
-  outline: 2px solid #005bd3;
-  outline-offset: 1px;
-}
-
-.videoHelpIcon {
-  width: 10px;
-  height: 10px;
-  flex-shrink: 0;
-  fill: currentColor;
-}
-
 .leftCardTitle {
   margin: 0;
   color: #202223;
