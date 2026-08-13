@@ -1,4 +1,5 @@
 import { processCss } from "../../../../lib/css-sanitizer";
+import { normalizeFpbUpsellSave } from "../../../../lib/fpb-upsell-config.server";
 
 function normalizePersonalizationData(personalizationData: any) {
   if (
@@ -100,7 +101,7 @@ export function parseFpbSaveBundleForm(formData: FormData) {
   const bundleUpsellConfigRaw = formData.get("bundleUpsellConfig") as
     | string
     | null;
-  const bundleUpsellConfig = bundleUpsellConfigRaw
+  const clientBundleUpsellConfig = bundleUpsellConfigRaw
     ? JSON.parse(bundleUpsellConfigRaw)
     : null;
   const upsellWidgetEnabled = formData.get("upsellWidgetEnabled") === "true";
@@ -110,6 +111,14 @@ export function parseFpbSaveBundleForm(formData: FormData) {
     (formData.get("upsellWidgetDisplayOn") as string | null) ?? "all";
   const autoSelectBrowsedProduct =
     formData.get("autoSelectBrowsedProduct") === "true";
+  const normalizedUpsell = normalizeFpbUpsellSave({
+    enabled: upsellWidgetEnabled,
+    displayMode: upsellWidgetDisplayMode,
+    displayOn: upsellWidgetDisplayOn,
+    autoSelectBrowsedProduct,
+    config: clientBundleUpsellConfig,
+  });
+  const bundleUpsellConfig = normalizedUpsell.config;
   const bundleBannerDesktopUrlRaw = formData.get("bundleBannerDesktopUrl") as
     | string
     | null;
@@ -160,7 +169,7 @@ export function parseFpbSaveBundleForm(formData: FormData) {
 
   return {
     allowQuantityChanges,
-    autoSelectBrowsedProduct,
+    autoSelectBrowsedProduct: normalizedUpsell.direct.autoSelectBrowsedProduct,
     bundleBannerDesktopUrl,
     bundleBannerMobileUrl,
     bundleDescription,
@@ -191,9 +200,9 @@ export function parseFpbSaveBundleForm(formData: FormData) {
     templateName,
     textOverrides,
     textOverridesByLocale,
-    upsellWidgetDisplayMode,
-    upsellWidgetDisplayOn,
-    upsellWidgetEnabled,
+    upsellWidgetDisplayMode: normalizedUpsell.direct.upsellWidgetDisplayMode,
+    upsellWidgetDisplayOn: normalizedUpsell.direct.upsellWidgetDisplayOn,
+    upsellWidgetEnabled: normalizedUpsell.direct.upsellWidgetEnabled,
     validateQuantityPerProduct,
     variantSelectorEnabled,
   };

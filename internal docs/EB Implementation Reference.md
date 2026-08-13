@@ -976,11 +976,12 @@ Buy X, Get Y:
 
 Public Skai Lama help articles corroborate the captured Bundle Visibility behavior:
 
-- Product Page Bundle Upsell Widgets are enabled from the bundle edit surface, then the merchant chooses Offer Upsell Block or Offer Upsell Button.
-- Default widget visibility is all product pages for items currently included in the bundle.
-- Manual product or collection selections override the default visibility.
-- The Add Browsed Product option preselects the product the shopper was viewing before clicking the widget/redirect.
-- Widget placement for upsell surfaces can be completed through Shopify theme editor app blocks; template choice and block position affect where those widget surfaces appear.
+- One master Product Page Bundle Upsell Widget control owns both Offer Upsell Button and Offer Upsell Block modes. Button mode configures CTA text. Block mode adds image, title, description, and CTA fields.
+- Targeting is mutually exclusive: all bundle products, selected products, or selected collections. All-bundle-product matching includes explicit products and configured collections from enabled paid steps; gifts and personalization add-ons are not eligibility sources.
+- Multiple eligible bundles stack in deterministic order.
+- Default placement is below the product form. A single theme app block provides custom placement, which takes precedence over automatic placement.
+- Add Browsed Product records the exact product and currently selected variant before redirect. The destination preselects only that variant in shared bundle state.
+- The storefront renderer belongs to the globally enabled app embed rather than an FPB design template. Standard, Classic, Compact, and Horizontal share the behavior.
 - Product Page Bundle Builder placement is different from merchant-dragged upsell blocks: 2026-06-11 Theme Editor evidence showed the PPB widget rendering while the native **Buy buttons** block was selected. Treat PPB as a Buy buttons/product-form replacement or override, not as a separate merchant-positioned block under Buy buttons.
 
 Reference URLs:

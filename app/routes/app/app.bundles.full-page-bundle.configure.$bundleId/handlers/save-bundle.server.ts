@@ -21,6 +21,7 @@ import {
   validateStepConditionFeasibility,
 } from "../../../../lib/step-condition-validation";
 import { parseFpbSaveBundleForm } from "./save-bundle-form.server";
+import { FpbUpsellValidationError } from "../../../../lib/fpb-upsell-config.server";
 import {
   compactBundleForConfigureResponse,
   syncBundleStorefrontNow,
@@ -678,6 +679,9 @@ export async function handleSaveBundle(
       { component: "handlers.server", bundleId },
       error,
     );
-    return json({ success: false, error: message }, { status: 500 });
+    return json(
+      { success: false, error: message },
+      { status: error instanceof FpbUpsellValidationError ? 400 : 500 },
+    );
   }
 }

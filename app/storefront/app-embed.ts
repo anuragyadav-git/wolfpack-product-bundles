@@ -3,6 +3,10 @@ import {
   type FpbDesignPreset,
 } from './fpb-template-assets.js';
 import { transferBootstrapLoadingScreen } from '../assets/widgets/full-page/bootstrap-skeleton.js';
+import {
+  initializeFpbProductPageUpsells,
+  reconcileFpbUpsellPlacement,
+} from './fpb-product-page-upsell.js';
 
 const embed = document.querySelector<HTMLElement>('[data-wpb-app-embed]');
 
@@ -71,10 +75,21 @@ function hydrateMarker(): void {
   loadFullPageRuntime(embed.dataset.fullPageScriptUrl);
 }
 
+function hydrateProductPageUpsells(): void {
+  if (!embed) return;
+  reconcileFpbUpsellPlacement();
+  void initializeFpbProductPageUpsells(embed);
+}
+
 (window as Window & { __WOLFPACK_BUNDLE_EMBED_ACTIVE__?: boolean }).__WOLFPACK_BUNDLE_EMBED_ACTIVE__ = true;
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', hydrateMarker, { once: true });
+  document.addEventListener('DOMContentLoaded', () => {
+    hydrateMarker();
+    hydrateProductPageUpsells();
+  }, { once: true });
 } else {
   hydrateMarker();
+  hydrateProductPageUpsells();
 }
 document.addEventListener('shopify:section:load', hydrateMarker);
+document.addEventListener('shopify:section:load', hydrateProductPageUpsells);

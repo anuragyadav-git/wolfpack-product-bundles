@@ -31,6 +31,7 @@ import { fullPageModalProductMethods } from './widgets/full-page/methods/modal-p
 import { fullPageSelectionNavigationMethods } from './widgets/full-page/methods/selection-navigation-methods.js';
 import { fullPageRuntimeCartSettingsMethods } from './widgets/full-page/methods/runtime-cart-settings-methods.js';
 import { fullPageTierFloatingRuntimeMethods } from './widgets/full-page/methods/tier-floating-runtime-methods.js';
+import { fullPageUpsellHandoffMethods } from './widgets/full-page/methods/upsell-handoff-methods.js';
 import { claimFullPageWidgetInitialization } from './widgets/full-page/initialization-guard.js';
 import { BundleProductModal } from './bundle-modal-component.js';
 
@@ -60,6 +61,7 @@ export class BundleWidgetFullPage {
       fullPageSelectionNavigationMethods,
       fullPageRuntimeCartSettingsMethods,
       fullPageTierFloatingRuntimeMethods,
+      fullPageUpsellHandoffMethods,
       bundleLevelCssMethods,
     );
     this.container = containerElement;

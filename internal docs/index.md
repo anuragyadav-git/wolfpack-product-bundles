@@ -5,7 +5,7 @@ title: Wolfpack Product Bundles Internal Docs
 type: index
 status: authoritative
 summary: Index of durable Wolfpack Product Bundles architecture, integration, feature, and operations documentation.
-last_audited: 2026-08-11
+last_audited: 2026-08-13
 owners:
   - engineering
 domains:
@@ -52,7 +52,7 @@ Full evidence record: `docs/competitor-analysis/16-eb-full-data-flow-investigati
 - [[Architecture/System Overview]] — App stack, services, deployment
 - [[Architecture/Database Schema]] — Authoritative Prisma schema summary
 - [[Architecture/Cart Transform Function]] — Rust Shopify Function cart transform and checkout discount contract
-- [[Architecture/Widget Architecture]] — FPB + PDP widgets, load strategy, versioning
+- [[Architecture/Widget Architecture]] — FPB + PDP widgets, app-embed-owned product-page upsells, load strategy, versioning
 - [[Architecture/Product Card Layout Contract]] — Hard rule for row-level card size behavior across all templates and interaction states
 - [[Architecture/Admin Configure Page]] — shared FPB/PPB Admin configure-page adapter boundary, section rhythm, route-owned save semantics
 - [[Architecture/Bundle Parent Product]] — shared neutral FPB/PPB Shopify parent contract, merchant metadata ownership, sync invariants, and host separation

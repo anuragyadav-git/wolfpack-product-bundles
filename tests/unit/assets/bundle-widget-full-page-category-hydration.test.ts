@@ -26,6 +26,40 @@ describe('Full Page widget category hydration behavior', () => {
   const getNoProductsAvailableMessage = fullPageProductGridMethods.getNoProductsAvailableMessage;
   const mergeCategoryProductVariantAvailability =
     fullPageProductProcessingMethods.mergeCategoryProductVariantAvailability;
+  const mergeProductsBySelectionId =
+    fullPageProductProcessingMethods.mergeProductsBySelectionId;
+
+  it('merges richer duplicate product galleries without creating a second card', () => {
+    const merged = mergeProductsBySelectionId([
+      {
+        selectionId: 'variant-1',
+        title: 'Pendant Earrings',
+        imageUrl: 'primary.jpg',
+        images: [{ src: 'primary.jpg' }],
+        variants: [{ selectionId: 'variant-1', available: true }],
+      },
+      {
+        selectionId: 'variant-1',
+        description: 'Hydrated description',
+        images: [
+          { src: 'primary.jpg' },
+          { src: 'detail-1.jpg' },
+          { src: 'detail-2.jpg' },
+          { src: 'detail-3.jpg' },
+        ],
+        variants: [{ selectionId: 'variant-1', available: true, quantityAvailable: 8 }],
+      },
+    ]);
+
+    expect(merged).toHaveLength(1);
+    expect(merged[0]).toMatchObject({
+      selectionId: 'variant-1',
+      title: 'Pendant Earrings',
+      description: 'Hydrated description',
+    });
+    expect(merged[0].images).toHaveLength(4);
+    expect(merged[0].variants[0].quantityAvailable).toBe(8);
+  });
 
   function categoryContext() {
     return {
@@ -400,6 +434,85 @@ describe('Full Page widget category hydration behavior', () => {
         expect.objectContaining({ id: '1', price: 1999 }),
         expect.objectContaining({ id: '2', price: 4200 }),
       ]);
+    } finally {
+      (global as any).window = previousWindow;
+      (global as any).fetch = previousFetch;
+    }
+  });
+
+  it('hydrates a compact cached product so its full image gallery reaches the drawer', async () => {
+    const previousWindow = (global as any).window;
+    const previousFetch = (global as any).fetch;
+    (global as any).window = {
+      Shopify: { shop: 'test.myshopify.com', country: 'US' },
+      location: { host: 'test.myshopify.com' },
+    };
+    (global as any).fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        products: [{
+          id: 'gid://shopify/Product/1',
+          title: 'Pendant Earrings',
+          images: [
+            { url: 'https://cdn.example.test/primary.jpg' },
+            { url: 'https://cdn.example.test/detail-1.jpg' },
+            { url: 'https://cdn.example.test/detail-2.jpg' },
+            { url: 'https://cdn.example.test/detail-3.jpg' },
+          ],
+          price: '19.99',
+          variants: [{
+            id: 'gid://shopify/ProductVariant/11',
+            title: 'Default Title',
+            price: '19.99',
+            available: true,
+          }],
+        }],
+      }),
+    });
+
+    const context: any = {
+      selectedBundle: {
+        steps: [{
+          products: [{
+            id: 'gid://shopify/Product/1',
+            title: 'Pendant Earrings',
+            images: [{ url: 'https://cdn.example.test/primary.jpg' }],
+            price: 1999,
+            variants: [{
+              id: 'gid://shopify/ProductVariant/11',
+              selectionId: 'gid://shopify/ProductVariant/11',
+              title: 'Default Title',
+              price: 1999,
+              available: true,
+            }],
+          }],
+        }],
+      },
+      stepProductData: [[]],
+      stepCollectionProductIds: {},
+      selectedProducts: [{}],
+      resolveStorefrontApiBase: () => '/apps/product-bundles',
+      collectStepProductIds: fullPageSearchCategoryMethods.collectStepProductIds,
+      collectStepCollectionHandles: () => [],
+      shouldExpandStepProductsDuringLoad: () => false,
+      extractId: (id: string) => String(id || '').split('/').pop(),
+      isVariantSelectableForInventory: () => true,
+      isInventoryTrackingOnAddToCartEnabled: () => false,
+      getFirstAvailableVariant: fullPageProductProcessingMethods.getFirstAvailableVariant,
+      processProductsForStep: fullPageProductProcessingMethods.processProductsForStep,
+      enrichMissingProductDescriptions: async (products: any[]) => products,
+      mergeCategoryProductVariantAvailability:
+        fullPageProductProcessingMethods.mergeCategoryProductVariantAvailability,
+      _mergeDirectDefaultProductsIntoStep: (_stepIndex: number, products: any[]) => products,
+    };
+
+    try {
+      await fullPageProductProcessingMethods.loadStepProducts.call(context, 0);
+
+      expect((global as any).fetch).toHaveBeenCalledWith(
+        expect.stringContaining('gid%3A%2F%2Fshopify%2FProduct%2F1'),
+      );
+      expect(context.stepProductData[0][0].images).toHaveLength(4);
     } finally {
       (global as any).window = previousWindow;
       (global as any).fetch = previousFetch;

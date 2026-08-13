@@ -1,0 +1,814 @@
+{
+  "schema_version": 1,
+  "job": {
+    "id": "fpb-product-page-upsell-shared-runtime-20260813",
+    "title": "FPB product-page upsell shared runtime",
+    "status": "active",
+    "stage": "CHROME_QA_PREFLIGHT",
+    "revision": 3,
+    "created_at": "2026-08-13T16:26:22Z",
+    "updated_at": "2026-08-13T16:56:31Z",
+    "owner": "Aditya Awasthi",
+    "product": "Wolfpack Product Bundles",
+    "repository": "/Users/adityaawasthi/Developer/wolfpack-product-bundles",
+    "branch": "feature/26.05-UI-changes",
+    "commit": "c6a67ee8092675098f93fa6b1f13b92b58bb82e8",
+    "artifact_root": "/Users/adityaawasthi/Developer/wolfpack-product-bundles/design-jobs",
+    "resume_stage": null
+  },
+  "scope": {
+    "product_family": "FPB",
+    "template": "Standard, Classic, Compact, Horizontal",
+    "component": "Product-page upsell offer and exact-variant handoff",
+    "implementation_mode": "design-director",
+    "design_goal": "One app-embed-owned, template-neutral FPB upsell runtime with unified placement and exact-variant handoff.",
+    "user_problem": "Saved FPB upsell configuration is not rendered by the current static Liquid blocks.",
+    "primary_user_action": "Open an eligible FPB from a product page and optionally carry the exact selected variant into it.",
+    "out_of_scope": [
+      "PPB behavior",
+      "Prisma changes",
+      "deployment",
+      "legacy block compatibility"
+    ],
+    "merchant_configurability": [
+      "mode",
+      "copy",
+      "image",
+      "localization",
+      "targeting",
+      "browsed-product preselection"
+    ],
+    "business_logic_constraints": [
+      "Only active or unlisted FPBs with public numbers",
+      "Exact variants only",
+      "No preset branches"
+    ]
+  },
+  "viewports": {
+    "reference": [],
+    "required": [
+      {
+        "width": 1280,
+        "height": 800
+      },
+      {
+        "width": 390,
+        "height": 844
+      },
+      {
+        "width": 320,
+        "height": 720
+      }
+    ],
+    "edge_cases": [
+      "constrained product column",
+      "multiple offers",
+      "missing image",
+      "long localized copy"
+    ],
+    "browser_zoom": 100,
+    "device_pixel_ratio_policy": "record-actual",
+    "locale": "",
+    "currency": "",
+    "color_scheme": "",
+    "reduced_motion": false
+  },
+  "references": {
+    "current": [],
+    "target": [],
+    "context": [],
+    "approved": [
+      "component-brief.md"
+    ],
+    "implementation": [
+      "implementation-handoff.md"
+    ],
+    "provenance": [],
+    "permissions_or_usage_notes": []
+  },
+  "decisions": {
+    "locked": [
+      "decision-001",
+      "decision-002",
+      "decision-003"
+    ],
+    "assumptions": [],
+    "rejected": [],
+    "open": [],
+    "recommendation_delegation": {
+      "status": "not-granted",
+      "scope": [],
+      "exclusions": [
+        "business-behavior",
+        "accessibility",
+        "data-semantics",
+        "approval-scope"
+      ],
+      "approved_by": "",
+      "approved_at": "",
+      "expires_at_stage": "FINAL_APPROVAL"
+    }
+  },
+  "states": {
+    "required": [
+      "UP-01",
+      "UP-02",
+      "UP-03",
+      "UP-04",
+      "UP-05",
+      "UP-06",
+      "UP-07",
+      "UP-08",
+      "UP-09",
+      "UP-10",
+      "UP-11",
+      "UP-12"
+    ],
+    "optional": [],
+    "not_applicable": [],
+    "coverage_status": "complete"
+  },
+  "responsive": {
+    "contract_status": "complete",
+    "breakpoints": [
+      "container 560px recommendation"
+    ],
+    "transformations": [
+      "horizontal block to stacked block",
+      "full-width CTA in narrow containers"
+    ]
+  },
+  "accessibility": {
+    "requirements": [
+      "native link",
+      "visible focus",
+      "44px target",
+      "decorative image",
+      "aria-busy"
+    ],
+    "known_risks": [],
+    "validation_status": "complete"
+  },
+  "handoff": {
+    "status": "approved",
+    "package_path": "implementation-handoff.md",
+    "implementation_owner": "Codex",
+    "implementation_branch": "feature/26.05-UI-changes",
+    "implementation_commit": "working-tree-2026-08-13"
+  },
+  "qa": {
+    "chrome_mcp_required": true,
+    "profile_policy": "default-profile-only",
+    "allow_isolated_context": false,
+    "preflight_status": "blocked",
+    "preflight_result_path": "qa/preflight.json",
+    "baseline_status": "not-started",
+    "baseline_paths": [],
+    "summary_path": "qa/browser-artifact-summary.json",
+    "execution_status": "not-started",
+    "required_viewports": [],
+    "required_states": [],
+    "console_status": "not-started",
+    "network_status": "not-started",
+    "accessibility_status": "not-started",
+    "lighthouse_status": "not-started",
+    "performance_status": "not-started",
+    "visual_diff_status": "not-started",
+    "non_regression_status": "not-started",
+    "retry_history": [],
+    "artifacts_path": "qa",
+    "blockers": [
+      "Chrome MCP cannot persist screenshots under the design job qa directory with its current filesystem roots.",
+      "The broader upsell design job still needs an approved visual baseline before final design approval."
+    ]
+  },
+  "approvals": {
+    "design": {
+      "status": "approved",
+      "approver": "Aditya Awasthi",
+      "at": "2026-08-13T16:31:27Z",
+      "revision": 1
+    },
+    "handoff": {
+      "status": "approved",
+      "approver": "Aditya Awasthi",
+      "at": "2026-08-13T16:31:27Z",
+      "revision": 1
+    },
+    "implementation": {
+      "status": "not-started",
+      "approver": "",
+      "at": "",
+      "revision": null
+    },
+    "final": {
+      "status": "not-started",
+      "approver": "",
+      "at": "",
+      "revision": null
+    }
+  },
+  "artifacts": {
+    "immutable_after_approval": true,
+    "current": {
+      "acceptance-criteria.md": {
+        "path": "acceptance-criteria.md",
+        "status": "approved",
+        "revision": 1,
+        "sha256": "bd905fca90f125a46e242e8166d1f5a1d3136786dac6576739e0b91652ac4c5b",
+        "approved_by": "Aditya Awasthi",
+        "approved_at": "2026-08-13T16:31:27Z",
+        "evidence": [
+          "acceptance-criteria.md"
+        ]
+      },
+      "accessibility-checklist.md": {
+        "path": "accessibility-checklist.md",
+        "status": "approved",
+        "revision": 2,
+        "sha256": "aa986ff59614052676b3a1d9545ec42551862bebc881d483946af98b4117494e",
+        "approved_by": "Aditya Awasthi",
+        "approved_at": "2026-08-13T16:33:57Z",
+        "evidence": [
+          "accessibility-checklist.md"
+        ]
+      },
+      "approval-record.yaml": {
+        "path": "approval-record.yaml",
+        "status": "approved",
+        "revision": 1,
+        "sha256": "7523ea08cc3a9b26d476702fcb47dac73e1fadcdfacb742507d84accddcf57f9",
+        "approved_by": "Aditya Awasthi",
+        "approved_at": "2026-08-13T16:31:27Z",
+        "evidence": [
+          "approval-record.yaml"
+        ]
+      },
+      "browser-test-plan.yaml": {
+        "path": "browser-test-plan.yaml",
+        "status": "approved",
+        "revision": 3,
+        "sha256": "74195a30cfa7139cfc2cdda76671fdb070e3b3ece9d7d9343f413903ba7f5a3e",
+        "approved_by": "Aditya Awasthi",
+        "approved_at": "2026-08-13T16:33:58Z",
+        "evidence": [
+          "browser-test-plan.yaml"
+        ]
+      },
+      "browser-test-report.md": {
+        "path": "browser-test-report.md",
+        "status": "draft",
+        "revision": 1,
+        "sha256": "c6dbe864dd45d6ffadcab7c4783358d99625178a8800bf7676f4a8f9e14ad921",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "chrome-preflight-result.yaml": {
+        "path": "chrome-preflight-result.yaml",
+        "status": "draft",
+        "revision": 1,
+        "sha256": "1e627d4e11bf43b1015d94435825ae4e689baf123e368c787bce70b8e1079b12",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "codex-task.md": {
+        "path": "codex-task.md",
+        "status": "approved",
+        "revision": 1,
+        "sha256": "e19fc12c90272025939c12d980632f5aeed3bbef8f3a469f2d8f98e3f0464130",
+        "approved_by": "Aditya Awasthi",
+        "approved_at": "2026-08-13T16:31:27Z",
+        "evidence": [
+          "codex-task.md"
+        ]
+      },
+      "component-anatomy.md": {
+        "path": "component-anatomy.md",
+        "status": "approved",
+        "revision": 1,
+        "sha256": "207da4330b5debb4986deeca2444a5dd9dd08092f26746fb749a933ff35981bf",
+        "approved_by": "Aditya Awasthi",
+        "approved_at": "2026-08-13T16:31:27Z",
+        "evidence": [
+          "component-anatomy.md"
+        ]
+      },
+      "component-brief.md": {
+        "path": "component-brief.md",
+        "status": "approved",
+        "revision": 1,
+        "sha256": "7cd552ca9c368cf9b9a6aee4146390dbbfb0ed6299e9a68fb61a214d91daf720",
+        "approved_by": "Aditya Awasthi",
+        "approved_at": "2026-08-13T16:31:05Z",
+        "evidence": [
+          "component-brief.md"
+        ]
+      },
+      "content-stress-cases.yaml": {
+        "path": "content-stress-cases.yaml",
+        "status": "approved",
+        "revision": 1,
+        "sha256": "82c903a238dd014a67c60f3fcdd9f0c4bd190c7c7d0f03356b15d7c373e5dad3",
+        "approved_by": "Aditya Awasthi",
+        "approved_at": "2026-08-13T16:31:27Z",
+        "evidence": [
+          "content-stress-cases.yaml"
+        ]
+      },
+      "design-tokens.json": {
+        "path": "design-tokens.json",
+        "status": "approved",
+        "revision": 1,
+        "sha256": "f46e2b8cc9c2f760c5e5043c03fe5c7d547f811f4eb83fa39e22b8d24ef06775",
+        "approved_by": "Aditya Awasthi",
+        "approved_at": "2026-08-13T16:31:27Z",
+        "evidence": [
+          "design-tokens.json"
+        ]
+      },
+      "direction-comparison.md": {
+        "path": "direction-comparison.md",
+        "status": "approved",
+        "revision": 1,
+        "sha256": "4d27d2a6504b36436b88f1c50fe818f28ddc19009984a1fc4e26a35471be774b",
+        "approved_by": "Aditya Awasthi",
+        "approved_at": "2026-08-13T16:31:27Z",
+        "evidence": [
+          "direction-comparison.md"
+        ]
+      },
+      "implementation-handoff.md": {
+        "path": "implementation-handoff.md",
+        "status": "approved",
+        "revision": 2,
+        "sha256": "3381694aa184d326d8af26bbb5b9d6ef1d72d8e9e5219c9c76aab4a206f6d30a",
+        "approved_by": "Aditya Awasthi",
+        "approved_at": "2026-08-13T16:33:57Z",
+        "evidence": [
+          "implementation-handoff.md"
+        ]
+      },
+      "interaction-contract.md": {
+        "path": "interaction-contract.md",
+        "status": "approved",
+        "revision": 1,
+        "sha256": "93fb39cf53ea8c5bc5b696f8408026db6922a5e40b1bc843bc66d95e730a2e8c",
+        "approved_by": "Aditya Awasthi",
+        "approved_at": "2026-08-13T16:31:27Z",
+        "evidence": [
+          "interaction-contract.md"
+        ]
+      },
+      "locked-decisions.yaml": {
+        "path": "locked-decisions.yaml",
+        "status": "approved",
+        "revision": 1,
+        "sha256": "30b76fc38bbe75b02b546b57d8bc8cce568b094174b72e24033d4e3d24ba9258",
+        "approved_by": "Aditya Awasthi",
+        "approved_at": "2026-08-13T16:31:27Z",
+        "evidence": [
+          "locked-decisions.yaml"
+        ]
+      },
+      "remediation-list.md": {
+        "path": "remediation-list.md",
+        "status": "draft",
+        "revision": 1,
+        "sha256": "6bcb710d3c28a26ae077673eaa66078027050da886c9b0959cf5bd30203604d0",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "responsive-contract.md": {
+        "path": "responsive-contract.md",
+        "status": "approved",
+        "revision": 2,
+        "sha256": "2052e57cc082d376438cca927d0239b89708348c772b8f5522d80a3b6bcca3a7",
+        "approved_by": "Aditya Awasthi",
+        "approved_at": "2026-08-13T16:33:57Z",
+        "evidence": [
+          "responsive-contract.md"
+        ]
+      },
+      "screenshot-inventory.yaml": {
+        "path": "screenshot-inventory.yaml",
+        "status": "approved",
+        "revision": 1,
+        "sha256": "0a9ddca9579b6c475ba103bee8dd47f1fadf985b540ea0aaae26fa0e32ffc56c",
+        "approved_by": "Aditya Awasthi",
+        "approved_at": "2026-08-13T16:31:05Z",
+        "evidence": [
+          "screenshot-inventory.yaml"
+        ]
+      },
+      "state-matrix.md": {
+        "path": "state-matrix.md",
+        "status": "approved",
+        "revision": 1,
+        "sha256": "f0903d90db7894614bf4652b8998ce5b5a24b9b26b448fd1b7efb530d898e716",
+        "approved_by": "Aditya Awasthi",
+        "approved_at": "2026-08-13T16:31:27Z",
+        "evidence": [
+          "state-matrix.md"
+        ]
+      },
+      "visual-audit.md": {
+        "path": "visual-audit.md",
+        "status": "approved",
+        "revision": 1,
+        "sha256": "f4550cb7dc52695aec73ea68761a96eb9dd267b87d360e66b1cae7ad483e6b67",
+        "approved_by": "Aditya Awasthi",
+        "approved_at": "2026-08-13T16:31:27Z",
+        "evidence": [
+          "visual-audit.md"
+        ]
+      },
+      "visual-qa-report.md": {
+        "path": "visual-qa-report.md",
+        "status": "draft",
+        "revision": 1,
+        "sha256": "6d34a24d4edcf8c691cb35c883e74fc68b0e4ae4397065e6f84acf8ddeea5def",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      }
+    },
+    "superseded": [
+      {
+        "path": "browser-test-plan.yaml",
+        "status": "approved",
+        "revision": 1,
+        "sha256": "3a8669f2a92c1f5269e9c6e343a62174a5373a00842deb128c79e6868a98637e",
+        "approved_by": "Aditya Awasthi",
+        "approved_at": "2026-08-13T16:31:27Z",
+        "evidence": [
+          "browser-test-plan.yaml"
+        ],
+        "superseded_at": "2026-08-13T16:32:39Z",
+        "superseded_by": "Aditya Awasthi",
+        "superseded_reason": "Correct non-regression case references for handoff validation"
+      },
+      {
+        "path": "responsive-contract.md",
+        "status": "approved",
+        "revision": 1,
+        "sha256": "c97d1abdd00f4951d87a75cef0a45a9bf7b20ecde3311add86713ba787b444bb",
+        "approved_by": "Aditya Awasthi",
+        "approved_at": "2026-08-13T16:31:27Z",
+        "evidence": [
+          "responsive-contract.md"
+        ],
+        "superseded_at": "2026-08-13T16:33:57Z",
+        "superseded_by": "Aditya Awasthi",
+        "superseded_reason": "Resolve mechanical handoff validation requirements"
+      },
+      {
+        "path": "accessibility-checklist.md",
+        "status": "approved",
+        "revision": 1,
+        "sha256": "d6669d4d8492c30f40262222f976b51f16c4e4bddc638f5f119e455e4f85a444",
+        "approved_by": "Aditya Awasthi",
+        "approved_at": "2026-08-13T16:31:27Z",
+        "evidence": [
+          "accessibility-checklist.md"
+        ],
+        "superseded_at": "2026-08-13T16:33:57Z",
+        "superseded_by": "Aditya Awasthi",
+        "superseded_reason": "Resolve mechanical handoff validation requirements"
+      },
+      {
+        "path": "implementation-handoff.md",
+        "status": "approved",
+        "revision": 1,
+        "sha256": "b8e7fbbd7a242570ce71160d1ba72caa2001611c3bd81fe07f0fc4914612a7d0",
+        "approved_by": "Aditya Awasthi",
+        "approved_at": "2026-08-13T16:31:27Z",
+        "evidence": [
+          "implementation-handoff.md"
+        ],
+        "superseded_at": "2026-08-13T16:33:57Z",
+        "superseded_by": "Aditya Awasthi",
+        "superseded_reason": "Resolve mechanical handoff validation requirements"
+      },
+      {
+        "path": "browser-test-plan.yaml",
+        "status": "approved",
+        "revision": 2,
+        "sha256": "bb77ee111a356e0d39d6847a4b180f894e74047c67b23c3b91d43c700a8ea2db",
+        "approved_by": "Aditya Awasthi",
+        "approved_at": "2026-08-13T16:32:39Z",
+        "evidence": [
+          "browser-test-plan.yaml"
+        ],
+        "superseded_at": "2026-08-13T16:33:58Z",
+        "superseded_by": "Aditya Awasthi",
+        "superseded_reason": "Resolve mechanical handoff validation requirements"
+      }
+    ]
+  },
+  "history": [
+    {
+      "sequence": 1,
+      "at": "2026-08-13T16:26:22Z",
+      "from": null,
+      "to": "DISCOVERY",
+      "revision": 1,
+      "reason": "Design job created",
+      "evidence": []
+    },
+    {
+      "sequence": 2,
+      "at": "2026-08-13T16:31:39Z",
+      "from": "DISCOVERY",
+      "to": "SCOPE",
+      "revision": 1,
+      "reason": "Approved brief records scope",
+      "evidence": [
+        "component-brief.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 3,
+      "at": "2026-08-13T16:31:39Z",
+      "from": "SCOPE",
+      "to": "REFERENCE_INTAKE",
+      "revision": 1,
+      "reason": "Repository and user-plan references inventoried",
+      "evidence": [
+        "screenshot-inventory.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 4,
+      "at": "2026-08-13T16:31:39Z",
+      "from": "REFERENCE_INTAKE",
+      "to": "REFERENCE_VALIDATION",
+      "revision": 1,
+      "reason": "Reference limitations accepted; no raster exact-match claims",
+      "evidence": [
+        "screenshot-inventory.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 5,
+      "at": "2026-08-13T16:31:39Z",
+      "from": "REFERENCE_VALIDATION",
+      "to": "VISUAL_ANALYSIS",
+      "revision": 1,
+      "reason": "Evidence-backed ownership and visual gaps recorded",
+      "evidence": [
+        "visual-audit.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 6,
+      "at": "2026-08-13T16:31:39Z",
+      "from": "VISUAL_ANALYSIS",
+      "to": "DIRECTION_EXPLORATION",
+      "revision": 1,
+      "reason": "Unified and rejected directions compared",
+      "evidence": [
+        "direction-comparison.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 7,
+      "at": "2026-08-13T16:31:39Z",
+      "from": "DIRECTION_EXPLORATION",
+      "to": "DIRECTION_APPROVAL",
+      "revision": 1,
+      "reason": "User-supplied plan explicitly selects unified direction",
+      "evidence": [
+        "locked-decisions.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 8,
+      "at": "2026-08-13T16:32:12Z",
+      "from": "DIRECTION_APPROVAL",
+      "to": "COMPONENT_ANATOMY",
+      "revision": 1,
+      "reason": "One owner assigned to each region",
+      "evidence": [
+        "component-anatomy.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 9,
+      "at": "2026-08-13T16:32:12Z",
+      "from": "COMPONENT_ANATOMY",
+      "to": "STATE_CONTRACT",
+      "revision": 1,
+      "reason": "Renderer and handoff state matrix approved",
+      "evidence": [
+        "state-matrix.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 10,
+      "at": "2026-08-13T16:32:12Z",
+      "from": "STATE_CONTRACT",
+      "to": "RESPONSIVE_CONTRACT",
+      "revision": 1,
+      "reason": "Container-driven responsive behavior approved",
+      "evidence": [
+        "responsive-contract.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 11,
+      "at": "2026-08-13T16:32:12Z",
+      "from": "RESPONSIVE_CONTRACT",
+      "to": "INTERACTION_ACCESSIBILITY",
+      "revision": 1,
+      "reason": "Interaction and accessibility contracts approved",
+      "evidence": [
+        "interaction-contract.md",
+        "accessibility-checklist.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 12,
+      "at": "2026-08-13T16:32:12Z",
+      "from": "INTERACTION_ACCESSIBILITY",
+      "to": "TOKENS_GEOMETRY",
+      "revision": 1,
+      "reason": "Existing merchant tokens and responsive geometry assigned",
+      "evidence": [
+        "design-tokens.json"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 13,
+      "at": "2026-08-13T16:32:12Z",
+      "from": "TOKENS_GEOMETRY",
+      "to": "PROTOTYPE_OPTIONAL",
+      "revision": 1,
+      "reason": "Prototype not applicable; approved behavior is testable in production modules",
+      "evidence": [
+        "state-matrix.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 14,
+      "at": "2026-08-13T16:32:12Z",
+      "from": "PROTOTYPE_OPTIONAL",
+      "to": "HANDOFF_ASSEMBLY",
+      "revision": 1,
+      "reason": "Architecture-correct implementation packet assembled",
+      "evidence": [
+        "implementation-handoff.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 15,
+      "at": "2026-08-13T16:32:12Z",
+      "from": "HANDOFF_ASSEMBLY",
+      "to": "HANDOFF_VALIDATION",
+      "revision": 1,
+      "reason": "Handoff artifacts are ready for mechanical validation",
+      "evidence": [
+        "browser-test-plan.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 16,
+      "at": "2026-08-13T16:32:39Z",
+      "from": "HANDOFF_VALIDATION",
+      "to": "HANDOFF_VALIDATION",
+      "revision": 2,
+      "reason": "Correct non-regression case references for handoff validation",
+      "evidence": [
+        "browser-test-plan.yaml"
+      ],
+      "event": "artifact-superseded",
+      "affected_artifacts": [
+        "browser-test-plan.yaml"
+      ]
+    },
+    {
+      "sequence": 17,
+      "at": "2026-08-13T16:33:57Z",
+      "from": "HANDOFF_VALIDATION",
+      "to": "HANDOFF_VALIDATION",
+      "revision": 2,
+      "reason": "Resolve mechanical handoff validation requirements",
+      "evidence": [
+        "responsive-contract.md"
+      ],
+      "event": "artifact-superseded",
+      "affected_artifacts": [
+        "responsive-contract.md"
+      ]
+    },
+    {
+      "sequence": 18,
+      "at": "2026-08-13T16:33:57Z",
+      "from": "HANDOFF_VALIDATION",
+      "to": "HANDOFF_VALIDATION",
+      "revision": 2,
+      "reason": "Resolve mechanical handoff validation requirements",
+      "evidence": [
+        "accessibility-checklist.md"
+      ],
+      "event": "artifact-superseded",
+      "affected_artifacts": [
+        "accessibility-checklist.md"
+      ]
+    },
+    {
+      "sequence": 19,
+      "at": "2026-08-13T16:33:57Z",
+      "from": "HANDOFF_VALIDATION",
+      "to": "HANDOFF_VALIDATION",
+      "revision": 2,
+      "reason": "Resolve mechanical handoff validation requirements",
+      "evidence": [
+        "implementation-handoff.md"
+      ],
+      "event": "artifact-superseded",
+      "affected_artifacts": [
+        "implementation-handoff.md"
+      ]
+    },
+    {
+      "sequence": 20,
+      "at": "2026-08-13T16:33:58Z",
+      "from": "HANDOFF_VALIDATION",
+      "to": "HANDOFF_VALIDATION",
+      "revision": 3,
+      "reason": "Resolve mechanical handoff validation requirements",
+      "evidence": [
+        "browser-test-plan.yaml"
+      ],
+      "event": "artifact-superseded",
+      "affected_artifacts": [
+        "browser-test-plan.yaml"
+      ]
+    },
+    {
+      "sequence": 21,
+      "at": "2026-08-13T16:34:01Z",
+      "from": "HANDOFF_VALIDATION",
+      "to": "IMPLEMENTATION_AWAITED",
+      "revision": 3,
+      "reason": "Validated approved handoff is authorized for implementation",
+      "evidence": [
+        "implementation-handoff.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 22,
+      "at": "2026-08-13T16:50:48Z",
+      "from": "IMPLEMENTATION_AWAITED",
+      "to": "CHROME_QA_PREFLIGHT",
+      "revision": 3,
+      "reason": "Local implementation, focused tests, generated assets, app build, and Shopify extension build are complete.",
+      "evidence": [
+        "implementation-handoff.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 23,
+      "at": "2026-08-13T16:51:31Z",
+      "from": "CHROME_QA_PREFLIGHT",
+      "to": "BLOCKED",
+      "revision": 3,
+      "reason": "Manual SIT deployment and a direct default-profile Chrome DevTools MCP connection are required for storefront QA.",
+      "evidence": [
+        "qa/preflight.json"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 24,
+      "at": "2026-08-13T16:56:31Z",
+      "from": "BLOCKED",
+      "to": "CHROME_QA_PREFLIGHT",
+      "revision": 3,
+      "reason": "User confirmed the current tunnel is sufficient and direct default-profile Chrome DevTools MCP is connected.",
+      "evidence": [
+        "qa/preflight.json"
+      ],
+      "affected_artifacts": []
+    }
+  ]
+}

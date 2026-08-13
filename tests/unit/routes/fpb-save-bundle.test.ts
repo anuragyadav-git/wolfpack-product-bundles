@@ -493,18 +493,42 @@ describe("FPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
     expect(updateArgs.data).not.toHaveProperty("showCompareAtPrices");
   });
 
-  it("persists direct bundleUpsellConfig from current full-page visibility controls", async () => {
+  it("normalizes and atomically persists the direct upsell fields with their config", async () => {
     const bundleUpsellConfig = makeBundleUpsellConfig();
     await handleSaveBundle(
       MOCK_ADMIN,
       MOCK_SESSION,
       "bundle-1",
-      makeFormData({ bundleUpsellConfig: JSON.stringify(bundleUpsellConfig) }),
+      makeFormData({
+        autoSelectBrowsedProduct: "true",
+        bundleUpsellConfig: JSON.stringify(bundleUpsellConfig),
+        upsellWidgetDisplayMode: "block",
+        upsellWidgetDisplayOn: "specific_products",
+        upsellWidgetEnabled: "true",
+      }),
     );
 
     expect(getDb().bundle.update).toHaveBeenCalledWith(
       expect.objectContaining({
-        data: expect.objectContaining({ bundleUpsellConfig }),
+        data: expect.objectContaining({
+          autoSelectBrowsedProduct: true,
+          upsellWidgetDisplayMode: "block",
+          upsellWidgetDisplayOn: "specific_products",
+          upsellWidgetEnabled: true,
+          bundleUpsellConfig: expect.objectContaining({
+            widgetConfiguration: expect.objectContaining({
+              isEnabled: true,
+              useLinkProductAsDefaultProduct: true,
+              displayConfiguration: expect.objectContaining({
+                showOnAllBundleProducts: false,
+                selectedProducts: [
+                  expect.objectContaining({ productId: "111" }),
+                ],
+                collectionsSelectedData: [],
+              }),
+            }),
+          }),
+        }),
       }),
     );
   });

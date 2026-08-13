@@ -4,7 +4,7 @@
 {% endcomment %}
 
 {% assign app_namespace = '$app' %}
-{% capture storefront_proxy_root %}{% render 'storefront-proxy-root' %}{% endcapture %}
+{% assign storefront_proxy_root = '/apps/product-bundles' %}
 {% assign bundle_variant = product.variants.first %}
 {% assign bundle_ui_config = nil %}
 {% assign is_bundle_product = false %}

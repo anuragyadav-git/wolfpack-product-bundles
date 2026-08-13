@@ -350,9 +350,6 @@ export function useConfigureActionController(flow: ConfigureBundleFlowDraft) {
     openThemeEditorInNewTab(buildFpbUpsellThemeEditorUrl({
       shop: flow.shop,
       apiKey: flow.apiKey,
-      displayMode: flow.upsellWidgetDisplayMode === "button"
-        ? "button"
-        : "block",
     }));
   }, [flow]);
   Object.assign(flow, {

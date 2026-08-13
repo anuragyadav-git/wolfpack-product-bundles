@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "job_id": "fpb-product-page-upsell-shared-runtime-20260813",
+  "revision": 1,
+  "status": "approved",
+  "groups": {
+    "color": [
+      {
+        "name": "upsell-text",
+        "value": "var(--bundle-global-primary-text, currentColor)",
+        "unit": "css",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": true,
+        "owner": "design settings",
+        "notes": "Primary copy"
+      },
+      {
+        "name": "upsell-body-text",
+        "value": "var(--bundle-global-secondary-text, currentColor)",
+        "unit": "css",
+        "source": "user-defined",
+        "confidence": "high",
+        "merchant_configurable": true,
+        "owner": "design settings",
+        "notes": "Description copy"
+      },
+      {
+        "name": "upsell-action-bg",
+        "value": "var(--bundle-global-primary-button, #111)",
+        "unit": "css",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": true,
+        "owner": "design settings",
+        "notes": "CTA background"
+      }
+    ],
+    "typography": [],
+    "spacing": [
+      {
+        "name": "upsell-gap",
+        "value": "clamp(12px, 2cqi, 20px)",
+        "unit": "css",
+        "source": "recommendation",
+        "confidence": "medium",
+        "merchant_configurable": false,
+        "owner": "shared upsell CSS",
+        "notes": "Content-driven spacing"
+      }
+    ],
+    "size": [
+      {
+        "name": "upsell-control-min",
+        "value": 44,
+        "unit": "px",
+        "source": "user-defined",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "shared upsell CSS",
+        "notes": "Minimum target"
+      }
+    ],
+    "radius": [],
+    "border": [],
+    "shadow": [],
+    "z_index": [],
+    "motion": [
+      {
+        "name": "upsell-spinner",
+        "value": "reduced-motion-disabled",
+        "unit": "policy",
+        "source": "user-defined",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "shared upsell CSS",
+        "notes": "Decorative only"
+      }
+    ],
+    "breakpoint": [
+      {
+        "name": "upsell-horizontal-min",
+        "value": 560,
+        "unit": "container-px",
+        "source": "recommendation",
+        "confidence": "medium",
+        "merchant_configurable": false,
+        "owner": "shared upsell CSS",
+        "notes": "May tune after Chrome evidence"
+      }
+    ],
+    "component_alias": []
+  }
+}

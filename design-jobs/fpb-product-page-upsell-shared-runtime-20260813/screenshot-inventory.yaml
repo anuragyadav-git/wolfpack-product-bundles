@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "job_id": "fpb-product-page-upsell-shared-runtime-20260813",
+  "revision": 1,
+  "status": "approved",
+  "items": [],
+  "limitations": [
+    "No raster reference is used as an exact geometry contract.",
+    "The user-provided behavior plan and repository EB evidence define structure and behavior; post-deploy Chrome QA will establish visual baselines."
+  ]
+}

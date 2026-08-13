@@ -390,7 +390,12 @@ FPB Configure Page
 │   ├── Sync Bundle
 │   │   └── [Button] "Sync Now" → ensure parent + metafields; returns canonical proxy URL
 │   ├── Bundle Widget
-│   │   └── [Button] "Embed Upsell Block/Button" → opens the product-template Theme Editor directly
+│   │   ├── Master switch + reactive product-page preview
+│   │   ├── Mode: Button or Block; Block adds image, title, and description
+│   │   ├── CTA + localized title/description/CTA fields
+│   │   ├── Target: all bundle products, selected products, or selected collections
+│   │   ├── Add browsed product switch
+│   │   └── [Button] "Embed Upsell" → opens the product-template Theme Editor with the unified `bundle-upsell` block
 │   │
 │   └── Select Template        → select_template section
 │       ├── Heading: "Customize your bundle"
@@ -471,9 +476,13 @@ PPB Configure Page
 │   ├── Your Bundle Link (copy button)
 │   └── Bundle Widget sub-section
 │       ├── Toggle: upsellWidgetEnabled
-│       ├── Display Mode: radio (block / button)
-│       ├── Display On: select (all / specific_products / specific_collections)
-│       └── Auto-Select Browsed Product: toggle (autoSelectBrowsedProduct)
+│       ├── Display Mode: choice list (block / button)
+│       ├── Block-only image, title, and description; CTA in both modes
+│       ├── Multi Language: title, description, and CTA
+│       ├── Display On: choice list (all / specific_products / specific_collections)
+│       ├── Product or collection resource picker for the active specific target
+│       ├── Auto-Select Browsed Product: switch (autoSelectBrowsedProduct)
+│       └── Embed Upsell → unified `bundle-upsell` placement block
 │
 ├── Bundle Settings
 │   ├── Pre Selected Product
@@ -643,6 +652,7 @@ Checkout order summary → Bundle & Save
 |---|---|
 | `/apps/product-bundles/api/bundle/:id.json` | HMAC-verified canonical storefront bundle response: exact `{ success, bundle }`; field-projection queries do not change the response shape |
 | `/apps/product-bundles/api/bundles.json` | All active bundles for shop |
+| `/apps/product-bundles/api/fpb-upsells.json` | Signed, shop-scoped FPB product-page offer lookup by product, collections, and locale; returns eligible minimal DTOs with private ETag caching |
 | `/apps/product-bundles/api/cart-bundle-details` | Signed storefront route that merges EB-style cart `bundle_details` metafield entries |
 | `/apps/product-bundles/api/cart-transform-runtime-token` | Signed storefront route that validates selected bundle lines and returns `_wolfpack_bundle_runtime` for Cart Transform / Discount Function verification |
 | `/apps/product-bundles/api/checkout-integration-discount-code` | Signed storefront route that creates short-lived app discount codes for third-party FPB checkout integrations |

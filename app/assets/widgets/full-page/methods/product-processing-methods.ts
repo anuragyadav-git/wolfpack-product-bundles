@@ -158,7 +158,7 @@ function collectCategoryProducts(step) {
 }
 
 function normalizeProductLookupId(product = {}) {
-  return extractFullPageId(product?.selectionId);
+  return extractFullPageId(product?.selectionId || product?.id || product?.productId);
 }
 
 function normalizeStorefrontApiVariant(variant = {}) {
@@ -183,12 +183,57 @@ function storefrontApiProductLookupKey(product = {}) {
   return extractFullPageId(product?.id);
 }
 
+function mergeProductVariants(currentVariants = [], incomingVariants = []) {
+  const mergedById = new Map();
+  [...currentVariants, ...incomingVariants].forEach(variant => {
+    const key = variantLookupKey(variant);
+    if (!key) return;
+    mergedById.set(key, {
+      ...(mergedById.get(key) || {}),
+      ...variant,
+    });
+  });
+  return Array.from(mergedById.values());
+}
+
+export function mergeFullPageProductsBySelectionId(products = []) {
+  const merged = [];
+  const indexBySelectionId = new Map();
+
+  products.forEach(product => {
+    const key = String(product?.selectionId || '');
+    if (!key || !indexBySelectionId.has(key)) {
+      if (key) indexBySelectionId.set(key, merged.length);
+      merged.push(product);
+      return;
+    }
+
+    const index = indexBySelectionId.get(key);
+    const current = merged[index];
+    const currentImages = Array.isArray(current?.images) ? current.images : [];
+    const incomingImages = Array.isArray(product?.images) ? product.images : [];
+    const currentVariants = Array.isArray(current?.variants) ? current.variants : [];
+    const incomingVariants = Array.isArray(product?.variants) ? product.variants : [];
+
+    merged[index] = {
+      ...product,
+      ...current,
+      description: current?.description || product?.description || '',
+      descriptionHtml: current?.descriptionHtml || product?.descriptionHtml || '',
+      images: incomingImages.length > currentImages.length ? incomingImages : currentImages,
+      variants: mergeProductVariants(currentVariants, incomingVariants),
+    };
+  });
+
+  return merged;
+}
+
 function productLookupKey(product) {
   return normalizeProductLookupId(product);
 }
 
 function productGraphqlId(product) {
-  const rawId = product?.selectionId;
+  const rawId = product?.selectionId || product?.id || product?.productId;
   if (!rawId) return null;
   const normalized = String(rawId);
   if (normalized.startsWith('gid://shopify/Product/')) return normalized;
@@ -200,7 +245,8 @@ function hasCompleteRuntimeProductData(product) {
   if (!product || typeof product !== 'object') return false;
   const price = Number(product.price);
   const variants = Array.isArray(product.variants) ? product.variants : [];
-  return Number.isFinite(price) && price > 0 && variants.length > 0;
+  const images = Array.isArray(product.images) ? product.images : [];
+  return Number.isFinite(price) && price > 0 && variants.length > 0 && images.length > 1;
 }
 
 function normalizeCachedRuntimeProduct(product) {
@@ -346,6 +392,10 @@ export function filterFullPageProductsByInvalidDefaultVariants(products, invalid
 }
 
 export const fullPageProductProcessingMethods: Record<string, any> & ThisType<any> = {
+mergeProductsBySelectionId(products) {
+  return mergeFullPageProductsBySelectionId(products);
+},
+
 mergeCategoryProductVariantAvailability(products, step) {
   if (!Array.isArray(products) || products.length === 0) return products;
 
@@ -404,7 +454,8 @@ async loadStepProducts(stepIndex) {
 
   // Process explicit products.
   // When loaded from metafield cache (data-bundle-config), step.products already contains
-  // full enriched data (images, variants, prices) — use directly, no API call needed.
+  // enriched data (images, variants, prices). Multi-image records are used directly;
+  // compact single-image records are hydrated so the product drawer receives the full gallery.
   // When loaded from the API response, step.StepProduct carries the enriched data and
   // step.products only has stubs, so skip the fetch to avoid a duplicate call.
   const hasEnrichedStepProducts = !step?.isFreeGift && Array.isArray(step.StepProduct) && step.StepProduct.length > 0
@@ -658,22 +709,14 @@ async loadStepProducts(stepIndex) {
   );
 
 
-  // Remove duplicates
-  const seen = new Set();
-  this.stepProductData[stepIndex] = processedProducts.filter(product => {
-    const key = product.selectionId || '';
-    if (!key) return true;
-    if (seen.has(key)) {
-      return false;
-    }
-    seen.add(key);
-    return true;
-  });
+  this.stepProductData[stepIndex] = mergeFullPageProductsBySelectionId(processedProducts);
 
   if (step?.isFreeGift && Array.isArray(step.addonTiers)) {
     step.maxQuantity = this.stepProductData[stepIndex].length;
     pruneStepSelectionsToProducts(this.selectedProducts, stepIndex, this.stepProductData[stepIndex]);
   }
+
+  this._reconcileFpbUpsellHandoffAfterStepLoad?.(stepIndex);
 
 },
 
