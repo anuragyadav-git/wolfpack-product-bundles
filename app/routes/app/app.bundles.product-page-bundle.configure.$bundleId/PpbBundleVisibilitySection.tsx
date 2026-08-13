@@ -29,7 +29,6 @@ export function PpbBundleVisibilitySection() {
           });
         },
         onEnableEmbed: flow.openThemeEditorForAppEmbed,
-        onOpenLink: () => window.open(link.url, "_blank"),
         placementOptions: [
           {
             title: "Bundle Widget",

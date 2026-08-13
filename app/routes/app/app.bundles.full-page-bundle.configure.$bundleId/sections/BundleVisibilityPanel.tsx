@@ -26,7 +26,6 @@ export function FpbBundleVisibilityPanel({
       });
     },
     onEnableEmbed: flow.openThemeEditorForAppEmbed,
-    onOpenLink: () => window.open(link.url, "_blank"),
     placementOptions: [
         {
           title: "Bundle Widget",

@@ -58,7 +58,6 @@ interface CommonBundleVisibilityOverviewProps {
   embedStatus: EmbedStatusModel;
   link: BundleLinkModel;
   onCopyLink: () => void;
-  onOpenLink: () => void;
   onEnableEmbed?: () => void;
   styles: Record<string, string>;
   themeEditorUrl?: string | null;
@@ -71,7 +70,6 @@ export function CommonBundleVisibilityOverview({
   link,
   onCopyLink,
   onEnableEmbed,
-  onOpenLink,
   placementOptions,
   styles,
   themeEditorUrl,
@@ -168,13 +166,6 @@ export function CommonBundleVisibilityOverview({
               onClick={onCopyLink}
             >
               Copy Link
-            </button>
-            <button
-              type="button"
-              className={styles.visibilityPlainAction}
-              onClick={onOpenLink}
-            >
-              View on Storefront
             </button>
           </div>
         ) : (
