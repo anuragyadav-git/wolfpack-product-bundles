@@ -175,6 +175,11 @@
   width: 100%;
 }
 
+.iconUploadButton s-button {
+  display: block;
+  width: 100%;
+}
+
 .iconImg {
   width: 100%;
   height: 100%;
@@ -186,6 +191,11 @@
   align-items: center;
   justify-content: center;
   color: #a8a8a8;
+}
+
+.iconPlaceholder svg {
+  width: 28px;
+  height: 28px;
 }
 
 .iconRemoveButton {

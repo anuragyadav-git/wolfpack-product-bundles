@@ -1,4 +1,5 @@
 import { usePpbConfigureContext } from "./PpbConfigureContext";
+import { DefaultStepTimelineIcon } from "../_shared/bundle-configure/DefaultStepTimelineIcon";
 
 export function PpbStepConfigCard({ step }: { step: any }) {
   const {
@@ -53,16 +54,7 @@ export function PpbStepConfigCard({ step }: { step: any }) {
               </>
             ) : (
               <div className={productPageBundleStyles.iconPlaceholder}>
-                <svg
-                  width="28"
-                  height="28"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                >
-                  <path d="M20 7l-8-4-8 4m16 0v10l-8 4m-8-4V7m16 5l-8 4-8-4" />
-                </svg>
+                <DefaultStepTimelineIcon step={step} />
               </div>
             )}
           </div>
@@ -87,7 +79,7 @@ export function PpbStepConfigCard({ step }: { step: any }) {
                 )
               }
             >
-              {(step as any).stepImage ? "Replace" : "Upload file"}
+              Replace
             </s-button>
           </div>
         </div>
