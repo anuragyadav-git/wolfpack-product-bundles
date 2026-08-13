@@ -51,7 +51,9 @@ export function SettingsLandingShell({
               accessibilityLabel="Back to previous page"
               onClick={onBack}
             />
-            <s-heading>Settings</s-heading>
+            <s-heading className={styles.settingsLandingTitle}>
+              Settings
+            </s-heading>
           </s-stack>
           <s-grid
             gridTemplateColumns="@container settings-landing (inline-size > 840px) 1fr 1fr 1fr, 1fr"
