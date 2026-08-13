@@ -74,6 +74,11 @@ interface FormattedStep {
   autoNextStepOnConditionMet: boolean;
   isFreeGift: boolean;
   freeGiftName: string | null;
+  addonLabel: string | null;
+  addonTitle: string | null;
+  addonDisplayFree: boolean;
+  addonTiers: unknown[];
+  addonUnlockAfterCompletion: boolean;
   isDefault: boolean;
   defaultVariantId: string | null;
   stepImage: string | null;
@@ -240,6 +245,11 @@ export function formatBundleForWidget(bundle: any): FormattedBundle {
       autoNextStepOnConditionMet: step.autoNextStepOnConditionMet === true,
       isFreeGift: step.isFreeGift ?? false,
       freeGiftName: step.freeGiftName ?? null,
+      addonLabel: step.addonLabel ?? null,
+      addonTitle: step.addonTitle ?? null,
+      addonDisplayFree: step.addonDisplayFree === true,
+      addonTiers: Array.isArray(step.addonTiers) ? step.addonTiers : [],
+      addonUnlockAfterCompletion: step.addonUnlockAfterCompletion !== false,
       isDefault: step.isDefault ?? false,
       defaultVariantId: step.defaultVariantId ?? null,
       stepImage: step.stepImage ?? step.timelineIconUrl ?? null,

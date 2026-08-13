@@ -440,6 +440,9 @@ export async function handleSaveBundle(
                 addonReplaceText: step.addonReplaceText ?? null,
                 addonIconUrl: step.addonIconUrl ?? null,
                 addonDisplayFree: step.addonDisplayFree === true,
+                addonTiers: Array.isArray(step.addonTiers)
+                  ? step.addonTiers
+                  : [],
                 addonUnlockAfterCompletion:
                   step.addonUnlockAfterCompletion !== false,
                 isDefault: step.isDefault === true,

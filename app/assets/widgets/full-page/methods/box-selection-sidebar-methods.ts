@@ -110,14 +110,21 @@ getActiveBoxSelectionRule(rules, totalQuantity) {
   const selected = this.selectedBoxSelectionRuleId
     ? rules.find(rule => rule.ruleId === this.selectedBoxSelectionRuleId)
     : null;
-  if (selected) return selected;
+  const activeRule = selected || rules.find(rule => rule.isDefaultSelected) || rules[0];
+  if (this.selectedBundle?.boxSelection?.autoProceedToNextRule === false) {
+    return activeRule;
+  }
 
-  const reachedRule = rules
-    .filter(rule => Number(totalQuantity || 0) >= rule.boxQuantity)
-    .sort((a, b) => b.boxQuantity - a.boxQuantity)[0];
-  if (reachedRule) return reachedRule;
+  let activeRuleIndex = rules.findIndex(rule => rule.ruleId === activeRule.ruleId);
+  const selectedQuantity = Number(totalQuantity || 0);
+  while (
+    activeRuleIndex < rules.length - 1
+    && selectedQuantity > Number(rules[activeRuleIndex].boxQuantity || 0)
+  ) {
+    activeRuleIndex += 1;
+  }
 
-  return rules.find(rule => rule.isDefaultSelected) || rules[0];
+  return rules[activeRuleIndex];
 },
 
 getSelectedBoxSelectionQuantity() {

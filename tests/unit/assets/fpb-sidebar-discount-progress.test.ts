@@ -538,6 +538,29 @@ describe('FPB desktop bundle quantity options', () => {
   });
 });
 
+describe('FPB shared bundle quantity option state', () => {
+  it('passes the same live selected quantity to desktop and mobile summary renderers', () => {
+    const desktopPanel = document.createElement('aside') as unknown as FakeElement;
+    const desktopContext = makeContext('STANDARD', 'simple');
+    desktopContext.getSelectedBoxSelectionQuantity = jest.fn(() => 3);
+    desktopContext.renderBoxSelectionOptions = jest.fn(() => document.createElement('div'));
+
+    const mobileContext = makeContext('STANDARD', 'simple');
+    mobileContext.getSelectedBoxSelectionQuantity = jest.fn(() => 3);
+    mobileContext.renderBoxSelectionOptions = jest.fn(() => document.createElement('div'));
+
+    fullPageSidePanelMethods.renderSidePanel.call(desktopContext, desktopPanel);
+    fullPageMobileSummaryMethods._renderCompactMobileSummaryBundleItems.call(
+      mobileContext,
+      { display: { format: '${{amount}}' } },
+      3,
+    );
+
+    expect(desktopContext.renderBoxSelectionOptions).toHaveBeenCalledWith(3);
+    expect(mobileContext.renderBoxSelectionOptions).toHaveBeenCalledWith(3);
+  });
+});
+
 describe('FPB summary removal accessibility', () => {
   it.each([
     ['14k Dangling Pendant Earrings', 'Delete 14k Dangling Pendant Earrings'],

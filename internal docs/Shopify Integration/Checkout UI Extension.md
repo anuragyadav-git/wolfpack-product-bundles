@@ -1,68 +1,109 @@
 ---
+schema_version: 1
+id: checkout-ui-extension
 title: Checkout UI Extension
 type: shopify-integration
-audited: 2026-06-29
-sources: extensions/bundle-checkout-ui/, CLAUDE.md memory
+status: authoritative
+summary: Checkout Bundle and Save reactive offers plus native total-savings rendering and signed cart mutation contracts.
+last_audited: 2026-08-13
+owners:
+  - engineering
+domains:
+  - checkout
+systems:
+  - bundle-checkout-ui
+  - checkout-bundle-offer-token
+source_paths:
+  - extensions/bundle-checkout-ui/shopify.extension.toml
+  - extensions/bundle-checkout-ui/src/BundleOffers.tsx
+  - extensions/bundle-checkout-ui/src/offer-mutations.ts
+  - extensions/bundle-checkout-ui/src/TotalSavings.tsx
+  - app/routes/api/api.checkout-bundle-offer-token.tsx
+related_docs:
+  - Architecture/Cart Transform Function.md
+  - Features/Pricing Pipeline.md
+tags:
+  - checkout
+  - ui-extension
+keywords:
+  - Bundle and Save
+  - ORDER_SUMMARY2
+  - runtime token
 ---
 
 # Checkout UI Extension
 
 ## Overview
 
-Preact-based extension registered on checkout and thank-you cart-line targets.
-For EB-style FPB parity, the extension intentionally renders nothing: Shopify
-native line properties and native discount allocations own the visible checkout
-display.
+The Preact extension provides one reactive `Bundle & Save` accordion on the
+checkout order summary. It groups mutable add-on and gift offers by signed bundle
+instance while Shopify native line properties, prices, and discount allocations
+remain the pricing source of truth.
 
 ## Targets
 
-| Page | Target |
+| Purpose | Target |
 |---|---|
-| Checkout | `purchase.checkout.cart-line-item.render-after` |
-| Thank-you | `purchase.thank-you.cart-line-item.render-after` |
+| Reactive offers | `purchase.checkout.block.render`, recommended placement `ORDER_SUMMARY2` |
+| Total savings | `purchase.checkout.reductions.render-after` |
 
-Note: Order status page uses `customer-account` extensions (separate app type), **not** `purchase` targets.
+The inert checkout cart-line and thank-you targets were removed. Order status
+uses a separate `customer-account` extension type and is not part of this extension.
+
+## Runtime Data
+
+The extension declares two app-owned metafields in `shopify.extension.toml`:
+
+- Variant `$app.bundle_ui_config` supplies the parent bundle's current checkout offers.
+- Shop `$app.serverUrl` supplies the authenticated backend origin.
+
+Cart Transform preserves `_wolfpackProductBundle:OfferId` and
+`_wolfpack_bundle_runtime` on each merged parent. Those attributes identify the
+bundle instance and provide the signed parent authorization anchor. The extension
+never derives or submits a discount percentage.
+
+## Mutation Contract
+
+Each selection change mutates immediately:
+
+- add: `addCartLine` at quantity `1`;
+- remove: `removeCartLine` through the No add-on or unchecked gift state;
+- replace or quantity change: one `updateCartLine` request containing the variant,
+  quantity, and complete refreshed attribute set.
+
+Before every mutation the extension re-reads the current cart line ID because
+Shopify cart-line IDs are unstable. It obtains a checkout session token and calls
+`POST /api/checkout-bundle-offer-token`. The route verifies the signed parent,
+checkout shop, current active bundle/tier, variant membership, and configured
+offer maximum, then returns an exact variant-and-quantity runtime token with the
+server-derived discount.
+
+After Shopify applies the line change, the extension waits for the live line and,
+when a discount is expected, a refreshed native allocation. Failed API, inventory,
+or allocation verification restores the previous variant, quantity, and attributes.
+
+Existing over-limit quantities and single-select offers containing multiple distinct
+variants are read-only. They are never truncated or normalized destructively.
+
+## Read-only Pricing Statuses
+
+Volume pricing, Buy X Get Y, and Bundle Quantity Options remain status-only rows.
+The extension does not expose checkout controls that change their configuration.
 
 ## Build Rules
 
-- **Default export required**: Shopify's Preact extension build uses `import Target from` (default import) for ALL targets
-- The `export` field in `shopify.extension.toml` is NOT supported for Preact extensions
-- Named exports cause build failure
-- Both checkout and thank-you targets share the same default export entry point
+- API version is `2026-04`.
+- Preact entry modules require a default export.
+- The `export` field in `shopify.extension.toml` is unsupported for these targets.
+- `network_access = true` is required for the authenticated backend request.
 
-## Key Gotcha
+## Durable Gotchas
 
-The `export` field behaviour differs between JS function extensions (which use named exports) and Preact UI extensions (which require default export). Don't confuse the two when editing extension configs.
+Shopify native checkout owns line properties, original/discounted prices, and
+discount allocation rows. Do not reintroduce an app-calculated `Bundle Savings`,
+`Actual Price`, or `Bundle Price` panel. The reductions target renders only the
+aggregate `TOTAL SAVINGS` value from native allocations.
 
-2026-06-29 parity note: do not reintroduce the custom `Bundle Savings` /
-`Actual Price` / `Bundle Price` panel for FPB Standard. Live EB checkout proof
-shows parent/add-on details rendered by native checkout line properties and
-discount rows. The extension target may stay registered, but checkout parity
-metadata belongs in storefront cart properties and Cart Transform output.
-
-2026-06-29 dev-preview gotcha: local source and built output can be inert while
-the active checkout still loads an older `version/dev-*` extension CDN URL. After
-changing the entry point to render `null` directly, Chrome proof showed a new dev
-CDN URL and a response with `ue=()=>null`; no custom checkout pricing labels
-remained in the live response or checkout snapshot. Evidence:
-`/private/tmp/fpb-standard-agentic-parity/checkout-ui/wpb-live-bundle-checkout-ui-after-entrypoint.response.network-response`
-and `wpb-current-checkout-after-entrypoint.snapshot.txt`.
-
-2026-06-29 follow-up proof: live SIT checkout loads the `bundle-checkout-ui`
-dev CDN asset and the fetched script contains none of the removed labels
-(`Bundle Savings`, `Actual Price`, `Bundle Price`, `Retail Price`, `You Save`).
-The expanded mobile order summary shows only native checkout rows: paid add-on
-line at the adjusted price, parent bundle line with `Box` / `Items`, and no app
-panel. This confirms the remaining EB gap is not a Checkout UI extension issue:
-EB's `ADD ON (-...)` row is a native line-level discount allocation, while WPB's
-Cart Transform `lineUpdate` only changes the line price. Evidence:
-`/private/tmp/fpb-standard-agentic-parity/checkout-ui/wpb-current-checkout-extension-script-audit.json`
-and `wpb-current-checkout-expanded.snapshot.txt`.
-
-2026-06-30 EB parity correction: paid add-on checkout proof also shows a native
-`TOTAL SAVINGS` row after the checkout total. Shopify Checkout UI static targets
-do not expose a slot after the native total row; the supported order-summary
-savings slot is `purchase.checkout.reductions.render-after`. WPB uses that target
-to render only `TOTAL SAVINGS` from native discount allocations or Cart Transform
-bundle savings attributes, while the cart-line target remains inert so it does
-not duplicate line item properties or native original/discounted price rows.
+Local source and build output can differ from the extension version loaded by an
+active checkout. After manual SIT deployment, confirm a fresh extension CDN URL and
+test with cache bypass before treating runtime behavior as verified.

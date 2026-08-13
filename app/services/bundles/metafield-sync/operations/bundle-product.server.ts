@@ -17,6 +17,7 @@ import { BundleStatus, BundleType } from "../../../../constants/bundle";
 import { formatStepCategoriesForRuntime } from "../../../../lib/bundle-config/category-runtime";
 import { resolveShowProductComparedAtPrice } from "../../../../lib/bundle-config/product-page-display";
 import { normalizeShopifyComponentQuantity } from "../utils/component-quantity";
+import { buildCheckoutOfferRuntime } from "../../../checkout-bundle-offers.server";
 
 async function ensureBundleParentVariantRequiresComponents(
   admin: ShopifyAdmin,
@@ -442,6 +443,7 @@ export async function updateBundleProductMetafields(
       ? bundleConfiguration.bundleLevelCss
       : null,
     personalizationData: bundleConfiguration.personalizationData ?? null,
+    checkoutOffers: buildCheckoutOfferRuntime(bundleConfiguration).offers,
     discountDisplayOverride: bundleConfiguration.discountDisplayOverride ?? null,
     validateQuantityPerProduct: bundleConfiguration.validateQuantityPerProduct ?? {
       isEnabled: false,
@@ -478,6 +480,7 @@ export async function updateBundleProductMetafields(
       addonReplaceText: step.addonReplaceText ?? null,
       addonIconUrl: step.addonIconUrl ?? null,
       addonDisplayFree: step.addonDisplayFree === true,
+      addonTiers: Array.isArray(step.addonTiers) ? step.addonTiers : [],
       addonUnlockAfterCompletion: step.addonUnlockAfterCompletion !== false,
       isDefault: step.isDefault || false,
       defaultVariantId: step.defaultVariantId || null,

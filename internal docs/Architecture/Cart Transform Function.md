@@ -122,6 +122,13 @@ The HMAC covers the base64url payload string, so Rust verifies the signature bef
 
 Parent bundle metafields are still written for EXPAND/display paths: `component_reference`, `component_quantities`, `price_adjustment`, and `component_pricing`. Component-variant `$app:component_parents` is no longer the configured MERGE source.
 
+MERGE output also preserves the verified `_wolfpack_bundle_runtime` token and the
+base `_wolfpackProductBundle:OfferId` on every parent line. The Checkout UI extension
+uses those two attributes as its authorization anchor and bundle-instance key; it
+still re-reads Shopify's unstable cart-line ID before each mutation. Add-on lines
+receive a freshly signed exact variant/quantity token from the authenticated checkout
+route whenever their selection or quantity changes.
+
 ### FPB add-on and free-gift pricing scenarios
 
 FPB Add-Ons with Bundles mirror EB checkout behavior: selected add-ons are separate cart lines, and any add-on discount is a native product discount on that selected add-on line. The parent bundle line must not absorb selected add-on savings.

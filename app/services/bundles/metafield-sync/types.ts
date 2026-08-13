@@ -1,3 +1,5 @@
+import type { CheckoutOffer } from "../../checkout-bundle-offers.server";
+
 /**
  * Metafield Sync Types
  *
@@ -65,6 +67,7 @@ export interface BundleUiConfig {
   bundleTextConfig?: Record<string, unknown> | null;
   bundleLevelCss?: string | null;
   personalizationData?: Record<string, unknown> | null;
+  checkoutOffers?: CheckoutOffer[];
   discountDisplayOverride?: Record<string, unknown> | null;
   validateQuantityPerProduct?: Record<string, unknown>;
   productSlotsEnabled?: boolean;
@@ -123,6 +126,8 @@ export interface BundleUiStep {
   addonIconUrl?: string | null;
   /** Show products at $0.00 in this step. */
   addonDisplayFree?: boolean;
+  /** Tier, eligibility, discount, and quantity contract used by checkout offers. */
+  addonTiers?: Record<string, unknown>[];
   /** Lock this step tab until prior steps meet minQuantity. */
   addonUnlockAfterCompletion?: boolean;
   /** If true, this step is pre-filled and not shown in the bottom-sheet modal tabs. */

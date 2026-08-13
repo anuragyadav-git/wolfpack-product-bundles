@@ -194,6 +194,16 @@ description as the next desktop summary row for every FPB preset. Its renderer
 and responsive presentation belong to the shared side-panel method and base
 sidebar CSS; preset styles must not restate or override this component.
 
+The active Bundle Quantity Option advances to the next configured rule as soon
+as the shopper's paid-product quantity exceeds the current rule quantity. The
+desktop summary sidebar and expanded mobile footer must both pass the same live
+paid-product quantity into the shared selector so their active rule, slot target,
+and exact-quantity validation cannot drift apart.
+
+Uploaded step-timeline icons occupy 80% of their circular icon container. The
+timeline container, connector geometry, and completed-state indicator retain
+their existing dimensions.
+
 Preset structural rules use the named FPB shell container rather than viewport
 media queries. This keeps a constrained host and a same-width browser viewport
 on the same layout path. The shared responsive asset owns shell gutters,

@@ -86,6 +86,7 @@ export function buildBundleBaseConfig(
       id: product.id,
       title: product.title || product.name || "Product",
       imageUrl: product.imageUrl || product.image?.url || null,
+      variants: Array.isArray(product.variants) ? product.variants : [],
     })),
     collections: (step.collections || []).map((collection: any) => ({
       id: collection.id,
@@ -106,6 +107,13 @@ export function buildBundleBaseConfig(
           })),
         }))
       : [],
+    isFreeGift: step.isFreeGift === true,
+    freeGiftName: step.freeGiftName ?? null,
+    addonLabel: step.addonLabel ?? null,
+    addonTitle: step.addonTitle ?? null,
+    addonDisplayFree: step.addonDisplayFree === true,
+    addonTiers: Array.isArray(step.addonTiers) ? step.addonTiers : [],
+    addonUnlockAfterCompletion: step.addonUnlockAfterCompletion !== false,
   }));
 
   const savedPricingMessages = safeJsonParse(
@@ -323,6 +331,13 @@ function buildSyncOptimizedSteps(steps: any[]): Array<Record<string, unknown>> {
       collections,
       StepProduct: Array.isArray(step.StepProduct) ? step.StepProduct : [],
       StepCategory: categories,
+      isFreeGift: step.isFreeGift === true,
+      freeGiftName: step.freeGiftName ?? null,
+      addonLabel: step.addonLabel ?? null,
+      addonTitle: step.addonTitle ?? null,
+      addonDisplayFree: step.addonDisplayFree === true,
+      addonTiers: Array.isArray(step.addonTiers) ? step.addonTiers : [],
+      addonUnlockAfterCompletion: step.addonUnlockAfterCompletion !== false,
     };
   });
 }

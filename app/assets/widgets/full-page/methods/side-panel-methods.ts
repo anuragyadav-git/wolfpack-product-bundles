@@ -208,9 +208,7 @@ renderSidePanel(panel) {
   }
 
   const selectedBoxSelectionQuantity = this.getSelectedBoxSelectionQuantity();
-  const boxSelection = this.renderBoxSelectionOptions(
-    isClassicDesktopSidebar ? selectedBoxSelectionQuantity : totalQuantity
-  );
+  const boxSelection = this.renderBoxSelectionOptions(selectedBoxSelectionQuantity);
 
   if (boxSelection) {
     panel.appendChild(boxSelection);

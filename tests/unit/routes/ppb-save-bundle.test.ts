@@ -684,6 +684,34 @@ describe("PPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
     );
   });
 
+  it("persists PPB add-on tier quantity and discount configuration", async () => {
+    const addonTiers = [{
+      tierId: "tier-1",
+      maxQuantity: 3,
+      eligibilityCondition: { type: "QUANTITY", value: 2 },
+      discount: { type: "PERCENTAGE", value: 25 },
+    }];
+    const stepsData = [makeStep({
+      isFreeGift: true,
+      addonDisplayFree: false,
+      addonTiers,
+    } as any)];
+
+    await handleSaveBundle(
+      MOCK_ADMIN,
+      MOCK_SESSION,
+      "bundle-1",
+      makeFormData({ stepsData: JSON.stringify(stepsData) }),
+    );
+
+    const stepCreate = getDb().bundle.update.mock.calls[0][0].data.steps.create[0];
+    expect(stepCreate).toMatchObject({
+      isFreeGift: true,
+      addonDisplayFree: false,
+      addonTiers,
+    });
+  });
+
   it("returns 500 when a StepProduct has a UUID ID", async () => {
     const stepsData = [
       makeStep({

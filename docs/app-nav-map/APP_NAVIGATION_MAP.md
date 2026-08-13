@@ -14,6 +14,7 @@ systems:
   - remix-routes
 source_paths:
   - app/routes/app/
+  - app/routes/api/
 related_docs:
   - internal docs/Architecture/FPB Host Evaluation.md
 tags:
@@ -617,6 +618,21 @@ Storefront bundle add
               └── CartTransform blockOnFailure=true → cart / checkout error; unmodified pricing is not accepted
 ```
 
+### Flow F: Reactive Checkout Bundle Offers
+
+```
+Checkout order summary → Bundle & Save
+  └── group controls by signed parent offer-group ID
+      ├── gift check/uncheck → add/remove cart line
+      ├── add-on selection → add/replace cart line
+      └── quantity change → request exact signed token
+          └── POST /api/checkout-bundle-offer-token with checkout session token
+              ├── current merchant config authorizes tier, variant, quantity, and discount
+              └── one updateCartLine changes quantity/variant and signed attributes
+                  ├── native discount allocation refreshes → keep change
+                  └── API, inventory, or allocation failure → restore prior line state
+```
+
 ---
 
 ## 4. API Routes Reference
@@ -630,6 +646,7 @@ Storefront bundle add
 | `/apps/product-bundles/api/cart-bundle-details` | Signed storefront route that merges EB-style cart `bundle_details` metafield entries |
 | `/apps/product-bundles/api/cart-transform-runtime-token` | Signed storefront route that validates selected bundle lines and returns `_wolfpack_bundle_runtime` for Cart Transform / Discount Function verification |
 | `/apps/product-bundles/api/checkout-integration-discount-code` | Signed storefront route that creates short-lived app discount codes for third-party FPB checkout integrations |
+| `/api/checkout-bundle-offer-token` | Checkout-session-authenticated route that validates a signed parent and current merchant offer config, then authorizes one exact add-on variant and quantity |
 | `/apps/product-bundles/api/design-settings/:shop` | CSS vars for storefront widgets |
 | `/apps/product-bundles/api/language-settings/:shop` | Settings -> Language JSON for storefront widget text and cart labels |
 | `/api/billing/create` | Initiate subscription |
