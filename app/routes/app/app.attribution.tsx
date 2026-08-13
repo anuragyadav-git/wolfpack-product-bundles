@@ -16,6 +16,7 @@ import {
   computeBundleFunnel,
   buildEngagementTrendSeries,
   buildBundlePerformanceMatrix,
+  buildBundleMetricTrendSeries,
   type OrderAttributionRow,
 } from "../../lib/analytics";
 import {
@@ -414,6 +415,7 @@ async function loadAttributionDashboardData({
   );
   const bundleLeaderboard = buildBundleLeaderboard(attrRows, bundleNameMap, bundleStatusMap, 10);
   const bundleRevenueTrend = buildBundleTrendSeries(attrRows, since, days, until);
+  const bundleMetricTrend = buildBundleMetricTrendSeries(attrRows, viewEvents, since, until);
 
   const totalViews = viewEvents.length;
   const prevTotalViews = prevViewEvents.length;
@@ -450,6 +452,7 @@ async function loadAttributionDashboardData({
   // (built in the single consolidated findMany above). Just compute the matrix id set.
   const matrixBundleIds = [...new Set([
     ...bundleIds,
+    ...viewBundleIds,
     ...engagementRows.map(r => r.bundleId),
     ...recentActivity.map(r => r.bundleId),
   ])];
@@ -468,6 +471,7 @@ async function loadAttributionDashboardData({
     matrixBundles,
     engagementRowsTyped,
     currentAttributions.map(a => ({ bundleId: a.bundleId, revenue: a.revenue, createdAt: a.createdAt })),
+    viewEvents,
   );
 
   // Top campaigns — derived from existing byCampaign array.
@@ -509,6 +513,7 @@ async function loadAttributionDashboardData({
     bundleRevenueSummary,
     bundleLeaderboard,
     bundleRevenueTrend,
+    bundleMetricTrend,
     views: { totalViews, prevTotalViews, viewsByBundle },
     // wpb-analytics-revamp-1 additions
     funnelSnapshot,

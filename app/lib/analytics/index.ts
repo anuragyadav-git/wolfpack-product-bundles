@@ -22,6 +22,20 @@ export type {
   BundleSummaryInput,
 } from "./engagement-helpers";
 
+export type {
+  BundleViewRow,
+  BundleMetricTrendPoint,
+} from "./bundle-metrics";
+
+export { buildBundleMetricTrendSeries } from "./bundle-metrics";
+
+export type {
+  BundleResultSortKey,
+  BundleResultSortDirection,
+} from "./bundle-results";
+
+export { filterAndSortBundleResults } from "./bundle-results";
+
 export {
   computeBundleFunnel,
   buildEngagementTrendSeries,

@@ -5,7 +5,7 @@ title: EB Implementation Reference
 type: reference
 status: authoritative
 summary: Records directly verified reference-app contracts used for Wolfpack bundle implementation and parity decisions.
-last_audited: 2026-08-12
+last_audited: 2026-08-13
 owners:
   - engineering
 domains:
@@ -65,6 +65,19 @@ All requests go to `https://prod.backend.giftbox.giftkart.app` with `?shopName={
 | FPB — full update (wrapper) | `POST` | `/api/stepsConfiguration/update?bundleId={id}`                     |
 | PPB — create bundle         | `POST` | `/api/mixAndMatch/create`                                          |
 | PPB — update                | `POST` | `/api/mixAndMatch/update?offerId={MIX-XXXXXX}`                     |
+
+## Admin Analytics Controls
+
+Live EB Analytics evidence captured on 2026-08-13:
+
+- The primary graph card is titled `Bundle Split` and exposes one radio-button dropdown with `Bundle Revenue`, `Bundle Views`, `Bundle Orders`, `Conversion`, and `AOV`.
+- `Bundle Revenue` is the default graph metric.
+- The bundle results card has a `Search by bundle name` field and one sort dropdown.
+- Sort metric radio options are `Bundle Name`, `Bundle Views`, `No. of Orders`, `Total Bundle Value`, and `Overall conversions`.
+- Sort direction is selected separately with `Highest` or `Lowest`.
+- The empty state reads `No Items found` and `Try changing the filters or search term`.
+- No `How to setup`, `Learn More`, or other help link is present on the Analytics graph or bundle results surface.
+- The observed fixture had views but no orders, so the live UI did not expose enough evidence to confirm EB's conversion denominator. Wolfpack uses bundle orders divided by bundle views for this surface because those are the two measured funnel values presented by the same control group; this is an explicit implementation inference, not a captured EB formula.
 
 ---
 
