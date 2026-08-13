@@ -162,7 +162,7 @@ function makeStep(
     minQuantity: 1,
     maxQuantity: 5,
     enabled: true,
-    products: [],
+    products: [{ id: "validation-product" }],
     collections: [],
     StepProduct: [],
     StepCategory: [],
@@ -171,7 +171,7 @@ function makeStep(
 }
 
 function makeDiscountData(overrides: Record<string, unknown> = {}) {
-  return {
+  const result: any = {
     discountEnabled: false,
     discountType: "percentage_off",
     discountRules: [],
@@ -181,6 +181,34 @@ function makeDiscountData(overrides: Record<string, unknown> = {}) {
     displayOptions: null,
     ...overrides,
   };
+  if (result.discountEnabled) {
+    result.discountRules = result.discountRules.map((rule: any) => ({
+      conditionType: "quantity",
+      conditionValue: 1,
+      ...rule,
+    }));
+    if (result.discountMessagingEnabled) {
+      result.ruleMessages = Object.fromEntries(result.discountRules.map((rule: any) => [
+        rule.id,
+        result.ruleMessages?.[rule.id] ?? {
+          discountText: "Add more to save",
+          successMessage: "Discount applied",
+        },
+      ]));
+      result.successMessage ||= "Discount applied";
+    }
+    const progress = result.displayOptions?.progressBar;
+    if (progress?.enabled && progress.type === "step_based") {
+      result.tierTextByRuleId = Object.fromEntries(result.discountRules.map((rule: any) => [
+        rule.id,
+        result.tierTextByRuleId?.[rule.id] ?? {
+          tierText: "Tier",
+          tierSubtext: "Savings",
+        },
+      ]));
+    }
+  }
+  return result;
 }
 
 function makeFormData(overrides: Record<string, string | null> = {}): FormData {
@@ -282,6 +310,33 @@ describe("PPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
     const body = await res.json() as any;
     expect(body.success).toBe(true);
     expect(body.message).toBe("Updated Successfully!");
+  });
+
+  it("returns structured field errors and does not persist an invalid draft", async () => {
+    const res = await handleSaveBundle(
+      MOCK_ADMIN,
+      MOCK_SESSION,
+      "bundle-1",
+      makeFormData({
+        bundleName: "",
+        stepsData: JSON.stringify([makeStep({ products: [], StepProduct: [], collections: [] })]),
+      }),
+    );
+    const body = await res.json() as any;
+
+    expect(res.status).toBe(400);
+    expect(body).toEqual({
+      success: false,
+      error: "Fix the highlighted fields before saving.",
+      fieldErrors: expect.arrayContaining([
+        { path: "bundle.name", message: "Enter a bundle name." },
+        {
+          path: "steps.step-1.resources",
+          message: "Add at least one product or collection.",
+        },
+      ]),
+    });
+    expect(getDb().bundle.update).not.toHaveBeenCalled();
   });
 
   it("persists Step 1 as enabled and allows a later step to be disabled", async () => {
@@ -490,23 +545,20 @@ describe("PPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
     );
   });
 
-  it("preserves draft status when StepCategory exists but is empty", async () => {
+  it("rejects a draft when its configured category is empty", async () => {
     const stepsData = [
       makeStep({
         StepCategory: [{ name: "Empty", sortOrder: 0, products: [], collections: [] }],
       }),
     ];
-    await handleSaveBundle(
+    const response = await handleSaveBundle(
       MOCK_ADMIN,
       MOCK_SESSION,
       "bundle-1",
       makeFormData({ stepsData: JSON.stringify(stepsData) })
     );
-    expect(getDb().bundle.update).toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: expect.objectContaining({ status: "draft" }),
-      })
-    );
+    expect(response.status).toBe(400);
+    expect(getDb().bundle.update).not.toHaveBeenCalled();
   });
 
   it("rejects save when a persisted variant reference has an invalid format", async () => {
@@ -693,6 +745,8 @@ describe("PPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
     }];
     const stepsData = [makeStep({
       isFreeGift: true,
+      addonLabel: "Add-on",
+      addonTitle: "Choose an add-on",
       addonDisplayFree: false,
       addonTiers,
     } as any)];

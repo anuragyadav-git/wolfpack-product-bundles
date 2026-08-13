@@ -169,7 +169,7 @@ function makeStepsData(
       minQuantity: 1,
       maxQuantity: 5,
       enabled: true,
-      products: [],
+      products: [{ id: "validation-product" }],
       collections: [],
       StepProduct: [],
       StepCategory: [],
@@ -179,7 +179,7 @@ function makeStepsData(
 }
 
 function makeDiscountData(overrides: Record<string, unknown> = {}) {
-  return {
+  const result: any = {
     discountEnabled: false,
     discountType: "percentage_off",
     discountRules: [],
@@ -191,6 +191,34 @@ function makeDiscountData(overrides: Record<string, unknown> = {}) {
     ruleMessagesByLocale: null,
     ...overrides,
   };
+  if (result.discountEnabled) {
+    result.discountRules = result.discountRules.map((rule: any) => ({
+      conditionType: "quantity",
+      conditionValue: 1,
+      ...rule,
+    }));
+    if (result.discountMessagingEnabled) {
+      result.ruleMessages = Object.fromEntries(result.discountRules.map((rule: any) => [
+        rule.id,
+        result.ruleMessages?.[rule.id] ?? {
+          discountText: "Add more to save",
+          successMessage: "Discount applied",
+        },
+      ]));
+      result.successMessage ||= "Discount applied";
+    }
+    const progress = result.pricingDisplayOptions?.progressBar;
+    if (progress?.enabled && progress.type === "step_based") {
+      result.tierTextByRuleId = Object.fromEntries(result.discountRules.map((rule: any) => [
+        rule.id,
+        result.tierTextByRuleId?.[rule.id] ?? {
+          tierText: "Tier",
+          tierSubtext: "Savings",
+        },
+      ]));
+    }
+  }
+  return result;
 }
 
 function makeFormData(overrides: Record<string, string | null> = {}): FormData {
@@ -302,6 +330,33 @@ describe("FPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
     const body = await res.json() as any;
     expect(body.success).toBe(true);
     expect(body.message).toBe("Updated Successfully!");
+  });
+
+  it("returns structured field errors and does not persist an invalid draft", async () => {
+    const res = await handleSaveBundle(
+      MOCK_ADMIN,
+      MOCK_SESSION,
+      "bundle-1",
+      makeFormData({
+        bundleName: "",
+        stepsData: JSON.stringify(makeStepsData({ products: [], StepProduct: [], collections: [] })),
+      }),
+    );
+    const body = await res.json() as any;
+
+    expect(res.status).toBe(400);
+    expect(body).toEqual({
+      success: false,
+      error: "Fix the highlighted fields before saving.",
+      fieldErrors: expect.arrayContaining([
+        { path: "bundle.name", message: "Enter a bundle name." },
+        {
+          path: "steps.step-1.resources",
+          message: "Add at least one product or collection.",
+        },
+      ]),
+    });
+    expect(getDb().bundle.update).not.toHaveBeenCalled();
   });
 
   it("persists Step 1 as enabled and allows a later step to be disabled", async () => {
@@ -681,14 +736,17 @@ describe("FPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
     const personalizationData = {
       isPersonalizationEnabled: true,
       personalizeStepText: "Add On",
+      personalizePageSubtext: "Choose add-ons",
       addonProducts: {
         isEnabled: true,
         title: "Add On",
         tiers: [
           {
             tierId: "tier1",
+            title: "Tier 1",
             discount: { type: "PERCENTAGE", value: "10" },
-            products: [{ id: "gid://shopify/Product/111" }],
+            selectedAddonProducts: [{ id: "gid://shopify/Product/111" }],
+            eligibilityCondition: { type: "QUANTITY", value: 1 },
           },
         ],
       },

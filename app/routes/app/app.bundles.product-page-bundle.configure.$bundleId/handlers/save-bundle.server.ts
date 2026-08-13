@@ -24,6 +24,10 @@ import {
   validateStepConditionFeasibility,
 } from "../../../../lib/step-condition-validation";
 import {
+  configureValidationFailure,
+  validateBundleConfigureFormData,
+} from "../../../../lib/bundle-config/configure-validation";
+import {
   isVariantExistsOnShopifyStorefront,
   validateVariantIdFromShopify,
   type ShopifyStorefrontVariantLookupResult,
@@ -92,6 +96,10 @@ async function validatePersistedStepProductVariants(
                 variantId: "",
                 reason: "invalid-format",
               },
+              fieldErrors: [{
+                path: `steps.${String(step.id ?? `step-${stepIndex + 1}`)}.products.${productIndex + 1}.variants.${variantIndex + 1}`,
+                message: "Select a valid product variant.",
+              }],
             },
             { status: 400 },
           );
@@ -111,6 +119,10 @@ async function validatePersistedStepProductVariants(
                 variantId: toStringVariant(rawVariantId),
                 reason: "invalid-format",
               },
+              fieldErrors: [{
+                path: `steps.${String(step.id ?? `step-${stepIndex + 1}`)}.products.${productIndex + 1}.variants.${variantIndex + 1}`,
+                message: "Select a valid product variant.",
+              }],
             },
             { status: 400 },
           );
@@ -135,6 +147,10 @@ async function validatePersistedStepProductVariants(
                 status: variantLookup.status,
                 reason: variantLookup.message || "not-found",
               },
+              fieldErrors: [{
+                path: `steps.${String(step.id ?? `step-${stepIndex + 1}`)}.products.${productIndex + 1}.variants.${variantIndex + 1}`,
+                message: "This product variant is not available on the storefront.",
+              }],
             },
             { status: 400 },
           );
@@ -167,6 +183,16 @@ export async function handleSaveBundle(
   });
 
   try {
+    const configureValidationIssues = validateBundleConfigureFormData(
+      formData,
+      "ppb",
+    );
+    if (configureValidationIssues.length > 0) {
+      return json(configureValidationFailure(configureValidationIssues), {
+        status: 400,
+      });
+    }
+
     const bundleName = formData.get("bundleName") as string;
     const bundleDescription = formData.get("bundleDescription") as string;
     const bundleStatus = formData.get("bundleStatus") as string;
@@ -276,6 +302,10 @@ export async function handleSaveBundle(
         {
           success: false,
           error: formatStepConditionErrors(stepValidationErrors),
+          fieldErrors: stepValidationErrors.map((validationError) => ({
+            path: `steps.${validationError.stepId}.conditions`,
+            message: validationError.message,
+          })),
         },
         { status: 400 },
       );
