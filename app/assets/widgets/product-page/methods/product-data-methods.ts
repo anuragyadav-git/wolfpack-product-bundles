@@ -1,5 +1,28 @@
 import { BUNDLE_WIDGET } from '../../shared/constants.js';
 
+function normalizeWeightToGrams(weight, unit) {
+  const numeric = Number(weight);
+  if (!Number.isFinite(numeric) || numeric <= 0) return 0;
+
+  switch (String(unit || '').toUpperCase()) {
+    case 'KILOGRAMS':
+    case 'KILOGRAM':
+    case 'KG':
+      return numeric * 1000;
+    case 'POUNDS':
+    case 'POUND':
+    case 'LB':
+    case 'LBS':
+      return numeric * 453.59237;
+    case 'OUNCES':
+    case 'OUNCE':
+    case 'OZ':
+      return numeric * 28.349523125;
+    default:
+      return numeric;
+  }
+}
+
 export const ProductPageProductDataMethods: Record<string, any> & ThisType<any> = {
   normalizeProductSelectionId(product = {}) {
     const candidate = this.extractId(product?.selectionId);
@@ -175,6 +198,8 @@ processProductsForStep(products, step) {
     available: isVariantSelectableForInventory(v),
     quantityAvailable: typeof v.quantityAvailable === 'number' ? v.quantityAvailable : null,
     currentlyNotInStock: v.currentlyNotInStock === true,
+    weight: normalizeWeightToGrams(v.weight, v.weightUnit),
+    weightUnit: 'GRAMS',
     option1: v.option1 || null,
     option2: v.option2 || null,
     option3: v.option3 || null,
@@ -217,6 +242,8 @@ processProductsForStep(products, step) {
             available: isVariantSelectableForInventory(variant),
             quantityAvailable: typeof variant.quantityAvailable === 'number' ? variant.quantityAvailable : null,
             currentlyNotInStock: variant.currentlyNotInStock === true,
+            weight: normalizeWeightToGrams(variant.weight, variant.weightUnit),
+            weightUnit: 'GRAMS',
             sellingPlanAllocations: variant.sellingPlanAllocations || [],
             // Preserve parent product data for variant selection in modal
             parentProductId: this.extractId(product.id),
@@ -263,6 +290,8 @@ processProductsForStep(products, step) {
           available: defaultVariant ? isVariantSelectableForInventory(defaultVariant) : false,
           quantityAvailable: typeof defaultVariant?.quantityAvailable === 'number' ? defaultVariant.quantityAvailable : null,
           currentlyNotInStock: defaultVariant?.currentlyNotInStock === true,
+          weight: normalizeWeightToGrams(defaultVariant?.weight, defaultVariant?.weightUnit),
+          weightUnit: 'GRAMS',
           sourceVariantCount: sourceVariants.length,
           // Preserve variants and options for variant selection in modal
           variants: processedVariants,

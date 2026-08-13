@@ -8,7 +8,7 @@ import { build } from 'esbuild';
 
 const rootDir = join(dirname(fileURLToPath(import.meta.url)), '..');
 const outputDir = process.env.WPB_STOREFRONT_OUTDIR || join(rootDir, 'extensions/bundle-builder/assets');
-const widgetVersion = '8.1.3';
+const widgetVersion = '8.1.4';
 
 const targets = {
   'full-page': {

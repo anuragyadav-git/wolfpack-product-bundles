@@ -7,6 +7,39 @@ function getSelectionId(item = {}) {
   return String(item?.selectionId || '');
 }
 
+function findStepSelectionMetric(products = [], selectionId = '') {
+  const normalizedSelectionId = String(selectionId || '');
+  for (const product of products) {
+    if (getSelectionId(product) === normalizedSelectionId) {
+      return { product, metric: product };
+    }
+    const variant = (Array.isArray(product?.variants) ? product.variants : [])
+      .find(candidate => getSelectionId(candidate) === normalizedSelectionId);
+    if (variant) return { product, metric: variant };
+  }
+  return { product: null, metric: null };
+}
+
+function replaceConditionValue(template, conditionType, required) {
+  const value = String(required);
+  if (conditionType === 'amount') {
+    return String(template)
+      .replace(/\{\{\s*conditionAmount\s*\}\}/g, value)
+      .replace(/\{conditionAmount\}/g, value)
+      .replace(/##conditionAmount##/g, value);
+  }
+  if (conditionType === 'weight') {
+    return String(template)
+      .replace(/\{\{\s*conditionWeight\s*\}\}/g, value)
+      .replace(/\{conditionWeight\}/g, value)
+      .replace(/##conditionWeight##/g, value);
+  }
+  return String(template)
+    .replace(/\{\{\s*conditionQuantity\s*\}\}/g, value)
+    .replace(/\{conditionQuantity\}/g, value)
+    .replace(/##conditionQuantity##/g, value);
+}
+
 const normalizeCategoryProductId = (product) => {
   return getSelectionId(product);
 };
@@ -34,27 +67,49 @@ export function shouldAutoAdvanceFullPageStep({ quantity = 0, step = null } = {}
   return categoryRuleCategories.some(category => category.autoNextStepOnConditionMet === true);
 }
 
-export function getFullPageStepConditionValidationMessage(step) {
-  if (!step || step.conditionType !== 'quantity') {
+export function getFullPageStepConditionValidationMessage(step, resolveText = null) {
+  const conditionType = step?.conditionType;
+  if (!['quantity', 'amount', 'weight'].includes(conditionType)) {
     return 'Please meet the quantity conditions for the current step before proceeding.';
   }
 
-  const requiredQuantity = Number(step.conditionValue || 0);
-  if (!Number.isFinite(requiredQuantity) || requiredQuantity <= 0) {
+  const required = Number(step.conditionValue || 0);
+  if (!Number.isFinite(required) || required <= 0) {
     return 'Please meet the quantity conditions for the current step before proceeding.';
   }
 
-  const productLabel = requiredQuantity === 1 ? 'product' : 'products';
-  switch (step.conditionOperator) {
-    case 'equal_to':
-      return `Add exactly ${requiredQuantity} ${productLabel} on this step`;
-    case 'greater_than_or_equal_to':
-      return `Add at least ${requiredQuantity} ${productLabel} on this step`;
-    case 'less_than_or_equal_to':
-      return `Add at most ${requiredQuantity} ${productLabel} on this step`;
-    default:
-      return 'Please meet the quantity conditions for the current step before proceeding.';
+  const operatorKey = {
+    equal_to: 'EqualTo',
+    greater_than_or_equal_to: 'GreaterThanOrEqualTo',
+    less_than_or_equal_to: 'LessThanOrEqualTo',
+  }[step.conditionOperator];
+  if (!operatorKey) {
+    return 'Please meet the quantity conditions for the current step before proceeding.';
   }
+
+  const productLabel = required === 1 ? 'product' : 'products';
+  const fallbacks = {
+    quantity: {
+      EqualTo: `Add exactly ${required} ${productLabel} on this step`,
+      GreaterThanOrEqualTo: `Add at least ${required} ${productLabel} on this step`,
+      LessThanOrEqualTo: `Add at most ${required} ${productLabel} on this step`,
+    },
+    amount: {
+      EqualTo: `Add products worth ${required} on this step`,
+      GreaterThanOrEqualTo: `Add products worth at least ${required} on this step`,
+      LessThanOrEqualTo: `Add products worth maximum of ${required} on this step`,
+    },
+    weight: {
+      EqualTo: `Add products weighing ${required} on this step`,
+      GreaterThanOrEqualTo: `Add products weighing at least ${required} on this step`,
+      LessThanOrEqualTo: `Add products weighing maximum of ${required} on this step`,
+    },
+  };
+  const fallback = fallbacks[conditionType][operatorKey];
+  const template = typeof resolveText === 'function'
+    ? resolveText(`condition${conditionType[0].toUpperCase()}${conditionType.slice(1)}${operatorKey}`, fallback)
+    : fallback;
+  return replaceConditionValue(template, conditionType, required);
 }
 
 function buildCategoryRuleValidationStep(step, stepIndex, stepCollectionProductIds = {}, extractId = value => value) {
@@ -89,7 +144,10 @@ function buildCategoryRuleValidationStep(step, stepIndex, stepCollectionProductI
 
 export const fullPageSelectionNavigationMethods: Record<string, any> & ThisType<any> = {
 getStepConditionValidationMessage(stepIndex = this.currentStepIndex) {
-  return getFullPageStepConditionValidationMessage(this.selectedBundle?.steps?.[stepIndex]);
+  return getFullPageStepConditionValidationMessage(
+    this.selectedBundle?.steps?.[stepIndex],
+    this._resolveText?.bind(this),
+  );
 },
 
 updateProductSelection(stepIndex, productId, newQuantity) {
@@ -441,15 +499,15 @@ findProductById(stepIndex, productId) {
     const conditionSelectionTotals = isAmountOrWeight
       ? this._buildConditionAwareStepSelections(stepProducts, conditionSelections)
       : conditionSelections;
-    const targetProduct = stepProducts.find(p => getSelectionId(p) === String(productId));
+    const { metric: targetMetric } = findStepSelectionMetric(stepProducts, productId);
     const targetValues = isAmountOrWeight
       ? {
-        amount: Number(targetProduct?.price || 0),
-        weight: Number(targetProduct?.weight || targetProduct?.weightInGrams || targetProduct?.grams || 0),
+        amount: Number(targetMetric?.price || 0),
+        weight: Number(targetMetric?.weight || targetMetric?.weightInGrams || targetMetric?.grams || 0),
       }
       : null;
 
-    const { allowed, limitText } = ConditionValidator.canUpdateQuantity(
+    const { allowed, conditionOperator, conditionValue } = ConditionValidator.canUpdateQuantity(
       step,
       conditionSelectionTotals,
       productId,
@@ -459,9 +517,13 @@ findProductById(stepIndex, productId) {
 
   // Only block and toast on increases — decreases are always permitted.
   if (!allowed && newQuantity > currentQty) {
-    const toastMessage = typeof ConditionValidator._formatStepLimitToast === 'function'
-      ? ConditionValidator._formatStepLimitToast(limitText, step.conditionValue)
-      : 'This step allows ' + limitText + ' product' + (step.conditionValue !== 1 ? 's' : '') + ' only.';
+    const violatedRule = conditionOperator && Number(conditionValue) > 0
+      ? { ...step, conditionOperator, conditionValue }
+      : step;
+    const toastMessage = getFullPageStepConditionValidationMessage(
+      violatedRule,
+      this._resolveText?.bind(this),
+    );
     ToastManager.show(toastMessage);
     return false;
   }
@@ -490,14 +552,14 @@ findProductById(stepIndex, productId) {
     const products = this.stepProductData[stepIndex] || [];
     const translated = {};
     for (const [selKey, qty] of Object.entries(conditionSelections)) {
-      const product = products.find(p => getSelectionId(p) === String(selKey));
+      const { product, metric } = findStepSelectionMetric(products, selKey);
       const productId = String((product && (product.parentProductId || product.id)) || selKey);
       const quantity = Number(qty) || 0;
       const current = translated[productId] || { quantity: 0, amount: 0 };
       translated[productId] = {
         quantity: current.quantity + quantity,
-        amount: current.amount + ((Number(product?.price) || 0) * quantity),
-        weight: (current.weight || 0) + ((Number(product?.weight) || 0) * quantity),
+        amount: current.amount + ((Number(metric?.price) || 0) * quantity),
+        weight: (current.weight || 0) + ((Number(metric?.weight) || 0) * quantity),
       };
     }
       return ConditionValidator.isStepConditionSatisfied(validationStep, translated);
@@ -519,9 +581,9 @@ findProductById(stepIndex, productId) {
     for (const [selKey, qty] of Object.entries(selections)) {
       const quantity = Number(qty) || 0;
       if (quantity <= 0) continue;
-      const product = stepProducts.find(p => getSelectionId(p) === String(selKey));
-      const unitAmount = Number(product?.price || 0);
-      const unitWeight = Number(product?.weight || product?.weightInGrams || product?.grams || 0);
+      const { metric } = findStepSelectionMetric(stepProducts, selKey);
+      const unitAmount = Number(metric?.price || 0);
+      const unitWeight = Number(metric?.weight || metric?.weightInGrams || metric?.grams || 0);
       const current = translated[selKey] || { quantity: 0, amount: 0, weight: 0 };
       translated[selKey] = {
         quantity: current.quantity + quantity,

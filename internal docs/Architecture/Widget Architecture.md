@@ -94,6 +94,16 @@ PPB Product List (`PDP_INPAGE + CASCADE`) owns its multi-step navigation in the 
 
 FPB product grids do not pre-disable or dim unselected cards when a step reaches its exact or maximum quantity. Returning to a completed step keeps the full product set interactive; an attempted increase beyond the configured rule is rejected by `validateStepCondition` before selection state changes, and the rule toast explains the limit.
 
+Quantity, Amount, and Weight step rules share the same selection and navigation
+gates in both storefront widgets. Quantity sums selected units, Amount sums
+variant prices in cents against merchant-entered currency-unit thresholds, and
+Weight sums Shopify variant weights normalized to grams. Metric lookup follows
+the selected variant ID into grouped-product variant data; it must not fall back
+to the card's default variant or treat an unmatched nested variant as zero.
+Rule toasts resolve the matching metric and operator language field before
+substituting `{{conditionQuantity}}`, `{{conditionAmount}}`, or
+`{{conditionWeight}}`.
+
 Before PPB category-as-step expansion, the runtime removes steps whose persisted `enabled` value is `false`. This visibility normalization also applies when category expansion is off, so a disabled Admin step can never render or prevent a single enabled multi-category step from expanding into navigable category steps.
 
 Product Page inventory normalization preserves `sourceVariantCount` after unavailable variants are filtered. Product List uses that metadata only when a grouped product originally had multiple variants but now has one sellable variant: the shared row shows the surviving variant title as static identity while keeping the selector absent. Fully unavailable products and unavailable options remain filtered.

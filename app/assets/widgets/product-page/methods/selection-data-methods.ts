@@ -42,6 +42,9 @@ findProductBySelectionKey(products, selectionKey) {
 
   return products.find((product) => (
     String(product?.selectionId || '') === normalized
+    || (Array.isArray(product?.variants) && product.variants.some(variant => (
+      this.normalizeSelectionKey(variant?.selectionId || '') === normalized
+    )))
   )) || null;
 },
 

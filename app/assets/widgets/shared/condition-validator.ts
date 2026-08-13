@@ -107,7 +107,12 @@ const ConditionValidator = (function () {
     );
 
     // Primary condition
-    const primary = _evaluateCanUpdate(step.conditionOperator, required, totalAfter);
+    const primary = _evaluateCanUpdate(
+      step.conditionOperator,
+      required,
+      totalAfter,
+      step.conditionValue,
+    );
     if (!primary.allowed) return primary;
 
     // Secondary condition — AND logic (only when both fields are non-null)
@@ -116,6 +121,7 @@ const ConditionValidator = (function () {
         step.conditionOperator2,
         _normalizeConditionRuleValue(conditionType, step.conditionValue2),
         totalAfter,
+        step.conditionValue2,
       );
       if (!secondary.allowed) return secondary;
     }
@@ -362,9 +368,10 @@ const ConditionValidator = (function () {
    * Evaluate a single condition's "can update" rule for the proposed total.
    * Lower-bound operators never block increases (no upper cap from them alone).
    */
-  function _evaluateCanUpdate(operator, required, totalAfter) {
+  function _evaluateCanUpdate(operator, required, totalAfter, displayRequired = required) {
+    const normalizedOperator = _normalizeOperator(operator);
     let allowed;
-    switch (operator) {
+    switch (normalizedOperator) {
       case OPERATORS.EQUAL_TO:
         // Allow building up to exactly N; prevent exceeding N.
         allowed = totalAfter <= required;
@@ -379,7 +386,12 @@ const ConditionValidator = (function () {
       default:
         allowed = true;
     }
-    return { allowed, limitText: allowed ? null : _buildLimitText(operator, required) };
+    return {
+      allowed,
+      limitText: allowed ? null : _buildLimitText(normalizedOperator, Number(displayRequired)),
+      conditionOperator: allowed ? null : normalizedOperator,
+      conditionValue: allowed ? null : Number(displayRequired),
+    };
   }
 
   /**

@@ -553,7 +553,7 @@ export const LANGUAGE_CONFIGURATION: LanguageConfiguration = {
       },
       {
         title: "Rule Messages",
-        description: "Product-page quantity and amount rule messages",
+        description: "Product-page quantity, amount, and weight rule messages",
         fields: [
           { key: "ppb.conditions.quantity.greaterThanOrEqualTo", label: "Greater than rule message (Quantity)", value: "Add at least {{conditionQuantity}} products on this step", kind: "text" },
           { key: "ppb.conditions.quantity.lessThanOrEqualTo", label: "Less than rule message (Quantity)", value: "Add a maximum of {{conditionQuantity}} products to continue", kind: "text" },
@@ -561,6 +561,9 @@ export const LANGUAGE_CONFIGURATION: LanguageConfiguration = {
           { key: "ppb.conditions.amount.greaterThanOrEqualTo", label: "Greater than rule message (Amount)", value: "Add products worth at least {{conditionAmount}} on this step", kind: "text" },
           { key: "ppb.conditions.amount.lessThanOrEqualTo", label: "Less than rule message (Amount)", value: "Add products worth maximum of {{conditionAmount}} on this step", kind: "text" },
           { key: "ppb.conditions.amount.equalTo", label: "Equal to rule message (Amount)", value: "Add products worth {{conditionAmount}} on this step", kind: "text" },
+          { key: "ppb.conditions.weight.greaterThanOrEqualTo", label: "Greater than rule message (Weight)", value: "Add products weighing at least {{conditionWeight}} on this step", kind: "text" },
+          { key: "ppb.conditions.weight.lessThanOrEqualTo", label: "Less than rule message (Weight)", value: "Add products weighing maximum of {{conditionWeight}} on this step", kind: "text" },
+          { key: "ppb.conditions.weight.equalTo", label: "Equal to rule message (Weight)", value: "Add products weighing {{conditionWeight}} on this step", kind: "text" },
         ],
       },
     ],

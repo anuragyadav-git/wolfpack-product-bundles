@@ -4,13 +4,21 @@ import { TemplateManager } from '../../shared/template-manager.js';
 import { ToastManager } from '../../shared/toast-manager.js';
 import { ConditionValidator } from '../../shared/condition-validator.js';
 
+function normalizeSelectionKey(widget, value) {
+  return typeof widget?.normalizeSelectionKey === 'function'
+    ? widget.normalizeSelectionKey(value)
+    : String(value || '');
+}
+
 export function formatCascadeStepLimitToast(limitText, required) {
   const normalizedRequired = Number(required);
   if (!Number.isFinite(normalizedRequired) || normalizedRequired <= 0) return '';
 
-  const qualifier = String(limitText || '')
-    .replace(/\s+-?\d+(?:\.\d+)?\s*$/, '')
-    .trim();
+  const limitParts = String(limitText || '').trim().split(/\s+/);
+  if (Number.isFinite(Number(limitParts[limitParts.length - 1]))) {
+    limitParts.pop();
+  }
+  const qualifier = limitParts.join(' ');
   const formattedRequired = String(normalizedRequired).padStart(2, '0');
   return `Add ${qualifier} ${formattedRequired} products on this step`;
 }
@@ -54,6 +62,17 @@ export function formatProductPageStepValidationToast(step = {}, resolveText = nu
     return String(template)
       .replace(/\{\{\s*conditionAmount\s*\}\}/g, formattedRequired)
       .replace(/\{conditionAmount\}/g, formattedRequired);
+  }
+
+  if (step.conditionType === 'weight') {
+    const formattedRequired = String(required);
+    const fallback = `Add products weighing ${qualifier === 'at least' ? 'at least ' : qualifier === 'at most' ? 'maximum of ' : ''}${formattedRequired} on this step`;
+    const template = typeof resolveText === 'function'
+      ? resolveText(`conditionWeight${operatorKey}`, fallback)
+      : fallback;
+    return String(template)
+      .replace(/\{\{\s*conditionWeight\s*\}\}/g, formattedRequired)
+      .replace(/\{conditionWeight\}/g, formattedRequired);
   }
 
   return '';
@@ -242,21 +261,26 @@ validateStepCondition(stepIndex, productId, newQuantity) {
   const step = this.selectedBundle.steps[stepIndex];
   const currentSelections = this.selectedProducts[stepIndex] || {};
   const currentQty = this.getSelectedQuantity(stepIndex, productId);
-  const normalizedProductId = this.normalizeSelectionKey(productId);
+  const normalizedProductId = normalizeSelectionKey(this, productId);
   const stepProducts = this.stepProductData[stepIndex] || [];
   const isAmountOrWeight = step.conditionType === 'amount' || step.conditionType === 'weight';
   const conditionSelections = isAmountOrWeight
     ? this._buildConditionAwareStepSelections(stepProducts, currentSelections)
     : currentSelections;
   const targetProduct = isAmountOrWeight ? this.findProductBySelectionKey(stepProducts, normalizedProductId) : null;
-  const targetValues = targetProduct
+  const targetMetric = targetProduct && Array.isArray(targetProduct.variants)
+    ? targetProduct.variants.find(variant => (
+      normalizeSelectionKey(this, variant?.selectionId || '') === normalizedProductId
+    )) || targetProduct
+    : targetProduct;
+  const targetValues = targetMetric
     ? {
-      amount: Number(targetProduct?.price || 0),
-      weight: Number(targetProduct?.weight || targetProduct?.weightInGrams || targetProduct?.grams || 0),
+      amount: Number(targetMetric?.price || 0),
+      weight: Number(targetMetric?.weight || targetMetric?.weightInGrams || targetMetric?.grams || 0),
     }
     : null;
 
-  const { allowed, limitText } = ConditionValidator.canUpdateQuantity(
+  const { allowed, limitText, conditionOperator, conditionValue } = ConditionValidator.canUpdateQuantity(
     step,
     conditionSelections,
     normalizedProductId,
@@ -266,12 +290,16 @@ validateStepCondition(stepIndex, productId, newQuantity) {
 
   // Only block and toast on increases — decreases are always permitted.
   if (!allowed && newQuantity > currentQty) {
-    const cascadeMessage = this._usesCascadeStepFlow?.()
-      ? formatCascadeStepLimitToast(limitText, step.conditionValue)
+    const violatedRule = conditionOperator && Number(conditionValue) > 0
+      ? { ...step, conditionOperator, conditionValue }
+      : step;
+    const cascadeMessage = this._usesCascadeStepFlow?.() && step.conditionType === 'quantity'
+      ? formatCascadeStepLimitToast(limitText, violatedRule.conditionValue)
       : '';
-    const toastMessage = cascadeMessage || (typeof ConditionValidator._formatStepLimitToast === 'function'
-      ? ConditionValidator._formatStepLimitToast(limitText, step.conditionValue)
-      : 'This step allows ' + limitText + ' product' + (step.conditionValue !== 1 ? 's' : '') + ' only.');
+    const toastMessage = cascadeMessage || formatProductPageStepValidationToast(
+      violatedRule,
+      this._resolveText?.bind(this),
+    );
     ToastManager.show(toastMessage);
     return false;
   }
@@ -287,8 +315,14 @@ validateStepCondition(stepIndex, productId, newQuantity) {
       if (quantity <= 0) continue;
 
       const product = this.findProductBySelectionKey(stepProducts, selKey);
-      const unitAmount = Number(product?.price || 0);
-      const unitWeight = Number(product?.weight || product?.weightInGrams || product?.grams || 0);
+      const normalizedSelectionId = normalizeSelectionKey(this, selKey);
+      const metric = product && Array.isArray(product.variants)
+        ? product.variants.find(variant => (
+          normalizeSelectionKey(this, variant?.selectionId || '') === normalizedSelectionId
+        )) || product
+        : product;
+      const unitAmount = Number(metric?.price || 0);
+      const unitWeight = Number(metric?.weight || metric?.weightInGrams || metric?.grams || 0);
       const current = translated[selKey] || { quantity: 0, amount: 0, weight: 0 };
       translated[selKey] = {
         quantity: current.quantity + quantity,
@@ -311,10 +345,16 @@ validateStep(stepIndex) {
     const translated = {};
     for (const [selKey, qty] of Object.entries(currentSelections)) {
       const product = this.findProductBySelectionKey(products, selKey);
+      const normalizedSelectionId = normalizeSelectionKey(this, selKey);
+      const metric = product && Array.isArray(product.variants)
+        ? product.variants.find(variant => (
+          normalizeSelectionKey(this, variant?.selectionId || '') === normalizedSelectionId
+        )) || product
+        : product;
       const productId = String((product && (product.parentProductId || product.id)) || selKey);
       const quantity = Number(qty) || 0;
-      const price = Number(product?.price || 0);
-      const weight = Number(product?.weight || product?.weightInGrams || product?.grams || 0);
+      const price = Number(metric?.price || 0);
+      const weight = Number(metric?.weight || metric?.weightInGrams || metric?.grams || 0);
       const current = translated[productId] || { quantity: 0, amount: 0, weight: 0 };
       translated[productId] = {
         quantity: current.quantity + quantity,
