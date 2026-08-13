@@ -2398,6 +2398,10 @@
 }
 
 @media (max-width: 767px) {
+  .readinessButton {
+    display: none;
+  }
+
   .templateDialogContent {
     min-height: calc(100vh - 112px);
   }

@@ -3133,6 +3133,10 @@
 }
 
 @media (max-width: 767px) {
+  .readinessButton {
+    display: none;
+  }
+
   .visibilityPlacementCard {
     align-items: stretch;
     flex-direction: column;
