@@ -52,6 +52,7 @@ import { BundleActionsButtons } from "./BundleActionsButtons";
 import {
   buildDashboardTablePage,
   buildDashboardTableRows,
+  getDashboardBundlesPerPageChoice,
 } from "./dashboard-table-model";
 import dashboardStyles from "./dashboard.module.css";
 
@@ -84,7 +85,8 @@ export function DashboardPage({ appEmbedStatus, banners }: DashboardPageProps) {
   const deleteModalRef = useRef<any>(null);
   const searchRef = useRef<any>(null);
   const langSelectRef = useRef<any>(null);
-  const perPageSelectRef = useRef<any>(null);
+  const perPageButtonRef = useRef<any>(null);
+  const perPageChoiceListRef = useRef<any>(null);
   const statusChoiceListRef = useRef<any>(null);
   const typeChoiceListRef = useRef<any>(null);
   const statusPopoverRef = useRef<any>(null);
@@ -416,11 +418,15 @@ export function DashboardPage({ appEmbedStatus, banners }: DashboardPageProps) {
   }, [handleLanguageChange]);
 
   useEffect(() => {
-    const el = perPageSelectRef.current;
+    const el = perPageChoiceListRef.current;
     if (!el) return;
     const handler = (e: Event) => {
-      const val = (e as CustomEvent).detail?.value ?? (e.target as HTMLSelectElement).value ?? '';
-      if (val) setBundlesPerPage(Number(val));
+      const value = getDashboardBundlesPerPageChoice(
+        (e.currentTarget as any).values ?? [],
+      );
+      if (value === null) return;
+      setBundlesPerPage(value);
+      window.setTimeout(() => perPageButtonRef.current?.click?.(), 0);
     };
     el.addEventListener('change', handler);
     return () => el.removeEventListener('change', handler);
@@ -710,16 +716,28 @@ export function DashboardPage({ appEmbedStatus, banners }: DashboardPageProps) {
                         <div className={dashboardStyles.perPageControls}>
                           <span>{t("dashboard.pagination.perPageLabel")}</span>
                           <div className={dashboardStyles.perPageSelectWrap}>
-                            <s-select
-                              ref={perPageSelectRef}
-                              label={t("dashboard.pagination.perPageLabel")}
-                              labelAccessibilityVisibility="exclusive"
-                              value={String(bundlesPerPage)}
+                            <s-button
+                              ref={perPageButtonRef}
+                              id="bundles-per-page-button"
+                              commandFor="bundles-per-page-popover"
+                              variant="secondary"
                             >
-                              <s-option value="10">{t("dashboard.pagination.per10")}</s-option>
-                              <s-option value="20">{t("dashboard.pagination.per20")}</s-option>
-                              <s-option value="50">{t("dashboard.pagination.per50")}</s-option>
-                            </s-select>
+                              {bundlesPerPage} ▾
+                            </s-button>
+                            <s-popover id="bundles-per-page-popover">
+                              <s-box padding="base">
+                                <s-choice-list
+                                  ref={perPageChoiceListRef}
+                                  name="bundles-per-page-list"
+                                  label={t("dashboard.pagination.perPageLabel")}
+                                  labelAccessibilityVisibility="exclusive"
+                                >
+                                  <s-choice value="10" selected={bundlesPerPage === 10 || undefined}>{t("dashboard.pagination.per10")}</s-choice>
+                                  <s-choice value="20" selected={bundlesPerPage === 20 || undefined}>{t("dashboard.pagination.per20")}</s-choice>
+                                  <s-choice value="50" selected={bundlesPerPage === 50 || undefined}>{t("dashboard.pagination.per50")}</s-choice>
+                                </s-choice-list>
+                              </s-box>
+                            </s-popover>
                           </div>
                         </div>
                       </div>

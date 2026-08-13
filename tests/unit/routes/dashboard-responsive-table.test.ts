@@ -1,6 +1,7 @@
 import {
   buildDashboardTablePage,
   buildDashboardTableRows,
+  getDashboardBundlesPerPageChoice,
 } from "../../../app/routes/app/app.dashboard/dashboard-table-model";
 
 describe("Dashboard responsive table model", () => {
@@ -73,5 +74,14 @@ describe("Dashboard responsive table model", () => {
       effectivePage: 2,
       totalPages: 2,
     });
+  });
+
+  it("accepts only supported single-choice bundle page sizes", () => {
+    expect(getDashboardBundlesPerPageChoice(["10"])).toBe(10);
+    expect(getDashboardBundlesPerPageChoice(["20"])).toBe(20);
+    expect(getDashboardBundlesPerPageChoice(["50"])).toBe(50);
+    expect(getDashboardBundlesPerPageChoice([])).toBeNull();
+    expect(getDashboardBundlesPerPageChoice(["25"])).toBeNull();
+    expect(getDashboardBundlesPerPageChoice(["10", "20"])).toBeNull();
   });
 });

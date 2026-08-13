@@ -90,6 +90,7 @@ Dashboard
 │       └── current theme blocks/embeds with Theme Editor action when needed
 ├── Section: "Your Bundles"
 │   └── DataTable of bundles (empty state if none exist)
+│       ├── Bundles per page dropdown → radio choices 10 / 20 / 50
 │       └── Per bundle row:
 │           ├── [Button] "Bundle Settings" → /app/bundles/{type}/configure/{bundleId}
 │           ├── [Button] "Clone" → immediately clones and opens the new draft
