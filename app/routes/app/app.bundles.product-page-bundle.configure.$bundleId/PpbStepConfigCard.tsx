@@ -17,71 +17,60 @@ export function PpbStepConfigCard({ step }: { step: any }) {
         Step Config
       </h3>
       <div className={productPageBundleStyles.stepConfigRow}>
-        <div className={productPageBundleStyles.iconColumn}>
-          <div className={productPageBundleStyles.iconBox}>
-            {(step as any).stepImage ? (
-              <>
-                <img
-                  src={(step as any).stepImage}
-                  alt="Step icon"
-                  className={productPageBundleStyles.iconImg}
-                />
-                <button
-                  type="button"
-                  className={productPageBundleStyles.iconRemoveButton}
-                  aria-label="Remove step icon"
-                  onClick={() => {
-                    stepsState.updateStepField(step.id, "stepImage", null);
-                    setShowIconPickerForStep(null);
-                    markAsDirty();
-                  }}
+        <div className={productPageBundleStyles.stepConfigIconBox}>
+          {(step as any).stepImage ? (
+            <>
+              <img
+                src={(step as any).stepImage}
+                alt="Step icon"
+                className={productPageBundleStyles.iconImg}
+              />
+              <button
+                type="button"
+                className={productPageBundleStyles.iconRemoveButton}
+                aria-label="Remove step icon"
+                onClick={() => {
+                  stepsState.updateStepField(step.id, "stepImage", null);
+                  setShowIconPickerForStep(null);
+                  markAsDirty();
+                }}
+              >
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  aria-hidden="true"
                 >
-                  <svg
-                    width="12"
-                    height="12"
-                    viewBox="0 0 20 20"
-                    fill="none"
-                    aria-hidden="true"
-                  >
-                    <path
-                      d="M6 6l8 8M14 6l-8 8"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                </button>
-              </>
-            ) : (
-              <div className={productPageBundleStyles.iconPlaceholder}>
-                <DefaultStepTimelineIcon step={step} />
-              </div>
-            )}
-          </div>
-          {showIconPickerForStep === step.id && (
-            <FilePicker
-              autoOpen
-              onClose={() => setShowIconPickerForStep(null)}
-              value={(step as any).stepImage ?? null}
-              onChange={(url: string | null) => {
-                stepsState.updateStepField(step.id, "stepImage", url);
-                setShowIconPickerForStep(null);
-                markAsDirty();
-              }}
-              label=""
-            />
+                  <path
+                    d="M6 6l8 8M14 6l-8 8"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </button>
+            </>
+          ) : (
+            <div className={productPageBundleStyles.iconPlaceholder}>
+              <DefaultStepTimelineIcon
+                className={productPageBundleStyles.defaultTimelineIcon}
+                step={step}
+              />
+            </div>
           )}
-          <div className={productPageBundleStyles.iconUploadButton}>
-            <s-button
-              onClick={() =>
-                setShowIconPickerForStep((prev) =>
-                  prev === step.id ? null : step.id,
-                )
-              }
-            >
-              Replace
-            </s-button>
-          </div>
+        </div>
+        <div className={productPageBundleStyles.iconUploadButton}>
+          <s-button
+            inlineSize="fill"
+            onClick={() =>
+              setShowIconPickerForStep((prev) =>
+                prev === step.id ? null : step.id,
+              )
+            }
+          >
+            Replace
+          </s-button>
         </div>
         <div className={productPageBundleStyles.fieldsColumn}>
           <s-text-field
@@ -100,6 +89,19 @@ export function PpbStepConfigCard({ step }: { step: any }) {
           />
         </div>
       </div>
+      {showIconPickerForStep === step.id && (
+        <FilePicker
+          autoOpen
+          onClose={() => setShowIconPickerForStep(null)}
+          value={(step as any).stepImage ?? null}
+          onChange={(url: string | null) => {
+            stepsState.updateStepField(step.id, "stepImage", url);
+            setShowIconPickerForStep(null);
+            markAsDirty();
+          }}
+          label=""
+        />
+      )}
     </div>
   );
 }

@@ -136,9 +136,12 @@
 .stepConfigRow {
   display: grid;
   grid-template-columns: var(--step-config-icon-control-width, 86px) 1fr;
+  grid-template-areas:
+    "icon fields"
+    "button .";
   column-gap: 16px;
-  row-gap: 12px;
-  align-items: start;
+  row-gap: 8px;
+  align-items: stretch;
 }
 
 .iconColumn {
@@ -171,12 +174,17 @@
   background: #ffffff;
 }
 
-.iconUploadButton {
-  width: 100%;
+.stepConfigIconBox {
+  composes: iconBox;
+  grid-area: icon;
+  align-self: stretch;
+  height: auto;
+  min-height: 0;
+  aspect-ratio: auto;
 }
 
-.iconUploadButton s-button {
-  display: block;
+.iconUploadButton {
+  grid-area: button;
   width: 100%;
 }
 
@@ -193,7 +201,9 @@
   color: #a8a8a8;
 }
 
-.iconPlaceholder svg {
+.defaultTimelineIcon {
+  display: block;
+  flex: none;
   width: 28px;
   height: 28px;
 }
@@ -217,6 +227,7 @@
 }
 
 .fieldsColumn {
+  grid-area: fields;
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -751,6 +762,10 @@
 }
 
 @media (max-width: 700px) {
+  .stepConfigRow {
+    grid-template-columns: var(--step-config-icon-control-width, 86px) minmax(0, 1fr);
+  }
+
   .discountFieldsRow,
   .discountFieldsRowPair {
     grid-template-columns: 1fr;
