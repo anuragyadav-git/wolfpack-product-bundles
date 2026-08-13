@@ -106,8 +106,10 @@ export function FpbBundleQuantityOptions({
                             >
                               Rule #{index + 1}
                             </h5>
-                            <s-button
+                            <s-press-button
                               variant="tertiary"
+                              tone="neutral"
+                              pressed={option.isDefault}
                               accessibilityLabel="Make this rule default"
                               onClick={() =>
                                 pricingState.setBundleQuantityDefaultRule(
@@ -115,9 +117,14 @@ export function FpbBundleQuantityOptions({
                                 )
                               }
                             >
-                              {option.isDefault ? "\u2605" : "\u2606"} Make this
-                              rule default
-                            </s-button>
+                              {option.isDefault ? (
+                                <s-text tone="success">
+                                  {"\u2605"} Make this rule default
+                                </s-text>
+                              ) : (
+                                <>{"\u2606"} Make this rule default</>
+                              )}
+                            </s-press-button>
                           </s-stack>
                           {option.compatibility.status === "blocked" && (
                             <p

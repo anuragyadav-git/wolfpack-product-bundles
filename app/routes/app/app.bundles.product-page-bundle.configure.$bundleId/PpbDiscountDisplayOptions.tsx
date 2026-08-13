@@ -127,19 +127,24 @@ function PpbBundleQuantityOptions() {
                         >
                           Rule #{index + 1}
                         </h5>
-                        <s-button
+                        <s-press-button
                           variant="tertiary"
+                          tone="neutral"
+                          pressed={rule.id === qtyOptionsDefaultRuleId}
                           accessibilityLabel="Make this rule default"
                           onClick={() => {
                             setQtyOptionsDefaultRuleId(rule.id);
                             markAsDirty();
                           }}
                         >
-                          {rule.id === qtyOptionsDefaultRuleId
-                            ? "\u2605"
-                            : "\u2606"}
-                          Make this rule default
-                        </s-button>
+                          {rule.id === qtyOptionsDefaultRuleId ? (
+                            <s-text tone="success">
+                              {"\u2605"} Make this rule default
+                            </s-text>
+                          ) : (
+                            <>{"\u2606"} Make this rule default</>
+                          )}
+                        </s-press-button>
                       </s-stack>
                       <s-stack direction="inline" gap="small">
                         <s-text-field
