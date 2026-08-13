@@ -1105,8 +1105,8 @@
 }
 
 .visibilityStatusEnabled {
-  background: #b4f4c4;
-  color: #0c5132;
+  background: var(--p-color-bg-fill-success-secondary, #b4fed2);
+  color: var(--p-color-text-success, #0c5132);
 }
 
 .visibilityStatusWarning {
