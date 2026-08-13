@@ -43,10 +43,12 @@ export function BundleReadinessOverlay({ items, open, onOpenChange, hideCollapse
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(open ?? false);
   const [showTriggerDetails, setShowTriggerDetails] = useState(true);
+  const [animatedScore, setAnimatedScore] = useState(0);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
   const wasExpandedRef = useRef(expanded);
+  const gaugeWasExpandedRef = useRef(expanded);
 
   useEffect(() => {
     const timeout = scheduleReadinessTriggerCollapse(() => {
@@ -91,10 +93,24 @@ export function BundleReadinessOverlay({ items, open, onOpenChange, hideCollapse
   const score = items.reduce((sum, i) => sum + (i.done ? i.points : 0), 0);
   const color = scoreColor(score);
 
+  useEffect(() => {
+    if (expanded && !gaugeWasExpandedRef.current) {
+      setAnimatedScore(0);
+    }
+
+    const frame = window.requestAnimationFrame(() => {
+      setAnimatedScore(score);
+    });
+
+    gaugeWasExpandedRef.current = expanded;
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [expanded, score]);
+
   const radius = 22;
   const circumference = 2 * Math.PI * radius;
   const arcLength = circumference * 0.75;
-  const progressLength = (score / 100) * arcLength;
+  const progressLength = (animatedScore / 100) * arcLength;
 
   const closeChecklist = useCallback(() => {
     setExpanded(false);
@@ -188,12 +204,12 @@ export function BundleReadinessOverlay({ items, open, onOpenChange, hideCollapse
         transform="rotate(135 28 28)"
       />
       <circle
+        className={styles.arcProgress}
         cx="28" cy="28" r={radius}
         fill="none" stroke={color} strokeWidth="4.5"
         strokeLinecap="round"
         strokeDasharray={`${progressLength} ${circumference - progressLength}`}
         transform="rotate(135 28 28)"
-        style={{ transition: "stroke-dasharray 0.6s ease" }}
       />
       <text x="28" y="34" textAnchor="middle" fontSize="16" fontWeight="700" fill={color}>
         {score}
@@ -226,20 +242,6 @@ export function BundleReadinessOverlay({ items, open, onOpenChange, hideCollapse
           onClick={handleDialogBackdropClick}
           onKeyDown={handleDialogKeyDown}
         >
-          <div className={styles.sheetHeader}>
-            <div className={styles.sheetHeaderScore}>
-              {renderDonut(true)}
-              <span id="bundle-readiness-title" className={styles.sheetTitle}>
-                {t("common.readiness.title")}
-              </span>
-            </div>
-            <s-button
-              variant="tertiary"
-              icon="x"
-              accessibilityLabel={t("common.actions.close")}
-              onClick={closeChecklist}
-            />
-          </div>
           <div className={styles.panel}>
               <div className={styles.panelItems}>
                 {items.map((item) => {
@@ -303,6 +305,26 @@ export function BundleReadinessOverlay({ items, open, onOpenChange, hideCollapse
                 {allDone ? t("common.readiness.ready") : t("common.readiness.notReady")}
               </div>
           </div>
+          <button
+            type="button"
+            className={styles.expandedScore}
+            onClick={closeChecklist}
+            aria-label={t("common.readiness.toggleAccessibility")}
+            aria-expanded="true"
+          >
+            {renderDonut(true)}
+            <span className={styles.expandedScoreCopy}>
+              <span id="bundle-readiness-title" className={styles.expandedScoreTitle}>
+                {t("common.readiness.title")}
+              </span>
+              <span className={styles.expandedScoreHelper}>
+                {t("common.readiness.helper")}
+              </span>
+            </span>
+            <span className={styles.expandedScoreChevron} aria-hidden="true">
+              {chevron}
+            </span>
+          </button>
         </dialog>
       )}
 

@@ -5,7 +5,7 @@ title: Bundle Readiness Overlay Test Spec
 type: test-spec
 status: active
 summary: Behavioral coverage for the EB-aligned floating bundle readiness checklist.
-last_audited: 2026-08-13
+last_audited: 2026-08-14
 owners:
   - engineering
 domains:
@@ -45,4 +45,4 @@ Preserve the readiness checklist's functional contract while its appearance matc
 ## Acceptance Criteria
 
 - [x] All listed behavioral tests pass.
-- [ ] Visual parity is verified in Chrome rather than through CSS assertions.
+- [x] Visual parity is verified in Chrome rather than through CSS assertions.
