@@ -576,6 +576,55 @@
   composes: visibilitySetupTime from "./bundle-configure-shared.module.css";
 }
 
+/* Shared Publishing Best Practices card system. */
+.publishingGuideGrid {
+  composes: publishingGuideGrid from "./bundle-configure-shared.module.css";
+}
+
+.publishingGuideCard {
+  composes: publishingGuideCard from "./bundle-configure-shared.module.css";
+}
+
+.publishingGuideMedia {
+  composes: publishingGuideMedia from "./bundle-configure-shared.module.css";
+}
+
+.publishingGuideIndex {
+  composes: publishingGuideIndex from "./bundle-configure-shared.module.css";
+}
+
+.publishingGuideBody {
+  composes: publishingGuideBody from "./bundle-configure-shared.module.css";
+}
+
+.publishingGuideContent {
+  composes: publishingGuideContent from "./bundle-configure-shared.module.css";
+}
+
+.publishingGuideTitle {
+  composes: publishingGuideTitle from "./bundle-configure-shared.module.css";
+}
+
+.publishingGuideTime {
+  composes: publishingGuideTime from "./bundle-configure-shared.module.css";
+}
+
+.publishingGuideDescription {
+  composes: publishingGuideDescription from "./bundle-configure-shared.module.css";
+}
+
+.publishingGuideDetails {
+  composes: publishingGuideDetails from "./bundle-configure-shared.module.css";
+}
+
+.publishingGuideAction {
+  composes: publishingGuideAction from "./bundle-configure-shared.module.css";
+}
+
+.publishingGuideSteps {
+  composes: publishingGuideSteps from "./bundle-configure-shared.module.css";
+}
+
 .visibilityOverviewStack {
   display: flex;
   flex-direction: column;

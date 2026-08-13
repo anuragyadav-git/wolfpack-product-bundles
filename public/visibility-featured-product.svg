@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="title desc">
+  <title id="title">Storefront featured product placement</title>
+  <desc id="desc">A storefront collection grid with one featured product card highlighted.</desc>
+  <rect width="640" height="360" rx="24" fill="#f1f2f4"/>
+  <rect x="30" y="30" width="580" height="300" rx="14" fill="#fff" stroke="#c9ccd0" stroke-width="3"/>
+  <rect x="30" y="30" width="580" height="42" rx="14" fill="#e5e7e9"/>
+  <circle cx="54" cy="51" r="6" fill="#9ca3aa"/><circle cx="74" cy="51" r="6" fill="#9ca3aa"/><circle cx="94" cy="51" r="6" fill="#9ca3aa"/>
+  <rect x="54" y="91" width="128" height="15" rx="6" fill="#202223"/>
+  <rect x="54" y="126" width="118" height="168" rx="9" fill="#f6f6f6" stroke="#d4d7da" stroke-width="2"/>
+  <rect x="66" y="138" width="94" height="94" rx="7" fill="#dfe2e4"/><circle cx="113" cy="175" r="22" fill="#fff" opacity=".8"/>
+  <rect x="68" y="246" width="76" height="10" rx="5" fill="#72787d"/><rect x="68" y="268" width="50" height="9" rx="4" fill="#a2a7ab"/>
+  <rect x="190" y="118" width="136" height="184" rx="11" fill="#e4f5eb" stroke="#008060" stroke-width="4"/>
+  <rect x="204" y="134" width="108" height="108" rx="8" fill="#b9ddc8"/><path d="M224 228c16-40 39-64 73-76 12 22 17 47 14 76z" fill="#7eba98"/>
+  <rect x="205" y="255" width="91" height="11" rx="5" fill="#164d3d"/><rect x="205" y="278" width="58" height="9" rx="4" fill="#5c7c72"/>
+  <rect x="344" y="126" width="118" height="168" rx="9" fill="#f6f6f6" stroke="#d4d7da" stroke-width="2"/>
+  <rect x="356" y="138" width="94" height="94" rx="7" fill="#dfe2e4"/><rect x="358" y="246" width="76" height="10" rx="5" fill="#72787d"/><rect x="358" y="268" width="50" height="9" rx="4" fill="#a2a7ab"/>
+  <rect x="480" y="126" width="106" height="168" rx="9" fill="#f6f6f6" stroke="#d4d7da" stroke-width="2"/>
+  <rect x="492" y="138" width="82" height="94" rx="7" fill="#dfe2e4"/><rect x="494" y="246" width="68" height="10" rx="5" fill="#72787d"/><rect x="494" y="268" width="46" height="9" rx="4" fill="#a2a7ab"/>
+  <rect x="178" y="108" width="176" height="28" rx="14" fill="#008060"/><text x="266" y="127" fill="#fff" font-family="Arial,sans-serif" font-size="13" text-anchor="middle">FEATURED PRODUCT</text>
+</svg>

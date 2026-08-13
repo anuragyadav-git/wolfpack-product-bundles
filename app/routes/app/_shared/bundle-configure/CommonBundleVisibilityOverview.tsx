@@ -23,7 +23,7 @@ const VISIBILITY_GUIDES: VisibilityGuide[] = [
     title: "Hero Banner",
     description:
       "Add a button to your homepage hero to drive shoppers directly to your bundle.",
-    img: "/Hero-Banner.avif",
+    img: "/visibility-hero-banner.svg",
     guide:
       "Copy your bundle link, open the theme editor, add or select an image banner, set the button label and link, then save.",
   },
@@ -31,7 +31,7 @@ const VISIBILITY_GUIDES: VisibilityGuide[] = [
     title: "Navigation Menu",
     description:
       "Add your bundle as a nav link so shoppers can find it from anywhere on your store.",
-    img: "/Navigation-Menu.avif",
+    img: "/visibility-navigation-menu.svg",
     guide:
       "Copy your bundle link, open Content > Menus, add the bundle as a main-menu item, then save the menu.",
   },
@@ -39,7 +39,7 @@ const VISIBILITY_GUIDES: VisibilityGuide[] = [
     title: "Announcement Banner",
     description:
       "Show your offer in the announcement bar so visitors see it instantly.",
-    img: "/Announcement-Bar.avif",
+    img: "/visibility-announcement-bar.svg",
     guide:
       "Copy your bundle link, open the theme editor, enable the announcement bar, add offer copy and the bundle link, then save.",
   },
@@ -47,7 +47,7 @@ const VISIBILITY_GUIDES: VisibilityGuide[] = [
     title: "Featured Product Card",
     description:
       "Feature your bundle product on your homepage so shoppers find it right away.",
-    img: "/Featured-Product-Card.avif",
+    img: "/visibility-featured-product.svg",
     guide:
       "Add the bundle product to a collection, open the theme editor, select Featured Collection, choose that collection, lower the max product count, then save.",
   },
@@ -115,30 +115,31 @@ export function CommonBundleVisibilityOverview({
             discoverable on your store.
           </p>
         </div>
-        <div className={styles.visibilityGuideGrid}>
-          {VISIBILITY_GUIDES.map(({ title, description, img, guide }) => (
-            <div key={title} className={styles.visibilityGuideCard}>
-              <div className={styles.visibilityGuideMedia}>
+        <div className={styles.publishingGuideGrid}>
+          {VISIBILITY_GUIDES.map(({ title, description, img, guide }, index) => (
+            <article key={title} className={styles.publishingGuideCard}>
+              <div className={styles.publishingGuideMedia}>
                 <img src={img} alt={title} />
+                <span className={styles.publishingGuideIndex}>
+                  {String(index + 1).padStart(2, "0")}
+                </span>
               </div>
-              <div className={styles.visibilityGuideBody}>
-                <h4 className={styles.visibilityGuideTitle}>{title}</h4>
-                <p className={styles.visibilityGuideDescription}>
+              <div className={styles.publishingGuideBody}>
+                <div className={styles.publishingGuideContent}>
+                  <h4 className={styles.publishingGuideTitle}>{title}</h4>
+                  <span className={styles.publishingGuideTime}>5 min setup</span>
+                </div>
+                <p className={styles.publishingGuideDescription}>
                   {description}
                 </p>
-                <div className={styles.visibilityGuideFooter}>
-                  <details>
-                    <summary className={styles.visibilityGuideAction}>
+                <details className={styles.publishingGuideDetails}>
+                    <summary className={styles.publishingGuideAction}>
                       Quick Setup Guide
                     </summary>
-                    <p className={styles.visibilityGuideDescription}>{guide}</p>
-                  </details>
-                  <span className={styles.visibilitySetupTime}>
-                    5 min setup
-                  </span>
-                </div>
+                    <p className={styles.publishingGuideSteps}>{guide}</p>
+                </details>
               </div>
-            </div>
+            </article>
           ))}
         </div>
       </div>
