@@ -5,7 +5,7 @@ title: FPB App Proxy Host
 type: architecture-decision
 status: accepted
 summary: Full Page Bundles use the signed app proxy as their sole storefront document host.
-last_audited: 2026-08-11
+last_audited: 2026-08-13
 owners:
   - engineering
 domains:
@@ -14,6 +14,7 @@ systems:
   - fpb-app-proxy
 source_paths:
   - app/routes/root/wpb.$bundleId.tsx
+  - app/services/bundles/fpb-public-number.server.ts
   - app/services/bundles/bundle-parent-product.server.ts
   - app/routes/app/app.dashboard/handlers/handlers.server.ts
   - extensions/bundle-builder/blocks/bundle-app-embed.liquid
@@ -31,9 +32,11 @@ keywords:
 
 ## Decision
 
-`/apps/product-bundles/wpb/{bundleId}` is the only FPB storefront document host. Shopify verifies and forwards the request through the installed default app-proxy root. The Remix route verifies the proxy HMAC before database access and returns `application/liquid`, so Shopify wraps the response in the active theme layout.
+`/apps/onlybundles/wpb/{publicNumber}` is the only FPB storefront document host. `publicNumber` is a positive, monotonic integer scoped to the shop. Shopify verifies and forwards the request through the installed default app-proxy root. The Remix route verifies the proxy HMAC before database access, resolves the bundle by `(shopId, publicNumber)`, and returns `application/liquid`, so Shopify wraps the response in the active theme layout.
 
-Active and unlisted bundles are public. Draft bundles require a 15-minute `wpb_preview` token bound to version, shop, bundle ID, and expiry. Archived, missing, cross-shop, and invalid-preview requests return `404`; invalid Shopify signatures return `400`.
+Active and unlisted bundles are public. Draft bundles require a 15-minute `wpb_preview` token bound to version, shop, the internal bundle ID, and expiry. The public number is routing identity only; widget configuration, analytics, cart contracts, and authorization continue using the internal bundle ID. Archived, missing, cross-shop, invalid-number, opaque-ID, and invalid-preview requests return `404`; invalid Shopify signatures return `400`.
+
+`Bundle.publicNumber` is unique with `shopId` and is non-null only for FPBs. `Shop.lastFpbPublicNumber` is incremented atomically in the same database transaction that creates an FPB. The migration backfills existing FPBs per shop in `createdAt`, then `id`, order and advances each shop counter to the assigned maximum. Deleted numbers are not reused.
 
 Admin Preview actions mint a fresh signed URL for every FPB status. Public bundles do not require the token, but using the same stateless action for active, unlisted, and draft previews prevents Admin surfaces from diverging and guarantees a new URL on every click. The click handler reserves a blank tab synchronously, before awaiting the authenticated preview response, then navigates that tab to the signed URL so browser popup protection does not discard the preview.
 
@@ -44,11 +47,18 @@ The Liquid response embeds the complete formatted runtime configuration in `data
 The application builds one canonical FPB URL:
 
 ```text
-https://{shop}/apps/product-bundles/wpb/{bundleId}
+https://{shop}/apps/onlybundles/wpb/{publicNumber}
 ```
 
 Merchant-customized proxy prefixes and subpaths are unsupported by this host
 contract. PPB remains at `/products/{handle}`.
+
+Changing the configured app-proxy subpath changes every signed storefront route,
+not only FPB document URLs. Canonical bundle links are derived and are not stored
+in the database, so no database URL rewrite is required. Existing parent-product
+redirects and `bundle_ui_config` metafields are Shopify-owned copies and must be
+refreshed through the normal storefront sync. Links pasted into navigation,
+emails, ads, or social profiles are merchant-owned and must be updated separately.
 
 ## Parent product routing
 
@@ -56,6 +66,12 @@ Normal FPB parent-product synchronization ensures redirects from any stored or
 live merchant-facing product handle to the app-proxy path, then moves the
 synthetic parent to `wpb-parent-{bundleId}` with Shopify's automatic handle
 redirect disabled. An already-correct redirect or internal handle is accepted.
+
+The internal parent-product handle intentionally continues using the database
+bundle ID because it is app-owned and not the merchant-facing FPB URL. Its
+Shopify redirect target uses the public number. Normal storefront sync and the
+deployment general sync both re-run this parent-host contract, updating stored
+redirects after the public-number migration without accepting old opaque URLs.
 
 Shopify can return percent-encoded URL redirect paths even when the stored
 product handle contains Unicode. Redirect lookup and exact-path comparison

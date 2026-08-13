@@ -165,7 +165,7 @@ asset is injected asynchronously into the document head and can execute before
 the marker exists.
 
 - Product-page upsell placement uses `bundle-upsell-block` or `bundle-upsell-button`.
-- Full-page bundle public links use the signed app-proxy document URL (`/apps/product-bundles/wpb/{bundleId}`). Shopify wraps `application/liquid` in the active theme layout and the app embed loads extension assets through `asset_url`.
+- Full-page bundle public links use the signed app-proxy document URL (`/apps/onlybundles/wpb/{publicNumber}`). The positive integer is unique per shop and hides the internal database ID. Shopify wraps `application/liquid` in the active theme layout and the app embed loads extension assets through `asset_url`.
 - Storefront JS/CSS must be loaded from Shopify theme-extension assets with Liquid `asset_url`. App proxy routes are only for API/data responses, not widget asset hosting.
 
 ## FPB Load Strategy
@@ -181,13 +181,13 @@ marker stage.
 
 ### App Proxy Document — Public FPB Route
 
-The public FPB route is `GET /apps/product-bundles/wpb/{bundleId}`. Shopify forwards it to Remix as `/wpb/{bundleId}` and app-proxy HMAC verification is required before lookup.
+The public FPB route is `GET /apps/onlybundles/wpb/{publicNumber}`. Shopify forwards it to Remix as `/wpb/{publicNumber}` and app-proxy HMAC verification is required before lookup. The route rejects non-positive or opaque path segments and resolves by `(shopId, publicNumber)`. Preview-token authorization and the emitted widget marker remain bound to the resolved internal bundle ID.
 
-The route returns an escaped full `formatBundleForWidget()` payload in the existing marker, marks it with `data-bundle-config-source="app_proxy"`, and responds with `Content-Type: application/liquid` and `Cache-Control: no-store`. The widget treats only this source-marked, bundle-ID-matched full payload as authoritative and renders it without requesting bundle JSON. If the app-proxy marker is absent or malformed, the widget uses the bundle JSON fallback. Active and unlisted bundles render publicly; drafts require a 15-minute shop-and-bundle-bound `wpb_preview` token. The route never emits `/apps/product-bundles/assets/...` URLs.
+The route returns an escaped full `formatBundleForWidget()` payload in the existing marker, marks it with `data-bundle-config-source="app_proxy"`, and responds with `Content-Type: application/liquid` and `Cache-Control: no-store`. The widget treats only this source-marked, bundle-ID-matched full payload as authoritative and renders it without requesting bundle JSON. If the app-proxy marker is absent or malformed, the widget uses the bundle JSON fallback. Active and unlisted bundles render publicly; drafts require a 15-minute shop-and-bundle-bound `wpb_preview` token. The route never emits `/apps/onlybundles/assets/...` URLs.
 
 ### API Fallback
 
-If metafield cache is absent/malformed → `GET /apps/product-bundles/api/bundle/{id}.json`
+If metafield cache is absent/malformed → `GET /apps/onlybundles/api/bundle/{id}.json`
 
 - Single retry after 3s for `503`/`504` responses (Render cold-start tolerance)
 
@@ -207,7 +207,7 @@ Runtime behavior in `app/assets/widgets/product-page/methods/config-lifecycle-me
 
 1. Parse `data-bundle-config` as a bootstrap marker only when `data-bundle-type="product_page"`.
 2. If marker is valid, fetch from:
-   - `GET /apps/product-bundles/api/bundle/{bundleId}.json`
+   - `GET /apps/onlybundles/api/bundle/{bundleId}.json`
    - accept the `response.bundle` payload and hydrate `this.bundleData`.
 3. If marker is missing/invalid:
    - show theme editor preview when in editor mode and `bundleId` exists

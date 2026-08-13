@@ -5,7 +5,7 @@ title: Cart Transform Function
 type: architecture
 status: authoritative
 summary: Runtime-token-verified Shopify Cart Transform architecture and fail-closed bundle pricing contract.
-last_audited: 2026-07-31
+last_audited: 2026-08-13
 owners:
   - engineering
 domains:
@@ -37,7 +37,7 @@ keywords:
 
 The cart transform function intercepts Shopify's checkout flow to merge individual product variants into logical bundle line items and apply bundle pricing. The active implementation is the Rust Shopify Function in `extensions/bundle-cart-transform-rs`, compiled to WASM.
 
-As of 2026-07-08, MERGE validation is runtime-token based. Storefront widgets POST the selected component/add-on variants to the signed app-proxy route `/apps/product-bundles/api/cart-transform-runtime-token` immediately before `/cart/add`. The route validates the selected variants against the current DB bundle config, signs a base64url payload with HMAC-SHA256, and returns `_wolfpack_bundle_runtime`. The Cart Transform and Discount Function verify that token with the same CartTransform owner metafield secret before trusting component, quantity, parent, pricing, or add-on discount data.
+As of 2026-07-08, MERGE validation is runtime-token based. Storefront widgets POST the selected component/add-on variants to the signed app-proxy route `/apps/onlybundles/api/cart-transform-runtime-token` immediately before `/cart/add`. The route validates the selected variants against the current DB bundle config, signs a base64url payload with HMAC-SHA256, and returns `_wolfpack_bundle_runtime`. The Cart Transform and Discount Function verify that token with the same CartTransform owner metafield secret before trusting component, quantity, parent, pricing, or add-on discount data.
 
 The request body is mandatory, so both FPB and PPB callers must use `POST`.
 The Remix resource route also exports a `GET` loader that returns controlled
@@ -152,7 +152,7 @@ happens:
    `window.__BUNDLE_WIDGET_VERSION__`.
 2. Confirm the deployed widget asset contains the current cart contract:
    `_wolfpackProductBundle:OfferId`, `_wolfpack_bundle_runtime`, and
-   `/apps/product-bundles/api/cart-transform-runtime-token`.
+   `/apps/onlybundles/api/cart-transform-runtime-token`.
 3. Mint a runtime token through the storefront app proxy with real selected
    variants, add the component lines through `/cart/add`, and inspect
    `/cart.js`.

@@ -5,7 +5,7 @@ title: Bundle Parent Product
 type: architecture
 status: authoritative
 summary: Shared neutral Shopify parent-product contract for FPB and PPB bundles.
-last_audited: 2026-07-14
+last_audited: 2026-08-13
 owners:
   - engineering
 domains:
@@ -69,7 +69,7 @@ FPB Sync Bundle returns the canonical app-proxy URL and performs no Shopify Page
 
 ## Storefront hosts
 
-- FPB is hosted at `/apps/product-bundles/wpb/{bundleId}` through the signed app proxy.
+- FPB is hosted at `/apps/onlybundles/wpb/{publicNumber}` through the signed app proxy.
 - PPB remains hosted at `/products/{shopifyProductHandle}` through the parent product page.
 
 The parent product is still required for both bundle types as the metafield owner and Cart Transform identity.

@@ -410,8 +410,9 @@ FPB Configure Page
 
 FPB configure has no Shopify Page selector, Page slug editor, Page creation,
 Page publishing, or Page-backed preview. The app embed is the only FPB theme
-activation prerequisite and `/apps/product-bundles/wpb/{bundleId}` is the only
-FPB document URL.
+activation prerequisite and `/apps/onlybundles/wpb/{publicNumber}` is the
+only FPB document URL. The number is assigned serially per shop; internal bundle
+IDs remain confined to Admin routes, runtime data, and signed authorization.
 
 Responsive configure behavior:
 - FPB and PPB keep the full Bundle Product and Bundle Setup sidebar on wide screens.
@@ -465,8 +466,8 @@ PPB Configure Page
 │
 ├── Bundle Visibility
 │   ├── App Embed Status (inline AppEmbedBanner when disabled)
-│   ├── Publishing Best Practices (2×2 card grid)
-│   ├── Your Bundle Link (copy + preview button)
+│   ├── Publishing Best Practices (responsive landscape placement cards with expandable setup guides)
+│   ├── Your Bundle Link (copy button)
 │   └── Bundle Widget sub-section
 │       ├── Toggle: upsellWidgetEnabled
 │       ├── Display Mode: radio (block / button)
@@ -624,20 +625,20 @@ Storefront bundle add
 
 | URL Pattern | Purpose |
 |---|---|
-| `/apps/product-bundles/api/bundle/:id.json` | HMAC-verified canonical storefront bundle response: exact `{ success, bundle }`; field-projection queries do not change the response shape |
-| `/apps/product-bundles/api/bundles.json` | All active bundles for shop |
-| `/apps/product-bundles/api/cart-bundle-details` | Signed storefront route that merges EB-style cart `bundle_details` metafield entries |
-| `/apps/product-bundles/api/cart-transform-runtime-token` | Signed storefront route that validates selected bundle lines and returns `_wolfpack_bundle_runtime` for Cart Transform / Discount Function verification |
-| `/apps/product-bundles/api/checkout-integration-discount-code` | Signed storefront route that creates short-lived app discount codes for third-party FPB checkout integrations |
-| `/apps/product-bundles/api/design-settings/:shop` | CSS vars for storefront widgets |
-| `/apps/product-bundles/api/language-settings/:shop` | Settings -> Language JSON for storefront widget text and cart labels |
+| `/apps/onlybundles/api/bundle/:id.json` | HMAC-verified canonical storefront bundle response: exact `{ success, bundle }`; field-projection queries do not change the response shape |
+| `/apps/onlybundles/api/bundles.json` | All active bundles for shop |
+| `/apps/onlybundles/api/cart-bundle-details` | Signed storefront route that merges EB-style cart `bundle_details` metafield entries |
+| `/apps/onlybundles/api/cart-transform-runtime-token` | Signed storefront route that validates selected bundle lines and returns `_wolfpack_bundle_runtime` for Cart Transform / Discount Function verification |
+| `/apps/onlybundles/api/checkout-integration-discount-code` | Signed storefront route that creates short-lived app discount codes for third-party FPB checkout integrations |
+| `/apps/onlybundles/api/design-settings/:shop` | CSS vars for storefront widgets |
+| `/apps/onlybundles/api/language-settings/:shop` | Settings -> Language JSON for storefront widget text and cart labels |
 | `/api/billing/create` | Initiate subscription |
 | `/api/billing/confirm` | Confirm subscription |
 | `/api/billing/cancel` | Cancel subscription |
 | `/api/activate-cart-transform` | Deploy cart transform function |
 | `/api/activate-pixel` | Activate UTM web pixel |
 | `/app/app-embed-status` | Authenticated Admin resource route for Preview-button app embed revalidation |
-| `/apps/product-bundles/api/proxy-health` | Proxy health check |
+| `/apps/onlybundles/api/proxy-health` | Proxy health check |
 | `/health` | Public Render HTTP health check; returns 2xx only when the app and DB are ready |
 | `/api/attribution` | UTM attribution analytics data |
 | `/api/web-vitals` | No-op tombstone for retired custom Admin Web Vitals beacons; returns 204 for stale POSTs |

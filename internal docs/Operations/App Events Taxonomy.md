@@ -5,7 +5,7 @@ title: Shopify App Events Taxonomy
 type: operations
 status: authoritative
 summary: Defines the canonical Shopify App Events vocabulary and merchant-flow tracing guidance.
-last_audited: 2026-07-23
+last_audited: 2026-08-13
 owners:
   - engineering
 domains:
@@ -61,9 +61,9 @@ Current repo state has no Shopify App Events emitter.
 Existing telemetry surfaces:
 
 - `wpb:*` browser `CustomEvent`s are emitted by the full-page storefront widget.
-- `/apps/product-bundles/api/attribution/engagement` accepts storefront engagement beacons and expects `wpb:*` event names.
+- `/apps/onlybundles/api/attribution/engagement` accepts storefront engagement beacons and expects `wpb:*` event names.
 - `/api/attribution` records checkout-completed UTM attribution from the Shopify Web Pixel.
-- `/apps/product-bundles/api/widget-error` records storefront widget runtime errors.
+- `/apps/onlybundles/api/widget-error` records storefront widget runtime errors.
 - `extensions/wolfpack-utm-pixel` subscribes to Shopify Web Pixel customer events such as `page_viewed` and `checkout_completed`.
 
 These surfaces serve storefront analytics and merchant integrations. App Events should be added alongside them for Dev Dashboard tracing and future billing meters.

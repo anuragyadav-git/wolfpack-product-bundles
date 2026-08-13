@@ -5,7 +5,7 @@ title: Cart Transform API
 type: shopify-integration
 status: authoritative
 summary: Shopify Cart Transform API target, activation, failure policy, inputs, and checkout-pricing boundaries.
-last_audited: 2026-07-14
+last_audited: 2026-08-13
 owners:
   - engineering
 domains:
@@ -84,7 +84,7 @@ cart {
 }
 ```
 
-The token is issued only by the signed app-proxy route `/apps/product-bundles/api/cart-transform-runtime-token`. It validates the current DB bundle config before signing selected component/add-on variant GIDs, quantities, parent variant, and pricing config.
+The token is issued only by the signed app-proxy route `/apps/onlybundles/api/cart-transform-runtime-token`. It validates the current DB bundle config before signing selected component/add-on variant GIDs, quantities, parent variant, and pricing config.
 
 ## Function Input Metafield Namespacing
 

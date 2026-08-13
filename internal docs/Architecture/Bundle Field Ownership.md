@@ -84,7 +84,7 @@ There is no runtime or persistence fallback to `categoryId`, `rank`,
 
 ## Public Bundle API
 
-`GET /apps/product-bundles/api/bundle/:id.json` returns exactly:
+`GET /apps/onlybundles/api/bundle/:id.json` returns exactly:
 
 ```json
 {
