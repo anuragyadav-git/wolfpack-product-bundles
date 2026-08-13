@@ -83,6 +83,10 @@ synthetic whole-builder surface.
 | 10 | Logical preview canvas | Desktop or mobile preview | Scene renders at the selected storefront viewport and scales only to fit its host | Storefront breakpoints do not depend on the center-column width |
 | 11 | Loading surface field relevance | Loading surface with Images & GIFs active | Image Fit is disabled while GIF and background controls remain interactive | Image Fit does not affect a loading screen |
 | 12 | Empty loading GIF picker | No saved GIF | The whole drop zone is clickable, says `Click to upload a loading GIF`, and has no nested upload button | One clear upload action |
+| 13 | Contextual controls | Selected bundle type, template, and preview surface | Only fields whose semantic target is present on that component are shown | Generic cross-surface controls are excluded |
+| 14 | Product preview actions | Add, increment, or decrement a fixture product | The local selection count and quantity control update without cart or network work | Preview-only interaction |
+| 15 | Progress preview action | Activate progress control | The deterministic progress state advances locally | Preview-only interaction |
+| 16 | Mobile summary disclosure | Mobile Cart / summary surface | Trigger expands and collapses the local footer preview | No storefront mutation |
 
 ### ColourGuideLinks
 

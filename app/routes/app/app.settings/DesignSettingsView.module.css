@@ -7,7 +7,8 @@
 }
 
 .hero {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
@@ -707,6 +708,16 @@
   gap: 8px;
 }
 
+.previewSummary > header > button {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  font: inherit;
+  font-weight: 700;
+  text-align: left;
+}
+
 .previewSummary > header strong,
 .previewSummary > footer strong {
   font-size: var(--preview-primary-font-size, 16px);
@@ -720,10 +731,16 @@
 
 .previewDiscount {
   display: grid;
+  width: 100%;
   gap: 5px;
+  border: 0;
+  background: transparent;
   color: var(--preview-discount-text, #202223);
+  padding: 0;
   font-size: var(--preview-secondary-font-size, 12px);
   font-weight: var(--preview-secondary-font-weight, 700);
+  text-align: left;
+  cursor: pointer;
 }
 
 .previewDiscount i {
@@ -981,6 +998,24 @@
   z-index: 2;
 }
 
+.previewStage[data-preview-viewport="mobile"]
+  .previewSummary:not([data-expanded="true"])
+  > :is(.previewDiscount, .previewSummaryRows, .previewSummarySlots) {
+  display: none;
+}
+
+.previewStage[data-preview-viewport="mobile"] .previewSummary > header > button::after {
+  margin-left: 6px;
+  content: "⌃";
+}
+
+.previewStage[data-preview-viewport="mobile"]
+  .previewSummary[data-expanded="true"]
+  > header
+  > button::after {
+  content: "⌄";
+}
+
 .previewStage[data-preview-viewport="mobile"] .previewTimeline {
   max-width: 94%;
 }
@@ -1031,7 +1066,6 @@
     margin-top: 14px;
   }
 
-  .hero,
   .previewHeader {
     align-items: stretch;
     flex-direction: column;

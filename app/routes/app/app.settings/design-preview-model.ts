@@ -8,6 +8,7 @@ import {
   type TemplateSelection,
 } from "../../../lib/bundle-config/template-selection";
 import { buildSettingsDesignRuntime } from "../../../lib/settings-design-runtime";
+import type { SettingsField } from "../../../lib/admin-configuration-surfaces";
 
 export type DesignPreviewSurface =
   | "bundle-header"
@@ -58,6 +59,7 @@ export interface DesignPreviewTemplateDescriptor {
 
 export interface DesignPreviewFieldTarget {
   surface: DesignPreviewSurface;
+  surfaces?: readonly DesignPreviewSurface[];
   elements: readonly string[];
   templates?: readonly TemplateKey[];
   surfaceOverrides?: Partial<Record<TemplateKey, DesignPreviewSurface>>;
@@ -323,27 +325,31 @@ const target = (
 const productTarget = (...elements: string[]) => target("product-card", elements, {
   surfaceOverrides: { "horizontal-slots": "product-picker", "vertical-slots": "product-picker" },
 });
+const sharedProductCartTarget = (...elements: string[]) => ({
+  ...productTarget(...elements),
+  surfaces: ["product-card", "product-picker", "cart-summary"] as const,
+});
 const cartTarget = (...elements: string[]) => target("cart-summary", elements);
 
 export const DESIGN_PREVIEW_FIELD_TARGETS: Readonly<Record<string, DesignPreviewFieldTarget>> = {
-  "Primary Color": productTarget("product action"),
-  "Button Text Color": productTarget("action text"),
-  "Primary Text Color": productTarget("product text", "prices"),
-  "Secondary Color": productTarget("quantity controls"),
-  "Product Background Color": productTarget("product cards", "cart", "empty slots"),
-  "Primary Font Size": productTarget("product titles", "primary prices", "step text"),
-  "Primary Font Weight": productTarget("product titles", "primary prices"),
-  "Secondary Font Size": productTarget("compare-at prices", "discount text"),
-  "Secondary Font Weight": productTarget("compare-at prices", "discount text"),
-  "Body Font Size": productTarget("variant labels", "supporting text"),
-  "Body Font Weight": productTarget("variant labels", "supporting text"),
-  "Bundle Buttons Corner Style": productTarget("buttons", "tabs", "quantity controls"),
-  "Bundle Buttons Base": productTarget("buttons", "tabs", "quantity controls"),
-  "Product Card & Cart Corner Style": productTarget("product cards", "cart"),
-  "Product Card & Cart Base": productTarget("product cards", "cart", "product images"),
+  "Primary Color": sharedProductCartTarget("product action"),
+  "Button Text Color": sharedProductCartTarget("action text"),
+  "Primary Text Color": sharedProductCartTarget("product text", "prices"),
+  "Secondary Color": sharedProductCartTarget("quantity controls"),
+  "Product Background Color": sharedProductCartTarget("product cards", "cart", "empty slots"),
+  "Primary Font Size": sharedProductCartTarget("product titles", "primary prices", "step text"),
+  "Primary Font Weight": sharedProductCartTarget("product titles", "primary prices"),
+  "Secondary Font Size": sharedProductCartTarget("compare-at prices", "discount text"),
+  "Secondary Font Weight": sharedProductCartTarget("compare-at prices", "discount text"),
+  "Body Font Size": sharedProductCartTarget("variant labels", "supporting text"),
+  "Body Font Weight": sharedProductCartTarget("variant labels", "supporting text"),
+  "Bundle Buttons Corner Style": sharedProductCartTarget("buttons", "tabs", "quantity controls"),
+  "Bundle Buttons Base": sharedProductCartTarget("buttons", "tabs", "quantity controls"),
+  "Product Card & Cart Corner Style": sharedProductCartTarget("product cards", "cart"),
+  "Product Card & Cart Base": sharedProductCartTarget("product cards", "cart", "product images"),
   "Image Fit": productTarget("product images"),
-  "generalSettings.loadingGifUrl": target("loading", ["loading animation"]),
-  "generalSettings.loadingBgColor": target("loading", ["loading screen background"]),
+  "generalSettings.loadingGifUrl": target("loading", ["loading animation"], { templates: ALL_FPB_TEMPLATES }),
+  "generalSettings.loadingBgColor": target("loading", ["loading screen background"], { templates: ALL_FPB_TEMPLATES }),
   "expert.navigationBanner.navigationBannerStepCompletionColor": target("navigation", ["completed steps"], { templates: ALL_FPB_TEMPLATES }),
   "expert.navigationBanner.navigationCheckColor": target("navigation", ["completed step checks"], { templates: ALL_FPB_TEMPLATES }),
   "expert.navigationBanner.navigationBannerStepTextColor": target("navigation", ["step labels"], { templates: ALL_FPB_TEMPLATES }),
@@ -425,6 +431,23 @@ export function getDesignPreviewFieldTarget(fieldKey: string, templateKey?: Temp
 export function isDesignPreviewFieldApplicable(fieldKey: string, templateKey: TemplateKey) {
   const fieldTarget = getDesignPreviewFieldTarget(fieldKey, templateKey);
   return !fieldTarget?.templates || fieldTarget.templates.includes(templateKey);
+}
+
+export function getDesignFieldsForPreviewContext(
+  fields: readonly SettingsField[],
+  templateKey: TemplateKey,
+  surface: DesignPreviewSurface,
+) {
+  return fields.filter((field) => {
+    if (field.kind === "loadingSpinner") return false;
+    const fieldKey = field.key ?? field.label;
+    const fieldTarget = getDesignPreviewFieldTarget(fieldKey, templateKey);
+    return Boolean(
+      fieldTarget
+      && (fieldTarget.surface === surface || fieldTarget.surfaces?.includes(surface))
+      && isDesignPreviewFieldApplicable(fieldKey, templateKey),
+    );
+  });
 }
 
 export function getDesignPreviewScene(

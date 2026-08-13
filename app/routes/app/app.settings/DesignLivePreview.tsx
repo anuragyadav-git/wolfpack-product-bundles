@@ -33,6 +33,42 @@ export type DesignPreviewState = {
   surface: DesignPreviewSurface;
 };
 
+export type PreviewInteractionState = {
+  quantities: Record<string, number>;
+  progressStep: number;
+  isMobileSummaryOpen: boolean;
+};
+
+export function createPreviewInteractionState(): PreviewInteractionState {
+  return {
+    quantities: Object.fromEntries(
+      DESIGN_PREVIEW_FIXTURE.products.map((product) => [product.id, product.quantity]),
+    ),
+    progressStep: 0,
+    isMobileSummaryOpen: false,
+  };
+}
+
+export function updatePreviewProductQuantity(
+  state: PreviewInteractionState,
+  productId: string,
+  delta: number,
+): PreviewInteractionState {
+  const quantity = Math.max(0, (state.quantities[productId] ?? 0) + delta);
+  return { ...state, quantities: { ...state.quantities, [productId]: quantity } };
+}
+
+export function advancePreviewProgress(state: PreviewInteractionState): PreviewInteractionState {
+  return {
+    ...state,
+    progressStep: (state.progressStep + 1) % (DESIGN_PREVIEW_FIXTURE.discountTiers.length + 1),
+  };
+}
+
+export function togglePreviewMobileSummary(state: PreviewInteractionState): PreviewInteractionState {
+  return { ...state, isMobileSummaryOpen: !state.isMobileSummaryOpen };
+}
+
 type Translate = (key: string) => string;
 
 export function getDefaultTemplateKey(bundleType: BundleContractType): TemplateKey {
@@ -134,10 +170,14 @@ function ProductImage({
 
 function ProductCard({
   product,
+  quantity,
+  onQuantityChange,
   variant,
   t,
 }: {
   product: DesignPreviewFixtureProduct;
+  quantity: number;
+  onQuantityChange: (delta: number) => void;
   variant: "grid" | "compact" | "row";
   t: Translate;
 }) {
@@ -145,7 +185,7 @@ function ProductCard({
     <article
       className={styles.previewProductCard}
       data-card-variant={variant}
-      data-selected={product.selected || undefined}
+      data-selected={quantity > 0 || undefined}
     >
       <ProductImage product={product} compact={variant === "row"} />
       <span className={styles.previewProductCopy}>
@@ -156,14 +196,14 @@ function ProductCard({
           <del>{t(`${product.translationKey}.compareAt`)}</del>
         </span>
       </span>
-      {product.selected ? (
+      {quantity > 0 ? (
         <span className={styles.previewQuantity} aria-label={t("settingsDcp.preview.previewOnly")}>
-          <button type="button" disabled>−</button>
-          <strong>{product.quantity}</strong>
-          <button type="button" disabled>+</button>
+          <button type="button" onClick={() => onQuantityChange(-1)}>−</button>
+          <strong>{quantity}</strong>
+          <button type="button" onClick={() => onQuantityChange(1)}>+</button>
         </span>
       ) : (
-        <button type="button" disabled aria-label={t("settingsDcp.preview.previewOnly")}>
+        <button type="button" onClick={() => onQuantityChange(1)}>
           {t("settingsDcp.preview.surface.add")}
         </button>
       )}
@@ -252,13 +292,14 @@ function CategoryNavigation({
   );
 }
 
-function DiscountProgress({ t }: { t: Translate }) {
+function DiscountProgress({ t, progressStep = 0, onAdvance }: { t: Translate; progressStep?: number; onAdvance?: () => void }) {
+  const progress = `${Math.min(100, 25 + progressStep * 25)}%`;
   return (
-    <div className={styles.previewDiscount}>
+    <button type="button" className={styles.previewDiscount} onClick={onAdvance}>
       <span>{t("settingsDcp.preview.surface.discount")}</span>
-      <i><b /></i>
+      <i><b style={{ width: progress }} /></i>
       <small>{DESIGN_PREVIEW_FIXTURE.discountTiers.map((tier) => `${tier.percentage}%`).join(" · ")}</small>
-    </div>
+    </button>
   );
 }
 
@@ -266,10 +307,16 @@ function BundleSummary({
   descriptor,
   viewport,
   t,
+  interaction,
+  onToggleMobileSummary,
+  onAdvanceProgress,
 }: {
   descriptor: DesignPreviewTemplateDescriptor;
   viewport: DesignPreviewViewport;
   t: Translate;
+  interaction: PreviewInteractionState;
+  onToggleMobileSummary: () => void;
+  onAdvanceProgress: () => void;
 }) {
   const usesSlots = descriptor.summary === "slot-grid" || descriptor.summary === "compact-slots";
   const viewportRegions = viewport === "mobile"
@@ -280,12 +327,12 @@ function BundleSummary({
     : descriptor.summary === "list-selected-drawer" ? "product-list-selected-drawer" : descriptor.summary;
 
   return (
-    <aside className={styles.previewSummary} data-summary={descriptor.summary} data-preview-region={region}>
+    <aside className={styles.previewSummary} data-summary={descriptor.summary} data-preview-region={region} data-expanded={viewport === "mobile" && interaction.isMobileSummaryOpen || undefined}>
       <header>
-        <strong>{t("settingsDcp.preview.surface.summary")}</strong>
+        <button type="button" onClick={viewport === "mobile" ? onToggleMobileSummary : undefined}>{t("settingsDcp.preview.surface.summary")}</button>
         <small>{t("settingsDcp.preview.surface.selectedCount")}</small>
       </header>
-      <DiscountProgress t={t} />
+      <DiscountProgress t={t} progressStep={interaction.progressStep} onAdvance={onAdvanceProgress} />
       {usesSlots ? (
         <div className={styles.previewSummarySlots}>
           <ProductImage product={DESIGN_PREVIEW_FIXTURE.products[0]} compact />
@@ -313,10 +360,14 @@ function ProductGrid({
   descriptor,
   limit,
   t,
+  interaction,
+  onProductQuantityChange,
 }: {
   descriptor: DesignPreviewTemplateDescriptor;
   limit?: number;
   t: Translate;
+  interaction: PreviewInteractionState;
+  onProductQuantityChange: (productId: string, delta: number) => void;
 }) {
   const region = descriptor.productCard.mode === "row" ? "product-rows" : "product-grid";
   return (
@@ -328,7 +379,7 @@ function ProductGrid({
       data-preview-region={region}
     >
       {DESIGN_PREVIEW_FIXTURE.products.slice(0, limit).map((product) => (
-        <ProductCard key={product.id} product={product} variant={descriptor.productCard.mode} t={t} />
+        <ProductCard key={product.id} product={product} quantity={interaction.quantities[product.id] ?? 0} onQuantityChange={(delta) => onProductQuantityChange(product.id, delta)} variant={descriptor.productCard.mode} t={t} />
       ))}
     </div>
   );
@@ -393,10 +444,10 @@ function CategoriesPreview({ descriptor, t }: { descriptor: DesignPreviewTemplat
   );
 }
 
-function ProductCardsPreview({ descriptor, t }: { descriptor: DesignPreviewTemplateDescriptor; t: Translate }) {
+function ProductCardsPreview({ descriptor, t, interaction, onProductQuantityChange }: { descriptor: DesignPreviewTemplateDescriptor; t: Translate; interaction: PreviewInteractionState; onProductQuantityChange: (productId: string, delta: number) => void }) {
   return (
     <section className={styles.previewComponentSurface} data-preview-component="product-card">
-      <div className={styles.previewProductComponent}><ProductGrid descriptor={descriptor} t={t} /></div>
+      <div className={styles.previewProductComponent}><ProductGrid descriptor={descriptor} t={t} interaction={interaction} onProductQuantityChange={onProductQuantityChange} /></div>
     </section>
   );
 }
@@ -433,7 +484,7 @@ function ProductPicker({
         <strong>{t("settingsDcp.preview.surface.chooseProduct")}</strong>
         {viewport === "desktop" ? <button type="button" disabled>×</button> : null}
       </header>
-      <ProductGrid descriptor={descriptor} limit={3} t={t} />
+      <ProductGrid descriptor={descriptor} limit={3} t={t} interaction={createPreviewInteractionState()} onProductQuantityChange={() => undefined} />
     </section>
   );
 }
@@ -442,21 +493,27 @@ function CartSummarySurface({
   descriptor,
   viewport,
   t,
+  interaction,
+  onToggleMobileSummary,
+  onAdvanceProgress,
 }: {
   descriptor: DesignPreviewTemplateDescriptor;
   viewport: DesignPreviewViewport;
   t: Translate;
+  interaction: PreviewInteractionState;
+  onToggleMobileSummary: () => void;
+  onAdvanceProgress: () => void;
 }) {
   if (descriptor.family === "full-page") {
     return (
       <div className={styles.previewCartFocus}>
-        <BundleSummary descriptor={descriptor} viewport={viewport} t={t} />
+        <BundleSummary descriptor={descriptor} viewport={viewport} t={t} interaction={interaction} onToggleMobileSummary={onToggleMobileSummary} onAdvanceProgress={onAdvanceProgress} />
       </div>
     );
   }
   return (
     <div className={styles.previewCartFocus} data-preview-region="neutral-pdp-shell">
-      <BundleSummary descriptor={descriptor} viewport={viewport} t={t} />
+      <BundleSummary descriptor={descriptor} viewport={viewport} t={t} interaction={interaction} onToggleMobileSummary={onToggleMobileSummary} onAdvanceProgress={onAdvanceProgress} />
       <footer className={styles.previewPdpFooter} data-preview-region={descriptor.summary === "modal-footer" ? "modal-footer" : "pdp-footer"}>
         <span><small>{t("settingsDcp.preview.surface.totalLabel")}</small><strong>{t("settingsDcp.preview.surface.totalPrice")}</strong></span>
         <button type="button" disabled>{t("settingsDcp.preview.surface.addBundle")}</button>
@@ -486,21 +543,25 @@ function PreviewSurface({
   viewport,
   loadingGifUrl,
   t,
+  interaction,
+  onInteractionChange,
 }: {
   descriptor: DesignPreviewTemplateDescriptor;
   surface: DesignPreviewSurface;
   viewport: DesignPreviewViewport;
   loadingGifUrl: string;
   t: Translate;
+  interaction: PreviewInteractionState;
+  onInteractionChange: (state: PreviewInteractionState) => void;
 }) {
   if (surface === "bundle-header") return <BundleHeaderPreview t={t} />;
   if (surface === "navigation") return <NavigationPreview descriptor={descriptor} t={t} />;
   if (surface === "categories") return <CategoriesPreview descriptor={descriptor} t={t} />;
-  if (surface === "product-card") return <ProductCardsPreview descriptor={descriptor} t={t} />;
+  if (surface === "product-card") return <ProductCardsPreview descriptor={descriptor} t={t} interaction={interaction} onProductQuantityChange={(productId, delta) => onInteractionChange(updatePreviewProductQuantity(interaction, productId, delta))} />;
   if (surface === "product-slots") return <ProductSlotsPreview descriptor={descriptor} t={t} />;
   if (surface === "product-picker") return <ProductPicker descriptor={descriptor} viewport={viewport} t={t} />;
   if (surface === "upsell") return <UpsellPreview t={t} />;
-  if (surface === "cart-summary") return <CartSummarySurface descriptor={descriptor} viewport={viewport} t={t} />;
+  if (surface === "cart-summary") return <CartSummarySurface descriptor={descriptor} viewport={viewport} t={t} interaction={interaction} onToggleMobileSummary={() => onInteractionChange(togglePreviewMobileSummary(interaction))} onAdvanceProgress={() => onInteractionChange(advancePreviewProgress(interaction))} />;
   if (surface === "loading") {
     return (
       <div className={styles.previewLoadingState} data-preview-region="loading-screen">
@@ -526,12 +587,14 @@ export function DesignLivePreview({
   activeFieldKey,
   initialState,
   onSurfaceChange,
+  onContextChange,
 }: {
   fieldValues: Record<string, string>;
   isExpertControlsEnabled: boolean;
   activeFieldKey?: string | null;
   initialState?: DesignPreviewState;
   onSurfaceChange?: (surface: DesignPreviewSurface) => void;
+  onContextChange?: (context: Pick<DesignPreviewState, "bundleType" | "templateKey" | "surface">) => void;
 }) {
   const { t } = useTranslation();
   const previewStageRef = useRef<HTMLDivElement>(null);
@@ -539,6 +602,7 @@ export function DesignLivePreview({
     initialState ?? createDesignPreviewState(),
   );
   const [fitScale, setFitScale] = useState(1);
+  const [interaction, setInteraction] = useState(createPreviewInteractionState);
   const availableTemplates = DESIGN_PREVIEW_TEMPLATES.filter(
     (template) => template.bundleType === previewState.bundleType,
   );
@@ -550,6 +614,10 @@ export function DesignLivePreview({
     ? getDesignPreviewFieldTarget(activeFieldKey, activeTemplate.key)
     : undefined;
   const fieldTargetSurface = fieldTarget?.surface;
+  const isFieldOnActiveSurface = Boolean(
+    fieldTarget
+    && (fieldTarget.surface === previewState.surface || fieldTarget.surfaces?.includes(previewState.surface)),
+  );
   const isApplicable = !activeFieldKey || isDesignPreviewFieldApplicable(activeFieldKey, activeTemplate.key);
   const previewTheme = useMemo(
     () => buildDesignPreviewTheme(fieldValues, isExpertControlsEnabled, activeTemplate.key),
@@ -562,13 +630,21 @@ export function DesignLivePreview({
   );
 
   useEffect(() => {
-    if (!fieldTargetSurface || !isApplicable) return;
+    if (!fieldTargetSurface || !isApplicable || isFieldOnActiveSurface) return;
     setPreviewState((current) => setDesignPreviewSurface(current, fieldTargetSurface));
-  }, [activeFieldKey, fieldTargetSurface, isApplicable]);
+  }, [activeFieldKey, fieldTargetSurface, isApplicable, isFieldOnActiveSurface]);
 
   useEffect(() => {
     onSurfaceChange?.(previewState.surface);
   }, [onSurfaceChange, previewState.surface]);
+
+  useEffect(() => {
+    onContextChange?.({
+      bundleType: previewState.bundleType,
+      templateKey: previewState.templateKey,
+      surface: previewState.surface,
+    });
+  }, [onContextChange, previewState.bundleType, previewState.surface, previewState.templateKey]);
 
   useEffect(() => {
     const stage = previewStageRef.current;
@@ -696,6 +772,8 @@ export function DesignLivePreview({
               viewport={previewState.viewport}
               loadingGifUrl={fieldValues["generalSettings.loadingGifUrl"] ?? ""}
               t={t}
+              interaction={interaction}
+              onInteractionChange={setInteraction}
             />
           </div>
         </div>

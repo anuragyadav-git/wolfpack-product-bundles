@@ -107,7 +107,7 @@ describe("DesignSettingsView live preview", () => {
     expect(view).toContain('<s-button icon="view" disabled="true">Preview Bundle</s-button>');
   });
 
-  it("exposes FPB loading controls and the loading preview surface", () => {
+  it("keeps FPB loading controls hidden until the Loading surface is selected", () => {
     const imagesTab = DESIGN_CONFIGURATION.find((tab) => tab.title === "Images & GIFs");
     expect(imagesTab).toBeDefined();
 
@@ -138,8 +138,8 @@ describe("DesignSettingsView live preview", () => {
     );
 
     expect(view).toContain('aria-label="Live bundle preview"');
-    expect(view).toContain("FPB Loading GIF");
-    expect(view).toContain("Loading Screen Background Color");
+    expect(view).not.toContain("FPB Loading GIF");
+    expect(view).not.toContain("Loading Screen Background Color");
     expect(view).toContain('<s-option value="loading">');
   });
 });

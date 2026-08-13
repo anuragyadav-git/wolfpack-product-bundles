@@ -12,6 +12,10 @@ import {
   setDesignPreviewTemplate,
   setDesignPreviewViewport,
   type DesignPreviewState,
+  createPreviewInteractionState,
+  updatePreviewProductQuantity,
+  advancePreviewProgress,
+  togglePreviewMobileSummary,
 } from "../../../app/routes/app/app.settings/DesignLivePreview";
 import { buildDesignPreviewTheme } from "../../../app/routes/app/app.settings/design-preview-model";
 
@@ -20,6 +24,19 @@ jest.mock("react-i18next", () => ({
 }));
 
 describe("Settings Design preview state", () => {
+  it("updates local product, progress, and mobile-summary preview interactions", () => {
+    const initial = createPreviewInteractionState();
+    const added = updatePreviewProductQuantity(initial, "third", 1);
+    const incremented = updatePreviewProductQuantity(added, "third", 1);
+    const progressed = advancePreviewProgress(incremented);
+    const expanded = togglePreviewMobileSummary(progressed);
+
+    expect(added.quantities.third).toBe(1);
+    expect(incremented.quantities.third).toBe(2);
+    expect(progressed.progressStep).toBe(1);
+    expect(expanded.isMobileSummaryOpen).toBe(true);
+    expect(togglePreviewMobileSummary(expanded).isMobileSummaryOpen).toBe(false);
+  });
   it("applies expert preview overrides only while expert controls are enabled", () => {
     const fieldValues = {
       "Primary Color": "#123456",

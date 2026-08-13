@@ -229,6 +229,17 @@ fetch bundle data, embed an iframe, or reproduce cart mutations. The separate
 Preview Bundle action remains the path to a real storefront bundle and is
 disabled when no storefront URL exists.
 
+The Design inspector is contextual rather than global. It filters navigation
+groups and fields through the selected bundle type, canonical template, and
+component surface, so a merchant never sees a control that has no target in the
+visible preview. Shared tokens may remain available on each component they
+actually affect; FPB-only loading controls are not exposed for PPB templates.
+
+Deterministic previews support local-only interaction for product add and
+quantity controls, discount-progress advancement, and the mobile summary
+footer disclosure. These interactions update preview state only and never call
+storefront APIs, mutate a cart, or alter persisted Design settings.
+
 ## Style Presets
 
 EB always persists a `stylePresets` object. Defaults:

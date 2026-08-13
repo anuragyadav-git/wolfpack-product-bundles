@@ -12,6 +12,7 @@ import {
   getDesignPreviewScene,
   getDesignPreviewSurfaceFidelity,
   getSupportedDesignPreviewSurfaces,
+  getDesignFieldsForPreviewContext,
   isDesignPreviewFieldApplicable,
 } from "../../../app/routes/app/app.settings/design-preview-model";
 import { existsSync } from "node:fs";
@@ -172,6 +173,17 @@ describe("Settings Design preview model", () => {
     expect(isDesignPreviewFieldApplicable("expert.generalSettings.productPageTitleColor", "standard")).toBe(false);
     expect(isDesignPreviewFieldApplicable("expert.emptyStateCard.emptyStateCardBorderColor", "horizontal-slots")).toBe(true);
     expect(isDesignPreviewFieldApplicable("expert.emptyStateCard.emptyStateCardBorderColor", "product-list")).toBe(false);
+  });
+
+  it("filters merchant controls to the selected template and component surface", () => {
+    const fields = DESIGN_CONFIGURATION.flatMap((section) => section.fields);
+
+    expect(getDesignFieldsForPreviewContext(fields, "standard", "product-card").map((field) => field.label))
+      .toEqual(expect.arrayContaining(["Primary Color", "Image Fit"]));
+    expect(getDesignFieldsForPreviewContext(fields, "standard", "loading").map((field) => field.label))
+      .toEqual(["FPB Loading GIF", "Loading Screen Background Color"]);
+    expect(getDesignFieldsForPreviewContext(fields, "product-list", "loading").map((field) => field.label))
+      .toEqual([]);
   });
 
   it("builds family-specific themes from normalized storefront runtime values", () => {
