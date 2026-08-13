@@ -509,8 +509,8 @@
   grid-template-columns: 18px minmax(0, 1fr) auto 28px;
   align-items: center;
   gap: 10px;
-  padding: 14px 16px 14px 20px;
-  min-height: 58px;
+  padding: 8px 16px 8px 20px;
+  min-height: 48px;
   background: #f7f7f7;
   cursor: pointer;
   user-select: none;
