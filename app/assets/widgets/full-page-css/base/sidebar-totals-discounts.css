@@ -17,6 +17,13 @@
   color: var(--bundle-side-panel-total-label-color, #1e1e1e);
 }
 
+.side-panel-total-heading {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
 .side-panel-total-prices {
   display: flex;
   align-items: center;

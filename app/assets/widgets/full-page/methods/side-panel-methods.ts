@@ -188,12 +188,8 @@ renderSidePanel(panel) {
   const headerTitle = document.createElement('span');
   headerTitle.className = 'side-panel-title';
   headerTitle.textContent = summaryText.title;
-  if (isStandardDesktopSidebar) {
-    headerCopy.appendChild(headerTitle);
-    header.appendChild(headerCopy);
-  } else {
-    header.appendChild(headerTitle);
-  }
+  headerCopy.appendChild(headerTitle);
+  header.appendChild(headerCopy);
 
   if (isStandardDesktopSidebar || allSelectedProducts.length > 0) {
     header.appendChild(createSummaryClearButton(() => this.showClearCartConfirmation()));
@@ -204,11 +200,7 @@ renderSidePanel(panel) {
   const subtitle = document.createElement('p');
   subtitle.className = 'side-panel-subtitle';
   subtitle.textContent = summaryText.subTitle;
-  if (isStandardDesktopSidebar) {
-    headerCopy.appendChild(subtitle);
-  } else {
-    panel.appendChild(subtitle);
-  }
+  headerCopy.appendChild(subtitle);
 
   const tierCta = this.createSidebarTierCta(nextRule);
   if (!isStandardDesktopSidebar && !isClassicDesktopSidebar && tierCta) {
@@ -495,9 +487,11 @@ renderSidePanel(panel) {
   const totalSection = document.createElement('div');
   totalSection.className = 'side-panel-total';
   totalSection.innerHTML = `
-    <span class="side-panel-total-label">Total</span>
-    <div class="side-panel-total-prices">
+    <span class="side-panel-total-heading">
+      <span class="side-panel-total-label">Total</span>
       ${discountBadgeLabel ? `<span class="fpb-summary-discount-badge">${discountBadgeLabel}</span>` : ''}
+    </span>
+    <div class="side-panel-total-prices">
       ${shouldShowOriginalTotal ? `<span class="side-panel-total-original">${CurrencyManager.convertAndFormat(totalPrice, currencyInfo)}</span>` : ''}
       <span class="side-panel-total-final">${CurrencyManager.convertAndFormat(finalPrice, currencyInfo)}</span>
     </div>

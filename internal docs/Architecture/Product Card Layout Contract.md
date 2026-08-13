@@ -184,6 +184,11 @@ viewport-relative `10%` sticky start. This lets the summary engage before the
 product-card row reaches the top of the viewport while preserving bounded
 sidebar height.
 
+The desktop summary header uses two explicit rows: bundle title and Clear share
+the first row at the same visual height, while the bundle description spans the
+second. Its action area keeps the total group beside the primary action; within
+that group, the label and price are stacked in two equal-height rows.
+
 Preset structural rules use the named FPB shell container rather than viewport
 media queries. This keeps a constrained host and a same-width browser viewport
 on the same layout path. The shared responsive asset owns shell gutters,
