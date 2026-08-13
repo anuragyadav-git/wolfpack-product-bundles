@@ -54,6 +54,7 @@ export function useConfigureTemplatePricingController(
     stepsState,
     templateSubmissionStartedRef,
     templateFetcher,
+    textOverridesByLocale,
     upsellWidgetButtonText,
     upsellWidgetCollectionsSelectedData,
     upsellWidgetDescription,
@@ -215,8 +216,18 @@ export function useConfigureTemplatePricingController(
     templateFetcher,
   ]);
   function buildBundleUpsellConfig() {
+    const multiLangText = Object.fromEntries(
+      Object.entries(textOverridesByLocale ?? {}).flatMap(([locale, values]) => {
+        const widgetCopy = {
+          widgetTitle: values?.widgetTitle ?? "",
+          widgetDescription: values?.widgetDescription ?? "",
+          widgetButtonText: values?.widgetButtonText ?? "",
+        };
+        return Object.values(widgetCopy).some(Boolean) ? [[locale, widgetCopy]] : [];
+      }),
+    );
     return {
-      multiLangText: savedBundleUpsellConfig?.multiLangText ?? {},
+      multiLangText,
       languageMode: upsellWidgetLanguageMode,
       widgetConfiguration: {
         isEnabled: upsellWidgetEnabled,

@@ -656,10 +656,20 @@
 
 .visibilityPlacementCard {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
   gap: 12px;
   margin-top: 12px;
   padding: 16px;
+}
+
+.visibilityPlacementCard > div {
+  flex: 1;
+  min-width: 0;
+}
+
+.visibilityPlacementCard > s-button {
+  flex-shrink: 0;
 }
 
 .visibilityTitleSwitchRow,
@@ -962,7 +972,6 @@
 .visibilityRadioBar {
   display: flex;
   justify-content: center;
-  gap: 18px;
   border-top: 1px solid #dedede;
   background: #ffffff;
   padding: 18px;
@@ -1008,6 +1017,30 @@
 .visibilitySelectionList {
   display: flex;
   flex-direction: column;
+  gap: 10px;
+}
+
+.upsellBlockFieldsRow {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  align-items: stretch;
+  gap: 8px;
+}
+
+.upsellBlockImageField,
+.upsellBlockCopyFields {
+  min-width: 0;
+}
+
+.upsellBlockImageField {
+  --wpb-file-picker-trigger-height: 160px;
+  --wpb-file-picker-trigger-padding: 12px 8px;
+}
+
+.upsellBlockCopyFields {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   gap: 10px;
 }
 
@@ -3100,6 +3133,15 @@
 }
 
 @media (max-width: 767px) {
+  .visibilityPlacementCard {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .upsellBlockFieldsRow {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .templateDialogContent {
     min-height: calc(100vh - 112px);
   }

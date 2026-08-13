@@ -44,7 +44,7 @@ export function FilePickerTrigger({
           style={{
             position: "relative",
             width: "100%",
-            height: "180px",
+            height: "var(--wpb-file-picker-trigger-height, 180px)",
             border: "1px solid #c9cccf",
             borderRadius: "8px",
             overflow: "hidden",
@@ -142,7 +142,7 @@ export function FilePickerTrigger({
         width: "100%",
         border: "2px dashed #c9cccf",
         borderRadius: "8px",
-        padding: "28px 16px",
+        padding: "var(--wpb-file-picker-trigger-padding, 28px 16px)",
         background: "#fafbfb",
         cursor: triggerIsUploading ? "default" : "pointer",
         display: "flex",
@@ -152,7 +152,9 @@ export function FilePickerTrigger({
         gap: "8px",
         textAlign: "center",
         boxSizing: "border-box",
-        height: fitPreviewToTrigger ? "180px" : undefined,
+        height: fitPreviewToTrigger
+          ? "var(--wpb-file-picker-trigger-height, 180px)"
+          : undefined,
       }}
     >
       {triggerIsUploading ? (
