@@ -90,7 +90,8 @@
 }
 
 .criticalHeroHeader {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: baseline;
   justify-content: space-between;
   margin: 0;
