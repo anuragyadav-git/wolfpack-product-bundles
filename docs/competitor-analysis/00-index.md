@@ -1,9 +1,35 @@
+---
+schema_version: 1
+id: eb-competitor-analysis-index
+title: EB Competitor Analysis Index
+type: index
+status: current
+summary: Indexes live EB research, implementation-facing evidence, parity matrices, and storefront verification records.
+last_audited: 2026-07-26
+owners:
+  - engineering
+domains:
+  - competitive-research
+systems:
+  - eb-reference
+source_paths:
+  - docs/competitor-analysis/
+related_docs:
+  - internal docs/EB Implementation Reference.md
+  - internal docs/EB Settings Design Reference.md
+tags:
+  - competitor-analysis
+  - evidence
+keywords:
+  - easy-bundles
+  - parity
+---
+
 # EB | Easy Bundle Builder — Competitor Analysis Index
 
 **App:** EB | Easy Bundle Builder (by Skai Lama / GiftKart)
-**Analysis Date:** 2026-04-24
-**Method:** Live crawl via Chrome DevTools MCP on a Shopify test store
-**Store:** `wolfpack-store-test-1.myshopify.com`
+**Initial analysis date:** 2026-04-24
+**Method:** Live crawl and follow-up audits through Chrome DevTools MCP
 
 ---
 
@@ -28,11 +54,21 @@
 | [15-single-embed-template-architecture.md](15-single-embed-template-architecture.md) | **How EB-style multi-type, multi-template storefront architecture can work through a single embed/runtime surface** |
 | [16-eb-full-data-flow-investigation.md](16-eb-full-data-flow-investigation.md) | **Primary evidence record — live FPB/PPB Admin + storefront capture (9 phases, all gaps resolved). Distilled reference: `internal docs/EB Implementation Reference.md`** |
 | [17-eb-complete-configure-e2e-audit.md](17-eb-complete-configure-e2e-audit.md) | **Fresh configure-page E2E audit for FPB and PPB: controls, dependencies, help links, save payloads, storefront effects, and template mappings** |
+| [18-category-rules-research.md](18-category-rules-research.md) | Category-rules Admin and storefront evidence |
+| [18-eb-settings-integrations-replication-evidence.md](18-eb-settings-integrations-replication-evidence.md) | Settings and integrations replication evidence |
+| [19-pdp-widget-placement-parity.md](19-pdp-widget-placement-parity.md) | Historical PDP placement interpretation and its documented supersession |
 | [fpb-standard-agentic-parity/SPEC.md](fpb-standard-agentic-parity/SPEC.md) | **Repeatable FPB Standard storefront parity loop: feature matrix, deterministic pairwise run set, stress cases, evidence contract, and verification workflow** |
+| [fpb-classic-agentic-parity/SPEC.md](fpb-classic-agentic-parity/SPEC.md) | Repeatable FPB Classic parity plan and evidence contract |
+| [fpb-compact-horizontal-agentic-parity/SPEC.md](fpb-compact-horizontal-agentic-parity/SPEC.md) | Combined Compact and Horizontal parity plan and evidence contract |
+| [ppb-product-grid-agentic-parity/SPEC.md](ppb-product-grid-agentic-parity/SPEC.md) | PPB Product Grid parity plan and evidence catalog |
+| [ppb-product-list-agentic-parity/SPEC.md](ppb-product-list-agentic-parity/SPEC.md) | PPB Product List parity plan and evidence catalog |
+| [ppb-horizontal-slots-agentic-parity/SPEC.md](ppb-horizontal-slots-agentic-parity/SPEC.md) | PPB Horizontal Slots parity plan and evidence catalog |
+| [ppb-vertical-slots-agentic-parity/SPEC.md](ppb-vertical-slots-agentic-parity/SPEC.md) | PPB Vertical Slots parity plan and evidence catalog |
+| [ppb-product-drawer-parity/MATRIX.md](ppb-product-drawer-parity/MATRIX.md) | Cross-template PPB product drawer parity matrix |
 
-## Screenshots
+## Evidence Notes
 
-All screenshots are in `screenshots/` numbered 01–35.
+Some captures referenced by these documents live outside the repository or were intentionally not committed. Each evidence document defines its own capture location and non-assumption rules. Use `internal docs/EB Implementation Reference.md` for distilled implementation contracts; use this directory when raw evidence or point-in-time parity history is required.
 
 ## Key Competitive Highlights
 
