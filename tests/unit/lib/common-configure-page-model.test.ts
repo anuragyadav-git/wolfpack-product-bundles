@@ -44,6 +44,14 @@ describe("common configure page model", () => {
     ).toBe("discount");
   });
 
+  it("uses the Polaris settings icon for Bundle Settings", () => {
+    expect(
+      buildConfigureSetupItems("full_page").find(
+        (item) => item.id === "bundle_settings",
+      )?.iconType,
+    ).toBe("settings");
+  });
+
   it("keeps Bundle Embed as a PPB-only visibility child", () => {
     expect(buildBundleVisibilityChildItems("full_page")).toEqual([
       { id: "bundle_widget", label: "Bundle Widget" },

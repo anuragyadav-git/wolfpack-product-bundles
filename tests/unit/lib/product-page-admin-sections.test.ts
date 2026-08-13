@@ -32,6 +32,13 @@ describe("product page admin sections", () => {
     ]);
   });
 
+  it("uses the Polaris settings icon for Bundle Settings", () => {
+    expect(
+      PRODUCT_PAGE_SETUP_ITEMS.find((item) => item.id === "bundle_settings")
+        ?.iconType,
+    ).toBe("settings");
+  });
+
   it("routes Bundle Settings Edit Defaults to Settings", () => {
     expect(PRODUCT_PAGE_EDIT_DEFAULTS_HREF).toBe("/app/settings");
   });

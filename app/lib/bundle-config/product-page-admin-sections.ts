@@ -29,7 +29,7 @@ export const PRODUCT_PAGE_SETUP_ITEMS: ProductPageSetupItem[] = [
   { id: "step_setup",         label: "Step Setup",         iconType: "note" },
   { id: "discount_pricing",   label: "Discount & Pricing", iconType: "filter" },
   { id: "bundle_visibility",  label: "Bundle Visibility",  iconType: "view" },
-  { id: "bundle_settings",    label: "Bundle Settings",    iconType: "edit" },
+  { id: "bundle_settings",    label: "Bundle Settings",    iconType: "settings" },
   { id: "subscriptions",      label: "Subscriptions",      iconType: "clock" },
   { id: "select_template",    label: "Select Template",    iconType: "paint-brush-flat" },
 ];
