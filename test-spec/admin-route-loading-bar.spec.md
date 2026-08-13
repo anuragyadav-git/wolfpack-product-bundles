@@ -4,7 +4,7 @@ id: admin-route-loading-bar
 title: Admin Route Loading Bar
 type: test-spec
 status: active
-summary: Verifies that Settings workspace and Analytics readiness use one accessible top-edge loading bar instead of skeleton content.
+summary: Verifies that Settings workspace and Analytics readiness use one accessible shared top-edge loading bar with continuous pending feedback.
 last_audited: 2026-08-13
 owners:
   - engineering
@@ -37,7 +37,7 @@ keywords:
 
 ## Purpose
 
-Keep Settings and Analytics loading feedback tied to their real Suspense readiness boundaries while removing route skeleton UI.
+Keep Settings and Analytics loading feedback tied to their real Suspense readiness boundaries while removing route skeleton UI and preserving visible activity until content is ready.
 
 ## Test Cases
 
@@ -56,3 +56,4 @@ Keep Settings and Analytics loading feedback tied to their real Suspense readine
 - [x] Settings workspace transitions use the loading bar and no card skeletons.
 - [x] Analytics readiness uses the loading bar and no dashboard or chart skeletons.
 - [x] The loading bar is accessible and respects reduced-motion preferences.
+- [x] The shared bar continues to show activity if route readiness takes longer than its initial fill.

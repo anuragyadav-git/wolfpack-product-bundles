@@ -119,7 +119,10 @@ first-render JavaScript instead.
 
 The Settings landing route keeps its small Polaris card shell behind the shared
 top-edge loading boundary until deferred Settings data and the minimum bar fill
-are complete. It keeps the workspace implementation behind a separate React
+are complete. The bar uses a staged black fill over a subtle track, then keeps a
+moving highlight visible if route readiness takes longer than the initial fill.
+Reduced-motion users receive the complete static bar without animation. It keeps
+the workspace implementation behind a separate React
 lazy boundary. The 2026-07-23 local
 production build split the initial Settings route (`app.settings`, 2.99 kB /
 1.27 kB gzip) from the complete `SettingsRoute` workspace (81.39 kB / 18.60 kB
@@ -234,8 +237,9 @@ on the document.
 Analytics keeps shell styles with `AttributionRouteShell` and dashboard styles
 with the lazy `AttributionDashboard` chunk. One outer readiness boundary owns
 the title bar, funnel heading, pixel-status banner, dashboard data, and lazy
-chart suspension. Its only fallback is the black top-edge loading bar, which
-fills for at least 800 milliseconds. Analytics content therefore appears as one
+chart suspension. Its only fallback is the shared black top-edge loading bar,
+which fills for at least 800 milliseconds and remains visibly active while
+readiness is pending. Analytics content therefore appears as one
 ready surface without skeleton cards, an early banner, or partially assembled
 chart panels.
 
