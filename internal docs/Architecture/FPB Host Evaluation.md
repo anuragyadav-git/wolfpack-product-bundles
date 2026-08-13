@@ -32,7 +32,7 @@ keywords:
 
 ## Decision
 
-`/apps/onlybundles/wpb/{publicNumber}` is the only FPB storefront document host. `publicNumber` is a positive, monotonic integer scoped to the shop. Shopify verifies and forwards the request through the installed default app-proxy root. The Remix route verifies the proxy HMAC before database access, resolves the bundle by `(shopId, publicNumber)`, and returns `application/liquid`, so Shopify wraps the response in the active theme layout.
+`/apps/product-bundles/wpb/{publicNumber}` is the only FPB storefront document host. `publicNumber` is a positive, monotonic integer scoped to the shop. Shopify verifies and forwards the request through the installed default app-proxy root. The Remix route verifies the proxy HMAC before database access, resolves the bundle by `(shopId, publicNumber)`, and returns `application/liquid`, so Shopify wraps the response in the active theme layout.
 
 Active and unlisted bundles are public. Draft bundles require a 15-minute `wpb_preview` token bound to version, shop, the internal bundle ID, and expiry. The public number is routing identity only; widget configuration, analytics, cart contracts, and authorization continue using the internal bundle ID. Archived, missing, cross-shop, invalid-number, opaque-ID, and invalid-preview requests return `404`; invalid Shopify signatures return `400`.
 
@@ -47,18 +47,18 @@ The Liquid response embeds the complete formatted runtime configuration in `data
 The application builds one canonical FPB URL:
 
 ```text
-https://{shop}/apps/onlybundles/wpb/{publicNumber}
+https://{shop}/apps/product-bundles/wpb/{publicNumber}
 ```
 
-Merchant-customized proxy prefixes and subpaths are unsupported by this host
-contract. PPB remains at `/products/{handle}`.
-
-Changing the configured app-proxy subpath changes every signed storefront route,
-not only FPB document URLs. Canonical bundle links are derived and are not stored
-in the database, so no database URL rewrite is required. Existing parent-product
-redirects and `bundle_ui_config` metafields are Shopify-owned copies and must be
-refreshed through the normal storefront sync. Links pasted into navigation,
-emails, ads, or social profiles are merchant-owned and must be updated separately.
+The application retains the established `/apps/product-bundles` root because
+Shopify treats `prefix` and `subpath` as installation-scoped values. A TOML
+change applies only to new installations; existing shops keep their installed
+path unless the merchant customizes it or reinstalls the app. Shopify does not
+provide an Admin or Storefront API for reading that path proactively. Keeping
+the established root avoids split proxy contracts and preserves existing FPB
+links and every signed FPB/PPB storefront API call. Merchant-customized proxy
+paths remain unsupported by this host contract. PPB remains at
+`/products/{handle}`.
 
 ## Parent product routing
 

@@ -45,7 +45,7 @@ keywords:
 ### App Server (Render)
 - Remix SSR + API routes
 - Serves admin UI (merchant dashboard)
-- Proxies storefront API calls via `/apps/onlybundles/`
+- Proxies storefront API calls via `/apps/product-bundles/`
 - Cold-start latency: ~3–10s on free/starter Render plans — widget has retry logic for this
 
 ### Shopify Extensions

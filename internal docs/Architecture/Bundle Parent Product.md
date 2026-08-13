@@ -69,7 +69,7 @@ FPB Sync Bundle returns the canonical app-proxy URL and performs no Shopify Page
 
 ## Storefront hosts
 
-- FPB is hosted at `/apps/onlybundles/wpb/{publicNumber}` through the signed app proxy.
+- FPB is hosted at `/apps/product-bundles/wpb/{publicNumber}` through the signed app proxy.
 - PPB remains hosted at `/products/{shopifyProductHandle}` through the parent product page.
 
 The parent product is still required for both bundle types as the metafield owner and Cart Transform identity.

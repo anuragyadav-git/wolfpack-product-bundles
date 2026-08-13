@@ -84,7 +84,7 @@ cart {
 }
 ```
 
-The token is issued only by the signed app-proxy route `/apps/onlybundles/api/cart-transform-runtime-token`. It validates the current DB bundle config before signing selected component/add-on variant GIDs, quantities, parent variant, and pricing config.
+The token is issued only by the signed app-proxy route `/apps/product-bundles/api/cart-transform-runtime-token`. It validates the current DB bundle config before signing selected component/add-on variant GIDs, quantities, parent variant, and pricing config.
 
 ## Function Input Metafield Namespacing
 
