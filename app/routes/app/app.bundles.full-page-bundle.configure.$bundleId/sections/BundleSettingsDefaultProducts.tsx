@@ -93,7 +93,7 @@ export function FpbDefaultProductsSettings({
               {!discountTipDismissed && (
                 <s-banner
                   tone="info"
-                  heading="Discount tip"
+                  title="Discount tip"
                   dismissible
                   onDismiss={() => setDiscountTipDismissed(true)}
                 >

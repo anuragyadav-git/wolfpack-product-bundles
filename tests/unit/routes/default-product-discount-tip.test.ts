@@ -67,8 +67,8 @@ describe("Pre Selected Product discount tip", () => {
     const banner = findElement(render(), "s-banner");
 
     expect(banner?.props.dismissible).toBe(true);
-    expect(banner?.props.heading).toBe("Discount tip");
-    expect(banner?.props.title).toBeUndefined();
+    expect(banner?.props.title).toBe("Discount tip");
+    expect(banner?.props.heading).toBeUndefined();
     banner?.props.onDismiss?.();
     expect(setDismissed).toHaveBeenCalledWith(true);
     expect(baseFlow.markAsDirty).not.toHaveBeenCalled();
