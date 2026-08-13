@@ -171,8 +171,16 @@ export function BundleReadinessOverlay({ items, open, onOpenChange, hideCollapse
     if (outside) closeChecklist();
   };
 
-  const donut = (
-    <svg width="48" height="48" viewBox="0 0 56 56" className={styles.arc}>
+  const renderDonut = (accessible: boolean) => (
+    <svg
+      width="48"
+      height="48"
+      viewBox="0 0 56 56"
+      className={styles.arc}
+      role={accessible ? "img" : undefined}
+      aria-label={accessible ? `${t("common.readiness.title")}: ${score}` : undefined}
+      aria-hidden={accessible ? undefined : true}
+    >
       <circle
         cx="28" cy="28" r={radius}
         fill="none" stroke="#e8e8e8" strokeWidth="4.5"
@@ -219,9 +227,12 @@ export function BundleReadinessOverlay({ items, open, onOpenChange, hideCollapse
           onKeyDown={handleDialogKeyDown}
         >
           <div className={styles.sheetHeader}>
-            <span id="bundle-readiness-title" className={styles.sheetTitle}>
-              {t("common.readiness.title")}
-            </span>
+            <div className={styles.sheetHeaderScore}>
+              {renderDonut(true)}
+              <span id="bundle-readiness-title" className={styles.sheetTitle}>
+                {t("common.readiness.title")}
+              </span>
+            </div>
             <s-button
               variant="tertiary"
               icon="x"
@@ -296,6 +307,7 @@ export function BundleReadinessOverlay({ items, open, onOpenChange, hideCollapse
       )}
 
       <div
+        hidden={expanded}
         className={`${styles.container} ${
           showTriggerContext ? styles.containerIntro : styles.containerCollapsed
         }`}
@@ -318,7 +330,7 @@ export function BundleReadinessOverlay({ items, open, onOpenChange, hideCollapse
             aria-expanded={expanded}
             aria-controls={expanded ? "bundle-readiness-dialog" : undefined}
           >
-            {donut}
+            {renderDonut(false)}
             <div
               className={styles.scoreLabel}
               aria-hidden={!showTriggerContext}

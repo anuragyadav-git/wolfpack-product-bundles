@@ -5,7 +5,7 @@ title: Bundle Readiness Overlay Test Spec
 type: test-spec
 status: active
 summary: Behavioral coverage for the EB-aligned floating bundle readiness checklist.
-last_audited: 2026-07-30
+last_audited: 2026-08-13
 owners:
   - engineering
 domains:
@@ -40,6 +40,7 @@ Preserve the readiness checklist's functional contract while its appearance matc
 | 2 | Timed collapse | Five seconds elapse | Collapse callback runs once | Pure timer behavior |
 | 3 | Alternate owner | `hideCollapsedTrigger=true`, `open=true` | Checklist content renders without a floating trigger | Supports controlled embedding |
 | 4 | Open checklist | `open=true` | Checklist renders as an accessible modal dialog | Mobile presentation is verified in Chrome |
+| 5 | Open score ownership | `open=true` | Dialog exposes the current score and the background trigger is hidden | Gauge remains in the active modal layer |
 
 ## Acceptance Criteria
 

@@ -25,7 +25,7 @@
 
 .dialog {
   position: fixed;
-  inset: auto auto 88px 16px;
+  inset: auto auto 16px 16px;
   box-sizing: border-box;
   width: min(320px, calc(100vw - 32px));
   max-width: none;
@@ -62,6 +62,13 @@
   gap: 12px;
   padding: 8px 10px 8px 16px;
   border-bottom: 1px solid #e1e3e5;
+}
+
+.sheetHeaderScore {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
 }
 
 .sheetTitle {

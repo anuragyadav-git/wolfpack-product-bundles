@@ -90,5 +90,8 @@ describe("BundleReadinessOverlay trigger", () => {
     expect(markup).toContain('aria-modal="true"');
     expect(markup).toContain('aria-labelledby="bundle-readiness-title"');
     expect(markup).toContain("Products selected");
+    expect(markup).toContain('aria-label="Readiness Score: 0"');
+    expect(markup).toContain('data-tour-target="fpb-readiness-score"');
+    expect(markup).toContain('hidden=""');
   });
 });
