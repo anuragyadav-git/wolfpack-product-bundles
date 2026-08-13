@@ -44,6 +44,8 @@ export function usePpbConfigureFlow() {
     visibility,
     display,
     settings,
+    templateState,
+    categoryHandlers,
   });
   const sharedHandlers = useSharedBundleHandlers({
     stepsState: base.stepsState,
@@ -69,6 +71,7 @@ export function usePpbConfigureFlow() {
     settings,
     templateState,
     sharedHandlers,
+    saveHandlers,
   });
   const handleAddToStorefront = useCallback(() => {
     base.openThemeEditorForAppEmbed();

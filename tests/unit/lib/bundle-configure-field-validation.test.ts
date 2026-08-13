@@ -124,7 +124,7 @@ describe("validateBundleConfigureFormData", () => {
             displayConfiguration: { collectionsSelectedData: [] },
           },
         }),
-        textOverrides: JSON.stringify({ embedDisplayOn: "specific_collections" }),
+        bundleEmbedDisplayOn: "specific_collections",
       }),
       "ppb",
     );

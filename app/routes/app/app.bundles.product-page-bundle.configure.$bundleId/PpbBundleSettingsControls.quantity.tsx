@@ -11,6 +11,8 @@ export function PpbQuantitySettings() {
     setQuantityValidationEnabled,
     setVariantSelectorEnabled,
     variantSelectorEnabled,
+    validationErrors = {},
+    clearValidationError,
   } = usePpbConfigureContext();
 
   return (
@@ -34,13 +36,17 @@ export function PpbQuantitySettings() {
           </span>
         </div>
         <s-number-field
+          id="configure-settings-maxQuantity"
           label="Maximum allowed quantity per product"
+          required={quantityValidationEnabled || undefined}
+          error={validationErrors["settings.maxQuantity"]}
           min={1}
           value={maxQtyPerProduct || "1"}
           disabled={!quantityValidationEnabled}
           onInput={(e) => {
             setMaxQtyPerProduct((e.target as HTMLInputElement).value);
             markAsDirty();
+            clearValidationError("settings.maxQuantity");
           }}
           autocomplete="off"
         />

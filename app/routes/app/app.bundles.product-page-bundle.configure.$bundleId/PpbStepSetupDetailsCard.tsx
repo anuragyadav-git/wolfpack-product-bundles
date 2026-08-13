@@ -14,6 +14,8 @@ export function PpbStepSetupDetailsCard({
     openStepMultiLanguageModal,
     productPageBundleStyles,
     stepsState,
+    validationErrors = {},
+    clearValidationError,
   } = usePpbConfigureContext();
 
   return (
@@ -76,7 +78,10 @@ export function PpbStepSetupDetailsCard({
         </p>
         <s-stack direction="block" gap="small">
           <s-text-field
+            id={`configure-steps-${step.id}-name`}
             label="Step Name"
+            required
+            error={validationErrors[`steps.${step.id}.name`]}
             placeholder="Eg:- Add product"
             value={step.name ?? ""}
             onInput={(event) => {
@@ -86,9 +91,15 @@ export function PpbStepSetupDetailsCard({
                 (event.target as HTMLInputElement).value,
               );
               markAsDirty();
+              clearValidationError(`steps.${step.id}.name`);
             }}
             autocomplete="off"
           />
+          {validationErrors[`steps.${step.id}.resources`] && (
+            <s-text id={`configure-steps-${step.id}-resources`} tone="critical">
+              {validationErrors[`steps.${step.id}.resources`]}
+            </s-text>
+          )}
         </s-stack>
       </div>
     </div>

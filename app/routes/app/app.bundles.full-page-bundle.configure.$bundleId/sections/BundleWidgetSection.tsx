@@ -38,6 +38,8 @@ export function BundleWidgetSection({
     upsellWidgetImageUrl,
     upsellWidgetSelectedProducts,
     upsellWidgetTitle,
+    validationErrors = {},
+    clearValidationError,
   } = flow;
 
   const handleWidgetTypeChange = (event: any) => {
@@ -177,13 +179,16 @@ export function BundleWidgetSection({
                       </div>
                       <div className={fullPageBundleStyles.upsellBlockCopyFields}>
                         <s-text-field
+                          id="configure-widget-title"
                           label="Widget title"
                           value={upsellWidgetTitle}
                           required
+                          error={validationErrors["widget.title"]}
                           disabled={!upsellWidgetEnabled || undefined}
                           onInput={(event: any) => {
                             setUpsellWidgetTitle(event.target.value);
                             markAsDirty();
+                            clearValidationError("widget.title");
                           }}
                         />
                         <s-text-area
@@ -200,15 +205,18 @@ export function BundleWidgetSection({
                     </div>
                   )}
                   <s-text-field
+                    id="configure-widget-buttonText"
                     label="Widget button text"
                     value={upsellWidgetButtonText}
                     required
+                    error={validationErrors["widget.buttonText"]}
                     disabled={!upsellWidgetEnabled || undefined}
                     onInput={(event: any) => {
                       const value = event.target.value;
                       setUpsellWidgetButtonText(value);
                       setTextOverrides((prev) => ({ ...prev, widgetButtonText: value }));
                       markAsDirty();
+                      clearValidationError("widget.buttonText");
                     }}
                   />
                 </div>
@@ -240,7 +248,10 @@ export function BundleWidgetSection({
                     <s-button
                       variant="secondary"
                       disabled={!upsellWidgetEnabled || undefined}
-                      onClick={() => openVisibilityProductPicker("widget")}
+                      onClick={async () => {
+                        await openVisibilityProductPicker("widget");
+                        clearValidationError("widget.products");
+                      }}
                     >
                       Select products
                     </s-button>
@@ -269,6 +280,11 @@ export function BundleWidgetSection({
                         ),
                       )}
                     </div>
+                    {validationErrors["widget.products"] && (
+                      <s-text id="configure-widget-products" tone="critical">
+                        {validationErrors["widget.products"]}
+                      </s-text>
+                    )}
                   </div>
                 )}
                 {upsellWidgetDisplayOn === "specific_collections" && (
@@ -276,7 +292,10 @@ export function BundleWidgetSection({
                     <s-button
                       variant="secondary"
                       disabled={!upsellWidgetEnabled || undefined}
-                      onClick={() => openVisibilityCollectionPicker("widget")}
+                      onClick={async () => {
+                        await openVisibilityCollectionPicker("widget");
+                        clearValidationError("widget.collections");
+                      }}
                     >
                       Select collections
                     </s-button>
@@ -310,6 +329,11 @@ export function BundleWidgetSection({
                         ),
                       )}
                     </div>
+                    {validationErrors["widget.collections"] && (
+                      <s-text id="configure-widget-collections" tone="critical">
+                        {validationErrors["widget.collections"]}
+                      </s-text>
+                    )}
                   </div>
                 )}
               </div>

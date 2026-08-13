@@ -2,18 +2,41 @@ import { useCallback } from "react";
 import { AppLogger } from "../../../lib/logger";
 import { normalizeDefaultProductsData } from "../../../lib/bundle-config/default-products";
 import { buildVisibilityDisplayConfiguration } from "./ConfigureBundleFlow.helpers";
+import { useConfigureValidation } from "../_shared/bundle-configure/useConfigureValidation";
 
 export function usePpbSaveHandlers({
   base,
   visibility,
   display,
   settings,
+  templateState,
+  categoryHandlers,
 }: {
   base: any;
   visibility: any;
   display: any;
   settings: any;
+  templateState: any;
+  categoryHandlers: any;
 }) {
+  const validation = useConfigureValidation({
+    kind: "ppb",
+    setActiveSection: base.setActiveSection,
+    revealIssue: (validationIssue) => {
+      if (!validationIssue.stepId) return;
+      const stepIndex = base.stepsState.steps.findIndex(
+        (step: any) => String(step.id) === validationIssue.stepId,
+      );
+      if (stepIndex >= 0) templateState.setActiveTabIndex(stepIndex);
+      if (validationIssue.categoryId) {
+        const key = `${validationIssue.stepId}__${validationIssue.categoryId}`;
+        categoryHandlers.setCategoryOpen((current: Record<string, boolean>) => ({
+          ...current,
+          [key]: true,
+        }));
+      }
+    },
+  });
   const buildDefaultProductsData = useCallback(() => {
     return normalizeDefaultProductsData(settings.defaultProductsData);
   }, [settings.defaultProductsData]);
@@ -196,6 +219,10 @@ export function usePpbSaveHandlers({
         String(visibility.autoSelectBrowsedProduct),
       );
       formData.append(
+        "bundleEmbedDisplayOn",
+        visibility.bundleEmbedDisplayOn,
+      );
+      formData.append(
         "preSelectedProductVariantId",
         settings.preSelectedProductVariantId,
       );
@@ -257,7 +284,9 @@ export function usePpbSaveHandlers({
         "useSingleStepCategoriesAsBundleSteps",
         String(settings.useSingleStepCategoriesAsBundleSteps),
       );
-      base.fetcher.submit(formData, { method: "post" });
+      validation.validateConfigureForm(formData, (validFormData) => {
+        base.fetcher.submit(validFormData, { method: "post" });
+      });
       return;
     } catch (error) {
       AppLogger.error("Save failed:", {}, error as any);
@@ -276,6 +305,7 @@ export function usePpbSaveHandlers({
     display,
     settings,
     visibility,
+    validation,
   ]);
 
   const handleDiscard = useCallback(() => {
@@ -334,12 +364,14 @@ export function usePpbSaveHandlers({
     visibility.setBundleEmbedAddBrowsedProduct(
       visibility.originalBundleEmbedAddBrowsedProductRef.current,
     );
-  }, [base, settings, visibility]);
+    validation.clearValidationErrors();
+  }, [base, settings, validation, visibility]);
 
   return {
     buildDefaultProductsData,
     buildBundleUpsellConfig,
     handleSave,
     handleDiscard,
+    ...validation,
   };
 }

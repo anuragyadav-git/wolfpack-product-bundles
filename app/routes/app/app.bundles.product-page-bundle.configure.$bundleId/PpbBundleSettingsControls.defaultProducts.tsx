@@ -18,6 +18,8 @@ export function PpbDefaultProductsSettings() {
     productPageBundleStyles,
     setDefaultProductsData,
     shopify,
+    validationErrors = {},
+    clearValidationError,
   } = usePpbConfigureContext();
 
   const selectedDefaultProducts = defaultProductsData.products ?? [];
@@ -55,6 +57,7 @@ export function PpbDefaultProductsSettings() {
       products: defaultProducts,
     }));
     markAsDirty();
+    clearValidationError("settings.defaultProducts");
   };
 
   return (
@@ -120,6 +123,11 @@ export function PpbDefaultProductsSettings() {
               <s-badge tone="success">{defaultProductCount} selected</s-badge>
             )}
           </div>
+          {validationErrors["settings.defaultProducts"] && (
+            <s-text id="configure-settings-defaultProducts" tone="critical">
+              {validationErrors["settings.defaultProducts"]}
+            </s-text>
+          )}
         </div>
       </s-stack>
     </s-section>

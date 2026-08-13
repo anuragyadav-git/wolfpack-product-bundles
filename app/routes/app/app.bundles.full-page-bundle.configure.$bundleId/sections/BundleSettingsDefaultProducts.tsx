@@ -11,6 +11,8 @@ export function FpbDefaultProductsSettings({
     markAsDirty,
     setDefaultProductsData,
     shopify,
+    validationErrors = {},
+    clearValidationError,
   } = flow;
 
   return (
@@ -52,6 +54,7 @@ export function FpbDefaultProductsSettings({
               products: defaultProducts,
             }));
             markAsDirty();
+            clearValidationError("settings.defaultProducts");
           };
           return (
             <s-stack direction="block" gap="small">
@@ -144,6 +147,11 @@ export function FpbDefaultProductsSettings({
                         </s-badge>
                       )}
                     </s-stack>
+                    {validationErrors["settings.defaultProducts"] && (
+                      <s-text id="configure-settings-defaultProducts" tone="critical">
+                        {validationErrors["settings.defaultProducts"]}
+                      </s-text>
+                    )}
                   </div>
                 </>
               )}

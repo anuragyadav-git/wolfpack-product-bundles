@@ -10,12 +10,14 @@ export function usePpbFetcherEffects({
   settings,
   templateState,
   sharedHandlers,
+  saveHandlers,
 }: {
   base: any;
   visibility: any;
   settings: any;
   templateState: any;
   sharedHandlers: any;
+  saveHandlers: any;
 }) {
   const { fetcher } = base;
   const {
@@ -33,6 +35,7 @@ export function usePpbFetcherEffects({
       base.lastProcessedFetcherDataRef.current = fetcher.data;
       const result = fetcher.data;
       if (result.success) {
+        saveHandlers.clearValidationErrors?.();
         if ("bundle" in result && result.bundle) {
           base.originalLoadingGifRef.current = base.loadingGif;
           base.originalShowProductPricesRef.current = base.showProductPrices;
@@ -113,6 +116,10 @@ export function usePpbFetcherEffects({
           );
         }
       } else {
+        if (Array.isArray((result as any).fieldErrors)) {
+          saveHandlers.setServerFieldErrors?.((result as any).fieldErrors);
+          return;
+        }
         const errorMessage =
           ("error" in result ? result.error : null) || "Operation failed";
         base.shopify.toast.show(errorMessage, {

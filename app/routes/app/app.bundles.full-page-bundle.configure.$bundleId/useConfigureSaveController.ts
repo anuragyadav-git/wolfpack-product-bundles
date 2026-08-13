@@ -6,8 +6,27 @@ import { resolveFpbProductSlotsEnabled } from "../../../lib/fpb-product-slots-av
 import { ADDON_MESSAGE_KEY } from "./configure-constants";
 import type { ConfigureBundleFlowDraft } from "./configure-flow-types";
 import { serializeFpbSaveSteps } from "./fpb-save-transport";
+import { useConfigureValidation } from "../_shared/bundle-configure/useConfigureValidation";
 
 export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
+  const validation = useConfigureValidation({
+    kind: "fpb",
+    setActiveSection: flow.setActiveSection,
+    revealIssue: (validationIssue) => {
+      if (!validationIssue.stepId) return;
+      const stepIndex = flow.stepsState.steps.findIndex(
+        (step: any) => String(step.id) === validationIssue.stepId,
+      );
+      if (stepIndex >= 0) flow.setActiveTabIndex(stepIndex);
+      if (validationIssue.categoryId) {
+        const key = `${validationIssue.stepId}__${validationIssue.categoryId}`;
+        flow.setCategoryOpen((current: Record<string, boolean>) => ({
+          ...current,
+          [key]: true,
+        }));
+      }
+    },
+  });
   const buildDefaultProductsData = useCallback(() => {
     return flow.normalizeDefaultProductsData(flow.defaultProductsData);
   }, [flow]);
@@ -134,6 +153,7 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
         "personalizationData",
         personalizationData ? JSON.stringify(personalizationData) : "",
       );
+      formData.append("validationAddonDraft", JSON.stringify(flow.addonDraft));
       formData.append(
         "bundleUpsellConfig",
         JSON.stringify(flow.buildBundleUpsellConfig()),
@@ -172,7 +192,9 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
         "defaultProductsData",
         JSON.stringify(buildDefaultProductsData()),
       );
-      flow.fetcher.submit(formData, { method: "post" });
+      validation.validateConfigureForm(formData, (validFormData) => {
+        flow.fetcher.submit(validFormData, { method: "post" });
+      });
       return;
     } catch (error) {
       AppLogger.error("Save failed:", {}, error as any);
@@ -184,7 +206,7 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
         },
       );
     }
-  }, [buildDefaultProductsData, flow]);
+  }, [buildDefaultProductsData, flow, validation]);
 
   useEffect(() => {
     if (flow.fetcher.data && flow.fetcher.state === "idle") {
@@ -194,6 +216,7 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
       flow.lastProcessedFetcherDataRef.current = flow.fetcher.data;
       const result = flow.fetcher.data;
       if (result.success) {
+        validation.clearValidationErrors();
         if ("bundle" in result && result.bundle) {
           flow.originalValuesRef.current = {
             status: flow.formState.bundleStatus,
@@ -294,6 +317,11 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
           );
         }
       } else {
+        if (Array.isArray((result as any).fieldErrors)) {
+          validation.setServerFieldErrors((result as any).fieldErrors);
+          flow.finishPreviewBundleLoading?.();
+          return;
+        }
         const errorMessage =
           ("error" in result ? result.error : null) || "Operation failed";
         flow.shopify.toast.show(errorMessage, {
@@ -340,7 +368,8 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
     flow.setAutoSelectBrowsedProduct(
       flow.originalAutoSelectBrowsedProductRef.current,
     );
-  }, [flow]);
+    validation.clearValidationErrors();
+  }, [flow, validation]);
   const handleConfirmDiscard = useCallback(() => {
     closeDiscardModal();
     handleDiscard();
@@ -353,5 +382,6 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
     handleDiscard,
     handleSave,
     serializePricingDisplayOptions,
+    ...validation,
   });
 }

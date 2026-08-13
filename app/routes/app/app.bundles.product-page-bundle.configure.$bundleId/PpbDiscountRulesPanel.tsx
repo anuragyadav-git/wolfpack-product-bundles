@@ -93,7 +93,11 @@ export function PpbDiscountRulesPanel() {
 }
 
 function PpbBuyXGetYRules() {
-  const { pricingState, productPageBundleStyles } = usePpbConfigureContext();
+  const {
+    pricingState,
+    productPageBundleStyles,
+    validationErrors = {},
+  } = usePpbConfigureContext();
 
   return (
     <s-stack direction="block" gap="small">
@@ -117,7 +121,10 @@ function PpbBuyXGetYRules() {
                 Customer buys
               </p>
               <s-number-field
+                id={`configure-discount-rules-${rule.id}-customerBuys`}
                 label="Minimum quantity of items"
+                required
+                error={validationErrors[`discount.rules.${rule.id}.customerBuys`]}
                 value={String(rule.customerBuys ?? 2)}
                 onInput={(e) =>
                   pricingState.updateDiscountRule(rule.id, {
@@ -133,7 +140,10 @@ function PpbBuyXGetYRules() {
                 Customer gets
               </p>
               <s-number-field
+                id={`configure-discount-rules-${rule.id}-customerGets`}
                 label="Quantity"
+                required
+                error={validationErrors[`discount.rules.${rule.id}.customerGets`]}
                 value={String(rule.customerGets ?? 1)}
                 onInput={(e) =>
                   pricingState.updateDiscountRule(rule.id, {
@@ -147,7 +157,10 @@ function PpbBuyXGetYRules() {
               />
               <div className={productPageBundleStyles.bxyRewardGrid}>
                 <s-number-field
+                  id={`configure-discount-rules-${rule.id}-discountValue`}
                   label="Discount value"
+                  required
+                  error={validationErrors[`discount.rules.${rule.id}.discountValue`]}
                   value={String(
                     getBogoDiscountInputValue(
                       rule.discountValue ?? 0,
@@ -248,6 +261,7 @@ function PpbStandardDiscountRules() {
     DiscountMethod,
     pricingState,
     productPageBundleStyles,
+    validationErrors = {},
   } = usePpbConfigureContext();
 
   return (
@@ -270,7 +284,10 @@ function PpbStandardDiscountRules() {
             {pricingState.discountType === DiscountMethod.FIXED_BUNDLE_PRICE ? (
               <div className={productPageBundleStyles.discountFieldsRowPair}>
                 <s-number-field
+                  id={`configure-discount-rules-${rule.id}-conditionValue`}
                   label="Number of Products in Bundle"
+                  required
+                  error={validationErrors[`discount.rules.${rule.id}.conditionValue`]}
                   value={String(rule.conditionValue ?? 0)}
                   onInput={(e) =>
                     pricingState.updateDiscountRule(rule.id, {
@@ -281,7 +298,10 @@ function PpbStandardDiscountRules() {
                   min={0}
                 />
                 <s-number-field
+                  id={`configure-discount-rules-${rule.id}-discountValue`}
                   label="Price"
+                  required
+                  error={validationErrors[`discount.rules.${rule.id}.discountValue`]}
                   value={String(centsToAmount(rule.discountValue))}
                   onInput={(e) =>
                     pricingState.updateDiscountRule(rule.id, {
@@ -311,7 +331,10 @@ function PpbStandardDiscountRules() {
                   <s-option value="amount">Amount</s-option>
                 </s-select>
                 <s-number-field
+                  id={`configure-discount-rules-${rule.id}-conditionValue`}
                   label="is greater than or equal to"
+                  required
+                  error={validationErrors[`discount.rules.${rule.id}.conditionValue`]}
                   value={String(
                     rule.conditionType === "amount"
                       ? centsToAmount(rule.conditionValue)
@@ -336,11 +359,14 @@ function PpbStandardDiscountRules() {
                   }
                 />
                 <s-number-field
+                  id={`configure-discount-rules-${rule.id}-discountValue`}
                   label={
                     pricingState.discountType === DiscountMethod.PERCENTAGE_OFF
                       ? "Percentage Off"
                       : "Fixed Amount Off"
                   }
+                  required
+                  error={validationErrors[`discount.rules.${rule.id}.discountValue`]}
                   value={String(
                     pricingState.discountType === DiscountMethod.PERCENTAGE_OFF
                       ? rule.discountValue

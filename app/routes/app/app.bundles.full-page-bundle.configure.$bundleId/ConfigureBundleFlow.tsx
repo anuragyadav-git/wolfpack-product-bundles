@@ -11,6 +11,7 @@ import { ImagesVisibilitySection } from "./sections/ImagesVisibilitySection";
 import { BundleSettingsSection } from "./sections/BundleSettingsSection";
 import { BundleWidgetSection } from "./sections/BundleWidgetSection";
 import { ConfigureRouteModals } from "./sections/ConfigureRouteModals";
+import { ConfigureValidationSummary } from "../_shared/bundle-configure/ConfigureValidationSummary";
 
 function ConfigureBundleFlow() {
   const flow = useConfigureBundleFlow();
@@ -66,6 +67,10 @@ function ConfigureBundleFlow() {
       sidebar={<ConfigureSidebar flow={flow} />}
       overlays={<ConfigureRouteModals flow={flow} />}
     >
+      <ConfigureValidationSummary
+        activeSection={flow.activeSection}
+        issues={flow.validationIssues}
+      />
       <StepSetupSection flow={flow} />
       <FreeGiftAddonsSection flow={flow} />
       <DiscountPricingSection flow={flow} />
