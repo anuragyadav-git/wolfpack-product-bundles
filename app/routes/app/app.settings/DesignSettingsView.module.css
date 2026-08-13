@@ -217,7 +217,7 @@
   block-size: clamp(640px, calc(100dvh - 160px), 884px);
   min-height: 0;
   place-items: start center;
-  overflow: auto;
+  overflow: hidden;
   background: #f1f2f3;
   padding: clamp(10px, 1.6vw, 20px);
 }
