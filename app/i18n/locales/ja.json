@@ -8,6 +8,9 @@
     "pricing": "料金",
     "events": "アップデートとFAQ"
   },
+  "integrations": {
+    "requestMessage": "新しい連携への対応をリクエストしたいです。"
+  },
   "dashboard": {
     "title": "Dashboard: Wolfpack Bundle Builder",
     "subtitle": "バンドル、カスタマーサポートなどにアクセスできます。",

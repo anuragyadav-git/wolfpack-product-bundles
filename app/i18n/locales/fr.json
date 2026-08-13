@@ -8,6 +8,9 @@
     "pricing": "Tarification",
     "events": "Mises à jour et FAQ"
   },
+  "integrations": {
+    "requestMessage": "Bonjour, je souhaite demander la prise en charge d'une nouvelle intégration."
+  },
   "dashboard": {
     "title": "Tableau de bord : Wolfpack Bundle Builder",
     "subtitle": "Accédez à vos bundles, au support client et bien plus.",

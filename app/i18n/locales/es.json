@@ -8,6 +8,9 @@
     "pricing": "Precios",
     "events": "Actualizaciones y preguntas frecuentes"
   },
+  "integrations": {
+    "requestMessage": "Hola, me gustaría solicitar compatibilidad con una nueva integración."
+  },
   "dashboard": {
     "title": "Dashboard: Wolfpack Bundle Builder",
     "subtitle": "Acceda a sus bundles, soporte al cliente y más.",
