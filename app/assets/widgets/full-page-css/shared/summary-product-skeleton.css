@@ -71,11 +71,7 @@
 #bundle-builder-app.bundle-widget-full-page[data-bundle-type="full_page"]
   .layout-sidebar[data-fpb-summary-mode="sidebar"]
   .side-panel-skeleton-slot
-  .side-panel-skeleton-line,
-#bundle-builder-app.bundle-widget-full-page[data-bundle-type="full_page"]
-  .layout-sidebar[data-fpb-summary-mode="sidebar"]
-  .side-panel-skeleton-slot
-  .side-panel-skeleton-remove {
+  .side-panel-skeleton-line {
   display: block;
   min-width: 0;
   min-height: 0;
@@ -112,15 +108,4 @@
   align-self: center;
   width: 100%;
   height: 1.25rem;
-}
-
-#bundle-builder-app.bundle-widget-full-page[data-bundle-type="full_page"]
-  .layout-sidebar[data-fpb-summary-mode="sidebar"]
-  .side-panel-skeleton-slot
-  .side-panel-skeleton-remove {
-  grid-column: 2;
-  grid-row: 2;
-  align-self: start;
-  width: 25%;
-  height: 0.75rem;
 }

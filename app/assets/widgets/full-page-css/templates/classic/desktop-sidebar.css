@@ -141,14 +141,6 @@
     color: var(--bundle-side-panel-discount-color, currentColor);
   }
 
-  .fpb-preset-classic .fpb-dp-sidebar .fpb-dp-track {
-    height: 8px;
-    background: var(
-      --fpb-discount-track-empty,
-      var(--bundle-side-panel-product-border, currentColor)
-    );
-  }
-
   .fpb-preset-classic .fpb-dp-sidebar .fpb-dp-fill {
     background: var(
       --fpb-discount-track-filled,

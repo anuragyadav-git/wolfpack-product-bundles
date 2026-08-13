@@ -433,7 +433,7 @@ body.fpb-mobile-summary-scroll-locked {
   .side-panel-skeleton-slot {
   display: grid;
   grid-template-columns: var(--fpb-mobile-summary-thumbnail-size)
-    minmax(0, 1fr) 44px;
+    minmax(0, 1fr);
   grid-template-rows: var(--fpb-mobile-summary-row-height);
   align-items: center;
   gap: var(--fpb-mobile-summary-gap);
@@ -470,10 +470,7 @@ body.fpb-mobile-summary-scroll-locked {
   .side-panel-skeleton-thumb,
 #bundle-builder-app
   .fpb-mobile-summary-products-list--skeletons
-  .side-panel-skeleton-line,
-#bundle-builder-app
-  .fpb-mobile-summary-products-list--skeletons
-  .side-panel-skeleton-remove {
+  .side-panel-skeleton-line {
   animation: none;
 }
 
@@ -497,16 +494,6 @@ body.fpb-mobile-summary-scroll-locked {
   width: 42px;
   height: 12px;
   margin-bottom: 10px;
-}
-
-#bundle-builder-app
-  .fpb-mobile-summary-products-list--skeletons
-  .side-panel-skeleton-remove {
-  grid-column: 3;
-  grid-row: 1;
-  place-self: center;
-  width: 18px;
-  height: 18px;
 }
 
 #bundle-builder-app .fpb-mobile-summary-totals {

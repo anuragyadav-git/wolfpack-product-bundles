@@ -529,10 +529,8 @@
   .fpb-mobile-summary-products-section,
   .layout-sidebar .side-panel-skeleton-slot .side-panel-skeleton-thumb,
   .layout-sidebar .side-panel-skeleton-slot .side-panel-skeleton-line,
-  .layout-sidebar .side-panel-skeleton-slot .side-panel-skeleton-remove,
   .fpb-mobile-summary-products-list--skeletons .side-panel-skeleton-thumb,
-  .fpb-mobile-summary-products-list--skeletons .side-panel-skeleton-line,
-  .fpb-mobile-summary-products-list--skeletons .side-panel-skeleton-remove {
+  .fpb-mobile-summary-products-list--skeletons .side-panel-skeleton-line {
     animation-duration: 1ms;
     transition-duration: 1ms;
   }

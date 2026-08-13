@@ -71,8 +71,7 @@
 }
 
 .layout-sidebar .side-panel-skeleton-slot .side-panel-skeleton-thumb,
-.layout-sidebar .side-panel-skeleton-slot .side-panel-skeleton-line,
-.layout-sidebar .side-panel-skeleton-slot .side-panel-skeleton-remove {
+.layout-sidebar .side-panel-skeleton-slot .side-panel-skeleton-line {
   display: block;
   background: var(--bundle-skeleton-base-bg, #e5e7eb);
   border-radius: 6px;
@@ -100,12 +99,6 @@
   width: 42px;
   height: 12px;
   flex: 0 0 42px;
-}
-
-.layout-sidebar .side-panel-skeleton-slot .side-panel-skeleton-remove {
-  width: 18px;
-  height: 18px;
-  flex: 0 0 18px;
 }
 
 .layout-sidebar .side-panel-products:not(:empty) + .side-panel-skeleton-slots {
@@ -157,61 +150,6 @@
   background: transparent;
 }
 
-.fpb-dp-sidebar .fpb-discount-step-list,
-.fpb-dp-sidebar .fpb-discount-step-subtitle-list {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  width: 100%;
-}
-
-.fpb-dp-sidebar .fpb-discount-step-list {
-  margin: 0 0 5px;
-}
-
-.fpb-dp-sidebar .fpb-discount-step-subtitle-list {
-  margin: 5px 0 0;
-}
-
-.fpb-dp-sidebar .fpb-discount-step:only-child,
-.fpb-dp-sidebar .fpb-discount-step-subtitle:only-child {
-  margin-left: auto;
-  text-align: right;
-  align-items: flex-end;
-}
-
-.fpb-dp-sidebar .fpb-discount-step {
-  align-items: flex-start;
-}
-
-.fpb-dp-sidebar .fpb-discount-step-title {
-  color: #000000;
-  font-size: inherit;
-  font-weight: 400;
-  line-height: inherit;
-}
-
-.fpb-dp-sidebar .fpb-discount-step-subtitle {
-  color: #000000;
-  font-size: inherit;
-  font-weight: 400;
-  line-height: inherit;
-  opacity: 1;
-}
-
-.fpb-dp-sidebar .fpb-dp-track {
-  height: 6px;
-  background: var(--fpb-discount-track-empty, #c1e7c5);
-  border-radius: 999px;
-}
-
-.fpb-dp-sidebar .fpb-dp-fill {
-  background: var(--fpb-discount-track-filled, #15a524);
-  border-radius: 999px;
-  min-width: 0;
-}
-
 .fpb-dp-row {
   display: flex;
   align-items: center;
@@ -236,38 +174,101 @@
 }
 
 .fpb-discount-step-list {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 8px;
+  display: grid;
+  grid-template-columns: repeat(
+    var(--bw-discount-milestone-count),
+    minmax(0, 1fr)
+  );
+  grid-template-rows: minmax(1.2em, auto) 16px minmax(1.2em, auto);
+  row-gap: 4px;
+  width: 100%;
+  margin: 0;
 }
 
 .fpb-discount-step {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
+  display: contents;
 }
 
 .fpb-discount-step-title {
+  grid-column: var(--bw-discount-milestone-index);
+  grid-row: 1;
+  align-self: end;
+  justify-self: end;
+  max-width: min(7rem, 100%);
   font-size: 12px;
   line-height: 1.2;
-  font-weight: 700;
+  font-weight: 600;
   color: inherit;
+  overflow-wrap: anywhere;
+  text-align: right;
 }
 
 .fpb-discount-step-subtitle {
+  grid-column: var(--bw-discount-milestone-index);
+  grid-row: 3;
+  align-self: start;
+  justify-self: end;
+  max-width: min(7rem, 100%);
   font-size: 11px;
   line-height: 1.2;
-  font-weight: 500;
+  font-weight: 400;
   color: inherit;
-  opacity: 0.78;
+  opacity: 0.68;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
+.fpb-discount-step:not(:last-child) .fpb-discount-step-title,
+.fpb-discount-step:not(:last-child) .fpb-discount-step-subtitle {
+  transform: translateX(50%);
+  text-align: center;
+}
+
+.fpb-discount-step-marker {
+  z-index: 2;
+  grid-column: var(--bw-discount-milestone-index);
+  grid-row: 2;
+  align-self: center;
+  justify-self: end;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--fpb-discount-track-empty, #c1e7c5);
+  border-radius: 50%;
+  background: var(--bundle-side-panel-bg, #ffffff);
+  color: var(--bundle-side-panel-bg, #ffffff);
+  font-size: 10px;
+  line-height: 1;
+  box-sizing: border-box;
+}
+
+.fpb-discount-step:not(:last-child) .fpb-discount-step-marker {
+  transform: translateX(50%);
+}
+
+.fpb-discount-step-active .fpb-discount-step-marker {
+  border-color: var(--fpb-discount-track-filled, #15a524);
+  box-shadow: inset 0 0 0 2px var(--bundle-side-panel-bg, #ffffff);
+  background: var(--fpb-discount-track-filled, #15a524);
+}
+
+.fpb-discount-step-reached .fpb-discount-step-marker {
+  border-color: var(--fpb-discount-track-filled, #15a524);
+  background: var(--fpb-discount-track-filled, #15a524);
 }
 
 .fpb-discount-step-reached .fpb-discount-step-title,
 .fpb-discount-step-reached .fpb-discount-step-subtitle {
   opacity: 1;
+}
+
+.fpb-dp-step_based .fpb-discount-step-list > .fpb-dp-track {
+  z-index: 1;
+  grid-column: 1 / -1;
+  grid-row: 2;
+  align-self: center;
 }
 
 .fpb-dp-simple .fpb-dp-track,
@@ -285,8 +286,15 @@
   width: var(--fpb-discount-progress-width, 0%);
   background: var(--fpb-discount-track-filled, #15a524);
   border-radius: 999px;
-  transition: width 400ms ease;
+  transition: width 400ms ease-out;
   min-width: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fpb-dp-fill,
+  .bw-discount-progress__fill {
+    transition: none;
+  }
 }
 
 .fpb-discount-progress.reached .fpb-dp-fill {
