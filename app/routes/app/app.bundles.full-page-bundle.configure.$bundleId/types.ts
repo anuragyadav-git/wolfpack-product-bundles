@@ -34,6 +34,7 @@ export interface BundlePricing {
 
 export interface BundleData {
   id: string;
+  publicNumber: number | null;
   name: string;
   description?: string;
   shopId: string;

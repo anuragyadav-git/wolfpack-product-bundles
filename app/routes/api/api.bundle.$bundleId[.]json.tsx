@@ -13,7 +13,7 @@ import { BUNDLE_PREVIEW_QUERY_PARAM } from "../../lib/bundle-preview-url";
  * Public API endpoint to fetch a single bundle by ID
  * Used by the full-page bundle widget via Shopify App Proxy
  *
- * GET /apps/product-bundles/api/bundle/:bundleId.json
+ * GET /apps/onlybundles/api/bundle/:bundleId.json
  *
  */
 

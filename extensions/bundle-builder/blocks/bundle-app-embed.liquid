@@ -3,7 +3,7 @@
 {% endcomment %}
 
 {% assign app_namespace = '$app' %}
-{% assign fpb_parent_bundle_id = nil %}
+{% assign fpb_public_number = nil %}
 {% if product and product.variants.first %}
   {% assign variant_metafields = product.variants.first.metafields[app_namespace] %}
   {% if variant_metafields %}
@@ -11,15 +11,15 @@
     {% if bundle_ui_config_field and bundle_ui_config_field.value %}
       {% assign bundle_ui_config = bundle_ui_config_field.value %}
       {% if bundle_ui_config.bundleType == 'full_page' %}
-        {% assign fpb_parent_bundle_id = bundle_ui_config.bundleId | default: bundle_ui_config.id %}
+        {% assign fpb_public_number = bundle_ui_config.publicNumber %}
       {% endif %}
     {% endif %}
   {% endif %}
 {% endif %}
 
 {% assign fpb_proxy_path = nil %}
-{% if fpb_parent_bundle_id != blank and request.design_mode == false %}
-  {% assign fpb_proxy_path = '/apps/product-bundles/wpb/' | append: fpb_parent_bundle_id %}
+{% if fpb_public_number != blank and request.design_mode == false %}
+  {% assign fpb_proxy_path = '/apps/onlybundles/wpb/' | append: fpb_public_number %}
 {% endif %}
 
 <div

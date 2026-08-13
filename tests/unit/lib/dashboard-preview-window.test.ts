@@ -18,8 +18,8 @@ describe("dashboard preview window", () => {
     const replace = jest.fn();
     const popup = { closed: false, location: { replace } } as unknown as Window;
 
-    expect(navigatePendingDashboardPreview(popup, "https://shop.test/apps/product-bundles/wpb/1?wpb_preview=token")).toBe(true);
-    expect(replace).toHaveBeenCalledWith("https://shop.test/apps/product-bundles/wpb/1?wpb_preview=token");
+    expect(navigatePendingDashboardPreview(popup, "https://shop.test/apps/onlybundles/wpb/1?wpb_preview=token")).toBe(true);
+    expect(replace).toHaveBeenCalledWith("https://shop.test/apps/onlybundles/wpb/1?wpb_preview=token");
   });
 
   it("reports that a missing or closed pending tab cannot be navigated", () => {

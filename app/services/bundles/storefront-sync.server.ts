@@ -10,6 +10,7 @@ import { buildFullPageBundleMetafieldConfig } from "../../routes/app/app.bundles
 import {
   buildSyncBundleConfiguration,
 } from "../../routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/runtime-config.server";
+import { ensureBundleParentProduct } from "./bundle-parent-product.server";
 
 export type StorefrontSyncReason = "save" | "retry" | "sync_bundle" | "preview";
 
@@ -44,6 +45,12 @@ async function syncFullPageBundleFromDb(
   if (!bundle.shopifyProductId) {
     return stats;
   }
+
+  await ensureBundleParentProduct({
+    admin,
+    shopDomain,
+    bundle,
+  });
 
   const bundleConfig = buildFullPageBundleMetafieldConfig(bundle);
   await updateBundleProductMetafields(admin, bundle.shopifyProductId, bundleConfig);
@@ -127,6 +134,7 @@ export async function syncBundleStorefrontNow(input: {
 export function compactBundleForConfigureResponse(bundle: any) {
   return {
     id: bundle.id,
+    publicNumber: bundle.publicNumber ?? null,
     bundleType: bundle.bundleType,
     status: bundle.status,
     name: bundle.name,

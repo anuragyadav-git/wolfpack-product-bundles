@@ -75,14 +75,18 @@ export async function handlePrepareStorefrontPreview(
     if (bundleType === "full_page") {
       const bundle = await db.bundle.findUnique({
         where: { id: bundleId, shopId: session.shop },
-        select: { id: true, bundleType: true, status: true },
+        select: { id: true, publicNumber: true, bundleType: true, status: true },
       });
-      if (!bundle || bundle.bundleType !== "full_page") {
+      if (
+        !bundle
+        || bundle.bundleType !== "full_page"
+        || bundle.publicNumber === null
+      ) {
         throw new Error("Bundle not found");
       }
 
       shareablePreviewUrl = appendFpbPreviewToken(
-        buildFpbStorefrontUrl(session.shop, bundleId),
+        buildFpbStorefrontUrl(session.shop, bundle.publicNumber),
         previewToken,
       );
       await recordFirstBundlePreviewEvent({

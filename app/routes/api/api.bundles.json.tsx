@@ -10,7 +10,7 @@ import { ERROR_MESSAGES } from "../../constants/errors";
  * Public API endpoint to fetch fresh bundle data
  * This bypasses Shopify's metafield cache and returns the latest data from database
  *
- * GET /apps/product-bundles/api/bundles.json
+ * GET /apps/onlybundles/api/bundles.json
  */
 export const loader: LoaderFunction = async ({ request }) => {
   try {

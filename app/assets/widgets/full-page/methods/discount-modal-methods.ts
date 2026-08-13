@@ -194,7 +194,7 @@ closeModal() {
 },
 
 resolveStorefrontApiBase() {
-  const appProxyPrefix = '/apps/product-bundles';
+  const appProxyPrefix = '/apps/onlybundles';
   if (window.location?.pathname?.startsWith(`${appProxyPrefix}/`)) {
     return appProxyPrefix;
   }

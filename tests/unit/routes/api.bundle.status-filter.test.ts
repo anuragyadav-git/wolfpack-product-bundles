@@ -61,13 +61,13 @@ function makeApiRequest(bundleId: string, previewToken?: string) {
     .sort()
     .join('');
   params.set('signature', createHmac('sha256', 'test_api_secret').update(message).digest('hex'));
-  return new Request(`https://test.myshopify.com/apps/product-bundles/api/bundle/${bundleId}.json?${params.toString()}`);
+  return new Request(`https://test.myshopify.com/apps/onlybundles/api/bundle/${bundleId}.json?${params.toString()}`);
 }
 
 function makeProxyRequest(bundleId: string) {
   const params = new URLSearchParams({
     shop: 'test-shop.myshopify.com',
-    path_prefix: '/apps/product-bundles',
+    path_prefix: '/apps/onlybundles',
     timestamp: '1770000000',
   });
   const message = [...params.entries()]
@@ -75,7 +75,7 @@ function makeProxyRequest(bundleId: string) {
     .sort()
     .join('');
   params.set('signature', createHmac('sha256', 'test_api_secret').update(message).digest('hex'));
-  return new Request(`https://test-shop.myshopify.com/apps/product-bundles/wpb/${bundleId}?${params.toString()}`);
+  return new Request(`https://test-shop.myshopify.com/apps/onlybundles/wpb/${bundleId}?${params.toString()}`);
 }
 
 describe('api.bundle.$bundleId.json — status filtering', () => {
@@ -190,18 +190,18 @@ describe('wpb.$bundleId (FPB proxy page) — draft access control', () => {
     process.env.SHOPIFY_API_SECRET = originalSecret;
   });
 
-  it('queries by verified shop and bundle identity before preview-token authorization', async () => {
+  it('queries by verified shop and public number before preview-token authorization', async () => {
     mockFindFirst().mockResolvedValue(null);
 
     await wpbProxyLoader({
-      request: makeProxyRequest('bundle-1'),
-      params: { bundleId: 'bundle-1' },
+      request: makeProxyRequest('1'),
+      params: { bundleId: '1' },
       context: {},
     } as any);
 
     const call = mockFindFirst().mock.calls[0]?.[0];
     expect(call?.where).toEqual({
-      id: 'bundle-1',
+      publicNumber: 1,
       shopId: 'test-shop.myshopify.com',
       bundleType: 'full_page',
     });
@@ -210,14 +210,15 @@ describe('wpb.$bundleId (FPB proxy page) — draft access control', () => {
   it('returns 404 for an unsigned DRAFT bundle', async () => {
     mockFindFirst().mockResolvedValue({
       id: 'bundle-1',
+      publicNumber: 1,
       shopId: 'test-shop.myshopify.com',
       bundleType: 'full_page',
       status: BundleStatus.DRAFT,
     });
 
     const response = await wpbProxyLoader({
-      request: makeProxyRequest('bundle-1'),
-      params: { bundleId: 'bundle-1' },
+      request: makeProxyRequest('1'),
+      params: { bundleId: '1' },
       context: {},
     } as any);
 

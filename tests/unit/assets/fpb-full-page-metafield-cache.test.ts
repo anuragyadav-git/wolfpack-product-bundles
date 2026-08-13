@@ -69,7 +69,7 @@ describe('FPB full-page metafield cache', () => {
 
     expect(widget.bundleData).toEqual({ 'bundle-1': currentBundle });
     expect(widget._bundleConfigCacheMode).toBe('proxy');
-    expect(fetchSpy).toHaveBeenCalledWith('/apps/product-bundles/api/bundle/bundle-1.json');
+    expect(fetchSpy).toHaveBeenCalledWith('/apps/onlybundles/api/bundle/bundle-1.json');
   });
 
   it('hydrates through the app proxy when the cached payload is only a bootstrap pointer', async () => {
@@ -94,7 +94,7 @@ describe('FPB full-page metafield cache', () => {
 
     expect(widget.bundleData).toEqual({ 'bundle-1': hydratedBundle });
     expect(widget._bundleConfigCacheMode).toBe('proxy');
-    expect(fetchSpy).toHaveBeenCalledWith('/apps/product-bundles/api/bundle/bundle-1.json');
+    expect(fetchSpy).toHaveBeenCalledWith('/apps/onlybundles/api/bundle/bundle-1.json');
   });
 
 });

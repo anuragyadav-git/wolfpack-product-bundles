@@ -127,7 +127,7 @@ describe('PPB product-page preflight validation', () => {
       headers: { 'Accept': 'application/json' },
     }));
     expect(fetchMock).not.toHaveBeenCalledWith(
-      '/apps/product-bundles/api/cart-transform-runtime-token',
+      '/apps/onlybundles/api/cart-transform-runtime-token',
       expect.any(Object),
     );
   });

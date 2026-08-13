@@ -12,6 +12,7 @@ import { syncBundleStorefrontNow } from "../../app/services/bundles/storefront-s
 jest.mock("../../app/db.server", () => ({
   __esModule: true,
   default: {
+    $transaction: jest.fn(),
     shop: {
       findUnique: jest.fn(),
       update: jest.fn(),
@@ -344,8 +345,9 @@ describe("FPB create + configure parity flow (scaffolded E2E path)", () => {
     db.bundle.create.mockResolvedValue({
       id: "bundle-1",
     });
-    db.shop.update.mockResolvedValue({});
+    db.shop.update.mockResolvedValue({ lastFpbPublicNumber: 1 });
     db.shop.updateMany.mockResolvedValue({ count: 0 });
+    db.$transaction.mockImplementation(async (callback: (tx: typeof db) => unknown) => callback(db));
     createAdmin.graphql = buildCreateAdmin().graphql;
   });
 

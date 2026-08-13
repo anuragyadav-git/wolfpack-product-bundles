@@ -35,7 +35,7 @@ describe("Full Page widget cart display properties", () => {
   it("syncs EB bundle_details through the signed app proxy instead of direct Storefront GraphQL", () => {
     const source = readFullPageWidgetSources();
 
-    expect(source).toContain("fetch('/apps/product-bundles/api/cart-bundle-details'");
+    expect(source).toContain("fetch('/apps/onlybundles/api/cart-bundle-details'");
     expect(source).toContain("bundleDetailsKey");
     expect(source).not.toContain("fetch(`/api/${version}/graphql.json`");
   });

@@ -16,8 +16,10 @@ export function useConfigureContentState(flow: ConfigureBundleFlowDraft) {
     [shop],
   );
   const bundlePageUrl = useMemo(
-    () => `https://${shopDomain}.myshopify.com/apps/product-bundles/wpb/${encodeURIComponent(bundle.id)}`,
-    [shopDomain, bundle.id],
+    () => typeof bundle.publicNumber !== "number"
+      ? ""
+      : `https://${shopDomain}.myshopify.com/apps/onlybundles/wpb/${bundle.publicNumber}`,
+    [shopDomain, bundle.publicNumber],
   );
 
   const [promoBannerBgImage, setPromoBannerBgImage] = useState<string | null>(

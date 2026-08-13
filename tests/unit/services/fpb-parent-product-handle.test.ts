@@ -114,6 +114,7 @@ describe("FPB parent product handle ownership", () => {
       appUrl: "https://app.example.test",
       bundle: {
         id: "bundle-1",
+        publicNumber: 1,
         name: "Build Your Box",
         bundleType: "full_page",
         shopifyProductId: null,
@@ -140,6 +141,7 @@ describe("FPB parent product handle ownership", () => {
       appUrl: "https://app.example.test",
       bundle: {
         id: "bundle-1",
+        publicNumber: 1,
         name: "Build Your Box",
         bundleType: "product_page",
         shopifyProductId: null,
@@ -166,6 +168,7 @@ describe("FPB parent product handle ownership", () => {
       appUrl: "https://app.example.test",
       bundle: {
         id: "bundle-1",
+        publicNumber: 1,
         name: "Build Your Box",
         bundleType: "full_page",
         shopifyProductId: "gid://shopify/Product/10",
@@ -224,6 +227,7 @@ describe("FPB parent product handle ownership", () => {
       appUrl: "https://app.example.test",
       bundle: {
         id: "bundle-1",
+        publicNumber: 1,
         name: "Build Your Box",
         bundleType: "full_page",
         shopifyProductId: "gid://shopify/Product/10",
@@ -236,7 +240,7 @@ describe("FPB parent product handle ownership", () => {
       expect.objectContaining({ variables: expect.objectContaining({
         id: "gid://shopify/UrlRedirect/1",
         urlRedirect: expect.objectContaining({
-          target: "/apps/product-bundles/wpb/bundle-1",
+          target: "/apps/onlybundles/wpb/1",
         }),
       }) }),
     );

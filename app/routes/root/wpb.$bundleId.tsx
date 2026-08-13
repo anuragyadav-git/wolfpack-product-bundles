@@ -5,6 +5,7 @@ import { verifyAppProxyRequest } from "../../lib/app-proxy.server";
 import { BundleStatus } from "../../constants/bundle";
 import { formatBundleForWidget } from "../../lib/bundle-formatter.server";
 import { verifyBundlePreviewToken } from "../../lib/bundle-preview-token.server";
+import { parseFpbPublicNumber } from "../../lib/fpb-storefront-url";
 import {
   renderFpbLoadingScreen,
   resolveFpbLoadingScreenSettings,
@@ -30,7 +31,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     AppLogger.warn("FPB proxy page rejected unsigned request", {
       component: "wpb.proxy",
       operation: "loader",
-      bundleId: bundleId ?? null,
+      bundleId: bundleId ?? undefined,
       status: 400,
       failureCategory: "invalid_proxy_signature",
       renderDurationMs: Date.now() - startedAt,
@@ -55,10 +56,26 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     });
   }
 
+  const publicNumber = parseFpbPublicNumber(bundleId);
+  if (publicNumber === null) {
+    AppLogger.info("FPB proxy page rejected invalid public number", {
+      component: "wpb.proxy",
+      shop: shopDomain,
+      publicPath: bundleId,
+      status: 404,
+      failureCategory: "invalid_public_number",
+      renderDurationMs: Date.now() - startedAt,
+    });
+    return new Response("Bundle not found", {
+      status: 404,
+      headers: { "Cache-Control": "no-store" },
+    });
+  }
+
   const [bundle, designSettings] = await Promise.all([
     db.bundle.findFirst({
       where: {
-        id: bundleId,
+        publicNumber,
         shopId: shopDomain,
         bundleType: "full_page",
       },
@@ -94,7 +111,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     AppLogger.info("FPB proxy page not found", {
       component: "wpb.proxy",
       shop: shopDomain,
-      bundleId,
+      publicNumber,
       status: 404,
       failureCategory: "not_found",
       renderDurationMs: Date.now() - startedAt,
@@ -111,14 +128,15 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     && verifyBundlePreviewToken({
       token: url.searchParams.get("wpb_preview"),
       shop: shopDomain,
-      bundleId,
+      bundleId: bundle.id,
     });
 
   if (!isPublic && !hasValidDraftPreview) {
     AppLogger.info("FPB proxy page hidden by status", {
       component: "wpb.proxy",
       shop: shopDomain,
-      bundleId,
+      bundleId: bundle.id,
+      publicNumber,
       status: 404,
       failureCategory: "status_not_public",
       renderDurationMs: Date.now() - startedAt,
@@ -147,7 +165,8 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   AppLogger.info("FPB proxy page rendered", {
     component: "wpb.proxy",
     shop: shopDomain,
-    bundleId,
+    bundleId: bundle.id,
+    publicNumber,
     status: 200,
     renderDurationMs: Date.now() - startedAt,
   });

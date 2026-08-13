@@ -221,6 +221,7 @@ export function buildFullPageBundleMetafieldConfig(
     description: bundle.description || "",
     status: bundle.status,
     bundleType: bundle.bundleType || BundleType.FULL_PAGE,
+    publicNumber: bundle.publicNumber,
     templateName: bundle.templateName || null,
     shopifyProductId: bundle.shopifyProductId || null,
     promoBannerBgImage: bundle.promoBannerBgImage ?? null,

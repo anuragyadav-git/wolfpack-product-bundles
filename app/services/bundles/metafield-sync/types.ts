@@ -55,6 +55,7 @@ export interface BundleUiConfig {
   description: string;
   status: string;
   bundleType: string;
+  publicNumber?: number | null;
   shopifyProductId: string | null;
   bundleDesignTemplate?: string | null;
   bundleDesignPresetId?: string | null;

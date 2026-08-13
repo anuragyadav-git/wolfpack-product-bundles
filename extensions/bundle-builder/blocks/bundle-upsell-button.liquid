@@ -1,8 +1,8 @@
-{% assign bundle_id = block.settings.bundle_id %}
+{% assign public_number = block.settings.public_number %}
 {% assign target_url = block.settings.target_url %}
 
-{% if target_url == blank and bundle_id != blank %}
-  {% assign target_url = '/apps/product-bundles/wpb/' | append: bundle_id %}
+{% if target_url == blank and public_number != blank %}
+  {% assign target_url = '/apps/onlybundles/wpb/' | append: public_number %}
 {% endif %}
 
 {% if target_url != blank or request.design_mode %}
@@ -39,7 +39,7 @@
     "templates": ["product"]
   },
   "settings": [
-    { "type": "text", "id": "bundle_id", "label": "Full-page bundle ID" },
+    { "type": "number", "id": "public_number", "label": "Full-page bundle number" },
     { "type": "url", "id": "target_url", "label": "Custom target URL" },
     { "type": "text", "id": "button_label", "label": "Button label", "default": "View Bundle" }
   ]

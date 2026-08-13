@@ -58,12 +58,12 @@ describe("common configure page model", () => {
     expect(
       buildBundleLinkModel({
         bundleType: "full_page",
-        fullPageUrl: "https://shop.test/apps/product-bundles/wpb/bundle-1",
+        fullPageUrl: "https://shop.test/apps/onlybundles/wpb/bundle-1",
       }),
     ).toMatchObject({
       kind: "proxy",
       isLinked: true,
-      url: "https://shop.test/apps/product-bundles/wpb/bundle-1",
+      url: "https://shop.test/apps/onlybundles/wpb/bundle-1",
     });
 
     expect(

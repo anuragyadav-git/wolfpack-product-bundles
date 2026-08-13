@@ -33,7 +33,7 @@ redirect_urls = [
 
 [app_proxy]
 url = "https://wolfpack-product-bundle-app-sit.onrender.com"
-subpath = "product-bundles"
+subpath = "onlybundles"
 prefix = "apps"
 
 [metafields]

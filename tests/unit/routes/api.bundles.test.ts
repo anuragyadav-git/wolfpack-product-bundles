@@ -29,7 +29,7 @@ const getDb = () => require("../../../app/db.server").default;
 const mockFindMany = () => getDb().bundle.findMany as jest.MockedFunction<any>;
 
 function makeRequest() {
-  return new Request("https://test-shop.myshopify.com/apps/product-bundles/api/bundles.json");
+  return new Request("https://test-shop.myshopify.com/apps/onlybundles/api/bundles.json");
 }
 
 describe("api.bundles.json", () => {

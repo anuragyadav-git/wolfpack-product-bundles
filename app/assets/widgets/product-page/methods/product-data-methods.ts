@@ -30,7 +30,7 @@ export const ProductPageProductDataMethods: Record<string, any> & ThisType<any> 
   },
 
 resolveStorefrontApiBase() {
-  const appProxyPrefix = '/apps/product-bundles';
+  const appProxyPrefix = '/apps/onlybundles';
   if (window.location?.pathname?.startsWith(`${appProxyPrefix}/`)) {
     return appProxyPrefix;
   }

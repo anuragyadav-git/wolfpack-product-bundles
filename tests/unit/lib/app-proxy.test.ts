@@ -4,7 +4,7 @@ import { verifyAppProxyRequest } from "../../../app/lib/app-proxy.server";
 function signedProxyUrl(overrides: Record<string, string> = {}) {
   const params = new URLSearchParams({
     shop: "test-shop.myshopify.com",
-    path_prefix: "/apps/product-bundles",
+    path_prefix: "/apps/onlybundles",
     timestamp: "1770000000",
     ...overrides,
   });
@@ -28,7 +28,7 @@ function signedProxyUrl(overrides: Record<string, string> = {}) {
     createHmac("sha256", "test_api_secret").update(message).digest("hex"),
   );
 
-  return new URL(`https://test-shop.myshopify.com/apps/product-bundles/wpb/bundle-1?${params.toString()}`);
+  return new URL(`https://test-shop.myshopify.com/apps/onlybundles/wpb/bundle-1?${params.toString()}`);
 }
 
 describe("verifyAppProxyRequest", () => {

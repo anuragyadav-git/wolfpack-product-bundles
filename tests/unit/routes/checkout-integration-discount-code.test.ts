@@ -33,7 +33,7 @@ jest.mock("../../../app/shopify.server", () => ({
 function makeSignedRequest(body: Record<string, unknown>, shop = "test-shop.myshopify.com") {
   const params = new URLSearchParams({
     shop,
-    path_prefix: "/apps/product-bundles",
+    path_prefix: "/apps/onlybundles",
     timestamp: "1770000000",
   });
 
@@ -48,7 +48,7 @@ function makeSignedRequest(body: Record<string, unknown>, shop = "test-shop.mysh
   );
 
   return new Request(
-    `https://${shop}/apps/product-bundles/api/checkout-integration-discount-code?${params.toString()}`,
+    `https://${shop}/apps/onlybundles/api/checkout-integration-discount-code?${params.toString()}`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },

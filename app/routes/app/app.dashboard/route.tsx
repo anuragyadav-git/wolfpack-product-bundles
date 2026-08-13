@@ -100,7 +100,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       status: { in: [BundleStatus.ACTIVE, BundleStatus.DRAFT, BundleStatus.UNLISTED] }
     },
     select: {
-      id: true, name: true, status: true, bundleType: true, createdAt: true,
+      id: true, publicNumber: true, name: true, status: true, bundleType: true, createdAt: true,
       shopifyProductId: true, shopifyProductHandle: true,
       pricing: { select: { enabled: true } },
     },
@@ -133,7 +133,11 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
   const bundlesWithPreview = bundles.map(bundle => ({
     ...bundle,
-    previewHandle: bundle.bundleType === BundleType.PRODUCT_PAGE ? bundle.shopifyProductHandle : bundle.id
+    previewHandle: bundle.bundleType === BundleType.PRODUCT_PAGE
+      ? bundle.shopifyProductHandle
+      : bundle.publicNumber === null
+        ? null
+        : String(bundle.publicNumber),
   }));
 
   // Billing + proxy-health run concurrently and stream through the deferred
@@ -152,7 +156,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     try {
       const controller = new AbortController();
       const proxyTimer = setTimeout(() => controller.abort(), 3000);
-      const proxyRes = await fetch(`https://${session.shop}/apps/product-bundles/api/proxy-health`, { signal: controller.signal });
+      const proxyRes = await fetch(`https://${session.shop}/apps/onlybundles/api/proxy-health`, { signal: controller.signal });
       clearTimeout(proxyTimer);
       if (proxyRes.status === 404) {
         const ct = proxyRes.headers.get("content-type") ?? "";

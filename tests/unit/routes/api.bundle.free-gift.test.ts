@@ -63,7 +63,7 @@ function makeRequest(bundleId: string, fields?: string, extraHeaders: Record<str
     ...extraHeaders,
   };
 
-  return new Request(`https://test.myshopify.com/apps/product-bundles/api/bundle/${bundleId}.json?${params.toString()}`, {
+  return new Request(`https://test.myshopify.com/apps/onlybundles/api/bundle/${bundleId}.json?${params.toString()}`, {
     headers,
   });
 }

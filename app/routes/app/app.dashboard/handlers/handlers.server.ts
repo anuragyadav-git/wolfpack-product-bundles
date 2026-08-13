@@ -15,6 +15,7 @@ import { BundleStatus, BundleType } from "../../../../constants/bundle";
 import { ERROR_MESSAGES } from "../../../../constants/errors";
 import { getBundleEditPath } from "../../../../lib/bundle-navigation";
 import { ensureBundleParentProduct } from "../../../../services/bundles/bundle-parent-product.server";
+import { createBundleWithPublicNumber } from "../../../../services/bundles/fpb-public-number.server";
 
 const GET_PUBLICATIONS = `
   query {
@@ -136,8 +137,7 @@ export async function handleCloneBundle(
     const clonedBundleName = `${originalBundle.name} (Copy)`;
 
     // Clone the bundle
-    const clonedBundle = await db.bundle.create({
-      data: {
+    const clonedBundle = await createBundleWithPublicNumber({
         name: clonedBundleName,
         description: originalBundle.description,
         shopId: session.shop,
@@ -145,7 +145,6 @@ export async function handleCloneBundle(
         status: BundleStatus.DRAFT,
         shopifyProductId: null,
         templateName: originalBundle.templateName,
-      },
     });
     await ensureBundleParentProduct({
       admin,
@@ -320,8 +319,7 @@ export async function handleCreateBundle(
 
     const isFirstBundle = existingBundleCount === 0;
 
-    const newBundle = await db.bundle.create({
-      data: {
+    const newBundle = await createBundleWithPublicNumber({
         name: bundleName,
         shopId: session.shop,
         bundleType: bundleType as any,
@@ -330,7 +328,6 @@ export async function handleCreateBundle(
         status: BundleStatus.DRAFT,
         shopifyProductId: null,
         shopifyProductHandle: null,
-      },
     });
     const parent = await ensureBundleParentProduct({
       admin,

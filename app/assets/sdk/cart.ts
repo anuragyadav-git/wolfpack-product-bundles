@@ -195,7 +195,7 @@ function syncBundleDetailsCartMetafield(bundleDetailsKey, sourceProperties) {
   return getBundleDetailsCartToken()
     .then(function (cartToken) {
       if (!cartToken) return null;
-      return fetch('/apps/product-bundles/api/cart-bundle-details', {
+      return fetch('/apps/onlybundles/api/cart-bundle-details', {
         method: 'POST',
         credentials: 'same-origin',
         headers: { 'Content-Type': 'application/json' },
@@ -225,7 +225,7 @@ function requestCartTransformRuntimeToken(state, cartResult) {
     return { variantId: item.id, quantity: item.quantity };
   });
 
-  return fetch('/apps/product-bundles/api/cart-transform-runtime-token', {
+  return fetch('/apps/onlybundles/api/cart-transform-runtime-token', {
     method: 'POST',
     credentials: 'same-origin',
     headers: { 'Content-Type': 'application/json' },

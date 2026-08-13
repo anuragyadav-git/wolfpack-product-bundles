@@ -43,6 +43,7 @@ describe("storefront sync action handlers", () => {
     } as any);
     (mockDb.bundle.findUnique as jest.Mock).mockResolvedValue({
       id: "bundle-1",
+      publicNumber: 1,
       bundleType: "full_page",
       status: "draft",
     });
@@ -59,7 +60,7 @@ describe("storefront sync action handlers", () => {
     const previewUrl = new URL(body.shareablePreviewUrl);
 
     expect(mockSyncBundleStorefrontNow).toHaveBeenCalledTimes(1);
-    expect(previewUrl.pathname).toBe("/apps/product-bundles/wpb/bundle-1");
+    expect(previewUrl.pathname).toBe("/apps/onlybundles/wpb/1");
     expect(verifyBundlePreviewToken({
       token: previewUrl.searchParams.get("wpb_preview"),
       shop: session.shop,

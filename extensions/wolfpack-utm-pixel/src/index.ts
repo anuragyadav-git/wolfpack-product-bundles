@@ -132,7 +132,7 @@ register(({ analytics, browser, settings }) => {
       };
 
       // POST directly to the app server attribution endpoint.
-      // Do NOT include /apps/product-bundles — that prefix is stripped by the App Proxy;
+      // Do NOT include /apps/onlybundles — that prefix is stripped by the App Proxy;
       // the server itself never sees it.
       await fetch(`${appServerUrl}/api/attribution`, {
         method: "POST",

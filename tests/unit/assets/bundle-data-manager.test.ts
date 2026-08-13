@@ -9,7 +9,7 @@ describe("BundleDataManager", () => {
         Shopify: undefined,
         isThemeEditorContext: false,
         location: {
-          pathname: "/apps/product-bundles/wpb/bundle-1",
+          pathname: "/apps/onlybundles/wpb/bundle-1",
           search: "",
         },
         autoDetectedBundleId: undefined,

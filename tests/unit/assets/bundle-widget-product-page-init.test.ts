@@ -147,7 +147,7 @@ function resolveProductPageStorefrontApiBase(
   }
 
   if (shopDomain && appHost !== locationHost) {
-    return '/apps/product-bundles';
+    return '/apps/onlybundles';
   }
 
   return appUrl || locationOrigin;
@@ -284,7 +284,7 @@ describe('resolveProductPageStorefrontApiBase — storefront hydration URLs', ()
       'agent-5sfidg3m.myshopify.com'
     );
 
-    expect(result).toBe('/apps/product-bundles');
+    expect(result).toBe('/apps/onlybundles');
   });
 
   it('keeps the app origin for non-Shopify preview pages with no app URL override', () => {
@@ -357,7 +357,7 @@ describe('Product Page bundle cart add transport contract', () => {
     ].join('\n');
 
     [ppbSource, fpbSource].forEach((source) => {
-      expect(source).toContain("fetch('/apps/product-bundles/api/cart-bundle-details'");
+      expect(source).toContain("fetch('/apps/onlybundles/api/cart-bundle-details'");
       expect(source).toContain("if (data?.ok !== true)");
       expect(source).toContain("fetch('/cart.js?app=wolfpackProductBundles'");
       expect(source).toContain('Failed to sync bundle_details cart metafield');

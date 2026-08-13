@@ -430,6 +430,7 @@ export async function updateBundleProductMetafields(
     description: bundleConfiguration.description || '',
     status: bundleConfiguration.status || BundleStatus.ACTIVE, // Widget needs this for filtering
     bundleType: bundleConfiguration.bundleType || BundleType.PRODUCT_PAGE, // Widget needs this for selection
+    publicNumber: bundleConfiguration.publicNumber ?? null,
     shopifyProductId: bundleConfiguration.shopifyProductId || null, // Product ID for matching
     bundleDesignTemplate: bundleConfiguration.bundleDesignTemplate ?? null,
     bundleDesignPresetId: bundleConfiguration.bundleDesignPresetId ?? null,

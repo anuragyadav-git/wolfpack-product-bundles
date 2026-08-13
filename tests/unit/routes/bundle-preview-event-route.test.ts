@@ -96,6 +96,7 @@ describe("handleCreateFpbPreview", () => {
     process.env.SHOPIFY_API_SECRET = "preview-secret";
     getDb().bundle.findUnique.mockResolvedValue({
       id: "bundle-1",
+      publicNumber: 1,
       bundleType: "full_page",
       status: "draft",
     });
@@ -115,7 +116,7 @@ describe("handleCreateFpbPreview", () => {
     const firstUrl = new URL((await first.json()).shareablePreviewUrl);
     const secondUrl = new URL((await second.json()).shareablePreviewUrl);
 
-    expect(firstUrl.pathname).toBe("/apps/product-bundles/wpb/bundle-1");
+    expect(firstUrl.pathname).toBe("/apps/onlybundles/wpb/1");
     expect(firstUrl.searchParams.get("wpb_preview")).not.toBe(secondUrl.searchParams.get("wpb_preview"));
     expect(verifyBundlePreviewToken({
       token: firstUrl.searchParams.get("wpb_preview"),

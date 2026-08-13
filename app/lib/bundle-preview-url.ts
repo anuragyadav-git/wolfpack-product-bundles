@@ -10,7 +10,7 @@ export function buildBundleConfigApiUrl(
   bundleId: string,
   locationSearch = "",
 ): string {
-  const apiUrl = `/apps/product-bundles/api/bundle/${encodeURIComponent(bundleId)}.json`;
+  const apiUrl = `/apps/onlybundles/api/bundle/${encodeURIComponent(bundleId)}.json`;
   const previewToken = new URLSearchParams(locationSearch).get(
     BUNDLE_PREVIEW_QUERY_PARAM,
   );

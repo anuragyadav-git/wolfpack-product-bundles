@@ -24,10 +24,10 @@ jest.mock("../../../app/db.server", () => ({
 
 const getDb = () => require("../../../app/db.server").default;
 
-function makeSignedRequest(bundleId = "bundle-1") {
+function makeSignedRequest(bundleId = "1") {
   const params = new URLSearchParams({
     shop: "test-shop.myshopify.com",
-    path_prefix: "/apps/product-bundles",
+    path_prefix: "/apps/onlybundles",
     timestamp: "1770000000",
   });
 
@@ -37,7 +37,7 @@ function makeSignedRequest(bundleId = "bundle-1") {
     .join("");
   params.set("signature", createHmac("sha256", "test_api_secret").update(message).digest("hex"));
 
-  return new Request(`https://test-shop.myshopify.com/apps/product-bundles/wpb/${bundleId}?${params.toString()}`);
+  return new Request(`https://test-shop.myshopify.com/apps/onlybundles/wpb/${bundleId}?${params.toString()}`);
 }
 
 describe("FPB app proxy page", () => {
@@ -66,7 +66,7 @@ describe("FPB app proxy page", () => {
 
     const response = (await loader({
       request: makeSignedRequest(),
-      params: { bundleId: "bundle-1" },
+      params: { bundleId: "1" },
       context: {},
     } as any)) as Response;
     const text = await response.text();
@@ -75,7 +75,7 @@ describe("FPB app proxy page", () => {
     expect(response.headers.get("Cache-Control")).toBe("no-store");
     expect(text).toContain("data-wpb-full-page-bundle");
     expect(text).toContain("data-bundle-id=\"bundle-1\"");
-    expect(text).not.toContain("/apps/product-bundles/assets/");
+    expect(text).not.toContain("/apps/onlybundles/assets/");
   });
 
   it("renders a customizable first-paint loading screen without skeleton cards", async () => {
@@ -99,7 +99,7 @@ describe("FPB app proxy page", () => {
 
     const response = (await loader({
       request: makeSignedRequest(),
-      params: { bundleId: "bundle-1" },
+      params: { bundleId: "1" },
       context: {},
     } as any)) as Response;
     const text = await response.text();
@@ -125,13 +125,13 @@ describe("FPB app proxy page", () => {
 
     const response = (await loader({
       request: makeSignedRequest(),
-      params: { bundleId: "bundle-1" },
+      params: { bundleId: "1" },
       context: {},
     } as any)) as Response;
     const text = await response.text();
 
     expect(response.status).toBe(200);
-    expect(text).not.toContain("/apps/product-bundles/assets/");
+    expect(text).not.toContain("/apps/onlybundles/assets/");
   });
 
   it("loads ordered step categories before status authorization", async () => {
@@ -162,7 +162,7 @@ describe("FPB app proxy page", () => {
 
     const response = (await loader({
       request: makeSignedRequest(),
-      params: { bundleId: "bundle-1" },
+      params: { bundleId: "1" },
       context: {},
     } as any)) as Response;
 
@@ -208,7 +208,7 @@ describe("FPB app proxy page", () => {
 
     const response = await loader({
       request: makeSignedRequest(),
-      params: { bundleId: "bundle-1" },
+      params: { bundleId: "1" },
       context: {},
     } as any) as Response;
     const text = await response.text();
@@ -250,7 +250,7 @@ describe("FPB app proxy page", () => {
 
     const response = (await loader({
       request: makeSignedRequest(),
-      params: { bundleId: "bundle-1" },
+      params: { bundleId: "1" },
       context: {},
     } as any)) as Response;
     const text = await response.text();
@@ -276,7 +276,7 @@ describe("FPB app proxy page", () => {
 
     const unsigned = await loader({
       request: makeSignedRequest(),
-      params: { bundleId: "bundle-1" },
+      params: { bundleId: "1" },
       context: {},
     } as any) as Response;
     expect(unsigned.status).toBe(404);
@@ -298,7 +298,7 @@ describe("FPB app proxy page", () => {
 
     const signed = await loader({
       request: new Request(url),
-      params: { bundleId: "bundle-1" },
+      params: { bundleId: "1" },
       context: {},
     } as any) as Response;
     expect(signed.status).toBe(200);
@@ -311,7 +311,7 @@ describe("FPB app proxy page", () => {
 
     const response = (await loader({
       request: new Request(url.toString()),
-      params: { bundleId: "bundle-1" },
+      params: { bundleId: "1" },
       context: {},
     } as any)) as Response;
 

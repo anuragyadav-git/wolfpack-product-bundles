@@ -88,6 +88,7 @@ describe("app.dashboard loader LCP behavior", () => {
     (mockDb.bundle.findMany as jest.Mock).mockResolvedValue([
       {
         id: "bundle-1",
+        publicNumber: 1,
         name: "Starter bundle",
         status: "active",
         bundleType: "full_page",
@@ -127,7 +128,7 @@ describe("app.dashboard loader LCP behavior", () => {
     expect(payload.bundles).toEqual([
       expect.objectContaining({
         id: "bundle-1",
-        previewHandle: "bundle-1",
+        previewHandle: "1",
       }),
     ]);
     const statusSettled = jest.fn();

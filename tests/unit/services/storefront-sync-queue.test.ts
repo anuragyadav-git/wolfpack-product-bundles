@@ -3,6 +3,7 @@ import {
   syncBundleStorefrontNow,
 } from "../../../app/services/bundles/storefront-sync.server";
 import { inngest } from "../../../app/inngest/client";
+import { ensureBundleParentProduct } from "../../../app/services/bundles/bundle-parent-product.server";
 
 jest.mock("../../../app/db.server", () => ({
   __esModule: true,
@@ -38,6 +39,16 @@ jest.mock("../../../app/services/theme-colors.server", () => ({
   syncThemeColors: jest.fn().mockResolvedValue(undefined),
 }));
 
+jest.mock("../../../app/services/bundles/bundle-parent-product.server", () => ({
+  ensureBundleParentProduct: jest.fn().mockResolvedValue({
+    productId: "gid://shopify/Product/1",
+    variantId: "gid://shopify/ProductVariant/1",
+    handle: "wpb-parent-bundle-1",
+    status: "UNLISTED",
+    created: false,
+  }),
+}));
+
 jest.mock(
   "../../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/shared.server",
   () => ({
@@ -70,6 +81,7 @@ describe("storefront sync direct flow", () => {
     jest.spyOn(Date, "now").mockReturnValue(1720440000000);
     getDb().bundle.update.mockImplementation(async ({ data }: any) => ({
       id: "bundle-1",
+      publicNumber: 1,
       storefrontSyncStatus: data.storefrontSyncStatus,
       storefrontSyncAttemptId: data.storefrontSyncAttemptId,
       storefrontSyncLastError: data.storefrontSyncLastError ?? null,
@@ -82,6 +94,7 @@ describe("storefront sync direct flow", () => {
     getDb().bundle.updateMany.mockResolvedValue({ count: 1 });
     getDb().bundle.findUnique.mockResolvedValue({
       id: "bundle-1",
+      publicNumber: 1,
       shopId: "test.myshopify.com",
       bundleType: "full_page",
       status: "active",
@@ -110,6 +123,10 @@ describe("storefront sync direct flow", () => {
 
     expect(getDb().bundle.update).not.toHaveBeenCalled();
     expect(mockSend).not.toHaveBeenCalled();
+    expect(ensureBundleParentProduct).toHaveBeenCalledWith(expect.objectContaining({
+      shopDomain: "test.myshopify.com",
+      bundle: expect.objectContaining({ id: "bundle-1", publicNumber: 1 }),
+    }));
     expect(result).toMatchObject({
       skipped: false,
       synced: true,
@@ -141,6 +158,7 @@ describe("storefront sync direct flow", () => {
   it("returns a compact configure response bundle without graph or sync internals", () => {
     const result = compactBundleForConfigureResponse({
       id: "bundle-1",
+      publicNumber: 1,
       bundleType: "full_page",
       status: "active",
       name: "Daily Essentials",
@@ -155,6 +173,7 @@ describe("storefront sync direct flow", () => {
 
     expect(result).toEqual({
       id: "bundle-1",
+      publicNumber: 1,
       bundleType: "full_page",
       status: "active",
       name: "Daily Essentials",

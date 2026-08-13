@@ -160,6 +160,22 @@ describe("updateBundleProductMetafields", () => {
     expect(parsed.steps[0].imageUrl).toBe("https://cdn.shopify.com/step-icon.png");
   });
 
+  it("emits the FPB public number for storefront redirects", async () => {
+    const admin = makeAdmin();
+    const config = makeBundleConfig(BundleType.FULL_PAGE, {
+      publicNumber: 12,
+    });
+
+    await updateBundleProductMetafields(admin, "gid://shopify/Product/999", config);
+
+    const metafields = getMetafieldsSetPayload(admin);
+    const parsed = JSON.parse(
+      metafields.find((field: any) => field.key === "bundle_ui_config").value,
+    );
+
+    expect(parsed.publicNumber).toBe(12);
+  });
+
   it("passes imageUrl as null when absent from step", async () => {
     const admin = makeAdmin();
 

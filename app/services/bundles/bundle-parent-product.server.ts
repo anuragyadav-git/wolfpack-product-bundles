@@ -8,6 +8,7 @@ import { buildFpbStorefrontUrl } from "../../lib/fpb-storefront-url";
 
 type BundleParentProductRecord = {
   id: string;
+  publicNumber?: number | null;
   name: string;
   bundleType?: string | null;
   shopifyProductId?: string | null;
@@ -156,12 +157,13 @@ async function ensureRedirect(
 async function ensureFpbParentProductHost(input: {
   admin: ShopifyAdmin;
   bundleId: string;
+  publicNumber: number;
   shopId: string;
   productId: string;
   storedHandle: string | null;
   liveHandle: string;
 }) {
-  const target = new URL(buildFpbStorefrontUrl(input.shopId, input.bundleId)).pathname;
+  const target = new URL(buildFpbStorefrontUrl(input.shopId, input.publicNumber)).pathname;
   const canonicalHandle = buildFpbInternalParentHandle(input.bundleId);
   const legacyHandles = [...new Set([input.storedHandle, input.liveHandle])]
     .filter((handle): handle is string =>
@@ -485,9 +487,13 @@ export async function ensureBundleParentProduct(input: {
     });
   } else {
     if (input.bundle.bundleType === "full_page") {
+      if (!input.bundle.publicNumber) {
+        throw new Error("FPB public number is required before parent product sync");
+      }
       const host = await ensureFpbParentProductHost({
         admin: input.admin,
         bundleId: input.bundle.id,
+        publicNumber: input.bundle.publicNumber,
         shopId: input.shopDomain,
         productId: product.id,
         storedHandle: input.bundle.shopifyProductHandle ?? null,

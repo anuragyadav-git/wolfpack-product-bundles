@@ -82,6 +82,7 @@ model Session {
 
 model Bundle {
   id                                   String            @id @default(cuid())
+  publicNumber                         Int?              // Per-shop public FPB URL identifier; null for PPB
   name                                 String
   description                          String?
   shopId                               String
@@ -147,6 +148,7 @@ model Bundle {
   analytics                            BundleAnalytics[]
 
   @@index([shopId])
+  @@unique([shopId, publicNumber])
   @@index([status])
   @@index([bundleType])
   @@index([shopifyPageHandle])
@@ -515,6 +517,7 @@ model Shop {
   installedAt             DateTime       @default(now())
   uninstalledAt           DateTime? // Track when app was uninstalled
   firstCreateTourEligible Boolean        @default(false) // True only for newly installed shops until their first create flow
+  lastFpbPublicNumber     Int            @default(0) // Atomically incremented when an FPB is created
   subscriptions           Subscription[] // Subscription history
   currentSubscriptionId   String? // Current active subscription
   adminLocale             String? // Shop-wide embedded Admin UI language preference; null defaults to English

@@ -70,6 +70,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
       take: 12,
       select: {
         id: true,
+        publicNumber: true,
         name: true,
         bundleType: true,
         shopifyProductHandle: true,
@@ -79,7 +80,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
       name: bundle.name,
       type: bundle.bundleType === "full_page" ? "Landing Page" : "Product Page",
       viewUrl: bundle.bundleType === "full_page"
-        ? buildFpbStorefrontUrl(session.shop, bundle.id)
+        ? bundle.publicNumber === null
+          ? null
+          : buildFpbStorefrontUrl(session.shop, bundle.publicNumber)
         : bundle.shopifyProductHandle
           ? `https://${session.shop}/products/${bundle.shopifyProductHandle}`
           : null,

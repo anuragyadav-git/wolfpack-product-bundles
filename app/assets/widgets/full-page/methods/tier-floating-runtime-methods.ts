@@ -276,7 +276,7 @@ _reportError(error) {
       url: window.location?.href ?? null,
     };
     // Use the app proxy path so the request is authenticated by Shopify
-    fetch('/apps/product-bundles/api/widget-error', {
+    fetch('/apps/onlybundles/api/widget-error', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
@@ -303,7 +303,7 @@ _recordView() {
     const bundleId = this.config?.bundleId ?? this.container?.dataset?.bundleId;
     const shop = window.Shopify?.shop;
     if (!bundleId || !shop) return;
-    fetch(`/apps/product-bundles/api/bundle/${bundleId}/view`, {
+    fetch(`/apps/onlybundles/api/bundle/${bundleId}/view`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ shop }),

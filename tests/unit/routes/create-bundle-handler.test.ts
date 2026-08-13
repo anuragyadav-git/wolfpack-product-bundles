@@ -5,6 +5,7 @@ import {
 import db from "../../../app/db.server";
 import { WidgetInstallationService } from "../../../app/services/widget-installation.server";
 import { ensureBundleParentProduct } from "../../../app/services/bundles/bundle-parent-product.server";
+import { createBundleWithPublicNumber } from "../../../app/services/bundles/fpb-public-number.server";
 
 jest.mock("../../../app/db.server", () => ({
   __esModule: true,
@@ -39,6 +40,10 @@ jest.mock("../../../app/services/widget-installation.server", () => ({
 
 jest.mock("../../../app/services/bundles/bundle-parent-product.server", () => ({
   ensureBundleParentProduct: jest.fn(),
+}));
+
+jest.mock("../../../app/services/bundles/fpb-public-number.server", () => ({
+  createBundleWithPublicNumber: jest.fn(),
 }));
 
 jest.mock("../../../app/lib/logger", () => ({
@@ -95,8 +100,9 @@ describe("handleCreateBundle", () => {
     (mockDb.shop.findUnique as jest.Mock).mockResolvedValue({ firstCreateTourEligible: false });
     (mockDb.shop.updateMany as jest.Mock).mockResolvedValue({ count: 0 });
     (mockDb.bundle.count as jest.Mock).mockResolvedValue(1);
-    (mockDb.bundle.create as jest.Mock).mockResolvedValue({
+    (createBundleWithPublicNumber as jest.Mock).mockResolvedValue({
       id: "bundle-1",
+      publicNumber: 1,
       name: "Standard Bundle",
       shopifyProductId: null,
       shopifyProductHandle: null,
@@ -126,12 +132,10 @@ describe("handleCreateBundle", () => {
     );
 
     expect(response.status).toBe(200);
-    expect(mockDb.bundle.create).toHaveBeenCalledWith(expect.objectContaining({
-      data: expect.objectContaining({
+    expect(createBundleWithPublicNumber).toHaveBeenCalledWith(expect.objectContaining({
         bundleType: "full_page",
         bundleDesignTemplate: "FBP_SIDE_FOOTER",
         bundleDesignPresetId: "STANDARD",
-      }),
     }));
   });
 
@@ -205,8 +209,9 @@ describe("handleCreateBundle", () => {
 describe("handleCloneBundle", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (mockDb.bundle.create as jest.Mock).mockResolvedValue({
+    (createBundleWithPublicNumber as jest.Mock).mockResolvedValue({
       id: "cloned-bundle",
+      publicNumber: 2,
       name: "Cloned Bundle",
     });
     (ensureBundleParentProduct as jest.Mock).mockResolvedValue({

@@ -14,7 +14,7 @@ export async function OPTIONS() {
 /**
  * Public proxy health check endpoint.
  * Called server-side from the dashboard loader via:
- *   GET https://{shop}/apps/product-bundles/api/proxy-health
+ *   GET https://{shop}/apps/onlybundles/api/proxy-health
  *
  * If Shopify forwards the request here → proxy is registered and healthy.
  * If Shopify returns 404 directly → proxy is not registered for this store.

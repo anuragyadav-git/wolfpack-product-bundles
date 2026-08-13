@@ -435,7 +435,7 @@ async requestCartTransformRuntimeToken(items, { offerGroupId, bundleType }) {
     }
   });
 
-  const response = await fetch('/apps/product-bundles/api/cart-transform-runtime-token', {
+  const response = await fetch('/apps/onlybundles/api/cart-transform-runtime-token', {
     method: 'POST',
     credentials: 'same-origin',
     headers: { 'Content-Type': 'application/json' },
