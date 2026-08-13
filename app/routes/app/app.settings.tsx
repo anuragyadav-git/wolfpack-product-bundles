@@ -15,9 +15,9 @@ import { ReduxProvider } from "../../store/ReduxProvider";
 import {
   SettingsLandingShell,
   SettingsWorkspaceError,
-  SettingsWorkspaceSkeleton,
   type SettingsWorkspaceView,
 } from "./app.settings/SettingsLandingShell";
+import { AdminRouteLoadingBar } from "../../components/AdminRouteLoadingBar";
 
 const loadSettingsWorkspace = async () => {
   const module = await import("./app.settings/SettingsRoute");
@@ -294,7 +294,7 @@ export default function SettingsRouteDefault() {
   }
 
   return (
-    <Suspense fallback={<SettingsWorkspaceSkeleton />}>
+    <Suspense fallback={<AdminRouteLoadingBar label="Loading Settings" />}>
       <Await
         resolve={workspaceData}
         errorElement={<SettingsWorkspaceError onExit={() => setWorkspaceView(null)} />}

@@ -2,8 +2,8 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import {
   SettingsLandingShell,
-  SettingsWorkspaceSkeleton,
 } from "../../../app/routes/app/app.settings/SettingsLandingShell";
+import { AdminRouteLoadingBar } from "../../../app/components/AdminRouteLoadingBar";
 
 describe("Settings landing shell", () => {
   it("renders three actionable Polaris cards without loading a settings workspace", () => {
@@ -20,14 +20,15 @@ describe("Settings landing shell", () => {
     expect(view).not.toContain("Design Control Panel");
   });
 
-  it("renders three skeleton cards without a loading spinner", () => {
+  it("renders the shared top-edge loading bar during workspace loading", () => {
     const view = renderToStaticMarkup(
-      React.createElement(SettingsWorkspaceSkeleton),
+      React.createElement(AdminRouteLoadingBar, { label: "Loading Settings" }),
     );
 
     expect(view).toContain('aria-label="Loading Settings"');
     expect(view).toContain('aria-busy="true"');
-    expect(view.match(/data-settings-skeleton-card="true"/g)).toHaveLength(3);
+    expect(view).toContain('role="progressbar"');
+    expect(view).not.toContain("data-settings-skeleton-card");
     expect(view).not.toContain("<s-spinner");
   });
 });
