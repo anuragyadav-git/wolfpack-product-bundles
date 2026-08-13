@@ -6,6 +6,7 @@ import {
   getProductPageModalValidationToastOptions,
 } from './modal-state-methods.js';
 import { getLastRequiredProductPageStepIndex } from './step-validation.js';
+import { buildStorefrontApiPath } from '../../../../config/storefront-proxy-routes.js';
 
 const MIN_LOADING_OVERLAY_VISIBLE_MS = 180;
 
@@ -283,7 +284,7 @@ _recordView() {
     const bundleId = this.container?.dataset?.bundleId;
     const shop = window.Shopify?.shop;
     if (!bundleId || !shop) return;
-    fetch(`/apps/product-bundles/api/bundle/${bundleId}/view`, {
+    fetch(buildStorefrontApiPath(`bundle/${bundleId}/view`), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ shop }),

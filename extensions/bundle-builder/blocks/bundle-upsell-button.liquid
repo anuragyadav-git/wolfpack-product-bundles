@@ -1,8 +1,9 @@
 {% assign public_number = block.settings.public_number %}
 {% assign target_url = block.settings.target_url %}
+{% capture storefront_proxy_root %}{% render 'storefront-proxy-root' %}{% endcapture %}
 
 {% if target_url == blank and public_number != blank %}
-  {% assign target_url = '/apps/product-bundles/wpb/' | append: public_number %}
+  {% assign target_url = storefront_proxy_root | append: '/wpb/' | append: public_number %}
 {% endif %}
 
 {% if target_url != blank or request.design_mode %}

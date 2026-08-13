@@ -1,3 +1,5 @@
+import { buildStorefrontApiPath } from "../config/storefront-proxy-routes";
+
 export const BUNDLE_PREVIEW_QUERY_PARAM = "wpb_preview";
 
 export function appendBundlePreviewToken(url: string, token: string): string {
@@ -10,7 +12,9 @@ export function buildBundleConfigApiUrl(
   bundleId: string,
   locationSearch = "",
 ): string {
-  const apiUrl = `/apps/product-bundles/api/bundle/${encodeURIComponent(bundleId)}.json`;
+  const apiUrl = buildStorefrontApiPath(
+    `bundle/${encodeURIComponent(bundleId)}.json`,
+  );
   const previewToken = new URLSearchParams(locationSearch).get(
     BUNDLE_PREVIEW_QUERY_PARAM,
   );

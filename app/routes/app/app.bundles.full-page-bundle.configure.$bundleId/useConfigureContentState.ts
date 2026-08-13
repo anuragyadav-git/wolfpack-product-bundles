@@ -5,6 +5,7 @@ import {
   type DefaultProductsData,
 } from "../../../lib/bundle-config/default-products";
 import type { ConfigureBundleFlowDraft } from "./configure-flow-types";
+import { buildFpbStorefrontUrl } from "../../../lib/fpb-storefront-url";
 
 export function useConfigureContentState(flow: ConfigureBundleFlowDraft) {
   const { bundle, shop } = flow;
@@ -18,7 +19,10 @@ export function useConfigureContentState(flow: ConfigureBundleFlowDraft) {
   const bundlePageUrl = useMemo(
     () => typeof bundle.publicNumber !== "number"
       ? ""
-      : `https://${shopDomain}.myshopify.com/apps/product-bundles/wpb/${bundle.publicNumber}`,
+      : buildFpbStorefrontUrl(
+          `${shopDomain}.myshopify.com`,
+          bundle.publicNumber,
+        ),
     [shopDomain, bundle.publicNumber],
   );
 

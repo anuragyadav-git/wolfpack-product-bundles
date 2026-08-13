@@ -1,4 +1,5 @@
 import { BUNDLE_WIDGET } from '../../shared/constants.js';
+import { STOREFRONT_PROXY_ROOT } from '../../../../config/storefront-proxy-routes.js';
 
 function normalizeWeightToGrams(weight, unit) {
   const numeric = Number(weight);
@@ -30,7 +31,7 @@ export const ProductPageProductDataMethods: Record<string, any> & ThisType<any> 
   },
 
 resolveStorefrontApiBase() {
-  const appProxyPrefix = '/apps/product-bundles';
+  const appProxyPrefix = STOREFRONT_PROXY_ROOT;
   if (window.location?.pathname?.startsWith(`${appProxyPrefix}/`)) {
     return appProxyPrefix;
   }

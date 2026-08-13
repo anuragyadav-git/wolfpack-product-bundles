@@ -1,4 +1,5 @@
 import { ToastManager } from '../../shared/toast-manager.js';
+import { buildStorefrontApiPath } from '../../../../config/storefront-proxy-routes.js';
 export const fullPageTierFloatingRuntimeMethods: Record<string, any> & ThisType<any> = {
 initTierPills(tiers) {
   if (tiers.length < 2) return;
@@ -276,7 +277,7 @@ _reportError(error) {
       url: window.location?.href ?? null,
     };
     // Use the app proxy path so the request is authenticated by Shopify
-    fetch('/apps/product-bundles/api/widget-error', {
+    fetch(buildStorefrontApiPath('widget-error'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
@@ -303,7 +304,7 @@ _recordView() {
     const bundleId = this.config?.bundleId ?? this.container?.dataset?.bundleId;
     const shop = window.Shopify?.shop;
     if (!bundleId || !shop) return;
-    fetch(`/apps/product-bundles/api/bundle/${bundleId}/view`, {
+    fetch(buildStorefrontApiPath(`bundle/${bundleId}/view`), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ shop }),

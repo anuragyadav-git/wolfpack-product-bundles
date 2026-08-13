@@ -114,6 +114,7 @@ import { getDiscountProgressData, getSelectedQuantity } from './widgets/shared/e
 import { renderDiscountProgress } from './widgets/shared/components/discount-progress.js';
 import { renderSharedProductCard } from './widgets/shared/components/product-card.js';
 import { installControllerMethods } from './widgets/shared/controller-methods.js';
+import { buildStorefrontApiPath } from '../config/storefront-proxy-routes.js';
 import { ProductPageCartMethods } from './widgets/product-page/methods/cart-methods.js';
 import { ProductPageModalMethods } from './widgets/product-page/methods/modal-methods.js';
 import { ProductPageSelectionMethods } from './widgets/product-page/methods/selection-methods.js';
@@ -306,7 +307,9 @@ export class BundleWidgetProductPage {
       if (!shop) return;
 
       const locale = window.Shopify?.locale || 'en';
-      const endpoint = `/apps/product-bundles/api/language-settings/${encodeURIComponent(shop)}?bundleType=product_page&locale=${encodeURIComponent(locale)}`;
+      const endpoint = buildStorefrontApiPath(
+        `language-settings/${encodeURIComponent(shop)}?bundleType=product_page&locale=${encodeURIComponent(locale)}`,
+      );
       const response = await fetch(endpoint, { credentials: 'same-origin' });
       if (!response.ok) return;
 
@@ -329,7 +332,9 @@ export class BundleWidgetProductPage {
       const shop = window.Shopify?.shop || this.container.dataset.shop;
       if (!shop) return;
 
-      const endpoint = `/apps/product-bundles/api/controls-settings/${encodeURIComponent(shop)}?bundleType=product_page`;
+      const endpoint = buildStorefrontApiPath(
+        `controls-settings/${encodeURIComponent(shop)}?bundleType=product_page`,
+      );
       const response = await fetch(endpoint, { credentials: 'same-origin' });
       if (!response.ok) return;
 

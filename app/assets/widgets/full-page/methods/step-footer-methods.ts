@@ -8,6 +8,7 @@ import {
 } from '../../shared/engine/cart-lines.js';
 import { shouldDisplayClassicFixedBundleRawTotal } from '../shared/summary-pricing-display.js';
 import { preflightVariantOnStorefront } from '../../shared/variant-preflight.js';
+import { buildStorefrontApiPath } from '../../../../config/storefront-proxy-routes.js';
 
 function shouldIncludeBundleQuantityCartProperties(context) {
   const pricing = context?.selectedBundle?.pricing || {};
@@ -435,7 +436,7 @@ async requestCartTransformRuntimeToken(items, { offerGroupId, bundleType }) {
     }
   });
 
-  const response = await fetch('/apps/product-bundles/api/cart-transform-runtime-token', {
+  const response = await fetch(buildStorefrontApiPath('cart-transform-runtime-token'), {
     method: 'POST',
     credentials: 'same-origin',
     headers: { 'Content-Type': 'application/json' },

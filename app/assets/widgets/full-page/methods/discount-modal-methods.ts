@@ -7,6 +7,7 @@ import {
   applyDiscountProgressTransition,
   renderDiscountProgress,
 } from '../../shared/components/discount-progress.js';
+import { STOREFRONT_PROXY_ROOT } from '../../../../config/storefront-proxy-routes.js';
 
 export const fullPageDiscountModalMethods: Record<string, any> & ThisType<any> = {
 _renderDiscountProgress(options = {}) {
@@ -194,7 +195,7 @@ closeModal() {
 },
 
 resolveStorefrontApiBase() {
-  const appProxyPrefix = '/apps/product-bundles';
+  const appProxyPrefix = STOREFRONT_PROXY_ROOT;
   if (window.location?.pathname?.startsWith(`${appProxyPrefix}/`)) {
     return appProxyPrefix;
   }

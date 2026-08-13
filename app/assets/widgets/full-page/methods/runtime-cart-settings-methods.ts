@@ -4,6 +4,7 @@ import { TemplateManager } from '../../shared/template-manager.js';
 import { createDefaultLoadingAnimation } from '../../shared/default-loading-animation.js';
 import { hideLoadingOverlayElement, markLoadingOverlayVisible } from '../../shared/loading-overlay.js';
 import { TemplateDesignSystem } from '../../shared/template-design-system.js';
+import { buildStorefrontApiPath } from '../../../../config/storefront-proxy-routes.js';
 
 const runtimeCartTemplateSystem = TemplateDesignSystem;
 
@@ -275,7 +276,7 @@ async syncBundleDetailsCartMetafield(bundleDetailsKey, sourceProperties) {
     const cartToken = await this.getBundleDetailsCartToken();
     if (!cartToken) return;
 
-    const response = await fetch('/apps/product-bundles/api/cart-bundle-details', {
+    const response = await fetch(buildStorefrontApiPath('cart-bundle-details'), {
       method: 'POST',
       credentials: 'same-origin',
       headers: {

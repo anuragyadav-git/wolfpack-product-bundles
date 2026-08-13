@@ -7,6 +7,7 @@ import {
   invokeCheckoutIntegrationProvider,
   waitForCheckoutIntegrationCapability,
 } from '../../shared/checkout-integration-adapters.js';
+import { buildStorefrontApiPath } from '../../../../config/storefront-proxy-routes.js';
 
 export const fullPageAnalyticsConfigMethods: Record<string, any> & ThisType<any> = {
 _ensureWpbSessionId() {
@@ -63,7 +64,7 @@ _sendEngagementBeacon(eventName) {
       timestamp: new Date().toISOString(),
     };
     sessionStorage.setItem(guardKey, '1');
-    fetch('/apps/product-bundles/api/attribution/engagement', {
+    fetch(buildStorefrontApiPath('attribution/engagement'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
@@ -80,7 +81,9 @@ async loadLanguageSettings() {
     if (!shop) return;
 
     const locale = window.Shopify?.locale || 'en';
-    const endpoint = `/apps/product-bundles/api/language-settings/${encodeURIComponent(shop)}?bundleType=full_page&locale=${encodeURIComponent(locale)}`;
+    const endpoint = buildStorefrontApiPath(
+      `language-settings/${encodeURIComponent(shop)}?bundleType=full_page&locale=${encodeURIComponent(locale)}`,
+    );
     const response = await fetch(endpoint, { credentials: 'same-origin' });
     if (!response.ok) return;
 
@@ -102,7 +105,9 @@ async loadControlsSettings() {
     const shop = window.Shopify?.shop || this.container.dataset.shop;
     if (!shop) return;
 
-    const endpoint = `/apps/product-bundles/api/controls-settings/${encodeURIComponent(shop)}?bundleType=full_page`;
+    const endpoint = buildStorefrontApiPath(
+      `controls-settings/${encodeURIComponent(shop)}?bundleType=full_page`,
+    );
     const response = await fetch(endpoint, { credentials: 'same-origin' });
     if (!response.ok) return;
 
@@ -222,7 +227,7 @@ _setCheckoutIntegrationDiscountState(code) {
 },
 
 async _createCheckoutIntegrationDiscountCode(providerId) {
-  const response = await fetch('/apps/product-bundles/api/checkout-integration-discount-code', {
+  const response = await fetch(buildStorefrontApiPath('checkout-integration-discount-code'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'same-origin',
@@ -465,7 +470,9 @@ async loadBundleData() {
         // Use Shopify app proxy path - Shopify automatically adds signature and auth params
         // App proxy config: /apps/product-bundles -> https://wolfpack-product-bundle-app.onrender.com
         // CRITICAL: URL-encode bundle ID to handle special characters in cuid() format
-        const apiUrl = `/apps/product-bundles/api/bundle/${encodeURIComponent(bundleId)}.json`;
+        const apiUrl = buildStorefrontApiPath(
+          `bundle/${encodeURIComponent(bundleId)}.json`,
+        );
 
         const response = await fetch(apiUrl);
 
