@@ -1,4 +1,5 @@
 import {
+  DISCOUNT_MESSAGE_TEMPLATES,
   normalizePricingRuleMessages,
   normalizePricingDisplayOptions,
   serializePricingDisplayOptions,
@@ -247,6 +248,12 @@ describe("normalizePricingDisplayOptions", () => {
 });
 
 describe("normalizePricingRuleMessages", () => {
+  it("maintains explicit message templates for every discount method", () => {
+    expect(Object.keys(DISCOUNT_MESSAGE_TEMPLATES).sort()).toEqual(
+      Object.values(DiscountMethod).sort(),
+    );
+  });
+
   it("returns method-specific default copy for discount-type resets", () => {
     expect(getDefaultDiscountRuleText(DiscountMethod.FIXED_AMOUNT_OFF)).toBe(
       "Add {{discountConditionDiff}} product(s) to save {{discountValueUnit}}{{discountValue}}!"
@@ -268,6 +275,15 @@ describe("normalizePricingRuleMessages", () => {
     );
     expect(getDefaultDiscountRuleSuccessMessage(DiscountMethod.BUY_X_GET_Y)).toBe(
       "Success! You got {{discountedItems}} product(s) at {{discountValue}}{{discountValueUnit}} off"
+    );
+    expect(getDefaultDiscountRuleText(DiscountMethod.FIXED_BUNDLE_PRICE)).toBe(
+      "Add {{discountConditionDiff}} product(s) to get the bundle for {{discountValueUnit}}{{discountValue}}!"
+    );
+    expect(getDefaultDiscountRuleText(DiscountMethod.FIXED_BUNDLE_PRICE, 1)).toBe(
+      "Congrats! Add {{discountConditionDiff}} more product(s) to get the bundle for {{discountValueUnit}}{{discountValue}}!"
+    );
+    expect(getDefaultDiscountRuleSuccessMessage(DiscountMethod.FIXED_BUNDLE_PRICE)).toBe(
+      "Success! Your bundle price is {{discountValueUnit}}{{discountValue}}."
     );
   });
 
