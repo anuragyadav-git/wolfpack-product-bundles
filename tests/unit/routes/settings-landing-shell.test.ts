@@ -3,7 +3,10 @@ import { renderToStaticMarkup } from "react-dom/server";
 import {
   SettingsLandingShell,
 } from "../../../app/routes/app/app.settings/SettingsLandingShell";
-import { AdminRouteLoadingBar } from "../../../app/components/AdminRouteLoadingBar";
+import {
+  AdminRouteLoadingBar,
+  waitForAdminRouteLoadingBar,
+} from "../../../app/components/AdminRouteLoadingBar";
 
 describe("Settings landing shell", () => {
   it("renders three actionable Polaris cards without loading a settings workspace", () => {
@@ -30,5 +33,18 @@ describe("Settings landing shell", () => {
     expect(view).toContain('role="progressbar"');
     expect(view).not.toContain("data-settings-skeleton-card");
     expect(view).not.toContain("<s-spinner");
+  });
+
+  it("keeps content pending until the loading bar fill duration completes", async () => {
+    jest.useFakeTimers();
+    const loadingComplete = jest.fn();
+
+    void waitForAdminRouteLoadingBar().then(loadingComplete);
+    await jest.advanceTimersByTimeAsync(799);
+    expect(loadingComplete).not.toHaveBeenCalled();
+
+    await jest.advanceTimersByTimeAsync(1);
+    expect(loadingComplete).toHaveBeenCalledTimes(1);
+    jest.useRealTimers();
   });
 });

@@ -9,7 +9,10 @@ import {
 } from "./app.settings/SettingsLandingShell";
 import { SettingsRoute } from "./app.settings/SettingsRoute";
 import { loader as settingsLoader } from "./app.settings";
-import { AdminRouteLoadingBar } from "../../components/AdminRouteLoadingBar";
+import {
+  AdminRouteLoadingBar,
+  waitForAdminRouteLoadingBar,
+} from "../../components/AdminRouteLoadingBar";
 
 export { action, loader } from "./app.settings";
 
@@ -22,7 +25,7 @@ export default function AdditionalConfigurationsRoute() {
     [searchParams],
   );
   const workspaceData = useMemo(
-    () => Promise.all([settingsPage, previewBundles]),
+    () => Promise.all([settingsPage, previewBundles, waitForAdminRouteLoadingBar()]),
     [previewBundles, settingsPage],
   );
   const handleNavigationChange = useCallback((navigation: {

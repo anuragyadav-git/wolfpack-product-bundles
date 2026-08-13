@@ -4,30 +4,28 @@
   z-index: 1000;
   height: 3px;
   overflow: hidden;
-  background: #d8d8d8;
+  background: transparent;
 }
 
 .loadingBarIndicator {
   display: block;
-  width: 40%;
+  width: 100%;
   height: 100%;
-  background: #008060;
-  animation: admin-route-loading 1.1s ease-in-out infinite;
+  background: #000000;
+  transform: scaleX(0);
+  transform-origin: left center;
+  animation: admin-route-loading 800ms ease-out forwards;
 }
 
 @keyframes admin-route-loading {
-  from {
-    transform: translateX(-100%);
-  }
-
   to {
-    transform: translateX(350%);
+    transform: scaleX(1);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .loadingBarIndicator {
-    width: 100%;
     animation: none;
+    transform: scaleX(1);
   }
 }

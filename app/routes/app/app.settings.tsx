@@ -17,7 +17,10 @@ import {
   SettingsWorkspaceError,
   type SettingsWorkspaceView,
 } from "./app.settings/SettingsLandingShell";
-import { AdminRouteLoadingBar } from "../../components/AdminRouteLoadingBar";
+import {
+  AdminRouteLoadingBar,
+  waitForAdminRouteLoadingBar,
+} from "../../components/AdminRouteLoadingBar";
 
 const loadSettingsWorkspace = async () => {
   const module = await import("./app.settings/SettingsRoute");
@@ -270,11 +273,13 @@ export async function action({ request }: ActionFunctionArgs) {
 
 export default function SettingsRouteDefault() {
   const { settingsPage, previewBundles } = useLoaderData<typeof loader>();
-  const workspaceData = useMemo(
-    () => Promise.all([settingsPage, previewBundles]),
-    [previewBundles, settingsPage],
-  );
   const [workspaceView, setWorkspaceView] = useState<SettingsWorkspaceView | null>(null);
+  const workspaceData = useMemo(
+    () => workspaceView
+      ? Promise.all([settingsPage, previewBundles, waitForAdminRouteLoadingBar()])
+      : null,
+    [previewBundles, settingsPage, workspaceView],
+  );
   const navigate = useNavigate();
   if (!workspaceView) {
     return (
@@ -296,19 +301,22 @@ export default function SettingsRouteDefault() {
   return (
     <Suspense fallback={<AdminRouteLoadingBar label="Loading Settings" />}>
       <Await
-        resolve={workspaceData}
+        resolve={workspaceData as NonNullable<typeof workspaceData>}
         errorElement={<SettingsWorkspaceError onExit={() => setWorkspaceView(null)} />}
       >
-        {([resolvedSettingsPage, resolvedPreviewBundles]) => (
-          <ReduxProvider>
-            <SettingsWorkspace
-              initialView={workspaceView}
-              onExit={() => setWorkspaceView(null)}
-              settingsPage={resolvedSettingsPage}
-              previewBundles={resolvedPreviewBundles}
-            />
-          </ReduxProvider>
-        )}
+        {(resolvedWorkspaceData: Awaited<NonNullable<typeof workspaceData>>) => {
+          const [resolvedSettingsPage, resolvedPreviewBundles] = resolvedWorkspaceData;
+          return (
+            <ReduxProvider>
+              <SettingsWorkspace
+                initialView={workspaceView}
+                onExit={() => setWorkspaceView(null)}
+                settingsPage={resolvedSettingsPage}
+                previewBundles={resolvedPreviewBundles}
+              />
+            </ReduxProvider>
+          );
+        }}
       </Await>
     </Suspense>
   );
