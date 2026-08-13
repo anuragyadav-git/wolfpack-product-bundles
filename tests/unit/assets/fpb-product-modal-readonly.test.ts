@@ -205,6 +205,53 @@ describe("FPB product modal read-only quick view", () => {
     expect(elements["modal-product-description"].innerHTML).toBe("");
   });
 
+  it("shows and cycles carousel navigation for multiple distinct product images", async () => {
+    const { BundleProductModal: Modal } = await import("../../../app/assets/bundle-modal-component.js");
+    const mainImage = { src: "", alt: "" };
+    const imageFrame = { classList: { toggle: jest.fn() } };
+    const navButtons = [{ hidden: true }, { hidden: true }];
+    (globalThis as typeof globalThis & { document: any }).document = {
+      getElementById: (id: string) => id === "modal-main-image" ? mainImage : null,
+    };
+
+    class TestModal extends Modal {
+      init() {
+        this.modalElement = {
+          querySelector: () => imageFrame,
+          querySelectorAll: () => navButtons,
+        };
+      }
+    }
+
+    const modal = new TestModal(buildWidget());
+    modal.currentProduct = {
+      ...product,
+      images: [
+        { src: "https://cdn.example/product.png" },
+        { src: "https://cdn.example/detail.png" },
+      ],
+    };
+    modal.loadImage();
+
+    expect(navButtons.every((button) => button.hidden === false)).toBe(true);
+    expect(mainImage.src).toBe("https://cdn.example/product.png");
+
+    modal.showAdjacentImage(1);
+    expect(mainImage.src).toBe("https://cdn.example/detail.png");
+
+    modal.showAdjacentImage(1);
+    expect(mainImage.src).toBe("https://cdn.example/product.png");
+  });
+
+  it("maps intentional horizontal image swipes to carousel direction", async () => {
+    const { getProductCarouselSwipeDirection } = await import("../../../app/assets/bundle-modal-component.js");
+
+    expect(getProductCarouselSwipeDirection({ distanceX: -64, distanceY: 8 })).toBe(1);
+    expect(getProductCarouselSwipeDirection({ distanceX: 64, distanceY: 8 })).toBe(-1);
+    expect(getProductCarouselSwipeDirection({ distanceX: 20, distanceY: 2 })).toBe(0);
+    expect(getProductCarouselSwipeDirection({ distanceX: -64, distanceY: 80 })).toBe(0);
+  });
+
   it("clears stale variant summary when opening a single-variant product", async () => {
     const { BundleModalVariantMethods } = await import("../../../app/assets/widgets/full-page/modal/variant-methods.js");
     const elements: Record<string, any> = {

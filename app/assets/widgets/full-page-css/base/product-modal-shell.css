@@ -122,6 +122,7 @@
   border-radius: 5px;
   overflow: hidden;
   position: relative;
+  touch-action: pan-y;
 }
 
 .bundle-modal-image-nav {

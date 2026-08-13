@@ -1030,7 +1030,7 @@ processProductsForStep(products, step) {
         // Preserve variants and options for variant selection in modal
         variants: processedVariants,
         options: processedOptions,
-        // Preserve the first image candidates for the product details modal.
+        // Preserve product images for the shared product-details carousel.
         images: product.images || (product.imageUrl ? [{ src: product.imageUrl }] : []),
         description: normalizeProductDescription(product),
         descriptionHtml: normalizeProductDescriptionHtml(product)

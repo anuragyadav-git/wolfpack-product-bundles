@@ -14,10 +14,13 @@ systems:
   - widget-runtime
 source_paths:
   - app/assets/bundle-widget-full-page.ts
+  - app/assets/bundle-modal-component.ts
   - app/assets/widgets/shared
   - app/assets/widgets/full-page/initialization-guard.js
   - app/assets/widgets/full-page-css/base/bootstrap-reservation.css
   - app/assets/bundle-widget-product-page.ts
+  - app/routes/api/api.storefront-products.tsx
+  - app/routes/api/api.storefront-collections.tsx
   - app/routes/app/app.settings/design-preview-model.ts
   - app/routes/root/wpb.$bundleId.tsx
   - extensions/bundle-builder/blocks/bundle-app-embed.liquid
@@ -86,7 +89,12 @@ storefront interactions.
 
 Source module names should describe their storefront responsibility. Avoid mechanical names such as `chunk-01.js` or `part-01.css`; those hide ownership and make stale widget code harder to spot.
 
-The shared Bundle Product Modal is intentionally a single-image product details modal: product image, name, description, variant controls when needed, quantity, and Add To Box. Do not reintroduce modal thumbnails, image counters, or carousel/gallery controls; EB's landing-page quick-view modal does not use a gallery.
+The shared Bundle Product Modal owns the product image carousel, name,
+description, variant controls when needed, quantity, and Add To Box. Direct
+product and collection hydration preserve up to 50 Shopify product images in
+source order. One image renders without navigation; multiple distinct images
+enable previous/next controls on desktop and horizontal swipe navigation in the
+mobile drawer. The same shared component owns both responsive surfaces.
 
 Because the shared product-details overlay is mounted under `document.body`, its responsive surface is viewport-owned rather than widget-container-owned. Product image activation opens a bounded, centered modal on desktop and a bounded bottom drawer on mobile. Both surfaces suppress horizontal overflow and keep excess content scrollable only on the vertical axis.
 

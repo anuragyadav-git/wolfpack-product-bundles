@@ -10,6 +10,7 @@ import { normalizeStorefrontQuantityAvailable } from "../../lib/storefront-varia
 // auth: public — fetched directly by the storefront widget (browser request, no Shopify session available)
 
 const INVENTORY_FIELDS = "quantityAvailable currentlyNotInStock";
+const PRODUCT_IMAGE_LIMIT = 50;
 
 /**
  * Public API endpoint to fetch products from collections using Storefront API
@@ -63,6 +64,13 @@ export async function loader({ request }: LoaderFunctionArgs) {
                     descriptionHtml
                     featuredImage {
                       url
+                    }
+                    images(first: ${PRODUCT_IMAGE_LIMIT}) {
+                      edges {
+                        node {
+                          url
+                        }
+                      }
                     }
                     options {
                       name
@@ -154,6 +162,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
             description: product.description || '',
             descriptionHtml: product.descriptionHtml || '',
             imageUrl: product.featuredImage?.url || '',
+            images: (product.images?.edges || [])
+              .map((edge: any) => edge.node?.url ? { src: edge.node.url } : null)
+              .filter(Boolean),
             options: (product.options || []).map((option: any) => ({
               name: option.name,
               values: Array.isArray(option.values) ? option.values : [],

@@ -28,6 +28,7 @@ const CORS_HEADERS = {
  */
 const INVENTORY_FIELDS = "quantityAvailable currentlyNotInStock";
 const PRODUCT_GID_PATTERN = /^gid:\/\/shopify\/Product\/(\d+)$/;
+const PRODUCT_IMAGE_LIMIT = 50;
 
 function normalizeProductId(productId: string): string | null {
   if (/^\d+$/.test(productId)) {
@@ -158,6 +159,9 @@ function buildProductsQuery(country: string | null, hasInventoryScope: boolean) 
         nodes(ids: $ids) {
           ... on Product {
             id title handle description descriptionHtml featuredImage { url }
+            images(first: ${PRODUCT_IMAGE_LIMIT}) {
+              edges { node { url } }
+            }
             variants(first: 1) {
               edges {
                 node {
@@ -175,6 +179,9 @@ function buildProductsQuery(country: string | null, hasInventoryScope: boolean) 
         nodes(ids: $ids) {
           ... on Product {
             id title handle description descriptionHtml featuredImage { url }
+            images(first: ${PRODUCT_IMAGE_LIMIT}) {
+              edges { node { url } }
+            }
             variants(first: 1) {
               edges {
                 node {
@@ -310,6 +317,10 @@ export async function loader({ request }: LoaderFunctionArgs) {
       nodes.map(async (product: any) => {
         if (!product) return null;
 
+        const images = (product.images?.edges || [])
+          .map((edge: any) => edge.node?.url ? { src: edge.node.url } : null)
+          .filter(Boolean);
+
         try {
           // Fetch all variants with pagination; pass country for market-correct prices
           const variantEdges = await fetchAllVariants(
@@ -327,6 +338,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
             description: product.description || '',
             descriptionHtml: product.descriptionHtml || '',
             imageUrl: product.featuredImage?.url || '',
+            images,
             variants: variantEdges.map(mapStorefrontVariant)
           };
         } catch (error) {
@@ -340,6 +352,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
             description: product.description || '',
             descriptionHtml: product.descriptionHtml || '',
             imageUrl: product.featuredImage?.url || '',
+            images,
             variants: fallbackVariants
           };
         }

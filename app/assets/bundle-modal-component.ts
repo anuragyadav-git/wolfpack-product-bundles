@@ -36,6 +36,17 @@ export function shouldDismissProductDrawerSwipe({
   return verticalDistance >= 96 || downwardVelocity >= 0.6;
 }
 
+export function getProductCarouselSwipeDirection({
+  distanceX = 0,
+  distanceY = 0,
+} = {}) {
+  const horizontalDistance = Number(distanceX);
+  const verticalDistance = Math.abs(Number(distanceY));
+  if (!Number.isFinite(horizontalDistance) || !Number.isFinite(verticalDistance)) return 0;
+  if (Math.abs(horizontalDistance) < 48 || verticalDistance >= Math.abs(horizontalDistance)) return 0;
+  return horizontalDistance < 0 ? 1 : -1;
+}
+
 export class BundleProductModal {
   constructor(widget) {
     this.widget = widget;
@@ -197,9 +208,37 @@ export class BundleProductModal {
         this.showAdjacentImage(button.dataset.modalImageNav === 'prev' ? -1 : 1);
       });
     });
+    this.setupImageCarouselGestures();
 
     // Swipe gesture detection for mobile
     this.setupSwipeGestures();
+  }
+
+  setupImageCarouselGestures() {
+    const imageFrame = this.modalElement.querySelector('.bundle-modal-main-image');
+    if (!imageFrame) return;
+
+    let gesture = null;
+    imageFrame.addEventListener('pointerdown', (event) => {
+      gesture = {
+        pointerId: event.pointerId,
+        startX: event.clientX,
+        startY: event.clientY,
+      };
+      imageFrame.setPointerCapture?.(event.pointerId);
+    });
+    imageFrame.addEventListener('pointerup', (event) => {
+      if (!gesture || event.pointerId !== gesture.pointerId) return;
+      const direction = getProductCarouselSwipeDirection({
+        distanceX: event.clientX - gesture.startX,
+        distanceY: event.clientY - gesture.startY,
+      });
+      gesture = null;
+      if (direction !== 0) this.showAdjacentImage(direction);
+    });
+    imageFrame.addEventListener('pointercancel', () => {
+      gesture = null;
+    });
   }
 
   /**

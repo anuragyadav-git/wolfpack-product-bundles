@@ -135,6 +135,61 @@ describe("api.storefront-products loader", () => {
     expect(body.products[0].descriptionHtml).toBe("<p>Detailed <strong>product</strong> copy</p>");
   });
 
+  it("preserves multiple Shopify product images for the product details carousel", async () => {
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          data: {
+            nodes: [
+              {
+                id: "gid://shopify/Product/111",
+                title: "Gallery Product",
+                handle: "gallery-product",
+                description: "",
+                descriptionHtml: "",
+                featuredImage: { url: "https://cdn.example/primary.jpg" },
+                images: {
+                  edges: [
+                    { node: { url: "https://cdn.example/primary.jpg" } },
+                    { node: { url: "https://cdn.example/detail.jpg" } },
+                  ],
+                },
+                variants: { edges: [] },
+              },
+            ],
+          },
+        }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          data: {
+            product: {
+              variants: {
+                pageInfo: { hasNextPage: false, endCursor: null },
+                edges: [],
+              },
+            },
+          },
+        }),
+      });
+
+    const response = await loader({
+      request: new Request("https://app.example/api/storefront-products?ids=gid://shopify/Product/111&shop=test.myshopify.com"),
+      params: {},
+      context: {},
+    } as any);
+    const body = await response.json() as { products: any[] };
+    const requestBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+
+    expect(requestBody.query).toContain("images(first:");
+    expect(body.products[0].images).toEqual([
+      { src: "https://cdn.example/primary.jpg" },
+      { src: "https://cdn.example/detail.jpg" },
+    ]);
+  });
+
   it("hydrates all product variants without requesting selling plan allocations when scope is absent", async () => {
     mockFetch
       .mockResolvedValueOnce({
