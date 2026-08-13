@@ -293,7 +293,10 @@ function PpbProgressTierTextFields({
             <p style={{ margin: 0, fontSize: 13, fontWeight: 500 }}>
               Rule #{index + 1}
             </p>
-            <s-stack direction="inline" gap="small">
+            <s-grid
+              gridTemplateColumns="repeat(2, minmax(0, 1fr))"
+              gap="small"
+            >
               <s-text-field
                 label="Tier Text"
                 value={tierTextByRuleId[rule.id]?.tierText ?? ""}
@@ -326,7 +329,7 @@ function PpbProgressTierTextFields({
                 }}
                 autocomplete="off"
               />
-            </s-stack>
+            </s-grid>
           </s-stack>
         </div>
       ))}

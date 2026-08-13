@@ -111,7 +111,10 @@ export function FpbProgressBarOptions({
                           >
                             Rule #{index + 1}
                           </p>
-                          <s-stack direction="inline" gap="small">
+                          <s-grid
+                            gridTemplateColumns="repeat(2, minmax(0, 1fr))"
+                            gap="small"
+                          >
                             <s-text-field
                               label="Tier Text"
                               value={tierTextByRuleId[rule.id]?.tierText ?? ""}
@@ -149,7 +152,7 @@ export function FpbProgressBarOptions({
                               }}
                               autocomplete="off"
                             />
-                          </s-stack>
+                          </s-grid>
                         </s-stack>
                       </div>
                     ))
