@@ -173,7 +173,7 @@ export const fullPageMobileSummaryMethods: Record<string, any> & ThisType<any> =
 _populateCompactMobileSummaryTray(sheet) {
   const previousListScrollTop = sheet.querySelector?.('.fpb-mobile-summary-products-list')?.scrollTop || 0;
   const previousProgressPercent = readRenderedDiscountProgressPercent(
-    sheet.querySelector?.('.fpb-dp-step_based')
+    sheet.querySelector?.('.fpb-discount-progress')
   );
   sheet.innerHTML = '';
 

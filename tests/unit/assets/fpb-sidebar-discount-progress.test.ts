@@ -19,6 +19,8 @@ class FakeElement {
   innerHTML = '';
   children: FakeElement[] = [];
   style: Record<string, string> = {};
+  attributes: Record<string, string> = {};
+  width = 0;
   listeners: Record<string, Array<() => unknown>> = {};
 
   constructor(tagName: string) {
@@ -65,16 +67,27 @@ class FakeElement {
     }
   }
 
-  setAttribute() {}
+  setAttribute(name: string, value: string) {
+    this.attributes[name] = value;
+  }
+
+  getAttribute(name: string) {
+    return this.attributes[name] ?? null;
+  }
+
+  getBoundingClientRect() {
+    return { width: this.width };
+  }
 
   querySelector(selector: string): FakeElement | null {
-    const selectorClasses = selector
-      .split('.')
-      .filter(Boolean)
-      .map((part) => part.trim())
-      .filter(Boolean);
-    const matches = selectorClasses.length > 0
-      && selectorClasses.every((className) => this.className.split(/\s+/).includes(className));
+    const attributeMatch = selector.match(/^\[([^=]+)="([^"]+)"\]$/);
+    const selectorClasses = selector.startsWith('.')
+      ? selector.split('.').filter(Boolean).map((part) => part.trim()).filter(Boolean)
+      : [];
+    const matches = attributeMatch
+      ? this.getAttribute(attributeMatch[1]) === attributeMatch[2]
+      : selectorClasses.length > 0
+        && selectorClasses.every((className) => this.className.split(/\s+/).includes(className));
     if (matches) return this;
 
     for (const child of this.children) {
@@ -205,6 +218,30 @@ describe('FPB summary sidebar discount progress', () => {
       expect(renderProgressCount).toBe(1);
     },
   );
+
+  it('passes the visible Simple Bar fill into the replacement render', () => {
+    const panel = document.createElement('aside') as unknown as FakeElement;
+    const previousProgress = document.createElement('div') as unknown as FakeElement;
+    previousProgress.className = 'fpb-discount-progress fpb-dp-simple';
+    const track = document.createElement('div') as unknown as FakeElement;
+    track.setAttribute('role', 'progressbar');
+    track.width = 200;
+    const fill = document.createElement('div') as unknown as FakeElement;
+    fill.setAttribute('data-bw-discount-progress-fill', 'true');
+    fill.width = 50;
+    previousProgress.append(track, fill);
+    panel.appendChild(previousProgress);
+
+    const context = makeContext('STANDARD', 'simple');
+    const renderProgress = jest.fn(() => document.createElement('div'));
+    context._renderDiscountProgress = renderProgress;
+
+    fullPageSidePanelMethods.renderSidePanel.call(context, panel);
+
+    expect(renderProgress).toHaveBeenCalledWith(expect.objectContaining({
+      previousProgressPercent: 25,
+    }));
+  });
 
   it.each(['STANDARD', 'CLASSIC', 'COMPACT', 'HORIZONTAL'])(
     'requests simple progress rendering in the %s summary sidebar',

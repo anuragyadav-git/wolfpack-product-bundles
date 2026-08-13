@@ -107,7 +107,7 @@ export const fullPageSidePanelMethods: Record<string, any> & ThisType<any> = {
 renderSidePanel(panel) {
   if (!panel) return;
   const previousProgressPercent = readRenderedDiscountProgressPercent(
-    panel.querySelector?.('.fpb-dp-step_based')
+    panel.querySelector?.('.fpb-discount-progress')
   );
   panel.innerHTML = '';
 

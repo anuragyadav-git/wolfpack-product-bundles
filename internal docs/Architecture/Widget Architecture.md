@@ -309,12 +309,12 @@ state markers such as `data-fpb-summary-mode` own visibility and responsive
 branching.
 
 The FPB desktop summary and mobile tray rebuild their contents after selection
-changes. A stepped discount-progress transition must therefore read the visible
-fill percentage before clearing the old summary DOM, render the replacement at
-that percentage, and move it to the new segment-based target on the following
-frames. A transition declared only on the fill width cannot animate across an
-element replacement. Initial renders and reduced-motion mode apply the target
-immediately.
+changes. Simple and Step-Based discount-progress transitions must therefore
+read the visible fill percentage before clearing the old summary DOM, render
+the replacement at that percentage, and move it to the new target on the
+following frames. A transition declared only on the fill width cannot animate
+across an element replacement. Initial renders and reduced-motion mode apply
+the target immediately.
 
 ---
 

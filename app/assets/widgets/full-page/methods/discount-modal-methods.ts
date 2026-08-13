@@ -108,8 +108,7 @@ _renderDiscountProgress(options = {}) {
   const bar = wrapper.firstElementChild;
   const previousProgressPercent = Number(options.previousProgressPercent);
   if (
-    progressBarType === 'step_based'
-    && options.previousProgressPercent !== null
+    options.previousProgressPercent !== null
     && options.previousProgressPercent !== undefined
     && Number.isFinite(previousProgressPercent)
   ) {
