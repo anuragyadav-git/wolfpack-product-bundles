@@ -189,6 +189,11 @@ the first row at the same visual height, while the bundle description spans the
 second. Its action area keeps the total group beside the primary action; within
 that group, the label and price are stacked in two equal-height rows.
 
+When Bundle Quantity Options are enabled, the shared box selector follows the
+description as the next desktop summary row for every FPB preset. Its renderer
+and responsive presentation belong to the shared side-panel method and base
+sidebar CSS; preset styles must not restate or override this component.
+
 Preset structural rules use the named FPB shell container rather than viewport
 media queries. This keeps a constrained host and a same-width browser viewport
 on the same layout path. The shared responsive asset owns shell gutters,

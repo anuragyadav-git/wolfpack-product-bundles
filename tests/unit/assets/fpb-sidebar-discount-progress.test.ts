@@ -505,6 +505,39 @@ describe('FPB mobile bundle quantity options', () => {
   });
 });
 
+describe('FPB desktop bundle quantity options', () => {
+  it.each(['STANDARD', 'CLASSIC', 'COMPACT', 'HORIZONTAL'])(
+    'renders saved bundle quantity options in the %s desktop summary',
+    (preset) => {
+      const panel = document.createElement('aside') as unknown as FakeElement;
+      const context = makeContext(preset, 'simple');
+      const boxSelection = document.createElement('div') as unknown as FakeElement;
+      context.renderBoxSelectionOptions = jest.fn(() => boxSelection);
+
+      fullPageSidePanelMethods.renderSidePanel.call(context, panel);
+
+      expect(context.renderBoxSelectionOptions).toHaveBeenCalledWith(0);
+      expect(panel.children).toContain(boxSelection);
+    },
+  );
+
+  it('omits desktop bundle quantity options when none are configured', () => {
+    const panelWithoutOptions = document.createElement('aside') as unknown as FakeElement;
+    const contextWithoutOptions = makeContext('STANDARD', 'simple');
+    contextWithoutOptions.renderBoxSelectionOptions = jest.fn(() => null);
+
+    const panelWithOptions = document.createElement('aside') as unknown as FakeElement;
+    const contextWithOptions = makeContext('STANDARD', 'simple');
+    contextWithOptions.renderBoxSelectionOptions = jest.fn(() => document.createElement('div'));
+
+    fullPageSidePanelMethods.renderSidePanel.call(contextWithoutOptions, panelWithoutOptions);
+    fullPageSidePanelMethods.renderSidePanel.call(contextWithOptions, panelWithOptions);
+
+    expect(contextWithoutOptions.renderBoxSelectionOptions).toHaveBeenCalledWith(0);
+    expect(panelWithoutOptions.children).toHaveLength(panelWithOptions.children.length - 1);
+  });
+});
+
 describe('FPB summary removal accessibility', () => {
   it.each([
     ['14k Dangling Pendant Earrings', 'Delete 14k Dangling Pendant Earrings'],

@@ -1136,8 +1136,7 @@ body:has([data-fpb-design-preset]) {
   }
 }
 
-.layout-sidebar[data-fpb-design-preset="STANDARD"] .fpb-sidebar-tier-cta,
-.layout-sidebar[data-fpb-design-preset="STANDARD"] .box-selection-container {
+.layout-sidebar[data-fpb-design-preset="STANDARD"] .fpb-sidebar-tier-cta {
   display: none;
 }
 

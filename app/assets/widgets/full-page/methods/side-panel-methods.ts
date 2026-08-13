@@ -212,7 +212,7 @@ renderSidePanel(panel) {
     isClassicDesktopSidebar ? selectedBoxSelectionQuantity : totalQuantity
   );
 
-  if ((isClassicDesktopSidebar || !isStandardDesktopSidebar) && boxSelection) {
+  if (boxSelection) {
     panel.appendChild(boxSelection);
   }
 

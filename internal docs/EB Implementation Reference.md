@@ -858,6 +858,14 @@ the rule object for the BXY threshold semantics.
 - Non-BXY states show the toggle, "Multi Language" action, and note: "Note: Bundle Quantity Options can only be enabled when discount rules are based on quantity."
 - When enabled for quantity-based rules, each rule renders "Box Label" and "Box Subtext" fields plus a "Make this rule default" star action.
 
+**Standard desktop storefront proof (2026-08-13):** The enabled box selector is
+the first row after the summary subtitle. In the verified two-rule fixture, the
+wrapper was a fluid two-column grid (`371.94px` wide with an `8px` gap) and sat
+`5px` below the subtitle. Each option was `55px` tall with `8px` padding and an
+`8px` radius. The active option used a black surface with white text; the
+inactive option used `rgb(238, 238, 238)` with black text. This is one shared
+summary component rather than a preset-specific card treatment.
+
 **Wolfpack implementation note (2026-07-04):** Because EB hides Bundle
 Quantity Options for BXY, Wolfpack storefront/cart code must not synthesize
 public `Box` cart display properties when the source `_bundle_display_properties`
