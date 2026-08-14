@@ -6,7 +6,8 @@
   "required": true,
   "completed_presets": [
     "CLASSIC",
-    "COMPACT"
+    "COMPACT",
+    "HORIZONTAL"
   ],
   "gates": {
     "functional": "passed",
@@ -87,6 +88,26 @@
       "id": "compact-state-geometry",
       "status": "passed",
       "actual": "Hover, keyboard focus, selection, and quantity 1-to-2 preserved outer-card height; 44px controls remained contained"
+    },
+    {
+      "id": "horizontal-preset-runtime-and-asset",
+      "status": "passed",
+      "actual": "HORIZONTAL persisted through Admin; only the Horizontal preset stylesheet was active and the live response contained the rebuilt frame, title, height, and one-column rules"
+    },
+    {
+      "id": "horizontal-five-width-and-boundary-geometry",
+      "status": "passed",
+      "actual": "Two columns at 1440 and 1280; one column at 768, 390, and 360; root container 799px used one column and 800/801px used up to one content-driven column; no overflow and equal row heights"
+    },
+    {
+      "id": "horizontal-state-geometry",
+      "status": "passed",
+      "actual": "Hover, keyboard focus, selection, and quantity 1-to-2 preserved 154px desktop and 138px mobile card heights; 44px controls remained contained"
+    },
+    {
+      "id": "final-four-preset-regression",
+      "status": "passed",
+      "actual": "Cache-bypassed final sweep confirmed Classic 4/2, Compact 3/2, frozen Standard 3/1, and restored Horizontal 2/1 desktop/mobile column behavior with zero overflow"
     }
   ],
   "observations": {
@@ -143,6 +164,13 @@
       "attempt": 3,
       "classification": "compact-slice",
       "setup": "COMPACT persisted through Admin; Cache Storage cleared; reload with ignoreCache true",
+      "result": "passed",
+      "recovery": "None"
+    },
+    {
+      "attempt": 4,
+      "classification": "horizontal-slice",
+      "setup": "HORIZONTAL persisted through Admin; generated asset touch triggered dev-preview republish; Cache Storage cleared; reload with ignoreCache true",
       "result": "passed",
       "recovery": "None"
     }

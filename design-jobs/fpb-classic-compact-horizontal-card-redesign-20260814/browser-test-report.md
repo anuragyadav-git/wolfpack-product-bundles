@@ -127,6 +127,19 @@ The desktop navigation trace measured LCP 7034ms and CLS 0.6949. The largest shi
 - Performance: desktop navigation trace measured LCP 5969ms and CLS 0.69, again dominated by delayed shared widget hydration. The same frozen shared-runtime waiver applies.
 - Raw reports: `/private/tmp/fpb-classic-compact-horizontal-card-redesign-20260814/qa/lighthouse/compact-{desktop,mobile}/`.
 
+## Horizontal slice and final regression
+
+- Persisted/runtime preset: `HORIZONTAL` with only `bundle-widget-full-page-horizontal.css` active after Cache Storage clear and ignore-cache reload.
+- Live asset recovery: the dev preview initially retained the preceding generated body. Touching the already-generated Horizontal asset triggered a new extension preview URL; the authoritative response then contained the frame and constrained-row declarations. No deploy or dev-server restart was performed.
+- Responsive geometry: two columns at 1440x900 and 1280x800; exactly one column at 768x1024, 390x844, and 360x800. Root container 799px used one column; at 800/801px the content-driven catalog used one permitted column. All widths had zero page-level overflow.
+- Card geometry: 154px with a 136px media/content row on wide desktop; 138px with a 120px row below the shared 800px container boundary. The existing 30/70 anatomy remained unchanged.
+- Interaction: hover produced zero geometry delta; selected and quantity 1-to-2 states stayed 138px high; 44px controls remained contained. Keyboard traversal reached the card root and rendered a solid 2px outline with 2px offset.
+- Final cross-template sweep: Classic retained 4 desktop / 2 mobile columns; Compact 3 / 2; frozen Standard 3 / 1; Horizontal 2 / 1. Every preset loaded only its own stylesheet and had zero horizontal overflow. The fixture was restored to Horizontal.
+- Console/network: final trace navigation produced no app-owned console error or failed request. Earlier theme-owned favicon behavior remains outside the widget.
+- Lighthouse: desktop accessibility 88 and mobile accessibility 95; Best Practices 77, SEO 92, and Agentic Browsing 51 at both. The same frozen shared-owner accessibility waiver applies.
+- Performance: desktop navigation trace measured LCP 5784ms and CLS 0.69, dominated by shared widget load delay. The same frozen shared-runtime waiver applies.
+- Raw reports: `/private/tmp/fpb-classic-compact-horizontal-card-redesign-20260814/qa/lighthouse/horizontal-{desktop,mobile}/`.
+
 ## Final approval status
 
-Classic and Compact slices passed with the two explicitly scoped shared-owner waivers above. The fixture is restored to Compact; Horizontal remains pending. No deployment was attempted.
+Classic, Compact, Horizontal, and the frozen-Standard regression passed with the two explicitly scoped shared-owner waivers above. The fixture is restored to Horizontal. No deployment was attempted.

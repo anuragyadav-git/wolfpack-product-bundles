@@ -3,11 +3,11 @@
   "job": {
     "id": "fpb-classic-compact-horizontal-card-redesign-20260814",
     "title": "FPB Classic Compact Horizontal Card Redesign",
-    "status": "qa-running",
-    "stage": "CHROME_QA_EXECUTION",
+    "status": "approved",
+    "stage": "FINAL_APPROVAL",
     "revision": 1,
     "created_at": "2026-08-14T00:41:21Z",
-    "updated_at": "2026-08-14T07:30:56Z",
+    "updated_at": "2026-08-14T07:51:45Z",
     "owner": "Aditya Awasthi",
     "product": "Wolfpack Product Bundles",
     "repository": "/Users/adityaawasthi/Developer/wolfpack-product-bundles",
@@ -181,7 +181,7 @@
     "allow_isolated_context": false,
     "preflight_status": "passed",
     "preflight_result_path": "qa/preflight.json",
-    "baseline_status": "partial",
+    "baseline_status": "passed",
     "baseline_paths": [
       "/private/tmp/fpb-classic-compact-horizontal-card-redesign-20260814/qa/baselines/classic-desktop-prechange.png",
       "/private/tmp/fpb-classic-compact-horizontal-card-redesign-20260814/qa/baselines/classic-mobile-prechange.png"
@@ -237,6 +237,14 @@
         "result": "passed",
         "evidence": "Compact request 21848 served rebuilt CSS; five-width matrix, interaction states, Lighthouse, trace, and frozen-Standard smoke completed",
         "recovery_action": "Compact preset CSS now owns the approved two-column track below the shared 800px container boundary"
+      },
+      {
+        "case_id": "horizontal-live-five-width",
+        "attempt": 1,
+        "classification": "product-css-and-infrastructure-retry",
+        "result": "passed",
+        "evidence": "Horizontal live asset served the framed bounded-row CSS; five widths, 799/800/801 boundary, interaction states, Lighthouse, trace, and final four-preset regression completed",
+        "recovery_action": "Horizontal preset now owns the one-column boundary and bounded non-variant row; generated asset touch triggered preview republish"
       }
     ],
     "artifacts_path": "qa",
@@ -311,7 +319,7 @@
         "path": "browser-test-report.md",
         "status": "complete",
         "revision": 1,
-        "sha256": "9bae2df44f51ae625f1486d25da4e6f419cd84bebc1a5812118a8634b795701f",
+        "sha256": "11e20a62859bdba6a870ac8baa7963958dee29e0550e90e6d1a624aa20712674",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -416,7 +424,7 @@
         "path": "remediation-list.md",
         "status": "complete",
         "revision": 1,
-        "sha256": "1a588f08b8bd90ebf9a2874af69501d8b6c0bffa3929fe1e9dbfdd51e9e6b98f",
+        "sha256": "4f6724e6274f0ae5fce309ca5d8773760f02593b13afe04ad04fc2444ed8fd0b",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -461,7 +469,7 @@
         "path": "visual-qa-report.md",
         "status": "complete",
         "revision": 1,
-        "sha256": "a36be938d05fcd49186c07eb42b36b3fd7097b357adb87100dfcda2aca0eb604",
+        "sha256": "6241218b23c1d5c1232e01608fa7034df5aa2405efb0a427f0881b3567eb2c16",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -698,6 +706,30 @@
       "reason": "User confirmed the SIT Shopify dev server was restarted; resume the blocked live-asset verification.",
       "evidence": [
         "browser-case-result.json"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 21,
+      "at": "2026-08-14T07:48:10Z",
+      "from": "CHROME_QA_EXECUTION",
+      "to": "VISUAL_REMEDIATION",
+      "revision": 1,
+      "reason": "All three preset QA slices and frozen-Standard regression recorded; measured CSS corrections completed",
+      "evidence": [
+        "browser-test-report.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 22,
+      "at": "2026-08-14T07:51:45Z",
+      "from": "VISUAL_REMEDIATION",
+      "to": "FINAL_APPROVAL",
+      "revision": 1,
+      "reason": "Horizontal remediation and final cross-template regression passed with scoped shared-boundary accessibility and performance waivers.",
+      "evidence": [
+        "qa/browser-artifact-summary.json"
       ],
       "affected_artifacts": []
     }

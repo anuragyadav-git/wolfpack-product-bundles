@@ -35,6 +35,8 @@ Artifact status: complete
 | Classic mobile | Classic pre-change baseline | `classic-live-mobile-dpr3.png` | None | 1170x2532 | Informational redesign diff | 0.4573858 | x0 y0 w1170 h2112 | Expected mismatch | ACCEPTED: approved CL-A redesign; two-column mobile geometry passed |
 | Compact desktop | Approved REF-WPB/REF-EB Compact cohort | Direct Chrome live capture | None | 1440x900 | Semantic contract | Not persisted by Chrome host | N/A | Host-limited | ACCEPTED: approved CO-A frame, title reserve, and integrated action are live |
 | Compact mobile | Approved REF-WPB/REF-EB Compact cohort | Direct Chrome live capture | None | 390x844 | Semantic contract | Not persisted by Chrome host | N/A | Host-limited | ACCEPTED: approved two-column Compact geometry and contained action are live |
+| Horizontal desktop | Approved REF-WPB/REF-EB Horizontal cohort | Direct Chrome live capture | None | 1440x900 | Semantic contract | Not persisted by Chrome host | N/A | Host-limited | ACCEPTED: approved two-column framed row-card treatment is live |
+| Horizontal mobile | Approved REF-WPB/REF-EB Horizontal cohort | Direct Chrome live capture | None | 390x844 | Semantic contract | Not persisted by Chrome host | N/A | Host-limited | ACCEPTED: approved one-column 30/70 row-card treatment is live |
 
 ## Semantic review
 
@@ -47,6 +49,9 @@ Artifact status: complete
 | Compact desktop card grid | Approved CO-A direction | Three equal framed image-first cards | Intentional grouping improvement | ACCEPTED | 797.172px grid; three ~257.72px tracks; 12px gap; equal 311.313px cards | Compact preset CSS | None |
 | Compact responsive grid | Approved CO-A direction | Two columns below the shared 800px container boundary | Prior shared cascade produced one column in desktop-width emulation and was corrected | ACCEPTED | 768: ~347.76px tracks; 390: 166.312px; 360: ~151.91px; zero overflow | Compact preset CSS | None |
 | Compact stateful geometry | Stable card shell | No outer-height change on hover, selection, or quantity update | None | ACCEPTED | 272px mobile card before/after; 44px controls contained; visible 2px focus outline | Compact preset CSS | None |
+| Horizontal desktop grid | Approved HO-A direction | Two equal framed row cards | Intentional grouping and density improvement | ACCEPTED | Two ~424.297px tracks; equal 154px cards; 136px media/content row | Horizontal preset CSS | None |
+| Horizontal responsive grid | Approved HO-A direction | One column below the shared 800px shell boundary | Corrected prior two-column 768px behavior | ACCEPTED | Root 799px: one column; 768/390/360: one column and 138px cards; zero overflow | Horizontal preset CSS | None |
+| Horizontal stateful geometry | Stable bounded row card | No outer-height change on hover, selection, or quantity update | None | ACCEPTED | 154px desktop and 138px mobile; 44px controls contained; visible 2px focus outline | Horizontal preset CSS | None |
 
 Severity: BLOCKER, HIGH, MEDIUM, LOW, or ACCEPTED. ACCEPTED requires an intentional approved deviation.
 
