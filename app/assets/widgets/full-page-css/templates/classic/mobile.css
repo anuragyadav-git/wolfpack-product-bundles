@@ -229,13 +229,13 @@
   }
 
   .fpb-preset-classic .sidebar-content .product-price-strike {
-    color: var(
-      --bundle-product-strike-price-color,
-      var(--bundle-side-panel-text-color, currentColor)
-    );
+    color: var(--bundle-product-strike-price-color, #8d8d8d);
     font-size: 14px;
     font-weight: 700;
     line-height: normal;
+    text-decoration: line-through;
+    text-decoration-color: currentColor;
+    text-decoration-thickness: 0.075em;
   }
 
   .fpb-preset-classic[data-fpb-card-cta-mode="icon"]

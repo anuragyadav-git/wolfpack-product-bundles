@@ -441,6 +441,17 @@
   line-height: 1.35;
 }
 
+[data-fpb-design-preset="HORIZONTAL"] .product-card .product-price-strike,
+#bundle-builder-app[data-bundle-type="full_page"][data-fpb-design-preset="HORIZONTAL"]
+  .product-card
+  .product-price-strike,
+#bundle-builder-app.fpb-preset-horizontal .product-card .product-price-strike {
+  color: var(--bundle-product-strike-price-color, #8d8d8d);
+  text-decoration: line-through;
+  text-decoration-color: currentColor;
+  text-decoration-thickness: 0.075em;
+}
+
 .fpb-preset-horizontal .sidebar-content .product-price-row,
 .fpb-preset-horizontal .sidebar-content .product-price,
 .fpb-preset-horizontal .sidebar-content .product-price-strike {
