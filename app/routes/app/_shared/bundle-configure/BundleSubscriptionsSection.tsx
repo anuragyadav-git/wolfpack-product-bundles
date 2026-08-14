@@ -298,6 +298,7 @@ export function BundleSubscriptionsSection(
                     )}
                     <s-button
                       variant="secondary"
+                      icon="refresh"
                       loading={
                         subscriptionFetcher.state === "submitting" || undefined
                       }
@@ -369,6 +370,7 @@ export function BundleSubscriptionsSection(
                   <s-heading>Plan Tiers</s-heading>
                   <s-button
                     variant="secondary"
+                    icon="refresh"
                     loading={
                       subscriptionFetcher.state === "submitting" || undefined
                     }
@@ -695,7 +697,9 @@ export function BundleSubscriptionsSection(
             <s-stack direction="block" gap="small">
               <s-stack direction="block" gap="xsmall">
                 <s-heading>Plan tier copy</s-heading>
-                <s-paragraph>Override plan names and labels for this locale.</s-paragraph>
+                <s-paragraph>
+                  Override plan names and labels for this locale.
+                </s-paragraph>
               </s-stack>
               <s-text-field
                 label="Purchase options title"
@@ -809,7 +813,8 @@ export function BundleSubscriptionsSection(
                       ...current,
                       oneTimePurchase: {
                         ...current.oneTimePurchase,
-                        description: (event.target as HTMLTextAreaElement).value,
+                        description: (event.target as HTMLTextAreaElement)
+                          .value,
                       },
                     }))
                   }
@@ -844,12 +849,15 @@ export function BundleSubscriptionsSection(
               />
               <s-checkbox
                 label="Show subscription discount on product cards"
-                checked={subscriptionConfig.showDiscountOnProductCards || undefined}
+                checked={
+                  subscriptionConfig.showDiscountOnProductCards || undefined
+                }
                 onChange={(event) =>
                   setSubscriptionConfig((current: any) => ({
                     ...current,
-                    showDiscountOnProductCards: (event.target as HTMLInputElement)
-                      .checked,
+                    showDiscountOnProductCards: (
+                      event.target as HTMLInputElement
+                    ).checked,
                   }))
                 }
               />
