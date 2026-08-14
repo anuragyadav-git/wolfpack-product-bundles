@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "job_id": "fpb-classic-compact-horizontal-card-redesign-20260814",
+  "revision": 1,
+  "status": "complete",
+  "design": {
+    "status": "approved",
+    "approver": "Aditya Awasthi",
+    "at": "2026-08-14T06:08:28Z",
+    "evidence": [
+      "direction-comparison.md",
+      "visual-audit.md",
+      "locked-decisions.yaml"
+    ],
+    "waivers": []
+  },
+  "handoff": {
+    "status": "approved",
+    "approver": "Aditya Awasthi",
+    "at": "2026-08-14T06:17:21Z",
+    "evidence": [
+      "implementation-handoff.md",
+      "acceptance-criteria.md",
+      "browser-test-plan.yaml"
+    ],
+    "waivers": []
+  },
+  "implementation": {
+    "status": "approved",
+    "approver": "Aditya Awasthi",
+    "at": "2026-08-14T06:17:21Z",
+    "evidence": [
+      "codex-task.md",
+      "implementation-handoff.md"
+    ],
+    "waivers": []
+  },
+  "final": {
+    "status": "not-started",
+    "approver": "",
+    "at": "",
+    "evidence": [],
+    "waivers": []
+  },
+  "superseded_approvals": []
+}

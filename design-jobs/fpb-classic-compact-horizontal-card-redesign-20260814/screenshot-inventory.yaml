@@ -1,0 +1,302 @@
+{
+  "schema_version": 1,
+  "job_id": "fpb-classic-compact-horizontal-card-redesign-20260814",
+  "revision": 1,
+  "status": "complete",
+  "items": [
+    {
+      "id": "REF-EB-CLASSIC-DESKTOP",
+      "original_filename": "chrome-session-eb-classic-1440.png",
+      "artifact_path": "",
+      "roles": [
+        "TARGET",
+        "INSPIRATION",
+        "DESKTOP",
+        "STATE"
+      ],
+      "component": "FPB Classic product cards",
+      "state": "two selected quantity cards plus default sale-price cards",
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "status": "known"
+      },
+      "browser_zoom": 100,
+      "pixel_dimensions": {
+        "width": 1440,
+        "height": 1257
+      },
+      "crop_status": "full-page",
+      "surrounding_context_included": true,
+      "source": "live EB storefront",
+      "provenance": "Chrome DevTools MCP default profile after Cache Storage clear and ignore-cache reload; runtime preset CLASSIC and template FBP_SIDE_FOOTER",
+      "intended_use": "inspiration",
+      "quality_issues": [
+        "Chrome host rejected every filePath, so the rendered PNG remains in-session rather than on disk"
+      ],
+      "comparable_counterparts": [
+        "REF-WPB-CLASSIC-DESKTOP"
+      ],
+      "permissions_or_usage_notes": "Competitor evidence for internal design analysis only",
+      "approval_status": "approved"
+    },
+    {
+      "id": "REF-WPB-CLASSIC-DESKTOP",
+      "original_filename": "chrome-session-wpb-classic-1440.png",
+      "artifact_path": "",
+      "roles": [
+        "CURRENT",
+        "DESKTOP",
+        "STATE"
+      ],
+      "component": "FPB Classic product cards",
+      "state": "default cards",
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "status": "known"
+      },
+      "browser_zoom": 100,
+      "pixel_dimensions": {
+        "width": 1440,
+        "height": 1210
+      },
+      "crop_status": "full-page",
+      "surrounding_context_included": true,
+      "source": "live Wolfpack SIT storefront",
+      "provenance": "Chrome DevTools MCP default profile after ignore-cache reload; runtime preset CLASSIC; widget 11.3.0; Classic preset stylesheet confirmed",
+      "intended_use": "structural reference",
+      "quality_issues": [
+        "Different selection state from EB; compare anatomy and geometry, not price state",
+        "Chrome host rejected file persistence"
+      ],
+      "comparable_counterparts": [
+        "REF-EB-CLASSIC-DESKTOP"
+      ],
+      "permissions_or_usage_notes": "Internal test-store evidence",
+      "approval_status": "approved"
+    },
+    {
+      "id": "REF-EB-CLASSIC-MOBILE",
+      "original_filename": "chrome-session-eb-classic-390.png",
+      "artifact_path": "",
+      "roles": [
+        "TARGET",
+        "INSPIRATION",
+        "MOBILE",
+        "STATE"
+      ],
+      "component": "FPB Classic product cards",
+      "state": "selected quantity, sale-price, and default cards with collapsed summary",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "status": "known"
+      },
+      "browser_zoom": 100,
+      "pixel_dimensions": {
+        "width": 1170,
+        "height": 2532
+      },
+      "crop_status": "viewport",
+      "surrounding_context_included": true,
+      "source": "live EB storefront",
+      "provenance": "Chrome DevTools MCP default profile; 3 DPR mobile touch emulation; cache-bypassed reload; CLASSIC",
+      "intended_use": "inspiration",
+      "quality_issues": [
+        "Chrome host rejected file persistence"
+      ],
+      "comparable_counterparts": [
+        "REF-WPB-CLASSIC-MOBILE"
+      ],
+      "permissions_or_usage_notes": "Competitor evidence for internal design analysis only",
+      "approval_status": "approved"
+    },
+    {
+      "id": "REF-WPB-CLASSIC-MOBILE",
+      "original_filename": "chrome-session-wpb-classic-390.png",
+      "artifact_path": "",
+      "roles": [
+        "CURRENT",
+        "MOBILE",
+        "STATE"
+      ],
+      "component": "FPB Classic product cards",
+      "state": "default cards with collapsed summary",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "status": "known"
+      },
+      "browser_zoom": 100,
+      "pixel_dimensions": {
+        "width": 1170,
+        "height": 2532
+      },
+      "crop_status": "viewport",
+      "surrounding_context_included": true,
+      "source": "live Wolfpack SIT storefront",
+      "provenance": "Chrome DevTools MCP default profile; 3 DPR mobile touch emulation; ignore-cache reload; CLASSIC",
+      "intended_use": "structural reference",
+      "quality_issues": [
+        "Different selection state from EB",
+        "Chrome host rejected file persistence"
+      ],
+      "comparable_counterparts": [
+        "REF-EB-CLASSIC-MOBILE"
+      ],
+      "permissions_or_usage_notes": "Internal test-store evidence",
+      "approval_status": "approved"
+    },
+    {
+      "id": "REF-EB-COMPACT-DESKTOP-MOBILE",
+      "original_filename": "chrome-session-eb-compact-cohort.png",
+      "artifact_path": "",
+      "roles": [
+        "TARGET",
+        "INSPIRATION",
+        "DESKTOP",
+        "MOBILE",
+        "STATE"
+      ],
+      "component": "FPB Compact product cards",
+      "state": "selected quantity, sale-price, and default cards",
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "status": "known"
+      },
+      "browser_zoom": 100,
+      "pixel_dimensions": {
+        "width": 1440,
+        "height": 1257
+      },
+      "crop_status": "desktop full-page plus separate 390x844 viewport capture",
+      "surrounding_context_included": true,
+      "source": "live EB storefront",
+      "provenance": "Chrome DevTools MCP default profile; runtime preset COMPACT; desktop and 390x844 cache-bypassed captures",
+      "intended_use": "inspiration",
+      "quality_issues": [
+        "Two captures grouped because file persistence is unavailable"
+      ],
+      "comparable_counterparts": [
+        "REF-WPB-COMPACT-DESKTOP-MOBILE"
+      ],
+      "permissions_or_usage_notes": "Competitor evidence for internal design analysis only",
+      "approval_status": "approved"
+    },
+    {
+      "id": "REF-WPB-COMPACT-DESKTOP-MOBILE",
+      "original_filename": "chrome-session-wpb-compact-cohort.png",
+      "artifact_path": "",
+      "roles": [
+        "CURRENT",
+        "DESKTOP",
+        "MOBILE",
+        "STATE"
+      ],
+      "component": "FPB Compact product cards",
+      "state": "default cards",
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "status": "known"
+      },
+      "browser_zoom": 100,
+      "pixel_dimensions": {
+        "width": 1440,
+        "height": 1210
+      },
+      "crop_status": "desktop full-page plus separate 390x844 viewport capture",
+      "surrounding_context_included": true,
+      "source": "live Wolfpack SIT storefront",
+      "provenance": "Chrome DevTools MCP default profile; runtime preset COMPACT; active Compact stylesheet confirmed; widget 11.3.0",
+      "intended_use": "structural reference",
+      "quality_issues": [
+        "Different selection state from EB",
+        "Chrome host rejected file persistence"
+      ],
+      "comparable_counterparts": [
+        "REF-EB-COMPACT-DESKTOP-MOBILE"
+      ],
+      "permissions_or_usage_notes": "Internal test-store evidence",
+      "approval_status": "approved"
+    },
+    {
+      "id": "REF-EB-HORIZONTAL-ALL-WIDTHS",
+      "original_filename": "chrome-session-eb-horizontal-cohort.png",
+      "artifact_path": "",
+      "roles": [
+        "TARGET",
+        "INSPIRATION",
+        "DESKTOP",
+        "TABLET",
+        "MOBILE",
+        "STATE"
+      ],
+      "component": "FPB Horizontal product cards",
+      "state": "selected quantity, sale-price, and default cards",
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "status": "known"
+      },
+      "browser_zoom": 100,
+      "pixel_dimensions": {
+        "width": 1440,
+        "height": 1257
+      },
+      "crop_status": "1440 full-page and 390 viewport; computed geometry at 1280, 768, and 360",
+      "surrounding_context_included": true,
+      "source": "live EB storefront",
+      "provenance": "Chrome DevTools MCP default profile; HORIZONTAL persisted and runtime values confirmed after cache-bypassed reloads",
+      "intended_use": "inspiration",
+      "quality_issues": [
+        "Stress widths have computed geometry but no persisted PNG files"
+      ],
+      "comparable_counterparts": [
+        "REF-WPB-HORIZONTAL-ALL-WIDTHS"
+      ],
+      "permissions_or_usage_notes": "Competitor evidence for internal design analysis only",
+      "approval_status": "approved"
+    },
+    {
+      "id": "REF-WPB-HORIZONTAL-ALL-WIDTHS",
+      "original_filename": "chrome-session-wpb-horizontal-cohort.png",
+      "artifact_path": "",
+      "roles": [
+        "CURRENT",
+        "DESKTOP",
+        "TABLET",
+        "MOBILE",
+        "STATE"
+      ],
+      "component": "FPB Horizontal product cards",
+      "state": "default cards",
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "status": "known"
+      },
+      "browser_zoom": 100,
+      "pixel_dimensions": {
+        "width": 1440,
+        "height": 1210
+      },
+      "crop_status": "1440 full-page and 390 viewport; computed geometry at 1280, 768, and 360",
+      "surrounding_context_included": true,
+      "source": "live Wolfpack SIT storefront",
+      "provenance": "Chrome DevTools MCP default profile; HORIZONTAL runtime and active stylesheet confirmed; widget 11.3.0",
+      "intended_use": "structural reference",
+      "quality_issues": [
+        "Different selection state from EB",
+        "Chrome host rejected file persistence"
+      ],
+      "comparable_counterparts": [
+        "REF-EB-HORIZONTAL-ALL-WIDTHS"
+      ],
+      "permissions_or_usage_notes": "Internal test-store evidence",
+      "approval_status": "approved"
+    }
+  ]
+}

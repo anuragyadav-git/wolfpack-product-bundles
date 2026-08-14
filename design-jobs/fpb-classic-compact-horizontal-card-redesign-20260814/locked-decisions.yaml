@@ -1,0 +1,102 @@
+{
+  "schema_version": 1,
+  "job_id": "fpb-classic-compact-horizontal-card-redesign-20260814",
+  "revision": 1,
+  "status": "approved",
+  "locked": [
+    {
+      "id": "CL-A",
+      "question": "Which conservative direction should govern the FPB Classic card redesign?",
+      "options_considered": [
+        "CL-A Framed Classic"
+      ],
+      "recommendation": "CL-A Framed Classic",
+      "selected_value": "CL-A Framed Classic",
+      "rationale": "Retains the four-column desktop and two-column phone image-first hierarchy while tightening the body rhythm inside a restrained card frame.",
+      "evidence_ids": [
+        "VA-CL-DESKTOP",
+        "VA-CL-MOBILE",
+        "VA-ALL-STATES"
+      ],
+      "status": "approved",
+      "approved_by": "Aditya Awasthi",
+      "approved_at": "2026-08-14T06:08:28Z",
+      "revision_introduced": 1,
+      "affected_artifacts": [
+        "component-anatomy.md",
+        "responsive-contract.md",
+        "design-tokens.json",
+        "implementation-handoff.md"
+      ]
+    },
+    {
+      "id": "CO-A",
+      "question": "Which conservative direction should govern the FPB Compact card redesign?",
+      "options_considered": [
+        "CO-A Structured Compact"
+      ],
+      "recommendation": "CO-A Structured Compact",
+      "selected_value": "CO-A Structured Compact",
+      "rationale": "Retains the three-column desktop and two-column phone density while restoring card grouping and a contained action treatment.",
+      "evidence_ids": [
+        "VA-CO-DESKTOP",
+        "VA-CO-MOBILE",
+        "VA-ALL-STATES"
+      ],
+      "status": "approved",
+      "approved_by": "Aditya Awasthi",
+      "approved_at": "2026-08-14T06:08:28Z",
+      "revision_introduced": 1,
+      "affected_artifacts": [
+        "component-anatomy.md",
+        "responsive-contract.md",
+        "design-tokens.json",
+        "implementation-handoff.md"
+      ]
+    },
+    {
+      "id": "HO-A",
+      "question": "Which conservative direction should govern the FPB Horizontal card redesign?",
+      "options_considered": [
+        "HO-A Bounded Horizontal"
+      ],
+      "recommendation": "HO-A Bounded Horizontal",
+      "selected_value": "HO-A Bounded Horizontal",
+      "rationale": "Retains the 30/70 row anatomy while restoring a bounded card and using one column below the shared 800px summary boundary.",
+      "evidence_ids": [
+        "VA-HO-DESKTOP",
+        "VA-HO-MOBILE",
+        "VA-HO-STRESS",
+        "VA-ALL-STATES"
+      ],
+      "status": "approved",
+      "approved_by": "Aditya Awasthi",
+      "approved_at": "2026-08-14T06:08:28Z",
+      "revision_introduced": 1,
+      "affected_artifacts": [
+        "component-anatomy.md",
+        "responsive-contract.md",
+        "design-tokens.json",
+        "implementation-handoff.md"
+      ]
+    }
+  ],
+  "assumptions": [],
+  "rejected": [],
+  "open": [],
+  "superseded": [],
+  "decision_shape": {
+    "id": "",
+    "question": "",
+    "options_considered": [],
+    "recommendation": "",
+    "selected_value": "",
+    "rationale": "",
+    "evidence_ids": [],
+    "status": "open",
+    "approved_by": "",
+    "approved_at": "",
+    "revision_introduced": 1,
+    "affected_artifacts": []
+  }
+}
