@@ -49,9 +49,12 @@ When enabled, it:
 6. Ensures the automatic add-on discount once for every shop with an enabled
    saved FPB add-on configuration.
 7. Ensures the role-tagged subscription initial-order automatic discount once
-   for every shop with an enabled saved PPB subscription configuration. This
-   node uses `recurringCycleLimit=1`; recurring bundle pricing is not enabled
-   until live recurring-order evidence exists.
+   for every shop with an enabled saved FPB or PPB subscription configuration.
+   This node uses `recurringCycleLimit=1`.
+8. Ensures the separate recurring subscription discount for shops with at least
+   one enabled recurring bundle configuration. This node uses
+   `recurringCycleLimit=0`, and the Function accepts it only when the signed
+   bundle selection also authorizes recurring bundle pricing.
 
 Any shop or bundle failure makes the command exit non-zero. This is the only
 deployment sync workflow and `WPB_DEPLOYMENT_GENERAL_SYNC` is its only flag.

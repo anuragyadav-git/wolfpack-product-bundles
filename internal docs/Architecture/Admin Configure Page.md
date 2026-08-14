@@ -57,13 +57,13 @@ Step Name, Category, Rules Configuration, and Step Config content is visually
 muted and inert until the merchant enables the step again. The save boundary
 also enforces Step 1 as enabled rather than relying only on the Admin control.
 
-PPB-only controls are explicit slots inside the shared rhythm. Category-level variant display controls update PPB `StepCategory.displayVariantsAsIndividualProducts` and `StepCategory.displayVariantsAsSwatches` fields; they are not step-wide FPB controls. Bundle Settings follows the same rule: shared rows cover overlapping settings, while FPB-only Product Slots / Slot Icon and PPB-only Variant Selector, discount display, banner, CSS, subscriptions, Bundle Embed, and Place Widget controls remain route-owned slots.
+PPB-only controls are explicit slots inside the shared rhythm. Category-level variant display controls update PPB `StepCategory.displayVariantsAsIndividualProducts` and `StepCategory.displayVariantsAsSwatches` fields; they are not step-wide FPB controls. Bundle Settings follows the same rule: shared rows cover overlapping settings, while FPB-only Product Slots / Slot Icon and PPB-only Variant Selector, discount display, banner, CSS, Bundle Embed, and Place Widget controls remain route-owned slots.
 
 The former `Pre-order & Subscription Integration` Bundle Settings row is absent
 from both FPB and PPB. Its `individualSellingPlanSelection` state and form field
-must not be reintroduced. PPB's separate `Subscriptions` rail section remains a
-distinct feature for discovering, selecting, validating, and persisting one
-provider-neutral shared selling-plan group. It does not restore the removed
+must not be reintroduced. FPB and PPB expose the same separate `Subscriptions`
+rail section for discovering, selecting, validating, and persisting one
+provider-neutral selling-plan group. It does not restore the removed
 per-product integration behavior.
 
 FPB Product Slots is available only when every enabled, non-default step has at
@@ -108,10 +108,10 @@ affected value. Successful Save and Discard clear all validation state.
 Only persisted, enabled feature branches are validated. Step 1 is always
 enabled. Disabled later steps, disabled pricing/widget/embed/add-on features,
 inactive targeting branches, optional media and CSS, and optional localized
-translations do not block Save. Enabled PPB subscriptions require a title, a
+translations do not block Save. Enabled FPB and PPB subscriptions require a title, a
 common group, at least one selected plan, a valid default option, a display
 name for each selected plan, and a one-time label when one-time purchase is
-enabled. Subscription validation failures use the same SaveBar field-error
+enabled. The same rules apply to enabled FPB subscriptions. Subscription validation failures use the same SaveBar field-error
 contract and block persistence and storefront sync atomically.
 
 Successful fetcher saves trigger normal Remix loader revalidation. Rehydrating

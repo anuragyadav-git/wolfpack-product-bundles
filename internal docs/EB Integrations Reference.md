@@ -91,7 +91,7 @@ Setup requirements:
 WPB supportability:
 - Supportable if WPB continues to use Shopify selling plans as the source of truth and exposes the same plan selection flow for bundles.
 - Provider-specific API integrations are not required by the EB guide; the contract is product membership in a selling plan plus bundle-level plan selection.
-- The 2026-08-14 PPB subscription design therefore discovers provider-owned plans and never creates or mutates them. Exact EB successful-save transport remains unobserved, so WPB uses its own versioned persistence contract.
+- The 2026-08-14 FPB/PPB subscription design therefore discovers provider-owned plans and never creates or mutates them. Exact EB successful-save transport remains unobserved, so WPB uses its own versioned persistence contract.
 
 ### Judge.me
 

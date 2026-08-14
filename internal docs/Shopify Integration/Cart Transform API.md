@@ -101,7 +101,7 @@ Do not query app-owned component/pricing metafields by key only. The app writers
 ## Checkout Discount Allocation Boundary
 
 Shopify's 2025-10 Cart Transform contract does not permit merge, expand, or
-update operations for cart lines that have a selling plan. PPB subscription
+update operations for cart lines that have a selling plan. FPB and PPB subscription
 component lines therefore remain separate and Cart Transform emits no operation
 for their group. A product Discount Function owns any signed Wolfpack bundle
 price adjustment on those lines. The initial-order automatic discount uses

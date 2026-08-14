@@ -62,9 +62,9 @@ Template behavior is resolved through plain config modules and method modules:
 Template installer/prototype patch functions have been removed. Widget entry files compose exported template method objects in the same central `Object.assign` used for controller method modules.
 
 The widgets do not accept the retired `individualSellingPlanSelection` field.
-PPB instead consumes the explicit public `subscription` object from
+FPB and PPB instead consume the explicit public `subscription` object from
 `bundle_ui_config`. A shared purchase-options component renders the selected
-selling-plan group across every PPB template. Subscription submissions add the
+selling-plan group across every FPB and PPB template. Subscription submissions add the
 same `selling_plan` to every component line and omit the merged-path public
 `Box` metadata; one-time submissions retain the existing merged-parent flow.
 

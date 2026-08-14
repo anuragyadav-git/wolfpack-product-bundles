@@ -35,8 +35,8 @@ Verify the shared FPB/PPB configure page model and dispatch behavior without ass
 ### ConfigureAdminModel
 | # | Scenario | Input | Expected Output | Notes |
 |---|---|---|---|---|
-| 1 | FPB section list | `bundleType: full_page` | Common setup sections with no PPB-only subscriptions section | Adapter contract |
-| 2 | PPB section list | `bundleType: product_page` | Common setup sections plus PPB-only subscriptions | Adapter contract |
+| 1 | FPB section list | `bundleType: full_page` | Common setup sections plus shared subscriptions | Adapter contract |
+| 2 | PPB section list | `bundleType: product_page` | Common setup sections plus shared subscriptions | Adapter contract |
 | 3 | FPB visibility children | `bundleType: full_page` | Bundle Widget child only | Adapter contract |
 | 4 | PPB visibility children | `bundleType: product_page` | Bundle Widget and Bundle Embed children | PPB-only behavior |
 | 5 | FPB bundle link | linked page handle and page URL | Link model returns page URL and linked state | Visibility behavior |

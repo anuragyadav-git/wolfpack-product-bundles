@@ -397,6 +397,12 @@ FPB Configure Page
 │   │   ├── Add browsed product switch
 │   │   └── [Button] "Embed Upsell" → opens the product-template Theme Editor with the unified `bundle-upsell` block
 │   │
+│   ├── Subscriptions                → subscriptions section
+│   │   ├── Enable switch + provider-neutral common selling-plan discovery
+│   │   ├── Plan subset, default purchase option, one-time and per-plan copy
+│   │   ├── Product-card discount display and localized copy
+│   │   └── Uses the global configure SaveBar; no section-specific save action
+│   │
 │   └── Select Template        → select_template section
 │       ├── Heading: "Customize your bundle"
 │       ├── [Button] "Customize Colors & Language" → /app/settings
@@ -412,7 +418,8 @@ FPB Configure Page
     ├── Product Picker Modal (Shopify resource picker)
     ├── Variables Modal (Discount Messaging variable reference)
     ├── Bundle Quantity Options Multi Language Modal (Box Label / Box Subtext)
-    └── Progress Bar Multi Language Modal (Tier Text / Tier Subtext)
+    ├── Progress Bar Multi Language Modal (Tier Text / Tier Subtext)
+    └── Subscription Multi Language Modal
 ```
 
 FPB configure has no Shopify Page selector, Page slug editor, Page creation,
@@ -439,9 +446,9 @@ Responsive configure behavior:
 PPB uses the same SaveBar validation flow as FPB. Required fields and resource
 selection are conditional on enabled persisted features; invalid Draft,
 Unlisted, and Active saves are blocked before the route action and displayed as
-inline critical field errors. Disabled branches are excluded. The feature-gated
-PPB subscription draft is validated only when enabled and remains unavailable
-to the storefront until the live SIT acceptance gate is complete.
+inline critical field errors. Disabled branches are excluded. Subscription
+drafts are validated only when enabled and use the same shared configuration
+contract as FPB.
 
 ```
 PPB Configure Page
@@ -518,7 +525,7 @@ PPB Configure Page
 │   ├── Bundle Subscriptions
 │   ├── How to setup?
 │   ├── Text: "Allow customers to purchase the bundle as a subscription"
-│   ├── Enable switch (POC-gated)
+│   ├── Enable switch
 │   ├── [Button] "Get Subscription Plans" → POST validateSellingPlanGroups
 │   ├── One common selling-plan group and merchant-selected plan subset
 │   ├── Default purchase option, one-time copy, plan copy, and translations

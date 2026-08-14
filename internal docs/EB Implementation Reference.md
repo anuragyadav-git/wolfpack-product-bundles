@@ -36,16 +36,38 @@ When implementing a feature that mirrors EB behaviour — data shapes, admin flo
 
 ---
 
-## PPB Bundle Subscriptions
+## FPB and PPB Bundle Subscriptions
 
-The 2026-08-14 research pass established the following bounded EB evidence:
+The 2026-08-14 research pass established that EB exposes Subscriptions for both FPB and PPB, with the following shared bounded evidence:
 
 - Every product in a subscription bundle must belong to one Shopify-compatible selling-plan group.
 - EB returns a no-common-plan state before it exposes subscription configuration when the selected products do not share a plan group.
 - The exposed configuration covers one-time purchase settings, selected and default plans, purchase-option copy, translations, product-card discount display, and an optional recurring bundle discount.
-- No positive common-plan fixture was available in the authenticated research store. The exact successful EB save endpoint and payload therefore remain unobserved. Wolfpack uses its own versioned, validated persistence contract and does not invent an EB request shape.
+- The same Subscriptions section and selling-plan validation flow are present in both FPB and PPB configure routes.
+- The populated configuration is grouped into `Bundle Subscriptions`, `Plan Tiers`, and `Configurations`. It exposes `Change Plan` and `Refresh Plan`, a purchase-options title, per-tier dropdown name, discount pill and option description, one-time purchase enablement and label, subscription-versus-one-time default selection, recurring-discount enablement, and a three-way bundle-discount target: subscription only, one-time only, or both.
+- The three groups are separate stacked cards in the configure page's right column. `Bundle Subscriptions` keeps the enable toggle and `How to setup?` beside the heading, `Multi Language` at the opposite edge, the selected group with `Change Plan`, and `Subscription Title`. `Plan Tiers` owns `Refresh Plan` and uses one subdued inset surface per plan, with dropdown name and discount pill in one row and the option description below. `Configurations` starts with recurring and one-time switches, then the one-time label/default checkbox and bundle-discount target.
+- The `Multi Language` modal repeats the purchase-options title, one-time label, and every selected tier's dropdown name, discount pill, and option description for the selected Shopify locale.
 
-Provider-specific APIs are not part of the observed contract. Shopify selling-plan compatibility and membership are the source of truth.
+The 2026-08-14 Shopify Subscriptions feasibility pass added a live native plan to the `yash-wolfpack` store and refined that evidence:
+
+- EB's current `How to setup?` article says it works with subscription apps other than Recharge. The documented exception is Recharge, not Freecharge.
+- The same article, updated 2026-05-27, directs merchants to create one Shopify-compatible plan covering every bundle product, use `Get Subscription plans`, choose a shared plan, then optionally edit the heading, discount description, widget description, one-time availability/default, and recurring discounts before saving. It says its widget description accepts HTML; Wolfpack does not adopt that unsafe rendering behavior.
+- Shopify Subscriptions created a standard public selling-plan group with a monthly plan, 10% price adjustment, variant selling-plan allocations, and app ownership from Shopify's Subscriptions app. The public product JSON exposed the group and allocation correctly.
+- Every component product in the isolated six-product FPB fixture shared that plan. The generated parent product was not required for component compatibility.
+- EB initially returned `NO_SELLING_PLAN_GROUPS_FOUND` because its cached component records still contained `sellingPlanGroups: []`. `Sync Product` refreshed only the generated parent. The documented global `Sync Collections` action refreshed component selling-plan data and made the plan discoverable. This cache boundary is an EB-specific operational gotcha, not a provider-integration requirement.
+- After that sync, `POST /api/stepsConfiguration/validateSellingPlanGroups?bundleId=2` returned `SELLING_PLAN_GROUPS_MATCHED` with group `gid://shopify/SellingPlanGroup/2213740740`, plan `gid://shopify/SellingPlan/4212326596`, option `Deliver every month`, and a 10% percentage pricing policy.
+- EB saved the FPB subscription through its normal `POST /api/stepsConfiguration/update?bundleId=2` wrapper. `subscriptionBundlesData` stored the validation response, selected group, plan display title and discount text, one-time settings, purchase-option title and subtitle, translations, product-card discount setting, bundle-discount target, and recurring-discount setting.
+- The default saved state enabled subscriptions and one-time purchase, selected the subscription by default, left recurring bundle discounts disabled, and applied the bundle discount to both purchase modes.
+- The native app touches plan creation and editing, product assignment, contracts, retry and inventory-failure policy, customer subscription management, notification settings, analytics, and a theme app block on product pages.
+- The native product-page block renders one-time and subscription choices as vertical semantic radios. It shows the selling-plan group name, cadence and discount, an auto-renewal note, and updates the product price when the subscription option is selected. The merchant controls its position in the product template through the theme editor.
+- Selecting the native plan adds `selling_plan=4212326596` to the product form. The resulting cart line uses the adjusted price and displays `Deliver every month, 10% off`.
+- On EB's FPB storefront, purchase options live inside the bundle summary immediately above the total and completion action. Product cards and selected-item rows update between the one-time and per-delivery prices. Desktop keeps the selector in the right summary column; mobile keeps it inside the expandable bottom summary tray rather than as a detached page-level card.
+- The authenticated desktop and mobile layout audit found the same compact hierarchy: a plain title above two vertical option cards; each card has a semantic radio, a 1px neutral border, roughly 7px radius, and 15px by 10px internal padding. The subscription card keeps the group label visible and places cadence plus a pill-shaped discount below it. Wolfpack follows this hierarchy through one shared FPB/PPB renderer while allowing each bundle template to own placement.
+- EB's subscription cart path adds separate component lines. Its `/cart/add.js` request placed the same `selling_plan: 4212326596` on every selected component and did not add a subscription to the generated parent product.
+- `/cart.js` and checkout showed two separate component lines, each with the same monthly allocation and its own 10% adjusted price. EB retained public `Bundle` and `Box` properties plus private `_bundleOfferId` on each line.
+- Checkout displayed cadence on each component, a recurring subtotal, an automatically-renewing-subscription consent statement, cancellation guidance, and a cancellation-policy disclosure before payment. No order was placed during this verification.
+
+Provider-specific APIs are not part of the observed contract. Shopify selling-plan compatibility and membership are the source of truth. The merchant must create the plan in a subscription app and include every selectable bundle product; EB then consumes the standard Shopify selling-plan group after its product cache is refreshed.
 
 ---
 
