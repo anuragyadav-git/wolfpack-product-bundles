@@ -3,6 +3,7 @@ import { CommonConfigureShell } from "../_shared/bundle-configure/CommonConfigur
 import { ConfigureCanvasHeader } from "./ConfigureCanvasHeader";
 import { ConfigureHiddenInputs } from "./ConfigureHiddenInputs";
 import { ConfigureSidebar } from "./ConfigureSidebar";
+import { ConfigureRouteLoadingWorkspace } from "../_shared/bundle-configure/ConfigureRouteLoadingWorkspace";
 import { useConfigureBundleFlow } from "./useConfigureBundleFlow";
 import { StepSetupSection } from "./sections/StepSetupSection";
 import { FreeGiftAddonsSection } from "./sections/FreeGiftAddonsSection";
@@ -16,6 +17,9 @@ import { BundleSubscriptionsSection } from "../_shared/bundle-configure/BundleSu
 
 function ConfigureBundleFlow() {
   const flow = useConfigureBundleFlow();
+  if (!flow.isCriticalStatusReady) {
+    return <ConfigureRouteLoadingWorkspace />;
+  }
   const {
     blockConfigurationChangeWhileSaving,
     fetcher,

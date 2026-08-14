@@ -10,6 +10,7 @@ import {
   PpbConfigureSidebar,
   PpbConfigureSupplement,
 } from "./PpbConfigureSidebar";
+import { ConfigureRouteLoadingWorkspace } from "../_shared/bundle-configure/ConfigureRouteLoadingWorkspace";
 import { PpbDiscountLanguageModals } from "./PpbDiscountLanguageModals";
 import { PpbMainSections } from "./PpbMainSections";
 import { PpbOverlayModals } from "./PpbOverlayModals";
@@ -21,8 +22,16 @@ import { PpbUtilityModals } from "./PpbUtilityModals";
 import { usePpbConfigureFlow } from "./usePpbConfigureFlow";
 
 function ConfigureBundleCanvas() {
-  const { blockConfigurationChangeWhileSaving, isSaveInFlight } =
-    usePpbConfigureContext();
+  const flow = usePpbConfigureContext();
+  const {
+    blockConfigurationChangeWhileSaving,
+    isSaveInFlight,
+    isCriticalStatusReady,
+  } = flow;
+
+  if (!isCriticalStatusReady) {
+    return <ConfigureRouteLoadingWorkspace />;
+  }
 
   return (
     <CommonConfigureShell
