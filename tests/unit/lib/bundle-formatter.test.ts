@@ -52,7 +52,7 @@ const makeStepProduct = (overrides: Record<string, unknown> = {}) => ({
 });
 
 describe("formatBundleForWidget", () => {
-  it("emits only a valid enabled PPB subscription config for proxy-loaded widgets", () => {
+  it("emits a valid enabled subscription config for both bundle widgets", () => {
     const subscription = {
       version: 1,
       enabled: true,
@@ -90,6 +90,10 @@ describe("formatBundleForWidget", () => {
       bundleType: "product_page",
       bundleSubscriptionConfig: subscription,
     }) as any);
+    const fullPageEnabled = formatBundleForWidget(makeBundle({
+      bundleType: "full_page",
+      bundleSubscriptionConfig: subscription,
+    }) as any);
     const disabled = formatBundleForWidget(makeBundle({
       bundleType: "product_page",
       bundleSubscriptionConfig: { ...subscription, enabled: false },
@@ -99,6 +103,7 @@ describe("formatBundleForWidget", () => {
       enabled: true,
       selectedPlanIds: ["gid://shopify/SellingPlan/1"],
     });
+    expect(fullPageEnabled.subscription).toEqual(enabled.subscription);
     expect(disabled.subscription).toBeNull();
   });
 

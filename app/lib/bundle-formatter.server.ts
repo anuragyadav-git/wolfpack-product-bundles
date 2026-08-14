@@ -11,9 +11,9 @@
 import { formatStepCategoriesForRuntime } from "./bundle-config/category-runtime";
 import { resolveShowProductComparedAtPrice } from "./bundle-config/product-page-display";
 import {
-  buildPublicPpbSubscriptionConfig,
-  type PpbSubscriptionConfigV1,
-} from "./ppb-subscriptions";
+  buildPublicBundleSubscriptionConfig,
+  type BundleSubscriptionConfigV1,
+} from "./bundle-subscriptions";
 
 /** Convert a Shopify GID to its numeric ID for storefront cart operations. */
 function extractNumericId(gid: string): string {
@@ -56,7 +56,7 @@ export interface FormattedBundle {
   // Per-bundle text overrides
   textOverrides: Record<string, string> | null;
   textOverridesByLocale: Record<string, Record<string, string>> | null;
-  subscription: PpbSubscriptionConfigV1 | null;
+  subscription: BundleSubscriptionConfigV1 | null;
 }
 
 interface FormattedStep {
@@ -312,8 +312,8 @@ export function formatBundleForWidget(bundle: any): FormattedBundle {
     showTextOnAddButton: bundle.showTextOnAddButton ?? false,
     textOverrides: (bundle.textOverrides as Record<string, string> | null) ?? null,
     textOverridesByLocale: (bundle.textOverridesByLocale as Record<string, Record<string, string>> | null) ?? null,
-    subscription: bundle.bundleType === "product_page"
-      ? buildPublicPpbSubscriptionConfig(bundle.bundleSubscriptionConfig)
-      : null,
+    subscription: buildPublicBundleSubscriptionConfig(
+      bundle.bundleSubscriptionConfig,
+    ),
   };
 }

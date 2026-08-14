@@ -75,6 +75,7 @@ function makeDeps() {
     syncBundle: jest.fn().mockResolvedValue({ synced: true }),
     setupAddonDiscount: jest.fn().mockResolvedValue({ success: true }),
     setupSubscriptionDiscount: jest.fn().mockResolvedValue({ success: true }),
+    setupSubscriptionRecurringDiscount: jest.fn().mockResolvedValue({ success: true }),
     logger: {
       info: jest.fn(),
       warn: jest.fn(),
@@ -154,6 +155,53 @@ describe("deployment general sync", () => {
     expect(deps.setupSubscriptionDiscount).toHaveBeenCalledWith(
       expect.objectContaining({ graphql: expect.any(Function) }),
       "beta.myshopify.com",
+    );
+  });
+
+  it("ensures the subscription discount role for an enabled FPB configuration", async () => {
+    const deps = makeDeps();
+    deps.prisma.bundle.findMany.mockResolvedValue([
+      {
+        id: "bundle-fpb-subscription",
+        shopId: "alpha.myshopify.com",
+        bundleType: "full_page",
+        personalizationData: null,
+        bundleSubscriptionConfig: { enabled: true },
+        steps: [],
+      },
+    ]);
+
+    await runDeploymentGeneralSync(
+      parseDeploymentGeneralSyncEnv({ WPB_DEPLOYMENT_GENERAL_SYNC: "true" }),
+      deps,
+    );
+
+    expect(deps.setupSubscriptionDiscount).toHaveBeenCalledTimes(1);
+    expect(deps.setupSubscriptionDiscount).toHaveBeenCalledWith(
+      expect.objectContaining({ graphql: expect.any(Function) }),
+      "alpha.myshopify.com",
+    );
+  });
+
+  it("ensures the recurring role only for shops with recurring bundle discounts", async () => {
+    const deps = makeDeps();
+    deps.prisma.bundle.findMany.mockResolvedValue([{
+      id: "bundle-recurring",
+      shopId: "alpha.myshopify.com",
+      bundleType: "full_page",
+      personalizationData: null,
+      bundleSubscriptionConfig: { enabled: true, recurringBundleDiscount: true },
+      steps: [],
+    }]);
+
+    await runDeploymentGeneralSync(
+      parseDeploymentGeneralSyncEnv({ WPB_DEPLOYMENT_GENERAL_SYNC: "true" }),
+      deps,
+    );
+
+    expect(deps.setupSubscriptionRecurringDiscount).toHaveBeenCalledWith(
+      expect.objectContaining({ graphql: expect.any(Function) }),
+      "alpha.myshopify.com",
     );
   });
 

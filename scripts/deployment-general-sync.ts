@@ -35,6 +35,11 @@ async function main() {
           admin as any,
           shopDomain,
         ),
+      setupSubscriptionRecurringDiscount: (admin, shopDomain) =>
+        AddOnDiscountFunctionService.completeSubscriptionRecurringSetup(
+          admin as any,
+          shopDomain,
+        ),
       logger: console,
     },
   );

@@ -95,7 +95,12 @@ fn run_automatic_addon_lines(
     run_function_with_input(cart_lines_discounts_generate_run, input.as_str()).expect("should run")
 }
 
-fn run_subscription_lines(plan_ids: &[&str], component_count: usize) -> schema::CartLinesDiscountsGenerateRunResult {
+fn run_subscription_lines_with_role(
+    plan_ids: &[&str],
+    component_count: usize,
+    recurring_bundle_discount: bool,
+    discount_role: &str,
+) -> schema::CartLinesDiscountsGenerateRunResult {
     let runtime_secret = test_runtime_secret();
     let payload = serde_json::json!({
         "version": 1,
@@ -114,7 +119,7 @@ fn run_subscription_lines(plan_ids: &[&str], component_count: usize) -> schema::
         "subscription": {
             "sellingPlanGroupId": "gid://shopify/SellingPlanGroup/1",
             "sellingPlanId": "gid://shopify/SellingPlan/1",
-            "recurringBundleDiscount": false
+            "recurringBundleDiscount": recurring_bundle_discount
         }
     }).to_string();
     let runtime_token = sign_runtime_token_for_test(&payload, &runtime_secret);
@@ -137,7 +142,7 @@ fn run_subscription_lines(plan_ids: &[&str], component_count: usize) -> schema::
         "discount": {
             "discountClasses": ["PRODUCT"],
             "runtimeTokenSecret": { "value": runtime_secret },
-            "discountRole": { "value": "subscription_initial" },
+            "discountRole": { "value": discount_role },
             "checkoutIntegrationConfig": null
         },
         "enteredDiscountCodes": [],
@@ -145,6 +150,10 @@ fn run_subscription_lines(plan_ids: &[&str], component_count: usize) -> schema::
         "presentmentCurrencyRate": "1.0"
     }).to_string();
     run_function_with_input(cart_lines_discounts_generate_run, &input).expect("should run")
+}
+
+fn run_subscription_lines(plan_ids: &[&str], component_count: usize) -> schema::CartLinesDiscountsGenerateRunResult {
+    run_subscription_lines_with_role(plan_ids, component_count, false, "subscription_initial")
 }
 
 #[test]
@@ -168,6 +177,28 @@ fn subscription_initial_role_rejects_mixed_plan_and_partial_groups() {
         2,
     ).operations.is_empty());
     assert!(run_subscription_lines(&["gid://shopify/SellingPlan/1"], 1).operations.is_empty());
+}
+
+#[test]
+fn subscription_roles_require_the_signed_recurring_mode() {
+    assert!(run_subscription_lines_with_role(
+        &["gid://shopify/SellingPlan/1", "gid://shopify/SellingPlan/1"],
+        2,
+        true,
+        "subscription_initial",
+    ).operations.is_empty());
+    assert_eq!(run_subscription_lines_with_role(
+        &["gid://shopify/SellingPlan/1", "gid://shopify/SellingPlan/1"],
+        2,
+        true,
+        "subscription_recurring",
+    ).operations.len(), 1);
+    assert!(run_subscription_lines_with_role(
+        &["gid://shopify/SellingPlan/1", "gid://shopify/SellingPlan/1"],
+        2,
+        false,
+        "subscription_recurring",
+    ).operations.is_empty());
 }
 
 #[test]

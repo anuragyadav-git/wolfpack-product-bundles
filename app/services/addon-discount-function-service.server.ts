@@ -29,7 +29,7 @@ type ExistingAddOnDiscount = {
 };
 
 type DiscountFunctionRole = {
-  key: "addons" | "subscription_initial";
+  key: "addons" | "subscription_initial" | "subscription_recurring";
   title: string;
   recurringCycleLimit?: number;
 };
@@ -41,6 +41,11 @@ const SUBSCRIPTION_INITIAL_ROLE: DiscountFunctionRole = {
   key: "subscription_initial",
   title: "Bundle Subscription - Initial Order",
   recurringCycleLimit: 1,
+};
+const SUBSCRIPTION_RECURRING_ROLE: DiscountFunctionRole = {
+  key: "subscription_recurring",
+  title: "Bundle Subscription - Recurring Orders",
+  recurringCycleLimit: 0,
 };
 const ADDON_DISCOUNT_API_VERSION = "2026-07" as ApiVersion;
 
@@ -318,6 +323,13 @@ export class AddOnDiscountFunctionService {
     shopDomain: string,
   ): Promise<AddOnDiscountActivationResult> {
     return this.completeRoleSetup(admin, shopDomain, SUBSCRIPTION_INITIAL_ROLE);
+  }
+
+  static async completeSubscriptionRecurringSetup(
+    admin: AdminApiContext,
+    shopDomain: string,
+  ): Promise<AddOnDiscountActivationResult> {
+    return this.completeRoleSetup(admin, shopDomain, SUBSCRIPTION_RECURRING_ROLE);
   }
 
   private static async completeRoleSetup(

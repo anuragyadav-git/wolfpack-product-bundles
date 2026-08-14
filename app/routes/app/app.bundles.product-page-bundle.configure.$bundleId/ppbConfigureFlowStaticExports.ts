@@ -49,7 +49,6 @@ import {
 import { deriveControlDependencies } from "../../../lib/bundle-config/control-dependencies";
 import {
   PRODUCT_PAGE_EDIT_DEFAULTS_HREF,
-  SUBSCRIPTION_NO_COMMON_PLAN_MESSAGE,
   buildProductPageThemeEditorDeepLink,
   resolveProductPageTemplateSuffix,
 } from "../../../lib/bundle-config/product-page-admin-sections";
@@ -124,7 +123,6 @@ export const ppbConfigureFlowStaticExports = {
   getDefaultDiscountRuleText,
   deriveControlDependencies,
   PRODUCT_PAGE_EDIT_DEFAULTS_HREF,
-  SUBSCRIPTION_NO_COMMON_PLAN_MESSAGE,
   buildProductPageThemeEditorDeepLink,
   resolveProductPageTemplateSuffix,
   buildDefaultProductEntryFromPicker,

@@ -45,9 +45,7 @@ export function buildConfigureSetupItems(
   bundleType: ConfigureBundleType,
 ): ConfigureSetupItem[] {
   const items = [...COMMON_SETUP_ITEMS];
-  if (bundleType === "product_page") {
-    items.push(SUBSCRIPTIONS_ITEM);
-  }
+  items.push(SUBSCRIPTIONS_ITEM);
   items.push(SELECT_TEMPLATE_ITEM);
   return items.map((item) => ({
     ...item,

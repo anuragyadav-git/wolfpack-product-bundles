@@ -310,6 +310,7 @@ fn build_automatic_addon_candidates(
 
 fn build_subscription_candidates(
     input: &schema::cart_lines_discounts_generate_run::Input,
+    recurring_bundle_discount: bool,
 ) -> Vec<schema::ProductDiscountCandidate> {
     let Some(runtime_secret) = input
         .discount()
@@ -351,7 +352,7 @@ fn build_subscription_candidates(
             continue;
         };
         if subscription.selling_plan_group_id.trim().is_empty()
-            || subscription.recurring_bundle_discount
+            || subscription.recurring_bundle_discount != recurring_bundle_discount
         {
             continue;
         }
@@ -606,7 +607,9 @@ fn cart_lines_discounts_generate_run(
         .map(|metafield| metafield.value().as_str())
         .unwrap_or("addons");
     let candidates = if discount_role == "subscription_initial" {
-        build_subscription_candidates(&input)
+        build_subscription_candidates(&input, false)
+    } else if discount_role == "subscription_recurring" {
+        build_subscription_candidates(&input, true)
     } else if is_checkout_integration_code_mode(&input) {
         let rate = decimal_to_f64(input.presentment_currency_rate());
         let presentment_currency_rate = if rate.is_finite() && rate > 0.0 {

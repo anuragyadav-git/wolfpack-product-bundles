@@ -54,6 +54,8 @@ jest.mock("../../../app/services/bundles/storefront-sync.server", () => ({
 jest.mock("../../../app/services/addon-discount-function-service.server", () => ({
   AddOnDiscountFunctionService: {
     completeSetup: jest.fn().mockResolvedValue({ success: true }),
+    completeSubscriptionInitialSetup: jest.fn().mockResolvedValue({ success: true }),
+    completeSubscriptionRecurringSetup: jest.fn().mockResolvedValue({ success: true }),
   },
 }));
 
@@ -300,6 +302,42 @@ function makeBundleUpsellConfig(overrides: Record<string, unknown> = {}) {
   };
 }
 
+function makeSubscriptionConfig(overrides: Record<string, unknown> = {}) {
+  return {
+    version: 1,
+    enabled: true,
+    selectedGroup: {
+      id: "gid://shopify/SellingPlanGroup/1",
+      name: "Subscribe and save",
+      options: ["Delivery every"],
+      plans: [{
+        id: "gid://shopify/SellingPlan/1",
+        sourceName: "Monthly",
+        options: ["Month"],
+        pricingPolicies: [],
+      }],
+    },
+    selectedPlanIds: ["gid://shopify/SellingPlan/1"],
+    defaultPurchaseOption: {
+      kind: "selling_plan",
+      sellingPlanId: "gid://shopify/SellingPlan/1",
+    },
+    oneTimePurchase: { enabled: true, title: "One-time purchase", description: "" },
+    copy: { title: "Purchase options", subtitle: "", unavailableMessage: "Unavailable" },
+    planCopy: {
+      "gid://shopify/SellingPlan/1": {
+        displayName: "Monthly",
+        discountPill: "",
+        description: "",
+      },
+    },
+    showDiscountOnProductCards: false,
+    recurringBundleDiscount: false,
+    translations: {},
+    ...overrides,
+  };
+}
+
 beforeEach(() => {
   jest.clearAllMocks();
   MOCK_ADMIN.graphql.mockResolvedValue({
@@ -330,6 +368,47 @@ describe("FPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
     const body = await res.json() as any;
     expect(body.success).toBe(true);
     expect(body.message).toBe("Updated Successfully!");
+  });
+
+  it("persists a valid provider-neutral subscription configuration", async () => {
+    const config = makeSubscriptionConfig();
+
+    const response = await handleSaveBundle(
+      MOCK_ADMIN,
+      MOCK_SESSION,
+      "bundle-1",
+      makeFormData({ bundleSubscriptionConfig: JSON.stringify(config) }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(getDb().bundle.update).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({
+        bundleSubscriptionConfig: expect.objectContaining({
+          enabled: true,
+          selectedPlanIds: ["gid://shopify/SellingPlan/1"],
+        }),
+      }),
+    }));
+  });
+
+  it("blocks FPB persistence when an enabled subscription configuration is invalid", async () => {
+    const response = await handleSaveBundle(
+      MOCK_ADMIN,
+      MOCK_SESSION,
+      "bundle-1",
+      makeFormData({
+        bundleSubscriptionConfig: JSON.stringify(makeSubscriptionConfig({
+          selectedPlanIds: [],
+        })),
+      }),
+    );
+    const body = await response.json() as any;
+
+    expect(response.status).toBe(400);
+    expect(body.fieldErrors).toEqual(expect.arrayContaining([
+      expect.objectContaining({ path: "subscriptions.selectedPlanIds" }),
+    ]));
+    expect(getDb().bundle.update).not.toHaveBeenCalled();
   });
 
   it("returns structured field errors and does not persist an invalid draft", async () => {

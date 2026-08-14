@@ -98,6 +98,10 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
         JSON.stringify(flow.conditionsState.stepConditions),
       );
       formData.append("bundleProduct", JSON.stringify(flow.bundleProduct));
+      formData.append(
+        "bundleSubscriptionConfig",
+        JSON.stringify(flow.subscriptionConfig),
+      );
       formData.append("promoBannerBgImage", flow.promoBannerBgImage ?? "");
       formData.append("loadingGif", flow.loadingGif ?? "");
       formData.append(
@@ -270,6 +274,8 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
             flow.upsellWidgetButtonText;
           flow.originalAutoSelectBrowsedProductRef.current =
             flow.autoSelectBrowsedProduct;
+          flow.originalSubscriptionConfigRef.current =
+            flow.subscriptionConfig;
           flow.setIsDirty(false);
           flow.shopify.toast.show(
             ("message" in result ? result.message : null) ||
@@ -367,6 +373,9 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
     );
     flow.setAutoSelectBrowsedProduct(
       flow.originalAutoSelectBrowsedProductRef.current,
+    );
+    flow.resetSubscriptionConfig(
+      flow.originalSubscriptionConfigRef.current,
     );
     validation.clearValidationErrors();
   }, [flow, validation]);

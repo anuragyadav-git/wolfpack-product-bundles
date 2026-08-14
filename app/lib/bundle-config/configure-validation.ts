@@ -1,3 +1,8 @@
+import {
+  getBundleSubscriptionCompatibilityIssues,
+  validateBundleSubscriptionConfig,
+} from "../bundle-subscriptions";
+
 export type BundleConfigureKind = "fpb" | "ppb";
 
 export interface ConfigureValidationIssue {
@@ -78,6 +83,17 @@ function hasStepResources(step: JsonRecord): boolean {
     (category) =>
       list(category?.products).length > 0 ||
       list(category?.collections).length > 0,
+  );
+}
+
+function hasEnabledPersonalization(value: unknown): boolean {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const addonProducts = (value as JsonRecord).addonProducts;
+  return Boolean(
+    addonProducts &&
+    typeof addonProducts === "object" &&
+    !Array.isArray(addonProducts) &&
+    addonProducts.isEnabled === true,
   );
 }
 
@@ -392,12 +408,28 @@ export function validateBundleConfigureFormData(
     }
   });
 
-  validateDiscounts(issues, readJson(formData, "discountData", {}));
+  const discount = readJson(formData, "discountData", {});
+  validateDiscounts(issues, discount);
   validateSettings(issues, formData);
   const upsell = readJson(formData, "bundleUpsellConfig", {});
   validateWidget(issues, formData, upsell);
   if (kind === "ppb") validatePpbEmbed(issues, formData, upsell);
   else validateFpbAddons(issues, formData);
+  const subscription = readJson(formData, "bundleSubscriptionConfig", null);
+  if (subscription?.enabled === true) {
+    const subscriptionIssues = [
+      ...validateBundleSubscriptionConfig(subscription),
+      ...getBundleSubscriptionCompatibilityIssues({
+        discountType: discount.discountType,
+        steps,
+        personalizationEnabled: hasEnabledPersonalization(
+          readJson(formData, "personalizationData", null),
+        ),
+      }),
+    ];
+    issues.push(...subscriptionIssues.map(({ path, message }) =>
+      issue(path, message, "subscriptions")));
+  }
   return issues;
 }
 

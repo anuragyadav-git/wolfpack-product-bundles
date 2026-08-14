@@ -18,7 +18,7 @@ import { formatStepCategoriesForRuntime } from "../../../../lib/bundle-config/ca
 import { resolveShowProductComparedAtPrice } from "../../../../lib/bundle-config/product-page-display";
 import { normalizeShopifyComponentQuantity } from "../utils/component-quantity";
 import { buildCheckoutOfferRuntime } from "../../../checkout-bundle-offers.server";
-import { buildPublicPpbSubscriptionConfig } from "../../../../lib/ppb-subscriptions";
+import { buildPublicBundleSubscriptionConfig } from "../../../../lib/bundle-subscriptions";
 
 async function ensureBundleParentVariantRequiresComponents(
   admin: ShopifyAdmin,
@@ -423,7 +423,7 @@ export async function updateBundleProductMetafields(
     priceAdjustment.method,
     priceAdjustment.value
   );
-  const publicSubscriptionConfig = buildPublicPpbSubscriptionConfig(
+  const publicSubscriptionConfig = buildPublicBundleSubscriptionConfig(
     bundleConfiguration.bundleSubscriptionConfig,
   );
 

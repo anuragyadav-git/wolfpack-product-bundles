@@ -22,9 +22,6 @@ export interface ProductPageThemeEditorDeepLinkInput {
 
 export const PRODUCT_PAGE_EDIT_DEFAULTS_HREF = "/app/settings";
 
-export const SUBSCRIPTION_NO_COMMON_PLAN_MESSAGE =
-  "To offer this bundle as a subscription, all of its products must be part of the same subscription plan in your Shopify settings. Please update your product selling plans and try again.";
-
 export const PRODUCT_PAGE_SETUP_ITEMS: ProductPageSetupItem[] = [
   { id: "step_setup",         label: "Step Setup",         iconType: "note" },
   { id: "discount_pricing",   label: "Discount & Pricing", iconType: "filter" },
@@ -33,12 +30,6 @@ export const PRODUCT_PAGE_SETUP_ITEMS: ProductPageSetupItem[] = [
   { id: "subscriptions",      label: "Subscriptions",      iconType: "clock" },
   { id: "select_template",    label: "Select Template",    iconType: "paint-brush-flat" },
 ];
-
-export interface SellingPlanValidationSources {
-  productIds: string[];
-  collectionIds: string[];
-  variantIdsByProductId: Record<string, string[]>;
-}
 
 export interface SellingPlanGroupSummary {
   id: string;
@@ -53,82 +44,6 @@ interface SellingPlanProduct {
 
 function asArray(value: unknown): any[] {
   return Array.isArray(value) ? value : [];
-}
-
-function normalizeProductId(value: unknown): string | null {
-  if (typeof value !== "string" || value.trim() === "") return null;
-  if (value.startsWith("gid://shopify/Product/")) return value;
-  if (/^\d+$/.test(value)) return `gid://shopify/Product/${value}`;
-  return null;
-}
-
-function normalizeCollectionId(value: unknown): string | null {
-  if (typeof value !== "string" || value.trim() === "") return null;
-  if (value.startsWith("gid://shopify/Collection/")) return value;
-  if (/^\d+$/.test(value)) return `gid://shopify/Collection/${value}`;
-  return null;
-}
-
-function normalizeVariantId(value: unknown): string | null {
-  if (typeof value !== "string" && typeof value !== "number") return null;
-  const raw = String(value).trim();
-  if (raw.startsWith("gid://shopify/ProductVariant/")) return raw;
-  if (/^\d+$/.test(raw)) return `gid://shopify/ProductVariant/${raw}`;
-  return null;
-}
-
-function addUnique(target: string[], value: string | null): void {
-  if (value && !target.includes(value)) target.push(value);
-}
-
-export function extractSellingPlanValidationSources(bundle: any): SellingPlanValidationSources {
-  const productIds: string[] = [];
-  const collectionIds: string[] = [];
-  const variantIdsByProductId: Record<string, string[]> = {};
-  const addProduct = (product: any) => {
-    const productId = normalizeProductId(product?.graphqlId ?? product?.productId ?? product?.id);
-    addUnique(productIds, productId);
-    if (!productId) return;
-    const variants = asArray(product?.variants)
-      .map((variant) => normalizeVariantId(
-        typeof variant === "object"
-          ? variant?.id ?? variant?.variantId ?? variant?.variantGraphqlId
-          : variant,
-      ))
-      .filter((id): id is string => id !== null);
-    if (variants.length > 0) {
-      variantIdsByProductId[productId] = Array.from(new Set([
-        ...(variantIdsByProductId[productId] ?? []),
-        ...variants,
-      ]));
-    }
-  };
-
-  for (const product of asArray(bundle?.defaultProductsData?.products)) {
-    addProduct(product);
-  }
-
-  for (const step of asArray(bundle?.steps)) {
-    for (const product of asArray(step.products)) {
-      addProduct(product);
-    }
-    for (const product of asArray(step.StepProduct)) {
-      addProduct(product);
-    }
-    for (const collection of asArray(step.collections)) {
-      addUnique(collectionIds, normalizeCollectionId(collection.id ?? collection.collectionGid));
-    }
-    for (const category of asArray(step.StepCategory)) {
-      for (const product of asArray(category.products)) {
-        addProduct(product);
-      }
-      for (const collection of asArray(category.collections)) {
-        addUnique(collectionIds, normalizeCollectionId(collection.id ?? collection.collectionGid));
-      }
-    }
-  }
-
-  return { productIds, collectionIds, variantIdsByProductId };
 }
 
 export function deriveCommonSellingPlanGroups(products: SellingPlanProduct[]): SellingPlanGroupSummary[] {

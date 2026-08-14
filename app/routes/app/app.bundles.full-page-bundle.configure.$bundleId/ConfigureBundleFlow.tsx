@@ -12,6 +12,7 @@ import { BundleSettingsSection } from "./sections/BundleSettingsSection";
 import { BundleWidgetSection } from "./sections/BundleWidgetSection";
 import { ConfigureRouteModals } from "./sections/ConfigureRouteModals";
 import { ConfigureValidationSummary } from "../_shared/bundle-configure/ConfigureValidationSummary";
+import { BundleSubscriptionsSection } from "../_shared/bundle-configure/BundleSubscriptionsSection";
 
 function ConfigureBundleFlow() {
   const flow = useConfigureBundleFlow();
@@ -76,6 +77,19 @@ function ConfigureBundleFlow() {
       <DiscountPricingSection flow={flow} />
       <ImagesVisibilitySection flow={flow} />
       <BundleSettingsSection flow={flow} />
+      <BundleSubscriptionsSection
+        activeSection={flow.activeSection}
+        bundle={flow.bundle}
+        pricingState={flow.pricingState}
+        setShowSubscriptionSetupGuide={flow.setShowSubscriptionSetupGuide}
+        showSubscriptionSetupGuide={flow.showSubscriptionSetupGuide}
+        shopLocales={flow.shopLocales}
+        stepsState={flow.stepsState}
+        subscriptionConfig={flow.subscriptionConfig}
+        setSubscriptionConfig={flow.setSubscriptionConfig}
+        subscriptionFetcher={flow.subscriptionFetcher}
+        validationErrors={flow.validationErrors}
+      />
       <BundleWidgetSection flow={flow} />
     </CommonConfigureShell>
   );

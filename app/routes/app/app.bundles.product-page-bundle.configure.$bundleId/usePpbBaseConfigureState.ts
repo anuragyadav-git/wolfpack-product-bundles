@@ -15,9 +15,9 @@ import {
 import { useBundleConfigurationState } from "../../../hooks/useBundleConfigurationState";
 import type { LoaderData } from "./types";
 import {
-  normalizePpbSubscriptionConfig,
-  type PpbSubscriptionConfigV1,
-} from "../../../lib/ppb-subscriptions";
+  normalizeBundleSubscriptionConfig,
+  type BundleSubscriptionConfigV1,
+} from "../../../lib/bundle-subscriptions";
 
 declare global {
   interface Window {
@@ -29,7 +29,7 @@ interface SubscriptionValidationResponse {
   success: boolean;
   isValid?: boolean;
   productCount?: number;
-  groups?: PpbSubscriptionConfigV1["selectedGroup"][];
+  groups?: BundleSubscriptionConfigV1["selectedGroup"][];
   message?: string | null;
   error?: string;
 }
@@ -65,8 +65,8 @@ export function usePpbBaseConfigureState() {
   const [showSubscriptionSetupGuide, setShowSubscriptionSetupGuide] =
     useState(false);
   const [subscriptionConfig, setSubscriptionConfigState] =
-    useState<PpbSubscriptionConfigV1>(() =>
-      normalizePpbSubscriptionConfig(bundle.bundleSubscriptionConfig),
+    useState<BundleSubscriptionConfigV1>(() =>
+      normalizeBundleSubscriptionConfig(bundle.bundleSubscriptionConfig),
     );
   const originalSubscriptionConfigRef = useRef(subscriptionConfig);
   const revalidator = useRevalidator();
@@ -141,8 +141,8 @@ export function usePpbBaseConfigureState() {
     originalValuesRef,
   } = configState;
   const setSubscriptionConfig = useCallback(
-    (updater: (current: PpbSubscriptionConfigV1) => PpbSubscriptionConfigV1) => {
-      setSubscriptionConfigState((current) => normalizePpbSubscriptionConfig(updater(current)));
+    (updater: (current: BundleSubscriptionConfigV1) => BundleSubscriptionConfigV1) => {
+      setSubscriptionConfigState((current) => normalizeBundleSubscriptionConfig(updater(current)));
       markAsDirty();
     },
     [markAsDirty],

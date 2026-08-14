@@ -11,19 +11,20 @@ import {
 } from "../../../app/lib/bundle-config/common-configure-page-model";
 
 describe("common configure page model", () => {
-  it("builds the FPB section list without PPB-only subscriptions", () => {
+  it("builds the FPB section list with shared subscriptions", () => {
     expect(buildConfigureSetupItems("full_page").map((item) => item.id)).toEqual(
       [
         "step_setup",
         "discount_pricing",
         "bundle_visibility",
         "bundle_settings",
+        "subscriptions",
         "select_template",
       ],
     );
   });
 
-  it("builds the PPB section list with PPB-only subscriptions", () => {
+  it("builds the PPB section list with shared subscriptions", () => {
     expect(
       buildConfigureSetupItems("product_page").map((item) => item.id),
     ).toEqual([

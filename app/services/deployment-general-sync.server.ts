@@ -90,6 +90,10 @@ export interface DeploymentGeneralSyncDependencies {
     admin: unknown,
     shopDomain: string,
   ) => Promise<{ success: boolean; error?: string }>;
+  setupSubscriptionRecurringDiscount: (
+    admin: unknown,
+    shopDomain: string,
+  ) => Promise<{ success: boolean; error?: string }>;
   updateStepProductVariants: (input: {
     stepProductId: string;
     variants: unknown;
@@ -138,6 +142,11 @@ function hasEnabledSubscription(config: unknown) {
     && !Array.isArray(config)
     && (config as Record<string, unknown>).enabled === true,
   );
+}
+
+function hasEnabledRecurringSubscription(config: unknown) {
+  return hasEnabledSubscription(config)
+    && (config as Record<string, unknown>).recurringBundleDiscount === true;
 }
 
 function errorMessage(error: unknown) {
@@ -370,6 +379,7 @@ export async function runDeploymentGeneralSync(
 
   const addonShops = new Set<string>();
   const subscriptionShops = new Set<string>();
+  const recurringSubscriptionShops = new Set<string>();
   for (const bundle of bundles) {
     if (failedShops.has(bundle.shopId)) continue;
     if (!isBundleType(bundle.bundleType)) {
@@ -398,11 +408,11 @@ export async function runDeploymentGeneralSync(
       ) {
         addonShops.add(bundle.shopId);
       }
-      if (
-        bundle.bundleType === "product_page"
-        && hasEnabledSubscription(bundle.bundleSubscriptionConfig)
-      ) {
+      if (hasEnabledSubscription(bundle.bundleSubscriptionConfig)) {
         subscriptionShops.add(bundle.shopId);
+      }
+      if (hasEnabledRecurringSubscription(bundle.bundleSubscriptionConfig)) {
+        recurringSubscriptionShops.add(bundle.shopId);
       }
       await runBundleVariantRemediation(
         bundle.shopId,
@@ -455,6 +465,21 @@ export async function runDeploymentGeneralSync(
         throw new Error(result.error ?? "Subscription discount setup failed");
       }
       summary.subscriptionDiscountShopsSynced += 1;
+    } catch (error) {
+      summary.failedShops += 1;
+      summary.shopFailures.push({ shopDomain, error: errorMessage(error) });
+    }
+  }
+
+  for (const shopDomain of recurringSubscriptionShops) {
+    try {
+      const result = await deps.setupSubscriptionRecurringDiscount(
+        adminByShop.get(shopDomain)!,
+        shopDomain,
+      );
+      if (!result.success) {
+        throw new Error(result.error ?? "Recurring subscription discount setup failed");
+      }
     } catch (error) {
       summary.failedShops += 1;
       summary.shopFailures.push({ shopDomain, error: errorMessage(error) });

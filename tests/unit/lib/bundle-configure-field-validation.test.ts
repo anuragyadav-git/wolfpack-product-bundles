@@ -41,6 +41,39 @@ describe("validateBundleConfigureFormData", () => {
     expect(validateBundleConfigureFormData(form(), "fpb")).toEqual([]);
   });
 
+  it.each(["fpb", "ppb"] as const)(
+    "validates enabled subscription configuration for %s",
+    (kind) => {
+      const issues = validateBundleConfigureFormData(
+        form({
+          bundleSubscriptionConfig: JSON.stringify({
+            version: 1,
+            enabled: true,
+            selectedGroup: null,
+            selectedPlanIds: [],
+            defaultPurchaseOption: { kind: "one_time" },
+            oneTimePurchase: { enabled: true, title: "", description: "" },
+            copy: { title: "", subtitle: "", unavailableMessage: "" },
+            planCopy: {},
+            showDiscountOnProductCards: false,
+            recurringBundleDiscount: false,
+            translations: {},
+          }),
+        }),
+        kind,
+      );
+
+      expect(issues).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+          path: "subscriptions.selectedGroup",
+          section: "subscriptions",
+        }),
+        expect.objectContaining({ path: "subscriptions.selectedPlanIds" }),
+        expect.objectContaining({ path: "subscriptions.copy.title" }),
+      ]));
+    },
+  );
+
   it("returns ordered issues for missing bundle and enabled-step requirements", () => {
     const issues = validateBundleConfigureFormData(
       form({

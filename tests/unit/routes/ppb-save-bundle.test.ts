@@ -58,6 +58,7 @@ jest.mock("../../../app/services/bundles/storefront-sync.server", () => ({
 jest.mock("../../../app/services/addon-discount-function-service.server", () => ({
   AddOnDiscountFunctionService: {
     completeSubscriptionInitialSetup: jest.fn().mockResolvedValue({ success: true }),
+    completeSubscriptionRecurringSetup: jest.fn().mockResolvedValue({ success: true }),
   },
 }));
 
@@ -350,7 +351,7 @@ describe("PPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
       enabled: true,
       selectedPlanIds: ["gid://shopify/SellingPlan/1"],
     });
-    expect(persisted.selectedGroup.plans[0]).not.toHaveProperty("position");
+    expect(persisted.selectedGroup.plans[0]).toHaveProperty("position", 1);
     expect(AddOnDiscountFunctionService.completeSubscriptionInitialSetup).toHaveBeenCalledWith(
       MOCK_ADMIN,
       MOCK_SESSION.shop,

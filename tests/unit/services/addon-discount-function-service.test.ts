@@ -149,6 +149,29 @@ describe("AddOnDiscountFunctionService", () => {
     });
   });
 
+  it("creates a role-tagged recurring subscription discount with no cycle limit", async () => {
+    mockShopifyAdmin.graphql
+      .mockResolvedValueOnce(addOnFunctionsMock())
+      .mockResolvedValueOnce(createMockGraphQLResponse({ discountNodes: { nodes: [] } }))
+      .mockResolvedValueOnce(createMockGraphQLResponse({
+        discountAutomaticAppCreate: {
+          automaticAppDiscount: { discountId: MOCK_DISCOUNT_ID, status: "ACTIVE" },
+          userErrors: [],
+        },
+      }));
+
+    const result = await AddOnDiscountFunctionService.completeSubscriptionRecurringSetup(
+      mockShopifyAdmin,
+      shopDomain,
+    );
+    expect(result.success).toBe(true);
+    expect(mockShopifyAdmin.graphql.mock.calls[2][1].variables.automaticAppDiscount).toMatchObject({
+      title: "Bundle Subscription - Recurring Orders",
+      recurringCycleLimit: 0,
+      metafields: [expect.objectContaining({ value: "subscription_recurring" })],
+    });
+  });
+
   it.each(["DISABLED", "EXPIRED"])(
     "reactivates a matching %s automatic discount",
     async (status) => {

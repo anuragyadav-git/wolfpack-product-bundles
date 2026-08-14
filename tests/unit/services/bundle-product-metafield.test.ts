@@ -676,9 +676,11 @@ describe("updateBundleProductMetafields", () => {
     });
   });
 
-  it("writes only the normalized public PPB subscription configuration", async () => {
-    const admin = makeAdmin();
-    const subscription = {
+  it.each([BundleType.FULL_PAGE, BundleType.PRODUCT_PAGE])(
+    "writes only the normalized public subscription configuration for %s",
+    async (bundleType) => {
+      const admin = makeAdmin();
+      const subscription = {
       version: 1,
       enabled: true,
       selectedGroup: {
@@ -695,36 +697,40 @@ describe("updateBundleProductMetafields", () => {
       showDiscountOnProductCards: false,
       recurringBundleDiscount: false,
       translations: {},
-    };
+      };
 
-    await updateBundleProductMetafields(
-      admin,
-      "gid://shopify/Product/999",
-      makeBundleConfig(BundleType.PRODUCT_PAGE, { bundleSubscriptionConfig: subscription }),
-    );
+      await updateBundleProductMetafields(
+        admin,
+        "gid://shopify/Product/999",
+        makeBundleConfig(bundleType, { bundleSubscriptionConfig: subscription }),
+      );
 
-    const metafields = getMetafieldsSetPayload(admin);
-    const uiConfig = JSON.parse(metafields.find((field: any) => field.key === "bundle_ui_config").value);
-    expect(uiConfig.subscription).toMatchObject({
-      enabled: true,
-      selectedPlanIds: ["gid://shopify/SellingPlan/1"],
-    });
-    expect(uiConfig.subscription.selectedGroup.plans[0]).not.toHaveProperty("position");
-  });
+      const metafields = getMetafieldsSetPayload(admin);
+      const uiConfig = JSON.parse(metafields.find((field: any) => field.key === "bundle_ui_config").value);
+      expect(uiConfig.subscription).toMatchObject({
+        enabled: true,
+        selectedPlanIds: ["gid://shopify/SellingPlan/1"],
+      });
+      expect(uiConfig.subscription.selectedGroup.plans[0]).toHaveProperty("position", 1);
+    },
+  );
 
-  it("omits disabled PPB subscription drafts from bundle_ui_config", async () => {
-    const admin = makeAdmin();
+  it.each([BundleType.FULL_PAGE, BundleType.PRODUCT_PAGE])(
+    "omits disabled subscription drafts from bundle_ui_config for %s",
+    async (bundleType) => {
+      const admin = makeAdmin();
 
-    await updateBundleProductMetafields(
-      admin,
-      "gid://shopify/Product/999",
-      makeBundleConfig(BundleType.PRODUCT_PAGE, {
-        bundleSubscriptionConfig: { enabled: false, selectedPlanIds: ["draft-plan"] },
-      }),
-    );
+      await updateBundleProductMetafields(
+        admin,
+        "gid://shopify/Product/999",
+        makeBundleConfig(bundleType, {
+          bundleSubscriptionConfig: { enabled: false, selectedPlanIds: ["draft-plan"] },
+        }),
+      );
 
-    const metafields = getMetafieldsSetPayload(admin);
-    const uiConfig = JSON.parse(metafields.find((field: any) => field.key === "bundle_ui_config").value);
-    expect(uiConfig).not.toHaveProperty("subscription");
-  });
+      const metafields = getMetafieldsSetPayload(admin);
+      const uiConfig = JSON.parse(metafields.find((field: any) => field.key === "bundle_ui_config").value);
+      expect(uiConfig).not.toHaveProperty("subscription");
+    },
+  );
 });

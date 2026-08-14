@@ -33,9 +33,10 @@ import {
   type ShopifyStorefrontVariantLookupResult,
 } from "../../../../lib/variant-existence.server";
 import {
-  normalizePpbSubscriptionConfig,
-  validatePpbSubscriptionConfig,
-} from "../../../../lib/ppb-subscriptions";
+  getBundleSubscriptionCompatibilityIssues,
+  normalizeBundleSubscriptionConfig,
+  validateBundleSubscriptionConfig,
+} from "../../../../lib/bundle-subscriptions";
 import { AddOnDiscountFunctionService } from "../../../../services/addon-discount-function-service.server";
 
 type ParsedVariantRef = string | number;
@@ -239,22 +240,16 @@ export async function handleSaveBundle(
     const subscriptionConfigRaw = formData.get("bundleSubscriptionConfig");
     const subscriptionConfig =
       typeof subscriptionConfigRaw === "string"
-        ? normalizePpbSubscriptionConfig(JSON.parse(subscriptionConfigRaw))
+        ? normalizeBundleSubscriptionConfig(JSON.parse(subscriptionConfigRaw))
         : null;
     if (subscriptionConfig?.enabled) {
-      const subscriptionIssues = validatePpbSubscriptionConfig(subscriptionConfig);
-      if (discountData.discountType === "buy_x_get_y") {
-        subscriptionIssues.push({
-          path: "subscriptions.enabled",
-          message: "Subscriptions are unavailable with Buy X Get Y pricing.",
-        });
-      }
-      if (stepsData.some((step: any) => step?.isFreeGift === true)) {
-        subscriptionIssues.push({
-          path: "subscriptions.enabled",
-          message: "Subscriptions are unavailable while a free-gift or add-on step is enabled.",
-        });
-      }
+      const subscriptionIssues = [
+        ...validateBundleSubscriptionConfig(subscriptionConfig),
+        ...getBundleSubscriptionCompatibilityIssues({
+          discountType: discountData.discountType,
+          steps: stepsData,
+        }),
+      ];
       if (subscriptionIssues.length > 0) {
         return json(
           {
@@ -633,6 +628,21 @@ export async function handleSaveBundle(
           bundleId,
           shopId: session.shop,
         }, { error: activation.error });
+      }
+      if (subscriptionConfig.recurringBundleDiscount) {
+        const recurringActivation =
+          await AddOnDiscountFunctionService.completeSubscriptionRecurringSetup(
+            admin,
+            session.shop,
+          );
+        if (!recurringActivation.success) {
+          AppLogger.warn("Subscription recurring discount setup failed during bundle save", {
+            component: "bundle-config",
+            operation: "save",
+            bundleId,
+            shopId: session.shop,
+          }, { error: recurringActivation.error });
+        }
       }
     }
 

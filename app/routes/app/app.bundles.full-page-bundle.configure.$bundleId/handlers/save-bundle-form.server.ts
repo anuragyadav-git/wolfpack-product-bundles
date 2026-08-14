@@ -1,5 +1,6 @@
 import { processCss } from "../../../../lib/css-sanitizer";
 import { normalizeFpbUpsellSave } from "../../../../lib/fpb-upsell-config.server";
+import { normalizeBundleSubscriptionConfig } from "../../../../lib/bundle-subscriptions";
 
 function normalizePersonalizationData(personalizationData: any) {
   if (
@@ -166,6 +167,10 @@ export function parseFpbSaveBundleForm(formData: FormData) {
   const bundleProductData = formData.get("bundleProduct")
     ? JSON.parse(formData.get("bundleProduct") as string)
     : null;
+  const bundleSubscriptionConfigRaw = formData.get("bundleSubscriptionConfig");
+  const bundleSubscriptionConfig = typeof bundleSubscriptionConfigRaw === "string"
+    ? normalizeBundleSubscriptionConfig(JSON.parse(bundleSubscriptionConfigRaw))
+    : null;
 
   return {
     allowQuantityChanges,
@@ -176,6 +181,7 @@ export function parseFpbSaveBundleForm(formData: FormData) {
     bundleLevelCss,
     bundleName,
     bundleProductData,
+    bundleSubscriptionConfig,
     bundleStatus,
     bundleTextConfig,
     bundleUpsellConfig,

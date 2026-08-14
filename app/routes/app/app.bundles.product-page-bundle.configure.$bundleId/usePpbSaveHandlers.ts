@@ -3,7 +3,7 @@ import { AppLogger } from "../../../lib/logger";
 import { normalizeDefaultProductsData } from "../../../lib/bundle-config/default-products";
 import { buildVisibilityDisplayConfiguration } from "./ConfigureBundleFlow.helpers";
 import { useConfigureValidation } from "../_shared/bundle-configure/useConfigureValidation";
-import { validatePpbSubscriptionConfig } from "../../../lib/ppb-subscriptions";
+import { validateBundleSubscriptionConfig } from "../../../lib/bundle-subscriptions";
 
 export function usePpbSaveHandlers({
   base,
@@ -102,7 +102,7 @@ export function usePpbSaveHandlers({
   const handleSave = useCallback(async () => {
     try {
       if (base.subscriptionConfig.enabled) {
-        const subscriptionIssues = validatePpbSubscriptionConfig(
+        const subscriptionIssues = validateBundleSubscriptionConfig(
           base.subscriptionConfig,
         );
         if (base.pricingState.discountType === "buy_x_get_y") {

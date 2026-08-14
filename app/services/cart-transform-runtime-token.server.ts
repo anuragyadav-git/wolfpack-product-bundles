@@ -1,7 +1,10 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { buildPriceAdjustmentConfig } from "./bundles/metafield-sync/utils/price-adjustment";
 import { collectAddonComponentVariants } from "./bundles/metafield-sync/utils/addon-components";
-import { buildPublicPpbSubscriptionConfig } from "../lib/ppb-subscriptions";
+import {
+  buildPublicBundleSubscriptionConfig,
+  shouldApplyBundleDiscount,
+} from "../lib/bundle-subscriptions";
 
 const RUNTIME_TOKEN_VERSION = 1;
 const RUNTIME_TOKEN_SECRET_CONTEXT = "wpb-runtime-token:";
@@ -50,7 +53,7 @@ type SelectionInput = {
 
 function normalizeSubscriptionSelection(bundle: any, value: SelectionInput["subscription"]) {
   if (!value) return undefined;
-  const config = buildPublicPpbSubscriptionConfig(bundle?.bundleSubscriptionConfig);
+  const config = buildPublicBundleSubscriptionConfig(bundle?.bundleSubscriptionConfig);
   const sellingPlanGroupId = String(value.sellingPlanGroupId ?? "").trim();
   const sellingPlanId = String(value.sellingPlanId ?? "").trim();
   if (!config || config.selectedGroup?.id !== sellingPlanGroupId) {
@@ -59,10 +62,14 @@ function normalizeSubscriptionSelection(bundle: any, value: SelectionInput["subs
   if (!config.selectedPlanIds.includes(sellingPlanId)) {
     throw new Error("Subscription selling plan is not enabled for this bundle");
   }
-  if (value.recurringBundleDiscount === true) {
-    throw new Error("Recurring bundle discounts are not enabled in the subscription POC");
+  if ((value.recurringBundleDiscount === true) !== config.recurringBundleDiscount) {
+    throw new Error("Recurring bundle discount selection does not match the saved bundle configuration");
   }
-  return { sellingPlanGroupId, sellingPlanId, recurringBundleDiscount: false };
+  return {
+    sellingPlanGroupId,
+    sellingPlanId,
+    recurringBundleDiscount: config.recurringBundleDiscount,
+  };
 }
 
 export function normalizeProductVariantGid(value: unknown): string | null {
@@ -291,6 +298,13 @@ export function buildRuntimeTokenPayload(input: {
   }
 
   const selection = validateRuntimeTokenSelection(input.bundle, input.selection);
+  const subscriptionConfig = buildPublicBundleSubscriptionConfig(
+    input.bundle.bundleSubscriptionConfig,
+  );
+  const appliesToPurchaseMode = !subscriptionConfig || shouldApplyBundleDiscount(
+    subscriptionConfig.bundleDiscountAppliesOn,
+    selection.subscription?.sellingPlanId,
+  );
 
   return {
     version: RUNTIME_TOKEN_VERSION,
@@ -302,7 +316,9 @@ export function buildRuntimeTokenPayload(input: {
     bundleName: String(input.bundle.name ?? "Bundle"),
     components: selection.components,
     addons: selection.addons,
-    priceAdjustment: buildPriceAdjustmentConfig(input.bundle.pricing),
+    priceAdjustment: appliesToPurchaseMode
+      ? buildPriceAdjustmentConfig(input.bundle.pricing)
+      : { method: "percentage_off", value: 0 },
     ...(selection.subscription ? { subscription: selection.subscription } : {}),
   };
 }

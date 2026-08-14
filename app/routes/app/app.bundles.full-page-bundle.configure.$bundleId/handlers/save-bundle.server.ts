@@ -35,6 +35,10 @@ import {
   validateVariantIdFromShopify,
   type ShopifyStorefrontVariantLookupResult,
 } from "../../../../lib/variant-existence.server";
+import {
+  getBundleSubscriptionCompatibilityIssues,
+  validateBundleSubscriptionConfig,
+} from "../../../../lib/bundle-subscriptions";
 
 type ParsedVariantRef = string | number;
 
@@ -231,6 +235,7 @@ export async function handleSaveBundle(
       bundleLevelCss,
       bundleName,
       bundleProductData,
+      bundleSubscriptionConfig,
       bundleStatus,
       bundleTextConfig,
       bundleUpsellConfig,
@@ -261,6 +266,27 @@ export async function handleSaveBundle(
       validateQuantityPerProduct,
       variantSelectorEnabled,
     } = parseFpbSaveBundleForm(formData);
+
+    if (bundleSubscriptionConfig?.enabled) {
+      const subscriptionIssues = [
+        ...validateBundleSubscriptionConfig(bundleSubscriptionConfig),
+        ...getBundleSubscriptionCompatibilityIssues({
+          discountType: discountData.discountType,
+          steps: stepsData,
+          personalizationEnabled: hasEnabledAddonProducts(personalizationData),
+        }),
+      ];
+      if (subscriptionIssues.length > 0) {
+        return json(
+          {
+            success: false,
+            error: "Fix the subscription configuration before saving.",
+            fieldErrors: subscriptionIssues,
+          },
+          { status: 400 },
+        );
+      }
+    }
 
     AppLogger.debug("Parsed form data:", {
       bundleName,
@@ -480,6 +506,7 @@ export async function handleSaveBundle(
         textOverrides,
         textOverridesByLocale,
         bundleTextConfig,
+        ...(bundleSubscriptionConfig ? { bundleSubscriptionConfig } : {}),
         personalizationData,
         boxSelection,
         bundleUpsellConfig,
@@ -682,6 +709,37 @@ export async function handleSaveBundle(
           bundleId,
           shopId: session.shop,
         }, activationError);
+      }
+    }
+
+    if (bundleSubscriptionConfig?.enabled) {
+      const activation =
+        await AddOnDiscountFunctionService.completeSubscriptionInitialSetup(
+          admin,
+          session.shop,
+        );
+      if (!activation.success) {
+        AppLogger.warn("Subscription initial-order discount setup failed during bundle save", {
+          component: "bundle-config",
+          operation: "save",
+          bundleId,
+          shopId: session.shop,
+        }, { error: activation.error });
+      }
+      if (bundleSubscriptionConfig.recurringBundleDiscount) {
+        const recurringActivation =
+          await AddOnDiscountFunctionService.completeSubscriptionRecurringSetup(
+            admin,
+            session.shop,
+          );
+        if (!recurringActivation.success) {
+          AppLogger.warn("Subscription recurring discount setup failed during bundle save", {
+            component: "bundle-config",
+            operation: "save",
+            bundleId,
+            shopId: session.shop,
+          }, { error: recurringActivation.error });
+        }
       }
     }
 
