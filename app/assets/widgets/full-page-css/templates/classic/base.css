@@ -77,6 +77,20 @@
   align-self: stretch;
 }
 
+.layout-sidebar[data-fpb-design-preset="CLASSIC"]
+  .sidebar-content
+  .product-price-row,
+.fpb-preset-classic
+  .sidebar-content
+  .product-price-row {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 0;
+}
+
 .layout-sidebar[data-fpb-design-preset="CLASSIC"][data-fpb-card-cta-mode="icon"]
   .product-price-row
   :is(.product-price, .product-price-strike) {
