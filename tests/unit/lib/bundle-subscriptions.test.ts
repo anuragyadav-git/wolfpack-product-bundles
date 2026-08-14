@@ -64,6 +64,49 @@ describe("bundle subscription config", () => {
     expect(normalized.planCopy).toEqual(config.planCopy);
   });
 
+  it("deduplicates duplicate plan IDs from both selected plans and plan rows", () => {
+    const duplicatePlan = { ...config.selectedGroup.plans[0], id: "gid://shopify/SellingPlan/12", sourceName: "Alternate" };
+    const normalized = normalizeBundleSubscriptionConfig({
+      ...config,
+      selectedGroup: {
+        ...config.selectedGroup,
+        plans: [
+          config.selectedGroup.plans[0],
+          config.selectedGroup.plans[0],
+          duplicatePlan,
+          duplicatePlan,
+        ],
+      },
+      selectedPlanIds: [
+        config.selectedPlanIds[0],
+        config.selectedPlanIds[0],
+        "gid://shopify/SellingPlan/12",
+        "gid://shopify/SellingPlan/12",
+      ],
+      planCopy: {
+        ...config.planCopy,
+        "gid://shopify/SellingPlan/12": { displayName: "Alternate", discountPill: "Save 20%", description: "Delivered weekly" },
+      },
+    });
+    expect(normalized.selectedGroup?.plans).toHaveLength(2);
+    expect(normalized.selectedGroup?.plans.map((plan) => plan.id)).toEqual([
+      "gid://shopify/SellingPlan/11",
+      "gid://shopify/SellingPlan/12",
+    ]);
+    expect(normalized.selectedPlanIds).toEqual([
+      "gid://shopify/SellingPlan/11",
+      "gid://shopify/SellingPlan/12",
+    ]);
+    expect(normalized.planCopy).toEqual({
+      ...config.planCopy,
+      "gid://shopify/SellingPlan/12": {
+        displayName: "Alternate",
+        discountPill: "Save 20%",
+        description: "Delivered weekly",
+      },
+    });
+  });
+
   it("returns semantic errors for invalid enabled configurations", () => {
     const result = validateBundleSubscriptionConfig({
       ...config,

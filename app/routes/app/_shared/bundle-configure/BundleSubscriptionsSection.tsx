@@ -85,6 +85,12 @@ export function BundleSubscriptionsSection(props: BundleSubscriptionsSectionProp
       ? [subscriptionConfig.selectedGroup]
       : [];
   const subscriptionsBlocked = compatibilityIssues.length > 0;
+  const uniquePlanRows = subscriptionConfig.selectedGroup
+    ? Array.from(new Map(
+      ((subscriptionConfig.selectedGroup.plans ?? []).filter((plan: any) => typeof plan?.id === "string" && plan.id.length > 0))
+        .map((plan: any) => [plan.id, plan]),
+    ).values())
+    : [];
   const validationMessage = validation?.success === false
     ? validation.error
     : validation?.isValid === false
@@ -92,13 +98,21 @@ export function BundleSubscriptionsSection(props: BundleSubscriptionsSectionProp
       : null;
   const setGroup = (groupId: string) => {
     const selectedGroup = groups.find((group: any) => group?.id === groupId) ?? null;
-    setSubscriptionConfig((current: any) => ({
-      ...current,
-      selectedGroup,
-      selectedPlanIds: [],
-      defaultPurchaseOption: { kind: "one_time" },
-      planCopy: {},
-    }));
+    setSubscriptionConfig((current: any) => {
+      const selectedPlanIds = Array.from(new Set((selectedGroup?.plans ?? [])
+        .map((plan: any) => plan?.id)
+        .filter((id: any) => typeof id === "string" && id.length > 0)));
+      return {
+        ...current,
+        selectedGroup,
+        selectedPlanIds,
+        defaultPurchaseOption: getDefaultPurchaseOptionFromOneTimeToggle({
+          ...current,
+          selectedPlanIds,
+        }, current.oneTimePurchase.enabled),
+        planCopy: {},
+      };
+    });
   };
   const updateTranslation = (
     key: keyof LocalizedSubscriptionCopy,
@@ -291,8 +305,7 @@ export function BundleSubscriptionsSection(props: BundleSubscriptionsSectionProp
                   </s-button>
                 </s-grid>
 
-                {subscriptionConfig.selectedGroup.plans.map((plan: any) => {
-                  const checked = subscriptionConfig.selectedPlanIds.includes(plan.id);
+                {uniquePlanRows.map((plan: any) => {
                   const planCopy = subscriptionConfig.planCopy[plan.id] ?? {
                     displayName: plan.sourceName,
                     discountPill: "",
@@ -301,80 +314,46 @@ export function BundleSubscriptionsSection(props: BundleSubscriptionsSectionProp
                   return (
                     <s-box key={plan.id} padding="base" background="subdued" borderRadius="base">
                       <s-stack direction="block" gap="base">
-                        <s-checkbox
-                          label={plan.sourceName}
-                          checked={checked || undefined}
-                          onChange={(event) => setSubscriptionConfig((current: any) => {
-                            const isChecked = (event.target as HTMLInputElement).checked;
-                            const selectedPlanIds = isChecked
-                              ? Array.from(new Set([...current.selectedPlanIds, plan.id]))
-                              : current.selectedPlanIds.filter((id: string) => id !== plan.id);
-                            const defaultPurchaseOption = !current.oneTimePurchase.enabled
-                              || (current.defaultPurchaseOption.kind === "selling_plan"
-                                && !selectedPlanIds.includes(current.defaultPurchaseOption.sellingPlanId))
-                              ? getDefaultPurchaseOptionFromOneTimeToggle({
-                                  ...current,
-                                  selectedPlanIds,
-                                }, false)
-                              : current.defaultPurchaseOption;
-                            return {
+                        <s-grid
+                          gridTemplateColumns="minmax(0, 1fr) minmax(7.5rem, 0.45fr)"
+                          gap="base"
+                        >
+                          <s-text-field
+                            label="Plan Name in Dropdown"
+                            value={planCopy.displayName}
+                            error={validationErrors[`subscriptions.planCopy.${plan.id}.displayName`]}
+                            onInput={(event) => setSubscriptionConfig((current: any) => ({
                               ...current,
-                              selectedPlanIds,
-                              defaultPurchaseOption,
                               planCopy: {
                                 ...current.planCopy,
-                                ...(isChecked ? { [plan.id]: current.planCopy[plan.id] ?? planCopy } : {}),
+                                [plan.id]: { ...current.planCopy[plan.id], displayName: (event.target as HTMLInputElement).value },
                               },
-                            };
-                          })}
+                            }))}
+                          />
+                          <s-text-field
+                            label="Discount Pill"
+                            value={planCopy.discountPill}
+                            onInput={(event) => setSubscriptionConfig((current: any) => ({
+                              ...current,
+                              planCopy: {
+                                ...current.planCopy,
+                                [plan.id]: { ...current.planCopy[plan.id], discountPill: (event.target as HTMLInputElement).value },
+                              },
+                            }))}
+                          />
+                        </s-grid>
+                        <s-divider />
+                        <s-text-area
+                          label="Subscription Option Description"
+                          value={planCopy.description}
+                          onInput={(event) => setSubscriptionConfig((current: any) => ({
+                            ...current,
+                            planCopy: {
+                              ...current.planCopy,
+                              [plan.id]: { ...current.planCopy[plan.id], description: (event.target as HTMLTextAreaElement).value },
+                            },
+                          }))}
                         />
-                        {Array.isArray(plan.options) && plan.options.length > 0 ? (
-                          <s-paragraph>{plan.options.join(" · ")}</s-paragraph>
-                        ) : null}
-                        {checked ? (
-                          <>
-                            <s-grid
-                              gridTemplateColumns="minmax(0, 1fr) minmax(7.5rem, 0.45fr)"
-                              gap="base"
-                            >
-                              <s-text-field
-                                label="Plan Name in Dropdown"
-                                value={planCopy.displayName}
-                                error={validationErrors[`subscriptions.planCopy.${plan.id}.displayName`]}
-                                onInput={(event) => setSubscriptionConfig((current: any) => ({
-                                  ...current,
-                                  planCopy: {
-                                    ...current.planCopy,
-                                    [plan.id]: { ...current.planCopy[plan.id], displayName: (event.target as HTMLInputElement).value },
-                                  },
-                                }))}
-                              />
-                              <s-text-field
-                                label="Discount Pill"
-                                value={planCopy.discountPill}
-                                onInput={(event) => setSubscriptionConfig((current: any) => ({
-                                  ...current,
-                                  planCopy: {
-                                    ...current.planCopy,
-                                    [plan.id]: { ...current.planCopy[plan.id], discountPill: (event.target as HTMLInputElement).value },
-                                  },
-                                }))}
-                              />
-                            </s-grid>
-                            <s-divider />
-                            <s-text-area
-                              label="Subscription Option Description"
-                              value={planCopy.description}
-                              onInput={(event) => setSubscriptionConfig((current: any) => ({
-                                ...current,
-                                planCopy: {
-                                  ...current.planCopy,
-                                  [plan.id]: { ...current.planCopy[plan.id], description: (event.target as HTMLTextAreaElement).value },
-                                },
-                              }))}
-                            />
-                          </>
-                        ) : null}
                       </s-stack>
                     </s-box>
                   );
@@ -453,7 +432,7 @@ export function BundleSubscriptionsSection(props: BundleSubscriptionsSectionProp
                         }));
                       }}
                     >
-                      {subscriptionConfig.selectedGroup.plans
+                      {uniquePlanRows
                         .filter((plan: any) => subscriptionConfig.selectedPlanIds.includes(plan.id))
                         .map((plan: any) => (
                           <s-choice key={plan.id} value={plan.id}>
@@ -558,7 +537,7 @@ export function BundleSubscriptionsSection(props: BundleSubscriptionsSectionProp
             value={localizedCopy.oneTimePurchaseTitle ?? ""}
             onInput={(event) => updateTranslation("oneTimePurchaseTitle", (event.target as HTMLInputElement).value)}
           />
-          {subscriptionConfig.selectedGroup?.plans
+          {uniquePlanRows
             .filter((plan) => subscriptionConfig.selectedPlanIds.includes(plan.id))
             .map((plan) => {
               const localizedPlan = localizedCopy.planCopy?.[plan.id] ?? {};

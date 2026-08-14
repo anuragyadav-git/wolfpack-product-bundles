@@ -202,13 +202,28 @@ function normalizePlan(value: any): BundleSubscriptionPlan | null {
   };
 }
 
+function dedupePlansById(plans: BundleSubscriptionPlan[]): BundleSubscriptionPlan[] {
+  const seen = new Set<string>();
+  const output: BundleSubscriptionPlan[] = [];
+  for (const plan of plans) {
+    if (seen.has(plan.id)) continue;
+    seen.add(plan.id);
+    output.push(plan);
+  }
+  return output;
+}
+
 export function normalizeBundleSubscriptionConfig(value: unknown): BundleSubscriptionConfigV1 {
   const input = value && typeof value === "object" && !Array.isArray(value) ? value as any : {};
-  const plans: BundleSubscriptionPlan[] = [...(Array.isArray(input.selectedGroup?.plans) ? input.selectedGroup.plans : [])]
+  const plans: BundleSubscriptionPlan[] = dedupePlansById(
+    [...(Array.isArray(input.selectedGroup?.plans) ? input.selectedGroup.plans : [])]
     .sort((left: any, right: any) => Number(left?.position ?? 0) - Number(right?.position ?? 0) || text(left?.id).localeCompare(text(right?.id)))
     .map(normalizePlan)
-    .filter((plan: BundleSubscriptionPlan | null): plan is BundleSubscriptionPlan => plan !== null);
-  const selectedPlanIds = stringList(input.selectedPlanIds).filter((id) => plans.some((plan: BundleSubscriptionPlan) => plan.id === id));
+    .filter((plan: BundleSubscriptionPlan | null): plan is BundleSubscriptionPlan => plan !== null),
+  );
+  const selectedPlanIds = Array.from(new Set(
+    stringList(input.selectedPlanIds).filter((id) => plans.some((plan: BundleSubscriptionPlan) => plan.id === id)),
+  ));
   const planCopy = Object.fromEntries(selectedPlanIds.map((planId) => {
     const source = input.planCopy?.[planId] ?? {};
     return [planId, {
@@ -348,7 +363,9 @@ export function reconcileBundleSubscriptionPlanDiscovery(
     };
   }
   const availablePlanIds = new Set(selectedGroup.plans.map((plan) => plan.id));
-  const selectedPlanIds = config.selectedPlanIds.filter((planId) => availablePlanIds.has(planId));
+  const selectedPlanIds = config.selectedPlanIds.length > 0
+    ? config.selectedPlanIds.filter((planId) => availablePlanIds.has(planId))
+    : Array.from(availablePlanIds);
   const planCopy = Object.fromEntries(selectedPlanIds.map((planId) => [planId, config.planCopy[planId]]));
   const defaultPurchaseOption = config.defaultPurchaseOption.kind === "selling_plan"
     && !selectedPlanIds.includes(config.defaultPurchaseOption.sellingPlanId)
