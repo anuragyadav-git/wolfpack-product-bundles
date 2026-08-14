@@ -355,7 +355,8 @@
   overflow-wrap: anywhere;
 }
 
-.layout-sidebar[data-fpb-design-preset="HORIZONTAL"] .product-card-price-action {
+.layout-sidebar[data-fpb-design-preset="HORIZONTAL"]
+  .product-card-price-action {
   border-top: 0;
 }
 
@@ -367,12 +368,12 @@
   grid-template-columns:
     minmax(min-content, 1fr)
     var(--horizontal-action-track);
-  grid-template-rows: var(--bundle-control-hit-target, 2.75rem);
+  grid-template-rows: auto;
   align-items: center;
   gap: var(--bundle-summary-control-gap, 0.5rem);
   width: 100%;
   min-width: 0;
-  height: var(--bundle-control-hit-target, 2.75rem);
+  height: auto;
   min-height: var(--horizontal-control-size);
   margin: 0;
   padding: 0;
@@ -405,7 +406,48 @@
   max-width: none;
   font-weight: 700;
   line-height: 1.35;
-  white-space: nowrap;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  overflow-wrap: normal;
+}
+
+/* fpb-compareat-horizontal-fix */
+
+[data-fpb-design-preset="HORIZONTAL"] .product-card .product-price-row,
+#bundle-builder-app[data-bundle-type="full_page"][data-fpb-design-preset="HORIZONTAL"]
+  .product-card
+  .product-price-row,
+#bundle-builder-app.fpb-preset-horizontal .product-card .product-price-row {
+  max-width: none;
+  width: 100%;
+}
+
+[data-fpb-design-preset="HORIZONTAL"] .product-card .product-price,
+#bundle-builder-app[data-bundle-type="full_page"][data-fpb-design-preset="HORIZONTAL"]
+  .product-card
+  .product-price,
+#bundle-builder-app.fpb-preset-horizontal .product-card .product-price,
+[data-fpb-design-preset="HORIZONTAL"] .product-card .product-price-strike,
+#bundle-builder-app[data-bundle-type="full_page"][data-fpb-design-preset="HORIZONTAL"]
+  .product-card
+  .product-price-strike,
+#bundle-builder-app.fpb-preset-horizontal .product-card .product-price-strike {
+  max-width: none;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  overflow-wrap: anywhere;
+  line-height: 1.35;
+}
+
+.fpb-preset-horizontal .sidebar-content .product-price-row,
+.fpb-preset-horizontal .sidebar-content .product-price,
+.fpb-preset-horizontal .sidebar-content .product-price-strike {
+  max-width: none;
+  font-weight: 700;
+  line-height: 1.35;
+  white-space: normal;
   overflow: visible;
   text-overflow: clip;
   overflow-wrap: normal;
