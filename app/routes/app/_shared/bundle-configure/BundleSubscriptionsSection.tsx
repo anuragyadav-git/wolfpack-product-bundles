@@ -691,78 +691,87 @@ export function BundleSubscriptionsSection(
               )
             )}
           </s-select>
-          <s-text-field
-            label="Purchase options title"
-            value={localizedCopy.title ?? ""}
-            onInput={(event) =>
-              updateTranslation(
-                "title",
-                (event.target as HTMLInputElement).value
-              )
-            }
-          />
-          <s-text-field
-            label="One-time purchase label"
-            value={localizedCopy.oneTimePurchaseTitle ?? ""}
-            onInput={(event) =>
-              updateTranslation(
-                "oneTimePurchaseTitle",
-                (event.target as HTMLInputElement).value
-              )
-            }
-          />
-          {uniquePlanRows
-            .filter((plan) =>
-              subscriptionConfig.selectedPlanIds.includes(plan.id)
-            )
-            .map((plan) => {
-              const localizedPlan = localizedCopy.planCopy?.[plan.id] ?? {};
-              return (
-                <s-box
-                  key={plan.id}
-                  padding="base"
-                  border="base"
-                  borderRadius="base"
-                >
-                  <s-stack direction="block" gap="small">
-                    <s-heading>{plan.sourceName}</s-heading>
-                    <s-text-field
-                      label="Plan name in dropdown"
-                      value={localizedPlan.displayName ?? ""}
-                      onInput={(event) =>
-                        updateLocalizedPlanCopy(
-                          plan.id,
-                          "displayName",
-                          (event.target as HTMLInputElement).value
-                        )
-                      }
-                    />
-                    <s-text-field
-                      label="Discount pill"
-                      value={localizedPlan.discountPill ?? ""}
-                      onInput={(event) =>
-                        updateLocalizedPlanCopy(
-                          plan.id,
-                          "discountPill",
-                          (event.target as HTMLInputElement).value
-                        )
-                      }
-                    />
-                    <s-text-area
-                      label="Subscription option description"
-                      value={localizedPlan.description ?? ""}
-                      onInput={(event) =>
-                        updateLocalizedPlanCopy(
-                          plan.id,
-                          "description",
-                          (event.target as HTMLTextAreaElement).value
-                        )
-                      }
-                    />
-                  </s-stack>
-                </s-box>
-              );
-            })}
+          <s-box padding="base" border="base" borderRadius="base">
+            <s-stack direction="block" gap="small">
+              <s-stack direction="block" gap="xsmall">
+                <s-heading>Plan tier copy</s-heading>
+                <s-paragraph>Override plan names and labels for this locale.</s-paragraph>
+              </s-stack>
+              <s-text-field
+                label="Purchase options title"
+                value={localizedCopy.title ?? ""}
+                onInput={(event) =>
+                  updateTranslation(
+                    "title",
+                    (event.target as HTMLInputElement).value
+                  )
+                }
+              />
+              <s-text-field
+                label="One-time purchase label"
+                value={localizedCopy.oneTimePurchaseTitle ?? ""}
+                onInput={(event) =>
+                  updateTranslation(
+                    "oneTimePurchaseTitle",
+                    (event.target as HTMLInputElement).value
+                  )
+                }
+              />
+              {uniquePlanRows
+                .filter((plan) =>
+                  subscriptionConfig.selectedPlanIds.includes(plan.id)
+                )
+                .map((plan) => {
+                  const localizedPlan = localizedCopy.planCopy?.[plan.id] ?? {};
+                  return (
+                    <s-box
+                      key={plan.id}
+                      padding="small"
+                      border="base"
+                      borderRadius="base"
+                    >
+                      <s-stack direction="block" gap="small">
+                        <s-heading level="h5">{plan.sourceName}</s-heading>
+                        <s-text-field
+                          label="Plan name in dropdown"
+                          value={localizedPlan.displayName ?? ""}
+                          onInput={(event) =>
+                            updateLocalizedPlanCopy(
+                              plan.id,
+                              "displayName",
+                              (event.target as HTMLInputElement).value
+                            )
+                          }
+                        />
+                        <s-text-field
+                          label="Discount pill"
+                          value={localizedPlan.discountPill ?? ""}
+                          onInput={(event) =>
+                            updateLocalizedPlanCopy(
+                              plan.id,
+                              "discountPill",
+                              (event.target as HTMLInputElement).value
+                            )
+                          }
+                        />
+                        <s-text-area
+                          label="Subscription option description"
+                          value={localizedPlan.description ?? ""}
+                          onInput={(event) =>
+                            updateLocalizedPlanCopy(
+                              plan.id,
+                              "description",
+                              (event.target as HTMLTextAreaElement).value
+                            )
+                          }
+                        />
+                      </s-stack>
+                    </s-box>
+                  );
+                })}
+            </s-stack>
+          </s-box>
+          <s-divider />
           <s-text-area
             label="Purchase options subtitle"
             value={localizedCopy.subtitle ?? ""}
@@ -783,66 +792,69 @@ export function BundleSubscriptionsSection(
               )
             }
           />
-          <s-divider />
-          <s-stack direction="block" gap="small">
-            <s-heading>Storefront display</s-heading>
-            <s-paragraph>
-              Configure the product-card text and labels shown to shoppers.
-            </s-paragraph>
-          </s-stack>
-          {subscriptionConfig.oneTimePurchase.enabled ? (
-            <s-text-area
-              label="One-time purchase description"
-              value={subscriptionConfig.oneTimePurchase.description}
-              onInput={(event) =>
-                setSubscriptionConfig((current: any) => ({
-                  ...current,
-                  oneTimePurchase: {
-                    ...current.oneTimePurchase,
-                    description: (event.target as HTMLTextAreaElement).value,
-                  },
-                }))
-              }
-            />
-          ) : null}
-          <s-text-area
-            label="Purchase options subtitle"
-            value={subscriptionConfig.copy.subtitle}
-            onInput={(event) =>
-              setSubscriptionConfig((current: any) => ({
-                ...current,
-                copy: {
-                  ...current.copy,
-                  subtitle: (event.target as HTMLTextAreaElement).value,
-                },
-              }))
-            }
-          />
-          <s-text-area
-            label="Unavailable-plan message"
-            value={subscriptionConfig.copy.unavailableMessage}
-            onInput={(event) =>
-              setSubscriptionConfig((current: any) => ({
-                ...current,
-                copy: {
-                  ...current.copy,
-                  unavailableMessage: (event.target as HTMLTextAreaElement)
-                    .value,
-                },
-              }))
-            }
-          />
-          <s-checkbox
-            label="Show subscription discount on product cards"
-            checked={subscriptionConfig.showDiscountOnProductCards || undefined}
-            onChange={(event) =>
-              setSubscriptionConfig((current: any) => ({
-                ...current,
-                showDiscountOnProductCards: (event.target as HTMLInputElement)
-                  .checked,
-              }))
-            }
-          />
+          <s-box padding="base" border="base" borderRadius="base">
+            <s-stack direction="block" gap="small">
+              <s-stack direction="block" gap="xsmall">
+                <s-heading>Storefront display</s-heading>
+                <s-paragraph>
+                  Configure the product-card text and labels shown to shoppers.
+                </s-paragraph>
+              </s-stack>
+              {subscriptionConfig.oneTimePurchase.enabled ? (
+                <s-text-area
+                  label="One-time purchase description"
+                  value={subscriptionConfig.oneTimePurchase.description}
+                  onInput={(event) =>
+                    setSubscriptionConfig((current: any) => ({
+                      ...current,
+                      oneTimePurchase: {
+                        ...current.oneTimePurchase,
+                        description: (event.target as HTMLTextAreaElement).value,
+                      },
+                    }))
+                  }
+                />
+              ) : null}
+              <s-text-area
+                label="Purchase options subtitle"
+                value={subscriptionConfig.copy.subtitle}
+                onInput={(event) =>
+                  setSubscriptionConfig((current: any) => ({
+                    ...current,
+                    copy: {
+                      ...current.copy,
+                      subtitle: (event.target as HTMLTextAreaElement).value,
+                    },
+                  }))
+                }
+              />
+              <s-text-area
+                label="Unavailable-plan message"
+                value={subscriptionConfig.copy.unavailableMessage}
+                onInput={(event) =>
+                  setSubscriptionConfig((current: any) => ({
+                    ...current,
+                    copy: {
+                      ...current.copy,
+                      unavailableMessage: (event.target as HTMLTextAreaElement)
+                        .value,
+                    },
+                  }))
+                }
+              />
+              <s-checkbox
+                label="Show subscription discount on product cards"
+                checked={subscriptionConfig.showDiscountOnProductCards || undefined}
+                onChange={(event) =>
+                  setSubscriptionConfig((current: any) => ({
+                    ...current,
+                    showDiscountOnProductCards: (event.target as HTMLInputElement)
+                      .checked,
+                  }))
+                }
+              />
+            </s-stack>
+          </s-box>
         </s-stack>
         <s-button
           slot="primary-action"

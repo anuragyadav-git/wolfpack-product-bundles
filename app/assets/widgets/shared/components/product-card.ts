@@ -32,9 +32,15 @@ export function renderSharedProductCard(product = {}, currentQuantity = 0, curre
     ? options.displayPrice
     : product.price;
   const price = formatPrice(displayPrice, currencyInfo);
-  const compareAtPrice = options.showCompareAtPrice === true
+  const shouldRenderCompareAtPrice = options.showCompareAtPrice === true
+    && product.compareAtPrice !== null
+    && product.compareAtPrice !== undefined;
+  const compareAtPrice = shouldRenderCompareAtPrice
     ? formatPrice(product.compareAtPrice, currencyInfo)
     : '';
+  const hasPriceText = Boolean(price);
+  const hasCompareAtText = Boolean(compareAtPrice);
+  const shouldRenderPriceRow = hasPriceText || hasCompareAtText;
   const variantSelectorBeforePrice = options.variantSelectorPlacement === 'beforePrice';
   const addButtonText = options.addButtonText || '+';
   const resolvedAddButtonLabel = options.addButtonAriaLabel || addButtonText;
@@ -90,10 +96,10 @@ export function renderSharedProductCard(product = {}, currentQuantity = 0, curre
         </div>
         <div class="product-card-price-action" role="group" aria-label="${escapeAttribute(`${quantityControlLabel} controls`)}" aria-expanded="${isSelected ? 'true' : 'false'}">
           ${variantSelectorBeforePrice ? options.variantSelectorHtml || '' : ''}
-          ${price ? `
+          ${shouldRenderPriceRow ? `
             <div class="bw-product-card__price product-price-row">
               ${compareAtPrice ? `<span class="bw-product-card__compare-price product-price-strike">${escapeHtml(compareAtPrice)}</span>` : ''}
-              <span class="bw-product-card__current-price product-price">${escapeHtml(price)}</span>
+              ${price ? `<span class="bw-product-card__current-price product-price">${escapeHtml(price)}</span>` : ''}
             </div>
           ` : ''}
           ${variantSelectorBeforePrice ? '' : options.variantSelectorHtml || ''}

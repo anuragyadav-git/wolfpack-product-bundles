@@ -315,6 +315,14 @@ expandProductsByVariant(products, shouldExpand = true) {
   const context = this || {};
   return products.flatMap(product => {
     const toCents = (value) => Math.round(parseFloat(value || '0') * 100);
+    const compareAtToCents = (value) => {
+      if (value == null) return null;
+      const resolvedValue = typeof value === 'object' && value !== null && typeof value?.amount !== 'undefined'
+        ? value.amount
+        : value;
+      const parsedValue = Number.parseFloat(resolvedValue);
+      return Number.isFinite(parsedValue) ? toCents(parsedValue) : null;
+    };
     const isVariantSelectable = (variant) => {
       if (typeof context.isVariantSelectableForInventory === 'function') {
         return context.isVariantSelectableForInventory(variant);
@@ -356,7 +364,7 @@ expandProductsByVariant(products, shouldExpand = true) {
             variantTitle: variant.title === 'Default Title' ? '' : variant.title,
             imageUrl,
             price: typeof variant.price === 'number' ? variant.price : toCents(variant.price),
-            compareAtPrice: variant.compareAtPrice ? (typeof variant.compareAtPrice === 'number' ? variant.compareAtPrice : toCents(variant.compareAtPrice)) : null,
+            compareAtPrice: compareAtToCents(variant.compareAtPrice) ?? compareAtToCents(variant.compare_at_price),
             variantId: variantSelectionId || variant.id,
             selectionId: variantSelectionId,
             available: isVariantSelectable(variant),

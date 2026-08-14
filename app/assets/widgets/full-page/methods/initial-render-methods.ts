@@ -5,6 +5,19 @@ export function getEnabledFullPageSteps(steps) {
   return steps.filter(step => step?.enabled !== false);
 }
 
+function resolveCompareAtPrice(product) {
+  const rawCompareAtPrice = product?.compareAtPrice;
+  const rawCompareAtPriceAlt = product?.compare_at_price;
+
+  const compareAtPrice = rawCompareAtPrice ?? rawCompareAtPriceAlt;
+  if (compareAtPrice == null) return null;
+  if (typeof compareAtPrice === 'object' && compareAtPrice !== null && typeof compareAtPrice?.amount !== 'undefined') {
+    return compareAtPrice.amount;
+  }
+
+  return compareAtPrice;
+}
+
 export const fullPageInitialRenderMethods: Record<string, any> & ThisType<any> = {
 shouldRenderFullPageStepChrome() {
   return Array.isArray(this.selectedBundle?.steps)
@@ -133,7 +146,7 @@ normalizePersonalizationAddonProduct(product) {
     handle: product?.handle || '',
     imageUrl,
     price: variants[0]?.price || product?.price || '0',
-    compareAtPrice: variants[0]?.compareAtPrice || null,
+    compareAtPrice: resolveCompareAtPrice(variants[0]) || null,
     variants: variants.map(variant => {
       const variantGid = variant.variantGraphqlId || variant.id || (variant.variantId ? `gid://shopify/ProductVariant/${variant.variantId}` : productGid);
       return {
@@ -142,7 +155,7 @@ normalizePersonalizationAddonProduct(product) {
         selectionId: variantGid,
         title: variant.variantTitle || variant.title || 'Default Title',
         price: variant.price || '0',
-        compareAtPrice: variant.compareAtPrice || null,
+        compareAtPrice: resolveCompareAtPrice(variant) || null,
         available: variant.available !== false,
         quantityAvailable: typeof variant.inventoryQuantity === 'number' ? variant.inventoryQuantity : null,
         currentlyNotInStock: false,

@@ -560,27 +560,70 @@ updateProductCardVariantDisplay(cardElement, product, step) {
 
   const displayProduct = this.buildPaidAddonProductDisplayData(product, step);
   const currencyInfo = CurrencyManager.getCurrencyInfo();
-  const priceEl = cardElement.querySelector('.product-price');
-  if (priceEl) {
-    priceEl.textContent = CurrencyManager.convertAndFormat(
-      getSubscriptionProductCardPrice(this, displayProduct.price || 0),
-      currencyInfo,
-    );
+  const formattedCurrentPrice = getSubscriptionProductCardPrice(
+    this,
+    displayProduct.price || 0,
+  );
+  const currentPriceText = CurrencyManager.convertAndFormat(
+    formattedCurrentPrice,
+    currencyInfo,
+  );
+  const compareAtText = displayProduct.compareAtPrice
+    ? CurrencyManager.convertAndFormat(displayProduct.compareAtPrice, currencyInfo)
+    : '';
+
+  let priceRow = cardElement.querySelector('.product-price-row');
+  let priceEl = cardElement.querySelector('.product-price');
+  let compareEl = cardElement.querySelector('.product-price-strike');
+  const actionRow = cardElement
+    .querySelector('.product-card-action')
+    ?.closest('.product-card-price-action');
+
+  if (!priceRow && (currentPriceText || compareAtText)) {
+    priceRow = document.createElement('div');
+    priceRow.className = 'bw-product-card__price product-price-row';
+    if (actionRow) {
+      actionRow.insertBefore(
+        priceRow,
+        actionRow.querySelector('.product-card-action') || null,
+      );
+    } else {
+      cardElement.appendChild(priceRow);
+    }
   }
 
-  const priceRow = cardElement.querySelector('.product-price-row');
-  let compareEl = cardElement.querySelector('.product-price-strike');
-  if (displayProduct.compareAtPrice) {
-    if (!compareEl && priceRow && priceEl) {
-      compareEl = document.createElement('span');
-      compareEl.className = 'bw-product-card__compare-price product-price-strike';
-      priceRow.insertBefore(compareEl, priceEl);
+  if (priceRow) {
+    if (priceEl) {
+      if (currentPriceText) {
+        priceEl.textContent = currentPriceText;
+      } else {
+        priceEl.remove();
+        priceEl = null;
+      }
+    } else if (currentPriceText) {
+      const currentPriceEl = document.createElement('span');
+      currentPriceEl.className = 'bw-product-card__current-price product-price';
+      currentPriceEl.textContent = currentPriceText;
+      priceRow.appendChild(currentPriceEl);
     }
-    if (compareEl) {
-      compareEl.textContent = CurrencyManager.convertAndFormat(displayProduct.compareAtPrice, currencyInfo);
+
+    if (compareAtText) {
+      if (!compareEl) {
+        compareEl = document.createElement('span');
+        compareEl.className = 'bw-product-card__compare-price product-price-strike';
+        if (priceEl) {
+          priceRow.insertBefore(compareEl, priceEl);
+        } else {
+          priceRow.appendChild(compareEl);
+        }
+      }
+      compareEl.textContent = compareAtText;
+    } else if (compareEl) {
+      compareEl.remove();
     }
-  } else if (compareEl) {
-    compareEl.remove();
+  }
+  if (!currentPriceText && !compareAtText && priceRow) {
+    priceRow.remove();
   }
 
   const imageEl = cardElement.querySelector('.bw-product-card__image, .product-image img, img');
@@ -589,6 +632,7 @@ updateProductCardVariantDisplay(cardElement, product, step) {
     cardElement.dataset.bwCardImageIndex = '0';
     cardElement.dataset.bwCardImageCount = String(getProductImageUrls(product).length);
   }
+
 },
 
 // Refresh the step timeline tabs in-place when product selections change.

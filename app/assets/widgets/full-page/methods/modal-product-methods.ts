@@ -19,6 +19,15 @@ function getSelectionId(item = {}) {
   return String(item?.selectionId || '');
 }
 
+function resolveCompareAtPrice(variant) {
+  const rawCompareAtPrice = variant?.compareAtPrice ?? variant?.compare_at_price;
+  if (rawCompareAtPrice == null) return null;
+  if (typeof rawCompareAtPrice === 'object' && rawCompareAtPrice !== null && typeof rawCompareAtPrice.amount !== 'undefined') {
+    return rawCompareAtPrice.amount;
+  }
+  return rawCompareAtPrice;
+}
+
 
 export const fullPageModalProductMethods: Record<string, any> & ThisType<any> = {
 renderModalTabs() {
@@ -432,7 +441,7 @@ attachProductEventHandlers(productGrid, stepIndex) {
           product.currentlyNotInStock = variantData.currentlyNotInStock === true;
           product.available = variantData.available === true;
           product.price = variantData.price;
-          product.compareAtPrice = variantData.compareAtPrice || null;
+          product.compareAtPrice = resolveCompareAtPrice(variantData);
 
           // Move quantity from old variant to new variant, re-clamping against
           // the new variant's quantityAvailable. If the new variant can't hold

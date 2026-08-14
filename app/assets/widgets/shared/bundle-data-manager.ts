@@ -230,6 +230,19 @@ export class BundleDataManager {
     );
   }
 
+  static _resolveCompareAtPrice(productData) {
+    const rawCompareAtPrice = productData?.compareAtPrice ?? productData?.compare_at_price;
+    if (rawCompareAtPrice == null) return null;
+    if (
+      typeof rawCompareAtPrice === 'object' &&
+      rawCompareAtPrice !== null &&
+      typeof rawCompareAtPrice.amount !== 'undefined'
+    ) {
+      return rawCompareAtPrice.amount;
+    }
+    return rawCompareAtPrice;
+  }
+
   static extractStepData(steps) {
     return steps.map(step => ({
       id: step.id,
@@ -250,7 +263,7 @@ export class BundleDataManager {
       // component-level onerror handling.
       imageUrl: sp.product?.imageUrl || BUNDLE_WIDGET.PLACEHOLDER_IMAGE,
       price: sp.product?.price || 0,
-      compareAtPrice: sp.product?.compareAtPrice || null,
+      compareAtPrice: BundleDataManager._resolveCompareAtPrice(sp.product),
       variants: sp.product?.variants || [],
       variantId: sp.variantId || null,
       quantity: Number.isFinite(Number(sp.quantity)) ? Number(sp.quantity) : 0,

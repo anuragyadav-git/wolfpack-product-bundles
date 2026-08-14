@@ -249,17 +249,48 @@ function hasCompleteRuntimeProductData(product) {
   return Number.isFinite(price) && price > 0 && variants.length > 0 && images.length > 1;
 }
 
+function parseFinitePrice(value) {
+  if (value == null) return null;
+  if (typeof value === 'object' && typeof value?.amount !== 'undefined') {
+    return parseFinitePrice(value.amount);
+  }
+  const parsed = Number.parseFloat(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
 function normalizeCachedRuntimeProduct(product) {
+  const normalizeCompareAt = (sourceProduct) => {
+    if (!sourceProduct) return null;
+    const raw = sourceProduct.compareAtPrice ?? sourceProduct.compare_at_price;
+    if (raw == null) return null;
+    const resolved = typeof raw === 'object' && raw !== null && typeof raw.amount !== 'undefined'
+      ? raw.amount
+      : raw;
+    const parsed = Number.parseFloat(resolved);
+    return Number.isFinite(parsed) ? parsed / 100 : null;
+  };
+
   return {
     ...product,
     price: (product.price || 0) / 100,
-    compareAtPrice: product.compareAtPrice ? product.compareAtPrice / 100 : null,
+    compareAtPrice: normalizeCompareAt(product),
     variants: product.variants?.map(variant => ({
       ...variant,
       price: (variant.price || 0) / 100,
-      compareAtPrice: variant.compareAtPrice ? variant.compareAtPrice / 100 : null,
+      compareAtPrice: normalizeCompareAt(variant),
     }))
   };
+}
+
+function normalizeCompareAtPriceToCents(value) {
+  if (value == null) return null;
+  const resolvedValue = typeof value === 'object' && value !== null && typeof value?.amount !== 'undefined'
+    ? value.amount
+    : value;
+  const parsedValue = Number.parseFloat(resolvedValue);
+  return Number.isFinite(parsedValue)
+    ? Math.round(parsedValue * 100)
+    : null;
 }
 
 function variantLookupKey(variant) {
@@ -612,13 +643,21 @@ async loadStepProducts(stepIndex) {
         handle: sp.handle,
         imageUrl: sp.imageUrl,
         price: sp.price,
-        compareAtPrice: sp.compareAtPrice,
+        compareAtPrice: sp.compareAtPrice != null
+        ? parseFinitePrice(sp.compareAtPrice)
+        : (sp.compare_at_price != null
+          ? parseFinitePrice(sp.compare_at_price?.amount ?? sp.compare_at_price)
+          : null),
         available: true,
         variants: sp.variants || [{
           id: sp.productId.replace('Product', 'ProductVariant'),
           title: 'Default Title',
           price: sp.price,
-          compareAtPrice: sp.compareAtPrice,
+          compareAtPrice: sp.compareAtPrice != null
+            ? parseFinitePrice(sp.compareAtPrice)
+            : (sp.compare_at_price != null
+              ? parseFinitePrice(sp.compare_at_price?.amount ?? sp.compare_at_price)
+              : null),
           available: true,
           image: sp.imageUrl ? { src: sp.imageUrl } : null
         }]
@@ -953,7 +992,7 @@ processProductsForStep(products, step) {
       selectionId: variantId,
       title: v.title,
       price: toCents(v.price),
-      compareAtPrice: v.compareAtPrice ? toCents(v.compareAtPrice) : null,
+      compareAtPrice: normalizeCompareAtPriceToCents(v.compareAtPrice) ?? normalizeCompareAtPriceToCents(v.compare_at_price),
       available: v.available === true && (
         !fullPageProductProcessingMethods.isInventoryTrackingOnAddToCartEnabled.call(this)
         || !(quantityAvailable === 0 && currentlyNotInStock !== true)
@@ -1005,7 +1044,7 @@ processProductsForStep(products, step) {
             title: `${product.title} - ${variant.title}`,
             imageUrl,
             price: toCents(variant.price),
-            compareAtPrice: variant.compareAtPrice ? toCents(variant.compareAtPrice) : null,
+            compareAtPrice: normalizeCompareAtPriceToCents(variant.compareAtPrice) ?? normalizeCompareAtPriceToCents(variant.compare_at_price),
             variantId,
             selectionId: variantId,
             available: this.isVariantSelectableForInventory(variant),
@@ -1062,7 +1101,9 @@ processProductsForStep(products, step) {
         price: defaultVariant
           ? toCents(defaultVariant.price)
           : toCents(product.price),
-        compareAtPrice: defaultVariant?.compareAtPrice ? toCents(defaultVariant.compareAtPrice) : null,
+        compareAtPrice: defaultVariant
+          ? normalizeCompareAtPriceToCents(defaultVariant.compareAtPrice) ?? normalizeCompareAtPriceToCents(defaultVariant.compare_at_price)
+          : null,
         variantId: selectionId,
         selectionId,
         available: defaultVariant ? this.isVariantSelectableForInventory(defaultVariant) : product.available === true,

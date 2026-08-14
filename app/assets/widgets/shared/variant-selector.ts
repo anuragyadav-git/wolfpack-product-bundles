@@ -268,6 +268,17 @@ class VariantSelectorComponent {
     return candidates[0];
   }
 
+  static _resolveCompareAtPrice(variant) {
+    if (!variant) return null;
+    const rawCompareAt = variant.compareAtPrice ?? variant.compare_at_price;
+    if (rawCompareAt == null) return null;
+    const resolved = typeof rawCompareAt === 'object' && rawCompareAt !== null && typeof rawCompareAt.amount !== 'undefined'
+      ? rawCompareAt.amount
+      : rawCompareAt;
+    const parsed = Number.parseFloat(resolved);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
   static _selectPrimary(cardEl, product, primaryOptIdx, val, onVariantChange) {
     const oldVariantId = product.variantId;
     const newVariant = VariantSelectorComponent._findBestVariant(
@@ -294,7 +305,7 @@ class VariantSelectorComponent {
     // Mutate product
     product.variantId = newVariant.id;
     product.price = newVariant.price;
-    product.compareAtPrice = newVariant.compareAtPrice || null;
+    product.compareAtPrice = VariantSelectorComponent._resolveCompareAtPrice(newVariant);
     product.imageUrl = VariantSelectorComponent._variantImageUrl(newVariant) || product.imageUrl;
     product.available = newVariant.available === true;
     product.quantityAvailable = typeof newVariant.quantityAvailable === 'number' ? newVariant.quantityAvailable : null;
@@ -365,7 +376,7 @@ class VariantSelectorComponent {
         const oldVariantId = product.variantId;
         product.variantId = candidate.id;
         product.price = candidate.price;
-        product.compareAtPrice = candidate.compareAtPrice || null;
+        product.compareAtPrice = VariantSelectorComponent._resolveCompareAtPrice(candidate);
         product.imageUrl = VariantSelectorComponent._variantImageUrl(candidate) || product.imageUrl;
         product.available = candidate.available === true;
         product.quantityAvailable = typeof candidate.quantityAvailable === 'number' ? candidate.quantityAvailable : null;
@@ -502,7 +513,7 @@ class VariantSelectorComponent {
     const oldVariantId = product.variantId;
     product.variantId = candidate.id;
     product.price = candidate.price;
-    product.compareAtPrice = candidate.compareAtPrice || null;
+    product.compareAtPrice = VariantSelectorComponent._resolveCompareAtPrice(candidate);
     product.imageUrl = VariantSelectorComponent._variantImageUrl(candidate) || product.imageUrl;
     product.available = candidate.available === true;
     product.quantityAvailable = typeof candidate.quantityAvailable === 'number' ? candidate.quantityAvailable : null;
