@@ -490,19 +490,21 @@ export function BundleSubscriptionsSection(
                       Configure the settings for the subscription bundle
                     </s-paragraph>
                   </s-stack>
-                  {shopLocales.length > 0 ? (
-                    <s-press-button
-                      variant="tertiary"
-                      tone="neutral"
-                      icon="globe"
-                      disabled={!subscriptionConfig.selectedGroup || undefined}
-                      onClick={() =>
-                        translationsModalRef.current?.showOverlay?.()
-                      }
-                    >
-                      Multi Language
-                    </s-press-button>
-                  ) : null}
+                  <s-press-button
+                    variant="tertiary"
+                    tone="neutral"
+                    icon="globe"
+                    disabled={
+                      shopLocales.length === 0 ||
+                      !subscriptionConfig.selectedGroup ||
+                      undefined
+                    }
+                    onClick={() =>
+                      translationsModalRef.current?.showOverlay?.()
+                    }
+                  >
+                    Multi Language
+                  </s-press-button>
                 </s-grid>
 
                 <s-switch
@@ -632,32 +634,85 @@ export function BundleSubscriptionsSection(
                     one-time purchases only, or both.
                   </s-paragraph>
                 </s-stack>
-                <s-choice-list
-                  label="Bundle discount applies on"
-                  labelAccessibilityVisibility="exclusive"
-                  variant="inline"
-                  values={[subscriptionConfig.bundleDiscountAppliesOn]}
-                  onChange={(event) => {
-                    const value = (
-                      (event.currentTarget as any).values as
-                        | string[]
-                        | undefined
-                    )?.[0];
-                    if (!value) return;
-                    setSubscriptionConfig((current: any) => ({
-                      ...current,
-                      bundleDiscountAppliesOn: value,
-                    }));
-                  }}
+                <s-grid
+                  gridTemplateColumns="repeat(3, minmax(0, 1fr))"
+                  gap="base"
                 >
-                  <s-choice value="subscription">
-                    Only on subscription purchase
-                  </s-choice>
-                  <s-choice value="one_time">
-                    Only on one-time purchase
-                  </s-choice>
-                  <s-choice value="both">On both</s-choice>
-                </s-choice-list>
+                  <s-choice-list
+                    label="Only on subscription purchase"
+                    labelAccessibilityVisibility="exclusive"
+                    values={
+                      subscriptionConfig.bundleDiscountAppliesOn ===
+                      "subscription"
+                        ? ["subscription"]
+                        : []
+                    }
+                    onChange={(event) => {
+                      const value = (
+                        (event.currentTarget as any).values as
+                          | string[]
+                          | undefined
+                      )?.[0];
+                      if (!value) return;
+                      setSubscriptionConfig((current: any) => ({
+                        ...current,
+                        bundleDiscountAppliesOn: value,
+                      }));
+                    }}
+                  >
+                    <s-choice value="subscription">
+                      Only on subscription purchase
+                    </s-choice>
+                  </s-choice-list>
+                  <s-choice-list
+                    label="Only on one-time purchase"
+                    labelAccessibilityVisibility="exclusive"
+                    values={
+                      subscriptionConfig.bundleDiscountAppliesOn === "one_time"
+                        ? ["one_time"]
+                        : []
+                    }
+                    onChange={(event) => {
+                      const value = (
+                        (event.currentTarget as any).values as
+                          | string[]
+                          | undefined
+                      )?.[0];
+                      if (!value) return;
+                      setSubscriptionConfig((current: any) => ({
+                        ...current,
+                        bundleDiscountAppliesOn: value,
+                      }));
+                    }}
+                  >
+                    <s-choice value="one_time">
+                      Only on one-time purchase
+                    </s-choice>
+                  </s-choice-list>
+                  <s-choice-list
+                    label="On both"
+                    labelAccessibilityVisibility="exclusive"
+                    values={
+                      subscriptionConfig.bundleDiscountAppliesOn === "both"
+                        ? ["both"]
+                        : []
+                    }
+                    onChange={(event) => {
+                      const value = (
+                        (event.currentTarget as any).values as
+                          | string[]
+                          | undefined
+                      )?.[0];
+                      if (!value) return;
+                      setSubscriptionConfig((current: any) => ({
+                        ...current,
+                        bundleDiscountAppliesOn: value,
+                      }));
+                    }}
+                  >
+                    <s-choice value="both">On both</s-choice>
+                  </s-choice-list>
+                </s-grid>
                 {subscriptionConfig.enabled &&
                 Object.keys(validationErrors).some((path) =>
                   path.startsWith("subscriptions.")
