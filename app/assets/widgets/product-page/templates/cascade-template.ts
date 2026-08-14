@@ -1,6 +1,8 @@
 import { ComponentGenerator } from '../../shared/component-generator.js';
 import { CurrencyManager } from '../../shared/currency-manager.js';
 import { PricingCalculator } from '../../shared/pricing-calculator.js';
+import { calculateBundleDiscountForPurchaseOption } from '../../shared/subscription-storefront-methods.js';
+import { calculateBundleTotalForPurchaseOption } from '../../shared/subscription-storefront-methods.js';
 import { TemplateManager } from '../../shared/template-manager.js';
 import { ToastManager } from '../../shared/toast-manager.js';
 import { renderSelectedProductRow } from '../../shared/components/selected-product-row.js';
@@ -204,12 +206,12 @@ export const cascadeTemplateMethods: Record<string, any> & ThisType<any> = {
 
     if (rules.length === 0 || !this.selectedBundle?.pricing?.enabled) return '';
 
-    const { totalQuantity, totalPrice, unitPrices } = PricingCalculator.calculateBundleTotal(
+    const { totalQuantity, totalPrice, unitPrices } = calculateBundleTotalForPurchaseOption(this,
       this.selectedProducts,
       this.stepProductData,
       this.selectedBundle?.steps
     );
-    const discountInfo = PricingCalculator.calculateDiscount(this.selectedBundle, totalPrice, totalQuantity, unitPrices);
+    const discountInfo = calculateBundleDiscountForPurchaseOption(this, totalPrice, totalQuantity, unitPrices);
     const combinedDiscountInfo = this.getDiscountInfoWithSelectedAddonDiscount(discountInfo, totalPrice);
     const nextRule = PricingCalculator.getNextDiscountRule?.(this.selectedBundle, totalQuantity, totalPrice) || null;
     const messageType = nextRule ? 'progress' : 'success';
@@ -244,7 +246,7 @@ export const cascadeTemplateMethods: Record<string, any> & ThisType<any> = {
     el.style.cssText = '';
 
     const selectedEntries = this._getSelectedProductEntries();
-    const { totalQuantity, totalPrice, unitPrices } = PricingCalculator.calculateBundleTotal(
+    const { totalQuantity, totalPrice, unitPrices } = calculateBundleTotalForPurchaseOption(this,
       this.selectedProducts,
       this.stepProductData,
       this.selectedBundle?.steps

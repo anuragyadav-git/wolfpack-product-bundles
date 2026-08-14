@@ -1,6 +1,7 @@
 import { BUNDLE_WIDGET } from '../../shared/constants.js';
 import { CurrencyManager } from '../../shared/currency-manager.js';
 import { PricingCalculator } from '../../shared/pricing-calculator.js';
+import { calculateBundleDiscountForPurchaseOption } from '../../shared/subscription-storefront-methods.js';
 import { ToastManager } from '../../shared/toast-manager.js';
 import {
   buildCartLineDisplayProperties as buildSharedCartLineDisplayProperties,
@@ -9,6 +10,7 @@ import {
 import { shouldDisplayClassicFixedBundleRawTotal } from '../shared/summary-pricing-display.js';
 import { preflightVariantOnStorefront } from '../../shared/variant-preflight.js';
 import { buildStorefrontApiPath } from '../../../../config/storefront-proxy-routes.js';
+import { applySellingPlanToJsonCartItems } from '../../shared/engine/cart-submit.js';
 
 function shouldIncludeBundleQuantityCartProperties(context) {
   const pricing = context?.selectedBundle?.pricing || {};
@@ -135,8 +137,8 @@ export const fullPageStepFooterMethods: Record<string, any> & ThisType<any> = {
       const price = Number(line?.product?.price || 0);
       for (let i = 0; i < quantity; i += 1) unitPrices.push(price);
     });
-    const discountInfo = PricingCalculator.calculateDiscount(
-      this.selectedBundle,
+    const discountInfo = calculateBundleDiscountForPurchaseOption(
+      this,
       totalPrice,
       totalQuantity,
       unitPrices
@@ -312,8 +314,6 @@ export const fullPageStepFooterMethods: Record<string, any> & ThisType<any> = {
       }
     }
 
-    const itemsForRuntimeToken = items;
-
     if (unavailableLines.length > 0) {
       ToastManager.show(unavailableLines[0]);
       return;
@@ -331,6 +331,11 @@ export const fullPageStepFooterMethods: Record<string, any> & ThisType<any> = {
         item.properties._addon_offer_id = item.properties._addon_offer_id || baseOfferId;
       }
     });
+    items = applySellingPlanToJsonCartItems(
+      items,
+      this.selectedSellingPlanId || '',
+    );
+    const itemsForRuntimeToken = items;
 
     try {
       const requestRuntimeToken = typeof this.requestCartTransformRuntimeToken === 'function'
@@ -446,6 +451,13 @@ async requestCartTransformRuntimeToken(items, { offerGroupId, bundleType }) {
       offerGroupId,
       components,
       addons,
+      ...(this.selectedSellingPlanId ? {
+        subscription: {
+          sellingPlanGroupId: this.selectedBundle?.subscription?.selectedGroup?.id,
+          sellingPlanId: this.selectedSellingPlanId,
+          recurringBundleDiscount: subscription.recurringBundleDiscount === true,
+        },
+      } : {}),
     }),
   });
   const data = await response.json().catch(() => null);

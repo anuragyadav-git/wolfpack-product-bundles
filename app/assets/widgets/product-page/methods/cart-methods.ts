@@ -3,6 +3,8 @@ import { buildProductPageCartFormData } from '../../shared/engine/cart-submit.js
 import { ToastManager } from '../../shared/toast-manager.js';
 import { CurrencyManager } from '../../shared/currency-manager.js';
 import { PricingCalculator } from '../../shared/pricing-calculator.js';
+import { calculateBundleDiscountForPurchaseOption } from '../../shared/subscription-storefront-methods.js';
+import { calculateBundleTotalForPurchaseOption } from '../../shared/subscription-storefront-methods.js';
 import { areRequiredProductPageStepsValid } from './step-validation.js';
 import { preflightVariantOnStorefront, resolveRuntimeVariantNumericId } from '../../shared/variant-preflight.js';
 import { buildStorefrontApiPath } from '../../../../config/storefront-proxy-routes.js';
@@ -39,7 +41,7 @@ function resolveRuntimeTokenProductId(product = {}) {
 export const ProductPageCartMethods: Record<string, any> & ThisType<any> = {
   async addToCart() {
     try {
-      const { totalPrice, totalQuantity } = PricingCalculator.calculateBundleTotal(
+      const { totalPrice, totalQuantity } = calculateBundleTotalForPurchaseOption(this,
         this.selectedProducts,
         this.stepProductData,
         this.selectedBundle?.steps
@@ -174,13 +176,13 @@ export const ProductPageCartMethods: Record<string, any> & ThisType<any> = {
   },
 
   buildCartLineSourceProperties(selectedLines) {
-    const { totalPrice, totalQuantity, unitPrices } = PricingCalculator.calculateBundleTotal(
+    const { totalPrice, totalQuantity, unitPrices } = calculateBundleTotalForPurchaseOption(this,
       this.selectedProducts,
       this.stepProductData,
       this.selectedBundle?.steps
     );
-    const discountInfo = PricingCalculator.calculateDiscount(
-      this.selectedBundle,
+    const discountInfo = calculateBundleDiscountForPurchaseOption(
+      this,
       totalPrice,
       totalQuantity,
       unitPrices
@@ -340,7 +342,7 @@ export const ProductPageCartMethods: Record<string, any> & ThisType<any> = {
           subscription: {
             sellingPlanGroupId: this.selectedBundle?.subscription?.selectedGroup?.id,
             sellingPlanId,
-            recurringBundleDiscount: false,
+            recurringBundleDiscount: subscription.recurringBundleDiscount === true,
           },
         } : {}),
       }),

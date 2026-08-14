@@ -1,5 +1,6 @@
 import { CurrencyManager } from '../../shared/currency-manager.js';
 import { PricingCalculator } from '../../shared/pricing-calculator.js';
+import { calculateBundleTotalForPurchaseOption } from '../../shared/subscription-storefront-methods.js';
 import { ConditionValidator } from '../../shared/condition-validator.js';
 
 function getAddonTiersForStep(step) {
@@ -246,7 +247,7 @@ getAddonTiers(step) {
 },
 
 getAddonTierEvaluation(step) {
-  const { totalPrice, totalQuantity } = PricingCalculator.calculateBundleTotal(
+  const { totalPrice, totalQuantity } = calculateBundleTotalForPurchaseOption(this,
     this.selectedProducts,
     this.stepProductData,
     this.selectedBundle?.steps
@@ -275,7 +276,7 @@ getAddonTierEvaluation(step) {
 },
 
 getAddonMessageTierEvaluation(step) {
-  const { totalPrice, totalQuantity } = PricingCalculator.calculateBundleTotal(
+  const { totalPrice, totalQuantity } = calculateBundleTotalForPurchaseOption(this,
     this.selectedProducts,
     this.stepProductData,
     this.selectedBundle?.steps
@@ -304,7 +305,7 @@ getAddonMessageTierEvaluation(step) {
 },
 
 getAddonSummaryEligibilityStates(step) {
-  const { totalPrice, totalQuantity } = PricingCalculator.calculateBundleTotal(
+  const { totalPrice, totalQuantity } = calculateBundleTotalForPurchaseOption(this,
     this.selectedProducts,
     this.stepProductData,
     this.selectedBundle?.steps

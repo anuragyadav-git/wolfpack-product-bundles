@@ -1,5 +1,7 @@
 import { CurrencyManager } from '../../shared/currency-manager.js';
 import { PricingCalculator } from '../../shared/pricing-calculator.js';
+import { calculateBundleDiscountForPurchaseOption } from '../../shared/subscription-storefront-methods.js';
+import { calculateBundleTotalForPurchaseOption } from '../../shared/subscription-storefront-methods.js';
 import { ToastManager } from '../../shared/toast-manager.js';
 import { TemplateManager } from '../../shared/template-manager.js';
 import { getSummaryDiscountBadgeLabel } from '../shared/summary-discount-badge.js';
@@ -111,13 +113,13 @@ renderSidePanel(panel) {
   );
   panel.innerHTML = '';
 
-  const { totalPrice, totalQuantity, unitPrices } = PricingCalculator.calculateBundleTotal(
+  const { totalPrice, totalQuantity, unitPrices } = calculateBundleTotalForPurchaseOption(this,
     this.selectedProducts,
     this.stepProductData,
     this.selectedBundle?.steps
   );
-  const discountInfo = PricingCalculator.calculateDiscount(
-    this.selectedBundle,
+  const discountInfo = calculateBundleDiscountForPurchaseOption(
+    this,
     totalPrice,
     totalQuantity,
     unitPrices
@@ -481,6 +483,16 @@ renderSidePanel(panel) {
   // Free gift section (locked or unlocked)
   if (!isClassicDesktopSidebar && !isStandardDesktopSidebar && activeStep?.isFreeGift !== true) this._renderFreeGiftSection(panel);
 
+  if (!isMobileSheet) {
+    const purchaseOptionsMount = document.createElement('div');
+    panel.appendChild(purchaseOptionsMount);
+    this.elements = this.elements || {};
+    this.elements.purchaseOptionsMounts = {
+      ...(this.elements.purchaseOptionsMounts || {}),
+      fpbDesktop: purchaseOptionsMount,
+    };
+  }
+
   // Total
   const totalSection = document.createElement('div');
   totalSection.className = 'side-panel-total';
@@ -601,6 +613,7 @@ renderSidePanel(panel) {
   actionSection.appendChild(navSection);
   panel.appendChild(actionDivider);
   panel.appendChild(actionSection);
+  this.renderPurchaseOptions?.();
 },
 
 _renderStandardSidebarSlotTiles(container, allSelectedProducts = []) {

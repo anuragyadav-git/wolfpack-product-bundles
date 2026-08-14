@@ -5,6 +5,7 @@ import { getProductImageUrls, renderSharedProductCard } from '../../shared/compo
 import { VariantSelectorComponent } from '../../shared/variant-selector.js';
 import { BundleProductModal } from '../../../bundle-modal-component.js';
 import { TemplateDesignSystem } from '../../shared/template-design-system.js';
+import { getSubscriptionProductCardPrice } from '../../shared/subscription-storefront-methods.js';
 
 const modalProductTemplateSystem = TemplateDesignSystem;
 
@@ -163,6 +164,7 @@ renderModalProducts(stepIndex, productsToRender = null) {
       currentQuantity,
       currencyInfo,
       {
+        displayPrice: getSubscriptionProductCardPrice(this, product.price),
         variantSelectorHtml,
         stockBadgeHtml: stockBadge,
         showCompareAtPrice: true,

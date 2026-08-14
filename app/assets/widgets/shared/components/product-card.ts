@@ -28,7 +28,10 @@ export function renderSharedProductCard(product = {}, currentQuantity = 0, curre
   const imageUrls = getProductImageUrls(product);
   const imageUrl = imageUrls[0] || DEFAULT_PLACEHOLDER_IMAGE;
   const hasMultipleImages = imageUrls.length > 1;
-  const price = formatPrice(product.price, currencyInfo);
+  const displayPrice = Object.prototype.hasOwnProperty.call(options, 'displayPrice')
+    ? options.displayPrice
+    : product.price;
+  const price = formatPrice(displayPrice, currencyInfo);
   const compareAtPrice = options.showCompareAtPrice === true
     ? formatPrice(product.compareAtPrice, currencyInfo)
     : '';

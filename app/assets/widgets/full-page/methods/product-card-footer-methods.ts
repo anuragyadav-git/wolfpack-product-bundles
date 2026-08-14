@@ -11,6 +11,7 @@ import {
 } from '../../shared/variant-selector-policy.js';
 import { BundleProductModal } from '../../../bundle-modal-component.js';
 import { TemplateDesignSystem } from '../../shared/template-design-system.js';
+import { getSubscriptionProductCardPrice } from '../../shared/subscription-storefront-methods.js';
 
 const productCardFooterTemplateSystem = TemplateDesignSystem;
 
@@ -139,6 +140,7 @@ createProductCard(product, stepIndex, options = {}) {
       currentQuantity,
       currencyInfo,
       {
+        displayPrice: getSubscriptionProductCardPrice(this, displayProduct.price),
         description: '',
         variantSelectorHtml,
         mode: getFpbProductCardMode(designPreset) || 'grid',
@@ -165,7 +167,10 @@ createProductCard(product, stepIndex, options = {}) {
     );
   } else {
     htmlString = ComponentGenerator.renderProductCard(
-      product,
+      {
+        ...product,
+        price: getSubscriptionProductCardPrice(this, product.price),
+      },
       currentQuantity,
       currencyInfo,
       {
@@ -557,7 +562,10 @@ updateProductCardVariantDisplay(cardElement, product, step) {
   const currencyInfo = CurrencyManager.getCurrencyInfo();
   const priceEl = cardElement.querySelector('.product-price');
   if (priceEl) {
-    priceEl.textContent = CurrencyManager.convertAndFormat(displayProduct.price || 0, currencyInfo);
+    priceEl.textContent = CurrencyManager.convertAndFormat(
+      getSubscriptionProductCardPrice(this, displayProduct.price || 0),
+      currencyInfo,
+    );
   }
 
   const priceRow = cardElement.querySelector('.product-price-row');

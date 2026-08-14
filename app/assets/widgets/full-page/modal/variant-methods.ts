@@ -344,7 +344,10 @@ export const BundleModalVariantMethods: Record<string, any> & ThisType<any> = {
     const variant = this.selectedVariant || this.currentProduct;
 
     // Format price using widget's currency manager
-    const price = variant.price || this.currentProduct.price || 0;
+    const originalPrice = variant.price || this.currentProduct.price || 0;
+    const price = this.widget?.getSubscriptionProductCardPrice
+      ? this.widget.getSubscriptionProductCardPrice(originalPrice)
+      : originalPrice;
     const compareAtPrice = variant.compareAtPrice || variant.compare_at_price ||
                            this.currentProduct.compareAtPrice || this.currentProduct.compare_at_price;
 

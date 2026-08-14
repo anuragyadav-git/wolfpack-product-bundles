@@ -18,6 +18,20 @@ export function normalizeSellingPlanIdForCart(value = '') {
   return match ? match[1] : raw;
 }
 
+export function applySellingPlanToJsonCartItems(items = [], sellingPlanId = '') {
+  if (!sellingPlanId) return items;
+  const cartSellingPlanId = normalizeSellingPlanIdForCart(sellingPlanId);
+  return items.map(item => {
+    const properties = { ...(item?.properties || {}) };
+    delete properties.Box;
+    return {
+      ...item,
+      selling_plan: cartSellingPlanId,
+      properties,
+    };
+  });
+}
+
 export function buildProductPageCartFormData(cartItems = [], {
   bundleName = '',
   offerId = '',

@@ -2,6 +2,7 @@ import { ConditionValidator } from '../../shared/condition-validator.js';
 import { CurrencyManager } from '../../shared/currency-manager.js';
 import { ToastManager } from '../../shared/toast-manager.js';
 import { ComponentGenerator } from '../../shared/component-generator.js';
+import { getSubscriptionProductCardPrice } from '../../shared/subscription-storefront-methods.js';
 
 export function resolveProductPageCardButtonText({
   currentQuantity = 0,
@@ -391,7 +392,7 @@ renderModalProducts(stepIndex, productsToRender = null) {
           ${product.price ? `
             <div class="product-price-row">
               ${this._shouldShowProductComparedAtPrice() && product.compareAtPrice ? `<span class="product-price-strike">${CurrencyManager.convertAndFormat(product.compareAtPrice, currencyInfo)}</span>` : ''}
-              <span class="product-price">${CurrencyManager.convertAndFormat(product.price, currencyInfo)}</span>
+              <span class="product-price">${CurrencyManager.convertAndFormat(getSubscriptionProductCardPrice(this, product.price), currencyInfo)}</span>
             </div>
           ` : ''}
 
@@ -694,7 +695,10 @@ attachProductEventHandlers(productGrid, stepIndex) {
             product,
             variantData,
             productCard,
-            formatPrice: (amount) => CurrencyManager.convertAndFormat(amount, CurrencyManager.getCurrencyInfo()),
+            formatPrice: (amount) => CurrencyManager.convertAndFormat(
+              getSubscriptionProductCardPrice(this, amount),
+              CurrencyManager.getCurrencyInfo(),
+            ),
             showCompareAtPrice: this._shouldShowProductComparedAtPrice(),
           });
 
