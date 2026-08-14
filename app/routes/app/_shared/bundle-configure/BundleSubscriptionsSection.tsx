@@ -635,6 +635,7 @@ export function BundleSubscriptionsSection(
                 <s-choice-list
                   label="Bundle discount applies on"
                   labelAccessibilityVisibility="exclusive"
+                  variant="inline"
                   values={[subscriptionConfig.bundleDiscountAppliesOn]}
                   onChange={(event) => {
                     const value = (
