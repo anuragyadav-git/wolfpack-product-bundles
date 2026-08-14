@@ -1,21 +1,21 @@
 {
-  "timestamp": "2026-08-13T23:38:49.823Z",
+  "timestamp": "2026-08-14T08:03:15.103Z",
   "summary": {
     "totalSuites": 4,
-    "totalTests": 1964,
-    "totalPassed": 1964,
+    "totalTests": 1970,
+    "totalPassed": 1970,
     "totalFailed": 0,
     "totalSkipped": 0,
-    "totalDuration": 9627
+    "totalDuration": 9210
   },
-  "totalDuration": 9628,
+  "totalDuration": 9212,
   "suites": [
     {
       "suite": "Unit Tests - Services",
       "passed": 288,
       "failed": 0,
       "skipped": 0,
-      "duration": 2293,
+      "duration": 2455,
       "commandFailed": false
     },
     {
@@ -23,7 +23,7 @@
       "passed": 33,
       "failed": 0,
       "skipped": 0,
-      "duration": 1665,
+      "duration": 1539,
       "commandFailed": false
     },
     {
@@ -31,15 +31,15 @@
       "passed": 478,
       "failed": 0,
       "skipped": 0,
-      "duration": 3131,
+      "duration": 2963,
       "commandFailed": false
     },
     {
       "suite": "Unit Tests - Assets",
-      "passed": 1165,
+      "passed": 1171,
       "failed": 0,
       "skipped": 0,
-      "duration": 2538,
+      "duration": 2253,
       "commandFailed": false
     }
   ],

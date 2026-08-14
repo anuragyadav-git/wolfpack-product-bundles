@@ -78,6 +78,16 @@ export function shouldUseClassicDesktopSummarySlotTiles({
   return isClassicDesktopSidebar === true && productSlotsEnabled === true;
 }
 
+export function shouldUseSharedDesktopSummaryRows({
+  designPreset,
+  isMobileSheet,
+  productSlotsEnabled,
+} = {}) {
+  return isSupportedFpbPreset(designPreset)
+    && isMobileSheet !== true
+    && productSlotsEnabled !== true;
+}
+
 export function getRemainingSummarySkeletonCount({
   designPreset,
   productSlotsEnabled,
@@ -157,6 +167,11 @@ renderSidePanel(panel) {
   });
   const useClassicDesktopSummarySlotTiles = shouldUseClassicDesktopSummarySlotTiles({
     isClassicDesktopSidebar,
+    productSlotsEnabled: useInlineSummarySlots,
+  });
+  const useSharedDesktopSummaryRows = shouldUseSharedDesktopSummaryRows({
+    designPreset: fullPageDesignPreset,
+    isMobileSheet,
     productSlotsEnabled: useInlineSummarySlots,
   });
   const remainingSummarySkeletonCount = getRemainingSummarySkeletonCount({
@@ -336,7 +351,7 @@ renderSidePanel(panel) {
       this._renderStandardSidebarSlotTiles(productsContainer, allSelectedProducts);
     } else if (allSelectedProducts.length > 0) {
       allSelectedProducts.forEach(item => {
-        if (isStandardDesktopSidebar) {
+        if (useSharedDesktopSummaryRows) {
           const row = this.createStandardSidebarSelectedRow(item, currencyInfo);
           const removeBtn = row?.querySelector('[data-action="remove-selected-product"]');
           if (removeBtn) {

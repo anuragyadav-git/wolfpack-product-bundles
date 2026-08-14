@@ -4,6 +4,7 @@ export {};
 const {
   createSummaryClearButton,
   fullPageSidePanelMethods,
+  shouldUseSharedDesktopSummaryRows,
 } = require('../../../app/assets/widgets/full-page/methods/side-panel-methods.js');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { fullPageMobileSummaryMethods } = require('../../../app/assets/widgets/full-page/methods/mobile-summary-methods.js');
@@ -401,6 +402,37 @@ describe('FPB summary sidebar discount progress', () => {
     expect(total?.innerHTML).toContain('side-panel-total-final');
     expect(total?.innerHTML).toContain('side-panel-total-original');
     expect(total?.innerHTML).toContain('$5.00');
+  });
+});
+
+describe('FPB shared desktop summary line items', () => {
+  it.each(['STANDARD', 'CLASSIC', 'COMPACT', 'HORIZONTAL'])(
+    'uses shared rows for the %s desktop summary when product slots are disabled',
+    (preset) => {
+      expect(shouldUseSharedDesktopSummaryRows({
+        designPreset: preset,
+        isMobileSheet: false,
+        productSlotsEnabled: false,
+      })).toBe(true);
+    },
+  );
+
+  it('keeps mobile sheets, product-slot summaries, and unknown presets off the desktop row path', () => {
+    expect(shouldUseSharedDesktopSummaryRows({
+      designPreset: 'COMPACT',
+      isMobileSheet: true,
+      productSlotsEnabled: false,
+    })).toBe(false);
+    expect(shouldUseSharedDesktopSummaryRows({
+      designPreset: 'HORIZONTAL',
+      isMobileSheet: false,
+      productSlotsEnabled: true,
+    })).toBe(false);
+    expect(shouldUseSharedDesktopSummaryRows({
+      designPreset: 'UNKNOWN',
+      isMobileSheet: false,
+      productSlotsEnabled: false,
+    })).toBe(false);
   });
 });
 
