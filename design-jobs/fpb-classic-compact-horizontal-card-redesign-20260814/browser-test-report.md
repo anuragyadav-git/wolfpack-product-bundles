@@ -114,6 +114,19 @@ The desktop navigation trace measured LCP 7034ms and CLS 0.6949. The largest shi
 | classic-live-asset-hard-reload | 1 | Infrastructure | Blocked | Cache Storage keys `[]`; `ignoreCache: true`; request 10772; no QA style injection after reload | Refresh the user-owned SIT Shopify dev preview and rerun | Yes; reload removed the temporary style injection |
 | classic-live-asset-hard-reload | 2 | Infrastructure retry | Passed | Request 11177 served rebuilt CSS; five-width matrix and Standard smoke passed | None | Yes; no QA style injection present |
 
+## Compact slice results
+
+- Persisted/runtime preset: `COMPACT` with only `bundle-widget-full-page-compact.css` active after Cache Storage clear and ignore-cache reload.
+- Live asset: request 21848 returned HTTP 200 and exposed the rebuilt frame, focus, and two-line title declarations.
+- Responsive geometry: three columns at 1440x900 and 1280x800; two columns at 768x1024, 390x844, and 360x800. All widths had zero page-level horizontal overflow and equal row heights.
+- Card geometry: 311.313px at 1440, 289.203px at 1280, 281.797px at 768, and 272px at 390/360. Titles reserve 44px desktop and 36px below the shared 800px container boundary.
+- Interaction: hover produced zero geometry delta; selected and quantity 1-to-2 states stayed 272px high; 44px controls remained inside the card. Keyboard traversal reached the card root and rendered a solid 2px outline with 2px offset.
+- Frozen Standard smoke: Standard retained three desktop columns and one mobile column, loaded only Standard preset CSS, and had no overflow. The fixture was restored to Compact and reverified.
+- Console/network: no new app-owned errors or failed widget requests. The only 404 remained the theme-owned `/favicon.ico`.
+- Lighthouse: desktop accessibility 88 and mobile accessibility 95; Best Practices 77, SEO 92, and Agentic Browsing 51 at both. The same frozen shared-owner accessibility waiver applies.
+- Performance: desktop navigation trace measured LCP 5969ms and CLS 0.69, again dominated by delayed shared widget hydration. The same frozen shared-runtime waiver applies.
+- Raw reports: `/private/tmp/fpb-classic-compact-horizontal-card-redesign-20260814/qa/lighthouse/compact-{desktop,mobile}/`.
+
 ## Final approval status
 
-Classic slice passed with the two explicitly scoped shared-owner waivers above. The fixture was restored to Classic. No deployment was attempted.
+Classic and Compact slices passed with the two explicitly scoped shared-owner waivers above. The fixture is restored to Compact; Horizontal remains pending. No deployment was attempted.

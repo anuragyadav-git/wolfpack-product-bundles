@@ -7,7 +7,7 @@
     "stage": "CHROME_QA_EXECUTION",
     "revision": 1,
     "created_at": "2026-08-14T00:41:21Z",
-    "updated_at": "2026-08-14T07:17:59Z",
+    "updated_at": "2026-08-14T07:30:56Z",
     "owner": "Aditya Awasthi",
     "product": "Wolfpack Product Bundles",
     "repository": "/Users/adityaawasthi/Developer/wolfpack-product-bundles",
@@ -229,6 +229,14 @@
         "result": "passed",
         "evidence": "Request 11177 served rebuilt Classic CSS; five-width interaction matrix, Lighthouse, trace, and frozen-Standard smoke completed",
         "recovery_action": "None"
+      },
+      {
+        "case_id": "compact-live-five-width",
+        "attempt": 1,
+        "classification": "product-css",
+        "result": "passed",
+        "evidence": "Compact request 21848 served rebuilt CSS; five-width matrix, interaction states, Lighthouse, trace, and frozen-Standard smoke completed",
+        "recovery_action": "Compact preset CSS now owns the approved two-column track below the shared 800px container boundary"
       }
     ],
     "artifacts_path": "qa",
@@ -303,7 +311,7 @@
         "path": "browser-test-report.md",
         "status": "complete",
         "revision": 1,
-        "sha256": "4771de6c081719ff2dc8066a77b56bfd18d0d532ea701da1a2805412cf305c81",
+        "sha256": "9bae2df44f51ae625f1486d25da4e6f419cd84bebc1a5812118a8634b795701f",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -408,7 +416,7 @@
         "path": "remediation-list.md",
         "status": "complete",
         "revision": 1,
-        "sha256": "71fa9cc38064aeb2595a80220f8464adf63d1f1f973e200975bf262e4d7aa642",
+        "sha256": "1a588f08b8bd90ebf9a2874af69501d8b6c0bffa3929fe1e9dbfdd51e9e6b98f",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -453,7 +461,7 @@
         "path": "visual-qa-report.md",
         "status": "complete",
         "revision": 1,
-        "sha256": "9f1d437fe228ed9e5d816411f903afd0fe583425d8da855eea76dd76b2197f29",
+        "sha256": "a36be938d05fcd49186c07eb42b36b3fd7097b357adb87100dfcda2aca0eb604",
         "approved_by": "",
         "approved_at": "",
         "evidence": []

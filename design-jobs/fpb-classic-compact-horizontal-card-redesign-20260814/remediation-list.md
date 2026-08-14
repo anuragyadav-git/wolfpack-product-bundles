@@ -49,3 +49,4 @@ Artifact status: complete
 |---|---|---|---|---|---|---|
 | classic-live-asset-hard-reload | 1 | Infrastructure | Request 10772; live card border 0px; title 93px and unclamped | Runtime CLASSIC and no page overflow passed | Not run | Blocked |
 | classic-live-asset-hard-reload | 2 | Infrastructure retry | Request 11177 contained rebuilt CSS; Cache Storage cleared; ignore-cache reload | Runtime, asset ownership, and default geometry passed | Five widths, interactions, Lighthouse, trace, and frozen Standard smoke passed | Passed with scoped shared-owner waivers |
+| compact-live-five-width | 1 | Product CSS correction | At 390/360 desktop-width emulation, shared responsive cascade initially collapsed Compact to one column | Forced the approved two-column track contract in Compact preset CSS | Five widths, interactions, Lighthouse, trace, and frozen Standard smoke passed | Passed with scoped shared-owner waivers |

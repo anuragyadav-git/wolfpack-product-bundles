@@ -4,6 +4,10 @@
   "viewport": "five-width-matrix",
   "state": "default-hover-focus-selected-quantity",
   "required": true,
+  "completed_presets": [
+    "CLASSIC",
+    "COMPACT"
+  ],
   "gates": {
     "functional": "passed",
     "visual": "passed",
@@ -67,7 +71,22 @@
     {
       "id": "frozen-standard-smoke",
       "status": "passed",
-      "actual": "Standard loaded only its preset stylesheet, retained three desktop columns and one mobile column, and showed no overflow; fixture was restored to Classic"
+      "actual": "After both completed slices, Standard loaded only its preset stylesheet, retained three desktop columns and one mobile column, and showed no overflow; the fixture was restored to the active slice preset"
+    },
+    {
+      "id": "compact-preset-runtime-and-asset",
+      "status": "passed",
+      "actual": "COMPACT persisted through the Admin template flow; request 21848 returned HTTP 200 and only the Compact preset stylesheet was active"
+    },
+    {
+      "id": "compact-five-width-geometry",
+      "status": "passed",
+      "actual": "Three columns at 1440 and 1280; two columns at 768, 390, and 360; no horizontal overflow; equal card heights held within rows"
+    },
+    {
+      "id": "compact-state-geometry",
+      "status": "passed",
+      "actual": "Hover, keyboard focus, selection, and quantity 1-to-2 preserved outer-card height; 44px controls remained contained"
     }
   ],
   "observations": {
@@ -117,6 +136,13 @@
       "attempt": 2,
       "classification": "infrastructure-retry",
       "setup": "User restarted the SIT dev server; Cache Storage cleared; reload with ignoreCache true",
+      "result": "passed",
+      "recovery": "None"
+    },
+    {
+      "attempt": 3,
+      "classification": "compact-slice",
+      "setup": "COMPACT persisted through Admin; Cache Storage cleared; reload with ignoreCache true",
       "result": "passed",
       "recovery": "None"
     }
