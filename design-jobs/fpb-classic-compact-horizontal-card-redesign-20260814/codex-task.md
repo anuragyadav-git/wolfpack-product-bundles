@@ -30,12 +30,12 @@ keywords:
 # Codex Task
 
 Artifact job ID: fpb-classic-compact-horizontal-card-redesign-20260814
-Artifact revision: 1
+Artifact revision: 3
 Artifact status: complete
 
 ## Job, revision, goal, and non-goals
 
-Revision 1. Implement CL-A, then CO-A, then HO-A as independent preset-CSS slices. Preserve Standard and all shared behavior. Non-goals and stop conditions are exactly those in `implementation-handoff.md`.
+Revision 3 remediation. Correct CL-A, then CO-A, then HO-A as independent preset-CSS slices. Preserve Standard and all shared behavior. Non-goals and stop conditions are exactly those in `implementation-handoff.md`.
 
 ## Approved references and source-of-truth priority
 
@@ -47,7 +47,7 @@ Inspect before editing. Implement the smallest architecture-correct change. Do n
 
 ## Component anatomy and required states
 
-Keep the existing card DOM. Prove all nine required states with zero state-driven card-height change and equal same-row heights.
+Keep the existing card DOM. Restore EB's component hierarchy: Classic and Compact use media, then full-width title/variant, then full-width price/action; Horizontal uses media left with title/variant above price/action on the right. Prove all nine required states with equal same-row heights and zero state-driven x, y, width, or height delta for the card, media, title/variant, price/action row, price, and reserved action envelope.
 
 ## Responsive transformations
 

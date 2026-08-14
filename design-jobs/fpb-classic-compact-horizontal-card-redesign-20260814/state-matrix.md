@@ -28,14 +28,14 @@ keywords:
 # State Matrix
 
 Artifact job ID: fpb-classic-compact-horizontal-card-redesign-20260814
-Artifact revision: 1
+Artifact revision: 3
 Artifact status: complete
 
 | State ID | Trigger | Data precondition | Visible result | Available interaction | Accessibility | Desktop | Mobile | Screenshot | Automated assertion | Approval |
 |---|---|---|---|---|---|---|---|---|---|---|
 | default | Initial populated render | Available simple product | Media, title, price, and add action inside preset frame | Details and add | Existing names and semantics remain exposed | Required | Required | Before each preset | Card bounds, grid count, no overflow | CL-A/CO-A/HO-A |
 | hover-focus | Pointer hover or keyboard focus | Interactive card/action | Non-expanding affordance and visible focus; magnifier remains pointer-only | Details/add/variant/quantity as applicable | Focus visible and not color-only | Required | Focus required; hover N/A on touch | Required | Card height delta 0; focus not clipped | CL-A/CO-A/HO-A |
-| selected-quantity | Add product, then increment | Selectable product | Add swaps immediately to inline quantity controls within same row | Decrement/increment/remove | Unique control names and exposed disabled limits | Required | Required | Before and after selection | Card and row height delta 0; exactly one state update per action | CL-A/CO-A/HO-A |
+| selected-quantity | Add product, then increment | Selectable product | Add swaps immediately to inline quantity controls within the same reserved action envelope | Decrement/increment/remove | Unique control names and exposed disabled limits | Required | Required | Before and after selection | Card, media, text/title, variant, price/action row, price, and action-envelope x/y/width/height deltas all 0; exactly one state update per action | CL-A/CO-A/HO-A |
 | sale-price | Render discounted product | Compare-at price greater than current price | Current and strike price remain readable without displacing action | Same as default | Meaning not conveyed by color alone | Required | Required | Required | Price/action stay inside card bounds | CL-A/CO-A/HO-A |
 | long-title | Render long merchant title | Title wraps beyond one line | Title uses reserved readable track; no card-row instability | Same as default | Full accessible name remains available | Required | Required | Required | No overlap, clipping, or horizontal overflow | CL-A/CO-A/HO-A |
 | mixed-media | Render portrait and landscape media in same row | Different source aspect ratios | Images remain contained in equal media envelopes | Details/add | Existing alt policy unchanged | Required | Required | Required | Equal row heights and consistent media bounds | CL-A/CO-A/HO-A |

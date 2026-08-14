@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "job_id": "fpb-classic-compact-horizontal-card-redesign-20260814",
-  "revision": 1,
+  "revision": 3,
   "status": "passed",
-  "checked_at": "2026-08-14T06:35:25Z",
+  "checked_at": "2026-08-14T08:18:00Z",
   "environment": "staging",
   "selected_page": {
     "page_id": 4,
@@ -16,16 +16,16 @@
     "intended_page_selected": {"mandatory": true, "status": "passed", "evidence": "Page 4 is the Wolfpack SIT FPB storefront route.", "blocker": "", "recovery_action": ""},
     "app_server_reachable": {"mandatory": true, "status": "passed", "evidence": "Storefront document request returned HTTP 200.", "blocker": "", "recovery_action": ""},
     "environment_confirmed": {"mandatory": true, "status": "passed", "evidence": "Connected Shopify dev preview uses the wolfpack-product-bundles-sit app.", "blocker": "", "recovery_action": ""},
-    "fixture_route_exists": {"mandatory": true, "status": "passed", "evidence": "FPB bundle route /apps/product-bundles/wpb/2 loaded and runtime preset CLASSIC was confirmed.", "blocker": "", "recovery_action": ""},
+    "fixture_route_exists": {"mandatory": true, "status": "passed", "evidence": "FPB bundle route /apps/product-bundles/wpb/2 loaded after cache bypass; bundle-widget-full-page-horizontal.css returned HTTP 200 and is the active preset stylesheet.", "blocker": "", "recovery_action": ""},
     "authentication_intentional": {"mandatory": true, "status": "passed", "evidence": "Existing connected default-profile test-store session was used; no credentials were captured.", "blocker": "", "recovery_action": ""},
     "sensitive_tabs_avoided": {"mandatory": true, "status": "passed", "evidence": "Only the intended Wolfpack admin and storefront pages were selected.", "blocker": "", "recovery_action": ""},
-    "viewport_resize_supported": {"mandatory": true, "status": "passed", "evidence": "Chrome retained 360x800 mobile/touch emulation at DPR 3 and had previously completed required resizes.", "blocker": "", "recovery_action": ""},
+    "viewport_resize_supported": {"mandatory": true, "status": "passed", "evidence": "Chrome reports the intended 1440x900 desktop viewport at DPR 1; the direct resize and emulation tools remain available for the required width matrix.", "blocker": "", "recovery_action": ""},
     "accessibility_snapshot_supported": {"mandatory": true, "status": "passed", "evidence": "Fresh accessibility-tree snapshots succeeded for admin and storefront pages.", "blocker": "", "recovery_action": ""},
-    "screenshot_write_supported": {"mandatory": true, "status": "passed", "evidence": "take_screenshot wrote an exact PNG to the macOS process TMPDIR; the bytes were copied to /private/tmp/fpb-classic-compact-horizontal-card-redesign-20260814/qa/actual/preflight.png and both SHA-256 hashes matched 40a66ed29377c89a6a0562fd4b5974d4537350f19033ac2ce1096c03889c8591.", "blocker": "", "recovery_action": ""},
-    "console_inspection_supported": {"mandatory": true, "status": "passed", "evidence": "list_console_messages returned seven current-page messages.", "blocker": "", "recovery_action": ""},
-    "network_inspection_supported": {"mandatory": true, "status": "passed", "evidence": "list_network_requests returned the storefront document and asset requests.", "blocker": "", "recovery_action": ""},
-    "repository_identity_recorded": {"mandatory": true, "status": "passed", "evidence": "Repository, branch feature/26.05-UI-changes, and commit 6846f4c64bd22c1a481726e0d7394ed267ec4010 recorded.", "blocker": "", "recovery_action": ""},
-    "job_revision_recorded": {"mandatory": true, "status": "passed", "evidence": "Design job revision 1 recorded.", "blocker": "", "recovery_action": ""},
+    "screenshot_write_supported": {"mandatory": true, "status": "passed", "evidence": "take_screenshot returned a current 1440x900 PNG with 160180 base64 characters. Direct filePath persistence remains unavailable under the Chrome MCP workspace policy, so raw image evidence stays in-session and concise measurements are written to the durable QA reports.", "blocker": "", "recovery_action": ""},
+    "console_inspection_supported": {"mandatory": true, "status": "passed", "evidence": "list_console_messages returned six current-page messages after the hard reload; no app-owned exception was present. One un-attributed resource 404 and one theme form-label issue will be tracked separately from widget findings.", "blocker": "", "recovery_action": ""},
+    "network_inspection_supported": {"mandatory": true, "status": "passed", "evidence": "list_network_requests returned the storefront document, all shared FPB assets, bundle-widget-full-page-horizontal.css, product data, language settings, and controls settings with HTTP 200 responses.", "blocker": "", "recovery_action": ""},
+    "repository_identity_recorded": {"mandatory": true, "status": "passed", "evidence": "Repository, branch feature/26.05-UI-changes, and commit a5250ef8f6e613bc729daba8b0ad96dfac2360e8 recorded.", "blocker": "", "recovery_action": ""},
+    "job_revision_recorded": {"mandatory": true, "status": "passed", "evidence": "Design job revision 3 recorded for the user-requested renewed card-composition QA pass.", "blocker": "", "recovery_action": ""},
     "baseline_identified": {"mandatory": true, "status": "passed", "evidence": "Classic desktop and mobile pre-change PNG baselines were captured before the dev CDN served the new CSS and copied byte-for-byte into /private/tmp/fpb-classic-compact-horizontal-card-redesign-20260814/qa/baselines.", "blocker": "", "recovery_action": ""}
   },
   "tool_inventory": [
@@ -52,7 +52,7 @@
   "repository": {
     "path": "/Users/adityaawasthi/Developer/wolfpack-product-bundles",
     "branch": "feature/26.05-UI-changes",
-    "commit": "6846f4c64bd22c1a481726e0d7394ed267ec4010"
+    "commit": "a5250ef8f6e613bc729daba8b0ad96dfac2360e8"
   },
   "baseline": {
     "id": "classic-and-standard-pre-slice",

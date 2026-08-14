@@ -26,11 +26,16 @@ keywords:
 # Remediation List
 
 Artifact job ID: fpb-classic-compact-horizontal-card-redesign-20260814
-Artifact revision: 1
+Artifact revision: 3
 Artifact status: complete
 
 | ID | Gate | Region and state | Expected | Actual | Measured delta | Severity | Canonical owner | Correction | Retest cases | Status |
 |---|---|---|---|---|---|---|---|---|---|---|
+| REM-CL-HIERARCHY-01 | Semantic and geometry | Classic desktop card body | EB hierarchy: media, full-width title/variant, full-width price/action | Default Wolfpack title and price/action share a row; selected state reflows into stacked rows | Title width `+115.92px`; action-row y `+52px`; price y `+56.5px` | BLOCKER | Classic preset raw CSS | Give body and descendants invariant row ownership; keep title/variant above price/action in both states | 1440, 1280, 768, 390, 360; default, selected, quantity, restored | Open |
+| REM-CL-MOBILE-02 | Geometry | Classic mobile price/action row | EB preserves price and action bounds | Selected state hides price and expands action across the row | Price width `104.59px -> 0px`; action x `-104.59px`, width `+109.59px` | BLOCKER | Classic preset raw CSS | Reserve a constant price region and constant action region for both controls | 390 and 360; default, selected, quantity, restored | Open |
+| REM-CO-STATE-01 | Geometry | Compact desktop/mobile price/action row | EB keeps price and control allocations constant | Quantity controls consume an additional 68px and push the split left | Price width `-68px`; action x `-68px`, width `+68px` at 1440 and 390 | HIGH | Compact preset raw CSS | Use invariant price/action tracks sized for the quantity control in every state | All five widths; sale price and selected quantity | Open |
+| REM-HO-STATE-01 | Semantic and geometry | Horizontal right-side content tracks | EB keeps title above price/action with identical bounds | Selected state recenters/reflows title and action rows | Desktop title y `+10px`, action-row y `-24px`, price y `-19px`; mobile title y `+10px`, action-row y `-8.95px` | BLOCKER | Horizontal preset raw CSS | Define invariant title/variant and price/action rows; remove state-dependent centering | All five widths; default, selected, quantity, restored | Open |
+| REM-HO-ACTION-02 | Geometry | Horizontal action allocation | EB action bounds do not change | Quantity state shifts action left and expands it | Desktop/mobile action x `-68px`, width `+68px` | BLOCKER | Horizontal preset raw CSS | Reserve the quantity-control width in the unselected state without changing interaction markup | All five widths; add, remove, quantity 1-to-2 | Open |
 
 ## Infrastructure blockers and product failures
 

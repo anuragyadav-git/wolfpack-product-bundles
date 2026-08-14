@@ -54,6 +54,7 @@ import {
   buildDashboardTableRows,
   getDashboardBundlesPerPageChoice,
 } from "./dashboard-table-model";
+import { DashboardLoadingWorkspace } from "./dashboard-route-readiness";
 import dashboardStyles from "./dashboard.module.css";
 
 const STATUS_TONE_MAP = { active: 'success', draft: 'info', unlisted: 'warning' } as const;
@@ -507,6 +508,11 @@ export function DashboardPage({ appEmbedStatus, banners }: DashboardPageProps) {
     getStatusDisplay,
     getBundleTypeDisplay,
   );
+
+  if (themeExtensionStatus.loading) {
+    return <DashboardLoadingWorkspace />;
+  }
+
   return (
     <>
       {renderDeleteModal && (

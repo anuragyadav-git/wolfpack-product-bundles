@@ -3,16 +3,16 @@
   "job": {
     "id": "fpb-classic-compact-horizontal-card-redesign-20260814",
     "title": "FPB Classic Compact Horizontal Card Redesign",
-    "status": "approved",
-    "stage": "FINAL_APPROVAL",
-    "revision": 1,
+    "status": "active",
+    "stage": "VISUAL_REMEDIATION",
+    "revision": 3,
     "created_at": "2026-08-14T00:41:21Z",
-    "updated_at": "2026-08-14T07:51:45Z",
+    "updated_at": "2026-08-14T08:24:45Z",
     "owner": "Aditya Awasthi",
     "product": "Wolfpack Product Bundles",
     "repository": "/Users/adityaawasthi/Developer/wolfpack-product-bundles",
     "branch": "feature/26.05-UI-changes",
-    "commit": "6846f4c64bd22c1a481726e0d7394ed267ec4010",
+    "commit": "a5250ef8f6e613bc729daba8b0ad96dfac2360e8",
     "artifact_root": "/Users/adityaawasthi/Developer/wolfpack-product-bundles/design-jobs",
     "resume_stage": null
   },
@@ -187,7 +187,7 @@
       "/private/tmp/fpb-classic-compact-horizontal-card-redesign-20260814/qa/baselines/classic-mobile-prechange.png"
     ],
     "summary_path": "qa/browser-artifact-summary.json",
-    "execution_status": "passed",
+    "execution_status": "failed",
     "required_viewports": [
       "1440x900",
       "1280x800",
@@ -211,7 +211,7 @@
     "accessibility_status": "waived",
     "lighthouse_status": "waived",
     "performance_status": "waived",
-    "visual_diff_status": "passed",
+    "visual_diff_status": "failed",
     "non_regression_status": "passed",
     "retry_history": [
       {
@@ -318,8 +318,8 @@
       "browser-test-report.md": {
         "path": "browser-test-report.md",
         "status": "complete",
-        "revision": 1,
-        "sha256": "11e20a62859bdba6a870ac8baa7963958dee29e0550e90e6d1a624aa20712674",
+        "revision": 3,
+        "sha256": "5f1db0c876df7f5a125662e65f6da3680f46e4fae315aab8fc1756df6c09d8c9",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -336,8 +336,8 @@
       "codex-task.md": {
         "path": "codex-task.md",
         "status": "complete",
-        "revision": 1,
-        "sha256": "bcb741eba928f2737c29dfe5013d64ceecdf0760448c4a7e93a02033a0faabc7",
+        "revision": 3,
+        "sha256": "b1d3ae0f1011b28973f2e6c78ddc11a92c9304ab67378f4a452f4e1ad2c5321a",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -403,8 +403,8 @@
       "interaction-contract.md": {
         "path": "interaction-contract.md",
         "status": "complete",
-        "revision": 1,
-        "sha256": "524f1207905c7883f69790e0d58d4988515c272c5271c978546ddde996eb4f4c",
+        "revision": 3,
+        "sha256": "fb98377da61cd5b8aa392eff32875c931736ffeed6ff5e6e0c35caa328810805",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -423,8 +423,8 @@
       "remediation-list.md": {
         "path": "remediation-list.md",
         "status": "complete",
-        "revision": 1,
-        "sha256": "4f6724e6274f0ae5fce309ca5d8773760f02593b13afe04ad04fc2444ed8fd0b",
+        "revision": 3,
+        "sha256": "85c9479265abbc5c8ec3d63576be02dedbf4e086aad92a0cf105bc595e1425d5",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -450,8 +450,8 @@
       "state-matrix.md": {
         "path": "state-matrix.md",
         "status": "complete",
-        "revision": 1,
-        "sha256": "8ba4daf140fce505b94fe72c828d15f7c41a5bb6bb27766769ba39d615dd959c",
+        "revision": 3,
+        "sha256": "6d77ccea35959baf4a3de4b0b42ebc548427ad5e99396c8e9fb3f5c48dd3f67a",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -468,8 +468,8 @@
       "visual-qa-report.md": {
         "path": "visual-qa-report.md",
         "status": "complete",
-        "revision": 1,
-        "sha256": "6241218b23c1d5c1232e01608fa7034df5aa2405efb0a427f0881b3567eb2c16",
+        "revision": 3,
+        "sha256": "e929aea09aa361d3bd9f21efbaa3d26c40b1da88009549af45ddc611cf03f821",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -732,6 +732,54 @@
         "qa/browser-artifact-summary.json"
       ],
       "affected_artifacts": []
+    },
+    {
+      "sequence": 23,
+      "at": "2026-08-14T08:11:00Z",
+      "from": "FINAL_APPROVAL",
+      "to": "VISUAL_REMEDIATION",
+      "revision": 2,
+      "reason": "User reopened final QA to investigate product-card component placement, EB hierarchy fidelity, and selected-state layout stability across Classic, Compact, and Horizontal.",
+      "evidence": [],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 24,
+      "at": "2026-08-14T08:11:14Z",
+      "from": "VISUAL_REMEDIATION",
+      "to": "CHROME_QA_PREFLIGHT",
+      "revision": 3,
+      "reason": "Refresh deterministic Chrome conditions before the reopened product-card hierarchy and state-stability audit.",
+      "evidence": [],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 25,
+      "at": "2026-08-14T08:13:50Z",
+      "from": "CHROME_QA_PREFLIGHT",
+      "to": "CHROME_QA_EXECUTION",
+      "revision": 3,
+      "reason": "Revision-3 direct Chrome preflight passed after cache-bypassed reload against the restarted SIT server.",
+      "evidence": [
+        "qa/preflight.json"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 26,
+      "at": "2026-08-14T08:23:53Z",
+      "from": "CHROME_QA_EXECUTION",
+      "to": "VISUAL_REMEDIATION",
+      "revision": 3,
+      "reason": "Revision-3 pairwise QA found internal product-card layout shifts in Classic, Compact, and Horizontal despite stable outer-card dimensions.",
+      "evidence": [
+        "visual-qa-report.md"
+      ],
+      "affected_artifacts": [
+        "visual-qa-report.md",
+        "browser-test-report.md",
+        "remediation-list.md"
+      ]
     }
   ]
 }

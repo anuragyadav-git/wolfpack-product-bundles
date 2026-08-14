@@ -28,7 +28,7 @@ keywords:
 # Interaction Contract
 
 Artifact job ID: fpb-classic-compact-horizontal-card-redesign-20260814
-Artifact revision: 1
+Artifact revision: 3
 Artifact status: complete
 
 | Control ID | Role | Accessible name | Pointer action | Keyboard action | State update | Focus behavior | Disabled or busy | Error recovery | Motion |
@@ -42,8 +42,8 @@ Artifact status: complete
 
 ## State transitions
 
-- Default → selected: the add control swaps immediately to inline quantity controls inside the same action track; outer card and row height delta must be zero.
-- Selected quantity changes: only quantity, price/summary values, and existing selected feedback update; no track, border, padding, or media-size change.
+- Default → selected: the add control swaps immediately to inline quantity controls inside the same action track. The card, media, text/title, variant, price/action row, and price border boxes must each retain the same x, y, width, and height. The action envelope must retain the same x, y, width, and height even though its contents change.
+- Selected quantity changes: only quantity, price/summary values, and existing selected feedback update; no track, border, padding, media-size, component position, or component-size change.
 - Hover/focus: feedback uses color, outline, or existing overlay within the card envelope and never raises or expands the card.
 - Variant selection: existing runtime owns data and availability. Preset CSS only prevents wrapping or selector geometry from displacing the price/action track.
 

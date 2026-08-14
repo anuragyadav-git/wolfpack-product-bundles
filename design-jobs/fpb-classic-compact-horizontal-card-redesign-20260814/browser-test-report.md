@@ -26,12 +26,12 @@ keywords:
 # Browser Test Report
 
 Artifact job ID: fpb-classic-compact-horizontal-card-redesign-20260814
-Artifact revision: 1
+Artifact revision: 3
 Artifact status: complete
 
 ## Job, implementation, and Chrome QA preflight
 
-- Environment, Chrome version, URL, branch, commit, fixture: SIT; Chrome 150.0.0.0; `https://agent-5sfidg3m.myshopify.com/apps/product-bundles/wpb/2`; `feature/26.05-UI-changes`; `6846f4c64bd22c1a481726e0d7394ed267ec4010`; FPB Subscription Compatibility 2026-08-14
+- Environment, Chrome version, URL, branch, commit, fixture: SIT; Chrome 150.0.0.0; `https://agent-5sfidg3m.myshopify.com/apps/product-bundles/wpb/2`; `feature/26.05-UI-changes`; `a5250ef8f6e613bc729daba8b0ad96dfac2360e8`; FPB Subscription Compatibility 2026-08-14
 - Browser profile: default profile only
 - Isolated context used: no
 - Available Chrome DevTools capabilities: page selection, navigation, emulation, snapshots, evaluation, screenshots, console, and network inspection
@@ -47,7 +47,16 @@ Artifact status: complete
 | Server, environment, and fixture reachable | Passed | Storefront and widget requests returned HTTP 200 |  |  |
 | Authentication intentional and sensitive tabs avoided | Passed | Existing authenticated default profile only |  |  |
 | Resize, snapshot, screenshot, console, and network work | Passed | Required tool calls completed in the current session |  |  |
-| Repository, job revision, and baseline identified | Passed | Job revision 1 and pre-change Classic baselines under `/private/tmp` |  |  |
+| Repository, job revision, and baseline identified | Passed | Job revision 3, current commit, and retained revision-1 baselines identified |  |  |
+
+## Revision 3 reopened internal-geometry audit
+
+- Setup: both EB and Wolfpack were configured to the same preset in Classic, Compact, Horizontal order. Cache Storage was cleared and both storefronts were reloaded with cache bypass after each preset change.
+- Pairwise conditions: `1440x900` DPR1 desktop and `390x844` DPR1 mobile/touch.
+- Measurement scope: card, media, text, title, variant when present, price/action row, price, and action control rectangles; unselected, selected, then restored.
+- EB result: all measured internal rectangles had `0px` state delta for all three presets at both viewports.
+- Wolfpack result: outer card dimensions stayed fixed, but internal component rectangles shifted in every preset. Detailed deltas and remediation owners are in `visual-qa-report.md` and `remediation-list.md`.
+- Console/network preflight: storefront document, shared assets, active Horizontal preset CSS, language settings, controls settings, products, and view requests returned HTTP 200. No app-owned exception was present; the existing theme-owned resource 404 remains separate.
 
 ## Conditions
 
@@ -65,7 +74,7 @@ Artifact status: complete
 |---|---|---|---|
 | Functional | Passed | Runtime resolves `CLASSIC`; mouse, touch-equivalent card controls, and keyboard focus operate |  |
 | Visual | Passed | Rebuilt Classic frame, two-line title track, aligned price/action row, and focus treatment are live |  |
-| Geometry | Passed | Equal row heights; zero outer-card delta for hover, selection, and quantity changes |  |
+| Geometry | Failed | Outer-card heights remain stable, but revision-3 internal rectangle measurements show state-dependent reflow in Classic, Compact, and Horizontal |  |
 | Responsive | Passed | Five target widths show no overflow, clipping, sticky overlap, or unstable rows |  |
 | Console | Passed | No new app-owned console error after reload |  |
 | Network | Passed | Classic request 11177 returned HTTP 200 with rebuilt declarations; required widget requests returned 200 |  |
@@ -142,4 +151,4 @@ The desktop navigation trace measured LCP 7034ms and CLS 0.6949. The largest shi
 
 ## Final approval status
 
-Classic, Compact, Horizontal, and the frozen-Standard regression passed with the two explicitly scoped shared-owner waivers above. The fixture is restored to Horizontal. No deployment was attempted.
+Revision 3 supersedes the earlier outer-height-only geometry conclusion. Classic, Compact, and Horizontal fail the internal state-stability requirement and require preset-owned CSS remediation. The fixture is restored to Horizontal. No production code was changed and no deployment was attempted.
