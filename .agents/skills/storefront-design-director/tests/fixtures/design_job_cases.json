@@ -1,0 +1,23 @@
+{
+  "product_card": {
+    "title": "Standard product card selection",
+    "product_family": "FPB",
+    "template": "Standard",
+    "component": "product-card",
+    "required_states": ["unselected", "selected", "variant-required", "out-of-stock"]
+  },
+  "summary_sidebar": {
+    "title": "Bundle summary sidebar",
+    "product_family": "FPB",
+    "template": "Classic",
+    "component": "summary-sidebar",
+    "required_states": ["empty", "partial", "cta-enabled", "submit-failure"]
+  },
+  "mobile_tray": {
+    "title": "Mobile summary tray",
+    "product_family": "PPB",
+    "template": "Product List",
+    "component": "mobile-summary-tray",
+    "required_states": ["collapsed", "expanded", "long-list", "safe-area"]
+  }
+}

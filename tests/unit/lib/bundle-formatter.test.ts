@@ -52,6 +52,61 @@ const makeStepProduct = (overrides: Record<string, unknown> = {}) => ({
 });
 
 describe("formatBundleForWidget", () => {
+  it("emits a valid enabled subscription config for both bundle widgets", () => {
+    const subscription = {
+      version: 1,
+      enabled: true,
+      selectedGroup: {
+        id: "gid://shopify/SellingPlanGroup/1",
+        name: "Subscribe and save",
+        options: ["Delivery every"],
+        plans: [{
+          id: "gid://shopify/SellingPlan/1",
+          sourceName: "Monthly",
+          options: ["1 month"],
+          pricingPolicies: [{ kind: "percentage", value: 10, afterCycle: 0 }],
+        }],
+      },
+      selectedPlanIds: ["gid://shopify/SellingPlan/1"],
+      defaultPurchaseOption: {
+        kind: "selling_plan",
+        sellingPlanId: "gid://shopify/SellingPlan/1",
+      },
+      oneTimePurchase: { enabled: true, title: "One-time purchase", description: "" },
+      copy: { title: "Purchase options", subtitle: "", unavailableMessage: "Unavailable" },
+      planCopy: {
+        "gid://shopify/SellingPlan/1": {
+          displayName: "Monthly",
+          discountPill: "10% off",
+          description: "",
+        },
+      },
+      showDiscountOnProductCards: false,
+      recurringBundleDiscount: false,
+      translations: {},
+    };
+
+    const enabled = formatBundleForWidget(makeBundle({
+      bundleType: "product_page",
+      bundleSubscriptionConfig: subscription,
+    }) as any);
+    const fullPageEnabled = formatBundleForWidget(makeBundle({
+      bundleType: "full_page",
+      bundleSubscriptionConfig: subscription,
+    }) as any);
+    const disabled = formatBundleForWidget(makeBundle({
+      bundleType: "product_page",
+      bundleSubscriptionConfig: { ...subscription, enabled: false },
+    }) as any);
+
+    expect(enabled.subscription).toMatchObject({
+      enabled: true,
+      selectedPlanIds: ["gid://shopify/SellingPlan/1"],
+    });
+    expect(fullPageEnabled.subscription).toEqual(enabled.subscription);
+    expect(disabled.subscription).toBeNull();
+  });
+
   it("returns top-level bundle fields", () => {
     const result = formatBundleForWidget(makeBundle() as any);
     expect(result.id).toBe("bundle-1");
@@ -68,15 +123,15 @@ describe("formatBundleForWidget", () => {
     expect(result).not.toHaveProperty("fullPageLayout");
   });
 
-  it("defaults full-page bundles to Standard Design when template fields are absent", () => {
+  it("preserves null full-page template fields when template values are absent", () => {
     const result = formatBundleForWidget(makeBundle({
       bundleDesignTemplate: null,
       bundleDesignPresetId: null,
     }) as any);
 
-    expect(result.bundleDesignTemplate).toBe("FBP_SIDE_FOOTER");
-    expect(result.bundleDesignPresetId).toBe("STANDARD");
-    expect(result.bundleDesignTemplateData).toBeNull();
+    expect(result.bundleDesignTemplate).toBeNull();
+    expect(result.bundleDesignPresetId).toBeNull();
+    expect(result).not.toHaveProperty("bundleDesignTemplateData");
   });
 
   it("emits the saved product slot icon URL for storefront empty slots", () => {
@@ -340,12 +395,8 @@ describe("formatBundleForWidget", () => {
           title: "Pick audit items",
           subTitle: "Choose audit products",
           sortOrder: 1,
-          categoryRank: 1,
           products: [categoryProduct],
-          selectedProducts: [],
           collections: [selectedCollection],
-          collectionsData: [],
-          collectionsSelectedData: [selectedCollection],
           conditions: [condition],
           categoryBanner: "https://cdn.example/category.png",
           categoryImg: "https://cdn.example/icon.png",
@@ -361,12 +412,11 @@ describe("formatBundleForWidget", () => {
 
     expect(result.steps[0].categories).toEqual([
       {
-        categoryId: "category98476",
+        id: "category98476",
         name: "Category 1 Direct Product Category",
         title: "Pick audit items",
         subTitle: "Choose audit products",
-        rank: 1,
-        categoryRank: 1,
+        sortOrder: 1,
         products: [
           {
             selectionId: "gid://shopify/Product/9427287703811",
@@ -379,10 +429,7 @@ describe("formatBundleForWidget", () => {
             ],
           },
         ],
-        selectedProducts: [],
         collections: [selectedCollection],
-        collectionsData: [],
-        collectionsSelectedData: [selectedCollection],
         conditions: [condition],
         categoryBanner: "https://cdn.example/category.png",
         categoryImg: "https://cdn.example/icon.png",
@@ -416,41 +463,39 @@ describe("formatBundleForWidget", () => {
 
     expect(result.bundleDesignTemplate).toBe("FBP_SIDE_FOOTER");
     expect(result.bundleDesignPresetId).toBe("STANDARD");
-    expect(result.bundleDesignTemplateData).toBeNull();
+    expect(result).not.toHaveProperty("bundleDesignTemplateData");
   });
 
   it("bridges product-page design preset into runtime template data", () => {
     const result = formatBundleForWidget(makeBundle({
       bundleType: "product_page",
       bundleDesignTemplate: "PDP_INPAGE",
-      bundleDesignPresetId: "CASCADE",
+      bundleDesignPresetId: "LIST",
     }) as any);
 
     expect(result.bundleDesignTemplate).toBe("PDP_INPAGE");
-    expect(result.bundleDesignPresetId).toBe("CASCADE");
-    expect(result.bundleDesignTemplateData).toEqual({ templateId: "CASCADE" });
+    expect(result.bundleDesignPresetId).toBe("LIST");
+    expect(result).not.toHaveProperty("bundleDesignTemplateData");
   });
 
-  it("exposes reference modal slot orientation for product-page horizontal slots", () => {
+  it("maps product-page horizontal slot preset into template contract", () => {
     const result = formatBundleForWidget(makeBundle({
       bundleType: "product_page",
       bundleDesignTemplate: "PDP_MODAL",
-      bundleDesignPresetId: "MODAL",
+      bundleDesignPresetId: "HORIZONTAL_SLOTS",
     }) as any);
 
-    expect(result.bundleDesignTemplateData).toEqual({ templateId: "MODAL" });
-    expect(result.renderFilledSlotsAsHorizontalStacked).toBe(true);
+    expect(result).not.toHaveProperty("bundleDesignTemplateData");
   });
 
-  it("exposes reference modal slot orientation for product-page vertical slots", () => {
+  it("maps product-page vertical slot preset into template contract", () => {
     const result = formatBundleForWidget(makeBundle({
       bundleType: "product_page",
       bundleDesignTemplate: "PDP_MODAL",
-      bundleDesignPresetId: "SIMPLIFIED",
+      bundleDesignPresetId: "VERTICAL_SLOTS",
     }) as any);
 
-    expect(result.bundleDesignTemplateData).toEqual({ templateId: "SIMPLIFIED" });
-    expect(result.renderFilledSlotsAsHorizontalStacked).toBe(false);
+    expect(result).not.toHaveProperty("bundleDesignTemplateData");
   });
 
   it("includes direct product-page bundle settings contracts without FPB Product Slots", () => {
@@ -477,7 +522,6 @@ describe("formatBundleForWidget", () => {
       ],
     };
     const validateQuantityPerProduct = { isEnabled: true, allowedQuantity: 1 };
-    const individualSellingPlanSelection = { isEnabled: false, showFor: "ALL_PRODUCTS" };
     const bundleTextConfig = {
       bundleSummary: {
         title: "Your Bundle",
@@ -491,7 +535,6 @@ describe("formatBundleForWidget", () => {
       validateQuantityPerProduct,
       productSlotsEnabled: true,
       productSlotIconUrl: "https://cdn.example.test/slot-icon.png",
-      individualSellingPlanSelection,
       bundleTextConfig,
     }) as any);
 
@@ -499,7 +542,6 @@ describe("formatBundleForWidget", () => {
     expect(result.validateQuantityPerProduct).toEqual(validateQuantityPerProduct);
     expect(result.productSlotsEnabled).toBe(false);
     expect(result.productSlotIconUrl).toBeNull();
-    expect(result.individualSellingPlanSelection).toEqual(individualSellingPlanSelection);
     expect(result.bundleTextConfig).toEqual(bundleTextConfig);
   });
 

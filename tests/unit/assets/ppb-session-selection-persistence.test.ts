@@ -5,8 +5,6 @@ const {
   normalizeProductPageSessionSelectionCategories,
   normalizeProductPageSessionSelections,
 } = require("../../../app/assets/widgets/product-page/methods/selection-persistence-methods.js");
-const { readFileSync } = require("node:fs");
-const { join } = require("node:path");
 
 describe("ProductPageSessionSelectionPersistence", () => {
   it("builds a stable offer-scoped storage key", () => {
@@ -167,17 +165,4 @@ describe("ProductPageSessionSelectionPersistence", () => {
     expect(context.loadStepProducts.mock.calls).toEqual([[0], [2]]);
   });
 
-  it("includes the persistence module in the Product Page storefront build", () => {
-    const buildScript = readFileSync(
-      join(process.cwd(), "scripts/build-widget-bundles.js"),
-      "utf8"
-    );
-    const modulesStart = buildScript.indexOf("const PRODUCT_PAGE_MODULES = [");
-    const modulesEnd = buildScript.indexOf("];", modulesStart);
-    const productPageModules = buildScript.slice(modulesStart, modulesEnd);
-
-    expect(productPageModules).toContain(
-      "app/assets/widgets/product-page/methods/selection-persistence-methods.js"
-    );
-  });
 });

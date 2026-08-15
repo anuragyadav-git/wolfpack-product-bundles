@@ -1,0 +1,785 @@
+{
+  "schema_version": 1,
+  "job": {
+    "id": "fpb-classic-compact-horizontal-card-redesign-20260814",
+    "title": "FPB Classic Compact Horizontal Card Redesign",
+    "status": "active",
+    "stage": "VISUAL_REMEDIATION",
+    "revision": 3,
+    "created_at": "2026-08-14T00:41:21Z",
+    "updated_at": "2026-08-14T08:24:45Z",
+    "owner": "Aditya Awasthi",
+    "product": "Wolfpack Product Bundles",
+    "repository": "/Users/adityaawasthi/Developer/wolfpack-product-bundles",
+    "branch": "feature/26.05-UI-changes",
+    "commit": "a5250ef8f6e613bc729daba8b0ad96dfac2360e8",
+    "artifact_root": "/Users/adityaawasthi/Developer/wolfpack-product-bundles/design-jobs",
+    "resume_stage": null
+  },
+  "scope": {
+    "product_family": "FPB",
+    "template": "CLASSIC, COMPACT, HORIZONTAL",
+    "component": "storefront product card and preset-owned responsive grid presentation",
+    "implementation_mode": "design-director",
+    "design_goal": "Conservatively polish three FPB preset card systems while preserving reference hierarchy, orientation, interactions, and all shared widget behavior.",
+    "user_problem": "Classic, Compact, and Horizontal require independent evidence-led product-card redesigns without changing frozen Standard or shared runtime contracts.",
+    "primary_user_action": "Browse products and operate variant, add, remove, and quantity controls without card geometry shifting.",
+    "out_of_scope": [
+      "FPB Standard production CSS",
+      "shared product-card renderer or shared base and responsive CSS",
+      "product loading, filtering, pagination, selection, pricing, validation, and cart logic",
+      "shared summary, mobile drawer, modal, and timeline presentation",
+      "API, schema, copy, persistence, new merchant settings, runtime styling, and new abstractions"
+    ],
+    "merchant_configurability": [
+      "reuse existing merchant-owned card and typography tokens",
+      "no new merchant settings"
+    ],
+    "business_logic_constraints": [
+      "preserve existing DOM, class, and data interfaces",
+      "preserve equal card heights within each row across all states",
+      "implement only in active preset-owned raw CSS",
+      "stop if existing DOM and preset CSS cannot express the approved direction"
+    ]
+  },
+  "viewports": {
+    "reference": [
+      "1440x900",
+      "390x844"
+    ],
+    "required": [
+      "1440x900",
+      "1280x800",
+      "768x1024",
+      "390x844",
+      "360x800"
+    ],
+    "edge_cases": [
+      "long title",
+      "sale price",
+      "mixed media",
+      "grouped variant",
+      "unavailable",
+      "disabled",
+      "selected quantity"
+    ],
+    "browser_zoom": 100,
+    "device_pixel_ratio_policy": "record-actual",
+    "locale": "record-live-fixture",
+    "currency": "record-live-fixture",
+    "color_scheme": "light",
+    "reduced_motion": false
+  },
+  "references": {
+    "current": [
+      "screenshot-inventory.yaml"
+    ],
+    "target": [
+      "screenshot-inventory.yaml"
+    ],
+    "context": [
+      "visual-audit.md",
+      "component-brief.md"
+    ],
+    "approved": [
+      "screenshot-inventory.yaml",
+      "component-brief.md"
+    ],
+    "implementation": [],
+    "provenance": [
+      "Chrome DevTools MCP default profile",
+      "live EB yash-wolfpack test fixture",
+      "live Wolfpack SIT agent-5sfidg3m fixture",
+      "cache-bypassed preset confirmation"
+    ],
+    "permissions_or_usage_notes": [
+      "Competitor captures are internal design inspiration only",
+      "Chrome filePath persistence was unavailable; computed evidence is durable in visual-audit.md"
+    ]
+  },
+  "decisions": {
+    "locked": [
+      "Classic then Compact then Horizontal execution order",
+      "Standard remains frozen and serves only as a regression baseline",
+      "C01-C15 remains the behavior ledger",
+      "one conservative Wolfpack direction per preset",
+      "preset-owned raw CSS is the only planned production owner",
+      "CL-A Framed Classic",
+      "CO-A Structured Compact",
+      "HO-A Bounded Horizontal"
+    ],
+    "assumptions": [],
+    "rejected": [],
+    "open": [],
+    "recommendation_delegation": {
+      "status": "not-granted",
+      "scope": [],
+      "exclusions": [
+        "business-behavior",
+        "accessibility",
+        "data-semantics",
+        "approval-scope"
+      ],
+      "approved_by": "",
+      "approved_at": "",
+      "expires_at_stage": "FINAL_APPROVAL"
+    }
+  },
+  "states": {
+    "required": [
+      "default",
+      "hover-focus",
+      "selected-quantity",
+      "sale-price",
+      "long-title",
+      "mixed-media",
+      "variant",
+      "unavailable",
+      "disabled"
+    ],
+    "optional": [],
+    "not_applicable": [],
+    "coverage_status": "complete"
+  },
+  "responsive": {
+    "contract_status": "complete",
+    "breakpoints": [
+      "shared FPB container boundary at 800px; verify 799/800/801",
+      "Classic and Compact catalog columns remain intrinsic and content-driven"
+    ],
+    "transformations": [
+      "Classic caps at four columns and renders two at 390px and 360px",
+      "Compact caps at three columns and renders two at 390px and 360px",
+      "Horizontal caps at two columns at or above 800px and renders one below 800px"
+    ]
+  },
+  "accessibility": {
+    "requirements": [
+      "preserve existing semantics, accessible names, and exposed states",
+      "preserve logical keyboard order and visible unclipped focus",
+      "retain 44px action and quantity targets",
+      "do not communicate selection, availability, disabled, sale, or focus by color alone",
+      "introduce no new motion and preserve reduced-motion behavior"
+    ],
+    "known_risks": [
+      "focus outline clipping at card edges",
+      "merchant-color contrast",
+      "long variant labels near the 800px Horizontal boundary"
+    ],
+    "validation_status": "complete"
+  },
+  "handoff": {
+    "status": "approved",
+    "package_path": "design-jobs/fpb-classic-compact-horizontal-card-redesign-20260814",
+    "implementation_owner": "Codex",
+    "implementation_branch": "feature/26.05-UI-changes",
+    "implementation_commit": ""
+  },
+  "qa": {
+    "chrome_mcp_required": true,
+    "profile_policy": "default-profile-only",
+    "allow_isolated_context": false,
+    "preflight_status": "passed",
+    "preflight_result_path": "qa/preflight.json",
+    "baseline_status": "passed",
+    "baseline_paths": [
+      "/private/tmp/fpb-classic-compact-horizontal-card-redesign-20260814/qa/baselines/classic-desktop-prechange.png",
+      "/private/tmp/fpb-classic-compact-horizontal-card-redesign-20260814/qa/baselines/classic-mobile-prechange.png"
+    ],
+    "summary_path": "qa/browser-artifact-summary.json",
+    "execution_status": "failed",
+    "required_viewports": [
+      "1440x900",
+      "1280x800",
+      "768x1024",
+      "390x844",
+      "360x800"
+    ],
+    "required_states": [
+      "default",
+      "hover-focus",
+      "selected-quantity",
+      "sale-price",
+      "long-title",
+      "mixed-media",
+      "variant",
+      "unavailable",
+      "disabled"
+    ],
+    "console_status": "passed",
+    "network_status": "passed",
+    "accessibility_status": "waived",
+    "lighthouse_status": "waived",
+    "performance_status": "waived",
+    "visual_diff_status": "failed",
+    "non_regression_status": "passed",
+    "retry_history": [
+      {
+        "case_id": "classic-live-asset-hard-reload",
+        "attempt": 1,
+        "classification": "infrastructure",
+        "result": "blocked",
+        "evidence": "Cache Storage empty; ignore-cache reload; request 10772 served the pre-change Classic body",
+        "recovery_action": "Refresh the user-owned SIT Shopify dev preview so it republishes the generated Classic asset, then repeat the same hard reload"
+      },
+      {
+        "case_id": "classic-live-asset-hard-reload",
+        "attempt": 2,
+        "classification": "infrastructure-retry",
+        "result": "passed",
+        "evidence": "Request 11177 served rebuilt Classic CSS; five-width interaction matrix, Lighthouse, trace, and frozen-Standard smoke completed",
+        "recovery_action": "None"
+      },
+      {
+        "case_id": "compact-live-five-width",
+        "attempt": 1,
+        "classification": "product-css",
+        "result": "passed",
+        "evidence": "Compact request 21848 served rebuilt CSS; five-width matrix, interaction states, Lighthouse, trace, and frozen-Standard smoke completed",
+        "recovery_action": "Compact preset CSS now owns the approved two-column track below the shared 800px container boundary"
+      },
+      {
+        "case_id": "horizontal-live-five-width",
+        "attempt": 1,
+        "classification": "product-css-and-infrastructure-retry",
+        "result": "passed",
+        "evidence": "Horizontal live asset served the framed bounded-row CSS; five widths, 799/800/801 boundary, interaction states, Lighthouse, trace, and final four-preset regression completed",
+        "recovery_action": "Horizontal preset now owns the one-column boundary and bounded non-variant row; generated asset touch triggered preview republish"
+      }
+    ],
+    "artifacts_path": "qa",
+    "blockers": []
+  },
+  "approvals": {
+    "design": {
+      "status": "approved",
+      "approver": "Aditya Awasthi",
+      "at": "2026-08-14T06:08:28Z",
+      "revision": 1
+    },
+    "handoff": {
+      "status": "approved",
+      "approver": "Aditya Awasthi",
+      "at": "2026-08-14T06:17:21Z",
+      "revision": 1
+    },
+    "implementation": {
+      "status": "approved",
+      "approver": "Aditya Awasthi",
+      "at": "2026-08-14T06:17:21Z",
+      "revision": 1
+    },
+    "final": {
+      "status": "not-started",
+      "approver": "",
+      "at": "",
+      "revision": null
+    }
+  },
+  "artifacts": {
+    "immutable_after_approval": true,
+    "current": {
+      "acceptance-criteria.md": {
+        "path": "acceptance-criteria.md",
+        "status": "complete",
+        "revision": 1,
+        "sha256": "6120d564112465f259115b0ba7bb4c0b0fb2934f771d8835c1b1eba87354fb04",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "accessibility-checklist.md": {
+        "path": "accessibility-checklist.md",
+        "status": "complete",
+        "revision": 1,
+        "sha256": "e88aa6599f68aa7bf65359af429198ec354908d0d0e8da1046475e82e5fdf2ea",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "approval-record.yaml": {
+        "path": "approval-record.yaml",
+        "status": "complete",
+        "revision": 1,
+        "sha256": "1430bfdad5f5ad435072d0b80edfd382bf3517decab38b55a0cb3816b960c055",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "browser-test-plan.yaml": {
+        "path": "browser-test-plan.yaml",
+        "status": "complete",
+        "revision": 1,
+        "sha256": "fda7ccc17725db37674885d980eddc0bac6a8d31777f14b9eaa1f6bb7f69aeb4",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "browser-test-report.md": {
+        "path": "browser-test-report.md",
+        "status": "complete",
+        "revision": 3,
+        "sha256": "5f1db0c876df7f5a125662e65f6da3680f46e4fae315aab8fc1756df6c09d8c9",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "chrome-preflight-result.yaml": {
+        "path": "chrome-preflight-result.yaml",
+        "status": "draft",
+        "revision": 1,
+        "sha256": "b402c28cff7ed2e0cbd060931b18b2fc013884eb744546ec8e496243456e0e0c",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "codex-task.md": {
+        "path": "codex-task.md",
+        "status": "complete",
+        "revision": 3,
+        "sha256": "b1d3ae0f1011b28973f2e6c78ddc11a92c9304ab67378f4a452f4e1ad2c5321a",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "component-anatomy.md": {
+        "path": "component-anatomy.md",
+        "status": "complete",
+        "revision": 1,
+        "sha256": "6038712976f0e0389a0b87e36135f078f85f1e79921aa09215474a6988e2a614",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "component-brief.md": {
+        "path": "component-brief.md",
+        "status": "complete",
+        "revision": 1,
+        "sha256": "10b638937fcd81a0024c8b757886ce1e6f155d4b5f66ad302671da0c50045a7d",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "content-stress-cases.yaml": {
+        "path": "content-stress-cases.yaml",
+        "status": "complete",
+        "revision": 1,
+        "sha256": "c84423608906023c4f5dc13c06f96c80554f4c00abbe03f949f0be4e28af12e4",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "design-tokens.json": {
+        "path": "design-tokens.json",
+        "status": "complete",
+        "revision": 1,
+        "sha256": "251f0325d5d277049e90a10c8a3c90b052f9031232bb8cbb3f2d7e15e0229871",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "direction-comparison.md": {
+        "path": "direction-comparison.md",
+        "status": "approved",
+        "revision": 1,
+        "sha256": "413a626a1a0bbf2110d222a724c9bae9d3439e18d5949c9c15407c880e6f1aee",
+        "approved_by": "Aditya Awasthi",
+        "approved_at": "2026-08-14T06:09:13Z",
+        "evidence": [
+          "visual-audit.md"
+        ]
+      },
+      "implementation-handoff.md": {
+        "path": "implementation-handoff.md",
+        "status": "approved",
+        "revision": 1,
+        "sha256": "ef4c64b3b2a5382b571008171344b9d339ff7dcb120c0ed2150a0a4cb4ade1ce",
+        "approved_by": "Aditya Awasthi",
+        "approved_at": "2026-08-14T06:18:12Z",
+        "evidence": [
+          "browser-test-plan.yaml"
+        ]
+      },
+      "interaction-contract.md": {
+        "path": "interaction-contract.md",
+        "status": "complete",
+        "revision": 3,
+        "sha256": "fb98377da61cd5b8aa392eff32875c931736ffeed6ff5e6e0c35caa328810805",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "locked-decisions.yaml": {
+        "path": "locked-decisions.yaml",
+        "status": "approved",
+        "revision": 1,
+        "sha256": "49723b33b5a00d0f1e74c7b33c9cb9ee1d069a63ccb107e95f5013497ecd660e",
+        "approved_by": "Aditya Awasthi",
+        "approved_at": "2026-08-14T06:09:13Z",
+        "evidence": [
+          "direction-comparison.md"
+        ]
+      },
+      "remediation-list.md": {
+        "path": "remediation-list.md",
+        "status": "complete",
+        "revision": 3,
+        "sha256": "85c9479265abbc5c8ec3d63576be02dedbf4e086aad92a0cf105bc595e1425d5",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "responsive-contract.md": {
+        "path": "responsive-contract.md",
+        "status": "complete",
+        "revision": 1,
+        "sha256": "709b8d7669ecf4d1e3171d00bc1f112c1c2886638f935fd985796c62a8c9f166",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "screenshot-inventory.yaml": {
+        "path": "screenshot-inventory.yaml",
+        "status": "complete",
+        "revision": 1,
+        "sha256": "f9c0800994066ec7fa3588f3a4ae87d916d7690e0ec6957ca936aed6e8c1283e",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "state-matrix.md": {
+        "path": "state-matrix.md",
+        "status": "complete",
+        "revision": 3,
+        "sha256": "6d77ccea35959baf4a3de4b0b42ebc548427ad5e99396c8e9fb3f5c48dd3f67a",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "visual-audit.md": {
+        "path": "visual-audit.md",
+        "status": "complete",
+        "revision": 1,
+        "sha256": "55f8490ba8a1b3efce97277975e06494fa4f10de8dae63bbdf660f450e1a0e6d",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "visual-qa-report.md": {
+        "path": "visual-qa-report.md",
+        "status": "complete",
+        "revision": 3,
+        "sha256": "e929aea09aa361d3bd9f21efbaa3d26c40b1da88009549af45ddc611cf03f821",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      }
+    },
+    "superseded": []
+  },
+  "history": [
+    {
+      "sequence": 1,
+      "at": "2026-08-14T00:41:21Z",
+      "from": null,
+      "to": "DISCOVERY",
+      "revision": 1,
+      "reason": "Design job created",
+      "evidence": []
+    },
+    {
+      "sequence": 2,
+      "at": "2026-08-14T00:42:36Z",
+      "from": "DISCOVERY",
+      "to": "SCOPE",
+      "revision": 1,
+      "reason": "Discovery and user-provided boundaries recorded in component brief",
+      "evidence": [],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 3,
+      "at": "2026-08-14T00:42:42Z",
+      "from": "SCOPE",
+      "to": "REFERENCE_INTAKE",
+      "revision": 1,
+      "reason": "Scope, non-goals, viewport matrix, state coverage, and preset CSS ownership are explicit",
+      "evidence": [],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 4,
+      "at": "2026-08-14T00:55:17Z",
+      "from": "REFERENCE_INTAKE",
+      "to": "REFERENCE_VALIDATION",
+      "revision": 1,
+      "reason": "Eight live EB/Wolfpack reference cohorts inventoried with preset, viewport, state, and provenance",
+      "evidence": [],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 5,
+      "at": "2026-08-14T00:55:56Z",
+      "from": "REFERENCE_VALIDATION",
+      "to": "VISUAL_ANALYSIS",
+      "revision": 1,
+      "reason": "References are sufficient for structural inspiration and computed geometry; limitations are recorded and no pixel-exact match is claimed",
+      "evidence": [],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 6,
+      "at": "2026-08-14T00:55:56Z",
+      "from": "VISUAL_ANALYSIS",
+      "to": "DIRECTION_EXPLORATION",
+      "revision": 1,
+      "reason": "Confidence-labeled visual audit records preset-specific gaps, invariants, and canonical CSS owners",
+      "evidence": [],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 7,
+      "at": "2026-08-14T00:56:09Z",
+      "from": "DIRECTION_EXPLORATION",
+      "to": "DIRECTION_APPROVAL",
+      "revision": 1,
+      "reason": "One controlled direction per preset is decision-ready",
+      "evidence": [
+        "direction-comparison.md",
+        "visual-audit.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 8,
+      "at": "2026-08-14T06:09:13Z",
+      "from": "DIRECTION_APPROVAL",
+      "to": "COMPONENT_ANATOMY",
+      "revision": 1,
+      "reason": "User approved CL-A, CO-A, and HO-A as the controlled design package.",
+      "evidence": [
+        "locked-decisions.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 9,
+      "at": "2026-08-14T06:09:53Z",
+      "from": "COMPONENT_ANATOMY",
+      "to": "STATE_CONTRACT",
+      "revision": 1,
+      "reason": "Existing product-card DOM and preset versus shared ownership are fully mapped.",
+      "evidence": [
+        "component-anatomy.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 10,
+      "at": "2026-08-14T06:10:20Z",
+      "from": "STATE_CONTRACT",
+      "to": "RESPONSIVE_CONTRACT",
+      "revision": 1,
+      "reason": "All required product-card states have triggers, expected results, accessibility constraints, and browser assertions.",
+      "evidence": [
+        "state-matrix.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 11,
+      "at": "2026-08-14T06:10:51Z",
+      "from": "RESPONSIVE_CONTRACT",
+      "to": "INTERACTION_ACCESSIBILITY",
+      "revision": 1,
+      "reason": "All required viewport and region transformations are explicit, including the 799/800/801 container boundary.",
+      "evidence": [
+        "responsive-contract.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 12,
+      "at": "2026-08-14T06:11:25Z",
+      "from": "INTERACTION_ACCESSIBILITY",
+      "to": "TOKENS_GEOMETRY",
+      "revision": 1,
+      "reason": "Interaction, keyboard, focus, disabled, recovery, motion, and shared-overlay boundaries are explicit.",
+      "evidence": [
+        "interaction-contract.md",
+        "accessibility-checklist.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 13,
+      "at": "2026-08-14T06:12:26Z",
+      "from": "TOKENS_GEOMETRY",
+      "to": "PROTOTYPE_OPTIONAL",
+      "revision": 1,
+      "reason": "Existing merchant and repository tokens, geometry invariants, and stress fixtures are explicit.",
+      "evidence": [
+        "design-tokens.json",
+        "content-stress-cases.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 14,
+      "at": "2026-08-14T06:12:26Z",
+      "from": "PROTOTYPE_OPTIONAL",
+      "to": "HANDOFF_ASSEMBLY",
+      "revision": 1,
+      "reason": "Standalone prototype is not applicable because approved directions reuse the existing DOM and interactions with preset-only CSS.",
+      "evidence": [
+        "component-anatomy.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 15,
+      "at": "2026-08-14T06:15:45Z",
+      "from": "HANDOFF_ASSEMBLY",
+      "to": "HANDOFF_VALIDATION",
+      "revision": 1,
+      "reason": "Implementation package and strict Chrome QA matrix are assembled for approval.",
+      "evidence": [
+        "implementation-handoff.md",
+        "browser-test-plan.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 16,
+      "at": "2026-08-14T06:18:12Z",
+      "from": "HANDOFF_VALIDATION",
+      "to": "IMPLEMENTATION_AWAITED",
+      "revision": 1,
+      "reason": "User approved the validated implementation handoff and authorized production CSS work.",
+      "evidence": [
+        "implementation-handoff.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 17,
+      "at": "2026-08-14T06:25:27Z",
+      "from": "IMPLEMENTATION_AWAITED",
+      "to": "CHROME_QA_PREFLIGHT",
+      "revision": 1,
+      "reason": "Classic implementation is built and strict default-profile Chrome preflight is now executable.",
+      "evidence": [
+        "qa/preflight.json"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 18,
+      "at": "2026-08-14T06:25:27Z",
+      "from": "CHROME_QA_PREFLIGHT",
+      "to": "CHROME_QA_EXECUTION",
+      "revision": 1,
+      "reason": "All mandatory Chrome preflight checks passed after using the process TMPDIR and preserving exact PNG bytes.",
+      "evidence": [
+        "qa/preflight.json"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 19,
+      "at": "2026-08-14T06:43:12Z",
+      "from": "CHROME_QA_EXECUTION",
+      "to": "BLOCKED",
+      "revision": 1,
+      "reason": "Cache-cleared ignore-cache reload still serves the pre-change Classic stylesheet from the connected SIT extension preview; no deployment was attempted.",
+      "evidence": [
+        "browser-case-result.json"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 20,
+      "at": "2026-08-14T07:00:03Z",
+      "from": "BLOCKED",
+      "to": "CHROME_QA_EXECUTION",
+      "revision": 1,
+      "reason": "User confirmed the SIT Shopify dev server was restarted; resume the blocked live-asset verification.",
+      "evidence": [
+        "browser-case-result.json"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 21,
+      "at": "2026-08-14T07:48:10Z",
+      "from": "CHROME_QA_EXECUTION",
+      "to": "VISUAL_REMEDIATION",
+      "revision": 1,
+      "reason": "All three preset QA slices and frozen-Standard regression recorded; measured CSS corrections completed",
+      "evidence": [
+        "browser-test-report.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 22,
+      "at": "2026-08-14T07:51:45Z",
+      "from": "VISUAL_REMEDIATION",
+      "to": "FINAL_APPROVAL",
+      "revision": 1,
+      "reason": "Horizontal remediation and final cross-template regression passed with scoped shared-boundary accessibility and performance waivers.",
+      "evidence": [
+        "qa/browser-artifact-summary.json"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 23,
+      "at": "2026-08-14T08:11:00Z",
+      "from": "FINAL_APPROVAL",
+      "to": "VISUAL_REMEDIATION",
+      "revision": 2,
+      "reason": "User reopened final QA to investigate product-card component placement, EB hierarchy fidelity, and selected-state layout stability across Classic, Compact, and Horizontal.",
+      "evidence": [],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 24,
+      "at": "2026-08-14T08:11:14Z",
+      "from": "VISUAL_REMEDIATION",
+      "to": "CHROME_QA_PREFLIGHT",
+      "revision": 3,
+      "reason": "Refresh deterministic Chrome conditions before the reopened product-card hierarchy and state-stability audit.",
+      "evidence": [],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 25,
+      "at": "2026-08-14T08:13:50Z",
+      "from": "CHROME_QA_PREFLIGHT",
+      "to": "CHROME_QA_EXECUTION",
+      "revision": 3,
+      "reason": "Revision-3 direct Chrome preflight passed after cache-bypassed reload against the restarted SIT server.",
+      "evidence": [
+        "qa/preflight.json"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 26,
+      "at": "2026-08-14T08:23:53Z",
+      "from": "CHROME_QA_EXECUTION",
+      "to": "VISUAL_REMEDIATION",
+      "revision": 3,
+      "reason": "Revision-3 pairwise QA found internal product-card layout shifts in Classic, Compact, and Horizontal despite stable outer-card dimensions.",
+      "evidence": [
+        "visual-qa-report.md"
+      ],
+      "affected_artifacts": [
+        "visual-qa-report.md",
+        "browser-test-report.md",
+        "remediation-list.md"
+      ]
+    }
+  ]
+}

@@ -3,8 +3,57 @@ import {
   runDeploymentGeneralSync,
 } from "../../../app/services/deployment-general-sync.server";
 
+jest.mock("../../../app/lib/variant-existence.server", () => ({
+  validateVariantIdFromShopify: jest.fn(async (rawVariantId: string | number) => {
+    const normalized = String(rawVariantId || "").trim();
+    if (!normalized) {
+      return { numericId: "", isValidFormat: false, reason: "Variant id is required." };
+    }
+
+    if (/^gid:\/\/shopify\/ProductVariant\/\d+$/.test(normalized)) {
+      return { numericId: normalized.split("/").pop() || "", isValidFormat: true };
+    }
+
+    if (/^\\d+$/.test(normalized)) {
+      return { numericId: normalized, isValidFormat: true };
+    }
+
+    return {
+      numericId: "",
+      isValidFormat: false,
+      reason: "Variant id format is invalid. Expected numeric or gid://shopify/ProductVariant/<id>.",
+    };
+  }),
+  isVariantExistsOnShopifyStorefront: jest.fn(async (_shopDomain: string, variantNumericId: string) => {
+    if (variantNumericId === "101" || variantNumericId === "102") {
+      return { ok: true, id: variantNumericId, status: 200 };
+    }
+    return { ok: false, id: variantNumericId, status: 404, message: "Variant lookup failed with status 404" };
+  }),
+}));
+
 function makeDeps() {
   const admin = { graphql: jest.fn() };
+  const persistedBundleRows = [
+    {
+      id: "bundle-1",
+      shopId: "alpha.myshopify.com",
+      bundleType: "full_page",
+      personalizationData: {
+        addonProducts: { isEnabled: true },
+      },
+      bundleSubscriptionConfig: null,
+      steps: [],
+    },
+    {
+      id: "bundle-2",
+      shopId: "beta.myshopify.com",
+      bundleType: "product_page",
+      personalizationData: null,
+      bundleSubscriptionConfig: { enabled: true },
+      steps: [],
+    },
+  ];
   return {
     prisma: {
       shop: {
@@ -14,29 +63,19 @@ function makeDeps() {
         ]),
       },
       bundle: {
-        findMany: jest.fn().mockResolvedValue([
-          {
-            id: "bundle-1",
-            shopId: "alpha.myshopify.com",
-            bundleType: "full_page",
-            personalizationData: {
-              addonProducts: { isEnabled: true },
-            },
-          },
-          {
-            id: "bundle-2",
-            shopId: "beta.myshopify.com",
-            bundleType: "product_page",
-            personalizationData: null,
-          },
-        ]),
+        findMany: jest.fn().mockResolvedValue(persistedBundleRows),
+      },
+      stepProduct: {
+        update: jest.fn().mockResolvedValue({}),
       },
     },
+    updateStepProductVariants: jest.fn().mockResolvedValue({}),
     getAdmin: jest.fn().mockResolvedValue(admin),
     ensureMetafieldDefinitions: jest.fn().mockResolvedValue(true),
     syncBundle: jest.fn().mockResolvedValue({ synced: true }),
     setupAddonDiscount: jest.fn().mockResolvedValue({ success: true }),
-    syncBundleMetaobjects: jest.fn().mockResolvedValue(0),
+    setupSubscriptionDiscount: jest.fn().mockResolvedValue({ success: true }),
+    setupSubscriptionRecurringDiscount: jest.fn().mockResolvedValue({ success: true }),
     logger: {
       info: jest.fn(),
       warn: jest.fn(),
@@ -82,8 +121,16 @@ describe("deployment general sync", () => {
       failedBundles: 0,
       failedShops: 0,
       metafieldDefinitionShopsSynced: 2,
-      metaobjectValuesSynced: 0,
       addonDiscountShopsSynced: 1,
+      subscriptionDiscountShopsSynced: 1,
+      variantRemediation: {
+        scannedBundles: 2,
+        scannedStepProducts: 0,
+        scannedVariants: 0,
+        removedVariants: 0,
+        updatedBundles: 0,
+        failures: [],
+      },
     });
     expect(deps.ensureMetafieldDefinitions).toHaveBeenCalledTimes(2);
     expect(deps.syncBundle).toHaveBeenCalledWith({
@@ -100,12 +147,118 @@ describe("deployment general sync", () => {
       bundleType: "product_page",
       reason: "sync_bundle",
     });
-    expect(deps.syncBundleMetaobjects).toHaveBeenCalledTimes(2);
     expect(deps.setupAddonDiscount).toHaveBeenCalledTimes(1);
     expect(deps.setupAddonDiscount).toHaveBeenCalledWith(
       expect.objectContaining({ graphql: expect.any(Function) }),
       "alpha.myshopify.com",
     );
+    expect(deps.setupSubscriptionDiscount).toHaveBeenCalledWith(
+      expect.objectContaining({ graphql: expect.any(Function) }),
+      "beta.myshopify.com",
+    );
+  });
+
+  it("ensures the subscription discount role for an enabled FPB configuration", async () => {
+    const deps = makeDeps();
+    deps.prisma.bundle.findMany.mockResolvedValue([
+      {
+        id: "bundle-fpb-subscription",
+        shopId: "alpha.myshopify.com",
+        bundleType: "full_page",
+        personalizationData: null,
+        bundleSubscriptionConfig: { enabled: true },
+        steps: [],
+      },
+    ]);
+
+    await runDeploymentGeneralSync(
+      parseDeploymentGeneralSyncEnv({ WPB_DEPLOYMENT_GENERAL_SYNC: "true" }),
+      deps,
+    );
+
+    expect(deps.setupSubscriptionDiscount).toHaveBeenCalledTimes(1);
+    expect(deps.setupSubscriptionDiscount).toHaveBeenCalledWith(
+      expect.objectContaining({ graphql: expect.any(Function) }),
+      "alpha.myshopify.com",
+    );
+  });
+
+  it("ensures the recurring role only for shops with recurring bundle discounts", async () => {
+    const deps = makeDeps();
+    deps.prisma.bundle.findMany.mockResolvedValue([{
+      id: "bundle-recurring",
+      shopId: "alpha.myshopify.com",
+      bundleType: "full_page",
+      personalizationData: null,
+      bundleSubscriptionConfig: { enabled: true, recurringBundleDiscount: true },
+      steps: [],
+    }]);
+
+    await runDeploymentGeneralSync(
+      parseDeploymentGeneralSyncEnv({ WPB_DEPLOYMENT_GENERAL_SYNC: "true" }),
+      deps,
+    );
+
+    expect(deps.setupSubscriptionRecurringDiscount).toHaveBeenCalledWith(
+      expect.objectContaining({ graphql: expect.any(Function) }),
+      "alpha.myshopify.com",
+    );
+  });
+
+  it("removes invalid persisted StepProduct variant refs and tracks remediation", async () => {
+    const deps = makeDeps();
+    deps.prisma.bundle.findMany.mockResolvedValueOnce([
+      {
+      id: "bundle-1",
+      shopId: "alpha.myshopify.com",
+      bundleType: "full_page",
+      personalizationData: { addonProducts: { isEnabled: true } },
+      steps: [
+        {
+          id: "step-1",
+          StepProduct: [
+            {
+              id: "step-product-1",
+              variants: [
+                { variantId: "gid://shopify/ProductVariant/101" },
+                { variantId: "gid://shopify/ProductVariant/999" },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+      {
+        id: "bundle-2",
+        shopId: "beta.myshopify.com",
+        bundleType: "product_page",
+        personalizationData: null,
+        steps: [],
+      },
+    ]);
+
+    const result = await runDeploymentGeneralSync(
+      parseDeploymentGeneralSyncEnv({
+        WPB_DEPLOYMENT_GENERAL_SYNC: "true",
+      }),
+      deps,
+    );
+
+    expect(result.variantRemediation.scannedStepProducts).toBe(1);
+    expect(result.variantRemediation.scannedVariants).toBe(2);
+    expect(result.variantRemediation.removedVariants).toBe(1);
+    expect(result.variantRemediation.updatedBundles).toBe(1);
+    expect(result.variantRemediation.failures).toHaveLength(1);
+    expect(result.variantRemediation.failures[0]).toMatchObject({
+      shopDomain: "alpha.myshopify.com",
+      bundleId: "bundle-1",
+      stepProductId: "step-product-1",
+      variantId: "gid://shopify/ProductVariant/999",
+    });
+    expect(deps.updateStepProductVariants).toHaveBeenCalledWith({
+      stepProductId: "step-product-1",
+      variants: [{ variantId: "gid://shopify/ProductVariant/101" }],
+    });
   });
 
   it("records bundle failures and continues syncing other bundles", async () => {
@@ -138,6 +291,7 @@ describe("deployment general sync", () => {
       shopId: "alpha.myshopify.com",
       bundleType: "unknown",
       personalizationData: null,
+      steps: [],
     }]);
 
     const result = await runDeploymentGeneralSync(
@@ -149,7 +303,6 @@ describe("deployment general sync", () => {
 
     expect(result.failedBundles).toBe(1);
     expect(deps.syncBundle).not.toHaveBeenCalled();
-    expect(deps.syncBundleMetaobjects).not.toHaveBeenCalled();
   });
 
   it("records shop setup failures and skips that shop's bundles", async () => {

@@ -1,0 +1,15 @@
+{
+  "case_id": "measured-remediation",
+  "invocation_decision": "not_applicable",
+  "claimed_stage": null,
+  "response_summary": "The supplied +8px selected-card growth and clipped mobile focus ring are separate failures. The exact delta is recorded, canonical CSS ownership is resolved, and the rerun scope requires a 0px selection delta plus an unclipped keyboard focus ring at desktop and mobile. A fresh SIT check did not reproduce either failure, so remediation remains bounded to the exact failing build rather than prescribing an unverified patch.",
+  "artifact_files": [
+    ".agents/skills/storefront-design-director/evals/results/latest/browser-evidence/sit-fpb-2026-08-04.json"
+  ],
+  "evidence_notes": [
+    "Geometry failure: supplied selected-card delta is +8px; current product-card contract requires 0px.",
+    "Accessibility failure: supplied mobile focus outline is clipped and must be retested independently.",
+    "Canonical geometry owners are base/search-category-product-grid.css and templates/side-footer-standard.css; focus ownership is base/sidebar-totals-discounts.css.",
+    "Fresh SIT measurements were 0px at 1280x800 and 390x844, with no focus clipping, so the supplied failing build remains the required remediation target."
+  ]
+}

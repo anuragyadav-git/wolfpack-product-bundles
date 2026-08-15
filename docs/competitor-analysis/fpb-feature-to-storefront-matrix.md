@@ -5,7 +5,7 @@ title: Full Page Bundle Feature-to-Storefront Verification Matrix
 type: verification-matrix
 status: active
 summary: Groups FPB storefront parity features into fixture-efficient evidence sweeps across all four designs.
-last_audited: 2026-07-30
+last_audited: 2026-08-12
 owners:
   - Wolfpack Product Bundles
 domains:
@@ -102,8 +102,9 @@ requires a different Shopify product.
 Measured competitor geometry is evidence, not an implementation value. Template
 shells must inherit the Shopify host/container width. Card, grid, summary, and
 tray geometry must be intrinsic and content-driven. Do not encode captured
-viewport widths, store-specific maximum widths, or introduce `clamp()` rules
-for this parity work.
+viewport widths or store-specific maximum widths. Use shared named containers,
+fluid tokens, and bounded `clamp()` values where they preserve the measured
+responsive relationship without copying one fixture's pixel geometry.
 
 ### Fixture groups
 

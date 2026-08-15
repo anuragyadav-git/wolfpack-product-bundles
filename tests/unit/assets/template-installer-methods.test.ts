@@ -4,13 +4,9 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const templateInstallerFiles = [
-  'app/assets/widgets/product-page/templates/cascade-template.js',
-  'app/assets/widgets/product-page/templates/cognive-template.js',
-  'app/assets/widgets/product-page/templates/modal-slot-template.js',
-  'app/assets/widgets/full-page/templates/standard-template.js',
-  'app/assets/widgets/full-page/templates/classic-template.js',
-  'app/assets/widgets/full-page/templates/compact-template.js',
-  'app/assets/widgets/full-page/templates/horizontal-template.js',
+  'app/assets/widgets/product-page/templates/cascade-template.ts',
+  'app/assets/widgets/product-page/templates/grid-template.ts',
+  'app/assets/widgets/product-page/templates/modal-slot-template.ts',
 ];
 
 describe('template installer method attachments', () => {

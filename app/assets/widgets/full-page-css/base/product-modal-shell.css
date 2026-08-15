@@ -1,4 +1,4 @@
-@media (min-width: 640px) {
+@media (min-width: 768px) {
   .bundle-modal-overlay.active .bundle-modal-container {
     transform: scale(1);
   }
@@ -8,6 +8,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  min-height: 44px;
+  box-sizing: border-box;
   padding: 12px 0 8px;
   cursor: grab;
   touch-action: none;
@@ -25,7 +27,7 @@
   background: rgba(0, 0, 0, 0.4);
 }
 
-@media (min-width: 640px) {
+@media (min-width: 768px) {
   .bundle-modal-drag-handle {
     display: none;
   }
@@ -51,7 +53,13 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-@media (min-width: 640px) {
+@media (max-width: 767px) {
+  .bundle-modal-close {
+    display: none;
+  }
+}
+
+@media (min-width: 768px) {
   .bundle-modal-close {
     top: 5px;
     right: 0;
@@ -74,11 +82,11 @@
   flex-direction: column;
   gap: 16px;
   padding: 16px;
-  padding-top: 56px;
+  padding-top: 16px;
   align-items: stretch;
 }
 
-@media (min-width: 640px) {
+@media (min-width: 768px) {
   .bundle-modal-content {
     gap: 24px;
     padding: 0;
@@ -114,6 +122,7 @@
   border-radius: 5px;
   overflow: hidden;
   position: relative;
+  touch-action: pan-y;
 }
 
 .bundle-modal-image-nav {
@@ -167,7 +176,7 @@
 
 @media (max-width: 640px) {
   .bundle-modal-details {
-    padding-bottom: 80px;
+    padding-bottom: 4px;
   }
 }
 
@@ -326,6 +335,10 @@
 }
 
 .bundle-modal-variant-btn.color-swatch {
+  background: var(
+    --bundle-modal-swatch-color,
+    linear-gradient(135deg, #f0f0f0, #e0e0e0)
+  );
   width: 36px;
   height: 36px;
   min-width: 36px;

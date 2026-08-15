@@ -1,0 +1,199 @@
+{
+  "schema_version": 1,
+  "job_id": "fpb-classic-compact-horizontal-card-redesign-20260814",
+  "revision": 1,
+  "status": "complete",
+  "groups": {
+    "color": [
+      {
+        "name": "--bundle-product-card-bg",
+        "value": "existing merchant value with #fff fallback",
+        "unit": "css-color",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": true,
+        "owner": "existing widget settings",
+        "notes": "Card surface for all three presets; never replace with a fixed production color."
+      },
+      {
+        "name": "--bundle-product-card-border-color",
+        "value": "existing merchant/theme value with neutral fallback",
+        "unit": "css-color",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": true,
+        "owner": "existing widget settings",
+        "notes": "Use for restrained frame and selected/focus-safe boundaries."
+      },
+      {
+        "name": "--bundle-product-card-font-color",
+        "value": "existing merchant value",
+        "unit": "css-color",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": true,
+        "owner": "existing widget settings",
+        "notes": "Titles and price inherit merchant ownership."
+      }
+    ],
+    "typography": [
+      {
+        "name": "--bundle-product-card-title-size",
+        "value": "existing merchant value with 1rem fallback",
+        "unit": "length",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": true,
+        "owner": "existing widget settings",
+        "notes": "Preserve readable left alignment and reserve up to two title lines without normalizing merchant copy."
+      }
+    ],
+    "spacing": [
+      {
+        "name": "--bundle-product-card-spacing",
+        "value": "existing merchant value",
+        "unit": "length",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": true,
+        "owner": "existing widget settings",
+        "notes": "Canonical grid and card rhythm input; derive preset aliases with calc only when needed."
+      },
+      {
+        "name": "--bundle-product-card-padding",
+        "value": "existing merchant value with 0.5rem fallback",
+        "unit": "length",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": true,
+        "owner": "existing widget settings",
+        "notes": "Internal frame padding."
+      },
+      {
+        "name": "--bundle-summary-control-gap",
+        "value": "existing token with 0.5rem fallback",
+        "unit": "length",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "shared widget tokens",
+        "notes": "Use between copy, price, and action tracks."
+      }
+    ],
+    "size": [
+      {
+        "name": "--bundle-control-hit-target",
+        "value": 2.75,
+        "unit": "rem",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "base/bootstrap-reservation.css",
+        "notes": "44px minimum action and quantity target; must not shrink."
+      },
+      {
+        "name": "horizontal-media-content-ratio",
+        "value": "3fr 7fr",
+        "unit": "grid-track",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "horizontal/overrides.css",
+        "notes": "Preserve approved 30/70 row anatomy."
+      }
+    ],
+    "radius": [
+      {
+        "name": "--bundle-product-card-border-radius",
+        "value": "existing merchant value with 0.625rem fallback",
+        "unit": "length",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": true,
+        "owner": "existing widget settings",
+        "notes": "Shared visual language across the three preset frames."
+      }
+    ],
+    "border": [
+      {
+        "name": "preset-card-frame",
+        "value": "1px solid var(--bundle-product-card-border-color, var(--color-border, #ececec))",
+        "unit": "css-border",
+        "source": "user-defined",
+        "confidence": "high",
+        "merchant_configurable": true,
+        "owner": "active preset stylesheet",
+        "notes": "Approved restrained frame; true one-pixel primitive with merchant-owned color."
+      }
+    ],
+    "shadow": [
+      {
+        "name": "preset-card-shadow",
+        "value": "none",
+        "unit": "css-shadow",
+        "source": "user-defined",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "active preset stylesheet",
+        "notes": "The approved quiet treatment uses boundaries, not elevation."
+      }
+    ],
+    "z_index": [],
+    "motion": [
+      {
+        "name": "preset-card-state-motion",
+        "value": "none",
+        "unit": "css-transition",
+        "source": "user-defined",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "active preset stylesheet",
+        "notes": "Selection and quantity swaps are immediate and geometry-stable."
+      }
+    ],
+    "breakpoint": [
+      {
+        "name": "fpb-summary-mode-boundary",
+        "value": 800,
+        "unit": "css-px container inline-size",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "shared/responsive-layout.css and shared runtime",
+        "notes": "Horizontal becomes one column below this existing boundary; do not create a second breakpoint."
+      }
+    ],
+    "component_alias": [
+      {
+        "name": "classic-card-gap",
+        "value": "var(--bundle-product-card-spacing)",
+        "unit": "length",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": true,
+        "owner": "classic preset CSS",
+        "notes": "Retain existing alias and ownership."
+      },
+      {
+        "name": "compact-card-gap",
+        "value": "var(--bundle-product-card-spacing)",
+        "unit": "length",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": true,
+        "owner": "compact preset CSS",
+        "notes": "Retain dense preset rhythm without fixed captured gaps."
+      },
+      {
+        "name": "horizontal-card-gap",
+        "value": "existing calc from merchant spacing tokens",
+        "unit": "length",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": true,
+        "owner": "horizontal preset CSS",
+        "notes": "Retain existing responsive expression."
+      }
+    ]
+  }
+}

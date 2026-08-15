@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "job": {
+    "id": "",
+    "title": "",
+    "status": "active",
+    "stage": "DISCOVERY",
+    "revision": 1,
+    "created_at": "",
+    "updated_at": "",
+    "owner": "",
+    "product": "",
+    "repository": "",
+    "branch": "",
+    "commit": "",
+    "artifact_root": "",
+    "resume_stage": null
+  },
+  "scope": {
+    "product_family": "",
+    "template": "",
+    "component": "",
+    "implementation_mode": "design-director",
+    "design_goal": "",
+    "user_problem": "",
+    "primary_user_action": "",
+    "out_of_scope": [],
+    "merchant_configurability": [],
+    "business_logic_constraints": []
+  },
+  "viewports": {
+    "reference": [],
+    "required": [],
+    "edge_cases": [],
+    "browser_zoom": 100,
+    "device_pixel_ratio_policy": "record-actual",
+    "locale": "",
+    "currency": "",
+    "color_scheme": "",
+    "reduced_motion": false
+  },
+  "references": {
+    "current": [],
+    "target": [],
+    "context": [],
+    "approved": [],
+    "implementation": [],
+    "provenance": [],
+    "permissions_or_usage_notes": []
+  },
+  "decisions": {
+    "locked": [],
+    "assumptions": [],
+    "rejected": [],
+    "open": [],
+    "recommendation_delegation": {
+      "status": "not-granted",
+      "scope": [],
+      "exclusions": ["business-behavior", "accessibility", "data-semantics", "approval-scope"],
+      "approved_by": "",
+      "approved_at": "",
+      "expires_at_stage": "FINAL_APPROVAL"
+    }
+  },
+  "states": {
+    "required": [],
+    "optional": [],
+    "not_applicable": [],
+    "coverage_status": "not-started"
+  },
+  "responsive": {
+    "contract_status": "not-started",
+    "breakpoints": [],
+    "transformations": []
+  },
+  "accessibility": {
+    "requirements": [],
+    "known_risks": [],
+    "validation_status": "not-started"
+  },
+  "handoff": {
+    "status": "not-started",
+    "package_path": "",
+    "implementation_owner": "",
+    "implementation_branch": "",
+    "implementation_commit": ""
+  },
+  "qa": {
+    "chrome_mcp_required": true,
+    "profile_policy": "default-profile-only",
+    "allow_isolated_context": false,
+    "preflight_status": "not-started",
+    "preflight_result_path": "qa/preflight.json",
+    "baseline_status": "not-started",
+    "baseline_paths": [],
+    "summary_path": "qa/browser-artifact-summary.json",
+    "execution_status": "not-started",
+    "required_viewports": [],
+    "required_states": [],
+    "console_status": "not-started",
+    "network_status": "not-started",
+    "accessibility_status": "not-started",
+    "lighthouse_status": "not-started",
+    "performance_status": "not-started",
+    "visual_diff_status": "not-started",
+    "non_regression_status": "not-started",
+    "retry_history": [],
+    "artifacts_path": "qa",
+    "blockers": []
+  },
+  "approvals": {
+    "design": {"status": "not-started", "approver": "", "at": "", "revision": null},
+    "handoff": {"status": "not-started", "approver": "", "at": "", "revision": null},
+    "implementation": {"status": "not-started", "approver": "", "at": "", "revision": null},
+    "final": {"status": "not-started", "approver": "", "at": "", "revision": null}
+  },
+  "artifacts": {
+    "immutable_after_approval": true,
+    "current": {},
+    "superseded": []
+  },
+  "history": []
+}

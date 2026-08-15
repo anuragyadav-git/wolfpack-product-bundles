@@ -1,0 +1,117 @@
+schema_version: 1
+id: wolfpack-design-system-manifest
+created: 2026-08-06
+version: 0.3.0
+status: active
+status_description: Runtime-backed copy and Admin Design inventories plus implemented foundation, family, template, fixture, and QA contracts.
+families:
+  - FPB
+  - PPB
+families_inventory:
+  fpb_templates:
+    - STANDARD
+    - CLASSIC
+    - COMPACT
+    - HORIZONTAL
+  ppb_templates:
+    - GRID
+    - LIST
+    - HORIZONTAL_SLOTS
+    - VERTICAL_SLOTS
+artifacts:
+  - design-system/README.md
+  - design-system/CHANGELOG.md
+  - design-system/design-system-manifest.yaml
+  - design-system/00-inventory/configuration-registry.yaml
+  - design-system/00-inventory/configuration-coverage.csv
+  - design-system/00-inventory/copy-registry.yaml
+  - design-system/00-inventory/copy-coverage.csv
+  - design-system/00-inventory/state-registry.yaml
+  - design-system/00-inventory/state-coverage.csv
+  - design-system/00-inventory/duplicate-style-audit.md
+  - design-system/00-inventory/template-registry.yaml
+  - design-system/00-inventory/component-registry.yaml
+  - design-system/00-inventory/ownership-map.md
+  - design-system/00-inventory/gaps-and-decisions.md
+  - design-system/00-inventory/configuration-registry.json
+  - design-system/00-inventory/copy-registry.json
+  - design-system/06-fixtures/products.json
+  - design-system/06-fixtures/fixtures.json
+  - design-system/06-fixtures/bundles/bundles.json
+  - design-system/06-fixtures/bundles/README.md
+  - design-system/06-fixtures/locales/en.json
+  - design-system/06-fixtures/locales/README.md
+  - design-system/06-fixtures/images/README.md
+  - design-system/08-qa/browser-test-plan.yaml
+  - design-system/06-fixtures/states/default-state.md
+  - design-system/scripts/_helpers.mjs
+  - design-system/scripts/extract-config-registry.mjs
+  - design-system/scripts/design-configuration-inventory.cjs
+  - design-system/scripts/extract-copy-registry.mjs
+  - design-system/scripts/copy-runtime-inventory.cjs
+  - design-system/scripts/validate-registry.mjs
+  - design-system/scripts/generate-fixtures.mjs
+  - design-system/scripts/validate-token-coverage.mjs
+  - design-system/scripts/validate-state-coverage.mjs
+  - design-system/scripts/validate-copy-coverage.mjs
+  - design-system/scripts/generate-browser-test-plan.mjs
+  - design-system/scripts/compare-images.py
+  - design-system/01-foundations/design-tokens.json
+  - design-system/01-foundations/merchant-token-contract.json
+  - design-system/01-foundations/typography.md
+  - design-system/01-foundations/color.md
+  - design-system/01-foundations/spacing-and-density.md
+  - design-system/01-foundations/radii-borders-shadows.md
+  - design-system/01-foundations/iconography.md
+  - design-system/01-foundations/imagery.md
+  - design-system/01-foundations/motion.md
+  - design-system/01-foundations/breakpoints.md
+  - design-system/01-foundations/z-index-and-overlays.md
+  - design-system/01-foundations/accessibility-foundations.md
+  - design-system/02-shared-components/product-card.md
+  - design-system/02-shared-components/buttons.md
+  - design-system/02-shared-components/price-group.md
+  - design-system/02-shared-components/quantity-control.md
+  - design-system/02-shared-components/variant-selector.md
+  - design-system/02-shared-components/product-media.md
+  - design-system/02-shared-components/badges.md
+  - design-system/02-shared-components/progress.md
+  - design-system/02-shared-components/feedback.md
+  - design-system/02-shared-components/modal.md
+  - design-system/02-shared-components/selected-product-row.md
+  - design-system/02-shared-components/skeleton.md
+  - design-system/02-shared-components/toast.md
+  - design-system/02-shared-components/empty-state.md
+  - design-system/02-shared-components/error-state.md
+  - design-system/03-fpb/family-contract.md
+  - design-system/03-fpb/state-matrix.md
+  - design-system/03-fpb/configuration-matrix.md
+  - design-system/03-fpb/copy-matrix.md
+  - design-system/03-fpb/responsive-contract.md
+  - design-system/03-fpb/standard/README.md
+  - design-system/03-fpb/classic/README.md
+  - design-system/03-fpb/compact/README.md
+  - design-system/03-fpb/horizontal/README.md
+  - design-system/04-ppb/family-contract.md
+  - design-system/04-ppb/state-matrix.md
+  - design-system/04-ppb/configuration-matrix.md
+  - design-system/04-ppb/copy-matrix.md
+  - design-system/04-ppb/responsive-contract.md
+  - design-system/04-ppb/grid/README.md
+  - design-system/04-ppb/list/README.md
+  - design-system/04-ppb/vertical-slots/README.md
+  - design-system/04-ppb/horizontal-slots/README.md
+  - design-system/05-copy/copy-preview-fixtures.yaml
+  - design-system/05-copy/length-guidance.md
+  - design-system/05-copy/localization.md
+  - design-system/05-copy/placeholder-contract.md
+  - design-system/05-copy/copy-schema.json
+  - design-system/05-copy/fallback-rules.md
+  - design-system/07-prototypes/fpb/README.md
+  - design-system/07-prototypes/ppb/README.md
+  - design-system/08-qa/reports/README.md
+  - design-system/scripts/completion-audit.cjs
+  - design-system/scripts/validate-completion.mjs
+compliance:
+  no_style_assertion_tests_required: true
+  no_unnecessary_backwards_compat_added: true

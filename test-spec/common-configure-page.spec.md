@@ -1,3 +1,30 @@
+---
+schema_version: 1
+id: common-configure-page
+title: Common Configure Page Test Spec
+type: test-spec
+status: active
+summary: Behavioral coverage for the shared FPB and PPB configure-page model and dispatch contracts.
+last_audited: 2026-08-14
+owners:
+  - engineering
+domains:
+  - admin
+systems:
+  - bundle-configure
+source_paths:
+  - app/lib/bundle-config/common-configure-page-model.ts
+  - app/lib/bundle-config/product-page-admin-sections.ts
+related_docs:
+  - internal docs/Architecture/Admin Configure Page.md
+tags:
+  - configure
+  - navigation
+keywords:
+  - bundle-settings
+  - settings-icon
+---
+
 # Test Spec: Common Configure Page
 **Spec ID:** common-configure-page  **Created:** 2026-07-11
 
@@ -8,8 +35,8 @@ Verify the shared FPB/PPB configure page model and dispatch behavior without ass
 ### ConfigureAdminModel
 | # | Scenario | Input | Expected Output | Notes |
 |---|---|---|---|---|
-| 1 | FPB section list | `bundleType: full_page` | Common setup sections with no PPB-only subscriptions section | Adapter contract |
-| 2 | PPB section list | `bundleType: product_page` | Common setup sections plus PPB-only subscriptions | Adapter contract |
+| 1 | FPB section list | `bundleType: full_page` | Common setup sections plus shared subscriptions | Adapter contract |
+| 2 | PPB section list | `bundleType: product_page` | Common setup sections plus shared subscriptions | Adapter contract |
 | 3 | FPB visibility children | `bundleType: full_page` | Bundle Widget child only | Adapter contract |
 | 4 | PPB visibility children | `bundleType: product_page` | Bundle Widget and Bundle Embed children | PPB-only behavior |
 | 5 | FPB bundle link | linked page handle and page URL | Link model returns page URL and linked state | Visibility behavior |
@@ -21,6 +48,7 @@ Verify the shared FPB/PPB configure page model and dispatch behavior without ass
 | 11 | FPB Bundle Settings slots | `bundleType: full_page` | Shared default-products, quantity, summary text plus FPB-only product slots/slot icon | Bundle Settings adapter contract |
 | 12 | PPB Bundle Settings slots | `bundleType: product_page` | Shared default-products, quantity, summary text plus PPB-only variant selector, discount display, banner, CSS, subscription, and embed/place-widget slots | Bundle Settings adapter contract |
 | 13 | PPB category variant update | categories plus `displayVariantsAsIndividualProducts=true` | All categories update that PPB category field and preserve other category data | Shared slot behavior |
+| 14 | Bundle Settings navigation icon | FPB and PPB setup models | Bundle Settings uses the Polaris `settings` icon type | Shared navigation contract |
 
 ### ConfigureActionDispatch
 | # | Scenario | Input | Expected Output | Notes |

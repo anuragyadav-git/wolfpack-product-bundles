@@ -23,8 +23,8 @@ describe('PPB Product List category filtering', () => {
   it('filters products to the active category product ids', () => {
     const step = {
       categories: [
-        { id: 'cat-a', products: [{ id: 'gid://shopify/Product/101' }] },
-        { id: 'cat-b', selectedProducts: [{ productId: 'gid://shopify/Product/202' }] },
+        { categoryId: 'cat-a', products: [{ selectionId: 'gid://shopify/Product/101' }] },
+        { categoryId: 'cat-b', products: [{ selectionId: 'gid://shopify/Product/202' }] },
       ],
     };
 
@@ -43,8 +43,8 @@ describe('PPB Product List category filtering', () => {
   it('returns no products for an empty manual active category', () => {
     const step = {
       categories: [
-        { id: 'cat-a', products: [{ id: 'gid://shopify/Product/101' }] },
-        { id: 'cat-empty', products: [], selectedProducts: [] },
+        { categoryId: 'cat-a', products: [{ selectionId: 'gid://shopify/Product/101' }] },
+        { categoryId: 'cat-empty', products: [] },
       ],
     };
 
@@ -61,8 +61,8 @@ describe('PPB Product List category filtering', () => {
   it('preserves hydrated products for collection-backed active categories', () => {
     const step = {
       categories: [
-        { id: 'cat-a', products: [{ id: 'gid://shopify/Product/101' }] },
-        { id: 'cat-collection', collectionsSelectedData: [{ handle: 'earrings' }] },
+        { categoryId: 'cat-a', products: [{ selectionId: 'gid://shopify/Product/101' }] },
+        { categoryId: 'cat-collection', collections: [{ handle: 'earrings' }] },
       ],
     };
 

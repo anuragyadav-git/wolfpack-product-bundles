@@ -7,7 +7,6 @@ import {
 } from "@remix-run/react";
 import { SaveBar, useAppBridge } from "@shopify/app-bridge-react";
 import { AppLogger } from "../../../lib/logger";
-import { slugify, validateSlug } from "../../../lib/slug-utils";
 import {
   getDefaultDiscountRuleSuccessMessage,
   getDefaultDiscountRuleText,
@@ -47,7 +46,6 @@ import {
 } from "../_shared/bundle-configure/modal-utils";
 import { BundleStatusSection } from "../_shared/bundle-configure/BundleStatusSection";
 import { useSharedBundleHandlers } from "../../../hooks/useSharedBundleHandlers";
-import { INDIVIDUAL_SELLING_PLAN_BLOCKED_MESSAGE } from "../../../lib/bundle-config/product-page-admin-sections";
 import {
   buildDefaultProductEntryFromPicker,
   normalizeDefaultProductsData,
@@ -149,7 +147,6 @@ const configureFlowStaticValues = {
   getVisibilityPickerSelection,
   hidePolarisModal,
   ImagesVisibilitySection,
-  INDIVIDUAL_SELLING_PLAN_BLOCKED_MESSAGE,
   MultiLanguageTextModal,
   normalizeAddonPickerProduct,
   normalizeDefaultProductsData,
@@ -166,7 +163,6 @@ const configureFlowStaticValues = {
   serializePricingDisplayOptions,
   SettingsRow,
   showPolarisModal,
-  slugify,
   STEP_CONDITION_OPERATOR_OPTIONS,
   STEP_CONDITION_TYPE_OPTIONS,
   StepSetupSection,
@@ -188,7 +184,6 @@ const configureFlowStaticValues = {
   useRevalidator,
   useSharedBundleHandlers,
   useState,
-  validateSlug,
   VisibilityBadge,
 };
 

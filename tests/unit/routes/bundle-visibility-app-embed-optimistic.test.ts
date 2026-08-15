@@ -38,21 +38,14 @@ function makeFpbFlow(overrides: Record<string, unknown> = {}) {
   return {
     activeSection: "bundle_visibility",
     appEmbedEnabled: false,
-    bundle: { shopifyPageHandle: "bundle-page" },
-    bundlePageUrl: "https://shop.test/pages/bundle-page",
+    bundle: {},
+    bundlePageUrl: "https://shop.test/apps/product-bundles/wpb/bundle-1",
     fullPageBundleStyles: visibilityStyles,
-    handleAddToStorefront: jest.fn(),
     handleSectionChange: jest.fn(),
-    isInstallingWidget: false,
     markAsDirty: jest.fn(),
     openThemeEditorForAppEmbed: jest.fn(),
     checkAppEmbedStatusBeforePreview: jest.fn(),
-    pageSlug: "bundle-page",
-    pageSlugError: null,
-    setHasManuallyEditedSlug: jest.fn(),
-    setPageSlug: jest.fn(),
     shopify: { toast: { show: jest.fn() } },
-    slugify: (value: string) => value,
     themeEditorUrl: "https://theme-editor.test",
     ...overrides,
   };
@@ -109,7 +102,7 @@ describe("Bundle Visibility app embed optimistic status", () => {
         flow: {
           activeSection: "step_setup",
           appEmbedEnabled: true,
-          bundle: { bundleType: "full_page", shopifyPageHandle: null },
+          bundle: { bundleType: "full_page" },
           bundleProduct: null,
           bundleSetupItems: [
             { id: "bundle_visibility", label: "Bundle Visibility" },

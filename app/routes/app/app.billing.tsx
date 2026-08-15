@@ -23,6 +23,10 @@ import {
 } from "../../utils/pricing";
 import { navigateBackOrFallback } from "../../lib/navigation";
 import { openSupportChat } from "../../lib/support-chat.client";
+import {
+  AdminPageBackTitle,
+  AdminPageTitleBar,
+} from "../../components/AdminPageNavigation";
 
 // Import shared billing components
 import {
@@ -215,22 +219,26 @@ export default function BillingPage() {
     : 0;
 
   const progressBarTone = getProgressBarTone(usagePercentage);
+  const handleBack = () =>
+    navigateBackOrFallback(navigate, "/app/dashboard", {
+      replaceFallback: true,
+    });
 
   return (
     <>
-      <ui-title-bar title={t("billing.route.title")}>
-        <button
-          variant="breadcrumb"
-          onClick={() =>
-            navigateBackOrFallback(navigate, "/app/dashboard", { replaceFallback: true })
-          }
-        >
-          {t("billing.route.dashboard")}
-        </button>
-      </ui-title-bar>
+      <AdminPageTitleBar
+        title={t("billing.route.title")}
+        breadcrumbLabel={t("billing.route.dashboard")}
+        onBack={handleBack}
+      />
 
       <s-query-container containerName="billing-page">
         <div className={billingStyles.pageShell}>
+          <AdminPageBackTitle
+            title={t("billing.route.title")}
+            backLabel="Back to previous page"
+            onBack={handleBack}
+          />
           <s-stack direction="block" gap="large">
 
           {showSuccessBanner && (
@@ -293,7 +301,12 @@ export default function BillingPage() {
                 </s-stack>
                 <CustomProgressBar progress={usagePercentage} tone={progressBarTone} />
                 {!data.subscription?.canCreateBundle && (
-                  <s-banner tone="warning">
+                  <s-banner
+                    tone="warning"
+                    heading="Bundle limit reached"
+                    dismissible={false}
+                    hidden={false}
+                  >
                     {t("billing.route.limitReached")}
                     {isFreePlan && ` ${t("billing.route.limitUpgrade")}`}
                   </s-banner>
@@ -353,7 +366,12 @@ export default function BillingPage() {
               {showCancelConfirm && (
                 <>
                   <s-divider />
-                  <s-banner tone="warning" heading={t("billing.route.cancelHeading")}>
+                  <s-banner
+                    tone="warning"
+                    heading={t("billing.route.cancelHeading")}
+                    dismissible={false}
+                    hidden={false}
+                  >
                     <s-stack direction="block" gap="small">
                       <p style={{ margin: 0, fontSize: 14 }}>
                         {t("billing.route.downgradeBody", { limit: PLANS.free.bundleLimit })}

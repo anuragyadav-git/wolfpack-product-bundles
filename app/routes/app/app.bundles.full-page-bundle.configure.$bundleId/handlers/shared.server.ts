@@ -2,10 +2,7 @@ import type { ShopifyAdmin } from "../../../../lib/auth-guards.server";
 import { AppLogger } from "../../../../lib/logger";
 import { parseConditionValue } from "../../../../lib/parse-condition-value";
 import { safeJsonParse } from "../../../../services/bundles/bundle-configure-handlers.server";
-import {
-  BundleStatus,
-  BundleType,
-} from "../../../../constants/bundle";
+import { BundleType } from "../../../../constants/bundle";
 import {
   formatProductReferencesForRuntime,
   formatStepCategoriesForRuntime,
@@ -17,23 +14,6 @@ import {
 
 const DEFAULT_PROGRESS_MESSAGE = "Add {conditionText} to get {discountText}";
 const DEFAULT_SUCCESS_MESSAGE = "Congratulations! You got {discountText}";
-
-export function parseIndividualSellingPlanSelection(formData: FormData) {
-  const raw = safeJsonParse(
-    formData.get("individualSellingPlanSelection") as string | null,
-    {
-      isEnabled: false,
-      showFor: "ALL_PRODUCTS",
-    },
-  ) as { isEnabled?: unknown; showFor?: unknown };
-  const showFor =
-    raw.showFor === "OOS_PRODUCTS" ? "OOS_PRODUCTS" : "ALL_PRODUCTS";
-
-  return {
-    isEnabled: raw.isEnabled === true,
-    showFor,
-  };
-}
 
 function buildFullPageBundlePricing(pricing: any) {
   if (!pricing) {
@@ -77,12 +57,12 @@ function buildFullPageBundlePricing(pricing: any) {
       showFooter: pricing.showFooter !== false,
       showDiscountProgressBar: pricing.showProgressBar === true,
     },
+    displayOptions: pricing.displayOptions ?? null,
     messages: {
       progress: firstRuleMessage?.discountText || DEFAULT_PROGRESS_MESSAGE,
       qualified: firstRuleMessage?.successMessage || DEFAULT_SUCCESS_MESSAGE,
       showInCart: true,
       showDiscountMessaging: parsedMessages.showDiscountMessaging || false,
-      displayOptions: parsedMessages.displayOptions || null,
       tierTextByRuleId: parsedMessages.tierTextByRuleId || null,
       tierTextByLocaleByRuleId: parsedMessages.tierTextByLocaleByRuleId || null,
     },
@@ -127,7 +107,7 @@ function buildFullPageBundleMetafieldSteps(steps: any[] = []) {
       multiLangData: step.multiLangData ?? {},
       stepImage: step.stepImage ?? step.timelineIconUrl ?? null,
       position: step.position ?? index + 1,
-      minQuantity: Number.isFinite(Number(step.minQuantity)) ? Number(step.minQuantity) : 0,
+      minQuantity: step.minQuantity,
       maxQuantity: step.maxQuantity ?? null,
       enabled: step.enabled !== false,
       conditionType: step.conditionType ?? null,
@@ -241,12 +221,9 @@ export function buildFullPageBundleMetafieldConfig(
     description: bundle.description || "",
     status: bundle.status,
     bundleType: bundle.bundleType || BundleType.FULL_PAGE,
+    publicNumber: bundle.publicNumber,
     templateName: bundle.templateName || null,
     shopifyProductId: bundle.shopifyProductId || null,
-    shopifyPageHandle:
-      (overrides.shopifyPageHandle as string | null | undefined) ??
-      bundle.shopifyPageHandle ??
-      null,
     promoBannerBgImage: bundle.promoBannerBgImage ?? null,
     loadingGif: bundle.loadingGif ?? null,
     type: "cart_transform",
@@ -268,11 +245,9 @@ export function buildFpbBaseConfig(
     bundleType: string;
     templateName: string | null;
     shopifyProductId: string | null;
-    shopifyPageHandle: string | null;
     personalizationData?: unknown;
     boxSelection?: unknown;
     bundleUpsellConfig?: unknown;
-    individualSellingPlanSelection?: unknown;
   },
   stepsData: any[],
   stepConditionsData: Record<string, any[]>,
@@ -292,12 +267,8 @@ export function buildFpbBaseConfig(
       pageTitle: step.pageTitle ?? null,
       multiLangData: step.multiLangData ?? {},
       stepImage: step.stepImage ?? null,
-      minQuantity: Number.isFinite(Number.parseInt(step.minQuantity, 10))
-        ? Number.parseInt(step.minQuantity, 10)
-        : 0,
-      maxQuantity: Number.isFinite(Number.parseInt(step.maxQuantity, 10))
-        ? Number.parseInt(step.maxQuantity, 10)
-        : null,
+      minQuantity: step.minQuantity,
+      maxQuantity: step.maxQuantity,
       enabled: step.enabled !== false,
       conditionType: stepConditionsData[step.id]?.[0]?.type || null,
       conditionOperator: stepConditionsData[step.id]?.[0]?.operator || null,
@@ -377,6 +348,7 @@ export function buildFpbBaseConfig(
         showFooter: discountData.showFooter !== false,
         showDiscountProgressBar: discountData.showDiscountProgressBar === true,
       },
+      displayOptions: canonicalPricingDisplayOptions,
       messages: {
         progress:
           firstRuleMsg?.discountText ||
@@ -386,7 +358,6 @@ export function buildFpbBaseConfig(
           "Congratulations! You got {discountText}",
         showDiscountMessaging: discountData.discountMessagingEnabled || false,
         showInCart: true,
-        displayOptions: canonicalPricingDisplayOptions,
         ruleMessagesByLocale: discountData.ruleMessagesByLocale || null,
         tierTextByRuleId: discountData.tierTextByRuleId || null,
         tierTextByLocaleByRuleId: discountData.tierTextByLocaleByRuleId || null,
@@ -403,14 +374,8 @@ export function buildFpbBaseConfig(
       isEnabled: false,
       allowedQuantity: 1,
     },
-    individualSellingPlanSelection: (updatedBundle as any)
-      .individualSellingPlanSelection ?? {
-      isEnabled: false,
-      showFor: "ALL_PRODUCTS",
-    },
     personalizationData: (updatedBundle as any).personalizationData ?? null,
     shopifyProductId: updatedBundle.shopifyProductId,
-    shopifyPageHandle: updatedBundle.shopifyPageHandle || null,
     updatedAt: new Date().toISOString(),
   };
 }

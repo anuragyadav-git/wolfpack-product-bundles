@@ -78,11 +78,9 @@ describe('PPB modal slot keyboard access', () => {
 
 function createWidget() {
   const widget = {
-    selectedBundle: {
-      renderFilledSlotsAsHorizontalStacked: true,
-    },
     _getProductPageTemplateType: () => 'PDP_MODAL',
-    _getProductPageDesignPreset: () => 'MODAL',
+    _getProductPageDesignPreset: () => 'HORIZONTAL_SLOTS',
+    _getProductPageTemplateContract: () => ({ templateType: 'PDP_MODAL', slots: { orientation: 'horizontal' } }),
     openModal: jest.fn(),
   } as any;
   Object.assign(widget, modalSlotTemplateMethods, ProductPageInpageRenderMethods);

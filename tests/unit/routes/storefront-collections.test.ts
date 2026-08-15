@@ -103,6 +103,62 @@ describe("api.storefront-collections loader", () => {
     expect(body.products[0].descriptionHtml).toBe("<p>Ring <strong>product</strong> description</p>");
   });
 
+  it("preserves multiple Shopify product images for the product details carousel", async () => {
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        data: {
+          collections: {
+            edges: [
+              {
+                node: {
+                  id: "gid://shopify/Collection/1",
+                  handle: "gallery",
+                  products: {
+                    edges: [
+                      {
+                        node: {
+                          id: "gid://shopify/Product/111",
+                          title: "Gallery Product",
+                          handle: "gallery-product",
+                          description: "",
+                          descriptionHtml: "",
+                          featuredImage: { url: "https://cdn.example/primary.jpg" },
+                          images: {
+                            edges: [
+                              { node: { url: "https://cdn.example/primary.jpg" } },
+                              { node: { url: "https://cdn.example/detail.jpg" } },
+                            ],
+                          },
+                          options: [],
+                          variants: { edges: [] },
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            ],
+          },
+        },
+      }),
+    });
+
+    const response = await loader({
+      request: new Request("https://app.example/api/storefront-collections?handles=gallery&shop=test.myshopify.com"),
+      params: {},
+      context: {},
+    } as any);
+    const body = await response.json() as { products: any[] };
+    const requestBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+
+    expect(requestBody.query).toContain("images(first:");
+    expect(body.products[0].images).toEqual([
+      { src: "https://cdn.example/primary.jpg" },
+      { src: "https://cdn.example/detail.jpg" },
+    ]);
+  });
+
   it("preserves variant option fields for grouped product variant selectors", async () => {
     mockFetch.mockResolvedValue({
       ok: true,

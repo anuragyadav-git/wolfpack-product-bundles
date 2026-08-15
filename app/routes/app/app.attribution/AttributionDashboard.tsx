@@ -1,20 +1,15 @@
-import { Await, useFetcher, useLoaderData, useNavigate } from "@remix-run/react";
-import { useState, useMemo, useEffect, useRef, Suspense } from "react";
+import { useFetcher, useNavigate } from "@remix-run/react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useAppBridge } from "@shopify/app-bridge-react";
 import "../../../components/analytics/shared/tokens.css";
 import {
   FunnelHero,
   BundlePerformanceMatrix,
-  LiveActivityFeed,
   TopCampaigns,
 } from "../../../components/analytics";
-import { LazyEngagementPulse, LazyRevenueAttribution } from "../../../components/analytics/lazy";
+import { LazyBundleMetricChart } from "../../../components/analytics/lazy";
 import styles from "../../../styles/routes/app-attribution.module.css";
-import type { AttributionDashboardData, loader } from "../app.attribution";
-import {
-  AttributionAnalyticsSkeletonCard,
-  AttributionDashboardSkeleton,
-} from "./AttributionDashboardSkeleton";
+import type { AttributionDashboardData } from "../app.attribution";
 import {
   ANALYTICS_NO_DATA_BANNER_COPY,
   shouldRenderAnalyticsNoDataBanner,
@@ -219,8 +214,13 @@ export function BackfillWindowModal({
         Close
       </s-button>
 
-      <s-stack direction="block" gap="base">
-        <s-banner heading={`Selected window: ${selectedWindow}`} tone="info">
+        <s-stack direction="block" gap="base">
+        <s-banner
+          heading={`Selected window: ${selectedWindow}`}
+          tone="info"
+          dismissible={false}
+          hidden={false}
+        >
           This queries Shopify orders for the selected period and creates attribution records that Analytics may have missed.
         </s-banner>
         <s-unordered-list>
@@ -253,26 +253,27 @@ function NoDataBanner({
   pixelStatus,
 }: {
   hasNoData: boolean;
-  pixelStatus: Promise<PixelStatusPayload>;
+  pixelStatus: PixelStatusPayload;
 }) {
   if (!hasNoData) return null;
 
+  if (!shouldRenderAnalyticsNoDataBanner({ hasNoData, pixelActive: Boolean(pixelStatus.active) })) {
+    return null;
+  }
+
   return (
-    <Suspense fallback={null}>
-      <Await resolve={pixelStatus}>
-        {(status) => (
-          shouldRenderAnalyticsNoDataBanner({ hasNoData, pixelActive: Boolean(status.active) }) ? (
-            <s-banner heading={ANALYTICS_NO_DATA_BANNER_COPY.heading} tone="info">
-              <s-stack direction="block" gap="small-100">
-                <p className={styles.bodyText}>
-                  {ANALYTICS_NO_DATA_BANNER_COPY.body}
-                </p>
-              </s-stack>
-            </s-banner>
-          ) : null
-        )}
-      </Await>
-    </Suspense>
+    <s-banner
+      heading={ANALYTICS_NO_DATA_BANNER_COPY.heading}
+      tone="info"
+      dismissible={false}
+      hidden={false}
+    >
+      <s-stack direction="block" gap="small-100">
+        <p className={styles.bodyText}>
+          {ANALYTICS_NO_DATA_BANNER_COPY.body}
+        </p>
+      </s-stack>
+    </s-banner>
   );
 }
 
@@ -320,7 +321,7 @@ export function CustomUtmTrackingCard({
   const feedback = fetcher.data?.error ?? fetcher.data?.message;
   const previewLabel = inputAnalysis.accepted.length > 0
     ? `Wolfpack will track: ${inputAnalysis.accepted.join(", ")}`
-    : "No valid custom attributes will be tracked yet.";
+    : null;
   const savedLabel = savedParameters.length > 0
     ? "Currently tracking"
     : "No custom attributes are configured yet.";
@@ -403,7 +404,7 @@ export function CustomUtmTrackingCard({
             }}
           />
           <div className={styles.customUtmFeedback} aria-live="polite">
-            <p className={styles.customUtmPreview}>{previewLabel}</p>
+            {previewLabel && <p className={styles.customUtmPreview}>{previewLabel}</p>}
             {savedParameters.length === 0 ? (
               <p className={styles.mutedBodyText}>
                 {savedLabel}
@@ -471,7 +472,12 @@ export function CustomUtmTrackingCard({
               When a shopper reaches checkout from a matching link, the saved values are stored with the order attribution record and included in analytics exports.
             </p>
           </div>
-          <s-banner tone="warning">
+          <s-banner
+            heading="Privacy check"
+            tone="warning"
+            dismissible={false}
+            hidden={false}
+          >
             Do not track shopper identifiers such as email addresses, phone numbers, customer IDs, or any value that can identify a person.
           </s-banner>
         </s-stack>
@@ -485,13 +491,11 @@ function AttributionDashboardContent({
   pixelStatus,
 }: {
   data: AttributionDashboardViewData;
-  pixelStatus: Promise<PixelStatusPayload>;
+  pixelStatus: PixelStatusPayload;
 }) {
   const {
     days, from, to, prevFrom, prevTo, summary,
-    bundleRevenueSummary, bundleRevenueTrend,
-    funnelSnapshot, engagementTrend, engagedSessions, prevEngagedSessions,
-    engagementToOrderPct, bundleMatrix, topCampaignsRows, activityFeed,
+    funnelSnapshot, bundleMetricTrend, bundleMatrix, topCampaignsRows,
     customUtmParameters,
   } = data;
   const navigate = useNavigate();
@@ -623,9 +627,23 @@ function AttributionDashboardContent({
             onConfirm={handleBackfillConfirm}
           />
           {backfillFetcher.data?.message ? (
-            <s-banner tone="success">{backfillFetcher.data.message}</s-banner>
+            <s-banner
+              tone="success"
+              heading="Backfill completed"
+              dismissible={false}
+              hidden={false}
+            >
+              {backfillFetcher.data.message}
+            </s-banner>
           ) : backfillFetcher.data?.error ? (
-            <s-banner tone="critical">{backfillFetcher.data.error}</s-banner>
+            <s-banner
+              tone="critical"
+              heading="Backfill failed"
+              dismissible={false}
+              hidden={false}
+            >
+              {backfillFetcher.data.error}
+            </s-banner>
           ) : null}
 
           {/* ────────── Revamped analytics sections (wpb-analytics-revamp-1) ─────── */}
@@ -638,23 +656,7 @@ function AttributionDashboardContent({
             showHeader={false}
           />
 
-          <div className={styles.dashboardChartGrid}>
-            <Suspense fallback={<AttributionAnalyticsSkeletonCard size="chart" />}>
-              <LazyEngagementPulse
-                engagedSessions={engagedSessions}
-                prevEngagedSessions={prevEngagedSessions}
-                engagementToOrderPct={engagementToOrderPct}
-                trend={engagementTrend}
-              />
-            </Suspense>
-            <Suspense fallback={<AttributionAnalyticsSkeletonCard size="chart" />}>
-              <LazyRevenueAttribution
-                summary={bundleRevenueSummary}
-                trend={bundleRevenueTrend}
-                formatRevenue={formatRevenue}
-              />
-            </Suspense>
-          </div>
+          <LazyBundleMetricChart trend={bundleMetricTrend} formatRevenue={formatRevenue} />
 
           <BundlePerformanceMatrix
             rows={bundleMatrix}
@@ -664,26 +666,19 @@ function AttributionDashboardContent({
 
           <CustomUtmTrackingCard customUtmParameters={customUtmParameters} />
 
-          <div className={styles.dashboardActivityGrid}>
-            <LiveActivityFeed initialEvents={activityFeed} />
-            <TopCampaigns rows={topCampaignsRows} formatRevenue={formatRevenue} />
-          </div>
+          <TopCampaigns rows={topCampaignsRows} formatRevenue={formatRevenue} />
 
         </div>
     </div>
   );
 }
 
-export default function AttributionDashboard() {
-  const { analytics, pixelStatus } = useLoaderData<typeof loader>();
-
-  return (
-    <>
-      <Suspense fallback={<AttributionDashboardSkeleton />}>
-        <Await resolve={analytics}>
-          {(data) => <AttributionDashboardContent data={data} pixelStatus={pixelStatus} />}
-        </Await>
-      </Suspense>
-    </>
-  );
+export default function AttributionDashboard({
+  data,
+  pixelStatus,
+}: {
+  data: AttributionDashboardViewData;
+  pixelStatus: PixelStatusPayload;
+}) {
+  return <AttributionDashboardContent data={data} pixelStatus={pixelStatus} />;
 }

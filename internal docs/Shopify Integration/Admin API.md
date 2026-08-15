@@ -1,8 +1,30 @@
 ---
+schema_version: 1
+id: shopify-admin-api
 title: Shopify Admin API
 type: shopify-integration
-audited: 2026-04-16
-sources: docs/API_ENDPOINTS.md (corrected), Shopify Dev MCP
+status: active
+summary: Authentication, rate-limit, and operational contracts for Wolfpack Admin API access.
+last_audited: 2026-08-13
+owners:
+  - engineering
+domains:
+  - shopify-integration
+systems:
+  - admin-api
+  - offline-session-auth
+source_paths:
+  - app/shopify.server.ts
+  - app/lib/cached-session-storage.server.ts
+  - app/services/offline-token.server.ts
+related_docs:
+  - internal docs/Architecture/Bundle Field Ownership.md
+tags:
+  - shopify
+  - authentication
+keywords:
+  - offline access token
+  - unauthenticated admin
 ---
 
 # Shopify Admin API
@@ -65,6 +87,23 @@ Do not make background Admin API calls by reading `Session.accessToken` directly
 Production rollout requirement:
 - New merchant launches naturally acquire or migrate expiring offline tokens.
 - Existing installed shops only migrate when a compliant code path loads their offline session. For a full production sweep, run the deployment backfill in dry-run first, then only run apply mode after explicit operator approval because migration revokes legacy non-expiring tokens and bundle sync can mutate Shopify resources.
+
+Read-only Admin audits must classify credential state before interpreting a
+Shopify `401`. Enforcing PostgreSQL read-only transactions prevents an expiring
+session from persisting its rotated token; a subsequent query can therefore
+fail even though the refresh exchange itself succeeded. Refresh only rows with
+an unexpired refresh token in a separately authorized session-maintenance step,
+then rerun the audit read-only. Legacy rows rejected by token exchange and rows
+with unusable refresh tokens require a merchant to launch the embedded app so a
+fresh browser session token can be exchanged. Never weaken the audit by reading
+raw stored access tokens or treating an unaudited shop as ready.
+
+Treat successful authentication and sufficient scopes as separate gates.
+`urlRedirects` requires online-store-navigation access; an older otherwise-valid
+token can still return `Access denied for urlRedirects field` until the merchant
+approves the app's current scopes. Shopify documents HTTP `402` as a frozen shop
+that the owner must unfreeze and HTTP `404` as an unavailable resource or shop;
+neither condition can be repaired by rotating an offline token.
 
 ---
 
@@ -146,4 +185,6 @@ Used by `bundle-config-metafield.server.ts` to cache bundle config for zero-late
 - Rate limit: ~4 req/sec unauthenticated (higher for authenticated/private tokens)
 - Used by widgets for product data when metafield cache is absent
 - Proxy route: `/apps/product-bundles/` (Shopify app proxy)
+- `/api/storefront-products` accepts numeric Shopify product IDs at the browser boundary, converts them to canonical `gid://shopify/Product/...` values before the Storefront API `nodes` query, and rejects malformed IDs before calling Shopify.
+- Product Page category runtime configuration identifies configured products and variants with `selectionId`; category filtering must compare those values with hydrated Storefront API IDs after transport-only normalization.
 - Variant `quantityAvailable` and `currentlyNotInStock` require the `unauthenticated_read_product_inventory` Storefront scope. Public proxy routes must include those fields only when the stored offline session scope contains that grant; otherwise Shopify rejects the whole query. When the scope is absent, map missing inventory quantity to `null` and treat it as unbounded in widgets.

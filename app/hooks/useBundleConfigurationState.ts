@@ -18,6 +18,7 @@ import {
   initializeConfigureRouteState,
   markConfigureRouteDirty,
   openConfigureModal,
+  resetConfigureRouteNavigation,
   setActiveConfigureSection,
   setActiveConfigureTabIndex,
   setAvailablePages as setAvailablePagesAction,
@@ -56,8 +57,6 @@ export interface BundleData {
   bundleType: string;
   templateName?: string;
   shopifyProductId?: string;
-  shopifyPageHandle?: string;
-  shopifyPageId?: string;
   steps: any[];
   pricing?: any;
 }
@@ -77,6 +76,7 @@ export interface UseBundleConfigurationProps {
   bundle: BundleData;
   bundleProduct: BundleProductData | null;
   shopify: any;
+  shopCurrencyCode: string;
 }
 
 // ============================================
@@ -93,10 +93,18 @@ export function getBundleProductImageUrl(loadedBundleProduct?: any): string {
   );
 }
 
+export function shouldResetConfigureNavigation(
+  previousBundleId: string | null,
+  currentBundleId: string,
+): boolean {
+  return previousBundleId !== currentBundleId;
+}
+
 export function useBundleConfigurationState({
   bundle,
   bundleProduct: loadedBundleProduct,
   shopify,
+  shopCurrencyCode,
 }: UseBundleConfigurationProps) {
   const dispatch = useAppDispatch();
   const configureRouteState = useAppSelector((state) => state.configureRouteState);
@@ -104,6 +112,7 @@ export function useBundleConfigurationState({
   const isDirty = configureRouteState.isDirty;
   const isResettingRef = useRef(false);
   const lastProcessedFetcherDataRef = useRef<any>(null);
+  const configuredBundleIdRef = useRef<string | null>(null);
 
   const markAsDirty = useCallback(() => {
     if (!isResettingRef.current) {
@@ -180,6 +189,7 @@ export function useBundleConfigurationState({
   // Pricing management
   const pricingState = useBundlePricing({
     initialPricing: bundle.pricing,
+    currencyCode: shopCurrencyCode,
     onStateChange: markAsDirty
   });
 
@@ -301,9 +311,13 @@ export function useBundleConfigurationState({
   );
 
   useEffect(() => {
+    if (shouldResetConfigureNavigation(configuredBundleIdRef.current, bundle.id)) {
+      dispatch(resetConfigureRouteNavigation());
+      configuredBundleIdRef.current = bundle.id;
+    }
     dispatch(initializeConfigureRouteState({
       bundleProduct: loadedBundleProduct || null,
-      productStatus: loadedBundleProduct?.status || "ACTIVE",
+      productStatus: loadedBundleProduct?.status || "",
       productTitle: loadedBundleProduct?.title || "",
       productImageUrl: getBundleProductImageUrl(loadedBundleProduct),
       selectedCollections: initialSelectedCollections,
@@ -373,11 +387,15 @@ export function useBundleConfigurationState({
     showDiscountProgressBar: pricingState.showDiscountProgressBar,
     discountMessagingEnabled: pricingState.discountMessagingEnabled,
     pricingDisplayOptions: JSON.stringify(pricingState.pricingDisplayOptions),
+    tierTextByRuleId: JSON.stringify(pricingState.tierTextByRuleId),
+    tierTextByLocaleByRuleId: JSON.stringify(
+      pricingState.tierTextByLocaleByRuleId,
+    ),
     selectedCollections: JSON.stringify({}),
     ruleMessages: JSON.stringify(initialRuleMessages),
     stepConditions: JSON.stringify(conditionsState.stepConditions),
     bundleProduct: loadedBundleProduct || null,
-    productStatus: loadedBundleProduct?.status || "ACTIVE",
+    productStatus: loadedBundleProduct?.status || "",
   });
 
   // ===== DISCARD HANDLER =====
@@ -404,6 +422,12 @@ export function useBundleConfigurationState({
       pricingState.setShowDiscountProgressBar(originalValues.showDiscountProgressBar);
       pricingState.setDiscountMessagingEnabled(originalValues.discountMessagingEnabled);
       pricingState.setPricingDisplayOptions(JSON.parse(originalValues.pricingDisplayOptions));
+      pricingState.setTierTextByRuleId(
+        JSON.parse(originalValues.tierTextByRuleId),
+      );
+      pricingState.setTierTextByLocaleByRuleId(
+        JSON.parse(originalValues.tierTextByLocaleByRuleId),
+      );
 
       // Reset collections
       setSelectedCollections(JSON.parse(originalValues.selectedCollections));
@@ -456,6 +480,10 @@ export function useBundleConfigurationState({
       showDiscountProgressBar: pricingState.showDiscountProgressBar,
       discountMessagingEnabled: pricingState.discountMessagingEnabled,
       pricingDisplayOptions: JSON.stringify(pricingState.pricingDisplayOptions),
+      tierTextByRuleId: JSON.stringify(pricingState.tierTextByRuleId),
+      tierTextByLocaleByRuleId: JSON.stringify(
+        pricingState.tierTextByLocaleByRuleId,
+      ),
       selectedCollections: JSON.stringify(selectedCollections),
       ruleMessages: JSON.stringify(ruleMessages),
       stepConditions: JSON.stringify(conditionsState.stepConditions),

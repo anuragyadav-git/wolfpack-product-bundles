@@ -65,6 +65,18 @@ describe("FilePickerTrigger", () => {
     expect((icon.type as Function).name).toBe("MobileIcon");
   });
 
+  it("keeps a loading GIF drop zone clickable without a nested upload button", () => {
+    const props = makeProps({
+      hint: "Click to upload a loading GIF",
+      showUploadButton: false,
+    });
+    const trigger = FilePickerTrigger(props as any);
+
+    expect(trigger.props.role).toBe("button");
+    expect(findElementByType(trigger, "s-button")).toBeNull();
+    expect(JSON.stringify(trigger)).toContain("Click to upload a loading GIF");
+  });
+
   it("exposes change and remove through the banner preview overflow menu", () => {
     const props = makeProps({
       value: "https://cdn.example.test/banner.png",

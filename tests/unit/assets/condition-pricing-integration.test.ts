@@ -17,7 +17,7 @@
 export {};
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const ConditionValidator = require('../../../app/assets/widgets/shared/condition-validator.js');
+const { ConditionValidator } = require('../../../app/assets/widgets/shared/condition-validator.js');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { PricingCalculator } = require('../../../app/assets/widgets/shared/pricing-calculator.js');
 

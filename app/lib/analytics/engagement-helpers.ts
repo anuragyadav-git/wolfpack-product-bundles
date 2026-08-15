@@ -8,6 +8,7 @@
  */
 
 import type { OrderAttributionRow, TrendPoint } from "./analytics-helpers";
+import type { BundleViewRow } from "./bundle-metrics";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -47,10 +48,12 @@ export interface BundleMatrixRow {
   presetId: string | null;
   status: string;
   engagedSessions: number;
+  views: number;
   ordersFromBundle: number;
   revenueCents: number;
   aovCents: number | null;
   engagementToOrderRate: number | null; // 0..100, null when no engagement
+  overallConversionRate: number; // 0..100, orders divided by views
 }
 
 // ─── computeBundleFunnel ───────────────────────────────────────────────────────
@@ -163,6 +166,7 @@ export function buildBundlePerformanceMatrix(
   bundles: BundleSummaryInput[],
   engagementRows: BundleEngagementRow[],
   attributionRows: OrderAttributionRow[],
+  viewRows: BundleViewRow[],
 ): BundleMatrixRow[] {
   const engagedByBundle = new Map<string, Set<string>>();
   for (const r of engagementRows) {
@@ -181,11 +185,18 @@ export function buildBundlePerformanceMatrix(
     revenueByBundle.set(r.bundleId, existing);
   }
 
+  const viewsByBundle = new Map<string, number>();
+  for (const row of viewRows) {
+    if (row.bundleId === null) continue;
+    viewsByBundle.set(row.bundleId, (viewsByBundle.get(row.bundleId) ?? 0) + 1);
+  }
+
   const rows: BundleMatrixRow[] = [];
   for (const b of bundles) {
     const engaged = engagedByBundle.get(b.id)?.size ?? 0;
     const rev = revenueByBundle.get(b.id) ?? { revenue: 0, orders: 0 };
-    if (engaged === 0 && rev.orders === 0) continue;
+    const views = viewsByBundle.get(b.id) ?? 0;
+    if (engaged === 0 && rev.orders === 0 && views === 0) continue;
     const aov = rev.orders > 0 ? Math.round(rev.revenue / rev.orders) : null;
     const rate =
       engaged > 0 ? Math.max(0, Math.min(100, Math.round((rev.orders / engaged) * 100))) : null;
@@ -195,10 +206,14 @@ export function buildBundlePerformanceMatrix(
       presetId: b.presetId,
       status: b.status,
       engagedSessions: engaged,
+      views,
       ordersFromBundle: rev.orders,
       revenueCents: rev.revenue,
       aovCents: aov,
       engagementToOrderRate: rate,
+      overallConversionRate: views > 0
+        ? Number(((rev.orders / views) * 100).toFixed(2))
+        : 0,
     });
   }
 

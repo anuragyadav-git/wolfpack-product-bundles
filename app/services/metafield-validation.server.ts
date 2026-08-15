@@ -250,11 +250,6 @@ export class MetafieldValidationService {
           {
             ownerId: productGid,
             namespace: "custom",
-            key: "component_parents"
-          },
-          {
-            ownerId: productGid,
-            namespace: "custom",
             key: "price_adjustment"
           }
         ];

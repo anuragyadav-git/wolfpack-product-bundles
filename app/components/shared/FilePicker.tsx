@@ -13,8 +13,17 @@ import {
   MAX_BYTES,
   MAX_POLLS,
   filenameFromUrl,
+  isAcceptedFileType,
 } from "./file-picker/utils";
-import { shouldApplyUploadMutationResult } from "../../lib/file-picker-upload-state";
+import {
+  resolveFilePickerInitialOpen,
+  shouldApplyUploadMutationResult,
+} from "../../lib/file-picker-upload-state";
+import {
+  hidePolarisModal,
+  showPolarisModal,
+  useModalHideListener,
+} from "../../routes/app/_shared/bundle-configure/modal-utils";
 
 export function FilePicker({
   value,
@@ -22,15 +31,18 @@ export function FilePicker({
   label = "Choose background image",
   hint,
   uploadLabel = "Upload image",
+  showUploadButton = true,
   triggerIcon = "desktop",
   uploadButtonAction = "upload",
   fitPreviewToTrigger = false,
   maxUploadBytes = MAX_BYTES,
   maxUploadErrorMessage = "File must be under 20 MB.",
+  acceptedTypes = ACCEPTED_TYPES,
+  invalidTypeErrorMessage = "Choose a supported image file.",
   autoOpen = false,
   onClose,
 }: FilePickerProps) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(() => resolveFilePickerInitialOpen(autoOpen));
   const previewActionsMenuId = `file-picker-preview-actions-${useId().replace(/:/g, "")}`;
   const dialogRef = useRef<any>(null);
   const [files, setFiles] = useState<StoreFile[]>([]);
@@ -56,13 +68,6 @@ export function FilePicker({
 
   const filesLoading = filesQuery.isFetching;
   const isBlocked = uploadStatus === "uploading" || uploadStatus === "polling";
-
-  useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog) return;
-    if (open) dialog.show?.();
-    if (!open) dialog.hide?.();
-  }, [open]);
 
   useEffect(() => {
     if (open && files.length === 0) {
@@ -199,6 +204,16 @@ export function FilePicker({
     onClose?.();
   }, [resetUploadState, onClose]);
 
+  useModalHideListener(dialogRef, handleClose);
+
+  useEffect(() => {
+    if (open) {
+      showPolarisModal(dialogRef);
+      return;
+    }
+    hidePolarisModal(dialogRef);
+  }, [open]);
+
   useEffect(() => {
     if (!open) return;
     const handler = (event: KeyboardEvent) => {
@@ -225,10 +240,6 @@ export function FilePicker({
     setSearch("");
     resetUploadState();
   }, [isBlocked, resetUploadState]);
-
-  useEffect(() => {
-    if (autoOpen) handleOpen();
-  }, [autoOpen, handleOpen]);
 
   const handleSelect = useCallback(() => {
     if (selectedUrl) onChange(selectedUrl);
@@ -276,6 +287,12 @@ export function FilePicker({
         return;
       }
 
+      if (!isAcceptedFileType(file.type, acceptedTypes)) {
+        setSizeError(invalidTypeErrorMessage);
+        setUploadFromTrigger(false);
+        return;
+      }
+
       if (file.size > maxUploadBytes) {
         setSizeError(maxUploadErrorMessage);
         setUploadFromTrigger(false);
@@ -293,7 +310,7 @@ export function FilePicker({
       form.append("file", file);
       void uploadStoreFile(form);
     },
-    [maxUploadBytes, maxUploadErrorMessage, uploadStoreFile],
+    [acceptedTypes, invalidTypeErrorMessage, maxUploadBytes, maxUploadErrorMessage, uploadStoreFile],
   );
 
   const filteredFiles = search
@@ -321,6 +338,7 @@ export function FilePicker({
           label={label}
           hint={hint}
           uploadLabel={uploadLabel}
+          showUploadButton={showUploadButton}
           triggerIcon={triggerIcon}
           uploadButtonAction={uploadButtonAction}
           fitPreviewToTrigger={fitPreviewToTrigger}
@@ -339,7 +357,12 @@ export function FilePicker({
         </s-text>
       )}
       {!open && uploadStatus === "error" && uploadError && (
-        <s-banner heading="Upload failed" tone="critical">
+        <s-banner
+          heading="Upload failed"
+          tone="critical"
+          dismissible={false}
+          hidden={false}
+        >
           <s-paragraph>{uploadError}</s-paragraph>
         </s-banner>
       )}
@@ -347,7 +370,7 @@ export function FilePicker({
       <input
         ref={fileInputRef}
         type="file"
-        accept={ACCEPTED_TYPES}
+        accept={acceptedTypes}
         style={{ display: "none" }}
         onChange={handleFileInputChange}
       />

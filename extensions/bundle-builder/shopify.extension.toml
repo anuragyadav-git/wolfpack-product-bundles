@@ -16,19 +16,10 @@ api_version = "2025-10"
 target = "all"
 liquid_path = "blocks/bundle-product-page.liquid"
 
-# Full-Page Bundle Block (for standalone pages)
-[[extensions.blocks]]
-target = "section"
-liquid_path = "blocks/bundle-full-page.liquid"
-
-# Product page upsell placement blocks
+# Product page upsell placement anchor
 [[extensions.blocks]]
 target = "all"
-liquid_path = "blocks/bundle-upsell-block.liquid"
-
-[[extensions.blocks]]
-target = "all"
-liquid_path = "blocks/bundle-upsell-button.liquid"
+liquid_path = "blocks/bundle-upsell.liquid"
 
 # Single App Embed — activated once per store in Theme Settings > App Embeds
 [[extensions.blocks]]

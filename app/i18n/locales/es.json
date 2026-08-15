@@ -8,6 +8,9 @@
     "pricing": "Precios",
     "events": "Actualizaciones y preguntas frecuentes"
   },
+  "integrations": {
+    "requestMessage": "Hola, me gustaría solicitar compatibilidad con una nueva integración."
+  },
   "dashboard": {
     "title": "Dashboard: Wolfpack Bundle Builder",
     "subtitle": "Acceda a sus bundles, soporte al cliente y más.",
@@ -84,7 +87,6 @@
       "previewUnavailable": "Guardar bundle para vista previa",
       "cloneBundle": "Clonar bundle",
       "deleteBundle": "Eliminar bundle",
-      "confirmClone": "¿Está seguro de que desea clonar este bundle?",
       "cloneSuccess": "Bundle clonado exitosamente",
       "deleteSuccess": "Bundle eliminado",
       "themeEditorUnavailable": "El enlace del editor de temas no está disponible para esta tienda."
@@ -204,7 +206,7 @@
       "guideImageAlt": "Cómo activar la inserción de la aplicación Wolfpack Bundles"
     },
     "previewGate": { "title": "La visibilidad de tu paquete aún no está configurada", "body": "Tu paquete está activo, pero los compradores no pueden encontrarlo. Configura la visibilidad para cambiarlo." },
-    "unlistedBundle": { "title": "Tu paquete no está listado", "body": "El paquete está oculto en los resultados de búsqueda y las páginas de colecciones de tu tienda. Para que sea visible, cambia el estado del producto del paquete a Activo en Productos de Shopify." },
+    "unlistedBundle": { "title": "Tu paquete no está listado", "body": "Para que sea visible, cambia el estado del producto del paquete a Activo en Productos de Shopify." },
     "proxyHealth": { "title": "Proxy de aplicación no conectado", "body": "Los widgets de paquetes de página completa no se cargarán en tu tienda. Reinstala la aplicación para solucionarlo." },
     "upgradePrompt": {
       "limitReachedTitle": "Límite de paquetes alcanzado", "limitReachedBody": "Has usado los {{limit}} paquetes del plan Gratuito. Mejora a Grow para obtener hasta 20 paquetes.",

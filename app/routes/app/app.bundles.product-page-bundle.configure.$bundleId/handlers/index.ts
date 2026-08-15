@@ -5,7 +5,6 @@
 export {
   safeJsonParse,
   handleSaveBundle,
-  handleSyncBundle,
   handleUpdateBundleStatus,
   handleSyncProduct,
   handleUpdateBundleProduct,
@@ -20,5 +19,3 @@ export {
   handleAssignProductTemplate,
   handleValidateWidgetPlacement,
 } from "./widget-placement.server";
-
-export { handleValidateSellingPlanGroups } from "./subscriptions.server";

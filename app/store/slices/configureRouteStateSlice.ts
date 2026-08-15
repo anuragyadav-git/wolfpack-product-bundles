@@ -35,7 +35,7 @@ export const defaultConfigureRouteState: ConfigureRouteState = {
   availablePages: [],
   selectedPage: null,
   bundleProduct: null,
-  productStatus: "ACTIVE",
+  productStatus: "",
   productTitle: "",
   productImageUrl: "",
   selectedCollections: {},
@@ -68,12 +68,14 @@ export const configureRouteStateSlice = createSlice({
       >>>,
     ) {
       state.bundleProduct = action.payload.bundleProduct ?? null;
-      state.productStatus = action.payload.productStatus ?? "ACTIVE";
+      state.productStatus = action.payload.productStatus ?? "";
       state.productTitle = action.payload.productTitle ?? "";
       state.productImageUrl = action.payload.productImageUrl ?? "";
       state.selectedCollections = action.payload.selectedCollections ?? {};
       state.ruleMessages = action.payload.ruleMessages ?? {};
       state.isDirty = false;
+    },
+    resetConfigureRouteNavigation(state) {
       state.activeTabIndex = 0;
       state.activeSection = "step_setup";
       state.forceNavigation = false;
@@ -153,6 +155,7 @@ export const {
   initializeConfigureRouteState,
   markConfigureRouteDirty,
   openConfigureModal,
+  resetConfigureRouteNavigation,
   setActiveConfigureSection,
   setActiveConfigureTabIndex,
   setAvailablePages,

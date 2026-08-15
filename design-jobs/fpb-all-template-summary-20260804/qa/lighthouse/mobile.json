@@ -1,0 +1,10 @@
+{
+  "status": "passed",
+  "categories": {
+    "accessibility": { "score": 1.0 },
+    "best-practices": { "score": 0.73 },
+    "seo": { "score": 0.92 },
+    "agentic-browsing": { "score": 1.0 }
+  },
+  "component_findings": []
+}

@@ -1,4 +1,5 @@
 import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
+import { DefaultProductDiscountTipBanner } from "../../_shared/bundle-configure/DefaultProductDiscountTipBanner";
 
 export function FpbDefaultProductsSettings({
   flow,
@@ -6,20 +7,14 @@ export function FpbDefaultProductsSettings({
   flow: ConfigureBundleFlowContext;
 }) {
   const {
-    activeTabIndex,
     buildDefaultProductEntryFromPicker,
-    bundle,
     defaultProductsData,
-    DiscountMethod,
     markAsDirty,
-    pricingState,
     setDefaultProductsData,
     shopify,
-    stepsState,
+    validationErrors = {},
+    clearValidationError,
   } = flow;
-  const settingsStep = stepsState.steps[activeTabIndex] || stepsState.steps[0];
-  const individualSellingPlanBlocked =
-    pricingState.discountType === DiscountMethod.BUY_X_GET_Y;
 
   return (
     <>
@@ -60,6 +55,7 @@ export function FpbDefaultProductsSettings({
               products: defaultProducts,
             }));
             markAsDirty();
+            clearValidationError("settings.defaultProducts");
           };
           return (
             <s-stack direction="block" gap="small">
@@ -92,11 +88,7 @@ export function FpbDefaultProductsSettings({
               <p style={{ margin: 0, fontSize: 13, color: "#6d7175" }}>
                 Choose products that should be added to bundle by default
               </p>
-              <s-banner tone="info">
-                Tip: Discounts are based on all items in your cart. Don&apos;t
-                forget to include the Pre Selected Product&apos;s quantity or
-                amount when setting up discounts.
-              </s-banner>
+              <DefaultProductDiscountTipBanner />
               {!defaultProductsEnabled && (
                 <p
                   style={{
@@ -147,6 +139,11 @@ export function FpbDefaultProductsSettings({
                         </s-badge>
                       )}
                     </s-stack>
+                    {validationErrors["settings.defaultProducts"] && (
+                      <s-text id="configure-settings-defaultProducts" tone="critical">
+                        {validationErrors["settings.defaultProducts"]}
+                      </s-text>
+                    )}
                   </div>
                 </>
               )}

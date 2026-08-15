@@ -2,9 +2,6 @@ export {};
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { fullPageAnalyticsConfigMethods } = require('../../../app/assets/widgets/full-page/methods/analytics-config-methods.js');
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const { fullPageTierFloatingRuntimeMethods } = require('../../../app/assets/widgets/full-page/methods/tier-floating-runtime-methods.js');
-
 function makeWidgetContext(bundleConfig: unknown, bundleConfigSource?: string) {
   const context: any = {
     container: {
@@ -47,7 +44,7 @@ describe('FPB full-page metafield cache', () => {
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
-  it('hydrates through the app proxy when a legacy full cached payload is present', async () => {
+  it('uses the app proxy when an untrusted full payload is present', async () => {
     const cachedBundle = {
       id: 'bundle-1',
       bundleType: 'full_page',
@@ -100,36 +97,4 @@ describe('FPB full-page metafield cache', () => {
     expect(fetchSpy).toHaveBeenCalledWith('/apps/product-bundles/api/bundle/bundle-1.json');
   });
 
-  it('does not need a second pre-render hydrate after a legacy full payload is resolved through the proxy', async () => {
-    const staleBundle = {
-      id: 'bundle-1',
-      bundleType: 'full_page',
-      bundleDesignPresetId: 'STANDARD',
-      name: 'Old Daily Essentials',
-      steps: [{ id: 'step-1', name: 'Old Step', products: [] }],
-    };
-    const currentBundle = {
-      id: 'bundle-1',
-      bundleType: 'full_page',
-      bundleDesignPresetId: 'CLASSIC',
-      name: 'Daily Essentials',
-      steps: [{ id: 'step-1', name: 'Full Size Earrings With A Very Long Classic Pill Label', products: [] }],
-    };
-    const fetchSpy = jest.spyOn(global, 'fetch' as any).mockResolvedValue({
-      ok: true,
-      json: async () => ({ success: true, bundle: currentBundle }),
-    });
-    const widget = makeWidgetContext(staleBundle);
-    Object.assign(widget, fullPageTierFloatingRuntimeMethods);
-
-    await widget.loadBundleData();
-    widget.selectedBundle = widget.bundleData['bundle-1'];
-    const view = await widget.hydrateCurrentFullPageBundleBeforeRender();
-
-    expect(view).toBe(false);
-    expect(widget.selectedBundle).toEqual(currentBundle);
-    expect(widget.bundleData).toEqual({ 'bundle-1': currentBundle });
-    expect(fetchSpy).toHaveBeenCalledTimes(1);
-    expect(fetchSpy).toHaveBeenCalledWith('/apps/product-bundles/api/bundle/bundle-1.json');
-  });
 });

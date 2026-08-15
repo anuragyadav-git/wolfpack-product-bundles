@@ -25,6 +25,8 @@ export function PpbBundleEmbedSection() {
     setBundleEmbedEnabled,
     setBundleEmbedSubTitle,
     setBundleEmbedTitle,
+    validationErrors = {},
+    clearValidationError,
   } = usePpbConfigureContext();
 
   return (
@@ -61,7 +63,7 @@ export function PpbBundleEmbedSection() {
                 <span title="Multi Language">
                   <s-button
                     variant="tertiary"
-                    icon="globe"
+                    icon="language-translate"
                     accessibilityLabel="Multi Language"
                     onClick={() =>
                       openMultiLanguageModal("Bundle Embed", [
@@ -84,28 +86,28 @@ export function PpbBundleEmbedSection() {
                 </span>
               </div>
               <div className={productPageBundleStyles.visibilityFieldStack}>
-                <label className={productPageBundleStyles.visibilityFieldLabel}>
-                  <span>Title</span>
-                  <input
-                    className={productPageBundleStyles.visibilityTextInput}
+                <s-text-field
+                    id="configure-embed-title"
+                    label="Title"
                     value={bundleEmbedTitle}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    required
+                    disabled={!bundleEmbedEnabled || undefined}
+                    error={validationErrors["embed.title"]}
+                    onInput={(e: any) => {
                       setBundleEmbedTitle(e.target.value);
                       markAsDirty();
+                      clearValidationError("embed.title");
                     }}
-                  />
-                </label>
-                <label className={productPageBundleStyles.visibilityFieldLabel}>
-                  <span>Sub Title</span>
-                  <input
-                    className={productPageBundleStyles.visibilityTextInput}
+                />
+                <s-text-field
+                    label="Sub Title"
                     value={bundleEmbedSubTitle}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    disabled={!bundleEmbedEnabled || undefined}
+                    onInput={(e: any) => {
                       setBundleEmbedSubTitle(e.target.value);
                       markAsDirty();
                     }}
-                  />
-                </label>
+                />
               </div>
               <div className={productPageBundleStyles.visibilityPanelSection}>
                 <h4 className={productPageBundleStyles.visibilitySectionTitle}>
@@ -149,7 +151,10 @@ export function PpbBundleEmbedSection() {
                       className={
                         productPageBundleStyles.visibilitySecondaryAction
                       }
-                      onClick={() => openVisibilityProductPicker("embed")}
+                      onClick={async () => {
+                        await openVisibilityProductPicker("embed");
+                        clearValidationError("embed.products");
+                      }}
                     >
                       Select products
                     </button>
@@ -179,6 +184,11 @@ export function PpbBundleEmbedSection() {
                         ),
                       )}
                     </div>
+                    {validationErrors["embed.products"] && (
+                      <s-text id="configure-embed-products" tone="critical">
+                        {validationErrors["embed.products"]}
+                      </s-text>
+                    )}
                   </div>
                 )}
                 {bundleEmbedDisplayOn === "specific_collections" && (
@@ -190,7 +200,10 @@ export function PpbBundleEmbedSection() {
                       className={
                         productPageBundleStyles.visibilitySecondaryAction
                       }
-                      onClick={() => openVisibilityCollectionPicker("embed")}
+                      onClick={async () => {
+                        await openVisibilityCollectionPicker("embed");
+                        clearValidationError("embed.collections");
+                      }}
                     >
                       Select collections
                     </button>
@@ -222,6 +235,11 @@ export function PpbBundleEmbedSection() {
                         ),
                       )}
                     </div>
+                    {validationErrors["embed.collections"] && (
+                      <s-text id="configure-embed-collections" tone="critical">
+                        {validationErrors["embed.collections"]}
+                      </s-text>
+                    )}
                   </div>
                 )}
               </div>

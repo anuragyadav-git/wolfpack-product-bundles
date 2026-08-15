@@ -8,12 +8,17 @@ import { PpbImagesGifsSection } from "./PpbImagesGifsSection";
 import { PpbBundleSettingsSection } from "./PpbBundleSettingsSection";
 import { PpbSubscriptionsSection } from "./PpbSubscriptionsSection";
 import { PpbFreeGiftAddonsSection } from "./PpbFreeGiftAddonsSection";
+import { ConfigureValidationSummary } from "../_shared/bundle-configure/ConfigureValidationSummary";
 
 export function PpbMainSections() {
-  usePpbConfigureContext();
+  const flow = usePpbConfigureContext();
 
   return (
     <>
+      <ConfigureValidationSummary
+        activeSection={flow.activeSection}
+        issues={flow.validationIssues}
+      />
       <PpbStepSetupSection /> <PpbDiscountPricingSection />
       <PpbBundleVisibilitySection /> <PpbBundleWidgetSection />
       <PpbBundleEmbedSection /> <PpbImagesGifsSection />

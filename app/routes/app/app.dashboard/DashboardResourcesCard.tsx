@@ -1,4 +1,4 @@
-import { Link } from "@remix-run/react";
+import { useNavigate } from "@remix-run/react";
 import type { Dispatch, SetStateAction } from "react";
 import { useTranslation } from "react-i18next";
 import dashboardStyles from "./dashboard.module.css";
@@ -11,6 +11,16 @@ type DashboardResourcesCardProps = {
 
 export function DashboardResourcesCard({ activeResource, setActiveResource, handleDirectChat }: DashboardResourcesCardProps) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+
+  const handleExploreUpdatesClick = () => {
+    navigate("/app/events");
+  };
+
+  const handleSdkDocumentationClick = () => {
+    window.open("https://wolfpackapps.com/", "_blank", "noopener,noreferrer");
+  };
+
   return (
   <div className={dashboardStyles.resourcesCard}>
     <div className={dashboardStyles.resourcesLayout}>
@@ -27,14 +37,22 @@ export function DashboardResourcesCard({ activeResource, setActiveResource, hand
           <div className={dashboardStyles.resourceItemIcon}><s-icon type="question-circle" /></div>
           <span className={dashboardStyles.resourceItemLabel}>{t("dashboard.resources.support")}</span>
         </button>
-        <Link to="/app/events" className={dashboardStyles.resourceItem}>
+        <button
+          type="button"
+          className={dashboardStyles.resourceItem}
+          onClick={handleExploreUpdatesClick}
+        >
           <div className={dashboardStyles.resourceItemIcon}><s-icon type="notification" /></div>
           <span className={dashboardStyles.resourceItemLabel}>{t("dashboard.resources.exploreUpdate")}</span>
-        </Link>
-        <a href="https://wolfpackapps.com/" target="_blank" rel="noopener noreferrer" className={dashboardStyles.resourceItem}>
+        </button>
+        <button
+          type="button"
+          className={dashboardStyles.resourceItem}
+          onClick={handleSdkDocumentationClick}
+        >
           <div className={dashboardStyles.resourceItemIcon}><s-icon type="code" /></div>
           <span className={dashboardStyles.resourceItemLabel}>{t("dashboard.resources.sdkDocumentation")}</span>
-        </a>
+        </button>
       </div>
 
       <div className={dashboardStyles.resourcesThumbnails}>

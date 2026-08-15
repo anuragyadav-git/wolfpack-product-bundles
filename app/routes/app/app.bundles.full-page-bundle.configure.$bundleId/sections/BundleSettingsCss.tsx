@@ -6,22 +6,14 @@ export function FpbBundleCssSettings({
   flow: ConfigureBundleFlowContext;
 }) {
   const {
-    activeTabIndex,
-    bundle,
     bundleLevelCss,
     bundleLevelCssExpanded,
     BundleStatusSection,
-    DiscountMethod,
     formState,
     markAsDirty,
-    pricingState,
     setBundleLevelCss,
     setBundleLevelCssExpanded,
-    stepsState,
   } = flow;
-  const settingsStep = stepsState.steps[activeTabIndex] || stepsState.steps[0];
-  const individualSellingPlanBlocked =
-    pricingState.discountType === DiscountMethod.BUY_X_GET_Y;
 
   return (
     <>

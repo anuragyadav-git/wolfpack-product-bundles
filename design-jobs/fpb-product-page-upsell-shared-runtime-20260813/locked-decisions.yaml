@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "job_id": "fpb-product-page-upsell-shared-runtime-20260813",
+  "revision": 1,
+  "status": "approved",
+  "locked": [
+    {
+      "id": "decision-001",
+      "question": "Who owns storefront rendering?",
+      "options_considered": [
+        "Liquid blocks",
+        "App embed runtime"
+      ],
+      "recommendation": "App embed runtime",
+      "selected_value": "App embed runtime with one bundle-upsell anchor",
+      "rationale": "Global targeting and automatic placement require one owner.",
+      "evidence_ids": [
+        "user-plan",
+        "VA-01",
+        "VA-02"
+      ],
+      "status": "locked",
+      "approved_by": "Aditya Awasthi",
+      "approved_at": "2026-08-13",
+      "revision_introduced": 1,
+      "affected_artifacts": [
+        "component-anatomy.md",
+        "implementation-handoff.md"
+      ]
+    },
+    {
+      "id": "decision-002",
+      "question": "Does FPB preset affect upsell behavior?",
+      "options_considered": [
+        "Preset branches",
+        "No preset branches"
+      ],
+      "recommendation": "No preset branches",
+      "selected_value": "Standard, Classic, Compact, and Horizontal share identical handoff logic",
+      "rationale": "The source product page is template-neutral and destination selection state is shared.",
+      "evidence_ids": [
+        "user-plan"
+      ],
+      "status": "locked",
+      "approved_by": "Aditya Awasthi",
+      "approved_at": "2026-08-13",
+      "revision_introduced": 1,
+      "affected_artifacts": [
+        "state-matrix.md",
+        "codex-task.md"
+      ]
+    },
+    {
+      "id": "decision-003",
+      "question": "How is custom placement migrated?",
+      "options_considered": [
+        "Compatibility shim",
+        "Breaking unified anchor"
+      ],
+      "recommendation": "Breaking unified anchor",
+      "selected_value": "Remove both old handles and add bundle-upsell",
+      "rationale": "The repository forbids backwards-compatibility shims and the plan sets version 11.0.0.",
+      "evidence_ids": [
+        "user-plan",
+        "repository-instructions"
+      ],
+      "status": "locked",
+      "approved_by": "Aditya Awasthi",
+      "approved_at": "2026-08-13",
+      "revision_introduced": 1,
+      "affected_artifacts": [
+        "implementation-handoff.md",
+        "acceptance-criteria.md"
+      ]
+    }
+  ],
+  "assumptions": [],
+  "rejected": [],
+  "open": [],
+  "superseded": []
+}

@@ -3,7 +3,7 @@
  *
  * Contains functions that are identical between the full-page and product-page
  * bundle configure routes. File-specific handlers (handleSaveBundle,
- * handleSyncProduct, handleValidateWidgetPlacement, handleCheckFullPageTemplate)
+ * handleSyncProduct and handleValidateWidgetPlacement)
  * live in their respective route handler files.
  */
 
@@ -13,7 +13,7 @@ import type { Session } from "@shopify/shopify-api";
 import { AppLogger } from "../../lib/logger";
 import db from "../../db.server";
 import { ThemeTemplateService } from "../theme-template.server";
-import { BundleStatus, BundleType, FullPageLayout } from "../../constants/bundle";
+import { BundleStatus } from "../../constants/bundle";
 import { SHOPIFY_REST_API_VERSION } from "../../constants/api";
 import { buildBundleProductDescriptionHtml } from "../../lib/bundle-product-description.server";
 

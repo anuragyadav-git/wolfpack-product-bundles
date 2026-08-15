@@ -37,7 +37,6 @@ describe("FPB runtime metafield config", () => {
       fullPageLayout: null,
       templateName: null,
       shopifyProductId: "gid://shopify/Product/999",
-      shopifyPageHandle: "bundle",
       steps: [
         {
           id: "step-1",
@@ -76,7 +75,6 @@ describe("FPB runtime metafield config", () => {
         fullPageLayout: null,
         templateName: null,
         shopifyProductId: "gid://shopify/Product/999",
-        shopifyPageHandle: "bundle",
       } as any,
       [
         {
@@ -114,5 +112,6 @@ describe("FPB runtime metafield config", () => {
       fixedBundlePrice: 4999,
     });
     expect(config).not.toHaveProperty("fullPageLayout");
+    expect(config).not.toHaveProperty("shopifyPageHandle");
   });
 });

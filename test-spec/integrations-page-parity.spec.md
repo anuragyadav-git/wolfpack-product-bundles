@@ -4,8 +4,8 @@ id: integrations-page-parity
 title: Integrations Page Parity Test Spec
 type: test-spec
 status: active
-summary: Verifies the complete ten-card integration inventory, support statuses, and safe setup actions.
-last_audited: 2026-07-30
+summary: Verifies the compact supported-integration catalog, shared loading state, and unsent Crisp request draft.
+last_audited: 2026-08-13
 owners:
   - Wolfpack Product Bundles
 domains:
@@ -14,7 +14,9 @@ systems:
   - admin-integrations
 source_paths:
   - app/lib/admin-configuration-surfaces.ts
+  - app/lib/support-chat.client.ts
   - app/routes/app/app.integrations.tsx
+  - app/routes/app/app.integrations/IntegrationsRouteShell.tsx
 related_docs:
   - internal docs/EB Integrations Reference.md
   - docs/competitor-analysis/checkout-integrations-additional-configurations-parity-plan.md
@@ -33,9 +35,9 @@ keywords:
 
 ## Purpose
 
-Keep the merchant guidance hub aligned with the complete ten-card integration
-inventory while distinguishing runtime support from guided, assisted, and
-planned setup.
+Keep the merchant guidance hub focused on the three integrations that need
+dedicated setup guidance. Shopify Checkout and Theme Cart Drawer remain owned
+by Settings rather than appearing as duplicate catalog entries.
 
 ## Test Cases
 
@@ -43,25 +45,25 @@ planned setup.
 
 | # | Scenario | Input | Expected Output | Notes |
 | --- | --- | --- | --- | --- |
-| 1 | Complete inventory | `INTEGRATION_CATEGORIES` | Five categories and ten cards | Uses live Admin evidence |
-| 2 | Stable order | All categories | Pre-orders, Subscriptions, Reviews, Page Builders, Checkout | Optimized for the source layout |
-| 3 | Supportability | Every card | Supported, Guided setup, Assisted setup, or Planned | Card presence never implies connection |
+| 1 | Compact inventory | `INTEGRATION_CATEGORIES` | Judge.me, GoKwik, and Shopflo only | Native checkout options stay in Settings |
+| 2 | Stable order | All categories | Reviews followed by Checkout | One catalog traversal |
+| 3 | Supportability | Every card | Supported or Guided setup | Card presence never implies connection |
 | 4 | Setup actions | Every card | WPB-owned safe destination | No competitor guide URL |
-| 5 | Assisted setup | Zapiet | Assisted setup status and action | No chat notification until merchant clicks |
 
 ### IntegrationsRoute
 
 | # | Scenario | Input | Expected Output | Notes |
 | --- | --- | --- | --- | --- |
-| 1 | Complete route | Render | All categories, cards, statuses, and setup actions appear | Uses Polaris-compatible semantics |
-| 2 | Request Integration | Explicit click | Opens WPB-owned contact destination | No automatic vendor intent |
-| 3 | External-link safety | Setup and request actions | New browsing context with `noreferrer` | No session leakage |
+| 1 | Initial loading | Route mount | Shared top-edge loading bar only | Catalog appears after readiness |
+| 2 | Compact route | Ready | Three cards, statuses, and setup actions appear | Uses Polaris web components first |
+| 3 | Request Integration | Explicit click | Opens Crisp with a prefilled unsent request | Merchant must press Send |
 | 4 | Responsive traversal | Desktop and mobile | One predictable card order | Visual proof via direct DevTools |
 
 ## Acceptance Criteria
 
-- [x] Five categories and ten cards are present.
-- [x] Every card has an accurate visible support status.
-- [x] Every setup action uses a WPB-owned destination.
+- [x] Judge.me, GoKwik, and Shopflo are the only catalog cards.
+- [x] Shopify Checkout and Theme Cart Drawer are absent from the source inventory.
+- [x] Request Integration opens Crisp with an unsent prefilled message.
+- [x] The shared loading bar hides all catalog content until ready.
 - [x] Focused behavior tests pass.
 - [x] Desktop and mobile Chrome proof is recorded.

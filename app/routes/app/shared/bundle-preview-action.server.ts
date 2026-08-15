@@ -5,8 +5,11 @@ import db from "../../../db.server";
 import { ERROR_MESSAGES } from "../../../constants/errors";
 import { BundleType } from "../../../constants/bundle";
 import { recordFirstBundlePreviewEvent } from "../../../services/bundles/bundle-preview-event.server";
-import { createFpbPreviewToken } from "../../../lib/fpb-preview-token.server";
-import { appendFpbPreviewToken, buildFpbStorefrontUrl } from "../../../lib/fpb-storefront-url";
+import { createBundlePreviewToken } from "../../../lib/bundle-preview-token.server";
+import {
+  appendFpbPreviewToken,
+  buildFpbStorefrontUrl,
+} from "../../../lib/fpb-storefront-url";
 
 export async function handleCreateFpbPreview(
   admin: ShopifyAdmin,
@@ -16,10 +19,14 @@ export async function handleCreateFpbPreview(
 ) {
   const bundle = await db.bundle.findUnique({
     where: { id: bundleId, shopId: session.shop },
-    select: { id: true, bundleType: true, status: true },
+    select: { id: true, publicNumber: true, bundleType: true, status: true },
   });
 
-  if (!bundle || bundle.bundleType !== BundleType.FULL_PAGE) {
+  if (
+    !bundle
+    || bundle.bundleType !== BundleType.FULL_PAGE
+    || bundle.publicNumber === null
+  ) {
     return json(
       { success: false, error: ERROR_MESSAGES.BUNDLE_NOT_FOUND },
       { status: 404 },
@@ -27,8 +34,8 @@ export async function handleCreateFpbPreview(
   }
 
   const shareablePreviewUrl = appendFpbPreviewToken(
-    buildFpbStorefrontUrl(session.shop, bundleId),
-    createFpbPreviewToken({ shop: session.shop, bundleId }),
+    buildFpbStorefrontUrl(session.shop, bundle.publicNumber),
+    createBundlePreviewToken({ shop: session.shop, bundleId }),
   );
 
   await recordFirstBundlePreviewEvent({
@@ -54,6 +61,7 @@ export async function handleRecordBundlePreview(
       id: true,
       bundleType: true,
       status: true,
+      publicNumber: true,
       shopifyProductHandle: true,
     },
   });
@@ -99,6 +107,7 @@ function resolveBundleLink(
   shopDomain: string,
   bundle: {
     id: string;
+    publicNumber: number | null;
     bundleType: string | null;
     shopifyProductHandle: string | null;
   },
@@ -112,7 +121,8 @@ function resolveBundleLink(
   }
 
   if (bundle.bundleType === BundleType.FULL_PAGE) {
-    return buildFpbStorefrontUrl(host, bundle.id);
+    if (bundle.publicNumber === null) return "";
+    return buildFpbStorefrontUrl(host, bundle.publicNumber);
   }
 
   return "";

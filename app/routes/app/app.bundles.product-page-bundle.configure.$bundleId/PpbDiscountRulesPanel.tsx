@@ -1,10 +1,14 @@
 import { usePpbConfigureContext } from "./PpbConfigureContext";
+import {
+  getBogoDiscountInputValue,
+  getBogoDiscountStoredValue,
+} from "../../../lib/pricing-progress-tier-defaults";
+import { DiscountPricingTipBanner } from "../_shared/bundle-configure/DiscountPricingTipBanner";
 
 export function PpbDiscountRulesPanel() {
   const {
     amountToCents,
     centsToAmount,
-    createNewPricingRule,
     DISCOUNT_METHOD_OPTIONS,
     DiscountMethod,
     pricingState,
@@ -37,11 +41,7 @@ export function PpbDiscountRulesPanel() {
             Set up discount rules, applied from lowest to highest.
           </p>
         </s-stack>
-        <s-banner tone="info">
-          Tip: Discounts are calculated based on the products in cart, make sure
-          to add the &quot;Default Product&quot; quantity or amount while
-          configuring discounts.
-        </s-banner>
+        <DiscountPricingTipBanner />
         <div
           style={{
             opacity: pricingState.discountEnabled ? 1 : 0.45,
@@ -58,9 +58,7 @@ export function PpbDiscountRulesPanel() {
                 onChange={(e) => {
                   const nextDiscountType = (e.target as HTMLSelectElement)
                     .value as typeof pricingState.discountType;
-                  const nextRule = createNewPricingRule(nextDiscountType);
-                  pricingState.setDiscountType(nextDiscountType);
-                  pricingState.setDiscountRules([nextRule]);
+                  pricingState.replaceDiscountMethod(nextDiscountType);
                   setRuleMessages({});
                   setRuleMessagesByLocale({});
                   setGlobalSuccessMessage("");
@@ -87,7 +85,11 @@ export function PpbDiscountRulesPanel() {
 }
 
 function PpbBuyXGetYRules() {
-  const { pricingState, productPageBundleStyles } = usePpbConfigureContext();
+  const {
+    pricingState,
+    productPageBundleStyles,
+    validationErrors = {},
+  } = usePpbConfigureContext();
 
   return (
     <s-stack direction="block" gap="small">
@@ -111,7 +113,10 @@ function PpbBuyXGetYRules() {
                 Customer buys
               </p>
               <s-number-field
+                id={`configure-discount-rules-${rule.id}-customerBuys`}
                 label="Minimum quantity of items"
+                required
+                error={validationErrors[`discount.rules.${rule.id}.customerBuys`]}
                 value={String(rule.customerBuys ?? 2)}
                 onInput={(e) =>
                   pricingState.updateDiscountRule(rule.id, {
@@ -127,7 +132,10 @@ function PpbBuyXGetYRules() {
                 Customer gets
               </p>
               <s-number-field
+                id={`configure-discount-rules-${rule.id}-customerGets`}
                 label="Quantity"
+                required
+                error={validationErrors[`discount.rules.${rule.id}.customerGets`]}
                 value={String(rule.customerGets ?? 1)}
                 onInput={(e) =>
                   pricingState.updateDiscountRule(rule.id, {
@@ -141,8 +149,16 @@ function PpbBuyXGetYRules() {
               />
               <div className={productPageBundleStyles.bxyRewardGrid}>
                 <s-number-field
+                  id={`configure-discount-rules-${rule.id}-discountValue`}
                   label="Discount value"
-                  value={String(rule.discountValue ?? 0)}
+                  required
+                  error={validationErrors[`discount.rules.${rule.id}.discountValue`]}
+                  value={String(
+                    getBogoDiscountInputValue(
+                      rule.discountValue ?? 0,
+                      rule.bxyDiscountType ?? "percentage",
+                    ),
+                  )}
                   onInput={(e) =>
                     pricingState.updateDiscountRule(rule.id, {
                       discountValue: (() => {
@@ -151,7 +167,10 @@ function PpbBuyXGetYRules() {
                         return (rule.bxyDiscountType ?? "percentage") ===
                           "percentage"
                           ? Math.min(100, Math.max(0, nextValue))
-                          : Math.max(0, nextValue);
+                          : getBogoDiscountStoredValue(
+                              Math.max(0, nextValue),
+                              "fixed_amount",
+                            );
                       })(),
                     })
                   }
@@ -163,7 +182,7 @@ function PpbBuyXGetYRules() {
                   }
                   prefix={
                     (rule.bxyDiscountType ?? "percentage") === "fixed_amount"
-                      ? "₹"
+                      ? pricingState.currencySymbol
                       : undefined
                   }
                   max={
@@ -178,18 +197,26 @@ function PpbBuyXGetYRules() {
                   onChange={(e) => {
                     const bxyDiscountType = (e.target as HTMLSelectElement)
                       .value as "percentage" | "fixed_amount";
-                    const currentValue = Number(rule.discountValue ?? 0) || 0;
+                    const currentValue = getBogoDiscountInputValue(
+                      Number(rule.discountValue ?? 0) || 0,
+                      rule.bxyDiscountType ?? "percentage",
+                    );
                     pricingState.updateDiscountRule(rule.id, {
                       bxyDiscountType,
                       discountValue:
                         bxyDiscountType === "percentage"
                           ? Math.min(100, Math.max(0, currentValue))
-                          : Math.max(0, currentValue),
+                          : getBogoDiscountStoredValue(
+                              Math.max(0, currentValue),
+                              "fixed_amount",
+                            ),
                     });
                   }}
                 >
                   <s-option value="percentage">% off</s-option>
-                  <s-option value="fixed_amount">₹ off</s-option>
+                  <s-option value="fixed_amount">
+                    {pricingState.currencySymbol} off
+                  </s-option>
                 </s-select>
                 <s-select
                   label="Apply Discount to"
@@ -226,6 +253,7 @@ function PpbStandardDiscountRules() {
     DiscountMethod,
     pricingState,
     productPageBundleStyles,
+    validationErrors = {},
   } = usePpbConfigureContext();
 
   return (
@@ -248,7 +276,10 @@ function PpbStandardDiscountRules() {
             {pricingState.discountType === DiscountMethod.FIXED_BUNDLE_PRICE ? (
               <div className={productPageBundleStyles.discountFieldsRowPair}>
                 <s-number-field
+                  id={`configure-discount-rules-${rule.id}-conditionValue`}
                   label="Number of Products in Bundle"
+                  required
+                  error={validationErrors[`discount.rules.${rule.id}.conditionValue`]}
                   value={String(rule.conditionValue ?? 0)}
                   onInput={(e) =>
                     pricingState.updateDiscountRule(rule.id, {
@@ -259,7 +290,10 @@ function PpbStandardDiscountRules() {
                   min={0}
                 />
                 <s-number-field
+                  id={`configure-discount-rules-${rule.id}-discountValue`}
                   label="Price"
+                  required
+                  error={validationErrors[`discount.rules.${rule.id}.discountValue`]}
                   value={String(centsToAmount(rule.discountValue))}
                   onInput={(e) =>
                     pricingState.updateDiscountRule(rule.id, {
@@ -269,7 +303,7 @@ function PpbStandardDiscountRules() {
                     })
                   }
                   min={0}
-                  prefix="₹"
+                  prefix={pricingState.currencySymbol}
                 />
               </div>
             ) : (
@@ -289,7 +323,10 @@ function PpbStandardDiscountRules() {
                   <s-option value="amount">Amount</s-option>
                 </s-select>
                 <s-number-field
+                  id={`configure-discount-rules-${rule.id}-conditionValue`}
                   label="is greater than or equal to"
+                  required
+                  error={validationErrors[`discount.rules.${rule.id}.conditionValue`]}
                   value={String(
                     rule.conditionType === "amount"
                       ? centsToAmount(rule.conditionValue)
@@ -307,14 +344,21 @@ function PpbStandardDiscountRules() {
                     });
                   }}
                   min={0}
-                  prefix={rule.conditionType === "amount" ? "₹" : undefined}
+                  prefix={
+                    rule.conditionType === "amount"
+                      ? pricingState.currencySymbol
+                      : undefined
+                  }
                 />
                 <s-number-field
+                  id={`configure-discount-rules-${rule.id}-discountValue`}
                   label={
                     pricingState.discountType === DiscountMethod.PERCENTAGE_OFF
                       ? "Percentage Off"
                       : "Fixed Amount Off"
                   }
+                  required
+                  error={validationErrors[`discount.rules.${rule.id}.discountValue`]}
                   value={String(
                     pricingState.discountType === DiscountMethod.PERCENTAGE_OFF
                       ? rule.discountValue
@@ -350,7 +394,7 @@ function PpbStandardDiscountRules() {
                   }
                   prefix={
                     pricingState.discountType !== DiscountMethod.PERCENTAGE_OFF
-                      ? "₹"
+                      ? pricingState.currencySymbol
                       : undefined
                   }
                 />

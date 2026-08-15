@@ -5,7 +5,7 @@ title: Product Card Layout Contract
 type: architecture
 status: authoritative
 summary: Defines stable and display-safe storefront product-card layout and content boundaries.
-last_audited: 2026-07-14
+last_audited: 2026-08-14
 owners:
   - engineering
 domains:
@@ -14,6 +14,13 @@ systems:
   - bundle-widgets
 source_paths:
   - app/assets/widgets/full-page
+  - app/assets/widgets/full-page/methods/side-panel-methods.ts
+  - app/assets/widgets/full-page-css/shared/responsive-layout.css
+  - app/assets/widgets/full-page-css/templates/standard/overrides.css
+  - app/assets/widgets/full-page-css/base/product-modal-shell.css
+  - app/assets/widgets/shared/variant-selector.ts
+  - app/assets/bundle-modal-component.ts
+  - app/storefront/app-embed.ts
   - app/assets/widgets/product-page
 related_docs:
   - Architecture/Bundle Parent Product.md
@@ -59,6 +66,13 @@ This is a hard requirement:
 - Avoid state transitions that change intrinsic card height (for example by showing additional in-card fields, tall selected chips, or expanding rows inside the card).
 - Keep hover/focus feedback non-expanding (outline, border, iconography, color) so cards do not visually overlap neighbors while hovered.
 - Keep selection/hover feedback on the existing card frame via overlays, borders, iconography, text color, opacity, and icon badges.
+- On pointer-capable desktop viewports, hovering the product image reveals a
+  circular magnifying-glass affordance at the image's top-right corner. Render
+  the icon with CSS geometry so it does not depend on a theme-root asset URL;
+  touch/mobile cards do not show this hover-only affordance.
+- Replace a product card's Add To Box button with its inline quantity selector immediately; do not animate width, radius, opacity, or geometry during that state swap.
+- Standard FPB cards use the same card, media, title, price, and sizing rules in text and icon CTA modes. Icon mode may override only the compact action geometry and place that action beside the price.
+- Reserve the Standard FPB variant-selector row only when the runtime renders `.vs-wrapper--standard`. The runtime renders that wrapper only when Bundle Settings enables variant selectors and the grouped product has more than one variant.
 - Prefer fixed row contracts (`min-height`, `height`, flex stretch, consistent padding/line-clamp) so selected/unselected variants stay layout-stable.
 - Keep PPB/inpage and PPB/modal states non-expanding on `selected` and hover-expanded transitions.
 - Keep merchant product descriptions out of compact FPB and PPB product cards. Preserve `description` and `descriptionHtml` in runtime product data for the product-details modal only.
@@ -75,6 +89,147 @@ This is a hard requirement:
   - `app/assets/widgets/full-page-css/templates/side-footer-horizontal.css`
   - `app/assets/widgets/product-page-css/base/modal-product-grid.css`
   - `app/assets/widgets/product-page-css/base/bottom-sheet-modal.css`
+
+## FPB responsive ownership
+
+The full-page widget uses its measured container width, not the browser viewport,
+to choose its summary surface. Standard, Classic, Compact, and Horizontal use
+the shared `data-fpb-summary-mode` contract: widths below `800px` use the sticky
+summary tray, while widths of `800px` or more use the sticky sidebar. The
+existing `ResizeObserver` propagates mode changes to the widget root, layout,
+and tray.
+
+On the mobile path, the shared summary owner renders an edge-to-edge dock with
+the summary trigger and primary action. The trigger opens a modal bottom sheet
+that grows with its content up to `80dvh`; its header, totals, and action remain
+stationary while the selected-products region shows up to three rows and
+scrolls from the fourth row onward. Empty capacity is represented by enough
+line-item skeletons to maintain three visible rows. Opening the sheet locks
+background scroll. Each mobile skeleton uses one row: its image and text group
+share the same vertical bounds rather than creating nested product rows. Mobile
+summary skeletons remain static and do not pulse or shimmer.
+Backdrop, Escape, trigger-toggle, and intentional downward-swipe paths all
+dismiss it and restore focus. The sheet does not render a separate close
+control. Presets may change visual tokens, but must not fork this anatomy or
+interaction contract.
+
+All storefront mobile drawers follow the same close-control boundary. At widths
+below `768px`, product details use the bottom-sheet anatomy with a drag handle,
+swipe dismissal, backdrop dismissal, and no cross button. The mobile variant
+selector also omits a cross and dismisses from its backdrop or after a variant
+choice. At `768px` and wider, product details use the centered desktop modal and
+retain its cross button. Desktop modal controls must not be copied into mobile
+drawer markup.
+
+The product-details drag handle is a 44px touch target and uses pointer capture
+for mouse, pen, and touch input. Only a downward, vertically dominant drag or
+flick dismisses the drawer; horizontal, upward, and short slow movement resets
+the sheet. The content surface keeps native momentum scrolling and contained
+vertical overscroll. Mobile details reserve only 4px below Add To Box, with
+device safe-area spacing owned separately by the drawer container.
+
+Mobile add-to-cart actions show the active discount label badge beside the
+merchant-authored action label and do not repeat the bundle price. Price remains
+owned by the collapsed summary row and the sheet totals. Across collapsed and
+expanded mobile states, the add-to-cart action is the sole discount-badge owner;
+the progress message and Total row do not repeat it.
+
+When Clear is triggered from the expanded mobile summary, confirmation uses a
+second native modal dialog above the summary. The summary remains open but inert
+until Go Back restores it; Clear All resets selections and collapses the mobile
+summary. Desktop Clear retains the existing centered confirmation dialog.
+
+The shared FPB shell is the only owner of horizontal gutters. It mirrors the
+fluid EB shell contract with three direct rules: the outer shell fills the host
+up to `96rem`, uses `0.625rem` padding, and centers each banner, category row,
+and sidebar layout at `96%` width. Do not add gutter `clamp()` formulas,
+piecewise breakpoints, or duplicate preset-level gutter tokens. The app embed
+composes storefront stylesheets in one fixed order: base widget, mobile-summary
+component, responsive shell/sidebar component, then the active preset
+entrypoint. Shared components define the default structural contract once,
+while the final preset layer may override visual treatment or an explicitly
+documented design exception. Preset entrypoints must not reimplement the shared
+gutter, sticky/scroll, summary-mode, or mobile-sheet algorithms.
+
+The four preset entrypoints are intentionally thin:
+
+- `templates/side-footer-standard.css` imports Standard timeline and visual overrides.
+- `templates/side-footer-classic.css` imports Classic visual component files.
+- `templates/side-footer-compact.css` imports Compact visual overrides.
+- `templates/side-footer-horizontal.css` imports Horizontal visual overrides.
+
+The app embed is the importer for `shared/mobile-summary-footer.css` and
+`shared/responsive-layout.css`. They remain separate generated Shopify assets
+instead of being expanded into all four preset files, which avoids duplicate
+downloads and keeps every generated asset below Shopify's 100,000-byte limit.
+
+The catalog track is a named inline-size container. Product grids reflow by
+catalog width: Standard and Compact cap at three columns, Classic caps at four,
+and Horizontal caps at two. Vertical preset media uses one shared fluid bounded
+height, while Horizontal preserves its 30/70 media/content split and contained
+imagery. Sidebar proportions remain preset-owned: Standard and Classic move
+from 59/41 toward 69/31 on wide hosts, Compact uses 60/40, and Horizontal uses
+65/35. Only the selected-products region inside the sidebar scrolls.
+
+Every FPB desktop summary reserves the same three-row product viewport. Each row
+is `4.6875rem` with a `0.9375rem` gap, and the products region begins vertical
+scrolling when a fourth line item is present. This capacity rule does not apply
+to inline slots or the mobile summary tray.
+
+When Product Slots is disabled, Standard, Classic, Compact, and Horizontal route
+desktop selected-product line items through the same shared row renderer. Preset
+styles must not replace that row anatomy. Product-slot tiles and the mobile
+summary keep their existing dedicated render paths.
+
+Discount qualification messages remain on one unbroken line in desktop
+sidebars and mobile summary trays. Presets may own their typography, but must
+not re-enable wrapping for `.side-panel-discount-message` or its mobile text.
+
+Desktop summary sidebars use a fluid `10dvh` sticky inset, matching EB's
+viewport-relative `10%` sticky start. This lets the summary engage before the
+product-card row reaches the top of the viewport while preserving bounded
+sidebar height.
+
+The desktop summary header uses two explicit rows: bundle title and Clear share
+the first row at the same visual height, while the bundle description spans the
+second. Its action area keeps the total group beside the primary action; within
+that group, the label and price are stacked in two equal-height rows.
+
+When Bundle Quantity Options are enabled, the shared box selector follows the
+description as the next desktop summary row for every FPB preset. Its renderer
+and responsive presentation belong to the shared side-panel method and base
+sidebar CSS; preset styles must not restate or override this component.
+
+The active Bundle Quantity Option advances to the next configured rule as soon
+as the shopper's paid-product quantity exceeds the current rule quantity. The
+desktop summary sidebar and expanded mobile footer must both pass the same live
+paid-product quantity into the shared selector so their active rule, slot target,
+and exact-quantity validation cannot drift apart.
+
+Uploaded step-timeline icons occupy 80% of their circular icon container. The
+timeline container, connector geometry, and completed-state indicator retain
+their existing dimensions.
+
+Preset structural rules use the named FPB shell container rather than viewport
+media queries. This keeps a constrained host and a same-width browser viewport
+on the same layout path. The shared responsive asset owns shell gutters,
+summary tracks, sidebar/tray visibility, catalog column counts, and bounded
+vertical-card media. Preset assets own only their visual treatment and
+preset-specific card anatomy.
+
+The app embed owns stylesheet loading. Runtime code may set only validated or
+measured data values through CSS custom properties; it must not inject static
+layout declarations or maintain a second stylesheet-switching path.
+
+### Standard card rows
+
+The Standard FPB card uses one explicit grid for media, title, reserved variant,
+price, and action rows. The variant track remains present when a product has no
+selector so titles, prices, and actions align across the catalog row. Outer
+content transitions use the shared card gap, while the price-to-action gap is a
+smaller dedicated token. Media height remains fluid and catalog-container
+driven. The action row retains the shared accessible control hit target even
+when a measured visual reference uses a smaller button.
 
 ## Acceptance
 

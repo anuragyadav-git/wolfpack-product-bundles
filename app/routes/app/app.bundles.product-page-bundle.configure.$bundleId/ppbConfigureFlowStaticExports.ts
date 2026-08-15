@@ -48,9 +48,7 @@ import {
 } from "../../../lib/pricing-display-options";
 import { deriveControlDependencies } from "../../../lib/bundle-config/control-dependencies";
 import {
-  INDIVIDUAL_SELLING_PLAN_BLOCKED_MESSAGE,
   PRODUCT_PAGE_EDIT_DEFAULTS_HREF,
-  SUBSCRIPTION_NO_COMMON_PLAN_MESSAGE,
   buildProductPageThemeEditorDeepLink,
   resolveProductPageTemplateSuffix,
 } from "../../../lib/bundle-config/product-page-admin-sections";
@@ -124,9 +122,7 @@ export const ppbConfigureFlowStaticExports = {
   getDefaultDiscountRuleSuccessMessage,
   getDefaultDiscountRuleText,
   deriveControlDependencies,
-  INDIVIDUAL_SELLING_PLAN_BLOCKED_MESSAGE,
   PRODUCT_PAGE_EDIT_DEFAULTS_HREF,
-  SUBSCRIPTION_NO_COMMON_PLAN_MESSAGE,
   buildProductPageThemeEditorDeepLink,
   resolveProductPageTemplateSuffix,
   buildDefaultProductEntryFromPicker,

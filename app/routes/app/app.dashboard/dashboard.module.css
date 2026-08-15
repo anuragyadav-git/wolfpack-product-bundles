@@ -10,6 +10,113 @@
   gap: 16px;
 }
 
+.storefrontSetupCard {
+  overflow: hidden;
+}
+
+.storefrontSetupLoadingCard {
+  overflow: hidden;
+  position: relative;
+}
+
+.storefrontSetupLoadingIcon {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  background: #eceef1;
+  flex: 0 0 auto;
+  animation: storefront-loading-pulse 1.2s ease-in-out infinite;
+}
+
+.storefrontSetupLoadingLines {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.storefrontSetupLoadingLine {
+  width: 74%;
+  height: 12px;
+  border-radius: 999px;
+  background: #e9ebef;
+  animation: storefront-loading-pulse 1.2s ease-in-out infinite;
+}
+
+.storefrontSetupLoadingLineShort {
+  width: 48%;
+  height: 12px;
+  border-radius: 999px;
+  background: #eceef1;
+  animation: storefront-loading-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes storefront-loading-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+.storefrontStatusBoardRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.storefrontStatusBoardSection {
+  display: grid;
+  gap: 6px;
+}
+
+.storefrontStatusBoardRowActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+@media (max-width: 560px) {
+  .storefrontStatusBoardRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .storefrontStatusBoardRowActions {
+    align-self: stretch;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 440px) {
+  .storefrontStatusBoardSection {
+    gap: 4px;
+  }
+
+  .storefrontStatusBoardRow {
+    padding: 10px 0;
+  }
+}
+
+@media (max-width: 720px) {
+  .storefrontStatusBoardRow {
+    align-items: flex-start;
+    justify-content: flex-start;
+  }
+
+  .storefrontStatusBoardRowActions {
+    align-items: flex-start;
+  }
+}
+
 .dashboardTitle {
   margin: 0;
   font-size: 20px;
@@ -25,7 +132,8 @@
 }
 
 .dashboardHeader {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
@@ -122,7 +230,7 @@
   padding: 14px 18px 18px;
   display: grid;
   grid-template-columns: 80px minmax(0, 1fr);
-  grid-template-rows: 1fr auto;
+  grid-template-rows: auto auto;
   gap: 10px 14px;
   align-items: start;
 }
@@ -155,7 +263,7 @@
 
 .supportCta {
   grid-column: 1 / -1;
-  align-self: end;
+  align-self: start;
 }
 
 .supportCta s-button[variant="primary"],
@@ -480,7 +588,7 @@
   justify-content: flex-start;
 }
 
-.perPageSelectWrap s-select {
+.perPageSelectWrap s-button {
   width: auto;
 }
 
@@ -509,10 +617,13 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  font: inherit;
   width: 100%;
   min-height: 40px;
   padding: 8px 12px;
   border: 0;
+  appearance: none;
+  -webkit-appearance: none;
   border-radius: 10px;
   background: transparent;
   color: #6d7175;
@@ -580,7 +691,7 @@
   display: grid;
   place-items: center;
   width: 100%;
-  aspect-ratio: 842 / 494;
+  aspect-ratio: 3 / 1;
   height: auto;
   background: #f3f3f3;
   color: #616161;
@@ -684,14 +795,6 @@
 @media (max-width: 1100px) {
   .dashboardPage {
     padding-inline: 24px;
-  }
-
-  .dashboardHeader {
-    flex-direction: column;
-  }
-
-  .dashboardActions {
-    justify-content: flex-start;
   }
 
   .topCardsGrid {

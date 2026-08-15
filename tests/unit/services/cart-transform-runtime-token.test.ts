@@ -5,8 +5,49 @@ import {
   signRuntimeCartToken,
   type RuntimeTokenPayload,
   validateRuntimeTokenSelection,
+  validateLiveSellingPlanSelection,
   verifyRuntimeCartToken,
 } from "../../../app/services/cart-transform-runtime-token.server";
+
+it("accepts native whole-product selling-plan assignments after resolving the exact variant product", async () => {
+  const graphql = jest.fn()
+    .mockResolvedValueOnce({
+      json: async () => ({
+        data: { node: { product: { id: "gid://shopify/Product/1" } } },
+      }),
+    })
+    .mockResolvedValueOnce({
+      json: async () => ({
+        data: {
+          node: {
+            sellingPlans: { nodes: [{ id: "gid://shopify/SellingPlan/1" }] },
+            appliesToProduct: true,
+            appliesToProductVariant: false,
+          },
+        },
+      }),
+    });
+
+  await expect(validateLiveSellingPlanSelection(
+    { graphql },
+    {
+      sellingPlanGroupId: "gid://shopify/SellingPlanGroup/1",
+      sellingPlanId: "gid://shopify/SellingPlan/1",
+      recurringBundleDiscount: false,
+    },
+    [{ variantId: "gid://shopify/ProductVariant/101", quantity: 1 }],
+  )).resolves.toBeUndefined();
+
+  expect(graphql.mock.calls[0][0]).toContain("ProductVariant");
+  expect(graphql.mock.calls[1][0]).toContain("appliesToProduct");
+  expect(graphql.mock.calls[1][1]).toEqual({
+    variables: {
+      id: "gid://shopify/SellingPlanGroup/1",
+      variantId: "gid://shopify/ProductVariant/101",
+      productId: "gid://shopify/Product/1",
+    },
+  });
+});
 
 function makeBundle(overrides: Record<string, unknown> = {}) {
   return {
@@ -114,15 +155,14 @@ describe("cart transform runtime token service", () => {
     ]);
   });
 
-  it("validates selected components from persisted category selectedProducts", () => {
+  it("validates selected components from persisted category products", () => {
     const selection = validateRuntimeTokenSelection(makeBundle({
       steps: [
         {
           StepProduct: [],
           StepCategory: [
             {
-              products: [],
-              selectedProducts: [
+              products: [
                 {
                   id: "gid://shopify/Product/3",
                   variants: [{ id: "gid://shopify/ProductVariant/301" }],
@@ -142,12 +182,12 @@ describe("cart transform runtime token service", () => {
     ]);
   });
 
-  it("validates selected components from runtime category products with variant gid fields", () => {
+  it("validates selected components from persisted category products with variant gid fields", () => {
     const selection = validateRuntimeTokenSelection(makeBundle({
       steps: [
         {
           StepProduct: [],
-          categories: [
+          StepCategory: [
             {
               products: [
                 {
@@ -265,6 +305,121 @@ describe("cart transform runtime token service", () => {
       method: "percentage_off",
       value: 15,
     });
+  });
+
+  it.each(["full_page", "product_page"])(
+    "includes only a saved selling plan for %s and validates recurring intent",
+    (bundleType) => {
+    const bundleSubscriptionConfig = {
+      version: 1,
+      enabled: true,
+      selectedGroup: {
+        id: "gid://shopify/SellingPlanGroup/1",
+        name: "Subscribe",
+        options: [],
+        plans: [{ id: "gid://shopify/SellingPlan/1", sourceName: "Monthly", options: [], position: 1, pricingPolicies: [] }],
+      },
+      selectedPlanIds: ["gid://shopify/SellingPlan/1"],
+      defaultPurchaseOption: { kind: "selling_plan", sellingPlanId: "gid://shopify/SellingPlan/1" },
+      oneTimePurchase: { enabled: true, title: "One time", description: "" },
+      copy: { title: "Purchase options", subtitle: "", unavailableMessage: "Unavailable" },
+      planCopy: { "gid://shopify/SellingPlan/1": { displayName: "Monthly", discountPill: "", description: "" } },
+      showDiscountOnProductCards: false,
+      recurringBundleDiscount: false,
+      bundleDiscountAppliesOn: "both",
+      translations: {},
+    };
+    const payload = buildRuntimeTokenPayload({
+      shop: "test-shop.myshopify.com",
+      bundle: makeBundle({ bundleType, bundleSubscriptionConfig }),
+      parentVariantId: "gid://shopify/ProductVariant/PARENT",
+      offerGroupId: "bundle-1_SESSION",
+      bundleType,
+      selection: {
+        components: [{ variantId: "101", quantity: 1 }],
+        subscription: {
+          sellingPlanGroupId: "gid://shopify/SellingPlanGroup/1",
+          sellingPlanId: "gid://shopify/SellingPlan/1",
+          recurringBundleDiscount: false,
+        },
+      },
+    });
+    expect(payload.subscription).toEqual({
+      sellingPlanGroupId: "gid://shopify/SellingPlanGroup/1",
+      sellingPlanId: "gid://shopify/SellingPlan/1",
+      recurringBundleDiscount: false,
+    });
+    expect(() => buildRuntimeTokenPayload({
+      shop: "test-shop.myshopify.com",
+      bundle: makeBundle({ bundleType, bundleSubscriptionConfig }),
+      parentVariantId: "gid://shopify/ProductVariant/PARENT",
+      offerGroupId: "bundle-1_SESSION",
+      bundleType,
+      selection: {
+        components: [{ variantId: "101", quantity: 1 }],
+        subscription: {
+          sellingPlanGroupId: "gid://shopify/SellingPlanGroup/1",
+          sellingPlanId: "gid://shopify/SellingPlan/1",
+          recurringBundleDiscount: true,
+        },
+      },
+    })).toThrow(/recurring bundle discount selection/i);
+
+    const recurringPayload = buildRuntimeTokenPayload({
+      shop: "test-shop.myshopify.com",
+      bundle: makeBundle({
+        bundleType,
+        bundleSubscriptionConfig: { ...bundleSubscriptionConfig, recurringBundleDiscount: true },
+      }),
+      parentVariantId: "gid://shopify/ProductVariant/PARENT",
+      offerGroupId: "bundle-1_SESSION",
+      bundleType,
+      selection: {
+        components: [{ variantId: "101", quantity: 1 }],
+        subscription: {
+          sellingPlanGroupId: "gid://shopify/SellingPlanGroup/1",
+          sellingPlanId: "gid://shopify/SellingPlan/1",
+          recurringBundleDiscount: true,
+        },
+      },
+    });
+    expect(recurringPayload.subscription?.recurringBundleDiscount).toBe(true);
+    },
+  );
+
+  it.each([
+    ["subscription", undefined, 0],
+    ["subscription", "gid://shopify/SellingPlan/1", 15],
+    ["one_time", undefined, 15],
+    ["one_time", "gid://shopify/SellingPlan/1", 0],
+  ])("targets bundle discounts to %s purchases", (target, planId, expectedValue) => {
+    const bundleSubscriptionConfig = {
+      version: 1, enabled: true,
+      selectedGroup: { id: "gid://shopify/SellingPlanGroup/1", name: "Subscribe", options: [], plans: [{ id: "gid://shopify/SellingPlan/1", sourceName: "Monthly", options: [], position: 1, pricingPolicies: [] }] },
+      selectedPlanIds: ["gid://shopify/SellingPlan/1"],
+      defaultPurchaseOption: { kind: "one_time" },
+      oneTimePurchase: { enabled: true, title: "One time", description: "" },
+      copy: { title: "Purchase options", subtitle: "", unavailableMessage: "Unavailable" },
+      planCopy: { "gid://shopify/SellingPlan/1": { displayName: "Monthly", discountPill: "", description: "" } },
+      showDiscountOnProductCards: false, recurringBundleDiscount: false,
+      bundleDiscountAppliesOn: target, translations: {},
+    };
+    const payload = buildRuntimeTokenPayload({
+      shop: "test-shop.myshopify.com",
+      bundle: makeBundle({ bundleSubscriptionConfig }),
+      parentVariantId: "gid://shopify/ProductVariant/PARENT",
+      offerGroupId: "bundle-1_SESSION",
+      bundleType: "full_page",
+      selection: {
+        components: [{ variantId: "101", quantity: 1 }],
+        ...(planId ? { subscription: {
+          sellingPlanGroupId: "gid://shopify/SellingPlanGroup/1",
+          sellingPlanId: planId,
+          recurringBundleDiscount: false,
+        } } : {}),
+      },
+    });
+    expect((payload.priceAdjustment as any).value).toBe(expectedValue);
   });
 
   it("omits validation-only product IDs from the signed runtime token payload", () => {

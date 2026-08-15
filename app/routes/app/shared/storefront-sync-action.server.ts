@@ -1,10 +1,17 @@
 import { json } from "@remix-run/node";
 import type { Session } from "@shopify/shopify-api";
 import type { ShopifyAdmin } from "../../../lib/auth-guards.server";
+import db from "../../../db.server";
 import {
   syncBundleStorefrontNow,
   type StorefrontSyncReason,
 } from "../../../services/bundles/storefront-sync.server";
+import { createBundlePreviewToken } from "../../../lib/bundle-preview-token.server";
+import {
+  appendFpbPreviewToken,
+  buildFpbStorefrontUrl,
+} from "../../../lib/fpb-storefront-url";
+import { recordFirstBundlePreviewEvent } from "../../../services/bundles/bundle-preview-event.server";
 
 function getErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : "Storefront sync failed";
@@ -59,11 +66,45 @@ export async function handlePrepareStorefrontPreview(
       reason: "preview",
     });
 
+    const previewToken = createBundlePreviewToken({
+      shop: session.shop,
+      bundleId,
+    });
+    let shareablePreviewUrl: string | null = null;
+
+    if (bundleType === "full_page") {
+      const bundle = await db.bundle.findUnique({
+        where: { id: bundleId, shopId: session.shop },
+        select: { id: true, publicNumber: true, bundleType: true, status: true },
+      });
+      if (
+        !bundle
+        || bundle.bundleType !== "full_page"
+        || bundle.publicNumber === null
+      ) {
+        throw new Error("Bundle not found");
+      }
+
+      shareablePreviewUrl = appendFpbPreviewToken(
+        buildFpbStorefrontUrl(session.shop, bundle.publicNumber),
+        previewToken,
+      );
+      await recordFirstBundlePreviewEvent({
+        admin,
+        shopDomain: session.shop,
+        bundle,
+        bundleLink: shareablePreviewUrl,
+        routeFamily: "fpb_configure",
+      });
+    }
+
     return json({
       success: true,
       statusCode: 200,
       ready: true,
       message: "success",
+      ...(bundleType === "product_page" ? { previewToken } : {}),
+      ...(shareablePreviewUrl ? { shareablePreviewUrl } : {}),
     });
   } catch (error) {
     return json(

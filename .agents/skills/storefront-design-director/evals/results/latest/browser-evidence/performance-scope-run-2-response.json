@@ -1,0 +1,17 @@
+{
+  "case_id": "performance-scope",
+  "invocation_decision": "not_applicable",
+  "claimed_stage": null,
+  "response_summary": "Two mobile, hard-reload Chrome DevTools traces were recorded and saved under the same lab policy. The candidate observed CLS 0.3139 and the repeat baseline observed CLS 0.0006; neither trace exposed a root-cause node. This is lab evidence only, no CrUX data exists, and approval remains blocked pending a stable reproduction and post-remediation rerun.",
+  "artifact_files": [
+    ".agents/skills/storefront-design-director/evals/results/latest/browser-evidence/sit-fpb-2026-08-04.json",
+    "/var/folders/fy/_yqdzrz51l99b3cp_bx6272r0000gn/T/storefront-design-director-performance-scope-mobile.trace.json.gz",
+    "/var/folders/fy/_yqdzrz51l99b3cp_bx6272r0000gn/T/storefront-design-director-performance-scope-mobile-baseline.trace.json.gz"
+  ],
+  "evidence_notes": [
+    "Chrome DevTools MCP performance trace used with a 390x844 mobile viewport, DPR 3, CPU 1x, and no network throttling.",
+    "CLSCulprits investigated both runs; Chrome reported no potential root cause.",
+    "Candidate raw trace and repeat-baseline raw trace were saved with SHA-256 hashes in the evidence artifact.",
+    "The run is explicitly labeled lab-only and no field-data claim is made."
+  ]
+}

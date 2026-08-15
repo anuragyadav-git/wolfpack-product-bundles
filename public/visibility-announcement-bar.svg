@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="title desc">
+  <title id="title">Storefront announcement bar placement</title>
+  <desc id="desc">A storefront browser with the top promotional announcement bar highlighted.</desc>
+  <rect width="640" height="360" rx="24" fill="#f1f2f4"/>
+  <rect x="30" y="30" width="580" height="300" rx="14" fill="#fff" stroke="#c9ccd0" stroke-width="3"/>
+  <rect x="30" y="30" width="580" height="42" rx="14" fill="#e5e7e9"/>
+  <circle cx="54" cy="51" r="6" fill="#9ca3aa"/><circle cx="74" cy="51" r="6" fill="#9ca3aa"/><circle cx="94" cy="51" r="6" fill="#9ca3aa"/>
+  <rect x="44" y="82" width="552" height="40" rx="7" fill="#008060" stroke="#006e52" stroke-width="3"/>
+  <rect x="198" y="97" width="244" height="10" rx="5" fill="#fff"/>
+  <rect x="54" y="142" width="532" height="48" rx="7" fill="#f2f3f3"/>
+  <rect x="74" y="160" width="92" height="14" rx="6" fill="#202223"/><rect x="390" y="162" width="46" height="9" rx="4" fill="#8c9196"/><rect x="454" y="162" width="46" height="9" rx="4" fill="#8c9196"/><rect x="518" y="162" width="46" height="9" rx="4" fill="#8c9196"/>
+  <rect x="54" y="208" width="532" height="92" rx="10" fill="#e8eaec"/>
+  <rect x="80" y="232" width="186" height="18" rx="6" fill="#62686d"/><rect x="80" y="264" width="132" height="10" rx="5" fill="#a1a6aa"/>
+  <rect x="44" y="72" width="188" height="28" rx="14" fill="#202223"/><text x="138" y="91" fill="#fff" font-family="Arial,sans-serif" font-size="13" text-anchor="middle">ANNOUNCEMENT BAR</text>
+</svg>

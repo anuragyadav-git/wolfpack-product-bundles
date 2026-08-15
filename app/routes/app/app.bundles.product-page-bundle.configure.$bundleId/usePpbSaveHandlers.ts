@@ -1,20 +1,43 @@
 import { useCallback } from "react";
 import { AppLogger } from "../../../lib/logger";
-import { DiscountMethod } from "../../../types/pricing";
 import { normalizeDefaultProductsData } from "../../../lib/bundle-config/default-products";
 import { buildVisibilityDisplayConfiguration } from "./ConfigureBundleFlow.helpers";
+import { useConfigureValidation } from "../_shared/bundle-configure/useConfigureValidation";
+import { validateBundleSubscriptionConfig } from "../../../lib/bundle-subscriptions";
 
 export function usePpbSaveHandlers({
   base,
   visibility,
   display,
   settings,
+  templateState,
+  categoryHandlers,
 }: {
   base: any;
   visibility: any;
   display: any;
   settings: any;
+  templateState: any;
+  categoryHandlers: any;
 }) {
+  const validation = useConfigureValidation({
+    kind: "ppb",
+    setActiveSection: base.setActiveSection,
+    revealIssue: (validationIssue) => {
+      if (!validationIssue.stepId) return;
+      const stepIndex = base.stepsState.steps.findIndex(
+        (step: any) => String(step.id) === validationIssue.stepId,
+      );
+      if (stepIndex >= 0) templateState.setActiveTabIndex(stepIndex);
+      if (validationIssue.categoryId) {
+        const key = `${validationIssue.stepId}__${validationIssue.categoryId}`;
+        categoryHandlers.setCategoryOpen((current: Record<string, boolean>) => ({
+          ...current,
+          [key]: true,
+        }));
+      }
+    },
+  });
   const buildDefaultProductsData = useCallback(() => {
     return normalizeDefaultProductsData(settings.defaultProductsData);
   }, [settings.defaultProductsData]);
@@ -78,6 +101,27 @@ export function usePpbSaveHandlers({
 
   const handleSave = useCallback(async () => {
     try {
+      if (base.subscriptionConfig.enabled) {
+        const subscriptionIssues = validateBundleSubscriptionConfig(
+          base.subscriptionConfig,
+        );
+        if (base.pricingState.discountType === "buy_x_get_y") {
+          subscriptionIssues.push({
+            path: "subscriptions.enabled",
+            message: "Subscriptions are unavailable with Buy X Get Y pricing.",
+          });
+        }
+        if (base.stepsState.steps.some((step: any) => step?.isFreeGift === true)) {
+          subscriptionIssues.push({
+            path: "subscriptions.enabled",
+            message: "Subscriptions are unavailable while a free-gift or add-on step is enabled.",
+          });
+        }
+        if (subscriptionIssues.length > 0) {
+          validation.setServerFieldErrors(subscriptionIssues);
+          return;
+        }
+      }
       const formData = new FormData();
       formData.append("intent", "saveBundle");
       formData.append("bundleName", base.formState.bundleName);
@@ -169,6 +213,10 @@ export function usePpbSaveHandlers({
       );
       formData.append("sdkMode", String(base.sdkMode));
       formData.append(
+        "bundleSubscriptionConfig",
+        JSON.stringify(base.subscriptionConfig),
+      );
+      formData.append(
         "textOverrides",
         Object.keys(base.textOverrides).length > 0
           ? JSON.stringify(base.textOverrides)
@@ -195,6 +243,10 @@ export function usePpbSaveHandlers({
       formData.append(
         "autoSelectBrowsedProduct",
         String(visibility.autoSelectBrowsedProduct),
+      );
+      formData.append(
+        "bundleEmbedDisplayOn",
+        visibility.bundleEmbedDisplayOn,
       );
       formData.append(
         "preSelectedProductVariantId",
@@ -230,16 +282,6 @@ export function usePpbSaveHandlers({
         }),
       );
       formData.append(
-        "individualSellingPlanSelection",
-        JSON.stringify({
-          isEnabled:
-            base.pricingState.discountType === DiscountMethod.BUY_X_GET_Y
-              ? false
-              : settings.individualSellingPlanEnabled,
-          showFor: settings.individualSellingPlanShowFor,
-        }),
-      );
-      formData.append(
         "bundleTextConfig",
         JSON.stringify({
           bundleSummary: {
@@ -268,7 +310,9 @@ export function usePpbSaveHandlers({
         "useSingleStepCategoriesAsBundleSteps",
         String(settings.useSingleStepCategoriesAsBundleSteps),
       );
-      base.fetcher.submit(formData, { method: "post" });
+      validation.validateConfigureForm(formData, (validFormData) => {
+        base.fetcher.submit(validFormData, { method: "post" });
+      });
       return;
     } catch (error) {
       AppLogger.error("Save failed:", {}, error as any);
@@ -287,6 +331,7 @@ export function usePpbSaveHandlers({
     display,
     settings,
     visibility,
+    validation,
   ]);
 
   const handleDiscard = useCallback(() => {
@@ -299,6 +344,9 @@ export function usePpbSaveHandlers({
     );
     base.setAllowQuantityChanges(base.originalAllowQuantityChangesRef.current);
     base.setSdkMode(base.originalSdkModeRef.current);
+    base.setSubscriptionConfigState(
+      base.originalSubscriptionConfigRef.current,
+    );
     base.setTextOverrides(base.originalTextOverridesRef.current);
     base.setTextOverridesByLocale(
       base.originalTextOverridesByLocaleRef.current,
@@ -345,12 +393,14 @@ export function usePpbSaveHandlers({
     visibility.setBundleEmbedAddBrowsedProduct(
       visibility.originalBundleEmbedAddBrowsedProductRef.current,
     );
-  }, [base, settings, visibility]);
+    validation.clearValidationErrors();
+  }, [base, settings, validation, visibility]);
 
   return {
     buildDefaultProductsData,
     buildBundleUpsellConfig,
     handleSave,
     handleDiscard,
+    ...validation,
   };
 }

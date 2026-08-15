@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "job_id": "fpb-classic-compact-horizontal-card-redesign-20260814",
+  "reconciled_at": "2026-08-14T12:15:00+05:30",
+  "overall_status": "approved",
+  "preflight_status": "passed",
+  "evidence_policy": {
+    "durable_reports": "design-jobs/fpb-classic-compact-horizontal-card-redesign-20260814",
+    "raw_browser_artifacts": "/private/tmp/fpb-classic-compact-horizontal-card-redesign-20260814/qa",
+    "note": "Raw Chrome screenshots, Lighthouse reports, and traces remain outside the repository per the approved job and repository rules."
+  },
+  "gates": {
+    "functional": "passed",
+    "visual": "passed",
+    "geometry": "passed",
+    "responsive": "passed",
+    "console": "passed",
+    "network": "passed",
+    "accessibility": "waived",
+    "performance": "waived",
+    "non_regression": "passed"
+  },
+  "cases": [
+    {
+      "case_id": "classic-five-width-and-state-regression",
+      "status": "passed",
+      "evidence": "browser-test-report.md#classic-implementation-qa"
+    },
+    {
+      "case_id": "compact-five-width-and-state-regression",
+      "status": "passed",
+      "evidence": "browser-test-report.md#compact-implementation-qa"
+    },
+    {
+      "case_id": "horizontal-five-width-boundary-and-state-regression",
+      "status": "passed",
+      "evidence": "browser-test-report.md#horizontal-implementation-qa"
+    },
+    {
+      "case_id": "final-four-preset-desktop-mobile-regression",
+      "status": "passed",
+      "evidence": "browser-test-report.md#final-cross-template-regression"
+    }
+  ],
+  "verified_contract": {
+    "classic": "Four desktop columns and two mobile columns with stable hover, focus, selected, and quantity geometry.",
+    "compact": "Three desktop columns and two mobile columns with stable hover, focus, selected, and quantity geometry.",
+    "horizontal": "Two desktop columns and one mobile column with stable row geometry and a verified 799/800/801 container boundary.",
+    "standard": "Frozen stylesheet retained three desktop columns and one mobile column with no horizontal overflow."
+  },
+  "observations": {
+    "console": "No new app-owned console errors after the final cache-bypassed regression.",
+    "network": "No failed widget requests after the final cache-bypassed regression.",
+    "active_fixture": "HORIZONTAL",
+    "active_asset": "bundle-widget-full-page-horizontal.css"
+  },
+  "waivers": [
+    {
+      "id": "WAIVER-CL-A11Y-SHARED",
+      "gate": "accessibility",
+      "reason": "Lighthouse findings are owned by the frozen shared product-card renderer, shared summary, or theme: aria-pressed on role=group, product-details accessible-name mismatch, summary contrast, and theme list semantics.",
+      "approver": "Aditya Awasthi",
+      "approved_at": "2026-08-14",
+      "follow_up": "Address in a separately approved shared-renderer, shared-summary, or theme slice."
+    },
+    {
+      "id": "WAIVER-CL-PERF-SHARED",
+      "gate": "performance",
+      "reason": "The traces measured delayed shared widget hydration; preset CSS cannot change the frozen shared loading/runtime owner.",
+      "approver": "Aditya Awasthi",
+      "approved_at": "2026-08-14",
+      "follow_up": "Investigate shared widget hydration and layout reservation in a separately approved runtime slice."
+    }
+  ],
+  "artifact_counts": {
+    "screenshots": 10,
+    "lighthouse_reports": 6,
+    "performance_traces": 1,
+    "durable_reports": 3
+  },
+  "missing_evidence": []
+}

@@ -6,6 +6,8 @@ import { BundleStatus } from "../../constants/bundle";
 import { ERROR_MESSAGES } from "../../constants/errors";
 import { formatBundleForWidget } from "../../lib/bundle-formatter.server";
 import { verifyAppProxyRequest } from "../../lib/app-proxy.server";
+import { verifyBundlePreviewToken } from "../../lib/bundle-preview-token.server";
+import { BUNDLE_PREVIEW_QUERY_PARAM } from "../../lib/bundle-preview-url";
 
 /**
  * Public API endpoint to fetch a single bundle by ID
@@ -13,68 +15,7 @@ import { verifyAppProxyRequest } from "../../lib/app-proxy.server";
  *
  * GET /apps/product-bundles/api/bundle/:bundleId.json
  *
- * Supports sparse fieldsets for optimized responses:
- * ?fields=id,name,steps.products.id,steps.products.title
- * ?fields=bootstrap
- *
- * Examples:
- * - Full response: /api/bundle/123.json
- * - Minimal: /api/bundle/123.json?fields=id,name,status
- * - Nested: /api/bundle/123.json?fields=id,name,steps.id,steps.name,steps.products.id
- * - Bootstrap pointer: /api/bundle/123.json?fields=bootstrap
  */
-
-/**
- * Filters an object to include only the specified fields.
- * Supports nested field notation (e.g., "steps.products.id")
- */
-function filterFields(obj: any, requestedFields: string[]): any {
-  if (!requestedFields || requestedFields.length === 0) {
-    return obj;
-  }
-
-  if (Array.isArray(obj)) {
-    return obj.map(item => filterFields(item, requestedFields));
-  }
-
-  const result: any = {};
-  const fieldsMap = new Map<string, string[]>();
-
-  requestedFields.forEach(field => {
-    const parts = field.split('.');
-    const root = parts[0];
-
-    if (!fieldsMap.has(root)) {
-      fieldsMap.set(root, []);
-    }
-
-    if (parts.length > 1) {
-      fieldsMap.get(root)!.push(parts.slice(1).join('.'));
-    } else {
-      fieldsMap.get(root)!.push('*');
-    }
-  });
-
-  for (const [field, subFields] of fieldsMap.entries()) {
-    if (Object.prototype.hasOwnProperty.call(obj, field)) {
-      if (subFields.includes('*')) {
-        result[field] = obj[field];
-      } else if (subFields.length > 0) {
-        result[field] = filterFields(obj[field], subFields);
-      }
-    }
-  }
-
-  return result;
-}
-
-function parseFieldsParam(fieldsParam: string | null): string[] | null {
-  if (!fieldsParam) return null;
-  return fieldsParam
-    .split(',')
-    .map(f => f.trim())
-    .filter(f => f.length > 0);
-}
 
 // Handle OPTIONS preflight requests for CORS
 export async function OPTIONS() {
@@ -94,18 +35,6 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Methods': 'GET, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type'
 };
-
-function buildBundleBootstrapPayload(bundleId: string, bundle: ReturnType<typeof formatBundleForWidget>, updatedAt: Date | null) {
-  return {
-    v: 2,
-    type: bundle.bundleType,
-    bundleType: bundle.bundleType,
-    id: bundleId,
-    ...(bundle.bundleDesignTemplate ? { bundleDesignTemplate: bundle.bundleDesignTemplate } : {}),
-    ...(bundle.bundleDesignPresetId ? { bundleDesignPresetId: bundle.bundleDesignPresetId } : {}),
-    ...(updatedAt ? { updatedAt: updatedAt.toISOString() } : {}),
-  };
-}
 
 function getNormalizedEtag(etag: string) {
   return etag.replace(/^W\//i, '').replace(/^"|"$/g, '').trim();
@@ -142,8 +71,6 @@ function isFreshByCacheHeaders(
 
 export const loader: LoaderFunction = async ({ request, params }) => {
   const url = new URL(request.url);
-  const requestedFields = parseFieldsParam(url.searchParams.get('fields'));
-
   try {
     const { bundleId } = params;
 
@@ -174,16 +101,13 @@ export const loader: LoaderFunction = async ({ request, params }) => {
       bundleId
     });
 
-    // Public storefront surface — only ACTIVE and UNLISTED bundles are served.
-    // Unlisted: hidden from search/collections/sitemap but accessible via direct URL.
-    // Draft and Archived are excluded; merchants preview drafts inside the admin.
+    // Load by the signed app-proxy shop and bundle identity before applying status
+    // authorization. Public requests serve ACTIVE/UNLISTED. DRAFT requires a
+    // short-lived Admin-minted token bound to this shop and bundle.
     const bundle = await db.bundle.findFirst({
       where: {
         id: bundleId,
         shopId: shopDomain,
-        status: {
-          in: [BundleStatus.ACTIVE, BundleStatus.UNLISTED]
-        }
       },
       include: {
         steps: {
@@ -203,7 +127,16 @@ export const loader: LoaderFunction = async ({ request, params }) => {
       }
     });
 
-    if (!bundle) {
+    const isPublic = bundle?.status === BundleStatus.ACTIVE
+      || bundle?.status === BundleStatus.UNLISTED;
+    const isAuthorizedDraftPreview = bundle?.status === BundleStatus.DRAFT
+      && verifyBundlePreviewToken({
+        token: url.searchParams.get(BUNDLE_PREVIEW_QUERY_PARAM),
+        shop: shopDomain,
+        bundleId,
+      });
+
+    if (!bundle || (!isPublic && !isAuthorizedDraftPreview)) {
       AppLogger.warn(ERROR_MESSAGES.BUNDLE_NOT_FOUND, {
         component: "api.bundle",
         operation: "loader",
@@ -229,19 +162,19 @@ export const loader: LoaderFunction = async ({ request, params }) => {
     // (every storefront visitor triggers it) and Admin API calls are rate-limited.
     const formattedBundle = formatBundleForWidget(bundle);
     const updatedAt = bundle.updatedAt ? new Date(bundle.updatedAt) : null;
-    const bootstrapPayload = buildBundleBootstrapPayload(formattedBundle.id, formattedBundle, updatedAt);
-
     const lastModified = updatedAt;
     const etag = `bundle:${bundle.id}:${updatedAt ? updatedAt.getTime() : 0}`;
     const commonHeaders = {
       ...CORS_HEADERS,
-      'Cache-Control': 'public, max-age=10, s-maxage=30, must-revalidate',
+      'Cache-Control': isAuthorizedDraftPreview
+        ? 'private, no-store'
+        : 'public, max-age=10, s-maxage=30, must-revalidate',
       'Vary': 'Accept-Encoding',
       'Last-Modified': lastModified ? lastModified.toUTCString() : new Date(0).toUTCString(),
       'ETag': `"${etag}"`
     };
 
-    if (isFreshByCacheHeaders(request, `"${etag}"`, lastModified)) {
+    if (!isAuthorizedDraftPreview && isFreshByCacheHeaders(request, `"${etag}"`, lastModified)) {
       return new Response(null, {
         status: 304,
         headers: commonHeaders,
@@ -250,29 +183,8 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 
     const responsePayload = {
       success: true,
-      bundle: formattedBundle,
-      timestamp: new Date().toISOString()
+      bundle: formattedBundle
     };
-    const bootstrapResponsePayload = {
-      ...responsePayload,
-      bootstrap: bootstrapPayload
-    };
-
-    // Apply sparse fieldsets if requested
-    if (requestedFields) {
-      const wantsBootstrap = requestedFields.includes('bootstrap');
-      const requestedDataFields = requestedFields.filter((field) => field !== 'bootstrap');
-      const bundleFields = requestedDataFields.map(f => `bundle.${f}`);
-      const filtered = filterFields(bootstrapResponsePayload, ['success', 'timestamp', ...bundleFields]);
-
-      if (wantsBootstrap) {
-        filtered.bootstrap = bootstrapPayload;
-      }
-
-      return json(filtered, {
-        headers: commonHeaders,
-      });
-    }
 
     return json(responsePayload, {
       headers: commonHeaders,

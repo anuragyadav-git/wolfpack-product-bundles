@@ -51,8 +51,8 @@ function createContext(displayVariantsAsIndividualProducts: boolean) {
       steps: [{
         id: 'productsData1',
         categories: [{
-          id: 'cat-variants',
-          products: [{ id: 'gid://shopify/Product/101' }],
+          categoryId: 'cat-variants',
+          products: [{ selectionId: 'gid://shopify/Product/101' }],
           displayVariantsAsIndividualProducts,
         }],
       }],

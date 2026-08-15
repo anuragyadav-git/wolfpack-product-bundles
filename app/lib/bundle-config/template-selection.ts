@@ -6,53 +6,44 @@ export type TemplateKey = FullPageTemplateKey | ProductPageTemplateKey;
 
 export interface TemplateSelection {
   bundleDesignTemplate: "FBP_SIDE_FOOTER" | "PDP_INPAGE" | "PDP_MODAL";
-  bundleDesignPresetId: "STANDARD" | "CLASSIC" | "COMPACT" | "HORIZONTAL" | "CASCADE" | "COGNIVE" | "MODAL" | "SIMPLIFIED";
-  templateId: "CASCADE" | "COGNIVE" | "MODAL" | "SIMPLIFIED" | null;
+  bundleDesignPresetId: "STANDARD" | "CLASSIC" | "COMPACT" | "HORIZONTAL" | "LIST" | "GRID" | "HORIZONTAL_SLOTS" | "VERTICAL_SLOTS";
 }
 
 const FULL_PAGE_TEMPLATE_MAP: Record<FullPageTemplateKey, TemplateSelection> = {
   standard: {
     bundleDesignTemplate: "FBP_SIDE_FOOTER",
     bundleDesignPresetId: "STANDARD",
-    templateId: null,
   },
   classic: {
     bundleDesignTemplate: "FBP_SIDE_FOOTER",
     bundleDesignPresetId: "CLASSIC",
-    templateId: null,
   },
   compact: {
     bundleDesignTemplate: "FBP_SIDE_FOOTER",
     bundleDesignPresetId: "COMPACT",
-    templateId: null,
   },
   horizontal: {
     bundleDesignTemplate: "FBP_SIDE_FOOTER",
     bundleDesignPresetId: "HORIZONTAL",
-    templateId: null,
   },
 };
 
 const PRODUCT_PAGE_TEMPLATE_MAP: Record<ProductPageTemplateKey, TemplateSelection> = {
   "product-list": {
     bundleDesignTemplate: "PDP_INPAGE",
-    bundleDesignPresetId: "CASCADE",
-    templateId: "CASCADE",
+    bundleDesignPresetId: "LIST",
   },
   "product-grid": {
     bundleDesignTemplate: "PDP_INPAGE",
-    bundleDesignPresetId: "COGNIVE",
-    templateId: "COGNIVE",
+    bundleDesignPresetId: "GRID",
   },
   "horizontal-slots": {
     bundleDesignTemplate: "PDP_MODAL",
-    bundleDesignPresetId: "MODAL",
-    templateId: "MODAL",
+    bundleDesignPresetId: "HORIZONTAL_SLOTS",
   },
   "vertical-slots": {
     bundleDesignTemplate: "PDP_MODAL",
-    bundleDesignPresetId: "SIMPLIFIED",
-    templateId: "SIMPLIFIED",
+    bundleDesignPresetId: "VERTICAL_SLOTS",
   },
 };
 
@@ -80,15 +71,4 @@ export function getStorefrontConfigLoadPlan(bundleType: BundleContractType): str
   }
 
   return ["product-page-config"];
-}
-
-export function resolveProductPageRenderFilledSlotsAsHorizontalStacked(
-  bundleDesignTemplate: string | null | undefined,
-  templateId: string | null | undefined,
-): boolean | null {
-  if (bundleDesignTemplate !== "PDP_MODAL") {
-    return null;
-  }
-
-  return templateId === "MODAL";
 }

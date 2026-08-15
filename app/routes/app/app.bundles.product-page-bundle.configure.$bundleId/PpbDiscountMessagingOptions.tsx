@@ -61,7 +61,12 @@ export function PpbDiscountMessagingOptions() {
         )}
       </s-stack>
       {pricingState.discountType === DiscountMethod.BUY_X_GET_Y && (
-        <s-banner tone="info">
+        <s-banner
+          tone="info"
+          heading="Discount messaging tip"
+          dismissible={false}
+          hidden={false}
+        >
           Discount messaging displays the Total Quantity to Claim Offer (Buy +
           Get) to ensure customers add their rewards to the cart
         </s-banner>

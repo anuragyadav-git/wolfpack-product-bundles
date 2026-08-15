@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "job_id": "fpb-all-template-summary-qa-20260806",
+  "revision": 3,
+  "status": "passed",
+  "checked_at": "2026-08-06T01:30:00+05:30",
+  "checks": {
+    "chrome_mcp_connected": {"mandatory": true, "status": "passed", "evidence": "Direct Chrome DevTools MCP returned the authenticated Agent storefront and Admin tabs."},
+    "supported_chrome_available": {"mandatory": true, "status": "passed", "evidence": "Connected default profile reports Chrome 150."},
+    "intended_page_selected": {"mandatory": true, "status": "passed", "evidence": "Page 23 was selected without bringToFront and matched the approved Agent FPB fixture."},
+    "app_server_reachable": {"mandatory": true, "status": "passed", "evidence": "Cache-bypassed hard reloads hydrated widget 5.0.227 without restarting the dev tunnel."},
+    "environment_confirmed": {"mandatory": true, "status": "passed", "evidence": "Development extension asset URLs and the Wolfpack Bundles SIT Admin session were active."},
+    "fixture_route_exists": {"mandatory": true, "status": "passed", "evidence": "Bundle cmse8sp170000v0ytaqqzsvtw rendered six deterministic products and all four saved presets."},
+    "authentication_intentional": {"mandatory": true, "status": "passed", "evidence": "Only the connected default Chrome profile and approved authenticated stores were used."},
+    "sensitive_tabs_avoided": {"mandatory": true, "status": "passed", "evidence": "Only Agent and Yash-wolfpack storefront and bundle configuration tabs were inspected."},
+    "viewport_resize_supported": {"mandatory": true, "status": "passed", "evidence": "Direct emulation covered 320, 390, 414, 768, 1023, 1024, 1025, and 1280 widths, with inherited proof at 360, 1440, and 1536."},
+    "accessibility_snapshot_supported": {"mandatory": true, "status": "passed", "evidence": "Accessibility snapshots exposed named disclosure, tier, remove, clear, and cart controls."},
+    "screenshot_write_supported": {"mandatory": true, "status": "passed", "evidence": "Storefront-only viewport PNG captures completed without browser chrome; raw images remain uncommitted."},
+    "console_inspection_supported": {"mandatory": true, "status": "passed", "evidence": "Console inspection separated ambient Shopify theme failures from component findings."},
+    "network_inspection_supported": {"mandatory": true, "status": "passed", "evidence": "Network inspection confirmed widget CSS, bundle data, products, and images loaded successfully."},
+    "repository_identity_recorded": {"mandatory": true, "status": "passed", "evidence": "wolfpack-product-bundles on feature/26.05-UI-changes at remediation commit 124517e6."},
+    "job_revision_recorded": {"mandatory": true, "status": "passed", "evidence": "Successor design job revision 3 is active."},
+    "baseline_identified": {"mandatory": true, "status": "passed", "evidence": "Revision-3 localized target references and approved predecessor lineage are present."}
+  },
+  "tool_inventory": ["list_pages", "select_page", "navigate_page", "emulate", "take_snapshot", "evaluate_script", "click", "press_key", "take_screenshot", "list_console_messages", "list_network_requests", "lighthouse_audit", "performance_start_trace"],
+  "browser": {"product": "Google Chrome", "version": "150.0.0.0", "profile_policy": "default-profile-only", "isolated_context_used": false},
+  "repository": {"path": "/Users/adityaawasthi/Developer/wolfpack-product-bundles", "branch": "feature/26.05-UI-changes", "commit": "124517e6"},
+  "baseline": {"id": "fpb-all-template-summary-targets-r3", "revision": 3, "path": "references/target"}
+}

@@ -6,7 +6,7 @@ const SETTINGS_SECTIONS: Array<{
   id: SettingsWorkspaceView;
   title: string;
   description: string;
-  icon: "edit" | "globe" | "filter";
+  icon: "edit" | "language-translate" | "filter";
 }> = [
   {
     id: "design",
@@ -18,7 +18,7 @@ const SETTINGS_SECTIONS: Array<{
     id: "language",
     title: "Language",
     description: "Configure all text, labels, and translations for your bundle here",
-    icon: "globe",
+    icon: "language-translate",
   },
   {
     id: "controls",
@@ -29,62 +29,88 @@ const SETTINGS_SECTIONS: Array<{
 ];
 
 export function SettingsLandingShell({
+  onBack,
   onSelect,
   onIntent,
 }: {
+  onBack: () => void;
   onSelect: (view: SettingsWorkspaceView) => void;
   onIntent?: () => void;
 }) {
   return (
-    <s-page heading="Settings" inlineSize="large">
-      <s-query-container containerName="settings-landing">
-        <s-grid
-          gridTemplateColumns="@container settings-landing (inline-size > 720px) 1fr 1fr 1fr, 1fr"
-          gap="base"
-        >
-          {SETTINGS_SECTIONS.map((section) => (
-            <s-clickable
-              key={section.id}
-              accessibilityLabel={`Open ${section.title} settings`}
-              padding="base"
-              border="base"
-              borderRadius="base"
-              onFocus={onIntent}
-              onClick={() => onSelect(section.id)}
-            >
-              <s-stack gap="base">
-                <s-icon type={section.icon} size="base" />
-                <s-heading>{section.title}</s-heading>
-                <s-paragraph color="subdued">{section.description}</s-paragraph>
-              </s-stack>
-            </s-clickable>
-          ))}
-        </s-grid>
+    <s-page inlineSize="large">
+      <s-query-container
+        containerName="settings-landing"
+        className={styles.settingsLandingViewport}
+      >
+        <div className={styles.settingsLandingContent}>
+          <s-stack direction="inline" gap="small" alignItems="center">
+            <s-button
+              variant="tertiary"
+              icon="arrow-left"
+              accessibilityLabel="Back to previous page"
+              onClick={onBack}
+            />
+            <s-heading className={styles.settingsLandingTitle}>
+              Settings
+            </s-heading>
+          </s-stack>
+          <s-grid
+            gridTemplateColumns="@container settings-landing (inline-size > 840px) 1fr 1fr 1fr, 1fr"
+            gap="large"
+          >
+            {SETTINGS_SECTIONS.map((section) => (
+              <s-clickable
+                key={section.id}
+                className={styles.settingsLandingTile}
+                accessibilityLabel={`Open ${section.title} settings`}
+                background="base"
+                padding="large"
+                border="base"
+                borderRadius="large"
+                onFocus={onIntent}
+                onClick={() => onSelect(section.id)}
+              >
+                <s-stack gap="large">
+                  <s-stack
+                    direction="inline"
+                    justifyContent="space-between"
+                    alignItems="center"
+                  >
+                    <s-box
+                      background="subdued"
+                      borderRadius="base"
+                      inlineSize="48px"
+                      blockSize="48px"
+                    >
+                      <s-stack
+                        direction="inline"
+                        justifyContent="center"
+                        alignItems="center"
+                        inlineSize="100%"
+                        blockSize="100%"
+                      >
+                        <s-icon type={section.icon} size="large" />
+                      </s-stack>
+                    </s-box>
+                    <s-icon
+                      className={styles.settingsLandingTileArrow}
+                      type="arrow-right"
+                      size="base"
+                    />
+                  </s-stack>
+                  <s-stack gap="small">
+                    <s-heading>{section.title}</s-heading>
+                    <s-paragraph color="subdued">
+                      {section.description}
+                    </s-paragraph>
+                  </s-stack>
+                </s-stack>
+              </s-clickable>
+            ))}
+          </s-grid>
+        </div>
       </s-query-container>
-    </s-page>
-  );
-}
-
-export function SettingsWorkspaceSkeleton() {
-  return (
-    <s-page heading="Settings" inlineSize="large">
-      <section aria-label="Loading Settings" aria-busy="true" className={styles.skeletonRegion}>
-        <s-grid
-          gridTemplateColumns="@container settings-loading (inline-size > 720px) 1fr 1fr 1fr, 1fr"
-          gap="base"
-        >
-          {["design", "language", "controls"].map((section) => (
-            <s-box key={section} padding="base" border="base" borderRadius="base">
-              <div data-settings-skeleton-card="true" aria-hidden="true" className={styles.skeletonCard}>
-                <span className={styles.skeletonIcon} />
-                <span className={styles.skeletonTitle} />
-                <span className={styles.skeletonLine} />
-                <span className={styles.skeletonLineShort} />
-              </div>
-            </s-box>
-          ))}
-        </s-grid>
-      </section>
     </s-page>
   );
 }
@@ -92,7 +118,12 @@ export function SettingsWorkspaceSkeleton() {
 export function SettingsWorkspaceError({ onExit }: { onExit: () => void }) {
   return (
     <s-page heading="Settings" inlineSize="large">
-      <s-banner heading="Settings could not be loaded" tone="critical">
+      <s-banner
+        heading="Settings could not be loaded"
+        tone="critical"
+        dismissible={false}
+        hidden={false}
+      >
         <s-stack direction="block" gap="small">
           <s-paragraph>
             Reload the page or return to Settings and try again.

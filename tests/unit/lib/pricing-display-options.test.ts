@@ -1,4 +1,5 @@
 import {
+  DISCOUNT_MESSAGE_TEMPLATES,
   normalizePricingRuleMessages,
   normalizePricingDisplayOptions,
   serializePricingDisplayOptions,
@@ -125,14 +126,51 @@ describe("normalizePricingDisplayOptions", () => {
         },
       },
       steps: [
-        { id: "step-1", enabled: true, maxQuantity: 2 },
-        { id: "step-2", enabled: true, maxQuantity: 2 },
+        { id: "step-1", enabled: true, conditionOperator: "equal_to", conditionValue: 2 },
+        { id: "step-2", enabled: true, conditionOperator: "equal_to", conditionValue: 2 },
       ],
     });
 
     expect(result.bundleQuantityOptions.options[0].compatibility).toEqual({
       status: "blocked",
       reason: "Configured steps allow up to 4 items, below this 5 item option.",
+    });
+  });
+
+  it("ignores stale hidden maxQuantity values when step rules define capacity", () => {
+    const result = normalizePricingDisplayOptions({
+      rules: [quantityRule("rule-4", 4, 15)],
+      messages: {
+        displayOptions: {
+          bundleQuantityOptions: { enabled: true },
+        },
+      },
+      steps: [
+        { id: "step-1", maxQuantity: 0, conditionOperator: "equal_to", conditionValue: 2 },
+        { id: "step-2", maxQuantity: 0, conditionOperator: "equal_to", conditionValue: 2 },
+      ],
+    });
+
+    expect(result.bundleQuantityOptions.options[0].compatibility).toEqual({
+      status: "compatible",
+    });
+  });
+
+  it("leaves compatibility unchecked when a step rule has no upper bound", () => {
+    const result = normalizePricingDisplayOptions({
+      rules: [quantityRule("rule-4", 4, 15)],
+      messages: {
+        displayOptions: {
+          bundleQuantityOptions: { enabled: true },
+        },
+      },
+      steps: [
+        { id: "step-1", conditionOperator: "greater_than_or_equal_to", conditionValue: 2 },
+      ],
+    });
+
+    expect(result.bundleQuantityOptions.options[0].compatibility).toEqual({
+      status: "unchecked",
     });
   });
 
@@ -210,6 +248,12 @@ describe("normalizePricingDisplayOptions", () => {
 });
 
 describe("normalizePricingRuleMessages", () => {
+  it("maintains explicit message templates for every discount method", () => {
+    expect(Object.keys(DISCOUNT_MESSAGE_TEMPLATES).sort()).toEqual(
+      Object.values(DiscountMethod).sort(),
+    );
+  });
+
   it("returns method-specific default copy for discount-type resets", () => {
     expect(getDefaultDiscountRuleText(DiscountMethod.FIXED_AMOUNT_OFF)).toBe(
       "Add {{discountConditionDiff}} product(s) to save {{discountValueUnit}}{{discountValue}}!"
@@ -231,6 +275,15 @@ describe("normalizePricingRuleMessages", () => {
     );
     expect(getDefaultDiscountRuleSuccessMessage(DiscountMethod.BUY_X_GET_Y)).toBe(
       "Success! You got {{discountedItems}} product(s) at {{discountValue}}{{discountValueUnit}} off"
+    );
+    expect(getDefaultDiscountRuleText(DiscountMethod.FIXED_BUNDLE_PRICE)).toBe(
+      "Add {{discountConditionDiff}} product(s) to get the bundle for {{discountValueUnit}}{{discountValue}}!"
+    );
+    expect(getDefaultDiscountRuleText(DiscountMethod.FIXED_BUNDLE_PRICE, 1)).toBe(
+      "Congrats! Add {{discountConditionDiff}} more product(s) to get the bundle for {{discountValueUnit}}{{discountValue}}!"
+    );
+    expect(getDefaultDiscountRuleSuccessMessage(DiscountMethod.FIXED_BUNDLE_PRICE)).toBe(
+      "Success! Your bundle price is {{discountValueUnit}}{{discountValue}}."
     );
   });
 

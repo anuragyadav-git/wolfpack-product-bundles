@@ -272,8 +272,6 @@ export interface GeneralSettings {
   filterIconColor: string;
   filterBgColor: string;
   filterTextColor: string;
-  loadingOverlayBgColor: string;
-  loadingOverlayTextColor: string;
   tileQuantityBadgeBgColor: string;
   tileQuantityBadgeTextColor: string;
 }
@@ -333,7 +331,6 @@ export interface WidgetStyleSettingsType {
   bottomSheetOverlayOpacity: number;
   bottomSheetAnimationDuration: number;
   emptySlotBorderStyle: string;
-  emptySlotBorderColor: string;
   freeGiftBadgeUrl: string;
   freeGiftBadgePosition: string;
   includedBadgeUrl: string;

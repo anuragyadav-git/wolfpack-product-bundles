@@ -1,3 +1,8 @@
+import {
+  isVariantExistsOnShopifyStorefront,
+  validateVariantIdFromShopify,
+} from "../lib/variant-existence.server";
+
 type BundleType = "full_page" | "product_page";
 
 export interface DeploymentGeneralSyncOptions {
@@ -12,8 +17,22 @@ export interface DeploymentGeneralSyncSummary {
   failedBundles: number;
   failedShops: number;
   metafieldDefinitionShopsSynced: number;
-  metaobjectValuesSynced: number;
   addonDiscountShopsSynced: number;
+  subscriptionDiscountShopsSynced: number;
+  variantRemediation: {
+    scannedBundles: number;
+    scannedStepProducts: number;
+    scannedVariants: number;
+    removedVariants: number;
+    updatedBundles: number;
+    failures: Array<{
+      shopDomain: string;
+      bundleId: string;
+      stepProductId: string;
+      variantId: string;
+      error: string;
+    }>;
+  };
   failures: Array<{ shopDomain: string; bundleId: string; error: string }>;
   shopFailures: Array<{ shopDomain: string; error: string }>;
 }
@@ -23,6 +42,14 @@ interface GeneralSyncBundle {
   shopId: string;
   bundleType: string;
   personalizationData: unknown;
+  bundleSubscriptionConfig: unknown;
+  steps: Array<{
+    id: string;
+    StepProduct: Array<{
+      id: string;
+      variants: unknown;
+    }>;
+  }>;
 }
 
 interface GeneralSyncPrisma {
@@ -31,6 +58,16 @@ interface GeneralSyncPrisma {
   };
   bundle: {
     findMany: (args: unknown) => Promise<GeneralSyncBundle[]>;
+  };
+  stepProduct: {
+    update: (args: {
+      where: {
+        id: string;
+      };
+      data: {
+        variants: unknown;
+      };
+    }) => Promise<unknown>;
   };
 }
 
@@ -49,11 +86,18 @@ export interface DeploymentGeneralSyncDependencies {
     admin: unknown,
     shopDomain: string,
   ) => Promise<{ success: boolean; error?: string }>;
-  syncBundleMetaobjects: (input: {
-    admin: unknown;
-    shopDomain: string;
-    bundle: GeneralSyncBundle;
-  }) => Promise<number>;
+  setupSubscriptionDiscount: (
+    admin: unknown,
+    shopDomain: string,
+  ) => Promise<{ success: boolean; error?: string }>;
+  setupSubscriptionRecurringDiscount: (
+    admin: unknown,
+    shopDomain: string,
+  ) => Promise<{ success: boolean; error?: string }>;
+  updateStepProductVariants: (input: {
+    stepProductId: string;
+    variants: unknown;
+  }) => Promise<unknown>;
   logger?: Pick<Console, "info" | "warn" | "error">;
 }
 
@@ -91,6 +135,20 @@ function hasEnabledAddonProducts(personalizationData: unknown) {
   );
 }
 
+function hasEnabledSubscription(config: unknown) {
+  return Boolean(
+    config
+    && typeof config === "object"
+    && !Array.isArray(config)
+    && (config as Record<string, unknown>).enabled === true,
+  );
+}
+
+function hasEnabledRecurringSubscription(config: unknown) {
+  return hasEnabledSubscription(config)
+    && (config as Record<string, unknown>).recurringBundleDiscount === true;
+}
+
 function errorMessage(error: unknown) {
   return error instanceof Error ? error.message : "Deployment general sync failed";
 }
@@ -104,17 +162,151 @@ function emptySummary(mode: "disabled" | "apply"): DeploymentGeneralSyncSummary 
     failedBundles: 0,
     failedShops: 0,
     metafieldDefinitionShopsSynced: 0,
-    metaobjectValuesSynced: 0,
     addonDiscountShopsSynced: 0,
+    subscriptionDiscountShopsSynced: 0,
+    variantRemediation: {
+      scannedBundles: 0,
+      scannedStepProducts: 0,
+      scannedVariants: 0,
+      removedVariants: 0,
+      updatedBundles: 0,
+      failures: [],
+    },
     failures: [],
     shopFailures: [],
   };
 }
 
-export async function syncPersistedBundleMetaobjects() {
-  // No persisted app-owned metaobject value contract exists yet. Keep this
-  // explicit hook aligned when a Prisma or metaobject contract is introduced.
-  return 0;
+function toVariantReference(rawVariant: unknown): string | number | null {
+  if (rawVariant === null || rawVariant === undefined) {
+    return null;
+  }
+  if (typeof rawVariant === "string" || typeof rawVariant === "number") {
+    return rawVariant;
+  }
+  if (typeof rawVariant !== "object") {
+    return null;
+  }
+
+  const candidate = rawVariant as Record<string, unknown>;
+  const directReference = candidate.variantId
+    || candidate.variantGraphqlId
+    || candidate.id
+    || candidate.variant_gid
+    || candidate.variantGraphql;
+
+  if (typeof directReference === "string" || typeof directReference === "number") {
+    return directReference;
+  }
+
+  return null;
+}
+
+async function runBundleVariantRemediation(
+  shopDomain: string,
+  bundle: GeneralSyncBundle,
+  deps: DeploymentGeneralSyncDependencies,
+  summary: DeploymentGeneralSyncSummary["variantRemediation"],
+) {
+  const resolvedVariantsByShop = new Map<string, Awaited<ReturnType<typeof isVariantExistsOnShopifyStorefront>>>();
+  let bundleUpdated = false;
+
+  for (const step of bundle.steps) {
+    for (const stepProduct of step.StepProduct) {
+      const refs = Array.isArray(stepProduct.variants) ? stepProduct.variants : [];
+      summary.scannedStepProducts += 1;
+      summary.scannedVariants += refs.length;
+
+      if (refs.length === 0) {
+        continue;
+      }
+
+      const validRefs: unknown[] = [];
+      let hasInvalidRef = false;
+
+      for (const variantRef of refs) {
+        const rawVariantId = toVariantReference(variantRef);
+        if (rawVariantId === null) {
+          hasInvalidRef = true;
+          summary.failures.push({
+            shopDomain,
+            bundleId: bundle.id,
+            stepProductId: stepProduct.id,
+            variantId: "",
+            error: "Missing or invalid variant reference",
+          });
+          continue;
+        }
+
+        const parsed = await validateVariantIdFromShopify(rawVariantId);
+        if (!parsed.isValidFormat) {
+          hasInvalidRef = true;
+          summary.failures.push({
+            shopDomain,
+            bundleId: bundle.id,
+            stepProductId: stepProduct.id,
+            variantId: String(rawVariantId),
+            error: parsed.reason || "Invalid variant format",
+          });
+          continue;
+        }
+
+        const cachedLookup = resolvedVariantsByShop.get(parsed.numericId);
+        const lookup = cachedLookup
+          || (await isVariantExistsOnShopifyStorefront(shopDomain, parsed.numericId));
+        resolvedVariantsByShop.set(parsed.numericId, lookup);
+        if (!lookup.ok) {
+          hasInvalidRef = true;
+          summary.failures.push({
+            shopDomain,
+            bundleId: bundle.id,
+            stepProductId: stepProduct.id,
+            variantId: String(rawVariantId),
+            error: `${lookup.message || "variant not found"} (${lookup.status})`,
+          });
+          continue;
+        }
+
+        validRefs.push(variantRef);
+      }
+
+      if (hasInvalidRef && validRefs.length !== refs.length) {
+        const removedCount = refs.length - validRefs.length;
+        if (removedCount <= 0) {
+          continue;
+        }
+        try {
+          await deps.updateStepProductVariants({
+            stepProductId: stepProduct.id,
+            variants: validRefs,
+          });
+          bundleUpdated = true;
+          summary.removedVariants += removedCount;
+          deps.logger?.info?.(
+            "[VARIANT_REMEDIATION] Removed invalid StepProduct variant refs from persisted bundle config.",
+            {
+              shopDomain,
+              bundleId: bundle.id,
+              stepProductId: stepProduct.id,
+              removedCount,
+            },
+          );
+        } catch (error) {
+          summary.failures.push({
+            shopDomain,
+            bundleId: bundle.id,
+            stepProductId: stepProduct.id,
+            variantId: "",
+            error: errorMessage(error),
+          });
+        }
+      }
+    }
+  }
+
+  if (bundleUpdated) {
+    summary.updatedBundles += 1;
+  }
 }
 
 export async function runDeploymentGeneralSync(
@@ -141,6 +333,18 @@ export async function runDeploymentGeneralSync(
         shopId: true,
         bundleType: true,
         personalizationData: true,
+        bundleSubscriptionConfig: true,
+        steps: {
+          select: {
+            id: true,
+            StepProduct: {
+              select: {
+                id: true,
+                variants: true,
+              },
+            },
+          },
+        },
       },
       orderBy: [
         { shopId: "asc" },
@@ -150,6 +354,7 @@ export async function runDeploymentGeneralSync(
   const summary = emptySummary("apply");
   summary.scannedShops = shopDomains.length;
   summary.scannedBundles = bundles.length;
+  summary.variantRemediation.scannedBundles = bundles.length;
 
   const adminByShop = new Map<string, unknown>();
   const failedShops = new Set<string>();
@@ -173,6 +378,8 @@ export async function runDeploymentGeneralSync(
   }
 
   const addonShops = new Set<string>();
+  const subscriptionShops = new Set<string>();
+  const recurringSubscriptionShops = new Set<string>();
   for (const bundle of bundles) {
     if (failedShops.has(bundle.shopId)) continue;
     if (!isBundleType(bundle.bundleType)) {
@@ -194,11 +401,6 @@ export async function runDeploymentGeneralSync(
         bundleType: bundle.bundleType,
         reason: "sync_bundle",
       });
-      summary.metaobjectValuesSynced += await deps.syncBundleMetaobjects({
-        admin,
-        shopDomain: bundle.shopId,
-        bundle,
-      });
       summary.syncedBundles += 1;
       if (
         bundle.bundleType === "full_page"
@@ -206,6 +408,18 @@ export async function runDeploymentGeneralSync(
       ) {
         addonShops.add(bundle.shopId);
       }
+      if (hasEnabledSubscription(bundle.bundleSubscriptionConfig)) {
+        subscriptionShops.add(bundle.shopId);
+      }
+      if (hasEnabledRecurringSubscription(bundle.bundleSubscriptionConfig)) {
+        recurringSubscriptionShops.add(bundle.shopId);
+      }
+      await runBundleVariantRemediation(
+        bundle.shopId,
+        bundle,
+        deps,
+        summary.variantRemediation,
+      );
     } catch (error) {
       const message = errorMessage(error);
       summary.failedBundles += 1;
@@ -238,6 +452,37 @@ export async function runDeploymentGeneralSync(
         shopDomain,
         error: errorMessage(error),
       });
+    }
+  }
+
+  for (const shopDomain of subscriptionShops) {
+    try {
+      const result = await deps.setupSubscriptionDiscount(
+        adminByShop.get(shopDomain)!,
+        shopDomain,
+      );
+      if (!result.success) {
+        throw new Error(result.error ?? "Subscription discount setup failed");
+      }
+      summary.subscriptionDiscountShopsSynced += 1;
+    } catch (error) {
+      summary.failedShops += 1;
+      summary.shopFailures.push({ shopDomain, error: errorMessage(error) });
+    }
+  }
+
+  for (const shopDomain of recurringSubscriptionShops) {
+    try {
+      const result = await deps.setupSubscriptionRecurringDiscount(
+        adminByShop.get(shopDomain)!,
+        shopDomain,
+      );
+      if (!result.success) {
+        throw new Error(result.error ?? "Recurring subscription discount setup failed");
+      }
+    } catch (error) {
+      summary.failedShops += 1;
+      summary.shopFailures.push({ shopDomain, error: errorMessage(error) });
     }
   }
 

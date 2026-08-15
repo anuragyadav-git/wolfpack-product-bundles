@@ -4,8 +4,8 @@ id: dashboard-storefront-setup-card
 title: Test Spec - Dashboard Storefront Setup Card
 type: test-spec
 status: active
-summary: Covers the action-first dashboard setup card and its retained detail modal.
-last_audited: 2026-07-30
+summary: Covers the dismissible Dashboard App Embed status banner after route readiness.
+last_audited: 2026-08-13
 owners:
   - engineering
 domains:
@@ -21,27 +21,27 @@ tags:
   - storefront-setup
 keywords:
   - theme-extension-status
-  - setup-modal
+  - app-embed-banner
 ---
 
 # Test Spec: Dashboard Storefront Setup Card
 **Spec ID:** dashboard-storefront-setup-card  **Created:** 2026-07-30
 
 ## Purpose
-Provide a clear, action-first storefront setup summary while retaining the detailed status modal.
+Provide a clear, dismissible App Embed status banner without a banner-specific loading skeleton.
 
 ## Test Cases
 ### DashboardStorefrontSetupCard
 | # | Scenario | Input | Expected Output | Notes |
 |---|---|---|---|---|
-| 1 | Status loading | Theme-extension status is pending | Card communicates that setup is being checked | No false completion state |
-| 2 | Status unavailable | Theme-extension status request fails | Card communicates that status needs attention | Modal retains the detailed error |
-| 3 | Setup incomplete | One or more core resources are disabled | Card reports the remaining count and offers setup action | Action opens the existing modal |
-| 4 | Setup complete | All core resources are enabled | Card reports storefront readiness | Details remain available in the modal |
-| 5 | Active bundle summary | Any non-negative active bundle count | Card reports the supplied count | Zero and plural counts remain accurate |
+| 1 | Route readiness is pending | App Embed or banner data is unresolved | Dashboard loading workspace surface remains visible | Banner has no independent skeleton |
+| 2 | Status unavailable | Resolved App Embed status is disabled | Banner communicates that setup needs attention and offers activation | Uses the resolved route payload |
+| 3 | Setup complete | Resolved App Embed status is enabled | Banner reports storefront readiness | No intermediate loading banner |
+| 4 | Banner dismissed | Merchant clicks the banner close control | Banner is removed for the current dashboard mount | Uses the Polaris banner dismiss event |
 
 ## Acceptance Criteria
-- [x] The card has distinct loading, error, incomplete, and complete states.
-- [x] The primary card action opens the detailed storefront setup modal.
-- [x] The modal retains core and optional resource statuses and Theme Editor action.
-- [x] The card and modal have no document-level clipping or horizontal overflow at desktop and mobile widths.
+- [x] The actual banner renders only after route readiness.
+- [x] No App Embed banner skeleton renders.
+- [x] Disabled App Embed state retains the Theme Editor action.
+- [x] The banner has no document-level clipping or horizontal overflow at desktop and mobile widths.
+- [x] The banner close control removes the banner for the current dashboard mount.

@@ -1,0 +1,238 @@
+{
+  "schema_version": 1,
+  "job_id": "fpb-all-template-summary-qa-20260806",
+  "revision": 3,
+  "status": "approved",
+  "cases": [
+    {
+      "id": "STRESS-01-long-summary-copy",
+      "data": {
+        "summary_title_length": 120,
+        "summary_subtitle_length": 240,
+        "locale": "long-form test locale",
+        "expectation": "Configured copy wraps without overlap, truncation, or fabricated fallback text."
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "STRESS-02-long-product-and-variant",
+      "data": {
+        "product_title_length": 120,
+        "variant_dimensions": 3,
+        "variant_value_length": 60,
+        "expectation": "Identity remains readable and remove/price controls remain reachable."
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "STRESS-03-wide-currency",
+      "data": {
+        "amount": 9999999.99,
+        "include_original_price": true,
+        "include_savings_badge": true,
+        "expectation": "Original, savings, final price, and mobile CTA reflow without collision."
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "STRESS-04-selection-capacity",
+      "data": {
+        "quantities": [
+          0,
+          1,
+          2,
+          10,
+          24
+        ],
+        "states": [
+          "empty",
+          "partial",
+          "exact",
+          "overflow"
+        ],
+        "expectation": "Selection identity is preserved; review scrolls internally only when needed; totals/actions remain reachable."
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "STRESS-05-product-slots",
+      "data": {
+        "product_slots": [
+          "disabled",
+          "enabled-default-icon",
+          "enabled-custom-icon"
+        ],
+        "fill_states": [
+          "empty",
+          "partial",
+          "complete"
+        ],
+        "expectation": "Exactly one row, slot, or skeleton branch renders with target-derived count."
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "STRESS-06-box-options",
+      "data": {
+        "targets": [
+          2,
+          4
+        ],
+        "states": [
+          "disabled",
+          "underfilled",
+          "exact",
+          "overfilled",
+          "switched-with-selection"
+        ],
+        "expectation": "Selected option, target, slots, validation, total, and CTA update atomically."
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "STRESS-07-pricing-families",
+      "data": {
+        "pricing": [
+          "disabled",
+          "percentage",
+          "fixed-amount",
+          "fixed-bundle-price",
+          "buy-x-get-y",
+          "amount-threshold"
+        ],
+        "presentation": [
+          "message-off-progress-off",
+          "message-on-progress-off",
+          "message-off-progress-on",
+          "message-on-progress-on"
+        ],
+        "expectation": "Independent controls, variables, tier result, savings, and totals remain correct."
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "STRESS-08-addons-and-gifts",
+      "data": {
+        "states": [
+          "disabled",
+          "gifting-step-only",
+          "locked",
+          "eligible",
+          "selected",
+          "multiple-tiers",
+          "active-addon-step"
+        ],
+        "expectation": "Offer placement, transient status, selected gift/add-on pricing, and core review remain synchronized."
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "STRESS-09-media-and-default-recovery",
+      "data": {
+        "states": [
+          "missing-image",
+          "slow-image",
+          "portrait-image",
+          "landscape-image",
+          "invalid-default",
+          "unavailable-default",
+          "unavailable-selected-item"
+        ],
+        "expectation": "Stable fallback geometry, preserved identity, and no blocked hydration or focus trap."
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "STRESS-10-loading-submit-failure-reload",
+      "data": {
+        "states": [
+          "delayed-hydration",
+          "cart-busy",
+          "cart-failure",
+          "cache-bypassed-hard-reload"
+        ],
+        "expectation": "No wrong-preset flash, duplicate control/listener/request, lost selections, or unrecoverable busy state."
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "STRESS-11-responsive-boundaries",
+      "data": {
+        "viewport_widths": [
+          319,
+          320,
+          360,
+          390,
+          414,
+          767,
+          768,
+          769,
+          1023,
+          1024,
+          1025,
+          1280,
+          1440,
+          1536
+        ],
+        "container_widths": [
+          599,
+          600,
+          601,
+          1023,
+          1024,
+          1025
+        ],
+        "zoom_percent": [
+          100,
+          200
+        ],
+        "expectation": "Exactly one summary surface, no page overflow, preserved state, and correct RD-001 replacement."
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "STRESS-12-safe-area-orientation-keyboard",
+      "data": {
+        "states": [
+          "safe-area-bottom",
+          "portrait-to-landscape",
+          "virtual-keyboard-open-close"
+        ],
+        "expectation": "Tray/action/focus remain reachable without fixed bottom-margin hacks or scroll lock."
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "STRESS-13-keyboard-focus-error",
+      "data": {
+        "paths": [
+          "disclosure",
+          "remove",
+          "blocked-remove",
+          "clear-cancel",
+          "box-switch",
+          "back",
+          "next-invalid",
+          "cart-failure"
+        ],
+        "expectation": "Logical order, visible focus, exposed state/reason, deterministic recovery, and one action per activation."
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "STRESS-14-reduced-motion",
+      "data": {
+        "preference": "reduce",
+        "states": [
+          "tray-toggle",
+          "offer-pulse",
+          "progress",
+          "loading",
+          "confirmation"
+        ],
+        "expectation": "Immediate final state with identical semantics, focus, and announcements."
+      },
+      "required_in_browser_qa": true
+    }
+  ]
+}

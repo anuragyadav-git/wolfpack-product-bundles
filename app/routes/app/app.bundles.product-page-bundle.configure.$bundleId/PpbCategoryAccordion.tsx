@@ -35,6 +35,8 @@ export function PpbCategoryAccordion({
         showPolarisModal: flow.showPolarisModal,
         stepsState: flow.stepsState,
         styles: flow.productPageBundleStyles,
+        validationErrors: flow.validationErrors,
+        clearValidationError: flow.clearValidationError,
       }}
       step={step}
       cat={cat}

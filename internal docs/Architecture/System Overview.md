@@ -1,8 +1,27 @@
 ---
+schema_version: 1
+id: system-overview
 title: System Overview
 type: architecture
-audited: 2026-07-10
-sources: docs/APPLICATION_ARCHITECTURE.md, docs/DEPLOYMENT.md, prisma/schema.prisma
+status: authoritative
+summary: High-level overview of the Wolfpack application stack, services, and deployment surfaces.
+last_audited: 2026-08-13
+owners:
+  - engineering
+domains:
+  - architecture
+systems:
+  - application
+source_paths:
+  - app/
+  - extensions/
+  - prisma/schema.prisma
+related_docs:
+  - Architecture/Widget Architecture.md
+tags:
+  - architecture
+keywords:
+  - system-overview
 ---
 
 # System Overview

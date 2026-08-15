@@ -7,7 +7,7 @@ function read(filePath: string) {
 
 function readMethodSources(dirPath: string) {
   return readdirSync(join(process.cwd(), dirPath))
-    .filter((file) => file.endsWith('.js'))
+    .filter((file) => file.endsWith('.ts'))
     .sort()
     .map((file) => read(`${dirPath}/${file}`))
     .join('\n');
@@ -15,7 +15,7 @@ function readMethodSources(dirPath: string) {
 
 export function readFullPageWidgetSources() {
   return [
-    read('app/assets/bundle-widget-full-page.js'),
+    read('app/assets/bundle-widget-full-page.ts'),
     readMethodSources('app/assets/widgets/full-page/methods'),
     readMethodSources('app/assets/widgets/full-page/templates'),
     readMethodSources('app/assets/widgets/full-page/modal'),
@@ -27,7 +27,7 @@ export function readFullPageWidgetSources() {
 
 export function readProductPageWidgetSources() {
   return [
-    read('app/assets/bundle-widget-product-page.js'),
+    read('app/assets/bundle-widget-product-page.ts'),
     readMethodSources('app/assets/widgets/product-page/methods'),
     readMethodSources('app/assets/widgets/product-page/templates'),
     readMethodSources('app/assets/widgets/shared'),

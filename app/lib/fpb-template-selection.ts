@@ -29,7 +29,7 @@ export function resolveFpbTemplateSelection(
   }
 
   return {
-    bundleDesignTemplate: savedTemplate ?? "FBP_SIDE_FOOTER",
-    bundleDesignPresetId: savedPreset ?? "STANDARD",
+    bundleDesignTemplate: savedTemplate,
+    bundleDesignPresetId: savedPreset,
   };
 }

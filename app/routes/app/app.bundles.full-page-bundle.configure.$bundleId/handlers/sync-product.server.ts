@@ -6,10 +6,6 @@ import db from "../../../../db.server";
 import { ERROR_MESSAGES } from "../../../../constants/errors";
 import { ensureBundleParentProduct } from "../../../../services/bundles/bundle-parent-product.server";
 import { updateBundleProductMetafields } from "../../../../services/bundles/metafield-sync.server";
-import {
-  convertBundleToStandardMetafields,
-  updateProductStandardMetafields,
-} from "../../../../services/bundles/standard-metafields.server";
 import { buildFullPageBundleMetafieldConfig } from "./shared.server";
 
 export async function handleSyncProduct(
@@ -51,21 +47,6 @@ export async function handleSyncProduct(
       shopifyProductId: parent.productId,
       shopifyProductHandle: parent.handle,
     });
-    const { metafields: standardMetafields, errors } =
-      await convertBundleToStandardMetafields(admin, bundleConfiguration);
-    if (errors.length > 0) {
-      AppLogger.warn("[PRODUCT_SYNC] Standard metafield conversion warnings", {
-        component: "app.bundles.full-page.configure",
-        bundleId,
-      }, errors);
-    }
-    if (Object.keys(standardMetafields).length > 0) {
-      await updateProductStandardMetafields(
-        admin,
-        parent.productId,
-        standardMetafields,
-      );
-    }
     await updateBundleProductMetafields(
       admin,
       parent.productId,

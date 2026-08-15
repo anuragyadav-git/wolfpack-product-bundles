@@ -33,22 +33,22 @@
 #bundle-builder-app[data-ppb-template-type="PDP_INPAGE"]:not([data-ppb-design-preset="PDP_MODAL"])
   .bw-ppb-cascade-selected-toggle {
   position: absolute;
-  top: -11px;
+  top: -22px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   align-items: center;
   gap: 6px;
   max-width: 80%;
-  height: 22px;
+  height: var(--bundle-product-card-action-min-height, 44px);
   padding: 0 10px;
   border: 0;
-  border-radius: 10px;
+  border-radius: 22px;
   background: #000000;
   color: #ffffff;
   font-size: 12px;
   font-weight: 400;
-  line-height: 22px;
+  line-height: normal;
   white-space: nowrap;
   cursor: pointer;
   z-index: 3;
@@ -157,7 +157,7 @@
 #bundle-builder-app[data-ppb-template-type="PDP_INPAGE"]:not([data-ppb-design-preset="PDP_MODAL"])
   .bw-ppb-cascade-selected-drawer--open,
 #bundle-builder-app[data-ppb-template-type="PDP_INPAGE"]:not([data-ppb-design-preset="PDP_MODAL"])
-  .gbbMixCascadeCartDrawerContainer--open {
+  .wpbMixCascadeCartDrawerContainer--open {
   height: var(--bw-ppb-cascade-selected-drawer-height, 0);
 }
 
@@ -254,8 +254,8 @@
   .bw-ppb-cascade-selected-item
   .bw-selected-row__remove {
   flex: 0 0 auto;
-  width: 24px;
-  height: 24px;
+  width: var(--bundle-product-card-action-min-height, 44px);
+  height: var(--bundle-product-card-action-min-height, 44px);
   border: 0;
   border-radius: 50%;
   background: transparent;
@@ -286,7 +286,7 @@
   .add-bundle-to-cart {
   width: 100%;
   max-width: none;
-  height: 41px;
+  height: var(--bundle-product-card-action-min-height, 44px);
   margin: 0;
   padding: 8px 4px;
   border-radius: 5px;
@@ -323,7 +323,7 @@
   flex: 0 0 40px;
   width: 40px;
   min-width: 40px;
-  height: 41px;
+  height: var(--bundle-product-card-action-min-height, 44px);
   padding: 0;
   border: 1px solid #d0d5dd;
   border-radius: 5px;
@@ -422,17 +422,17 @@
   }
 
   #bundle-builder-app[data-ppb-template-type="PDP_INPAGE"]:not([data-ppb-design-preset="PDP_MODAL"])
-    .bw-ppb-cascade-footer {
-    position: sticky;
-    bottom: 0;
-    z-index: 20;
+  .bw-ppb-cascade-footer {
+    position: relative;
+    bottom: auto;
+    z-index: auto;
     padding: 15px 4px;
     background: #ffffff;
   }
 
   #bundle-builder-app[data-ppb-template-type="PDP_INPAGE"]:not([data-ppb-design-preset="PDP_MODAL"])
-    .add-bundle-to-cart {
-    height: 38px;
+  .add-bundle-to-cart {
+    height: var(--bundle-product-card-action-min-height, 44px);
     font-size: 12px;
     line-height: 21.6px;
   }

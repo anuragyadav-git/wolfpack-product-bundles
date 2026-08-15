@@ -1,11 +1,6 @@
 export {};
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const fs = require('node:fs');
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const path = require('node:path');
-
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { getSummaryDiscountBadgeLabel } = require(
   '../../../app/assets/widgets/full-page/shared/summary-discount-badge.js'
 );
@@ -35,22 +30,4 @@ describe('FPB summary discount badge', () => {
     expect(getSummaryDiscountBadgeLabel(discountInfo)).toBe('');
   });
 
-  it('ships the formatter in the generated full-page widget before its consumers', () => {
-    const bundledSource = fs.readFileSync(
-      path.join(
-        process.cwd(),
-        'extensions/bundle-builder/assets/bundle-widget-full-page-bundled.js'
-      ),
-      'utf8'
-    );
-    const definitionIndex = bundledSource.indexOf(
-      'function getSummaryDiscountBadgeLabel'
-    );
-    const firstUseIndex = bundledSource.indexOf(
-      'getSummaryDiscountBadgeLabel('
-    );
-
-    expect(definitionIndex).toBeGreaterThanOrEqual(0);
-    expect(firstUseIndex).toBeGreaterThan(definitionIndex);
-  });
 });

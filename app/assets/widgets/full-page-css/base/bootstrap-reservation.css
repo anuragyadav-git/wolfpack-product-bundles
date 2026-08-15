@@ -1,0 +1,56 @@
+#bundle-builder-app[data-bundle-type="full_page"] {
+  --bundle-control-hit-target: 2.75rem;
+  --fpb-card-action-size: var(--bundle-control-hit-target);
+  --fpb-card-quantity-selector-height: var(--bundle-control-hit-target);
+  --fpb-card-quantity-selector-width: calc(
+    var(--bundle-control-hit-target) + var(--bundle-control-hit-target) + 1.5rem
+  );
+  container-name: fpb-bootstrap;
+  container-type: inline-size;
+  min-block-size: 100svh;
+}
+
+[data-wpb-full-page-bundle][hidden]:not([data-wpb-hydrated="true"]) {
+  display: block;
+  min-block-size: 100svh;
+}
+
+[data-wpb-loading-screen] {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 100%;
+  min-block-size: 100svh;
+  background: var(--wpb-loading-screen-bg, #ffffff);
+}
+
+[data-wpb-loading-gif] {
+  display: block;
+  max-inline-size: 150px;
+  max-block-size: 150px;
+  object-fit: contain;
+}
+
+[data-wpb-loading-spinner] {
+  box-sizing: border-box;
+  inline-size: 48px;
+  block-size: 48px;
+  border: 4px solid rgba(0, 0, 0, 0.16);
+  border-block-start-color: #111111;
+  border-radius: 50%;
+  animation: wpb-loading-spin 0.75s linear infinite;
+}
+
+@keyframes wpb-loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-wpb-loading-spinner] {
+    animation-duration: 1.5s;
+  }
+}
+@import "./fpb-product-page-upsell.css";

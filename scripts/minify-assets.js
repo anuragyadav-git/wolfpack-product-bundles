@@ -4,15 +4,14 @@ import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { minifyCSS, resolveCssImports } from './minify-assets/css-minifier.js';
-import { minifyJS } from './minify-assets/js-minifier.js';
 import { fmtBytes, printSummary } from './minify-assets/output.js';
 import { createTargets, CSS_SIZE_LIMIT_BYTES } from './minify-assets/targets.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const ROOT_DIR = dirname(dirname(__filename));
-const { css: CSS_FILES, js: JS_FILES } = createTargets(ROOT_DIR);
+const { css: CSS_FILES } = createTargets(ROOT_DIR);
 
-function processFile(fileEntry, type) {
+function processFile(fileEntry) {
   const sourcePath = typeof fileEntry === 'string' ? fileEntry : fileEntry.source;
   const targetPath = typeof fileEntry === 'string' ? fileEntry : fileEntry.target;
   const label = targetPath.replace(ROOT_DIR + '/', '');
@@ -25,14 +24,12 @@ function processFile(fileEntry, type) {
 
   const original = readFileSync(sourcePath, 'utf-8');
   const beforeBytes = Buffer.byteLength(original, 'utf-8');
-  const minified = type === 'css'
-    ? minifyCSS(resolveCssImports(sourcePath, original))
-    : minifyJS(original);
+  const minified = minifyCSS(resolveCssImports(sourcePath, original));
   const afterBytes = Buffer.byteLength(minified, 'utf-8');
 
   writeFileSync(targetPath, minified, 'utf-8');
 
-  if (type === 'css' && afterBytes > CSS_SIZE_LIMIT_BYTES) {
+  if (afterBytes > CSS_SIZE_LIMIT_BYTES) {
     console.warn(
       `  [WARN] ${label} is ${afterBytes.toLocaleString()} B - exceeds Shopify's ${CSS_SIZE_LIMIT_BYTES.toLocaleString()} B limit!`,
     );
@@ -41,10 +38,10 @@ function processFile(fileEntry, type) {
   return { file: label, beforeBytes, afterBytes, skipped: false };
 }
 
-function runGroup(label, files, type, results) {
+function runGroup(label, files, results) {
   console.log(label);
   for (const file of files) {
-    const result = processFile(file, type);
+    const result = processFile(file);
     if (!result.skipped) {
       console.log(`  -> ${result.file}  (${fmtBytes(result.beforeBytes)} -> ${fmtBytes(result.afterBytes)})`);
     }
@@ -55,9 +52,9 @@ function runGroup(label, files, type, results) {
 
 function main() {
   const mode = process.argv[2] || 'all';
-  if (!['css', 'js', 'all'].includes(mode)) {
+  if (!['css', 'all'].includes(mode)) {
     console.error(`Unknown mode: ${mode}`);
-    console.error('Usage: node scripts/minify-assets.js [css|js|all]');
+    console.error('Usage: node scripts/minify-assets.js [css|all]');
     process.exit(1);
   }
 
@@ -67,8 +64,7 @@ function main() {
 
   const startTime = Date.now();
   const results = [];
-  if (mode === 'css' || mode === 'all') runGroup('Minifying CSS files...', CSS_FILES, 'css', results);
-  if (mode === 'js' || mode === 'all') runGroup('Minifying JS bundles...', JS_FILES, 'js', results);
+  runGroup('Minifying CSS files...', CSS_FILES, results);
 
   printSummary(results);
   console.log(`  Completed in ${Date.now() - startTime}ms`);

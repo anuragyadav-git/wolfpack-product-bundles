@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "job_id": "fpb-all-template-product-card-parity-20260806",
+  "revision": 1,
+  "status": "draft",
+  "design": {
+    "status": "not-started",
+    "approver": "",
+    "at": "",
+    "evidence": [],
+    "waivers": []
+  },
+  "handoff": {
+    "status": "not-started",
+    "approver": "",
+    "at": "",
+    "evidence": [],
+    "waivers": []
+  },
+  "implementation": {
+    "status": "not-started",
+    "approver": "",
+    "at": "",
+    "evidence": [],
+    "waivers": []
+  },
+  "final": {
+    "status": "not-started",
+    "approver": "",
+    "at": "",
+    "evidence": [],
+    "waivers": []
+  },
+  "superseded_approvals": []
+}

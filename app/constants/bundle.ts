@@ -27,18 +27,6 @@ export enum BundleType {
   FULL_PAGE = "full_page",
 }
 
-export enum FullPageLayout {
-  FOOTER_BOTTOM = "footer_bottom",
-  FOOTER_SIDE = "footer_side",
-}
-
-export enum StorefrontSyncStatus {
-  QUEUED = "queued",
-  SYNCING = "syncing",
-  SYNCED = "synced",
-  FAILED = "failed",
-}
-
 // ============================================
 // FORM SELECT OPTIONS
 // ============================================

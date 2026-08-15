@@ -200,9 +200,7 @@ export function usePpbPlacementHandlers({
         }
         const placementBlockHandle =
           base.activeSection === "bundle_widget"
-            ? visibility.upsellWidgetDisplayMode === "button"
-              ? "bundle-upsell-button"
-              : "bundle-upsell-block"
+            ? "bundle-upsell"
             : base.blockHandle;
         const productIdForTemplate =
           base.bundleProduct?.id ??
@@ -262,7 +260,7 @@ export function usePpbPlacementHandlers({
         );
       }
     },
-    [base, visibility.upsellWidgetDisplayMode],
+    [base],
   );
 
   return {

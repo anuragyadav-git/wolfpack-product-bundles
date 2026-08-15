@@ -9,6 +9,16 @@ pub struct RuntimeTokenPayload {
     pub addons: Vec<RuntimeTokenAddonLine>,
     #[serde(default)]
     pub price_adjustment: serde_json::Value,
+    #[serde(default)]
+    pub subscription: Option<RuntimeTokenSubscription>,
+}
+
+#[derive(serde::Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct RuntimeTokenSubscription {
+    pub selling_plan_group_id: String,
+    pub selling_plan_id: String,
+    pub recurring_bundle_discount: bool,
 }
 
 #[derive(serde::Deserialize, Debug, Clone)]

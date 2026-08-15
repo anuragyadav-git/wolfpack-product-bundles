@@ -13,7 +13,7 @@ export type SettingsField = {
   key?: string;
   label: string;
   value?: string;
-  kind?: "color" | "text" | "number" | "select" | "radio" | "toggle" | "css" | "script" | "secret" | "image" | "file" | "button" | "loadingSpinner";
+  kind?: "color" | "text" | "number" | "select" | "radio" | "toggle" | "css" | "script" | "secret" | "image" | "file" | "button" | "loadingGif" | "loadingSpinner";
   note?: string;
   description?: string;
   guideUrl?: string;
@@ -94,7 +94,7 @@ export const SETTINGS_CARDS: SettingsCard[] = [
     id: "language",
     title: "Language",
     description: "Configure all text, labels, and translations for your bundle here",
-    icon: "globe",
+    icon: "language-translate",
   },
   {
     id: "controls",
@@ -214,10 +214,11 @@ export const DESIGN_CONFIGURATION: SettingsTab[] = [
   },
   {
     title: "Images & GIFs",
-    description: "Image-fit and loading-media controls.",
+    description: "Image-fit and full-page bundle loading screen controls.",
     fields: [
       { label: "Image Fit", value: "Cover", kind: "select", options: ["Cover", "Contain", "Fill"] },
-      { label: "Bundle Loading GIF", value: "Default spinner", kind: "loadingSpinner", description: "Displayed on the initial bundle load unless a merchant GIF is configured on the bundle." },
+      { key: "generalSettings.loadingGifUrl", label: "FPB Loading GIF", value: "", kind: "loadingGif", description: "Optional GIF displayed instead of the default spinner on the full-page bundle loading screen." },
+      { key: "generalSettings.loadingBgColor", label: "Loading Screen Background Color", value: "#ffffff", kind: "color", description: "Background color of the full-page bundle loading screen." },
       { label: "Checkout GIF", value: "Default spinner", kind: "loadingSpinner", description: "Displayed during checkout loading unless a merchant GIF is configured." },
     ],
   },
@@ -230,7 +231,6 @@ export const EXPERT_COLOR_CONTROLS: Record<string, SettingsField[]> = {
     { key: "expert.navigationBanner.navigationBannerStepTextColor", label: "Step Text Color", value: "#000000", kind: "color", description: "Text color for step names and navigation labels" },
     { key: "expert.generalSettings.productPageTitleColor", label: "Product Page Title Color", value: "#000000", kind: "color", description: "Title text color on the bundle builder page" },
     { key: "expert.navigationBanner.navigationBannerStepProgressBarEmptyColor", label: "Step Progress Bar Empty Color", value: "#cccccc", kind: "color", description: "Background color for incomplete sections of progress bars" },
-    { key: "expert.generalSettings.loadingBgColor", label: "Loading Screen Background Color", value: "transparent", kind: "color", description: "Background color bundle loading screen" },
     { key: "expert.generalSettings.conditionToastBgColor", label: "Condition Toast Background Color", value: "#000000", kind: "color", description: "Background color for condition toast" },
     { key: "expert.generalSettings.conditionToastTextColor", label: "Condition Toast Text Color", value: "#ffffff", kind: "color", description: "Text color for condition toast" },
     { key: "expert.navigationBanner.tabsActiveBgColor", label: "Active Tab Background Color", value: "#000000", kind: "color", description: "Background color for the currently selected category tab", group: "Categories", guideUrl: "/design-color-guide-categories.avif" },
@@ -553,7 +553,7 @@ export const LANGUAGE_CONFIGURATION: LanguageConfiguration = {
       },
       {
         title: "Rule Messages",
-        description: "Product-page quantity and amount rule messages",
+        description: "Product-page quantity, amount, and weight rule messages",
         fields: [
           { key: "ppb.conditions.quantity.greaterThanOrEqualTo", label: "Greater than rule message (Quantity)", value: "Add at least {{conditionQuantity}} products on this step", kind: "text" },
           { key: "ppb.conditions.quantity.lessThanOrEqualTo", label: "Less than rule message (Quantity)", value: "Add a maximum of {{conditionQuantity}} products to continue", kind: "text" },
@@ -561,6 +561,9 @@ export const LANGUAGE_CONFIGURATION: LanguageConfiguration = {
           { key: "ppb.conditions.amount.greaterThanOrEqualTo", label: "Greater than rule message (Amount)", value: "Add products worth at least {{conditionAmount}} on this step", kind: "text" },
           { key: "ppb.conditions.amount.lessThanOrEqualTo", label: "Less than rule message (Amount)", value: "Add products worth maximum of {{conditionAmount}} on this step", kind: "text" },
           { key: "ppb.conditions.amount.equalTo", label: "Equal to rule message (Amount)", value: "Add products worth {{conditionAmount}} on this step", kind: "text" },
+          { key: "ppb.conditions.weight.greaterThanOrEqualTo", label: "Greater than rule message (Weight)", value: "Add products weighing at least {{conditionWeight}} on this step", kind: "text" },
+          { key: "ppb.conditions.weight.lessThanOrEqualTo", label: "Less than rule message (Weight)", value: "Add products weighing maximum of {{conditionWeight}} on this step", kind: "text" },
+          { key: "ppb.conditions.weight.equalTo", label: "Equal to rule message (Weight)", value: "Add products weighing {{conditionWeight}} on this step", kind: "text" },
         ],
       },
     ],
@@ -808,34 +811,6 @@ export const INTEGRATION_CATEGORIES: IntegrationCategory[] = [
         guideSummary: [
           "Enable the Shopflo checkout integration and confirm SDK loading on storefront pages.",
           "Use discount-code handoff flow so order discounting continues through checkout.",
-        ],
-      },
-      {
-        id: "native-checkout",
-        title: "Shopify Checkout",
-        description: "Route bundle checkout through Shopify's native checkout flow.",
-        logoLabel: "Shopify",
-        status: "Supported",
-        ctaLabel: "View Setup",
-        ctaType: "guide",
-        setupUrl: "https://help.shopify.com/manual/checkout",
-        guideSummary: [
-          "Keep checkout routing on Shopify-native flow so inventory and discounts remain consistent.",
-          "Use bundle token metadata and Storefront/cart transforms only for runtime behavior you control.",
-        ],
-      },
-      {
-        id: "theme_cart_drawer",
-        title: "Theme Cart Drawer",
-        description: "Keep buyers in Shopify's cart drawer flow.",
-        logoLabel: "Shopify",
-        status: "Supported",
-        ctaLabel: "View Setup",
-        ctaType: "guide",
-        setupUrl: "https://wolfpackapps.com",
-        guideSummary: [
-          "Enable theme-cart handoff and keep standard cart flow active after bundle line-item updates.",
-          "Use storefront side-drawer callbacks when available to preserve conversion.",
         ],
       },
     ],

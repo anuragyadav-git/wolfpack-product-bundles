@@ -6,6 +6,7 @@ import {
   verifyRuntimeCartToken,
 } from "../../../app/services/cart-transform-runtime-token.server";
 import { getBundleProductVariantId } from "../../../app/utils/variant-lookup.server";
+import { unauthenticated } from "../../../app/shopify.server";
 
 jest.mock("../../../app/db.server", () => ({
   bundle: {
@@ -97,6 +98,23 @@ describe("cart transform runtime token route", () => {
     process.env.SHOPIFY_API_SECRET = "test_api_secret";
     mockDb.bundle.findFirst.mockResolvedValue(makeBundle());
     mockGetBundleProductVariantId.mockResolvedValue("gid://shopify/ProductVariant/PARENT");
+    (unauthenticated.admin as jest.Mock).mockResolvedValue({
+      admin: {
+        graphql: jest.fn().mockImplementation(async (query: string) => ({
+          json: async () => query.includes("ResolveRuntimeSellingPlanVariant")
+            ? { data: { node: { product: { id: "gid://shopify/Product/1" } } } }
+            : {
+                data: {
+                  node: {
+                    sellingPlans: { nodes: [{ id: "gid://shopify/SellingPlan/1" }] },
+                    appliesToProduct: true,
+                    appliesToProductVariant: false,
+                  },
+                },
+              },
+        })),
+      },
+    });
   });
 
   afterAll(() => {
@@ -178,6 +196,51 @@ describe("cart transform runtime token route", () => {
       offerGroupId: "MIX-bundle-1_ABC",
       parentVariantId: "gid://shopify/ProductVariant/PARENT",
       components: [{ variantId: "gid://shopify/ProductVariant/101", quantity: 1 }],
+    });
+  });
+
+  it("revalidates a saved selling plan and exact selected variant before signing", async () => {
+    mockDb.bundle.findFirst.mockResolvedValue(makeBundle({
+      bundleSubscriptionConfig: {
+        version: 1,
+        enabled: true,
+        selectedGroup: {
+          id: "gid://shopify/SellingPlanGroup/1",
+          name: "Subscribe",
+          options: [],
+          plans: [{ id: "gid://shopify/SellingPlan/1", sourceName: "Monthly", options: [], position: 1, pricingPolicies: [] }],
+        },
+        selectedPlanIds: ["gid://shopify/SellingPlan/1"],
+        defaultPurchaseOption: { kind: "selling_plan", sellingPlanId: "gid://shopify/SellingPlan/1" },
+        oneTimePurchase: { enabled: true, title: "One time", description: "" },
+        copy: { title: "Purchase options", subtitle: "", unavailableMessage: "Unavailable" },
+        planCopy: { "gid://shopify/SellingPlan/1": { displayName: "Monthly", discountPill: "", description: "" } },
+        showDiscountOnProductCards: false,
+        recurringBundleDiscount: false,
+        translations: {},
+      },
+    }));
+    const response = await action({
+      request: makeSignedRequest({
+        bundleId: "bundle-1",
+        bundleType: "product_page",
+        offerGroupId: "bundle-1_SESSION",
+        components: [{ variantId: "101", quantity: 1 }],
+        subscription: {
+          sellingPlanGroupId: "gid://shopify/SellingPlanGroup/1",
+          sellingPlanId: "gid://shopify/SellingPlan/1",
+          recurringBundleDiscount: false,
+        },
+      }),
+      params: {}, context: {},
+    } as any) as Response;
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    const secret = generateCartTransformRuntimeTokenSecret("test-shop.myshopify.com", "test_api_secret");
+    expect(verifyRuntimeCartToken(body.token, secret)?.subscription).toEqual({
+      sellingPlanGroupId: "gid://shopify/SellingPlanGroup/1",
+      sellingPlanId: "gid://shopify/SellingPlan/1",
+      recurringBundleDiscount: false,
     });
   });
 

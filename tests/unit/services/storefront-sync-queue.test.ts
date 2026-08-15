@@ -1,9 +1,9 @@
 import {
   compactBundleForConfigureResponse,
-  formatBundleStorefrontSync,
   syncBundleStorefrontNow,
 } from "../../../app/services/bundles/storefront-sync.server";
 import { inngest } from "../../../app/inngest/client";
+import { ensureBundleParentProduct } from "../../../app/services/bundles/bundle-parent-product.server";
 
 jest.mock("../../../app/db.server", () => ({
   __esModule: true,
@@ -35,24 +35,18 @@ jest.mock("../../../app/services/bundles/metafield-sync.server", () => ({
   updateBundleProductMetafields: jest.fn().mockResolvedValue(undefined),
 }));
 
-jest.mock("../../../app/services/bundles/standard-metafields.server", () => ({
-  convertBundleToStandardMetafields: jest.fn().mockResolvedValue({
-    metafields: {},
-    errors: [],
-  }),
-  updateProductStandardMetafields: jest.fn().mockResolvedValue(undefined),
-}));
-
-jest.mock(
-  "../../../app/services/widget-installation/widget-full-page-bundle.server",
-  () => ({
-    refreshFullPageBundlePageBody: jest.fn().mockResolvedValue({ success: true }),
-    writeBundleConfigPageMetafield: jest.fn().mockResolvedValue(undefined),
-  }),
-);
-
 jest.mock("../../../app/services/theme-colors.server", () => ({
   syncThemeColors: jest.fn().mockResolvedValue(undefined),
+}));
+
+jest.mock("../../../app/services/bundles/bundle-parent-product.server", () => ({
+  ensureBundleParentProduct: jest.fn().mockResolvedValue({
+    productId: "gid://shopify/Product/1",
+    variantId: "gid://shopify/ProductVariant/1",
+    handle: "wpb-parent-bundle-1",
+    status: "UNLISTED",
+    created: false,
+  }),
 }));
 
 jest.mock(
@@ -87,6 +81,7 @@ describe("storefront sync direct flow", () => {
     jest.spyOn(Date, "now").mockReturnValue(1720440000000);
     getDb().bundle.update.mockImplementation(async ({ data }: any) => ({
       id: "bundle-1",
+      publicNumber: 1,
       storefrontSyncStatus: data.storefrontSyncStatus,
       storefrontSyncAttemptId: data.storefrontSyncAttemptId,
       storefrontSyncLastError: data.storefrontSyncLastError ?? null,
@@ -99,6 +94,7 @@ describe("storefront sync direct flow", () => {
     getDb().bundle.updateMany.mockResolvedValue({ count: 1 });
     getDb().bundle.findUnique.mockResolvedValue({
       id: "bundle-1",
+      publicNumber: 1,
       shopId: "test.myshopify.com",
       bundleType: "full_page",
       status: "active",
@@ -106,8 +102,6 @@ describe("storefront sync direct flow", () => {
       description: null,
       shopifyProductId: "gid://shopify/Product/1",
       shopifyProductHandle: "daily-essentials",
-      shopifyPageId: "gid://shopify/Page/1",
-      shopifyPageHandle: "daily-essentials",
       steps: [],
       pricing: null,
     });
@@ -127,34 +121,20 @@ describe("storefront sync direct flow", () => {
       reason: "save",
     });
 
-    expect(getDb().bundle.update).toHaveBeenCalledWith({
-      where: { id: "bundle-1", shopId: "test.myshopify.com" },
-      data: expect.objectContaining({
-        storefrontSyncStatus: "syncing",
-        storefrontSyncLastError: null,
-        storefrontSyncStats: null,
-        storefrontSyncAttemptId: "bundle-1:1720440000000",
-      }),
-    });
+    expect(getDb().bundle.update).not.toHaveBeenCalled();
     expect(mockSend).not.toHaveBeenCalled();
+    expect(ensureBundleParentProduct).toHaveBeenCalledWith(expect.objectContaining({
+      shopDomain: "test.myshopify.com",
+      bundle: expect.objectContaining({ id: "bundle-1", publicNumber: 1 }),
+    }));
     expect(result).toMatchObject({
       skipped: false,
       synced: true,
     });
-    expect(getDb().bundle.updateMany).toHaveBeenCalledWith({
-      where: {
-        id: "bundle-1",
-        shopId: "test.myshopify.com",
-        storefrontSyncAttemptId: "bundle-1:1720440000000",
-      },
-      data: expect.objectContaining({
-        storefrontSyncStatus: "synced",
-        storefrontSyncLastError: null,
-      }),
-    });
+    expect(getDb().bundle.updateMany).not.toHaveBeenCalled();
   });
 
-  it("records failed status when direct sync throws", async () => {
+  it("propagates direct sync failures without persisting operational status", async () => {
     const { CartTransformService } = require("../../../app/services/cart-transform-service.server");
     CartTransformService.completeSetup.mockResolvedValueOnce({
       success: false,
@@ -171,45 +151,20 @@ describe("storefront sync direct flow", () => {
       }),
     ).rejects.toThrow("Cart Transform activation failed");
 
-    expect(getDb().bundle.updateMany).toHaveBeenLastCalledWith({
-      where: {
-        id: "bundle-1",
-        shopId: "test.myshopify.com",
-        storefrontSyncAttemptId: "bundle-1:1720440000000",
-      },
-      data: expect.objectContaining({
-        storefrontSyncStatus: "failed",
-        storefrontSyncLastError: "Cart Transform activation failed",
-      }),
-    });
-  });
-
-  it("formats nullable bundle state for Admin loaders", () => {
-    expect(formatBundleStorefrontSync({})).toEqual({
-      status: "synced",
-      attemptId: null,
-      error: null,
-      queuedAt: null,
-      startedAt: null,
-      syncedAt: null,
-      failedAt: null,
-      stats: null,
-    });
+    expect(getDb().bundle.update).not.toHaveBeenCalled();
+    expect(getDb().bundle.updateMany).not.toHaveBeenCalled();
   });
 
   it("returns a compact configure response bundle without graph or sync internals", () => {
     const result = compactBundleForConfigureResponse({
       id: "bundle-1",
+      publicNumber: 1,
       bundleType: "full_page",
       status: "active",
       name: "Daily Essentials",
       description: "Bundle copy",
       shopifyProductId: "gid://shopify/Product/1",
       shopifyProductHandle: "daily-essentials",
-      shopifyPageId: "gid://shopify/Page/1",
-      shopifyPageHandle: "daily-essentials",
-      shopifyPreviewPageId: "gid://shopify/Page/2",
-      shopifyPreviewPageHandle: "preview-daily-essentials",
       storefrontSyncStatus: "synced",
       storefrontSyncAttemptId: "attempt-1",
       steps: [{ id: "step-1" }],
@@ -218,16 +173,13 @@ describe("storefront sync direct flow", () => {
 
     expect(result).toEqual({
       id: "bundle-1",
+      publicNumber: 1,
       bundleType: "full_page",
       status: "active",
       name: "Daily Essentials",
       description: "Bundle copy",
       shopifyProductId: "gid://shopify/Product/1",
       shopifyProductHandle: "daily-essentials",
-      shopifyPageId: "gid://shopify/Page/1",
-      shopifyPageHandle: "daily-essentials",
-      shopifyPreviewPageId: "gid://shopify/Page/2",
-      shopifyPreviewPageHandle: "preview-daily-essentials",
     });
     expect(result).not.toHaveProperty("steps");
     expect(result).not.toHaveProperty("pricing");

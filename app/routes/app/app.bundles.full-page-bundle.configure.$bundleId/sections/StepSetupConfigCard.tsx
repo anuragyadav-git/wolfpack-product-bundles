@@ -1,4 +1,5 @@
 import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
+import { DefaultStepTimelineIcon } from "../../_shared/bundle-configure/DefaultStepTimelineIcon";
 
 export function FpbStepConfigCard({
   flow,
@@ -23,80 +24,60 @@ export function FpbStepConfigCard({
           Step Config
         </h3>
         <div className={fullPageBundleStyles.stepConfigRow}>
-          <div className={fullPageBundleStyles.iconColumn}>
-            <div className={fullPageBundleStyles.iconBox}>
-              {(step as any).stepImage ? (
-                <>
-                  <img
-                    src={(step as any).stepImage}
-                    alt="Step icon"
-                    className={fullPageBundleStyles.iconImg}
-                  />
-                  <button
-                    type="button"
-                    className={fullPageBundleStyles.iconRemoveButton}
-                    aria-label="Remove step icon"
-                    onClick={() => {
-                      stepsState.updateStepField(step.id, "stepImage", null);
-                      setShowIconPickerForStep(null);
-                      markAsDirty();
-                    }}
-                  >
-                    <svg
-                      width="12"
-                      height="12"
-                      viewBox="0 0 20 20"
-                      fill="none"
-                      aria-hidden="true"
-                    >
-                      <path
-                        d="M6 6l8 8M14 6l-8 8"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                      />
-                    </svg>
-                  </button>
-                </>
-              ) : (
-                <div className={fullPageBundleStyles.iconPlaceholder}>
+          <div className={fullPageBundleStyles.stepConfigIconBox}>
+            {(step as any).stepImage ? (
+              <>
+                <img
+                  src={(step as any).stepImage}
+                  alt="Step icon"
+                  className={fullPageBundleStyles.iconImg}
+                />
+                <button
+                  type="button"
+                  className={fullPageBundleStyles.iconRemoveButton}
+                  aria-label="Remove step icon"
+                  onClick={() => {
+                    stepsState.updateStepField(step.id, "stepImage", null);
+                    setShowIconPickerForStep(null);
+                    markAsDirty();
+                  }}
+                >
                   <svg
-                    width="28"
-                    height="28"
-                    viewBox="0 0 24 24"
+                    width="12"
+                    height="12"
+                    viewBox="0 0 20 20"
                     fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
+                    aria-hidden="true"
                   >
-                    <path d="M20 7l-8-4-8 4m16 0v10l-8 4m-8-4V7m16 5l-8 4-8-4" />
+                    <path
+                      d="M6 6l8 8M14 6l-8 8"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                    />
                   </svg>
-                </div>
-              )}
-            </div>
-            {showIconPickerForStep === step.id && (
-              <FilePicker
-                autoOpen
-                onClose={() => setShowIconPickerForStep(null)}
-                value={(step as any).stepImage ?? null}
-                onChange={(url: string | null) => {
-                  stepsState.updateStepField(step.id, "stepImage", url);
-                  setShowIconPickerForStep(null);
-                  markAsDirty();
-                }}
-                label=""
-              />
+                </button>
+              </>
+            ) : (
+              <div className={fullPageBundleStyles.iconPlaceholder}>
+                <DefaultStepTimelineIcon
+                  className={fullPageBundleStyles.defaultTimelineIcon}
+                  step={step}
+                />
+              </div>
             )}
-            <div className={fullPageBundleStyles.iconUploadButton}>
-              <s-button
-                onClick={() =>
-                  setShowIconPickerForStep((prev: string | null) =>
-                    prev === step.id ? null : step.id,
-                  )
-                }
-              >
-                {(step as any).stepImage ? "Replace" : "Upload file"}
-              </s-button>
-            </div>
+          </div>
+          <div className={fullPageBundleStyles.iconUploadButton}>
+            <s-button
+              inlineSize="fill"
+              onClick={() =>
+                setShowIconPickerForStep((prev: string | null) =>
+                  prev === step.id ? null : step.id,
+                )
+              }
+            >
+              Replace
+            </s-button>
           </div>
           <div className={fullPageBundleStyles.fieldsColumn}>
             <s-text-field
@@ -115,6 +96,19 @@ export function FpbStepConfigCard({
             />
           </div>
         </div>
+        {showIconPickerForStep === step.id && (
+          <FilePicker
+            autoOpen
+            onClose={() => setShowIconPickerForStep(null)}
+            value={(step as any).stepImage ?? null}
+            onChange={(url: string | null) => {
+              stepsState.updateStepField(step.id, "stepImage", url);
+              setShowIconPickerForStep(null);
+              markAsDirty();
+            }}
+            label=""
+          />
+        )}
       </div>
     </>
   );

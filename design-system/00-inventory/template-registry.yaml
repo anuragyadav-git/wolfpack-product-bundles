@@ -1,0 +1,76 @@
+items:
+  - id: fpb-standard
+    family: FPB
+    template: STANDARD
+    aliases: [STANDARD]
+    source_config: app/assets/widgets/shared/template-design-system.js#fpb.contracts.STANDARD
+    registry: app/assets/widgets/full-page/templates/registry.js
+    summary:
+      mode: rows
+      layout: baseline full-page
+
+  - id: fpb-classic
+    family: FPB
+    template: CLASSIC
+    aliases: [CLASSIC]
+    source_config: app/assets/widgets/shared/template-design-system.js#fpb.contracts.CLASSIC
+    registry: app/assets/widgets/full-page/templates/registry.js
+    summary:
+      mode: slots
+      layout: tab-grid
+
+  - id: fpb-compact
+    family: FPB
+    template: COMPACT
+    aliases: [COMPACT]
+    source_config: app/assets/widgets/shared/template-design-system.js#fpb.contracts.COMPACT
+    registry: app/assets/widgets/full-page/templates/registry.js
+    summary:
+      mode: compactSlots
+      layout: compact cards
+
+  - id: fpb-horizontal
+    family: FPB
+    template: HORIZONTAL
+    aliases: [HORIZONTAL]
+    source_config: app/assets/widgets/shared/template-design-system.js#fpb.contracts.HORIZONTAL
+    registry: app/assets/widgets/full-page/templates/registry.js
+    summary:
+      mode: rows
+      layout: row-first
+
+  - id: ppb-grid
+    family: PPB
+    template: GRID
+    aliases: [GRID]
+    source_config: app/assets/widgets/shared/template-design-system.js#ppb.contracts.GRID
+    registry: app/assets/widgets/product-page/templates/registry.js
+    summary:
+      adapter: grid-template
+
+  - id: ppb-list
+    family: PPB
+    template: LIST
+    aliases: [LIST]
+    source_config: app/assets/widgets/shared/template-design-system.js#ppb.contracts.LIST
+    registry: app/assets/widgets/product-page/templates/registry.js
+    summary:
+      adapter: list-template
+
+  - id: ppb-horizontal-slots
+    family: PPB
+    template: HORIZONTAL_SLOTS
+    aliases: [HORIZONTAL_SLOTS]
+    source_config: app/assets/widgets/shared/template-design-system.js#ppb.contracts.HORIZONTAL_SLOTS
+    registry: app/assets/widgets/product-page/templates/registry.js
+    summary:
+      adapter: horizontal-slots-template
+
+  - id: ppb-vertical-slots
+    family: PPB
+    template: VERTICAL_SLOTS
+    aliases: [VERTICAL_SLOTS]
+    source_config: app/assets/widgets/shared/template-design-system.js#ppb.contracts.VERTICAL_SLOTS
+    registry: app/assets/widgets/product-page/templates/registry.js
+    summary:
+      adapter: vertical-slots-template

@@ -1,0 +1,7 @@
+{
+  "violations": [],
+  "allowlisted": [
+    {"pattern": "Failed to load resource", "reason": "Ambient Shopify theme 404 and telemetry 503; widget assets and data returned 200.", "owner": "Shopify theme", "review_date": "2026-08-06"},
+    {"pattern": "preloaded using link preload", "reason": "Shopify theme preload warning unrelated to the FPB component.", "owner": "Shopify theme", "review_date": "2026-08-06"}
+  ]
+}

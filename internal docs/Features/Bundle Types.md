@@ -1,32 +1,53 @@
 ---
+schema_version: 1
+id: bundle-types
 title: Bundle Types
 type: feature
-audited: 2026-04-16
-sources: prisma/schema.prisma, CLAUDE.md
+status: authoritative
+summary: Defines the storefront hosts and runtime responsibilities of full-page and product-page bundles.
+last_audited: 2026-08-11
+owners:
+  - engineering
+domains:
+  - bundles
+systems:
+  - storefront
+source_paths:
+  - prisma/schema.prisma
+  - app/routes/root/wpb.$bundleId.tsx
+  - extensions/bundle-builder/blocks/bundle-app-embed.liquid
+  - extensions/bundle-builder/blocks/bundle-product-page.liquid
+related_docs:
+  - ../Architecture/Widget Architecture.md
+tags:
+  - fpb
+  - ppb
+keywords:
+  - full-page bundle
+  - product-page bundle
 ---
 
 # Bundle Types
 
 ## Full-Page Bundle (FPB)
 
-A dedicated bundle-builder page hosted on a Shopify page (not a product page). The customer configures the bundle by selecting from each step.
+A dedicated bundle-builder document served by the signed Shopify app-proxy route. The customer configures the bundle by selecting from each step.
 
-- **Widget**: `bundle-widget-full-page.js` → `bundle-full-page.liquid` block
-- **Layouts** (`FullPageLayout` enum):
-  - `CLASSIC` — standard step-by-step layout
-  - `EDITORIAL` — rich media / editorial style
-  - `GRID` — compact grid layout
-- **Config delivery**: Metafield cache (Stage 1) + proxy API fallback (Stage 2) — see [[Architecture/Widget Architecture]]
+- **Host**: `/apps/product-bundles/wpb/{bundleId}` rendered inside the active Shopify theme layout
+- **Widget**: `bundle-widget-full-page.ts`, loaded through `bundle-app-embed.liquid`
+- **Config delivery**: complete app-proxy marker first, bundle JSON API fallback second
 - **Promo banner**: per-bundle `promoBannerBgImage` field
 - **Step timeline**: optional progress indicator (`showStepTimeline`)
 - **Tier config**: tiered pricing JSON (`tierConfig`)
 
-## Product-Page Bundle (PDP)
+FPB does not create, select, or require a Shopify Page.
+
+## Product-Page Bundle (PPB)
 
 Embeds the bundle selector directly on a Shopify product page.
 
-- **Widget**: `bundle-widget-product-page.js` → product page block
-- Simpler load strategy (product context already available)
+- **Widget**: `bundle-widget-product-page.ts`, loaded through `bundle-product-page.liquid`
+- **Placement**: merchant-selected product template app block
 
 ## Bundle Status
 
@@ -42,5 +63,6 @@ Bundle status does not mutate the Shopify parent product status. Parent-product 
 ## Inventory Sync
 
 Bundle stock = `MIN(component_inventory / component_quantity)` across all steps.
-- Updated via `inventoryAdjustQuantities` mutation (not deprecated singular form)
-- Debounced: skip if `inventorySyncedAt` < 60 seconds ago
+
+- Updated via `inventoryAdjustQuantities` mutation
+- Debounced: skip if `inventorySyncedAt` is less than 60 seconds old

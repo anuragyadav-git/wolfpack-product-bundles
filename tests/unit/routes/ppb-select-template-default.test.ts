@@ -29,11 +29,11 @@ describe("resolveProductPageTemplateSelection", () => {
     expect(
       resolveProductPageTemplateSelection({
         bundleDesignTemplate: "PDP_INPAGE",
-        bundleDesignPresetId: "COGNIVE",
+        bundleDesignPresetId: "GRID",
       }),
     ).toEqual({
       layoutTemplate: "PDP_INPAGE",
-      presetId: "COGNIVE",
+      presetId: "GRID",
     });
   });
 

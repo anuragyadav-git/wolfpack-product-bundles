@@ -5,7 +5,7 @@ title: Cart Transform Function
 type: architecture
 status: authoritative
 summary: Runtime-token-verified Shopify Cart Transform architecture and fail-closed bundle pricing contract.
-last_audited: 2026-07-31
+last_audited: 2026-08-14
 owners:
   - engineering
 domains:
@@ -38,6 +38,15 @@ keywords:
 The cart transform function intercepts Shopify's checkout flow to merge individual product variants into logical bundle line items and apply bundle pricing. The active implementation is the Rust Shopify Function in `extensions/bundle-cart-transform-rs`, compiled to WASM.
 
 As of 2026-07-08, MERGE validation is runtime-token based. Storefront widgets POST the selected component/add-on variants to the signed app-proxy route `/apps/product-bundles/api/cart-transform-runtime-token` immediately before `/cart/add`. The route validates the selected variants against the current DB bundle config, signs a base64url payload with HMAC-SHA256, and returns `_wolfpack_bundle_runtime`. The Cart Transform and Discount Function verify that token with the same CartTransform owner metafield secret before trusting component, quantity, parent, pricing, or add-on discount data.
+
+FPB and PPB subscription requests add the saved selling-plan group and plan to that
+signed payload. The token route revalidates the plan and every exact selected
+variant against Shopify before signing. Cart Transform emits no merge, expand,
+or update operation for a group containing a selling-plan allocation. The
+Discount Function's `subscription_initial` role accepts only a complete group
+whose lines, plan allocations, variants, and quantities exactly match the
+token, then applies bundle pricing through an automatic discount node with
+`recurringCycleLimit=1`.
 
 The request body is mandatory, so both FPB and PPB callers must use `POST`.
 The Remix resource route also exports a `GET` loader that returns controlled
@@ -121,6 +130,13 @@ The token payload contains:
 The HMAC covers the base64url payload string, so Rust verifies the signature before decoding JSON. If `runtime_token_secret` is configured on the CartTransform owner and a line token is missing, tampered, or mismatched against actual cart line variants/quantities, the function emits no merge or add-on discount.
 
 Parent bundle metafields are still written for EXPAND/display paths: `component_reference`, `component_quantities`, `price_adjustment`, and `component_pricing`. Component-variant `$app:component_parents` is no longer the configured MERGE source.
+
+MERGE output also preserves the verified `_wolfpack_bundle_runtime` token and the
+base `_wolfpackProductBundle:OfferId` on every parent line. The Checkout UI extension
+uses those two attributes as its authorization anchor and bundle-instance key; it
+still re-reads Shopify's unstable cart-line ID before each mutation. Add-on lines
+receive a freshly signed exact variant/quantity token from the authenticated checkout
+route whenever their selection or quantity changes.
 
 ### FPB add-on and free-gift pricing scenarios
 

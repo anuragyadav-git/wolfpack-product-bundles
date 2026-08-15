@@ -64,7 +64,8 @@
 }
 
 .canvasHeader {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
@@ -117,41 +118,35 @@
   flex-wrap: wrap;
 }
 
+.unlistedBannerGap {
+  margin: 0 0 24px;
+}
+
 .readinessButton {
   box-sizing: border-box;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  min-height: 32px;
-  padding: 5px 10px;
+  height: 28px;
+  min-height: 28px;
   border: 1px solid transparent;
   border-radius: 8px;
-  color: #202223;
-  font: inherit;
-  cursor: pointer;
+  color: #ffffff;
+  transition: filter 120ms ease;
 }
 
-.readinessButtonLow {
-  background: #fff8e6;
-  border-color: #e8c56d;
-}
-
-.readinessButtonMedium {
-  background: #eef5ff;
-  border-color: #cfe2ff;
-}
-
-.readinessButtonHigh {
-  background: #eaf7f0;
-  border-color: #b7ead2;
+.readinessButton:hover {
+  filter: brightness(0.9);
 }
 
 .readinessScore {
+  margin-right: 8px;
+  color: #ffffff;
   font-size: 14px;
   font-weight: 700;
 }
 
 .readinessLabel {
+  color: #ffffff;
   font-size: 12px;
   font-weight: 600;
 }
@@ -309,42 +304,6 @@
 .linkButton:focus-visible {
   color: #003a8c;
   text-decoration: underline;
-}
-
-.videoHelpButton {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 28px;
-  padding: 4px 8px;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  background: transparent;
-  color: #303030;
-  font: inherit;
-  font-size: 12px;
-  font-weight: 600;
-  line-height: 1;
-  cursor: pointer;
-  transition: background-color 0.15s ease;
-}
-
-.videoHelpButton:hover {
-  background: #f1f1f1;
-  text-decoration: none;
-}
-
-.videoHelpButton:focus-visible {
-  background: #f1f1f1;
-  outline: 2px solid #005bd3;
-  outline-offset: 1px;
-}
-
-.videoHelpIcon {
-  width: 10px;
-  height: 10px;
-  flex-shrink: 0;
-  fill: currentColor;
 }
 
 .leftCardTitle {
@@ -557,10 +516,16 @@
   composes: stepSetupDescription from "./bundle-configure-shared.module.css";
 }
 
+.stepSetupDetails {
+  composes: stepSetupDetails from "./bundle-configure-shared.module.css";
+}
+
+.stepDisabledContent {
+  composes: stepDisabledContent from "./bundle-configure-shared.module.css";
+}
+
 .stepFlowCard {
   overflow: visible;
-  margin-bottom: 0;
-  padding-bottom: 0;
 }
 
 .stepFlowTitleRow {
@@ -784,6 +749,10 @@
   composes: iconBox from "./bundle-configure-shared.module.css";
 }
 
+.stepConfigIconBox {
+  composes: stepConfigIconBox from "./bundle-configure-shared.module.css";
+}
+
 .iconUploadButton {
   composes: iconUploadButton from "./bundle-configure-shared.module.css";
 }
@@ -794,6 +763,10 @@
 
 .iconPlaceholder {
   composes: iconPlaceholder from "./bundle-configure-shared.module.css";
+}
+
+.defaultTimelineIcon {
+  composes: defaultTimelineIcon from "./bundle-configure-shared.module.css";
 }
 
 .iconRemoveButton {
@@ -928,6 +901,55 @@
   composes: visibilitySetupTime from "./bundle-configure-shared.module.css";
 }
 
+/* Shared Publishing Best Practices card system. */
+.publishingGuideGrid {
+  composes: publishingGuideGrid from "./bundle-configure-shared.module.css";
+}
+
+.publishingGuideCard {
+  composes: publishingGuideCard from "./bundle-configure-shared.module.css";
+}
+
+.publishingGuideMedia {
+  composes: publishingGuideMedia from "./bundle-configure-shared.module.css";
+}
+
+.publishingGuideIndex {
+  composes: publishingGuideIndex from "./bundle-configure-shared.module.css";
+}
+
+.publishingGuideBody {
+  composes: publishingGuideBody from "./bundle-configure-shared.module.css";
+}
+
+.publishingGuideContent {
+  composes: publishingGuideContent from "./bundle-configure-shared.module.css";
+}
+
+.publishingGuideTitle {
+  composes: publishingGuideTitle from "./bundle-configure-shared.module.css";
+}
+
+.publishingGuideTime {
+  composes: publishingGuideTime from "./bundle-configure-shared.module.css";
+}
+
+.publishingGuideDescription {
+  composes: publishingGuideDescription from "./bundle-configure-shared.module.css";
+}
+
+.publishingGuideDetails {
+  composes: publishingGuideDetails from "./bundle-configure-shared.module.css";
+}
+
+.publishingGuideAction {
+  composes: publishingGuideAction from "./bundle-configure-shared.module.css";
+}
+
+.publishingGuideSteps {
+  composes: publishingGuideSteps from "./bundle-configure-shared.module.css";
+}
+
 .visibilityOverviewStack {
   display: flex;
   flex-direction: column;
@@ -1037,8 +1059,8 @@
 }
 
 .visibilityStatusEnabled {
-  background: #b4f4c4;
-  color: #0c5132;
+  background: var(--p-color-bg-fill-success-secondary, #b4fed2);
+  color: var(--p-color-text-success, #0c5132);
 }
 
 .visibilityStatusWarning {
@@ -1132,6 +1154,7 @@
 
 .visibilityTextInput,
 .visibilityTextarea {
+  box-sizing: border-box;
   width: 100%;
   min-width: 0;
   border: 1px solid #8a8a8a;
@@ -1288,14 +1311,6 @@
   accent-color: #303030;
 }
 
-.visibilityInfoBanner {
-  border-radius: 7px;
-  background: #eaf4ff;
-  color: #21527c;
-  padding: 10px 12px;
-  font-size: 13px;
-}
-
 .visibilityPanelSection {
   display: flex;
   flex-direction: column;
@@ -1420,7 +1435,7 @@
 .templateDialogBody {
   flex: 1;
   overflow-y: auto;
-  padding: 24px;
+  padding: 24px calc(100% / 6);
 }
 
 .templateDialogIntro {
@@ -1594,7 +1609,7 @@
 .templateDialogFooter {
   display: flex;
   justify-content: flex-end;
-  padding: 16px 24px 24px;
+  padding: 16px calc(100% / 6) 24px;
 }
 
 .templateDialogConfirmHeader {
@@ -2337,6 +2352,10 @@
 }
 
 @media (max-width: 767px) {
+  .readinessButton {
+    display: none;
+  }
+
   .templateDialogContent {
     min-height: calc(100vh - 112px);
   }

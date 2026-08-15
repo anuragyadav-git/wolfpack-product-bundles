@@ -1,3 +1,31 @@
+---
+schema_version: 1
+id: attribution-lcp-funnel
+title: Attribution LCP Funnel
+type: test-spec
+status: active
+summary: Verifies Analytics funnel loading behavior and persisted event calculations.
+last_audited: 2026-08-13
+owners:
+  - engineering
+domains:
+  - admin
+  - analytics
+systems:
+  - attribution
+source_paths:
+  - app/routes/app/app.attribution/AttributionRouteShell.tsx
+  - app/routes/app/app.attribution/AttributionDashboard.tsx
+related_docs:
+  - internal docs/Operations/Admin Performance.md
+tags:
+  - tdd
+  - lcp
+keywords:
+  - funnel
+  - loading-bar
+---
+
 # Test Spec: Attribution LCP Funnel
 **Spec ID:** attribution-lcp-funnel  **Created:** 2026-07-11
 
@@ -8,7 +36,7 @@ Keep the analytics route LCP path fast while preserving merchant feedback during
 ### AttributionRouteShell
 | # | Scenario | Input | Expected Output | Notes |
 |---|---|---|---|---|
-| 1 | Analytics payload is still loading | Pending analytics promise | Title bar and critical funnel heading render with visual skeleton cards below | Skeletons must not expose loading copy as LCP text |
+| 1 | Analytics payload is still loading | Pending analytics promise | Only the black top-edge loading bar renders | Title, funnel, banner, dashboard, and chart skeletons are not rendered |
 
 ### computeBundleFunnel
 | # | Scenario | Input | Expected Output | Notes |
@@ -30,4 +58,4 @@ Keep the analytics route LCP path fast while preserving merchant feedback during
 - [ ] All listed test cases pass
 - [ ] `tsc` passes
 - [ ] Integration tests pass
-- [ ] LCP route shell still renders the critical heading before analytics content
+- [ ] Analytics reveals the critical heading only after the complete route is ready.

@@ -1,0 +1,441 @@
+{
+  "images": [
+    {
+      "path": "design-jobs/fpb-all-template-product-card-parity-20260806/references/current/fpb-all-template-product-card-parity-20260806__current-classic-desktop__empty__1440x900__r1.png",
+      "filename": "fpb-all-template-product-card-parity-20260806__current-classic-desktop__empty__1440x900__r1.png",
+      "format": "PNG",
+      "pixel_width": 1440,
+      "pixel_height": 900,
+      "aspect_ratio": 1.6,
+      "file_size": 178485,
+      "sha256": "5cd886e795e4632281ed1ad9d3e7e06955dc40f8639bb8b71096596d8a940a24",
+      "viewport": {
+        "status": "estimated",
+        "width": null,
+        "height": null
+      },
+      "quality_issues": []
+    },
+    {
+      "path": "design-jobs/fpb-all-template-product-card-parity-20260806/references/current/fpb-all-template-product-card-parity-20260806__current-classic-desktop__partial__1440x900__r1.png",
+      "filename": "fpb-all-template-product-card-parity-20260806__current-classic-desktop__partial__1440x900__r1.png",
+      "format": "PNG",
+      "pixel_width": 1440,
+      "pixel_height": 900,
+      "aspect_ratio": 1.6,
+      "file_size": 200268,
+      "sha256": "937bf4ec36b124e73d5b23c92442f0d4aa5c9b7723957a45bbcbe41aae0995e0",
+      "viewport": {
+        "status": "estimated",
+        "width": null,
+        "height": null
+      },
+      "quality_issues": []
+    },
+    {
+      "path": "design-jobs/fpb-all-template-product-card-parity-20260806/references/current/fpb-all-template-product-card-parity-20260806__current-classic-mobile__empty-collapsed__390x844__r1.png",
+      "filename": "fpb-all-template-product-card-parity-20260806__current-classic-mobile__empty-collapsed__390x844__r1.png",
+      "format": "PNG",
+      "pixel_width": 390,
+      "pixel_height": 844,
+      "aspect_ratio": 0.462085,
+      "file_size": 66933,
+      "sha256": "7816c709e0970535a2401af216e8fe1e065dce2ae947cd366f7a9f0a2aac5f8c",
+      "viewport": {
+        "status": "estimated",
+        "width": null,
+        "height": null
+      },
+      "quality_issues": [
+        "low-resolution"
+      ]
+    },
+    {
+      "path": "design-jobs/fpb-all-template-product-card-parity-20260806/references/current/fpb-all-template-product-card-parity-20260806__current-classic-mobile__empty-expanded__390x844__r1.png",
+      "filename": "fpb-all-template-product-card-parity-20260806__current-classic-mobile__empty-expanded__390x844__r1.png",
+      "format": "PNG",
+      "pixel_width": 390,
+      "pixel_height": 844,
+      "aspect_ratio": 0.462085,
+      "file_size": 70252,
+      "sha256": "3b2620ad0970a5657dc103b9f4718cb92a7b790e854dc59420112ee08ef306ec",
+      "viewport": {
+        "status": "estimated",
+        "width": null,
+        "height": null
+      },
+      "quality_issues": [
+        "low-resolution"
+      ]
+    },
+    {
+      "path": "design-jobs/fpb-all-template-product-card-parity-20260806/references/current/fpb-all-template-product-card-parity-20260806__current-compact-desktop__empty__1440x900__r1.png",
+      "filename": "fpb-all-template-product-card-parity-20260806__current-compact-desktop__empty__1440x900__r1.png",
+      "format": "PNG",
+      "pixel_width": 1440,
+      "pixel_height": 900,
+      "aspect_ratio": 1.6,
+      "file_size": 192071,
+      "sha256": "cbe69a22f9e32ee2fcf8ece0f6d83500858c7fd2facf4157284a0cb97e58a60b",
+      "viewport": {
+        "status": "estimated",
+        "width": null,
+        "height": null
+      },
+      "quality_issues": []
+    },
+    {
+      "path": "design-jobs/fpb-all-template-product-card-parity-20260806/references/current/fpb-all-template-product-card-parity-20260806__current-compact-mobile__empty-collapsed__390x844__r1.png",
+      "filename": "fpb-all-template-product-card-parity-20260806__current-compact-mobile__empty-collapsed__390x844__r1.png",
+      "format": "PNG",
+      "pixel_width": 390,
+      "pixel_height": 844,
+      "aspect_ratio": 0.462085,
+      "file_size": 81214,
+      "sha256": "a1c07b84468621a684ac7729fa723f3ed1a123c50d2c60189558f2696b7f809c",
+      "viewport": {
+        "status": "estimated",
+        "width": null,
+        "height": null
+      },
+      "quality_issues": [
+        "low-resolution"
+      ]
+    },
+    {
+      "path": "design-jobs/fpb-all-template-product-card-parity-20260806/references/current/fpb-all-template-product-card-parity-20260806__current-compact-mobile__empty-expanded__390x844__r1.png",
+      "filename": "fpb-all-template-product-card-parity-20260806__current-compact-mobile__empty-expanded__390x844__r1.png",
+      "format": "PNG",
+      "pixel_width": 390,
+      "pixel_height": 844,
+      "aspect_ratio": 0.462085,
+      "file_size": 78946,
+      "sha256": "d903d05294f954583ded73efb4c30976e4bff2b069412e141347e2b8482092b7",
+      "viewport": {
+        "status": "estimated",
+        "width": null,
+        "height": null
+      },
+      "quality_issues": [
+        "low-resolution"
+      ]
+    },
+    {
+      "path": "design-jobs/fpb-all-template-product-card-parity-20260806/references/current/fpb-all-template-product-card-parity-20260806__current-horizontal-desktop__empty__1440x900__r1.png",
+      "filename": "fpb-all-template-product-card-parity-20260806__current-horizontal-desktop__empty__1440x900__r1.png",
+      "format": "PNG",
+      "pixel_width": 1440,
+      "pixel_height": 900,
+      "aspect_ratio": 1.6,
+      "file_size": 126469,
+      "sha256": "ffe0717402c2f43c16aef9b8eaaf9535f5542d4daa2bdef65e1bccc89c3ad31f",
+      "viewport": {
+        "status": "estimated",
+        "width": null,
+        "height": null
+      },
+      "quality_issues": []
+    },
+    {
+      "path": "design-jobs/fpb-all-template-product-card-parity-20260806/references/current/fpb-all-template-product-card-parity-20260806__current-horizontal-mobile__empty-collapsed__390x844__r1.png",
+      "filename": "fpb-all-template-product-card-parity-20260806__current-horizontal-mobile__empty-collapsed__390x844__r1.png",
+      "format": "PNG",
+      "pixel_width": 390,
+      "pixel_height": 844,
+      "aspect_ratio": 0.462085,
+      "file_size": 70148,
+      "sha256": "09ec39c6d956f5e347c4c32d79002bb26d4698716d5b9ac7f7f2bb5e38bd7605",
+      "viewport": {
+        "status": "estimated",
+        "width": null,
+        "height": null
+      },
+      "quality_issues": [
+        "low-resolution"
+      ]
+    },
+    {
+      "path": "design-jobs/fpb-all-template-product-card-parity-20260806/references/current/fpb-all-template-product-card-parity-20260806__current-horizontal-mobile__empty-expanded__390x844__r1.png",
+      "filename": "fpb-all-template-product-card-parity-20260806__current-horizontal-mobile__empty-expanded__390x844__r1.png",
+      "format": "PNG",
+      "pixel_width": 390,
+      "pixel_height": 844,
+      "aspect_ratio": 0.462085,
+      "file_size": 67767,
+      "sha256": "8b43c40d41a48d16bb30034bd346f764de1ad72e60fa4846e4feaf8269ebd89e",
+      "viewport": {
+        "status": "estimated",
+        "width": null,
+        "height": null
+      },
+      "quality_issues": [
+        "low-resolution"
+      ]
+    },
+    {
+      "path": "design-jobs/fpb-all-template-product-card-parity-20260806/references/current/fpb-all-template-product-card-parity-20260806__current-standard-desktop__empty__1440x900__r1.png",
+      "filename": "fpb-all-template-product-card-parity-20260806__current-standard-desktop__empty__1440x900__r1.png",
+      "format": "PNG",
+      "pixel_width": 1440,
+      "pixel_height": 900,
+      "aspect_ratio": 1.6,
+      "file_size": 234422,
+      "sha256": "b43c57bbc5cd3f2e9f0fcb292bb5515c2841a6aadf8efd0ba1331ef48c5c2b5a",
+      "viewport": {
+        "status": "estimated",
+        "width": null,
+        "height": null
+      },
+      "quality_issues": []
+    },
+    {
+      "path": "design-jobs/fpb-all-template-product-card-parity-20260806/references/current/fpb-all-template-product-card-parity-20260806__current-standard-mobile__empty-collapsed__390x844__r1.png",
+      "filename": "fpb-all-template-product-card-parity-20260806__current-standard-mobile__empty-collapsed__390x844__r1.png",
+      "format": "PNG",
+      "pixel_width": 390,
+      "pixel_height": 844,
+      "aspect_ratio": 0.462085,
+      "file_size": 67429,
+      "sha256": "4b49f038e1eb55c8ec5c5e53732085a0b0a8257bcfd3048da032d5912e981255",
+      "viewport": {
+        "status": "estimated",
+        "width": null,
+        "height": null
+      },
+      "quality_issues": [
+        "low-resolution"
+      ]
+    },
+    {
+      "path": "design-jobs/fpb-all-template-product-card-parity-20260806/references/current/fpb-all-template-product-card-parity-20260806__current-standard-mobile__empty-expanded__390x844__r1.png",
+      "filename": "fpb-all-template-product-card-parity-20260806__current-standard-mobile__empty-expanded__390x844__r1.png",
+      "format": "PNG",
+      "pixel_width": 390,
+      "pixel_height": 844,
+      "aspect_ratio": 0.462085,
+      "file_size": 71127,
+      "sha256": "919e8395d1e2ff93d0be17271699601fcf19b13e7d347ff978fbae08ff5c4a47",
+      "viewport": {
+        "status": "estimated",
+        "width": null,
+        "height": null
+      },
+      "quality_issues": [
+        "low-resolution"
+      ]
+    },
+    {
+      "path": "design-jobs/fpb-all-template-product-card-parity-20260806/references/target/fpb-all-template-product-card-parity-20260806__target-classic-desktop__partial__1440x900__r1.png",
+      "filename": "fpb-all-template-product-card-parity-20260806__target-classic-desktop__partial__1440x900__r1.png",
+      "format": "PNG",
+      "pixel_width": 1440,
+      "pixel_height": 900,
+      "aspect_ratio": 1.6,
+      "file_size": 188524,
+      "sha256": "28f3d7b2931d19aa3b23e1214b9058d82d867f4f441f32de6472c3135504c34f",
+      "viewport": {
+        "status": "estimated",
+        "width": null,
+        "height": null
+      },
+      "quality_issues": []
+    },
+    {
+      "path": "design-jobs/fpb-all-template-product-card-parity-20260806/references/target/fpb-all-template-product-card-parity-20260806__target-classic-mobile__partial-collapsed__390x844__r1.png",
+      "filename": "fpb-all-template-product-card-parity-20260806__target-classic-mobile__partial-collapsed__390x844__r1.png",
+      "format": "PNG",
+      "pixel_width": 390,
+      "pixel_height": 844,
+      "aspect_ratio": 0.462085,
+      "file_size": 82421,
+      "sha256": "baaf925eed1a2c566592a310e1bdeb08007926968ec183b5be7fa733530de079",
+      "viewport": {
+        "status": "estimated",
+        "width": null,
+        "height": null
+      },
+      "quality_issues": [
+        "low-resolution"
+      ]
+    },
+    {
+      "path": "design-jobs/fpb-all-template-product-card-parity-20260806/references/target/fpb-all-template-product-card-parity-20260806__target-classic-mobile__partial-expanded__390x844__r1.png",
+      "filename": "fpb-all-template-product-card-parity-20260806__target-classic-mobile__partial-expanded__390x844__r1.png",
+      "format": "PNG",
+      "pixel_width": 390,
+      "pixel_height": 844,
+      "aspect_ratio": 0.462085,
+      "file_size": 77514,
+      "sha256": "1e4e8085452e9d4488400035f1833132c3fe2cf5aef256c2d1b6ba81665b43c6",
+      "viewport": {
+        "status": "estimated",
+        "width": null,
+        "height": null
+      },
+      "quality_issues": [
+        "low-resolution"
+      ]
+    },
+    {
+      "path": "design-jobs/fpb-all-template-product-card-parity-20260806/references/target/fpb-all-template-product-card-parity-20260806__target-compact-desktop__partial__1440x900__r1.png",
+      "filename": "fpb-all-template-product-card-parity-20260806__target-compact-desktop__partial__1440x900__r1.png",
+      "format": "PNG",
+      "pixel_width": 1440,
+      "pixel_height": 900,
+      "aspect_ratio": 1.6,
+      "file_size": 213668,
+      "sha256": "79796cc5901304ac5f96f9b34574ebf2cf80ebc04d204d0ba36de4096bf566b6",
+      "viewport": {
+        "status": "estimated",
+        "width": null,
+        "height": null
+      },
+      "quality_issues": []
+    },
+    {
+      "path": "design-jobs/fpb-all-template-product-card-parity-20260806/references/target/fpb-all-template-product-card-parity-20260806__target-compact-mobile__partial-collapsed__390x844__r1.png",
+      "filename": "fpb-all-template-product-card-parity-20260806__target-compact-mobile__partial-collapsed__390x844__r1.png",
+      "format": "PNG",
+      "pixel_width": 390,
+      "pixel_height": 844,
+      "aspect_ratio": 0.462085,
+      "file_size": 81659,
+      "sha256": "c0c3019afd69aa0dda2119fa0ef48dfac6b0923ef2b6156e856842d57d445df8",
+      "viewport": {
+        "status": "estimated",
+        "width": null,
+        "height": null
+      },
+      "quality_issues": [
+        "low-resolution"
+      ]
+    },
+    {
+      "path": "design-jobs/fpb-all-template-product-card-parity-20260806/references/target/fpb-all-template-product-card-parity-20260806__target-compact-mobile__partial-expanded__390x844__r1.png",
+      "filename": "fpb-all-template-product-card-parity-20260806__target-compact-mobile__partial-expanded__390x844__r1.png",
+      "format": "PNG",
+      "pixel_width": 390,
+      "pixel_height": 844,
+      "aspect_ratio": 0.462085,
+      "file_size": 77402,
+      "sha256": "92772c3fdf4b30b4f673423a783d7e208819cd88fc8c91be0e8bc087a28a4d6b",
+      "viewport": {
+        "status": "estimated",
+        "width": null,
+        "height": null
+      },
+      "quality_issues": [
+        "low-resolution"
+      ]
+    },
+    {
+      "path": "design-jobs/fpb-all-template-product-card-parity-20260806/references/target/fpb-all-template-product-card-parity-20260806__target-horizontal-desktop__partial__1440x900__r1.png",
+      "filename": "fpb-all-template-product-card-parity-20260806__target-horizontal-desktop__partial__1440x900__r1.png",
+      "format": "PNG",
+      "pixel_width": 1440,
+      "pixel_height": 900,
+      "aspect_ratio": 1.6,
+      "file_size": 155884,
+      "sha256": "f38b585d54565b0315c138310e59c9245f09bd36735e2963fbdcbd9051779db4",
+      "viewport": {
+        "status": "estimated",
+        "width": null,
+        "height": null
+      },
+      "quality_issues": []
+    },
+    {
+      "path": "design-jobs/fpb-all-template-product-card-parity-20260806/references/target/fpb-all-template-product-card-parity-20260806__target-horizontal-mobile__partial-collapsed__390x844__r1.png",
+      "filename": "fpb-all-template-product-card-parity-20260806__target-horizontal-mobile__partial-collapsed__390x844__r1.png",
+      "format": "PNG",
+      "pixel_width": 390,
+      "pixel_height": 844,
+      "aspect_ratio": 0.462085,
+      "file_size": 66312,
+      "sha256": "448b106e6806cbf033d3e3fbc75039237a44dea63a3b61c60e8df95c1db71b2d",
+      "viewport": {
+        "status": "estimated",
+        "width": null,
+        "height": null
+      },
+      "quality_issues": [
+        "low-resolution"
+      ]
+    },
+    {
+      "path": "design-jobs/fpb-all-template-product-card-parity-20260806/references/target/fpb-all-template-product-card-parity-20260806__target-horizontal-mobile__partial-expanded__390x844__r1.png",
+      "filename": "fpb-all-template-product-card-parity-20260806__target-horizontal-mobile__partial-expanded__390x844__r1.png",
+      "format": "PNG",
+      "pixel_width": 390,
+      "pixel_height": 844,
+      "aspect_ratio": 0.462085,
+      "file_size": 68591,
+      "sha256": "9184c99d2231a13907c8a99f61b141df82d31b0461fba21fd3473e57d30826a7",
+      "viewport": {
+        "status": "estimated",
+        "width": null,
+        "height": null
+      },
+      "quality_issues": [
+        "low-resolution"
+      ]
+    },
+    {
+      "path": "design-jobs/fpb-all-template-product-card-parity-20260806/references/target/fpb-all-template-product-card-parity-20260806__target-standard-desktop__partial__1440x900__r1.png",
+      "filename": "fpb-all-template-product-card-parity-20260806__target-standard-desktop__partial__1440x900__r1.png",
+      "format": "PNG",
+      "pixel_width": 1440,
+      "pixel_height": 900,
+      "aspect_ratio": 1.6,
+      "file_size": 256050,
+      "sha256": "d21f4b909e998c1c81120ad6e0264f08009f2d54429af471abf64a144419e1aa",
+      "viewport": {
+        "status": "estimated",
+        "width": null,
+        "height": null
+      },
+      "quality_issues": []
+    },
+    {
+      "path": "design-jobs/fpb-all-template-product-card-parity-20260806/references/target/fpb-all-template-product-card-parity-20260806__target-standard-mobile__partial-collapsed__390x844__r1.png",
+      "filename": "fpb-all-template-product-card-parity-20260806__target-standard-mobile__partial-collapsed__390x844__r1.png",
+      "format": "PNG",
+      "pixel_width": 390,
+      "pixel_height": 844,
+      "aspect_ratio": 0.462085,
+      "file_size": 81718,
+      "sha256": "80515826256b29c1624c0e8fb4a4ae358f15fb7da1859502bb9793f73b3beebb",
+      "viewport": {
+        "status": "estimated",
+        "width": null,
+        "height": null
+      },
+      "quality_issues": [
+        "low-resolution"
+      ]
+    },
+    {
+      "path": "design-jobs/fpb-all-template-product-card-parity-20260806/references/target/fpb-all-template-product-card-parity-20260806__target-standard-mobile__partial-expanded__390x844__r1.png",
+      "filename": "fpb-all-template-product-card-parity-20260806__target-standard-mobile__partial-expanded__390x844__r1.png",
+      "format": "PNG",
+      "pixel_width": 390,
+      "pixel_height": 844,
+      "aspect_ratio": 0.462085,
+      "file_size": 77387,
+      "sha256": "b4bc04303a5e7b5e9092d63b5836323484704de61810f7efc42bf4eea2abdc76",
+      "viewport": {
+        "status": "estimated",
+        "width": null,
+        "height": null
+      },
+      "quality_issues": [
+        "low-resolution"
+      ]
+    }
+  ],
+  "comparability": {
+    "width_mismatch": true,
+    "comparable_geometry": false,
+    "note": "Pixel dimensions do not prove CSS viewport dimensions; record viewport and zoom separately."
+  }
+}

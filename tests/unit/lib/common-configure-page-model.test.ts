@@ -11,19 +11,20 @@ import {
 } from "../../../app/lib/bundle-config/common-configure-page-model";
 
 describe("common configure page model", () => {
-  it("builds the FPB section list without PPB-only subscriptions", () => {
+  it("builds the FPB section list with shared subscriptions", () => {
     expect(buildConfigureSetupItems("full_page").map((item) => item.id)).toEqual(
       [
         "step_setup",
         "discount_pricing",
         "bundle_visibility",
         "bundle_settings",
+        "subscriptions",
         "select_template",
       ],
     );
   });
 
-  it("builds the PPB section list with PPB-only subscriptions", () => {
+  it("builds the PPB section list with shared subscriptions", () => {
     expect(
       buildConfigureSetupItems("product_page").map((item) => item.id),
     ).toEqual([
@@ -36,6 +37,22 @@ describe("common configure page model", () => {
     ]);
   });
 
+  it("uses the Polaris discount icon for Discount & Pricing", () => {
+    expect(
+      buildConfigureSetupItems("full_page").find(
+        (item) => item.id === "discount_pricing",
+      )?.iconType,
+    ).toBe("discount");
+  });
+
+  it("uses the Polaris settings icon for Bundle Settings", () => {
+    expect(
+      buildConfigureSetupItems("full_page").find(
+        (item) => item.id === "bundle_settings",
+      )?.iconType,
+    ).toBe("settings");
+  });
+
   it("keeps Bundle Embed as a PPB-only visibility child", () => {
     expect(buildBundleVisibilityChildItems("full_page")).toEqual([
       { id: "bundle_widget", label: "Bundle Widget" },
@@ -46,17 +63,16 @@ describe("common configure page model", () => {
     ]);
   });
 
-  it("returns FPB page links and PPB product links", () => {
+  it("returns FPB proxy links and PPB product links", () => {
     expect(
       buildBundleLinkModel({
         bundleType: "full_page",
-        fullPageUrl: "https://shop.test/pages/build-a-box",
-        pageHandle: "build-a-box",
+        fullPageUrl: "https://shop.test/apps/product-bundles/wpb/bundle-1",
       }),
     ).toMatchObject({
-      kind: "page",
+      kind: "proxy",
       isLinked: true,
-      url: "https://shop.test/pages/build-a-box",
+      url: "https://shop.test/apps/product-bundles/wpb/bundle-1",
     });
 
     expect(

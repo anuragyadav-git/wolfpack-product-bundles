@@ -15,8 +15,6 @@ export const fullPageTemplateOptions = [
   },
 ] as const;
 
-export type IndividualSellingPlanShowFor = "ALL_PRODUCTS" | "OOS_PRODUCTS";
-
 export const FPB_DESIGN_CONTROL_PANEL_URL = "/app/settings";
 
 export const bundleSetupItems = buildConfigureSetupItems("full_page");

@@ -8,6 +8,9 @@
     "pricing": "Tarification",
     "events": "Mises à jour et FAQ"
   },
+  "integrations": {
+    "requestMessage": "Bonjour, je souhaite demander la prise en charge d'une nouvelle intégration."
+  },
   "dashboard": {
     "title": "Tableau de bord : Wolfpack Bundle Builder",
     "subtitle": "Accédez à vos bundles, au support client et bien plus.",
@@ -84,7 +87,6 @@
       "previewUnavailable": "Enregistrez le bundle pour l'aperçu",
       "cloneBundle": "Dupliquer le bundle",
       "deleteBundle": "Supprimer le bundle",
-      "confirmClone": "Êtes-vous sûr de vouloir dupliquer ce bundle ?",
       "cloneSuccess": "Bundle dupliqué avec succès",
       "deleteSuccess": "Bundle supprimé",
       "themeEditorUnavailable": "Le lien de l'éditeur de thème est indisponible."
@@ -210,7 +212,7 @@
     },
     "unlistedBundle": {
       "title": "Votre lot n'est pas répertorié",
-      "body": "Le lot est masqué des résultats de recherche et des pages de collections de votre boutique. Pour le rendre visible, définissez le statut du produit du lot sur Actif dans Shopify Produits."
+      "body": "Pour le rendre visible, définissez le statut du produit du lot sur Actif dans Shopify Produits."
     },
     "proxyHealth": { "title": "Proxy d'application non connecté", "body": "Les widgets de lots en pleine page ne se chargeront pas dans votre boutique. Réinstallez l'application pour résoudre ce problème." },
     "upgradePrompt": {

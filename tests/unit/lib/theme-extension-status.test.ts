@@ -5,6 +5,19 @@ import {
 } from "../../../app/lib/theme-extension-status";
 
 describe("theme extension status normalization", () => {
+  it("tracks the unified upsell placement resource", () => {
+    expect(THEME_EXTENSION_RESOURCES).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ handle: "bundle-upsell" }),
+      ]),
+    );
+    expect(
+      THEME_EXTENSION_RESOURCES.some(({ handle }) =>
+        ["bundle-upsell-button", "bundle-upsell-block"].includes(handle),
+      ),
+    ).toBe(false);
+  });
+
   it("returns every configured resource with explicit status", () => {
     const response: ShopifyThemeExtensionInfo[] = [{
       handle: "bundle-builder",
@@ -21,8 +34,7 @@ describe("theme extension status normalization", () => {
     expect(result.find((item) => item.handle === "bundle-app-embed")?.enabled).toBe(true);
     expect(result.find((item) => item.handle === "bundle-product-page")?.status).toBe("available");
     expect(result.find((item) => item.handle === "bundle-product-page")?.enabled).toBe(false);
-    expect(result.find((item) => item.handle === "bundle-full-page")?.status).toBe("unavailable");
-    expect(result.find((item) => item.handle === "bundle-full-page")?.enabled).toBe(false);
+    expect(result.some((item) => item.handle === "bundle-full-page")).toBe(false);
   });
 
   it("does not treat unrelated extensions as Wolfpack resources", () => {

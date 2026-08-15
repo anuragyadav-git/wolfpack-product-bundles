@@ -1,21 +1,83 @@
-import { readFullPageWidgetSources } from './widget-source-helpers';
+import { fullPageBoxSelectionSidebarMethods } from '../../../app/assets/widgets/full-page/methods/box-selection-sidebar-methods';
 
-describe("FPB box selection quantity validation runtime contract", () => {
-  let source: string;
+function createContext(selectedQuantity: number) {
+  return {
+    selectedBoxSelectionRuleId: 'rule-1',
+    selectedBundle: {
+      boxSelection: {
+        isEnabled: true,
+        validateBoxSelectionQuantity: true,
+        rules: [{ ruleId: 'rule-1', boxQuantity: 3, boxLabel: 'Three pack' }],
+      },
+    },
+    getAllSelectedProductsData: () => [{ quantity: selectedQuantity }],
+    ...fullPageBoxSelectionSidebarMethods,
+  };
+}
 
-  beforeAll(() => {
-    source = readFullPageWidgetSources();
+function createProgressionContext(
+  selectedQuantity: number,
+  autoProceedToNextRule: boolean | undefined = true,
+) {
+  return {
+    selectedBoxSelectionRuleId: 'rule-2',
+    selectedBundle: {
+      boxSelection: {
+        isEnabled: true,
+        validateBoxSelectionQuantity: true,
+        autoProceedToNextRule,
+        rules: [
+          { ruleId: 'rule-2', boxQuantity: 2, boxLabel: 'Two pack' },
+          { ruleId: 'rule-4', boxQuantity: 4, boxLabel: 'Four pack' },
+          { ruleId: 'rule-6', boxQuantity: 6, boxLabel: 'Six pack' },
+        ],
+      },
+    },
+    getAllSelectedProductsData: () => [{ quantity: selectedQuantity }],
+    ...fullPageBoxSelectionSidebarMethods,
+  };
+}
+
+describe('FPB box selection quantity validation runtime contract', () => {
+  it('requires the active box quantity exactly', () => {
+    expect(createContext(2).getBoxSelectionValidationState()).toMatchObject({ isEnabled: true, isValid: false });
+    expect(createContext(3).getBoxSelectionValidationState()).toMatchObject({ isEnabled: true, isValid: true });
+    expect(createContext(4).getBoxSelectionValidationState()).toMatchObject({ isEnabled: true, isValid: false });
   });
 
-  it("uses EB-style exact active box quantity validation", () => {
-    expect(source).toContain("getBoxSelectionValidationState");
-    expect(source).toContain("boxSelection?.validateBoxSelectionQuantity === true");
-    expect(source).toContain("Number(totalQuantity || 0) === Number(activeRule.boxQuantity || 0)");
+  it('uses validation state to gate checkout', () => {
+    expect(createContext(2).canCheckoutWithBoxSelection()).toBe(false);
+    expect(createContext(3).canCheckoutWithBoxSelection()).toBe(true);
   });
 
-  it("gates all FPB add-to-cart CTA paths with box selection validation", () => {
-    expect(source).toContain("canCheckoutWithBoxSelection");
-    expect(source).toContain("if (!this.canCheckoutWithBoxSelection())");
-    expect(source.match(/this\.canCheckoutWithBoxSelection\(\)/g)?.length ?? 0).toBeGreaterThanOrEqual(6);
+  it('keeps the current rule active until its quantity is exceeded', () => {
+    const context = createProgressionContext(2);
+    expect(context.getBoxSelectionValidationState().activeRule.ruleId).toBe('rule-2');
+  });
+
+  it('automatically advances to the next rule after the current quantity is exceeded', () => {
+    const context = createProgressionContext(3);
+    expect(context.getBoxSelectionValidationState()).toMatchObject({
+      isEnabled: true,
+      isValid: false,
+      activeRule: { ruleId: 'rule-4', boxQuantity: 4 },
+      totalQuantity: 3,
+    });
+  });
+
+  it('advances across multiple rules when the selected quantity jumps', () => {
+    const context = createProgressionContext(5);
+    expect(context.getBoxSelectionValidationState().activeRule.ruleId).toBe('rule-6');
+  });
+
+  it('keeps the highest configured rule active when its quantity is exceeded', () => {
+    const context = createProgressionContext(7);
+    context.selectedBoxSelectionRuleId = 'rule-6';
+    expect(context.getBoxSelectionValidationState().activeRule.ruleId).toBe('rule-6');
+  });
+
+  it('honors an explicit auto-progression opt-out', () => {
+    const context = createProgressionContext(5, false);
+    expect(context.getBoxSelectionValidationState().activeRule.ruleId).toBe('rule-2');
   });
 });

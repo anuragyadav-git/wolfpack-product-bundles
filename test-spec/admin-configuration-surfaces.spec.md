@@ -1,3 +1,28 @@
+---
+schema_version: 1
+id: admin-configuration-surfaces
+title: Recovered Admin Surfaces
+type: test-spec
+status: active
+summary: Covers recovered Admin configuration surfaces and their current product contracts.
+last_audited: 2026-08-13
+owners:
+  - engineering
+domains:
+  - admin
+systems:
+  - configuration-surfaces
+source_paths:
+  - app/routes/app/
+related_docs: []
+tags:
+  - admin-ui
+  - configuration
+keywords:
+  - settings
+  - integrations
+---
+
 # Test Spec: Recovered Admin Surfaces
 **Spec ID:** admin-configuration-surfaces  **Issue:** [eb-replication-recovery-1]  **Created:** 2026-06-01
 
@@ -99,7 +124,7 @@ Lock the recovered Settings and Integrations Admin contracts so route UI stays a
 ### ProductPageBundleSettingsSurfaceContract
 | # | Scenario | Input | Expected Output | Notes |
 |---|---|---|---|---|
-| 1 | PPB Bundle Settings sections | PPB configure route source | Pre Selected Product, Quantity Validation, Pre-order & Subscription Integration, Cart line item discount display, Bundle Level CSS, and Bundle Status exist | Captured from PPB Bundle Settings evidence |
+| 1 | PPB Bundle Settings sections | PPB configure route source | Pre Selected Product, Quantity Validation, Cart line item discount display, Bundle Level CSS, and Bundle Status exist; Pre-order & Subscription Integration is absent | Current WPB product decision 2026-08-13 |
 | 2 | PPB excludes FPB-only cart labels | PPB configure route source | Bundle Cart Title and Bundle Cart Subtitle are absent from PPB Bundle Settings | Captured PPB evidence explicitly excludes those fields |
 
 ### FullPageBundleSettingsSurfaceContract

@@ -1,0 +1,9 @@
+{
+  "status": "passed",
+  "categories": {"accessibility": {"score": 1}},
+  "component_findings": [],
+  "page_level_score": 0.89,
+  "page_level_findings": ["One Shopify theme form-field label issue; no FPB component finding."],
+  "best_practices_score": 1,
+  "source": "Chrome DevTools Lighthouse snapshot, desktop, 2026-08-06"
+}

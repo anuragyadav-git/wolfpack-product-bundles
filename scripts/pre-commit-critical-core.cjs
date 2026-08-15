@@ -14,6 +14,7 @@ const GENERATED_FILES = new Set([
   "extensions/bundle-builder/assets/bundle-widget-full-page-bundled.js",
   "extensions/bundle-builder/assets/bundle-widget-product-page-bundled.js",
   "extensions/bundle-builder/assets/wolfpack-bundles-sdk.js",
+  "extensions/bundle-builder/assets/bundle-app-embed.js",
   "extensions/bundle-builder/assets/bundle-widget-full-page.css",
   "extensions/bundle-builder/assets/bundle-widget-full-page-mobile-summary.css",
   "extensions/bundle-builder/assets/bundle-widget-full-page-standard.css",
@@ -22,7 +23,7 @@ const GENERATED_FILES = new Set([
   "extensions/bundle-builder/assets/bundle-widget-full-page-horizontal.css",
   "extensions/bundle-builder/assets/bundle-widget.css",
   "extensions/bundle-builder/assets/bundle-widget-product-page-cascade.css",
-  "extensions/bundle-builder/assets/bundle-widget-product-page-cognive.css",
+  "extensions/bundle-builder/assets/bundle-widget-product-page-grid.css",
   "extensions/bundle-builder/assets/bundle-widget-product-page-modal.css",
 ]);
 
@@ -88,26 +89,29 @@ function isCheckedForPartialStaging(file) {
 
 function affectsFullPageWidget(file) {
   const normalized = normalizePath(file);
-  return normalized === "app/assets/bundle-widget-full-page.js"
-    || normalized === "app/assets/bundle-modal-component.js"
+  return normalized === "app/storefront/full-page.ts"
+    || normalized === "app/storefront/app-embed.ts"
+    || normalized === "app/assets/bundle-widget-full-page.ts"
+    || normalized === "app/assets/bundle-modal-component.ts"
     || normalized.startsWith("app/assets/widgets/full-page/")
     || normalized.startsWith("app/assets/widgets/shared/");
 }
 
 function affectsProductPageWidget(file) {
   const normalized = normalizePath(file);
-  return normalized === "app/assets/bundle-widget-product-page.js"
+  return normalized === "app/storefront/product-page.ts"
+    || normalized === "app/assets/bundle-widget-product-page.ts"
     || normalized.startsWith("app/assets/widgets/product-page/")
     || normalized.startsWith("app/assets/widgets/shared/");
 }
 
 function affectsSdk(file) {
   const normalized = normalizePath(file);
-  return normalized.startsWith("app/assets/sdk/");
+  return normalized === "app/storefront/sdk.ts" || normalized.startsWith("app/assets/sdk/");
 }
 
 function affectsWidgetBuildScript(file) {
-  return normalizePath(file) === "scripts/build-widget-bundles.js";
+  return normalizePath(file) === "scripts/build-storefront.mjs";
 }
 
 function affectsWidgetCss(file) {

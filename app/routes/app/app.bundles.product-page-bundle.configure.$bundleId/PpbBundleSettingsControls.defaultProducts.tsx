@@ -1,3 +1,4 @@
+import { DefaultProductDiscountTipBanner } from "../_shared/bundle-configure/DefaultProductDiscountTipBanner";
 import { usePpbConfigureContext } from "./PpbConfigureContext";
 
 type DefaultProductSelection = {
@@ -18,6 +19,8 @@ export function PpbDefaultProductsSettings() {
     productPageBundleStyles,
     setDefaultProductsData,
     shopify,
+    validationErrors = {},
+    clearValidationError,
   } = usePpbConfigureContext();
 
   const selectedDefaultProducts = defaultProductsData.products ?? [];
@@ -55,6 +58,7 @@ export function PpbDefaultProductsSettings() {
       products: defaultProducts,
     }));
     markAsDirty();
+    clearValidationError("settings.defaultProducts");
   };
 
   return (
@@ -81,11 +85,7 @@ export function PpbDefaultProductsSettings() {
             />
           </span>
         </div>
-        <s-banner tone="info">
-          Tip: Discounts are based on all items in your cart. Don&apos;t forget
-          to include the Pre Selected Product&apos;s quantity or amount when
-          setting up discounts.
-        </s-banner>
+        <DefaultProductDiscountTipBanner />
         <s-text-field
           label="Default products title"
           value={defaultProductsData.defaultProductsTitle ?? ""}
@@ -115,6 +115,11 @@ export function PpbDefaultProductsSettings() {
               <s-badge tone="success">{defaultProductCount} selected</s-badge>
             )}
           </div>
+          {validationErrors["settings.defaultProducts"] && (
+            <s-text id="configure-settings-defaultProducts" tone="critical">
+              {validationErrors["settings.defaultProducts"]}
+            </s-text>
+          )}
         </div>
       </s-stack>
     </s-section>

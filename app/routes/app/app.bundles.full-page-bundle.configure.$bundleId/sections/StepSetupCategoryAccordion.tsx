@@ -33,6 +33,8 @@ export function FpbStepCategoryAccordion({
         showPolarisModal: flow.showPolarisModal,
         stepsState: flow.stepsState,
         styles: flow.fullPageBundleStyles,
+        validationErrors: flow.validationErrors,
+        clearValidationError: flow.clearValidationError,
       }}
       step={step}
       cat={cat}

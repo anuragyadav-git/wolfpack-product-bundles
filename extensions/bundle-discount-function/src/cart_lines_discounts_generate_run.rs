@@ -308,6 +308,115 @@ fn build_automatic_addon_candidates(
         .collect()
 }
 
+fn build_subscription_candidates(
+    input: &schema::cart_lines_discounts_generate_run::Input,
+    recurring_bundle_discount: bool,
+) -> Vec<schema::ProductDiscountCandidate> {
+    let Some(runtime_secret) = input
+        .discount()
+        .runtime_token_secret()
+        .map(|metafield| metafield.value().as_str())
+        .filter(|value| !value.trim().is_empty())
+    else {
+        return vec![];
+    };
+    let mut groups: HashMap<String, Vec<usize>> = HashMap::new();
+    for (index, line) in input.cart().lines().iter().enumerate() {
+        if line.selling_plan_allocation().is_none() {
+            continue;
+        }
+        let Some(group_id) = line
+            .wolfpack_product_bundle_offer_id()
+            .and_then(|attribute| attribute.value())
+            .and_then(|value| wolfpack_product_bundle_offer_group_id(value.as_str()))
+        else {
+            continue;
+        };
+        groups.entry(group_id).or_default().push(index);
+    }
+
+    let mut candidates = Vec::new();
+    for (group_id, indices) in groups {
+        let Some(token) = indices.iter().find_map(|&index| {
+            input.cart().lines()[index]
+                .runtime_token()
+                .and_then(|attribute| attribute.value())
+                .map(|value| value.as_str())
+        }) else {
+            continue;
+        };
+        let Some(payload) = verify_runtime_token(token, runtime_secret) else {
+            continue;
+        };
+        let Some(subscription) = payload.subscription.as_ref() else {
+            continue;
+        };
+        if subscription.selling_plan_group_id.trim().is_empty()
+            || subscription.recurring_bundle_discount != recurring_bundle_discount
+        {
+            continue;
+        }
+
+        let plan_matches = indices.iter().all(|&index| {
+            input.cart().lines()[index]
+                .selling_plan_allocation()
+                .map(|allocation| allocation.selling_plan().id() == &subscription.selling_plan_id)
+                .unwrap_or(false)
+        });
+        if !plan_matches {
+            continue;
+        }
+
+        let mut actual_components = Vec::new();
+        let mut targets = Vec::new();
+        let mut total = 0.0;
+        let mut quantity = 0i64;
+        let mut unit_prices = Vec::new();
+        for &index in &indices {
+            let line = &input.cart().lines()[index];
+            let schema::cart_lines_discounts_generate_run::input::cart::lines::Merchandise::ProductVariant(variant) = line.merchandise() else {
+                actual_components.clear();
+                break;
+            };
+            let line_quantity = *line.quantity() as i64;
+            let unit_price = decimal_to_f64(line.cost().amount_per_quantity().amount());
+            actual_components.push((variant.id().to_string(), line_quantity));
+            quantity += line_quantity;
+            total += unit_price * line_quantity as f64;
+            for _ in 0..line_quantity.max(0) {
+                unit_prices.push(unit_price);
+            }
+            targets.push(schema::ProductDiscountCandidateTarget::CartLine(
+                schema::CartLineTarget { id: line.id().clone(), quantity: None },
+            ));
+        }
+        if !token_components_match(&payload, &group_id, &actual_components) {
+            continue;
+        }
+        let percentage = calculate_parent_discount_percentage(
+            &serde_json::to_string(&payload.price_adjustment).unwrap_or_default(),
+            total,
+            total,
+            quantity,
+            &unit_prices,
+            decimal_to_f64(input.presentment_currency_rate()),
+        );
+        if percentage <= 0.0 || targets.is_empty() {
+            continue;
+        }
+        candidates.push(schema::ProductDiscountCandidate {
+            associated_discount_code: None,
+            message: Some(BUNDLE_DISCOUNT_MESSAGE.to_string()),
+            prerequisites: None,
+            targets,
+            value: schema::ProductDiscountCandidateValue::Percentage(
+                schema::Percentage { value: Decimal(percentage) },
+            ),
+        });
+    }
+    candidates
+}
+
 fn build_checkout_integration_candidates(
     input: &schema::cart_lines_discounts_generate_run::Input,
     presentment_currency_rate: f64,
@@ -492,7 +601,16 @@ fn cart_lines_discounts_generate_run(
         return Ok(schema::CartLinesDiscountsGenerateRunResult { operations: vec![] });
     }
 
-    let candidates = if is_checkout_integration_code_mode(&input) {
+    let discount_role = input
+        .discount()
+        .discount_role()
+        .map(|metafield| metafield.value().as_str())
+        .unwrap_or("addons");
+    let candidates = if discount_role == "subscription_initial" {
+        build_subscription_candidates(&input, false)
+    } else if discount_role == "subscription_recurring" {
+        build_subscription_candidates(&input, true)
+    } else if is_checkout_integration_code_mode(&input) {
         let rate = decimal_to_f64(input.presentment_currency_rate());
         let presentment_currency_rate = if rate.is_finite() && rate > 0.0 {
             rate

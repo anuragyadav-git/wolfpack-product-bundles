@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "case_id": "",
+  "viewport": "",
+  "state": "",
+  "required": true,
+  "gates": {
+    "functional": "not-run",
+    "visual": "not-run",
+    "geometry": "not-run",
+    "responsive": "not-run",
+    "console": "not-run",
+    "network": "not-run",
+    "accessibility": "not-run",
+    "performance": "not-run",
+    "non_regression": "not-run"
+  },
+  "performance_reason": "",
+  "evidence": {
+    "snapshot": "",
+    "screenshots": {
+      "before": "",
+      "after": "",
+      "element": {"actual": "", "baseline": "", "diff": "", "comparison_summary": ""},
+      "viewport": {"actual": "", "baseline": "", "diff": "", "comparison_summary": ""}
+    },
+    "console": "",
+    "network": "",
+    "accessibility": "",
+    "lighthouse": {"desktop": "", "mobile": ""},
+    "performance_trace": null
+  },
+  "assertions": [],
+  "observations": {
+    "console": {"violations": [], "allowlisted": []},
+    "network": {"violations": [], "expected_analytics": []}
+  },
+  "waivers": [],
+  "retry_history": []
+}

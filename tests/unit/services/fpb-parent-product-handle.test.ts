@@ -114,6 +114,7 @@ describe("FPB parent product handle ownership", () => {
       appUrl: "https://app.example.test",
       bundle: {
         id: "bundle-1",
+        publicNumber: 1,
         name: "Build Your Box",
         bundleType: "full_page",
         shopifyProductId: null,
@@ -140,6 +141,7 @@ describe("FPB parent product handle ownership", () => {
       appUrl: "https://app.example.test",
       bundle: {
         id: "bundle-1",
+        publicNumber: 1,
         name: "Build Your Box",
         bundleType: "product_page",
         shopifyProductId: null,
@@ -166,6 +168,7 @@ describe("FPB parent product handle ownership", () => {
       appUrl: "https://app.example.test",
       bundle: {
         id: "bundle-1",
+        publicNumber: 1,
         name: "Build Your Box",
         bundleType: "full_page",
         shopifyProductId: "gid://shopify/Product/10",
@@ -186,6 +189,65 @@ describe("FPB parent product handle ownership", () => {
       where: { id: "bundle-1", shopId: "test-shop.myshopify.com" },
       data: { shopifyProductHandle: "wpb-parent-bundle-1" },
     });
+  });
+
+  it("updates Shopify's percent-encoded redirect for a Unicode parent handle", async () => {
+    const legacyHandle = "customize-your-own-box-👉";
+    const encodedPath = "/products/customize-your-own-box-%f0%9f%91%89";
+    const admin = makeExistingAdmin("full_page");
+    const original = admin.graphql.getMockImplementation()!;
+    admin.graphql.mockImplementation(async (query: string, options?: any) => {
+      if (query.includes("GetBundleParentProduct")) {
+        return response({ data: { product: {
+          id: "gid://shopify/Product/10",
+          handle: legacyHandle,
+          status: "UNLISTED",
+          variants: { nodes: [{ id: "gid://shopify/ProductVariant/20" }] },
+        } } });
+      }
+      if (query.includes("FindUrlRedirect")) {
+        return response({ data: { urlRedirects: { nodes: [{
+          id: "gid://shopify/UrlRedirect/1",
+          path: encodedPath,
+          target: "/pages/legacy-bundle",
+        }] } } });
+      }
+      if (query.includes("UpdateUrlRedirect")) {
+        return response({ data: { urlRedirectUpdate: {
+          urlRedirect: { id: "gid://shopify/UrlRedirect/1" },
+          userErrors: [],
+        } } });
+      }
+      return original(query, options);
+    });
+
+    await ensureBundleParentProduct({
+      admin,
+      shopDomain: "test-shop.myshopify.com",
+      appUrl: "https://app.example.test",
+      bundle: {
+        id: "bundle-1",
+        publicNumber: 1,
+        name: "Build Your Box",
+        bundleType: "full_page",
+        shopifyProductId: "gid://shopify/Product/10",
+        shopifyProductHandle: legacyHandle,
+      },
+    });
+
+    expect(admin.graphql).toHaveBeenCalledWith(
+      expect.stringContaining("UpdateUrlRedirect"),
+      expect.objectContaining({ variables: expect.objectContaining({
+        id: "gid://shopify/UrlRedirect/1",
+        urlRedirect: expect.objectContaining({
+          target: "/apps/product-bundles/wpb/1",
+        }),
+      }) }),
+    );
+    expect(admin.graphql).not.toHaveBeenCalledWith(
+      expect.stringContaining("CreateUrlRedirect"),
+      expect.anything(),
+    );
   });
 
   it("does not move an existing PPB parent", async () => {

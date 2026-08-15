@@ -12,8 +12,10 @@ Verify PPB product cards keep the same selected-card quantity selector behavior 
 |---|---|---|---|---|
 | 1 | Shared PPB card is selected | Shared product card with only an add button, `quantity = 2` | Runtime removes the add button and appends an inline quantity control with the current quantity | Covers Grid/Cascade shared-card surfaces |
 | 2 | Shared PPB quantity button is clicked | Click target has `inline-qty-btn qty-increase` classes | Delegated handler treats it as a quantity control | Prevents rendered selector from being inert |
+| 3 | Shared PPB card selection changes | Quantity changes from zero to positive, then back to zero | Card `aria-pressed` and selected-state label match the current quantity | Covers partial DOM updates without a full card render |
 
 ## Acceptance Criteria
 
 - [ ] Selected PPB product cards render a functional quantity selector without requiring a full re-render.
+- [ ] Partial quantity updates keep the card's accessible selected state synchronized.
 - [ ] The test verifies behavior and state, not visual placement or CSS values.

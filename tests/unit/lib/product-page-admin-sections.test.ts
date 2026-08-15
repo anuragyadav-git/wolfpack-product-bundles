@@ -1,16 +1,17 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import {
-  INDIVIDUAL_SELLING_PLAN_BLOCKED_MESSAGE,
   PRODUCT_PAGE_EDIT_DEFAULTS_HREF,
   PRODUCT_PAGE_SETUP_ITEMS,
-  SUBSCRIPTION_NO_COMMON_PLAN_MESSAGE,
   buildProductPageThemeEditorDeepLink,
   deriveCommonSellingPlanGroups,
-  extractSellingPlanValidationSources,
   resolveProductPageTemplateSuffix,
   resolveProductPageThemeEditorTemplateHandle,
 } from "../../../app/lib/bundle-config/product-page-admin-sections";
+import {
+  extractSellingPlanValidationSources,
+  SUBSCRIPTION_NO_COMMON_PLAN_MESSAGE,
+} from "../../../app/lib/bundle-subscriptions";
 
 const configureHandlersSource = readFileSync(
   join(process.cwd(), "app/services/bundles/bundle-configure-handlers.server.ts"),
@@ -33,6 +34,13 @@ describe("product page admin sections", () => {
     ]);
   });
 
+  it("uses the Polaris settings icon for Bundle Settings", () => {
+    expect(
+      PRODUCT_PAGE_SETUP_ITEMS.find((item) => item.id === "bundle_settings")
+        ?.iconType,
+    ).toBe("settings");
+  });
+
   it("routes Bundle Settings Edit Defaults to Settings", () => {
     expect(PRODUCT_PAGE_EDIT_DEFAULTS_HREF).toBe("/app/settings");
   });
@@ -40,12 +48,6 @@ describe("product page admin sections", () => {
   it("uses the captured no-common-selling-plan validation message", () => {
     expect(SUBSCRIPTION_NO_COMMON_PLAN_MESSAGE).toBe(
       "To offer this bundle as a subscription, all of its products must be part of the same subscription plan in your Shopify settings. Please update your product selling plans and try again."
-    );
-  });
-
-  it("uses the captured individual selling plan blocked-state message", () => {
-    expect(INDIVIDUAL_SELLING_PLAN_BLOCKED_MESSAGE).toBe(
-      "Individual selling plans can't be enabled while a bundle-level subscription or BXGY discount is active. Disable it to use individual selling plans."
     );
   });
 

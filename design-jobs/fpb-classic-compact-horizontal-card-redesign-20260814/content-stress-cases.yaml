@@ -1,0 +1,134 @@
+{
+  "schema_version": 1,
+  "job_id": "fpb-classic-compact-horizontal-card-redesign-20260814",
+  "revision": 1,
+  "status": "complete",
+  "cases": [
+    {
+      "id": "long-product-title",
+      "data": {
+        "condition": "merchant title wraps to at least two lines at 360px"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "short-product-title",
+      "data": {
+        "condition": "single short word"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "high-price",
+      "data": {
+        "condition": "price string approaches action track width"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "discounted-price",
+      "data": {
+        "condition": "current and compare-at prices both render"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "zero-discount",
+      "data": {
+        "condition": "compare-at price absent"
+      },
+      "required_in_browser_qa": false
+    },
+    {
+      "id": "long-variant-name",
+      "data": {
+        "condition": "selected option wraps without widening card"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "multiple-variant-dimensions",
+      "data": {
+        "condition": "grouped product exposes selector and unavailable option"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "missing-image",
+      "data": {
+        "condition": "existing missing-media fallback"
+      },
+      "required_in_browser_qa": false
+    },
+    {
+      "id": "portrait-image",
+      "data": {
+        "condition": "portrait media shares a row with landscape media"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "landscape-image",
+      "data": {
+        "condition": "landscape media shares a row with portrait media"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "quantity-one",
+      "data": {
+        "condition": "selected card shows inline quantity at one"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "quantity-ten-plus",
+      "data": {
+        "condition": "multi-digit quantity does not widen control"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "zero-selected-products",
+      "data": {
+        "condition": "default summary state"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "many-selected-products",
+      "data": {
+        "condition": "summary reaches existing scroll threshold"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "long-translated-copy",
+      "data": {
+        "condition": "not introduced by this CSS-only slice"
+      },
+      "required_in_browser_qa": false
+    },
+    {
+      "id": "wide-currency-format",
+      "data": {
+        "condition": "currency and compare-at price wrap safely"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "validation-error",
+      "data": {
+        "condition": "existing shared validation path"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "slow-loading-state",
+      "data": {
+        "condition": "shared loading path regression only"
+      },
+      "required_in_browser_qa": false
+    }
+  ]
+}

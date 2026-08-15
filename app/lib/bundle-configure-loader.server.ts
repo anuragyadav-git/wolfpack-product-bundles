@@ -56,6 +56,14 @@ const GET_BUNDLE_PRODUCT = `
   }
 `;
 
+const GET_SHOP_CURRENCY = `
+  query GetShopCurrency {
+    shop {
+      currencyCode
+    }
+  }
+`;
+
 const GET_SHOP_LOCALES = `
   query GetShopLocales {
     shopLocales {
@@ -88,12 +96,26 @@ export async function fetchBundleProduct(
   }
 }
 
+export async function fetchShopCurrencyCode(admin: any): Promise<string> {
+  const response = await admin.graphql(GET_SHOP_CURRENCY);
+  const data = (await response.json()) as {
+    data?: {
+      shop?: { currencyCode?: string };
+    };
+  };
+  const shopCurrencyCode = data.data?.shop?.currencyCode;
+  if (!shopCurrencyCode) {
+    throw new Error("Shop currency is missing from Shopify Admin response");
+  }
+  return shopCurrencyCode;
+}
+
 export async function fetchShopLocales(
-  admin: any
+  admin: any,
 ): Promise<{ locale: string; name: string; primary: boolean }[]> {
   try {
     const response = await admin.graphql(GET_SHOP_LOCALES);
-    const data = await response.json() as {
+    const data = (await response.json()) as {
       data?: {
         shopLocales?: {
           locale: string;
@@ -103,9 +125,10 @@ export async function fetchShopLocales(
         }[];
       };
     };
-    return (data.data?.shopLocales ?? []).filter((l) => l.published);
+    return (data.data?.shopLocales ?? [])
+      .filter((locale) => locale.published)
+      .map(({ locale, name, primary }) => ({ locale, name, primary }));
   } catch {
-    // Non-critical — fall back to English-only mode
     return [];
   }
 }

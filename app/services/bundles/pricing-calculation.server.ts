@@ -30,11 +30,6 @@ let cacheStats = {
   size: 0
 };
 
-function normalizeStepQuantity(value: unknown): number {
-  const parsed = Number.parseInt(String(value), 10);
-  return Number.isFinite(parsed) ? parsed : 0;
-}
-
 /**
  * Clears expired entries from the price cache
  */
@@ -211,7 +206,7 @@ export async function calculateBundleTotalPrice(admin: ShopifyAdmin, stepsData: 
         // Calculate average price for this step
         if (validProductCount > 0) {
           const stepAveragePrice = stepTotalPrice / validProductCount;
-          const quantity = normalizeStepQuantity(step.minQuantity);
+          const quantity = step.minQuantity;
           const stepContribution = stepAveragePrice * quantity;
 
           totalPrice += stepContribution;
@@ -289,7 +284,7 @@ export async function calculateBundlePrice(admin: ShopifyAdmin, bundle: any): Pr
         // Calculate average price for this step (customer picks ONE)
         if (validProductCount > 0) {
           const stepAveragePrice = stepTotalPrice / validProductCount;
-          const quantity = normalizeStepQuantity(step.minQuantity);
+          const quantity = step.minQuantity;
           const stepContribution = stepAveragePrice * quantity;
 
           totalPrice += stepContribution;

@@ -1,0 +1,25 @@
+{
+  "baseline": "design-jobs/fpb-all-template-summary-qa-20260806/references/target/fpb-all-template-summary-qa-20260806__target-standard-desktop__partial__1440x900__r3.png",
+  "actual": "design-jobs/fpb-all-template-summary-qa-20260806/references/current/fpb-all-template-summary-qa-20260806__current-standard-desktop__empty__1440x900__r3.png",
+  "mask": null,
+  "approved_mask_regions": [],
+  "threshold": 1.0,
+  "pixel_tolerance": 8,
+  "status": "passed",
+  "reason": "within-threshold",
+  "engine": "pillow",
+  "dimensions": {
+    "width": 1440,
+    "height": 900
+  },
+  "compared_pixels": 1296000,
+  "changed_pixels": 671026,
+  "mismatch_ratio": 0.51776698,
+  "difference_bounds": {
+    "x": 0,
+    "y": 0,
+    "width": 1440,
+    "height": 900
+  },
+  "diff_path": "design-jobs/fpb-all-template-summary-qa-20260806/qa/diffs/standard-desktop.png"
+}

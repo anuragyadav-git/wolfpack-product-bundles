@@ -1,4 +1,6 @@
 import type { ConfigureBundleFlowContext } from "./useConfigureBundleFlow";
+import { AdminPageTitleBar } from "../../../components/AdminPageNavigation";
+import { getReadinessScoreColor } from "../../../components/bundle-configure/BundleReadinessOverlay";
 
 export function ConfigureCanvasHeader({
   flow,
@@ -15,11 +17,9 @@ export function ConfigureCanvasHeader({
     handleBackClick,
     handlePreviewBundle,
     isPreviewBundleLoading,
-    appEmbedBannerFeedbackTrigger,
     openThemeEditorForAppEmbed,
     openProductInAdmin,
     parentProductStatusUi,
-    readinessClassName,
     readinessScore,
     setReadinessOpen,
     shop,
@@ -29,6 +29,11 @@ export function ConfigureCanvasHeader({
 
   return (
     <>
+      <AdminPageTitleBar
+        title="Configure Bundle Flow"
+        breadcrumbLabel="Dashboard"
+        onBack={handleBackClick}
+      />
       <div className={fullPageBundleStyles.canvasHeader}>
         <div className={fullPageBundleStyles.canvasTitleGroup}>
           <div className={fullPageBundleStyles.canvasTitleRow}>
@@ -46,18 +51,27 @@ export function ConfigureCanvasHeader({
           </div>
         </div>
         <div className={fullPageBundleStyles.canvasActions}>
-          <button
-            type="button"
-            className={`${fullPageBundleStyles.readinessButton} ${readinessClassName}`}
-            onClick={() => setReadinessOpen(true)}
+          <span
+            className={fullPageBundleStyles.readinessButton}
+            style={{
+              backgroundColor: getReadinessScoreColor(readinessScore),
+              borderColor: getReadinessScoreColor(readinessScore),
+            }}
           >
-            <span className={fullPageBundleStyles.readinessScore}>
-              {readinessScore}
-            </span>
-            <span className={fullPageBundleStyles.readinessLabel}>
-              Readiness Score
-            </span>
-          </button>
+            <s-press-button
+              variant="tertiary"
+              tone="neutral"
+              accessibilityLabel={`${readinessScore} Readiness Score`}
+              onClick={() => setReadinessOpen(true)}
+            >
+              <span className={fullPageBundleStyles.readinessScore}>
+                {readinessScore}
+              </span>
+              <span className={fullPageBundleStyles.readinessLabel}>
+                Readiness Score
+              </span>
+            </s-press-button>
+          </span>
           <s-button
             variant="secondary"
             icon="view"
@@ -74,21 +88,22 @@ export function ConfigureCanvasHeader({
       <AppEmbedBanner
         appEmbedEnabled={appEmbedEnabled}
         themeEditorUrl={themeEditorUrl}
-        feedbackTrigger={appEmbedBannerFeedbackTrigger}
         onEnableClick={openThemeEditorForAppEmbed}
       />
       {parentProductStatusUi.showUnlistedBanner && (
-        <UnlistedBundleBanner
-          shop={shop}
-          bundleProductId={bundleProduct?.id ?? bundle.shopifyProductId ?? null}
-          onManage={() => {
-            const productId =
-              bundleProduct?.legacyResourceId ||
-              bundleProduct?.id?.split("/").pop() ||
-              bundle.shopifyProductId?.split("/").pop();
-            if (productId) openProductInAdmin(productId);
-          }}
-        />
+        <div className={fullPageBundleStyles.unlistedBannerGap}>
+          <UnlistedBundleBanner
+            shop={shop}
+            bundleProductId={bundleProduct?.id ?? bundle.shopifyProductId ?? null}
+            onManage={() => {
+              const productId =
+                bundleProduct?.legacyResourceId ||
+                bundleProduct?.id?.split("/").pop() ||
+                bundle.shopifyProductId?.split("/").pop();
+              if (productId) openProductInAdmin(productId);
+            }}
+          />
+        </div>
       )}
     </>
   );

@@ -5,7 +5,7 @@ title: Deployment
 type: operations
 status: active
 summary: Deployment commands, environment configuration, and Shopify-managed installation rules.
-last_audited: 2026-07-31
+last_audited: 2026-08-07
 owners:
   - engineering
 domains:
@@ -43,7 +43,7 @@ keywords:
 
 ## Shopify Extension Deploy
 
-1. Increment `WIDGET_VERSION` in `scripts/build-widget-bundles.js`
+1. Increment `widgetVersion` in `scripts/build-storefront.mjs`
 2. Run `npm run build:widgets`
 3. Check CSS file sizes: `wc -c extensions/bundle-builder/assets/*.css` (must be < 100,000 B)
 4. Run `npm run deploy:prod` or `npm run deploy:sit`

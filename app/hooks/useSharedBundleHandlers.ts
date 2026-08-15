@@ -42,10 +42,7 @@ export function buildClonedStepPayload(stepToClone: any, cloneTimestamp: number)
     ? stepToClone.StepProduct.map((product: any) => ({
       ...product,
       variants: cloneArrayObjects(product?.variants),
-      selectedProducts: cloneArrayObjects(product?.selectedProducts),
       collections: cloneArrayObjects(product?.collections),
-      collectionsData: cloneArrayObjects(product?.collectionsData),
-      collectionsSelectedData: cloneArrayObjects(product?.collectionsSelectedData),
       multiLangData: cloneValue(product?.multiLangData),
     }))
     : [];
@@ -55,10 +52,7 @@ export function buildClonedStepPayload(stepToClone: any, cloneTimestamp: number)
       ...category,
       id: `cat-${cloneTimestamp}-${categoryIndex}`,
       products: cloneArrayObjects(category?.products),
-      selectedProducts: cloneArrayObjects(category?.selectedProducts),
       collections: cloneArrayObjects(category?.collections),
-      collectionsData: cloneArrayObjects(category?.collectionsData),
-      collectionsSelectedData: cloneArrayObjects(category?.collectionsSelectedData),
       conditions: cloneArrayObjects(category?.conditions),
       multiLangData: cloneValue(category?.multiLangData),
     }))

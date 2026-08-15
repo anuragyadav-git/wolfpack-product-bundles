@@ -5,7 +5,7 @@ title: Build Process
 type: operations
 status: authoritative
 summary: Build, minification, lint, and pre-commit requirements for deployable application and storefront assets.
-last_audited: 2026-07-22
+last_audited: 2026-08-10
 owners:
   - engineering
 domains:
@@ -13,7 +13,7 @@ domains:
 systems:
   - asset-pipeline
 source_paths:
-  - scripts/build-widget-bundles.js
+  - scripts/build-storefront.mjs
   - scripts/minify-assets.js
 related_docs:
   - internal docs/index.md
@@ -41,12 +41,14 @@ npm run build:widgets:product-page # PDP only
 
 | Source | Output |
 |---|---|
-| `app/assets/bundle-widget-full-page.js` + shared/template modules | `extensions/bundle-builder/assets/bundle-widget-full-page-bundled.js` |
-| `app/assets/bundle-widget-product-page.js` + shared/template modules | `extensions/bundle-builder/assets/bundle-widget-product-page-bundled.js` |
+| `app/storefront/full-page.ts` | `extensions/bundle-builder/assets/bundle-widget-full-page-bundled.js` |
+| `app/storefront/product-page.ts` | `extensions/bundle-builder/assets/bundle-widget-product-page-bundled.js` |
+| `app/storefront/sdk.ts` | `extensions/bundle-builder/assets/wolfpack-bundles-sdk.js` |
+| `app/storefront/app-embed.ts` | `extensions/bundle-builder/assets/bundle-app-embed.js` |
 
 **Both source AND bundled files must be committed.**
 
-The widget build inlines shared modules, template config registries, and template method modules before each widget entry file. Template files should export config or method objects; do not reintroduce `installXTemplate` functions or template-specific prototype patching.
+`scripts/build-storefront.mjs` is the only JavaScript asset producer. esbuild follows ESM imports from each entry and emits minified IIFEs; `scripts/minify-assets.js` owns CSS only. Widget controllers and method modules import shared primitives directly from `app/assets/widgets/shared/`; do not introduce compatibility barrels or rely on browser globals to satisfy module dependencies. Do not add manual module arrays, import stripping, source concatenation, or a second JS minification pass.
 
 Keep split source modules semantically named by responsibility. Mechanical split names such as `chunk-01.js` or `part-01.css` are not acceptable long-term source structure.
 

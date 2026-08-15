@@ -52,7 +52,7 @@ export function FpbBundleQuantityOptions({
             </s-stack>
             <s-button
               variant="secondary"
-              icon="globe"
+              icon="language-translate"
               disabled={
                 !pricingState.pricingDisplayOptions.bundleQuantityOptions
                   .enabled ||
@@ -106,8 +106,10 @@ export function FpbBundleQuantityOptions({
                             >
                               Rule #{index + 1}
                             </h5>
-                            <s-button
+                            <s-press-button
                               variant="tertiary"
+                              tone="neutral"
+                              pressed={option.isDefault}
                               accessibilityLabel="Make this rule default"
                               onClick={() =>
                                 pricingState.setBundleQuantityDefaultRule(
@@ -115,9 +117,13 @@ export function FpbBundleQuantityOptions({
                                 )
                               }
                             >
-                              {option.isDefault ? "\u2605" : "\u2606"} Make this
-                              rule default
-                            </s-button>
+                              <s-text
+                                tone={option.isDefault ? "success" : "neutral"}
+                              >
+                                {option.isDefault ? "\u2605" : "\u2606"} Make
+                                this rule default
+                              </s-text>
+                            </s-press-button>
                           </s-stack>
                           {option.compatibility.status === "blocked" && (
                             <p

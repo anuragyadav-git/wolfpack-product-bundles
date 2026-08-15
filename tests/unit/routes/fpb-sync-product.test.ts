@@ -16,10 +16,6 @@ jest.mock("../../../app/services/bundles/metafield-sync.server", () => ({
   updateBundleProductMetafields: jest.fn(),
   updateComponentProductMetafields: jest.fn(),
 }));
-jest.mock("../../../app/services/bundles/standard-metafields.server", () => ({
-  convertBundleToStandardMetafields: jest.fn().mockResolvedValue({ metafields: {}, errors: [] }),
-  updateProductStandardMetafields: jest.fn(),
-}));
 jest.mock("../../../app/services/theme-template.server", () => ({
   ThemeTemplateService: { ensureTemplates: jest.fn() },
 }));
@@ -38,7 +34,6 @@ function makeBundle(overrides: Record<string, unknown> = {}) {
     bundleType: "full_page",
     shopifyProductId: "gid://shopify/Product/1",
     shopifyProductHandle: "old-handle",
-    shopifyPageHandle: "build-a-box",
     steps: [],
     pricing: null,
     ...overrides,
@@ -87,8 +82,10 @@ describe("FPB handleSyncProduct", () => {
       "gid://shopify/Product/1",
       expect.objectContaining({
         shopifyProductId: "gid://shopify/Product/1",
-        shopifyPageHandle: "build-a-box",
       }),
+    );
+    expect(mockUpdateMetafields.mock.calls[0]?.[2]).not.toHaveProperty(
+      "shopifyPageHandle",
     );
   });
 

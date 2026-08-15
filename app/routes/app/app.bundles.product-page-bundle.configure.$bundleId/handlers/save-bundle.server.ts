@@ -10,6 +10,7 @@ import { normaliseShopifyProductId } from "../../../../services/bundles/bundle-c
 import { BundleStatus } from "../../../../constants/bundle";
 import { ERROR_MESSAGES } from "../../../../constants/errors";
 import { buildStepCategoryCreateInput } from "../../../../lib/bundle-config/category-persistence";
+import { resolveBundleStepEnabled } from "../../../../lib/bundle-config/step-enablement";
 import {
   normalizePricingDisplayOptions,
   serializeBoxSelectionFromPricingDisplayOptions,
@@ -18,15 +19,153 @@ import {
   compactBundleForConfigureResponse,
   syncBundleStorefrontNow,
 } from "../../../../services/bundles/storefront-sync.server";
+import {
+  formatStepConditionErrors,
+  validateStepConditionFeasibility,
+} from "../../../../lib/step-condition-validation";
+import {
+  configureValidationFailure,
+  validateBundleConfigureFormData,
+} from "../../../../lib/bundle-config/configure-validation";
+import {
+  isVariantExistsOnShopifyStorefront,
+  validateVariantIdFromShopify,
+  type ShopifyStorefrontVariantLookupResult,
+} from "../../../../lib/variant-existence.server";
+import {
+  getBundleSubscriptionCompatibilityIssues,
+  normalizeBundleSubscriptionConfig,
+  validateBundleSubscriptionConfig,
+} from "../../../../lib/bundle-subscriptions";
+import { AddOnDiscountFunctionService } from "../../../../services/addon-discount-function-service.server";
 
-function normalizeMinQuantity(value: unknown): number {
-  const parsed = Number.parseInt(String(value), 10);
-  return Number.isFinite(parsed) ? parsed : 0;
+type ParsedVariantRef = string | number;
+
+function extractStepProductVariantReference(rawVariant: unknown): ParsedVariantRef | null {
+  if (rawVariant === null || rawVariant === undefined) {
+    return null;
+  }
+
+  if (typeof rawVariant === "string" || typeof rawVariant === "number") {
+    return rawVariant;
+  }
+
+  if (typeof rawVariant !== "object") {
+    return null;
+  }
+
+  const candidate = rawVariant as Record<string, unknown>;
+  const directReference =
+    candidate.variantId ??
+    candidate.variantGraphqlId ??
+    candidate.id ??
+    candidate.variant_gid ??
+    candidate.variantGraphql;
+
+  if (typeof directReference === "string" || typeof directReference === "number") {
+    return directReference;
+  }
+
+  return null;
 }
 
-function normalizeMaxQuantity(value: unknown): number {
-  const parsed = Number.parseInt(String(value), 10);
-  return Number.isFinite(parsed) ? parsed : 0;
+function toStringVariant(rawVariant: unknown): string {
+  return String(rawVariant ?? "");
+}
+
+async function validatePersistedStepProductVariants(
+  shopDomain: string,
+  stepsData: Array<Record<string, unknown>>,
+): Promise<Response | null> {
+  const seen = new Map<string, ShopifyStorefrontVariantLookupResult>();
+
+  for (let stepIndex = 0; stepIndex < stepsData.length; stepIndex += 1) {
+    const step = stepsData[stepIndex];
+    const products = Array.isArray(step.StepProduct) ? step.StepProduct : [];
+
+    for (let productIndex = 0; productIndex < products.length; productIndex += 1) {
+      const product = products[productIndex] as Record<string, unknown>;
+      const variantRefs = Array.isArray(product.variants) ? product.variants : [];
+
+      for (let variantIndex = 0; variantIndex < variantRefs.length; variantIndex += 1) {
+        const rawVariantId = extractStepProductVariantReference(variantRefs[variantIndex]);
+        if (rawVariantId === null) {
+          return json(
+            {
+              success: false,
+              error: `ppb-save blocked on step ${stepIndex + 1}, product ${productIndex + 1}: empty variant reference at position ${variantIndex + 1}.`,
+              context: {
+                route: "ppb-save",
+                stepIndex: stepIndex + 1,
+                productIndex: productIndex + 1,
+                variantIndex: variantIndex + 1,
+                variantId: "",
+                reason: "invalid-format",
+              },
+              fieldErrors: [{
+                path: `steps.${String(step.id ?? `step-${stepIndex + 1}`)}.products.${productIndex + 1}.variants.${variantIndex + 1}`,
+                message: "Select a valid product variant.",
+              }],
+            },
+            { status: 400 },
+          );
+        }
+        const parsed = await validateVariantIdFromShopify(rawVariantId);
+
+        if (!parsed.isValidFormat) {
+          return json(
+            {
+              success: false,
+              error: `ppb-save blocked on step ${stepIndex + 1}, product ${productIndex + 1}: invalid variant format for "${toStringVariant(rawVariantId)}".`,
+              context: {
+                route: "ppb-save",
+                stepIndex: stepIndex + 1,
+                productIndex: productIndex + 1,
+                variantIndex: variantIndex + 1,
+                variantId: toStringVariant(rawVariantId),
+                reason: "invalid-format",
+              },
+              fieldErrors: [{
+                path: `steps.${String(step.id ?? `step-${stepIndex + 1}`)}.products.${productIndex + 1}.variants.${variantIndex + 1}`,
+                message: "Select a valid product variant.",
+              }],
+            },
+            { status: 400 },
+          );
+        }
+
+        const variantLookup =
+          seen.get(parsed.numericId)
+          || await isVariantExistsOnShopifyStorefront(shopDomain, parsed.numericId);
+        seen.set(parsed.numericId, variantLookup);
+
+        if (!variantLookup.ok) {
+          return json(
+            {
+              success: false,
+              error: `ppb-save blocked variant in step ${stepIndex + 1}, product ${productIndex + 1}: ${toStringVariant(rawVariantId)} is not available on storefront (${variantLookup.status}).`,
+              context: {
+                route: "ppb-save",
+                stepIndex: stepIndex + 1,
+                productIndex: productIndex + 1,
+                variantIndex: variantIndex + 1,
+                variantId: toStringVariant(rawVariantId),
+                status: variantLookup.status,
+                reason: variantLookup.message || "not-found",
+              },
+              fieldErrors: [{
+                path: `steps.${String(step.id ?? `step-${stepIndex + 1}`)}.products.${productIndex + 1}.variants.${variantIndex + 1}`,
+                message: "This product variant is not available on the storefront.",
+              }],
+            },
+            { status: 400 },
+          );
+        }
+      }
+    }
+  }
+
+  return null;
 }
 
 export async function handleSaveBundle(
@@ -50,6 +189,16 @@ export async function handleSaveBundle(
   });
 
   try {
+    const configureValidationIssues = validateBundleConfigureFormData(
+      formData,
+      "ppb",
+    );
+    if (configureValidationIssues.length > 0) {
+      return json(configureValidationFailure(configureValidationIssues), {
+        status: 400,
+      });
+    }
+
     const bundleName = formData.get("bundleName") as string;
     const bundleDescription = formData.get("bundleDescription") as string;
     const bundleStatus = formData.get("bundleStatus") as string;
@@ -88,6 +237,30 @@ export async function handleSaveBundle(
     const bundleProductData = formData.get("bundleProduct")
       ? JSON.parse(formData.get("bundleProduct") as string)
       : null;
+    const subscriptionConfigRaw = formData.get("bundleSubscriptionConfig");
+    const subscriptionConfig =
+      typeof subscriptionConfigRaw === "string"
+        ? normalizeBundleSubscriptionConfig(JSON.parse(subscriptionConfigRaw))
+        : null;
+    if (subscriptionConfig?.enabled) {
+      const subscriptionIssues = [
+        ...validateBundleSubscriptionConfig(subscriptionConfig),
+        ...getBundleSubscriptionCompatibilityIssues({
+          discountType: discountData.discountType,
+          steps: stepsData,
+        }),
+      ];
+      if (subscriptionIssues.length > 0) {
+        return json(
+          {
+            success: false,
+            error: "Fix the subscription configuration before saving.",
+            fieldErrors: subscriptionIssues,
+          },
+          { status: 400 },
+        );
+      }
+    }
 
     AppLogger.debug("Parsed form data:", {
       bundleName,
@@ -127,14 +300,53 @@ export async function handleSaveBundle(
     // VALIDATION + NORMALISATION: Validate and normalise all product IDs in one pass at the boundary.
     // normaliseShopifyProductId rejects UUIDs (corrupted browser state) and converts numeric IDs to GIDs.
     // IDs are mutated in place so the Prisma .map() below can use product.id directly.
+    const stepValidationErrors = [];
     for (const step of stepsData) {
-      if (!step.StepProduct || !Array.isArray(step.StepProduct)) continue;
-      for (const product of step.StepProduct) {
-        product.id = normaliseShopifyProductId(product.id, {
-          title: product.title || product.name || "unknown",
-          stepName: step.name,
-        });
+      if (Array.isArray(step.StepProduct)) {
+        for (const product of step.StepProduct) {
+          product.id = normaliseShopifyProductId(product.id, {
+            title: product.title || product.name || "unknown",
+            stepName: step.name,
+          });
+        }
       }
+
+      const stepConditions = stepConditionsData[step.id] || [];
+      const firstCondition = stepConditions.length > 0 ? stepConditions[0] : null;
+      const secondCondition = stepConditions.length > 1 ? stepConditions[1] : null;
+      stepValidationErrors.push(
+        ...validateStepConditionFeasibility({
+          stepId: step.id,
+          stepName: step.name,
+          conditionType: firstCondition?.type || null,
+          conditionOperator: firstCondition?.operator || null,
+          conditionValue: parseConditionValue(firstCondition?.value),
+          conditionOperator2: secondCondition?.operator || null,
+          conditionValue2: parseConditionValue(secondCondition?.value),
+        }),
+      );
+    }
+
+    if (stepValidationErrors.length > 0) {
+      return json(
+        {
+          success: false,
+          error: formatStepConditionErrors(stepValidationErrors),
+          fieldErrors: stepValidationErrors.map((validationError) => ({
+            path: `steps.${validationError.stepId}.conditions`,
+            message: validationError.message,
+          })),
+        },
+        { status: 400 },
+      );
+    }
+
+    const variantValidationResponse = await validatePersistedStepProductVariants(
+      session.shop,
+      stepsData,
+    );
+    if (variantValidationResponse) {
+      return variantValidationResponse;
     }
 
     AppLogger.debug("[VALIDATION] All product IDs are valid Shopify GIDs");
@@ -202,7 +414,6 @@ export async function handleSaveBundle(
       ruleMessages: discountData.ruleMessages || {},
       successMessage: discountData.successMessage ?? null,
       successMessageByLocale: discountData.successMessageByLocale ?? null,
-      displayOptions: discountData.displayOptions ?? null,
       tierTextByRuleId: discountData.tierTextByRuleId ?? null,
       tierTextByLocaleByRuleId: discountData.tierTextByLocaleByRuleId ?? null,
     };
@@ -212,8 +423,25 @@ export async function handleSaveBundle(
     // Get existing bundle to preserve shopifyProductId/Handle if not provided
     const existingBundle = await db.bundle.findUnique({
       where: { id: bundleId, shopId: session.shop },
-      select: { shopifyProductId: true, shopifyProductHandle: true },
+      select: {
+        shopifyProductId: true,
+        shopifyProductHandle: true,
+        personalizationData: true,
+      },
     });
+    if (subscriptionConfig?.enabled && existingBundle?.personalizationData) {
+      return json(
+        {
+          success: false,
+          error: "Fix the subscription configuration before saving.",
+          fieldErrors: [{
+            path: "subscriptions.enabled",
+            message: "Subscriptions are unavailable while personalization is enabled.",
+          }],
+        },
+        { status: 400 },
+      );
+    }
 
     // Update bundle in database
     AppLogger.debug("[BUNDLE_CONFIG] Updating bundle in database");
@@ -242,6 +470,7 @@ export async function handleSaveBundle(
         sdkMode,
         textOverrides,
         textOverridesByLocale,
+        ...(subscriptionConfig ? { bundleSubscriptionConfig: subscriptionConfig } : {}),
         ...parsePPBBundleVisibility(formData),
         ...parsedBundleSettings,
         boxSelection,
@@ -277,9 +506,9 @@ export async function handleSaveBundle(
                 collections: step.collections || [],
                 displayVariantsAsIndividual:
                   step.displayVariantsAsIndividualProducts || false,
-                minQuantity: normalizeMinQuantity(step.minQuantity),
-                maxQuantity: normalizeMaxQuantity(step.maxQuantity),
-                enabled: step.enabled !== false, // Default to true unless explicitly false
+                minQuantity: step.minQuantity,
+                maxQuantity: step.maxQuantity,
+                enabled: resolveBundleStepEnabled(index, step.enabled),
                 // Free gift / add-on step fields
                 isFreeGift: step.isFreeGift === true,
                 freeGiftName: step.freeGiftName || null,
@@ -289,6 +518,9 @@ export async function handleSaveBundle(
                 addonReplaceText: step.addonReplaceText ?? null,
                 addonIconUrl: step.addonIconUrl ?? null,
                 addonDisplayFree: step.addonDisplayFree === true,
+                addonTiers: Array.isArray(step.addonTiers)
+                  ? step.addonTiers
+                  : [],
                 addonUnlockAfterCompletion:
                   step.addonUnlockAfterCompletion !== false,
                 isDefault: step.isDefault === true,
@@ -319,8 +551,8 @@ export async function handleSaveBundle(
                           product.image?.url ||
                           null,
                         variants: product.variants || null,
-                        minQuantity: normalizeMinQuantity(product.minQuantity),
-                        maxQuantity: parseInt(product.maxQuantity) || 10,
+                        minQuantity: product.minQuantity,
+                        maxQuantity: product.maxQuantity,
                         position: productIndex + 1,
                       };
                     },
@@ -383,6 +615,36 @@ export async function handleSaveBundle(
       bundleType: "product_page",
       reason: "save",
     });
+    if (subscriptionConfig?.enabled) {
+      const activation =
+        await AddOnDiscountFunctionService.completeSubscriptionInitialSetup(
+          admin,
+          session.shop,
+        );
+      if (!activation.success) {
+        AppLogger.warn("Subscription initial-order discount setup failed during bundle save", {
+          component: "bundle-config",
+          operation: "save",
+          bundleId,
+          shopId: session.shop,
+        }, { error: activation.error });
+      }
+      if (subscriptionConfig.recurringBundleDiscount) {
+        const recurringActivation =
+          await AddOnDiscountFunctionService.completeSubscriptionRecurringSetup(
+            admin,
+            session.shop,
+          );
+        if (!recurringActivation.success) {
+          AppLogger.warn("Subscription recurring discount setup failed during bundle save", {
+            component: "bundle-config",
+            operation: "save",
+            bundleId,
+            shopId: session.shop,
+          }, { error: recurringActivation.error });
+        }
+      }
+    }
 
     return json({
       success: true,

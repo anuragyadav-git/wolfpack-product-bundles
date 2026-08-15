@@ -38,14 +38,14 @@ export function useConfigureVisibilityTemplateState(
       getVisibilityDisplayTarget(savedWidgetDisplayConfiguration, "all")
   );
   const [upsellWidgetTitle, setUpsellWidgetTitle] = useState<string>(
-    savedWidgetConfiguration?.title ?? "Bundle & Save"
+    savedWidgetConfiguration?.title ?? ""
   );
   const [upsellWidgetDescription, setUpsellWidgetDescription] =
     useState<string>(savedWidgetConfiguration?.description ?? "");
   const [upsellWidgetButtonText, setUpsellWidgetButtonText] = useState<string>(
     savedWidgetConfiguration?.buttonText ??
       textOverrides.widgetButtonText ??
-      "Save More With Bundle"
+      ""
   );
   const [upsellWidgetImageUrl, setUpsellWidgetImageUrl] = useState<string>(
     savedWidgetConfiguration?.imageUrl ?? ""
@@ -104,7 +104,7 @@ export function useConfigureVisibilityTemplateState(
   const originalUpsellWidgetButtonTextRef = useRef<string>(
     savedWidgetConfiguration?.buttonText ??
       (bundle as any).textOverrides?.widgetButtonText ??
-      "Save More With Bundle"
+      ""
   );
   const originalAutoSelectBrowsedProductRef = useRef<boolean>(
     savedWidgetConfiguration?.useLinkProductAsDefaultProduct ??
