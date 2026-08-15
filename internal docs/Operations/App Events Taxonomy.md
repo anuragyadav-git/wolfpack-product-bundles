@@ -5,7 +5,7 @@ title: Shopify App Events Taxonomy
 type: operations
 status: authoritative
 summary: Defines the canonical Shopify App Events vocabulary and merchant-flow tracing guidance.
-last_audited: 2026-07-23
+last_audited: 2026-08-13
 owners:
   - engineering
 domains:

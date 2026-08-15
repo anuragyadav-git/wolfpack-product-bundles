@@ -1,3 +1,31 @@
+---
+schema_version: 1
+id: ppb-list-selected-entries
+title: PPB List Selected Entries Test Spec
+type: test-spec
+status: active
+summary: Behavioral coverage for shared PPB selected-entry traversal and drawer state preservation.
+last_audited: 2026-08-14
+owners:
+  - engineering
+domains:
+  - storefront
+systems:
+  - product-page-bundle
+source_paths:
+  - app/assets/widgets/product-page/templates/cascade-template.ts
+  - app/assets/widgets/product-page/methods/footer-modal-state-methods.ts
+  - app/assets/widgets/product-page/methods/selection-methods.ts
+related_docs:
+  - internal docs/Architecture/Widget Architecture.md
+tags:
+  - ppb
+  - selected-products
+keywords:
+  - cascade-drawer
+  - wpb-selector
+---
+
 # Test Spec: PPB List Selected Entries
 **Spec ID:** ppb-list-selected-entries  **Issue:** waived  **Created:** 2026-06-11
 
@@ -18,6 +46,7 @@ Move PPB List/Cascade selected-entry traversal to a shared selector before repla
 | 1 | Source integration | Cascade source | Imports and calls shared selector | Avoids heavy widget import in test |
 | 2 | Variant-expanded drawer row | Selected Product List variant has title `Product - Variant` and `variantTitle` | Drawer display keeps `Product - Variant x n` as the title and suppresses the duplicate variant row | Matches EB's selected variant display |
 | 3 | Discounted selected drawer row | Qualified Product List percentage discount | Drawer row display keeps the single original item price | EB keeps discounted drawer price nodes hidden; visible row price stays single-valued |
+| 4 | Wolfpack-owned drawer selectors | Footer rerender or selection update | Runtime queries only `wpb` and shared `bw` selector namespaces | Removes competitor-prefixed code identifiers |
 
 ## Acceptance Criteria
 - [x] All listed test cases pass

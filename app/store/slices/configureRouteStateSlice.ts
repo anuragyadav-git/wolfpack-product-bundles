@@ -74,6 +74,8 @@ export const configureRouteStateSlice = createSlice({
       state.selectedCollections = action.payload.selectedCollections ?? {};
       state.ruleMessages = action.payload.ruleMessages ?? {};
       state.isDirty = false;
+    },
+    resetConfigureRouteNavigation(state) {
       state.activeTabIndex = 0;
       state.activeSection = "step_setup";
       state.forceNavigation = false;
@@ -153,6 +155,7 @@ export const {
   initializeConfigureRouteState,
   markConfigureRouteDirty,
   openConfigureModal,
+  resetConfigureRouteNavigation,
   setActiveConfigureSection,
   setActiveConfigureTabIndex,
   setAvailablePages,

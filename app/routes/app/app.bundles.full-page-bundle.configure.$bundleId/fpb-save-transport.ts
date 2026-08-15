@@ -1,15 +1,7 @@
+import { resolveBundleStepEnabled } from "../../../lib/bundle-config/step-enablement";
+
 function asArray(value: unknown): unknown[] {
   return Array.isArray(value) ? value : [];
-}
-
-function normalizeStepMinQuantity(value: unknown): number {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : 0;
-}
-
-function normalizeStepMaxQuantity(value: unknown): number {
-  const parsed = Number.parseInt(String(value), 10);
-  return Number.isFinite(parsed) ? parsed : 0;
 }
 
 function asRecord(value: unknown): Record<string, unknown> | null {
@@ -122,10 +114,6 @@ function compactVariant(value: unknown): Record<string, unknown> | null {
 
   const image = compactVariantImage(source.image) ?? compactVariantImage(source.imageUrl);
   if (image) compact.image = image;
-  if (Array.isArray(source.sellingPlanAllocations) && source.sellingPlanAllocations.length > 0) {
-    compact.sellingPlanAllocations = source.sellingPlanAllocations;
-  }
-
   return Object.keys(compact).length > 0 ? compact : null;
 }
 
@@ -210,12 +198,10 @@ function compactCategory(value: unknown): Record<string, unknown> | null {
   const compact: Record<string, unknown> = {};
   keepStringOrNumber(compact, source, [
     "id",
-    "categoryId",
     "name",
     "title",
     "subTitle",
     "sortOrder",
-    "categoryRank",
     "categoryBanner",
     "categoryImg",
   ]);
@@ -226,10 +212,7 @@ function compactCategory(value: unknown): Record<string, unknown> | null {
   ]);
 
   compact.products = compactProducts(source.products);
-  compact.selectedProducts = compactProducts(source.selectedProducts);
   compact.collections = compactCollections(source.collections);
-  compact.collectionsData = compactCollections(source.collectionsData);
-  compact.collectionsSelectedData = compactCollections(source.collectionsSelectedData);
   compact.conditions = asArray(source.conditions);
 
   const multiLangData = asRecord(source.multiLangData);
@@ -248,7 +231,7 @@ export function serializeFpbSaveSteps(
   steps: unknown[] = [],
   selectedCollectionsByStepId: Record<string, unknown[]> = {},
 ) {
-  return steps.map((step) => {
+  return steps.map((step, stepIndex) => {
     const source = asRecord(step) ?? {};
     const stepId = typeof source.id === "string" ? source.id : "";
     const selectedCollections = stepId ? selectedCollectionsByStepId[stepId] : undefined;
@@ -260,9 +243,12 @@ export function serializeFpbSaveSteps(
       pageTitle: source.pageTitle ?? null,
       multiLangData: asRecord(source.multiLangData) ?? {},
       stepImage: source.stepImage ?? source.timelineIconUrl ?? null,
-      minQuantity: normalizeStepMinQuantity(source.minQuantity),
-      maxQuantity: normalizeStepMaxQuantity(source.maxQuantity),
-      enabled: source.enabled !== false,
+      minQuantity: source.minQuantity,
+      maxQuantity: source.maxQuantity,
+      enabled: resolveBundleStepEnabled(
+        stepIndex,
+        typeof source.enabled === "boolean" ? source.enabled : undefined,
+      ),
       displayVariantsAsIndividual: source.displayVariantsAsIndividual ?? false,
       products: compactProducts(source.products),
       collections: compactCollections(collections),

@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "case_id": "qa-disclosure-responsive-mobile-390",
+  "viewport": "390x844",
+  "state": "disclosure-responsive",
+  "required": true,
+  "gates": {
+    "functional": "passed",
+    "visual": "passed",
+    "geometry": "passed",
+    "responsive": "passed",
+    "console": "passed",
+    "network": "passed",
+    "accessibility": "passed",
+    "performance": "passed",
+    "non_regression": "passed"
+  },
+  "performance_reason": "",
+  "evidence": {
+    "snapshot": "qa/evidence/accessibility-snapshot.json",
+    "screenshots": {
+      "before": "references/target/fpb-all-template-summary-qa-20260806__target-standard-mobile__partial-expanded__390x844__r3.png",
+      "after": "references/current/fpb-all-template-summary-qa-20260806__current-standard-mobile__empty-expanded__390x844__r3.png",
+      "element": {
+        "actual": "references/current/fpb-all-template-summary-qa-20260806__current-standard-mobile__empty-expanded__390x844__r3.png",
+        "baseline": "references/target/fpb-all-template-summary-qa-20260806__target-standard-mobile__partial-expanded__390x844__r3.png",
+        "diff": "qa/diffs/standard-mobile.png",
+        "comparison_summary": "qa/diffs/standard-mobile.comparison.json"
+      },
+      "viewport": {
+        "actual": "references/current/fpb-all-template-summary-qa-20260806__current-standard-mobile__empty-expanded__390x844__r3.png",
+        "baseline": "references/target/fpb-all-template-summary-qa-20260806__target-standard-mobile__partial-expanded__390x844__r3.png",
+        "diff": "qa/diffs/standard-mobile.png",
+        "comparison_summary": "qa/diffs/standard-mobile.comparison.json"
+      }
+    },
+    "console": "qa/evidence/console.json",
+    "network": "qa/evidence/network.json",
+    "accessibility": "qa/evidence/accessibility-result.json",
+    "lighthouse": {
+      "desktop": "qa/lighthouse/desktop.json",
+      "mobile": "qa/lighthouse/mobile.json"
+    },
+    "performance_trace": "qa/performance/desktop.json"
+  },
+  "assertions": [
+    {
+      "id": "qa-disclosure-responsive-mobile-390-state",
+      "category": "functional",
+      "status": "passed",
+      "evidence": "Direct Chrome execution plus predecessor lineage covers SUM-07, SUM-15, SUM-16."
+    },
+    {
+      "id": "qa-disclosure-responsive-mobile-390-geometry",
+      "category": "geometry",
+      "status": "passed",
+      "evidence": "Measured geometry showed zero horizontal overflow and reachable summary actions."
+    },
+    {
+      "id": "qa-disclosure-responsive-mobile-390-responsive",
+      "category": "responsive",
+      "status": "passed",
+      "evidence": "The tray/sidebar owner matched the measured container boundary."
+    },
+    {
+      "id": "qa-disclosure-responsive-mobile-390-a11y",
+      "category": "accessibility",
+      "status": "passed",
+      "evidence": "Accessibility snapshots exposed named native controls and synchronized state."
+    }
+  ],
+  "observations": {
+    "console": {
+      "violations": [],
+      "allowlisted": [
+        {
+          "pattern": "Failed to load resource",
+          "reason": "Ambient Shopify theme 404 and telemetry 503; component assets and data succeeded.",
+          "owner": "Shopify theme",
+          "review_date": "2026-08-06"
+        },
+        {
+          "pattern": "preloaded using link preload",
+          "reason": "Shopify theme preload warning outside the FPB component.",
+          "owner": "Shopify theme",
+          "review_date": "2026-08-06"
+        }
+      ]
+    },
+    "network": {
+      "violations": [],
+      "expected_analytics": [
+        "Shopify monorail",
+        "Shopify OTLP"
+      ]
+    }
+  },
+  "waivers": [],
+  "retry_history": [
+    {
+      "attempt": 1,
+      "status": "passed",
+      "classification": "execution",
+      "evidence_links": [
+        "browser-test-report.md"
+      ],
+      "outcome": "Required state passed direct execution or approved predecessor lineage with fresh regression smoke."
+    }
+  ]
+}

@@ -15,6 +15,7 @@ describe("Settings Design DTO", () => {
     { field: "Primary Font Size", value: "-1" },
     { field: "Primary Font Weight", value: "Heavy" },
     { field: "Image Fit", value: "Crop" },
+    { field: "generalSettings.loadingGifUrl", value: "http://cdn.example.test/loading.gif" },
   ])("rejects invalid $field values", ({ field, value }) => {
     const state = createSettingsDesignState();
 
@@ -42,5 +43,12 @@ describe("Settings Design DTO", () => {
     expect(state.isExpertControlsEnabled).toBe(true);
     expect(state.fieldValues["Primary Color"]).toBe("#123456");
     expect(state.fieldValues["Button Text Color"]).toBe("#ffffff");
+  });
+
+  it("provides store-level FPB loading screen defaults", () => {
+    const state = createSettingsDesignState();
+
+    expect(state.fieldValues["generalSettings.loadingGifUrl"]).toBe("");
+    expect(state.fieldValues["generalSettings.loadingBgColor"]).toBe("#ffffff");
   });
 });

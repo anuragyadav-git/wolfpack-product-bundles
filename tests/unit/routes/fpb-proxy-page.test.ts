@@ -1,6 +1,6 @@
 import { createHmac } from "node:crypto";
 import { loader } from "../../../app/routes/root/wpb.$bundleId";
-import { createFpbPreviewToken } from "../../../app/lib/fpb-preview-token.server";
+import { createBundlePreviewToken } from "../../../app/lib/bundle-preview-token.server";
 
 jest.mock("../../../app/lib/logger", () => ({
   AppLogger: {
@@ -16,12 +16,15 @@ jest.mock("../../../app/db.server", () => ({
     bundle: {
       findFirst: jest.fn(),
     },
+    designSettings: {
+      findUnique: jest.fn(),
+    },
   },
 }));
 
 const getDb = () => require("../../../app/db.server").default;
 
-function makeSignedRequest(bundleId = "bundle-1") {
+function makeSignedRequest(bundleId = "1") {
   const params = new URLSearchParams({
     shop: "test-shop.myshopify.com",
     path_prefix: "/apps/product-bundles",
@@ -43,6 +46,7 @@ describe("FPB app proxy page", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     process.env.SHOPIFY_API_SECRET = "test_api_secret";
+    getDb().designSettings.findUnique.mockResolvedValue(null);
   });
 
   afterAll(() => {
@@ -56,14 +60,13 @@ describe("FPB app proxy page", () => {
       shopId: "test-shop.myshopify.com",
       bundleType: "full_page",
       status: "active",
-      shopifyPageHandle: "build-a-box",
       steps: [],
       pricing: null,
     });
 
     const response = (await loader({
       request: makeSignedRequest(),
-      params: { bundleId: "bundle-1" },
+      params: { bundleId: "1" },
       context: {},
     } as any)) as Response;
     const text = await response.text();
@@ -75,6 +78,40 @@ describe("FPB app proxy page", () => {
     expect(text).not.toContain("/apps/product-bundles/assets/");
   });
 
+  it("renders a customizable first-paint loading screen without skeleton cards", async () => {
+    getDb().bundle.findFirst.mockResolvedValue({
+      id: "bundle-1",
+      name: "Build a Box",
+      shopId: "test-shop.myshopify.com",
+      bundleType: "full_page",
+      status: "active",
+      steps: [],
+      pricing: null,
+    });
+    getDb().designSettings.findUnique.mockResolvedValue({
+      generalSettings: {
+        loadingScreen: {
+          gifUrl: "https://cdn.example.test/loading.gif",
+          backgroundColor: "#f4f1eb",
+        },
+      },
+    });
+
+    const response = (await loader({
+      request: makeSignedRequest(),
+      params: { bundleId: "1" },
+      context: {},
+    } as any)) as Response;
+    const text = await response.text();
+
+    expect(text).toContain("data-wpb-loading-screen");
+    expect(text).toContain('role="status"');
+    expect(text).toContain("https://cdn.example.test/loading.gif");
+    expect(text).toContain("#f4f1eb");
+    expect(text).not.toContain("data-wpb-bootstrap-card");
+    expect(text).not.toContain("skeleton");
+  });
+
   it("does not require a linked Shopify page", async () => {
     getDb().bundle.findFirst.mockResolvedValue({
       id: "bundle-1",
@@ -82,14 +119,13 @@ describe("FPB app proxy page", () => {
       shopId: "test-shop.myshopify.com",
       bundleType: "full_page",
       status: "active",
-      shopifyPageHandle: null,
       steps: [],
       pricing: null,
     });
 
     const response = (await loader({
       request: makeSignedRequest(),
-      params: { bundleId: "bundle-1" },
+      params: { bundleId: "1" },
       context: {},
     } as any)) as Response;
     const text = await response.text();
@@ -98,7 +134,7 @@ describe("FPB app proxy page", () => {
     expect(text).not.toContain("/apps/product-bundles/assets/");
   });
 
-  it("still loads ordered step categories before legacy page-link handling", async () => {
+  it("loads ordered step categories before status authorization", async () => {
     const category = {
       id: "category-1",
       name: "Phones",
@@ -113,7 +149,6 @@ describe("FPB app proxy page", () => {
       shopId: "test-shop.myshopify.com",
       bundleType: "full_page",
       status: "draft",
-      shopifyPageHandle: null,
       steps: [
         {
           id: "step-1",
@@ -127,7 +162,7 @@ describe("FPB app proxy page", () => {
 
     const response = (await loader({
       request: makeSignedRequest(),
-      params: { bundleId: "bundle-1" },
+      params: { bundleId: "1" },
       context: {},
     } as any)) as Response;
 
@@ -173,7 +208,7 @@ describe("FPB app proxy page", () => {
 
     const response = await loader({
       request: makeSignedRequest(),
-      params: { bundleId: "bundle-1" },
+      params: { bundleId: "1" },
       context: {},
     } as any) as Response;
     const text = await response.text();
@@ -215,7 +250,7 @@ describe("FPB app proxy page", () => {
 
     const response = (await loader({
       request: makeSignedRequest(),
-      params: { bundleId: "bundle-1" },
+      params: { bundleId: "1" },
       context: {},
     } as any)) as Response;
     const text = await response.text();
@@ -241,14 +276,14 @@ describe("FPB app proxy page", () => {
 
     const unsigned = await loader({
       request: makeSignedRequest(),
-      params: { bundleId: "bundle-1" },
+      params: { bundleId: "1" },
       context: {},
     } as any) as Response;
     expect(unsigned.status).toBe(404);
 
     const request = makeSignedRequest();
     const url = new URL(request.url);
-    url.searchParams.set("wpb_preview", createFpbPreviewToken({
+    url.searchParams.set("wpb_preview", createBundlePreviewToken({
       shop: "test-shop.myshopify.com",
       bundleId: "bundle-1",
       apiSecret: "test_api_secret",
@@ -263,7 +298,7 @@ describe("FPB app proxy page", () => {
 
     const signed = await loader({
       request: new Request(url),
-      params: { bundleId: "bundle-1" },
+      params: { bundleId: "1" },
       context: {},
     } as any) as Response;
     expect(signed.status).toBe(200);
@@ -276,7 +311,7 @@ describe("FPB app proxy page", () => {
 
     const response = (await loader({
       request: new Request(url.toString()),
-      params: { bundleId: "bundle-1" },
+      params: { bundleId: "1" },
       context: {},
     } as any)) as Response;
 

@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
-import { FPB_TEMPLATE_CONFIGS } from "../../../assets/widgets/full-page/templates/registry.js";
-import { PPB_TEMPLATE_CONFIGS } from "../../../assets/widgets/product-page/templates/registry.js";
+import { FPB_TEMPLATE_CONFIGS } from "../../../assets/widgets/full-page/templates/registry";
+import { PPB_TEMPLATE_CONFIGS } from "../../../assets/widgets/product-page/templates/registry";
 import {
   mapTemplateSelection,
   type BundleContractType,
@@ -8,9 +8,14 @@ import {
   type TemplateSelection,
 } from "../../../lib/bundle-config/template-selection";
 import { buildSettingsDesignRuntime } from "../../../lib/settings-design-runtime";
+import type { SettingsField } from "../../../lib/admin-configuration-surfaces";
 
 export type DesignPreviewSurface =
-  | "builder"
+  | "bundle-header"
+  | "navigation"
+  | "categories"
+  | "product-card"
+  | "product-slots"
   | "product-picker"
   | "cart-summary"
   | "loading"
@@ -23,11 +28,11 @@ export type DesignPreviewNavigation =
   | "timeline"
   | "compact-timeline"
   | "horizontal-timeline"
-  | "cascade-steps"
-  | "cognive-steps"
+  | "list-steps"
+  | "grid-steps"
   | "none";
 export type DesignPreviewCategories = "accordion" | "pills" | "underline" | "tabs" | "none";
-export type DesignPreviewSummary = "rows" | "slot-grid" | "compact-slots" | "cascade-drawer" | "pdp-footer" | "modal-footer";
+export type DesignPreviewSummary = "rows" | "slot-grid" | "compact-slots" | "list-selected-drawer" | "pdp-footer" | "modal-footer";
 
 export interface DesignPreviewProductCardContract {
   mode: "grid" | "compact" | "row";
@@ -54,6 +59,7 @@ export interface DesignPreviewTemplateDescriptor {
 
 export interface DesignPreviewFieldTarget {
   surface: DesignPreviewSurface;
+  surfaces?: readonly DesignPreviewSurface[];
   elements: readonly string[];
   templates?: readonly TemplateKey[];
   surfaceOverrides?: Partial<Record<TemplateKey, DesignPreviewSurface>>;
@@ -89,7 +95,7 @@ export type DesignPreviewTheme = CSSProperties & Record<`--preview-${string}`, s
 export const DESIGN_PREVIEW_VIEWPORTS: Readonly<
   Record<DesignPreviewViewport, { width: number; height: number }>
 > = {
-  desktop: { width: 1280, height: 800 },
+  desktop: { width: 1280, height: 1136 },
   mobile: { width: 390, height: 844 },
 };
 
@@ -108,7 +114,7 @@ export function getDesignPreviewSurfaceFidelity(
   _templateKey: TemplateKey,
   surface: DesignPreviewSurface,
 ): DesignPreviewSurfaceFidelity {
-  return surface === "builder" || surface === "cart-summary"
+  return ["bundle-header", "navigation", "categories", "product-card", "product-slots", "cart-summary"].includes(surface)
     ? "storefront"
     : "representative";
 }
@@ -144,13 +150,13 @@ function resolveFullPageSummary(mode: string | undefined): DesignPreviewSummary 
 }
 
 function resolveProductPageNavigation(selection: TemplateSelection): DesignPreviewNavigation {
-  if (selection.bundleDesignPresetId === "CASCADE") return "cascade-steps";
-  if (selection.bundleDesignPresetId === "COGNIVE") return "cognive-steps";
+  if (selection.bundleDesignPresetId === "LIST") return "list-steps";
+  if (selection.bundleDesignPresetId === "GRID") return "grid-steps";
   return "none";
 }
 
 function resolveProductPageSummary(mode: string | undefined): DesignPreviewSummary {
-  if (mode === "drawerRows") return "cascade-drawer";
+  if (mode === "drawerRows") return "list-selected-drawer";
   if (mode === "drawer") return "pdp-footer";
   return "modal-footer";
 }
@@ -159,8 +165,9 @@ const ALL_FPB_TEMPLATES: readonly TemplateKey[] = ["standard", "classic", "compa
 const PRODUCT_PAGE_TEMPLATES: readonly TemplateKey[] = ["product-list", "product-grid", "horizontal-slots", "vertical-slots"];
 const SLOT_TEMPLATES: readonly TemplateKey[] = ["horizontal-slots", "vertical-slots"];
 const CATEGORY_TEMPLATES: readonly TemplateKey[] = ["classic", "compact", "horizontal", "product-list", "product-grid"];
-const COMMON_SURFACES = ["builder", "cart-summary", "loading", "validation", "upsell"] as const;
-const SLOT_SURFACES = ["builder", "product-picker", "cart-summary", "loading", "validation", "upsell"] as const;
+const FULL_PAGE_SURFACES = ["navigation", "categories", "product-card", "cart-summary", "loading", "validation", "upsell"] as const;
+const PRODUCT_PAGE_SURFACES = ["bundle-header", "navigation", "categories", "product-card", "cart-summary", "loading", "validation", "upsell"] as const;
+const SLOT_SURFACES = ["bundle-header", "product-slots", "product-picker", "cart-summary", "loading", "validation", "upsell"] as const;
 
 function fullPageDescriptor(
   key: "standard" | "classic" | "compact" | "horizontal",
@@ -186,7 +193,7 @@ function fullPageDescriptor(
         mobile: configuredColumns?.mobile ?? 2,
       },
     },
-    supportedSurfaces: COMMON_SURFACES,
+    supportedSurfaces: FULL_PAGE_SURFACES,
     ...adapter,
   };
 }
@@ -217,7 +224,7 @@ function productPageDescriptor(
           : { desktop: 3, mobile: 2 },
     },
     slotOrientation,
-    supportedSurfaces: isSlotTemplate ? SLOT_SURFACES : COMMON_SURFACES,
+    supportedSurfaces: isSlotTemplate ? SLOT_SURFACES : PRODUCT_PAGE_SURFACES,
     ...adapter,
   };
 }
@@ -254,15 +261,15 @@ export const DESIGN_PREVIEW_TEMPLATES: readonly DesignPreviewTemplateDescriptor[
   productPageDescriptor("product-list", "settingsDcp.preview.templates.productList", PPB_TEMPLATE_CONFIGS.LIST, {
     categories: "tabs",
     sceneRegions: {
-      desktop: ["neutral-pdp-shell", "cascade-step-flow", "category-tabs", "product-rows", "pdp-footer"],
-      mobile: ["neutral-pdp-shell", "cascade-step-flow", "category-tabs", "product-rows", "pdp-footer"],
+      desktop: ["neutral-pdp-shell", "product-list-step-flow", "category-tabs", "product-rows", "pdp-footer"],
+      mobile: ["neutral-pdp-shell", "product-list-step-flow", "category-tabs", "product-rows", "pdp-footer"],
     },
   }),
   productPageDescriptor("product-grid", "settingsDcp.preview.templates.productGrid", PPB_TEMPLATE_CONFIGS.GRID, {
     categories: "tabs",
     sceneRegions: {
-      desktop: ["neutral-pdp-shell", "cognive-step-headers", "category-tabs", "product-grid", "pdp-footer"],
-      mobile: ["neutral-pdp-shell", "cognive-step-headers", "category-tabs", "product-grid", "pdp-footer"],
+      desktop: ["neutral-pdp-shell", "product-grid-step-headers", "category-tabs", "product-grid", "pdp-footer"],
+      mobile: ["neutral-pdp-shell", "product-grid-step-headers", "category-tabs", "product-grid", "pdp-footer"],
     },
   }),
   productPageDescriptor("horizontal-slots", "settingsDcp.preview.templates.horizontalSlots", PPB_TEMPLATE_CONFIGS.HORIZONTAL_SLOTS, {
@@ -315,47 +322,51 @@ const target = (
   elements: readonly string[],
   options: Pick<DesignPreviewFieldTarget, "templates" | "surfaceOverrides"> = {},
 ): DesignPreviewFieldTarget => ({ surface, elements, ...options });
-const builderTarget = (...elements: string[]) => target("builder", elements);
-const productTarget = (...elements: string[]) => target("builder", elements, {
+const productTarget = (...elements: string[]) => target("product-card", elements, {
   surfaceOverrides: { "horizontal-slots": "product-picker", "vertical-slots": "product-picker" },
+});
+const sharedProductCartTarget = (...elements: string[]) => ({
+  ...productTarget(...elements),
+  surfaces: ["product-card", "product-picker", "cart-summary"] as const,
 });
 const cartTarget = (...elements: string[]) => target("cart-summary", elements);
 
 export const DESIGN_PREVIEW_FIELD_TARGETS: Readonly<Record<string, DesignPreviewFieldTarget>> = {
-  "Primary Color": builderTarget("product action", "active navigation", "progress", "cart action"),
-  "Button Text Color": builderTarget("action text", "active navigation text"),
-  "Primary Text Color": builderTarget("product text", "prices", "navigation", "cart text"),
-  "Secondary Color": builderTarget("inactive navigation", "empty progress", "quantity controls"),
-  "Product Background Color": productTarget("product cards", "cart", "empty slots"),
-  "Primary Font Size": productTarget("product titles", "primary prices", "step text"),
-  "Primary Font Weight": productTarget("product titles", "primary prices"),
-  "Secondary Font Size": productTarget("compare-at prices", "discount text"),
-  "Secondary Font Weight": productTarget("compare-at prices", "discount text"),
-  "Body Font Size": productTarget("variant labels", "supporting text"),
-  "Body Font Weight": productTarget("variant labels", "supporting text"),
-  "Bundle Buttons Corner Style": productTarget("buttons", "tabs", "quantity controls"),
-  "Bundle Buttons Base": productTarget("buttons", "tabs", "quantity controls"),
-  "Product Card & Cart Corner Style": productTarget("product cards", "cart"),
-  "Product Card & Cart Base": productTarget("product cards", "cart", "product images"),
+  "Primary Color": sharedProductCartTarget("product action"),
+  "Button Text Color": sharedProductCartTarget("action text"),
+  "Primary Text Color": sharedProductCartTarget("product text", "prices"),
+  "Secondary Color": sharedProductCartTarget("quantity controls"),
+  "Product Background Color": sharedProductCartTarget("product cards", "cart", "empty slots"),
+  "Primary Font Size": sharedProductCartTarget("product titles", "primary prices", "step text"),
+  "Primary Font Weight": sharedProductCartTarget("product titles", "primary prices"),
+  "Secondary Font Size": sharedProductCartTarget("compare-at prices", "discount text"),
+  "Secondary Font Weight": sharedProductCartTarget("compare-at prices", "discount text"),
+  "Body Font Size": sharedProductCartTarget("variant labels", "supporting text"),
+  "Body Font Weight": sharedProductCartTarget("variant labels", "supporting text"),
+  "Bundle Buttons Corner Style": sharedProductCartTarget("buttons", "tabs", "quantity controls"),
+  "Bundle Buttons Base": sharedProductCartTarget("buttons", "tabs", "quantity controls"),
+  "Product Card & Cart Corner Style": sharedProductCartTarget("product cards", "cart"),
+  "Product Card & Cart Base": sharedProductCartTarget("product cards", "cart", "product images"),
   "Image Fit": productTarget("product images"),
-  "expert.navigationBanner.navigationBannerStepCompletionColor": target("builder", ["completed steps"], { templates: ALL_FPB_TEMPLATES }),
-  "expert.navigationBanner.navigationCheckColor": target("builder", ["completed step checks"], { templates: ALL_FPB_TEMPLATES }),
-  "expert.navigationBanner.navigationBannerStepTextColor": target("builder", ["step labels"], { templates: ALL_FPB_TEMPLATES }),
-  "expert.generalSettings.productPageTitleColor": target("builder", ["product-page title"], { templates: PRODUCT_PAGE_TEMPLATES }),
-  "expert.navigationBanner.navigationBannerStepProgressBarEmptyColor": target("builder", ["step progress"], { templates: ALL_FPB_TEMPLATES }),
-  "expert.generalSettings.loadingBgColor": target("loading", ["loading overlay"]),
+  "generalSettings.loadingGifUrl": target("loading", ["loading animation"], { templates: ALL_FPB_TEMPLATES }),
+  "generalSettings.loadingBgColor": target("loading", ["loading screen background"], { templates: ALL_FPB_TEMPLATES }),
+  "expert.navigationBanner.navigationBannerStepCompletionColor": target("navigation", ["completed steps"], { templates: ALL_FPB_TEMPLATES }),
+  "expert.navigationBanner.navigationCheckColor": target("navigation", ["completed step checks"], { templates: ALL_FPB_TEMPLATES }),
+  "expert.navigationBanner.navigationBannerStepTextColor": target("navigation", ["step labels"], { templates: ALL_FPB_TEMPLATES }),
+  "expert.generalSettings.productPageTitleColor": target("bundle-header", ["product-page title"], { templates: PRODUCT_PAGE_TEMPLATES }),
+  "expert.navigationBanner.navigationBannerStepProgressBarEmptyColor": target("navigation", ["step progress"], { templates: ALL_FPB_TEMPLATES }),
   "expert.generalSettings.conditionToastBgColor": target("validation", ["condition toast"]),
   "expert.generalSettings.conditionToastTextColor": target("validation", ["condition toast text"]),
-  "expert.navigationBanner.tabsActiveBgColor": target("builder", ["active categories"], { templates: CATEGORY_TEMPLATES }),
-  "expert.navigationBanner.tabsActiveTextColor": target("builder", ["active category text"], { templates: CATEGORY_TEMPLATES }),
-  "expert.navigationBanner.tabsInactiveBgColor": target("builder", ["inactive categories"], { templates: CATEGORY_TEMPLATES }),
-  "expert.navigationBanner.tabsInactiveTextColor": target("builder", ["inactive category text"], { templates: CATEGORY_TEMPLATES }),
+  "expert.navigationBanner.tabsActiveBgColor": target("categories", ["active categories"], { templates: CATEGORY_TEMPLATES }),
+  "expert.navigationBanner.tabsActiveTextColor": target("categories", ["active category text"], { templates: CATEGORY_TEMPLATES }),
+  "expert.navigationBanner.tabsInactiveBgColor": target("categories", ["inactive categories"], { templates: CATEGORY_TEMPLATES }),
+  "expert.navigationBanner.tabsInactiveTextColor": target("categories", ["inactive category text"], { templates: CATEGORY_TEMPLATES }),
   "expert.productCard.productCardBgColor": productTarget("product cards"),
   "expert.productCard.productCardTextColor": productTarget("product titles"),
   "expert.productCard.productCardButtonColor": productTarget("product actions"),
   "expert.productCard.productCardButtonTextColor": productTarget("product action text"),
-  "expert.emptyStateCard.emptyStateCardBorderColor": target("builder", ["empty slot border", "empty slot icon"], { templates: SLOT_TEMPLATES }),
-  "expert.emptyStateCard.emptyStateCardTextColor": target("builder", ["empty slot text"], { templates: SLOT_TEMPLATES }),
+  "expert.emptyStateCard.emptyStateCardBorderColor": target("product-slots", ["empty slot border", "empty slot icon"], { templates: SLOT_TEMPLATES }),
+  "expert.emptyStateCard.emptyStateCardTextColor": target("product-slots", ["empty slot text"], { templates: SLOT_TEMPLATES }),
   "expert.cartFooter.cartFooterBgColor": cartTarget("cart"),
   "expert.cartFooter.cartFooterTextColor": cartTarget("cart text"),
   "expert.cartFooter.cartFooterNextButtonColor": cartTarget("next action"),
@@ -401,7 +412,11 @@ export function getDesignPreviewTemplate(templateKey: TemplateKey) {
 }
 
 export function getSupportedDesignPreviewSurfaces(templateKey: TemplateKey) {
-  return getDesignPreviewTemplate(templateKey)?.supportedSurfaces ?? COMMON_SURFACES;
+  return getDesignPreviewTemplate(templateKey)?.supportedSurfaces ?? FULL_PAGE_SURFACES;
+}
+
+export function getDefaultDesignPreviewSurface(templateKey: TemplateKey): DesignPreviewSurface {
+  return getDesignPreviewTemplate(templateKey)?.slotOrientation ? "product-slots" : "product-card";
 }
 
 export function getDesignPreviewFieldTarget(fieldKey: string, templateKey?: TemplateKey) {
@@ -418,6 +433,23 @@ export function isDesignPreviewFieldApplicable(fieldKey: string, templateKey: Te
   return !fieldTarget?.templates || fieldTarget.templates.includes(templateKey);
 }
 
+export function getDesignFieldsForPreviewContext(
+  fields: readonly SettingsField[],
+  templateKey: TemplateKey,
+  surface: DesignPreviewSurface,
+) {
+  return fields.filter((field) => {
+    if (field.kind === "loadingSpinner") return false;
+    const fieldKey = field.key ?? field.label;
+    const fieldTarget = getDesignPreviewFieldTarget(fieldKey, templateKey);
+    return Boolean(
+      fieldTarget
+      && (fieldTarget.surface === surface || fieldTarget.surfaces?.includes(surface))
+      && isDesignPreviewFieldApplicable(fieldKey, templateKey),
+    );
+  });
+}
+
 export function getDesignPreviewScene(
   templateKey: TemplateKey,
   surface: DesignPreviewSurface,
@@ -426,16 +458,37 @@ export function getDesignPreviewScene(
   const descriptor = getDesignPreviewTemplate(templateKey);
   if (!descriptor) throw new Error(`Unknown Design preview template "${templateKey}"`);
 
-  const regions = viewport === "mobile"
-    ? [...descriptor.sceneRegions.mobile]
-    : [...descriptor.sceneRegions.desktop];
-  if (surface === "product-picker" && descriptor.slotOrientation) {
+  const navigationRegion = descriptor.navigation === "list-steps"
+    ? "product-list-step-flow"
+    : descriptor.navigation === "grid-steps"
+      ? "product-grid-step-headers"
+      : descriptor.navigation;
+  const categoryRegion = descriptor.categories === "accordion"
+    ? "category-accordion"
+    : descriptor.categories === "pills"
+      ? "pill-categories"
+      : descriptor.categories === "underline"
+        ? "underline-categories"
+        : "category-tabs";
+  const regions: string[] = [];
+
+  if (surface === "bundle-header") {
+    regions.push("bundle-header");
+  } else if (surface === "navigation" && navigationRegion !== "none") {
+    regions.push(navigationRegion);
+  } else if (surface === "categories" && descriptor.categories !== "none") {
+    regions.push(categoryRegion);
+  } else if (surface === "product-card") {
+    regions.push(descriptor.productCard.mode === "row" ? "product-rows" : "product-grid");
+  } else if (surface === "product-slots" && descriptor.slotOrientation) {
+    regions.push(`${descriptor.slotOrientation}-slots`);
+  } else if (surface === "product-picker" && descriptor.slotOrientation) {
     regions.push(viewport === "mobile" ? "product-picker-bottom-sheet" : "product-picker-modal");
   } else if (surface === "cart-summary") {
-    if (templateKey === "product-list") regions.push("cascade-selected-drawer", "pdp-footer");
+    if (templateKey === "product-list") regions.push("product-list-selected-drawer", "pdp-footer");
     else if (descriptor.family === "product-page") regions.push(descriptor.summary);
     else regions.push(viewport === "mobile" ? descriptor.sceneRegions.mobile.at(-1) ?? "sticky-summary-tray" : "summary-sidebar");
-  } else if (surface !== "builder") {
+  } else {
     regions.push(`${surface}-overlay`);
   }
 

@@ -4,10 +4,10 @@ import { useConfigureBundleController } from "./useConfigureBundleController";
 import { useConfigureContentState } from "./useConfigureContentState";
 import { useConfigureLocalizationState } from "./useConfigureLocalizationState";
 import { useConfigureModalController } from "./useConfigureModalController";
-import { useConfigurePageSelectionController } from "./useConfigurePageSelectionController";
 import { useConfigureSaveController } from "./useConfigureSaveController";
 import { useConfigureTemplatePricingController } from "./useConfigureTemplatePricingController";
 import { useConfigureVisibilityTemplateState } from "./useConfigureVisibilityTemplateState";
+import { useConfigureSubscriptionState } from "./useConfigureSubscriptionState";
 import { buildConfigureBundleFlowContext } from "./configure-flow-statics";
 
 export function useConfigureBundleFlow() {
@@ -15,12 +15,12 @@ export function useConfigureBundleFlow() {
 
   useConfigureAddonState(flow);
   useConfigureContentState(flow);
+  useConfigureSubscriptionState(flow);
   useConfigureLocalizationState(flow);
   useConfigureVisibilityTemplateState(flow);
   useConfigureTemplatePricingController(flow);
   useConfigureModalController(flow);
   useConfigureActionController(flow);
-  useConfigurePageSelectionController(flow);
   useConfigureSaveController(flow);
 
   return buildConfigureBundleFlowContext(flow);

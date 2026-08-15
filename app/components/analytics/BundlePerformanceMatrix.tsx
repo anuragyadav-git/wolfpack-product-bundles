@@ -1,15 +1,16 @@
 /**
- * BundlePerformanceMatrix — sortable per-bundle row table.
- *
- * Each row shows: preset chip, name, engaged sessions, orders, AOV, revenue,
- * conversion %. Sort by any column. Click a row to navigate to bundle configure.
+ * BundlePerformanceMatrix — searchable and sortable per-bundle result table.
  *
  * Issue: docs/issues-prod/wpb-analytics-revamp-1.md
  */
 
-import { useMemo, useState } from "react";
-import { SortableHeader, type SortDir } from "./shared/SortableHeader";
-import type { BundleMatrixRow } from "../../lib/analytics";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  filterAndSortBundleResults,
+  type BundleMatrixRow,
+  type BundleResultSortDirection,
+  type BundleResultSortKey,
+} from "../../lib/analytics";
 
 export interface BundlePerformanceMatrixProps {
   rows: BundleMatrixRow[];
@@ -17,50 +18,117 @@ export interface BundlePerformanceMatrixProps {
   onRowClick?: (bundleId: string) => void;
 }
 
-type RowKey = keyof Pick<BundleMatrixRow, "bundleName" | "presetId" | "engagedSessions" | "ordersFromBundle" | "revenueCents" | "aovCents" | "engagementToOrderRate">;
+const SORT_OPTIONS: Array<{ key: BundleResultSortKey; label: string }> = [
+  { key: "bundleName", label: "Bundle Name" },
+  { key: "views", label: "Bundle Views" },
+  { key: "ordersFromBundle", label: "No. of Orders" },
+  { key: "revenueCents", label: "Total Bundle Value" },
+  { key: "overallConversionRate", label: "Overall conversions" },
+];
+
+type ChoiceListElement = HTMLElement & { values?: string[] };
+type TextFieldElement = HTMLElement & { value?: string };
 
 export function BundlePerformanceMatrix({ rows, formatRevenue, onRowClick }: BundlePerformanceMatrixProps) {
-  const [sortKey, setSortKey] = useState<RowKey>("revenueCents");
-  const [sortDir, setSortDir] = useState<SortDir>("desc");
+  const [query, setQuery] = useState("");
+  const [sortKey, setSortKey] = useState<BundleResultSortKey>("revenueCents");
+  const [direction, setDirection] = useState<BundleResultSortDirection>("desc");
+  const searchRef = useRef<TextFieldElement>(null);
+  const sortChoiceRef = useRef<ChoiceListElement>(null);
+  const directionChoiceRef = useRef<ChoiceListElement>(null);
+  const sortTriggerRef = useRef<HTMLElement>(null);
+  const filteredRows = useMemo(
+    () => filterAndSortBundleResults(rows, query, sortKey, direction),
+    [rows, query, sortKey, direction],
+  );
 
-  const sorted = useMemo(() => {
-    const copy = rows.slice();
-    copy.sort((a, b) => {
-      const av = a[sortKey] as number | string | null;
-      const bv = b[sortKey] as number | string | null;
-      if (av === null && bv === null) return 0;
-      if (av === null) return 1;
-      if (bv === null) return -1;
-      if (typeof av === "number" && typeof bv === "number") {
-        return sortDir === "asc" ? av - bv : bv - av;
-      }
-      const cmp = String(av).localeCompare(String(bv));
-      return sortDir === "asc" ? cmp : -cmp;
-    });
-    return copy;
-  }, [rows, sortKey, sortDir]);
+  useEffect(() => {
+    const search = searchRef.current;
+    if (!search) return;
+    const handleInput = (event: Event) => setQuery((event.currentTarget as TextFieldElement).value ?? "");
+    search.addEventListener("input", handleInput);
+    return () => search.removeEventListener("input", handleInput);
+  }, []);
 
-  const handleSort = (key: string) => {
-    if (sortKey === key) {
-      setSortDir(d => (d === "asc" ? "desc" : "asc"));
-    } else {
-      setSortKey(key as RowKey);
-      setSortDir("desc");
-    }
-  };
+  useEffect(() => {
+    const choices = sortChoiceRef.current;
+    if (!choices) return;
+    const handleChange = (event: Event) => {
+      const nextKey = (event.currentTarget as ChoiceListElement).values?.[0] as BundleResultSortKey | undefined;
+      if (nextKey && SORT_OPTIONS.some(option => option.key === nextKey)) setSortKey(nextKey);
+    };
+    choices.addEventListener("change", handleChange);
+    return () => choices.removeEventListener("change", handleChange);
+  }, []);
+
+  useEffect(() => {
+    const choices = directionChoiceRef.current;
+    if (!choices) return;
+    const handleChange = (event: Event) => {
+      const nextDirection = (event.currentTarget as ChoiceListElement).values?.[0] as BundleResultSortDirection | undefined;
+      if (nextDirection !== "asc" && nextDirection !== "desc") return;
+      setDirection(nextDirection);
+      sortTriggerRef.current?.click();
+    };
+    choices.addEventListener("change", handleChange);
+    return () => choices.removeEventListener("change", handleChange);
+  }, []);
 
   return (
     <section className="wpb-card wpb-card--flush" aria-labelledby="wpb-bundle-matrix-title">
       <header className="wpb-section-header">
         <div>
           <h2 id="wpb-bundle-matrix-title" className="wpb-section-title">Bundle Performance</h2>
-          <p className="wpb-section-hint">{rows.length} active bundles in period</p>
+          <p className="wpb-section-hint">{rows.length} bundles in period</p>
         </div>
       </header>
 
-      {rows.length === 0 ? (
-        <div className="wpb-empty-block">
-          No bundle activity yet in this window. Once shoppers engage with a bundle, it appears here.
+      <div className="wpb-results-toolbar">
+        <s-text-field
+          ref={searchRef}
+          label="Search bundles"
+          labelAccessibilityVisibility="exclusive"
+          icon="search"
+          placeholder="Search by bundle name"
+          value={query}
+          autocomplete="off"
+        />
+        <s-button
+          ref={sortTriggerRef}
+          commandFor="bundle-performance-sort-popover"
+          variant="secondary"
+          accessibilityLabel="Sort bundle performance"
+        >
+          <span className="wpb-results-sort-glyph" aria-hidden>↕</span> Sort
+        </s-button>
+        <s-popover id="bundle-performance-sort-popover">
+          <s-box padding="base">
+            <s-choice-list ref={sortChoiceRef} name="bundle-performance-sort" label="Sort by">
+              {SORT_OPTIONS.map(option => (
+                <s-choice key={option.key} value={option.key} selected={option.key === sortKey || undefined}>
+                  {option.label}
+                </s-choice>
+              ))}
+            </s-choice-list>
+            <s-divider />
+            <s-choice-list
+              ref={directionChoiceRef}
+              name="bundle-performance-direction"
+              label="Direction"
+              labelAccessibilityVisibility="exclusive"
+            >
+              <s-choice value="desc" selected={direction === "desc" || undefined}>↑ Highest</s-choice>
+              <s-choice value="asc" selected={direction === "asc" || undefined}>↓ Lowest</s-choice>
+            </s-choice-list>
+          </s-box>
+        </s-popover>
+      </div>
+
+      {filteredRows.length === 0 ? (
+        <div className="wpb-results-empty">
+          <span className="wpb-results-empty-icon" aria-hidden><s-icon type="search" /></span>
+          <h3 className="wpb-results-empty-title">No Items found</h3>
+          <p className="wpb-section-hint">Try changing the filters or search term</p>
         </div>
       ) : (
         <div className="wpb-matrix-scroll">
@@ -68,30 +136,24 @@ export function BundlePerformanceMatrix({ rows, formatRevenue, onRowClick }: Bun
             <thead>
               <tr className="wpb-matrix-head-row">
                 <th className="wpb-matrix-th wpb-matrix-th--bundle">
-                  <SortableHeader label="Bundle" sortKey="bundleName" activeKey={sortKey} direction={sortDir} onSort={handleSort} />
+                  Bundle
                 </th>
-                <th className="wpb-matrix-th wpb-matrix-th--preset">
-                  <SortableHeader label="Preset" sortKey="presetId" activeKey={sortKey} direction={sortDir} onSort={handleSort} />
+                <th className="wpb-matrix-th wpb-matrix-th--right">
+                  Views
                 </th>
-                <th className="wpb-matrix-th wpb-matrix-th--right wpb-matrix-th--engaged">
-                  <SortableHeader label="Engaged" sortKey="engagedSessions" activeKey={sortKey} direction={sortDir} onSort={handleSort} align="right" />
+                <th className="wpb-matrix-th wpb-matrix-th--right">
+                  No. of Orders
                 </th>
-                <th className="wpb-matrix-th wpb-matrix-th--right wpb-matrix-th--orders">
-                  <SortableHeader label="Orders" sortKey="ordersFromBundle" activeKey={sortKey} direction={sortDir} onSort={handleSort} align="right" />
+                <th className="wpb-matrix-th wpb-matrix-th--right">
+                  Total Bundle Value
                 </th>
-                <th className="wpb-matrix-th wpb-matrix-th--right wpb-matrix-th--conv">
-                  <SortableHeader label="Conv." sortKey="engagementToOrderRate" activeKey={sortKey} direction={sortDir} onSort={handleSort} align="right" />
-                </th>
-                <th className="wpb-matrix-th wpb-matrix-th--right wpb-matrix-th--aov">
-                  <SortableHeader label="AOV" sortKey="aovCents" activeKey={sortKey} direction={sortDir} onSort={handleSort} align="right" />
-                </th>
-                <th className="wpb-matrix-th wpb-matrix-th--right wpb-matrix-th--revenue">
-                  <SortableHeader label="Revenue" sortKey="revenueCents" activeKey={sortKey} direction={sortDir} onSort={handleSort} align="right" />
+                <th className="wpb-matrix-th wpb-matrix-th--right">
+                  Overall conversions
                 </th>
               </tr>
             </thead>
             <tbody>
-              {sorted.map((row) => {
+              {filteredRows.map((row) => {
                 return (
                   <tr
                     key={row.bundleId}
@@ -102,28 +164,17 @@ export function BundlePerformanceMatrix({ rows, formatRevenue, onRowClick }: Bun
                     <td className="wpb-matrix-cell wpb-matrix-cell--primary">
                       {row.bundleName}
                     </td>
-                    <td className="wpb-matrix-cell">
-                      <span
-                        className="wpb-preset-chip"
-                        data-preset={row.presetId ?? "DEFAULT"}
-                      >
-                        {row.presetId ?? "—"}
-                      </span>
-                    </td>
-                    <td className="wpb-matrix-cell wpb-matrix-cell--right wpb-matrix-cell--engagement">
-                      {row.engagedSessions.toLocaleString()}
+                    <td className="wpb-matrix-cell wpb-matrix-cell--right">
+                      {row.views.toLocaleString()}
                     </td>
                     <td className="wpb-matrix-cell wpb-matrix-cell--right">
                       {row.ordersFromBundle.toLocaleString()}
                     </td>
-                    <td className="wpb-matrix-cell wpb-matrix-cell--right wpb-matrix-cell--muted">
-                      {row.engagementToOrderRate === null ? "—" : `${row.engagementToOrderRate}%`}
-                    </td>
-                    <td className="wpb-matrix-cell wpb-matrix-cell--right wpb-matrix-cell--muted">
-                      {row.aovCents === null ? "—" : formatRevenue(row.aovCents)}
-                    </td>
                     <td className="wpb-matrix-cell wpb-matrix-cell--right wpb-matrix-cell--revenue">
                       {formatRevenue(row.revenueCents)}
+                    </td>
+                    <td className="wpb-matrix-cell wpb-matrix-cell--right wpb-matrix-cell--muted">
+                      {row.overallConversionRate.toFixed(2)}%
                     </td>
                   </tr>
                 );

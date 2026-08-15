@@ -1,7 +1,30 @@
 ---
+schema_version: 1
+id: eb-settings-language-reference
 title: EB Settings Language Reference
 type: reference
-last_audited: 2026-06-04
+status: active
+summary: Documents EB language settings evidence and the WPB storefront language-runtime contract.
+last_audited: 2026-08-13
+owners:
+  - engineering
+domains:
+  - storefront
+  - admin
+systems:
+  - settings-language
+  - widget-runtime
+source_paths:
+  - app/lib/settings-language-runtime.ts
+  - app/lib/admin-configuration-surfaces.ts
+related_docs:
+  - internal docs/EB Implementation Reference.md
+tags:
+  - language
+  - storefront
+keywords:
+  - rule messages
+  - text overrides
 ---
 
 # EB Settings Language Reference
@@ -131,13 +154,18 @@ Landing Page / FPB (`en`) has 135 leaf text fields across these roots:
 - `addons`
 - `modals.clearCart`
 
-Product Page / PPB (`mixAndMatchTextData.en`) has 30 leaf text fields:
+Product Page / PPB (`mixAndMatchTextData.en`) has 33 leaf text fields in WPB:
 
 - `productCard`
 - `general`
 - `footer`
 - `conditions.amount`
 - `conditions.quantity`
+- `conditions.weight`
+
+WPB exposes Weight as a saved step-rule type for both bundle runtimes, so its
+Product Page language document includes the three Weight operator messages even
+though the latest captured EB PPB selector exposed only Quantity and Amount.
 
 Runtime PPB `customTextSettings` values are plain strings. Runtime FPB `languageData` values remain EB field objects with `{id,label,type,value}`.
 

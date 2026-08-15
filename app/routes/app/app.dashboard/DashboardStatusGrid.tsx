@@ -2,12 +2,11 @@ import {
   THEME_EXTENSION_RESOURCES,
   type NormalizedThemeExtensionResource,
 } from "../../../lib/theme-extension-status";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { DashboardBannerSkeleton } from "../../../components/skeletons/DashboardBannerSkeleton";
 
 type DashboardStatusGridProps = {
   resources: NormalizedThemeExtensionResource[];
-  loading: boolean;
   error: boolean;
   appEmbedEnabled?: boolean;
   themeEditorUrl: string | null;
@@ -16,7 +15,6 @@ type DashboardStatusGridProps = {
 
 const CORE_STORE_FRONT_RESOURCES = [
   "bundle-app-embed",
-  "bundle-full-page",
   "bundle-product-page",
 ] as const;
 
@@ -99,19 +97,15 @@ export function getStorefrontStatusRows(
 
 export function DashboardStatusGrid({
   error,
-  loading,
   appEmbedEnabled = false,
   onOpenThemeEditor,
   resources,
   themeEditorUrl,
 }: DashboardStatusGridProps) {
   const { t } = useTranslation();
+  const [dismissed, setDismissed] = useState(false);
 
-  if (loading) {
-    return (
-      <DashboardBannerSkeleton />
-    );
-  }
+  if (dismissed) return null;
 
   const {
     core: coreResources,
@@ -144,21 +138,24 @@ export function DashboardStatusGrid({
       heading={title}
       dismissible={true}
       hidden={false}
+      onDismiss={() => setDismissed(true)}
     >
-      {!setupComplete ? (
-        <s-stack direction="inline" justifyContent="space-between" alignItems="start" gap="base">
+      <s-box minBlockSize="28px">
+        {!setupComplete ? (
+          <s-stack direction="inline" justifyContent="space-between" alignItems="start" gap="base">
+            <s-text>{summaryDescription}</s-text>
+            <s-button
+              variant="tertiary"
+              onClick={onOpenThemeEditor}
+              disabled={!themeEditorUrl}
+            >
+              {t("dashboard.storefrontSetup.activate")}
+            </s-button>
+          </s-stack>
+        ) : (
           <s-text>{summaryDescription}</s-text>
-          <s-button
-            variant="secondary"
-            onClick={onOpenThemeEditor}
-            disabled={!themeEditorUrl}
-          >
-            {t("dashboard.storefrontSetup.activate")}
-          </s-button>
-        </s-stack>
-      ) : (
-        <s-text>{summaryDescription}</s-text>
-      )}
+        )}
+      </s-box>
     </s-banner>
   );
 }

@@ -134,6 +134,9 @@ const PPB_DEFAULTS = {
   amountGreaterThanOrEqualTo: "Add products worth at least {{conditionAmount}} on this step",
   amountLessThanOrEqualTo: "Add products worth maximum of {{conditionAmount}} on this step",
   amountEqualTo: "Add products worth {{conditionAmount}} on this step",
+  weightGreaterThanOrEqualTo: "Add products weighing at least {{conditionWeight}} on this step",
+  weightLessThanOrEqualTo: "Add products weighing maximum of {{conditionWeight}} on this step",
+  weightEqualTo: "Add products weighing {{conditionWeight}} on this step",
 };
 
 export const SETTINGS_LANGUAGE_BUNDLE_TYPES = [
@@ -323,6 +326,11 @@ function buildPpbLanguage(values: Record<string, unknown>) {
         lessThanOrEqualTo: conditionField("Less than rule message (Quantity)", getField(values, "ppb.conditions.quantity.lessThanOrEqualTo", PPB_DEFAULTS.quantityLessThanOrEqualTo)),
         equalTo: conditionField("Equal to rule message (Quantity)", getField(values, "ppb.conditions.quantity.equalTo", PPB_DEFAULTS.quantityEqualTo)),
       },
+      weight: {
+        greaterThanOrEqualTo: conditionField("Greater than rule message (Weight)", getField(values, "ppb.conditions.weight.greaterThanOrEqualTo", PPB_DEFAULTS.weightGreaterThanOrEqualTo)),
+        lessThanOrEqualTo: conditionField("Less than rule message (Weight)", getField(values, "ppb.conditions.weight.lessThanOrEqualTo", PPB_DEFAULTS.weightLessThanOrEqualTo)),
+        equalTo: conditionField("Equal to rule message (Weight)", getField(values, "ppb.conditions.weight.equalTo", PPB_DEFAULTS.weightEqualTo)),
+      },
     },
   };
 }
@@ -372,6 +380,10 @@ export function buildPpbCustomTextSettings(ppbLanguage: JsonObject) {
 
 function buildFpbTextOverrides(fpbLanguage: JsonObject) {
   const general = fpbLanguage.general as Record<string, LanguageField>;
+  const conditions = fpbLanguage.conditions as JsonObject;
+  const quantityConditions = conditions.quantity as Record<string, LanguageField>;
+  const amountConditions = conditions.amount as Record<string, LanguageField>;
+  const weightConditions = conditions.weight as Record<string, LanguageField>;
   return {
     productAddButton: general.addToBoxButtonText.value,
     addToCartButton: general.addToCartButtonText.value,
@@ -382,6 +394,15 @@ function buildFpbTextOverrides(fpbLanguage: JsonObject) {
     addingToCart: general.preparingBundleLabel.value,
     includedBadge: general.addedLabel.value,
     reviewButton: general.reviewButtonText.value,
+    conditionQuantityGreaterThanOrEqualTo: quantityConditions.greaterThanOrEqualTo.value,
+    conditionQuantityLessThanOrEqualTo: quantityConditions.lessThanOrEqualTo.value,
+    conditionQuantityEqualTo: quantityConditions.equalTo.value,
+    conditionAmountGreaterThanOrEqualTo: amountConditions.greaterThanOrEqualTo.value,
+    conditionAmountLessThanOrEqualTo: amountConditions.lessThanOrEqualTo.value,
+    conditionAmountEqualTo: amountConditions.equalTo.value,
+    conditionWeightGreaterThanOrEqualTo: weightConditions.greaterThanOrEqualTo.value,
+    conditionWeightLessThanOrEqualTo: weightConditions.lessThanOrEqualTo.value,
+    conditionWeightEqualTo: weightConditions.equalTo.value,
   };
 }
 
@@ -389,6 +410,7 @@ function buildPpbTextOverrides(customTextSettings: Record<string, unknown>) {
   const conditions = customTextSettings.conditions as JsonObject | undefined;
   const quantityConditions = conditions?.quantity as Record<string, LanguageField> | undefined;
   const amountConditions = conditions?.amount as Record<string, LanguageField> | undefined;
+  const weightConditions = conditions?.weight as Record<string, LanguageField> | undefined;
 
   return {
     productCardAddButton: String(customTextSettings.productCardAddBtnText),
@@ -409,6 +431,9 @@ function buildPpbTextOverrides(customTextSettings: Record<string, unknown>) {
     conditionAmountGreaterThanOrEqualTo: String(amountConditions?.greaterThanOrEqualTo?.value),
     conditionAmountLessThanOrEqualTo: String(amountConditions?.lessThanOrEqualTo?.value),
     conditionAmountEqualTo: String(amountConditions?.equalTo?.value),
+    conditionWeightGreaterThanOrEqualTo: String(weightConditions?.greaterThanOrEqualTo?.value),
+    conditionWeightLessThanOrEqualTo: String(weightConditions?.lessThanOrEqualTo?.value),
+    conditionWeightEqualTo: String(weightConditions?.equalTo?.value),
   };
 }
 

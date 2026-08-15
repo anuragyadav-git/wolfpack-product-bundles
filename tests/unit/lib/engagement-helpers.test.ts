@@ -112,7 +112,7 @@ describe("buildBundlePerformanceMatrix", () => {
   ];
 
   it("filters out bundles with no engagement and no revenue", () => {
-    const rows = buildBundlePerformanceMatrix(bundles, [], []);
+    const rows = buildBundlePerformanceMatrix(bundles, [], [], []);
     expect(rows).toEqual([]);
   });
 
@@ -126,12 +126,31 @@ describe("buildBundlePerformanceMatrix", () => {
       { bundleId: "b1", revenue: 10_000, createdAt: D("2026-06-01") },
       { bundleId: "b2", revenue: 25_000, createdAt: D("2026-06-01") },
     ];
-    const rows = buildBundlePerformanceMatrix(bundles, eng, attr);
+    const rows = buildBundlePerformanceMatrix(bundles, eng, attr, []);
     expect(rows.map(r => r.bundleId)).toEqual(["b2", "b1"]);
     const b1 = rows.find(r => r.bundleId === "b1")!;
     expect(b1.engagedSessions).toBe(2);
     expect(b1.ordersFromBundle).toBe(1);
     expect(b1.aovCents).toBe(10_000);
     expect(b1.engagementToOrderRate).toBe(50);
+  });
+
+  it("keeps view-only bundles and computes overall conversion from orders divided by views", () => {
+    const attr: OrderAttributionRow[] = [
+      { bundleId: "b1", revenue: 10_000, createdAt: D("2026-06-01") },
+    ];
+    const views = Array.from({ length: 4 }, () => ({
+      bundleId: "b1",
+      createdAt: D("2026-06-01"),
+    }));
+    views.push({ bundleId: "b3", createdAt: D("2026-06-01") });
+
+    const rows = buildBundlePerformanceMatrix(bundles, [], attr, views);
+    const b1 = rows.find(r => r.bundleId === "b1")!;
+    const b3 = rows.find(r => r.bundleId === "b3")!;
+
+    expect(b1.views).toBe(4);
+    expect(b1.overallConversionRate).toBe(25);
+    expect(b3).toMatchObject({ views: 1, ordersFromBundle: 0, overallConversionRate: 0 });
   });
 });

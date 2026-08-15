@@ -6,49 +6,12 @@
 @import "./classic/variant-selector.css";
 @import "./standard-step-timeline.css";
 
-@media (min-width: 769px) {
-  .layout-sidebar[data-fpb-design-preset="CLASSIC"] .sidebar-layout-wrapper {
-    grid-template-columns:
-      minmax(0, var(--classic-desktop-content-fr))
-      minmax(
-        var(--classic-desktop-sidebar-min-width),
-        var(--classic-desktop-sidebar-fr)
-      );
-    align-items: start;
-  }
-
-  .layout-sidebar[data-fpb-design-preset="CLASSIC"] .full-page-side-panel {
-    width: 100%;
-    max-width: none;
-    flex-basis: auto;
-    justify-self: stretch;
-    align-self: start;
-    box-sizing: border-box;
-    overflow: hidden;
-  }
-
-  .layout-sidebar[data-fpb-design-preset="CLASSIC"] .side-panel-products {
-    max-width: 100%;
-    overflow-x: hidden;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    scrollbar-gutter: stable;
-  }
-
-  .layout-sidebar[data-fpb-design-preset="CLASSIC"] .side-panel-product-row {
-    max-width: 100%;
-    min-width: 0;
-    box-sizing: border-box;
-  }
-}
+/* Shared shell, sidebar, and mobile-summary structure is composed by the app embed. */
 
 #bundle-builder-app .full-page-product-grid .product-card,
-#bundle-builder-app .fpb-mobile-summary-tray .product-card,
 #bundle-builder-app .full-page-product-grid .product-card.bw-product-card--hover-expanded,
-#bundle-builder-app .full-page-product-grid .product-card.bw-product-card--selected,
-#bundle-builder-app .fpb-mobile-summary-tray .product-card.bw-product-card--hover-expanded,
-#bundle-builder-app .fpb-mobile-summary-tray .product-card.bw-product-card--selected {
-  height: 100% !important;
-  min-height: 0 !important;
-  max-height: none !important;
+#bundle-builder-app .full-page-product-grid .product-card.bw-product-card--selected {
+  height: 100%;
+  min-height: 0;
+  max-height: none;
 }

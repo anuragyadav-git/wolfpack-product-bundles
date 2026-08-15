@@ -1,0 +1,164 @@
+{
+  "schema_version": 1,
+  "job_id": "fpb-classic-summary-20260804",
+  "revision": 1,
+  "status": "passed",
+  "checked_at": "2026-08-04T14:55:01Z",
+  "environment": "staging",
+  "selected_page": {
+    "page_id": 13,
+    "url": "https://agent-5sfidg3m.myshopify.com/apps/product-bundles/wpb/cmse8sp170000v0ytaqqzsvtw",
+    "title": "agent"
+  },
+  "checks": {
+    "chrome_mcp_connected": {
+      "mandatory": true,
+      "status": "passed",
+      "evidence": "list_pages returned live pages on retry.",
+      "blocker": "",
+      "recovery_action": ""
+    },
+    "supported_chrome_available": {
+      "mandatory": true,
+      "status": "passed",
+      "evidence": "Chrome 150.0.0.0 on macOS responded through the default profile.",
+      "blocker": "",
+      "recovery_action": ""
+    },
+    "intended_page_selected": {
+      "mandatory": true,
+      "status": "passed",
+      "evidence": "Page 13 is the approved Agent base URL plus exact fixture path and was selected with bringToFront false.",
+      "blocker": "",
+      "recovery_action": ""
+    },
+    "app_server_reachable": {
+      "mandatory": true,
+      "status": "passed",
+      "evidence": "A cache-bypassed reload returned successfully and the fixture document request returned 200.",
+      "blocker": "",
+      "recovery_action": ""
+    },
+    "environment_confirmed": {
+      "mandatory": true,
+      "status": "passed",
+      "evidence": "browser-test-plan.yaml identifies the Agent environment as staging.",
+      "blocker": "",
+      "recovery_action": ""
+    },
+    "fixture_route_exists": {
+      "mandatory": true,
+      "status": "passed",
+      "evidence": "The exact bundle route hydrated six known products and the Classic summary.",
+      "blocker": "",
+      "recovery_action": ""
+    },
+    "authentication_intentional": {
+      "mandatory": true,
+      "status": "passed",
+      "evidence": "The approved storefront route loaded through the connected default Chrome profile without an authentication redirect.",
+      "blocker": "",
+      "recovery_action": ""
+    },
+    "sensitive_tabs_avoided": {
+      "mandatory": true,
+      "status": "passed",
+      "evidence": "Only the approved Agent storefront page was selected and captured; unrelated tabs were not selected or inspected.",
+      "blocker": "",
+      "recovery_action": ""
+    },
+    "viewport_resize_supported": {
+      "mandatory": true,
+      "status": "passed",
+      "evidence": "DevTools emulated an exact 390x844 mobile viewport at DPR 2 with mobile and touch enabled.",
+      "blocker": "",
+      "recovery_action": ""
+    },
+    "accessibility_snapshot_supported": {
+      "mandatory": true,
+      "status": "passed",
+      "evidence": "Fresh desktop and mobile accessibility-tree snapshots exposed the product and Classic summary controls.",
+      "blocker": "",
+      "recovery_action": ""
+    },
+    "screenshot_write_supported": {
+      "mandatory": true,
+      "status": "passed",
+      "evidence": "Chrome returned a complete PNG; the skill exact-byte fallback saved qa/preflight-connectivity.png at 780x1688 physical pixels, 202725 bytes, SHA-256 51a26d9885dc52a360197c1c2a225ceebbd522f15be2dc3119a19e01ed90580c.",
+      "blocker": "",
+      "recovery_action": ""
+    },
+    "console_inspection_supported": {
+      "mandatory": true,
+      "status": "passed",
+      "evidence": "Console listing returned message IDs and severity metadata.",
+      "blocker": "",
+      "recovery_action": ""
+    },
+    "network_inspection_supported": {
+      "mandatory": true,
+      "status": "passed",
+      "evidence": "Network listing returned sanitized request metadata, including 200 responses for the fixture and widget assets.",
+      "blocker": "",
+      "recovery_action": ""
+    },
+    "repository_identity_recorded": {
+      "mandatory": true,
+      "status": "passed",
+      "evidence": "/Users/adityaawasthi/Developer/wolfpack-product-bundles on feature/26.05-UI-changes at 2ec135306cb530e45b9e93560119d9f29f0cbb36.",
+      "blocker": "",
+      "recovery_action": ""
+    },
+    "job_revision_recorded": {
+      "mandatory": true,
+      "status": "passed",
+      "evidence": "Design job fpb-classic-summary-20260804 revision 1.",
+      "blocker": "",
+      "recovery_action": ""
+    },
+    "baseline_identified": {
+      "mandatory": true,
+      "status": "passed",
+      "evidence": "Approved target baseline ref-target-desktop-001 revision 1 is recorded in screenshot-inventory.yaml.",
+      "blocker": "",
+      "recovery_action": ""
+    }
+  },
+  "tool_inventory": [
+    "mcp__chrome_devtools__list_pages",
+    "mcp__chrome_devtools__select_page",
+    "mcp__chrome_devtools__navigate_page",
+    "mcp__chrome_devtools__wait_for",
+    "mcp__chrome_devtools__resize_page",
+    "mcp__chrome_devtools__emulate",
+    "mcp__chrome_devtools__take_snapshot",
+    "mcp__chrome_devtools__take_screenshot",
+    "mcp__chrome_devtools__evaluate_script",
+    "mcp__chrome_devtools__list_console_messages",
+    "mcp__chrome_devtools__get_console_message",
+    "mcp__chrome_devtools__list_network_requests",
+    "mcp__chrome_devtools__get_network_request",
+    "mcp__chrome_devtools__lighthouse_audit",
+    "mcp__chrome_devtools__performance_start_trace",
+    "mcp__chrome_devtools__performance_stop_trace",
+    "mcp__chrome_devtools__performance_analyze_insight"
+  ],
+  "browser": {
+    "product": "Chrome",
+    "version": "150.0.0.0",
+    "profile_policy": "default-profile-only",
+    "isolated_context_used": false
+  },
+  "repository": {
+    "path": "/Users/adityaawasthi/Developer/wolfpack-product-bundles",
+    "branch": "feature/26.05-UI-changes",
+    "commit": "2ec135306cb530e45b9e93560119d9f29f0cbb36"
+  },
+  "baseline": {
+    "id": "ref-target-desktop-001",
+    "revision": 1,
+    "path": "references/target/fpb-classic-summary-20260804__target-desktop__summary-sidebar__partially-filled__1440x900__r1.png"
+  },
+  "artifact_directory": "qa",
+  "blockers": []
+}

@@ -17,18 +17,12 @@ describe('PPB Vertical Slots shared shell migration', () => {
 
   it('creates a vertical shared slot wrapper at runtime', () => {
     class ProductPageWidget {
-      selectedBundle: { renderFilledSlotsAsHorizontalStacked: boolean };
-
-      constructor() {
-        this.selectedBundle = { renderFilledSlotsAsHorizontalStacked: false };
-      }
-
       _getProductPageTemplateType() {
         return 'PDP_MODAL';
       }
 
       _getProductPageDesignPreset() {
-        return 'MODAL';
+        return 'VERTICAL_SLOTS';
       }
     }
 

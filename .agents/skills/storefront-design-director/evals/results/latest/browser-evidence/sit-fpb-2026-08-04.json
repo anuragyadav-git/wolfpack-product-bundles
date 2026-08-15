@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-08-04T06:22:05Z",
+  "environment": "SIT",
+  "store": "agent-5sfidg3m",
+  "bundle": {
+    "id": "cmse8sp170000v0ytaqqzsvtw",
+    "name": "SDD Eval FPB 2026-08-04",
+    "type": "full_page",
+    "template": "FBP_SIDE_FOOTER",
+    "preset": "STANDARD",
+    "product_count": 6,
+    "admin_url": "https://admin.shopify.com/store/agent-5sfidg3m/apps/wolfpack-product-bundles-sit/app/bundles/full-page-bundle/configure/cmse8sp170000v0ytaqqzsvtw?mode=create&first_load=true",
+    "storefront_url": "https://agent-5sfidg3m.myshopify.com/apps/product-bundles/wpb/cmse8sp170000v0ytaqqzsvtw"
+  },
+  "browser_contract": {
+    "tool": "Chrome DevTools MCP",
+    "connection": "existing connected default Chrome profile",
+    "isolated_context_used": false,
+    "cache_storage_entries_deleted": 0,
+    "reload_policy": "ignoreCache=true before each viewport pass",
+    "screenshots_committed": false,
+    "unrelated_tabs_touched": false
+  },
+  "route_recovery": {
+    "initial_queryless_reload_status": 500,
+    "initial_page_message": "There was an error in the third-party application.",
+    "bundle_json_probe_status": 200,
+    "cache_busted_document_probe_status": 200,
+    "final_queryless_hard_reload_status": 200,
+    "final_queryless_render_verified": true,
+    "note": "The transient app-proxy document failure cleared without source or deployment changes; final evidence uses a fresh successful canonical-path reload."
+  },
+  "measured_remediation": {
+    "supplied_case_evidence": {
+      "selected_card_height_delta_px": 8,
+      "mobile_focus_outline_clipped": true,
+      "disposition": "Treat geometry and accessibility as independent failures until the exact failing build is reproduced."
+    },
+    "fresh_sit_observations": {
+      "desktop": {
+        "viewport_css_px": "1280x800",
+        "device_pixel_ratio": 1,
+        "unselected_card_height_px": 405.58,
+        "selected_card_height_px": 405.58,
+        "selection_height_delta_px": 0,
+        "selected_outline": "2px solid black with -2px offset",
+        "summary_height_before_selection_px": 241,
+        "summary_height_after_selection_px": 316
+      },
+      "mobile": {
+        "viewport_css_px": "390x844",
+        "device_pixel_ratio": 3,
+        "unselected_card_height_px": 309,
+        "selected_card_height_px": 309,
+        "selection_height_delta_px": 0,
+        "add_button_focus_outline": "2px solid rgb(92, 106, 196) with 2px offset",
+        "add_button_focus_clipped": false,
+        "selected_quantity_focus_outline": "3px solid white with 0px offset",
+        "selected_quantity_focus_clipped": false
+      },
+      "conclusion": "The supplied +8px and clipped-focus failures were not reproduced on the refreshed SIT fixture; this does not erase the supplied failing evidence."
+    },
+    "canonical_owners": [
+      "internal docs/Architecture/Product Card Layout Contract.md",
+      "app/assets/widgets/full-page-css/base/search-category-product-grid.css",
+      "app/assets/widgets/full-page-css/base/sidebar-totals-discounts.css",
+      "app/assets/widgets/full-page-css/templates/side-footer-standard.css"
+    ],
+    "retest_scope": [
+      "Use the exact failing build and fixture at desktop 1280x800 and mobile 390x844.",
+      "Measure the same card before and after selection and require a 0px height delta.",
+      "Keyboard-focus add and quantity controls and require the full outline to remain inside every clipping ancestor.",
+      "Rerun the summary-tray CLS trace after any source remediation."
+    ]
+  },
+  "performance_scope": {
+    "evidence_label": "lab-only Chrome DevTools MCP traces; no CrUX field data available",
+    "conditions": {
+      "viewport_css_px": "390x844",
+      "device_pixel_ratio": 3,
+      "cpu_throttling": "1x",
+      "network_throttling": "none",
+      "navigation": "hard reload of the same SIT FPB route"
+    },
+    "candidate_trace": {
+      "path": "/var/folders/fy/_yqdzrz51l99b3cp_bx6272r0000gn/T/storefront-design-director-performance-scope-mobile.trace.json.gz",
+      "bytes": 5516595,
+      "sha256": "76476b7599e447e429c6b7a46484e91bc7f168c1bd35c5b8fde0181dbbb1d9e6",
+      "lcp_ms": 7814,
+      "cls": 0.3139,
+      "worst_shift_cluster_start_ms": 7785,
+      "cls_culprit": "Chrome identified no potential root cause"
+    },
+    "repeat_baseline_trace": {
+      "path": "/var/folders/fy/_yqdzrz51l99b3cp_bx6272r0000gn/T/storefront-design-director-performance-scope-mobile-baseline.trace.json.gz",
+      "bytes": 11447603,
+      "sha256": "638ab0d19b3c6986a56bf8477ffda91e18f9d4371b3b6493fea7814da368afbb",
+      "lcp_ms": 12631,
+      "cls": 0.0006,
+      "worst_shift_cluster_start_ms": 27682,
+      "cls_culprit": "Chrome identified no potential root cause"
+    },
+    "disposition": "Approval remains blocked at the product-workflow level because one controlled lab trace has bad CLS and the repeat has high variance; the eval passes only if the skill reports that gate honestly."
+  }
+}

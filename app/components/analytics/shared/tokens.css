@@ -164,6 +164,56 @@
   margin: 0 -8px -8px;
 }
 
+.wpb-section-header--metric-chart {
+  align-items: flex-start;
+}
+
+.wpb-metric-selector {
+  flex: none;
+}
+
+.wpb-metric-chart {
+  height: 300px;
+  margin: 0 -8px -8px;
+}
+
+.wpb-results-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 0 0 16px;
+  border-bottom: 1px solid var(--wpb-line);
+}
+
+.wpb-results-sort-glyph {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.wpb-results-empty {
+  display: flex;
+  min-height: 168px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 8px;
+  padding: 24px;
+  text-align: center;
+}
+
+.wpb-results-empty-icon {
+  color: var(--wpb-ink-500);
+  font-size: 48px;
+  line-height: 1;
+}
+
+.wpb-results-empty-title {
+  margin: 0;
+  color: var(--wpb-ink-900);
+  font: var(--wpb-heading);
+}
+
 .wpb-funnel-grid {
   display: grid;
   gap: 24px;
@@ -354,8 +404,37 @@
 
 .wpb-campaign-row {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: minmax(0, 1fr) minmax(80px, 0.25fr) minmax(120px, 0.3fr);
   gap: 12px;
+  align-items: center;
+}
+
+.wpb-campaign-table {
+  display: grid;
+}
+
+.wpb-campaign-table-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(80px, 0.25fr) minmax(120px, 0.3fr);
+  gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--wpb-line);
+  color: var(--wpb-ink-500);
+  font: var(--wpb-micro);
+}
+
+.wpb-campaign-table-head span:not(:first-child) {
+  text-align: right;
+}
+
+.wpb-campaign-table-row {
+  padding-block: 14px;
+  border-bottom: 1px solid var(--wpb-line);
+}
+
+.wpb-campaign-table-row:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
 }
 
 .wpb-activity-row {
@@ -565,6 +644,19 @@
     align-items: flex-start;
     flex-direction: column;
     gap: 4px;
+  }
+
+  .wpb-section-header--metric-chart {
+    gap: 12px;
+  }
+
+  .wpb-metric-selector,
+  .wpb-metric-selector s-button {
+    width: 100%;
+  }
+
+  .wpb-metric-chart {
+    height: 240px;
   }
 
   .wpb-two-column-grid {

@@ -27,15 +27,16 @@ const CORS_HEADERS = {
  * Storefront API rejects the whole query with "Access denied".
  */
 const INVENTORY_FIELDS = "quantityAvailable currentlyNotInStock";
-const SELLING_PLAN_ALLOCATION_FIELDS = `
-                sellingPlanAllocations(first: 100) {
-                  edges {
-                    node {
-                      priceAdjustments { price { amount currencyCode } }
-                      sellingPlan { id name }
-                    }
-                  }
-                }`;
+const PRODUCT_GID_PATTERN = /^gid:\/\/shopify\/Product\/(\d+)$/;
+const PRODUCT_IMAGE_LIMIT = 50;
+
+function normalizeProductId(productId: string): string | null {
+  if (/^\d+$/.test(productId)) {
+    return `gid://shopify/Product/${productId}`;
+  }
+
+  return PRODUCT_GID_PATTERN.test(productId) ? productId : null;
+}
 
 function mapStorefrontVariant(edge: any) {
   return {
@@ -43,13 +44,6 @@ function mapStorefrontVariant(edge: any) {
     title: edge.node.title,
     price: edge.node.price?.amount || '0',
     compareAtPrice: edge.node.compareAtPrice?.amount || null,
-    sellingPlanAllocations: (edge.node.sellingPlanAllocations?.edges || [])
-      .map((allocationEdge: any) => allocationEdge?.node)
-      .map((allocation: any) => ({
-        ...allocation,
-        id: allocation?.id ?? allocation?.sellingPlan?.id ?? null,
-      }))
-      .filter((allocation: any) => Boolean(allocation)),
     available: edge.node.availableForSale,
     quantityAvailable: normalizeStorefrontQuantityAvailable(edge.node),
     currentlyNotInStock: edge.node.currentlyNotInStock === true,
@@ -71,11 +65,9 @@ async function fetchAllVariants(
   productId: string,
   country: string | null,
   hasInventoryScope: boolean,
-  hasSellingPlanScope: boolean,
   cursor?: string
 ): Promise<any[]> {
   const inventoryFields = hasInventoryScope ? ` ${INVENTORY_FIELDS}` : "";
-  const sellingPlanAllocationFields = hasSellingPlanScope ? SELLING_PLAN_ALLOCATION_FIELDS : "";
 
   const VARIANT_QUERY = country
     ? `query getProductVariants($id: ID!, $cursor: String, $country: CountryCode!) @inContext(country: $country) {
@@ -90,7 +82,6 @@ async function fetchAllVariants(
                 weight
                 weightUnit
                 image { url }
-${sellingPlanAllocationFields}
               }
             }
           }
@@ -108,7 +99,6 @@ ${sellingPlanAllocationFields}
                 weight
                 weightUnit
                 image { url }
-${sellingPlanAllocationFields}
               }
             }
           }
@@ -153,7 +143,6 @@ ${sellingPlanAllocationFields}
       productId,
       country,
       hasInventoryScope,
-      hasSellingPlanScope,
       endCursor
     );
     return [...variants, ...nextPageVariants];
@@ -170,6 +159,9 @@ function buildProductsQuery(country: string | null, hasInventoryScope: boolean) 
         nodes(ids: $ids) {
           ... on Product {
             id title handle description descriptionHtml featuredImage { url }
+            images(first: ${PRODUCT_IMAGE_LIMIT}) {
+              edges { node { url } }
+            }
             variants(first: 1) {
               edges {
                 node {
@@ -187,6 +179,9 @@ function buildProductsQuery(country: string | null, hasInventoryScope: boolean) 
         nodes(ids: $ids) {
           ... on Product {
             id title handle description descriptionHtml featuredImage { url }
+            images(first: ${PRODUCT_IMAGE_LIMIT}) {
+              edges { node { url } }
+            }
             variants(first: 1) {
               edges {
                 node {
@@ -218,11 +213,17 @@ export async function loader({ request }: LoaderFunctionArgs) {
     return json({ error: "Missing shop parameter" }, { status: 400, headers: CORS_HEADERS });
   }
 
-  const ids = productIds.split(",").map(id => id.trim()).filter(Boolean);
+  const requestedIds = productIds.split(",").map(id => id.trim()).filter(Boolean);
 
-  if (ids.length === 0) {
+  if (requestedIds.length === 0) {
     return json({ error: "No valid product IDs provided" }, { status: 400, headers: CORS_HEADERS });
   }
+
+  const normalizedIds = requestedIds.map(normalizeProductId);
+  if (normalizedIds.some(id => id === null)) {
+    return json({ error: "Invalid product IDs" }, { status: 400, headers: CORS_HEADERS });
+  }
+  const ids = normalizedIds as string[];
 
   try {
     // Storefront token is created at install time (lifecycle webhook / auth callback).
@@ -281,7 +282,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
     // Scope is synced from Shopify on install and on every app/scopes_update webhook
     // (see handleScopesUpdate in lifecycle.server.ts), so session.scope is authoritative.
     const hasInventoryScope = (session.scope ?? "").includes("unauthenticated_read_product_inventory");
-    const hasSellingPlanScope = (session.scope ?? "").includes("unauthenticated_read_selling_plans");
     const STOREFRONT_QUERY = buildProductsQuery(country, hasInventoryScope);
     const storefrontUrl = `https://${shop}/api/${SHOPIFY_REST_API_VERSION}/graphql.json`;
 
@@ -317,6 +317,10 @@ export async function loader({ request }: LoaderFunctionArgs) {
       nodes.map(async (product: any) => {
         if (!product) return null;
 
+        const images = (product.images?.edges || [])
+          .map((edge: any) => edge.node?.url ? { src: edge.node.url } : null)
+          .filter(Boolean);
+
         try {
           // Fetch all variants with pagination; pass country for market-correct prices
           const variantEdges = await fetchAllVariants(
@@ -324,8 +328,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
             storefrontAccessToken,
             product.id,
             country,
-            hasInventoryScope,
-            hasSellingPlanScope
+            hasInventoryScope
           );
 
           return {
@@ -335,6 +338,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
             description: product.description || '',
             descriptionHtml: product.descriptionHtml || '',
             imageUrl: product.featuredImage?.url || '',
+            images,
             variants: variantEdges.map(mapStorefrontVariant)
           };
         } catch (error) {
@@ -348,6 +352,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
             description: product.description || '',
             descriptionHtml: product.descriptionHtml || '',
             imageUrl: product.featuredImage?.url || '',
+            images,
             variants: fallbackVariants
           };
         }

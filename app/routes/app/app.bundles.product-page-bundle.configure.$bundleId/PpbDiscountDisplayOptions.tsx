@@ -85,7 +85,7 @@ function PpbBundleQuantityOptions() {
         </s-stack>
         <s-button
           variant="secondary"
-          icon="globe"
+          icon="language-translate"
           disabled={!qtyOptionsEnabled || shopLocales.length === 0 || undefined}
           onClick={() => setIsBundleQuantityMultiLangModalOpen(true)}
         >
@@ -127,19 +127,29 @@ function PpbBundleQuantityOptions() {
                         >
                           Rule #{index + 1}
                         </h5>
-                        <s-button
+                        <s-press-button
                           variant="tertiary"
+                          tone="neutral"
+                          pressed={rule.id === qtyOptionsDefaultRuleId}
                           accessibilityLabel="Make this rule default"
                           onClick={() => {
                             setQtyOptionsDefaultRuleId(rule.id);
                             markAsDirty();
                           }}
                         >
-                          {rule.id === qtyOptionsDefaultRuleId
-                            ? "\u2605"
-                            : "\u2606"}
-                          Make this rule default
-                        </s-button>
+                          <s-text
+                            tone={
+                              rule.id === qtyOptionsDefaultRuleId
+                                ? "success"
+                                : "neutral"
+                            }
+                          >
+                            {rule.id === qtyOptionsDefaultRuleId
+                              ? "\u2605"
+                              : "\u2606"}{" "}
+                            Make this rule default
+                          </s-text>
+                        </s-press-button>
                       </s-stack>
                       <s-stack direction="inline" gap="small">
                         <s-text-field
@@ -225,7 +235,7 @@ function PpbProgressBarOptions() {
         </s-stack>
         <s-button
           variant="secondary"
-          icon="globe"
+          icon="language-translate"
           disabled={
             !progressBarEnabled ||
             progressBarType !== "step_based" ||
@@ -293,7 +303,10 @@ function PpbProgressTierTextFields({
             <p style={{ margin: 0, fontSize: 13, fontWeight: 500 }}>
               Rule #{index + 1}
             </p>
-            <s-stack direction="inline" gap="small">
+            <s-grid
+              gridTemplateColumns="repeat(2, minmax(0, 1fr))"
+              gap="small"
+            >
               <s-text-field
                 label="Tier Text"
                 value={tierTextByRuleId[rule.id]?.tierText ?? ""}
@@ -326,7 +339,7 @@ function PpbProgressTierTextFields({
                 }}
                 autocomplete="off"
               />
-            </s-stack>
+            </s-grid>
           </s-stack>
         </div>
       ))}

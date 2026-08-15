@@ -14,9 +14,11 @@ import { buildPriceAdjustmentConfig } from "../utils/price-adjustment";
 import { collectAddonComponentVariants } from "../utils/addon-components";
 import type { BundleUiConfig, ComponentPricing } from "../types";
 import { BundleStatus, BundleType } from "../../../../constants/bundle";
-import { resolveProductPageRenderFilledSlotsAsHorizontalStacked } from "../../../../lib/bundle-config/template-selection";
 import { formatStepCategoriesForRuntime } from "../../../../lib/bundle-config/category-runtime";
 import { resolveShowProductComparedAtPrice } from "../../../../lib/bundle-config/product-page-display";
+import { normalizeShopifyComponentQuantity } from "../utils/component-quantity";
+import { buildCheckoutOfferRuntime } from "../../../checkout-bundle-offers.server";
+import { buildPublicBundleSubscriptionConfig } from "../../../../lib/bundle-subscriptions";
 
 async function ensureBundleParentVariantRequiresComponents(
   admin: ShopifyAdmin,
@@ -69,16 +71,6 @@ function collectStepProductReferences(step: any): Array<{ id: string }> {
   }
 
   return productIds.map((id) => ({ id }));
-}
-
-function normalizeStepMinQuantity(value: unknown): number {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : 0;
-}
-
-function normalizeStepMaxQuantity(value: unknown): number {
-  const parsed = Number.parseInt(String(value), 10);
-  return Number.isFinite(parsed) ? parsed : 0;
 }
 
 function normalizeShopifyGid(value: unknown, resource: "ProductVariant"): string | null {
@@ -138,7 +130,7 @@ function collectCachedStepVariants(
   };
 
   for (const step of Array.isArray(steps) ? steps : []) {
-    const quantity = normalizeStepMinQuantity(step.minQuantity);
+    const quantity = step.minQuantity;
 
     for (const stepProduct of Array.isArray(step.StepProduct) ? step.StepProduct : []) {
       appendProductVariants(stepProduct, quantity);
@@ -206,7 +198,7 @@ export async function updateBundleProductMetafields(
           if (stepProduct.productId && !isUUID(stepProduct.productId)) {
             productIdMap.push({
               productId: stepProduct.productId,
-              stepMinQuantity: normalizeStepMinQuantity(step.minQuantity),
+              stepMinQuantity: step.minQuantity,
               source: 'StepProduct'
             });
           } else if (stepProduct.productId) {
@@ -222,7 +214,7 @@ export async function updateBundleProductMetafields(
           if (product.id && !isUUID(product.id)) {
             productIdMap.push({
               productId: product.id,
-              stepMinQuantity: normalizeStepMinQuantity(step.minQuantity),
+              stepMinQuantity: step.minQuantity,
               source: 'products'
             });
           }
@@ -269,7 +261,7 @@ export async function updateBundleProductMetafields(
                 if (!alreadyAdded) {
                   productIdMap.push({
                     productId,
-                    stepMinQuantity: normalizeStepMinQuantity(step.minQuantity),
+                    stepMinQuantity: step.minQuantity,
                     source: `collection:${handle}`
                   });
                 }
@@ -300,7 +292,7 @@ export async function updateBundleProductMetafields(
           if (p.id && !isUUID(p.id) && !productIdMap.some(item => item.productId === p.id)) {
             productIdMap.push({
               productId: p.id,
-              stepMinQuantity: normalizeStepMinQuantity(step.minQuantity),
+              stepMinQuantity: step.minQuantity,
               source: `StepCategory:${cat.name}`,
             });
           }
@@ -328,7 +320,7 @@ export async function updateBundleProductMetafields(
               if (productId && !isUUID(productId) && !productIdMap.some(item => item.productId === productId)) {
                 productIdMap.push({
                   productId,
-                  stepMinQuantity: normalizeStepMinQuantity(step.minQuantity),
+                  stepMinQuantity: step.minQuantity,
                   source: `StepCategory:${cat.name}:collection:${handle}`,
                 });
               }
@@ -356,14 +348,15 @@ export async function updateBundleProductMetafields(
   ) => {
     if (componentReferences.includes(variantId)) return;
 
+    const componentQuantity = normalizeShopifyComponentQuantity(quantity);
     componentReferences.push(variantId);
-    componentQuantities.push(quantity);
+    componentQuantities.push(componentQuantity);
 
     if (priceCents !== null) {
       componentPricingData.push({
         variantId,
         priceCents,
-        quantity,
+        quantity: componentQuantity,
         title,
         imageUrl,
       });
@@ -430,13 +423,11 @@ export async function updateBundleProductMetafields(
     priceAdjustment.method,
     priceAdjustment.value
   );
+  const publicSubscriptionConfig = buildPublicBundleSubscriptionConfig(
+    bundleConfiguration.bundleSubscriptionConfig,
+  );
 
   // Build bundle_ui_config for widget
-  const bundleDesignTemplateData = bundleConfiguration.bundleDesignTemplateData
-    ?? (bundleConfiguration.bundleType === BundleType.PRODUCT_PAGE && bundleConfiguration.bundleDesignPresetId
-      ? { templateId: bundleConfiguration.bundleDesignPresetId }
-      : null);
-
   const bundleUiConfig: BundleUiConfig = {
     id: bundleConfiguration.id || bundleConfiguration.bundleId, // Widget expects 'id' field
     bundleId: bundleConfiguration.id || bundleConfiguration.bundleId, // Keep for backwards compatibility
@@ -444,10 +435,10 @@ export async function updateBundleProductMetafields(
     description: bundleConfiguration.description || '',
     status: bundleConfiguration.status || BundleStatus.ACTIVE, // Widget needs this for filtering
     bundleType: bundleConfiguration.bundleType || BundleType.PRODUCT_PAGE, // Widget needs this for selection
+    publicNumber: bundleConfiguration.publicNumber ?? null,
     shopifyProductId: bundleConfiguration.shopifyProductId || null, // Product ID for matching
     bundleDesignTemplate: bundleConfiguration.bundleDesignTemplate ?? null,
     bundleDesignPresetId: bundleConfiguration.bundleDesignPresetId ?? null,
-    bundleDesignTemplateData,
     defaultProductsData: bundleConfiguration.defaultProductsData ?? {},
     boxSelection: bundleConfiguration.boxSelection ?? null,
     bundleUpsellConfig: bundleConfiguration.bundleUpsellConfig ?? null,
@@ -456,24 +447,19 @@ export async function updateBundleProductMetafields(
       ? bundleConfiguration.bundleLevelCss
       : null,
     personalizationData: bundleConfiguration.personalizationData ?? null,
+    ...(publicSubscriptionConfig !== null
+      ? { subscription: publicSubscriptionConfig }
+      : {}),
+    checkoutOffers: buildCheckoutOfferRuntime(bundleConfiguration).offers,
     discountDisplayOverride: bundleConfiguration.discountDisplayOverride ?? null,
-    individualSellingPlanSelection: bundleConfiguration.individualSellingPlanSelection ?? {
-      isEnabled: false,
-      showFor: "ALL_PRODUCTS",
-    },
     validateQuantityPerProduct: bundleConfiguration.validateQuantityPerProduct ?? {
       isEnabled: false,
       allowedQuantity: 0,
     },
     productSlotsEnabled: bundleConfiguration.bundleType === "full_page" ? bundleConfiguration.productSlotsEnabled ?? false : false,
-    productSlotIconUrl: bundleConfiguration.bundleType === "full_page" ? bundleConfiguration.productSlotIconUrl ?? null : null,
-    useSingleStepCategoriesAsBundleSteps: bundleConfiguration.useSingleStepCategoriesAsBundleSteps ?? false,
-    renderFilledSlotsAsHorizontalStacked: bundleConfiguration.renderFilledSlotsAsHorizontalStacked
-      ?? resolveProductPageRenderFilledSlotsAsHorizontalStacked(
-        bundleConfiguration.bundleDesignTemplate,
-        bundleDesignTemplateData?.templateId,
-      ),
-    showProductComparedAtPrice: resolveShowProductComparedAtPrice(bundleConfiguration),
+  productSlotIconUrl: bundleConfiguration.bundleType === "full_page" ? bundleConfiguration.productSlotIconUrl ?? null : null,
+  useSingleStepCategoriesAsBundleSteps: bundleConfiguration.useSingleStepCategoriesAsBundleSteps ?? false,
+  showProductComparedAtPrice: resolveShowProductComparedAtPrice(bundleConfiguration),
     bundleVariantId: bundleVariantId, // Bundle parent variant ID for cart transform EXPAND operation
     steps: (bundleConfiguration.steps || []).map((step: any) => ({
       id: step.id,
@@ -481,8 +467,8 @@ export async function updateBundleProductMetafields(
       pageTitle: step.pageTitle ?? null,
       multiLangData: step.multiLangData ?? {},
       position: step.position || 0,
-      minQuantity: normalizeStepMinQuantity(step.minQuantity),
-      maxQuantity: normalizeStepMaxQuantity(step.maxQuantity),
+      minQuantity: step.minQuantity,
+      maxQuantity: step.maxQuantity,
       products: collectStepProductReferences(step),
       collections: Array.isArray(step.collections) ? step.collections : [],
       categories: formatStepCategoriesForRuntime(step, Array.isArray(step.StepProduct) ? step.StepProduct : []),
@@ -501,6 +487,7 @@ export async function updateBundleProductMetafields(
       addonReplaceText: step.addonReplaceText ?? null,
       addonIconUrl: step.addonIconUrl ?? null,
       addonDisplayFree: step.addonDisplayFree === true,
+      addonTiers: Array.isArray(step.addonTiers) ? step.addonTiers : [],
       addonUnlockAfterCompletion: step.addonUnlockAfterCompletion !== false,
       isDefault: step.isDefault || false,
       defaultVariantId: step.defaultVariantId || null,
@@ -533,7 +520,7 @@ export async function updateBundleProductMetafields(
       showDiscountMessaging: bundleConfiguration.pricing?.messages?.showDiscountMessaging || false,
       showFooter: bundleConfiguration.pricing?.display?.showFooter !== false && bundleConfiguration.messaging?.showFooter !== false,
       showDiscountProgressBar: bundleConfiguration.pricing?.display?.showDiscountProgressBar === true || bundleConfiguration.pricing?.showProgressBar === true,
-      displayOptions: bundleConfiguration.pricing?.displayOptions ?? bundleConfiguration.pricing?.messages?.displayOptions ?? null
+      displayOptions: bundleConfiguration.pricing?.displayOptions ?? null
     },
     promoBannerBgImage: bundleConfiguration.promoBannerBgImage ?? null,
     bundleBannerDesktopUrl: bundleConfiguration.bundleBannerDesktopUrl ?? null,

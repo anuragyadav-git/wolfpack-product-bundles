@@ -137,7 +137,7 @@ describe("app.attribution loader — campaign aggregation", () => {
     ]);
   });
 
-  it("returns pixel status separately so the first status card does not wait for analytics", async () => {
+  it("starts pixel status and analytics concurrently for the shared page readiness boundary", async () => {
     getDb().orderAttribution.findMany.mockReset();
     getDb().bundleAnalytics.findMany.mockReset();
     getDb().bundleEngagement.findMany.mockReset();

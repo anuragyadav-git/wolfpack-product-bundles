@@ -4,8 +4,6 @@ import {
   type DefaultProductsData,
 } from "../../../lib/bundle-config/default-products";
 
-export type IndividualSellingPlanShowFor = "ALL_PRODUCTS" | "OOS_PRODUCTS";
-
 export function usePpbBundleSettingsState({ bundle }: { bundle: any }) {
   const [preSelectedProductVariantId, setPreSelectedProductVariantId] =
     useState<string>((bundle as any).preSelectedProductVariantId ?? "");
@@ -54,24 +52,6 @@ export function usePpbBundleSettingsState({ bundle }: { bundle: any }) {
   const originalDefaultProductsDataRef = useRef<DefaultProductsData>(
     initialDefaultProductsData,
   );
-  const [individualSellingPlanEnabled, setIndividualSellingPlanEnabled] =
-    useState<boolean>(
-      (
-        (bundle as any).individualSellingPlanSelection as {
-          isEnabled?: boolean;
-        } | null
-      )?.isEnabled === true,
-    );
-  const [individualSellingPlanShowFor, setIndividualSellingPlanShowFor] =
-    useState<IndividualSellingPlanShowFor>(
-      (
-        (bundle as any).individualSellingPlanSelection as {
-          showFor?: unknown;
-        } | null
-      )?.showFor === "OOS_PRODUCTS"
-        ? "OOS_PRODUCTS"
-        : "ALL_PRODUCTS",
-    );
   const [useSingleStepCategoriesAsBundleSteps, setUseSingleStepCategoriesAsBundleSteps] =
     useState<boolean>(
       (bundle as any).useSingleStepCategoriesAsBundleSteps === true,
@@ -105,10 +85,6 @@ export function usePpbBundleSettingsState({ bundle }: { bundle: any }) {
     defaultProductsData,
     setDefaultProductsData,
     originalDefaultProductsDataRef,
-    individualSellingPlanEnabled,
-    setIndividualSellingPlanEnabled,
-    individualSellingPlanShowFor,
-    setIndividualSellingPlanShowFor,
     useSingleStepCategoriesAsBundleSteps,
     setUseSingleStepCategoriesAsBundleSteps,
   };

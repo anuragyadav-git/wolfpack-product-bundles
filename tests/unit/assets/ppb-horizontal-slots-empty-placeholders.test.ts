@@ -134,10 +134,10 @@ describe('PPB Horizontal Slots empty placeholders', () => {
 
 function createWidget(config = {}) {
   const widget = {
-    selectedBundle: { renderFilledSlotsAsHorizontalStacked: true },
     config,
     _getProductPageTemplateType: () => 'PDP_MODAL',
-    _getProductPageDesignPreset: () => 'MODAL',
+    _getProductPageDesignPreset: () => 'HORIZONTAL_SLOTS',
+    _getProductPageTemplateContract: () => ({ templateType: 'PDP_MODAL', slots: { orientation: 'horizontal' } }),
     openModal: jest.fn(),
   } as any;
   Object.assign(widget, modalSlotTemplateMethods);

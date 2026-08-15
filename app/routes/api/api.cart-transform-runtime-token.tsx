@@ -6,6 +6,7 @@ import {
   buildRuntimeTokenPayload,
   generateCartTransformRuntimeTokenSecret,
   signRuntimeCartToken,
+  validateLiveSellingPlanSelection,
 } from "../../services/cart-transform-runtime-token.server";
 import { getBundleProductVariantId } from "../../utils/variant-lookup.server";
 
@@ -90,8 +91,16 @@ export async function action({ request }: ActionFunctionArgs) {
       selection: {
         components: body?.components,
         addons: body?.addons,
+        subscription: body?.subscription,
       },
     });
+    if (payload.subscription) {
+      await validateLiveSellingPlanSelection(
+        admin as never,
+        payload.subscription,
+        payload.components,
+      );
+    }
     const secret = generateCartTransformRuntimeTokenSecret(shop);
     const token = signRuntimeCartToken(payload, secret);
 

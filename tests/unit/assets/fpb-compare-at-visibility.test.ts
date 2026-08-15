@@ -1,12 +1,9 @@
 import { fullPageProductCardFooterMethods } from "../../../app/assets/widgets/full-page/methods/product-card-footer-methods.js";
 
 describe("FPB compare-at price visibility", () => {
-  it.each([
-    [true, true],
-    [false, false],
-  ])(
-    "honors the persisted storefront flag when it is %s",
-    (showProductComparedAtPrice, expectedVisible) => {
+  it.each([true, false, undefined])(
+    "renders available compare-at data when the stale storefront flag is %s",
+    (showProductComparedAtPrice) => {
       const originalDocument = (global as { document?: unknown }).document;
       let renderedHtml = "";
       (global as { document?: unknown }).document = {
@@ -47,12 +44,57 @@ describe("FPB compare-at price visibility", () => {
           0,
         ) as { html: string };
 
-        expect(card.html.includes("bw-product-card__compare-price")).toBe(
-          expectedVisible,
-        );
+        expect(card.html).toContain("529.00");
+        expect(card.html).toContain("489.00");
       } finally {
         (global as { document?: unknown }).document = originalDocument;
       }
     },
   );
+
+  it("does not fabricate a compare-at price when product data omits it", () => {
+    const originalDocument = (global as { document?: unknown }).document;
+    let renderedHtml = "";
+    (global as { document?: unknown }).document = {
+      createElement: () => ({
+        firstChild: null as null | { html: string },
+        get innerHTML() {
+          return renderedHtml;
+        },
+        set innerHTML(value: string) {
+          renderedHtml = value;
+          this.firstChild = { html: value };
+        },
+      }),
+    };
+
+    try {
+      const card = fullPageProductCardFooterMethods.createProductCard.call(
+        {
+          selectedProducts: [{}],
+          selectedBundle: {
+            variantSelectorEnabled: false,
+            steps: [{}],
+          },
+          getFullPageDesignPreset: () => "STANDARD",
+          buildPaidAddonProductDisplayData: (value: unknown) => value,
+          isVariantOutOfStock: () => false,
+          getProductCardAddButtonText: () => "Add",
+          applyStandardExpandedVariantTitle: () => undefined,
+          attachProductCardListeners: () => undefined,
+        },
+        {
+          id: "variant-regular",
+          title: "Regular product",
+          price: 48900,
+        },
+        0,
+      ) as { html: string };
+
+      expect(card.html).toContain("489.00");
+      expect(card.html).not.toContain("529.00");
+    } finally {
+      (global as { document?: unknown }).document = originalDocument;
+    }
+  });
 });

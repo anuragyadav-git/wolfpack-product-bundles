@@ -1,5 +1,6 @@
 import { processCss } from "../../../../lib/css-sanitizer";
-import { parseIndividualSellingPlanSelection } from "./shared.server";
+import { normalizeFpbUpsellSave } from "../../../../lib/fpb-upsell-config.server";
+import { normalizeBundleSubscriptionConfig } from "../../../../lib/bundle-subscriptions";
 
 function normalizePersonalizationData(personalizationData: any) {
   if (
@@ -71,7 +72,6 @@ export function parseFpbSaveBundleForm(formData: FormData) {
     (formData.get("floatingBadgeText") as string) ?? "";
   const floatingBadgeText = floatingBadgeTextRaw.slice(0, 60);
   const showProductPrices = formData.get("showProductPrices") !== "false";
-  const showCompareAtPrices = formData.get("showCompareAtPrices") === "true";
   const cartRedirectToCheckout =
     formData.get("cartRedirectToCheckout") === "true";
   const allowQuantityChanges =
@@ -102,7 +102,7 @@ export function parseFpbSaveBundleForm(formData: FormData) {
   const bundleUpsellConfigRaw = formData.get("bundleUpsellConfig") as
     | string
     | null;
-  const bundleUpsellConfig = bundleUpsellConfigRaw
+  const clientBundleUpsellConfig = bundleUpsellConfigRaw
     ? JSON.parse(bundleUpsellConfigRaw)
     : null;
   const upsellWidgetEnabled = formData.get("upsellWidgetEnabled") === "true";
@@ -112,6 +112,14 @@ export function parseFpbSaveBundleForm(formData: FormData) {
     (formData.get("upsellWidgetDisplayOn") as string | null) ?? "all";
   const autoSelectBrowsedProduct =
     formData.get("autoSelectBrowsedProduct") === "true";
+  const normalizedUpsell = normalizeFpbUpsellSave({
+    enabled: upsellWidgetEnabled,
+    displayMode: upsellWidgetDisplayMode,
+    displayOn: upsellWidgetDisplayOn,
+    autoSelectBrowsedProduct,
+    config: clientBundleUpsellConfig,
+  });
+  const bundleUpsellConfig = normalizedUpsell.config;
   const bundleBannerDesktopUrlRaw = formData.get("bundleBannerDesktopUrl") as
     | string
     | null;
@@ -143,8 +151,6 @@ export function parseFpbSaveBundleForm(formData: FormData) {
   const validateQuantityPerProduct = validateQuantityPerProductRaw
     ? JSON.parse(validateQuantityPerProductRaw)
     : { isEnabled: false, allowedQuantity: 1 };
-  const individualSellingPlanSelection =
-    parseIndividualSellingPlanSelection(formData);
   const defaultProductsDataRaw = formData.get("defaultProductsData") as
     | string
     | null;
@@ -161,16 +167,21 @@ export function parseFpbSaveBundleForm(formData: FormData) {
   const bundleProductData = formData.get("bundleProduct")
     ? JSON.parse(formData.get("bundleProduct") as string)
     : null;
+  const bundleSubscriptionConfigRaw = formData.get("bundleSubscriptionConfig");
+  const bundleSubscriptionConfig = typeof bundleSubscriptionConfigRaw === "string"
+    ? normalizeBundleSubscriptionConfig(JSON.parse(bundleSubscriptionConfigRaw))
+    : null;
 
   return {
     allowQuantityChanges,
-    autoSelectBrowsedProduct,
+    autoSelectBrowsedProduct: normalizedUpsell.direct.autoSelectBrowsedProduct,
     bundleBannerDesktopUrl,
     bundleBannerMobileUrl,
     bundleDescription,
     bundleLevelCss,
     bundleName,
     bundleProductData,
+    bundleSubscriptionConfig,
     bundleStatus,
     bundleTextConfig,
     bundleUpsellConfig,
@@ -179,7 +190,6 @@ export function parseFpbSaveBundleForm(formData: FormData) {
     discountData,
     floatingBadgeEnabled,
     floatingBadgeText,
-    individualSellingPlanSelection,
     loadingGif,
     maxQtyPerProduct,
     personalizationData,
@@ -188,7 +198,6 @@ export function parseFpbSaveBundleForm(formData: FormData) {
     promoBannerBgImage,
     quantityValidationEnabled,
     searchBarEnabled,
-    showCompareAtPrices,
     showProductPrices,
     showStepTimelineParsed,
     showTextOnAddButton,
@@ -197,9 +206,9 @@ export function parseFpbSaveBundleForm(formData: FormData) {
     templateName,
     textOverrides,
     textOverridesByLocale,
-    upsellWidgetDisplayMode,
-    upsellWidgetDisplayOn,
-    upsellWidgetEnabled,
+    upsellWidgetDisplayMode: normalizedUpsell.direct.upsellWidgetDisplayMode,
+    upsellWidgetDisplayOn: normalizedUpsell.direct.upsellWidgetDisplayOn,
+    upsellWidgetEnabled: normalizedUpsell.direct.upsellWidgetEnabled,
     validateQuantityPerProduct,
     variantSelectorEnabled,
   };

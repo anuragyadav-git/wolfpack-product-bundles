@@ -10,13 +10,35 @@ describe("FPB product modal read-only quick view", () => {
     };
   }
 
+  function createStyleDeclaration() {
+    const values = new Map<string, string>();
+    return {
+      setProperty: (name: string, value: string) => values.set(name, value),
+      removeProperty: (name: string) => values.delete(name),
+    };
+  }
+
   beforeEach(() => {
     jest.resetModules();
     const bodyClassList = createClassList();
-    (globalThis as any).window = {};
+    const rootClassList = createClassList();
+    (globalThis as any).window = {
+      scrollY: 240,
+      scrollBy: (_x: number, y: number) => {
+        if (!rootClassList.contains("modal-open")) {
+          (globalThis as any).window.scrollY += y;
+        }
+      },
+    };
     (globalThis as any).document = {
       body: {
         classList: bodyClassList as any,
+        style: createStyleDeclaration(),
+        scrollTop: 240,
+      },
+      documentElement: {
+        classList: rootClassList as any,
+        scrollTop: 240,
       },
     };
   });
@@ -32,9 +54,7 @@ describe("FPB product modal read-only quick view", () => {
   }
 
   async function createModal(widget: ReturnType<typeof buildWidget>) {
-    await import("../../../app/assets/bundle-modal-component.js");
-    const Modal = ((globalThis as typeof globalThis & { window: { BundleProductModal: new (widget: unknown) => any } }).window)
-      .BundleProductModal;
+    const { BundleProductModal: Modal } = await import("../../../app/assets/bundle-modal-component.js");
     class TestModal extends Modal {
       init() {
         this.modalElement = {
@@ -53,9 +73,7 @@ describe("FPB product modal read-only quick view", () => {
   }
 
   async function createModalForPopulate(widget: ReturnType<typeof buildWidget>) {
-    await import("../../../app/assets/bundle-modal-component.js");
-    const Modal = ((globalThis as typeof globalThis & { window: { BundleProductModal: new (widget: unknown) => any } }).window)
-      .BundleProductModal;
+    const { BundleProductModal: Modal } = await import("../../../app/assets/bundle-modal-component.js");
     const elements: Record<string, any> = {
       "modal-product-title": { textContent: "" },
       "modal-product-description": { textContent: "", innerHTML: "" },
@@ -64,6 +82,12 @@ describe("FPB product modal read-only quick view", () => {
     (globalThis as typeof globalThis & { document: any }).document = {
       body: {
         classList: createClassList(),
+        style: createStyleDeclaration(),
+        scrollTop: 0,
+      },
+      documentElement: {
+        classList: createClassList(),
+        scrollTop: 0,
       },
       getElementById: (id: string) => elements[id] ?? null,
     };
@@ -131,6 +155,21 @@ describe("FPB product modal read-only quick view", () => {
     expect(isActive).toBe(false);
   });
 
+  it("prevents the storefront behind the product modal from scrolling", async () => {
+    const widget = buildWidget();
+    const modal = await createModal(widget);
+
+    modal.open(product, { id: "step-1" }, { readOnly: true });
+    window.scrollBy(0, 100);
+
+    expect(window.scrollY).toBe(240);
+
+    modal.close();
+    window.scrollBy(0, 100);
+
+    expect(window.scrollY).toBe(340);
+  });
+
   it("renders Shopify product descriptionHtml as modal HTML", async () => {
     const widget = buildWidget();
     const { modal, elements } = await createModalForPopulate(widget);
@@ -164,6 +203,53 @@ describe("FPB product modal read-only quick view", () => {
       "Plain <strong>text</strong> fallback.",
     );
     expect(elements["modal-product-description"].innerHTML).toBe("");
+  });
+
+  it("shows and cycles carousel navigation for multiple distinct product images", async () => {
+    const { BundleProductModal: Modal } = await import("../../../app/assets/bundle-modal-component.js");
+    const mainImage = { src: "", alt: "" };
+    const imageFrame = { classList: { toggle: jest.fn() } };
+    const navButtons = [{ hidden: true }, { hidden: true }];
+    (globalThis as typeof globalThis & { document: any }).document = {
+      getElementById: (id: string) => id === "modal-main-image" ? mainImage : null,
+    };
+
+    class TestModal extends Modal {
+      init() {
+        this.modalElement = {
+          querySelector: () => imageFrame,
+          querySelectorAll: () => navButtons,
+        };
+      }
+    }
+
+    const modal = new TestModal(buildWidget());
+    modal.currentProduct = {
+      ...product,
+      images: [
+        { src: "https://cdn.example/product.png" },
+        { src: "https://cdn.example/detail.png" },
+      ],
+    };
+    modal.loadImage();
+
+    expect(navButtons.every((button) => button.hidden === false)).toBe(true);
+    expect(mainImage.src).toBe("https://cdn.example/product.png");
+
+    modal.showAdjacentImage(1);
+    expect(mainImage.src).toBe("https://cdn.example/detail.png");
+
+    modal.showAdjacentImage(1);
+    expect(mainImage.src).toBe("https://cdn.example/product.png");
+  });
+
+  it("maps intentional horizontal image swipes to carousel direction", async () => {
+    const { getProductCarouselSwipeDirection } = await import("../../../app/assets/bundle-modal-component.js");
+
+    expect(getProductCarouselSwipeDirection({ distanceX: -64, distanceY: 8 })).toBe(1);
+    expect(getProductCarouselSwipeDirection({ distanceX: 64, distanceY: 8 })).toBe(-1);
+    expect(getProductCarouselSwipeDirection({ distanceX: 20, distanceY: 2 })).toBe(0);
+    expect(getProductCarouselSwipeDirection({ distanceX: -64, distanceY: 80 })).toBe(0);
   });
 
   it("clears stale variant summary when opening a single-variant product", async () => {

@@ -7,7 +7,7 @@ const { PricingCalculator } = require('../../../app/assets/widgets/shared/pricin
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { CurrencyManager } = require('../../../app/assets/widgets/shared/currency-manager.js');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const { ToastManager } = require('../../../app/assets/bundle-widget-components.js');
+const { ToastManager } = require('../../../app/assets/widgets/shared/toast-manager.js');
 
 (globalThis as any).PricingCalculator = PricingCalculator;
 (globalThis as any).CurrencyManager = CurrencyManager;

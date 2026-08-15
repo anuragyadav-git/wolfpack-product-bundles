@@ -18,7 +18,6 @@ export type {
   BundleStatusSectionProps,
   ActionResponse,
   SyncProductResponse,
-  PagesResponse,
   ThemeTemplatesResponse,
   WidgetValidationResponse,
 } from "../../../types/bundle-configure";
@@ -35,13 +34,12 @@ export interface BundlePricing {
 
 export interface BundleData {
   id: string;
+  publicNumber: number | null;
   name: string;
   description?: string;
   shopId: string;
   shopifyProductId?: string;
   shopifyProductHandle?: string;
-  shopifyPageHandle?: string;
-  shopifyPageId?: string;
   bundleType: string;
   status: BundleStatus;
   templateName?: string;
@@ -60,6 +58,8 @@ export interface LoaderData {
   blockHandle: string;
   configureMode?: "create" | "edit";
   showFirstLoadTour?: boolean;
+  shopCurrencyCode: string;
+  shopLocales: { locale: string; name: string; primary: boolean }[];
 }
 
 export interface SaveBundleResponse extends ActionResponse {

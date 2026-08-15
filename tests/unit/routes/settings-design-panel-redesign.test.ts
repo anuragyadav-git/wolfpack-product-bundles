@@ -12,6 +12,10 @@ import {
   setDesignPreviewTemplate,
   setDesignPreviewViewport,
   type DesignPreviewState,
+  createPreviewInteractionState,
+  updatePreviewProductQuantity,
+  advancePreviewProgress,
+  togglePreviewMobileSummary,
 } from "../../../app/routes/app/app.settings/DesignLivePreview";
 import { buildDesignPreviewTheme } from "../../../app/routes/app/app.settings/design-preview-model";
 
@@ -20,6 +24,19 @@ jest.mock("react-i18next", () => ({
 }));
 
 describe("Settings Design preview state", () => {
+  it("updates local product, progress, and mobile-summary preview interactions", () => {
+    const initial = createPreviewInteractionState();
+    const added = updatePreviewProductQuantity(initial, "third", 1);
+    const incremented = updatePreviewProductQuantity(added, "third", 1);
+    const progressed = advancePreviewProgress(incremented);
+    const expanded = togglePreviewMobileSummary(progressed);
+
+    expect(added.quantities.third).toBe(1);
+    expect(incremented.quantities.third).toBe(2);
+    expect(progressed.progressStep).toBe(1);
+    expect(expanded.isMobileSummaryOpen).toBe(true);
+    expect(togglePreviewMobileSummary(expanded).isMobileSummaryOpen).toBe(false);
+  });
   it("applies expert preview overrides only while expert controls are enabled", () => {
     const fieldValues = {
       "Primary Color": "#123456",
@@ -30,12 +47,12 @@ describe("Settings Design preview state", () => {
     expect(buildDesignPreviewTheme(fieldValues, true)["--preview-product-button-bg"]).toBe("#abcdef");
   });
 
-  it("uses Landing Page Standard desktop Builder defaults", () => {
+  it("uses Landing Page Standard desktop Product card defaults", () => {
     expect(createDesignPreviewState()).toEqual({
       bundleType: "full_page",
       templateKey: "standard",
       viewport: "desktop",
-      surface: "builder",
+      surface: "product-card",
     });
   });
 
@@ -72,7 +89,7 @@ describe("Settings Design preview state", () => {
       bundleType: "full_page",
       templateKey: "standard",
       viewport: "mobile",
-      surface: "builder",
+      surface: "product-card",
     });
   });
 
@@ -81,7 +98,7 @@ describe("Settings Design preview state", () => {
       createDesignPreviewState("product_page"),
       "product-picker",
     );
-    expect(slotState.surface).toBe("builder");
+    expect(slotState.surface).toBe("product-card");
 
     const horizontalSlots = setDesignPreviewTemplate(
       createDesignPreviewState("product_page"),
@@ -90,7 +107,7 @@ describe("Settings Design preview state", () => {
     const pickerState = setDesignPreviewSurface(horizontalSlots, "product-picker");
     expect(pickerState.surface).toBe("product-picker");
     expect(setDesignPreviewTemplate(pickerState, "vertical-slots").surface).toBe("product-picker");
-    expect(setDesignPreviewTemplate(pickerState, "product-list").surface).toBe("builder");
+    expect(setDesignPreviewTemplate(pickerState, "product-list").surface).toBe("product-card");
   });
 
   it("switches viewport and surface without changing the selected template", () => {
@@ -125,7 +142,7 @@ describe("DesignLivePreview", () => {
           bundleType: "product_page",
           templateKey: "horizontal-slots",
           viewport: "desktop",
-          surface: "builder",
+          surface: "product-slots",
         },
       }),
     );
@@ -151,15 +168,15 @@ describe("DesignLivePreview", () => {
               bundleType: template.bundleType,
               templateKey: template.key,
               viewport,
-              surface: "builder",
+              surface: template.slotOrientation ? "product-slots" : "product-card",
             },
           }),
         );
 
         expect(view).toContain(`data-template-key="${template.key}"`);
         expect(view).toContain(`data-preview-viewport="${viewport}"`);
-        expect(view).toContain(`data-preview-surface="builder"`);
-        expect(view).toContain(`data-preview-region="${template.sceneRegions.desktop[0]}"`);
+        expect(view).toContain(`data-preview-surface="${template.slotOrientation ? "product-slots" : "product-card"}"`);
+        expect(view).toContain(`data-preview-region="${template.slotOrientation ? `${template.slotOrientation}-slots` : template.productCard.mode === "row" ? "product-rows" : "product-grid"}"`);
         expect(view).not.toContain("<iframe");
         expect(view).not.toContain("http://");
         expect(view).not.toContain("https://");
@@ -168,6 +185,11 @@ describe("DesignLivePreview", () => {
   );
 
   it.each([
+    ["product-list", "bundle-header"],
+    ["standard", "navigation"],
+    ["classic", "categories"],
+    ["product-grid", "product-card"],
+    ["vertical-slots", "product-slots"],
     ["horizontal-slots", "product-picker"],
     ["product-list", "cart-summary"],
     ["standard", "loading"],
@@ -190,6 +212,27 @@ describe("DesignLivePreview", () => {
 
     expect(view).toContain(`data-preview-surface="${surface}"`);
     expect(view).toContain(`settingsDcp.preview.surfaceSelector.${surface}`);
+  });
+
+  it("renders a selected component without composing the whole builder", () => {
+    const view = renderToStaticMarkup(
+      React.createElement(DesignLivePreview, {
+        fieldValues: {},
+        isExpertControlsEnabled: false,
+        initialState: {
+          bundleType: "full_page",
+          templateKey: "standard",
+          viewport: "desktop",
+          surface: "product-card",
+        },
+      }),
+    );
+
+    expect(view).toContain('data-preview-region="product-grid"');
+    expect(view).not.toContain('data-preview-region="timeline"');
+    expect(view).not.toContain('data-preview-region="category-accordion"');
+    expect(view).not.toContain('data-preview-region="summary-sidebar"');
+    expect(view).not.toContain('value="builder"');
   });
 
   it("renders optimized local fixture media without network or shopping work", () => {

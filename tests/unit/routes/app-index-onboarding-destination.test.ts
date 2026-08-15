@@ -1,5 +1,5 @@
 import {
-  AppRouteSkeleton,
+  AppRouteLoadingWorkspace,
   getInitialAppDestination,
 } from "../../../app/routes/app/app._index";
 import React from "react";
@@ -26,11 +26,11 @@ describe("initial app destination", () => {
     expect(getInitialAppDestination(false)).toBeNull();
   });
 
-  it("renders a stable route-shaped loading state while client routing resolves", () => {
-    const markup = renderToStaticMarkup(React.createElement(AppRouteSkeleton));
+  it("renders the shared loading bar and workspace message while client routing resolves", () => {
+    const markup = renderToStaticMarkup(React.createElement(AppRouteLoadingWorkspace));
 
-    expect(markup).toContain('aria-label="Loading Wolfpack Product Bundles"');
-    expect(markup).toContain('aria-busy="true"');
+    expect(markup).toContain('role="progressbar"');
+    expect(markup).toContain('aria-label="Loading Dashboard"');
     expect(markup).toContain("Loading your workspace");
   });
 });

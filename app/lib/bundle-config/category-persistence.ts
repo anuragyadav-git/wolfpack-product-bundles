@@ -19,15 +19,10 @@ function objectRecord(value: unknown): Record<string, unknown> | null {
 }
 
 export function buildStepCategoryCreateInput(category: Record<string, unknown>, index: number) {
-  const categoryId = stringValue(category.categoryId) ?? stringValue(category.id);
-  const categoryRank = numberValue(category.categoryRank);
-  const sortOrder = numberValue(category.sortOrder) ?? categoryRank ?? index;
+  const categoryId = stringValue(category.id);
+  const sortOrder = numberValue(category.sortOrder) ?? index;
   const products = asObjectArray(category.products);
-  const selectedProducts = asObjectArray(category.selectedProducts);
-  const collectionsData = asObjectArray(category.collectionsData);
-  const collectionsSelectedData = asObjectArray(category.collectionsSelectedData);
-  const explicitCollections = asObjectArray(category.collections);
-  const collections = explicitCollections.length > 0 ? explicitCollections : collectionsSelectedData;
+  const collections = asObjectArray(category.collections);
 
   return {
     ...(categoryId ? { id: categoryId } : {}),
@@ -35,12 +30,8 @@ export function buildStepCategoryCreateInput(category: Record<string, unknown>, 
     title: stringValue(category.title),
     subTitle: stringValue(category.subTitle),
     sortOrder,
-    categoryRank,
     products,
-    selectedProducts,
     collections,
-    collectionsData,
-    collectionsSelectedData,
     conditions: asObjectArray(category.conditions),
     categoryBanner: stringValue(category.categoryBanner),
     categoryImg: stringValue(category.categoryImg),

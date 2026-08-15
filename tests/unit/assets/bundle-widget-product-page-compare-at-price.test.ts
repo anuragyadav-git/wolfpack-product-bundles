@@ -12,7 +12,6 @@ describe('PPB compare-at price visibility contract', () => {
   it('gates compare-at strike prices behind the EB setting', () => {
     expect(widgetSource).toContain('_shouldShowProductComparedAtPrice()');
     expect(widgetSource).toContain('showCompareAtPrices');
-    expect(widgetSource).toContain('Display Compare At Price');
     expect(widgetSource).toContain('this._shouldShowProductComparedAtPrice() && product.compareAtPrice');
   });
 

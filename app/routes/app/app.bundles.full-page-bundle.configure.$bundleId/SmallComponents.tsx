@@ -5,6 +5,7 @@ import {
   HELP_TOOLTIPS,
   type HelpTooltipKey,
 } from "../../../constants/help-tooltips";
+import { suppressInfoIconPointerActivation } from "../../../lib/admin-info-icon-interaction";
 import fullPageBundleStyles from "../../../styles/routes/full-page-bundle-configure.module.css";
 
 export function SettingsRow({
@@ -90,6 +91,8 @@ export function RichHelpTooltip({
         aria-label={
           accessibilityLabel || tooltip.accessibilityLabel || label || title
         }
+        onPointerDown={suppressInfoIconPointerActivation}
+        onClick={suppressInfoIconPointerActivation}
       >
         <s-icon type={(icon || "info") as any} />
         {label && (
@@ -178,6 +181,8 @@ export function QuestionHelpTooltip({
         role="img"
         tabIndex={0}
         aria-label={tooltip.accessibilityLabel || title || description}
+        onPointerDown={suppressInfoIconPointerActivation}
+        onClick={suppressInfoIconPointerActivation}
       >
         <s-icon type="info" />
       </span>

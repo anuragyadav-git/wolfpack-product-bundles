@@ -1,0 +1,163 @@
+{
+  "schema_version": 1,
+  "job_id": "fpb-classic-summary-20260804",
+  "revision": 1,
+  "status": "complete",
+  "locked": [
+    {
+      "id": "decision-001",
+      "question": "Should the target preserve the Agent fixture's product and business semantics?",
+      "options_considered": [
+        "preserve",
+        "change"
+      ],
+      "recommendation": "preserve",
+      "selected_value": "Preserve the same fixture configuration and business semantics.",
+      "rationale": "The user required the EB fixture to match the application fixture.",
+      "evidence_ids": [
+        "component-brief.md"
+      ],
+      "status": "locked",
+      "approved_by": "Aditya Awasthi",
+      "approved_at": "2026-08-04",
+      "revision_introduced": 1,
+      "affected_artifacts": [
+        "state-matrix.md",
+        "interaction-contract.md"
+      ]
+    },
+    {
+      "id": "decision-003",
+      "question": "Who captures and stores the reference screenshots?",
+      "options_considered": [
+        "user capture",
+        "design director capture"
+      ],
+      "recommendation": "design director capture",
+      "selected_value": "The design director captures viewport-only storefront screenshots in the design-job directory.",
+      "rationale": "The user explicitly requested self-capture without browser chrome.",
+      "evidence_ids": [
+        "screenshot-inventory.yaml"
+      ],
+      "status": "locked",
+      "approved_by": "Aditya Awasthi",
+      "approved_at": "2026-08-04",
+      "revision_introduced": 1,
+      "affected_artifacts": [
+        "screenshot-inventory.yaml"
+      ]
+    },
+    {
+      "id": "decision-004",
+      "question": "Which stores provide current and target evidence?",
+      "options_considered": [
+        "Agent current and Yash target"
+      ],
+      "recommendation": "Agent current and Yash target",
+      "selected_value": "Agent provides current desktop and mobile; Yash-wolfpack bundle 2 provides target desktop.",
+      "rationale": "The user assigned the evidence sources.",
+      "evidence_ids": [
+        "screenshot-inventory.yaml"
+      ],
+      "status": "locked",
+      "approved_by": "Aditya Awasthi",
+      "approved_at": "2026-08-04",
+      "revision_introduced": 1,
+      "affected_artifacts": [
+        "screenshot-inventory.yaml",
+        "visual-audit.md"
+      ]
+    },
+    {
+      "id": "decision-005",
+      "question": "May the Agent fixture be changed from Standard to Classic?",
+      "options_considered": [
+        "leave Standard",
+        "change to Classic"
+      ],
+      "recommendation": "change to Classic",
+      "selected_value": "The design director has authority over all fixtures.",
+      "rationale": "The user explicitly granted fixture authority.",
+      "evidence_ids": [
+        "screenshot-inventory.yaml"
+      ],
+      "status": "locked",
+      "approved_by": "Aditya Awasthi",
+      "approved_at": "2026-08-04",
+      "revision_introduced": 1,
+      "affected_artifacts": [
+        "screenshot-inventory.yaml",
+        "visual-audit.md"
+      ]
+    },
+    {
+      "id": "decision-006",
+      "question": "Which redesign direction should govern the FPB Classic summary contract?",
+      "options_considered": [
+        "Direction A",
+        "Direction B",
+        "Direction C"
+      ],
+      "recommendation": "Direction A",
+      "selected_value": "Direction A \u2014 Calm Review Panel.",
+      "rationale": "It improves review hierarchy while preserving Wolfpack semantics and limiting sibling risk.",
+      "evidence_ids": [
+        "visual-audit.md",
+        "direction-comparison.md"
+      ],
+      "status": "locked",
+      "approved_by": "Aditya Awasthi",
+      "approved_at": "2026-08-04T09:33:44Z",
+      "revision_introduced": 1,
+      "affected_artifacts": [
+        "component-anatomy.md",
+        "state-matrix.md",
+        "responsive-contract.md",
+        "interaction-contract.md",
+        "design-tokens.json"
+      ]
+    },
+    {
+      "id": "decision-007",
+      "question": "Should the mobile/tablet tray remain the summary replacement below 1024px of available widget width?",
+      "options_considered": [
+        "retain legacy 768px boundary",
+        "use 1024px available-width boundary"
+      ],
+      "recommendation": "use 1024px available-width boundary",
+      "selected_value": "Tray below 1024px; desktop sidebar at 1024px and above.",
+      "rationale": "This removes the current 768\u20131023px ownership gap and preserves a content-safe sidebar.",
+      "evidence_ids": [
+        "responsive-contract.md",
+        "component-anatomy.md"
+      ],
+      "status": "locked",
+      "approved_by": "Aditya Awasthi",
+      "approved_at": "2026-08-04T09:42:38Z",
+      "revision_introduced": 1,
+      "affected_artifacts": [
+        "responsive-contract.md",
+        "interaction-contract.md",
+        "browser-test-plan.yaml"
+      ]
+    }
+  ],
+  "assumptions": [],
+  "rejected": [],
+  "open": [],
+  "superseded": [],
+  "decision_shape": {
+    "id": "",
+    "question": "",
+    "options_considered": [],
+    "recommendation": "",
+    "selected_value": "",
+    "rationale": "",
+    "evidence_ids": [],
+    "status": "open",
+    "approved_by": "",
+    "approved_at": "",
+    "revision_introduced": 1,
+    "affected_artifacts": []
+  }
+}

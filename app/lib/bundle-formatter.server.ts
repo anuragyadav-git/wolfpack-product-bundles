@@ -3,7 +3,6 @@
  *
  * Used by:
  *  - app/routes/api/api.bundle.$bundleId[.]json.tsx  (proxy API response)
- *  - app/services/widget-installation/widget-full-page-bundle.server.ts (page metafield cache)
  *
  * Converts a Prisma bundle (with steps + StepProduct + pricing) into the
  * JSON shape the widget expects.
@@ -11,7 +10,10 @@
 
 import { formatStepCategoriesForRuntime } from "./bundle-config/category-runtime";
 import { resolveShowProductComparedAtPrice } from "./bundle-config/product-page-display";
-import { resolveProductPageRenderFilledSlotsAsHorizontalStacked } from "./bundle-config/template-selection";
+import {
+  buildPublicBundleSubscriptionConfig,
+  type BundleSubscriptionConfigV1,
+} from "./bundle-subscriptions";
 
 /** Convert a Shopify GID to its numeric ID for storefront cart operations. */
 function extractNumericId(gid: string): string {
@@ -27,7 +29,6 @@ export interface FormattedBundle {
   bundleType: string;
   bundleDesignTemplate: string | null;
   bundleDesignPresetId: string | null;
-  bundleDesignTemplateData: { templateId: string } | null;
   loadingGif: string | null;
   defaultProductsData: Record<string, unknown>;
   boxSelection: Record<string, unknown> | null;
@@ -38,13 +39,11 @@ export interface FormattedBundle {
   bundleBannerMobileUrl: string | null;
   personalizationData: Record<string, unknown> | null;
   discountDisplayOverride: Record<string, unknown> | null;
-  individualSellingPlanSelection: Record<string, unknown>;
   validateQuantityPerProduct: Record<string, unknown>;
   productSlotsEnabled: boolean;
   productSlotIconUrl: string | null;
   variantSelectorEnabled: boolean;
   useSingleStepCategoriesAsBundleSteps: boolean;
-  renderFilledSlotsAsHorizontalStacked: boolean | null;
   shopifyProductId: string | null;
   steps: FormattedStep[];
   pricing: FormattedPricing | null;
@@ -57,6 +56,7 @@ export interface FormattedBundle {
   // Per-bundle text overrides
   textOverrides: Record<string, string> | null;
   textOverridesByLocale: Record<string, Record<string, string>> | null;
+  subscription: BundleSubscriptionConfigV1 | null;
 }
 
 interface FormattedStep {
@@ -79,6 +79,11 @@ interface FormattedStep {
   autoNextStepOnConditionMet: boolean;
   isFreeGift: boolean;
   freeGiftName: string | null;
+  addonLabel: string | null;
+  addonTitle: string | null;
+  addonDisplayFree: boolean;
+  addonTiers: unknown[];
+  addonUnlockAfterCompletion: boolean;
   isDefault: boolean;
   defaultVariantId: string | null;
   stepImage: string | null;
@@ -111,6 +116,7 @@ interface FormattedPricing {
   rules: unknown[];
   showFooter: boolean;
   messages: unknown;
+  displayOptions: unknown;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -122,9 +128,7 @@ function getCategorySourceProducts(step: any): any[] {
   if (!Array.isArray(step.StepCategory)) return [];
 
   return step.StepCategory.flatMap((category: any) => {
-    const categoryProducts = Array.isArray(category?.products) ? category.products : [];
-    const selectedProducts = Array.isArray(category?.selectedProducts) ? category.selectedProducts : [];
-    return [...categoryProducts, ...selectedProducts];
+    return Array.isArray(category?.products) ? category.products : [];
   });
 }
 
@@ -167,13 +171,13 @@ function getProductId(product: any): string {
 }
 
 function resolveBundleDesignTemplate(bundle: any): string | null {
-  if (bundle.bundleDesignTemplate) return bundle.bundleDesignTemplate;
-  return bundle.bundleType === "full_page" ? "FBP_SIDE_FOOTER" : null;
+  if (bundle?.bundleDesignTemplate) return bundle.bundleDesignTemplate;
+  return null;
 }
 
 function resolveBundleDesignPresetId(bundle: any): string | null {
-  if (bundle.bundleDesignPresetId) return bundle.bundleDesignPresetId;
-  return bundle.bundleType === "full_page" ? "STANDARD" : null;
+  if (bundle?.bundleDesignPresetId) return bundle.bundleDesignPresetId;
+  return null;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -246,6 +250,11 @@ export function formatBundleForWidget(bundle: any): FormattedBundle {
       autoNextStepOnConditionMet: step.autoNextStepOnConditionMet === true,
       isFreeGift: step.isFreeGift ?? false,
       freeGiftName: step.freeGiftName ?? null,
+      addonLabel: step.addonLabel ?? null,
+      addonTitle: step.addonTitle ?? null,
+      addonDisplayFree: step.addonDisplayFree === true,
+      addonTiers: Array.isArray(step.addonTiers) ? step.addonTiers : [],
+      addonUnlockAfterCompletion: step.addonUnlockAfterCompletion !== false,
       isDefault: step.isDefault ?? false,
       defaultVariantId: step.defaultVariantId ?? null,
       stepImage: step.stepImage ?? step.timelineIconUrl ?? null,
@@ -255,9 +264,6 @@ export function formatBundleForWidget(bundle: any): FormattedBundle {
 
   const bundleDesignTemplate = resolveBundleDesignTemplate(bundle);
   const bundleDesignPresetId = resolveBundleDesignPresetId(bundle);
-  const bundleDesignTemplateData = bundle.bundleType === "product_page" && bundleDesignPresetId
-    ? { templateId: bundleDesignPresetId }
-    : null;
 
   return {
     id: bundle.id,
@@ -267,7 +273,6 @@ export function formatBundleForWidget(bundle: any): FormattedBundle {
     bundleType: bundle.bundleType,
     bundleDesignTemplate,
     bundleDesignPresetId,
-    bundleDesignTemplateData,
     loadingGif: bundle.loadingGif ?? null,
     defaultProductsData: (bundle.defaultProductsData as Record<string, unknown> | null) ?? {},
     boxSelection: (bundle.boxSelection as Record<string, unknown> | null) ?? null,
@@ -280,23 +285,15 @@ export function formatBundleForWidget(bundle: any): FormattedBundle {
     bundleBannerMobileUrl: bundle.bundleBannerMobileUrl ?? null,
     personalizationData: (bundle.personalizationData as Record<string, unknown> | null) ?? null,
     discountDisplayOverride: (bundle.discountDisplayOverride as Record<string, unknown> | null) ?? null,
-    individualSellingPlanSelection: (bundle.individualSellingPlanSelection as Record<string, unknown> | null) ?? {
-      isEnabled: false,
-      showFor: "ALL_PRODUCTS",
-    },
     validateQuantityPerProduct: (bundle.validateQuantityPerProduct as Record<string, unknown> | null) ?? {
       isEnabled: false,
       allowedQuantity: 1,
     },
     productSlotsEnabled: bundle.bundleType === "full_page" ? bundle.productSlotsEnabled ?? false : false,
     productSlotIconUrl: bundle.bundleType === "full_page" ? bundle.productSlotIconUrl ?? null : null,
-    variantSelectorEnabled: bundle.variantSelectorEnabled ?? true,
-    useSingleStepCategoriesAsBundleSteps: bundle.useSingleStepCategoriesAsBundleSteps ?? false,
-    renderFilledSlotsAsHorizontalStacked: resolveProductPageRenderFilledSlotsAsHorizontalStacked(
-      bundle.bundleDesignTemplate,
-      bundleDesignTemplateData?.templateId,
-    ),
-    shopifyProductId: bundle.shopifyProductId,
+  variantSelectorEnabled: bundle.variantSelectorEnabled ?? true,
+  useSingleStepCategoriesAsBundleSteps: bundle.useSingleStepCategoriesAsBundleSteps ?? false,
+  shopifyProductId: bundle.shopifyProductId,
     steps,
     pricing: bundle.pricing
       ? {
@@ -305,6 +302,7 @@ export function formatBundleForWidget(bundle: any): FormattedBundle {
           rules: bundle.pricing.rules ?? [],
           showFooter: bundle.pricing.showFooter,
           messages: bundle.pricing.messages ?? {},
+          displayOptions: bundle.pricing.displayOptions ?? null,
         }
       : null,
     showProductPrices: bundle.showProductPrices ?? true,
@@ -314,5 +312,8 @@ export function formatBundleForWidget(bundle: any): FormattedBundle {
     showTextOnAddButton: bundle.showTextOnAddButton ?? false,
     textOverrides: (bundle.textOverrides as Record<string, string> | null) ?? null,
     textOverridesByLocale: (bundle.textOverridesByLocale as Record<string, Record<string, string>> | null) ?? null,
+    subscription: buildPublicBundleSubscriptionConfig(
+      bundle.bundleSubscriptionConfig,
+    ),
   };
 }

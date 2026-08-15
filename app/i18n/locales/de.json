@@ -8,6 +8,9 @@
     "pricing": "Preise",
     "events": "Updates und FAQs"
   },
+  "integrations": {
+    "requestMessage": "Hallo, ich möchte Unterstützung für eine neue Integration anfragen."
+  },
   "dashboard": {
     "title": "Dashboard: Wolfpack Bundle Builder",
     "subtitle": "Zugriff auf Ihre Bundles, Kundensupport und mehr.",
@@ -84,7 +87,6 @@
       "previewUnavailable": "Bundle speichern für Vorschau",
       "cloneBundle": "Bundle duplizieren",
       "deleteBundle": "Bundle löschen",
-      "confirmClone": "Möchten Sie dieses Bundle wirklich duplizieren?",
       "cloneSuccess": "Bundle erfolgreich dupliziert",
       "deleteSuccess": "Bundle gelöscht",
       "themeEditorUnavailable": "Der Theme-Editor-Link ist für diesen Shop nicht verfügbar."

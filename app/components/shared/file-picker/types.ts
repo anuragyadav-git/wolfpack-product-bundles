@@ -9,11 +9,14 @@ export interface FilePickerProps {
   label?: string;
   hint?: string;
   uploadLabel?: string;
+  showUploadButton?: boolean;
   triggerIcon?: "desktop" | "mobile";
   uploadButtonAction?: "upload" | "openPicker";
   fitPreviewToTrigger?: boolean;
   maxUploadBytes?: number;
   maxUploadErrorMessage?: string;
+  acceptedTypes?: string;
+  invalidTypeErrorMessage?: string;
   autoOpen?: boolean;
   onClose?: () => void;
 }

@@ -24,8 +24,7 @@ export type {
   BundleUiStep,
   BundleUiPricing,
   BundleUiPricingRule,
-  BundleUiMessaging,
-  ComponentParentsData
+  BundleUiMessaging
 } from "./metafield-sync";
 
 // Re-export utilities
@@ -41,9 +40,5 @@ export {
 // Re-export operations
 export {
   ensureVariantBundleMetafieldDefinitions,
-  ensurePageBundleIdMetafieldDefinition,
-  ensureCustomPageBundleIdDefinition,
-  ensureCustomPageBundleConfigDefinition,
-  updateBundleProductMetafields,
-  updateComponentProductMetafields
+  updateBundleProductMetafields
 } from "./metafield-sync";

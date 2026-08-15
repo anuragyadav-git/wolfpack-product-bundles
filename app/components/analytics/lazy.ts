@@ -1,8 +1,8 @@
 /**
  * Lazy wrappers around the analytics components that depend on recharts.
  *
- * Only EngagementPulse + RevenueAttribution touch recharts (directly + via
- * shared/KpiTile). Lazy-loading them keeps `vendor-charts` off the critical
+ * BundleMetricChart touches recharts directly. Lazy-loading it keeps
+ * `vendor-charts` off the critical
  * path for the rest of the admin and defers its parse cost on /app/attribution
  * until after the shell paints.
  *
@@ -15,10 +15,6 @@
 
 import { lazy } from "react";
 
-export const LazyEngagementPulse = lazy(() =>
-  import("./EngagementPulse").then((m) => ({ default: m.EngagementPulse })),
-);
-
-export const LazyRevenueAttribution = lazy(() =>
-  import("./RevenueAttribution").then((m) => ({ default: m.RevenueAttribution })),
+export const LazyBundleMetricChart = lazy(() =>
+  import("./BundleMetricChart").then((m) => ({ default: m.BundleMetricChart })),
 );

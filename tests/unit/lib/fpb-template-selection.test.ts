@@ -1,14 +1,14 @@
 import { resolveFpbTemplateSelection } from "../../../app/lib/fpb-template-selection";
 
 describe("resolveFpbTemplateSelection", () => {
-  it("defaults full-page bundles without saved template fields to Standard", () => {
+  it("preserves null template fields for full-page bundles", () => {
     expect(resolveFpbTemplateSelection({
       bundleType: "full_page",
       bundleDesignTemplate: null,
       bundleDesignPresetId: null,
     })).toEqual({
-      bundleDesignTemplate: "FBP_SIDE_FOOTER",
-      bundleDesignPresetId: "STANDARD",
+      bundleDesignTemplate: null,
+      bundleDesignPresetId: null,
     });
   });
 
@@ -18,8 +18,8 @@ describe("resolveFpbTemplateSelection", () => {
       bundleDesignTemplate: "",
       bundleDesignPresetId: " ",
     })).toEqual({
-      bundleDesignTemplate: "FBP_SIDE_FOOTER",
-      bundleDesignPresetId: "STANDARD",
+      bundleDesignTemplate: null,
+      bundleDesignPresetId: null,
     });
   });
 

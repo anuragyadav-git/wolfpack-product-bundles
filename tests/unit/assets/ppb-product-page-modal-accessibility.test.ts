@@ -22,7 +22,7 @@ const {
 const {
   ProductPageWidgetMiscMethods,
 } = require('../../../app/assets/widgets/product-page/methods/widget-misc-methods.js');
-const { ToastManager } = require('../../../app/assets/bundle-widget-components.js');
+const { ToastManager } = require('../../../app/assets/widgets/shared/toast-manager.js');
 
 beforeEach(() => {
   jest.restoreAllMocks();

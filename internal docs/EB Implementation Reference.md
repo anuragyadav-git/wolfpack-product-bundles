@@ -5,7 +5,7 @@ title: EB Implementation Reference
 type: reference
 status: authoritative
 summary: Records directly verified reference-app contracts used for Wolfpack bundle implementation and parity decisions.
-last_audited: 2026-07-30
+last_audited: 2026-08-14
 owners:
   - engineering
 domains:
@@ -33,6 +33,41 @@ keywords:
 When implementing a feature that mirrors EB behaviour — data shapes, admin flows, storefront runtime, cart integration, template IDs, widget settings — look here first. Every fact below was captured directly from live EB Admin/storefront inspection (Chrome DevTools MCP, authenticated `yash-wolfpack` store) and verified against EB's minified widget JS/CSS. No inferences are made; entries without direct evidence are labelled.
 
 **Full evidence record:** `docs/competitor-analysis/16-eb-full-data-flow-investigation.md`
+
+---
+
+## FPB and PPB Bundle Subscriptions
+
+The 2026-08-14 research pass established that EB exposes Subscriptions for both FPB and PPB, with the following shared bounded evidence:
+
+- Every product in a subscription bundle must belong to one Shopify-compatible selling-plan group.
+- EB returns a no-common-plan state before it exposes subscription configuration when the selected products do not share a plan group.
+- The exposed configuration covers one-time purchase settings, selected and default plans, purchase-option copy, translations, product-card discount display, and an optional recurring bundle discount.
+- The same Subscriptions section and selling-plan validation flow are present in both FPB and PPB configure routes.
+- The populated configuration is grouped into `Bundle Subscriptions`, `Plan Tiers`, and `Configurations`. It exposes `Change Plan` and `Refresh Plan`, a purchase-options title, per-tier dropdown name, discount pill and option description, one-time purchase enablement and label, subscription-versus-one-time default selection, recurring-discount enablement, and a three-way bundle-discount target: subscription only, one-time only, or both.
+- The three groups are separate stacked cards in the configure page's right column. `Bundle Subscriptions` keeps the enable toggle and `How to setup?` beside the heading, `Multi Language` at the opposite edge, the selected group with `Change Plan`, and `Subscription Title`. `Plan Tiers` owns `Refresh Plan` and uses one subdued inset surface per plan, with dropdown name and discount pill in one row and the option description below. `Configurations` starts with recurring and one-time switches, then the one-time label/default checkbox and bundle-discount target.
+- The `Multi Language` modal repeats the purchase-options title, one-time label, and every selected tier's dropdown name, discount pill, and option description for the selected Shopify locale.
+
+The 2026-08-14 Shopify Subscriptions feasibility pass added a live native plan to the `yash-wolfpack` store and refined that evidence:
+
+- EB's current `How to setup?` article says it works with subscription apps other than Recharge. The documented exception is Recharge, not Freecharge.
+- The same article, updated 2026-05-27, directs merchants to create one Shopify-compatible plan covering every bundle product, use `Get Subscription plans`, choose a shared plan, then optionally edit the heading, discount description, widget description, one-time availability/default, and recurring discounts before saving. It says its widget description accepts HTML; Wolfpack does not adopt that unsafe rendering behavior.
+- Shopify Subscriptions created a standard public selling-plan group with a monthly plan, 10% price adjustment, variant selling-plan allocations, and app ownership from Shopify's Subscriptions app. The public product JSON exposed the group and allocation correctly.
+- Every component product in the isolated six-product FPB fixture shared that plan. The generated parent product was not required for component compatibility.
+- EB initially returned `NO_SELLING_PLAN_GROUPS_FOUND` because its cached component records still contained `sellingPlanGroups: []`. `Sync Product` refreshed only the generated parent. The documented global `Sync Collections` action refreshed component selling-plan data and made the plan discoverable. This cache boundary is an EB-specific operational gotcha, not a provider-integration requirement.
+- After that sync, `POST /api/stepsConfiguration/validateSellingPlanGroups?bundleId=2` returned `SELLING_PLAN_GROUPS_MATCHED` with group `gid://shopify/SellingPlanGroup/2213740740`, plan `gid://shopify/SellingPlan/4212326596`, option `Deliver every month`, and a 10% percentage pricing policy.
+- EB saved the FPB subscription through its normal `POST /api/stepsConfiguration/update?bundleId=2` wrapper. `subscriptionBundlesData` stored the validation response, selected group, plan display title and discount text, one-time settings, purchase-option title and subtitle, translations, product-card discount setting, bundle-discount target, and recurring-discount setting.
+- The default saved state enabled subscriptions and one-time purchase, selected the subscription by default, left recurring bundle discounts disabled, and applied the bundle discount to both purchase modes.
+- The native app touches plan creation and editing, product assignment, contracts, retry and inventory-failure policy, customer subscription management, notification settings, analytics, and a theme app block on product pages.
+- The native product-page block renders one-time and subscription choices as vertical semantic radios. It shows the selling-plan group name, cadence and discount, an auto-renewal note, and updates the product price when the subscription option is selected. The merchant controls its position in the product template through the theme editor.
+- Selecting the native plan adds `selling_plan=4212326596` to the product form. The resulting cart line uses the adjusted price and displays `Deliver every month, 10% off`.
+- On EB's FPB storefront, purchase options live inside the bundle summary immediately above the total and completion action. Product cards and selected-item rows update between the one-time and per-delivery prices. Desktop keeps the selector in the right summary column; mobile keeps it inside the expandable bottom summary tray rather than as a detached page-level card.
+- The authenticated desktop and mobile layout audit found the same compact hierarchy: a plain title above two vertical option cards; each card has a semantic radio, a 1px neutral border, roughly 7px radius, and 15px by 10px internal padding. The subscription card keeps the group label visible and places cadence plus a pill-shaped discount below it. Wolfpack follows this hierarchy through one shared FPB/PPB renderer while allowing each bundle template to own placement.
+- EB's subscription cart path adds separate component lines. Its `/cart/add.js` request placed the same `selling_plan: 4212326596` on every selected component and did not add a subscription to the generated parent product.
+- `/cart.js` and checkout showed two separate component lines, each with the same monthly allocation and its own 10% adjusted price. EB retained public `Bundle` and `Box` properties plus private `_bundleOfferId` on each line.
+- Checkout displayed cadence on each component, a recurring subtotal, an automatically-renewing-subscription consent statement, cancellation guidance, and a cancellation-policy disclosure before payment. No order was placed during this verification.
+
+Provider-specific APIs are not part of the observed contract. Shopify selling-plan compatibility and membership are the source of truth. The merchant must create the plan in a subscription app and include every selectable bundle product; EB then consumes the standard Shopify selling-plan group after its product cache is refreshed.
 
 ---
 
@@ -65,6 +100,19 @@ All requests go to `https://prod.backend.giftbox.giftkart.app` with `?shopName={
 | FPB — full update (wrapper) | `POST` | `/api/stepsConfiguration/update?bundleId={id}`                     |
 | PPB — create bundle         | `POST` | `/api/mixAndMatch/create`                                          |
 | PPB — update                | `POST` | `/api/mixAndMatch/update?offerId={MIX-XXXXXX}`                     |
+
+## Admin Analytics Controls
+
+Live EB Analytics evidence captured on 2026-08-13:
+
+- The primary graph card is titled `Bundle Split` and exposes one radio-button dropdown with `Bundle Revenue`, `Bundle Views`, `Bundle Orders`, `Conversion`, and `AOV`.
+- `Bundle Revenue` is the default graph metric.
+- The bundle results card has a `Search by bundle name` field and one sort dropdown.
+- Sort metric radio options are `Bundle Name`, `Bundle Views`, `No. of Orders`, `Total Bundle Value`, and `Overall conversions`.
+- Sort direction is selected separately with `Highest` or `Lowest`.
+- The empty state reads `No Items found` and `Try changing the filters or search term`.
+- No `How to setup`, `Learn More`, or other help link is present on the Analytics graph or bundle results surface.
+- The observed fixture had views but no orders, so the live UI did not expose enough evidence to confirm EB's conversion denominator. Wolfpack uses bundle orders divided by bundle views for this surface because those are the two measured funnel values presented by the same control group; this is an explicit implementation inference, not a captured EB formula.
 
 ---
 
@@ -237,6 +285,12 @@ Asset behavior:
 - The uploaded Slot Icon is stored in the merchant's Shopify store assets.
 - The practical upload limit is smaller than Shopify's general store asset maximum.
 - If no Slot Icon is configured, FPB empty slots fall back to the default plus icon.
+
+Product Slots-off reference behavior verified on 2026-08-11:
+
+- The Standard summary renders two product-row skeletons before any selection.
+- The same two-row skeleton baseline is present in the desktop sidebar and the expanded mobile footer tray.
+- The skeletons use a thumbnail block plus title, variant, price, and action bars; they are summary placeholders, not loading-state ownership.
 
 ### Selection Rules and Blocking Behavior
 
@@ -839,6 +893,14 @@ the rule object for the BXY threshold semantics.
 - Non-BXY states show the toggle, "Multi Language" action, and note: "Note: Bundle Quantity Options can only be enabled when discount rules are based on quantity."
 - When enabled for quantity-based rules, each rule renders "Box Label" and "Box Subtext" fields plus a "Make this rule default" star action.
 
+**Standard desktop storefront proof (2026-08-13):** The enabled box selector is
+the first row after the summary subtitle. In the verified two-rule fixture, the
+wrapper was a fluid two-column grid (`371.94px` wide with an `8px` gap) and sat
+`5px` below the subtitle. Each option was `55px` tall with `8px` padding and an
+`8px` radius. The active option used a black surface with white text; the
+inactive option used `rgb(238, 238, 238)` with black text. This is one shared
+summary component rather than a preset-specific card treatment.
+
 **Wolfpack implementation note (2026-07-04):** Because EB hides Bundle
 Quantity Options for BXY, Wolfpack storefront/cart code must not synthesize
 public `Box` cart display properties when the source `_bundle_display_properties`
@@ -878,6 +940,24 @@ Rule #1
 ```
 
 These are merchant-editable text fields (not fixed computed values).
+
+**Verified default generation matrix (2026-08-13):**
+
+- Quantity condition title: `{conditionValue} Pack`
+- Amount condition title: `Spend {currencySymbol}{conditionValue}`
+- Buy X, Get Y title: `Add {customerBuys + customerGets}`
+- Percentage Off subtext: `Save {discountValue}%`
+- Fixed Amount Off subtext: `Save {currencySymbol}{discountValue}`
+- Fixed Bundle Price subtext: `Save {currencySymbol}{discountValue}`
+- Buy X, Get Y percentage subtext: `{customerGets} Product(s) @ {discountValue}% off`
+- Buy X, Get Y fixed-amount subtext: `{customerGets} Product(s) @ {currencySymbol}{discountValue} off`
+
+EB regenerates the dependent field when its source rule changes, even when the
+merchant previously customized that field. Condition changes replace Tier Text;
+discount-value or reward-type changes replace Tier Subtext; changing the Buy X,
+Get Y `customerGets` value replaces both. Unaffected fields retain their current
+merchant value. Existing localized tier entries receive the same affected-field
+replacement.
 
 **Progress Bar "Multi Language" button (enabled only with Step-Based Bar):**
 
@@ -931,11 +1011,12 @@ Buy X, Get Y:
 
 Public Skai Lama help articles corroborate the captured Bundle Visibility behavior:
 
-- Product Page Bundle Upsell Widgets are enabled from the bundle edit surface, then the merchant chooses Offer Upsell Block or Offer Upsell Button.
-- Default widget visibility is all product pages for items currently included in the bundle.
-- Manual product or collection selections override the default visibility.
-- The Add Browsed Product option preselects the product the shopper was viewing before clicking the widget/redirect.
-- Widget placement for upsell surfaces can be completed through Shopify theme editor app blocks; template choice and block position affect where those widget surfaces appear.
+- One master Product Page Bundle Upsell Widget control owns both Offer Upsell Button and Offer Upsell Block modes. Button mode configures CTA text. Block mode adds image, title, description, and CTA fields.
+- Targeting is mutually exclusive: all bundle products, selected products, or selected collections. All-bundle-product matching includes explicit products and configured collections from enabled paid steps; gifts and personalization add-ons are not eligibility sources.
+- Multiple eligible bundles stack in deterministic order.
+- Default placement is below the product form. A single theme app block provides custom placement, which takes precedence over automatic placement.
+- Add Browsed Product records the exact product and currently selected variant before redirect. The destination preselects only that variant in shared bundle state.
+- The storefront renderer belongs to the globally enabled app embed rather than an FPB design template. Standard, Classic, Compact, and Horizontal share the behavior.
 - Product Page Bundle Builder placement is different from merchant-dragged upsell blocks: 2026-06-11 Theme Editor evidence showed the PPB widget rendering while the native **Buy buttons** block was selected. Treat PPB as a Buy buttons/product-form replacement or override, not as a separate merchant-positioned block under Buy buttons.
 
 Reference URLs:
@@ -1151,6 +1232,16 @@ while the storefront DTO key intentionally remains EB-compatible
 `showProductComparedAtPrice`. The metafield writer must map between those names;
 reading `showProductComparedAtPrice` directly from the persisted bundle silently
 forces the storefront flag to false.
+
+### FPB compare-at price ownership
+
+Live EB Admin and Standard storefront evidence on 2026-08-12 confirms that FPB
+has no `Show Compare At Price` control in its bundle configuration. Product
+cards render compare-at price data whenever it is present: the verified sale
+product rendered its original price with a line-through beside the current
+price, while a product without compare-at data rendered only its current price.
+FPB compare-at visibility is therefore product-driven and must not be gated by
+the persisted PPB visibility setting.
 
 ---
 

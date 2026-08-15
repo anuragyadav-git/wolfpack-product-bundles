@@ -7,8 +7,8 @@ describe("serializeFpbSaveSteps", () => {
         id: "step-1",
         name: "Pick one",
         pageTitle: "Choose your product",
-        minQuantity: "1",
-        maxQuantity: "3",
+        minQuantity: 1,
+        maxQuantity: 3,
         enabled: true,
         displayVariantsAsIndividual: true,
         multiLangData: { en: { name: "Pick one" } },
@@ -55,8 +55,7 @@ describe("serializeFpbSaveSteps", () => {
             subTitle: "Sub",
             sortOrder: 0,
             products: [{ id: "gid://shopify/Product/123" }],
-            selectedProducts: [{ id: "gid://shopify/Product/123", title: "Test Product" }],
-            collectionsSelectedData: [
+            collections: [
               {
                 id: "gid://shopify/Collection/222",
                 collectionId: "222",
@@ -128,8 +127,7 @@ describe("serializeFpbSaveSteps", () => {
       id: "category-1",
       title: "Category",
       products: [{ id: "gid://shopify/Product/123" }],
-      selectedProducts: [{ id: "gid://shopify/Product/123", title: "Test Product" }],
-      collectionsSelectedData: [
+      collections: [
         {
           id: "gid://shopify/Collection/222",
           collectionId: "222",
@@ -140,5 +138,28 @@ describe("serializeFpbSaveSteps", () => {
       ],
     });
     expect(result[0].StepCategory[0]).not.toHaveProperty("productsConnection");
+  });
+
+  it("does not invent zero quantity bounds when Admin state has no bounds", () => {
+    const [serialized] = serializeFpbSaveSteps([
+      {
+        id: "step-1",
+        name: "Pick two",
+        minQuantity: null,
+        maxQuantity: null,
+      },
+    ]);
+
+    expect(serialized.minQuantity).toBeNull();
+    expect(serialized.maxQuantity).toBeNull();
+  });
+
+  it("forces Step 1 enabled while preserving a disabled later step", () => {
+    const serialized = serializeFpbSaveSteps([
+      { id: "step-1", enabled: false },
+      { id: "step-2", enabled: false },
+    ]);
+
+    expect(serialized.map((step) => step.enabled)).toEqual([true, false]);
   });
 });

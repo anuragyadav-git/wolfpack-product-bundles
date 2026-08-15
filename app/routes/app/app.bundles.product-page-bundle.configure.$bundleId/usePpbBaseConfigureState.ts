@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useRef, useState, type SyntheticEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type SyntheticEvent,
+} from "react";
 import {
   useFetcher,
   useLoaderData,
@@ -9,11 +15,13 @@ import { useAppBridge } from "@shopify/app-bridge-react";
 import { getParentProductStatusUi } from "../../../lib/parent-product-status-ui";
 import { handleAdminSaveLockedEvent } from "../../../lib/admin-save-lock";
 import { openThemeEditorInNewTab } from "../../../lib/theme-editor-navigation.client";
-import {
-  getThemeExtensionStatusFromAppBridge,
-} from "../../../lib/app-embed-status-check.client";
+import { getThemeExtensionStatusFromAppBridge } from "../../../lib/app-embed-status-check.client";
 import { useBundleConfigurationState } from "../../../hooks/useBundleConfigurationState";
 import type { LoaderData } from "./types";
+import {
+  normalizeBundleSubscriptionConfig,
+  type BundleSubscriptionConfigV1,
+} from "../../../lib/bundle-subscriptions";
 
 declare global {
   interface Window {
@@ -25,7 +33,7 @@ interface SubscriptionValidationResponse {
   success: boolean;
   isValid?: boolean;
   productCount?: number;
-  plans?: Array<{ id: string; name: string }>;
+  groups?: BundleSubscriptionConfigV1["selectedGroup"][];
   message?: string | null;
   error?: string;
 }
@@ -36,6 +44,7 @@ export function usePpbBaseConfigureState() {
     loaderData.bundle as unknown as import("../../../hooks/useBundleConfigurationState").BundleData & {
       loadingGif?: string | null;
       shopifyProductHandle?: string;
+      bundleSubscriptionConfig?: unknown;
     };
   const {
     bundleProduct: loadedBundleProduct,
@@ -43,6 +52,7 @@ export function usePpbBaseConfigureState() {
     apiKey,
     blockHandle,
     shopLocales = [],
+    shopCurrencyCode,
     appEmbedEnabled = true,
     themeEditorUrl = null,
   } = loaderData as any;
@@ -50,17 +60,23 @@ export function usePpbBaseConfigureState() {
   const shopify = useAppBridge();
   const fetcher = useFetcher<any>();
   const subscriptionFetcher = useFetcher<SubscriptionValidationResponse>();
-  const [currentAppEmbedEnabled, setCurrentAppEmbedEnabled] =
-    useState<boolean | null>(null);
+  const [currentAppEmbedEnabled, setCurrentAppEmbedEnabled] = useState<
+    boolean | null
+  >(null);
+  const [isCriticalStatusReady, setIsCriticalStatusReady] = useState(false);
   const [currentThemeEditorUrl, setCurrentThemeEditorUrl] =
     useState(themeEditorUrl);
   const [appEmbedBannerFeedbackTrigger, setAppEmbedBannerFeedbackTrigger] =
     useState(0);
   const [showSubscriptionSetupGuide, setShowSubscriptionSetupGuide] =
     useState(false);
+  const [subscriptionConfig, setSubscriptionConfigState] =
+    useState<BundleSubscriptionConfigV1>(() =>
+      normalizeBundleSubscriptionConfig(bundle.bundleSubscriptionConfig)
+    );
+  const originalSubscriptionConfigRef = useRef(subscriptionConfig);
   const revalidator = useRevalidator();
-  const presentedAppEmbedEnabled =
-    currentAppEmbedEnabled ?? true;
+  const presentedAppEmbedEnabled = currentAppEmbedEnabled ?? true;
   const isBundleVisibilityPending = !presentedAppEmbedEnabled;
   const isSaveInFlight = fetcher.state !== "idle";
   const saveBarRef = useRef<UISaveBarElement | null>(null);
@@ -72,15 +88,16 @@ export function usePpbBaseConfigureState() {
       handleAdminSaveLockedEvent(
         event,
         isSaveInFlight,
-        triggerSaveBarIrritation,
+        triggerSaveBarIrritation
       );
     },
-    [isSaveInFlight, triggerSaveBarIrritation],
+    [isSaveInFlight, triggerSaveBarIrritation]
   );
   const configState = useBundleConfigurationState({
     bundle,
     bundleProduct: loadedBundleProduct,
     shopify,
+    shopCurrencyCode,
   });
   const {
     isDirty,
@@ -128,13 +145,27 @@ export function usePpbBaseConfigureState() {
     forceNavigation,
     originalValuesRef,
   } = configState;
+  const setSubscriptionConfig = useCallback(
+    (
+      updater: (
+        current: BundleSubscriptionConfigV1
+      ) => BundleSubscriptionConfigV1
+    ) => {
+      setSubscriptionConfigState((current) =>
+        normalizeBundleSubscriptionConfig(updater(current))
+      );
+      markAsDirty();
+    },
+    [markAsDirty]
+  );
   const parentProductStatusUi = getParentProductStatusUi(
-    loadedBundleProduct?.status || bundleProduct?.status || productStatus,
+    loadedBundleProduct?.status || bundleProduct?.status || productStatus
   );
   useEffect(() => {
     let active = true;
     setCurrentAppEmbedEnabled(null);
     setCurrentThemeEditorUrl(themeEditorUrl);
+    setIsCriticalStatusReady(false);
     void getThemeExtensionStatusFromAppBridge(shopify)
       .then((status) => {
         if (active) {
@@ -143,6 +174,11 @@ export function usePpbBaseConfigureState() {
       })
       .catch(() => {
         if (active) setCurrentAppEmbedEnabled(appEmbedEnabled);
+      })
+      .finally(() => {
+        if (active) {
+          setIsCriticalStatusReady(true);
+        }
       });
     return () => {
       active = false;
@@ -188,44 +224,44 @@ export function usePpbBaseConfigureState() {
     return appEmbedEnabled;
   }, [shopify]);
   const [loadingGif, setLoadingGif] = useState<string | null>(
-    bundle.loadingGif ?? null,
+    bundle.loadingGif ?? null
   );
   const originalLoadingGifRef = useRef<string | null>(
-    bundle.loadingGif ?? null,
+    bundle.loadingGif ?? null
   );
   const [showProductPrices, setShowProductPrices] = useState<boolean>(
-    (bundle as any).showProductPrices ?? true,
+    (bundle as any).showProductPrices ?? true
   );
   const originalShowProductPricesRef = useRef<boolean>(
-    (bundle as any).showProductPrices ?? true,
+    (bundle as any).showProductPrices ?? true
   );
   const [showCompareAtPrices, setShowCompareAtPrices] = useState<boolean>(
-    (bundle as any).showCompareAtPrices ?? false,
+    (bundle as any).showCompareAtPrices ?? false
   );
   const originalShowCompareAtPricesRef = useRef<boolean>(
-    (bundle as any).showCompareAtPrices ?? false,
+    (bundle as any).showCompareAtPrices ?? false
   );
   const [cartRedirectToCheckout, setCartRedirectToCheckout] = useState<boolean>(
-    (bundle as any).cartRedirectToCheckout ?? false,
+    (bundle as any).cartRedirectToCheckout ?? false
   );
   const originalCartRedirectToCheckoutRef = useRef<boolean>(
-    (bundle as any).cartRedirectToCheckout ?? false,
+    (bundle as any).cartRedirectToCheckout ?? false
   );
   const [allowQuantityChanges, setAllowQuantityChanges] = useState<boolean>(
-    (bundle as any).allowQuantityChanges ?? true,
+    (bundle as any).allowQuantityChanges ?? true
   );
   const originalAllowQuantityChangesRef = useRef<boolean>(
-    (bundle as any).allowQuantityChanges ?? true,
+    (bundle as any).allowQuantityChanges ?? true
   );
   const [sdkMode, setSdkMode] = useState<boolean>(
-    (bundle as any).sdkMode ?? false,
+    (bundle as any).sdkMode ?? false
   );
   const originalSdkModeRef = useRef<boolean>((bundle as any).sdkMode ?? false);
   const [textOverrides, setTextOverrides] = useState<Record<string, string>>(
-    ((bundle as any).textOverrides as Record<string, string>) ?? {},
+    ((bundle as any).textOverrides as Record<string, string>) ?? {}
   );
   const originalTextOverridesRef = useRef<Record<string, string>>(
-    ((bundle as any).textOverrides as Record<string, string>) ?? {},
+    ((bundle as any).textOverrides as Record<string, string>) ?? {}
   );
   const [textOverridesByLocale, setTextOverridesByLocale] = useState<
     Record<string, Record<string, string>>
@@ -233,7 +269,7 @@ export function usePpbBaseConfigureState() {
     ((bundle as any).textOverridesByLocale as Record<
       string,
       Record<string, string>
-    >) ?? {},
+    >) ?? {}
   );
   const originalTextOverridesByLocaleRef = useRef<
     Record<string, Record<string, string>>
@@ -241,16 +277,18 @@ export function usePpbBaseConfigureState() {
     ((bundle as any).textOverridesByLocale as Record<
       string,
       Record<string, string>
-    >) ?? {},
+    >) ?? {}
   );
   return {
     loaderData,
+    isCriticalStatusReady,
     bundle,
     loadedBundleProduct,
     shop,
     apiKey,
     blockHandle,
     shopLocales,
+    shopCurrencyCode,
     appEmbedBannerFeedbackTrigger,
     appEmbedEnabled: presentedAppEmbedEnabled,
     themeEditorUrl: currentThemeEditorUrl,
@@ -263,6 +301,10 @@ export function usePpbBaseConfigureState() {
     subscriptionFetcher,
     showSubscriptionSetupGuide,
     setShowSubscriptionSetupGuide,
+    subscriptionConfig,
+    setSubscriptionConfig,
+    setSubscriptionConfigState,
+    originalSubscriptionConfigRef,
     revalidator,
     isBundleVisibilityPending,
     isSaveInFlight,

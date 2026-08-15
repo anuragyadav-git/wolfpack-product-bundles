@@ -12,6 +12,7 @@ import { syncBundleStorefrontNow } from "../../app/services/bundles/storefront-s
 jest.mock("../../app/db.server", () => ({
   __esModule: true,
   default: {
+    $transaction: jest.fn(),
     shop: {
       findUnique: jest.fn(),
       update: jest.fn(),
@@ -39,7 +40,6 @@ jest.mock("../../app/lib/logger", () => ({
 
 jest.mock("../../app/services/widget-installation.server", () => ({
   WidgetInstallationService: {
-    createFullPageBundle: jest.fn(),
     validateProductBundleWidgetSetup: jest.fn().mockResolvedValue({
       widgetInstalled: false,
       requiresOneTimeSetup: false,
@@ -66,14 +66,6 @@ jest.mock("../../app/services/bundles/bundle-parent-product.server", () => ({
   }),
 }));
 
-jest.mock("../../app/services/bundles/standard-metafields.server", () => ({
-  convertBundleToStandardMetafields: jest.fn().mockResolvedValue({
-    metafields: {},
-    errors: [],
-  }),
-  updateProductStandardMetafields: jest.fn().mockResolvedValue(undefined),
-}));
-
 jest.mock("../../app/utils/variant-lookup.server", () => ({
   getBundleProductVariantId: jest.fn().mockResolvedValue("gid://shopify/ProductVariant/999"),
 }));
@@ -94,16 +86,6 @@ jest.mock("../../app/lib/css-sanitizer", () => ({
 jest.mock("../../app/services/theme-colors.server", () => ({
   syncThemeColors: jest.fn().mockResolvedValue(undefined),
 }));
-
-jest.mock(
-  "../../app/services/widget-installation/widget-full-page-bundle.server",
-  () => ({
-    writeBundleConfigPageMetafield: jest.fn().mockResolvedValue(undefined),
-    renamePageHandle: jest.fn(),
-    publishPreviewPage: jest.fn(),
-    getPreviewPageUrl: jest.fn(),
-  }),
-);
 
 jest.mock("../../app/services/bundles/pricing-calculation.server", () => ({
   calculateBundlePrice: jest.fn().mockResolvedValue("99.99"),
@@ -175,8 +157,8 @@ function buildSaveFormData(personalizationDataFixture: ReturnType<typeof buildPe
     {
       id: "step-1",
       name: "Bundle Product",
-      minQuantity: "1",
-      maxQuantity: "4",
+      minQuantity: 1,
+      maxQuantity: 4,
       enabled: true,
       StepProduct: [
         {
@@ -192,8 +174,8 @@ function buildSaveFormData(personalizationDataFixture: ReturnType<typeof buildPe
     {
       id: "step-2",
       name: "Add On",
-      minQuantity: "1",
-      maxQuantity: "1",
+      minQuantity: 1,
+      maxQuantity: 1,
       enabled: true,
       isFreeGift: true,
       addonLabel: "Add On",
@@ -247,7 +229,7 @@ function buildPersonalizationData() {
   return {
     isPersonalizationEnabled: true,
     personalizeStepText: "Add On",
-    personalizePageSubtext: "",
+    personalizePageSubtext: "Choose add-ons",
     stepImage: "https://cdn.example.test/addon-step-icon.png",
     addonProducts: {
       isEnabled: true,
@@ -363,8 +345,9 @@ describe("FPB create + configure parity flow (scaffolded E2E path)", () => {
     db.bundle.create.mockResolvedValue({
       id: "bundle-1",
     });
-    db.shop.update.mockResolvedValue({});
+    db.shop.update.mockResolvedValue({ lastFpbPublicNumber: 1 });
     db.shop.updateMany.mockResolvedValue({ count: 0 });
+    db.$transaction.mockImplementation(async (callback: (tx: typeof db) => unknown) => callback(db));
     createAdmin.graphql = buildCreateAdmin().graphql;
   });
 
@@ -446,7 +429,7 @@ describe("FPB create + configure parity flow (scaffolded E2E path)", () => {
     });
   });
 
-  it("normalizes a zero add-on threshold to 1 when saving a fresh bundle", async () => {
+  it("rejects a zero add-on threshold before saving a fresh bundle", async () => {
     const personalizationData = buildPersonalizationDataWithZeroThreshold();
 
     const createResponse = await handleCreateBundle(
@@ -492,21 +475,17 @@ describe("FPB create + configure parity flow (scaffolded E2E path)", () => {
     const saveBody = await saveResponse.json();
 
     expect({ status: saveResponse.status, body: saveBody }).toMatchObject({
-      status: 200,
-      body: { success: true },
-    });
-
-    const updateCall = db.bundle.update.mock.calls[0][0];
-    expect(updateCall.data.personalizationData.addonProducts.tiers[0]).toMatchObject({
-      eligibilityCondition: {
-        type: "QUANTITY",
-        value: 1,
+      status: 400,
+      body: {
+        success: false,
+        fieldErrors: expect.arrayContaining([
+          expect.objectContaining({
+            path: "addons.products.tiers.tier-1.eligibility",
+          }),
+        ]),
       },
     });
-    expect(syncBundleStorefrontNow).toHaveBeenCalledWith(expect.objectContaining({
-      bundleId: "bundle-1",
-      bundleType: "full_page",
-      reason: "save",
-    }));
+    expect(db.bundle.update).not.toHaveBeenCalled();
+    expect(syncBundleStorefrontNow).not.toHaveBeenCalled();
   });
 });

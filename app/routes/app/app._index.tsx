@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import styles from "../../styles/routes/app-index.module.css";
 import { navigateBackOrFallback } from "../../lib/navigation";
 import { openSupportChat } from "../../lib/support-chat.client";
+import { AdminRouteLoadingBar } from "../../components/AdminRouteLoadingBar";
 
 // This route handles /app → shows the Welcome landing screen for intentional visits,
 // and silently redirects to the dashboard when Shopify's auth flow lands here.
@@ -34,30 +35,22 @@ export function getInitialAppDestination(
   return "/app/dashboard";
 }
 
-export function AppRouteSkeleton() {
+export function AppRouteLoadingWorkspace() {
   const { t } = useTranslation();
 
   return (
-    <main
-      className={styles.routeSkeleton}
-      aria-label={t("common.loading.appLabel")}
-      aria-busy="true"
-    >
-      <section className={styles.routeSkeletonHero}>
-        <div className={styles.routeSkeletonBrand} />
-        <div className={styles.routeSkeletonTitle} />
-        <div className={styles.routeSkeletonCopy} />
-        <div className={styles.routeSkeletonActions} />
-      </section>
-      <section className={styles.routeSkeletonCards}>
-        {Array.from({ length: 3 }, (_, index) => (
-          <div key={index} className={styles.routeSkeletonCard} />
-        ))}
-      </section>
-      <span className={styles.visuallyHidden}>
-        {t("common.loading.workspace")}
-      </span>
-    </main>
+    <>
+      <AdminRouteLoadingBar label="Loading Dashboard" />
+      <main
+        className={styles.routeLoadingWorkspace}
+        role="status"
+        aria-live="polite"
+      >
+        <s-heading className={styles.routeLoadingWorkspaceMessage}>
+          {t("common.loading.workspace")}
+        </s-heading>
+      </main>
+    </>
   );
 }
 
@@ -121,7 +114,7 @@ export default function AppIndex() {
     }
   }, [navigate]);
 
-  if (!showLanding) return <AppRouteSkeleton />;
+  if (!showLanding) return <AppRouteLoadingWorkspace />;
 
   return (
     <div className={styles.page}>

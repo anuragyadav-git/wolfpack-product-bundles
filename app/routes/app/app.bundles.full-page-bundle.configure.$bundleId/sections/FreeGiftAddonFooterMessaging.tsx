@@ -46,7 +46,7 @@ export function FpbAddonFooterMessaging({
             </s-button>
             <s-button
               variant="secondary"
-              icon="globe"
+              icon="language-translate"
               onClick={openAddonFooterMultiLanguageModal}
             >
               Multi Language

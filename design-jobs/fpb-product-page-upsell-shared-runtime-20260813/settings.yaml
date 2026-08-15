@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "artifact_root": "design-jobs",
+  "required_viewports": [
+    {"width": 320, "height": 720, "label": "narrow-mobile-stress"},
+    {"width": 360, "height": 800, "label": "baseline-mobile"},
+    {"width": 390, "height": 844, "label": "primary-mobile"},
+    {"width": 414, "height": 896, "label": "wide-mobile"},
+    {"width": 768, "height": 1024, "label": "tablet-portrait"},
+    {"width": 1024, "height": 768, "label": "small-desktop"},
+    {"width": 1280, "height": 800, "label": "desktop"},
+    {"width": 1440, "height": 900, "label": "primary-desktop"},
+    {"width": 1536, "height": 960, "label": "wide-desktop"}
+  ],
+  "visual_comparison": {
+    "mismatch_threshold": 0.01,
+    "pixel_tolerance": 8,
+    "major_boundary_css_px": 4,
+    "require_semantic_review": true
+  },
+  "chrome_qa": {
+    "required": true,
+    "profile_policy": "default-profile-only",
+    "allow_isolated_context": false,
+    "browser_zoom": 100,
+    "disable_nonessential_animation_for_capture": true,
+    "max_retries": 2
+  },
+  "security": {
+    "production_read_only": true,
+    "exclude_browser_profiles": true,
+    "exclude_credentials": true,
+    "exclude_private_response_bodies": true
+  }
+}

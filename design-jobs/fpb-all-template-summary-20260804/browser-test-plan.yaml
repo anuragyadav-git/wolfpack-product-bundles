@@ -1,0 +1,650 @@
+{
+  "schema_version": 1,
+  "job_id": "fpb-all-template-summary-20260804",
+  "revision": 2,
+  "status": "approved",
+  "chrome_mcp_required": true,
+  "environment": "development",
+  "base_url": "https://agent-5sfidg3m.myshopify.com/apps/product-bundles/wpb/cmse8sp170000v0ytaqqzsvtw",
+  "fixture": "Agent FPB cmse8sp170000v0ytaqqzsvtw; transition incrementally within each matrix group across Standard, Classic, Compact, and Horizontal",
+  "authentication_mode": "connected default Chrome profile with existing test-store session; storefront password 1 only if challenged",
+  "setup": {
+    "profile_policy": "default-profile-only",
+    "allow_isolated_context": false,
+    "zoom_percent": 100,
+    "artifact_directory": "qa",
+    "max_retries": 2,
+    "locale": "en-US plus de-DE stress fixture",
+    "currency": "store default plus EUR stress fixture",
+    "theme": "Agent test storefront",
+    "feature_flags": [],
+    "random_time_control": "not-applicable",
+    "device_pixel_ratio_policy": "record-actual",
+    "waits": [
+      "document.fonts.ready",
+      "images-complete",
+      "hydration-ready",
+      "target-state-ready"
+    ],
+    "scroll": {
+      "x": 0,
+      "y": 0
+    },
+    "disable_nonessential_animation": true,
+    "hide_caret_and_transient_cursors": true,
+    "dynamic_region_policy": "exclude-or-approved-mask"
+  },
+  "viewports": [
+    {
+      "id": "mobile-320",
+      "mode": "mobile",
+      "width": 320,
+      "height": 720
+    },
+    {
+      "id": "mobile-360",
+      "mode": "mobile",
+      "width": 360,
+      "height": 800
+    },
+    {
+      "id": "mobile-390",
+      "mode": "mobile",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "mobile-414",
+      "mode": "mobile",
+      "width": 414,
+      "height": 896
+    },
+    {
+      "id": "tablet-768",
+      "mode": "mobile",
+      "width": 768,
+      "height": 1024
+    },
+    {
+      "id": "desktop-1024",
+      "mode": "desktop",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "id": "desktop-1280",
+      "mode": "desktop",
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "id": "desktop-1440",
+      "mode": "desktop",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "id": "desktop-1536",
+      "mode": "desktop",
+      "width": 1536,
+      "height": 960
+    }
+  ],
+  "states": [
+    {
+      "id": "empty-slots",
+      "covers": [
+        "SUM-01",
+        "SUM-02"
+      ]
+    },
+    {
+      "id": "selection-flow",
+      "covers": [
+        "SUM-03",
+        "SUM-04",
+        "SUM-05",
+        "SUM-06",
+        "SUM-13"
+      ]
+    },
+    {
+      "id": "disclosure-responsive",
+      "covers": [
+        "SUM-07",
+        "SUM-15",
+        "SUM-16"
+      ]
+    },
+    {
+      "id": "quantity-pricing",
+      "covers": [
+        "SUM-08",
+        "SUM-09",
+        "SUM-10"
+      ]
+    },
+    {
+      "id": "offers-copy",
+      "covers": [
+        "SUM-11",
+        "SUM-12"
+      ]
+    },
+    {
+      "id": "loading-recovery",
+      "covers": [
+        "SUM-14"
+      ]
+    },
+    {
+      "id": "controls-submit",
+      "covers": [
+        "SUM-17",
+        "SUM-18"
+      ]
+    },
+    {
+      "id": "content-stress",
+      "covers": [
+        "SUM-19"
+      ]
+    },
+    {
+      "id": "reduced-motion",
+      "covers": [
+        "SUM-20"
+      ]
+    }
+  ],
+  "interactions": [
+    {
+      "id": "qa-empty-slots-mobile-320",
+      "purpose": "Prove every preset empty-row and product-slot branch at the minimum supported width.",
+      "precondition": "Start a clean fixture group; capture Product Slots off, then enable the saved slot configuration for each preset.",
+      "viewport": "mobile-320",
+      "state": "empty-slots",
+      "steps": [
+        "Clear Cache Storage where available and hard reload with ignoreCache true.",
+        "Cycle Standard, Classic, Compact, and Horizontal; capture collapsed and expanded empty states.",
+        "Enable Product Slots, hard reload, and verify configured count and icon without full fixture restoration between compatible presets."
+      ],
+      "expected_semantic_result": "Empty rows and slots reflect saved configuration without fake controls, duplicate surfaces, or preset-first-paint flash.",
+      "dom_assertions": [
+        "one-summary-surface",
+        "one-disclosure-button",
+        "collapsed-content-inert",
+        "configured-slot-count"
+      ],
+      "style_geometry_assertions": [
+        "no-horizontal-overflow",
+        "44px-controls",
+        "safe-inset",
+        "stable-footer"
+      ],
+      "screenshot_path": "qa/screenshots/qa-empty-slots-mobile-320.png",
+      "baseline_path": "qa/baselines/qa-empty-slots-mobile-320.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "new_errors": 0,
+        "new_repeated_warnings": 0
+      },
+      "network_expectations": {
+        "unexpected_failures": 0,
+        "duplicate_mutations": 0
+      },
+      "cleanup": [
+        "Return fixture to slots-off empty state at the fixture-group boundary."
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "qa-selection-flow-mobile-360",
+      "purpose": "Prove partial, exact, overflow, remove, Clear, and multi-step ownership in the shared tray.",
+      "precondition": "Slots off; build partial then exact and overflow selections with removable and protected items.",
+      "viewport": "mobile-360",
+      "state": "selection-flow",
+      "steps": [
+        "Hard reload with cache bypass before each preset pass.",
+        "Exercise partial, exact, overflow, protected removal, eligible removal, Clear cancel, and Clear confirm across all presets.",
+        "Traverse Back and Next and verify current-step removal ownership."
+      ],
+      "expected_semantic_result": "Selection identity, ordering, totals, validation, and action availability update once while header and actions remain outside internal list scroll.",
+      "dom_assertions": [
+        "selection-count-sync",
+        "one-handler-effect",
+        "protected-remove-disabled",
+        "clear-focus-recovery"
+      ],
+      "style_geometry_assertions": [
+        "bounded-list-scroll",
+        "stable-total-action",
+        "no-page-scroll-lock",
+        "no-layout-shift"
+      ],
+      "screenshot_path": "qa/screenshots/qa-selection-flow-mobile-360.png",
+      "baseline_path": "qa/baselines/qa-selection-flow-mobile-360.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "new_errors": 0,
+        "new_repeated_warnings": 0
+      },
+      "network_expectations": {
+        "unexpected_failures": 0,
+        "duplicate_mutations": 0
+      },
+      "cleanup": [
+        "Clear selections through the normal confirmation path."
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "qa-disclosure-responsive-mobile-390",
+      "purpose": "Prove disclosure semantics, reload idempotency, and responsive ownership around all critical boundaries.",
+      "precondition": "Partial selection retained; all four preset configurations available.",
+      "viewport": "mobile-390",
+      "state": "disclosure-responsive",
+      "steps": [
+        "Clear Cache Storage and hard reload; verify active asset URL and widget version.",
+        "For every preset toggle the single disclosure by pointer and keyboard and hard reload while expanded and collapsed.",
+        "Sweep 319, 320, 600 constrained host, 767, 768, 769, 1023, 1024, and 1025 measured container widths."
+      ],
+      "expected_semantic_result": "One tray exists below 1024px and one desktop sidebar at or above 1024px; reload creates no duplicates and disclosure never mutates selection.",
+      "dom_assertions": [
+        "single-disclosure",
+        "aria-expanded-sync",
+        "collapsed-inert",
+        "bootstrap-idempotent"
+      ],
+      "style_geometry_assertions": [
+        "exclusive-responsive-owners",
+        "no-overlap",
+        "no-horizontal-overflow",
+        "page-scroll-available"
+      ],
+      "screenshot_path": "qa/screenshots/qa-disclosure-responsive-mobile-390.png",
+      "baseline_path": "qa/baselines/qa-disclosure-responsive-mobile-390.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "new_errors": 0,
+        "new_repeated_warnings": 0
+      },
+      "network_expectations": {
+        "unexpected_failures": 0,
+        "duplicate_mutations": 0
+      },
+      "cleanup": [
+        "Restore 390x844 viewport and collapsed tray."
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "qa-quantity-pricing-mobile-414",
+      "purpose": "Prove quantity-option enforcement and every supported pricing family in the shared tray.",
+      "precondition": "Enable two quantity tiers; prepare disabled, percent, fixed-amount, fixed-price, BXY, and threshold pricing fixtures.",
+      "viewport": "mobile-414",
+      "state": "quantity-pricing",
+      "steps": [
+        "Carry compatible selection state while switching quantity tiers and proving under, exact, and over target.",
+        "At the fixture-group boundary configure each pricing family and independently toggle progress and message controls.",
+        "Repeat full shared-path proof once and perform every-preset count, total, and CTA smoke."
+      ],
+      "expected_semantic_result": "Saved target, qualification, message, progress, original/final total, and CTA states stay synchronized with no duplicate calculations.",
+      "dom_assertions": [
+        "selected-tier-announced",
+        "target-count-sync",
+        "pricing-output-correct",
+        "disabled-reason-perceivable"
+      ],
+      "style_geometry_assertions": [
+        "large-money-fits",
+        "progress-text-equivalent",
+        "stable-action",
+        "no-overlap"
+      ],
+      "screenshot_path": "qa/screenshots/qa-quantity-pricing-mobile-414.png",
+      "baseline_path": "qa/baselines/qa-quantity-pricing-mobile-414.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "new_errors": 0,
+        "new_repeated_warnings": 0
+      },
+      "network_expectations": {
+        "unexpected_failures": 0,
+        "duplicate_mutations": 0
+      },
+      "cleanup": [
+        "Restore default quantity and pricing fixture at group boundary."
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "qa-offers-copy-tablet-768",
+      "purpose": "Prove add-on/gift placement and saved localized summary copy at tablet width.",
+      "precondition": "Configure locked, eligible, selected, and active-step offer states plus long localized title/subtitle and EUR currency.",
+      "viewport": "tablet-768",
+      "state": "offers-copy",
+      "steps": [
+        "Hard reload each configuration and cycle every preset without resetting compatible copy/currency state.",
+        "Traverse offer eligibility and active-step placement without completing a cart mutation.",
+        "Verify long title, subtitle, message, product, variant, and large money formatting."
+      ],
+      "expected_semantic_result": "Offers appear only in their owned stage, selections remain intact, and saved copy/currency render without fabricated fallback text.",
+      "dom_assertions": [
+        "offer-placement-correct",
+        "selection-preserved",
+        "saved-copy-present",
+        "locale-currency-correct"
+      ],
+      "style_geometry_assertions": [
+        "text-reflows",
+        "price-reachable",
+        "no-clipped-focus",
+        "tray-inset-stable"
+      ],
+      "screenshot_path": "qa/screenshots/qa-offers-copy-tablet-768.png",
+      "baseline_path": "qa/baselines/qa-offers-copy-tablet-768.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "new_errors": 0,
+        "new_repeated_warnings": 0
+      },
+      "network_expectations": {
+        "unexpected_failures": 0,
+        "duplicate_mutations": 0
+      },
+      "cleanup": [
+        "Restore default locale",
+        "currency",
+        "and offer configuration."
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "qa-loading-recovery-desktop-1024",
+      "purpose": "Prove first-paint ownership and recovery exactly at the desktop boundary.",
+      "precondition": "Prepare delayed hydration, missing image, invalid default, unavailable item, and recoverable fixture correction.",
+      "viewport": "desktop-1024",
+      "state": "loading-recovery",
+      "steps": [
+        "Hard reload with cache bypass while delaying hydration and media through non-destructive DevTools controls.",
+        "Exercise each recovery branch on the shared path and every-preset first-paint smoke.",
+        "Correct the fixture through the normal application flow and hard reload."
+      ],
+      "expected_semantic_result": "The reserved desktop shell avoids wrong-preset flash and focus traps; recoverable problems preserve usable identity and resolve normally.",
+      "dom_assertions": [
+        "one-desktop-summary",
+        "busy-state-perceivable",
+        "fallback-identity-preserved",
+        "no-duplicate-controls"
+      ],
+      "style_geometry_assertions": [
+        "reserved-shell-stable",
+        "no-major-layout-shift",
+        "media-fallback-stable",
+        "no-overflow"
+      ],
+      "screenshot_path": "qa/screenshots/qa-loading-recovery-desktop-1024.png",
+      "baseline_path": "qa/baselines/qa-loading-recovery-desktop-1024.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "expected_recovery_only": true,
+        "uncaught_errors": 0
+      },
+      "network_expectations": {
+        "only_intentionally_delayed_or_blocked_requests": true,
+        "duplicate_mutations": 0
+      },
+      "cleanup": [
+        "Remove request controls and restore a valid available fixture."
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "qa-controls-submit-desktop-1280",
+      "purpose": "Prove control states, keyboard behavior, single submission, failure recovery, and preset identity.",
+      "precondition": "Qualified selection; non-destructive interception available for cart success/failure without creating a real order.",
+      "viewport": "desktop-1280",
+      "state": "controls-submit",
+      "steps": [
+        "For each preset inspect hover, focus-visible, pressed, disabled, and busy states on applicable controls.",
+        "Activate controls by keyboard and pointer and verify one handler invocation.",
+        "Intercept Add to Cart for slow and rejected responses; verify duplicate guard, preserved selections, error, focus, and retry readiness."
+      ],
+      "expected_semantic_result": "Controls remain stable and accessible, one activation fires once, and failure preserves selection while exposing recovery.",
+      "dom_assertions": [
+        "native-controls-named",
+        "state-attributes-correct",
+        "single-submit",
+        "selection-preserved-on-failure"
+      ],
+      "style_geometry_assertions": [
+        "visible-focus",
+        "44px-targets",
+        "no-busy-layout-shift",
+        "preset-identity-retained"
+      ],
+      "screenshot_path": "qa/screenshots/qa-controls-submit-desktop-1280.png",
+      "baseline_path": "qa/baselines/qa-controls-submit-desktop-1280.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "new_errors": 0,
+        "tested_failure_handled": true
+      },
+      "network_expectations": {
+        "duplicate_mutations": 0,
+        "real_order_or_destructive_action": 0
+      },
+      "cleanup": [
+        "Remove interception and keep cart/order unmodified."
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "qa-content-stress-desktop-1440",
+      "purpose": "Prove all desktop identities under long content, large money, long lists, slow/missing media, and 200 percent zoom.",
+      "precondition": "Use every browser-required content stress fixture and a twelve-line selection list.",
+      "viewport": "desktop-1440",
+      "state": "content-stress",
+      "steps": [
+        "Cycle all presets with long localized strings, large EUR prices, quantity 12, and missing/slow media.",
+        "Set page zoom to 200 percent, verify reflow, then restore 100 percent.",
+        "Capture computed shell, list, header, total, and action geometry."
+      ],
+      "expected_semantic_result": "Product identity and actions remain available; text reflows at documented owners and media fallback does not change selection identity.",
+      "dom_assertions": [
+        "all-products-preserved",
+        "accessible-names-complete",
+        "image-fallback-valid",
+        "actions-reachable"
+      ],
+      "style_geometry_assertions": [
+        "no-clipped-focus",
+        "no-page-overflow",
+        "bounded-list-scroll",
+        "geometry-within-token-tolerance"
+      ],
+      "screenshot_path": "qa/screenshots/qa-content-stress-desktop-1440.png",
+      "baseline_path": "qa/baselines/qa-content-stress-desktop-1440.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "new_errors": 0,
+        "new_repeated_warnings": 0
+      },
+      "network_expectations": {
+        "unexpected_failures": 0,
+        "only_intentional_media_delay": true
+      },
+      "cleanup": [
+        "Restore zoom to 100 percent and default content fixture."
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "qa-reduced-motion-regression-desktop-1536",
+      "purpose": "Prove reduced-motion behavior and final cross-preset/sibling non-regression at the widest required viewport.",
+      "precondition": "Stable partial and complete fixtures; reduced-motion emulation available.",
+      "viewport": "desktop-1536",
+      "state": "reduced-motion",
+      "steps": [
+        "Emulate prefers-reduced-motion and exercise disclosure through a temporary below-boundary resize, progress, loading, and offer state changes.",
+        "Restore desktop viewport and compare Standard, Classic, Compact, and Horizontal anatomy and intentional identities.",
+        "Run final hard-reload, semantic snapshot, console, network, Lighthouse, and performance evidence pass."
+      ],
+      "expected_semantic_result": "State changes complete without decorative motion or delayed access, and no preset or shared behavior regresses.",
+      "dom_assertions": [
+        "final-state-immediate",
+        "focus-stable",
+        "all-presets-render",
+        "one-summary-owner"
+      ],
+      "style_geometry_assertions": [
+        "nonessential-motion-disabled",
+        "preset-identities-distinct",
+        "shared-hierarchy-consistent",
+        "no-overflow"
+      ],
+      "screenshot_path": "qa/screenshots/qa-reduced-motion-regression-desktop-1536.png",
+      "baseline_path": "qa/baselines/qa-reduced-motion-regression-desktop-1536.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "new_errors": 0,
+        "new_repeated_warnings": 0
+      },
+      "network_expectations": {
+        "unexpected_failures": 0,
+        "duplicate_mutations": 0
+      },
+      "cleanup": [
+        "Reset motion emulation",
+        "viewport",
+        "scroll",
+        "and fixture to initial safe state."
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    }
+  ],
+  "assertions": {
+    "library": "references/chrome-devtools-test-protocol.md",
+    "require_json_serializable_results": true
+  },
+  "screenshots": {
+    "format": "png",
+    "index_path": "qa/screenshot-index.json",
+    "element_required": true,
+    "viewport_required": true,
+    "before_after_critical_interactions": true,
+    "full_page_only_when_needed": true,
+    "metadata_required": [
+      "viewport",
+      "dpr",
+      "zoom",
+      "state",
+      "revision"
+    ]
+  },
+  "console_policy": {
+    "fail_on": [
+      "uncaught-exception",
+      "unhandled-promise-rejection",
+      "severe-application-error",
+      "failed-resource-parse",
+      "new-repeated-warning",
+      "accessibility-runtime-error",
+      "hydration-error",
+      "duplicate-key-warning",
+      "change-caused-csp-violation",
+      "tested-interaction-error"
+    ],
+    "allowlist": []
+  },
+  "network_policy": {
+    "fail_on": [
+      "unexpected-4xx-5xx",
+      "blocked-required-asset",
+      "implementation-caused-abort",
+      "cors-error",
+      "duplicate-mutation",
+      "missing-product-media-outside-test",
+      "missing-translation",
+      "local-to-production-request",
+      "real-order-or-destructive-action"
+    ],
+    "expected_analytics": [],
+    "redact_secrets_and_private_bodies": true
+  },
+  "lighthouse": {
+    "required": true,
+    "devices": [
+      "desktop",
+      "mobile"
+    ],
+    "modes": [
+      "snapshot",
+      "navigation"
+    ],
+    "categories": [
+      "accessibility",
+      "best-practices",
+      "seo"
+    ],
+    "performance_excluded": true,
+    "report_paths": {
+      "desktop": "qa/lighthouse/desktop.json",
+      "mobile": "qa/lighthouse/mobile.json"
+    }
+  },
+  "performance": {
+    "required": true,
+    "triggers": [
+      "hard-reload-first-paint",
+      "disclosure",
+      "long-list-scroll",
+      "add-to-cart-busy-recovery"
+    ],
+    "not_applicable_reason": "",
+    "trace_paths": [
+      "qa/performance/desktop-trace.json.gz",
+      "qa/performance/mobile-trace.json.gz"
+    ],
+    "metrics": [
+      "LCP",
+      "CLS",
+      "interaction-findings",
+      "long-tasks",
+      "layout-shift-sources",
+      "image-font-loading"
+    ]
+  },
+  "visual_diff": {
+    "format": "png",
+    "comparison": "scripts/compare_images.py",
+    "diff_required": true,
+    "json_summary_required": true,
+    "approved_reference_and_actual_side_by_side": true,
+    "allowed_masks": []
+  },
+  "non_regression": {
+    "required": true,
+    "cases": [
+      "qa-disclosure-responsive-mobile-390",
+      "qa-controls-submit-desktop-1280",
+      "qa-reduced-motion-regression-desktop-1536"
+    ]
+  },
+  "cleanup": [
+    "Remove injected capture or request-control state.",
+    "Restore motion, zoom, viewport, and scroll position.",
+    "Restore reversible fixture state at the fixture-group boundary.",
+    "Delete temporary sensitive evidence and keep raw browser captures uncommitted."
+  ]
+}

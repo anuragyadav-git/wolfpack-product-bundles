@@ -1,0 +1,6 @@
+{
+  "violations": [],
+  "duplicate_requests": [],
+  "expected_analytics": ["Shopify monorail and OTLP telemetry"],
+  "observations": ["Widget CSS, bundle config, product images, and the signed bundle-data request completed successfully."]
+}

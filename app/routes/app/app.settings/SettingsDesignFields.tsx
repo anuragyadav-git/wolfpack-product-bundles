@@ -1,4 +1,5 @@
 import type { SettingsField } from "../../../lib/admin-configuration-surfaces";
+import { FilePicker } from "../../../components/shared/FilePicker";
 import styles from "../../../styles/routes/admin-configuration-surfaces.module.css";
 
 export function SettingsCardIcon({ icon }: { icon: string }) {
@@ -13,11 +14,13 @@ export function DesignFields({
   title,
   fields,
   values,
+  disabledFieldKeys = [],
   onFieldChange,
 }: {
   title?: string;
   fields: SettingsField[];
   values: Record<string, string>;
+  disabledFieldKeys?: string[];
   onFieldChange: (label: string, value: string) => void;
 }) {
   const defaultGroup = title ?? "";
@@ -77,6 +80,7 @@ export function DesignFields({
                       name={fieldKey}
                       value={value || field.options?.[0] || ""}
                       details={field.description}
+                      disabled={disabledFieldKeys.includes(fieldKey)}
                       onChange={handleInput}
                     >
                       {(field.options?.length ? field.options : [field.value ?? ""]).map((option) => (
@@ -96,6 +100,20 @@ export function DesignFields({
                       min={0}
                       max={999}
                       onInput={handleInput}
+                    />
+                  );
+                }
+                if (field.kind === "loadingGif") {
+                  return (
+                    <FilePicker
+                      key={`${group.title}:${field.label}`}
+                      label={field.label}
+                      hint="Click to upload a loading GIF"
+                      showUploadButton={false}
+                      acceptedTypes="image/gif"
+                      invalidTypeErrorMessage="Choose a GIF file."
+                      value={value || null}
+                      onChange={(url) => onFieldChange(fieldKey, url ?? "")}
                     />
                   );
                 }

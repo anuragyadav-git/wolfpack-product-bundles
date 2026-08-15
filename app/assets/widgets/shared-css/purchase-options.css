@@ -1,0 +1,87 @@
+.wpb-purchase-options {
+  display: grid;
+  gap: clamp(0.5rem, 1cqi, 0.625rem);
+  margin: clamp(0.5rem, 1cqi, 0.75rem) 0 clamp(0.75rem, 1.5cqi, 1rem);
+  min-inline-size: 0;
+  padding: 0;
+  border: 0;
+}
+
+.wpb-purchase-options__title {
+  margin-block-end: 0;
+  padding: 0;
+  font-size: 1em;
+  font-weight: 600;
+}
+.wpb-purchase-options__subtitle { margin: 0; }
+.wpb-purchase-options > .wpb-purchase-options__option {
+  display: grid;
+  min-height: 44px;
+  align-items: stretch;
+  gap: clamp(0.3125rem, 0.75cqi, 0.5rem);
+  padding-block: clamp(0.75rem, 1.5cqi, 0.9375rem);
+  padding-inline: clamp(0.625rem, 1cqi, 0.75rem);
+  border: 1px solid var(--wpb-border-color, #e3e3e3);
+  border-radius: var(--wpb-card-radius, 0.5rem);
+  background: var(--wpb-surface-color, #fff);
+  cursor: pointer;
+}
+.wpb-purchase-options > .wpb-purchase-options__option:has(input:checked) {
+  border-color: var(--wpb-text-color, #1f1f1f);
+}
+.wpb-purchase-options > .wpb-purchase-options__option:focus-within {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+.wpb-purchase-options__option-header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.625rem;
+}
+.wpb-purchase-options > .wpb-purchase-options__option[data-purchase-type="subscription"] {
+  align-content: start;
+}
+.wpb-purchase-options__option input {
+  min-width: 20px;
+  min-height: 20px;
+  margin: 0;
+  accent-color: currentColor;
+}
+.wpb-purchase-options__plan-select {
+  width: 100%;
+  min-height: 44px;
+  padding-inline: 0.75rem;
+  border: 1px solid var(--wpb-border-color, #d8d8d8);
+  border-radius: calc(var(--wpb-card-radius, 0.5rem) - 0.125rem);
+  background: var(--wpb-surface-color, #fff);
+}
+.wpb-purchase-options__plan-details {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: clamp(0.3125rem, 0.75cqi, 0.5rem);
+}
+.wpb-purchase-options__plan-details > * {
+  min-width: 0;
+}
+.wpb-purchase-options__supporting-copy {
+  overflow-wrap: anywhere;
+}
+.wpb-purchase-options__discount-pill {
+  justify-self: start;
+  padding: clamp(0.125rem, 0.25cqi, 0.1875rem) clamp(0.5rem, 0.75cqi, 0.625rem);
+  border-radius: 999px;
+  background: var(--bundle-discount-pill-bg, #1f2937);
+  color: var(--bundle-discount-pill-text, #fff);
+  font-size: clamp(0.625rem, 0.75cqi, 0.6875rem);
+  font-weight: 500;
+}
+@media (max-width: 749px) {
+  .wpb-purchase-options { gap: 0.5rem; }
+
+  .fpb-mobile-summary-dialog .wpb-purchase-options__title,
+  .fpb-mobile-summary-dialog .wpb-purchase-options__subtitle {
+    display: none;
+  }
+}

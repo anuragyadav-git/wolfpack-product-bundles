@@ -45,6 +45,7 @@ export interface BundleData {
   loadingGif?: string | null;
   steps: BundleStep[];
   pricing?: BundlePricing;
+  bundleSubscriptionConfig?: unknown;
 }
 
 export interface LoaderData {
@@ -55,6 +56,8 @@ export interface LoaderData {
   blockHandle: string;
   configureMode?: "create" | "edit";
   showFirstLoadTour?: boolean;
+  shopCurrencyCode: string;
+  shopLocales: { locale: string; name: string; primary: boolean }[];
 }
 
 export interface BundleProductCardProps {

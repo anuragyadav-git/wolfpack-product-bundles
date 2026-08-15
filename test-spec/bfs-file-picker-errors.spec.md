@@ -5,7 +5,7 @@ title: BFS File Picker Errors Test Spec
 type: test-spec
 status: active
 summary: Behavior gates for current-attempt file upload errors and stale mutation results.
-last_audited: 2026-07-20
+last_audited: 2026-08-13
 owners:
   - engineering
 domains:
@@ -38,6 +38,12 @@ Ensure media errors appear only after the merchant starts an upload in the curre
 | 2 | Current upload fails | Active attempt and failed mutation | Contextual error appears | Merchant interacted |
 | 3 | Picker closes/reopens | Previous failed attempt | Attempt state resets | No stale error |
 
+### FilePickerInitialOpen
+| # | Scenario | Input | Expected Output | Notes |
+|---|---|---|---|---|
+| 1 | Auto-open picker mounts | `autoOpen=true` | Initial open state is true | Prevents an initial hide event from unmounting the picker |
+| 2 | Normal picker mounts | `autoOpen=false` | Initial open state is false | Preserves explicit-trigger behavior |
+
 ## Acceptance Criteria
-- [ ] All listed test cases pass
-- [ ] Invalid current uploads still explain how to recover
+- [x] All listed test cases pass
+- [x] Invalid current uploads still explain how to recover

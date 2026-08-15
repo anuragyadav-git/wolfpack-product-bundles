@@ -26,6 +26,10 @@ import {
   FAQSection,
 } from "../../components/billing";
 import { navigateBackOrFallback } from "../../lib/navigation";
+import {
+  AdminPageBackTitle,
+  AdminPageTitleBar,
+} from "../../components/AdminPageNavigation";
 
 type PricingSubscriptionData = {
   error?: "Failed to load pricing information";
@@ -129,9 +133,11 @@ export async function action({ request }: ActionFunctionArgs) {
 function PricingBody({
   data,
   plans,
+  onBack,
 }: {
   data: PricingSubscriptionData;
   plans: typeof PLANS;
+  onBack: () => void;
 }) {
   const fetcher = useFetcher<typeof action>();
 
@@ -183,6 +189,11 @@ function PricingBody({
 
       <s-query-container containerName="pricing-page">
         <div className={pricingStyles.pageShell}>
+          <AdminPageBackTitle
+            title="Pricing"
+            backLabel="Back to previous page"
+            onBack={onBack}
+          />
           <s-stack direction="block" gap="large">
           <SubscriptionQuotaCard
             currentBundleCount={currentBundleCount}
@@ -235,22 +246,21 @@ function PricingSkeleton() {
 export default function PricingPage() {
   const { plans, subscription } = useLoaderData<typeof loader>();
   const navigate = useNavigate();
+  const handleBack = () =>
+    navigateBackOrFallback(navigate, "/app/dashboard", {
+      replaceFallback: true,
+    });
 
   return (
     <>
-      <ui-title-bar title="Pricing">
-        <button
-          variant="breadcrumb"
-          onClick={() =>
-            navigateBackOrFallback(navigate, "/app/dashboard", { replaceFallback: true })
-          }
-        >
-          Dashboard
-        </button>
-      </ui-title-bar>
+      <AdminPageTitleBar
+        title="Pricing"
+        breadcrumbLabel="Dashboard"
+        onBack={handleBack}
+      />
       <Suspense fallback={<PricingSkeleton />}>
         <Await resolve={subscription}>
-          {(data) => <PricingBody data={data} plans={plans} />}
+          {(data) => <PricingBody data={data} plans={plans} onBack={handleBack} />}
         </Await>
       </Suspense>
     </>

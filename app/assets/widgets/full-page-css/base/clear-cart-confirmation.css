@@ -139,3 +139,70 @@
     grid-template-columns: minmax(0, 150px) minmax(0, 150px);
   }
 }
+
+@media (max-width: 767px) {
+  dialog.wpb-clear-cart-confirmation--mobile {
+    inset: 0;
+    width: calc(100% - 32px);
+    max-width: 420px;
+    height: max-content;
+    max-height: calc(100dvh - 32px);
+    margin: auto;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    overflow: visible;
+  }
+
+  dialog.wpb-clear-cart-confirmation--mobile:not([open]) {
+    display: none;
+  }
+
+  dialog.wpb-clear-cart-confirmation--mobile[open] {
+    display: block;
+  }
+
+  dialog.wpb-clear-cart-confirmation--mobile::backdrop {
+    background: rgba(0, 0, 0, 0.58);
+  }
+
+  .wpb-clear-cart-confirmation--mobile
+    .wpb-clear-cart-confirmation__container {
+    width: 100%;
+    max-width: none;
+    gap: 16px;
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.24);
+  }
+
+  .wpb-clear-cart-confirmation--mobile
+    .wpb-clear-cart-confirmation__title {
+    max-width: none;
+    font-size: 20px;
+    line-height: 26px;
+  }
+
+  .wpb-clear-cart-confirmation--mobile
+    .wpb-clear-cart-confirmation__description {
+    max-width: 320px;
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  .wpb-clear-cart-confirmation--mobile
+    .wpb-clear-cart-confirmation__footer {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    width: 100%;
+  }
+
+  .wpb-clear-cart-confirmation--mobile
+    :is(
+      .wpb-clear-cart-confirmation__cancel,
+      .wpb-clear-cart-confirmation__confirm
+    ) {
+    width: 100%;
+    min-width: 0;
+    height: 48px;
+  }
+}

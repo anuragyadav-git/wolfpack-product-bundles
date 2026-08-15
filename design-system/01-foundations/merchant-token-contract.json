@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "id": "wolfpack-merchant-token-contract",
+  "title": "Wolfpack Merchant Token Contract",
+  "status": "active",
+  "owners": [
+    "Wolfpack Product Bundles"
+  ],
+  "created_on": "2026-08-06",
+  "scope": {
+    "families": [
+      "FPB",
+      "PPB"
+    ],
+    "surfaces": [
+      "storefront",
+      "admin-preview"
+    ]
+  },
+  "token_resolution": {
+    "order": [
+      "system",
+      "shared",
+      "family",
+      "template",
+      "merchant-override",
+      "state"
+    ],
+    "notes": [
+      "Merchant overrides are optional and should be treated as final override for valid inputs.",
+      "State-layer transforms should modify token appearance, not replace business semantics."
+    ]
+  },
+  "contracts": {
+    "editable_by_merchant": [
+      {
+        "scope": "theme_style_controls",
+        "examples": [
+          "--bundle-button-bg",
+          "--bundle-button-text-color",
+          "--bundle-sidebar-button-bg",
+          "--bundle-sidebar-button-text"
+        ],
+        "rationale": "Primary CTA and secondary action styling are merchant-surfaced in theme settings."
+      },
+      {
+      "scope": "template_overrides",
+      "examples": [
+        "template-specific spacing and density aliases"
+      ],
+      "rationale": "Applied only when template override controls are explicitly exposed."
+      }
+    ],
+    "non_editable_core": [
+      "validation",
+      "pricing",
+      "cart serialization",
+      "discount arithmetic",
+      "selection state transitions",
+      "inventory guard behavior"
+    ],
+    "fallback_rules": [
+      "If merchant value missing or invalid, use family or template fallback according to hierarchy.",
+      "If no merchant or template value exists, use shared semantic default."
+    ],
+    "token_scope": {
+      "surface": [
+        "canvas",
+        "surface",
+        "surface-elevated"
+      ],
+      "interactive": [
+        "action.primary",
+        "action.secondary",
+        "action.destructive"
+      ],
+      "state": [
+        "state.success",
+        "state.warning",
+        "state.error",
+        "state.disabled"
+      ],
+      "copy_reinforcement": [
+        "badges",
+        "toasts",
+        "empty_state_states"
+      ]
+    }
+  },
+  "pending_verification": []
+}

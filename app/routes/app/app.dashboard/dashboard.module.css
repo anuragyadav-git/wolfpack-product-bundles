@@ -132,7 +132,8 @@
 }
 
 .dashboardHeader {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
@@ -587,7 +588,7 @@
   justify-content: flex-start;
 }
 
-.perPageSelectWrap s-select {
+.perPageSelectWrap s-button {
   width: auto;
 }
 
@@ -690,7 +691,7 @@
   display: grid;
   place-items: center;
   width: 100%;
-  aspect-ratio: 842 / 494;
+  aspect-ratio: 3 / 1;
   height: auto;
   background: #f3f3f3;
   color: #616161;
@@ -794,14 +795,6 @@
 @media (max-width: 1100px) {
   .dashboardPage {
     padding-inline: 24px;
-  }
-
-  .dashboardHeader {
-    flex-direction: column;
-  }
-
-  .dashboardActions {
-    justify-content: flex-start;
   }
 
   .topCardsGrid {

@@ -24,9 +24,9 @@ export interface BundleSettingsSlotModel {
 
 const COMMON_SETUP_ITEMS: ConfigureSetupItem[] = [
   { id: "step_setup", label: "Step Setup", iconType: "note" },
-  { id: "discount_pricing", label: "Discount & Pricing", iconType: "filter" },
+  { id: "discount_pricing", label: "Discount & Pricing", iconType: "discount" },
   { id: "bundle_visibility", label: "Bundle Visibility", iconType: "view" },
-  { id: "bundle_settings", label: "Bundle Settings", iconType: "edit" },
+  { id: "bundle_settings", label: "Bundle Settings", iconType: "settings" },
 ];
 
 const SELECT_TEMPLATE_ITEM: ConfigureSetupItem = {
@@ -45,9 +45,7 @@ export function buildConfigureSetupItems(
   bundleType: ConfigureBundleType,
 ): ConfigureSetupItem[] {
   const items = [...COMMON_SETUP_ITEMS];
-  if (bundleType === "product_page") {
-    items.push(SUBSCRIPTIONS_ITEM);
-  }
+  items.push(SUBSCRIPTIONS_ITEM);
   items.push(SELECT_TEMPLATE_ITEM);
   return items.map((item) => ({
     ...item,
@@ -87,7 +85,7 @@ export function buildEmbedStatusModel(
 }
 
 export interface BundleLinkModel {
-  kind: "page" | "product";
+  kind: "proxy" | "product";
   isLinked: boolean;
   url: string;
   emptyMessage: string;
@@ -96,13 +94,12 @@ export interface BundleLinkModel {
 export function buildBundleLinkModel(input: {
   bundleType: ConfigureBundleType;
   fullPageUrl?: string | null;
-  pageHandle?: string | null;
   shop?: string | null;
   productHandle?: string | null;
 }): BundleLinkModel {
   if (input.bundleType === "full_page") {
     return {
-      kind: "page",
+      kind: "proxy",
       isLinked: Boolean(input.fullPageUrl),
       url: input.fullPageUrl ?? "",
       emptyMessage: "Bundle link is unavailable.",

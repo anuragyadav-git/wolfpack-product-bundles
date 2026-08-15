@@ -1,5 +1,9 @@
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const { FPB_COMPACT_TEMPLATE_CONFIG } = require('../../../app/assets/widgets/full-page/templates/compact.config.js');
+const {
+  TemplateDesignSystem: { fpb: { contracts: FPB_TEMPLATE_CONTRACTS } = {} } = {},
+} = require('../../../app/assets/widgets/shared/template-design-system.js');
+
+const FPB_COMPACT_TEMPLATE_CONFIG = FPB_TEMPLATE_CONTRACTS?.COMPACT || null;
 
 describe('FPB Compact template config contract', () => {
   it('keeps the COMPACT preset mapping', () => {

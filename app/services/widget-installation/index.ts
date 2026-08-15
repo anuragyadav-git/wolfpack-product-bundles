@@ -14,7 +14,6 @@ export { WidgetInstallationService } from './widget-installation-core.server';
 export type {
   WidgetInstallationStatus,
   ThemeEditorDeepLink,
-  FullPageBundleResult,
   ProductBundleWidgetStatus,
 } from './types';
 
@@ -24,9 +23,6 @@ export {
   generateProductBundleInstallationLink,
   generateProductBundleConfigurationLink
 } from './widget-theme-editor-links.server';
-
-// Full-page bundle operations (for direct access)
-export { createFullPageBundle } from './widget-full-page-bundle.server';
 
 // Product bundle operations (for direct access)
 export { validateProductBundleWidgetSetup } from './widget-product-bundle.server';

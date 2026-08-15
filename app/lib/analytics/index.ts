@@ -22,6 +22,28 @@ export type {
   BundleSummaryInput,
 } from "./engagement-helpers";
 
+export type {
+  BundleViewRow,
+  BundleMetricTrendPoint,
+} from "./bundle-metrics";
+
+export { buildBundleMetricTrendSeries } from "./bundle-metrics";
+
+export type {
+  BundleResultSortKey,
+  BundleResultSortDirection,
+} from "./bundle-results";
+
+export { filterAndSortBundleResults } from "./bundle-results";
+
+export type {
+  CampaignResultRow,
+  CampaignResultSortKey,
+  CampaignResultSortDirection,
+} from "./campaign-results";
+
+export { filterAndSortCampaignResults } from "./campaign-results";
+
 export {
   computeBundleFunnel,
   buildEngagementTrendSeries,

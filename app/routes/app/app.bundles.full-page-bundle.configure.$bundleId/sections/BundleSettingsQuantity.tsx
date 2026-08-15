@@ -1,4 +1,5 @@
 import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
+import { areFpbProductSlotsAvailable } from "../../../../lib/fpb-product-slots-availability";
 
 export function FpbQuantitySettings({
   flow,
@@ -7,11 +8,10 @@ export function FpbQuantitySettings({
 }) {
   const {
     activeTabIndex,
-    DiscountMethod,
+    conditionsState,
     FilePicker,
     markAsDirty,
     maxQtyPerProduct,
-    pricingState,
     productSlotIconUrl,
     productSlotsEnabled,
     quantityValidationEnabled,
@@ -23,10 +23,14 @@ export function FpbQuantitySettings({
     setShowSlotIconPicker,
     showSlotIconPicker,
     stepsState,
+    validationErrors = {},
+    clearValidationError,
   } = flow;
   const settingsStep = stepsState.steps[activeTabIndex] || stepsState.steps[0];
-  const individualSellingPlanBlocked =
-    pricingState.discountType === DiscountMethod.BUY_X_GET_Y;
+  const productSlotsAvailable = areFpbProductSlotsAvailable(
+    stepsState.steps,
+    conditionsState.stepConditions,
+  );
 
   return (
     <>
@@ -55,49 +59,70 @@ export function FpbQuantitySettings({
             />
           </s-stack>
           <s-number-field
+            id="configure-settings-maxQuantity"
             label="Maximum allowed quantity per product"
+            required={quantityValidationEnabled || undefined}
+            error={validationErrors["settings.maxQuantity"]}
             min={1}
             value={maxQtyPerProduct || "1"}
             disabled={!quantityValidationEnabled}
             onInput={(e) => {
               setMaxQtyPerProduct((e.target as HTMLInputElement).value);
               markAsDirty();
+              clearValidationError("settings.maxQuantity");
             }}
             autocomplete="off"
           />
           {/* Product Slots sub-section */}
           {settingsStep && (
-            <s-stack direction="block" gap="small-400">
-              <s-stack direction="inline" alignItems="center" gap="small">
+            <>
+              <s-divider />
+              <s-stack direction="block" gap="small-400">
+                <s-stack direction="inline" alignItems="center" gap="small">
+                  <p
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 6,
+                      margin: 0,
+                      fontSize: 14,
+                      fontWeight: 600,
+                      flex: 1,
+                      opacity: productSlotsAvailable ? 1 : 0.5,
+                    }}
+                  >
+                    Product Slots
+                    <QuestionHelpTooltip tooltipKey="productSlots" />
+                  </p>
+                  <s-switch
+                    accessibilityLabel="Enable product slots display"
+                    checked={
+                      productSlotsAvailable && productSlotsEnabled
+                        ? true
+                        : undefined
+                    }
+                    disabled={!productSlotsAvailable}
+                    onChange={(e) => {
+                      if (!productSlotsAvailable) return;
+                      setProductSlotsEnabled(
+                        (e.target as HTMLInputElement).checked,
+                      );
+                      markAsDirty();
+                    }}
+                  />
+                </s-stack>
                 <p
                   style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 6,
                     margin: 0,
-                    fontSize: 14,
-                    fontWeight: 600,
-                    flex: 1,
+                    fontSize: 13,
+                    color: "#6d7175",
+                    opacity: productSlotsAvailable ? 1 : 0.5,
                   }}
                 >
-                  Product Slots
-                  <QuestionHelpTooltip tooltipKey="productSlots" />
+                  This feature displays empty slots on the storefront.
                 </p>
-                <s-switch
-                  accessibilityLabel="Enable product slots display"
-                  checked={productSlotsEnabled || undefined}
-                  onChange={(e) => {
-                    setProductSlotsEnabled(
-                      (e.target as HTMLInputElement).checked,
-                    );
-                    markAsDirty();
-                  }}
-                />
               </s-stack>
-              <p style={{ margin: 0, fontSize: 13, color: "#6d7175" }}>
-                This feature displays empty slots on the storefront.
-              </p>
-            </s-stack>
+            </>
           )}
           {/* Slot Icon — nested inside EQV section */}
           <s-stack direction="block" gap="small-400">
@@ -106,6 +131,7 @@ export function FpbQuantitySettings({
                 display: "flex",
                 alignItems: "flex-start",
                 gap: 14,
+                opacity: productSlotsAvailable ? 1 : 0.5,
               }}
             >
               <div
@@ -177,12 +203,14 @@ export function FpbQuantitySettings({
                 >
                   <s-button
                     variant="secondary"
+                    disabled={!productSlotsAvailable}
                     onClick={() => setShowSlotIconPicker(true)}
                   >
                     Change Icon
                   </s-button>
                   <button
                     type="button"
+                    disabled={!productSlotsAvailable}
                     onClick={() => {
                       setProductSlotIconUrl("");
                       markAsDirty();
@@ -192,11 +220,11 @@ export function FpbQuantitySettings({
                       border: 0,
                       padding: 0,
                       background: "transparent",
-                      color: "#005bd3",
+                      color: productSlotsAvailable ? "#005bd3" : "#8c9196",
                       font: "inherit",
                       fontSize: 13,
                       lineHeight: "20px",
-                      cursor: "pointer",
+                      cursor: productSlotsAvailable ? "pointer" : "default",
                     }}
                   >
                     Reset
@@ -204,7 +232,7 @@ export function FpbQuantitySettings({
                 </div>
               </div>
             </div>
-            {showSlotIconPicker && (
+            {productSlotsAvailable && showSlotIconPicker && (
               <FilePicker
                 autoOpen
                 onClose={() => setShowSlotIconPicker(false)}
@@ -218,7 +246,14 @@ export function FpbQuantitySettings({
                 uploadLabel="No file chosen"
               />
             )}
-            <p style={{ margin: 0, fontSize: 12, color: "#6d7175" }}>
+            <p
+              style={{
+                margin: 0,
+                fontSize: 12,
+                color: "#6d7175",
+                opacity: productSlotsAvailable ? 1 : 0.5,
+              }}
+            >
               Note: Only applicable when rules are based on quantity
             </p>
           </s-stack>

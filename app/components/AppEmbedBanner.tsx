@@ -17,28 +17,36 @@ export function AppEmbedBanner({
   if (appEmbedEnabled) return null;
 
   return (
-    <s-banner
-      tone="warning"
-      heading={t("common.appEmbed.guideTitle")}
-      dismissible={false}
-      hidden={false}
-    >
-      <s-text>{t("common.appEmbed.body")}</s-text>
-      {themeEditorUrl ? (
-        <s-button
-          slot="secondary-actions"
-          variant="secondary"
-          onClick={() => {
-            if (onEnableClick) {
-              onEnableClick();
-              return;
-            }
-            openThemeEditorInNewTab(themeEditorUrl);
-          }}
+    <s-box paddingBlockEnd="large-200">
+      <s-banner
+        tone="warning"
+        heading={t("common.appEmbed.guideTitle")}
+        dismissible={false}
+        hidden={false}
+      >
+        <s-stack
+          direction="inline"
+          justifyContent="space-between"
+          alignItems="center"
+          gap="base"
         >
-          {t("common.actions.enableHere")}
-        </s-button>
-      ) : null}
-    </s-banner>
+          <s-text>{t("common.appEmbed.body")}</s-text>
+          {themeEditorUrl ? (
+            <s-button
+              variant="secondary"
+              onClick={() => {
+                if (onEnableClick) {
+                  onEnableClick();
+                  return;
+                }
+                openThemeEditorInNewTab(themeEditorUrl);
+              }}
+            >
+              {t("common.actions.enableHere")}
+            </s-button>
+          ) : null}
+        </s-stack>
+      </s-banner>
+    </s-box>
   );
 }

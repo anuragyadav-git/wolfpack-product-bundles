@@ -16,9 +16,7 @@ export {
 
 export { handleSaveBundle } from "./save-bundle.server";
 export { handleSyncProduct } from "./sync-product.server";
-export { handleSyncBundle } from "./sync-bundle.server";
 export { handleUpdateBundleDesignTemplate } from "./design-template.server";
-export { handleValidateSellingPlanGroups } from "./subscriptions.server";
 export {
   handleAssignProductTemplate,
   handleValidateWidgetPlacement,

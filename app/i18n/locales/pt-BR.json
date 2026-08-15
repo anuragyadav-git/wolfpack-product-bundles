@@ -8,6 +8,9 @@
     "pricing": "Preços",
     "events": "Atualizações e perguntas frequentes"
   },
+  "integrations": {
+    "requestMessage": "Olá, gostaria de solicitar suporte para uma nova integração."
+  },
   "dashboard": {
     "title": "Dashboard: Wolfpack Bundle Builder",
     "subtitle": "Acesse seus bundles, suporte ao cliente e muito mais.",
@@ -84,7 +87,6 @@
       "previewUnavailable": "Salve o bundle para visualizar",
       "cloneBundle": "Clonar bundle",
       "deleteBundle": "Excluir bundle",
-      "confirmClone": "Tem certeza de que deseja clonar este bundle?",
       "cloneSuccess": "Bundle clonado com sucesso",
       "deleteSuccess": "Bundle excluído",
       "themeEditorUnavailable": "O link do editor de tema não está disponível para esta loja."

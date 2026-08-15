@@ -414,6 +414,30 @@ mod tests {
 
         assert_eq!(output.operations.len(), 1);
         assert_eq!(merge_discount_percentage(&output).as_deref(), Some("20.0"));
+        let attributes = merge_attributes(&output);
+        assert_eq!(
+            attributes
+                .get("_wolfpackProductBundle:OfferId")
+                .map(String::as_str),
+            Some("FBP-bundle-1_ABC")
+        );
+        assert_eq!(
+            attributes
+                .get("_wolfpack_bundle_runtime")
+                .map(String::as_str),
+            Some(runtime_token.as_str())
+        );
+    }
+
+    #[test]
+    fn test_selling_plan_group_emits_no_cart_transform_operation() {
+        let input = messaging_merge_input("").replacen(
+            "\"merchandise\"",
+            "\"sellingPlanAllocation\":{\"sellingPlan\":{\"id\":\"gid://shopify/SellingPlan/1\"}},\"merchandise\"",
+            1,
+        );
+        let output = run_function_with_input(cart_transform_run, &input).unwrap();
+        assert!(output.operations.is_empty());
     }
 
     #[test]

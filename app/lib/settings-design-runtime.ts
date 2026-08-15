@@ -210,9 +210,6 @@ const EXPERT_TARGETS: Record<string, string[]> = {
   "expert.navigationBanner.navigationBannerStepProgressBarEmptyColor": [
     "navigationBanner.navigationBannerStepProgressBarEmptyColor",
   ],
-  "expert.generalSettings.loadingBgColor": [
-    "generalSettings.loadingBgColor",
-  ],
   "expert.generalSettings.conditionToastBgColor": [
     "generalSettings.conditionToastBgColor",
     "mixAndMatchConfig.toast.toastBgColor",
@@ -436,6 +433,8 @@ export function buildSettingsDesignRuntime(payload: unknown, currentPageCustomiz
   const cardRadiusStyle = normalizeRadiusStyle(getField(fieldValues, "Product Card & Cart Corner Style", DEFAULT_STYLE_PRESETS.corners.productCardBorderRadiusStyle), false);
   const cardRadiusBase = numberFromPx(getField(fieldValues, "Product Card & Cart Base", `${DEFAULT_STYLE_PRESETS.corners.productCardBaseBorderRadius}px`), DEFAULT_STYLE_PRESETS.corners.productCardBaseBorderRadius);
   const productImageFit = normalizeImageFit(getField(fieldValues, "Image Fit", DEFAULT_STYLE_PRESETS.images.productImageFit));
+  const loadingGifUrl = getField(fieldValues, "generalSettings.loadingGifUrl", "");
+  const loadingBackgroundColor = getField(fieldValues, "generalSettings.loadingBgColor", "#ffffff");
   const buttonRadius = radiusForStyle(buttonRadiusStyle, buttonRadiusBase);
   const cardRadius = radiusForStyle(cardRadiusStyle, cardRadiusBase);
   const cardImageRadius = imageRadiusFromBase(cardRadiusBase);
@@ -461,6 +460,8 @@ export function buildSettingsDesignRuntime(payload: unknown, currentPageCustomiz
   CARD_RADIUS_TARGETS.forEach((path) => setPath(designPatch, path, cardRadius));
   IMAGE_RADIUS_TARGETS.forEach((path) => setPath(designPatch, path, cardImageRadius));
   IMAGE_FIT_TARGETS.forEach((path) => setPath(designPatch, path, productImageFit));
+  setPath(designPatch, "generalSettings.loadingGifUrl", loadingGifUrl);
+  setPath(designPatch, "generalSettings.loadingBgColor", loadingBackgroundColor);
 
   if (isExpertControlsEnabled) {
     Object.entries(EXPERT_TARGETS).forEach(([fieldKey, paths]) => {
@@ -571,6 +572,10 @@ export function buildSettingsDesignRuntime(payload: unknown, currentPageCustomiz
       bundleUpsellButtonBgColor: String((pageCustomization.generalSettings as JsonObject).bundleUpSellButtonBg ?? primaryColor),
       bundleUpsellBorderColor: String((pageCustomization.generalSettings as JsonObject).bundleUpSellButtonBorderColor ?? primaryColor),
       bundleUpsellTextColor: String((pageCustomization.generalSettings as JsonObject).bundleUpsellTextColor ?? buttonTextColor),
+      loadingScreen: {
+        gifUrl: loadingGifUrl,
+        backgroundColor: loadingBackgroundColor,
+      },
     },
   };
 

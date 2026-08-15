@@ -15,11 +15,3 @@ export function getDashboardInitialImagePreloads(): DashboardInitialImagePreload
     },
   ];
 }
-
-export function shouldRenderDashboardResourceCard({
-  hasMainContentSettled,
-}: {
-  hasMainContentSettled: boolean;
-}) {
-  return hasMainContentSettled;
-}

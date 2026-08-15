@@ -6,10 +6,13 @@ import {
 } from "../../lib/additional-configurations-navigation";
 import {
   SettingsWorkspaceError,
-  SettingsWorkspaceSkeleton,
 } from "./app.settings/SettingsLandingShell";
 import { SettingsRoute } from "./app.settings/SettingsRoute";
 import { loader as settingsLoader } from "./app.settings";
+import {
+  AdminRouteLoadingBar,
+  waitForAdminRouteLoadingBar,
+} from "../../components/AdminRouteLoadingBar";
 
 export { action, loader } from "./app.settings";
 
@@ -22,7 +25,7 @@ export default function AdditionalConfigurationsRoute() {
     [searchParams],
   );
   const workspaceData = useMemo(
-    () => Promise.all([settingsPage, previewBundles]),
+    () => Promise.all([settingsPage, previewBundles, waitForAdminRouteLoadingBar()]),
     [previewBundles, settingsPage],
   );
   const handleNavigationChange = useCallback((navigation: {
@@ -37,7 +40,7 @@ export default function AdditionalConfigurationsRoute() {
   }, [setSearchParams]);
 
   return (
-    <Suspense fallback={<SettingsWorkspaceSkeleton />}>
+    <Suspense fallback={<AdminRouteLoadingBar label="Loading Settings" />}>
       <Await
         resolve={workspaceData}
         errorElement={<SettingsWorkspaceError onExit={() => navigate("/app/settings")} />}

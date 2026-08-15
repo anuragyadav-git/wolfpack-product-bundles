@@ -8,6 +8,9 @@
     "pricing": "Pricing",
     "events": "Updates & FAQs"
   },
+  "integrations": {
+    "requestMessage": "Hi, I'd like to request support for a new integration."
+  },
   "dashboard": {
     "title": "Dashboard: Wolfpack Bundles",
     "subtitle": "Access your bundles, Customer support and more.",
@@ -84,7 +87,6 @@
       "previewUnavailable": "Save bundle to preview",
       "cloneBundle": "Clone bundle",
       "deleteBundle": "Delete bundle",
-      "confirmClone": "Are you sure you want to clone this bundle?",
       "cloneSuccess": "Bundle cloned successfully",
       "deleteSuccess": "Bundle deleted",
       "themeEditorUnavailable": "Theme editor link is unavailable for this store."
@@ -170,7 +172,11 @@
       "templateLabel": "Template",
       "surfaceSelector": {
         "label": "Preview surface",
-        "builder": "Builder",
+        "bundle-header": "Bundle header",
+        "navigation": "Navigation",
+        "categories": "Categories",
+        "product-card": "Product cards",
+        "product-slots": "Product slots",
         "product-picker": "Product picker",
         "cart-summary": "Cart / summary",
         "loading": "Loading",

@@ -32,7 +32,7 @@ const CSS_OUTPUTS = [
   "extensions/bundle-builder/assets/bundle-widget-full-page-horizontal.css",
   "extensions/bundle-builder/assets/bundle-widget.css",
   "extensions/bundle-builder/assets/bundle-widget-product-page-cascade.css",
-  "extensions/bundle-builder/assets/bundle-widget-product-page-cognive.css",
+  "extensions/bundle-builder/assets/bundle-widget-product-page-grid.css",
   "extensions/bundle-builder/assets/bundle-widget-product-page-modal.css",
 ];
 

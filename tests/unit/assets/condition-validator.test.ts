@@ -18,7 +18,7 @@
 export {};
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const ConditionValidator = require('../../../app/assets/widgets/shared/condition-validator.js');
+const { ConditionValidator } = require('../../../app/assets/widgets/shared/condition-validator.js');
 
 const {
   calculateStepTotalAfterUpdate,
@@ -411,6 +411,8 @@ describe('canUpdateQuantity — two conditions (GTE + LTE, i.e. range)', () => {
     const result = canUpdateQuantity(step, { A: 6 }, 'A', 7);
     expect(result.allowed).toBe(false);
     expect(result.limitText).toBe('at most 6');
+    expect(result.conditionOperator).toBe(LTE);
+    expect(result.conditionValue).toBe(6);
   });
 
   it('blocks when new product pushes total above 6', () => {

@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useRef, useState, type SyntheticEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type SyntheticEvent,
+} from "react";
 import {
   useFetcher,
   useLoaderData,
@@ -9,9 +15,7 @@ import { useAppBridge } from "@shopify/app-bridge-react";
 import { handleAdminSaveLockedEvent } from "../../../lib/admin-save-lock";
 import { getParentProductStatusUi } from "../../../lib/parent-product-status-ui";
 import { openThemeEditorInNewTab } from "../../../lib/theme-editor-navigation.client";
-import {
-  getThemeExtensionStatusFromAppBridge,
-} from "../../../lib/app-embed-status-check.client";
+import { getThemeExtensionStatusFromAppBridge } from "../../../lib/app-embed-status-check.client";
 import { useBundleConfigurationState } from "../../../hooks/useBundleConfigurationState";
 import { useEnsureProductTemplateMutation } from "../../../store/api/adminApi";
 import type { LoaderData } from "./types";
@@ -30,8 +34,8 @@ export function useConfigureBundleController(): ConfigureBundleFlowDraft {
     availableBundles,
     shop,
     apiKey,
-    blockHandle,
     shopLocales = [],
+    shopCurrencyCode,
     appEmbedEnabled = true,
     themeEditorUrl = null,
   } = loaderData as any;
@@ -39,8 +43,10 @@ export function useConfigureBundleController(): ConfigureBundleFlowDraft {
   const shopify = useAppBridge();
   const fetcher = useFetcher<any>();
   const revalidator = useRevalidator();
-  const [currentAppEmbedEnabled, setCurrentAppEmbedEnabled] =
-    useState<boolean | null>(null);
+  const [currentAppEmbedEnabled, setCurrentAppEmbedEnabled] = useState<
+    boolean | null
+  >(null);
+  const [isCriticalStatusReady, setIsCriticalStatusReady] = useState(false);
   const [currentThemeEditorUrl, setCurrentThemeEditorUrl] =
     useState(themeEditorUrl);
   const [appEmbedBannerFeedbackTrigger, setAppEmbedBannerFeedbackTrigger] =
@@ -56,15 +62,16 @@ export function useConfigureBundleController(): ConfigureBundleFlowDraft {
       handleAdminSaveLockedEvent(
         event,
         isSaveInFlight,
-        triggerSaveBarIrritation,
+        triggerSaveBarIrritation
       );
     },
-    [isSaveInFlight, triggerSaveBarIrritation],
+    [isSaveInFlight, triggerSaveBarIrritation]
   );
   const configState = useBundleConfigurationState({
     bundle,
     bundleProduct: loadedBundleProduct,
     shopify,
+    shopCurrencyCode,
   });
   const {
     isDirty,
@@ -78,9 +85,6 @@ export function useConfigureBundleController(): ConfigureBundleFlowDraft {
     stepsState,
     conditionsState,
     pricingState,
-    isPageSelectionModalOpen,
-    openPageSelectionModal,
-    closePageSelectionModal,
     isProductsModalOpen,
     openProductsModal,
     closeProductsModal,
@@ -89,12 +93,6 @@ export function useConfigureBundleController(): ConfigureBundleFlowDraft {
     closeCollectionsModal,
     currentModalStepId,
     setCurrentModalStepId,
-    isLoadingPages,
-    setIsLoadingPages,
-    availablePages,
-    setAvailablePages,
-    selectedPage,
-    setSelectedPage,
     bundleProduct,
     setBundleProduct,
     productStatus,
@@ -116,12 +114,13 @@ export function useConfigureBundleController(): ConfigureBundleFlowDraft {
     originalValuesRef,
   } = configState;
   const parentProductStatusUi = getParentProductStatusUi(
-    loadedBundleProduct?.status || bundleProduct?.status || productStatus,
+    loadedBundleProduct?.status || bundleProduct?.status || productStatus
   );
   useEffect(() => {
     let active = true;
     setCurrentAppEmbedEnabled(null);
     setCurrentThemeEditorUrl(themeEditorUrl);
+    setIsCriticalStatusReady(false);
     void getThemeExtensionStatusFromAppBridge(shopify)
       .then((status) => {
         if (active) {
@@ -130,6 +129,11 @@ export function useConfigureBundleController(): ConfigureBundleFlowDraft {
       })
       .catch(() => {
         if (active) setCurrentAppEmbedEnabled(appEmbedEnabled);
+      })
+      .finally(() => {
+        if (active) {
+          setIsCriticalStatusReady(true);
+        }
       });
     return () => {
       active = false;
@@ -181,14 +185,12 @@ export function useConfigureBundleController(): ConfigureBundleFlowDraft {
     apiKey,
     appEmbedBannerFeedbackTrigger,
     appEmbedEnabled: currentAppEmbedEnabled ?? true,
+    isCriticalStatusReady,
     availableBundles,
-    availablePages,
     blockConfigurationChangeWhileSaving,
-    blockHandle,
     bundle,
     bundleProduct,
     closeCollectionsModal,
-    closePageSelectionModal,
     closeProductsModal,
     conditionsState,
     configState,
@@ -200,8 +202,6 @@ export function useConfigureBundleController(): ConfigureBundleFlowDraft {
     hookHandleDiscard,
     isCollectionsModalOpen,
     isDirty,
-    isLoadingPages,
-    isPageSelectionModalOpen,
     isProductsModalOpen,
     isResettingRef,
     isSaveInFlight,
@@ -212,7 +212,6 @@ export function useConfigureBundleController(): ConfigureBundleFlowDraft {
     markAsSaved,
     navigate,
     openCollectionsModal,
-    openPageSelectionModal,
     openProductsModal,
     originalValuesRef,
     parentProductStatusUi,
@@ -227,24 +226,21 @@ export function useConfigureBundleController(): ConfigureBundleFlowDraft {
     ruleMessages,
     saveBarRef,
     selectedCollections,
-    selectedPage,
     setActiveSection,
     setActiveTabIndex,
-    setAvailablePages,
     setBundleProduct,
     setCurrentModalStepId,
     setForceNavigation,
     setIsDirty,
-    setIsLoadingPages,
     setProductImageUrl,
     setProductStatus,
     setProductTitle,
     setRuleMessages,
     setSelectedCollections,
-    setSelectedPage,
     shop,
     shopify,
     shopLocales,
+    shopCurrencyCode,
     stepsState,
     themeEditorUrl: currentThemeEditorUrl,
     triggerAppEmbedBannerFeedback,

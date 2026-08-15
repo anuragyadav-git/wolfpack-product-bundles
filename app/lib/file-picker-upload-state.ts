@@ -1,3 +1,7 @@
+export function resolveFilePickerInitialOpen(autoOpen: boolean) {
+  return autoOpen;
+}
+
 export function shouldApplyUploadMutationResult({
   hasCurrentAttempt,
   isSuccess,

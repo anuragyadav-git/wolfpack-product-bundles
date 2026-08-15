@@ -1,12 +1,15 @@
-import { Await, useFetcher, useNavigate, useLoaderData, useSearchParams } from "@remix-run/react";
+import { useFetcher, useNavigate, useLoaderData, useSearchParams } from "@remix-run/react";
 import { lazy, useCallback, useRef, useEffect, useMemo, useState, Suspense } from "react";
 import { useAppBridge } from "@shopify/app-bridge-react";
 import { useTranslation } from "react-i18next";
 import { OptimisedImage } from "../../../components/OptimisedImage";
 import { ProxyHealthBanner } from "../../../components/ProxyHealthBanner";
-import { DashboardBannerSkeleton } from "../../../components/skeletons/DashboardBannerSkeleton";
 import { useDashboardState } from "../../../hooks/useDashboardState";
-import { getBundleEditPath, resolveCloneConfigureRedirect } from "../../../lib/bundle-navigation";
+import {
+  buildDashboardCloneFormData,
+  getBundleEditPath,
+  resolveCloneConfigureRedirect,
+} from "../../../lib/bundle-navigation";
 import { decideDashboardPreviewAction } from "../../../lib/dashboard-preview-action";
 import {
   closePendingDashboardPreview,
@@ -35,9 +38,7 @@ import {
 import type { action, DashboardAppEmbedStatus, loader } from "./route";
 import { DashboardTopCards } from "./DashboardTopCards";
 import { DashboardStatusGrid } from "./DashboardStatusGrid";
-import {
-  shouldRenderDashboardResourceCard,
-} from "./dashboard-media-state";
+import { DashboardResourcesCard } from "./DashboardResourcesCard";
 import {
   shouldRenderDashboardDeleteModal,
   shouldRenderDashboardPreviewModal,
@@ -51,37 +52,24 @@ import { BundleActionsButtons } from "./BundleActionsButtons";
 import {
   buildDashboardTablePage,
   buildDashboardTableRows,
+  getDashboardBundlesPerPageChoice,
 } from "./dashboard-table-model";
+import { DashboardLoadingWorkspace } from "./dashboard-route-readiness";
 import dashboardStyles from "./dashboard.module.css";
 
 const STATUS_TONE_MAP = { active: 'success', draft: 'info', unlisted: 'warning' } as const;
-const DashboardResourcesCard = lazy(() =>
-  import("./DashboardResourcesCard").then((module) => ({ default: module.DashboardResourcesCard })),
-);
 const EnablePreviewModal = lazy(() =>
   import("../../../components/EnablePreviewModal").then((module) => ({ default: module.EnablePreviewModal })),
 );
-const DEFAULT_APP_EMBED_STATUS: DashboardAppEmbedStatus = {
-  appEmbedEnabled: false,
-  themeEditorUrl: null,
+type DashboardPageProps = {
+  appEmbedStatus: DashboardAppEmbedStatus;
+  banners: {
+    proxyHealthy: boolean;
+  };
 };
 
-function DashboardAppEmbedStatusHydrator({
-  status,
-  onResolve,
-}: {
-  status: DashboardAppEmbedStatus;
-  onResolve: (status: DashboardAppEmbedStatus) => void;
-}) {
-  useEffect(() => {
-    onResolve(status);
-  }, [onResolve, status]);
-
-  return null;
-}
-
-export function DashboardPage() {
-  const { bundles, shop, appUrl, appEmbedStatus, banners } = useLoaderData<typeof loader>();
+export function DashboardPage({ appEmbedStatus, banners }: DashboardPageProps) {
+  const { bundles, shop, appUrl } = useLoaderData<typeof loader>();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const fetcher = useFetcher();
@@ -98,7 +86,8 @@ export function DashboardPage() {
   const deleteModalRef = useRef<any>(null);
   const searchRef = useRef<any>(null);
   const langSelectRef = useRef<any>(null);
-  const perPageSelectRef = useRef<any>(null);
+  const perPageButtonRef = useRef<any>(null);
+  const perPageChoiceListRef = useRef<any>(null);
   const statusChoiceListRef = useRef<any>(null);
   const typeChoiceListRef = useRef<any>(null);
   const statusPopoverRef = useRef<any>(null);
@@ -109,15 +98,9 @@ export function DashboardPage() {
   const [previewingBundleId, setPreviewingBundleId] = useState<string | null>(null);
   const [editingBundleId, setEditingBundleId] = useState<string | null>(null);
   const [activeActionMenuBundleId, setActiveActionMenuBundleId] = useState<string | null>(null);
-  const [hasMainContentSettled, setHasMainContentSettled] = useState(false);
-  const [resolvedAppEmbedStatus, setResolvedAppEmbedStatus] = useState<DashboardAppEmbedStatus>(DEFAULT_APP_EMBED_STATUS);
   const [appEmbedOpenOptimism, setAppEmbedOpenOptimism] = useState(false);
   const [currentThemeEditorUrl, setCurrentThemeEditorUrl] = useState<string | null>(null);
   const [currentAppEmbedEnabled, setCurrentAppEmbedEnabled] = useState<boolean | null>(null);
-
-  const handleAppEmbedStatusResolved = useCallback((status: DashboardAppEmbedStatus) => {
-    setResolvedAppEmbedStatus(status);
-  }, []);
 
   const refreshAppEmbedFromBridge = useCallback(async () => {
     try {
@@ -125,10 +108,10 @@ export function DashboardPage() {
       setCurrentAppEmbedEnabled(status.appEmbedEnabled);
     } catch {
       setCurrentAppEmbedEnabled((current) => (
-        current ?? resolvedAppEmbedStatus.appEmbedEnabled ?? true
+        current ?? appEmbedStatus.appEmbedEnabled
       ));
     }
-  }, [resolvedAppEmbedStatus.appEmbedEnabled, shopify]);
+  }, [appEmbedStatus.appEmbedEnabled, shopify]);
 
   const refreshAppEmbedFromBridgeAndClearOptimism = useCallback(async () => {
     await refreshAppEmbedFromBridge();
@@ -136,10 +119,10 @@ export function DashboardPage() {
   }, [refreshAppEmbedFromBridge]);
 
   useEffect(() => {
-    setCurrentThemeEditorUrl(resolvedAppEmbedStatus.themeEditorUrl);
+    setCurrentThemeEditorUrl(appEmbedStatus.themeEditorUrl);
     setCurrentAppEmbedEnabled(null);
     void refreshAppEmbedFromBridge();
-  }, [resolvedAppEmbedStatus.appEmbedEnabled, resolvedAppEmbedStatus.themeEditorUrl, refreshAppEmbedFromBridge]);
+  }, [appEmbedStatus.appEmbedEnabled, appEmbedStatus.themeEditorUrl, refreshAppEmbedFromBridge]);
 
   useEffect(() => {
     if (!appEmbedOpenOptimism) return;
@@ -160,15 +143,6 @@ export function DashboardPage() {
       document.removeEventListener("visibilitychange", onVisibilityChange);
     };
   }, [appEmbedOpenOptimism, refreshAppEmbedFromBridgeAndClearOptimism]);
-
-  useEffect(() => {
-    if (typeof window.requestIdleCallback === "function") {
-      const idleId = window.requestIdleCallback(() => setHasMainContentSettled(true), { timeout: 1800 });
-      return () => window.cancelIdleCallback?.(idleId);
-    }
-    const timeoutId = window.setTimeout(() => setHasMainContentSettled(true), 1200);
-    return () => window.clearTimeout(timeoutId);
-  }, []);
 
   useEffect(() => {
     if (fetcher.state !== 'idle' || !fetcher.data) return;
@@ -221,14 +195,9 @@ export function DashboardPage() {
   }, [navigate]);
 
   const handleCloneBundle = useCallback((bundleId: string) => {
-    if (confirm(t("dashboard.actions.confirmClone"))) {
-      fetcherIntentRef.current = 'cloneBundle';
-      const formData = new FormData();
-      formData.append("intent", "cloneBundle");
-      formData.append("bundleId", bundleId);
-      fetcher.submit(formData, { method: "post" });
-    }
-  }, [fetcher, bundles, t]);
+    fetcherIntentRef.current = 'cloneBundle';
+    fetcher.submit(buildDashboardCloneFormData(bundleId), { method: "post" });
+  }, [fetcher]);
 
   const handleDeleteBundle = useCallback((bundleId: string) => {
     openDeleteModal(bundleId);
@@ -271,7 +240,7 @@ export function DashboardPage() {
     deleteModalRef.current?.show?.();
   }, [bundleToDelete]);
 
-  const appEmbedEnabled = currentAppEmbedEnabled ?? true;
+  const appEmbedEnabled = currentAppEmbedEnabled ?? appEmbedStatus.appEmbedEnabled;
 
   const enablePreviewGate = useEnablePreviewGate({
     appEmbedEnabled,
@@ -450,11 +419,15 @@ export function DashboardPage() {
   }, [handleLanguageChange]);
 
   useEffect(() => {
-    const el = perPageSelectRef.current;
+    const el = perPageChoiceListRef.current;
     if (!el) return;
     const handler = (e: Event) => {
-      const val = (e as CustomEvent).detail?.value ?? (e.target as HTMLSelectElement).value ?? '';
-      if (val) setBundlesPerPage(Number(val));
+      const value = getDashboardBundlesPerPageChoice(
+        (e.currentTarget as any).values ?? [],
+      );
+      if (value === null) return;
+      setBundlesPerPage(value);
+      window.setTimeout(() => perPageButtonRef.current?.click?.(), 0);
     };
     el.addEventListener('change', handler);
     return () => el.removeEventListener('change', handler);
@@ -535,9 +508,10 @@ export function DashboardPage() {
     getStatusDisplay,
     getBundleTypeDisplay,
   );
-  const renderResourceCard = shouldRenderDashboardResourceCard({
-    hasMainContentSettled,
-  });
+
+  if (themeExtensionStatus.loading) {
+    return <DashboardLoadingWorkspace />;
+  }
 
   return (
     <>
@@ -554,17 +528,6 @@ export function DashboardPage() {
           </s-text>
         </s-modal>
       )}
-
-      <Suspense fallback={null}>
-        <Await resolve={appEmbedStatus}>
-          {(status) => (
-            <DashboardAppEmbedStatusHydrator
-              status={status as DashboardAppEmbedStatus}
-              onResolve={handleAppEmbedStatusResolved}
-            />
-          )}
-        </Await>
-      </Suspense>
 
       <div className={dashboardStyles.dashboardPage}>
         <div className={dashboardStyles.dashboardLayout}>
@@ -607,24 +570,14 @@ export function DashboardPage() {
             </div>
           </div>
 
-          {/* Banners + app-embed setup card share one loading state guard. */}
-          <Suspense fallback={<DashboardBannerSkeleton />}>
-            <Await resolve={banners}>
-              {(b) => (
-                <>
-                  <DashboardStatusGrid
-                    resources={themeExtensionStatus.resources}
-                    loading={themeExtensionStatus.loading}
-                    error={themeExtensionStatus.error}
-                    themeEditorUrl={currentThemeEditorUrl}
-                    appEmbedEnabled={appEmbedEnabled}
-                    onOpenThemeEditor={handleOpenThemeEditor}
-                  />
-                  {!b.proxyHealthy && <ProxyHealthBanner shop={shop} appUrl={appUrl} />}
-                </>
-              )}
-            </Await>
-          </Suspense>
+          <DashboardStatusGrid
+            resources={themeExtensionStatus.resources}
+            error={themeExtensionStatus.error}
+            themeEditorUrl={currentThemeEditorUrl}
+            appEmbedEnabled={appEmbedEnabled}
+            onOpenThemeEditor={handleOpenThemeEditor}
+          />
+          {!banners.proxyHealthy && <ProxyHealthBanner shop={shop} appUrl={appUrl} />}
 
           {/* Bundles panel */}
           <div className={dashboardStyles.bundlesQueryContainer}>
@@ -769,16 +722,28 @@ export function DashboardPage() {
                         <div className={dashboardStyles.perPageControls}>
                           <span>{t("dashboard.pagination.perPageLabel")}</span>
                           <div className={dashboardStyles.perPageSelectWrap}>
-                            <s-select
-                              ref={perPageSelectRef}
-                              label={t("dashboard.pagination.perPageLabel")}
-                              labelAccessibilityVisibility="exclusive"
-                              value={String(bundlesPerPage)}
+                            <s-button
+                              ref={perPageButtonRef}
+                              id="bundles-per-page-button"
+                              commandFor="bundles-per-page-popover"
+                              variant="secondary"
                             >
-                              <s-option value="10">{t("dashboard.pagination.per10")}</s-option>
-                              <s-option value="20">{t("dashboard.pagination.per20")}</s-option>
-                              <s-option value="50">{t("dashboard.pagination.per50")}</s-option>
-                            </s-select>
+                              {bundlesPerPage} ▾
+                            </s-button>
+                            <s-popover id="bundles-per-page-popover">
+                              <s-box padding="base">
+                                <s-choice-list
+                                  ref={perPageChoiceListRef}
+                                  name="bundles-per-page-list"
+                                  label={t("dashboard.pagination.perPageLabel")}
+                                  labelAccessibilityVisibility="exclusive"
+                                >
+                                  <s-choice value="10" selected={bundlesPerPage === 10 || undefined}>{t("dashboard.pagination.per10")}</s-choice>
+                                  <s-choice value="20" selected={bundlesPerPage === 20 || undefined}>{t("dashboard.pagination.per20")}</s-choice>
+                                  <s-choice value="50" selected={bundlesPerPage === 50 || undefined}>{t("dashboard.pagination.per50")}</s-choice>
+                                </s-choice-list>
+                              </s-box>
+                            </s-popover>
                           </div>
                         </div>
                       </div>
@@ -795,16 +760,11 @@ export function DashboardPage() {
             handleDirectChat={handleDirectChat}
           />
 
-          {/* Resources card */}
-          {renderResourceCard && (
-            <Suspense fallback={null}>
-              <DashboardResourcesCard
-                activeResource={activeResource}
-                setActiveResource={setActiveResource}
-                handleDirectChat={handleDirectChat}
-              />
-            </Suspense>
-          )}
+          <DashboardResourcesCard
+            activeResource={activeResource}
+            setActiveResource={setActiveResource}
+            handleDirectChat={handleDirectChat}
+          />
 
         </div>
       </div>

@@ -22,7 +22,7 @@ const { fullPageProductProcessingMethods } =
   require("../../../app/assets/widgets/full-page/methods/product-processing-methods.js");
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { PricingCalculator } =
-  require("../../../app/assets/bundle-widget-components.js");
+  require("../../../app/assets/widgets/shared/pricing-calculator.js");
 
 const buildAddonStepFromPersonalization =
   fullPageInitialRenderMethods.buildAddonStepFromPersonalization;

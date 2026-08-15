@@ -1,0 +1,108 @@
+{
+  "schema_version": 1,
+  "job_id": "fpb-classic-summary-20260804",
+  "revision": 1,
+  "status": "complete",
+  "items": [
+    {
+      "id": "ref-current-desktop-001",
+      "original_filename": "fpb-classic-summary-20260804__current-desktop__summary-sidebar__partially-filled__1440x900__r1.png",
+      "artifact_path": "references/current/fpb-classic-summary-20260804__current-desktop__summary-sidebar__partially-filled__1440x900__r1.png",
+      "roles": [
+        "current",
+        "desktop",
+        "context"
+      ],
+      "component": "FPB Classic summary sidebar and product-grid relationship",
+      "state": "partially-filled-recommended",
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "status": "captured"
+      },
+      "browser_zoom": 100,
+      "pixel_dimensions": {
+        "width": 1440,
+        "height": 900
+      },
+      "crop_status": "viewport-only",
+      "surrounding_context_included": true,
+      "source": "Chrome DevTools MCP viewport capture",
+      "provenance": "Agent test-store Wolfpack storefront bundle cmse8sp170000v0ytaqqzsvtw",
+      "intended_use": "structural reference",
+      "quality_issues": [],
+      "comparable_counterparts": [
+        "ref-target-desktop-001",
+        "ref-current-mobile-001"
+      ],
+      "permissions_or_usage_notes": "",
+      "approval_status": "validated-sufficient"
+    },
+    {
+      "id": "ref-target-desktop-001",
+      "original_filename": "fpb-classic-summary-20260804__target-desktop__summary-sidebar__partially-filled__1440x900__r1.png",
+      "artifact_path": "references/target/fpb-classic-summary-20260804__target-desktop__summary-sidebar__partially-filled__1440x900__r1.png",
+      "roles": [
+        "target",
+        "desktop",
+        "inspiration"
+      ],
+      "component": "Target summary sidebar and product-grid relationship",
+      "state": "comparable-partially-filled-preferred",
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "status": "captured"
+      },
+      "browser_zoom": 100,
+      "pixel_dimensions": {
+        "width": 1440,
+        "height": 900
+      },
+      "crop_status": "viewport-only",
+      "surrounding_context_included": true,
+      "source": "Chrome DevTools MCP viewport capture",
+      "provenance": "Yash-wolfpack EB landing-page bundle 2 created with explicit user authorization",
+      "intended_use": "inspiration",
+      "quality_issues": [],
+      "comparable_counterparts": [
+        "ref-current-desktop-001"
+      ],
+      "permissions_or_usage_notes": "User approved retaining a storefront-only screenshot inside this design job.",
+      "approval_status": "validated-sufficient"
+    },
+    {
+      "id": "ref-current-mobile-001",
+      "original_filename": "fpb-classic-summary-20260804__current-mobile__summary-tray__partially-filled__390x844__r1.png",
+      "artifact_path": "references/current/fpb-classic-summary-20260804__current-mobile__summary-tray__partially-filled__390x844__r1.png",
+      "roles": [
+        "current",
+        "mobile",
+        "context"
+      ],
+      "component": "FPB Classic mobile summary tray/footer and surrounding content",
+      "state": "partially-filled-recommended",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "status": "captured"
+      },
+      "browser_zoom": 100,
+      "pixel_dimensions": {
+        "width": 390,
+        "height": 844
+      },
+      "crop_status": "viewport-only",
+      "surrounding_context_included": true,
+      "source": "Chrome DevTools MCP viewport capture",
+      "provenance": "Agent test-store Wolfpack storefront bundle cmse8sp170000v0ytaqqzsvtw",
+      "intended_use": "structural reference",
+      "quality_issues": [],
+      "comparable_counterparts": [
+        "ref-current-desktop-001"
+      ],
+      "permissions_or_usage_notes": "",
+      "approval_status": "validated-sufficient"
+    }
+  ]
+}

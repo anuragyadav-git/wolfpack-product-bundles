@@ -76,26 +76,16 @@ export function FpbStepRuleModeContent({
         }}
       >
         {ruleModeOptions.map((opt) => (
-          <label
+          <s-choice-list
             key={opt.value}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              cursor: "pointer",
-              fontSize: 14,
-            }}
+            label={`${opt.label} rule mode`}
+            labelAccessibilityVisibility="exclusive"
+            name={`step-rule-mode-${step.id}`}
+            values={activeRuleMode === opt.value ? [opt.value] : []}
+            onChange={() => handleRuleModeChange(opt.value)}
           >
-            <input
-              type="radio"
-              name={`step-rule-mode-${step.id}`}
-              value={opt.value}
-              checked={activeRuleMode === opt.value}
-              onChange={() => handleRuleModeChange(opt.value)}
-              style={{ margin: 0 }}
-            />
-            {opt.label}
-          </label>
+            <s-choice value={opt.value}>{opt.label}</s-choice>
+          </s-choice-list>
         ))}
       </div>
       {activeRuleMode === "category" ? (

@@ -110,11 +110,6 @@ interface SyncResult {
   error?: string;
 }
 
-function normalizeStepMinQuantity(value: unknown): number {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : 0;
-}
-
 // --- Pure Calculation ---
 
 /**
@@ -278,7 +273,7 @@ export async function syncBundleInventory(
       for (const sp of step.StepProduct) {
         componentProducts.push({
           productId: sp.productId,
-          quantity: normalizeStepMinQuantity(sp.minQuantity),
+          quantity: sp.minQuantity,
         });
       }
 
@@ -313,7 +308,7 @@ export async function syncBundleInventory(
                 if (!alreadyAdded) {
                   componentProducts.push({
                     productId,
-                    quantity: normalizeStepMinQuantity(step.minQuantity),
+                    quantity: step.minQuantity,
                   });
                 }
               }

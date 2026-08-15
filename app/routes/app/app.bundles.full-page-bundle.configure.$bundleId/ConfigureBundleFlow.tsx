@@ -3,6 +3,7 @@ import { CommonConfigureShell } from "../_shared/bundle-configure/CommonConfigur
 import { ConfigureCanvasHeader } from "./ConfigureCanvasHeader";
 import { ConfigureHiddenInputs } from "./ConfigureHiddenInputs";
 import { ConfigureSidebar } from "./ConfigureSidebar";
+import { ConfigureRouteLoadingWorkspace } from "../_shared/bundle-configure/ConfigureRouteLoadingWorkspace";
 import { useConfigureBundleFlow } from "./useConfigureBundleFlow";
 import { StepSetupSection } from "./sections/StepSetupSection";
 import { FreeGiftAddonsSection } from "./sections/FreeGiftAddonsSection";
@@ -11,9 +12,14 @@ import { ImagesVisibilitySection } from "./sections/ImagesVisibilitySection";
 import { BundleSettingsSection } from "./sections/BundleSettingsSection";
 import { BundleWidgetSection } from "./sections/BundleWidgetSection";
 import { ConfigureRouteModals } from "./sections/ConfigureRouteModals";
+import { ConfigureValidationSummary } from "../_shared/bundle-configure/ConfigureValidationSummary";
+import { BundleSubscriptionsSection } from "../_shared/bundle-configure/BundleSubscriptionsSection";
 
 function ConfigureBundleFlow() {
   const flow = useConfigureBundleFlow();
+  if (!flow.isCriticalStatusReady) {
+    return <ConfigureRouteLoadingWorkspace />;
+  }
   const {
     blockConfigurationChangeWhileSaving,
     fetcher,
@@ -66,11 +72,28 @@ function ConfigureBundleFlow() {
       sidebar={<ConfigureSidebar flow={flow} />}
       overlays={<ConfigureRouteModals flow={flow} />}
     >
+      <ConfigureValidationSummary
+        activeSection={flow.activeSection}
+        issues={flow.validationIssues}
+      />
       <StepSetupSection flow={flow} />
       <FreeGiftAddonsSection flow={flow} />
       <DiscountPricingSection flow={flow} />
       <ImagesVisibilitySection flow={flow} />
       <BundleSettingsSection flow={flow} />
+      <BundleSubscriptionsSection
+        activeSection={flow.activeSection}
+        bundle={flow.bundle}
+        pricingState={flow.pricingState}
+        setShowSubscriptionSetupGuide={flow.setShowSubscriptionSetupGuide}
+        showSubscriptionSetupGuide={flow.showSubscriptionSetupGuide}
+        shopLocales={flow.shopLocales}
+        stepsState={flow.stepsState}
+        subscriptionConfig={flow.subscriptionConfig}
+        setSubscriptionConfig={flow.setSubscriptionConfig}
+        subscriptionFetcher={flow.subscriptionFetcher}
+        validationErrors={flow.validationErrors}
+      />
       <BundleWidgetSection flow={flow} />
     </CommonConfigureShell>
   );

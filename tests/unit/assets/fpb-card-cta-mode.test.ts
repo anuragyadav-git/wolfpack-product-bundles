@@ -51,15 +51,15 @@ describe('FPB product card CTA mode', () => {
     expect(runtime.getProductAddButtonText()).toBe('+');
   });
 
-  it('uses persisted showTextOnPlusEnabled to render text button copy', () => {
-    const runtime = makeRuntime({ showTextOnPlusEnabled: true });
+  it('uses persisted showTextOnAddButton to render text button copy', () => {
+    const runtime = makeRuntime({ showTextOnAddButton: true, bundleDesignPresetId: 'STANDARD' });
 
     expect(runtime.resolveFullPageCardCtaMode()).toBe('text');
     expect(runtime.getProductAddButtonText()).toBe('Add +');
   });
 
-  it('uses compact plus icon copy when showTextOnPlusEnabled is disabled', () => {
-    const runtime = makeRuntime({ showTextOnPlusEnabled: false });
+  it('uses compact plus icon copy when showTextOnAddButton is disabled', () => {
+    const runtime = makeRuntime({ showTextOnAddButton: false, bundleDesignPresetId: 'STANDARD' });
 
     expect(runtime.resolveFullPageCardCtaMode()).toBe('icon');
     expect(runtime.getProductAddButtonText()).toBe('+');
@@ -74,7 +74,7 @@ describe('FPB product card CTA mode', () => {
   it('does not collapse Compact selected cards into a badge-only state', () => {
     const runtime = makeRuntime({
       bundleDesignPresetId: 'COMPACT',
-      showTextOnPlusEnabled: false,
+      showTextOnAddButton: false,
     });
 
     expect(runtime.resolveFullPageCardCtaMode()).toBe('icon');
@@ -84,7 +84,7 @@ describe('FPB product card CTA mode', () => {
   it('does not collapse Standard icon selected cards into a badge-only state', () => {
     const runtime = makeRuntime({
       bundleDesignPresetId: 'STANDARD',
-      showTextOnPlusEnabled: false,
+      showTextOnAddButton: false,
     });
 
     expect(runtime.resolveFullPageCardCtaMode()).toBe('icon');
@@ -94,16 +94,16 @@ describe('FPB product card CTA mode', () => {
   it('does not collapse Standard text selected cards into a badge-only state', () => {
     const runtime = makeRuntime({
       bundleDesignPresetId: 'STANDARD',
-      showTextOnPlusEnabled: true,
+      showTextOnAddButton: true,
     });
 
     expect(runtime.resolveFullPageCardCtaMode()).toBe('text');
     expect(runtime.usesSelectedQuantityBadge()).toBe(false);
   });
 
-  it('falls back to Standard when no preset is present', () => {
+  it('returns null when no preset is present', () => {
     const runtime = makeRuntime({});
 
-    expect(runtime.getFullPageDesignPreset()).toBe('STANDARD');
+    expect(runtime.getFullPageDesignPreset()).toBeNull();
   });
 });

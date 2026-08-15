@@ -1,3 +1,9 @@
+const storefrontTypeScriptMapper = {
+  '^(\\.{1,2}/.*)\\.js$': '$1',
+  '^(.*app/assets/(?:widgets|sdk)/.*)\\.js$': '$1.ts',
+  '^(.*app/assets/(?:bundle-modal-component|bundle-widget-full-page|bundle-widget-product-page))\\.js$': '$1.ts',
+};
+
 /** @type {import('jest').Config} */
 export default {
   testEnvironment: 'node',
@@ -38,7 +44,9 @@ export default {
   coverageReporters: ['text', 'lcov', 'html'],
   setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
   moduleNameMapper: {
+    ...storefrontTypeScriptMapper,
     '^~/(.*)$': '<rootDir>/app/$1',
+    '\\.css\\?url$': '<rootDir>/tests/__mocks__/styleUrlMock.js',
   },
   testTimeout: 30000,
   verbose: true,
@@ -60,7 +68,9 @@ export default {
         '^.+\\.js$': ['babel-jest', { plugins: ['@babel/plugin-transform-modules-commonjs'] }],
       },
       moduleNameMapper: {
+        ...storefrontTypeScriptMapper,
         '^~/(.*)$': '<rootDir>/app/$1',
+        '\\.css\\?url$': '<rootDir>/tests/__mocks__/styleUrlMock.js',
         '\\.module\\.css$': '<rootDir>/tests/__mocks__/styleMock.js',
         '\\.css$': '<rootDir>/tests/__mocks__/styleMock.js',
       },
@@ -83,7 +93,9 @@ export default {
         '^.+\\.js$': ['babel-jest', { plugins: ['@babel/plugin-transform-modules-commonjs'] }],
       },
       moduleNameMapper: {
+        ...storefrontTypeScriptMapper,
         '^~/(.*)$': '<rootDir>/app/$1',
+        '\\.css\\?url$': '<rootDir>/tests/__mocks__/styleUrlMock.js',
         '\\.module\\.css$': '<rootDir>/tests/__mocks__/styleMock.js',
         '\\.css$': '<rootDir>/tests/__mocks__/styleMock.js',
       },
@@ -106,7 +118,9 @@ export default {
         '^.+\\.js$': ['babel-jest', { plugins: ['@babel/plugin-transform-modules-commonjs'] }],
       },
       moduleNameMapper: {
+        ...storefrontTypeScriptMapper,
         '^~/(.*)$': '<rootDir>/app/$1',
+        '\\.css\\?url$': '<rootDir>/tests/__mocks__/styleUrlMock.js',
         '\\.module\\.css$': '<rootDir>/tests/__mocks__/styleMock.js',
         '\\.css$': '<rootDir>/tests/__mocks__/styleMock.js',
       },

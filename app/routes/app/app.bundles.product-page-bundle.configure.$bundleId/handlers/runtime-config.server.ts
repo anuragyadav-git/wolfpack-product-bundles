@@ -2,11 +2,9 @@ import type { ShopifyAdmin } from "../../../../lib/auth-guards.server";
 import { AppLogger } from "../../../../lib/logger";
 import {
   updateBundleProductMetafields,
-  updateComponentProductMetafields,
 } from "../../../../services/bundles/metafield-sync.server";
 import { parseConditionValue } from "../../../../lib/parse-condition-value";
 import { formatStepCategoryForRuntime } from "../../../../lib/bundle-config/category-runtime";
-import { resolveProductPageRenderFilledSlotsAsHorizontalStacked } from "../../../../lib/bundle-config/template-selection";
 import { BundleStatus, BundleType } from "../../../../constants/bundle";
 import { safeJsonParse } from "../../../../services/bundles/bundle-configure-handlers.server";
 
@@ -53,8 +51,8 @@ export function buildBundleBaseConfig(
     boxSelection?: unknown;
     bundleUpsellConfig?: unknown;
     bundleTextConfig?: unknown;
+    bundleSubscriptionConfig?: unknown;
     discountDisplayOverride?: unknown;
-    individualSellingPlanSelection?: unknown;
     validateQuantityPerProduct?: unknown;
     useSingleStepCategoriesAsBundleSteps?: boolean | null;
     pricing?: {
@@ -73,12 +71,8 @@ export function buildBundleBaseConfig(
     pageTitle: step.pageTitle ?? null,
     multiLangData: step.multiLangData ?? {},
     stepImage: step.stepImage ?? null,
-    minQuantity: Number.isFinite(Number.parseInt(step.minQuantity, 10))
-      ? Number.parseInt(step.minQuantity, 10)
-      : 0,
-    maxQuantity: Number.isFinite(Number.parseInt(step.maxQuantity, 10))
-      ? Number.parseInt(step.maxQuantity, 10)
-      : null,
+    minQuantity: step.minQuantity,
+    maxQuantity: step.maxQuantity,
     enabled: step.enabled !== false,
     conditionType: stepConditionsData[step.id]?.[0]?.type || null,
     conditionOperator: stepConditionsData[step.id]?.[0]?.operator || null,
@@ -93,6 +87,7 @@ export function buildBundleBaseConfig(
       id: product.id,
       title: product.title || product.name || "Product",
       imageUrl: product.imageUrl || product.image?.url || null,
+      variants: Array.isArray(product.variants) ? product.variants : [],
     })),
     collections: (step.collections || []).map((collection: any) => ({
       id: collection.id,
@@ -113,6 +108,13 @@ export function buildBundleBaseConfig(
           })),
         }))
       : [],
+    isFreeGift: step.isFreeGift === true,
+    freeGiftName: step.freeGiftName ?? null,
+    addonLabel: step.addonLabel ?? null,
+    addonTitle: step.addonTitle ?? null,
+    addonDisplayFree: step.addonDisplayFree === true,
+    addonTiers: Array.isArray(step.addonTiers) ? step.addonTiers : [],
+    addonUnlockAfterCompletion: step.addonUnlockAfterCompletion !== false,
   }));
 
   const savedPricingMessages = safeJsonParse(
@@ -121,20 +123,12 @@ export function buildBundleBaseConfig(
   );
   const pricingDisplayOptions =
     updatedBundle.pricing?.displayOptions ??
-    discountData.displayOptions ??
-    savedPricingMessages.displayOptions ??
-    null;
+    discountData.displayOptions ?? null;
   const pricingRuleMessages =
     savedPricingMessages.ruleMessages ?? discountData.ruleMessages ?? {};
   const firstRuleId =
     discountData.discountRules?.[0]?.id ?? Object.keys(pricingRuleMessages)[0];
   const firstRuleMsg = firstRuleId && pricingRuleMessages?.[firstRuleId];
-
-  const bundleDesignTemplateData =
-    updatedBundle.bundleType === "product_page" &&
-    updatedBundle.bundleDesignPresetId
-      ? { templateId: updatedBundle.bundleDesignPresetId }
-      : null;
 
   return {
     bundleId: updatedBundle.id,
@@ -146,28 +140,18 @@ export function buildBundleBaseConfig(
     templateName: updatedBundle.templateName,
     bundleDesignTemplate: updatedBundle.bundleDesignTemplate ?? null,
     bundleDesignPresetId: updatedBundle.bundleDesignPresetId ?? null,
-    bundleDesignTemplateData,
     defaultProductsData: updatedBundle.defaultProductsData ?? {},
     boxSelection: updatedBundle.boxSelection ?? null,
     bundleUpsellConfig: updatedBundle.bundleUpsellConfig ?? null,
     bundleTextConfig: updatedBundle.bundleTextConfig ?? null,
+    bundleSubscriptionConfig: updatedBundle.bundleSubscriptionConfig ?? null,
     discountDisplayOverride: updatedBundle.discountDisplayOverride ?? null,
-    individualSellingPlanSelection:
-      updatedBundle.individualSellingPlanSelection ?? {
-        isEnabled: false,
-        showFor: "ALL_PRODUCTS",
-      },
     validateQuantityPerProduct: updatedBundle.validateQuantityPerProduct ?? {
       isEnabled: false,
       allowedQuantity: 1,
     },
-    useSingleStepCategoriesAsBundleSteps:
+  useSingleStepCategoriesAsBundleSteps:
       updatedBundle.useSingleStepCategoriesAsBundleSteps ?? false,
-    renderFilledSlotsAsHorizontalStacked:
-      resolveProductPageRenderFilledSlotsAsHorizontalStacked(
-        updatedBundle.bundleDesignTemplate,
-        bundleDesignTemplateData?.templateId,
-      ),
     steps: optimizedSteps,
     pricing: {
       enabled: discountData.discountEnabled,
@@ -337,7 +321,7 @@ function buildSyncOptimizedSteps(steps: any[]): Array<Record<string, unknown>> {
       name: step.name,
       position: step.position,
       stepImage: step.timelineIconUrl ?? null,
-      minQuantity: Number.isFinite(Number(step.minQuantity)) ? Number(step.minQuantity) : 0,
+      minQuantity: step.minQuantity,
       maxQuantity: step.maxQuantity ?? null,
       enabled: step.enabled !== false,
       conditionType: step.conditionType,
@@ -349,6 +333,13 @@ function buildSyncOptimizedSteps(steps: any[]): Array<Record<string, unknown>> {
       collections,
       StepProduct: Array.isArray(step.StepProduct) ? step.StepProduct : [],
       StepCategory: categories,
+      isFreeGift: step.isFreeGift === true,
+      freeGiftName: step.freeGiftName ?? null,
+      addonLabel: step.addonLabel ?? null,
+      addonTitle: step.addonTitle ?? null,
+      addonDisplayFree: step.addonDisplayFree === true,
+      addonTiers: Array.isArray(step.addonTiers) ? step.addonTiers : [],
+      addonUnlockAfterCompletion: step.addonUnlockAfterCompletion !== false,
     };
   });
 }
@@ -395,11 +386,11 @@ function buildSyncPricingConfig(pricing: any): Record<string, unknown> | null {
       ruleMessages: syncRuleMessages,
       successMessage: syncMsgs.successMessage ?? null,
       successMessageByLocale: syncMsgs.successMessageByLocale ?? null,
-      displayOptions: pricing.displayOptions ?? syncMsgs.displayOptions ?? null,
+      displayOptions: pricing.displayOptions ?? null,
       tierTextByRuleId: syncMsgs.tierTextByRuleId ?? null,
       tierTextByLocaleByRuleId: syncMsgs.tierTextByLocaleByRuleId ?? null,
     },
-    displayOptions: pricing.displayOptions ?? syncMsgs.displayOptions ?? null,
+    displayOptions: pricing.displayOptions ?? null,
   };
 }
 
@@ -409,11 +400,6 @@ export function buildSyncBundleConfiguration(
   extra: Record<string, unknown> = {},
 ): Record<string, unknown> {
   const bundleDesignPresetId = bundle.bundleDesignPresetId ?? null;
-  const bundleDesignTemplateData =
-    bundle.bundleType === BundleType.PRODUCT_PAGE && bundleDesignPresetId
-      ? { templateId: bundleDesignPresetId }
-      : null;
-
   return {
     bundleId: bundle.id,
     id: bundle.id,
@@ -426,28 +412,19 @@ export function buildSyncBundleConfiguration(
     type: "cart_transform",
     bundleDesignTemplate: bundle.bundleDesignTemplate ?? null,
     bundleDesignPresetId,
-    bundleDesignTemplateData,
     defaultProductsData: bundle.defaultProductsData ?? {},
     boxSelection: bundle.boxSelection ?? null,
     bundleUpsellConfig: bundle.bundleUpsellConfig ?? null,
     bundleTextConfig: bundle.bundleTextConfig ?? null,
     personalizationData: bundle.personalizationData ?? null,
+    bundleSubscriptionConfig: bundle.bundleSubscriptionConfig ?? null,
     discountDisplayOverride: bundle.discountDisplayOverride ?? null,
-    individualSellingPlanSelection: bundle.individualSellingPlanSelection ?? {
-      isEnabled: false,
-      showFor: "ALL_PRODUCTS",
-    },
     validateQuantityPerProduct: bundle.validateQuantityPerProduct ?? {
       isEnabled: false,
       allowedQuantity: 1,
     },
-    useSingleStepCategoriesAsBundleSteps:
+  useSingleStepCategoriesAsBundleSteps:
       bundle.useSingleStepCategoriesAsBundleSteps ?? false,
-    renderFilledSlotsAsHorizontalStacked:
-      resolveProductPageRenderFilledSlotsAsHorizontalStacked(
-        bundle.bundleDesignTemplate,
-        bundleDesignTemplateData?.templateId,
-      ),
     steps: buildSyncOptimizedSteps(bundle.steps || []),
     pricing: buildSyncPricingConfig(bundle.pricing),
     loadingGif: bundle.loadingGif ?? null,
@@ -479,21 +456,7 @@ export async function updateSyncMetafields(
     `${configSize} chars`,
   );
 
-  const [componentResult, variantResult] = await Promise.allSettled([
-    updateComponentProductMetafields(admin, productId, bundleConfiguration),
-    updateBundleProductMetafields(admin, productId, bundleConfiguration),
-  ]);
-
-  if (componentResult.status === "rejected") {
-    throw new Error(
-      `Failed to update component metafields: ${componentResult.reason}`,
-    );
-  }
-  if (variantResult.status === "rejected") {
-    throw new Error(
-      `Failed to update bundle variant metafields: ${variantResult.reason}`,
-    );
-  }
+  await updateBundleProductMetafields(admin, productId, bundleConfiguration);
 
   return bundleConfiguration;
 }

@@ -33,6 +33,8 @@ export function PpbBundleWidgetSection() {
     upsellWidgetImageUrl,
     upsellWidgetSelectedProducts,
     upsellWidgetTitle,
+    validationErrors = {},
+    clearValidationError,
   } = usePpbConfigureContext();
 
   return (
@@ -108,12 +110,13 @@ export function PpbBundleWidgetSection() {
               </div>
               <s-banner
                 tone="info"
-                heading="Widget visibility tip"
                 dismissible={false}
                 hidden={false}
               >
-                Select if you want the upsell block or button to appear on
-                product pages.
+                <s-text>
+                  Select if you want the upsell block or button to appear on
+                  product pages.
+                </s-text>
               </s-banner>
               <div className={productPageBundleStyles.visibilityPanelSection}>
                 <div
@@ -126,7 +129,7 @@ export function PpbBundleWidgetSection() {
                   </h4>
                   <s-button
                     variant="secondary"
-                    icon="globe"
+                    icon="language-translate"
                     onClick={() =>
                       openMultiLanguageModal("Bundle Widget", [
                         {
@@ -165,47 +168,42 @@ export function PpbBundleWidgetSection() {
                     />
                   </div>
                   <div className={productPageBundleStyles.visibilityFieldStack}>
-                    <label
-                      className={productPageBundleStyles.visibilityFieldLabel}
-                    >
-                      <span>Widget Title</span>
-                      <input
-                        className={productPageBundleStyles.visibilityTextInput}
+                    <s-text-field
+                        id="configure-widget-title"
+                        label="Widget Title"
                         value={upsellWidgetTitle}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        required={upsellWidgetDisplayMode !== "button" || undefined}
+                        disabled={!upsellWidgetEnabled || undefined}
+                        error={validationErrors["widget.title"]}
+                        onInput={(e: any) => {
                           setUpsellWidgetTitle(e.target.value);
                           markAsDirty();
+                          clearValidationError("widget.title");
                         }}
-                      />
-                    </label>
-                    <label
-                      className={productPageBundleStyles.visibilityFieldLabel}
-                    >
-                      <span>Widget Description</span>
-                      <textarea
-                        className={productPageBundleStyles.visibilityTextarea}
+                    />
+                    <s-text-area
+                        label="Widget Description"
                         value={upsellWidgetDescription}
-                        onChange={(
-                          e: React.ChangeEvent<HTMLTextAreaElement>,
-                        ) => {
+                        rows={3}
+                        disabled={!upsellWidgetEnabled || undefined}
+                        onInput={(e: any) => {
                           setUpsellWidgetDescription(e.target.value);
                           markAsDirty();
                         }}
-                      />
-                    </label>
-                    <label
-                      className={productPageBundleStyles.visibilityFieldLabel}
-                    >
-                      <span>Widget Button Text</span>
-                      <input
-                        className={productPageBundleStyles.visibilityTextInput}
+                    />
+                    <s-text-field
+                        id="configure-widget-buttonText"
+                        label="Widget Button Text"
                         value={upsellWidgetButtonText}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        required
+                        disabled={!upsellWidgetEnabled || undefined}
+                        error={validationErrors["widget.buttonText"]}
+                        onInput={(e: any) => {
                           setUpsellWidgetButtonText(e.target.value);
                           markAsDirty();
+                          clearValidationError("widget.buttonText");
                         }}
-                      />
-                    </label>
+                    />
                   </div>
                 </div>
               </div>
@@ -251,7 +249,10 @@ export function PpbBundleWidgetSection() {
                       className={
                         productPageBundleStyles.visibilitySecondaryAction
                       }
-                      onClick={() => openVisibilityProductPicker("widget")}
+                      onClick={async () => {
+                        await openVisibilityProductPicker("widget");
+                        clearValidationError("widget.products");
+                      }}
                     >
                       Select products
                     </button>
@@ -281,6 +282,11 @@ export function PpbBundleWidgetSection() {
                         ),
                       )}
                     </div>
+                    {validationErrors["widget.products"] && (
+                      <s-text id="configure-widget-products" tone="critical">
+                        {validationErrors["widget.products"]}
+                      </s-text>
+                    )}
                   </div>
                 )}
                 {upsellWidgetDisplayOn === "specific_collections" && (
@@ -292,7 +298,10 @@ export function PpbBundleWidgetSection() {
                       className={
                         productPageBundleStyles.visibilitySecondaryAction
                       }
-                      onClick={() => openVisibilityCollectionPicker("widget")}
+                      onClick={async () => {
+                        await openVisibilityCollectionPicker("widget");
+                        clearValidationError("widget.collections");
+                      }}
                     >
                       Select collections
                     </button>
@@ -327,6 +336,11 @@ export function PpbBundleWidgetSection() {
                         ),
                       )}
                     </div>
+                    {validationErrors["widget.collections"] && (
+                      <s-text id="configure-widget-collections" tone="critical">
+                        {validationErrors["widget.collections"]}
+                      </s-text>
+                    )}
                   </div>
                 )}
               </div>

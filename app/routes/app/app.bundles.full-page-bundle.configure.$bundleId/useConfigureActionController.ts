@@ -1,11 +1,19 @@
-import { useCallback, useState, type MouseEvent } from "react";
+import { useCallback, useState } from "react";
 import { AppLogger } from "../../../lib/logger";
 import { navigateBackOrFallback } from "../../../lib/navigation";
-import { validateSlug } from "../../../lib/slug-utils";
 import { markBundlePreviewComplete } from "../../../lib/bundle-preview-readiness";
 import { verifyAppEmbedEnabledBeforePreview } from "../../../lib/app-embed-status-check.client";
 import { prepareStorefrontPreviewForOpen } from "../../../lib/storefront-sync-preview.client";
+import {
+  closePendingDashboardPreview,
+  navigatePendingDashboardPreview,
+  openPendingDashboardPreview,
+} from "../../../lib/dashboard-preview-window";
 import { blockUnsavedAdminNavigation } from "../../../lib/admin-unsaved-navigation";
+import {
+  buildFpbUpsellThemeEditorUrl,
+  openThemeEditorInNewTab,
+} from "../../../lib/theme-editor-navigation.client";
 import { useSharedBundleHandlers } from "../../../hooks/useSharedBundleHandlers";
 import {
   getGuidedTourTransition,
@@ -79,6 +87,7 @@ export function useConfigureActionController(flow: ConfigureBundleFlowDraft) {
       );
       return false;
     }
+    const pendingPreviewWindow = openPendingDashboardPreview();
     setIsPreviewBundleLoading(true);
     const appEmbedEnabled = await verifyAppEmbedEnabledBeforePreview(
       flow.appEmbedEnabled,
@@ -88,13 +97,16 @@ export function useConfigureActionController(flow: ConfigureBundleFlowDraft) {
       },
     );
     if (!appEmbedEnabled) {
+      closePendingDashboardPreview(pendingPreviewWindow);
       finishPreviewBundleLoading();
       flow.triggerAppEmbedBannerFeedback();
       return false;
     }
+    let preparedPreview;
     try {
-      await prepareStorefrontPreviewForOpen();
+      preparedPreview = await prepareStorefrontPreviewForOpen();
     } catch (error) {
+      closePendingDashboardPreview(pendingPreviewWindow);
       finishPreviewBundleLoading();
       flow.shopify.toast.show(
         error instanceof Error
@@ -104,12 +116,41 @@ export function useConfigureActionController(flow: ConfigureBundleFlowDraft) {
       );
       return false;
     }
-    const executePreviewBundle = (): "opened" | "pending_fetcher" => {
+    if (
+      flow.bundle.bundleType === "full_page" &&
+      !preparedPreview.shareablePreviewUrl
+    ) {
+      closePendingDashboardPreview(pendingPreviewWindow);
+      finishPreviewBundleLoading();
+      flow.shopify.toast.show("Preview URL is unavailable.", {
+        isError: true,
+        duration: 5000,
+      });
+      return false;
+    }
+    const executePreviewBundle = (): "opened" => {
       if (flow.bundle.bundleType === "full_page") {
-        const formData = new FormData();
-        formData.append("intent", "createFpbPreview");
-        flow.fetcher.submit(formData, { method: "post" });
-        return "pending_fetcher";
+        if (
+          !navigatePendingDashboardPreview(
+            pendingPreviewWindow,
+            preparedPreview.shareablePreviewUrl!,
+          )
+        ) {
+          window.open(
+            preparedPreview.shareablePreviewUrl!,
+            "_blank",
+            "noopener,noreferrer",
+          );
+        }
+        markBundlePreviewComplete({
+          bundleId: flow.bundle.id,
+          storage: window.localStorage,
+          setHasPreview: flow.setHasPreview,
+        });
+        flow.shopify.toast.show("Bundle preview opened in new tab", {
+          isError: false,
+        });
+        return "opened";
       }
       let productUrl = null;
       const productHandle =
@@ -142,7 +183,9 @@ export function useConfigureActionController(flow: ConfigureBundleFlowDraft) {
         productUrl = `https://admin.shopify.com/store/${shopDomain}/products/${productId}`;
       }
       if (productUrl) {
-        open(productUrl, "_blank");
+        if (!navigatePendingDashboardPreview(pendingPreviewWindow, productUrl)) {
+          open(productUrl, "_blank", "noopener,noreferrer");
+        }
         recordBundlePreview(productUrl, "fpb_configure");
         const isPreviewUrl =
           flow.bundleProduct &&
@@ -157,6 +200,7 @@ export function useConfigureActionController(flow: ConfigureBundleFlowDraft) {
         });
         flow.shopify.toast.show(message, { isError: false });
       } else {
+        closePendingDashboardPreview(pendingPreviewWindow);
         AppLogger.error("Bundle product data:", {}, flow.bundleProduct);
         flow.shopify.toast.show(
           "Unable to determine bundle product URL. Please check bundle product configuration.",
@@ -165,10 +209,8 @@ export function useConfigureActionController(flow: ConfigureBundleFlowDraft) {
       }
       return "opened";
     };
-    const previewResult = executePreviewBundle();
-    if (previewResult === "opened") {
-      finishPreviewBundleLoading();
-    }
+    executePreviewBundle();
+    finishPreviewBundleLoading();
     return true;
   }, [finishPreviewBundleLoading, flow]);
   const handleSectionChange = useCallback(
@@ -291,84 +333,32 @@ export function useConfigureActionController(flow: ConfigureBundleFlowDraft) {
       window.setTimeout(flow.closeSelectTemplateModal, 500);
     }
   }, [flow, handlePreviewBundle]);
-  const handlePageSelectionBackdropClick = useCallback(
-    (event: MouseEvent<HTMLDivElement>) => {
-      if (event.currentTarget === event.target) {
-        flow.closePageSelectionModal();
-      }
-    },
-    [flow],
-  );
   const handleAddNewStep = useCallback(() => {
     flow.stepsState.addStep();
     flow.setSlideDir("forward");
     flow.setSlideKey((prev: number) => prev + 1);
     flow.setActiveTabIndex(flow.stepsState.steps.length);
   }, [flow]);
-  const loadAvailablePages = useCallback(() => {
-    flow.setIsLoadingPages(true);
-    try {
-      const formData = new FormData();
-      if (flow.bundle.bundleType === "full_page") {
-        formData.append("intent", "getPages");
-      } else {
-        formData.append("intent", "getThemeTemplates");
-      }
-      flow.fetcher.submit(formData, { method: "post" });
-    } catch (error) {
-      const resourceType =
-        flow.bundle.bundleType === "full_page" ? "pages" : "theme templates";
-      AppLogger.error(`Failed to load ${resourceType}:`, {}, error as any);
-      flow.shopify.toast.show(`Failed to load ${resourceType}`, {
-        isError: true,
-        duration: 5000,
-      });
-      flow.setIsLoadingPages(false);
-    }
-  }, [flow]);
-  const handleAddToStorefront = useCallback(async () => {
-    try {
-      const normalizedSlugError = validateSlug(flow.normalizedPageSlug);
-      if (normalizedSlugError) {
-        flow.shopify.toast.show(normalizedSlugError, {
-          isError: true,
-          duration: 5000,
-        });
-        return;
-      }
-      const formData = new FormData();
-      formData.append("intent", "validateWidgetPlacement");
-      formData.append("desiredSlug", flow.normalizedPageSlug);
-      flow.fetcher.submit(formData, { method: "post" });
-    } catch (error) {
-      AppLogger.error("Error creating bundle page:", {}, error as any);
-      flow.shopify.toast.show("Failed to create bundle page", {
-        isError: true,
-        duration: 5000,
-      });
-    }
-  }, [flow]);
   const handlePlaceWidget = useCallback(() => {
-    try {
-      flow.openPageSelectionModal();
-      loadAvailablePages();
-    } catch (error) {
-      AppLogger.error("Error opening page selection:", {}, error as any);
-      flow.shopify.toast.show("Failed to open page selection", {
+    if (!flow.apiKey) {
+      flow.shopify.toast.show("App configuration is unavailable.", {
         isError: true,
         duration: 5000,
       });
+      return;
     }
-  }, [flow, loadAvailablePages]);
+    openThemeEditorInNewTab(buildFpbUpsellThemeEditorUrl({
+      shop: flow.shop,
+      apiKey: flow.apiKey,
+    }));
+  }, [flow]);
   Object.assign(flow, {
     ...addonActionHandlers,
     ...visibilityActionHandlers,
     enablePreviewGate,
     handleAddNewStep,
-    handleAddToStorefront,
     handleBackClick,
     handleGuidedTourStepChange,
-    handlePageSelectionBackdropClick,
     handlePlaceWidget,
     handlePreviewBundle,
     finishPreviewBundleLoading,
@@ -376,7 +366,6 @@ export function useConfigureActionController(flow: ConfigureBundleFlowDraft) {
     handleReadinessItemClick,
     handleSectionChange,
     handleTemplatePreview,
-    loadAvailablePages,
     openProductInAdmin,
   });
 }

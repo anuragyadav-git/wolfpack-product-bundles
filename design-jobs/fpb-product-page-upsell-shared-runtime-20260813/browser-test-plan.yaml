@@ -1,0 +1,302 @@
+{
+  "schema_version": 1,
+  "job_id": "fpb-product-page-upsell-shared-runtime-20260813",
+  "revision": 3,
+  "status": "approved",
+  "chrome_mcp_required": true,
+  "environment": "staging",
+  "base_url": "https://wolfpack-store-test-1.myshopify.com/products/<target-product>",
+  "fixture": "FPB upsell fixture with button, block, multiple offers, product targets, collection targets, and all four FPB presets",
+  "authentication_mode": "connected default Chrome profile; storefront password 1 if challenged",
+  "setup": {
+    "profile_policy": "default-profile-only",
+    "allow_isolated_context": false,
+    "zoom_percent": 100,
+    "artifact_directory": "qa",
+    "max_retries": 2,
+    "locale": "en plus one localized locale",
+    "currency": "store default",
+    "theme": "SIT active theme",
+    "feature_flags": [],
+    "random_time_control": "not-applicable",
+    "device_pixel_ratio_policy": "record-actual",
+    "waits": [
+      "document.fonts.ready",
+      "images-complete",
+      "hydration-ready",
+      "target-state-ready"
+    ],
+    "scroll": {
+      "x": 0,
+      "y": 0
+    },
+    "disable_nonessential_animation": true,
+    "hide_caret_and_transient_cursors": true,
+    "dynamic_region_policy": "exclude-or-approved-mask"
+  },
+  "viewports": [
+    {
+      "id": "desktop",
+      "mode": "desktop",
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "id": "mobile",
+      "mode": "mobile",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "narrow",
+      "mode": "mobile",
+      "width": 320,
+      "height": 720
+    }
+  ],
+  "states": [
+    {
+      "id": "placement",
+      "covers": [
+        "UP-03",
+        "UP-04",
+        "UP-05",
+        "UP-06",
+        "UP-07"
+      ]
+    },
+    {
+      "id": "handoff",
+      "covers": [
+        "UP-08",
+        "UP-09",
+        "UP-10",
+        "UP-11",
+        "UP-12"
+      ]
+    },
+    {
+      "id": "empty-error",
+      "covers": [
+        "UP-01",
+        "UP-02"
+      ]
+    }
+  ],
+  "interactions": [
+    {
+      "id": "qa-render-placement",
+      "purpose": "Verify all eligible modes and placement paths.",
+      "precondition": "Manual SIT deploy complete; cache cleared; eligible fixtures saved.",
+      "viewport": "desktop",
+      "state": "placement",
+      "steps": [
+        "Hard reload with ignoreCache true.",
+        "Verify default placement, then unified custom block, then multiple offers."
+      ],
+      "expected_semantic_result": "Exactly one ordered offer list at the winning anchor.",
+      "dom_assertions": [
+        "one-list",
+        "ordered-offers",
+        "no-empty-shell"
+      ],
+      "style_geometry_assertions": [
+        "no-overflow",
+        "44px-cta",
+        "container-reflow"
+      ],
+      "screenshot_path": "qa/screenshots/qa-render-placement.png",
+      "baseline_path": "qa/baselines/qa-render-placement.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "new_errors": 0,
+        "new_repeated_warnings": 0
+      },
+      "network_expectations": {
+        "unexpected_failures": 0,
+        "duplicate_mutations": 0
+      },
+      "cleanup": [
+        "Remove custom anchor at fixture-group boundary."
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "qa-exact-handoff",
+      "purpose": "Verify click-time variant capture and shared destination selection refresh.",
+      "precondition": "autoSelect enabled; product has two selectable variants.",
+      "viewport": "mobile",
+      "state": "handoff",
+      "steps": [
+        "Change variant.",
+        "Activate CTA by keyboard.",
+        "Verify source attribution and exact selection in each FPB preset."
+      ],
+      "expected_semantic_result": "Exact clicked variant is selected once without changing active step; sidebar/mobile footer share state.",
+      "dom_assertions": [
+        "exact-variant",
+        "one-shot-storage",
+        "shared-summary-state"
+      ],
+      "style_geometry_assertions": [
+        "busy-state-stable",
+        "no-overflow"
+      ],
+      "screenshot_path": "qa/screenshots/qa-exact-handoff.png",
+      "baseline_path": "qa/baselines/qa-exact-handoff.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "new_errors": 0,
+        "new_repeated_warnings": 0
+      },
+      "network_expectations": {
+        "unexpected_failures": 0,
+        "duplicate_mutations": 0
+      },
+      "cleanup": [
+        "Clear session handoff keys."
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "qa-empty-error-narrow",
+      "purpose": "Verify no shell on untargeted products and API failure at the narrow viewport.",
+      "precondition": "Use one untargeted product and one controlled failed API request after manual SIT deploy.",
+      "viewport": "narrow",
+      "state": "empty-error",
+      "steps": [
+        "Hard reload with ignoreCache true.",
+        "Verify untargeted and failed-response states add no upsell shell."
+      ],
+      "expected_semantic_result": "The product page remains unchanged and contains no focusable upsell controls.",
+      "dom_assertions": [
+        "no-upsell-root"
+      ],
+      "style_geometry_assertions": [
+        "no-layout-shift"
+      ],
+      "screenshot_path": "qa/screenshots/qa-empty-error-narrow.png",
+      "baseline_path": "qa/baselines/qa-empty-error-narrow.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "new_errors": 0,
+        "new_repeated_warnings": 0
+      },
+      "network_expectations": {
+        "unexpected_failures": 0,
+        "duplicate_mutations": 0
+      },
+      "cleanup": [
+        "Restore normal API response."
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    }
+  ],
+  "assertions": {
+    "library": "references/chrome-devtools-test-protocol.md",
+    "require_json_serializable_results": true
+  },
+  "screenshots": {
+    "format": "png",
+    "index_path": "qa/screenshot-index.json",
+    "element_required": true,
+    "viewport_required": true,
+    "before_after_critical_interactions": true,
+    "full_page_only_when_needed": true,
+    "metadata_required": [
+      "viewport",
+      "dpr",
+      "zoom",
+      "state",
+      "revision"
+    ]
+  },
+  "console_policy": {
+    "fail_on": [
+      "uncaught-exception",
+      "unhandled-promise-rejection",
+      "severe-application-error",
+      "new-repeated-warning",
+      "accessibility-runtime-error",
+      "hydration-error",
+      "change-caused-csp-violation",
+      "tested-interaction-error"
+    ],
+    "allowlist": []
+  },
+  "network_policy": {
+    "fail_on": [
+      "unexpected-4xx-5xx",
+      "blocked-required-asset",
+      "implementation-caused-abort",
+      "cors-error",
+      "duplicate-mutation",
+      "local-to-production-request",
+      "real-order-or-destructive-action"
+    ],
+    "expected_analytics": [],
+    "redact_secrets_and_private_bodies": true
+  },
+  "lighthouse": {
+    "required": true,
+    "devices": [
+      "desktop",
+      "mobile"
+    ],
+    "modes": [
+      "snapshot"
+    ],
+    "categories": [
+      "accessibility",
+      "best-practices"
+    ],
+    "performance_excluded": true,
+    "report_paths": {
+      "desktop": "qa/lighthouse/desktop.json",
+      "mobile": "qa/lighthouse/mobile.json"
+    }
+  },
+  "performance": {
+    "required": true,
+    "triggers": [
+      "new global app-embed network request",
+      "DOM observer",
+      "image loading"
+    ],
+    "not_applicable_reason": "",
+    "trace_paths": [
+      "qa/traces/upsell.json"
+    ],
+    "metrics": [
+      "LCP",
+      "CLS",
+      "interaction-findings",
+      "long-tasks",
+      "layout-shift-sources",
+      "image-font-loading"
+    ]
+  },
+  "visual_diff": {
+    "format": "png",
+    "comparison": "scripts/compare_images.py",
+    "diff_required": true,
+    "json_summary_required": true,
+    "approved_reference_and_actual_side_by_side": true,
+    "allowed_masks": []
+  },
+  "non_regression": {
+    "required": true,
+    "cases": [
+      "qa-exact-handoff",
+      "qa-render-placement"
+    ]
+  },
+  "cleanup": [
+    "Restore fixture-group state.",
+    "Clear session handoff keys.",
+    "Delete transient Chrome evidence and never commit screenshots."
+  ]
+}

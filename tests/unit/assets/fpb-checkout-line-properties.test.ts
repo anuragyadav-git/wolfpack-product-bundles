@@ -358,10 +358,8 @@ describe("FPB checkout cart-line properties", () => {
               bxyDiscountType: "percentage",
               bxyApplyMode: "lowest_priced",
             }],
-            messages: {
-              displayOptions: {
-                bundleQuantityOptions: { enabled: false },
-              },
+            displayOptions: {
+              bundleQuantityOptions: { enabled: false },
             },
           },
           steps: [{ id: "paid-step", isFreeGift: false }],

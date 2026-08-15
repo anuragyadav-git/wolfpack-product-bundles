@@ -29,6 +29,7 @@ export function useConfigureTemplatePricingController(
     bundle,
     bundleDesignPresetId,
     bundleDesignTemplate,
+    conditionsState,
     formState,
     isSelectTemplateModalOpen,
     lastTemplateRequestRef,
@@ -53,6 +54,7 @@ export function useConfigureTemplatePricingController(
     stepsState,
     templateSubmissionStartedRef,
     templateFetcher,
+    textOverridesByLocale,
     upsellWidgetButtonText,
     upsellWidgetCollectionsSelectedData,
     upsellWidgetDescription,
@@ -214,8 +216,18 @@ export function useConfigureTemplatePricingController(
     templateFetcher,
   ]);
   function buildBundleUpsellConfig() {
+    const multiLangText = Object.fromEntries(
+      Object.entries(textOverridesByLocale ?? {}).flatMap(([locale, values]) => {
+        const widgetCopy = {
+          widgetTitle: values?.widgetTitle ?? "",
+          widgetDescription: values?.widgetDescription ?? "",
+          widgetButtonText: values?.widgetButtonText ?? "",
+        };
+        return Object.values(widgetCopy).some(Boolean) ? [[locale, widgetCopy]] : [];
+      }),
+    );
     return {
-      multiLangText: savedBundleUpsellConfig?.multiLangText ?? {},
+      multiLangText,
       languageMode: upsellWidgetLanguageMode,
       widgetConfiguration: {
         isEnabled: upsellWidgetEnabled,
@@ -242,16 +254,29 @@ export function useConfigureTemplatePricingController(
         rules: pricingState.discountRules,
         messages: { displayOptions: pricingState.pricingDisplayOptions },
         showProgressBar: pricingState.showDiscountProgressBar,
-        steps: stepsState.steps.map((step: any) => ({
-          id: step.id,
-          enabled: step.enabled,
-          maxQuantity: step.maxQuantity,
-        })),
+        steps: stepsState.steps.map((step: any) => {
+          const [firstCondition, secondCondition] =
+            conditionsState.stepConditions[step.id] || [];
+          return {
+            id: step.id,
+            enabled: step.enabled,
+            conditionType: firstCondition?.type ?? null,
+            conditionOperator: firstCondition?.operator ?? null,
+            conditionValue: firstCondition
+              ? Number(firstCondition.value)
+              : null,
+            conditionOperator2: secondCondition?.operator ?? null,
+            conditionValue2: secondCondition
+              ? Number(secondCondition.value)
+              : null,
+          };
+        }),
       }),
     [
       pricingState.discountRules,
       pricingState.pricingDisplayOptions,
       pricingState.showDiscountProgressBar,
+      conditionsState.stepConditions,
       stepsState.steps,
     ]
   );
@@ -304,11 +329,7 @@ export function useConfigureTemplatePricingController(
           : 0;
         return totalProducts + legacyProducts + categoryProductCount;
       }, 0) >= 3;
-    const hasBundleVisibility = Boolean(
-      bundle.shopifyPageId ||
-        bundle.shopifyPageHandle ||
-        formState.bundleStatus === "active"
-    );
+    const hasBundleVisibility = formState.bundleStatus === "active";
     const parentProductActive =
       String(
         productStatus || loadedBundleProduct?.status || ""
@@ -359,8 +380,6 @@ export function useConfigureTemplatePricingController(
     ];
   }, [
     appEmbedEnabled,
-    bundle.shopifyPageHandle,
-    bundle.shopifyPageId,
     flow.hasPreview,
     formState.bundleStatus,
     loadedBundleProduct?.status,
@@ -372,13 +391,6 @@ export function useConfigureTemplatePricingController(
     (sum, item) => sum + (item.done ? item.points : 0),
     0
   );
-  const readinessClassName =
-    readinessScore >= 80
-      ? fullPageBundleStyles.readinessButtonHigh
-      : readinessScore >= 40
-      ? fullPageBundleStyles.readinessButtonMedium
-      : fullPageBundleStyles.readinessButtonLow;
-
   Object.assign(flow, {
     buildBundleUpsellConfig,
     buildVisibilityDisplayConfiguration,
@@ -394,7 +406,6 @@ export function useConfigureTemplatePricingController(
     normalizePricingRuleMessages,
     openDesignControlPanel,
     openSelectTemplateModal,
-    readinessClassName,
     readinessItems,
     readinessScore,
   });

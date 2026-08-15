@@ -1,4 +1,9 @@
-import { defer, json, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/node";
+import {
+  defer,
+  json,
+  type ActionFunctionArgs,
+  type LoaderFunctionArgs,
+} from "@remix-run/node";
 import { Await, useLoaderData, useNavigate } from "@remix-run/react";
 import { lazy, Suspense, useMemo, useState } from "react";
 import type { Prisma } from "@prisma/client";
@@ -11,12 +16,17 @@ import { parseSettingsDesignPayload } from "../../lib/settings-design-contract";
 import { SETTINGS_LANGUAGE_BUNDLE_TYPES, buildSettingsLanguageRuntime } from "../../lib/settings-language-runtime";
 import { CartTransformService } from "../../services/cart-transform-service.server";
 import { buildFpbStorefrontUrl } from "../../lib/fpb-storefront-url";
+import { navigateBackOrFallback } from "../../lib/navigation";
+import { ReduxProvider } from "../../store/ReduxProvider";
 import {
   SettingsLandingShell,
   SettingsWorkspaceError,
-  SettingsWorkspaceSkeleton,
   type SettingsWorkspaceView,
 } from "./app.settings/SettingsLandingShell";
+import {
+  AdminRouteLoadingBar,
+  waitForAdminRouteLoadingBar,
+} from "../../components/AdminRouteLoadingBar";
 
 const loadSettingsWorkspace = async () => {
   const module = await import("./app.settings/SettingsRoute");
@@ -24,6 +34,14 @@ const loadSettingsWorkspace = async () => {
 };
 
 const SettingsWorkspace = lazy(loadSettingsWorkspace);
+
+export function waitForSettingsRouteReady<TSettings, TPreviewBundles>(
+  settingsPage: Promise<TSettings>,
+  previewBundles: Promise<TPreviewBundles>,
+  loadingBar: Promise<void> = waitForAdminRouteLoadingBar(),
+) {
+  return Promise.all([settingsPage, previewBundles, loadingBar]);
+}
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const { session } = await requireAdminSession(request);
@@ -52,6 +70,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
       take: 12,
       select: {
         id: true,
+        publicNumber: true,
         name: true,
         bundleType: true,
         shopifyProductHandle: true,
@@ -61,7 +80,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
       name: bundle.name,
       type: bundle.bundleType === "full_page" ? "Landing Page" : "Product Page",
       viewUrl: bundle.bundleType === "full_page"
-        ? buildFpbStorefrontUrl(session.shop, bundle.id)
+        ? bundle.publicNumber === null
+          ? null
+          : buildFpbStorefrontUrl(session.shop, bundle.publicNumber)
         : bundle.shopifyProductHandle
           ? `https://${session.shop}/products/${bundle.shopifyProductHandle}`
           : null,
@@ -269,43 +290,79 @@ export async function action({ request }: ActionFunctionArgs) {
 
 export default function SettingsRouteDefault() {
   const { settingsPage, previewBundles } = useLoaderData<typeof loader>();
-  const workspaceData = useMemo(
-    () => Promise.all([settingsPage, previewBundles]),
+  const [workspaceView, setWorkspaceView] = useState<SettingsWorkspaceView | null>(null);
+  const routeData = useMemo(
+    () => waitForSettingsRouteReady(settingsPage, previewBundles),
     [previewBundles, settingsPage],
   );
-  const [workspaceView, setWorkspaceView] = useState<SettingsWorkspaceView | null>(null);
+  const workspaceData = useMemo(
+    () => workspaceView
+      ? Promise.all([settingsPage, previewBundles, waitForAdminRouteLoadingBar()])
+      : null,
+    [previewBundles, settingsPage, workspaceView],
+  );
   const navigate = useNavigate();
-  if (!workspaceView) {
-    return (
-      <SettingsLandingShell
-        onSelect={(view) => {
-          if (view === "controls") {
-            navigate("/app/additional-configurations");
-            return;
-          }
-          setWorkspaceView(view);
-        }}
-        onIntent={() => {
-          void loadSettingsWorkspace();
-        }}
-      />
-    );
-  }
 
   return (
-    <Suspense fallback={<SettingsWorkspaceSkeleton />}>
+    <Suspense fallback={<AdminRouteLoadingBar label="Loading Settings" />}>
       <Await
-        resolve={workspaceData}
+        resolve={routeData}
         errorElement={<SettingsWorkspaceError onExit={() => setWorkspaceView(null)} />}
       >
-        {([resolvedSettingsPage, resolvedPreviewBundles]) => (
-          <SettingsWorkspace
-            initialView={workspaceView}
-            onExit={() => setWorkspaceView(null)}
-            settingsPage={resolvedSettingsPage}
-            previewBundles={resolvedPreviewBundles}
-          />
-        )}
+        {([resolvedSettingsPage, resolvedPreviewBundles]) => {
+          if (!workspaceView) {
+            return (
+              <>
+                <ui-title-bar title="Settings">
+                  <button
+                    variant="breadcrumb"
+                    onClick={() =>
+                      navigateBackOrFallback(navigate, "/app/dashboard", {
+                        replaceFallback: true,
+                      })
+                  }
+                  >
+                    Dashboard
+                  </button>
+                </ui-title-bar>
+                <SettingsLandingShell
+                  onBack={() =>
+                    navigateBackOrFallback(navigate, "/app/dashboard", {
+                      replaceFallback: true,
+                    })
+                  }
+                  onSelect={(view) => {
+                    if (view === "controls") {
+                      navigate("/app/additional-configurations");
+                      return;
+                    }
+                    setWorkspaceView(view);
+                  }}
+                  onIntent={() => {
+                    void loadSettingsWorkspace();
+                  }}
+                />
+              </>
+            );
+          }
+
+          return (
+            <Suspense fallback={<AdminRouteLoadingBar label="Loading Settings" />}>
+              <Await resolve={workspaceData as NonNullable<typeof workspaceData>}>
+                {() => (
+                  <ReduxProvider>
+                    <SettingsWorkspace
+                      initialView={workspaceView}
+                      onExit={() => setWorkspaceView(null)}
+                      settingsPage={resolvedSettingsPage}
+                      previewBundles={resolvedPreviewBundles}
+                    />
+                  </ReduxProvider>
+                )}
+              </Await>
+            </Suspense>
+          );
+        }}
       </Await>
     </Suspense>
   );

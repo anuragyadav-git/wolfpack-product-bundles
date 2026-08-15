@@ -1,0 +1,9 @@
+{
+  "status": "passed",
+  "findings": [],
+  "evidence": [
+    "Disclosure aria-expanded changed by pointer and Enter.",
+    "Collapsed review content became aria-hidden and inert.",
+    "Clear confirmation wrapped Shift+Tab and restored focus to Review your bundle after confirm."
+  ]
+}

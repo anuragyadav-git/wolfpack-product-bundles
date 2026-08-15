@@ -49,6 +49,24 @@ describe("BundleDataManager", () => {
     expect(selected).toBe(bundle);
   });
 
+  it("selects an API-authorized draft product-page bundle by explicit bundle ID", () => {
+    const bundle = {
+      id: "bundle-1",
+      name: "Draft PPB",
+      status: "draft",
+      bundleType: "product_page",
+      shopifyProductId: "gid://shopify/Product/1111",
+      steps: [{ id: "step-1", name: "Step 1" }],
+    };
+
+    const selected = BundleDataManager.selectBundle(
+      { "bundle-1": bundle },
+      { bundleId: "bundle-1", currentProductId: "1111" },
+    );
+
+    expect(selected).toBe(bundle);
+  });
+
   it("selects a full-page bundle by explicit bundle ID without product-page targeting context", () => {
     const bundle = {
       id: "bundle-1",
@@ -77,7 +95,7 @@ describe("BundleDataManager", () => {
     expect(selected).toBe(bundle);
   });
 
-  it("does not select a draft bundle without an explicit full-page bundle ID", () => {
+  it("does not select a draft bundle without an explicit bundle ID", () => {
     const bundle = {
       id: "bundle-1",
       name: "Draft FPB",

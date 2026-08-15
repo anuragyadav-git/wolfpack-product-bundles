@@ -141,10 +141,6 @@ function compactVariants(value: unknown): Record<string, unknown>[] {
       const image = compactVariantImageReference(source.image) ?? compactVariantImageReference(source.imageUrl);
       if (image) compact.image = image;
 
-      if (Array.isArray(source.sellingPlanAllocations) && source.sellingPlanAllocations.length > 0) {
-        compact.sellingPlanAllocations = source.sellingPlanAllocations;
-      }
-
       return Object.keys(compact).length > 0 ? compact : null;
     })
     .filter((variant): variant is Record<string, unknown> => variant !== null);
@@ -284,25 +280,18 @@ export function formatStepCategoryForRuntime(
   index: number,
   productSources: unknown[] = [],
 ) {
-  const categoryId = stringOrNull(category.categoryId) ?? stringOrNull(category.id) ?? `category-${index + 1}`;
-  const categoryRank = numberOrNull(category.categoryRank);
-  const sortOrder = numberOrNull(category.sortOrder);
-  const collectionsSelectedData = compactCollectionReferences(category.collectionsSelectedData);
-  const collections = compactCollectionReferences(category.collections);
+  const categoryId = stringOrNull(category.id) ?? `category-${index + 1}`;
+  const sortOrder = numberOrNull(category.sortOrder) ?? index;
   const productSourceByKey = buildProductSourceMap(productSources);
 
   return {
-    categoryId,
+    id: categoryId,
     name: stringOrEmpty(category.name),
     title: stringOrEmpty(category.title) || stringOrEmpty(category.name),
     subTitle: stringOrEmpty(category.subTitle),
-    rank: categoryRank ?? sortOrder ?? index,
-    categoryRank,
+    sortOrder,
     products: compactProductReferences(category.products, productSourceByKey),
-    selectedProducts: compactProductReferences(category.selectedProducts, productSourceByKey),
-    collections: collections.length > 0 ? collections : collectionsSelectedData,
-    collectionsData: compactCollectionReferences(category.collectionsData),
-    collectionsSelectedData,
+    collections: compactCollectionReferences(category.collections),
     conditions: asArray(category.conditions),
     categoryBanner: stringOrEmpty(category.categoryBanner),
     categoryImg: stringOrEmpty(category.categoryImg),

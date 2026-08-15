@@ -5,7 +5,7 @@ title: Admin Performance
 type: operations
 status: authoritative
 summary: Embedded Admin Web Vitals instrumentation, route-level LCP findings, and critical-path constraints.
-last_audited: 2026-07-30
+last_audited: 2026-08-13
 owners:
   - engineering
 domains:
@@ -15,10 +15,19 @@ systems:
   - app-bridge
   - remix
 source_paths:
+  - app/components/AdminRouteLoadingBar.tsx
   - app/lib/admin-web-vitals-diagnostics.client.ts
+  - app/routes/app/app.settings.tsx
+  - app/routes/app/app.settings/SettingsLandingShell.module.css
   - app/routes/app/app.settings/SettingsRoute.tsx
   - app/routes/app/app.settings/DesignSettingsView.tsx
   - app/routes/app/app.settings/DesignLivePreview.tsx
+  - app/routes/app/app.dashboard/route.tsx
+  - app/routes/app/app.dashboard/dashboard-route-readiness.tsx
+  - app/routes/app/app.dashboard/DashboardPage.tsx
+  - app/routes/app/app._index.tsx
+  - app/routes/app/app.attribution/AttributionRouteShell.tsx
+  - app/routes/app/app.attribution/AttributionDashboard.tsx
 related_docs:
   - internal docs/Operations/LCP and CLS Playbook.md
 tags:
@@ -95,14 +104,14 @@ Measured in the Shopify Admin chrome on `wolfpack-store-test-1` / SIT using
 
 | Route | Iframe LCP candidate / source-audited candidate | Fix status |
 |---|---|---|
-| `/app/dashboard` | Current local app candidate: support card content text; historical candidates: `/bundleGallery.avif`, `/appEmbed.avif` | Keep only the above-the-fold support avatar preload; render the top cards immediately; do not load decorative dashboard guide screenshots in the initial viewport; use CSS-only thumbnail placeholders for app-embed and resources-card previews. Keep the support card outside delayed Polaris custom-element wrappers; defer the lower resources card until the main content has settled; render row action-menu content only after a row menu is opened. App-embed theme detection is deferred from the initial loader payload and hydrated via a deferred promise; the app-embed card can still run an on-demand status check before opening the theme editor. |
+| `/app/dashboard` | Loading workspace message during readiness; historical content candidate: support card text | Keep the complete visible Dashboard behind one readiness boundary until App Embed status, banner data, the Dashboard module, and the shared black loading-bar interval are ready. During that interval render only the top-edge bar and centered `Loading your workspace` message. Reveal the header, App Embed banner, bundle panel, top cards, and resources card together. Do not restore banner skeletons or idle-delayed visible cards. Keep row action-menu content lazy until merchant intent because closed overlays are not Dashboard page content. |
 | `/app/bundles/create` | Measured: bundle type thumbnail rendered via `/ppb.avif` | Preloaded in route `links()` and HTTP `Link`; adjacent `/fpb.avif` also preloaded. The thumbnail is now a CSS background with stable dimensions, and local candidate paint was under target. |
 | `/app/integrations` | Measured: text subtitle (`p._subtitle...`) | No image preload fix; page LCP is text/bootstrap-bound |
 | `/app/events` | Source audit: no first-viewport owned image | No image preload fix |
 | `/app/billing` | Source audit: no first-viewport owned image | No image preload fix |
 | `/app/pricing` | Source audit: no first-viewport owned image | No image preload fix |
 | `/app/bundles/cart-transform` | Source audit: no first-viewport owned image | No image preload fix |
-| `/app/attribution` | Current local app candidate: critical funnel heading; historical candidates: inactive tracking body copy, deferred funnel hero title | Render the funnel heading in the route shell before analytics resolves; keep inactive/no-data copy out of the critical first-paint path; render the deferred funnel metrics without duplicating the late heading. |
+| `/app/attribution` | Loading bar during readiness; historical candidates: critical funnel heading, inactive tracking body copy, deferred funnel hero title | Keep the entire Analytics surface, including the title bar, funnel heading, and pixel-status banner, behind one readiness boundary. Reveal it only after data, lazy modules, and the black loading-bar fill are complete. |
 | `/app/settings` | Source audit: dynamic settings preview images are not route hero content | The complete Settings workspace, including Design, is lazy-loaded through one post-click boundary. Its representative preview uses local markup and CSS with no remote media, storefront iframe, widget runtime, or fake Images & GIFs loading state. Do not add speculative preloads; use repeated `?wpbWebVitalsDebug=1` samples for concrete settings-subview evidence. |
 | `/app/store-files` / `/app/upload-store-file` | Source audit: images are picker/file content, not initial route hero content | No route preload |
 | Configure routes | Source audit: dynamic product/template images depend on loaded bundle state and active section/modal | Do not globally preload; measure concrete FPB/PPB configure URLs and preload only confirmed above-fold candidates |
@@ -114,8 +123,13 @@ first-render JavaScript instead.
 
 ## Settings Design Control Panel
 
-The Settings landing route renders a small Polaris card shell and keeps the
-workspace implementation behind one React lazy boundary. The 2026-07-23 local
+The Settings landing route keeps its small Polaris card shell behind the shared
+top-edge loading boundary until deferred Settings data and the minimum bar fill
+are complete. The bar uses a staged black fill over a subtle track, then keeps a
+moving highlight visible if route readiness takes longer than the initial fill.
+Reduced-motion users receive the complete static bar without animation. It keeps
+the workspace implementation behind a separate React
+lazy boundary. The 2026-07-23 local
 production build split the initial Settings route (`app.settings`, 2.99 kB /
 1.27 kB gzip) from the complete `SettingsRoute` workspace (81.39 kB / 18.60 kB
 gzip, plus 22.22 kB / 4.30 kB gzip CSS). The template-specific scene registry,
@@ -124,11 +138,25 @@ Design is statically part of that post-click workspace chunk, so entering Design
 does not wait for a second sequential JavaScript request. The workspace chunk is
 not required for the first Settings paint.
 
-The three landing cards are the complete interactive targets and do not render
-separate button-like `Configure` labels. After a card is selected, the Suspense
-boundary preserves the three-card footprint with lightweight local skeletons;
-do not replace this transition with a centered spinner because that collapses
-the established layout while the workspace chunk resolves.
+The landing stylesheet is a CSS-module dependency of `SettingsLandingShell` and
+is declared as a Settings-route CSS dependency in the production build manifest.
+Do not expose it as an independent route `links()` URL: during client-side Admin
+navigation, that separate request can finish after the landing component renders
+and cause an unstyled first paint followed by a second styled layout. Keeping the
+CSS in the component dependency graph lets Remix preload it with the route module
+without adding a render delay or loading-state workaround. The three
+landing cards are the complete interactive targets and do not render
+separate button-like `Configure` labels. Each card uses a framed section icon,
+clear title and description hierarchy, and a trailing directional affordance;
+hover, keyboard-focus, and reduced-motion states are owned by the landing shell.
+Their desktop content area uses the same two-of-twelve-column gutter on each
+side as the template selection surface, and the card group is centered in the
+available viewport. The grid uses three columns at wide widths and one column
+when the embedded app surface is narrow. The same shared
+top-edge loading bar is used for initial Settings route readiness and after a
+card is selected while the workspace chunk becomes ready. The black bar fills
+for a minimum of 800 milliseconds before content can replace it. It does not
+use a spinner or card skeleton.
 
 The Settings workspace owns the Design inspector/preview layout and the
 eight-template representative preview. Wide containers use three columns for
@@ -141,13 +169,13 @@ iframe is independent of the browser's top-level viewport.
 
 The preview uses local fixture markup and media, canonical template descriptors
 derived from the storefront registries, and theme values from the normalized
-storefront Design runtime. Builder, Product Picker, Cart / Summary, Loading,
-Validation, and Upsell are deterministic local surfaces rather than storefront
-interactions. Builder and Cart / Summary are the storefront-matched surfaces;
-the other states remain representative. Preview scenes use fixed logical
-1280×800 desktop and 390×844 mobile canvases that scale as a whole to fit their
+storefront Design runtime. It renders Bundle header, Navigation, Categories,
+Product cards, Product slots, Product picker, Cart / Summary, Loading,
+Validation, and Upsell as separate deterministic local surfaces. It does not
+compose or claim parity for a whole builder. Preview scenes use fixed logical
+1280×1136 desktop and 390×844 mobile canvases that scale as a whole to fit their
 Admin host, preserving the storefront breakpoint under test. Only slot templates
-include Product Picker. The preview does not
+include Product slots and Product picker. The preview does not
 fetch bundle data, load remote media, embed a storefront iframe, duplicate the
 widget runtime, mutate a cart, or persist preview state. Local Design editing and
 preview rendering therefore remain available when the shop has no storefront-ready
@@ -190,8 +218,11 @@ The `/app` layout loader must keep Shopify authentication on the critical path, 
 The `/app/dashboard` loader must also keep non-critical Admin checks off the
 response path. App-embed refresh/status checks and web-pixel reconciliation are
 deferred or scheduled as post-response background tasks; the first dashboard
-payload should come from the shop, bundle summary, and subscription data needed
-to render above the fold.
+payload should come from the shop and bundle summary. The client readiness
+boundary keeps the loading workspace surface visible until deferred App Embed
+and banner data resolve; this preserves a prompt streamed response without
+revealing partial Dashboard content. Web-pixel reconciliation remains a
+post-response background task.
 
 The shared `/app` shell must not import or await providers that do not have
 runtime consumers on every Admin page. On 2026-07-10, the global Mantle provider
@@ -202,11 +233,12 @@ analytics provider route-scoped until a shared runtime consumer exists.
 
 ## Admin Mobile and First-Load Contract
 
-The authenticated `/app` index must render a route-shaped skeleton while the
-client resolves auth parameters and the dashboard destination. It
-must not return a blank iframe during that interval. The skeleton reserves
-stable hero and card geometry, exposes an accessible busy state, and disables
-its shimmer under `prefers-reduced-motion`.
+The authenticated `/app` index must render the shared top-edge loading bar and
+centered `Loading your workspace` message while the client resolves auth
+parameters and the Dashboard destination. It must not return a blank iframe or
+render a route-shaped skeleton during that interval. The `/app/dashboard`
+readiness boundary then retains the same loading treatment until all visible
+Dashboard content can be revealed together.
 
 Redux Toolkit, React Redux, Redux, Reselect, and Immer are isolated in
 `vendor-state`. Chart-only dependencies remain in `vendor-charts`. Production
@@ -224,9 +256,13 @@ padding, and keep horizontal scrolling inside labelled data regions rather than
 on the document.
 
 Analytics keeps shell styles with `AttributionRouteShell` and dashboard styles
-with the lazy `AttributionDashboard` chunk. This ensures dashboard markup and
-CSS resolve atomically behind the existing skeleton rather than painting
-unstyled analytics content.
+with the lazy `AttributionDashboard` chunk. One outer readiness boundary owns
+the title bar, funnel heading, pixel-status banner, dashboard data, and lazy
+chart suspension. Its only fallback is the shared black top-edge loading bar,
+which fills for at least 800 milliseconds and remains visibly active while
+readiness is pending. Analytics content therefore appears as one
+ready surface without skeleton cards, an early banner, or partially assembled
+chart panels.
 
 ## 2026-07-30 Shared Shell and Onboarding Completion
 

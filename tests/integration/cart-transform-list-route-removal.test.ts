@@ -22,10 +22,10 @@ describe("Cart Transform list route removal", () => {
 
   it("does not schedule cart-transform self-heal from storefront widget sources", () => {
     const sourceFiles = [
-      "app/assets/bundle-widget-full-page.js",
-      "app/assets/bundle-widget-product-page.js",
-      "app/assets/widgets/full-page/methods/analytics-config-methods.js",
-      "app/assets/widgets/product-page/methods/config-lifecycle-methods.js",
+      "app/assets/bundle-widget-full-page.ts",
+      "app/assets/bundle-widget-product-page.ts",
+      "app/assets/widgets/full-page/methods/analytics-config-methods.ts",
+      "app/assets/widgets/product-page/methods/config-lifecycle-methods.ts",
     ];
 
     for (const sourceFile of sourceFiles) {

@@ -1,5 +1,31 @@
+---
+schema_version: 1
+id: fpb-runtime-config-surface
+title: FPB Runtime Config Surface Test Spec
+type: test-spec
+status: active
+summary: Verifies that FPB configuration parsing exposes only supported storefront display settings.
+last_audited: 2026-08-11
+owners:
+  - engineering
+domains:
+  - storefront
+systems:
+  - widget-runtime
+source_paths:
+  - app/assets/widgets/full-page/methods/analytics-config-methods.ts
+related_docs:
+  - internal docs/Architecture/Widget Architecture.md
+tags:
+  - fpb
+  - configuration
+keywords:
+  - parseConfiguration
+---
+
 # Test Spec: FPB Runtime Config Surface
-**Spec ID:** fpb-runtime-config-surface  **Issue:** [eb-configure-completion-parity-1]  **Created:** 2026-06-01
+
+**Spec ID:** fpb-runtime-config-surface  **Created:** 2026-06-01
 
 ## Purpose
 Ensure the full-page bundle runtime does not emit unsupported text-banner or modal quantity-selector config.
@@ -8,9 +34,7 @@ Ensure the full-page bundle runtime does not emit unsupported text-banner or mod
 ### FpbRuntimeConfigSurface
 | # | Scenario | Input | Expected Output | Notes |
 |---|---|---|---|---|
-| 1 | FPB image-only banner runtime | Full-page widget source | No `promoBannerSubtitle`, `promoBannerTagline`, `promoBannerNote`, or default text strings | FPB supports image banners only |
-| 2 | FPB template-controlled modal runtime | Full-page widget source | No `showQuantitySelectorInModal` config | Storefront modals follow Select Template options |
+| 1 | Parse unsupported storefront display settings | Dataset contains unsupported text-banner, modal quantity, spacing, and card-count values | Parsed config omits every unsupported field | Verifies runtime behavior without asserting source structure or CSS |
 
 ## Acceptance Criteria
-- [ ] Unsupported FPB text-banner defaults are absent from the full-page runtime.
-- [ ] FPB modal quantity selector config is absent from the full-page runtime.
+- [ ] Unsupported fields are absent from the parsed FPB runtime configuration.

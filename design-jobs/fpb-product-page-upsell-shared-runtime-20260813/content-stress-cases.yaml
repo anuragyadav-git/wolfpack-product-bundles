@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "job_id": "fpb-product-page-upsell-shared-runtime-20260813",
+  "revision": 1,
+  "status": "approved",
+  "cases": [
+    {
+      "id": "long-localized-copy",
+      "data": {
+        "title": "80-character merchant title",
+        "description": "three wrapped lines",
+        "buttonText": "localized CTA of 40 characters"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "missing-image",
+      "data": {
+        "imageUrl": null,
+        "mode": "block"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "multiple-offers",
+      "data": {
+        "offers": 3
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "narrow-product-column",
+      "data": {
+        "containerWidth": 320
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "api-error",
+      "data": {
+        "status": 500
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "variant-change",
+      "data": {
+        "initialVariant": "A",
+        "clickedVariant": "B"
+      },
+      "required_in_browser_qa": true
+    }
+  ]
+}

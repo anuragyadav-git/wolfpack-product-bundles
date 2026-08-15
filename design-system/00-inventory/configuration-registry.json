@@ -1,0 +1,4853 @@
+{
+  "count": 103,
+  "families": [
+    "FPB",
+    "PPB",
+    "SHARED"
+  ],
+  "items": [
+    {
+      "id": "fpb-standard-summary-mode",
+      "family": "FPB",
+      "templates": [
+        "STANDARD"
+      ],
+      "admin_label": "Standard Preset",
+      "admin_location": "Bundle Settings",
+      "field_name": "bundleDesignPresetId",
+      "persisted_location": "bundle_design",
+      "runtime_location": "data-fpb-design-preset",
+      "type": "enum",
+      "allowed_values": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "default": "STANDARD",
+      "nullable": false,
+      "dependencies": [
+        "template config"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "full-page template renderer",
+        "side panel",
+        "mobile summary"
+      ],
+      "affected_states": [
+        "summary mode",
+        "slot rendering"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "medium",
+      "accessibility_impact": "none",
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/assets/widgets/full-page/methods/runtime-cart-settings-methods.js",
+      "notes": "Centralized via shared template contract resolver."
+    },
+    {
+      "id": "ppb-template-selection",
+      "family": "PPB",
+      "templates": [
+        "GRID",
+        "LIST",
+        "HORIZONTAL_SLOTS",
+        "VERTICAL_SLOTS"
+      ],
+      "admin_label": "PPB Template",
+      "admin_location": "Widget Settings",
+      "field_name": "bundleDesignTemplate",
+      "persisted_location": "bundle_data",
+      "runtime_location": "template-type/data attrs",
+      "type": "enum",
+      "allowed_values": [
+        "PDP_INPAGE",
+        "PDP_MODAL"
+      ],
+      "default": "PDP_MODAL",
+      "nullable": false,
+      "dependencies": [
+        "template configuration"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "product-page layout",
+        "modal/inline renderers"
+      ],
+      "affected_states": [
+        "selection flow",
+        "drawer behavior"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "medium",
+      "accessibility_impact": "medium",
+      "fixture_ids": [
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/assets/widgets/product-page/templates/registry.js",
+      "notes": "Legacy aliases mapped through registry now route through shared contract."
+    },
+    {
+      "id": "fpb-show-step-timeline",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "admin_label": "Show Step Timeline",
+      "admin_location": "Widget Steps",
+      "field_name": "showStepTimeline",
+      "persisted_location": "bundle_data",
+      "runtime_location": "selectedBundle.showStepTimeline",
+      "type": "boolean",
+      "allowed_values": [
+        "true",
+        "false"
+      ],
+      "default": true,
+      "nullable": false,
+      "dependencies": [
+        "step navigation"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "step timeline",
+        "step navigation"
+      ],
+      "affected_states": [
+        "summary mode"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "medium",
+      "accessibility_impact": "low",
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "DISCOVERED_CURRENT",
+      "evidence": "app/assets/widgets/full-page/methods/responsive-layout-methods.js",
+      "notes": "Controls whether step timeline chrome renders across viewport modes."
+    },
+    {
+      "id": "fpb-show-product-prices",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "admin_label": "Show Product Prices",
+      "admin_location": "Bundle Settings",
+      "field_name": "showProductPrices",
+      "persisted_location": "bundle_data",
+      "runtime_location": "this.config.showProductPrices",
+      "type": "boolean",
+      "allowed_values": [
+        "true",
+        "false"
+      ],
+      "default": true,
+      "nullable": false,
+      "dependencies": [
+        "pricing display"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "product card",
+        "cart footer"
+      ],
+      "affected_states": [
+        "pricing rendering"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "low",
+      "accessibility_impact": "low",
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "DISCOVERED_CURRENT",
+      "evidence": "app/assets/widgets/full-page/methods/runtime-cart-settings-methods.js",
+      "notes": "Admin toggle drives FPB card price visibility and fallback state."
+    },
+    {
+      "id": "fpb-show-compare-at-prices",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "admin_label": "Show Compare At Prices",
+      "admin_location": "Bundle Settings",
+      "field_name": "showCompareAtPrices",
+      "persisted_location": "bundle_data",
+      "runtime_location": "this.config.showCompareAtPrices",
+      "type": "boolean",
+      "allowed_values": [
+        "true",
+        "false"
+      ],
+      "default": false,
+      "nullable": false,
+      "dependencies": [
+        "price display"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "product card",
+        "discount badge"
+      ],
+      "affected_states": [
+        "pricing rendering"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "low",
+      "accessibility_impact": "low",
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "DISCOVERED_CURRENT",
+      "evidence": "app/lib/bundle-formatter.server.ts",
+      "notes": "Optional compare-at price line in card and summary presentations."
+    },
+    {
+      "id": "fpb-cart-redirect-to-checkout",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "admin_label": "Redirect Cart to Checkout",
+      "admin_location": "Bundle Settings",
+      "field_name": "cartRedirectToCheckout",
+      "persisted_location": "bundle_data",
+      "runtime_location": "storefront config runtime",
+      "type": "boolean",
+      "allowed_values": [
+        "true",
+        "false"
+      ],
+      "default": false,
+      "nullable": false,
+      "dependencies": [
+        "checkout flow"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "add-to-cart workflow"
+      ],
+      "affected_states": [
+        "checkout handoff"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "low",
+      "accessibility_impact": "medium",
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "DISCOVERED_CURRENT",
+      "evidence": "app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/save-bundle-form.server.ts",
+      "notes": "Toggles post-bundle action from cart to checkout when enabled."
+    },
+    {
+      "id": "fpb-allow-quantity-changes",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "admin_label": "Allow Quantity Changes",
+      "admin_location": "Bundle Settings",
+      "field_name": "allowQuantityChanges",
+      "persisted_location": "bundle_data",
+      "runtime_location": "widget quantity controls",
+      "type": "boolean",
+      "allowed_values": [
+        "true",
+        "false"
+      ],
+      "default": true,
+      "nullable": false,
+      "dependencies": [
+        "quantity control"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "quantity stepper"
+      ],
+      "affected_states": [
+        "selection enforcement"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "medium",
+      "accessibility_impact": "medium",
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "DISCOVERED_CURRENT",
+      "evidence": "app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/save-bundle-form.server.ts",
+      "notes": "Global guard for whether user-editable per-product quantities remain interactive."
+    },
+    {
+      "id": "fpb-search-bar-enabled",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "admin_label": "Show Search Bar",
+      "admin_location": "Bundle Settings",
+      "field_name": "searchBarEnabled",
+      "persisted_location": "bundle_data",
+      "runtime_location": "storefront config runtime",
+      "type": "boolean",
+      "allowed_values": [
+        "true",
+        "false"
+      ],
+      "default": false,
+      "nullable": false,
+      "dependencies": [
+        "product filtering"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "product list"
+      ],
+      "affected_states": [
+        "search/filter behavior"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "medium",
+      "accessibility_impact": "high",
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "DISCOVERED_CURRENT",
+      "evidence": "app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/save-bundle-form.server.ts",
+      "notes": "Controls visibility of bundle product search input when supported by template."
+    },
+    {
+      "id": "fpb-show-text-on-add-button",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "admin_label": "Show Text on Add Button",
+      "admin_location": "Widget Settings",
+      "field_name": "showTextOnAddButton",
+      "persisted_location": "bundle_data",
+      "runtime_location": "runtime-cart-settings-methods.js",
+      "type": "boolean",
+      "allowed_values": [
+        "true",
+        "false"
+      ],
+      "default": false,
+      "nullable": false,
+      "dependencies": [
+        "CTA rendering"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "product card add button"
+      ],
+      "affected_states": [
+        "add button mode"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "low",
+      "accessibility_impact": "medium",
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "DISCOVERED_CURRENT",
+      "evidence": "app/assets/widgets/full-page/methods/runtime-cart-settings-methods.js",
+      "notes": "Switches CTA from icon-only to text label when possible."
+    },
+    {
+      "id": "fpb-variant-selector-enabled",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "admin_label": "Enable Variant Selector",
+      "admin_location": "Widget Settings",
+      "field_name": "variantSelectorEnabled",
+      "persisted_location": "bundle_data",
+      "runtime_location": "full-page/product-card-footer-methods.js",
+      "type": "boolean",
+      "allowed_values": [
+        "true",
+        "false"
+      ],
+      "default": true,
+      "nullable": false,
+      "dependencies": [
+        "variant rendering"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "product card variants"
+      ],
+      "affected_states": [
+        "variant selection flow"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "medium",
+      "accessibility_impact": "high",
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "DISCOVERED_CURRENT",
+      "evidence": "app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/save-bundle-form.server.ts",
+      "notes": "Allows hiding or exposing inline variant controls."
+    },
+    {
+      "id": "fpb-floating-badge-enabled",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "admin_label": "Floating Badge Enabled",
+      "admin_location": "Bundle Settings",
+      "field_name": "floatingBadgeEnabled",
+      "persisted_location": "bundle_data",
+      "runtime_location": "full-page/tier-floating-runtime-methods.js",
+      "type": "boolean",
+      "allowed_values": [
+        "true",
+        "false"
+      ],
+      "default": false,
+      "nullable": false,
+      "dependencies": [
+        "floating badge"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "floating badge"
+      ],
+      "affected_states": [
+        "floating promotional state"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "low",
+      "accessibility_impact": "low",
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "DISCOVERED_CURRENT",
+      "evidence": "app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/save-bundle-form.server.ts",
+      "notes": "Enables fixed-position promo badge for FPB storefront rendering."
+    },
+    {
+      "id": "fpb-floating-badge-text",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "admin_label": "Floating Badge Text",
+      "admin_location": "Bundle Settings",
+      "field_name": "floatingBadgeText",
+      "persisted_location": "bundle_data",
+      "runtime_location": "full-page/tier-floating-runtime-methods.js",
+      "type": "string",
+      "allowed_values": [],
+      "default": "",
+      "nullable": true,
+      "dependencies": [
+        "floating badge"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "floatingBadgeEnabled === true",
+      "affected_components": [
+        "floating badge"
+      ],
+      "affected_states": [
+        "floating promotional state"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "low",
+      "accessibility_impact": "low",
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "DISCOVERED_CURRENT",
+      "evidence": "app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/save-bundle-form.server.ts",
+      "notes": "Plain text label used by floating badge overlay (trimmed to fit constraints)."
+    },
+    {
+      "id": "fpb-product-slots-enabled",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "admin_label": "Enable Product Slots",
+      "admin_location": "Bundle Settings",
+      "field_name": "productSlotsEnabled",
+      "persisted_location": "bundle_data",
+      "runtime_location": "this.selectedBundle.productSlotsEnabled",
+      "type": "boolean",
+      "allowed_values": [
+        "true",
+        "false"
+      ],
+      "default": false,
+      "nullable": false,
+      "dependencies": [
+        "summary slot layout"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "mobile summary",
+        "side panel"
+      ],
+      "affected_states": [
+        "summary mode"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "medium",
+      "accessibility_impact": "medium",
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "DISCOVERED_CURRENT",
+      "evidence": "app/assets/widgets/full-page/methods/mobile-summary-methods.js",
+      "notes": "Activates per-step selected product slot chips in summary surfaces."
+    },
+    {
+      "id": "fpb-max-qty-per-product",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "admin_label": "Maximum Qty Per Product",
+      "admin_location": "Bundle Settings",
+      "field_name": "maxQtyPerProduct",
+      "persisted_location": "bundle_data",
+      "runtime_location": "shared/condition-validator.js",
+      "type": "integer",
+      "allowed_values": [],
+      "default": "null",
+      "nullable": true,
+      "dependencies": [
+        "quantity validation"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "quantity controls"
+      ],
+      "affected_states": [
+        "quantity validation"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "low",
+      "accessibility_impact": "low",
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "DISCOVERED_CURRENT",
+      "evidence": "app/assets/widgets/shared/condition-validator.js",
+      "notes": "Enforces per-product max on quantity controls when validation is active."
+    },
+    {
+      "id": "fpb-product-slot-icon-url",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "admin_label": "Product Slot Icon",
+      "admin_location": "Bundle Settings",
+      "field_name": "productSlotIconUrl",
+      "persisted_location": "bundle_data",
+      "runtime_location": "full-page/mobile-summary-methods.js",
+      "type": "string",
+      "allowed_values": [],
+      "default": "",
+      "nullable": true,
+      "dependencies": [
+        "productSlotsEnabled"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "productSlotsEnabled === true",
+      "affected_components": [
+        "mobile summary slots"
+      ],
+      "affected_states": [
+        "summary mode"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "low",
+      "accessibility_impact": "medium",
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "DISCOVERED_CURRENT",
+      "evidence": "app/assets/widgets/full-page/methods/mobile-summary-methods.js",
+      "notes": "Optional icon used for empty slot placeholders in summary state."
+    },
+    {
+      "id": "fpb-auto-select-browsed-product",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "admin_label": "Auto Select Browsed Product",
+      "admin_location": "Bundle Settings",
+      "field_name": "autoSelectBrowsedProduct",
+      "persisted_location": "bundle_data",
+      "runtime_location": "storefront runtime flow",
+      "type": "boolean",
+      "allowed_values": [
+        "true",
+        "false"
+      ],
+      "default": false,
+      "nullable": false,
+      "dependencies": [
+        "default browsing"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "initial selected products"
+      ],
+      "affected_states": [
+        "initialization defaults"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "low",
+      "accessibility_impact": "low",
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "DISCOVERED_CURRENT",
+      "evidence": "app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/save-bundle-form.server.ts",
+      "notes": "Preloads current product context into bundle state when present."
+    },
+    {
+      "id": "fpb-bundle-banner-desktop-url",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "admin_label": "Bundle Banner Desktop URL",
+      "admin_location": "Widget Timeline",
+      "field_name": "bundleBannerDesktopUrl",
+      "persisted_location": "bundle_data",
+      "runtime_location": "full-page/timeline-banner-methods.js",
+      "type": "string",
+      "allowed_values": [],
+      "default": "",
+      "nullable": true,
+      "dependencies": [
+        "timeline banner"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "timeline banner"
+      ],
+      "affected_states": [
+        "summary mode"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "medium",
+      "accessibility_impact": "low",
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "DISCOVERED_CURRENT",
+      "evidence": "app/assets/widgets/full-page/methods/timeline-banner-methods.js",
+      "notes": "Image source for desktop variant of timeline banner section."
+    },
+    {
+      "id": "fpb-bundle-banner-mobile-url",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "admin_label": "Bundle Banner Mobile URL",
+      "admin_location": "Widget Timeline",
+      "field_name": "bundleBannerMobileUrl",
+      "persisted_location": "bundle_data",
+      "runtime_location": "full-page/timeline-banner-methods.js",
+      "type": "string",
+      "allowed_values": [],
+      "default": "",
+      "nullable": true,
+      "dependencies": [
+        "timeline banner"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "timeline banner"
+      ],
+      "affected_states": [
+        "summary mode"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "medium",
+      "accessibility_impact": "low",
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "DISCOVERED_CURRENT",
+      "evidence": "app/assets/widgets/full-page/methods/timeline-banner-methods.js",
+      "notes": "Image source for mobile variant of timeline banner section."
+    },
+    {
+      "id": "fpb-loading-gif",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "admin_label": "Loading GIF",
+      "admin_location": "Bundle Settings",
+      "field_name": "loadingGif",
+      "persisted_location": "bundle_data",
+      "runtime_location": "full-page/runtime behavior",
+      "type": "string",
+      "allowed_values": [],
+      "default": "",
+      "nullable": true,
+      "dependencies": [
+        "loading state"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "adding state"
+      ],
+      "affected_states": [
+        "loading"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "low",
+      "accessibility_impact": "low",
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "DISCOVERED_CURRENT",
+      "evidence": "app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/save-bundle-form.server.ts",
+      "notes": "Optional loading media override for add-to-cart feedback path."
+    },
+    {
+      "id": "fpb-bundle-level-css",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "admin_label": "Bundle Level CSS",
+      "admin_location": "Theme Styling",
+      "field_name": "bundleLevelCss",
+      "persisted_location": "bundle_data",
+      "runtime_location": "widget custom CSS payload",
+      "type": "string",
+      "allowed_values": [],
+      "default": "",
+      "nullable": true,
+      "dependencies": [
+        "custom styling"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "all storefront components"
+      ],
+      "affected_states": [
+        "rendering"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "high",
+      "accessibility_impact": "medium",
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "DISCOVERED_CURRENT",
+      "evidence": "app/assets/widgets/product-page/methods/selection-data-methods.js",
+      "notes": "Admin-provided CSS injected into bundle widget runtime scope."
+    },
+    {
+      "id": "fpb-default-products-data",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "admin_label": "Default Products Data",
+      "admin_location": "Widget Settings",
+      "field_name": "defaultProductsData",
+      "persisted_location": "bundle_data",
+      "runtime_location": "full-page/product-processing-methods.js",
+      "type": "object",
+      "allowed_values": [],
+      "default": "{}",
+      "nullable": true,
+      "dependencies": [
+        "default product preload"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "initial state"
+      ],
+      "affected_states": [
+        "initialization"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "low",
+      "accessibility_impact": "low",
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "DISCOVERED_CURRENT",
+      "evidence": "app/assets/widgets/full-page/methods/product-processing-methods.js",
+      "notes": "Serialized default/preselected product payload used to hydrate selection state."
+    },
+    {
+      "id": "fpb-validate-quantity-per-product",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "admin_label": "Validate Quantity Per Product",
+      "admin_location": "Widget Settings",
+      "field_name": "validateQuantityPerProduct",
+      "persisted_location": "bundle_data",
+      "runtime_location": "shared/condition-validator.js",
+      "type": "object",
+      "allowed_values": [],
+      "default": "{}",
+      "nullable": true,
+      "dependencies": [
+        "maxQtyPerProduct"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "quantity controls"
+      ],
+      "affected_states": [
+        "quantity validation"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "low",
+      "accessibility_impact": "low",
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "DISCOVERED_CURRENT",
+      "evidence": "app/assets/widgets/shared/condition-validator.js",
+      "notes": "Object flag driving allowIncrease/disablity for per-product quantity caps."
+    },
+    {
+      "id": "fpb-individual-selling-plan-selection",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "admin_label": "Individual Selling Plan Selection",
+      "admin_location": "Bundle Settings",
+      "field_name": "individualSellingPlanSelection",
+      "persisted_location": "bundle_data",
+      "runtime_location": "full-page/selection-data-methods.js",
+      "type": "object",
+      "allowed_values": [],
+      "default": "{}",
+      "nullable": true,
+      "dependencies": [
+        "subscription settings"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "product card variant options"
+      ],
+      "affected_states": [
+        "selection behavior"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "low",
+      "accessibility_impact": "medium",
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "DISCOVERED_CURRENT",
+      "evidence": "app/assets/widgets/full-page/methods/product-processing-methods.js",
+      "notes": "Stores per-product subscription-plan toggle behavior for selection lifecycle."
+    },
+    {
+      "id": "fpb-bundle-text-config",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "admin_label": "Bundle Text Config",
+      "admin_location": "Widget Settings",
+      "field_name": "bundleTextConfig",
+      "persisted_location": "bundle_data",
+      "runtime_location": "full-page/analytics-config-methods.js",
+      "type": "object",
+      "allowed_values": [],
+      "default": "{}",
+      "nullable": true,
+      "dependencies": [
+        "text overrides"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "copy output"
+      ],
+      "affected_states": [
+        "render text"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "low",
+      "accessibility_impact": "medium",
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "DISCOVERED_CURRENT",
+      "evidence": "app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/save-bundle-form.server.ts",
+      "notes": "Admin-authored optional bundle text JSON merged into widget text overrides."
+    },
+    {
+      "id": "fpb-bundle-upsell-config",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "admin_label": "Bundle Upsell Config",
+      "admin_location": "Widget Settings",
+      "field_name": "bundleUpsellConfig",
+      "persisted_location": "bundle_data",
+      "runtime_location": "bundle formatter",
+      "type": "object",
+      "allowed_values": [],
+      "default": "{}",
+      "nullable": true,
+      "dependencies": [
+        "upsell widget"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "upsellWidgetEnabled === true",
+      "affected_components": [
+        "upsell widgets"
+      ],
+      "affected_states": [
+        "upsell render state"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "medium",
+      "accessibility_impact": "medium",
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "DISCOVERED_CURRENT",
+      "evidence": "app/lib/bundle-formatter.server.ts",
+      "notes": "Optional upsell configuration payload persisted and surfaced to storefront runtime."
+    },
+    {
+      "id": "fpb-upsell-widget-enabled",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "admin_label": "Upsell Widget Enabled",
+      "admin_location": "Widget Settings",
+      "field_name": "upsellWidgetEnabled",
+      "persisted_location": "bundle_data",
+      "runtime_location": "storefront runtime flow",
+      "type": "boolean",
+      "allowed_values": [
+        "true",
+        "false"
+      ],
+      "default": false,
+      "nullable": false,
+      "dependencies": [
+        "bundleUpsellConfig"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "upsell blocks"
+      ],
+      "affected_states": [
+        "upsell render state"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "medium",
+      "accessibility_impact": "low",
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "DISCOVERED_CURRENT",
+      "evidence": "app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/save-bundle-form.server.ts",
+      "notes": "Global toggle that gates upsell widget rendering and data use."
+    },
+    {
+      "id": "fpb-upsell-widget-display-mode",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "admin_label": "Upsell Widget Display Mode",
+      "admin_location": "Widget Settings",
+      "field_name": "upsellWidgetDisplayMode",
+      "persisted_location": "bundle_data",
+      "runtime_location": "storefront runtime flow",
+      "type": "string",
+      "allowed_values": [
+        "block",
+        "inline"
+      ],
+      "default": "block",
+      "nullable": true,
+      "dependencies": [
+        "upsellWidgetEnabled"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "upsellWidgetEnabled === true",
+      "affected_components": [
+        "upsell blocks"
+      ],
+      "affected_states": [
+        "upsell render state"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "medium",
+      "accessibility_impact": "low",
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "DISCOVERED_CURRENT",
+      "evidence": "app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/save-bundle-form.server.ts",
+      "notes": "Controls whether upsell content renders as block or inline in the bundle flow."
+    },
+    {
+      "id": "fpb-upsell-widget-display-on",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "admin_label": "Upsell Widget Display On",
+      "admin_location": "Widget Settings",
+      "field_name": "upsellWidgetDisplayOn",
+      "persisted_location": "bundle_data",
+      "runtime_location": "storefront runtime flow",
+      "type": "string",
+      "allowed_values": [
+        "all",
+        "some"
+      ],
+      "default": "all",
+      "nullable": true,
+      "dependencies": [
+        "upsellWidgetEnabled"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "upsellWidgetEnabled === true",
+      "affected_components": [
+        "upsell blocks"
+      ],
+      "affected_states": [
+        "upsell render state"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "medium",
+      "accessibility_impact": "low",
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "DISCOVERED_CURRENT",
+      "evidence": "app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/save-bundle-form.server.ts",
+      "notes": "Limits where upsell blocks are injected by storefront location."
+    },
+    {
+      "id": "fpb-text-overrides",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "admin_label": "Text Overrides",
+      "admin_location": "Widget Settings",
+      "field_name": "textOverrides",
+      "persisted_location": "bundle_data",
+      "runtime_location": "full-page/analytics-config-methods.js",
+      "type": "object",
+      "allowed_values": [],
+      "default": "{}",
+      "nullable": true,
+      "dependencies": [
+        "copy overrides"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "all text surfaces"
+      ],
+      "affected_states": [
+        "render text"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "low",
+      "accessibility_impact": "medium",
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "DISCOVERED_CURRENT",
+      "evidence": "app/assets/widgets/full-page/methods/analytics-config-methods.js",
+      "notes": "Primary localized key/value map for storefront copy overrides."
+    },
+    {
+      "id": "fpb-text-overrides-by-locale",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "admin_label": "Text Overrides by Locale",
+      "admin_location": "Widget Settings",
+      "field_name": "textOverridesByLocale",
+      "persisted_location": "bundle_data",
+      "runtime_location": "full-page/analytics-config-methods.js",
+      "type": "object",
+      "allowed_values": [],
+      "default": "{}",
+      "nullable": true,
+      "dependencies": [
+        "textOverrides"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "localized text surfaces"
+      ],
+      "affected_states": [
+        "render text"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "low",
+      "accessibility_impact": "medium",
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "DISCOVERED_CURRENT",
+      "evidence": "app/assets/widgets/full-page/methods/widget-misc-methods.js",
+      "notes": "Locale partition of text overrides for multi-language storefront rendering."
+    },
+    {
+      "id": "fpb-personalization-data",
+      "family": "FPB",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL"
+      ],
+      "admin_label": "Personalization Data",
+      "admin_location": "Widget Settings",
+      "field_name": "personalizationData",
+      "persisted_location": "bundle_data",
+      "runtime_location": "full-page product page flow",
+      "type": "object",
+      "allowed_values": [],
+      "default": "{}",
+      "nullable": true,
+      "dependencies": [
+        "personalization mode"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "personalization screens"
+      ],
+      "affected_states": [
+        "message flow"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "low",
+      "accessibility_impact": "low",
+      "fixture_ids": [
+        "fpb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary"
+      ],
+      "status": "DISCOVERED_CURRENT",
+      "evidence": "app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/save-bundle-form.server.ts",
+      "notes": "Payload for personalize flow options such as message cards and gifting metadata."
+    },
+    {
+      "id": "ppb-show-product-prices",
+      "family": "PPB",
+      "templates": [
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Show Product Prices",
+      "admin_location": "Bundle Settings",
+      "field_name": "showProductPrices",
+      "persisted_location": "bundle_data",
+      "runtime_location": "product-page/config-lifecycle-methods.js",
+      "type": "boolean",
+      "allowed_values": [
+        "true",
+        "false"
+      ],
+      "default": true,
+      "nullable": false,
+      "dependencies": [
+        "pricing display"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "product card",
+        "footer totals"
+      ],
+      "affected_states": [
+        "pricing rendering"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "low",
+      "accessibility_impact": "low",
+      "fixture_ids": [
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "DISCOVERED_CURRENT",
+      "evidence": "app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/save-bundle.server.ts",
+      "notes": "Shared numeric visibility flag for product pricing in PPB storefront."
+    },
+    {
+      "id": "ppb-show-compare-at-prices",
+      "family": "PPB",
+      "templates": [
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Show Compare At Prices",
+      "admin_location": "Bundle Settings",
+      "field_name": "showCompareAtPrices",
+      "persisted_location": "bundle_data",
+      "runtime_location": "app/lib/bundle-config/product-page-display.ts",
+      "type": "boolean",
+      "allowed_values": [
+        "true",
+        "false"
+      ],
+      "default": false,
+      "nullable": false,
+      "dependencies": [
+        "price display"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "product card",
+        "footer totals"
+      ],
+      "affected_states": [
+        "pricing rendering"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "low",
+      "accessibility_impact": "low",
+      "fixture_ids": [
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "DISCOVERED_CURRENT",
+      "evidence": "app/lib/bundle-config/product-page-display.ts",
+      "notes": "PPB compare-at line visibility toggle resolved from controls layer."
+    },
+    {
+      "id": "ppb-cart-redirect-to-checkout",
+      "family": "PPB",
+      "templates": [
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Redirect Cart to Checkout",
+      "admin_location": "Bundle Settings",
+      "field_name": "cartRedirectToCheckout",
+      "persisted_location": "bundle_data",
+      "runtime_location": "product-page runtime workflow",
+      "type": "boolean",
+      "allowed_values": [
+        "true",
+        "false"
+      ],
+      "default": false,
+      "nullable": false,
+      "dependencies": [
+        "checkout flow"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "add-to-cart action"
+      ],
+      "affected_states": [
+        "checkout handoff"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "low",
+      "accessibility_impact": "medium",
+      "fixture_ids": [
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "DISCOVERED_CURRENT",
+      "evidence": "app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/save-bundle.server.ts",
+      "notes": "Same behavior flag as FPB but applied in PPB add-on workflow."
+    },
+    {
+      "id": "ppb-allow-quantity-changes",
+      "family": "PPB",
+      "templates": [
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Allow Quantity Changes",
+      "admin_location": "Bundle Settings",
+      "field_name": "allowQuantityChanges",
+      "persisted_location": "bundle_data",
+      "runtime_location": "product-page/selection-methods.js",
+      "type": "boolean",
+      "allowed_values": [
+        "true",
+        "false"
+      ],
+      "default": true,
+      "nullable": false,
+      "dependencies": [
+        "quantity controls"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "quantity controls"
+      ],
+      "affected_states": [
+        "selection behavior"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "medium",
+      "accessibility_impact": "medium",
+      "fixture_ids": [
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "DISCOVERED_CURRENT",
+      "evidence": "app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/save-bundle.server.ts",
+      "notes": "Toggles quantity-editability across in-page and modal PPB flows."
+    },
+    {
+      "id": "ppb-auto-select-browsed-product",
+      "family": "PPB",
+      "templates": [
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Auto Select Browsed Product",
+      "admin_location": "Bundle Settings",
+      "field_name": "autoSelectBrowsedProduct",
+      "persisted_location": "bundle_data",
+      "runtime_location": "product-page runtime flow",
+      "type": "boolean",
+      "allowed_values": [
+        "true",
+        "false"
+      ],
+      "default": false,
+      "nullable": false,
+      "dependencies": [
+        "default selection"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "initial selected products"
+      ],
+      "affected_states": [
+        "initialization defaults"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "low",
+      "accessibility_impact": "low",
+      "fixture_ids": [
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "DISCOVERED_CURRENT",
+      "evidence": "app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/parsers.ts",
+      "notes": "Uses current PDP context to seed selection where supported."
+    },
+    {
+      "id": "ppb-bundle-banner-desktop-url",
+      "family": "PPB",
+      "templates": [
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Bundle Banner Desktop URL",
+      "admin_location": "Widget Settings",
+      "field_name": "bundleBannerDesktopUrl",
+      "persisted_location": "bundle_data",
+      "runtime_location": "theme/banner sections",
+      "type": "string",
+      "allowed_values": [],
+      "default": "",
+      "nullable": true,
+      "dependencies": [
+        "banner"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "bundle banner"
+      ],
+      "affected_states": [
+        "banner rendering"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "medium",
+      "accessibility_impact": "low",
+      "fixture_ids": [
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "DISCOVERED_CURRENT",
+      "evidence": "app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/parsers.ts",
+      "notes": "Desktop media source for PPB banner presentation."
+    },
+    {
+      "id": "ppb-bundle-banner-mobile-url",
+      "family": "PPB",
+      "templates": [
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Bundle Banner Mobile URL",
+      "admin_location": "Widget Settings",
+      "field_name": "bundleBannerMobileUrl",
+      "persisted_location": "bundle_data",
+      "runtime_location": "theme/banner sections",
+      "type": "string",
+      "allowed_values": [],
+      "default": "",
+      "nullable": true,
+      "dependencies": [
+        "banner"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "bundle banner"
+      ],
+      "affected_states": [
+        "banner rendering"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "medium",
+      "accessibility_impact": "low",
+      "fixture_ids": [
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "DISCOVERED_CURRENT",
+      "evidence": "app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/parsers.ts",
+      "notes": "Mobile media source for PPB banner presentation."
+    },
+    {
+      "id": "ppb-bundle-level-css",
+      "family": "PPB",
+      "templates": [
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Bundle Level CSS",
+      "admin_location": "Theme Styling",
+      "field_name": "bundleLevelCss",
+      "persisted_location": "bundle_data",
+      "runtime_location": "full-page/runtime CSS injection",
+      "type": "string",
+      "allowed_values": [],
+      "default": "",
+      "nullable": true,
+      "dependencies": [
+        "custom styling"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "all storefront components"
+      ],
+      "affected_states": [
+        "rendering"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "high",
+      "accessibility_impact": "medium",
+      "fixture_ids": [
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "DISCOVERED_CURRENT",
+      "evidence": "app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/parsers.ts",
+      "notes": "Per-bundle CSS injection path for PPB variants."
+    },
+    {
+      "id": "ppb-variant-selector-enabled",
+      "family": "PPB",
+      "templates": [
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Enable Variant Selector",
+      "admin_location": "Widget Settings",
+      "field_name": "variantSelectorEnabled",
+      "persisted_location": "bundle_data",
+      "runtime_location": "product-page/methods/inpage-render-methods.js",
+      "type": "boolean",
+      "allowed_values": [
+        "true",
+        "false"
+      ],
+      "default": true,
+      "nullable": false,
+      "dependencies": [
+        "variant controls"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "product card variants"
+      ],
+      "affected_states": [
+        "variant selection flow"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "medium",
+      "accessibility_impact": "high",
+      "fixture_ids": [
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "DISCOVERED_CURRENT",
+      "evidence": "app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/usePpbModalAndTemplateController.ts",
+      "notes": "Governs whether PPB cards expose inline variant selection UI."
+    },
+    {
+      "id": "ppb-show-text-on-add-button",
+      "family": "PPB",
+      "templates": [
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Show Text on Add Button",
+      "admin_location": "Widget Settings",
+      "field_name": "showTextOnAddButton",
+      "persisted_location": "bundle_data",
+      "runtime_location": "product-page/methods/config-lifecycle-methods.js",
+      "type": "boolean",
+      "allowed_values": [
+        "true",
+        "false"
+      ],
+      "default": false,
+      "nullable": false,
+      "dependencies": [
+        "cta rendering"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "add button"
+      ],
+      "affected_states": [
+        "cta mode"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "low",
+      "accessibility_impact": "medium",
+      "fixture_ids": [
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "DISCOVERED_CURRENT",
+      "evidence": "app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/parsers.ts",
+      "notes": "PPB CTA copy mode for product add controls."
+    },
+    {
+      "id": "ppb-max-qty-per-product",
+      "family": "PPB",
+      "templates": [
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Maximum Qty Per Product",
+      "admin_location": "Bundle Settings",
+      "field_name": "maxQtyPerProduct",
+      "persisted_location": "bundle_data",
+      "runtime_location": "product-page/selection-methods.js",
+      "type": "integer",
+      "allowed_values": [],
+      "default": "null",
+      "nullable": true,
+      "dependencies": [
+        "quantity validation"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "quantity controls"
+      ],
+      "affected_states": [
+        "quantity validation"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "low",
+      "accessibility_impact": "low",
+      "fixture_ids": [
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "DISCOVERED_CURRENT",
+      "evidence": "app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/parsers.ts",
+      "notes": "Per-product cap used in PPB quantity limit logic."
+    },
+    {
+      "id": "ppb-default-products-data",
+      "family": "PPB",
+      "templates": [
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Default Products Data",
+      "admin_location": "Widget Settings",
+      "field_name": "defaultProductsData",
+      "persisted_location": "bundle_data",
+      "runtime_location": "product-page/default-product-methods.js",
+      "type": "object",
+      "allowed_values": [],
+      "default": "{}",
+      "nullable": true,
+      "dependencies": [
+        "default product prefill"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "initial state"
+      ],
+      "affected_states": [
+        "initialization"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "low",
+      "accessibility_impact": "low",
+      "fixture_ids": [
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "DISCOVERED_CURRENT",
+      "evidence": "app/assets/widgets/product-page/methods/default-product-methods.js",
+      "notes": "Shared payload for default/preselected product hydration."
+    },
+    {
+      "id": "ppb-box-selection",
+      "family": "PPB",
+      "templates": [
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Box Selection",
+      "admin_location": "Widget Settings",
+      "field_name": "boxSelection",
+      "persisted_location": "bundle_data",
+      "runtime_location": "product-page config payload",
+      "type": "object",
+      "allowed_values": [],
+      "default": "{}",
+      "nullable": true,
+      "dependencies": [
+        "box/tiers feature"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "box selection UI"
+      ],
+      "affected_states": [
+        "box selection"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "medium",
+      "accessibility_impact": "medium",
+      "fixture_ids": [
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "DISCOVERED_CURRENT",
+      "evidence": "app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/parsers.ts",
+      "notes": "Persisted configuration for PPB box/tier selection behavior."
+    },
+    {
+      "id": "ppb-bundle-cart-title",
+      "family": "PPB",
+      "templates": [
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Bundle Cart Title",
+      "admin_location": "Widget Settings",
+      "field_name": "bundleCartTitle",
+      "persisted_location": "bundle_data",
+      "runtime_location": "product-page/cart summary methods",
+      "type": "string",
+      "allowed_values": [],
+      "default": "",
+      "nullable": true,
+      "dependencies": [
+        "summary content"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "bundle cart header"
+      ],
+      "affected_states": [
+        "cart summary"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "low",
+      "accessibility_impact": "low",
+      "fixture_ids": [
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "DISCOVERED_CURRENT",
+      "evidence": "app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/parsers.ts",
+      "notes": "Overrides PPB cart drawer/title text for the selected bundle section."
+    },
+    {
+      "id": "ppb-bundle-cart-subtitle",
+      "family": "PPB",
+      "templates": [
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Bundle Cart Subtitle",
+      "admin_location": "Widget Settings",
+      "field_name": "bundleCartSubtitle",
+      "persisted_location": "bundle_data",
+      "runtime_location": "product-page/cart summary methods",
+      "type": "string",
+      "allowed_values": [],
+      "default": "",
+      "nullable": true,
+      "dependencies": [
+        "summary content"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "bundle cart header"
+      ],
+      "affected_states": [
+        "cart summary"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "low",
+      "accessibility_impact": "low",
+      "fixture_ids": [
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "DISCOVERED_CURRENT",
+      "evidence": "app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/parsers.ts",
+      "notes": "Optional supporting copy for PPB cart summary header."
+    },
+    {
+      "id": "ppb-discount-display-override",
+      "family": "PPB",
+      "templates": [
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Discount Display Override",
+      "admin_location": "Widget Settings",
+      "field_name": "discountDisplayOverride",
+      "persisted_location": "bundle_data",
+      "runtime_location": "bundle-formatter runtime",
+      "type": "object",
+      "allowed_values": [],
+      "default": "{}",
+      "nullable": true,
+      "dependencies": [
+        "discount messaging"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "discount badges"
+      ],
+      "affected_states": [
+        "discount messaging"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "low",
+      "accessibility_impact": "low",
+      "fixture_ids": [
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "DISCOVERED_CURRENT",
+      "evidence": "app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/parsers.ts",
+      "notes": "Structured override used by PPB discount messaging and ribbon formatting."
+    },
+    {
+      "id": "ppb-individual-selling-plan-selection",
+      "family": "PPB",
+      "templates": [
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Individual Selling Plan Selection",
+      "admin_location": "Widget Settings",
+      "field_name": "individualSellingPlanSelection",
+      "persisted_location": "bundle_data",
+      "runtime_location": "product-page/selection-data-methods.js",
+      "type": "object",
+      "allowed_values": [],
+      "default": "{}",
+      "nullable": true,
+      "dependencies": [
+        "subscription options"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "subscription controls"
+      ],
+      "affected_states": [
+        "selection behavior"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "low",
+      "accessibility_impact": "medium",
+      "fixture_ids": [
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "DISCOVERED_CURRENT",
+      "evidence": "app/assets/widgets/product-page/methods/selection-data-methods.js",
+      "notes": "Stores whether individual subscription plan selection is enabled and for which scope."
+    },
+    {
+      "id": "ppb-validate-quantity-per-product",
+      "family": "PPB",
+      "templates": [
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Validate Quantity Per Product",
+      "admin_location": "Widget Settings",
+      "field_name": "validateQuantityPerProduct",
+      "persisted_location": "bundle_data",
+      "runtime_location": "product-page/selection-methods.js",
+      "type": "object",
+      "allowed_values": [],
+      "default": "{}",
+      "nullable": true,
+      "dependencies": [
+        "maxQtyPerProduct"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "quantity controls"
+      ],
+      "affected_states": [
+        "quantity validation"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "low",
+      "accessibility_impact": "low",
+      "fixture_ids": [
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "DISCOVERED_CURRENT",
+      "evidence": "app/assets/widgets/product-page/methods/selection-methods.js",
+      "notes": "PPB equivalent of FPB per-product quantity validation policy."
+    },
+    {
+      "id": "ppb-use-single-step-categories",
+      "family": "PPB",
+      "templates": [
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Single Step Categories as Bundle Steps",
+      "admin_location": "Widget Settings",
+      "field_name": "useSingleStepCategoriesAsBundleSteps",
+      "persisted_location": "bundle_data",
+      "runtime_location": "product-page/single-step-categories.js",
+      "type": "boolean",
+      "allowed_values": [
+        "true",
+        "false"
+      ],
+      "default": false,
+      "nullable": false,
+      "dependencies": [
+        "category rendering"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "category navigator"
+      ],
+      "affected_states": [
+        "step mapping"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "low",
+      "accessibility_impact": "medium",
+      "fixture_ids": [
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "DISCOVERED_CURRENT",
+      "evidence": "app/assets/widgets/product-page/single-step-categories.js",
+      "notes": "Flattens single-step categories into top-level bundle step flow."
+    },
+    {
+      "id": "ppb-preselected-product-variant-id",
+      "family": "PPB",
+      "templates": [
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Preselected Product Variant",
+      "admin_location": "Widget Settings",
+      "field_name": "preSelectedProductVariantId",
+      "persisted_location": "bundle_data",
+      "runtime_location": "product-page runtime state",
+      "type": "string",
+      "allowed_values": [],
+      "default": "",
+      "nullable": true,
+      "dependencies": [
+        "variant defaults"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "preselected variants"
+      ],
+      "affected_states": [
+        "initialization"
+      ],
+      "merchant_editable": false,
+      "responsive_impact": "low",
+      "accessibility_impact": "low",
+      "fixture_ids": [
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "DISCOVERED_CURRENT",
+      "evidence": "app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/parsers.ts",
+      "notes": "Internal variant ID used for initial product selection context."
+    },
+    {
+      "id": "ppb-upsell-widget-enabled",
+      "family": "PPB",
+      "templates": [
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Upsell Widget Enabled",
+      "admin_location": "Widget Settings",
+      "field_name": "upsellWidgetEnabled",
+      "persisted_location": "bundle_data",
+      "runtime_location": "product-page config lifecycle",
+      "type": "boolean",
+      "allowed_values": [
+        "true",
+        "false"
+      ],
+      "default": false,
+      "nullable": false,
+      "dependencies": [
+        "upsell config"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "upsell blocks"
+      ],
+      "affected_states": [
+        "upsell render state"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "medium",
+      "accessibility_impact": "low",
+      "fixture_ids": [
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "DISCOVERED_CURRENT",
+      "evidence": "app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/parsers.ts",
+      "notes": "Feature toggle for PPB upsell block rendering."
+    },
+    {
+      "id": "ppb-upsell-widget-display-mode",
+      "family": "PPB",
+      "templates": [
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Upsell Widget Display Mode",
+      "admin_location": "Widget Settings",
+      "field_name": "upsellWidgetDisplayMode",
+      "persisted_location": "bundle_data",
+      "runtime_location": "product-page config lifecycle",
+      "type": "string",
+      "allowed_values": [
+        "block",
+        "inline"
+      ],
+      "default": "block",
+      "nullable": true,
+      "dependencies": [
+        "upsellWidgetEnabled"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "upsellWidgetEnabled === true",
+      "affected_components": [
+        "upsell blocks"
+      ],
+      "affected_states": [
+        "upsell render state"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "medium",
+      "accessibility_impact": "low",
+      "fixture_ids": [
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "DISCOVERED_CURRENT",
+      "evidence": "app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/parsers.ts",
+      "notes": "Modifies placement style for PPB upsell content."
+    },
+    {
+      "id": "ppb-upsell-widget-display-on",
+      "family": "PPB",
+      "templates": [
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Upsell Widget Display On",
+      "admin_location": "Widget Settings",
+      "field_name": "upsellWidgetDisplayOn",
+      "persisted_location": "bundle_data",
+      "runtime_location": "product-page config lifecycle",
+      "type": "string",
+      "allowed_values": [
+        "all",
+        "some"
+      ],
+      "default": "all",
+      "nullable": true,
+      "dependencies": [
+        "upsellWidgetEnabled"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "upsellWidgetEnabled === true",
+      "affected_components": [
+        "upsell blocks"
+      ],
+      "affected_states": [
+        "upsell render state"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "medium",
+      "accessibility_impact": "low",
+      "fixture_ids": [
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "DISCOVERED_CURRENT",
+      "evidence": "app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/parsers.ts",
+      "notes": "Restricts where PPB upsell widgets are visible in the page."
+    },
+    {
+      "id": "design-primary-color",
+      "family": "SHARED",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL",
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Primary Color",
+      "admin_location": "Settings > Design > Brand Colors",
+      "field_name": "Primary Color",
+      "persisted_location": "DesignSettings.settingsData.fieldValues.Primary Color",
+      "runtime_location": "buildSettingsDesignRuntime.fieldValues.Primary Color",
+      "type": "color",
+      "allowed_values": [],
+      "default": "#000000",
+      "nullable": false,
+      "dependencies": [],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "Action buttons, progress bars, and active elements"
+      ],
+      "affected_states": [
+        "default",
+        "selected",
+        "disabled",
+        "focus"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "Semantic token propagates to all applicable responsive adapters",
+      "accessibility_impact": "Configured color pair requires contrast validation",
+      "fixture_ids": [
+        "fpb-all-templates",
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary",
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/admin-configuration-surfaces.ts; app/lib/settings-design-runtime.ts",
+      "notes": "Generated from the canonical Admin Design field contract."
+    },
+    {
+      "id": "design-button-text-color",
+      "family": "SHARED",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL",
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Button Text Color",
+      "admin_location": "Settings > Design > Brand Colors",
+      "field_name": "Button Text Color",
+      "persisted_location": "DesignSettings.settingsData.fieldValues.Button Text Color",
+      "runtime_location": "buildSettingsDesignRuntime.fieldValues.Button Text Color",
+      "type": "color",
+      "allowed_values": [],
+      "default": "#ffffff",
+      "nullable": false,
+      "dependencies": [],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "Text displayed on primary buttons and action elements"
+      ],
+      "affected_states": [
+        "default",
+        "selected",
+        "disabled",
+        "focus"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "Semantic token propagates to all applicable responsive adapters",
+      "accessibility_impact": "Configured color pair requires contrast validation",
+      "fixture_ids": [
+        "fpb-all-templates",
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary",
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/admin-configuration-surfaces.ts; app/lib/settings-design-runtime.ts",
+      "notes": "Generated from the canonical Admin Design field contract."
+    },
+    {
+      "id": "design-primary-text-color",
+      "family": "SHARED",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL",
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Primary Text Color",
+      "admin_location": "Settings > Design > Brand Colors",
+      "field_name": "Primary Text Color",
+      "persisted_location": "DesignSettings.settingsData.fieldValues.Primary Text Color",
+      "runtime_location": "buildSettingsDesignRuntime.fieldValues.Primary Text Color",
+      "type": "color",
+      "allowed_values": [],
+      "default": "#000000",
+      "nullable": false,
+      "dependencies": [],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "Product names, prices, labels, and main content text"
+      ],
+      "affected_states": [
+        "default",
+        "selected",
+        "disabled",
+        "focus"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "Semantic token propagates to all applicable responsive adapters",
+      "accessibility_impact": "Configured color pair requires contrast validation",
+      "fixture_ids": [
+        "fpb-all-templates",
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary",
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/admin-configuration-surfaces.ts; app/lib/settings-design-runtime.ts",
+      "notes": "Generated from the canonical Admin Design field contract."
+    },
+    {
+      "id": "design-secondary-color",
+      "family": "SHARED",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL",
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Secondary Color",
+      "admin_location": "Settings > Design > Brand Colors",
+      "field_name": "Secondary Color",
+      "persisted_location": "DesignSettings.settingsData.fieldValues.Secondary Color",
+      "runtime_location": "buildSettingsDesignRuntime.fieldValues.Secondary Color",
+      "type": "color",
+      "allowed_values": [],
+      "default": "#eeeeee",
+      "nullable": false,
+      "dependencies": [],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "Secondary elements, empty progress bars, and inactive states"
+      ],
+      "affected_states": [
+        "default",
+        "selected",
+        "disabled",
+        "focus"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "Semantic token propagates to all applicable responsive adapters",
+      "accessibility_impact": "Configured color pair requires contrast validation",
+      "fixture_ids": [
+        "fpb-all-templates",
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary",
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/admin-configuration-surfaces.ts; app/lib/settings-design-runtime.ts",
+      "notes": "Generated from the canonical Admin Design field contract."
+    },
+    {
+      "id": "design-product-background-color",
+      "family": "SHARED",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL",
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Product Background Color",
+      "admin_location": "Settings > Design > Brand Colors",
+      "field_name": "Product Background Color",
+      "persisted_location": "DesignSettings.settingsData.fieldValues.Product Background Color",
+      "runtime_location": "buildSettingsDesignRuntime.fieldValues.Product Background Color",
+      "type": "color",
+      "allowed_values": [],
+      "default": "#ffffff",
+      "nullable": false,
+      "dependencies": [],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "Background color for product cards and cart footer"
+      ],
+      "affected_states": [
+        "default",
+        "selected",
+        "disabled",
+        "focus"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "Semantic token propagates to all applicable responsive adapters",
+      "accessibility_impact": "Configured color pair requires contrast validation",
+      "fixture_ids": [
+        "fpb-all-templates",
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary",
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/admin-configuration-surfaces.ts; app/lib/settings-design-runtime.ts",
+      "notes": "Generated from the canonical Admin Design field contract."
+    },
+    {
+      "id": "design-primary-font-size",
+      "family": "SHARED",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL",
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Primary Font Size",
+      "admin_location": "Settings > Design > Typography",
+      "field_name": "Primary Font Size",
+      "persisted_location": "DesignSettings.settingsData.fieldValues.Primary Font Size",
+      "runtime_location": "buildSettingsDesignRuntime.fieldValues.Primary Font Size",
+      "type": "number",
+      "allowed_values": [],
+      "default": "16",
+      "nullable": false,
+      "dependencies": [],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "Typography"
+      ],
+      "affected_states": [
+        "default",
+        "selected",
+        "disabled",
+        "focus"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "Semantic token propagates to all applicable responsive adapters",
+      "accessibility_impact": "No semantic change",
+      "fixture_ids": [
+        "fpb-all-templates",
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary",
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/admin-configuration-surfaces.ts; app/lib/settings-design-runtime.ts",
+      "notes": "Generated from the canonical Admin Design field contract."
+    },
+    {
+      "id": "design-primary-font-weight",
+      "family": "SHARED",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL",
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Primary Font Weight",
+      "admin_location": "Settings > Design > Typography",
+      "field_name": "Primary Font Weight",
+      "persisted_location": "DesignSettings.settingsData.fieldValues.Primary Font Weight",
+      "runtime_location": "buildSettingsDesignRuntime.fieldValues.Primary Font Weight",
+      "type": "select",
+      "allowed_values": [
+        "Regular",
+        "Bold"
+      ],
+      "default": "Bold",
+      "nullable": false,
+      "dependencies": [],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "Typography"
+      ],
+      "affected_states": [
+        "default",
+        "selected",
+        "disabled",
+        "focus"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "Semantic token propagates to all applicable responsive adapters",
+      "accessibility_impact": "No semantic change",
+      "fixture_ids": [
+        "fpb-all-templates",
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary",
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/admin-configuration-surfaces.ts; app/lib/settings-design-runtime.ts",
+      "notes": "Generated from the canonical Admin Design field contract."
+    },
+    {
+      "id": "design-secondary-font-size",
+      "family": "SHARED",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL",
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Secondary Font Size",
+      "admin_location": "Settings > Design > Typography",
+      "field_name": "Secondary Font Size",
+      "persisted_location": "DesignSettings.settingsData.fieldValues.Secondary Font Size",
+      "runtime_location": "buildSettingsDesignRuntime.fieldValues.Secondary Font Size",
+      "type": "number",
+      "allowed_values": [],
+      "default": "14",
+      "nullable": false,
+      "dependencies": [],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "Typography"
+      ],
+      "affected_states": [
+        "default",
+        "selected",
+        "disabled",
+        "focus"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "Semantic token propagates to all applicable responsive adapters",
+      "accessibility_impact": "No semantic change",
+      "fixture_ids": [
+        "fpb-all-templates",
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary",
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/admin-configuration-surfaces.ts; app/lib/settings-design-runtime.ts",
+      "notes": "Generated from the canonical Admin Design field contract."
+    },
+    {
+      "id": "design-secondary-font-weight",
+      "family": "SHARED",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL",
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Secondary Font Weight",
+      "admin_location": "Settings > Design > Typography",
+      "field_name": "Secondary Font Weight",
+      "persisted_location": "DesignSettings.settingsData.fieldValues.Secondary Font Weight",
+      "runtime_location": "buildSettingsDesignRuntime.fieldValues.Secondary Font Weight",
+      "type": "select",
+      "allowed_values": [
+        "Regular",
+        "Bold"
+      ],
+      "default": "Bold",
+      "nullable": false,
+      "dependencies": [],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "Typography"
+      ],
+      "affected_states": [
+        "default",
+        "selected",
+        "disabled",
+        "focus"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "Semantic token propagates to all applicable responsive adapters",
+      "accessibility_impact": "No semantic change",
+      "fixture_ids": [
+        "fpb-all-templates",
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary",
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/admin-configuration-surfaces.ts; app/lib/settings-design-runtime.ts",
+      "notes": "Generated from the canonical Admin Design field contract."
+    },
+    {
+      "id": "design-body-font-size",
+      "family": "SHARED",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL",
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Body Font Size",
+      "admin_location": "Settings > Design > Typography",
+      "field_name": "Body Font Size",
+      "persisted_location": "DesignSettings.settingsData.fieldValues.Body Font Size",
+      "runtime_location": "buildSettingsDesignRuntime.fieldValues.Body Font Size",
+      "type": "number",
+      "allowed_values": [],
+      "default": "14",
+      "nullable": false,
+      "dependencies": [],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "Typography"
+      ],
+      "affected_states": [
+        "default",
+        "selected",
+        "disabled",
+        "focus"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "Semantic token propagates to all applicable responsive adapters",
+      "accessibility_impact": "No semantic change",
+      "fixture_ids": [
+        "fpb-all-templates",
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary",
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/admin-configuration-surfaces.ts; app/lib/settings-design-runtime.ts",
+      "notes": "Generated from the canonical Admin Design field contract."
+    },
+    {
+      "id": "design-body-font-weight",
+      "family": "SHARED",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL",
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Body Font Weight",
+      "admin_location": "Settings > Design > Typography",
+      "field_name": "Body Font Weight",
+      "persisted_location": "DesignSettings.settingsData.fieldValues.Body Font Weight",
+      "runtime_location": "buildSettingsDesignRuntime.fieldValues.Body Font Weight",
+      "type": "select",
+      "allowed_values": [
+        "Regular",
+        "Bold"
+      ],
+      "default": "Regular",
+      "nullable": false,
+      "dependencies": [],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "Typography"
+      ],
+      "affected_states": [
+        "default",
+        "selected",
+        "disabled",
+        "focus"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "Semantic token propagates to all applicable responsive adapters",
+      "accessibility_impact": "No semantic change",
+      "fixture_ids": [
+        "fpb-all-templates",
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary",
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/admin-configuration-surfaces.ts; app/lib/settings-design-runtime.ts",
+      "notes": "Generated from the canonical Admin Design field contract."
+    },
+    {
+      "id": "design-bundle-buttons-corner-style",
+      "family": "SHARED",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL",
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Bundle Buttons Corner Style",
+      "admin_location": "Settings > Design > Corners",
+      "field_name": "Bundle Buttons Corner Style",
+      "persisted_location": "DesignSettings.settingsData.fieldValues.Bundle Buttons Corner Style",
+      "runtime_location": "buildSettingsDesignRuntime.fieldValues.Bundle Buttons Corner Style",
+      "type": "select",
+      "allowed_values": [
+        "Sharp",
+        "Base",
+        "Round"
+      ],
+      "default": "Base",
+      "nullable": false,
+      "dependencies": [],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "Corners"
+      ],
+      "affected_states": [
+        "default",
+        "selected",
+        "disabled",
+        "focus"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "Semantic token propagates to all applicable responsive adapters",
+      "accessibility_impact": "No semantic change",
+      "fixture_ids": [
+        "fpb-all-templates",
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary",
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/admin-configuration-surfaces.ts; app/lib/settings-design-runtime.ts",
+      "notes": "Generated from the canonical Admin Design field contract."
+    },
+    {
+      "id": "design-bundle-buttons-base",
+      "family": "SHARED",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL",
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Bundle Buttons Base",
+      "admin_location": "Settings > Design > Corners",
+      "field_name": "Bundle Buttons Base",
+      "persisted_location": "DesignSettings.settingsData.fieldValues.Bundle Buttons Base",
+      "runtime_location": "buildSettingsDesignRuntime.fieldValues.Bundle Buttons Base",
+      "type": "number",
+      "allowed_values": [],
+      "default": "5px",
+      "nullable": false,
+      "dependencies": [],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "Corners"
+      ],
+      "affected_states": [
+        "default",
+        "selected",
+        "disabled",
+        "focus"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "Semantic token propagates to all applicable responsive adapters",
+      "accessibility_impact": "No semantic change",
+      "fixture_ids": [
+        "fpb-all-templates",
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary",
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/admin-configuration-surfaces.ts; app/lib/settings-design-runtime.ts",
+      "notes": "Generated from the canonical Admin Design field contract."
+    },
+    {
+      "id": "design-product-card-cart-corner-style",
+      "family": "SHARED",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL",
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Product Card & Cart Corner Style",
+      "admin_location": "Settings > Design > Corners",
+      "field_name": "Product Card & Cart Corner Style",
+      "persisted_location": "DesignSettings.settingsData.fieldValues.Product Card & Cart Corner Style",
+      "runtime_location": "buildSettingsDesignRuntime.fieldValues.Product Card & Cart Corner Style",
+      "type": "select",
+      "allowed_values": [
+        "Sharp",
+        "Base"
+      ],
+      "default": "Base",
+      "nullable": false,
+      "dependencies": [],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "Corners"
+      ],
+      "affected_states": [
+        "default",
+        "selected",
+        "disabled",
+        "focus"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "Semantic token propagates to all applicable responsive adapters",
+      "accessibility_impact": "No semantic change",
+      "fixture_ids": [
+        "fpb-all-templates",
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary",
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/admin-configuration-surfaces.ts; app/lib/settings-design-runtime.ts",
+      "notes": "Generated from the canonical Admin Design field contract."
+    },
+    {
+      "id": "design-product-card-cart-base",
+      "family": "SHARED",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL",
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Product Card & Cart Base",
+      "admin_location": "Settings > Design > Corners",
+      "field_name": "Product Card & Cart Base",
+      "persisted_location": "DesignSettings.settingsData.fieldValues.Product Card & Cart Base",
+      "runtime_location": "buildSettingsDesignRuntime.fieldValues.Product Card & Cart Base",
+      "type": "number",
+      "allowed_values": [],
+      "default": "10px",
+      "nullable": false,
+      "dependencies": [],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "Corners"
+      ],
+      "affected_states": [
+        "default",
+        "selected",
+        "disabled",
+        "focus"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "Semantic token propagates to all applicable responsive adapters",
+      "accessibility_impact": "No semantic change",
+      "fixture_ids": [
+        "fpb-all-templates",
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary",
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/admin-configuration-surfaces.ts; app/lib/settings-design-runtime.ts",
+      "notes": "Generated from the canonical Admin Design field contract."
+    },
+    {
+      "id": "design-image-fit",
+      "family": "SHARED",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL",
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Image Fit",
+      "admin_location": "Settings > Design > Images & GIFs",
+      "field_name": "Image Fit",
+      "persisted_location": "DesignSettings.settingsData.fieldValues.Image Fit",
+      "runtime_location": "buildSettingsDesignRuntime.fieldValues.Image Fit",
+      "type": "select",
+      "allowed_values": [
+        "Cover",
+        "Contain",
+        "Fill"
+      ],
+      "default": "Cover",
+      "nullable": false,
+      "dependencies": [],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "Images & GIFs"
+      ],
+      "affected_states": [
+        "default",
+        "selected",
+        "disabled",
+        "focus"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "Semantic token propagates to all applicable responsive adapters",
+      "accessibility_impact": "No semantic change",
+      "fixture_ids": [
+        "fpb-all-templates",
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary",
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/admin-configuration-surfaces.ts; app/lib/settings-design-runtime.ts",
+      "notes": "Generated from the canonical Admin Design field contract."
+    },
+    {
+      "id": "design-bundle-loading-gif",
+      "family": "SHARED",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL",
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Bundle Loading GIF",
+      "admin_location": "Settings > Design > Images & GIFs",
+      "field_name": "Bundle Loading GIF",
+      "persisted_location": "DesignSettings.settingsData.fieldValues.Bundle Loading GIF",
+      "runtime_location": "buildSettingsDesignRuntime.fieldValues.Bundle Loading GIF",
+      "type": "loadingSpinner",
+      "allowed_values": [],
+      "default": "Default spinner",
+      "nullable": false,
+      "dependencies": [],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "Displayed on the initial bundle load unless a merchant GIF is configured on the bundle."
+      ],
+      "affected_states": [
+        "default",
+        "selected",
+        "disabled",
+        "focus"
+      ],
+      "merchant_editable": false,
+      "responsive_impact": "Semantic token propagates to all applicable responsive adapters",
+      "accessibility_impact": "No semantic change",
+      "fixture_ids": [
+        "fpb-all-templates",
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary",
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "DESIGN_ONLY",
+      "evidence": "app/lib/admin-configuration-surfaces.ts; app/lib/settings-design-runtime.ts",
+      "notes": "Generated from the canonical Admin Design field contract."
+    },
+    {
+      "id": "design-checkout-gif",
+      "family": "SHARED",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL",
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Checkout GIF",
+      "admin_location": "Settings > Design > Images & GIFs",
+      "field_name": "Checkout GIF",
+      "persisted_location": "DesignSettings.settingsData.fieldValues.Checkout GIF",
+      "runtime_location": "buildSettingsDesignRuntime.fieldValues.Checkout GIF",
+      "type": "loadingSpinner",
+      "allowed_values": [],
+      "default": "Default spinner",
+      "nullable": false,
+      "dependencies": [],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "Displayed during checkout loading unless a merchant GIF is configured."
+      ],
+      "affected_states": [
+        "default",
+        "selected",
+        "disabled",
+        "focus"
+      ],
+      "merchant_editable": false,
+      "responsive_impact": "Semantic token propagates to all applicable responsive adapters",
+      "accessibility_impact": "No semantic change",
+      "fixture_ids": [
+        "fpb-all-templates",
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary",
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "DESIGN_ONLY",
+      "evidence": "app/lib/admin-configuration-surfaces.ts; app/lib/settings-design-runtime.ts",
+      "notes": "Generated from the canonical Admin Design field contract."
+    },
+    {
+      "id": "design-expert-navigation-banner-navigation-banner-step-completion-color",
+      "family": "SHARED",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL",
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Completed step color",
+      "admin_location": "Settings > Design > General",
+      "field_name": "expert.navigationBanner.navigationBannerStepCompletionColor",
+      "persisted_location": "DesignSettings.settingsData.fieldValues.expert.navigationBanner.navigationBannerStepCompletionColor",
+      "runtime_location": "buildSettingsDesignRuntime.fieldValues.expert.navigationBanner.navigationBannerStepCompletionColor",
+      "type": "color",
+      "allowed_values": [],
+      "default": "#000000",
+      "nullable": false,
+      "dependencies": [
+        "isExpertControlsEnabled=true"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "Expert Color Controls enabled",
+      "affected_components": [
+        "Background color for completed step indicators"
+      ],
+      "affected_states": [
+        "default",
+        "selected",
+        "disabled",
+        "focus"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "Semantic token propagates to all applicable responsive adapters",
+      "accessibility_impact": "Configured color pair requires contrast validation",
+      "fixture_ids": [
+        "fpb-all-templates",
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary",
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/admin-configuration-surfaces.ts; app/lib/settings-design-runtime.ts",
+      "notes": "Generated from the canonical Admin Design field contract."
+    },
+    {
+      "id": "design-expert-navigation-banner-navigation-check-color",
+      "family": "SHARED",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL",
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Check Mark Color",
+      "admin_location": "Settings > Design > General",
+      "field_name": "expert.navigationBanner.navigationCheckColor",
+      "persisted_location": "DesignSettings.settingsData.fieldValues.expert.navigationBanner.navigationCheckColor",
+      "runtime_location": "buildSettingsDesignRuntime.fieldValues.expert.navigationBanner.navigationCheckColor",
+      "type": "color",
+      "allowed_values": [],
+      "default": "#FFFFFF",
+      "nullable": false,
+      "dependencies": [
+        "isExpertControlsEnabled=true"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "Expert Color Controls enabled",
+      "affected_components": [
+        "Check mark icons displayed on completed bundle steps"
+      ],
+      "affected_states": [
+        "default",
+        "selected",
+        "disabled",
+        "focus"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "Semantic token propagates to all applicable responsive adapters",
+      "accessibility_impact": "Configured color pair requires contrast validation",
+      "fixture_ids": [
+        "fpb-all-templates",
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary",
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/admin-configuration-surfaces.ts; app/lib/settings-design-runtime.ts",
+      "notes": "Generated from the canonical Admin Design field contract."
+    },
+    {
+      "id": "design-expert-navigation-banner-navigation-banner-step-text-color",
+      "family": "SHARED",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL",
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Step Text Color",
+      "admin_location": "Settings > Design > General",
+      "field_name": "expert.navigationBanner.navigationBannerStepTextColor",
+      "persisted_location": "DesignSettings.settingsData.fieldValues.expert.navigationBanner.navigationBannerStepTextColor",
+      "runtime_location": "buildSettingsDesignRuntime.fieldValues.expert.navigationBanner.navigationBannerStepTextColor",
+      "type": "color",
+      "allowed_values": [],
+      "default": "#000000",
+      "nullable": false,
+      "dependencies": [
+        "isExpertControlsEnabled=true"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "Expert Color Controls enabled",
+      "affected_components": [
+        "Text color for step names and navigation labels"
+      ],
+      "affected_states": [
+        "default",
+        "selected",
+        "disabled",
+        "focus"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "Semantic token propagates to all applicable responsive adapters",
+      "accessibility_impact": "Configured color pair requires contrast validation",
+      "fixture_ids": [
+        "fpb-all-templates",
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary",
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/admin-configuration-surfaces.ts; app/lib/settings-design-runtime.ts",
+      "notes": "Generated from the canonical Admin Design field contract."
+    },
+    {
+      "id": "design-expert-general-settings-product-page-title-color",
+      "family": "SHARED",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL",
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Product Page Title Color",
+      "admin_location": "Settings > Design > General",
+      "field_name": "expert.generalSettings.productPageTitleColor",
+      "persisted_location": "DesignSettings.settingsData.fieldValues.expert.generalSettings.productPageTitleColor",
+      "runtime_location": "buildSettingsDesignRuntime.fieldValues.expert.generalSettings.productPageTitleColor",
+      "type": "color",
+      "allowed_values": [],
+      "default": "#000000",
+      "nullable": false,
+      "dependencies": [
+        "isExpertControlsEnabled=true"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "Expert Color Controls enabled",
+      "affected_components": [
+        "Title text color on the bundle builder page"
+      ],
+      "affected_states": [
+        "default",
+        "selected",
+        "disabled",
+        "focus"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "Semantic token propagates to all applicable responsive adapters",
+      "accessibility_impact": "Configured color pair requires contrast validation",
+      "fixture_ids": [
+        "fpb-all-templates",
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary",
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/admin-configuration-surfaces.ts; app/lib/settings-design-runtime.ts",
+      "notes": "Generated from the canonical Admin Design field contract."
+    },
+    {
+      "id": "design-expert-navigation-banner-navigation-banner-step-progress-bar-empty-color",
+      "family": "SHARED",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL",
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Step Progress Bar Empty Color",
+      "admin_location": "Settings > Design > General",
+      "field_name": "expert.navigationBanner.navigationBannerStepProgressBarEmptyColor",
+      "persisted_location": "DesignSettings.settingsData.fieldValues.expert.navigationBanner.navigationBannerStepProgressBarEmptyColor",
+      "runtime_location": "buildSettingsDesignRuntime.fieldValues.expert.navigationBanner.navigationBannerStepProgressBarEmptyColor",
+      "type": "color",
+      "allowed_values": [],
+      "default": "#cccccc",
+      "nullable": false,
+      "dependencies": [
+        "isExpertControlsEnabled=true"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "Expert Color Controls enabled",
+      "affected_components": [
+        "Background color for incomplete sections of progress bars"
+      ],
+      "affected_states": [
+        "default",
+        "selected",
+        "disabled",
+        "focus"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "Semantic token propagates to all applicable responsive adapters",
+      "accessibility_impact": "Configured color pair requires contrast validation",
+      "fixture_ids": [
+        "fpb-all-templates",
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary",
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/admin-configuration-surfaces.ts; app/lib/settings-design-runtime.ts",
+      "notes": "Generated from the canonical Admin Design field contract."
+    },
+    {
+      "id": "design-expert-general-settings-loading-bg-color",
+      "family": "SHARED",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL",
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Loading Screen Background Color",
+      "admin_location": "Settings > Design > General",
+      "field_name": "expert.generalSettings.loadingBgColor",
+      "persisted_location": "DesignSettings.settingsData.fieldValues.expert.generalSettings.loadingBgColor",
+      "runtime_location": "buildSettingsDesignRuntime.fieldValues.expert.generalSettings.loadingBgColor",
+      "type": "color",
+      "allowed_values": [],
+      "default": "transparent",
+      "nullable": false,
+      "dependencies": [
+        "isExpertControlsEnabled=true"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "Expert Color Controls enabled",
+      "affected_components": [
+        "Background color bundle loading screen"
+      ],
+      "affected_states": [
+        "default",
+        "selected",
+        "disabled",
+        "focus"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "Semantic token propagates to all applicable responsive adapters",
+      "accessibility_impact": "Configured color pair requires contrast validation",
+      "fixture_ids": [
+        "fpb-all-templates",
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary",
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/admin-configuration-surfaces.ts; app/lib/settings-design-runtime.ts",
+      "notes": "Generated from the canonical Admin Design field contract."
+    },
+    {
+      "id": "design-expert-general-settings-condition-toast-bg-color",
+      "family": "SHARED",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL",
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Condition Toast Background Color",
+      "admin_location": "Settings > Design > General",
+      "field_name": "expert.generalSettings.conditionToastBgColor",
+      "persisted_location": "DesignSettings.settingsData.fieldValues.expert.generalSettings.conditionToastBgColor",
+      "runtime_location": "buildSettingsDesignRuntime.fieldValues.expert.generalSettings.conditionToastBgColor",
+      "type": "color",
+      "allowed_values": [],
+      "default": "#000000",
+      "nullable": false,
+      "dependencies": [
+        "isExpertControlsEnabled=true"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "Expert Color Controls enabled",
+      "affected_components": [
+        "Background color for condition toast"
+      ],
+      "affected_states": [
+        "default",
+        "selected",
+        "disabled",
+        "focus"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "Semantic token propagates to all applicable responsive adapters",
+      "accessibility_impact": "Configured color pair requires contrast validation",
+      "fixture_ids": [
+        "fpb-all-templates",
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary",
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/admin-configuration-surfaces.ts; app/lib/settings-design-runtime.ts",
+      "notes": "Generated from the canonical Admin Design field contract."
+    },
+    {
+      "id": "design-expert-general-settings-condition-toast-text-color",
+      "family": "SHARED",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL",
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Condition Toast Text Color",
+      "admin_location": "Settings > Design > General",
+      "field_name": "expert.generalSettings.conditionToastTextColor",
+      "persisted_location": "DesignSettings.settingsData.fieldValues.expert.generalSettings.conditionToastTextColor",
+      "runtime_location": "buildSettingsDesignRuntime.fieldValues.expert.generalSettings.conditionToastTextColor",
+      "type": "color",
+      "allowed_values": [],
+      "default": "#ffffff",
+      "nullable": false,
+      "dependencies": [
+        "isExpertControlsEnabled=true"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "Expert Color Controls enabled",
+      "affected_components": [
+        "Text color for condition toast"
+      ],
+      "affected_states": [
+        "default",
+        "selected",
+        "disabled",
+        "focus"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "Semantic token propagates to all applicable responsive adapters",
+      "accessibility_impact": "Configured color pair requires contrast validation",
+      "fixture_ids": [
+        "fpb-all-templates",
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary",
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/admin-configuration-surfaces.ts; app/lib/settings-design-runtime.ts",
+      "notes": "Generated from the canonical Admin Design field contract."
+    },
+    {
+      "id": "design-expert-navigation-banner-tabs-active-bg-color",
+      "family": "SHARED",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL",
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Active Tab Background Color",
+      "admin_location": "Settings > Design > General",
+      "field_name": "expert.navigationBanner.tabsActiveBgColor",
+      "persisted_location": "DesignSettings.settingsData.fieldValues.expert.navigationBanner.tabsActiveBgColor",
+      "runtime_location": "buildSettingsDesignRuntime.fieldValues.expert.navigationBanner.tabsActiveBgColor",
+      "type": "color",
+      "allowed_values": [],
+      "default": "#000000",
+      "nullable": false,
+      "dependencies": [
+        "isExpertControlsEnabled=true"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "Expert Color Controls enabled",
+      "affected_components": [
+        "Background color for the currently selected category tab"
+      ],
+      "affected_states": [
+        "default",
+        "selected",
+        "disabled",
+        "focus"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "Semantic token propagates to all applicable responsive adapters",
+      "accessibility_impact": "Configured color pair requires contrast validation",
+      "fixture_ids": [
+        "fpb-all-templates",
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary",
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/admin-configuration-surfaces.ts; app/lib/settings-design-runtime.ts",
+      "notes": "Generated from the canonical Admin Design field contract."
+    },
+    {
+      "id": "design-expert-navigation-banner-tabs-active-text-color",
+      "family": "SHARED",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL",
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Active Tab Text Color",
+      "admin_location": "Settings > Design > General",
+      "field_name": "expert.navigationBanner.tabsActiveTextColor",
+      "persisted_location": "DesignSettings.settingsData.fieldValues.expert.navigationBanner.tabsActiveTextColor",
+      "runtime_location": "buildSettingsDesignRuntime.fieldValues.expert.navigationBanner.tabsActiveTextColor",
+      "type": "color",
+      "allowed_values": [],
+      "default": "#F6f6f6",
+      "nullable": false,
+      "dependencies": [
+        "isExpertControlsEnabled=true"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "Expert Color Controls enabled",
+      "affected_components": [
+        "Text color for the currently selected category tab"
+      ],
+      "affected_states": [
+        "default",
+        "selected",
+        "disabled",
+        "focus"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "Semantic token propagates to all applicable responsive adapters",
+      "accessibility_impact": "Configured color pair requires contrast validation",
+      "fixture_ids": [
+        "fpb-all-templates",
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary",
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/admin-configuration-surfaces.ts; app/lib/settings-design-runtime.ts",
+      "notes": "Generated from the canonical Admin Design field contract."
+    },
+    {
+      "id": "design-expert-navigation-banner-tabs-inactive-bg-color",
+      "family": "SHARED",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL",
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Inactive Tab Background Color",
+      "admin_location": "Settings > Design > General",
+      "field_name": "expert.navigationBanner.tabsInactiveBgColor",
+      "persisted_location": "DesignSettings.settingsData.fieldValues.expert.navigationBanner.tabsInactiveBgColor",
+      "runtime_location": "buildSettingsDesignRuntime.fieldValues.expert.navigationBanner.tabsInactiveBgColor",
+      "type": "color",
+      "allowed_values": [],
+      "default": "#FFFFFF",
+      "nullable": false,
+      "dependencies": [
+        "isExpertControlsEnabled=true"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "Expert Color Controls enabled",
+      "affected_components": [
+        "Background color for unselected category tabs"
+      ],
+      "affected_states": [
+        "default",
+        "selected",
+        "disabled",
+        "focus"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "Semantic token propagates to all applicable responsive adapters",
+      "accessibility_impact": "Configured color pair requires contrast validation",
+      "fixture_ids": [
+        "fpb-all-templates",
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary",
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/admin-configuration-surfaces.ts; app/lib/settings-design-runtime.ts",
+      "notes": "Generated from the canonical Admin Design field contract."
+    },
+    {
+      "id": "design-expert-navigation-banner-tabs-inactive-text-color",
+      "family": "SHARED",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL",
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Inactive Tab Text Color",
+      "admin_location": "Settings > Design > General",
+      "field_name": "expert.navigationBanner.tabsInactiveTextColor",
+      "persisted_location": "DesignSettings.settingsData.fieldValues.expert.navigationBanner.tabsInactiveTextColor",
+      "runtime_location": "buildSettingsDesignRuntime.fieldValues.expert.navigationBanner.tabsInactiveTextColor",
+      "type": "color",
+      "allowed_values": [],
+      "default": "#000000",
+      "nullable": false,
+      "dependencies": [
+        "isExpertControlsEnabled=true"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "Expert Color Controls enabled",
+      "affected_components": [
+        "Text color for unselected category tabs"
+      ],
+      "affected_states": [
+        "default",
+        "selected",
+        "disabled",
+        "focus"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "Semantic token propagates to all applicable responsive adapters",
+      "accessibility_impact": "Configured color pair requires contrast validation",
+      "fixture_ids": [
+        "fpb-all-templates",
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary",
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/admin-configuration-surfaces.ts; app/lib/settings-design-runtime.ts",
+      "notes": "Generated from the canonical Admin Design field contract."
+    },
+    {
+      "id": "design-expert-product-card-product-card-bg-color",
+      "family": "SHARED",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL",
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Background Color",
+      "admin_location": "Settings > Design > Product Card",
+      "field_name": "expert.productCard.productCardBgColor",
+      "persisted_location": "DesignSettings.settingsData.fieldValues.expert.productCard.productCardBgColor",
+      "runtime_location": "buildSettingsDesignRuntime.fieldValues.expert.productCard.productCardBgColor",
+      "type": "color",
+      "allowed_values": [],
+      "default": "#ffffff",
+      "nullable": false,
+      "dependencies": [
+        "isExpertControlsEnabled=true"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "Expert Color Controls enabled",
+      "affected_components": [
+        "Background color of individual product cards"
+      ],
+      "affected_states": [
+        "default",
+        "selected",
+        "disabled",
+        "focus"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "Semantic token propagates to all applicable responsive adapters",
+      "accessibility_impact": "Configured color pair requires contrast validation",
+      "fixture_ids": [
+        "fpb-all-templates",
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary",
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/admin-configuration-surfaces.ts; app/lib/settings-design-runtime.ts",
+      "notes": "Generated from the canonical Admin Design field contract."
+    },
+    {
+      "id": "design-expert-product-card-product-card-text-color",
+      "family": "SHARED",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL",
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Product Title Text Color",
+      "admin_location": "Settings > Design > Product Card",
+      "field_name": "expert.productCard.productCardTextColor",
+      "persisted_location": "DesignSettings.settingsData.fieldValues.expert.productCard.productCardTextColor",
+      "runtime_location": "buildSettingsDesignRuntime.fieldValues.expert.productCard.productCardTextColor",
+      "type": "color",
+      "allowed_values": [],
+      "default": "#252525",
+      "nullable": false,
+      "dependencies": [
+        "isExpertControlsEnabled=true"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "Expert Color Controls enabled",
+      "affected_components": [
+        "Text color for product names displayed on cards"
+      ],
+      "affected_states": [
+        "default",
+        "selected",
+        "disabled",
+        "focus"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "Semantic token propagates to all applicable responsive adapters",
+      "accessibility_impact": "Configured color pair requires contrast validation",
+      "fixture_ids": [
+        "fpb-all-templates",
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary",
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/admin-configuration-surfaces.ts; app/lib/settings-design-runtime.ts",
+      "notes": "Generated from the canonical Admin Design field contract."
+    },
+    {
+      "id": "design-expert-product-card-product-card-button-color",
+      "family": "SHARED",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL",
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Add Product Button Color",
+      "admin_location": "Settings > Design > Product Card",
+      "field_name": "expert.productCard.productCardButtonColor",
+      "persisted_location": "DesignSettings.settingsData.fieldValues.expert.productCard.productCardButtonColor",
+      "runtime_location": "buildSettingsDesignRuntime.fieldValues.expert.productCard.productCardButtonColor",
+      "type": "color",
+      "allowed_values": [],
+      "default": "#000000",
+      "nullable": false,
+      "dependencies": [
+        "isExpertControlsEnabled=true"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "Expert Color Controls enabled",
+      "affected_components": [
+        "Color for the button on the product card"
+      ],
+      "affected_states": [
+        "default",
+        "selected",
+        "disabled",
+        "focus"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "Semantic token propagates to all applicable responsive adapters",
+      "accessibility_impact": "Configured color pair requires contrast validation",
+      "fixture_ids": [
+        "fpb-all-templates",
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary",
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/admin-configuration-surfaces.ts; app/lib/settings-design-runtime.ts",
+      "notes": "Generated from the canonical Admin Design field contract."
+    },
+    {
+      "id": "design-expert-product-card-product-card-button-text-color",
+      "family": "SHARED",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL",
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Add Product Button Text Color",
+      "admin_location": "Settings > Design > Product Card",
+      "field_name": "expert.productCard.productCardButtonTextColor",
+      "persisted_location": "DesignSettings.settingsData.fieldValues.expert.productCard.productCardButtonTextColor",
+      "runtime_location": "buildSettingsDesignRuntime.fieldValues.expert.productCard.productCardButtonTextColor",
+      "type": "color",
+      "allowed_values": [],
+      "default": "#ffffff",
+      "nullable": false,
+      "dependencies": [
+        "isExpertControlsEnabled=true"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "Expert Color Controls enabled",
+      "affected_components": [
+        "Text color for the button on the product card"
+      ],
+      "affected_states": [
+        "default",
+        "selected",
+        "disabled",
+        "focus"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "Semantic token propagates to all applicable responsive adapters",
+      "accessibility_impact": "Configured color pair requires contrast validation",
+      "fixture_ids": [
+        "fpb-all-templates",
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary",
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/admin-configuration-surfaces.ts; app/lib/settings-design-runtime.ts",
+      "notes": "Generated from the canonical Admin Design field contract."
+    },
+    {
+      "id": "design-expert-empty-state-card-empty-state-card-border-color",
+      "family": "SHARED",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL",
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Empty State Border Color",
+      "admin_location": "Settings > Design > Product Card",
+      "field_name": "expert.emptyStateCard.emptyStateCardBorderColor",
+      "persisted_location": "DesignSettings.settingsData.fieldValues.expert.emptyStateCard.emptyStateCardBorderColor",
+      "runtime_location": "buildSettingsDesignRuntime.fieldValues.expert.emptyStateCard.emptyStateCardBorderColor",
+      "type": "color",
+      "allowed_values": [],
+      "default": "#000",
+      "nullable": false,
+      "dependencies": [
+        "isExpertControlsEnabled=true"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "Expert Color Controls enabled",
+      "affected_components": [
+        "Border color for empty product slots waiting to be filled"
+      ],
+      "affected_states": [
+        "default",
+        "selected",
+        "disabled",
+        "focus"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "Semantic token propagates to all applicable responsive adapters",
+      "accessibility_impact": "Configured color pair requires contrast validation",
+      "fixture_ids": [
+        "fpb-all-templates",
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary",
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/admin-configuration-surfaces.ts; app/lib/settings-design-runtime.ts",
+      "notes": "Generated from the canonical Admin Design field contract."
+    },
+    {
+      "id": "design-expert-empty-state-card-empty-state-card-text-color",
+      "family": "SHARED",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL",
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Empty State Text Color",
+      "admin_location": "Settings > Design > Product Card",
+      "field_name": "expert.emptyStateCard.emptyStateCardTextColor",
+      "persisted_location": "DesignSettings.settingsData.fieldValues.expert.emptyStateCard.emptyStateCardTextColor",
+      "runtime_location": "buildSettingsDesignRuntime.fieldValues.expert.emptyStateCard.emptyStateCardTextColor",
+      "type": "color",
+      "allowed_values": [],
+      "default": "#3E3E3E",
+      "nullable": false,
+      "dependencies": [
+        "isExpertControlsEnabled=true"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "Expert Color Controls enabled",
+      "affected_components": [
+        "Text color for placeholder messages in empty product slots"
+      ],
+      "affected_states": [
+        "default",
+        "selected",
+        "disabled",
+        "focus"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "Semantic token propagates to all applicable responsive adapters",
+      "accessibility_impact": "Configured color pair requires contrast validation",
+      "fixture_ids": [
+        "fpb-all-templates",
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary",
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/admin-configuration-surfaces.ts; app/lib/settings-design-runtime.ts",
+      "notes": "Generated from the canonical Admin Design field contract."
+    },
+    {
+      "id": "design-expert-cart-footer-cart-footer-bg-color",
+      "family": "SHARED",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL",
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Cart Background Color",
+      "admin_location": "Settings > Design > Bundle Cart",
+      "field_name": "expert.cartFooter.cartFooterBgColor",
+      "persisted_location": "DesignSettings.settingsData.fieldValues.expert.cartFooter.cartFooterBgColor",
+      "runtime_location": "buildSettingsDesignRuntime.fieldValues.expert.cartFooter.cartFooterBgColor",
+      "type": "color",
+      "allowed_values": [],
+      "default": "#ffffff",
+      "nullable": false,
+      "dependencies": [
+        "isExpertControlsEnabled=true"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "Expert Color Controls enabled",
+      "affected_components": [
+        "Background color for bundle cart"
+      ],
+      "affected_states": [
+        "default",
+        "selected",
+        "disabled",
+        "focus"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "Semantic token propagates to all applicable responsive adapters",
+      "accessibility_impact": "Configured color pair requires contrast validation",
+      "fixture_ids": [
+        "fpb-all-templates",
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary",
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/admin-configuration-surfaces.ts; app/lib/settings-design-runtime.ts",
+      "notes": "Generated from the canonical Admin Design field contract."
+    },
+    {
+      "id": "design-expert-cart-footer-cart-footer-text-color",
+      "family": "SHARED",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL",
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Cart Text Color",
+      "admin_location": "Settings > Design > Bundle Cart",
+      "field_name": "expert.cartFooter.cartFooterTextColor",
+      "persisted_location": "DesignSettings.settingsData.fieldValues.expert.cartFooter.cartFooterTextColor",
+      "runtime_location": "buildSettingsDesignRuntime.fieldValues.expert.cartFooter.cartFooterTextColor",
+      "type": "color",
+      "allowed_values": [],
+      "default": "#000000",
+      "nullable": false,
+      "dependencies": [
+        "isExpertControlsEnabled=true"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "Expert Color Controls enabled",
+      "affected_components": [
+        "Text color for cart content, totals, and labels"
+      ],
+      "affected_states": [
+        "default",
+        "selected",
+        "disabled",
+        "focus"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "Semantic token propagates to all applicable responsive adapters",
+      "accessibility_impact": "Configured color pair requires contrast validation",
+      "fixture_ids": [
+        "fpb-all-templates",
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary",
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/admin-configuration-surfaces.ts; app/lib/settings-design-runtime.ts",
+      "notes": "Generated from the canonical Admin Design field contract."
+    },
+    {
+      "id": "design-expert-cart-footer-cart-footer-next-button-color",
+      "family": "SHARED",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL",
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Next Button Color",
+      "admin_location": "Settings > Design > Bundle Cart",
+      "field_name": "expert.cartFooter.cartFooterNextButtonColor",
+      "persisted_location": "DesignSettings.settingsData.fieldValues.expert.cartFooter.cartFooterNextButtonColor",
+      "runtime_location": "buildSettingsDesignRuntime.fieldValues.expert.cartFooter.cartFooterNextButtonColor",
+      "type": "color",
+      "allowed_values": [],
+      "default": "#000000",
+      "nullable": false,
+      "dependencies": [
+        "isExpertControlsEnabled=true"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "Expert Color Controls enabled",
+      "affected_components": [
+        "Background color for the next step button"
+      ],
+      "affected_states": [
+        "default",
+        "selected",
+        "disabled",
+        "focus"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "Semantic token propagates to all applicable responsive adapters",
+      "accessibility_impact": "Configured color pair requires contrast validation",
+      "fixture_ids": [
+        "fpb-all-templates",
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary",
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/admin-configuration-surfaces.ts; app/lib/settings-design-runtime.ts",
+      "notes": "Generated from the canonical Admin Design field contract."
+    },
+    {
+      "id": "design-expert-cart-footer-cart-footer-next-button-text-color",
+      "family": "SHARED",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL",
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Next Button Text Color",
+      "admin_location": "Settings > Design > Bundle Cart",
+      "field_name": "expert.cartFooter.cartFooterNextButtonTextColor",
+      "persisted_location": "DesignSettings.settingsData.fieldValues.expert.cartFooter.cartFooterNextButtonTextColor",
+      "runtime_location": "buildSettingsDesignRuntime.fieldValues.expert.cartFooter.cartFooterNextButtonTextColor",
+      "type": "color",
+      "allowed_values": [],
+      "default": "#ffffff",
+      "nullable": false,
+      "dependencies": [
+        "isExpertControlsEnabled=true"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "Expert Color Controls enabled",
+      "affected_components": [
+        "Text color for the next step button"
+      ],
+      "affected_states": [
+        "default",
+        "selected",
+        "disabled",
+        "focus"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "Semantic token propagates to all applicable responsive adapters",
+      "accessibility_impact": "Configured color pair requires contrast validation",
+      "fixture_ids": [
+        "fpb-all-templates",
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary",
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/admin-configuration-surfaces.ts; app/lib/settings-design-runtime.ts",
+      "notes": "Generated from the canonical Admin Design field contract."
+    },
+    {
+      "id": "design-expert-cart-footer-cart-footer-back-button-color",
+      "family": "SHARED",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL",
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Back Button Color",
+      "admin_location": "Settings > Design > Bundle Cart",
+      "field_name": "expert.cartFooter.cartFooterBackButtonColor",
+      "persisted_location": "DesignSettings.settingsData.fieldValues.expert.cartFooter.cartFooterBackButtonColor",
+      "runtime_location": "buildSettingsDesignRuntime.fieldValues.expert.cartFooter.cartFooterBackButtonColor",
+      "type": "color",
+      "allowed_values": [],
+      "default": "#6d7175",
+      "nullable": false,
+      "dependencies": [
+        "isExpertControlsEnabled=true"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "Expert Color Controls enabled",
+      "affected_components": [
+        "Background color for the back step button"
+      ],
+      "affected_states": [
+        "default",
+        "selected",
+        "disabled",
+        "focus"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "Semantic token propagates to all applicable responsive adapters",
+      "accessibility_impact": "Configured color pair requires contrast validation",
+      "fixture_ids": [
+        "fpb-all-templates",
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary",
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/admin-configuration-surfaces.ts; app/lib/settings-design-runtime.ts",
+      "notes": "Generated from the canonical Admin Design field contract."
+    },
+    {
+      "id": "design-expert-cart-footer-cart-footer-back-button-text-color",
+      "family": "SHARED",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL",
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Back Button Text Color",
+      "admin_location": "Settings > Design > Bundle Cart",
+      "field_name": "expert.cartFooter.cartFooterBackButtonTextColor",
+      "persisted_location": "DesignSettings.settingsData.fieldValues.expert.cartFooter.cartFooterBackButtonTextColor",
+      "runtime_location": "buildSettingsDesignRuntime.fieldValues.expert.cartFooter.cartFooterBackButtonTextColor",
+      "type": "color",
+      "allowed_values": [],
+      "default": "#000000",
+      "nullable": false,
+      "dependencies": [
+        "isExpertControlsEnabled=true"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "Expert Color Controls enabled",
+      "affected_components": [
+        "Text color for the back step button"
+      ],
+      "affected_states": [
+        "default",
+        "selected",
+        "disabled",
+        "focus"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "Semantic token propagates to all applicable responsive adapters",
+      "accessibility_impact": "Configured color pair requires contrast validation",
+      "fixture_ids": [
+        "fpb-all-templates",
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary",
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/admin-configuration-surfaces.ts; app/lib/settings-design-runtime.ts",
+      "notes": "Generated from the canonical Admin Design field contract."
+    },
+    {
+      "id": "design-expert-cart-footer-cart-footer-discount-text-color",
+      "family": "SHARED",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL",
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Discount Text Color",
+      "admin_location": "Settings > Design > Bundle Cart",
+      "field_name": "expert.cartFooter.cartFooterDiscountTextColor",
+      "persisted_location": "DesignSettings.settingsData.fieldValues.expert.cartFooter.cartFooterDiscountTextColor",
+      "runtime_location": "buildSettingsDesignRuntime.fieldValues.expert.cartFooter.cartFooterDiscountTextColor",
+      "type": "color",
+      "allowed_values": [],
+      "default": "#000000",
+      "nullable": false,
+      "dependencies": [
+        "isExpertControlsEnabled=true"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "Expert Color Controls enabled",
+      "affected_components": [
+        "Text color for discount messages"
+      ],
+      "affected_states": [
+        "default",
+        "selected",
+        "disabled",
+        "focus"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "Semantic token propagates to all applicable responsive adapters",
+      "accessibility_impact": "Configured color pair requires contrast validation",
+      "fixture_ids": [
+        "fpb-all-templates",
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary",
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/admin-configuration-surfaces.ts; app/lib/settings-design-runtime.ts",
+      "notes": "Generated from the canonical Admin Design field contract."
+    },
+    {
+      "id": "design-expert-cart-footer-cart-footer-discount-progress-bar-empty-color",
+      "family": "SHARED",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL",
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Discount Progress Bar Empty Color",
+      "admin_location": "Settings > Design > Bundle Cart",
+      "field_name": "expert.cartFooter.cartFooterDiscountProgressBarEmptyColor",
+      "persisted_location": "DesignSettings.settingsData.fieldValues.expert.cartFooter.cartFooterDiscountProgressBarEmptyColor",
+      "runtime_location": "buildSettingsDesignRuntime.fieldValues.expert.cartFooter.cartFooterDiscountProgressBarEmptyColor",
+      "type": "color",
+      "allowed_values": [],
+      "default": "#C1E7C5",
+      "nullable": false,
+      "dependencies": [
+        "isExpertControlsEnabled=true"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "Expert Color Controls enabled",
+      "affected_components": [
+        "Fill color for empty part of discount progress bar"
+      ],
+      "affected_states": [
+        "default",
+        "selected",
+        "disabled",
+        "focus"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "Semantic token propagates to all applicable responsive adapters",
+      "accessibility_impact": "Configured color pair requires contrast validation",
+      "fixture_ids": [
+        "fpb-all-templates",
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary",
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/admin-configuration-surfaces.ts; app/lib/settings-design-runtime.ts",
+      "notes": "Generated from the canonical Admin Design field contract."
+    },
+    {
+      "id": "design-expert-cart-footer-cart-footer-discount-progress-bar-filled-color",
+      "family": "SHARED",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL",
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Discount Progress Bar Filled Color",
+      "admin_location": "Settings > Design > Bundle Cart",
+      "field_name": "expert.cartFooter.cartFooterDiscountProgressBarFilledColor",
+      "persisted_location": "DesignSettings.settingsData.fieldValues.expert.cartFooter.cartFooterDiscountProgressBarFilledColor",
+      "runtime_location": "buildSettingsDesignRuntime.fieldValues.expert.cartFooter.cartFooterDiscountProgressBarFilledColor",
+      "type": "color",
+      "allowed_values": [],
+      "default": "#15A524",
+      "nullable": false,
+      "dependencies": [
+        "isExpertControlsEnabled=true"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "Expert Color Controls enabled",
+      "affected_components": [
+        "Fill color for completed part of discount progress bar"
+      ],
+      "affected_states": [
+        "default",
+        "selected",
+        "disabled",
+        "focus"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "Semantic token propagates to all applicable responsive adapters",
+      "accessibility_impact": "Configured color pair requires contrast validation",
+      "fixture_ids": [
+        "fpb-all-templates",
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary",
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/admin-configuration-surfaces.ts; app/lib/settings-design-runtime.ts",
+      "notes": "Generated from the canonical Admin Design field contract."
+    },
+    {
+      "id": "design-expert-mix-and-match-config-general-settings-bundle-upsell-button-bg",
+      "family": "SHARED",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL",
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Upsell Button Color",
+      "admin_location": "Settings > Design > Upsell",
+      "field_name": "expert.mixAndMatchConfig.generalSettings.bundleUpsellButtonBg",
+      "persisted_location": "DesignSettings.settingsData.fieldValues.expert.mixAndMatchConfig.generalSettings.bundleUpsellButtonBg",
+      "runtime_location": "buildSettingsDesignRuntime.fieldValues.expert.mixAndMatchConfig.generalSettings.bundleUpsellButtonBg",
+      "type": "color",
+      "allowed_values": [],
+      "default": "#000000",
+      "nullable": false,
+      "dependencies": [
+        "isExpertControlsEnabled=true"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "Expert Color Controls enabled",
+      "affected_components": [
+        "Background color for upsell buttons"
+      ],
+      "affected_states": [
+        "default",
+        "selected",
+        "disabled",
+        "focus"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "Semantic token propagates to all applicable responsive adapters",
+      "accessibility_impact": "Configured color pair requires contrast validation",
+      "fixture_ids": [
+        "fpb-all-templates",
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary",
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/admin-configuration-surfaces.ts; app/lib/settings-design-runtime.ts",
+      "notes": "Generated from the canonical Admin Design field contract."
+    },
+    {
+      "id": "design-expert-mix-and-match-config-general-settings-bundle-upsell-button-text-color",
+      "family": "SHARED",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL",
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Upsell Button Text Color",
+      "admin_location": "Settings > Design > Upsell",
+      "field_name": "expert.mixAndMatchConfig.generalSettings.bundleUpsellButtonTextColor",
+      "persisted_location": "DesignSettings.settingsData.fieldValues.expert.mixAndMatchConfig.generalSettings.bundleUpsellButtonTextColor",
+      "runtime_location": "buildSettingsDesignRuntime.fieldValues.expert.mixAndMatchConfig.generalSettings.bundleUpsellButtonTextColor",
+      "type": "color",
+      "allowed_values": [],
+      "default": "#ffffff",
+      "nullable": false,
+      "dependencies": [
+        "isExpertControlsEnabled=true"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "Expert Color Controls enabled",
+      "affected_components": [
+        "Text color displayed on upsell buttons"
+      ],
+      "affected_states": [
+        "default",
+        "selected",
+        "disabled",
+        "focus"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "Semantic token propagates to all applicable responsive adapters",
+      "accessibility_impact": "Configured color pair requires contrast validation",
+      "fixture_ids": [
+        "fpb-all-templates",
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary",
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/admin-configuration-surfaces.ts; app/lib/settings-design-runtime.ts",
+      "notes": "Generated from the canonical Admin Design field contract."
+    },
+    {
+      "id": "design-expert-mix-and-match-config-general-settings-bundle-upsell-font-color",
+      "family": "SHARED",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL",
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Upsell Widget Body Text Color",
+      "admin_location": "Settings > Design > Upsell",
+      "field_name": "expert.mixAndMatchConfig.generalSettings.bundleUpsellFontColor",
+      "persisted_location": "DesignSettings.settingsData.fieldValues.expert.mixAndMatchConfig.generalSettings.bundleUpsellFontColor",
+      "runtime_location": "buildSettingsDesignRuntime.fieldValues.expert.mixAndMatchConfig.generalSettings.bundleUpsellFontColor",
+      "type": "color",
+      "allowed_values": [],
+      "default": "#000000",
+      "nullable": false,
+      "dependencies": [
+        "isExpertControlsEnabled=true"
+      ],
+      "mutual_exclusions": [],
+      "visibility_condition": "Expert Color Controls enabled",
+      "affected_components": [
+        "Text color displayed on upsell widget"
+      ],
+      "affected_states": [
+        "default",
+        "selected",
+        "disabled",
+        "focus"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "Semantic token propagates to all applicable responsive adapters",
+      "accessibility_impact": "Configured color pair requires contrast validation",
+      "fixture_ids": [
+        "fpb-all-templates",
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary",
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/admin-configuration-surfaces.ts; app/lib/settings-design-runtime.ts",
+      "notes": "Generated from the canonical Admin Design field contract."
+    },
+    {
+      "id": "design-expert-controls-enabled",
+      "family": "SHARED",
+      "templates": [
+        "STANDARD",
+        "CLASSIC",
+        "COMPACT",
+        "HORIZONTAL",
+        "GRID",
+        "LIST",
+        "VERTICAL_SLOTS",
+        "HORIZONTAL_SLOTS"
+      ],
+      "admin_label": "Expert Color Controls",
+      "admin_location": "Settings > Design",
+      "field_name": "isExpertControlsEnabled",
+      "persisted_location": "DesignSettings.settingsData.isExpertControlsEnabled",
+      "runtime_location": "buildSettingsDesignRuntime.isExpertControlsEnabled",
+      "type": "boolean",
+      "allowed_values": [
+        true,
+        false
+      ],
+      "default": false,
+      "nullable": false,
+      "dependencies": [],
+      "mutual_exclusions": [],
+      "visibility_condition": "always",
+      "affected_components": [
+        "Expert Design controls"
+      ],
+      "affected_states": [
+        "default",
+        "selected",
+        "disabled",
+        "focus"
+      ],
+      "merchant_editable": true,
+      "responsive_impact": "Controls expert token propagation across every adapter",
+      "accessibility_impact": "Enabled expert colors require contrast validation",
+      "fixture_ids": [
+        "fpb-all-templates",
+        "ppb-all-templates"
+      ],
+      "test_case_ids": [
+        "fpb-all-template-summary",
+        "product-page-bundle-template-design-verification"
+      ],
+      "status": "CONFIRMED_CURRENT",
+      "evidence": "app/lib/settings-design-contract.ts; app/lib/settings-design-runtime.ts",
+      "notes": "Canonical switch for expert field applicability."
+    }
+  ]
+}

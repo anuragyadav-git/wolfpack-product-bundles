@@ -28,6 +28,7 @@ import {
 import { runAfterSaveBarLeaveConfirmation } from "../../../lib/admin-savebar-navigation.client";
 import { createSettingsDesignState, type SettingsDesignPayload } from "../../../lib/settings-design-contract";
 import { DesignSettingsView } from "./DesignSettingsView";
+import { AdminPageTitleBar } from "../../../components/AdminPageNavigation";
 import type { AdditionalConfigurationsNavigation } from "../../../lib/additional-configurations-navigation";
 import {
   applyAdditionalConfigurationAction,
@@ -321,7 +322,11 @@ export function SettingsRoute({
 
     return (
       <>
-        <ui-title-bar title="Language Configurations" />
+        <AdminPageTitleBar
+          title="Language Configurations"
+          breadcrumbLabel="Settings"
+          onBack={returnToSettingsLanding}
+        />
         <main className={styles.page}>
           <header className={styles.languageHero}>
             <button
@@ -459,7 +464,11 @@ export function SettingsRoute({
   if (settingsView === "controls") {
     return (
       <>
-        <ui-title-bar title="Additional Configurations" />
+        <AdminPageTitleBar
+          title="Additional Configurations"
+          breadcrumbLabel="Settings"
+          onBack={returnToSettingsLanding}
+        />
         <main className={styles.page}>
           <header className={styles.hero}>
             <div className={styles.settingsSubpageHeaderLeft}>

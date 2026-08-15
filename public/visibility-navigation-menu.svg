@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="title desc">
+  <title id="title">Storefront navigation menu placement</title>
+  <desc id="desc">A storefront header with the main navigation menu highlighted.</desc>
+  <rect width="640" height="360" rx="24" fill="#f1f2f4"/>
+  <rect x="30" y="30" width="580" height="300" rx="14" fill="#fff" stroke="#c9ccd0" stroke-width="3"/>
+  <rect x="30" y="30" width="580" height="42" rx="14" fill="#e5e7e9"/>
+  <circle cx="54" cy="51" r="6" fill="#9ca3aa"/><circle cx="74" cy="51" r="6" fill="#9ca3aa"/><circle cx="94" cy="51" r="6" fill="#9ca3aa"/>
+  <rect x="48" y="86" width="544" height="58" rx="8" fill="#e4f5eb" stroke="#008060" stroke-width="4"/>
+  <rect x="68" y="106" width="92" height="16" rx="6" fill="#202223"/>
+  <rect x="252" y="108" width="52" height="11" rx="5" fill="#5b625f"/><rect x="324" y="108" width="52" height="11" rx="5" fill="#008060"/><rect x="396" y="108" width="52" height="11" rx="5" fill="#5b625f"/><rect x="468" y="108" width="52" height="11" rx="5" fill="#5b625f"/>
+  <circle cx="556" cy="114" r="10" fill="none" stroke="#5b625f" stroke-width="3"/>
+  <rect x="54" y="164" width="532" height="136" rx="10" fill="#eef0f1"/>
+  <rect x="78" y="190" width="214" height="18" rx="6" fill="#60666b"/><rect x="78" y="222" width="164" height="10" rx="5" fill="#a0a5aa"/><rect x="78" y="244" width="132" height="10" rx="5" fill="#a0a5aa"/>
+  <rect x="382" y="184" width="158" height="92" rx="8" fill="#d4d8db"/>
+  <rect x="44" y="76" width="150" height="28" rx="14" fill="#008060"/><text x="119" y="95" fill="#fff" font-family="Arial,sans-serif" font-size="13" text-anchor="middle">MAIN MENU</text>
+</svg>

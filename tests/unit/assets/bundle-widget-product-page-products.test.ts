@@ -3,7 +3,7 @@ const { ProductPageSelectionDataMethods } = require('../../../app/assets/widgets
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { ProductPageSelectionMethods } = require('../../../app/assets/widgets/product-page/methods/selection-methods.js');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const { ToastManager } = require('../../../app/assets/bundle-widget-components.js');
+const { ToastManager } = require('../../../app/assets/widgets/shared/toast-manager.js');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { shouldDisableProductPageVariantOption } = require('../../../app/assets/widgets/product-page/methods/modal-methods.js');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -27,6 +27,8 @@ interface StorefrontVariant {
   quantityAvailable?: number | null;
   currentlyNotInStock?: boolean;
   image?: { src?: string } | null;
+  weight?: number;
+  weightUnit?: string;
 }
 
 interface StorefrontProduct {
@@ -67,6 +69,32 @@ function processProductPageProductsForStep(
 }
 
 describe('processProductPageProductsForStep', () => {
+  it('normalizes Shopify variant weight to grams for step-rule validation', () => {
+    const products = processProductPageProductsForStep([{
+      id: 'gid://shopify/Product/900',
+      title: 'Weighted Product',
+      variants: [{
+        id: 'gid://shopify/ProductVariant/901',
+        title: 'Heavy',
+        price: '12.00',
+        available: true,
+        weight: 1.5,
+        weightUnit: 'KILOGRAMS',
+      }],
+    }], { displayVariantsAsIndividual: false });
+
+    expect(products[0]).toMatchObject({
+      selectionId: '901',
+      weight: 1500,
+      weightUnit: 'GRAMS',
+    });
+    expect(products[0].variants[0]).toMatchObject({
+      selectionId: '901',
+      weight: 1500,
+      weightUnit: 'GRAMS',
+    });
+  });
+
   it('uses the first available variant for parent product cards when the first variant is unavailable', () => {
     const products = processProductPageProductsForStep([
       {
