@@ -5,6 +5,7 @@ import { requireAdminSession } from "../../app/lib/auth-guards.server";
 import * as fpbHandlers from "../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers";
 import * as ppbHandlers from "../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers";
 import * as storefrontSyncAction from "../../app/routes/app/shared/storefront-sync-action.server";
+import * as subscriptionDiscovery from "../../app/services/bundle-subscription-discovery.server";
 
 jest.mock("../../app/lib/auth-guards.server", () => ({
   requireAdminSession: jest.fn(),
@@ -34,6 +35,9 @@ jest.mock("../../app/routes/app/app.bundles.product-page-bundle.configure.$bundl
   handleValidateWidgetPlacement: jest.fn(),
   handleAssignProductTemplate: jest.fn(),
   handleUpdateBundleDesignTemplate: jest.fn(),
+}));
+
+jest.mock("../../app/services/bundle-subscription-discovery.server", () => ({
   handleValidateSellingPlanGroups: jest.fn(),
 }));
 
@@ -144,6 +148,16 @@ describe("FPB configure action dispatch", () => {
     );
   });
 
+  it("routes validateSellingPlanGroups to shared full-page discovery", async () => {
+    const handler = subscriptionDiscovery.handleValidateSellingPlanGroups as jest.Mock;
+    handler.mockResolvedValue(responseFor("validateSellingPlanGroups"));
+
+    const response = await fpbAction(makeActionArgs("validateSellingPlanGroups"));
+
+    expect(await response.json()).toEqual({ success: true, intent: "validateSellingPlanGroups" });
+    expect(handler).toHaveBeenCalledWith(mockAdmin, mockSession, "bundle-1", "full_page");
+  });
+
   it("returns a 400 response for unknown FPB intents", async () => {
     const response = await fpbAction(makeActionArgs("not-real"));
     const body = await response.json();
@@ -165,7 +179,6 @@ describe("PPB configure action dispatch", () => {
     ["validateWidgetPlacement", "handleValidateWidgetPlacement"],
     ["updateBundleDesignTemplate", "handleUpdateBundleDesignTemplate"],
     ["assignProductTemplate", "handleAssignProductTemplate"],
-    ["validateSellingPlanGroups", "handleValidateSellingPlanGroups"],
   ] as const)("routes %s to %s", async (intent, handlerName) => {
     const handler = ppbHandlers[handlerName] as jest.Mock;
     handler.mockResolvedValue(responseFor(intent));
@@ -175,6 +188,16 @@ describe("PPB configure action dispatch", () => {
 
     expect(body).toEqual({ success: true, intent });
     expect(handler).toHaveBeenCalledTimes(1);
+  });
+
+  it("routes validateSellingPlanGroups to shared product-page discovery", async () => {
+    const handler = subscriptionDiscovery.handleValidateSellingPlanGroups as jest.Mock;
+    handler.mockResolvedValue(responseFor("validateSellingPlanGroups"));
+
+    const response = await ppbAction(makeActionArgs("validateSellingPlanGroups"));
+
+    expect(await response.json()).toEqual({ success: true, intent: "validateSellingPlanGroups" });
+    expect(handler).toHaveBeenCalledWith(mockAdmin, mockSession, "bundle-1", "product_page");
   });
 
   it("routes syncBundle to shared storefront sync with product_page type", async () => {

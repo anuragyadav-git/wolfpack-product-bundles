@@ -1,6 +1,6 @@
 import { isMultiLanguageActionDisabled } from "../../../../lib/bundle-config/common-configure-page-model";
-import { LiveUpsellWidgetPreview } from "../../../../components/bundle-configure/LiveUpsellWidgetPreview";
 import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
+import { getVisibilityResourceId } from "../visibility-helpers";
 
 export function BundleWidgetSection({
   flow,
@@ -10,8 +10,8 @@ export function BundleWidgetSection({
   const {
     activeSection,
     autoSelectBrowsedProduct,
+    FilePicker,
     fullPageBundleStyles,
-    getVisibilityResourceId,
     handlePlaceWidget,
     markAsDirty,
     openMultiLanguageModal,
@@ -22,17 +22,33 @@ export function BundleWidgetSection({
     setAutoSelectBrowsedProduct,
     setTextOverrides,
     setUpsellWidgetButtonText,
+    setUpsellWidgetDescription,
     setUpsellWidgetDisplayMode,
     setUpsellWidgetDisplayOn,
     setUpsellWidgetEnabled,
+    setUpsellWidgetImageUrl,
+    setUpsellWidgetTitle,
     shopLocales,
     upsellWidgetButtonText,
     upsellWidgetCollectionsSelectedData,
+    upsellWidgetDescription,
     upsellWidgetDisplayMode,
     upsellWidgetDisplayOn,
     upsellWidgetEnabled,
+    upsellWidgetImageUrl,
     upsellWidgetSelectedProducts,
+    upsellWidgetTitle,
+    validationErrors = {},
+    clearValidationError,
   } = flow;
+
+  const handleWidgetTypeChange = (event: any) => {
+    const value = event.target.values?.[0];
+    if (value === "button" || value === "block") {
+      setUpsellWidgetDisplayMode(value);
+      markAsDirty();
+    }
+  };
 
   return (
     <>
@@ -57,56 +73,59 @@ export function BundleWidgetSection({
                 }}
               />
             </div>
-            <div
-              className={fullPageBundleStyles.upsellWidgetContent}
-              style={{
-                opacity: upsellWidgetEnabled ? 1 : 0.4,
-                pointerEvents: upsellWidgetEnabled ? undefined : "none",
-              }}
-            >
+            <div className={fullPageBundleStyles.upsellWidgetContent}>
               <div className={fullPageBundleStyles.visibilityPreviewFrame}>
-                <LiveUpsellWidgetPreview
-                  mode={upsellWidgetDisplayMode === "button" ? "button" : "block"}
-                  title="Bundle offer"
-                  buttonText={upsellWidgetButtonText}
+                <s-image
+                  aspectRatio="16/9"
+                  src={
+                    upsellWidgetDisplayMode === "button"
+                      ? "/Upsell-Button.png"
+                      : "/Upsell-Block.png"
+                  }
+                  alt={
+                    upsellWidgetDisplayMode === "button"
+                      ? "Product page with a bundle upsell button"
+                      : "Product page with a bundle upsell block"
+                  }
                 />
                 <div className={fullPageBundleStyles.visibilityRadioBar}>
-                  <label className={fullPageBundleStyles.visibilityRadioLabel}>
-                    <input
-                      type="radio"
-                      name="fpbUpsellWidgetType"
-                      value="block"
-                      checked={upsellWidgetDisplayMode !== "button"}
-                      onChange={() => {
-                        setUpsellWidgetDisplayMode("block");
-                        markAsDirty();
-                      }}
-                    />
-                    <span>Offer Upsell Block</span>
-                  </label>
-                  <label className={fullPageBundleStyles.visibilityRadioLabel}>
-                    <input
-                      type="radio"
-                      name="fpbUpsellWidgetType"
-                      value="button"
-                      checked={upsellWidgetDisplayMode === "button"}
-                      onChange={() => {
-                        setUpsellWidgetDisplayMode("button");
-                        markAsDirty();
-                      }}
-                    />
-                    <span>Offer Upsell Button</span>
-                  </label>
+                  <s-stack
+                    direction="inline"
+                    justifyContent="center"
+                    alignItems="center"
+                    gap="base"
+                  >
+                    <s-choice-list
+                      label="Widget type"
+                      labelAccessibilityVisibility="exclusive"
+                      name="fpbUpsellWidgetTypeBlock"
+                      values={upsellWidgetDisplayMode === "block" ? ["block"] : []}
+                      disabled={!upsellWidgetEnabled || undefined}
+                      onChange={handleWidgetTypeChange}
+                    >
+                      <s-choice value="block">Offer Upsell Block</s-choice>
+                    </s-choice-list>
+                    <s-choice-list
+                      label="Widget type"
+                      labelAccessibilityVisibility="exclusive"
+                      name="fpbUpsellWidgetTypeButton"
+                      values={upsellWidgetDisplayMode === "button" ? ["button"] : []}
+                      disabled={!upsellWidgetEnabled || undefined}
+                      onChange={handleWidgetTypeChange}
+                    >
+                      <s-choice value="button">Offer Upsell Button</s-choice>
+                    </s-choice-list>
+                  </s-stack>
                 </div>
               </div>
               <s-banner
                 tone="info"
-                heading="Widget visibility tip"
                 dismissible={false}
                 hidden={false}
               >
-                Select if you want the upsell block or button to appear on
-                product pages.
+                <s-text>
+                  Select if you want the upsell block or button to appear on product pages.
+                </s-text>
               </s-banner>
               <div className={fullPageBundleStyles.visibilityPanelSection}>
                 <div className={fullPageBundleStyles.visibilitySectionHeader}>
@@ -117,10 +136,20 @@ export function BundleWidgetSection({
                     variant="secondary"
                     icon="language-translate"
                     disabled={
-                      isMultiLanguageActionDisabled(shopLocales) || undefined
+                      !upsellWidgetEnabled || isMultiLanguageActionDisabled(shopLocales) || undefined
                     }
                     onClick={() =>
                       openMultiLanguageModal("Bundle Widget", [
+                        {
+                          key: "widgetTitle",
+                          label: "Widget Title",
+                          fallback: upsellWidgetTitle,
+                        },
+                        {
+                          key: "widgetDescription",
+                          label: "Widget Description",
+                          fallback: upsellWidgetDescription,
+                        },
                         {
                           key: "widgetButtonText",
                           label: "Widget Button Text",
@@ -133,64 +162,99 @@ export function BundleWidgetSection({
                   </s-button>
                 </div>
                 <div className={fullPageBundleStyles.visibilityFieldStack}>
-                  <label className={fullPageBundleStyles.visibilityFieldLabel}>
-                    <span>Widget Button Text</span>
-                    <input
-                      className={fullPageBundleStyles.visibilityTextInput}
-                      value={upsellWidgetButtonText}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        const value = e.target.value;
-                        setUpsellWidgetButtonText(value);
-                        setTextOverrides((prev) => ({
-                          ...prev,
-                          widgetButtonText: value,
-                        }));
-                        markAsDirty();
-                      }}
-                    />
-                  </label>
+                  {upsellWidgetDisplayMode !== "button" && (
+                    <div className={fullPageBundleStyles.upsellBlockFieldsRow}>
+                      <div className={fullPageBundleStyles.upsellBlockImageField}>
+                        {upsellWidgetEnabled && (
+                          <FilePicker
+                            label="Widget image"
+                            value={upsellWidgetImageUrl || null}
+                            fitPreviewToTrigger
+                            onChange={(url: string | null) => {
+                              setUpsellWidgetImageUrl(url ?? "");
+                              markAsDirty();
+                            }}
+                          />
+                        )}
+                      </div>
+                      <div className={fullPageBundleStyles.upsellBlockCopyFields}>
+                        <s-text-field
+                          id="configure-widget-title"
+                          label="Widget title"
+                          value={upsellWidgetTitle}
+                          required
+                          error={validationErrors["widget.title"]}
+                          disabled={!upsellWidgetEnabled || undefined}
+                          onInput={(event: any) => {
+                            setUpsellWidgetTitle(event.target.value);
+                            markAsDirty();
+                            clearValidationError("widget.title");
+                          }}
+                        />
+                        <s-text-area
+                          label="Widget description"
+                          value={upsellWidgetDescription}
+                          rows={3}
+                          disabled={!upsellWidgetEnabled || undefined}
+                          onInput={(event: any) => {
+                            setUpsellWidgetDescription(event.target.value);
+                            markAsDirty();
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )}
+                  <s-text-field
+                    id="configure-widget-buttonText"
+                    label="Widget button text"
+                    value={upsellWidgetButtonText}
+                    required
+                    error={validationErrors["widget.buttonText"]}
+                    disabled={!upsellWidgetEnabled || undefined}
+                    onInput={(event: any) => {
+                      const value = event.target.value;
+                      setUpsellWidgetButtonText(value);
+                      setTextOverrides((prev) => ({ ...prev, widgetButtonText: value }));
+                      markAsDirty();
+                      clearValidationError("widget.buttonText");
+                    }}
+                  />
                 </div>
               </div>
               <div className={fullPageBundleStyles.visibilityPanelSection}>
                 <h4 className={fullPageBundleStyles.visibilitySectionTitle}>
                   Display Widget on
                 </h4>
-                <div className={fullPageBundleStyles.visibilityTargetOptions}>
-                  {[
-                    { value: "all", label: "All products in bundle" },
-                    { value: "specific_products", label: "Specific products" },
-                    {
-                      value: "specific_collections",
-                      label: "Specific collections",
-                    },
-                  ].map(({ value, label }) => (
-                    <label
-                      key={value}
-                      className={fullPageBundleStyles.visibilityRadioLabel}
-                    >
-                      <input
-                        type="radio"
-                        name="fpbWidgetDisplayOn"
-                        value={value}
-                        checked={upsellWidgetDisplayOn === value}
-                        onChange={() => {
-                          setUpsellWidgetDisplayOn(value);
-                          markAsDirty();
-                        }}
-                      />
-                      <span>{label}</span>
-                    </label>
-                  ))}
-                </div>
+                <s-choice-list
+                  label="Product-page targeting"
+                  labelAccessibilityVisibility="exclusive"
+                  name="fpbWidgetDisplayOn"
+                  values={[upsellWidgetDisplayOn]}
+                  disabled={!upsellWidgetEnabled || undefined}
+                  onChange={(event: any) => {
+                    const value = event.target.values?.[0];
+                    if (["all", "specific_products", "specific_collections"].includes(value)) {
+                      setUpsellWidgetDisplayOn(value);
+                      markAsDirty();
+                    }
+                  }}
+                >
+                  <s-choice value="all">All products in bundle</s-choice>
+                  <s-choice value="specific_products">Specific products</s-choice>
+                  <s-choice value="specific_collections">Specific collections</s-choice>
+                </s-choice-list>
                 {upsellWidgetDisplayOn === "specific_products" && (
                   <div className={fullPageBundleStyles.visibilityTargetPicker}>
-                    <button
-                      type="button"
-                      className={fullPageBundleStyles.visibilitySecondaryAction}
-                      onClick={() => openVisibilityProductPicker("widget")}
+                    <s-button
+                      variant="secondary"
+                      disabled={!upsellWidgetEnabled || undefined}
+                      onClick={async () => {
+                        await openVisibilityProductPicker("widget");
+                        clearValidationError("widget.products");
+                      }}
                     >
                       Select products
-                    </button>
+                    </s-button>
                     <div
                       className={fullPageBundleStyles.visibilitySelectionList}
                     >
@@ -203,29 +267,38 @@ export function BundleWidgetSection({
                             }
                           >
                             <span>{product.title ?? "Untitled product"}</span>
-                            <button
-                              type="button"
+                            <s-button
+                              variant="tertiary"
+                              disabled={!upsellWidgetEnabled || undefined}
                               onClick={() =>
                                 removeVisibilityProductTarget("widget", index)
                               }
                             >
                               Remove
-                            </button>
+                            </s-button>
                           </div>
                         ),
                       )}
                     </div>
+                    {validationErrors["widget.products"] && (
+                      <s-text id="configure-widget-products" tone="critical">
+                        {validationErrors["widget.products"]}
+                      </s-text>
+                    )}
                   </div>
                 )}
                 {upsellWidgetDisplayOn === "specific_collections" && (
                   <div className={fullPageBundleStyles.visibilityTargetPicker}>
-                    <button
-                      type="button"
-                      className={fullPageBundleStyles.visibilitySecondaryAction}
-                      onClick={() => openVisibilityCollectionPicker("widget")}
+                    <s-button
+                      variant="secondary"
+                      disabled={!upsellWidgetEnabled || undefined}
+                      onClick={async () => {
+                        await openVisibilityCollectionPicker("widget");
+                        clearValidationError("widget.collections");
+                      }}
                     >
                       Select collections
-                    </button>
+                    </s-button>
                     <div
                       className={fullPageBundleStyles.visibilitySelectionList}
                     >
@@ -240,8 +313,9 @@ export function BundleWidgetSection({
                             <span>
                               {collection.title ?? "Untitled collection"}
                             </span>
-                            <button
-                              type="button"
+                            <s-button
+                              variant="tertiary"
+                              disabled={!upsellWidgetEnabled || undefined}
                               onClick={() =>
                                 removeVisibilityCollectionTarget(
                                   "widget",
@@ -250,49 +324,47 @@ export function BundleWidgetSection({
                               }
                             >
                               Remove
-                            </button>
+                            </s-button>
                           </div>
                         ),
                       )}
                     </div>
+                    {validationErrors["widget.collections"] && (
+                      <s-text id="configure-widget-collections" tone="critical">
+                        {validationErrors["widget.collections"]}
+                      </s-text>
+                    )}
                   </div>
                 )}
               </div>
-              <label className={fullPageBundleStyles.visibilityCheckboxLabel}>
-                <input
-                  type="checkbox"
-                  checked={autoSelectBrowsedProduct}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    setAutoSelectBrowsedProduct(e.target.checked);
-                    markAsDirty();
-                  }}
-                />
-                <span>Add browsed product to bundle</span>
-              </label>
+              <s-checkbox
+                label="Add browsed product to bundle"
+                checked={autoSelectBrowsedProduct || undefined}
+                disabled={!upsellWidgetEnabled || undefined}
+                onChange={(event: any) => {
+                  setAutoSelectBrowsedProduct(event.target.checked);
+                  markAsDirty();
+                }}
+              />
             </div>
           </div>
           <div className={fullPageBundleStyles.visibilityPlacementCard}>
             <div>
               <h4 className={fullPageBundleStyles.visibilitySectionTitle}>
-                Embed the Upsell
-                {upsellWidgetDisplayMode === "button" ? "Button" : "Block"} at a
-                custom location
+                Embed Upsell at a custom location
               </h4>
               <p className={fullPageBundleStyles.visibilityCardText}>
-                By default, the upsell
-                {upsellWidgetDisplayMode === "button" ? "button" : "block"} is
-                added below the Buy Button. You can move it to a custom spot on
+                By default, the upsell is added below the Buy Button. You can move it to a custom spot on
                 the product page if you prefer.
               </p>
             </div>
-            <button
-              type="button"
-              className={fullPageBundleStyles.visibilityPrimaryAction}
+            <s-button
+              variant="secondary"
               onClick={handlePlaceWidget}
             >
+              <s-icon type="external" />
               Embed Upsell
-              {upsellWidgetDisplayMode === "button" ? "Button" : "Block"}
-            </button>
+            </s-button>
           </div>
         </div>
       )}

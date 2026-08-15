@@ -1,0 +1,637 @@
+{
+  "schema_version": 1,
+  "job_id": "fpb-classic-compact-horizontal-card-redesign-20260814",
+  "revision": 1,
+  "status": "complete",
+  "chrome_mcp_required": true,
+  "environment": "staging",
+  "base_url": "https://agent-5sfidg3m.myshopify.com/apps/product-bundles/wpb/2",
+  "fixture": "Wolfpack SIT FPB bundle 2 with compatible shared product state carried between preset-only transitions",
+  "authentication_mode": "connected default Chrome profile with existing test-store session; do not persist credentials",
+  "setup": {
+    "profile_policy": "default-profile-only",
+    "allow_isolated_context": false,
+    "zoom_percent": 100,
+    "artifact_directory": "qa",
+    "max_retries": 2,
+    "locale": "record-live-fixture",
+    "currency": "record-live-fixture",
+    "theme": "record-live-fixture-light",
+    "feature_flags": [],
+    "random_time_control": "not-applicable-no-time-dependent-card-content",
+    "device_pixel_ratio_policy": "record-actual",
+    "waits": [
+      "document.fonts.ready",
+      "images-complete",
+      "document-complete",
+      "widget-root-and-target-preset-ready"
+    ],
+    "scroll": {
+      "x": 0,
+      "y": 0
+    },
+    "disable_nonessential_animation": true,
+    "hide_caret_and_transient_cursors": true,
+    "dynamic_region_policy": "stabilize fixture; no masks approved",
+    "cache_policy": "clear Cache Storage where available and reload with ignoreCache before each baseline or post-build pass",
+    "stylesheet_proof": "record active shared base and exactly one active preset stylesheet plus runtime preset attribute"
+  },
+  "viewports": [
+    {
+      "id": "primary-desktop",
+      "mode": "desktop",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "id": "desktop-stress",
+      "mode": "desktop",
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "id": "tablet-portrait",
+      "mode": "mobile",
+      "width": 768,
+      "height": 1024
+    },
+    {
+      "id": "primary-mobile",
+      "mode": "mobile",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "narrow-mobile",
+      "mode": "mobile",
+      "width": 360,
+      "height": 800
+    }
+  ],
+  "states": [
+    {
+      "id": "default"
+    },
+    {
+      "id": "hover-focus"
+    },
+    {
+      "id": "selected-quantity"
+    },
+    {
+      "id": "sale-price"
+    },
+    {
+      "id": "long-title"
+    },
+    {
+      "id": "mixed-media"
+    },
+    {
+      "id": "variant"
+    },
+    {
+      "id": "unavailable"
+    },
+    {
+      "id": "disabled"
+    }
+  ],
+  "interactions": [
+    {
+      "id": "classic-desktop-matrix",
+      "purpose": "Prove CL-A desktop geometry and every applicable card state.",
+      "precondition": "Classic preset persisted and runtime-confirmed after cache-bypassed reload.",
+      "viewport": "primary-desktop",
+      "state": "default",
+      "steps": [
+        "Capture fresh accessibility tree and default geometry.",
+        "Hover then keyboard-focus details and add controls.",
+        "Exercise sale, long-title, mixed-media, variant, unavailable, selected, quantity, and disabled fixture states safely."
+      ],
+      "expected_semantic_result": "Four-column image-first Classic cards retain existing names, controls, and state behavior inside the approved frame.",
+      "dom_assertions": [
+        "Runtime preset is CLASSIC.",
+        "Existing card DOM and shared summary DOM remain unchanged.",
+        "Each activation produces one state update."
+      ],
+      "style_geometry_assertions": [
+        "Grid has four columns at the recorded catalog width.",
+        "Same-row card heights match within 1px and state height delta is 0px.",
+        "No clipping, page horizontal overflow, or summary overlap; focus is visible."
+      ],
+      "screenshot_path": "qa/actual/classic-desktop-matrix.png",
+      "baseline_path": "qa/baselines/classic-desktop-approved.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "new_violations": 0
+      },
+      "network_expectations": {
+        "failed_required_widget_requests": 0,
+        "duplicate_mutations": 0
+      },
+      "cleanup": [
+        "Return quantity and variant to baseline.",
+        "Remove capture CSS and restore scroll."
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "classic-mobile-matrix",
+      "purpose": "Prove CL-A mobile/touch geometry and every applicable card state.",
+      "precondition": "Classic preset persisted; shared mobile tray collapsed at baseline.",
+      "viewport": "primary-mobile",
+      "state": "selected-quantity",
+      "steps": [
+        "Capture default two-column layout.",
+        "Operate details, add, quantity, variant, unavailable, and disabled paths by touch and keyboard.",
+        "Open and close the shared summary drawer without changing its presentation."
+      ],
+      "expected_semantic_result": "Two-column Classic cards remain stable and all existing controls remain reachable above the shared tray.",
+      "dom_assertions": [
+        "Runtime preset is CLASSIC.",
+        "Mobile summary state remains synchronized.",
+        "Focus returns after drawer close."
+      ],
+      "style_geometry_assertions": [
+        "Exactly two columns.",
+        "No state-driven card height change.",
+        "No tray overlap, focus clipping, or horizontal overflow."
+      ],
+      "screenshot_path": "qa/actual/classic-mobile-matrix.png",
+      "baseline_path": "qa/baselines/classic-mobile-approved.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "new_violations": 0
+      },
+      "network_expectations": {
+        "failed_required_widget_requests": 0,
+        "duplicate_mutations": 0
+      },
+      "cleanup": [
+        "Close drawer and restore baseline selection.",
+        "Remove capture CSS and restore scroll."
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "compact-desktop-matrix",
+      "purpose": "Prove CO-A desktop density and every applicable card state.",
+      "precondition": "Compact preset persisted and runtime-confirmed after cache-bypassed reload.",
+      "viewport": "desktop-stress",
+      "state": "sale-price",
+      "steps": [
+        "Capture default three-column layout.",
+        "Exercise hover, focus, selection, quantity, sale, long-title, mixed-media, variant, unavailable, and disabled states.",
+        "Smoke shared sidebar, modal, and timeline."
+      ],
+      "expected_semantic_result": "Three-column Compact cards read as bounded dense cards while retaining existing behavior.",
+      "dom_assertions": [
+        "Runtime preset is COMPACT.",
+        "Existing renderer output and shared surfaces remain unchanged.",
+        "One action produces one update."
+      ],
+      "style_geometry_assertions": [
+        "Exactly three columns at recorded catalog width.",
+        "Contained action target remains at least 44px.",
+        "Same-row heights match and no state changes outer geometry."
+      ],
+      "screenshot_path": "qa/actual/compact-desktop-matrix.png",
+      "baseline_path": "qa/baselines/compact-desktop-approved.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "new_violations": 0
+      },
+      "network_expectations": {
+        "failed_required_widget_requests": 0,
+        "duplicate_mutations": 0
+      },
+      "cleanup": [
+        "Restore variant and quantity.",
+        "Remove capture CSS and restore scroll."
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "compact-mobile-matrix",
+      "purpose": "Prove CO-A mobile grouping and every applicable touch/keyboard state.",
+      "precondition": "Compact preset persisted; mobile tray baseline restored.",
+      "viewport": "primary-mobile",
+      "state": "mixed-media",
+      "steps": [
+        "Capture portrait and landscape media in the same row.",
+        "Exercise add/quantity, long title, sale, variant, unavailable, disabled, and keyboard focus.",
+        "Smoke shared mobile drawer and product drawer."
+      ],
+      "expected_semantic_result": "Two-column Compact cards keep stable media and contained controls with unchanged shared drawers.",
+      "dom_assertions": [
+        "Runtime preset is COMPACT.",
+        "All existing accessible controls remain exposed.",
+        "Shared drawer close paths restore focus."
+      ],
+      "style_geometry_assertions": [
+        "Exactly two columns.",
+        "Mixed media shares equal envelopes and row heights.",
+        "No overflow, clipping, or bottom-tray obstruction."
+      ],
+      "screenshot_path": "qa/actual/compact-mobile-matrix.png",
+      "baseline_path": "qa/baselines/compact-mobile-approved.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "new_violations": 0
+      },
+      "network_expectations": {
+        "failed_required_widget_requests": 0,
+        "duplicate_mutations": 0
+      },
+      "cleanup": [
+        "Close drawers and restore selection.",
+        "Remove capture CSS and restore scroll."
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "horizontal-desktop-matrix",
+      "purpose": "Prove HO-A bounded desktop rows and every applicable state.",
+      "precondition": "Horizontal preset persisted and runtime-confirmed after cache-bypassed reload.",
+      "viewport": "primary-desktop",
+      "state": "variant",
+      "steps": [
+        "Capture two-column 30/70 default rows.",
+        "Exercise hover/focus, selected quantity, sale, long-title, mixed-media, variant, unavailable, and disabled states.",
+        "Smoke shared sidebar, product modal, and timeline."
+      ],
+      "expected_semantic_result": "Two-column bounded Horizontal rows retain 30/70 anatomy and existing interactions.",
+      "dom_assertions": [
+        "Runtime preset is HORIZONTAL.",
+        "Variant selection updates existing shared state once.",
+        "Shared surfaces remain unchanged."
+      ],
+      "style_geometry_assertions": [
+        "Exactly two columns and 30/70 tracks.",
+        "Title/variant remain above price/action.",
+        "No state height delta, overflow, clipping, or overlap."
+      ],
+      "screenshot_path": "qa/actual/horizontal-desktop-matrix.png",
+      "baseline_path": "qa/baselines/horizontal-desktop-approved.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "new_violations": 0
+      },
+      "network_expectations": {
+        "failed_required_widget_requests": 0,
+        "duplicate_mutations": 0
+      },
+      "cleanup": [
+        "Restore variant and quantity.",
+        "Remove capture CSS and restore scroll."
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "horizontal-mobile-matrix",
+      "purpose": "Prove HO-A single-column mobile rows and every applicable state.",
+      "precondition": "Horizontal preset persisted; mobile tray baseline restored.",
+      "viewport": "primary-mobile",
+      "state": "unavailable",
+      "steps": [
+        "Capture single-column 30/70 rows.",
+        "Exercise touch and keyboard details, add/quantity, sale, long-title, mixed-media, variant, unavailable, and disabled states.",
+        "Open and close shared drawers."
+      ],
+      "expected_semantic_result": "One-column Horizontal rows keep all controls reachable and shared drawers unchanged.",
+      "dom_assertions": [
+        "Runtime preset is HORIZONTAL.",
+        "Unavailable state prevents add while recovery remains available.",
+        "Focus restores after drawer close."
+      ],
+      "style_geometry_assertions": [
+        "Exactly one column and 30/70 tracks.",
+        "Final action clears sticky tray.",
+        "No state height delta, horizontal overflow, or focus clipping."
+      ],
+      "screenshot_path": "qa/actual/horizontal-mobile-matrix.png",
+      "baseline_path": "qa/baselines/horizontal-mobile-approved.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "new_violations": 0
+      },
+      "network_expectations": {
+        "failed_required_widget_requests": 0,
+        "duplicate_mutations": 0
+      },
+      "cleanup": [
+        "Close drawers and restore baseline selection.",
+        "Remove capture CSS and restore scroll."
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "horizontal-tablet-boundary",
+      "purpose": "Verify the approved one-column Horizontal tablet treatment and 799/800/801 boundary.",
+      "precondition": "Horizontal preset active with long title and selected quantity fixtures.",
+      "viewport": "tablet-portrait",
+      "state": "hover-focus",
+      "steps": [
+        "Measure at 768x1024.",
+        "Resize shell/viewport to exercise 799, 800, and 801px container widths where supported.",
+        "Record summary surface, grid tracks, focus, and scroll at each boundary."
+      ],
+      "expected_semantic_result": "Horizontal and shared summary switch once at the existing 800px container boundary without losing state.",
+      "dom_assertions": [
+        "Below 800 only mobile summary is exposed.",
+        "At and above 800 only desktop sidebar is exposed.",
+        "Selection persists across resize."
+      ],
+      "style_geometry_assertions": [
+        "One Horizontal column below 800 and up to two at/above 800.",
+        "No overlap or overflow at any boundary.",
+        "Focus remains visible."
+      ],
+      "screenshot_path": "qa/actual/horizontal-tablet-boundary.png",
+      "baseline_path": "qa/baselines/horizontal-tablet-approved.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "new_violations": 0
+      },
+      "network_expectations": {
+        "failed_required_widget_requests": 0,
+        "duplicate_mutations": 0
+      },
+      "cleanup": [
+        "Restore 768x1024 viewport and baseline state.",
+        "Remove capture CSS and restore scroll."
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "classic-narrow-long-title",
+      "purpose": "Stress CL-A at the narrowest required width with long content.",
+      "precondition": "Classic preset active with long title and wide currency fixture.",
+      "viewport": "narrow-mobile",
+      "state": "long-title",
+      "steps": [
+        "Capture default and selected long-title cards.",
+        "Tab through visible actions."
+      ],
+      "expected_semantic_result": "Two-column Classic remains readable and operable at 360px.",
+      "dom_assertions": [
+        "Full accessible product name remains available.",
+        "Actions retain existing semantics."
+      ],
+      "style_geometry_assertions": [
+        "Two columns with no page overflow.",
+        "Text and prices do not overlap actions.",
+        "Selected height delta is 0px."
+      ],
+      "screenshot_path": "qa/actual/classic-narrow-long-title.png",
+      "baseline_path": "qa/baselines/classic-narrow-approved.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "new_violations": 0
+      },
+      "network_expectations": {
+        "failed_required_widget_requests": 0,
+        "duplicate_mutations": 0
+      },
+      "cleanup": [
+        "Restore selection.",
+        "Remove capture CSS and restore scroll."
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "compact-narrow-disabled",
+      "purpose": "Stress CO-A disabled controls and hit targets at 360px.",
+      "precondition": "Compact preset active with existing disabled-limit fixture.",
+      "viewport": "narrow-mobile",
+      "state": "disabled",
+      "steps": [
+        "Focus the disabled-limit control and inspect exposed state.",
+        "Attempt safe pointer and keyboard activation."
+      ],
+      "expected_semantic_result": "Disabled control does not mutate state and remains perceivable without changing card geometry.",
+      "dom_assertions": [
+        "Disabled state is exposed.",
+        "Quantity remains unchanged after activation attempts."
+      ],
+      "style_geometry_assertions": [
+        "Control hit area remains at least 44px.",
+        "No clipping or overflow.",
+        "Card height is unchanged."
+      ],
+      "screenshot_path": "qa/actual/compact-narrow-disabled.png",
+      "baseline_path": "qa/baselines/compact-narrow-approved.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "new_violations": 0
+      },
+      "network_expectations": {
+        "failed_required_widget_requests": 0,
+        "duplicate_mutations": 0
+      },
+      "cleanup": [
+        "Restore baseline state.",
+        "Remove capture CSS and restore scroll."
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "standard-desktop-regression",
+      "purpose": "Prove frozen Standard desktop output and shared surfaces remain unchanged after every slice.",
+      "precondition": "Standard preset persisted and cache-bypassed reload completed.",
+      "viewport": "desktop-stress",
+      "state": "default",
+      "steps": [
+        "Capture default Standard grid/sidebar/timeline.",
+        "Select one item, open and close details, then restore."
+      ],
+      "expected_semantic_result": "Standard behavior and appearance match its pre-slice baseline.",
+      "dom_assertions": [
+        "Runtime preset is STANDARD.",
+        "Selection and modal flow remain functional."
+      ],
+      "style_geometry_assertions": [
+        "No baseline boundary or wrapping regression.",
+        "No horizontal overflow or sticky overlap."
+      ],
+      "screenshot_path": "qa/actual/standard-desktop-regression.png",
+      "baseline_path": "qa/baselines/standard-desktop-frozen.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "new_violations": 0
+      },
+      "network_expectations": {
+        "failed_required_widget_requests": 0,
+        "duplicate_mutations": 0
+      },
+      "cleanup": [
+        "Restore Standard fixture selection.",
+        "Remove capture CSS and restore scroll."
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "standard-mobile-regression",
+      "purpose": "Prove frozen Standard mobile output and shared tray/drawers remain unchanged after every slice.",
+      "precondition": "Standard preset active and mobile summary collapsed.",
+      "viewport": "primary-mobile",
+      "state": "default",
+      "steps": [
+        "Capture Standard grid and collapsed tray.",
+        "Open/close summary and product drawers by supported paths."
+      ],
+      "expected_semantic_result": "Standard and shared mobile surfaces match the frozen baseline with focus restored.",
+      "dom_assertions": [
+        "Runtime preset is STANDARD.",
+        "Drawer expanded state and focus restoration are correct."
+      ],
+      "style_geometry_assertions": [
+        "No baseline visual regression.",
+        "No tray overlap, clipping, or horizontal overflow."
+      ],
+      "screenshot_path": "qa/actual/standard-mobile-regression.png",
+      "baseline_path": "qa/baselines/standard-mobile-frozen.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "new_violations": 0
+      },
+      "network_expectations": {
+        "failed_required_widget_requests": 0,
+        "duplicate_mutations": 0
+      },
+      "cleanup": [
+        "Close drawers and restore scroll/state.",
+        "Remove capture CSS."
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    }
+  ],
+  "assertions": {
+    "library": "references/chrome-devtools-test-protocol.md",
+    "require_json_serializable_results": true,
+    "geometry_tolerance_css_px": 1,
+    "major_boundary_tolerance_css_px": 4
+  },
+  "screenshots": {
+    "format": "png",
+    "index_path": "qa/screenshot-index.json",
+    "element_required": true,
+    "viewport_required": true,
+    "before_after_critical_interactions": true,
+    "full_page_only_when_needed": true,
+    "metadata_required": [
+      "viewport",
+      "dpr",
+      "zoom",
+      "state",
+      "preset",
+      "revision"
+    ]
+  },
+  "console_policy": {
+    "fail_on": [
+      "uncaught-exception",
+      "unhandled-promise-rejection",
+      "severe-application-error",
+      "failed-resource-parse",
+      "new-repeated-warning",
+      "accessibility-runtime-error",
+      "hydration-error",
+      "duplicate-key-warning",
+      "change-caused-csp-violation",
+      "tested-interaction-error"
+    ],
+    "allowlist": []
+  },
+  "network_policy": {
+    "fail_on": [
+      "unexpected-4xx-5xx",
+      "blocked-required-asset",
+      "implementation-caused-abort",
+      "cors-error",
+      "duplicate-mutation",
+      "missing-product-media",
+      "missing-translation",
+      "local-to-production-request",
+      "real-order-or-destructive-action"
+    ],
+    "expected_analytics": [],
+    "redact_secrets_and_private_bodies": true
+  },
+  "lighthouse": {
+    "required": true,
+    "devices": [
+      "desktop",
+      "mobile"
+    ],
+    "modes": [
+      "snapshot",
+      "navigation"
+    ],
+    "categories": [
+      "accessibility",
+      "best-practices",
+      "seo"
+    ],
+    "performance_excluded": true,
+    "report_paths": {
+      "desktop": "qa/lighthouse/desktop.json",
+      "mobile": "qa/lighthouse/mobile.json"
+    }
+  },
+  "performance": {
+    "required": true,
+    "triggers": [
+      "responsive grid change",
+      "card geometry and state stability"
+    ],
+    "not_applicable_reason": "",
+    "trace_paths": [
+      "qa/performance/classic-desktop.json",
+      "qa/performance/compact-mobile.json",
+      "qa/performance/horizontal-boundary.json"
+    ],
+    "metrics": [
+      "LCP",
+      "CLS",
+      "interaction-findings",
+      "long-tasks",
+      "layout-shift-sources",
+      "image-font-loading"
+    ]
+  },
+  "visual_diff": {
+    "format": "png",
+    "comparison": ".agents/skills/storefront-design-director/scripts/compare_images.py",
+    "diff_required": true,
+    "json_summary_required": true,
+    "approved_reference_and_actual_side_by_side": true,
+    "allowed_masks": []
+  },
+  "non_regression": {
+    "required": true,
+    "cases": [
+      "standard-desktop-regression",
+      "standard-mobile-regression"
+    ]
+  },
+  "cleanup": [
+    "Remove injected capture styles.",
+    "Restore scroll position and viewport.",
+    "Restore reversible selection and variant state.",
+    "Leave fixture on the next required preset or restore Standard at the final boundary.",
+    "Delete temporary sensitive or transient evidence; retain no credentials or private bodies."
+  ]
+}

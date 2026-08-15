@@ -18,6 +18,7 @@ export interface DeploymentGeneralSyncSummary {
   failedShops: number;
   metafieldDefinitionShopsSynced: number;
   addonDiscountShopsSynced: number;
+  subscriptionDiscountShopsSynced: number;
   variantRemediation: {
     scannedBundles: number;
     scannedStepProducts: number;
@@ -41,6 +42,7 @@ interface GeneralSyncBundle {
   shopId: string;
   bundleType: string;
   personalizationData: unknown;
+  bundleSubscriptionConfig: unknown;
   steps: Array<{
     id: string;
     StepProduct: Array<{
@@ -81,6 +83,14 @@ export interface DeploymentGeneralSyncDependencies {
     reason: "sync_bundle";
   }) => Promise<unknown>;
   setupAddonDiscount: (
+    admin: unknown,
+    shopDomain: string,
+  ) => Promise<{ success: boolean; error?: string }>;
+  setupSubscriptionDiscount: (
+    admin: unknown,
+    shopDomain: string,
+  ) => Promise<{ success: boolean; error?: string }>;
+  setupSubscriptionRecurringDiscount: (
     admin: unknown,
     shopDomain: string,
   ) => Promise<{ success: boolean; error?: string }>;
@@ -125,6 +135,20 @@ function hasEnabledAddonProducts(personalizationData: unknown) {
   );
 }
 
+function hasEnabledSubscription(config: unknown) {
+  return Boolean(
+    config
+    && typeof config === "object"
+    && !Array.isArray(config)
+    && (config as Record<string, unknown>).enabled === true,
+  );
+}
+
+function hasEnabledRecurringSubscription(config: unknown) {
+  return hasEnabledSubscription(config)
+    && (config as Record<string, unknown>).recurringBundleDiscount === true;
+}
+
 function errorMessage(error: unknown) {
   return error instanceof Error ? error.message : "Deployment general sync failed";
 }
@@ -139,6 +163,7 @@ function emptySummary(mode: "disabled" | "apply"): DeploymentGeneralSyncSummary 
     failedShops: 0,
     metafieldDefinitionShopsSynced: 0,
     addonDiscountShopsSynced: 0,
+    subscriptionDiscountShopsSynced: 0,
     variantRemediation: {
       scannedBundles: 0,
       scannedStepProducts: 0,
@@ -308,6 +333,7 @@ export async function runDeploymentGeneralSync(
         shopId: true,
         bundleType: true,
         personalizationData: true,
+        bundleSubscriptionConfig: true,
         steps: {
           select: {
             id: true,
@@ -352,6 +378,8 @@ export async function runDeploymentGeneralSync(
   }
 
   const addonShops = new Set<string>();
+  const subscriptionShops = new Set<string>();
+  const recurringSubscriptionShops = new Set<string>();
   for (const bundle of bundles) {
     if (failedShops.has(bundle.shopId)) continue;
     if (!isBundleType(bundle.bundleType)) {
@@ -379,6 +407,12 @@ export async function runDeploymentGeneralSync(
         && hasEnabledAddonProducts(bundle.personalizationData)
       ) {
         addonShops.add(bundle.shopId);
+      }
+      if (hasEnabledSubscription(bundle.bundleSubscriptionConfig)) {
+        subscriptionShops.add(bundle.shopId);
+      }
+      if (hasEnabledRecurringSubscription(bundle.bundleSubscriptionConfig)) {
+        recurringSubscriptionShops.add(bundle.shopId);
       }
       await runBundleVariantRemediation(
         bundle.shopId,
@@ -418,6 +452,37 @@ export async function runDeploymentGeneralSync(
         shopDomain,
         error: errorMessage(error),
       });
+    }
+  }
+
+  for (const shopDomain of subscriptionShops) {
+    try {
+      const result = await deps.setupSubscriptionDiscount(
+        adminByShop.get(shopDomain)!,
+        shopDomain,
+      );
+      if (!result.success) {
+        throw new Error(result.error ?? "Subscription discount setup failed");
+      }
+      summary.subscriptionDiscountShopsSynced += 1;
+    } catch (error) {
+      summary.failedShops += 1;
+      summary.shopFailures.push({ shopDomain, error: errorMessage(error) });
+    }
+  }
+
+  for (const shopDomain of recurringSubscriptionShops) {
+    try {
+      const result = await deps.setupSubscriptionRecurringDiscount(
+        adminByShop.get(shopDomain)!,
+        shopDomain,
+      );
+      if (!result.success) {
+        throw new Error(result.error ?? "Recurring subscription discount setup failed");
+      }
+    } catch (error) {
+      summary.failedShops += 1;
+      summary.shopFailures.push({ shopDomain, error: errorMessage(error) });
     }
   }
 

@@ -193,12 +193,16 @@ _hideNativeDynamicCheckoutControls() {
 
 setupDOMElements() {
   const modalEl = this.ensureBottomSheet();
+  const purchaseOptionsMount = this.container.querySelector('[data-wpb-purchase-options-mount="ppb"]')
+    || document.createElement('div');
+  purchaseOptionsMount.setAttribute('data-wpb-purchase-options-mount', 'ppb');
 
   // Get or create main UI elements
   this.elements = {
     defaultProducts: this.container.querySelector('.bw-default-products') || this._createDirectDefaultProductsEl(),
     stepsContainer: this.container.querySelector('.bundle-steps') || this.createStepsContainer(),
     qtyPillsEl: this.container.querySelector('.bw-qty-pills') || this._createQtyPillsEl(),
+    purchaseOptionsMount,
     footer: this.container.querySelector('.bundle-footer-messaging') || this.createFooter(),
     addToCartButton: this.container.querySelector('.add-bundle-to-cart') || this.createAddToCartButton(),
     dynamicCheckoutVisual: this.container.querySelector('.bw-ppb-dynamic-checkout-visual') || this._createDynamicCheckoutVisual(),
@@ -216,6 +220,8 @@ setupDOMElements() {
   if (!this.container.querySelector('.bw-qty-pills')) {
     this.container.appendChild(this.elements.qtyPillsEl);
   }
+  this.container.appendChild(this.elements.purchaseOptionsMount);
+  this.elements.purchaseOptionsMounts = { ppb: this.elements.purchaseOptionsMount };
   if (!this.container.querySelector('.bundle-footer-messaging')) {
     this.container.appendChild(this.elements.footer);
   }

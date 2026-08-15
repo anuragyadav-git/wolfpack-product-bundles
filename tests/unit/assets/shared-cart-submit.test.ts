@@ -1,6 +1,7 @@
 import { readProductPageWidgetSources } from './widget-source-helpers';
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const {
+  applySellingPlanToJsonCartItems,
   buildProductPageCartFormData,
   extractBundleDetailsSourceProperties,
 } = require('../../../app/assets/widgets/shared/engine/cart-submit.js');
@@ -50,6 +51,40 @@ describe('shared cart-submit helpers', () => {
       _bundle_display_properties: '{"box":"1"}',
       keep: 'yes',
     });
+  });
+
+  it('adds one selling plan to every subscription component and omits public Box metadata', () => {
+    const { formData } = buildProductPageCartFormData([
+      { id: 101, quantity: 1, properties: {} },
+      { id: 202, quantity: 2, properties: {} },
+    ], {
+      bundleName: 'Subscription bundle',
+      offerId: 'offer',
+      sessionKey: 'session',
+      runtimeToken: 'signed-token',
+      sellingPlanId: 'gid://shopify/SellingPlan/55',
+    });
+
+    expect(formData.get('items[0][selling_plan]')).toBe('55');
+    expect(formData.get('items[1][selling_plan]')).toBe('55');
+    expect(formData.has('items[0][properties][Box]')).toBe(false);
+    expect(formData.get('items[0][properties][_wolfpack_bundle_runtime]')).toBe('signed-token');
+  });
+
+  it('adds one selling plan to every full-page JSON component and omits public Box metadata', () => {
+    const original = [
+      { id: '101', quantity: 1, properties: { Box: '1', _private: 'keep' } },
+      { id: '202', quantity: 2, properties: { Box: '2' } },
+    ];
+
+    expect(applySellingPlanToJsonCartItems(
+      original,
+      'gid://shopify/SellingPlan/55',
+    )).toEqual([
+      { id: '101', quantity: 1, selling_plan: '55', properties: { _private: 'keep' } },
+      { id: '202', quantity: 2, selling_plan: '55', properties: {} },
+    ]);
+    expect(original[0].properties.Box).toBe('1');
   });
 
   it('is used by the product-page widget controller', () => {

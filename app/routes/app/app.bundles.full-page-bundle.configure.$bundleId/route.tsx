@@ -27,6 +27,7 @@ import {
 } from "../shared/storefront-sync-action.server";
 import ConfigureBundleFlow from "./ConfigureBundleFlow";
 import { ReduxProvider } from "../../../store/ReduxProvider";
+import { handleValidateSellingPlanGroups } from "../../../services/bundle-subscription-discovery.server";
 
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   const { session, admin } = await requireAdminSession(request);
@@ -156,6 +157,8 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
           bundleId,
           formData,
         );
+      case "validateSellingPlanGroups":
+        return await handleValidateSellingPlanGroups(admin, session, bundleId, "full_page");
       default:
         return json(
           { success: false, error: ERROR_MESSAGES.UNKNOWN_ACTION },

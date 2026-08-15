@@ -7,6 +7,7 @@ import {
   getBogoDiscountInputValue,
   getBogoDiscountStoredValue,
 } from "../../../../lib/pricing-progress-tier-defaults";
+import { DiscountPricingTipBanner } from "../../_shared/bundle-configure/DiscountPricingTipBanner";
 
 export function fixedBundlePriceInputToCents(value: string): number {
   return amountToCents(Number(value) || 0);
@@ -27,6 +28,7 @@ export function FpbDiscountRulesSection({
     setRuleMessages,
     setRuleMessagesByLocale,
     setSuccessMessageByLocale,
+    validationErrors = {},
   } = flow;
 
   return (
@@ -60,16 +62,7 @@ export function FpbDiscountRulesSection({
               }
             />
           </div>
-          <s-banner
-            tone="info"
-            heading="Discount setup tip"
-            dismissible={false}
-            hidden={false}
-          >
-            Tip: Discounts are calculated based on the products in cart, make
-            sure to add the &quot;Default Product&quot; quantity or amount while
-            configuring discounts.
-          </s-banner>
+          <DiscountPricingTipBanner />
           {/* Q2: Discount Type — always visible, grayed when disabled */}
           <div
             style={{
@@ -142,7 +135,10 @@ export function FpbDiscountRulesSection({
                           Customer buys
                         </p>
                         <s-number-field
+                          id={`configure-discount-rules-${rule.id}-customerBuys`}
                           label="Minimum quantity of items"
+                          required
+                          error={validationErrors[`discount.rules.${rule.id}.customerBuys`]}
                           value={String(rule.customerBuys ?? 2)}
                           onInput={(e) =>
                             pricingState.updateDiscountRule(rule.id, {
@@ -165,7 +161,10 @@ export function FpbDiscountRulesSection({
                           Customer gets
                         </p>
                         <s-number-field
+                          id={`configure-discount-rules-${rule.id}-customerGets`}
                           label="Quantity"
+                          required
+                          error={validationErrors[`discount.rules.${rule.id}.customerGets`]}
                           value={String(rule.customerGets ?? 1)}
                           onInput={(e) =>
                             pricingState.updateDiscountRule(rule.id, {
@@ -180,7 +179,10 @@ export function FpbDiscountRulesSection({
                         />
                         <div className={fullPageBundleStyles.bxyRewardGrid}>
                           <s-number-field
+                            id={`configure-discount-rules-${rule.id}-discountValue`}
                             label="Discount value"
+                            required
+                            error={validationErrors[`discount.rules.${rule.id}.discountValue`]}
                             value={String(
                               getBogoDiscountInputValue(
                                 rule.discountValue ?? 0,
@@ -281,7 +283,10 @@ export function FpbDiscountRulesSection({
                             }
                           >
                             <s-number-field
+                              id={`configure-discount-rules-${rule.id}-conditionValue`}
                               label="Number of Products in Bundle"
+                              required
+                              error={validationErrors[`discount.rules.${rule.id}.conditionValue`]}
                               value={String(rule.conditionValue ?? 0)}
                               onInput={(e) =>
                                 pricingState.updateDiscountRule(rule.id, {
@@ -294,7 +299,10 @@ export function FpbDiscountRulesSection({
                               min={0}
                             />
                             <s-number-field
+                              id={`configure-discount-rules-${rule.id}-discountValue`}
                               label="Price"
+                              required
+                              error={validationErrors[`discount.rules.${rule.id}.discountValue`]}
                               value={String(centsToAmount(rule.discountValue))}
                               onChange={(e) =>
                                 pricingState.updateDiscountRule(rule.id, {
@@ -325,7 +333,10 @@ export function FpbDiscountRulesSection({
                               <s-option value="amount">Amount</s-option>
                             </s-select>
                             <s-number-field
+                              id={`configure-discount-rules-${rule.id}-conditionValue`}
                               label="is greater than or equal to"
+                              required
+                              error={validationErrors[`discount.rules.${rule.id}.conditionValue`]}
                               value={String(
                                 rule.conditionType === "amount"
                                   ? centsToAmount(rule.conditionValue)
@@ -352,12 +363,15 @@ export function FpbDiscountRulesSection({
                               }
                             />
                             <s-number-field
+                              id={`configure-discount-rules-${rule.id}-discountValue`}
                               label={
                                 pricingState.discountType ===
                                 DiscountMethod.PERCENTAGE_OFF
                                   ? "Percentage Off"
                                   : "Fixed Amount Off"
                               }
+                              required
+                              error={validationErrors[`discount.rules.${rule.id}.discountValue`]}
                               value={String(
                                 pricingState.discountType ===
                                   DiscountMethod.PERCENTAGE_OFF

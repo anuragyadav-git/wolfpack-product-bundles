@@ -1,5 +1,7 @@
 import { CurrencyManager } from '../../shared/currency-manager.js';
 import { PricingCalculator } from '../../shared/pricing-calculator.js';
+import { calculateBundleDiscountForPurchaseOption } from '../../shared/subscription-storefront-methods.js';
+import { calculateBundleTotalForPurchaseOption } from '../../shared/subscription-storefront-methods.js';
 import { ToastManager } from '../../shared/toast-manager.js';
 import { TemplateManager } from '../../shared/template-manager.js';
 import { getSummaryDiscountBadgeLabel } from '../shared/summary-discount-badge.js';
@@ -76,6 +78,16 @@ export function shouldUseClassicDesktopSummarySlotTiles({
   return isClassicDesktopSidebar === true && productSlotsEnabled === true;
 }
 
+export function shouldUseSharedDesktopSummaryRows({
+  designPreset,
+  isMobileSheet,
+  productSlotsEnabled,
+} = {}) {
+  return isSupportedFpbPreset(designPreset)
+    && isMobileSheet !== true
+    && productSlotsEnabled !== true;
+}
+
 export function getRemainingSummarySkeletonCount({
   designPreset,
   productSlotsEnabled,
@@ -111,13 +123,13 @@ renderSidePanel(panel) {
   );
   panel.innerHTML = '';
 
-  const { totalPrice, totalQuantity, unitPrices } = PricingCalculator.calculateBundleTotal(
+  const { totalPrice, totalQuantity, unitPrices } = calculateBundleTotalForPurchaseOption(this,
     this.selectedProducts,
     this.stepProductData,
     this.selectedBundle?.steps
   );
-  const discountInfo = PricingCalculator.calculateDiscount(
-    this.selectedBundle,
+  const discountInfo = calculateBundleDiscountForPurchaseOption(
+    this,
     totalPrice,
     totalQuantity,
     unitPrices
@@ -155,6 +167,11 @@ renderSidePanel(panel) {
   });
   const useClassicDesktopSummarySlotTiles = shouldUseClassicDesktopSummarySlotTiles({
     isClassicDesktopSidebar,
+    productSlotsEnabled: useInlineSummarySlots,
+  });
+  const useSharedDesktopSummaryRows = shouldUseSharedDesktopSummaryRows({
+    designPreset: fullPageDesignPreset,
+    isMobileSheet,
     productSlotsEnabled: useInlineSummarySlots,
   });
   const remainingSummarySkeletonCount = getRemainingSummarySkeletonCount({
@@ -334,7 +351,7 @@ renderSidePanel(panel) {
       this._renderStandardSidebarSlotTiles(productsContainer, allSelectedProducts);
     } else if (allSelectedProducts.length > 0) {
       allSelectedProducts.forEach(item => {
-        if (isStandardDesktopSidebar) {
+        if (useSharedDesktopSummaryRows) {
           const row = this.createStandardSidebarSelectedRow(item, currencyInfo);
           const removeBtn = row?.querySelector('[data-action="remove-selected-product"]');
           if (removeBtn) {
@@ -481,6 +498,16 @@ renderSidePanel(panel) {
   // Free gift section (locked or unlocked)
   if (!isClassicDesktopSidebar && !isStandardDesktopSidebar && activeStep?.isFreeGift !== true) this._renderFreeGiftSection(panel);
 
+  if (!isMobileSheet) {
+    const purchaseOptionsMount = document.createElement('div');
+    panel.appendChild(purchaseOptionsMount);
+    this.elements = this.elements || {};
+    this.elements.purchaseOptionsMounts = {
+      ...(this.elements.purchaseOptionsMounts || {}),
+      fpbDesktop: purchaseOptionsMount,
+    };
+  }
+
   // Total
   const totalSection = document.createElement('div');
   totalSection.className = 'side-panel-total';
@@ -601,6 +628,7 @@ renderSidePanel(panel) {
   actionSection.appendChild(navSection);
   panel.appendChild(actionDivider);
   panel.appendChild(actionSection);
+  this.renderPurchaseOptions?.();
 },
 
 _renderStandardSidebarSlotTiles(container, allSelectedProducts = []) {

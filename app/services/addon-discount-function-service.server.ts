@@ -28,8 +28,25 @@ type ExistingAddOnDiscount = {
   status: string;
 };
 
+type DiscountFunctionRole = {
+  key: "addons" | "subscription_initial" | "subscription_recurring";
+  title: string;
+  recurringCycleLimit?: number;
+};
+
 const ADDON_DISCOUNT_FUNCTION_HANDLE = "bundle-discount-function";
 const ADDON_DISCOUNT_TITLE = "Add On";
+const ADDON_ROLE: DiscountFunctionRole = { key: "addons", title: ADDON_DISCOUNT_TITLE };
+const SUBSCRIPTION_INITIAL_ROLE: DiscountFunctionRole = {
+  key: "subscription_initial",
+  title: "Bundle Subscription - Initial Order",
+  recurringCycleLimit: 1,
+};
+const SUBSCRIPTION_RECURRING_ROLE: DiscountFunctionRole = {
+  key: "subscription_recurring",
+  title: "Bundle Subscription - Recurring Orders",
+  recurringCycleLimit: 0,
+};
 const ADDON_DISCOUNT_API_VERSION = "2026-07" as ApiVersion;
 
 function formatGraphQLErrors(errors: Array<{ message?: string }> = []) {
@@ -89,6 +106,7 @@ export class AddOnDiscountFunctionService {
   private static async findExistingDiscounts(
     admin: AdminApiContext,
     functionId: string,
+    role: DiscountFunctionRole,
   ): Promise<ExistingAddOnDiscount[]> {
     const QUERY = `
       query FindAddOnAutomaticDiscounts {
@@ -122,7 +140,7 @@ export class AddOnDiscountFunctionService {
       .filter((node: any) => {
         const discount = node?.discount;
         return discount?.__typename === "DiscountAutomaticApp"
-          && discount?.title === ADDON_DISCOUNT_TITLE
+          && discount?.title === role.title
           && discount?.appDiscountType?.functionId === functionId;
       })
       .map((node: any) => ({
@@ -208,6 +226,7 @@ export class AddOnDiscountFunctionService {
   private static async createAutomaticDiscount(
     admin: AdminApiContext,
     shopifyFunction: AddOnDiscountFunction,
+    role: DiscountFunctionRole,
   ): Promise<AddOnDiscountActivationResult> {
     const MUTATION = `
       mutation CreateAddOnAutomaticDiscount($automaticAppDiscount: DiscountAutomaticAppInput!) {
@@ -229,7 +248,7 @@ export class AddOnDiscountFunctionService {
       apiVersion: ADDON_DISCOUNT_API_VERSION,
       variables: {
         automaticAppDiscount: {
-          title: ADDON_DISCOUNT_TITLE,
+          title: role.title,
           functionHandle: shopifyFunction.handle,
           startsAt: new Date().toISOString(),
           discountClasses: ["PRODUCT"],
@@ -238,6 +257,15 @@ export class AddOnDiscountFunctionService {
             productDiscounts: true,
             shippingDiscounts: false,
           },
+          ...(role.recurringCycleLimit !== undefined
+            ? { recurringCycleLimit: role.recurringCycleLimit }
+            : {}),
+          metafields: [{
+            namespace: "$app",
+            key: "discount_role",
+            type: "single_line_text_field",
+            value: role.key,
+          }],
         },
       },
     });
@@ -287,6 +315,28 @@ export class AddOnDiscountFunctionService {
     admin: AdminApiContext,
     shopDomain: string,
   ): Promise<AddOnDiscountActivationResult> {
+    return this.completeRoleSetup(admin, shopDomain, ADDON_ROLE);
+  }
+
+  static async completeSubscriptionInitialSetup(
+    admin: AdminApiContext,
+    shopDomain: string,
+  ): Promise<AddOnDiscountActivationResult> {
+    return this.completeRoleSetup(admin, shopDomain, SUBSCRIPTION_INITIAL_ROLE);
+  }
+
+  static async completeSubscriptionRecurringSetup(
+    admin: AdminApiContext,
+    shopDomain: string,
+  ): Promise<AddOnDiscountActivationResult> {
+    return this.completeRoleSetup(admin, shopDomain, SUBSCRIPTION_RECURRING_ROLE);
+  }
+
+  private static async completeRoleSetup(
+    admin: AdminApiContext,
+    shopDomain: string,
+    role: DiscountFunctionRole,
+  ): Promise<AddOnDiscountActivationResult> {
     AppLogger.info("Starting add-on discount function setup", {
       component: "addon-discount-function",
       operation: "complete-setup",
@@ -306,6 +356,7 @@ export class AddOnDiscountFunctionService {
       const existingDiscounts = await this.findExistingDiscounts(
         admin,
         shopifyFunction.id,
+        role,
       );
       const activeDiscount = existingDiscounts.find(
         (discount) => discount.status === "ACTIVE",
@@ -327,7 +378,7 @@ export class AddOnDiscountFunctionService {
             inactiveDiscount,
             shopifyFunction,
           )
-        : await this.createAutomaticDiscount(admin, shopifyFunction);
+        : await this.createAutomaticDiscount(admin, shopifyFunction, role);
 
       if (!result.success) {
         AppLogger.warn("Add-on automatic discount setup failed", {

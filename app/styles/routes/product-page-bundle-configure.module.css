@@ -126,37 +126,27 @@
   box-sizing: border-box;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  min-height: 32px;
-  padding: 5px 10px;
+  height: 28px;
+  min-height: 28px;
   border: 1px solid transparent;
   border-radius: 8px;
-  color: #202223;
-  font: inherit;
-  cursor: pointer;
+  color: #ffffff;
+  transition: filter 120ms ease;
 }
 
-.readinessButtonLow {
-  background: #fff8e6;
-  border-color: #e8c56d;
-}
-
-.readinessButtonMedium {
-  background: #eef5ff;
-  border-color: #cfe2ff;
-}
-
-.readinessButtonHigh {
-  background: #eaf7f0;
-  border-color: #b7ead2;
+.readinessButton:hover {
+  filter: brightness(0.9);
 }
 
 .readinessScore {
+  margin-right: 8px;
+  color: #ffffff;
   font-size: 14px;
   font-weight: 700;
 }
 
 .readinessLabel {
+  color: #ffffff;
   font-size: 12px;
   font-weight: 600;
 }
@@ -314,42 +304,6 @@
 .linkButton:focus-visible {
   color: #003a8c;
   text-decoration: underline;
-}
-
-.videoHelpButton {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 28px;
-  padding: 4px 8px;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  background: transparent;
-  color: #303030;
-  font: inherit;
-  font-size: 12px;
-  font-weight: 600;
-  line-height: 1;
-  cursor: pointer;
-  transition: background-color 0.15s ease;
-}
-
-.videoHelpButton:hover {
-  background: #f1f1f1;
-  text-decoration: none;
-}
-
-.videoHelpButton:focus-visible {
-  background: #f1f1f1;
-  outline: 2px solid #005bd3;
-  outline-offset: 1px;
-}
-
-.videoHelpIcon {
-  width: 10px;
-  height: 10px;
-  flex-shrink: 0;
-  fill: currentColor;
 }
 
 .leftCardTitle {
@@ -1105,8 +1059,8 @@
 }
 
 .visibilityStatusEnabled {
-  background: #b4f4c4;
-  color: #0c5132;
+  background: var(--p-color-bg-fill-success-secondary, #b4fed2);
+  color: var(--p-color-text-success, #0c5132);
 }
 
 .visibilityStatusWarning {
@@ -2398,6 +2352,10 @@
 }
 
 @media (max-width: 767px) {
+  .readinessButton {
+    display: none;
+  }
+
   .templateDialogContent {
     min-height: calc(100vh - 112px);
   }

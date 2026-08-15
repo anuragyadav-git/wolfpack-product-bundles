@@ -45,6 +45,7 @@ export interface BundleData {
   loadingGif?: string | null;
   steps: BundleStep[];
   pricing?: BundlePricing;
+  bundleSubscriptionConfig?: unknown;
 }
 
 export interface LoaderData {

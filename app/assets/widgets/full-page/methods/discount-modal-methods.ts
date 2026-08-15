@@ -1,5 +1,6 @@
 import { CurrencyManager } from '../../shared/currency-manager.js';
 import { PricingCalculator } from '../../shared/pricing-calculator.js';
+import { calculateBundleDiscountForPurchaseOption } from '../../shared/subscription-storefront-methods.js';
 import { ToastManager } from '../../shared/toast-manager.js';
 import { TemplateManager } from '../../shared/template-manager.js';
 import { getDiscountProgressData } from '../../shared/engine/bundle-selectors.js';
@@ -8,6 +9,7 @@ import {
   renderDiscountProgress,
 } from '../../shared/components/discount-progress.js';
 import { STOREFRONT_PROXY_ROOT } from '../../../../config/storefront-proxy-routes.js';
+import { calculateBundleTotalForPurchaseOption } from '../../shared/subscription-storefront-methods.js';
 
 export const fullPageDiscountModalMethods: Record<string, any> & ThisType<any> = {
 _renderDiscountProgress(options = {}) {
@@ -25,14 +27,15 @@ _renderDiscountProgress(options = {}) {
         totalQuantity: providedTotalQuantity,
         unitPrices: providedUnitPrices || []
       }
-    : PricingCalculator.calculateBundleTotal(
+    : calculateBundleTotalForPurchaseOption(this,
         this.selectedProducts,
         this.stepProductData,
         this.selectedBundle?.steps
       );
   const discountInfo = providedCombinedDiscountInfo ?? this.getDiscountInfoWithSelectedAddonDiscount(
-    PricingCalculator.calculateDiscount(
-      this.selectedBundle, totalPrice, totalQuantity, unitPrices
+    calculateBundleDiscountForPurchaseOption(
+      this,
+      totalPrice, totalQuantity, unitPrices
     ),
     totalPrice
   );
@@ -132,13 +135,13 @@ getFormattedHeaderText() {
     return this._escapeHTML(currentStep?.name) || `Step ${this.currentStepIndex + 1}`;
   }
 
-  const { totalQuantity, totalPrice, unitPrices } = PricingCalculator.calculateBundleTotal(
+  const { totalQuantity, totalPrice, unitPrices } = calculateBundleTotalForPurchaseOption(this,
     this.selectedProducts,
     this.stepProductData,
     this.selectedBundle?.steps
   );
-  const discountInfo = PricingCalculator.calculateDiscount(
-    this.selectedBundle,
+  const discountInfo = calculateBundleDiscountForPurchaseOption(
+    this,
     totalPrice,
     totalQuantity,
     unitPrices

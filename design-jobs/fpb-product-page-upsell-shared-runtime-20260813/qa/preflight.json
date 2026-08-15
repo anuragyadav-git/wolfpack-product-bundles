@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "job_id": "fpb-product-page-upsell-shared-runtime-20260813",
+  "revision": 3,
+  "status": "blocked",
+  "checked_at": "2026-08-13T17:09:42Z",
+  "environment": "staging",
+  "selected_page": {
+    "page_id": 5,
+    "url": "https://agent-5sfidg3m.myshopify.com/apps/product-bundles/wpb/1",
+    "title": "agent"
+  },
+  "checks": {
+    "chrome_mcp_connected": {
+      "mandatory": true,
+      "status": "passed",
+      "evidence": "Direct Chrome DevTools MCP listed and selected the existing default-profile storefront and Shopify Admin pages.",
+      "blocker": "",
+      "recovery_action": ""
+    },
+    "supported_chrome_available": { "mandatory": true, "status": "passed", "evidence": "Chrome DevTools MCP navigation, emulation, snapshot, evaluation, screenshot, console, and network tools responded.", "blocker": "", "recovery_action": "" },
+    "intended_page_selected": { "mandatory": true, "status": "passed", "evidence": "Selected existing FPB fixture page 5 and Shopify Admin configure page 3 without bringing either tab to front.", "blocker": "", "recovery_action": "" },
+    "app_server_reachable": { "mandatory": true, "status": "passed", "evidence": "The existing SIT dev tunnel served current Admin source and Shopify dev extension assets after cache-bypassed reloads; no deploy or restart was performed.", "blocker": "", "recovery_action": "" },
+    "environment_confirmed": { "mandatory": true, "status": "passed", "evidence": "browser-test-plan.yaml specifies staging SIT.", "blocker": "", "recovery_action": "" },
+    "fixture_route_exists": { "mandatory": true, "status": "passed", "evidence": "FPB fixture /apps/product-bundles/wpb/1 loaded bundle cmse8sp170000v0ytaqqzsvtw.", "blocker": "", "recovery_action": "" },
+    "authentication_intentional": { "mandatory": true, "status": "passed", "evidence": "Used only the connected default Chrome profile and its existing Shopify sessions.", "blocker": "", "recovery_action": "" },
+    "sensitive_tabs_avoided": { "mandatory": true, "status": "passed", "evidence": "Page inventory was reviewed; only the intended agent storefront and Admin tabs were selected.", "blocker": "", "recovery_action": "" },
+    "viewport_resize_supported": { "mandatory": true, "status": "passed", "evidence": "Emulated 390x844 mobile storefront and 1280x800 desktop Admin viewports.", "blocker": "", "recovery_action": "" },
+    "accessibility_snapshot_supported": { "mandatory": true, "status": "passed", "evidence": "Fresh storefront and Admin accessibility snapshots exposed carousel and Polaris control semantics.", "blocker": "", "recovery_action": "" },
+    "screenshot_write_supported": { "mandatory": true, "status": "blocked", "evidence": "Inline screenshot capture succeeded, but Chrome MCP rejected both relative and absolute qa file paths as outside its configured roots.", "blocker": "Durable screenshot file output is unavailable from the Chrome MCP filesystem policy.", "recovery_action": "Allow the repository qa directory in the Chrome MCP workspace roots, then save the evidence PNGs." },
+    "console_inspection_supported": { "mandatory": true, "status": "passed", "evidence": "Console inspection tools are exposed and callable.", "blocker": "", "recovery_action": "" },
+    "network_inspection_supported": { "mandatory": true, "status": "passed", "evidence": "Network request listing confirmed the current dev extension asset and storefront data endpoint responses.", "blocker": "", "recovery_action": "" },
+    "repository_identity_recorded": { "mandatory": true, "status": "passed", "evidence": "Repository, branch, and base commit are recorded below.", "blocker": "", "recovery_action": "" },
+    "job_revision_recorded": { "mandatory": true, "status": "passed", "evidence": "Job fpb-product-page-upsell-shared-runtime-20260813 revision 3.", "blocker": "", "recovery_action": "" },
+    "baseline_identified": { "mandatory": true, "status": "not-run", "evidence": "The requested correction pass used semantic and interaction evidence rather than a visual-diff baseline.", "blocker": "No approved visual baseline is recorded for the broader upsell design job.", "recovery_action": "Capture and approve the full upsell runtime baseline before final design approval." }
+  },
+  "tool_inventory": [
+    "mcp__chrome_devtools__list_pages",
+    "mcp__chrome_devtools__select_page",
+    "mcp__chrome_devtools__navigate_page",
+    "mcp__chrome_devtools__emulate",
+    "mcp__chrome_devtools__take_snapshot",
+    "mcp__chrome_devtools__take_screenshot",
+    "mcp__chrome_devtools__evaluate_script",
+    "mcp__chrome_devtools__list_network_requests"
+  ],
+  "browser": {
+    "product": "Chrome",
+    "version": "connected-default-profile",
+    "profile_policy": "default-profile-only",
+    "isolated_context_used": false
+  },
+  "repository": {
+    "path": "/Users/adityaawasthi/Developer/wolfpack-product-bundles",
+    "branch": "feature/26.05-UI-changes",
+    "commit": "c6a67ee8092675098f93fa6b1f13b92b58bb82e8+working-tree"
+  },
+  "baseline": { "id": "", "revision": null, "path": "" },
+  "artifact_directory": "qa",
+  "blockers": [
+    "Chrome MCP cannot persist screenshots under the design job qa directory with its current filesystem roots.",
+    "The broader upsell design job still needs an approved visual baseline before final design approval."
+  ]
+}

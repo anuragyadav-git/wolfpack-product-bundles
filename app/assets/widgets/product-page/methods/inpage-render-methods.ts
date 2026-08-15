@@ -8,6 +8,7 @@ import { renderDiscountProgress } from '../../shared/components/discount-progres
 import { renderSharedProductCard } from '../../shared/components/product-card.js';
 import { shouldRenderInlineVariantSelector } from '../../shared/variant-selector-policy.js';
 import { resolveProductPageCardButtonText, resolveProductPageInlineAddText } from './modal-methods.js';
+import { getSubscriptionProductCardPrice } from '../../shared/subscription-storefront-methods.js';
 
 function bsIsDefaultStep(step) { return !!step?.isDefault; }
 
@@ -210,6 +211,7 @@ _renderInpageStepProducts(stepIndex, target) {
         currentQuantity,
         currencyInfo,
         {
+          displayPrice: getSubscriptionProductCardPrice(this, cascadeProduct.price),
           mode: 'row',
           className: [
             'bw-ppb-cascade-product-row',
@@ -237,6 +239,7 @@ _renderInpageStepProducts(stepIndex, target) {
         currentQuantity,
         currencyInfo,
         {
+          displayPrice: getSubscriptionProductCardPrice(this, product.price),
           variantSelectorHtml,
           description: '',
           displaySeeMoreLink: false,
@@ -262,7 +265,7 @@ _renderInpageStepProducts(stepIndex, target) {
       ${product.price ? `
         <div class="product-price-row">
           ${this._shouldShowProductComparedAtPrice() && product.compareAtPrice ? `<span class="product-price-strike">${CurrencyManager.convertAndFormat(product.compareAtPrice, currencyInfo)}</span>` : ''}
-          <span class="product-price">${CurrencyManager.convertAndFormat(product.price, currencyInfo)}</span>
+          <span class="product-price">${CurrencyManager.convertAndFormat(getSubscriptionProductCardPrice(this, product.price), currencyInfo)}</span>
         </div>
       ` : ''}
       ${this.renderInlineCardVariantSelector(product, currentStep)}

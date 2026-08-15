@@ -40,9 +40,11 @@ export function FpbAddonProductsCard({
               />
               <span />
             </label>
-            <button
-              type="button"
-              className={fullPageBundleStyles.videoHelpButton}
+            <s-press-button
+              variant="tertiary"
+              tone="neutral"
+              icon="play"
+              accessibilityLabel="How to setup?"
               onClick={() =>
                 window.open(
                   ADDONS_HELP_ARTICLE_URL,
@@ -51,15 +53,8 @@ export function FpbAddonProductsCard({
                 )
               }
             >
-              <svg
-                className={fullPageBundleStyles.videoHelpIcon}
-                viewBox="0 0 10 10"
-                aria-hidden="true"
-              >
-                <path d="M2 1 L9 5 L2 9 Z" />
-              </svg>
               How to setup?
-            </button>
+            </s-press-button>
           </div>
           <div className={fullPageBundleStyles.addonsHeaderActions}>
             <s-button

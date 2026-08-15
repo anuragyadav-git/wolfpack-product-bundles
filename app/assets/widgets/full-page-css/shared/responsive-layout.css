@@ -334,9 +334,8 @@
   #bundle-builder-app.bundle-widget-full-page[data-bundle-type="full_page"]
     .layout-sidebar[data-fpb-summary-mode="sidebar"]
     .side-panel-summary-content {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    grid-auto-rows: max-content;
+    display: flex;
+    flex-direction: column;
     gap: 0;
     width: 100%;
     min-height: 0;

@@ -10,6 +10,10 @@
 
 import { formatStepCategoriesForRuntime } from "./bundle-config/category-runtime";
 import { resolveShowProductComparedAtPrice } from "./bundle-config/product-page-display";
+import {
+  buildPublicBundleSubscriptionConfig,
+  type BundleSubscriptionConfigV1,
+} from "./bundle-subscriptions";
 
 /** Convert a Shopify GID to its numeric ID for storefront cart operations. */
 function extractNumericId(gid: string): string {
@@ -52,6 +56,7 @@ export interface FormattedBundle {
   // Per-bundle text overrides
   textOverrides: Record<string, string> | null;
   textOverridesByLocale: Record<string, Record<string, string>> | null;
+  subscription: BundleSubscriptionConfigV1 | null;
 }
 
 interface FormattedStep {
@@ -307,5 +312,8 @@ export function formatBundleForWidget(bundle: any): FormattedBundle {
     showTextOnAddButton: bundle.showTextOnAddButton ?? false,
     textOverrides: (bundle.textOverrides as Record<string, string> | null) ?? null,
     textOverridesByLocale: (bundle.textOverridesByLocale as Record<string, Record<string, string>> | null) ?? null,
+    subscription: buildPublicBundleSubscriptionConfig(
+      bundle.bundleSubscriptionConfig,
+    ),
   };
 }

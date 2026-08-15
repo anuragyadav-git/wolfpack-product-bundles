@@ -36,6 +36,8 @@ export interface CommonStepCategoryAccordionAdapter {
     updateStepField: (stepId: string, field: string, value: unknown) => void;
   };
   styles: Record<string, string>;
+  validationErrors?: Record<string, string>;
+  clearValidationError?: (path: string) => void;
 }
 
 export function CommonStepCategoryAccordion({
@@ -69,6 +71,8 @@ export function CommonStepCategoryAccordion({
     showPolarisModal,
     stepsState,
     styles,
+    validationErrors = {},
+    clearValidationError,
   } = adapter;
   const catKey = `${step.id}__${cat.id ?? catIndex}`;
   const catActiveTab = categoryActiveTabs[catKey] ?? 0;
@@ -77,6 +81,7 @@ export function CommonStepCategoryAccordion({
   const catCollections = (cat.collections as any[]) ?? [];
   const isOpen = categoryOpen[catKey] ?? false;
   const shouldRenderCategoryNameField = stepCategories.length > 1;
+  const categoryPath = `steps.${step.id}.categories.${cat.id ?? `category-${catIndex + 1}`}`;
   const modalIdBase = `configure-category-${catKey.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
   const selectedProductsModalId = `${modalIdBase}-selected-products-modal`;
   const selectedCollectionsModalId = `${modalIdBase}-selected-collections-modal`;
@@ -95,6 +100,7 @@ export function CommonStepCategoryAccordion({
     );
     stepsState.updateStepField(step.id, "StepCategory", updated);
     markAsDirty();
+    clearValidationError?.(`${categoryPath}.resources`);
   };
 
   const handlePickProducts = async () => {
@@ -300,12 +306,13 @@ export function CommonStepCategoryAccordion({
               <div className={styles.catNameRow}>
                 <div className={styles.categoryInputStack}>
                   <input
-                    id={`configure-category-name-${catKey}`}
+                    id={`configure-${categoryPath.replace(/[^a-zA-Z0-9_-]/g, "-")}-name`}
                     className={styles.categoryNameInput}
                     type="text"
                     value={cat.name ?? ""}
                     placeholder={`Category ${catIndex + 1}`}
                     aria-label="Category name"
+                    aria-invalid={validationErrors[`${categoryPath}.name`] ? true : undefined}
                     onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                       const updated = stepCategories.map(
                         (category: any, index: number) =>
@@ -323,8 +330,14 @@ export function CommonStepCategoryAccordion({
                         updated,
                       );
                       markAsDirty();
+                      clearValidationError?.(`${categoryPath}.name`);
                     }}
                   />
+                  {validationErrors[`${categoryPath}.name`] && (
+                    <s-text tone="critical">
+                      {validationErrors[`${categoryPath}.name`]}
+                    </s-text>
+                  )}
                 </div>
                 <button
                   type="button"
@@ -402,6 +415,14 @@ export function CommonStepCategoryAccordion({
             />
           )}
           {categoryControls}
+          {validationErrors[`${categoryPath}.resources`] && (
+            <s-text
+              id={`configure-${categoryPath.replace(/[^a-zA-Z0-9_-]/g, "-")}-resources`}
+              tone="critical"
+            >
+              {validationErrors[`${categoryPath}.resources`]}
+            </s-text>
+          )}
         </div>
       )}
     </div>

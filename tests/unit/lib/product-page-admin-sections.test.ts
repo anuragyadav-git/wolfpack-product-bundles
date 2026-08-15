@@ -3,13 +3,15 @@ import { join } from "node:path";
 import {
   PRODUCT_PAGE_EDIT_DEFAULTS_HREF,
   PRODUCT_PAGE_SETUP_ITEMS,
-  SUBSCRIPTION_NO_COMMON_PLAN_MESSAGE,
   buildProductPageThemeEditorDeepLink,
   deriveCommonSellingPlanGroups,
-  extractSellingPlanValidationSources,
   resolveProductPageTemplateSuffix,
   resolveProductPageThemeEditorTemplateHandle,
 } from "../../../app/lib/bundle-config/product-page-admin-sections";
+import {
+  extractSellingPlanValidationSources,
+  SUBSCRIPTION_NO_COMMON_PLAN_MESSAGE,
+} from "../../../app/lib/bundle-subscriptions";
 
 const configureHandlersSource = readFileSync(
   join(process.cwd(), "app/services/bundles/bundle-configure-handlers.server.ts"),
@@ -30,6 +32,13 @@ describe("product page admin sections", () => {
       "subscriptions",
       "select_template",
     ]);
+  });
+
+  it("uses the Polaris settings icon for Bundle Settings", () => {
+    expect(
+      PRODUCT_PAGE_SETUP_ITEMS.find((item) => item.id === "bundle_settings")
+        ?.iconType,
+    ).toBe("settings");
   });
 
   it("routes Bundle Settings Edit Defaults to Settings", () => {

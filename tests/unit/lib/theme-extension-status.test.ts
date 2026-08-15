@@ -5,6 +5,19 @@ import {
 } from "../../../app/lib/theme-extension-status";
 
 describe("theme extension status normalization", () => {
+  it("tracks the unified upsell placement resource", () => {
+    expect(THEME_EXTENSION_RESOURCES).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ handle: "bundle-upsell" }),
+      ]),
+    );
+    expect(
+      THEME_EXTENSION_RESOURCES.some(({ handle }) =>
+        ["bundle-upsell-button", "bundle-upsell-block"].includes(handle),
+      ),
+    ).toBe(false);
+  });
+
   it("returns every configured resource with explicit status", () => {
     const response: ShopifyThemeExtensionInfo[] = [{
       handle: "bundle-builder",

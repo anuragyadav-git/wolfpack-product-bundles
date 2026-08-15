@@ -7,3 +7,4 @@
 @import "./base/bottom-sheet-modal.css";
 @import "./base/slot-cards-default-products.css";
 @import "./base/quantity-pills-skeletons.css";
+@import "../shared-css/purchase-options.css";

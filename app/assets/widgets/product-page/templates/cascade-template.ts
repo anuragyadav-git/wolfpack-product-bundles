@@ -1,6 +1,8 @@
 import { ComponentGenerator } from '../../shared/component-generator.js';
 import { CurrencyManager } from '../../shared/currency-manager.js';
 import { PricingCalculator } from '../../shared/pricing-calculator.js';
+import { calculateBundleDiscountForPurchaseOption } from '../../shared/subscription-storefront-methods.js';
+import { calculateBundleTotalForPurchaseOption } from '../../shared/subscription-storefront-methods.js';
 import { TemplateManager } from '../../shared/template-manager.js';
 import { ToastManager } from '../../shared/toast-manager.js';
 import { renderSelectedProductRow } from '../../shared/components/selected-product-row.js';
@@ -42,10 +44,10 @@ export function getCascadeSelectedDrawerHeight({
   const borderOffset = Number.isFinite(borderTopWidth) ? borderTopWidth : 0;
   const listStyle = typeof getComputedStyle === 'function' ? getComputedStyle(list) : {};
   const selectedRows = typeof list.querySelectorAll === 'function'
-    ? Array.from(list.querySelectorAll('.bw-ppb-cascade-selected-item, .gbbMixCascadeBundleCartItem'))
+    ? Array.from(list.querySelectorAll('.bw-ppb-cascade-selected-item, .wpbMixCascadeBundleCartItem'))
     : [];
   const title = typeof list.querySelector === 'function'
-    ? list.querySelector('.bw-ppb-cascade-selected-list-title, .gbbMixCascadeCartSectionHeading')
+    ? list.querySelector('.bw-ppb-cascade-selected-list-title, .wpbMixCascadeCartSectionHeading')
     : null;
   const rowGap = Number.parseFloat(listStyle.rowGap || listStyle.gap || '0');
   const paddingTop = Number.parseFloat(listStyle.paddingTop || '0');
@@ -204,12 +206,12 @@ export const cascadeTemplateMethods: Record<string, any> & ThisType<any> = {
 
     if (rules.length === 0 || !this.selectedBundle?.pricing?.enabled) return '';
 
-    const { totalQuantity, totalPrice, unitPrices } = PricingCalculator.calculateBundleTotal(
+    const { totalQuantity, totalPrice, unitPrices } = calculateBundleTotalForPurchaseOption(this,
       this.selectedProducts,
       this.stepProductData,
       this.selectedBundle?.steps
     );
-    const discountInfo = PricingCalculator.calculateDiscount(this.selectedBundle, totalPrice, totalQuantity, unitPrices);
+    const discountInfo = calculateBundleDiscountForPurchaseOption(this, totalPrice, totalQuantity, unitPrices);
     const combinedDiscountInfo = this.getDiscountInfoWithSelectedAddonDiscount(discountInfo, totalPrice);
     const nextRule = PricingCalculator.getNextDiscountRule?.(this.selectedBundle, totalQuantity, totalPrice) || null;
     const messageType = nextRule ? 'progress' : 'success';
@@ -244,7 +246,7 @@ export const cascadeTemplateMethods: Record<string, any> & ThisType<any> = {
     el.style.cssText = '';
 
     const selectedEntries = this._getSelectedProductEntries();
-    const { totalQuantity, totalPrice, unitPrices } = PricingCalculator.calculateBundleTotal(
+    const { totalQuantity, totalPrice, unitPrices } = calculateBundleTotalForPurchaseOption(this,
       this.selectedProducts,
       this.stepProductData,
       this.selectedBundle?.steps
@@ -257,14 +259,14 @@ export const cascadeTemplateMethods: Record<string, any> & ThisType<any> = {
       this.cascadeSelectedDrawerState.isOpen,
     );
     const drawer = document.createElement('div');
-    drawer.className = `bw-ppb-cascade-selected-drawer wpbMixCascadeCartDrawerContainer${drawerState.isOpen ? ' bw-ppb-cascade-selected-drawer--open gbbMixCascadeCartDrawerContainer--open' : ''}`;
+    drawer.className = `bw-ppb-cascade-selected-drawer wpbMixCascadeCartDrawerContainer${drawerState.isOpen ? ' bw-ppb-cascade-selected-drawer--open wpbMixCascadeCartDrawerContainer--open' : ''}`;
 
     const toggle = document.createElement('button');
     toggle.type = 'button';
     toggle.className = 'bw-ppb-cascade-selected-toggle wpbMixCascadeSelectedItemsInCartWrappper';
     toggle.setAttribute('aria-expanded', drawerState.isOpen ? 'true' : 'false');
     toggle.innerHTML = `
-      <span class="bw-ppb-cascade-selected-toggle-chevron gbbMixCascadeCartChevronIcon" aria-hidden="true"></span>
+      <span class="bw-ppb-cascade-selected-toggle-chevron wpbMixCascadeCartChevronIcon" aria-hidden="true"></span>
       <span class="bw-ppb-cascade-selected-toggle-label wpbMixCascadeCartDrawerBtnText">${ComponentGenerator.escapeHtml(this._resolveText('viewBundleItems', 'View Bundle Items'))}</span>
       <span class="bw-ppb-cascade-selected-toggle-count wpbMixCascadeSelectedItemsInCart">${drawerState.selectedQuantity}</span>
     `;
@@ -276,11 +278,11 @@ export const cascadeTemplateMethods: Record<string, any> & ThisType<any> = {
       list.className = 'bw-ppb-cascade-selected-list wpbMixCascadeCartItemsWrapper';
 
       const title = document.createElement('div');
-      title.className = 'bw-ppb-cascade-selected-list-title gbbMixCascadeCartSectionHeading wpbMixCascadeCartItemsTitle';
+      title.className = 'bw-ppb-cascade-selected-list-title wpbMixCascadeCartSectionHeading wpbMixCascadeCartItemsTitle';
       title.dataset.sectionId = 'selectedProducts';
       title.innerHTML = `
-        <span class="bw-ppb-cascade-selected-list-title-text gbbMixCascadeCartSectionHeadingTitle">${ComponentGenerator.escapeHtml(this._resolveText('bundleCartSelectedProductsText', 'Selected Products'))}</span>
-        <span class="bw-ppb-cascade-selected-list-title-line gbbMixCascadeCartSectionHeadingLine" aria-hidden="true"></span>
+        <span class="bw-ppb-cascade-selected-list-title-text wpbMixCascadeCartSectionHeadingTitle">${ComponentGenerator.escapeHtml(this._resolveText('bundleCartSelectedProductsText', 'Selected Products'))}</span>
+        <span class="bw-ppb-cascade-selected-list-title-line wpbMixCascadeCartSectionHeadingLine" aria-hidden="true"></span>
       `;
       list.appendChild(title);
 
@@ -307,7 +309,7 @@ export const cascadeTemplateMethods: Record<string, any> & ThisType<any> = {
       const nextExpanded = Boolean(isExpanded && drawerState.hasSelectedProducts);
       let maxDrawerHeight = 0;
       drawer.classList.toggle('bw-ppb-cascade-selected-drawer--open', nextExpanded);
-      drawer.classList.toggle('gbbMixCascadeCartDrawerContainer--open', nextExpanded);
+      drawer.classList.toggle('wpbMixCascadeCartDrawerContainer--open', nextExpanded);
       if (list && nextExpanded) {
         maxDrawerHeight = getCascadeSelectedDrawerHeight({ list, drawer });
         drawer.style.setProperty('--bw-ppb-cascade-selected-drawer-height', `${maxDrawerHeight}px`);

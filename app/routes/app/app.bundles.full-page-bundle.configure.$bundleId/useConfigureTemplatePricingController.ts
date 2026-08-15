@@ -54,6 +54,7 @@ export function useConfigureTemplatePricingController(
     stepsState,
     templateSubmissionStartedRef,
     templateFetcher,
+    textOverridesByLocale,
     upsellWidgetButtonText,
     upsellWidgetCollectionsSelectedData,
     upsellWidgetDescription,
@@ -215,8 +216,18 @@ export function useConfigureTemplatePricingController(
     templateFetcher,
   ]);
   function buildBundleUpsellConfig() {
+    const multiLangText = Object.fromEntries(
+      Object.entries(textOverridesByLocale ?? {}).flatMap(([locale, values]) => {
+        const widgetCopy = {
+          widgetTitle: values?.widgetTitle ?? "",
+          widgetDescription: values?.widgetDescription ?? "",
+          widgetButtonText: values?.widgetButtonText ?? "",
+        };
+        return Object.values(widgetCopy).some(Boolean) ? [[locale, widgetCopy]] : [];
+      }),
+    );
     return {
-      multiLangText: savedBundleUpsellConfig?.multiLangText ?? {},
+      multiLangText,
       languageMode: upsellWidgetLanguageMode,
       widgetConfiguration: {
         isEnabled: upsellWidgetEnabled,
@@ -380,13 +391,6 @@ export function useConfigureTemplatePricingController(
     (sum, item) => sum + (item.done ? item.points : 0),
     0
   );
-  const readinessClassName =
-    readinessScore >= 80
-      ? fullPageBundleStyles.readinessButtonHigh
-      : readinessScore >= 40
-      ? fullPageBundleStyles.readinessButtonMedium
-      : fullPageBundleStyles.readinessButtonLow;
-
   Object.assign(flow, {
     buildBundleUpsellConfig,
     buildVisibilityDisplayConfiguration,
@@ -402,7 +406,6 @@ export function useConfigureTemplatePricingController(
     normalizePricingRuleMessages,
     openDesignControlPanel,
     openSelectTemplateModal,
-    readinessClassName,
     readinessItems,
     readinessScore,
   });

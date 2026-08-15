@@ -5,7 +5,7 @@ title: Product Card Layout Contract
 type: architecture
 status: authoritative
 summary: Defines stable and display-safe storefront product-card layout and content boundaries.
-last_audited: 2026-08-13
+last_audited: 2026-08-14
 owners:
   - engineering
 domains:
@@ -14,6 +14,7 @@ systems:
   - bundle-widgets
 source_paths:
   - app/assets/widgets/full-page
+  - app/assets/widgets/full-page/methods/side-panel-methods.ts
   - app/assets/widgets/full-page-css/shared/responsive-layout.css
   - app/assets/widgets/full-page-css/templates/standard/overrides.css
   - app/assets/widgets/full-page-css/base/product-modal-shell.css
@@ -174,6 +175,11 @@ Every FPB desktop summary reserves the same three-row product viewport. Each row
 is `4.6875rem` with a `0.9375rem` gap, and the products region begins vertical
 scrolling when a fourth line item is present. This capacity rule does not apply
 to inline slots or the mobile summary tray.
+
+When Product Slots is disabled, Standard, Classic, Compact, and Horizontal route
+desktop selected-product line items through the same shared row renderer. Preset
+styles must not replace that row anatomy. Product-slot tiles and the mobile
+summary keep their existing dedicated render paths.
 
 Discount qualification messages remain on one unbroken line in desktop
 sidebars and mobile summary trays. Presets may own their typography, but must

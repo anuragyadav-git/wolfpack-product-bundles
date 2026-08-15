@@ -343,10 +343,22 @@ export const BundleModalVariantMethods: Record<string, any> & ThisType<any> = {
     const priceEl = document.getElementById('modal-product-price');
     const variant = this.selectedVariant || this.currentProduct;
 
+    const resolveCompareAtPrice = (candidate) => {
+      const rawCompareAt = candidate?.compareAtPrice ?? candidate?.compare_at_price;
+      if (rawCompareAt == null) return null;
+      if (typeof rawCompareAt === 'object' && rawCompareAt !== null && typeof rawCompareAt.amount !== 'undefined') {
+        return rawCompareAt.amount;
+      }
+      return rawCompareAt;
+    };
+
     // Format price using widget's currency manager
-    const price = variant.price || this.currentProduct.price || 0;
-    const compareAtPrice = variant.compareAtPrice || variant.compare_at_price ||
-                           this.currentProduct.compareAtPrice || this.currentProduct.compare_at_price;
+    const originalPrice = variant.price || this.currentProduct.price || 0;
+    const price = this.widget?.getSubscriptionProductCardPrice
+      ? this.widget.getSubscriptionProductCardPrice(originalPrice)
+      : originalPrice;
+    const compareAtPrice = resolveCompareAtPrice(variant)
+      || resolveCompareAtPrice(this.currentProduct);
 
     let priceHTML = '';
 

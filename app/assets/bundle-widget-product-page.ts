@@ -129,6 +129,8 @@ import { ProductPageDomMethods } from './widgets/product-page/methods/dom-method
 import { ProductPageFooterModalStateMethods } from './widgets/product-page/methods/footer-modal-state-methods.js';
 import { ProductPageModalStateMethods } from './widgets/product-page/methods/modal-state-methods.js';
 import { ProductPageWidgetMiscMethods } from './widgets/product-page/methods/widget-misc-methods.js';
+import { renderBundlePurchaseOptions } from './widgets/shared/components/purchase-options.js';
+import { bundleSubscriptionStorefrontMethods } from './widgets/shared/subscription-storefront-methods.js';
 
 
 export class BundleWidgetProductPage {
@@ -150,6 +152,7 @@ export class BundleWidgetProductPage {
       ProductPageModalMethods,
       ProductPageSelectionMethods,
       ProductPageCartMethods,
+      bundleSubscriptionStorefrontMethods,
       bundleLevelCssMethods,
       modalSlotTemplateMethods,
       cascadeTemplateMethods,
@@ -167,6 +170,7 @@ export class BundleWidgetProductPage {
     this.isInitialized = false;
     this.config = {};
     this.elements = {};
+    this.selectedSellingPlanId = undefined;
 
     // Initialize product modal for variant selection (if BundleProductModal is available)
     this.productModal = null;
@@ -187,6 +191,14 @@ export class BundleWidgetProductPage {
       selectedProducts: this.selectedProducts,
       stepProductData: this.stepProductData,
     });
+  }
+
+  renderPurchaseOptions() {
+    renderBundlePurchaseOptions(this);
+  }
+
+  refreshSubscriptionProductCardPrices() {
+    this.renderUI?.();
   }
 
   async init() {

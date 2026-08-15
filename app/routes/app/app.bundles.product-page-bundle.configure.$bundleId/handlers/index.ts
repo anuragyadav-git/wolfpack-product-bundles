@@ -19,5 +19,3 @@ export {
   handleAssignProductTemplate,
   handleValidateWidgetPlacement,
 } from "./widget-placement.server";
-
-export { handleValidateSellingPlanGroups } from "./subscriptions.server";

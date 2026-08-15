@@ -26,7 +26,7 @@ const COMMON_SETUP_ITEMS: ConfigureSetupItem[] = [
   { id: "step_setup", label: "Step Setup", iconType: "note" },
   { id: "discount_pricing", label: "Discount & Pricing", iconType: "discount" },
   { id: "bundle_visibility", label: "Bundle Visibility", iconType: "view" },
-  { id: "bundle_settings", label: "Bundle Settings", iconType: "edit" },
+  { id: "bundle_settings", label: "Bundle Settings", iconType: "settings" },
 ];
 
 const SELECT_TEMPLATE_ITEM: ConfigureSetupItem = {
@@ -45,9 +45,7 @@ export function buildConfigureSetupItems(
   bundleType: ConfigureBundleType,
 ): ConfigureSetupItem[] {
   const items = [...COMMON_SETUP_ITEMS];
-  if (bundleType === "product_page") {
-    items.push(SUBSCRIPTIONS_ITEM);
-  }
+  items.push(SUBSCRIPTIONS_ITEM);
   items.push(SELECT_TEMPLATE_ITEM);
   return items.map((item) => ({
     ...item,

@@ -1,5 +1,6 @@
 import { useState, type Ref } from "react";
 import type { ConfigureChildItem } from "../../../../lib/bundle-config/common-configure-page-model";
+import { DiscountMethod } from "../../../../types/pricing";
 
 type StatusBadge = { label: string; tone?: string } | null;
 type CommonSetupItem = ConfigureChildItem & {
@@ -37,7 +38,10 @@ export interface CommonConfigureSidebarAdapter {
   openProductInAdmin: (productId: string) => void;
   openSelectTemplateModal: () => void;
   parentProductStatusUi: { label: string; tone?: string };
-  pricingState: any;
+  pricingState: {
+    discountEnabled: boolean;
+    discountType: string;
+  };
   productImageUrl?: string | null;
   productMenuOpen: boolean;
   productTitle?: string | null;
@@ -119,12 +123,35 @@ export function selectConfigureSection({
   if (closeAfterSelection) closeMobileNavigation();
 }
 
+export function getDiscountPricingStatusBadge(
+  discountEnabled: boolean,
+  discountType: string,
+): StatusBadge {
+  if (!discountEnabled) return { label: "None" };
+
+  switch (discountType) {
+    case DiscountMethod.PERCENTAGE_OFF:
+      return { label: "% off", tone: "success" };
+    case DiscountMethod.FIXED_AMOUNT_OFF:
+      return { label: "$ off", tone: "success" };
+    case DiscountMethod.FIXED_BUNDLE_PRICE:
+      return { label: "fixed", tone: "success" };
+    case DiscountMethod.BUY_X_GET_Y:
+      return { label: "BXGY", tone: "success" };
+    default:
+      return null;
+  }
+}
+
 function getItemStatusBadge(
   item: CommonSetupItem,
   adapter: CommonConfigureSidebarAdapter,
 ): StatusBadge {
-  if (item.id === "discount_pricing" && !adapter.pricingState.discountEnabled) {
-    return { label: "None" };
+  if (item.id === "discount_pricing") {
+    return getDiscountPricingStatusBadge(
+      adapter.pricingState.discountEnabled,
+      adapter.pricingState.discountType,
+    );
   }
   if (item.id === "bundle_visibility") {
     return adapter.appEmbedEnabled

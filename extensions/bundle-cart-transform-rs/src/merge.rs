@@ -101,6 +101,12 @@ pub fn process_merge_operations(
         .filter(|value| !value.trim().is_empty());
 
     for (offer_group_id, line_indices) in &bundle_groups {
+        if line_indices
+            .iter()
+            .any(|&idx| lines[idx].selling_plan_allocation().is_some())
+        {
+            continue;
+        }
         let merge_line_indices: Vec<usize> = line_indices
             .iter()
             .copied()

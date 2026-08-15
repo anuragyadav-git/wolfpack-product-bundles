@@ -125,24 +125,40 @@ export function useConfigureContentState(flow: ConfigureBundleFlowDraft) {
   };
   const [textOverrides, setTextOverrides] =
     useState<Record<string, string>>(initialTextOverrides);
+  const savedUpsellMultiLangText =
+    (((bundle as any).bundleUpsellConfig as {
+      multiLangText?: Record<string, Record<string, string>>;
+    } | null)?.multiLangText ?? {});
+  const initialTextOverridesByLocale = Object.fromEntries(
+    Array.from(
+      new Set([
+        ...Object.keys(
+          ((bundle as any).textOverridesByLocale as Record<
+            string,
+            Record<string, string>
+          >) ?? {},
+        ),
+        ...Object.keys(savedUpsellMultiLangText),
+      ]),
+    ).map((locale) => [
+      locale,
+      {
+        ...(savedUpsellMultiLangText[locale] ?? {}),
+        ...(((bundle as any).textOverridesByLocale as Record<
+          string,
+          Record<string, string>
+        >)?.[locale] ?? {}),
+      },
+    ]),
+  );
   const [textOverridesByLocale, setTextOverridesByLocale] = useState<
     Record<string, Record<string, string>>
-  >(
-    ((bundle as any).textOverridesByLocale as Record<
-      string,
-      Record<string, string>
-    >) ?? {},
-  );
+  >(initialTextOverridesByLocale);
   const originalTextOverridesRef =
     useRef<Record<string, string>>(initialTextOverrides);
   const originalTextOverridesByLocaleRef = useRef<
     Record<string, Record<string, string>>
-  >(
-    ((bundle as any).textOverridesByLocale as Record<
-      string,
-      Record<string, string>
-    >) ?? {},
-  );
+  >(initialTextOverridesByLocale);
   const [textOverridesLocale, setTextOverridesLocale] = useState<string>("en");
 
   Object.assign(flow, {

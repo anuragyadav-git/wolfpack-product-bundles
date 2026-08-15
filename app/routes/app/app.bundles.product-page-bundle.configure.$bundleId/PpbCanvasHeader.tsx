@@ -1,5 +1,6 @@
 import { AppEmbedBanner } from "../../../components/AppEmbedBanner";
 import { AdminPageTitleBar } from "../../../components/AdminPageNavigation";
+import { getReadinessScoreColor } from "../../../components/bundle-configure/BundleReadinessOverlay";
 import { usePpbConfigureContext } from "./PpbConfigureContext";
 
 export function PpbCanvasHeader() {
@@ -17,7 +18,6 @@ export function PpbCanvasHeader() {
     openProductInAdmin,
     parentProductStatusUi,
     productPageBundleStyles,
-    readinessClassName,
     readinessScore,
     setReadinessOpen,
     shop,
@@ -48,18 +48,27 @@ export function PpbCanvasHeader() {
           </div>
         </div>
         <div className={productPageBundleStyles.canvasActions}>
-          <button
-            type="button"
-            className={`${productPageBundleStyles.readinessButton} ${readinessClassName}`}
-            onClick={() => setReadinessOpen(true)}
+          <span
+            className={productPageBundleStyles.readinessButton}
+            style={{
+              backgroundColor: getReadinessScoreColor(readinessScore),
+              borderColor: getReadinessScoreColor(readinessScore),
+            }}
           >
-            <span className={productPageBundleStyles.readinessScore}>
-              {readinessScore}
-            </span>
-            <span className={productPageBundleStyles.readinessLabel}>
-              Readiness Score
-            </span>
-          </button>
+            <s-press-button
+              variant="tertiary"
+              tone="neutral"
+              accessibilityLabel={`${readinessScore} Readiness Score`}
+              onClick={() => setReadinessOpen(true)}
+            >
+              <span className={productPageBundleStyles.readinessScore}>
+                {readinessScore}
+              </span>
+              <span className={productPageBundleStyles.readinessLabel}>
+                Readiness Score
+              </span>
+            </s-press-button>
+          </span>
           <s-button
             variant="secondary"
             icon="view"

@@ -5,7 +5,7 @@ title: Widget Architecture
 type: architecture
 status: authoritative
 summary: FPB and PPB bootstrap, hydration, extension-asset, and widget runtime architecture.
-last_audited: 2026-08-13
+last_audited: 2026-08-14
 owners:
   - engineering
 domains:
@@ -15,6 +15,8 @@ systems:
 source_paths:
   - app/config/storefront-proxy-routes.ts
   - app/assets/bundle-widget-full-page.ts
+  - app/storefront/fpb-product-page-upsell.ts
+  - app/storefront/fpb-upsell-handoff.ts
   - app/assets/bundle-modal-component.ts
   - app/assets/widgets/shared
   - app/assets/widgets/full-page/initialization-guard.js
@@ -22,10 +24,12 @@ source_paths:
   - app/assets/bundle-widget-product-page.ts
   - app/routes/api/api.storefront-products.tsx
   - app/routes/api/api.storefront-collections.tsx
+  - app/routes/api/api.fpb-upsells[.]json.tsx
   - app/routes/app/app.settings/design-preview-model.ts
   - app/routes/root/wpb.$bundleId.tsx
   - extensions/bundle-builder/blocks/bundle-app-embed.liquid
-  - extensions/bundle-builder/snippets/storefront-proxy-root.liquid
+  - extensions/bundle-builder/blocks/bundle-product-page.liquid
+  - extensions/bundle-builder/blocks/bundle-upsell.liquid
   - scripts/build-storefront.mjs
   - scripts/minify-assets/targets.js
 related_docs:
@@ -57,11 +61,12 @@ Template behavior is resolved through plain config modules and method modules:
 
 Template installer/prototype patch functions have been removed. Widget entry files compose exported template method objects in the same central `Object.assign` used for controller method modules.
 
-The widgets do not accept `individualSellingPlanSelection`, hydrate
-`sellingPlanAllocations`, or add `selling_plan` to cart lines. Those fields
-belonged to the removed Bundle Settings `Pre-order & Subscription Integration`
-contract. Any future subscription storefront behavior requires a new explicit
-contract owned by the separate PPB Subscriptions feature.
+The widgets do not accept the retired `individualSellingPlanSelection` field.
+FPB and PPB instead consume the explicit public `subscription` object from
+`bundle_ui_config`. A shared purchase-options component renders the selected
+selling-plan group across every FPB and PPB template. Subscription submissions add the
+same `selling_plan` to every component line and omit the merged-path public
+`Box` metadata; one-time submissions retain the existing merged-parent flow.
 
 ## Admin Design Preview Adapter
 
@@ -97,6 +102,14 @@ product and collection hydration preserve up to 50 Shopify product images in
 source order. One image renders without navigation; multiple distinct images
 enable previous/next controls on desktop and horizontal swipe navigation in the
 mobile drawer. The same shared component owns both responsive surfaces.
+When explicit-step data and collection hydration produce the same selectable
+variant, deduplication merges the records instead of keeping the first payload
+unchanged. The merged record preserves the richer image gallery, description,
+and variant inventory metadata so an earlier compact step record cannot disable
+the shared carousel. A direct product whose metafield payload contains only a
+compact single-image record is also hydrated through the existing storefront
+products endpoint before rendering; product identifiers may arrive in `id`,
+`selectionId`, or `productId`, and must resolve to the same product lookup key.
 
 Because the shared product-details overlay is mounted under `document.body`, its responsive surface is viewport-owned rather than widget-container-owned. Product image activation opens a bounded, centered modal on desktop and a bounded bottom drawer on mobile. Both surfaces suppress horizontal overflow and keep excess content scrollable only on the vertical axis.
 
@@ -166,16 +179,20 @@ body marker unless initialization is redesigned. A schema-level `javascript`
 asset is injected asynchronously into the document head and can execute before
 the marker exists.
 
-- Product-page upsell placement uses `bundle-upsell-block` or `bundle-upsell-button`.
+- FPB product-page upsells are owned by the global app-embed runtime. The embed supplies product, collection, locale, selected-variant, and signed endpoint context. `/apps/product-bundles/api/fpb-upsells.json` returns only shop-scoped eligible public offers and uses short private caching with ETag revalidation.
+- `bundle-upsell` is a setting-free custom-placement anchor. The first visible custom anchor wins; otherwise the runtime inserts once below the primary product add-to-cart form through a bounded observer. The runtime never falls back to arbitrary body placement and renders no shell for empty or failed responses.
+- Product-page clicks capture the currently selected variant into a ten-minute, bundle-scoped, consume-once session handoff. The shared FPB controller reconciles only the exact available variant into the first matching enabled paid step and refreshes the existing desktop sidebar and mobile footer from `selectedProducts`. This flow is template-neutral across Standard, Classic, Compact, and Horizontal.
 - Full-page bundle public links use the signed app-proxy document URL (`/apps/product-bundles/wpb/{publicNumber}`). The positive integer is unique per shop and hides the internal database ID. Shopify wraps `application/liquid` in the active theme layout and the app embed loads extension assets through `asset_url`.
 - Storefront JS/CSS must be loaded from Shopify theme-extension assets with Liquid `asset_url`. App proxy routes are only for API/data responses, not widget asset hosting.
 
 Proxy URL ownership is centralized at each build boundary. TypeScript callers use
 `app/config/storefront-proxy-routes.ts` for the installed proxy root and API or
-document path composition. Theme-extension Liquid uses the shared
-`storefront-proxy-root` snippet because Liquid cannot import the TypeScript
-module. The production and SIT TOMLs retain their required literal `subpath`
-values because Shopify reads those deployment manifests directly.
+document path composition. Theme-extension blocks use the canonical relative
+proxy root directly. Do not capture a theme-app-extension snippet to construct a
+URL: Shopify wraps rendered extension snippets in diagnostic HTML comments, and
+capturing that output corrupts URL attributes. The production and SIT TOMLs
+retain their required literal `subpath` values because Shopify reads those
+deployment manifests directly.
 
 ## FPB Load Strategy
 

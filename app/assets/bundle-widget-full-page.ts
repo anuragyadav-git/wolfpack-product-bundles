@@ -31,8 +31,11 @@ import { fullPageModalProductMethods } from './widgets/full-page/methods/modal-p
 import { fullPageSelectionNavigationMethods } from './widgets/full-page/methods/selection-navigation-methods.js';
 import { fullPageRuntimeCartSettingsMethods } from './widgets/full-page/methods/runtime-cart-settings-methods.js';
 import { fullPageTierFloatingRuntimeMethods } from './widgets/full-page/methods/tier-floating-runtime-methods.js';
+import { fullPageUpsellHandoffMethods } from './widgets/full-page/methods/upsell-handoff-methods.js';
 import { claimFullPageWidgetInitialization } from './widgets/full-page/initialization-guard.js';
 import { BundleProductModal } from './bundle-modal-component.js';
+import { renderBundlePurchaseOptions } from './widgets/shared/components/purchase-options.js';
+import { bundleSubscriptionStorefrontMethods } from './widgets/shared/subscription-storefront-methods.js';
 
 
 export class BundleWidgetFullPage {
@@ -60,6 +63,8 @@ export class BundleWidgetFullPage {
       fullPageSelectionNavigationMethods,
       fullPageRuntimeCartSettingsMethods,
       fullPageTierFloatingRuntimeMethods,
+      fullPageUpsellHandoffMethods,
+      bundleSubscriptionStorefrontMethods,
       bundleLevelCssMethods,
     );
     this.container = containerElement;
@@ -76,6 +81,7 @@ export class BundleWidgetFullPage {
     this.compactMobileSummaryTrayExpanded = false;
     this.standardTimelineWindowStart = 0;
     this.standardTimelineLastActiveEntryIndex = 0;
+    this.selectedSellingPlanId = undefined;
 
     // Search state for filtering products within steps
     this.searchQuery = '';
@@ -104,6 +110,14 @@ export class BundleWidgetFullPage {
       selectedProducts: this.selectedProducts,
       stepProductData: this.stepProductData,
     });
+  }
+
+  renderPurchaseOptions() {
+    renderBundlePurchaseOptions(this);
+  }
+
+  refreshSubscriptionProductCardPrices() {
+    this.reRenderFullPage?.();
   }
 
   async init() {
@@ -160,6 +174,7 @@ export class BundleWidgetFullPage {
 
       // Render initial UI (async for full-page bundles to load products)
       await this.renderUI();
+      this.renderPurchaseOptions();
 
       removeBootstrapLoadingScreen(this.container);
 

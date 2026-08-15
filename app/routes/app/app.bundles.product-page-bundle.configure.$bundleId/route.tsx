@@ -18,9 +18,9 @@ import {
   handleEnsureBundleTemplates,
   handleValidateWidgetPlacement,
   handleUpdateBundleDesignTemplate,
-  handleValidateSellingPlanGroups,
   handleAssignProductTemplate,
 } from "./handlers";
+import { handleValidateSellingPlanGroups } from "../../../services/bundle-subscription-discovery.server";
 import {
   fetchBundleProduct,
   fetchShopCurrencyCode,
@@ -174,7 +174,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
       case "recordBundlePreview":
         return await handleRecordBundlePreview(admin, session, bundleId, formData);
       case "validateSellingPlanGroups":
-        return await handleValidateSellingPlanGroups(admin, session, bundleId);
+        return await handleValidateSellingPlanGroups(admin, session, bundleId, "product_page");
       default:
         return json(
           { success: false, error: ERROR_MESSAGES.UNKNOWN_ACTION },

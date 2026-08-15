@@ -157,7 +157,7 @@
 #bundle-builder-app[data-ppb-template-type="PDP_INPAGE"]:not([data-ppb-design-preset="PDP_MODAL"])
   .bw-ppb-cascade-selected-drawer--open,
 #bundle-builder-app[data-ppb-template-type="PDP_INPAGE"]:not([data-ppb-design-preset="PDP_MODAL"])
-  .gbbMixCascadeCartDrawerContainer--open {
+  .wpbMixCascadeCartDrawerContainer--open {
   height: var(--bw-ppb-cascade-selected-drawer-height, 0);
 }
 

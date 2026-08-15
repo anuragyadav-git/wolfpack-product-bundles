@@ -1,5 +1,7 @@
 import { CurrencyManager } from '../../shared/currency-manager.js';
 import { PricingCalculator } from '../../shared/pricing-calculator.js';
+import { calculateBundleDiscountForPurchaseOption } from '../../shared/subscription-storefront-methods.js';
+import { calculateBundleTotalForPurchaseOption } from '../../shared/subscription-storefront-methods.js';
 import { TemplateManager } from '../../shared/template-manager.js';
 import { ToastManager } from '../../shared/toast-manager.js';
 import { BUNDLE_WIDGET } from '../../shared/constants.js';
@@ -107,7 +109,7 @@ renderFooter() {
   const el = this.elements.footer;
   if (!el) return;
   if (this._isProductPageCascadeTemplate() || this._isProductPageGridTemplate?.()) {
-    const openDrawer = el.querySelector('.bw-ppb-cascade-selected-drawer--open, .gbbMixCascadeCartDrawerContainer--open');
+    const openDrawer = el.querySelector('.bw-ppb-cascade-selected-drawer--open, .wpbMixCascadeCartDrawerContainer--open');
     if (openDrawer) {
       const drawerHeight = openDrawer.getBoundingClientRect?.().height || 0;
       this.cascadeSelectedDrawerState = {
@@ -148,7 +150,7 @@ renderFooter() {
   }
 
   // Calculate current progress toward the first active rule's condition
-  const { totalQuantity, totalPrice, unitPrices } = PricingCalculator.calculateBundleTotal(
+  const { totalQuantity, totalPrice, unitPrices } = calculateBundleTotalForPurchaseOption(this,
     this.selectedProducts,
     this.stepProductData,
     this.selectedBundle?.steps
@@ -159,7 +161,7 @@ renderFooter() {
   const conditionType = PricingCalculator.getRuleConditionType(rule);
   const current = conditionType === 'quantity' ? totalQuantity : totalPrice;
 
-  const discountInfo = PricingCalculator.calculateDiscount(this.selectedBundle, totalPrice, totalQuantity, unitPrices);
+  const discountInfo = calculateBundleDiscountForPurchaseOption(this, totalPrice, totalQuantity, unitPrices);
   const combinedDiscountInfo = this.getDiscountInfoWithSelectedAddonDiscount(discountInfo, totalPrice);
   const nextRule = PricingCalculator.getNextDiscountRule(this.selectedBundle, totalQuantity, totalPrice);
   const ruleToUse = combinedDiscountInfo.applicableRule || nextRule || rule;
@@ -335,14 +337,14 @@ getProductPageTierPillContent(rule, index, qtyOpts) {
 },
 
 updateAddToCartButton() {
-  const { totalPrice, totalQuantity, unitPrices } = PricingCalculator.calculateBundleTotal(
+  const { totalPrice, totalQuantity, unitPrices } = calculateBundleTotalForPurchaseOption(this,
     this.selectedProducts,
     this.stepProductData,
     this.selectedBundle?.steps
   );
 
-  const discountInfo = PricingCalculator.calculateDiscount(
-    this.selectedBundle,
+  const discountInfo = calculateBundleDiscountForPurchaseOption(
+    this,
     totalPrice,
     totalQuantity,
     unitPrices

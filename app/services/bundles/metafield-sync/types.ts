@@ -1,4 +1,5 @@
 import type { CheckoutOffer } from "../../checkout-bundle-offers.server";
+import type { BundleSubscriptionConfigV1 } from "../../../lib/bundle-subscriptions";
 
 /**
  * Metafield Sync Types
@@ -67,6 +68,7 @@ export interface BundleUiConfig {
   bundleTextConfig?: Record<string, unknown> | null;
   bundleLevelCss?: string | null;
   personalizationData?: Record<string, unknown> | null;
+  subscription?: BundleSubscriptionConfigV1 | null;
   checkoutOffers?: CheckoutOffer[];
   discountDisplayOverride?: Record<string, unknown> | null;
   validateQuantityPerProduct?: Record<string, unknown>;

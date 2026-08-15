@@ -1,0 +1,178 @@
+{
+  "schema_version": 1,
+  "case_id": "classic-live-asset-hard-reload",
+  "viewport": "five-width-matrix",
+  "state": "default-hover-focus-selected-quantity",
+  "required": true,
+  "completed_presets": [
+    "CLASSIC",
+    "COMPACT",
+    "HORIZONTAL"
+  ],
+  "gates": {
+    "functional": "passed",
+    "visual": "passed",
+    "geometry": "passed",
+    "responsive": "passed",
+    "console": "passed",
+    "network": "passed",
+    "accessibility": "waived",
+    "performance": "waived",
+    "non_regression": "passed"
+  },
+  "performance_reason": "Desktop trace measured LCP 7034ms and CLS 0.6949 during delayed shared widget hydration. The trace identified no direct layout-shift root cause. Shared loading/runtime is frozen for this preset-owned CSS slice and is recorded as WAIVER-CL-PERF-SHARED.",
+  "evidence": {
+    "snapshot": "Direct Chrome DevTools MCP snapshots and computed-style evaluations",
+    "screenshots": {
+      "before": "/private/tmp/fpb-classic-compact-horizontal-card-redesign-20260814/qa/baselines/classic-desktop-prechange.png",
+      "after": "/private/tmp/fpb-classic-compact-horizontal-card-redesign-20260814/qa/actual/classic-live-desktop.png",
+      "element": {
+        "actual": "",
+        "baseline": "",
+        "diff": "",
+        "comparison_summary": ""
+      },
+      "viewport": {
+        "actual": "/private/tmp/fpb-classic-compact-horizontal-card-redesign-20260814/qa/actual/classic-live-desktop.png",
+        "baseline": "/private/tmp/fpb-classic-compact-horizontal-card-redesign-20260814/qa/baselines/classic-desktop-prechange.png",
+        "diff": "/private/tmp/fpb-classic-compact-horizontal-card-redesign-20260814/qa/actual/classic-desktop-diff.png",
+        "comparison_summary": "/private/tmp/fpb-classic-compact-horizontal-card-redesign-20260814/qa/actual/classic-desktop-diff.json"
+      }
+    },
+    "console": "No new app-owned console errors; theme-owned findings are allowlisted below",
+    "network": "Classic stylesheet request 11177 returned HTTP 200 with the rebuilt frame, focus, and two-line title declarations; required widget requests returned HTTP 200",
+    "accessibility": "Lighthouse desktop 88 and mobile 95; shared-renderer, shared-summary, and theme findings waived for this frozen-boundary slice",
+    "lighthouse": {
+      "desktop": "/private/tmp/fpb-classic-compact-horizontal-card-redesign-20260814/qa/lighthouse/classic-desktop/report.json",
+      "mobile": "/private/tmp/fpb-classic-compact-horizontal-card-redesign-20260814/qa/lighthouse/classic-mobile/report.json"
+    },
+    "performance_trace": "/private/tmp/fpb-classic-compact-horizontal-card-redesign-20260814/qa/performance/classic-desktop-trace.json.gz"
+  },
+  "assertions": [
+    {
+      "id": "classic-preset-runtime",
+      "status": "passed",
+      "actual": "CLASSIC with FBP_SIDE_FOOTER and only the Classic preset stylesheet active"
+    },
+    {
+      "id": "classic-built-css-live",
+      "status": "passed",
+      "actual": "Served request 11177 contains the rebuilt one-pixel frame, focus-visible outline, and two-line clamp declarations"
+    },
+    {
+      "id": "five-width-overflow-and-geometry",
+      "status": "passed",
+      "actual": "No horizontal overflow at 1440x900, 1280x800, 768x1024, 390x844, or 360x800; equal card heights held within rows"
+    },
+    {
+      "id": "classic-state-geometry",
+      "status": "passed",
+      "actual": "Hover, keyboard focus, add-to-selected, and quantity 1-to-2 preserved outer-card geometry; controls remained contained and 44px"
+    },
+    {
+      "id": "frozen-standard-smoke",
+      "status": "passed",
+      "actual": "After both completed slices, Standard loaded only its preset stylesheet, retained three desktop columns and one mobile column, and showed no overflow; the fixture was restored to the active slice preset"
+    },
+    {
+      "id": "compact-preset-runtime-and-asset",
+      "status": "passed",
+      "actual": "COMPACT persisted through the Admin template flow; request 21848 returned HTTP 200 and only the Compact preset stylesheet was active"
+    },
+    {
+      "id": "compact-five-width-geometry",
+      "status": "passed",
+      "actual": "Three columns at 1440 and 1280; two columns at 768, 390, and 360; no horizontal overflow; equal card heights held within rows"
+    },
+    {
+      "id": "compact-state-geometry",
+      "status": "passed",
+      "actual": "Hover, keyboard focus, selection, and quantity 1-to-2 preserved outer-card height; 44px controls remained contained"
+    },
+    {
+      "id": "horizontal-preset-runtime-and-asset",
+      "status": "passed",
+      "actual": "HORIZONTAL persisted through Admin; only the Horizontal preset stylesheet was active and the live response contained the rebuilt frame, title, height, and one-column rules"
+    },
+    {
+      "id": "horizontal-five-width-and-boundary-geometry",
+      "status": "passed",
+      "actual": "Two columns at 1440 and 1280; one column at 768, 390, and 360; root container 799px used one column and 800/801px used up to one content-driven column; no overflow and equal row heights"
+    },
+    {
+      "id": "horizontal-state-geometry",
+      "status": "passed",
+      "actual": "Hover, keyboard focus, selection, and quantity 1-to-2 preserved 154px desktop and 138px mobile card heights; 44px controls remained contained"
+    },
+    {
+      "id": "final-four-preset-regression",
+      "status": "passed",
+      "actual": "Cache-bypassed final sweep confirmed Classic 4/2, Compact 3/2, frozen Standard 3/1, and restored Horizontal 2/1 desktop/mobile column behavior with zero overflow"
+    }
+  ],
+  "observations": {
+    "console": {
+      "violations": [],
+      "allowlisted": [
+        "Theme-owned missing-label accessibility finding",
+        "Theme-owned preload warning",
+        "Theme HotReload and content-visibility informational messages"
+      ]
+    },
+    "network": {
+      "violations": [],
+      "expected_analytics": [],
+      "allowlisted": [
+        "Theme-owned /favicon.ico returned HTTP 404"
+      ]
+    }
+  },
+  "waivers": [
+    {
+      "id": "WAIVER-CL-A11Y-SHARED",
+      "gate": "accessibility",
+      "reason": "Lighthouse findings are owned by the frozen shared product-card renderer, shared summary, or theme: aria-pressed on role=group, product-details accessible name mismatch, summary contrast, and theme list semantics.",
+      "approver": "Aditya Awasthi",
+      "date": "2026-08-14",
+      "follow_up": "Address in a separately approved shared-renderer, shared-summary, or theme slice."
+    },
+    {
+      "id": "WAIVER-CL-PERF-SHARED",
+      "gate": "performance",
+      "reason": "The desktop trace measured delayed shared widget hydration with LCP 7034ms and CLS 0.6949; preset CSS cannot change the frozen shared loading/runtime owner.",
+      "approver": "Aditya Awasthi",
+      "date": "2026-08-14",
+      "follow_up": "Investigate shared widget hydration and layout reservation in a separately approved runtime slice."
+    }
+  ],
+  "retry_history": [
+    {
+      "attempt": 1,
+      "classification": "infrastructure",
+      "setup": "Cache Storage empty; Meta+0; reload with ignoreCache true",
+      "result": "blocked",
+      "recovery": "Restart the user-owned SIT Shopify dev preview"
+    },
+    {
+      "attempt": 2,
+      "classification": "infrastructure-retry",
+      "setup": "User restarted the SIT dev server; Cache Storage cleared; reload with ignoreCache true",
+      "result": "passed",
+      "recovery": "None"
+    },
+    {
+      "attempt": 3,
+      "classification": "compact-slice",
+      "setup": "COMPACT persisted through Admin; Cache Storage cleared; reload with ignoreCache true",
+      "result": "passed",
+      "recovery": "None"
+    },
+    {
+      "attempt": 4,
+      "classification": "horizontal-slice",
+      "setup": "HORIZONTAL persisted through Admin; generated asset touch triggered dev-preview republish; Cache Storage cleared; reload with ignoreCache true",
+      "result": "passed",
+      "recovery": "None"
+    }
+  ]
+}

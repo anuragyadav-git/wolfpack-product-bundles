@@ -25,11 +25,13 @@
 
 .dialog {
   position: fixed;
-  inset: auto auto 88px 16px;
+  inset: auto auto 16px 16px;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
   width: min(320px, calc(100vw - 32px));
   max-width: none;
-  max-height: min(68dvh, 520px);
+  max-height: min(80dvh, 560px);
   margin: 0;
   padding: 0;
   overflow: hidden;
@@ -38,6 +40,10 @@
   background: #ffffff;
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
   color: inherit;
+}
+
+.dialog:not([open]) {
+  display: none;
 }
 
 .dialog::backdrop {
@@ -52,22 +58,6 @@
   to {
     opacity: 1;
   }
-}
-
-.sheetHeader {
-  display: flex;
-  min-height: 52px;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 8px 10px 8px 16px;
-  border-bottom: 1px solid #e1e3e5;
-}
-
-.sheetTitle {
-  font-size: 14px;
-  font-weight: 650;
-  color: #202223;
 }
 
 /* Collapsed trigger — gauge, score label, and chevron */
@@ -112,6 +102,12 @@
   width: 48px;
   height: 48px;
   flex-shrink: 0;
+}
+
+.arcProgress {
+  transition:
+    stroke-dasharray 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+    stroke 0.2s ease;
 }
 
 .scoreLabel {
@@ -179,19 +175,25 @@
 }
 
 .panel {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
   background: white;
   border: 0;
   border-radius: 0;
-  padding: 14px 12px max(10px, env(safe-area-inset-bottom));
+  padding: 10px 12px 0;
   box-shadow: none;
 }
 
 .panelItems {
   display: flex;
+  min-height: 0;
+  flex: 1;
   flex-direction: column;
   gap: 8px;
-  margin-bottom: 10px;
-  max-height: 380px;
+  margin-bottom: 8px;
+  max-height: none;
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: #e0e0e0 transparent;
@@ -291,17 +293,73 @@
 }
 
 .statusNotReady {
-  padding: 2px 0 8px;
+  padding: 10px 0 11px;
+  border-top: 1px solid #e1e3e5;
   font-size: 12px;
   font-weight: 500;
   color: #5c5f62;
 }
 
 .statusReady {
-  padding: 2px 0 8px;
+  padding: 10px 0 11px;
+  border-top: 1px solid #e1e3e5;
   font-size: 12px;
   font-weight: 500;
   color: #008060;
+}
+
+.expandedScore {
+  appearance: none;
+  box-sizing: border-box;
+  display: flex;
+  width: 100%;
+  min-height: 78px;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px max(8px, env(safe-area-inset-bottom));
+  border: 0;
+  background: #ffffff;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.expandedScore:hover {
+  background: #f7f7f7;
+}
+
+.expandedScore:focus-visible {
+  outline: 2px solid #005bd3;
+  outline-offset: -2px;
+}
+
+.expandedScoreCopy {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.expandedScoreTitle {
+  color: #202223;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.expandedScoreHelper {
+  color: #5c5f62;
+  font-size: 12px;
+  line-height: 1.3;
+}
+
+.expandedScoreChevron {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  padding: 8px 0 8px 4px;
 }
 
 @media (max-width: 767px) {
@@ -325,11 +383,16 @@
   .panelItems {
     max-height: min(58dvh, 520px);
   }
+
+  .expandedScore {
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .dialog::backdrop,
   .collapsed,
+  .arcProgress,
   .scoreLabel,
   .chevron,
   .chevronWrapper {

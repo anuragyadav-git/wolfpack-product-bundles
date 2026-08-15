@@ -5,7 +5,7 @@ title: Wolfpack Product Bundles App Navigation and UI Map
 type: navigation-map
 status: authoritative
 summary: Routes, screens, actions, modals, and storefront-preview flows for the embedded app.
-last_audited: 2026-08-13
+last_audited: 2026-08-14
 owners:
   - engineering
 domains:
@@ -30,7 +30,7 @@ keywords:
 > Any time a new page, modal, tab, sidebar section, or user flow is added or removed,
 > this document **must** be updated. See CLAUDE.md for the enforcement rule.
 
-**Last Updated:** 2026-08-13
+**Last Updated:** 2026-08-14
 **Environment mapped:** SIT (`wolfpack-product-bundles-sit`)
 **Test store:** `wolfpack-store-test-1.myshopify.com`
 
@@ -390,7 +390,18 @@ FPB Configure Page
 │   ├── Sync Bundle
 │   │   └── [Button] "Sync Now" → ensure parent + metafields; returns canonical proxy URL
 │   ├── Bundle Widget
-│   │   └── [Button] "Embed Upsell Block/Button" → opens the product-template Theme Editor directly
+│   │   ├── Master switch + reactive product-page preview
+│   │   ├── Mode: Button or Block; Block adds image, title, and description
+│   │   ├── CTA + localized title/description/CTA fields
+│   │   ├── Target: all bundle products, selected products, or selected collections
+│   │   ├── Add browsed product switch
+│   │   └── [Button] "Embed Upsell" → opens the product-template Theme Editor with the unified `bundle-upsell` block
+│   │
+│   ├── Subscriptions                → subscriptions section
+│   │   ├── Enable switch + provider-neutral common selling-plan discovery
+│   │   ├── Plan subset, default purchase option, one-time and per-plan copy
+│   │   ├── Product-card discount display and localized copy
+│   │   └── Uses the global configure SaveBar; no section-specific save action
 │   │
 │   └── Select Template        → select_template section
 │       ├── Heading: "Customize your bundle"
@@ -400,13 +411,15 @@ FPB Configure Page
 │               Persists: wpbLayoutTemplate (always FBP_SIDE_FOOTER) + wpbPresetId (STANDARD | CLASSIC | COMPACT | HORIZONTAL)
 │
 ├── Save Bar (App Bridge): [Discard] [Save]
+│   └── Save validates required fields for enabled persisted features; invalid drafts stay dirty, open/focus the first affected section, and show inline critical feedback without submitting
 │
 └── Modals:
     ├── Bundle Status Modal (Draft / Active / Unlisted)
     ├── Product Picker Modal (Shopify resource picker)
     ├── Variables Modal (Discount Messaging variable reference)
     ├── Bundle Quantity Options Multi Language Modal (Box Label / Box Subtext)
-    └── Progress Bar Multi Language Modal (Tier Text / Tier Subtext)
+    ├── Progress Bar Multi Language Modal (Tier Text / Tier Subtext)
+    └── Subscription Multi Language Modal
 ```
 
 FPB configure has no Shopify Page selector, Page slug editor, Page creation,
@@ -429,6 +442,13 @@ Responsive configure behavior:
 
 **Route file:** `app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/route.tsx`
 **URL:** `/app/bundles/product-page-bundle/configure/:bundleId`
+
+PPB uses the same SaveBar validation flow as FPB. Required fields and resource
+selection are conditional on enabled persisted features; invalid Draft,
+Unlisted, and Active saves are blocked before the route action and displayed as
+inline critical field errors. Disabled branches are excluded. Subscription
+drafts are validated only when enabled and use the same shared configuration
+contract as FPB.
 
 ```
 PPB Configure Page
@@ -471,9 +491,13 @@ PPB Configure Page
 │   ├── Your Bundle Link (copy button)
 │   └── Bundle Widget sub-section
 │       ├── Toggle: upsellWidgetEnabled
-│       ├── Display Mode: radio (block / button)
-│       ├── Display On: select (all / specific_products / specific_collections)
-│       └── Auto-Select Browsed Product: toggle (autoSelectBrowsedProduct)
+│       ├── Display Mode: choice list (block / button)
+│       ├── Block-only image, title, and description; CTA in both modes
+│       ├── Multi Language: title, description, and CTA
+│       ├── Display On: choice list (all / specific_products / specific_collections)
+│       ├── Product or collection resource picker for the active specific target
+│       ├── Auto-Select Browsed Product: switch (autoSelectBrowsedProduct)
+│       └── Embed Upsell → unified `bundle-upsell` placement block
 │
 ├── Bundle Settings
 │   ├── Pre Selected Product
@@ -501,8 +525,12 @@ PPB Configure Page
 │   ├── Bundle Subscriptions
 │   ├── How to setup?
 │   ├── Text: "Allow customers to purchase the bundle as a subscription"
+│   ├── Enable switch
 │   ├── [Button] "Get Subscription Plans" → POST validateSellingPlanGroups
-│   └── No-common-plan warning when selected products do not share a selling plan group
+│   ├── One common selling-plan group and merchant-selected plan subset
+│   ├── Default purchase option, one-time copy, plan copy, and translations
+│   ├── Uses the global configure SaveBar; no section-specific save action
+│   └── No-common-plan warning when every selectable variant does not share a plan
 │
 ├── Select Template
 │   ├── Heading: "Customize your bundle"
@@ -643,6 +671,7 @@ Checkout order summary → Bundle & Save
 |---|---|
 | `/apps/product-bundles/api/bundle/:id.json` | HMAC-verified canonical storefront bundle response: exact `{ success, bundle }`; field-projection queries do not change the response shape |
 | `/apps/product-bundles/api/bundles.json` | All active bundles for shop |
+| `/apps/product-bundles/api/fpb-upsells.json` | Signed, shop-scoped FPB product-page offer lookup by product, collections, and locale; returns eligible minimal DTOs with private ETag caching |
 | `/apps/product-bundles/api/cart-bundle-details` | Signed storefront route that merges EB-style cart `bundle_details` metafield entries |
 | `/apps/product-bundles/api/cart-transform-runtime-token` | Signed storefront route that validates selected bundle lines and returns `_wolfpack_bundle_runtime` for Cart Transform / Discount Function verification |
 | `/apps/product-bundles/api/checkout-integration-discount-code` | Signed storefront route that creates short-lived app discount codes for third-party FPB checkout integrations |

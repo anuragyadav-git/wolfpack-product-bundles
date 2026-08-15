@@ -388,9 +388,9 @@
 }
 
 .featureBadgeGreen {
-  background: #e6f9ee;
-  color: #00848e;
-  border-color: #b3e8d4;
+  background: var(--p-color-bg-fill-success-secondary, #b4fed2);
+  color: var(--p-color-text-success, #0c5132);
+  border-color: var(--p-color-border-success, #92fec2);
 }
 
 .featureBadgeOrange {

@@ -22,12 +22,12 @@ export function LiveUpsellWidgetPreview({
       accessibilityLabel="Live widget preview"
     >
       <s-stack gap="base">
-        {imageUrl ? <s-image src={imageUrl} alt="Widget preview image" aspectRatio="1/1" /> : null}
+        {imageUrl ? <s-image src={imageUrl} alt="" aspectRatio="1/1" /> : null}
         <s-stack gap="small">
-          <s-heading>{title || "Bundle offer"}</s-heading>
+          {title ? <s-heading>{title}</s-heading> : null}
           {mode === "block" && description ? <s-paragraph>{description}</s-paragraph> : null}
         </s-stack>
-        <s-button variant="primary">{buttonText || "View bundle"}</s-button>
+        {buttonText ? <s-button variant="primary">{buttonText}</s-button> : null}
       </s-stack>
     </s-box>
   );

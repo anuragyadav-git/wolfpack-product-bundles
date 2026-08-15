@@ -1,5 +1,6 @@
 import { BUNDLE_WIDGET } from '../../shared/constants.js';
 import { PricingCalculator } from '../../shared/pricing-calculator.js';
+import { calculateBundleTotalForPurchaseOption } from '../../shared/subscription-storefront-methods.js';
 
 export const ProductPageSelectionDataMethods: Record<string, any> & ThisType<any> = {
 isInventoryTrackingOnAddToCartEnabled() {
@@ -121,7 +122,7 @@ getAddonTiers(step) {
 },
 
 getAddonTierEvaluation(step) {
-  const { totalPrice, totalQuantity } = PricingCalculator.calculateBundleTotal(
+  const { totalPrice, totalQuantity } = calculateBundleTotalForPurchaseOption(this,
     this.selectedProducts,
     this.stepProductData,
     this.selectedBundle?.steps

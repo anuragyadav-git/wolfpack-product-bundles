@@ -20,7 +20,12 @@ import {
   formatStepConditionErrors,
   validateStepConditionFeasibility,
 } from "../../../../lib/step-condition-validation";
+import {
+  configureValidationFailure,
+  validateBundleConfigureFormData,
+} from "../../../../lib/bundle-config/configure-validation";
 import { parseFpbSaveBundleForm } from "./save-bundle-form.server";
+import { FpbUpsellValidationError } from "../../../../lib/fpb-upsell-config.server";
 import {
   compactBundleForConfigureResponse,
   syncBundleStorefrontNow,
@@ -30,6 +35,10 @@ import {
   validateVariantIdFromShopify,
   type ShopifyStorefrontVariantLookupResult,
 } from "../../../../lib/variant-existence.server";
+import {
+  getBundleSubscriptionCompatibilityIssues,
+  validateBundleSubscriptionConfig,
+} from "../../../../lib/bundle-subscriptions";
 
 type ParsedVariantRef = string | number;
 
@@ -94,6 +103,10 @@ async function validatePersistedStepProductVariants(
                 variantId: "",
                 reason: "invalid-format",
               },
+              fieldErrors: [{
+                path: `steps.${String(step.id ?? `step-${stepIndex + 1}`)}.products.${productIndex + 1}.variants.${variantIndex + 1}`,
+                message: "Select a valid product variant.",
+              }],
             },
             { status: 400 },
           );
@@ -114,6 +127,10 @@ async function validatePersistedStepProductVariants(
                 variantId: toStringVariant(rawVariantId),
                 reason: "invalid-format",
               },
+              fieldErrors: [{
+                path: `steps.${String(step.id ?? `step-${stepIndex + 1}`)}.products.${productIndex + 1}.variants.${variantIndex + 1}`,
+                message: "Select a valid product variant.",
+              }],
             },
             { status: 400 },
           );
@@ -138,6 +155,10 @@ async function validatePersistedStepProductVariants(
                 status: variantLookup.status,
                 reason: variantLookup.message || "not-found",
               },
+              fieldErrors: [{
+                path: `steps.${String(step.id ?? `step-${stepIndex + 1}`)}.products.${productIndex + 1}.variants.${variantIndex + 1}`,
+                message: "This product variant is not available on the storefront.",
+              }],
             },
             { status: 400 },
           );
@@ -195,6 +216,16 @@ export async function handleSaveBundle(
   });
 
   try {
+    const configureValidationIssues = validateBundleConfigureFormData(
+      formData,
+      "fpb",
+    );
+    if (configureValidationIssues.length > 0) {
+      return json(configureValidationFailure(configureValidationIssues), {
+        status: 400,
+      });
+    }
+
     const {
       allowQuantityChanges,
       autoSelectBrowsedProduct,
@@ -204,6 +235,7 @@ export async function handleSaveBundle(
       bundleLevelCss,
       bundleName,
       bundleProductData,
+      bundleSubscriptionConfig,
       bundleStatus,
       bundleTextConfig,
       bundleUpsellConfig,
@@ -234,6 +266,27 @@ export async function handleSaveBundle(
       validateQuantityPerProduct,
       variantSelectorEnabled,
     } = parseFpbSaveBundleForm(formData);
+
+    if (bundleSubscriptionConfig?.enabled) {
+      const subscriptionIssues = [
+        ...validateBundleSubscriptionConfig(bundleSubscriptionConfig),
+        ...getBundleSubscriptionCompatibilityIssues({
+          discountType: discountData.discountType,
+          steps: stepsData,
+          personalizationEnabled: hasEnabledAddonProducts(personalizationData),
+        }),
+      ];
+      if (subscriptionIssues.length > 0) {
+        return json(
+          {
+            success: false,
+            error: "Fix the subscription configuration before saving.",
+            fieldErrors: subscriptionIssues,
+          },
+          { status: 400 },
+        );
+      }
+    }
 
     AppLogger.debug("Parsed form data:", {
       bundleName,
@@ -304,6 +357,10 @@ export async function handleSaveBundle(
         {
           success: false,
           error: formatStepConditionErrors(stepValidationErrors),
+          fieldErrors: stepValidationErrors.map((validationError) => ({
+            path: `steps.${validationError.stepId}.conditions`,
+            message: validationError.message,
+          })),
         },
         { status: 400 },
       );
@@ -449,6 +506,7 @@ export async function handleSaveBundle(
         textOverrides,
         textOverridesByLocale,
         bundleTextConfig,
+        ...(bundleSubscriptionConfig ? { bundleSubscriptionConfig } : {}),
         personalizationData,
         boxSelection,
         bundleUpsellConfig,
@@ -654,6 +712,37 @@ export async function handleSaveBundle(
       }
     }
 
+    if (bundleSubscriptionConfig?.enabled) {
+      const activation =
+        await AddOnDiscountFunctionService.completeSubscriptionInitialSetup(
+          admin,
+          session.shop,
+        );
+      if (!activation.success) {
+        AppLogger.warn("Subscription initial-order discount setup failed during bundle save", {
+          component: "bundle-config",
+          operation: "save",
+          bundleId,
+          shopId: session.shop,
+        }, { error: activation.error });
+      }
+      if (bundleSubscriptionConfig.recurringBundleDiscount) {
+        const recurringActivation =
+          await AddOnDiscountFunctionService.completeSubscriptionRecurringSetup(
+            admin,
+            session.shop,
+          );
+        if (!recurringActivation.success) {
+          AppLogger.warn("Subscription recurring discount setup failed during bundle save", {
+            component: "bundle-config",
+            operation: "save",
+            bundleId,
+            shopId: session.shop,
+          }, { error: recurringActivation.error });
+        }
+      }
+    }
+
     // BUNDLE INDEX: No longer needed
     // Cart transform now queries variant metafields directly (Shopify Standard)
     // Shop-level bundle index has been removed for better performance and simplicity
@@ -678,6 +767,9 @@ export async function handleSaveBundle(
       { component: "handlers.server", bundleId },
       error,
     );
-    return json({ success: false, error: message }, { status: 500 });
+    return json(
+      { success: false, error: message },
+      { status: error instanceof FpbUpsellValidationError ? 400 : 500 },
+    );
   }
 }

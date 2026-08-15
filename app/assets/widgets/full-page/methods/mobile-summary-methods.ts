@@ -1,5 +1,7 @@
 import { CurrencyManager } from '../../shared/currency-manager.js';
 import { PricingCalculator } from '../../shared/pricing-calculator.js';
+import { calculateBundleDiscountForPurchaseOption } from '../../shared/subscription-storefront-methods.js';
+import { calculateBundleTotalForPurchaseOption } from '../../shared/subscription-storefront-methods.js';
 import { ToastManager } from '../../shared/toast-manager.js';
 import { TemplateManager } from '../../shared/template-manager.js';
 import { getDiscountProgressData } from '../../shared/engine/bundle-selectors.js';
@@ -177,13 +179,13 @@ _populateCompactMobileSummaryTray(sheet) {
   );
   sheet.innerHTML = '';
 
-  const { totalPrice, totalQuantity, unitPrices } = PricingCalculator.calculateBundleTotal(
+  const { totalPrice, totalQuantity, unitPrices } = calculateBundleTotalForPurchaseOption(this,
     this.selectedProducts,
     this.stepProductData,
     this.selectedBundle?.steps
   );
-  const discountInfo = PricingCalculator.calculateDiscount(
-    this.selectedBundle,
+  const discountInfo = calculateBundleDiscountForPurchaseOption(
+    this,
     totalPrice,
     totalQuantity,
     unitPrices
@@ -396,6 +398,14 @@ _populateCompactMobileSummaryTray(sheet) {
   productsSection.appendChild(bundleItems);
   dialogPanel.appendChild(productsSection);
 
+  const purchaseOptionsMount = document.createElement('div');
+  dialogPanel.appendChild(purchaseOptionsMount);
+  this.elements = this.elements || {};
+  this.elements.purchaseOptionsMounts = {
+    ...(this.elements.purchaseOptionsMounts || {}),
+    fpbMobile: purchaseOptionsMount,
+  };
+
   const totals = document.createElement('div');
   totals.className = 'fpb-mobile-summary-totals';
   const totalHeading = document.createElement('div');
@@ -441,6 +451,7 @@ _populateCompactMobileSummaryTray(sheet) {
   if (this.compactMobileSummaryTrayExpanded === true) {
     this._setCompactMobileSummaryOpen(sheet, true, { restoreFocus: false });
   }
+  this.renderPurchaseOptions?.();
 },
 
 _toggleCompactMobileSummaryTray(sheet) {

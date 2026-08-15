@@ -71,7 +71,7 @@ describe('PPB List Cascade selected entries integration', () => {
 
     ProductPageFooterModalStateMethods.renderFooter.call(context);
 
-    expect(footer.querySelector).toHaveBeenCalledWith('.bw-ppb-cascade-selected-drawer--open, .gbbMixCascadeCartDrawerContainer--open');
+    expect(footer.querySelector).toHaveBeenCalledWith('.bw-ppb-cascade-selected-drawer--open, .wpbMixCascadeCartDrawerContainer--open');
     expect(context.cascadeSelectedDrawerState.isOpen).toBe(true);
     expect(context.cascadeSelectedDrawerState.height).toBe(115);
     expect(footer.innerHTML).toBe('');
@@ -82,7 +82,7 @@ describe('PPB List Cascade selected entries integration', () => {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { ProductPageFooterModalStateMethods } = require('../../../app/assets/widgets/product-page/methods/footer-modal-state-methods.js');
     const openDrawer = {
-      className: 'gbbMixCascadeCartDrawerContainer--open',
+      className: 'wpbMixCascadeCartDrawerContainer--open',
       getBoundingClientRect: () => ({ height: 132 }),
     };
     const footer = {
@@ -106,7 +106,7 @@ describe('PPB List Cascade selected entries integration', () => {
 
     ProductPageFooterModalStateMethods.renderFooter.call(context);
 
-    expect(footer.querySelector).toHaveBeenCalledWith('.bw-ppb-cascade-selected-drawer--open, .gbbMixCascadeCartDrawerContainer--open');
+    expect(footer.querySelector).toHaveBeenCalledWith('.bw-ppb-cascade-selected-drawer--open, .wpbMixCascadeCartDrawerContainer--open');
     expect(context.cascadeSelectedDrawerState.isOpen).toBe(true);
     expect(context.cascadeSelectedDrawerState.height).toBe(132);
     expect(footer.innerHTML).toBe('');
@@ -358,7 +358,7 @@ describe('PPB List Cascade selected entries integration', () => {
 
     ProductPageSelectionMethods.updateProductSelection.call(context, 0, 'variant_a', 2);
 
-    expect(footer.querySelector).toHaveBeenCalledWith('.bw-ppb-cascade-selected-drawer--open, .gbbMixCascadeCartDrawerContainer--open');
+    expect(footer.querySelector).toHaveBeenCalledWith('.bw-ppb-cascade-selected-drawer--open, .wpbMixCascadeCartDrawerContainer--open');
     expect(context.cascadeSelectedDrawerState).toMatchObject({
       isOpen: true,
       height: 144,

@@ -1,6 +1,10 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { buildPriceAdjustmentConfig } from "./bundles/metafield-sync/utils/price-adjustment";
 import { collectAddonComponentVariants } from "./bundles/metafield-sync/utils/addon-components";
+import {
+  buildPublicBundleSubscriptionConfig,
+  shouldApplyBundleDiscount,
+} from "../lib/bundle-subscriptions";
 
 const RUNTIME_TOKEN_VERSION = 1;
 const RUNTIME_TOKEN_SECRET_CONTEXT = "wpb-runtime-token:";
@@ -30,12 +34,43 @@ export type RuntimeTokenPayload = {
   components: RuntimeTokenLine[];
   addons: RuntimeTokenAddonLine[];
   priceAdjustment: unknown;
+  subscription?: {
+    sellingPlanGroupId: string;
+    sellingPlanId: string;
+    recurringBundleDiscount: boolean;
+  };
 };
 
 type SelectionInput = {
   components?: Array<{ variantId?: unknown; productId?: unknown; quantity?: unknown }>;
   addons?: Array<{ variantId?: unknown; quantity?: unknown; discount?: unknown }>;
+  subscription?: {
+    sellingPlanGroupId?: unknown;
+    sellingPlanId?: unknown;
+    recurringBundleDiscount?: unknown;
+  };
 };
+
+function normalizeSubscriptionSelection(bundle: any, value: SelectionInput["subscription"]) {
+  if (!value) return undefined;
+  const config = buildPublicBundleSubscriptionConfig(bundle?.bundleSubscriptionConfig);
+  const sellingPlanGroupId = String(value.sellingPlanGroupId ?? "").trim();
+  const sellingPlanId = String(value.sellingPlanId ?? "").trim();
+  if (!config || config.selectedGroup?.id !== sellingPlanGroupId) {
+    throw new Error("Subscription selling-plan group is not enabled for this bundle");
+  }
+  if (!config.selectedPlanIds.includes(sellingPlanId)) {
+    throw new Error("Subscription selling plan is not enabled for this bundle");
+  }
+  if ((value.recurringBundleDiscount === true) !== config.recurringBundleDiscount) {
+    throw new Error("Recurring bundle discount selection does not match the saved bundle configuration");
+  }
+  return {
+    sellingPlanGroupId,
+    sellingPlanId,
+    recurringBundleDiscount: config.recurringBundleDiscount,
+  };
+}
 
 export function normalizeProductVariantGid(value: unknown): string | null {
   if (typeof value !== "string" && typeof value !== "number") return null;
@@ -188,7 +223,60 @@ export function validateRuntimeTokenSelection(bundle: any, selection: SelectionI
   return {
     components: normalizeLines(selection.components, allowedIds),
     addons: normalizeAddonLines(selection.addons, allowedIds.variantIds),
+    subscription: normalizeSubscriptionSelection(bundle, selection.subscription),
   };
+}
+
+export async function validateLiveSellingPlanSelection(
+  admin: { graphql: (query: string, options: any) => Promise<{ json: () => Promise<any> }> },
+  selection: NonNullable<RuntimeTokenPayload["subscription"]>,
+  components: RuntimeTokenLine[],
+) {
+  const variantQuery = `
+    query ResolveRuntimeSellingPlanVariant($variantId: ID!) {
+      node(id: $variantId) {
+        ... on ProductVariant { product { id } }
+      }
+    }
+  `;
+  const groupQuery = `
+    query ValidateRuntimeSellingPlan($id: ID!, $variantId: ID!, $productId: ID!) {
+      node(id: $id) {
+        ... on SellingPlanGroup {
+          sellingPlans(first: 250) { nodes { id } }
+          appliesToProduct(productId: $productId)
+          appliesToProductVariant(productVariantId: $variantId)
+        }
+      }
+    }
+  `;
+  for (const component of components) {
+    const variantResponse = await admin.graphql(variantQuery, {
+      variables: { variantId: component.variantId },
+    });
+    const variantData = await variantResponse.json();
+    const productId = variantData.data?.node?.product?.id;
+    if (typeof productId !== "string") {
+      throw new Error("Selected subscription variant no longer exists");
+    }
+    const response = await admin.graphql(groupQuery, {
+      variables: {
+        id: selection.sellingPlanGroupId,
+        variantId: component.variantId,
+        productId,
+      },
+    });
+    const data = await response.json();
+    const group = data.data?.node;
+    if (!group) throw new Error("Saved subscription selling-plan group no longer exists");
+    const planIds = new Set((group.sellingPlans?.nodes ?? []).map((plan: any) => plan?.id));
+    if (!planIds.has(selection.sellingPlanId)) {
+      throw new Error("Saved subscription selling plan no longer exists");
+    }
+    if (group.appliesToProduct !== true && group.appliesToProductVariant !== true) {
+      throw new Error("Selected variant does not support the saved selling plan");
+    }
+  }
 }
 
 export function buildRuntimeTokenPayload(input: {
@@ -210,6 +298,13 @@ export function buildRuntimeTokenPayload(input: {
   }
 
   const selection = validateRuntimeTokenSelection(input.bundle, input.selection);
+  const subscriptionConfig = buildPublicBundleSubscriptionConfig(
+    input.bundle.bundleSubscriptionConfig,
+  );
+  const appliesToPurchaseMode = !subscriptionConfig || shouldApplyBundleDiscount(
+    subscriptionConfig.bundleDiscountAppliesOn,
+    selection.subscription?.sellingPlanId,
+  );
 
   return {
     version: RUNTIME_TOKEN_VERSION,
@@ -221,7 +316,10 @@ export function buildRuntimeTokenPayload(input: {
     bundleName: String(input.bundle.name ?? "Bundle"),
     components: selection.components,
     addons: selection.addons,
-    priceAdjustment: buildPriceAdjustmentConfig(input.bundle.pricing),
+    priceAdjustment: appliesToPurchaseMode
+      ? buildPriceAdjustmentConfig(input.bundle.pricing)
+      : { method: "percentage_off", value: 0 },
+    ...(selection.subscription ? { subscription: selection.subscription } : {}),
   };
 }
 

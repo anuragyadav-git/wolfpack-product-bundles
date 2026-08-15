@@ -3,7 +3,7 @@
 {% endcomment %}
 
 {% assign app_namespace = '$app' %}
-{% capture storefront_proxy_root %}{% render 'storefront-proxy-root' %}{% endcapture %}
+{% assign storefront_proxy_root = '/apps/product-bundles' %}
 {% assign fpb_public_number = nil %}
 {% if product and product.variants.first %}
   {% assign variant_metafields = product.variants.first.metafields[app_namespace] %}
@@ -23,11 +23,20 @@
   {% assign fpb_proxy_path = storefront_proxy_root | append: '/wpb/' | append: fpb_public_number %}
 {% endif %}
 
+{% assign fpb_upsells_endpoint = storefront_proxy_root | append: '/api/fpb-upsells.json' %}
+{% capture product_collection_ids %}{% if product %}{% for collection in product.collections %}{{ collection.id }}{% unless forloop.last %},{% endunless %}{% endfor %}{% endif %}{% endcapture %}
+
 <div
   hidden
   data-wpb-app-embed
   data-redirect-path="{{ fpb_proxy_path }}"
   data-full-page-script-url="{{ 'bundle-widget-full-page-bundled.js' | asset_url }}"
+  data-fpb-upsells-endpoint="{{ fpb_upsells_endpoint }}"
+  data-product-id="{% if product %}{{ product.id }}{% endif %}"
+  data-product-handle="{% if product %}{{ product.handle | escape }}{% endif %}"
+  data-collection-ids="{{ product_collection_ids | strip }}"
+  data-locale="{{ request.locale.iso_code }}"
+  data-selected-variant-id="{% if product and product.selected_or_first_available_variant %}{{ product.selected_or_first_available_variant.id }}{% endif %}"
   data-full-page-style-url="{{ 'bundle-widget-full-page.css' | asset_url }}"
   data-mobile-summary-style-url="{{ 'bundle-widget-full-page-mobile-summary.css' | asset_url }}"
   data-responsive-style-url="{{ 'bundle-widget-full-page-responsive.css' | asset_url }}"
@@ -46,7 +55,7 @@
   "settings": [
     {
       "type": "paragraph",
-      "content": "Activates Wolfpack bundle storefront features. Bundle placement is controlled from the Wolfpack app."
+      "content": "Activates Wolfpack bundle storefront features, including product-page bundle offers."
     }
   ]
 }

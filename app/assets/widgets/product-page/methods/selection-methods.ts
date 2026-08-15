@@ -175,7 +175,7 @@ updateProductSelection(stepIndex, productId, newQuantity) {
   }
 
   const cascadeDrawerWasOpen = (this._isProductPageCascadeTemplate?.() || this._isProductPageGridTemplate?.())
-    && this.elements?.footer?.querySelector('.bw-ppb-cascade-selected-drawer--open, .gbbMixCascadeCartDrawerContainer--open');
+    && this.elements?.footer?.querySelector('.bw-ppb-cascade-selected-drawer--open, .wpbMixCascadeCartDrawerContainer--open');
   if (cascadeDrawerWasOpen) {
     const drawerHeight = cascadeDrawerWasOpen.getBoundingClientRect?.().height || 0;
     this.cascadeSelectedDrawerState = {

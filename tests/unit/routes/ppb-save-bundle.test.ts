@@ -10,6 +10,7 @@ import {
   updateBundleProductMetafields,
 } from "../../../app/services/bundles/metafield-sync.server";
 import { syncBundleStorefrontNow } from "../../../app/services/bundles/storefront-sync.server";
+import { AddOnDiscountFunctionService } from "../../../app/services/addon-discount-function-service.server";
 
 jest.mock("../../../app/db.server", () => ({
   __esModule: true,
@@ -52,6 +53,13 @@ jest.mock("../../../app/services/bundles/storefront-sync.server", () => ({
     synced: true,
     stats: {},
   }),
+}));
+
+jest.mock("../../../app/services/addon-discount-function-service.server", () => ({
+  AddOnDiscountFunctionService: {
+    completeSubscriptionInitialSetup: jest.fn().mockResolvedValue({ success: true }),
+    completeSubscriptionRecurringSetup: jest.fn().mockResolvedValue({ success: true }),
+  },
 }));
 
 jest.mock("../../../app/utils/variant-lookup.server", () => ({
@@ -162,7 +170,7 @@ function makeStep(
     minQuantity: 1,
     maxQuantity: 5,
     enabled: true,
-    products: [],
+    products: [{ id: "validation-product" }],
     collections: [],
     StepProduct: [],
     StepCategory: [],
@@ -171,7 +179,7 @@ function makeStep(
 }
 
 function makeDiscountData(overrides: Record<string, unknown> = {}) {
-  return {
+  const result: any = {
     discountEnabled: false,
     discountType: "percentage_off",
     discountRules: [],
@@ -181,6 +189,34 @@ function makeDiscountData(overrides: Record<string, unknown> = {}) {
     displayOptions: null,
     ...overrides,
   };
+  if (result.discountEnabled) {
+    result.discountRules = result.discountRules.map((rule: any) => ({
+      conditionType: "quantity",
+      conditionValue: 1,
+      ...rule,
+    }));
+    if (result.discountMessagingEnabled) {
+      result.ruleMessages = Object.fromEntries(result.discountRules.map((rule: any) => [
+        rule.id,
+        result.ruleMessages?.[rule.id] ?? {
+          discountText: "Add more to save",
+          successMessage: "Discount applied",
+        },
+      ]));
+      result.successMessage ||= "Discount applied";
+    }
+    const progress = result.displayOptions?.progressBar;
+    if (progress?.enabled && progress.type === "step_based") {
+      result.tierTextByRuleId = Object.fromEntries(result.discountRules.map((rule: any) => [
+        rule.id,
+        result.tierTextByRuleId?.[rule.id] ?? {
+          tierText: "Tier",
+          tierSubtext: "Savings",
+        },
+      ]));
+    }
+  }
+  return result;
 }
 
 function makeFormData(overrides: Record<string, string | null> = {}): FormData {
@@ -282,6 +318,96 @@ describe("PPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
     const body = await res.json() as any;
     expect(body.success).toBe(true);
     expect(body.message).toBe("Updated Successfully!");
+  });
+
+  it("persists a normalized enabled subscription config and activates the initial-order role", async () => {
+    const config = {
+      version: 1,
+      enabled: true,
+      selectedGroup: {
+        id: "gid://shopify/SellingPlanGroup/1",
+        name: "Subscribe",
+        options: [],
+        plans: [{ id: "gid://shopify/SellingPlan/1", sourceName: "Monthly", options: [], position: 1, pricingPolicies: [] }],
+      },
+      selectedPlanIds: ["gid://shopify/SellingPlan/1"],
+      defaultPurchaseOption: { kind: "selling_plan", sellingPlanId: "gid://shopify/SellingPlan/1" },
+      oneTimePurchase: { enabled: true, title: "One time", description: "" },
+      copy: { title: "Purchase options", subtitle: "", unavailableMessage: "Unavailable" },
+      planCopy: { "gid://shopify/SellingPlan/1": { displayName: "Monthly", discountPill: "", description: "" } },
+      showDiscountOnProductCards: false,
+      recurringBundleDiscount: false,
+      translations: {},
+    };
+    const response = await handleSaveBundle(
+      MOCK_ADMIN,
+      MOCK_SESSION,
+      "bundle-1",
+      makeFormData({ bundleSubscriptionConfig: JSON.stringify(config) }),
+    );
+    expect(response.status).toBe(200);
+    const persisted = getDb().bundle.update.mock.calls[0][0].data.bundleSubscriptionConfig;
+    expect(persisted).toMatchObject({
+      enabled: true,
+      selectedPlanIds: ["gid://shopify/SellingPlan/1"],
+    });
+    expect(persisted.selectedGroup.plans[0]).toHaveProperty("position", 1);
+    expect(AddOnDiscountFunctionService.completeSubscriptionInitialSetup).toHaveBeenCalledWith(
+      MOCK_ADMIN,
+      MOCK_SESSION.shop,
+    );
+  });
+
+  it("blocks enabled subscriptions for Buy X Get Y before persistence or sync", async () => {
+    const config = {
+      version: 1,
+      enabled: true,
+      selectedGroup: null,
+      selectedPlanIds: [],
+      defaultPurchaseOption: { kind: "one_time" },
+      oneTimePurchase: { enabled: true, title: "One time", description: "" },
+      copy: { title: "Purchase options", subtitle: "", unavailableMessage: "Unavailable" },
+      planCopy: {}, showDiscountOnProductCards: false, recurringBundleDiscount: false, translations: {},
+    };
+    const response = await handleSaveBundle(
+      MOCK_ADMIN,
+      MOCK_SESSION,
+      "bundle-1",
+      makeFormData({
+        bundleSubscriptionConfig: JSON.stringify(config),
+        discountData: JSON.stringify(makeDiscountData({ discountType: "buy_x_get_y" })),
+      }),
+    );
+    expect(response.status).toBe(400);
+    expect(getDb().bundle.update).not.toHaveBeenCalled();
+    expect(syncBundleStorefrontNow).not.toHaveBeenCalled();
+  });
+
+  it("returns structured field errors and does not persist an invalid draft", async () => {
+    const res = await handleSaveBundle(
+      MOCK_ADMIN,
+      MOCK_SESSION,
+      "bundle-1",
+      makeFormData({
+        bundleName: "",
+        stepsData: JSON.stringify([makeStep({ products: [], StepProduct: [], collections: [] } as any)]),
+      }),
+    );
+    const body = await res.json() as any;
+
+    expect(res.status).toBe(400);
+    expect(body).toEqual({
+      success: false,
+      error: "Fix the highlighted fields before saving.",
+      fieldErrors: expect.arrayContaining([
+        { path: "bundle.name", message: "Enter a bundle name." },
+        {
+          path: "steps.step-1.resources",
+          message: "Add at least one product or collection.",
+        },
+      ]),
+    });
+    expect(getDb().bundle.update).not.toHaveBeenCalled();
   });
 
   it("persists Step 1 as enabled and allows a later step to be disabled", async () => {
@@ -490,23 +616,20 @@ describe("PPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
     );
   });
 
-  it("preserves draft status when StepCategory exists but is empty", async () => {
+  it("rejects a draft when its configured category is empty", async () => {
     const stepsData = [
       makeStep({
         StepCategory: [{ name: "Empty", sortOrder: 0, products: [], collections: [] }],
       }),
     ];
-    await handleSaveBundle(
+    const response = await handleSaveBundle(
       MOCK_ADMIN,
       MOCK_SESSION,
       "bundle-1",
       makeFormData({ stepsData: JSON.stringify(stepsData) })
     );
-    expect(getDb().bundle.update).toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: expect.objectContaining({ status: "draft" }),
-      })
-    );
+    expect(response.status).toBe(400);
+    expect(getDb().bundle.update).not.toHaveBeenCalled();
   });
 
   it("rejects save when a persisted variant reference has an invalid format", async () => {
@@ -693,6 +816,8 @@ describe("PPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
     }];
     const stepsData = [makeStep({
       isFreeGift: true,
+      addonLabel: "Add-on",
+      addonTitle: "Choose an add-on",
       addonDisplayFree: false,
       addonTiers,
     } as any)];

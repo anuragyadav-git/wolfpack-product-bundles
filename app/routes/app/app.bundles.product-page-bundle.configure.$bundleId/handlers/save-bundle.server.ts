@@ -24,10 +24,20 @@ import {
   validateStepConditionFeasibility,
 } from "../../../../lib/step-condition-validation";
 import {
+  configureValidationFailure,
+  validateBundleConfigureFormData,
+} from "../../../../lib/bundle-config/configure-validation";
+import {
   isVariantExistsOnShopifyStorefront,
   validateVariantIdFromShopify,
   type ShopifyStorefrontVariantLookupResult,
 } from "../../../../lib/variant-existence.server";
+import {
+  getBundleSubscriptionCompatibilityIssues,
+  normalizeBundleSubscriptionConfig,
+  validateBundleSubscriptionConfig,
+} from "../../../../lib/bundle-subscriptions";
+import { AddOnDiscountFunctionService } from "../../../../services/addon-discount-function-service.server";
 
 type ParsedVariantRef = string | number;
 
@@ -92,6 +102,10 @@ async function validatePersistedStepProductVariants(
                 variantId: "",
                 reason: "invalid-format",
               },
+              fieldErrors: [{
+                path: `steps.${String(step.id ?? `step-${stepIndex + 1}`)}.products.${productIndex + 1}.variants.${variantIndex + 1}`,
+                message: "Select a valid product variant.",
+              }],
             },
             { status: 400 },
           );
@@ -111,6 +125,10 @@ async function validatePersistedStepProductVariants(
                 variantId: toStringVariant(rawVariantId),
                 reason: "invalid-format",
               },
+              fieldErrors: [{
+                path: `steps.${String(step.id ?? `step-${stepIndex + 1}`)}.products.${productIndex + 1}.variants.${variantIndex + 1}`,
+                message: "Select a valid product variant.",
+              }],
             },
             { status: 400 },
           );
@@ -135,6 +153,10 @@ async function validatePersistedStepProductVariants(
                 status: variantLookup.status,
                 reason: variantLookup.message || "not-found",
               },
+              fieldErrors: [{
+                path: `steps.${String(step.id ?? `step-${stepIndex + 1}`)}.products.${productIndex + 1}.variants.${variantIndex + 1}`,
+                message: "This product variant is not available on the storefront.",
+              }],
             },
             { status: 400 },
           );
@@ -167,6 +189,16 @@ export async function handleSaveBundle(
   });
 
   try {
+    const configureValidationIssues = validateBundleConfigureFormData(
+      formData,
+      "ppb",
+    );
+    if (configureValidationIssues.length > 0) {
+      return json(configureValidationFailure(configureValidationIssues), {
+        status: 400,
+      });
+    }
+
     const bundleName = formData.get("bundleName") as string;
     const bundleDescription = formData.get("bundleDescription") as string;
     const bundleStatus = formData.get("bundleStatus") as string;
@@ -205,6 +237,30 @@ export async function handleSaveBundle(
     const bundleProductData = formData.get("bundleProduct")
       ? JSON.parse(formData.get("bundleProduct") as string)
       : null;
+    const subscriptionConfigRaw = formData.get("bundleSubscriptionConfig");
+    const subscriptionConfig =
+      typeof subscriptionConfigRaw === "string"
+        ? normalizeBundleSubscriptionConfig(JSON.parse(subscriptionConfigRaw))
+        : null;
+    if (subscriptionConfig?.enabled) {
+      const subscriptionIssues = [
+        ...validateBundleSubscriptionConfig(subscriptionConfig),
+        ...getBundleSubscriptionCompatibilityIssues({
+          discountType: discountData.discountType,
+          steps: stepsData,
+        }),
+      ];
+      if (subscriptionIssues.length > 0) {
+        return json(
+          {
+            success: false,
+            error: "Fix the subscription configuration before saving.",
+            fieldErrors: subscriptionIssues,
+          },
+          { status: 400 },
+        );
+      }
+    }
 
     AppLogger.debug("Parsed form data:", {
       bundleName,
@@ -276,6 +332,10 @@ export async function handleSaveBundle(
         {
           success: false,
           error: formatStepConditionErrors(stepValidationErrors),
+          fieldErrors: stepValidationErrors.map((validationError) => ({
+            path: `steps.${validationError.stepId}.conditions`,
+            message: validationError.message,
+          })),
         },
         { status: 400 },
       );
@@ -363,8 +423,25 @@ export async function handleSaveBundle(
     // Get existing bundle to preserve shopifyProductId/Handle if not provided
     const existingBundle = await db.bundle.findUnique({
       where: { id: bundleId, shopId: session.shop },
-      select: { shopifyProductId: true, shopifyProductHandle: true },
+      select: {
+        shopifyProductId: true,
+        shopifyProductHandle: true,
+        personalizationData: true,
+      },
     });
+    if (subscriptionConfig?.enabled && existingBundle?.personalizationData) {
+      return json(
+        {
+          success: false,
+          error: "Fix the subscription configuration before saving.",
+          fieldErrors: [{
+            path: "subscriptions.enabled",
+            message: "Subscriptions are unavailable while personalization is enabled.",
+          }],
+        },
+        { status: 400 },
+      );
+    }
 
     // Update bundle in database
     AppLogger.debug("[BUNDLE_CONFIG] Updating bundle in database");
@@ -393,6 +470,7 @@ export async function handleSaveBundle(
         sdkMode,
         textOverrides,
         textOverridesByLocale,
+        ...(subscriptionConfig ? { bundleSubscriptionConfig: subscriptionConfig } : {}),
         ...parsePPBBundleVisibility(formData),
         ...parsedBundleSettings,
         boxSelection,
@@ -537,6 +615,36 @@ export async function handleSaveBundle(
       bundleType: "product_page",
       reason: "save",
     });
+    if (subscriptionConfig?.enabled) {
+      const activation =
+        await AddOnDiscountFunctionService.completeSubscriptionInitialSetup(
+          admin,
+          session.shop,
+        );
+      if (!activation.success) {
+        AppLogger.warn("Subscription initial-order discount setup failed during bundle save", {
+          component: "bundle-config",
+          operation: "save",
+          bundleId,
+          shopId: session.shop,
+        }, { error: activation.error });
+      }
+      if (subscriptionConfig.recurringBundleDiscount) {
+        const recurringActivation =
+          await AddOnDiscountFunctionService.completeSubscriptionRecurringSetup(
+            admin,
+            session.shop,
+          );
+        if (!recurringActivation.success) {
+          AppLogger.warn("Subscription recurring discount setup failed during bundle save", {
+            component: "bundle-config",
+            operation: "save",
+            bundleId,
+            shopId: session.shop,
+          }, { error: recurringActivation.error });
+        }
+      }
+    }
 
     return json({
       success: true,

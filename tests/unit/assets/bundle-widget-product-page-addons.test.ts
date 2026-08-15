@@ -43,7 +43,7 @@ describe("Product Page widget direct Add-ons contract", () => {
 
     expect(source).toContain("buildCartLineSourceProperties(selectedLines)");
     expect(source).toContain("const combinedDiscountAmount = Math.min(totalPrice, baseDiscountAmount + addonDiscountAmount);");
-    expect(source).toContain("const discountInfo = PricingCalculator.calculateDiscount(");
+    expect(source).toContain("const discountInfo = calculateBundleDiscountForPurchaseOption(");
     expect(source).toContain("const combinedDiscountInfo = this.getDiscountInfoWithSelectedAddonDiscount(discountInfo, totalPrice);");
     expect(source).toContain("const discountAmount = Math.max(0, Number(combinedDiscountInfo.discountAmount || 0));");
     expect(source).toContain("const chargeableAddonStep = steps.find(candidate => candidate?.isFreeGift === true && candidate?.addonDisplayFree !== true && this.getAddonLineDiscount(candidate));");

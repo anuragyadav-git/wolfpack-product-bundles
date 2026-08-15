@@ -1,5 +1,7 @@
 import { CurrencyManager } from '../../shared/currency-manager.js';
 import { PricingCalculator } from '../../shared/pricing-calculator.js';
+import { calculateBundleDiscountForPurchaseOption } from '../../shared/subscription-storefront-methods.js';
+import { calculateBundleTotalForPurchaseOption } from '../../shared/subscription-storefront-methods.js';
 import { ToastManager } from '../../shared/toast-manager.js';
 import { ConditionValidator } from '../../shared/condition-validator.js';
 
@@ -637,14 +639,14 @@ updateModalFooterMessaging() {
   // Skip if modal is not active (full-page mode uses inline footer instead)
   if (!this.elements.modal || this.elements.modal.hidden) return;
 
-  const { totalPrice, totalQuantity, unitPrices } = PricingCalculator.calculateBundleTotal(
+  const { totalPrice, totalQuantity, unitPrices } = calculateBundleTotalForPurchaseOption(this,
     this.selectedProducts,
     this.stepProductData,
     this.selectedBundle?.steps
   );
 
-  const discountInfo = PricingCalculator.calculateDiscount(
-    this.selectedBundle,
+  const discountInfo = calculateBundleDiscountForPurchaseOption(
+    this,
     totalPrice,
     totalQuantity,
     unitPrices
