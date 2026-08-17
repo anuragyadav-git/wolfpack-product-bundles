@@ -2,7 +2,7 @@
 
 client_id = "63077bb0483a6ce08a2d6139b14d170b"
 name = "Wolfpack Bundles SIT"
-application_url = "https://wolfpack-product-bundle-app-sit.onrender.com"
+application_url = "https://wolfpack-product-bundles-sit.onrender.com"
 embedded = true
 handle = "wolfpack-product-bundles-sit"
 
@@ -26,13 +26,13 @@ scopes = "read_customer_events,read_discounts,read_inventory,read_orders,read_pr
 
 [auth]
 redirect_urls = [
-  "https://wolfpack-product-bundle-app-sit.onrender.com/auth/callback",
-  "https://wolfpack-product-bundle-app-sit.onrender.com/auth/shopify/callback",
-  "https://wolfpack-product-bundle-app-sit.onrender.com/api/auth/callback"
+  "https://wolfpack-product-bundles-sit.onrender.com/auth/callback",
+  "https://wolfpack-product-bundles-sit.onrender.com/auth/shopify/callback",
+  "https://wolfpack-product-bundles-sit.onrender.com/api/auth/callback"
 ]
 
 [app_proxy]
-url = "https://wolfpack-product-bundle-app-sit.onrender.com"
+url = "https://wolfpack-product-bundles-sit.onrender.com"
 subpath = "product-bundles"
 prefix = "apps"
 
