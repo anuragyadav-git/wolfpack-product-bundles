@@ -84,7 +84,7 @@ export function resolveInpageProductSelection(
   selectedProductCategoryIndexes = {},
   activeCategoryIndex = null,
 ) {
-  const defaultSelectionKey = product.variantId || product.id || '';
+  const defaultSelectionKey = product.selectionId || product.variantId || product.id || '';
   const candidateIds = [defaultSelectionKey, product.id, product.productId];
   if (Array.isArray(product.variants)) {
     candidateIds.push(...product.variants.map((variant) => variant.id));
@@ -182,7 +182,7 @@ _renderInpageStepProducts(stepIndex, target) {
   const inlineAddText = resolveProductPageInlineAddText(this._resolveText?.bind(this));
 
   target.innerHTML = products.map(product => {
-    const directSelectionKey = product.variantId || product.id;
+    const directSelectionKey = product.selectionId || product.variantId || product.id;
     const restoredGridSelection = usesGridCards
       ? resolveInpageProductSelection(
         product,
@@ -193,6 +193,7 @@ _renderInpageStepProducts(stepIndex, target) {
       )
       : null;
     const selectionKey = restoredGridSelection?.selectionKey || directSelectionKey;
+    const productSelection = { ...product, selectionId: selectionKey };
     const currentQuantity = restoredGridSelection?.quantity
       ?? this.getSelectedQuantity(stepIndex, selectionKey);
     const { available, outOfStock } = this.getVariantAvailable(stepIndex, selectionKey);
@@ -205,7 +206,7 @@ _renderInpageStepProducts(stepIndex, target) {
     const variantSelectorHtml = this.renderInlineCardVariantSelector(product, currentStep);
 
     if (usesCascadeCards) {
-      const cascadeProduct = getCascadeSoleVariantDisplayProduct(product);
+      const cascadeProduct = getCascadeSoleVariantDisplayProduct(productSelection);
       return renderSharedProductCard(
         cascadeProduct,
         currentQuantity,
@@ -235,7 +236,7 @@ _renderInpageStepProducts(stepIndex, target) {
 
     if (usesGridCards) {
       return renderSharedProductCard(
-        selectionKey === directSelectionKey ? product : { ...product, variantId: selectionKey },
+        productSelection,
         currentQuantity,
         currencyInfo,
         {
@@ -250,53 +251,34 @@ _renderInpageStepProducts(stepIndex, target) {
           addButtonText: resolveProductPageCardButtonText({ currentQuantity, currentStep, outOfStock, defaultAddText: inlineAddText }),
           selectedAction: 'button',
           selectedButtonText: resolveProductPageCardButtonText({ currentQuantity, currentStep, outOfStock, defaultAddText: inlineAddText }),
-          addDisabled: false,
+          addDisabled: outOfStock,
           increaseDisabled,
           stockBadgeHtml: stockBadge,
         }
       );
     }
 
-    const addUnavailableAttribute = outOfStock ? 'aria-disabled="true"' : '';
-    const showQuantitySelector = !this._usesCompactInpageProductCards()
-      && widgetConfig.showQuantitySelectorOnCard;
-    const productContent = `
-      <div class="product-title">${ComponentGenerator.escapeHtml(product.title)}</div>
-      ${product.price ? `
-        <div class="product-price-row">
-          ${this._shouldShowProductComparedAtPrice() && product.compareAtPrice ? `<span class="product-price-strike">${CurrencyManager.convertAndFormat(product.compareAtPrice, currencyInfo)}</span>` : ''}
-          <span class="product-price">${CurrencyManager.convertAndFormat(getSubscriptionProductCardPrice(this, product.price), currencyInfo)}</span>
-        </div>
-      ` : ''}
-      ${this.renderInlineCardVariantSelector(product, currentStep)}
-      ${showQuantitySelector ? `
-        <div class="product-quantity-wrapper">
-          <div class="product-quantity-selector">
-            <button class="qty-btn qty-decrease" data-product-id="${selectionKey}">−</button>
-            <span class="qty-display">${currentQuantity}</span>
-            <button class="qty-btn qty-increase" data-product-id="${selectionKey}" ${increaseDisabled ? 'disabled aria-disabled="true"' : ''}>+</button>
-          </div>
-        </div>
-      ` : ''}
-    `;
-    const addButton = `
-      <button class="product-add-btn ${currentQuantity > 0 ? 'added' : ''}" data-product-id="${selectionKey}" ${addUnavailableAttribute}>
-        ${resolveProductPageCardButtonText({ currentQuantity, currentStep, outOfStock, defaultAddText: inlineAddText })}
-      </button>
-    `;
-
-    return `
-      <div class="product-card ${usesGridCards ? 'bw-ppb-grid-product-card' : ''} ${currentQuantity > 0 ? 'bw-product-card--selected' : ''} ${outOfStock ? 'is-out-of-stock' : ''}" data-product-id="${selectionKey}">
-        <div class="product-image">
-          <img src="${product.imageUrl}" alt="${ComponentGenerator.escapeHtml(product.title)}" loading="lazy">
-          ${stockBadge}
-        </div>
-        <div class="product-content-wrapper">
-          ${productContent}
-          ${addButton}
-        </div>
-      </div>
-    `;
+    return renderSharedProductCard(
+      productSelection,
+      currentQuantity,
+      currencyInfo,
+      {
+        displayPrice: getSubscriptionProductCardPrice(this, product.price),
+        variantSelectorHtml,
+        className: `bw-product-card--legacy ${usesGridCards ? 'bw-ppb-grid-product-card' : ''} ${outOfStock ? 'is-out-of-stock' : ''}`.trim(),
+        description: '',
+        displaySeeMoreLink: false,
+        expandProductCardOnHover: false,
+        showCompareAtPrice: this._shouldShowProductComparedAtPrice(),
+        mode: usesGridCards ? 'grid' : 'row',
+        addButtonText: resolveProductPageCardButtonText({ currentQuantity, currentStep, outOfStock, defaultAddText: inlineAddText }),
+        selectedAction: 'button',
+        selectedButtonText: resolveProductPageCardButtonText({ currentQuantity, currentStep, outOfStock, defaultAddText: inlineAddText }),
+        addDisabled: outOfStock,
+        increaseDisabled,
+        stockBadgeHtml: stockBadge,
+      }
+    );
   }).join('');
 
   prependStepBanner();

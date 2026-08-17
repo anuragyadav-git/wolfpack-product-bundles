@@ -1,6 +1,6 @@
 import { json, type ActionFunctionArgs } from "@remix-run/node";
 import prisma from "../../db.server";
-import { verifyAppProxyRequest } from "../../lib/app-proxy.server";
+import { requireAppProxy } from "../../lib/auth-guards.server";
 import { AppLogger } from "../../lib/logger";
 import {
   buildRuntimeTokenPayload,
@@ -40,16 +40,8 @@ function sanitizeString(value: unknown) {
 }
 
 export async function action({ request }: ActionFunctionArgs) {
-  const url = new URL(request.url);
-  const shop = verifyAppProxyRequest(url);
-
-  if (!shop) {
-    AppLogger.warn("Runtime cart token rejected unsigned storefront request", {
-      component: "api.cart-transform-runtime-token",
-      operation: "action",
-    });
-    return json({ ok: false, error: "Invalid storefront request" }, { status: 400, headers: CORS_HEADERS });
-  }
+  const { session } = await requireAppProxy(request);
+  const shop = session.shop;
 
   const body = await request.json().catch(() => null);
   const bundleId = sanitizeString(body?.bundleId);
@@ -106,6 +98,10 @@ export async function action({ request }: ActionFunctionArgs) {
 
     return json({ ok: true, token }, { headers: { ...CORS_HEADERS, "Cache-Control": "no-store" } });
   } catch (error) {
+    if (error instanceof Response) {
+      throw error;
+    }
+
     AppLogger.warn("Runtime cart token payload rejected", {
       component: "api.cart-transform-runtime-token",
       operation: "action",

@@ -25,6 +25,11 @@ jest.mock("../../../app/lib/checkout-integrations", () => ({
 }));
 
 jest.mock("../../../app/shopify.server", () => ({
+  authenticate: {
+    public: {
+      appProxy: jest.fn(),
+    },
+  },
   unauthenticated: {
     admin: jest.fn(),
   },
@@ -61,10 +66,12 @@ describe("checkout integration discount code route", () => {
   const originalSecret = process.env.SHOPIFY_API_SECRET;
   const mockUnauthenticatedAdmin = unauthenticated.admin as jest.Mock;
   const mockCreateForProvider = CheckoutIntegrationDiscountCodeService.createForProvider as jest.Mock;
+  const mockAppProxy = (require("../../../app/shopify.server").authenticate.public.appProxy) as jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
     process.env.SHOPIFY_API_SECRET = "test_api_secret";
+    mockAppProxy.mockResolvedValue({ session: { shop: "test-shop.myshopify.com" } });
     mockUnauthenticatedAdmin.mockResolvedValue({ admin: { graphql: jest.fn() } });
     mockCreateForProvider.mockResolvedValue({
       success: true,
@@ -116,11 +123,12 @@ describe("checkout integration discount code route", () => {
   });
 
   it("rejects unsigned storefront requests", async () => {
+    mockAppProxy.mockRejectedValueOnce(new Response("Unauthorized", { status: 400 }));
     const request = makeSignedRequest({ providerId: "gokwik" });
     const url = new URL(request.url);
     url.searchParams.set("signature", "bad-signature");
 
-    const response = await action({
+    await expect(action({
       request: new Request(url.toString(), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -128,9 +136,8 @@ describe("checkout integration discount code route", () => {
       }),
       params: {},
       context: {},
-    } as any) as Response;
+    } as any)).rejects.toBeInstanceOf(Response);
 
-    expect(response.status).toBe(400);
     expect(mockUnauthenticatedAdmin).not.toHaveBeenCalled();
   });
 

@@ -183,6 +183,7 @@ describe('wpb.$bundleId (FPB proxy page) — draft access control', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     process.env.SHOPIFY_API_SECRET = 'test_api_secret';
+    mockAppProxy.mockResolvedValue({ session: { shop: 'test-shop.myshopify.com' } });
     mockFindDesignSettings().mockResolvedValue(null);
   });
 

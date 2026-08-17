@@ -179,7 +179,7 @@ describe('PPB in-page rendering control wiring', () => {
     expect(target.innerHTML).not.toContain('product-quantity-wrapper');
   });
 
-  it('renders row quantity selectors when the showQuantitySelectorOnCard control is enabled', () => {
+  it('uses shared card button flow when showQuantitySelectorOnCard is enabled', () => {
     const target = createTarget();
     const context = {
       ...ProductPageInpageRenderMethods,
@@ -192,7 +192,58 @@ describe('PPB in-page rendering control wiring', () => {
 
     ProductPageInpageRenderMethods._renderInpageStepProducts.call(context, 0, target);
 
-    expect(target.innerHTML).toContain('product-quantity-wrapper');
+    expect(target.innerHTML).toContain('product-add-btn');
+    expect(target.innerHTML).toContain('bw-product-card--legacy');
+  });
+
+  it('disables Grid add button for out-of-stock products', () => {
+    const target = createTarget();
+    const context = {
+      ...ProductPageInpageRenderMethods,
+      ...createBaseContext({
+        _isProductPageGridTemplate: () => true,
+        _isProductPageCascadeTemplate: () => false,
+        stepProductData: [[
+          {
+            id: 'variant-out-of-stock',
+            variantId: 'variant-001',
+            price: 1200,
+            title: 'Out of Stock Product',
+          },
+        ]],
+        getVariantAvailable: () => ({ available: null, outOfStock: true }),
+      }),
+    } as any;
+
+    ProductPageInpageRenderMethods._renderInpageStepProducts.call(context, 0, target);
+
+    expect(target.innerHTML).toContain('product-add-btn');
+    expect(target.innerHTML).toContain('disabled');
+    expect(target.innerHTML).toContain('aria-disabled="true"');
+    expect(target.innerHTML).toContain('Out of stock');
+  });
+
+  it('uses selectionId as the shared card identity key in in-page rendering', () => {
+    const target = createTarget();
+    const context = {
+      ...ProductPageInpageRenderMethods,
+      ...createBaseContext({
+        stepProductData: [[{
+          id: 'product-legacy-id',
+          selectionId: 'selection-id-xyz',
+          variantId: 'variant-legacy-id',
+          price: 1200,
+          title: 'Selection-id product',
+        }]],
+        _isProductPageGridTemplate: () => false,
+        _isProductPageCascadeTemplate: () => false,
+      }),
+    } as any;
+
+    ProductPageInpageRenderMethods._renderInpageStepProducts.call(context, 0, target);
+
+    expect(target.innerHTML).toContain('data-product-id="selection-id-xyz"');
+    expect(target.innerHTML).toContain('data-current-selected-variant-id="selection-id-xyz"');
   });
 });
 
@@ -228,6 +279,52 @@ describe('PPB shared product card control classes', () => {
 });
 
 describe('PPB modal product-card description wiring', () => {
+  it('uses the shared product card markup in modal views', () => {
+    const productGrid = {
+      innerHTML: '',
+      classList: { add: jest.fn(), remove: jest.fn() },
+      offsetWidth: 0,
+    } as any;
+
+    const context = {
+      ...ProductPageModalMethods,
+      config: { showQuantitySelectorOnCard: false, displaySeeMoreLink: true, expandProductCardOnHover: true },
+      selectedBundle: { steps: [{}], validateQuantityPerProduct: null },
+      stepProductData: [[{
+        id: 'modal-shared-card',
+        imageUrl: '/shared-card.png',
+        price: 1200,
+        title: 'Modal shared card product',
+        description: 'Hidden product description',
+      }]],
+      selectedProducts: [{}],
+      activeInpageCategoryIndexes: {},
+      elements: {
+        modal: {
+          querySelector: (selector: string) => {
+            if (selector === '.product-grid') return productGrid;
+            if (selector === '.bw-bs-body') return { querySelector: () => null };
+            return null;
+          },
+        },
+      },
+      _filterProductsForInpageCategory: (_step: unknown, products: unknown[]) => products,
+      expandProductsByVariant: (products: unknown[]) => products,
+      getSelectedQuantity: () => 0,
+      getVariantAvailable: () => ({ available: null, outOfStock: false }),
+      _shouldShowProductComparedAtPrice: () => false,
+      renderVariantSelector: () => '',
+      attachProductEventHandlers: jest.fn(),
+    } as any;
+
+    ProductPageModalMethods.renderModalProducts.call(context, 0);
+
+    expect(productGrid.innerHTML).toContain('data-bw-product-card="true"');
+    expect(productGrid.innerHTML).toContain('bw-product-card--mode-grid');
+    expect(productGrid.innerHTML).toContain('product-add-btn');
+    expect(productGrid.innerHTML).not.toContain('bw-product-card__description');
+  });
+
   it('omits populated descriptions from Horizontal and Vertical Slots product cards', () => {
     const productGrid = {
       innerHTML: '',

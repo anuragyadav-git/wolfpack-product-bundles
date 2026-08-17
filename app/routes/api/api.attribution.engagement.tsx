@@ -17,7 +17,7 @@
 
 import { json, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/node";
 import db from "../../db.server";
-import { verifyAppProxyRequest } from "../../lib/app-proxy.server";
+import { requireAppProxy } from "../../lib/auth-guards.server";
 import { AppLogger } from "../../lib/logger";
 import { recordBusinessEvent } from "../../services/app-events.server";
 
@@ -82,20 +82,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     return json({ error: "Method not allowed" }, { status: 405, headers: buildCorsHeaders(request) });
   }
 
-  const url = new URL(request.url);
-  const proxyShop = verifyAppProxyRequest(url);
-
-  if (!proxyShop) {
-    AppLogger.warn("Bundle engagement rejected unsigned storefront request", {
-      component: "api.attribution.engagement",
-      operation: "action",
-      method: request.method,
-    });
-    return json(
-      { error: "Invalid storefront request" },
-      { status: 400, headers: buildCorsHeaders(request) }
-    );
-  }
+  const { session: proxySession } = await requireAppProxy(request);
+  const proxyShop = proxySession.shop;
 
   let eventContext: {
     shopDomain: string;
@@ -222,6 +210,10 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
     return json({ ok: true }, { headers: buildCorsHeaders(request) });
   } catch (error) {
+    if (error instanceof Response) {
+      throw error;
+    }
+
     AppLogger.error("[ENGAGEMENT] Failed to record bundle engagement", {
       component: "api.attribution.engagement",
     }, error);

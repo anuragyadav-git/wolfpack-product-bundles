@@ -154,14 +154,13 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     }
   })();
   const proxyHealthPromise = (async () => {
+    const controller = new AbortController();
+    const proxyTimer = setTimeout(() => controller.abort(), 2000);
     try {
-      const controller = new AbortController();
-      const proxyTimer = setTimeout(() => controller.abort(), 3000);
       const proxyRes = await fetch(
         `https://${session.shop}${buildStorefrontApiPath("proxy-health")}`,
         { signal: controller.signal },
       );
-      clearTimeout(proxyTimer);
       if (proxyRes.status === 404) {
         const ct = proxyRes.headers.get("content-type") ?? "";
         if (ct.includes("text/html")) {
@@ -169,7 +168,11 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
           return false;
         }
       }
-    } catch { /* Timeout — default healthy */ }
+    } catch {
+      /* Timeout or network error — default healthy */
+    } finally {
+      clearTimeout(proxyTimer);
+    }
     return true;
   })();
 

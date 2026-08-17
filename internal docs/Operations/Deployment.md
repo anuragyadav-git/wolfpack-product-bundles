@@ -5,7 +5,7 @@ title: Deployment
 type: operations
 status: active
 summary: Deployment commands, environment configuration, and Shopify-managed installation rules.
-last_audited: 2026-08-07
+last_audited: 2026-08-17
 owners:
   - engineering
 domains:
@@ -40,6 +40,27 @@ keywords:
 - Node.js 22
 - PostgreSQL database
 - Server cold-starts: ~3–10s on starter plans (widget has retry logic for this)
+
+### Remix stream dependency contract
+
+The Remix 2 Admin server must use the `turbo-stream` version declared by its
+installed `@remix-run/react` package. Do not force a different serializer major
+through npm `overrides` or `resolutions`. Remix 2.17.5 declares
+`turbo-stream@2.4.1`; forcing version 3 makes the server-side `StreamTransfer`
+reader pass an incompatible value to `TextDecoder.decode()`, aborting the HTML
+stream before hydration and leaving the embedded app on `Loading your
+workspace`.
+
+Single Fetch stays disabled while the application remains on Remix 2. This
+keeps the affected serializer off the Admin request path. Re-enable it only as
+part of a separately verified framework upgrade whose declared serializer
+contract includes the security-patched version.
+
+After changing dependency overrides, regenerate the lockfile with the same npm
+major used by the Node 22 image and run `npm ci --dry-run --ignore-scripts`.
+`npm install` can succeed against an existing `node_modules` tree even when
+optional WASM peer packages are missing from the lockfile; Render's clean
+install will reject that lockfile with `EUSAGE` before the build begins.
 
 ## Shopify Extension Deploy
 
