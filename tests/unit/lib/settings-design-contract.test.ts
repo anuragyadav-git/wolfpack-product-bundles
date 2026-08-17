@@ -51,4 +51,15 @@ describe("Settings Design DTO", () => {
     expect(state.fieldValues["generalSettings.loadingGifUrl"]).toBe("");
     expect(state.fieldValues["generalSettings.loadingBgColor"]).toBe("#ffffff");
   });
+
+  it("resolves legacy field names like Bundle Loading GIF to canonical keys", () => {
+    const state = createSettingsDesignState({
+      isExpertControlsEnabled: false,
+      fieldValues: {
+        "Bundle Loading GIF": "https://cdn.example.test/loader.gif",
+      },
+    });
+
+    expect(state.fieldValues["generalSettings.loadingGifUrl"]).toBe("https://cdn.example.test/loader.gif");
+  });
 });
