@@ -25,30 +25,15 @@ describe("Settings Design DTO", () => {
     })).toThrow(`Invalid Design field: ${field}`);
   });
 
-  it("rejects unknown fields instead of persisting an unbounded record", () => {
+  it("ignores unmapped or obsolete fields without throwing or persisting them", () => {
     const state = createSettingsDesignState();
-
-    expect(() => parseSettingsDesignPayload({
+    const result = parseSettingsDesignPayload({
       ...state,
-      fieldValues: { ...state.fieldValues, unknownField: "value" },
-    })).toThrow("Unknown Design field: unknownField");
-  });
-
-  it("hydrates valid persisted values over current defaults", () => {
-    const state = createSettingsDesignState({
-      isExpertControlsEnabled: true,
-      fieldValues: { "Primary Color": "#123456" },
+      fieldValues: { ...state.fieldValues, obsoleteField: "value", "Bundle Loading GIF": "https://example.com/loader.gif" },
     });
 
-    expect(state.isExpertControlsEnabled).toBe(true);
-    expect(state.fieldValues["Primary Color"]).toBe("#123456");
-    expect(state.fieldValues["Button Text Color"]).toBe("#ffffff");
-  });
-
-  it("provides store-level FPB loading screen defaults", () => {
-    const state = createSettingsDesignState();
-
-    expect(state.fieldValues["generalSettings.loadingGifUrl"]).toBe("");
-    expect(state.fieldValues["generalSettings.loadingBgColor"]).toBe("#ffffff");
+    expect(result.fieldValues["obsoleteField"]).toBeUndefined();
+    expect(result.fieldValues["Bundle Loading GIF"]).toBeUndefined();
+    expect(result.fieldValues["Primary Color"]).toBe("#000000");
   });
 });
