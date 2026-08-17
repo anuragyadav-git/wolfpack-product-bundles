@@ -68,30 +68,14 @@ function validateFieldValue(field: SettingsField, value: string) {
   return value.length <= 2048;
 }
 
-const LEGACY_KEY_ALIASES: Record<string, string> = {
-  "Bundle Loading GIF": "generalSettings.loadingGifUrl",
-  "Bundle Loading Background Color": "generalSettings.loadingBgColor",
-};
-
 export function parseSettingsDesignPayload(value: unknown): SettingsDesignPayload {
   if (!isRecord(value) || !isRecord(value.fieldValues) || typeof value.isExpertControlsEnabled !== "boolean") {
     throw new Error("Invalid Settings Design payload");
   }
 
-  for (const rawKey of Object.keys(value.fieldValues)) {
-    const key = LEGACY_KEY_ALIASES[rawKey] ?? rawKey;
-    if (!FIELD_BY_KEY.has(key)) throw new Error(`Unknown Design field: ${rawKey}`);
-  }
-
   const fieldValues = { ...SETTINGS_DESIGN_DEFAULT_FIELD_VALUES } as Record<string, string>;
   for (const [key, field] of FIELD_BY_KEY) {
-    let candidate = value.fieldValues[key];
-    if (candidate === undefined) {
-      const legacyKey = Object.keys(LEGACY_KEY_ALIASES).find((lk) => LEGACY_KEY_ALIASES[lk] === key);
-      if (legacyKey) {
-        candidate = value.fieldValues[legacyKey];
-      }
-    }
+    const candidate = value.fieldValues[key];
     if (candidate === undefined) continue;
     if (typeof candidate !== "string" || !validateFieldValue(field, candidate.trim())) {
       throw new Error(`Invalid Design field: ${key}`);
