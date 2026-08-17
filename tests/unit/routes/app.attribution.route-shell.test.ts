@@ -60,7 +60,6 @@ describe("app.attribution route shell", () => {
     const ready = waitForAnalyticsRouteReady(
       Promise.resolve({ bundleMetricTrend: [] }),
       pixelStatus,
-      Promise.resolve(),
     );
     const settled = jest.fn();
     void ready.then(settled);
@@ -72,7 +71,6 @@ describe("app.attribution route shell", () => {
     await expect(ready).resolves.toEqual([
       { bundleMetricTrend: [] },
       { active: true },
-      undefined,
     ]);
   });
 });
