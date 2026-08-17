@@ -1,7 +1,7 @@
 import type { LoaderFunctionArgs } from "@remix-run/node";
 import db from "../../db.server";
 import { AppLogger } from "../../lib/logger";
-import { verifyAppProxyRequest } from "../../lib/app-proxy.server";
+import { requireAppProxy } from "../../lib/auth-guards.server";
 import { BundleStatus } from "../../constants/bundle";
 import { formatBundleForWidget } from "../../lib/bundle-formatter.server";
 import { verifyBundlePreviewToken } from "../../lib/bundle-preview-token.server";
@@ -24,23 +24,9 @@ function escapeHtmlAttribute(value: string): string {
 export async function loader({ request, params }: LoaderFunctionArgs) {
   const startedAt = Date.now();
   const url = new URL(request.url);
-  const shopDomain = verifyAppProxyRequest(url);
+  const { session } = await requireAppProxy(request);
+  const shopDomain = session.shop;
   const bundleId = params.bundleId;
-
-  if (!shopDomain) {
-    AppLogger.warn("FPB proxy page rejected unsigned request", {
-      component: "wpb.proxy",
-      operation: "loader",
-      bundleId: bundleId ?? undefined,
-      status: 400,
-      failureCategory: "invalid_proxy_signature",
-      renderDurationMs: Date.now() - startedAt,
-    });
-    return new Response("Invalid bundle link", {
-      status: 400,
-      headers: { "Cache-Control": "no-store" },
-    });
-  }
 
   if (!bundleId) {
     AppLogger.warn("FPB proxy page missing bundle ID", {

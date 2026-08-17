@@ -49,18 +49,16 @@ function resolvePpbTemplateContract({
 }
 
 function resolvePpbTemplatePresetId({
+  templateType = '',
   designPreset = '',
 }) {
   if (typeof designPreset !== 'string') {
     return null;
   }
-  const normalizedPreset = designPreset.trim().toUpperCase();
-  const supportedPresets = templateDesignSystem?.ppb?.templateIds;
-  if (Array.isArray(supportedPresets) && supportedPresets.includes(normalizedPreset)) {
-    return normalizedPreset;
-  }
-
-  return null;
+  return resolvePpbTemplateContract({
+    templateType,
+    designPreset,
+  })?.id || null;
 }
 
 export const ProductPageConfigLifecycleMethods: Record<string, any> & ThisType<any> = {
@@ -308,7 +306,7 @@ _getProductPageTemplateType() {
   const templateType = this.selectedBundle?.bundleDesignTemplate;
   return templateType === 'PDP_INPAGE' || templateType === 'PDP_MODAL'
     ? templateType
-    : 'PDP_MODAL';
+    : '';
 },
 
 _getProductPageTemplateContract() {
@@ -319,19 +317,29 @@ _getProductPageTemplateContract() {
 },
 
 _getProductPageDesignPreset() {
-  const rawPresetId = this.selectedBundle?.bundleDesignPresetId || '';
-  if (typeof rawPresetId === 'string' && rawPresetId.trim() !== '') {
-    return resolvePpbTemplatePresetId({
-      designPreset: rawPresetId.trim().toUpperCase(),
+  const presetCandidates = [
+    this.selectedBundle?.bundleDesignPresetId,
+    this.selectedBundle?.bundleDesignTemplateData?.templateId,
+  ];
+
+  for (const candidate of presetCandidates) {
+    if (typeof candidate !== 'string' || candidate.trim() === '') continue;
+
+    const resolved = resolvePpbTemplatePresetId({
+      templateType: this._getProductPageTemplateType(),
+      designPreset: candidate.trim().toUpperCase(),
     });
+
+    if (resolved) {
+      return resolved;
+    }
   }
 
   return null;
 },
 
 _isProductPageInpageTemplate() {
-  return this._getProductPageTemplateContract?.()?.templateType === 'PDP_INPAGE'
-    || this._getProductPageTemplateType() === 'PDP_INPAGE';
+  return this._getProductPageTemplateContract?.()?.templateType === 'PDP_INPAGE';
 },
 
 _shouldShowProductComparedAtPrice() {
@@ -472,10 +480,12 @@ _markProductPageTemplate() {
 
   this.container.dataset.ppbTemplateType = templateType;
   this.container.dataset.ppbDesignPreset = canonicalPreset;
+  this.container.dataset.ppbTemplateId = canonicalPreset;
   this.container.setAttribute('template-id', canonicalPreset);
   this.container.setAttribute('template-type', templateType);
   this.elements.stepsContainer.dataset.ppbTemplateType = templateType;
   this.elements.stepsContainer.dataset.ppbDesignPreset = canonicalPreset;
+  this.elements.stepsContainer.dataset.ppbTemplateId = canonicalPreset;
 
   document.body?.setAttribute('wpbmix-template-id', canonicalPreset);
   document.body?.setAttribute('wpbmix-template-type', templateType);

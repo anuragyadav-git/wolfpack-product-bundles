@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { json, type LoaderFunctionArgs } from "@remix-run/node";
 import db from "../../db.server";
-import { verifyAppProxyRequest } from "../../lib/app-proxy.server";
+import { requireAppProxy } from "../../lib/auth-guards.server";
 import { AppLogger } from "../../lib/logger";
 import { selectEligibleFpbUpsells } from "../../services/fpb-upsells.server";
 
@@ -9,8 +9,8 @@ const CACHE_CONTROL = "private, max-age=30, must-revalidate";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
-  const shop = verifyAppProxyRequest(url);
-  if (!shop) return json({ offers: [] }, { status: 401, headers: { "Cache-Control": "private, no-store" } });
+  const { session } = await requireAppProxy(request);
+  const shop = session.shop;
 
   const productId = url.searchParams.get("productId")?.trim() ?? "";
   const locale = url.searchParams.get("locale")?.trim() ?? "";
@@ -40,6 +40,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
     if (request.headers.get("If-None-Match") === etag) return new Response(null, { status: 304, headers });
     return json({ offers }, { headers });
   } catch (error) {
+    if (error instanceof Response) {
+      throw error;
+    }
     AppLogger.error("Failed to resolve FPB product-page upsells", { component: "api.fpb-upsells", shop }, error);
     return json({ offers: [] }, { status: 500, headers: { "Cache-Control": "private, no-store" } });
   }

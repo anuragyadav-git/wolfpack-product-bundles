@@ -1,7 +1,7 @@
 import { json, type ActionFunctionArgs } from "@remix-run/node";
 import prisma from "../../db.server";
 import { SHOPIFY_REST_API_VERSION } from "../../constants/api";
-import { verifyAppProxyRequest } from "../../lib/app-proxy.server";
+import { requireAppProxy } from "../../lib/auth-guards.server";
 import { AppLogger } from "../../lib/logger";
 import { getOfflineSessionForShop } from "../../services/offline-token.server";
 import { createStorefrontAccessToken } from "../../services/storefront-token.server";
@@ -29,11 +29,10 @@ const GET_CART_BUNDLE_DETAILS_QUERY = `
 `;
 
 const SET_CART_BUNDLE_DETAILS_MUTATION = `
-  mutation SetCartBundleDetails($metafields: [CartMetafieldsSetInput!]!) {
+  mutation SetCartBundleDetails($metafields: [MetafieldsSetInput!]!) {
     cartMetafieldsSet(metafields: $metafields) {
       metafields {
         key
-        type
         value
       }
       userErrors {
@@ -48,62 +47,72 @@ export function OPTIONS() {
   return new Response(null, { status: 204, headers: CORS_HEADERS });
 }
 
-export function normalizeCartId(cartId: unknown, cartToken: unknown) {
-  if (typeof cartId === "string" && cartId.startsWith("gid://shopify/Cart/")) {
-    return cartId;
+export function normalizeCartId(cartId: unknown, cartToken: unknown): string | null {
+  if (typeof cartId === "string" && cartId.trim().startsWith("gid://shopify/Cart/")) {
+    return cartId.trim();
   }
 
-  if (typeof cartToken !== "string") {
-    return null;
-  }
+  const rawToken = (typeof cartId === "string" && cartId.trim())
+    ? cartId.trim()
+    : (typeof cartToken === "string" && cartToken.trim())
+      ? cartToken.trim()
+      : null;
 
-  const trimmedToken = cartToken.trim();
-  if (!trimmedToken) return null;
-
-  return `gid://shopify/Cart/${trimmedToken}`;
+  if (!rawToken) return null;
+  const token = rawToken.replace(/^gid:\/\/shopify\/Cart\//, "");
+  return token ? `gid://shopify/Cart/${token}` : null;
 }
 
-export function sanitizeDisplayProperties(input: unknown): DisplayProperties {
-  if (!input || typeof input !== "object" || Array.isArray(input)) return {};
+function validateBundleDetailsKey(key: unknown): string | null {
+  if (typeof key !== "string") return null;
+  const trimmed = key.trim();
+  return /^[a-zA-Z0-9_-]{1,100}$/.test(trimmed) ? trimmed : null;
+}
 
-  return Object.entries(input).reduce<DisplayProperties>((acc, [key, value]) => {
-    if (!key || value === null || value === undefined) return acc;
-    if (!["string", "number", "boolean"].includes(typeof value)) return acc;
-    acc[key] = String(value);
-    return acc;
-  }, {});
+export function sanitizeDisplayProperties(props: unknown): DisplayProperties {
+  if (!props || typeof props !== "object" || Array.isArray(props)) {
+    return {};
+  }
+
+  const sanitized: DisplayProperties = {};
+  for (const [rawKey, rawValue] of Object.entries(props as Record<string, unknown>)) {
+    if (typeof rawKey !== "string") continue;
+    const key = rawKey.trim();
+
+    let value: string | null = null;
+    if (typeof rawValue === "string") {
+      value = rawValue.trim();
+    } else if (typeof rawValue === "number" || typeof rawValue === "boolean") {
+      value = String(rawValue).trim();
+    }
+
+    if (!key || !value || key.length > 50 || value.length > 500) continue;
+    if (key.startsWith("_") || key.includes("\n") || value.includes("\n")) continue;
+    sanitized[key] = value;
+  }
+
+  return sanitized;
 }
 
 export function mergeBundleDetailsValue(
-  existingValue: string | null | undefined,
+  existingValue: string | null,
   bundleDetailsKey: string,
   displayProperties: DisplayProperties,
-) {
-  let existingDetails: Record<string, unknown> = {};
-
+): Record<string, { displayProperties: DisplayProperties }> {
+  let detailsMap: Record<string, { displayProperties: DisplayProperties }> = {};
   if (existingValue) {
     try {
       const parsed = JSON.parse(existingValue);
       if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-        existingDetails = parsed;
+        detailsMap = parsed;
       }
     } catch {
-      existingDetails = {};
+      detailsMap = {};
     }
   }
 
-  return {
-    ...existingDetails,
-    [bundleDetailsKey]: { displayProperties },
-  };
-}
-
-function validateBundleDetailsKey(value: unknown) {
-  if (typeof value !== "string") return null;
-  const trimmed = value.trim();
-  if (!trimmed) return null;
-  if (!/^[A-Za-z0-9:_-]+_[A-Za-z0-9]+$/.test(trimmed)) return null;
-  return trimmed;
+  detailsMap[bundleDetailsKey] = { displayProperties };
+  return detailsMap;
 }
 
 async function postStorefrontGraphql(
@@ -135,16 +144,8 @@ async function postStorefrontGraphql(
 }
 
 export async function action({ request }: ActionFunctionArgs) {
-  const url = new URL(request.url);
-  const shop = verifyAppProxyRequest(url);
-
-  if (!shop) {
-    AppLogger.warn("Cart bundle_details rejected unsigned storefront request", {
-      component: "api.cart-bundle-details",
-      operation: "action",
-    });
-    return json({ ok: false, error: "Invalid storefront request" }, { status: 400, headers: CORS_HEADERS });
-  }
+  const { session: proxySession } = await requireAppProxy(request);
+  const shop = proxySession.shop;
 
   const body = await request.json().catch(() => null);
   const cartId = normalizeCartId(body?.cartId, body?.cartToken);
@@ -219,6 +220,10 @@ export async function action({ request }: ActionFunctionArgs) {
 
     return json({ ok: true }, { headers: { ...CORS_HEADERS, "Cache-Control": "no-store" } });
   } catch (error) {
+    if (error instanceof Response) {
+      throw error;
+    }
+
     AppLogger.error("Cart bundle_details sync failed", {
       component: "api.cart-bundle-details",
       operation: "action",

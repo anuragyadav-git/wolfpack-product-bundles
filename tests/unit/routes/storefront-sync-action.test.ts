@@ -56,7 +56,7 @@ describe("storefront sync action handlers", () => {
       "bundle-1",
       "full_page",
     );
-    const body = await response.json();
+    const body = await response.json() as any;
     const previewUrl = new URL(body.shareablePreviewUrl);
 
     expect(mockSyncBundleStorefrontNow).toHaveBeenCalledTimes(1);
@@ -110,7 +110,7 @@ describe("storefront sync action handlers", () => {
       "bundle-1",
       "product_page",
     );
-    const body = await response.json();
+    const body = await response.json() as any;
 
     expect(mockSyncBundleStorefrontNow).toHaveBeenCalledWith({
       admin,

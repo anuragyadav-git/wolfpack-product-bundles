@@ -30,7 +30,6 @@ const shopify = shopifyApp({
   distribution: AppDistribution.AppStore,
   future: {
     unstable_newEmbeddedAuthStrategy: true,
-    removeRest: true,
   },
   hooks: {
     afterAuth: async ({ session, admin }) => {

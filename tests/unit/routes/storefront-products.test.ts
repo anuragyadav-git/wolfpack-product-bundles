@@ -284,7 +284,7 @@ describe("api.storefront-products loader", () => {
 
     expect(variantsRequestBody.query).not.toContain("sellingPlanAllocations");
     expect(body.products[0].variants).toHaveLength(2);
-    expect(body.products[0].variants.map((variant) => variant.title)).toEqual(["6", "7"]);
+    expect(body.products[0].variants.map((variant: any) => variant.title)).toEqual(["6", "7"]);
   });
 
   it("does not request or expose selling plan allocations when the obsolete integration scope is granted", async () => {
