@@ -4,7 +4,7 @@ import { authenticate } from "../shopify.server";
 import type { Session } from "@shopify/shopify-api";
 import { AppLogger } from "./logger";
 
-// Admin context type derived from the configured shopify instance (removeRest: true → no REST client)
+// Admin context type derived from the configured shopify instance
 export type ShopifyAdmin = Awaited<ReturnType<typeof authenticate.admin>>["admin"];
 
 // ─── Admin Session Guard ──────────────────────────────────────────────────────
@@ -23,13 +23,19 @@ export async function requireAdminSession(request: Request): Promise<{
 // Use on routes called via Shopify's app proxy (storefront widget → Shopify CDN → app).
 // Equivalent to: await authenticate.public.appProxy(request)
 // Returns: { session } — session.shop is the validated shop domain
-export async function requireAppProxy(request: Request): Promise<{
-  session: Session;
-}> {
-  const { session } = await authenticate.public.appProxy(request);
-  // Shopify guarantees a valid session for authenticated proxy requests;
-  // the SDK type is widened to Session | undefined as a conservative default.
-  return { session: session as Session };
+export async function requireAppProxy(
+  request: Request,
+): Promise<{ session: Session }> {
+  const context = await authenticate.public.appProxy(request);
+
+  if (!context.session) {
+    throw new Response("Unauthorized", {
+      status: 401,
+      statusText: "No Shopify session is available",
+    });
+  }
+
+  return { session: context.session };
 }
 
 // ─── Internal Secret Guard ────────────────────────────────────────────────────

@@ -1,5 +1,6 @@
 import { createHmac } from "node:crypto";
 import { action, loader } from "../../../app/routes/api/api.attribution.engagement";
+import { authenticate } from "../../../app/shopify.server";
 
 jest.mock("../../../app/db.server", () => ({
   __esModule: true,
@@ -22,10 +23,19 @@ jest.mock("../../../app/services/app-events.server", () => ({
   recordBusinessEvent: jest.fn(),
 }));
 
+jest.mock("../../../app/shopify.server", () => ({
+  authenticate: {
+    public: {
+      appProxy: jest.fn(),
+    },
+  },
+}));
+
 const getDb = () => require("../../../app/db.server").default;
 const mockCreateMany = () => getDb().bundleEngagement.createMany as jest.MockedFunction<any>;
 const mockRecordBusinessEvent = () =>
   require("../../../app/services/app-events.server").recordBusinessEvent as jest.MockedFunction<any>;
+const mockAppProxy = authenticate.public.appProxy as jest.MockedFunction<any>;
 
 function makeSignedRequest(
   body: Record<string, unknown>,
@@ -68,6 +78,7 @@ describe("api.attribution.engagement", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     process.env.SHOPIFY_API_SECRET = "test_api_secret";
+    mockAppProxy.mockResolvedValue({ session: { shop: "test-shop.myshopify.com" } });
     mockCreateMany().mockResolvedValue({ count: 1 });
   });
 
@@ -160,7 +171,8 @@ describe("api.attribution.engagement", () => {
   });
 
   it("rejects unsigned or invalid app-proxy requests", async () => {
-    const response = await action({
+    mockAppProxy.mockRejectedValueOnce(new Response("Unauthorized", { status: 400 }));
+    await expect(action({
       request: makeSignedRequest({
         shopId: "test-shop.myshopify.com",
         bundleId: "bundle-123",
@@ -169,9 +181,8 @@ describe("api.attribution.engagement", () => {
       }, "test-shop.myshopify.com", { badSignature: true }),
       params: {},
       context: {},
-    } as any) as Response;
+    } as any)).rejects.toBeInstanceOf(Response);
 
-    expect(response.status).toBe(400);
     expect(mockCreateMany()).not.toHaveBeenCalled();
   });
 

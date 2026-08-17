@@ -115,6 +115,44 @@
       "save": "Salvar",
       "saveSuccess": "Idioma de administração salvo",
       "saveError": "Não foi possível salvar o idioma de administração"
+    },
+    "storefrontSetup": {
+      "loadingTitle": "Checking storefront setup",
+      "loadingDescription": "Checking your published theme components and app embed.",
+      "errorTitle": "Storefront status needs attention",
+      "errorDescription": "We couldn't check your published theme. Open details to review the next step.",
+      "incompleteTitle": "App Embed Status",
+      "incompleteDescription_one": "App embed is not enabled in your theme editor.",
+      "incompleteDescription_other": "App embed is not enabled in your theme editor.",
+      "completeTitle": "Your storefront is ready",
+      "completeDescription": "App embed is enabled in your theme editor",
+      "finishSetup": "Finish setup",
+      "viewDetails": "Show status",
+      "activate": "Enable",
+      "ready": "Ready",
+      "checking": "Checking setup",
+      "actionNeeded": "Action needed",
+      "coreComponents": "Core components enabled",
+      "activeBundles": "Active bundles",
+      "modalHeading": "Storefront setup",
+      "modalDescription": "These components control how Wolfpack bundles appear on your storefront.",
+      "modalError": "Status unavailable. Reload to try again.",
+      "coreHeading": "Core bundle components",
+      "optionalHeading": "Optional placements",
+      "openThemeEditor": "Open Theme Editor",
+      "close": "Close",
+      "resources": {
+        "appEmbed": "App embed",
+        "fullPage": "Full-page widget",
+        "productPage": "Product-page widget",
+        "upsellBlock": "Upsell block",
+        "upsellButton": "Upsell button"
+      },
+      "status": {
+        "enabled": "Enabled",
+        "ready": "Ready to enable",
+        "unavailable": "Not available"
+      }
     }
   },
   "settingsDcp": {
@@ -131,14 +169,96 @@
         "stepOne": "1. Escolher produtos",
         "stepTwo": "2. Revisar pacote",
         "products": {
-          "first": { "name": "Essencial do dia a dia", "price": "US$ 24,00" },
-          "second": { "name": "Adição popular", "price": "US$ 18,00" }
+          "first": {
+            "name": "Essencial do dia a dia",
+            "price": "US$ 24,00",
+            "compareAt": "$28.00"
+          },
+          "second": {
+            "name": "Adição popular",
+            "price": "US$ 18,00",
+            "compareAt": "$22.00"
+          },
+          "third": {
+            "name": "Customer favourite",
+            "price": "$16.00",
+            "compareAt": "$20.00"
+          },
+          "fourth": {
+            "name": "Bundle extra",
+            "price": "$12.00",
+            "compareAt": "$15.00"
+          }
         },
         "add": "Adicionar",
         "summary": "Resumo do pacote",
         "total": "2 produtos selecionados · US$ 42,00",
-        "next": "Continuar"
-      }
+        "next": "Continuar",
+        "bundleName": "Build your perfect bundle",
+        "navigationLabel": "Bundle steps",
+        "slotsLabel": "Bundle slots",
+        "stepOneShort": "Products",
+        "stepTwoShort": "Extras",
+        "stepThreeShort": "Review",
+        "categoryOne": "Essentials",
+        "categoryTwo": "Favourites",
+        "categoryThree": "Extras",
+        "selectionRule": "Choose at least 2 products",
+        "progressCount": "1 of 2 selected",
+        "variant": "Standard",
+        "added": "Added ×1",
+        "upsellTitle": "Complete your bundle",
+        "upsellBody": "Add a popular extra.",
+        "upsellEyebrow": "Recommended for your bundle",
+        "selectedCount": "2 items",
+        "discount": "You are $8 away from 15% off",
+        "totalLabel": "Bundle total",
+        "totalPrice": "$42.00",
+        "back": "Back",
+        "emptySlot": "Choose a product",
+        "chooseProduct": "Choose a product",
+        "slotNumber": "Product {{number}}",
+        "addBundle": "Add bundle to cart",
+        "loadingBody": "Preparing your bundle…",
+        "validationMessage": "Add at least 2 products on this step"
+      },
+      "bundleType": {
+        "label": "Bundle type",
+        "landingPage": "Landing Page",
+        "productPage": "Product Page"
+      },
+      "templateLabel": "Template",
+      "surfaceSelector": {
+        "label": "Preview surface",
+        "bundle-header": "Bundle header",
+        "navigation": "Navigation",
+        "categories": "Categories",
+        "product-card": "Product cards",
+        "product-slots": "Product slots",
+        "product-picker": "Product picker",
+        "cart-summary": "Cart / summary",
+        "loading": "Loading",
+        "validation": "Validation",
+        "upsell": "Upsell"
+      },
+      "templates": {
+        "standard": "Standard",
+        "classic": "Classic",
+        "compact": "Compact",
+        "horizontal": "Horizontal",
+        "productList": "Product List",
+        "productGrid": "Product Grid",
+        "horizontalSlots": "Horizontal Slots",
+        "verticalSlots": "Vertical Slots"
+      },
+      "viewport": {
+        "label": "Preview viewport",
+        "desktop": "Desktop preview",
+        "mobile": "Mobile preview"
+      },
+      "previewOnly": "Preview only",
+      "loading": "Loading preview",
+      "notApplicable": "This setting is not used by the selected template."
     }
   },
   "tooltips": {
@@ -192,9 +312,19 @@
   },
   "common": {
     "actions": {
-      "close": "Fechar", "dismiss": "Dispensar", "manage": "Gerenciar", "enable": "Ativar", "enableHere": "Ativar aqui", "learnMore": "Saiba mais",
-      "maybeLater": "Talvez mais tarde", "setUpVisibility": "Configurar visibilidade", "reinstallApp": "Reinstalar aplicativo",
-      "upgradeNow": "Fazer upgrade agora", "viewPlans": "Ver planos", "discardChanges": "Descartar alterações", "continueEditing": "Continuar editando"
+      "close": "Fechar",
+      "dismiss": "Dispensar",
+      "manage": "Gerenciar",
+      "enable": "Ativar",
+      "enableHere": "Ativar aqui",
+      "learnMore": "Saiba mais",
+      "maybeLater": "Talvez mais tarde",
+      "setUpVisibility": "Configurar visibilidade",
+      "reinstallApp": "Reinstalar aplicativo",
+      "upgradeNow": "Fazer upgrade agora",
+      "viewPlans": "Ver planos",
+      "discardChanges": "Descartar alterações",
+      "continueEditing": "Continuar editando"
     },
     "loading": {
       "appLabel": "Carregando o Wolfpack Product Bundles",
@@ -205,49 +335,171 @@
       "guideTitle": "Ativar incorporação do app",
       "guideImageAlt": "Como ativar a incorporação do app Wolfpack Bundles"
     },
-    "previewGate": { "title": "A visibilidade do seu pacote ainda não está configurada", "body": "Seu pacote está ativo, mas os compradores não conseguem encontrá-lo. Configure a visibilidade para mudar isso." },
-    "unlistedBundle": { "title": "Seu pacote não está listado", "body": "Para que ele seja encontrado, altere o status do produto do pacote para Ativo em Produtos da Shopify." },
-    "proxyHealth": { "title": "Proxy do aplicativo não conectado", "body": "Os widgets de pacote de página inteira não serão carregados na vitrine. Reinstale o aplicativo para corrigir isso." },
+    "previewGate": {
+      "title": "A visibilidade do seu pacote ainda não está configurada",
+      "body": "Seu pacote está ativo, mas os compradores não conseguem encontrá-lo. Configure a visibilidade para mudar isso."
+    },
+    "unlistedBundle": {
+      "title": "Seu pacote não está listado",
+      "body": "Para que ele seja encontrado, altere o status do produto do pacote para Ativo em Produtos da Shopify."
+    },
+    "proxyHealth": {
+      "title": "Proxy do aplicativo não conectado",
+      "body": "Os widgets de pacote de página inteira não serão carregados na vitrine. Reinstale o aplicativo para corrigir isso."
+    },
     "upgradePrompt": {
-      "limitReachedTitle": "Limite de pacotes atingido", "limitReachedBody": "Você usou todos os {{limit}} pacotes do plano Gratuito. Faça upgrade para Grow e tenha até 20 pacotes.",
-      "approachingTitle": "Limite de pacotes próximo", "approachingBody": "Você está usando {{current}} de {{limit}} pacotes. Faça upgrade para Grow e tenha até 20 pacotes.",
+      "limitReachedTitle": "Limite de pacotes atingido",
+      "limitReachedBody": "Você usou todos os {{limit}} pacotes do plano Gratuito. Faça upgrade para Grow e tenha até 20 pacotes.",
+      "approachingTitle": "Limite de pacotes próximo",
+      "approachingBody": "Você está usando {{current}} de {{limit}} pacotes. Faça upgrade para Grow e tenha até 20 pacotes.",
       "usageBody": "Você está usando {{current}} de {{limit}} pacotes no plano Gratuito. Precisa de mais? Faça upgrade para Grow e tenha 20 pacotes."
     },
-    "discardChanges": { "title": "Descartar todas as alterações não salvas", "body": "Ao descartar as alterações, você excluirá todas as edições feitas desde o último salvamento." },
+    "discardChanges": {
+      "title": "Descartar todas as alterações não salvas",
+      "body": "Ao descartar as alterações, você excluirá todas as edições feitas desde o último salvamento."
+    },
     "multiLanguage": {
-      "title": "Personalizar texto para vários idiomas", "saveAndClose": "Salvar e fechar", "translations": "Traduções",
-      "helper": "Use a lista suspensa nesta seção para especificar o idioma que deseja editar", "chooseLanguage": "Escolher idioma para editar",
-      "customText": "Texto personalizado", "inputHelper": "Insira o texto para o idioma selecionado", "textSettings": "Configurações de texto"
+      "title": "Personalizar texto para vários idiomas",
+      "saveAndClose": "Salvar e fechar",
+      "translations": "Traduções",
+      "helper": "Use a lista suspensa nesta seção para especificar o idioma que deseja editar",
+      "chooseLanguage": "Escolher idioma para editar",
+      "customText": "Texto personalizado",
+      "inputHelper": "Insira o texto para o idioma selecionado",
+      "textSettings": "Configurações de texto"
     },
     "readiness": {
-      "itemAccessibility": "Item de prontidão {{label}}", "points": "+{{points}} pontos", "ready": "Seu pacote está pronto para vender!",
-      "notReady": "Seu pacote ainda não está pronto para vender.", "toggleAccessibility": "Alternar pontuação de prontidão",
-      "title": "Pontuação de prontidão", "helper": "Conclua todas as etapas para maximizar o sucesso do seu pacote."
+      "itemAccessibility": "Item de prontidão {{label}}",
+      "points": "+{{points}} pontos",
+      "ready": "Seu pacote está pronto para vender!",
+      "notReady": "Seu pacote ainda não está pronto para vender.",
+      "toggleAccessibility": "Alternar pontuação de prontidão",
+      "title": "Pontuação de prontidão",
+      "helper": "Conclua todas as etapas para maximizar o sucesso do seu pacote."
     },
-    "bundleStatus": { "title": "Status do pacote", "options": { "active": "Ativo", "draft": "Rascunho", "archived": "Arquivado", "unlisted": "Não listado (campanhas publicitárias)" } }
+    "bundleStatus": {
+      "title": "Status do pacote",
+      "options": {
+        "active": "Ativo",
+        "draft": "Rascunho",
+        "archived": "Arquivado",
+        "unlisted": "Não listado (campanhas publicitárias)"
+      }
+    }
   },
   "createBundle": {
-    "title": "Criar pacote", "dashboard": "Painel", "heading": "Selecionar tipo de criador de pacotes", "help": "Como funcionam os tipos de criador de pacotes?",
-    "validation": { "required": "O nome do pacote é obrigatório", "minLength": "O nome do pacote deve ter pelo menos 3 caracteres" },
-    "fields": { "name": "Nome do pacote", "namePlaceholder": "Ex.: pacote de camisetas" },
-    "bundleType": {
-      "productPage": { "title": "Criador de pacotes na página do produto", "description": "Exibir o criador de pacotes nas páginas de produto existentes (recomendado para a maioria das lojas)" },
-      "fullPage": { "title": "Criador de pacotes de página inteira", "description": "Criar uma página de destino dedicada para seu pacote com abas e personalização completa" }
+    "title": "Criar pacote",
+    "dashboard": "Painel",
+    "heading": "Selecionar tipo de criador de pacotes",
+    "help": "Como funcionam os tipos de criador de pacotes?",
+    "validation": {
+      "required": "O nome do pacote é obrigatório",
+      "minLength": "O nome do pacote deve ter pelo menos 3 caracteres"
     },
-    "actions": { "selected": "Selecionado", "select": "Selecionar", "next": "Avançar" }
+    "fields": {
+      "name": "Nome do pacote",
+      "namePlaceholder": "Ex.: pacote de camisetas"
+    },
+    "bundleType": {
+      "productPage": {
+        "title": "Criador de pacotes na página do produto",
+        "description": "Exibir o criador de pacotes nas páginas de produto existentes (recomendado para a maioria das lojas)"
+      },
+      "fullPage": {
+        "title": "Criador de pacotes de página inteira",
+        "description": "Criar uma página de destino dedicada para seu pacote com abas e personalização completa"
+      }
+    },
+    "actions": {
+      "selected": "Selecionado",
+      "select": "Selecionar",
+      "next": "Avançar"
+    }
   },
   "billing": {
     "pricePerMonth": "US$ {{price}}/mês",
-    "actions": { "tryAgain": "Tentar novamente", "contactSupport": "Falar com o suporte", "cancel": "Cancelar" },
-    "error": { "heading": "Problema na assinatura", "missingChargeId": "Falha na confirmação da assinatura: ID da cobrança ausente.", "confirmationFailed": "Não foi possível confirmar a assinatura com a Shopify.", "unexpected": "Ocorreu um erro inesperado durante a configuração da assinatura." },
-    "upgradeModal": {
-      "heading": "Fazer upgrade para o plano Grow", "confirm": "Confirmar upgrade - US$ {{price}}/mês", "redirect": "Você será redirecionado para a Shopify para concluir sua assinatura.",
-      "benefitsHeading": "O que você recebe com o Grow:", "bundleLimit": "Até 20 pacotes (atualmente {{current}}/{{limit}})", "billedMonthly": "Cobrado mensalmente pela Shopify",
-      "benefits": { "noRevenueCap": "Sem limite de receita de pacotes - o plano gratuito é limitado a US$ 500/mês", "advancedDiscounts": "Regras avançadas de desconto", "prioritySupport": "Suporte prioritário" }
+    "actions": {
+      "tryAgain": "Tentar novamente",
+      "contactSupport": "Falar com o suporte",
+      "cancel": "Cancelar"
     },
-    "success": { "heading": "Boas-vindas ao plano Grow!", "body": "Sua assinatura foi ativada. Agora você tem acesso a todos os recursos premium.", "bundleLimit": "Limite de pacotes", "bundleLimitValue": "20 pacotes", "designControl": "Controle de design", "fullAccess": "Acesso completo", "support": "Suporte", "priority": "Prioritário" },
-    "cards": { "currentPlan": "Plano atual", "freePrice": "Grátis", "freeDescription": "Para vendas de pacotes de até US$ 500/mês - grátis até você crescer", "includes": "Inclui:", "freePlan": "Plano gratuito", "mostPopular": "Mais popular", "perMonth": "/ mês", "growDescription": "Para vendas de pacotes acima de US$ 500/mês - sem limite de receita", "growIncludes": "Tudo do plano Grátis, mais:", "upgradeToGrow": "Fazer upgrade para Grow", "cancelAnytimeBilled": "Cancele quando quiser. Cobrado pela Shopify." },
-    "cta": { "heading": "Pronto para expandir seu negócio de pacotes?", "body": "Faça upgrade para o plano Grow para duplicar os pacotes, personalizar totalmente o design e ter suporte prioritário.", "highlights": { "bundles": "20 pacotes", "design": "Painel de controle de design", "support": "Suporte prioritário" }, "upgrade": "Fazer upgrade para Grow - US$ {{price}}/mês", "cancelAnytime": "Cancele quando quiser" },
-    "route": { "title": "Assinatura e cobrança", "dashboard": "Painel", "currentPlan": "Plano atual", "active": "Ativo", "inactive": "Inativo", "bundleUsage": "Uso de pacotes", "bundleCount": "{{current}} / {{limit}} pacotes", "limitReached": "Você atingiu seu limite de pacotes.", "limitUpgrade": "Faça upgrade para Grow para ter mais pacotes.", "overview": "Visão geral dos pacotes", "activeBundles": "Pacotes ativos", "totalSteps": "Total de etapas", "productPage": "Página do produto", "fullPage": "Página inteira", "cancelSubscription": "Cancelar assinatura", "cancelHeading": "Cancelar assinatura?", "downgradeBody": "Você mudará para o plano Gratuito com limite de {{limit}} pacotes.", "archiveWarning": "Aviso: você tem {{current}} pacotes. Os {{excess}} pacotes excedentes serão arquivados (não excluídos).", "confirmCancellation": "Confirmar cancelamento", "keepSubscription": "Manter assinatura", "features": "Recursos do seu plano", "needHelp": "Precisa de ajuda?", "helpBody": "Tem dúvidas sobre cobrança ou precisa de um plano personalizado? Nossa equipe está aqui para ajudar." }
+    "error": {
+      "heading": "Problema na assinatura",
+      "missingChargeId": "Falha na confirmação da assinatura: ID da cobrança ausente.",
+      "confirmationFailed": "Não foi possível confirmar a assinatura com a Shopify.",
+      "unexpected": "Ocorreu um erro inesperado durante a configuração da assinatura."
+    },
+    "upgradeModal": {
+      "heading": "Fazer upgrade para o plano Grow",
+      "confirm": "Confirmar upgrade - US$ {{price}}/mês",
+      "redirect": "Você será redirecionado para a Shopify para concluir sua assinatura.",
+      "benefitsHeading": "O que você recebe com o Grow:",
+      "bundleLimit": "Até 20 pacotes (atualmente {{current}}/{{limit}})",
+      "billedMonthly": "Cobrado mensalmente pela Shopify",
+      "benefits": {
+        "noRevenueCap": "Sem limite de receita de pacotes - o plano gratuito é limitado a US$ 500/mês",
+        "advancedDiscounts": "Regras avançadas de desconto",
+        "prioritySupport": "Suporte prioritário"
+      }
+    },
+    "success": {
+      "heading": "Boas-vindas ao plano Grow!",
+      "body": "Sua assinatura foi ativada. Agora você tem acesso a todos os recursos premium.",
+      "bundleLimit": "Limite de pacotes",
+      "bundleLimitValue": "20 pacotes",
+      "designControl": "Controle de design",
+      "fullAccess": "Acesso completo",
+      "support": "Suporte",
+      "priority": "Prioritário"
+    },
+    "cards": {
+      "currentPlan": "Plano atual",
+      "freePrice": "Grátis",
+      "freeDescription": "Para vendas de pacotes de até US$ 500/mês - grátis até você crescer",
+      "includes": "Inclui:",
+      "freePlan": "Plano gratuito",
+      "mostPopular": "Mais popular",
+      "perMonth": "/ mês",
+      "growDescription": "Para vendas de pacotes acima de US$ 500/mês - sem limite de receita",
+      "growIncludes": "Tudo do plano Grátis, mais:",
+      "upgradeToGrow": "Fazer upgrade para Grow",
+      "cancelAnytimeBilled": "Cancele quando quiser. Cobrado pela Shopify."
+    },
+    "cta": {
+      "heading": "Pronto para expandir seu negócio de pacotes?",
+      "body": "Faça upgrade para o plano Grow para duplicar os pacotes, personalizar totalmente o design e ter suporte prioritário.",
+      "highlights": {
+        "bundles": "20 pacotes",
+        "design": "Painel de controle de design",
+        "support": "Suporte prioritário"
+      },
+      "upgrade": "Fazer upgrade para Grow - US$ {{price}}/mês",
+      "cancelAnytime": "Cancele quando quiser"
+    },
+    "route": {
+      "title": "Assinatura e cobrança",
+      "dashboard": "Painel",
+      "currentPlan": "Plano atual",
+      "active": "Ativo",
+      "inactive": "Inativo",
+      "bundleUsage": "Uso de pacotes",
+      "bundleCount": "{{current}} / {{limit}} pacotes",
+      "limitReached": "Você atingiu seu limite de pacotes.",
+      "limitUpgrade": "Faça upgrade para Grow para ter mais pacotes.",
+      "overview": "Visão geral dos pacotes",
+      "activeBundles": "Pacotes ativos",
+      "totalSteps": "Total de etapas",
+      "productPage": "Página do produto",
+      "fullPage": "Página inteira",
+      "cancelSubscription": "Cancelar assinatura",
+      "cancelHeading": "Cancelar assinatura?",
+      "downgradeBody": "Você mudará para o plano Gratuito com limite de {{limit}} pacotes.",
+      "archiveWarning": "Aviso: você tem {{current}} pacotes. Os {{excess}} pacotes excedentes serão arquivados (não excluídos).",
+      "confirmCancellation": "Confirmar cancelamento",
+      "keepSubscription": "Manter assinatura",
+      "features": "Recursos do seu plano",
+      "needHelp": "Precisa de ajuda?",
+      "helpBody": "Tem dúvidas sobre cobrança ou precisa de um plano personalizado? Nossa equipe está aqui para ajudar."
+    }
   }
 }

@@ -46,10 +46,44 @@ describe('PPB template registry resolver', () => {
     }).id).toBe('HORIZONTAL_SLOTS');
   });
 
-  it('does not resolve legacy preset IDs', () => {
+  it('does not resolve unknown preset IDs', () => {
+    expect(resolvePpbTemplate({
+      templateType: 'PDP_INPAGE',
+      designPreset: 'UNKNOWN_PRESET',
+    })).toBeNull();
+  });
+
+  it('resolves EB-style legacy aliases from PDP_MODAL and PDP_INPAGE', () => {
+    expect(resolvePpbTemplate({
+      templateType: 'PDP_INPAGE',
+      designPreset: 'CASCADE',
+    }).id).toBe('LIST');
+    expect(resolvePpbTemplate({
+      templateType: 'PDP_MODAL',
+      designPreset: 'MODAL',
+    }).id).toBe('HORIZONTAL_SLOTS');
+    expect(resolvePpbTemplate({
+      templateType: 'PDP_MODAL',
+      designPreset: 'SIMPLIFIED',
+    }).id).toBe('VERTICAL_SLOTS');
+    expect(resolvePpbTemplate({
+      templateType: 'PDP_INPAGE',
+      designPreset: 'COGNIVE',
+    }).id).toBe('GRID');
+    expect(resolvePpbTemplate({
+      templateType: 'PDP_INPAGE',
+      designPreset: 'cOgNiVe',
+    }).id).toBe('GRID');
+  });
+
+  it('does not resolve legacy aliases when template type mismatches', () => {
     expect(resolvePpbTemplate({
       templateType: 'PDP_INPAGE',
       designPreset: 'MODAL',
+    })).toBeNull();
+    expect(resolvePpbTemplate({
+      templateType: 'PDP_MODAL',
+      designPreset: 'CASCADE',
     })).toBeNull();
   });
 

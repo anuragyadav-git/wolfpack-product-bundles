@@ -73,10 +73,6 @@ export function parseSettingsDesignPayload(value: unknown): SettingsDesignPayloa
     throw new Error("Invalid Settings Design payload");
   }
 
-  for (const key of Object.keys(value.fieldValues)) {
-    if (!FIELD_BY_KEY.has(key)) throw new Error(`Unknown Design field: ${key}`);
-  }
-
   const fieldValues = { ...SETTINGS_DESIGN_DEFAULT_FIELD_VALUES } as Record<string, string>;
   for (const [key, field] of FIELD_BY_KEY) {
     const candidate = value.fieldValues[key];

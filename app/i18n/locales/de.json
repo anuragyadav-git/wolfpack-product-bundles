@@ -115,6 +115,44 @@
       "save": "Speichern",
       "saveSuccess": "Admin-Sprache gespeichert",
       "saveError": "Admin-Sprache konnte nicht gespeichert werden"
+    },
+    "storefrontSetup": {
+      "loadingTitle": "Checking storefront setup",
+      "loadingDescription": "Checking your published theme components and app embed.",
+      "errorTitle": "Storefront status needs attention",
+      "errorDescription": "We couldn't check your published theme. Open details to review the next step.",
+      "incompleteTitle": "App Embed Status",
+      "incompleteDescription_one": "App embed is not enabled in your theme editor.",
+      "incompleteDescription_other": "App embed is not enabled in your theme editor.",
+      "completeTitle": "Your storefront is ready",
+      "completeDescription": "App embed is enabled in your theme editor",
+      "finishSetup": "Finish setup",
+      "viewDetails": "Show status",
+      "activate": "Enable",
+      "ready": "Ready",
+      "checking": "Checking setup",
+      "actionNeeded": "Action needed",
+      "coreComponents": "Core components enabled",
+      "activeBundles": "Active bundles",
+      "modalHeading": "Storefront setup",
+      "modalDescription": "These components control how Wolfpack bundles appear on your storefront.",
+      "modalError": "Status unavailable. Reload to try again.",
+      "coreHeading": "Core bundle components",
+      "optionalHeading": "Optional placements",
+      "openThemeEditor": "Open Theme Editor",
+      "close": "Close",
+      "resources": {
+        "appEmbed": "App embed",
+        "fullPage": "Full-page widget",
+        "productPage": "Product-page widget",
+        "upsellBlock": "Upsell block",
+        "upsellButton": "Upsell button"
+      },
+      "status": {
+        "enabled": "Enabled",
+        "ready": "Ready to enable",
+        "unavailable": "Not available"
+      }
     }
   },
   "settingsDcp": {
@@ -131,14 +169,96 @@
         "stepOne": "1. Produkte auswählen",
         "stepTwo": "2. Bundle prüfen",
         "products": {
-          "first": { "name": "Alltags-Essential", "price": "24,00 $" },
-          "second": { "name": "Beliebte Ergänzung", "price": "18,00 $" }
+          "first": {
+            "name": "Alltags-Essential",
+            "price": "24,00 $",
+            "compareAt": "$28.00"
+          },
+          "second": {
+            "name": "Beliebte Ergänzung",
+            "price": "18,00 $",
+            "compareAt": "$22.00"
+          },
+          "third": {
+            "name": "Customer favourite",
+            "price": "$16.00",
+            "compareAt": "$20.00"
+          },
+          "fourth": {
+            "name": "Bundle extra",
+            "price": "$12.00",
+            "compareAt": "$15.00"
+          }
         },
         "add": "Hinzufügen",
         "summary": "Bundle-Zusammenfassung",
         "total": "2 Produkte ausgewählt · 42,00 $",
-        "next": "Weiter"
-      }
+        "next": "Weiter",
+        "bundleName": "Build your perfect bundle",
+        "navigationLabel": "Bundle steps",
+        "slotsLabel": "Bundle slots",
+        "stepOneShort": "Products",
+        "stepTwoShort": "Extras",
+        "stepThreeShort": "Review",
+        "categoryOne": "Essentials",
+        "categoryTwo": "Favourites",
+        "categoryThree": "Extras",
+        "selectionRule": "Choose at least 2 products",
+        "progressCount": "1 of 2 selected",
+        "variant": "Standard",
+        "added": "Added ×1",
+        "upsellTitle": "Complete your bundle",
+        "upsellBody": "Add a popular extra.",
+        "upsellEyebrow": "Recommended for your bundle",
+        "selectedCount": "2 items",
+        "discount": "You are $8 away from 15% off",
+        "totalLabel": "Bundle total",
+        "totalPrice": "$42.00",
+        "back": "Back",
+        "emptySlot": "Choose a product",
+        "chooseProduct": "Choose a product",
+        "slotNumber": "Product {{number}}",
+        "addBundle": "Add bundle to cart",
+        "loadingBody": "Preparing your bundle…",
+        "validationMessage": "Add at least 2 products on this step"
+      },
+      "bundleType": {
+        "label": "Bundle type",
+        "landingPage": "Landing Page",
+        "productPage": "Product Page"
+      },
+      "templateLabel": "Template",
+      "surfaceSelector": {
+        "label": "Preview surface",
+        "bundle-header": "Bundle header",
+        "navigation": "Navigation",
+        "categories": "Categories",
+        "product-card": "Product cards",
+        "product-slots": "Product slots",
+        "product-picker": "Product picker",
+        "cart-summary": "Cart / summary",
+        "loading": "Loading",
+        "validation": "Validation",
+        "upsell": "Upsell"
+      },
+      "templates": {
+        "standard": "Standard",
+        "classic": "Classic",
+        "compact": "Compact",
+        "horizontal": "Horizontal",
+        "productList": "Product List",
+        "productGrid": "Product Grid",
+        "horizontalSlots": "Horizontal Slots",
+        "verticalSlots": "Vertical Slots"
+      },
+      "viewport": {
+        "label": "Preview viewport",
+        "desktop": "Desktop preview",
+        "mobile": "Mobile preview"
+      },
+      "previewOnly": "Preview only",
+      "loading": "Loading preview",
+      "notApplicable": "This setting is not used by the selected template."
     }
   },
   "tooltips": {
@@ -192,9 +312,19 @@
   },
   "common": {
     "actions": {
-      "close": "Schließen", "dismiss": "Ausblenden", "manage": "Verwalten", "enable": "Aktivieren", "enableHere": "Hier aktivieren", "learnMore": "Mehr erfahren",
-      "maybeLater": "Vielleicht später", "setUpVisibility": "Sichtbarkeit einrichten", "reinstallApp": "App neu installieren",
-      "upgradeNow": "Jetzt upgraden", "viewPlans": "Tarife anzeigen", "discardChanges": "Änderungen verwerfen", "continueEditing": "Weiter bearbeiten"
+      "close": "Schließen",
+      "dismiss": "Ausblenden",
+      "manage": "Verwalten",
+      "enable": "Aktivieren",
+      "enableHere": "Hier aktivieren",
+      "learnMore": "Mehr erfahren",
+      "maybeLater": "Vielleicht später",
+      "setUpVisibility": "Sichtbarkeit einrichten",
+      "reinstallApp": "App neu installieren",
+      "upgradeNow": "Jetzt upgraden",
+      "viewPlans": "Tarife anzeigen",
+      "discardChanges": "Änderungen verwerfen",
+      "continueEditing": "Weiter bearbeiten"
     },
     "loading": {
       "appLabel": "Wolfpack Product Bundles wird geladen",
@@ -205,49 +335,171 @@
       "guideTitle": "App-Einbettung aktivieren",
       "guideImageAlt": "So aktivierst du die Wolfpack Bundles App-Einbettung"
     },
-    "previewGate": { "title": "Die Sichtbarkeit deines Bundles ist noch nicht eingerichtet", "body": "Dein Bundle ist aktiv, aber Käufer können es nicht finden. Richte die Sichtbarkeit ein, um das zu ändern." },
-    "unlistedBundle": { "title": "Dein Bundle ist nicht gelistet", "body": "Stelle den Status des Bundle-Produkts in Shopify Produkte auf Aktiv, damit es gefunden werden kann." },
-    "proxyHealth": { "title": "App-Proxy nicht verbunden", "body": "Ganzseitige Bundle-Widgets werden in deinem Storefront nicht geladen. Installiere die App erneut, um das Problem zu beheben." },
+    "previewGate": {
+      "title": "Die Sichtbarkeit deines Bundles ist noch nicht eingerichtet",
+      "body": "Dein Bundle ist aktiv, aber Käufer können es nicht finden. Richte die Sichtbarkeit ein, um das zu ändern."
+    },
+    "unlistedBundle": {
+      "title": "Dein Bundle ist nicht gelistet",
+      "body": "Stelle den Status des Bundle-Produkts in Shopify Produkte auf Aktiv, damit es gefunden werden kann."
+    },
+    "proxyHealth": {
+      "title": "App-Proxy nicht verbunden",
+      "body": "Ganzseitige Bundle-Widgets werden in deinem Storefront nicht geladen. Installiere die App erneut, um das Problem zu beheben."
+    },
     "upgradePrompt": {
-      "limitReachedTitle": "Bundle-Limit erreicht", "limitReachedBody": "Du hast alle {{limit}} Bundles im kostenlosen Tarif verwendet. Upgrade auf Grow für bis zu 20 Bundles.",
-      "approachingTitle": "Bundle-Limit fast erreicht", "approachingBody": "Du verwendest {{current}} von {{limit}} Bundles. Upgrade auf Grow für bis zu 20 Bundles.",
+      "limitReachedTitle": "Bundle-Limit erreicht",
+      "limitReachedBody": "Du hast alle {{limit}} Bundles im kostenlosen Tarif verwendet. Upgrade auf Grow für bis zu 20 Bundles.",
+      "approachingTitle": "Bundle-Limit fast erreicht",
+      "approachingBody": "Du verwendest {{current}} von {{limit}} Bundles. Upgrade auf Grow für bis zu 20 Bundles.",
       "usageBody": "Du verwendest {{current}} von {{limit}} Bundles im kostenlosen Tarif. Benötigst du mehr? Upgrade auf Grow für 20 Bundles."
     },
-    "discardChanges": { "title": "Alle nicht gespeicherten Änderungen verwerfen", "body": "Wenn du die Änderungen verwirfst, werden alle Bearbeitungen seit dem letzten Speichern gelöscht." },
+    "discardChanges": {
+      "title": "Alle nicht gespeicherten Änderungen verwerfen",
+      "body": "Wenn du die Änderungen verwirfst, werden alle Bearbeitungen seit dem letzten Speichern gelöscht."
+    },
     "multiLanguage": {
-      "title": "Text für mehrere Sprachen anpassen", "saveAndClose": "Speichern und schließen", "translations": "Übersetzungen",
-      "helper": "Wähle in diesem Abschnitt über das Dropdown-Menü die Sprache aus, die du bearbeiten möchtest", "chooseLanguage": "Zu bearbeitende Sprache auswählen",
-      "customText": "Benutzerdefinierter Text", "inputHelper": "Text für die ausgewählte Sprache eingeben", "textSettings": "Texteinstellungen"
+      "title": "Text für mehrere Sprachen anpassen",
+      "saveAndClose": "Speichern und schließen",
+      "translations": "Übersetzungen",
+      "helper": "Wähle in diesem Abschnitt über das Dropdown-Menü die Sprache aus, die du bearbeiten möchtest",
+      "chooseLanguage": "Zu bearbeitende Sprache auswählen",
+      "customText": "Benutzerdefinierter Text",
+      "inputHelper": "Text für die ausgewählte Sprache eingeben",
+      "textSettings": "Texteinstellungen"
     },
     "readiness": {
-      "itemAccessibility": "Bereitschaftselement {{label}}", "points": "+{{points}} Punkte", "ready": "Dein Bundle ist verkaufsbereit!",
-      "notReady": "Dein Bundle ist noch nicht verkaufsbereit.", "toggleAccessibility": "Bereitschaftswert ein- oder ausblenden",
-      "title": "Bereitschaftswert", "helper": "Schließe alle Schritte ab, um den Erfolg deines Bundles zu maximieren."
+      "itemAccessibility": "Bereitschaftselement {{label}}",
+      "points": "+{{points}} Punkte",
+      "ready": "Dein Bundle ist verkaufsbereit!",
+      "notReady": "Dein Bundle ist noch nicht verkaufsbereit.",
+      "toggleAccessibility": "Bereitschaftswert ein- oder ausblenden",
+      "title": "Bereitschaftswert",
+      "helper": "Schließe alle Schritte ab, um den Erfolg deines Bundles zu maximieren."
     },
-    "bundleStatus": { "title": "Bundle-Status", "options": { "active": "Aktiv", "draft": "Entwurf", "archived": "Archiviert", "unlisted": "Nicht gelistet (Werbekampagnen)" } }
+    "bundleStatus": {
+      "title": "Bundle-Status",
+      "options": {
+        "active": "Aktiv",
+        "draft": "Entwurf",
+        "archived": "Archiviert",
+        "unlisted": "Nicht gelistet (Werbekampagnen)"
+      }
+    }
   },
   "createBundle": {
-    "title": "Bundle erstellen", "dashboard": "Dashboard", "heading": "Bundle-Builder-Typ auswählen", "help": "Wie funktionieren Bundle-Builder-Typen?",
-    "validation": { "required": "Bundle-Name ist erforderlich", "minLength": "Bundle-Name muss mindestens 3 Zeichen lang sein" },
-    "fields": { "name": "Bundle-Name", "namePlaceholder": "z. B. T-Shirt-Bundle" },
-    "bundleType": {
-      "productPage": { "title": "Produktseiten-Bundle-Builder", "description": "Bundle-Builder auf vorhandenen Produktseiten anzeigen (für die meisten Shops empfohlen)" },
-      "fullPage": { "title": "Ganzseitiger Bundle-Builder", "description": "Eine eigene Landingpage für dein Bundle mit Tabs und vollständiger Anpassung erstellen" }
+    "title": "Bundle erstellen",
+    "dashboard": "Dashboard",
+    "heading": "Bundle-Builder-Typ auswählen",
+    "help": "Wie funktionieren Bundle-Builder-Typen?",
+    "validation": {
+      "required": "Bundle-Name ist erforderlich",
+      "minLength": "Bundle-Name muss mindestens 3 Zeichen lang sein"
     },
-    "actions": { "selected": "Ausgewählt", "select": "Auswählen", "next": "Weiter" }
+    "fields": {
+      "name": "Bundle-Name",
+      "namePlaceholder": "z. B. T-Shirt-Bundle"
+    },
+    "bundleType": {
+      "productPage": {
+        "title": "Produktseiten-Bundle-Builder",
+        "description": "Bundle-Builder auf vorhandenen Produktseiten anzeigen (für die meisten Shops empfohlen)"
+      },
+      "fullPage": {
+        "title": "Ganzseitiger Bundle-Builder",
+        "description": "Eine eigene Landingpage für dein Bundle mit Tabs und vollständiger Anpassung erstellen"
+      }
+    },
+    "actions": {
+      "selected": "Ausgewählt",
+      "select": "Auswählen",
+      "next": "Weiter"
+    }
   },
   "billing": {
     "pricePerMonth": "${{price}}/Monat",
-    "actions": { "tryAgain": "Erneut versuchen", "contactSupport": "Support kontaktieren", "cancel": "Abbrechen" },
-    "error": { "heading": "Abonnementproblem", "missingChargeId": "Abonnementbestätigung fehlgeschlagen: Zahlungs-ID fehlt.", "confirmationFailed": "Abonnement konnte nicht bei Shopify bestätigt werden.", "unexpected": "Beim Einrichten des Abonnements ist ein unerwarteter Fehler aufgetreten." },
-    "upgradeModal": {
-      "heading": "Auf den Grow-Tarif upgraden", "confirm": "Upgrade bestätigen - ${{price}}/Monat", "redirect": "Du wirst zu Shopify weitergeleitet, um dein Abonnement abzuschließen.",
-      "benefitsHeading": "Das erhältst du mit Grow:", "bundleLimit": "Bis zu 20 Bundles (aktuell {{current}}/{{limit}})", "billedMonthly": "Monatliche Abrechnung über Shopify",
-      "benefits": { "noRevenueCap": "Kein Umsatzlimit für Bundles - der kostenlose Tarif ist auf $500/Monat begrenzt", "advancedDiscounts": "Erweiterte Rabattregeln", "prioritySupport": "Priorisierter Support" }
+    "actions": {
+      "tryAgain": "Erneut versuchen",
+      "contactSupport": "Support kontaktieren",
+      "cancel": "Abbrechen"
     },
-    "success": { "heading": "Willkommen im Grow-Tarif!", "body": "Dein Abonnement wurde aktiviert. Du hast jetzt Zugriff auf alle Premium-Funktionen.", "bundleLimit": "Bundle-Limit", "bundleLimitValue": "20 Bundles", "designControl": "Designsteuerung", "fullAccess": "Voller Zugriff", "support": "Support", "priority": "Priorisiert" },
-    "cards": { "currentPlan": "Aktueller Tarif", "freePrice": "Kostenlos", "freeDescription": "Für Bundle-Umsätze bis $500/Monat - kostenlos, bis du wächst", "includes": "Enthält:", "freePlan": "Kostenloser Tarif", "mostPopular": "Am beliebtesten", "perMonth": "/ Monat", "growDescription": "Für Bundle-Umsätze über $500/Monat - kein Umsatzlimit", "growIncludes": "Alles aus Kostenlos, plus:", "upgradeToGrow": "Auf Grow upgraden", "cancelAnytimeBilled": "Jederzeit kündbar. Abrechnung über Shopify." },
-    "cta": { "heading": "Bereit, dein Bundle-Geschäft auszubauen?", "body": "Upgrade auf Grow für doppelt so viele Bundles, vollständige Designanpassung und priorisierten Support.", "highlights": { "bundles": "20 Bundles", "design": "Design-Kontrollpanel", "support": "Priorisierter Support" }, "upgrade": "Auf Grow upgraden - ${{price}}/Monat", "cancelAnytime": "Jederzeit kündbar" },
-    "route": { "title": "Abonnement und Abrechnung", "dashboard": "Dashboard", "currentPlan": "Aktueller Tarif", "active": "Aktiv", "inactive": "Inaktiv", "bundleUsage": "Bundle-Nutzung", "bundleCount": "{{current}} / {{limit}} Bundles", "limitReached": "Du hast dein Bundle-Limit erreicht.", "limitUpgrade": "Upgrade auf Grow für mehr Bundles.", "overview": "Bundle-Übersicht", "activeBundles": "Aktive Bundles", "totalSteps": "Schritte insgesamt", "productPage": "Produktseite", "fullPage": "Ganze Seite", "cancelSubscription": "Abonnement kündigen", "cancelHeading": "Abonnement kündigen?", "downgradeBody": "Du wirst auf den kostenlosen Tarif mit einem Limit von {{limit}} Bundles herabgestuft.", "archiveWarning": "Warnung: Du hast {{current}} Bundles. Die überschüssigen {{excess}} Bundles werden archiviert (nicht gelöscht).", "confirmCancellation": "Kündigung bestätigen", "keepSubscription": "Abonnement behalten", "features": "Funktionen deines Tarifs", "needHelp": "Brauchst du Hilfe?", "helpBody": "Hast du Fragen zur Abrechnung oder benötigst einen individuellen Tarif? Unser Team hilft dir gerne." }
+    "error": {
+      "heading": "Abonnementproblem",
+      "missingChargeId": "Abonnementbestätigung fehlgeschlagen: Zahlungs-ID fehlt.",
+      "confirmationFailed": "Abonnement konnte nicht bei Shopify bestätigt werden.",
+      "unexpected": "Beim Einrichten des Abonnements ist ein unerwarteter Fehler aufgetreten."
+    },
+    "upgradeModal": {
+      "heading": "Auf den Grow-Tarif upgraden",
+      "confirm": "Upgrade bestätigen - ${{price}}/Monat",
+      "redirect": "Du wirst zu Shopify weitergeleitet, um dein Abonnement abzuschließen.",
+      "benefitsHeading": "Das erhältst du mit Grow:",
+      "bundleLimit": "Bis zu 20 Bundles (aktuell {{current}}/{{limit}})",
+      "billedMonthly": "Monatliche Abrechnung über Shopify",
+      "benefits": {
+        "noRevenueCap": "Kein Umsatzlimit für Bundles - der kostenlose Tarif ist auf $500/Monat begrenzt",
+        "advancedDiscounts": "Erweiterte Rabattregeln",
+        "prioritySupport": "Priorisierter Support"
+      }
+    },
+    "success": {
+      "heading": "Willkommen im Grow-Tarif!",
+      "body": "Dein Abonnement wurde aktiviert. Du hast jetzt Zugriff auf alle Premium-Funktionen.",
+      "bundleLimit": "Bundle-Limit",
+      "bundleLimitValue": "20 Bundles",
+      "designControl": "Designsteuerung",
+      "fullAccess": "Voller Zugriff",
+      "support": "Support",
+      "priority": "Priorisiert"
+    },
+    "cards": {
+      "currentPlan": "Aktueller Tarif",
+      "freePrice": "Kostenlos",
+      "freeDescription": "Für Bundle-Umsätze bis $500/Monat - kostenlos, bis du wächst",
+      "includes": "Enthält:",
+      "freePlan": "Kostenloser Tarif",
+      "mostPopular": "Am beliebtesten",
+      "perMonth": "/ Monat",
+      "growDescription": "Für Bundle-Umsätze über $500/Monat - kein Umsatzlimit",
+      "growIncludes": "Alles aus Kostenlos, plus:",
+      "upgradeToGrow": "Auf Grow upgraden",
+      "cancelAnytimeBilled": "Jederzeit kündbar. Abrechnung über Shopify."
+    },
+    "cta": {
+      "heading": "Bereit, dein Bundle-Geschäft auszubauen?",
+      "body": "Upgrade auf Grow für doppelt so viele Bundles, vollständige Designanpassung und priorisierten Support.",
+      "highlights": {
+        "bundles": "20 Bundles",
+        "design": "Design-Kontrollpanel",
+        "support": "Priorisierter Support"
+      },
+      "upgrade": "Auf Grow upgraden - ${{price}}/Monat",
+      "cancelAnytime": "Jederzeit kündbar"
+    },
+    "route": {
+      "title": "Abonnement und Abrechnung",
+      "dashboard": "Dashboard",
+      "currentPlan": "Aktueller Tarif",
+      "active": "Aktiv",
+      "inactive": "Inaktiv",
+      "bundleUsage": "Bundle-Nutzung",
+      "bundleCount": "{{current}} / {{limit}} Bundles",
+      "limitReached": "Du hast dein Bundle-Limit erreicht.",
+      "limitUpgrade": "Upgrade auf Grow für mehr Bundles.",
+      "overview": "Bundle-Übersicht",
+      "activeBundles": "Aktive Bundles",
+      "totalSteps": "Schritte insgesamt",
+      "productPage": "Produktseite",
+      "fullPage": "Ganze Seite",
+      "cancelSubscription": "Abonnement kündigen",
+      "cancelHeading": "Abonnement kündigen?",
+      "downgradeBody": "Du wirst auf den kostenlosen Tarif mit einem Limit von {{limit}} Bundles herabgestuft.",
+      "archiveWarning": "Warnung: Du hast {{current}} Bundles. Die überschüssigen {{excess}} Bundles werden archiviert (nicht gelöscht).",
+      "confirmCancellation": "Kündigung bestätigen",
+      "keepSubscription": "Abonnement behalten",
+      "features": "Funktionen deines Tarifs",
+      "needHelp": "Brauchst du Hilfe?",
+      "helpBody": "Hast du Fragen zur Abrechnung oder benötigst einen individuellen Tarif? Unser Team hilft dir gerne."
+    }
   }
 }

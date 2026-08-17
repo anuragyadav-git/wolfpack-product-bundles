@@ -2,6 +2,7 @@ import { ConditionValidator } from '../../shared/condition-validator.js';
 import { CurrencyManager } from '../../shared/currency-manager.js';
 import { ToastManager } from '../../shared/toast-manager.js';
 import { ComponentGenerator } from '../../shared/component-generator.js';
+import { renderSharedProductCard } from '../../shared/components/product-card.js';
 import { getSubscriptionProductCardPrice } from '../../shared/subscription-storefront-methods.js';
 
 export function resolveProductPageCardButtonText({
@@ -109,6 +110,7 @@ export function applyProductPageVariantSelection({
     ? variantData.quantityAvailable
     : null;
   product.currentlyNotInStock = variantData.currentlyNotInStock === true;
+  product.selectionId = nextVariantId;
   product.variantId = nextVariantId;
   product.variantTitle = nextVariantTitle;
   if (Number.isFinite(nextPrice)) product.price = nextPrice;
@@ -291,7 +293,8 @@ renderModalCategoryTabs() {
 
 renderModalProducts(stepIndex, productsToRender = null) {
   // Use all products from step data
-  const rawProducts = productsToRender || this.stepProductData[stepIndex];
+  const stepProductData = this.stepProductData || [];
+  const rawProducts = productsToRender ?? stepProductData[stepIndex];
   const currentStep = this.selectedBundle?.steps?.[stepIndex];
   const widgetConfig = this.config || {};
   const categoryProducts = this._filterProductsForInpageCategory(
@@ -364,7 +367,10 @@ renderModalProducts(stepIndex, productsToRender = null) {
   );
 
   productGrid.innerHTML = products.map(product => {
-    const selectionKey = product.variantId || product.id;
+    const selectionKey = product.selectionId || product.variantId || product.id;
+    const productSelection = product.selectionId
+      ? product
+      : { ...product, selectionId: selectionKey };
     const currentQuantity = this.getSelectedQuantity(stepIndex, selectionKey);
     const currencyInfo = CurrencyManager.getCurrencyInfo();
 
@@ -373,53 +379,45 @@ renderModalProducts(stepIndex, productsToRender = null) {
     const atMaxStock = available !== null && currentQuantity >= available;
     const atMaxProductQuantity = productQuantityLimit !== null && currentQuantity >= productQuantityLimit;
     const increaseDisabled = outOfStock || atMaxStock || atMaxProductQuantity;
-    const addUnavailableAttribute = outOfStock ? 'aria-disabled="true"' : '';
-    const soleVariantDisplayTitle = getModalSoleVariantDisplayTitle(product);
-
     const stockBadge = outOfStock
       ? `<div class="product-stock-badge product-stock-badge--out">Out of stock</div>`
       : '';
-    return `
-      <div class="product-card${freeGiftCardClass} ${currentQuantity > 0 ? 'bw-product-card--selected' : ''} ${outOfStock ? 'is-out-of-stock' : ''}" data-product-id="${selectionKey}">
-        <div class="product-image">
-          <img src="${product.imageUrl}" alt="${ComponentGenerator.escapeHtml(product.title)}" loading="lazy">
-          ${stockBadge}
-        </div>
-
-        <div class="product-content-wrapper">
-          <div class="product-title">${ComponentGenerator.escapeHtml(product.title)}</div>
-
-          ${product.price ? `
-            <div class="product-price-row">
-              ${this._shouldShowProductComparedAtPrice() && product.compareAtPrice ? `<span class="product-price-strike">${CurrencyManager.convertAndFormat(product.compareAtPrice, currencyInfo)}</span>` : ''}
-              <span class="product-price">${CurrencyManager.convertAndFormat(getSubscriptionProductCardPrice(this, product.price), currencyInfo)}</span>
-            </div>
-          ` : ''}
-
-          <div class="product-spacer"></div>
-
-          ${this.renderVariantSelector(product)}
-
-          ${soleVariantDisplayTitle ? `
-            <div class="bw-bs-single-variant-title">${ComponentGenerator.escapeHtml(soleVariantDisplayTitle)}</div>
-          ` : ''}
-
-          ${showQuantitySelector ? `
-            <div class="product-quantity-wrapper">
-              <div class="product-quantity-selector">
-                <button class="qty-btn qty-decrease" data-product-id="${selectionKey}">−</button>
-                <span class="qty-display">${currentQuantity}</span>
-                <button class="qty-btn qty-increase" data-product-id="${selectionKey}" ${increaseDisabled ? 'disabled aria-disabled="true"' : ''}>+</button>
-              </div>
-            </div>
-          ` : ''}
-
-          <button class="product-add-btn ${currentQuantity > 0 ? 'added' : ''}" data-product-id="${selectionKey}" ${addUnavailableAttribute}>
-            ${resolveProductPageCardButtonText({ currentQuantity, currentStep, outOfStock, defaultAddText: 'Add to Cart' })}
-          </button>
-        </div>
-      </div>
-    `;
+    return renderSharedProductCard(
+      {
+        ...productSelection,
+        title: product.title,
+        imageUrl: product.imageUrl,
+        description: '',
+      },
+      currentQuantity,
+      currencyInfo,
+      {
+        displayPrice: getSubscriptionProductCardPrice(this, product.price),
+        description: '',
+        displaySeeMoreLink: false,
+        expandProductCardOnHover: false,
+        showCompareAtPrice: this._shouldShowProductComparedAtPrice(),
+        mode: 'grid',
+        className: `${freeGiftCardClass} ${currentQuantity > 0 ? 'bw-product-card--selected' : ''} ${outOfStock ? 'is-out-of-stock' : ''}`.trim(),
+        variantSelectorHtml: this.renderVariantSelector(product),
+        stockBadgeHtml: stockBadge,
+        addButtonText: resolveProductPageCardButtonText({
+          currentQuantity,
+          currentStep,
+          outOfStock,
+          defaultAddText: 'Add to Cart',
+        }),
+        selectedButtonText: resolveProductPageCardButtonText({
+          currentQuantity,
+          currentStep,
+          outOfStock,
+          defaultAddText: 'Add to Cart',
+        }),
+        selectedAction: showQuantitySelector ? undefined : 'button',
+        addDisabled: outOfStock,
+        increaseDisabled,
+      },
+    );
   }).join('');
 
   // Trigger slide-up animation for cards

@@ -1,12 +1,21 @@
 import { createHmac } from "node:crypto";
 import { loader } from "../../../app/routes/root/wpb.$bundleId";
 import { createBundlePreviewToken } from "../../../app/lib/bundle-preview-token.server";
+import { authenticate } from "../../../app/shopify.server";
 
 jest.mock("../../../app/lib/logger", () => ({
   AppLogger: {
     info: jest.fn(),
     warn: jest.fn(),
     error: jest.fn(),
+  },
+}));
+
+jest.mock("../../../app/shopify.server", () => ({
+  authenticate: {
+    public: {
+      appProxy: jest.fn(),
+    },
   },
 }));
 
@@ -23,6 +32,7 @@ jest.mock("../../../app/db.server", () => ({
 }));
 
 const getDb = () => require("../../../app/db.server").default;
+const mockAppProxy = authenticate.public.appProxy as jest.MockedFunction<any>;
 
 function makeSignedRequest(bundleId = "1") {
   const params = new URLSearchParams({
@@ -46,6 +56,7 @@ describe("FPB app proxy page", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     process.env.SHOPIFY_API_SECRET = "test_api_secret";
+    mockAppProxy.mockResolvedValue({ session: { shop: "test-shop.myshopify.com" } });
     getDb().designSettings.findUnique.mockResolvedValue(null);
   });
 
@@ -305,17 +316,17 @@ describe("FPB app proxy page", () => {
   });
 
   it("rejects invalid signatures before querying the bundle", async () => {
+    mockAppProxy.mockRejectedValueOnce(new Response("Invalid bundle link", { status: 400 }));
     const request = makeSignedRequest();
     const url = new URL(request.url);
     url.searchParams.set("signature", "bad-signature");
 
-    const response = (await loader({
+    await expect(loader({
       request: new Request(url.toString()),
       params: { bundleId: "1" },
       context: {},
-    } as any)) as Response;
+    } as any)).rejects.toBeInstanceOf(Response);
 
-    expect(response.status).toBe(400);
     expect(getDb().bundle.findFirst).not.toHaveBeenCalled();
   });
 });

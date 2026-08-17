@@ -7,10 +7,16 @@ import {
 } from "../../../app/routes/api/api.cart-bundle-details";
 import { getOfflineSessionForShop } from "../../../app/services/offline-token.server";
 import { createStorefrontAccessToken } from "../../../app/services/storefront-token.server";
+import { authenticate } from "../../../app/shopify.server";
 
 jest.mock("../../../app/db.server", () => ({}));
 
 jest.mock("../../../app/shopify.server", () => ({
+  authenticate: {
+    public: {
+      appProxy: jest.fn(),
+    },
+  },
   sessionStorage: {},
 }));
 
@@ -99,6 +105,7 @@ describe("cart bundle_details metafield route", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     process.env.SHOPIFY_API_SECRET = "test_api_secret";
+    (authenticate.public.appProxy as jest.Mock).mockResolvedValue({ session: { shop: "test-shop.myshopify.com" } });
     mockGetOfflineSessionForShop.mockResolvedValue({
       accessToken: "admin-token",
       storefrontAccessToken: "sf-token",

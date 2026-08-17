@@ -190,6 +190,23 @@ describe('requireAppProxy', () => {
     await expect(requireAppProxy(request)).rejects.toBe(errorResponse);
   });
 
+  it('throws 401 Response when context.session is missing', async () => {
+    authenticate.public.appProxy.mockResolvedValue({ session: undefined });
+
+    const { requireAppProxy } = await import('../../../app/lib/auth-guards.server');
+    const request = makeRequest();
+
+    let thrown: Response | undefined;
+    try {
+      await requireAppProxy(request);
+    } catch (e: any) {
+      thrown = e;
+    }
+
+    expect(thrown).toBeInstanceOf(Response);
+    expect(thrown?.status).toBe(401);
+  });
+
   it('calls authenticate.public.appProxy exactly once per request', async () => {
     authenticate.public.appProxy.mockResolvedValue({ session: mockSession });
 

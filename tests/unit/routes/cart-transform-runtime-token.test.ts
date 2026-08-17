@@ -15,6 +15,11 @@ jest.mock("../../../app/db.server", () => ({
 }));
 
 jest.mock("../../../app/shopify.server", () => ({
+  authenticate: {
+    public: {
+      appProxy: jest.fn().mockResolvedValue({ session: { shop: "test-shop.myshopify.com" } }),
+    },
+  },
   unauthenticated: {
     admin: jest.fn().mockResolvedValue({ admin: { graphql: jest.fn() } }),
   },
