@@ -178,6 +178,7 @@ describe('PPB List shared product cards', () => {
     const product = {
       id: 'product-1',
       variantId: 'variant-old',
+      selectionId: 'variant-old',
       title: '18k Pedal Ring',
       price: 39900,
       imageUrl: 'https://cdn.shopify.com/old.jpg',
@@ -217,6 +218,7 @@ describe('PPB List shared product cards', () => {
 
     expect(product).toMatchObject({
       variantId: 'variant-new',
+      selectionId: 'variant-new',
       variantTitle: '8',
       price: 45900,
       imageUrl: 'https://cdn.shopify.com/new.jpg',

@@ -5,7 +5,7 @@ import { AppLogger } from "../../lib/logger";
 import { BundleStatus } from "../../constants/bundle";
 import { ERROR_MESSAGES } from "../../constants/errors";
 import { formatBundleForWidget } from "../../lib/bundle-formatter.server";
-import { verifyAppProxyRequest } from "../../lib/app-proxy.server";
+import { requireAppProxy } from "../../lib/auth-guards.server";
 import { verifyBundlePreviewToken } from "../../lib/bundle-preview-token.server";
 import { BUNDLE_PREVIEW_QUERY_PARAM } from "../../lib/bundle-preview-url";
 
@@ -78,21 +78,8 @@ export const loader: LoaderFunction = async ({ request, params }) => {
       return json({ error: ERROR_MESSAGES.BUNDLE_ID_REQUIRED }, { status: 400, headers: CORS_HEADERS });
     }
 
-    // Verify the Shopify App Proxy HMAC signature and extract the shop domain.
-    // authenticate.public.appProxy() has a known incompatibility with
-    // unstable_newEmbeddedAuthStrategy — it can throw or redirect unexpectedly.
-    // Lightweight HMAC verification is equivalent and more reliable for public
-    // storefront-facing API routes. Bundle data is non-sensitive (storefront-visible).
-    const shopDomain = verifyAppProxyRequest(url);
-
-    if (!shopDomain) {
-      AppLogger.warn("App Proxy HMAC verification failed", {
-        component: "api.bundle",
-        bundleId,
-        url: url.toString(),
-      });
-      return json({ error: ERROR_MESSAGES.SHOP_NOT_FOUND }, { status: 400, headers: CORS_HEADERS });
-    }
+    const { session } = await requireAppProxy(request);
+    const shopDomain = session.shop;
 
     AppLogger.info("Fetching bundle", {
       component: "api.bundle",
@@ -191,6 +178,10 @@ export const loader: LoaderFunction = async ({ request, params }) => {
     });
 
   } catch (error) {
+    if (error instanceof Response) {
+      throw error;
+    }
+
     AppLogger.error("Error fetching bundle", {
       component: "api.bundle",
       operation: "loader",
@@ -198,7 +189,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
     }, error);
     return json({
       success: false,
-      error: error instanceof Error ? error.message : "Internal error"
+      error: "Unable to fetch bundle"
     }, { status: 500, headers: CORS_HEADERS });
   }
 };

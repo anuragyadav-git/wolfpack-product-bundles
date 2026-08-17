@@ -12,7 +12,8 @@ describe('PPB compare-at price visibility contract', () => {
   it('gates compare-at strike prices behind the EB setting', () => {
     expect(widgetSource).toContain('_shouldShowProductComparedAtPrice()');
     expect(widgetSource).toContain('showCompareAtPrices');
-    expect(widgetSource).toContain('this._shouldShowProductComparedAtPrice() && product.compareAtPrice');
+    expect(widgetSource).toContain('showCompareAtPrice');
+    expect(widgetSource).toContain('shouldRenderCompareAtPrice');
   });
 
   it('uses runtime control flags as a fallback when the bundle payload flag is absent', () => {

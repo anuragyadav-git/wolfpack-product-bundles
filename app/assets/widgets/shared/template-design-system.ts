@@ -132,7 +132,7 @@ const TemplateDesignSystem = (function () {
     GRID: {
       id: 'GRID',
       templateType: 'PDP_INPAGE',
-      aliases: ['GRID'],
+      aliases: ['GRID', 'COGNIVE'],
       family: 'PPB',
       productCard: {
         mode: 'grid',
@@ -148,7 +148,7 @@ const TemplateDesignSystem = (function () {
     LIST: {
       id: 'LIST',
       templateType: 'PDP_INPAGE',
-      aliases: ['LIST'],
+      aliases: ['LIST', 'CASCADE'],
       family: 'PPB',
       productCard: {
         mode: 'row',
@@ -164,7 +164,7 @@ const TemplateDesignSystem = (function () {
     HORIZONTAL_SLOTS: {
       id: 'HORIZONTAL_SLOTS',
       templateType: 'PDP_MODAL',
-      aliases: ['HORIZONTAL_SLOTS'],
+      aliases: ['HORIZONTAL_SLOTS', 'MODAL'],
       family: 'PPB',
       slots: {
         orientation: 'horizontal',
@@ -180,7 +180,7 @@ const TemplateDesignSystem = (function () {
     VERTICAL_SLOTS: {
       id: 'VERTICAL_SLOTS',
       templateType: 'PDP_MODAL',
-      aliases: ['VERTICAL_SLOTS'],
+      aliases: ['VERTICAL_SLOTS', 'SIMPLIFIED'],
       family: 'PPB',
       slots: {
         orientation: 'vertical',
@@ -218,7 +218,6 @@ const TemplateDesignSystem = (function () {
       contract.aliases.forEach((alias) => {
         map[alias] = contract;
       });
-      if (contract.templateType) map[contract.templateType] = contract;
     });
     return map;
   })();
@@ -249,12 +248,17 @@ const TemplateDesignSystem = (function () {
     designPreset = '',
   } = {}) {
     const normalizedTemplateType = typeof templateType === 'string' ? templateType.trim().toUpperCase() : '';
+    const resolvedContract = getPpbTemplateContractByAlias(designPreset);
+    if (!normalizedTemplateType || !resolvedContract) {
+      return null;
+    }
+
     if (normalizedTemplateType === 'PDP_INPAGE') {
-      return getPpbTemplateContractByAlias(designPreset) || null;
+      return resolvedContract.templateType === 'PDP_INPAGE' ? resolvedContract : null;
     }
 
     if (normalizedTemplateType === 'PDP_MODAL') {
-      return getPpbTemplateContractByAlias(designPreset);
+      return resolvedContract.templateType === 'PDP_MODAL' ? resolvedContract : null;
     }
 
     return null;

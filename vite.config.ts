@@ -61,13 +61,11 @@ export default defineConfig({
         v3_relativeSplatPath: true,
         v3_throwAbortReason: true,
         v3_lazyRouteDiscovery: true,
-        // Issue: admin-lcp-phase2-universal-wins-1.
-        // Remix's single-fetch parallelises child-route data loading and
-        // removes a serial waterfall during navigation. Safe to enable as
-        // long as no loader returns non-serializable values (Maps, Sets,
-        // BigInts, Dates outside `defer()` payloads). Audited 2026-06-07:
-        // every admin loader returns plain JSON shapes via Remix `json()`.
-        v3_singleFetch: true,
+        // Remix 2.17.5 requires turbo-stream 2.4.1. Do not enable single-fetch
+        // or override that serializer to a different major version. The
+        // incompatible turbo-stream 3 override caused the production document
+        // stream to abort before hydration on 2026-08-17.
+        v3_singleFetch: false,
         v3_routeConfig: true,
       },
     }),

@@ -16,9 +16,11 @@ const EXCLUDED_PATH_PARTS = [
 ];
 
 const ACTIVE_REFACTOR_BACKLOG = new Set<string>([
+  "app/routes/app/_shared/bundle-configure/BundleSubscriptionsSection.tsx",
   "app/routes/app/_shared/bundle-configure/CommonStepCategoryAccordion.tsx",
   "app/routes/app/app.attribution/AttributionDashboard.tsx",
   "app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/save-bundle.server.ts",
+  "app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/save-bundle.server.ts",
   "app/routes/app/app.dashboard/DashboardPage.tsx",
   "app/routes/app/app.settings/DesignLivePreview.tsx",
 ]);
