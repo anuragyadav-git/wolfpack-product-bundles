@@ -5,7 +5,6 @@ import type { loader } from "../app.attribution";
 import styles from "./AttributionRouteShell.module.css";
 import {
   AdminRouteLoadingBar,
-  waitForAdminRouteLoadingBar,
 } from "../../../components/AdminRouteLoadingBar";
 import {
   AdminPageBackTitle,
@@ -64,9 +63,8 @@ function AttributionCriticalStatus({
 export function waitForAnalyticsRouteReady<TAnalytics, TPixelStatus>(
   analytics: Promise<TAnalytics>,
   pixelStatus: Promise<TPixelStatus>,
-  loadingBar: Promise<void> = waitForAdminRouteLoadingBar(),
 ) {
-  return Promise.all([analytics, pixelStatus, loadingBar]);
+  return Promise.all([analytics, pixelStatus]);
 }
 
 export default function AttributionRouteShell() {
