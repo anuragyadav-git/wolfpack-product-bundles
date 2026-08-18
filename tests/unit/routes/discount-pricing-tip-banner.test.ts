@@ -1,37 +1,64 @@
 import React from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import {
+  DiscountPricingTipBanner,
+  DISCOUNT_PRICING_TIP_BANNER_KEY,
+} from "../../../app/routes/app/_shared/bundle-configure/DiscountPricingTipBanner";
+import {
+  dismissBannerInSession,
+  isBannerDismissedInSession,
+} from "../../../app/lib/banner-session-state";
 
-import { DiscountPricingTipBanner } from "../../../app/routes/app/_shared/bundle-configure/DiscountPricingTipBanner";
+class MockSessionStorage {
+  private store = new Map<string, string>();
+  getItem(key: string): string | null {
+    return this.store.get(key) ?? null;
+  }
+  setItem(key: string, value: string): void {
+    this.store.set(key, String(value));
+  }
+  removeItem(key: string): void {
+    this.store.delete(key);
+  }
+  clear(): void {
+    this.store.clear();
+  }
+}
 
-jest.mock("react", () => ({
-  ...jest.requireActual("react"),
-  useState: jest.fn(),
-}));
+describe("DiscountPricingTipBanner with session state persistence", () => {
+  let mockStorage: MockSessionStorage;
+  const originalWindow = (globalThis as any).window;
 
-describe("Shared Discount & Pricing tip banner", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    mockStorage = new MockSessionStorage();
+    (globalThis as any).window = {
+      sessionStorage: mockStorage,
+    };
   });
 
-  it("renders the FPB banner contract and dismisses locally", () => {
-    const setDismissed = jest.fn();
-    (React.useState as jest.Mock).mockReturnValueOnce([false, setDismissed]);
-    const banner = DiscountPricingTipBanner() as React.ReactElement<any>;
-
-    expect(banner.type).toBe("s-banner");
-    expect(banner.props.tone).toBe("info");
-    expect(banner.props.heading).toBe("Discount setup tip");
-    expect(banner.props.title).toBeUndefined();
-    expect(banner.props.dismissible).toBe(true);
-    expect(React.Children.toArray(banner.props.children).join(" ")).toContain(
-      "Default Product",
-    );
-    banner.props.onDismiss();
-    expect(setDismissed).toHaveBeenCalledWith(true);
+  afterEach(() => {
+    (globalThis as any).window = originalWindow;
   });
 
-  it("hides after dismissal", () => {
-    (React.useState as jest.Mock).mockReturnValueOnce([true, jest.fn()]);
+  it("renders when not yet dismissed in session", () => {
+    const view = renderToStaticMarkup(React.createElement(DiscountPricingTipBanner));
+    expect(view).toContain("s-banner");
+    expect(view).toContain("Discount setup tip");
+    expect(isBannerDismissedInSession(DISCOUNT_PRICING_TIP_BANNER_KEY)).toBe(false);
+  });
 
-    expect(DiscountPricingTipBanner()).toBeNull();
+  it("stores dismissed state in session storage on dismiss", () => {
+    expect(isBannerDismissedInSession(DISCOUNT_PRICING_TIP_BANNER_KEY)).toBe(false);
+
+    dismissBannerInSession(DISCOUNT_PRICING_TIP_BANNER_KEY);
+
+    expect(isBannerDismissedInSession(DISCOUNT_PRICING_TIP_BANNER_KEY)).toBe(true);
+  });
+
+  it("returns nothing when already dismissed in session (e.g. on page reload)", () => {
+    dismissBannerInSession(DISCOUNT_PRICING_TIP_BANNER_KEY);
+
+    const view = renderToStaticMarkup(React.createElement(DiscountPricingTipBanner));
+    expect(view).toBe("");
   });
 });

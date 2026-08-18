@@ -14,9 +14,9 @@ const mockCartTransformCompleteSetup = jest.fn().mockResolvedValue({
 let capturedShopifyConfig: any;
 
 jest.mock("@shopify/shopify-app-remix/server", () => ({
-  ApiVersion: { October25: "2025-10" },
+  ApiVersion: { October25: "2025-10", July26: "2026-07" },
   AppDistribution: { AppStore: "app_store" },
-  LATEST_API_VERSION: "2025-10",
+  LATEST_API_VERSION: "2026-07",
   shopifyApp: jest.fn((config) => {
     capturedShopifyConfig = config;
     return {
