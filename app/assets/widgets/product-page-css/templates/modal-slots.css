@@ -1,4 +1,13 @@
 #bundle-builder-app[data-ppb-template-type="PDP_MODAL"] {
+  --bw-ppb-slot-surface: var(--bundle-surface-color, #ffffff);
+  --bw-ppb-slot-accent: var(--bundle-global-primary-button, #1e3a8a);
+  --bw-ppb-slot-space: clamp(0.5rem, 2cqi, 0.875rem);
+  --bw-ppb-slot-radius: clamp(0.5rem, 1.5cqi, 0.75rem);
+  --bw-ppb-slot-hairline: 1px;
+  --bw-ppb-slot-target: 44px;
+  --bw-ppb-slot-tile-min-inline: 8.5rem;
+  --bw-ppb-slot-tile-min-block: clamp(11rem, 48cqi, 13rem);
+  --bw-ppb-slot-row-min-block: clamp(4rem, 16cqi, 4.75rem);
   width: 100%;
   max-width: 100%;
   margin: 0;
@@ -23,6 +32,7 @@
 }
 
 .bw-ppb-modal-slot-section {
+  container-type: inline-size;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: 10px;
@@ -208,17 +218,18 @@
   .bw-ppb-modal-slot-grid.bw-ppb-modal-slot-grid--simplified
   .bw-slot-card--empty {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 16px;
-  column-gap: 8px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: var(--bw-ppb-slot-space);
   width: 100%;
-  height: 60px;
-  min-height: 60px;
-  padding: 10px;
+  min-height: var(--bw-ppb-slot-row-min-block);
+  height: auto;
+  padding: var(--bw-ppb-slot-space);
   align-items: center;
   justify-items: stretch;
-  border: 2px dashed #000000;
-  border-radius: 10px;
-  background: #ffffff;
+  border: var(--bw-ppb-slot-hairline) dashed
+    var(--bundle-border-color, #d1d5db);
+  border-radius: var(--bw-ppb-slot-radius);
+  background: var(--bw-ppb-slot-surface);
   box-shadow: none;
 }
 
@@ -229,8 +240,8 @@
   grid-column: 2;
   grid-row: 1;
   justify-self: end;
-  width: 16px;
-  height: 16px;
+  width: clamp(1rem, 5cqi, 1.5rem);
+  height: clamp(1rem, 5cqi, 1.5rem);
   margin: 0;
   object-fit: contain;
   background: var(--bundle-empty-slot-visual-bg, #ff9790);
@@ -265,14 +276,19 @@
 #bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="VERTICAL_SLOTS"][data-ppb-slot-orientation="vertical"]
   .bw-ppb-modal-slot-grid.bw-ppb-modal-slot-grid--simplified
   .bw-slot-card--filled {
-  display: flex;
-  flex-direction: row;
+  display: grid;
+  grid-template-columns: clamp(3rem, 14cqi, 3.5rem) minmax(0, 1fr)
+    var(--bw-ppb-slot-target);
   align-items: center;
-  gap: 5px;
+  gap: var(--bw-ppb-slot-space);
   width: 100%;
-  height: 64px;
-  min-height: 64px;
-  padding: 5px;
+  min-height: var(--bw-ppb-slot-row-min-block);
+  height: auto;
+  padding: calc(var(--bw-ppb-slot-space) * 0.75);
+  border: var(--bw-ppb-slot-hairline) solid
+    var(--bundle-border-color, #d1d5db);
+  border-radius: var(--bw-ppb-slot-radius);
+  background: var(--bw-ppb-slot-surface);
   overflow: hidden;
 }
 
@@ -281,10 +297,9 @@
   .bw-slot-card--filled
   .step-clear-badge {
   position: static;
-  order: 3;
-  flex: 0 0 var(--bundle-product-card-action-min-height, 44px);
-  width: var(--bundle-product-card-action-min-height, 44px);
-  height: var(--bundle-product-card-action-min-height, 44px);
+  grid-column: 3;
+  width: var(--bw-ppb-slot-target);
+  height: var(--bw-ppb-slot-target);
   margin: 0;
 }
 
@@ -301,12 +316,12 @@
   .bw-ppb-modal-slot-grid.bw-ppb-modal-slot-grid--simplified
   .bw-slot-card--filled
   .bw-slot-card__image-wrapper {
-  order: 1;
-  flex: 0 0 50px;
-  width: 50px;
-  height: 50px;
-  min-height: 50px;
-  border-radius: 0;
+  grid-column: 1;
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  aspect-ratio: 1;
+  border-radius: clamp(0.25rem, 1vw, 0.375rem);
 }
 
 #bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="VERTICAL_SLOTS"][data-ppb-slot-orientation="vertical"]
@@ -314,18 +329,16 @@
   .bw-slot-card--filled
   .bw-slot-card__image-wrapper
   img {
-  width: 50px;
-  height: 50px;
-  border-radius: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
 }
 
 #bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="VERTICAL_SLOTS"][data-ppb-slot-orientation="vertical"]
   .bw-ppb-modal-slot-grid.bw-ppb-modal-slot-grid--simplified
   .bw-slot-card--filled
   .step-name {
-  order: 2;
   position: static;
-  flex: 1 1 auto;
   min-width: 0;
   max-width: none;
   margin: 0;
@@ -531,11 +544,15 @@
 #bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="HORIZONTAL_SLOTS"][data-ppb-slot-orientation="horizontal"]
   .bw-ppb-modal-slot-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(min(100%, var(--bw-ppb-slot-tile-min-inline)), 1fr)
+  );
+  grid-auto-rows: 1fr;
+  gap: clamp(0.625rem, 3cqi, 1rem);
   width: 100%;
-  height: 200px;
-  align-items: start;
+  height: auto;
+  align-items: stretch;
   justify-items: stretch;
 }
 
@@ -546,26 +563,27 @@
   .bw-ppb-modal-slot-grid
   .bw-slot-card--empty {
   display: grid;
-  grid-template-columns: minmax(0, 76.923%);
+  grid-template-columns: minmax(0, 1fr);
   align-content: center;
   justify-content: center;
   align-items: center;
   justify-items: center;
-  gap: 8px;
+  gap: var(--bw-ppb-slot-space);
   width: 100%;
-  height: 200px;
-  min-height: 200px;
-  padding: 0;
-  border: 2px dashed #000000;
-  border-radius: 10px;
-  background: #ffffff;
+  height: 100%;
+  min-height: var(--bw-ppb-slot-tile-min-block);
+  padding: var(--bw-ppb-slot-space);
+  border: var(--bw-ppb-slot-hairline) dashed
+    var(--bundle-border-color, #d1d5db);
+  border-radius: var(--bw-ppb-slot-radius);
+  background: var(--bw-ppb-slot-surface);
   box-shadow: none;
 }
 
 #bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="HORIZONTAL_SLOTS"][data-ppb-slot-orientation="horizontal"]
   .bw-ppb-modal-slot-grid
   .bw-slot-card__empty-visual {
-  width: 100%;
+  width: min(100%, 6rem);
   height: auto;
   aspect-ratio: 1;
   margin: 0;
@@ -585,6 +603,119 @@
   line-height: normal;
   margin: 0;
   text-align: center;
+}
+
+#bundle-builder-app[data-ppb-template-type="PDP_MODAL"]
+  .bw-slot-card--filled {
+  box-shadow: none;
+}
+
+#bundle-builder-app[data-ppb-template-type="PDP_MODAL"]
+  .bw-slot-card--filled:focus-visible {
+  outline: 2px solid var(--bw-ppb-slot-accent);
+  outline-offset: 2px;
+}
+
+#bundle-builder-app[data-ppb-template-type="PDP_MODAL"]
+  .bw-slot-card__identity {
+  min-width: 0;
+}
+
+#bundle-builder-app[data-ppb-template-type="PDP_MODAL"]
+  .bw-slot-card__identity
+  .step-name {
+  margin: 0;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  white-space: normal;
+}
+
+#bundle-builder-app[data-ppb-template-type="PDP_MODAL"]
+  .bw-slot-card__variant {
+  margin: 0;
+  overflow: hidden;
+  color: var(--bundle-global-secondary-text, #6b7280);
+  font-size: clamp(0.75rem, 2.8cqi, 0.8125rem);
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#bundle-builder-app[data-ppb-template-type="PDP_MODAL"]
+  .bw-slot-card__prices {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.5rem;
+  min-width: 0;
+  font-size: clamp(0.75rem, 2.8cqi, 0.875rem);
+  line-height: 1.3;
+}
+
+#bundle-builder-app[data-ppb-template-type="PDP_MODAL"]
+  .bw-slot-card__price {
+  color: var(--bundle-global-primary-text, #111827);
+  font-weight: 700;
+}
+
+#bundle-builder-app[data-ppb-template-type="PDP_MODAL"]
+  .bw-slot-card__compare-at-price {
+  color: var(--bundle-global-secondary-text, #6b7280);
+}
+
+#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-slot-orientation="vertical"]
+  .bw-slot-card__identity {
+  grid-column: 2;
+  display: grid;
+  gap: calc(var(--bw-ppb-slot-space) * 0.25);
+}
+
+#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="HORIZONTAL_SLOTS"][data-ppb-slot-orientation="horizontal"]
+  .bw-slot-card--filled {
+  position: relative;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  width: 100%;
+  height: 100%;
+  min-height: var(--bw-ppb-slot-tile-min-block);
+  border: var(--bw-ppb-slot-hairline) solid
+    var(--bundle-border-color, #d1d5db);
+  border-radius: var(--bw-ppb-slot-radius);
+  background: var(--bw-ppb-slot-surface);
+  overflow: hidden;
+}
+
+#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="HORIZONTAL_SLOTS"][data-ppb-slot-orientation="horizontal"]
+  .bw-slot-card--filled
+  .bw-slot-card__image-wrapper {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="HORIZONTAL_SLOTS"][data-ppb-slot-orientation="horizontal"]
+  .bw-slot-card--filled
+  .bw-slot-card__image {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  object-fit: cover;
+}
+
+#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="HORIZONTAL_SLOTS"][data-ppb-slot-orientation="horizontal"]
+  .bw-slot-card__identity {
+  display: grid;
+  gap: calc(var(--bw-ppb-slot-space) * 0.25);
+  padding: var(--bw-ppb-slot-space);
+}
+
+#bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-design-preset="HORIZONTAL_SLOTS"][data-ppb-slot-orientation="horizontal"]
+  .bw-slot-card--filled
+  .step-clear-badge {
+  width: var(--bw-ppb-slot-target);
+  height: var(--bw-ppb-slot-target);
 }
 
 #bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-slot-orientation="vertical"]

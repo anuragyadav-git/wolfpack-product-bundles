@@ -12,8 +12,8 @@ describe('SelectedSlotTitle', () => {
     expect(resolveSelectedSlotTitle(longTitle, true)).toBe(longTitle);
   });
 
-  it('preserves compact titles for other templates', () => {
-    expect(resolveSelectedSlotTitle(longTitle, false)).toBe('14k Dangling Obsidian Ear...');
+  it('keeps the full title for CSS-owned clamping in other templates', () => {
+    expect(resolveSelectedSlotTitle(longTitle, false)).toBe(longTitle);
   });
 
   it('keeps short titles unchanged', () => {

@@ -26,10 +26,63 @@ function makeSlotCardKeyboardAccessible(card, activate) {
   });
 }
 
-export function resolveSelectedSlotTitle(title, isVertical) {
-  const normalizedTitle = String(title || '');
-  if (isVertical || normalizedTitle.length <= 25) return normalizedTitle;
-  return `${normalizedTitle.substring(0, 25)}...`;
+export function resolveSelectedSlotTitle(title, _isVertical) {
+  return String(title || '');
+}
+
+export function resolveSelectedSlotContent(
+  product = {},
+  currencyInfo = CurrencyManager.getCurrencyInfo(),
+) {
+  const rawVariantTitle = String(product.variantTitle || '').trim();
+  const variantTitle = rawVariantTitle && rawVariantTitle !== 'Default Title'
+    ? rawVariantTitle
+    : '';
+  const rawTitle = String(product.parentTitle || product.title || '');
+  const expandedVariantSuffix = variantTitle ? ` - ${variantTitle}` : '';
+  const title = !product.parentTitle && expandedVariantSuffix && rawTitle.endsWith(expandedVariantSuffix)
+    ? rawTitle.slice(0, -expandedVariantSuffix.length)
+    : rawTitle;
+  const price = Number(product.price);
+  const compareAtPrice = Number(product.compareAtPrice);
+  const hasPrice = product.price !== null
+    && product.price !== undefined
+    && Number.isFinite(price);
+  const hasCompareAtPrice = hasPrice
+    && product.compareAtPrice !== null
+    && product.compareAtPrice !== undefined
+    && Number.isFinite(compareAtPrice)
+    && compareAtPrice > price;
+
+  return {
+    title,
+    variantTitle,
+    priceText: hasPrice ? CurrencyManager.convertAndFormat(price, currencyInfo) : '',
+    compareAtPriceText: hasCompareAtPrice
+      ? CurrencyManager.convertAndFormat(compareAtPrice, currencyInfo)
+      : '',
+  };
+}
+
+function getStepSlotElements(widget, stepIndex) {
+  const candidates = widget.elements?.stepsContainer?.querySelectorAll?.('[data-step-index]') || [];
+  return [...candidates].filter(
+    candidate => String(candidate.dataset?.stepIndex) === String(stepIndex),
+  );
+}
+
+function focusModalSlotAfterRemoval(widget, stepIndex, slotIndex) {
+  const focusRecovery = () => {
+    const sameStep = getStepSlotElements(widget, stepIndex);
+    const nextFocus = sameStep[slotIndex] || sameStep.at(-1);
+    nextFocus?.focus?.();
+  };
+
+  if (typeof globalThis.requestAnimationFrame === 'function') {
+    globalThis.requestAnimationFrame(focusRecovery);
+  } else {
+    globalThis.queueMicrotask?.(focusRecovery);
+  }
 }
 
 function renderInpageProductLoadingRows(rowCount = 3) {
@@ -361,7 +414,10 @@ createSelectedProductCard(item, cardIndex) {
     clearBadge.setAttribute('aria-label', clearBadge.title);
     clearBadge.addEventListener('click', (e) => {
       e.stopPropagation();
+      const stepSlots = getStepSlotElements(this, stepIndex);
+      const slotIndex = Math.max(0, stepSlots.indexOf(stepBox));
       this.removeProductFromSelection(stepIndex, variantId);
+      focusModalSlotAfterRemoval(this, stepIndex, slotIndex);
     });
     stepBox.appendChild(clearBadge);
   }
@@ -384,16 +440,51 @@ createSelectedProductCard(item, cardIndex) {
     stepBox.appendChild(badge);
   }
 
-  // Product title at bottom
+  const content = resolveSelectedSlotContent(product);
+  const identity = document.createElement('div');
+  identity.className = 'bw-slot-card__identity';
+
   const productTitle = document.createElement('p');
   productTitle.className = 'step-name step-name-completed product-title-state';
   const displayTitle = resolveSelectedSlotTitle(
-    product.title,
+    content.title,
     this._usesVerticalModalSlotLayout?.() === true,
   );
   productTitle.textContent = displayTitle;
-  productTitle.title = product.title; // Full title on hover
-  stepBox.appendChild(productTitle);
+  productTitle.title = content.title;
+  identity.appendChild(productTitle);
+
+  if (content.variantTitle) {
+    const variantTitle = document.createElement('p');
+    variantTitle.className = 'bw-slot-card__variant';
+    variantTitle.textContent = content.variantTitle;
+    identity.appendChild(variantTitle);
+  }
+
+  if (content.priceText) {
+    const prices = document.createElement('div');
+    prices.className = 'bw-slot-card__prices';
+
+    const price = document.createElement('span');
+    price.className = 'bw-slot-card__price';
+    price.textContent = content.priceText;
+    prices.appendChild(price);
+
+    if (content.compareAtPriceText) {
+      const compareAtPrice = document.createElement('s');
+      compareAtPrice.className = 'bw-slot-card__compare-at-price';
+      compareAtPrice.textContent = content.compareAtPriceText;
+      prices.appendChild(compareAtPrice);
+    }
+
+    identity.appendChild(prices);
+  }
+
+  stepBox.appendChild(identity);
+  stepBox.setAttribute(
+    'aria-label',
+    [content.title, content.variantTitle].filter(Boolean).join(', '),
+  );
 
   // Filled slots stay editable. Selection validation still runs inside the
   // picker, while reopening lets shoppers replace an exact-one choice.

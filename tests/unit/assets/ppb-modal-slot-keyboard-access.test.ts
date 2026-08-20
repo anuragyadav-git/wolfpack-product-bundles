@@ -74,6 +74,79 @@ describe('PPB modal slot keyboard access', () => {
     expect(stopPropagation).toHaveBeenCalledTimes(1);
     expect(widget.removeProductFromSelection).toHaveBeenCalledWith(0, 'variant-1');
   });
+
+  it('restores focus to the same-index slot after removal rerenders the step', () => {
+    const widget = createWidget();
+    const originalAnimationFrame = globalThis.requestAnimationFrame;
+    globalThis.requestAnimationFrame = ((callback: FrameRequestCallback) => {
+      callback(0);
+      return 1;
+    }) as typeof requestAnimationFrame;
+
+    try {
+      const card = widget.createSelectedProductCard({
+        product: { title: 'Obsidian Earrings', imageUrl: '/earrings.jpg' },
+        stepIndex: 0,
+        step: { name: 'Choose earrings' },
+        variantId: 'variant-1',
+        instanceIndex: 0,
+      }, 1);
+      const precedingSlot = { dataset: { stepIndex: '0' }, focus: jest.fn() };
+      const recoveryTarget = { dataset: { stepIndex: '0' }, focus: jest.fn() };
+      let renderPass = 0;
+      widget.elements = {
+        stepsContainer: {
+          querySelectorAll: jest.fn(() => {
+            renderPass += 1;
+            return renderPass === 1
+              ? [precedingSlot, card]
+              : [precedingSlot, recoveryTarget];
+          }),
+        },
+      };
+
+      card.children[0].dispatch('click', { stopPropagation: jest.fn() });
+
+      expect(recoveryTarget.focus).toHaveBeenCalledTimes(1);
+    } finally {
+      globalThis.requestAnimationFrame = originalAnimationFrame;
+    }
+  });
+
+  it('falls back to the previous slot when removal leaves no same-index target', () => {
+    const widget = createWidget();
+    const originalAnimationFrame = globalThis.requestAnimationFrame;
+    globalThis.requestAnimationFrame = ((callback: FrameRequestCallback) => {
+      callback(0);
+      return 1;
+    }) as typeof requestAnimationFrame;
+
+    try {
+      const card = widget.createSelectedProductCard({
+        product: { title: 'Obsidian Earrings', imageUrl: '/earrings.jpg' },
+        stepIndex: 0,
+        step: { name: 'Choose earrings' },
+        variantId: 'variant-1',
+        instanceIndex: 0,
+      }, 1);
+      const precedingSlot = { dataset: { stepIndex: '0' }, focus: jest.fn() };
+      let renderPass = 0;
+      widget.elements = {
+        stepsContainer: {
+          querySelectorAll: jest.fn(() => {
+            renderPass += 1;
+            return renderPass === 1 ? [precedingSlot, card] : [precedingSlot];
+          }),
+        },
+      };
+
+      card.children[0].dispatch('click', { stopPropagation: jest.fn() });
+
+      expect(precedingSlot.focus).toHaveBeenCalledTimes(1);
+    } finally {
+      globalThis.requestAnimationFrame = originalAnimationFrame;
+    }
+  });
 });
 
 function createWidget() {
