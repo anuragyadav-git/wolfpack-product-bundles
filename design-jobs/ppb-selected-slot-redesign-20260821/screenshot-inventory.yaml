@@ -1,0 +1,226 @@
+{
+  "schema_version": 1,
+  "job_id": "ppb-selected-slot-redesign-20260821",
+  "revision": 2,
+  "status": "complete",
+  "items": [
+    {
+      "id": "EB-DOC-HS-001",
+      "original_filename": "16-eb-full-data-flow-investigation.md",
+      "artifact_path": "docs/competitor-analysis/16-eb-full-data-flow-investigation.md",
+      "roles": [
+        "target",
+        "inspiration",
+        "structural"
+      ],
+      "component": "PPB Horizontal Slots selected state",
+      "state": "filled and empty slots",
+      "viewport": {
+        "width": null,
+        "height": null,
+        "status": "documented-multiple"
+      },
+      "browser_zoom": "unknown",
+      "pixel_dimensions": {
+        "width": null,
+        "height": null
+      },
+      "crop_status": "documented-observation",
+      "surrounding_context_included": true,
+      "source": "authenticated EB investigation archive",
+      "provenance": "repository competitor-analysis evidence",
+      "intended_use": "Hierarchy and orientation reference only",
+      "quality_issues": [
+        "No current comparable raster capture",
+        "Historical measurements are not implementation tokens"
+      ],
+      "comparable_counterparts": [
+        "WPB-HS-MOBILE-001",
+        "WPB-HS-DESKTOP-001"
+      ],
+      "permissions_or_usage_notes": "Read-only inspiration; no competitor code or fixed pixel values may be copied.",
+      "approval_status": "approved-for-structural-inspiration"
+    },
+    {
+      "id": "EB-DOC-VS-001",
+      "original_filename": "EB Implementation Reference.md",
+      "artifact_path": "internal docs/EB Implementation Reference.md",
+      "roles": [
+        "target",
+        "inspiration",
+        "behavior"
+      ],
+      "component": "PPB Vertical Slots selected state",
+      "state": "filled slot row",
+      "viewport": {
+        "width": null,
+        "height": null,
+        "status": "documented-mobile-and-desktop"
+      },
+      "browser_zoom": "unknown",
+      "pixel_dimensions": {
+        "width": null,
+        "height": null
+      },
+      "crop_status": "documented-observation",
+      "surrounding_context_included": true,
+      "source": "authenticated EB investigation archive",
+      "provenance": "repository EB implementation reference",
+      "intended_use": "Information order, density, and shared-runtime behavior",
+      "quality_issues": [
+        "No current comparable raster capture",
+        "Historical measured row values are evidence only"
+      ],
+      "comparable_counterparts": [
+        "WPB-VS-MOBILE-001",
+        "WPB-VS-DESKTOP-001"
+      ],
+      "permissions_or_usage_notes": "Read-only inspiration; use responsive Wolfpack-owned tokens.",
+      "approval_status": "approved-for-structural-inspiration"
+    },
+    {
+      "id": "WPB-HS-MOBILE-001",
+      "original_filename": "direct-chrome-session-capture",
+      "artifact_path": "",
+      "roles": [
+        "current",
+        "mobile",
+        "measured"
+      ],
+      "component": "PPB Horizontal Slots selected state",
+      "state": "one filled slot, next step empty",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "status": "exact"
+      },
+      "browser_zoom": "100%",
+      "pixel_dimensions": {
+        "width": 390,
+        "height": 844
+      },
+      "crop_status": "viewport",
+      "surrounding_context_included": true,
+      "source": "agent storefront preview",
+      "provenance": "Direct Chrome DevTools MCP after Cache Storage clear and ignore-cache reload; widget 12.1.1",
+      "intended_use": "Current-state geometry and hierarchy baseline",
+      "quality_issues": [
+        "Transient Chrome evidence only; screenshot intentionally not committed"
+      ],
+      "comparable_counterparts": [
+        "EB-DOC-HS-001",
+        "WPB-HS-DESKTOP-001"
+      ],
+      "permissions_or_usage_notes": "Development agent-store fixture; Product Grid restored after capture.",
+      "approval_status": "approved-current-evidence"
+    },
+    {
+      "id": "WPB-HS-DESKTOP-001",
+      "original_filename": "direct-chrome-session-capture",
+      "artifact_path": "",
+      "roles": [
+        "current",
+        "desktop",
+        "measured"
+      ],
+      "component": "PPB Horizontal Slots selected state",
+      "state": "one filled slot, next step empty",
+      "viewport": {
+        "width": 1280,
+        "height": 800,
+        "status": "exact"
+      },
+      "browser_zoom": "100%",
+      "pixel_dimensions": {
+        "width": 1280,
+        "height": 800
+      },
+      "crop_status": "viewport",
+      "surrounding_context_included": true,
+      "source": "agent storefront preview",
+      "provenance": "Direct Chrome DevTools MCP; current selected slot measured after responsive re-render",
+      "intended_use": "Desktop current-state geometry and column baseline",
+      "quality_issues": [
+        "Transient Chrome evidence only; screenshot intentionally not committed"
+      ],
+      "comparable_counterparts": [
+        "EB-DOC-HS-001",
+        "WPB-HS-MOBILE-001"
+      ],
+      "permissions_or_usage_notes": "Development agent-store fixture.",
+      "approval_status": "approved-current-evidence"
+    },
+    {
+      "id": "WPB-VS-MOBILE-001",
+      "original_filename": "direct-chrome-session-capture",
+      "artifact_path": "",
+      "roles": [
+        "current",
+        "mobile",
+        "measured"
+      ],
+      "component": "PPB Vertical Slots selected state",
+      "state": "one filled row, next step empty",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "status": "exact"
+      },
+      "browser_zoom": "100%",
+      "pixel_dimensions": {
+        "width": 390,
+        "height": 844
+      },
+      "crop_status": "viewport",
+      "surrounding_context_included": true,
+      "source": "agent storefront preview",
+      "provenance": "Direct Chrome DevTools MCP after Cache Storage clear and ignore-cache reload; compatible session selection carried forward",
+      "intended_use": "Current compact-row baseline and responsive comparison",
+      "quality_issues": [
+        "Transient Chrome evidence only; screenshot intentionally not committed"
+      ],
+      "comparable_counterparts": [
+        "EB-DOC-VS-001",
+        "WPB-VS-DESKTOP-001"
+      ],
+      "permissions_or_usage_notes": "Development agent-store fixture; Product Grid restored after capture.",
+      "approval_status": "approved-current-evidence"
+    },
+    {
+      "id": "WPB-VS-DESKTOP-001",
+      "original_filename": "direct-chrome-session-capture",
+      "artifact_path": "",
+      "roles": [
+        "current",
+        "desktop",
+        "measured"
+      ],
+      "component": "PPB Vertical Slots selected state",
+      "state": "one filled row, next step empty",
+      "viewport": {
+        "width": 1280,
+        "height": 800,
+        "status": "exact"
+      },
+      "browser_zoom": "100%",
+      "pixel_dimensions": {
+        "width": 1280,
+        "height": 800
+      },
+      "crop_status": "viewport",
+      "surrounding_context_included": true,
+      "source": "agent storefront preview",
+      "provenance": "Direct Chrome DevTools MCP; current selected row measured after responsive re-render",
+      "intended_use": "Desktop compact-row baseline",
+      "quality_issues": [
+        "Transient Chrome evidence only; screenshot intentionally not committed"
+      ],
+      "comparable_counterparts": [
+        "EB-DOC-VS-001",
+        "WPB-VS-MOBILE-001"
+      ],
+      "permissions_or_usage_notes": "Development agent-store fixture.",
+      "approval_status": "approved-current-evidence"
+    }
+  ]
+}

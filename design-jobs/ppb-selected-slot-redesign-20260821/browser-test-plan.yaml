@@ -1,0 +1,601 @@
+{
+  "schema_version": 1,
+  "job_id": "ppb-selected-slot-redesign-20260821",
+  "revision": 2,
+  "status": "approved",
+  "chrome_mcp_required": true,
+  "environment": "development",
+  "base_url": "https://agent-5sfidg3m.myshopify.com/products/ppb-template-parity-2026-08-20",
+  "fixture": "PPB Template Parity 2026-08-20; bundle cmt1l6lt50000v0tlyp73d2ml; transition Product Grid to Horizontal Slots to Vertical Slots and restore Product Grid at group boundary",
+  "authentication_mode": "Connected default Chrome profile; existing signed-in agent-store Admin session for fixture transitions",
+  "setup": {
+    "profile_policy": "default-profile-only",
+    "allow_isolated_context": false,
+    "zoom_percent": 100,
+    "artifact_directory": "qa",
+    "max_retries": 2,
+    "locale": "en",
+    "currency": "USD",
+    "theme": "agent development storefront light theme",
+    "feature_flags": [],
+    "random_time_control": "not applicable",
+    "device_pixel_ratio_policy": "record-actual",
+    "waits": [
+      "document.fonts.ready",
+      "images-complete",
+      "widget-version-present",
+      "selected-slot-state-ready"
+    ],
+    "scroll": {
+      "x": 0,
+      "y": 0
+    },
+    "disable_nonessential_animation": true,
+    "hide_caret_and_transient_cursors": true,
+    "dynamic_region_policy": "no masks approved",
+    "cache_policy": "Clear Cache Storage and reload with ignoreCache before every fixture group",
+    "asset_proof": "Record window.__BUNDLE_WIDGET_VERSION__ and served widget/CSS asset URLs"
+  },
+  "viewports": [
+    {
+      "id": "narrow-mobile",
+      "mode": "mobile",
+      "width": 320,
+      "height": 700
+    },
+    {
+      "id": "primary-mobile",
+      "mode": "mobile",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "mobile-boundary",
+      "mode": "mobile",
+      "width": 767,
+      "height": 900
+    },
+    {
+      "id": "desktop-boundary",
+      "mode": "desktop",
+      "width": 768,
+      "height": 900
+    },
+    {
+      "id": "desktop",
+      "mode": "desktop",
+      "width": 1280,
+      "height": 800
+    }
+  ],
+  "states": [
+    {
+      "id": "empty-loading",
+      "description": "Reachable empty slot and geometry-matched loading state"
+    },
+    {
+      "id": "filled",
+      "description": "Ordinary selected product in Horizontal and Vertical orientations"
+    },
+    {
+      "id": "long-pricing",
+      "description": "Long title, long variant, payable price, and compare-at price"
+    },
+    {
+      "id": "replace-remove",
+      "description": "Exact replacement, exact removal, keyboard, and focus recovery"
+    },
+    {
+      "id": "unavailable-restored",
+      "description": "Hard-reloaded unavailable or no-longer-selectable persisted item"
+    },
+    {
+      "id": "capacity",
+      "description": "Minimum trailing empty and exact-capacity no-overflow behavior"
+    },
+    {
+      "id": "non-regression",
+      "description": "PPB Product Grid and FPB presentation/behavior smoke"
+    }
+  ],
+  "interactions": [
+    {
+      "id": "horizontal-narrow-content",
+      "purpose": "Prove readable intrinsic Horizontal tiles with long identity and compare-at pricing at the narrowest viewport.",
+      "precondition": "Fixture saved as Horizontal Slots with long-title, variant, and compare-at product selected.",
+      "viewport": "narrow-mobile",
+      "state": "long-pricing",
+      "steps": [
+        "Clear Cache Storage and hard reload with ignoreCache.",
+        "Wait for fonts, product image, widget version, and selected slot.",
+        "Capture accessibility tree.",
+        "Measure slot, identity, prices, actions, grid, and document overflow.",
+        "Capture element and viewport PNGs."
+      ],
+      "expected_semantic_result": "The selected instance exposes full accessible identity, payable and compare-at price, replacement, and removal without content collision.",
+      "dom_assertions": [
+        "Exactly one replacement owner and one remove button exist for the selected instance.",
+        "Compare-at is present because fixture data supplies a higher retail price.",
+        "No duplicate IDs or hidden focusable overflow slots exist."
+      ],
+      "style_geometry_assertions": [
+        "Document has zero horizontal overflow.",
+        "Selected and empty slots in the same grid have equal outer block size within 1 CSS pixel.",
+        "Title, price group, and 44px action targets remain inside the slot boundary."
+      ],
+      "screenshot_path": "qa/actual/horizontal-narrow-content.png",
+      "baseline_path": "qa/baselines/horizontal-narrow-content.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "violations": [],
+        "fail_on_policy": true
+      },
+      "network_expectations": {
+        "violations": [],
+        "duplicate_mutations": 0
+      },
+      "cleanup": [
+        "Remove capture styles.",
+        "Restore scroll position.",
+        "Retain compatible selection for the next Horizontal case."
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "horizontal-mobile-replace-remove",
+      "purpose": "Prove exact replacement/removal, keyboard completion, and focus recovery on primary mobile.",
+      "precondition": "Horizontal fixture has at least two selected instances and one reachable replacement path.",
+      "viewport": "primary-mobile",
+      "state": "replace-remove",
+      "steps": [
+        "Take a fresh accessibility snapshot.",
+        "Activate the second filled slot with keyboard.",
+        "Dismiss picker with Escape and verify focus return.",
+        "Reopen and replace the second slot.",
+        "Activate only its remove button.",
+        "Verify surviving selections and focus recovery.",
+        "Capture before and after PNGs."
+      ],
+      "expected_semantic_result": "Only the second instance is replaced and removed; another instance remains unchanged and focus returns to the deterministic same-index recovery target.",
+      "dom_assertions": [
+        "Replacement target matches the activated instance.",
+        "Remove does not open the picker.",
+        "One activation produces one selection update.",
+        "Focus returns to the exact slot or defined same-index recovery control."
+      ],
+      "style_geometry_assertions": [
+        "No slot or CTA overlap occurs before or after updates.",
+        "No sibling slot changes height because another slot is selected or removed.",
+        "Focus treatment is visible and unclipped."
+      ],
+      "screenshot_path": "qa/actual/horizontal-mobile-replace-remove.png",
+      "baseline_path": "qa/baselines/horizontal-mobile-replace-remove.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "violations": [],
+        "fail_on_policy": true
+      },
+      "network_expectations": {
+        "violations": [],
+        "duplicate_mutations": 0
+      },
+      "cleanup": [
+        "Remove capture styles.",
+        "Restore a compatible filled selection for boundary checks.",
+        "Restore scroll position."
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "empty-loading-mobile",
+      "purpose": "Verify reachable empty and loading slots preserve approved geometry and semantics.",
+      "precondition": "Horizontal fixture exposes an empty capacity slot and a deterministic reload/hydration pass.",
+      "viewport": "primary-mobile",
+      "state": "empty-loading",
+      "steps": [
+        "Hard reload with cache bypass.",
+        "Capture loading geometry when deterministically observable.",
+        "Wait for hydration.",
+        "Capture empty and filled slot geometry and accessibility tree.",
+        "Activate the empty slot and dismiss picker."
+      ],
+      "expected_semantic_result": "Loading resolves without reordering, the empty slot is reachable, and picker dismissal restores focus to it.",
+      "dom_assertions": [
+        "Empty slot has a non-empty accessible name from existing labels.",
+        "Empty activation opens the correct step without a replacement target.",
+        "Loading completion preserves slot order."
+      ],
+      "style_geometry_assertions": [
+        "Loading, empty, and filled minimum geometry do not shift the grid unexpectedly.",
+        "No horizontal overflow or clipped focus exists."
+      ],
+      "screenshot_path": "qa/actual/empty-loading-mobile.png",
+      "baseline_path": "qa/baselines/empty-loading-mobile.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "violations": [],
+        "fail_on_policy": true
+      },
+      "network_expectations": {
+        "violations": [],
+        "duplicate_mutations": 0
+      },
+      "cleanup": [
+        "Close picker.",
+        "Remove capture styles.",
+        "Restore scroll position."
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "picker-boundary-mobile",
+      "purpose": "Verify the final mobile boundary preserves slot anatomy and focus round trip.",
+      "precondition": "Horizontal fixture has one ordinary filled slot.",
+      "viewport": "mobile-boundary",
+      "state": "filled",
+      "steps": [
+        "Hard reload with cache bypass.",
+        "Capture slot geometry.",
+        "Open picker from filled slot.",
+        "Dismiss with the mobile close contract.",
+        "Verify focus return and capture viewport PNG."
+      ],
+      "expected_semantic_result": "The selected slot remains Direction A while the existing picker uses its final mobile presentation.",
+      "dom_assertions": [
+        "Filled slot identity and actions remain exposed.",
+        "Focus returns to the invoking slot."
+      ],
+      "style_geometry_assertions": [
+        "No horizontal overflow.",
+        "Slot content remains inside the product-information owner.",
+        "Picker does not overlap an unreachable slot action after dismissal."
+      ],
+      "screenshot_path": "qa/actual/picker-boundary-mobile.png",
+      "baseline_path": "qa/baselines/picker-boundary-mobile.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "violations": [],
+        "fail_on_policy": true
+      },
+      "network_expectations": {
+        "violations": [],
+        "duplicate_mutations": 0
+      },
+      "cleanup": [
+        "Close all overlays.",
+        "Remove capture styles.",
+        "Restore scroll."
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "picker-boundary-desktop",
+      "purpose": "Verify the first desktop boundary changes only picker presentation, not slot semantics.",
+      "precondition": "Same Horizontal selection as the mobile-boundary case.",
+      "viewport": "desktop-boundary",
+      "state": "filled",
+      "steps": [
+        "Resize to 768x900 without mutating fixture.",
+        "Take fresh accessibility snapshot.",
+        "Open and dismiss picker.",
+        "Measure slot and document overflow.",
+        "Capture viewport PNG."
+      ],
+      "expected_semantic_result": "The selected slot semantic tree and exact target remain unchanged across the boundary.",
+      "dom_assertions": [
+        "Replacement and remove controls retain names and order.",
+        "Selection state is unchanged."
+      ],
+      "style_geometry_assertions": [
+        "No one-pixel boundary overflow or content collision.",
+        "Card geometry remains content-driven."
+      ],
+      "screenshot_path": "qa/actual/picker-boundary-desktop.png",
+      "baseline_path": "qa/baselines/picker-boundary-desktop.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "violations": [],
+        "fail_on_policy": true
+      },
+      "network_expectations": {
+        "violations": [],
+        "duplicate_mutations": 0
+      },
+      "cleanup": [
+        "Close overlays.",
+        "Remove capture styles.",
+        "Restore scroll."
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "vertical-capacity-mobile",
+      "purpose": "Prove compact Vertical rows, price hierarchy, and minimum/exact capacity behavior.",
+      "precondition": "Transition the compatible fixture to Vertical Slots; retain selection; prepare minimum then exact rule states without full reset.",
+      "viewport": "primary-mobile",
+      "state": "capacity",
+      "steps": [
+        "Hard reload after the fixture transition.",
+        "Verify selected row identity and price.",
+        "Capture minimum-rule trailing empty state.",
+        "Transition only incompatible capacity configuration to exact.",
+        "Capture exact-full state.",
+        "Measure overflow and row/action bounds."
+      ],
+      "expected_semantic_result": "Vertical uses compact full-width rows; minimum keeps one empty target and exact exposes no overflow target.",
+      "dom_assertions": [
+        "Each selected instance has one replacement and at most one remove action.",
+        "Minimum and exact capacities match existing rules.",
+        "Compare-at follows product data."
+      ],
+      "style_geometry_assertions": [
+        "Rows span the owner without horizontal overflow.",
+        "Identity and prices do not overlap the trailing 44px remove target.",
+        "Empty and selected base row geometry matches."
+      ],
+      "screenshot_path": "qa/actual/vertical-capacity-mobile.png",
+      "baseline_path": "qa/baselines/vertical-capacity-mobile.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "violations": [],
+        "fail_on_policy": true
+      },
+      "network_expectations": {
+        "violations": [],
+        "duplicate_mutations": 0
+      },
+      "cleanup": [
+        "Carry compatible Vertical state to desktop.",
+        "Remove capture styles.",
+        "Restore scroll."
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "vertical-restored-desktop",
+      "purpose": "Verify hard-reload persistence and recovery for a restored unavailable Vertical selection.",
+      "precondition": "Vertical fixture contains the selected/restored test instance and safe recovery state.",
+      "viewport": "desktop",
+      "state": "unavailable-restored",
+      "steps": [
+        "Clear cache and hard reload.",
+        "Wait for restoration.",
+        "Capture accessibility tree and row PNG.",
+        "Verify identity, status, price when available, replacement, and removal.",
+        "Remove the unavailable instance and verify focus recovery."
+      ],
+      "expected_semantic_result": "The restored instance remains identifiable and recoverable without altering other selections.",
+      "dom_assertions": [
+        "Restored instance maps to the persisted selection key.",
+        "Unavailable status is perceivable.",
+        "Removal changes only that instance."
+      ],
+      "style_geometry_assertions": [
+        "Row remains inside the desktop product-information column.",
+        "Status and price do not collide with the remove target.",
+        "Document has zero horizontal overflow."
+      ],
+      "screenshot_path": "qa/actual/vertical-restored-desktop.png",
+      "baseline_path": "qa/baselines/vertical-restored-desktop.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "violations": [],
+        "fail_on_policy": true
+      },
+      "network_expectations": {
+        "violations": [],
+        "duplicate_mutations": 0
+      },
+      "cleanup": [
+        "Restore the normal compatible selection.",
+        "Restore fixture to Product Grid at the fixture-group boundary.",
+        "Hard reload and confirm Product Grid.",
+        "Remove capture styles and restore scroll."
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "product-grid-non-regression",
+      "purpose": "Confirm PPB Product Grid remains behaviorally and visually outside selected-slot changes after fixture restoration.",
+      "precondition": "Fixture restored to Product Grid and hard reloaded.",
+      "viewport": "primary-mobile",
+      "state": "non-regression",
+      "steps": [
+        "Verify served version and Product Grid renderer.",
+        "Select an ordinary product.",
+        "Verify configured quantity-validation presentation.",
+        "Capture viewport and console/network evidence."
+      ],
+      "expected_semantic_result": "Product Grid selection and quantity behavior remain unchanged.",
+      "dom_assertions": [
+        "Product Grid selection updates once.",
+        "No selected-slot tile/row semantics leak into Product Grid.",
+        "Quantity behavior follows existing validation configuration."
+      ],
+      "style_geometry_assertions": [
+        "Product cards retain equal selected/unselected geometry.",
+        "No horizontal overflow or footer collision."
+      ],
+      "screenshot_path": "qa/actual/product-grid-non-regression.png",
+      "baseline_path": "qa/baselines/product-grid-non-regression.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "violations": [],
+        "fail_on_policy": true
+      },
+      "network_expectations": {
+        "violations": [],
+        "duplicate_mutations": 0
+      },
+      "cleanup": [
+        "Remove test selection if incompatible with the restored fixture.",
+        "Remove capture styles.",
+        "Keep Product Grid as final fixture state."
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "fpb-non-regression",
+      "purpose": "Confirm the shared source change does not alter FPB selected-slot presentation or behavior.",
+      "precondition": "Use the existing deterministic FPB storefront fixture in the connected default profile without changing FPB configuration.",
+      "viewport": "desktop",
+      "state": "non-regression",
+      "steps": [
+        "Hard reload the FPB fixture with cache bypass.",
+        "Capture ordinary selected-slot state and accessibility tree.",
+        "Verify replacement/removal smoke behavior without cart submission.",
+        "Capture viewport, console, and network evidence."
+      ],
+      "expected_semantic_result": "FPB presentation and selected-slot behavior remain unchanged.",
+      "dom_assertions": [
+        "FPB selection and removal operate once.",
+        "No PPB-only identity markup or orientation presentation leaks into FPB."
+      ],
+      "style_geometry_assertions": [
+        "FPB baseline geometry remains within approved visual tolerance.",
+        "No new horizontal overflow."
+      ],
+      "screenshot_path": "qa/actual/fpb-non-regression.png",
+      "baseline_path": "qa/baselines/fpb-non-regression.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "violations": [],
+        "fail_on_policy": true
+      },
+      "network_expectations": {
+        "violations": [],
+        "duplicate_mutations": 0
+      },
+      "cleanup": [
+        "Restore reversible FPB selection state.",
+        "Remove capture styles.",
+        "Restore scroll."
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    }
+  ],
+  "assertions": {
+    "library": "references/chrome-devtools-test-protocol.md",
+    "require_json_serializable_results": true,
+    "geometry_tolerance_css_px": 1,
+    "horizontal_overflow_tolerance_css_px": 0
+  },
+  "screenshots": {
+    "format": "png",
+    "index_path": "qa/screenshot-index.json",
+    "element_required": true,
+    "viewport_required": true,
+    "before_after_critical_interactions": true,
+    "full_page_only_when_needed": true,
+    "metadata_required": [
+      "viewport",
+      "dpr",
+      "zoom",
+      "state",
+      "revision",
+      "served-widget-version",
+      "asset-url"
+    ]
+  },
+  "console_policy": {
+    "fail_on": [
+      "uncaught-exception",
+      "unhandled-promise-rejection",
+      "severe-application-error",
+      "failed-resource-parse",
+      "new-repeated-warning",
+      "accessibility-runtime-error",
+      "hydration-error",
+      "duplicate-key-warning",
+      "change-caused-csp-violation",
+      "tested-interaction-error"
+    ],
+    "allowlist": []
+  },
+  "network_policy": {
+    "fail_on": [
+      "unexpected-4xx-5xx",
+      "blocked-required-asset",
+      "implementation-caused-abort",
+      "cors-error",
+      "duplicate-mutation",
+      "missing-product-media",
+      "missing-translation",
+      "local-to-production-request",
+      "real-order-or-destructive-action"
+    ],
+    "expected_analytics": [],
+    "redact_secrets_and_private_bodies": true
+  },
+  "lighthouse": {
+    "required": true,
+    "devices": [
+      "desktop",
+      "mobile"
+    ],
+    "modes": [
+      "snapshot",
+      "navigation"
+    ],
+    "categories": [
+      "accessibility",
+      "best-practices",
+      "seo"
+    ],
+    "performance_excluded": true,
+    "report_paths": {
+      "desktop": "qa/lighthouse/desktop.json",
+      "mobile": "qa/lighthouse/mobile.json"
+    }
+  },
+  "performance": {
+    "required": true,
+    "triggers": [
+      "selected-slot geometry and image/content reflow can affect CLS"
+    ],
+    "not_applicable_reason": "",
+    "trace_paths": [
+      "qa/performance/selected-slot-mobile.json.gz"
+    ],
+    "metrics": [
+      "LCP",
+      "CLS",
+      "interaction-findings",
+      "long-tasks",
+      "layout-shift-sources",
+      "image-font-loading"
+    ]
+  },
+  "visual_diff": {
+    "format": "png",
+    "comparison": "scripts/compare_images.py",
+    "diff_required": true,
+    "json_summary_required": true,
+    "approved_reference_and_actual_side_by_side": true,
+    "allowed_masks": []
+  },
+  "non_regression": {
+    "required": true,
+    "cases": [
+      "product-grid-non-regression",
+      "fpb-non-regression"
+    ]
+  },
+  "cleanup": [
+    "Remove injected capture styles.",
+    "Restore scroll position.",
+    "Carry compatible fixture state only within the Horizontal and Vertical fixture group.",
+    "Restore Product Grid at the fixture-group boundary and confirm with cache-cleared hard reload.",
+    "Restore reversible FPB selection state.",
+    "Delete temporary sensitive or transient evidence."
+  ]
+}
