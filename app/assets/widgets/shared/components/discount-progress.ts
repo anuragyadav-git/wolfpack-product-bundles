@@ -12,6 +12,7 @@ export function renderDiscountProgress(progressData = {}, options = {}) {
   const mode = options.mode || 'bar';
   const message = progressData.message || '';
   const shouldRenderMessage = options.messagePlacement !== 'external' && message;
+  const renderedMessage = options.messageIsHtml ? String(message) : escapeHtml(message);
   const milestones = Array.isArray(progressData.milestones) ? progressData.milestones : [];
   const trackMarkup = renderTrack(progressPercent, options);
   const rootClasses = [
@@ -23,7 +24,7 @@ export function renderDiscountProgress(progressData = {}, options = {}) {
 
   return `
     <div class="${rootClasses}" data-bw-discount-progress="true" style="--bw-discount-progress-width:${progressPercent}%">
-      ${shouldRenderMessage ? `<div class="bw-discount-progress__message ${escapeAttribute(options.messageClassName || '')}">${escapeHtml(message)}</div>` : ''}
+      ${shouldRenderMessage ? `<div class="bw-discount-progress__message ${escapeAttribute(options.messageClassName || '')}">${renderedMessage}</div>` : ''}
       ${renderMilestones(milestones, options, options.milestonesOnTrack ? trackMarkup : '')}
       ${options.milestonesOnTrack && milestones.length ? '' : trackMarkup}
       ${options.renderSubtitleList ? renderMilestoneSubtitleList(milestones, options) : ''}

@@ -7,6 +7,10 @@ function mount(): void {
   initializeFullPageWidget(document);
 }
 
+(window as Window & {
+  __WOLFPACK_INITIALIZE_FULL_PAGE_WIDGET__?: (root?: Document) => void;
+}).__WOLFPACK_INITIALIZE_FULL_PAGE_WIDGET__ = initializeFullPageWidget;
+
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', mount, { once: true });
 } else {

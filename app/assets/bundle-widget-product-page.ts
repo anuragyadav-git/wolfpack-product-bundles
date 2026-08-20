@@ -131,6 +131,12 @@ import { ProductPageModalStateMethods } from './widgets/product-page/methods/mod
 import { ProductPageWidgetMiscMethods } from './widgets/product-page/methods/widget-misc-methods.js';
 import { renderBundlePurchaseOptions } from './widgets/shared/components/purchase-options.js';
 import { bundleSubscriptionStorefrontMethods } from './widgets/shared/subscription-storefront-methods.js';
+import { applyBrowsedProductPreselection } from './widgets/product-page/embed-preselection.js';
+import { BundleProductModal } from './bundle-modal-component.js';
+
+export function createProductPageProductModal(widget, ModalConstructor = BundleProductModal) {
+  return new ModalConstructor(widget, { drawerOwner: 'ppb' });
+}
 
 
 export class BundleWidgetProductPage {
@@ -172,9 +178,7 @@ export class BundleWidgetProductPage {
     this.elements = {};
     this.selectedSellingPlanId = undefined;
 
-    // Initialize product modal for variant selection (if BundleProductModal is available)
-    this.productModal = null;
-    this.productModal = null;
+    this.productModal = createProductPageProductModal(this);
 
     // Call async init but don't block constructor
     this.init().catch(error => {
@@ -213,7 +217,7 @@ export class BundleWidgetProductPage {
 
       // Move the container into its final product-form placement before the
       // bootstrap overlay paints, so loading and rendered states share a slot.
-      this._relocateContainerToProductForm();
+      if (!this.config.isEmbedSource) this._relocateContainerToProductForm();
 
       // Show loading overlay immediately with fallback spinner while bundle config loads.
       this.showLoadingOverlay(null, { bootstrap: true });
@@ -247,16 +251,31 @@ export class BundleWidgetProductPage {
       // Initialize data structures
       this.initializeDataStructures();
       this._initDirectDefaultProducts();
-      this._restoreSessionSelections();
+      const restoredSelections = this._restoreSessionSelections();
       await this._preloadDirectDefaultProducts();
+
+      if (
+        this.config.isEmbedSource &&
+        this.config.preselectBrowsedProduct &&
+        !restoredSelections
+      ) {
+        await Promise.all(
+          this.selectedBundle.steps.map((_, stepIndex) =>
+            this.loadStepProducts(stepIndex).catch(() => {}),
+          ),
+        );
+        applyBrowsedProductPreselection(this, true, false);
+      }
 
       // Pre-load product data for default steps so filled cards show real image/title
       await this._preloadDefaultStepProducts();
       await this._preloadRestoredSelectionProducts();
 
-      this._relocateContainerToProductForm();
-      this._hideNativeProductPrice();
-      this._hideNativeDynamicCheckoutControls();
+      if (!this.config.isEmbedSource) {
+        this._relocateContainerToProductForm();
+        this._hideNativeProductPrice();
+        this._hideNativeDynamicCheckoutControls();
+      }
 
       // Setup DOM elements
       this.setupDOMElements();

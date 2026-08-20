@@ -18,6 +18,10 @@
 
 import { BundleModalVariantMethods } from './widgets/full-page/modal/variant-methods.js';
 import { BUNDLE_WIDGET } from './widgets/shared/constants.js';
+import {
+  drawerLayerManager,
+  shouldDismissDrawerSwipe,
+} from './widgets/shared/drawer-layer-manager.js';
 
 export interface BundleProductModal {
   [key: string]: any;
@@ -28,12 +32,7 @@ export function shouldDismissProductDrawerSwipe({
   distanceX = 0,
   velocityY = 0,
 } = {}) {
-  const verticalDistance = Number(distanceY);
-  const horizontalDistance = Math.abs(Number(distanceX));
-  const downwardVelocity = Number(velocityY);
-  if (!Number.isFinite(verticalDistance) || verticalDistance <= 0) return false;
-  if (horizontalDistance > verticalDistance) return false;
-  return verticalDistance >= 96 || downwardVelocity >= 0.6;
+  return shouldDismissDrawerSwipe({ distanceY, distanceX, velocityY });
 }
 
 export function getProductCarouselSwipeDirection({
@@ -48,7 +47,7 @@ export function getProductCarouselSwipeDirection({
 }
 
 export class BundleProductModal {
-  constructor(widget) {
+  constructor(widget, options = {}) {
     this.widget = widget;
     this.modalElement = null;
     this.currentProduct = null;
@@ -59,6 +58,10 @@ export class BundleProductModal {
     this.readOnly = false;
     this.lockedScrollY = 0;
     this.isDocumentScrollLocked = false;
+    this.isPpbOwned = options.drawerOwner === 'ppb'
+      || Boolean(widget?.container?.closest?.('[data-ppb-template-type]'));
+    this.drawerLayer = null;
+    this.focusOrigin = null;
 
     this.init();
   }
@@ -101,12 +104,12 @@ export class BundleProductModal {
    */
   createModalHTML() {
     const modalHTML = `
-      <div class="bundle-modal-overlay" id="bundle-product-modal">
+      <div class="bundle-modal-overlay" id="bundle-product-modal"${this.isPpbOwned ? ' data-ppb-drawer-surface="product-details"' : ''}>
         <div class="bundle-modal-container">
           <!-- Mobile Drag Handle for Swipe-to-Dismiss -->
-          <div class="bundle-modal-drag-handle">
+          ${this.isPpbOwned ? '<button type="button" class="bundle-modal-drag-handle" aria-label="Close modal">' : '<div class="bundle-modal-drag-handle" aria-hidden="true">'}
             <div class="bundle-modal-drag-indicator"></div>
-          </div>
+          ${this.isPpbOwned ? '</button>' : '</div>'}
           <button class="bundle-modal-close" aria-label="Close modal">&times;</button>
 
           <div class="bundle-modal-content">
@@ -172,18 +175,38 @@ export class BundleProductModal {
     // Close button
     const closeBtn = this.modalElement.querySelector('.bundle-modal-close');
     closeBtn.addEventListener('click', () => this.close());
+    if (this.isPpbOwned) {
+      this.modalElement.querySelector('.bundle-modal-drag-handle')?.addEventListener('click', () => this.close());
+    }
 
     // Close on overlay click
     this.modalElement.addEventListener('click', (e) => {
       if (e.target === this.modalElement) {
-        this.close();
+        if (!this.drawerLayer || drawerLayerManager.isTopmost(this.drawerLayer)) this.close();
       }
     });
 
     // Close on ESC key
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && this.modalElement.classList.contains('active')) {
+      if (!this.modalElement.classList.contains('active')) return;
+      if (this.drawerLayer && !drawerLayerManager.isTopmost(this.drawerLayer)) return;
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        e.stopImmediatePropagation?.();
         this.close();
+        return;
+      }
+      if (e.key === 'Tab' && this.isPpbOwned) {
+        const focusable = Array.from(this.modalElement.querySelectorAll(
+          'button:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        )).filter((element) => element.getClientRects?.().length !== 0);
+        if (focusable.length === 0) return;
+        const currentIndex = focusable.indexOf(document.activeElement);
+        const nextIndex = e.shiftKey
+          ? (currentIndex <= 0 ? focusable.length - 1 : currentIndex - 1)
+          : (currentIndex < 0 || currentIndex === focusable.length - 1 ? 0 : currentIndex + 1);
+        e.preventDefault();
+        focusable[nextIndex]?.focus?.();
       }
     });
 
@@ -322,6 +345,7 @@ export class BundleProductModal {
     this.selectedOptions = {};
     this.selectedQuantity = 1;
     this.readOnly = options.readOnly === true;
+    this.focusOrigin = document.activeElement;
     const imageCount = this.getProductImages().length;
     const initialImageIndex = Number(options.initialImageIndex || 0);
     this.currentImageIndex = imageCount > 0
@@ -334,7 +358,21 @@ export class BundleProductModal {
 
     // Show modal
     this.modalElement.classList.add('active');
-    this.lockDocumentScroll();
+    if (this.isPpbOwned) {
+      this.drawerLayer = drawerLayerManager.open({
+        id: 'product-details',
+        requestClose: () => this.close(),
+        trigger: this.focusOrigin,
+      });
+      const isMobileDrawer = window.matchMedia?.('(max-width: 767px)').matches
+        || window.innerWidth <= 767;
+      const initialControl = this.modalElement.querySelector(
+        isMobileDrawer ? '.bundle-modal-drag-handle' : '.bundle-modal-close',
+      );
+      initialControl?.focus?.({ preventScroll: true });
+    } else {
+      this.lockDocumentScroll();
+    }
   }
 
   /**
@@ -342,7 +380,13 @@ export class BundleProductModal {
    */
   close() {
     this.modalElement.classList.remove('active');
-    this.unlockDocumentScroll();
+    if (this.drawerLayer) {
+      drawerLayerManager.close(this.drawerLayer, { restoreFocus: true });
+      this.drawerLayer = null;
+    } else {
+      this.unlockDocumentScroll();
+    }
+    this.focusOrigin = null;
 
     // Reset state
     this.currentProduct = null;

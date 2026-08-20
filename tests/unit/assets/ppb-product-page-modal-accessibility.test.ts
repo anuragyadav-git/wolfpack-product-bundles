@@ -304,7 +304,7 @@ describe('PPB modal accessibility keyboard and focus management', () => {
   });
 
   it('resolves modal discount messaging through locale-aware TemplateManager templates', async () => {
-    const footerDiscountText = { textContent: '' };
+    const footerDiscountText = { textContent: '', innerHTML: '' };
     const discountSection = {
       style: {},
       classList: {
@@ -390,7 +390,9 @@ describe('PPB modal accessibility keyboard and focus management', () => {
       },
     );
 
-    expect(footerDiscountText.textContent).toContain('Ajouter');
+    expect(footerDiscountText.innerHTML).toContain('Ajouter <span');
+    expect(footerDiscountText.innerHTML).not.toContain('&lt;span');
+    expect(footerDiscountText.textContent).toBe('');
     expect(discountSection.classList.remove).toHaveBeenCalled();
   });
 });

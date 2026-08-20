@@ -114,7 +114,9 @@ attachEventListeners() {
 
   // Overlay closes bottom-sheet
   if (this.elements.bsOverlay) {
-    this.elements.bsOverlay.addEventListener('click', () => this.closeModal());
+    this.elements.bsOverlay.addEventListener('click', () => {
+      if (this._isPpbPickerDrawerTopmost?.() !== false) this.closeModal();
+    });
   }
   if (prevButton) prevButton.addEventListener('click', () => this.navigateModal(-1));
   if (nextButton) nextButton.addEventListener('click', () => this.navigateModal(1));
@@ -127,7 +129,7 @@ attachEventListeners() {
     if (target && (target.tagName === 'INPUT' || target.isContentEditable)) return;
 
     if (e.key === 'Escape') {
-      this.closeModal();
+      if (this._isPpbPickerDrawerTopmost?.() !== false) this.closeModal();
       return;
     }
 

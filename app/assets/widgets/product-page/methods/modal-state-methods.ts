@@ -5,6 +5,7 @@ import { calculateBundleTotalForPurchaseOption } from '../../shared/subscription
 import { TemplateManager } from '../../shared/template-manager.js';
 import { ToastManager } from '../../shared/toast-manager.js';
 import { ConditionValidator } from '../../shared/condition-validator.js';
+import { drawerLayerManager } from '../../shared/drawer-layer-manager.js';
 
 function normalizeSelectionKey(widget, value) {
   return typeof widget?.normalizeSelectionKey === 'function'
@@ -207,6 +208,13 @@ openModal(stepIndex) {
 
   // Show bottom-sheet
   this.setBottomSheetVisibility(true);
+  if (!this._ppbPickerDrawerLayer) {
+    this._ppbPickerDrawerLayer = drawerLayerManager.open({
+      id: 'bundle-picker',
+      requestClose: () => this.closeModal(),
+      trigger: this._modalOriginFocusElement,
+    });
+  }
   if (this.elements.bsOverlay) this.elements.bsOverlay.classList.add('bw-bs-overlay--open');
   const runAfterFrame = (typeof requestAnimationFrame === 'function')
     ? requestAnimationFrame
@@ -218,7 +226,6 @@ openModal(stepIndex) {
     modal.classList.add('bw-bs-panel--open');
     this._focusFirstModalControl();
   });
-  document.body.style.overflow = 'hidden';
 
   // Capture stepIndex so async callback doesn't render stale step if user navigates away
   const capturedStepIndex = stepIndex;
@@ -248,7 +255,10 @@ openModal(stepIndex) {
 closeModal() {
   this.elements.modal.classList.remove('bw-bs-panel--open');
   if (this.elements.bsOverlay) this.elements.bsOverlay.classList.remove('bw-bs-overlay--open');
-  document.body.style.overflow = '';
+  if (this._ppbPickerDrawerLayer) {
+    drawerLayerManager.close(this._ppbPickerDrawerLayer);
+    this._ppbPickerDrawerLayer = null;
+  }
   this.setBottomSheetVisibility(false);
   this._modalSlotReplacementTarget = null;
 
@@ -257,6 +267,11 @@ closeModal() {
   this.updateAddToCartButton();
   this.updateFooterMessaging();
   this._restoreActiveElementAfterModalClose();
+},
+
+_isPpbPickerDrawerTopmost() {
+  return !this._ppbPickerDrawerLayer
+    || drawerLayerManager.isTopmost(this._ppbPickerDrawerLayer);
 },
 
 validateStepCondition(stepIndex, productId, newQuantity) {
@@ -498,7 +513,7 @@ updateModalDiscountMessaging(totalPrice, totalQuantity, discountInfo, currencyIn
   );
   const message = TemplateManager.replaceVariables(template, variables);
 
-  footerDiscountText.textContent = discountInfo.qualifiesForDiscount && !nextRule
+  footerDiscountText.innerHTML = discountInfo.qualifiesForDiscount && !nextRule
     ? message
     : message || '';
   if (discountSection) {

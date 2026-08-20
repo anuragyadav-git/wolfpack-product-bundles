@@ -323,12 +323,12 @@
 }
 
 .bw-bs-panel.bundle-builder-modal.bw-bs-panel--open {
-  height: min(var(--bundle-bottom-sheet-max-height, 880px), 85vh);
+  height: min(85dvh, 48rem);
 }
 
 @media (max-width: 767px) {
   .bw-bs-panel.bundle-builder-modal.bw-bs-panel--open {
-    height: 85vh;
+    height: min(85dvh, 48rem);
   }
 }
 
@@ -343,7 +343,8 @@
   flex: 0 0 auto;
   align-self: flex-start;
   gap: 16px;
-  width: calc(100% + 32px);
+  width: 100%;
+  min-width: 0;
   padding: 0 1px 2px;
   overflow-x: auto;
   overflow-y: hidden;
@@ -459,20 +460,21 @@
     display: none;
   }
 
-  .bw-bs-close-mobile svg {
-    width: 40px;
-    height: 24px;
+  #bundle-builder-modal.bw-bs-panel.bw-bs-panel--open .bw-bs-close-mobile {
+    top: -7px;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
   }
 
-  .bw-bs-panel::before {
-    content: "";
-    display: block;
-    width: 36px;
-    height: 4px;
-    background: rgba(0, 0, 0, 0.18);
-    border-radius: 2px;
-    margin: 10px auto 0;
-    flex-shrink: 0;
+  .bw-bs-close-mobile svg {
+    width: 32px;
+    height: 20px;
+  }
+
+  #bundle-builder-modal.bw-bs-panel::before {
+    display: none;
   }
 }
 
@@ -599,7 +601,7 @@
   #bundle-builder-modal.bw-bs-panel .bw-bs-header {
     padding: 30px 20px var(
       --bundle-bs-mobile-header-bottom-space,
-      clamp(44px, 11.4vw, 48px)
+      clamp(12px, 3vw, 16px)
     );
   }
 

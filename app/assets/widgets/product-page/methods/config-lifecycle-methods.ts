@@ -174,6 +174,9 @@ parseConfiguration() {
     bundleId: dataset.bundleId || null,
     isContainerProduct: dataset.isContainerProduct === 'true',
     containerBundleId: dataset.containerBundleId || null,
+    isEmbedSource: dataset.wpbPpbEmbedSource === 'true',
+    preselectBrowsedProduct: dataset.preselectBrowsedProduct === 'true',
+    selectedVariantId: dataset.selectedVariantId || null,
     hideDefaultButtons: dataset.hideDefaultButtons === 'true',
     showStepNumbers: dataset.showStepNumbers !== 'false',
     // Quantity selector visibility settings (default: show on card)
@@ -222,7 +225,16 @@ _parseBundleConfigPayload(rawValue) {
     const bundleId = this.container.dataset.bundleId;
     const configValue = this._parseBundleConfigPayload(this.container.dataset.bundleConfig);
 
-    if (bundleType === 'product_page' && this._isBundleConfigBootstrapPayload(configValue)) {
+    if (
+      this.container.dataset.wpbPpbEmbedSource === 'true' &&
+      configValue &&
+      typeof configValue.id === 'string' &&
+      Array.isArray(configValue.steps)
+    ) {
+      bundleData = { [configValue.id]: configValue };
+    }
+
+    if (!bundleData && bundleType === 'product_page' && this._isBundleConfigBootstrapPayload(configValue)) {
       const RETRY_DELAY_MS = 3000;
       const RETRYABLE_STATUSES = new Set([503, 504]);
 
@@ -340,21 +352,6 @@ _getProductPageDesignPreset() {
 
 _isProductPageInpageTemplate() {
   return this._getProductPageTemplateContract?.()?.templateType === 'PDP_INPAGE';
-},
-
-_shouldShowProductComparedAtPrice() {
-  const controls = this._getProductPageControls();
-  const controlSetting = parseControlBoolean(
-    controls,
-    ['showCompareAtPrices'],
-    undefined,
-  );
-
-  if (controlSetting === true || controlSetting === false) {
-    return controlSetting;
-  }
-
-  return this.selectedBundle?.showProductComparedAtPrice === true;
 },
 
 ensureProductPageTemplateStylesheet(templateType, designPreset) {

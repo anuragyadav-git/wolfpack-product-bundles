@@ -8,3 +8,5 @@
 @import "./base/slot-cards-default-products.css";
 @import "./base/quantity-pills-skeletons.css";
 @import "../shared-css/purchase-options.css";
+@import "./base/mobile-drawers.css";
+@import "./base/embed-host.css";

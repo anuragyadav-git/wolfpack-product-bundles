@@ -131,6 +131,22 @@ function createSharedProductCard() {
   return { scope, card, action, addButton };
 }
 
+function containsText(element: FakeElement, text: string): boolean {
+  return element.textContent === text
+    || element.children.some(child => containsText(child, text));
+}
+
+function findButtonByText(element: FakeElement, text: string): FakeElement | null {
+  if (element.tagName === 'button' && element.textContent === text) return element;
+
+  for (const child of element.children) {
+    const match = findButtonByText(child, text);
+    if (match) return match;
+  }
+
+  return null;
+}
+
 describe('PPB shared card quantity selector state', () => {
   const originalDocument = global.document;
 
@@ -167,6 +183,56 @@ describe('PPB shared card quantity selector state', () => {
     expect(card.classList.contains('bw-product-card--selected')).toBe(true);
     expect(card.attributes.get('aria-pressed')).toBe('true');
     expect(card.attributes.get('aria-label')).toBe('Open product details (selected)');
+  });
+
+  it('replaces a Product Grid add button with inline controls when quantity validation is disabled', () => {
+    const { scope, card, action, addButton } = createSharedProductCard();
+    card.classList.add('bw-ppb-grid-product-card');
+    global.document = {
+      createElement(tagName: string) {
+        return new FakeElement(tagName);
+      },
+    } as unknown as Document;
+
+    ProductPageSelectionMethods.updateProductQuantityDisplay.call({
+      container: scope,
+      elements: { modal: { classList: { contains: () => false } } },
+      selectedBundle: {
+        steps: [{}],
+        validateQuantityPerProduct: { isEnabled: false, allowedQuantity: 1 },
+      },
+      _resolveText: (_key: string, fallback: string) => fallback,
+      getVariantAvailable: () => ({ available: null, outOfStock: false }),
+    }, 0, 'variant-1', 1);
+
+    expect(addButton.removed).toBe(true);
+    expect(containsText(action, '1')).toBe(true);
+  });
+
+  it('keeps Product Grid inline controls and disables increment at a maximum above one', () => {
+    const { scope, card, action } = createSharedProductCard();
+    card.classList.add('bw-ppb-grid-product-card');
+    global.document = {
+      createElement(tagName: string) {
+        return new FakeElement(tagName);
+      },
+    } as unknown as Document;
+
+    ProductPageSelectionMethods.updateProductQuantityDisplay.call({
+      container: scope,
+      elements: { modal: { classList: { contains: () => false } } },
+      selectedBundle: {
+        steps: [{}],
+        validateQuantityPerProduct: { isEnabled: true, allowedQuantity: 3 },
+      },
+      _resolveText: (_key: string, fallback: string) => fallback,
+      getVariantAvailable: () => ({ available: null, outOfStock: false }),
+    }, 0, 'variant-1', 3);
+
+    const increment = findButtonByText(action, '+');
+    expect(containsText(action, '3')).toBe(true);
+    expect(increment?.disabled).toBe(true);
+    expect(increment?.getAttribute('aria-disabled')).toBe('true');
   });
 
   it('restores the accessible unselected state when quantity returns to zero', () => {

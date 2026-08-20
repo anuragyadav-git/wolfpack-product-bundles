@@ -5,7 +5,7 @@ title: Widget Architecture
 type: architecture
 status: authoritative
 summary: FPB and PPB bootstrap, hydration, extension-asset, and widget runtime architecture.
-last_audited: 2026-08-14
+last_audited: 2026-08-21
 owners:
   - engineering
 domains:
@@ -17,18 +17,25 @@ source_paths:
   - app/assets/bundle-widget-full-page.ts
   - app/storefront/fpb-product-page-upsell.ts
   - app/storefront/fpb-upsell-handoff.ts
+  - app/storefront/ppb-bundle-embed.ts
+  - app/storefront/page-builder-embed.ts
   - app/assets/bundle-modal-component.ts
   - app/assets/widgets/shared
+  - app/assets/widgets/shared/drawer-layer-manager.ts
   - app/assets/widgets/full-page/initialization-guard.js
   - app/assets/widgets/full-page-css/base/bootstrap-reservation.css
   - app/assets/bundle-widget-product-page.ts
   - app/routes/api/api.storefront-products.tsx
   - app/routes/api/api.storefront-collections.tsx
   - app/routes/api/api.fpb-upsells[.]json.tsx
+  - app/routes/api/api.ppb-embed[.]json.tsx
+  - app/routes/api/api.page-builder-embed[.]json.tsx
   - app/routes/app/app.settings/design-preview-model.ts
   - app/routes/root/wpb.$bundleId.tsx
   - extensions/bundle-builder/blocks/bundle-app-embed.liquid
   - extensions/bundle-builder/blocks/bundle-product-page.liquid
+  - extensions/bundle-builder/blocks/bundle-product-page-embed.liquid
+  - extensions/bundle-builder/blocks/bundle-page-builder-embed.liquid
   - extensions/bundle-builder/blocks/bundle-upsell.liquid
   - scripts/build-storefront.mjs
   - scripts/minify-assets/targets.js
@@ -121,6 +128,17 @@ The shared multi-step FPB timeline sizes its navigation track from the rendered 
 
 PPB Product List (`PDP_INPAGE + CASCADE`) owns its multi-step navigation in the Product Page layout, footer, and validation method modules. A multi-step Product List renders only `currentStepIndex`; intermediate primary actions navigate Next after current-step validation, the final step uses Add Bundle to Cart, and Back preserves selections across steps. Single-step Product List and the other PPB templates keep their existing rendering paths. Product List exact-rule over-selection is blocked before state mutation so the current step and selected-items drawer remain stable.
 
+PPB drawer ownership is explicit through `data-ppb-drawer-surface` values for
+`selected-summary`, `bundle-picker`, `product-details`, and `variant-selector`.
+The selected summary belongs to widget flow and never participates in document
+scroll locking. The other three surfaces share the drawer layer manager: only
+the top layer owns Escape and backdrop dismissal, document scroll locks once
+across nested overlays, and the final close restores the prior scroll styles.
+Mobile product details and variants use semantic 44px handle buttons; desktop
+product details retain the cross control, and desktop variants remain inline.
+Focus returns to the originating product, slot, or variant trigger after the
+owning layer closes.
+
 FPB product grids do not pre-disable or dim unselected cards when a step reaches its exact or maximum quantity. Returning to a completed step keeps the full product set interactive; an attempted increase beyond the configured rule is rejected by `validateStepCondition` before selection state changes, and the rule toast explains the limit.
 
 Quantity, Amount, and Weight step rules share the same selection and navigation
@@ -144,7 +162,23 @@ Product Page inventory normalization preserves `sourceVariantCount` after unavai
 - Theme Editor exposes one FPB body app embed: `bundle-app-embed` (`Wolfpack Bundle`). It is the activation/status surface and hydrates the canonical app-proxy marker. The retired `bundle-full-page` Page block is not part of the extension contract.
 - Shopify stores enabled app embed blocks in `config/settings_data.json` under `current.blocks`. Per Shopify's Theme app extension configuration docs, an app embed appears there only after first enable; if the merchant disables it later, the block remains and has `disabled: true`. App embed status detection reads the active theme settings file, supports `OnlineStoreThemeFileBodyText.content`, `OnlineStoreThemeFileBodyBase64.contentBase64`, and `OnlineStoreThemeFileBodyUrl.url`, tolerates Shopify's generated comment header before parsing the settings JSON, matches the block `type` shape `shopify://apps/{app-handle}/blocks/{block-handle}/{unique-id}`, and treats `disabled: true` as inactive. Shopify Admin `currentAppInstallation.app.handle` is the sole app-identity source; environment, client-key, and hardcoded handle fallbacks are prohibited. A missing handle or unreadable settings file fails closed so merchants see the enable banner instead of a false Active state.
 - The embedded Admin enable flow opens Theme Editor in a new tab and hides the configure warning plus updates Bundle Visibility status optimistically after the merchant clicks `Enable here`. Configure page-load status comes from the server loader's parallel Shopify theme settings read. Every FPB preview action synchronously reserves a tab, requests a new stateless signed URL, and navigates the reserved tab after the response; the token is required for drafts and harmless for public statuses.
-- Product-page builder placement uses the `bundle-product-page` app block. The app embed does not inject PPB markup because the merchant controls the widget's product-page position through this section block.
+- Parent-product PPB rendering continues to use the `bundle-product-page` app
+  block. Greenfield Bundle Embed rendering is separately owned by the global
+  `bundle-app-embed` runtime: it resolves an eligible PPB, lazily loads PPB
+  assets, and mounts before the primary visible Add to Cart control. The
+  `bundle-product-page-embed` product-template block is a setting-free custom
+  placement anchor and takes precedence when visible.
+- Page builders use the separate provider-neutral `bundle-page-builder-embed`
+  block. It emits data only; `bundle-app-embed` continues to own signed
+  resolution, Shopify CDN asset URLs, lazy runtime loading, and rendering.
+  `eligible-product` mode becomes the preferred PPB custom anchor and reuses
+  `/apps/product-bundles/api/ppb-embed.json`. `product-page-bundle` resolves an
+  exact Active or Unlisted PPB by its generated parent-product handle, while
+  `full-page-bundle` resolves an exact Active or Unlisted FPB by its per-shop
+  public number through `/apps/product-bundles/api/page-builder-embed.json`.
+  The first valid marker is authoritative. Existing parent-product PPB and FPB
+  app-proxy roots win; direct page-builder modes suppress automatic PPB builder
+  initialization so only one primary bundle builder exists per page.
 - Before opening a PPB storefront preview, the preview flow first synchronizes the selected product template, then posts to the dedicated authenticated `/validate-widget-placement` JSON resource route. That route reads the parent product's effective `templateSuffix`, inspects that product JSON template in the MAIN theme, and verifies an app block owned by the current app with handle `bundle-product-page`. The placement check must not post to the rendered configure document route because an embedded document response can be HTML rather than the JSON contract expected by the client. Missing, malformed, or unreadable template data fails closed and opens Shopify's Theme Editor deep link for that exact template and product. A parent product alone is not evidence that the PPB widget is installed.
 
 ### FPB Bootstrap Idempotency and First-Paint Reservation
@@ -182,6 +216,30 @@ the marker exists.
 - FPB product-page upsells are owned by the global app-embed runtime. The embed supplies product, collection, locale, selected-variant, and signed endpoint context. `/apps/product-bundles/api/fpb-upsells.json` returns only shop-scoped eligible public offers and uses short private caching with ETag revalidation.
 - `bundle-upsell` is a setting-free custom-placement anchor. The first visible custom anchor wins; otherwise the runtime inserts once below the primary product add-to-cart form through a bounded observer. The runtime never falls back to arbitrary body placement and renders no shell for empty or failed responses.
 - Product-page clicks capture the currently selected variant into a ten-minute, bundle-scoped, consume-once session handoff. The shared FPB controller reconciles only the exact available variant into the first matching enabled paid step and refreshes the existing desktop sidebar and mobile footer from `selectedProducts`. This flow is template-neutral across Standard, Classic, Compact, and Horizontal.
+- PPB Bundle Embed uses the same global loader but a separate signed
+  `/apps/product-bundles/api/ppb-embed.json` contract. It returns one
+  shop-scoped Active or Unlisted PPB selected by `createdAt ASC, id ASC`, plus
+  localized title/subtitle and the browsed-product preselection flag. Responses
+  use private 30-second ETag caching.
+- The PPB embed host consumes the endpoint's preloaded formatted bundle instead
+  of making the parent-product configuration request. It marks the controller
+  as an embed source, preventing controller relocation and native price/dynamic
+  checkout hiding. Product Page CSS/runtime load only after a non-null eligible
+  response. Section reload reconciliation reuses the request result and never
+  creates a second widget.
+- A visible `bundle-product-page-embed` anchor wins; otherwise the host mounts
+  immediately before the first visible primary Add to Cart control. Exact
+  available current-variant preselection runs only when enabled and no shopper
+  session selection was restored.
+- Direct page-builder responses use private 30-second ETag caching and preload
+  the formatted bundle. Direct PPB sets the existing embed-source contract and
+  therefore never relocates itself or hides native product price, dynamic
+  checkout, or product forms. Direct FPB marks its signed inline configuration
+  as `app_proxy`, preserving the canonical full-page load priority and avoiding
+  a second configuration request. Section reloads reuse the resolved payload.
+- PageFly and GemPages should use their Shopify App elements to place
+  `bundle-page-builder-embed`. Shogun custom layouts can emit the same plain
+  HTML marker because it contains no Shopify Liquid or external asset URL.
 - Full-page bundle public links use the signed app-proxy document URL (`/apps/product-bundles/wpb/{publicNumber}`). The positive integer is unique per shop and hides the internal database ID. Shopify wraps `application/liquid` in the active theme layout and the app embed loads extension assets through `asset_url`.
 - Storefront JS/CSS must be loaded from Shopify theme-extension assets with Liquid `asset_url`. App proxy routes are only for API/data responses, not widget asset hosting.
 

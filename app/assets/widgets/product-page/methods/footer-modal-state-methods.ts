@@ -219,6 +219,7 @@ renderFooter() {
     milestoneSubtitleClassName: 'bw-discount-progress__milestone-subtitle',
     renderInlineSubtitles: false,
     renderSubtitleList: false,
+    messageIsHtml: true,
     mode: progressMode === 'simple' ? 'bar' : 'stepped',
   });
   const modeClassName = progressMode === 'simple'

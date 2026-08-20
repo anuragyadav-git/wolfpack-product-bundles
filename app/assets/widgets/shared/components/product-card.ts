@@ -32,8 +32,7 @@ export function renderSharedProductCard(product = {}, currentQuantity = 0, curre
     ? options.displayPrice
     : product.price;
   const price = formatPrice(displayPrice, currencyInfo);
-  const shouldRenderCompareAtPrice = options.showCompareAtPrice === true
-    && product.compareAtPrice !== null
+  const shouldRenderCompareAtPrice = product.compareAtPrice !== null
     && product.compareAtPrice !== undefined;
   const compareAtPrice = shouldRenderCompareAtPrice
     ? formatPrice(product.compareAtPrice, currencyInfo)

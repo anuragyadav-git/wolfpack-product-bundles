@@ -141,11 +141,16 @@
 
 .bw-ppb-modal-slot-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 8.5rem), 1fr));
+  grid-auto-rows: 1fr;
   gap: 16px;
   width: 100%;
-  align-items: start;
+  align-items: stretch;
   justify-items: stretch;
+}
+
+.bw-ppb-modal-slot-grid > .step-box {
+  height: 100%;
 }
 
 #bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-slot-orientation="vertical"]
@@ -709,3 +714,5 @@
   cursor: default;
   user-select: none;
 }
+@import "../../full-page-css/base/product-modal-shell.css";
+@import "../../full-page-css/base/product-modal-controls.css";

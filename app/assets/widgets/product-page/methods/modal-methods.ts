@@ -4,6 +4,7 @@ import { ToastManager } from '../../shared/toast-manager.js';
 import { ComponentGenerator } from '../../shared/component-generator.js';
 import { renderSharedProductCard } from '../../shared/components/product-card.js';
 import { getSubscriptionProductCardPrice } from '../../shared/subscription-storefront-methods.js';
+import { VariantSelectorComponent } from '../../shared/variant-selector.js';
 
 export function resolveProductPageCardButtonText({
   currentQuantity = 0,
@@ -96,7 +97,6 @@ export function applyProductPageVariantSelection({
   variantData = {},
   productCard = null,
   formatPrice = null,
-  showCompareAtPrice = false,
 } = {}) {
   const nextVariantId = variantData.id || product.variantId || product.id;
   const nextVariantTitle = variantData.title && variantData.title !== 'Default Title'
@@ -135,7 +135,7 @@ export function applyProductPageVariantSelection({
 
   const compareEl = productCard.querySelector?.('.product-price-strike');
   if (compareEl) {
-    if (showCompareAtPrice === true && Number.isFinite(product.compareAtPrice) && typeof formatPrice === 'function') {
+    if (Number.isFinite(product.compareAtPrice) && typeof formatPrice === 'function') {
       compareEl.textContent = formatPrice(product.compareAtPrice);
     } else if (typeof compareEl.remove === 'function') {
       compareEl.remove();
@@ -150,6 +150,20 @@ export function applyProductPageVariantSelection({
   }
 
   return product;
+}
+
+export function dispatchProductPageVariantSelection({
+  product,
+  select,
+  oldVariantId,
+  newVariantId,
+  createEvent = () => new Event('change', { bubbles: true }),
+} = {}) {
+  if (!product || !select || !newVariantId) return false;
+  product.variantId = oldVariantId;
+  select.value = newVariantId;
+  select.dispatchEvent(createEvent());
+  return true;
 }
 
 function normalizeVariantPrice(value) {
@@ -396,7 +410,6 @@ renderModalProducts(stepIndex, productsToRender = null) {
         description: '',
         displaySeeMoreLink: false,
         expandProductCardOnHover: false,
-        showCompareAtPrice: this._shouldShowProductComparedAtPrice(),
         mode: 'grid',
         className: `${freeGiftCardClass} ${currentQuantity > 0 ? 'bw-product-card--selected' : ''} ${outOfStock ? 'is-out-of-stock' : ''}`.trim(),
         variantSelectorHtml: this.renderVariantSelector(product),
@@ -439,6 +452,16 @@ renderVariantSelector(product) {
     : false;
   const variantLabel = this._resolveText?.('productVariantLabel', 'Select variant') || 'Select variant';
 
+  const mobileDrawerSelector = VariantSelectorComponent.renderDropdownHtml(
+    product,
+    product.options?.[0] || null,
+    {
+      placeholder: variantLabel,
+      mobileMode: 'drawer',
+      hideUnavailable: trackInventoryOnAddToCart,
+    },
+  );
+
   return `
     <div class="variant-selector-wrapper">
       <label class="visually-hidden" for="variant-selector-${product.id}">${ComponentGenerator.escapeHtml(variantLabel)}</label>
@@ -451,6 +474,9 @@ renderVariantSelector(product) {
           return `<option value="${v.id}" ${selected} ${disabled}>${label}</option>`;
         }).join('')}
       </select>
+      <div class="ppb-mobile-variant-selector">
+        ${mobileDrawerSelector}
+      </div>
     </div>
   `;
 },
@@ -633,6 +659,16 @@ attachProductEventHandlers(productGrid, stepIndex) {
     const productId = card.dataset.productId;
     const product = findProduct(productId);
     const canClickCardToAdd = this._isProductCardClickAddEnabled();
+    if (product?.variants?.length > 1 && card.querySelector('.vs-wrapper--standard')) {
+      VariantSelectorComponent.attachListeners(card, product, (newVariantId, oldVariantId) => {
+        dispatchProductPageVariantSelection({
+          product,
+          select: card.querySelector('.variant-selector'),
+          oldVariantId,
+          newVariantId,
+        });
+      });
+    }
     if (canClickCardToAdd) {
       card.style.cursor = 'pointer';
     }
@@ -697,7 +733,6 @@ attachProductEventHandlers(productGrid, stepIndex) {
               getSubscriptionProductCardPrice(this, amount),
               CurrencyManager.getCurrencyInfo(),
             ),
-            showCompareAtPrice: this._shouldShowProductComparedAtPrice(),
           });
 
           // Update UI without full re-render

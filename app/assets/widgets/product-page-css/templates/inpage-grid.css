@@ -488,3 +488,5 @@
     font-size: 12px;
   }
 }
+@import "../../full-page-css/base/product-modal-shell.css";
+@import "../../full-page-css/base/product-modal-controls.css";

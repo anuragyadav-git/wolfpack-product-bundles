@@ -338,6 +338,10 @@ updateProductQuantityDisplay(stepIndex, productId, quantity) {
     const existingInlineControls = productCard.querySelector('.inline-quantity-controls');
     const cascadeRow = productCard.classList.contains('bw-ppb-cascade-product-row');
     const step = this.selectedBundle?.steps?.[stepIndex];
+    const productQuantityLimit = ConditionValidator.getAllowedQuantityPerProduct(
+      this.selectedBundle?.validateQuantityPerProduct
+    );
+    const usesCompactSelectedAction = ppbGridCard && productQuantityLimit === 1;
     const defaultAddText = cascadeRow
       ? resolveProductPageInlineAddText(this._resolveText?.bind(this))
       : this._resolveText('productCardAddButton', 'Add to Cart');
@@ -347,9 +351,6 @@ updateProductQuantityDisplay(stepIndex, productId, quantity) {
     }
 
     if (increaseBtn) {
-      const productQuantityLimit = ConditionValidator.getAllowedQuantityPerProduct(
-        this.selectedBundle?.validateQuantityPerProduct
-      );
       const { available, outOfStock } = this.getVariantAvailable(stepIndex, productId);
       const atMaxStock = available !== null && quantity >= available;
       const atMaxProductQuantity = productQuantityLimit !== null && quantity >= productQuantityLimit;
@@ -362,7 +363,7 @@ updateProductQuantityDisplay(stepIndex, productId, quantity) {
       }
     }
 
-    if (actionWrapper && quantity > 0 && ppbGridCard) {
+    if (actionWrapper && quantity > 0 && usesCompactSelectedAction) {
       actionWrapper.classList.add('is-expanded');
       existingInlineControls?.remove();
       const selectedText = resolveProductPageCardButtonText({
@@ -380,9 +381,6 @@ updateProductQuantityDisplay(stepIndex, productId, quantity) {
       actionWrapper.classList.add('is-expanded');
       if (addBtn) addBtn.remove();
       if (!existingInlineControls) {
-        const productQuantityLimit = ConditionValidator.getAllowedQuantityPerProduct(
-          this.selectedBundle?.validateQuantityPerProduct
-        );
         const { available, outOfStock } = this.getVariantAvailable(stepIndex, productId);
         const atMaxStock = available !== null && quantity >= available;
         const atMaxProductQuantity = productQuantityLimit !== null && quantity >= productQuantityLimit;

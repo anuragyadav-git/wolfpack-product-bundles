@@ -707,3 +707,5 @@
   width: auto;
   }
 }
+@import "../../full-page-css/base/product-modal-shell.css";
+@import "../../full-page-css/base/product-modal-controls.css";

@@ -1,6 +1,22 @@
 'use strict';
 
+let standardMobileDrawerCleanup: (() => void) | null = null;
+
 import { CurrencyManager } from './currency-manager.js';
+import {
+  drawerLayerManager,
+  shouldDismissDrawerSwipe,
+} from './drawer-layer-manager.js';
+
+export function getStandardMobileDrawerContract({ isPpbOwned = false } = {}) {
+  return {
+    closeControl: isPpbOwned ? 'handle' : 'cross',
+    dismissOnBackdrop: true,
+    dismissOnEscape: true,
+    dismissOnSelection: true,
+    showApplyAction: false,
+  };
+}
 
 /**
  * VariantSelectorComponent
@@ -130,6 +146,8 @@ class VariantSelectorComponent {
       ? options.formatPrice
       : (value) => VariantSelectorComponent.formatDrawerPrice(value);
     const productPrice = selectedVariant.price ?? product.price ?? 0;
+    const isPpbDrawer = options.drawerOwner === 'ppb';
+    const drawerContract = getStandardMobileDrawerContract({ isPpbOwned: isPpbDrawer });
 
     const optionHtml = variants.map((variant) => {
       const label = VariantSelectorComponent.getStandardVariantLabel(variant, optionNames, primaryIdx);
@@ -146,8 +164,17 @@ class VariantSelectorComponent {
     }).join('');
 
     return `
-      <div class="vs-mobile-drawer vs-mobile-drawer--standard" data-vs-mobile-drawer>
+      <div class="vs-mobile-drawer vs-mobile-drawer--standard" data-vs-mobile-drawer${isPpbDrawer ? ' data-ppb-drawer-surface="variant-selector"' : ''}>
         <div class="vs-mobile-drawer-sheet" role="dialog" aria-modal="true">
+          ${drawerContract.closeControl === 'handle' ? `
+          <button type="button" class="vs-mobile-drawer-handle" data-vs-drawer-handle aria-label="Close variant selector">
+            <span class="vs-mobile-drawer-grip" aria-hidden="true"></span>
+          </button>` : `
+          <button type="button" class="vs-mobile-drawer-close" aria-label="Close variant selector">
+            <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+              <path d="M6 6 18 18M18 6 6 18" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"></path>
+            </svg>
+          </button>`}
           <div class="vs-mobile-drawer-header">
             ${productImageUrl ? `<img class="vs-mobile-drawer-product-image" src="${VariantSelectorComponent._esc(productImageUrl)}" alt="">` : ''}
             <div class="vs-mobile-drawer-product-info">
@@ -428,19 +455,122 @@ class VariantSelectorComponent {
     const primaryIdx = parseInt(wrapper.dataset.vsPrimaryIdx || '1', 10);
     const placeholder = wrapper.dataset.vsPlaceholder || selected.querySelector('.vs-selected-label')?.textContent?.trim() || '';
 
+    const ppbOwner = cardEl.closest?.('#bundle-builder-app[data-ppb-template-type], [data-ppb-template-type="PDP_INPAGE"], [data-ppb-template-type="PDP_MODAL"]');
+    const isPpbDrawer = Boolean(ppbOwner);
     document.body.insertAdjacentHTML('beforeend', VariantSelectorComponent.renderStandardMobileDrawerHtml(product, {
       placeholder,
       primaryIdx,
+      drawerOwner: isPpbDrawer ? 'ppb' : 'shared',
     }));
     selected.setAttribute('aria-expanded', 'true');
 
     const drawer = document.body.querySelector('[data-vs-mobile-drawer]');
     if (!drawer) return;
 
+    const documentRoot = document.documentElement;
+    const documentBody = document.body;
+    const previousRootOverflow = documentRoot.style.overflow;
+    const previousBodyOverflow = documentBody.style.overflow;
+    let isClosed = false;
+    let drawerLayer = null;
+
+    if (!isPpbDrawer) {
+      documentRoot.style.overflow = 'hidden';
+      documentBody.style.overflow = 'hidden';
+    }
+
     const close = () => {
-      VariantSelectorComponent.closeStandardMobileDrawer();
+      if (isClosed) return;
+      isClosed = true;
+      if (!isPpbDrawer) document.removeEventListener('keydown', handleKeyDown);
+      drawer.remove();
+      if (drawerLayer) {
+        drawerLayerManager.close(drawerLayer);
+      } else {
+        documentRoot.style.overflow = previousRootOverflow;
+        documentBody.style.overflow = previousBodyOverflow;
+      }
       selected.setAttribute('aria-expanded', 'false');
+      const currentTrigger = selected.isConnected
+        ? selected
+        : cardEl.querySelector('.vs-selected');
+      currentTrigger?.focus?.({ preventScroll: true });
+      if (standardMobileDrawerCleanup === close) {
+        standardMobileDrawerCleanup = null;
+      }
     };
+
+    const handleKeyDown = (event) => {
+      if (event.key !== 'Escape') return;
+      event.preventDefault();
+      close();
+    };
+
+    standardMobileDrawerCleanup = close;
+    if (isPpbDrawer) {
+      drawerLayer = drawerLayerManager.open({
+        id: 'variant-selector',
+        requestClose: close,
+        trigger: selected,
+      });
+    } else {
+      document.addEventListener('keydown', handleKeyDown);
+    }
+    drawer.querySelector('.vs-mobile-drawer-close')?.addEventListener('click', (event) => {
+      event.stopPropagation();
+      close();
+    });
+    const handle = drawer.querySelector('[data-vs-drawer-handle]');
+    handle?.addEventListener('click', (event) => {
+      event.stopPropagation();
+      close();
+    });
+    if (handle) {
+      const sheet = drawer.querySelector('.vs-mobile-drawer-sheet');
+      let gesture = null;
+      const reset = () => {
+        sheet.style.transform = '';
+        sheet.style.transition = '';
+      };
+      handle.addEventListener('pointerdown', (event) => {
+        gesture = {
+          pointerId: event.pointerId,
+          startX: event.clientX,
+          startY: event.clientY,
+          startedAt: performance.now(),
+        };
+        sheet.style.transition = 'none';
+        handle.setPointerCapture?.(event.pointerId);
+      });
+      handle.addEventListener('pointermove', (event) => {
+        if (!gesture || event.pointerId !== gesture.pointerId) return;
+        const distanceY = Math.max(0, event.clientY - gesture.startY);
+        const distanceX = event.clientX - gesture.startX;
+        if (Math.abs(distanceX) > distanceY) return;
+        sheet.style.transform = `translateY(${distanceY}px)`;
+      });
+      handle.addEventListener('pointerup', (event) => {
+        if (!gesture || event.pointerId !== gesture.pointerId) return;
+        const elapsed = Math.max(1, performance.now() - gesture.startedAt);
+        const distanceY = event.clientY - gesture.startY;
+        const distanceX = event.clientX - gesture.startX;
+        gesture = null;
+        if (shouldDismissDrawerSwipe({ distanceY, distanceX, velocityY: distanceY / elapsed })) {
+          close();
+          return;
+        }
+        reset();
+      });
+      handle.addEventListener('pointercancel', () => {
+        gesture = null;
+        reset();
+      });
+    }
+
+    const initialFocus = drawer.querySelector(
+      '.vs-mobile-option--selected:not([aria-disabled="true"]), .vs-mobile-option:not([aria-disabled="true"])'
+    );
+    initialFocus?.focus?.({ preventScroll: true });
 
     drawer.addEventListener('click', (event) => {
       if (event.target === drawer) {
@@ -466,6 +596,10 @@ class VariantSelectorComponent {
 
   static closeStandardMobileDrawer() {
     if (typeof document === 'undefined') return;
+    if (standardMobileDrawerCleanup) {
+      standardMobileDrawerCleanup();
+      return;
+    }
     document.querySelector('[data-vs-mobile-drawer]')?.remove();
   }
 
