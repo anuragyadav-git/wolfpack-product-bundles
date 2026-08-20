@@ -61,7 +61,7 @@
   align-items: center;
   gap: 6px;
   max-width: 100%;
-  height: var(--bundle-product-card-action-min-height, 44px);
+  height: clamp(2rem, 3vw, 2.125rem);
   padding: 0 10px;
   border-radius: 10px;
   background: #000000;
