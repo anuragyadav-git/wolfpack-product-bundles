@@ -3,11 +3,11 @@
   "job": {
     "id": "ppb-selected-slot-redesign-20260821",
     "title": "PPB Selected Slot Redesign",
-    "status": "ready-for-handoff",
-    "stage": "IMPLEMENTATION_AWAITED",
+    "status": "active",
+    "stage": "CHROME_QA_PREFLIGHT",
     "revision": 2,
     "created_at": "2026-08-20T20:25:02Z",
-    "updated_at": "2026-08-20T20:57:51Z",
+    "updated_at": "2026-08-20T21:30:29Z",
     "owner": "wolfpack",
     "product": "Product Page Bundle",
     "repository": "/Users/adityaawasthi/Developer/wolfpack-product-bundles",
@@ -213,9 +213,9 @@
   "handoff": {
     "status": "approved",
     "package_path": "implementation-handoff.md",
-    "implementation_owner": "",
-    "implementation_branch": "",
-    "implementation_commit": ""
+    "implementation_owner": "Codex",
+    "implementation_branch": "feature/26.05-UI-changes",
+    "implementation_commit": "48168633a825388d9860ef7796648998473d07e6"
   },
   "qa": {
     "chrome_mcp_required": true,
@@ -268,10 +268,10 @@
       "revision": 2
     },
     "implementation": {
-      "status": "not-started",
-      "approver": "",
-      "at": "",
-      "revision": null
+      "status": "returned",
+      "approver": "user",
+      "at": "2026-08-21T00:00:00Z",
+      "revision": 2
     },
     "final": {
       "status": "not-started",
@@ -721,6 +721,18 @@
         "implementation-handoff.md",
         "browser-test-plan.yaml",
         "approval-record.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 18,
+      "at": "2026-08-20T21:30:29Z",
+      "from": "IMPLEMENTATION_AWAITED",
+      "to": "CHROME_QA_PREFLIGHT",
+      "revision": 2,
+      "reason": "Implementation commit 48168633 returned and user restarted the development server for direct Chrome verification",
+      "evidence": [
+        "implementation-handoff.md"
       ],
       "affected_artifacts": []
     }

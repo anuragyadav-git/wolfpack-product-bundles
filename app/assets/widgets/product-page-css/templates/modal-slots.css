@@ -7,7 +7,7 @@
   --bw-ppb-slot-target: 44px;
   --bw-ppb-slot-tile-min-inline: 8.5rem;
   --bw-ppb-slot-tile-min-block: clamp(11rem, 48cqi, 13rem);
-  --bw-ppb-slot-row-min-block: clamp(4rem, 16cqi, 4.75rem);
+  --bw-ppb-slot-row-min-block: clamp(4.25rem, 16cqi, 4.75rem);
   width: 100%;
   max-width: 100%;
   margin: 0;
@@ -298,6 +298,7 @@
   .step-clear-badge {
   position: static;
   grid-column: 3;
+  grid-row: 1;
   width: var(--bw-ppb-slot-target);
   height: var(--bw-ppb-slot-target);
   margin: 0;
@@ -317,6 +318,7 @@
   .bw-slot-card--filled
   .bw-slot-card__image-wrapper {
   grid-column: 1;
+  grid-row: 1;
   width: 100%;
   height: auto;
   min-height: 0;
@@ -570,7 +572,7 @@
   justify-items: center;
   gap: var(--bw-ppb-slot-space);
   width: 100%;
-  height: 100%;
+  height: var(--bw-ppb-slot-tile-min-block);
   min-height: var(--bw-ppb-slot-tile-min-block);
   padding: var(--bw-ppb-slot-space);
   border: var(--bw-ppb-slot-hairline) dashed
@@ -624,11 +626,18 @@
 #bundle-builder-app[data-ppb-template-type="PDP_MODAL"]
   .bw-slot-card__identity
   .step-name {
+  position: static;
+  max-width: 100%;
   margin: 0;
+  padding: 0;
   overflow: hidden;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
+  transform: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
   white-space: normal;
 }
 
@@ -668,6 +677,7 @@
 #bundle-builder-app[data-ppb-template-type="PDP_MODAL"][data-ppb-slot-orientation="vertical"]
   .bw-slot-card__identity {
   grid-column: 2;
+  grid-row: 1;
   display: grid;
   gap: calc(var(--bw-ppb-slot-space) * 0.25);
 }
@@ -678,8 +688,10 @@
   display: grid;
   grid-template-rows: minmax(0, 1fr) auto;
   width: 100%;
-  height: 100%;
+  height: var(--bw-ppb-slot-tile-min-block);
   min-height: var(--bw-ppb-slot-tile-min-block);
+  align-items: stretch;
+  justify-content: stretch;
   border: var(--bw-ppb-slot-hairline) solid
     var(--bundle-border-color, #d1d5db);
   border-radius: var(--bw-ppb-slot-radius);
