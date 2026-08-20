@@ -240,9 +240,7 @@
 
 #bundle-builder-app
   .bw-ppb-cascade-selected-list-title-line {
-  flex: 1 1 0;
-  min-width: 24px;
-  border-top: 1px solid var(--bw-ppb-summary-rule-color);
+  display: none;
 }
 
 #bundle-builder-app
