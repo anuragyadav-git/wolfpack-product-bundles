@@ -3,9 +3,9 @@ schema_version: 1
 id: ppb-template-design-implementation-goal
 title: PPB Template Design and Product Card Implementation Plan
 type: design-plan
-status: in-progress
+status: complete
 summary: Keep PPB template architecture aligned to FPB structure while implementing EB-inspired layout and product-card parity for all PPB templates.
-last_audited: 2026-08-15
+last_audited: 2026-08-20
 owners:
   - engineering
 domains:
@@ -365,7 +365,24 @@ No selection algorithm, payload shape, or persistence contract may be introduced
 - [x] List/Grid in-page card rendering uses shared product-card controls and state handling.
 - [x] Modal slot shared shell/path behavior is covered by unit gates for empty/filled/vertical states.
 - [x] Legacy EB aliases (`CASCADE`, `COGNIVE`, `MODAL`, `SIMPLIFIED`) resolve through shared `TemplateDesignSystem.resolvePpbTemplate`.
-- [ ] Direct viewport/fixture parity evidence captured for all four template lanes (1280×800 and 390×844), including interaction behavior.
+- [x] Direct baseline viewport evidence captured for all four template lanes at 1280×800 and 390×844 through Chrome DevTools MCP.
+- [x] Multi-step, empty-slot, and replacement behavior passed through direct Chrome fixture interaction; sold-out, inventory, compare-at, variant, persistence, loading, and error behavior passed through focused PPB behavior tests.
+
+### Live fixture evidence (2026-08-20)
+
+- Fixture bundle: `cmt1l6lt50000v0tlyp73d2ml` (`PPB Template Parity 2026-08-20`).
+- Storefront: `https://agent-5sfidg3m.myshopify.com/products/ppb-template-parity-2026-08-20`.
+- Runtime: local and Shopify dev-preview artifacts are versioned `11.3.1`; the cache-cleared storefront loaded the new dev asset with valid `PDP_INPAGE` / `GRID` markers, three cards, and no mobile overflow. The signed bundle-config proxy returned HTTP 200 after the bundle and parent product were activated.
+- Product List: `LIST` markers; three 70px row cards; 44px add/quantity controls; selection restored after hard reload and enabled the bundle CTA.
+- Product Grid: `GRID` markers; three columns in the desktop product-form placement and two columns at 390px; selection state carried forward from Product List.
+- Horizontal Slots: `HORIZONTAL_SLOTS` with `data-ppb-slot-orientation="horizontal"`; populated compact tile measured 200px high with a 44px remove target.
+- Vertical Slots: `VERTICAL_SLOTS` with `data-ppb-slot-orientation="vertical"`; populated full-width row measured 64px high with a 44px remove target.
+- Modal slots: remove -> empty -> replacement immediately repainted the shared slot shell in both orientations; the selected product and CTA remained correct after hard reload.
+- Multi-step Product List: Step 1/Step 2 navigation, three hydrated cards per step, 70px rows, and no mobile overflow passed at 1280×800 and 390×844.
+- Multi-step Product Grid: Step 1/Step 2 navigation, equal-height cards, three desktop columns, two mobile columns, and no mobile overflow passed at 1280×800 and 390×844.
+- Behavior-state suite: `npx jest tests/unit/assets/ppb-*.test.ts --runInBand` passed 38 suites and 205 tests, including variant, sold-out, compare-at, empty-slot, replacement, persistence, loading/error, validation, and payload gates.
+- No clipping, overlap, or canonical marker drift was observed in the baseline desktop/mobile pass.
+- Screenshots remain transient QA evidence and are not committed, per repository policy.
 
 ## Delivery scope for this implementation
 

@@ -195,6 +195,9 @@ updateProductSelection(stepIndex, productId, newQuantity) {
     this.updateProductQuantityDisplay(stepIndex, replacementSelectionKey, 0);
   }
   this.updateProductQuantityDisplay(stepIndex, selectionKey, quantity);
+  if (this._isProductPageModalSlotTemplate?.()) {
+    this.renderSteps();
+  }
   this._renderDirectDefaultProducts();
   this.renderModalTabs();
   this.updateModalNavigation();
