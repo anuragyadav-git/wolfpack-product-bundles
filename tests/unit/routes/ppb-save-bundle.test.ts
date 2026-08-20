@@ -230,7 +230,6 @@ function makeFormData(overrides: Record<string, string | null> = {}): FormData {
   fd.set("showProductPrices", "true");
   fd.set("allowQuantityChanges", "true");
   fd.set("cartRedirectToCheckout", "false");
-  fd.set("showCompareAtPrices", "false");
   fd.set("sdkMode", "false");
   for (const [k, v] of Object.entries(overrides)) {
     if (v === null) fd.delete(k);
@@ -318,6 +317,18 @@ describe("PPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
     const body = await res.json() as any;
     expect(body.success).toBe(true);
     expect(body.message).toBe("Updated Successfully!");
+  });
+
+  it("ignores compare-at visibility fields in PPB save payloads", async () => {
+    await handleSaveBundle(
+      MOCK_ADMIN,
+      MOCK_SESSION,
+      "bundle-1",
+      makeFormData({ showCompareAtPrices: "false" }),
+    );
+
+    const updateArgs = getDb().bundle.update.mock.calls[0][0];
+    expect(updateArgs.data).not.toHaveProperty("showCompareAtPrices");
   });
 
   it("persists a normalized enabled subscription config and activates the initial-order role", async () => {

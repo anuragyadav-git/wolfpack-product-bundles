@@ -16,6 +16,7 @@ import { ERROR_MESSAGES } from "../../../../constants/errors";
 import { getBundleEditPath } from "../../../../lib/bundle-navigation";
 import { ensureBundleParentProduct } from "../../../../services/bundles/bundle-parent-product.server";
 import { createBundleWithPublicNumber } from "../../../../services/bundles/fpb-public-number.server";
+import { normalizePpbBundleEmbedConfig } from "../../../../lib/ppb-bundle-embed";
 
 const GET_PUBLICATIONS = `
   query {
@@ -142,6 +143,10 @@ export async function handleCloneBundle(
         description: originalBundle.description,
         shopId: session.shop,
         bundleType: originalBundle.bundleType,
+        bundleUpsellConfig:
+          originalBundle.bundleType === BundleType.PRODUCT_PAGE
+            ? (normalizePpbBundleEmbedConfig(null) as any)
+            : undefined,
         status: BundleStatus.DRAFT,
         shopifyProductId: null,
         templateName: originalBundle.templateName,
@@ -325,6 +330,10 @@ export async function handleCreateBundle(
         bundleType: bundleType as any,
         bundleDesignTemplate: bundleType === BundleType.FULL_PAGE ? "FBP_SIDE_FOOTER" : null,
         bundleDesignPresetId: bundleType === BundleType.FULL_PAGE ? "STANDARD" : null,
+        bundleUpsellConfig:
+          bundleType === BundleType.PRODUCT_PAGE
+            ? (normalizePpbBundleEmbedConfig(null) as any)
+            : undefined,
         status: BundleStatus.DRAFT,
         shopifyProductId: null,
         shopifyProductHandle: null,

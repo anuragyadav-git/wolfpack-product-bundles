@@ -459,7 +459,7 @@ export async function updateBundleProductMetafields(
     productSlotsEnabled: bundleConfiguration.bundleType === "full_page" ? bundleConfiguration.productSlotsEnabled ?? false : false,
   productSlotIconUrl: bundleConfiguration.bundleType === "full_page" ? bundleConfiguration.productSlotIconUrl ?? null : null,
   useSingleStepCategoriesAsBundleSteps: bundleConfiguration.useSingleStepCategoriesAsBundleSteps ?? false,
-  showProductComparedAtPrice: resolveShowProductComparedAtPrice(bundleConfiguration),
+  showProductComparedAtPrice: resolveShowProductComparedAtPrice(),
     bundleVariantId: bundleVariantId, // Bundle parent variant ID for cart transform EXPAND operation
     steps: (bundleConfiguration.steps || []).map((step: any) => ({
       id: step.id,

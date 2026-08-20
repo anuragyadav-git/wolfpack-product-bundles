@@ -5,7 +5,7 @@ title: Wolfpack Product Bundles Internal Docs
 type: index
 status: authoritative
 summary: Index of durable Wolfpack Product Bundles architecture, integration, feature, and operations documentation.
-last_audited: 2026-08-14
+last_audited: 2026-08-21
 owners:
   - engineering
 domains:
@@ -72,6 +72,7 @@ Full evidence record: `docs/competitor-analysis/16-eb-full-data-flow-investigati
 - [[Shopify Integration/Web Pixels]] — UTM Web Pixel settings payload rules, including nonblank custom-parameter sentinel behavior
 - [[Shopify Integration/Webhooks]] — Subscribed webhook topics, removed broad topics, and delivery-volume rationale
 - [[Features/Bundle Types]] — FPB vs PDP, layout modes, step config
+- [[Features/Page Builder Integrations Guide]] — merchant-friendly blog source and setup instructions for PageFly, GemPages, Shogun, direct PPB/FPB embeds, and custom-code fallback markers
 - [[Features/Pricing Pipeline]] — UI → DB → Metafield → Cart Transform units
 - [[Features/Bundle Instance Tracking]] — EB `_wolfpackProductBundle:OfferId`, MERGE dedup, unique titles
 - [[Operations/Deployment]] — Render + Shopify deploy process

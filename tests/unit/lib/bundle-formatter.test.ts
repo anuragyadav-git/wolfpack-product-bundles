@@ -174,10 +174,10 @@ describe("formatBundleForWidget", () => {
     expect(result.variantSelectorEnabled).toBe(true);
   });
 
-  it("projects the persisted compare-at setting to the product-page runtime key", () => {
+  it("keeps product-page compare-at visibility enabled despite a stale persisted setting", () => {
     const result = formatBundleForWidget(makeBundle({
       bundleType: "product_page",
-      showCompareAtPrices: true,
+      showCompareAtPrices: false,
     }) as any);
 
     expect(result.showProductComparedAtPrice).toBe(true);

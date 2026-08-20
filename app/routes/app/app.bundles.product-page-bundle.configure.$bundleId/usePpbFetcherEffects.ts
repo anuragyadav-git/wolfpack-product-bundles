@@ -3,6 +3,7 @@ import {
   resolveTemplateReadyStep,
   shouldProcessTemplateResponse,
 } from "../../../lib/template-ready-step";
+import { removeLegacyPpbEmbedTextOverrides } from "../../../lib/ppb-bundle-embed";
 
 export function usePpbFetcherEffects({
   base,
@@ -39,8 +40,6 @@ export function usePpbFetcherEffects({
         if ("bundle" in result && result.bundle) {
           base.originalLoadingGifRef.current = base.loadingGif;
           base.originalShowProductPricesRef.current = base.showProductPrices;
-          base.originalShowCompareAtPricesRef.current =
-            base.showCompareAtPrices;
           base.originalCartRedirectToCheckoutRef.current =
             base.cartRedirectToCheckout;
           base.originalAllowQuantityChangesRef.current =
@@ -48,9 +47,23 @@ export function usePpbFetcherEffects({
           base.originalSdkModeRef.current = base.sdkMode;
           base.originalSubscriptionConfigRef.current =
             base.subscriptionConfig;
-          base.originalTextOverridesRef.current = base.textOverrides;
+          const canonicalTextOverrides =
+            removeLegacyPpbEmbedTextOverrides(base.textOverrides);
+          const canonicalTextOverridesByLocale = Object.fromEntries(
+            Object.entries(base.textOverridesByLocale).map(
+              ([locale, values]) => [
+                locale,
+                removeLegacyPpbEmbedTextOverrides(
+                  values as Record<string, string>,
+                ),
+              ],
+            ),
+          );
+          base.setTextOverrides(canonicalTextOverrides);
+          base.setTextOverridesByLocale(canonicalTextOverridesByLocale);
+          base.originalTextOverridesRef.current = canonicalTextOverrides;
           base.originalTextOverridesByLocaleRef.current =
-            base.textOverridesByLocale;
+            canonicalTextOverridesByLocale;
           settings.originalDefaultProductsDataRef.current =
             settings.defaultProductsData;
           visibility.originalUpsellWidgetEnabledRef.current =
@@ -79,6 +92,16 @@ export function usePpbFetcherEffects({
             visibility.bundleEmbedDisplayOn;
           visibility.originalBundleEmbedAddBrowsedProductRef.current =
             visibility.bundleEmbedAddBrowsedProduct;
+          visibility.originalBundleEmbedSelectedProductsRef.current =
+            visibility.bundleEmbedSelectedProducts;
+          visibility.originalBundleEmbedSpecificProductPagesRef.current =
+            visibility.bundleEmbedSpecificProductPages;
+          visibility.originalBundleEmbedCollectionsSelectedDataRef.current =
+            visibility.bundleEmbedCollectionsSelectedData;
+          visibility.originalBundleEmbedSpecificCollectionPagesRef.current =
+            visibility.bundleEmbedSpecificCollectionPages;
+          visibility.originalBundleEmbedMultiLangTextRef.current =
+            visibility.bundleEmbedMultiLangText;
           base.markAsSaved();
           base.shopify.toast.show(
             ("message" in result ? result.message : null) ||

@@ -5,7 +5,7 @@ title: EB Integrations Reference
 type: implementation-reference
 status: authoritative
 summary: Records live EB integration setup evidence and Wolfpack support boundaries.
-last_audited: 2026-08-14
+last_audited: 2026-08-21
 owners:
   - engineering
 domains:
@@ -13,7 +13,9 @@ domains:
 systems:
   - integrations
 source_paths:
-  - app/routes/app/app.integrations.tsx
+  - app/lib/admin-configuration-surfaces.ts
+  - app/storefront/page-builder-embed.ts
+  - app/routes/api/api.page-builder-embed[.]json.tsx
 related_docs:
   - internal docs/EB Implementation Reference.md
 tags:
@@ -43,8 +45,9 @@ Original live EB integration inventory from 2026-06-04:
 - Checkout: Gokwik, Shopflo
 
 Current WPB Admin inventory:
-- Checkout only.
-- Integrations page cards: GoKwik and Shopflo only.
+- Reviews: Judge.me.
+- Page Builders: PageFly, GemPages, Shogun.
+- Checkout: GoKwik, Shopflo.
 - Settings > Controls > Checkout Integration dropdown keeps the complete redirect/cart callback provider list: Shopify checkout, Theme cart drawer, GoKwik, Shopflo, Zecpay, Rebuy, Shiprocket/Fastrr, Monster cart, Upcart, and Kaching Cart.
 
 WPB interim setup destination:
@@ -112,14 +115,25 @@ WPB supportability:
 Both cards open the same product-page page-builder article:
 `https://easybundles-help.skailama.app/en/article/embedding-app-scripts-product-page-bundles-on-shopify-page-builders-work-for-ecomposer-gempages-and-other-page-builders-h9gw6d/`
 
-Setup requirements:
-- For a parent product page, merchant embeds a wrapper div for the product-page bundle app block and loads EB product-page bundle JS/CSS.
-- For a home page or other non-product page, merchant adds `window.wolfpackProductBundlesPDPConfig = { productHandle: "..." }` before loading the same JS/CSS.
-- Article names Ecomposer, GemPages, PageFly, and other page builders.
+Live findings refreshed on 2026-08-21:
+- PageFly and GemPages remain the only Page Builders cards in EB. Shogun is not listed.
+- Both cards open the same article, updated 2026-04-27.
+- A parent product page uses EB's Product Page Bundle wrapper plus the PPB JS/CSS assets.
+- A home page or other non-product page sets `window.easyBundlesPDPConfig = { productHandle: "..." }` before loading the same assets. The previously recorded `window.wolfpackProductBundlesPDPConfig` name was incorrect and is not an EB contract.
+- The article names Ecomposer, GemPages, PageFly, and other page builders.
+- The related Full Page Bundle article uses a separate target selector, shop name, and numeric bundle ID before loading a dedicated full-page embed script.
+
+Provider documentation findings:
+- PageFly's Shopify App Block Element is available on Online Store 2.0, is limited to one App Block Element per page, and can contain multiple Shopify app blocks. Its HTML/Liquid element is the fallback for third-party embed markup.
+- GemPages exposes a Shopify App Element that is configured after publishing through Shopify Theme Editor. GemPages V7 Custom Code accepts HTML/Liquid, CSS, and JavaScript as a fallback.
+- Shogun existing and Shopify 2.0 product layouts retain theme-app behavior. Shogun Custom Layout accepts all-HTML embed code, but its ordinary HTML element does not evaluate Shopify Liquid. Shogun Custom Elements can use their own Liquid context only on eligible plans and are not required for WPB support.
 
 WPB supportability:
-- Supportable if WPB exposes an equivalent embeddable product-page bundle wrapper and documented `productHandle` override for non-product pages.
-- Current implementation should be verified against WPB storefront script loading before publishing final WPB guide copy.
+- `bundle-page-builder-embed` is the provider-neutral Shopify app block for eligible-product PPB, direct PPB, and direct FPB modes.
+- Direct PPB resolves by the generated parent-product handle. Direct FPB resolves by its per-shop public number. Eligible-product mode reuses canonical Bundle Embed targeting and preselection.
+- Manual fallback snippets emit the same marker contract and never load storefront JS/CSS themselves. The globally enabled `bundle-app-embed` owns Shopify `asset_url` assets and signed API resolution.
+- PageFly and GemPages use their Shopify App elements first. Shogun custom layouts use the Liquid-free marker fallback with concrete parent handle or public number.
+- The three WPB cards temporarily open `https://wolfpackapps.com` until dedicated provider guides are published.
 
 ### Checkout and Side-Cart Handoff Providers
 

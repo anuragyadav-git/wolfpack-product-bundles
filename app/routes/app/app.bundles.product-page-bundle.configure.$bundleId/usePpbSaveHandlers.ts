@@ -4,6 +4,10 @@ import { normalizeDefaultProductsData } from "../../../lib/bundle-config/default
 import { buildVisibilityDisplayConfiguration } from "./ConfigureBundleFlow.helpers";
 import { useConfigureValidation } from "../_shared/bundle-configure/useConfigureValidation";
 import { validateBundleSubscriptionConfig } from "../../../lib/bundle-subscriptions";
+import {
+  mergePpbBundleEmbedTranslations,
+  removeLegacyPpbEmbedTextOverrides,
+} from "../../../lib/ppb-bundle-embed";
 
 export function usePpbSaveHandlers({
   base,
@@ -43,8 +47,13 @@ export function usePpbSaveHandlers({
   }, [settings.defaultProductsData]);
 
   const buildBundleUpsellConfig = useCallback(() => {
+    const existingMultiLangText =
+      visibility.savedBundleUpsellConfig?.multiLangText ?? {};
     return {
-      multiLangText: visibility.savedBundleUpsellConfig?.multiLangText ?? {},
+      multiLangText: mergePpbBundleEmbedTranslations(
+        existingMultiLangText,
+        visibility.bundleEmbedMultiLangText,
+      ),
       widgetConfiguration: {
         isEnabled: visibility.upsellWidgetEnabled,
         type: "OFFER_WIDGET",
@@ -81,6 +90,7 @@ export function usePpbSaveHandlers({
     visibility.bundleEmbedCollectionsSelectedData,
     visibility.bundleEmbedDisplayOn,
     visibility.bundleEmbedEnabled,
+    visibility.bundleEmbedMultiLangText,
     visibility.bundleEmbedSelectedProducts,
     visibility.bundleEmbedSpecificCollectionPages,
     visibility.bundleEmbedSpecificProductPages,
@@ -101,6 +111,19 @@ export function usePpbSaveHandlers({
 
   const handleSave = useCallback(async () => {
     try {
+      if (visibility.bundleEmbedEnabled) {
+        const appEmbedEnabled =
+          await base.checkAppEmbedStatusBeforePreview();
+        if (!appEmbedEnabled) {
+          validation.setServerFieldErrors([
+            {
+              path: "embed.appEmbed",
+              message: "Enable the Wolfpack Bundle app embed before saving Bundle Embed.",
+            },
+          ]);
+          return;
+        }
+      }
       if (base.subscriptionConfig.enabled) {
         const subscriptionIssues = validateBundleSubscriptionConfig(
           base.subscriptionConfig,
@@ -202,7 +225,6 @@ export function usePpbSaveHandlers({
       formData.append("bundleProduct", JSON.stringify(base.bundleProduct));
       formData.append("loadingGif", base.loadingGif ?? "");
       formData.append("showProductPrices", String(base.showProductPrices));
-      formData.append("showCompareAtPrices", String(base.showCompareAtPrices));
       formData.append(
         "cartRedirectToCheckout",
         String(base.cartRedirectToCheckout),
@@ -218,14 +240,20 @@ export function usePpbSaveHandlers({
       );
       formData.append(
         "textOverrides",
-        Object.keys(base.textOverrides).length > 0
-          ? JSON.stringify(base.textOverrides)
+        Object.keys(removeLegacyPpbEmbedTextOverrides(base.textOverrides)).length > 0
+          ? JSON.stringify(removeLegacyPpbEmbedTextOverrides(base.textOverrides))
           : "",
+      );
+      const canonicalTextOverridesByLocale = Object.fromEntries(
+        Object.entries(base.textOverridesByLocale).map(([locale, values]) => [
+          locale,
+          removeLegacyPpbEmbedTextOverrides(values as Record<string, string>),
+        ]),
       );
       formData.append(
         "textOverridesByLocale",
-        Object.keys(base.textOverridesByLocale).length > 0
-          ? JSON.stringify(base.textOverridesByLocale)
+        Object.keys(canonicalTextOverridesByLocale).length > 0
+          ? JSON.stringify(canonicalTextOverridesByLocale)
           : "",
       );
       formData.append(
@@ -338,7 +366,6 @@ export function usePpbSaveHandlers({
     base.hookHandleDiscard();
     base.setLoadingGif(base.originalLoadingGifRef.current);
     base.setShowProductPrices(base.originalShowProductPricesRef.current);
-    base.setShowCompareAtPrices(base.originalShowCompareAtPricesRef.current);
     base.setCartRedirectToCheckout(
       base.originalCartRedirectToCheckoutRef.current,
     );
@@ -392,6 +419,21 @@ export function usePpbSaveHandlers({
     );
     visibility.setBundleEmbedAddBrowsedProduct(
       visibility.originalBundleEmbedAddBrowsedProductRef.current,
+    );
+    visibility.setBundleEmbedSelectedProducts(
+      visibility.originalBundleEmbedSelectedProductsRef.current,
+    );
+    visibility.setBundleEmbedSpecificProductPages(
+      visibility.originalBundleEmbedSpecificProductPagesRef.current,
+    );
+    visibility.setBundleEmbedCollectionsSelectedData(
+      visibility.originalBundleEmbedCollectionsSelectedDataRef.current,
+    );
+    visibility.setBundleEmbedSpecificCollectionPages(
+      visibility.originalBundleEmbedSpecificCollectionPagesRef.current,
+    );
+    visibility.setBundleEmbedMultiLangText(
+      visibility.originalBundleEmbedMultiLangTextRef.current,
     );
     validation.clearValidationErrors();
   }, [base, settings, validation, visibility]);

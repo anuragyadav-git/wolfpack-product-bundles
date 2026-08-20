@@ -201,14 +201,15 @@ export function usePpbPlacementHandlers({
         const placementBlockHandle =
           base.activeSection === "bundle_widget"
             ? "bundle-upsell"
-            : base.blockHandle;
+            : "bundle-product-page-embed";
+        const isBundleEmbedPlacement = base.activeSection === "bundle_embed";
         const productIdForTemplate =
           base.bundleProduct?.id ??
           (base.bundle as any).shopifyProductId ??
           null;
         const productTemplateSuffix =
           resolveProductPageTemplateSuffix(template);
-        if (productIdForTemplate) {
+        if (productIdForTemplate && !isBundleEmbedPlacement) {
           const formData = new FormData();
           formData.append("intent", "assignProductTemplate");
           formData.append("productId", productIdForTemplate);
@@ -225,15 +226,21 @@ export function usePpbPlacementHandlers({
             );
           }
         }
-        const pageProductHandle =
-          base.bundleProduct?.handle ?? base.bundle.shopifyProductHandle;
+        const representativeProduct =
+          visibility.bundleEmbedSelectedProducts?.[0] ?? null;
+        const pageProductHandle = isBundleEmbedPlacement
+          ? representativeProduct?.handle ?? base.bundleProduct?.handle ?? base.bundle.shopifyProductHandle
+          : base.bundleProduct?.handle ?? base.bundle.shopifyProductHandle;
+        const productPreviewUrl = isBundleEmbedPlacement
+          ? representativeProduct?.onlineStorePreviewUrl ?? representativeProduct?.onlineStoreUrl
+          : base.bundleProduct?.onlineStorePreviewUrl;
         const themeEditorUrl = buildProductPageThemeEditorDeepLink({
           shop: base.shop,
           apiKey: base.apiKey,
           blockHandle: placementBlockHandle,
           bundleId: base.bundle.id,
           productHandle: pageProductHandle,
-          productPreviewUrl: base.bundleProduct?.onlineStorePreviewUrl,
+          productPreviewUrl,
           template,
         });
         base.setSelectedPage(template);
@@ -260,7 +267,7 @@ export function usePpbPlacementHandlers({
         );
       }
     },
-    [base],
+    [base, visibility.bundleEmbedSelectedProducts],
   );
 
   return {

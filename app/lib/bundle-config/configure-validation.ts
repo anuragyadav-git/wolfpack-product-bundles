@@ -185,9 +185,7 @@ function validatePpbEmbed(
 ) {
   const embed = upsell.upsellConfiguration ?? {};
   if (embed.isEnabled !== true) return;
-  const textOverrides = readJson(formData, "textOverrides", {});
   const target = text(formData.get("bundleEmbedDisplayOn")) ||
-    text(textOverrides.embedDisplayOn) ||
     displayTarget(embed.displayConfiguration ?? {}, "all_products");
   if (!text(embed.title)) {
     issues.push(issue("embed.title", "Enter a bundle embed title.", "bundle_embed"));

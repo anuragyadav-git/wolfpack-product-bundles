@@ -5,7 +5,7 @@ title: Wolfpack Product Bundles App Navigation and UI Map
 type: navigation-map
 status: authoritative
 summary: Routes, screens, actions, modals, and storefront-preview flows for the embedded app.
-last_audited: 2026-08-14
+last_audited: 2026-08-21
 owners:
   - engineering
 domains:
@@ -30,7 +30,7 @@ keywords:
 > Any time a new page, modal, tab, sidebar section, or user flow is added or removed,
 > this document **must** be updated. See CLAUDE.md for the enforcement rule.
 
-**Last Updated:** 2026-08-14
+**Last Updated:** 2026-08-21
 **Environment mapped:** SIT (`wolfpack-product-bundles-sit`)
 **Test store:** `wolfpack-store-test-1.myshopify.com`
 
@@ -243,6 +243,10 @@ Integrations Hub
 ├── Request Integration → opens Crisp with an unsent prefilled request
 ├── Reviews
 │   └── Judge.me → View Setup
+├── Page Builders
+│   ├── PageFly → View Setup
+│   ├── GemPages → View Setup
+│   └── Shogun → View Setup
 └── Checkout
     ├── GoKwik → View Setup
     └── Shopflo → View Setup
@@ -256,6 +260,10 @@ Setup behavior:
 - `View Setup` opens the WPB-owned setup/support destination in a new browsing context.
 - `Request Integration` opens Crisp and pre-fills the composer; the merchant must send the message.
 - External competitor help URLs are intentionally not embedded in source code; sanitized evidence remains in `docs/competitor-analysis/18-eb-settings-integrations-replication-evidence.md`.
+- Page-builder cards describe guided compatibility through the provider-neutral
+  Theme App Extension block and HTML marker. Until dedicated WPB guides are
+  published, their setup actions use the same `https://wolfpackapps.com`
+  destination as the other catalog cards.
 
 ---
 
@@ -498,8 +506,16 @@ PPB Configure Page
 │       ├── Product or collection resource picker for the active specific target
 │       ├── Auto-Select Browsed Product: switch (autoSelectBrowsedProduct)
 │       └── Embed Upsell → unified `bundle-upsell` placement block
+│   └── Bundle Embed sub-section
+│       ├── Master switch: Embed Bundle Builder on Product Pages
+│       ├── Canonical localized Title + Sub Title
+│       ├── Display On: all bundle products / specific products / specific collections
+│       ├── Product or collection resource picker for the active target
+│       ├── Add browsed product to bundle
+│       └── Place Block → product-template selector → `bundle-product-page-embed` Theme Editor deep link
 │
 ├── Bundle Settings
+│   ├── PPB compare-at prices are product-driven; no per-bundle visibility control
 │   ├── Pre Selected Product
 │   │   ├── Enable toggle
 │   │   ├── Tip banner
@@ -672,6 +688,8 @@ Checkout order summary → Bundle & Save
 | `/apps/product-bundles/api/bundle/:id.json` | HMAC-verified canonical storefront bundle response: exact `{ success, bundle }`; field-projection queries do not change the response shape |
 | `/apps/product-bundles/api/bundles.json` | All active bundles for shop |
 | `/apps/product-bundles/api/fpb-upsells.json` | Signed, shop-scoped FPB product-page offer lookup by product, collections, and locale; returns eligible minimal DTOs with private ETag caching |
+| `/apps/product-bundles/api/ppb-embed.json` | Signed, shop-scoped Product Page Bundle embed lookup by product, collections, and locale; returns the first eligible formatted PPB with localized copy and private ETag caching |
+| `/apps/product-bundles/api/page-builder-embed.json` | Signed direct page-builder lookup: resolves an Active or Unlisted PPB by generated parent-product handle or an FPB by shop-scoped public number; returns a formatted preloaded bundle with private ETag caching |
 | `/apps/product-bundles/api/cart-bundle-details` | Signed storefront route that merges EB-style cart `bundle_details` metafield entries |
 | `/apps/product-bundles/api/cart-transform-runtime-token` | Signed storefront route that validates selected bundle lines and returns `_wolfpack_bundle_runtime` for Cart Transform / Discount Function verification |
 | `/apps/product-bundles/api/checkout-integration-discount-code` | Signed storefront route that creates short-lived app discount codes for third-party FPB checkout integrations |

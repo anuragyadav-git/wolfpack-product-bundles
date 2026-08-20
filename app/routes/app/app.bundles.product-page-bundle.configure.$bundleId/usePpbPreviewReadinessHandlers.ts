@@ -174,7 +174,8 @@ export function usePpbPreviewReadinessHandlers({
           : 0;
         return totalProducts + legacyProducts + categoryProductCount;
       }, 0) >= 3;
-    const widgetPlaced = visibility.upsellWidgetEnabled;
+    const widgetPlaced =
+      visibility.upsellWidgetEnabled || visibility.bundleEmbedEnabled;
     const parentProductActive =
       String(
         base.productStatus || base.loadedBundleProduct?.status || "",
@@ -231,6 +232,7 @@ export function usePpbPreviewReadinessHandlers({
     base.stepsState.steps,
     templateState.hasPreview,
     visibility.upsellWidgetEnabled,
+    visibility.bundleEmbedEnabled,
   ]);
   const readinessScore = readinessItems.reduce(
     (sum, item) => sum + (item.done ? item.points : 0),

@@ -242,21 +242,28 @@ describe("recovered admin surfaces contract", () => {
   it("keeps the recovered integrations inventory and action types", () => {
     expect(INTEGRATION_CATEGORIES.map((category) => category.title)).toEqual([
       "Reviews",
+      "Page Builders",
       "Checkout",
     ]);
-    expect(getIntegrationCardCount()).toBe(3);
+    expect(getIntegrationCardCount()).toBe(6);
 
     const cards = INTEGRATION_CATEGORIES.flatMap((category) => category.cards);
     expect(cards.map((card) => card.id)).toEqual([
       "judgeme",
+      "pagefly",
+      "gempages",
+      "shogun",
       "gokwik",
       "shopflo",
     ]);
-    expect(cards.filter((card) => card.ctaType === "guide")).toHaveLength(3);
+    expect(cards.filter((card) => card.ctaType === "guide")).toHaveLength(6);
     expect(cards.filter((card) => card.ctaType === "chat")).toHaveLength(0);
     expect(cards.every((card) => card.ctaLabel === "View Setup")).toBe(true);
     expect(cards.map((card) => card.id)).toEqual(expect.arrayContaining([
       "judgeme",
+      "pagefly",
+      "gempages",
+      "shogun",
       "gokwik",
       "shopflo",
     ]));
@@ -272,6 +279,12 @@ describe("recovered admin surfaces contract", () => {
       id: "shopflo",
       setupUrl: "https://wolfpackapps.com",
     }));
+    expect(cards.filter((card) => ["pagefly", "gempages", "shogun"].includes(card.id)))
+      .toEqual(expect.arrayContaining([
+        expect.objectContaining({ id: "pagefly", status: "Guided setup", setupUrl: "https://wolfpackapps.com" }),
+        expect.objectContaining({ id: "gempages", status: "Guided setup", setupUrl: "https://wolfpackapps.com" }),
+        expect.objectContaining({ id: "shogun", status: "Guided setup", setupUrl: "https://wolfpackapps.com" }),
+      ]));
     expect(new Set(cards.map((card) => card.status))).toEqual(new Set([
       "Supported",
       "Guided setup",

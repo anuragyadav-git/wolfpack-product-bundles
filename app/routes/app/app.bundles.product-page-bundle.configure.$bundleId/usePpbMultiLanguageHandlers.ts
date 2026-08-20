@@ -7,6 +7,8 @@ export function usePpbMultiLanguageHandlers({
   stepsState,
   textOverridesByLocale,
   setTextOverridesByLocale,
+  bundleEmbedMultiLangText,
+  setBundleEmbedMultiLangText,
   markAsDirty,
 }: {
   shopLocales: Array<{ primary: boolean; locale: string }>;
@@ -14,6 +16,15 @@ export function usePpbMultiLanguageHandlers({
   textOverridesByLocale: Record<string, Record<string, string>>;
   setTextOverridesByLocale: React.Dispatch<
     React.SetStateAction<Record<string, Record<string, string>>>
+  >;
+  bundleEmbedMultiLangText: Record<
+    string,
+    { upsellConfiguration?: { title?: string; subTitle?: string } }
+  >;
+  setBundleEmbedMultiLangText: React.Dispatch<
+    React.SetStateAction<
+      Record<string, { upsellConfiguration?: { title?: string; subTitle?: string } }>
+    >
   >;
   markAsDirty: () => void;
 }) {
@@ -35,8 +46,12 @@ export function usePpbMultiLanguageHandlers({
     [shopLocales],
   );
   const openMultiLanguageModal = useCallback(
-    (title: string, fields: MultiLanguageField[]) => {
-      setMultiLanguageTarget({ type: "text-overrides" });
+    (
+      title: string,
+      fields: MultiLanguageField[],
+      target: "text-overrides" | "embed" = "text-overrides",
+    ) => {
+      setMultiLanguageTarget({ type: target });
       setMultiLanguageTitle(title);
       setMultiLanguageFields(fields);
       setTextOverridesLocale(defaultMultiLanguageLocale());
@@ -127,8 +142,16 @@ export function usePpbMultiLanguageHandlers({
         Record<string, string>
       >;
     }
+    if (multiLanguageTarget?.type === "embed") {
+      return Object.fromEntries(
+        Object.entries(bundleEmbedMultiLangText).map(([locale, entry]) => [
+          locale,
+          entry.upsellConfiguration ?? {},
+        ]),
+      );
+    }
     return textOverridesByLocale;
-  }, [multiLanguageTarget, stepsState.steps, textOverridesByLocale]);
+  }, [bundleEmbedMultiLangText, multiLanguageTarget, stepsState.steps, textOverridesByLocale]);
   const saveStepSetupMultiLanguageValues = useCallback(
     (nextValues: Record<string, Record<string, string>>) => {
       if (multiLanguageTarget?.type === "step") {
@@ -165,10 +188,27 @@ export function usePpbMultiLanguageHandlers({
         markAsDirty();
         return;
       }
+      if (multiLanguageTarget?.type === "embed") {
+        setBundleEmbedMultiLangText(
+          Object.fromEntries(
+            Object.entries(nextValues).map(([locale, values]) => [
+              locale,
+              {
+                upsellConfiguration: {
+                  title: values.title,
+                  subTitle: values.subTitle,
+                },
+              },
+            ]),
+          ),
+        );
+        markAsDirty();
+        return;
+      }
       setTextOverridesByLocale(nextValues);
       markAsDirty();
     },
-    [markAsDirty, multiLanguageTarget, setTextOverridesByLocale, stepsState],
+    [markAsDirty, multiLanguageTarget, setBundleEmbedMultiLangText, setTextOverridesByLocale, stepsState],
   );
 
   return {
