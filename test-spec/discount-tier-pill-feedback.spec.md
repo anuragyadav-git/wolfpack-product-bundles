@@ -76,12 +76,12 @@ and drive localized Cart / Summary preview actions.
 
 ## Acceptance Criteria
 
-- [ ] All listed test cases pass.
-- [ ] FPB and PPB emit `wpb:discount-tier-reached` only after their selection UI rerenders.
-- [ ] SDK mode emits `wbp:discount-tier-reached` after its normal successful mutation event.
-- [ ] Event detail is `{ bundleId, tierId, tierIndex, tierCount, feedbackState }`.
-- [ ] Tier feedback lasts 650 ms and completion feedback lasts 1.2 seconds.
-- [ ] Every mounted eligible pricing/count pill replays feedback without geometry changes.
-- [ ] Reduced motion holds colors statically and restores the normal appearance.
-- [ ] Four Design colors persist and generate four CSS variables.
-- [ ] Cart / Summary preview exposes localized Tier hit and All tiers complete actions.
+- [x] All listed test cases pass.
+- [x] FPB and PPB emit `wpb:discount-tier-reached` only after their selection UI rerenders.
+- [x] SDK mode emits `wbp:discount-tier-reached` after its normal successful mutation event.
+- [x] Event detail is `{ bundleId, tierId, tierIndex, tierCount, feedbackState }`.
+- [x] Tier feedback lasts 650 ms and completion feedback lasts 1.2 seconds.
+- [x] Every mounted eligible pricing/count pill replays feedback without geometry changes.
+- [x] Reduced motion holds colors statically and restores the normal appearance.
+- [x] Four Design colors persist and generate four CSS variables.
+- [x] Cart / Summary preview exposes localized Tier hit and All tiers complete actions.

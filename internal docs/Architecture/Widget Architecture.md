@@ -21,6 +21,8 @@ source_paths:
   - app/storefront/page-builder-embed.ts
   - app/assets/bundle-modal-component.ts
   - app/assets/widgets/shared
+  - app/assets/widgets/shared/discount-tier-feedback.ts
+  - app/assets/widgets/shared-css/discount-tier-feedback.css
   - app/assets/widgets/shared/drawer-layer-manager.ts
   - app/assets/widgets/full-page/initialization-guard.js
   - app/assets/widgets/full-page-css/base/bootstrap-reservation.css
@@ -399,6 +401,47 @@ the replacement at that percentage, and move it to the new target on the
 following frames. A transition declared only on the fill width cannot animate
 across an element replacement. Initial renders and reduced-motion mode apply
 the target immediately.
+
+### Discount Tier Pill Feedback
+
+Widget version `12.3.0` adds shared color-only feedback for pricing tiers when
+`pricing.enabled` is true. Immediately before a selection mutation, the FPB and
+PPB controllers capture the effective pricing tier; after a successful mutation,
+the normal selection events and totals/pills rerender complete before the shared
+transition helper compares the new tier. An advance dispatches one
+`wpb:discount-tier-reached` event from the widget root. Custom SDK mode dispatches
+the equivalent `wbp:discount-tier-reached` event after its normal selection
+event. Both use this detail contract:
+
+```ts
+{
+  bundleId: string;
+  tierId: string;
+  tierIndex: number; // zero-based
+  tierCount: number;
+  feedbackState: "tier" | "complete";
+}
+```
+
+Initial hydration, restored selection state, same-tier changes, downgrades,
+failed mutations, and disabled pricing do not emit. A later re-earned tier emits
+again, a multi-tier jump emits once for its highest newly reached tier, and a
+single configured tier is a completion.
+
+The widget-root listener applies `data-wpb-discount-feedback` to every currently
+mounted eligible pricing/count pill. The shared FPB/PPB stylesheet animates only
+background and text colors: an intermediate tier uses one 650 ms beat, while
+completion uses two beats over 1.2 seconds. The listener then removes the state
+attribute so each pill returns to its owned appearance. Reduced-motion mode holds
+the selected colors for the same duration without animation before restoration.
+
+Merchant colors are stored under `pageCustomization.stylePresets.colors` as
+`discountTierBackgroundColor`, `discountTierTextColor`,
+`discountCompletionBackgroundColor`, and `discountCompletionTextColor`. They are
+published as `--bundle-discount-feedback-tier-bg`,
+`--bundle-discount-feedback-tier-text`,
+`--bundle-discount-feedback-complete-bg`, and
+`--bundle-discount-feedback-complete-text`.
 
 ---
 

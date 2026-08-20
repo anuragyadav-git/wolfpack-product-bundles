@@ -78,7 +78,7 @@ describe('discount tier transition state', () => {
 });
 
 describe('mounted discount pill feedback', () => {
-  function makeFeedbackRoot(count: number) {
+  function makeFeedbackRoot(count: number, portalCount = 0) {
     let listener: ((event: Event) => void) | null = null;
     const pills = Array.from({ length: count }, () => {
       const attributes = new Map<string, string>();
@@ -90,13 +90,28 @@ describe('mounted discount pill feedback', () => {
         removeAttribute: (name: string) => attributes.delete(name),
       };
     });
+    const portalPills = Array.from({ length: portalCount }, () => {
+      const attributes = new Map<string, string>();
+      return {
+        offsetWidth: 100,
+        setAttribute: (name: string, value: string) => attributes.set(name, value),
+        getAttribute: (name: string) => attributes.get(name) ?? null,
+        hasAttribute: (name: string) => attributes.has(name),
+        removeAttribute: (name: string) => attributes.delete(name),
+      };
+    });
     const root = {
       querySelectorAll: () => pills,
+      ownerDocument: {
+        getElementById: (id: string) => id === 'bundle-builder-modal'
+          ? { querySelectorAll: () => portalPills }
+          : null,
+      },
       addEventListener: (_name: string, callback: (event: Event) => void) => { listener = callback; },
       removeEventListener: () => { listener = null; },
       dispatch: (detail: Record<string, unknown>) => listener?.({ detail } as unknown as Event),
     };
-    return { root, pills };
+    return { root, pills, portalPills };
   }
 
   beforeEach(() => {
@@ -116,6 +131,18 @@ describe('mounted discount pill feedback', () => {
     expect(pills.every((pill) => pill.getAttribute('data-wpb-discount-feedback') === 'tier')).toBe(true);
     jest.advanceTimersByTime(650);
     expect(pills.every((pill) => !pill.hasAttribute('data-wpb-discount-feedback'))).toBe(true);
+    cleanup();
+  });
+
+  it('targets eligible pills mounted in the shared modal portal', () => {
+    const { root, portalPills } = makeFeedbackRoot(0, 1);
+    const cleanup = installDiscountTierPillFeedback(root as any);
+
+    root.dispatch({ bundleId: 'bundle-1', tierId: 'tier-1', tierIndex: 0, tierCount: 2, feedbackState: 'tier' });
+
+    expect(portalPills[0].getAttribute('data-wpb-discount-feedback')).toBe('tier');
+    jest.advanceTimersByTime(650);
+    expect(portalPills[0].hasAttribute('data-wpb-discount-feedback')).toBe(false);
     cleanup();
   });
 

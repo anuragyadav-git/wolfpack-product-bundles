@@ -147,7 +147,15 @@ export function installDiscountTierPillFeedback(root: Element) {
     const detail = (event as CustomEvent<DiscountTierReachedDetail>).detail;
     if (detail?.feedbackState !== 'tier' && detail?.feedbackState !== 'complete') return;
 
-    root.querySelectorAll(`[${DISCOUNT_TIER_PILL_ATTRIBUTE}]`).forEach((pill) => {
+    const pills = new Set<Element>(
+      root.querySelectorAll(`[${DISCOUNT_TIER_PILL_ATTRIBUTE}]`),
+    );
+    root.ownerDocument
+      ?.getElementById('bundle-builder-modal')
+      ?.querySelectorAll(`[${DISCOUNT_TIER_PILL_ATTRIBUTE}]`)
+      .forEach((pill) => pills.add(pill));
+
+    pills.forEach((pill) => {
       const existingTimer = cleanupTimers.get(pill);
       if (existingTimer) clearTimeout(existingTimer);
 
