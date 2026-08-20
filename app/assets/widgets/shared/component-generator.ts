@@ -170,7 +170,7 @@ export class ComponentGenerator {
         </div>
         <div class="modal-footer">
           <div class="modal-footer-grouped-content">
-            <div class="modal-footer-total-pill">
+            <div class="modal-footer-total-pill" data-wpb-discount-feedback-pill>
               <span class="total-price-strike"></span>
               <span class="total-price-final"></span>
               <span class="price-cart-separator">|</span>

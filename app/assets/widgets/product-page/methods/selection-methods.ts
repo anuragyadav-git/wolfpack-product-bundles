@@ -3,6 +3,10 @@ import { ToastManager } from '../../shared/toast-manager.js';
 import { resolveProductCardSelectionAriaLabel } from '../../shared/components/product-card.js';
 import { resolveProductPageCardButtonText, resolveProductPageInlineAddText } from './modal-methods.js';
 import { areRequiredProductPageStepsValid } from './step-validation.js';
+import {
+  captureDiscountTierState,
+  dispatchDiscountTierTransition,
+} from '../../shared/discount-tier-feedback.js';
 
 function createInlineQuantityControl(productId, quantity, increaseDisabled) {
   const wrapper = document.createElement('div');
@@ -118,6 +122,7 @@ export function shouldAutoAdvanceProductPageStep({ quantity = 0, productId = '',
 
 export const ProductPageSelectionMethods: Record<string, any> & ThisType<any> = {
 updateProductSelection(stepIndex, productId, newQuantity) {
+  const discountTierBefore = captureDiscountTierState(this);
   const selectionKey = this.normalizeSelectionKey(productId);
   let quantity = Math.max(0, newQuantity);
   const directDefaultRequiredQuantity = this._getDirectDefaultRequiredQuantity(selectionKey);
@@ -224,6 +229,11 @@ updateProductSelection(stepIndex, productId, newQuantity) {
     }
   }
   this._maybeAutoAddAfterLastStep();
+  dispatchDiscountTierTransition({
+    root: this.container,
+    before: discountTierBefore,
+    after: captureDiscountTierState(this),
+  });
 },
 
 _maybeAutoAddAfterLastStep() {

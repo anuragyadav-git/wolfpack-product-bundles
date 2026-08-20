@@ -236,6 +236,7 @@ _populateCompactMobileSummaryTray(sheet) {
   dock.className = 'fpb-mobile-summary-dock';
   const countBadge = document.createElement('button');
   countBadge.className = 'fpb-mobile-summary-count-badge';
+  countBadge.setAttribute('data-wpb-discount-feedback-pill', '');
   countBadge.setAttribute('type', 'button');
   countBadge.setAttribute('aria-controls', MOBILE_SUMMARY_DIALOG_ID);
   if (countBadge.dataset) {
@@ -749,6 +750,7 @@ _createMobileSummaryActionButton({
   if (shouldAddToCart && discountBadgeLabel) {
     const discountBadge = document.createElement('span');
     discountBadge.className = 'fpb-summary-discount-badge fpb-mobile-summary-action-discount-badge';
+    discountBadge.setAttribute('data-wpb-discount-feedback-pill', '');
     discountBadge.textContent = discountBadgeLabel;
     ctaBtn.appendChild(discountBadge);
   }

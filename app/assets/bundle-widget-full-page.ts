@@ -36,6 +36,7 @@ import { claimFullPageWidgetInitialization } from './widgets/full-page/initializ
 import { BundleProductModal } from './bundle-modal-component.js';
 import { renderBundlePurchaseOptions } from './widgets/shared/components/purchase-options.js';
 import { bundleSubscriptionStorefrontMethods } from './widgets/shared/subscription-storefront-methods.js';
+import { installDiscountTierPillFeedback } from './widgets/shared/discount-tier-feedback.js';
 
 
 export class BundleWidgetFullPage {
@@ -68,6 +69,7 @@ export class BundleWidgetFullPage {
       bundleLevelCssMethods,
     );
     this.container = containerElement;
+    this._discountTierFeedbackCleanup = installDiscountTierPillFeedback(containerElement);
     this.selectedBundle = null;
     this.selectedProducts = [];
     this.stepProductData = [];

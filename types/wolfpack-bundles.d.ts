@@ -193,6 +193,15 @@ export interface WbpCartFailedDetail {
   error: string;
 }
 
+export interface DiscountTierReachedDetail {
+  bundleId: string;
+  tierId: string;
+  /** Zero-based index in the effective pricing-rule tier order. */
+  tierIndex: number;
+  tierCount: number;
+  feedbackState: 'tier' | 'complete';
+}
+
 // ─── Global Augmentation ─────────────────────────────────────────────────────
 
 declare global {
@@ -208,5 +217,7 @@ declare global {
     'wbp:step-cleared': CustomEvent<WbpStepClearedDetail>;
     'wbp:cart-success': CustomEvent<WbpCartSuccessDetail>;
     'wbp:cart-failed': CustomEvent<WbpCartFailedDetail>;
+    'wbp:discount-tier-reached': CustomEvent<DiscountTierReachedDetail>;
+    'wpb:discount-tier-reached': CustomEvent<DiscountTierReachedDetail>;
   }
 }

@@ -133,6 +133,7 @@ import { renderBundlePurchaseOptions } from './widgets/shared/components/purchas
 import { bundleSubscriptionStorefrontMethods } from './widgets/shared/subscription-storefront-methods.js';
 import { applyBrowsedProductPreselection } from './widgets/product-page/embed-preselection.js';
 import { BundleProductModal } from './bundle-modal-component.js';
+import { installDiscountTierPillFeedback } from './widgets/shared/discount-tier-feedback.js';
 
 export function createProductPageProductModal(widget, ModalConstructor = BundleProductModal) {
   return new ModalConstructor(widget, { drawerOwner: 'ppb' });
@@ -165,6 +166,7 @@ export class BundleWidgetProductPage {
       gridTemplateMethods,
     );
     this.container = containerElement;
+    this._discountTierFeedbackCleanup = installDiscountTierPillFeedback(containerElement);
     this.selectedBundle = null;
     this.selectedProducts = [];
     this.selectedProductCategoryIndexes = [];

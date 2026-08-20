@@ -191,7 +191,8 @@ export const cascadeTemplateMethods: Record<string, any> & ThisType<any> = {
     appendPart('span', 'bw-ppb-cascade-add-to-cart-separator', content.separator);
     appendPart('span', 'bw-ppb-cascade-add-to-cart-price', content.finalPriceText);
     appendPart('span', 'bw-ppb-cascade-add-to-cart-compare', content.compareAtPriceText, { hidden: true });
-    appendPart('span', 'bw-ppb-cascade-add-to-cart-discount-pill', content.discountPillText);
+    const discountPill = appendPart('span', 'bw-ppb-cascade-add-to-cart-discount-pill', content.discountPillText);
+    discountPill?.setAttribute('data-wpb-discount-feedback-pill', '');
   },
 
   _getSelectedProductEntries() {

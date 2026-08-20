@@ -22,6 +22,7 @@ export function initDebugMode(state, sdk) {
   var events = [
     'wbp:ready', 'wbp:item-added', 'wbp:item-removed',
     'wbp:step-cleared', 'wbp:cart-success', 'wbp:cart-failed',
+    'wbp:discount-tier-reached',
   ];
   events.forEach(function (name) {
     window.addEventListener(name, function (e) {

@@ -1,6 +1,33 @@
+---
+schema_version: 1
+id: wolfpack-bundles-sdk-usage-guide
+title: Wolfpack Bundles SDK Developer Usage Guide
+type: developer-guide
+status: active
+summary: Documents the custom storefront SDK API, events, debugging, and integration contract.
+last_audited: 2026-08-21
+owners:
+  - engineering
+domains:
+  - storefront
+systems:
+  - bundle-sdk
+source_paths:
+  - app/storefront/sdk.ts
+  - types/wolfpack-bundles.d.ts
+related_docs:
+  - internal docs/Architecture/Widget Architecture.md
+tags:
+  - sdk
+  - storefront-events
+keywords:
+  - WolfpackBundles
+  - wbp:discount-tier-reached
+---
+
 # Wolfpack Bundles SDK — Developer Usage Guide
 
-> **Version:** 2.7.0 (matches widget version)
+> **Version:** 12.3.0 (matches widget version)
 > **Architecture:** Headless-on-Liquid — the App manages backend logic, pricing, and cart session. You own the HTML, CSS, and state rendering.
 
 ---
@@ -272,6 +299,12 @@ All events fire on `window`. Use `addEventListener` to listen.
 | `wbp:step-cleared` | `clearStep()` succeeds | `{ stepId }` |
 | `wbp:cart-success` | `addBundleToCart()` completes successfully | `{ bundleId }` |
 | `wbp:cart-failed` | `addBundleToCart()` fails (validation or network) | `{ error }` |
+| `wbp:discount-tier-reached` | A successful selection mutation advances the effective `pricing.enabled` rule tier | `{ bundleId, tierId, tierIndex, tierCount, feedbackState }` |
+
+`tierIndex` is zero-based. `feedbackState` is `"tier"` for an intermediate
+tier and `"complete"` for the highest configured tier. A multi-tier jump emits
+once for the highest newly reached tier; restored state, same-tier changes,
+downgrades, failed mutations, and disabled pricing do not emit.
 
 **Example — re-render on any selection change:**
 ```js
@@ -312,6 +345,10 @@ window.addEventListener('wbp:item-added', (e: CustomEvent<WbpItemAddedDetail>) =
   console.log(e.detail.stepId, e.detail.variantId, e.detail.qty);
 });
 
+window.addEventListener('wbp:discount-tier-reached', (e: CustomEvent<DiscountTierReachedDetail>) => {
+  console.log(e.detail.feedbackState, e.detail.tierIndex, e.detail.tierCount);
+});
+
 const result: AddRemoveResult = WolfpackBundles!.addItem('step_abc', 123456, 1);
 const price: DisplayPrice = WolfpackBundles!.getDisplayPrice();
 const validation: BundleValidationResult = WolfpackBundles!.validateBundle();
@@ -331,6 +368,7 @@ Append `?wbp_debug=true` to any storefront URL. The SDK will:
 [WolfpackBundles SDK] Debug mode active (?wbp_debug=true)
   State: { isReady: true, bundleId: "bundle_123", steps: [...], ... }
 [WolfpackBundles] Event: wbp:item-added { stepId: "step_1", variantId: "44321001234", qty: 1, ... }
+[WolfpackBundles] Event: wbp:discount-tier-reached { bundleId: "bundle_123", tierId: "rule_1", tierIndex: 0, tierCount: 2, feedbackState: "tier" }
 [WolfpackBundles] Event: wbp:cart-success { bundleId: "bundle_123" }
 ```
 
@@ -498,5 +536,5 @@ Before going live with a custom SDK implementation:
 
 ---
 
-*Wolfpack Product Bundles — SDK v2.7.0*
-*Generated: 2026-04-28*
+*Wolfpack Product Bundles — SDK v12.3.0*
+*Updated: 2026-08-21*

@@ -514,7 +514,7 @@ renderSidePanel(panel) {
   totalSection.innerHTML = `
     <span class="side-panel-total-heading">
       <span class="side-panel-total-label">Total</span>
-      ${discountBadgeLabel ? `<span class="fpb-summary-discount-badge">${discountBadgeLabel}</span>` : ''}
+      ${discountBadgeLabel ? `<span class="fpb-summary-discount-badge" data-wpb-discount-feedback-pill>${discountBadgeLabel}</span>` : ''}
     </span>
     <div class="side-panel-total-prices">
       ${shouldShowOriginalTotal ? `<span class="side-panel-total-original">${CurrencyManager.convertAndFormat(totalPrice, currencyInfo)}</span>` : ''}

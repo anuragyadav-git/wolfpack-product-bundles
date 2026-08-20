@@ -228,7 +228,7 @@ ensureModal() {
           <!-- Centered Grouped Content Container -->
           <div class="modal-footer-grouped-content">
             <!-- Total Pill - Sits Above Buttons -->
-            <div class="modal-footer-total-pill">
+            <div class="modal-footer-total-pill" data-wpb-discount-feedback-pill>
               <span class="total-price-strike"></span>
               <span class="total-price-final"></span>
               <span class="price-cart-separator">|</span>

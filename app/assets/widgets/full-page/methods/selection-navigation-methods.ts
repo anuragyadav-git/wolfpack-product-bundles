@@ -4,6 +4,10 @@ import { calculateBundleDiscountForPurchaseOption } from '../../shared/subscript
 import { calculateBundleTotalForPurchaseOption } from '../../shared/subscription-storefront-methods.js';
 import { ToastManager } from '../../shared/toast-manager.js';
 import { ConditionValidator } from '../../shared/condition-validator.js';
+import {
+  captureDiscountTierState,
+  dispatchDiscountTierTransition,
+} from '../../shared/discount-tier-feedback.js';
 
 function getSelectionId(item = {}) {
   return String(item?.selectionId || '');
@@ -153,6 +157,7 @@ getStepConditionValidationMessage(stepIndex = this.currentStepIndex) {
 },
 
 updateProductSelection(stepIndex, productId, newQuantity) {
+  const discountTierBefore = captureDiscountTierState(this);
   let quantity = Math.max(0, newQuantity);
 
   // Clamp against real per-variant stock before doing anything else.
@@ -242,6 +247,12 @@ updateProductSelection(stepIndex, productId, newQuantity) {
       }
     }
   }
+
+  dispatchDiscountTierTransition({
+    root: this.container,
+    before: discountTierBefore,
+    after: captureDiscountTierState(this),
+  });
 },
 
 _shouldRenderProductSlots() {
