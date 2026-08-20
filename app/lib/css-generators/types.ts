@@ -180,6 +180,10 @@ export interface CSSDesignSettings {
   discountPillFontSize?: number;
   discountPillFontWeight?: number;
   discountPillBorderRadius?: number;
+  discountTierBackgroundColor?: string;
+  discountTierTextColor?: string;
+  discountCompletionBackgroundColor?: string;
+  discountCompletionTextColor?: string;
   toastBgColor?: string;
   toastTextColor?: string;
   bundleBgColor?: string;

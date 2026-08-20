@@ -258,7 +258,11 @@
       },
       "previewOnly": "Preview only",
       "loading": "Loading preview",
-      "notApplicable": "This setting is not used by the selected template."
+      "notApplicable": "This setting is not used by the selected template.",
+      "feedback": {
+        "tierHit": "ティア達成",
+        "complete": "全ティア達成"
+      }
     }
   },
   "tooltips": {

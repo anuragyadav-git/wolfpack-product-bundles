@@ -258,7 +258,11 @@
       },
       "previewOnly": "Preview only",
       "loading": "Loading preview",
-      "notApplicable": "This setting is not used by the selected template."
+      "notApplicable": "This setting is not used by the selected template.",
+      "feedback": {
+        "tierHit": "Faixa atingida",
+        "complete": "Todas as faixas concluídas"
+      }
     }
   },
   "tooltips": {

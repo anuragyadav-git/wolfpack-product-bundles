@@ -201,6 +201,10 @@
       "previewOnly": "Preview only",
       "loading": "Loading preview",
       "notApplicable": "This setting is not used by the selected template.",
+      "feedback": {
+        "tierHit": "Tier hit",
+        "complete": "All tiers complete"
+      },
       "surface": {
         "bundleName": "Build your perfect bundle",
         "description": "Choose products to build your bundle.",

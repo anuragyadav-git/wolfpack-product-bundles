@@ -188,6 +188,10 @@ export const DESIGN_CONFIGURATION: SettingsTab[] = [
       { label: "Primary Text Color", value: "#000000", kind: "color", description: "Product names, prices, labels, and main content text" },
       { label: "Secondary Color", value: "#eeeeee", kind: "color", description: "Secondary elements, empty progress bars, and inactive states" },
       { label: "Product Background Color", value: "#ffffff", kind: "color", description: "Background color for product cards and cart footer" },
+      { key: "stylePresets.colors.discountTierBackgroundColor", group: "Discount feedback", label: "Tier background", value: "#D1FAE5", kind: "color", description: "Color beat shown when a shopper reaches an intermediate discount tier" },
+      { key: "stylePresets.colors.discountTierTextColor", group: "Discount feedback", label: "Tier text", value: "#065F46", kind: "color", description: "Text color shown during intermediate tier feedback" },
+      { key: "stylePresets.colors.discountCompletionBackgroundColor", group: "Discount feedback", label: "Completion background", value: "#047857", kind: "color", description: "Color beats shown when a shopper reaches the highest discount tier" },
+      { key: "stylePresets.colors.discountCompletionTextColor", group: "Discount feedback", label: "Completion text", value: "#FFFFFF", kind: "color", description: "Text color shown during highest-tier feedback" },
     ],
   },
   {

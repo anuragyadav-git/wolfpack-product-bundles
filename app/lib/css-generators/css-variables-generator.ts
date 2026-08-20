@@ -360,6 +360,10 @@ export function generateCSSVariables(ctx: CSSGenerationContext): string {
   --bundle-discount-pill-font-size: ${s.discountPillFontSize || 12}px;
   --bundle-discount-pill-font-weight: ${s.discountPillFontWeight || 600};
   --bundle-discount-pill-border-radius: ${s.discountPillBorderRadius || 20}px;
+  --bundle-discount-feedback-tier-bg: ${s.discountTierBackgroundColor || '#D1FAE5'};
+  --bundle-discount-feedback-tier-text: ${s.discountTierTextColor || '#065F46'};
+  --bundle-discount-feedback-complete-bg: ${s.discountCompletionBackgroundColor || '#047857'};
+  --bundle-discount-feedback-complete-text: ${s.discountCompletionTextColor || '#FFFFFF'};
   /* Toasts */
   --bundle-toast-bg: ${s.toastBgColor || globalPrimaryButton};
   --bundle-toast-text: ${s.toastTextColor || globalButtonText};

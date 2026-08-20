@@ -15,6 +15,10 @@ const DEFAULT_STYLE_PRESETS = {
     primaryTextColor: "#000000",
     accentColor: "#eeeeee",
     backgroundColor: "#ffffff",
+    discountTierBackgroundColor: "#D1FAE5",
+    discountTierTextColor: "#065F46",
+    discountCompletionBackgroundColor: "#047857",
+    discountCompletionTextColor: "#FFFFFF",
   },
   typography: {
     primaryFontSize: "16px",
@@ -422,6 +426,10 @@ export function buildSettingsDesignRuntime(payload: unknown, currentPageCustomiz
   const primaryTextColor = getField(fieldValues, "Primary Text Color", DEFAULT_STYLE_PRESETS.colors.primaryTextColor);
   const accentColor = getField(fieldValues, "Secondary Color", DEFAULT_STYLE_PRESETS.colors.accentColor);
   const backgroundColor = getField(fieldValues, "Product Background Color", DEFAULT_STYLE_PRESETS.colors.backgroundColor);
+  const discountTierBackgroundColor = getField(fieldValues, "stylePresets.colors.discountTierBackgroundColor", DEFAULT_STYLE_PRESETS.colors.discountTierBackgroundColor);
+  const discountTierTextColor = getField(fieldValues, "stylePresets.colors.discountTierTextColor", DEFAULT_STYLE_PRESETS.colors.discountTierTextColor);
+  const discountCompletionBackgroundColor = getField(fieldValues, "stylePresets.colors.discountCompletionBackgroundColor", DEFAULT_STYLE_PRESETS.colors.discountCompletionBackgroundColor);
+  const discountCompletionTextColor = getField(fieldValues, "stylePresets.colors.discountCompletionTextColor", DEFAULT_STYLE_PRESETS.colors.discountCompletionTextColor);
   const primaryFontSize = normalizePx(getField(fieldValues, "Primary Font Size", DEFAULT_STYLE_PRESETS.typography.primaryFontSize), DEFAULT_STYLE_PRESETS.typography.primaryFontSize);
   const primaryFontWeight = normalizeWeight(getField(fieldValues, "Primary Font Weight", DEFAULT_STYLE_PRESETS.typography.primaryFontWeight), "Bold");
   const secondaryFontSize = normalizePx(getField(fieldValues, "Secondary Font Size", DEFAULT_STYLE_PRESETS.typography.secondaryFontSize), DEFAULT_STYLE_PRESETS.typography.secondaryFontSize);
@@ -480,6 +488,10 @@ export function buildSettingsDesignRuntime(payload: unknown, currentPageCustomiz
       primaryTextColor,
       accentColor,
       backgroundColor,
+      discountTierBackgroundColor,
+      discountTierTextColor,
+      discountCompletionBackgroundColor,
+      discountCompletionTextColor,
     },
     typography: {
       primaryFontSize,
@@ -540,6 +552,10 @@ export function buildSettingsDesignRuntime(payload: unknown, currentPageCustomiz
     quantitySelectorBgColor: String((pageCustomization.productCard as JsonObject).productCardQuantitySelectorBgColor ?? accentColor),
     quantitySelectorTextColor: String((pageCustomization.productCard as JsonObject).quantitySelectorButtonTextColor ?? buttonTextColor),
     quantitySelectorBorderRadius: numberFromPx(buttonRadius, 5),
+    discountTierBackgroundColor,
+    discountTierTextColor,
+    discountCompletionBackgroundColor,
+    discountCompletionTextColor,
     variantSelectorTextColor: primaryTextColor,
     footerSettings: {
       footerBgColor: String((pageCustomization.cartFooter as JsonObject).cartFooterBgColor ?? backgroundColor),
