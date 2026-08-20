@@ -1,5 +1,9 @@
 export {};
 
+jest.mock('../../../app/assets/widgets/shared/toast-manager.js', () => ({
+  ToastManager: { show: jest.fn() },
+}));
+
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { fullPageSelectionNavigationMethods } = require('../../../app/assets/widgets/full-page/methods/selection-navigation-methods.js');
 
@@ -58,5 +62,60 @@ describe('FPB per-product quantity-limit controls', () => {
 
     expect(button.disabled).toBe(false);
     expect(button.attributes.has('aria-disabled')).toBe(false);
+  });
+});
+
+function createSelectionContext(validateQuantityPerProduct: { isEnabled: boolean; allowedQuantity: number }) {
+  return {
+    selectedBundle: {
+      steps: [{}],
+      validateQuantityPerProduct,
+    },
+    selectedProducts: [{ 'variant-1': 1 }],
+    getVariantAvailable: jest.fn(() => ({ available: null, outOfStock: false })),
+    validateStepCondition: jest.fn(() => true),
+    updateProductQuantityDisplay: jest.fn(),
+    renderModalTabs: jest.fn(),
+    updateModalNavigation: jest.fn(),
+    updateModalFooterMessaging: jest.fn(),
+    _emitStorefrontEvent: jest.fn(),
+    _sendEngagementBeacon: jest.fn(),
+    _syncFreeGiftLock: jest.fn(),
+    container: { dataset: { bundleType: 'full_page' } },
+    elements: { stepsContainer: { querySelector: jest.fn(() => null) } },
+    renderSidePanel: jest.fn(),
+    _syncSummaryPresentationMode: jest.fn(() => 'sidebar'),
+    updateStepTimeline: jest.fn(),
+    currentStepIndex: 0,
+  };
+}
+
+describe('FPB per-product quantity-limit selection mutations', () => {
+  it('rejects an increase above an enabled maximum before changing selection state', () => {
+    const context = createSelectionContext({ isEnabled: true, allowedQuantity: 1 });
+
+    fullPageSelectionNavigationMethods.updateProductSelection.call(context, 0, 'variant-1', 2);
+
+    expect(context.selectedProducts[0]['variant-1']).toBe(1);
+    expect(context.updateProductQuantityDisplay).not.toHaveBeenCalled();
+  });
+
+  it('allows an increase up to an enabled maximum greater than one', () => {
+    const context = createSelectionContext({ isEnabled: true, allowedQuantity: 3 });
+    context.selectedProducts[0]['variant-1'] = 2;
+
+    fullPageSelectionNavigationMethods.updateProductSelection.call(context, 0, 'variant-1', 3);
+
+    expect(context.selectedProducts[0]['variant-1']).toBe(3);
+    expect(context.updateProductQuantityDisplay).toHaveBeenCalledWith(0, 'variant-1', 3);
+  });
+
+  it('allows an increase above the saved maximum when validation is disabled', () => {
+    const context = createSelectionContext({ isEnabled: false, allowedQuantity: 1 });
+
+    fullPageSelectionNavigationMethods.updateProductSelection.call(context, 0, 'variant-1', 2);
+
+    expect(context.selectedProducts[0]['variant-1']).toBe(2);
+    expect(context.updateProductQuantityDisplay).toHaveBeenCalledWith(0, 'variant-1', 2);
   });
 });
