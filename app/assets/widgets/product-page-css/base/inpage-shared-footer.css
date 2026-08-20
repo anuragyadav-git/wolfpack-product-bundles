@@ -63,14 +63,9 @@
   max-width: 100%;
   height: clamp(2rem, 3vw, 2.125rem);
   padding: 0 10px;
-  border-radius: 10px;
+  border-radius: 999px;
   background: #000000;
   box-sizing: border-box;
-}
-
-#bundle-builder-app
-  .wpbMixCascadeSelectedItemsInCartWrappper {
-  border-radius: 10px;
 }
 
 #bundle-builder-app
@@ -178,7 +173,6 @@
     gap: clamp(5px, 1.6vw, 7px);
     padding-block: 0;
     padding-inline: clamp(9px, 2.8vw, 12px);
-    border-radius: 999px;
   }
 
 }
