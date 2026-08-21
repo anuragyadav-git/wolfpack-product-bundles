@@ -14,6 +14,7 @@ systems:
   - integrations
 source_paths:
   - app/lib/admin-configuration-surfaces.ts
+  - app/assets/widgets/full-page/fpb-controls-integrations.ts
   - app/storefront/page-builder-embed.ts
   - app/routes/api/api.page-builder-embed[.]json.tsx
 related_docs:
@@ -107,8 +108,9 @@ Setup requirements:
 - EB also provides a video guide.
 
 WPB supportability:
-- Supportable through WPB Controls custom CSS/theme-page CSS if that setting is wired to storefront assets.
-- No Judge.me API integration is implied by the quick setup guide.
+- Supported through the Landing Page Controls Judge.me toggle and public API token.
+- Agent-store verification on 2026-08-21 installed Judge.me on the free plan, enabled its core Horizon theme app embed, and confirmed `200` responses from Judge.me's current `widgets/preview_badge` API for both FPB products.
+- EB's older batch cache endpoint still describes the observed Yash runtime, but a fresh Judge.me installation returns `404 Shop not found` there. WPB uses the current public widget API per Shopify external product ID and isolates failures per product.
 
 ### PageFly and GemPages
 

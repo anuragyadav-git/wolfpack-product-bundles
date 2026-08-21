@@ -5,7 +5,7 @@ title: Admin Configure Page
 type: architecture
 status: authoritative
 summary: Defines the shared FPB and PPB configure-page boundary and direct create, clone, edit, and save flows.
-last_audited: 2026-08-14
+last_audited: 2026-08-21
 owners:
   - engineering
 domains:
@@ -35,6 +35,24 @@ The FPB configure page is the canonical Admin configure design. FPB and PPB keep
 The only bundle configuration routes are the type-specific FPB and PPB configure pages. Bundle creation, cloning, and editing navigate directly to the appropriate configure route. The retired `/app/bundles/create/configure/:bundleId` configuration wizard and its route-specific state, actions, preview helper, and modal controllers are not part of the supported architecture.
 
 Shared configure primitives should accept adapter props for route-owned state and actions. FPB continues to use `useConfigureBundleFlow()`, and PPB continues to use `usePpbConfigureFlow()`. Shared components must not read route loaders or submit forms directly.
+
+Feature switches follow one shared disabled-configuration contract across FPB
+and PPB. The master switch remains interactive, while every dependent setting
+stays rendered with its saved value, is visually subdued, and sits inside an
+`aria-disabled` and native `inert` region. Native controls also receive their
+own `disabled` state, including shared `FilePicker` triggers. Turning a feature
+off must not clear its draft configuration; turning it back on restores the
+same values. Mutually exclusive mode branches and prerequisite acquisition
+flows may remain conditional because they do not represent disabled saved
+configuration.
+
+Bundle Visibility is a shared Polaris web-component surface for FPB and PPB,
+covering app-embed status, setup guidance, the canonical bundle link, and
+responsive placement choices. PPB Bundle Widget and Bundle Embed are
+route-owned Polaris web-component surfaces. Their master switches sit outside
+the disabled region, and their preview, localized copy, targeting, selected
+resources, browsed-product behavior, and Theme Editor placement actions remain
+visible but inert while disabled.
 
 Step Setup uses the same section rhythm for both bundle types:
 

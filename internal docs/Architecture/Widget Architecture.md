@@ -27,6 +27,7 @@ source_paths:
   - app/assets/widgets/full-page/initialization-guard.js
   - app/assets/widgets/full-page-css/base/bootstrap-reservation.css
   - app/assets/bundle-widget-product-page.ts
+  - app/assets/widgets/product-page/ppb-modal-card-presentation.ts
   - app/routes/api/api.storefront-products.tsx
   - app/routes/api/api.storefront-collections.tsx
   - app/routes/api/api.fpb-upsells[.]json.tsx
@@ -67,6 +68,16 @@ Template behavior is resolved through plain config modules and method modules:
 - FPB configs: `app/assets/widgets/full-page/templates/{standard,classic,compact,horizontal}.config.ts`
 - PPB configs: `app/assets/widgets/product-page/templates/{grid,list,horizontal-slots,vertical-slots}.config.ts`
 - Registries resolve canonical app template identifiers to those target template configs. FPB Standard is stored and emitted as `STANDARD`.
+
+## PPB modal-template picker ownership
+
+PPB Horizontal Slots (`PDP_MODAL/MODAL`) and Vertical Slots (`PDP_MODAL/SIMPLIFIED`) share the single `#bundle-builder-modal` picker owned by `product-page/methods/dom-methods.ts`. Product List and Product Grid use their in-page surfaces and must not inherit modal-only layout behavior.
+
+The shared picker is an 85dvh bottom sheet with three regions: a non-scrolling header, the only vertically scrolling catalog body, and a non-scrolling footer in normal flex flow. Footer geometry must never overlap product actions or focus rings. The catalog renders five tracks at 1440px, four at 1280px, and two at 768px and below; fixed track counts keep sparse rows from stretching. Modal lifecycle and exact opener-focus restoration remain owned by `modal-state-methods.ts`, while the global keyboard listener contains Tab focus only when the picker is the topmost drawer layer.
+
+Horizontal/Vertical modal cards keep native grouped-variant selectors inline at every viewport. A selector change updates only active card context; Add remains the selection mutation. A pure PPB modal-card presentation helper resolves `add`, `quantity`, or `maximum-reached` from per-product quantity validation. At maximum the localized `Added xN` action removes the full selected quantity. These overrides ignore `showQuantitySelectorOnCard` only for modal cards; Product List/Grid retain their in-page behavior.
+
+Filled Horizontal slots remain bounded by the existing responsive tile block-size token, while filled Vertical slots use the existing responsive row block-size as both their minimum and maximum. Product names wrap and visually clamp only within that boundary; their complete value remains in the DOM, the product-details surface, and the product-specific accessible name of the overlaid cross-badge remove control. The cross badge keeps a 44px interaction target, stops propagation so it cannot open replacement, and uses the existing single-removal and same-index focus-recovery paths.
 
 Template installer/prototype patch functions have been removed. Widget entry files compose exported template method objects in the same central `Object.assign` used for controller method modules.
 
@@ -120,7 +131,7 @@ compact single-image record is also hydrated through the existing storefront
 products endpoint before rendering; product identifiers may arrive in `id`,
 `selectionId`, or `productId`, and must resolve to the same product lookup key.
 
-Because the shared product-details overlay is mounted under `document.body`, its responsive surface is viewport-owned rather than widget-container-owned. Product image activation opens a bounded, centered modal on desktop and a bounded bottom drawer on mobile. Both surfaces suppress horizontal overflow and keep excess content scrollable only on the vertical axis.
+Because the shared product-details overlay is mounted under `document.body`, its responsive surface is viewport-owned rather than widget-container-owned. In PPB modal templates, only the product image activates a full-width bottom sheet above the picker; the sheet has an 88dvh ceiling, a constrained content column, safe-area padding, and internal vertical scrolling on desktop and mobile. It restores the selected variant and quantity when editing, and commits through the originating-slot replacement target so Update cannot create a duplicate. FPB retains its existing responsive presentation.
 
 While product details are open, the storefront document root and body are both
 scroll-locked. The modal or drawer remains the only vertical scroll owner, and
@@ -131,13 +142,14 @@ The shared multi-step FPB timeline sizes its navigation track from the rendered 
 PPB Product List (`PDP_INPAGE + CASCADE`) owns its multi-step navigation in the Product Page layout, footer, and validation method modules. A multi-step Product List renders only `currentStepIndex`; intermediate primary actions navigate Next after current-step validation, the final step uses Add Bundle to Cart, and Back preserves selections across steps. Single-step Product List and the other PPB templates keep their existing rendering paths. Product List exact-rule over-selection is blocked before state mutation so the current step and selected-items drawer remain stable.
 
 PPB drawer ownership is explicit through `data-ppb-drawer-surface` values for
-`selected-summary`, `bundle-picker`, `product-details`, and `variant-selector`.
+`selected-summary`, `bundle-picker`, `product-details`, and, where still used by
+in-page templates, `variant-selector`.
 The selected summary belongs to widget flow and never participates in document
 scroll locking. The other three surfaces share the drawer layer manager: only
 the top layer owns Escape and backdrop dismissal, document scroll locks once
 across nested overlays, and the final close restores the prior scroll styles.
-Mobile product details and variants use semantic 44px handle buttons; desktop
-product details retain the cross control, and desktop variants remain inline.
+Product details uses a semantic handle on mobile and a close control on desktop.
+Horizontal/Vertical variants remain native and inline on both viewport classes.
 Focus returns to the originating product, slot, or variant trigger after the
 owning layer closes.
 

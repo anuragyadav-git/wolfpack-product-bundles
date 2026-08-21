@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "status": "passed",
+  "source": "direct Chrome DevTools with cache-cleared hard reloads at all five required viewports",
+  "served_widget_version": "14.0.0",
+  "viewports": {
+    "1440x900": {"fixture_width": 148.75, "fixture_height": 29, "stress_width": 189.1875, "contained": true, "horizontal_overflow": 0},
+    "1280x800": {"fixture_width": 148.75, "fixture_height": 29, "stress_width": 189.1875, "contained": true, "horizontal_overflow": 0},
+    "768x1024": {"fixture_width": 148.75, "fixture_height": 29, "stress_width": 189.1875, "contained": true, "horizontal_overflow": 0},
+    "390x844": {"fixture_width": 130.5625, "fixture_height": 32, "stress_width": 168.203125, "contained": true, "horizontal_overflow": 0},
+    "360x800": {"fixture_width": 122.453125, "fixture_height": 32, "stress_width": 157.328125, "contained": true, "horizontal_overflow": 0}
+  },
+  "stress_content": {"count": "123", "final_price": "$12,345.67", "compare_at_price": "$19,999.99"},
+  "assertions": [
+    "Icon and count share one vertically centered flex row.",
+    "The pill shrink-wraps fixture content.",
+    "The pill grows for longer count and price content.",
+    "The pill remains inside the footer with zero page overflow."
+  ]
+}

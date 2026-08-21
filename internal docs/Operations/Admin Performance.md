@@ -5,7 +5,7 @@ title: Admin Performance
 type: operations
 status: authoritative
 summary: Embedded Admin Web Vitals instrumentation, route-level LCP findings, and critical-path constraints.
-last_audited: 2026-08-13
+last_audited: 2026-08-21
 owners:
   - engineering
 domains:
@@ -25,6 +25,7 @@ source_paths:
   - app/routes/app/app.dashboard/route.tsx
   - app/routes/app/app.dashboard/dashboard-route-readiness.tsx
   - app/routes/app/app.dashboard/DashboardPage.tsx
+  - app/routes/app/app.dashboard/AppEmbedEnableModal.tsx
   - app/routes/app/app._index.tsx
   - app/routes/app/app.attribution/AttributionRouteShell.tsx
   - app/routes/app/app.attribution/AttributionDashboard.tsx
@@ -104,7 +105,7 @@ Measured in the Shopify Admin chrome on `wolfpack-store-test-1` / SIT using
 
 | Route | Iframe LCP candidate / source-audited candidate | Fix status |
 |---|---|---|
-| `/app/dashboard` | Loading workspace message during readiness; historical content candidate: support card text | Keep the complete visible Dashboard behind one readiness boundary until App Embed status, banner data, the Dashboard module, and the shared black loading-bar interval are ready. During that interval render only the top-edge bar and centered `Loading your workspace` message. Reveal the header, App Embed banner, bundle panel, top cards, and resources card together. Do not restore banner skeletons or idle-delayed visible cards. Keep row action-menu content lazy until merchant intent because closed overlays are not Dashboard page content. |
+| `/app/dashboard` | Loading workspace message during readiness; historical content candidate: support card text | Keep the complete visible Dashboard behind one readiness boundary until App Embed status, banner data, the Dashboard module, and the shared black loading-bar interval are ready. During that interval render only the top-edge bar and centered `Loading your workspace` message. Reveal the header, App Embed banner, bundle panel, top cards, and resources card together. Do not restore banner skeletons or idle-delayed visible cards. Keep row action-menu content lazy until merchant intent because closed overlays are not Dashboard page content. Mount the app-embed tutorial media only after the merchant opens its instructional modal so the initial Dashboard route does not request either video source. |
 | `/app/bundles/create` | Measured: bundle type thumbnail rendered via `/ppb.avif` | Preloaded in route `links()` and HTTP `Link`; adjacent `/fpb.avif` also preloaded. The thumbnail is now a CSS background with stable dimensions, and local candidate paint was under target. |
 | `/app/integrations` | Measured: text subtitle (`p._subtitle...`) | No image preload fix; page LCP is text/bootstrap-bound |
 | `/app/events` | Source audit: no first-viewport owned image | No image preload fix |
@@ -157,6 +158,11 @@ top-edge loading bar is used for initial Settings route readiness and after a
 card is selected while the workspace chunk becomes ready. The black bar fills
 for a minimum of 800 milliseconds before content can replace it. It does not
 use a spinner or card skeleton.
+
+Controls uses a dedicated route. Selecting its Settings card immediately
+replaces the landing cards with the same top-edge loading bar while Remix
+navigates, then the Controls route retains that loading treatment until its
+deferred Settings data and minimum fill interval are ready.
 
 The Settings workspace owns the Design inspector/preview layout and the
 eight-template representative preview. Wide containers use three columns for

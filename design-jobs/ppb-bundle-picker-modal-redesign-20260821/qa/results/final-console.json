@@ -1,0 +1,8 @@
+{
+  "status": "passed",
+  "violations": [],
+  "allowlisted": [
+    {"exact": "GET /favicon.ico 404", "reason": "Theme-owned missing favicon", "owner": "Shopify test theme", "review_date": "2026-08-21"},
+    {"pattern": "preloaded but not used", "reason": "Shopify/theme preload advisory outside PPB ownership", "owner": "Shopify test theme", "review_date": "2026-08-21"}
+  ]
+}

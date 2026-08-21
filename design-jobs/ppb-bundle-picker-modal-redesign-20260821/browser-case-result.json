@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "case_id": "ppb-revision-4-formal-matrix",
+  "viewport": "1440x900, 1280x800, 768x1024, 390x844, 360x800",
+  "state": "all required PPB picker and details states",
+  "required": true,
+  "gates": {
+    "functional": "passed",
+    "visual": "passed",
+    "geometry": "passed",
+    "responsive": "passed",
+    "console": "passed",
+    "network": "passed",
+    "accessibility": "passed",
+    "performance": "passed",
+    "non_regression": "passed"
+  },
+  "performance_reason": "Picker and card entrance animations changed, so a trusted direct-Chrome interaction trace was required.",
+  "evidence": {
+    "snapshot": "Fresh accessibility snapshots were captured before every accepted interaction.",
+    "screenshots": {
+      "before": "qa/screenshots/horizontal-1440x900.png",
+      "after": "qa/screenshots/quantity-action-equality-390x844.png",
+      "element": {"actual": "qa/screenshots/quantity-action-equality-1440x900.png", "baseline": "approved revision-3 contract", "diff": "", "comparison_summary": "Quantity and Add both measure 204x44."},
+      "viewport": {"actual": "qa/screenshots/horizontal-390x844.png", "baseline": "approved revision-3 contract", "diff": "", "comparison_summary": "Two-column fixed-shell mobile layout passes with zero overflow."}
+    },
+    "console": "No PPB-owned errors or warnings after the final hard reload and close-button retest.",
+    "network": "All PPB assets and endpoints succeeded; only the theme favicon returned 404.",
+    "accessibility": "qa/lighthouse/mobile-report.json and qa/lighthouse/desktop-report.json",
+    "lighthouse": {"desktop": "qa/lighthouse/desktop-report.html", "mobile": "qa/lighthouse/mobile-report.html"},
+    "performance_trace": {"interaction": "trusted picker open", "cls": 0, "inp_ms": 37}
+  },
+  "assertions": [
+    "All four PPB templates pass the five-viewport responsive matrix.",
+    "Quantity controls and Add share the same footprint.",
+    "Only images open details; title, background, variant selection, and Add remain independent.",
+    "Topmost sheet dismissal, focus restoration, focus containment, and scroll lock pass.",
+    "Validation, maximum, remove-all, replacement, restoration, failure, and non-regression states pass."
+  ],
+  "observations": {
+    "console": {"violations": [], "allowlisted": ["theme favicon 404", "Shopify/theme preload notices"]},
+    "network": {"violations": [], "expected_analytics": []}
+  },
+  "waivers": [],
+  "retry_history": [
+    "A synthetic interaction trace reported CLS 0.23; the card entrance was changed to opacity-only and the accepted trusted-click trace reported CLS 0.00.",
+    "A close-button aria-hidden focus warning was reproduced, covered with a red/green test, fixed, rebuilt, hard-reloaded, and cleared in direct Chrome."
+  ]
+}
