@@ -13,6 +13,12 @@ describe("checkout integration provider registry", () => {
       "Theme cart drawer",
       "GoKwik",
       "Shopflo",
+      "Zecpay",
+      "Rebuy",
+      "Shiprocket / Fastrr",
+      "Monster Cart",
+      "UpCart",
+      "Kaching Cart",
     ]);
   });
 
@@ -23,6 +29,11 @@ describe("checkout integration provider registry", () => {
     expect(normalizeCheckoutIntegrationProvider("native")).toBe("native");
     expect(normalizeCheckoutIntegrationProvider("GoKwik")).toBe("gokwik");
     expect(normalizeCheckoutIntegrationProvider("Shopflo")).toBe("shopflo");
+    expect(normalizeCheckoutIntegrationProvider("Zecpay")).toBe("zecpay");
+    expect(normalizeCheckoutIntegrationProvider("Shiprocket / Fastrr")).toBe("shiprocket_fastrr");
+    expect(normalizeCheckoutIntegrationProvider("Monster Cart")).toBe("monster_cart");
+    expect(normalizeCheckoutIntegrationProvider("UpCart")).toBe("upcart");
+    expect(normalizeCheckoutIntegrationProvider("Kaching Cart")).toBe("kaching_cart");
   });
 
   it("marks no legacy providers as discount-code providers", () => {
@@ -30,6 +41,9 @@ describe("checkout integration provider registry", () => {
     expect(isDiscountCodeCheckoutIntegrationProvider("theme_cart_drawer")).toBe(false);
     expect(isDiscountCodeCheckoutIntegrationProvider("gokwik")).toBe(true);
     expect(isDiscountCodeCheckoutIntegrationProvider("shopflo")).toBe(true);
+    expect(isDiscountCodeCheckoutIntegrationProvider("zecpay")).toBe(true);
+    expect(isDiscountCodeCheckoutIntegrationProvider("shiprocket_fastrr")).toBe(true);
+    expect(isDiscountCodeCheckoutIntegrationProvider("monster_cart")).toBe(false);
   });
 
   it("keeps app-proxy discount code creation closed to checkout handoff providers", () => {
@@ -37,6 +51,8 @@ describe("checkout integration provider registry", () => {
     expect(isSupportedCheckoutIntegrationProvider("theme_cart_drawer")).toBe(false);
     expect(isSupportedCheckoutIntegrationProvider("gokwik")).toBe(true);
     expect(isSupportedCheckoutIntegrationProvider("shopflo")).toBe(true);
+    expect(isSupportedCheckoutIntegrationProvider("zecpay")).toBe(true);
+    expect(isSupportedCheckoutIntegrationProvider("shiprocket_fastrr")).toBe(true);
     expect(isSupportedCheckoutIntegrationProvider("monster_cart")).toBe(false);
   });
 
@@ -66,9 +82,10 @@ describe("checkout integration provider registry", () => {
       requiresCartRefresh: false,
     });
     expect(getCheckoutIntegrationProvider("monster_cart")).toMatchObject({
-      id: "native",
-      callbackMode: "native",
+      id: "monster_cart",
+      callbackMode: "side_cart",
       requiresDiscountCode: false,
+      requiresCartRefresh: true,
     });
   });
 });

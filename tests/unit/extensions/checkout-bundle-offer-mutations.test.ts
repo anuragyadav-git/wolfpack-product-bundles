@@ -9,7 +9,7 @@ import {
   isOfferControlPending,
 } from "../../../extensions/bundle-checkout-ui/src/BundleOffers";
 
-const attributes = (values: Record<string, string>) => Object.entries(values).map(([key, value]) => ({ key, value }));
+const attributes = (values: Record<string, string>) => Object.entries(values).map(([key, value]: any) => ({ key, value }));
 const line = (overrides: Partial<OfferCartLine> = {}): OfferCartLine => ({
   id: "line-1",
   quantity: 2,
@@ -143,7 +143,7 @@ describe("checkout bundle offer mutations", () => {
 
   it("requests a fresh exact token for every quantity increase and decrease", async () => {
     let lines = [line({ quantity: 1 })];
-    const requestToken = jest.fn(async ({ quantity }) => ({
+    const requestToken = jest.fn(async ({ quantity }: any) => ({
       attributes: attributes({
         _checkout_offer_key: "offer-1",
         _wolfpack_bundle_runtime: `token-${quantity}`,

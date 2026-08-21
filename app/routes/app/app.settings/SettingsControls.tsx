@@ -1,95 +1,14 @@
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import type { SettingsField } from "../../../lib/admin-configuration-surfaces";
 import {
   getDisabledAdditionalConfigurationFields,
   isAdditionalConfigurationActionDisabled,
 } from "../../../lib/additional-configurations-behavior";
 import styles from "../../../styles/routes/admin-configuration-surfaces.module.css";
+import {
+  useModalHideListener,
+} from "../_shared/bundle-configure/modal-utils";
 import { getFieldValueKey } from "./settings-state";
-
-function AdditionalConfigurationFileUpload({
-  value,
-  disabled,
-  onChange,
-}: {
-  value: string;
-  disabled: boolean;
-  onChange: (value: string) => void;
-}) {
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [status, setStatus] = useState<"idle" | "uploading" | "success" | "error">("idle");
-
-  const uploadFile = async (file: File) => {
-    setStatus("uploading");
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const uploadResponse = await fetch("/app/upload-store-file", {
-        method: "POST",
-        body: formData,
-      });
-      const uploadResult = await uploadResponse.json() as {
-        ok?: boolean;
-        fileId?: string;
-      };
-      if (!uploadResponse.ok || !uploadResult.ok || !uploadResult.fileId) {
-        setStatus("error");
-        return;
-      }
-
-      for (let pollCount = 0; pollCount < 15; pollCount += 1) {
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        const statusResponse = await fetch(
-          `/app/upload-store-file?fileId=${encodeURIComponent(uploadResult.fileId)}`,
-        );
-        const statusResult = await statusResponse.json() as {
-          fileStatus?: string;
-          file?: { url?: string };
-        };
-        if (statusResult.fileStatus === "READY" && statusResult.file?.url) {
-          onChange(statusResult.file.url);
-          setStatus("success");
-          return;
-        }
-        if (!statusResponse.ok || statusResult.fileStatus === "FAILED") {
-          setStatus("error");
-          return;
-        }
-      }
-      setStatus("error");
-    } catch {
-      setStatus("error");
-    }
-  };
-
-  return (
-    <div className={styles.ebFieldStack}>
-      {value ? <img className={styles.ebPreviewImage} src={value} alt="Selected video player logo" /> : null}
-      <input
-        ref={inputRef}
-        type="file"
-        accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml,image/avif"
-        hidden
-        disabled={disabled || status === "uploading"}
-        onChange={(event) => {
-          const file = event.currentTarget.files?.[0];
-          event.currentTarget.value = "";
-          if (file) void uploadFile(file);
-        }}
-      />
-      <s-button
-        variant="secondary"
-        loading={status === "uploading" || undefined}
-        disabled={disabled || status === "uploading" || undefined}
-        onClick={() => inputRef.current?.click()}
-      >
-        {value ? "Replace file" : "Upload file"}
-      </s-button>
-      {status === "success" ? <s-badge tone="success">Upload complete</s-badge> : null}
-      {status === "error" ? <s-badge tone="critical">Upload failed. Please try again.</s-badge> : null}
-    </div>
-  );
-}
 
 export function ControlsContentCards({
   title,
@@ -128,14 +47,13 @@ export function ControlsContentCards({
               {index === 0 && description && <p>{description}</p>}
             </div>
             {group.title === "Cart Messaging" && (
-              <button
-                type="button"
-                className={styles.controlsEditLanguageButton}
-                disabled={isAdditionalConfigurationActionDisabled("Cart Messaging", values)}
-                onClick={() => onFieldAction?.("Cart Messaging")}
+              <s-button
+                variant="tertiary"
+                disabled={isAdditionalConfigurationActionDisabled("shared.cartMessaging.isEnabled", values)}
+                onClick={() => onFieldAction?.("shared.cartMessaging.isEnabled")}
               >
                 Edit Language
-              </button>
+              </s-button>
             )}
           </div>
           <div className={styles.controlsCardFields}>
@@ -146,12 +64,12 @@ export function ControlsContentCards({
 
               return (
                 <ControlsField
-                  key={`${title}-${field.label}`}
+                  key={`${title}-${getFieldValueKey(field)}`}
                   field={displayField}
-                  value={values[field.label] ?? ""}
-                  disabled={disabledFields.has(field.label)}
-                  onChange={(value) => onFieldChange(field.label, value)}
-                  onAction={onFieldAction ? () => onFieldAction(field.label) : undefined}
+                  value={values[getFieldValueKey(field)] ?? ""}
+                  disabled={disabledFields.has(getFieldValueKey(field))}
+                  onChange={(value) => onFieldChange(getFieldValueKey(field), value)}
+                  onAction={onFieldAction ? () => onFieldAction(getFieldValueKey(field)) : undefined}
                 />
               );
             })}
@@ -181,27 +99,40 @@ export function SettingsVariablesModal({
   modal: { title: string; variables: string[] } | null;
   onClose: () => void;
 }) {
-  if (!modal) {
-    return null;
-  }
+  const modalRef = useRef<any>(null);
+  useModalHideListener(modalRef, onClose);
+
+  const descriptions: Record<string, string> = {
+    "{{boxSelectionDifference}}": "The number of excess items the customer must remove.",
+    "{{conditionQuantity}}": "The required number of products for the step.",
+    "{{conditionAmount}}": "The required monetary value for the step, shown without a currency symbol.",
+    "{{conditionWeight}}": "The required product weight for the step.",
+    "{{stepName}}": "The current bundle step name.",
+    "{{maxAllowedAddons}}": "The maximum number of addon products allowed on the step.",
+    "{{allowedQuantity}}": "The allowed product quantity.",
+    "{{quantityDifference}}": "The number of products still required.",
+  };
 
   return (
-    <div className={styles.settingsModalBackdrop} role="presentation">
-      <section className={styles.settingsVariablesModal} role="dialog" aria-modal="true" aria-labelledby="settings-variables-title">
-        <div className={styles.settingsVariablesHeader}>
-          <h2 id="settings-variables-title">Variables</h2>
-          <button type="button" className={styles.settingsModalDismiss} aria-label="Dismiss variables modal" onClick={onClose}>
-            <s-icon type="x" size="small"></s-icon>
-          </button>
-        </div>
-        <p className={styles.settingsVariablesDescription}>{modal.title}</p>
-        <div className={styles.settingsVariablesList}>
-          {modal.variables.map((variable) => (
-            <code key={variable}>{variable}</code>
-          ))}
-        </div>
-      </section>
-    </div>
+    <s-modal ref={modalRef} id="settings-language-variables" heading="Variables">
+      <s-button
+        slot="primary-action"
+        variant="primary"
+        commandFor="settings-language-variables"
+        command="--hide"
+        onClick={onClose}
+      >
+        Close
+      </s-button>
+      <s-stack gap="base">
+        {modal ? <s-text color="subdued">{modal.title}</s-text> : null}
+        {modal?.variables.map((variable) => (
+          <s-section key={variable} heading={variable}>
+            {descriptions[variable] ? <s-text>{descriptions[variable]}</s-text> : null}
+          </s-section>
+        ))}
+      </s-stack>
+    </s-modal>
   );
 }
 
@@ -241,13 +172,14 @@ export function ControlsFormGroup({
         <div className={styles.ebSectionHeader}>
           <h3 className={styles.detailTitle}>{title}</h3>
           {hasVariables && (
-            <button
-              type="button"
-              className={styles.ebVariablesButton}
+            <s-button
+              variant="tertiary"
+              commandFor="settings-language-variables"
+              command="--show"
               onClick={() => onShowVariables?.(title, variables)}
             >
               Show Variables
-            </button>
+            </s-button>
           )}
         </div>
         {description && <p className={styles.detailDescription}>{description}</p>}
@@ -291,42 +223,34 @@ export function ControlsField({
   const displayValue = value.trim() ? value : field.value ?? "";
 
   if (field.kind === "toggle") {
+    if (hasInlineAction) {
+      return (
+        <s-stack direction="inline" gap="base" justifyContent="space-between" alignItems="center">
+          <s-switch
+            id={inputId}
+            label={field.label}
+            checked={isChecked || undefined}
+            disabled={disabled || undefined}
+            onChange={(event: Event) => onChange((event.currentTarget as HTMLInputElement).checked ? "Checked" : "")}
+          />
+          <s-button variant="tertiary" disabled={disabled || undefined} onClick={onAction}>
+            {field.description}
+          </s-button>
+        </s-stack>
+      );
+    }
+
     return (
-      <label className={styles.ebSettingRow} htmlFor={inputId}>
-        <input
+      <s-stack direction="block" gap="small-100">
+        <s-switch
           id={inputId}
-          className={styles.ebSwitchInput}
-          type="checkbox"
-          checked={isChecked}
-          disabled={disabled}
-          onChange={(event) => onChange(event.currentTarget.checked ? "Checked" : "")}
+          label={field.label}
+          details={field.description}
+          checked={isChecked || undefined}
+          disabled={disabled || undefined}
+          onChange={(event: Event) => onChange((event.currentTarget as HTMLInputElement).checked ? "Checked" : "")}
         />
-        <span className={styles.ebSwitchVisual} aria-hidden="true">
-          <s-icon type={isChecked ? "toggle-on" : "toggle-off"} size="small"></s-icon>
-        </span>
-        <span>
-          <span className={hasInlineAction ? styles.ebSettingLabelLine : undefined}>
-            <span className={styles.ebSettingLabel}>{field.label}</span>
-            {hasInlineAction ? (
-            <button
-              type="button"
-              className={styles.ebInlineAction}
-              disabled={disabled}
-              onClick={(event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                onAction?.();
-              }}
-            >
-              {field.description}
-            </button>
-            ) : null}
-          </span>
-          {!hasInlineAction && field.description ? (
-            <span className={styles.ebSettingHelp}>{field.description}</span>
-          ) : null}
-        </span>
-      </label>
+      </s-stack>
     );
   }
 
@@ -334,85 +258,83 @@ export function ControlsField({
     const colorValue = /^#[0-9a-f]{6}$/i.test(value) ? value : field.value || "#000000";
 
     return (
-      <label className={styles.ebFieldStack}>
-        <span>{field.label}</span>
-        {field.description && <span className={styles.ebSettingHelp}>{field.description}</span>}
-        <span className={styles.ebColorInputRow}>
-          <input
-            className={styles.ebTextInput}
-            aria-label={`${field.label} Hex Code`}
-            value={value}
-            disabled={disabled}
-            onChange={(event) => onChange(event.currentTarget.value)}
-          />
-          <input
-            className={styles.ebColorWell}
-            type="color"
-            value={colorValue}
-            disabled={disabled}
-            onChange={(event) => onChange(event.currentTarget.value)}
-          />
-        </span>
-      </label>
+      <s-color-field
+        label={field.label}
+        details={field.description}
+        value={colorValue}
+        disabled={disabled || undefined}
+        onInput={(event: Event) => onChange((event.currentTarget as HTMLInputElement).value)}
+      />
     );
   }
 
   if (field.kind === "select") {
+    const options = field.options?.length ? field.options : [field.value ?? ""];
+    const selectedOption = value || options[0] || "";
+    const selectedIndex = Math.max(0, options.indexOf(selectedOption));
+
     return (
-      <label className={styles.ebFieldStack}>
-        <span>{field.label}</span>
-            <span className={styles.ebSelectWrap}>
-              <select className={styles.ebSelect} value={value || field.options?.[0] || ""} disabled={disabled} onChange={(event) => onChange(event.currentTarget.value)}>
-                {(field.options?.length ? field.options : [field.value ?? ""]).map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
-            </span>
-        {field.description && <span className={styles.ebSettingHelp}>{field.description}</span>}
-      </label>
+      <s-select
+        label={field.label}
+        details={field.description}
+        value={`controls-option-${selectedIndex}`}
+        disabled={disabled || undefined}
+        onChange={(event: Event) => {
+          const optionIndex = Number.parseInt(
+            (event.currentTarget as HTMLSelectElement).value.replace("controls-option-", ""),
+            10,
+          );
+          const selected = options.at(optionIndex);
+          if (selected !== undefined) onChange(selected);
+        }}
+      >
+        {options.map((option, optionIndex) => (
+          <s-option key={option} value={`controls-option-${optionIndex}`}>{option}</s-option>
+        ))}
+      </s-select>
     );
   }
 
   if (field.kind === "radio") {
     return (
-      <fieldset className={styles.ebRadioGroup} disabled={disabled}>
-        <legend>{field.label}</legend>
-        {field.description && <span className={styles.ebSettingHelp}>{field.description}</span>}
+      <s-choice-list
+        label={field.label}
+        details={field.description}
+        name={inputId}
+        values={[value || field.value || ""]}
+        disabled={disabled || undefined}
+        onChange={(event: Event) => {
+          const values = (event.currentTarget as HTMLElement & { values?: string[] }).values;
+          if (values?.[0]) onChange(values[0]);
+        }}
+      >
         {(field.options?.length ? field.options : [field.value ?? ""]).map((option) => (
-          <label key={option} className={styles.ebSettingRow}>
-            <input
-              type="radio"
-              name={inputId}
-              checked={(value || field.value) === option}
-              onChange={() => onChange(option)}
-            />
-            <span className={styles.ebSettingLabel}>{option}</span>
-          </label>
+          <s-choice key={option} value={option}>{option}</s-choice>
         ))}
-      </fieldset>
+      </s-choice-list>
     );
   }
 
   if (field.kind === "script" || field.kind === "css") {
     return (
-      <label className={styles.ebFieldStack}>
-        <span>{field.label}</span>
-        <textarea className={styles.ebTextArea} value={value} rows={4} disabled={disabled} onChange={(event) => onChange(event.currentTarget.value)} />
-        {field.description && <span className={styles.ebSettingHelp}>{field.description}</span>}
-        {field.note && <span className={styles.ebFieldNote}>Note: {field.note}</span>}
-      </label>
+      <s-text-area
+        label={field.label}
+        details={[field.description, field.note ? `Note: ${field.note}` : ""].filter(Boolean).join(" ") || undefined}
+        value={value}
+        rows={4}
+        disabled={disabled || undefined}
+        onInput={(event: Event) => onChange((event.currentTarget as HTMLTextAreaElement).value)}
+      />
     );
   }
 
   if (field.kind === "image") {
     return (
-      <div className={styles.ebFieldStack}>
-        <span>{field.label}</span>
-        <img className={styles.ebPreviewImage} src={value || field.value} alt={field.label} />
-        {field.description && <span className={styles.ebSettingHelp}>{field.description}</span>}
-      </div>
+      <s-stack direction="block" gap="small-100">
+        <s-text type="strong">{field.label}</s-text>
+        <s-image src={value || field.value || ""} alt={field.label} />
+        {field.description ? <s-text color="subdued">{field.description}</s-text> : null}
+      </s-stack>
     );
   }
 
@@ -429,54 +351,39 @@ export function ControlsField({
     );
   }
 
-  if (field.kind === "file") {
-    return (
-      <div className={styles.ebFieldStack}>
-        <span>{field.label}</span>
-        <AdditionalConfigurationFileUpload
-          value={value}
-          disabled={disabled}
-          onChange={onChange}
-        />
-        {field.description && <span className={styles.ebSettingHelp}>{field.description}</span>}
-      </div>
-    );
-  }
-
   if (field.kind === "button") {
     return (
-      <div className={styles.ebFieldStack}>
-        <button type="button" className={styles.settingsSecondaryButton} disabled={disabled} onClick={onAction}>
+      <s-stack direction="block" gap="small-100">
+        <s-button variant="secondary" disabled={disabled || undefined} onClick={onAction}>
           {field.value || field.label}
-        </button>
-        {field.description && <span className={styles.ebSettingHelp}>{field.description}</span>}
-      </div>
+        </s-button>
+        {field.description ? <s-text color="subdued">{field.description}</s-text> : null}
+      </s-stack>
     );
   }
 
   if (field.kind === "secret") {
     return (
-      <label className={styles.ebFieldStack}>
-        <span>{field.label}</span>
-        <input
-          className={styles.ebTextInput}
-          type="password"
-          autoComplete="off"
-          value={value}
-          disabled={disabled}
-          onChange={(event) => onChange(event.currentTarget.value)}
-        />
-        {field.description && <span className={styles.ebSettingHelp}>{field.description}</span>}
-      </label>
+      <s-text-field
+        type="password"
+        label={field.label}
+        {...({ details: field.description } as any)}
+        value={value}
+        autocomplete="off"
+        disabled={disabled || undefined}
+        onInput={(event: Event) => onChange((event.currentTarget as HTMLInputElement).value)}
+      />
     );
   }
 
   return (
-    <label className={styles.ebFieldStack}>
-      <span>{field.label}</span>
-      <input className={styles.ebTextInput} value={value} disabled={disabled} onChange={(event) => onChange(event.currentTarget.value)} />
-      {field.description && <span className={styles.ebSettingHelp}>{field.description}</span>}
-      {field.note && <span className={styles.ebFieldNote}>Note: {field.note}</span>}
-    </label>
+    <s-text-field
+      label={field.label}
+      details={[field.description, field.note ? `Note: ${field.note}` : ""].filter(Boolean).join(" ") || undefined}
+      value={value}
+      autocomplete="off"
+      disabled={disabled || undefined}
+      onInput={(event: Event) => onChange((event.currentTarget as HTMLInputElement).value)}
+    />
   );
 }

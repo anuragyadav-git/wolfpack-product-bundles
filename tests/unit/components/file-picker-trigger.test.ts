@@ -31,11 +31,16 @@ function makeProps(overrides: Record<string, unknown> = {}) {
 
 function getEmptyTriggerChildren(props: ReturnType<typeof makeProps>) {
   const trigger = FilePickerTrigger(props as any);
-  const content = React.Children.toArray(trigger.props.children)[0] as React.ReactElement;
+  const content = React.Children.toArray(
+    trigger.props.children
+  )[0] as React.ReactElement;
   return React.Children.toArray(content.props.children) as React.ReactElement[];
 }
 
-function findElementByType(node: React.ReactNode, type: string): React.ReactElement | null {
+function findElementByType(
+  node: React.ReactNode,
+  type: string
+): React.ReactElement | null {
   for (const child of React.Children.toArray(node)) {
     if (!React.isValidElement(child)) continue;
     if (child.type === type) return child;
@@ -88,11 +93,42 @@ describe("FilePickerTrigger", () => {
     const menu = findElementByType(trigger, "s-menu");
 
     expect(menu).not.toBeNull();
-    const actions = React.Children.toArray(menu!.props.children) as React.ReactElement[];
+    const actions = React.Children.toArray(
+      menu!.props.children
+    ) as React.ReactElement[];
     actions[0].props.onClick();
     actions[1].props.onClick();
 
     expect(props.handleOpen).toHaveBeenCalledTimes(1);
     expect(props.handleRemove).toHaveBeenCalledTimes(1);
+  });
+
+  it("prevents empty trigger interaction while disabled", () => {
+    const props = makeProps({ disabled: true });
+    const trigger = FilePickerTrigger(props as any);
+    const uploadButton = findElementByType(trigger, "s-button");
+
+    expect(trigger.props.tabIndex).toBe(-1);
+    expect(trigger.props["aria-disabled"]).toBe(true);
+    expect(trigger.props.onClick).toBeUndefined();
+    expect(uploadButton?.props.disabled).toBe(true);
+  });
+
+  it("disables change and remove actions while preserving a selected image", () => {
+    const props = makeProps({
+      disabled: true,
+      value: "https://cdn.example.test/banner.png",
+      currentFilename: "banner.png",
+      fitPreviewToTrigger: true,
+    });
+    const trigger = FilePickerTrigger(props as any);
+    const menu = findElementByType(trigger, "s-menu");
+    const actions = React.Children.toArray(
+      menu!.props.children
+    ) as React.ReactElement[];
+
+    expect(trigger.props.children).toBeDefined();
+    expect(actions[0].props.disabled).toBe(true);
+    expect(actions[1].props.disabled).toBe(true);
   });
 });

@@ -33,7 +33,7 @@ describe("BundleReadinessOverlay trigger", () => {
   });
 
   it("includes the full readiness context in the initial DOM", () => {
-    const Overlay = BundleReadinessOverlay as React.ComponentType<
+    const Overlay = BundleReadinessOverlay as unknown as React.ComponentType<
       Record<string, unknown>
     >;
     const markup = renderToStaticMarkup(
@@ -75,7 +75,7 @@ describe("BundleReadinessOverlay trigger", () => {
   });
 
   it("can hide the floating trigger when another surface owns the control", () => {
-    const Overlay = BundleReadinessOverlay as React.ComponentType<Record<string, unknown>>;
+    const Overlay = BundleReadinessOverlay as unknown as React.ComponentType<Record<string, unknown>>;
     const markup = renderToStaticMarkup(
       React.createElement(Overlay, {
         items: [{ key: "products", label: "Products selected", points: 60, done: true }],
@@ -89,7 +89,7 @@ describe("BundleReadinessOverlay trigger", () => {
   });
 
   it("renders the open checklist as an accessible modal dialog", () => {
-    const Overlay = BundleReadinessOverlay as React.ComponentType<Record<string, unknown>>;
+    const Overlay = BundleReadinessOverlay as unknown as React.ComponentType<Record<string, unknown>>;
     const markup = renderToStaticMarkup(
       React.createElement(Overlay, {
         items: [{ key: "products", label: "Products selected", points: 60, done: false }],

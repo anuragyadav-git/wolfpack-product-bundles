@@ -40,7 +40,7 @@ export class ThemeTemplateService {
         message: "Bundle functionality is available through the default product template. Add the Bundle Builder block in the theme editor."
       };
 
-    } catch (error) {
+    } catch (error: any) {
       AppLogger.error('Error ensuring template', { component: 'theme-template', operation: 'ensure-template' }, error);
       return {
         success: false,
@@ -57,7 +57,7 @@ export class ThemeTemplateService {
     try {
       // Since we use theme app extensions, templates are always "available"
       return true;
-    } catch (error) {
+    } catch (error: any) {
       AppLogger.error('Error checking template existence', { component: 'theme-template', operation: 'template-exists' }, error);
       return false;
     }

@@ -61,7 +61,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
         bundleLimit: subscriptionInfo.bundleLimit,
         canCreateBundle: subscriptionInfo.canCreateBundle,
       } satisfies PricingSubscriptionData;
-    } catch (error) {
+    } catch (error: any) {
       AppLogger.error("Error loading pricing page", {
         component: "app.pricing",
         operation: "loader"
@@ -114,7 +114,7 @@ export async function action({ request }: ActionFunctionArgs) {
         confirmationUrl: result.confirmationUrl,
       });
 
-    } catch (error) {
+    } catch (error: any) {
       AppLogger.error("Error creating subscription from pricing page", {
         component: "app.pricing",
         operation: "action-upgrade"

@@ -650,7 +650,7 @@ export async function handleSaveBundle(
       bundle: compactBundleForConfigureResponse(updatedBundle),
       message: "Updated Successfully!",
     });
-  } catch (error) {
+  } catch (error: any) {
     const message =
       error instanceof Error
         ? error.message

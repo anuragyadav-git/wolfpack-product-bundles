@@ -1,389 +1,391 @@
-import type React from "react";
 import { LiveUpsellWidgetPreview } from "../../../components/bundle-configure/LiveUpsellWidgetPreview";
+import { DisabledConfigurationRegion } from "../_shared/bundle-configure/DisabledConfigurationRegion";
 import { usePpbConfigureContext } from "./PpbConfigureContext";
 
+const WIDGET_TARGETS = [
+  { value: "all", label: "All products in bundle" },
+  { value: "specific_products", label: "Specific products" },
+  { value: "specific_collections", label: "Specific collections" },
+] as const;
+
 export function PpbBundleWidgetSection() {
-  const {
-    activeSection,
-    autoSelectBrowsedProduct,
-    FilePicker,
-    getVisibilityResourceId,
-    handlePlaceWidget,
-    markAsDirty,
-    openMultiLanguageModal,
-    openVisibilityCollectionPicker,
-    openVisibilityProductPicker,
-    productPageBundleStyles,
-    removeVisibilityCollectionTarget,
-    removeVisibilityProductTarget,
-    setAutoSelectBrowsedProduct,
-    setUpsellWidgetButtonText,
-    setUpsellWidgetDescription,
-    setUpsellWidgetDisplayMode,
-    setUpsellWidgetDisplayOn,
-    setUpsellWidgetEnabled,
-    setUpsellWidgetImageUrl,
-    setUpsellWidgetTitle,
-    upsellWidgetButtonText,
-    upsellWidgetCollectionsSelectedData,
-    upsellWidgetDescription,
-    upsellWidgetDisplayMode,
-    upsellWidgetDisplayOn,
-    upsellWidgetEnabled,
-    upsellWidgetImageUrl,
-    upsellWidgetSelectedProducts,
-    upsellWidgetTitle,
-    validationErrors = {},
-    clearValidationError,
-  } = usePpbConfigureContext();
+  const flow = usePpbConfigureContext();
+  if (flow.activeSection !== "bundle_widget") return null;
+
+  const disabled = !flow.upsellWidgetEnabled;
+  const changeDisplayMode = (event: Event) => {
+    const value = (event.target as HTMLElement & { values?: string[] })
+      .values?.[0];
+    if (value === "button" || value === "block") {
+      flow.setUpsellWidgetDisplayMode(value);
+      flow.markAsDirty();
+    }
+  };
+  const changeTarget = (event: Event) => {
+    const value = (event.target as HTMLElement & { values?: string[] })
+      .values?.[0];
+    if (value && WIDGET_TARGETS.some((target) => target.value === value)) {
+      flow.setUpsellWidgetDisplayOn(value);
+      flow.markAsDirty();
+    }
+  };
 
   return (
-    <>
-      {activeSection === "bundle_widget" && (
-        <div data-tour-target="ppb-bundle-widget">
-          <div className={productPageBundleStyles.visibilityPanel}>
-            <div className={productPageBundleStyles.visibilityTitleSwitchRow}>
-              <div>
-                <h3 className={productPageBundleStyles.visibilityPanelTitle}>
-                  Product Page Bundle Upsell Widgets
-                </h3>
-                <p className={productPageBundleStyles.visibilityCardText}>
-                  This will display an upsell block or button on the product
-                  pages of your choice.
-                </p>
-              </div>
-              <s-switch
-                checked={upsellWidgetEnabled || undefined}
-                onChange={(e: any) => {
-                  setUpsellWidgetEnabled(e.target.checked);
-                  markAsDirty();
-                }}
-              />
-            </div>
-            <div
-              className={productPageBundleStyles.upsellWidgetContent}
-              style={{
-                opacity: upsellWidgetEnabled ? 1 : 0.4,
-                pointerEvents: upsellWidgetEnabled ? undefined : "none",
-              }}
-            >
-              <div className={productPageBundleStyles.visibilityPreviewFrame}>
-                <LiveUpsellWidgetPreview
-                  mode={upsellWidgetDisplayMode === "button" ? "button" : "block"}
-                  title={upsellWidgetTitle}
-                  description={upsellWidgetDescription}
-                  buttonText={upsellWidgetButtonText}
-                  imageUrl={upsellWidgetImageUrl || undefined}
-                />
-                <div className={productPageBundleStyles.visibilityRadioBar}>
-                  <label
-                    className={productPageBundleStyles.visibilityRadioLabel}
-                  >
-                    <input
-                      type="radio"
-                      name="upsellWidgetType"
-                      value="block"
-                      checked={upsellWidgetDisplayMode !== "button"}
-                      onChange={() => {
-                        setUpsellWidgetDisplayMode("block");
-                        markAsDirty();
-                      }}
-                    />
-                    <span>Offer Upsell Block</span>
-                  </label>
-                  <label
-                    className={productPageBundleStyles.visibilityRadioLabel}
-                  >
-                    <input
-                      type="radio"
-                      name="upsellWidgetType"
-                      value="button"
-                      checked={upsellWidgetDisplayMode === "button"}
-                      onChange={() => {
-                        setUpsellWidgetDisplayMode("button");
-                        markAsDirty();
-                      }}
-                    />
-                    <span>Offer Upsell Button</span>
-                  </label>
-                </div>
-              </div>
-              <s-banner
-                tone="info"
-                dismissible={false}
-                hidden={false}
-              >
-                <s-text>
-                  Select if you want the upsell block or button to appear on
-                  product pages.
+    <div data-tour-target="ppb-bundle-widget">
+      <s-stack direction="block" gap="base">
+        <s-section>
+          <s-stack
+            direction="inline"
+            justifyContent="space-between"
+            alignItems="start"
+            gap="base"
+          >
+            <s-stack direction="inline" alignItems="start" gap="small">
+              <s-icon type="product" />
+              <s-stack direction="block" gap="small-100">
+                <s-heading>Product Page Bundle Upsell Widgets</s-heading>
+                <s-text color="subdued">
+                  Display an upsell block or button on the product pages of your
+                  choice.
                 </s-text>
-              </s-banner>
-              <div className={productPageBundleStyles.visibilityPanelSection}>
-                <div
-                  className={productPageBundleStyles.visibilitySectionHeader}
+              </s-stack>
+            </s-stack>
+            <s-switch
+              accessibilityLabel="Enable product page bundle upsell widgets"
+              checked={flow.upsellWidgetEnabled || undefined}
+              onChange={(event: Event) => {
+                flow.setUpsellWidgetEnabled(
+                  (event.target as HTMLInputElement).checked
+                );
+                flow.markAsDirty();
+              }}
+            />
+          </s-stack>
+        </s-section>
+
+        <DisabledConfigurationRegion disabled={disabled}>
+          <s-stack direction="block" gap="base">
+            <s-section>
+              <s-stack direction="block" gap="base">
+                <s-stack
+                  direction="inline"
+                  alignItems="center"
+                  justifyContent="space-between"
+                  gap="small"
                 >
-                  <h4
-                    className={productPageBundleStyles.visibilitySectionTitle}
-                  >
-                    Widget Settings
-                  </h4>
+                  <s-heading>Widget style</s-heading>
+                  {disabled && <s-badge tone="neutral">Disabled</s-badge>}
+                </s-stack>
+                <s-box padding="base" background="subdued" borderRadius="base">
+                  <LiveUpsellWidgetPreview
+                    mode={
+                      flow.upsellWidgetDisplayMode === "button"
+                        ? "button"
+                        : "block"
+                    }
+                    title={flow.upsellWidgetTitle}
+                    description={flow.upsellWidgetDescription}
+                    buttonText={flow.upsellWidgetButtonText}
+                    imageUrl={flow.upsellWidgetImageUrl || undefined}
+                  />
+                </s-box>
+                <s-choice-list
+                  label="Widget type"
+                  name="ppbUpsellWidgetType"
+                  values={[
+                    flow.upsellWidgetDisplayMode === "button"
+                      ? "button"
+                      : "block",
+                  ]}
+                  disabled={disabled || undefined}
+                  onChange={changeDisplayMode}
+                >
+                  <s-choice value="block">Offer Upsell Block</s-choice>
+                  <s-choice value="button">Offer Upsell Button</s-choice>
+                </s-choice-list>
+                <s-banner tone="info" dismissible={false} hidden={false}>
+                  Select whether the upsell appears as a complete offer block or
+                  a compact button.
+                </s-banner>
+              </s-stack>
+            </s-section>
+
+            <s-section>
+              <s-stack direction="block" gap="base">
+                <s-stack
+                  direction="inline"
+                  alignItems="center"
+                  justifyContent="space-between"
+                  gap="small"
+                >
+                  <s-heading>Widget Settings</s-heading>
                   <s-button
                     variant="secondary"
-                    icon="language-translate"
+                    icon="globe"
+                    disabled={disabled || undefined}
                     onClick={() =>
-                      openMultiLanguageModal("Bundle Widget", [
+                      flow.openMultiLanguageModal("Bundle Widget", [
                         {
                           key: "widgetTitle",
                           label: "Widget Title",
-                          fallback: upsellWidgetTitle,
+                          fallback: flow.upsellWidgetTitle,
                         },
                         {
                           key: "widgetDescription",
                           label: "Widget Description",
-                          fallback: upsellWidgetDescription,
+                          fallback: flow.upsellWidgetDescription,
                           multiline: true,
                         },
                         {
                           key: "widgetButtonText",
                           label: "Widget Button Text",
-                          fallback: upsellWidgetButtonText,
+                          fallback: flow.upsellWidgetButtonText,
                         },
                       ])
                     }
                   >
                     Multi Language
                   </s-button>
-                </div>
-                <div className={productPageBundleStyles.visibilitySettingsGrid}>
-                  <div
-                    className={productPageBundleStyles.visibilityImagePicker}
-                  >
-                    <FilePicker
-                      label="Upload Image"
-                      value={upsellWidgetImageUrl || null}
-                      onChange={(url) => {
-                        setUpsellWidgetImageUrl(url ?? "");
-                        markAsDirty();
+                </s-stack>
+                <s-grid
+                  gridTemplateColumns="@container ppb-widget-settings (inline-size > 680px) minmax(220px, 0.8fr) minmax(0, 1.2fr), 1fr"
+                  gap="base"
+                >
+                  <flow.FilePicker
+                    label="Upload Image"
+                    value={flow.upsellWidgetImageUrl || null}
+                    disabled={disabled}
+                    fitPreviewToTrigger
+                    onChange={(url: string | null) => {
+                      flow.setUpsellWidgetImageUrl(url ?? "");
+                      flow.markAsDirty();
+                    }}
+                  />
+                  <s-stack direction="block" gap="base">
+                    <s-text-field
+                      id="configure-widget-title"
+                      label="Widget Title"
+                      value={flow.upsellWidgetTitle}
+                      required={
+                        flow.upsellWidgetDisplayMode !== "button" || undefined
+                      }
+                      disabled={disabled || undefined}
+                      error={flow.validationErrors["widget.title"]}
+                      onInput={(event: Event) => {
+                        flow.setUpsellWidgetTitle(
+                          (event.target as HTMLInputElement).value
+                        );
+                        flow.markAsDirty();
+                        flow.clearValidationError("widget.title");
                       }}
                     />
-                  </div>
-                  <div className={productPageBundleStyles.visibilityFieldStack}>
-                    <s-text-field
-                        id="configure-widget-title"
-                        label="Widget Title"
-                        value={upsellWidgetTitle}
-                        required={upsellWidgetDisplayMode !== "button" || undefined}
-                        disabled={!upsellWidgetEnabled || undefined}
-                        error={validationErrors["widget.title"]}
-                        onInput={(e: any) => {
-                          setUpsellWidgetTitle(e.target.value);
-                          markAsDirty();
-                          clearValidationError("widget.title");
-                        }}
-                    />
                     <s-text-area
-                        label="Widget Description"
-                        value={upsellWidgetDescription}
-                        rows={3}
-                        disabled={!upsellWidgetEnabled || undefined}
-                        onInput={(e: any) => {
-                          setUpsellWidgetDescription(e.target.value);
-                          markAsDirty();
-                        }}
+                      label="Widget Description"
+                      value={flow.upsellWidgetDescription}
+                      rows={3}
+                      disabled={disabled || undefined}
+                      onInput={(event: Event) => {
+                        flow.setUpsellWidgetDescription(
+                          (event.target as HTMLTextAreaElement).value
+                        );
+                        flow.markAsDirty();
+                      }}
                     />
                     <s-text-field
-                        id="configure-widget-buttonText"
-                        label="Widget Button Text"
-                        value={upsellWidgetButtonText}
-                        required
-                        disabled={!upsellWidgetEnabled || undefined}
-                        error={validationErrors["widget.buttonText"]}
-                        onInput={(e: any) => {
-                          setUpsellWidgetButtonText(e.target.value);
-                          markAsDirty();
-                          clearValidationError("widget.buttonText");
-                        }}
+                      id="configure-widget-buttonText"
+                      label="Widget Button Text"
+                      value={flow.upsellWidgetButtonText}
+                      required
+                      disabled={disabled || undefined}
+                      error={flow.validationErrors["widget.buttonText"]}
+                      onInput={(event: Event) => {
+                        flow.setUpsellWidgetButtonText(
+                          (event.target as HTMLInputElement).value
+                        );
+                        flow.markAsDirty();
+                        flow.clearValidationError("widget.buttonText");
+                      }}
                     />
-                  </div>
-                </div>
-              </div>
-              <div className={productPageBundleStyles.visibilityPanelSection}>
-                <h4 className={productPageBundleStyles.visibilitySectionTitle}>
-                  Display Widget on
-                </h4>
-                <div
-                  className={productPageBundleStyles.visibilityTargetOptions}
+                  </s-stack>
+                </s-grid>
+              </s-stack>
+            </s-section>
+
+            <s-section>
+              <s-stack direction="block" gap="base">
+                <s-heading>Display Widget on</s-heading>
+                <s-choice-list
+                  label="Product-page targeting"
+                  labelAccessibilityVisibility="exclusive"
+                  name="ppbWidgetDisplayOn"
+                  values={[flow.upsellWidgetDisplayOn]}
+                  disabled={disabled || undefined}
+                  onChange={changeTarget}
                 >
-                  {[
-                    { value: "all", label: "All products in bundle" },
-                    { value: "specific_products", label: "Specific products" },
-                    {
-                      value: "specific_collections",
-                      label: "Specific collections",
-                    },
-                  ].map(({ value, label }) => (
-                    <label
-                      key={value}
-                      className={productPageBundleStyles.visibilityRadioLabel}
-                    >
-                      <input
-                        type="radio"
-                        name="widgetDisplayOn"
-                        value={value}
-                        checked={upsellWidgetDisplayOn === value}
-                        onChange={() => {
-                          setUpsellWidgetDisplayOn(value);
-                          markAsDirty();
-                        }}
-                      />
-                      <span>{label}</span>
-                    </label>
+                  {WIDGET_TARGETS.map((target) => (
+                    <s-choice key={target.value} value={target.value}>
+                      {target.label}
+                    </s-choice>
                   ))}
-                </div>
-                {upsellWidgetDisplayOn === "specific_products" && (
-                  <div
-                    className={productPageBundleStyles.visibilityTargetPicker}
-                  >
-                    <button
-                      type="button"
-                      className={
-                        productPageBundleStyles.visibilitySecondaryAction
-                      }
+                </s-choice-list>
+
+                {flow.upsellWidgetDisplayOn === "specific_products" && (
+                  <s-stack direction="block" gap="small">
+                    <s-button
+                      variant="secondary"
+                      icon="product"
+                      disabled={disabled || undefined}
                       onClick={async () => {
-                        await openVisibilityProductPicker("widget");
-                        clearValidationError("widget.products");
+                        await flow.openVisibilityProductPicker("widget");
+                        flow.clearValidationError("widget.products");
                       }}
                     >
                       Select products
-                    </button>
-                    <div
-                      className={
-                        productPageBundleStyles.visibilitySelectionList
-                      }
-                    >
-                      {upsellWidgetSelectedProducts.map(
-                        (product: any, index) => (
-                          <div
-                            key={getVisibilityResourceId(product) ?? index}
-                            className={
-                              productPageBundleStyles.visibilitySelectionItem
-                            }
+                    </s-button>
+                    {flow.upsellWidgetSelectedProducts.map(
+                      (product: any, index: number) => (
+                        <s-box
+                          key={flow.getVisibilityResourceId(product) ?? index}
+                          padding="small"
+                          background="subdued"
+                          borderRadius="base"
+                        >
+                          <s-stack
+                            direction="inline"
+                            alignItems="center"
+                            justifyContent="space-between"
+                            gap="small"
                           >
-                            <span>{product.title ?? "Untitled product"}</span>
-                            <button
-                              type="button"
+                            <s-text>
+                              {product.title ?? "Untitled product"}
+                            </s-text>
+                            <s-button
+                              variant="tertiary"
+                              icon="delete"
+                              disabled={disabled || undefined}
+                              accessibilityLabel={`Remove ${
+                                product.title ?? "product"
+                              }`}
                               onClick={() =>
-                                removeVisibilityProductTarget("widget", index)
+                                flow.removeVisibilityProductTarget(
+                                  "widget",
+                                  index
+                                )
                               }
-                            >
-                              Remove
-                            </button>
-                          </div>
-                        ),
-                      )}
-                    </div>
-                    {validationErrors["widget.products"] && (
+                            />
+                          </s-stack>
+                        </s-box>
+                      )
+                    )}
+                    {flow.validationErrors["widget.products"] && (
                       <s-text id="configure-widget-products" tone="critical">
-                        {validationErrors["widget.products"]}
+                        {flow.validationErrors["widget.products"]}
                       </s-text>
                     )}
-                  </div>
+                  </s-stack>
                 )}
-                {upsellWidgetDisplayOn === "specific_collections" && (
-                  <div
-                    className={productPageBundleStyles.visibilityTargetPicker}
-                  >
-                    <button
-                      type="button"
-                      className={
-                        productPageBundleStyles.visibilitySecondaryAction
-                      }
+
+                {flow.upsellWidgetDisplayOn === "specific_collections" && (
+                  <s-stack direction="block" gap="small">
+                    <s-button
+                      variant="secondary"
+                      icon="product"
+                      disabled={disabled || undefined}
                       onClick={async () => {
-                        await openVisibilityCollectionPicker("widget");
-                        clearValidationError("widget.collections");
+                        await flow.openVisibilityCollectionPicker("widget");
+                        flow.clearValidationError("widget.collections");
                       }}
                     >
                       Select collections
-                    </button>
-                    <div
-                      className={
-                        productPageBundleStyles.visibilitySelectionList
-                      }
-                    >
-                      {upsellWidgetCollectionsSelectedData.map(
-                        (collection: any, index) => (
-                          <div
-                            key={getVisibilityResourceId(collection) ?? index}
-                            className={
-                              productPageBundleStyles.visibilitySelectionItem
-                            }
+                    </s-button>
+                    {flow.upsellWidgetCollectionsSelectedData.map(
+                      (collection: any, index: number) => (
+                        <s-box
+                          key={
+                            flow.getVisibilityResourceId(collection) ?? index
+                          }
+                          padding="small"
+                          background="subdued"
+                          borderRadius="base"
+                        >
+                          <s-stack
+                            direction="inline"
+                            alignItems="center"
+                            justifyContent="space-between"
+                            gap="small"
                           >
-                            <span>
+                            <s-text>
                               {collection.title ?? "Untitled collection"}
-                            </span>
-                            <button
-                              type="button"
+                            </s-text>
+                            <s-button
+                              variant="tertiary"
+                              icon="delete"
+                              disabled={disabled || undefined}
+                              accessibilityLabel={`Remove ${
+                                collection.title ?? "collection"
+                              }`}
                               onClick={() =>
-                                removeVisibilityCollectionTarget(
+                                flow.removeVisibilityCollectionTarget(
                                   "widget",
-                                  index,
+                                  index
                                 )
                               }
-                            >
-                              Remove
-                            </button>
-                          </div>
-                        ),
-                      )}
-                    </div>
-                    {validationErrors["widget.collections"] && (
+                            />
+                          </s-stack>
+                        </s-box>
+                      )
+                    )}
+                    {flow.validationErrors["widget.collections"] && (
                       <s-text id="configure-widget-collections" tone="critical">
-                        {validationErrors["widget.collections"]}
+                        {flow.validationErrors["widget.collections"]}
                       </s-text>
                     )}
-                  </div>
+                  </s-stack>
                 )}
-              </div>
-              <label
-                className={productPageBundleStyles.visibilityCheckboxLabel}
-              >
-                <input
-                  type="checkbox"
-                  checked={autoSelectBrowsedProduct}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    setAutoSelectBrowsedProduct(e.target.checked);
-                    markAsDirty();
+
+                <s-checkbox
+                  label="Add browsed product to bundle"
+                  checked={flow.autoSelectBrowsedProduct || undefined}
+                  disabled={disabled || undefined}
+                  onChange={(event: Event) => {
+                    flow.setAutoSelectBrowsedProduct(
+                      (event.target as HTMLInputElement).checked
+                    );
+                    flow.markAsDirty();
                   }}
                 />
-                <span>Add browsed product to bundle</span>
-              </label>
-            </div>
-          </div>
-          <div className={productPageBundleStyles.visibilityPlacementCard}>
-            <div>
-              <h4 className={productPageBundleStyles.visibilitySectionTitle}>
-                Embed the Upsell
-                {upsellWidgetDisplayMode === "button" ? "Button" : "Block"} at a
-                custom location
-              </h4>
-              <p className={productPageBundleStyles.visibilityCardText}>
-                By default, the upsell
-                {upsellWidgetDisplayMode === "button" ? "button" : "block"} is
-                added below the Buy Button. You can move it to a custom spot on
-                the product page if you prefer.
-              </p>
-            </div>
-            <button
-              type="button"
-              className={productPageBundleStyles.visibilityPrimaryAction}
-              onClick={handlePlaceWidget}
-            >
-              Embed Upsell
-              {upsellWidgetDisplayMode === "button" ? "Button" : "Block"}
-            </button>
-          </div>
-        </div>
-      )}
-    </>
+              </s-stack>
+            </s-section>
+
+            <s-section>
+              <s-stack
+                direction="inline"
+                alignItems="center"
+                justifyContent="space-between"
+                gap="base"
+              >
+                <s-stack direction="inline" alignItems="start" gap="small">
+                  <s-icon type="globe" />
+                  <s-stack direction="block" gap="small-100">
+                    <s-heading>Place the upsell at a custom location</s-heading>
+                    <s-text color="subdued">
+                      By default, the upsell is added below the Buy Button. Move
+                      it to another product-page location if needed.
+                    </s-text>
+                  </s-stack>
+                </s-stack>
+                <s-button
+                  variant="primary"
+                  disabled={disabled || undefined}
+                  onClick={flow.handlePlaceWidget}
+                >
+                  Place Widget
+                </s-button>
+              </s-stack>
+            </s-section>
+          </s-stack>
+        </DisabledConfigurationRegion>
+      </s-stack>
+    </div>
   );
 }

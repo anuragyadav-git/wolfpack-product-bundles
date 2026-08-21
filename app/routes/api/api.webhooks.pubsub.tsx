@@ -131,7 +131,7 @@ export async function action({ request }: ActionFunctionArgs) {
       { status: 200 }
     );
 
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.error("Error processing Pub/Sub webhook", {
       component: "api.webhooks.pubsub",
       operation: "action"

@@ -72,8 +72,8 @@ function adminFileLineCounts(): FileLineCount[] {
 describe("Admin route and component file boundaries", () => {
   it("keeps new Admin route/component files under the hard line-count cap", () => {
     const oversizedFiles = adminFileLineCounts()
-      .filter(({ lineCount }) => lineCount > MAX_ADMIN_FILE_LINES)
-      .filter(({ relativePath }) => !ACTIVE_REFACTOR_BACKLOG.has(relativePath));
+      .filter(({ lineCount }: any) => lineCount > MAX_ADMIN_FILE_LINES)
+      .filter(({ relativePath }: any) => !ACTIVE_REFACTOR_BACKLOG.has(relativePath));
 
     expect(oversizedFiles).toEqual([]);
   });
@@ -95,7 +95,7 @@ describe("Admin route and component file boundaries", () => {
 
   it("keeps configure route-family splits readable instead of hiding bulk state in any-typed flow objects", () => {
     const configureSources = adminFileLineCounts()
-      .map(({ relativePath }) => relativePath)
+      .map(({ relativePath }: any) => relativePath)
       .filter((relativePath) =>
         CONFIGURE_ROUTE_FAMILIES.some((family) => relativePath.startsWith(family))
       )
@@ -105,21 +105,21 @@ describe("Admin route and component file boundaries", () => {
       }));
 
     const flowObjectFiles = configureSources
-      .filter(({ source }) => /\bsectionFlow\b|flow:\s*any/.test(source))
-      .map(({ relativePath }) => relativePath);
+      .filter(({ source }: any) => /\bsectionFlow\b|flow:\s*any/.test(source))
+      .map(({ relativePath }: any) => relativePath);
 
     expect(flowObjectFiles).toEqual([]);
   });
 
   it("keeps configure route-family files under the comfort cap", () => {
     const oversizedTargets = adminFileLineCounts()
-      .filter(({ relativePath }) =>
+      .filter(({ relativePath }: any) =>
         CONFIGURE_ROUTE_FAMILIES.some((family) => relativePath.startsWith(family))
       )
       .filter(
-        ({ lineCount }) => lineCount > CONFIGURE_ROUTE_FAMILY_COMFORT_LINES
+        ({ lineCount }: any) => lineCount > CONFIGURE_ROUTE_FAMILY_COMFORT_LINES
       )
-      .filter(({ relativePath }) => !CONFIGURE_ROUTE_FAMILY_REFACTOR_BACKLOG.has(relativePath));
+      .filter(({ relativePath }: any) => !CONFIGURE_ROUTE_FAMILY_REFACTOR_BACKLOG.has(relativePath));
 
     expect(oversizedTargets).toEqual([]);
   });

@@ -16,28 +16,60 @@ type SharedCartLabels = {
   bundleDiscountDisplayLabel: string;
 };
 
-type SettingsLanguageDocument = {
+export type SettingsLanguageDocument = {
   languageMode: "SINGLE" | "MULTIPLE";
   en: JsonObject;
-  mixAndMatchTextData: {
-    en: JsonObject;
-  };
-  sharedComponents: {
+  mixAndMatchTextData: Record<string, JsonObject> & { en: JsonObject };
+  sharedComponents: Record<string, {
+    cartAndCheckout: Record<keyof SharedCartLabels, LanguageField>;
+  }> & {
     en: {
       cartAndCheckout: Record<keyof SharedCartLabels, LanguageField>;
     };
   };
-};
+} & Record<string, unknown>;
 
-export type SettingsLanguageRuntime = {
-  languageMode: "SINGLE" | "MULTIPLE";
-  activeLocale: "en";
-  selectedLanguage: string;
-  languageData: SettingsLanguageDocument;
-  fpbLanguageData: JsonObject;
-  ppbCustomTextSettings: Record<string, unknown>;
-  sharedCartLabels: SharedCartLabels;
-};
+export const SETTINGS_LANGUAGE_LOCALES = [
+  { code: "en", label: "English" },
+  { code: "ar", label: "Arabic" },
+  { code: "bg-BG", label: "Bulgarian (BG)" },
+  { code: "ca", label: "Catalan" },
+  { code: "zh-CN", label: "Chinese (CN)" },
+  { code: "zh-TW", label: "Chinese (TW)" },
+  { code: "hr", label: "Croatian" },
+  { code: "cs", label: "Czech" },
+  { code: "da", label: "Danish" },
+  { code: "nl", label: "Dutch" },
+  { code: "et", label: "Estonian" },
+  { code: "fi", label: "Finnish" },
+  { code: "fr", label: "French" },
+  { code: "ka", label: "Georgian" },
+  { code: "de", label: "German" },
+  { code: "el", label: "Greek" },
+  { code: "he", label: "Hebrew" },
+  { code: "hu", label: "Hungarian" },
+  { code: "id", label: "Indonesian" },
+  { code: "it", label: "Italian" },
+  { code: "ja", label: "Japanese" },
+  { code: "ko", label: "Korean" },
+  { code: "lv", label: "Latvian" },
+  { code: "lt", label: "Lithuanian" },
+  { code: "nb", label: "Norwegian Bokmål" },
+  { code: "pl", label: "Polish" },
+  { code: "pt-BR", label: "Portuguese (BR)" },
+  { code: "pt-PT", label: "Portuguese (PT)" },
+  { code: "ro", label: "Romanian" },
+  { code: "ru", label: "Russian" },
+  { code: "sr", label: "Serbian" },
+  { code: "sk-SK", label: "Slovak (SK)" },
+  { code: "sl-SI", label: "Slovenian (SI)" },
+  { code: "es", label: "Spanish" },
+  { code: "sv", label: "Swedish" },
+  { code: "th", label: "Thai" },
+  { code: "tr", label: "Turkish" },
+  { code: "vi", label: "Vietnamese" },
+  { code: "no", label: "Norwegian" },
+] as const;
 
 const DEFAULT_SHARED_CART_LABELS: SharedCartLabels = {
   bundleContainsLabel: "Items",
@@ -83,32 +115,11 @@ const FPB_DEFAULTS = {
   maxAddonProductsAllowed: "Add a maximum of {{maxAllowedAddons}} addon products on this step",
   addonProductsMandatory: "Addon product is mandatory on this step",
   mobileAddonNotification: "Additional offers to be unlocked",
-  messageLabel: "Message",
-  senderNamePlaceholder: "From",
-  recipientNamePlaceholder: "To",
-  messagePlaceholder: "Enter a message here...",
-  recipientEmailAddressLabel: "Recipient Email Address",
-  recipientEmailAddressPlaceholder: "Enter a recipient email address here...",
-  emailValidationMessage: "Please enter a valid email address",
-  sendNowLabel: "Send Now",
-  sendLaterLabel: "Send Later",
-  personalizePageSubtext: "",
-  messageRequiredWarning: "Please enter a message",
-  permissionDenied: "Permission Denied",
-  uploadConfirmation: "Your video has been successfully uploaded!",
-  pressToRecord: "Press to record",
-  recording: "Recording....",
-  videoErrorMessage: "An error occured, Please try again!",
-  videoLoading: "Loading....",
-  uploading: "Uploading....",
-  sendVideoMessageText: "Send Video Message",
-  messageDeliveryInfo: "The message will be sent to the recipient via email as soon as the order is placed",
-  saveVideoText: "Save Video",
-  reRecordVideoText: "Re-Record Video",
 };
 
 const PPB_DEFAULTS = {
   productCardAddBtnText: "Add to Cart",
+  productDetailsUpdateButtonText: "Update",
   productVariantLabelText: "Select variant",
   productAddedBtnText: "Added x{{allowedQuantity}}",
   productCardAddBtnTextInPage: "Add +",
@@ -124,6 +135,7 @@ const PPB_DEFAULTS = {
   footerFinishBtnText: "Done",
   noProductsAvailable: "No Products Available",
   addToCartBundleBtnLoadingText: "Adding Bundle...",
+  addBundleSuccessText: "Bundle Added",
   emptyCardText: "Product",
   stepsDrawerPillText: "Show all steps",
   inventoryLimitReachedText: "No More Stock",
@@ -143,12 +155,6 @@ export const SETTINGS_LANGUAGE_BUNDLE_TYPES = [
   BundleType.PRODUCT_PAGE,
   BundleType.FULL_PAGE,
 ] as const;
-
-function getLanguageFieldValues(payload: Record<string, unknown>) {
-  return payload.languageFieldValues && typeof payload.languageFieldValues === "object"
-    ? payload.languageFieldValues as Record<string, unknown>
-    : {};
-}
 
 function getField(values: Record<string, unknown>, key: string, fallback: string) {
   const value = values[key];
@@ -240,33 +246,6 @@ function buildFpbLanguage(values: Record<string, unknown>) {
     landingPage: {},
     navigationSteps: {},
     productPage: {},
-    giftBoxPage: {},
-    videoMessage: {
-      permissionDenied: languageField("permissionDenied", "Permission Denied", getField(values, "fpb.videoMessage.permissionDenied", FPB_DEFAULTS.permissionDenied)),
-      uploadConfirmation: languageField("uploadConfirmation", "Upload Confirmation", getField(values, "fpb.videoMessage.uploadConfirmation", FPB_DEFAULTS.uploadConfirmation)),
-      pressToRecord: languageField("pressToRecord", "Press to record", getField(values, "fpb.videoMessage.pressToRecord", FPB_DEFAULTS.pressToRecord)),
-      recording: languageField("recording", "Recording", getField(values, "fpb.videoMessage.recording", FPB_DEFAULTS.recording)),
-      errorMessage: languageField("videoErrorMessage", "Error Message", getField(values, "fpb.videoMessage.videoErrorMessage", FPB_DEFAULTS.videoErrorMessage)),
-      loading: languageField("videoLoading", "Loading", getField(values, "fpb.videoMessage.videoLoading", FPB_DEFAULTS.videoLoading)),
-      uploading: languageField("uploading", "Uploading", getField(values, "fpb.videoMessage.uploading", FPB_DEFAULTS.uploading)),
-      sendVideoMessageText: languageField("sendVideoMessageText", "Send Video Message Text", getField(values, "fpb.videoMessage.sendVideoMessageText", FPB_DEFAULTS.sendVideoMessageText)),
-      messageDeliveryInfo: languageField("messageDeliveryInfo", "Message Delivery Info", getField(values, "fpb.videoMessage.messageDeliveryInfo", FPB_DEFAULTS.messageDeliveryInfo)),
-      saveVideoText: languageField("saveVideoText", "Save Video Text", getField(values, "fpb.videoMessage.saveVideoText", FPB_DEFAULTS.saveVideoText)),
-      reRecordVideoText: languageField("reRecordVideoText", "Re-Record Video Text", getField(values, "fpb.videoMessage.reRecordVideoText", FPB_DEFAULTS.reRecordVideoText)),
-    },
-    personalizePage: {
-      messageLabel: languageField("messageLabel", "Message Label", getField(values, "fpb.personalizePage.messageLabel", FPB_DEFAULTS.messageLabel)),
-      senderNamePlaceholder: languageField("senderNamePlaceholder", "Sender Name Placeholder", getField(values, "fpb.personalizePage.senderNamePlaceholder", FPB_DEFAULTS.senderNamePlaceholder)),
-      recipientNamePlaceholder: languageField("recipientNamePlaceholder", "Recipient Name Placeholder", getField(values, "fpb.personalizePage.recipientNamePlaceholder", FPB_DEFAULTS.recipientNamePlaceholder)),
-      messagePlaceholder: languageField("messagePlaceholder", "Message Placeholder", getField(values, "fpb.personalizePage.messagePlaceholder", FPB_DEFAULTS.messagePlaceholder)),
-      recipientEmailAddressLabel: languageField("recipientEmailAddressLabel", "Recipient Email Address Label", getField(values, "fpb.personalizePage.recipientEmailAddressLabel", FPB_DEFAULTS.recipientEmailAddressLabel)),
-      recipientEmailAddressPlaceholder: languageField("recipientEmailAddressPlaceholder", "Recipient Email Address Placeholder", getField(values, "fpb.personalizePage.recipientEmailAddressPlaceholder", FPB_DEFAULTS.recipientEmailAddressPlaceholder)),
-      emailValidationMessage: languageField("emailValidationMessage", "Email Validation Message", getField(values, "fpb.personalizePage.emailValidationMessage", FPB_DEFAULTS.emailValidationMessage)),
-      sendNowLabel: languageField("sendNowLabel", "Send Now Label", getField(values, "fpb.personalizePage.sendNowLabel", FPB_DEFAULTS.sendNowLabel)),
-      sendLaterLabel: languageField("sendLaterLabel", "Send Later Label", getField(values, "fpb.personalizePage.sendLaterLabel", FPB_DEFAULTS.sendLaterLabel)),
-      personalizePageSubtext: languageField("personalizePageSubtext", "Personalize Page Subtext", getField(values, "fpb.personalizePage.personalizePageSubtext", FPB_DEFAULTS.personalizePageSubtext)),
-      messageRequiredWarning: languageField("messageRequiredWarning", "Message is required warning", getField(values, "fpb.personalizePage.messageRequiredWarning", FPB_DEFAULTS.messageRequiredWarning)),
-    },
     reviewPage: {},
     discountRules: {},
     sortBy: {},
@@ -305,6 +284,7 @@ function buildPpbLanguage(values: Record<string, unknown>) {
       addBundleToCartBtnText: languageField("addBundleToCartBtnText", "Add Bundle Cart label", getField(values, "ppb.general.addBundleToCartBtnText", PPB_DEFAULTS.addToCartBundleBtnText)),
       noProductsAvailable: languageField("noProductsAvailable", "No Products Available label", getField(values, "ppb.general.noProductsAvailable", PPB_DEFAULTS.noProductsAvailable)),
       addToCartBundleBtnLoadingText: languageField("addToCartBundleBtnLoadingText", "Add Bundle Loading label", getField(values, "ppb.general.addToCartBundleBtnLoadingText", PPB_DEFAULTS.addToCartBundleBtnLoadingText)),
+      addBundleSuccessText: languageField("addBundleSuccessText", "Add Bundle Success label", getField(values, "ppb.general.addBundleSuccessText", PPB_DEFAULTS.addBundleSuccessText)),
       emptyCardText: languageField("emptyCardText", "Add Empty Product Card Text", getField(values, "ppb.general.emptyCardText", PPB_DEFAULTS.emptyCardText)),
       stepsDrawerPillText: languageField("stepsDrawerPillText", "Steps Drawer Pill Text", getField(values, "ppb.general.stepsDrawerPillText", PPB_DEFAULTS.stepsDrawerPillText)),
       inventoryLimitReachedText: languageField("inventoryLimitReachedText", "Inventory Limit Reached Label", getField(values, "ppb.general.inventoryLimitReachedText", PPB_DEFAULTS.inventoryLimitReachedText)),
@@ -359,6 +339,7 @@ export function buildPpbCustomTextSettings(ppbLanguage: JsonObject) {
     addToCartBundleBtnText: general.addBundleToCartBtnText.value,
     subtotalLabelText: general.subtotalLabelText.value,
     addToCartBundleBtnLoadingText: general.addToCartBundleBtnLoadingText.value,
+    addBundleSuccessText: general.addBundleSuccessText.value,
     noProductsAvailable: general.noProductsAvailable.value,
     inventoryLimitReachedText: general.inventoryLimitReachedText.value,
     emptyCardText: general.emptyCardText.value,
@@ -380,6 +361,10 @@ export function buildPpbCustomTextSettings(ppbLanguage: JsonObject) {
 
 function buildFpbTextOverrides(fpbLanguage: JsonObject) {
   const general = fpbLanguage.general as Record<string, LanguageField>;
+  const modals = fpbLanguage.modals as Record<string, unknown>;
+  const clearCart = modals.clearCart as Record<string, LanguageField>;
+  const toasts = fpbLanguage.toasts as Record<string, LanguageField>;
+  const addons = fpbLanguage.addons as Record<string, LanguageField>;
   const conditions = fpbLanguage.conditions as JsonObject;
   const quantityConditions = conditions.quantity as Record<string, LanguageField>;
   const amountConditions = conditions.amount as Record<string, LanguageField>;
@@ -394,6 +379,26 @@ function buildFpbTextOverrides(fpbLanguage: JsonObject) {
     addingToCart: general.preparingBundleLabel.value,
     includedBadge: general.addedLabel.value,
     reviewButton: general.reviewButtonText.value,
+    totalLabelText: general.totalLabelText.value,
+    viewCartProductsLabel: general.viewCartProductsLabel.value,
+    discountBadgeSuffix: general.discountBadgeSuffix.value,
+    cartInclusionTitle: general.cartInclusionTitle.value,
+    subscriptionSelectionLabel: general.subscriptionSelectionLabel.value,
+    redirectingLabel: general.redirectingLabel.value,
+    addedLabel: general.addedLabel.value,
+    addButtonText: general.addButtonText.value,
+    selectBundleProductsLabel: general.selectBundleProductsLabel.value,
+    quantityLabel: (modals.quantityLabel as LanguageField).value,
+    clearCartModalTitle: clearCart.title.value,
+    clearCartModalDescription: clearCart.description.value,
+    clearCartButtonText: clearCart.clearButtonText.value,
+    clearCartCancelButtonText: clearCart.cancelButtonText.value,
+    clearCartConfirmButtonText: clearCart.confirmButtonText.value,
+    boxSelectionEligibilityToast: toasts.boxSelectionEligibilityToast.value,
+    removeProductFromFooterText: toasts.removeProductFromFooterText.value,
+    maxAddonProductsAllowed: addons.maxAddonProductsAllowed.value,
+    addonProductsMandatory: addons.addonProductsMandatory.value,
+    mobileAddonNotification: addons.mobileAddonNotification.value,
     conditionQuantityGreaterThanOrEqualTo: quantityConditions.greaterThanOrEqualTo.value,
     conditionQuantityLessThanOrEqualTo: quantityConditions.lessThanOrEqualTo.value,
     conditionQuantityEqualTo: quantityConditions.equalTo.value,
@@ -415,15 +420,25 @@ function buildPpbTextOverrides(customTextSettings: Record<string, unknown>) {
   return {
     productCardAddButton: String(customTextSettings.productCardAddBtnText),
     productCardInlineAddButton: String(customTextSettings.productCardAddBtnText_inPage),
+    productDetailsUpdateButton: PPB_DEFAULTS.productDetailsUpdateButtonText,
     productVariantLabel: String(customTextSettings.productVariantLabelText),
     addToCartButton: String(customTextSettings.addToCartBundleBtnText),
     addingToCart: String(customTextSettings.addToCartBundleBtnLoadingText),
+    addBundleSuccess: String(customTextSettings.addBundleSuccessText),
     nextButton: String(customTextSettings.footerNextBtnText),
     doneButton: String(customTextSettings.footerFinishBtnText),
     includedBadge: String(customTextSettings.productAddedBtnText),
     noProductsAvailable: String(customTextSettings.noProductsAvailable),
     viewBundleItems: String(customTextSettings.bundleCartDrawerBtnText_inPage),
     bundleCartSelectedProductsText: String(customTextSettings.bundleCartSelectedProductsText_inPage),
+    subtotalLabelText: String(customTextSettings.subtotalLabelText),
+    previousButton: String(customTextSettings.footerPrevBtnText),
+    discountRibbonSuffix: String(customTextSettings.discountRibbonSuffix),
+    subscriptionSelectionLabel: String(customTextSettings.selectSubscriptionPlanButtonText),
+    boxConditionInitialText: String(customTextSettings.boxConditionInitialText_inPage),
+    emptyCardText: String(customTextSettings.emptyCardText),
+    stepsDrawerPillText: String(customTextSettings.stepsDrawerPillText),
+    inventoryLimitReachedText: String(customTextSettings.inventoryLimitReachedText),
     boxSelectionEligibilityToast_inPage: String(customTextSettings.boxSelectionEligibilityToast_inPage),
     conditionQuantityGreaterThanOrEqualTo: String(quantityConditions?.greaterThanOrEqualTo?.value),
     conditionQuantityLessThanOrEqualTo: String(quantityConditions?.lessThanOrEqualTo?.value),
@@ -438,65 +453,134 @@ function buildPpbTextOverrides(customTextSettings: Record<string, unknown>) {
 }
 
 export function buildSettingsLanguageRuntime(payload: Record<string, unknown>) {
-  const values = getLanguageFieldValues(payload);
-  const sharedCartAndCheckout = buildSharedCartFields(values);
-  const sharedCartLabels = getSharedCartLabels(sharedCartAndCheckout);
-  const fpbLanguageData = buildFpbLanguage(values);
-  const ppbLanguageData = buildPpbLanguage(values);
-  const ppbCustomTextSettings = buildPpbCustomTextSettings(ppbLanguageData);
-  const languageMode = payload.isMultilanguageEnabled === false ? "SINGLE" : "MULTIPLE";
-  const selectedLanguage = typeof payload.selectedLanguage === "string" ? payload.selectedLanguage : "English";
-  const languageData: SettingsLanguageDocument = {
+  const submittedLocales = payload.localeFieldValues && typeof payload.localeFieldValues === "object"
+    ? payload.localeFieldValues as Record<string, Record<string, unknown>>
+    : {};
+  const localeValues = Object.keys(submittedLocales).length > 0 ? submittedLocales : { en: {} };
+  if (!localeValues.en) localeValues.en = {};
+  const languageMode = payload.languageMode === "SINGLE" ? "SINGLE" : "MULTIPLE";
+  const fpbLocales: Record<string, JsonObject> = {};
+  const ppbLocales: Record<string, JsonObject> = {};
+  const sharedLocales: Record<string, { cartAndCheckout: Record<keyof SharedCartLabels, LanguageField> }> = {};
+  for (const [locale, values] of Object.entries(localeValues)) {
+    fpbLocales[locale] = buildFpbLanguage(values);
+    ppbLocales[locale] = buildPpbLanguage(values);
+    sharedLocales[locale] = { cartAndCheckout: buildSharedCartFields(values) };
+  }
+  const settingsLanguage = {
     languageMode,
-    en: fpbLanguageData,
-    mixAndMatchTextData: {
-      en: ppbLanguageData,
-    },
-    sharedComponents: {
-      en: {
-        cartAndCheckout: sharedCartAndCheckout,
-      },
-    },
-  };
+    ...fpbLocales,
+    mixAndMatchTextData: ppbLocales,
+    sharedComponents: sharedLocales,
+  } as SettingsLanguageDocument;
+  const englishGeneral = settingsLanguage.en.general as Record<string, LanguageField>;
 
   return {
-    buttonAddToCartText: (fpbLanguageData.general as Record<string, LanguageField>).addToBoxButtonText.value,
-    settingsLanguage: {
-      languageMode,
-      activeLocale: "en",
-      selectedLanguage,
-      languageData,
-      fpbLanguageData: {
-        ...fpbLanguageData,
-        sharedComponents: languageData.sharedComponents.en,
-      },
-      ppbCustomTextSettings,
-      sharedCartLabels,
-    } satisfies SettingsLanguageRuntime,
+    buttonAddToCartText: englishGeneral.addToBoxButtonText.value,
+    settingsLanguage,
   };
 }
 
-export function buildSettingsLanguageResponse(settingsLanguage: unknown, bundleType: LanguageBundleType | string) {
-  const runtime = settingsLanguage && typeof settingsLanguage === "object"
-    ? settingsLanguage as SettingsLanguageRuntime
+function resolveLocale(document: SettingsLanguageDocument, requestedLocale?: string | null) {
+  if (document.languageMode === "SINGLE") return "en";
+  const requested = String(requestedLocale ?? "").trim().toLowerCase();
+  if (!requested) return "en";
+  const locales = Object.keys(document.mixAndMatchTextData);
+  const exact = locales.find((locale) => locale.toLowerCase() === requested);
+  if (exact) return exact;
+  const base = requested.split("-")[0];
+  return locales.find((locale) => locale.toLowerCase() === base) ?? "en";
+}
+
+export function removeSettingsLanguageLocale(document: SettingsLanguageDocument, locale: string) {
+  if (locale === "en") return document;
+  const { [locale]: _removedFpb, ...fpbRoots } = document;
+  const { [locale]: _removedPpb, ...mixAndMatchTextData } = document.mixAndMatchTextData;
+  const { [locale]: _removedShared, ...sharedComponents } = document.sharedComponents;
+  return { ...fpbRoots, mixAndMatchTextData, sharedComponents } as SettingsLanguageDocument;
+}
+
+function collectFieldValues(target: Record<string, string>, prefix: string, value: unknown) {
+  if (!value || typeof value !== "object") return;
+  const record = value as Record<string, unknown>;
+  if (typeof record.value === "string") {
+    target[prefix] = record.value;
+    return;
+  }
+  for (const [key, child] of Object.entries(record)) {
+    collectFieldValues(target, prefix ? `${prefix}.${key}` : key, child);
+  }
+}
+
+function isSettingsLanguageDocument(value: unknown): value is SettingsLanguageDocument {
+  if (!value || typeof value !== "object") return false;
+  const document = value as Record<string, unknown>;
+  const mixAndMatchTextData = document.mixAndMatchTextData;
+  const sharedComponents = document.sharedComponents;
+  return (document.languageMode === "SINGLE" || document.languageMode === "MULTIPLE")
+    && Boolean(document.en && typeof document.en === "object")
+    && Boolean(mixAndMatchTextData && typeof mixAndMatchTextData === "object" && "en" in mixAndMatchTextData)
+    && Boolean(sharedComponents && typeof sharedComponents === "object" && "en" in sharedComponents);
+}
+
+export function buildSettingsLanguageFormState(settingsLanguage: unknown) {
+  const document = isSettingsLanguageDocument(settingsLanguage)
+    ? settingsLanguage
+    : buildSettingsLanguageRuntime({ languageMode: "MULTIPLE", localeFieldValues: { en: {} } }).settingsLanguage;
+  const localeFieldValues: Record<string, Record<string, string>> = {};
+  for (const locale of Object.keys(document.mixAndMatchTextData)) {
+    const values: Record<string, string> = {};
+    collectFieldValues(values, "fpb", document[locale]);
+    collectFieldValues(values, "ppb", document.mixAndMatchTextData[locale]);
+    collectFieldValues(values, "shared", document.sharedComponents[locale]);
+    for (const [key, value] of Object.entries({ ...values })) {
+      if (key.startsWith("shared.cartAndCheckout.")) {
+        values[key.replace("shared.cartAndCheckout.", "shared.cartCheckout.")] = value;
+        delete values[key];
+      }
+    }
+    const clearCartAliases: Record<string, string> = {
+      "fpb.modals.clearCart.title": "fpb.modals.clearCartModalTitle",
+      "fpb.modals.clearCart.description": "fpb.modals.clearCartModalDescription",
+      "fpb.modals.clearCart.clearButtonText": "fpb.modals.clearCartButtonText",
+      "fpb.modals.clearCart.cancelButtonText": "fpb.modals.clearCartCancelButtonText",
+      "fpb.modals.clearCart.confirmButtonText": "fpb.modals.clearCartConfirmButtonText",
+    };
+    for (const [source, target] of Object.entries(clearCartAliases)) {
+      if (values[source] !== undefined) values[target] = values[source];
+      delete values[source];
+    }
+    localeFieldValues[locale] = values;
+  }
+  return { languageMode: document.languageMode, localeFieldValues };
+}
+
+export function buildSettingsLanguageResponse(settingsLanguage: unknown, bundleType: LanguageBundleType | string, requestedLocale?: string | null) {
+  const document = isSettingsLanguageDocument(settingsLanguage)
+    ? settingsLanguage
     : buildSettingsLanguageRuntime({}).settingsLanguage;
+  const activeLocale = resolveLocale(document, requestedLocale);
+  const fpbLocale = document[activeLocale] as JsonObject;
+  const ppbLocale = document.mixAndMatchTextData[activeLocale];
+  const sharedCartAndCheckout = document.sharedComponents[activeLocale].cartAndCheckout;
+  const sharedCartLabels = getSharedCartLabels(sharedCartAndCheckout);
+  const ppbCustomTextSettings = buildPpbCustomTextSettings(ppbLocale);
   const normalizedBundleType = bundleType === BundleType.FULL_PAGE ? BundleType.FULL_PAGE : BundleType.PRODUCT_PAGE;
   const textOverrides = normalizedBundleType === BundleType.FULL_PAGE
-    ? buildFpbTextOverrides(runtime.fpbLanguageData)
-    : buildPpbTextOverrides(runtime.ppbCustomTextSettings);
+    ? buildFpbTextOverrides(fpbLocale)
+    : buildPpbTextOverrides(ppbCustomTextSettings);
 
   return {
     bundleType: normalizedBundleType,
-    languageMode: runtime.languageMode,
-    activeLocale: runtime.activeLocale,
-    selectedLanguage: runtime.selectedLanguage,
-    languageData: runtime.languageData,
+    languageMode: document.languageMode,
+    activeLocale,
+    languageData: document,
     activeLanguageData: normalizedBundleType === BundleType.FULL_PAGE
-      ? runtime.fpbLanguageData
-      : runtime.languageData.mixAndMatchTextData.en,
-    fpbLanguageData: runtime.fpbLanguageData,
-    ppbCustomTextSettings: runtime.ppbCustomTextSettings,
-    sharedCartLabels: runtime.sharedCartLabels,
+      ? fpbLocale
+      : ppbLocale,
+    fpbLanguageData: { ...fpbLocale, sharedComponents: document.sharedComponents[activeLocale] },
+    ppbCustomTextSettings,
+    sharedCartLabels,
     textOverrides,
   };
 }

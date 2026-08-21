@@ -37,7 +37,7 @@ export function usePpbPlacementHandlers({
       const formData = new FormData();
       formData.append("intent", "getThemeTemplates");
       base.fetcher.submit(formData, { method: "post" });
-    } catch (error) {
+    } catch (error: any) {
       AppLogger.error("Failed to load theme templates:", {}, error as any);
       base.shopify.toast.show("Failed to load theme templates", {
         isError: true,
@@ -53,7 +53,7 @@ export function usePpbPlacementHandlers({
       templateState.pendingPlacementModalRef.current = true;
       templateState.setIsPreparingPlacementTemplates(true);
       loadAvailablePages();
-    } catch (error) {
+    } catch (error: any) {
       AppLogger.error("Error opening page selection:", {}, error as any);
       base.shopify.toast.show("Failed to open page selection", {
         isError: true,
@@ -250,7 +250,7 @@ export function usePpbPlacementHandlers({
           { isError: false, duration: 5000 },
         );
         openThemeEditorInNewTab(themeEditorUrl);
-      } catch (error) {
+      } catch (error: any) {
         const errorMessage =
           error instanceof Error ? error.message : "Unknown error";
         AppLogger.error(

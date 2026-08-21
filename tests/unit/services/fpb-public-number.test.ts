@@ -21,7 +21,7 @@ describe("createBundleWithPublicNumber", () => {
       shop: { update: shopUpdate },
       bundle: { create: bundleCreate },
     }));
-    bundleCreate.mockImplementation(async ({ data }) => ({ id: "bundle-1", ...data }));
+    bundleCreate.mockImplementation(async ({ data }: any) => ({ id: "bundle-1", ...data }));
   });
 
   it("atomically assigns the shop's next public number to an FPB", async () => {

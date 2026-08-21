@@ -400,7 +400,7 @@ function imageRadiusFromBase(basePx: number) {
 }
 
 function applyMapping(target: JsonObject, mapping: Record<string, string[]>, values: Record<string, string>) {
-  Object.entries(values).forEach(([key, value]) => {
+  Object.entries(values).forEach(([key, value]: any) => {
     mapping[key]?.forEach((path) => setPath(target, path, value));
   });
 }
@@ -472,12 +472,12 @@ export function buildSettingsDesignRuntime(payload: unknown, currentPageCustomiz
   setPath(designPatch, "generalSettings.loadingBgColor", loadingBackgroundColor);
 
   if (isExpertControlsEnabled) {
-    Object.entries(EXPERT_TARGETS).forEach(([fieldKey, paths]) => {
+    Object.entries(EXPERT_TARGETS).forEach(([fieldKey, paths]: any) => {
       const value = fieldValues[fieldKey];
       if (value === null || value === undefined || value === "") {
         return;
       }
-      paths.forEach((path) => setPath(designPatch, path, String(value)));
+      paths.forEach((path: string) => setPath(designPatch, path, String(value)));
     });
   }
 

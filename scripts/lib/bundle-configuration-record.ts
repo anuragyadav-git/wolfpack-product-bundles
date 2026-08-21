@@ -55,8 +55,8 @@ function canonicalize(value: unknown): unknown {
   if (value !== null && typeof value === "object") {
     return Object.fromEntries(
       Object.entries(value as UnknownRecord)
-        .sort(([left], [right]) => left.localeCompare(right))
-        .map(([key, child]) => [key, canonicalize(child)]),
+        .sort(([left]: any, [right]: any) => left.localeCompare(right))
+        .map(([key, child]: any) => [key, canonicalize(child)]),
     );
   }
   return value;
@@ -315,7 +315,7 @@ function collectLeaves(value: unknown, currentPath: string, target: string[]) {
   if (value !== null && typeof value === "object" && !Array.isArray(value)) {
     const entries = Object.entries(value as UnknownRecord);
     if (entries.length > 0) {
-      for (const [key, child] of entries.sort(([left], [right]) => left.localeCompare(right))) {
+      for (const [key, child] of entries.sort(([left]: any, [right]: any) => left.localeCompare(right))) {
         collectLeaves(child, `${currentPath}.${key}`, target);
       }
       return;
@@ -543,7 +543,7 @@ async function readPreviousConfiguration(directory: string): Promise<unknown | n
   let files: string[];
   try {
     files = (await readdir(directory)).filter((file) => file.endsWith(".json")).sort();
-  } catch (error) {
+  } catch (error: any) {
     if ((error as NodeJS.ErrnoException).code === "ENOENT") return null;
     throw error;
   }
@@ -638,7 +638,7 @@ export async function writeConfigurationSnapshot(input: SnapshotInput) {
       configurationHash,
       changes,
     }), { flag: "wx" });
-  } catch (error) {
+  } catch (error: any) {
     if ((error as NodeJS.ErrnoException).code === "EEXIST") {
       throw new Error(`Configuration snapshot ${stem} already exists`);
     }

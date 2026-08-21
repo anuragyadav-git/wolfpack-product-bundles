@@ -138,12 +138,15 @@ export function extractSellingPlanValidationSources(bundle: any): SellingPlanVal
     addUnique(productIds, productId);
     if (!productId) return;
     const variants = (Array.isArray(product?.variants) ? product.variants : [])
-      .map((variant) => normalizeVariantId(
-        typeof variant === "object"
-          ? variant?.id ?? variant?.variantId ?? variant?.variantGraphqlId
-          : variant,
-      ))
-      .filter((id): id is string => id !== null);
+      .map((variant: unknown) => {
+        const record = variant && typeof variant === "object"
+          ? variant as Record<string, unknown>
+          : null;
+        return normalizeVariantId(
+          record ? record.id ?? record.variantId ?? record.variantGraphqlId : variant,
+        );
+      })
+      .filter((id: string | null): id is string => id !== null);
     if (variants.length > 0) {
       variantIdsByProductId[productId] = Array.from(new Set([
         ...(variantIdsByProductId[productId] ?? []),
@@ -252,7 +255,7 @@ export function normalizeBundleSubscriptionConfig(value: unknown): BundleSubscri
           ...(text(plan.discountPill) ? { discountPill: text(plan.discountPill) } : {}),
           ...(text(plan.description) ? { description: text(plan.description) } : {}),
         }];
-      }).filter(([, plan]) => Object.keys(plan).length > 0)),
+      }).filter(([, plan]: any) => Object.keys(plan).length > 0)),
     } : {}),
   }]));
   const bundleDiscountAppliesOn = ["subscription", "one_time", "both"].includes(input.bundleDiscountAppliesOn)

@@ -72,7 +72,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
       upgraded: upgraded === "true",
       callbackError: error || null,
     });
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.error("Error loading billing page", {
       component: "app.billing",
       operation: "loader"
@@ -117,7 +117,7 @@ export async function action({ request }: ActionFunctionArgs) {
       }
 
       return json({ success: true, confirmationUrl: result.confirmationUrl });
-    } catch (error) {
+    } catch (error: any) {
       AppLogger.error("Error creating subscription", {
         component: "app.billing",
         operation: "action-upgrade"
@@ -136,7 +136,7 @@ export async function action({ request }: ActionFunctionArgs) {
       }
 
       return json({ success: true, message: "Subscription cancelled successfully" });
-    } catch (error) {
+    } catch (error: any) {
       AppLogger.error("Error cancelling subscription", {
         component: "app.billing",
         operation: "action-cancel"

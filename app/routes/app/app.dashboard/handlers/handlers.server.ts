@@ -102,7 +102,7 @@ export async function discoverSalesChannels(admin: any): Promise<Array<{ id: str
     const publicationsData = await publicationsResponse.json();
     const edges = publicationsData.data?.publications?.edges || [];
     return edges.map((edge: any) => ({ id: edge.node.id, name: edge.node.name }));
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.error('Failed to discover sales channels', { component: 'app.dashboard' }, error);
     return [];
   }
@@ -220,7 +220,7 @@ export async function handleCloneBundle(
       redirectTo: `${getBundleEditPath(clonedBundle.id, originalBundle.bundleType)}?mode=create`,
     });
 
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.error("Failed to clone bundle", { component: "app.dashboard", operation: "clone-bundle" }, error);
     return json({ error: 'Failed to clone bundle' }, { status: 500 });
   }
@@ -271,7 +271,7 @@ export async function handleDeleteBundle(
         await admin.graphql(UPDATE_PRODUCT_STATUS, {
           variables: { id: bundle.shopifyProductId }
         });
-      } catch (productError) {
+      } catch (productError: any) {
         AppLogger.error("Error updating Shopify product status",
           { component: "app.dashboard", operation: "delete-bundle" },
           productError);
@@ -287,7 +287,7 @@ export async function handleDeleteBundle(
       { component: "app.dashboard", operation: "delete-bundle", bundleId });
 
     return json({ success: true, message: "Bundle deleted successfully" });
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.error("Failed to delete bundle", { component: "app.dashboard", operation: "delete-bundle" }, error);
     return json({ success: false, error: "Failed to delete bundle" }, { status: 500 });
   }
@@ -380,7 +380,7 @@ export async function handleCreateBundle(
           requiresOneTimeSetup: widgetCheckResult.requiresOneTimeSetup,
           message: widgetCheckResult.message
         });
-      } catch (error) {
+      } catch (error: any) {
         AppLogger.warn(
           "Widget installation check failed after bundle creation",
           {
@@ -413,7 +413,7 @@ export async function handleCreateBundle(
       }
     });
 
-  } catch (error) {
+  } catch (error: any) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     AppLogger.error("Failed to create bundle", { component: "app.dashboard", operation: "create-bundle" }, error);
     return json({ error: `Failed to create bundle: ${errorMessage}` }, { status: 500 });

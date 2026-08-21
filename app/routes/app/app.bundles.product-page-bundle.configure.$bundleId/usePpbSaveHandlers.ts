@@ -245,7 +245,7 @@ export function usePpbSaveHandlers({
           : "",
       );
       const canonicalTextOverridesByLocale = Object.fromEntries(
-        Object.entries(base.textOverridesByLocale).map(([locale, values]) => [
+        Object.entries(base.textOverridesByLocale).map(([locale, values]: any) => [
           locale,
           removeLegacyPpbEmbedTextOverrides(values as Record<string, string>),
         ]),
@@ -342,7 +342,7 @@ export function usePpbSaveHandlers({
         base.fetcher.submit(validFormData, { method: "post" });
       });
       return;
-    } catch (error) {
+    } catch (error: any) {
       AppLogger.error("Save failed:", {}, error as any);
       base.shopify.toast.show(
         (error as Error).message || "Failed to save changes",

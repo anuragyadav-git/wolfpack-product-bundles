@@ -149,7 +149,7 @@ export async function ensureVariantBundleMetafieldDefinitions(admin: any): Promi
           component: "definitions.server",
         }, { key: definition.key });
       }
-    } catch (error) {
+    } catch (error: any) {
       AppLogger.error("[METAFIELD_DEF] Failed to create definition", {
         component: "definitions.server",
       }, { key: definition.key, error: error instanceof Error ? error.message : String(error) });

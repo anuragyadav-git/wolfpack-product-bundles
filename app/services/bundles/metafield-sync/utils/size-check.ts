@@ -89,7 +89,7 @@ export function safeJsonParse<T>(json: any, defaultValue: T): T {
   if (typeof json === 'string') {
     try {
       return JSON.parse(json);
-    } catch (e) {
+    } catch (e: any) {
       return defaultValue;
     }
   }

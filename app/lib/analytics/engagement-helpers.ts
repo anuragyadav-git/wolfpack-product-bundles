@@ -141,7 +141,7 @@ export function buildEngagementTrendSeries(
     bucket.uniqueBundles.add(r.bundleId);
   }
 
-  return Array.from(series.entries()).map(([date, b]) => ({
+  return Array.from(series.entries()).map(([date, b]: any) => ({
     date,
     engagements: b.engagements,
     uniqueBundles: b.uniqueBundles.size,

@@ -1,11 +1,18 @@
 import type { RefObject } from "react";
 import type { StoreFile } from "../../../routes/app/app.store-files";
 
-export type UploadStatus = "idle" | "uploading" | "polling" | "success" | "timeout" | "error";
+export type UploadStatus =
+  | "idle"
+  | "uploading"
+  | "polling"
+  | "success"
+  | "timeout"
+  | "error";
 
 export interface FilePickerProps {
   value: string | null;
   onChange: (url: string | null) => void;
+  disabled?: boolean;
   label?: string;
   hint?: string;
   uploadLabel?: string;

@@ -32,7 +32,7 @@ function form(overrides: Record<string, string> = {}) {
     JSON.stringify({ isEnabled: false, allowedQuantity: 1 }),
   );
   data.set("defaultProductsData", "{}");
-  Object.entries(overrides).forEach(([key, value]) => data.set(key, value));
+  Object.entries(overrides).forEach(([key, value]: any) => data.set(key, value));
   return data;
 }
 
@@ -86,7 +86,7 @@ describe("validateBundleConfigureFormData", () => {
       "fpb",
     );
 
-    expect(issues.map(({ path }) => path)).toEqual([
+    expect(issues.map(({ path }: any) => path)).toEqual([
       "bundle.name",
       "steps.step-1.name",
       "steps.step-1.resources",
@@ -126,7 +126,7 @@ describe("validateBundleConfigureFormData", () => {
       "ppb",
     );
 
-    expect(issues.map(({ path }) => path)).toEqual(
+    expect(issues.map(({ path }: any) => path)).toEqual(
       expect.arrayContaining([
         "steps.step-1.categories.cat-1.name",
         "steps.step-1.categories.cat-1.resources",
@@ -162,7 +162,7 @@ describe("validateBundleConfigureFormData", () => {
       "ppb",
     );
 
-    expect(issues.map(({ path }) => path)).toEqual(
+    expect(issues.map(({ path }: any) => path)).toEqual(
       expect.arrayContaining([
         "widget.title",
         "widget.buttonText",

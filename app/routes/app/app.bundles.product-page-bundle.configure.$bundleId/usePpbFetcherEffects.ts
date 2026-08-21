@@ -51,7 +51,7 @@ export function usePpbFetcherEffects({
             removeLegacyPpbEmbedTextOverrides(base.textOverrides);
           const canonicalTextOverridesByLocale = Object.fromEntries(
             Object.entries(base.textOverridesByLocale).map(
-              ([locale, values]) => [
+              ([locale, values]: any) => [
                 locale,
                 removeLegacyPpbEmbedTextOverrides(
                   values as Record<string, string>,

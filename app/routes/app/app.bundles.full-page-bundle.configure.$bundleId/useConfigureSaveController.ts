@@ -200,7 +200,7 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
         flow.fetcher.submit(validFormData, { method: "post" });
       });
       return;
-    } catch (error) {
+    } catch (error: any) {
       AppLogger.error("Save failed:", {}, error as any);
       flow.shopify.toast.show(
         (error as Error).message || "Failed to save changes",

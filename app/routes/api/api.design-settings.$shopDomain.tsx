@@ -185,7 +185,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
       // (|| fallbacks would incorrectly discard those falsy values).
       const db = designSettings as unknown as Record<string, unknown>;
       const directCols = Object.fromEntries(
-        Object.entries(db).filter(([, v]) => v !== null && v !== undefined)
+        Object.entries(db).filter(([, v]: any) => v !== null && v !== undefined)
       );
       finalSettings = {
         ...defaultSettings,
@@ -248,7 +248,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
         "Vary": "Origin",
       },
     });
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.error("Failed to generate design settings CSS", {
       component: "api.design-settings.css",
       shopDomain,

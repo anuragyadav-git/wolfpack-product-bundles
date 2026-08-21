@@ -55,7 +55,6 @@ describe("recovered admin surfaces contract", () => {
       "Popups",
       "Toasts",
       "Addons",
-      "Messages",
     ]);
     expect(LANGUAGE_CONFIGURATION.productPageTemplateSections).toEqual([
       "Product Card",
@@ -84,7 +83,6 @@ describe("recovered admin surfaces contract", () => {
       "Configuration",
       "CSS & Scripts",
       "Integrations",
-      "Advanced",
     ]);
     expect(CONTROL_LAYOUTS[1]?.tabs.map((tab) => tab.title)).toEqual([
       "Configuration",
@@ -129,7 +127,6 @@ describe("recovered admin surfaces contract", () => {
     expect(productPageCss?.fields.map((field) => field.label)).toEqual([
       "Custom CSS for Mix And Match Bundles",
       "Execute Custom Script",
-      "Selectors",
       "Side cart selector",
       "Side cart section ID",
       "Cart page items selector",
@@ -139,7 +136,6 @@ describe("recovered admin surfaces contract", () => {
     ]);
     expect(productPageCss?.fields.map((field) => field.group)).toEqual([
       "CSS",
-      "JavaScript & Selectors",
       "JavaScript & Selectors",
       "JavaScript & Selectors",
       "JavaScript & Selectors",
@@ -194,6 +190,12 @@ describe("recovered admin surfaces contract", () => {
         "Theme cart drawer",
         "GoKwik",
         "Shopflo",
+        "Zecpay",
+        "Rebuy",
+        "Shiprocket / Fastrr",
+        "Monster Cart",
+        "UpCart",
+        "Kaching Cart",
       ],
     });
 
@@ -202,7 +204,6 @@ describe("recovered admin surfaces contract", () => {
       "CSS",
       "CSS",
       "CSS",
-      "JavaScript & Selectors",
       "JavaScript & Selectors",
       "JavaScript & Selectors",
       "JavaScript & Selectors",
@@ -222,21 +223,9 @@ describe("recovered admin surfaces contract", () => {
       "Integrate with Judge Me",
     ]);
 
-    const landingAdvanced = CONTROL_LAYOUTS[0]?.tabs.find((tab) => tab.title === "Advanced");
-    expect(landingAdvanced?.contentTitle).toBe("Video Player Page Settings");
-    expect(landingAdvanced?.contentDescription).toBe("Customize the video player page of the bundle video message");
-    expect(landingAdvanced?.fields.map((field) => field.label)).toEqual([
-      "Logo",
-      "Background Color",
-      "Upload file",
-      "Update Image",
-    ]);
-    expect(landingAdvanced?.fields.map((field) => field.group)).toEqual([
-      "Video Player Page Settings",
-      "Video Player Page Settings",
-      "Video Player Page Settings",
-      "Video Player Page Settings",
-    ]);
+    expect(CONTROL_LAYOUTS[0]?.tabs.some((tab) => tab.title === "Advanced")).toBe(false);
+    expect(CONTROL_LAYOUTS.flatMap((layout) => layout.tabs.flatMap((tab) => tab.fields))
+      .every((field) => typeof field.key === "string" && field.key.length > 0)).toBe(true);
   });
 
   it("keeps the recovered integrations inventory and action types", () => {

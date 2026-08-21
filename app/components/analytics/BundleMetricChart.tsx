@@ -22,8 +22,8 @@ export interface BundleMetricChartProps {
 
 export function BundleMetricChart({ trend, formatRevenue }: BundleMetricChartProps) {
   const [metric, setMetric] = useState<BundleMetricKey>("revenueCents");
-  const choiceListRef = useRef<ChoiceListElement>(null);
-  const metricTriggerRef = useRef<HTMLElement>(null);
+  const choiceListRef = useRef<any>(null);
+  const metricTriggerRef = useRef<any>(null);
   const selected = METRICS.find(option => option.key === metric) ?? METRICS[0];
   const currencyMetric = metric === "revenueCents" || metric === "aovCents";
 
@@ -33,7 +33,7 @@ export function BundleMetricChart({ trend, formatRevenue }: BundleMetricChartPro
     const handleChange = (event: Event) => {
       const values = (event.currentTarget as ChoiceListElement).values;
       const nextMetric = values?.[0] as BundleMetricKey | undefined;
-      if (!METRICS.some(option => option.key === nextMetric)) return;
+      if (!nextMetric || !METRICS.some(option => option.key === nextMetric)) return;
       setMetric(nextMetric);
       metricTriggerRef.current?.click();
     };

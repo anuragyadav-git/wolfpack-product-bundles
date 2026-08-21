@@ -38,6 +38,20 @@ describe("Settings landing shell", () => {
     expect(view).not.toContain("<s-spinner");
   });
 
+  it("replaces the Settings cards with the shared loading bar while Controls navigation is pending", () => {
+    const view = renderToStaticMarkup(
+      React.createElement(SettingsLandingShell, {
+        onBack: jest.fn(),
+        onSelect: jest.fn(),
+        isLoadingControls: true,
+      }),
+    );
+
+    expect(view).toContain('aria-label="Loading Settings"');
+    expect(view).toContain('role="progressbar"');
+    expect(view).not.toContain("Open Controls settings");
+  });
+
   it("keeps content pending until the loading bar fill duration completes", async () => {
     jest.useFakeTimers();
     const loadingComplete = jest.fn();

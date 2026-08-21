@@ -63,7 +63,7 @@ export const safeJsonParse = (value: any, defaultValue: any = []) => {
   if (typeof value === "string") {
     try {
       return JSON.parse(value);
-    } catch (error) {
+    } catch (error: any) {
       AppLogger.error("JSON parse failed", {
         component: 'bundle-config',
         operation: 'json-parse'
@@ -180,7 +180,7 @@ export async function handleUpdateBundleProduct(admin: ShopifyAdmin, session: Se
       message: "Product details updated successfully"
     });
 
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.error("[PRODUCT_UPDATE] Error updating product:", {}, error as any);
     return json({
       success: false,
@@ -309,7 +309,7 @@ export async function handleGetThemeTemplates(admin: ShopifyAdmin, _session?: Se
       bundleContainerCount: 0
     });
 
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.error("Error fetching theme templates:", {}, error as any);
     return json({
       success: false,
@@ -454,7 +454,7 @@ export async function handleEnsureBundleTemplates(admin: ShopifyAdmin, session: 
       }
     });
 
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.error("[TEMPLATE_HANDLER] Error during template creation:", {}, error as any);
     return json({
       success: false,

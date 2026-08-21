@@ -47,6 +47,9 @@ type OfferGroup = {
   offers: CheckoutOffer[];
 };
 
+const Details = 's-details' as any;
+const Summary = 's-summary' as any;
+
 function attributeValue(line: any, key: string) {
   return line?.attributes?.find((attribute: any) => attribute.key === key)?.value;
 }
@@ -168,7 +171,7 @@ function BundleOffersExtension() {
         requestedQuantity: quantity,
         getLines: () => shopify.lines.value as unknown as OfferCartLine[],
         applyCartLinesChange: (change) => applyCartLinesChange(change),
-        requestToken: async ({offerKey, variantId, quantity: requestedQuantity}) => {
+        requestToken: async ({offerKey, variantId, quantity: requestedQuantity}: any) => {
           const authorization = await sessionToken.get();
           const response = await fetch(`${serverUrl}/api/checkout-bundle-offer-token`, {
             method: 'POST',
@@ -198,8 +201,8 @@ function BundleOffersExtension() {
   };
 
   return (
-    <s-details>
-      <s-summary slot="summary">{translate('bundleAndSave')}</s-summary>
+    <Details>
+      <Summary slot="summary">{String(translate('bundleAndSave'))}</Summary>
       <s-stack direction="block" gap="base">
         {groups.map((group) => (
           <s-section key={group.id} heading={group.name || translate('bundleOffers')}>
@@ -215,7 +218,7 @@ function BundleOffersExtension() {
                 if (state.readOnly) {
                   return (
                     <s-banner key={offer.key} tone="info" heading={offer.title}>
-                      {translate(state.reason === 'over-limit' ? 'offerOverLimitReadOnly' : 'offerMultipleVariantsReadOnly')}
+                      {String(translate(state.reason === 'over-limit' ? 'offerOverLimitReadOnly' : 'offerMultipleVariantsReadOnly'))}
                     </s-banner>
                   );
                 }
@@ -243,7 +246,7 @@ function BundleOffersExtension() {
                           void changeOffer(group, offer, value || null, value ? replacementQuantity : 0);
                         }}
                       >
-                        <s-option value="">{translate('noAddon')}</s-option>
+                        <s-option value="">{String(translate('noAddon'))}</s-option>
                         {offer.variants.map((variant) => (
                           <s-option key={variant.id} value={variant.id}>{variant.title}</s-option>
                         ))}
@@ -262,7 +265,7 @@ function BundleOffersExtension() {
                         value={String(quantity)}
                         disabled={pending}
                         onChange={(event) => {
-                          const nextQuantity = Number((event.currentTarget as HTMLInputElement).value);
+                          const nextQuantity = Number((event.currentTarget as unknown as HTMLInputElement).value);
                           void changeOffer(group, offer, selectedVariantId, nextQuantity);
                         }}
                       />
@@ -271,14 +274,14 @@ function BundleOffersExtension() {
                 );
               })}
               {getReadOnlyStatusKeys(group.config).map((status) => (
-                <s-text key={status} color="subdued">{translate(status)}</s-text>
+                <s-text key={status} color="subdued">{String(translate(status))}</s-text>
               ))}
             </s-stack>
           </s-section>
         ))}
         {error && <s-banner tone="critical">{error}</s-banner>}
       </s-stack>
-    </s-details>
+    </Details>
   );
 }
 

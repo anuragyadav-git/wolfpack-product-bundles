@@ -69,7 +69,7 @@ export function UpgradeSuccessBanner({
         </s-stack>
 
         <s-stack direction="inline" gap="base">
-          {stats.map(({ label, value }) => (
+          {stats.map(({ label, value }: any) => (
             <div
               key={label}
               style={{

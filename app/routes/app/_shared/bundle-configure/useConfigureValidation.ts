@@ -66,7 +66,7 @@ export function useConfigureValidation({
 
   const setServerFieldErrors = useCallback(
     (fieldErrors: Array<{ path: string; message: string }>) => {
-      const issues = fieldErrors.map(({ path, message }) => ({
+      const issues = fieldErrors.map(({ path, message }: any) => ({
         path,
         message,
         section: sectionForPath(path),

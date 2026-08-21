@@ -71,7 +71,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
       return new Response(null, { status: 304, headers });
     }
     return json(payload, { headers });
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof Response) throw error;
     AppLogger.error(
       "Failed to resolve PPB product-page embed",

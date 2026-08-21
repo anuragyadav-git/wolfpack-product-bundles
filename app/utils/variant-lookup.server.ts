@@ -110,7 +110,7 @@ export async function batchGetFirstVariants(
     console.log(`[BATCH_VARIANT_LOOKUP] Successfully fetched ${results.size} variant results`);
 
     return results;
-  } catch (error) {
+  } catch (error: any) {
     console.error('[BATCH_VARIANT_LOOKUP] Error:', error);
     productIds.forEach(id => {
       const cleanId = id.replace('gid://shopify/Product/', '');
@@ -225,7 +225,7 @@ export async function batchGetProductVariants(
     console.log(`[BATCH_VARIANT_LOOKUP_ALL] Successfully fetched ${results.size} variant result sets`);
 
     return results;
-  } catch (error) {
+  } catch (error: any) {
     console.error('[BATCH_VARIANT_LOOKUP_ALL] Error:', error);
     productIds.forEach(id => {
       const cleanId = id.replace('gid://shopify/Product/', '');
@@ -358,7 +358,7 @@ export async function batchGetFirstVariantsWithPrices(
     console.log(`[BATCH_VARIANT_LOOKUP_PRICES] Successfully fetched ${results.size} variant results with prices`);
 
     return results;
-  } catch (error) {
+  } catch (error: any) {
     console.error('[BATCH_VARIANT_LOOKUP_PRICES] Error:', error);
     productIds.forEach(id => {
       const cleanId = id.replace('gid://shopify/Product/', '');
@@ -422,7 +422,7 @@ export async function getFirstVariantId(
     const errorMsg = `Product not found in Shopify (may have been deleted)`;
     console.error(`❌ [VARIANT_LOOKUP] ${errorMsg} - Product ID: ${productId}`);
     return { success: false, error: errorMsg, productId: cleanProductId };
-  } catch (error) {
+  } catch (error: any) {
     const errorMsg = error instanceof Error ? error.message : String(error);
     console.error(`❌ [VARIANT_LOOKUP] GraphQL error for product ${productId}:`, errorMsg);
     return { success: false, error: `API error: ${errorMsg}`, productId: productId.replace('gid://shopify/Product/', '') };
@@ -461,7 +461,7 @@ export async function getBundleProductVariantId(admin: any, shopifyProductId: st
 
     console.log(`🔍 [VARIANT_LOOKUP] Product ${shopifyProductId} → Variant ${variantId}`);
     return variantId || null;
-  } catch (error) {
+  } catch (error: any) {
     console.error(`❌ [VARIANT_LOOKUP] Failed to get variant for product ${shopifyProductId}:`, error);
     return null;
   }

@@ -286,7 +286,7 @@ function deriveCommonGroups(products: Awaited<ReturnType<typeof fetchProductsWit
     }
   }
   return Array.from(common.values())
-    .map(({ eligibleVariantIds: _eligibleVariantIds, ...group }) => ({
+    .map(({ eligibleVariantIds: _eligibleVariantIds, ...group }: any) => ({
       ...group,
       plans: [...group.plans].sort((left, right) => left.position - right.position || left.id.localeCompare(right.id)),
     }))

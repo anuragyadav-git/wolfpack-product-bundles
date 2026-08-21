@@ -86,7 +86,7 @@ export async function fetchBundleProduct(
     });
     const data = await response.json();
     return data.data?.product ?? null;
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.warn("Failed to fetch bundle product", {
       component: "bundle-config",
       bundleId,
@@ -127,7 +127,7 @@ export async function fetchShopLocales(
     };
     return (data.data?.shopLocales ?? [])
       .filter((locale) => locale.published)
-      .map(({ locale, name, primary }) => ({ locale, name, primary }));
+      .map(({ locale, name, primary }: any) => ({ locale, name, primary }));
   } catch {
     return [];
   }

@@ -60,7 +60,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
         ? transforms.filter((e: any) => e.node.functionId !== rustFunctionId).map((e: any) => e.node.id)
         : []
     });
-  } catch (error) {
+  } catch (error: any) {
     return json({
       error: "Failed to check cart transform status",
       activated: false

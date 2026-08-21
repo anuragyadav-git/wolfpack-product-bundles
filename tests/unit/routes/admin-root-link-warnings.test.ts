@@ -108,7 +108,7 @@ describe("admin root link warnings", () => {
 
   it("preloads only first-render dashboard media with React-safe responsive image attributes", async () => {
     const { headers, links } = await import("../../../app/routes/app/app.dashboard/route");
-    const preloads = links().filter((link) => link.rel === "preload");
+    const preloads = links().filter((link) => (link as any).rel === "preload");
 
     expect(preloads).toHaveLength(1);
     expect(preloads[0]).toMatchObject({

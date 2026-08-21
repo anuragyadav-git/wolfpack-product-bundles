@@ -74,7 +74,7 @@ export function normalizePpbBundleEmbedConfig(
   const display = record(upsell.displayConfiguration);
   const translations = record(root.multiLangText);
   const multiLangText = Object.fromEntries(
-    Object.entries(translations).flatMap(([locale, rawEntry]) => {
+    Object.entries(translations).flatMap(([locale, rawEntry]: any) => {
       const localized = record(record(rawEntry).upsellConfiguration);
       if (!locale.trim() || Object.keys(localized).length === 0) return [];
       const entry: { title?: string; subTitle?: string } = {};
@@ -108,7 +108,7 @@ export function removeLegacyPpbEmbedTextOverrides<T>(
 ): Record<string, T> {
   return Object.fromEntries(
     Object.entries(overrides).filter(
-      ([key]) => !LEGACY_EMBED_OVERRIDE_KEYS.has(key),
+      ([key]: any) => !LEGACY_EMBED_OVERRIDE_KEYS.has(key),
     ),
   );
 }

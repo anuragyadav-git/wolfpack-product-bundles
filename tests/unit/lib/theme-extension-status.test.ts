@@ -14,7 +14,7 @@ describe("theme extension status normalization", () => {
       ]),
     );
     expect(
-      THEME_EXTENSION_RESOURCES.some(({ handle }) =>
+      THEME_EXTENSION_RESOURCES.some(({ handle }: any) =>
         ["bundle-upsell-button", "bundle-upsell-block"].includes(handle),
       ),
     ).toBe(false);

@@ -1,4 +1,5 @@
 import { DefaultProductDiscountTipBanner } from "../_shared/bundle-configure/DefaultProductDiscountTipBanner";
+import { DisabledConfigurationRegion } from "../_shared/bundle-configure/DisabledConfigurationRegion";
 import { usePpbConfigureContext } from "./PpbConfigureContext";
 
 type DefaultProductSelection = {
@@ -30,7 +31,7 @@ export function PpbDefaultProductsSettings() {
   const defaultProductSelectionIds = selectedDefaultProducts
     .map(
       (product: DefaultProductSelection) =>
-        product.graphqlId || product.productId || product.id,
+        product.graphqlId || product.productId || product.id
     )
     .filter(isString)
     .map((id: string) => ({ id }));
@@ -47,10 +48,10 @@ export function PpbDefaultProductsSettings() {
       .map(buildDefaultProductEntryFromPicker)
       .filter(
         (
-          product: ReturnType<typeof buildDefaultProductEntryFromPicker>,
+          product: ReturnType<typeof buildDefaultProductEntryFromPicker>
         ): product is NonNullable<
           ReturnType<typeof buildDefaultProductEntryFromPicker>
-        > => Boolean(product),
+        > => Boolean(product)
       );
     setDefaultProductsData((prev) => ({
       isDefaultProductsEnabled: true,
@@ -85,42 +86,51 @@ export function PpbDefaultProductsSettings() {
             />
           </span>
         </div>
-        <DefaultProductDiscountTipBanner />
-        <s-text-field
-          label="Default products title"
-          value={defaultProductsData.defaultProductsTitle ?? ""}
-          onInput={(e) => {
-            const value = (e.target as HTMLInputElement).value;
-            setDefaultProductsData((prev) => ({
-              ...prev,
-              defaultProductsTitle: value,
-            }));
-            markAsDirty();
-          }}
-          autocomplete="off"
-        />
-        <div className={productPageBundleStyles.defaultProductsPickerGroup}>
-          <p style={{ margin: 0, fontSize: 13, fontWeight: 600 }}>
-            Choose default products
-          </p>
-          <div className={productPageBundleStyles.defaultProductsPickerActions}>
-            <s-button
-              variant={defaultProductsEnabled ? "primary" : "secondary"}
+        <DisabledConfigurationRegion disabled={!defaultProductsEnabled}>
+          <s-stack direction="block" gap="small">
+            <DefaultProductDiscountTipBanner />
+            <s-text-field
+              label="Default products title"
+              value={defaultProductsData.defaultProductsTitle ?? ""}
               disabled={!defaultProductsEnabled || undefined}
-              onClick={handleDefaultProductPicker}
-            >
-              Browse Products
-            </s-button>
-            {defaultProductCount > 0 && (
-              <s-badge tone="success">{defaultProductCount} selected</s-badge>
-            )}
-          </div>
-          {validationErrors["settings.defaultProducts"] && (
-            <s-text id="configure-settings-defaultProducts" tone="critical">
-              {validationErrors["settings.defaultProducts"]}
-            </s-text>
-          )}
-        </div>
+              onInput={(e) => {
+                const value = (e.target as HTMLInputElement).value;
+                setDefaultProductsData((prev) => ({
+                  ...prev,
+                  defaultProductsTitle: value,
+                }));
+                markAsDirty();
+              }}
+              autocomplete="off"
+            />
+            <div className={productPageBundleStyles.defaultProductsPickerGroup}>
+              <p style={{ margin: 0, fontSize: 13, fontWeight: 600 }}>
+                Choose default products
+              </p>
+              <div
+                className={productPageBundleStyles.defaultProductsPickerActions}
+              >
+                <s-button
+                  variant={defaultProductsEnabled ? "primary" : "secondary"}
+                  disabled={!defaultProductsEnabled || undefined}
+                  onClick={handleDefaultProductPicker}
+                >
+                  Browse Products
+                </s-button>
+                {defaultProductCount > 0 && (
+                  <s-badge tone="success">
+                    {defaultProductCount} selected
+                  </s-badge>
+                )}
+              </div>
+              {validationErrors["settings.defaultProducts"] && (
+                <s-text id="configure-settings-defaultProducts" tone="critical">
+                  {validationErrors["settings.defaultProducts"]}
+                </s-text>
+              )}
+            </div>
+          </s-stack>
+        </DisabledConfigurationRegion>
       </s-stack>
     </s-section>
   );

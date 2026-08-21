@@ -144,7 +144,7 @@ export function usePpbMultiLanguageHandlers({
     }
     if (multiLanguageTarget?.type === "embed") {
       return Object.fromEntries(
-        Object.entries(bundleEmbedMultiLangText).map(([locale, entry]) => [
+        Object.entries(bundleEmbedMultiLangText).map(([locale, entry]: any) => [
           locale,
           entry.upsellConfiguration ?? {},
         ]),
@@ -191,7 +191,7 @@ export function usePpbMultiLanguageHandlers({
       if (multiLanguageTarget?.type === "embed") {
         setBundleEmbedMultiLangText(
           Object.fromEntries(
-            Object.entries(nextValues).map(([locale, values]) => [
+            Object.entries(nextValues).map(([locale, values]: any) => [
               locale,
               {
                 upsellConfiguration: {

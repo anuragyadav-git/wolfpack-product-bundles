@@ -118,7 +118,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       deletedMetafields: data.data?.metafieldsDelete?.deletedMetafields || []
     });
 
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.error('Error during metafield cleanup', {
       component: 'metafield-cleanup',
       operation: 'cleanup'

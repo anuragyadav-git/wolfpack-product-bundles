@@ -59,7 +59,7 @@ export function PpbUtilityModals() {
             replaces them with live bundle and discount values.
           </p>
           <div className={productPageBundleStyles.templateVariableGrid}>
-            {ADDON_TEMPLATE_VARIABLES.map(([variable, description]) => (
+            {ADDON_TEMPLATE_VARIABLES.map(([variable, description]: any) => (
               <div
                 key={variable}
                 className={productPageBundleStyles.templateVariableItem}
@@ -87,7 +87,7 @@ export function PpbUtilityModals() {
         size="base"
       >
         <div>
-          {DISCOUNT_TEMPLATE_VARIABLES.map(([variable, description], index) => (
+          {DISCOUNT_TEMPLATE_VARIABLES.map(([variable, description]: any, index) => (
             <div key={variable}>
               {index > 0 && <s-divider />}
               <div className={productPageBundleStyles.discountVariableRow}>

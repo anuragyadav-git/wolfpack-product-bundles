@@ -56,7 +56,7 @@ export async function recordFirstBundlePreviewEvent({
     });
 
     return true;
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.warn("Failed to record first bundle preview event", {
       component: "bundle-preview-event",
       operation: "record-first-preview",

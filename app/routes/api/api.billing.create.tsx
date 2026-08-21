@@ -126,7 +126,7 @@ export async function action({ request }: ActionFunctionArgs) {
       subscriptionId: result.subscriptionId
     });
 
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.error("Error creating subscription", {
       component: "api.billing.create",
       operation: "action"

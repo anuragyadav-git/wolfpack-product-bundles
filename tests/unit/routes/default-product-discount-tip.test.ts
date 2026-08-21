@@ -34,7 +34,7 @@ jest.mock(
   "../../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/PpbConfigureContext",
   () => ({
     usePpbConfigureContext: () => mockUsePpbConfigureContext(),
-  }),
+  })
 );
 
 const baseFlow = {
@@ -75,25 +75,50 @@ describe("Pre Selected Product discount tip with session state", () => {
   });
 
   it("renders the shared banner when not dismissed in session", () => {
-    const view = renderToStaticMarkup(React.createElement(DefaultProductDiscountTipBanner));
+    const view = renderToStaticMarkup(
+      React.createElement(DefaultProductDiscountTipBanner)
+    );
     expect(view).toContain("s-banner");
     expect(view).toContain("Discount tip");
-    expect(isBannerDismissedInSession(DEFAULT_PRODUCT_DISCOUNT_TIP_BANNER_KEY)).toBe(false);
+    expect(
+      isBannerDismissedInSession(DEFAULT_PRODUCT_DISCOUNT_TIP_BANNER_KEY)
+    ).toBe(false);
   });
 
   it.each([
     ["FPB", () => FpbDefaultProductsSettings({ flow: baseFlow as any })],
     ["PPB", () => PpbDefaultProductsSettings()],
-  ])("renders in %s parent section when not dismissed in session", (_, render) => {
-    const view = renderToStaticMarkup(render());
-    expect(view).toContain("Discount tip");
-  });
+  ])(
+    "renders in %s parent section when not dismissed in session",
+    (_, render) => {
+      const view = renderToStaticMarkup(render());
+      expect(view).toContain("Discount tip");
+    }
+  );
+
+  it.each([
+    ["FPB", () => FpbDefaultProductsSettings({ flow: baseFlow as any })],
+    ["PPB", () => PpbDefaultProductsSettings()],
+  ])(
+    "keeps configured controls visible and inert in disabled %s state",
+    (_, render) => {
+      const view = renderToStaticMarkup(render());
+
+      expect(view).toContain("Default products title");
+      expect(view).toContain('aria-disabled="true"');
+      expect(view).toContain('disabled="true"');
+    }
+  );
 
   it("persists dismissal in session storage and hides on reload", () => {
     dismissBannerInSession(DEFAULT_PRODUCT_DISCOUNT_TIP_BANNER_KEY);
-    expect(isBannerDismissedInSession(DEFAULT_PRODUCT_DISCOUNT_TIP_BANNER_KEY)).toBe(true);
+    expect(
+      isBannerDismissedInSession(DEFAULT_PRODUCT_DISCOUNT_TIP_BANNER_KEY)
+    ).toBe(true);
 
-    const view = renderToStaticMarkup(React.createElement(DefaultProductDiscountTipBanner));
+    const view = renderToStaticMarkup(
+      React.createElement(DefaultProductDiscountTipBanner)
+    );
     expect(view).toBe("");
   });
 });

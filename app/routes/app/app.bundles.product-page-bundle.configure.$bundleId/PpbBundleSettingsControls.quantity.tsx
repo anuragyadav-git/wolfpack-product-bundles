@@ -1,4 +1,5 @@
 import { usePpbConfigureContext } from "./PpbConfigureContext";
+import { DisabledConfigurationRegion } from "../_shared/bundle-configure/DisabledConfigurationRegion";
 
 export function PpbQuantitySettings() {
   const {
@@ -28,28 +29,30 @@ export function PpbQuantitySettings() {
               checked={quantityValidationEnabled || undefined}
               onChange={(e) => {
                 setQuantityValidationEnabled(
-                  (e.target as HTMLInputElement).checked,
+                  (e.target as HTMLInputElement).checked
                 );
                 markAsDirty();
               }}
             />
           </span>
         </div>
-        <s-number-field
-          id="configure-settings-maxQuantity"
-          label="Maximum allowed quantity per product"
-          required={quantityValidationEnabled || undefined}
-          error={validationErrors["settings.maxQuantity"]}
-          min={1}
-          value={maxQtyPerProduct || "1"}
-          disabled={!quantityValidationEnabled}
-          onInput={(e) => {
-            setMaxQtyPerProduct((e.target as HTMLInputElement).value);
-            markAsDirty();
-            clearValidationError("settings.maxQuantity");
-          }}
-          autocomplete="off"
-        />
+        <DisabledConfigurationRegion disabled={!quantityValidationEnabled}>
+          <s-number-field
+            id="configure-settings-maxQuantity"
+            label="Maximum allowed quantity per product"
+            required={quantityValidationEnabled || undefined}
+            error={validationErrors["settings.maxQuantity"]}
+            min={1}
+            value={maxQtyPerProduct || "1"}
+            disabled={!quantityValidationEnabled}
+            onInput={(e) => {
+              setMaxQtyPerProduct((e.target as HTMLInputElement).value);
+              markAsDirty();
+              clearValidationError("settings.maxQuantity");
+            }}
+            autocomplete="off"
+          />
+        </DisabledConfigurationRegion>
         <div className={productPageBundleStyles.settingTitleRow}>
           <div>
             <h3 className={productPageBundleStyles.settingTitle}>
@@ -67,7 +70,7 @@ export function PpbQuantitySettings() {
               checked={variantSelectorEnabled || undefined}
               onChange={(e) => {
                 setVariantSelectorEnabled(
-                  (e.target as HTMLInputElement).checked,
+                  (e.target as HTMLInputElement).checked
                 );
                 markAsDirty();
               }}

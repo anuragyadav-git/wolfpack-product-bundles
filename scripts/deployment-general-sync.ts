@@ -22,7 +22,7 @@ async function main() {
       ensureMetafieldDefinitions: (admin) =>
         ensureVariantBundleMetafieldDefinitions(admin),
       syncBundle: syncBundleStorefrontNow as any,
-      updateStepProductVariants: async ({ stepProductId, variants }) => {
+      updateStepProductVariants: async ({ stepProductId, variants }: any) => {
         await db.stepProduct.update({
           where: { id: stepProductId },
           data: { variants: variants as any },

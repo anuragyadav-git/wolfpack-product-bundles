@@ -273,7 +273,7 @@ export async function updateBundleProductMetafields(
               handle,
               count: collProductEdges.length,
             });
-          } catch (collError) {
+          } catch (collError: any) {
             AppLogger.warn("Could not fetch products from collection", {
               component: "metafield-sync",
               operation: "updateBundleProductMetafields",

@@ -269,7 +269,7 @@ export async function handleSubscriptionUpdate(
       message: `Subscription updated to ${mappedStatus}`
     };
 
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.error("Error handling subscription update", {
       component: "webhook-processor",
       operation: "handleSubscriptionUpdate"
@@ -499,7 +499,7 @@ export async function handleSubscriptionCancelled(
       message: "Subscription cancelled and downgraded to free plan"
     };
 
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.error("Error handling subscription cancellation", {
       component: "webhook-processor",
       operation: "handleSubscriptionCancelled"
@@ -557,7 +557,7 @@ export async function handleSubscriptionApproachingCap(
       message: "Approaching capped amount event logged"
     };
 
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.error("Error handling approaching capped amount", {
       component: "webhook-processor",
       operation: "handleSubscriptionApproachingCap"
@@ -595,7 +595,7 @@ export async function handlePurchaseUpdate(
       message: `One-time purchase update processed: ${status}`
     };
 
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.error("Error handling purchase update", {
       component: "webhook-processor",
       operation: "handlePurchaseUpdate"

@@ -1,4 +1,5 @@
 import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
+import { DisabledConfigurationRegion } from "../../_shared/bundle-configure/DisabledConfigurationRegion";
 
 export function FpbBundleQuantityOptions({
   flow,
@@ -45,7 +46,7 @@ export function FpbBundleQuantityOptions({
                 disabled={!bundleQuantityOptionsEligible || undefined}
                 onChange={(e) =>
                   pricingState.setBundleQuantityOptionsEnabled(
-                    (e.target as HTMLInputElement).checked,
+                    (e.target as HTMLInputElement).checked
                   )
                 }
               />
@@ -68,7 +69,12 @@ export function FpbBundleQuantityOptions({
             <strong>Note:</strong> Bundle Quantity Options can only be enabled
             when discount rules are based on quantity.
           </p>
-          {pricingState.pricingDisplayOptions.bundleQuantityOptions.enabled && (
+          <DisabledConfigurationRegion
+            disabled={
+              !pricingState.pricingDisplayOptions.bundleQuantityOptions
+                .enabled || !bundleQuantityOptionsEligible
+            }
+          >
             <div className={fullPageBundleStyles.nestedDisplayOptions}>
               <s-stack direction="block" gap="small">
                 {normalizedPricingDisplayOptions.bundleQuantityOptions.options
@@ -113,7 +119,7 @@ export function FpbBundleQuantityOptions({
                               accessibilityLabel="Make this rule default"
                               onClick={() =>
                                 pricingState.setBundleQuantityDefaultRule(
-                                  option.ruleId,
+                                  option.ruleId
                                 )
                               }
                             >
@@ -145,7 +151,7 @@ export function FpbBundleQuantityOptions({
                                   option.ruleId,
                                   {
                                     label: (e.target as HTMLInputElement).value,
-                                  },
+                                  }
                                 )
                               }
                               autocomplete="off"
@@ -159,7 +165,7 @@ export function FpbBundleQuantityOptions({
                                   {
                                     subtext: (e.target as HTMLInputElement)
                                       .value,
-                                  },
+                                  }
                                 )
                               }
                               autocomplete="off"
@@ -167,12 +173,12 @@ export function FpbBundleQuantityOptions({
                           </s-stack>
                         </s-stack>
                       </div>
-                    ),
+                    )
                   )
                 )}
               </s-stack>
             </div>
-          )}
+          </DisabledConfigurationRegion>
         </div>
       )}
     </>

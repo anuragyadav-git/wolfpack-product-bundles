@@ -33,7 +33,7 @@ function fillTemplate(
   values: Record<string, string | number>,
 ): string {
   return Object.entries(values).reduce(
-    (result, [key, value]) =>
+    (result, [key, value]: any) =>
       result.replaceAll(`{${key}}`, String(value)),
     template,
   );
@@ -211,7 +211,7 @@ export function applyProgressTierRuleUpdate({
 
   const nextLocalized = Object.fromEntries(
     Object.entries(state.tierTextByLocaleByRuleId).map(
-      ([locale, localizedRules]) => {
+      ([locale, localizedRules]: any) => {
         const localizedRule = localizedRules[rule.id];
         if (!localizedRule) return [locale, localizedRules];
         const nextLocalizedRule = { ...localizedRule };
@@ -244,7 +244,7 @@ export function removeProgressTierRule(
 
   const tierTextByLocaleByRuleId = Object.fromEntries(
     Object.entries(state.tierTextByLocaleByRuleId).map(
-      ([locale, localizedRules]) => {
+      ([locale, localizedRules]: any) => {
         const nextRules = { ...localizedRules };
         delete nextRules[ruleId];
         return [locale, nextRules];

@@ -9,6 +9,26 @@
  */
 
 declare global {
+  interface Window {
+    Shopify: any;
+    Shopflo: any;
+    __BUNDLE_APP_URL__: string;
+    __WPB_BUNDLE_BUTTON_SELECTORS__: {
+      addToCartButtons: string;
+      buyNowButton: string;
+    };
+    __WOLFPACK_PPB_TEMPLATE_CSS_URLS__: Record<string, string | undefined>;
+    __bsHelpers: any;
+    autoDetectedBundleId: string | null;
+    currentProductCollections: unknown[];
+    currentProductGid: string | null;
+    currentProductHandle: string | null;
+    currentProductId: string | number | null;
+    gokwikSdk: any;
+    isThemeEditorContext: boolean;
+    shopMoneyFormat: string;
+  }
+
   namespace NodeJS {
     interface ProcessEnv {
       // Database Configuration
@@ -57,6 +77,12 @@ declare global {
       /** Optional Mantle API URL override */
       MANTLE_API_URL?: string;
     }
+  }
+}
+
+declare module "react" {
+  interface HTMLAttributes<T> {
+    inert?: string;
   }
 }
 

@@ -425,7 +425,7 @@ export function validateBundleConfigureFormData(
         ),
       }),
     ];
-    issues.push(...subscriptionIssues.map(({ path, message }) =>
+    issues.push(...subscriptionIssues.map(({ path, message }: any) =>
       issue(path, message, "subscriptions")));
   }
   return issues;
@@ -434,14 +434,14 @@ export function validateBundleConfigureFormData(
 export function getConfigureFieldErrorMap(
   issues: ConfigureValidationIssue[],
 ): Record<string, string> {
-  return Object.fromEntries(issues.map(({ path, message }) => [path, message]));
+  return Object.fromEntries(issues.map(({ path, message }: any) => [path, message]));
 }
 
 export function configureValidationFailure(issues: ConfigureValidationIssue[]) {
   return {
     success: false as const,
     error: "Fix the highlighted fields before saving.",
-    fieldErrors: issues.map(({ path, message }) => ({ path, message })),
+    fieldErrors: issues.map(({ path, message }: any) => ({ path, message })),
   };
 }
 

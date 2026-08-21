@@ -140,7 +140,7 @@ export function useBundleSteps({ initialSteps, shopify, onStateChange }: UseBund
         }));
         shopify.toast.show("All collections removed", { isError: false });
       }
-    } catch (error) {
+    } catch (error: any) {
       const errorMessage = typeof error === 'string' ? error :
         (error && typeof error === 'object' && 'message' in error) ? (error as { message: string }).message : '';
 

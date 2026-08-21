@@ -59,7 +59,7 @@ export async function handleAppUninstalled(
       await db.designSettings.deleteMany({
         where: { shopId: shopDomain },
       });
-    } catch (e) {
+    } catch (e: any) {
       // Non-critical - log and continue
       AppLogger.warn("Failed to delete design settings", {
         component: "webhook-processor",
@@ -72,7 +72,7 @@ export async function handleAppUninstalled(
       await db.queuedJob.deleteMany({
         where: { shopId: shopDomain },
       });
-    } catch (e) {
+    } catch (e: any) {
       AppLogger.warn("Failed to delete queued jobs", {
         component: "webhook-processor",
         operation: "handleAppUninstalled",
@@ -84,7 +84,7 @@ export async function handleAppUninstalled(
       await db.complianceRecord.deleteMany({
         where: { shop: shopDomain },
       });
-    } catch (e) {
+    } catch (e: any) {
       AppLogger.warn("Failed to delete compliance records", {
         component: "webhook-processor",
         operation: "handleAppUninstalled",
@@ -99,7 +99,7 @@ export async function handleAppUninstalled(
           ...(currentWebhookEventId ? { id: { not: currentWebhookEventId } } : {})
         },
       });
-    } catch (e) {
+    } catch (e: any) {
       AppLogger.warn("Failed to delete webhook events", {
         component: "webhook-processor",
         operation: "handleAppUninstalled",
@@ -113,7 +113,7 @@ export async function handleAppUninstalled(
       await db.businessEvent.deleteMany({
         where: { shopDomain },
       });
-    } catch (e) {
+    } catch (e: any) {
       AppLogger.warn("Failed to delete business events", {
         component: "webhook-processor",
         operation: "handleAppUninstalled",
@@ -125,7 +125,7 @@ export async function handleAppUninstalled(
       await db.shop.deleteMany({
         where: { shopDomain },
       });
-    } catch (e) {
+    } catch (e: any) {
       AppLogger.warn("Failed to delete shop record", {
         component: "webhook-processor",
         operation: "handleAppUninstalled",
@@ -154,7 +154,7 @@ export async function handleAppUninstalled(
       success: true,
       message: `App uninstalled, cleaned up ${deletedBundles.count} bundles and all shop data`,
     };
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.error("Error handling app uninstall", {
       component: "webhook-processor",
       operation: "handleAppUninstalled",
@@ -217,7 +217,7 @@ export async function handleScopesUpdate(
       success: true,
       message: `Updated ${updated.count} session scopes`,
     };
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.error("Error handling scopes update", {
       component: "webhook-processor",
       operation: "handleScopesUpdate",

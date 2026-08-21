@@ -1,4 +1,5 @@
 import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
+import { DisabledConfigurationRegion } from "../../_shared/bundle-configure/DisabledConfigurationRegion";
 
 export function FpbSummaryTextSettings({
   flow,
@@ -47,21 +48,16 @@ export function FpbSummaryTextSettings({
               onChange={(e) => {
                 const enabled = (e.target as HTMLInputElement).checked;
                 setShowTextOnAddButton(enabled);
-                if (!enabled) {
-                  setTextOverrides((prev) => ({
-                    ...prev,
-                    addToCartButton: "",
-                  }));
-                }
                 markAsDirty();
               }}
             />
           </SettingsRow>
-          {showTextOnAddButton && (
+          <DisabledConfigurationRegion disabled={!showTextOnAddButton}>
             <s-stack direction="inline" gap="small" alignItems="end">
               <s-text-field
                 label="Button text"
                 value={textOverrides.addToCartButton ?? ""}
+                disabled={!showTextOnAddButton || undefined}
                 placeholder="Add to Cart"
                 autocomplete="off"
                 onInput={(e) => {
@@ -75,6 +71,7 @@ export function FpbSummaryTextSettings({
               <s-button
                 variant="secondary"
                 icon="language-translate"
+                disabled={!showTextOnAddButton || undefined}
                 onClick={() =>
                   openMultiLanguageModal("Add Button Text", [
                     {
@@ -88,7 +85,7 @@ export function FpbSummaryTextSettings({
                 Multi Language
               </s-button>
             </s-stack>
-          )}
+          </DisabledConfigurationRegion>
         </s-stack>
       </s-section>
       {/* Bundle Cart */}

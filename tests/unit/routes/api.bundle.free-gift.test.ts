@@ -53,7 +53,7 @@ function makeRequest(bundleId: string, fields?: string, extraHeaders: Record<str
   if (fields) params.set('fields', fields);
   // Compute HMAC so verifyAppProxyRequest() passes (uses SHOPIFY_API_SECRET from setup.ts)
   const message = [...params.entries()]
-    .map(([k, v]) => `${k}=${v}`)
+    .map(([k, v]: any) => `${k}=${v}`)
     .sort()
     .join('');
   const signature = createHmac('sha256', 'test_api_secret').update(message).digest('hex');

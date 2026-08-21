@@ -198,7 +198,7 @@ export async function createProductPageRedirect(
         target,
       });
     }
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.warn(
       "[URL_REDIRECT] Failed to create product page redirect (non-fatal)",
       {

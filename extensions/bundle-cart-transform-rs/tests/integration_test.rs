@@ -856,6 +856,11 @@ mod tests {
                 "amount": "$10.00",
                 "percentage": "33.33%",
                 "amountPercentage": "$10.00 (33.33%)"
+            },
+            "labels": {
+                "items": "Articles",
+                "retailPrice": "Prix normal",
+                "youSave": "Économie"
             }
         })
         .to_string();
@@ -907,15 +912,15 @@ mod tests {
 
         let attributes = merge_attributes(&output);
         assert_eq!(
-            attributes.get("Items").map(String::as_str),
+            attributes.get("Articles").map(String::as_str),
             Some("3 x Widget")
         );
         assert_eq!(
-            attributes.get("Retail Price").map(String::as_str),
+            attributes.get("Prix normal").map(String::as_str),
             Some("$30.00")
         );
         assert_eq!(
-            attributes.get("You Save").map(String::as_str),
+            attributes.get("Économie").map(String::as_str),
             Some("$10.00 (33.33%)")
         );
     }
@@ -1552,7 +1557,6 @@ mod tests {
                 .map(String::as_str),
             Some("5000")
         );
-
         let line_update = output
             .operations
             .iter()

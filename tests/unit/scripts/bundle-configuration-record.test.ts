@@ -215,7 +215,7 @@ describe("bundle configuration record", () => {
     const normalized = normalizeFpbConfiguration(makeBundle());
 
     expect(normalized.presentation.loadingAnimation).toBeNull();
-    expect(normalized.presentation.floatingBadge.enabled).toBe(false);
+    expect((normalized.presentation.floatingBadge as any).enabled).toBe(false);
     expect(normalized.defaults.products).toEqual({});
     expect(normalized.steps[0].filters).toEqual([]);
   });

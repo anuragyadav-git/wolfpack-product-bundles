@@ -46,7 +46,7 @@ export function AppRouteLoadingWorkspace() {
         role="status"
         aria-live="polite"
       >
-        <s-heading className={styles.routeLoadingWorkspaceMessage}>
+        <s-heading {...({ className: styles.routeLoadingWorkspaceMessage } as any)}>
           {t("common.loading.workspace")}
         </s-heading>
       </main>

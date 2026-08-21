@@ -4,7 +4,7 @@ describe('FullPageWidgetInitialization', () => {
   it('claims an idle container synchronously', () => {
     const container = { dataset: {} as Record<string, string> };
 
-    expect(claimFullPageWidgetInitialization(container)).toBe(true);
+    expect(claimFullPageWidgetInitialization(container as unknown as HTMLElement)).toBe(true);
     expect(container.dataset.initializing).toBe('true');
   });
 
@@ -13,7 +13,7 @@ describe('FullPageWidgetInitialization', () => {
       dataset: { initializing: 'true' } as Record<string, string>,
     };
 
-    expect(claimFullPageWidgetInitialization(container)).toBe(false);
+    expect(claimFullPageWidgetInitialization(container as unknown as HTMLElement)).toBe(false);
   });
 
   it('rejects a claim after initialization completes', () => {
@@ -21,7 +21,7 @@ describe('FullPageWidgetInitialization', () => {
       dataset: { initialized: 'true' } as Record<string, string>,
     };
 
-    expect(claimFullPageWidgetInitialization(container)).toBe(false);
+    expect(claimFullPageWidgetInitialization(container as unknown as HTMLElement)).toBe(false);
   });
 
   it('allows retry after a failed initialization releases its claim', () => {
@@ -31,6 +31,6 @@ describe('FullPageWidgetInitialization', () => {
 
     delete container.dataset.initializing;
 
-    expect(claimFullPageWidgetInitialization(container)).toBe(true);
+    expect(claimFullPageWidgetInitialization(container as unknown as HTMLElement)).toBe(true);
   });
 });

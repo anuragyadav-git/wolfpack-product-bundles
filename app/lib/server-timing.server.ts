@@ -49,7 +49,7 @@ export class ServerTiming {
         description,
       });
       return result;
-    } catch (error) {
+    } catch (error: any) {
       // Record the duration even on failure so slowness is visible regardless of outcome.
       this.entries.push({
         name: `${name}.err`,

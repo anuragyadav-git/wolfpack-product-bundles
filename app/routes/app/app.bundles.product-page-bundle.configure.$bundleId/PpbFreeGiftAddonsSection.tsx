@@ -1,5 +1,6 @@
 import type React from "react";
 import { usePpbConfigureContext } from "./PpbConfigureContext";
+import { DisabledConfigurationRegion } from "../_shared/bundle-configure/DisabledConfigurationRegion";
 
 export function PpbFreeGiftAddonsSection() {
   const {
@@ -55,148 +56,145 @@ export function PpbFreeGiftAddonsSection() {
                         stepsState.updateStepField(
                           step.id,
                           "isFreeGift",
-                          checked,
+                          checked
                         );
-                        if (!checked) {
-                          stepsState.updateStepField(
-                            step.id,
-                            "addonLabel",
-                            null,
-                          );
-                          stepsState.updateStepField(
-                            step.id,
-                            "addonTitle",
-                            null,
-                          );
-                          stepsState.updateStepField(
-                            step.id,
-                            "addonIconUrl",
-                            null,
-                          );
-                        }
                         markAsDirty();
                       }}
                     />
                   </div>
-                  <div className={productPageBundleStyles.mediaFieldGrid}>
-                    <div className={productPageBundleStyles.iconColumn}>
-                      <div className={productPageBundleStyles.iconBox}>
-                        {step.addonIconUrl ? (
-                          <img
-                            src={step.addonIconUrl}
-                            alt="Add-ons step icon"
-                            className={productPageBundleStyles.iconImg}
+                  <DisabledConfigurationRegion disabled={!step.isFreeGift}>
+                    <div className={productPageBundleStyles.mediaFieldGrid}>
+                      <div className={productPageBundleStyles.iconColumn}>
+                        <div className={productPageBundleStyles.iconBox}>
+                          {step.addonIconUrl ? (
+                            <img
+                              src={step.addonIconUrl}
+                              alt="Add-ons step icon"
+                              className={productPageBundleStyles.iconImg}
+                            />
+                          ) : (
+                            <div
+                              className={
+                                productPageBundleStyles.iconPlaceholder
+                              }
+                            >
+                              Upload file
+                            </div>
+                          )}
+                        </div>
+                        {showIconPickerForStep === `addon-${step.id}` && (
+                          <FilePicker
+                            autoOpen
+                            disabled={!step.isFreeGift}
+                            value={step.addonIconUrl ?? null}
+                            maxUploadBytes={50 * 1024}
+                            maxUploadErrorMessage="Please upload a file smaller than 50KB"
+                            onChange={(url: string | null) => {
+                              stepsState.updateStepField(
+                                step.id,
+                                "addonIconUrl",
+                                url
+                              );
+                              setShowIconPickerForStep(null);
+                              markAsDirty();
+                            }}
+                            onClose={() => setShowIconPickerForStep(null)}
+                            label=""
                           />
-                        ) : (
-                          <div
-                            className={productPageBundleStyles.iconPlaceholder}
-                          >
-                            Upload file
-                          </div>
                         )}
+                        <s-button
+                          variant="secondary"
+                          icon="upload"
+                          disabled={!step.isFreeGift || undefined}
+                          onClick={() =>
+                            setShowIconPickerForStep((prev) =>
+                              prev === `addon-${step.id}`
+                                ? null
+                                : `addon-${step.id}`
+                            )
+                          }
+                        >
+                          {showIconPickerForStep === `addon-${step.id}`
+                            ? "Close picker"
+                            : "Replace"}
+                        </s-button>
                       </div>
-                      {showIconPickerForStep === `addon-${step.id}` && (
-                        <FilePicker
-                          autoOpen
-                          value={step.addonIconUrl ?? null}
-                          maxUploadBytes={50 * 1024}
-                          maxUploadErrorMessage="Please upload a file smaller than 50KB"
-                          onChange={(url: string | null) => {
+                      <s-stack direction="block" gap="small">
+                        <s-button
+                          variant="secondary"
+                          icon="language-translate"
+                          disabled
+                        >
+                          Multi Language
+                        </s-button>
+                        <s-text-field
+                          label="Step Name"
+                          disabled={!step.isFreeGift || undefined}
+                          value={step.addonLabel ?? step.freeGiftName ?? ""}
+                          placeholder="Add On"
+                          onInput={(e) => {
+                            const value = (e.target as HTMLInputElement).value;
                             stepsState.updateStepField(
                               step.id,
-                              "addonIconUrl",
-                              url,
+                              "addonLabel",
+                              value
                             );
-                            setShowIconPickerForStep(null);
+                            stepsState.updateStepField(
+                              step.id,
+                              "freeGiftName",
+                              value
+                            );
                             markAsDirty();
                           }}
-                          onClose={() => setShowIconPickerForStep(null)}
-                          label=""
+                          autocomplete="off"
                         />
-                      )}
-                      <s-button
-                        variant="secondary"
-                        icon="upload"
-                        onClick={() =>
-                          setShowIconPickerForStep((prev) =>
-                            prev === `addon-${step.id}`
-                              ? null
-                              : `addon-${step.id}`,
-                          )
-                        }
-                      >
-                        {showIconPickerForStep === `addon-${step.id}`
-                          ? "Close picker"
-                          : "Replace"}
-                      </s-button>
+                        <s-text-field
+                          label="Add On"
+                          disabled={!step.isFreeGift || undefined}
+                          value={step.addonAddText ?? ""}
+                          placeholder="Add to Cart"
+                          onInput={(e) => {
+                            stepsState.updateStepField(
+                              step.id,
+                              "addonAddText",
+                              (e.target as HTMLInputElement).value || null
+                            );
+                            markAsDirty();
+                          }}
+                          autocomplete="off"
+                        />
+                        <s-text-field
+                          label="Step Title"
+                          disabled={!step.isFreeGift || undefined}
+                          value={step.addonTitle ?? ""}
+                          onInput={(e) => {
+                            stepsState.updateStepField(
+                              step.id,
+                              "addonTitle",
+                              (e.target as HTMLInputElement).value
+                            );
+                            markAsDirty();
+                          }}
+                          autocomplete="off"
+                        />
+                        <s-text-field
+                          label="Replace"
+                          disabled={!step.isFreeGift || undefined}
+                          value={step.addonReplaceText ?? ""}
+                          placeholder="Selected ✓"
+                          onInput={(e) => {
+                            stepsState.updateStepField(
+                              step.id,
+                              "addonReplaceText",
+                              (e.target as HTMLInputElement).value || null
+                            );
+                            markAsDirty();
+                          }}
+                          autocomplete="off"
+                        />
+                      </s-stack>
                     </div>
-                    <s-stack direction="block" gap="small">
-                      <s-button variant="secondary" icon="language-translate" disabled>
-                        Multi Language
-                      </s-button>
-                      <s-text-field
-                        label="Step Name"
-                        value={step.addonLabel ?? step.freeGiftName ?? ""}
-                        placeholder="Add On"
-                        onInput={(e) => {
-                          const value = (e.target as HTMLInputElement).value;
-                          stepsState.updateStepField(
-                            step.id,
-                            "addonLabel",
-                            value,
-                          );
-                          stepsState.updateStepField(
-                            step.id,
-                            "freeGiftName",
-                            value,
-                          );
-                          markAsDirty();
-                        }}
-                        autocomplete="off"
-                      />
-                      <s-text-field
-                        label="Add On"
-                        value={step.addonAddText ?? ""}
-                        placeholder="Add to Cart"
-                        onInput={(e) => {
-                          stepsState.updateStepField(
-                            step.id,
-                            "addonAddText",
-                            (e.target as HTMLInputElement).value || null,
-                          );
-                          markAsDirty();
-                        }}
-                        autocomplete="off"
-                      />
-                      <s-text-field
-                        label="Step Title"
-                        value={step.addonTitle ?? ""}
-                        onInput={(e) => {
-                          stepsState.updateStepField(
-                            step.id,
-                            "addonTitle",
-                            (e.target as HTMLInputElement).value,
-                          );
-                          markAsDirty();
-                        }}
-                        autocomplete="off"
-                      />
-                      <s-text-field
-                        label="Replace"
-                        value={step.addonReplaceText ?? ""}
-                        placeholder="Selected ✓"
-                        onInput={(e) => {
-                          stepsState.updateStepField(
-                            step.id,
-                            "addonReplaceText",
-                            (e.target as HTMLInputElement).value || null,
-                          );
-                          markAsDirty();
-                        }}
-                        autocomplete="off"
-                      />
-                    </s-stack>
-                  </div>
+                  </DisabledConfigurationRegion>
                 </div>
                 {/* Card 2: Add-Ons with Bundles */}
                 <div className={productPageBundleStyles.card}>
@@ -219,189 +217,210 @@ export function PpbFreeGiftAddonsSection() {
                         stepsState.updateStepField(
                           step.id,
                           "addonUnlockAfterCompletion",
-                          (e.target as HTMLInputElement).checked,
+                          (e.target as HTMLInputElement).checked
                         );
                         markAsDirty();
                       }}
                     />
                   </div>
-                  <s-stack direction="block" gap="small">
-                    <s-stack direction="inline" gap="small">
-                      <s-press-button
-                        variant="tertiary"
-                        tone="neutral"
-                        icon="play"
-                        accessibilityLabel="How to setup?"
-                        onClick={() =>
-                          window.open(
-                            "https://www.youtube.com/watch?v=5ClNNtFybHo",
-                            "_blank",
-                            "noopener,noreferrer",
-                          )
-                        }
-                      >
-                        How to setup?
-                      </s-press-button>
-                      <s-button variant="secondary" icon="language-translate" disabled>
-                        Multi Language
-                      </s-button>
-                    </s-stack>
-                    <s-text-field
-                      label="Add on Section title"
-                      value={step.freeGiftName ?? ""}
-                      onInput={(e) => {
-                        stepsState.updateStepField(
-                          step.id,
-                          "freeGiftName",
-                          (e.target as HTMLInputElement).value,
-                        );
-                        markAsDirty();
-                      }}
-                      autocomplete="off"
-                    />
-                    {(() => {
-                      const addonTiers: { displayFree: boolean }[] = Array.isArray(
-                        step.addonTiers,
-                      )
-                        ? (step.addonTiers as { displayFree: boolean }[])
-                        : [];
-                      const updateAddonTiers = (
-                        updated: { displayFree: boolean }[],
-                      ) => {
-                        stepsState.updateStepField(
-                          step.id,
-                          "addonTiers",
-                          updated,
-                        );
-                        markAsDirty();
-                      };
-                      return (
-                        <>
-                          {addonTiers.map((tier, idx) => (
-                            <div
-                              key={idx}
-                              className={productPageBundleStyles.ruleCard}
-                            >
+                  <DisabledConfigurationRegion
+                    disabled={step.addonUnlockAfterCompletion === false}
+                  >
+                    <s-stack direction="block" gap="small">
+                      <s-stack direction="inline" gap="small">
+                        <s-press-button
+                          variant="tertiary"
+                          tone="neutral"
+                          icon="play"
+                          accessibilityLabel="How to setup?"
+                          onClick={() =>
+                            window.open(
+                              "https://www.youtube.com/watch?v=5ClNNtFybHo",
+                              "_blank",
+                              "noopener,noreferrer"
+                            )
+                          }
+                        >
+                          How to setup?
+                        </s-press-button>
+                        <s-button
+                          variant="secondary"
+                          icon="language-translate"
+                          disabled
+                        >
+                          Multi Language
+                        </s-button>
+                      </s-stack>
+                      <s-text-field
+                        label="Add on Section title"
+                        value={step.freeGiftName ?? ""}
+                        onInput={(e) => {
+                          stepsState.updateStepField(
+                            step.id,
+                            "freeGiftName",
+                            (e.target as HTMLInputElement).value
+                          );
+                          markAsDirty();
+                        }}
+                        autocomplete="off"
+                      />
+                      {(() => {
+                        const addonTiers: { displayFree: boolean }[] =
+                          Array.isArray(step.addonTiers)
+                            ? (step.addonTiers as { displayFree: boolean }[])
+                            : [];
+                        const updateAddonTiers = (
+                          updated: { displayFree: boolean }[]
+                        ) => {
+                          stepsState.updateStepField(
+                            step.id,
+                            "addonTiers",
+                            updated
+                          );
+                          markAsDirty();
+                        };
+                        return (
+                          <>
+                            {addonTiers.map((tier, idx) => (
                               <div
-                                className={productPageBundleStyles.ruleHeader}
+                                key={idx}
+                                className={productPageBundleStyles.ruleCard}
                               >
-                                <h4
-                                  style={{
-                                    margin: 0,
-                                    fontSize: 14,
-                                    fontWeight: 650,
-                                  }}
+                                <div
+                                  className={productPageBundleStyles.ruleHeader}
                                 >
-                                  Tier {idx + 1}
-                                </h4>
-                                <s-button
-                                  variant="tertiary"
-                                  onClick={() => {
-                                    updateAddonTiers(
-                                      addonTiers.filter((_, i) => i !== idx),
+                                  <h4
+                                    style={{
+                                      margin: 0,
+                                      fontSize: 14,
+                                      fontWeight: 650,
+                                    }}
+                                  >
+                                    Tier {idx + 1}
+                                  </h4>
+                                  <s-button
+                                    variant="tertiary"
+                                    onClick={() => {
+                                      updateAddonTiers(
+                                        addonTiers.filter((_, i) => i !== idx)
+                                      );
+                                    }}
+                                  >
+                                    Delete
+                                  </s-button>
+                                </div>
+                                <s-checkbox
+                                  label="Display products as free ($0.00)"
+                                  checked={tier.displayFree === true}
+                                  onChange={(e) => {
+                                    const updated = addonTiers.map((t, i) =>
+                                      i === idx
+                                        ? {
+                                            ...t,
+                                            displayFree: (
+                                              e.target as HTMLInputElement
+                                            ).checked,
+                                          }
+                                        : t
                                     );
+                                    updateAddonTiers(updated);
                                   }}
-                                >
-                                  Delete
-                                </s-button>
+                                />
                               </div>
-                              <s-checkbox
-                                label="Display products as free ($0.00)"
-                                checked={tier.displayFree === true}
-                                onChange={(e) => {
-                                  const updated = addonTiers.map((t, i) =>
-                                    i === idx
-                                      ? {
-                                          ...t,
-                                          displayFree: (
-                                            e.target as HTMLInputElement
-                                          ).checked,
-                                        }
-                                      : t,
-                                  );
-                                  updateAddonTiers(updated);
-                                }}
-                              />
-                            </div>
-                          ))}
-                          <s-button
-                            variant="secondary"
-                            icon="plus"
-                            onClick={() =>
-                              updateAddonTiers([
-                                ...addonTiers,
-                                { displayFree: true },
-                              ])
-                            }
-                          >
-                            Add Add Ons Tier
-                          </s-button>
-                        </>
-                      );
-                    })()}
-                  </s-stack>
+                            ))}
+                            <s-button
+                              variant="secondary"
+                              icon="plus"
+                              onClick={() =>
+                                updateAddonTiers([
+                                  ...addonTiers,
+                                  { displayFree: true },
+                                ])
+                              }
+                            >
+                              Add Add Ons Tier
+                            </s-button>
+                          </>
+                        );
+                      })()}
+                    </s-stack>
+                  </DisabledConfigurationRegion>
                 </div>
                 {/* Card 3: Footer Messaging */}
                 {Array.isArray(step.addonTiers) &&
                   step.addonTiers.length > 0 && (
-                  <div className={productPageBundleStyles.card}>
-                  <div className={productPageBundleStyles.panelHeader}>
-                    <h3 className={productPageBundleStyles.panelTitle}>
-                      Footer Messaging
-                    </h3>
-                    <s-stack direction="inline" gap="small-100">
-                      <s-button
-                        variant="tertiary"
-                        onClick={() =>
-                          showPolarisModal(templateVariablesModalRef)
-                        }
-                      >
-                        Show Variables
-                      </s-button>
-                      <s-button variant="secondary" icon="language-translate" disabled>
-                        Multi Language
-                      </s-button>
-                    </s-stack>
-                  </div>
-                  <s-stack direction="block" gap="small">
-                    <h4 style={{ margin: 0, fontSize: 14, fontWeight: 650 }}>
-                      Tier 1
-                    </h4>
-                    <s-text-field
-                      label="Message when rule not met"
-                      value={addonMessages.discountText}
-                      placeholder="Add {{addonsConditionDiff}} more product(s) to claim {{addonsDiscountValue}}{{addonsDiscountValueUnit}} off on Add ons"
-                      onInput={(e) => {
-                        const value = (e.target as HTMLInputElement).value;
-                        setRuleMessages((prev) => ({
-                          ...prev,
-                          [`addons-${step.id}`]: {
-                            ...(prev[`addons-${step.id}`] || addonMessages),
-                            discountText: value,
-                          },
-                        }));
-                      }}
-                      autocomplete="off"
-                    />
-                    <s-text-field
-                      label="Success Message"
-                      value={addonMessages.successMessage}
-                      placeholder="Congrats you are eligible for {{addonsDiscountValue}}{{addonsDiscountValueUnit}} off on Add ons"
-                      onInput={(e) => {
-                        const value = (e.target as HTMLInputElement).value;
-                        setRuleMessages((prev) => ({
-                          ...prev,
-                          [`addons-${step.id}`]: {
-                            ...(prev[`addons-${step.id}`] || addonMessages),
-                            successMessage: value,
-                          },
-                        }));
-                      }}
-                      autocomplete="off"
-                    />
-                  </s-stack>
-                  </div>
-                )}
+                    <DisabledConfigurationRegion
+                      disabled={step.addonUnlockAfterCompletion === false}
+                    >
+                      <div className={productPageBundleStyles.card}>
+                        <div className={productPageBundleStyles.panelHeader}>
+                          <h3 className={productPageBundleStyles.panelTitle}>
+                            Footer Messaging
+                          </h3>
+                          <s-stack direction="inline" gap="small-100">
+                            <s-button
+                              variant="tertiary"
+                              onClick={() =>
+                                showPolarisModal(templateVariablesModalRef)
+                              }
+                            >
+                              Show Variables
+                            </s-button>
+                            <s-button
+                              variant="secondary"
+                              icon="language-translate"
+                              disabled
+                            >
+                              Multi Language
+                            </s-button>
+                          </s-stack>
+                        </div>
+                        <s-stack direction="block" gap="small">
+                          <h4
+                            style={{ margin: 0, fontSize: 14, fontWeight: 650 }}
+                          >
+                            Tier 1
+                          </h4>
+                          <s-text-field
+                            label="Message when rule not met"
+                            value={addonMessages.discountText}
+                            placeholder="Add {{addonsConditionDiff}} more product(s) to claim {{addonsDiscountValue}}{{addonsDiscountValueUnit}} off on Add ons"
+                            onInput={(e) => {
+                              const value = (e.target as HTMLInputElement)
+                                .value;
+                              setRuleMessages((prev) => ({
+                                ...prev,
+                                [`addons-${step.id}`]: {
+                                  ...(prev[`addons-${step.id}`] ||
+                                    addonMessages),
+                                  discountText: value,
+                                },
+                              }));
+                            }}
+                            autocomplete="off"
+                          />
+                          <s-text-field
+                            label="Success Message"
+                            value={addonMessages.successMessage}
+                            placeholder="Congrats you are eligible for {{addonsDiscountValue}}{{addonsDiscountValueUnit}} off on Add ons"
+                            onInput={(e) => {
+                              const value = (e.target as HTMLInputElement)
+                                .value;
+                              setRuleMessages((prev) => ({
+                                ...prev,
+                                [`addons-${step.id}`]: {
+                                  ...(prev[`addons-${step.id}`] ||
+                                    addonMessages),
+                                  successMessage: value,
+                                },
+                              }));
+                            }}
+                            autocomplete="off"
+                          />
+                        </s-stack>
+                      </div>
+                    </DisabledConfigurationRegion>
+                  )}
               </s-stack>
             </div>
           );

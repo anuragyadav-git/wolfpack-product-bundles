@@ -41,7 +41,7 @@ export class MetafieldCleanupService {
         operation: 'cleanup-bundle'
       }, { bundleId });
 
-    } catch (error) {
+    } catch (error: any) {
       AppLogger.error('Failed to cleanup metafields for bundle', {
         component: 'cleanup',
         operation: 'cleanup-bundle'
@@ -212,7 +212,7 @@ export class MetafieldCleanupService {
             });
           }
 
-        } catch (parseError) {
+        } catch (parseError: any) {
           AppLogger.error('Error parsing bundle index JSON', {
             component: 'cleanup',
             operation: 'update-shop-metafields'
@@ -225,7 +225,7 @@ export class MetafieldCleanupService {
         });
       }
 
-    } catch (error) {
+    } catch (error: any) {
       AppLogger.error('Error updating shop metafields', {
         component: 'cleanup',
         operation: 'update-shop-metafields'
@@ -277,7 +277,7 @@ export class MetafieldCleanupService {
             operation: 'batch-delete'
           }, { deletedCount });
         }
-      } catch (error) {
+      } catch (error: any) {
         AppLogger.error('Error in batch metafield deletion', {
           component: 'cleanup',
           operation: 'batch-delete'
@@ -325,7 +325,7 @@ export class MetafieldCleanupService {
       }, { namespace, key, exists, status: exists ? 'still exists' : 'successfully deleted' });
 
       return !exists; // Return true if metafield no longer exists
-    } catch (error) {
+    } catch (error: any) {
       AppLogger.error('Verification error', {
         component: 'cleanup',
         operation: 'verify'
@@ -400,7 +400,7 @@ export class MetafieldCleanupService {
         operation: 'emergency-cleanup'
       });
 
-    } catch (error) {
+    } catch (error: any) {
       AppLogger.error('Emergency cleanup failed', {
         component: 'cleanup',
         operation: 'emergency-cleanup'
