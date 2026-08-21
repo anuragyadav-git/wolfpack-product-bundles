@@ -1,6 +1,6 @@
 'use strict';
 
-function appendBannerImage(documentRef, wrapper, url, className) {
+function appendBannerImage(documentRef: Document, wrapper: HTMLDivElement, url: any, className: string) {
   if (!url) return;
 
   const img = documentRef.createElement('img');
@@ -11,7 +11,7 @@ function appendBannerImage(documentRef, wrapper, url, className) {
   wrapper.appendChild(img);
 }
 
-export function createBundleBannerElement(config = {}, documentRef = document) {
+export function createBundleBannerElement(config: any = {}, documentRef = document) {
   const desktopBannerUrl = config.desktopBannerUrl;
   const mobileBannerUrl = config.mobileBannerUrl;
   if (!desktopBannerUrl && !mobileBannerUrl) return null;
@@ -27,7 +27,7 @@ export function createBundleBannerElement(config = {}, documentRef = document) {
   return wrapper;
 }
 
-export function createStepBannerImageElement(step = {}, escapeHtml = value => value, documentRef = document) {
+export function createStepBannerImageElement(step: any = {}, escapeHtml = (value: any)  => value, documentRef = document) {
   if (!step.bannerImageUrl) return null;
 
   const wrapper = documentRef.createElement('div');

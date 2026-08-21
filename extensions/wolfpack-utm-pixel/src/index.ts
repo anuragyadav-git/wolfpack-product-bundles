@@ -53,13 +53,13 @@ function extractUtmParams(url: string, customParamNames: string[]): Record<strin
       params.captured_at = new Date().toISOString();
       return params;
     }
-  } catch (_e) {
+  } catch (_e: any) {
     // Invalid URL — ignore
   }
   return null;
 }
 
-register(({ analytics, browser, settings }) => {
+register(({ analytics, browser, settings }: any) => {
   const appServerUrl = settings.app_server_url as string | undefined;
   const customUtmParameters = parseCustomUtmParameters(settings.custom_utm_parameters);
   // Shop domain is passed in at activation from session.shop so it doesn't depend
@@ -72,7 +72,7 @@ register(({ analytics, browser, settings }) => {
   // ── page_viewed: Capture UTMs from the landing URL (last-touch) ──
   // Uses localStorage (persists across sessions) and always overwrites so the
   // most recent UTM click gets credit (last-touch attribution model).
-  analytics.subscribe("page_viewed", async (event) => {
+  analytics.subscribe("page_viewed", async (event: any) => {
     try {
       const url = event.context?.document?.location?.href;
       if (!url) return;
@@ -82,7 +82,7 @@ register(({ analytics, browser, settings }) => {
 
       // Last-touch: always overwrite with the most recent UTM click
       await browser.localStorage.setItem(UTM_STORAGE_KEY, JSON.stringify(utmParams));
-    } catch (_e) {
+    } catch (_e: any) {
       // Silently fail — pixel errors must not affect storefront
     }
   });
@@ -90,7 +90,7 @@ register(({ analytics, browser, settings }) => {
   // ── checkout_completed: Send attribution data to server ──
   // Always fires, even when no UTMs are stored, so that bundle revenue is tracked
   // for direct / organic traffic. UTM fields are null when not available.
-  analytics.subscribe("checkout_completed", async (event) => {
+  analytics.subscribe("checkout_completed", async (event: any) => {
     try {
       if (!appServerUrl) return;
 
@@ -145,7 +145,7 @@ register(({ analytics, browser, settings }) => {
       if (storedUtmsRaw) {
         await browser.localStorage.removeItem(UTM_STORAGE_KEY);
       }
-    } catch (_e) {
+    } catch (_e: any) {
       // Silently fail — pixel errors must not affect checkout
     }
   });

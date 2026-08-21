@@ -6,10 +6,10 @@ import {
 } from './engine/selling-plan-pricing.js';
 
 export const bundleSubscriptionStorefrontMethods: Record<string, any> & ThisType<any> = {
-  getSubscriptionProductCardPrice(price) {
+  getSubscriptionProductCardPrice(price: any) {
     return getSubscriptionProductCardPrice(this, price);
   },
-  calculateBundleTotalForPurchaseOption(selectedProducts, stepProductData, steps = null) {
+  calculateBundleTotalForPurchaseOption(selectedProducts: any, stepProductData: any, steps: any = null) {
     return calculateBundleTotalForPurchaseOption(
       this,
       selectedProducts,
@@ -17,7 +17,7 @@ export const bundleSubscriptionStorefrontMethods: Record<string, any> & ThisType
       steps,
     );
   },
-  calculateBundleDiscountForPurchaseOption(totalPrice, totalQuantity, unitPrices = []) {
+  calculateBundleDiscountForPurchaseOption(totalPrice: any, totalQuantity: any, unitPrices: any[] = []) {
     return calculateBundleDiscountForPurchaseOption(
       this,
       totalPrice,
@@ -28,10 +28,10 @@ export const bundleSubscriptionStorefrontMethods: Record<string, any> & ThisType
 };
 
 export function calculateBundleDiscountForPurchaseOption(
-  controller,
-  totalPrice,
-  totalQuantity,
-  unitPrices = [],
+  controller: any,
+  totalPrice: number,
+  totalQuantity: number,
+  unitPrices: any[] = [],
 ) {
   const bundle = controller?.selectedBundle;
   const subscription = bundle?.subscription;
@@ -49,7 +49,7 @@ export function calculateBundleDiscountForPurchaseOption(
   return PricingCalculator.calculateDiscount(bundle, totalPrice, totalQuantity, unitPrices);
 }
 
-export function getSubscriptionProductCardPrice(controller, price) {
+export function getSubscriptionProductCardPrice(controller: any, price: any) {
   return resolveSubscriptionProductCardPrice(
     controller?.selectedBundle?.subscription,
     controller?.selectedSellingPlanId,
@@ -58,10 +58,10 @@ export function getSubscriptionProductCardPrice(controller, price) {
 }
 
 export function calculateBundleTotalForPurchaseOption(
-  controller,
-  selectedProducts,
-  stepProductData,
-  steps = null,
+  controller: any,
+  selectedProducts: any,
+  stepProductData: any,
+  steps: any = null,
 ) {
   const result = PricingCalculator.calculateBundleTotal(
     selectedProducts,
@@ -71,7 +71,7 @@ export function calculateBundleTotalForPurchaseOption(
   const subscription = controller?.selectedBundle?.subscription;
   const sellingPlanId = controller?.selectedSellingPlanId;
   const plan = subscription?.selectedGroup?.plans?.find?.(
-    (candidate) => candidate?.id === sellingPlanId,
+    (candidate: any) => candidate?.id === sellingPlanId,
   );
   if (!subscription?.enabled || !sellingPlanId || !plan) return result;
   const adjusted = applyStorefrontSellingPlanPricingToUnitPrices(

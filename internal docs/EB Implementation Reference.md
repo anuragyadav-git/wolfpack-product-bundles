@@ -5,7 +5,7 @@ title: EB Implementation Reference
 type: reference
 status: authoritative
 summary: Records directly verified reference-app contracts used for Wolfpack bundle implementation and parity decisions.
-last_audited: 2026-08-14
+last_audited: 2026-08-21
 owners:
   - engineering
 domains:
@@ -1009,15 +1009,48 @@ Buy X, Get Y:
 
 ### Bundle Visibility — Product Page Widget and Embed
 
+Live authenticated EB evidence refreshed on 2026-08-20 separates the Product
+Page Bundle **Bundle Embed** builder from the older upsell widget flow:
+
+- Bundle Embed is a two-card Admin flow. Its master control is **Embed Bundle
+  Builder on Product Pages**, followed by localized Title/Sub Title, one of All
+  products in bundle / Specific products / Specific collections, and **Add
+  browsed product to bundle**. Changing targeting mode clears both product and
+  collection selections.
+- The canonical configuration is
+  `bundleUpsellConfig.upsellConfiguration`: `isEnabled`, `title`, `subTitle`,
+  the five-array `displayConfiguration`, and
+  `useLinkProductAsDefaultProduct`. Localized title/subtitle values belong at
+  `bundleUpsellConfig.multiLangText[locale].upsellConfiguration`; legacy embed
+  keys in `textOverrides` are not part of the live contract.
+- The global store App Embed resolves Product Page Bundles only on product
+  pages. Eligible bundles are Active or Unlisted and enabled. All-products
+  targeting matches products or collections in enabled paid steps/categories;
+  specific targeting matches its selected products or collections. When more
+  than one bundle matches, EB uses the first deterministic match.
+- The builder mounts immediately before the primary visible Add to Cart
+  control. A visible custom Product Page Bundle placement block wins over that
+  automatic location. The placement block is only an anchor; the global App
+  Embed owns eligibility, asset loading, and rendering.
+- Add browsed product selects quantity one of the currently selected available
+  variant in its matching step. It does not overwrite restored shopper state.
+  This direct builder flow leaves the ordinary product form, native price, and
+  dynamic checkout controls intact.
+
 Public Skai Lama help articles corroborate the captured Bundle Visibility behavior:
 
 - One master Product Page Bundle Upsell Widget control owns both Offer Upsell Button and Offer Upsell Block modes. Button mode configures CTA text. Block mode adds image, title, description, and CTA fields.
 - Targeting is mutually exclusive: all bundle products, selected products, or selected collections. All-bundle-product matching includes explicit products and configured collections from enabled paid steps; gifts and personalization add-ons are not eligibility sources.
-- Multiple eligible bundles stack in deterministic order.
-- Default placement is below the product form. A single theme app block provides custom placement, which takes precedence over automatic placement.
+- The older upsell offer mode can expose multiple eligible offers; Bundle Embed
+  resolves only the first eligible builder.
+- Custom placement takes precedence over automatic placement in both modes,
+  but Bundle Embed's automatic location is before the primary visible Add to
+  Cart control.
 - Add Browsed Product records the exact product and currently selected variant before redirect. The destination preselects only that variant in shared bundle state.
 - The storefront renderer belongs to the globally enabled app embed rather than an FPB design template. Standard, Classic, Compact, and Horizontal share the behavior.
-- Product Page Bundle Builder placement is different from merchant-dragged upsell blocks: 2026-06-11 Theme Editor evidence showed the PPB widget rendering while the native **Buy buttons** block was selected. Treat PPB as a Buy buttons/product-form replacement or override, not as a separate merchant-positioned block under Buy buttons.
+- Product Page Bundle Builder placement is distinct from merchant-dragged
+  upsell offer blocks and from the parent-product PPB block. The 2026-08-20
+  Bundle Embed flow preserves the native Buy buttons/product form.
 
 Reference URLs:
 
@@ -1171,9 +1204,11 @@ separate horizontal step-button rail.
 
 Product cards remain complete at both viewport classes: desktop uses three
 columns inside the product form and mobile uses two, with image, two-line title,
-price, and action visible. Selecting a card replaces `Add +` with the
-quantity-aware `Added xN` button. It does not add a check marker or expose inline
-minus/quantity/plus controls; activating `Added xN` removes that product.
+price, and action visible. When per-product quantity validation is enabled with
+a maximum of one, selecting a card replaces `Add +` with `Added x1` and does not
+expose inline minus/quantity/plus controls. When validation is disabled or its
+maximum exceeds one, the selected card exposes inline quantity controls; an
+enabled maximum gates the increment action.
 
 The incomplete intermediate `Next` action remains visually and functionally
 active so it can explain the unmet rule. In the confirmed minimum-two fixture it
@@ -1217,6 +1252,33 @@ mobile fixture each filled row was `64px` high with `50px` media and a `20px`
 remove control; minimum rules retain a following empty slot while exact rules
 do not.
 
+### PPB modal card, grouped variant, and product-details refinement
+
+Live findings supplied for the 2026-08-21 revision-2 implementation refine the
+accepted Horizontal and Vertical picker contract:
+
+- Grouped multi-variant cards retain a native in-card selector on desktop and
+  mobile. The visual `Select variant` label remains on desktop and is visually
+  hidden, but still accessible, on mobile. Changing the selector updates the
+  card's active variant identity, image, price, compare-at context, and
+  availability without adding or migrating a selected quantity.
+- The card image is the only product-details trigger. The title and card
+  background are informational; Add remains an independent mutation.
+- Quantity Validation owns selected-card presentation. Disabled validation and
+  enabled validation below the maximum show inline quantity controls. At the
+  maximum, the controls are replaced by the check/`Added xN` action, and
+  activating it removes the full selected quantity. Maximum one transitions
+  directly to `Added x1`.
+- Product details is an editable PPB quick-shop sheet above the picker. It
+  contains gallery, title, price/compare-at, description, native variant,
+  quantity, and localized Add/Update. Update targets the originating slot and
+  must not leave a duplicate selection.
+
+The relevant general setup, Steps vs. Categories, and Rules help articles were
+read in full before the accepted Horizontal/Vertical fixture work (recorded in
+`HS00-eb-fixture-evidence.md` and `VS00-eb-empty-desktop-baseline.md`). Their
+durable hierarchy and rule facts remain unchanged for this refinement.
+
 ### PPB compare-at price ownership
 
 Live EB Admin evidence on 2026-07-13 places `Show Compare At Price` under the
@@ -1224,14 +1286,15 @@ global Settings → Controls → Configuration → Bundle Settings surface, not 
 an individual PPB bundle's Bundle Settings section. The control was checked on
 `yash-wolfpack`; the inspected Horizontal Slots products still rendered ordinary
 prices because their hydrated product data did not contain a usable compare-at
-value. Treat the global control and product data as independent gates when
-building a compare-at fixture.
+value.
 
-Wolfpack persists the current bundle-level projection as `showCompareAtPrices`,
-while the storefront DTO key intentionally remains EB-compatible
-`showProductComparedAtPrice`. The metafield writer must map between those names;
-reading `showProductComparedAtPrice` directly from the persisted bundle silently
-forces the storefront flag to false.
+Wolfpack intentionally diverges from the reference control as of 2026-08-21:
+PPB compare-at visibility is product-driven and is not an individual bundle
+configuration. The Admin configure flow does not expose or save
+`showCompareAtPrices`; storefront cards render a compare-at value whenever the
+hydrated product or selected variant provides one. The EB-compatible storefront
+DTO key `showProductComparedAtPrice` remains enabled and cannot be disabled by a
+stale persisted bundle value.
 
 ### FPB compare-at price ownership
 
@@ -1786,6 +1849,34 @@ Captured from FPB Classic storefront GraphQL and DOM evidence on 2026-07-04 whil
 - Treat the Settings help statement "Products with zero inventory are not shown in the bundle" as shorthand for non-sellable Storefront API availability, not a raw `quantityAvailable === 0` rule.
 
 ## Checkout Integration Discount-Code Handoff
+
+### Current Settings Controls inventory
+
+Verified in the authenticated Yash store on 2026-08-21:
+
+- Landing Page and Product Page Cart Messaging both expose Bundle Items, Original Bundle Price, Discount Display, and the three discount formats in the supported Wolfpack scope.
+- Landing Page CSS and Scripts separates bundle-builder CSS, dummy-product CSS, global theme CSS, bundle-page JavaScript, and Add to Cart/Buy now selectors. `Button Selectors` is a heading, not a third saved input. Integrations separately gates global theme JavaScript, cart JavaScript/selectors, and Judge.me token configuration.
+- Product Page exposes hide out-of-stock products, inventory validation, add after the final step, empty-state boxes, completed-step title hiding, product-card click add, collection Quick Add redirect, post-add redirect/script, Mix and Match CSS, and side-cart/cart selectors.
+- The visible Advanced tab belongs to EB's separate customer video-message player. Video messaging is not part of the Controls parity implementation until that feature itself is in scope.
+- EB Judge.me runtime calls `https://cache.judge.me/widgets/shopify/{shop}` with `publictoken` and comma-separated `preview_badge_product_ids`, adds `html_miracle` assets to the document head, and injects the returned `preview_badges` HTML into matching product cards. A missing token or failed request must not block card rendering.
+- Fresh Judge.me installations are not provisioned on that legacy cache endpoint: the authenticated Agent store returned `404 Shop not found` after app-embed activation. Wolfpack therefore uses Judge.me's current public widget API, `GET https://api.judge.me/api/v1/widgets/preview_badge`, with `shop_domain`, Shopify `external_id`, and the public `api_token`. The endpoint returns one sanitized `badge` per product, so Wolfpack requests products independently and preserves successful badges when another product request fails.
+- EB runs the Product Page custom script once during bundle-page initialization. The separate redirect script runs after cart add.
+- EB refreshes configured side-cart/cart-page section markup with `/?section_id={sectionId}` before opening or continuing the configured post-add flow, and updates the configured native product-price selector with the current bundle total.
+- EB product-card click add delegates a non-control card click to the card's existing Add action. Selected quantity controls, links, and form fields keep their own behavior.
+- EB collection Quick Add maps active bundle parent-product handles to their bundle URLs, rewrites matching product links, and intercepts the matching card's add action to navigate to that URL.
+- EB irrelevant-image filtering retains media referenced by relevant variants plus media sharing the same alt text, then filters the product image list to those media.
+
+### Wolfpack Agent-store Controls verification
+
+Verified on the authenticated `agent-5sfidg3m` SIT store on 2026-08-21:
+
+- Every visible toggle, radio, select, text area, text field, dependent-field gate, Discard action, layout selector, and Controls sub-navigation item accepted interaction. The Controls POST returned `200`, persisted the canonical schema to both layout runtimes, and both public `controls-settings` endpoints returned schema version 1 after a cache-bypassed storefront reload.
+- Polaris `s-select` removes a select during upgrade when an option value contains unescaped quotation marks. Discount-format labels triggered this through Polaris's internal attribute selector. Controls now uses opaque `controls-option-N` values while preserving the exact displayed and persisted labels.
+- The Save POST succeeds. Controls uses a dedicated fetcher response to confirm the exact submitted snapshot so the contextual Save bar closes without requiring a reload.
+- Runtime consumers are confirmed for shared cart messaging, FPB compare-at display, FPB/PPB inventory validation, FPB checkout/provider/script/font/CSS/bundle script, global theme CSS and enabled integration scripts, PPB out-of-stock filtering, auto-add, condition-driven empty boxes, completed-step title hiding, redirect action/script, Mix and Match CSS, and the PPB side-cart trigger selector.
+- Runtime consumers now cover FPB irrelevant-variant-image hiding, both layouts' collection Quick Add redirect, Judge.me badge loading, configured theme quick-add selectors, PPB card-click add, PPB side-cart section refresh, and PPB product-price updates. PPB page-load and post-add scripts have separate lifecycles. Cart-page section refresh remains used only when the post-add action stays on the cart page; a direct redirect cannot refresh markup after navigation.
+- Judge.me is installed on the Agent store's free plan, its core theme app embed is enabled on Horizon, and Landing Page Controls stores the public token. A cache-bypassed FPB pass returned `200` for both current widget-API requests and mounted both product badges; the fixture products have zero reviews, so Judge.me intentionally returned hidden `No reviews` badges.
+- Third-party checkout choices are selectable and covered by provider/capability behavior tests, but their live callbacks remain integration-gated because those checkout/cart apps are not installed on the Agent store.
 
 Captured from the EB checkout/side-cart functions article on 2026-07-02:
 

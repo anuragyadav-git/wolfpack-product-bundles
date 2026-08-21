@@ -19,7 +19,7 @@ export function PpbBundleVisibilitySection() {
         active: flow.activeSection === "bundle_visibility",
         embedStatus: buildEmbedStatusModel(
           "product_page",
-          flow.appEmbedEnabled,
+          flow.appEmbedEnabled
         ),
         link,
         onCopyLink: () => {
@@ -47,7 +47,6 @@ export function PpbBundleVisibilitySection() {
             onAction: () => flow.handleSectionChange("bundle_embed"),
           },
         ],
-        styles: flow.productPageBundleStyles,
         themeEditorUrl: flow.themeEditorUrl,
       })}
     </div>

@@ -32,7 +32,7 @@ export function CartPropertyFixContent() {
       await navigator.clipboard.writeText(LIQUID_SNIPPET);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch (_e) {
+    } catch (_e: any) {
       // clipboard unavailable — no-op
     }
   }, []);
@@ -63,7 +63,7 @@ export function CartPropertyFixContent() {
 
       {/* ── Numbered steps ────────────────────────────────────────── */}
       <s-stack direction="block" gap="base">
-        {STEPS.map(({ n, title, desc }) => (
+        {STEPS.map(({ n, title, desc }: any) => (
           <s-stack key={n} direction="inline" gap="base" alignItems="start">
             <div style={{
               width: 26,

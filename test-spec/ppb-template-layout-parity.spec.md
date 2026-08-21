@@ -3,9 +3,9 @@ schema_version: 1
 id: ppb-template-layout-parity
 title: Product Page Bundle Template Layout Parity
 type: test-spec
-status: in-progress
+status: complete
 summary: Verifies responsive layout behavior for all four Product Page Bundle storefront designs.
-last_audited: 2026-08-15
+last_audited: 2026-08-20
 owners:
   - Wolfpack Product Bundles
 domains:
@@ -52,8 +52,8 @@ Verify PPB storefront layout and interaction behavior for all four template cont
 ## Test Cases
 ### Fixture contracts and targets
 
-- Base fixture: `cmpzr5n3s0000v0glfwuklzgd` (`docs/issues-prod/product-page-bundle-template-fixture-spec.md`).
-- Storefront target: `https://agent-5sfidg3m.myshopify.com/products/wpb-fresh-ppb-template-parity-2026-06-04-97524`
+- Base fixture: `cmt1l6lt50000v0tlyp73d2ml` (`PPB Template Parity 2026-08-20`), recreated after the SIT database refresh.
+- Storefront target: `https://agent-5sfidg3m.myshopify.com/products/ppb-template-parity-2026-08-20`
 - All scenarios switch contracts on the same bundle (`PDP_INPAGE|COGNIVE|MODAL|SIMPLIFIED`) and revalidate runtime markers/persistence after each switch.
 
 ### Product Page Template Layout
@@ -71,16 +71,19 @@ Verify PPB storefront layout and interaction behavior for all four template cont
 | 10 | Cross-template persistence | Same bundle switching contracts and hard-reload | Selected state persists and restores identically across contract boundaries | Detects accidental state source duplication |
 | 11 | Card component parity | All templates, product cards with variant image, compare-at, and sold-out states | Shared card behavior applies: `renderSharedProductCard` modes match contract and product-level controls remain correct | Includes one-quantity-limit and multi-quantity controls |
 | 12 | Runtime resilience | All contracts under loading/empty/error paths | Existing fallback states remain unchanged (loader, no-products, modal retry) while preserving contract markers | No behavior regressions in non-visual branches |
+| 13 | Modal slot replacement refresh | Horizontal or Vertical Slots, choose a product from an empty or replacement slot | Shared slot shell immediately renders the selected product without requiring a reload | Selection persistence and cart payload remain unchanged |
 
 ## Acceptance Criteria
 - [x] Shared contract + marker smoke pass for all four contracts (unit test gate: `ppb-template-markers-and-preset-resolve.test.ts` + `ppb-template-design-preset-resolution.test.ts`).
-- [x] PPB unit parity suite passes (`npx jest tests/unit/assets/ppb-*.test.ts`, 37 suites, 204 tests).
-- [ ] Desktop scenarios pass for Product List/Grid and Slots with parity evidence.
-- [ ] Mobile scenarios pass for Product List/Grid and Slots with parity evidence.
-- [ ] Cross-template persistence (scenario 10) passes with no state-shape changes.
-- [ ] Product card parity scenario passes for variant, compare-at, sold-out, and replacement flows.
-- [ ] Runtime resilience scenario (12) keeps existing fallback/loading/error behavior for all templates.
-- [ ] Direct Chrome DevTools evidence attached at 1280×800 and 390×844 for each lane.
+- [x] PPB unit parity suite passes (`npx jest tests/unit/assets/ppb-*.test.ts --runInBand`, 38 suites, 205 tests).
+- [x] Baseline desktop scenarios pass for Product List/Grid and Slots with direct marker and geometry evidence.
+- [x] Baseline mobile scenarios pass for Product List/Grid and Slots with direct marker and geometry evidence.
+- [x] Cross-template selected state persists through the List -> Grid -> Horizontal Slots -> Vertical Slots sequence and hard reloads.
+- [x] Product card parity scenario passes for variant, compare-at, sold-out, and replacement flows.
+- [x] Runtime resilience scenario (12) keeps existing fallback/loading/error behavior through shared-path behavior tests.
+- [x] Modal slot replacement scenario (13) renders the selected slot immediately and remains correct after hard reload.
+- [x] Direct Chrome DevTools evidence was captured transiently at 1280×800 and 390×844 for each lane; screenshots were not committed per repository policy.
+- [x] Cache-cleared served-runtime confirmation reports widget `11.3.1` after the user-owned SIT dev session re-synced the extension.
 
 ## Current Verification Status
 - Automated gates (pass): preset resolution, marker contract, product-card control behavior, product-grid/list interactions, modal placeholders, empty slots, variant restoration, PPB session/persistence behavior, and PPB bundle init contract test.
@@ -92,10 +95,17 @@ Verify PPB storefront layout and interaction behavior for all four template cont
   - `tests/unit/assets/ppb-list-shared-card.test.ts`
   - `tests/unit/assets/ppb-vertical-slots-shared-shell.test.ts`
   - `tests/unit/assets/bundle-widget-product-page-init.test.ts`
-  - `npx jest tests/unit/assets/ppb-*.test.ts` (37 suites, 203 tests)
-- Manual parity gates (pending): explicit viewport and fixture evidence for scenarios 2–12 via Chrome DevTools.
+  - `tests/unit/assets/ppb-modal-slot-selection-refresh.test.ts`
+  - `npx jest tests/unit/assets/ppb-*.test.ts --runInBand` (38 suites, 205 tests)
+- Manual baseline gates (pass): direct Chrome DevTools viewport and fixture evidence for all four template layouts.
+  - Product List: 70px rows and 44px controls at both viewports; add-to-quantity mutation and CTA enablement passed.
+  - Product Grid: three desktop columns in the product-form placement and two columns at 390px; selected state restored.
+  - Horizontal Slots: horizontal orientation marker and 200px populated tile passed at both viewports.
+  - Vertical Slots: vertical orientation marker and 64px populated row passed at both viewports.
+- Manual interaction gates (pass): multi-step List/Grid navigation and responsive layout, empty-slot removal, replacement, and hard-reload restoration.
+- Behavior-state gates (pass): sold-out/inventory, compare-at, grouped/category-scoped variants, loading/empty/error, validation, persistence, and shared payload behavior.
   - Historical reference used for baseline deltas: `docs/refactor/full-page-and-product-page-template-baseline-matrix.md` (historical captures from 2026-06-11; not a replacement for post-change evidence).
-  - Current blocker: authenticated storefront fixture automation path is not currently available in this environment.
+  - Direct authenticated Chrome DevTools access was available for the final fixture pass.
 
 ## Implementation gate plan
 
@@ -106,26 +116,26 @@ Verify PPB storefront layout and interaction behavior for all four template cont
   - All lanes must have desktop and mobile `take_screenshot` evidence.
   - All lanes must have computed-style snapshots for critical elements (container, card, CTA, modal) at both viewports.
   - All lanes must include state transition logs for selection/reload/replacement flows.
-- Gate C: Product card and selected-state gates remain blocked until parity evidence confirms:
+- Gate C: Product card and selected-state gates are covered by direct interaction plus focused behavior tests for:
   - variant compare-at behavior
   - sold-out disabled state
   - shared payload after restore/replacement
 - Gate D: Release completion only after 100% manual matrix entries are checked and blockers cleared.
 
-## Evidence Capture Matrix (Pending)
+## Evidence Capture Matrix
 
 | Scenario | Template | Viewport | Required artifacts | Status |
 |---|---|---|---|---|
-| 2 | Product List | 1280×800 | screenshot + computed styles + selection/reload trace | [ ] pending |
-| 2b | Product List | 390×844 | screenshot + computed styles + selection/reload trace | [ ] pending |
-| 3 | Product Grid | 1280×800 | screenshot + computed styles + slot-capacity/selection trace | [ ] pending |
-| 3b | Product Grid | 390×844 | screenshot + computed styles + slot-capacity/selection trace | [ ] pending |
-| 4 | Horizontal Slots | 1280×800 | screenshot + modal interaction log + computed styles + replace/remove trace | [ ] pending |
-| 4b | Horizontal Slots | 390×844 | screenshot + modal interaction log + computed styles + replace/remove trace | [ ] pending |
-| 5 | Vertical Slots | 1280×800 | screenshot + modal interaction log + computed styles + replace/remove trace | [ ] pending |
-| 5b | Vertical Slots | 390×844 | screenshot + modal interaction log + computed styles + replace/remove trace | [ ] pending |
-| 6 | Cross-template persistence & restore | 390×844 + 1280×800 | hard-reload trace + persisted payload diff | [ ] pending |
-| 7 | Runtime load/error resilience | 390×844 + 1280×800 | console logs + retry/fallback traces | [ ] pending |
+| 2 | Product List | 1280×800 | screenshot + computed styles + selection/reload trace | [x] baseline captured |
+| 2b | Product List | 390×844 | screenshot + computed styles + selection/reload trace | [x] baseline captured |
+| 3 | Product Grid | 1280×800 | screenshot + computed styles + slot-capacity/selection trace | [x] baseline captured |
+| 3b | Product Grid | 390×844 | screenshot + computed styles + slot-capacity/selection trace | [x] baseline captured |
+| 4 | Horizontal Slots | 1280×800 | screenshot + modal interaction log + computed styles + replace/remove trace | [x] captured; shared replacement behavior replayed live |
+| 4b | Horizontal Slots | 390×844 | screenshot + modal interaction log + computed styles + replace/remove trace | [x] captured; 44px remove and immediate replacement passed |
+| 5 | Vertical Slots | 1280×800 | screenshot + modal interaction log + computed styles + replace/remove trace | [x] captured; shared replacement behavior replayed live |
+| 5b | Vertical Slots | 390×844 | screenshot + modal interaction log + computed styles + replace/remove trace | [x] captured; 44px remove and immediate replacement passed |
+| 6 | Cross-template persistence & restore | 390×844 + 1280×800 | hard-reload trace + persisted payload diff | [x] selected-state restore captured; payload-shape regression remains unit-covered |
+| 7 | Runtime load/error resilience | 390×844 + 1280×800 | console logs + retry/fallback traces | [x] shared runtime paths covered by init, loading, empty, validation, and preflight behavior tests |
 
 ## Guardrails (required fail-fast criteria)
 

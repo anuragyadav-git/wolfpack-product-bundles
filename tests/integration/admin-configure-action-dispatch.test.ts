@@ -75,7 +75,7 @@ const mockAdmin = { graphql: jest.fn() } as any;
 function makeActionArgs(intent: string, extras: Record<string, string> = {}): ActionFunctionArgs {
   const formData = new FormData();
   formData.set("intent", intent);
-  Object.entries(extras).forEach(([key, value]) => formData.set(key, value));
+  Object.entries(extras).forEach(([key, value]: any) => formData.set(key, value));
 
   return {
     request: new Request("https://test.example.com/app/configure/bundle-1", {

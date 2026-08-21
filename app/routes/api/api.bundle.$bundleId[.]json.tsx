@@ -69,7 +69,7 @@ function isFreshByCacheHeaders(
   return lastModified.getTime() <= clientLastModifiedMs;
 }
 
-export const loader: LoaderFunction = async ({ request, params }) => {
+export const loader: LoaderFunction = async ({ request, params }: any) => {
   const url = new URL(request.url);
   try {
     const { bundleId } = params;
@@ -177,7 +177,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
       headers: commonHeaders,
     });
 
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof Response) {
       throw error;
     }

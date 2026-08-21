@@ -12,7 +12,7 @@ import { STOREFRONT_PROXY_ROOT } from '../../../../config/storefront-proxy-route
 import { calculateBundleTotalForPurchaseOption } from '../../shared/subscription-storefront-methods.js';
 
 export const fullPageDiscountModalMethods: Record<string, any> & ThisType<any> = {
-_renderDiscountProgress(options = {}) {
+_renderDiscountProgress(options: any = {}) {
   const placement = options.placement || "default";
   const providedCombinedDiscountInfo = options.combinedDiscountInfo;
   const providedTotalPrice = options.totalPrice;
@@ -79,7 +79,7 @@ _renderDiscountProgress(options = {}) {
     return null;
   }
 
-  const progressData = getDiscountProgressData({
+  const progressData: any = getDiscountProgressData({
     currentValue: progressPct,
     targetValue: 100,
     message,
@@ -109,7 +109,7 @@ _renderDiscountProgress(options = {}) {
     renderInlineSubtitles: true,
     renderSubtitleList: false,
   }).trim();
-  const bar = wrapper.firstElementChild;
+  const bar = wrapper.firstElementChild as HTMLElement | null;
   const previousProgressPercent = Number(options.previousProgressPercent);
   if (
     options.previousProgressPercent !== null
@@ -163,7 +163,7 @@ getFormattedHeaderText() {
   );
 },
 
-openModal(stepIndex) {
+openModal(stepIndex: any) {
   this.currentStepIndex = stepIndex;
 
   // Update modal header
@@ -183,7 +183,7 @@ openModal(stepIndex) {
     modal.hidden = false;
     modal.classList.add('active');
     document.body.classList.add('modal-open');
-  }).catch(error => {
+  }).catch((error: any)  => {
     ToastManager.show('Failed to load products for this step');
   });
 },
@@ -211,7 +211,7 @@ resolveStorefrontApiBase() {
   if (configuredAppUrl) {
     try {
       configuredAppHost = new URL(configuredAppUrl).host;
-    } catch (_error) {
+    } catch (_error: any) {
       configuredAppHost = '';
     }
   }

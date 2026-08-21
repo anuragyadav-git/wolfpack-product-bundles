@@ -12,3 +12,4 @@ describe('FPB Compact template config contract', () => {
     expect(FPB_COMPACT_TEMPLATE_CONFIG.aliases).toEqual(expect.arrayContaining(['COMPACT']));
   });
 });
+export {};

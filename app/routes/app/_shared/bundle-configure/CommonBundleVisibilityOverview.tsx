@@ -59,7 +59,6 @@ interface CommonBundleVisibilityOverviewProps {
   link: BundleLinkModel;
   onCopyLink: () => void;
   onEnableEmbed?: () => void;
-  styles: Record<string, string>;
   themeEditorUrl?: string | null;
   placementOptions: VisibilityPlacementOption[];
 }
@@ -71,135 +70,154 @@ export function CommonBundleVisibilityOverview({
   onCopyLink,
   onEnableEmbed,
   placementOptions,
-  styles,
   themeEditorUrl,
 }: CommonBundleVisibilityOverviewProps) {
   if (!active) return null;
 
   return (
-    <div className={styles.visibilityOverviewStack}>
-      <div className={styles.visibilityOverviewCard}>
-        <div className={styles.visibilityCardHeaderRow}>
-          <div>
-            <h3 className={styles.visibilityCardTitle}>App Embed Status</h3>
-            <p className={styles.visibilityCardText}>{embedStatus.description}</p>
-          </div>
-          <div
-            className={
-              embedStatus.enabled
-                ? styles.visibilityStatusEnabled
-                : styles.visibilityStatusWarning
-            }
+    <s-stack direction="block" gap="base">
+      <s-section>
+        <s-stack direction="block" gap="base">
+          <s-stack
+            direction="inline"
+            alignItems="start"
+            justifyContent="space-between"
+            gap="base"
           >
-            {embedStatus.label}
-          </div>
-        </div>
-        {!embedStatus.enabled && themeEditorUrl && onEnableEmbed && (
-          <button
-            type="button"
-            className={styles.visibilitySecondaryAction}
-            onClick={onEnableEmbed}
+            <s-stack direction="inline" alignItems="start" gap="small">
+              <s-icon
+                type={embedStatus.enabled ? "check" : "alert-triangle"}
+                tone={embedStatus.enabled ? "success" : "caution"}
+              />
+              <s-stack direction="block" gap="small-100">
+                <s-heading>App Embed Status</s-heading>
+                <s-text color="subdued">{embedStatus.description}</s-text>
+              </s-stack>
+            </s-stack>
+            <s-badge tone={embedStatus.enabled ? "success" : "warning"}>
+              {embedStatus.label}
+            </s-badge>
+          </s-stack>
+          {!embedStatus.enabled && themeEditorUrl && onEnableEmbed && (
+            <s-button variant="primary" icon="globe" onClick={onEnableEmbed}>
+              Enable Here
+            </s-button>
+          )}
+        </s-stack>
+      </s-section>
+
+      <s-section>
+        <s-stack direction="block" gap="base">
+          <s-stack direction="block" gap="small-100">
+            <s-heading>Publishing Best Practices</s-heading>
+            <s-text color="subdued">
+              Pick a placement and follow the quick guide to make your bundle
+              discoverable on your store.
+            </s-text>
+          </s-stack>
+          <s-grid
+            gridTemplateColumns="@container bundle-visibility (inline-size > 760px) repeat(2, minmax(0, 1fr)), 1fr"
+            gap="base"
           >
-            Enable Here
-          </button>
-        )}
-      </div>
+            {VISIBILITY_GUIDES.map(({ title, description, img, guide }: any) => (
+              <s-box
+                key={title}
+                padding="base"
+                border="base"
+                borderRadius="base"
+              >
+                <s-stack direction="block" gap="base">
+                  <s-image aspectRatio="16/7" src={img} alt={title} />
+                  <s-stack
+                    direction="inline"
+                    justifyContent="space-between"
+                    gap="small"
+                  >
+                    <s-heading>{title}</s-heading>
+                    <s-badge tone="info">5 min setup</s-badge>
+                  </s-stack>
+                  <s-text color="subdued">{description}</s-text>
+                  <details>
+                    <summary>Quick Setup Guide</summary>
+                    <s-box paddingBlockStart="small">
+                      <s-text color="subdued">{guide}</s-text>
+                    </s-box>
+                  </details>
+                </s-stack>
+              </s-box>
+            ))}
+          </s-grid>
+        </s-stack>
+      </s-section>
 
-      <div className={styles.visibilityOverviewCard}>
-        <div className={styles.visibilitySectionIntro}>
-          <h3 className={styles.visibilityCardTitle}>
-            Publishing Best Practices
-          </h3>
-          <p className={styles.visibilityCardText}>
-            Pick a placement and follow the quick guide to make your bundle
-            discoverable on your store.
-          </p>
-        </div>
-        <div className={styles.publishingGuideGrid}>
-          {VISIBILITY_GUIDES.map(({ title, description, img, guide }, index) => (
-            <article key={title} className={styles.publishingGuideCard}>
-              <div className={styles.publishingGuideMedia}>
-                <img src={img} alt={title} />
-                <span className={styles.publishingGuideIndex}>
-                  {String(index + 1).padStart(2, "0")}
-                </span>
-              </div>
-              <div className={styles.publishingGuideBody}>
-                <div className={styles.publishingGuideContent}>
-                  <h4 className={styles.publishingGuideTitle}>{title}</h4>
-                  <span className={styles.publishingGuideTime}>5 min setup</span>
-                </div>
-                <p className={styles.publishingGuideDescription}>
-                  {description}
-                </p>
-                <details className={styles.publishingGuideDetails}>
-                    <summary className={styles.publishingGuideAction}>
-                      Quick Setup Guide
-                    </summary>
-                    <p className={styles.publishingGuideSteps}>{guide}</p>
-                </details>
-              </div>
-            </article>
-          ))}
-        </div>
-      </div>
-
-      <div className={styles.visibilityOverviewCard}>
-        <div className={styles.visibilitySectionIntro}>
-          <h3 className={styles.visibilityCardTitle}>Your Bundle Link</h3>
-          <p className={styles.visibilityCardText}>
-            Use this link to place your bundle anywhere - theme components,
-            emails, ads, or social bios.
-          </p>
-        </div>
-        {link.isLinked ? (
-          <div className={styles.visibilityLinkRow}>
-            <input
-              className={styles.visibilityTextInput}
-              aria-label="Bundle link"
-              value={link.url}
-              disabled
-              readOnly
-            />
-            <button
-              type="button"
-              className={styles.visibilitySecondaryAction}
-              onClick={onCopyLink}
+      <s-section>
+        <s-stack direction="block" gap="base">
+          <s-stack direction="inline" alignItems="start" gap="small">
+            <s-icon type="globe" />
+            <s-stack direction="block" gap="small-100">
+              <s-heading>Your Bundle Link</s-heading>
+              <s-text color="subdued">
+                Use this link to place your bundle anywhere - theme components,
+                emails, ads, or social bios.
+              </s-text>
+            </s-stack>
+          </s-stack>
+          {link.isLinked ? (
+            <s-grid
+              gridTemplateColumns="@container bundle-link (inline-size > 520px) minmax(0, 1fr) auto, 1fr"
+              gap="small"
+              alignItems="end"
             >
-              Copy Link
-            </button>
-          </div>
-        ) : (
-          <p className={styles.visibilityCardText}>{link.emptyMessage}</p>
-        )}
-      </div>
+              <s-text-field label="Bundle link" value={link.url} disabled />
+              <s-button
+                variant="secondary"
+                icon="duplicate"
+                onClick={onCopyLink}
+              >
+                Copy Link
+              </s-button>
+            </s-grid>
+          ) : (
+            <s-banner tone="warning">{link.emptyMessage}</s-banner>
+          )}
+        </s-stack>
+      </s-section>
 
-      <div className={styles.visibilityOverviewCard}>
-        <h3 className={styles.visibilityCardTitle}>
-          Want more placement options?
-        </h3>
-        {placementOptions.map((option) => (
-          <div key={option.title} className={styles.visibilitySetupPanel}>
-            <div>
-              <h4 className={styles.visibilitySetupTitle}>{option.title}</h4>
-              <p className={styles.visibilityCardText}>
-                {option.description}
-              </p>
-            </div>
-            <button
-              type="button"
-              className={
-                option.variant === "primary"
-                  ? styles.visibilityPrimaryAction
-                  : styles.visibilitySecondaryAction
-              }
-              onClick={option.onAction}
-            >
-              {option.actionLabel}
-            </button>
-          </div>
-        ))}
-      </div>
-    </div>
+      <s-section>
+        <s-stack direction="block" gap="base">
+          <s-stack direction="inline" alignItems="center" gap="small">
+            <s-icon type="product" />
+            <s-heading>Want more placement options?</s-heading>
+          </s-stack>
+          <s-grid
+            gridTemplateColumns="@container visibility-options (inline-size > 680px) repeat(2, minmax(0, 1fr)), 1fr"
+            gap="base"
+          >
+            {placementOptions.map((option) => (
+              <s-box
+                key={option.title}
+                padding="base"
+                background="subdued"
+                borderRadius="base"
+              >
+                <s-stack direction="block" gap="base">
+                  <s-stack direction="block" gap="small-100">
+                    <s-heading>{option.title}</s-heading>
+                    <s-text color="subdued">{option.description}</s-text>
+                  </s-stack>
+                  <s-button
+                    variant={option.variant}
+                    icon="arrow-right"
+                    onClick={option.onAction}
+                  >
+                    {option.actionLabel}
+                  </s-button>
+                </s-stack>
+              </s-box>
+            ))}
+          </s-grid>
+        </s-stack>
+      </s-section>
+    </s-stack>
   );
 }

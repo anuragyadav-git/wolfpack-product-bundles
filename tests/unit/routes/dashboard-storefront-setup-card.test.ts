@@ -10,7 +10,7 @@ const APP_EMBED_RESOURCE = {
   status: "unavailable" as const,
   enabled: false,
   target: null,
-};
+} as const;
 
 const AVAILABLE_RESOURCE = {
   handle: "bundle-product-page",
@@ -19,7 +19,7 @@ const AVAILABLE_RESOURCE = {
   status: "available" as const,
   enabled: true,
   target: null,
-};
+} as const;
 
 describe("dashboard storefront setup card", () => {
   it("keeps loading and failed checks distinct from a completed setup", () => {

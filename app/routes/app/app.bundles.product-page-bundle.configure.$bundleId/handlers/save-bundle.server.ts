@@ -213,7 +213,6 @@ export async function handleSaveBundle(
     const loadingGifRaw = formData.get("loadingGif") as string;
     const loadingGif = loadingGifRaw || null;
     const showProductPrices = formData.get("showProductPrices") !== "false";
-    const showCompareAtPrices = formData.get("showCompareAtPrices") === "true";
     const cartRedirectToCheckout =
       formData.get("cartRedirectToCheckout") === "true";
     const allowQuantityChanges =
@@ -464,7 +463,6 @@ export async function handleSaveBundle(
         templateName: templateName,
         loadingGif: loadingGif,
         showProductPrices,
-        showCompareAtPrices,
         cartRedirectToCheckout,
         allowQuantityChanges,
         sdkMode,
@@ -652,7 +650,7 @@ export async function handleSaveBundle(
       bundle: compactBundleForConfigureResponse(updatedBundle),
       message: "Updated Successfully!",
     });
-  } catch (error) {
+  } catch (error: any) {
     const message =
       error instanceof Error
         ? error.message

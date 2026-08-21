@@ -1,0 +1,8 @@
+{
+  "status": "passed",
+  "violations": [],
+  "duplicate_requests": [],
+  "allowlisted": [
+    {"request": "GET /favicon.ico", "status": 404, "reason": "Theme-owned missing favicon"}
+  ]
+}

@@ -81,7 +81,7 @@ function queueProductHandleBackfill(
         );
       }
       if (updates.length > 0) await Promise.all(updates);
-    } catch (error) {
+    } catch (error: any) {
       AppLogger.error("Failed to backfill product handles", { component: "app.dashboard", operation: "backfill-product-handles" }, error);
     }
   })();
@@ -148,7 +148,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const billingPromise = (async () => {
     try {
       return await getSubscriptionInfoFromCache(session.shop);
-    } catch (error) {
+    } catch (error: any) {
       AppLogger.error("Failed to fetch subscription info", { component: "app.dashboard", operation: "get-subscription-info" }, error);
       return null;
     }
@@ -212,7 +212,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
             AppLogger.warn("UTM pixel create/reconnect had errors on dashboard load", { component: "app.dashboard", operation: "ensure-web-pixel" }, errs);
           }
         }
-      } catch (_err) { /* Non-critical */ }
+      } catch (_err: any) { /* Non-critical */ }
     });
   }
 

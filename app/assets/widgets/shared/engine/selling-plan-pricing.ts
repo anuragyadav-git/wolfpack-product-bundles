@@ -12,7 +12,7 @@ export function resolveStorefrontSubscriptionPresentation(subscription: any, loc
   const selectedPlanIds = Array.isArray(subscription?.selectedPlanIds)
     ? subscription.selectedPlanIds
     : [];
-  const localizedCopy = {
+  const localizedCopy: any = {
     title: exact.title ?? language.title ?? subscription?.copy?.title ?? "",
     subtitle: exact.subtitle ?? language.subtitle ?? subscription?.copy?.subtitle ?? "",
     ...(exact.unavailableMessage ?? language.unavailableMessage ?? subscription?.copy?.unavailableMessage

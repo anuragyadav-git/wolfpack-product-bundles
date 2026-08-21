@@ -3,14 +3,14 @@
 import { PricingCalculator } from '../widgets/shared/pricing-calculator.js';
 import { CurrencyManager } from '../widgets/shared/currency-manager.js';
 
-export function getDisplayPrice(state) {
+export function getDisplayPrice(state: any) {
   if (!state.isReady || !state.bundleData) {
     return { original: 0, discounted: 0, savings: 0, savingsPercent: 0, formatted: '' };
   }
 
   var totals = PricingCalculator.calculateBundleTotal(
     // Build selectedProducts array (array-of-objects indexed by step position, matching widget format)
-    state.steps.map(function (step) { return state.selections[step.id] || {}; }),
+    state.steps.map(function (step: any) { return state.selections[step.id] || {}; }),
     state.stepProductData || [],
     state.steps
   );
@@ -32,7 +32,7 @@ export function getDisplayPrice(state) {
     try {
       var currencyInfo = CurrencyManager.getCurrencyInfo();
       formatted = CurrencyManager.convertAndFormat(discounted, currencyInfo);
-    } catch (_) {
+    } catch (_: any) {
       formatted = '$' + (discounted / 100).toFixed(2);
     }
   } else {

@@ -27,16 +27,15 @@ export function FpbBundleVisibilityPanel({
     },
     onEnableEmbed: flow.openThemeEditorForAppEmbed,
     placementOptions: [
-        {
-          title: "Bundle Widget",
-          description:
-            "This will display an upsell block or button on the product pages of your choice.",
-          actionLabel: "Set up Bundle Widget",
-          variant: "primary",
-          onAction: () => flow.handleSectionChange("bundle_widget"),
-        },
-      ],
-    styles: flow.fullPageBundleStyles,
+      {
+        title: "Bundle Widget",
+        description:
+          "This will display an upsell block or button on the product pages of your choice.",
+        actionLabel: "Set up Bundle Widget",
+        variant: "primary",
+        onAction: () => flow.handleSectionChange("bundle_widget"),
+      },
+    ],
     themeEditorUrl: flow.themeEditorUrl,
   });
 }

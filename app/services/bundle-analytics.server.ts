@@ -121,7 +121,7 @@ export class BundleAnalyticsService {
         }
       };
 
-    } catch (error) {
+    } catch (error: any) {
       AppLogger.error("Error getting shop stats", {
         component: "bundle-analytics.server",
         operation: "getShopStats"
@@ -179,7 +179,7 @@ export class BundleAnalyticsService {
         createdAt: bundle.createdAt,
       }));
 
-    } catch (error) {
+    } catch (error: any) {
       AppLogger.error("Error getting bundle metrics", {
         component: "bundle-analytics.server",
         operation: "getBundleMetrics"
@@ -221,7 +221,7 @@ export class BundleAnalyticsService {
         bundlesCreatedLast30Days: last30Days,
       };
 
-    } catch (error) {
+    } catch (error: any) {
       AppLogger.error("Error getting recent activity", {
         component: "bundle-analytics.server",
         operation: "getRecentActivity"
@@ -260,7 +260,7 @@ export class BundleAnalyticsService {
         }
       };
 
-    } catch (error) {
+    } catch (error: any) {
       AppLogger.error("Error getting analytics summary", {
         component: "bundle-analytics.server",
         operation: "getAnalyticsSummary"
@@ -324,7 +324,7 @@ export class BundleAnalyticsService {
         bundleTypes: { productPage: productPage, fullPage: fullPage }
       };
 
-    } catch (error) {
+    } catch (error: any) {
       AppLogger.error("Error getting quick stats", {
         component: "bundle-analytics.server",
         operation: "getQuickStats"

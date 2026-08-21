@@ -1,0 +1,175 @@
+{
+  "schema_version": 1,
+  "job_id": "ppb-bundle-picker-modal-redesign-20260821",
+  "revision": 6,
+  "status": "complete",
+  "cases": [
+    {
+      "id": "long-product-title",
+      "data": {
+        "title": "Extra long product title that wraps normally, reaches the filled-slot height cap, visually clamps without collision, and remains complete in the accessible name"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "short-product-title",
+      "data": {
+        "title": "Tea"
+      },
+      "required_in_browser_qa": false
+    },
+    {
+      "id": "high-price",
+      "data": {
+        "price": "$12,345.67"
+      },
+      "required_in_browser_qa": false
+    },
+    {
+      "id": "discounted-price",
+      "data": {
+        "price": "$79.00",
+        "compare_at": "$129.00"
+      },
+      "required_in_browser_qa": false
+    },
+    {
+      "id": "zero-discount",
+      "data": {
+        "discount": 0
+      },
+      "required_in_browser_qa": false
+    },
+    {
+      "id": "long-variant-name",
+      "data": {
+        "variant": "Extra Large / Limited Edition / Midnight Blue"
+      },
+      "required_in_browser_qa": false
+    },
+    {
+      "id": "multiple-variant-dimensions",
+      "data": {
+        "options": [
+          "Size",
+          "Color",
+          "Material"
+        ]
+      },
+      "required_in_browser_qa": false
+    },
+    {
+      "id": "missing-image",
+      "data": {
+        "image": null
+      },
+      "required_in_browser_qa": false
+    },
+    {
+      "id": "portrait-image",
+      "data": {
+        "aspect_ratio": "2:3"
+      },
+      "required_in_browser_qa": false
+    },
+    {
+      "id": "landscape-image",
+      "data": {
+        "aspect_ratio": "16:9"
+      },
+      "required_in_browser_qa": false
+    },
+    {
+      "id": "quantity-one",
+      "data": {
+        "quantity": 1
+      },
+      "required_in_browser_qa": false
+    },
+    {
+      "id": "quantity-ten-plus",
+      "data": {
+        "quantity": 12
+      },
+      "required_in_browser_qa": false
+    },
+    {
+      "id": "zero-selected-products",
+      "data": {
+        "selected": 0
+      },
+      "required_in_browser_qa": false
+    },
+    {
+      "id": "many-selected-products",
+      "data": {
+        "selected": 12
+      },
+      "required_in_browser_qa": false
+    },
+    {
+      "id": "long-translated-copy",
+      "data": {
+        "scale": 1.8
+      },
+      "required_in_browser_qa": false
+    },
+    {
+      "id": "wide-currency-format",
+      "data": {
+        "currency": "CHF 12\u2019345.67"
+      },
+      "required_in_browser_qa": false
+    },
+    {
+      "id": "validation-error",
+      "data": {
+        "message": "Existing localized selection requirement"
+      },
+      "required_in_browser_qa": false
+    },
+    {
+      "id": "slow-loading-state",
+      "data": {
+        "latency_ms": 3000
+      },
+      "required_in_browser_qa": false
+    },
+    {
+      "id": "sparse-desktop-grid",
+      "data": {
+        "products": 2,
+        "viewport": "1440x900"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "maximum-greater-than-one",
+      "data": {
+        "quantity": 3,
+        "allowed_quantity": 3
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "grouped-variant-context",
+      "data": {
+        "variants": [
+          "available",
+          "unavailable",
+          "compare-at",
+          "variant-image"
+        ]
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "details-long-description",
+      "data": {
+        "description_lines": 24,
+        "images": 5
+      },
+      "required_in_browser_qa": true
+    }
+  ]
+}

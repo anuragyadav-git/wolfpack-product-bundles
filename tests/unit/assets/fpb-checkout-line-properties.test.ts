@@ -7,7 +7,7 @@ const { fullPageStepFooterMethods } =
 const { fullPageValidationAddonsMethods } =
   require("../../../app/assets/widgets/full-page/methods/validation-addons-methods.js");
 function createCartAddFetchMock() {
-  return jest.fn(async (url: string) => ({
+  return jest.fn(async (url: string, _options?: RequestInit) => ({
     ok: true,
     json: async () =>
       url === "/apps/product-bundles/api/cart-transform-runtime-token"
@@ -125,9 +125,9 @@ describe("FPB checkout cart-line properties", () => {
     }
 
     const tokenRequest = fetchMock.mock.calls.find(
-      ([url]) => url === "/apps/product-bundles/api/cart-transform-runtime-token",
-    );
-    const body = JSON.parse(tokenRequest[1].body);
+      ([url]: any) => url === "/apps/product-bundles/api/cart-transform-runtime-token",
+    )!;
+    const body = JSON.parse(String(tokenRequest[1]?.body));
 
     expect(tokenRequest[1]).toMatchObject({
       method: "POST",
@@ -140,7 +140,7 @@ describe("FPB checkout cart-line properties", () => {
     }]);
   });
 
-  it("keeps paid add-on savings out of parent bundle display metadata", () => {
+    it("keeps paid add-on savings out of parent pricing metadata", () => {
     const originalWindow = (global as any).window;
     let sourceProperties;
 
@@ -187,6 +187,11 @@ describe("FPB checkout cart-line properties", () => {
       box: "1",
       items: "1 x Paid product",
       retailPrice: "$829.00",
+      labels: {
+        items: "Items",
+        retailPrice: "Retail Price",
+        youSave: "You Save",
+      },
     });
     expect(sourceProperties).not.toHaveProperty("Items");
     expect(sourceProperties).not.toHaveProperty("Retail Price");
@@ -294,9 +299,9 @@ describe("FPB checkout cart-line properties", () => {
       (global as any).setTimeout = originalSetTimeout;
     }
 
-    const addRequest = fetchMock.mock.calls.find(([url]) => url === "/cart/add.js");
+    const addRequest: any = fetchMock.mock.calls.find(([url]: any) => url === "/cart/add.js")!;
     expect(addRequest).toBeDefined();
-    const body = JSON.parse(addRequest[1].body);
+    const body = JSON.parse(String(addRequest[1]?.body));
     expect(body.items).toEqual([
       expect.objectContaining({
         id: "111",
@@ -412,9 +417,9 @@ describe("FPB checkout cart-line properties", () => {
       (global as any).setTimeout = originalSetTimeout;
     }
 
-    const addRequest = fetchMock.mock.calls.find(([url]) => url === "/cart/add.js");
+    const addRequest = fetchMock.mock.calls.find(([url]: any) => url === "/cart/add.js")!;
     expect(addRequest).toBeDefined();
-    const body = JSON.parse(addRequest[1].body);
+    const body = JSON.parse(String(addRequest[1]?.body));
 
     expect(body.items).toHaveLength(2);
     body.items.forEach((item: { properties: Record<string, string> }) => {
@@ -510,9 +515,9 @@ describe("FPB checkout cart-line properties", () => {
       (global as any).setTimeout = originalSetTimeout;
     }
 
-    const addRequest = fetchMock.mock.calls.find(([url]) => url === "/cart/add.js");
+    const addRequest = fetchMock.mock.calls.find(([url]: any) => url === "/cart/add.js")!;
     expect(addRequest).toBeDefined();
-    const body = JSON.parse(addRequest[1].body);
+    const body = JSON.parse(String(addRequest[1]?.body));
     const addonLine = body.items.find(
       (item: { properties: Record<string, string> }) =>
         item.properties._bundle_step_type === "addon:PERCENTAGE:10",
@@ -943,9 +948,9 @@ describe("FPB checkout cart-line properties", () => {
       (global as any).setTimeout = originalSetTimeout;
     }
 
-    const addRequest = fetchMock.mock.calls.find(([url]) => url === "/cart/add.js");
+    const addRequest = fetchMock.mock.calls.find(([url]: any) => url === "/cart/add.js")!;
     expect(addRequest).toBeDefined();
-    const body = JSON.parse(addRequest[1].body);
+    const body = JSON.parse(String(addRequest[1]?.body));
     const addonLine = body.items.find(
       (item: { properties: Record<string, string> }) =>
         item.properties._bundle_step_type === "addon:PERCENTAGE:100",
@@ -963,6 +968,11 @@ describe("FPB checkout cart-line properties", () => {
       box: "1",
       items: "1 x Paid product",
       retailPrice: "$829.00",
+      labels: {
+        items: "Items",
+        retailPrice: "Retail Price",
+        youSave: "You Save",
+      },
     });
   });
 
@@ -1076,9 +1086,9 @@ describe("FPB checkout cart-line properties", () => {
       (global as any).setTimeout = originalSetTimeout;
     }
 
-    const addRequest = fetchMock.mock.calls.find(([url]) => url === "/cart/add.js");
+    const addRequest = fetchMock.mock.calls.find(([url]: any) => url === "/cart/add.js")!;
     expect(addRequest).toBeDefined();
-    const body = JSON.parse(addRequest[1].body);
+    const body = JSON.parse(String(addRequest[1]?.body));
     const addonLine = body.items.find(
       (item: { properties: Record<string, string> }) =>
         item.properties._bundle_step_type === "addon:PERCENTAGE:100",
@@ -1199,9 +1209,9 @@ describe("FPB checkout cart-line properties", () => {
       (global as any).setTimeout = originalSetTimeout;
     }
 
-    const addRequest = fetchMock.mock.calls.find(([url]) => url === "/cart/add.js");
+    const addRequest = fetchMock.mock.calls.find(([url]: any) => url === "/cart/add.js")!;
     expect(addRequest).toBeDefined();
-    const body = JSON.parse(addRequest[1].body);
+    const body = JSON.parse(String(addRequest[1]?.body));
     const displayProperties = JSON.parse(body.items[0].properties._bundle_display_properties);
 
     expect(body.items).toHaveLength(2);
@@ -1213,6 +1223,11 @@ describe("FPB checkout cart-line properties", () => {
       box: "1",
       items: "1 x First product, 1 x Second product",
       retailPrice: "",
+      labels: {
+        items: "Items",
+        retailPrice: "Retail Price",
+        youSave: "You Save",
+      },
     });
     expect(displayProperties).not.toHaveProperty("youSave");
   });

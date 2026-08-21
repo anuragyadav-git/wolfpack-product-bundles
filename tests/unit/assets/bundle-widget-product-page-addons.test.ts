@@ -9,7 +9,7 @@ describe("Product Page widget direct Add-ons contract", () => {
     const source = readProductPageWidgetSources();
 
     expect(source).toContain("getAddonLineDiscount(step)");
-    expect(source).toContain("getAddonProductSelectionKeys(step)");
+    expect(source).toContain("getAddonProductSelectionKeys(step: any)");
     expect(source).toContain("calculateSelectedAddonDiscountAmount()");
     expect(source).toContain("getDiscountInfoWithSelectedAddonDiscount(discountInfo, totalPrice)");
     expect(source).toContain("const discount = step?.addonDiscount || tier?.discount || {}");
@@ -46,7 +46,7 @@ describe("Product Page widget direct Add-ons contract", () => {
     expect(source).toContain("const discountInfo = calculateBundleDiscountForPurchaseOption(");
     expect(source).toContain("const combinedDiscountInfo = this.getDiscountInfoWithSelectedAddonDiscount(discountInfo, totalPrice);");
     expect(source).toContain("const discountAmount = Math.max(0, Number(combinedDiscountInfo.discountAmount || 0));");
-    expect(source).toContain("const chargeableAddonStep = steps.find(candidate => candidate?.isFreeGift === true && candidate?.addonDisplayFree !== true && this.getAddonLineDiscount(candidate));");
+    expect(source).toContain("const chargeableAddonStep = steps.find((candidate: any)  => candidate?.isFreeGift === true && candidate?.addonDisplayFree !== true && this.getAddonLineDiscount(candidate));");
     expect(source).toContain("const isChargeableAddonItem = Number(item.stepIndex) === chargeableAddonStepIndex || (item.isFreeGift === true && item.addonDisplayFree !== true);");
     expect(source).toContain("const discountPercentage = combinedDiscountInfo.discountPercentage");
     expect(source).toContain("buildCartLineSourceProperties({");

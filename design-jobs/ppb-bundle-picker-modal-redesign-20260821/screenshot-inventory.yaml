@@ -1,0 +1,257 @@
+{
+  "schema_version": 1,
+  "job_id": "ppb-bundle-picker-modal-redesign-20260821",
+  "revision": 6,
+  "status": "complete",
+  "items": [
+    {
+      "id": "WPB-PICKER-DESKTOP-001",
+      "original_filename": "direct-chrome-session-capture",
+      "artifact_path": "",
+      "roles": [
+        "CURRENT",
+        "DESKTOP",
+        "STATE"
+      ],
+      "component": "PPB shared bundle picker",
+      "state": "Horizontal Slots loaded catalog",
+      "viewport": {
+        "width": 1280,
+        "height": 800,
+        "status": "exact"
+      },
+      "browser_zoom": "100%",
+      "pixel_dimensions": {
+        "width": 1280,
+        "height": 800
+      },
+      "crop_status": "viewport",
+      "surrounding_context_included": true,
+      "source": "agent SIT storefront",
+      "provenance": "Direct Chrome DevTools MCP after cache-bypassed reload; widget 12.3.0",
+      "intended_use": "current-state geometry and overflow baseline",
+      "quality_issues": [
+        "Transient screenshot intentionally not committed"
+      ],
+      "comparable_counterparts": [
+        "EB-PICKER-DOC-001"
+      ],
+      "permissions_or_usage_notes": "Development fixture; safe product catalog only.",
+      "approval_status": "approved-current-evidence"
+    },
+    {
+      "id": "WPB-PICKER-MOBILE-001",
+      "original_filename": "direct-chrome-session-capture",
+      "artifact_path": "",
+      "roles": [
+        "CURRENT",
+        "MOBILE",
+        "STATE"
+      ],
+      "component": "PPB shared bundle picker",
+      "state": "Horizontal Slots loaded catalog",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "status": "exact"
+      },
+      "browser_zoom": "100%",
+      "pixel_dimensions": {
+        "width": 390,
+        "height": 844
+      },
+      "crop_status": "viewport",
+      "surrounding_context_included": true,
+      "source": "agent SIT storefront",
+      "provenance": "Direct Chrome DevTools MCP after Cache Storage clear and ignore-cache reload; widget 12.3.0",
+      "intended_use": "mobile current-state geometry and footer-overlap baseline",
+      "quality_issues": [
+        "Transient screenshot intentionally not committed"
+      ],
+      "comparable_counterparts": [
+        "EB-PICKER-DOC-001"
+      ],
+      "permissions_or_usage_notes": "Development fixture; safe product catalog only.",
+      "approval_status": "approved-current-evidence"
+    },
+    {
+      "id": "EB-PICKER-DOC-001",
+      "original_filename": "HS17-modal-scroll-focus-evidence.md",
+      "artifact_path": "docs/competitor-analysis/ppb-horizontal-slots-agentic-parity/HS17-modal-scroll-focus-evidence.md",
+      "roles": [
+        "TARGET",
+        "INSPIRATION",
+        "CONTEXT"
+      ],
+      "component": "EB PPB modal picker",
+      "state": "desktop and mobile open picker",
+      "viewport": {
+        "width": null,
+        "height": null,
+        "status": "documented-multiple"
+      },
+      "browser_zoom": "documented 100%",
+      "pixel_dimensions": {
+        "width": null,
+        "height": null
+      },
+      "crop_status": "documented-observation",
+      "surrounding_context_included": true,
+      "source": "accepted direct EB parity evidence",
+      "provenance": "Repository evidence captured with direct Chrome DevTools MCP on 2026-07-13",
+      "intended_use": "structural and interaction inspiration, not exact visual matching",
+      "quality_issues": [
+        "Historical evidence may not represent current EB styling",
+        "No current comparable raster capture"
+      ],
+      "comparable_counterparts": [
+        "WPB-PICKER-DESKTOP-001",
+        "WPB-PICKER-MOBILE-001"
+      ],
+      "permissions_or_usage_notes": "Use only hierarchy and behavior; do not copy competitor code or branding.",
+      "approval_status": "approved-for-inspiration"
+    },
+    {
+      "id": "EB-PICKER-DOC-002",
+      "original_filename": "VS04-live-modal-and-filled-row-reaudit.md",
+      "artifact_path": "docs/competitor-analysis/ppb-vertical-slots-agentic-parity/VS04-live-modal-and-filled-row-reaudit.md",
+      "roles": [
+        "TARGET",
+        "INSPIRATION",
+        "STATE"
+      ],
+      "component": "EB PPB modal picker",
+      "state": "Vertical Slots selected and validation states",
+      "viewport": {
+        "width": null,
+        "height": null,
+        "status": "documented-mobile-and-desktop"
+      },
+      "browser_zoom": "documented 100%",
+      "pixel_dimensions": {
+        "width": null,
+        "height": null
+      },
+      "crop_status": "documented-observation",
+      "surrounding_context_included": true,
+      "source": "accepted direct EB parity evidence",
+      "provenance": "Repository evidence captured with direct Chrome DevTools MCP on 2026-07-13",
+      "intended_use": "shared picker, selected-card, toast, and responsive behavior inspiration",
+      "quality_issues": [
+        "Historical evidence may not represent current EB styling"
+      ],
+      "comparable_counterparts": [
+        "WPB-PICKER-MOBILE-001"
+      ],
+      "permissions_or_usage_notes": "Use only hierarchy and behavior; Wolfpack tokens remain authoritative.",
+      "approval_status": "approved-for-inspiration"
+    },
+    {
+      "id": "EB-PICKER-DOC-003",
+      "original_filename": "HS03-variant-display-evidence.md",
+      "artifact_path": "docs/competitor-analysis/ppb-horizontal-slots-agentic-parity/HS03-variant-display-evidence.md",
+      "roles": [
+        "TARGET",
+        "CONTEXT",
+        "STATE"
+      ],
+      "component": "EB grouped multi-variant picker card",
+      "state": "native selector change followed by independent Add",
+      "viewport": {
+        "width": null,
+        "height": null,
+        "status": "documented-desktop"
+      },
+      "browser_zoom": "documented 100%",
+      "pixel_dimensions": {
+        "width": null,
+        "height": null
+      },
+      "crop_status": "documented-observation",
+      "surrounding_context_included": true,
+      "source": "accepted direct EB parity evidence",
+      "provenance": "Repository evidence captured with direct Chrome DevTools MCP on 2026-07-13",
+      "intended_use": "behavioral reference for grouped selector identity and separate Add action",
+      "quality_issues": [
+        "No committed raster; visual label treatment is supplied by the revision-2 contract"
+      ],
+      "comparable_counterparts": [
+        "WPB-PICKER-DESKTOP-001"
+      ],
+      "permissions_or_usage_notes": "Behavioral evidence only; use Wolfpack markup and branding.",
+      "approval_status": "approved-for-behavior"
+    },
+    {
+      "id": "EB-PICKER-DOC-004",
+      "original_filename": "VS06-quantity-validation-current-state.md",
+      "artifact_path": "docs/competitor-analysis/ppb-vertical-slots-agentic-parity/VS06-quantity-validation-current-state.md",
+      "roles": [
+        "TARGET",
+        "CONTEXT",
+        "STATE"
+      ],
+      "component": "EB modal selected product card",
+      "state": "maximum-one Added x1 and remove-all activation",
+      "viewport": {
+        "width": null,
+        "height": null,
+        "status": "documented-current-state"
+      },
+      "browser_zoom": "documented 100%",
+      "pixel_dimensions": {
+        "width": null,
+        "height": null
+      },
+      "crop_status": "documented-observation",
+      "surrounding_context_included": true,
+      "source": "accepted direct EB parity evidence",
+      "provenance": "Repository evidence captured with direct Chrome DevTools MCP on 2026-07-13",
+      "intended_use": "behavioral reference for maximum-reached card presentation",
+      "quality_issues": [
+        "Maximum greater than one and validation-disabled states are supplied by the revision-2 contract"
+      ],
+      "comparable_counterparts": [
+        "WPB-PICKER-MOBILE-001"
+      ],
+      "permissions_or_usage_notes": "Behavioral evidence only.",
+      "approval_status": "approved-for-behavior"
+    },
+    {
+      "id": "EB-PICKER-DOC-005",
+      "original_filename": "VS07-grouped-variant-selector-evidence.md",
+      "artifact_path": "docs/competitor-analysis/ppb-vertical-slots-agentic-parity/VS07-grouped-variant-selector-evidence.md",
+      "roles": [
+        "TARGET",
+        "MOBILE",
+        "DESKTOP",
+        "STATE"
+      ],
+      "component": "EB Vertical Slots grouped variant card",
+      "state": "desktop and mobile selector identity retained through Add",
+      "viewport": {
+        "width": null,
+        "height": null,
+        "status": "documented-1280-and-390"
+      },
+      "browser_zoom": "documented 100%",
+      "pixel_dimensions": {
+        "width": null,
+        "height": null
+      },
+      "crop_status": "documented-observation",
+      "surrounding_context_included": true,
+      "source": "accepted direct EB parity evidence",
+      "provenance": "Repository evidence captured with direct Chrome DevTools MCP on 2026-07-13",
+      "intended_use": "behavioral reference for shared Horizontal and Vertical grouped selectors",
+      "quality_issues": [
+        "No committed raster"
+      ],
+      "comparable_counterparts": [
+        "WPB-PICKER-DESKTOP-001",
+        "WPB-PICKER-MOBILE-001"
+      ],
+      "permissions_or_usage_notes": "Behavioral evidence only.",
+      "approval_status": "approved-for-behavior"
+    }
+  ]
+}

@@ -16,7 +16,7 @@ describe("Settings Design DTO", () => {
     { field: "Primary Font Weight", value: "Heavy" },
     { field: "Image Fit", value: "Crop" },
     { field: "generalSettings.loadingGifUrl", value: "http://cdn.example.test/loading.gif" },
-  ])("rejects invalid $field values", ({ field, value }) => {
+  ])("rejects invalid $field values", ({ field, value }: any) => {
     const state = createSettingsDesignState();
 
     expect(() => parseSettingsDesignPayload({

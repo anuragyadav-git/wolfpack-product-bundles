@@ -280,7 +280,7 @@ export async function validateProductBundleWidgetSetup(
       message: 'Bundle widget is installed. Create a bundle product to see it on your storefront.'
     };
 
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.error('Failed to validate product bundle widget setup', {
       component: 'WidgetProductBundle',
       shop,

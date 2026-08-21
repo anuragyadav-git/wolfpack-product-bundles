@@ -107,7 +107,7 @@ export async function isVariantExistsOnShopifyStorefront(
       status: response.status,
       available,
     };
-  } catch (error) {
+  } catch (error: any) {
     return {
       ok: false,
       id: variantNumericId,

@@ -64,7 +64,7 @@ function makeBundleResponse(overrides: Partial<{
     }
 
     if (query.includes("ProductWithSellingPlanGroups")) {
-      const product = (overrides.products ?? []).find(({ id }) => id === options?.variables?.id);
+      const product = (overrides.products ?? []).find(({ id }: any) => id === options?.variables?.id);
       return Promise.resolve({
         json: async () => ({
           data: {

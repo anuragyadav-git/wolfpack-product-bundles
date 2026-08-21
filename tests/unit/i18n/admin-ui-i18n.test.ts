@@ -17,7 +17,7 @@ function flattenKeys(value: unknown, prefix = ""): string[] {
   }
 
   return Object.entries(value)
-    .flatMap(([key, child]) => flattenKeys(child, prefix ? `${prefix}.${key}` : key))
+    .flatMap(([key, child]: any) => flattenKeys(child, prefix ? `${prefix}.${key}` : key))
     .sort();
 }
 

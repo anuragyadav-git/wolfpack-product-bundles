@@ -7,15 +7,19 @@ import { renderDiscountProgress } from '../../shared/components/discount-progres
 import { renderSharedProductCard } from '../../shared/components/product-card.js';
 import { formatProductPageStepValidationToast } from './modal-state-methods.js';
 
-export function shouldHideInpageStepChrome({ isCascade = false, steps = [], step = null } = {}) {
+export function shouldHideInpageStepChrome({ isCascade = false, steps = [], step = null }: any = {}) {
   if (!isCascade) return false;
 
   const categories = Array.isArray(step?.categories) ? step.categories : [];
   return Array.isArray(steps) && steps.length === 1 && categories.length <= 1;
 }
 
-export function shouldUseCascadeStepFlow({ isInpage = false, isCascade = false, isGrid = false, steps = [] } = {}) {
+export function shouldUseCascadeStepFlow({ isInpage = false, isCascade = false, isGrid = false, steps = [] }: any = {}) {
   return Boolean(isInpage && (isCascade || isGrid) && Array.isArray(steps) && steps.length > 1);
+}
+
+export function shouldShowCompletedStepTitle({ isComplete = false, hideCompletedTitles = false }: any = {}) {
+  return !(isComplete && hideCompletedTitles);
 }
 
 export function getCascadeStepNavigationState({
@@ -23,7 +27,7 @@ export function getCascadeStepNavigationState({
   direction = 0,
   stepCount = 0,
   isCurrentStepValid = false,
-} = {}) {
+}: any = {}) {
   const lastStepIndex = Math.max(0, Number(stepCount || 0) - 1);
   const current = Math.min(Math.max(0, Number(currentStepIndex || 0)), lastStepIndex);
 
@@ -46,10 +50,10 @@ export function getCascadeStepNavigationState({
   return { targetStepIndex: current + 1, blocked: false, isFinal: false };
 }
 
-export function getGridStepRenderSequence({ stepCount = 0, currentStepIndex = 0 } = {}) {
+export function getGridStepRenderSequence({ stepCount = 0, currentStepIndex = 0 }: any = {}) {
   const count = Math.max(0, Number(stepCount || 0));
   const activeIndex = Math.min(Math.max(0, Number(currentStepIndex || 0)), Math.max(0, count - 1));
-  const sequence = [];
+  const sequence: any[] = [];
 
   for (let stepIndex = 0; stepIndex < count; stepIndex += 1) {
     sequence.push({ type: 'header', stepIndex });
@@ -117,7 +121,7 @@ _renderDirectDefaultProducts() {
   list.className = 'bw-default-products__list';
   const currencyInfo = CurrencyManager.getCurrencyInfo();
 
-  products.forEach(product => {
+  products.forEach((product: any)  => {
     const selectedQuantity = Number(this.getSelectedQuantity(0, product.variantId));
     const defaultQuantity = Number.parseFloat(product.defaultRequiredQuantity);
     const resolvedDefaultQuantity = Number.isFinite(defaultQuantity) && defaultQuantity >= 0 ? defaultQuantity : 0;
@@ -160,7 +164,7 @@ _renderDirectDefaultProducts() {
 },
 
 // Returns a full-width banner image element for a step, or null if not configured
-_createStepBannerImage(step) {
+_createStepBannerImage(step: any) {
   const imageUrl = step?.stepImage || step?.bannerImageUrl || null;
   if (!imageUrl) return null;
   const wrapper = document.createElement('div');
@@ -191,9 +195,9 @@ renderProductPageLayout() {
 
   const stepsToRender = usesCascadeStepFlow
     ? [[this.selectedBundle.steps[this.currentStepIndex], this.currentStepIndex]]
-    : this.selectedBundle.steps.map((step, stepIndex) => [step, stepIndex]);
+    : this.selectedBundle.steps.map((step: any, stepIndex: any) => [step, stepIndex]);
 
-  stepsToRender.forEach(([step, stepIndex]) => {
+  stepsToRender.forEach(([step, stepIndex]: any) => {
     if (this._isProductPageInpageTemplate()) {
       const section = this._createInpageStepSection(step, stepIndex);
       const target = section.querySelector('.bw-ppb-inpage-step-grid');
@@ -235,11 +239,11 @@ renderProductPageLayout() {
     } else {
       // Regular selectable step
       const stepSelections = this.selectedProducts[stepIndex] || {};
-      const selectedEntries = Object.entries(stepSelections).filter(([, qty]) => qty > 0);
+      const selectedEntries = Object.entries(stepSelections).filter(([, qty]: any) => qty > 0);
 
       if (selectedEntries.length > 0) {
         const products = this.expandProductsByVariant(this.stepProductData[stepIndex] || []);
-        selectedEntries.forEach(([variantId, qty]) => {
+        selectedEntries.forEach(([variantId, qty]: any) => {
           const product = this.findProductBySelectionKey(products, variantId);
           if (product) {
             for (let i = 0; i < qty; i++) {
@@ -251,7 +255,7 @@ renderProductPageLayout() {
             }
           }
         });
-        const totalQty = selectedEntries.reduce((sum, [, qty]) => sum + qty, 0);
+        const totalQty = selectedEntries.reduce((sum, [, qty]: any) => sum + qty, 0);
         if (this._isProductPageModalSlotTemplate()) {
           this._appendModalSlotEmptyCards(target, step, stepIndex, totalQty);
         } else if (!this.validateStep(stepIndex)) {
@@ -278,7 +282,7 @@ _renderGridStepFlowLayout() {
     currentStepIndex: this.currentStepIndex,
   });
 
-  sequence.forEach(({ type, stepIndex }) => {
+  sequence.forEach(({ type, stepIndex }: any) => {
     const step = this.selectedBundle.steps[stepIndex];
     if (type === 'header') {
       this.elements.stepsContainer.appendChild(this._createGridStepHeader(step, stepIndex));
@@ -293,15 +297,22 @@ _renderGridStepFlowLayout() {
   });
 },
 
-_createGridStepHeader(step, stepIndex) {
+_createGridStepHeader(step: any, stepIndex: number) {
   const button = document.createElement('button');
   const isActive = stepIndex === this.currentStepIndex;
+  const isComplete = this.validateStep(stepIndex);
+  const title = step.pageTitle || step.name || `Step ${stepIndex + 1}`;
+  const showTitle = shouldShowCompletedStepTitle({
+    isComplete,
+    hideCompletedTitles: this._getProductPageControls?.()?.hideStepTitlesInCompletedState === true,
+  });
   button.type = 'button';
-  button.className = `bw-ppb-grid-step${isActive ? ' is-active' : ''}${this.validateStep(stepIndex) ? ' is-complete' : ''}`;
+  button.className = `bw-ppb-grid-step${isActive ? ' is-active' : ''}${isComplete ? ' is-complete' : ''}`;
+  button.setAttribute('aria-label', title);
   button.setAttribute('aria-current', isActive ? 'step' : 'false');
   button.innerHTML = `
     <span class="bw-ppb-grid-step__number">${stepIndex + 1}</span>
-    <span class="bw-ppb-grid-step__label">${ComponentGenerator.escapeHtml(step.pageTitle || step.name || `Step ${stepIndex + 1}`)}</span>
+    ${showTitle ? `<span class="bw-ppb-grid-step__label">${ComponentGenerator.escapeHtml(title)}</span>` : ''}
   `;
   button.addEventListener('click', () => {
     if (isActive) return;
@@ -339,17 +350,23 @@ _createCascadeStepFlowHeader() {
   const header = document.createElement('div');
   header.className = 'bw-ppb-cascade-step-flow';
 
-  this.selectedBundle.steps.forEach((step, stepIndex) => {
+  this.selectedBundle.steps.forEach((step: any, stepIndex: number) => {
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'bw-ppb-cascade-step-flow__step';
     button.classList.toggle('is-active', stepIndex === this.currentStepIndex);
     button.classList.toggle('is-complete', this.validateStep(stepIndex));
+    const title = step.pageTitle || step.name || `Step ${stepIndex + 1}`;
+    const showTitle = shouldShowCompletedStepTitle({
+      isComplete: this.validateStep(stepIndex),
+      hideCompletedTitles: this._getProductPageControls?.()?.hideStepTitlesInCompletedState === true,
+    });
+    button.setAttribute('aria-label', title);
     button.setAttribute('aria-current', stepIndex === this.currentStepIndex ? 'step' : 'false');
     button.disabled = stepIndex > this.currentStepIndex && !this.isStepAccessible(stepIndex);
     button.innerHTML = `
       <span class="bw-ppb-cascade-step-flow__number">${stepIndex + 1}</span>
-      <span class="bw-ppb-cascade-step-flow__label">${ComponentGenerator.escapeHtml(step.pageTitle || step.name || `Step ${stepIndex + 1}`)}</span>
+      ${showTitle ? `<span class="bw-ppb-cascade-step-flow__label">${ComponentGenerator.escapeHtml(title)}</span>` : ''}
     `;
     button.addEventListener('click', () => {
       if (button.disabled || stepIndex === this.currentStepIndex) return;
@@ -365,7 +382,7 @@ _createCascadeStepFlowHeader() {
   return header;
 },
 
-_focusCascadeStepFlowButton(stepIndex) {
+_focusCascadeStepFlowButton(stepIndex: string|number) {
   const buttons = this.elements?.stepsContainer
     ?.querySelectorAll?.('.bw-ppb-cascade-step-flow__step') || [];
   const target = buttons[stepIndex];
@@ -374,7 +391,7 @@ _focusCascadeStepFlowButton(stepIndex) {
   }
 },
 
-navigateCascadeStep(direction) {
+navigateCascadeStep(direction: any) {
   if (!this._usesCascadeStepFlow()) return false;
 
   const navigation = getCascadeStepNavigationState({
@@ -396,7 +413,7 @@ navigateCascadeStep(direction) {
   return true;
 },
 
-_createInpageStepSection(step, stepIndex) {
+_createInpageStepSection(step: any, stepIndex: any) {
   const section = document.createElement('div');
   const preset = this._getProductPageDesignPreset();
   const isCascade = this._isProductPageCascadeTemplate?.() === true;
@@ -432,7 +449,7 @@ _createInpageStepSection(step, stepIndex) {
   return section;
 },
 
-_createInpageCategoryTabs(step, stepIndex) {
+_createInpageCategoryTabs(step: any, stepIndex: string|number) {
   const categories = Array.isArray(step?.categories) ? step.categories : [];
   if (categories.length === 0) return null;
 
@@ -444,7 +461,7 @@ _createInpageCategoryTabs(step, stepIndex) {
   const isCascade = this._isProductPageCascadeTemplate?.() === true;
   tabs.className = `bw-ppb-inpage-category-tabs${isCascade ? ' wpbMixCascadeCategoryTabsWrapper' : ''}`;
 
-  categories.forEach((category, categoryIndex) => {
+  categories.forEach((category: any, categoryIndex: any) => {
     const button = document.createElement('button');
     button.type = 'button';
     const isActive = categoryIndex === this.activeInpageCategoryIndexes[stepIndex];
@@ -467,13 +484,13 @@ _createInpageCategoryTabs(step, stepIndex) {
   return tabs;
 },
 
-_getInpageCategoryLabel(category, categoryIndex) {
+_getInpageCategoryLabel(category: any, categoryIndex: number) {
   return category?.title || category?.name || `Category ${categoryIndex + 1}`;
 },
 
-_getCategoryProductIds(category) {
+_getCategoryProductIds(category: any) {
   const ids = new Set();
-  const addProductId = (product) => {
+  const addProductId = (product: any) => {
     const id = product?.selectionId;
     if (id) ids.add(this.extractId(id));
   };
@@ -482,11 +499,11 @@ _getCategoryProductIds(category) {
   return ids;
 },
 
-_categoryHasCollections(category) {
+_categoryHasCollections(category: any) {
   return Boolean(category?.collections?.length);
 },
 
-_filterProductsForInpageCategory(step, products, stepIndex) {
+_filterProductsForInpageCategory(step: any, products: any[], stepIndex: string|number) {
   const categories = Array.isArray(step?.categories) ? step.categories : [];
   if (categories.length === 0) return products;
 
@@ -500,20 +517,20 @@ _filterProductsForInpageCategory(step, products, stepIndex) {
   }
 
   const categoryProducts = categories.length > 1
-    ? products.filter(product => {
+    ? products.filter((product: any)  => {
       const productId = this.extractId(product.parentProductId || product.id);
       return categoryProductIds.has(productId);
     })
     : products;
 
-  return categoryProducts.flatMap(product => {
+  return categoryProducts.flatMap((product: any)  => {
     const productId = this.extractId(product.parentProductId || product.id);
-    const configuredProduct = configuredProducts.find(candidate => (
+    const configuredProduct = configuredProducts.find((candidate: any)  => (
       this.extractId(candidate?.selectionId) === productId
     ));
     const configuredVariantIds = new Set(
       (Array.isArray(configuredProduct?.variants) ? configuredProduct.variants : [])
-        .map(variant => this.extractId(variant?.selectionId))
+        .map((variant: any)  => this.extractId(variant?.selectionId))
         .filter(Boolean)
     );
 
@@ -521,12 +538,12 @@ _filterProductsForInpageCategory(step, products, stepIndex) {
       return [product];
     }
 
-    const variants = product.variants.filter(variant => (
+    const variants = product.variants.filter((variant: any)  => (
       configuredVariantIds.has(this.extractId(variant?.id || variant?.variantId))
     ));
     if (variants.length === 0) return [];
 
-    const selectedVariant = variants.find(variant => variant?.available !== false) || variants[0];
+    const selectedVariant = variants.find((variant: any)  => variant?.available !== false) || variants[0];
     const variantImageUrl = selectedVariant?.image?.src
       || selectedVariant?.image?.url
       || selectedVariant?.imageUrl

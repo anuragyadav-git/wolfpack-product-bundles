@@ -7,16 +7,16 @@
 
 'use strict';
 
-export function getCurrentStep(state) {
+export function getCurrentStep(state: any) {
   const steps = Array.isArray(state?.steps) ? state.steps : [];
   return steps[state?.currentStepIndex || 0] || null;
 }
 
-export function getSelectedQuantity(state) {
+export function getSelectedQuantity(state: any) {
   return getSelectedEntries(state).reduce((total, entry) => total + entry.quantity, 0);
 }
 
-export function getSelectedSubtotalCents(state) {
+export function getSelectedSubtotalCents(state: any) {
   return getSelectedEntries(state).reduce((total, entry) => {
     const product = findProductByVariantId(state, entry.variantId);
     const price = Number(product?.price || 0);
@@ -24,7 +24,7 @@ export function getSelectedSubtotalCents(state) {
   }, 0);
 }
 
-export function getDiscountProgressData({ currentValue = 0, targetValue = 0, message = '' } = {}) {
+export function getDiscountProgressData({ currentValue = 0, targetValue = 0, message = '' }: any = {}) {
   const current = Math.max(0, Number(currentValue || 0));
   const target = Math.max(0, Number(targetValue || 0));
   const progressPercent = target > 0
@@ -40,14 +40,14 @@ export function getDiscountProgressData({ currentValue = 0, targetValue = 0, mes
   };
 }
 
-export function getSelectedEntries(state) {
+export function getSelectedEntries(state: any) {
   const selectedProducts = Array.isArray(state?.selectedProducts) ? state.selectedProducts : [];
-  const entries = [];
+  const entries: { stepIndex: any; variantId: string; quantity: number; }[] = [];
 
-  selectedProducts.forEach((stepSelections, stepIndex) => {
+  selectedProducts.forEach((stepSelections: any, stepIndex: any) => {
     if (!stepSelections || typeof stepSelections !== 'object') return;
 
-    Object.entries(stepSelections).forEach(([variantId, quantity]) => {
+    Object.entries(stepSelections).forEach(([variantId, quantity]: any) => {
       const normalizedQuantity = Number(quantity || 0);
       if (normalizedQuantity <= 0) return;
       entries.push({ stepIndex, variantId, quantity: normalizedQuantity });
@@ -57,11 +57,11 @@ export function getSelectedEntries(state) {
   return entries;
 }
 
-export function getSelectedProductEntries(state, options = {}) {
+export function getSelectedProductEntries(state: any, options: any = {}) {
   const stepProductData = Array.isArray(state?.stepProductData) ? state.stepProductData : [];
-  const normalizeSelectionKey = options.normalizeSelectionKey || ((value) => String(value));
+  const normalizeSelectionKey = options.normalizeSelectionKey || ((value: any) => String(value));
 
-  return getSelectedEntries(state).reduce((entries, entry) => {
+  return getSelectedEntries(state).reduce<any[]>((entries, entry) => {
     const sourceProducts = stepProductData[entry.stepIndex] || [];
     const products = typeof options.expandProductsByStep === 'function'
       ? options.expandProductsByStep(sourceProducts, entry.stepIndex)
@@ -83,7 +83,7 @@ export function getTimelineEntryState({
   isCompleted = false,
   isAccessible = true,
   hasMultipleCategoryEntry = false,
-} = {}) {
+}: any = {}) {
   const step = entry.step || {};
   const isDefaultStep = step.isDefault === true;
   const isCategoryEntry = entry.type === 'multiple_categories';
@@ -91,7 +91,7 @@ export function getTimelineEntryState({
     && (!hasMultipleCategoryEntry || isCategoryEntry);
   const completed = Boolean(isCompleted);
   const accessible = isAccessible !== false;
-  const classes = [];
+  const classes: any[] = [];
 
   if (isDefaultStep) classes.push('timeline-step--included');
   if (isCurrent) classes.push('timeline-step--active');
@@ -113,7 +113,7 @@ export function shouldShowTimelineCompletedState({
   currentStepIndex = 0,
   isStepCompleted = false,
   hasMultipleCategoryEntry = false,
-} = {}) {
+}: any = {}) {
   if (!isStepCompleted) return false;
 
   const stepIndex = Number(entry.stepIndex);
@@ -131,7 +131,7 @@ export function shouldShowTimelineCompletedState({
     || (hasMultipleCategoryEntry && stepIndex === activeStepIndex);
 }
 
-function findProductByVariantId(state, variantId) {
+function findProductByVariantId(state: any, variantId: any) {
   const stepProductData = Array.isArray(state?.stepProductData) ? state.stepProductData : [];
 
   for (const products of stepProductData) {

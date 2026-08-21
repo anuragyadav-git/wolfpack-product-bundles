@@ -12,7 +12,7 @@ export function DefaultProductDiscountTipBanner() {
   return (
     <s-banner
       tone="info"
-      title="Discount tip"
+      {...({ title: "Discount tip" } as any)}
       dismissible
       onDismiss={dismiss}
     >

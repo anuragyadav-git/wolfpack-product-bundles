@@ -295,9 +295,9 @@ describe('PPB Product List step conditions', () => {
   });
 
   it('uses active Product Page quantity validation language when provided', () => {
-    const resolveText = jest.fn((key, fallback) => ({
+    const resolveText = jest.fn((key: string, fallback: string) => ({
       conditionQuantityGreaterThanOrEqualTo: 'Choose at least {{conditionQuantity}} items',
-    }[key] || fallback));
+    } as Record<string, string>)[key] || fallback);
 
     expect(formatProductPageStepValidationToast({
       conditionType: 'quantity',
@@ -307,9 +307,9 @@ describe('PPB Product List step conditions', () => {
   });
 
   it('uses active Product Page amount validation language when provided', () => {
-    const resolveText = jest.fn((key, fallback) => ({
+    const resolveText = jest.fn((key: string, fallback: string) => ({
       conditionAmountGreaterThanOrEqualTo: 'Choose products worth {{conditionAmount}}',
-    }[key] || fallback));
+    } as Record<string, string>)[key] || fallback);
 
     expect(formatProductPageStepValidationToast({
       conditionType: 'amount',
@@ -319,9 +319,9 @@ describe('PPB Product List step conditions', () => {
   });
 
   it('uses active Product Page weight validation language when provided', () => {
-    const resolveText = jest.fn((key, fallback) => ({
+    const resolveText = jest.fn((key: string, fallback: string) => ({
       conditionWeightLessThanOrEqualTo: 'Choose products weighing no more than {{conditionWeight}}',
-    }[key] || fallback));
+    } as Record<string, string>)[key] || fallback);
 
     expect(formatProductPageStepValidationToast({
       conditionType: 'weight',

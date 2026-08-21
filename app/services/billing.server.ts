@@ -184,7 +184,7 @@ export class BillingService {
         subscriptionId: subscription.id
       };
 
-    } catch (error) {
+    } catch (error: any) {
       AppLogger.error("Error creating subscription", {
         component: "billing.server",
         operation: "createSubscription"
@@ -281,7 +281,7 @@ export class BillingService {
         isActive: status === SubscriptionStatusValue.active
       };
 
-    } catch (error) {
+    } catch (error: any) {
       AppLogger.error("Error getting subscription info", {
         component: "billing.server",
         operation: "getSubscriptionInfo"
@@ -418,7 +418,7 @@ export class BillingService {
 
       return { success: true };
 
-    } catch (error) {
+    } catch (error: any) {
       AppLogger.error("Error confirming subscription", {
         component: "billing.server",
         operation: "confirmSubscription"
@@ -522,7 +522,7 @@ export class BillingService {
 
       return { success: true };
 
-    } catch (error) {
+    } catch (error: any) {
       AppLogger.error("Error cancelling subscription", {
         component: "billing.server",
         operation: "cancelSubscription"
@@ -586,7 +586,7 @@ export class BillingService {
 
       return shop;
 
-    } catch (error) {
+    } catch (error: any) {
       AppLogger.error("Error ensuring shop", {
         component: "billing.server",
         operation: "ensureShop"
@@ -665,7 +665,7 @@ export class BillingService {
         archivedBundleIds: archiveIds
       };
 
-    } catch (error) {
+    } catch (error: any) {
       AppLogger.error("Error in downgrade protection", {
         component: "billing.server",
         operation: "handleDowngradeProtection"
@@ -757,7 +757,7 @@ export class BillingService {
       }, { shopDomain, subscriptionId: subscription.id, days, expiresAt: expiresAt.toISOString() });
 
       return { success: true, subscriptionId: subscription.id, expiresAt };
-    } catch (error) {
+    } catch (error: any) {
       AppLogger.error("Error granting Grow plan", {
         component: "billing.server",
         operation: "grantGrowPlan"

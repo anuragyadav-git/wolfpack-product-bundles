@@ -4,13 +4,14 @@ import { ToastManager } from '../../shared/toast-manager.js';
 import { ComponentGenerator } from '../../shared/component-generator.js';
 import { renderSharedProductCard } from '../../shared/components/product-card.js';
 import { getSubscriptionProductCardPrice } from '../../shared/subscription-storefront-methods.js';
+import { resolvePpbModalCardPresentation } from '../ppb-modal-card-presentation.js';
 
 export function resolveProductPageCardButtonText({
   currentQuantity = 0,
   currentStep = {},
   outOfStock = false,
   defaultAddText = 'Add +',
-} = {}) {
+}: any = {}) {
   if (outOfStock) return 'Out of stock';
 
   const rawText = currentQuantity > 0
@@ -22,13 +23,13 @@ export function resolveProductPageCardButtonText({
     .replace(/\{\{\s*quantity\s*\}\}/g, String(currentQuantity));
 }
 
-export function resolveProductPageInlineAddText(resolveText) {
+export function resolveProductPageInlineAddText(resolveText: (arg0: string,arg1: string) => any) {
   if (typeof resolveText !== 'function') return 'Add +';
   const modalFallback = resolveText('productCardAddButton', 'Add +');
   return resolveText('productCardInlineAddButton', modalFallback || 'Add +') || 'Add +';
 }
 
-export function shouldDisableProductPageVariantOption(variant, trackInventoryOnAddToCart = false) {
+export function shouldDisableProductPageVariantOption(variant: any, trackInventoryOnAddToCart = false) {
   if (variant?.available !== true) {
     return true;
   }
@@ -39,9 +40,9 @@ export function shouldDisableProductPageVariantOption(variant, trackInventoryOnA
 }
 
 export function shouldDisplayVariantsAsIndividualForModalCategory(
-  step,
-  stepIndex,
-  activeCategoryIndexes = {},
+  step: any,
+  stepIndex: string|number,
+  activeCategoryIndexes: any = {},
 ) {
   const categories = Array.isArray(step?.categories) ? step.categories : [];
   if (categories.length > 0) {
@@ -57,7 +58,7 @@ export function shouldDisplayVariantsAsIndividualForModalCategory(
     || step?.displayVariantsAsIndividual === true;
 }
 
-export function getModalSoleVariantDisplayTitle(product = {}) {
+export function getModalSoleVariantDisplayTitle(product: any = {}) {
   const variants = Array.isArray(product?.variants) ? product.variants : [];
   if (Number(product?.sourceVariantCount || 0) <= 1 || variants.length !== 1) {
     return '';
@@ -71,7 +72,7 @@ export function resolveProductPageModalStepPosition({
   stepIndex,
   currentStepIndex,
   stepCount,
-} = {}) {
+}: any = {}) {
   if (
     !Number.isInteger(stepIndex)
     || !Number.isInteger(currentStepIndex)
@@ -96,8 +97,7 @@ export function applyProductPageVariantSelection({
   variantData = {},
   productCard = null,
   formatPrice = null,
-  showCompareAtPrice = false,
-} = {}) {
+}: any = {}) {
   const nextVariantId = variantData.id || product.variantId || product.id;
   const nextVariantTitle = variantData.title && variantData.title !== 'Default Title'
     ? variantData.title
@@ -124,7 +124,7 @@ export function applyProductPageVariantSelection({
 
   productCard.dataset.productId = nextVariantId;
   productCard.dataset.currentSelectedVariantId = nextVariantId;
-  productCard.querySelectorAll?.('[data-product-id]').forEach(el => {
+  productCard.querySelectorAll?.('[data-product-id]').forEach((el: any)  => {
     el.dataset.productId = nextVariantId;
   });
 
@@ -135,7 +135,7 @@ export function applyProductPageVariantSelection({
 
   const compareEl = productCard.querySelector?.('.product-price-strike');
   if (compareEl) {
-    if (showCompareAtPrice === true && Number.isFinite(product.compareAtPrice) && typeof formatPrice === 'function') {
+    if (Number.isFinite(product.compareAtPrice) && typeof formatPrice === 'function') {
       compareEl.textContent = formatPrice(product.compareAtPrice);
     } else if (typeof compareEl.remove === 'function') {
       compareEl.remove();
@@ -152,7 +152,21 @@ export function applyProductPageVariantSelection({
   return product;
 }
 
-function normalizeVariantPrice(value) {
+export function dispatchProductPageVariantSelection({
+  product,
+  select,
+  oldVariantId,
+  newVariantId,
+  createEvent = () => new Event('change', { bubbles: true }),
+}: any = {}) {
+  if (!product || !select || !newVariantId) return false;
+  product.variantId = oldVariantId;
+  select.value = newVariantId;
+  select.dispatchEvent(createEvent());
+  return true;
+}
+
+function normalizeVariantPrice(value: string|null|undefined) {
   if (value === null || value === undefined || value === '') return null;
   if (typeof value === 'number') return value;
 
@@ -160,7 +174,7 @@ function normalizeVariantPrice(value) {
   return Number.isFinite(parsed) ? Math.round(parsed * 100) : null;
 }
 
-function resolveVariantImageUrl(variantData = {}) {
+function resolveVariantImageUrl(variantData: any = {}) {
   const image = variantData.image;
   if (!image) return '';
   if (typeof image === 'string') return image;
@@ -176,7 +190,7 @@ renderModalTabs() {
   const stepCount = this.selectedBundle.steps.length;
   tabsContainer.style.setProperty('--bw-tab-count', stepCount.toString());
 
-  this.selectedBundle.steps.forEach((step, index) => {
+  this.selectedBundle.steps.forEach((step: any, index: number) => {
     const isAccessible = this.isStepAccessible(index);
     const isActive = index === this.currentStepIndex;
     const isFreeGift = !!step.isFreeGift;
@@ -270,7 +284,7 @@ renderModalCategoryTabs() {
   }
 
   tabsContainer.hidden = false;
-  categories.forEach((category, categoryIndex) => {
+  categories.forEach((category: any, categoryIndex: any) => {
     const button = tabsContainer.ownerDocument.createElement('button');
     button.type = 'button';
     button.className = 'bw-bs-category-tab';
@@ -282,7 +296,7 @@ renderModalCategoryTabs() {
     );
     button.addEventListener('click', () => {
       this.activeInpageCategoryIndexes[stepIndex] = categoryIndex;
-      tabsContainer.querySelectorAll('.bw-bs-category-tab').forEach(tab => {
+      tabsContainer.querySelectorAll('.bw-bs-category-tab').forEach((tab: any)  => {
         tab.classList.toggle('active', tab === button);
       });
       this.renderModalProducts(stepIndex);
@@ -291,12 +305,11 @@ renderModalCategoryTabs() {
   });
 },
 
-renderModalProducts(stepIndex, productsToRender = null) {
+renderModalProducts(stepIndex: string|number, productsToRender: any = null) {
   // Use all products from step data
   const stepProductData = this.stepProductData || [];
   const rawProducts = productsToRender ?? stepProductData[stepIndex];
   const currentStep = this.selectedBundle?.steps?.[stepIndex];
-  const widgetConfig = this.config || {};
   const categoryProducts = this._filterProductsForInpageCategory(
     currentStep,
     rawProducts,
@@ -359,19 +372,22 @@ renderModalProducts(stepIndex, productsToRender = null) {
     return;
   }
 
-  const showQuantitySelector = widgetConfig.showQuantitySelectorOnCard;
   // Free gift product cards use a different border (gray instead of gold)
   const freeGiftCardClass = isFreeGiftStep ? ' bw-product-card--free-gift' : '';
   const productQuantityLimit = ConditionValidator.getAllowedQuantityPerProduct(
     this.selectedBundle?.validateQuantityPerProduct
   );
 
-  productGrid.innerHTML = products.map(product => {
+  productGrid.innerHTML = products.map((product: any)  => {
     const selectionKey = product.selectionId || product.variantId || product.id;
     const productSelection = product.selectionId
       ? product
       : { ...product, selectionId: selectionKey };
     const currentQuantity = this.getSelectedQuantity(stepIndex, selectionKey);
+    const cardPresentation = resolvePpbModalCardPresentation({
+      quantity: currentQuantity,
+      validation: this.selectedBundle?.validateQuantityPerProduct,
+    });
     const currencyInfo = CurrencyManager.getCurrencyInfo();
 
     // Per-variant stock state derived from Storefront API quantityAvailable
@@ -396,8 +412,9 @@ renderModalProducts(stepIndex, productsToRender = null) {
         description: '',
         displaySeeMoreLink: false,
         expandProductCardOnHover: false,
-        showCompareAtPrice: this._shouldShowProductComparedAtPrice(),
         mode: 'grid',
+        cardInteractive: false,
+        titleInteractive: false,
         className: `${freeGiftCardClass} ${currentQuantity > 0 ? 'bw-product-card--selected' : ''} ${outOfStock ? 'is-out-of-stock' : ''}`.trim(),
         variantSelectorHtml: this.renderVariantSelector(product),
         stockBadgeHtml: stockBadge,
@@ -413,7 +430,7 @@ renderModalProducts(stepIndex, productsToRender = null) {
           outOfStock,
           defaultAddText: 'Add to Cart',
         }),
-        selectedAction: showQuantitySelector ? undefined : 'button',
+        selectedAction: cardPresentation.mode === 'maximum-reached' ? 'button' : undefined,
         addDisabled: outOfStock,
         increaseDisabled,
       },
@@ -429,7 +446,7 @@ renderModalProducts(stepIndex, productsToRender = null) {
   this.attachProductEventHandlers(productGrid, stepIndex);
 },
 
-renderVariantSelector(product) {
+renderVariantSelector(product: any) {
   if (!product.variants || product.variants.length <= 1) {
     return '';
   }
@@ -441,9 +458,9 @@ renderVariantSelector(product) {
 
   return `
     <div class="variant-selector-wrapper">
-      <label class="visually-hidden" for="variant-selector-${product.id}">${ComponentGenerator.escapeHtml(variantLabel)}</label>
+      <label class="ppb-modal-variant-label" for="variant-selector-${product.id}">${ComponentGenerator.escapeHtml(variantLabel)}</label>
       <select id="variant-selector-${product.id}" class="variant-selector" data-base-product-id="${product.id}" aria-label="${ComponentGenerator.escapeHtml(variantLabel)}">
-        ${product.variants.map(v => {
+        ${product.variants.map((v: any)  => {
           const isHardOOS = shouldDisableProductPageVariantOption(v, trackInventoryOnAddToCart);
           const label = isHardOOS ? `${v.title} — out of stock` : v.title;
           const selected = v.id === product.variantId ? 'selected' : '';
@@ -457,7 +474,7 @@ renderVariantSelector(product) {
 
 // Render loading skeleton for modal product grid - solid pulsating cards
 // No internal button/quantity skeletons - just clean solid cards
-renderModalProductsLoading(stepIndex) {
+renderModalProductsLoading(stepIndex: any) {
   const productGrid = this.elements.modal.querySelector('.product-grid');
 
   productGrid.innerHTML = `
@@ -488,12 +505,12 @@ preloadNextStep() {
   this.loadStepProducts(nextStepIndex)
     .then(() => {
     })
-    .catch(error => {
+    .catch((error: any)  => {
       // Don't show error to user - preloading is optimization only
     });
 },
 
-attachProductEventHandlers(productGrid, stepIndex) {
+attachProductEventHandlers(productGrid: any, stepIndex: string|number) {
   // Remove existing event listeners to prevent duplicates
   const newProductGrid = productGrid.cloneNode(true);
   productGrid.parentNode.replaceChild(newProductGrid, productGrid);
@@ -501,17 +518,17 @@ attachProductEventHandlers(productGrid, stepIndex) {
   // Get step data for modal
   const step = this.selectedBundle.steps[stepIndex];
   // Helper to find product by ID
-  const findProduct = (productId) => {
+  const findProduct = (productId: any) => {
     return this.findProductBySelectionKey(this.stepProductData[stepIndex] || [], productId);
   };
   const hasDomElement = typeof Element !== 'undefined';
-  const getEventTarget = (eventTarget) => {
+  const getEventTarget = (eventTarget: any) => {
     if (!eventTarget) return null;
     if (!hasDomElement) return eventTarget;
     return eventTarget instanceof Element ? eventTarget : eventTarget.parentElement;
   };
 
-  const matchesSelector = (element, selector) => {
+  const matchesSelector = (element: any, selector: string) => {
     if (!element) return false;
     if (typeof element.matches === 'function') {
       return element.matches(selector);
@@ -529,16 +546,16 @@ attachProductEventHandlers(productGrid, stepIndex) {
     return false;
   };
 
-  const findClosest = (element, selector) => {
+  const findClosest = (element: any, selector: string) => {
     if (!element) return null;
     const selectors = selector
       .split(',')
-      .map((part) => part.trim())
+      .map((part: string) => part.trim())
       .filter(Boolean);
 
     let current = element;
     while (current) {
-      if (selectors.some((candidate) => matchesSelector(current, candidate))) {
+      if (selectors.some((candidate: any) => matchesSelector(current, candidate))) {
         return current;
       }
       current = current.parentElement;
@@ -548,7 +565,7 @@ attachProductEventHandlers(productGrid, stepIndex) {
   };
 
   // Quantity button handlers
-  newProductGrid.addEventListener('click', (e) => {
+  newProductGrid.addEventListener('click', (e: any) => {
     const eventTarget = getEventTarget(e.target);
     if (!eventTarget) return;
 
@@ -563,8 +580,17 @@ attachProductEventHandlers(productGrid, stepIndex) {
     }
   });
 
+  newProductGrid.addEventListener('keydown', (e: any) => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    const eventTarget = getEventTarget(e.target);
+    const productImage = findClosest(eventTarget, '.product-image');
+    if (!productImage) return;
+    e.preventDefault();
+    productImage.click?.();
+  });
+
   // Add to Bundle button handler
-  newProductGrid.addEventListener('click', (e) => {
+  newProductGrid.addEventListener('click', (e: any) => {
     const eventTarget = getEventTarget(e.target);
     if (!eventTarget) return;
 
@@ -573,27 +599,24 @@ attachProductEventHandlers(productGrid, stepIndex) {
       const productId = eventTarget.dataset.productId;
       const product = findProduct(productId);
 
-      // If product has variants and modal is available, open the modal
-      if (product && product.variants && product.variants.length > 1 && this.productModal) {
-        this.productModal.open(product, step);
-      } else {
-        // No variants or modal not available - toggle directly.
-        // Use direct-default required quantity when configured; only fall back to 1
-        // when there is no explicit default quantity for the product.
-        const currentQuantity = this.getSelectedQuantity(stepIndex, productId);
-        const directDefaultRequiredQuantity = this._getDirectDefaultRequiredQuantity(productId);
-        const toggleQuantity = currentQuantity > 0
-          ? 0
-          : directDefaultRequiredQuantity ?? 1;
-        if (toggleQuantity > 0 || currentQuantity > 0) {
-          this.updateProductSelection(stepIndex, productId, toggleQuantity);
-        }
+      if (!product) return;
+      const currentQuantity = this.getSelectedQuantity(stepIndex, productId);
+      const presentation = resolvePpbModalCardPresentation({
+        quantity: currentQuantity,
+        validation: this.selectedBundle?.validateQuantityPerProduct,
+      });
+      const directDefaultRequiredQuantity = this._getDirectDefaultRequiredQuantity(productId);
+      const toggleQuantity = presentation.mode === 'maximum-reached'
+        ? 0
+        : directDefaultRequiredQuantity ?? 1;
+      if (toggleQuantity > 0 || currentQuantity > 0) {
+        this.updateProductSelection(stepIndex, productId, toggleQuantity);
       }
     }
   });
 
-  // Product card click follows Settings -> Controls. Product image/title still opens variants when card add is disabled.
-  newProductGrid.addEventListener('click', (e) => {
+  // Modal cards keep details, variants, and Add as separate actions.
+  newProductGrid.addEventListener('click', (e: any) => {
     const eventTarget = getEventTarget(e.target);
     if (!eventTarget) return;
 
@@ -602,59 +625,32 @@ attachProductEventHandlers(productGrid, stepIndex) {
     if (findClosest(eventTarget, '.product-add-btn, .qty-btn, .inline-qty-btn, .variant-selector, button, input, select, a')) return;
 
     const productImage = findClosest(eventTarget, '.product-image');
-    const productTitle = findClosest(eventTarget, '.product-title');
-    const canClickCardToAdd = this._isProductCardClickAddEnabled();
-    if (!canClickCardToAdd && !productImage && !productTitle) return;
+    if (!productImage) return;
 
     const productId = productCard.dataset.productId;
     const product = findProduct(productId);
     if (!product) return;
 
-    if (product.variants && product.variants.length > 1 && this.productModal && step) {
-      this.productModal.open(product, step);
-      return;
-    }
-
-    if (canClickCardToAdd) {
+    if (this.productModal && step) {
       const currentQuantity = this.getSelectedQuantity(stepIndex, productId);
-      const directDefaultRequiredQuantity = this._getDirectDefaultRequiredQuantity(productId);
-      const toggleQuantity = currentQuantity > 0
-        ? 0
-        : directDefaultRequiredQuantity ?? 1;
-
-      if (toggleQuantity > 0 || currentQuantity > 0) {
-        this.updateProductSelection(stepIndex, productId, toggleQuantity);
-      }
-    }
-  });
-
-  // Add cursor pointer styles to clickable product cards, images, and titles.
-  newProductGrid.querySelectorAll('.product-card').forEach(card => {
-    const productId = card.dataset.productId;
-    const product = findProduct(productId);
-    const canClickCardToAdd = this._isProductCardClickAddEnabled();
-    if (canClickCardToAdd) {
-      card.style.cursor = 'pointer';
-    }
-    if (product && product.variants && product.variants.length > 1 && this.productModal) {
-      const imageEl = card.querySelector('.product-image');
-      const titleEl = card.querySelector('.product-title');
-      if (imageEl) imageEl.style.cursor = 'pointer';
-      if (titleEl) titleEl.style.cursor = 'pointer';
+      this.productModal.open(product, step, {
+        originalSelectionKey: currentQuantity > 0 ? productId : '',
+        selectedQuantity: currentQuantity || 1,
+      });
     }
   });
 
   // Variant selector handler (for inline dropdown if used)
-  newProductGrid.addEventListener('change', (e) => {
+  newProductGrid.addEventListener('change', (e: any) => {
     if (e.target.classList.contains('variant-selector')) {
       e.stopPropagation();
       const newVariantId = e.target.value;
       const baseProductId = e.target.dataset.baseProductId;
 
       // Find the product and update its variant
-      const product = this.stepProductData[stepIndex].find(p => p.id === baseProductId);
+      const product = this.stepProductData[stepIndex].find((p: any)  => p.id === baseProductId);
       if (product && product.variants) {
-        const variantData = product.variants.find(v => v.id === newVariantId);
+        const variantData = product.variants.find((v: any)  => v.id === newVariantId);
         if (variantData) {
           // Sync the new variant's stock fields onto the product so
           // getVariantAvailable() reflects post-swap state.
@@ -663,44 +659,19 @@ attachProductEventHandlers(productGrid, stepIndex) {
             : null;
           product.currentlyNotInStock = variantData.currentlyNotInStock === true;
 
-          // Move quantity from old variant to new variant, re-clamping against
-          // the new variant's quantityAvailable. If the new variant can't hold
-          // the old quantity, reduce it and surface a toast.
-          const oldQuantity = this.getSelectedQuantity(stepIndex, product.variantId);
-          if (oldQuantity > 0) {
-            this.setSelectedQuantity(stepIndex, product.variantId, 0);
-
-            const newQtyAvail = product.quantityAvailable;
-            const trackInventoryOnAddToCart = typeof this.isInventoryTrackingOnAddToCartEnabled === 'function'
-              ? this.isInventoryTrackingOnAddToCartEnabled()
-              : false;
-            const newOOS = shouldDisableProductPageVariantOption(product, trackInventoryOnAddToCart);
-            let migratedQty = oldQuantity;
-            if (newOOS) {
-              ToastManager.show('Selected variant is out of stock — selection cleared.');
-              migratedQty = 0;
-            } else if (trackInventoryOnAddToCart && newQtyAvail !== null && oldQuantity > newQtyAvail) {
-              migratedQty = newQtyAvail;
-              ToastManager.show('Only ' + newQtyAvail + ' in stock — quantity adjusted.');
-            }
-            if (migratedQty > 0) {
-              this.setSelectedQuantity(stepIndex, newVariantId, migratedQty);
-            }
-          }
-
           const productCard = e.target.closest('.product-card');
           applyProductPageVariantSelection({
             product,
             variantData,
             productCard,
-            formatPrice: (amount) => CurrencyManager.convertAndFormat(
+            formatPrice: (amount: any) => CurrencyManager.convertAndFormat(
               getSubscriptionProductCardPrice(this, amount),
               CurrencyManager.getCurrencyInfo(),
             ),
-            showCompareAtPrice: this._shouldShowProductComparedAtPrice(),
           });
 
-          // Update UI without full re-render
+          // Re-render the active card context without mutating the bundle selection.
+          this.renderModalProducts(stepIndex);
           this.updateModalNavigation();
           this.updateModalFooterMessaging();
         }

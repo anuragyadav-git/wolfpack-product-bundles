@@ -5,7 +5,7 @@ title: Theme App Extensions
 type: shopify-integration
 status: authoritative
 summary: Theme extension handles, activation status, and App Bridge status source for Wolfpack storefront resources.
-last_audited: 2026-07-31
+last_audited: 2026-08-21
 owners:
   - engineering
 domains:
@@ -17,6 +17,8 @@ source_paths:
   - extensions/bundle-builder/shopify.extension.toml
   - app/lib/theme-extension-status.ts
   - app/lib/app-embed-status-check.client.ts
+  - app/routes/app/app.dashboard/dashboard-app-embed-enable-flow.ts
+  - app/routes/app/app.dashboard/AppEmbedEnableModal.tsx
   - app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/useConfigureBundleController.ts
   - app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/usePpbBaseConfigureState.ts
 related_docs:
@@ -35,6 +37,15 @@ keywords:
 Shopify stores app embed activation per theme. `ThemeRole.MAIN` is the currently published storefront theme, and Shopify allows only one main theme at a time. Unpublished and development themes can also have the app embed enabled, but that does not make the live storefront embed active.
 
 The homepage and preview gate now use Shopify App Bridge `shopify.app.extensions()` in the embedded Admin context. The response is normalized into the five resources declared by the extension TOML, with explicit `active`, `available`, or `unavailable` status. The app embed is the global preview gate; product-page previews validate the product-page block separately and do not require the global embed.
+
+The Dashboard warning banner opens an instructional modal before sending the
+merchant to Theme Editor through the existing `activateAppId` deep link. Opening
+the modal or Theme Editor does not optimistically change status. After the
+merchant returns, focus and visibility events are deduplicated into one App
+Bridge extension check. A confirmed active `bundle-app-embed` is the only
+success result; inactive and rejected checks remain unresolved and expose retry
+and support actions. Closing after visiting Theme Editor performs one final
+deduplicated check.
 
 The server-side MAIN-theme `settings_data.json` checker remains available for legacy banner hydration and migration diagnostics, but it is not the authoritative client-side status source for the homepage or preview gate.
 

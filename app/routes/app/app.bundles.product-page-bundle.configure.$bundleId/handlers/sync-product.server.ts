@@ -77,7 +77,7 @@ export async function handleSyncProduct(
       productHandle: parent.handle,
       message: "Updated Successfully!",
     });
-  } catch (error) {
+  } catch (error: any) {
     const message = error instanceof Error ? error.message : "Unknown sync error";
     AppLogger.error(
       "[PRODUCT_SYNC] Failed to sync PPB parent product",

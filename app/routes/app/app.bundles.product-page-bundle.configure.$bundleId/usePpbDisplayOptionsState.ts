@@ -31,7 +31,7 @@ export function usePpbDisplayOptionsState({
   >(_savedDisplayOpts?.bundleQuantityOptions?.defaultRuleId ?? null);
   const [qtyRuleLabels, setQtyRuleLabels] = useState<Record<string, string>>(
     Object.fromEntries(
-      Object.entries(savedQuantityOptionsByRuleId).map(([ruleId, option]) => [
+      Object.entries(savedQuantityOptionsByRuleId).map(([ruleId, option]: any) => [
         ruleId,
         option.label ?? "",
       ]),
@@ -41,7 +41,7 @@ export function usePpbDisplayOptionsState({
     Record<string, string>
   >(
     Object.fromEntries(
-      Object.entries(savedQuantityOptionsByRuleId).map(([ruleId, option]) => [
+      Object.entries(savedQuantityOptionsByRuleId).map(([ruleId, option]: any) => [
         ruleId,
         option.subtext ?? "",
       ]),

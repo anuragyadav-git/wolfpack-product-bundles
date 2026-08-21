@@ -1,4 +1,5 @@
 import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
+import { DisabledConfigurationRegion } from "../../_shared/bundle-configure/DisabledConfigurationRegion";
 
 export function FpbDiscountMessagingOptions({
   flow,
@@ -52,7 +53,7 @@ export function FpbDiscountMessagingOptions({
               checked={pricingState.discountMessagingEnabled || undefined}
               onChange={(e) =>
                 pricingState.setDiscountMessagingEnabled(
-                  (e.target as HTMLInputElement).checked,
+                  (e.target as HTMLInputElement).checked
                 )
               }
             />
@@ -64,7 +65,7 @@ export function FpbDiscountMessagingOptions({
               disabled={!pricingState.discountMessagingEnabled || undefined}
               onChange={(e) => {
                 setDiscountMessagingMultiLanguageEnabled(
-                  (e.target as HTMLInputElement).checked,
+                  (e.target as HTMLInputElement).checked
                 );
                 markAsDirty();
               }}
@@ -82,11 +83,15 @@ export function FpbDiscountMessagingOptions({
             Get) to ensure customers add their rewards to the cart
           </s-banner>
         )}
-        {pricingState.discountMessagingEnabled && (
+        <DisabledConfigurationRegion
+          disabled={!pricingState.discountMessagingEnabled}
+        >
           <div className={fullPageBundleStyles.nestedDisplayOptions}>
             <s-stack direction="block" gap="small">
-              {discountMessagingMultiLanguageEnabled &&
-                shopLocales.length > 0 && (
+              {shopLocales.length > 0 && (
+                <DisabledConfigurationRegion
+                  disabled={!discountMessagingMultiLanguageEnabled}
+                >
                   <s-stack direction="block" gap="small-100">
                     <s-select
                       label="Language"
@@ -119,7 +124,7 @@ export function FpbDiscountMessagingOptions({
                             {loc.name}
                             {loc.primary ? " (default)" : ""}
                           </s-option>
-                        ),
+                        )
                       )}
                     </s-select>
                     <p
@@ -141,8 +146,8 @@ export function FpbDiscountMessagingOptions({
                         .filter(
                           (locale) =>
                             !shopLocales.find(
-                              (l: any) => l.locale === locale && l.primary,
-                            ),
+                              (l: any) => l.locale === locale && l.primary
+                            )
                         )
                         .map((locale) => {
                           const locName =
@@ -152,7 +157,8 @@ export function FpbDiscountMessagingOptions({
                         })}
                     </s-stack>
                   </s-stack>
-                )}
+                </DisabledConfigurationRegion>
+              )}
               <div style={{ textAlign: "right" }}>
                 <s-button
                   variant="tertiary"
@@ -167,13 +173,13 @@ export function FpbDiscountMessagingOptions({
                     (rule: any, index: number) => {
                       const localeMessages =
                         discountMessagingMultiLanguageEnabled
-                          ? (ruleMessagesByLocale[activeDiscountLocale]?.[
+                          ? ruleMessagesByLocale[activeDiscountLocale]?.[
                               rule.id
-                            ] ?? normalizedRuleMessages[rule.id])
+                            ] ?? normalizedRuleMessages[rule.id]
                           : normalizedRuleMessages[rule.id];
                       const defaultDiscountText = getDefaultDiscountRuleText(
                         pricingState.discountType,
-                        index,
+                        index
                       );
                       return (
                         <div
@@ -217,7 +223,7 @@ export function FpbDiscountMessagingOptions({
                                   updateRuleMessage(
                                     rule.id,
                                     "discountText",
-                                    val,
+                                    val
                                   );
                                 }
                               }}
@@ -226,7 +232,7 @@ export function FpbDiscountMessagingOptions({
                           </s-stack>
                         </div>
                       );
-                    },
+                    }
                   )}
                   <s-section>
                     <s-stack direction="block" gap="small">
@@ -235,21 +241,23 @@ export function FpbDiscountMessagingOptions({
                         value={(() => {
                           const defaultMsg =
                             getDefaultDiscountRuleSuccessMessage(
-                              pricingState.discountType,
+                              pricingState.discountType
                             );
                           const val = discountMessagingMultiLanguageEnabled
-                            ? (successMessageByLocale[activeDiscountLocale] ??
-                              globalSuccessMessage)
+                            ? successMessageByLocale[activeDiscountLocale] ??
+                              globalSuccessMessage
                             : globalSuccessMessage;
                           return val || defaultMsg;
                         })()}
                         onInput={(e) => {
                           const val = (e.target as HTMLInputElement).value;
                           if (discountMessagingMultiLanguageEnabled) {
-                            setSuccessMessageByLocale((prev: Record<string, string>) => ({
-                              ...prev,
-                              [activeDiscountLocale]: val,
-                            }));
+                            setSuccessMessageByLocale(
+                              (prev: Record<string, string>) => ({
+                                ...prev,
+                                [activeDiscountLocale]: val,
+                              })
+                            );
                           } else {
                             setGlobalSuccessMessage(val);
                           }
@@ -276,7 +284,7 @@ export function FpbDiscountMessagingOptions({
               )}
             </s-stack>
           </div>
-        )}
+        </DisabledConfigurationRegion>
       </div>
     </>
   );

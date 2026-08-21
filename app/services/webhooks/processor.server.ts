@@ -259,7 +259,7 @@ export class WebhookProcessor {
 
       return result;
 
-    } catch (error) {
+    } catch (error: any) {
       AppLogger.error("Error processing webhook", {
         component: "webhook-processor",
         operation: "processPubSubMessage"

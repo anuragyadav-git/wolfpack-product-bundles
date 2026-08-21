@@ -217,7 +217,7 @@ export function useConfigureTemplatePricingController(
   ]);
   function buildBundleUpsellConfig() {
     const multiLangText = Object.fromEntries(
-      Object.entries(textOverridesByLocale ?? {}).flatMap(([locale, values]) => {
+      Object.entries(textOverridesByLocale ?? {}).flatMap(([locale, values]: any) => {
         const widgetCopy = {
           widgetTitle: values?.widgetTitle ?? "",
           widgetDescription: values?.widgetDescription ?? "",

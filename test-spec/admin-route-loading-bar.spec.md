@@ -4,8 +4,8 @@ id: admin-route-loading-bar
 title: Admin Route Loading Bar
 type: test-spec
 status: active
-summary: Verifies that Settings workspace and Analytics readiness use one accessible shared top-edge loading bar with continuous pending feedback.
-last_audited: 2026-08-13
+summary: Verifies that Settings navigation, workspace readiness, and Analytics use one accessible shared top-edge loading bar with continuous pending feedback.
+last_audited: 2026-08-21
 owners:
   - engineering
 domains:
@@ -47,13 +47,15 @@ Keep Settings and Analytics loading feedback tied to their real Suspense readine
 | --- | --- | --- | --- | --- |
 | 1 | Settings landing page is pending | Settings data or loading-bar fill is unresolved | One progressbar labelled Loading Settings | Landing cards remain hidden |
 | 2 | Settings workspace is pending | Settings workspace chunk is unresolved after a card selection | One progressbar labelled Loading Settings | No skeleton markup |
-| 3 | Loading bar fill is in progress | Fewer than 800 milliseconds elapsed | Content stays pending | Bar completes before content is revealed |
-| 4 | Analytics dashboard is pending | Analytics data, status, or dashboard/chart chunk is unresolved | Only one progressbar labelled Loading Analytics | Title, funnel header, status banner, and dashboard stay behind one readiness boundary |
+| 3 | Controls route navigation is pending | Merchant selects Controls and the target route loader has not mounted | Settings cards are replaced by one progressbar labelled Loading Settings | Prevents a pre-loader feedback gap |
+| 4 | Loading bar fill is in progress | Fewer than 800 milliseconds elapsed | Content stays pending | Bar completes before content is revealed |
+| 5 | Analytics dashboard is pending | Analytics data, status, or dashboard/chart chunk is unresolved | Only one progressbar labelled Loading Analytics | Title, funnel header, status banner, and dashboard stay behind one readiness boundary |
 
 ## Acceptance Criteria
 
 - [x] The Settings landing page stays behind the shared loading bar until its deferred data is ready.
 - [x] Settings workspace transitions use the loading bar and no card skeletons.
+- [x] Controls route navigation shows the loading bar immediately and continuously through target readiness.
 - [x] Analytics readiness uses the loading bar and no dashboard or chart skeletons.
 - [x] The loading bar is accessible and respects reduced-motion preferences.
 - [x] The shared bar continues to show activity if route readiness takes longer than its initial fill.

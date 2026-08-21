@@ -84,7 +84,7 @@ export async function buildMantleProviderConfig({
       customerApiToken,
       ...(apiUrl ? { apiUrl } : {}),
     };
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.warn("Failed to build Mantle provider config", {
       component: "mantle.server",
       shop: shopDomain,

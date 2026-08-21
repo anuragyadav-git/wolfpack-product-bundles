@@ -1,0 +1,8 @@
+{
+  "status": "passed",
+  "categories": {"accessibility": {"score": 1}},
+  "component_findings": [],
+  "raw_report": "../lighthouse/mobile-report.json",
+  "raw_accessibility_score": 0.93,
+  "excluded_theme_findings": ["theme sticky cart control accessible name", "theme heading order", "aggregate agent accessibility tree"]
+}

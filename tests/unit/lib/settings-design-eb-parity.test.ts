@@ -69,6 +69,10 @@ describe("buildSettingsDesignRuntime", () => {
         primaryTextColor: "#222222",
         accentColor: "#dddddd",
         backgroundColor: "#ffffff",
+        discountTierBackgroundColor: "#D1FAE5",
+        discountTierTextColor: "#065F46",
+        discountCompletionBackgroundColor: "#047857",
+        discountCompletionTextColor: "#FFFFFF",
       },
       typography: {
         primaryFontSize: "18px",
@@ -214,6 +218,30 @@ describe("buildSettingsDesignRuntime", () => {
 });
 
 describe("Settings Design CSS variable aliases", () => {
+  it("persists custom discount feedback colors and emits their CSS variables", () => {
+    const runtime = buildSettingsDesignRuntime(makePayload({
+      "stylePresets.colors.discountTierBackgroundColor": "#aabbcc",
+      "stylePresets.colors.discountTierTextColor": "#112233",
+      "stylePresets.colors.discountCompletionBackgroundColor": "#334455",
+      "stylePresets.colors.discountCompletionTextColor": "#fefefe",
+    }));
+    const colors = (runtime.pageCustomization as any).stylePresets.colors;
+    const css = generateCSSFromSettings(runtime.cssSettings as any, "product_page");
+
+    expect(colors).toMatchObject({
+      discountTierBackgroundColor: "#aabbcc",
+      discountTierTextColor: "#112233",
+      discountCompletionBackgroundColor: "#334455",
+      discountCompletionTextColor: "#fefefe",
+    });
+    expectGeneratedCssToInclude(css, [
+      "--bundle-discount-feedback-tier-bg: #aabbcc",
+      "--bundle-discount-feedback-tier-text: #112233",
+      "--bundle-discount-feedback-complete-bg: #334455",
+      "--bundle-discount-feedback-complete-text: #fefefe",
+    ]);
+  });
+
   it("emits EB PPB direct variables and consolidated bridge variables", () => {
     const runtime = buildSettingsDesignRuntime(makePayload());
     const css = generateCSSFromSettings(runtime.cssSettings as any, "product_page");

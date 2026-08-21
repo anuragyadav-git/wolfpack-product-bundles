@@ -81,7 +81,7 @@ describe("ProductPageSessionSelectionPersistence", () => {
       ),
       setItem: jest.fn(),
     };
-    const context = {
+    const context: any = {
       selectedBundle: { offerId: "MIX-1", steps: [{}, {}] },
       selectedProducts: [{ required: 1 }, {}],
       selectedProductCategoryIndexes: [{ required: 0 }, {}],
@@ -108,7 +108,7 @@ describe("ProductPageSessionSelectionPersistence", () => {
   });
 
   it("keeps initial selections when stored JSON is malformed", () => {
-    const context = {
+    const context: any = {
       selectedBundle: { offerId: "MIX-1", steps: [{}] },
       selectedProducts: [{ required: 1 }],
       _getProductPageSelectionStorage: () => ({ getItem: () => "{bad json" }),

@@ -1,0 +1,146 @@
+{
+  "schema_version": 1,
+  "job_id": "ppb-selected-slot-redesign-20260821",
+  "revision": 1,
+  "status": "draft",
+  "checked_at": "",
+  "environment": "",
+  "selected_page": {
+    "page_id": null,
+    "url": "",
+    "title": ""
+  },
+  "checks": {
+    "chrome_mcp_connected": {
+      "mandatory": true,
+      "status": "not-run",
+      "evidence": "",
+      "blocker": "",
+      "recovery_action": ""
+    },
+    "supported_chrome_available": {
+      "mandatory": true,
+      "status": "not-run",
+      "evidence": "",
+      "blocker": "",
+      "recovery_action": ""
+    },
+    "intended_page_selected": {
+      "mandatory": true,
+      "status": "not-run",
+      "evidence": "",
+      "blocker": "",
+      "recovery_action": ""
+    },
+    "app_server_reachable": {
+      "mandatory": true,
+      "status": "not-run",
+      "evidence": "",
+      "blocker": "",
+      "recovery_action": ""
+    },
+    "environment_confirmed": {
+      "mandatory": true,
+      "status": "not-run",
+      "evidence": "",
+      "blocker": "",
+      "recovery_action": ""
+    },
+    "fixture_route_exists": {
+      "mandatory": true,
+      "status": "not-run",
+      "evidence": "",
+      "blocker": "",
+      "recovery_action": ""
+    },
+    "authentication_intentional": {
+      "mandatory": true,
+      "status": "not-run",
+      "evidence": "",
+      "blocker": "",
+      "recovery_action": ""
+    },
+    "sensitive_tabs_avoided": {
+      "mandatory": true,
+      "status": "not-run",
+      "evidence": "",
+      "blocker": "",
+      "recovery_action": ""
+    },
+    "viewport_resize_supported": {
+      "mandatory": true,
+      "status": "not-run",
+      "evidence": "",
+      "blocker": "",
+      "recovery_action": ""
+    },
+    "accessibility_snapshot_supported": {
+      "mandatory": true,
+      "status": "not-run",
+      "evidence": "",
+      "blocker": "",
+      "recovery_action": ""
+    },
+    "screenshot_write_supported": {
+      "mandatory": true,
+      "status": "not-run",
+      "evidence": "",
+      "blocker": "",
+      "recovery_action": ""
+    },
+    "console_inspection_supported": {
+      "mandatory": true,
+      "status": "not-run",
+      "evidence": "",
+      "blocker": "",
+      "recovery_action": ""
+    },
+    "network_inspection_supported": {
+      "mandatory": true,
+      "status": "not-run",
+      "evidence": "",
+      "blocker": "",
+      "recovery_action": ""
+    },
+    "repository_identity_recorded": {
+      "mandatory": true,
+      "status": "not-run",
+      "evidence": "",
+      "blocker": "",
+      "recovery_action": ""
+    },
+    "job_revision_recorded": {
+      "mandatory": true,
+      "status": "not-run",
+      "evidence": "",
+      "blocker": "",
+      "recovery_action": ""
+    },
+    "baseline_identified": {
+      "mandatory": true,
+      "status": "not-run",
+      "evidence": "",
+      "blocker": "",
+      "recovery_action": ""
+    }
+  },
+  "tool_inventory": [],
+  "browser": {
+    "product": "",
+    "version": "",
+    "profile_policy": "default-profile-only",
+    "isolated_context_used": false
+  },
+  "repository": {
+    "path": "",
+    "branch": "",
+    "commit": ""
+  },
+  "baseline": {
+    "id": "",
+    "revision": null,
+    "path": ""
+  },
+  "artifact_directory": "qa",
+  "blockers": []
+}

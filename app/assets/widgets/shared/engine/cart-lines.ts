@@ -8,13 +8,13 @@
 
 'use strict';
 
-const DEFAULT_CART_LINE_LABELS = {
+const DEFAULT_CART_LINE_LABELS: any = {
   items: 'Items',
   retailPrice: 'Retail Price',
   youSave: 'You Save',
 };
 
-function formatCartLineItemTitle(product = {}) {
+function formatCartLineItemTitle(product: any = {}) {
   const title = String(product.title || product.id || '');
   const variantTitle = String(product.variantTitle || product.variant || '').trim();
   if (!variantTitle || variantTitle === 'Default Title' || title.endsWith(`(${variantTitle})`)) {
@@ -30,10 +30,11 @@ export function buildCartLineSourceProperties({
   discountPercentage = null,
   box = '1',
   includeBox = true,
-} = {}) {
-  const displayProperties = {
+  labels = null,
+}: any = {}) {
+  const displayProperties: any = {
     items: selectedLines
-      .map(({ product = {}, quantity = 0 }) => `${Number(quantity || 0)} x ${formatCartLineItemTitle(product)}`)
+      .map(({ product = {}, quantity = 0 }: any) => `${Number(quantity || 0)} x ${formatCartLineItemTitle(product)}`)
       .join(', '),
     retailPrice: String(retailPrice || ''),
   };
@@ -51,17 +52,24 @@ export function buildCartLineSourceProperties({
     };
   }
 
+  if (labels) {
+    displayProperties.labels = {
+      ...DEFAULT_CART_LINE_LABELS,
+      ...labels,
+    };
+  }
+
   return {
     _bundle_display_properties: JSON.stringify(displayProperties),
   };
 }
 
-export function buildCartLineDisplayProperties(displayProperties = {}, labels = DEFAULT_CART_LINE_LABELS) {
-  const cartLineLabels = {
+export function buildCartLineDisplayProperties(displayProperties: any = {}, labels = DEFAULT_CART_LINE_LABELS) {
+  const cartLineLabels: any = {
     ...DEFAULT_CART_LINE_LABELS,
     ...labels,
   };
-  const properties = {
+  const properties: any = {
     Box: displayProperties.box || '1',
     [cartLineLabels.items]: displayProperties.items,
     [cartLineLabels.retailPrice]: displayProperties.retailPrice,

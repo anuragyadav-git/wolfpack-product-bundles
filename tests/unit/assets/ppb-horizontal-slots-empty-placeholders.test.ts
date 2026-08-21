@@ -46,7 +46,7 @@ describe('PPB Horizontal Slots empty placeholders', () => {
       selectedCount: 3,
       labels: ['Product 4'],
     },
-  ])('$name', ({ step, selectedCount, labels }) => {
+  ])('$name', ({ step, selectedCount, labels }: any) => {
     const target = createFakeElement('div');
     const widget = createWidget();
 
@@ -99,6 +99,22 @@ describe('PPB Horizontal Slots empty placeholders', () => {
     widget._appendModalSlotEmptyCards(
       target,
       { name: 'Step 1', conditionOperator: 'greater_than_or_equal_to', conditionValue: 2 },
+      0,
+      0
+    );
+
+    expect(target.children.map((card: any) => card.children.at(-1)?.textContent)).toEqual([
+      'Product 1',
+    ]);
+  });
+
+  it('keeps one operable empty slot when the step has no capacity condition', () => {
+    const target = createFakeElement('div');
+    const widget = createWidget();
+
+    widget._appendModalSlotEmptyCards(
+      target,
+      { name: 'Step 1' },
       0,
       0
     );

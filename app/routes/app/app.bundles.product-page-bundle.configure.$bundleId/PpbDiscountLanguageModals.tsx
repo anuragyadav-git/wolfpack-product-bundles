@@ -182,7 +182,7 @@ export function PpbDiscountLanguageModals() {
                       }
                       onInput={(e) => {
                         const val = (e.target as HTMLTextAreaElement).value;
-                        setTierTextByLocaleByRuleId((prev) => ({
+                        setTierTextByLocaleByRuleId((prev: { [x: string]: { [x: string]: { tierSubtext: any; }; }; }) => ({
                           ...prev,
                           [activeProgressBarLocale]: {
                             ...(prev[activeProgressBarLocale] || {}),
@@ -211,7 +211,7 @@ export function PpbDiscountLanguageModals() {
                       }
                       onInput={(e) => {
                         const val = (e.target as HTMLTextAreaElement).value;
-                        setTierTextByLocaleByRuleId((prev) => ({
+                        setTierTextByLocaleByRuleId((prev: { [x: string]: { [x: string]: { tierText: any; }; }; }) => ({
                           ...prev,
                           [activeProgressBarLocale]: {
                             ...(prev[activeProgressBarLocale] || {}),

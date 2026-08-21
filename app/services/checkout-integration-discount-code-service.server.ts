@@ -50,7 +50,7 @@ export class CheckoutIntegrationDiscountCodeService {
       });
 
       return match?.node?.id ?? null;
-    } catch (error) {
+    } catch (error: any) {
       AppLogger.warn("Failed to resolve checkout integration discount function", {
         component: "checkout-integration-discount-code",
         operation: "resolve-function",
@@ -166,7 +166,7 @@ export class CheckoutIntegrationDiscountCodeService {
         code: payload?.codeAppDiscount?.codes?.nodes?.[0]?.code ?? code,
         expiresAt: payload?.codeAppDiscount?.endsAt ?? expiresAt,
       };
-    } catch (error) {
+    } catch (error: any) {
       return {
         success: false,
         providerId,

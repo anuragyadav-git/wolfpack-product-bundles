@@ -20,7 +20,7 @@ function getPpbTemplateContracts() {
     : {};
 }
 
-export const PPB_TEMPLATE_CONFIGS = {
+export const PPB_TEMPLATE_CONFIGS: any = {
   get GRID() {
     return getPpbTemplateContracts().GRID || null;
   },

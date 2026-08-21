@@ -2,7 +2,7 @@
 import { BUNDLE_WIDGET } from '../../shared/constants.js';
 
 export const ProductPageDefaultProductMethods: Record<string, any> & ThisType<any> = {
-  _normalizeRequiredQuantity(value) {
+  _normalizeRequiredQuantity(value: string) {
     const parsed = Number.parseFloat(value);
     return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0;
   },
@@ -22,7 +22,7 @@ initializeDataStructures() {
   // Default products are always included in the bundle — no user selection required.
   // buildCartItems() reads selectedProducts, so without this the default item is
   // silently excluded from the cart payload on classic modal style bundles.
-  this.selectedBundle.steps.forEach((step, i) => {
+  this.selectedBundle.steps.forEach((step: any, i: any) => {
     if (step.isDefault && step.defaultVariantId) {
       const normalizedDefaultVariantId = this.normalizeSelectionKey(step.defaultVariantId);
       if (normalizedDefaultVariantId) {
@@ -41,7 +41,7 @@ _getDirectDefaultProductsData() {
   return data;
 },
 
-  _normalizeDirectDefaultProduct(product) {
+  _normalizeDirectDefaultProduct(product: any) {
   const variant = Array.isArray(product.variants) ? product.variants[0] : null;
   const variantId = this.extractId(variant?.selectionId);
   if (!variantId) return null;
@@ -88,7 +88,7 @@ _getDirectDefaultProductItems() {
   const data = this._getDirectDefaultProductsData();
   if (!data) return [];
   return data.products
-    .map(product => this._normalizeDirectDefaultProduct(product))
+    .map((product: any)  => this._normalizeDirectDefaultProduct(product))
     .filter(Boolean);
 },
 
@@ -96,7 +96,7 @@ _initDirectDefaultProducts() {
   this.directDefaultProducts = this._getDirectDefaultProductItems();
   if (this.directDefaultProducts.length === 0 || !this.selectedProducts[0]) return;
 
-  this.directDefaultProducts.forEach(product => {
+  this.directDefaultProducts.forEach((product: any)  => {
     this.setSelectedQuantity(0, product.variantId, this._normalizeRequiredQuantity(product.defaultRequiredQuantity));
   });
 },
@@ -106,19 +106,19 @@ async _preloadDirectDefaultProducts() {
   await this.loadStepProducts(0).catch(() => {});
 },
 
-_mergeDirectDefaultProductsIntoStep(stepIndex, products) {
+_mergeDirectDefaultProductsIntoStep(stepIndex: number, products: string|any[]) {
   if (stepIndex !== 0 || this.directDefaultProducts.length === 0) return products;
   return products.concat(this.directDefaultProducts);
 },
 
-_isDirectDefaultVariant(variantId) {
+_isDirectDefaultVariant(variantId: any) {
   const normalizedVariantId = this.extractId(variantId);
-  return this.directDefaultProducts.some(product => product.variantId === normalizedVariantId);
+  return this.directDefaultProducts.some((product: any)  => product.variantId === normalizedVariantId);
 },
 
-_getDirectDefaultRequiredQuantity(variantId) {
+_getDirectDefaultRequiredQuantity(variantId: any) {
   const normalizedVariantId = this.extractId(variantId);
-  const product = this.directDefaultProducts.find(item => item.variantId === normalizedVariantId);
+  const product = this.directDefaultProducts.find((item: any)  => item.variantId === normalizedVariantId);
   return product ? this._normalizeRequiredQuantity(product.defaultRequiredQuantity) : null;
 },
 
@@ -128,7 +128,7 @@ _getDirectDefaultRequiredQuantity(variantId) {
  * Non-fatal — a failed fetch just leaves the card in a loading placeholder state.
  */
 async _preloadDefaultStepProducts() {
-  const promises = this.selectedBundle.steps.map((step, i) => {
+  const promises = this.selectedBundle.steps.map((step: any, i: any) => {
     if (step.isDefault && step.defaultVariantId) {
       return this.loadStepProducts(i).catch(() => {});
     }
@@ -141,7 +141,7 @@ async _preloadDefaultStepProducts() {
  * Returns the product object for a default step from stepProductData,
  * matched by defaultVariantId. Returns null when not yet loaded.
  */
-_getDefaultStepProduct(stepIndex) {
+_getDefaultStepProduct(stepIndex: string|number) {
   const step = this.selectedBundle.steps[stepIndex];
   if (!step?.isDefault || !step.defaultVariantId) return null;
   const products = this.stepProductData[stepIndex] || [];

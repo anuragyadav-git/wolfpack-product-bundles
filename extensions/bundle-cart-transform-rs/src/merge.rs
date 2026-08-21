@@ -423,7 +423,7 @@ pub fn process_merge_operations(
             if cart_line_messaging.show_bundle_contains {
                 if let Some(value) = source_items {
                     attributes.push(schema::AttributeOutput {
-                        key: "Items".into(),
+                        key: source_display_properties.labels.items.clone(),
                         value,
                     });
                 }
@@ -432,7 +432,7 @@ pub fn process_merge_operations(
             if cart_line_messaging.show_original_price {
                 if let Some(value) = source_retail_price {
                     attributes.push(schema::AttributeOutput {
-                        key: "Retail Price".into(),
+                        key: source_display_properties.labels.retail_price.clone(),
                         value,
                     });
                 }
@@ -446,7 +446,7 @@ pub fn process_merge_operations(
                     source_you_save_percentage,
                 ) {
                     attributes.push(schema::AttributeOutput {
-                        key: "You Save".into(),
+                        key: source_display_properties.labels.you_save.clone(),
                         value,
                     });
                 }

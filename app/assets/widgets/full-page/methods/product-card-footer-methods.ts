@@ -15,29 +15,29 @@ import { getSubscriptionProductCardPrice } from '../../shared/subscription-store
 
 const productCardFooterTemplateSystem = TemplateDesignSystem;
 
-function getSelectionId(item = {}) {
+function getSelectionId(item: any = {}) {
   return String(item?.selectionId || '');
 }
 
-function getFpbPresetContract(designPreset) {
+function getFpbPresetContract(designPreset: any) {
   if (typeof productCardFooterTemplateSystem?.fpb?.resolveContract !== 'function') return null;
   return productCardFooterTemplateSystem.fpb.resolveContract(designPreset) || null;
 }
 
-function getFpbProductCardMode(designPreset) {
+function getFpbProductCardMode(designPreset: any) {
   return getFpbPresetContract(designPreset)?.productCard?.mode || null;
 }
 
-function isClassicFpbPreset(designPreset) {
+function isClassicFpbPreset(designPreset: any) {
   return getFpbPresetContract(designPreset)?.summary?.mode === 'slots';
 }
 
-function shouldUseSharedProductCard(designPreset) {
+function shouldUseSharedProductCard(designPreset: any) {
   const mode = getFpbProductCardMode(designPreset);
   return mode === 'grid' || mode === 'compact' || mode === 'row';
 }
 
-function shouldUseAddonDiscountBadge(designPreset) {
+function shouldUseAddonDiscountBadge(designPreset: any) {
   const contract = getFpbPresetContract(designPreset);
   if (!contract) return false;
 
@@ -48,8 +48,8 @@ function shouldUseAddonDiscountBadge(designPreset) {
 
 
 export const fullPageProductCardFooterMethods: Record<string, any> & ThisType<any> = {
-createProductCard(product, stepIndex, options = {}) {
-  const resolveText = (key, fallback) => (
+createProductCard(product: any, stepIndex: string|number, options: any = {}) {
+  const resolveText = (key: string, fallback: string) => (
     typeof this._resolveText === 'function' ? this._resolveText(key, fallback) : fallback
   );
   const productId = getSelectionId(product);
@@ -87,7 +87,7 @@ createProductCard(product, stepIndex, options = {}) {
     displayVariantsAsIndividualProducts,
   });
   const selectableVariantCount = Array.isArray(product?.variants)
-    ? product.variants.filter(variant => variant?.available !== false).length
+    ? product.variants.filter((variant: any)  => variant?.available !== false).length
     : 0;
   const openVariantModalOnAdd =
     this.selectedBundle?.variantSelectorEnabled === false
@@ -145,7 +145,7 @@ createProductCard(product, stepIndex, options = {}) {
         variantSelectorHtml,
         mode: getFpbProductCardMode(designPreset) || 'grid',
         className: outOfStock ? 'is-out-of-stock' : '',
-        showCompareAtPrice: true,
+        showCompareAtPrice: this._getLandingPageControls?.()?.showCompareAtPrice === true,
         openImageLabel: resolveText('productImageLabel', 'Open product details'),
         openTitleLabel: resolveText('productTitleLabel', 'Open product details'),
         imageNavPreviousLabel: resolveText('productImagePreviousLabel', 'Previous image'),
@@ -184,7 +184,7 @@ createProductCard(product, stepIndex, options = {}) {
   // Convert HTML string to DOM element
   const wrapper = document.createElement('div');
   wrapper.innerHTML = htmlString.trim();
-  const cardElement = wrapper.firstChild;
+  const cardElement = wrapper.firstChild as HTMLElement;
 
   this.applyStandardExpandedVariantTitle(cardElement, displayProduct);
 
@@ -257,7 +257,7 @@ createProductCard(product, stepIndex, options = {}) {
   return cardElement;
 },
 
-buildPaidAddonProductDisplayData(product, step) {
+buildPaidAddonProductDisplayData(product: any, step: any) {
   const isAddonDiscountStep = step?.isFreeGift === true;
   if (!isAddonDiscountStep || typeof this.getAddonLineDiscount !== 'function') return product;
 
@@ -280,7 +280,7 @@ buildPaidAddonProductDisplayData(product, step) {
   };
   },
 
-getProductCardAddButtonText(step) {
+getProductCardAddButtonText(step: any) {
   const isPaidAddonStep = step?.isFreeGift === true && step?.addonDisplayFree !== true;
   if (isPaidAddonStep) {
     if (isClassicFpbPreset(this.getFullPageDesignPreset?.())) {
@@ -292,7 +292,7 @@ getProductCardAddButtonText(step) {
   return this.getProductAddButtonText();
 },
 
-applyStandardExpandedVariantTitle(cardElement, product) {
+applyStandardExpandedVariantTitle(cardElement: any, product: any) {
   const contract = getFpbPresetContract(this.getFullPageDesignPreset?.());
   if (!contract || contract.summary?.mode !== 'rows') return;
   if (!cardElement) return;
@@ -325,7 +325,7 @@ applyStandardExpandedVariantTitle(cardElement, product) {
   variantDividerEl.insertAdjacentElement('afterend', variantEl);
 },
 
-getSummaryProductDisplayTitle(item) {
+getSummaryProductDisplayTitle(item: any) {
   if (!item) return '';
   const hasVariantLabel = item.variantTitle && item.variantTitle !== 'Default Title';
   const hasUsableParentTitle = typeof item.parentTitle === 'string' && item.parentTitle.trim().length > 0;
@@ -341,7 +341,7 @@ getSummaryProductDisplayTitle(item) {
   return inferredParentTitle || item.title || '';
 },
 
-getSummaryProductVariantDisplay(item) {
+getSummaryProductVariantDisplay(item: any) {
   if (!item) return '';
 
   const explicitVariantTitle = typeof item.variantTitle === 'string' ? item.variantTitle : '';
@@ -364,7 +364,7 @@ getSummaryProductVariantDisplay(item) {
   return this.getSummaryVariantFromDisplayTitle(normalizedTitle);
 },
 
-getParentTitleFromDisplayTitle(displayTitle) {
+getParentTitleFromDisplayTitle(displayTitle: string) {
   if (typeof displayTitle !== 'string') return '';
   const separatorIndex = displayTitle.indexOf(' - ');
   if (separatorIndex <= 0) return '';
@@ -372,7 +372,7 @@ getParentTitleFromDisplayTitle(displayTitle) {
   return parentCandidate || '';
 },
 
-getSummaryVariantFromDisplayTitle(displayTitle) {
+getSummaryVariantFromDisplayTitle(displayTitle: string) {
   if (typeof displayTitle !== 'string') return '';
   const separatorIndex = displayTitle.indexOf(' - ');
   if (separatorIndex <= 0) return '';
@@ -381,7 +381,7 @@ getSummaryVariantFromDisplayTitle(displayTitle) {
 },
 
 // Attach event listeners to product card
-attachProductCardListeners(cardElement, product, stepIndex, options = {}) {
+attachProductCardListeners(cardElement: any, product: any, stepIndex: any, options: any = {}) {
   // Default steps are read-only — no add/remove/quantity interaction allowed
   const step = (this.selectedBundle?.steps || [])[stepIndex];
   if (step?.isDefault) return;
@@ -389,7 +389,7 @@ attachProductCardListeners(cardElement, product, stepIndex, options = {}) {
   // Prefer the clicked control's data key; variant selector updates the DOM before
   // subsequent quantity clicks, while the captured product object can lag behind.
   const getProductId = () => getSelectionId(product);
-  const getClickedProductId = (element) => element?.dataset?.productId || getProductId();
+  const getClickedProductId = (element: any) => element?.dataset?.productId || getProductId();
   const openCardDetails = () => {
     if (!this.productModal) {
       this.productModal = new BundleProductModal(this);
@@ -403,12 +403,12 @@ attachProductCardListeners(cardElement, product, stepIndex, options = {}) {
       readOnly: isClassicQuickView,
     });
   };
-  const isActivationKey = (event) => event.key === 'Enter' || event.key === ' ';
-  const isProductCardControl = (element) => element.closest(
+  const isActivationKey = (event: any) => event.key === 'Enter' || event.key === ' ';
+  const isProductCardControl = (element: any) => element.closest(
     '.inline-qty-btn, .product-add-btn, .bw-product-card__image-nav, .product-card-action, .vs-wrapper',
   );
 
-  cardElement.addEventListener('click', (e) => {
+  cardElement.addEventListener('click', (e: any) => {
     const imageNav = e.target.closest('.bw-product-card__image-nav');
     if (imageNav) {
       e.preventDefault();
@@ -432,7 +432,7 @@ attachProductCardListeners(cardElement, product, stepIndex, options = {}) {
     openCardDetails();
   });
 
-  cardElement.addEventListener('keydown', (event) => {
+  cardElement.addEventListener('keydown', (event: any) => {
     if (!isActivationKey(event)) return;
     const { target } = event;
     const normalizedTarget = target || cardElement;
@@ -444,7 +444,7 @@ attachProductCardListeners(cardElement, product, stepIndex, options = {}) {
   });
 
   // Inline quantity increase/decrease buttons (delegated via card element)
-  cardElement.addEventListener('click', (e) => {
+  cardElement.addEventListener('click', (e: any) => {
     const btn = e.target.closest('.inline-qty-btn');
     if (!btn) return;
     e.stopPropagation();
@@ -463,7 +463,7 @@ attachProductCardListeners(cardElement, product, stepIndex, options = {}) {
   });
 
   // Circle add button: qty 0 → 1
-  cardElement.addEventListener('click', (e) => {
+  cardElement.addEventListener('click', (e: any) => {
     const addBtn = e.target.closest('.product-add-btn');
     if (!addBtn) return;
     e.stopPropagation();
@@ -507,7 +507,7 @@ attachProductCardListeners(cardElement, product, stepIndex, options = {}) {
     product,
     displayVariantsAsIndividualProducts,
   })) {
-    VariantSelectorComponent.attachListeners(cardElement, product, (newVariantId, oldVariantId) => {
+    VariantSelectorComponent.attachListeners(cardElement, product, (newVariantId: string|number, oldVariantId: string|number) => {
       const oldQty = this.selectedProducts[stepIndex]?.[oldVariantId] || 0;
 
       if (oldQty > 0 && oldVariantId !== newVariantId) {
@@ -540,7 +540,7 @@ attachProductCardListeners(cardElement, product, stepIndex, options = {}) {
       // Update data-product-id on card + action buttons so subsequent clicks use correct ID
       cardElement.dataset.productId = newVariantId;
       cardElement.dataset.currentSelectedVariantId = newVariantId;
-      cardElement.querySelectorAll('[data-product-id]').forEach(el => {
+      cardElement.querySelectorAll('[data-product-id]').forEach((el: any)  => {
         if (el !== cardElement) el.dataset.productId = newVariantId;
       });
       this.updateProductCardVariantDisplay(cardElement, product, step);
@@ -555,7 +555,7 @@ attachProductCardListeners(cardElement, product, stepIndex, options = {}) {
   }
 },
 
-updateProductCardVariantDisplay(cardElement, product, step) {
+updateProductCardVariantDisplay(cardElement: any, product: any, step: any) {
   if (!cardElement || !product) return;
 
   const displayProduct = this.buildPaidAddonProductDisplayData(product, step);

@@ -312,7 +312,7 @@ export async function checkAppEmbedEnabled(
     );
 
     return { enabled, themeId: theme.id };
-  } catch (err) {
+  } catch (err: any) {
     AppLogger.warn("checkAppEmbedEnabled: unexpected error", { shopDomain, err });
     return { enabled: false, themeId: null };
   }

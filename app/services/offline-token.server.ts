@@ -122,7 +122,7 @@ async function requestOfflineToken(
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
     try {
       return await requestOfflineTokenOnce(shop, params);
-    } catch (error) {
+    } catch (error: any) {
       if (attempt >= maxAttempts || !isTransientOfflineTokenRequestError(error)) {
         throw error;
       }
@@ -378,7 +378,7 @@ export async function ensureShopHasExpiringOfflineSession(
           options.idToken,
           storage,
         );
-      } catch (error) {
+      } catch (error: any) {
         AppLogger.error("[OFFLINE_TOKEN] Failed to acquire expiring offline session", {
           component: "offline-token.server",
           shop,
@@ -398,7 +398,7 @@ export async function ensureShopHasExpiringOfflineSession(
     if (shouldRefreshOfflineSession(record)) {
       try {
         return await refreshOfflineSession(prisma, record, storage);
-      } catch (error) {
+      } catch (error: any) {
         AppLogger.error("[OFFLINE_TOKEN] Failed to refresh offline session", {
           component: "offline-token.server",
           shop,
@@ -413,7 +413,7 @@ export async function ensureShopHasExpiringOfflineSession(
   if (record.refreshToken) {
     try {
       return await refreshOfflineSession(prisma, record, storage);
-    } catch (error) {
+    } catch (error: any) {
       AppLogger.error("[OFFLINE_TOKEN] Failed to refresh incomplete offline session", {
         component: "offline-token.server",
         shop,
@@ -424,7 +424,7 @@ export async function ensureShopHasExpiringOfflineSession(
 
   try {
     return await migrateOfflineSessionToExpiring(prisma, record, storage);
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.error("[OFFLINE_TOKEN] Failed to migrate offline session", {
       component: "offline-token.server",
       shop,
@@ -474,7 +474,7 @@ export async function getOfflineSessionForShop(
   if (!record.refreshToken && migrateIfNeeded) {
     try {
       return await migrateOfflineSessionToExpiring(prisma, record, storage);
-    } catch (error) {
+    } catch (error: any) {
       AppLogger.error("[OFFLINE_TOKEN] Failed to migrate offline session", {
         component: "offline-token.server",
         shop,
@@ -490,7 +490,7 @@ export async function getOfflineSessionForShop(
   ) {
     try {
       return await refreshOfflineSession(prisma, record, storage);
-    } catch (error) {
+    } catch (error: any) {
       AppLogger.error("[OFFLINE_TOKEN] Failed to refresh offline session", {
         component: "offline-token.server",
         shop,

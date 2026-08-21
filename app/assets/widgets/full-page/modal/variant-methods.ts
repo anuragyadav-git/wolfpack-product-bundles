@@ -1,6 +1,6 @@
 'use strict';
 
-function isRgbColorValue(value) {
+function isRgbColorValue(value: string) {
   const lowerValue = value.toLowerCase();
   const isRgba = lowerValue.startsWith('rgba(');
   const isRgb = lowerValue.startsWith('rgb(');
@@ -10,7 +10,7 @@ function isRgbColorValue(value) {
   const components = lowerValue.slice(prefixLength, -1).split(',');
   if (components.length !== (isRgba ? 4 : 3)) return false;
 
-  return components.every((component, index) => {
+  return components.every((component: string, index: number) => {
     const trimmed = component.trim();
     const isPercent = trimmed.endsWith('%');
     const rawNumber = isPercent ? trimmed.slice(0, -1) : trimmed;
@@ -32,7 +32,7 @@ export const BundleModalVariantMethods: Record<string, any> & ThisType<any> = {
   },
 
   createVariantSelectors() {
-    const variantsContainer = document.getElementById('modal-variants-container');
+    const variantsContainer = document.getElementById('modal-variants-container')!;
     const variants = this.currentProduct.variants || [];
 
     this.resetVariantSelectionState();
@@ -44,13 +44,47 @@ export const BundleModalVariantMethods: Record<string, any> & ThisType<any> = {
       return;
     }
 
+    if (this.isPpbOwned) {
+      const firstOption = this.currentProduct.options?.[0];
+      const optionLabel = (typeof firstOption === 'string' ? firstOption : firstOption?.name)
+        || this.currentProduct.title;
+      const variantLabel = this.widget?._resolveText?.('productVariantLabel', optionLabel) || optionLabel;
+      const currentVariantId = String(this.currentProduct.variantId || this.currentProduct.selectionId || variants[0]?.id || '');
+      variantsContainer.innerHTML = `
+        <label class="bundle-modal-variant-label" for="bundle-modal-native-variant">${variantLabel}</label>
+        <select id="bundle-modal-native-variant" class="bundle-modal-native-variant" aria-label="${variantLabel}">
+          ${variants.map((variant: any) => {
+            const id = String(variant.id || variant.variantId || '');
+            const unavailable = variant.available === false || variant.availableForSale === false;
+            return `<option value="${id}"${id === currentVariantId ? ' selected' : ''}${unavailable ? ' disabled' : ''}>${variant.title || id}</option>`;
+          }).join('')}
+        </select>
+      `;
+      const select = variantsContainer.querySelector<HTMLSelectElement>('.bundle-modal-native-variant');
+      this.selectedVariant = variants.find((variant: any) => String(variant.id || variant.variantId || '') === currentVariantId)
+        || variants[0];
+      select?.addEventListener('change', () => {
+        this.selectedVariant = variants.find((variant: any) => String(variant.id || variant.variantId || '') === String(select.value))
+          || variants[0];
+        this.updateSelectionSummary();
+        this.updatePrice();
+        this.updateAvailability();
+        this.updateVariantImage();
+      });
+      this.updateSelectionSummary();
+      this.updatePrice();
+      this.updateAvailability();
+      this.updateVariantImage();
+      return;
+    }
+
     // Extract option names (e.g., Size, Color)
     // Handle different data structures: options can be array of strings or array of objects
     let optionNames = this.currentProduct.options || [];
 
     // If options is array of objects with name property, extract names
     if (optionNames.length > 0 && typeof optionNames[0] === 'object' && optionNames[0].name) {
-      optionNames = optionNames.map(opt => opt.name);
+      optionNames = optionNames.map((opt: any)  => opt.name);
     }
 
     // If still no option names, try to infer from first variant
@@ -75,15 +109,15 @@ export const BundleModalVariantMethods: Record<string, any> & ThisType<any> = {
 
     // Find the current variant to pre-select its options
     const currentVariantId = this.currentProduct.variantId;
-    const currentVariant = variants.find(v => String(v.id) === String(currentVariantId));
+    const currentVariant = variants.find((v: any)  => String(v.id) === String(currentVariantId));
 
     // Create button-style selector for each option
-    variantsContainer.innerHTML = optionNames.map((optionName, optionIndex) => {
+    variantsContainer.innerHTML = optionNames.map((optionName: any, optionIndex: number) => {
       // Get unique values for this option, filtering out undefined/null
-      const optionValues = [...new Set(
+      const optionValues: any[] = [...new Set(
         variants
-          .map(v => v[`option${optionIndex + 1}`])
-          .filter(val => val !== undefined && val !== null && val !== '')
+          .map((v: any)  => v[`option${optionIndex + 1}`])
+          .filter((val: string|null|undefined)  => val !== undefined && val !== null && val !== '')
       )];
 
       if (optionValues.length === 0) return '';
@@ -116,13 +150,13 @@ export const BundleModalVariantMethods: Record<string, any> & ThisType<any> = {
           </div>
         </div>
       `;
-    }).filter(html => html !== '').join('');
+    }).filter((html: string)  => html !== '').join('');
 
     // Add click handlers to variant buttons
-    variantsContainer.querySelectorAll('.bundle-modal-variant-btn').forEach((btn) => {
-      btn.addEventListener('click', (e) => {
+    variantsContainer.querySelectorAll<HTMLButtonElement>('.bundle-modal-variant-btn').forEach((btn) => {
+      btn.addEventListener('click', (e: any) => {
         e.preventDefault();
-        const optionIndex = parseInt(btn.dataset.optionIndex);
+        const optionIndex = parseInt(btn.dataset.optionIndex || '0', 10);
         const value = btn.dataset.value;
         this.selectVariantOption(optionIndex, value);
       });
@@ -138,14 +172,14 @@ export const BundleModalVariantMethods: Record<string, any> & ThisType<any> = {
    * @param {string[]} values - Option values
    * @returns {boolean}
    */
-  isColorOption(optionName, values) {
-    const colorKeywords = ['color', 'colour', 'colors', 'colours'];
+  isColorOption(optionName: string, values: any[]) {
+    const colorKeywords: any[] = ['color', 'colour', 'colors', 'colours'];
     if (colorKeywords.some(keyword => optionName.toLowerCase().includes(keyword))) {
       return true;
     }
     // Check if values look like color names
-    const commonColors = ['red', 'blue', 'green', 'black', 'white', 'yellow', 'pink', 'purple', 'orange', 'brown', 'grey', 'gray', 'navy', 'beige', 'cream'];
-    const colorMatches = values.filter(v => commonColors.some(c => v.toLowerCase().includes(c)));
+    const commonColors: any[] = ['red', 'blue', 'green', 'black', 'white', 'yellow', 'pink', 'purple', 'orange', 'brown', 'grey', 'gray', 'navy', 'beige', 'cream'];
+    const colorMatches = values.filter((v: string)  => commonColors.some(c => v.toLowerCase().includes(c)));
     return colorMatches.length > values.length / 2;
   },
 
@@ -154,9 +188,9 @@ export const BundleModalVariantMethods: Record<string, any> & ThisType<any> = {
    * @param {string} colorName - Color name
    * @returns {string} CSS style string
    */
-  getColorValue(colorName) {
+  getColorValue(colorName: string) {
     // Map common color names to CSS colors
-    const colorMap = {
+    const colorMap: any = {
       'red': '#DC2626', 'blue': '#2563EB', 'green': '#16A34A', 'black': '#000000',
       'white': '#FFFFFF', 'yellow': '#EAB308', 'pink': '#EC4899', 'purple': '#9333EA',
       'orange': '#EA580C', 'brown': '#92400E', 'grey': '#6B7280', 'gray': '#6B7280',
@@ -184,14 +218,14 @@ export const BundleModalVariantMethods: Record<string, any> & ThisType<any> = {
    * @param {number} optionIndex - Index of the option (0, 1, or 2)
    * @param {string} value - Selected value
    */
-  selectVariantOption(optionIndex, value) {
+  selectVariantOption(optionIndex: string|number, value: string|null) {
     // Update selected options
     this.selectedOptions[optionIndex] = value;
 
     // Update button states
     const optionsContainer = document.querySelector(`.bundle-modal-variant-options[data-option-index="${optionIndex}"]`);
     if (optionsContainer) {
-      optionsContainer.querySelectorAll('.bundle-modal-variant-btn').forEach((btn) => {
+      optionsContainer.querySelectorAll<HTMLElement>('.bundle-modal-variant-btn').forEach((btn) => {
         btn.classList.toggle('selected', btn.dataset.value === value);
       });
     }
@@ -219,7 +253,7 @@ export const BundleModalVariantMethods: Record<string, any> & ThisType<any> = {
 
 
     // Find matching variant
-    this.selectedVariant = variants.find(variant => {
+    this.selectedVariant = variants.find((variant: any)  => {
       return selectedOptionValues.every((value, index) => {
         const variantValue = variant[`option${index + 1}`];
         return variantValue === value;
@@ -288,11 +322,11 @@ export const BundleModalVariantMethods: Record<string, any> & ThisType<any> = {
       const optionsContainer = document.querySelector(`.bundle-modal-variant-options[data-option-index="${optionIndex}"]`);
       if (!optionsContainer) return;
 
-      optionsContainer.querySelectorAll('.bundle-modal-variant-btn').forEach(btn => {
+      optionsContainer.querySelectorAll<HTMLButtonElement>('.bundle-modal-variant-btn').forEach(btn => {
         const testValue = btn.dataset.value;
 
         // Check if any variant exists with this option value + current other selections
-        const hasAvailableVariant = variants.some(variant => {
+        const hasAvailableVariant = variants.some((variant: any)  => {
           // Check if variant has this option value
           if (variant[`option${optionIndex + 1}`] !== testValue) return false;
 
@@ -328,7 +362,7 @@ export const BundleModalVariantMethods: Record<string, any> & ThisType<any> = {
                        variantImage.src || variantImage.url;
 
       if (imageUrl) {
-        const mainImageEl = document.getElementById('modal-main-image');
+        const mainImageEl = document.getElementById('modal-main-image') as HTMLImageElement | null;
         if (mainImageEl) {
           mainImageEl.src = imageUrl;
         }
@@ -340,10 +374,10 @@ export const BundleModalVariantMethods: Record<string, any> & ThisType<any> = {
    * Update price display
    */
   updatePrice() {
-    const priceEl = document.getElementById('modal-product-price');
+    const priceEl = document.getElementById('modal-product-price')!;
     const variant = this.selectedVariant || this.currentProduct;
 
-    const resolveCompareAtPrice = (candidate) => {
+    const resolveCompareAtPrice = (candidate: any) => {
       const rawCompareAt = candidate?.compareAtPrice ?? candidate?.compare_at_price;
       if (rawCompareAt == null) return null;
       if (typeof rawCompareAt === 'object' && rawCompareAt !== null && typeof rawCompareAt.amount !== 'undefined') {
@@ -379,7 +413,7 @@ export const BundleModalVariantMethods: Record<string, any> & ThisType<any> = {
    * @param {number} price - Price in cents
    * @returns {string} Formatted price
    */
-  formatPrice(price) {
+  formatPrice(price: number) {
     // Use widget's currency formatting if available
     if (this.widget && this.widget.formatPrice) {
       return this.widget.formatPrice(price);
@@ -394,7 +428,7 @@ export const BundleModalVariantMethods: Record<string, any> & ThisType<any> = {
    * Update availability status
    */
   updateAvailability() {
-    const addBtn = document.getElementById('modal-add-to-box');
+    const addBtn = document.getElementById('modal-add-to-box') as HTMLButtonElement;
     const variant = this.selectedVariant || this.currentProduct;
 
     // Check if variant is available (handle different property names from Storefront API)

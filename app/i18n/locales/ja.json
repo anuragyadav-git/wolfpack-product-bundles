@@ -129,6 +129,19 @@
       "finishSetup": "Finish setup",
       "viewDetails": "Show status",
       "activate": "Enable",
+      "enableModal": {
+        "heading": "ストアで Wolfpack Bundle を有効にする",
+        "description": "テーマエディターで Wolfpack Bundle アプリ埋め込みをオンにして保存をクリックし、ここに戻ってください。",
+        "mediaLabel": "Wolfpack Bundle アプリ埋め込みを有効にしてテーマを保存する手順",
+        "openThemeEditor": "テーマエディターを開く",
+        "checking": "テーマを確認しています…",
+        "enabled": "アプリ埋め込みが有効になりました",
+        "notDetected": "アプリ埋め込みが検出されませんでした",
+        "openThemeEditorAgain": "テーマエディターをもう一度開く",
+        "chatWithSupport": "サポートにチャットする",
+        "done": "完了",
+        "cancel": "キャンセル"
+      },
       "ready": "Ready",
       "checking": "Checking setup",
       "actionNeeded": "Action needed",
@@ -258,7 +271,11 @@
       },
       "previewOnly": "Preview only",
       "loading": "Loading preview",
-      "notApplicable": "This setting is not used by the selected template."
+      "notApplicable": "This setting is not used by the selected template.",
+      "feedback": {
+        "tierHit": "ティア達成",
+        "complete": "全ティア達成"
+      }
     }
   },
   "tooltips": {

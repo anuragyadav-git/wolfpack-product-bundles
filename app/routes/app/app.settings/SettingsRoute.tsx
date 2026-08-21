@@ -1,11 +1,10 @@
-import { useActionData, useSubmit } from "@remix-run/react";
+import { useActionData, useFetcher, useSubmit } from "@remix-run/react";
 import { useEffect, useRef, useState } from "react";
 import { useAppBridge } from "@shopify/app-bridge-react";
 import {
   CONTROL_LAYOUTS,
   DESIGN_CONFIGURATION,
   LANGUAGE_CONFIGURATION,
-  SUPPORTED_LANGUAGE_LABELS,
 } from "../../../lib/admin-configuration-surfaces";
 import styles from "../../../styles/routes/admin-configuration-surfaces.module.css";
 import type { action } from "../app.settings";
@@ -13,13 +12,14 @@ import {
   getInitialControlFieldValues,
   getInitialDesignFieldValues,
   getInitialLanguageFieldValues,
+  getConfirmedControlValues,
 } from "./settings-state";
 import { getControlTabIcon } from "./SettingsDesignFields";
 import {
   ControlsContentCards,
-  ControlsFormGroup,
   SettingsVariablesModal,
 } from "./SettingsControls";
+import { LanguageSettingsView } from "./LanguageSettingsView";
 import {
   SettingsContextualSaveBar,
   SettingsHelpModal,
@@ -31,7 +31,6 @@ import { DesignSettingsView } from "./DesignSettingsView";
 import { AdminPageTitleBar } from "../../../components/AdminPageNavigation";
 import type { AdditionalConfigurationsNavigation } from "../../../lib/additional-configurations-navigation";
 import {
-  applyAdditionalConfigurationAction,
   createDeferredSettingsNavigation,
 } from "../../../lib/additional-configurations-behavior";
 
@@ -58,22 +57,25 @@ export function SettingsRoute({
   previewBundles,
 }: SettingsRouteProps) {
   const actionData = useActionData<typeof action>();
+  const controlsFetcher = useFetcher<typeof action>();
   const submit = useSubmit();
   const shopify = useAppBridge();
-  const languageNavigationRef = useRef<HTMLDetailsElement>(null);
   const controlsNavigationRef = useRef<HTMLDetailsElement>(null);
   const deferredControlsNavigationRef = useRef(createDeferredSettingsNavigation());
   const pendingSavedControlValuesRef = useRef<Record<string, string> | null>(null);
+  const pendingSavedLanguageStateRef = useRef<{
+    languageMode: "SINGLE" | "MULTIPLE";
+    localeFieldValues: Record<string, Record<string, string>>;
+  } | null>(null);
+  const previousSavedControlValuesRef = useRef<Record<string, string> | null>(null);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const [settingsHelpArticle, setSettingsHelpArticle] = useState<"inventory" | null>(null);
   const [settingsVariablesModal, setSettingsVariablesModal] = useState<{ title: string; variables: string[] } | null>(null);
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
   const persistedLanguageState = settingsPage?.language && typeof settingsPage.language === "object"
       ? settingsPage.language as {
-        isMultilanguageEnabled?: boolean;
-        selectedLanguage?: string;
-        activeTemplateLayout?: string;
-        languageFieldValues?: Record<string, string>;
+        languageMode?: "SINGLE" | "MULTIPLE";
+        localeFieldValues?: Record<string, Record<string, string>>;
       }
     : null;
   const persistedControlState = settingsPage?.controls && typeof settingsPage.controls === "object"
@@ -81,22 +83,15 @@ export function SettingsRoute({
     : null;
   const persistedDesignState = createSettingsDesignState(settingsPage?.design);
   const [settingsView, setSettingsView] = useState<"landing" | "design" | "language" | "controls">(initialView);
-  const [isMultilanguageEnabled, setIsMultilanguageEnabled] = useState(persistedLanguageState?.isMultilanguageEnabled ?? LANGUAGE_CONFIGURATION.enabled);
-  const [selectedLanguage, setSelectedLanguage] = useState(persistedLanguageState?.selectedLanguage ?? LANGUAGE_CONFIGURATION.selectedLanguage);
-  const [languageFieldValues, setLanguageFieldValues] = useState<Record<string, string>>({
-    ...getInitialLanguageFieldValues(),
-    ...(persistedLanguageState?.languageFieldValues ?? {}),
-  });
+  const initialLanguageLocaleValues = persistedLanguageState?.localeFieldValues ?? { en: getInitialLanguageFieldValues() };
+  const [languageMode, setLanguageMode] = useState<"SINGLE" | "MULTIPLE">(persistedLanguageState?.languageMode ?? "MULTIPLE");
+  const [selectedLanguage, setSelectedLanguage] = useState("en");
+  const [languageLocaleValues, setLanguageLocaleValues] = useState<Record<string, Record<string, string>>>(initialLanguageLocaleValues);
   const [activeLanguagePanel, setActiveLanguagePanel] = useState<"cartCheckout" | string>("Product Card");
-  const [activeLanguageLayout, setActiveLanguageLayout] = useState(persistedLanguageState?.activeTemplateLayout ?? "Landing Page Layout");
+  const [activeLanguageLayout, setActiveLanguageLayout] = useState("Landing Page Layout");
   const [savedLanguageState, setSavedLanguageState] = useState(() => ({
-    isMultilanguageEnabled: persistedLanguageState?.isMultilanguageEnabled ?? LANGUAGE_CONFIGURATION.enabled,
-    selectedLanguage: persistedLanguageState?.selectedLanguage ?? LANGUAGE_CONFIGURATION.selectedLanguage,
-    activeTemplateLayout: persistedLanguageState?.activeTemplateLayout ?? "Landing Page Layout",
-    languageFieldValues: {
-      ...getInitialLanguageFieldValues(),
-      ...(persistedLanguageState?.languageFieldValues ?? {}),
-    },
+    languageMode: persistedLanguageState?.languageMode ?? "MULTIPLE" as const,
+    localeFieldValues: initialLanguageLocaleValues,
   }));
   const [controlFieldValues, setControlFieldValues] = useState<Record<string, string>>({
     ...getInitialControlFieldValues(),
@@ -143,7 +138,8 @@ export function SettingsRoute({
   const selectedControlFields = hasNestedControlGroups
     ? selectedControlTab.fields.filter((field) => (field.group ?? selectedControlTab.contentTitle ?? selectedControlTab.title) === selectedControlGroupTitle)
     : selectedControlTab.fields;
-  const currentLanguageState = { isMultilanguageEnabled, selectedLanguage, activeTemplateLayout: activeLanguageLayout, languageFieldValues };
+  const languageFieldValues = languageLocaleValues[selectedLanguage] ?? getInitialLanguageFieldValues(selectedLanguage);
+  const currentLanguageState = { languageMode, localeFieldValues: languageLocaleValues };
   const isLanguageDirty = JSON.stringify(currentLanguageState) !== JSON.stringify(savedLanguageState);
   const isControlsDirty = JSON.stringify(controlFieldValues) !== JSON.stringify(savedControlFieldValues);
   const currentDesignState = { fieldValues: designFieldValues, isExpertControlsEnabled: isExpertColorControls };
@@ -191,10 +187,10 @@ export function SettingsRoute({
       return;
     }
     if (settingsView === "language") {
-      setIsMultilanguageEnabled(savedLanguageState.isMultilanguageEnabled);
-      setSelectedLanguage(savedLanguageState.selectedLanguage);
-      setActiveLanguageLayout(savedLanguageState.activeTemplateLayout);
-      setLanguageFieldValues(savedLanguageState.languageFieldValues);
+      setLanguageMode(savedLanguageState.languageMode);
+      setSelectedLanguage("en");
+      setActiveLanguageLayout("Landing Page Layout");
+      setLanguageLocaleValues(savedLanguageState.localeFieldValues);
       return;
     }
     if (settingsView === "controls") {
@@ -213,17 +209,19 @@ export function SettingsRoute({
       return;
     }
     if (settingsView === "language") {
+      pendingSavedLanguageStateRef.current = currentLanguageState;
       submit({
         intent: "saveSettingsLanguage",
         payload: JSON.stringify(currentLanguageState),
       }, { method: "post" });
-      setSavedLanguageState(currentLanguageState);
       return;
     }
     if (settingsView === "controls") {
       const submittedControlValues = { ...controlFieldValues };
       pendingSavedControlValuesRef.current = submittedControlValues;
-      submit({
+      previousSavedControlValuesRef.current = savedControlFieldValues;
+      setSavedControlFieldValues(submittedControlValues);
+      controlsFetcher.submit({
         intent: "saveSettingsControls",
         payload: JSON.stringify(submittedControlValues),
       }, { method: "post" });
@@ -247,19 +245,40 @@ export function SettingsRoute({
     if (
       actionData.success
       && "intent" in actionData
-      && actionData.intent === "saveSettingsControls"
+      && actionData.intent === "saveSettingsLanguage"
     ) {
-      const confirmedValues = pendingSavedControlValuesRef.current;
-      if (confirmedValues) {
-        setSavedControlFieldValues(confirmedValues);
-        pendingSavedControlValuesRef.current = null;
-        if (JSON.stringify(controlFieldValues) === JSON.stringify(confirmedValues)) {
-          deferredControlsNavigationRef.current.complete();
-        }
+      if (pendingSavedLanguageStateRef.current) {
+        setSavedLanguageState(pendingSavedLanguageStateRef.current);
+        pendingSavedLanguageStateRef.current = null;
       }
+    } else if (
+      actionData.success === false
+      && "intent" in actionData
+      && actionData.intent === "saveSettingsLanguage"
+    ) {
+      pendingSavedLanguageStateRef.current = null;
     }
     setSaveMessage(actionData.success ? "Settings saved successfully" : actionData.message || "Something went wrong");
-  }, [actionData, controlFieldValues]);
+  }, [actionData]);
+
+  useEffect(() => {
+    const response = controlsFetcher.data;
+    if (!response) return;
+    const confirmedValues = getConfirmedControlValues(response, pendingSavedControlValuesRef.current);
+    if (confirmedValues) {
+      setSavedControlFieldValues(confirmedValues);
+      pendingSavedControlValuesRef.current = null;
+      previousSavedControlValuesRef.current = null;
+      if (JSON.stringify(controlFieldValues) === JSON.stringify(confirmedValues)) {
+        deferredControlsNavigationRef.current.complete();
+      }
+    } else if (response.success === false && pendingSavedControlValuesRef.current) {
+      setSavedControlFieldValues(previousSavedControlValuesRef.current ?? {});
+      pendingSavedControlValuesRef.current = null;
+      previousSavedControlValuesRef.current = null;
+    }
+    setSaveMessage(response.success ? "Settings saved successfully" : response.message || "Something went wrong");
+  }, [controlsFetcher.data, controlFieldValues]);
 
   useEffect(() => {
     if (settingsView !== "controls") return;
@@ -306,9 +325,6 @@ export function SettingsRoute({
 
   if (settingsView === "language") {
     const isProductPageLanguageLayout = activeLanguageLayout === "Product Page Layout";
-    const activeLanguageSections = isProductPageLanguageLayout
-      ? LANGUAGE_CONFIGURATION.productPageTemplateSections
-      : LANGUAGE_CONFIGURATION.templateSections;
     const activeLanguageTemplateFields = isProductPageLanguageLayout
       ? LANGUAGE_CONFIGURATION.productPageTemplateFields
       : LANGUAGE_CONFIGURATION.templateFields;
@@ -322,141 +338,52 @@ export function SettingsRoute({
 
     return (
       <>
-        <AdminPageTitleBar
-          title="Language Configurations"
-          breadcrumbLabel="Settings"
+        <AdminPageTitleBar title="Language Configurations" breadcrumbLabel="Settings" onBack={returnToSettingsLanding} />
+        <LanguageSettingsView
+          activeLayout={activeLanguageLayout}
+          activePanel={activeLanguagePanel}
+          fieldGroups={languageGroups}
+          fieldValues={languageFieldValues}
+          languageMode={languageMode}
+          localeFieldValues={languageLocaleValues}
+          selectedLocale={selectedLanguage}
           onBack={returnToSettingsLanding}
+          onFieldChange={(key, value) => setLanguageLocaleValues((current) => ({
+            ...current,
+            [selectedLanguage]: {
+              ...(current[selectedLanguage] ?? getInitialLanguageFieldValues()),
+              [key]: value,
+            },
+          }))}
+          onLayoutChange={(nextLayout) => {
+            setActiveLanguageLayout(nextLayout);
+            setSelectedLanguage("en");
+            setActiveLanguagePanel(nextLayout === "Product Page Layout"
+              ? LANGUAGE_CONFIGURATION.productPageTemplateSections[0]
+              : LANGUAGE_CONFIGURATION.templateSections[0]);
+          }}
+          onModeChange={(nextMode) => {
+            setLanguageMode(nextMode);
+            setSelectedLanguage("en");
+          }}
+          onPanelChange={setActiveLanguagePanel}
+          onRemoveLocale={(locale) => {
+            setLanguageLocaleValues((current) => Object.fromEntries(
+              Object.entries(current).filter(([code]) => code !== locale),
+            ));
+            if (selectedLanguage === locale) setSelectedLanguage("en");
+          }}
+          onSelectLocale={(locale, initialValues) => {
+            if (initialValues) {
+              setLanguageLocaleValues((current) => ({ ...current, [locale]: initialValues }));
+            }
+            setSelectedLanguage(locale);
+          }}
+          onShowVariables={(title, variables) => setSettingsVariablesModal({ title, variables })}
         />
-        <main className={styles.page}>
-          <header className={styles.languageHero}>
-            <button
-              type="button"
-              className={styles.settingsSubpageBackButton}
-              aria-label="Back to Settings"
-              onClick={returnToSettingsLanding}
-            >
-              <s-icon type="arrow-left" size="small"></s-icon>
-            </button>
-            <h1 className={styles.title}>Language Configurations</h1>
-          </header>
-
-          <section className={styles.languageTopCard} aria-label="Language mode">
-            <div className={styles.languageTopCopy}>
-              <s-switch
-                label="Enable Multilanguage"
-                details="Select the language mode for your app"
-                checked={isMultilanguageEnabled || undefined}
-                onChange={(event) => setIsMultilanguageEnabled(Boolean(event.currentTarget.checked))}
-              />
-            </div>
-            <div className={styles.languageSelectStack}>
-              <s-select
-                label="Add preferred languages"
-                value={selectedLanguage}
-                onChange={(event) => setSelectedLanguage(event.currentTarget.value || selectedLanguage)}
-              >
-                {SUPPORTED_LANGUAGE_LABELS.map((language) => (
-                  <s-option key={language} value={language}>{language}</s-option>
-                ))}
-              </s-select>
-            </div>
-          </section>
-
-          <section className={styles.languageEditorCard} aria-label="Language Configurations">
-            <button type="button" className={styles.languageSelectedChip}>
-              {selectedLanguage}
-            </button>
-            <div className={styles.languageContentLayout}>
-              <details ref={languageNavigationRef} className={styles.responsiveSectionDisclosure}>
-                <summary className={styles.responsiveSectionSummary}>
-                  <span>
-                    <span className={styles.responsiveSectionEyebrow}>Language section</span>
-                    <strong>{activeLanguagePanel === "cartCheckout" ? "Cart & Checkout" : activeLanguagePanel}</strong>
-                  </span>
-                  <span aria-hidden="true">▾</span>
-                </summary>
-                <aside className={`${styles.languageSidebarCard} ${styles.responsiveSectionContent}`}>
-                <section className={styles.languageSidebarSection}>
-                  <h2 className={styles.languageSidebarTitle}>Shared Components</h2>
-                  <p className={styles.languageSidebarDescription}>Customize language for components across all templates</p>
-                  <button
-                    type="button"
-                    className={activeLanguagePanel === "cartCheckout" ? styles.languageSharedButtonActive : styles.languageSharedButton}
-                    onClick={() => {
-                      setActiveLanguagePanel("cartCheckout");
-                      languageNavigationRef.current?.removeAttribute("open");
-                    }}
-                  >
-                    Cart &amp; Checkout
-                  </button>
-                </section>
-                <section className={styles.languageSidebarSection}>
-                  <h2 className={styles.languageSidebarTitle}>Template Language</h2>
-                  <p className={styles.languageSidebarDescription}>Edit language for your landing page or product page template</p>
-                  <span className={styles.languageLayoutButton}>
-                    <select
-                      className={styles.languageLayoutSelect}
-                      aria-label="Template language layout"
-                      value={activeLanguageLayout}
-                      onChange={(event) => {
-                        const nextLayout = event.currentTarget.value;
-                        setActiveLanguageLayout(nextLayout);
-                        setActiveLanguagePanel(nextLayout === "Product Page Layout"
-                          ? LANGUAGE_CONFIGURATION.productPageTemplateSections[0]
-                          : LANGUAGE_CONFIGURATION.templateSections[0]);
-                        languageNavigationRef.current?.removeAttribute("open");
-                      }}
-                    >
-                      <option value="Landing Page Layout">Landing Page Layout</option>
-                      <option value="Product Page Layout">Product Page Layout</option>
-                    </select>
-                  </span>
-                  <div className={styles.languageNavList} aria-label="Template Language">
-                    {activeLanguageSections.map((section) => (
-                      <button
-                        key={section}
-                        type="button"
-                        className={activeLanguagePanel === section ? styles.languageNavActive : styles.languageNavButton}
-                        onClick={() => {
-                          setActiveLanguagePanel(section);
-                          languageNavigationRef.current?.removeAttribute("open");
-                        }}
-                      >
-                        <span className={styles.languageNavIcon} aria-hidden="true" />
-                        {section}
-                      </button>
-                    ))}
-                  </div>
-                </section>
-                </aside>
-              </details>
-              <section className={styles.languageFieldPanel}>
-                {languageGroups.map((group) => (
-                  <ControlsFormGroup
-                    key={`${activeLanguagePanel}-${group.title}`}
-                    title={group.title}
-                    description={group.description}
-                    fields={group.fields}
-                    values={languageFieldValues}
-                    onFieldChange={(label, value) => setLanguageFieldValues((current) => ({
-                      ...current,
-                      [label]: value,
-                    }))}
-                    onShowVariables={(title, variables) => setSettingsVariablesModal({ title, variables })}
-                  />
-                ))}
-                {activeLanguagePanel !== "cartCheckout" && languageGroups.length === 0 && (
-                  <p className={styles.emptyLanguageState}>
-                    No live field list has been captured for this section yet.
-                  </p>
-                )}
-              </section>
-            </div>
-          </section>
           <SettingsContextualSaveBar isOpen={isActiveSubpageDirty} onDiscard={discardActiveSettingsChanges} onSave={saveActiveSettingsChanges} />
           <SettingsVariablesModal modal={settingsVariablesModal} onClose={() => setSettingsVariablesModal(null)} />
           <SettingsToast message={saveMessage} onDismiss={() => setSaveMessage(null)} />
-        </main>
       </>
     );
   }
@@ -502,12 +429,12 @@ export function SettingsRoute({
               <h2>App Configurations</h2>
               <p>Configure your bundle settings</p>
               <span className={styles.controlsLayoutSelectWrap}>
-                <select
-                  className={styles.controlsLayoutSelect}
-                  aria-label="Layout selector"
+                <s-select
+                  label="Layout selector"
+                  labelAccessibilityVisibility="exclusive"
                   value={activeControlLayout}
                   onChange={(event) => {
-                    const nextLayoutLabel = event.target.value;
+                    const nextLayoutLabel = event.currentTarget.value;
                     const nextLayout = CONTROL_LAYOUTS.find((layout) => layout.label === nextLayoutLabel) ?? CONTROL_LAYOUTS[0];
                     navigateWithinControls(() => {
                       setActiveControlLayout(nextLayout.label);
@@ -518,11 +445,11 @@ export function SettingsRoute({
                   }}
                 >
                   {CONTROL_LAYOUTS.map((layout) => (
-                    <option key={layout.id} value={layout.label}>
+                    <s-option key={layout.id} value={layout.label}>
                       {layout.label}
-                    </option>
+                    </s-option>
                   ))}
-                </select>
+                </s-select>
               </span>
               <div className={styles.controlsNavList} role="tablist" aria-label="Configuration tabs">
                 {selectedControlLayout.tabs.map((tab) => (
@@ -572,15 +499,16 @@ export function SettingsRoute({
                 values={controlFieldValues}
                 onFieldChange={(label, value) => setControlFieldValues((current) => ({ ...current, [label]: value }))}
                 onFieldAction={(label) => {
-                  if (label === "Cart Messaging") {
+                  if (label === "shared.cartMessaging.isEnabled") {
                     navigateToSettingsView("language");
                     return;
                   }
-                  if (label === "Track inventory on Add To Cart (in beta)") {
+                  if (
+                    label === "landingPage.trackInventoryOnAddToCart"
+                    || label === "productPage.trackInventoryOnAddToCart"
+                  ) {
                     setSettingsHelpArticle("inventory");
-                    return;
                   }
-                  setControlFieldValues((current) => applyAdditionalConfigurationAction(label, current));
                 }}
               />
             </section>

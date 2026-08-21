@@ -1,11 +1,11 @@
 import { FullPagePreset } from '../../shared/full-page-preset.js';
 
-export function getEnabledFullPageSteps(steps) {
+export function getEnabledFullPageSteps(steps: any[]) {
   if (!Array.isArray(steps)) return [];
   return steps.filter(step => step?.enabled !== false);
 }
 
-function resolveCompareAtPrice(product) {
+function resolveCompareAtPrice(product: any) {
   const rawCompareAtPrice = product?.compareAtPrice;
   const rawCompareAtPriceAlt = product?.compare_at_price;
 
@@ -97,9 +97,9 @@ buildAddonStepFromPersonalization() {
 
   const addonProductsEnabled = addonProducts?.isEnabled === true;
   const tiers = addonProductsEnabled && Array.isArray(addonProducts.tiers) ? addonProducts.tiers : [];
-  const selectedAddonProducts = tiers.flatMap(tier =>
+  const selectedAddonProducts = tiers.flatMap((tier: any)  =>
     Array.isArray(tier?.selectedAddonProducts)
-      ? tier.selectedAddonProducts.map(product => this.normalizePersonalizationAddonProduct(product))
+      ? tier.selectedAddonProducts.map((product: any)  => this.normalizePersonalizationAddonProduct(product))
       : []
   );
 
@@ -129,7 +129,7 @@ buildAddonStepFromPersonalization() {
   };
 },
 
-normalizePersonalizationAddonProduct(product) {
+normalizePersonalizationAddonProduct(product: any) {
   const productGid = product?.graphqlId || product?.id || (product?.productId ? `gid://shopify/Product/${product.productId}` : '');
   const imageUrl = product?.images?.[0]?.originalSrc
     || product?.images?.[0]?.url
@@ -147,7 +147,7 @@ normalizePersonalizationAddonProduct(product) {
     imageUrl,
     price: variants[0]?.price || product?.price || '0',
     compareAtPrice: resolveCompareAtPrice(variants[0]) || null,
-    variants: variants.map(variant => {
+    variants: variants.map((variant: any)  => {
       const variantGid = variant.variantGraphqlId || variant.id || (variant.variantId ? `gid://shopify/ProductVariant/${variant.variantId}` : productGid);
       return {
         variantId: variantGid,
@@ -228,7 +228,7 @@ ensureModal() {
           <!-- Centered Grouped Content Container -->
           <div class="modal-footer-grouped-content">
             <!-- Total Pill - Sits Above Buttons -->
-            <div class="modal-footer-total-pill">
+            <div class="modal-footer-total-pill" data-wpb-discount-feedback-pill>
               <span class="total-price-strike"></span>
               <span class="total-price-final"></span>
               <span class="price-cart-separator">|</span>
@@ -266,7 +266,7 @@ ensureModal() {
   return modal;
 },
 
-setupTabScrollArrows(modal) {
+setupTabScrollArrows(modal: any) {
   const tabsContainer = modal.querySelector('.modal-tabs');
   const leftArrow = modal.querySelector('.tab-arrow-left');
   const rightArrow = modal.querySelector('.tab-arrow-right');

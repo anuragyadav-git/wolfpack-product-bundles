@@ -1,0 +1,349 @@
+{
+  "schema_version": 1,
+  "job_id": "ppb-bundle-picker-modal-redesign-20260821",
+  "revision": 6,
+  "status": "approved",
+  "locked": [
+    {
+      "id": "DEC-001",
+      "question": "Product scope",
+      "options_considered": [
+        "PPB",
+        "FPB and PPB"
+      ],
+      "recommendation": "PPB only",
+      "selected_value": "PPB only",
+      "rationale": "User explicitly narrowed the redesign",
+      "evidence_ids": [
+        "user-2026-08-21"
+      ],
+      "status": "approved",
+      "approved_by": "Aditya",
+      "approved_at": "2026-08-21",
+      "revision_introduced": 1,
+      "affected_artifacts": [
+        "component-brief.md",
+        "implementation-handoff.md"
+      ]
+    },
+    {
+      "id": "DEC-002",
+      "question": "Template coverage",
+      "options_considered": [
+        "both modal templates",
+        "Horizontal only",
+        "Vertical only"
+      ],
+      "recommendation": "both modal templates",
+      "selected_value": "Horizontal Slots and Vertical Slots",
+      "rationale": "Both use one shared PDP_MODAL picker runtime",
+      "evidence_ids": [
+        "repository-architecture"
+      ],
+      "status": "approved",
+      "approved_by": "Aditya",
+      "approved_at": "2026-08-21",
+      "revision_introduced": 1,
+      "affected_artifacts": [
+        "component-anatomy.md",
+        "responsive-contract.md"
+      ]
+    },
+    {
+      "id": "DEC-003",
+      "question": "Visual direction",
+      "options_considered": [
+        "EB UX with Wolfpack brand",
+        "exact EB parity",
+        "light inspiration"
+      ],
+      "recommendation": "EB UX with Wolfpack brand",
+      "selected_value": "EB UX with Wolfpack brand",
+      "rationale": "Improves hierarchy without bypassing merchant design controls",
+      "evidence_ids": [
+        "direction-comparison.md"
+      ],
+      "status": "approved",
+      "approved_by": "Aditya",
+      "approved_at": "2026-08-21",
+      "revision_introduced": 1,
+      "affected_artifacts": [
+        "design-tokens.json",
+        "implementation-handoff.md"
+      ]
+    },
+    {
+      "id": "DEC-004",
+      "question": "Grouped variant interaction",
+      "options_considered": [
+        "native selector on every viewport",
+        "mobile variant drawer"
+      ],
+      "recommendation": "native selector on every viewport",
+      "selected_value": "native selector changes card context without adding",
+      "rationale": "Matches the supplied live EB finding and keeps Add independent",
+      "evidence_ids": [
+        "EB-PICKER-DOC-003",
+        "EB-PICKER-DOC-005",
+        "user-revision-2-plan"
+      ],
+      "status": "approved",
+      "approved_by": "Aditya",
+      "approved_at": "2026-08-21",
+      "revision_introduced": 2,
+      "affected_artifacts": [
+        "component-anatomy.md",
+        "state-matrix.md",
+        "interaction-contract.md"
+      ]
+    },
+    {
+      "id": "DEC-005",
+      "question": "Modal selected-card presentation",
+      "options_considered": [
+        "always Added xN",
+        "quantity-validation-owned states"
+      ],
+      "recommendation": "quantity-validation-owned states",
+      "selected_value": "quantity controls below maximum; Added xN at maximum",
+      "rationale": "Preserves editability and communicates the actual maximum state",
+      "evidence_ids": [
+        "EB-PICKER-DOC-004",
+        "user-revision-2-plan"
+      ],
+      "status": "approved",
+      "approved_by": "Aditya",
+      "approved_at": "2026-08-21",
+      "revision_introduced": 2,
+      "affected_artifacts": [
+        "state-matrix.md",
+        "implementation-handoff.md"
+      ]
+    },
+    {
+      "id": "DEC-006",
+      "question": "Product-details activation",
+      "options_considered": [
+        "whole card",
+        "image only"
+      ],
+      "recommendation": "image only",
+      "selected_value": "image plus reused magnifier opens details",
+      "rationale": "Separates browsing, variant selection, and Add actions",
+      "evidence_ids": [
+        "user-revision-2-plan"
+      ],
+      "status": "approved",
+      "approved_by": "Aditya",
+      "approved_at": "2026-08-21",
+      "revision_introduced": 2,
+      "affected_artifacts": [
+        "component-anatomy.md",
+        "interaction-contract.md",
+        "accessibility-checklist.md"
+      ]
+    },
+    {
+      "id": "DEC-007",
+      "question": "Product-details component boundary",
+      "options_considered": [
+        "shared generic responsive overlay",
+        "PPB-owned stacked sheet"
+      ],
+      "recommendation": "PPB-owned stacked sheet",
+      "selected_value": "full-width 88dvh sheet above picker with constrained content",
+      "rationale": "Supports editing the originating slot while preserving PPB layer ownership",
+      "evidence_ids": [
+        "user-revision-2-plan"
+      ],
+      "status": "approved",
+      "approved_by": "Aditya",
+      "approved_at": "2026-08-21",
+      "revision_introduced": 2,
+      "affected_artifacts": [
+        "component-brief.md",
+        "component-anatomy.md",
+        "responsive-contract.md",
+        "interaction-contract.md"
+      ]
+    },
+    {
+      "id": "DEC-008",
+      "question": "In-page template scope",
+      "options_considered": [
+        "change all PPB cards",
+        "modal-only behavior with in-page regression"
+      ],
+      "recommendation": "modal-only behavior with in-page regression",
+      "selected_value": "Product List and Product Grid unchanged",
+      "rationale": "The approved behavior overrides are limited to Horizontal and Vertical picker cards",
+      "evidence_ids": [
+        "repository-architecture",
+        "user-revision-2-plan"
+      ],
+      "status": "approved",
+      "approved_by": "Aditya",
+      "approved_at": "2026-08-21",
+      "revision_introduced": 2,
+      "affected_artifacts": [
+        "implementation-handoff.md",
+        "browser-test-plan.yaml"
+      ]
+    },
+    {
+      "id": "DEC-009",
+      "question": "Modal quantity-control footprint",
+      "options_considered": [
+        "compact intrinsic control",
+        "match the card action footprint"
+      ],
+      "recommendation": "match the card action footprint",
+      "selected_value": "full-width quantity selector with the same minimum height as Add and Added",
+      "rationale": "The user explicitly requested equal visual weight for selected and unselected modal-card actions",
+      "evidence_ids": [
+        "user-2026-08-21-quantity-footprint"
+      ],
+      "status": "approved",
+      "approved_by": "Aditya",
+      "approved_at": "2026-08-21",
+      "revision_introduced": 2,
+      "affected_artifacts": [
+        "locked-decisions.yaml",
+        "implementation-handoff.md",
+        "browser-test-plan.yaml"
+      ]
+    },
+    {
+      "id": "DEC-010",
+      "question": "Footer summary sizing",
+      "options_considered": [
+        "rigid minimum-width grid",
+        "content-responsive contained pill"
+      ],
+      "recommendation": "content-responsive contained pill",
+      "selected_value": "shrink-wrap icon, count, divider, and prices while capping within the footer",
+      "rationale": "The user supplied a failing capture where rigid tracks displaced the count and requested content-responsive sizing",
+      "evidence_ids": [
+        "user-2026-08-21-footer-summary-capture"
+      ],
+      "status": "approved",
+      "approved_by": "Aditya",
+      "approved_at": "2026-08-21",
+      "revision_introduced": 4,
+      "affected_artifacts": [
+        "design-tokens.json",
+        "responsive-contract.md",
+        "implementation-handoff.md",
+        "browser-test-plan.yaml"
+      ]
+    },
+    {
+      "id": "DEC-011",
+      "question": "Filled-slot title and remove-action hierarchy",
+      "options_considered": [
+        "clamped title with overlaid icon-only remove",
+        "full natural title with outlined icon-and-text remove below product information"
+      ],
+      "recommendation": "full natural title with outlined icon-and-text remove below product information",
+      "selected_value": "show the complete product name and a separate 44px Remove control",
+      "rationale": "The user explicitly approved complete title visibility and a clearer destructive action that cannot overlap identity content",
+      "evidence_ids": [
+        "user-2026-08-21-selected-slot-confirmation"
+      ],
+      "status": "superseded",
+      "approved_by": "Aditya",
+      "approved_at": "2026-08-21",
+      "revision_introduced": 5,
+      "affected_artifacts": [
+        "component-anatomy.md",
+        "state-matrix.md",
+        "responsive-contract.md",
+        "interaction-contract.md",
+        "accessibility-checklist.md",
+        "implementation-handoff.md",
+        "browser-test-plan.yaml"
+      ]
+    },
+    {
+      "id": "DEC-012",
+      "question": "Filled-slot remove-action presentation",
+      "options_considered": [
+        "separate outlined icon-and-text action below product information",
+        "cross badge over the filled slot"
+      ],
+      "recommendation": "cross badge over the filled slot",
+      "selected_value": "overlay a compact cross badge with a 44px minimum target over the filled slot",
+      "rationale": "The user explicitly replaced the revision-5 Remove action with an overlaid cross badge",
+      "evidence_ids": [
+        "user-2026-08-21-filled-slot-cross-badge"
+      ],
+      "status": "approved",
+      "approved_by": "Aditya",
+      "approved_at": "2026-08-21",
+      "revision_introduced": 6,
+      "affected_artifacts": [
+        "component-anatomy.md",
+        "state-matrix.md",
+        "responsive-contract.md",
+        "interaction-contract.md",
+        "accessibility-checklist.md",
+        "design-tokens.json",
+        "implementation-handoff.md",
+        "browser-test-plan.yaml"
+      ]
+    },
+    {
+      "id": "DEC-013",
+      "question": "Filled-slot maximum-height overflow",
+      "options_considered": [
+        "let exceptionally long titles expand beyond the cap",
+        "keep the cap and clamp only the overflowing visual title"
+      ],
+      "recommendation": "keep the cap and clamp only the overflowing visual title",
+      "selected_value": "responsive maximum height takes precedence; the complete name remains in the accessible name and product-details surface",
+      "rationale": "The user explicitly approved the recommendation, resolving the conflict between bounded slot height and unbounded visible wrapping",
+      "evidence_ids": [
+        "user-2026-08-21-filled-slot-height-approval"
+      ],
+      "status": "approved",
+      "approved_by": "Aditya",
+      "approved_at": "2026-08-21",
+      "revision_introduced": 6,
+      "affected_artifacts": [
+        "component-anatomy.md",
+        "state-matrix.md",
+        "responsive-contract.md",
+        "interaction-contract.md",
+        "accessibility-checklist.md",
+        "design-tokens.json",
+        "content-stress-cases.yaml",
+        "implementation-handoff.md",
+        "browser-test-plan.yaml"
+      ]
+    }
+  ],
+  "assumptions": [
+    "Existing merchant tokens remain authoritative",
+    "No new merchant-facing copy"
+  ],
+  "rejected": [
+    "FPB changes",
+    "template-specific forks",
+    "exact competitor branding",
+    "shallow modal"
+  ],
+  "open": [],
+  "superseded": [
+    {
+      "revision": 1,
+      "decision": "mobile variant drawer and unconditional modal Added xN presentation",
+      "reason": "Revision-2 live behavior changes grouped-variant and quantity-state ownership"
+    },
+    {
+      "revision": 5,
+      "decision": "full natural title with a separate outlined icon-and-text Remove action below product information",
+      "reason": "Revision 6 replaces the separate action with an overlaid cross badge and introduces a filled-slot height cap"
+    }
+  ],
+  "decision_shape": null
+}

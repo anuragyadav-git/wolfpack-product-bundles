@@ -209,7 +209,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     });
 
     return json({ ok: true }, { headers: buildCorsHeaders(request) });
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof Response) {
       throw error;
     }

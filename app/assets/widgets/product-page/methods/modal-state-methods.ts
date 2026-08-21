@@ -1,18 +1,21 @@
 import { CurrencyManager } from '../../shared/currency-manager.js';
 import { PricingCalculator } from '../../shared/pricing-calculator.js';
-import { calculateBundleDiscountForPurchaseOption } from '../../shared/subscription-storefront-methods.js';
-import { calculateBundleTotalForPurchaseOption } from '../../shared/subscription-storefront-methods.js';
+import {
+  calculateBundleDiscountForPurchaseOption,
+  calculateBundleTotalForPurchaseOption,
+} from '../../shared/subscription-storefront-methods.js';
 import { TemplateManager } from '../../shared/template-manager.js';
 import { ToastManager } from '../../shared/toast-manager.js';
 import { ConditionValidator } from '../../shared/condition-validator.js';
+import { drawerLayerManager } from '../../shared/drawer-layer-manager.js';
 
-function normalizeSelectionKey(widget, value) {
+function normalizeSelectionKey(widget: any, value: string) {
   return typeof widget?.normalizeSelectionKey === 'function'
     ? widget.normalizeSelectionKey(value)
     : String(value || '');
 }
 
-export function formatCascadeStepLimitToast(limitText, required) {
+export function formatCascadeStepLimitToast(limitText: string|null, required: any) {
   const normalizedRequired = Number(required);
   if (!Number.isFinite(normalizedRequired) || normalizedRequired <= 0) return '';
 
@@ -25,11 +28,11 @@ export function formatCascadeStepLimitToast(limitText, required) {
   return `Add ${qualifier} ${formattedRequired} products on this step`;
 }
 
-export function formatProductPageStepValidationToast(step = {}, resolveText = null) {
+export function formatProductPageStepValidationToast(step: any = {}, resolveText: any = null) {
   const required = Number(step.conditionValue);
   if (!Number.isFinite(required) || required <= 0) return '';
 
-  const qualifierByOperator = {
+  const qualifierByOperator: any = {
     equal_to: 'exactly',
     greater_than_or_equal_to: 'at least',
     less_than_or_equal_to: 'at most',
@@ -37,7 +40,7 @@ export function formatProductPageStepValidationToast(step = {}, resolveText = nu
   const qualifier = qualifierByOperator[step.conditionOperator];
   if (!qualifier) return '';
 
-  const operatorKeyByOperator = {
+  const operatorKeyByOperator: any = {
     equal_to: 'EqualTo',
     greater_than_or_equal_to: 'GreaterThanOrEqualTo',
     less_than_or_equal_to: 'LessThanOrEqualTo',
@@ -83,7 +86,18 @@ export function formatProductPageStepValidationToast(step = {}, resolveText = nu
 export function getProductPageModalValidationToastOptions() {
   return {
     dismissible: true,
+    dismissButton: true,
     className: 'bundle-toast--modal',
+    role: 'alert',
+  };
+}
+
+export function resolveModalFooterSummaryState({ totalQuantity = 0 }: any = {}) {
+  const quantity = Number(totalQuantity);
+  const hasSelection = Number.isFinite(quantity) && quantity > 0;
+  return {
+    hidden: !hasSelection,
+    quantityText: hasSelection ? String(quantity) : '',
   };
 }
 
@@ -100,7 +114,7 @@ _getModalFocusableSelectors() {
   ];
 },
 
-_isElementVisibleForFocus(element) {
+_isElementVisibleForFocus(element: any) {
   if (!element || typeof element !== 'object') return false;
   if (element.disabled === true) return false;
   if (element.getAttribute && element.getAttribute('aria-hidden') === 'true') return false;
@@ -116,17 +130,17 @@ _getModalFocusableControls() {
   const modal = this.elements?.modal;
   if (!modal) return [];
 
-  const controls = [];
+  const controls: any[] = [];
   const seen = new Set();
   const selectors = this._getModalFocusableSelectors();
 
-  selectors.forEach((selector) => {
+  selectors.forEach((selector: any) => {
     const list = typeof modal.querySelectorAll === 'function'
       ? modal.querySelectorAll(selector)
       : [];
 
     if (!list) return;
-    list.forEach((el) => {
+    list.forEach((el: unknown) => {
       if (!this._isElementVisibleForFocus(el) || seen.has(el)) return;
       seen.add(el);
       controls.push(el);
@@ -136,8 +150,8 @@ _getModalFocusableControls() {
   return controls;
 },
 
-_captureActiveElementBeforeModalOpen() {
-  const activeElement = globalThis.document?.activeElement;
+_captureActiveElementBeforeModalOpen(originFocusElement: any = null) {
+  const activeElement = originFocusElement ?? globalThis.document?.activeElement;
   if (activeElement && typeof activeElement.focus === 'function') {
     this._modalOriginFocusElement = activeElement;
     this._modalOriginFocusKey = {
@@ -164,6 +178,12 @@ _restoreActiveElementAfterModalClose() {
       candidate.dataset?.stepIndex === previousFocusKey.stepIndex
       && (previousFocusKey.cardIndex === undefined || candidate.dataset?.cardIndex === previousFocusKey.cardIndex)
       && (previousFocusKey.variantId === undefined || candidate.dataset?.variantId === previousFocusKey.variantId)
+      && (
+        candidate.tagName === 'BUTTON'
+        || candidate.tagName === 'A'
+        || candidate.getAttribute?.('role') === 'button'
+        || Number(candidate.tabIndex) >= 0
+      )
     ));
   }
 
@@ -187,9 +207,9 @@ getFormattedHeaderText() {
   return currentStep?.name || `Step ${this.currentStepIndex + 1}`;
 },
 
-openModal(stepIndex) {
+openModal(stepIndex: any, originFocusElement: any = null) {
   this.currentStepIndex = stepIndex;
-  this._captureActiveElementBeforeModalOpen();
+  this._captureActiveElementBeforeModalOpen(originFocusElement);
 
   // Update modal header with step name
   const modal = this.elements.modal;
@@ -207,10 +227,17 @@ openModal(stepIndex) {
 
   // Show bottom-sheet
   this.setBottomSheetVisibility(true);
+  if (!this._ppbPickerDrawerLayer) {
+    this._ppbPickerDrawerLayer = drawerLayerManager.open({
+      id: 'bundle-picker',
+      requestClose: () => this.closeModal(),
+      trigger: this._modalOriginFocusElement,
+    });
+  }
   if (this.elements.bsOverlay) this.elements.bsOverlay.classList.add('bw-bs-overlay--open');
   const runAfterFrame = (typeof requestAnimationFrame === 'function')
     ? requestAnimationFrame
-    : (callback) => {
+    : (callback: () => void) => {
       callback();
     };
 
@@ -218,7 +245,6 @@ openModal(stepIndex) {
     modal.classList.add('bw-bs-panel--open');
     this._focusFirstModalControl();
   });
-  document.body.style.overflow = 'hidden';
 
   // Capture stepIndex so async callback doesn't render stale step if user navigates away
   const capturedStepIndex = stepIndex;
@@ -248,8 +274,10 @@ openModal(stepIndex) {
 closeModal() {
   this.elements.modal.classList.remove('bw-bs-panel--open');
   if (this.elements.bsOverlay) this.elements.bsOverlay.classList.remove('bw-bs-overlay--open');
-  document.body.style.overflow = '';
-  this.setBottomSheetVisibility(false);
+  if (this._ppbPickerDrawerLayer) {
+    drawerLayerManager.close(this._ppbPickerDrawerLayer);
+    this._ppbPickerDrawerLayer = null;
+  }
   this._modalSlotReplacementTarget = null;
 
   // Update main UI
@@ -257,9 +285,15 @@ closeModal() {
   this.updateAddToCartButton();
   this.updateFooterMessaging();
   this._restoreActiveElementAfterModalClose();
+  this.setBottomSheetVisibility(false);
 },
 
-validateStepCondition(stepIndex, productId, newQuantity) {
+_isPpbPickerDrawerTopmost() {
+  return !this._ppbPickerDrawerLayer
+    || drawerLayerManager.isTopmost(this._ppbPickerDrawerLayer);
+},
+
+validateStepCondition(stepIndex: string|number, productId: any, newQuantity: number) {
   const step = this.selectedBundle.steps[stepIndex];
   const currentSelections = this.selectedProducts[stepIndex] || {};
   const currentQty = this.getSelectedQuantity(stepIndex, productId);
@@ -271,7 +305,7 @@ validateStepCondition(stepIndex, productId, newQuantity) {
     : currentSelections;
   const targetProduct = isAmountOrWeight ? this.findProductBySelectionKey(stepProducts, normalizedProductId) : null;
   const targetMetric = targetProduct && Array.isArray(targetProduct.variants)
-    ? targetProduct.variants.find(variant => (
+    ? targetProduct.variants.find((variant: any)  => (
       normalizeSelectionKey(this, variant?.selectionId || '') === normalizedProductId
     )) || targetProduct
     : targetProduct;
@@ -288,7 +322,7 @@ validateStepCondition(stepIndex, productId, newQuantity) {
     normalizedProductId,
     newQuantity,
     targetValues,
-  );
+  ) as any;
 
   // Only block and toast on increases — decreases are always permitted.
   if (!allowed && newQuantity > currentQty) {
@@ -309,9 +343,9 @@ validateStepCondition(stepIndex, productId, newQuantity) {
   return true;
 },
 
-  _buildConditionAwareStepSelections(stepProducts, currentSelections) {
+  _buildConditionAwareStepSelections(stepProducts: any, currentSelections: any) {
     const selections = currentSelections || {};
-    const translated = {};
+    const translated: any = {};
     for (const [selKey, qty] of Object.entries(selections)) {
       const quantity = Number(qty) || 0;
       if (quantity <= 0) continue;
@@ -319,7 +353,7 @@ validateStepCondition(stepIndex, productId, newQuantity) {
       const product = this.findProductBySelectionKey(stepProducts, selKey);
       const normalizedSelectionId = normalizeSelectionKey(this, selKey);
       const metric = product && Array.isArray(product.variants)
-        ? product.variants.find(variant => (
+        ? product.variants.find((variant: any)  => (
           normalizeSelectionKey(this, variant?.selectionId || '') === normalizedSelectionId
         )) || product
         : product;
@@ -335,7 +369,7 @@ validateStepCondition(stepIndex, productId, newQuantity) {
     return translated;
   },
 
-validateStep(stepIndex) {
+validateStep(stepIndex: string|number) {
   const step = this.selectedBundle.steps[stepIndex];
   const currentSelections = this.selectedProducts[stepIndex] || {};
 
@@ -344,12 +378,12 @@ validateStep(stepIndex) {
   // each variant-ID key → its parent product ID before the validator runs.
   if (ConditionValidator.isCategoryRuleMode(step)) {
     const products = this.stepProductData[stepIndex] || [];
-    const translated = {};
+    const translated: any = {};
     for (const [selKey, qty] of Object.entries(currentSelections)) {
       const product = this.findProductBySelectionKey(products, selKey);
       const normalizedSelectionId = normalizeSelectionKey(this, selKey);
       const metric = product && Array.isArray(product.variants)
-        ? product.variants.find(variant => (
+        ? product.variants.find((variant: any)  => (
           normalizeSelectionKey(this, variant?.selectionId || '') === normalizedSelectionId
         )) || product
         : product;
@@ -377,7 +411,7 @@ validateStep(stepIndex) {
   return ConditionValidator.isStepConditionSatisfied(step, currentSelections);
 },
 
-isStepAccessible(stepIndex) {
+isStepAccessible(stepIndex: number) {
   if (this._isConditionValidationEnabled?.() === false) {
     return true;
   }
@@ -400,6 +434,8 @@ updateModalNavigation() {
 
   // Buttons are never disabled — navigateModal handles invalid steps with a toast.
   prevButton.disabled = false;
+  prevButton.textContent = this._resolveText('previousButton', 'Prev');
+  prevButton.setAttribute?.('aria-label', prevButton.textContent);
 
   const isLastStep = this.currentStepIndex === this.selectedBundle.steps.length - 1;
   const footer = this.elements.modal?.querySelector('.bw-bs-footer');
@@ -408,6 +444,7 @@ updateModalNavigation() {
   footer?.classList.toggle('bw-bs-footer--last-step', isLastStep);
 
   nextButton.textContent = isLastStep ? this._resolveText('doneButton', 'Done') : this._resolveText('nextButton', 'Next');
+  nextButton.setAttribute('aria-label', nextButton.textContent);
   nextButton.disabled = false;
 },
 
@@ -432,9 +469,15 @@ updateModalFooterMessaging() {
   this.updateModalHeaderText(totalPrice, totalQuantity, combinedDiscountInfo, currencyInfo);
 
   // Update cart badge with total item count
+  const cartPill = this.elements.modal.querySelector('.bw-bs-cart-pill');
   const cartBadge = this.elements.modal.querySelector('.cart-badge-count');
+  const summaryState = resolveModalFooterSummaryState({ totalQuantity });
+  if (cartPill) {
+    cartPill.hidden = summaryState.hidden;
+    cartPill.setAttribute('aria-hidden', String(summaryState.hidden));
+  }
   if (cartBadge) {
-    cartBadge.textContent = totalQuantity.toString();
+    cartBadge.textContent = summaryState.quantityText;
   }
 
   // Update total prices in the footer pill
@@ -444,7 +487,7 @@ updateModalFooterMessaging() {
   this.updateModalDiscountMessaging(totalPrice, totalQuantity, combinedDiscountInfo, currencyInfo);
 },
 
-updateModalHeaderText(totalPrice, totalQuantity, discountInfo, currencyInfo) {
+updateModalHeaderText(totalPrice: any, totalQuantity: any, discountInfo: any, currencyInfo: any) {
   const modalStepTitle = this.elements.modal.querySelector('.modal-step-title');
   if (!modalStepTitle) return;
 
@@ -453,7 +496,7 @@ updateModalHeaderText(totalPrice, totalQuantity, discountInfo, currencyInfo) {
   modalStepTitle.textContent = currentStep?.name || `Step ${this.currentStepIndex + 1}`;
 },
 
-updateModalDiscountMessaging(totalPrice, totalQuantity, discountInfo, currencyInfo) {
+updateModalDiscountMessaging(totalPrice: any, totalQuantity: any, discountInfo: any, currencyInfo: any) {
   const footerDiscountText = this.elements.modal.querySelector('.footer-discount-text');
   const discountSection = this.elements.modal.querySelector('.modal-footer-discount-messaging')
     || this.elements.modal.querySelector('.modal-header-discount-messaging');
@@ -498,7 +541,7 @@ updateModalDiscountMessaging(totalPrice, totalQuantity, discountInfo, currencyIn
   );
   const message = TemplateManager.replaceVariables(template, variables);
 
-  footerDiscountText.textContent = discountInfo.qualifiesForDiscount && !nextRule
+  footerDiscountText.innerHTML = discountInfo.qualifiesForDiscount && !nextRule
     ? message
     : message || '';
   if (discountSection) {
@@ -510,7 +553,7 @@ updateModalDiscountMessaging(totalPrice, totalQuantity, discountInfo, currencyIn
   }
 },
 
-updateFooterTotalPrices(totalPrice, discountInfo, currencyInfo) {
+updateFooterTotalPrices(totalPrice: number, discountInfo: any, currencyInfo: any) {
   const strikePriceEl = this.elements.modal.querySelector('.total-price-strike');
   const finalPriceEl = this.elements.modal.querySelector('.total-price-final');
 

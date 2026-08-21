@@ -45,7 +45,7 @@ describe('FPB completed-step product card interaction', () => {
       searchQuery: '',
       getActiveStepCategoryEntry: () => null,
       shouldDisplayVariantsAsIndividualForProductGrid: () => false,
-      expandProductsByVariant: (items) => items,
+      expandProductsByVariant: (items: any) => items,
       createProductCard,
     };
 

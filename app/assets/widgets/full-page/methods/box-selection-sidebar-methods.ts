@@ -22,14 +22,14 @@ import {
 import { FullPagePreset } from '../../shared/full-page-preset.js';
 
 
-function getSummarySlotQuantity(item = {}) {
+function getSummarySlotQuantity(item: any = {}) {
   const quantity = Number(item?.quantity);
   return Number.isFinite(quantity) ? Math.max(0, Math.floor(quantity)) : 0;
 }
 
-function expandSelectedItemsForSummarySlots(allSelectedProducts = []) {
+function expandSelectedItemsForSummarySlots(allSelectedProducts: any[] = []) {
   const selectedProducts = Array.isArray(allSelectedProducts) ? allSelectedProducts : [];
-  const expanded = [];
+  const expanded: any[] = [];
 
   selectedProducts.forEach((item) => {
     const normalizedQuantity = getSummarySlotQuantity(item);
@@ -41,17 +41,17 @@ function expandSelectedItemsForSummarySlots(allSelectedProducts = []) {
   return expanded;
 }
 
-function getSelectionId(item = {}) {
+function getSelectionId(item: any = {}) {
   return String(item?.selectionId || '');
 }
 
-export function canSwitchBoxSelectionRule(selectedQuantity, targetQuantity) {
+export function canSwitchBoxSelectionRule(selectedQuantity: any, targetQuantity: any) {
   return Number(selectedQuantity || 0) <= Number(targetQuantity || 0);
 }
 
 
 export const fullPageBoxSelectionSidebarMethods: Record<string, any> & ThisType<any> = {
-getSidebarTierCtaContent(nextRule) {
+getSidebarTierCtaContent(nextRule: any) {
   const pricing = this.selectedBundle?.pricing;
   if (!pricing?.enabled) return null;
 
@@ -62,12 +62,12 @@ getSidebarTierCtaContent(nextRule) {
   const tierTextByRuleId = pricing.messages?.tierTextByRuleId || {};
   const rules = Array.isArray(pricing.rules) ? pricing.rules : [];
   const selectedRuleId = rules.some(
-    item => String(item?.id || '') === String(this.selectedBoxSelectionRuleId || '')
+(    item: any)  => String(item?.id || '') === String(this.selectedBoxSelectionRuleId || '')
   )
     ? this.selectedBoxSelectionRuleId
     : null;
   const ruleId = selectedRuleId || bundleQuantityOptions.defaultRuleId || nextRule?.id || rules[0]?.id;
-  const rule = ruleId ? rules.find(item => String(item?.id || '') === String(ruleId)) : null;
+  const rule = ruleId ? rules.find((item: any)  => String(item?.id || '') === String(ruleId)) : null;
   const option = ruleId ? (optionsByRuleId[ruleId] || tierTextByRuleId[ruleId]) : null;
   const label = typeof option?.label === 'string' && option.label.trim()
     ? option.label.trim()
@@ -93,18 +93,18 @@ getBoxSelectionRules() {
   }
 
   return boxSelection.rules
-    .map(rule => ({
+    .map((rule: any)  => ({
       ruleId: String(rule.ruleId || ''),
       boxQuantity: Number(rule.boxQuantity || 0),
       boxLabel: String(rule.boxLabel || ''),
       boxSubtext: String(rule.boxSubtext || ''),
       isDefaultSelected: rule.isDefaultSelected === true,
     }))
-    .filter(rule => rule.ruleId && rule.boxQuantity > 0)
-    .sort((a, b) => a.boxQuantity - b.boxQuantity);
+    .filter((rule: any)  => rule.ruleId && rule.boxQuantity > 0)
+    .sort((a: any, b: any) => a.boxQuantity - b.boxQuantity);
 },
 
-getActiveBoxSelectionRule(rules, totalQuantity) {
+getActiveBoxSelectionRule(rules: any[], totalQuantity: any) {
   if (!Array.isArray(rules) || rules.length === 0) return null;
 
   const selected = this.selectedBoxSelectionRuleId
@@ -128,13 +128,14 @@ getActiveBoxSelectionRule(rules, totalQuantity) {
 },
 
 getSelectedBoxSelectionQuantity() {
-  return this.getAllSelectedProductsData().reduce((total, item) => {
+  return this.getAllSelectedProductsData().reduce((total: number, item: any) => {
     if (item.isDefault === true || item.isFreeGift === true) return total;
     return total + (Number(item.quantity || 0) || 0);
   }, 0);
 },
 
-getBoxSelectionValidationState(totalQuantity = this.getSelectedBoxSelectionQuantity()) {
+getBoxSelectionValidationState(totalQuantity: any = undefined) {
+  if (totalQuantity === undefined) totalQuantity = this.getSelectedBoxSelectionQuantity();
   const boxSelection = this.selectedBundle?.boxSelection;
   const rules = this.getBoxSelectionRules();
   const activeRule = this.getActiveBoxSelectionRule(rules, totalQuantity);
@@ -188,7 +189,7 @@ renderBoxSelectionOptions(totalQuantity = 0) {
     wrapper.dataset.activeRuleId = activeRule.ruleId;
   }
 
-  rules.forEach(rule => {
+  rules.forEach((rule: any)  => {
     const option = document.createElement('button');
     const isActive = activeRule?.ruleId === rule.ruleId;
     option.type = 'button';
@@ -224,7 +225,7 @@ renderBoxSelectionOptions(totalQuantity = 0) {
   return wrapper;
 },
 
-getClassicSidebarSlotCount(allSelectedProducts = [], activeStep = null) {
+getClassicSidebarSlotCount(allSelectedProducts: any[] = [], activeStep: any = null) {
   const selectedBoxSelectionQuantity = this.getSelectedBoxSelectionQuantity();
   const boxRules = this.getBoxSelectionRules();
   const activeBoxRule = this.getActiveBoxSelectionRule(
@@ -246,10 +247,10 @@ getClassicSidebarSlotCount(allSelectedProducts = [], activeStep = null) {
   return Math.max(selectedCount, 2);
 },
 
-renderClassicSidebarSlots(allSelectedProducts = [], slotCount = 0) {
+renderClassicSidebarSlots(allSelectedProducts: any[] = [], slotCount = 0) {
   const safeSlotCount = Math.max(0, Number(slotCount || 0));
   const selectedSlotItems = expandSelectedItemsForSummarySlots(allSelectedProducts);
-  const slotData = [];
+  const slotData: { id: string; label: any; product?: { selectionId: string; title: any; variantTitle: any; imageUrl: any; quantity: any; isDefault: boolean; stepIndex: any; }; }[]|undefined = [];
 
   for (let slotIndex = 0; slotIndex < safeSlotCount; slotIndex += 1) {
     const item = selectedSlotItems[slotIndex];
@@ -287,12 +288,12 @@ renderClassicSidebarSlots(allSelectedProducts = [], slotCount = 0) {
   }).trim();
   const slots = wrapper.firstElementChild;
 
-  slots?.querySelectorAll('[data-action="remove-selected-product"]').forEach(removeBtn => {
-    removeBtn.addEventListener('click', (event) => {
+  slots?.querySelectorAll<HTMLElement>('[data-action="remove-selected-product"]').forEach(removeBtn => {
+    removeBtn.addEventListener('click', (event: any) => {
       event.stopPropagation();
       const productId = removeBtn.dataset.variantId;
       const slotNode = typeof removeBtn.closest === 'function'
-        ? removeBtn.closest('[data-slot-id]')
+        ? removeBtn.closest<HTMLElement>('[data-slot-id]')
         : null;
       const slotId = slotNode?.dataset?.slotId
         || slotNode?.getAttribute?.('data-slot-id')
@@ -311,7 +312,7 @@ renderClassicSidebarSlots(allSelectedProducts = [], slotCount = 0) {
       if (nextQuantity === selectedQty) return;
 
       const summaryTitle = this.getSummaryProductDisplayTitle(product);
-      const removedItem = {
+      const removedItem: any = {
         stepIndex: product.stepIndex,
         selectionId: product.selectionId,
         quantity: selectedQty,
@@ -342,13 +343,13 @@ renderClassicSidebarSlots(allSelectedProducts = [], slotCount = 0) {
 },
 
 // Escape HTML special characters to prevent innerHTML injection
-_escapeHTML(str) {
+_escapeHTML(str: string) {
   if (!str) return '';
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 },
 
-_getSelectedProductImageSrc(item = {}) {
-  const getImageSrc = (image) => {
+_getSelectedProductImageSrc(item: any = {}) {
+  const getImageSrc = (image: any) => {
     if (!image) return '';
     if (typeof image === 'string') return image;
     return image.src
@@ -373,13 +374,13 @@ _getSelectedProductImageSrc(item = {}) {
     || getImageSrc(item.productImageUrl);
 },
 
-_formatSidebarDiscountMessage(discountMessage) {
+_formatSidebarDiscountMessage(discountMessage: string) {
   const message = typeof discountMessage === 'string' ? discountMessage.trim() : '';
   return message.replace(/!+\s*$/, '');
 },
 
 // Returns default SVG icon markup for a step based on its type
-_getDefaultTimelineIcon(step) {
+_getDefaultTimelineIcon(step: any) {
   if (step.isDefault) {
     // Included/locked step — lock icon
     return `<svg class="timeline-step-icon--svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -405,15 +406,15 @@ _getDefaultTimelineIcon(step) {
   </svg>`;
 },
 
-_getStepSelectedQuantity(stepIndex) {
+_getStepSelectedQuantity(stepIndex: string|number) {
   const stepSelections = this.selectedProducts?.[stepIndex] || {};
-  return Object.values(stepSelections).reduce((total, qty) => total + (Number(qty) || 0), 0);
+  return Object.values<any>(stepSelections).reduce((total: number, qty: any) => total + (Number(qty) || 0), 0);
 },
 
-_getStepRequiredQuantity(step) {
+_getStepRequiredQuantity(step: any) {
   if (!step) return 0;
 
-  const toNumber = (value) => {
+  const toNumber = (value: any) => {
     const parsed = Number(value);
     return Number.isFinite(parsed) ? parsed : null;
   };
@@ -422,7 +423,7 @@ _getStepRequiredQuantity(step) {
   const secondaryValue = toNumber(step.conditionValue2);
   const OPERATORS = ConditionValidator.OPERATORS;
 
-  const targetForOperator = (operator, value) => {
+  const targetForOperator = (operator: any, value: number|null) => {
     if (value == null) return null;
     switch (operator) {
       case OPERATORS.GREATER_THAN:
@@ -441,12 +442,12 @@ _getStepRequiredQuantity(step) {
   const targets = [
     targetForOperator(step.conditionOperator, primaryValue),
     targetForOperator(step.conditionOperator2, secondaryValue),
-  ].filter((value) => value != null && value > 0);
+  ].filter((value): value is number => value != null && value > 0);
 
   return targets.length > 0 ? Math.max(...targets) : 0;
 },
 
-_getStepProgressRatio(stepIndex) {
+_getStepProgressRatio(stepIndex: string|number) {
   const step = this.selectedBundle?.steps?.[stepIndex];
   if (!step) return 0;
   if (this.isStepCompleted(stepIndex)) return 1;
@@ -457,7 +458,7 @@ _getStepProgressRatio(stepIndex) {
   return Math.max(0, Math.min(1, selectedQuantity / requiredQuantity));
 },
 
-_getDefaultTimelineIconDataUri(step) {
+_getDefaultTimelineIconDataUri(step: any) {
   const svg = this._getDefaultTimelineIcon(step)
     .replace('class="timeline-step-icon--svg"', 'xmlns="http://www.w3.org/2000/svg"')
     .replace(' xmlns="http://www.w3.org/2000/svg"', '');
@@ -473,9 +474,9 @@ _usesReferenceStepBarTimeline() {
 
 buildStepTimelineEntries() {
   const steps = Array.isArray(this.selectedBundle?.steps) ? this.selectedBundle.steps : [];
-  const entries = [];
+  const entries: { type: string; step: any; stepIndex: any; label: any; }[] = [];
 
-  steps.forEach((step, index) => {
+  steps.forEach((step: any, index: any) => {
     const stepLabel = (step.isFreeGift && step.addonLabel) ? step.addonLabel : step.name;
     entries.push({
       type: 'step',

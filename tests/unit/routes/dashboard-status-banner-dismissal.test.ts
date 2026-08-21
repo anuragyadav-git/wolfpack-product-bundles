@@ -32,7 +32,7 @@ const APP_EMBED_RESOURCE = {
   status: "active" as const,
   enabled: true,
   target: null,
-};
+} as const;
 
 describe("dashboard status banner dismissal with session persistence", () => {
   let mockStorage: MockSessionStorage;

@@ -282,7 +282,7 @@ describe('Bundle Widget JavaScript', () => {
         selectedProducts.forEach((stepSelections, stepIndex) => {
           const productsInStep = stepProductData[stepIndex] || [];
 
-          Object.entries(stepSelections).forEach(([variantId, quantity]) => {
+          Object.entries(stepSelections).forEach(([variantId, quantity]: any) => {
             const product = productsInStep.find((p: any) => p.id === variantId);
             if (product && (quantity as any) > 0) {
               const price = parseFloat(product.price) || 0;
@@ -466,7 +466,7 @@ describe('Bundle Widget JavaScript', () => {
         selectedProducts.forEach((stepSelections, stepIndex) => {
           const productsInStep = stepProductData[stepIndex] || [];
 
-          Object.entries(stepSelections).forEach(([variantId, quantity]) => {
+          Object.entries(stepSelections).forEach(([variantId, quantity]: any) => {
             const product = productsInStep.find((p: any) => p.id === variantId);
             if (product && (quantity as any) > 0) {
               cartItems.push({
@@ -548,7 +548,7 @@ describe('Bundle Widget JavaScript', () => {
         try {
           await mockWindow.fetch('/cart/add.js');
           return { success: true };
-        } catch (error) {
+        } catch (error: any) {
           mockWindow.console.error('Network error:', error);
           return { success: false, error: (error as Error).message };
         }

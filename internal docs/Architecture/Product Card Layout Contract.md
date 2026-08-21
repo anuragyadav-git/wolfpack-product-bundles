@@ -5,7 +5,7 @@ title: Product Card Layout Contract
 type: architecture
 status: authoritative
 summary: Defines stable and display-safe storefront product-card layout and content boundaries.
-last_audited: 2026-08-14
+last_audited: 2026-08-21
 owners:
   - engineering
 domains:
@@ -22,6 +22,7 @@ source_paths:
   - app/assets/bundle-modal-component.ts
   - app/storefront/app-embed.ts
   - app/assets/widgets/product-page
+  - app/assets/widgets/product-page-css/base/mobile-drawers.css
 related_docs:
   - Architecture/Bundle Parent Product.md
 tags:
@@ -71,6 +72,7 @@ This is a hard requirement:
   the icon with CSS geometry so it does not depend on a theme-root asset URL;
   touch/mobile cards do not show this hover-only affordance.
 - Replace a product card's Add To Box button with its inline quantity selector immediately; do not animate width, radius, opacity, or geometry during that state swap.
+- Product Grid is the sole PPB exception when per-product quantity validation is enabled with a maximum of one: its selected action remains the compact quantity-aware button. When validation is disabled or its maximum exceeds one, Product Grid uses the shared inline selector and disables increment at the configured maximum.
 - Standard FPB cards use the same card, media, title, price, and sizing rules in text and icon CTA modes. Icon mode may override only the compact action geometry and place that action beside the price.
 - Reserve the Standard FPB variant-selector row only when the runtime renders `.vs-wrapper--standard`. The runtime renders that wrapper only when Bundle Settings enables variant selectors and the grouped product has more than one variant.
 - Prefer fixed row contracts (`min-height`, `height`, flex stretch, consistent padding/line-clamp) so selected/unselected variants stay layout-stable.
@@ -112,6 +114,27 @@ Backdrop, Escape, trigger-toggle, and intentional downward-swipe paths all
 dismiss it and restore focus. The sheet does not render a separate close
 control. Presets may change visual tokens, but must not fork this anatomy or
 interaction contract.
+
+## PPB drawer and slot ownership
+
+Product List and Product Grid share one widget-bounded mobile summary owner.
+The footer is sticky inside `#bundle-builder-app`, so its disclosure expands
+upward without becoming a viewport modal, adding a backdrop, or locking page
+scroll. Selection rerenders preserve its open state while products remain; the
+last removal collapses it and leaves the zero-count summary trigger available.
+
+Horizontal Slots and Vertical Slots share the same bottom-sheet picker runtime.
+Orientation changes only slot presentation: horizontal slots use responsive
+equal-height tiles, while vertical slots use equal-height full-width rows. A
+selected and empty slot reserve the same row geometry, and a filled slot keeps
+its exact replacement target through picker selection.
+
+PPB modal surfaces declare their owner with `data-ppb-drawer-surface`. The
+bundle picker, product-details drawer, and variant selector participate in one
+layer stack; only its top layer handles Escape or backdrop dismissal. The first
+modal layer locks document scrolling, the final close restores the previous
+scroll styles, and every layer restores focus to its exact trigger. The
+selected-summary disclosure is intentionally outside this modal stack.
 
 All storefront mobile drawers follow the same close-control boundary. At widths
 below `768px`, product details use the bottom-sheet anatomy with a drag handle,

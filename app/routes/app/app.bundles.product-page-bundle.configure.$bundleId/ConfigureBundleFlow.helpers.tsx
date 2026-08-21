@@ -127,6 +127,7 @@ type VisibilityDisplayConfiguration = {
 
 export type StepSetupMultiLanguageTarget =
   | { type: "text-overrides" }
+  | { type: "embed" }
   | { type: "step"; stepId: string }
   | { type: "step-category"; stepId: string; categoryIndex: number };
 

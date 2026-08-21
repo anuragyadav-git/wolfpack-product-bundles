@@ -12,14 +12,12 @@
 export class CurrencyManager {
   static getShopify() {
     if (typeof window !== 'undefined' && window.Shopify) return window.Shopify;
-    if (typeof Shopify !== 'undefined') return Shopify;
-    return null;
+    return (globalThis as any).Shopify || null;
   }
 
   static getShopMoneyFormat() {
     if (typeof window !== 'undefined' && window.shopMoneyFormat) return window.shopMoneyFormat;
-    if (typeof shopMoneyFormat !== 'undefined') return shopMoneyFormat;
-    return '{{amount}}';
+    return (globalThis as any).shopMoneyFormat || '{{amount}}';
   }
 
   static getShopBaseCurrency() {
@@ -48,7 +46,7 @@ export class CurrencyManager {
     return { ...this.getShopBaseCurrency(), rate: 1 };
   }
 
-  static convertCurrency(amount, fromCurrency, toCurrency, rate = 1) {
+  static convertCurrency(amount: number, fromCurrency: any, toCurrency: any, rate = 1) {
     if (fromCurrency === toCurrency) return amount;
     const shopify = this.getShopify();
 
@@ -56,7 +54,7 @@ export class CurrencyManager {
     if (shopify?.currency?.convert) {
       try {
         return shopify.currency.convert(amount, fromCurrency, toCurrency);
-      } catch (e) {
+      } catch (e: any) {
         console.warn('[BUNDLE_WIDGET] Shopify.currency.convert failed, using rate fallback:', e);
       }
     }
@@ -64,7 +62,7 @@ export class CurrencyManager {
     return Math.round(amount * rate);
   }
 
-  static formatMoney(amount, format) {
+  static formatMoney(amount: number, format: string) {
     const shopify = this.getShopify();
     if (shopify?.formatMoney) {
       return shopify.formatMoney(amount, format);
@@ -75,8 +73,8 @@ export class CurrencyManager {
     return format ? format.replace('{{amount}}', formatted) : `$${formatted}`;
   }
 
-  static getCurrencySymbol(currencyCode) {
-    const symbols = {
+  static getCurrencySymbol(currencyCode: string|number) {
+    const symbols: any = {
       'USD': '$', 'EUR': '€', 'GBP': '£', 'JPY': '¥',
       'CAD': 'C$', 'AUD': 'A$', 'INR': '₹', 'CNY': '¥',
       'CHF': 'CHF', 'SEK': 'kr', 'NOK': 'kr', 'DKK': 'kr',
@@ -105,7 +103,7 @@ export class CurrencyManager {
    * the merchant's decimal/thousand-separator placeholder choice
    * (e.g. {{amount_with_comma_separator}}) while ensuring symbols always render.
    */
-  static normalizeCurrencyFormat(format, code, symbol) {
+  static normalizeCurrencyFormat(format: string|null, code: string, symbol: string) {
     if (!format) return `${symbol}{{amount}}`;
     if (!code || !symbol || symbol === code) return format;
     return format.replace(new RegExp(`\\b${code}\\b`, 'g'), symbol);
@@ -149,7 +147,7 @@ export class CurrencyManager {
    * @param {object} currencyInfo  Result of getCurrencyInfo()
    * @returns {string}  Formatted price string in the display currency
    */
-  static convertAndFormat(amount, currencyInfo) {
+  static convertAndFormat(amount: number, currencyInfo: any) {
     const rate = currencyInfo.display.rate;
     const converted = currencyInfo.isMultiCurrency && rate && isFinite(rate)
       ? this.convertCurrency(amount, currencyInfo.calculation.code, currencyInfo.display.code, rate)

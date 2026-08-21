@@ -96,7 +96,7 @@ export function usePpbPreviewReadinessHandlers({
             (base.formState.templateName || "").trim(),
           );
           await fetch(window.location.href, { method: "POST", body: formData });
-        } catch (err) {
+        } catch (err: any) {
           AppLogger.error(
             "Failed to sync product templateSuffix before preview",
             {},
@@ -144,7 +144,7 @@ export function usePpbPreviewReadinessHandlers({
       });
       base.shopify.toast.show(message, { isError: false });
       return true;
-    } catch (error) {
+    } catch (error: any) {
       base.shopify.toast.show(
         error instanceof Error
           ? error.message
@@ -174,7 +174,8 @@ export function usePpbPreviewReadinessHandlers({
           : 0;
         return totalProducts + legacyProducts + categoryProductCount;
       }, 0) >= 3;
-    const widgetPlaced = visibility.upsellWidgetEnabled;
+    const widgetPlaced =
+      visibility.upsellWidgetEnabled || visibility.bundleEmbedEnabled;
     const parentProductActive =
       String(
         base.productStatus || base.loadedBundleProduct?.status || "",
@@ -231,6 +232,7 @@ export function usePpbPreviewReadinessHandlers({
     base.stepsState.steps,
     templateState.hasPreview,
     visibility.upsellWidgetEnabled,
+    visibility.bundleEmbedEnabled,
   ]);
   const readinessScore = readinessItems.reduce(
     (sum, item) => sum + (item.done ? item.points : 0),
@@ -263,7 +265,7 @@ export function usePpbPreviewReadinessHandlers({
       const openFallback = () => {
         try {
           base.shopify.navigate(adminProductUrl);
-        } catch (error) {
+        } catch (error: any) {
           AppLogger.warn(
             "Falling back to a new tab for Admin product navigation",
             { productId },
@@ -292,7 +294,7 @@ export function usePpbPreviewReadinessHandlers({
             });
           }
           return;
-        } catch (error) {
+        } catch (error: any) {
           AppLogger.warn(
             "Falling back after Product editor intent failed",
             { productId },

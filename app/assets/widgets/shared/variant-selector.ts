@@ -1,6 +1,22 @@
 'use strict';
 
+let standardMobileDrawerCleanup: (() => void) | null = null;
+
 import { CurrencyManager } from './currency-manager.js';
+import {
+  drawerLayerManager,
+  shouldDismissDrawerSwipe,
+} from './drawer-layer-manager.js';
+
+export function getStandardMobileDrawerContract({ isPpbOwned = false }: any = {}) {
+  return {
+    closeControl: isPpbOwned ? 'handle' : 'cross',
+    dismissOnBackdrop: true,
+    dismissOnEscape: true,
+    dismissOnSelection: true,
+    showApplyAction: false,
+  };
+}
 
 /**
  * VariantSelectorComponent
@@ -26,7 +42,7 @@ class VariantSelectorComponent {
    * @param {string|null} primaryOptionName - Merchant-configured primary dimension (e.g. "Size")
    * @returns {string} HTML string, or '' if no selector needed
    */
-  static renderHtml(product, primaryOptionName) {
+  static renderHtml(product: any, primaryOptionName: any) {
     const variants = product.variants || [];
     const options = product.options || [];
 
@@ -36,7 +52,7 @@ class VariantSelectorComponent {
     const primaryValues = VariantSelectorComponent._uniqueSelectableValues(variants, primaryIdx);
     if (primaryValues.length === 0) return '';
 
-    const selectedVariant = variants.find(v => v.id === product.variantId);
+    const selectedVariant = variants.find((v: any)  => v.id === product.variantId);
     const selectedPrimaryVal = selectedVariant
       ? (selectedVariant[`option${primaryIdx}`] || primaryValues[0])
       : primaryValues[0];
@@ -58,7 +74,7 @@ class VariantSelectorComponent {
     // Secondary dimension pills (options beyond primary)
     const secondaryHtml = (() => {
       if (options.length <= 1 || !selectedVariant) return '';
-      const pills = options.map((optName, i) => {
+      const pills = options.map((optName: any, i: number) => {
         if (i === primaryIdx - 1) return '';
         const optIdx = i + 1;
         const val = selectedVariant[`option${optIdx}`];
@@ -72,14 +88,14 @@ class VariantSelectorComponent {
     return `<div class="vs-wrapper" data-vs-product-id="${productId}"><div class="vs-btn-group">${btnGroupHtml}${overflowHtml}</div>${secondaryHtml}</div>`;
   }
 
-  static renderDropdownHtml(product, primaryOptionName, options = {}) {
+  static renderDropdownHtml(product: any, primaryOptionName: any, options: any = {}) {
     const variants = product.variants || [];
     const optionNames = product.options || [];
 
     if (variants.length <= 1 || optionNames.length === 0) return '';
 
     const primaryIdx = VariantSelectorComponent._primaryIdx(optionNames, primaryOptionName);
-    const selectedVariant = variants.find(variant => String(variant.id) === String(product.variantId)) || variants[0];
+    const selectedVariant = variants.find((variant: any)  => String(variant.id) === String(product.variantId)) || variants[0];
     const selectedPrimaryValue = selectedVariant?.[`option${primaryIdx}`] || selectedVariant?.title || '';
     const selectedLabel = options.placeholder || selectedPrimaryValue;
     const productId = product.id || product.variantId;
@@ -88,7 +104,7 @@ class VariantSelectorComponent {
     const dropdownVariants = options.hideUnavailable === true
       ? variants.filter(VariantSelectorComponent._isSelectableVariant)
       : variants;
-    const optionHtml = dropdownVariants.map((variant) => {
+    const optionHtml = dropdownVariants.map((variant: any) => {
       const primaryValue = variant[`option${primaryIdx}`] || variant.title || '';
       const value = optionNames.length > 1 && variant.title ? variant.title : primaryValue;
       const imageUrl = VariantSelectorComponent._variantImageUrl(variant);
@@ -118,20 +134,22 @@ class VariantSelectorComponent {
     `;
   }
 
-  static renderStandardMobileDrawerHtml(product, options = {}) {
+  static renderStandardMobileDrawerHtml(product: any, options: any = {}) {
     const variants = product.variants || [];
     const optionNames = product.options || [];
     const primaryIdx = options.primaryIdx || VariantSelectorComponent._primaryIdx(optionNames, options.primaryOptionName);
-    const selectedVariant = variants.find(v => String(v.id) === String(product.variantId)) || variants[0] || product;
+    const selectedVariant = variants.find((v: any)  => String(v.id) === String(product.variantId)) || variants[0] || product;
     const productImageUrl = VariantSelectorComponent._variantImageUrl(selectedVariant) || product.imageUrl || '';
     const productTitle = product.title || selectedVariant.productTitle || '';
     const placeholder = options.placeholder || '';
     const formatPrice = typeof options.formatPrice === 'function'
       ? options.formatPrice
-      : (value) => VariantSelectorComponent.formatDrawerPrice(value);
+      : (value: any) => VariantSelectorComponent.formatDrawerPrice(value);
     const productPrice = selectedVariant.price ?? product.price ?? 0;
+    const isPpbDrawer = options.drawerOwner === 'ppb';
+    const drawerContract = getStandardMobileDrawerContract({ isPpbOwned: isPpbDrawer });
 
-    const optionHtml = variants.map((variant) => {
+    const optionHtml = variants.map((variant: any) => {
       const label = VariantSelectorComponent.getStandardVariantLabel(variant, optionNames, primaryIdx);
       const imageUrl = VariantSelectorComponent._variantImageUrl(variant) || productImageUrl;
       const isAvailable = variant.available !== false;
@@ -146,8 +164,17 @@ class VariantSelectorComponent {
     }).join('');
 
     return `
-      <div class="vs-mobile-drawer vs-mobile-drawer--standard" data-vs-mobile-drawer>
+      <div class="vs-mobile-drawer vs-mobile-drawer--standard" data-vs-mobile-drawer${isPpbDrawer ? ' data-ppb-drawer-surface="variant-selector"' : ''}>
         <div class="vs-mobile-drawer-sheet" role="dialog" aria-modal="true">
+          ${drawerContract.closeControl === 'handle' ? `
+          <button type="button" class="vs-mobile-drawer-handle" data-vs-drawer-handle aria-label="Close variant selector">
+            <span class="vs-mobile-drawer-grip" aria-hidden="true"></span>
+          </button>` : `
+          <button type="button" class="vs-mobile-drawer-close" aria-label="Close variant selector">
+            <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+              <path d="M6 6 18 18M18 6 6 18" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"></path>
+            </svg>
+          </button>`}
           <div class="vs-mobile-drawer-header">
             ${productImageUrl ? `<img class="vs-mobile-drawer-product-image" src="${VariantSelectorComponent._esc(productImageUrl)}" alt="">` : ''}
             <div class="vs-mobile-drawer-product-info">
@@ -174,8 +201,8 @@ class VariantSelectorComponent {
    * @param {Object} product - Product object (mutated on variant change)
    * @param {Function} onVariantChange - Called with (newVariantId, oldVariantId) after mutation
    */
-  static attachListeners(cardEl, product, onVariantChange) {
-    cardEl.addEventListener('click', (e) => {
+  static attachListeners(cardEl: any, product: any, onVariantChange: any) {
+    cardEl.addEventListener('click', (e: any) => {
       const btn = e.target.closest('.vs-btn, .vs-secondary-pill');
       if (!btn || btn.disabled) return;
       e.stopPropagation();
@@ -197,7 +224,7 @@ class VariantSelectorComponent {
       }
     });
 
-    cardEl.addEventListener('click', (e) => {
+    cardEl.addEventListener('click', (e: any) => {
       const selected = e.target.closest('.vs-selected');
       if (selected) {
         e.stopPropagation();
@@ -214,34 +241,34 @@ class VariantSelectorComponent {
 
   // ── Private helpers ────────────────────────────────────────────────────────
 
-  static _primaryIdx(options, primaryOptionName) {
+  static _primaryIdx(options: any[], primaryOptionName: string) {
     if (!primaryOptionName) return 1;
-    const idx = options.findIndex(o => o.toLowerCase() === primaryOptionName.toLowerCase());
+    const idx = options.findIndex((o: string)  => o.toLowerCase() === primaryOptionName.toLowerCase());
     return idx >= 0 ? idx + 1 : 1;
   }
 
-  static _uniqueValues(variants, optIdx) {
+  static _uniqueValues(variants: any[], optIdx: number) {
     const seen = new Set();
-    const out = [];
-    variants.forEach(v => {
+    const out: any[] = [];
+    variants.forEach((v: any)  => {
       const val = v[`option${optIdx}`];
       if (val && !seen.has(val)) { seen.add(val); out.push(val); }
     });
     return out;
   }
 
-  static _uniqueSelectableValues(variants, optIdx) {
+  static _uniqueSelectableValues(variants: any, optIdx: number) {
     return VariantSelectorComponent._uniqueValues(
       (variants || []).filter(VariantSelectorComponent._isSelectableVariant),
       optIdx
     );
   }
 
-  static _isSelectableVariant(variant) {
+  static _isSelectableVariant(variant: any) {
     return variant?.available !== false;
   }
 
-  static _esc(str) {
+  static _esc(str: string|null|undefined) {
     if (str === null || str === undefined) return '';
     return String(str)
       .replace(/&/g, '&amp;')
@@ -250,9 +277,9 @@ class VariantSelectorComponent {
       .replace(/"/g, '&quot;');
   }
 
-  static _findBestVariant(variants, primaryOptIdx, primaryValue, currentVariantId) {
-    const current = variants.find(v => v.id === currentVariantId);
-    const candidates = variants.filter(v =>
+  static _findBestVariant(variants: any[], primaryOptIdx: number, primaryValue: any, currentVariantId: any) {
+    const current = variants.find((v: any)  => v.id === currentVariantId);
+    const candidates = variants.filter((v: any)  =>
       v[`option${primaryOptIdx}`] === primaryValue && VariantSelectorComponent._isSelectableVariant(v)
     );
     if (candidates.length === 0) return null;
@@ -262,13 +289,13 @@ class VariantSelectorComponent {
       if (i === primaryOptIdx) continue;
       const curVal = current[`option${i}`];
       if (!curVal) continue;
-      const match = candidates.find(v => v[`option${i}`] === curVal);
+      const match = candidates.find((v: any)  => v[`option${i}`] === curVal);
       if (match) return match;
     }
     return candidates[0];
   }
 
-  static _resolveCompareAtPrice(variant) {
+  static _resolveCompareAtPrice(variant: any) {
     if (!variant) return null;
     const rawCompareAt = variant.compareAtPrice ?? variant.compare_at_price;
     if (rawCompareAt == null) return null;
@@ -279,7 +306,7 @@ class VariantSelectorComponent {
     return Number.isFinite(parsed) ? parsed : null;
   }
 
-  static _selectPrimary(cardEl, product, primaryOptIdx, val, onVariantChange) {
+  static _selectPrimary(cardEl: any, product: any, primaryOptIdx: number, val: any, onVariantChange: (arg0: any,arg1: any) => void) {
     const oldVariantId = product.variantId;
     const newVariant = VariantSelectorComponent._findBestVariant(
       product.variants || [], primaryOptIdx, val, oldVariantId
@@ -289,11 +316,11 @@ class VariantSelectorComponent {
     // Update button group visual state
     const wrapper = cardEl.querySelector('.vs-wrapper');
     if (wrapper) {
-      wrapper.querySelectorAll('.vs-btn:not(.vs-btn--overflow)').forEach(b => {
+      wrapper.querySelectorAll('.vs-btn:not(.vs-btn--overflow)').forEach((b: any)  => {
         b.classList.toggle('vs-btn--selected', b.dataset.primaryValue === val);
       });
       // Update secondary pills
-      wrapper.querySelectorAll('.vs-secondary-pill').forEach(pill => {
+      wrapper.querySelectorAll('.vs-secondary-pill').forEach((pill: any)  => {
         const optIdx = parseInt(pill.dataset.optIdx, 10);
         const label = pill.querySelector('.vs-secondary-label');
         const optName = label ? label.textContent.replace(':', '').trim() : `Option ${optIdx}`;
@@ -314,23 +341,23 @@ class VariantSelectorComponent {
     onVariantChange(newVariant.id, oldVariantId);
   }
 
-  static _openOverflowPanel(overflowBtn, cardEl, product, onVariantChange) {
+  static _openOverflowPanel(overflowBtn: any, cardEl: any, product: any, onVariantChange: any) {
     VariantSelectorComponent._closePanel(cardEl);
 
     const primaryOptIdx = parseInt(overflowBtn.dataset.primaryOptIdx, 10);
     let allValues;
     try { allValues = JSON.parse(overflowBtn.dataset.allValues); }
-    catch (_) { allValues = VariantSelectorComponent._uniqueSelectableValues(product.variants || [], primaryOptIdx); }
+    catch (_: any) { allValues = VariantSelectorComponent._uniqueSelectableValues(product.variants || [], primaryOptIdx); }
 
-    const currentVariant = (product.variants || []).find(v => v.id === product.variantId);
+    const currentVariant = (product.variants || []).find((v: any)  => v.id === product.variantId);
     const currentPrimary = currentVariant ? currentVariant[`option${primaryOptIdx}`] : null;
 
     const panel = VariantSelectorComponent._makePanel();
 
-    allValues.forEach(val => {
+    allValues.forEach((val: string|null)  => {
       const sel = val === currentPrimary;
       const tile = VariantSelectorComponent._makeTile(val, sel, false);
-      tile.addEventListener('click', (e) => {
+      tile.addEventListener('click', (e: any) => {
         e.stopPropagation();
         VariantSelectorComponent._selectPrimary(cardEl, product, primaryOptIdx, val, onVariantChange);
         VariantSelectorComponent._closePanel(cardEl);
@@ -343,11 +370,11 @@ class VariantSelectorComponent {
     VariantSelectorComponent._bindOutsideClose(panel, cardEl);
   }
 
-  static _openSecondaryPanel(pill, cardEl, product, onVariantChange) {
+  static _openSecondaryPanel(pill: any, cardEl: any, product: any, onVariantChange: (arg0: any,arg1: any) => void) {
     VariantSelectorComponent._closePanel(cardEl);
 
     const optIdx = parseInt(pill.dataset.optIdx, 10);
-    const currentVariant = (product.variants || []).find(v => v.id === product.variantId);
+    const currentVariant = (product.variants || []).find((v: any)  => v.id === product.variantId);
     const currentVal = currentVariant ? currentVariant[`option${optIdx}`] : null;
 
     // Determine primary selection to preserve it when picking a secondary value
@@ -355,7 +382,7 @@ class VariantSelectorComponent {
     const primaryBtn = wrapper?.querySelector('.vs-btn--selected');
     const primaryOptIdx = primaryBtn ? parseInt(primaryBtn.dataset.primaryOptIdx, 10) : 1;
     const currentPrimary = currentVariant ? currentVariant[`option${primaryOptIdx}`] : null;
-    const values = VariantSelectorComponent._uniqueValues((product.variants || []).filter(v => {
+    const values = VariantSelectorComponent._uniqueValues((product.variants || []).filter((v: any)  => {
       const matchesPrimary = !currentPrimary || v[`option${primaryOptIdx}`] === currentPrimary;
       return matchesPrimary && VariantSelectorComponent._isSelectableVariant(v);
     }), optIdx);
@@ -363,14 +390,14 @@ class VariantSelectorComponent {
     const panel = VariantSelectorComponent._makePanel('vs-panel--secondary');
 
     values.forEach(val => {
-      const candidate = (product.variants || []).find(v => {
+      const candidate = (product.variants || []).find((v: any)  => {
         const matchesPrimary = !currentPrimary || v[`option${primaryOptIdx}`] === currentPrimary;
         return matchesPrimary && v[`option${optIdx}`] === val && VariantSelectorComponent._isSelectableVariant(v);
       });
       const sel = val === currentVal;
       const tile = VariantSelectorComponent._makeTile(val, sel, !candidate);
 
-      tile.addEventListener('click', (e) => {
+      tile.addEventListener('click', (e: any) => {
         e.stopPropagation();
         if (!candidate) return;
         const oldVariantId = product.variantId;
@@ -395,14 +422,14 @@ class VariantSelectorComponent {
     VariantSelectorComponent._bindOutsideClose(panel, cardEl);
   }
 
-  static _makePanel(extraClass) {
+  static _makePanel(extraClass = '') {
     const panel = document.createElement('div');
     panel.className = ['vs-panel', extraClass].filter(Boolean).join(' ');
     panel.dataset.vsPanel = '1';
     return panel;
   }
 
-  static handleStandardSelectorClick(selected, cardEl, product, onVariantChange) {
+  static handleStandardSelectorClick(selected: any, cardEl: any, product: any, onVariantChange: any) {
     const wrapper = selected.closest('.vs-wrapper--standard');
     const opensInlineOnMobile = wrapper?.dataset.vsMobileMode === 'inline';
     if (VariantSelectorComponent.isMobileViewport() && !opensInlineOnMobile) {
@@ -418,7 +445,7 @@ class VariantSelectorComponent {
     return window.matchMedia?.('(max-width: 767px)').matches || window.innerWidth <= 767;
   }
 
-  static openStandardMobileDrawer(selected, cardEl, product, onVariantChange) {
+  static openStandardMobileDrawer(selected: any, cardEl: any, product: any, onVariantChange: any) {
     const wrapper = selected.closest('.vs-wrapper--standard');
     if (!wrapper || typeof document === 'undefined') return;
 
@@ -428,21 +455,124 @@ class VariantSelectorComponent {
     const primaryIdx = parseInt(wrapper.dataset.vsPrimaryIdx || '1', 10);
     const placeholder = wrapper.dataset.vsPlaceholder || selected.querySelector('.vs-selected-label')?.textContent?.trim() || '';
 
+    const ppbOwner = cardEl.closest?.('#bundle-builder-app[data-ppb-template-type], [data-ppb-template-type="PDP_INPAGE"], [data-ppb-template-type="PDP_MODAL"]');
+    const isPpbDrawer = Boolean(ppbOwner);
     document.body.insertAdjacentHTML('beforeend', VariantSelectorComponent.renderStandardMobileDrawerHtml(product, {
       placeholder,
       primaryIdx,
+      drawerOwner: isPpbDrawer ? 'ppb' : 'shared',
     }));
     selected.setAttribute('aria-expanded', 'true');
 
     const drawer = document.body.querySelector('[data-vs-mobile-drawer]');
     if (!drawer) return;
 
+    const documentRoot = document.documentElement;
+    const documentBody = document.body;
+    const previousRootOverflow = documentRoot.style.overflow;
+    const previousBodyOverflow = documentBody.style.overflow;
+    let isClosed = false;
+    let drawerLayer: any = null;
+
+    if (!isPpbDrawer) {
+      documentRoot.style.overflow = 'hidden';
+      documentBody.style.overflow = 'hidden';
+    }
+
     const close = () => {
-      VariantSelectorComponent.closeStandardMobileDrawer();
+      if (isClosed) return;
+      isClosed = true;
+      if (!isPpbDrawer) document.removeEventListener('keydown', handleKeyDown);
+      drawer.remove();
+      if (drawerLayer) {
+        drawerLayerManager.close(drawerLayer);
+      } else {
+        documentRoot.style.overflow = previousRootOverflow;
+        documentBody.style.overflow = previousBodyOverflow;
+      }
       selected.setAttribute('aria-expanded', 'false');
+      const currentTrigger = selected.isConnected
+        ? selected
+        : cardEl.querySelector('.vs-selected');
+      currentTrigger?.focus?.({ preventScroll: true });
+      if (standardMobileDrawerCleanup === close) {
+        standardMobileDrawerCleanup = null;
+      }
     };
 
-    drawer.addEventListener('click', (event) => {
+    const handleKeyDown = (event: any) => {
+      if (event.key !== 'Escape') return;
+      event.preventDefault();
+      close();
+    };
+
+    standardMobileDrawerCleanup = close;
+    if (isPpbDrawer) {
+      drawerLayer = drawerLayerManager.open({
+        id: 'variant-selector',
+        requestClose: close,
+        trigger: selected,
+      });
+    } else {
+      document.addEventListener('keydown', handleKeyDown);
+    }
+    drawer.querySelector('.vs-mobile-drawer-close')?.addEventListener('click', (event: any) => {
+      event.stopPropagation();
+      close();
+    });
+    const handle = drawer.querySelector('[data-vs-drawer-handle]');
+    handle?.addEventListener('click', (event: any) => {
+      event.stopPropagation();
+      close();
+    });
+    if (handle) {
+      const sheet = drawer.querySelector<HTMLElement>('.vs-mobile-drawer-sheet')!;
+      let gesture: any = null;
+      const reset = () => {
+        sheet.style.transform = '';
+        sheet.style.transition = '';
+      };
+      handle.addEventListener('pointerdown', (event: any) => {
+        gesture = {
+          pointerId: event.pointerId,
+          startX: event.clientX,
+          startY: event.clientY,
+          startedAt: performance.now(),
+        };
+        sheet.style.transition = 'none';
+        handle.setPointerCapture?.(event.pointerId);
+      });
+      handle.addEventListener('pointermove', (event: any) => {
+        if (!gesture || event.pointerId !== gesture.pointerId) return;
+        const distanceY = Math.max(0, event.clientY - gesture.startY);
+        const distanceX = event.clientX - gesture.startX;
+        if (Math.abs(distanceX) > distanceY) return;
+        sheet.style.transform = `translateY(${distanceY}px)`;
+      });
+      handle.addEventListener('pointerup', (event: any) => {
+        if (!gesture || event.pointerId !== gesture.pointerId) return;
+        const elapsed = Math.max(1, performance.now() - gesture.startedAt);
+        const distanceY = event.clientY - gesture.startY;
+        const distanceX = event.clientX - gesture.startX;
+        gesture = null;
+        if (shouldDismissDrawerSwipe({ distanceY, distanceX, velocityY: distanceY / elapsed })) {
+          close();
+          return;
+        }
+        reset();
+      });
+      handle.addEventListener('pointercancel', () => {
+        gesture = null;
+        reset();
+      });
+    }
+
+    const initialFocus = drawer.querySelector<HTMLElement>(
+      '.vs-mobile-option--selected:not([aria-disabled="true"]), .vs-mobile-option:not([aria-disabled="true"])'
+    );
+    initialFocus?.focus?.({ preventScroll: true });
+
+    drawer.addEventListener('click', (event: any) => {
       if (event.target === drawer) {
         event.stopPropagation();
         close();
@@ -455,7 +585,7 @@ class VariantSelectorComponent {
       event.stopPropagation();
       if (optionButton.getAttribute('aria-disabled') === 'true') return;
 
-      const sourceOption = Array.from(panel?.querySelectorAll('.vs-option') || [])
+      const sourceOption = (Array.from(panel?.querySelectorAll('.vs-option') || []) as HTMLElement[])
         .find(option => String(option.dataset.variantId) === String(optionButton.dataset.variantId));
       if (sourceOption) {
         VariantSelectorComponent._selectStandardOption(cardEl, product, sourceOption, onVariantChange);
@@ -466,15 +596,19 @@ class VariantSelectorComponent {
 
   static closeStandardMobileDrawer() {
     if (typeof document === 'undefined') return;
+    if (standardMobileDrawerCleanup) {
+      standardMobileDrawerCleanup();
+      return;
+    }
     document.querySelector('[data-vs-mobile-drawer]')?.remove();
   }
 
-  static getStandardVariantLabel(variant, optionNames, primaryIdx) {
+  static getStandardVariantLabel(variant: any, optionNames: string|any[], primaryIdx: any) {
     const primaryValue = variant[`option${primaryIdx}`] || variant.title || '';
     return optionNames.length > 1 && variant.title ? variant.title : primaryValue;
   }
 
-  static formatDrawerPrice(value) {
+  static formatDrawerPrice(value: any) {
     if (typeof CurrencyManager !== 'undefined') {
       return CurrencyManager.convertAndFormat(value || 0, CurrencyManager.getCurrencyInfo());
     }
@@ -482,13 +616,13 @@ class VariantSelectorComponent {
     return String(value || 0);
   }
 
-  static _toggleStandardDropdown(selected, cardEl) {
+  static _toggleStandardDropdown(selected: any, cardEl: any) {
     const wrapper = selected.closest('.vs-wrapper--standard');
     const panel = wrapper?.querySelector('.vs-options');
     if (!wrapper || !panel) return;
 
     const willOpen = panel.hidden === true;
-    cardEl.querySelectorAll('.vs-wrapper--standard .vs-options').forEach((otherPanel) => {
+    cardEl.querySelectorAll('.vs-wrapper--standard .vs-options').forEach((otherPanel: any) => {
       if (otherPanel !== panel) {
         otherPanel.hidden = true;
         otherPanel.closest('.vs-wrapper--standard')?.querySelector('.vs-selected')?.setAttribute('aria-expanded', 'false');
@@ -502,12 +636,12 @@ class VariantSelectorComponent {
     }
   }
 
-  static _selectStandardOption(cardEl, product, option, onVariantChange) {
+  static _selectStandardOption(cardEl: any, product: any, option: any, onVariantChange: (arg0: any,arg1: any) => void) {
     const wrapper = option.closest('.vs-wrapper--standard');
     const selected = wrapper?.querySelector('.vs-selected');
     const panel = wrapper?.querySelector('.vs-options');
     const variantId = option.dataset.variantId;
-    const candidate = (product.variants || []).find(v => String(v.id) === String(variantId));
+    const candidate = (product.variants || []).find((v: any)  => String(v.id) === String(variantId));
     if (!candidate) return;
 
     const oldVariantId = product.variantId;
@@ -529,9 +663,9 @@ class VariantSelectorComponent {
     onVariantChange(candidate.id, oldVariantId);
   }
 
-  static _bindStandardOutsideClose(panel, selected) {
+  static _bindStandardOutsideClose(panel: any, selected: any) {
     setTimeout(() => {
-      const close = (e) => {
+      const close = (e: any) => {
         if (!panel.contains(e.target) && !selected.contains(e.target)) {
           panel.hidden = true;
           selected.setAttribute('aria-expanded', 'false');
@@ -542,7 +676,7 @@ class VariantSelectorComponent {
     }, 0);
   }
 
-  static _variantImageUrl(variant) {
+  static _variantImageUrl(variant: any) {
     return variant?.image?.src
       || variant?.image?.url
       || (typeof variant?.image === 'string' ? variant.image : null)
@@ -550,7 +684,7 @@ class VariantSelectorComponent {
       || null;
   }
 
-  static _makeTile(label, isSelected, isOos) {
+  static _makeTile(label: string|null, isSelected: boolean, isOos: boolean) {
     const tile = document.createElement('button');
     tile.type = 'button';
     tile.className = ['vs-panel-tile', isSelected ? 'vs-panel-tile--selected' : '', isOos ? 'vs-panel-tile--oos' : ''].filter(Boolean).join(' ');
@@ -559,13 +693,13 @@ class VariantSelectorComponent {
     return tile;
   }
 
-  static _closePanel(cardEl) {
+  static _closePanel(cardEl: any) {
     cardEl.querySelector('[data-vs-panel]')?.remove();
   }
 
-  static _bindOutsideClose(panel, cardEl) {
+  static _bindOutsideClose(panel: HTMLDivElement, cardEl: any) {
     setTimeout(() => {
-      const close = (e) => {
+      const close = (e: any) => {
         if (!panel.contains(e.target)) {
           VariantSelectorComponent._closePanel(cardEl);
           document.removeEventListener('click', close);

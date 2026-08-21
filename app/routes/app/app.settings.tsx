@@ -4,16 +4,26 @@ import {
   type ActionFunctionArgs,
   type LoaderFunctionArgs,
 } from "@remix-run/node";
-import { Await, useLoaderData, useNavigate } from "@remix-run/react";
+import { Await, useLoaderData, useNavigate, useNavigation } from "@remix-run/react";
 import { lazy, Suspense, useMemo, useState } from "react";
 import type { Prisma } from "@prisma/client";
 import { BundleType } from "../../constants/bundle";
 import { prisma } from "../../db.server";
 import { requireAdminSession } from "../../lib/auth-guards.server";
-import { SETTINGS_CONTROLS_BUNDLE_TYPES, buildSettingsControlsRuntime } from "../../lib/settings-controls-runtime";
+import {
+  SETTINGS_CONTROLS_BUNDLE_TYPES,
+  SETTINGS_CONTROLS_SCHEMA_VERSION,
+  buildSettingsControlsFormValues,
+  buildSettingsControlsRuntime,
+  type SettingsControlsRuntime,
+} from "../../lib/settings-controls-runtime";
 import { SETTINGS_DESIGN_BUNDLE_TYPES, buildSettingsDesignRuntime } from "../../lib/settings-design-runtime";
 import { parseSettingsDesignPayload } from "../../lib/settings-design-contract";
-import { SETTINGS_LANGUAGE_BUNDLE_TYPES, buildSettingsLanguageRuntime } from "../../lib/settings-language-runtime";
+import {
+  SETTINGS_LANGUAGE_BUNDLE_TYPES,
+  buildSettingsLanguageFormState,
+  buildSettingsLanguageRuntime,
+} from "../../lib/settings-language-runtime";
 import { CartTransformService } from "../../services/cart-transform-service.server";
 import { buildFpbStorefrontUrl } from "../../lib/fpb-storefront-url";
 import { navigateBackOrFallback } from "../../lib/navigation";
@@ -54,9 +64,20 @@ export async function loader({ request }: LoaderFunctionArgs) {
       const generalSettings = settings?.generalSettings && typeof settings.generalSettings === "object"
         ? settings.generalSettings as Record<string, unknown>
         : {};
-      return generalSettings.settingsPage && typeof generalSettings.settingsPage === "object"
+      const settingsPage = generalSettings.settingsPage && typeof generalSettings.settingsPage === "object"
         ? generalSettings.settingsPage as Record<string, unknown>
+        : {};
+      const storedControls = generalSettings.settingsControls && typeof generalSettings.settingsControls === "object"
+        ? generalSettings.settingsControls as Partial<SettingsControlsRuntime>
         : null;
+      const runtime = storedControls?.schemaVersion === SETTINGS_CONTROLS_SCHEMA_VERSION
+        ? storedControls as SettingsControlsRuntime
+        : buildSettingsControlsRuntime({}).settingsControls;
+      return {
+        ...settingsPage,
+        language: buildSettingsLanguageFormState(generalSettings.settingsLanguage),
+        controls: buildSettingsControlsFormValues(runtime),
+      };
     });
   const previewBundles = prisma.bundle.findMany({
       where: {
@@ -117,7 +138,7 @@ export async function action({ request }: ActionFunctionArgs) {
     let savedState;
     try {
       savedState = parseSettingsDesignPayload(payload);
-    } catch (error) {
+    } catch (error: any) {
       return json({
         success: false,
         intent,
@@ -183,13 +204,16 @@ export async function action({ request }: ActionFunctionArgs) {
   });
   if (intent === "saveSettingsLanguage") {
     const languageRuntime = buildSettingsLanguageRuntime(payload);
-
-    await Promise.all(SETTINGS_LANGUAGE_BUNDLE_TYPES.map(async (bundleType) => {
-      const currentForBundleType = bundleType === BundleType.PRODUCT_PAGE
-        ? current
-        : await prisma.designSettings.findUnique({
-          where: { shopId_bundleType: { shopId: session.shop, bundleType } },
-        });
+    const currentRows = await prisma.designSettings.findMany({
+      where: {
+        shopId: session.shop,
+        bundleType: { in: [...SETTINGS_LANGUAGE_BUNDLE_TYPES] },
+      },
+    });
+    const currentByBundleType = new Map(currentRows.map((row) => [row.bundleType, row]));
+    const writes = SETTINGS_LANGUAGE_BUNDLE_TYPES.map((bundleType) => {
+      const currentForBundleType = currentByBundleType.get(bundleType)
+        ?? (bundleType === BundleType.PRODUCT_PAGE ? current : null);
       const currentBundleGeneralSettings = currentForBundleType?.generalSettings && typeof currentForBundleType.generalSettings === "object"
         ? currentForBundleType.generalSettings as Record<string, unknown>
         : {};
@@ -197,8 +221,8 @@ export async function action({ request }: ActionFunctionArgs) {
         ...(currentBundleGeneralSettings.settingsPage && typeof currentBundleGeneralSettings.settingsPage === "object"
           ? currentBundleGeneralSettings.settingsPage as Record<string, unknown>
           : {}),
-        language: payload,
       };
+      delete nextBundleSettingsPage.language;
       const nextBundleGeneralSettings = {
         ...currentBundleGeneralSettings,
         settingsLanguage: languageRuntime.settingsLanguage,
@@ -209,7 +233,7 @@ export async function action({ request }: ActionFunctionArgs) {
         generalSettings: nextBundleGeneralSettings as Prisma.InputJsonValue,
       } as Prisma.DesignSettingsUncheckedUpdateInput;
 
-      await prisma.designSettings.upsert({
+      return prisma.designSettings.upsert({
         where: { shopId_bundleType: { shopId: session.shop, bundleType } },
         create: {
           shopId: session.shop,
@@ -218,9 +242,11 @@ export async function action({ request }: ActionFunctionArgs) {
         } as Prisma.DesignSettingsUncheckedCreateInput,
         update: updateData,
       });
-    }));
+    });
 
-    return json({ success: true, message: "Settings saved successfully" });
+    await prisma.$transaction(writes);
+
+    return json({ success: true, intent, message: "Settings saved successfully", savedState: payload });
   }
 
   if (intent === "saveSettingsControls") {
@@ -235,16 +261,16 @@ export async function action({ request }: ActionFunctionArgs) {
       const currentBundleGeneralSettings = currentForBundleType?.generalSettings && typeof currentForBundleType.generalSettings === "object"
         ? currentForBundleType.generalSettings as Record<string, unknown>
         : {};
-      const nextBundleSettingsPage = {
-        ...(currentBundleGeneralSettings.settingsPage && typeof currentBundleGeneralSettings.settingsPage === "object"
-          ? currentBundleGeneralSettings.settingsPage as Record<string, unknown>
-          : {}),
-        controls: payload,
-      };
+      const currentSettingsPage = currentBundleGeneralSettings.settingsPage && typeof currentBundleGeneralSettings.settingsPage === "object"
+        ? currentBundleGeneralSettings.settingsPage as Record<string, unknown>
+        : {};
+      const settingsPageWithoutControls = Object.fromEntries(
+        Object.entries(currentSettingsPage).filter(([key]: any) => key !== "controls"),
+      );
       const nextBundleGeneralSettings = {
         ...currentBundleGeneralSettings,
         settingsControls: controlsRuntime.settingsControls,
-        settingsPage: nextBundleSettingsPage,
+        settingsPage: settingsPageWithoutControls,
       };
       const updateData = {
         customCss: bundleType === BundleType.FULL_PAGE
@@ -302,6 +328,9 @@ export default function SettingsRouteDefault() {
     [previewBundles, settingsPage, workspaceView],
   );
   const navigate = useNavigate();
+  const navigation = useNavigation();
+  const isControlsNavigationPending = navigation.state !== "idle"
+    && navigation.location?.pathname === "/app/additional-configurations";
 
   return (
     <Suspense fallback={<AdminRouteLoadingBar label="Loading Settings" />}>
@@ -309,7 +338,7 @@ export default function SettingsRouteDefault() {
         resolve={routeData}
         errorElement={<SettingsWorkspaceError onExit={() => setWorkspaceView(null)} />}
       >
-        {([resolvedSettingsPage, resolvedPreviewBundles]) => {
+        {([resolvedSettingsPage, resolvedPreviewBundles]: any) => {
           if (!workspaceView) {
             return (
               <>
@@ -326,6 +355,7 @@ export default function SettingsRouteDefault() {
                   </button>
                 </ui-title-bar>
                 <SettingsLandingShell
+                  isLoadingControls={isControlsNavigationPending}
                   onBack={() =>
                     navigateBackOrFallback(navigate, "/app/dashboard", {
                       replaceFallback: true,

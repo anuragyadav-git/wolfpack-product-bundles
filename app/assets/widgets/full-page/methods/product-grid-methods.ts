@@ -19,30 +19,34 @@ import {
   buildCartLineSourceProperties,
 } from '../../shared/engine/cart-lines.js';
 import { TemplateDesignSystem } from '../../shared/template-design-system.js';
+import {
+  filterIrrelevantVariantImages,
+  hydrateJudgeMeReviewCards,
+} from '../fpb-controls-integrations.js';
 
 const productGridTemplateSystem = TemplateDesignSystem;
 
-function getFpbPresetContract(designPreset) {
+function getFpbPresetContract(designPreset: any) {
   if (typeof productGridTemplateSystem?.fpb?.resolveContract !== 'function') return null;
   return productGridTemplateSystem.fpb.resolveContract(designPreset) || null;
 }
 
-function shouldScrollActiveCategoryTitleIntoView(designPreset) {
+function shouldScrollActiveCategoryTitleIntoView(designPreset: any) {
   const contract = getFpbPresetContract(designPreset);
   return contract?.summary?.mode === 'rows' && contract?.productCard?.mode === 'grid';
 }
 
-function supportsCategorySectionRows(designPreset) {
+function supportsCategorySectionRows(designPreset: any) {
   const contract = getFpbPresetContract(designPreset);
   return contract?.summary?.mode === 'slots';
 }
 
-function getSelectionId(item = {}) {
+function getSelectionId(item: any = {}) {
   return String(item?.selectionId || '');
 }
 
 
-export function shouldCategoryTabActivateProducts() {
+export function shouldCategoryTabActivateProducts(_context?: any) {
   return true;
 }
 
@@ -64,14 +68,14 @@ scrollActiveCategoryTitleIntoView() {
   });
 },
 
-activateStepCategory(categoryId) {
+activateStepCategory(categoryId: any) {
   this.activeCollectionId = categoryId;
   Promise.resolve(this.reRenderFullPage()).then(() => {
     this.scrollActiveCategoryTitleIntoView();
   });
 },
 
-createCategorySectionRows(stepIndex, placement = 'all') {
+createCategorySectionRows(stepIndex: string|number, placement = 'all') {
   if (!supportsCategorySectionRows(this.getFullPageDesignPreset?.())) return null;
 
   if (!this.selectedBundle || !this.selectedBundle.steps || !this.selectedBundle.steps[stepIndex]) {
@@ -83,8 +87,8 @@ createCategorySectionRows(stepIndex, placement = 'all') {
   if (categoryEntries.length <= 1) return null;
 
   const activeCategoryId = this.getActiveStepCategoryId(step);
-  const activeCategoryIndex = categoryEntries.findIndex(entry => entry.id === activeCategoryId);
-  const inactiveCategoryEntries = categoryEntries.filter((entry, index) => {
+  const activeCategoryIndex = categoryEntries.findIndex((entry: any)  => entry.id === activeCategoryId);
+  const inactiveCategoryEntries = categoryEntries.filter((entry: any, index: number) => {
     if (entry.id === activeCategoryId) return false;
     if (placement === 'before') return index < activeCategoryIndex;
     if (placement === 'after') return index > activeCategoryIndex;
@@ -95,7 +99,7 @@ createCategorySectionRows(stepIndex, placement = 'all') {
   const categoryRowsContainer = document.createElement('div');
   categoryRowsContainer.className = 'fpb-category-section-rows';
 
-  inactiveCategoryEntries.forEach(entry => {
+  inactiveCategoryEntries.forEach((entry: any)  => {
     const categoryRow = document.createElement('button');
     categoryRow.type = 'button';
     categoryRow.className = 'fpb-category-section-row fpb-category-section-row--collapsed';
@@ -117,7 +121,7 @@ getNoProductsAvailableMessage() {
   return 'No Products Available';
 },
 
-createCategoryTabs(stepIndex) {
+createCategoryTabs(stepIndex: string|number) {
   if (!this.selectedBundle || !this.selectedBundle.steps || !this.selectedBundle.steps[stepIndex]) {
     return null;
   }
@@ -139,13 +143,13 @@ createCategoryTabs(stepIndex) {
     tabEntries = categoryEntries;
   } else if (customFilters) {
     tabEntries = customFilters
-      .map(f => {
-        const col = step.collections.find(c => (c.handle || c.id) === f.collectionHandle);
+      .map((f: any)  => {
+        const col = step.collections.find((c: any)  => (c.handle || c.id) === f.collectionHandle);
         return col ? { id: col.id, title: f.label } : null;
       })
       .filter(Boolean);
   } else {
-    tabEntries = step.collections.map(c => ({ id: c.id, title: c.title }));
+    tabEntries = step.collections.map((c: any)  => ({ id: c.id, title: c.title }));
   }
 
   if (tabEntries.length === 0) {
@@ -171,7 +175,7 @@ createCategoryTabs(stepIndex) {
     tabsContainer.appendChild(allTab);
   }
 
-  tabEntries.forEach(entry => {
+  tabEntries.forEach((entry: any)  => {
     const tab = document.createElement('button');
     tab.className = 'category-tab';
     if (activeCategoryId === entry.id) {
@@ -199,11 +203,11 @@ createCategoryTabs(stepIndex) {
   return tabsContainer;
 },
 
-orderProductsForActiveCategory(products, activeCategory, stepIndex) {
+orderProductsForActiveCategory(products: any[], activeCategory: any, stepIndex: any) {
   if (!activeCategory) return products;
 
   const productOrder = new Map();
-  const addProductId = (productId) => {
+  const addProductId = (productId: any) => {
     const normalizedProductId = this.extractId(productId);
     if (normalizedProductId && !productOrder.has(normalizedProductId)) {
       productOrder.set(normalizedProductId, productOrder.size);
@@ -211,13 +215,13 @@ orderProductsForActiveCategory(products, activeCategory, stepIndex) {
   };
 
   (activeCategory.productIds || []).forEach(addProductId);
-  (activeCategory.handles || []).forEach(handle => {
+  (activeCategory.handles || []).forEach((handle: any)  => {
     const collectionProductIds = this.stepCollectionProductIds[`${stepIndex}:${handle}`] || [];
     collectionProductIds.forEach(addProductId);
   });
 
   return products
-    .map((product, index) => {
+    .map((product: any, index: any) => {
       const productId = product.parentProductId || product.id || '';
       return {
         product,
@@ -225,13 +229,13 @@ orderProductsForActiveCategory(products, activeCategory, stepIndex) {
         order: productOrder.get(this.extractId(productId)),
       };
     })
-    .filter(entry => entry.order !== undefined)
-    .sort((a, b) => a.order - b.order || a.index - b.index)
-    .map(entry => entry.product);
+    .filter((entry: any)  => entry.order !== undefined)
+    .sort((a: any, b: any) => a.order - b.order || a.index - b.index)
+    .map((entry: any)  => entry.product);
 },
 
 // Create horizontal scrollable product grid
-createFullPageProductGrid(stepIndex) {
+createFullPageProductGrid(stepIndex: string|number) {
   const grid = document.createElement('div');
   grid.className = 'full-page-product-grid';
 
@@ -252,16 +256,16 @@ createFullPageProductGrid(stepIndex) {
     if (activeCategory) {
       products = this.orderProductsForActiveCategory(products, activeCategory, stepIndex);
     } else if (step.collections) {
-      const activeCollection = step.collections.find(c => c.id === activeCollectionId);
+      const activeCollection = step.collections.find((c: any)  => c.id === activeCollectionId);
     if (activeCollection && activeCollection.handle) {
       const membershipKey = `${stepIndex}:${activeCollection.handle}`;
       const collectionProductIds = this.stepCollectionProductIds[membershipKey];
       if (collectionProductIds && collectionProductIds.length > 0) {
-        products = products.filter(p => {
+        products = products.filter((p: any)  => {
           // parentProductId is numeric product ID (set when displayVariantsAsIndividual is true)
           // p.id is numeric product ID otherwise
         const numericPid = p.parentProductId || p.id || '';
-        return collectionProductIds.some(cid => {
+        return collectionProductIds.some((cid: any)  => {
             const numericCid = this.extractId(cid);
             return numericPid === numericCid;
           });
@@ -272,12 +276,15 @@ createFullPageProductGrid(stepIndex) {
   }
 
   const shouldDisplayVariantsAsIndividual = this.shouldDisplayVariantsAsIndividualForProductGrid(step, activeCategory);
+  if (this._getLandingPageControls?.()?.hideIrrelevantVariantImages === true) {
+    products = products.map(filterIrrelevantVariantImages);
+  }
   let expandedProducts = this.expandProductsByVariant(products, shouldDisplayVariantsAsIndividual);
 
   // Filter by search query if active
   if (this.searchQuery && this.searchQuery.trim()) {
     const query = this.searchQuery.toLowerCase().trim();
-    expandedProducts = expandedProducts.filter(product => {
+    expandedProducts = expandedProducts.filter((product: any)  => {
       const title = (product.title || '').toLowerCase();
       const variantTitle = (product.variantTitle || '').toLowerCase();
       const parentTitle = (product.parentTitle || '').toLowerCase();
@@ -295,27 +302,41 @@ createFullPageProductGrid(stepIndex) {
   }
 
   // Create product cards using ComponentGenerator
-  expandedProducts.forEach(product => {
+  expandedProducts.forEach((product: any)  => {
     const productCard = this.createProductCard(product, stepIndex, {
       displayVariantsAsIndividualProducts: shouldDisplayVariantsAsIndividual,
     });
     grid.appendChild(productCard);
   });
 
+  const integrations = this._getLandingPageControls?.()?.integrations;
+  const judgeMeToken = String(integrations?.judgeMePublicToken || '').trim();
+  const shop = (typeof window !== 'undefined' ? window.Shopify?.shop : '')
+    || this.container?.dataset?.shop
+    || '';
+  if (integrations?.judgeMeEnabled === true && judgeMeToken && shop) {
+    void hydrateJudgeMeReviewCards({
+      root: grid,
+      products: expandedProducts,
+      shop,
+      token: judgeMeToken,
+    });
+  }
+
   return grid;
 },
 
 // Expand products with multiple variants into separate product entries
 // Each variant becomes its own card showing "Product Title - Variant Name"
-expandProductsByVariant(products, shouldExpand = true) {
+expandProductsByVariant(products: any[], shouldExpand = true) {
   if (!shouldExpand) {
     return products;
   }
 
   const context = this || {};
-  return products.flatMap(product => {
-    const toCents = (value) => Math.round(parseFloat(value || '0') * 100);
-    const compareAtToCents = (value) => {
+  return products.flatMap((product: any)  => {
+    const toCents = (value: any) => Math.round(parseFloat(String(value || '0')) * 100);
+    const compareAtToCents = (value: any) => {
       if (value == null) return null;
       const resolvedValue = typeof value === 'object' && value !== null && typeof value?.amount !== 'undefined'
         ? value.amount
@@ -323,7 +344,7 @@ expandProductsByVariant(products, shouldExpand = true) {
       const parsedValue = Number.parseFloat(resolvedValue);
       return Number.isFinite(parsedValue) ? toCents(parsedValue) : null;
     };
-    const isVariantSelectable = (variant) => {
+    const isVariantSelectable = (variant: any) => {
       if (typeof context.isVariantSelectableForInventory === 'function') {
         return context.isVariantSelectableForInventory(variant);
       }
@@ -338,8 +359,8 @@ expandProductsByVariant(products, shouldExpand = true) {
     // If product has multiple variants, expand into separate cards
     if (product.variants && product.variants.length > 1) {
       return product.variants
-        .filter(variant => isVariantSelectable(variant))
-        .map(variant => {
+        .filter((variant: any)  => isVariantSelectable(variant))
+        .map((variant: any)  => {
           const variantSelectionId = getSelectionId(variant);
           const runtimeInventory = typeof context.getRuntimeVariantInventory === 'function'
             ? context.getRuntimeVariantInventory(variant)
@@ -393,7 +414,7 @@ shouldUseProductGridSpinnerOnly() {
   return true;
 },
 
-renderProductGridLoadingState(productGridContainer) {
+renderProductGridLoadingState(productGridContainer: any) {
   if (!productGridContainer) return;
 
   productGridContainer.innerHTML = this.createProductGridLoadingState();
@@ -414,7 +435,7 @@ preloadAllSteps() {
   const steps = this.selectedBundle?.steps;
   if (!steps) return;
 
-  steps.forEach((_, index) => {
+  steps.forEach((_: any, index: string|number) => {
     // Skip the step already on screen — it's been loaded synchronously
     if (index === this.currentStepIndex) return;
     // Skip steps already cached

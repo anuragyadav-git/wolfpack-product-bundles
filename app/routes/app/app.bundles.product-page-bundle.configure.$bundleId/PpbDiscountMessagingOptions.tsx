@@ -1,5 +1,6 @@
 import { usePpbConfigureContext } from "./PpbConfigureContext";
 import { PpbDiscountMessageRuleFields } from "./PpbDiscountMessageRuleFields";
+import { DisabledConfigurationRegion } from "../_shared/bundle-configure/DisabledConfigurationRegion";
 
 export function PpbDiscountMessagingOptions() {
   const {
@@ -41,7 +42,7 @@ export function PpbDiscountMessagingOptions() {
             checked={pricingState.discountMessagingEnabled || undefined}
             onChange={(e) =>
               pricingState.setDiscountMessagingEnabled(
-                (e.target as HTMLInputElement).checked,
+                (e.target as HTMLInputElement).checked
               )
             }
           />
@@ -53,7 +54,7 @@ export function PpbDiscountMessagingOptions() {
             disabled={!pricingState.discountMessagingEnabled || undefined}
             onChange={(e) => {
               setDiscountMessagingMultiLanguageEnabled(
-                (e.target as HTMLInputElement).checked,
+                (e.target as HTMLInputElement).checked
               );
               markAsDirty();
             }}
@@ -71,11 +72,15 @@ export function PpbDiscountMessagingOptions() {
           Get) to ensure customers add their rewards to the cart
         </s-banner>
       )}
-      {pricingState.discountMessagingEnabled && (
+      <DisabledConfigurationRegion
+        disabled={!pricingState.discountMessagingEnabled}
+      >
         <div className={productPageBundleStyles.nestedDisplayOptions}>
           <s-stack direction="block" gap="small">
-            {discountMessagingMultiLanguageEnabled &&
-              shopLocales.length > 0 && (
+            {shopLocales.length > 0 && (
+              <DisabledConfigurationRegion
+                disabled={!discountMessagingMultiLanguageEnabled}
+              >
                 <PpbDiscountLanguageSelector
                   activeDiscountLocale={activeDiscountLocale}
                   markAsDirty={markAsDirty}
@@ -85,7 +90,8 @@ export function PpbDiscountMessagingOptions() {
                   setRuleMessagesByLocale={setRuleMessagesByLocale}
                   shopLocales={shopLocales}
                 />
-              )}
+              </DisabledConfigurationRegion>
+            )}
             <div style={{ textAlign: "right" }}>
               <s-button
                 variant="tertiary"
@@ -97,7 +103,7 @@ export function PpbDiscountMessagingOptions() {
             <PpbDiscountMessageRuleFields />
           </s-stack>
         </div>
-      )}
+      </DisabledConfigurationRegion>
     </div>
   );
 }
@@ -160,8 +166,8 @@ function PpbDiscountLanguageSelector({
             (locale) =>
               !shopLocales.find(
                 (localeOption) =>
-                  localeOption.locale === locale && localeOption.primary,
-              ),
+                  localeOption.locale === locale && localeOption.primary
+              )
           )
           .map((locale) => {
             const localeName =

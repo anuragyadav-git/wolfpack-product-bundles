@@ -158,7 +158,7 @@ export class CachedSessionStorage {
   private async loadSessionRow(id: string): Promise<SessionRow | null> {
     try {
       return await this.prisma.session.findUnique({ where: { id } });
-    } catch (error) {
+    } catch (error: any) {
       if (!isTransientPrismaConnectionError(error)) {
         throw error;
       }
@@ -197,7 +197,7 @@ export class CachedSessionStorage {
     if (!row.refreshToken) {
       try {
         return (await migrateOfflineSessionToExpiring(this.prisma, row, this)) as SessionRow;
-      } catch (error) {
+      } catch (error: any) {
         return await this.handleOfflineTokenHydrationFailure(row, error, {
           action: "migration",
           deleteUnusableCredential: true,
@@ -208,7 +208,7 @@ export class CachedSessionStorage {
     if (!row.expires || !row.refreshTokenExpiresAt || shouldRefreshOfflineSession(row)) {
       try {
         return (await refreshOfflineSession(this.prisma, row, this)) as SessionRow;
-      } catch (error) {
+      } catch (error: any) {
         if (isOfflineCredentialUnusable(error)) {
           return await this.handleOfflineTokenHydrationFailure(row, error, {
             action: "refresh",

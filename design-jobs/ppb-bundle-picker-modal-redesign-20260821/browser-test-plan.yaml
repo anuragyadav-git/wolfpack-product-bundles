@@ -1,0 +1,619 @@
+{
+  "schema_version": 1,
+  "job_id": "ppb-bundle-picker-modal-redesign-20260821",
+  "revision": 6,
+  "status": "approved",
+  "chrome_mcp_required": true,
+  "environment": "development",
+  "base_url": "https://agent-5sfidg3m.myshopify.com",
+  "fixture": "/products/ppb-mobile-modal-qa-2026-08-20",
+  "authentication_mode": "authenticated default Chrome profile; storefront password 1 if challenged",
+  "setup": {
+    "profile_policy": "default-profile-only",
+    "allow_isolated_context": false,
+    "zoom_percent": 100,
+    "artifact_directory": "qa",
+    "max_retries": 2,
+    "locale": "en",
+    "currency": "USD",
+    "theme": "light",
+    "feature_flags": [],
+    "random_time_control": "",
+    "device_pixel_ratio_policy": "record-actual",
+    "waits": [
+      "document.fonts.ready",
+      "images-complete",
+      "hydration-ready",
+      "target-state-ready"
+    ],
+    "scroll": {
+      "x": 0,
+      "y": 0
+    },
+    "disable_nonessential_animation": true,
+    "hide_caret_and_transient_cursors": true,
+    "dynamic_region_policy": "exclude-or-approved-mask"
+  },
+  "viewports": [
+    {
+      "id": "wide-desktop",
+      "mode": "desktop",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "id": "desktop",
+      "mode": "desktop",
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "id": "tablet",
+      "mode": "mobile",
+      "width": 768,
+      "height": 1024
+    },
+    {
+      "id": "mobile",
+      "mode": "mobile",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "narrow-mobile",
+      "mode": "mobile",
+      "width": 360,
+      "height": 800
+    }
+  ],
+  "states": [
+    {
+      "id": "loaded",
+      "recipe": "Open an empty Horizontal or Vertical slot and wait for products",
+      "assertions": [
+        "sheet is 85dvh within 4px",
+        "header and footer visible",
+        "catalog scrolls internally",
+        "no horizontal overflow"
+      ]
+    },
+    {
+      "id": "quantity-below-maximum",
+      "recipe": "Select and increment an available product below its configured maximum",
+      "assertions": [
+        "selected state visible",
+        "quantity selector matches the Add and Added action footprint",
+        "card and sheet rectangles do not shift unexpectedly",
+        "footer remains clear of product actions"
+      ]
+    },
+    {
+      "id": "validation-error",
+      "recipe": "Attempt to advance without satisfying the existing rule",
+      "assertions": [
+        "existing feedback is perceivable",
+        "footer remains operable"
+      ]
+    },
+    {
+      "id": "grouped-variant",
+      "recipe": "Change a grouped native selector and confirm no add mutation",
+      "assertions": [
+        "variant identity, image, price, and availability update",
+        "Add remains independent"
+      ]
+    },
+    {
+      "id": "maximum-reached",
+      "recipe": "Reach the per-product maximum and activate Added xN",
+      "assertions": [
+        "maximum state replaces quantity controls",
+        "activation removes the entire selected quantity"
+      ]
+    },
+    {
+      "id": "topmost-details",
+      "recipe": "Open product details from the image while the picker is open",
+      "assertions": [
+        "nested layer is topmost",
+        "Escape closes nested layer before picker"
+      ]
+    },
+    {
+      "id": "close-reopen",
+      "recipe": "Close and reopen the same slot",
+      "assertions": [
+        "focus returns to exact opener",
+        "existing selection state is retained"
+      ]
+    },
+    {
+      "id": "filled-slot-identity",
+      "recipe": "Render a selected Horizontal or Vertical slot with a long product name, then activate Remove",
+      "assertions": [
+        "title wraps and visually clamps only at the responsive slot height cap",
+        "complete product name remains exposed programmatically",
+        "cross badge overlays the slot without obscuring readable identity",
+        "one removal mutation occurs without replacement opening",
+        "focus returns to the same-index empty slot or previous valid slot"
+      ]
+    }
+  ],
+  "interactions": [
+    {
+      "id": "wide-horizontal-loaded",
+      "purpose": "Verify wide desktop intrinsic catalog capacity",
+      "precondition": "Horizontal Slots fixture is loaded and served version is 14.0.0",
+      "viewport": "wide-desktop",
+      "state": "loaded",
+      "steps": [
+        "Clear Cache Storage and hard reload with cache ignored",
+        "Open an empty slot",
+        "Wait for catalog readiness",
+        "Scroll catalog to end"
+      ],
+      "expected_semantic_result": "The labelled picker remains operable with stable task regions",
+      "dom_assertions": [
+        "Dialog has aria-modal and a valid labelled-by target",
+        "Only catalog owns vertical scrolling"
+      ],
+      "style_geometry_assertions": [
+        "Sheet height is 85dvh within 4px",
+        "Header and footer rectangles remain stable",
+        "Footer summary width follows its rendered content and remains contained",
+        "No product action is covered"
+      ],
+      "screenshot_path": "qa/screenshots/wide-horizontal-loaded.png",
+      "baseline_path": "qa/baselines/wide-horizontal-loaded.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "new_errors": 0
+      },
+      "network_expectations": {
+        "unexpected_failures": 0
+      },
+      "cleanup": [
+        "Close picker",
+        "Restore scroll position"
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "filled-slot-title-remove",
+      "purpose": "Verify bounded selected-product identity and independent cross-badge removal",
+      "precondition": "Horizontal or Vertical Slots contains a selected product with a long name",
+      "viewport": "wide-desktop",
+      "state": "filled-slot-identity",
+      "steps": [
+        "Clear Cache Storage and hard reload with cache ignored",
+        "Inspect the long selected title and its programmatic name",
+        "Activate the overlaid cross badge"
+      ],
+      "expected_semantic_result": "The complete name remains programmatically available and the cross badge deletes exactly one represented selection without opening replacement",
+      "dom_assertions": [
+        "Cross badge is a native button with a localized product-specific accessible name containing the complete product name",
+        "Removal returns focus to the same-index empty slot or the previous valid slot"
+      ],
+      "style_geometry_assertions": [
+        "Filled slot stays within its approved responsive maximum height",
+        "Title wraps and clamps only at the cap without badge collision",
+        "Cross badge overlays the top end corner with at least a 44px target",
+        "No horizontal overflow"
+      ],
+      "screenshot_path": "qa/screenshots/filled-slot-title-remove.png",
+      "baseline_path": "qa/baselines/filled-slot-title-remove.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "new_errors": 0
+      },
+      "network_expectations": {
+        "unexpected_failures": 0
+      },
+      "cleanup": [
+        "Restore the selected product"
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "desktop-validation",
+      "purpose": "Verify desktop footer and validation recovery",
+      "precondition": "Horizontal Slots fixture is loaded and served version is 14.0.0",
+      "viewport": "desktop",
+      "state": "validation-error",
+      "steps": [
+        "Open picker",
+        "Attempt invalid advance",
+        "Correct the selection"
+      ],
+      "expected_semantic_result": "Existing validation is perceivable and recoverable",
+      "dom_assertions": [
+        "Footer controls remain reachable",
+        "Error behavior is unchanged"
+      ],
+      "style_geometry_assertions": [
+        "Footer does not overlap the catalog",
+        "No horizontal overflow"
+      ],
+      "screenshot_path": "qa/screenshots/desktop-validation.png",
+      "baseline_path": "qa/baselines/desktop-validation.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "new_errors": 0
+      },
+      "network_expectations": {
+        "duplicate_mutations": 0
+      },
+      "cleanup": [
+        "Close picker"
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "tablet-details",
+      "purpose": "Verify tablet two-column catalog and stacked details ownership",
+      "precondition": "Vertical Slots fixture has a product with details and served version is 14.0.0",
+      "viewport": "tablet",
+      "state": "topmost-details",
+      "steps": [
+        "Open picker",
+        "Open details from the product image",
+        "Press Escape"
+      ],
+      "expected_semantic_result": "Escape closes only the topmost nested layer",
+      "dom_assertions": [
+        "Picker remains open after nested close",
+        "Focus remains in picker"
+      ],
+      "style_geometry_assertions": [
+        "Catalog uses two columns",
+        "Nested layer has no page overflow"
+      ],
+      "screenshot_path": "qa/screenshots/tablet-nested.png",
+      "baseline_path": "qa/baselines/tablet-nested.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "new_errors": 0
+      },
+      "network_expectations": {
+        "unexpected_failures": 0
+      },
+      "cleanup": [
+        "Close remaining layers"
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "mobile-selected",
+      "purpose": "Verify primary mobile selection and keyboard containment",
+      "precondition": "Horizontal Slots fixture is loaded and served version is 14.0.0",
+      "viewport": "mobile",
+      "state": "quantity-below-maximum",
+      "steps": [
+        "Open picker with keyboard",
+        "Select a product",
+        "Tab from last control",
+        "Shift+Tab from first control",
+        "Scroll catalog"
+      ],
+      "expected_semantic_result": "Selection works and focus stays inside the picker",
+      "dom_assertions": [
+        "Selected state is exposed",
+        "Focus never leaves topmost picker"
+      ],
+      "style_geometry_assertions": [
+        "Sheet height is 85dvh within 4px",
+        "Footer does not cover actions",
+        "No horizontal overflow"
+      ],
+      "screenshot_path": "qa/screenshots/mobile-selected.png",
+      "baseline_path": "qa/baselines/mobile-selected.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "new_errors": 0
+      },
+      "network_expectations": {
+        "duplicate_mutations": 0
+      },
+      "cleanup": [
+        "Close picker",
+        "Restore scroll position"
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "narrow-close-reopen",
+      "purpose": "Verify narrow mobile focus restoration and persisted state",
+      "precondition": "Vertical Slots fixture is loaded and served version is 14.0.0",
+      "viewport": "narrow-mobile",
+      "state": "close-reopen",
+      "steps": [
+        "Open picker",
+        "Select a product",
+        "Close picker",
+        "Confirm opener focus",
+        "Reopen same slot"
+      ],
+      "expected_semantic_result": "Exact focus and existing selection state are restored",
+      "dom_assertions": [
+        "Opener receives focus after close",
+        "Reopened picker retains selection"
+      ],
+      "style_geometry_assertions": [
+        "Two columns fit without page overflow",
+        "Long content does not cover footer"
+      ],
+      "screenshot_path": "qa/screenshots/narrow-close-reopen.png",
+      "baseline_path": "qa/baselines/narrow-close-reopen.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "new_errors": 0
+      },
+      "network_expectations": {
+        "unexpected_failures": 0
+      },
+      "cleanup": [
+        "Close picker",
+        "Restore fixture state"
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "desktop-grouped-variant",
+      "purpose": "Verify native grouped variant context updates without selection mutation",
+      "precondition": "Horizontal Slots grouped-variant fixture is loaded and served version is 14.0.0",
+      "viewport": "desktop",
+      "state": "grouped-variant",
+      "steps": [
+        "Hard reload with cache ignored",
+        "Open picker",
+        "Change native variant",
+        "Confirm mutation count remains zero",
+        "Activate Add once"
+      ],
+      "expected_semantic_result": "Variant context updates and Add remains independent",
+      "dom_assertions": [
+        "Selector has an accessible name",
+        "Card identity and availability match active variant",
+        "Exactly one Add mutation occurs after Add"
+      ],
+      "style_geometry_assertions": [
+        "Visual selector label is present",
+        "Card action remains unobscured"
+      ],
+      "screenshot_path": "qa/screenshots/desktop-grouped-variant.png",
+      "baseline_path": "qa/baselines/desktop-grouped-variant.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "new_errors": 0
+      },
+      "network_expectations": {
+        "duplicate_mutations": 0
+      },
+      "cleanup": [
+        "Remove selection",
+        "Close picker"
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "mobile-maximum-remove-all",
+      "purpose": "Verify maximum-reached presentation and remove-all behavior",
+      "precondition": "Vertical Slots quantity-validation fixture is loaded and served version is 14.0.0",
+      "viewport": "mobile",
+      "state": "maximum-reached",
+      "steps": [
+        "Hard reload with cache ignored",
+        "Open picker",
+        "Reach configured maximum",
+        "Activate Added xN"
+      ],
+      "expected_semantic_result": "Reached state replaces controls and activation removes the full quantity",
+      "dom_assertions": [
+        "Quantity controls are absent at maximum",
+        "Selection quantity becomes zero after one activation"
+      ],
+      "style_geometry_assertions": [
+        "Two columns remain stable",
+        "Footer does not obscure the action"
+      ],
+      "screenshot_path": "qa/screenshots/mobile-maximum-remove-all.png",
+      "baseline_path": "qa/baselines/mobile-maximum-remove-all.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "new_errors": 0
+      },
+      "network_expectations": {
+        "duplicate_mutations": 0
+      },
+      "cleanup": [
+        "Close picker"
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "product-list-regression",
+      "purpose": "Verify Product List retains in-page quantity and variant behavior",
+      "precondition": "Product List control fixture is loaded and served version is 14.0.0",
+      "viewport": "desktop",
+      "state": "loaded",
+      "steps": [
+        "Hard reload with cache ignored",
+        "Change grouped variant",
+        "Add and adjust quantity"
+      ],
+      "expected_semantic_result": "Existing Product List behavior is unchanged",
+      "dom_assertions": [
+        "In-page card behavior follows its existing settings",
+        "No modal-only remove-all override applies"
+      ],
+      "style_geometry_assertions": [
+        "No horizontal overflow"
+      ],
+      "screenshot_path": "qa/screenshots/product-list-regression.png",
+      "baseline_path": "qa/baselines/product-list-regression.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "new_errors": 0
+      },
+      "network_expectations": {
+        "duplicate_mutations": 0
+      },
+      "cleanup": [
+        "Restore selection"
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "product-grid-regression",
+      "purpose": "Verify Product Grid retains in-page quantity and variant behavior",
+      "precondition": "Product Grid control fixture is loaded and served version is 14.0.0",
+      "viewport": "mobile",
+      "state": "loaded",
+      "steps": [
+        "Hard reload with cache ignored",
+        "Change grouped variant",
+        "Add and adjust quantity"
+      ],
+      "expected_semantic_result": "Existing Product Grid behavior is unchanged",
+      "dom_assertions": [
+        "In-page card behavior follows its existing settings",
+        "No modal-only remove-all override applies"
+      ],
+      "style_geometry_assertions": [
+        "Two columns fit without horizontal overflow"
+      ],
+      "screenshot_path": "qa/screenshots/product-grid-regression.png",
+      "baseline_path": "qa/baselines/product-grid-regression.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "new_errors": 0
+      },
+      "network_expectations": {
+        "duplicate_mutations": 0
+      },
+      "cleanup": [
+        "Restore selection"
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    }
+  ],
+  "assertions": {
+    "library": "references/chrome-devtools-test-protocol.md",
+    "require_json_serializable_results": true
+  },
+  "screenshots": {
+    "format": "png",
+    "index_path": "qa/screenshot-index.json",
+    "element_required": true,
+    "viewport_required": true,
+    "before_after_critical_interactions": true,
+    "full_page_only_when_needed": true,
+    "metadata_required": [
+      "viewport",
+      "dpr",
+      "zoom",
+      "state",
+      "revision"
+    ]
+  },
+  "console_policy": {
+    "fail_on": [
+      "uncaught-exception",
+      "unhandled-promise-rejection",
+      "severe-application-error",
+      "failed-resource-parse",
+      "new-repeated-warning",
+      "accessibility-runtime-error",
+      "hydration-error",
+      "duplicate-key-warning",
+      "change-caused-csp-violation",
+      "tested-interaction-error"
+    ],
+    "allowlist": []
+  },
+  "network_policy": {
+    "fail_on": [
+      "unexpected-4xx-5xx",
+      "blocked-required-asset",
+      "implementation-caused-abort",
+      "cors-error",
+      "duplicate-mutation",
+      "missing-product-media",
+      "missing-translation",
+      "local-to-production-request",
+      "real-order-or-destructive-action"
+    ],
+    "expected_analytics": [],
+    "redact_secrets_and_private_bodies": true
+  },
+  "lighthouse": {
+    "required": true,
+    "devices": [
+      "desktop",
+      "mobile"
+    ],
+    "modes": [
+      "snapshot",
+      "navigation"
+    ],
+    "categories": [
+      "accessibility",
+      "best-practices",
+      "seo"
+    ],
+    "performance_excluded": true,
+    "report_paths": {
+      "desktop": "qa/lighthouse/desktop.json",
+      "mobile": "qa/lighthouse/mobile.json"
+    }
+  },
+  "performance": {
+    "required": false,
+    "triggers": [],
+    "not_applicable_reason": "Layout redesign changes no fetch, render scheduling, or business runtime; geometry and Lighthouse checks are proportionate.",
+    "trace_paths": [],
+    "metrics": [
+      "LCP",
+      "CLS",
+      "interaction-findings",
+      "long-tasks",
+      "layout-shift-sources",
+      "image-font-loading"
+    ]
+  },
+  "visual_diff": {
+    "format": "png",
+    "comparison": "scripts/compare_images.py",
+    "diff_required": true,
+    "json_summary_required": true,
+    "approved_reference_and_actual_side_by_side": true,
+    "allowed_masks": []
+  },
+  "non_regression": {
+    "required": true,
+    "cases": [
+      "wide-horizontal-loaded",
+      "tablet-details",
+      "mobile-selected",
+      "narrow-close-reopen",
+      "product-list-regression",
+      "product-grid-regression"
+    ]
+  },
+  "cleanup": [
+    "Remove injected capture styles.",
+    "Restore scroll position.",
+    "Restore reversible test state.",
+    "Delete temporary sensitive or transient evidence."
+  ]
+}

@@ -1,0 +1,740 @@
+{
+  "schema_version": 1,
+  "job": {
+    "id": "ppb-selected-slot-redesign-20260821",
+    "title": "PPB Selected Slot Redesign",
+    "status": "active",
+    "stage": "CHROME_QA_PREFLIGHT",
+    "revision": 2,
+    "created_at": "2026-08-20T20:25:02Z",
+    "updated_at": "2026-08-20T21:30:29Z",
+    "owner": "wolfpack",
+    "product": "Product Page Bundle",
+    "repository": "/Users/adityaawasthi/Developer/wolfpack-product-bundles",
+    "branch": "feature/26.05-UI-changes",
+    "commit": "911af40bf26800116497611fdb3504a50486c86c",
+    "artifact_root": "/Users/adityaawasthi/Developer/wolfpack-product-bundles/design-jobs",
+    "resume_stage": null
+  },
+  "scope": {
+    "product_family": "Product Page Bundle",
+    "template": "Horizontal Slots and Vertical Slots",
+    "component": "selected product slot",
+    "implementation_mode": "design-director",
+    "design_goal": "Create a coherent, responsive selected-slot treatment inspired by EB while retaining Wolfpack ownership and interaction semantics.",
+    "user_problem": "The current selected state of PPB product slots needs a deliberate redesign.",
+    "primary_user_action": "Review a selected product and replace or remove that exact slot.",
+    "out_of_scope": [
+      "Product Grid and Product List cards",
+      "bundle picker product-card redesign",
+      "pricing, validation, persistence, and cart behavior changes",
+      "merchant configuration or API changes",
+      "FPB presentation"
+    ],
+    "merchant_configurability": [
+      "existing saved labels",
+      "existing merchant color tokens",
+      "existing slot numbering and icon configuration"
+    ],
+    "business_logic_constraints": [
+      "filled slots retain exact replacement targeting",
+      "remove affects only the selected slot",
+      "minimum rules retain reachable capacity",
+      "exact rules expose no overflow capacity",
+      "hard-reload selection restoration remains unchanged",
+      "empty and selected slots retain equal geometry within their orientation"
+    ]
+  },
+  "viewports": {
+    "reference": [],
+    "required": [
+      "320x700",
+      "390x844",
+      "767x900",
+      "768x900",
+      "1280x800"
+    ],
+    "edge_cases": [
+      "long product title",
+      "variant label",
+      "compare-at price",
+      "unavailable product restored from session",
+      "minimum-rule trailing empty slot",
+      "exact-rule full capacity"
+    ],
+    "browser_zoom": 100,
+    "device_pixel_ratio_policy": "record-actual",
+    "locale": "en",
+    "currency": "storefront fixture currency",
+    "color_scheme": "light",
+    "reduced_motion": false
+  },
+  "references": {
+    "current": [
+      "screenshot-inventory.yaml"
+    ],
+    "target": [
+      "screenshot-inventory.yaml"
+    ],
+    "context": [
+      "visual-audit.md"
+    ],
+    "approved": [
+      "screenshot-inventory.yaml"
+    ],
+    "implementation": [],
+    "provenance": [
+      "Direct Chrome DevTools MCP current-state capture",
+      "Authenticated EB investigation archive"
+    ],
+    "permissions_or_usage_notes": [
+      "EB references are structural inspiration only; no competitor code or fixed pixel values are copied.",
+      "Agent-store screenshots are transient investigation evidence and are not committed."
+    ]
+  },
+  "decisions": {
+    "locked": [
+      {
+        "id": "D-001",
+        "decision": "Use EB as the selected-slot hierarchy and interaction reference without copying fixed pixel values.",
+        "source": "user-provided",
+        "revision": 1
+      },
+      {
+        "id": "D-002",
+        "decision": "The contract covers both PPB Horizontal Slots and Vertical Slots through one shared runtime with orientation-only presentation differences.",
+        "source": "conversation-context-and-repository-contract",
+        "revision": 1
+      },
+      {
+        "id": "D-003",
+        "decision": "Horizontal uses a product-led tile hierarchy while Vertical uses the same identity and action model in a compact full-width row.",
+        "source": "reference-evidence-resolution-O-001",
+        "revision": 1
+      },
+      {
+        "id": "D-004",
+        "decision": "Direction A - Quiet Product Tile is the approved selected-slot visual direction.",
+        "source": "user-approved-2026-08-20T20:42:05Z",
+        "revision": 1
+      },
+      {
+        "id": "D-005",
+        "decision": "The responsive, interaction, accessibility, and token contracts are approved for implementation handoff.",
+        "source": "user-approved-2026-08-20T20:49:52Z",
+        "revision": 2
+      }
+    ],
+    "assumptions": [
+      {
+        "id": "A-001",
+        "assumption": "The selected-slot redesign may refine visual hierarchy but will not add new merchant-facing copy or controls.",
+        "status": "reversible"
+      }
+    ],
+    "rejected": [],
+    "open": [],
+    "recommendation_delegation": {
+      "status": "not-granted",
+      "scope": [],
+      "exclusions": [
+        "business-behavior",
+        "accessibility",
+        "data-semantics",
+        "approval-scope"
+      ],
+      "approved_by": "",
+      "approved_at": "",
+      "expires_at_stage": "FINAL_APPROVAL"
+    }
+  },
+  "states": {
+    "required": [
+      "ST-01",
+      "ST-02",
+      "ST-04",
+      "ST-06",
+      "ST-07",
+      "ST-08",
+      "ST-09",
+      "ST-10",
+      "ST-12",
+      "ST-13",
+      "ST-14",
+      "ST-15",
+      "ST-16"
+    ],
+    "optional": [
+      "ST-03",
+      "ST-05",
+      "ST-11"
+    ],
+    "not_applicable": [
+      "inline quantity controls",
+      "inline variant controls",
+      "slot-owned scrolling",
+      "expanded or collapsed",
+      "drag reorder"
+    ],
+    "coverage_status": "complete"
+  },
+  "responsive": {
+    "contract_status": "complete",
+    "breakpoints": [
+      "320x700",
+      "390x844",
+      "767x900",
+      "768x900",
+      "1280x800"
+    ],
+    "transformations": [
+      "Horizontal intrinsic equal-height tile columns",
+      "Vertical one-column content-driven rows",
+      "no semantic replacement across 767/768"
+    ]
+  },
+  "accessibility": {
+    "requirements": [
+      "distinct replacement and remove controls",
+      "44px targets",
+      "visible focus",
+      "exact focus return",
+      "non-color state",
+      "high-zoom reflow",
+      "reduced motion"
+    ],
+    "known_risks": [
+      "invalid nested interactive semantics",
+      "clamped title used as accessible name",
+      "merchant focus contrast"
+    ],
+    "validation_status": "complete"
+  },
+  "handoff": {
+    "status": "approved",
+    "package_path": "implementation-handoff.md",
+    "implementation_owner": "Codex",
+    "implementation_branch": "feature/26.05-UI-changes",
+    "implementation_commit": "48168633a825388d9860ef7796648998473d07e6"
+  },
+  "qa": {
+    "chrome_mcp_required": true,
+    "profile_policy": "default-profile-only",
+    "allow_isolated_context": false,
+    "preflight_status": "not-started",
+    "preflight_result_path": "qa/preflight.json",
+    "baseline_status": "not-started",
+    "baseline_paths": [],
+    "summary_path": "qa/browser-artifact-summary.json",
+    "execution_status": "not-started",
+    "required_viewports": [
+      "narrow-mobile",
+      "primary-mobile",
+      "mobile-boundary",
+      "desktop-boundary",
+      "desktop"
+    ],
+    "required_states": [
+      "empty-loading",
+      "filled",
+      "long-pricing",
+      "replace-remove",
+      "unavailable-restored",
+      "capacity",
+      "non-regression"
+    ],
+    "console_status": "not-started",
+    "network_status": "not-started",
+    "accessibility_status": "not-started",
+    "lighthouse_status": "not-started",
+    "performance_status": "not-started",
+    "visual_diff_status": "not-started",
+    "non_regression_status": "not-started",
+    "retry_history": [],
+    "artifacts_path": "qa",
+    "blockers": []
+  },
+  "approvals": {
+    "design": {
+      "status": "approved",
+      "approver": "user",
+      "at": "2026-08-20T20:42:05Z",
+      "revision": 1
+    },
+    "handoff": {
+      "status": "approved",
+      "approver": "user",
+      "at": "2026-08-20T20:57:24Z",
+      "revision": 2
+    },
+    "implementation": {
+      "status": "returned",
+      "approver": "user",
+      "at": "2026-08-21T00:00:00Z",
+      "revision": 2
+    },
+    "final": {
+      "status": "not-started",
+      "approver": "",
+      "at": "",
+      "revision": null
+    }
+  },
+  "artifacts": {
+    "immutable_after_approval": true,
+    "current": {
+      "acceptance-criteria.md": {
+        "path": "acceptance-criteria.md",
+        "status": "approved",
+        "revision": 2,
+        "sha256": "32fd9ae6cc9e464c0ae788a498d1bda8c6365ab36e9b6f2ba1917c1ca957af70",
+        "approved_by": "user",
+        "approved_at": "2026-08-20T20:57:43Z",
+        "evidence": [
+          "implementation-handoff.md"
+        ]
+      },
+      "accessibility-checklist.md": {
+        "path": "accessibility-checklist.md",
+        "status": "approved",
+        "revision": 2,
+        "sha256": "ebf1b4b66b7bacdcfeeff64ccbbd94234505406410d25699bd08c750c39fc96d",
+        "approved_by": "user",
+        "approved_at": "2026-08-20T20:50:52Z",
+        "evidence": [
+          "interaction-contract.md"
+        ]
+      },
+      "approval-record.yaml": {
+        "path": "approval-record.yaml",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "c9b2e85472601c434fd152a1345bec9b3380a4620f09ec2bf81958308229b14a",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "browser-test-plan.yaml": {
+        "path": "browser-test-plan.yaml",
+        "status": "approved",
+        "revision": 2,
+        "sha256": "043c0a54334dbcf491ee9e08b7b47692b76909677aef09ff50abfcdcec75c977",
+        "approved_by": "user",
+        "approved_at": "2026-08-20T20:57:43Z",
+        "evidence": [
+          "acceptance-criteria.md"
+        ]
+      },
+      "browser-test-report.md": {
+        "path": "browser-test-report.md",
+        "status": "draft",
+        "revision": 1,
+        "sha256": "4fa1a703e7f12f6426caf6c39ac1e5c7bfd9003d8f3183b54548d72fdaa03ebc",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "chrome-preflight-result.yaml": {
+        "path": "chrome-preflight-result.yaml",
+        "status": "draft",
+        "revision": 1,
+        "sha256": "8eca5c75de82819bb9042ce70e86fb71bac2944576c140693acb409754d3b275",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "codex-task.md": {
+        "path": "codex-task.md",
+        "status": "approved",
+        "revision": 2,
+        "sha256": "4b19de79e24e4632ac2f426fe753d4715a8a4dd179097bd2bb17a5b71c8e4a93",
+        "approved_by": "user",
+        "approved_at": "2026-08-20T20:57:42Z",
+        "evidence": [
+          "implementation-handoff.md"
+        ]
+      },
+      "component-anatomy.md": {
+        "path": "component-anatomy.md",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "46038fc59a45e0d1b3d0da6b74ef32d4ac3e0180aeefeb4be40feb1d4165b497",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "component-brief.md": {
+        "path": "component-brief.md",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "f4e78553305393afe2ce6ebfc4e57234e1846eb7383cc79ebed7745d7deb2a58",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "content-stress-cases.yaml": {
+        "path": "content-stress-cases.yaml",
+        "status": "approved",
+        "revision": 2,
+        "sha256": "95bd11c20076f67155d8ee09337bbfd0c865594e42c92a8c3703447c810da26e",
+        "approved_by": "user",
+        "approved_at": "2026-08-20T20:50:52Z",
+        "evidence": [
+          "state-matrix.md"
+        ]
+      },
+      "design-tokens.json": {
+        "path": "design-tokens.json",
+        "status": "approved",
+        "revision": 2,
+        "sha256": "afd76dd1efa252f0f5553c5b8e9eb686c75dcc93824184541e7d2104e46fbc1b",
+        "approved_by": "user",
+        "approved_at": "2026-08-20T20:50:52Z",
+        "evidence": [
+          "responsive-contract.md"
+        ]
+      },
+      "direction-comparison.md": {
+        "path": "direction-comparison.md",
+        "status": "approved",
+        "revision": 1,
+        "sha256": "5e81bcd7f480aeab769537d516d7a09a9eade89bfb02a6a9a63ac5291a0c7872",
+        "approved_by": "user",
+        "approved_at": "2026-08-20T20:42:38Z",
+        "evidence": [
+          "screenshot-inventory.yaml",
+          "visual-audit.md"
+        ]
+      },
+      "implementation-handoff.md": {
+        "path": "implementation-handoff.md",
+        "status": "approved",
+        "revision": 2,
+        "sha256": "54cdf8eaf556f238823f73ccb217f21e1888104022287462c0782a80a0d14806",
+        "approved_by": "user",
+        "approved_at": "2026-08-20T20:57:42Z",
+        "evidence": [
+          "locked-decisions.yaml"
+        ]
+      },
+      "interaction-contract.md": {
+        "path": "interaction-contract.md",
+        "status": "approved",
+        "revision": 2,
+        "sha256": "ba0b0f16712a206352559ff19d25f52da7401a5b2a5e64d9be907c339ca370b8",
+        "approved_by": "user",
+        "approved_at": "2026-08-20T20:50:52Z",
+        "evidence": [
+          "responsive-contract.md"
+        ]
+      },
+      "locked-decisions.yaml": {
+        "path": "locked-decisions.yaml",
+        "status": "approved",
+        "revision": 2,
+        "sha256": "236d1d88a4e2e8c40cbfdd19413a16606b8a3761b349e95a83e067d10f805211",
+        "approved_by": "user",
+        "approved_at": "2026-08-20T20:50:52Z",
+        "evidence": [
+          "responsive-contract.md",
+          "interaction-contract.md"
+        ]
+      },
+      "remediation-list.md": {
+        "path": "remediation-list.md",
+        "status": "draft",
+        "revision": 1,
+        "sha256": "5213009766ff02a21d8bbbd492ba910c01dc526460e50c7cc647d25fe47d4dcf",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "responsive-contract.md": {
+        "path": "responsive-contract.md",
+        "status": "approved",
+        "revision": 2,
+        "sha256": "b5b4930568da33e6c8ab73173e37f26f5868eb23e8bc19327567900f6065b72e",
+        "approved_by": "user",
+        "approved_at": "2026-08-20T20:50:52Z",
+        "evidence": [
+          "state-matrix.md"
+        ]
+      },
+      "screenshot-inventory.yaml": {
+        "path": "screenshot-inventory.yaml",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "aebe4aae0ffc2fc24d566424338cc0ff6951c60bb59f4ac6a5be874444fc279a",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "state-matrix.md": {
+        "path": "state-matrix.md",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "b6374469b59897e42f7f0e19b797217f09a77bad81dc1212fe30f677b372ba45",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "visual-audit.md": {
+        "path": "visual-audit.md",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "bc3a907ca6ec7d5ecbcde1e2216820a6cf5fb0bb5a7c34491b04eb082cbf8c5a",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "visual-qa-report.md": {
+        "path": "visual-qa-report.md",
+        "status": "draft",
+        "revision": 1,
+        "sha256": "7d43d8fa256cc4eb1f598505525f7ed2f669b20461d68c6bd2b1c993082cd21b",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      }
+    },
+    "superseded": [
+      {
+        "path": "locked-decisions.yaml",
+        "status": "approved",
+        "revision": 1,
+        "sha256": "3aab1926f8745fc352f66e1a634bc57e1fa6cdc6ba4c7047a117744999311264",
+        "approved_by": "user",
+        "approved_at": "2026-08-20T20:42:38Z",
+        "evidence": [
+          "direction-comparison.md"
+        ],
+        "superseded_at": "2026-08-20T20:50:52Z",
+        "superseded_by": "user",
+        "superseded_reason": "Record the user's separate approval of the responsive and interaction contracts in revision 2."
+      }
+    ]
+  },
+  "history": [
+    {
+      "sequence": 1,
+      "at": "2026-08-20T20:25:02Z",
+      "from": null,
+      "to": "DISCOVERY",
+      "revision": 1,
+      "reason": "Design job created",
+      "evidence": []
+    },
+    {
+      "sequence": 2,
+      "at": "2026-08-20T20:26:19Z",
+      "from": "DISCOVERY",
+      "to": "SCOPE",
+      "revision": 1,
+      "reason": "Discovery captured the requested PPB selected-slot redesign, user action, and invariant business constraints.",
+      "evidence": [
+        "component-brief.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 3,
+      "at": "2026-08-20T20:26:37Z",
+      "from": "SCOPE",
+      "to": "REFERENCE_INTAKE",
+      "revision": 1,
+      "reason": "Scope fixes both PPB slot orientations, selected-slot actions, invariant business behavior, and explicit non-goals.",
+      "evidence": [
+        "component-brief.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 4,
+      "at": "2026-08-20T20:37:48Z",
+      "from": "REFERENCE_INTAKE",
+      "to": "REFERENCE_VALIDATION",
+      "revision": 1,
+      "reason": "Inventory includes measured current Horizontal and Vertical states plus approved EB structural evidence; exact-pixel limitations are documented.",
+      "evidence": [
+        "screenshot-inventory.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 5,
+      "at": "2026-08-20T20:37:56Z",
+      "from": "REFERENCE_VALIDATION",
+      "to": "VISUAL_ANALYSIS",
+      "revision": 1,
+      "reason": "References are sufficient for an EB-inspired hierarchy contract; exact-match inference is explicitly excluded because current comparable EB raster evidence is unavailable.",
+      "evidence": [
+        "screenshot-inventory.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 6,
+      "at": "2026-08-20T20:38:04Z",
+      "from": "VISUAL_ANALYSIS",
+      "to": "DIRECTION_EXPLORATION",
+      "revision": 1,
+      "reason": "Confidence-labeled audit identifies Horizontal truncation, Vertical compact-row strengths, and preserved behavior invariants.",
+      "evidence": [
+        "visual-audit.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 7,
+      "at": "2026-08-20T20:38:13Z",
+      "from": "DIRECTION_EXPLORATION",
+      "to": "DIRECTION_APPROVAL",
+      "revision": 1,
+      "reason": "Three behavior-equivalent directions are decision-ready; Direction A is recommended from measured current-state and EB structural evidence.",
+      "evidence": [
+        "direction-comparison.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 8,
+      "at": "2026-08-20T20:42:42Z",
+      "from": "DIRECTION_APPROVAL",
+      "to": "COMPONENT_ANATOMY",
+      "revision": 1,
+      "reason": "User approved Direction A - Quiet Product Tile; direction and decision artifacts are locked at revision 1.",
+      "evidence": [
+        "direction-comparison.md",
+        "locked-decisions.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 9,
+      "at": "2026-08-20T20:44:23Z",
+      "from": "COMPONENT_ANATOMY",
+      "to": "STATE_CONTRACT",
+      "revision": 1,
+      "reason": "Every selected-slot region now has one semantic, state, event, style, token, and responsive owner.",
+      "evidence": [
+        "component-anatomy.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 10,
+      "at": "2026-08-20T20:45:16Z",
+      "from": "STATE_CONTRACT",
+      "to": "RESPONSIVE_CONTRACT",
+      "revision": 1,
+      "reason": "Ordinary, boundary, loading, failure, recovery, pricing, and accessibility states are complete for both orientations.",
+      "evidence": [
+        "state-matrix.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 11,
+      "at": "2026-08-20T20:50:52Z",
+      "from": "RESPONSIVE_CONTRACT",
+      "to": "RESPONSIVE_CONTRACT",
+      "revision": 2,
+      "reason": "Record the user's separate approval of the responsive and interaction contracts in revision 2.",
+      "evidence": [
+        "responsive-contract.md",
+        "interaction-contract.md"
+      ],
+      "event": "artifact-superseded",
+      "affected_artifacts": [
+        "locked-decisions.yaml"
+      ]
+    },
+    {
+      "sequence": 12,
+      "at": "2026-08-20T20:50:59Z",
+      "from": "RESPONSIVE_CONTRACT",
+      "to": "INTERACTION_ACCESSIBILITY",
+      "revision": 2,
+      "reason": "User approved the container-driven responsive contract at revision 2.",
+      "evidence": [
+        "responsive-contract.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 13,
+      "at": "2026-08-20T20:50:59Z",
+      "from": "INTERACTION_ACCESSIBILITY",
+      "to": "TOKENS_GEOMETRY",
+      "revision": 2,
+      "reason": "Interaction and accessibility contracts are approved with exact focus and action ownership.",
+      "evidence": [
+        "interaction-contract.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 14,
+      "at": "2026-08-20T20:50:59Z",
+      "from": "TOKENS_GEOMETRY",
+      "to": "PROTOTYPE_OPTIONAL",
+      "revision": 2,
+      "reason": "Responsive tokens and content stress fixtures are approved; no unresolved high-risk interaction requires a standalone prototype.",
+      "evidence": [
+        "design-tokens.json"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 15,
+      "at": "2026-08-20T20:50:59Z",
+      "from": "PROTOTYPE_OPTIONAL",
+      "to": "HANDOFF_ASSEMBLY",
+      "revision": 2,
+      "reason": "Prototype is not applicable because repository semantics and approved contracts fully specify the bounded change.",
+      "evidence": [
+        "component-anatomy.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 16,
+      "at": "2026-08-20T20:55:25Z",
+      "from": "HANDOFF_ASSEMBLY",
+      "to": "HANDOFF_VALIDATION",
+      "revision": 2,
+      "reason": "Implementation handoff, bounded Codex task, acceptance criteria, and deterministic browser plan are assembled at revision 2.",
+      "evidence": [
+        "implementation-handoff.md",
+        "browser-test-plan.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 17,
+      "at": "2026-08-20T20:57:51Z",
+      "from": "HANDOFF_VALIDATION",
+      "to": "IMPLEMENTATION_AWAITED",
+      "revision": 2,
+      "reason": "User approved the complete implementation handoff; validate_handoff.py passes with no blocking or advisory findings.",
+      "evidence": [
+        "implementation-handoff.md",
+        "browser-test-plan.yaml",
+        "approval-record.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 18,
+      "at": "2026-08-20T21:30:29Z",
+      "from": "IMPLEMENTATION_AWAITED",
+      "to": "CHROME_QA_PREFLIGHT",
+      "revision": 2,
+      "reason": "Implementation commit 48168633 returned and user restarted the development server for direct Chrome verification",
+      "evidence": [
+        "implementation-handoff.md"
+      ],
+      "affected_artifacts": []
+    }
+  ]
+}

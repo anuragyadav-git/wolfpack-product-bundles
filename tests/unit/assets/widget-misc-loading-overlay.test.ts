@@ -131,6 +131,7 @@ describe('ProductPageWidgetMiscMethods modal controls', () => {
     const modal = createMockElement() as MockElement & {
       querySelectorAll: (selector: string) => MockElement[];
     };
+    modal.classList.add('bw-bs-panel--open');
     modal.querySelectorAll = (selector) => selector === '.close-button' ? closeButtons : [];
     const addToCartButton = createMockElement();
     const closeModal = jest.fn();

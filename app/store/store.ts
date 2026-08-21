@@ -40,7 +40,7 @@ function loadStoredPreferences(): UserPreferences | undefined {
     }
 
     return preferences;
-  } catch (error) {
+  } catch (error: any) {
     console.warn("Failed to load persisted preferences:", error);
     return undefined;
   }
@@ -57,7 +57,7 @@ const persistPreferencesMiddleware: Middleware = (storeApi) => (next) => (action
     const preferences = (storeApi.getState() as RootState).preferences;
     window.localStorage.setItem(PREFERENCES_STORAGE_KEY, JSON.stringify(preferences));
     window.localStorage.setItem(RECENT_BUNDLES_STORAGE_KEY, JSON.stringify(preferences.recentBundles));
-  } catch (error) {
+  } catch (error: any) {
     console.warn("Failed to persist preferences:", error);
   }
 

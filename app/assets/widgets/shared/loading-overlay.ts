@@ -9,13 +9,16 @@
 
 const DEFAULT_HIDE_TIMEOUT_MS = 400;
 
-export function markLoadingOverlayVisible(overlay) {
+export function markLoadingOverlayVisible(overlay: HTMLDivElement) {
   if (!overlay) return;
   overlay.setAttribute('aria-hidden', 'false');
   overlay.classList.add('is-visible');
 }
 
-export function hideLoadingOverlayElement(overlay, timeoutMs = DEFAULT_HIDE_TIMEOUT_MS) {
+export function hideLoadingOverlayElement(
+  overlay: HTMLDivElement,
+  timeoutMs: number = DEFAULT_HIDE_TIMEOUT_MS,
+) {
   if (!overlay) return;
 
   let finished = false;

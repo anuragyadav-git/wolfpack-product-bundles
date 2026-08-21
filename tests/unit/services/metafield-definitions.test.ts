@@ -25,7 +25,7 @@ describe("ensureVariantBundleMetafieldDefinitions", () => {
 
     await ensureVariantBundleMetafieldDefinitions(admin);
 
-    const keys = admin.graphql.mock.calls.map(([, options]) =>
+    const keys = admin.graphql.mock.calls.map(([, options]: any) =>
       options.variables.definition.key,
     );
     expect(keys).toEqual([

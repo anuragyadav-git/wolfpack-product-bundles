@@ -1,0 +1,20 @@
+{
+  "baseline": "design-jobs/ppb-bundle-picker-modal-redesign-20260821/qa/baselines/quantity-action-equality-1440x900.png",
+  "actual": "design-jobs/ppb-bundle-picker-modal-redesign-20260821/qa/screenshots/quantity-action-equality-1440x900.png",
+  "mask": null,
+  "approved_mask_regions": [],
+  "threshold": 0.01,
+  "pixel_tolerance": 8,
+  "status": "passed",
+  "reason": "within-threshold",
+  "engine": "pillow",
+  "dimensions": {
+    "width": 1440,
+    "height": 900
+  },
+  "compared_pixels": 1296000,
+  "changed_pixels": 0,
+  "mismatch_ratio": 0.0,
+  "difference_bounds": null,
+  "diff_path": "design-jobs/ppb-bundle-picker-modal-redesign-20260821/qa/diffs/quantity-action-equality-1440x900.png"
+}

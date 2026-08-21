@@ -9,7 +9,7 @@
 
 import { cloneSelectedProducts } from './create-bundle-state.js';
 
-export function addSelectedProduct(state, { stepIndex, variantId, quantity = 1 }) {
+export function addSelectedProduct(state: any, { stepIndex, variantId, quantity = 1 }: any) {
   const selectedProducts = cloneSelectedProducts(state?.selectedProducts);
   ensureStep(selectedProducts, stepIndex);
 
@@ -19,7 +19,7 @@ export function addSelectedProduct(state, { stepIndex, variantId, quantity = 1 }
   return { ...state, selectedProducts };
 }
 
-export function removeSelectedProduct(state, { stepIndex, variantId, quantity = 1 }) {
+export function removeSelectedProduct(state: any, { stepIndex, variantId, quantity = 1 }: any) {
   const selectedProducts = cloneSelectedProducts(state?.selectedProducts);
   ensureStep(selectedProducts, stepIndex);
 
@@ -35,15 +35,16 @@ export function removeSelectedProduct(state, { stepIndex, variantId, quantity = 
   return { ...state, selectedProducts };
 }
 
-export function clearStepSelection(state, stepIndex) {
+export function clearStepSelection(state: any, stepIndex: string|number) {
   const selectedProducts = cloneSelectedProducts(state?.selectedProducts);
-  ensureStep(selectedProducts, stepIndex);
-  selectedProducts[stepIndex] = {};
+  const normalizedStepIndex = Number(stepIndex);
+  ensureStep(selectedProducts, normalizedStepIndex);
+  selectedProducts[normalizedStepIndex] = {};
 
   return { ...state, selectedProducts };
 }
 
-function ensureStep(selectedProducts, stepIndex) {
+function ensureStep(selectedProducts: any[], stepIndex: number) {
   while (selectedProducts.length <= stepIndex) {
     selectedProducts.push({});
   }

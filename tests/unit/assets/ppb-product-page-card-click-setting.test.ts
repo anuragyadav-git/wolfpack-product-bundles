@@ -57,4 +57,28 @@ describe('PPB product page card click setting', () => {
 
     expect(context._isConditionValidationEnabled()).toBe(false);
   });
+
+  it('activates the existing add action for a non-interactive card click', () => {
+    const click = jest.fn();
+    const card = { querySelector: jest.fn(() => ({ click })) };
+    const target = { closest: jest.fn((selector: string) => selector === '.product-card' ? card : null) };
+    const context = {
+      ...ProductPageConfigLifecycleMethods,
+      config: { controlsSettings: { activeControls: { addToCartWhenProductCardClicked: true } } },
+    };
+
+    expect(context._activateProductCardClickAdd(target)).toBe(true);
+    expect(click).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not hijack form-control clicks', () => {
+    const target = { closest: jest.fn((selector: string) => selector.includes('button') ? {} : null) };
+    const context = {
+      ...ProductPageConfigLifecycleMethods,
+      config: { controlsSettings: { activeControls: { addToCartWhenProductCardClicked: true } } },
+    };
+
+    expect(context._activateProductCardClickAdd(target)).toBe(false);
+  });
 });
+export {};

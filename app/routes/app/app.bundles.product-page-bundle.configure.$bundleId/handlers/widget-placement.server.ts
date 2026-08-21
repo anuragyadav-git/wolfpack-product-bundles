@@ -69,7 +69,7 @@ export async function handleValidateWidgetPlacement(
       configurationLink: result.configurationLink,
       message: result.message,
     });
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.error(
       "[WIDGET_PLACEMENT] Error validating widget placement:",
       {},

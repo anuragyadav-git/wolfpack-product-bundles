@@ -162,6 +162,23 @@ describe("handleCreateBundle", () => {
       },
       data: { firstCreateTourEligible: false },
     });
+    expect(createBundleWithPublicNumber).toHaveBeenCalledWith(
+      expect.objectContaining({
+        bundleType: "product_page",
+        bundleUpsellConfig: {
+          upsellConfiguration: {
+            isEnabled: false,
+            title: "Build Your Bundle & Save More",
+            subTitle: "",
+            displayConfiguration: expect.objectContaining({
+              showOnAllBundleProducts: true,
+            }),
+            useLinkProductAsDefaultProduct: false,
+          },
+          multiLangText: {},
+        },
+      }),
+    );
   });
 
   it("keeps successful creation successful when the noncritical widget check fails", async () => {

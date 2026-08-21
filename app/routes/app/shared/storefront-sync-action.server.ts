@@ -39,7 +39,7 @@ export async function handleSyncStorefrontNow(
       synced: true,
       message: "Updated Successfully!",
     });
-  } catch (error) {
+  } catch (error: any) {
     return json(
       {
         success: false,
@@ -106,7 +106,7 @@ export async function handlePrepareStorefrontPreview(
       ...(bundleType === "product_page" ? { previewToken } : {}),
       ...(shareablePreviewUrl ? { shareablePreviewUrl } : {}),
     });
-  } catch (error) {
+  } catch (error: any) {
     return json(
       {
         success: false,

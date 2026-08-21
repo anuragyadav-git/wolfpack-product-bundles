@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "case_id": "ppb-revision-4-formal-matrix",
+  "viewport": "1440x900, 1280x800, 768x1024, 390x844, 360x800",
+  "state": "all required PPB picker and product-details states",
+  "required": true,
+  "gates": {
+    "functional": "passed",
+    "visual": "passed",
+    "geometry": "passed",
+    "responsive": "passed",
+    "console": "passed",
+    "network": "passed",
+    "accessibility": "passed",
+    "performance": "passed",
+    "non_regression": "passed"
+  },
+  "performance_reason": "Picker and card entrance animations changed, so a trusted direct-Chrome interaction trace was required.",
+  "evidence": {
+    "snapshot": "results/final-accessibility-snapshot.txt",
+    "screenshots": {
+      "before": "baselines/horizontal-390x844.png",
+      "after": "screenshots/horizontal-390x844.png",
+      "element": {
+        "actual": "screenshots/quantity-action-equality-1440x900.png",
+        "baseline": "baselines/quantity-action-equality-1440x900.png",
+        "diff": "diffs/quantity-action-equality-1440x900.png",
+        "comparison_summary": "results/quantity-action-equality.comparison.json"
+      },
+      "viewport": {
+        "actual": "screenshots/horizontal-390x844.png",
+        "baseline": "baselines/horizontal-390x844.png",
+        "diff": "diffs/horizontal-390x844.png",
+        "comparison_summary": "results/horizontal-390x844.comparison.json"
+      }
+    },
+    "console": "results/final-console.json",
+    "network": "results/final-network.json",
+    "accessibility": "results/accessibility.json",
+    "lighthouse": {"desktop": "results/lighthouse-desktop-component.json", "mobile": "results/lighthouse-mobile-component.json"},
+    "performance_trace": "results/ppb-picker-open.trace"
+  },
+  "assertions": [
+    {"id": "matrix", "category": "responsive", "status": "passed"},
+    {"id": "quantity-action-equality", "category": "geometry", "status": "passed"},
+    {"id": "footer-summary-content-sizing", "category": "geometry", "status": "passed", "evidence": "results/footer-summary-revision-4.json"},
+    {"id": "image-only-details", "category": "functional", "status": "passed"},
+    {"id": "stacked-layer-ownership", "category": "accessibility", "status": "passed"},
+    {"id": "product-list-grid-regression", "category": "non_regression", "status": "passed"}
+  ],
+  "observations": {
+    "console": {
+      "violations": [],
+      "allowlisted": [
+        {"exact": "GET /favicon.ico 404", "reason": "Theme-owned missing favicon", "owner": "Shopify test theme", "review_date": "2026-08-21"},
+        {"pattern": "preloaded but not used", "reason": "Shopify/theme preload advisory outside PPB ownership", "owner": "Shopify test theme", "review_date": "2026-08-21"}
+      ]
+    },
+    "network": {"violations": [], "expected_analytics": []}
+  },
+  "waivers": [],
+  "retry_history": [
+    {"attempt": 1, "status": "failed", "evidence_links": ["results/ppb-picker-open.trace"], "reason": "Synthetic interaction reported CLS 0.23."},
+    {"attempt": 2, "status": "passed", "evidence_links": ["results/ppb-picker-open.trace", "results/final-console.json"], "reason": "Opacity-only entrance and focus-order remediation passed trusted Chrome reruns."}
+    ,{"attempt": 3, "status": "passed", "evidence_links": ["results/footer-summary-revision-4.json"], "reason": "Revision-4 footer summary passed content growth and containment at 1440, 390, and 360."}
+  ]
+}

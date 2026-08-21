@@ -106,6 +106,60 @@ describe('PPB card control setting parsing', () => {
 });
 
 describe('PPB in-page rendering control wiring', () => {
+  function renderSelectedGridCard(validateQuantityPerProduct: Record<string, unknown>) {
+    const target = createTarget();
+    const context = {
+      ...ProductPageInpageRenderMethods,
+      ...createBaseContext({
+        selectedBundle: {
+          steps: [{}],
+          validateQuantityPerProduct,
+        },
+        selectedProducts: [{ 'variant-1': 1 }],
+        _isProductPageGridTemplate: () => true,
+      }),
+    } as any;
+
+    ProductPageInpageRenderMethods._renderInpageStepProducts.call(context, 0, target);
+    return target.innerHTML;
+  }
+
+  it('uses the selected button for Product Grid when quantity validation is enabled at one', () => {
+    const html = renderSelectedGridCard({ isEnabled: true, allowedQuantity: 1 });
+
+    expect(html).toContain('Added x1');
+    expect(html).not.toContain('Decrease quantity');
+  });
+
+  it('renders Product Grid inline quantity controls when quantity validation is disabled', () => {
+    const html = renderSelectedGridCard({ isEnabled: false, allowedQuantity: 1 });
+
+    expect(html).toContain('Remove Card product');
+    expect(html).toContain('Increase quantity');
+    expect(html).not.toContain('Added x1');
+  });
+
+  it('renders Product Grid inline controls and gates increment at a configured maximum above one', () => {
+    const target = createTarget();
+    const context = {
+      ...ProductPageInpageRenderMethods,
+      ...createBaseContext({
+        selectedBundle: {
+          steps: [{}],
+          validateQuantityPerProduct: { isEnabled: true, allowedQuantity: 3 },
+        },
+        selectedProducts: [{ 'variant-1': 3 }],
+        _isProductPageGridTemplate: () => true,
+      }),
+    } as any;
+
+    ProductPageInpageRenderMethods._renderInpageStepProducts.call(context, 0, target);
+
+    expect(target.innerHTML).toContain('Decrease quantity');
+    expect(target.innerHTML).toMatch(/aria-label="Increase quantity[^>]*disabled aria-disabled="true"/);
+    expect(target.innerHTML).not.toContain('Added x3');
+  });
+
   it.each([
     ['Product List', true],
     ['generic in-page rows', false],

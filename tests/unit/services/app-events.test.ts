@@ -166,7 +166,7 @@ describe("app-events service", () => {
       attributes: {},
     });
 
-    expect((global.fetch as jest.Mock).mock.calls.filter(([url]) => url === "https://api.shopify.com/auth/access_token")).toHaveLength(1);
+    expect((global.fetch as jest.Mock).mock.calls.filter(([url]: any) => url === "https://api.shopify.com/auth/access_token")).toHaveLength(1);
   });
 
   it("retries retryable Shopify responses and never throws", async () => {
@@ -186,7 +186,7 @@ describe("app-events service", () => {
     });
 
     expect(result.status).toBe("delivered");
-    expect((global.fetch as jest.Mock).mock.calls.filter(([url]) => url === "https://api.shopify.com/app/unstable/events")).toHaveLength(2);
+    expect((global.fetch as jest.Mock).mock.calls.filter(([url]: any) => url === "https://api.shopify.com/app/unstable/events")).toHaveLength(2);
   });
 
   it("returns failed delivery for permanent Shopify errors without throwing", async () => {

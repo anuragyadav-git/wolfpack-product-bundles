@@ -1,23 +1,23 @@
 'use strict';
 
-function normalizeConditionType(value) {
+function normalizeConditionType(value: string) {
   if (typeof value !== 'string') return value;
   return value.trim().toLowerCase();
 }
 
-function normalizeConditionOperator(value) {
+function normalizeConditionOperator(value: string) {
   if (typeof value !== 'string') return value;
   const normalized = value.trim();
   if (normalized.indexOf('_') !== -1) return normalized.toLowerCase();
   return normalized.replace(/([A-Z])/g, '_$1').toLowerCase();
 }
 
-function normalizeConditionValue(value) {
+function normalizeConditionValue(value: any) {
   const numeric = Number(value);
   return Number.isFinite(numeric) ? numeric : value;
 }
 
-function cloneConditionFields(conditions, fallbackCondition, fallbackStep) {
+function cloneConditionFields(conditions: any, fallbackCondition: any, fallbackStep: any) {
   const sourceConditions = Array.isArray(conditions)
     ? conditions
     : (Array.isArray(fallbackCondition) ? fallbackCondition : undefined);
@@ -56,7 +56,7 @@ function cloneConditionFields(conditions, fallbackCondition, fallbackStep) {
     secondary?.value ?? fallbackStep?.conditionValue2,
   );
 
-  const next = {
+  const next: any = {
     conditions: sourceConditions,
   };
 
@@ -71,10 +71,10 @@ function cloneConditionFields(conditions, fallbackCondition, fallbackStep) {
   return next;
 }
 
-export function ppbExpandSingleStepCategoriesAsSteps(bundle) {
+export function ppbExpandSingleStepCategoriesAsSteps(bundle: any) {
   if (!Array.isArray(bundle?.steps)) return bundle;
 
-  const enabledSteps = bundle.steps.filter((step) => step?.enabled !== false);
+  const enabledSteps = bundle.steps.filter((step: any) => step?.enabled !== false);
   const normalizedBundle = enabledSteps.length === bundle.steps.length
     ? bundle
     : { ...bundle, steps: enabledSteps };
@@ -88,7 +88,7 @@ export function ppbExpandSingleStepCategoriesAsSteps(bundle) {
 
   return {
     ...normalizedBundle,
-    steps: categories.map((category, categoryIndex) => {
+    steps: categories.map((category: any, categoryIndex: number) => {
       const categoryLabel = category?.pageTitle
         || category?.title
         || category?.name
