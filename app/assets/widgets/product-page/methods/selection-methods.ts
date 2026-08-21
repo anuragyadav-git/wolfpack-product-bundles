@@ -3,8 +3,13 @@ import { ToastManager } from '../../shared/toast-manager.js';
 import { resolveProductCardSelectionAriaLabel } from '../../shared/components/product-card.js';
 import { resolveProductPageCardButtonText, resolveProductPageInlineAddText } from './modal-methods.js';
 import { areRequiredProductPageStepsValid } from './step-validation.js';
+import { resolvePpbModalCardPresentation } from '../ppb-modal-card-presentation.js';
+import {
+  captureDiscountTierState,
+  dispatchDiscountTierTransition,
+} from '../../shared/discount-tier-feedback.js';
 
-function createInlineQuantityControl(productId, quantity, increaseDisabled) {
+function createInlineQuantityControl(productId: string|undefined, quantity: any, increaseDisabled: any) {
   const wrapper = document.createElement('div');
   wrapper.classList.add('inline-quantity-controls', 'bw-quantity-control');
   wrapper.dataset.productId = productId;
@@ -36,16 +41,17 @@ function createInlineQuantityControl(productId, quantity, increaseDisabled) {
   return wrapper;
 }
 
-function createProductPageAddButton(productId, text) {
+function createProductPageAddButton(productId: string|undefined, text: string|null, selected = false) {
   const addButton = document.createElement('button');
   addButton.type = 'button';
   addButton.classList.add('product-add-btn', 'bw-product-card__add-button');
   addButton.dataset.productId = productId;
   addButton.textContent = text;
+  addButton.setAttribute('aria-pressed', String(selected));
   return addButton;
 }
 
-function bsFindNextIncompleteStep(steps, selectedProducts, validateFn, fromIndex) {
+function bsFindNextIncompleteStep(steps: string|any[], selectedProducts: any, validateFn: any, fromIndex: number) {
   for (let i = fromIndex + 1; i < steps.length; i++) {
     if (steps[i].isDefault || steps[i].isFreeGift) continue;
     if (!validateFn(i)) return i;
@@ -53,24 +59,24 @@ function bsFindNextIncompleteStep(steps, selectedProducts, validateFn, fromIndex
   return -1;
 }
 
-function normalizeProductPageAutoNextId(value) {
+function normalizeProductPageAutoNextId(value: string|null|undefined) {
   if (value === null || value === undefined || value === '') return '';
   return String(value).split('/').pop();
 }
 
-function collectCategoryAutoNextProductIds(category) {
+function collectCategoryAutoNextProductIds(category: any) {
   const ids = new Set();
-  const addId = (value) => {
+  const addId = (value: any) => {
     const normalized = normalizeProductPageAutoNextId(value);
     if (normalized) ids.add(normalized);
   };
-  const addProduct = (product) => {
+  const addProduct = (product: any) => {
     addId(product?.id);
     addId(product?.productId);
     addId(product?.graphqlId);
     addId(product?.variantId);
     addId(product?.variantGraphqlId);
-    (Array.isArray(product?.variants) ? product.variants : []).forEach(variant => {
+    (Array.isArray(product?.variants) ? product.variants : []).forEach((variant: any)  => {
       addId(variant?.id);
       addId(variant?.variantId);
       addId(variant?.variantGraphqlId);
@@ -85,7 +91,7 @@ function collectCategoryAutoNextProductIds(category) {
 // Mirrors `shouldAutoAdvanceFullPageStep` in the full-page widget: auto-next can
 // be enabled per step or per category rule.
 // Removals and non-configured conditions never auto-advance.
-export function shouldAutoAdvanceProductPageStep({ quantity = 0, productId = '', step = null } = {}) {
+export function shouldAutoAdvanceProductPageStep({ quantity = 0, productId = '', step = null }: any = {}) {
   if (
     quantity > 0
     && step?.autoNextStepOnConditionMet === true
@@ -97,7 +103,7 @@ export function shouldAutoAdvanceProductPageStep({ quantity = 0, productId = '',
   }
 
   const categories = Array.isArray(step?.categories) ? step.categories : [];
-  const categoryRuleCategories = categories.filter(category =>
+  const categoryRuleCategories = categories.filter((category: any)  =>
     Array.isArray(category?.conditions) && category.conditions.length > 0
   );
 
@@ -106,7 +112,7 @@ export function shouldAutoAdvanceProductPageStep({ quantity = 0, productId = '',
   }
 
   const selectedProductId = normalizeProductPageAutoNextId(productId);
-  return categoryRuleCategories.some(category => {
+  return categoryRuleCategories.some((category: any)  => {
     if (category.autoNextStepOnConditionMet !== true) return false;
     const categoryProductIds = collectCategoryAutoNextProductIds(category);
     if (categoryProductIds.size === 0) {
@@ -117,7 +123,8 @@ export function shouldAutoAdvanceProductPageStep({ quantity = 0, productId = '',
 }
 
 export const ProductPageSelectionMethods: Record<string, any> & ThisType<any> = {
-updateProductSelection(stepIndex, productId, newQuantity) {
+updateProductSelection(stepIndex: string|number, productId: any, newQuantity: number) {
+  const discountTierBefore = captureDiscountTierState(this);
   const selectionKey = this.normalizeSelectionKey(productId);
   let quantity = Math.max(0, newQuantity);
   const directDefaultRequiredQuantity = this._getDirectDefaultRequiredQuantity(selectionKey);
@@ -195,6 +202,9 @@ updateProductSelection(stepIndex, productId, newQuantity) {
     this.updateProductQuantityDisplay(stepIndex, replacementSelectionKey, 0);
   }
   this.updateProductQuantityDisplay(stepIndex, selectionKey, quantity);
+  if (this._isProductPageModalSlotTemplate?.()) {
+    this.renderSteps();
+  }
   this._renderDirectDefaultProducts();
   this.renderModalTabs();
   this.updateModalNavigation();
@@ -221,6 +231,11 @@ updateProductSelection(stepIndex, productId, newQuantity) {
     }
   }
   this._maybeAutoAddAfterLastStep();
+  dispatchDiscountTierTransition({
+    root: this.container,
+    before: discountTierBefore,
+    after: captureDiscountTierState(this),
+  });
 },
 
 _maybeAutoAddAfterLastStep() {
@@ -263,7 +278,7 @@ _syncFreeGiftSlotCard() {
  * If the current step's condition is now met, advances to the next incomplete step,
  * or closes the modal if all steps are complete.
  */
-_autoProgressBottomSheet(stepIndex) {
+_autoProgressBottomSheet(stepIndex: any) {
   const clearAutoAdvance = () => {
     this._autoAdvancePending = false;
   };
@@ -276,7 +291,7 @@ _autoProgressBottomSheet(stepIndex) {
   const next = bsFindNextIncompleteStep(
     this.selectedBundle.steps,
     this.selectedProducts,
-    (i) => this.validateStep(i),
+    (i: any) => this.validateStep(i),
     stepIndex
   );
 
@@ -317,9 +332,10 @@ _autoProgressBottomSheet(stepIndex) {
   }
 },
 
-updateProductQuantityDisplay(stepIndex, productId, quantity) {
+updateProductQuantityDisplay(stepIndex: string|number, productId: any, quantity: number) {
   // Update quantity display without full re-render
-  const scope = this.elements.modal?.classList.contains('bw-bs-panel--open')
+  const modalOpen = this.elements.modal?.classList.contains('bw-bs-panel--open') === true;
+  const scope = modalOpen
     ? this.elements.modal
     : this.container;
   const productCard = scope.querySelector(`[data-product-id="${productId}"]`);
@@ -335,6 +351,16 @@ updateProductQuantityDisplay(stepIndex, productId, quantity) {
     const existingInlineControls = productCard.querySelector('.inline-quantity-controls');
     const cascadeRow = productCard.classList.contains('bw-ppb-cascade-product-row');
     const step = this.selectedBundle?.steps?.[stepIndex];
+    const productQuantityLimit = ConditionValidator.getAllowedQuantityPerProduct(
+      this.selectedBundle?.validateQuantityPerProduct
+    );
+    const modalPresentation = resolvePpbModalCardPresentation({
+      quantity,
+      validation: this.selectedBundle?.validateQuantityPerProduct,
+    });
+    const usesCompactSelectedAction = modalOpen
+      ? modalPresentation.mode === 'maximum-reached'
+      : ppbGridCard && productQuantityLimit === 1;
     const defaultAddText = cascadeRow
       ? resolveProductPageInlineAddText(this._resolveText?.bind(this))
       : this._resolveText('productCardAddButton', 'Add to Cart');
@@ -344,9 +370,6 @@ updateProductQuantityDisplay(stepIndex, productId, quantity) {
     }
 
     if (increaseBtn) {
-      const productQuantityLimit = ConditionValidator.getAllowedQuantityPerProduct(
-        this.selectedBundle?.validateQuantityPerProduct
-      );
       const { available, outOfStock } = this.getVariantAvailable(stepIndex, productId);
       const atMaxStock = available !== null && quantity >= available;
       const atMaxProductQuantity = productQuantityLimit !== null && quantity >= productQuantityLimit;
@@ -359,7 +382,7 @@ updateProductQuantityDisplay(stepIndex, productId, quantity) {
       }
     }
 
-    if (actionWrapper && quantity > 0 && ppbGridCard) {
+    if (actionWrapper && quantity > 0 && usesCompactSelectedAction) {
       actionWrapper.classList.add('is-expanded');
       existingInlineControls?.remove();
       const selectedText = resolveProductPageCardButtonText({
@@ -369,7 +392,7 @@ updateProductQuantityDisplay(stepIndex, productId, quantity) {
         defaultAddText,
       });
       if (!addBtn) {
-        actionWrapper.appendChild(createProductPageAddButton(productId, selectedText));
+        actionWrapper.appendChild(createProductPageAddButton(productId, selectedText, true));
       } else {
         addBtn.textContent = selectedText;
       }
@@ -377,9 +400,6 @@ updateProductQuantityDisplay(stepIndex, productId, quantity) {
       actionWrapper.classList.add('is-expanded');
       if (addBtn) addBtn.remove();
       if (!existingInlineControls) {
-        const productQuantityLimit = ConditionValidator.getAllowedQuantityPerProduct(
-          this.selectedBundle?.validateQuantityPerProduct
-        );
         const { available, outOfStock } = this.getVariantAvailable(stepIndex, productId);
         const atMaxStock = available !== null && quantity >= available;
         const atMaxProductQuantity = productQuantityLimit !== null && quantity >= productQuantityLimit;
@@ -406,6 +426,7 @@ updateProductQuantityDisplay(stepIndex, productId, quantity) {
     }
 
     if (addBtn) {
+      addBtn.setAttribute('aria-pressed', String(quantity > 0));
       if (quantity > 0) {
         addBtn.textContent = resolveProductPageCardButtonText({
           currentQuantity: quantity,
@@ -433,7 +454,7 @@ updateProductQuantityDisplay(stepIndex, productId, quantity) {
     }
 
     const isSelected = quantity > 0;
-    productCard.setAttribute('aria-pressed', String(isSelected));
+    productCard.removeAttribute('aria-pressed');
     const currentAriaLabel = productCard.getAttribute('aria-label');
     if (currentAriaLabel) {
       productCard.setAttribute(

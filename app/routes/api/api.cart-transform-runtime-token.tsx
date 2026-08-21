@@ -97,7 +97,7 @@ export async function action({ request }: ActionFunctionArgs) {
     const token = signRuntimeCartToken(payload, secret);
 
     return json({ ok: true, token }, { headers: { ...CORS_HEADERS, "Cache-Control": "no-store" } });
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof Response) {
       throw error;
     }

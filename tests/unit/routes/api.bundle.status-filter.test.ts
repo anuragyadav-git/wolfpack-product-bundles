@@ -57,7 +57,7 @@ function makeApiRequest(bundleId: string, previewToken?: string) {
   });
   if (previewToken) params.set('wpb_preview', previewToken);
   const message = [...params.entries()]
-    .map(([k, v]) => `${k}=${v}`)
+    .map(([k, v]: any) => `${k}=${v}`)
     .sort()
     .join('');
   params.set('signature', createHmac('sha256', 'test_api_secret').update(message).digest('hex'));
@@ -71,7 +71,7 @@ function makeProxyRequest(bundleId: string) {
     timestamp: '1770000000',
   });
   const message = [...params.entries()]
-    .map(([k, v]) => `${k}=${v}`)
+    .map(([k, v]: any) => `${k}=${v}`)
     .sort()
     .join('');
   params.set('signature', createHmac('sha256', 'test_api_secret').update(message).digest('hex'));
@@ -111,7 +111,7 @@ describe('api.bundle.$bundleId.json — status filtering', () => {
       request: makeApiRequest('bundle-1'),
       params: { bundleId: 'bundle-1' },
       context: {},
-    } as any);
+    } as any) as Response;
 
     expect(mockFindFirst()).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -133,7 +133,7 @@ describe('api.bundle.$bundleId.json — status filtering', () => {
       request: makeApiRequest('bundle-1', previewToken),
       params: { bundleId: 'bundle-1' },
       context: {},
-    } as any);
+    } as any) as Response;
 
     expect(response.status).toBe(200);
     expect(response.headers.get('Cache-Control')).toBe('private, no-store');
@@ -151,7 +151,7 @@ describe('api.bundle.$bundleId.json — status filtering', () => {
       request: makeApiRequest('bundle-1', previewToken),
       params: { bundleId: 'bundle-1' },
       context: {},
-    } as any);
+    } as any) as Response;
 
     expect(response.status).toBe(404);
   });
@@ -171,7 +171,7 @@ describe('api.bundle.$bundleId.json — status filtering', () => {
       request: makeApiRequest('bundle-1', previewToken),
       params: { bundleId: 'bundle-1' },
       context: {},
-    } as any);
+    } as any) as Response;
 
     expect(response.status).toBe(404);
   });

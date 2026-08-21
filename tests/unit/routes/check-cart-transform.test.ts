@@ -48,7 +48,7 @@ describe("api.check-cart-transform route", () => {
 
     const request = new Request("https://app.example.com/api/check-cart-transform");
     const response = await loader({ request, params: {}, context: {} });
-    const data = await response.json();
+    const data: any = await response.json();
 
     expect(data.activated).toBe(true);
     expect(data.cartTransformId).toBe("gid://shopify/CartTransform/100");
@@ -94,7 +94,7 @@ describe("api.check-cart-transform route", () => {
 
     const request = new Request("https://app.example.com/api/check-cart-transform");
     const response = await loader({ request, params: {}, context: {} });
-    const data = await response.json();
+    const data: any = await response.json();
 
     expect(data.activated).toBe(false);
     expect(data.cartTransformId).toBeNull();
@@ -112,7 +112,7 @@ describe("api.check-cart-transform route", () => {
 
     const request = new Request("https://app.example.com/api/check-cart-transform");
     const response = await loader({ request, params: {}, context: {} });
-    const data = await response.json();
+    const data: any = await response.json();
 
     expect(data.activated).toBe(false);
     expect(data.error).toBe("Failed to check cart transform status");

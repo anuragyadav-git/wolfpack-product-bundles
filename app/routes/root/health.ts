@@ -23,7 +23,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
         headers: NO_STORE_HEADERS,
       }
     );
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.warn(
       "Render health check failed",
       {

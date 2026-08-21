@@ -124,7 +124,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     });
 
     return json({ success: true }, { headers: CORS_HEADERS });
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.error("[ATTRIBUTION] Failed to record attribution", {
       component: "api.attribution",
     }, error);

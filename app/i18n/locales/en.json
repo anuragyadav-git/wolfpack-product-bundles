@@ -129,6 +129,19 @@
       "finishSetup": "Finish setup",
       "viewDetails": "Show status",
       "activate": "Enable",
+      "enableModal": {
+        "heading": "Enable Wolfpack Bundle on your store",
+        "description": "Turn on the Wolfpack Bundle app embed in Theme Editor, click Save, then return here.",
+        "mediaLabel": "Tutorial showing how to enable the Wolfpack Bundle app embed and save the theme",
+        "openThemeEditor": "Open Theme Editor",
+        "checking": "Checking your theme…",
+        "enabled": "App embed enabled",
+        "notDetected": "App embed not detected",
+        "openThemeEditorAgain": "Open Theme Editor again",
+        "chatWithSupport": "Chat with support",
+        "done": "Done",
+        "cancel": "Cancel"
+      },
       "ready": "Ready",
       "checking": "Checking setup",
       "actionNeeded": "Action needed",
@@ -201,6 +214,10 @@
       "previewOnly": "Preview only",
       "loading": "Loading preview",
       "notApplicable": "This setting is not used by the selected template.",
+      "feedback": {
+        "tierHit": "Tier hit",
+        "complete": "All tiers complete"
+      },
       "surface": {
         "bundleName": "Build your perfect bundle",
         "description": "Choose products to build your bundle.",

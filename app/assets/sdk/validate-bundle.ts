@@ -2,7 +2,7 @@
 
 import { ConditionValidator } from '../widgets/shared/condition-validator.js';
 
-function _stepIsCategoryRuleMode(step) {
+function _stepIsCategoryRuleMode(step: any) {
   var categories = Array.isArray(step && step.categories) ? step.categories : [];
   for (var i = 0; i < categories.length; i++) {
     var c = categories[i];
@@ -11,8 +11,8 @@ function _stepIsCategoryRuleMode(step) {
   return false;
 }
 
-export function validateStep(stepId, state) {
-  var step = state.steps.find(function (s) { return s.id === stepId; });
+export function validateStep(stepId: string, state: any) {
+  var step = state.steps.find(function (s: any) { return s.id === stepId; });
   if (!step) {
     return { valid: false, message: 'stepId "' + stepId + '" not found in bundle.' };
   }
@@ -29,9 +29,9 @@ export function validateStep(stepId, state) {
 
   var condVal = Number(step.conditionValue);
   if (!Number.isFinite(condVal) || condVal < 0) condVal = 0;
-  if (condVal === 0) return { valid: true };
+  if (condVal === 0) return { valid: true, message: '' };
   var op = step.conditionOperator || 'equal_to';
-  var opLabels = {
+  var opLabels: any = {
     'equal_to': 'exactly ' + condVal,
     'greater_than': 'more than ' + condVal,
     'less_than': 'less than ' + condVal,
@@ -42,9 +42,9 @@ export function validateStep(stepId, state) {
   return { valid: false, message: 'This step requires ' + label + ' item' + (condVal !== 1 ? 's' : '') + '.' };
 }
 
-export function validateBundle(state) {
-  var errors = {};
-  state.steps.forEach(function (step) {
+export function validateBundle(state: any) {
+  var errors: any = {};
+  state.steps.forEach(function (step: any) {
     if (step.isFreeGift || step.isDefault) return;
     var result = validateStep(step.id, state);
     if (!result.valid) {

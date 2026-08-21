@@ -23,7 +23,7 @@ export function PpbCategoryStepSettings() {
             }}
           />
         </s-stack>
-        <s-text tone="subdued">
+        <s-text tone={"subdued" as any}>
           Show one category at a time with step navigation.
         </s-text>
       </s-stack>

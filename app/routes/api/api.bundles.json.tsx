@@ -12,7 +12,7 @@ import { ERROR_MESSAGES } from "../../constants/errors";
  *
  * GET /apps/product-bundles/api/bundles.json
  */
-export const loader: LoaderFunction = async ({ request }) => {
+export const loader: LoaderFunction = async ({ request }: any) => {
   try {
     // Authenticate the request
     const { session } = await requireAppProxy(request);
@@ -99,7 +99,7 @@ export const loader: LoaderFunction = async ({ request }) => {
       }
     });
 
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.error("Error fetching bundles", { component: "apps.product-bundles.api.bundles.json", operation: "loader" }, error);
     return json({
       success: false,

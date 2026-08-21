@@ -52,7 +52,7 @@ export function FpbBundleTemplateSettings({
               description:
                 "Set a different discount format or label for this bundle only.",
             },
-          ].map(({ value, label, description }) => (
+          ].map(({ value, label, description }: any) => (
             <label
               key={value}
               style={{

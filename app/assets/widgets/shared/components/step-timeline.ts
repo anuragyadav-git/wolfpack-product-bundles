@@ -13,7 +13,7 @@ export function renderStepTimelineEntry({
   label = '',
   iconHtml = '',
   classes = [],
-} = {}) {
+}: any = {}) {
   const className = [
     'timeline-step',
     ...classes,
@@ -30,7 +30,7 @@ export function renderStepTimelineEntry({
   `;
 }
 
-function escapeHtml(value) {
+function escapeHtml(value: string) {
   return String(value)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -39,6 +39,6 @@ function escapeHtml(value) {
     .replace(/'/g, '&#39;');
 }
 
-function escapeAttribute(value) {
-  return escapeHtml(value).replace(/`/g, '&#96;');
+function escapeAttribute(value: string|number) {
+  return escapeHtml(String(value)).replace(/`/g, '&#96;');
 }

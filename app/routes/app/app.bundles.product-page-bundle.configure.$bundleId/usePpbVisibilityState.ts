@@ -3,18 +3,21 @@ import {
   asVisibilityArray,
   getVisibilityDisplayTarget,
 } from "./ConfigureBundleFlow.helpers";
+import { normalizePpbBundleEmbedConfig } from "../../../lib/ppb-bundle-embed";
 
 export function usePpbVisibilityState({
   bundle,
-  textOverrides,
 }: {
   bundle: any;
-  textOverrides: Record<string, string>;
 }) {
   const savedBundleUpsellConfig = ((bundle as any).bundleUpsellConfig ??
     null) as any;
   const savedWidgetConfiguration = savedBundleUpsellConfig?.widgetConfiguration;
   const savedUpsellConfiguration = savedBundleUpsellConfig?.upsellConfiguration;
+  const normalizedEmbedConfig = normalizePpbBundleEmbedConfig(
+    savedBundleUpsellConfig,
+  );
+  const canonicalEmbedConfiguration = normalizedEmbedConfig.upsellConfiguration;
   const savedWidgetDisplayConfiguration =
     savedWidgetConfiguration?.displayConfiguration;
   const savedEmbedDisplayConfiguration =
@@ -74,52 +77,50 @@ export function usePpbVisibilityState({
         false,
     );
   const [bundleEmbedEnabled, setBundleEmbedEnabled] = useState<boolean>(
-    savedUpsellConfiguration?.isEnabled ??
-      textOverrides.bundleEmbedEnabled === "true",
+    canonicalEmbedConfiguration.isEnabled,
   );
   const [bundleEmbedTitle, setBundleEmbedTitle] = useState<string>(
-    savedUpsellConfiguration?.title ??
-      textOverrides.embedTitle ??
-      "Build Your Bundle & Save More",
+    canonicalEmbedConfiguration.title,
   );
   const [bundleEmbedSubTitle, setBundleEmbedSubTitle] = useState<string>(
-    savedUpsellConfiguration?.subTitle ?? textOverrides.embedSubTitle ?? "",
+    canonicalEmbedConfiguration.subTitle,
   );
   const [bundleEmbedDisplayOn, setBundleEmbedDisplayOn] = useState<string>(
-    textOverrides.embedDisplayOn ??
-      getVisibilityDisplayTarget(
-        savedEmbedDisplayConfiguration,
-        "all_products",
-      ),
+    getVisibilityDisplayTarget(
+      canonicalEmbedConfiguration.displayConfiguration,
+      "all_products",
+    ),
   );
   const [bundleEmbedAddBrowsedProduct, setBundleEmbedAddBrowsedProduct] =
     useState<boolean>(
-      savedUpsellConfiguration?.useLinkProductAsDefaultProduct ??
-        textOverrides.embedAddBrowsedProduct === "true",
+      canonicalEmbedConfiguration.useLinkProductAsDefaultProduct,
     );
   const [bundleEmbedSelectedProducts, setBundleEmbedSelectedProducts] =
     useState<unknown[]>(
-      asVisibilityArray(savedEmbedDisplayConfiguration?.selectedProducts),
+      asVisibilityArray(canonicalEmbedConfiguration.displayConfiguration.selectedProducts),
     );
   const [bundleEmbedSpecificProductPages, setBundleEmbedSpecificProductPages] =
     useState<unknown[]>(
       asVisibilityArray(
-        savedEmbedDisplayConfiguration?.showOnSpecificProductPages,
+        canonicalEmbedConfiguration.displayConfiguration.showOnSpecificProductPages,
       ),
     );
   const [
     bundleEmbedCollectionsSelectedData,
     setBundleEmbedCollectionsSelectedData,
   ] = useState<unknown[]>(
-    asVisibilityArray(savedEmbedDisplayConfiguration?.collectionsSelectedData),
+      asVisibilityArray(canonicalEmbedConfiguration.displayConfiguration.collectionsSelectedData),
   );
   const [
     bundleEmbedSpecificCollectionPages,
     setBundleEmbedSpecificCollectionPages,
   ] = useState<unknown[]>(
     asVisibilityArray(
-      savedEmbedDisplayConfiguration?.showOnSpecificCollectionPages,
+      canonicalEmbedConfiguration.displayConfiguration.showOnSpecificCollectionPages,
     ),
+  );
+  const [bundleEmbedMultiLangText, setBundleEmbedMultiLangText] = useState(
+    normalizedEmbedConfig.multiLangText,
   );
   const originalUpsellWidgetEnabledRef = useRef<boolean>(
     savedWidgetConfiguration?.isEnabled ??
@@ -151,29 +152,37 @@ export function usePpbVisibilityState({
       false,
   );
   const originalBundleEmbedEnabledRef = useRef<boolean>(
-    savedUpsellConfiguration?.isEnabled ??
-      (bundle as any).textOverrides?.bundleEmbedEnabled === "true",
+    canonicalEmbedConfiguration.isEnabled,
   );
   const originalBundleEmbedTitleRef = useRef<string>(
-    savedUpsellConfiguration?.title ??
-      (bundle as any).textOverrides?.embedTitle ??
-      "Build Your Bundle & Save More",
+    canonicalEmbedConfiguration.title,
   );
   const originalBundleEmbedSubTitleRef = useRef<string>(
-    savedUpsellConfiguration?.subTitle ??
-      (bundle as any).textOverrides?.embedSubTitle ??
-      "",
+    canonicalEmbedConfiguration.subTitle,
   );
   const originalBundleEmbedDisplayOnRef = useRef<string>(
-    (bundle as any).textOverrides?.embedDisplayOn ??
-      getVisibilityDisplayTarget(
-        savedEmbedDisplayConfiguration,
-        "all_products",
-      ),
+    getVisibilityDisplayTarget(
+      canonicalEmbedConfiguration.displayConfiguration,
+      "all_products",
+    ),
   );
   const originalBundleEmbedAddBrowsedProductRef = useRef<boolean>(
-    savedUpsellConfiguration?.useLinkProductAsDefaultProduct ??
-      (bundle as any).textOverrides?.embedAddBrowsedProduct === "true",
+    canonicalEmbedConfiguration.useLinkProductAsDefaultProduct,
+  );
+  const originalBundleEmbedSelectedProductsRef = useRef(
+    canonicalEmbedConfiguration.displayConfiguration.selectedProducts,
+  );
+  const originalBundleEmbedSpecificProductPagesRef = useRef(
+    canonicalEmbedConfiguration.displayConfiguration.showOnSpecificProductPages,
+  );
+  const originalBundleEmbedCollectionsSelectedDataRef = useRef(
+    canonicalEmbedConfiguration.displayConfiguration.collectionsSelectedData,
+  );
+  const originalBundleEmbedSpecificCollectionPagesRef = useRef(
+    canonicalEmbedConfiguration.displayConfiguration.showOnSpecificCollectionPages,
+  );
+  const originalBundleEmbedMultiLangTextRef = useRef(
+    normalizedEmbedConfig.multiLangText,
   );
 
   return {
@@ -224,6 +233,8 @@ export function usePpbVisibilityState({
     setBundleEmbedCollectionsSelectedData,
     bundleEmbedSpecificCollectionPages,
     setBundleEmbedSpecificCollectionPages,
+    bundleEmbedMultiLangText,
+    setBundleEmbedMultiLangText,
     originalUpsellWidgetEnabledRef,
     originalUpsellWidgetDisplayModeRef,
     originalUpsellWidgetDisplayOnRef,
@@ -237,5 +248,10 @@ export function usePpbVisibilityState({
     originalBundleEmbedSubTitleRef,
     originalBundleEmbedDisplayOnRef,
     originalBundleEmbedAddBrowsedProductRef,
+    originalBundleEmbedSelectedProductsRef,
+    originalBundleEmbedSpecificProductPagesRef,
+    originalBundleEmbedCollectionsSelectedDataRef,
+    originalBundleEmbedSpecificCollectionPagesRef,
+    originalBundleEmbedMultiLangTextRef,
   };
 }

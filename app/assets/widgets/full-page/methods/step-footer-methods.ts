@@ -12,14 +12,14 @@ import { preflightVariantOnStorefront } from '../../shared/variant-preflight.js'
 import { buildStorefrontApiPath } from '../../../../config/storefront-proxy-routes.js';
 import { applySellingPlanToJsonCartItems } from '../../shared/engine/cart-submit.js';
 
-function shouldIncludeBundleQuantityCartProperties(context) {
+function shouldIncludeBundleQuantityCartProperties(context: any) {
   const pricing = context?.selectedBundle?.pricing || {};
   const method = String(pricing.method || '').toLowerCase();
   const bundleQuantityOptions = pricing.displayOptions?.bundleQuantityOptions;
   return !(method === 'buy_x_get_y' && bundleQuantityOptions?.enabled === false);
 }
 
-function extractNumericFullPageId(value, extractId) {
+function extractNumericFullPageId(value: string|null|undefined, extractId: (arg0: any) => any) {
   if (value === null || value === undefined || value === '') return '';
   if (typeof extractId === 'function') return extractId(value);
   const raw = String(value || '');
@@ -28,14 +28,14 @@ function extractNumericFullPageId(value, extractId) {
   return raw.includes('/') ? raw.split('/').pop() : raw;
 }
 
-function resolveCartVariantId(product, selectionId, extractId) {
+function resolveCartVariantId(product: any, selectionId: any, extractId: any) {
   const candidateVariantFromSelection = (() => {
     if (!product) return '';
     const variants = Array.isArray(product.variants) ? product.variants : [];
     const selected = String(selectionId || '');
     if (!selected) return '';
 
-    const matchingVariant = variants.find((candidate) => {
+    const matchingVariant = variants.find((candidate: any) => {
       const candidateId = extractNumericFullPageId(
         candidate?.selectionId || candidate?.variantId || candidate?.id,
         extractId
@@ -60,7 +60,7 @@ function resolveCartVariantId(product, selectionId, extractId) {
   );
 }
 
-function mergeDuplicateCartLines(lines = []) {
+function mergeDuplicateCartLines(lines: any[] = []) {
   const grouped = new Map();
 
   lines.forEach((line) => {
@@ -107,7 +107,7 @@ function mergeDuplicateCartLines(lines = []) {
 }
 
 export const fullPageStepFooterMethods: Record<string, any> & ThisType<any> = {
-  isSelectedAddonCartLine(step) {
+  isSelectedAddonCartLine(step: any) {
     if (step?.isFreeGift !== true) return false;
     const addonEval = typeof this.getAddonTierEvaluation === 'function'
       ? this.getAddonTierEvaluation(step)
@@ -118,21 +118,21 @@ export const fullPageStepFooterMethods: Record<string, any> & ThisType<any> = {
     return Boolean(this.getAddonLineDiscount(step));
   },
 
-  buildCartLineSourceProperties(selectedLines) {
-    const parentSelectedLines = selectedLines.filter((line) => {
+  buildCartLineSourceProperties(selectedLines: any[]) {
+    const parentSelectedLines = selectedLines.filter((line: any) => {
       return !fullPageStepFooterMethods.isSelectedAddonCartLine.call(this, line?.step);
     });
-    const totalPrice = parentSelectedLines.reduce((sum, line) => {
+    const totalPrice = parentSelectedLines.reduce((sum: number, line: any) => {
       const quantity = Number(line?.quantity || 0);
       const price = Number(line?.product?.price || 0);
       return sum + (price * quantity);
     }, 0);
     const totalQuantity = parentSelectedLines.reduce(
-      (sum, line) => sum + Number(line?.quantity || 0),
+      (sum: number, line: any) => sum + Number(line?.quantity || 0),
       0
     );
-    const unitPrices = [];
-    parentSelectedLines.forEach((line) => {
+    const unitPrices: number[]|undefined = [];
+    parentSelectedLines.forEach((line: any) => {
       const quantity = Number(line?.quantity || 0);
       const price = Number(line?.product?.price || 0);
       for (let i = 0; i < quantity; i += 1) unitPrices.push(price);
@@ -148,7 +148,6 @@ export const fullPageStepFooterMethods: Record<string, any> & ThisType<any> = {
     const discountPercentage = Number(discountInfo.discountPercentage || 0)
       || (totalPrice > 0 ? (discountAmount / totalPrice) * 100 : 0);
     const useDisplayOnlyFixedPrice = shouldDisplayClassicFixedBundleRawTotal(this, discountInfo);
-
     const sourceProperties = buildSharedCartLineSourceProperties({
       selectedLines: parentSelectedLines,
       retailPrice: useDisplayOnlyFixedPrice
@@ -159,17 +158,18 @@ export const fullPageStepFooterMethods: Record<string, any> & ThisType<any> = {
         : '',
       discountPercentage,
       includeBox: shouldIncludeBundleQuantityCartProperties(this),
+      labels: this.getCartLineLabels?.(),
     });
 
     return sourceProperties;
   },
 
-  buildCartLineDisplayProperties(displayProperties) {
+  buildCartLineDisplayProperties(displayProperties: any) {
     return buildSharedCartLineDisplayProperties(displayProperties, this.getCartLineLabels());
   },
 
   // Add bundle to cart
-  async addBundleToCart(clickedButton = null) {
+  async addBundleToCart(clickedButton: any = null) {
   if (this._isWidgetActionBusy) return;
   const actionButton = clickedButton || this.container?.querySelector('.footer-btn-next');
   this._setWidgetBusy(true, actionButton);
@@ -186,7 +186,7 @@ export const fullPageStepFooterMethods: Record<string, any> & ThisType<any> = {
       return;
     }
     // Build cart items from selected products
-    let items = [];
+    let items: any[] = [];
 
     // Generate unique bundle instance ID for this add-to-cart action
     // This allows cart transform to group components and prevents Shopify from
@@ -195,11 +195,11 @@ export const fullPageStepFooterMethods: Record<string, any> & ThisType<any> = {
     const sessionKey = this.generateBundleSessionKey();
     const offerId = this.resolveFullPageOfferId();
     const baseOfferId = `${offerId}_${sessionKey}`;
-    const selectedLines = [];
+    const selectedLines: any[] = [];
     const variantPreflightCache = new Map();
-    const unavailableLines = [];
+    const unavailableLines: any[] = [];
     let itemNumber = 0;
-    const hasAddonStepConfigured = (this.selectedBundle?.steps || []).some((candidateStep) => {
+    const hasAddonStepConfigured = (this.selectedBundle?.steps || []).some((candidateStep: any) => {
       return fullPageStepFooterMethods.isSelectedAddonCartLine.call(this, candidateStep);
     });
 
@@ -211,14 +211,14 @@ export const fullPageStepFooterMethods: Record<string, any> & ThisType<any> = {
       const stepSelections = this.selectedProducts[stepIndex] || {};
       const productsInStep = this.expandProductsByVariant(this.stepProductData[stepIndex] || []);
 
-      for (const [variantId, quantity] of Object.entries(stepSelections)) {
+      for (const [variantId, quantity] of Object.entries<any>(stepSelections)) {
         if (quantity <= 0) continue;
         const requestedQuantity = Number(quantity || 0);
         const resolvedSelectionId = extractNumericFullPageId(
           variantId,
           typeof this.extractId === 'function' ? this.extractId : null,
         );
-        const product = productsInStep.find((candidate) => {
+        const product = productsInStep.find((candidate: any) => {
           const candidateSelectionId = extractNumericFullPageId(
             candidate?.selectionId || candidate?.variantId || candidate?.id,
             typeof this.extractId === 'function' ? this.extractId : null,
@@ -271,7 +271,7 @@ export const fullPageStepFooterMethods: Record<string, any> & ThisType<any> = {
         }
 
         itemNumber += 1;
-        const properties = {
+        const properties: any = {
           '_bundleName': bundleName,
           '_wolfpackProductBundle:prodQty': String(quantity),
           '_wolfpackProductBundle:OfferId': `${offerId}_${sessionKey}_${itemNumber}`,
@@ -302,7 +302,7 @@ export const fullPageStepFooterMethods: Record<string, any> & ThisType<any> = {
         }
         if (step?.isDefault) properties._bundle_step_type = 'default';
 
-        const cartItem = {
+        const cartItem: any = {
           id: numericVariantId,
           quantity: quantity,
           properties,
@@ -389,14 +389,14 @@ export const fullPageStepFooterMethods: Record<string, any> & ThisType<any> = {
         baseOfferId,
       );
 
-    } catch (fetchError) {
+    } catch (fetchError: any) {
       this._emitStorefrontEvent('bundle-add-to-cart-failed', { reason: 'fetch-error', message: String(fetchError && fetchError.message || fetchError) });
       ToastManager.show(
         String(fetchError && fetchError.message) || 'Failed to add bundle to cart. Please try again.'
       );
     }
 
-  } catch (error) {
+  } catch (error: any) {
     this._emitStorefrontEvent('bundle-add-to-cart-failed', { reason: 'validation-error', message: String(error && error.message || error) });
     ToastManager.show('Failed to add bundle to cart. Please try again.');
   } finally {
@@ -405,7 +405,7 @@ export const fullPageStepFooterMethods: Record<string, any> & ThisType<any> = {
   }
 },
 
-parseRuntimeAddonDiscount(stepType) {
+parseRuntimeAddonDiscount(stepType: string) {
   if (typeof stepType !== 'string') return null;
   const parts = stepType.split(':');
   if (parts.length !== 3 || parts[0] !== 'addon' || String(parts[1]).toUpperCase() !== 'PERCENTAGE') {
@@ -416,17 +416,17 @@ parseRuntimeAddonDiscount(stepType) {
   return { type: 'PERCENTAGE', value: Math.min(100, value) };
 },
 
-async requestCartTransformRuntimeToken(items, { offerGroupId, bundleType }) {
-  const components = [];
-  const addons = [];
+async requestCartTransformRuntimeToken(items: any[], { offerGroupId, bundleType }: any) {
+  const components: { variantId: any; productId: any; quantity: any; }[] = [];
+  const addons: { discount: any; variantId: any; productId: any; quantity: any; }[] = [];
   const parseAddonDiscount = typeof this.parseRuntimeAddonDiscount === 'function'
     ? this.parseRuntimeAddonDiscount
     : fullPageStepFooterMethods.parseRuntimeAddonDiscount;
 
-  items.forEach((item) => {
+  items.forEach((item: any) => {
     const stepType = item?.properties?._bundle_step_type;
     const isAddon = stepType === 'addon' || (typeof stepType === 'string' && stepType.startsWith('addon:'));
-    const line = {
+    const line: any = {
       variantId: item.id,
       productId: item._runtimeProductId || item.productId || undefined,
       quantity: item.quantity,
@@ -455,7 +455,7 @@ async requestCartTransformRuntimeToken(items, { offerGroupId, bundleType }) {
         subscription: {
           sellingPlanGroupId: this.selectedBundle?.subscription?.selectedGroup?.id,
           sellingPlanId: this.selectedSellingPlanId,
-          recurringBundleDiscount: subscription.recurringBundleDiscount === true,
+          recurringBundleDiscount: this.selectedBundle?.subscription?.recurringBundleDiscount === true,
         },
       } : {}),
     }),
@@ -467,13 +467,13 @@ async requestCartTransformRuntimeToken(items, { offerGroupId, bundleType }) {
   return data.token;
 },
 
-createStepElement(step, index) {
+createStepElement(step: any, index: number) {
   const stepBox = document.createElement('div');
   stepBox.className = 'step-box';
-  stepBox.dataset.stepIndex = index;
+  stepBox.dataset.stepIndex = String(index);
 
   const selectedProducts = this.selectedProducts[index] || {};
-  const hasSelections = Object.values(selectedProducts).some(qty => qty > 0);
+  const hasSelections = Object.values<any>(selectedProducts).some(qty => qty > 0);
 
   if (hasSelections) {
     stepBox.classList.add('step-completed');
@@ -488,7 +488,7 @@ createStepElement(step, index) {
       </svg>
     `;
     clearBadge.title = 'Remove all products from this step';
-    clearBadge.addEventListener('click', (e) => {
+    clearBadge.addEventListener('click', (e: any) => {
       e.stopPropagation(); // Prevent opening modal
       this.clearStepSelections(index);
     });
@@ -500,7 +500,7 @@ createStepElement(step, index) {
       const imagesContainer = document.createElement('div');
       imagesContainer.className = 'step-images';
 
-      productImages.slice(0, 4).forEach(imageData => {
+      productImages.slice(0, 4).forEach((imageData: any)  => {
         const img = document.createElement('img');
         img.src = imageData.url;
         img.alt = imageData.alt;
@@ -511,7 +511,7 @@ createStepElement(step, index) {
       stepBox.appendChild(imagesContainer);
 
       // Add count badge if more than 4 products
-      const totalQuantity = Object.values(selectedProducts).reduce((sum, qty) => sum + qty, 0);
+      const totalQuantity = Object.values<any>(selectedProducts).reduce((sum: number, qty: any) => sum + Number(qty || 0), 0);
       if (productImages.length > 4 || totalQuantity > 4) {
         const countBadge = document.createElement('div');
         countBadge.className = 'image-count-badge';
@@ -554,13 +554,13 @@ createStepElement(step, index) {
   return stepBox;
 },
 
-getStepProductImages(stepIndex) {
+getStepProductImages(stepIndex: string|number) {
   const selectedProducts = this.selectedProducts[stepIndex] || {};
-  const productImages = [];
+  const productImages: { url: any; alt: any; }[] = [];
 
-  Object.entries(selectedProducts).forEach(([variantId, quantity]) => {
+  Object.entries(selectedProducts).forEach(([variantId, quantity]: any) => {
     if (quantity > 0) {
-      const product = this.stepProductData[stepIndex].find(p => String(p.selectionId || '') === String(variantId));
+      const product = this.stepProductData[stepIndex].find((p: any)  => String(p.selectionId || '') === String(variantId));
       if (product && product.imageUrl && !productImages.find(img => img.url === product.imageUrl)) {
         productImages.push({
           url: product.imageUrl,
@@ -573,12 +573,12 @@ getStepProductImages(stepIndex) {
   return productImages;
 },
 
-getStepSelectionText(selectedProducts) {
-  const totalSelected = Object.values(selectedProducts).reduce((sum, qty) => sum + (qty || 0), 0);
+getStepSelectionText(selectedProducts: any) {
+  const totalSelected = Object.values<any>(selectedProducts).reduce((sum: number, qty: any) => sum + Number(qty || 0), 0);
   return totalSelected > 0 ? `${totalSelected} selected` : '';
 },
 
-clearStepSelections(stepIndex) {
+clearStepSelections(stepIndex: string|number) {
   // Clear all product selections for this step
   this.selectedProducts[stepIndex] = {};
 
@@ -595,9 +595,9 @@ getDiscountProgressState(totalPrice = 0, totalQuantity = 0) {
   const tierTextByRuleId = pricing?.messages?.tierTextByRuleId || {};
   const boxRules = this.getBoxSelectionRules();
   const eligibleRules = rules
-    .filter(rule => rule && (rule.conditionType === 'quantity' || rule.conditionType === 'amount'))
-    .sort((a, b) => (Number(a.conditionValue || 0) || 0) - (Number(b.conditionValue || 0) || 0));
-  const reachedByIndex = eligibleRules.map((rule) => {
+    .filter((rule: any)  => rule && (rule.conditionType === 'quantity' || rule.conditionType === 'amount'))
+    .sort((a: any, b: any) => (Number(a.conditionValue || 0) || 0) - (Number(b.conditionValue || 0) || 0));
+  const reachedByIndex = eligibleRules.map((rule: any) => {
     const threshold = Number(rule.conditionValue || 0) || 0;
     const currentValue = rule.conditionType === 'amount'
       ? Number(totalPrice || 0)
@@ -608,14 +608,14 @@ getDiscountProgressState(totalPrice = 0, totalQuantity = 0) {
       threshold
     );
   });
-  const activeIndex = reachedByIndex.findIndex(isReached => !isReached);
+  const activeIndex = reachedByIndex.findIndex((isReached: any)  => !isReached);
   const milestoneCount = eligibleRules.length;
   const milestones = eligibleRules
-    .map((rule, index) => {
+    .map((rule: any, index: number) => {
       const ruleId = String(rule.id || '');
       const threshold = Number(rule.conditionValue || 0) || 0;
       const tierText = tierTextByRuleId?.[ruleId] || {};
-      const boxRule = boxRules.find(box => box.ruleId === ruleId);
+      const boxRule = boxRules.find((box: any)  => box.ruleId === ruleId);
       const discountMethod = pricing?.method || BUNDLE_WIDGET.DISCOUNT_METHODS.PERCENTAGE_OFF;
       const discountValue = Number(rule.discountValue ?? rule.discount?.value ?? 0) || 0;
       const fallbackTitle = rule.conditionType === 'quantity' && threshold > 0
@@ -643,19 +643,19 @@ getDiscountProgressState(totalPrice = 0, totalQuantity = 0) {
         isReached,
       };
     })
-    .filter(milestone => milestone.ruleId && milestone.title);
+    .filter((milestone: any)  => milestone.ruleId && milestone.title);
 
   if (!milestones.length) {
     return { milestones: [], progressPercent: 0 };
   }
 
-  const activeMilestoneIndex = milestones.findIndex(milestone => milestone.state === 'active');
+  const activeMilestoneIndex = milestones.findIndex((milestone: any)  => milestone.state === 'active');
   if (activeMilestoneIndex === -1) {
     return { milestones, progressPercent: 100 };
   }
 
   const activeMilestone = milestones[activeMilestoneIndex];
-  let previousMatchingMilestone = null;
+  let previousMatchingMilestone: any = null;
   for (let index = activeMilestoneIndex - 1; index >= 0; index -= 1) {
     if (milestones[index].conditionType === activeMilestone.conditionType) {
       previousMatchingMilestone = milestones[index];

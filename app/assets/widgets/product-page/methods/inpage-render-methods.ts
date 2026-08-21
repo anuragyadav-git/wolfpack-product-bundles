@@ -10,15 +10,15 @@ import { shouldRenderInlineVariantSelector } from '../../shared/variant-selector
 import { resolveProductPageCardButtonText, resolveProductPageInlineAddText } from './modal-methods.js';
 import { getSubscriptionProductCardPrice } from '../../shared/subscription-storefront-methods.js';
 
-function bsIsDefaultStep(step) { return !!step?.isDefault; }
+function bsIsDefaultStep(step: any) { return !!step?.isDefault; }
 
-function bsGetDiscountBadgeLabel(step) { return step?.discountBadgeLabel || null; }
+function bsGetDiscountBadgeLabel(step: any) { return step?.discountBadgeLabel || null; }
 
-function makeSlotCardKeyboardAccessible(card, activate) {
+function makeSlotCardKeyboardAccessible(card: HTMLDivElement, activate: any) {
   card.setAttribute('role', 'button');
   card.tabIndex = 0;
   card.addEventListener('click', activate);
-  card.addEventListener('keydown', (event) => {
+  card.addEventListener('keydown', (event: any) => {
     if (event.target && event.target !== card) return;
     if (event.key !== 'Enter' && event.key !== ' ') return;
     event.preventDefault();
@@ -26,10 +26,104 @@ function makeSlotCardKeyboardAccessible(card, activate) {
   });
 }
 
-export function resolveSelectedSlotTitle(title, isVertical) {
-  const normalizedTitle = String(title || '');
-  if (isVertical || normalizedTitle.length <= 25) return normalizedTitle;
-  return `${normalizedTitle.substring(0, 25)}...`;
+function createSlotReplacementTrigger(accessibleName: string, activate: (event: Event) => void) {
+  const trigger = document.createElement('button');
+  trigger.type = 'button';
+  trigger.className = 'bw-slot-card__replace-trigger';
+  trigger.setAttribute('aria-label', accessibleName);
+  trigger.addEventListener('click', activate);
+  return trigger;
+}
+
+export function resolveSelectedSlotTitle(title: string, _isVertical: boolean) {
+  return String(title || '');
+}
+
+function resolveFilledSlotRemoveLabel(
+  resolveText: ((key: string, fallback: string) => string) | undefined,
+  productTitle: unknown,
+) {
+  const fallback = 'Remove this product';
+  const template = typeof resolveText === 'function'
+    ? String(resolveText('removeProductFromFooterText', fallback) || fallback)
+    : fallback;
+  const title = String(productTitle || '').trim();
+
+  if (!title) return template.replace('{{stepName}}', '').trim();
+  if (template.includes('{{stepName}}')) {
+    return template.replace('{{stepName}}', title);
+  }
+  return `${template}: ${title}`;
+}
+
+function createFilledSlotRemoveButton({ label, onRemove }: any) {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'step-clear-badge';
+  button.title = label;
+  button.setAttribute('aria-label', label);
+  button.innerHTML = '<span aria-hidden="true">&times;</span>';
+  button.addEventListener('click', (event: any) => {
+    event.stopPropagation();
+    onRemove(event);
+  });
+  return button;
+}
+
+export function resolveSelectedSlotContent(
+  product: any = {},
+  currencyInfo = CurrencyManager.getCurrencyInfo(),
+) {
+  const rawVariantTitle = String(product.variantTitle || '').trim();
+  const variantTitle = rawVariantTitle && rawVariantTitle !== 'Default Title'
+    ? rawVariantTitle
+    : '';
+  const rawTitle = String(product.parentTitle || product.title || '');
+  const expandedVariantSuffix = variantTitle ? ` - ${variantTitle}` : '';
+  const title = !product.parentTitle && expandedVariantSuffix && rawTitle.endsWith(expandedVariantSuffix)
+    ? rawTitle.slice(0, -expandedVariantSuffix.length)
+    : rawTitle;
+  const price = Number(product.price);
+  const compareAtPrice = Number(product.compareAtPrice);
+  const hasPrice = product.price !== null
+    && product.price !== undefined
+    && Number.isFinite(price);
+  const hasCompareAtPrice = hasPrice
+    && product.compareAtPrice !== null
+    && product.compareAtPrice !== undefined
+    && Number.isFinite(compareAtPrice)
+    && compareAtPrice > price;
+
+  return {
+    title,
+    variantTitle,
+    priceText: hasPrice ? CurrencyManager.convertAndFormat(price, currencyInfo) : '',
+    compareAtPriceText: hasCompareAtPrice
+      ? CurrencyManager.convertAndFormat(compareAtPrice, currencyInfo)
+      : '',
+  };
+}
+
+function getStepSlotElements(widget: any, stepIndex: any) {
+  const candidates = widget.elements?.stepsContainer?.querySelectorAll?.('[data-step-index]') || [];
+  return [...candidates].filter(
+    candidate => String(candidate.dataset?.stepIndex) === String(stepIndex),
+  );
+}
+
+function focusModalSlotAfterRemoval(widget: any, stepIndex: any, slotIndex: number) {
+  const focusRecovery = () => {
+    const sameStep = getStepSlotElements(widget, stepIndex);
+    const nextFocus = sameStep[slotIndex] || sameStep.at(-1);
+    const nestedTrigger = nextFocus?.querySelector?.('.bw-slot-card__replace-trigger');
+    (nestedTrigger || nextFocus)?.focus?.();
+  };
+
+  if (typeof globalThis.requestAnimationFrame === 'function') {
+    globalThis.requestAnimationFrame(focusRecovery);
+  } else {
+    globalThis.queueMicrotask?.(focusRecovery);
+  }
 }
 
 function renderInpageProductLoadingRows(rowCount = 3) {
@@ -51,7 +145,7 @@ function renderInpageProductLoadingRows(rowCount = 3) {
   `;
 }
 
-export function shouldDisplayVariantsAsIndividualForInpageCategory(step, stepIndex, activeCategoryIndexes = {}) {
+export function shouldDisplayVariantsAsIndividualForInpageCategory(step: any, stepIndex: string|number, activeCategoryIndexes: any = {}) {
   const categories = Array.isArray(step?.categories) ? step.categories : [];
   if (categories.length > 0) {
     const activeIndex = typeof activeCategoryIndexes?.[stepIndex] === 'number'
@@ -66,7 +160,7 @@ export function shouldDisplayVariantsAsIndividualForInpageCategory(step, stepInd
     || step?.displayVariantsAsIndividual === true;
 }
 
-export function getCascadeSoleVariantDisplayProduct(product = {}) {
+export function getCascadeSoleVariantDisplayProduct(product: any = {}) {
   const variants = Array.isArray(product.variants) ? product.variants : [];
   const soleVariantTitle = typeof variants[0]?.title === 'string' ? variants[0].title.trim() : '';
   const hadMultipleSourceVariants = Number(product.sourceVariantCount || 0) > 1;
@@ -78,23 +172,23 @@ export function getCascadeSoleVariantDisplayProduct(product = {}) {
 }
 
 export function resolveInpageProductSelection(
-  product = {},
-  stepSelections = {},
-  normalizeSelectionKey = (value) => String(value || ''),
-  selectedProductCategoryIndexes = {},
-  activeCategoryIndex = null,
+  product: any = {},
+  stepSelections: any = {},
+  normalizeSelectionKey = (value: any) => String(value || ''),
+  selectedProductCategoryIndexes: any = {},
+  activeCategoryIndex: any = null,
 ) {
   const defaultSelectionKey = product.selectionId || product.variantId || product.id || '';
-  const candidateIds = [defaultSelectionKey, product.id, product.productId];
+  const candidateIds: any[] = [defaultSelectionKey, product.id, product.productId];
   if (Array.isArray(product.variants)) {
-    candidateIds.push(...product.variants.map((variant) => variant.id));
+    candidateIds.push(...product.variants.map((variant: any) => variant.id));
   }
 
   const normalizedCandidates = new Set(
     candidateIds.map(normalizeSelectionKey).filter(Boolean),
   );
   const restoredEntry = Object.entries(stepSelections || {}).find(
-    ([selectionKey, rawQuantity]) => (
+    ([selectionKey, rawQuantity]: any) => (
       Number(rawQuantity) > 0
       && normalizedCandidates.has(normalizeSelectionKey(selectionKey))
     ),
@@ -103,7 +197,7 @@ export function resolveInpageProductSelection(
   if (restoredEntry) {
     const normalizedSelectionKey = normalizeSelectionKey(restoredEntry[0]);
     const categoryOwnerEntry = Object.entries(selectedProductCategoryIndexes || {}).find(
-      ([selectionKey]) => normalizeSelectionKey(selectionKey) === normalizedSelectionKey,
+      ([selectionKey]: any) => normalizeSelectionKey(selectionKey) === normalizedSelectionKey,
     );
     const categoryOwner = categoryOwnerEntry ? Number(categoryOwnerEntry[1]) : null;
     const belongsToActiveCategory = (
@@ -124,7 +218,7 @@ export function resolveInpageProductSelection(
 }
 
 export const ProductPageInpageRenderMethods: Record<string, any> & ThisType<any> = {
-_renderInpageStepProducts(stepIndex, target) {
+_renderInpageStepProducts(stepIndex: string|number, target: any) {
   const rawProducts = this.stepProductData[stepIndex] || [];
   if (!this._inpageStepProductsLoaded) this._inpageStepProductsLoaded = {};
   target.classList.toggle('bw-ppb-cascade-product-list', this._isProductPageCascadeTemplate());
@@ -181,7 +275,7 @@ _renderInpageStepProducts(stepIndex, target) {
   const currencyInfo = CurrencyManager.getCurrencyInfo();
   const inlineAddText = resolveProductPageInlineAddText(this._resolveText?.bind(this));
 
-  target.innerHTML = products.map(product => {
+  target.innerHTML = products.map((product: any)  => {
     const directSelectionKey = product.selectionId || product.variantId || product.id;
     const restoredGridSelection = usesGridCards
       ? resolveInpageProductSelection(
@@ -193,7 +287,7 @@ _renderInpageStepProducts(stepIndex, target) {
       )
       : null;
     const selectionKey = restoredGridSelection?.selectionKey || directSelectionKey;
-    const productSelection = { ...product, selectionId: selectionKey };
+    const productSelection: any = { ...product, selectionId: selectionKey };
     const currentQuantity = restoredGridSelection?.quantity
       ?? this.getSelectedQuantity(stepIndex, selectionKey);
     const { available, outOfStock } = this.getVariantAvailable(stepIndex, selectionKey);
@@ -224,7 +318,6 @@ _renderInpageStepProducts(stepIndex, target) {
           description: '',
           displaySeeMoreLink: false,
           expandProductCardOnHover: false,
-          showCompareAtPrice: this._shouldShowProductComparedAtPrice(),
           variantSelectorHtml,
           addButtonText: resolveProductPageCardButtonText({ currentQuantity, currentStep, outOfStock, defaultAddText: inlineAddText }),
           addDisabled: outOfStock,
@@ -245,11 +338,10 @@ _renderInpageStepProducts(stepIndex, target) {
           description: '',
           displaySeeMoreLink: false,
           expandProductCardOnHover: false,
-          showCompareAtPrice: this._shouldShowProductComparedAtPrice(),
           mode: 'grid',
           className: `bw-ppb-grid-product-card ${outOfStock ? 'is-out-of-stock' : ''}`.trim(),
           addButtonText: resolveProductPageCardButtonText({ currentQuantity, currentStep, outOfStock, defaultAddText: inlineAddText }),
-          selectedAction: 'button',
+          selectedAction: productQuantityLimit === 1 ? 'button' : undefined,
           selectedButtonText: resolveProductPageCardButtonText({ currentQuantity, currentStep, outOfStock, defaultAddText: inlineAddText }),
           addDisabled: outOfStock,
           increaseDisabled,
@@ -269,10 +361,9 @@ _renderInpageStepProducts(stepIndex, target) {
         description: '',
         displaySeeMoreLink: false,
         expandProductCardOnHover: false,
-        showCompareAtPrice: this._shouldShowProductComparedAtPrice(),
         mode: usesGridCards ? 'grid' : 'row',
         addButtonText: resolveProductPageCardButtonText({ currentQuantity, currentStep, outOfStock, defaultAddText: inlineAddText }),
-        selectedAction: 'button',
+        selectedAction: productQuantityLimit === 1 ? 'button' : undefined,
         selectedButtonText: resolveProductPageCardButtonText({ currentQuantity, currentStep, outOfStock, defaultAddText: inlineAddText }),
         addDisabled: outOfStock,
         increaseDisabled,
@@ -285,7 +376,7 @@ _renderInpageStepProducts(stepIndex, target) {
   this.attachProductEventHandlers(target, stepIndex);
 },
 
-renderInlineCardVariantSelector(product, step) {
+renderInlineCardVariantSelector(product: any, step: any) {
   if (!shouldRenderInlineVariantSelector({
     bundleVariantSelectorEnabled: this.selectedBundle?.variantSelectorEnabled !== false,
     product,
@@ -298,10 +389,10 @@ renderInlineCardVariantSelector(product, step) {
 },
 
 // Create an "add more" card for incomplete steps
-createAddMoreCard(step, stepIndex, currentCount) {
+createAddMoreCard(step: any, stepIndex: number, currentCount: number) {
   const stepBox = document.createElement('div');
   stepBox.className = 'step-box add-more-card';
-  stepBox.dataset.stepIndex = stepIndex;
+  stepBox.dataset.stepIndex = String(stepIndex);
 
   // Plus icon
   const plusIcon = document.createElement('span');
@@ -331,17 +422,18 @@ createAddMoreCard(step, stepIndex, currentCount) {
   stepBox.appendChild(selectionCount);
 
   // Add click handler to open modal
-  stepBox.addEventListener('click', () => this.openModal(stepIndex));
+  stepBox.addEventListener('click', (event: any) => this.openModal(stepIndex, event.currentTarget));
 
   return stepBox;
 },
 
 // Create a state card for a selected product
-createSelectedProductCard(item, cardIndex) {
+createSelectedProductCard(item: any, cardIndex: string|undefined) {
   const { product, stepIndex, step, variantId, instanceIndex } = item;
 
   const isDefault = bsIsDefaultStep(step);
   const badgeLabel = bsGetDiscountBadgeLabel(step);
+  const content = resolveSelectedSlotContent(product);
 
   const stepBox = document.createElement('div');
   stepBox.className = 'step-box step-completed product-card-state bw-slot-card bw-slot-card--filled';
@@ -349,22 +441,31 @@ createSelectedProductCard(item, cardIndex) {
   stepBox.dataset.variantId = variantId;
   stepBox.dataset.cardIndex = cardIndex;
 
+  const replacementTrigger = createSlotReplacementTrigger(
+    [content.title, content.variantTitle].filter(Boolean).join(', '),
+    (event: any) => {
+      this._modalSlotReplacementTarget = {
+        stepIndex,
+        selectionKey: this.normalizeSelectionKey?.(variantId) || variantId,
+      };
+      this.openModal(stepIndex, event.currentTarget);
+    },
+  );
+  replacementTrigger.dataset.stepIndex = String(stepIndex);
+  replacementTrigger.dataset.cardIndex = String(cardIndex);
+  replacementTrigger.dataset.variantId = String(variantId);
+  stepBox.appendChild(replacementTrigger);
+
   // Remove button — hidden for default (non-removable) steps
   if (!isDefault) {
-    const clearBadge = document.createElement('button');
-    clearBadge.type = 'button';
-    clearBadge.className = 'step-clear-badge';
-    clearBadge.innerHTML = `
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-        <circle cx="12" cy="12" r="12" fill="#f3f4f6"/>
-        <path d="M8 8L16 16M16 8L8 16" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    `;
-    clearBadge.title = 'Remove this product';
-    clearBadge.setAttribute('aria-label', clearBadge.title);
-    clearBadge.addEventListener('click', (e) => {
-      e.stopPropagation();
-      this.removeProductFromSelection(stepIndex, variantId);
+    const clearBadge = createFilledSlotRemoveButton({
+      label: resolveFilledSlotRemoveLabel(this._resolveText?.bind(this), content.title),
+      onRemove: () => {
+        const stepSlots = getStepSlotElements(this, stepIndex);
+        const slotIndex = Math.max(0, stepSlots.indexOf(stepBox));
+        this.removeProductFromSelection(stepIndex, variantId);
+        focusModalSlotAfterRemoval(this, stepIndex, slotIndex);
+      },
     });
     stepBox.appendChild(clearBadge);
   }
@@ -387,26 +488,46 @@ createSelectedProductCard(item, cardIndex) {
     stepBox.appendChild(badge);
   }
 
-  // Product title at bottom
+  const identity = document.createElement('div');
+  identity.className = 'bw-slot-card__identity';
+
   const productTitle = document.createElement('p');
   productTitle.className = 'step-name step-name-completed product-title-state';
   const displayTitle = resolveSelectedSlotTitle(
-    product.title,
+    content.title,
     this._usesVerticalModalSlotLayout?.() === true,
   );
   productTitle.textContent = displayTitle;
-  productTitle.title = product.title; // Full title on hover
-  stepBox.appendChild(productTitle);
+  productTitle.title = content.title;
+  identity.appendChild(productTitle);
 
-  // Filled slots stay editable. Selection validation still runs inside the
-  // picker, while reopening lets shoppers replace an exact-one choice.
-  makeSlotCardKeyboardAccessible(stepBox, () => {
-    this._modalSlotReplacementTarget = {
-      stepIndex,
-      selectionKey: this.normalizeSelectionKey?.(variantId) || variantId,
-    };
-    this.openModal(stepIndex);
-  });
+  if (content.variantTitle) {
+    const variantTitle = document.createElement('p');
+    variantTitle.className = 'bw-slot-card__variant';
+    variantTitle.textContent = content.variantTitle;
+    identity.appendChild(variantTitle);
+  }
+
+  if (content.priceText) {
+    const prices = document.createElement('div');
+    prices.className = 'bw-slot-card__prices';
+
+    const price = document.createElement('span');
+    price.className = 'bw-slot-card__price';
+    price.textContent = content.priceText;
+    prices.appendChild(price);
+
+    if (content.compareAtPriceText) {
+      const compareAtPrice = document.createElement('s');
+      compareAtPrice.className = 'bw-slot-card__compare-at-price';
+      compareAtPrice.textContent = content.compareAtPriceText;
+      prices.appendChild(compareAtPrice);
+    }
+
+    identity.appendChild(prices);
+  }
+
+  stepBox.appendChild(identity);
 
   return stepBox;
 },
@@ -415,7 +536,7 @@ createSelectedProductCard(item, cardIndex) {
  * Creates a slot card for a default/compulsory product step.
  * Looks like a filled card but has no remove button and shows an "Included" badge.
  */
-createDefaultProductCard(step, stepIndex, product) {
+createDefaultProductCard(step: any, stepIndex: string|undefined, product: any) {
   const stepBox = document.createElement('div');
   stepBox.className = 'step-box bw-slot-card bw-slot-card--filled';
   stepBox.dataset.stepIndex = stepIndex;
@@ -455,10 +576,10 @@ createDefaultProductCard(step, stepIndex, product) {
 /**
  * Placeholder card for a default step while its product data is still loading.
  */
-_createDefaultLoadingCard(step, stepIndex) {
+_createDefaultLoadingCard(step: any, stepIndex: number) {
   const stepBox = document.createElement('div');
   stepBox.className = 'step-box bw-slot-card bw-slot-card--filled';
-  stepBox.dataset.stepIndex = stepIndex;
+  stepBox.dataset.stepIndex = String(stepIndex);
   stepBox.style.cursor = 'default';
   stepBox.style.opacity = '0.7';
 
@@ -480,14 +601,14 @@ _createDefaultLoadingCard(step, stepIndex) {
  * Shows a ribbon icon, "Free {name}" label.
  * Non-clickable (locked) until all paid steps are complete.
  */
-createFreeGiftSlotCard(step, stepIndex) {
+createFreeGiftSlotCard(step: any, stepIndex: number) {
   const unlocked = this.isFreeGiftUnlocked;
   const stepBox = document.createElement('div');
-  stepBox.dataset.stepIndex = stepIndex;
+  stepBox.dataset.stepIndex = String(stepIndex);
 
   // Check if free gift step already has a selection
   const stepSelections = this.selectedProducts[stepIndex] || {};
-  const selectedEntries = Object.entries(stepSelections).filter(([, qty]) => qty > 0);
+  const selectedEntries = Object.entries(stepSelections).filter(([, qty]: any) => qty > 0);
 
   if (selectedEntries.length > 0 && unlocked) {
     // Show selected product for free gift slot
@@ -497,6 +618,15 @@ createFreeGiftSlotCard(step, stepIndex) {
     if (product) {
       // Show filled state for free gift
       stepBox.className = 'step-box step-completed product-card-state bw-slot-card bw-slot-card--filled';
+
+      const replacementTrigger = createSlotReplacementTrigger(
+        String(product.title || ''),
+        (event: any) => this.openModal(stepIndex, event.currentTarget),
+      );
+      replacementTrigger.dataset.stepIndex = String(stepIndex);
+      replacementTrigger.dataset.cardIndex = '0';
+      replacementTrigger.dataset.variantId = String(variantId);
+      stepBox.appendChild(replacementTrigger);
 
       const imageWrapper = document.createElement('div');
       imageWrapper.className = 'bw-slot-card__image-wrapper';
@@ -508,15 +638,11 @@ createFreeGiftSlotCard(step, stepIndex) {
       stepBox.appendChild(imageWrapper);
 
       // Remove button
-      const clearBadge = document.createElement('button');
-      clearBadge.type = 'button';
-      clearBadge.className = 'step-clear-badge';
-      clearBadge.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="12" fill="#f3f4f6"/><path d="M8 8L16 16M16 8L8 16" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-      clearBadge.title = 'Remove this product';
-      clearBadge.setAttribute('aria-label', clearBadge.title);
-      clearBadge.addEventListener('click', (e) => {
-        e.stopPropagation();
+      const clearBadge = createFilledSlotRemoveButton({
+        label: resolveFilledSlotRemoveLabel(this._resolveText?.bind(this), product.title),
+        onRemove: () => {
         this.removeProductFromSelection(stepIndex, variantId);
+        },
       });
       stepBox.appendChild(clearBadge);
 
@@ -531,7 +657,6 @@ createFreeGiftSlotCard(step, stepIndex) {
 
       // Ribbon overlay even in filled state
       stepBox.appendChild(this._createRibbonSvg());
-      makeSlotCardKeyboardAccessible(stepBox, () => this.openModal(stepIndex));
       return stepBox;
     }
   }
@@ -600,7 +725,7 @@ _createRibbonSvg() {
 },
 
 // Remove a specific product from selection (decrease quantity by 1)
-removeProductFromSelection(stepIndex, variantId) {
+removeProductFromSelection(stepIndex: string|number, variantId: any) {
   // Guard: default products are compulsory — they must always stay in selectedProducts
   const step = this.selectedBundle?.steps[stepIndex];
   const normalizedVariantId = this.normalizeSelectionKey(variantId);

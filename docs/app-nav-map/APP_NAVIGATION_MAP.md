@@ -5,7 +5,7 @@ title: Wolfpack Product Bundles App Navigation and UI Map
 type: navigation-map
 status: authoritative
 summary: Routes, screens, actions, modals, and storefront-preview flows for the embedded app.
-last_audited: 2026-08-14
+last_audited: 2026-08-21
 owners:
   - engineering
 domains:
@@ -30,7 +30,7 @@ keywords:
 > Any time a new page, modal, tab, sidebar section, or user flow is added or removed,
 > this document **must** be updated. See CLAUDE.md for the enforcement rule.
 
-**Last Updated:** 2026-08-14
+**Last Updated:** 2026-08-21
 **Environment mapped:** SIT (`wolfpack-product-bundles-sit`)
 **Test store:** `wolfpack-store-test-1.myshopify.com`
 
@@ -52,6 +52,7 @@ without exposing a blank iframe. First-create guidance begins only after a succe
 bundle creation.
 
 Destination flow:
+
 ```
 /app with Shopify auth parameters
 └── /app/dashboard
@@ -115,14 +116,31 @@ Dashboard
 ```
 
 Dashboard preview behavior:
+
 - Product-page bundle preview opens `/products/{shopifyProductHandle}`.
 - Every full-page bundle preview requests a new 15-minute signed `wpb_preview` URL on each click; active and unlisted bundles remain publicly accessible at the canonical URL without the token.
 - First successful preview records the Admin `bundle_previewed` event with bundle id, type, status, and link.
 - The bundle table uses Polaris automatic table/list presentation: desktop keeps Name, Status, Type, and Actions columns, while phone containers expose the same record fields and row actions as a stacked list.
 - Core bundle work stays above support and education content: create actions, unresolved storefront setup, filters, and bundle actions render before the support cards.
 - The App Embed Status banner can be dismissed with its close control for the current dashboard mount.
+- The warning-state Enable action opens the App Embed Enable modal; it does not navigate or mark the embed active by itself.
+
+App Embed Enable modal:
+
+```
+App Embed Enable
+├── Idle: instructional video + Open Theme Editor + Cancel
+├── Detecting: spinner while Shopify App Bridge checks the published theme
+├── Success: confirmed enabled status + Done
+└── Failure: retry Theme Editor + existing support chat action
+```
+
+The Theme Editor action uses the existing `activateAppId` deep link. Focus and
+visibility returns are deduplicated into one `shopify.app.extensions()` check;
+only a confirmed active `bundle-app-embed` changes the banner to success.
 
 #### "Create Bundle" Button
+
 Navigates to: `/app/bundles/create` (bundle type selection entry)
 
 ---
@@ -142,6 +160,7 @@ Create Bundle Entry
 ```
 
 Create redirect targets:
+
 ```
 Product Page: `/app/bundles/product-page-bundle/configure/:bundleId?mode=create`
 Full Page: `/app/bundles/full-page-bundle/configure/:bundleId?mode=create`
@@ -154,6 +173,7 @@ is noncritical; a timeout or error leaves creation successful and the configure
 redirect intact.
 
 Configure page storefront sync status:
+
 - Full-page and product-page configure pages do not show a separate Storefront sync status or retry banner.
 - Save persists DB changes and publishes Shopify storefront data synchronously before returning a compact success response.
 - Existing Sync Bundle actions run the same direct storefront sync path.
@@ -161,7 +181,9 @@ Configure page storefront sync status:
 - Bundle creation and cloning route directly to the bundle type's configure page; there is no intermediate configuration wizard route.
 
 #### Modal: Delete Bundle Confirmation
+
 Triggered by: "Delete" row action
+
 ```
 Delete Confirmation Modal (centered, small)
 ├── "Are you sure you want to delete [bundle name]?"
@@ -175,6 +197,7 @@ Delete Confirmation Modal (centered, small)
 **Route file:** `app/routes/app/app.settings.tsx`
 
 Admin Settings hub:
+
 ```
 Settings
 ├── App Bridge breadcrumb: Dashboard back action + Settings title
@@ -182,14 +205,16 @@ Settings
 ├── Card: Design
 │   └── Shows Settings -> Design controls: brand colors, typography, corners, images and GIFs
 ├── Card: Language
-│   └── Shows multilanguage mode, supported languages, shared Cart & Checkout strings, Landing Page Layout strings, and Product Page Layout strings
+│   └── Shows multilanguage mode, 39 add/remove locale choices, shared Cart & Checkout strings, Landing Page Layout strings, and Product Page Layout strings
 └── Card: Controls
     └── Navigates to /app/additional-configurations
 ```
 
 Primary action:
+
 - The complete Design, Language, and Controls cards are the actions; they do not render separate `Configure` affordances.
 - Selecting Design opens the Settings -> Design subpage.
+- Selecting Controls immediately replaces the landing cards with the shared top-edge loading bar while `/app/additional-configurations` navigates and becomes ready.
 - While the lazy Design or Language workspace loads after selection, the route shows three skeleton cards instead of a spinner.
 - The Design Control Panel lazy-loads after entry and uses a responsive three-column workspace: section navigation on the left, the largest app-owned preview in the middle, and active fields on the right. At medium widths the preview spans the first row; at phone widths a Preview / Customize segmented control shows one workspace pane at a time.
 - Preview-only Bundle Type and Template selectors cover Landing Page Standard, Classic, Compact, and Horizontal plus Product Page Product List, Product Grid, Horizontal Slots, and Vertical Slots.
@@ -201,7 +226,8 @@ Primary action:
 - Local Design controls and template previews remain available without a storefront-ready bundle. Only the separate Preview Bundle action requires a storefront URL.
 - Relevant Expert Colour Control groups expose `Show Colour Guide` links to the five app-owned AVIF guide paths generated from tracked public PNG sources by CI/CD.
 - Settings back actions await App Bridge Save Bar leave confirmation while unsaved changes exist.
-- At phone widths, Language and Controls section navigation becomes a native disclosure that closes after a section is selected while retaining the current unsaved form state.
+- Language uses Polaris web components for locale chips, layout/section navigation, fields, variable guidance, and the contextual save flow. English is mandatory; removing another locale removes it from Landing Page, Product Page, and shared language roots.
+- Language and Controls retain unsaved form state while switching configuration sections.
 - Settings has one landing owner; selecting a subpage lazy-loads the workspace and returning home is guarded by the contextual save bar.
 - Cart Messaging navigation from Controls to Language is also guarded by the contextual save bar.
 
@@ -212,19 +238,21 @@ Primary action:
 **Route file:** `app/routes/app/app.additional-configurations.tsx`
 
 Dedicated Controls workspace:
+
 ```
 Additional Configurations
 ├── Landing Page Layout
 │   ├── Configuration
 │   ├── CSS & Scripts
-│   ├── Integrations
-│   └── Advanced
+│   └── Integrations
 └── Product Page Layout
     ├── Configuration
     └── CSS & Scripts
 ```
 
 - Reuses the Settings controls loader, action, persistence, save bar, and discard behavior.
+- Configuration includes shared cart messaging for bundle items, original price, and discount display. Landing Page additionally owns checkout providers; Product Page owns its post-add redirect.
+- CSS, scripts, selectors, and integrations save through stable field keys into the versioned storefront Controls contract. The deferred video-message player is not exposed as an Advanced tab.
 - Deep-links layout, tab, and nested group through `layout`, `tab`, and `group` query parameters.
 - Invalid query combinations resolve to the first valid visible tab and group.
 - Back navigation returns to `/app/settings` after App Bridge save-bar leave confirmation.
@@ -236,6 +264,7 @@ Additional Configurations
 **Route file:** `app/routes/app/app.integrations.tsx`
 
 Compact Admin Integrations catalog:
+
 ```
 Integrations Hub
 ├── App Bridge breadcrumb → previous page, with Dashboard fallback
@@ -243,6 +272,10 @@ Integrations Hub
 ├── Request Integration → opens Crisp with an unsent prefilled request
 ├── Reviews
 │   └── Judge.me → View Setup
+├── Page Builders
+│   ├── PageFly → View Setup
+│   ├── GemPages → View Setup
+│   └── Shogun → View Setup
 └── Checkout
     ├── GoKwik → View Setup
     └── Shopflo → View Setup
@@ -251,11 +284,16 @@ Integrations Hub
 Shopify Checkout and Theme Cart Drawer are configured in Settings and are not duplicated in this catalog. All setup actions currently open `https://wolfpackapps.com` until WPB-owned quick setup guides are published.
 
 Setup behavior:
+
 - The shared top-edge loading bar is the only route content shown while the compact catalog prepares.
 - Cards display Supported or Guided setup without claiming connection state.
 - `View Setup` opens the WPB-owned setup/support destination in a new browsing context.
 - `Request Integration` opens Crisp and pre-fills the composer; the merchant must send the message.
 - External competitor help URLs are intentionally not embedded in source code; sanitized evidence remains in `docs/competitor-analysis/18-eb-settings-integrations-replication-evidence.md`.
+- Page-builder cards describe guided compatibility through the provider-neutral
+  Theme App Extension block and HTML marker. Until dedicated WPB guides are
+  published, their setup actions use the same `https://wolfpackapps.com`
+  destination as the other catalog cards.
 
 ---
 
@@ -299,15 +337,18 @@ Analytics Page (revamped — issue wpb-analytics-revamp-1)
 ```
 
 Responsive analytics behavior:
+
 - The route owns a named `analytics-page` query container so toolbar, KPI, chart, and activity layouts respond to the embedded app width.
 - Date, comparison, and export actions stack without page-level clipping; matrices preserve every value inside their labelled internal scroller.
 - The lightweight route shell and its stylesheet render before the lazy dashboard module; the dashboard JavaScript and CSS resolve together behind the route skeleton.
 
 **Visual tokens:** `app/components/analytics/shared/tokens.css`
+
 - engagement teal `#0E7C7B`, revenue gold `#B08800`, warning amber `#A36F00`
 - 44 px hero numerics · 11 px uppercase labels · 12 px radius · warm `#F5F2EE` bg
 
 **Server helpers:** `app/lib/analytics/engagement-helpers.ts`
+
 - `computeBundleFunnel`, `buildEngagementTrendSeries`, `buildBundlePerformanceMatrix`
 - Pure-fn, unit-tested at `tests/unit/lib/engagement-helpers.test.ts`
 
@@ -429,6 +470,7 @@ only FPB document URL. The number is assigned serially per shop; internal bundle
 IDs remain confined to Admin routes, runtime data, and signed authorization.
 
 Responsive configure behavior:
+
 - FPB and PPB keep the full Bundle Product and Bundle Setup sidebar on wide screens.
 - Tablet and phone containers show Bundle Product first and replace the long setup sidebar with a compact native disclosure labelled with the active parent or nested section.
 - Selecting a section closes the mobile disclosure without changing save, dirty-state, or route adapter behavior.
@@ -486,11 +528,13 @@ PPB Configure Page
 │       └── Variables modal: five supported discount template variables
 │
 ├── Bundle Visibility
-│   ├── App Embed Status (inline AppEmbedBanner when disabled)
-│   ├── Publishing Best Practices (responsive landscape placement cards with expandable setup guides)
-│   ├── Your Bundle Link (copy button)
+│   ├── Shared FPB/PPB Polaris surface
+│   ├── App Embed Status (inline enable action and status badge)
+│   ├── Publishing Best Practices (responsive placement cards with expandable setup guides)
+│   ├── Your Bundle Link (read-only field + copy action)
 │   └── Bundle Widget sub-section
 │       ├── Toggle: upsellWidgetEnabled
+│       ├── Disabled state keeps all saved settings visible, subdued, and inert
 │       ├── Display Mode: choice list (block / button)
 │       ├── Block-only image, title, and description; CTA in both modes
 │       ├── Multi Language: title, description, and CTA
@@ -498,10 +542,20 @@ PPB Configure Page
 │       ├── Product or collection resource picker for the active specific target
 │       ├── Auto-Select Browsed Product: switch (autoSelectBrowsedProduct)
 │       └── Embed Upsell → unified `bundle-upsell` placement block
+│   └── Bundle Embed sub-section
+│       ├── Master switch: Embed Bundle Builder on Product Pages
+│       ├── Disabled state keeps all saved settings visible, subdued, and inert
+│       ├── Canonical localized Title + Sub Title
+│       ├── Display On: all bundle products / specific products / specific collections
+│       ├── Product or collection resource picker for the active target
+│       ├── Add browsed product to bundle
+│       └── Place Block → product-template selector → `bundle-product-page-embed` Theme Editor deep link
 │
 ├── Bundle Settings
+│   ├── PPB compare-at prices are product-driven; no per-bundle visibility control
 │   ├── Pre Selected Product
 │   │   ├── Enable toggle
+│   │   ├── Disabled state keeps configured title and products visible, subdued, and inert
 │   │   ├── Tip banner
 │   │   ├── Default products title
 │   │   ├── Multi Language
@@ -551,11 +605,16 @@ disclosure behavior as FPB, including nested Step Setup and Bundle Visibility
 items.
 
 **Widget storefront features (as of v2.9.0):**
+
 - Step slot cards (empty/filled/locked states) with `addonLabel` for free gift tabs
 - Quantity option pills (from `displayOptions.bundleQuantityOptions`)
 - Gift message UI: textarea + optional From/To fields + char counter
 - Progress bar (from `displayOptions.progressBar`)
 - Gift message cart line item with `_bundle_id` + `_gift_message` properties
+- Horizontal/Vertical Slots open a shared 85dvh picker with a fixed header and
+  footer, internally scrolling two/four/five-column catalog, native grouped
+  variant selectors, validation-owned quantity states, and an editable stacked
+  product-details sheet. Product List/Grid retain their in-page card flow.
 
 ---
 
@@ -579,12 +638,14 @@ Billing Page
 ## 3. User Flows
 
 ### Flow A: Auth
+
 ```
 / (landing)
   └── not authenticated → /auth/login → OAuth → /auth/callback → /app/dashboard
 ```
 
 ### Flow B: Create & Configure Bundle
+
 ```
 /app/dashboard
   └── [Create Bundle] → /app/bundles/create → select type + enter name → POST
@@ -603,6 +664,7 @@ Billing Page
 On tablet and phone containers, configure section changes use the compact current-section disclosure.
 
 ### Flow C: Design Customisation
+
 ```
 /app/settings
   └── Click Design card → Settings -> Design panel opens
@@ -618,6 +680,7 @@ On tablet and phone containers, configure section changes use the compact curren
 ```
 
 ### Flow C2: Unsaved Navigation Protection
+
 ```
 Dirty Admin form
   └── App nav, Settings back, configure Design Control Panel, or PPB section change
@@ -627,6 +690,7 @@ Dirty Admin form
 ```
 
 ### Flow D: Billing Upgrade
+
 ```
 /app/pricing
   └── [Upgrade to Grow]
@@ -637,6 +701,7 @@ Dirty Admin form
 ```
 
 ### Flow E: Bundle Checkout Pricing Safety
+
 ```
 Storefront bundle add
   └── signed runtime token + component lines → Shopify cart pipeline
@@ -667,39 +732,41 @@ Checkout order summary → Bundle & Save
 
 > These are backend-only — not navigable pages. Listed for DevTools network debugging.
 
-| URL Pattern | Purpose |
-|---|---|
-| `/apps/product-bundles/api/bundle/:id.json` | HMAC-verified canonical storefront bundle response: exact `{ success, bundle }`; field-projection queries do not change the response shape |
-| `/apps/product-bundles/api/bundles.json` | All active bundles for shop |
-| `/apps/product-bundles/api/fpb-upsells.json` | Signed, shop-scoped FPB product-page offer lookup by product, collections, and locale; returns eligible minimal DTOs with private ETag caching |
-| `/apps/product-bundles/api/cart-bundle-details` | Signed storefront route that merges EB-style cart `bundle_details` metafield entries |
-| `/apps/product-bundles/api/cart-transform-runtime-token` | Signed storefront route that validates selected bundle lines and returns `_wolfpack_bundle_runtime` for Cart Transform / Discount Function verification |
-| `/apps/product-bundles/api/checkout-integration-discount-code` | Signed storefront route that creates short-lived app discount codes for third-party FPB checkout integrations |
-| `/api/checkout-bundle-offer-token` | Checkout-session-authenticated route that validates a signed parent and current merchant offer config, then authorizes one exact add-on variant and quantity |
-| `/apps/product-bundles/api/design-settings/:shop` | CSS vars for storefront widgets |
-| `/apps/product-bundles/api/language-settings/:shop` | Settings -> Language JSON for storefront widget text and cart labels |
-| `/api/billing/create` | Initiate subscription |
-| `/api/billing/confirm` | Confirm subscription |
-| `/api/billing/cancel` | Cancel subscription |
-| `/api/activate-cart-transform` | Deploy cart transform function |
-| `/api/activate-pixel` | Activate UTM web pixel |
-| `/app/app-embed-status` | Authenticated Admin resource route for Preview-button app embed revalidation |
-| `/apps/product-bundles/api/proxy-health` | Proxy health check |
-| `/health` | Public Render HTTP health check; returns 2xx only when the app and DB are ready |
-| `/api/attribution` | UTM attribution analytics data |
-| `/api/web-vitals` | No-op tombstone for retired custom Admin Web Vitals beacons; returns 204 for stale POSTs |
-| `/api/widget-error` | Widget runtime error logging |
-| `/api/webhooks/pubsub` | Pub/Sub webhook handler |
-| `/api/inngest` | Inngest background job handler |
+| URL Pattern                                                    | Purpose                                                                                                                                                                                                         |
+| -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/apps/product-bundles/api/bundle/:id.json`                    | HMAC-verified canonical storefront bundle response: exact `{ success, bundle }`; field-projection queries do not change the response shape                                                                      |
+| `/apps/product-bundles/api/bundles.json`                       | All active bundles for shop                                                                                                                                                                                     |
+| `/apps/product-bundles/api/fpb-upsells.json`                   | Signed, shop-scoped FPB product-page offer lookup by product, collections, and locale; returns eligible minimal DTOs with private ETag caching                                                                  |
+| `/apps/product-bundles/api/ppb-embed.json`                     | Signed, shop-scoped Product Page Bundle embed lookup by product, collections, and locale; returns the first eligible formatted PPB with localized copy and private ETag caching                                 |
+| `/apps/product-bundles/api/page-builder-embed.json`            | Signed direct page-builder lookup: resolves an Active or Unlisted PPB by generated parent-product handle or an FPB by shop-scoped public number; returns a formatted preloaded bundle with private ETag caching |
+| `/apps/product-bundles/api/cart-bundle-details`                | Signed storefront route that merges EB-style cart `bundle_details` metafield entries                                                                                                                            |
+| `/apps/product-bundles/api/cart-transform-runtime-token`       | Signed storefront route that validates selected bundle lines and returns `_wolfpack_bundle_runtime` for Cart Transform / Discount Function verification                                                         |
+| `/apps/product-bundles/api/checkout-integration-discount-code` | Signed storefront route that creates short-lived app discount codes for third-party FPB checkout integrations                                                                                                   |
+| `/api/checkout-bundle-offer-token`                             | Checkout-session-authenticated route that validates a signed parent and current merchant offer config, then authorizes one exact add-on variant and quantity                                                    |
+| `/apps/product-bundles/api/design-settings/:shop`              | CSS vars for storefront widgets                                                                                                                                                                                 |
+| `/apps/product-bundles/api/language-settings/:shop`            | Settings -> Language JSON for storefront widget text and cart labels                                                                                                                                            |
+| `/api/billing/create`                                          | Initiate subscription                                                                                                                                                                                           |
+| `/api/billing/confirm`                                         | Confirm subscription                                                                                                                                                                                            |
+| `/api/billing/cancel`                                          | Cancel subscription                                                                                                                                                                                             |
+| `/api/activate-cart-transform`                                 | Deploy cart transform function                                                                                                                                                                                  |
+| `/api/activate-pixel`                                          | Activate UTM web pixel                                                                                                                                                                                          |
+| `/app/app-embed-status`                                        | Authenticated Admin resource route for Preview-button app embed revalidation                                                                                                                                    |
+| `/apps/product-bundles/api/proxy-health`                       | Proxy health check                                                                                                                                                                                              |
+| `/health`                                                      | Public Render HTTP health check; returns 2xx only when the app and DB are ready                                                                                                                                 |
+| `/api/attribution`                                             | UTM attribution analytics data                                                                                                                                                                                  |
+| `/api/web-vitals`                                              | No-op tombstone for retired custom Admin Web Vitals beacons; returns 204 for stale POSTs                                                                                                                        |
+| `/api/widget-error`                                            | Widget runtime error logging                                                                                                                                                                                    |
+| `/api/webhooks/pubsub`                                         | Pub/Sub webhook handler                                                                                                                                                                                         |
+| `/api/inngest`                                                 | Inngest background job handler                                                                                                                                                                                  |
 
 ---
 
 ## 5. Screenshots Index
 
-| File | What it shows |
-|---|---|
-| `screenshots/02-dashboard.png` | Dashboard (empty state — no bundles) |
-| `screenshots/03-analytics.png` | Analytics / Attribution page |
-| `screenshots/04-pricing.png` | Pricing page (Free vs Grow) |
-| `screenshots/05-events.png` | Updates & FAQs page |
-| `screenshots/06-create-bundle-modal.png` | Create Bundle modal |
+| File                                     | What it shows                        |
+| ---------------------------------------- | ------------------------------------ |
+| `screenshots/02-dashboard.png`           | Dashboard (empty state — no bundles) |
+| `screenshots/03-analytics.png`           | Analytics / Attribution page         |
+| `screenshots/04-pricing.png`             | Pricing page (Free vs Grow)          |
+| `screenshots/05-events.png`              | Updates & FAQs page                  |
+| `screenshots/06-create-bundle-modal.png` | Create Bundle modal                  |

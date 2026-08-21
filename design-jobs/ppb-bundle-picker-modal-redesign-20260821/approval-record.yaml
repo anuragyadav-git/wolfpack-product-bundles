@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "job_id": "ppb-bundle-picker-modal-redesign-20260821",
+  "revision": 6,
+  "status": "complete",
+  "design": {
+    "status": "approved",
+    "approver": "Aditya",
+    "at": "2026-08-21",
+    "evidence": [
+      "direction-comparison.md",
+      "locked-decisions.yaml",
+      "user-supplied revision-2 implementation plan",
+      "user-approved revision-6 height-cap recommendation"
+    ],
+    "waivers": []
+  },
+  "handoff": {
+    "status": "approved",
+    "approver": "Aditya",
+    "at": "2026-08-21",
+    "evidence": [
+      "implementation-handoff.md",
+      "codex-task.md",
+      "acceptance-criteria.md",
+      "browser-test-plan.yaml",
+      "user-2026-08-21-revision-6-handoff-approval"
+    ],
+    "waivers": []
+  },
+  "implementation": {
+    "status": "not-started",
+    "approver": "",
+    "at": "",
+    "evidence": [],
+    "waivers": []
+  },
+  "final": {
+    "status": "not-started",
+    "approver": "",
+    "at": "",
+    "evidence": [],
+    "waivers": []
+  },
+  "superseded_approvals": [
+    {
+      "revision": 1,
+      "design": "approved",
+      "handoff": "approved",
+      "implementation": "approved",
+      "reason": "Material component-boundary and primary-action change"
+    },
+    {
+      "revision": 4,
+      "design": "approved",
+      "handoff": "approved",
+      "implementation": "approved",
+      "reason": "Revision 5 changes filled-slot title and Remove-action anatomy"
+    },
+    {
+      "revision": 5,
+      "design": "approved",
+      "handoff": "approved",
+      "implementation": "not-started",
+      "reason": "Revision 6 replaces the separate Remove action and unbounded filled-slot title growth"
+    }
+  ]
+}

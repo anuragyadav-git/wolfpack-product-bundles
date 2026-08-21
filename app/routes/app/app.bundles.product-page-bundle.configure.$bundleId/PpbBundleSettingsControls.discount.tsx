@@ -71,7 +71,7 @@ export function PpbCartDiscountDisplaySettings() {
         <p style={{ margin: 0, fontSize: 13, color: "#6d7175" }}>
           Shows how much the customer is saving on the bundle in cart
         </p>
-        {CART_DISCOUNT_DISPLAY_OPTIONS.map(({ value, label, description }) => (
+        {CART_DISCOUNT_DISPLAY_OPTIONS.map(({ value, label, description }: any) => (
           <label
             key={value}
             style={{

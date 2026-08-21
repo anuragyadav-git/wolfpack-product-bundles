@@ -1,7 +1,3 @@
-.queryContainer {
-  display: block;
-}
-
 .page {
   width: min(100%, 1080px);
   margin: 0 auto;

@@ -15,6 +15,8 @@ import {
   createPreviewInteractionState,
   updatePreviewProductQuantity,
   advancePreviewProgress,
+  clearPreviewDiscountFeedback,
+  triggerPreviewDiscountFeedback,
   togglePreviewMobileSummary,
 } from "../../../app/routes/app/app.settings/DesignLivePreview";
 import { buildDesignPreviewTheme } from "../../../app/routes/app/app.settings/design-preview-model";
@@ -36,6 +38,22 @@ describe("Settings Design preview state", () => {
     expect(progressed.progressStep).toBe(1);
     expect(expanded.isMobileSummaryOpen).toBe(true);
     expect(togglePreviewMobileSummary(expanded).isMobileSummaryOpen).toBe(false);
+  });
+
+  it("replays tier and completion feedback in local preview state", () => {
+    const initial = createPreviewInteractionState();
+    const tier = triggerPreviewDiscountFeedback(initial, "tier");
+    const repeatedTier = triggerPreviewDiscountFeedback(tier, "tier");
+    const complete = triggerPreviewDiscountFeedback(repeatedTier, "complete");
+
+    expect(tier.discountFeedback).toEqual({ state: "tier", replay: 1 });
+    expect(repeatedTier.discountFeedback).toEqual({ state: "tier", replay: 2 });
+    expect(complete.discountFeedback).toEqual({ state: "complete", replay: 3 });
+    expect(clearPreviewDiscountFeedback(complete, 2)).toBe(complete);
+    expect(clearPreviewDiscountFeedback(complete, 3).discountFeedback).toEqual({
+      state: null,
+      replay: 3,
+    });
   });
   it("applies expert preview overrides only while expert controls are enabled", () => {
     const fieldValues = {
@@ -154,6 +172,28 @@ describe("DesignLivePreview", () => {
     expect(view).toContain('accessibilityLabel="settingsDcp.preview.viewport.desktop"');
     expect(view).toContain('accessibilityLabel="settingsDcp.preview.viewport.mobile"');
     expect(view).toContain('aria-pressed="true"');
+  });
+
+  it("renders localized discount feedback actions only for Cart / summary", () => {
+    const cartView = renderToStaticMarkup(
+      React.createElement(DesignLivePreview, {
+        fieldValues: {},
+        isExpertControlsEnabled: false,
+        initialState: {
+          bundleType: "full_page",
+          templateKey: "standard",
+          viewport: "desktop",
+          surface: "cart-summary",
+        },
+      }),
+    );
+    const productView = renderToStaticMarkup(
+      React.createElement(DesignLivePreview, { fieldValues: {}, isExpertControlsEnabled: false }),
+    );
+
+    expect(cartView).toContain("settingsDcp.preview.feedback.tierHit");
+    expect(cartView).toContain("settingsDcp.preview.feedback.complete");
+    expect(productView).not.toContain("settingsDcp.preview.feedback.tierHit");
   });
 
   it.each(DESIGN_PREVIEW_TEMPLATES)(

@@ -113,8 +113,8 @@ describe("handleCreateFpbPreview", () => {
 
     const first = await handleCreateFpbPreview(mockAdmin, mockSession, "bundle-1");
     const second = await handleCreateFpbPreview(mockAdmin, mockSession, "bundle-1");
-    const firstUrl = new URL((await first.json()).shareablePreviewUrl);
-    const secondUrl = new URL((await second.json()).shareablePreviewUrl);
+    const firstUrl = new URL(((await first.json()) as any).shareablePreviewUrl);
+    const secondUrl = new URL(((await second.json()) as any).shareablePreviewUrl);
 
     expect(firstUrl.pathname).toBe("/apps/product-bundles/wpb/1");
     expect(firstUrl.searchParams.get("wpb_preview")).not.toBe(secondUrl.searchParams.get("wpb_preview"));

@@ -39,7 +39,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     } else {
       return json({ error: "Function not found" }, { status: 404 });
     }
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.error("Failed to fetch function ID", { component: "api.get-function-id", operation: "loader" }, error);
     return json({ error: "Failed to fetch function ID" }, { status: 500 });
   }

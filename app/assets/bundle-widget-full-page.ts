@@ -36,11 +36,12 @@ import { claimFullPageWidgetInitialization } from './widgets/full-page/initializ
 import { BundleProductModal } from './bundle-modal-component.js';
 import { renderBundlePurchaseOptions } from './widgets/shared/components/purchase-options.js';
 import { bundleSubscriptionStorefrontMethods } from './widgets/shared/subscription-storefront-methods.js';
+import { installDiscountTierPillFeedback } from './widgets/shared/discount-tier-feedback.js';
 
 
 export class BundleWidgetFullPage {
 
-  constructor(containerElement) {
+  constructor(containerElement: Element) {
     installControllerMethods(
       this,
       fullPageAnalyticsConfigMethods,
@@ -68,6 +69,7 @@ export class BundleWidgetFullPage {
       bundleLevelCssMethods,
     );
     this.container = containerElement;
+    this._discountTierFeedbackCleanup = installDiscountTierPillFeedback(containerElement);
     this.selectedBundle = null;
     this.selectedProducts = [];
     this.stepProductData = [];
@@ -198,7 +200,7 @@ export class BundleWidgetFullPage {
         this._recordView();
       }
 
-    } catch (error) {
+    } catch (error: any) {
       removeBootstrapLoadingScreen(this.container);
       this.hideLoadingOverlay();
       // Log full error to browser console for developer debugging
@@ -230,7 +232,7 @@ export interface BundleWidgetFullPage {
 // INITIALIZATION
 // ============================================================================
 export function initializeFullPageWidget(root = document) {
-  const containers = root.querySelectorAll('#bundle-builder-app');
+  const containers = root.querySelectorAll<HTMLElement>('#bundle-builder-app');
   containers.forEach(container => {
     const bundleType = container.dataset.bundleType || 'full_page';
     if (bundleType === 'full_page' && claimFullPageWidgetInitialization(container)) {

@@ -380,6 +380,26 @@
 
 #bundle-builder-app[data-ppb-template-type="PDP_INPAGE"][data-ppb-design-preset="GRID"]
   .bw-ppb-grid-product-grid
+  .product-card-action
+  .inline-quantity-controls {
+  justify-content: space-between;
+  width: 100%;
+  height: var(--bundle-product-card-action-min-height, 44px);
+  min-height: var(--bundle-product-card-action-min-height, 44px);
+}
+
+#bundle-builder-app[data-ppb-template-type="PDP_INPAGE"][data-ppb-design-preset="GRID"]
+  .bw-ppb-grid-product-grid
+  .product-card-action
+  .inline-qty-btn {
+  align-self: stretch;
+  min-width: var(--bundle-product-card-action-min-height, 44px);
+  min-height: var(--bundle-product-card-action-min-height, 44px);
+  padding: 0;
+}
+
+#bundle-builder-app[data-ppb-template-type="PDP_INPAGE"][data-ppb-design-preset="GRID"]
+  .bw-ppb-grid-product-grid
   .product-card.bw-product-card--selected
   .product-add-btn,
 #bundle-builder-app[data-ppb-template-type="PDP_INPAGE"][data-ppb-design-preset="GRID"]
@@ -488,3 +508,5 @@
     font-size: 12px;
   }
 }
+@import "../../full-page-css/base/product-modal-shell.css";
+@import "../../full-page-css/base/product-modal-controls.css";

@@ -7,7 +7,7 @@
 
 'use strict';
 
-export function extractBundleDetailsSourceProperties(cartItems = []) {
+export function extractBundleDetailsSourceProperties(cartItems: any[] = []) {
   const firstItem = cartItems.find(item => item?.properties?._bundle_display_properties);
   return firstItem?.properties || {};
 }
@@ -18,11 +18,11 @@ export function normalizeSellingPlanIdForCart(value = '') {
   return match ? match[1] : raw;
 }
 
-export function applySellingPlanToJsonCartItems(items = [], sellingPlanId = '') {
+export function applySellingPlanToJsonCartItems(items: any[] = [], sellingPlanId = '') {
   if (!sellingPlanId) return items;
   const cartSellingPlanId = normalizeSellingPlanIdForCart(sellingPlanId);
   return items.map(item => {
-    const properties = { ...(item?.properties || {}) };
+    const properties: any = { ...(item?.properties || {}) };
     delete properties.Box;
     return {
       ...item,
@@ -32,13 +32,13 @@ export function applySellingPlanToJsonCartItems(items = [], sellingPlanId = '') 
   });
 }
 
-export function buildProductPageCartFormData(cartItems = [], {
+export function buildProductPageCartFormData(cartItems: any[] = [], {
   bundleName = '',
   offerId = '',
   sessionKey = '',
   runtimeToken = '',
   sellingPlanId = '',
-} = {}) {
+}: any = {}) {
   const formData = new FormData();
   const cartSellingPlanId = normalizeSellingPlanIdForCart(sellingPlanId);
 
@@ -50,7 +50,7 @@ export function buildProductPageCartFormData(cartItems = [], {
       formData.append(`items[${index}][selling_plan]`, cartSellingPlanId);
     }
 
-    Object.entries(item.properties || {}).forEach(([key, value]) => {
+    Object.entries(item.properties || {}).forEach(([key, value]: any) => {
       if (value === undefined || value === null) return;
       formData.append(`items[${index}][properties][${key}]`, String(value));
     });

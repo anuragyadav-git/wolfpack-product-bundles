@@ -185,9 +185,7 @@ function validatePpbEmbed(
 ) {
   const embed = upsell.upsellConfiguration ?? {};
   if (embed.isEnabled !== true) return;
-  const textOverrides = readJson(formData, "textOverrides", {});
   const target = text(formData.get("bundleEmbedDisplayOn")) ||
-    text(textOverrides.embedDisplayOn) ||
     displayTarget(embed.displayConfiguration ?? {}, "all_products");
   if (!text(embed.title)) {
     issues.push(issue("embed.title", "Enter a bundle embed title.", "bundle_embed"));
@@ -427,7 +425,7 @@ export function validateBundleConfigureFormData(
         ),
       }),
     ];
-    issues.push(...subscriptionIssues.map(({ path, message }) =>
+    issues.push(...subscriptionIssues.map(({ path, message }: any) =>
       issue(path, message, "subscriptions")));
   }
   return issues;
@@ -436,14 +434,14 @@ export function validateBundleConfigureFormData(
 export function getConfigureFieldErrorMap(
   issues: ConfigureValidationIssue[],
 ): Record<string, string> {
-  return Object.fromEntries(issues.map(({ path, message }) => [path, message]));
+  return Object.fromEntries(issues.map(({ path, message }: any) => [path, message]));
 }
 
 export function configureValidationFailure(issues: ConfigureValidationIssue[]) {
   return {
     success: false as const,
     error: "Fix the highlighted fields before saving.",
-    fieldErrors: issues.map(({ path, message }) => ({ path, message })),
+    fieldErrors: issues.map(({ path, message }: any) => ({ path, message })),
   };
 }
 

@@ -32,7 +32,7 @@ const shopify = shopifyApp({
     unstable_newEmbeddedAuthStrategy: true,
   },
   hooks: {
-    afterAuth: async ({ session, admin }) => {
+    afterAuth: async ({ session, admin }: any) => {
       AppLogger.info("afterAuth hook triggered", { shop: session.shop });
       const existingShop = await prisma.shop.findUnique({
         where: { shopDomain: session.shop },

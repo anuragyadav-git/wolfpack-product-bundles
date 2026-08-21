@@ -12,12 +12,12 @@
 import { BUNDLE_WIDGET } from './constants.js';
 
 export class BundleDataManager {
-  static validateBundleData(bundles) {
+  static validateBundleData(bundles: any[]) {
     if (!Array.isArray(bundles) || bundles.length === 0) {
       throw new Error('No bundles available');
     }
 
-    const required = ['id', 'name', 'status', 'bundleType', 'steps'];
+    const required: any[] = ['id', 'name', 'status', 'bundleType', 'steps'];
     bundles.forEach((bundle, index) => {
       required.forEach(field => {
         if (!bundle[field]) {
@@ -45,12 +45,12 @@ export class BundleDataManager {
     return bundles;
   }
 
-  static validateSingleBundle(bundle) {
+  static validateSingleBundle(bundle: any) {
     if (!bundle || typeof bundle !== 'object') {
       return false;
     }
 
-    const required = ['id', 'name', 'status', 'bundleType', 'steps'];
+    const required: any[] = ['id', 'name', 'status', 'bundleType', 'steps'];
     for (const field of required) {
       if (bundle[field] === undefined || bundle[field] === null) {
         return false;
@@ -64,17 +64,17 @@ export class BundleDataManager {
     return true;
   }
 
-  static filterActiveBundles(bundles) {
+  static filterActiveBundles(bundles: any[]) {
     // BundleStatus enum: draft | active | archived — 'published' is not a valid status
-    return bundles.filter(bundle => bundle.status === 'active');
+    return bundles.filter((bundle: any)  => bundle.status === 'active');
   }
 
-  static _normalizeId(value) {
+  static _normalizeId(value: any) {
     if (value === null || value === undefined) {
       return [];
     }
 
-    const output = [];
+    const output: string[] = [];
 
     const candidates = Array.isArray(value) ? value : [value];
 
@@ -91,14 +91,14 @@ export class BundleDataManager {
       output.push(token.toLowerCase());
 
       if (token.includes('/')) {
-        output.push(token.split('/').pop().toLowerCase());
+        output.push(token.split('/').pop()!.toLowerCase());
       }
     });
 
     return output;
   }
 
-  static _buildTargetIdentifierSet(resources) {
+  static _buildTargetIdentifierSet(resources: any[]) {
     if (!Array.isArray(resources)) {
       return new Set();
     }
@@ -121,7 +121,7 @@ export class BundleDataManager {
     return identifiers;
   }
 
-  static _buildCurrentCollectionIdentifierSet(currentProductCollections) {
+  static _buildCurrentCollectionIdentifierSet(currentProductCollections: any[]) {
     if (!Array.isArray(currentProductCollections) || currentProductCollections.length === 0) {
       return new Set();
     }
@@ -144,7 +144,7 @@ export class BundleDataManager {
     return identifiers;
   }
 
-  static _evaluateWidgetVisibility(bundle, config) {
+  static _evaluateWidgetVisibility(bundle: any, config: any) {
     if (!bundle || typeof bundle !== 'object') {
       return false;
     }
@@ -207,30 +207,30 @@ export class BundleDataManager {
     return [...collectionTargetSet].some((value) => currentCollectionSet.has(value));
   }
 
-  static getProductPageBundles(bundles) {
-    return bundles.filter(bundle =>
+  static getProductPageBundles(bundles: any[]) {
+    return bundles.filter((bundle: any)  =>
       bundle.bundleType === BUNDLE_WIDGET.BUNDLE_TYPES.PRODUCT_PAGE
     );
   }
 
-  static getFullPageBundles(bundles) {
-    return bundles.filter(bundle =>
+  static getFullPageBundles(bundles: any[]) {
+    return bundles.filter((bundle: any)  =>
       bundle.bundleType === BUNDLE_WIDGET.BUNDLE_TYPES.FULL_PAGE
     );
   }
 
-  static getBundleById(bundles, bundleId) {
-    return bundles.find(bundle => bundle.id === bundleId);
+  static getBundleById(bundles: any[], bundleId: any) {
+    return bundles.find((bundle: any)  => bundle.id === bundleId);
   }
 
-  static getContainerBundle(bundles, productId) {
-    return bundles.find(bundle =>
+  static getContainerBundle(bundles: any[], productId: any) {
+    return bundles.find((bundle: any)  =>
       bundle.containerProductId &&
       bundle.containerProductId.toString() === productId?.toString()
     );
   }
 
-  static _resolveCompareAtPrice(productData) {
+  static _resolveCompareAtPrice(productData: any) {
     const rawCompareAtPrice = productData?.compareAtPrice ?? productData?.compare_at_price;
     if (rawCompareAtPrice == null) return null;
     if (
@@ -243,8 +243,8 @@ export class BundleDataManager {
     return rawCompareAtPrice;
   }
 
-  static extractStepData(steps) {
-    return steps.map(step => ({
+  static extractStepData(steps: any[]) {
+    return steps.map((step: any)  => ({
       id: step.id,
       name: step.name || 'Unnamed Step',
       required: step.required || false,
@@ -254,8 +254,8 @@ export class BundleDataManager {
     }));
   }
 
-  static extractProductData(stepProducts) {
-    return stepProducts.map(sp => ({
+  static extractProductData(stepProducts: any[]) {
+    return stepProducts.map((sp: any)  => ({
       id: sp.product?.id || sp.productId,
       shopifyProductId: sp.product?.shopifyProductId || sp.shopifyProductId,
       title: sp.product?.title || 'Untitled Product',
@@ -270,12 +270,12 @@ export class BundleDataManager {
     }));
   }
 
-  static selectBundle(bundlesData, config) {
+  static selectBundle(bundlesData: any, config: any) {
     if (!bundlesData || typeof bundlesData !== 'object') {
       return null;
     }
 
-    const bundles = Object.values(bundlesData).filter(bundle => {
+    const bundles = (Object.values(bundlesData) as any[]).filter(bundle => {
       if (!this.validateSingleBundle(bundle)) return false;
       if (bundle.status === 'active' || bundle.status === 'unlisted') return true;
 

@@ -1,4 +1,5 @@
 import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
+import { DisabledConfigurationRegion } from "../../_shared/bundle-configure/DisabledConfigurationRegion";
 import { areFpbProductSlotsAvailable } from "../../../../lib/fpb-product-slots-availability";
 
 export function FpbQuantitySettings({
@@ -29,7 +30,7 @@ export function FpbQuantitySettings({
   const settingsStep = stepsState.steps[activeTabIndex] || stepsState.steps[0];
   const productSlotsAvailable = areFpbProductSlotsAvailable(
     stepsState.steps,
-    conditionsState.stepConditions,
+    conditionsState.stepConditions
   );
 
   return (
@@ -52,27 +53,29 @@ export function FpbQuantitySettings({
               checked={quantityValidationEnabled || undefined}
               onChange={(e) => {
                 setQuantityValidationEnabled(
-                  (e.target as HTMLInputElement).checked,
+                  (e.target as HTMLInputElement).checked
                 );
                 markAsDirty();
               }}
             />
           </s-stack>
-          <s-number-field
-            id="configure-settings-maxQuantity"
-            label="Maximum allowed quantity per product"
-            required={quantityValidationEnabled || undefined}
-            error={validationErrors["settings.maxQuantity"]}
-            min={1}
-            value={maxQtyPerProduct || "1"}
-            disabled={!quantityValidationEnabled}
-            onInput={(e) => {
-              setMaxQtyPerProduct((e.target as HTMLInputElement).value);
-              markAsDirty();
-              clearValidationError("settings.maxQuantity");
-            }}
-            autocomplete="off"
-          />
+          <DisabledConfigurationRegion disabled={!quantityValidationEnabled}>
+            <s-number-field
+              id="configure-settings-maxQuantity"
+              label="Maximum allowed quantity per product"
+              required={quantityValidationEnabled || undefined}
+              error={validationErrors["settings.maxQuantity"]}
+              min={1}
+              value={maxQtyPerProduct || "1"}
+              disabled={!quantityValidationEnabled}
+              onInput={(e) => {
+                setMaxQtyPerProduct((e.target as HTMLInputElement).value);
+                markAsDirty();
+                clearValidationError("settings.maxQuantity");
+              }}
+              autocomplete="off"
+            />
+          </DisabledConfigurationRegion>
           {/* Product Slots sub-section */}
           {settingsStep && (
             <>
@@ -105,7 +108,7 @@ export function FpbQuantitySettings({
                     onChange={(e) => {
                       if (!productSlotsAvailable) return;
                       setProductSlotsEnabled(
-                        (e.target as HTMLInputElement).checked,
+                        (e.target as HTMLInputElement).checked
                       );
                       markAsDirty();
                     }}

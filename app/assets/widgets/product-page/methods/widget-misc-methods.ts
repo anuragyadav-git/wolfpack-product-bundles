@@ -7,11 +7,12 @@ import {
 } from './modal-state-methods.js';
 import { getLastRequiredProductPageStepIndex } from './step-validation.js';
 import { buildStorefrontApiPath } from '../../../../config/storefront-proxy-routes.js';
+import { bindDrawerSwipeDismissal } from '../../shared/drawer-layer-manager.js';
 
 const MIN_LOADING_OVERLAY_VISIBLE_MS = 180;
 
 export const ProductPageWidgetMiscMethods: Record<string, any> & ThisType<any> = {
-showLoadingOverlay(gifUrl, options = {}) {
+showLoadingOverlay(gifUrl: string, options: any = {}) {
   if (!this.container) return;
   if (options.bootstrap === true) {
     this.container.dataset.wpbBootstrapLoading = 'true';
@@ -46,8 +47,7 @@ showLoadingOverlay(gifUrl, options = {}) {
   // avoids a race condition where hideLoadingOverlay() is called before the rAF
   // fires (which happens when loadBundleData() resolves synchronously from the
   // dataset attribute — microtasks settle before animation frames).
-  // eslint-disable-next-line no-unused-expressions
-  overlay.offsetHeight;
+  void overlay.offsetHeight;
 
   // Keep overlay visible briefly so we avoid a flash that never renders.
   this._bundleLoadingOverlayToken = (this._bundleLoadingOverlayToken || 0) + 1;
@@ -108,26 +108,37 @@ attachEventListeners() {
   const prevButton = modal.querySelector('.prev-button');
   const nextButton = modal.querySelector('.next-button');
 
-  closeButtons.forEach((closeButton) => {
-    closeButton.addEventListener('click', () => this.closeModal());
+  closeButtons.forEach((closeButton: any) => {
+    closeButton.addEventListener('click', () => {
+      if (modal.classList.contains('bw-bs-panel--open')) this.closeModal();
+    });
+  });
+
+  this._ppbPickerSwipeCleanup?.();
+  this._ppbPickerSwipeCleanup = bindDrawerSwipeDismissal({
+    handle: modal.querySelector('.bw-bs-close-mobile'),
+    canDismiss: () => this._isPpbPickerDrawerTopmost?.() !== false,
+    requestClose: () => this.closeModal(),
   });
 
   // Overlay closes bottom-sheet
   if (this.elements.bsOverlay) {
-    this.elements.bsOverlay.addEventListener('click', () => this.closeModal());
+    this.elements.bsOverlay.addEventListener('click', () => {
+      if (this._isPpbPickerDrawerTopmost?.() !== false) this.closeModal();
+    });
   }
   if (prevButton) prevButton.addEventListener('click', () => this.navigateModal(-1));
   if (nextButton) nextButton.addEventListener('click', () => this.navigateModal(1));
 
   // Keyboard: close on Escape
-  document.addEventListener('keydown', (e) => {
+  document.addEventListener('keydown', (e: any) => {
     if (!modal.classList.contains('bw-bs-panel--open')) return;
 
     const target = e.target;
     if (target && (target.tagName === 'INPUT' || target.isContentEditable)) return;
 
     if (e.key === 'Escape') {
-      this.closeModal();
+      if (this._isPpbPickerDrawerTopmost?.() !== false) this.closeModal();
       return;
     }
 
@@ -144,6 +155,8 @@ attachEventListeners() {
     }
 
     if (e.key === 'Tab') {
+      if (this._isPpbPickerDrawerTopmost?.() === false) return;
+
       const controls = typeof this._getModalFocusableControls === 'function'
         ? this._getModalFocusableControls()
         : [];
@@ -162,7 +175,7 @@ attachEventListeners() {
   });
 },
 
-async navigateModal(direction) {
+async navigateModal(direction: number) {
   const newStepIndex = this.currentStepIndex + direction;
 
   if (direction < 0 && newStepIndex >= 0) {
@@ -255,7 +268,7 @@ showFallbackUI() {
   `;
 },
 
-showErrorUI(error) {
+showErrorUI(error: any) {
   this.container.innerHTML = `
     <div class="bundle-error">
       <h3>Bundle Widget Error</h3>
@@ -268,7 +281,7 @@ showErrorUI(error) {
   `;
 },
 
-_resolveText(key, fallback) {
+_resolveText(key: string|number, fallback: any) {
   const locale = window.Shopify?.locale;
   if (locale && this.config?.textOverridesByLocale?.[locale]?.[key]) {
     return this.config.textOverridesByLocale[locale][key];
@@ -290,7 +303,7 @@ _recordView() {
       body: JSON.stringify({ shop }),
       keepalive: true,
     }).catch(() => { /* best-effort */ });
-  } catch (_) {
+  } catch (_: any) {
     // Never throw from analytics
   }
 }

@@ -158,7 +158,7 @@ export async function getProductPrice(admin: ShopifyAdmin, productId: string): P
     // Fallback price
     setCachedPrice(cacheKey, DEFAULT_FALLBACK_PRICE);
     return DEFAULT_FALLBACK_PRICE;
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.warn("[PRICING] Failed to fetch product price, using fallback", {
       component: "pricing-calculation",
       operation: "getProductPrice",
@@ -196,7 +196,7 @@ export async function calculateBundleTotalPrice(admin: ShopifyAdmin, stepsData: 
             const productPrice = await getProductPrice(admin, stepProduct.id);
             stepTotalPrice += parseFloat(productPrice);
             validProductCount++;
-          } catch (error) {
+          } catch (error: any) {
             AppLogger.warn("[BUNDLE_TOTAL_PRICE] Error getting price for product", {
               component: "pricing-calculation",
             }, { productId: stepProduct.id, error: error instanceof Error ? error.message : String(error) });
@@ -236,7 +236,7 @@ export async function calculateBundleTotalPrice(admin: ShopifyAdmin, stepsData: 
     });
 
     return totalPrice;
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.warn("[BUNDLE_TOTAL_PRICE] Error calculating total bundle price", {
       component: "pricing-calculation",
       operation: "calculateBundleTotalPrice",
@@ -274,7 +274,7 @@ export async function calculateBundlePrice(admin: ShopifyAdmin, bundle: any): Pr
             const productPrice = await getProductPrice(admin, stepProduct.productId);
             stepTotalPrice += parseFloat(productPrice);
             validProductCount++;
-          } catch (error) {
+          } catch (error: any) {
             AppLogger.warn("[BUNDLE_PRICING] Error getting price for product", {
               component: "pricing-calculation",
             }, { productId: stepProduct.productId, error: error instanceof Error ? error.message : String(error) });
@@ -347,7 +347,7 @@ export async function calculateBundlePrice(admin: ShopifyAdmin, bundle: any): Pr
     });
 
     return finalPrice.toFixed(2);
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.warn("[BUNDLE_PRICING] Error calculating bundle price, using default", {
       component: "pricing-calculation",
       operation: "calculateBundlePrice",
@@ -438,7 +438,7 @@ export async function updateBundleProductPrice(admin: ShopifyAdmin, productId: s
     AppLogger.debug("[BUNDLE_PRICING] Successfully updated bundle product price", {
       component: "pricing-calculation",
     }, { from: currentPrice, to: newPrice });
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.error("[BUNDLE_PRICING] Error updating bundle product price", {
       component: "pricing-calculation",
       operation: "updateBundleProductPrice",

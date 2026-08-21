@@ -1,19 +1,13 @@
 import { usePpbConfigureContext } from "./PpbConfigureContext";
 import { PpbDiscountMessagingOptions } from "./PpbDiscountMessagingOptions";
+import { DisabledConfigurationRegion } from "../_shared/bundle-configure/DisabledConfigurationRegion";
 
 export function PpbDiscountDisplayOptions() {
-  const { displayOptionsInactive, productPageBundleStyles } =
-    usePpbConfigureContext();
+  const { displayOptionsInactive } = usePpbConfigureContext();
 
   return (
     <s-section>
-      <div
-        className={
-          displayOptionsInactive
-            ? productPageBundleStyles.displayOptionsInactive
-            : undefined
-        }
-      >
+      <DisabledConfigurationRegion disabled={displayOptionsInactive}>
         <s-stack direction="block" gap="small">
           <s-stack direction="block" gap="small-400">
             <h4 style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>
@@ -27,7 +21,7 @@ export function PpbDiscountDisplayOptions() {
           <PpbProgressBarOptions />
           <PpbDiscountMessagingOptions />
         </s-stack>
-      </div>
+      </DisabledConfigurationRegion>
     </s-section>
   );
 }
@@ -96,7 +90,9 @@ function PpbBundleQuantityOptions() {
         <strong>Note:</strong> Bundle Quantity Options can only be enabled when
         discount rules are based on quantity.
       </p>
-      {qtyOptionsEnabled && (
+      <DisabledConfigurationRegion
+        disabled={!qtyOptionsEnabled || !bundleQuantityOptionsEligible}
+      >
         <div className={productPageBundleStyles.nestedDisplayOptions}>
           <s-stack direction="block" gap="small">
             {pricingState.discountRules.length === 0 ? (
@@ -186,7 +182,7 @@ function PpbBundleQuantityOptions() {
             )}
           </s-stack>
         </div>
-      )}
+      </DisabledConfigurationRegion>
     </div>
   );
 }
@@ -194,7 +190,6 @@ function PpbBundleQuantityOptions() {
 function PpbProgressBarOptions() {
   const {
     markAsDirty,
-    pricingState,
     productPageBundleStyles,
     progressBarEnabled,
     progressBarType,
@@ -247,7 +242,7 @@ function PpbProgressBarOptions() {
           Multi Language
         </s-button>
       </s-stack>
-      {progressBarEnabled && (
+      <DisabledConfigurationRegion disabled={!progressBarEnabled}>
         <div className={productPageBundleStyles.nestedDisplayOptions}>
           <s-stack direction="block" gap="small">
             <s-choice-list
@@ -272,7 +267,7 @@ function PpbProgressBarOptions() {
             ) : null}
           </s-stack>
         </div>
-      )}
+      </DisabledConfigurationRegion>
     </div>
   );
 }
@@ -303,10 +298,7 @@ function PpbProgressTierTextFields({
             <p style={{ margin: 0, fontSize: 13, fontWeight: 500 }}>
               Rule #{index + 1}
             </p>
-            <s-grid
-              gridTemplateColumns="repeat(2, minmax(0, 1fr))"
-              gap="small"
-            >
+            <s-grid gridTemplateColumns="repeat(2, minmax(0, 1fr))" gap="small">
               <s-text-field
                 label="Tier Text"
                 value={tierTextByRuleId[rule.id]?.tierText ?? ""}

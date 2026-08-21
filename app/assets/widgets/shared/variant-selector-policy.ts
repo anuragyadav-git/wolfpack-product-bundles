@@ -4,7 +4,7 @@ export function shouldRenderInlineVariantSelector({
   bundleVariantSelectorEnabled = true,
   product,
   displayVariantsAsIndividualProducts = false,
-} = {}) {
+}: any = {}) {
   if (bundleVariantSelectorEnabled === false) return false;
   if (!product || !Array.isArray(product.variants) || product.variants.length <= 1) return false;
   if (displayVariantsAsIndividualProducts === true) return false;
@@ -12,7 +12,7 @@ export function shouldRenderInlineVariantSelector({
   return true;
 }
 
-export function getInlineVariantSelectorPresentation(designPreset) {
+export function getInlineVariantSelectorPresentation(designPreset: any) {
   const templateSystem = TemplateDesignSystem;
 
   if (typeof templateSystem?.fpb?.resolveContract !== 'function') {

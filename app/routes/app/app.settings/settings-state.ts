@@ -5,9 +5,13 @@ import {
   LANGUAGE_CONFIGURATION,
   type SettingsField,
 } from "../../../lib/admin-configuration-surfaces";
+import {
+  SETTINGS_LANGUAGE_SOURCE_TEXT,
+  SETTINGS_LANGUAGE_TRANSLATIONS,
+} from "../../../lib/settings-language-presets.generated";
 
-export function getInitialLanguageFieldValues() {
-  return Object.fromEntries(
+export function getInitialLanguageFieldValues(locale = "en") {
+  const englishValues = Object.fromEntries(
     [
       ...LANGUAGE_CONFIGURATION.sharedCartFields,
       ...LANGUAGE_CONFIGURATION.productCardFields,
@@ -22,12 +26,21 @@ export function getInitialLanguageFieldValues() {
       field.value ?? "",
     ]),
   ) as Record<string, string>;
+  const translatedValues = SETTINGS_LANGUAGE_TRANSLATIONS[locale];
+  if (!translatedValues) return englishValues;
+
+  const translationBySource = new Map<string, string | undefined>(
+    SETTINGS_LANGUAGE_SOURCE_TEXT.map((source, index) => [source, translatedValues[index]]),
+  );
+  return Object.fromEntries(
+    Object.entries(englishValues).map(([key, value]) => [key, translationBySource.get(value) ?? value]),
+  );
 }
 
 export function getInitialControlFieldValues() {
   return Object.fromEntries(
     CONTROL_LAYOUTS.flatMap((layout) => layout.tabs.flatMap((tab) => tab.fields.map((field) => [
-      field.label,
+      getFieldValueKey(field),
       field.value ?? "",
     ]))),
   ) as Record<string, string>;
@@ -47,4 +60,15 @@ export function getInitialDesignFieldValues() {
 
 export function getFieldValueKey(field: SettingsField) {
   return field.key ?? field.label;
+}
+
+export function getConfirmedControlValues(
+  response: { success?: boolean; intent?: string } | undefined,
+  pendingValues: Record<string, string> | null,
+) {
+  return response?.success === true
+    && response.intent === "saveSettingsControls"
+    && pendingValues
+    ? pendingValues
+    : null;
 }

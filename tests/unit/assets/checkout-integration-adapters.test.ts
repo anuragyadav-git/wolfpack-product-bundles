@@ -135,6 +135,19 @@ describe("checkout integration capability detection", () => {
     });
   });
 
+  it.each([
+    ["zecpay", { zecpeCheckFunctionAndCall: jest.fn() }, "zecpay_callback"],
+    ["shiprocket_fastrr", { shiprocketCheckoutBuyCartHandler: jest.fn() }, "shiprocket_fastrr_callback"],
+    ["rebuy", { Cart: { getCart: jest.fn() } }, "rebuy_cart_callback"],
+    ["upcart", { upcartOpenCart: jest.fn() }, "upcart_callback"],
+    ["kaching_cart", { kachingCartApi: { refreshCart: jest.fn(), openCart: jest.fn() } }, "kaching_cart_callback"],
+  ])("detects the documented %s storefront callback", (providerId, runtimeWindow, capability) => {
+    expect(detectCheckoutIntegrationCapability(providerId, runtimeWindow)).toMatchObject({
+      available: true,
+      capability,
+    });
+  });
+
   it("waits for delayed callback availability within the bounded timeout", async () => {
     const runtimeWindow: Record<string, unknown> = {};
     const options = {
@@ -285,6 +298,33 @@ describe("checkout integration invocation lifecycle", () => {
       capability: "shopflo_callback",
     });
     expect(options.openShopfloCheckout).toHaveBeenCalledTimes(1);
+  });
+
+  it("invokes Zecpay and Shiprocket checkout callbacks", async () => {
+    const zecpay = jest.fn(() => true);
+    const shiprocket = jest.fn(() => true);
+
+    await expect(invokeCheckoutIntegrationProvider("zecpay", { zecpeCheckFunctionAndCall: zecpay }))
+      .resolves.toMatchObject({ ok: true });
+    await expect(invokeCheckoutIntegrationProvider("shiprocket_fastrr", {
+      shiprocketCheckoutBuyCartHandler: shiprocket,
+    })).resolves.toMatchObject({ ok: true });
+    expect(zecpay).toHaveBeenCalledWith("handleOcc");
+    expect(shiprocket).toHaveBeenCalledTimes(1);
+  });
+
+  it("refreshes before opening Kaching Cart", async () => {
+    const calls: string[] = [];
+    const runtimeWindow = {
+      kachingCartApi: {
+        refreshCart: jest.fn(async () => calls.push("refresh")),
+        openCart: jest.fn(() => calls.push("open")),
+      },
+    };
+
+    await expect(invokeCheckoutIntegrationProvider("kaching_cart", runtimeWindow))
+      .resolves.toMatchObject({ ok: true });
+    expect(calls).toEqual(["refresh", "open"]);
   });
 
   it("returns invocation errors when GoKwik callback throws", async () => {

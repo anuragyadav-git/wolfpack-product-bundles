@@ -51,7 +51,7 @@ describe("FPB compare-at price setting control", () => {
 
     expect(control).toBeNull();
     expect(
-      renderToStaticMarkup(createElement(FpbSummaryTextSettings, { flow })),
+      renderToStaticMarkup(createElement(FpbSummaryTextSettings, { flow: flow as any })),
     ).not.toContain("Show Compare At Price");
   });
 });

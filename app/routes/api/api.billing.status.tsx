@@ -48,7 +48,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
       }
     });
 
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.error("Error getting subscription status", {
       component: "api.billing.status",
       operation: "loader"

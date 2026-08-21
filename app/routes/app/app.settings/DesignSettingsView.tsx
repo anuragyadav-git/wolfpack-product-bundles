@@ -79,12 +79,12 @@ export function DesignSettingsView({
     activePreviewSurface,
   );
   const contextualExpertScopes = Object.entries(EXPERT_COLOR_CONTROLS)
-    .filter(([, fields]) => getDesignFieldsForPreviewContext(
+    .filter(([, fields]: any) => getDesignFieldsForPreviewContext(
       fields,
       activePreviewTemplate,
       activePreviewSurface,
     ).length > 0)
-    .map(([scope]) => scope);
+    .map(([scope]: any) => scope);
 
   useEffect(() => {
     if (isExpertScopeActive) {
@@ -167,7 +167,7 @@ export function DesignSettingsView({
               isExpertControlsEnabled={isExpertColorControls}
               activeFieldKey={activePreviewFieldKey}
               onSurfaceChange={setActivePreviewSurface}
-              onContextChange={({ templateKey }) => setActivePreviewTemplate(templateKey)}
+              onContextChange={({ templateKey }: any) => setActivePreviewTemplate(templateKey)}
             />
           </div>
           <div

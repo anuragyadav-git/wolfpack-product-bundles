@@ -24,6 +24,7 @@ function createContext(marker: { remove: jest.Mock } | null = null) {
     },
     getAttribute: jest.fn((name: string) => attributes.get(name) ?? null),
     setAttribute: jest.fn((name: string, value: string) => attributes.set(name, value)),
+    removeAttribute: jest.fn((name: string) => attributes.delete(name)),
     prepend: jest.fn(),
   };
   const context = {

@@ -1,4 +1,4 @@
-export function resolveRuntimeVariantNumericId(rawVariantId) {
+export function resolveRuntimeVariantNumericId(rawVariantId: any) {
   const normalizedRawId = String(rawVariantId ?? "").trim();
   if (!normalizedRawId) return "";
 
@@ -12,7 +12,7 @@ export function resolveRuntimeVariantNumericId(rawVariantId) {
 }
 
 export async function preflightVariantOnStorefront(
-  rawVariantId,
+  rawVariantId: string,
   fetchImpl = typeof fetch === "function" ? fetch : null,
 ) {
   const variantNumericId = resolveRuntimeVariantNumericId(rawVariantId);
@@ -61,7 +61,7 @@ export async function preflightVariantOnStorefront(
       message: available === false ? "Variant lookup returned available:false." : undefined,
       available,
     };
-  } catch (error) {
+  } catch (error: any) {
     return {
       ok: false,
       id: variantNumericId,

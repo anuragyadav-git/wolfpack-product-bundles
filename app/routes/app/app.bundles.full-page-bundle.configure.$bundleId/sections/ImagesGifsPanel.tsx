@@ -1,4 +1,5 @@
 import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
+import { DisabledConfigurationRegion } from "../../_shared/bundle-configure/DisabledConfigurationRegion";
 
 export function FpbImagesGifsPanel({
   flow,
@@ -196,7 +197,7 @@ export function FpbImagesGifsPanel({
                               stepsState.updateStepField(
                                 step.id,
                                 "imageUrl",
-                                url ?? null,
+                                url ?? null
                               );
                               markAsDirty();
                             }}
@@ -232,14 +233,14 @@ export function FpbImagesGifsPanel({
                               stepsState.updateStepField(
                                 step.id,
                                 "bannerImageUrl",
-                                url ?? null,
+                                url ?? null
                               );
                               markAsDirty();
                             }}
                           />
                         </s-stack>
                       </s-stack>
-                    ),
+                    )
                 )}
               </s-stack>
             </s-section>
@@ -272,25 +273,26 @@ export function FpbImagesGifsPanel({
                 checked={floatingBadgeEnabled || undefined}
                 onChange={(e) => {
                   setFloatingBadgeEnabled(
-                    (e.target as HTMLInputElement).checked,
+                    (e.target as HTMLInputElement).checked
                   );
                   markAsDirty();
                 }}
               />
-              {floatingBadgeEnabled && (
+              <DisabledConfigurationRegion disabled={!floatingBadgeEnabled}>
                 <s-text-field
                   label="Badge text"
                   value={floatingBadgeText}
+                  disabled={!floatingBadgeEnabled || undefined}
                   onInput={(e) => {
                     setFloatingBadgeText(
-                      (e.target as HTMLInputElement).value.slice(0, 60),
+                      (e.target as HTMLInputElement).value.slice(0, 60)
                     );
                     markAsDirty();
                   }}
                   placeholder="e.g. Save 20% today only!"
                   autocomplete="off"
                 />
-              )}
+              </DisabledConfigurationRegion>
             </s-stack>
           </s-section>
         </>

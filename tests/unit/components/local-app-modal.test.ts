@@ -17,8 +17,8 @@ describe("LocalAppModal", () => {
           title: "Discard changes",
           onClose: jest.fn(),
           primaryAction: React.createElement("button", null, "Discard"),
+          children: React.createElement("p", null, "Unsaved changes"),
         },
-        React.createElement("p", null, "Unsaved changes"),
       ),
     );
 

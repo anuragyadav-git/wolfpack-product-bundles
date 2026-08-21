@@ -142,7 +142,7 @@ export async function handleRequest(req: IncomingMessage, res: ServerResponse): 
 
     try {
       rawBody = await readRawBody(req);
-    } catch (error) {
+    } catch (error: any) {
       AppLogger.error("Failed to read request body", {
         component: "webhook-worker",
         operation: "requestHandler",

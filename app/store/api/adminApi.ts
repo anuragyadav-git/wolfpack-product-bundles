@@ -64,7 +64,7 @@ export const adminApi = createApi({
       }
 
       return { data };
-    } catch (error) {
+    } catch (error: any) {
       return {
         error: {
           status: "FETCH_ERROR",

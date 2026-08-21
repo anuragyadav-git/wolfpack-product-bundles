@@ -12,7 +12,7 @@ import { renderQuantityControl } from './quantity-control.js';
 const DEFAULT_PLACEHOLDER_IMAGE = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400"%3E%3Crect width="400" height="400" fill="%23f3f4f6"/%3E%3C/svg%3E';
 const PRODUCT_DESCRIPTION_PREVIEW_LENGTH = 110;
 
-export function renderSharedProductCard(product = {}, currentQuantity = 0, currencyInfo = {}, options = {}) {
+export function renderSharedProductCard(product: any = {}, currentQuantity = 0, currencyInfo: any = {}, options: any = {}) {
   const selectionKey = String(product.selectionId || '');
   const quantity = Math.max(0, Number(currentQuantity || 0));
   const isSelected = quantity > 0;
@@ -32,8 +32,7 @@ export function renderSharedProductCard(product = {}, currentQuantity = 0, curre
     ? options.displayPrice
     : product.price;
   const price = formatPrice(displayPrice, currencyInfo);
-  const shouldRenderCompareAtPrice = options.showCompareAtPrice === true
-    && product.compareAtPrice !== null
+  const shouldRenderCompareAtPrice = product.compareAtPrice !== null
     && product.compareAtPrice !== undefined;
   const compareAtPrice = shouldRenderCompareAtPrice
     ? formatPrice(product.compareAtPrice, currencyInfo)
@@ -57,6 +56,8 @@ export function renderSharedProductCard(product = {}, currentQuantity = 0, curre
   const decreaseQuantityLabel = options.decreaseQuantityAriaLabel || options.decreaseLabel || 'Decrease quantity';
   const increaseQuantityLabel = options.increaseQuantityAriaLabel || options.increaseLabel || 'Increase quantity';
   const activationLabel = openImageLabel || openTitleLabel || title;
+  const cardInteractive = options.cardInteractive !== false;
+  const titleInteractive = options.titleInteractive !== false;
   const rootClasses = [
     'bw-product-card',
     'product-card',
@@ -72,7 +73,7 @@ export function renderSharedProductCard(product = {}, currentQuantity = 0, curre
   const rootAriaLabel = resolveProductCardSelectionAriaLabel(activationLabel, isSelected);
 
   return `
-    <div class="${rootClasses}" data-bw-product-card="true" data-product-id="${escapeAttribute(selectionKey)}" data-current-selected-variant-id="${escapeAttribute(selectionKey)}" data-bw-card-image-count="${imageUrls.length}" data-bw-card-image-index="0"${isIndividualVariantCard ? ' data-bw-card-individual-variant="true"' : ''}${hasMultipleImages ? ' data-bw-card-has-multiple-images="true"' : ''} tabindex="0" role="group" aria-label="${escapeAttribute(rootAriaLabel)}" aria-pressed="${isSelected ? 'true' : 'false'}">
+    <div class="${rootClasses}" data-bw-product-card="true" data-product-id="${escapeAttribute(selectionKey)}" data-current-selected-variant-id="${escapeAttribute(selectionKey)}" data-bw-card-image-count="${imageUrls.length}" data-bw-card-image-index="0"${isIndividualVariantCard ? ' data-bw-card-individual-variant="true"' : ''}${hasMultipleImages ? ' data-bw-card-has-multiple-images="true"' : ''}${cardInteractive ? ' tabindex="0"' : ''} role="group" aria-label="${escapeAttribute(rootAriaLabel)}">
       <div class="bw-product-card__media product-image" data-bw-product-media="true" role="button" tabindex="0" aria-label="${escapeAttribute(openImageLabel)}">
         <img class="bw-product-card__image" src="${escapeAttribute(imageUrl)}" alt="${escapeAttribute(title)}" loading="lazy">
         ${hasMultipleImages ? renderImageNavButton('prev', imageNavPrevLabel) : ''}
@@ -85,7 +86,7 @@ export function renderSharedProductCard(product = {}, currentQuantity = 0, curre
       ${options.cardBadgeHtml || ''}
       <div class="bw-product-card__body product-content-wrapper">
       <div class="bw-product-card__text product-text-container ${variantText ? 'bw-product-card__text--has-variant product-text-container--has-variant' : ''}">
-          <div class="bw-product-card__title product-title" role="button" tabindex="0" aria-label="${escapeAttribute(openTitleLabel)}">${escapeHtml(title)}</div>
+          <div class="bw-product-card__title product-title"${titleInteractive ? ` role="button" tabindex="0" aria-label="${escapeAttribute(openTitleLabel)}"` : ''}>${escapeHtml(title)}</div>
           ${variantText ? `<div class="bw-product-card__variant product-variant-row" data-bw-card-variant-row="true" aria-label="${escapeAttribute(`${variantLabel}: ${variantText}`)}">${escapeHtml(variantText)}</div>` : ''}
           ${renderProductDescription({
             description: descriptionText,
@@ -143,9 +144,9 @@ export function resolveProductCardSelectionAriaLabel(label = '', isSelected = fa
   return `${baseLabel} (${isSelected ? 'selected' : 'not selected'})`;
 }
 
-export function getProductImageUrls(product = {}) {
-  const urls = [];
-  const addUrl = (value) => {
+export function getProductImageUrls(product: any = {}) {
+  const urls: any[] = [];
+  const addUrl = (value: any) => {
     const url = normalizeImageUrl(value);
     if (url && !urls.includes(url)) urls.push(url);
   };
@@ -158,7 +159,7 @@ export function getProductImageUrls(product = {}) {
   return urls.length > 0 ? urls : [DEFAULT_PLACEHOLDER_IMAGE];
 }
 
-function getDisplayTitle(product, variantText) {
+function getDisplayTitle(product: any, variantText: any) {
   const parentTitle = typeof product.parentTitle === 'string' ? product.parentTitle.trim() : '';
   const rawTitle = typeof product.title === 'string' ? product.title.trim() : '';
 
@@ -172,7 +173,7 @@ function getDisplayTitle(product, variantText) {
   return parentTitle || rawTitle;
 }
 
-function getVariantDisplayText(product) {
+function getVariantDisplayText(product: any) {
   const explicitVariantTitle = typeof product.variantTitle === 'string' ? product.variantTitle.trim() : '';
   if (explicitVariantTitle && explicitVariantTitle !== 'Default Title') {
     return explicitVariantTitle;
@@ -198,7 +199,7 @@ function getVariantDisplayText(product) {
   return '';
 }
 
-function renderAddButton(selectionKey, options) {
+function renderAddButton(selectionKey: string, options: any) {
   const disabled = options.addDisabled === true;
   const text = options.addButtonText || '+';
   const addLabel = options.addButtonAriaLabel || 'Add';
@@ -211,7 +212,7 @@ function renderAddButton(selectionKey, options) {
   `;
 }
 
-function renderImageNavButton(direction, label) {
+function renderImageNavButton(direction: string, label: any) {
   const safeLabel = String(label || (direction === 'prev' ? 'Previous image' : 'Next image'));
   const symbol = direction === 'prev' ? '&#10094;' : '&#10095;';
   return `
@@ -226,7 +227,7 @@ function renderProductDescription({
   displaySeeMoreLink = false,
   descriptionMaxLength = PRODUCT_DESCRIPTION_PREVIEW_LENGTH,
   seeMoreText = 'See more',
-}) {
+}: any) {
   const descriptionText = resolveProductDescriptionText(description);
   if (!descriptionText) return '';
 
@@ -252,13 +253,13 @@ function renderProductDescription({
   `;
 }
 
-function normalizeImageUrl(value) {
+function normalizeImageUrl(value: any) {
   if (!value) return '';
   if (typeof value === 'string') return value;
   return value.url || value.src || value.originalSrc || value.transformedSrc || '';
 }
 
-function formatPrice(value, currencyInfo) {
+function formatPrice(value: string|null, currencyInfo: any) {
   if (value == null || value === '') return '';
 
   const amount = Number(value || 0) / 100;
@@ -266,13 +267,13 @@ function formatPrice(value, currencyInfo) {
   return format.replace('{{amount}}', amount.toFixed(2));
 }
 
-function resolveProductDescriptionText(value) {
+function resolveProductDescriptionText(value: string|null) {
   if (value == null) return '';
 
   return String(value);
 }
 
-function escapeHtml(value) {
+function escapeHtml(value: string) {
   return String(value)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -281,6 +282,6 @@ function escapeHtml(value) {
     .replace(/'/g, '&#39;');
 }
 
-function escapeAttribute(value) {
+function escapeAttribute(value: string) {
   return escapeHtml(value).replace(/`/g, '&#96;');
 }

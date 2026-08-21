@@ -463,6 +463,22 @@
   opacity: 1;
 }
 
+.bundle-toast.bundle-toast--modal button.toast-close {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+}
+
+.bundle-toast.bundle-toast--modal button.toast-close svg {
+  width: 20px;
+  height: 20px;
+}
+
 @media (max-width: 480px) {
   .bundle-toast {
     top: calc(12px + env(safe-area-inset-top));

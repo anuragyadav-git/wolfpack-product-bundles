@@ -1,0 +1,217 @@
+{
+  "schema_version": 1,
+  "job_id": "ppb-bundle-picker-modal-redesign-20260821",
+  "revision": 6,
+  "status": "complete",
+  "groups": {
+    "color": [
+      {
+        "name": "picker-color-system",
+        "value": "existing merchant CSS variables",
+        "unit": "",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": true,
+        "owner": "PPB page customization",
+        "notes": "No EB colors are copied."
+      }
+    ],
+    "typography": [
+      {
+        "name": "picker-type-system",
+        "value": "existing widget typography variables",
+        "unit": "",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": true,
+        "owner": "PPB page customization",
+        "notes": "Preserve localized content and hierarchy."
+      }
+    ],
+    "spacing": [
+      {
+        "name": "picker-inline-gutter",
+        "value": "clamp(1rem, 4vw, 4rem)",
+        "unit": "css",
+        "source": "recommendation",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "modal-product-grid.css",
+        "notes": "Fluid desktop gutter; mobile resolves to 20px."
+      },
+      {
+        "name": "picker-grid-gap",
+        "value": "clamp(0.75rem, 2vw, 1.875rem)",
+        "unit": "css",
+        "source": "reference-observed",
+        "confidence": "medium",
+        "merchant_configurable": false,
+        "owner": "modal-product-grid.css",
+        "notes": "Responsive, content-driven spacing."
+      }
+    ],
+    "size": [
+      {
+        "name": "picker-sheet-height",
+        "value": 85,
+        "unit": "dvh",
+        "source": "user-defined",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "bottom-sheet-modal.css",
+        "notes": "Exact sheet boundary."
+      },
+      {
+        "name": "picker-card-min",
+        "value": "clamp(10rem, 16vw, 14.5rem)",
+        "unit": "css",
+        "source": "recommendation",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "modal-product-grid.css",
+        "notes": "Content-driven desktop track; sparse grids align to start and do not stretch."
+      },
+      {
+        "name": "details-sheet-max-height",
+        "value": 88,
+        "unit": "dvh",
+        "source": "user-defined",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "PPB product-details CSS",
+        "notes": "Full-width sheet with constrained inner content and safe-area padding."
+      },
+      {
+        "name": "picker-control-target-min",
+        "value": 44,
+        "unit": "px",
+        "source": "recommendation",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "modal shell controls",
+        "notes": "True accessibility primitive."
+      },
+      {
+        "name": "filled-slot-remove-target",
+        "value": 44,
+        "unit": "px",
+        "source": "user-approved recommendation",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "modal-slots.css",
+        "notes": "Compact overlaid cross badge; the visual glyph may be smaller but its interactive target remains 44px."
+      },
+      {
+        "name": "filled-slot-horizontal-max-block",
+        "value": "clamp(11rem, 48cqi, 13rem)",
+        "unit": "css",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "modal-slots.css",
+        "notes": "Existing Horizontal slot tile geometry becomes the maximum filled-slot block size."
+      },
+      {
+        "name": "filled-slot-vertical-max-block",
+        "value": "clamp(4.25rem, 16cqi, 4.75rem)",
+        "unit": "css",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "modal-slots.css",
+        "notes": "Existing Vertical row geometry becomes the maximum filled-slot block size."
+      }
+    ],
+    "radius": [],
+    "border": [],
+    "shadow": [],
+    "z_index": [
+      {
+        "name": "picker-layer",
+        "value": "existing layer manager",
+        "unit": "",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "drawer-layer-manager",
+        "notes": "Picker and product details share stack ownership; details is above picker."
+      }
+    ],
+    "motion": [
+      {
+        "name": "picker-motion",
+        "value": "existing transition with reduced-motion suppression",
+        "unit": "",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "bottom-sheet-modal.css",
+        "notes": "No business timing changes."
+      }
+    ],
+    "breakpoint": [
+      {
+        "name": "picker-compact-boundary",
+        "value": 768,
+        "unit": "px",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "product-page modal CSS",
+        "notes": "Selector label becomes visually hidden after 768; validate 767, 768, and 769."
+      },
+      {
+        "name": "picker-five-column-boundary",
+        "value": 1440,
+        "unit": "px",
+        "source": "user-defined",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "modal-product-grid.css",
+        "notes": "Five columns at 1440; four at 1280; two at 768 and below."
+      }
+    ],
+    "component_alias": [
+      {
+        "name": "picker-footer-width",
+        "value": "min(300px, calc(100% - 40px))",
+        "unit": "css",
+        "source": "reference-observed",
+        "confidence": "medium",
+        "merchant_configurable": false,
+        "owner": "modal-footer-empty-toast.css",
+        "notes": "Compact reserved dock remains unobscured and safe-area aware."
+      },
+      {
+        "name": "picker-footer-summary-size",
+        "value": "max-content capped at calc(100% - 24px)",
+        "unit": "css",
+        "source": "user-defined",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "bottom-sheet-modal.css",
+        "notes": "Three content-owned tracks keep icon/count aligned and grow for price content without leaving the footer."
+      },
+      {
+        "name": "details-content-width",
+        "value": "min(100% - 2rem, 72rem)",
+        "unit": "css",
+        "source": "recommendation",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "PPB product-details CSS",
+        "notes": "Constrained content column inside the full-width sheet."
+      }
+    ]
+  },
+  "token_shape": {
+    "name": "",
+    "value": null,
+    "unit": "",
+    "source": "recommendation",
+    "confidence": "low",
+    "merchant_configurable": false,
+    "owner": "",
+    "notes": ""
+  }
+}

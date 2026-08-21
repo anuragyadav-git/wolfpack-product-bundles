@@ -158,6 +158,39 @@ pub struct CartLineDisplayProperties {
     pub retail_price: Option<String>,
     #[serde(default)]
     pub you_save: CartLineDisplaySavings,
+    #[serde(default)]
+    pub labels: CartLineDisplayLabels,
+}
+
+#[derive(serde::Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct CartLineDisplayLabels {
+    #[serde(default = "default_items_label")]
+    pub items: String,
+    #[serde(default = "default_retail_price_label")]
+    pub retail_price: String,
+    #[serde(default = "default_you_save_label")]
+    pub you_save: String,
+}
+
+impl Default for CartLineDisplayLabels {
+    fn default() -> Self {
+        Self {
+            items: default_items_label(),
+            retail_price: default_retail_price_label(),
+            you_save: default_you_save_label(),
+        }
+    }
+}
+
+fn default_items_label() -> String {
+    "Items".to_string()
+}
+fn default_retail_price_label() -> String {
+    "Retail Price".to_string()
+}
+fn default_you_save_label() -> String {
+    "You Save".to_string()
 }
 
 #[derive(serde::Deserialize, Debug, Clone, Default)]

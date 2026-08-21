@@ -14,6 +14,11 @@ describe('shared cart-line metadata helpers', () => {
       retailPrice: '$20.00',
       discountAmount: '$5.00',
       discountPercentage: 25,
+      labels: {
+        items: 'Articles',
+        retailPrice: 'Prix normal',
+        youSave: 'Économie',
+      },
     });
 
     const displayProperties = JSON.parse(sourceProperties._bundle_display_properties);
@@ -26,6 +31,11 @@ describe('shared cart-line metadata helpers', () => {
         amount: '$5.00',
         percentage: '25%',
         amountPercentage: '$5.00 (25%)',
+      },
+      labels: {
+        items: 'Articles',
+        retailPrice: 'Prix normal',
+        youSave: 'Économie',
       },
     });
   });

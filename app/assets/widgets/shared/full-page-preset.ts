@@ -28,7 +28,7 @@ const FullPagePreset = (function () {
       : [];
   }
 
-  function normalizePreset(rawValue, fallback = '') {
+  function normalizePreset(rawValue: string, fallback = '') {
     const trimmed = typeof rawValue === 'string' ? rawValue.trim().toUpperCase() : '';
     if (!trimmed) return fallback;
     if (getFpbTemplateIds().includes(trimmed)) return trimmed;
@@ -39,7 +39,7 @@ const FullPagePreset = (function () {
     return fallback;
   }
 
-  function getPresetContract(rawValue) {
+  function getPresetContract(rawValue: any) {
     const templateSystem = getTemplateSystem();
     if (!templateSystem?.fpb?.resolveContract) return null;
     return templateSystem.fpb.resolveContract(rawValue) || null;
@@ -48,19 +48,19 @@ const FullPagePreset = (function () {
   /**
    * Normalize a raw preset id to one of the four supported values.
    */
-  function resolvePresetAttr(bundle) {
+  function resolvePresetAttr(bundle: any) {
     const raw = (bundle && bundle.bundleDesignPresetId) || '';
     if (typeof raw !== 'string') return '';
     return normalizePreset(raw, '');
   }
 
-  function resolveTemplateAttr(bundle) {
+  function resolveTemplateAttr(bundle: any) {
     const raw = bundle && bundle.bundleDesignTemplate;
     if (typeof raw !== 'string' || raw.trim() === '') return '';
     return raw.trim().toUpperCase();
   }
 
-  function isSupportedPreset(rawValue) {
+  function isSupportedPreset(rawValue: string) {
     return normalizePreset(rawValue, '') !== '';
   }
 
@@ -68,7 +68,7 @@ const FullPagePreset = (function () {
    * Apply the preset + template data attributes to the widget container.
    * Safe to call repeatedly (idempotent).
    */
-  function markContainer(container, bundle) {
+  function markContainer(container: any, bundle: any) {
     if (!container || !container.dataset) return;
     const preset = resolvePresetAttr(bundle);
     const template = resolveTemplateAttr(bundle);
@@ -86,7 +86,7 @@ const FullPagePreset = (function () {
     }
   }
 
-  function shouldUseReferenceStepBarTimeline({ layout, presetId } = {}) {
+  function shouldUseReferenceStepBarTimeline({ layout, presetId }: any = {}) {
     const normalizedLayout = typeof layout === 'string' ? layout.trim().toLowerCase() : '';
     if (normalizedLayout !== 'footer_side') return false;
 

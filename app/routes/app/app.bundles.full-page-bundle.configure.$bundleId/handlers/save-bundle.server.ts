@@ -702,7 +702,7 @@ export async function handleSaveBundle(
             shopId: session.shop,
           }, { error: activationResult.error });
         }
-      } catch (activationError) {
+      } catch (activationError: any) {
         AppLogger.warn("Add-on discount function setup threw during bundle save", {
           component: "bundle-config",
           operation: "save",
@@ -757,7 +757,7 @@ export async function handleSaveBundle(
       bundle: compactBundleForConfigureResponse(updatedBundle),
       message: "Updated Successfully!",
     });
-  } catch (error) {
+  } catch (error: any) {
     const message =
       error instanceof Error
         ? error.message

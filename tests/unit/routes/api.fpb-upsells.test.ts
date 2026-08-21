@@ -23,8 +23,8 @@ function request(extra: Record<string, string | string[]> = {}, signed = true, h
     (Array.isArray(value) ? value : [value]).forEach((item) => params.append(key, item));
   }
   if (signed) {
-    const message = [...params.entries()].reduce((map, [key, value]) => map.set(key, [...(map.get(key) ?? []), value]), new Map<string, string[]>());
-    const canonical = [...message.entries()].map(([key, values]) => `${key}=${values.join(",")}`).sort().join("");
+    const message = [...params.entries()].reduce((map, [key, value]: any) => map.set(key, [...(map.get(key) ?? []), value]), new Map<string, string[]>());
+    const canonical = [...message.entries()].map(([key, values]: any) => `${key}=${values.join(",")}`).sort().join("");
     params.set("signature", createHmac("sha256", "test_api_secret").update(canonical).digest("hex"));
   }
   return new Request(`https://test.myshopify.com/apps/product-bundles/api/fpb-upsells.json?${params}`, { headers });

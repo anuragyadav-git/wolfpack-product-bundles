@@ -23,13 +23,13 @@ _ensureWpbSessionId() {
     sessionStorage.setItem(storageKey, id);
     this._wpbSessionId = id;
     return id;
-  } catch (_e) {
+  } catch (_e: any) {
     this._wpbSessionId = `wpb-${Date.now()}`;
     return this._wpbSessionId;
   }
 },
 
-_emitStorefrontEvent(name, detail = {}) {
+_emitStorefrontEvent(name: any, detail: any = {}) {
   try {
     const fullDetail = Object.assign({
       bundleId: this.selectedBundle?.id || null,
@@ -39,12 +39,12 @@ _emitStorefrontEvent(name, detail = {}) {
       timestamp: new Date().toISOString(),
     }, detail);
     window.dispatchEvent(new CustomEvent(`wpb:${name}`, { detail: fullDetail, bubbles: true }));
-  } catch (_e) {
+  } catch (_e: any) {
     // Listener errors must never break the widget.
   }
 },
 
-_sendEngagementBeacon(eventName) {
+_sendEngagementBeacon(eventName: any) {
   try {
     const bundleId = this.selectedBundle?.id || this.container?.dataset?.bundleId;
     if (!bundleId) return;
@@ -52,7 +52,7 @@ _sendEngagementBeacon(eventName) {
     if (sessionStorage.getItem(guardKey) === '1') return;
     const sessionId = this._ensureWpbSessionId();
     const shopId = window.Shopify?.shop || this.container?.dataset?.shop || window.location.hostname;
-    const payload = {
+    const payload: any = {
       shopId,
       bundleId,
       sessionId,
@@ -70,7 +70,7 @@ _sendEngagementBeacon(eventName) {
       body: JSON.stringify(payload),
       keepalive: true,
     }).catch(() => { /* fire-and-forget */ });
-  } catch (_e) {
+  } catch (_e: any) {
     // Beacon failures must never break the widget.
   }
 },
@@ -95,7 +95,7 @@ async loadLanguageSettings() {
       ...(this.config.textOverrides || {}),
       ...(languageSettings.textOverrides || {})
     };
-  } catch (_) {
+  } catch (_: any) {
     // Non-critical: default and bundle-level text still render.
   }
 },
@@ -112,7 +112,22 @@ async loadControlsSettings() {
     if (!response.ok) return;
 
     this.config.controlsSettings = await response.json();
-  } catch (_) {
+    const controls = this._getLandingPageControls();
+    const customFont = String(controls?.font?.customFont || '').trim();
+    if (customFont) {
+      this.container.style.setProperty('--wpb-controls-font-family', customFont);
+    } else {
+      this.container.style.removeProperty('--wpb-controls-font-family');
+    }
+    window.__WPB_BUNDLE_BUTTON_SELECTORS__ = {
+      addToCartButtons: controls?.selectors?.addToCartButtons || '',
+      buyNowButton: controls?.selectors?.buyNowButton || '',
+    };
+    if (!this._controlsBundleScriptApplied) {
+      this._controlsBundleScriptApplied = true;
+      this._runControlsScript(controls?.scripts?.bundlePage);
+    }
+  } catch (_: any) {
     // Non-critical: the widget keeps its current default behavior.
   }
 },
@@ -123,29 +138,29 @@ _getLandingPageControls() {
     || null;
 },
 
-_runControlsScript(script) {
+_runControlsScript(script: string) {
   if (!script || typeof script !== 'string') return;
   try {
     new Function(script).call(window);
-  } catch (_) {
+  } catch (_: any) {
     // Merchant-authored integration script should not block bundle checkout.
   }
 },
 
-_getCheckoutIntegrationProvider(providerId) {
+_getCheckoutIntegrationProvider(providerId: any) {
   return getCheckoutIntegrationProvider(providerId);
 },
 
-_isCheckoutIntegrationProvider(providerId) {
+_isCheckoutIntegrationProvider(providerId: any) {
   return this._getCheckoutIntegrationProvider(providerId).id !== 'native';
 },
 
-_getCheckoutIntegrationFallbackTarget(provider) {
+_getCheckoutIntegrationFallbackTarget(provider: any) {
   return provider.fallbackAction === 'checkout' ? '/checkout' : '/cart';
 },
 
 async _openThemeCartDrawer() {
-  let cart = null;
+  let cart: any = null;
   try {
     const response = await fetch('/cart.js', {
       credentials: 'same-origin',
@@ -154,11 +169,11 @@ async _openThemeCartDrawer() {
     if (response.ok) {
       cart = await response.json();
     }
-  } catch (_) {
+  } catch (_: any) {
     // Cart drawer refresh is best-effort.
   }
 
-  const detail = { cart };
+  const detail: any = { cart };
   [
     'cart:refresh',
     'cart:updated',
@@ -168,18 +183,18 @@ async _openThemeCartDrawer() {
     try {
       document.dispatchEvent(new CustomEvent(eventName, { detail, bubbles: true }));
       window.dispatchEvent(new CustomEvent(eventName, { detail }));
-    } catch (_) {
+    } catch (_: any) {
       // Keep trying the remaining event contracts.
     }
   });
 
-  const drawer = document.querySelector('cart-drawer, cart-notification');
+  const drawer: any = document.querySelector('cart-drawer, cart-notification');
   if (drawer && typeof drawer.open === 'function') {
     drawer.open();
     return true;
   }
 
-  const trigger = document.querySelector(
+  const trigger = document.querySelector<HTMLElement>(
     '[aria-controls="CartDrawer"], [data-cart-drawer-open], [data-cart-open], [href="/cart"]',
   );
   if (trigger && typeof trigger.click === 'function') {
@@ -190,7 +205,7 @@ async _openThemeCartDrawer() {
   return cart !== null;
 },
 
-_openGokwikCheckout(checkoutUrl) {
+_openGokwikCheckout(checkoutUrl: any) {
   try {
     if (typeof window.gokwikSdk?.initCheckout !== 'function') return false;
     window.gokwikSdk.initCheckout({
@@ -212,21 +227,21 @@ _openShopfloCheckout() {
   }
 },
 
-_setCheckoutIntegrationDiscountState(code) {
+_setCheckoutIntegrationDiscountState(code: string|number|boolean) {
   if (!code) return;
   try {
-    sessionStorage.setItem('wpbDiscountCode', code);
-  } catch (_) {
+    sessionStorage.setItem('wpbDiscountCode', String(code));
+  } catch (_: any) {
     // Non-critical persistence.
   }
   try {
-    document.cookie = `discount_code=${encodeURIComponent(code)}; path=/; Secure; SameSite=Lax`;
-  } catch (_) {
+    document.cookie = `discount_code=${encodeURIComponent(String(code))}; path=/; Secure; SameSite=Lax`;
+  } catch (_: any) {
     // Non-critical persistence.
   }
 },
 
-async _createCheckoutIntegrationDiscountCode(providerId) {
+async _createCheckoutIntegrationDiscountCode(providerId: any) {
   const response = await fetch(buildStorefrontApiPath('checkout-integration-discount-code'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -241,7 +256,7 @@ async _createCheckoutIntegrationDiscountCode(providerId) {
   return payload;
 },
 
-async _applyCheckoutIntegrationDiscountCode(code) {
+async _applyCheckoutIntegrationDiscountCode(code: string|number|boolean) {
   if (!code) return false;
   const discountUrl = `/discount/${encodeURIComponent(code)}?redirect=/cart`;
   const response = await fetch(discountUrl, {
@@ -253,14 +268,14 @@ async _applyCheckoutIntegrationDiscountCode(code) {
   return response.ok;
 },
 
-async _invokeCheckoutIntegrationProvider(providerId, options = {}) {
-  const adapterOptions = {
+async _invokeCheckoutIntegrationProvider(providerId: any, options: any = {}) {
+  const adapterOptions: any = {
     ...options,
     openThemeCartDrawer: () => this._openThemeCartDrawer(),
-    openGokwikCheckout: (checkoutUrl) => this._openGokwikCheckout(checkoutUrl),
+    openGokwikCheckout: (checkoutUrl: any) => this._openGokwikCheckout(checkoutUrl),
     openShopfloCheckout: () => this._openShopfloCheckout(),
   };
-  const capability = await waitForCheckoutIntegrationCapability(
+  const capability: any = await waitForCheckoutIntegrationCapability(
     providerId,
     window,
     adapterOptions,
@@ -276,10 +291,10 @@ async _invokeCheckoutIntegrationProvider(providerId, options = {}) {
   return invokeCheckoutIntegrationProvider(providerId, window, adapterOptions);
 },
 
-async _handleCheckoutIntegrationProvider(checkout) {
+async _handleCheckoutIntegrationProvider(checkout: any) {
   const provider = this._getCheckoutIntegrationProvider(checkout?.providerId || 'native');
   const providerId = provider.id;
-  let payload = null;
+  let payload: any = null;
 
   if (provider.requiresDiscountCode) {
     payload = await this._createCheckoutIntegrationDiscountCode(providerId);
@@ -318,7 +333,7 @@ async _handleCheckoutIntegrationProvider(checkout) {
   window.location.href = this._getCheckoutIntegrationFallbackTarget(provider);
 },
 
-async _handlePostAddToCartAction(actionConfig, lifecycleKey) {
+async _handlePostAddToCartAction(actionConfig: any, lifecycleKey: any) {
   const checkout = actionConfig || this._getLandingPageControls()?.checkout || {};
   const provider = getCheckoutIntegrationProvider(checkout.providerId || 'native');
 
@@ -340,7 +355,7 @@ async _handlePostAddToCartAction(actionConfig, lifecycleKey) {
     try {
       await this._handleCheckoutIntegrationProvider(checkout);
       return;
-    } catch (error) {
+    } catch (error: any) {
       this._emitStorefrontEvent('checkout-integration-provider-fallback', {
         providerId,
         reason: 'discount-code-error',
@@ -404,7 +419,7 @@ parseConfiguration() {
   this._bundleConfigCacheMode = 'none';
 },
 
-_parseBundleConfigPayload(rawValue) {
+_parseBundleConfigPayload(rawValue: string) {
   if (!rawValue || rawValue.trim() === '' || rawValue === 'null' || rawValue === 'undefined') {
     return null;
   }
@@ -412,12 +427,12 @@ _parseBundleConfigPayload(rawValue) {
   try {
     const parsed = JSON.parse(rawValue);
     return typeof parsed === 'object' && parsed !== null ? parsed : null;
-  } catch (_error) {
+  } catch (_error: any) {
     return null;
   }
 },
 
-_isBundleConfigBootstrapPayload(payload) {
+_isBundleConfigBootstrapPayload(payload: any) {
   return !!(
     payload &&
     typeof payload === 'object' &&
@@ -429,7 +444,7 @@ _isBundleConfigBootstrapPayload(payload) {
 },
 
 async loadBundleData() {
-  let bundleData = null;
+  let bundleData: any = null;
 
   const bundleId = this.container.dataset.bundleId;
 
@@ -482,9 +497,9 @@ async loadBundleData() {
           try {
             const errorData = await response.json();
             errorDetails = JSON.stringify(errorData);
-          } catch (e) {
+          } catch (e: any) {
           }
-          const err = new Error(`API request failed: ${errorDetails}`);
+          const err = new Error(`API request failed: ${errorDetails}`) as Error & { status?: number };
           err.status = response.status;
           throw err;
         }
@@ -501,7 +516,7 @@ async loadBundleData() {
       try {
         try {
           bundleData = await fetchBundleData();
-        } catch (firstErr) {
+        } catch (firstErr: any) {
           // Retry once for 504/503 (server cold-start)
           if (RETRYABLE_STATUSES.has(firstErr.status)) {
             await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS));
@@ -510,7 +525,7 @@ async loadBundleData() {
             throw firstErr;
           }
         }
-      } catch (error) {
+      } catch (error: any) {
         throw error;
       }
     }

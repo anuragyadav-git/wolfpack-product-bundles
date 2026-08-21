@@ -130,7 +130,7 @@ function installFakeDocument() {
     dispatch: (type: string, event: { key?: string; shiftKey?: boolean; preventDefault?: () => void } = {}) => {
       (documentListeners.get(type) || []).forEach((listener) => listener(event));
     },
-  };
+  } as any;
 
   (global as unknown as { document: typeof fakeDocument }).document = fakeDocument;
   return fakeDocument;
@@ -151,7 +151,7 @@ function createWidget() {
     _clearCartConfirmationModal: null as FakeElement | null,
     _clearCartConfirmationKeydownHandler: null,
     ...fullPageClearCartConfirmationMethods,
-  };
+  } as any;
 }
 
 describe('fullPageClearCartConfirmationMethods', () => {
@@ -204,7 +204,7 @@ describe('fullPageClearCartConfirmationMethods', () => {
     const preventDefault = jest.fn();
 
     widget.showClearCartConfirmation();
-    document.dispatch('keydown', { key: 'Escape', preventDefault });
+    (document as any).dispatch('keydown', { key: 'Escape', preventDefault });
 
     expect(preventDefault).toHaveBeenCalledTimes(1);
     expect(widget._clearCartConfirmationModal).toBeNull();
@@ -258,7 +258,7 @@ describe('fullPageClearCartConfirmationMethods', () => {
     widget.showClearCartConfirmation();
     widget._clearCartConfirmationModal?.querySelector('.wpb-clear-cart-confirmation__cancel')?.click();
 
-    expect(trigger.focused).toBe(true);
+    expect((trigger as any).focused).toBe(true);
     expect(document.activeElement).toBe(trigger);
   });
 
@@ -271,7 +271,7 @@ describe('fullPageClearCartConfirmationMethods', () => {
     widget.showClearCartConfirmation();
     widget._clearCartConfirmationModal?.querySelector('.wpb-clear-cart-confirmation__confirm')?.click();
 
-    expect(disclosure.focused).toBe(true);
+    expect((disclosure as any).focused).toBe(true);
     expect(document.activeElement).toBe(disclosure);
   });
 
@@ -289,10 +289,10 @@ describe('fullPageClearCartConfirmationMethods', () => {
     widget.showClearCartConfirmation();
     widget._clearCartConfirmationModal?.querySelector('.wpb-clear-cart-confirmation__confirm')?.click();
 
-    expect(disclosure.focused).toBe(false);
+    expect((disclosure as any).focused).toBe(false);
     callbacks.shift()?.();
     callbacks.shift()?.();
-    expect(disclosure.focused).toBe(true);
+    expect((disclosure as any).focused).toBe(true);
     delete (global as unknown as { requestAnimationFrame?: (callback: () => void) => number }).requestAnimationFrame;
   });
 
@@ -305,7 +305,7 @@ describe('fullPageClearCartConfirmationMethods', () => {
     const closeButton = modal?.querySelector('.wpb-clear-cart-confirmation__close');
     const confirmButton = modal?.querySelector('.wpb-clear-cart-confirmation__confirm');
     confirmButton?.focus();
-    document.dispatch('keydown', { key: 'Tab', preventDefault });
+    (document as any).dispatch('keydown', { key: 'Tab', preventDefault });
 
     expect(preventDefault).toHaveBeenCalledTimes(1);
     expect(document.activeElement).toBe(closeButton);

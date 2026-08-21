@@ -1,0 +1,2 @@
+Direct Chrome accessibility snapshot summary, 2026-08-21.
+The selected slot is an operable named button. The picker is a labelled modal dialog. Only product images expose Open product details. Add and native variant selectors remain independent controls. The product-details sheet is the topmost labelled modal dialog while open. Tab and Shift+Tab remain in the top layer. Escape restores focus to the exact image trigger, and closing the picker restores focus to the originating slot.

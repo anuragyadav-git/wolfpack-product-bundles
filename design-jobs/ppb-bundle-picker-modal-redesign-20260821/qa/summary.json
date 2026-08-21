@@ -1,0 +1,355 @@
+{
+  "overall_status": "approved",
+  "preflight_status": "passed",
+  "preflight": {
+    "schema_version": 1,
+    "job_id": "ppb-bundle-picker-modal-redesign-20260821",
+    "revision": 4,
+    "status": "passed",
+    "checked_at": "2026-08-21T09:05:00Z",
+    "environment": "SIT development storefront",
+    "selected_page": {
+      "page_id": 6,
+      "url": "https://agent-5sfidg3m.myshopify.com/products/ppb-mobile-modal-qa-2026-08-20",
+      "title": "PPB Mobile Modal QA 2026-08-20 - agent"
+    },
+    "checks": {
+      "chrome_mcp_connected": {
+        "mandatory": true,
+        "status": "passed",
+        "evidence": "Direct mcp__chrome_devtools__list_pages returned the authenticated default-profile tab inventory.",
+        "blocker": "",
+        "recovery_action": ""
+      },
+      "supported_chrome_available": {
+        "mandatory": true,
+        "status": "passed",
+        "evidence": "Direct page selection, reload, emulation, snapshot, interaction, console, network, and inline screenshot operations succeeded.",
+        "blocker": "",
+        "recovery_action": ""
+      },
+      "intended_page_selected": {
+        "mandatory": true,
+        "status": "passed",
+        "evidence": "Page 6 is the deterministic PPB Mobile Modal QA storefront fixture.",
+        "blocker": "",
+        "recovery_action": ""
+      },
+      "app_server_reachable": {
+        "mandatory": true,
+        "status": "passed",
+        "evidence": "Cache-ignored reload returned the storefront document and PPB API requests without starting or restarting the user-owned server.",
+        "blocker": "",
+        "recovery_action": ""
+      },
+      "environment_confirmed": {
+        "mandatory": true,
+        "status": "passed",
+        "evidence": "The fixture served development extension assets and window.__BUNDLE_WIDGET_VERSION__ 14.0.0.",
+        "blocker": "",
+        "recovery_action": ""
+      },
+      "fixture_route_exists": {
+        "mandatory": true,
+        "status": "passed",
+        "evidence": "The live Horizontal route is deterministic. Remaining template and validation states use documented tab-local response adapters before widget initialization; they do not change Admin or server fixtures.",
+        "blocker": "",
+        "recovery_action": ""
+      },
+      "authentication_intentional": {
+        "mandatory": true,
+        "status": "passed",
+        "evidence": "The existing default Chrome profile loaded the test storefront directly.",
+        "blocker": "",
+        "recovery_action": ""
+      },
+      "sensitive_tabs_avoided": {
+        "mandatory": true,
+        "status": "passed",
+        "evidence": "Only test-store storefront tabs were inspected; no Admin mutation was performed.",
+        "blocker": "",
+        "recovery_action": ""
+      },
+      "viewport_resize_supported": {
+        "mandatory": true,
+        "status": "passed",
+        "evidence": "Direct emulation succeeded at 1440x900, 1280x800, 768x1024, 390x844, and 360x800.",
+        "blocker": "",
+        "recovery_action": ""
+      },
+      "accessibility_snapshot_supported": {
+        "mandatory": true,
+        "status": "passed",
+        "evidence": "Fresh accessibility snapshots exposed the dialog, image-only details controls, independent Add actions, quantity controls, and exact focus restoration.",
+        "blocker": "",
+        "recovery_action": ""
+      },
+      "screenshot_write_supported": {
+        "mandatory": true,
+        "status": "passed",
+        "evidence": "Direct Chrome returned PNG bytes and the sanitized output was persisted to qa/screenshots/chrome-write-probe.png without using another browser or automation runtime.",
+        "blocker": "",
+        "recovery_action": ""
+      },
+      "console_inspection_supported": {
+        "mandatory": true,
+        "status": "passed",
+        "evidence": "After remediation and a cache-ignored hard reload, direct console inspection returned no PPB-owned warning; only the theme favicon 404 and Shopify/theme preload notices remain.",
+        "blocker": "",
+        "recovery_action": ""
+      },
+      "network_inspection_supported": {
+        "mandatory": true,
+        "status": "passed",
+        "evidence": "Widget assets and relevant PPB endpoints returned 200 or 304. No PPB mutation request occurred during the final reload.",
+        "blocker": "",
+        "recovery_action": ""
+      },
+      "repository_identity_recorded": {
+        "mandatory": true,
+        "status": "passed",
+        "evidence": "Repository wolfpack-product-bundles, branch feature/26.05-UI-changes, commit 334c731736e2ef1a2d0abb1805672ca03333d2c5.",
+        "blocker": "",
+        "recovery_action": ""
+      },
+      "job_revision_recorded": {
+        "mandatory": true,
+        "status": "passed",
+        "evidence": "Design job ppb-bundle-picker-modal-redesign-20260821 revision 4.",
+        "blocker": "",
+        "recovery_action": ""
+      },
+      "baseline_identified": {
+        "mandatory": true,
+        "status": "passed",
+        "evidence": "Revision-4 contract is recorded in locked-decisions.yaml, design-tokens.json, responsive-contract.md, and qa/results/footer-summary-revision-4.json.",
+        "blocker": "",
+        "recovery_action": ""
+      }
+    },
+    "tool_inventory": [
+      "mcp__chrome_devtools__list_pages",
+      "mcp__chrome_devtools__select_page",
+      "mcp__chrome_devtools__navigate_page",
+      "mcp__chrome_devtools__emulate",
+      "mcp__chrome_devtools__take_snapshot",
+      "mcp__chrome_devtools__take_screenshot",
+      "mcp__chrome_devtools__evaluate_script",
+      "mcp__chrome_devtools__click",
+      "mcp__chrome_devtools__press_key",
+      "mcp__chrome_devtools__list_console_messages",
+      "mcp__chrome_devtools__list_network_requests"
+    ],
+    "browser": {
+      "product": "Chrome",
+      "version": "direct DevTools session; exact version not exposed by page inventory",
+      "profile_policy": "default-profile-only",
+      "isolated_context_used": false
+    },
+    "repository": {
+      "path": "/Users/adityaawasthi/Developer/wolfpack-product-bundles",
+      "branch": "feature/26.05-UI-changes",
+      "commit": "334c731736e2ef1a2d0abb1805672ca03333d2c5"
+    },
+    "baseline": {
+      "id": "ppb-bundle-picker-modal-redesign-r4",
+      "revision": 4,
+      "path": "qa/results/footer-summary-revision-4.json"
+    },
+    "artifact_directory": "qa",
+    "horizontal_observations": {
+      "served_version": "14.0.0",
+      "passes": [
+        "five, four, and two-column responsive catalog tracks",
+        "sparse desktop tracks retain intended width",
+        "catalog-only scrolling with reserved footer",
+        "zero horizontal overflow",
+        "image-only details activation semantics",
+        "quantity controls when validation is disabled",
+        "topmost Escape ownership, exact focus restoration, and scroll-lock lifetime"
+      ],
+      "product_failures": []
+    },
+    "cleanup": "The tab-local session selection was restored to one 14k Dangling Obsidian Earrings after the remove-all probe; no server fixture was mutated.",
+    "blockers": []
+  },
+  "gates": {
+    "functional": "passed",
+    "visual": "passed",
+    "geometry": "passed",
+    "responsive": "passed",
+    "console": "passed",
+    "network": "passed",
+    "accessibility": "passed",
+    "performance": "passed",
+    "non_regression": "passed"
+  },
+  "cases": [
+    {
+      "schema_version": 1,
+      "case_id": "ppb-revision-4-formal-matrix",
+      "viewport": "1440x900, 1280x800, 768x1024, 390x844, 360x800",
+      "state": "all required PPB picker and product-details states",
+      "required": true,
+      "gates": {
+        "functional": "passed",
+        "visual": "passed",
+        "geometry": "passed",
+        "responsive": "passed",
+        "console": "passed",
+        "network": "passed",
+        "accessibility": "passed",
+        "performance": "passed",
+        "non_regression": "passed"
+      },
+      "performance_reason": "Picker and card entrance animations changed, so a trusted direct-Chrome interaction trace was required.",
+      "evidence": {
+        "snapshot": "results/final-accessibility-snapshot.txt",
+        "screenshots": {
+          "before": "baselines/horizontal-390x844.png",
+          "after": "screenshots/horizontal-390x844.png",
+          "element": {
+            "actual": "screenshots/quantity-action-equality-1440x900.png",
+            "baseline": "baselines/quantity-action-equality-1440x900.png",
+            "diff": "diffs/quantity-action-equality-1440x900.png",
+            "comparison_summary": "results/quantity-action-equality.comparison.json"
+          },
+          "viewport": {
+            "actual": "screenshots/horizontal-390x844.png",
+            "baseline": "baselines/horizontal-390x844.png",
+            "diff": "diffs/horizontal-390x844.png",
+            "comparison_summary": "results/horizontal-390x844.comparison.json"
+          }
+        },
+        "console": "results/final-console.json",
+        "network": "results/final-network.json",
+        "accessibility": "results/accessibility.json",
+        "lighthouse": {
+          "desktop": "results/lighthouse-desktop-component.json",
+          "mobile": "results/lighthouse-mobile-component.json"
+        },
+        "performance_trace": "results/ppb-picker-open.trace"
+      },
+      "assertions": [
+        {
+          "id": "matrix",
+          "category": "responsive",
+          "status": "passed"
+        },
+        {
+          "id": "quantity-action-equality",
+          "category": "geometry",
+          "status": "passed"
+        },
+        {
+          "id": "footer-summary-content-sizing",
+          "category": "geometry",
+          "status": "passed",
+          "evidence": "results/footer-summary-revision-4.json"
+        },
+        {
+          "id": "image-only-details",
+          "category": "functional",
+          "status": "passed"
+        },
+        {
+          "id": "stacked-layer-ownership",
+          "category": "accessibility",
+          "status": "passed"
+        },
+        {
+          "id": "product-list-grid-regression",
+          "category": "non_regression",
+          "status": "passed"
+        }
+      ],
+      "observations": {
+        "console": {
+          "violations": [],
+          "allowlisted": [
+            {
+              "exact": "GET /favicon.ico 404",
+              "reason": "Theme-owned missing favicon",
+              "owner": "Shopify test theme",
+              "review_date": "2026-08-21"
+            },
+            {
+              "pattern": "preloaded but not used",
+              "reason": "Shopify/theme preload advisory outside PPB ownership",
+              "owner": "Shopify test theme",
+              "review_date": "2026-08-21"
+            }
+          ]
+        },
+        "network": {
+          "violations": [],
+          "expected_analytics": []
+        }
+      },
+      "waivers": [],
+      "retry_history": [
+        {
+          "attempt": 1,
+          "status": "failed",
+          "evidence_links": [
+            "results/ppb-picker-open.trace"
+          ],
+          "reason": "Synthetic interaction reported CLS 0.23."
+        },
+        {
+          "attempt": 2,
+          "status": "passed",
+          "evidence_links": [
+            "results/ppb-picker-open.trace",
+            "results/final-console.json"
+          ],
+          "reason": "Opacity-only entrance and focus-order remediation passed trusted Chrome reruns."
+        },
+        {
+          "attempt": 3,
+          "status": "passed",
+          "evidence_links": [
+            "results/footer-summary-revision-4.json"
+          ],
+          "reason": "Revision-4 footer summary passed content growth and containment at 1440, 390, and 360."
+        }
+      ],
+      "source": "/Users/adityaawasthi/Developer/wolfpack-product-bundles/design-jobs/ppb-bundle-picker-modal-redesign-20260821/qa/formal-matrix.result.json"
+    }
+  ],
+  "screenshot_index": [
+    {
+      "case_id": "ppb-revision-4-formal-matrix",
+      "kind": "viewport",
+      "phase": "before",
+      "path": "baselines/horizontal-390x844.png"
+    },
+    {
+      "case_id": "ppb-revision-4-formal-matrix",
+      "kind": "viewport",
+      "phase": "after",
+      "path": "screenshots/horizontal-390x844.png"
+    },
+    {
+      "case_id": "ppb-revision-4-formal-matrix",
+      "kind": "element",
+      "phase": "after",
+      "path": "screenshots/quantity-action-equality-1440x900.png"
+    },
+    {
+      "case_id": "ppb-revision-4-formal-matrix",
+      "kind": "viewport",
+      "phase": "after",
+      "path": "screenshots/horizontal-390x844.png"
+    }
+  ],
+  "artifact_counts": {
+    "screenshots": 27,
+    "diffs": 2,
+    "console": 1,
+    "network": 1,
+    "lighthouse": 4,
+    "traces": 1
+  },
+  "missing_evidence": []
+}

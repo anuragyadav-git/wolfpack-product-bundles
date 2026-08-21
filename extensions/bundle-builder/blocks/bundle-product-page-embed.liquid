@@ -1,0 +1,20 @@
+{% comment %}
+  Custom placement anchor for Product Page Bundle embeds. The global app embed
+  owns eligibility, assets, and rendering.
+{% endcomment %}
+
+<div
+  {{ block.shopify_attributes }}
+  data-wpb-ppb-embed-anchor
+></div>
+
+{% schema %}
+{
+  "name": "Bundle Builder placement",
+  "target": "section",
+  "enabled_on": {
+    "templates": ["product"]
+  },
+  "settings": []
+}
+{% endschema %}

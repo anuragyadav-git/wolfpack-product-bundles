@@ -27,6 +27,8 @@ export type ConfigureBundleFlowContextValue = ConfigureBundleFlowDraft & {
   loadingGif: string | null;
   promoBannerBgImage: string | null;
   pricingState: Record<string, any> & {
+    discountEnabled: boolean;
+    discountType: string;
     discountRules: any[];
     setDiscountMessagingEnabled: StateSetter<boolean>;
     setDiscountRules: StateSetter<any[]>;

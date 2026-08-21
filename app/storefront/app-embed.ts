@@ -7,6 +7,16 @@ import {
   initializeFpbProductPageUpsells,
   reconcileFpbUpsellPlacement,
 } from './fpb-product-page-upsell.js';
+import {
+  initializePpbBundleEmbed,
+  reconcilePpbBundleEmbedPlacement,
+} from './ppb-bundle-embed.js';
+import {
+  findPageBuilderEmbedMarker,
+  initializePageBuilderEmbed,
+  suppressesAutomaticPpbEmbed,
+} from './page-builder-embed.js';
+import { loadAndApplyGlobalSettingsControls } from './settings-controls.js';
 
 const embed = document.querySelector<HTMLElement>('[data-wpb-app-embed]');
 
@@ -81,15 +91,41 @@ function hydrateProductPageUpsells(): void {
   void initializeFpbProductPageUpsells(embed);
 }
 
+function hydratePpbBundleEmbed(): void {
+  if (!embed) return;
+  if (suppressesAutomaticPpbEmbed(findPageBuilderEmbedMarker())) return;
+  reconcilePpbBundleEmbedPlacement();
+  void initializePpbBundleEmbed(embed);
+}
+
+function hydratePageBuilderEmbed(): void {
+  if (!embed) return;
+  void initializePageBuilderEmbed(embed);
+}
+
+function hydrateGlobalSettingsControls(): void {
+  if (!embed || embed.dataset.wpbControlsHydrated === 'true') return;
+  embed.dataset.wpbControlsHydrated = 'true';
+  void loadAndApplyGlobalSettingsControls(embed.dataset.controlsSettingsEndpoint || '');
+}
+
 (window as Window & { __WOLFPACK_BUNDLE_EMBED_ACTIVE__?: boolean }).__WOLFPACK_BUNDLE_EMBED_ACTIVE__ = true;
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
     hydrateMarker();
+    hydratePageBuilderEmbed();
     hydrateProductPageUpsells();
+    hydratePpbBundleEmbed();
+    hydrateGlobalSettingsControls();
   }, { once: true });
 } else {
   hydrateMarker();
+  hydratePageBuilderEmbed();
   hydrateProductPageUpsells();
+  hydratePpbBundleEmbed();
+  hydrateGlobalSettingsControls();
 }
 document.addEventListener('shopify:section:load', hydrateMarker);
+document.addEventListener('shopify:section:load', hydratePageBuilderEmbed);
 document.addEventListener('shopify:section:load', hydrateProductPageUpsells);
+document.addEventListener('shopify:section:load', hydratePpbBundleEmbed);

@@ -45,7 +45,7 @@ export default function AdditionalConfigurationsRoute() {
         resolve={workspaceData}
         errorElement={<SettingsWorkspaceError onExit={() => navigate("/app/settings")} />}
       >
-        {([resolvedSettingsPage, resolvedPreviewBundles]) => (
+        {([resolvedSettingsPage, resolvedPreviewBundles]: any) => (
           <SettingsRoute
             initialView="controls"
             initialControlNavigation={initialNavigation}

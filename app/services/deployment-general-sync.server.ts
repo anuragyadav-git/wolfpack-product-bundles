@@ -291,7 +291,7 @@ async function runBundleVariantRemediation(
               removedCount,
             },
           );
-        } catch (error) {
+        } catch (error: any) {
           summary.failures.push({
             shopDomain,
             bundleId: bundle.id,
@@ -323,7 +323,7 @@ export async function runDeploymentGeneralSync(
     select: { shopDomain: true },
     orderBy: { shopDomain: "asc" },
   });
-  const shopDomains = shops.map(({ shopDomain }) => shopDomain);
+  const shopDomains = shops.map(({ shopDomain }: any) => shopDomain);
   const bundles = shopDomains.length === 0
     ? []
     : await deps.prisma.bundle.findMany({
@@ -365,7 +365,7 @@ export async function runDeploymentGeneralSync(
       await deps.ensureMetafieldDefinitions(admin);
       adminByShop.set(shopDomain, admin);
       summary.metafieldDefinitionShopsSynced += 1;
-    } catch (error) {
+    } catch (error: any) {
       const message = errorMessage(error);
       failedShops.add(shopDomain);
       summary.failedShops += 1;
@@ -420,7 +420,7 @@ export async function runDeploymentGeneralSync(
         deps,
         summary.variantRemediation,
       );
-    } catch (error) {
+    } catch (error: any) {
       const message = errorMessage(error);
       summary.failedBundles += 1;
       summary.failures.push({
@@ -446,7 +446,7 @@ export async function runDeploymentGeneralSync(
         throw new Error(result.error ?? "Add-on discount setup failed");
       }
       summary.addonDiscountShopsSynced += 1;
-    } catch (error) {
+    } catch (error: any) {
       summary.failedShops += 1;
       summary.shopFailures.push({
         shopDomain,
@@ -465,7 +465,7 @@ export async function runDeploymentGeneralSync(
         throw new Error(result.error ?? "Subscription discount setup failed");
       }
       summary.subscriptionDiscountShopsSynced += 1;
-    } catch (error) {
+    } catch (error: any) {
       summary.failedShops += 1;
       summary.shopFailures.push({ shopDomain, error: errorMessage(error) });
     }
@@ -480,7 +480,7 @@ export async function runDeploymentGeneralSync(
       if (!result.success) {
         throw new Error(result.error ?? "Recurring subscription discount setup failed");
       }
-    } catch (error) {
+    } catch (error: any) {
       summary.failedShops += 1;
       summary.shopFailures.push({ shopDomain, error: errorMessage(error) });
     }

@@ -82,7 +82,7 @@ export default function AttributionRouteShell() {
   return (
     <Suspense fallback={<AdminRouteLoadingBar label="Loading Analytics" />}>
       <Await resolve={routeReady}>
-        {([resolvedAnalytics, resolvedPixelStatus]) => (
+        {([resolvedAnalytics, resolvedPixelStatus]: any) => (
           <>
             <AdminPageTitleBar
               title="Analytics"
@@ -91,7 +91,7 @@ export default function AttributionRouteShell() {
             />
             <s-query-container
               containerName="analytics-page"
-              className={styles.analyticsQueryContainer}
+              {...({ className: styles.analyticsQueryContainer } as any)}
             >
               <AttributionCriticalFunnelHeader onBack={handleBack} />
               <AttributionCriticalStatus status={resolvedPixelStatus} />

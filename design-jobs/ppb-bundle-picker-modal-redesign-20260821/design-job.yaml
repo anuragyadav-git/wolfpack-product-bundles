@@ -1,0 +1,1824 @@
+{
+  "schema_version": 1,
+  "job": {
+    "id": "ppb-bundle-picker-modal-redesign-20260821",
+    "title": "PPB bundle picker modal redesign",
+    "status": "blocked",
+    "stage": "BLOCKED",
+    "revision": 6,
+    "created_at": "2026-08-21T00:51:07Z",
+    "updated_at": "2026-08-21T11:33:05Z",
+    "owner": "Aditya",
+    "product": "Wolfpack Product Bundles",
+    "repository": "/Users/adityaawasthi/Developer/wolfpack-product-bundles",
+    "branch": "feature/26.05-UI-changes",
+    "commit": "334c731736e2ef1a2d0abb1805672ca03333d2c5",
+    "artifact_root": "/Users/adityaawasthi/Developer/wolfpack-product-bundles/design-jobs",
+    "resume_stage": "CHROME_QA_PREFLIGHT"
+  },
+  "scope": {
+    "product_family": "PPB",
+    "template": "Horizontal Slots and Vertical Slots",
+    "component": "Shared bundle-picker modal and stacked PPB product-details sheet",
+    "implementation_mode": "design-director",
+    "design_goal": "EB-inspired responsive picker hierarchy with Wolfpack merchant branding and stronger accessibility",
+    "user_problem": "The current PPB picker is shallow and its floating footer obscures product actions, especially on mobile",
+    "primary_user_action": "Open a slot, choose or replace products directly or through editable details, advance steps, and close or reopen without losing state",
+    "out_of_scope": [
+      "PPB Product List",
+      "PPB Product Grid",
+      "FPB",
+      "Admin UI",
+      "APIs",
+      "database schema",
+      "cart semantics"
+    ],
+    "merchant_configurability": [
+      "existing button colors",
+      "card colors",
+      "typography",
+      "price styling",
+      "discount messaging",
+      "localized copy"
+    ],
+    "business_logic_constraints": [
+      "preserve selection state",
+      "preserve pricing and validation",
+      "preserve inventory and subscription behavior",
+      "preserve nested drawer ownership",
+      "preserve session restoration",
+      "variant selection does not add a product",
+      "details updates modify the originating slot without duplication"
+    ]
+  },
+  "viewports": {
+    "reference": [
+      "1280x800",
+      "390x844"
+    ],
+    "required": [
+      "1440x900",
+      "1280x800",
+      "768x1024",
+      "390x844",
+      "360x800"
+    ],
+    "edge_cases": [
+      "long category labels",
+      "two-line product titles",
+      "compare-at prices",
+      "single and grouped variants",
+      "out of stock",
+      "loading",
+      "fetch error",
+      "nested product details",
+      "nested variant drawer"
+    ],
+    "browser_zoom": 100,
+    "device_pixel_ratio_policy": "record-actual",
+    "locale": "en",
+    "currency": "USD",
+    "color_scheme": "light",
+    "reduced_motion": false
+  },
+  "references": {
+    "current": [
+      "screenshot-inventory.yaml"
+    ],
+    "target": [
+      "screenshot-inventory.yaml"
+    ],
+    "context": [
+      "screenshot-inventory.yaml"
+    ],
+    "approved": [
+      "screenshot-inventory.yaml",
+      "visual-audit.md"
+    ],
+    "implementation": [],
+    "provenance": [
+      "direct Chrome DevTools MCP",
+      "repository accepted parity evidence"
+    ],
+    "permissions_or_usage_notes": [
+      "EB is inspiration rather than an exact-match target",
+      "No Chrome screenshots are committed"
+    ]
+  },
+  "decisions": {
+    "locked": [
+      "PPB only",
+      "Horizontal and Vertical Slots share one modal",
+      "EB UX with Wolfpack branding",
+      "85dvh bottom sheet",
+      "fixed header and footer with catalog-only scrolling",
+      "Product List and Product Grid unchanged",
+      "native grouped-variant selectors on desktop and mobile",
+      "image-only product-details activation",
+      "Quantity Validation owns modal-card presentation",
+      "product details is a stacked PPB-owned sheet",
+      "modal quantity selectors match the Add and Added action footprint",
+      "footer summary shrink-wraps its content and remains contained",
+      "filled-slot Remove uses a cross badge over the slot",
+      "filled-slot maximum height takes precedence and visually clamps only overflowing titles while preserving the complete accessible name"
+    ],
+    "assumptions": [
+      "existing merchant tokens remain authoritative",
+      "no new customer-facing copy",
+      "accepted July EB evidence is sufficient for already documented structure and behavior",
+      "the supplied revision-2 plan is the user-provided source for newer live EB findings not represented by committed screenshots"
+    ],
+    "rejected": [
+      "FPB scope",
+      "template-specific picker forks",
+      "exact EB visual cloning",
+      "shallow content-height modal",
+      "PPB custom mobile variant drawer",
+      "card-wide product-details activation"
+    ],
+    "open": [],
+    "recommendation_delegation": {
+      "status": "not-granted",
+      "scope": [],
+      "exclusions": [
+        "business-behavior",
+        "accessibility",
+        "data-semantics",
+        "approval-scope"
+      ],
+      "approved_by": "",
+      "approved_at": "",
+      "expires_at_stage": "FINAL_APPROVAL"
+    }
+  },
+  "states": {
+    "required": [
+      "closed",
+      "loading",
+      "loaded",
+      "empty",
+      "fetch-error",
+      "selected",
+      "validation-error",
+      "topmost-details",
+      "quantity-below-maximum",
+      "maximum-reached",
+      "grouped-variant",
+      "details-update",
+      "close-reopen"
+    ],
+    "optional": [],
+    "not_applicable": [],
+    "coverage_status": "complete"
+  },
+  "responsive": {
+    "contract_status": "complete",
+    "breakpoints": [
+      "0-767",
+      "768-1023",
+      "1024+"
+    ],
+    "transformations": [
+      "mobile shows current step title only",
+      "desktop and tablet show the step rail",
+      "catalog uses two columns through tablet",
+      "wide desktop uses intrinsic four or five columns",
+      "footer remains outside the scroll owner"
+    ]
+  },
+  "accessibility": {
+    "requirements": [
+      "role dialog",
+      "aria-modal true",
+      "aria-labelledby dynamic title",
+      "top-layer Escape and backdrop",
+      "initial focus",
+      "Tab containment",
+      "exact focus restoration",
+      "html and body scroll lock"
+    ],
+    "known_risks": [
+      "nested drawers competing for Escape",
+      "hidden breakpoint close control receiving focus",
+      "rerendered slot opener identity",
+      "footer covering focusable product actions"
+    ],
+    "validation_status": "complete"
+  },
+  "handoff": {
+    "status": "approved",
+    "package_path": "design-jobs/ppb-bundle-picker-modal-redesign-20260821",
+    "implementation_owner": "Codex",
+    "implementation_branch": "feature/26.05-UI-changes",
+    "implementation_commit": ""
+  },
+  "qa": {
+    "chrome_mcp_required": true,
+    "profile_policy": "default-profile-only",
+    "allow_isolated_context": false,
+    "preflight_status": "passed",
+    "preflight_result_path": "qa/preflight.json",
+    "baseline_status": "passed",
+    "baseline_paths": [
+      "qa/baselines/quantity-action-equality-1440x900.png",
+      "qa/baselines/horizontal-390x844.png"
+    ],
+    "summary_path": "qa/summary.json",
+    "execution_status": "passed",
+    "required_viewports": [
+      "1440x900",
+      "1280x800",
+      "768x1024",
+      "390x844",
+      "360x800"
+    ],
+    "required_states": [
+      "loaded",
+      "selected",
+      "close-reopen"
+    ],
+    "console_status": "passed",
+    "network_status": "passed",
+    "accessibility_status": "passed",
+    "lighthouse_status": "passed",
+    "performance_status": "passed",
+    "visual_diff_status": "passed",
+    "non_regression_status": "passed",
+    "retry_history": [
+      {
+        "at": "2026-08-21T09:05:00Z",
+        "stage": "CHROME_QA_PREFLIGHT",
+        "result": "blocked",
+        "evidence": "Direct Chrome recovered and Horizontal Slots probes completed; persistent screenshot writes and the complete deterministic fixture matrix remain unavailable."
+      },
+      {
+        "at": "2026-08-21T09:45:07Z",
+        "stage": "VISUAL_REMEDIATION",
+        "result": "passed",
+        "evidence": "qa/summary.json records every required gate passed with no missing evidence after revision-3 remediation."
+      }
+    ],
+    "artifacts_path": "qa",
+    "blockers": []
+  },
+  "approvals": {
+    "design": {
+      "status": "approved",
+      "approver": "Aditya",
+      "at": "2026-08-21",
+      "revision": 5
+    },
+    "handoff": {
+      "status": "approved",
+      "approver": "Aditya",
+      "at": "2026-08-21",
+      "revision": 5
+    },
+    "implementation": {
+      "status": "not-started",
+      "approver": "",
+      "at": "",
+      "revision": null
+    },
+    "final": {
+      "status": "not-started",
+      "approver": "",
+      "at": "",
+      "revision": null
+    }
+  },
+  "artifacts": {
+    "immutable_after_approval": true,
+    "current": {
+      "acceptance-criteria.md": {
+        "path": "acceptance-criteria.md",
+        "status": "approved",
+        "revision": 6,
+        "sha256": "04b9373ce199cb51a714355a29261689c41eea75e16680b004a0f232419af1cd",
+        "approved_by": "Aditya",
+        "approved_at": "2026-08-21T11:03:52Z",
+        "evidence": [
+          "implementation-handoff.md"
+        ]
+      },
+      "accessibility-checklist.md": {
+        "path": "accessibility-checklist.md",
+        "status": "complete",
+        "revision": 6,
+        "sha256": "8addfcab6651386fb1a6bb09a83ff706a1f7bc84df2d0fe51ff54b26404a34a2",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "approval-record.yaml": {
+        "path": "approval-record.yaml",
+        "status": "complete",
+        "revision": 6,
+        "sha256": "95f3ed1e2d95dcbb70501d9e9a381e62eddf61588b57c116dbefad3f2dfa7abd",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "browser-test-plan.yaml": {
+        "path": "browser-test-plan.yaml",
+        "status": "approved",
+        "revision": 6,
+        "sha256": "ac984be894cb619c33d24fe552114070e236ab5211ca59107023a77f26173e9d",
+        "approved_by": "Aditya",
+        "approved_at": "2026-08-21T11:03:52Z",
+        "evidence": [
+          "acceptance-criteria.md"
+        ]
+      },
+      "browser-test-report.md": {
+        "path": "browser-test-report.md",
+        "status": "draft",
+        "revision": 6,
+        "sha256": "e657ab68604222c62b9bd0147b2468987fd95f3a02faf8128575d637a05ca815",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "chrome-preflight-result.yaml": {
+        "path": "chrome-preflight-result.yaml",
+        "status": "blocked",
+        "revision": 6,
+        "sha256": "8527ac28e65a9c7f066989196da71a646cef03f7673862d3e3197ecc855957ac",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "codex-task.md": {
+        "path": "codex-task.md",
+        "status": "approved",
+        "revision": 6,
+        "sha256": "b4207eeb7d5bb17ce369a4f81713bc0542cb8924445b3f87a8a4af3c3c69c87c",
+        "approved_by": "Aditya",
+        "approved_at": "2026-08-21T11:03:52Z",
+        "evidence": [
+          "implementation-handoff.md"
+        ]
+      },
+      "component-anatomy.md": {
+        "path": "component-anatomy.md",
+        "status": "complete",
+        "revision": 6,
+        "sha256": "28946ae36baf62873d25eb23592ceb3352e88e7ef5f778d9a439064fc1713434",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "component-brief.md": {
+        "path": "component-brief.md",
+        "status": "complete",
+        "revision": 6,
+        "sha256": "eed032453253f0c21e4e3b73f2153533a6f36ff9741690b2cb6784b7d7c43110",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "content-stress-cases.yaml": {
+        "path": "content-stress-cases.yaml",
+        "status": "complete",
+        "revision": 6,
+        "sha256": "4801459e0cd3bd5bd13ba45b3722e625d4aeaa2eb9852ce370f85485a9032519",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "design-tokens.json": {
+        "path": "design-tokens.json",
+        "status": "complete",
+        "revision": 6,
+        "sha256": "fd0a83d258636938ca01bfbe18b6264a4ce71c50cd6531c0d2d4ef7291b14008",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "direction-comparison.md": {
+        "path": "direction-comparison.md",
+        "status": "approved",
+        "revision": 2,
+        "sha256": "bbb1a7b18094cff177d2e2d8f7c2f5f59cdd86e3b7893ced5c83a05bb7a41b24",
+        "approved_by": "Aditya",
+        "approved_at": "2026-08-21T07:56:54Z",
+        "evidence": [
+          "visual-audit.md"
+        ]
+      },
+      "implementation-handoff.md": {
+        "path": "implementation-handoff.md",
+        "status": "approved",
+        "revision": 6,
+        "sha256": "3ee199be70f7c6c7b1dc42340ad02be9adbb5cfec258ffcfa760febcdbc5424d",
+        "approved_by": "Aditya",
+        "approved_at": "2026-08-21T11:03:52Z",
+        "evidence": [
+          "locked-decisions.yaml"
+        ]
+      },
+      "interaction-contract.md": {
+        "path": "interaction-contract.md",
+        "status": "complete",
+        "revision": 6,
+        "sha256": "93f32c41afd1b36ac520449e3fd8367c0b444875ee1aaaa96e961ff067fe91bc",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "locked-decisions.yaml": {
+        "path": "locked-decisions.yaml",
+        "status": "approved",
+        "revision": 6,
+        "sha256": "b67200ec061056f4ac66736c3b42d90c93a99ea0a406485a5328662d6eb01419",
+        "approved_by": "Aditya",
+        "approved_at": "2026-08-21T10:57:02Z",
+        "evidence": [
+          "component-anatomy.md"
+        ]
+      },
+      "remediation-list.md": {
+        "path": "remediation-list.md",
+        "status": "draft",
+        "revision": 5,
+        "sha256": "68179e19b871f5969cc91a43bf26c541160929fa9869452ffc4bb7364afd0373",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "responsive-contract.md": {
+        "path": "responsive-contract.md",
+        "status": "complete",
+        "revision": 6,
+        "sha256": "9dfcf4e58ce40915aa45277342fbfdca23564374b2b9dfc9cfcab3721dd064b3",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "screenshot-inventory.yaml": {
+        "path": "screenshot-inventory.yaml",
+        "status": "complete",
+        "revision": 6,
+        "sha256": "eb890cbec7f03e53dcbb7e33dca4c2fac5e1b27d295643f3fe918612294d6495",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "state-matrix.md": {
+        "path": "state-matrix.md",
+        "status": "complete",
+        "revision": 6,
+        "sha256": "a952a5ff7bd39cbff753c2f0e429fc26cffbb065768c9d0504da5b28194b51b7",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "visual-audit.md": {
+        "path": "visual-audit.md",
+        "status": "complete",
+        "revision": 6,
+        "sha256": "1195cfff60b6d074175f814a352a04dc1a0c0337d0a193b126442518ad05d337",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "visual-qa-report.md": {
+        "path": "visual-qa-report.md",
+        "status": "draft",
+        "revision": 5,
+        "sha256": "4756db4efe47649631e56ff47603a2951b244f2fda7ae41955c2a77c0e96c528",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      }
+    },
+    "superseded": [
+      {
+        "path": "direction-comparison.md",
+        "status": "approved",
+        "revision": 1,
+        "sha256": "5eaf054c13c4e650593d22de00693678d9cc6a8ca7be0856bce92c8b8c1cfd5a",
+        "approved_by": "Aditya",
+        "approved_at": "2026-08-21T01:01:18Z",
+        "evidence": [
+          "approval-record.yaml"
+        ],
+        "superseded_at": "2026-08-21T07:56:54Z",
+        "superseded_by": "Aditya",
+        "superseded_reason": "Revision 2 replaces the approved component boundary and primary actions."
+      },
+      {
+        "path": "locked-decisions.yaml",
+        "status": "approved",
+        "revision": 1,
+        "sha256": "f19e16dc85ccf51b9a8ddddd2819cd62b10a5ac59f24d586308bb08b06c7184b",
+        "approved_by": "Aditya",
+        "approved_at": "2026-08-21T01:01:18Z",
+        "evidence": [
+          "approval-record.yaml"
+        ],
+        "superseded_at": "2026-08-21T07:56:54Z",
+        "superseded_by": "Aditya",
+        "superseded_reason": "Revision 2 supersedes the mobile variant drawer and unconditional Added xN decisions."
+      },
+      {
+        "path": "implementation-handoff.md",
+        "status": "approved",
+        "revision": 1,
+        "sha256": "139154e1711b81d304a14c34c326ee96ed68852ba8f3ad3984029ad4382812f2",
+        "approved_by": "Aditya",
+        "approved_at": "2026-08-21T01:01:19Z",
+        "evidence": [
+          "approval-record.yaml"
+        ],
+        "superseded_at": "2026-08-21T08:02:38Z",
+        "superseded_by": "Aditya",
+        "superseded_reason": "Revision 2 replaces the component boundary and card/detail actions."
+      },
+      {
+        "path": "codex-task.md",
+        "status": "approved",
+        "revision": 1,
+        "sha256": "a4caf3bc81e36afc7b5477e230c1a79918185a40fa312334174aa4efbf6559ab",
+        "approved_by": "Aditya",
+        "approved_at": "2026-08-21T01:01:19Z",
+        "evidence": [
+          "approval-record.yaml"
+        ],
+        "superseded_at": "2026-08-21T08:02:38Z",
+        "superseded_by": "Aditya",
+        "superseded_reason": "Revision 2 implementation scope supersedes the revision-1 picker-only task."
+      },
+      {
+        "path": "locked-decisions.yaml",
+        "status": "approved",
+        "revision": 2,
+        "sha256": "d32ecf5c7e531435ed4e2a09c4d83dab0c302045ad14ff1e5f4bf33d9c440e2e",
+        "approved_by": "Aditya",
+        "approved_at": "2026-08-21T07:56:54Z",
+        "evidence": [
+          "direction-comparison.md"
+        ],
+        "superseded_at": "2026-08-21T09:03:01Z",
+        "superseded_by": "Aditya",
+        "superseded_reason": "User approved equal modal quantity and action footprints"
+      },
+      {
+        "path": "implementation-handoff.md",
+        "status": "approved",
+        "revision": 2,
+        "sha256": "4f643ea784f46c861b1f0a4f1e48548e92f609e5e271ecbe86bbe986ca778fb1",
+        "approved_by": "Aditya",
+        "approved_at": "2026-08-21T08:02:38Z",
+        "evidence": [
+          "locked-decisions.yaml"
+        ],
+        "superseded_at": "2026-08-21T09:03:01Z",
+        "superseded_by": "Aditya",
+        "superseded_reason": "User approved equal modal quantity and action footprints"
+      },
+      {
+        "path": "locked-decisions.yaml",
+        "status": "approved",
+        "revision": 3,
+        "sha256": "66682ae31dce51c34dae2043fe5236f026f388a59fe09bf4de258b1b8f60ae7d",
+        "approved_by": "Aditya",
+        "approved_at": "2026-08-21T09:03:01Z",
+        "evidence": [
+          "direction-comparison.md"
+        ],
+        "superseded_at": "2026-08-21T09:52:06Z",
+        "superseded_by": "Aditya",
+        "superseded_reason": "User approved content-responsive footer summary"
+      },
+      {
+        "path": "implementation-handoff.md",
+        "status": "approved",
+        "revision": 3,
+        "sha256": "a08301d028f9950a5d48c5eb87ba02027d603c3c13c2c8ded4f74f91ae237694",
+        "approved_by": "Aditya",
+        "approved_at": "2026-08-21T09:03:01Z",
+        "evidence": [
+          "locked-decisions.yaml"
+        ],
+        "superseded_at": "2026-08-21T09:52:06Z",
+        "superseded_by": "Aditya",
+        "superseded_reason": "User requested revision-4 footer implementation"
+      },
+      {
+        "path": "locked-decisions.yaml",
+        "status": "approved",
+        "revision": 4,
+        "sha256": "e388974ac9eca21261d2f020741545193c175958f5af064c54f739a6c0e8c5bf",
+        "approved_by": "Aditya",
+        "approved_at": "2026-08-21T09:52:06Z",
+        "evidence": [
+          "remediation-list.md"
+        ],
+        "superseded_at": "2026-08-21T10:14:52Z",
+        "superseded_by": "Aditya",
+        "superseded_reason": "User approved revision-5 filled-slot redesign"
+      },
+      {
+        "path": "implementation-handoff.md",
+        "status": "approved",
+        "revision": 4,
+        "sha256": "b1eea47bdbe508affe21a951fe75da44f497ddad6b3a4418759896216173cc2e",
+        "approved_by": "Aditya",
+        "approved_at": "2026-08-21T09:52:06Z",
+        "evidence": [
+          "locked-decisions.yaml"
+        ],
+        "superseded_at": "2026-08-21T10:14:53Z",
+        "superseded_by": "Aditya",
+        "superseded_reason": "User approved revision-5 handoff direction"
+      },
+      {
+        "path": "codex-task.md",
+        "status": "approved",
+        "revision": 2,
+        "sha256": "470361aba1190411d8e2b166130ecad0607271de7b113fffd86b886a022160a3",
+        "approved_by": "Aditya",
+        "approved_at": "2026-08-21T08:02:38Z",
+        "evidence": [
+          "implementation-handoff.md"
+        ],
+        "superseded_at": "2026-08-21T10:14:53Z",
+        "superseded_by": "Aditya",
+        "superseded_reason": "Revision-5 implementation task replaces prior approved task"
+      },
+      {
+        "path": "locked-decisions.yaml",
+        "status": "approved",
+        "revision": 5,
+        "sha256": "889abd161a1fbe0aaac69008145b4851f2370462046b149ee2f1123ab33dc959",
+        "approved_by": "Aditya",
+        "approved_at": "2026-08-21T10:14:52Z",
+        "evidence": [
+          "component-anatomy.md"
+        ],
+        "superseded_at": "2026-08-21T10:51:53Z",
+        "superseded_by": "Aditya",
+        "superseded_reason": "Revision 6 replaces the filled-slot Remove hierarchy and leaves title overflow under the new height cap awaiting user choice."
+      },
+      {
+        "path": "implementation-handoff.md",
+        "status": "approved",
+        "revision": 5,
+        "sha256": "fa8cfb141cfe48903b5039e7aef403b6863eadc2ef49927ef13f2fac26c1976d",
+        "approved_by": "Aditya",
+        "approved_at": "2026-08-21T10:14:53Z",
+        "evidence": [
+          "locked-decisions.yaml"
+        ],
+        "superseded_at": "2026-08-21T10:57:47Z",
+        "superseded_by": "",
+        "superseded_reason": "Revision 6 replaces revision-5 filled-slot title growth and separate Remove action."
+      },
+      {
+        "path": "codex-task.md",
+        "status": "approved",
+        "revision": 5,
+        "sha256": "edaf2e3e08979dd60a5f34db3108b67bc25759bb3559b32a64d7af3d6f897387",
+        "approved_by": "Aditya",
+        "approved_at": "2026-08-21T10:14:53Z",
+        "evidence": [
+          "implementation-handoff.md"
+        ],
+        "superseded_at": "2026-08-21T10:57:47Z",
+        "superseded_by": "",
+        "superseded_reason": "Revision 6 implementation task now owns bounded filled slots and the overlaid cross badge."
+      }
+    ]
+  },
+  "history": [
+    {
+      "sequence": 1,
+      "at": "2026-08-21T00:51:07Z",
+      "from": null,
+      "to": "DISCOVERY",
+      "revision": 1,
+      "reason": "Design job created",
+      "evidence": []
+    },
+    {
+      "sequence": 2,
+      "at": "2026-08-21T00:54:25Z",
+      "from": "DISCOVERY",
+      "to": "SCOPE",
+      "revision": 1,
+      "reason": "PPB modal scope and approved direction recorded",
+      "evidence": [
+        "component-brief.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 3,
+      "at": "2026-08-21T00:55:43Z",
+      "from": "SCOPE",
+      "to": "REFERENCE_INTAKE",
+      "revision": 1,
+      "reason": "Approved scope is complete",
+      "evidence": [
+        "component-brief.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 4,
+      "at": "2026-08-21T00:55:50Z",
+      "from": "REFERENCE_INTAKE",
+      "to": "REFERENCE_VALIDATION",
+      "revision": 1,
+      "reason": "Reference inventory records current WPB captures and accepted EB inspiration evidence",
+      "evidence": [
+        "screenshot-inventory.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 5,
+      "at": "2026-08-21T01:01:28Z",
+      "from": "REFERENCE_VALIDATION",
+      "to": "VISUAL_ANALYSIS",
+      "revision": 1,
+      "reason": "Validated current and reference evidence",
+      "evidence": [
+        "visual-audit.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 6,
+      "at": "2026-08-21T01:01:28Z",
+      "from": "VISUAL_ANALYSIS",
+      "to": "DIRECTION_EXPLORATION",
+      "revision": 1,
+      "reason": "Compared the approved responsive direction with the rejected shallow-sheet alternative",
+      "evidence": [
+        "direction-comparison.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 7,
+      "at": "2026-08-21T01:01:28Z",
+      "from": "DIRECTION_EXPLORATION",
+      "to": "DIRECTION_APPROVAL",
+      "revision": 1,
+      "reason": "Aditya approved the EB-inspired Wolfpack direction",
+      "evidence": [
+        "approval-record.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 8,
+      "at": "2026-08-21T01:01:28Z",
+      "from": "DIRECTION_APPROVAL",
+      "to": "COMPONENT_ANATOMY",
+      "revision": 1,
+      "reason": "Canonical PPB modal ownership and regions documented",
+      "evidence": [
+        "component-anatomy.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 9,
+      "at": "2026-08-21T01:01:28Z",
+      "from": "COMPONENT_ANATOMY",
+      "to": "STATE_CONTRACT",
+      "revision": 1,
+      "reason": "Behavioral state coverage completed",
+      "evidence": [
+        "state-matrix.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 10,
+      "at": "2026-08-21T01:01:28Z",
+      "from": "STATE_CONTRACT",
+      "to": "RESPONSIVE_CONTRACT",
+      "revision": 1,
+      "reason": "Five-viewport transformation contract completed",
+      "evidence": [
+        "responsive-contract.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 11,
+      "at": "2026-08-21T01:01:28Z",
+      "from": "RESPONSIVE_CONTRACT",
+      "to": "INTERACTION_ACCESSIBILITY",
+      "revision": 1,
+      "reason": "Keyboard, focus, nested-layer, and reduced-motion behavior completed",
+      "evidence": [
+        "interaction-contract.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 12,
+      "at": "2026-08-21T01:01:28Z",
+      "from": "INTERACTION_ACCESSIBILITY",
+      "to": "TOKENS_GEOMETRY",
+      "revision": 1,
+      "reason": "Merchant-owned tokens and responsive geometry completed",
+      "evidence": [
+        "design-tokens.json"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 13,
+      "at": "2026-08-21T01:01:28Z",
+      "from": "TOKENS_GEOMETRY",
+      "to": "PROTOTYPE_OPTIONAL",
+      "revision": 1,
+      "reason": "Standalone prototype is not needed because the existing shared modal is the implementation surface",
+      "evidence": [
+        "implementation-handoff.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 14,
+      "at": "2026-08-21T01:01:29Z",
+      "from": "PROTOTYPE_OPTIONAL",
+      "to": "HANDOFF_ASSEMBLY",
+      "revision": 1,
+      "reason": "Implementation packet assembled",
+      "evidence": [
+        "implementation-handoff.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 15,
+      "at": "2026-08-21T01:03:45Z",
+      "from": "HANDOFF_ASSEMBLY",
+      "to": "HANDOFF_VALIDATION",
+      "revision": 1,
+      "reason": "The handoff validator passed with no blocking findings",
+      "evidence": [
+        "implementation-handoff.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 16,
+      "at": "2026-08-21T01:03:45Z",
+      "from": "HANDOFF_VALIDATION",
+      "to": "IMPLEMENTATION_AWAITED",
+      "revision": 1,
+      "reason": "Aditya explicitly authorized implementation of the approved plan",
+      "evidence": [
+        "approval-record.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 17,
+      "at": "2026-08-21T01:13:18Z",
+      "from": "IMPLEMENTATION_AWAITED",
+      "to": "CHROME_QA_PREFLIGHT",
+      "revision": 1,
+      "reason": "Direct Chrome DevTools preflight passed on the available authenticated SIT storefront fixture",
+      "evidence": [
+        "browser-test-report.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 18,
+      "at": "2026-08-21T01:14:03Z",
+      "from": "CHROME_QA_PREFLIGHT",
+      "to": "CHROME_QA_EXECUTION",
+      "revision": 1,
+      "reason": "Completed the five-viewport Horizontal Slots matrix; recorded missing Vertical Slots and Product List fixtures",
+      "evidence": [
+        "browser-test-report.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 19,
+      "at": "2026-08-21T07:51:33Z",
+      "from": "CHROME_QA_EXECUTION",
+      "to": "SCOPE",
+      "revision": 2,
+      "reason": "Revision 2 changes the approved component boundary and primary actions: inline native variant selectors replace the PPB mobile variant drawer, product details becomes a PPB-owned stacked sheet, and Quantity Validation owns modal-card presentation.",
+      "evidence": [],
+      "affected_artifacts": [
+        "component-brief.md",
+        "screenshot-inventory.yaml",
+        "visual-audit.md",
+        "direction-comparison.md",
+        "locked-decisions.yaml",
+        "component-anatomy.md",
+        "state-matrix.md",
+        "responsive-contract.md",
+        "interaction-contract.md",
+        "accessibility-checklist.md",
+        "design-tokens.json",
+        "content-stress-cases.yaml",
+        "implementation-handoff.md",
+        "codex-task.md",
+        "browser-test-plan.yaml",
+        "acceptance-criteria.md",
+        "approval-record.yaml",
+        "chrome-preflight-result.yaml",
+        "browser-test-report.md",
+        "visual-qa-report.md",
+        "remediation-list.md"
+      ]
+    },
+    {
+      "sequence": 20,
+      "at": "2026-08-21T07:53:31Z",
+      "from": "SCOPE",
+      "to": "REFERENCE_INTAKE",
+      "revision": 2,
+      "reason": "Revision-2 component scope and non-goals are recorded in component-brief.md.",
+      "evidence": [
+        "component-brief.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 21,
+      "at": "2026-08-21T07:54:12Z",
+      "from": "REFERENCE_INTAKE",
+      "to": "REFERENCE_VALIDATION",
+      "revision": 2,
+      "reason": "Revision-2 reference inventory preserves prior WPB captures and adds accepted EB grouped-variant and quantity-validation evidence.",
+      "evidence": [
+        "screenshot-inventory.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 22,
+      "at": "2026-08-21T07:55:05Z",
+      "from": "REFERENCE_VALIDATION",
+      "to": "VISUAL_ANALYSIS",
+      "revision": 2,
+      "reason": "Revision-2 references are sufficient for structural and behavioral analysis: exact visual measurements remain browser acceptance work, while the supplied plan locks the changed live behavior.",
+      "evidence": [
+        "screenshot-inventory.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 23,
+      "at": "2026-08-21T07:55:34Z",
+      "from": "VISUAL_ANALYSIS",
+      "to": "DIRECTION_EXPLORATION",
+      "revision": 2,
+      "reason": "Revision-2 visual and behavioral gaps are confidence-labelled in visual-audit.md.",
+      "evidence": [
+        "visual-audit.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 24,
+      "at": "2026-08-21T07:56:35Z",
+      "from": "DIRECTION_EXPLORATION",
+      "to": "DIRECTION_APPROVAL",
+      "revision": 2,
+      "reason": "The user supplied and authorized a single controlled revision-2 direction; direction-comparison.md records it and the superseded revision-1 choices.",
+      "evidence": [
+        "direction-comparison.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 25,
+      "at": "2026-08-21T07:56:43Z",
+      "from": "DIRECTION_APPROVAL",
+      "to": "COMPONENT_ANATOMY",
+      "revision": 2,
+      "reason": "Revision-2 controlled direction and decisions are explicitly approved in the durable artifacts.",
+      "evidence": [
+        "locked-decisions.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 26,
+      "at": "2026-08-21T07:56:54Z",
+      "from": "COMPONENT_ANATOMY",
+      "to": "COMPONENT_ANATOMY",
+      "revision": 2,
+      "reason": "Revision 2 replaces the approved component boundary and primary actions.",
+      "evidence": [
+        "visual-audit.md"
+      ],
+      "event": "artifact-superseded",
+      "affected_artifacts": [
+        "direction-comparison.md"
+      ]
+    },
+    {
+      "sequence": 27,
+      "at": "2026-08-21T07:56:54Z",
+      "from": "COMPONENT_ANATOMY",
+      "to": "COMPONENT_ANATOMY",
+      "revision": 2,
+      "reason": "Revision 2 supersedes the mobile variant drawer and unconditional Added xN decisions.",
+      "evidence": [
+        "direction-comparison.md"
+      ],
+      "event": "artifact-superseded",
+      "affected_artifacts": [
+        "locked-decisions.yaml"
+      ]
+    },
+    {
+      "sequence": 28,
+      "at": "2026-08-21T07:57:55Z",
+      "from": "COMPONENT_ANATOMY",
+      "to": "STATE_CONTRACT",
+      "revision": 2,
+      "reason": "Revision-2 component regions and canonical owners are recorded without template forks or FPB presentation changes.",
+      "evidence": [
+        "component-anatomy.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 29,
+      "at": "2026-08-21T07:58:23Z",
+      "from": "STATE_CONTRACT",
+      "to": "RESPONSIVE_CONTRACT",
+      "revision": 2,
+      "reason": "Revision-2 state coverage includes quantity boundaries, grouped variants, details add/update/cancel, layer ownership, capacity, and restoration.",
+      "evidence": [
+        "state-matrix.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 30,
+      "at": "2026-08-21T07:58:54Z",
+      "from": "RESPONSIVE_CONTRACT",
+      "to": "INTERACTION_ACCESSIBILITY",
+      "revision": 2,
+      "reason": "Revision-2 responsive transformations cover exact required viewports, selector labels, sparse tracks, stacked details, and touch magnifier behavior.",
+      "evidence": [
+        "responsive-contract.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 31,
+      "at": "2026-08-21T07:59:26Z",
+      "from": "INTERACTION_ACCESSIBILITY",
+      "to": "TOKENS_GEOMETRY",
+      "revision": 2,
+      "reason": "Revision-2 interaction and accessibility contracts define image-only details, native selectors, one-layer dismissal, exact focus return, and bounded selection mutations.",
+      "evidence": [
+        "interaction-contract.md",
+        "accessibility-checklist.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 32,
+      "at": "2026-08-21T07:59:58Z",
+      "from": "TOKENS_GEOMETRY",
+      "to": "PROTOTYPE_OPTIONAL",
+      "revision": 2,
+      "reason": "Revision-2 tokens use responsive, content-driven geometry and preserve merchant ownership; stress cases cover sparse grids, grouped variants, maximum quantities, and long details.",
+      "evidence": [
+        "design-tokens.json",
+        "content-stress-cases.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 33,
+      "at": "2026-08-21T08:00:05Z",
+      "from": "PROTOTYPE_OPTIONAL",
+      "to": "HANDOFF_ASSEMBLY",
+      "revision": 2,
+      "reason": "Standalone prototype is not required because the supplied revision-2 contract and existing shared components resolve the interaction and ownership questions.",
+      "evidence": [
+        "component-anatomy.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 34,
+      "at": "2026-08-21T08:02:38Z",
+      "from": "HANDOFF_ASSEMBLY",
+      "to": "HANDOFF_ASSEMBLY",
+      "revision": 2,
+      "reason": "Revision 2 replaces the component boundary and card/detail actions.",
+      "evidence": [
+        "locked-decisions.yaml"
+      ],
+      "event": "artifact-superseded",
+      "affected_artifacts": [
+        "implementation-handoff.md"
+      ]
+    },
+    {
+      "sequence": 35,
+      "at": "2026-08-21T08:02:38Z",
+      "from": "HANDOFF_ASSEMBLY",
+      "to": "HANDOFF_ASSEMBLY",
+      "revision": 2,
+      "reason": "Revision 2 implementation scope supersedes the revision-1 picker-only task.",
+      "evidence": [
+        "implementation-handoff.md"
+      ],
+      "event": "artifact-superseded",
+      "affected_artifacts": [
+        "codex-task.md"
+      ]
+    },
+    {
+      "sequence": 36,
+      "at": "2026-08-21T08:02:38Z",
+      "from": "HANDOFF_ASSEMBLY",
+      "to": "HANDOFF_VALIDATION",
+      "revision": 2,
+      "reason": "Revision-2 implementation packet and browser plan are assembled with bounded ownership and regression scope.",
+      "evidence": [
+        "implementation-handoff.md",
+        "browser-test-plan.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 37,
+      "at": "2026-08-21T08:03:22Z",
+      "from": "HANDOFF_VALIDATION",
+      "to": "IMPLEMENTATION_AWAITED",
+      "revision": 2,
+      "reason": "Revision-2 handoff validator passed and the user explicitly authorized implementation of the supplied plan.",
+      "evidence": [
+        "implementation-handoff.md",
+        "approval-record.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 38,
+      "at": "2026-08-21T08:15:35Z",
+      "from": "IMPLEMENTATION_AWAITED",
+      "to": "CHROME_QA_PREFLIGHT",
+      "revision": 2,
+      "reason": "Revision-2 implementation is present in the approved branch working tree and local PPB regression, widget build, CSS minification, generated syntax, asset-size, and Graphify gates have completed.",
+      "evidence": [
+        "implementation-handoff.md",
+        "approval-record.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 39,
+      "at": "2026-08-21T08:17:51Z",
+      "from": "CHROME_QA_PREFLIGHT",
+      "to": "BLOCKED",
+      "revision": 2,
+      "reason": "Revision-2 Chrome QA cannot begin because the mandatory direct mcp__chrome_devtools__ tool namespace is not exposed in this session; no permitted substitute exists.",
+      "evidence": [
+        "qa/preflight.json",
+        "chrome-preflight-result.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 40,
+      "at": "2026-08-21T08:26:23Z",
+      "from": "BLOCKED",
+      "to": "CHROME_QA_PREFLIGHT",
+      "revision": 2,
+      "reason": "The direct Chrome DevTools MCP namespace is now exposed and list_pages returned the authenticated default-profile storefront tabs.",
+      "evidence": [
+        "qa/preflight.json"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 41,
+      "at": "2026-08-21T08:43:20Z",
+      "from": "CHROME_QA_PREFLIGHT",
+      "to": "BLOCKED",
+      "revision": 2,
+      "reason": "Revision-2 direct Chrome preflight recovered and exposed three live Horizontal product failures, but persistent screenshot writes and the complete deterministic fixture matrix remain unavailable.",
+      "evidence": [
+        "qa/preflight.json"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 42,
+      "at": "2026-08-21T08:51:05Z",
+      "from": "BLOCKED",
+      "to": "CHROME_QA_PREFLIGHT",
+      "revision": 2,
+      "reason": "The user requested blocker resolution; direct Chrome screenshot output can now be persisted as a sanitized QA artifact, and remaining state coverage will use explicit tab-local response adapters without mutating SIT fixtures.",
+      "evidence": [
+        "qa/screenshots/chrome-write-probe.png"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 43,
+      "at": "2026-08-21T08:52:00Z",
+      "from": "CHROME_QA_PREFLIGHT",
+      "to": "CHROME_QA_EXECUTION",
+      "revision": 2,
+      "reason": "All mandatory direct Chrome preflight capabilities now pass and the revision-2 state matrix has non-mutating deterministic recipes.",
+      "evidence": [
+        "qa/preflight.json"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 44,
+      "at": "2026-08-21T09:03:01Z",
+      "from": "CHROME_QA_EXECUTION",
+      "to": "CHROME_QA_EXECUTION",
+      "revision": 3,
+      "reason": "User approved equal modal quantity and action footprints",
+      "evidence": [
+        "direction-comparison.md"
+      ],
+      "event": "artifact-superseded",
+      "affected_artifacts": [
+        "locked-decisions.yaml"
+      ]
+    },
+    {
+      "sequence": 45,
+      "at": "2026-08-21T09:03:01Z",
+      "from": "CHROME_QA_EXECUTION",
+      "to": "CHROME_QA_EXECUTION",
+      "revision": 3,
+      "reason": "User approved equal modal quantity and action footprints",
+      "evidence": [
+        "locked-decisions.yaml"
+      ],
+      "event": "artifact-superseded",
+      "affected_artifacts": [
+        "implementation-handoff.md"
+      ]
+    },
+    {
+      "sequence": 46,
+      "at": "2026-08-21T09:44:27Z",
+      "from": "CHROME_QA_EXECUTION",
+      "to": "VISUAL_REMEDIATION",
+      "revision": 3,
+      "reason": "Formal direct Chrome QA completed; all measured revision-3 product findings were remediated and rerun successfully",
+      "evidence": [
+        "qa/summary.json",
+        "browser-test-report.md",
+        "visual-qa-report.md",
+        "remediation-list.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 47,
+      "at": "2026-08-21T09:45:21Z",
+      "from": "VISUAL_REMEDIATION",
+      "to": "FINAL_APPROVAL",
+      "revision": 3,
+      "reason": "All scoped visual, behavior, responsive, accessibility, console, network, performance, and PPB regression gates pass with no open remediation",
+      "evidence": [
+        "qa/summary.json",
+        "browser-test-report.md",
+        "visual-qa-report.md",
+        "remediation-list.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 48,
+      "at": "2026-08-21T09:46:43Z",
+      "from": "FINAL_APPROVAL",
+      "to": "TOKENS_GEOMETRY",
+      "revision": 4,
+      "reason": "User supplied revision changes the PPB footer summary from a rigid desktop grid to a content-responsive contained pill",
+      "evidence": [],
+      "affected_artifacts": [
+        "design-tokens.json",
+        "responsive-contract.md",
+        "implementation-handoff.md",
+        "browser-test-plan.yaml",
+        "acceptance-criteria.md",
+        "browser-test-report.md",
+        "visual-qa-report.md",
+        "remediation-list.md"
+      ]
+    },
+    {
+      "sequence": 49,
+      "at": "2026-08-21T09:52:06Z",
+      "from": "TOKENS_GEOMETRY",
+      "to": "TOKENS_GEOMETRY",
+      "revision": 4,
+      "reason": "User approved content-responsive footer summary",
+      "evidence": [
+        "remediation-list.md"
+      ],
+      "event": "artifact-superseded",
+      "affected_artifacts": [
+        "locked-decisions.yaml"
+      ]
+    },
+    {
+      "sequence": 50,
+      "at": "2026-08-21T09:52:06Z",
+      "from": "TOKENS_GEOMETRY",
+      "to": "TOKENS_GEOMETRY",
+      "revision": 4,
+      "reason": "User requested revision-4 footer implementation",
+      "evidence": [
+        "locked-decisions.yaml"
+      ],
+      "event": "artifact-superseded",
+      "affected_artifacts": [
+        "implementation-handoff.md"
+      ]
+    },
+    {
+      "sequence": 51,
+      "at": "2026-08-21T09:52:20Z",
+      "from": "TOKENS_GEOMETRY",
+      "to": "PROTOTYPE_OPTIONAL",
+      "revision": 4,
+      "reason": "Revision-4 footer summary uses the existing PPB CSS owner and needs no standalone prototype",
+      "evidence": [
+        "implementation-handoff.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 52,
+      "at": "2026-08-21T09:52:20Z",
+      "from": "PROTOTYPE_OPTIONAL",
+      "to": "HANDOFF_ASSEMBLY",
+      "revision": 4,
+      "reason": "Revision-4 token, responsive, acceptance, and Chrome contracts are assembled",
+      "evidence": [
+        "implementation-handoff.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 53,
+      "at": "2026-08-21T09:52:49Z",
+      "from": "HANDOFF_ASSEMBLY",
+      "to": "HANDOFF_VALIDATION",
+      "revision": 4,
+      "reason": "Revision-4 handoff validator passed",
+      "evidence": [
+        "implementation-handoff.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 54,
+      "at": "2026-08-21T09:52:49Z",
+      "from": "HANDOFF_VALIDATION",
+      "to": "IMPLEMENTATION_AWAITED",
+      "revision": 4,
+      "reason": "User explicitly requested implementation of the content-responsive footer summary",
+      "evidence": [
+        "locked-decisions.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 55,
+      "at": "2026-08-21T09:52:49Z",
+      "from": "IMPLEMENTATION_AWAITED",
+      "to": "CHROME_QA_PREFLIGHT",
+      "revision": 4,
+      "reason": "Direct Chrome default-profile preflight remains passed for revision 4",
+      "evidence": [
+        "qa/preflight.json"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 56,
+      "at": "2026-08-21T09:52:50Z",
+      "from": "CHROME_QA_PREFLIGHT",
+      "to": "CHROME_QA_EXECUTION",
+      "revision": 4,
+      "reason": "Cache-cleared direct Chrome footer remediation passed at 1440, 390, and 360",
+      "evidence": [
+        "qa/results/footer-summary-revision-4.json"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 57,
+      "at": "2026-08-21T09:52:50Z",
+      "from": "CHROME_QA_EXECUTION",
+      "to": "VISUAL_REMEDIATION",
+      "revision": 4,
+      "reason": "Revision-4 footer alignment, content growth, containment, and overflow findings are resolved",
+      "evidence": [
+        "qa/results/footer-summary-revision-4.json"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 58,
+      "at": "2026-08-21T09:53:11Z",
+      "from": "VISUAL_REMEDIATION",
+      "to": "FINAL_APPROVAL",
+      "revision": 4,
+      "reason": "Revision-4 footer summary is content-responsive, aligned, contained, and passes scoped direct Chrome remediation",
+      "evidence": [
+        "qa/summary.json",
+        "qa/results/footer-summary-revision-4.json",
+        "browser-test-report.md",
+        "visual-qa-report.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 59,
+      "at": "2026-08-21T10:10:50Z",
+      "from": "FINAL_APPROVAL",
+      "to": "COMPONENT_ANATOMY",
+      "revision": 5,
+      "reason": "User approved selected-slot anatomy revision: full natural product-name wrapping and a 44px outlined icon-and-text Remove action below product information",
+      "evidence": [
+        "component-anatomy.md"
+      ],
+      "affected_artifacts": [
+        "locked-decisions.yaml",
+        "component-anatomy.md",
+        "state-matrix.md",
+        "responsive-contract.md",
+        "interaction-contract.md",
+        "accessibility-checklist.md",
+        "design-tokens.json",
+        "content-stress-cases.yaml",
+        "implementation-handoff.md",
+        "codex-task.md",
+        "browser-test-plan.yaml",
+        "acceptance-criteria.md",
+        "browser-test-report.md",
+        "visual-qa-report.md",
+        "remediation-list.md"
+      ]
+    },
+    {
+      "sequence": 60,
+      "at": "2026-08-21T10:14:52Z",
+      "from": "COMPONENT_ANATOMY",
+      "to": "COMPONENT_ANATOMY",
+      "revision": 5,
+      "reason": "User approved revision-5 filled-slot redesign",
+      "evidence": [
+        "component-anatomy.md"
+      ],
+      "event": "artifact-superseded",
+      "affected_artifacts": [
+        "locked-decisions.yaml"
+      ]
+    },
+    {
+      "sequence": 61,
+      "at": "2026-08-21T10:14:53Z",
+      "from": "COMPONENT_ANATOMY",
+      "to": "COMPONENT_ANATOMY",
+      "revision": 5,
+      "reason": "User approved revision-5 handoff direction",
+      "evidence": [
+        "locked-decisions.yaml"
+      ],
+      "event": "artifact-superseded",
+      "affected_artifacts": [
+        "implementation-handoff.md"
+      ]
+    },
+    {
+      "sequence": 62,
+      "at": "2026-08-21T10:14:53Z",
+      "from": "COMPONENT_ANATOMY",
+      "to": "COMPONENT_ANATOMY",
+      "revision": 5,
+      "reason": "Revision-5 implementation task replaces prior approved task",
+      "evidence": [
+        "implementation-handoff.md"
+      ],
+      "event": "artifact-superseded",
+      "affected_artifacts": [
+        "codex-task.md"
+      ]
+    },
+    {
+      "sequence": 63,
+      "at": "2026-08-21T10:15:23Z",
+      "from": "COMPONENT_ANATOMY",
+      "to": "STATE_CONTRACT",
+      "revision": 5,
+      "reason": "Revision-5 filled-slot anatomy and ownership are complete",
+      "evidence": [
+        "component-anatomy.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 64,
+      "at": "2026-08-21T10:15:23Z",
+      "from": "STATE_CONTRACT",
+      "to": "RESPONSIVE_CONTRACT",
+      "revision": 5,
+      "reason": "Filled-slot selected and removal states are complete",
+      "evidence": [
+        "state-matrix.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 65,
+      "at": "2026-08-21T10:15:23Z",
+      "from": "RESPONSIVE_CONTRACT",
+      "to": "INTERACTION_ACCESSIBILITY",
+      "revision": 5,
+      "reason": "Full-title wrapping and dedicated Remove flow are defined at every required viewport",
+      "evidence": [
+        "responsive-contract.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 66,
+      "at": "2026-08-21T10:15:23Z",
+      "from": "INTERACTION_ACCESSIBILITY",
+      "to": "TOKENS_GEOMETRY",
+      "revision": 5,
+      "reason": "Remove semantics, focus recovery, visible label, and target requirements are complete",
+      "evidence": [
+        "interaction-contract.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 67,
+      "at": "2026-08-21T10:15:23Z",
+      "from": "TOKENS_GEOMETRY",
+      "to": "PROTOTYPE_OPTIONAL",
+      "revision": 5,
+      "reason": "No standalone prototype is needed because the existing filled-slot tree and approved hierarchy are unambiguous",
+      "evidence": [
+        "implementation-handoff.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 68,
+      "at": "2026-08-21T10:15:23Z",
+      "from": "PROTOTYPE_OPTIONAL",
+      "to": "HANDOFF_ASSEMBLY",
+      "revision": 5,
+      "reason": "Revision-5 implementation and Chrome QA packet is assembled",
+      "evidence": [
+        "implementation-handoff.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 69,
+      "at": "2026-08-21T10:15:59Z",
+      "from": "HANDOFF_ASSEMBLY",
+      "to": "HANDOFF_VALIDATION",
+      "revision": 5,
+      "reason": "Revision-5 handoff validator passed with no blocking findings",
+      "evidence": [
+        "implementation-handoff.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 70,
+      "at": "2026-08-21T10:15:59Z",
+      "from": "HANDOFF_VALIDATION",
+      "to": "IMPLEMENTATION_AWAITED",
+      "revision": 5,
+      "reason": "Revision-5 selected-slot design and handoff are approved; production implementation must return separately",
+      "evidence": [
+        "approval-record.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 71,
+      "at": "2026-08-21T10:50:44Z",
+      "from": "IMPLEMENTATION_AWAITED",
+      "to": "COMPONENT_ANATOMY",
+      "revision": 6,
+      "reason": "User replaced the revision-5 filled-slot Remove hierarchy with an overlaid cross badge and added a maximum-height requirement; title overflow behavior remains open.",
+      "evidence": [
+        "component-anatomy.md"
+      ],
+      "affected_artifacts": [
+        "locked-decisions.yaml",
+        "component-anatomy.md",
+        "state-matrix.md",
+        "responsive-contract.md",
+        "interaction-contract.md",
+        "accessibility-checklist.md",
+        "design-tokens.json",
+        "content-stress-cases.yaml",
+        "implementation-handoff.md",
+        "codex-task.md",
+        "browser-test-plan.yaml",
+        "acceptance-criteria.md",
+        "browser-test-report.md",
+        "visual-qa-report.md",
+        "remediation-list.md",
+        "approval-record.yaml"
+      ]
+    },
+    {
+      "sequence": 72,
+      "at": "2026-08-21T10:51:53Z",
+      "from": "COMPONENT_ANATOMY",
+      "to": "COMPONENT_ANATOMY",
+      "revision": 6,
+      "reason": "Revision 6 replaces the filled-slot Remove hierarchy and leaves title overflow under the new height cap awaiting user choice.",
+      "evidence": [
+        "component-anatomy.md"
+      ],
+      "event": "artifact-superseded",
+      "affected_artifacts": [
+        "locked-decisions.yaml"
+      ]
+    },
+    {
+      "sequence": 73,
+      "at": "2026-08-21T10:57:12Z",
+      "from": "COMPONENT_ANATOMY",
+      "to": "STATE_CONTRACT",
+      "revision": 6,
+      "reason": "Revision-6 filled-slot anatomy and canonical owners are complete.",
+      "evidence": [
+        "component-anatomy.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 74,
+      "at": "2026-08-21T10:57:12Z",
+      "from": "STATE_CONTRACT",
+      "to": "RESPONSIVE_CONTRACT",
+      "revision": 6,
+      "reason": "Revision-6 filled-slot state and recovery paths are complete.",
+      "evidence": [
+        "state-matrix.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 75,
+      "at": "2026-08-21T10:57:12Z",
+      "from": "RESPONSIVE_CONTRACT",
+      "to": "INTERACTION_ACCESSIBILITY",
+      "revision": 6,
+      "reason": "Revision-6 responsive contract is approved by the user recommendation approval.",
+      "evidence": [
+        "responsive-contract.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 76,
+      "at": "2026-08-21T10:57:29Z",
+      "from": "INTERACTION_ACCESSIBILITY",
+      "to": "TOKENS_GEOMETRY",
+      "revision": 6,
+      "reason": "Revision-6 interaction and accessibility contracts are complete.",
+      "evidence": [
+        "interaction-contract.md",
+        "accessibility-checklist.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 77,
+      "at": "2026-08-21T10:57:29Z",
+      "from": "TOKENS_GEOMETRY",
+      "to": "PROTOTYPE_OPTIONAL",
+      "revision": 6,
+      "reason": "Revision-6 tokens and stress cases are complete; existing markup and geometry make a separate prototype unnecessary.",
+      "evidence": [
+        "design-tokens.json",
+        "content-stress-cases.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 78,
+      "at": "2026-08-21T10:57:29Z",
+      "from": "PROTOTYPE_OPTIONAL",
+      "to": "HANDOFF_ASSEMBLY",
+      "revision": 6,
+      "reason": "Standalone prototype remains not applicable because the bounded slot and cross-badge interaction use existing semantic owners.",
+      "evidence": [
+        "component-anatomy.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 79,
+      "at": "2026-08-21T10:57:47Z",
+      "from": "HANDOFF_ASSEMBLY",
+      "to": "HANDOFF_ASSEMBLY",
+      "revision": 6,
+      "reason": "Revision 6 replaces revision-5 filled-slot title growth and separate Remove action.",
+      "evidence": [
+        "locked-decisions.yaml"
+      ],
+      "event": "artifact-superseded",
+      "affected_artifacts": [
+        "implementation-handoff.md"
+      ]
+    },
+    {
+      "sequence": 80,
+      "at": "2026-08-21T10:57:47Z",
+      "from": "HANDOFF_ASSEMBLY",
+      "to": "HANDOFF_ASSEMBLY",
+      "revision": 6,
+      "reason": "Revision 6 implementation task now owns bounded filled slots and the overlaid cross badge.",
+      "evidence": [
+        "implementation-handoff.md"
+      ],
+      "event": "artifact-superseded",
+      "affected_artifacts": [
+        "codex-task.md"
+      ]
+    },
+    {
+      "sequence": 81,
+      "at": "2026-08-21T11:03:52Z",
+      "from": "HANDOFF_ASSEMBLY",
+      "to": "HANDOFF_VALIDATION",
+      "revision": 6,
+      "reason": "Revision-6 implementation packet is complete and explicitly approved.",
+      "evidence": [
+        "approval-record.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 82,
+      "at": "2026-08-21T11:03:53Z",
+      "from": "HANDOFF_VALIDATION",
+      "to": "IMPLEMENTATION_AWAITED",
+      "revision": 6,
+      "reason": "Revision-6 handoff validator passed and the user authorized implementation.",
+      "evidence": [
+        "implementation-handoff.md",
+        "approval-record.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 83,
+      "at": "2026-08-21T11:09:18Z",
+      "from": "IMPLEMENTATION_AWAITED",
+      "to": "CHROME_QA_PREFLIGHT",
+      "revision": 6,
+      "reason": "Revision-6 implementation is present in the working tree; focused tests, full PPB regression, builds, minification, syntax, lint, asset-size, and Graphify checks completed.",
+      "evidence": [
+        "implementation-handoff.md",
+        "acceptance-criteria.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 84,
+      "at": "2026-08-21T11:33:05Z",
+      "from": "CHROME_QA_PREFLIGHT",
+      "to": "BLOCKED",
+      "revision": 6,
+      "reason": "Revision-6 Chrome preflight cannot complete because the existing SIT app-proxy endpoints repeatedly return HTTP 500 and direct Chrome cannot persist new screenshots under the current workspace-root policy.",
+      "evidence": [
+        "qa/preflight.json",
+        "chrome-preflight-result.yaml",
+        "browser-test-report.md"
+      ],
+      "affected_artifacts": []
+    }
+  ]
+}

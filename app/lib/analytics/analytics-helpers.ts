@@ -136,7 +136,7 @@ export function buildBundleLeaderboard(
   return Array.from(map.entries())
     .sort((a, b) => b[1].revenue - a[1].revenue)
     .slice(0, limit)
-    .map(([bundleId, { revenue, orders }]) => ({
+    .map(([bundleId, { revenue, orders }]: any) => ({
       bundleId,
       bundleName: bundleNameMap[bundleId] ?? "Unknown Bundle",
       bundleStatus: bundleStatusMap[bundleId] ?? "active",
@@ -209,7 +209,7 @@ export function buildBundleTrendSeries(
   // Return sorted by date ascending
   return Array.from(map.entries())
     .sort((a, b) => a[0].localeCompare(b[0]))
-    .map(([date, { bundleRevenue, totalRevenue }]) => ({
+    .map(([date, { bundleRevenue, totalRevenue }]: any) => ({
       date,
       bundleRevenue,
       totalRevenue,

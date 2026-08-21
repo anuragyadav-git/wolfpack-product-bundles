@@ -82,7 +82,7 @@ export function reconcileFpbUpsellHandoff(input: {
   if (!input.payload || input.payload.bundleId !== input.bundleId) return { matched: false, stepIndex: null, changed: false };
   const orderedIndexes = input.steps
     .map((step, index) => ({ step, index }))
-    .filter(({ step }) => step.enabled !== false && step.isFreeGift !== true)
+    .filter(({ step }: any) => step.enabled !== false && step.isFreeGift !== true)
     .sort((a, b) => Number(a.step.position ?? a.index) - Number(b.step.position ?? b.index));
   for (const { index } of orderedIndexes) {
     const selectionId = findExactVariant(input.stepProductData[index] ?? [], input.payload.productId, input.payload.variantId);

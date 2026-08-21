@@ -1,13 +1,22 @@
 import { ComponentGenerator } from '../../shared/component-generator.js';
 import { CurrencyManager } from '../../shared/currency-manager.js';
 import { PricingCalculator } from '../../shared/pricing-calculator.js';
-import { calculateBundleDiscountForPurchaseOption } from '../../shared/subscription-storefront-methods.js';
-import { calculateBundleTotalForPurchaseOption } from '../../shared/subscription-storefront-methods.js';
+import {
+  calculateBundleDiscountForPurchaseOption,
+  calculateBundleTotalForPurchaseOption,
+} from '../../shared/subscription-storefront-methods.js';
+import { getCascadeSummaryPillContent } from './cascade-summary.js';
 import { TemplateManager } from '../../shared/template-manager.js';
 import { ToastManager } from '../../shared/toast-manager.js';
 import { renderSelectedProductRow } from '../../shared/components/selected-product-row.js';
 import { getSelectedProductEntries } from '../../shared/engine/bundle-selectors.js';
-export function getCascadeSelectedDrawerState(selectedEntries = [], isOpen = false) {
+
+export function renderCascadeDiscountMessage(element: HTMLParagraphElement, message = '') {
+  if (!element) return;
+  element.innerHTML = typeof message === 'string' ? message : '';
+}
+
+export function getCascadeSelectedDrawerState(selectedEntries: any[] = [], isOpen = false) {
   const entries = Array.isArray(selectedEntries) ? selectedEntries : [];
   const selectedQuantity = entries.reduce((sum, entry) => sum + Math.max(0, Number(entry?.quantity || 0)), 0);
   const hasSelectedProducts = selectedQuantity > 0;
@@ -22,12 +31,8 @@ export function getCascadeSelectedDrawerState(selectedEntries = [], isOpen = fal
 export function getNextCascadeSelectedDrawerExpandedState({
   hasSelectedProducts = false,
   isExpanded = false,
-  onEmpty = null,
-} = {}) {
-  if (!hasSelectedProducts) {
-    if (typeof onEmpty === 'function') onEmpty();
-    return false;
-  }
+}: any = {}) {
+  if (!hasSelectedProducts) return false;
   return !isExpanded;
 }
 
@@ -35,14 +40,14 @@ export function getCascadeSelectedDrawerHeight({
   list = null,
   drawer = null,
   viewportHeight = typeof window !== 'undefined' ? window.innerHeight : 0,
-} = {}) {
+}: any = {}) {
   if (!list) return 0;
 
   const borderTopWidth = drawer && typeof getComputedStyle === 'function'
     ? Number.parseFloat(getComputedStyle(drawer).borderTopWidth || '0')
     : 0;
   const borderOffset = Number.isFinite(borderTopWidth) ? borderTopWidth : 0;
-  const listStyle = typeof getComputedStyle === 'function' ? getComputedStyle(list) : {};
+  const listStyle: any = typeof getComputedStyle === 'function' ? getComputedStyle(list) : {};
   const selectedRows = typeof list.querySelectorAll === 'function'
     ? Array.from(list.querySelectorAll('.bw-ppb-cascade-selected-item, .wpbMixCascadeBundleCartItem'))
     : [];
@@ -55,7 +60,7 @@ export function getCascadeSelectedDrawerHeight({
   let visibleRowsHeight = Number.POSITIVE_INFINITY;
 
   if (selectedRows.length >= visibleRowsLimit && title) {
-    const visibleRows = selectedRows.slice(0, visibleRowsLimit);
+    const visibleRows = selectedRows.slice(0, visibleRowsLimit) as HTMLElement[];
     const titleHeight = title.getBoundingClientRect?.().height || 0;
     const rowHeights = visibleRows.reduce((sum, row) => (
       sum + (row.getBoundingClientRect?.().height || 0)
@@ -80,7 +85,7 @@ export function prepareCascadeSelectedProductDisplay({
   variantId = '',
   quantity = 0,
   formatPrice = null,
-} = {}) {
+}: any = {}) {
   const normalizedQuantity = Number.isFinite(Number(quantity)) ? Math.max(0, Number(quantity)) : 0;
   const title = product.title || product.parentTitle || '';
   const variantTitle = normalizeSelectedRowVariantTitle(product, title);
@@ -95,14 +100,14 @@ export function prepareCascadeSelectedProductDisplay({
     ...product,
     variantId,
     quantity: normalizedQuantity,
-    title: `${title} x ${normalizedQuantity}`,
+    title,
     variantTitle,
     priceText,
     quantityLabel: `x ${normalizedQuantity}`,
   };
 }
 
-function normalizeSelectedRowVariantTitle(product, title) {
+function normalizeSelectedRowVariantTitle(product: any, title: any) {
   const variantTitle = product.variantTitle && product.variantTitle !== 'Default Title'
     ? String(product.variantTitle).trim()
     : '';
@@ -114,11 +119,11 @@ function normalizeSelectedRowVariantTitle(product, title) {
   return variantTitle;
 }
 
-export function shouldMountCascadeAddToCartInFooter(addToCartButton, footerElement) {
+export function shouldMountCascadeAddToCartInFooter(addToCartButton: any, footerElement: any) {
   return Boolean(addToCartButton && footerElement && addToCartButton.parentElement !== footerElement);
 }
 
-function formatCascadeDiscountPercentage(value) {
+function formatCascadeDiscountPercentage(value: number) {
   const percentage = Number(value || 0);
   if (!Number.isFinite(percentage) || percentage <= 0) return '';
 
@@ -133,7 +138,7 @@ export function getCascadeAddToCartButtonContent({
   totalPriceText = '',
   discountAmountText = '',
   discountInfo = null,
-} = {}) {
+}: any = {}) {
   const hasDiscount = Boolean(discountInfo?.hasDiscount);
   const discountMethod = discountInfo?.discountMethod || '';
   const appliedRuleValue = Number(discountInfo?.applicableRule?.discountValue || 0);
@@ -161,15 +166,15 @@ export const cascadeTemplateMethods: Record<string, any> & ThisType<any> = {
     return this._getProductPageTemplateContract?.()?.id === 'LIST';
   },
 
-  _getCascadeAddToCartButtonContent(options = {}) {
+  _getCascadeAddToCartButtonContent(options: any = {}) {
     return getCascadeAddToCartButtonContent(options);
   },
 
-  _renderCascadeAddToCartButtonContent(button, content = {}) {
+  _renderCascadeAddToCartButtonContent(button: any, content: any = {}) {
     if (!button) return;
     button.textContent = '';
 
-    const appendPart = (tagName, className, text, { hidden = false } = {}) => {
+    const appendPart = (tagName: string, className: string, text: any, { hidden = false }: any = {}) => {
       if (!text) return null;
       const part = document.createElement(tagName);
       part.className = className;
@@ -186,7 +191,8 @@ export const cascadeTemplateMethods: Record<string, any> & ThisType<any> = {
     appendPart('span', 'bw-ppb-cascade-add-to-cart-separator', content.separator);
     appendPart('span', 'bw-ppb-cascade-add-to-cart-price', content.finalPriceText);
     appendPart('span', 'bw-ppb-cascade-add-to-cart-compare', content.compareAtPriceText, { hidden: true });
-    appendPart('span', 'bw-ppb-cascade-add-to-cart-discount-pill', content.discountPillText);
+    const discountPill = appendPart('span', 'bw-ppb-cascade-add-to-cart-discount-pill', content.discountPillText);
+    discountPill?.setAttribute('data-wpb-discount-feedback-pill', '');
   },
 
   _getSelectedProductEntries() {
@@ -194,8 +200,8 @@ export const cascadeTemplateMethods: Record<string, any> & ThisType<any> = {
       selectedProducts: this.selectedProducts,
       stepProductData: this.stepProductData,
     }, {
-      expandProductsByStep: (products) => this.expandProductsByVariant(products || []),
-      normalizeSelectionKey: (value) => this.normalizeSelectionKey(value),
+      expandProductsByStep: (products: any) => this.expandProductsByVariant(products || []),
+      normalizeSelectionKey: (value: any) => this.normalizeSelectionKey(value),
     });
   },
 
@@ -240,7 +246,7 @@ export const cascadeTemplateMethods: Record<string, any> & ThisType<any> = {
     return TemplateManager.replaceVariables(template, variables);
   },
 
-  _renderCascadeFooter(el) {
+  _renderCascadeFooter(el: any) {
     el.className = 'bundle-footer-messaging bw-ppb-cascade-footer wpbMixCascadeFooterWrapper wpbMixCascadeFooterWrapper--bundleATCBtnV2 wpbMixCascadeFooterWrapper--cartDrawerUI';
     el.style.display = '';
     el.style.cssText = '';
@@ -258,21 +264,55 @@ export const cascadeTemplateMethods: Record<string, any> & ThisType<any> = {
       selectedEntries,
       this.cascadeSelectedDrawerState.isOpen,
     );
+    const discountInfo = calculateBundleDiscountForPurchaseOption(
+      this,
+      totalPrice,
+      totalQuantity,
+      unitPrices,
+    );
+    const combinedDiscountInfo = this.getDiscountInfoWithSelectedAddonDiscount(discountInfo, totalPrice);
+    const currencyInfo = CurrencyManager.getCurrencyInfo();
+    const summaryContent = getCascadeSummaryPillContent({
+      selectedQuantity: drawerState.selectedQuantity,
+      totalPriceText: CurrencyManager.convertAndFormat(totalPrice, currencyInfo),
+      finalPriceText: CurrencyManager.convertAndFormat(combinedDiscountInfo.finalPrice, currencyInfo),
+      hasDiscount: Number(combinedDiscountInfo.discountAmount || 0) > 0,
+    });
     const drawer = document.createElement('div');
+    drawer.dataset.ppbDrawerSurface = 'selected-summary';
     drawer.className = `bw-ppb-cascade-selected-drawer wpbMixCascadeCartDrawerContainer${drawerState.isOpen ? ' bw-ppb-cascade-selected-drawer--open wpbMixCascadeCartDrawerContainer--open' : ''}`;
 
     const toggle = document.createElement('button');
     toggle.type = 'button';
     toggle.className = 'bw-ppb-cascade-selected-toggle wpbMixCascadeSelectedItemsInCartWrappper';
     toggle.setAttribute('aria-expanded', drawerState.isOpen ? 'true' : 'false');
+    const toggleLabel = this._resolveText('viewBundleItems', 'View Bundle Items');
+    toggle.setAttribute(
+      'aria-label',
+      `${toggleLabel}: ${summaryContent.selectedQuantity}, ${summaryContent.finalPriceText}`,
+    );
     toggle.innerHTML = `
-      <span class="bw-ppb-cascade-selected-toggle-chevron wpbMixCascadeCartChevronIcon" aria-hidden="true"></span>
-      <span class="bw-ppb-cascade-selected-toggle-label wpbMixCascadeCartDrawerBtnText">${ComponentGenerator.escapeHtml(this._resolveText('viewBundleItems', 'View Bundle Items'))}</span>
-      <span class="bw-ppb-cascade-selected-toggle-count wpbMixCascadeSelectedItemsInCart">${drawerState.selectedQuantity}</span>
+      <span class="bw-ppb-cascade-selected-toggle-surface">
+        <span class="bw-ppb-cascade-selected-toggle-chevron wpbMixCascadeCartChevronIcon" aria-hidden="true"></span>
+        <span class="bw-ppb-cascade-selected-toggle-label wpbMixCascadeCartDrawerBtnText">${ComponentGenerator.escapeHtml(toggleLabel)}</span>
+        <span class="bw-ppb-cascade-selected-toggle-summary" aria-hidden="true">
+          <span class="bw-ppb-cascade-selected-toggle-cart">
+            <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+              <path fill-rule="evenodd" clip-rule="evenodd" d="M3 4.5C3 4.22386 3.22386 4 3.5 4H5.5C5.73 4 5.93 4.16 5.98 4.385L6.52 7H20.5C20.76 7 20.99 7.14 21.1 7.37C21.21 7.6 21.18 7.88 21.02 8.08L17.02 13.08C16.85 13.29 16.6 13.41 16.33 13.41H8.66L8.07 16H19.5C19.78 16 20 16.22 20 16.5C20 16.78 19.78 17 19.5 17H7.5C7.27 17 7.07 16.84 7.02 16.615L5.02 7.615L4.5 5H3.5C3.22 5 3 4.78 3 4.5ZM8 19.5C8 20.33 7.33 21 6.5 21C5.67 21 5 20.33 5 19.5C5 18.67 5.67 18 6.5 18C7.33 18 8 18.67 8 19.5ZM19 19.5C19 20.33 18.33 21 17.5 21C16.67 21 16 20.33 16 19.5C16 18.67 16.67 18 17.5 18C18.33 18 19 18.67 19 19.5Z" fill="currentColor"/>
+            </svg>
+            <span class="bw-ppb-cascade-selected-toggle-count wpbMixCascadeSelectedItemsInCart">${summaryContent.selectedQuantity}</span>
+          </span>
+          <span class="bw-ppb-cascade-selected-toggle-divider"></span>
+          <span class="bw-ppb-cascade-selected-toggle-prices">
+            <span class="bw-ppb-cascade-selected-toggle-final-price">${ComponentGenerator.escapeHtml(summaryContent.finalPriceText)}</span>
+            ${summaryContent.compareAtPriceText ? `<s class="bw-ppb-cascade-selected-toggle-compare-price">${ComponentGenerator.escapeHtml(summaryContent.compareAtPriceText)}</s>` : ''}
+          </span>
+        </span>
+      </span>
     `;
     drawer.appendChild(toggle);
 
-    let list = null;
+    let list: HTMLDivElement|null = null;
     if (drawerState.hasSelectedProducts) {
       list = document.createElement('div');
       list.className = 'bw-ppb-cascade-selected-list wpbMixCascadeCartItemsWrapper';
@@ -286,26 +326,26 @@ export const cascadeTemplateMethods: Record<string, any> & ThisType<any> = {
       `;
       list.appendChild(title);
 
-      selectedEntries.forEach(({ stepIndex, variantId, quantity, product }) => {
+      selectedEntries.forEach(({ stepIndex, variantId, quantity, product }: any) => {
         const item = document.createElement('div');
         item.innerHTML = renderSelectedProductRow(prepareCascadeSelectedProductDisplay({
           product,
           variantId,
           quantity,
-          formatPrice: (amount) => CurrencyManager.convertAndFormat(amount, CurrencyManager.getCurrencyInfo()),
+          formatPrice: (amount: any) => CurrencyManager.convertAndFormat(amount, CurrencyManager.getCurrencyInfo()),
         }), {
           className: 'bw-ppb-cascade-selected-item wpbMixCascadeBundleCartItem',
         }).trim();
-        const row = item.firstElementChild;
+        const row = item.firstElementChild as HTMLElement | null;
         row?.querySelector('[data-action="remove-selected-product"]')?.addEventListener('click', () => {
           this.removeProductFromSelection(stepIndex, variantId);
         });
-        if (row) list.appendChild(row);
+        if (row) list!.appendChild(row);
       });
       drawer.appendChild(list);
     }
 
-    const setDrawerExpanded = (isExpanded) => {
+    const setDrawerExpanded = (isExpanded: boolean) => {
       const nextExpanded = Boolean(isExpanded && drawerState.hasSelectedProducts);
       let maxDrawerHeight = 0;
       drawer.classList.toggle('bw-ppb-cascade-selected-drawer--open', nextExpanded);
@@ -322,7 +362,6 @@ export const cascadeTemplateMethods: Record<string, any> & ThisType<any> = {
       setDrawerExpanded(getNextCascadeSelectedDrawerExpandedState({
         hasSelectedProducts: drawerState.hasSelectedProducts,
         isExpanded: drawer.classList.contains('bw-ppb-cascade-selected-drawer--open'),
-        onEmpty: () => ToastManager.show('Add items to your bundle first'),
       }));
     });
 
@@ -332,7 +371,7 @@ export const cascadeTemplateMethods: Record<string, any> & ThisType<any> = {
       drawer.style.setProperty('--bw-ppb-cascade-selected-drawer-height', `${previousDrawerHeight}px`);
       const scheduleFrame = typeof window !== 'undefined' && typeof window.requestAnimationFrame === 'function'
         ? window.requestAnimationFrame.bind(window)
-        : (callback) => callback();
+        : (callback: () => any) => callback();
       scheduleFrame(() => setDrawerExpanded(true));
     } else {
       setDrawerExpanded(drawerState.isOpen);
@@ -342,7 +381,7 @@ export const cascadeTemplateMethods: Record<string, any> & ThisType<any> = {
     if (message) {
       const messageEl = document.createElement('p');
       messageEl.className = 'bw-ppb-cascade-discount-message';
-      messageEl.textContent = message;
+      renderCascadeDiscountMessage(messageEl, message);
       el.appendChild(messageEl);
     }
 

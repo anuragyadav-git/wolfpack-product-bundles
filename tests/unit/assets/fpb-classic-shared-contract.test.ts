@@ -12,3 +12,4 @@ describe('FPB Classic template config contract', () => {
     expect(FPB_CLASSIC_TEMPLATE_CONFIG.aliases).toEqual(expect.arrayContaining(['CLASSIC']));
   });
 });
+export {};

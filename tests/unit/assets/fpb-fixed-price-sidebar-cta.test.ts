@@ -96,7 +96,7 @@ describe('fullPageBoxSelectionSidebarMethods.getSidebarTierCtaContent', () => {
   });
 
   it('uses the shopper-selected bundle quantity option before the configured default', () => {
-    const context = makeContext({
+    const context: any = makeContext({
       enabled: true,
       method: 'percentage_off',
       rules: [

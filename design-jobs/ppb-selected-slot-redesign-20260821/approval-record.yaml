@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "job_id": "ppb-selected-slot-redesign-20260821",
+  "revision": 2,
+  "status": "complete",
+  "design": {
+    "status": "approved",
+    "approver": "user",
+    "at": "2026-08-20T20:49:52Z",
+    "evidence": [
+      "direction-comparison.md",
+      "visual-audit.md",
+      "screenshot-inventory.yaml",
+      "responsive-contract.md",
+      "interaction-contract.md",
+      "accessibility-checklist.md",
+      "design-tokens.json"
+    ],
+    "waivers": []
+  },
+  "handoff": {
+    "status": "approved",
+    "approver": "user",
+    "at": "2026-08-20T20:57:24Z",
+    "evidence": [
+      "implementation-handoff.md",
+      "codex-task.md",
+      "acceptance-criteria.md",
+      "browser-test-plan.yaml"
+    ],
+    "waivers": []
+  },
+  "implementation": {
+    "status": "not-started",
+    "approver": "",
+    "at": "",
+    "evidence": [],
+    "waivers": []
+  },
+  "final": {
+    "status": "not-started",
+    "approver": "",
+    "at": "",
+    "evidence": [],
+    "waivers": []
+  },
+  "superseded_approvals": []
+}

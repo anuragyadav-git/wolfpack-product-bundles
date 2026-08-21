@@ -1,0 +1,100 @@
+{
+  "schema_version": 1,
+  "job_id": "ppb-selected-slot-redesign-20260821",
+  "revision": 2,
+  "status": "approved",
+  "locked": [
+    {
+      "id": "D-004",
+      "question": "Which visual direction should define the PPB selected-slot redesign?",
+      "options_considered": [
+        "Direction A - Quiet Product Tile",
+        "Direction B - Framed Slot Label",
+        "Direction C - Media-forward Minimal"
+      ],
+      "recommendation": "Direction A - Quiet Product Tile",
+      "selected_value": "Direction A - Quiet Product Tile",
+      "rationale": "It applies the EB-inspired product hierarchy with the least visual machinery, fixes Horizontal identity loss, and retains Vertical compactness.",
+      "evidence_ids": [
+        "direction-comparison.md",
+        "visual-audit.md",
+        "screenshot-inventory.yaml"
+      ],
+      "status": "approved",
+      "approved_by": "user",
+      "approved_at": "2026-08-20T20:42:05Z",
+      "revision_introduced": 1,
+      "affected_artifacts": [
+        "component-anatomy.md",
+        "state-matrix.md",
+        "responsive-contract.md",
+        "interaction-contract.md",
+        "accessibility-checklist.md",
+        "design-tokens.json",
+        "content-stress-cases.yaml"
+      ]
+    },
+    {
+      "id": "D-005",
+      "question": "Are the responsive and interaction contracts approved for implementation handoff?",
+      "options_considered": [
+        "approve",
+        "revise"
+      ],
+      "recommendation": "approve",
+      "selected_value": "approve",
+      "rationale": "The user approved the container-driven responsive rules, shared orientation semantics, focus model, and exact replacement/removal contract.",
+      "evidence_ids": [
+        "responsive-contract.md",
+        "interaction-contract.md",
+        "accessibility-checklist.md",
+        "design-tokens.json"
+      ],
+      "status": "approved",
+      "approved_by": "user",
+      "approved_at": "2026-08-20T20:49:52Z",
+      "revision_introduced": 2,
+      "affected_artifacts": [
+        "implementation-handoff.md",
+        "codex-task.md",
+        "acceptance-criteria.md",
+        "browser-test-plan.yaml"
+      ]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "A-001",
+      "value": "No new merchant-facing copy or controls are introduced.",
+      "status": "active"
+    }
+  ],
+  "rejected": [
+    {
+      "id": "R-001",
+      "value": "Direction B - Framed Slot Label",
+      "reason": "Adds avoidable density and competes with product identity."
+    },
+    {
+      "id": "R-002",
+      "value": "Direction C - Media-forward Minimal",
+      "reason": "Insufficient resilience for long identity and pricing content."
+    }
+  ],
+  "open": [],
+  "superseded": [],
+  "decision_shape": {
+    "id": "",
+    "question": "",
+    "options_considered": [],
+    "recommendation": "",
+    "selected_value": "",
+    "rationale": "",
+    "evidence_ids": [],
+    "status": "open",
+    "approved_by": "",
+    "approved_at": "",
+    "revision_introduced": 1,
+    "affected_artifacts": []
+  }
+}

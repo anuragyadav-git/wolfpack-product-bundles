@@ -1,0 +1,31 @@
+@keyframes wpb-discount-tier-color-beat {
+  50% {
+    background-color: var(--wpb-discount-feedback-bg);
+    color: var(--wpb-discount-feedback-text);
+  }
+}
+
+[data-wpb-discount-feedback-pill][data-wpb-discount-feedback="tier"],
+#bundle-builder-modal [data-wpb-discount-feedback-pill][data-wpb-discount-feedback="tier"] {
+  --wpb-discount-feedback-bg: var(--bundle-discount-feedback-tier-bg, #d1fae5);
+  --wpb-discount-feedback-text: var(--bundle-discount-feedback-tier-text, #065f46);
+  animation: wpb-discount-tier-color-beat 650ms ease-in-out;
+}
+
+[data-wpb-discount-feedback-pill][data-wpb-discount-feedback="complete"],
+#bundle-builder-modal [data-wpb-discount-feedback-pill][data-wpb-discount-feedback="complete"] {
+  --wpb-discount-feedback-bg: var(--bundle-discount-feedback-complete-bg, #047857);
+  --wpb-discount-feedback-text: var(--bundle-discount-feedback-complete-text, #ffffff);
+  animation:
+    wpb-discount-tier-color-beat 500ms ease-in-out,
+    wpb-discount-tier-color-beat 500ms ease-in-out 700ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-wpb-discount-feedback-pill][data-wpb-discount-feedback],
+  #bundle-builder-modal [data-wpb-discount-feedback-pill][data-wpb-discount-feedback] {
+    animation: none;
+    background-color: var(--wpb-discount-feedback-bg);
+    color: var(--wpb-discount-feedback-text);
+  }
+}

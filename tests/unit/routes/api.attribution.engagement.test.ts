@@ -49,7 +49,7 @@ function makeSignedRequest(
   });
 
   const message = [...params.entries()]
-    .map(([key, value]) => `${key}=${value}`)
+    .map(([key, value]: any) => `${key}=${value}`)
     .sort()
     .join("");
 

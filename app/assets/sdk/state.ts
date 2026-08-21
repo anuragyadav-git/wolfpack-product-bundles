@@ -16,11 +16,11 @@ export function createState() {
   };
 }
 
-function _findStep(state, stepId) {
-  return state.steps.find(function (s) { return s.id === stepId; }) || null;
+function _findStep(state: any, stepId: any) {
+  return state.steps.find(function (s: any) { return s.id === stepId; }) || null;
 }
 
-export function addItem(state, stepId, variantId, qty) {
+export function addItem(state: any, stepId: string, variantId: string|number, qty: number) {
   if (!state.isReady) {
     return { success: false, error: 'WolfpackBundles SDK not ready yet.' };
   }
@@ -44,7 +44,7 @@ export function addItem(state, stepId, variantId, qty) {
   return { success: true };
 }
 
-export function removeItem(state, stepId, variantId, qty) {
+export function removeItem(state: any, stepId: string, variantId: string|number, qty: number) {
   if (!state.isReady) {
     return { success: false, error: 'WolfpackBundles SDK not ready yet.' };
   }
@@ -65,7 +65,7 @@ export function removeItem(state, stepId, variantId, qty) {
   return { success: true };
 }
 
-export function clearStep(state, stepId) {
+export function clearStep(state: any, stepId: string) {
   if (!state.isReady) {
     return { success: false, error: 'WolfpackBundles SDK not ready yet.' };
   }

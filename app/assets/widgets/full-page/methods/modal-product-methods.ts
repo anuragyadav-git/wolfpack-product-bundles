@@ -10,16 +10,16 @@ import { getSubscriptionProductCardPrice } from '../../shared/subscription-store
 
 const modalProductTemplateSystem = TemplateDesignSystem;
 
-function isClassicFpbPreset(designPreset) {
+function isClassicFpbPreset(designPreset: any) {
   if (!modalProductTemplateSystem?.fpb?.resolveContract) return false;
   return modalProductTemplateSystem.fpb.resolveContract(designPreset)?.summary?.mode === 'slots';
 }
 
-function getSelectionId(item = {}) {
+function getSelectionId(item: any = {}) {
   return String(item?.selectionId || '');
 }
 
-function resolveCompareAtPrice(variant) {
+function resolveCompareAtPrice(variant: any) {
   const rawCompareAtPrice = variant?.compareAtPrice ?? variant?.compare_at_price;
   if (rawCompareAtPrice == null) return null;
   if (typeof rawCompareAtPrice === 'object' && rawCompareAtPrice !== null && typeof rawCompareAtPrice.amount !== 'undefined') {
@@ -35,7 +35,7 @@ renderModalTabs() {
   if (!tabsContainer) return; // Modal not active (full-page mode)
   tabsContainer.innerHTML = '';
 
-  this.selectedBundle.steps.forEach((step, index) => {
+  this.selectedBundle.steps.forEach((step: any, index: number) => {
     const isAccessible = this.isStepAccessible(index);
     const isActive = index === this.currentStepIndex;
 
@@ -77,16 +77,16 @@ renderModalTabs() {
   }
 },
 
-renderModalProducts(stepIndex, productsToRender = null) {
+renderModalProducts(stepIndex: number, productsToRender: any = null) {
   // Use all products from step data
   const products = productsToRender || this.stepProductData[stepIndex];
   const selectedProducts = this.selectedProducts[stepIndex];
   const productGrid = this.elements.modal.querySelector('.product-grid');
   const step = this.selectedBundle?.steps?.[stepIndex] || {};
-  const resolveText = (key, fallback) => (
+  const resolveText = (key: string, fallback: string) => (
     typeof this._resolveText === 'function' ? this._resolveText(key, fallback) : fallback
   );
-  const escapeText = (value) => (
+  const escapeText = (value: any) => (
     typeof this._escapeHTML === 'function' ? this._escapeHTML(value) : String(value)
   );
 
@@ -103,7 +103,7 @@ renderModalProducts(stepIndex, productsToRender = null) {
           '>': '&gt;',
           '"': '&quot;',
           "'": '&#39;',
-        })[char]);
+        } as Record<string, string>)[char] || char);
       productGrid.innerHTML = `
         <div class="empty-products-message">
           <p>${escapedEmptyMessage}</p>
@@ -135,7 +135,7 @@ renderModalProducts(stepIndex, productsToRender = null) {
     return;
   }
 
-  productGrid.innerHTML = products.map(product => {
+  productGrid.innerHTML = products.map((product: any)  => {
     const selectionKey = getSelectionId(product);
     const currentQuantity = selectedProducts[selectionKey] || 0;
     const currencyInfo = CurrencyManager.getCurrencyInfo();
@@ -177,7 +177,7 @@ renderModalProducts(stepIndex, productsToRender = null) {
         displayPrice: getSubscriptionProductCardPrice(this, product.price),
         variantSelectorHtml,
         stockBadgeHtml: stockBadge,
-        showCompareAtPrice: true,
+        showCompareAtPrice: this._getLandingPageControls?.()?.showCompareAtPrice === true,
         openImageLabel: resolveText('productImageLabel', 'Open product details'),
         openTitleLabel: resolveText('productTitleLabel', 'Open product details'),
         imageNavPreviousLabel: resolveText('productImagePreviousLabel', 'Previous image'),
@@ -203,7 +203,7 @@ renderModalProducts(stepIndex, productsToRender = null) {
   this.attachProductEventHandlers(productGrid, stepIndex);
 },
 
-renderVariantSelector(product, step) {
+renderVariantSelector(product: any, step: any) {
   if (!product.variants || product.variants.length <= 1) {
     return '';
   }
@@ -224,7 +224,7 @@ renderVariantSelector(product, step) {
   });
 },
 
-attachProductEventHandlers(productGrid, stepIndex) {
+attachProductEventHandlers(productGrid: any, stepIndex: string|number) {
   // Remove existing event listeners to prevent duplicates
   const newProductGrid = productGrid.cloneNode(true);
   productGrid.parentNode.replaceChild(newProductGrid, productGrid);
@@ -233,16 +233,16 @@ attachProductEventHandlers(productGrid, stepIndex) {
   const step = this.selectedBundle.steps[stepIndex];
 
   // Helper to find product by ID
-  const findProduct = (productId) => {
+  const findProduct = (productId: any) => {
     const targetId = String(productId || '');
-    return this.stepProductData[stepIndex]?.find((p) => {
+    return this.stepProductData[stepIndex]?.find((p: any) => {
       const selectionKey = getSelectionId(p);
       const variantId = String(p?.variantId || p?.id || '');
       return String(selectionKey) === targetId || variantId === targetId;
     });
   };
 
-  const openProductModalForCard = (productCard) => {
+  const openProductModalForCard = (productCard: any) => {
     if (!this.productModal) {
       this.productModal = new BundleProductModal(this);
     }
@@ -261,7 +261,7 @@ attachProductEventHandlers(productGrid, stepIndex) {
   };
 
   // Quantity button handlers
-  newProductGrid.addEventListener('click', (e) => {
+  newProductGrid.addEventListener('click', (e: any) => {
     if (e.target.classList.contains('inline-qty-btn')) {
       e.stopPropagation();
       const productId = e.target.dataset.productId;
@@ -274,7 +274,7 @@ attachProductEventHandlers(productGrid, stepIndex) {
   });
 
   // Add to Bundle button handler - adds directly without opening modal
-  newProductGrid.addEventListener('click', (e) => {
+  newProductGrid.addEventListener('click', (e: any) => {
     if (e.target.classList.contains('product-add-btn')) {
       e.stopPropagation();
       const productId = e.target.dataset.productId;
@@ -299,7 +299,7 @@ attachProductEventHandlers(productGrid, stepIndex) {
   });
 
   // Product image/title click - open modal
-  newProductGrid.addEventListener('click', (e) => {
+  newProductGrid.addEventListener('click', (e: any) => {
     const imageNav = e.target.closest('.bw-product-card__image-nav');
     if (imageNav) {
       e.preventDefault();
@@ -326,12 +326,12 @@ attachProductEventHandlers(productGrid, stepIndex) {
     }
   });
 
-  const isActivationKey = (event) => event.key === 'Enter' || event.key === ' ' || event.key === 'Spacebar';
-  const isProductCardControl = (element) => element.closest(
+  const isActivationKey = (event: any) => event.key === 'Enter' || event.key === ' ' || event.key === 'Spacebar';
+  const isProductCardControl = (element: any) => element.closest(
     '.inline-qty-btn, .product-add-btn, .bw-product-card__image-nav, .product-card-action, .variant-selector, .vs-wrapper',
   );
 
-  newProductGrid.addEventListener('keydown', (e) => {
+  newProductGrid.addEventListener('keydown', (e: any) => {
     if (!isActivationKey(e)) return;
 
     const target = e.target || newProductGrid;
@@ -342,8 +342,8 @@ attachProductEventHandlers(productGrid, stepIndex) {
     openProductModalForCard(target.closest('.product-card'));
   });
 
-  newProductGrid.querySelectorAll('.product-image, .product-title').forEach((element) => {
-    element.addEventListener('click', (event) => {
+  newProductGrid.querySelectorAll('.product-image, .product-title').forEach((element: any) => {
+    element.addEventListener('click', (event: any) => {
       if (event.target.closest('.bw-product-card__image-nav')) return;
       event.stopPropagation();
       openProductModalForCard(event.target.closest('.product-card'));
@@ -352,7 +352,7 @@ attachProductEventHandlers(productGrid, stepIndex) {
 
   const displayVariantsAsIndividualProducts = step?.displayVariantsAsIndividualProducts === true
     || step?.displayVariantsAsIndividual === true;
-  newProductGrid.querySelectorAll('.product-card').forEach((cardElement) => {
+  newProductGrid.querySelectorAll('.product-card').forEach((cardElement: any) => {
     const product = findProduct(cardElement.dataset.productId);
     if (!product) return;
     if (!shouldRenderInlineVariantSelector({
@@ -365,7 +365,7 @@ attachProductEventHandlers(productGrid, stepIndex) {
     if (!cardElement.querySelector('.vs-wrapper')) {
       return;
     }
-    VariantSelectorComponent.attachListeners(cardElement, product, (newVariantId, oldVariantId) => {
+    VariantSelectorComponent.attachListeners(cardElement, product, (newVariantId: string|number, oldVariantId: string|number) => {
       const oldQuantity = this.selectedProducts[stepIndex]?.[oldVariantId] || 0;
       if (oldQuantity > 0 && oldVariantId !== newVariantId) {
         delete this.selectedProducts[stepIndex][oldVariantId];
@@ -397,7 +397,7 @@ attachProductEventHandlers(productGrid, stepIndex) {
 
       cardElement.dataset.productId = newVariantId;
       cardElement.dataset.currentSelectedVariantId = newVariantId;
-      cardElement.querySelectorAll('[data-product-id]').forEach((el) => {
+      cardElement.querySelectorAll('[data-product-id]').forEach((el: any) => {
         if (el !== cardElement) {
           el.dataset.productId = newVariantId;
         }
@@ -416,7 +416,7 @@ attachProductEventHandlers(productGrid, stepIndex) {
   });
 
   // Variant selector handler
-  newProductGrid.addEventListener('change', (e) => {
+  newProductGrid.addEventListener('change', (e: any) => {
     if (e.target.classList.contains('variant-selector')) {
       e.stopPropagation();
       const newVariantId = e.target.value;
@@ -427,7 +427,7 @@ attachProductEventHandlers(productGrid, stepIndex) {
       const product = findProduct(baseProductId)
         || (cardElement ? findProduct(cardElement.dataset.productId) : null);
       if (product) {
-        const variantData = product.variants.find(v => getSelectionId(v) === String(newVariantId));
+        const variantData = product.variants.find((v: any)  => getSelectionId(v) === String(newVariantId));
         if (variantData) {
           const oldSelectionKey = getSelectionId(product);
           const oldQuantity = this.selectedProducts[stepIndex]?.[oldSelectionKey] || 0;
@@ -479,7 +479,7 @@ attachProductEventHandlers(productGrid, stepIndex) {
           if (cardElement) {
             cardElement.dataset.productId = newVariantId;
             cardElement.dataset.currentSelectedVariantId = newVariantId;
-            cardElement.querySelectorAll('[data-product-id]').forEach((el) => {
+            cardElement.querySelectorAll('[data-product-id]').forEach((el: any) => {
               if (el !== cardElement) {
                 el.dataset.productId = newVariantId;
               }

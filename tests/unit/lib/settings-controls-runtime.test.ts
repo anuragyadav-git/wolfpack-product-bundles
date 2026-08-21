@@ -1,238 +1,147 @@
-import fs from "node:fs";
-import path from "node:path";
+import { BundleType } from "../../../app/constants/bundle";
+import {
+  SETTINGS_CONTROLS_SCHEMA_VERSION,
+  buildSettingsControlsResponse,
+  buildSettingsControlsFormValues,
+  buildSettingsControlsRuntime,
+} from "../../../app/lib/settings-controls-runtime";
 
-const runtimeModulePath = path.join(process.cwd(), "app/lib/settings-controls-runtime.ts");
-
-const controlsPayload = {
-  "Show Compare At Price": "Checked",
-  "Hide Irrelevant variant images": "Checked",
-  "Track inventory on Add To Cart (in beta)": "Checked",
-  "Redirect Collection Page 'Quick Add' to Bundle": "Checked",
-  "Cart Messaging": "Checked",
-  "Bundle Items": "",
-  "Original Bundle Price": "Checked",
-  "Discount Display": "Checked",
-  "Discount format": "Percentage only (Eg: \"You save 19%\")",
-  "Checkout Settings": "Redirect to Checkout",
-  "Checkout Integration": "Shopify checkout",
-  "Execute Script": "window.__fpbPostAddRuns = true;",
-  "Custom Font": "Inter",
-  "Custom CSS for bundle builder pages": ".wpbBundle-HTML .builder { color: red; }",
-  "Custom CSS for bundle dummy product page": ".wpbBundle-HTML .dummy { color: blue; }",
-  "Custom CSS for theme pages": ".wpbBundle-HTML .theme { color: green; }",
-  "Enable Custom Theme Integration Script": "Checked",
-  "Custom Theme Integration Script": "window.__themeIntegrated = true;",
-  "Enable Cart Integration": "Checked",
-  "Cart Item Selectors": ".cart-item",
-  "Cart Item Remove Parent Selectors": ".cart-row",
-  "Cart Item Remove Selectors": ".cart-remove",
-  "Cart Item Quantity Button Selectors": ".qty-btn",
-  "Custom Cart Integration Script": "window.__cartIntegrated = true;",
-  "Enable Judge Me Integration": "Checked",
-  "Public token": "judge-token",
-  "Background Color": "#fefefe",
-  "Logo": "https://cdn.example.com/logo.png",
-  "Hide Out Of Stock Products": "Checked",
-  "showCompareAtPrices": "true",
-  "addBundleToCartAfterLastStepCompleted": "true",
-  "Display empty state boxes based on bundle condition": "",
-  "Hide Step Titles in completed state": "Checked",
-  "addToCartWhenProductCardClicked": "",
-  "Redirect Settings": "Redirect to Cart",
-  "validateConditionsBeforeAddToCart": "true",
-  "Custom CSS for Mix And Match Bundles": ".wpbMixBundle { color: purple; }",
-  "Execute Custom Script": "window.__ppbCustom = true;",
-  "Side cart selector": ".side-cart",
-  "Side cart section ID": "cart-drawer",
-  "Cart page items selector": ".cart-items",
-  "Cart page items section ID": "main-cart-items",
-  "Side cart open button selector": ".open-cart",
-  "Product page price selector": ".price",
+const values = {
+  "landingPage.showCompareAtPrice": "Checked",
+  "landingPage.hideIrrelevantVariantImages": "Checked",
+  "landingPage.trackInventoryOnAddToCart": "Checked",
+  "landingPage.redirectCollectionQuickAddToBundle": "Checked",
+  "shared.cartMessaging.isEnabled": "Checked",
+  "shared.cartMessaging.showBundleContains": "",
+  "shared.cartMessaging.showOriginalPrice": "Checked",
+  "shared.cartMessaging.discountDisplay.isEnabled": "Checked",
+  "shared.cartMessaging.discountDisplay.format": "Percentage only (Eg: \"You save 19%\")",
+  "landingPage.checkout.action": "Redirect to Checkout",
+  "landingPage.checkout.providerId": "Monster Cart",
+  "landingPage.checkout.executeScript": "window.__fpbPostAddRuns = true;",
+  "landingPage.font.customFont": "Inter",
+  "landingPage.css.bundleBuilderPages": ".builder { color: red; }",
+  "landingPage.css.bundleDummyProductPage": ".dummy { color: blue; }",
+  "landingPage.css.themePages": ".theme { color: green; }",
+  "landingPage.scripts.bundlePage": "window.__bundlePage = true;",
+  "landingPage.selectors.addToCartButtons": ".add-button",
+  "landingPage.selectors.buyNowButton": ".buy-button",
+  "landingPage.integrations.customThemeScriptEnabled": "Checked",
+  "landingPage.integrations.customThemeIntegrationScript": "window.__themeIntegrated = true;",
+  "landingPage.integrations.cartIntegrationEnabled": "Checked",
+  "landingPage.integrations.cartItemSelectors": ".cart-item",
+  "landingPage.integrations.cartItemRemoveParentSelectors": ".cart-row",
+  "landingPage.integrations.cartItemRemoveSelectors": ".cart-remove",
+  "landingPage.integrations.cartItemQuantityButtonSelectors": ".qty-btn",
+  "landingPage.integrations.customCartIntegrationScript": "window.__cartIntegrated = true;",
+  "landingPage.integrations.judgeMeEnabled": "Checked",
+  "landingPage.integrations.judgeMePublicToken": "judge-token",
+  "productPage.hideOutOfStockProducts": "Checked",
+  "productPage.trackInventoryOnAddToCart": "Checked",
+  "productPage.addBundleToCartAfterLastStepCompleted": "Checked",
+  "productPage.displayEmptyStateBoxesBasedOnBundleCondition": "",
+  "productPage.hideStepTitlesInCompletedState": "Checked",
+  "productPage.addToCartWhenProductCardClicked": "Checked",
+  "productPage.redirectCollectionQuickAddToBundle": "Checked",
+  "productPage.redirect.action": "Redirect to Cart",
+  "productPage.redirect.executeScript": "window.__ppbPostAddRuns = true;",
+  "productPage.css.mixAndMatchBundles": ".mix { color: purple; }",
+  "productPage.scripts.executeCustomScript": "window.__ppbCustom = true;",
+  "productPage.selectors.sideCart": ".side-cart",
+  "productPage.selectors.sideCartSectionId": "cart-drawer",
+  "productPage.selectors.cartPageItems": ".cart-items",
+  "productPage.selectors.cartPageItemsSectionId": "main-cart-items",
+  "productPage.selectors.sideCartOpenButton": ".open-cart",
+  "productPage.selectors.productPagePrice": ".price",
 };
 
 describe("Settings Controls runtime mapping", () => {
-  it("provides a dedicated runtime mapper module", () => {
-    expect(fs.existsSync(runtimeModulePath)).toBe(true);
-  });
+  it("maps stable Admin keys into the versioned canonical contract", () => {
+    const result = buildSettingsControlsRuntime(values);
 
-  it("maps EB Landing Page and Product Page controls into scoped runtime data", async () => {
-    const { buildSettingsControlsRuntime } = await import("../../../app/lib/settings-controls-runtime");
-
-    const runtime = buildSettingsControlsRuntime(controlsPayload);
-
-    expect(runtime.settingsControls.landingPage).toMatchObject({
-      showCompareAtPrice: true,
-      hideIrrelevantVariantImages: true,
-      trackInventoryOnAddToCart: true,
-      redirectCollectionQuickAddToBundle: true,
-      checkout: {
-        action: "checkout",
-        providerId: "native",
-        executeScript: "window.__fpbPostAddRuns = true;",
+    expect(SETTINGS_CONTROLS_SCHEMA_VERSION).toBe(1);
+    expect(result.settingsControls).toMatchObject({
+      schemaVersion: 1,
+      shared: {
+        cartMessaging: {
+          isEnabled: true,
+          showBundleContains: false,
+          showOriginalPrice: true,
+          discountDisplay: { isEnabled: true, format: "percentage_only" },
+        },
       },
-      font: {
-        customFont: "Inter",
+      landingPage: {
+        showCompareAtPrice: true,
+        checkout: { action: "checkout", providerId: "monster_cart" },
+        scripts: { bundlePage: "window.__bundlePage = true;" },
+        selectors: {
+          addToCartButtons: ".add-button",
+          buyNowButton: ".buy-button",
+        },
       },
-      css: {
-        bundleBuilderPages: ".wpbBundle-HTML .builder { color: red; }",
-        bundleDummyProductPage: ".wpbBundle-HTML .dummy { color: blue; }",
-        themePages: ".wpbBundle-HTML .theme { color: green; }",
-      },
-      integrations: {
-        customThemeScriptEnabled: true,
-        customThemeIntegrationScript: "window.__themeIntegrated = true;",
-        cartIntegrationEnabled: true,
-        judgeMeEnabled: true,
-        judgeMePublicToken: "judge-token",
-      },
-      videoPlayerPage: {
-        backgroundColor: "#fefefe",
-        logoUrl: "https://cdn.example.com/logo.png",
+      productPage: {
+        addBundleToCartAfterLastStepCompleted: true,
+        addToCartWhenProductCardClicked: true,
+        redirect: { action: "cart", executeScript: "window.__ppbPostAddRuns = true;" },
       },
     });
-
-    expect(runtime.settingsControls.productPage).toMatchObject({
-      hideOutOfStockProducts: true,
-      trackInventoryOnAddToCart: true,
-      showCompareAtPrices: true,
-      addBundleToCartAfterLastStepCompleted: true,
-      displayEmptyStateBoxesBasedOnBundleCondition: false,
-      hideStepTitlesInCompletedState: true,
-      validateConditionsBeforeAddToCart: true,
-      addToCartWhenProductCardClicked: false,
-      redirectCollectionQuickAddToBundle: true,
-      redirect: {
-        action: "cart",
-        executeScript: "window.__fpbPostAddRuns = true;",
-      },
-      css: {
-        mixAndMatchBundles: ".wpbMixBundle { color: purple; }",
-        themePages: ".wpbBundle-HTML .theme { color: green; }",
-      },
-      scripts: {
-        executeCustomScript: "window.__ppbCustom = true;",
-      },
-      selectors: {
-        sideCart: ".side-cart",
-        sideCartSectionId: "cart-drawer",
-        cartPageItems: ".cart-items",
-        cartPageItemsSectionId: "main-cart-items",
-        sideCartOpenButton: ".open-cart",
-        productPagePrice: ".price",
-      },
-    });
+    expect(result.bundleCartLineMessaging).toEqual(result.settingsControls.shared.cartMessaging);
   });
 
-  it("keeps CSS scopes separate while returning per-bundle CSS strings", async () => {
-    const { buildSettingsControlsRuntime } = await import("../../../app/lib/settings-controls-runtime");
-
-    const runtime = buildSettingsControlsRuntime(controlsPayload);
-
-    expect(runtime.fullPageCustomCss).toContain(".builder");
-    expect(runtime.fullPageCustomCss).toContain(".dummy");
-    expect(runtime.fullPageCustomCss).toContain(".theme");
-    expect(runtime.fullPageCustomCss).not.toContain(".wpbMixBundle");
-    expect(runtime.productPageCustomCss).toContain(".wpbMixBundle");
-    expect(runtime.productPageCustomCss).toContain(".theme");
-    expect(runtime.productPageCustomCss).not.toContain(".builder");
-    expect(runtime.productPageCustomCss).not.toContain(".dummy");
-  });
-
-  it("keeps existing cart line messaging runtime compatibility", async () => {
-    const { buildSettingsControlsRuntime } = await import("../../../app/lib/settings-controls-runtime");
-
-    const runtime = buildSettingsControlsRuntime(controlsPayload);
-
-    expect(runtime.bundleCartLineMessaging).toEqual({
-      isEnabled: true,
-      showBundleContains: false,
-      showOriginalPrice: true,
-      discountDisplay: {
-        isEnabled: true,
-        format: "percentage_only",
-      },
-    });
-  });
-
-  it("falls back to native checkout for unknown checkout integration labels", async () => {
-    const { buildSettingsControlsRuntime } = await import("../../../app/lib/settings-controls-runtime");
-
-    const runtime = buildSettingsControlsRuntime({
-      ...controlsPayload,
-      "Checkout Integration": "Paste custom script",
-    });
-
-    expect(runtime.settingsControls.landingPage.checkout).toEqual({
-      action: "checkout",
-      providerId: "native",
-      executeScript: "window.__fpbPostAddRuns = true;",
-    });
-  });
-
-  it("maps article-listed checkout and side-cart provider labels", async () => {
-    const { buildSettingsControlsRuntime } = await import("../../../app/lib/settings-controls-runtime");
-
-    const runtime = buildSettingsControlsRuntime({
-      ...controlsPayload,
-      "Checkout Integration": "Theme cart drawer",
-    });
-
-    expect(runtime.settingsControls.landingPage.checkout.providerId).toBe("theme_cart_drawer");
-  });
-
-  it("maps GoKwik provider label to provider ID", async () => {
-    const { buildSettingsControlsRuntime } = await import("../../../app/lib/settings-controls-runtime");
-
-    const runtime = buildSettingsControlsRuntime({
-      ...controlsPayload,
-      "Checkout Integration": "GoKwik",
-    });
-
-    expect(runtime.settingsControls.landingPage.checkout.providerId).toBe("gokwik");
-  });
-
-  it("maps Shopflo provider label to provider ID", async () => {
-    const { buildSettingsControlsRuntime } = await import("../../../app/lib/settings-controls-runtime");
-
-    const runtime = buildSettingsControlsRuntime({
-      ...controlsPayload,
-      "Checkout Integration": "Shopflo",
-    });
-
-    expect(runtime.settingsControls.landingPage.checkout.providerId).toBe("shopflo");
-  });
-
-  it("defaults missing validate-conditions control to enabled", async () => {
-    const { buildSettingsControlsRuntime } = await import("../../../app/lib/settings-controls-runtime");
-
-    const payloadWithoutValidationControl = { ...controlsPayload };
-    delete payloadWithoutValidationControl["validateConditionsBeforeAddToCart"];
-    const runtime = buildSettingsControlsRuntime(payloadWithoutValidationControl);
-
-    expect(runtime.settingsControls.productPage.validateConditionsBeforeAddToCart).toBe(true);
-  });
-
-  it("uses canonical product-page keys only", async () => {
-    const { buildSettingsControlsRuntime } = await import("../../../app/lib/settings-controls-runtime");
-
-    const runtime = buildSettingsControlsRuntime({
-      ...controlsPayload,
-      showCompareAtPrices: "false",
-      addToCartWhenProductCardClicked: "true",
-      addBundleToCartAfterLastStepCompleted: "false",
-      validateConditionsBeforeAddToCart: "false",
-      // legacy aliases should no longer be read
+  it("never interprets presentation labels as persisted keys", () => {
+    const result = buildSettingsControlsRuntime({
       "Show Compare At Price": "Checked",
-      "Display Compare At Price": "true",
-      "addBundleToCartOnDone": "true",
-      "addToBundleOnProductCardClicked": "true",
-      "Add to cart when product card is clicked": "Checked",
-      "Validate conditions before add to cart": "Checked",
+      "Cart Messaging": "Checked",
+      "landingPage.showCompareAtPrice": "",
+      "shared.cartMessaging.isEnabled": "",
     });
 
-    expect(runtime.settingsControls.productPage.addToCartWhenProductCardClicked).toBe(true);
-    expect(runtime.settingsControls.productPage.showCompareAtPrices).toBe(false);
-    expect(runtime.settingsControls.productPage.addBundleToCartAfterLastStepCompleted).toBe(false);
-    expect(runtime.settingsControls.productPage.validateConditionsBeforeAddToCart).toBe(false);
+    expect(result.settingsControls.landingPage.showCompareAtPrice).toBe(false);
+    expect(result.settingsControls.shared.cartMessaging.isEnabled).toBe(false);
+  });
+
+  it("keeps theme CSS global instead of projecting it into either widget CSS column", () => {
+    const result = buildSettingsControlsRuntime(values);
+
+    expect(result.fullPageCustomCss).toContain(".builder");
+    expect(result.fullPageCustomCss).toContain(".dummy");
+    expect(result.fullPageCustomCss).not.toContain(".theme");
+    expect(result.productPageCustomCss).toContain(".mix");
+    expect(result.productPageCustomCss).not.toContain(".theme");
+  });
+
+  it("returns schema metadata and the requested active layout", () => {
+    const runtime = buildSettingsControlsRuntime(values).settingsControls;
+    const response = buildSettingsControlsResponse(runtime, BundleType.PRODUCT_PAGE);
+
+    expect(response.schemaVersion).toBe(1);
+    expect(response.activeControls).toBe(runtime.productPage);
+    expect(response.settingsControls).toBe(runtime);
+  });
+
+  it("hydrates the Admin form from the canonical contract using stable keys", () => {
+    const runtime = buildSettingsControlsRuntime(values).settingsControls;
+
+    expect(buildSettingsControlsFormValues(runtime)).toMatchObject({
+      "landingPage.checkout.providerId": "Monster Cart",
+      "productPage.addBundleToCartAfterLastStepCompleted": "Checked",
+      "productPage.redirect.action": "Redirect to Cart",
+    });
+  });
+
+  it("uses safe defaults for an absent canonical contract", () => {
+    const response = buildSettingsControlsResponse(null, BundleType.FULL_PAGE);
+
+    expect(response.settingsControls.schemaVersion).toBe(1);
+    expect(response.activeControls).toBe(response.settingsControls.landingPage);
+    expect(response.settingsControls.shared.cartMessaging).toMatchObject({
+      isEnabled: true,
+      showBundleContains: true,
+      showOriginalPrice: true,
+      discountDisplay: { isEnabled: true },
+    });
+    expect(response.settingsControls.landingPage.showCompareAtPrice).toBe(true);
+    expect(response.settingsControls.productPage.hideOutOfStockProducts).toBe(true);
+    expect(response.settingsControls.productPage.validateConditionsBeforeAddToCart).toBe(true);
   });
 });

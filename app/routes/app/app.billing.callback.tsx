@@ -59,7 +59,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
     return redirect("/app/billing?upgraded=true");
 
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.error("Error in billing callback", {
       component: "app.billing.callback",
       operation: "loader"

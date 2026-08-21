@@ -12,6 +12,7 @@ type DashboardStatusGridProps = {
   appEmbedEnabled?: boolean;
   themeEditorUrl: string | null;
   onOpenThemeEditor: () => void;
+  enableActionRef?: { current: any };
 };
 
 const CORE_STORE_FRONT_RESOURCES = [
@@ -94,6 +95,7 @@ export function getStorefrontStatusRows(
 export function DashboardStatusGrid({
   error,
   appEmbedEnabled = false,
+  enableActionRef,
   onOpenThemeEditor,
   resources,
   themeEditorUrl,
@@ -141,6 +143,7 @@ export function DashboardStatusGrid({
           <s-stack direction="inline" justifyContent="space-between" alignItems="start" gap="base">
             <s-text>{summaryDescription}</s-text>
             <s-button
+              ref={enableActionRef}
               variant="tertiary"
               onClick={onOpenThemeEditor}
               disabled={!themeEditorUrl}

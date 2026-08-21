@@ -51,7 +51,7 @@ export async function handleCustomerDataRequest(
       message: "Customer data request recorded"
     };
 
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.error("Error handling customer data request", {
       component: "webhook-processor",
       operation: "handleCustomerDataRequest"
@@ -108,7 +108,7 @@ export async function handleCustomerRedact(
       message: "Customer data redacted"
     };
 
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.error("Error handling customer redact", {
       component: "webhook-processor",
       operation: "handleCustomerRedact"
@@ -208,7 +208,7 @@ export async function handleShopRedact(
       message: "Shop data redacted"
     };
 
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.error("Error handling shop redact", {
       component: "webhook-processor",
       operation: "handleShopRedact"

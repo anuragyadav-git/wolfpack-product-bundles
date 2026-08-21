@@ -29,6 +29,7 @@ beforeEach(() => {
 });
 
 function createFocusableButton(name: string) {
+  const attributes = new Map<string, string>();
   return {
     name,
     dataset: {} as Record<string, string>,
@@ -41,7 +42,8 @@ function createFocusableButton(name: string) {
     classList: {
       contains: () => false,
     },
-    getAttribute: () => null,
+    getAttribute: (attribute: string) => attributes.get(attribute) ?? null,
+    setAttribute: (attribute: string, value: string) => attributes.set(attribute, value),
   } as any;
 }
 
@@ -126,7 +128,7 @@ function createContext({
       remove: jest.fn(),
     },
   },
-} = {}) {
+}: any = {}) {
   const modal = createModal({
     closeButton,
     closeButtons,
@@ -217,15 +219,47 @@ function createContext({
 }
 
 describe('PPB modal accessibility keyboard and focus management', () => {
+  it('keeps the Next or Done accessible name equal to its visible label', () => {
+    const attributes = new Map<string, string>();
+    const nextButton = {
+      textContent: '',
+      disabled: false,
+      setAttribute: (name: string, value: string) => attributes.set(name, value),
+    };
+    const footer = { classList: { toggle: jest.fn() } };
+    const context = {
+      currentStepIndex: 0,
+      selectedBundle: { steps: [{}] },
+      elements: {
+        modal: {
+          querySelector: (selector: string) => ({
+            '.prev-button': { disabled: false },
+            '.next-button': nextButton,
+            '.bw-bs-footer': footer,
+          }[selector] || null),
+        },
+      },
+      _resolveText: (key: string, fallback: string) => key === 'doneButton' ? 'Done' : fallback,
+    } as any;
+
+    ProductPageModalStateMethods.updateModalNavigation.call(context);
+
+    expect(nextButton.textContent).toBe('Done');
+    expect(attributes.get('aria-label')).toBe('Done');
+  });
+
   it('restores focus to the rerendered opener and focuses the modal close control on open', async () => {
     jest.spyOn(ToastManager, 'show').mockImplementation(() => {});
 
     const { context, opener, closeButton, fakeDocument } = createContext();
     const rerenderedOpener = createFocusableButton('rerendered-opener');
+    const rerenderedCard = createFocusableButton('rerendered-card');
+    rerenderedCard.tagName = 'DIV';
     opener.dataset = { stepIndex: '0', cardIndex: '0', variantId: 'variant-1' };
     rerenderedOpener.dataset = { ...opener.dataset };
+    rerenderedCard.dataset = { ...opener.dataset };
     context.elements.stepsContainer = {
-      querySelectorAll: jest.fn(() => [rerenderedOpener]),
+      querySelectorAll: jest.fn(() => [rerenderedCard, rerenderedOpener]),
     };
     context.renderSteps.mockImplementation(() => {
       opener.isConnected = false;
@@ -244,9 +278,12 @@ describe('PPB modal accessibility keyboard and focus management', () => {
     context.closeModal();
 
     expect(opener.focus).not.toHaveBeenCalled();
+    expect(rerenderedCard.focus).not.toHaveBeenCalled();
     expect(rerenderedOpener.focus).toHaveBeenCalledTimes(1);
     expect(context.renderSteps.mock.invocationCallOrder[0])
       .toBeLessThan(rerenderedOpener.focus.mock.invocationCallOrder[0]);
+    expect(rerenderedOpener.focus.mock.invocationCallOrder[0])
+      .toBeLessThan(context.setBottomSheetVisibility.mock.invocationCallOrder[1]);
   });
 
   it('skips a breakpoint-hidden close control and focuses the visible modal close control', async () => {
@@ -303,8 +340,59 @@ describe('PPB modal accessibility keyboard and focus management', () => {
     expect(preventDefault).toHaveBeenCalledTimes(2);
   });
 
+  it('wraps Tab and Shift+Tab within the topmost picker', () => {
+    const { context, closeButton, nextButton, keyboardHandlerHolder, fakeDocument } = createContext();
+    context._isPpbPickerDrawerTopmost = jest.fn(() => true);
+    (globalThis as any).document = fakeDocument;
+    context.elements.modal.classList.add('bw-bs-panel--open');
+    context.attachEventListeners();
+
+    const preventForward = jest.fn();
+    fakeDocument.activeElement = nextButton;
+    keyboardHandlerHolder.handler({
+      key: 'Tab',
+      shiftKey: false,
+      target: nextButton,
+      preventDefault: preventForward,
+    });
+
+    expect(preventForward).toHaveBeenCalledTimes(1);
+    expect(closeButton.focus).toHaveBeenCalledTimes(1);
+
+    const preventReverse = jest.fn();
+    fakeDocument.activeElement = closeButton;
+    keyboardHandlerHolder.handler({
+      key: 'Tab',
+      shiftKey: true,
+      target: closeButton,
+      preventDefault: preventReverse,
+    });
+
+    expect(preventReverse).toHaveBeenCalledTimes(1);
+    expect(nextButton.focus).toHaveBeenCalledTimes(1);
+  });
+
+  it('leaves Tab handling to a nested drawer when the picker is not topmost', () => {
+    const { context, nextButton, keyboardHandlerHolder, fakeDocument } = createContext();
+    context._isPpbPickerDrawerTopmost = jest.fn(() => false);
+    (globalThis as any).document = fakeDocument;
+    context.elements.modal.classList.add('bw-bs-panel--open');
+    context.attachEventListeners();
+
+    const preventDefault = jest.fn();
+    fakeDocument.activeElement = nextButton;
+    keyboardHandlerHolder.handler({
+      key: 'Tab',
+      shiftKey: false,
+      target: nextButton,
+      preventDefault,
+    });
+
+    expect(preventDefault).not.toHaveBeenCalled();
+  });
+
   it('resolves modal discount messaging through locale-aware TemplateManager templates', async () => {
-    const footerDiscountText = { textContent: '' };
+    const footerDiscountText = { textContent: '', innerHTML: '' };
     const discountSection = {
       style: {},
       classList: {
@@ -390,7 +478,9 @@ describe('PPB modal accessibility keyboard and focus management', () => {
       },
     );
 
-    expect(footerDiscountText.textContent).toContain('Ajouter');
+    expect(footerDiscountText.innerHTML).toContain('Ajouter <span');
+    expect(footerDiscountText.innerHTML).not.toContain('&lt;span');
+    expect(footerDiscountText.textContent).toBe('');
     expect(discountSection.classList.remove).toHaveBeenCalled();
   });
 });

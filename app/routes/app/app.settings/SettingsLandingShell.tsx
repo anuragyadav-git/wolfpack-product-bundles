@@ -1,4 +1,5 @@
 import styles from "./SettingsLandingShell.module.css";
+import { AdminRouteLoadingBar } from "../../../components/AdminRouteLoadingBar";
 
 export type SettingsWorkspaceView = "design" | "language" | "controls";
 
@@ -6,7 +7,7 @@ const SETTINGS_SECTIONS: Array<{
   id: SettingsWorkspaceView;
   title: string;
   description: string;
-  icon: "edit" | "language-translate" | "filter";
+  icon: "edit" | "language-translate" | "settings";
 }> = [
   {
     id: "design",
@@ -24,7 +25,7 @@ const SETTINGS_SECTIONS: Array<{
     id: "controls",
     title: "Controls",
     description: "Change loading screen gif, add custom CSS, modify checkout settings and more",
-    icon: "filter",
+    icon: "settings",
   },
 ];
 
@@ -32,16 +33,22 @@ export function SettingsLandingShell({
   onBack,
   onSelect,
   onIntent,
+  isLoadingControls = false,
 }: {
   onBack: () => void;
   onSelect: (view: SettingsWorkspaceView) => void;
   onIntent?: () => void;
+  isLoadingControls?: boolean;
 }) {
+  if (isLoadingControls) {
+    return <AdminRouteLoadingBar label="Loading Settings" />;
+  }
+
   return (
     <s-page inlineSize="large">
       <s-query-container
         containerName="settings-landing"
-        className={styles.settingsLandingViewport}
+        {...({ className: styles.settingsLandingViewport } as any)}
       >
         <div className={styles.settingsLandingContent}>
           <s-stack direction="inline" gap="small" alignItems="center">
@@ -51,7 +58,7 @@ export function SettingsLandingShell({
               accessibilityLabel="Back to previous page"
               onClick={onBack}
             />
-            <s-heading className={styles.settingsLandingTitle}>
+            <s-heading {...({ className: styles.settingsLandingTitle } as any)}>
               Settings
             </s-heading>
           </s-stack>
@@ -62,7 +69,7 @@ export function SettingsLandingShell({
             {SETTINGS_SECTIONS.map((section) => (
               <s-clickable
                 key={section.id}
-                className={styles.settingsLandingTile}
+                {...({ className: styles.settingsLandingTile } as any)}
                 accessibilityLabel={`Open ${section.title} settings`}
                 background="base"
                 padding="large"
@@ -90,11 +97,11 @@ export function SettingsLandingShell({
                         inlineSize="100%"
                         blockSize="100%"
                       >
-                        <s-icon type={section.icon} size="large" />
+                        <s-icon type={section.icon} size={"large" as any} />
                       </s-stack>
                     </s-box>
                     <s-icon
-                      className={styles.settingsLandingTileArrow}
+                      {...({ className: styles.settingsLandingTileArrow } as any)}
                       type="arrow-right"
                       size="base"
                     />

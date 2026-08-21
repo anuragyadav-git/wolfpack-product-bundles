@@ -290,7 +290,7 @@ export function FpbSelectedItemsModals({
             replaces them with live bundle and discount values.
           </p>
           <div className={fullPageBundleStyles.templateVariableGrid}>
-            {TEMPLATE_VARIABLES.map(([variable, description]) => (
+            {TEMPLATE_VARIABLES.map(([variable, description]: any) => (
               <div
                 key={variable}
                 className={fullPageBundleStyles.templateVariableItem}
@@ -318,7 +318,7 @@ export function FpbSelectedItemsModals({
         size="base"
       >
         <div>
-          {TEMPLATE_VARIABLES.map(([variable, description], index) => (
+          {TEMPLATE_VARIABLES.map(([variable, description]: any, index) => (
             <div key={variable}>
               {index > 0 && <s-divider />}
               <div className={fullPageBundleStyles.discountVariableRow}>
@@ -338,7 +338,7 @@ export function FpbSelectedItemsModals({
         size="base"
       >
         <div>
-          {ADDON_TEMPLATE_VARIABLES.map(([variable, description], index) => (
+          {ADDON_TEMPLATE_VARIABLES.map(([variable, description]: any, index) => (
             <div key={variable}>
               {index > 0 && <s-divider />}
               <div className={fullPageBundleStyles.discountVariableRow}>

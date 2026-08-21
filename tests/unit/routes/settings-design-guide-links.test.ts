@@ -14,7 +14,7 @@ const EXPECTED_GUIDES = [
 describe("Settings Design visual guide links", () => {
   it("opens every Wolfpack-owned AVIF guide in a new tab", () => {
     const view = Object.entries(EXPERT_COLOR_CONTROLS)
-      .map(([title, fields]) => renderToStaticMarkup(React.createElement(DesignFields, {
+      .map(([title, fields]: any) => renderToStaticMarkup(React.createElement(DesignFields, {
         title,
         fields,
         values: {},

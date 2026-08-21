@@ -74,7 +74,7 @@ class TestRunner {
       // Generate final report
       this.generateFinalReport();
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Test execution failed:', error);
       process.exit(1);
     }
@@ -414,7 +414,7 @@ class TestRunner {
     try {
       fs.writeFileSync(reportPath, JSON.stringify(detailedReport, null, 2));
       console.log(`\n📄 Detailed report saved to: ${reportPath}`);
-    } catch (error) {
+    } catch (error: any) {
       console.warn(`⚠️  Could not save detailed report: ${error}`);
     }
   }

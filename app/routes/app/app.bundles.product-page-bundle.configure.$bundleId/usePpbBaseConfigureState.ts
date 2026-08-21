@@ -235,12 +235,6 @@ export function usePpbBaseConfigureState() {
   const originalShowProductPricesRef = useRef<boolean>(
     (bundle as any).showProductPrices ?? true
   );
-  const [showCompareAtPrices, setShowCompareAtPrices] = useState<boolean>(
-    (bundle as any).showCompareAtPrices ?? false
-  );
-  const originalShowCompareAtPricesRef = useRef<boolean>(
-    (bundle as any).showCompareAtPrices ?? false
-  );
   const [cartRedirectToCheckout, setCartRedirectToCheckout] = useState<boolean>(
     (bundle as any).cartRedirectToCheckout ?? false
   );
@@ -364,9 +358,6 @@ export function usePpbBaseConfigureState() {
     showProductPrices,
     setShowProductPrices,
     originalShowProductPricesRef,
-    showCompareAtPrices,
-    setShowCompareAtPrices,
-    originalShowCompareAtPricesRef,
     cartRedirectToCheckout,
     setCartRedirectToCheckout,
     originalCartRedirectToCheckoutRef,

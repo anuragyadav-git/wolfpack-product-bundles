@@ -129,6 +129,19 @@
       "finishSetup": "Finish setup",
       "viewDetails": "Show status",
       "activate": "Enable",
+      "enableModal": {
+        "heading": "Wolfpack Bundle in deinem Shop aktivieren",
+        "description": "Aktiviere das Wolfpack Bundle-App-Embed im Theme-Editor, klicke auf Speichern und kehre dann hierher zurück.",
+        "mediaLabel": "Anleitung zum Aktivieren des Wolfpack Bundle-App-Embeds und Speichern des Themes",
+        "openThemeEditor": "Theme-Editor öffnen",
+        "checking": "Theme wird geprüft…",
+        "enabled": "App-Embed aktiviert",
+        "notDetected": "App-Embed nicht erkannt",
+        "openThemeEditorAgain": "Theme-Editor erneut öffnen",
+        "chatWithSupport": "Support kontaktieren",
+        "done": "Fertig",
+        "cancel": "Abbrechen"
+      },
       "ready": "Ready",
       "checking": "Checking setup",
       "actionNeeded": "Action needed",
@@ -258,7 +271,11 @@
       },
       "previewOnly": "Preview only",
       "loading": "Loading preview",
-      "notApplicable": "This setting is not used by the selected template."
+      "notApplicable": "This setting is not used by the selected template.",
+      "feedback": {
+        "tierHit": "Rabattstufe erreicht",
+        "complete": "Alle Stufen erreicht"
+      }
     }
   },
   "tooltips": {

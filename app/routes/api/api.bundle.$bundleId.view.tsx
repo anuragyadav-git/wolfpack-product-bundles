@@ -60,7 +60,7 @@ export const action: ActionFunction = async ({ request, params }: { request: Req
     });
 
     return json({ ok: true }, { headers: CORS_HEADERS });
-  } catch (err) {
+  } catch (err: any) {
     AppLogger.error("Failed to record bundle view", {
       component: "api.bundle.view",
       operation: "record-view",

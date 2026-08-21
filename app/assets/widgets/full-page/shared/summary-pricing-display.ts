@@ -1,4 +1,4 @@
-export function shouldDisplayClassicFixedBundleRawTotal(widget, discountInfo) {
+export function shouldDisplayClassicFixedBundleRawTotal(widget: any, discountInfo: any) {
   if (widget?.getFullPageDesignPreset?.() !== 'CLASSIC') return false;
   if (!discountInfo?.hasDiscount) return false;
 

@@ -47,7 +47,7 @@ export function buildBundleMetricTrendSeries(
     if (bucket) bucket.views += 1;
   }
 
-  return Array.from(buckets.entries()).map(([date, bucket]) => ({
+  return Array.from(buckets.entries()).map(([date, bucket]: any) => ({
     date,
     ...bucket,
     conversionRate: bucket.views > 0 ? Number(((bucket.orders / bucket.views) * 100).toFixed(2)) : 0,

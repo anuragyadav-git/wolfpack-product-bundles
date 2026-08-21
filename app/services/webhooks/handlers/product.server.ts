@@ -115,7 +115,7 @@ export async function handleProductUpdate(
       message: "Product update processed, no critical changes detected"
     };
 
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.error("Error handling product update", {
       component: "webhook-processor",
       operation: "handleProductUpdate"
@@ -255,7 +255,7 @@ export async function handleProductDelete(
       message: "Product deleted from bundle steps"
     };
 
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.error("Error handling product delete", {
       component: "webhook-processor",
       operation: "handleProductDelete"

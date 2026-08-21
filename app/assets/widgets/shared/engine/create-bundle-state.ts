@@ -7,7 +7,7 @@
 
 'use strict';
 
-export function createBundleState(input = {}) {
+export function createBundleState(input: any = {}) {
   const bundle = input.bundle || null;
   const steps = Array.isArray(input.steps)
     ? input.steps
@@ -22,7 +22,7 @@ export function createBundleState(input = {}) {
   };
 }
 
-export function cloneSelectedProducts(selectedProducts) {
+export function cloneSelectedProducts(selectedProducts: any[]) {
   if (!Array.isArray(selectedProducts)) return [];
 
   return selectedProducts.map((stepSelections) => {

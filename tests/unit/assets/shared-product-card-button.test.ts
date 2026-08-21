@@ -109,7 +109,7 @@ describe('shared product card add button', () => {
 
     expect(html).toContain('tabindex="0"');
     expect(html).toContain('role="group"');
-    expect(html).toContain('aria-pressed="false"');
     expect(html).toContain('aria-label="Open product details"');
+    expect(html.slice(0, html.indexOf('>') + 1)).not.toContain('aria-pressed');
   });
 });

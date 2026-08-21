@@ -388,7 +388,7 @@ export class AddOnDiscountFunctionService {
       }
 
       return result;
-    } catch (error) {
+    } catch (error: any) {
       const message = error instanceof Error
         ? error.message
         : "Unknown add-on discount activation error";

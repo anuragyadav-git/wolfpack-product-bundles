@@ -12,12 +12,12 @@ import {
   getLastRequiredProductPageStepIndex,
 } from './step-validation.js';
 
-function resolveDiscountProgressMode(displayOptions = {}) {
+function resolveDiscountProgressMode(displayOptions: any = {}) {
   const type = String(displayOptions?.type || '').toLowerCase().trim();
   return type === 'step_based' ? 'step_based' : 'simple';
 }
 
-function getDiscountProgressMilestones(bundle, totalPrice = 0, totalQuantity = 0) {
+function getDiscountProgressMilestones(bundle: any, totalPrice = 0, totalQuantity = 0) {
   const pricing = bundle?.pricing || {};
   const rules = Array.isArray(pricing.rules) ? pricing.rules : [];
   const method = String(pricing.method || '');
@@ -25,9 +25,9 @@ function getDiscountProgressMilestones(bundle, totalPrice = 0, totalQuantity = 0
   const tierTextByRuleId = pricing?.messages?.tierTextByRuleId || {};
 
   return rules
-    .filter((rule) => rule?.conditionType === 'quantity' || rule?.conditionType === 'amount')
-    .sort((a, b) => (Number(a.conditionValue || 0) || 0) - (Number(b.conditionValue || 0) || 0))
-    .map((rule) => {
+    .filter((rule: any) => rule?.conditionType === 'quantity' || rule?.conditionType === 'amount')
+    .sort((a: any, b: any) => (Number(a.conditionValue || 0) || 0) - (Number(b.conditionValue || 0) || 0))
+    .map((rule: any) => {
       const ruleId = String(rule?.id || '');
       const threshold = Number(rule?.conditionValue || 0) || 0;
       if (!ruleId || threshold <= 0) return null;
@@ -64,13 +64,13 @@ function getDiscountProgressMilestones(bundle, totalPrice = 0, totalQuantity = 0
       };
     })
     .filter(Boolean)
-    .filter((milestone) => milestone.title);
+    .filter((milestone: any) => milestone.title);
 }
 
 export function shouldDisableIntermediateProductPageCta({
   isGrid = false,
   currentStepValid = false,
-} = {}) {
+}: any = {}) {
   return Boolean(!isGrid && !currentStepValid);
 }
 
@@ -80,14 +80,14 @@ renderFullPageLayout() {
   this.renderProductPageLayout();
 },
 
-clearStepSelections(stepIndex) {
+clearStepSelections(stepIndex: number) {
   // Clear all product selections for this step
   this.selectedProducts[stepIndex] = {};
   if (this.selectedProductCategoryIndexes) {
     this.selectedProductCategoryIndexes[stepIndex] = {};
   }
   if (stepIndex === 0 && this.directDefaultProducts.length > 0) {
-    this.directDefaultProducts.forEach(product => {
+    this.directDefaultProducts.forEach((product: any)  => {
       const defaultQuantity = Number.parseFloat(product.defaultRequiredQuantity);
       const normalizedDefaultQuantity = Number.isFinite(defaultQuantity) && defaultQuantity >= 0 ? defaultQuantity : 0;
       this.setSelectedQuantity(0, product.variantId, normalizedDefaultQuantity);
@@ -201,7 +201,7 @@ renderFooter() {
 
   const primary = getComputedStyle(document.documentElement).getPropertyValue('--bundle-global-primary-button').trim() || '#1e3a8a';
   el.style.display = '';
-  const progressData = getDiscountProgressData({
+  const progressData: any = getDiscountProgressData({
     currentValue: current,
     targetValue: conditionTarget,
     message,
@@ -219,6 +219,7 @@ renderFooter() {
     milestoneSubtitleClassName: 'bw-discount-progress__milestone-subtitle',
     renderInlineSubtitles: false,
     renderSubtitleList: false,
+    messageIsHtml: true,
     mode: progressMode === 'simple' ? 'bar' : 'stepped',
   });
   const modeClassName = progressMode === 'simple'
@@ -253,7 +254,7 @@ renderQuantityOptionPills() {
   el.style.setProperty('--bw-qty-pill-active-color', primary);
   const defaultIndex = qtyOpts.defaultRuleIndex ?? 0;
 
-  rules.forEach((rule, index) => {
+  rules.forEach((rule: any, index: any) => {
     const { label, subtext } = this.getProductPageTierPillContent(rule, index, qtyOpts);
     const isActive = index === defaultIndex;
 
@@ -274,7 +275,7 @@ renderQuantityOptionPills() {
     }
 
     pill.addEventListener('click', () => {
-      el.querySelectorAll('.bw-qty-pill').forEach(p => {
+      el.querySelectorAll('.bw-qty-pill').forEach((p: any)  => {
         p.classList.remove('bw-qty-pill--active');
       });
       pill.classList.add('bw-qty-pill--active');
@@ -287,7 +288,7 @@ renderQuantityOptionPills() {
   });
 },
 
-getProductPageTierPillContent(rule, index, qtyOpts) {
+getProductPageTierPillContent(rule: any, index: number, qtyOpts: any) {
   const pricing = this.selectedBundle?.pricing || {};
   const bundleQuantityOptions = this.selectedBundle?.messaging?.displayOptions?.bundleQuantityOptions || qtyOpts || {};
   const optionsByRuleId = bundleQuantityOptions.optionsByRuleId || {};
@@ -350,6 +351,12 @@ updateAddToCartButton() {
     unitPrices
   );
   const combinedDiscountInfo = this.getDiscountInfoWithSelectedAddonDiscount(discountInfo, totalPrice);
+  const currencyInfo = CurrencyManager.getCurrencyInfo();
+  this._updateNativeProductPrice?.(
+    totalQuantity > 0 ? CurrencyManager.convertAndFormat(combinedDiscountInfo.finalPrice, currencyInfo) : '',
+    totalQuantity > 0 ? CurrencyManager.convertAndFormat(totalPrice, currencyInfo) : '',
+    totalQuantity > 0,
+  );
 
   const button = this.elements.addToCartButton;
   const usesCascadeStepFlow = this._usesCascadeStepFlow?.() === true;
@@ -369,14 +376,13 @@ updateAddToCartButton() {
   const canCheckoutByBoxSelection = boxSelectionState.valid !== false;
 
   // Count only paid (non-free-gift, non-default) step selections for the total check
-  const paidTotalQuantity = this.selectedProducts.reduce((sum, stepSelections, i) => {
+  const paidTotalQuantity = this.selectedProducts.reduce((sum: number, stepSelections: any, i: number) => {
     const step = this.selectedBundle.steps[i];
     if (step.isFreeGift || step.isDefault) return sum;
-    return sum + Object.values(stepSelections || {}).reduce((s, qty) => s + qty, 0);
+    return sum + Object.values<any>(stepSelections || {}).reduce((s: number, qty: any) => s + Number(qty || 0), 0);
   }, 0);
 
   if (isIntermediateCascadeStep) {
-    const currencyInfo = CurrencyManager.getCurrencyInfo();
     const currentStepValid = this.validateStep(this.currentStepIndex);
     const formattedPrice = totalQuantity > 0
       ? CurrencyManager.convertAndFormat(combinedDiscountInfo.finalPrice, currencyInfo)
@@ -421,7 +427,6 @@ updateAddToCartButton() {
     button.classList.add('disabled');
   } else {
     // All steps valid and products selected - enable button
-    const currencyInfo = CurrencyManager.getCurrencyInfo();
     const formattedPrice = CurrencyManager.convertAndFormat(combinedDiscountInfo.finalPrice, currencyInfo);
     const buttonLabel = this._resolveText('addToCartButton', 'Add Bundle to Cart');
 

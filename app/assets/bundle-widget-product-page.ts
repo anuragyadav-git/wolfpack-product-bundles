@@ -70,7 +70,7 @@
  * Find the next incomplete non-default step after `fromIndex`.
  * Returns -1 when all remaining non-default steps are complete.
  */
-function bsFindNextIncompleteStep(steps, selectedProducts, validateFn, fromIndex) {
+function bsFindNextIncompleteStep(steps: string|any[], selectedProducts: any, validateFn: (arg0: any) => any, fromIndex: number) {
   for (let i = fromIndex + 1; i < steps.length; i++) {
     // Free gift and default steps are non-required — never auto-advance into them.
     // The free gift step has its own unlock flow; default steps are pre-filled.
@@ -80,9 +80,9 @@ function bsFindNextIncompleteStep(steps, selectedProducts, validateFn, fromIndex
   return -1;
 }
 
-function bsIsDefaultStep(step) { return !!step?.isDefault; }
+function bsIsDefaultStep(step: any) { return !!step?.isDefault; }
 
-function bsGetDiscountBadgeLabel(step) { return step?.discountBadgeLabel || null; }
+function bsGetDiscountBadgeLabel(step: any) { return step?.discountBadgeLabel || null; }
 
 // Export for unit tests
 if (typeof window !== 'undefined') {
@@ -131,11 +131,18 @@ import { ProductPageModalStateMethods } from './widgets/product-page/methods/mod
 import { ProductPageWidgetMiscMethods } from './widgets/product-page/methods/widget-misc-methods.js';
 import { renderBundlePurchaseOptions } from './widgets/shared/components/purchase-options.js';
 import { bundleSubscriptionStorefrontMethods } from './widgets/shared/subscription-storefront-methods.js';
+import { applyBrowsedProductPreselection } from './widgets/product-page/embed-preselection.js';
+import { BundleProductModal } from './bundle-modal-component.js';
+import { installDiscountTierPillFeedback } from './widgets/shared/discount-tier-feedback.js';
+
+export function createProductPageProductModal(widget: any, ModalConstructor = BundleProductModal) {
+  return new ModalConstructor(widget, { drawerOwner: 'ppb' });
+}
 
 
 export class BundleWidgetProductPage {
 
-  constructor(containerElement) {
+  constructor(containerElement: Element) {
     installControllerMethods(
       this,
       ProductPageConfigLifecycleMethods,
@@ -159,6 +166,7 @@ export class BundleWidgetProductPage {
       gridTemplateMethods,
     );
     this.container = containerElement;
+    this._discountTierFeedbackCleanup = installDiscountTierPillFeedback(containerElement);
     this.selectedBundle = null;
     this.selectedProducts = [];
     this.selectedProductCategoryIndexes = [];
@@ -172,9 +180,7 @@ export class BundleWidgetProductPage {
     this.elements = {};
     this.selectedSellingPlanId = undefined;
 
-    // Initialize product modal for variant selection (if BundleProductModal is available)
-    this.productModal = null;
-    this.productModal = null;
+    this.productModal = createProductPageProductModal(this);
 
     // Call async init but don't block constructor
     this.init().catch(error => {
@@ -213,7 +219,7 @@ export class BundleWidgetProductPage {
 
       // Move the container into its final product-form placement before the
       // bootstrap overlay paints, so loading and rendered states share a slot.
-      this._relocateContainerToProductForm();
+      if (!this.config.isEmbedSource) this._relocateContainerToProductForm();
 
       // Show loading overlay immediately with fallback spinner while bundle config loads.
       this.showLoadingOverlay(null, { bootstrap: true });
@@ -244,19 +250,36 @@ export class BundleWidgetProductPage {
         return;
       }
 
+      this._runProductPageLoadScriptOnce();
+
       // Initialize data structures
       this.initializeDataStructures();
       this._initDirectDefaultProducts();
-      this._restoreSessionSelections();
+      const restoredSelections = this._restoreSessionSelections();
       await this._preloadDirectDefaultProducts();
+
+      if (
+        this.config.isEmbedSource &&
+        this.config.preselectBrowsedProduct &&
+        !restoredSelections
+      ) {
+        await Promise.all(
+          this.selectedBundle.steps.map((_: any, stepIndex: any) =>
+            this.loadStepProducts(stepIndex).catch(() => {}),
+          ),
+        );
+        applyBrowsedProductPreselection(this, true, false);
+      }
 
       // Pre-load product data for default steps so filled cards show real image/title
       await this._preloadDefaultStepProducts();
       await this._preloadRestoredSelectionProducts();
 
-      this._relocateContainerToProductForm();
-      this._hideNativeProductPrice();
-      this._hideNativeDynamicCheckoutControls();
+      if (!this.config.isEmbedSource) {
+        this._relocateContainerToProductForm();
+        this._hideNativeProductPrice();
+        this._hideNativeDynamicCheckoutControls();
+      }
 
       // Setup DOM elements
       this.setupDOMElements();
@@ -282,7 +305,7 @@ export class BundleWidgetProductPage {
         this._recordView();
       }
 
-    } catch (error) {
+    } catch (error: any) {
       this.hideLoadingOverlay();
       this.showErrorUI(error);
     }
@@ -308,7 +331,7 @@ export class BundleWidgetProductPage {
       } else {
       }
 
-    } catch (error) {
+    } catch (error: any) {
       // Don't throw - widget should work even if design CSS fails to load
     }
   }
@@ -334,7 +357,7 @@ export class BundleWidgetProductPage {
         ...(this.config.textOverrides || {}),
         ...(languageSettings.textOverrides || {})
       };
-    } catch (_) {
+    } catch (_: any) {
       // Non-critical: default and bundle-level text still render.
     }
   }
@@ -351,7 +374,7 @@ export class BundleWidgetProductPage {
       if (!response.ok) return;
 
       this.config.controlsSettings = await response.json();
-    } catch (_) {
+    } catch (_: any) {
       // Non-critical: the widget keeps its current default behavior.
     }
   }
@@ -367,7 +390,7 @@ export interface BundleWidgetProductPage {
 // INITIALIZATION
 // ============================================================================
 export function initializeProductPageWidget(root = document) {
-  const containers = root.querySelectorAll('#bundle-builder-app');
+  const containers = root.querySelectorAll<HTMLElement>('#bundle-builder-app');
   containers.forEach(container => {
     if (!container.dataset.initialized) {
       const bundleType = container.dataset.bundleType || 'product_page';

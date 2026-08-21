@@ -41,7 +41,6 @@ function IntegrationsCatalog({ onBack }: { onBack: () => void }) {
       />
       <s-query-container
         containerName="integrations-page"
-        className={styles.queryContainer}
       >
         <main className={styles.page}>
           <header className={styles.header}>
@@ -88,7 +87,7 @@ function IntegrationsCatalog({ onBack }: { onBack: () => void }) {
                             alt={`${integration.title} logo`}
                           />
                         ) : (
-                          <s-icon type="product" size="large" />
+                          <s-icon type="product" size="base" />
                         )}
                       </span>
                       <s-badge tone={integration.status === "Supported" ? "success" : "info"}>
