@@ -121,7 +121,6 @@ describe('PPB validation control disables cart gating when disabled', () => {
         _isConditionValidationEnabled: () => false,
         validateProductPageBoxSelectionCheckout: () => ({ valid: true, totalQuantity: 1, targetQuantity: 1, difference: 0 }),
         expandProductsByVariant: (products: unknown[]) => products,
-        updateAddToCartButton: jest.fn(),
         buildCartItems: () => [{ id: 101, quantity: 1, properties: {} }],
         getDiscountInfoWithSelectedAddonDiscount(value: Record<string, unknown>) {
           return value;
@@ -137,9 +136,6 @@ describe('PPB validation control disables cart gating when disabled', () => {
         syncBundleDetailsCartMetafield: jest.fn(),
         resolveProductPageOfferId: () => 'MIX-1',
         generateBundleSessionKey: () => 'K1K',
-        hideLoadingOverlay: jest.fn(),
-        showLoadingOverlay: jest.fn(),
-        _handlePostAddToCartAction: jest.fn(),
         elements: {
           addToCartButton: { disabled: false, textContent: '' },
         },
@@ -190,9 +186,6 @@ describe('PPB validation control disables cart gating when disabled', () => {
         _isConditionValidationEnabled: () => true,
         validateProductPageBoxSelectionCheckout: () => ({ valid: true, totalQuantity: 1, targetQuantity: 1, difference: 0 }),
         expandProductsByVariant: (products: unknown[]) => products,
-        hideLoadingOverlay: jest.fn(),
-        showLoadingOverlay: jest.fn(),
-        updateAddToCartButton: jest.fn(),
         elements: {
           addToCartButton: { disabled: false, textContent: '' },
         },

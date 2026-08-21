@@ -16,6 +16,7 @@ import {
   initializePageBuilderEmbed,
   suppressesAutomaticPpbEmbed,
 } from './page-builder-embed.js';
+import { loadAndApplyGlobalSettingsControls } from './settings-controls.js';
 
 const embed = document.querySelector<HTMLElement>('[data-wpb-app-embed]');
 
@@ -102,6 +103,12 @@ function hydratePageBuilderEmbed(): void {
   void initializePageBuilderEmbed(embed);
 }
 
+function hydrateGlobalSettingsControls(): void {
+  if (!embed || embed.dataset.wpbControlsHydrated === 'true') return;
+  embed.dataset.wpbControlsHydrated = 'true';
+  void loadAndApplyGlobalSettingsControls(embed.dataset.controlsSettingsEndpoint || '');
+}
+
 (window as Window & { __WOLFPACK_BUNDLE_EMBED_ACTIVE__?: boolean }).__WOLFPACK_BUNDLE_EMBED_ACTIVE__ = true;
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
@@ -109,12 +116,14 @@ if (document.readyState === 'loading') {
     hydratePageBuilderEmbed();
     hydrateProductPageUpsells();
     hydratePpbBundleEmbed();
+    hydrateGlobalSettingsControls();
   }, { once: true });
 } else {
   hydrateMarker();
   hydratePageBuilderEmbed();
   hydrateProductPageUpsells();
   hydratePpbBundleEmbed();
+  hydrateGlobalSettingsControls();
 }
 document.addEventListener('shopify:section:load', hydrateMarker);
 document.addEventListener('shopify:section:load', hydratePageBuilderEmbed);

@@ -8,7 +8,7 @@ import { createBundleBannerElement, createStepBannerImageElement } from '../../s
 import { renderStepTimelineEntry } from '../../shared/components/step-timeline.js';
 
 export const fullPageTimelineBannerMethods: Record<string, any> & ThisType<any> = {
-getStandardTimelineVisibleEntries(timelineEntries, activeEntryIndex) {
+getStandardTimelineVisibleEntries(timelineEntries: any, activeEntryIndex: number) {
   const entries = Array.isArray(timelineEntries) ? timelineEntries : [];
   const timelinePageSize = this.getStandardTimelinePageSize();
 
@@ -67,10 +67,10 @@ createStepTimeline() {
 
   const timelineEntries = this.buildStepTimelineEntries();
   const totalEntryCount = Math.max(timelineEntries.length, 1);
-  const hasMultipleCategoryEntryForStep = (entry) => (
+  const hasMultipleCategoryEntryForStep = (entry: any) => (
     this.shouldRenderMultipleCategoryTimelineEntry(entry?.step)
   );
-  const activeEntryIndex = Math.max(0, timelineEntries.findIndex((entry) => (
+  const activeEntryIndex = Math.max(0, timelineEntries.findIndex((entry: any) => (
     entry.type === 'multiple_categories'
       ? Number(entry.stepIndex) === Number(this.currentStepIndex)
       : entry.type === 'step'
@@ -91,7 +91,7 @@ createStepTimeline() {
   timeline.dataset.pageSize = String(pageSize);
   timeline.dataset.totalEntries = String(totalEntryCount);
 
-  const createTimelineArrow = (direction) => {
+  const createTimelineArrow = (direction: string) => {
     const button = document.createElement('button');
     button.type = 'button';
     button.className = direction === 'prev'
@@ -118,7 +118,7 @@ createStepTimeline() {
     timeline.appendChild(createTimelineArrow('next'));
   }
 
-  visibleEntries.forEach((entry, displayIndex) => {
+  visibleEntries.forEach((entry: any, displayIndex: number) => {
     const step = entry.step;
     const index = entry.stepIndex;
     const hasMultipleCategoryEntry = this.shouldRenderMultipleCategoryTimelineEntry(step);
@@ -153,7 +153,7 @@ createStepTimeline() {
       iconHtml: iconContent,
       classes: timelineState.classes,
     }).trim();
-    const stepEl = stepWrapper.firstElementChild;
+    const stepEl = stepWrapper.firstElementChild as HTMLElement;
 
     // Click handler — accessible steps only
     if (entry.type === 'step' && timelineState.isAccessible && !timelineState.isDefaultStep) {
@@ -204,7 +204,7 @@ createStandardStepTimeline() {
 
   const timelineEntries = this.buildStepTimelineEntries();
   const totalEntryCount = Math.max(timelineEntries.length, 1);
-  const activeEntryIndex = Math.max(0, timelineEntries.findIndex((entry) => (
+  const activeEntryIndex = Math.max(0, timelineEntries.findIndex((entry: any) => (
     entry.type === 'multiple_categories'
       ? Number(entry.stepIndex) === Number(this.currentStepIndex)
       : entry.type === 'step'
@@ -219,7 +219,7 @@ createStandardStepTimeline() {
     isPaged,
   } = this.getStandardTimelineVisibleEntries(timelineEntries, activeEntryIndex);
   const entryCount = Math.max(visibleEntries.length, 1);
-  const activeVisibleEntryIndex = Math.max(0, visibleEntries.findIndex((entry) => {
+  const activeVisibleEntryIndex = Math.max(0, visibleEntries.findIndex((entry: any) => {
     if (Number(entry.stepIndex) !== Number(this.currentStepIndex)) {
       return false;
     }
@@ -248,7 +248,7 @@ createStandardStepTimeline() {
   itemsContainer.dataset.pageSize = String(pageSize);
   itemsContainer.dataset.totalEntries = String(totalEntryCount);
 
-  const createTimelineArrow = (direction) => {
+  const createTimelineArrow = (direction: string) => {
     const button = document.createElement('button');
     button.type = 'button';
     button.className = direction === 'prev'
@@ -275,7 +275,7 @@ createStandardStepTimeline() {
     itemsContainer.appendChild(createTimelineArrow('next'));
   }
 
-  visibleEntries.forEach((entry) => {
+  visibleEntries.forEach((entry: any) => {
     const step = entry.step;
     const index = entry.stepIndex;
     const hasMultipleCategoryEntry = this.shouldRenderMultipleCategoryTimelineEntry(step);
@@ -349,7 +349,7 @@ createStandardStepTimeline() {
 },
 
 // Returns a full-width banner image element for the active step, or null if not configured
-createStepBannerImage(stepIndex) {
+createStepBannerImage(stepIndex: string|number) {
   const step = (this.selectedBundle?.steps || [])[stepIndex];
   return createStepBannerImageElement(step, value => this._escapeHTML(value), document);
 },
@@ -362,7 +362,7 @@ createBundleBanners() {
 },
 
 // Get a compact quantity hint string for a step tab (e.g. "Pick 2" or "Pick 2–5")
-getStepQuantityHint(step) {
+getStepQuantityHint(step: any) {
   if (!step) return null;
 
   const { conditionOperator, conditionValue, conditionOperator2, conditionValue2 } = step;
@@ -393,13 +393,13 @@ getStepQuantityHint(step) {
 },
 
 // Get product images for a step (helper for tabs)
-getStepProductImages(stepIndex) {
+getStepProductImages(stepIndex: string|number) {
   const selectedProducts = this.selectedProducts[stepIndex] || {};
-  const productImages = [];
+  const productImages: { url: any; alt: any; }[] = [];
 
-  Object.entries(selectedProducts).forEach(([variantId, quantity]) => {
+  Object.entries(selectedProducts).forEach(([variantId, quantity]: any) => {
     if (quantity > 0) {
-      const product = this.stepProductData[stepIndex]?.find(p => String(p.selectionId || '') === String(variantId));
+      const product = this.stepProductData[stepIndex]?.find((p: any)  => String(p.selectionId || '') === String(variantId));
       if (product && product.imageUrl && !productImages.find(img => img.url === product.imageUrl)) {
         productImages.push({
           url: product.imageUrl,

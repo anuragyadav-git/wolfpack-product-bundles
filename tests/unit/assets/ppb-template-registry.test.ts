@@ -96,3 +96,4 @@ describe('PPB template registry resolver', () => {
     ]);
   });
 });
+export {};

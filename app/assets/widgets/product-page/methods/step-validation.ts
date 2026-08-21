@@ -1,4 +1,4 @@
-export function isProductPageStepRequiredForValidation(step = {}) {
+export function isProductPageStepRequiredForValidation(step: any = {}) {
   if (!step || step.enabled === false || step.isFreeGift || step.isDefault) {
     return false;
   }
@@ -10,14 +10,14 @@ export function isProductPageStepRequiredForValidation(step = {}) {
   }
 
   const categories = Array.isArray(step.categories) ? step.categories : [];
-  return categories.some((category) => {
+  return categories.some((category: any) => {
     const categoryProducts = Array.isArray(category?.products) ? category.products : [];
     const categoryCollections = Array.isArray(category?.collections) ? category.collections : [];
     return categoryProducts.length > 0 || categoryCollections.length > 0;
   });
 }
 
-export function areRequiredProductPageStepsValid(steps = [], validateStep = () => false) {
+export function areRequiredProductPageStepsValid(steps: any[] = [], validateStep: (index: number) => boolean = () => false) {
   if (!Array.isArray(steps)) return true;
   return steps.every((step, index) => {
     if (!isProductPageStepRequiredForValidation(step)) return true;
@@ -25,7 +25,7 @@ export function areRequiredProductPageStepsValid(steps = [], validateStep = () =
   });
 }
 
-export function getLastRequiredProductPageStepIndex(steps = []) {
+export function getLastRequiredProductPageStepIndex(steps: any[] = []) {
   if (!Array.isArray(steps)) return -1;
   for (let index = steps.length - 1; index >= 0; index -= 1) {
     if (isProductPageStepRequiredForValidation(steps[index])) {

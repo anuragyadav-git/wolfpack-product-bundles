@@ -12,7 +12,7 @@ function getWindow() {
   return typeof window === 'undefined' ? null : window;
 }
 
-function parseBoolean(value) {
+function parseBoolean(value: string) {
   if (typeof value === 'boolean') return value;
   if (typeof value !== 'string') return undefined;
   const normalized = value.trim().toLowerCase();
@@ -21,7 +21,7 @@ function parseBoolean(value) {
   return undefined;
 }
 
-function parseControlBoolean(controls, labels, fallback) {
+function parseControlBoolean(controls: any, labels: string[], fallback: boolean|undefined) {
   if (!controls || typeof controls !== 'object') {
     return fallback;
   }
@@ -40,7 +40,7 @@ const templateDesignSystem = TemplateDesignSystem;
 function resolvePpbTemplateContract({
   templateType = '',
   designPreset = '',
-}) {
+}: any) {
   if (!templateDesignSystem?.resolvePpbTemplate) return null;
   return templateDesignSystem.resolvePpbTemplate({
     templateType,
@@ -51,7 +51,7 @@ function resolvePpbTemplateContract({
 function resolvePpbTemplatePresetId({
   templateType = '',
   designPreset = '',
-}) {
+}: any) {
   if (typeof designPreset !== 'string') {
     return null;
   }
@@ -77,23 +77,65 @@ _isProductCardClickAddEnabled() {
   ) === true;
 },
 
+_activateProductCardClickAdd(eventTarget: any) {
+  if (!this._isProductCardClickAddEnabled() || !eventTarget?.closest) return false;
+  if (eventTarget.closest('button, input, select, textarea, a, .qty-btn, .inline-qty-btn, .variant-selector')) {
+    return false;
+  }
+  const card = eventTarget.closest('.product-card');
+  const addButton = card?.querySelector?.('.product-add-btn');
+  if (!addButton || addButton.disabled) return false;
+  addButton.click();
+  return true;
+},
+
 _isConditionValidationEnabled() {
   const controls = this._getProductPageControls();
   return parseControlBoolean(controls, ['validateConditionsBeforeAddToCart'], true) !== false;
 },
 
-_runControlsScript(script) {
+_runControlsScript(script: string) {
   if (!script || typeof script !== 'string') return;
   const runtimeWindow = getWindow();
   if (!runtimeWindow) return;
   try {
     new Function(script).call(runtimeWindow);
-  } catch (_) {
+  } catch (_: any) {
     // Merchant-authored integration script should not block bundle checkout.
   }
 },
 
-async _handlePostAddToCartAction(actionConfig, lifecycleKey) {
+_runProductPageLoadScriptOnce() {
+  if (this._controlsPageLoadScriptApplied) return;
+  this._controlsPageLoadScriptApplied = true;
+  this._runControlsScript(this._getProductPageControls()?.scripts?.executeCustomScript);
+},
+
+async _refreshConfiguredCartSection(action: string) {
+  const controls = this._getProductPageControls();
+  const selectors = controls?.selectors || {};
+  const onCartPage = action === 'cart';
+  const sectionId = onCartPage ? selectors.cartPageItemsSectionId : selectors.sideCartSectionId;
+  const selector = onCartPage ? selectors.cartPageItems : selectors.sideCart;
+  if (!sectionId || !selector || typeof fetch !== 'function' || typeof document === 'undefined') return false;
+
+  try {
+    const response = await fetch(`/?section_id=${encodeURIComponent(sectionId)}`, { credentials: 'same-origin' });
+    if (!response.ok) return false;
+    const html = await response.text();
+    const template = document.createElement('template');
+    template.innerHTML = html;
+    const replacement = template.content.querySelector(selector);
+    const current = document.querySelector(selector);
+    if (!replacement || !current) return false;
+    current.replaceWith(replacement);
+    return true;
+  } catch (_: any) {
+    return false;
+  }
+},
+
+async _handlePostAddToCartAction(actionConfig: any, lifecycleKey: any) {
   const controls = this._getProductPageControls();
   const redirect = actionConfig || controls?.redirect || {};
 
@@ -105,8 +147,6 @@ async _handlePostAddToCartAction(actionConfig, lifecycleKey) {
   }
 
   this._runControlsScript(redirect.executeScript);
-  this._runControlsScript(controls?.scripts?.executeCustomScript);
-
   const action = redirect.action || 'cart';
   if (action === 'checkout') {
     const runtimeWindow = getWindow();
@@ -119,6 +159,7 @@ async _handlePostAddToCartAction(actionConfig, lifecycleKey) {
   }
 
   if (action === 'side_cart') {
+    await this._refreshConfiguredCartSection?.('side_cart');
     const selector = redirect.selectors?.sideCartOpenButton
       || controls?.selectors?.sideCartOpenButton
       || controls?.selectors?.sideCart;
@@ -136,6 +177,10 @@ async _handlePostAddToCartAction(actionConfig, lifecycleKey) {
       },
     );
     if (invocation.ok) return;
+  }
+
+  if (action === 'cart') {
+    await this._refreshConfiguredCartSection?.('cart');
   }
 
   setTimeout(() => {
@@ -195,7 +240,7 @@ parseConfiguration() {
   };
 },
 
-_parseBundleConfigPayload(rawValue) {
+_parseBundleConfigPayload(rawValue: string) {
     if (!rawValue || rawValue.trim() === '' || rawValue === 'null' || rawValue === 'undefined') {
       return null;
     }
@@ -203,12 +248,12 @@ _parseBundleConfigPayload(rawValue) {
     try {
       const parsed = JSON.parse(rawValue);
       return typeof parsed === 'object' && parsed !== null ? parsed : null;
-    } catch (_error) {
+    } catch (_error: any) {
       return null;
     }
   },
 
-  _isBundleConfigBootstrapPayload(payload) {
+  _isBundleConfigBootstrapPayload(payload: any) {
     return !!(
       payload &&
       typeof payload === 'object' &&
@@ -220,7 +265,7 @@ _parseBundleConfigPayload(rawValue) {
   },
 
   async loadBundleData() {
-    let bundleData = null;
+    let bundleData: any = null;
     const bundleType = this.container.dataset.bundleType;
     const bundleId = this.container.dataset.bundleId;
     const configValue = this._parseBundleConfigPayload(this.container.dataset.bundleConfig);
@@ -250,10 +295,10 @@ _parseBundleConfigPayload(rawValue) {
           try {
             const errorData = await response.json();
             errorDetails = JSON.stringify(errorData);
-          } catch (_) {
+          } catch (_: any) {
             // Ignore parse failures for error body.
           }
-          const err = new Error(`API request failed: ${errorDetails}`);
+          const err = new Error(`API request failed: ${errorDetails}`) as Error & { status?: number };
           err.status = response.status;
           throw err;
         }
@@ -269,7 +314,7 @@ _parseBundleConfigPayload(rawValue) {
       try {
         try {
           bundleData = await fetchBundleData();
-        } catch (firstErr) {
+        } catch (firstErr: any) {
           if (RETRYABLE_STATUSES.has(firstErr.status)) {
             await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS));
             bundleData = await fetchBundleData();
@@ -277,7 +322,7 @@ _parseBundleConfigPayload(rawValue) {
             throw firstErr;
           }
         }
-      } catch (_error) {
+      } catch (_error: any) {
       }
     }
 
@@ -329,7 +374,7 @@ _getProductPageTemplateContract() {
 },
 
 _getProductPageDesignPreset() {
-  const presetCandidates = [
+  const presetCandidates: any[] = [
     this.selectedBundle?.bundleDesignPresetId,
     this.selectedBundle?.bundleDesignTemplateData?.templateId,
   ];
@@ -354,7 +399,7 @@ _isProductPageInpageTemplate() {
   return this._getProductPageTemplateContract?.()?.templateType === 'PDP_INPAGE';
 },
 
-ensureProductPageTemplateStylesheet(templateType, designPreset) {
+ensureProductPageTemplateStylesheet(templateType: any, designPreset: any) {
   const templateContract = this._getProductPageTemplateContract();
   const templateKey = String(templateContract?.templateType || templateType || 'PDP_MODAL')
     .trim()
@@ -365,7 +410,7 @@ ensureProductPageTemplateStylesheet(templateType, designPreset) {
     ? 'vertical'
     : 'horizontal';
   const runtimeWindow = getWindow();
-  const urls = runtimeWindow?.__WOLFPACK_PPB_TEMPLATE_CSS_URLS__ || {};
+  const urls: Record<string, string | undefined> = runtimeWindow?.__WOLFPACK_PPB_TEMPLATE_CSS_URLS__ || {};
   const isModalTemplate = templateKey === 'PDP_MODAL';
   const modalAssetKey = normalizedSlotOrientation === 'vertical' ? 'VERTICAL_SLOTS' : 'HORIZONTAL_SLOTS';
   const href = urls[isModalTemplate
@@ -388,25 +433,25 @@ ensureProductPageTemplateStylesheet(templateType, designPreset) {
     return pendingPromise;
   }
 
-  const existingLink = Array.from(document.querySelectorAll('link[rel="stylesheet"]')).find((link) =>
+  const existingLink = Array.from(document.querySelectorAll<HTMLLinkElement>('link[rel="stylesheet"]')).find((link) =>
     link.getAttribute('href') === href
     || link.href === href
     || link.dataset.wpbPpbTemplateCss === assetKey
   );
 
-  const markLoaded = (link) => {
+  const markLoaded = (link: HTMLLinkElement) => {
     if (link instanceof HTMLLinkElement) {
       link.dataset.wpbPpbTemplateCssLoaded = '1';
     }
   };
 
-  const isStylesheetLoaded = (link) => {
+  const isStylesheetLoaded = (link: HTMLLinkElement) => {
     if (!link) return false;
     if (link.dataset?.wpbPpbTemplateCssLoaded === '1') return true;
 
     try {
       return !!link.sheet;
-    } catch (_error) {
+    } catch (_error: any) {
       return false;
     }
   };
@@ -417,7 +462,7 @@ ensureProductPageTemplateStylesheet(templateType, designPreset) {
       return Promise.resolve();
     }
 
-    const promise = new Promise((resolve) => {
+    const promise = new Promise<void>((resolve) => {
       const done = () => {
         markLoaded(existingLink);
         this._ppbTemplateStylesheetPromises.delete(href);
@@ -437,7 +482,7 @@ ensureProductPageTemplateStylesheet(templateType, designPreset) {
   link.href = href;
   link.dataset.wpbPpbTemplateCss = assetKey;
 
-  const promise = new Promise((resolve) => {
+  const promise = new Promise<void>((resolve) => {
     const done = () => {
       markLoaded(link);
       this._ppbTemplateStylesheetPromises.delete(href);
@@ -504,22 +549,22 @@ _markProductPageTemplate() {
 
 /** Steps that are neither free gift nor default — require user selection */
 get paidSteps() {
-  return this.selectedBundle?.steps?.filter(s => !s.isFreeGift && !s.isDefault) ?? [];
+  return this.selectedBundle?.steps?.filter((s: any)  => !s.isFreeGift && !s.isDefault) ?? [];
 },
 
 /** The free gift step, if any */
 get freeGiftStep() {
-  return this.selectedBundle?.steps?.find(s => s.isFreeGift) ?? null;
+  return this.selectedBundle?.steps?.find((s: any)  => s.isFreeGift) ?? null;
 },
 
 /** Index of the free gift step, or -1 */
 get freeGiftStepIndex() {
-  return this.selectedBundle?.steps?.findIndex(s => s.isFreeGift) ?? -1;
+  return this.selectedBundle?.steps?.findIndex((s: any)  => s.isFreeGift) ?? -1;
 },
 
 /** Steps that are pre-filled with a compulsory product */
 get defaultStepsList() {
-  return this.selectedBundle?.steps?.filter(s => s.isDefault) ?? [];
+  return this.selectedBundle?.steps?.filter((s: any)  => s.isDefault) ?? [];
 },
 
 /**
@@ -528,7 +573,7 @@ get defaultStepsList() {
  */
 get isFreeGiftUnlocked() {
   if (!this.selectedBundle) return false;
-  return this.selectedBundle.steps.every((step, i) => {
+  return this.selectedBundle.steps.every((step: any, i: any) => {
     if (step.isFreeGift || step.isDefault) return true; // skip these
     return this.validateStep(i);
   });

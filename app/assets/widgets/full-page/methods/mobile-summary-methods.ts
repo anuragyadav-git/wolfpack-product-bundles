@@ -19,14 +19,14 @@ import { TemplateDesignSystem } from '../../shared/template-design-system.js';
 
 const mobileSummaryTemplateSystem = TemplateDesignSystem;
 
-function getSummarySlotQuantity(item = {}) {
+function getSummarySlotQuantity(item: any = {}) {
   const quantity = Number(item?.quantity);
   return Number.isFinite(quantity) ? Math.max(0, Math.floor(quantity)) : 0;
 }
 
-function expandSelectedItemsForSummarySlots(allSelectedProducts = []) {
+function expandSelectedItemsForSummarySlots(allSelectedProducts: any[] = []) {
   const selectedProducts = Array.isArray(allSelectedProducts) ? allSelectedProducts : [];
-  const expanded = [];
+  const expanded: any[] = [];
 
   selectedProducts.forEach((item) => {
     const normalizedQuantity = getSummarySlotQuantity(item);
@@ -38,7 +38,7 @@ function expandSelectedItemsForSummarySlots(allSelectedProducts = []) {
   return expanded;
 }
 
-function syncCompactMobileSummaryDisclosureState(sheet, expanded) {
+function syncCompactMobileSummaryDisclosureState(sheet: any, expanded: any) {
   const bundleItems = sheet.querySelector?.('.fpb-mobile-summary-bundle-items');
   if (!bundleItems) return;
 
@@ -51,35 +51,35 @@ function syncCompactMobileSummaryDisclosureState(sheet, expanded) {
   bundleItems.setAttribute?.('aria-hidden', 'true');
 }
 
-function getSelectionId(item = {}) {
+function getSelectionId(item: any = {}) {
   return String(item?.selectionId || '');
 }
 
-function isSupportedFpbPreset(rawValue) {
+function isSupportedFpbPreset(rawValue: any) {
   if (typeof rawValue !== 'string') return false;
   if (typeof mobileSummaryTemplateSystem?.fpb?.isSupportedPreset === 'function') return mobileSummaryTemplateSystem.fpb.isSupportedPreset(rawValue);
   return Boolean(getFpbPresetContract(rawValue));
 }
 
-function getFpbPresetContract(rawValue) {
+function getFpbPresetContract(rawValue: string) {
   if (typeof mobileSummaryTemplateSystem?.fpb?.resolveContract !== 'function') return null;
   return mobileSummaryTemplateSystem.fpb.resolveContract(rawValue) || null;
 }
 
-function isClassicFpbPreset(rawValue) {
+function isClassicFpbPreset(rawValue: any) {
   return getFpbPresetContract(rawValue)?.summary?.mode === 'slots';
 }
 
-function isStandardFpbPreset(rawValue) {
+function isStandardFpbPreset(rawValue: any) {
   const contract = getFpbPresetContract(rawValue);
   return contract?.summary?.mode === 'rows' && contract?.productCard?.mode === 'grid';
 }
 
-function isStandardOrClassicFpbPreset(rawValue) {
+function isStandardOrClassicFpbPreset(rawValue: any) {
   return isStandardFpbPreset(rawValue) || isClassicFpbPreset(rawValue);
 }
 
-function supportsAdditionalOfferStatus(rawValue) {
+function supportsAdditionalOfferStatus(rawValue: string) {
   const contract = getFpbPresetContract(rawValue);
   if (contract?.mobileSummary?.showAdditionalOfferStatus != null) {
     return contract.mobileSummary.showAdditionalOfferStatus === true;
@@ -95,12 +95,12 @@ function supportsAdditionalOfferStatus(rawValue) {
     : false;
 }
 
-export function shouldUseMobileSummarySlotTiles({ designPreset, productSlotsEnabled } = {}) {
+export function shouldUseMobileSummarySlotTiles({ designPreset, productSlotsEnabled }: any = {}) {
   if (productSlotsEnabled !== true) return false;
   return Boolean(getFpbPresetContract(designPreset));
 }
 
-export function shouldUseFluidMobileSummaryFooter(designPreset) {
+export function shouldUseFluidMobileSummaryFooter(designPreset: any) {
   return isSupportedFpbPreset(designPreset);
 }
 
@@ -109,7 +109,8 @@ export function getMobileAdditionalOffersStatus({
   currentStepIndex = 0,
   steps = [],
   addonStates = [],
-} = {}) {
+  message = 'Additional offers to be unlocked',
+}: any = {}) {
   if (!supportsAdditionalOfferStatus(designPreset)) return { visible: false, message: '' };
 
   const bundleSteps = Array.isArray(steps) ? steps : [];
@@ -123,7 +124,7 @@ export function getMobileAdditionalOffersStatus({
 
   return {
     visible: true,
-    message: 'Additional offers to be unlocked',
+    message,
   };
 }
 
@@ -131,7 +132,7 @@ export function shouldDismissMobileSummarySwipe({
   distanceY = 0,
   distanceX = 0,
   velocityY = 0,
-} = {}) {
+}: any = {}) {
   const verticalDistance = Number(distanceY);
   const horizontalDistance = Math.abs(Number(distanceX));
   const downwardVelocity = Number(velocityY);
@@ -143,13 +144,13 @@ export function shouldDismissMobileSummarySwipe({
 export function getMobileSummarySkeletonCount({
   remainingRequiredCount = 0,
   selectedLineItemCount = 0,
-} = {}) {
+}: any = {}) {
   const remaining = Math.max(0, Number(remainingRequiredCount) || 0);
   const selectedRows = Math.max(0, Number(selectedLineItemCount) || 0);
   return Math.max(remaining, 3 - selectedRows);
 }
 
-function normalizeStepContentSubtext(value) {
+function normalizeStepContentSubtext(value: string) {
   if (typeof value !== 'string') return '';
   const text = value.trim();
   const normalized = text.toLowerCase();
@@ -172,7 +173,7 @@ function normalizeStepContentSubtext(value) {
 const MOBILE_SUMMARY_DIALOG_ID = 'fpb-mobile-summary-dialog';
 
 export const fullPageMobileSummaryMethods: Record<string, any> & ThisType<any> = {
-_populateCompactMobileSummaryTray(sheet) {
+_populateCompactMobileSummaryTray(sheet: any) {
   const previousListScrollTop = sheet.querySelector?.('.fpb-mobile-summary-products-list')?.scrollTop || 0;
   const previousProgressPercent = readRenderedDiscountProgressPercent(
     sheet.querySelector?.('.fpb-discount-progress')
@@ -208,7 +209,7 @@ _populateCompactMobileSummaryTray(sheet) {
     : [];
   const selectedFooterQuantity = shouldRenderSlotTiles
     ? selectedSlotItems.length
-    : allSelectedProducts.reduce((sum, item) => {
+    : allSelectedProducts.reduce((sum: number, item: any) => {
       const quantity = Number(item.quantity);
       return sum + (Number.isFinite(quantity) ? quantity : 0);
     }, 0);
@@ -219,7 +220,7 @@ _populateCompactMobileSummaryTray(sheet) {
     shouldUseFluidMobileSummaryFooter(designPreset)
   );
   const summaryToggleLabel = summaryText?.title || 'Review your bundle';
-  const addonStep = (this.selectedBundle?.steps || []).find(step => step?.isFreeGift === true) || null;
+  const addonStep = (this.selectedBundle?.steps || []).find((step: any)  => step?.isFreeGift === true) || null;
   const addonStates = addonStep && typeof this.getAddonSummaryEligibilityStates === 'function'
     ? this.getAddonSummaryEligibilityStates(addonStep)
     : [];
@@ -228,6 +229,8 @@ _populateCompactMobileSummaryTray(sheet) {
     currentStepIndex: this.currentStepIndex,
     steps: this.selectedBundle?.steps || [],
     addonStates,
+    message: this._resolveText?.('mobileAddonNotification', 'Additional offers to be unlocked')
+      || 'Additional offers to be unlocked',
   });
   const toggleSummaryTray = () => {
     this._toggleCompactMobileSummaryTray(sheet);
@@ -382,7 +385,7 @@ _populateCompactMobileSummaryTray(sheet) {
 
   const isLastStep = this.currentStepIndex === (this.selectedBundle?.steps?.length || 1) - 1;
   const conditionlessMobile = this.bundleHasNoConditions();
-  const actionArgs = {
+  const actionArgs: any = {
     discountBadgeLabel,
     conditionlessMobile,
     isLastStep,
@@ -455,7 +458,7 @@ _populateCompactMobileSummaryTray(sheet) {
   this.renderPurchaseOptions?.();
 },
 
-_toggleCompactMobileSummaryTray(sheet) {
+_toggleCompactMobileSummaryTray(sheet: any) {
   const nextExpanded = !this.compactMobileSummaryTrayExpanded;
   this._setCompactMobileSummaryOpen?.(sheet, nextExpanded);
   if (!this._setCompactMobileSummaryOpen) {
@@ -463,7 +466,7 @@ _toggleCompactMobileSummaryTray(sheet) {
   }
 },
 
-_setCompactMobileSummaryOpen(sheet, expanded, { restoreFocus = true } = {}) {
+_setCompactMobileSummaryOpen(sheet: any, expanded: boolean, { restoreFocus = true }: any = {}) {
   const dialog = sheet.querySelector?.('.fpb-mobile-summary-dialog');
   const trigger = sheet.querySelector?.('.fpb-mobile-summary-count-badge');
   this.compactMobileSummaryTrayExpanded = expanded === true;
@@ -482,15 +485,15 @@ _setCompactMobileSummaryOpen(sheet, expanded, { restoreFocus = true } = {}) {
   if (restoreFocus) trigger?.focus?.();
 },
 
-_bindCompactMobileSummaryDialog(sheet, dialog, dragHandle) {
+_bindCompactMobileSummaryDialog(sheet: any, dialog: any, dragHandle: any) {
   if (!dialog || dialog.dataset?.fpbSummaryBound === 'true') return;
   if (dialog.dataset) dialog.dataset.fpbSummaryBound = 'true';
 
-  dialog.addEventListener?.('cancel', (event) => {
+  dialog.addEventListener?.('cancel', (event: any) => {
     event.preventDefault?.();
     this._setCompactMobileSummaryOpen(sheet, false);
   });
-  dialog.addEventListener?.('click', (event) => {
+  dialog.addEventListener?.('click', (event: any) => {
     if (event.target === dialog) this._setCompactMobileSummaryOpen(sheet, false);
   });
   dialog.addEventListener?.('close', () => {
@@ -503,8 +506,8 @@ _bindCompactMobileSummaryDialog(sheet, dialog, dragHandle) {
     }
   });
 
-  let gesture = null;
-  dragHandle?.addEventListener?.('pointerdown', (event) => {
+  let gesture: any = null;
+  dragHandle?.addEventListener?.('pointerdown', (event: any) => {
     gesture = {
       pointerId: event.pointerId,
       startX: event.clientX,
@@ -513,12 +516,12 @@ _bindCompactMobileSummaryDialog(sheet, dialog, dragHandle) {
     };
     dragHandle.setPointerCapture?.(event.pointerId);
   });
-  dragHandle?.addEventListener?.('pointermove', (event) => {
+  dragHandle?.addEventListener?.('pointermove', (event: any) => {
     if (!gesture || event.pointerId !== gesture.pointerId) return;
     const distanceY = Math.max(0, event.clientY - gesture.startY);
     dialog.style?.setProperty?.('--fpb-mobile-summary-drag-y', `${distanceY}px`);
   });
-  const finishGesture = (event) => {
+  const finishGesture = (event: any) => {
     if (!gesture || event.pointerId !== gesture.pointerId) return;
     const elapsed = Math.max(1, performance.now() - gesture.startedAt);
     const distanceY = event.clientY - gesture.startY;
@@ -540,11 +543,11 @@ _bindCompactMobileSummaryDialog(sheet, dialog, dragHandle) {
   });
 },
 
-_syncCompactMobileSummaryDisclosureState(sheet, expanded) {
+_syncCompactMobileSummaryDisclosureState(sheet: any, expanded: any) {
   syncCompactMobileSummaryDisclosureState(sheet, expanded);
 },
 
-_renderCompactMobileSummaryBundleItems(currencyInfo, totalQuantity) {
+_renderCompactMobileSummaryBundleItems(currencyInfo: any, totalQuantity: number) {
   const allSelectedProducts = this.getAllSelectedProductsData();
   const activeStep = this.selectedBundle?.steps?.[this.currentStepIndex] || this.selectedBundle?.steps?.[0] || null;
   const summaryText = this.getBundleSummaryText();
@@ -592,7 +595,7 @@ _renderCompactMobileSummaryBundleItems(currencyInfo, totalQuantity) {
     return bundleItems;
   }
 
-  allSelectedProducts.forEach(item => {
+  allSelectedProducts.forEach((item: any)  => {
     const summaryTitle = this.getSummaryProductDisplayTitle(item);
     const variantInfo = this.getSummaryProductVariantDisplay(item);
     const row = document.createElement('div');
@@ -694,7 +697,7 @@ _renderCompactMobileSummaryBundleItems(currencyInfo, totalQuantity) {
   return bundleItems;
 },
 
-_renderCompactMobileSummarySlotTiles(container, allSelectedProducts = [], activeStep = null, totalQuantity = 0) {
+_renderCompactMobileSummarySlotTiles(container: any, allSelectedProducts: any[] = [], activeStep: any = null, totalQuantity = 0) {
   const selectedItems = expandSelectedItemsForSummarySlots(allSelectedProducts);
   const selectedCount = selectedItems.length;
   const sharedTargetCount = typeof this.getSummarySidebarMaxItemCount === 'function'
@@ -735,7 +738,7 @@ _createMobileSummaryActionButton({
   conditionlessMobile,
   isLastStep,
   isComplete
-}) {
+}: any) {
   const ctaBtn = document.createElement('button');
   ctaBtn.className = 'side-panel-btn side-panel-btn-next';
   const shouldAdvance = !conditionlessMobile && !isLastStep;
@@ -817,14 +820,14 @@ getBundleContentSummaryText() {
   };
 },
 
-getCurrentStepContentText(stepIndex) {
+getCurrentStepContentText(stepIndex: string|number) {
   const step = this.selectedBundle?.steps?.[stepIndex];
   return {
     subtext: normalizeStepContentSubtext(step?.pageTitle)
   };
 },
 
-createStepContentHeader(stepIndex) {
+createStepContentHeader(stepIndex: any) {
   if (!this.shouldRenderFullPageStepChrome()) return null;
 
   const contentText = this.getCurrentStepContentText(stepIndex);
@@ -852,14 +855,14 @@ usesSelectedQuantityBadge() {
   return false;
 },
 
-_isStandardDesktopSidebar(panel) {
+_isStandardDesktopSidebar(panel: any) {
   const preset = this.getFullPageDesignPreset();
   return this.resolveFullPageLayout() === 'footer_side'
     && isStandardOrClassicFpbPreset(preset)
     && !panel?.classList?.contains('fpb-mobile-bottom-sheet');
 },
 
-createStandardSidebarSelectedRow(item, currencyInfo) {
+createStandardSidebarSelectedRow(item: any, currencyInfo: any) {
   const summaryTitle = this.getSummaryProductDisplayTitle(item);
   const variantInfo = this.getSummaryProductVariantDisplay(item);
   const isFreeGiftItem = item.isFreeGift === true && item.addonDisplayFree === true;
@@ -884,9 +887,9 @@ createStandardSidebarSelectedRow(item, currencyInfo) {
   return row;
 },
 
-createStandardSidebarDiscountProgress({ discountMessage, combinedDiscountInfo, totalPrice, totalQuantity }) {
+createStandardSidebarDiscountProgress({ discountMessage, combinedDiscountInfo, totalPrice, totalQuantity }: any) {
   const activeRule = combinedDiscountInfo?.applicableRule
-    || PricingCalculator.getNextDiscountRule?.(this.selectedBundle, totalQuantity)
+    || PricingCalculator.getNextDiscountRule?.(this.selectedBundle, totalQuantity, totalPrice)
     || null;
   if (!activeRule) return null;
 

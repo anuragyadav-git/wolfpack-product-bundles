@@ -3,23 +3,23 @@ import { PricingCalculator } from '../../shared/pricing-calculator.js';
 import { calculateBundleTotalForPurchaseOption } from '../../shared/subscription-storefront-methods.js';
 import { ConditionValidator } from '../../shared/condition-validator.js';
 
-function getAddonTiersForStep(step) {
+function getAddonTiersForStep(step: any) {
   return Array.isArray(step?.addonTiers) ? step.addonTiers.filter(Boolean) : [];
 }
 
-function hasConfiguredAddonRule(step) {
+function hasConfiguredAddonRule(step: any) {
   if (!step) return false;
   const eligibilityValue = Number(step.addonEligibilityCondition?.value) || 0;
   if (eligibilityValue > 0) return true;
 
-  return getAddonTiersForStep(step).some(tier => {
+  return getAddonTiersForStep(step).some((tier: any)  => {
     const tierValue = Number(tier?.eligibilityCondition?.value) || 0;
     if (tierValue > 0) return true;
     return Array.isArray(tier?.selectedAddonProducts) && tier.selectedAddonProducts.length > 0;
   });
 }
 
-function getAddonTierCandidatesWithState(step, totalPrice, totalQuantity) {
+function getAddonTierCandidatesWithState(step: any, totalPrice: number, totalQuantity: number) {
   const directTier = step?.addonEligibilityCondition || step?.addonDiscount
     ? [{
         eligibilityCondition: step?.addonEligibilityCondition || {},
@@ -29,7 +29,7 @@ function getAddonTierCandidatesWithState(step, totalPrice, totalQuantity) {
   const tiers = getAddonTiersForStep(step);
   const candidates = tiers.length > 0 ? tiers : directTier;
 
-  return candidates.map((tier, index) => {
+  return candidates.map((tier: any, index: any) => {
     const condition = tier?.eligibilityCondition || {};
     const conditionType = String(condition.type || 'QUANTITY').toUpperCase();
     const conditionValue = Number(condition.value || 0);
@@ -39,7 +39,7 @@ function getAddonTierCandidatesWithState(step, totalPrice, totalQuantity) {
   });
 }
 
-function normalizeAddonPercentageDiscount(...sources) {
+function normalizeAddonPercentageDiscount(...sources: any[]) {
   for (const source of sources) {
     if (!source || typeof source !== 'object' || Array.isArray(source)) continue;
     const type = String(source.type ?? source.discountType ?? '').toUpperCase();
@@ -51,24 +51,24 @@ function normalizeAddonPercentageDiscount(...sources) {
   return null;
 }
 
-function getAddonDiscountForStepTier(step, tier) {
+function getAddonDiscountForStepTier(step: any, tier: any) {
   return normalizeAddonPercentageDiscount(tier?.discount, tier, step?.addonDiscount);
 }
 
-function getSelectionId(item = {}) {
+function getSelectionId(item: any = {}) {
   return String(item?.selectionId || '');
 }
 
-function getDefaultVariantQuantity(variant = {}) {
+function getDefaultVariantQuantity(variant: any = {}) {
   return normalizeDefaultRequiredQuantity(variant.defaultRequiredQuantity);
 }
 
-function normalizeDefaultRequiredQuantity(value = 0) {
-  const rawQuantity = Number.parseFloat(value);
+function normalizeDefaultRequiredQuantity(value: any = 0) {
+  const rawQuantity = Number.parseFloat(String(value));
   return Number.isFinite(rawQuantity) && rawQuantity >= 0 ? rawQuantity : 0;
 }
 
-function createFreeGiftStatusIcon(state) {
+function createFreeGiftStatusIcon(state: string) {
   const icon = document.createElement('span');
   icon.className = `side-panel-free-gift-icon side-panel-free-gift-icon--${state}`;
   icon.setAttribute('aria-hidden', 'true');
@@ -76,7 +76,7 @@ function createFreeGiftStatusIcon(state) {
   return icon;
 }
 
-function createFreeGiftStatusText(message) {
+function createFreeGiftStatusText(message: string|null) {
   const text = document.createElement('span');
   text.className = 'side-panel-free-gift-text';
   text.textContent = message;
@@ -166,7 +166,7 @@ async _sidebarAdvanceToNextStep() {
     this.hideLoadingOverlay();
     this.preloadNextStep();
     this._renderMobileSummaryTray();
-  } catch (error) {
+  } catch (error: any) {
     this.hideLoadingOverlay();
     productGridContainer.innerHTML = '<p class="error-message">Failed to load products. Please try again.</p>';
     this._renderMobileSummaryTray();
@@ -180,7 +180,7 @@ canProceedToNextStep() {
 
 // Helper: Check if all bundle conditions are met
 areBundleConditionsMet() {
-  return this.selectedBundle.steps.every((step, index) => {
+  return this.selectedBundle.steps.every((step: any, index: any) => {
     if (step.isFreeGift || step.isDefault) return true; // non-blocking steps
     return this.isStepCompleted(index);
   });
@@ -193,14 +193,14 @@ areBundleConditionsMet() {
 // merchant-configured addon threshold.
 bundleHasNoConditions() {
   if (!this.selectedBundle?.steps?.length) return false;
-  return this.selectedBundle.steps.every(step => {
+  return this.selectedBundle.steps.every((step: any)  => {
     if (step.isDefault) return true;
     if (step.isFreeGift) {
       const eligibilityValue = Number(step.addonEligibilityCondition?.value) || 0;
       if (eligibilityValue > 0) return false;
       const tiers = getAddonTiersForStep(step);
       if (tiers.length > 0) {
-        return tiers.every(tier => {
+        return tiers.every((tier: any)  => {
           const tierValue = Number(tier.eligibilityCondition?.value) || 0;
           if (tierValue > 0) return false;
           if (Array.isArray(tier.selectedAddonProducts) && tier.selectedAddonProducts.length > 0) return false;
@@ -216,37 +216,37 @@ bundleHasNoConditions() {
 // Free gift helpers
 
 get freeGiftStep() {
-  return (this.selectedBundle?.steps || []).find(s => s.isFreeGift) ?? null;
+  return (this.selectedBundle?.steps || []).find((s: any)  => s.isFreeGift) ?? null;
 },
 
 get freeGiftStepIndex() {
-  return (this.selectedBundle?.steps || []).findIndex(s => s.isFreeGift);
+  return (this.selectedBundle?.steps || []).findIndex((s: any)  => s.isFreeGift);
 },
 
 get paidSteps() {
-  return (this.selectedBundle?.steps || []).filter(s => !s.isFreeGift && !s.isDefault);
+  return (this.selectedBundle?.steps || []).filter((s: any)  => !s.isFreeGift && !s.isDefault);
 },
 
 get isFreeGiftUnlocked() {
   if (!this.freeGiftStep) return false;
   const steps = this.selectedBundle?.steps || [];
-  return this.paidSteps.every(paidStep => {
+  return this.paidSteps.every((paidStep: any)  => {
     const globalIndex = steps.indexOf(paidStep);
     return this.isStepCompleted(globalIndex);
   });
 },
 
-canNavigateToStep(targetStepIndex) {
+canNavigateToStep(targetStepIndex: string|number) {
   const targetStep = (this.selectedBundle?.steps || [])[targetStepIndex];
   if (targetStep?.isFreeGift && !this.isFreeGiftUnlocked) return false;
   return true;
 },
 
-getAddonTiers(step) {
+getAddonTiers(step: any) {
   return getAddonTiersForStep(step);
 },
 
-getAddonTierEvaluation(step) {
+getAddonTierEvaluation(step: any) {
   const { totalPrice, totalQuantity } = calculateBundleTotalForPurchaseOption(this,
     this.selectedProducts,
     this.stepProductData,
@@ -258,11 +258,11 @@ getAddonTierEvaluation(step) {
   }
 
   const eligible = withState
-    .filter(candidate => candidate.isEligible)
-    .sort((a, b) => (a.threshold - b.threshold) || (a.index - b.index));
+    .filter((candidate: any)  => candidate.isEligible)
+    .sort((a: any, b: any) => (a.threshold - b.threshold) || (a.index - b.index));
   const next = withState
-    .filter(candidate => !candidate.isEligible)
-    .sort((a, b) => (a.threshold - b.threshold) || (a.index - b.index));
+    .filter((candidate: any)  => !candidate.isEligible)
+    .sort((a: any, b: any) => (a.threshold - b.threshold) || (a.index - b.index));
   const selected = eligible[eligible.length - 1] || next[0] || withState[0];
 
   return {
@@ -275,7 +275,7 @@ getAddonTierEvaluation(step) {
   };
 },
 
-getAddonMessageTierEvaluation(step) {
+getAddonMessageTierEvaluation(step: any) {
   const { totalPrice, totalQuantity } = calculateBundleTotalForPurchaseOption(this,
     this.selectedProducts,
     this.stepProductData,
@@ -287,11 +287,11 @@ getAddonMessageTierEvaluation(step) {
   }
 
   const next = withState
-    .filter(candidate => !candidate.isEligible)
-    .sort((a, b) => (a.threshold - b.threshold) || (a.index - b.index));
+    .filter((candidate: any)  => !candidate.isEligible)
+    .sort((a: any, b: any) => (a.threshold - b.threshold) || (a.index - b.index));
   const eligible = withState
-    .filter(candidate => candidate.isEligible)
-    .sort((a, b) => (a.threshold - b.threshold) || (a.index - b.index));
+    .filter((candidate: any)  => candidate.isEligible)
+    .sort((a: any, b: any) => (a.threshold - b.threshold) || (a.index - b.index));
   const selected = next[0] || eligible[eligible.length - 1] || withState[0];
 
   return {
@@ -304,7 +304,7 @@ getAddonMessageTierEvaluation(step) {
   };
 },
 
-getAddonSummaryEligibilityStates(step) {
+getAddonSummaryEligibilityStates(step: any) {
   const { totalPrice, totalQuantity } = calculateBundleTotalForPurchaseOption(this,
     this.selectedProducts,
     this.stepProductData,
@@ -314,21 +314,21 @@ getAddonSummaryEligibilityStates(step) {
   const getEligibilityState = typeof this.getAddonEligibilityState === 'function'
     ? this.getAddonEligibilityState
     : fullPageValidationAddonsMethods.getAddonEligibilityState;
-  const compareTierProgression = (left, right) => (
+  const compareTierProgression = (left: any, right: any) => (
     (left.threshold - right.threshold) || (left.index - right.index)
   );
   const eligible = withState
-    .filter(candidate => candidate.isEligible)
+    .filter((candidate: any)  => candidate.isEligible)
     .sort(compareTierProgression);
   const activeEligible = eligible[eligible.length - 1] || null;
   const visibleCandidates = activeEligible
-    ? withState.filter(candidate => (
+    ? withState.filter((candidate: any)  => (
         candidate === activeEligible
         || (!candidate.isEligible && compareTierProgression(candidate, activeEligible) > 0)
       ))
     : withState;
 
-  return visibleCandidates.map(candidate => getEligibilityState.call(this, step, {
+  return visibleCandidates.map((candidate: any)  => getEligibilityState.call(this, step, {
     tier: candidate.tier,
     tierIndex: candidate.index,
     isEligible: candidate.isEligible === true,
@@ -340,7 +340,7 @@ getAddonSummaryEligibilityStates(step) {
 
 _getFreeGiftRemainingCount() {
   const steps = this.selectedBundle?.steps || [];
-  const paidStepsComplete = this.paidSteps.every(paidStep => {
+  const paidStepsComplete = this.paidSteps.every((paidStep: any)  => {
     const globalIndex = steps.indexOf(paidStep);
     return this.isStepCompleted(globalIndex);
   });
@@ -351,17 +351,17 @@ _getFreeGiftRemainingCount() {
 
   if (paidStepsComplete) return 0;
 
-  const total = this.paidSteps.reduce((sum, s) => {
+  const total = this.paidSteps.reduce((sum: any, s: any) => {
       const required = typeof this._getSummarySidebarRequiredQuantity === 'function'
         ? this._getSummarySidebarRequiredQuantity(s)
         : null;
       return sum + (Number.isFinite(required) && required > 0 ? required : 0);
     },
     0);
-  const selected = this.paidSteps.reduce((sum, paidStep) => {
+  const selected = this.paidSteps.reduce((sum: number, paidStep: any) => {
     const globalIndex = steps.indexOf(paidStep);
     const stepSel = this.selectedProducts[globalIndex] ?? {};
-    return sum + Object.values(stepSel).reduce((s, p) => {
+    return sum + Object.values<any>(stepSel).reduce((s: number, p: any) => {
       const quantity = typeof p === 'number' ? p : Number(p?.quantity);
       return s + (Number.isFinite(quantity) ? quantity : 0);
     }, 0);
@@ -369,13 +369,13 @@ _getFreeGiftRemainingCount() {
   return Math.max(0, total - selected);
 },
 
-getAddonEligibilityState(step, evaluationOverride = null) {
+getAddonEligibilityState(step: any, evaluationOverride: any = null) {
   const evaluation = evaluationOverride || (typeof this.getAddonTierEvaluation === 'function'
     ? this.getAddonTierEvaluation(step)
     : fullPageValidationAddonsMethods.getAddonTierEvaluation.call(this, step));
   const tier = evaluation.tier;
   const condition = tier?.eligibilityCondition || step?.addonEligibilityCondition || {};
-  const discount = getAddonDiscountForStepTier(step, tier) || {};
+  const discount: any = getAddonDiscountForStepTier(step, tier) || {};
   const conditionType = String(condition.type || 'QUANTITY').toUpperCase();
   const conditionValue = Number(condition.value || 0);
   const currencyInfo = CurrencyManager.getCurrencyInfo();
@@ -413,7 +413,7 @@ getAddonEligibilityState(step, evaluationOverride = null) {
   };
 },
 
-getAddonMessageEligibilityState(step) {
+getAddonMessageEligibilityState(step: any) {
   const evaluation = typeof this.getAddonMessageTierEvaluation === 'function'
     ? this.getAddonMessageTierEvaluation(step)
     : fullPageValidationAddonsMethods.getAddonMessageTierEvaluation.call(this, step);
@@ -423,7 +423,7 @@ getAddonMessageEligibilityState(step) {
   return getEligibilityState.call(this, step, evaluation);
 },
 
-getAddonLineDiscount(step) {
+getAddonLineDiscount(step: any) {
   const evaluation = typeof this.getAddonTierEvaluation === 'function'
     ? this.getAddonTierEvaluation(step)
     : fullPageValidationAddonsMethods.getAddonTierEvaluation.call(this, step);
@@ -432,15 +432,15 @@ getAddonLineDiscount(step) {
   return getAddonDiscountForStepTier(step, tier);
 },
 
-getAddonProductSelectionKeys(step) {
+getAddonProductSelectionKeys(step: any) {
   const keys = new Set();
-  const addKey = (value) => {
+  const addKey = (value: any) => {
     if (value === null || value === undefined || value === '') return;
     const selectionId = String(value?.selectionId || '');
     if (!selectionId) return;
     keys.add(selectionId);
   };
-  const products = [
+  const products: any[] = [
     ...(Array.isArray(step?.StepProduct) ? step.StepProduct : []),
     ...(Array.isArray(step?.products) ? step.products : []),
   ];
@@ -457,9 +457,9 @@ getAddonProductSelectionKeys(step) {
 
 calculateSelectedAddonDiscountAmount() {
   const steps = this.selectedBundle?.steps || [];
-  const chargeableAddonStep = steps.find(candidate => candidate?.isFreeGift === true && this.getAddonLineDiscount(candidate));
+  const chargeableAddonStep = steps.find((candidate: any)  => candidate?.isFreeGift === true && this.getAddonLineDiscount(candidate));
   const chargeableAddonStepIndex = steps.indexOf(chargeableAddonStep);
-  return this.getAllSelectedProductsData().reduce((total, item) => {
+  return this.getAllSelectedProductsData().reduce((total: number, item: any) => {
     const itemStepIndex = Number(item.stepIndex);
     const isChargeableAddonItem = itemStepIndex === chargeableAddonStepIndex || (item.isFreeGift === true && item.addonDisplayFree !== true);
     if (!isChargeableAddonItem) return total;
@@ -474,7 +474,7 @@ calculateSelectedAddonDiscountAmount() {
   }, 0);
 },
 
-getDiscountInfoWithSelectedAddonDiscount(discountInfo, totalPrice) {
+getDiscountInfoWithSelectedAddonDiscount(discountInfo: any, totalPrice: number) {
   const baseDiscountAmount = Math.max(0, Number(discountInfo?.discountAmount || 0));
   const addonDiscountAmount = this.calculateSelectedAddonDiscountAmount();
   const combinedDiscountAmount = Math.min(totalPrice, baseDiscountAmount + addonDiscountAmount);
@@ -491,7 +491,7 @@ getDiscountInfoWithSelectedAddonDiscount(discountInfo, totalPrice) {
   };
 },
 
-renderAddonEligibilityMessage(step, eligibilityState) {
+renderAddonEligibilityMessage(step: any, eligibilityState: any) {
   const messages = step?.addonMessaging || {};
   const tierKey = eligibilityState?.tierIndex >= 0 ? `tier${eligibilityState.tierIndex + 1}` : 'tier1';
   const tierMessages = messages[tierKey] || messages.tier1 || {};
@@ -504,7 +504,7 @@ renderAddonEligibilityMessage(step, eligibilityState) {
   const messageTemplate = template || defaultMessage;
   if (!messageTemplate) return '';
 
-  return Object.entries(eligibilityState.variables).reduce((message, [key, value]) => {
+  return Object.entries(eligibilityState.variables).reduce((message, [key, value]: any) => {
     if (key === 'discountValue') {
       const unit = eligibilityState.variables.discountValueUnit || '';
       const displayValue = unit ? `${value}${unit}` : value;
@@ -521,7 +521,7 @@ renderAddonEligibilityMessage(step, eligibilityState) {
   }, messageTemplate);
 },
 
-getDefaultAddonTierMessage(eligibilityState) {
+getDefaultAddonTierMessage(eligibilityState: any) {
   if (!eligibilityState) return '';
   if (eligibilityState.isEligible) {
     return 'Congrats you are eligible for ##addonsDiscountValue####addonsDiscountValueUnit## off on Add ons';
@@ -532,7 +532,7 @@ getDefaultAddonTierMessage(eligibilityState) {
   return 'Add ##addonsConditionDiff## more product(s) to claim ##addonsDiscountValue####addonsDiscountValueUnit## off on Add ons';
 },
 
-renderAddonSectionTitle(step) {
+renderAddonSectionTitle(step: any) {
   const title = step?.freeGiftName || step?.addonTitle || step?.addonLabel;
   if (typeof title !== 'string' || !title.trim()) return null;
 
@@ -542,7 +542,7 @@ renderAddonSectionTitle(step) {
   return titleEl;
 },
 
-createAddonTierMessageElement(message, isEligible) {
+createAddonTierMessageElement(message: string|null, isEligible: any) {
   const messageCard = document.createElement('div');
   messageCard.className = isEligible
     ? 'side-panel-addon-message side-panel-addon-message--eligible'
@@ -573,8 +573,8 @@ createAddonTierMessageElement(message, isEligible) {
 _initDefaultProducts() {
     const steps = this.selectedBundle?.steps || [];
     const normalizeId = (value = '') => this.extractId(value);
-    const normalizeSelectionId = (candidate) => getSelectionId(candidate);
-    const canSelectDefault = (variant) => {
+    const normalizeSelectionId = (candidate: any) => getSelectionId(candidate);
+    const canSelectDefault = (variant: any) => {
       if (!variant) return false;
       if (typeof this.isVariantSelectableForInventory === 'function') {
         return this.isVariantSelectableForInventory(variant);
@@ -582,19 +582,19 @@ _initDefaultProducts() {
       return variant.available !== false;
   };
 
-  steps.forEach((step, stepIndex) => {
+  steps.forEach((step: any, stepIndex: string|number) => {
     if (!step.isDefault || !step.defaultVariantId) return;
     const targetId = normalizeId(step.defaultVariantId);
     if (!targetId) return;
-    const allProducts = [...(step.products || []), ...(step.StepProduct || [])];
-    const isMatchingDefault = (candidate) => normalizeSelectionId(candidate) === targetId;
+    const allProducts: any[] = [...(step.products || []), ...(step.StepProduct || [])];
+    const isMatchingDefault = (candidate: any) => normalizeSelectionId(candidate) === targetId;
     const product = allProducts.find((product) => {
       if (isMatchingDefault(product)) return true;
       if (!Array.isArray(product.variants)) return false;
       return product.variants.some(isMatchingDefault);
     });
     if (!product) return;
-    let selectedVariant = null;
+    let selectedVariant: any = null;
     if (Array.isArray(product.variants) && product.variants.length > 0) {
       selectedVariant = product.variants.find(isMatchingDefault);
       if (!selectedVariant) return;
@@ -609,7 +609,7 @@ _initDefaultProducts() {
 },
 
 _initDirectDefaultProducts() {
-  const canSelectDirectDefault = (product = {}) => {
+  const canSelectDirectDefault = (product: any = {}) => {
     const firstVariant = Array.isArray(product.variants) ? product.variants[0] : null;
     if (!firstVariant) return false;
     if (typeof this.isVariantSelectableForInventory === 'function') {
@@ -622,7 +622,7 @@ _initDirectDefaultProducts() {
   if (this.directDefaultProducts.length === 0 || !this.selectedProducts[0]) return;
 
     this.directDefaultProducts = this.directDefaultProducts.filter(canSelectDirectDefault);
-    this.directDefaultProducts.forEach(product => {
+    this.directDefaultProducts.forEach((product: any)  => {
       const selectionId = getSelectionId(product);
       if (!selectionId) return;
       const defaultQuantity = Number.parseFloat(product.defaultRequiredQuantity);
@@ -643,7 +643,7 @@ _syncFreeGiftLock() {
 },
 
 // Render the free gift locked/unlocked section in a given container
-_renderFreeGiftSection(container) {
+_renderFreeGiftSection(container: any) {
   const step = this.freeGiftStep;
   if (!step) return;
   if (step.addonProductsEnabled === false) return;
@@ -663,15 +663,15 @@ _renderFreeGiftSection(container) {
           : this.getAddonEligibilityState(step));
     const states = summaryStates.length > 0 ? summaryStates : [fallbackState].filter(Boolean);
     const messages = states
-      .map(eligibilityState => ({
+      .map((eligibilityState: any)  => ({
         eligibilityState,
         message: this.renderAddonEligibilityMessage(step, eligibilityState),
       }))
-      .filter(({ message }) => Boolean(message));
+      .filter(({ message }: any) => Boolean(message));
     if (messages.length === 0) return;
 
     const title = this.renderAddonSectionTitle(step);
-    const hasEligibleTier = messages.some(({ eligibilityState }) => eligibilityState.isEligible);
+    const hasEligibleTier = messages.some(({ eligibilityState }: any) => eligibilityState.isEligible);
     section.className = hasEligibleTier
       ? 'side-panel-addon-summary side-panel-free-gift unlocked'
       : 'side-panel-addon-summary side-panel-free-gift';
@@ -681,7 +681,7 @@ _renderFreeGiftSection(container) {
     const createMessageElement = typeof this.createAddonTierMessageElement === 'function'
       ? this.createAddonTierMessageElement
       : fullPageValidationAddonsMethods.createAddonTierMessageElement;
-    messages.forEach(({ message, eligibilityState }) => {
+    messages.forEach(({ message, eligibilityState }: any) => {
       tierList.appendChild(createMessageElement.call(this, message, eligibilityState.isEligible));
     });
     section.appendChild(tierList);
@@ -704,7 +704,7 @@ _renderFreeGiftSection(container) {
   container.appendChild(section);
 },
 
-_renderStandardSidebarEmptySlots(container, options = {}) {
+_renderStandardSidebarEmptySlots(container: any, options: any = {}) {
   const slotCount = this.getSummarySidebarMaxItemCount();
   const filledCount = Math.max(0, Number(options.filledCount || 0));
   const emptySlotCount = Math.max(0, slotCount - filledCount);
@@ -755,7 +755,7 @@ _renderStandardSidebarEmptySlots(container, options = {}) {
 },
 
 // Render empty-summary skeleton rows that match selected product rows.
-_renderSidebarProductSkeletons(container, slotCountOverride) {
+_renderSidebarProductSkeletons(container: any, slotCountOverride: any) {
   const slotCount = Number.isFinite(Number(slotCountOverride))
     ? Math.max(0, Number(slotCountOverride))
     : this.getSummarySidebarMaxItemCount();
@@ -776,13 +776,13 @@ _renderSidebarProductSkeletons(container, slotCountOverride) {
   }
 },
 
-_getSummarySidebarRequiredQuantity(step) {
+_getSummarySidebarRequiredQuantity(step: any) {
   if (!step || step.enabled === false || step.isDefault || step.isFreeGift) return null;
   if (ConditionValidator.isCategoryRuleMode(step)) return null;
 
-  let requiredQuantity = null;
+  let requiredQuantity: number|null = null;
 
-  const pushLowerBound = (operator, value) => {
+  const pushLowerBound = (operator: string, value: number) => {
     if (!Number.isFinite(value) || value <= 0) {
       return;
     }

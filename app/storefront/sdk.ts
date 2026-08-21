@@ -14,7 +14,7 @@ import {
 function captureSdkDiscountTierState(state: any) {
   return captureDiscountTierState({
     selectedBundle: state.bundleData,
-    selectedProducts: state.steps.map((step) => state.selections[step.id] || {}),
+    selectedProducts: state.steps.map((step: { id: string|number; }) => state.selections[step.id] || {}),
     stepProductData: state.stepProductData,
   });
 }

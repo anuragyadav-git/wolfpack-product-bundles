@@ -34,18 +34,18 @@ describe('PPB product card button copy', () => {
   });
 
   it('resolves PPB inline product-card add copy before modal add copy', () => {
-    const resolveText = jest.fn((key, fallback) => ({
+    const resolveText = jest.fn((key: string, fallback: string) => ({
       productCardAddButton: 'Modal Add',
       productCardInlineAddButton: 'Inline Add +',
-    }[key] || fallback));
+    } as Record<string, string>)[key] || fallback);
 
     expect(resolveProductPageInlineAddText(resolveText)).toBe('Inline Add +');
   });
 
   it('falls back to modal product-card add copy for inline cards', () => {
-    const resolveText = jest.fn((key, fallback) => ({
+    const resolveText = jest.fn((key: string, fallback: string) => ({
       productCardAddButton: 'Modal Add',
-    }[key] || fallback));
+    } as Record<string, string>)[key] || fallback);
 
     expect(resolveProductPageInlineAddText(resolveText)).toBe('Modal Add');
   });
@@ -53,7 +53,7 @@ describe('PPB product card button copy', () => {
   it('renders the active Product Page variant label on variant selectors', () => {
     const html = ProductPageModalMethods.renderVariantSelector.call(
       {
-        _resolveText: (key, fallback) => (key === 'productVariantLabel' ? 'Choose Variant' : fallback),
+        _resolveText: (key: string, fallback: any) => (key === 'productVariantLabel' ? 'Choose Variant' : fallback),
         isInventoryTrackingOnAddToCartEnabled: () => false,
       },
       {

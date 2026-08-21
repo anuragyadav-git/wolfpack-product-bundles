@@ -12,3 +12,4 @@ describe('FPB Standard template config contract', () => {
     expect(FPB_STANDARD_TEMPLATE_CONFIG.aliases).toEqual(['STANDARD']);
   });
 });
+export {};

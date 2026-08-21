@@ -48,7 +48,7 @@ describe('PPB selected-slot content', () => {
     { compareAtPrice: null },
     { compareAtPrice: 0 },
     { compareAtPrice: 80000 },
-  ])('hides compare-at when it is not an available higher retail price', ({ compareAtPrice }) => {
+  ])('hides compare-at when it is not an available higher retail price', ({ compareAtPrice }: any) => {
     expect(resolveSelectedSlotContent({
       title: 'Obsidian Earrings',
       price: 82900,
@@ -61,3 +61,4 @@ describe('PPB selected-slot content', () => {
     expect(resolveSelectedSlotTitle(title, false)).toBe(title);
   });
 });
+export {};

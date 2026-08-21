@@ -118,7 +118,7 @@ describe('PPB single-step categories-as-steps storefront contract', () => {
     const expanded = ppbExpandSingleStepCategoriesAsSteps(bundle);
 
     expect(expanded.steps).toHaveLength(2);
-    expect(expanded.steps.map((step) => step._sourceStepId)).toEqual([
+    expect(expanded.steps.map((step: { _sourceStepId: any; }) => step._sourceStepId)).toEqual([
       'enabled-step',
       'enabled-step',
     ]);

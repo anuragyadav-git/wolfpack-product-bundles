@@ -17,11 +17,30 @@
 'use strict';
 
 import { BundleModalVariantMethods } from './widgets/full-page/modal/variant-methods.js';
+
+export function resolveBundleProductModalActionText({
+  originalSelectionKey = '',
+  currentStep = {},
+  resolveText,
+  fallbackText = '',
+}: any = {}) {
+  const action = originalSelectionKey ? 'update' : 'add';
+  const text = action === 'update'
+    ? (currentStep?.addonReplaceText
+      || resolveText?.('productDetailsUpdateButton', fallbackText)
+      || fallbackText)
+    : (currentStep?.addonAddText
+      || resolveText?.('productCardAddButton', fallbackText)
+      || fallbackText);
+
+  return { action, text };
+}
 import { BUNDLE_WIDGET } from './widgets/shared/constants.js';
 import {
   drawerLayerManager,
   shouldDismissDrawerSwipe,
 } from './widgets/shared/drawer-layer-manager.js';
+import { resolvePpbDetailsCommit } from './widgets/product-page/ppb-modal-card-presentation.js';
 
 export interface BundleProductModal {
   [key: string]: any;
@@ -31,14 +50,14 @@ export function shouldDismissProductDrawerSwipe({
   distanceY = 0,
   distanceX = 0,
   velocityY = 0,
-} = {}) {
+}: any = {}) {
   return shouldDismissDrawerSwipe({ distanceY, distanceX, velocityY });
 }
 
 export function getProductCarouselSwipeDirection({
   distanceX = 0,
   distanceY = 0,
-} = {}) {
+}: any = {}) {
   const horizontalDistance = Number(distanceX);
   const verticalDistance = Math.abs(Number(distanceY));
   if (!Number.isFinite(horizontalDistance) || !Number.isFinite(verticalDistance)) return 0;
@@ -47,12 +66,29 @@ export function getProductCarouselSwipeDirection({
 }
 
 export class BundleProductModal {
-  constructor(widget, options = {}) {
+  widget: any;
+  modalElement: any;
+  currentProduct: any;
+  currentStep: any;
+  selectedVariant: any;
+  selectedOptions: Record<string, any>;
+  selectedQuantity: number;
+  currentImageIndex: number;
+  readOnly: boolean;
+  lockedScrollY: number;
+  isDocumentScrollLocked: boolean;
+  isPpbOwned: boolean;
+  drawerLayer: any;
+  focusOrigin: any;
+  originalSelectionKey: string;
+
+  constructor(widget: any, options: any = {}) {
     this.widget = widget;
     this.modalElement = null;
     this.currentProduct = null;
     this.currentStep = null;
     this.selectedVariant = null;
+    this.selectedOptions = {};
     this.selectedQuantity = 1;
     this.currentImageIndex = 0;
     this.readOnly = false;
@@ -62,6 +98,7 @@ export class BundleProductModal {
       || Boolean(widget?.container?.closest?.('[data-ppb-template-type]'));
     this.drawerLayer = null;
     this.focusOrigin = null;
+    this.originalSelectionKey = '';
 
     this.init();
   }
@@ -104,7 +141,7 @@ export class BundleProductModal {
    */
   createModalHTML() {
     const modalHTML = `
-      <div class="bundle-modal-overlay" id="bundle-product-modal"${this.isPpbOwned ? ' data-ppb-drawer-surface="product-details"' : ''}>
+      <div class="bundle-modal-overlay" id="bundle-product-modal"${this.isPpbOwned ? ' data-ppb-drawer-surface="product-details" role="dialog" aria-modal="true" aria-labelledby="modal-product-title"' : ''}>
         <div class="bundle-modal-container">
           <!-- Mobile Drag Handle for Swipe-to-Dismiss -->
           ${this.isPpbOwned ? '<button type="button" class="bundle-modal-drag-handle" aria-label="Close modal">' : '<div class="bundle-modal-drag-handle" aria-hidden="true">'}
@@ -146,7 +183,7 @@ export class BundleProductModal {
 
               <!-- Quantity Selector (below variants) -->
               <div class="bundle-modal-quantity">
-                <label class="bundle-modal-quantity-label">Quantity</label>
+                <span class="bundle-modal-quantity-label">Quantity</span>
                 <div class="bundle-modal-quantity-controls">
                   <button class="bundle-modal-qty-btn" id="modal-qty-decrease">−</button>
                   <span class="bundle-modal-qty-display" id="modal-qty-display">1</span>
@@ -180,14 +217,14 @@ export class BundleProductModal {
     }
 
     // Close on overlay click
-    this.modalElement.addEventListener('click', (e) => {
+    this.modalElement.addEventListener('click', (e: any) => {
       if (e.target === this.modalElement) {
         if (!this.drawerLayer || drawerLayerManager.isTopmost(this.drawerLayer)) this.close();
       }
     });
 
     // Close on ESC key
-    document.addEventListener('keydown', (e) => {
+    document.addEventListener('keydown', (e: any) => {
       if (!this.modalElement.classList.contains('active')) return;
       if (this.drawerLayer && !drawerLayerManager.isTopmost(this.drawerLayer)) return;
       if (e.key === 'Escape') {
@@ -199,9 +236,9 @@ export class BundleProductModal {
       if (e.key === 'Tab' && this.isPpbOwned) {
         const focusable = Array.from(this.modalElement.querySelectorAll(
           'button:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
-        )).filter((element) => element.getClientRects?.().length !== 0);
+        )).filter((element: any) => element.getClientRects?.().length !== 0) as HTMLElement[];
         if (focusable.length === 0) return;
-        const currentIndex = focusable.indexOf(document.activeElement);
+        const currentIndex = focusable.indexOf(document.activeElement as HTMLElement);
         const nextIndex = e.shiftKey
           ? (currentIndex <= 0 ? focusable.length - 1 : currentIndex - 1)
           : (currentIndex < 0 || currentIndex === focusable.length - 1 ? 0 : currentIndex + 1);
@@ -211,21 +248,21 @@ export class BundleProductModal {
     });
 
     // Quantity controls
-    document.getElementById('modal-qty-decrease').addEventListener('click', () => {
+    document.getElementById('modal-qty-decrease')!.addEventListener('click', () => {
       this.updateQuantity(Math.max(1, this.selectedQuantity - 1));
     });
 
-    document.getElementById('modal-qty-increase').addEventListener('click', () => {
+    document.getElementById('modal-qty-increase')!.addEventListener('click', () => {
       this.updateQuantity(this.selectedQuantity + 1);
     });
 
     // Add To Box button
-    document.getElementById('modal-add-to-box').addEventListener('click', () => {
+    document.getElementById('modal-add-to-box')!.addEventListener('click', () => {
       this.addToBundle();
     });
 
-    this.modalElement.querySelectorAll('[data-modal-image-nav]').forEach((button) => {
-      button.addEventListener('click', (event) => {
+    this.modalElement.querySelectorAll('[data-modal-image-nav]').forEach((button: any) => {
+      button.addEventListener('click', (event: any) => {
         event.preventDefault();
         event.stopPropagation();
         this.showAdjacentImage(button.dataset.modalImageNav === 'prev' ? -1 : 1);
@@ -241,8 +278,8 @@ export class BundleProductModal {
     const imageFrame = this.modalElement.querySelector('.bundle-modal-main-image');
     if (!imageFrame) return;
 
-    let gesture = null;
-    imageFrame.addEventListener('pointerdown', (event) => {
+    let gesture: any = null;
+    imageFrame.addEventListener('pointerdown', (event: any) => {
       gesture = {
         pointerId: event.pointerId,
         startX: event.clientX,
@@ -250,7 +287,7 @@ export class BundleProductModal {
       };
       imageFrame.setPointerCapture?.(event.pointerId);
     });
-    imageFrame.addEventListener('pointerup', (event) => {
+    imageFrame.addEventListener('pointerup', (event: any) => {
       if (!gesture || event.pointerId !== gesture.pointerId) return;
       const direction = getProductCarouselSwipeDirection({
         distanceX: event.clientX - gesture.startX,
@@ -273,13 +310,13 @@ export class BundleProductModal {
     const dragHandle = this.modalElement.querySelector('.bundle-modal-drag-handle');
     if (!dragHandle || !modalContainer) return;
 
-    let gesture = null;
+    let gesture: any = null;
     const resetDrawerPosition = () => {
       modalContainer.style.transform = '';
       modalContainer.style.opacity = '';
     };
 
-    dragHandle.addEventListener('pointerdown', (event) => {
+    dragHandle.addEventListener('pointerdown', (event: any) => {
       gesture = {
         pointerId: event.pointerId,
         startX: event.clientX,
@@ -290,7 +327,7 @@ export class BundleProductModal {
       dragHandle.setPointerCapture?.(event.pointerId);
     });
 
-    dragHandle.addEventListener('pointermove', (event) => {
+    dragHandle.addEventListener('pointermove', (event: any) => {
       if (!gesture || event.pointerId !== gesture.pointerId) return;
       const distanceX = event.clientX - gesture.startX;
       const distanceY = Math.max(0, event.clientY - gesture.startY);
@@ -299,7 +336,7 @@ export class BundleProductModal {
       modalContainer.style.opacity = String(Math.max(0.5, 1 - distanceY / 300));
     });
 
-    const finishGesture = (event) => {
+    const finishGesture = (event: any) => {
       if (!gesture || event.pointerId !== gesture.pointerId) return;
       const elapsed = Math.max(1, performance.now() - gesture.startedAt);
       const distanceY = event.clientY - gesture.startY;
@@ -337,13 +374,14 @@ export class BundleProductModal {
    * @param {Object} product - Product data
    * @param {Object} step - Step data
    */
-  open(product, step, options = {}) {
+  open(product: any, step: any, options: any = {}) {
 
     this.currentProduct = product;
     this.currentStep = step;
     this.selectedVariant = null;
     this.selectedOptions = {};
-    this.selectedQuantity = 1;
+    this.originalSelectionKey = String(options.originalSelectionKey || '');
+    this.selectedQuantity = Math.max(1, Number(options.selectedQuantity || 1));
     this.readOnly = options.readOnly === true;
     this.focusOrigin = document.activeElement;
     const imageCount = this.getProductImages().length;
@@ -395,6 +433,7 @@ export class BundleProductModal {
     this.selectedQuantity = 1;
     this.currentImageIndex = 0;
     this.readOnly = false;
+    this.originalSelectionKey = '';
     this.updateReadOnlyState();
   }
 
@@ -404,10 +443,10 @@ export class BundleProductModal {
   populateModal() {
     // Set title - use parent title if this is a flattened variant
     const displayTitle = this.currentProduct.parentTitle || this.currentProduct.title;
-    document.getElementById('modal-product-title').textContent = displayTitle;
+    document.getElementById('modal-product-title')!.textContent = displayTitle;
 
     // Keep the description row mounted so the modal layout remains stable.
-    const descriptionEl = document.getElementById('modal-product-description');
+    const descriptionEl = document.getElementById('modal-product-description')!;
     const descriptionHtml = typeof this.currentProduct.descriptionHtml === 'string'
       ? this.currentProduct.descriptionHtml.trim()
       : '';
@@ -428,8 +467,20 @@ export class BundleProductModal {
     // Set initial price
     this.updatePrice();
 
+    const actionButton = document.getElementById('modal-add-to-box');
+    if (this.isPpbOwned && actionButton) {
+      const presentation = resolveBundleProductModalActionText({
+        originalSelectionKey: this.originalSelectionKey,
+        currentStep: this.currentStep,
+        resolveText: this.widget?._resolveText?.bind(this.widget),
+        fallbackText: actionButton.textContent,
+      });
+      actionButton.textContent = presentation.text;
+      actionButton.dataset.action = presentation.action;
+    }
+
     // Reset quantity display
-    document.getElementById('modal-qty-display').textContent = this.selectedQuantity;
+    document.getElementById('modal-qty-display')!.textContent = String(this.selectedQuantity);
   }
 
   updateReadOnlyState() {
@@ -458,8 +509,8 @@ export class BundleProductModal {
     const product = this.currentProduct;
     if (!product) return [BUNDLE_WIDGET.PLACEHOLDER_IMAGE];
 
-    const urls = [];
-    const addUrl = (value) => {
+    const urls: any[] = [];
+    const addUrl = (value: any) => {
       const url = this.normalizeImageUrl(value);
       if (url && !urls.includes(url)) urls.push(url);
     };
@@ -472,7 +523,7 @@ export class BundleProductModal {
     return urls.length > 0 ? urls : [BUNDLE_WIDGET.PLACEHOLDER_IMAGE];
   }
 
-  normalizeImageUrl(value) {
+  normalizeImageUrl(value: any) {
     if (!value) return '';
     if (typeof value === 'string') return value;
     return value.url || value.src || value.originalSrc || value.transformedSrc || '';
@@ -484,7 +535,7 @@ export class BundleProductModal {
   }
 
   loadImage() {
-    const mainImageEl = document.getElementById('modal-main-image');
+    const mainImageEl = document.getElementById('modal-main-image') as HTMLImageElement | null;
     if (!mainImageEl) return;
 
     const images = this.getProductImages();
@@ -497,12 +548,12 @@ export class BundleProductModal {
     if (imageFrame) {
       imageFrame.classList.toggle('bundle-modal-main-image--has-gallery', hasGallery);
     }
-    this.modalElement.querySelectorAll('[data-modal-image-nav]').forEach((button) => {
+    this.modalElement.querySelectorAll('[data-modal-image-nav]').forEach((button: any) => {
       button.hidden = !hasGallery;
     });
   }
 
-  showAdjacentImage(direction) {
+  showAdjacentImage(direction: number) {
     const images = this.getProductImages();
     if (images.length <= 1) return;
 
@@ -510,9 +561,9 @@ export class BundleProductModal {
     this.loadImage();
   }
 
-  updateQuantity(quantity) {
+  updateQuantity(quantity: number) {
     this.selectedQuantity = Math.max(1, quantity);
-    document.getElementById('modal-qty-display').textContent = this.selectedQuantity;
+    document.getElementById('modal-qty-display')!.textContent = String(this.selectedQuantity);
   }
 
   /**
@@ -539,23 +590,33 @@ export class BundleProductModal {
 
     // Use selectedBundle.steps (not widget.steps which doesn't exist)
     const steps = this.widget.selectedBundle?.steps || [];
-    const stepIndex = steps.findIndex(s => s.id === this.currentStep.id);
+    const stepIndex = steps.findIndex((s: any)  => s.id === this.currentStep.id);
 
     if (stepIndex === -1) {
       return;
     }
 
-    // Use variantId if available, otherwise fall back to id
-    // This matches how the widget stores product selections
     const productId = variant.variantId || variant.id || this.currentProduct.id;
+    const commit = resolvePpbDetailsCommit({
+      stepIndex,
+      originalSelectionKey: this.isPpbOwned ? this.originalSelectionKey : '',
+      nextSelectionKey: productId,
+      quantity: this.selectedQuantity,
+    });
 
 
     // Call widget's method to add product
     if (this.widget.updateProductSelection) {
+      if (this.isPpbOwned && commit.removeSelectionKey) {
+        this.widget._modalSlotReplacementTarget = {
+          stepIndex: commit.stepIndex,
+          selectionKey: commit.removeSelectionKey,
+        };
+      }
       this.widget.updateProductSelection(
-        stepIndex,
-        productId,
-        this.selectedQuantity
+        commit.stepIndex,
+        commit.nextSelectionKey,
+        commit.quantity
       );
     } else {
       return;

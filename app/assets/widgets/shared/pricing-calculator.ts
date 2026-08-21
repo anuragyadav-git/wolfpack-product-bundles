@@ -10,19 +10,19 @@
 
 import { BUNDLE_WIDGET } from './constants.js';
 
-function isDiscountedAddonStep(step) {
+function isDiscountedAddonStep(step: any) {
   if (!step || step.isFreeGift !== true) return false;
   if (Array.isArray(step.addonTiers) && step.addonTiers.length > 0) return true;
   return Boolean(step.addonEligibilityCondition || step.addonDiscount);
 }
 
 export class PricingCalculator {
-  static calculateBundleTotal(selectedProducts, stepProductData, steps = null) {
+  static calculateBundleTotal(selectedProducts: any[], stepProductData: any[], steps: any = null) {
     let totalPrice = 0;
     let totalQuantity = 0;
-    const unitPrices = [];
+    const unitPrices: any[] = [];
 
-    selectedProducts.forEach((stepSelections, stepIndex) => {
+    selectedProducts.forEach((stepSelections: any, stepIndex: number) => {
       // Skip only legacy free gifts. EB-style add-on tiers remain in the
       // original subtotal so their native line discount can reduce them to zero.
       const step = steps?.[stepIndex];
@@ -30,9 +30,9 @@ export class PricingCalculator {
 
       const productsInStep = stepProductData[stepIndex] || [];
 
-      Object.entries(stepSelections).forEach(([variantId, quantity]) => {
-        let product = productsInStep.find(p => String(p.selectionId || '') === String(variantId));
-        let matchedVariant = null;
+      Object.entries(stepSelections).forEach(([variantId, quantity]: any) => {
+        let product = productsInStep.find((p: any)  => String(p.selectionId || '') === String(variantId));
+        let matchedVariant: any = null;
 
         // If not found, search within nested variants array of each product
         // This handles the case where displayVariantsAsIndividual is false
@@ -40,7 +40,7 @@ export class PricingCalculator {
         if (!product) {
           for (const p of productsInStep) {
             if (p.variants && Array.isArray(p.variants)) {
-              const variant = p.variants.find(v => String(v.selectionId || '') === String(variantId));
+              const variant = p.variants.find((v: any)  => String(v.selectionId || '') === String(variantId));
               if (variant) {
                 product = p;
                 matchedVariant = variant;
@@ -68,19 +68,19 @@ export class PricingCalculator {
     return { totalPrice, totalQuantity, unitPrices };
   }
 
-  static getDiscountMethod(bundle) {
+  static getDiscountMethod(bundle: any) {
     return bundle?.pricing?.method || BUNDLE_WIDGET.DISCOUNT_METHODS.PERCENTAGE_OFF;
   }
 
-  static getRuleConditionType(rule) {
+  static getRuleConditionType(rule: any) {
     return rule?.conditionType || 'quantity';
   }
 
-  static getRuleConditionOperator(rule) {
+  static getRuleConditionOperator(rule: any) {
     return rule?.conditionOperator || 'gte';
   }
 
-  static getRuleConditionValue(rule, discountMethod = BUNDLE_WIDGET.DISCOUNT_METHODS.PERCENTAGE_OFF) {
+  static getRuleConditionValue(rule: any, discountMethod = BUNDLE_WIDGET.DISCOUNT_METHODS.PERCENTAGE_OFF) {
     if (
       discountMethod === BUNDLE_WIDGET.DISCOUNT_METHODS.BUY_X_GET_Y &&
       this.getRuleConditionType(rule) === 'quantity'
@@ -95,11 +95,11 @@ export class PricingCalculator {
     return Number(rule?.conditionValue ?? 0);
   }
 
-  static getRuleDiscountValue(rule) {
+  static getRuleDiscountValue(rule: any) {
     return Number(rule?.discountValue ?? 0);
   }
 
-  static calculateDiscount(bundle, totalPrice, totalQuantity, unitPrices = []) {
+  static calculateDiscount(bundle: any, totalPrice: number, totalQuantity: number, unitPrices: any[] = []) {
     if (!bundle?.pricing?.enabled || !bundle.pricing.rules?.length) {
       return {
         hasDiscount: false,
@@ -112,7 +112,7 @@ export class PricingCalculator {
     }
 
     const rules = bundle.pricing.rules;
-    let bestRule = null;
+    let bestRule: any = null;
     const discountMethod = this.getDiscountMethod(bundle);
 
     for (const rule of rules) {
@@ -182,7 +182,7 @@ export class PricingCalculator {
     const finalPrice = Math.max(0, totalPrice - discountAmount);
     const discountPercentage = totalPrice > 0 ? (discountAmount / totalPrice) * 100 : 0;
 
-    const result = {
+    const result: any = {
       hasDiscount: discountAmount > 0,
       discountAmount,
       finalPrice,
@@ -196,7 +196,7 @@ export class PricingCalculator {
     return result;
   }
 
-  static calculateBuyXGetYDiscountAmount(rule, totalPrice, totalQuantity, unitPrices = []) {
+  static calculateBuyXGetYDiscountAmount(rule: any, totalPrice: number, totalQuantity: number, unitPrices: any[] = []) {
     const customerBuys = Number(rule?.customerBuys || 0);
     const customerGets = Number(rule?.customerGets || 0);
     const discountValue = this.getRuleDiscountValue(rule);
@@ -237,7 +237,7 @@ export class PricingCalculator {
     return Math.min(Math.round(discountAmount), totalPrice);
   }
 
-  static checkCondition(value, condition, targetValue) {
+  static checkCondition(value: number, condition: any, targetValue: number) {
     // Handle different condition formats
     const normalizedCondition = this.normalizeCondition(condition);
 
@@ -260,9 +260,9 @@ export class PricingCalculator {
     }
   }
 
-  static normalizeCondition(condition) {
+  static normalizeCondition(condition: string|number) {
     // Handle different condition formats from admin
-    const conditionMap = {
+    const conditionMap: any = {
       'gte': BUNDLE_WIDGET.CONDITION_OPERATORS.GREATER_THAN_OR_EQUAL_TO,
       'gt': BUNDLE_WIDGET.CONDITION_OPERATORS.GREATER_THAN,
       'lte': BUNDLE_WIDGET.CONDITION_OPERATORS.LESS_THAN_OR_EQUAL_TO,
@@ -280,7 +280,7 @@ export class PricingCalculator {
     return conditionMap[condition] || condition || BUNDLE_WIDGET.CONDITION_OPERATORS.GREATER_THAN_OR_EQUAL_TO;
   }
 
-  static getNextDiscountRule(bundle, currentQuantity, currentAmount) {
+  static getNextDiscountRule(bundle: any, currentQuantity: number, currentAmount: number|undefined) {
     if (!bundle?.pricing?.enabled || !bundle.pricing.rules?.length) return null;
 
     const rules = [...bundle.pricing.rules].sort((a, b) =>
@@ -300,9 +300,9 @@ export class PricingCalculator {
       let isRuleSatisfied = false;
 
       if (conditionType === 'amount') {
-        isRuleSatisfied = this.checkCondition(currentAmount, conditionOperator, conditionValue);
+        isRuleSatisfied = this.checkCondition(Number(currentAmount || 0), conditionOperator, conditionValue ?? 0);
       } else {
-        isRuleSatisfied = this.checkCondition(currentQuantity, conditionOperator, conditionValue);
+        isRuleSatisfied = this.checkCondition(currentQuantity, conditionOperator, conditionValue ?? 0);
       }
 
       // Return the first rule that is not satisfied (next target)

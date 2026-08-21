@@ -8,7 +8,7 @@ import { buildStorefrontApiPath } from '../../../../config/storefront-proxy-rout
 
 const runtimeCartTemplateSystem = TemplateDesignSystem;
 
-export function resolveTierConfig(apiTierConfig, dataTierConfig) {
+export function resolveTierConfig(apiTierConfig: any, dataTierConfig: any) {
   if (apiTierConfig == null) return dataTierConfig;
   const mapped = (Array.isArray(apiTierConfig) ? apiTierConfig : [])
     .filter(t => (
@@ -22,7 +22,7 @@ export function resolveTierConfig(apiTierConfig, dataTierConfig) {
   return mapped.length >= 2 ? mapped : [];
 }
 
-function getFpbPresetContract(rawValue) {
+function getFpbPresetContract(rawValue: string) {
   if (typeof rawValue !== 'string') return null;
   const normalizedPreset = rawValue.trim().toUpperCase();
   if (!normalizedPreset) return null;
@@ -32,26 +32,26 @@ function getFpbPresetContract(rawValue) {
   return null;
 }
 
-function isClassicFpbPreset(rawValue) {
+function isClassicFpbPreset(rawValue: string) {
   return getFpbPresetContract(rawValue)?.summary?.mode === 'slots';
 }
 
-function isHorizontalFpbPreset(rawValue) {
+function isHorizontalFpbPreset(rawValue: string) {
   return getFpbPresetContract(rawValue)?.productCard?.mode === 'row';
 }
 
-function isRowsFpbPreset(rawValue) {
+function isRowsFpbPreset(rawValue: string) {
   return getFpbPresetContract(rawValue)?.summary?.mode === 'rows';
 }
 
-function isStandardFpbPreset(rawValue) {
+function isStandardFpbPreset(rawValue: string) {
   const contract = getFpbPresetContract(rawValue);
   return contract?.summary?.mode === 'rows' && contract?.productCard?.mode === 'grid';
 }
 
 
 export const fullPageRuntimeCartSettingsMethods: Record<string, any> & ThisType<any> = {
-updateModalHeaderText(totalPrice, totalQuantity, discountInfo, currencyInfo) {
+updateModalHeaderText(totalPrice: any, totalQuantity: any, discountInfo: any, currencyInfo: any) {
   const modalStepTitle = this.elements.modal.querySelector('.modal-step-title');
   if (!modalStepTitle) return;
 
@@ -79,7 +79,7 @@ updateModalHeaderText(totalPrice, totalQuantity, discountInfo, currencyInfo) {
   modalStepTitle.innerHTML = headerText;
 },
 
-updateModalDiscountMessaging(totalPrice, totalQuantity, discountInfo, currencyInfo) {
+updateModalDiscountMessaging(totalPrice: any, totalQuantity: any, discountInfo: any, currencyInfo: any) {
   const footerDiscountText = this.elements.modal.querySelector('.footer-discount-text');
   const discountSection = this.elements.modal.querySelector('.modal-footer-discount-messaging');
 
@@ -120,7 +120,7 @@ updateModalDiscountMessaging(totalPrice, totalQuantity, discountInfo, currencyIn
   }
 },
 
-updateFooterTotalPrices(totalPrice, discountInfo, currencyInfo) {
+updateFooterTotalPrices(totalPrice: number, discountInfo: any, currencyInfo: any) {
   const strikePriceEl = this.elements.modal.querySelector('.total-price-strike');
   const finalPriceEl = this.elements.modal.querySelector('.total-price-final');
 
@@ -176,13 +176,13 @@ hideLoadingOverlay() {
   hideLoadingOverlayElement(overlay);
 },
 
-_getButtonDataset(button) {
+_getButtonDataset(button: any) {
   if (!button) return null;
   if (!button.dataset) button.dataset = {};
   return button.dataset;
 },
 
-_setActionButtonLoadingState(button, isLoading) {
+_setActionButtonLoadingState(button: any, isLoading: any) {
   if (!button) return;
   const dataset = this._getButtonDataset(button);
 
@@ -206,7 +206,7 @@ _setActionButtonLoadingState(button, isLoading) {
   button.classList.remove('fpb-inline-spinner-active');
 },
 
-_setWidgetBusy(isBusy, activeButton = null) {
+_setWidgetBusy(isBusy: any, activeButton: any = null) {
   this._isWidgetActionBusy = Boolean(isBusy);
 
   if (!this.container) return;
@@ -215,7 +215,7 @@ _setWidgetBusy(isBusy, activeButton = null) {
   this._setActionButtonLoadingState(activeButton, isBusy);
 },
 
-_withWidgetActionBusy(action, options = {}) {
+_withWidgetActionBusy(action: () => any, options: any = {}) {
   const { actionButton = null } = options;
 
   if (!this.container || this._isWidgetActionBusy) return Promise.resolve(false);
@@ -268,7 +268,7 @@ resolveFullPageOfferId() {
   return offerId.startsWith('FBP-') ? offerId : `FBP-${offerId}`;
 },
 
-async syncBundleDetailsCartMetafield(bundleDetailsKey, sourceProperties) {
+async syncBundleDetailsCartMetafield(bundleDetailsKey: any, sourceProperties: any) {
   try {
     const displayProperties = this.buildBundleDetailsDisplayProperties(sourceProperties);
     if (!bundleDetailsKey || Object.keys(displayProperties).length === 0) return;
@@ -297,13 +297,13 @@ async syncBundleDetailsCartMetafield(bundleDetailsKey, sourceProperties) {
     if (data?.ok !== true) {
       throw new Error(data?.error || 'bundle_details sync failed');
     }
-  } catch (error) {
+  } catch (error: any) {
     console.warn('[Wolfpack Bundles] Failed to sync bundle_details cart metafield', error);
   }
 },
 
-buildBundleDetailsDisplayProperties(sourceProperties) {
-  const displayProperties = {};
+buildBundleDetailsDisplayProperties(sourceProperties: any) {
+  const displayProperties: any = {};
   const raw = sourceProperties?._bundle_display_properties;
   const cartLineLabels = this.getCartLineLabels();
 
@@ -369,7 +369,7 @@ generateBundleSessionKey() {
  * Parses the JSON string from data-tier-config into a TierConfig array.
  * Returns [] on any error — pill bar is simply not shown.
  */
-parseTierConfig(rawJson) {
+parseTierConfig(rawJson: string) {
   try {
     const parsed = JSON.parse(rawJson);
     if (!Array.isArray(parsed)) return [];
@@ -383,7 +383,7 @@ parseTierConfig(rawJson) {
   }
 },
 
-resolveTierConfig(apiTierConfig, dataTierConfig) {
+resolveTierConfig(apiTierConfig: any, dataTierConfig: any) {
   return resolveTierConfig(apiTierConfig, dataTierConfig);
 },
 
@@ -395,20 +395,23 @@ resolveTierConfig(apiTierConfig, dataTierConfig) {
  * @param {boolean} dataAttrValue - From data-show-step-timeline attribute (theme editor)
  * @returns {boolean}
  */
-resolveShowStepTimeline(apiValue, dataAttrValue) {
+resolveShowStepTimeline(apiValue: boolean | null | undefined, dataAttrValue: any) {
   if (apiValue !== null && apiValue !== undefined) return apiValue;
   return dataAttrValue;
 },
 
-resolveFullPageLayout(bundle = this.selectedBundle) {
+resolveFullPageLayout(bundle: any = undefined) {
+  if (bundle === undefined) bundle = this.selectedBundle;
   return 'footer_side';
 },
 
-getFullPageTemplate(bundle = this.selectedBundle) {
+getFullPageTemplate(bundle: any = undefined) {
+  if (bundle === undefined) bundle = this.selectedBundle;
   return 'FBP_SIDE_FOOTER';
 },
 
-getFullPageDesignPreset(bundle = this.selectedBundle) {
+getFullPageDesignPreset(bundle: any = undefined) {
+  if (bundle === undefined) bundle = this.selectedBundle;
   const rawPresetId =
     bundle?.bundleDesignPresetId
     || '';
@@ -425,7 +428,8 @@ getFullPageDesignPreset(bundle = this.selectedBundle) {
     : null;
 },
 
-resolveFullPageCardCtaMode(bundle = this.selectedBundle) {
+resolveFullPageCardCtaMode(bundle: any = undefined) {
+  if (bundle === undefined) bundle = this.selectedBundle;
   const showTextOnAddButton =
     bundle?.showTextOnAddButton === true;
 
@@ -481,7 +485,7 @@ applyFullPageDesignPresetMarker() {
 },
 
 /** Returns true if the given tier index is the currently active one. */
-isTierActive(tierIndex) {
+isTierActive(tierIndex: any) {
   return tierIndex === this.activeTierIndex;
 },
 

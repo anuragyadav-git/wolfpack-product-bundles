@@ -43,8 +43,12 @@ describe('SelectedSlotTitle', () => {
         instanceIndex: 0,
       }, 0);
 
-      card.dispatch('click');
-      expect(openModal).toHaveBeenCalledWith(0);
+      const replacementControl = card.children.find((child: any) => (
+        child.tagName === 'BUTTON' && child.getAttribute('aria-label') === longTitle
+      ));
+
+      replacementControl.dispatch('click');
+      expect(openModal).toHaveBeenCalledWith(0, replacementControl);
     } finally {
       global.document = originalDocument;
     }
@@ -56,7 +60,7 @@ describe('SelectedSlotTitle', () => {
       selections[key] = quantity;
     });
     const validateStepCondition = jest.fn((_stepIndex: number, key: string, quantity: number) => (
-      Object.entries(selections).reduce((total, [selectionKey, selectedQuantity]) => (
+      Object.entries(selections).reduce((total, [selectionKey, selectedQuantity]: any) => (
         total + (selectionKey === key ? 0 : selectedQuantity)
       ), quantity) <= 1
     ));
@@ -118,8 +122,11 @@ function createFakeElement(tagName: string) {
     setAttribute(name: string, value: string) {
       attributes.set(name, value);
     },
+    getAttribute(name: string) {
+      return attributes.get(name) || null;
+    },
     dispatch(name: string) {
-      listeners[name]?.({ stopPropagation: () => {} });
+      listeners[name]?.({ stopPropagation: () => {}, currentTarget: this } as any);
     },
     set innerHTML(_value: string) {},
     textContent: '',
@@ -128,3 +135,4 @@ function createFakeElement(tagName: string) {
     alt: '',
   };
 }
+export {};

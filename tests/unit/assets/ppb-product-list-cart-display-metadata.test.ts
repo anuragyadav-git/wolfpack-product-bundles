@@ -109,6 +109,11 @@ describe('PPB Product List cart display metadata', () => {
       box: '1',
       items: '2 x 14k Dangling Obsidian Earrings, 1 x 14k Dangling Pendant Earrings, 1 x 18k Pedal Ring - 8 (8)',
       retailPrice: '$2676.00',
+      labels: {
+        items: 'Items',
+        retailPrice: 'Retail Price',
+        youSave: 'You Save',
+      },
     });
 
     expect(ProductPageCartMethods.buildBundleDetailsDisplayProperties.call(context, items[0].properties)).toEqual({
@@ -124,7 +129,7 @@ describe('PPB Product List cart display metadata', () => {
       runtimeToken: 'runtime-token',
     });
     expect(cartContext.bundleDetailsKey).toBe('MIX-894502_K1K');
-    expect((Array.from(cartContext.formData.entries()) as Array<[string, unknown]>).filter(([key]) => key.endsWith('[_wolfpackProductBundle:OfferId]'))).toEqual([
+    expect((Array.from(cartContext.formData.entries()) as Array<[string, unknown]>).filter(([key]: any) => key.endsWith('[_wolfpackProductBundle:OfferId]'))).toEqual([
       ['items[0][properties][_wolfpackProductBundle:OfferId]', 'MIX-894502_K1K_1'],
       ['items[1][properties][_wolfpackProductBundle:OfferId]', 'MIX-894502_K1K_2'],
       ['items[2][properties][_wolfpackProductBundle:OfferId]', 'MIX-894502_K1K_3'],

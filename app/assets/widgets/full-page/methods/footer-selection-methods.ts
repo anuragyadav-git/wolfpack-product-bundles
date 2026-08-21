@@ -1,37 +1,37 @@
 import { ConditionValidator } from '../../shared/condition-validator.js';
 
-const getFooterSelectionId = (value = {}) => String(value?.selectionId || '');
+const getFooterSelectionId = (value: any = {}) => String(value?.selectionId || '');
 
-const findProductBySelectionId = (products = [], selectionId = '') => {
+const findProductBySelectionId = (products: any[] = [], selectionId = '') => {
   const normalized = String(selectionId || '');
   return products.find(product => getFooterSelectionId(product) === normalized);
 };
 
-const findVariantBySelectionId = (product, selectionId = '') => {
+const findVariantBySelectionId = (product: any, selectionId = '') => {
   const normalized = String(selectionId || '');
   const variants = Array.isArray(product?.variants) ? product.variants : [];
-  return variants.find(variant => String(variant?.selectionId || '') === normalized);
+  return variants.find((variant: any)  => String(variant?.selectionId || '') === normalized);
 };
 
 export const fullPageFooterSelectionMethods: Record<string, any> & ThisType<any> = {
-truncateTitle(title, maxLength) {
+truncateTitle(title: string, maxLength: number) {
   if (!title) return '';
   if (title.length <= maxLength) return title;
   return `${title.substring(0, maxLength)}...`;
 },
 
 getAllSelectedProductsData() {
-  const allProducts = [];
+  const allProducts: { stepIndex: any; selectionId: string; variantId: string; quantity: unknown; title: any; parentTitle: any; variantTitle: string; imageUrl: any; image: any; price: any; isDefault: any; isFreeGift: any; addonDisplayFree: boolean; }[] = [];
 
-  this.selectedBundle.steps.forEach((step, stepIndex) => {
+  this.selectedBundle.steps.forEach((step: any, stepIndex: string|number) => {
     const stepSelections = this.selectedProducts[stepIndex] || {};
     const productsInStep = this.stepProductData[stepIndex] || [];
 
-    Object.entries(stepSelections).forEach(([variantId, quantity]) => {
+    Object.entries(stepSelections).forEach(([variantId, quantity]: any) => {
       if (quantity <= 0) return;
 
       let product = findProductBySelectionId(productsInStep, variantId);
-      let matchedVariant = null;
+      let matchedVariant: any = null;
       if (!product) {
         for (const candidate of productsInStep) {
           const variant = findVariantBySelectionId(candidate, variantId);
@@ -86,7 +86,7 @@ getAllSelectedProductsData() {
   return allProducts;
 },
 
-isStepCompleted(stepIndex) {
+isStepCompleted(stepIndex: string|number) {
   const step = this.selectedBundle.steps[stepIndex];
   const stepSelections = this.selectedProducts[stepIndex] || {};
   if (typeof this.validateStep === 'function') {

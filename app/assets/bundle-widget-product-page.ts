@@ -70,7 +70,7 @@
  * Find the next incomplete non-default step after `fromIndex`.
  * Returns -1 when all remaining non-default steps are complete.
  */
-function bsFindNextIncompleteStep(steps, selectedProducts, validateFn, fromIndex) {
+function bsFindNextIncompleteStep(steps: string|any[], selectedProducts: any, validateFn: (arg0: any) => any, fromIndex: number) {
   for (let i = fromIndex + 1; i < steps.length; i++) {
     // Free gift and default steps are non-required — never auto-advance into them.
     // The free gift step has its own unlock flow; default steps are pre-filled.
@@ -80,9 +80,9 @@ function bsFindNextIncompleteStep(steps, selectedProducts, validateFn, fromIndex
   return -1;
 }
 
-function bsIsDefaultStep(step) { return !!step?.isDefault; }
+function bsIsDefaultStep(step: any) { return !!step?.isDefault; }
 
-function bsGetDiscountBadgeLabel(step) { return step?.discountBadgeLabel || null; }
+function bsGetDiscountBadgeLabel(step: any) { return step?.discountBadgeLabel || null; }
 
 // Export for unit tests
 if (typeof window !== 'undefined') {
@@ -135,14 +135,14 @@ import { applyBrowsedProductPreselection } from './widgets/product-page/embed-pr
 import { BundleProductModal } from './bundle-modal-component.js';
 import { installDiscountTierPillFeedback } from './widgets/shared/discount-tier-feedback.js';
 
-export function createProductPageProductModal(widget, ModalConstructor = BundleProductModal) {
+export function createProductPageProductModal(widget: any, ModalConstructor = BundleProductModal) {
   return new ModalConstructor(widget, { drawerOwner: 'ppb' });
 }
 
 
 export class BundleWidgetProductPage {
 
-  constructor(containerElement) {
+  constructor(containerElement: Element) {
     installControllerMethods(
       this,
       ProductPageConfigLifecycleMethods,
@@ -250,6 +250,8 @@ export class BundleWidgetProductPage {
         return;
       }
 
+      this._runProductPageLoadScriptOnce();
+
       // Initialize data structures
       this.initializeDataStructures();
       this._initDirectDefaultProducts();
@@ -262,7 +264,7 @@ export class BundleWidgetProductPage {
         !restoredSelections
       ) {
         await Promise.all(
-          this.selectedBundle.steps.map((_, stepIndex) =>
+          this.selectedBundle.steps.map((_: any, stepIndex: any) =>
             this.loadStepProducts(stepIndex).catch(() => {}),
           ),
         );
@@ -303,7 +305,7 @@ export class BundleWidgetProductPage {
         this._recordView();
       }
 
-    } catch (error) {
+    } catch (error: any) {
       this.hideLoadingOverlay();
       this.showErrorUI(error);
     }
@@ -329,7 +331,7 @@ export class BundleWidgetProductPage {
       } else {
       }
 
-    } catch (error) {
+    } catch (error: any) {
       // Don't throw - widget should work even if design CSS fails to load
     }
   }
@@ -355,7 +357,7 @@ export class BundleWidgetProductPage {
         ...(this.config.textOverrides || {}),
         ...(languageSettings.textOverrides || {})
       };
-    } catch (_) {
+    } catch (_: any) {
       // Non-critical: default and bundle-level text still render.
     }
   }
@@ -372,7 +374,7 @@ export class BundleWidgetProductPage {
       if (!response.ok) return;
 
       this.config.controlsSettings = await response.json();
-    } catch (_) {
+    } catch (_: any) {
       // Non-critical: the widget keeps its current default behavior.
     }
   }
@@ -388,7 +390,7 @@ export interface BundleWidgetProductPage {
 // INITIALIZATION
 // ============================================================================
 export function initializeProductPageWidget(root = document) {
-  const containers = root.querySelectorAll('#bundle-builder-app');
+  const containers = root.querySelectorAll<HTMLElement>('#bundle-builder-app');
   containers.forEach(container => {
     if (!container.dataset.initialized) {
       const bundleType = container.dataset.bundleType || 'product_page';

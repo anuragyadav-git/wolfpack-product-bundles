@@ -11,12 +11,12 @@ import { ToastManager } from '../../shared/toast-manager.js';
 import { renderSelectedProductRow } from '../../shared/components/selected-product-row.js';
 import { getSelectedProductEntries } from '../../shared/engine/bundle-selectors.js';
 
-export function renderCascadeDiscountMessage(element, message = '') {
+export function renderCascadeDiscountMessage(element: HTMLParagraphElement, message = '') {
   if (!element) return;
   element.innerHTML = typeof message === 'string' ? message : '';
 }
 
-export function getCascadeSelectedDrawerState(selectedEntries = [], isOpen = false) {
+export function getCascadeSelectedDrawerState(selectedEntries: any[] = [], isOpen = false) {
   const entries = Array.isArray(selectedEntries) ? selectedEntries : [];
   const selectedQuantity = entries.reduce((sum, entry) => sum + Math.max(0, Number(entry?.quantity || 0)), 0);
   const hasSelectedProducts = selectedQuantity > 0;
@@ -31,7 +31,7 @@ export function getCascadeSelectedDrawerState(selectedEntries = [], isOpen = fal
 export function getNextCascadeSelectedDrawerExpandedState({
   hasSelectedProducts = false,
   isExpanded = false,
-} = {}) {
+}: any = {}) {
   if (!hasSelectedProducts) return false;
   return !isExpanded;
 }
@@ -40,14 +40,14 @@ export function getCascadeSelectedDrawerHeight({
   list = null,
   drawer = null,
   viewportHeight = typeof window !== 'undefined' ? window.innerHeight : 0,
-} = {}) {
+}: any = {}) {
   if (!list) return 0;
 
   const borderTopWidth = drawer && typeof getComputedStyle === 'function'
     ? Number.parseFloat(getComputedStyle(drawer).borderTopWidth || '0')
     : 0;
   const borderOffset = Number.isFinite(borderTopWidth) ? borderTopWidth : 0;
-  const listStyle = typeof getComputedStyle === 'function' ? getComputedStyle(list) : {};
+  const listStyle: any = typeof getComputedStyle === 'function' ? getComputedStyle(list) : {};
   const selectedRows = typeof list.querySelectorAll === 'function'
     ? Array.from(list.querySelectorAll('.bw-ppb-cascade-selected-item, .wpbMixCascadeBundleCartItem'))
     : [];
@@ -60,7 +60,7 @@ export function getCascadeSelectedDrawerHeight({
   let visibleRowsHeight = Number.POSITIVE_INFINITY;
 
   if (selectedRows.length >= visibleRowsLimit && title) {
-    const visibleRows = selectedRows.slice(0, visibleRowsLimit);
+    const visibleRows = selectedRows.slice(0, visibleRowsLimit) as HTMLElement[];
     const titleHeight = title.getBoundingClientRect?.().height || 0;
     const rowHeights = visibleRows.reduce((sum, row) => (
       sum + (row.getBoundingClientRect?.().height || 0)
@@ -85,7 +85,7 @@ export function prepareCascadeSelectedProductDisplay({
   variantId = '',
   quantity = 0,
   formatPrice = null,
-} = {}) {
+}: any = {}) {
   const normalizedQuantity = Number.isFinite(Number(quantity)) ? Math.max(0, Number(quantity)) : 0;
   const title = product.title || product.parentTitle || '';
   const variantTitle = normalizeSelectedRowVariantTitle(product, title);
@@ -107,7 +107,7 @@ export function prepareCascadeSelectedProductDisplay({
   };
 }
 
-function normalizeSelectedRowVariantTitle(product, title) {
+function normalizeSelectedRowVariantTitle(product: any, title: any) {
   const variantTitle = product.variantTitle && product.variantTitle !== 'Default Title'
     ? String(product.variantTitle).trim()
     : '';
@@ -119,11 +119,11 @@ function normalizeSelectedRowVariantTitle(product, title) {
   return variantTitle;
 }
 
-export function shouldMountCascadeAddToCartInFooter(addToCartButton, footerElement) {
+export function shouldMountCascadeAddToCartInFooter(addToCartButton: any, footerElement: any) {
   return Boolean(addToCartButton && footerElement && addToCartButton.parentElement !== footerElement);
 }
 
-function formatCascadeDiscountPercentage(value) {
+function formatCascadeDiscountPercentage(value: number) {
   const percentage = Number(value || 0);
   if (!Number.isFinite(percentage) || percentage <= 0) return '';
 
@@ -138,7 +138,7 @@ export function getCascadeAddToCartButtonContent({
   totalPriceText = '',
   discountAmountText = '',
   discountInfo = null,
-} = {}) {
+}: any = {}) {
   const hasDiscount = Boolean(discountInfo?.hasDiscount);
   const discountMethod = discountInfo?.discountMethod || '';
   const appliedRuleValue = Number(discountInfo?.applicableRule?.discountValue || 0);
@@ -166,15 +166,15 @@ export const cascadeTemplateMethods: Record<string, any> & ThisType<any> = {
     return this._getProductPageTemplateContract?.()?.id === 'LIST';
   },
 
-  _getCascadeAddToCartButtonContent(options = {}) {
+  _getCascadeAddToCartButtonContent(options: any = {}) {
     return getCascadeAddToCartButtonContent(options);
   },
 
-  _renderCascadeAddToCartButtonContent(button, content = {}) {
+  _renderCascadeAddToCartButtonContent(button: any, content: any = {}) {
     if (!button) return;
     button.textContent = '';
 
-    const appendPart = (tagName, className, text, { hidden = false } = {}) => {
+    const appendPart = (tagName: string, className: string, text: any, { hidden = false }: any = {}) => {
       if (!text) return null;
       const part = document.createElement(tagName);
       part.className = className;
@@ -200,8 +200,8 @@ export const cascadeTemplateMethods: Record<string, any> & ThisType<any> = {
       selectedProducts: this.selectedProducts,
       stepProductData: this.stepProductData,
     }, {
-      expandProductsByStep: (products) => this.expandProductsByVariant(products || []),
-      normalizeSelectionKey: (value) => this.normalizeSelectionKey(value),
+      expandProductsByStep: (products: any) => this.expandProductsByVariant(products || []),
+      normalizeSelectionKey: (value: any) => this.normalizeSelectionKey(value),
     });
   },
 
@@ -246,7 +246,7 @@ export const cascadeTemplateMethods: Record<string, any> & ThisType<any> = {
     return TemplateManager.replaceVariables(template, variables);
   },
 
-  _renderCascadeFooter(el) {
+  _renderCascadeFooter(el: any) {
     el.className = 'bundle-footer-messaging bw-ppb-cascade-footer wpbMixCascadeFooterWrapper wpbMixCascadeFooterWrapper--bundleATCBtnV2 wpbMixCascadeFooterWrapper--cartDrawerUI';
     el.style.display = '';
     el.style.cssText = '';
@@ -312,7 +312,7 @@ export const cascadeTemplateMethods: Record<string, any> & ThisType<any> = {
     `;
     drawer.appendChild(toggle);
 
-    let list = null;
+    let list: HTMLDivElement|null = null;
     if (drawerState.hasSelectedProducts) {
       list = document.createElement('div');
       list.className = 'bw-ppb-cascade-selected-list wpbMixCascadeCartItemsWrapper';
@@ -326,26 +326,26 @@ export const cascadeTemplateMethods: Record<string, any> & ThisType<any> = {
       `;
       list.appendChild(title);
 
-      selectedEntries.forEach(({ stepIndex, variantId, quantity, product }) => {
+      selectedEntries.forEach(({ stepIndex, variantId, quantity, product }: any) => {
         const item = document.createElement('div');
         item.innerHTML = renderSelectedProductRow(prepareCascadeSelectedProductDisplay({
           product,
           variantId,
           quantity,
-          formatPrice: (amount) => CurrencyManager.convertAndFormat(amount, CurrencyManager.getCurrencyInfo()),
+          formatPrice: (amount: any) => CurrencyManager.convertAndFormat(amount, CurrencyManager.getCurrencyInfo()),
         }), {
           className: 'bw-ppb-cascade-selected-item wpbMixCascadeBundleCartItem',
         }).trim();
-        const row = item.firstElementChild;
+        const row = item.firstElementChild as HTMLElement | null;
         row?.querySelector('[data-action="remove-selected-product"]')?.addEventListener('click', () => {
           this.removeProductFromSelection(stepIndex, variantId);
         });
-        if (row) list.appendChild(row);
+        if (row) list!.appendChild(row);
       });
       drawer.appendChild(list);
     }
 
-    const setDrawerExpanded = (isExpanded) => {
+    const setDrawerExpanded = (isExpanded: boolean) => {
       const nextExpanded = Boolean(isExpanded && drawerState.hasSelectedProducts);
       let maxDrawerHeight = 0;
       drawer.classList.toggle('bw-ppb-cascade-selected-drawer--open', nextExpanded);
@@ -371,7 +371,7 @@ export const cascadeTemplateMethods: Record<string, any> & ThisType<any> = {
       drawer.style.setProperty('--bw-ppb-cascade-selected-drawer-height', `${previousDrawerHeight}px`);
       const scheduleFrame = typeof window !== 'undefined' && typeof window.requestAnimationFrame === 'function'
         ? window.requestAnimationFrame.bind(window)
-        : (callback) => callback();
+        : (callback: () => any) => callback();
       scheduleFrame(() => setDrawerExpanded(true));
     } else {
       setDrawerExpanded(drawerState.isOpen);

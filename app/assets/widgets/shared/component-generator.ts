@@ -14,7 +14,7 @@ import { CurrencyManager } from './currency-manager.js';
 
 export class ComponentGenerator {
   /** Escape HTML special characters to prevent XSS in innerHTML contexts */
-  static escapeHtml(str) {
+  static escapeHtml(str: string) {
     if (!str) return '';
     return String(str)
       .replace(/&/g, '&amp;')
@@ -32,7 +32,7 @@ export class ComponentGenerator {
    * @param {Object} options - Optional settings
    * @param {boolean} options.showQuantitySelector - Whether to show quantity selector (default: true)
    */
-  static renderProductCard(product, currentQuantity, currencyInfo, options = {}) {
+  static renderProductCard(product: any, currentQuantity: number, currencyInfo: any, options: any = {}) {
     const selectionKey = product.variantId || product.id;
     const isSelected = currentQuantity > 0;
 
@@ -114,7 +114,7 @@ export class ComponentGenerator {
   /**
    * Generates HTML for empty state cards
    */
-  static renderEmptyStateCards(labelText, count = 3) {
+  static renderEmptyStateCards(labelText: any, count = 3) {
     const cards = Array(count).fill(0).map(() => `
       <div class="empty-state-card">
         <svg class="empty-state-card-icon" width="69" height="69" viewBox="0 0 69 69" fill="none">
@@ -131,12 +131,12 @@ export class ComponentGenerator {
   /**
    * Generates variant selector HTML if product has variants
    */
-  static renderVariantSelector(product) {
+  static renderVariantSelector(product: any) {
     if (!product.variants || product.variants.length <= 1) {
       return '';
     }
 
-    const options = product.variants.map(variant => {
+    const options = product.variants.map((variant: any)  => {
       const isAvailable = variant.available !== false;
       const label = this.escapeHtml(variant.title === 'Default Title' ? product.title : variant.title);
       return `<option value="${variant.id}" ${!isAvailable ? 'disabled' : ''}>${label}${!isAvailable ? ' (Out of Stock)' : ''}</option>`;
@@ -210,7 +210,7 @@ export class ComponentGenerator {
   /**
    * Generates tab HTML for modal navigation
    */
-  static renderTab(step, index, isActive, isCompleted, isLocked) {
+  static renderTab(step: any, index: number, isActive: any, isCompleted: any, isLocked: any) {
     const statusClass = isCompleted ? 'completed' : (isLocked ? 'locked' : '');
     const activeClass = isActive ? 'active' : '';
 
@@ -229,7 +229,7 @@ export class ComponentGenerator {
   /**
    * Generates progress bar HTML
    */
-  static renderProgressBar(currentValue, targetValue) {
+  static renderProgressBar(currentValue: number, targetValue: number) {
     const percentage = targetValue > 0 ? Math.min(100, (currentValue / targetValue) * 100) : 0;
 
     return `

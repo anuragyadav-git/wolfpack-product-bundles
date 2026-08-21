@@ -1,7 +1,7 @@
 import { BUNDLE_WIDGET } from '../../shared/constants.js';
 import { STOREFRONT_PROXY_ROOT } from '../../../../config/storefront-proxy-routes.js';
 
-function normalizeWeightToGrams(weight, unit) {
+function normalizeWeightToGrams(weight: any, unit: any) {
   const numeric = Number(weight);
   if (!Number.isFinite(numeric) || numeric <= 0) return 0;
 
@@ -25,7 +25,7 @@ function normalizeWeightToGrams(weight, unit) {
 }
 
 export const ProductPageProductDataMethods: Record<string, any> & ThisType<any> = {
-  normalizeProductSelectionId(product = {}) {
+  normalizeProductSelectionId(product: any = {}) {
     const candidate = this.extractId(product?.selectionId);
     return candidate || '';
   },
@@ -45,7 +45,7 @@ resolveStorefrontApiBase() {
   if (configuredAppUrl) {
     try {
       configuredAppHost = new URL(configuredAppUrl).host;
-    } catch (_error) {
+    } catch (_error: any) {
       configuredAppHost = '';
     }
   }
@@ -61,41 +61,41 @@ resolveStorefrontApiBase() {
   return configuredAppUrl || currentOrigin;
 },
 
-collectStepProductIds(step) {
-  const productIds = [];
-  const addProductId = (product) => {
+collectStepProductIds(step: any) {
+  const productIds: any[] = [];
+  const addProductId = (product: any) => {
     const id = this.normalizeProductSelectionId(product);
     if (id && !productIds.includes(id)) productIds.push(id);
   };
 
   (step.products || []).forEach(addProductId);
-  (step.categories || []).forEach(category => {
+  (step.categories || []).forEach((category: any)  => {
     (category.products || []).forEach(addProductId);
   });
 
   return productIds;
 },
 
-collectStepCollectionHandles(step) {
-  const handles = [];
-  const addCollectionHandle = (collection) => {
+collectStepCollectionHandles(step: any) {
+  const handles: any[] = [];
+  const addCollectionHandle = (collection: any) => {
     const handle = collection?.handle;
     if (handle && !handles.includes(handle)) handles.push(handle);
   };
 
   (step.collections || []).forEach(addCollectionHandle);
-  (step.categories || []).forEach(category => {
+  (step.categories || []).forEach((category: any)  => {
     (category.collections || []).forEach(addCollectionHandle);
   });
 
   return handles;
 },
 
-async loadStepProducts(stepIndex) {
+async loadStepProducts(stepIndex: string|number) {
   const step = this.selectedBundle.steps[stepIndex];
 
   const cachedProducts = this.stepProductData[stepIndex] || [];
-  const hasHydratedProducts = cachedProducts.some(product =>
+  const hasHydratedProducts = cachedProducts.some((product: any)  =>
     product?.selectionId
     || product?.imageUrl
     || (Array.isArray(product?.variants) && product.variants.length > 0)
@@ -106,7 +106,7 @@ async loadStepProducts(stepIndex) {
     return;
   }
 
-  let allProducts = [];
+  let allProducts: any[] = [];
   let fetchFailed = false;
 
   const shop = window.Shopify?.shop || window.location.host;
@@ -124,7 +124,7 @@ async loadStepProducts(stepIndex) {
       } else {
         fetchFailed = true;
       }
-    } catch (_e) {
+    } catch (_e: any) {
       fetchFailed = true;
     }
   }
@@ -141,7 +141,7 @@ async loadStepProducts(stepIndex) {
       } else {
         fetchFailed = true;
       }
-    } catch (_e) {
+    } catch (_e: any) {
       fetchFailed = true;
     }
   }
@@ -154,7 +154,7 @@ async loadStepProducts(stepIndex) {
 
   // Remove duplicates
   const seen = new Set();
-  this.stepProductData[stepIndex] = processedProducts.filter(product => {
+  this.stepProductData[stepIndex] = processedProducts.filter((product: any)  => {
     const key = this.normalizeProductSelectionId(product);
     if (seen.has(key)) {
       return false;
@@ -168,7 +168,7 @@ async loadStepProducts(stepIndex) {
   this._stepFetchFailed[stepIndex] = fetchFailed && this.stepProductData[stepIndex].length === 0;
 },
 
-processProductsForStep(products, step) {
+processProductsForStep(products: any[], step: any) {
   // See full-page widget for the same fields. quantityAvailable is number|null
   // (null = untracked / scope ungranted → treat as unlimited in the clamp).
   const trackInventoryOnAddToCart = typeof this.isInventoryTrackingOnAddToCartEnabled === 'function'
@@ -178,16 +178,16 @@ processProductsForStep(products, step) {
     ? this._getProductPageControls()
     : null;
   const hideOutOfStockProducts = controls?.hideOutOfStockProducts !== false;
-  const isTrackedZeroStock = (variant) => (
+  const isTrackedZeroStock = (variant: any) => (
     variant?.quantityAvailable === 0 && variant?.currentlyNotInStock !== true
   );
-  const isVariantSelectableForInventory = (variant) => (
+  const isVariantSelectableForInventory = (variant: any) => (
     variant?.available === true && (
       !trackInventoryOnAddToCart || !isTrackedZeroStock(variant)
     )
   );
-  const toCents = (value) => Math.round(parseFloat(value || '0') * 100);
-  const normalizeVariant = (v) => ({
+  const toCents = (value: any) => Math.round(parseFloat(value || '0') * 100);
+  const normalizeVariant = (v: any) => ({
     id: this.extractId(v.id),
     selectionId: this.extractId(v.id),
     title: v.title,
@@ -204,10 +204,10 @@ processProductsForStep(products, step) {
     image: v.image || null
   });
 
-  return products.flatMap(product => {
+  return products.flatMap((product: any)  => {
     const sourceVariants = Array.isArray(product.variants) ? product.variants : [];
     const customerVisibleVariants = hideOutOfStockProducts
-      ? sourceVariants.filter(variant => variant?.available !== false)
+      ? sourceVariants.filter((variant: any)  => variant?.available !== false)
       : sourceVariants;
 
     if (step.displayVariantsAsIndividual && product.variants && product.variants.length > 0) {
@@ -219,13 +219,13 @@ processProductsForStep(products, step) {
       // Preserve parent product reference for variant selection and tracking
       const processedVariants = customerVisibleVariants.map(normalizeVariant);
 
-      const processedOptions = (product.options || []).map(opt => {
+      const processedOptions = (product.options || []).map((opt: any)  => {
         if (typeof opt === 'string') return opt;
         return opt.name || opt;
       });
 
       return customerVisibleVariants
-        .map(variant => {
+        .map((variant: any)  => {
           // Storefront API: prioritize variant image, fallback to product featured image
           const imageUrl = variant?.image?.src || product.imageUrl || BUNDLE_WIDGET.PLACEHOLDER_IMAGE;
 
@@ -268,7 +268,7 @@ processProductsForStep(products, step) {
       const processedVariants = customerVisibleVariants.map(normalizeVariant);
 
       // Process options array for variant selector labels
-      const processedOptions = (product.options || []).map(opt => {
+      const processedOptions = (product.options || []).map((opt: any)  => {
         if (typeof opt === 'string') return opt;
         return opt.name || opt;
       });

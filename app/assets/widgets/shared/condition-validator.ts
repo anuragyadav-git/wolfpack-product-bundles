@@ -18,7 +18,7 @@
 // this directory use ES module syntax. Do not convert without updating the test config.
 const ConditionValidator = (function () {
   // ─── Operator constants ───────────────────────────────────────────────────
-  const OPERATORS = {
+  const OPERATORS: any = {
     EQUAL_TO:                'equal_to',
     GREATER_THAN_OR_EQUAL_TO: 'greater_than_or_equal_to',
     LESS_THAN_OR_EQUAL_TO:   'less_than_or_equal_to',
@@ -43,7 +43,7 @@ const ConditionValidator = (function () {
    * @param {number}  options.targetWeightPerUnit  Per-unit weight for the target product
    * @returns {number}  Total across all products in the step after the update
    */
-  function calculateStepTotalAfterUpdate(currentSelections, targetProductId, newQuantity, options = {}) {
+  function calculateStepTotalAfterUpdate(currentSelections: any, targetProductId: string, newQuantity: any, options: any = {}) {
     const selections = currentSelections || {};
     const conditionType = _normalizeConditionType(options.conditionType);
     const targetAmountPerUnit = Number(options.targetAmountPerUnit);
@@ -85,7 +85,7 @@ const ConditionValidator = (function () {
    * @param {number}  newQuantity       Proposed quantity (0 = remove)
    * @returns {{ allowed: boolean, limitText: string|null }}
    */
-  function canUpdateQuantity(step, currentSelections, targetProductId, newQuantity, targetValues) {
+  function canUpdateQuantity(step: any, currentSelections: any, targetProductId: any, newQuantity: any, targetValues: any = null) {
     // No explicit condition configured → no upper bound; always allow increases
     if (!step || !step.conditionType || !step.conditionOperator || !_isPositiveConditionValue(step.conditionValue)) {
       return { allowed: true, limitText: null };
@@ -136,13 +136,13 @@ const ConditionValidator = (function () {
    * (snake_case) and category rules (camelCase, persisted from the admin
    * UI's CATEGORY_CONDITION_OPERATOR_OPTIONS).
    */
-  function _normalizeOperator(operator) {
+  function _normalizeOperator(operator: string) {
     if (typeof operator !== 'string' || operator.length === 0) return operator;
     if (operator.indexOf('_') !== -1) return operator;
     return operator.replace(/([A-Z])/g, '_$1').toLowerCase();
   }
 
-  function _sumQuantities(selections) {
+  function _sumQuantities(selections: any) {
     let total = 0;
     if (!selections) return total;
     for (const qty of Object.values(selections)) {
@@ -151,25 +151,25 @@ const ConditionValidator = (function () {
     return total;
   }
 
-  function _normalizeConditionType(conditionType) {
+  function _normalizeConditionType(conditionType: string) {
     if (conditionType === 'amount') return 'amount';
     if (conditionType === 'weight') return 'weight';
     return 'quantity';
   }
 
-  function _normalizeConditionRuleValue(conditionType, value) {
+  function _normalizeConditionRuleValue(conditionType: string, value: any) {
     const numeric = Number(value);
     if (!Number.isFinite(numeric)) return numeric;
     return _normalizeConditionType(conditionType) === 'amount' ? numeric * 100 : numeric;
   }
 
-  function _getSelectionValueByConditionType(selection, conditionType) {
+  function _getSelectionValueByConditionType(selection: unknown, conditionType: string) {
     if (conditionType === 'amount') return _getSelectionAmount(selection);
     if (conditionType === 'weight') return _getSelectionWeight(selection);
     return _getSelectionQuantity(selection);
   }
 
-  function _getTargetMetric(values) {
+  function _getTargetMetric(values: any) {
     const amount = Number(values && values.amount);
     const weight = Number(values && values.weight);
     return {
@@ -178,12 +178,12 @@ const ConditionValidator = (function () {
     };
   }
 
-  function _isPositiveConditionValue(value) {
+  function _isPositiveConditionValue(value: any) {
     const numeric = Number(value);
     return Number.isFinite(numeric) && numeric > 0;
   }
 
-  function _collectCategoryProductIds(category) {
+  function _collectCategoryProductIds(category: any) {
     const ids = new Set();
     const products = Array.isArray(category && category.products) ? category.products : [];
     for (const product of products) {
@@ -195,28 +195,28 @@ const ConditionValidator = (function () {
     return ids;
   }
 
-  function _getSelectionQuantity(selection) {
+  function _getSelectionQuantity(selection: unknown) {
     if (selection && typeof selection === 'object') {
-      return Number(selection.quantity) || 0;
+      return Number((selection as Record<string, unknown>).quantity) || 0;
     }
     return Number(selection) || 0;
   }
 
-  function _getSelectionAmount(selection) {
+  function _getSelectionAmount(selection: any) {
     if (selection && typeof selection === 'object') {
       return Number(selection.amount) || 0;
     }
     return Number(selection) || 0;
   }
 
-  function _getSelectionWeight(selection) {
+  function _getSelectionWeight(selection: any) {
     if (selection && typeof selection === 'object') {
       return Number(selection.weight) || 0;
     }
     return Number(selection) || 0;
   }
 
-  function _normalizeAmountRuleValue(value) {
+  function _normalizeAmountRuleValue(value: any) {
     const numeric = Number(value);
     if (!Number.isFinite(numeric)) return numeric;
     return numeric * 100;
@@ -228,9 +228,9 @@ const ConditionValidator = (function () {
    *
    * Used by `isStepConditionSatisfied` in category-rule mode.
    */
-  function evaluateCategoryRules(category, stepSelections) {
+  function evaluateCategoryRules(category: any, stepSelections: any) {
     const rules = Array.isArray(category && category.conditions)
-      ? category.conditions.filter(rule => _isPositiveConditionValue(rule && rule.value))
+      ? category.conditions.filter((rule: any)  => _isPositiveConditionValue(rule && rule.value))
       : [];
     if (rules.length === 0) return true;
 
@@ -260,11 +260,11 @@ const ConditionValidator = (function () {
     return true;
   }
 
-  function _isCategoryRuleMode(step) {
+  function _isCategoryRuleMode(step: any) {
     const categories = Array.isArray(step && step.categories) ? step.categories : [];
-    return categories.some(c =>
+    return categories.some((c: any)  =>
       Array.isArray(c && c.conditions)
-      && c.conditions.some(rule => _isPositiveConditionValue(rule && rule.value))
+      && c.conditions.some((rule: any)  => _isPositiveConditionValue(rule && rule.value))
     );
   }
 
@@ -278,7 +278,7 @@ const ConditionValidator = (function () {
    * @param {Record<string, number>} currentSelections  Current selections for this step
    * @returns {boolean}
    */
-  function isStepConditionSatisfied(step, currentSelections) {
+  function isStepConditionSatisfied(step: any, currentSelections: any) {
     if (!step) return true;
     const conditionType = _normalizeConditionType(step.conditionType);
 
@@ -322,7 +322,7 @@ const ConditionValidator = (function () {
     return true;
   }
 
-  function getAllowedQuantityPerProduct(validateQuantityPerProduct) {
+  function getAllowedQuantityPerProduct(validateQuantityPerProduct: any) {
     if (!validateQuantityPerProduct || validateQuantityPerProduct.isEnabled !== true) {
       return null;
     }
@@ -335,7 +335,7 @@ const ConditionValidator = (function () {
     return Math.floor(allowed);
   }
 
-  function canUpdateProductQuantity(validateQuantityPerProduct, currentQuantity, newQuantity) {
+  function canUpdateProductQuantity(validateQuantityPerProduct: any, currentQuantity: number, newQuantity: number) {
     const limit = getAllowedQuantityPerProduct(validateQuantityPerProduct);
     if (limit === null) {
       return { allowed: true, limit: null };
@@ -353,7 +353,7 @@ const ConditionValidator = (function () {
     };
   }
 
-  function isProductQuantityIncreaseDisabled(validateQuantityPerProduct, currentQuantity) {
+  function isProductQuantityIncreaseDisabled(validateQuantityPerProduct: any, currentQuantity: any) {
     const current = Number(currentQuantity) || 0;
     return !canUpdateProductQuantity(
       validateQuantityPerProduct,
@@ -368,7 +368,7 @@ const ConditionValidator = (function () {
    * Evaluate a single condition's "can update" rule for the proposed total.
    * Lower-bound operators never block increases (no upper cap from them alone).
    */
-  function _evaluateCanUpdate(operator, required, totalAfter, displayRequired = required) {
+  function _evaluateCanUpdate(operator: any, required: number, totalAfter: number, displayRequired = required) {
     const normalizedOperator = _normalizeOperator(operator);
     let allowed;
     switch (normalizedOperator) {
@@ -397,7 +397,7 @@ const ConditionValidator = (function () {
   /**
    * Evaluate whether a total satisfies a single condition at step-completion time.
    */
-  function _evaluateSatisfied(operator, required, total) {
+  function _evaluateSatisfied(operator: any, required: number, total: number) {
     switch (operator) {
       case OPERATORS.EQUAL_TO:                 return total === required;
       case OPERATORS.GREATER_THAN_OR_EQUAL_TO: return total >= required;
@@ -406,8 +406,8 @@ const ConditionValidator = (function () {
     }
   }
 
-  function _buildLimitText(operator, required) {
-    const map = {
+  function _buildLimitText(operator: string|number, required: number) {
+    const map: any = {
       [OPERATORS.EQUAL_TO]:                `exactly ${required}`,
       [OPERATORS.LESS_THAN_OR_EQUAL_TO]:   `at most ${required}`,
       [OPERATORS.GREATER_THAN_OR_EQUAL_TO]: `at least ${required}`,
@@ -415,7 +415,7 @@ const ConditionValidator = (function () {
     return map[operator] || String(required);
   }
 
-  function _formatStepLimitToast(limitText, required) {
+  function _formatStepLimitToast(limitText: any, required: any) {
     const requiredQuantity = Number(required);
     if (!Number.isFinite(requiredQuantity) || requiredQuantity <= 0) {
       return 'This step is not configured correctly.';

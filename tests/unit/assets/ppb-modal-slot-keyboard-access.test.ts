@@ -33,10 +33,10 @@ describe('PPB modal slot keyboard access', () => {
 
     card.dispatch('click', {});
 
-    expect(widget.openModal).toHaveBeenCalledWith(0);
+    expect(widget.openModal).toHaveBeenCalledWith(0, card);
   });
 
-  it.each(['Enter', ' '])('reopens a filled slot with the %p key', (key) => {
+  it('reopens a filled slot through a labelled native replacement control', () => {
     const widget = createWidget();
     const card = widget.createSelectedProductCard({
       product: { title: 'Obsidian Earrings', imageUrl: '/earrings.jpg' },
@@ -45,29 +45,62 @@ describe('PPB modal slot keyboard access', () => {
       variantId: 'variant-1',
       instanceIndex: 0,
     }, 0);
-    const preventDefault = jest.fn();
+    const replacement = card.children[0];
 
-    card.dispatch('keydown', { key, preventDefault });
+    expect(replacement.tagName).toBe('BUTTON');
+    expect(replacement.type).toBe('button');
+    expect(replacement.getAttribute('aria-label')).toBe('Obsidian Earrings');
+    expect(replacement.dataset).toEqual({
+      stepIndex: '0',
+      cardIndex: '0',
+      variantId: 'variant-1',
+    });
+    replacement.dispatch('click', {});
 
-    expect(preventDefault).toHaveBeenCalledTimes(1);
-    expect(widget.openModal).toHaveBeenCalledWith(0);
+    expect(widget.openModal).toHaveBeenCalledWith(0, replacement);
   });
 
-  it('exposes the filled-slot remove action as a labelled native control', () => {
+  it('exposes a complete selected-slot name without folding in the nested remove action', () => {
     const widget = createWidget();
     const card = widget.createSelectedProductCard({
-      product: { title: 'Obsidian Earrings', imageUrl: '/earrings.jpg' },
+      product: { title: 'Obsidian Earrings', imageUrl: '/earrings.jpg', price: 82900 },
       stepIndex: 0,
       step: { name: 'Choose earrings' },
       variantId: 'variant-1',
       instanceIndex: 0,
     }, 0);
-    const remove = card.children[0];
+
+    expect(card.getAttribute('aria-label')).toBeNull();
+    expect(card.children[0].getAttribute('aria-label')).toBe('Obsidian Earrings');
+    const identity = card.children.at(-1);
+    expect(identity?.children[0]?.textContent).toBe('Obsidian Earrings');
+    expect(identity?.children[1]?.children[0]?.textContent).toBe('$ 829.00');
+  });
+
+  it('exposes the filled-slot cross badge with the complete localized product-specific name', () => {
+    const widget = createWidget();
+    widget._resolveText = jest.fn((key: string, fallback: string) => (
+      key === 'removeProductFromFooterText' ? 'Remove {{stepName}}' : fallback
+    ));
+    const productTitle = 'Extra Long Obsidian Earrings with Complete Product Name';
+    const card = widget.createSelectedProductCard({
+      product: { title: productTitle, imageUrl: '/earrings.jpg' },
+      stepIndex: 0,
+      step: { name: 'Choose earrings' },
+      variantId: 'variant-1',
+      instanceIndex: 0,
+    }, 0);
+    const remove = getRemoveControl(card);
     const stopPropagation = jest.fn();
 
     expect(remove.tagName).toBe('BUTTON');
     expect(remove.type).toBe('button');
-    expect(remove.getAttribute('aria-label')).toBe('Remove this product');
+    expect(remove.getAttribute('aria-label')).toBe(`Remove ${productTitle}`);
+    expect(remove.title).toBe(`Remove ${productTitle}`);
+    expect(widget._resolveText).toHaveBeenCalledWith(
+      'removeProductFromFooterText',
+      'Remove this product',
+    );
 
     remove.dispatch('click', { stopPropagation });
 
@@ -105,7 +138,7 @@ describe('PPB modal slot keyboard access', () => {
         },
       };
 
-      card.children[0].dispatch('click', { stopPropagation: jest.fn() });
+      getRemoveControl(card).dispatch('click', { stopPropagation: jest.fn() });
 
       expect(recoveryTarget.focus).toHaveBeenCalledTimes(1);
     } finally {
@@ -140,7 +173,7 @@ describe('PPB modal slot keyboard access', () => {
         },
       };
 
-      card.children[0].dispatch('click', { stopPropagation: jest.fn() });
+      getRemoveControl(card).dispatch('click', { stopPropagation: jest.fn() });
 
       expect(precedingSlot.focus).toHaveBeenCalledTimes(1);
     } finally {
@@ -159,6 +192,12 @@ function createWidget() {
   Object.assign(widget, modalSlotTemplateMethods, ProductPageInpageRenderMethods);
   widget.removeProductFromSelection = jest.fn();
   return widget;
+}
+
+function getRemoveControl(card: any) {
+  return card.children.find((child: any) => (
+    child.getAttribute?.('aria-label')?.startsWith('Remove')
+  ));
 }
 
 function createFakeDocument() {
@@ -196,7 +235,7 @@ function createFakeElement(tagName: string) {
       listeners.set(name, listener);
     },
     dispatch(name: string, event: any) {
-      listeners.get(name)?.(event);
+      listeners.get(name)?.({ ...event, currentTarget: this });
     },
   };
 }

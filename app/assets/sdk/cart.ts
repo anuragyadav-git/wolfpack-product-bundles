@@ -2,7 +2,7 @@
 
 import { buildStorefrontApiPath } from '../../config/storefront-proxy-routes.js';
 
-function _generateBundleInstanceId(bundleId) {
+function _generateBundleInstanceId(bundleId: string) {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
     return bundleId + '_' + crypto.randomUUID();
   }
@@ -23,19 +23,19 @@ function _generateBundleSessionKey() {
   return Math.random().toString(36).slice(2, 2 + keyLength).toUpperCase().padEnd(keyLength, '0');
 }
 
-function _resolveProductPageOfferId(state) {
+function _resolveProductPageOfferId(state: any) {
   var rawOfferId = state.offerId || state.bundleOfferId || state.bundleId || 'UNKNOWN';
   var offerId = String(rawOfferId);
   return offerId.indexOf('MIX-') === 0 ? offerId : 'MIX-' + offerId;
 }
 
-function _formatCartAmount(cents, state) {
+function _formatCartAmount(cents: number, state: any) {
   if (typeof state.formatMoney === 'function') return state.formatMoney(cents);
   return String(cents);
 }
 
-function _buildCartLineSourceProperties(state, selectedLines) {
-  var retailCents = selectedLines.reduce(function (sum, line) {
+function _buildCartLineSourceProperties(state: any, selectedLines: any[]) {
+  var retailCents = selectedLines.reduce(function (sum: number, line: any) {
     if (line.step && line.step.isFreeGift) return sum;
     return sum + ((Number(line.product.price) || 0) * line.quantity);
   }, 0);
@@ -45,9 +45,9 @@ function _buildCartLineSourceProperties(state, selectedLines) {
     discountPercentage = Math.round((discountCents / retailCents) * 100);
   }
 
-  var displayProperties = {
+  var displayProperties: any = {
     box: '1',
-    items: selectedLines.map(function (line) {
+    items: selectedLines.map(function (line: any) {
       return line.quantity + ' x ' + (line.product.title || line.product.id);
     }).join(', '),
     retailPrice: _formatCartAmount(retailCents, state),
@@ -68,16 +68,16 @@ function _buildCartLineSourceProperties(state, selectedLines) {
   };
 }
 
-export function buildCartItems(state) {
+export function buildCartItems(state: any) {
   var bundleInstanceId = _generateBundleInstanceId(state.bundleId);
   var offerId = _resolveProductPageOfferId(state);
   var sessionKey = _generateBundleSessionKey();
   var itemNumber = 0;
-  var items = [];
-  var unavailable = [];
-  var selectedLines = [];
+  var items: { id: number; quantity: any; properties: { Box: string; _bundleName: any; '_wolfpackProductBundle:OfferId': string; '_wolfpackProductBundle:prodQty': string; }; }[] = [];
+  var unavailable: any[] = [];
+  var selectedLines: { product: any; quantity: any; step: any; }[] = [];
 
-  state.steps.forEach(function (step, stepIndex) {
+  state.steps.forEach(function (step: any, stepIndex: string|number) {
     var stepSelections = state.selections[step.id] || {};
     var productsInStep = (state.stepProductData && state.stepProductData[stepIndex]) || [];
 
@@ -85,7 +85,7 @@ export function buildCartItems(state) {
       var qty = stepSelections[variantId];
       if (!qty || qty <= 0) return;
 
-      var product = productsInStep.find(function (p) {
+      var product = productsInStep.find(function (p: any) {
         return String(p.variantId || p.id) === String(variantId);
       });
       if (!product) return;
@@ -96,7 +96,7 @@ export function buildCartItems(state) {
       }
 
       itemNumber += 1;
-      var properties = {
+      var properties: any = {
         'Box': String(itemNumber),
         '_bundleName': state.bundleName || '',
         '_wolfpackProductBundle:OfferId': offerId + '_' + sessionKey + '_' + itemNumber,
@@ -136,9 +136,9 @@ export function buildCartItems(state) {
   };
 }
 
-export function buildProductPageCartFormData(items, runtimeToken) {
+export function buildProductPageCartFormData(items: any[], runtimeToken: any) {
   var formData = new FormData();
-  items.forEach(function (item, index) {
+  items.forEach(function (item: any, index: number) {
     formData.append('items[' + index + '][id]', String(item.id));
     formData.append('items[' + index + '][quantity]', String(item.quantity));
     Object.keys(item.properties || {}).forEach(function (key) {
@@ -153,8 +153,8 @@ export function buildProductPageCartFormData(items, runtimeToken) {
   return formData;
 }
 
-export function buildBundleDetailsDisplayProperties(sourceProperties) {
-  var displayProperties = {};
+export function buildBundleDetailsDisplayProperties(sourceProperties: any) {
+  var displayProperties: any = {};
   var raw = sourceProperties && sourceProperties._bundle_display_properties;
 
   if (raw) {
@@ -166,7 +166,7 @@ export function buildBundleDetailsDisplayProperties(sourceProperties) {
       if (parsed && parsed.youSave && parsed.youSave.amountPercentage) {
         displayProperties['You Save'] = String(parsed.youSave.amountPercentage);
       }
-    } catch (_) {}
+    } catch (_: any) {}
   }
 
   ['Box', 'Items', 'Retail Price', 'You Save'].forEach(function (key) {
@@ -190,7 +190,7 @@ function getBundleDetailsCartToken() {
     .catch(function () { return null; });
 }
 
-function syncBundleDetailsCartMetafield(bundleDetailsKey, sourceProperties) {
+function syncBundleDetailsCartMetafield(bundleDetailsKey: any, sourceProperties: any) {
   var displayProperties = buildBundleDetailsDisplayProperties(sourceProperties);
   if (!bundleDetailsKey || Object.keys(displayProperties).length === 0) return Promise.resolve();
 
@@ -222,8 +222,8 @@ function syncBundleDetailsCartMetafield(bundleDetailsKey, sourceProperties) {
     });
 }
 
-function requestCartTransformRuntimeToken(state, cartResult) {
-  var components = cartResult.items.map(function (item) {
+function requestCartTransformRuntimeToken(state: any, cartResult: any) {
+  var components = cartResult.items.map(function (item: any) {
     return { variantId: item.id, quantity: item.quantity };
   });
 
@@ -249,17 +249,17 @@ function requestCartTransformRuntimeToken(state, cartResult) {
     });
 }
 
-export function addBundleToCart(state, validateBundleFn, emitFn) {
+export function addBundleToCart(state: any, validateBundleFn: any, emitFn: any) {
   var validation = validateBundleFn();
   if (!validation.valid) {
     emitFn('wbp:cart-failed', { error: 'Bundle validation failed. Complete all required steps.' });
     return Promise.resolve();
   }
 
-  var cartResult;
+  var cartResult: any;
   try {
     cartResult = buildCartItems(state);
-  } catch (e) {
+  } catch (e: any) {
     emitFn('wbp:cart-failed', { error: e.message });
     return Promise.resolve();
   }
@@ -275,7 +275,7 @@ export function addBundleToCart(state, validateBundleFn, emitFn) {
       return response.text().then(function (text) {
         if (!response.ok) {
           var msg = 'Cart add failed (' + response.status + ')';
-          try { msg = JSON.parse(text).message || msg; } catch (_) {}
+          try { msg = JSON.parse(text).message || msg; } catch (_: any) {}
           throw new Error(msg);
         }
         return text;

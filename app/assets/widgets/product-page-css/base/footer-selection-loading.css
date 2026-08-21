@@ -323,12 +323,12 @@
 }
 
 .bw-bs-panel.bundle-builder-modal.bw-bs-panel--open {
-  height: min(85dvh, 48rem);
+  height: 85dvh;
 }
 
 @media (max-width: 767px) {
   .bw-bs-panel.bundle-builder-modal.bw-bs-panel--open {
-    height: min(85dvh, 48rem);
+    height: 85dvh;
   }
 }
 
@@ -438,6 +438,7 @@
 }
 
 .bw-bs-close-mobile {
+  touch-action: none;
   position: absolute;
   top: 0;
   left: 50%;

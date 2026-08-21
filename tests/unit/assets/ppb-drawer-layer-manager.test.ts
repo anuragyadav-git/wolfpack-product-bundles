@@ -1,4 +1,5 @@
 import {
+  bindDrawerSwipeDismissal,
   DrawerLayerManager,
   shouldDismissDrawerSwipe,
 } from '../../../app/assets/widgets/shared/drawer-layer-manager';
@@ -69,4 +70,76 @@ describe('shared drawer swipe threshold', () => {
     expect(shouldDismissDrawerSwipe({ distanceY: 100, distanceX: 110, velocityY: 0.8 })).toBe(false);
     expect(shouldDismissDrawerSwipe({ distanceY: -100, distanceX: 0, velocityY: -0.8 })).toBe(false);
   });
+
+  it('dismisses the bound topmost drawer after an intentional downward drag', () => {
+    const handle = createPointerTarget();
+    handle.setPointerCapture.mockImplementation(() => {
+      throw new Error('pointer capture unavailable');
+    });
+    handle.releasePointerCapture.mockImplementation(() => {
+      throw new Error('pointer capture unavailable');
+    });
+    const surface = { style: {} as Record<string, string> };
+    const requestClose = jest.fn();
+
+    bindDrawerSwipeDismissal({
+      handle,
+      surface,
+      canDismiss: () => true,
+      requestClose,
+      now: (() => {
+        let value = 0;
+        return () => (value += 100);
+      })(),
+      settleDuration: 0,
+    });
+
+    handle.dispatch('pointerdown', { pointerId: 1, clientX: 10, clientY: 10 });
+    handle.dispatch('pointermove', { pointerId: 1, clientX: 14, clientY: 130 });
+    handle.dispatch('pointerup', { pointerId: 1, clientX: 14, clientY: 130 });
+
+    expect(requestClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps the drawer open for short drags and when another layer owns dismissal', () => {
+    const handle = createPointerTarget();
+    const surface = { style: {} as Record<string, string> };
+    const requestClose = jest.fn();
+    let topmost = true;
+    let currentTime = 0;
+
+    bindDrawerSwipeDismissal({
+      handle,
+      surface,
+      canDismiss: () => topmost,
+      requestClose,
+      now: () => (currentTime += 100),
+      settleDuration: 0,
+    });
+
+    handle.dispatch('pointerdown', { pointerId: 1, clientX: 10, clientY: 10 });
+    handle.dispatch('pointerup', { pointerId: 1, clientX: 12, clientY: 45 });
+    topmost = false;
+    handle.dispatch('pointerdown', { pointerId: 2, clientX: 10, clientY: 10 });
+    handle.dispatch('pointerup', { pointerId: 2, clientX: 12, clientY: 150 });
+
+    expect(requestClose).not.toHaveBeenCalled();
+  });
 });
+
+function createPointerTarget() {
+  const listeners = new Map<string, (event: any) => void>();
+  return {
+    addEventListener(type: string, listener: (event: any) => void) {
+      listeners.set(type, listener);
+    },
+    removeEventListener(type: string) {
+      listeners.delete(type);
+    },
+    setPointerCapture: jest.fn(),
+    releasePointerCapture: jest.fn(),
+    dispatch(type: string, event: any) {
+      listeners.get(type)?.({ preventDefault: jest.fn(), ...event });
+    },
+  };
+}

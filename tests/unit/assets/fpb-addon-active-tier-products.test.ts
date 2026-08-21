@@ -45,8 +45,8 @@ describe("FPB add-on active tier products", () => {
       selectedBundle: { steps: [step] },
       stepProductData: [[]],
       stepCollectionProductIds: {},
-      enrichMissingProductDescriptions: async (products) => products,
-      mergeCategoryProductVariantAvailability: (products) => products,
+      enrichMissingProductDescriptions: async (products: any) => products,
+      mergeCategoryProductVariantAvailability: (products: any) => products,
       resolveStorefrontApiBase: () => 'https://example.test',
       rememberRuntimeProductInventory: () => {},
       getAddonTierEvaluation: () => ({
@@ -95,8 +95,8 @@ describe("FPB add-on active tier products", () => {
       selectedBundle: { steps: [step] },
       stepProductData: [[]],
       stepCollectionProductIds: {},
-      enrichMissingProductDescriptions: async (products) => products,
-      mergeCategoryProductVariantAvailability: (products) => products,
+      enrichMissingProductDescriptions: async (products: any) => products,
+      mergeCategoryProductVariantAvailability: (products: any) => products,
       resolveStorefrontApiBase: () => 'https://example.test',
       rememberRuntimeProductInventory: () => {},
       getAddonTierEvaluation: () => ({

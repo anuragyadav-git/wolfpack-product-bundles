@@ -232,3 +232,4 @@ describe('PPB List shared product cards', () => {
     expect(imageEl.src).toBe('https://cdn.shopify.com/new.jpg');
   });
 });
+export {};

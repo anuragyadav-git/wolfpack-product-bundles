@@ -127,12 +127,7 @@ export function dispatchDiscountTierTransition({
   before,
   after,
   eventName = DISCOUNT_TIER_EVENT,
-}: {
-  root: EventTarget | null | undefined;
-  before: DiscountTierState;
-  after: DiscountTierState;
-  eventName?: string;
-}) {
+}: any) {
   const detail = getDiscountTierTransition(before, after);
   if (!detail || !root?.dispatchEvent) return null;
 

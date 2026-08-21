@@ -181,7 +181,7 @@ describe('PPB shared card quantity selector state', () => {
     expect(quantityControls).not.toBeNull();
     expect(quantityDisplay?.textContent).toBe('2');
     expect(card.classList.contains('bw-product-card--selected')).toBe(true);
-    expect(card.attributes.get('aria-pressed')).toBe('true');
+    expect(card.attributes.get('aria-pressed')).toBeUndefined();
     expect(card.attributes.get('aria-label')).toBe('Open product details (selected)');
   });
 
@@ -235,10 +235,37 @@ describe('PPB shared card quantity selector state', () => {
     expect(increment?.getAttribute('aria-disabled')).toBe('true');
   });
 
+  it('replaces modal quantity controls with Added xN at a configured maximum', () => {
+    const { scope, card, action } = createSharedProductCard();
+    scope.classList.add('bw-bs-panel--open');
+    global.document = {
+      createElement(tagName: string) {
+        return new FakeElement(tagName);
+      },
+    } as unknown as Document;
+
+    ProductPageSelectionMethods.updateProductQuantityDisplay.call({
+      container: new FakeElement('div'),
+      elements: { modal: scope },
+      selectedBundle: {
+        steps: [{}],
+        validateQuantityPerProduct: { isEnabled: true, allowedQuantity: 3 },
+      },
+      _resolveText: (_key: string, fallback: string) => fallback,
+      getVariantAvailable: () => ({ available: null, outOfStock: false }),
+    }, 0, 'variant-1', 3);
+
+    expect(action.querySelector('.inline-quantity-controls')).toBeNull();
+    expect(action.querySelector('.product-add-btn')?.textContent).toBe('Added x3');
+    expect(action.querySelector('.product-add-btn')?.getAttribute('aria-pressed')).toBe('true');
+    expect(card.attributes.get('aria-pressed')).toBeUndefined();
+  });
+
   it('restores the accessible unselected state when quantity returns to zero', () => {
-    const { scope, card } = createSharedProductCard();
+    const { scope, card, addButton } = createSharedProductCard();
     card.setAttribute('aria-label', 'Open product details (selected)');
     card.setAttribute('aria-pressed', 'true');
+    addButton.setAttribute('aria-pressed', 'true');
 
     ProductPageSelectionMethods.updateProductQuantityDisplay.call({
       container: scope,
@@ -252,8 +279,9 @@ describe('PPB shared card quantity selector state', () => {
       getVariantAvailable: () => ({ available: null, outOfStock: false }),
     }, 0, 'variant-1', 0);
 
-    expect(card.attributes.get('aria-pressed')).toBe('false');
+    expect(card.attributes.get('aria-pressed')).toBeUndefined();
     expect(card.attributes.get('aria-label')).toBe('Open product details (not selected)');
+    expect(addButton.attributes.get('aria-pressed')).toBe('false');
   });
 
   it('delegates inline quantity button clicks to the quantity update path', () => {
@@ -285,5 +313,71 @@ describe('PPB shared card quantity selector state', () => {
 
     expect(clickEvent.stopPropagation).toHaveBeenCalled();
     expect(updates).toEqual([[0, 'variant-1', 2]]);
+  });
+
+  it('opens modal product details from the image without activating card-click Add', () => {
+    const productGrid = new FakeElement('div');
+    const card = new FakeElement('div', 'product-card');
+    const image = new FakeElement('div', 'product-image');
+    card.dataset.productId = 'variant-1';
+    card.appendChild(image);
+    productGrid.appendChild(card);
+    (productGrid as any).parentNode = { replaceChild: jest.fn() };
+    const activateCardClickAdd = jest.fn(() => true);
+    const openDetails = jest.fn();
+    const product = { id: 'product-1', selectionId: 'variant-1' };
+
+    ProductPageModalMethods.attachProductEventHandlers.call({
+      selectedBundle: { steps: [{}] },
+      stepProductData: [[product]],
+      findProductBySelectionKey: () => product,
+      getSelectedQuantity: () => 0,
+      _activateProductCardClickAdd: activateCardClickAdd,
+      productModal: { open: openDetails },
+    }, productGrid, 0);
+
+    const clickEvent = {
+      target: image,
+      preventDefault: jest.fn(),
+      stopPropagation: jest.fn(),
+    };
+    productGrid.listeners.click.forEach(listener => listener(clickEvent));
+
+    expect(activateCardClickAdd).not.toHaveBeenCalled();
+    expect(openDetails).toHaveBeenCalledTimes(1);
+    expect(openDetails).toHaveBeenCalledWith(product, {}, {
+      originalSelectionKey: '',
+      selectedQuantity: 1,
+    });
+  });
+
+  it('keeps modal card backgrounds independent from Add and product details', () => {
+    const productGrid = new FakeElement('div');
+    const card = new FakeElement('div', 'product-card');
+    card.dataset.productId = 'variant-1';
+    productGrid.appendChild(card);
+    (productGrid as any).parentNode = { replaceChild: jest.fn() };
+    const activateCardClickAdd = jest.fn(() => true);
+    const openDetails = jest.fn();
+    const product = { id: 'product-1', selectionId: 'variant-1' };
+
+    ProductPageModalMethods.attachProductEventHandlers.call({
+      selectedBundle: { steps: [{}] },
+      stepProductData: [[product]],
+      findProductBySelectionKey: () => product,
+      getSelectedQuantity: () => 0,
+      _activateProductCardClickAdd: activateCardClickAdd,
+      productModal: { open: openDetails },
+    }, productGrid, 0);
+
+    const clickEvent = {
+      target: card,
+      preventDefault: jest.fn(),
+      stopPropagation: jest.fn(),
+    };
+    productGrid.listeners.click.forEach(listener => listener(clickEvent));
+
+    expect(activateCardClickAdd).not.toHaveBeenCalled();
+    expect(openDetails).not.toHaveBeenCalled();
   });
 });

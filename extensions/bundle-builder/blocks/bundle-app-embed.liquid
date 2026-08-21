@@ -26,6 +26,7 @@
 {% assign fpb_upsells_endpoint = storefront_proxy_root | append: '/api/fpb-upsells.json' %}
 {% assign ppb_embed_endpoint = storefront_proxy_root | append: '/api/ppb-embed.json' %}
 {% assign page_builder_embed_endpoint = storefront_proxy_root | append: '/api/page-builder-embed.json' %}
+{% assign controls_settings_endpoint = storefront_proxy_root | append: '/api/controls-settings/' | append: shop.domain | append: '?bundleType=full_page' %}
 {% assign ppb_design_settings_url = storefront_proxy_root | append: '/api/design-settings/' | append: shop.domain | append: '?bundleType=product_page' %}
 {% capture product_collection_ids %}{% if product %}{% for collection in product.collections %}{{ collection.id }}{% unless forloop.last %},{% endunless %}{% endfor %}{% endif %}{% endcapture %}
 
@@ -37,6 +38,7 @@
   data-fpb-upsells-endpoint="{{ fpb_upsells_endpoint }}"
   data-ppb-embed-endpoint="{{ ppb_embed_endpoint }}"
   data-page-builder-embed-endpoint="{{ page_builder_embed_endpoint }}"
+  data-controls-settings-endpoint="{{ controls_settings_endpoint }}"
   data-product-id="{% if product %}{{ product.id }}{% endif %}"
   data-product-handle="{% if product %}{{ product.handle | escape }}{% endif %}"
   data-collection-ids="{{ product_collection_ids | strip }}"

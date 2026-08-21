@@ -3,7 +3,7 @@ import {
   reconcileFpbUpsellHandoff,
 } from '../../../../storefront/fpb-upsell-handoff.js';
 
-export const fullPageUpsellHandoffMethods = {
+export const fullPageUpsellHandoffMethods: any = {
   _initializeFpbUpsellHandoff() {
     const bundleId = String(this.selectedBundle?.id ?? this.container?.dataset?.bundleId ?? '');
     this._pendingFpbUpsellHandoff = bundleId && typeof window !== 'undefined'
@@ -12,7 +12,7 @@ export const fullPageUpsellHandoffMethods = {
     this._fpbUpsellHydratedStepIndexes = new Set();
   },
 
-  _reconcileFpbUpsellHandoffAfterStepLoad(stepIndex) {
+  _reconcileFpbUpsellHandoffAfterStepLoad(stepIndex: any) {
     const payload = this._pendingFpbUpsellHandoff;
     if (!payload) return;
     this._fpbUpsellHydratedStepIndexes ??= new Set();
@@ -34,10 +34,10 @@ export const fullPageUpsellHandoffMethods = {
       return;
     }
     const paidStepIndexes = (this.selectedBundle?.steps ?? [])
-      .map((step, index) => ({ step, index }))
-      .filter(({ step }) => step?.enabled !== false && step?.isFreeGift !== true)
-      .map(({ index }) => index);
-    if (paidStepIndexes.every((index) => this._fpbUpsellHydratedStepIndexes.has(index))) {
+      .map((step: any, index: any) => ({ step, index }))
+      .filter(({ step }: any) => step?.enabled !== false && step?.isFreeGift !== true)
+      .map(({ index }: any) => index);
+    if (paidStepIndexes.every((index: any) => this._fpbUpsellHydratedStepIndexes.has(index))) {
       this._pendingFpbUpsellHandoff = null;
     }
   },

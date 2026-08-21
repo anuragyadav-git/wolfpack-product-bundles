@@ -1,4 +1,4 @@
-export function getSummaryDiscountBadgeLabel(discountInfo = {}, formattedDiscountAmount = '') {
+export function getSummaryDiscountBadgeLabel(discountInfo: any = {}, formattedDiscountAmount = '') {
   if (discountInfo.hasDiscount !== true) return '';
 
   if (

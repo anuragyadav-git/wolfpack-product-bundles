@@ -38,3 +38,4 @@ describe('FPB template registry resolver', () => {
   });
 
 });
+export {};

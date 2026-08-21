@@ -517,3 +517,4 @@ describe('Product Page widget product-level inventory tracking', () => {
     }));
   });
 });
+export {};

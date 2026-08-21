@@ -12,7 +12,7 @@ function createContext(selectedQuantity: number) {
     },
     getAllSelectedProductsData: () => [{ quantity: selectedQuantity }],
     ...fullPageBoxSelectionSidebarMethods,
-  };
+  } as any;
 }
 
 function createProgressionContext(
@@ -35,7 +35,7 @@ function createProgressionContext(
     },
     getAllSelectedProductsData: () => [{ quantity: selectedQuantity }],
     ...fullPageBoxSelectionSidebarMethods,
-  };
+  } as any;
 }
 
 describe('FPB box selection quantity validation runtime contract', () => {

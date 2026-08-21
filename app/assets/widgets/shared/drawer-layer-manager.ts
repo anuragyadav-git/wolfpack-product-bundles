@@ -2,7 +2,7 @@ export function shouldDismissDrawerSwipe({
   distanceY = 0,
   distanceX = 0,
   velocityY = 0,
-} = {}) {
+}: any = {}) {
   const verticalDistance = Number(distanceY);
   const horizontalDistance = Math.abs(Number(distanceX));
   const downwardVelocity = Number(velocityY);
@@ -12,8 +12,87 @@ export function shouldDismissDrawerSwipe({
   return verticalDistance >= 96 || downwardVelocity >= 0.6;
 }
 
+export function bindDrawerSwipeDismissal({
+  handle,
+  canDismiss = () => true,
+  requestClose,
+  now = () => globalThis.performance?.now?.() || Date.now(),
+}: any = {}) {
+  if (!handle?.addEventListener || typeof requestClose !== 'function') {
+    return () => {};
+  }
+
+  let gesture: any = null;
+
+  const onPointerDown = (event: any) => {
+    if (canDismiss() === false) return;
+    gesture = {
+      pointerId: event.pointerId,
+      startX: Number(event.clientX) || 0,
+      startY: Number(event.clientY) || 0,
+      startedAt: now(),
+    };
+    try {
+      handle.setPointerCapture?.(event.pointerId);
+    } catch (_error) {
+      // Pointer capture is optional; the release event still resolves the gesture.
+    }
+  };
+
+  const finishGesture = (event: any) => {
+    if (!gesture || event.pointerId !== gesture.pointerId) return;
+
+    const elapsed = Math.max(1, now() - gesture.startedAt);
+    const distanceX = (Number(event.clientX) || 0) - gesture.startX;
+    const distanceY = (Number(event.clientY) || 0) - gesture.startY;
+    const shouldDismiss = canDismiss() !== false && shouldDismissDrawerSwipe({
+      distanceY,
+      distanceX,
+      velocityY: distanceY / elapsed,
+    });
+
+    try {
+      handle.releasePointerCapture?.(gesture.pointerId);
+    } catch (_error) {
+      // The pointer may already have been released by the browser.
+    }
+    gesture = null;
+
+    if (!shouldDismiss) return;
+    event.preventDefault?.();
+    requestClose('swipe');
+  };
+
+  const cancelGesture = (event: any) => {
+    if (gesture && (event?.pointerId === undefined || event.pointerId === gesture.pointerId)) {
+      try {
+        handle.releasePointerCapture?.(gesture.pointerId);
+      } catch (_error) {
+        // The pointer may already have been released by the browser.
+      }
+      gesture = null;
+    }
+  };
+
+  handle.addEventListener('pointerdown', onPointerDown);
+  handle.addEventListener('pointerup', finishGesture);
+  handle.addEventListener('pointercancel', cancelGesture);
+
+  return () => {
+    handle.removeEventListener?.('pointerdown', onPointerDown);
+    handle.removeEventListener?.('pointerup', finishGesture);
+    handle.removeEventListener?.('pointercancel', cancelGesture);
+    gesture = null;
+  };
+}
+
 export class DrawerLayerManager {
-  constructor(documentRef = globalThis.document) {
+  documentRef: any;
+  layers: any[];
+  previousRootOverflow: string;
+  previousBodyOverflow: string;
+
+  constructor(documentRef: any = globalThis.document) {
     this.documentRef = documentRef;
     this.layers = [];
     this.previousRootOverflow = '';
@@ -21,8 +100,8 @@ export class DrawerLayerManager {
     this.handleKeyDown = this.handleKeyDown.bind(this);
   }
 
-  open({ id, requestClose, trigger = null }) {
-    const layer = { id, requestClose, trigger };
+  open({ id, requestClose, trigger = null }: any) {
+    const layer: any = { id, requestClose, trigger };
     if (this.layers.length === 0) {
       const root = this.documentRef?.documentElement;
       const body = this.documentRef?.body;
@@ -36,7 +115,7 @@ export class DrawerLayerManager {
     return layer;
   }
 
-  close(layer, { restoreFocus = false } = {}) {
+  close(layer: any, { restoreFocus = false }: any = {}) {
     const index = this.layers.lastIndexOf(layer);
     if (index < 0) return;
     this.layers.splice(index, 1);
@@ -53,11 +132,11 @@ export class DrawerLayerManager {
     this.documentRef?.removeEventListener?.('keydown', this.handleKeyDown);
   }
 
-  isTopmost(layer) {
+  isTopmost(layer: any) {
     return this.layers[this.layers.length - 1] === layer;
   }
 
-  handleKeyDown(event) {
+  handleKeyDown(event: any) {
     if (event?.key !== 'Escape') return;
     const layer = this.layers[this.layers.length - 1];
     if (!layer || typeof layer.requestClose !== 'function') return;

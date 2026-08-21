@@ -45,3 +45,4 @@ describe('PPB in-page empty step loading', () => {
     expect(target.innerHTML).toContain('No products are configured for this step.');
   });
 });
+export {};

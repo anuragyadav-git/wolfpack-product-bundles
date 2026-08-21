@@ -118,7 +118,7 @@ describe('FPB all-template summary responsive ownership', () => {
       expect(container.attributes['data-fpb-summary-mode']).toBe('tray');
 
       availableWidth = 800;
-      resizeCallback?.([], context._summaryResizeObserver as ResizeObserver);
+      resizeCallback?.([], context._summaryResizeObserver as unknown as ResizeObserver);
 
       expect(container.attributes['data-fpb-summary-mode']).toBe('sidebar');
       expect(stepsContainer.attributes['data-fpb-summary-mode']).toBe('sidebar');
