@@ -1,6 +1,8 @@
-.bw-slot-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+.bw-slot-card {
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
 }
 
 .bw-slot-card--empty {
@@ -22,12 +24,14 @@
 }
 
 .bw-slot-card--filled {
+  display: flex;
+  flex-direction: column;
   border: var(--bundle-state-card-border-width, 2px) solid
     var(
       --bundle-empty-state-card-border,
       var(--bundle-global-primary-button, #1e3a8a)
     );
-  height: 200px;
+  overflow: hidden;
 }
 
 .bw-slot-card__plus-icon {
@@ -37,13 +41,6 @@
   width: 32px;
   height: 32px;
   margin-bottom: 8px;
-}
-
-.bw-slot-card__image {
-  width: 100%;
-  height: 140px;
-  object-fit: cover;
-  display: block;
 }
 
 .bw-slot-card__label {
@@ -127,18 +124,12 @@
   overflow: hidden;
 }
 
-.bw-slot-card__image-wrapper img {
+.bw-slot-card__image {
+  display: block;
   width: 100%;
   height: 140px;
   object-fit: cover;
-  display: block;
   border-radius: 8px 8px 0 0;
-}
-
-.bw-slot-card--filled {
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
 }
 
 .bw-bs-free-gift-promo {

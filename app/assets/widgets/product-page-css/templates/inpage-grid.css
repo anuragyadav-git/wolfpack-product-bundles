@@ -475,6 +475,19 @@
 }
 
 #bundle-builder-app[data-ppb-template-type="PDP_INPAGE"][data-ppb-design-preset="GRID"]
+  .bw-ppb-inpage-step-grid
+  .bw-slot-card--filled {
+  height: 200px;
+}
+
+#bundle-builder-app[data-ppb-template-type="PDP_INPAGE"][data-ppb-design-preset="GRID"]
+  .bw-ppb-inpage-step-grid
+  .bw-slot-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+#bundle-builder-app[data-ppb-template-type="PDP_INPAGE"][data-ppb-design-preset="GRID"]
   .bw-slot-card__image-wrapper {
   width: 100%;
   aspect-ratio: 1;
