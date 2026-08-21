@@ -36,12 +36,16 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
       ? settings.generalSettings as Record<string, unknown>
       : {};
 
-    return json(buildSettingsLanguageResponse(generalSettings.settingsLanguage, bundleType), {
+    return json(buildSettingsLanguageResponse(
+      generalSettings.settingsLanguage,
+      bundleType,
+      url.searchParams.get("locale"),
+    ), {
       headers: {
         "Cache-Control": "no-store, max-age=0",
       },
     });
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.error("Failed to load language settings", {
       component: "api.language-settings",
       shopDomain,
@@ -49,7 +53,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
       error: error instanceof Error ? error.message : String(error),
     });
 
-    return json(buildSettingsLanguageResponse(null, bundleType), {
+    return json(buildSettingsLanguageResponse(null, bundleType, url.searchParams.get("locale")), {
       headers: {
         "Cache-Control": "no-store, max-age=0",
       },

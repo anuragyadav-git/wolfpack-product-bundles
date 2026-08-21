@@ -52,7 +52,7 @@ export async function action({ request }: ActionFunctionArgs) {
         "Cache-Control": "no-store",
       },
     });
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof Response) {
       throw error;
     }

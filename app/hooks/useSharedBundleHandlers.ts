@@ -232,7 +232,7 @@ export function useSharedBundleHandlers(params: SharedBundleHandlersParams) {
 
         shopify.toast.show(message);
       }
-    } catch (error) {
+    } catch (error: any) {
       // Resource picker throws an error when user cancels - this is expected behavior
       // Enhanced error detection to catch more cancellation patterns
       const errorMessage = typeof error === 'string' ? error :
@@ -266,7 +266,7 @@ export function useSharedBundleHandlers(params: SharedBundleHandlersParams) {
       fetcher.submit(formData, { method: "post" });
 
       // Response will be handled by the existing useEffect
-    } catch (error) {
+    } catch (error: any) {
       AppLogger.error("Product sync failed:", {}, error as any);
       shopify.toast.show((error as Error).message || ERROR_MESSAGES.FAILED_TO_SYNC_PRODUCT, { isError: true, duration: 5000 });
     }
@@ -296,7 +296,7 @@ export function useSharedBundleHandlers(params: SharedBundleHandlersParams) {
 
         shopify.toast.show("Bundle product updated successfully", { isError: false });
       }
-    } catch (error) {
+    } catch (error: any) {
       // Resource picker throws an error when user cancels - this is expected behavior
       // Enhanced error detection to catch more cancellation patterns
       const errorMessage = typeof error === 'string' ? error :
@@ -493,7 +493,7 @@ export function useSharedBundleHandlers(params: SharedBundleHandlersParams) {
         }));
         shopify.toast.show("All collections removed", { isError: false });
       }
-    } catch (error) {
+    } catch (error: any) {
       // Resource picker throws an error when user cancels - this is expected behavior
       // Enhanced error detection to catch more cancellation patterns
       const errorMessage = typeof error === 'string' ? error :

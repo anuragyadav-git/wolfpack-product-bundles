@@ -34,7 +34,7 @@ describe("admin web vitals diagnostics", () => {
     };
 
     installAdminWebVitalsDiagnostics({ windowLike: win as any });
-    onReportCallback?.({ metrics: [{ name: "LCP", id: "lcp-2499", value: 2499 }] });
+    (onReportCallback as ((payload: any) => void) | null)?.({ metrics: [{ name: "LCP", id: "lcp-2499", value: 2499 }] });
 
     expect((win as any).__wpbAdminWebVitals.getLcpP75Summary()).toEqual({
       "/app/bundles/create": {
@@ -46,7 +46,7 @@ describe("admin web vitals diagnostics", () => {
     });
 
     (win as any).__wpbAdminWebVitals.clearLcpSamples();
-    onReportCallback?.({ metrics: [{ name: "LCP", id: "lcp-2500", value: 2500 }] });
+    (onReportCallback as ((payload: any) => void) | null)?.({ metrics: [{ name: "LCP", id: "lcp-2500", value: 2500 }] });
 
     expect((win as any).__wpbAdminWebVitals.getLcpP75Summary()).toEqual({
       "/app/bundles/create": {

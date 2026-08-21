@@ -4,8 +4,8 @@ id: fpb-product-quantity-limit-controls
 title: FPB Product Quantity Limit Controls Test Spec
 type: test-spec
 status: active
-summary: Verifies that FPB increment controls reflect the configured per-product quantity limit.
-last_audited: 2026-07-21
+summary: Verifies that FPB product selection and increment controls enforce the configured per-product quantity limit.
+last_audited: 2026-08-21
 owners:
   - wolfpack
 domains:
@@ -44,11 +44,15 @@ Ensure every FPB preset disables its product-card increment control when the mer
 | 1 | Quantity reaches a configured limit greater than one | Limit `3`, quantity `3` | Increment button is disabled and exposes `aria-disabled="true"` | Prevents fixture-specific limit handling. |
 | 2 | Quantity drops below the limit | Limit `2`, quantity changes from `2` to `1` | Increment button is enabled and stale ARIA state is removed | Covers live selection updates. |
 | 3 | Per-product validation is disabled | Disabled rule, quantity `9` | Increment button stays enabled | Preserves unrestricted quantity behavior. |
-| 4 | Shared validator evaluates the next increment | Limits `1` and `3` with quantities below and at limit | Disabled state follows the configured rule | Shared by initial render and live updates. |
+| 4 | Enabled validation rejects a mutation above the maximum | Limit `1`, current quantity `1`, requested quantity `2` | Stored selection and downstream UI updates remain unchanged | Prevents callers from bypassing a disabled increment control. |
+| 5 | Enabled validation permits a mutation at the maximum | Limit `3`, current quantity `2`, requested quantity `3` | Stored selection becomes `3` and normal FPB updates run | Confirms limits greater than one remain usable. |
+| 6 | Disabled validation permits quantities above the saved maximum | Disabled rule with saved limit `1`, current quantity `1`, requested quantity `2` | Stored selection becomes `2` | The enable flag owns enforcement. |
 
 ## Acceptance Criteria
 
 - [x] All listed test cases pass.
 - [x] Initial selected-card render and live quantity changes use the same configured rule.
+- [x] The FPB selection mutation rejects increases above an enabled maximum.
+- [x] Enabled maxima greater than one and disabled validation preserve normal quantity updates.
 - [x] No quantity clamping or fixture-specific limit is introduced.
 - [x] Agent Store desktop and mobile behavior matches the source fixture after a hard reload.

@@ -39,6 +39,66 @@ export const CHECKOUT_INTEGRATION_PROVIDERS = [
     timeoutMs: 1500,
     fallbackAction: "checkout",
   },
+  {
+    id: "zecpay",
+    label: "Zecpay",
+    callbackMode: "checkout_handoff",
+    strategy: "third_party_checkout",
+    requiresDiscountCode: true,
+    requiresCartRefresh: false,
+    timeoutMs: 1500,
+    fallbackAction: "checkout",
+  },
+  {
+    id: "rebuy",
+    label: "Rebuy",
+    callbackMode: "side_cart",
+    strategy: "third_party_side_cart",
+    requiresDiscountCode: false,
+    requiresCartRefresh: true,
+    timeoutMs: 1500,
+    fallbackAction: "cart",
+  },
+  {
+    id: "shiprocket_fastrr",
+    label: "Shiprocket / Fastrr",
+    callbackMode: "checkout_handoff",
+    strategy: "third_party_checkout",
+    requiresDiscountCode: true,
+    requiresCartRefresh: false,
+    timeoutMs: 1500,
+    fallbackAction: "checkout",
+  },
+  {
+    id: "monster_cart",
+    label: "Monster Cart",
+    callbackMode: "side_cart",
+    strategy: "third_party_side_cart",
+    requiresDiscountCode: false,
+    requiresCartRefresh: true,
+    timeoutMs: 1500,
+    fallbackAction: "cart",
+  },
+  {
+    id: "upcart",
+    label: "UpCart",
+    callbackMode: "side_cart",
+    strategy: "third_party_side_cart",
+    requiresDiscountCode: false,
+    requiresCartRefresh: true,
+    timeoutMs: 1500,
+    fallbackAction: "cart",
+  },
+  {
+    id: "kaching_cart",
+    label: "Kaching Cart",
+    callbackMode: "side_cart",
+    strategy: "third_party_side_cart",
+    requiresDiscountCode: false,
+    requiresCartRefresh: true,
+    timeoutMs: 1500,
+    fallbackAction: "cart",
+  },
 ] as const;
 
 export type CheckoutIntegrationProvider = typeof CHECKOUT_INTEGRATION_PROVIDERS[number];
@@ -67,7 +127,7 @@ const PROVIDERS_BY_ID = new Map<CheckoutIntegrationProviderId, CheckoutIntegrati
 );
 
 const LABEL_TO_PROVIDER = new Map<string, CheckoutIntegrationProviderId>(
-  Object.entries(CHECKOUT_INTEGRATION_PROVIDER_LABELS).map(([id, label]) => [
+  Object.entries(CHECKOUT_INTEGRATION_PROVIDER_LABELS).map(([id, label]: any) => [
     label.toLowerCase(),
     id as CheckoutIntegrationProviderId,
   ]),

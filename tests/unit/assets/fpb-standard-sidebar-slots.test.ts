@@ -83,7 +83,7 @@ describe('FPB Standard sidebar slot tiles', () => {
       quantity: 3,
       stepIndex: 0,
     };
-    const context = {
+    const context: { selectedProducts: Record<number, Record<string, number>>; [key: string]: any } = {
       currentStepIndex: 0,
       selectedProducts: {
         0: {

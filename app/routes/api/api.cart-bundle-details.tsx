@@ -219,7 +219,7 @@ export async function action({ request }: ActionFunctionArgs) {
     }
 
     return json({ ok: true }, { headers: { ...CORS_HEADERS, "Cache-Control": "no-store" } });
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof Response) {
       throw error;
     }

@@ -181,7 +181,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
           { status: 400 },
         );
     }
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.error(
       "Action failed",
       {

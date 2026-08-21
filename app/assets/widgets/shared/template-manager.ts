@@ -14,7 +14,7 @@ import { CurrencyManager } from './currency-manager.js';
 import { PricingCalculator } from './pricing-calculator.js';
 
 export class TemplateManager {
-  static getQualificationGap(currentValue, targetValue, operator, unitStep = 1) {
+  static getQualificationGap(currentValue: number, targetValue: number, operator: any, unitStep = 1) {
     const normalizedOp = PricingCalculator.normalizeCondition(operator);
 
     switch (normalizedOp) {
@@ -32,13 +32,13 @@ export class TemplateManager {
     }
   }
 
-  static replaceVariables(template, variables) {
+  static replaceVariables(template: string, variables: any) {
     if (!template) return '';
 
     let result = template;
 
     // Replace variables — double braces first to prevent single-brace partial matches
-    Object.entries(variables).forEach(([key, value]) => {
+    Object.entries(variables).forEach(([key, value]: any) => {
       // Wrap conditionText and discountText with styled spans
       let replacementValue = value;
       if (key === 'conditionText') {
@@ -60,14 +60,14 @@ export class TemplateManager {
     totalPrice = 0,
     discountInfo = {},
     messageType = 'progress'
-  } = {}) {
+  }: any = {}) {
     const nextRule = PricingCalculator.getNextDiscountRule(bundle, totalQuantity, totalPrice);
     return messageType === 'success'
       ? (discountInfo.applicableRule || nextRule)
       : (nextRule || discountInfo.applicableRule);
   }
 
-  static createDiscountVariables(bundle, totalPrice, totalQuantity, discountInfo, currencyInfo, options = {}) {
+  static createDiscountVariables(bundle: any, totalPrice: number, totalQuantity: number, discountInfo: any, currencyInfo: any, options: any = {}) {
     const ruleToUse = options.rule || this.getDiscountMessageRule({
       bundle,
       totalQuantity,
@@ -112,7 +112,7 @@ export class TemplateManager {
     const currentProgress = conditionType === 'amount' ? totalPrice : totalQuantity;
     const progressPercentage = targetValue > 0 ? Math.min(100, (currentProgress / targetValue) * 100) : 0;
 
-    const variables = {
+    const variables: any = {
       // Condition-specific variables
       amountNeeded: conditionData.amountNeeded,
       itemsNeeded: conditionData.itemsNeeded,
@@ -156,14 +156,14 @@ export class TemplateManager {
     return variables;
   }
 
-  static getRuleMessages(bundle, locale = '') {
+  static getRuleMessages(bundle: any, locale = '') {
     const pricingMessages = bundle?.pricing?.messages;
     const byLocale = pricingMessages?.ruleMessagesByLocale;
     const localeRuleMessages = locale && byLocale?.[locale];
     return localeRuleMessages || pricingMessages?.ruleMessages || {};
   }
 
-  static getRuleTierMessage(bundle, rule) {
+  static getRuleTierMessage(bundle: any, rule: any) {
     const ruleId = rule?.id ? String(rule.id) : '';
     if (!ruleId) return '';
 
@@ -182,7 +182,7 @@ export class TemplateManager {
     messageType = 'progress',
     fallbackTemplate = '',
     locale = ''
-  }) {
+  }: any) {
     const rule = this.getDiscountMessageRule({
       bundle,
       totalQuantity,
@@ -205,7 +205,7 @@ export class TemplateManager {
       : (fallbackTemplate || '');
   }
 
-  static formatOperatorText(operator, targetValue, unit) {
+  static formatOperatorText(operator: any, targetValue: number, unit: string) {
     const normalizedOp = PricingCalculator.normalizeCondition(operator);
     const label = targetValue === 1 ? unit : `${unit}s`;
 
@@ -226,7 +226,7 @@ export class TemplateManager {
     }
   }
 
-  static calculateConditionData(conditionType, targetValue, conditionOperator, totalPrice, totalQuantity, currencyInfo) {
+  static calculateConditionData(conditionType: string, targetValue: number, conditionOperator: any, totalPrice: any, totalQuantity: any, currencyInfo: any) {
     if (conditionType === 'amount') {
       // Amount-based condition - targetValue is already in cents
       const normalizedOp = PricingCalculator.normalizeCondition(conditionOperator);
@@ -313,11 +313,11 @@ export class TemplateManager {
     }
   }
 
-  static calculateDiscountData(discountMethod, rawDiscountValue, currencyInfo, rule = null) {
+  static calculateDiscountData(discountMethod: any, rawDiscountValue: string|number|null, currencyInfo: any, rule: any = null) {
     if (rawDiscountValue == null) {
       console.warn('[BUNDLE_WIDGET] calculateDiscountData: rawDiscountValue is', rawDiscountValue);
     }
-    const safeValue = parseFloat(rawDiscountValue) || 0;
+    const safeValue = parseFloat(String(rawDiscountValue ?? 0)) || 0;
 
     switch (discountMethod) {
       case BUNDLE_WIDGET.DISCOUNT_METHODS.PERCENTAGE_OFF:
@@ -389,7 +389,7 @@ export class TemplateManager {
     }
   }
 
-  static shouldUseDtoDiscountDisplay(discountMethod, rule = null) {
+  static shouldUseDtoDiscountDisplay(discountMethod: string, rule: any = null) {
     if (discountMethod === BUNDLE_WIDGET.DISCOUNT_METHODS.FIXED_AMOUNT_OFF) {
       return true;
     }
@@ -401,7 +401,7 @@ export class TemplateManager {
     return false;
   }
 
-  static canUseSavedDiscountDisplayValue(discountMethod, valueToken, rule = null) {
+  static canUseSavedDiscountDisplayValue(discountMethod: string, valueToken: string|null, rule: any = null) {
     if (valueToken == null) return false;
     const token = String(valueToken).trim();
     if (!token) return false;
@@ -420,7 +420,7 @@ export class TemplateManager {
     return true;
   }
 
-  static containsPercentageValue(value) {
+  static containsPercentageValue(value: string) {
     if (typeof value !== 'string') return false;
     const percentIndex = value.indexOf('%');
     if (percentIndex === -1) return false;
@@ -431,13 +431,13 @@ export class TemplateManager {
       .some(character => character >= '0' && character <= '9');
   }
 
-  static getRuleDiscountDisplay(bundle, rule = null) {
+  static getRuleDiscountDisplay(bundle: any, rule: any = null) {
     const messages = bundle?.pricing?.messages;
     const ruleId = rule?.id ? String(rule.id) : '';
     const bundleQuantityOptions = messages?.displayOptions?.bundleQuantityOptions || {};
     const optionsByRuleId = bundleQuantityOptions.optionsByRuleId || {};
     const tierTextByRuleId = messages?.tierTextByRuleId || {};
-    const candidates = [];
+    const candidates: any[] = [];
 
     if (ruleId) {
       candidates.push(optionsByRuleId[ruleId]?.subtext);
@@ -462,7 +462,7 @@ export class TemplateManager {
     };
   }
 
-  static extractDiscountValueToken(displayText) {
+  static extractDiscountValueToken(displayText: string) {
     if (typeof displayText !== 'string') return '';
 
     const token = displayText
@@ -475,7 +475,7 @@ export class TemplateManager {
     return /\d/.test(token) ? token : '';
   }
 
-  static createEmptyVariables(bundle, totalPrice, totalQuantity, discountInfo, currencyInfo) {
+  static createEmptyVariables(bundle: any, totalPrice: any, totalQuantity: any, discountInfo: any, currencyInfo: any) {
     return {
       // Condition-specific variables
       amountNeeded: '0',

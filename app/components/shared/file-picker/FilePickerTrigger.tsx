@@ -1,4 +1,4 @@
-import type { KeyboardEvent, MouseEvent } from "react";
+import type { KeyboardEvent } from "react";
 import { MobileIcon, MonitorIcon } from "./FilePickerIcons";
 import { truncateStoreFileText } from "./utils";
 
@@ -14,10 +14,17 @@ type FilePickerTriggerProps = {
   fitPreviewToTrigger: boolean;
   previewActionsMenuId: string;
   triggerIsUploading: boolean;
-  uploadStatus: "idle" | "uploading" | "polling" | "success" | "timeout" | "error";
+  uploadStatus:
+    | "idle"
+    | "uploading"
+    | "polling"
+    | "success"
+    | "timeout"
+    | "error";
+  disabled?: boolean;
   handleOpen: () => void;
   handleRemove: () => void;
-  handleTriggerUpload: (event: MouseEvent) => void;
+  handleTriggerUpload: (event: { stopPropagation: () => void }) => void;
 };
 
 export function FilePickerTrigger({
@@ -33,6 +40,7 @@ export function FilePickerTrigger({
   previewActionsMenuId,
   triggerIsUploading,
   uploadStatus,
+  disabled = false,
   handleOpen,
   handleRemove,
   handleTriggerUpload,
@@ -74,12 +82,25 @@ export function FilePickerTrigger({
               icon="menu-horizontal"
               variant="secondary"
               accessibilityLabel="Banner image actions"
+              disabled={disabled || undefined}
             />
-            <s-menu id={previewActionsMenuId} accessibilityLabel="Banner image actions">
-              <s-button icon="edit" onClick={handleOpen}>
+            <s-menu
+              id={previewActionsMenuId}
+              accessibilityLabel="Banner image actions"
+            >
+              <s-button
+                icon="edit"
+                disabled={disabled || undefined}
+                onClick={handleOpen}
+              >
                 Change image
               </s-button>
-              <s-button icon="delete" tone="critical" onClick={handleRemove}>
+              <s-button
+                icon="delete"
+                tone="critical"
+                disabled={disabled || undefined}
+                onClick={handleRemove}
+              >
                 Remove image
               </s-button>
             </s-menu>
@@ -115,10 +136,20 @@ export function FilePickerTrigger({
               {truncateStoreFileText(currentFilename ?? value, 24)}
             </s-text>
             <s-stack direction="inline" gap="small">
-              <s-button variant="tertiary" onClick={handleOpen}>
+              <s-button
+                variant="tertiary"
+                disabled={disabled || undefined}
+                onClick={handleOpen}
+              >
                 Change
               </s-button>
-              <s-button variant="tertiary" tone="critical" icon="delete" onClick={handleRemove}>
+              <s-button
+                variant="tertiary"
+                tone="critical"
+                icon="delete"
+                disabled={disabled || undefined}
+                onClick={handleRemove}
+              >
                 Remove
               </s-button>
             </s-stack>
@@ -129,22 +160,23 @@ export function FilePickerTrigger({
   }
 
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (event.key === "Enter" || event.key === " ") handleOpen();
+    if (!disabled && (event.key === "Enter" || event.key === " ")) handleOpen();
   };
 
   return (
     <div
       role="button"
-      tabIndex={0}
-      onClick={!triggerIsUploading ? handleOpen : undefined}
-      onKeyDown={!triggerIsUploading ? handleKeyDown : undefined}
+      tabIndex={disabled ? -1 : 0}
+      aria-disabled={disabled || undefined}
+      onClick={!disabled && !triggerIsUploading ? handleOpen : undefined}
+      onKeyDown={!disabled && !triggerIsUploading ? handleKeyDown : undefined}
       style={{
         width: "100%",
         border: "2px dashed #c9cccf",
         borderRadius: "8px",
         padding: "var(--wpb-file-picker-trigger-padding, 28px 16px)",
         background: "#fafbfb",
-        cursor: triggerIsUploading ? "default" : "pointer",
+        cursor: disabled || triggerIsUploading ? "default" : "pointer",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -159,7 +191,7 @@ export function FilePickerTrigger({
     >
       {triggerIsUploading ? (
         <>
-          <s-spinner size="small" accessibilityLabel="Uploading image" />
+          <s-spinner size="base" accessibilityLabel="Uploading image" />
           <s-text color="subdued">
             {uploadStatus === "uploading" ? "Uploading…" : "Processing…"}
           </s-text>
@@ -167,17 +199,12 @@ export function FilePickerTrigger({
       ) : (
         <>
           {triggerIcon === "mobile" ? <MobileIcon /> : <MonitorIcon />}
-          <s-text type="strong">
-            {label}
-          </s-text>
-          {hint && (
-            <s-text color="subdued">
-              {hint}
-            </s-text>
-          )}
+          <s-text type="strong">{label}</s-text>
+          {hint && <s-text color="subdued">{hint}</s-text>}
           {showUploadButton ? (
             <s-button
               variant="secondary"
+              disabled={disabled || undefined}
               onClick={(event) => {
                 event.stopPropagation();
                 if (uploadButtonAction === "openPicker") {

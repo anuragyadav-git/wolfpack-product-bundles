@@ -60,7 +60,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
       message: "Subscription confirmed successfully"
     });
 
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.error("Error confirming subscription", {
       component: "api.billing.confirm",
       operation: "loader"

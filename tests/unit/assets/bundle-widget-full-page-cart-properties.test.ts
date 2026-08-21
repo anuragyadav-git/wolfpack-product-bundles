@@ -10,7 +10,7 @@ describe("Full Page widget cart display properties", () => {
       "utf8",
     );
 
-    expect(source).toContain("buildCartLineDisplayProperties(displayProperties)");
+    expect(source).toContain("buildCartLineDisplayProperties(displayProperties: any)");
     expect(source).toContain("buildSharedCartLineDisplayProperties(displayProperties, this.getCartLineLabels())");
     expect(sharedCartLinesSource).toContain("Box: displayProperties.box || '1'");
     expect(sharedCartLinesSource).toContain("[cartLineLabels.items]: displayProperties.items");

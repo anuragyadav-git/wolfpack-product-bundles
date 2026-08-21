@@ -30,7 +30,7 @@ class FakeElement {
   private _innerHTML = '';
   attributes: Record<string, string> = {};
   dataset: Record<string, string> = {};
-  private children: FakeElement[] = [];
+  public children: FakeElement[] = [];
   private listeners: Record<string, Array<(event?: { stopPropagation?: () => void }) => unknown>> = {};
   private parent: FakeElement | null = null;
 
@@ -183,7 +183,7 @@ beforeEach(() => {
 
   global.getComputedStyle = jest.fn(() => ({
     getPropertyValue: () => '',
-  })) as typeof window.getComputedStyle;
+  })) as unknown as typeof window.getComputedStyle;
 });
 
 afterEach(() => {
@@ -326,7 +326,6 @@ describe('fullPageBoxSelectionSidebarMethods.getClassicSidebarSlotCount', () => 
       },
       getBoxSelectionRules: () => [],
       getActiveBoxSelectionRule: () => null,
-      getSummarySidebarMaxItemCount: () => 0,
       removeSummarySelectedProduct: jest.fn(),
     };
 

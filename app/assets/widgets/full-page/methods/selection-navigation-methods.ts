@@ -4,25 +4,29 @@ import { calculateBundleDiscountForPurchaseOption } from '../../shared/subscript
 import { calculateBundleTotalForPurchaseOption } from '../../shared/subscription-storefront-methods.js';
 import { ToastManager } from '../../shared/toast-manager.js';
 import { ConditionValidator } from '../../shared/condition-validator.js';
+import {
+  captureDiscountTierState,
+  dispatchDiscountTierTransition,
+} from '../../shared/discount-tier-feedback.js';
 
-function getSelectionId(item = {}) {
+function getSelectionId(item: any = {}) {
   return String(item?.selectionId || '');
 }
 
-function findStepSelectionMetric(products = [], selectionId = '') {
+function findStepSelectionMetric(products: any[] = [], selectionId = '') {
   const normalizedSelectionId = String(selectionId || '');
   for (const product of products) {
     if (getSelectionId(product) === normalizedSelectionId) {
       return { product, metric: product };
     }
     const variant = (Array.isArray(product?.variants) ? product.variants : [])
-      .find(candidate => getSelectionId(candidate) === normalizedSelectionId);
+      .find((candidate: any)  => getSelectionId(candidate) === normalizedSelectionId);
     if (variant) return { product, metric: variant };
   }
   return { product: null, metric: null };
 }
 
-function replaceConditionValue(template, conditionType, required) {
+function replaceConditionValue(template: any, conditionType: string, required: number) {
   const value = String(required);
   if (conditionType === 'amount') {
     return String(template)
@@ -42,11 +46,11 @@ function replaceConditionValue(template, conditionType, required) {
     .replace(/##conditionQuantity##/g, value);
 }
 
-const normalizeCategoryProductId = (product) => {
+const normalizeCategoryProductId = (product: any) => {
   return getSelectionId(product);
 };
 
-export function shouldAutoAdvanceFullPageStep({ quantity = 0, step = null } = {}) {
+export function shouldAutoAdvanceFullPageStep({ quantity = 0, step = null }: any = {}) {
   if (
     quantity > 0 &&
     step?.autoNextStepOnConditionMet === true &&
@@ -58,7 +62,7 @@ export function shouldAutoAdvanceFullPageStep({ quantity = 0, step = null } = {}
   }
 
   const categories = Array.isArray(step?.categories) ? step.categories : [];
-  const categoryRuleCategories = categories.filter(category =>
+  const categoryRuleCategories = categories.filter((category: any)  =>
     Array.isArray(category?.conditions) && category.conditions.length > 0
   );
 
@@ -66,10 +70,10 @@ export function shouldAutoAdvanceFullPageStep({ quantity = 0, step = null } = {}
     return false;
   }
 
-  return categoryRuleCategories.some(category => category.autoNextStepOnConditionMet === true);
+  return categoryRuleCategories.some((category: any)  => category.autoNextStepOnConditionMet === true);
 }
 
-export function getFullPageStepConditionValidationMessage(step, resolveText = null) {
+export function getFullPageStepConditionValidationMessage(step: any, resolveText: any = null) {
   const conditionType = step?.conditionType;
   if (!['quantity', 'amount', 'weight'].includes(conditionType)) {
     return 'Please meet the quantity conditions for the current step before proceeding.';
@@ -80,17 +84,17 @@ export function getFullPageStepConditionValidationMessage(step, resolveText = nu
     return 'Please meet the quantity conditions for the current step before proceeding.';
   }
 
-  const operatorKey = {
+  const operatorKey = ({
     equal_to: 'EqualTo',
     greater_than_or_equal_to: 'GreaterThanOrEqualTo',
     less_than_or_equal_to: 'LessThanOrEqualTo',
-  }[step.conditionOperator];
+  } as Record<string, string>)[step.conditionOperator];
   if (!operatorKey) {
     return 'Please meet the quantity conditions for the current step before proceeding.';
   }
 
   const productLabel = required === 1 ? 'product' : 'products';
-  const fallbacks = {
+  const fallbacks: any = {
     quantity: {
       EqualTo: `Add exactly ${required} ${productLabel} on this step`,
       GreaterThanOrEqualTo: `Add at least ${required} ${productLabel} on this step`,
@@ -114,22 +118,22 @@ export function getFullPageStepConditionValidationMessage(step, resolveText = nu
   return replaceConditionValue(template, conditionType, required);
 }
 
-function buildCategoryRuleValidationStep(step, stepIndex, stepCollectionProductIds = {}, extractId = value => value) {
+function buildCategoryRuleValidationStep(step: any, stepIndex: any, stepCollectionProductIds: any = {}, extractId = (value: any)  => value) {
   if (!ConditionValidator.isCategoryRuleMode(step)) return step;
   const categories = Array.isArray(step?.categories) ? step.categories : [];
 
   return {
     ...step,
-    categories: categories.map(category => {
+    categories: categories.map((category: any)  => {
       const products = Array.isArray(category?.products) ? [...category.products] : [];
       const seenProductIds = new Set(products.map(product => {
         return normalizeCategoryProductId(product);
       }));
-      const addCollectionHandle = (collection) => {
+      const addCollectionHandle = (collection: any) => {
         const handle = collection?.handle;
         if (!handle) return;
         const productIds = stepCollectionProductIds[`${stepIndex}:${handle}`] || [];
-        productIds.forEach(productId => {
+        productIds.forEach((productId: null)  => {
           const normalizedId = String(productId == null ? '' : productId);
           if (!normalizedId || seenProductIds.has(normalizedId)) return;
           seenProductIds.add(normalizedId);
@@ -145,14 +149,16 @@ function buildCategoryRuleValidationStep(step, stepIndex, stepCollectionProductI
 }
 
 export const fullPageSelectionNavigationMethods: Record<string, any> & ThisType<any> = {
-getStepConditionValidationMessage(stepIndex = this.currentStepIndex) {
+getStepConditionValidationMessage(stepIndex: any = undefined) {
+  if (stepIndex === undefined) stepIndex = this.currentStepIndex;
   return getFullPageStepConditionValidationMessage(
     this.selectedBundle?.steps?.[stepIndex],
     this._resolveText?.bind(this),
   );
 },
 
-updateProductSelection(stepIndex, productId, newQuantity) {
+updateProductSelection(stepIndex: string|number, productId: string|number, newQuantity: number) {
+  const discountTierBefore = captureDiscountTierState(this);
   let quantity = Math.max(0, newQuantity);
 
   // Clamp against real per-variant stock before doing anything else.
@@ -242,13 +248,19 @@ updateProductSelection(stepIndex, productId, newQuantity) {
       }
     }
   }
+
+  dispatchDiscountTierTransition({
+    root: this.container,
+    before: discountTierBefore,
+    after: captureDiscountTierState(this),
+  });
 },
 
 _shouldRenderProductSlots() {
   return this.selectedBundle?.productSlotsEnabled === true;
 },
 
-syncProductQuantityIncreaseState(increaseButton, quantity) {
+syncProductQuantityIncreaseState(increaseButton: any, quantity: any) {
   if (!increaseButton) return;
 
   const disabled = ConditionValidator.isProductQuantityIncreaseDisabled(
@@ -263,7 +275,7 @@ syncProductQuantityIncreaseState(increaseButton, quantity) {
   }
 },
 
-  updateProductQuantityDisplay(stepIndex, productId, quantity) {
+  updateProductQuantityDisplay(stepIndex: string | number, productId: string | number, quantity: number) {
   if (this.usesSelectedQuantityBadge()) {
     this.refreshCurrentProductGrid(stepIndex);
     if (this.elements?.modal?.querySelector('.product-grid')) {
@@ -276,7 +288,7 @@ syncProductQuantityIncreaseState(increaseButton, quantity) {
   const productCard = this.container.querySelector('[data-product-id="' + productId + '"]');
   if (!productCard) return;
   const step = this.selectedBundle?.steps?.[stepIndex] || {};
-  const sanitizeAria = (value, fallback) => String(value ?? fallback ?? '')
+  const sanitizeAria = (value: any, fallback?: string) => String(value ?? fallback ?? '')
     .replace(/&/g, '&amp;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;')
@@ -304,7 +316,7 @@ syncProductQuantityIncreaseState(increaseButton, quantity) {
   const productTargetName = sanitizeAria(productTitleText || productId, 'product');
 
   if (productCard) {
-    productCard.setAttribute('aria-pressed', quantity > 0 ? 'true' : 'false');
+    productCard.removeAttribute('aria-pressed');
     productCard.setAttribute('aria-expanded', String(quantity > 0));
     const activationAria = productCard.getAttribute('aria-label') || `${sanitizeAria('Open product details')}`;
     const stateSuffix = quantity > 0 ? 'selected' : 'not selected';
@@ -336,7 +348,7 @@ syncProductQuantityIncreaseState(increaseButton, quantity) {
       // Just update the quantity display
       const qtyDisplay = existingQuantityControls.querySelector('.inline-qty-display');
       if (qtyDisplay) {
-        qtyDisplay.textContent = quantity;
+        qtyDisplay.textContent = String(quantity);
         qtyDisplay.setAttribute('aria-label', sanitizeAria(`${quantityLabel}: ${quantity}`));
       }
       const decreaseButton = existingQuantityControls.querySelector('.qty-decrease');
@@ -373,7 +385,7 @@ syncProductQuantityIncreaseState(increaseButton, quantity) {
 
       decreaseButton.type = 'button';
       decreaseButton.className = 'inline-qty-btn qty-decrease';
-      decreaseButton.dataset.productId = productId;
+      decreaseButton.dataset.productId = String(productId);
       decreaseButton.textContent = '−';
       decreaseButton.setAttribute(
         'aria-label',
@@ -385,13 +397,13 @@ syncProductQuantityIncreaseState(increaseButton, quantity) {
       );
 
       quantityDisplay.className = 'inline-qty-display';
-      quantityDisplay.textContent = quantity;
+      quantityDisplay.textContent = String(quantity);
       quantityDisplay.setAttribute('aria-label', sanitizeAria(`${quantityLabel}: ${quantity}`));
       quantityDisplay.setAttribute('aria-live', 'polite');
 
       increaseButton.type = 'button';
       increaseButton.className = 'inline-qty-btn qty-increase';
-      increaseButton.dataset.productId = productId;
+      increaseButton.dataset.productId = String(productId);
       increaseButton.textContent = '+';
       increaseButton.setAttribute('aria-label', sanitizeAria(`${increaseLabel} ${productTargetName}`));
 
@@ -407,7 +419,7 @@ syncProductQuantityIncreaseState(increaseButton, quantity) {
       this.syncProductQuantityIncreaseState(increaseBtn, quantity);
 
       if (increaseBtn) {
-        increaseBtn.addEventListener('click', (e) => {
+        increaseBtn.addEventListener('click', (e: any) => {
           e.stopPropagation();
           const currentQty = this.selectedProducts[stepIndex]?.[productId] || 0;
           this.updateProductSelection(stepIndex, productId, currentQty + 1);
@@ -415,7 +427,7 @@ syncProductQuantityIncreaseState(increaseButton, quantity) {
       }
 
       if (decreaseBtn) {
-        decreaseBtn.addEventListener('click', (e) => {
+        decreaseBtn.addEventListener('click', (e: any) => {
           e.stopPropagation();
           const currentQty = this.selectedProducts[stepIndex]?.[productId] || 0;
           if (currentQty > 0) {
@@ -440,7 +452,7 @@ syncProductQuantityIncreaseState(increaseButton, quantity) {
       if (!existingAddBtn) {
         const addButton = document.createElement('button');
         addButton.className = 'product-add-btn';
-        addButton.dataset.productId = productId;
+        addButton.dataset.productId = String(productId);
         addButton.type = 'button';
         addButton.setAttribute('aria-label', addButtonAriaLabel);
         addButton.setAttribute('aria-pressed', 'false');
@@ -448,7 +460,7 @@ syncProductQuantityIncreaseState(increaseButton, quantity) {
         actionContainer.appendChild(addButton);
 
         // Attach event listener to the new button
-        addButton.addEventListener('click', (e) => {
+        addButton.addEventListener('click', (e: any) => {
           e.stopPropagation();
           const directDefaultQuantities = this._getDirectDefaultSelectionQuantities?.(stepIndex) || {};
           const hasDirectDefaultQuantity = Object.prototype.hasOwnProperty.call(
@@ -470,7 +482,7 @@ syncProductQuantityIncreaseState(increaseButton, quantity) {
   }
 },
 
-refreshCurrentProductGrid(stepIndex) {
+refreshCurrentProductGrid(stepIndex: any) {
   if (this.container.dataset.bundleType !== 'full_page') return false;
   if (stepIndex !== this.currentStepIndex) return false;
 
@@ -483,12 +495,12 @@ refreshCurrentProductGrid(stepIndex) {
 },
 
 // Helper to find product by ID across all step data
-findProductById(stepIndex, productId) {
+findProductById(stepIndex: string|number, productId: any) {
   const products = this.stepProductData[stepIndex] || [];
-  return products.find(p => getSelectionId(p) === String(productId));
+  return products.find((p: any)  => getSelectionId(p) === String(productId));
 },
 
-  validateStepCondition(stepIndex, productId, newQuantity) {
+  validateStepCondition(stepIndex: string | number, productId: string | number, newQuantity: number) {
     const step = this.selectedBundle.steps[stepIndex];
     const currentSelections = this.selectedProducts[stepIndex] || {};
     const currentQty = currentSelections[productId] || 0;
@@ -501,7 +513,7 @@ findProductById(stepIndex, productId) {
     const conditionSelectionTotals = isAmountOrWeight
       ? this._buildConditionAwareStepSelections(stepProducts, conditionSelections)
       : conditionSelections;
-    const { metric: targetMetric } = findStepSelectionMetric(stepProducts, productId);
+    const { metric: targetMetric } = findStepSelectionMetric(stepProducts, String(productId));
     const targetValues = isAmountOrWeight
       ? {
         amount: Number(targetMetric?.price || 0),
@@ -515,7 +527,7 @@ findProductById(stepIndex, productId) {
       productId,
       conditionNewQuantity,
       targetValues,
-    );
+    ) as any;
 
   // Only block and toast on increases — decreases are always permitted.
   if (!allowed && newQuantity > currentQty) {
@@ -533,7 +545,7 @@ findProductById(stepIndex, productId) {
   return true;
 },
 
-  validateStep(stepIndex) {
+  validateStep(stepIndex: string|number) {
     const step = this.selectedBundle.steps[stepIndex];
     const currentSelections = this.selectedProducts[stepIndex] || {};
     const conditionSelections = typeof this._getStepConditionSelections === 'function'
@@ -552,7 +564,7 @@ findProductById(stepIndex, productId) {
 
   if (ConditionValidator.isCategoryRuleMode(validationStep)) {
     const products = this.stepProductData[stepIndex] || [];
-    const translated = {};
+    const translated: any = {};
     for (const [selKey, qty] of Object.entries(conditionSelections)) {
       const { product, metric } = findStepSelectionMetric(products, selKey);
       const productId = String((product && (product.parentProductId || product.id)) || selKey);
@@ -577,9 +589,9 @@ findProductById(stepIndex, productId) {
     return ConditionValidator.isStepConditionSatisfied(validationStep, conditionSelections);
   },
 
-  _buildConditionAwareStepSelections(stepProducts, currentSelections) {
+  _buildConditionAwareStepSelections(stepProducts: any, currentSelections: any) {
     const selections = currentSelections || {};
-    const translated = {};
+    const translated: any = {};
     for (const [selKey, qty] of Object.entries(selections)) {
       const quantity = Number(qty) || 0;
       if (quantity <= 0) continue;
@@ -596,7 +608,7 @@ findProductById(stepIndex, productId) {
     return translated;
   },
 
-isStepAccessible(stepIndex) {
+isStepAccessible(stepIndex: number) {
   // Default steps are always accessible (read-only, pre-selected)
   if (this.selectedBundle?.steps[stepIndex]?.isDefault) return true;
   // Add-on step: lock until prior steps complete only when addonUnlockAfterCompletion is true (default)

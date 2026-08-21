@@ -36,7 +36,7 @@ type PurchaseOptionsController = {
 
 function selectedPlans(subscription: StorefrontSubscription) {
   const ids = new Set(Array.isArray(subscription?.selectedPlanIds) ? subscription.selectedPlanIds : []);
-  return (subscription?.selectedGroup?.plans || []).filter((plan: { id: string }) => ids.has(plan.id));
+  return (subscription?.selectedGroup?.plans || []).filter((plan: any) => ids.has(plan.id));
 }
 
 export function getDefaultSellingPlanId(subscription: StorefrontSubscription) {
@@ -58,7 +58,7 @@ export function isPurchaseOptionSelected(value: string, selectedSellingPlanId?: 
 }
 
 export function resolveCompactPlanSupportingCopy(
-  presentation: { displayName?: string; description?: string },
+  presentation: any,
 ) {
   return presentation.description || presentation.displayName || '';
 }
@@ -72,7 +72,7 @@ export function resolvePurchaseOptionsMounts(
   return Array.from(new Set(availableMounts));
 }
 
-export function renderBundlePurchaseOptions(controller: PurchaseOptionsController) {
+export function renderBundlePurchaseOptions(controller: PurchaseOptionsController | any) {
   if (
     !controller._purchaseOptionsRefreshInstalled &&
     typeof controller.updateAddToCartButton === 'function'
@@ -89,7 +89,7 @@ export function renderBundlePurchaseOptions(controller: PurchaseOptionsControlle
     controller?.selectedBundle?.subscription,
     document.documentElement.lang,
   );
-  (controller.elements.purchaseOptions || []).forEach((element) => element.remove?.());
+  (controller.elements.purchaseOptions || []).forEach((element: any) => element.remove?.());
   controller.elements.purchaseOptions = [];
   if (!subscription?.enabled || !subscription.selectedGroup) return;
 
@@ -155,7 +155,7 @@ export function renderBundlePurchaseOptions(controller: PurchaseOptionsControlle
       const select = document.createElement('select');
       select.className = 'wpb-purchase-options__plan-select';
       select.setAttribute('aria-label', subscription.selectedGroup.name);
-      plans.forEach((plan: { id: string; sourceName?: string }) => {
+      plans.forEach((plan: any) => {
         const option = document.createElement('option');
         option.value = plan.id;
         option.textContent = subscription.planCopy?.[plan.id]?.displayName || plan.sourceName || '';

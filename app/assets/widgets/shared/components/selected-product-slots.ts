@@ -9,7 +9,7 @@
 
 import { renderSelectedProductRow } from './selected-product-row.js';
 
-export function renderSelectedProductSlots(slots = [], options = {}) {
+export function renderSelectedProductSlots(slots: any[] = [], options: any = {}) {
   const mode = options.mode || 'grid';
   const classes = [
     'bw-selected-slots',
@@ -24,7 +24,7 @@ export function renderSelectedProductSlots(slots = [], options = {}) {
   `;
 }
 
-function renderSlot(slot = {}, index, options) {
+function renderSlot(slot: any = {}, index: number, options: any) {
   const product = slot.product || null;
   const slotId = slot.id || `slot-${index}`;
   const label = slot.label || `Slot ${index + 1}`;
@@ -60,7 +60,7 @@ function renderSlot(slot = {}, index, options) {
   `;
 }
 
-function getStatusClasses(product) {
+function getStatusClasses(product: any) {
   if (!product) return [];
 
   return [
@@ -70,7 +70,7 @@ function getStatusClasses(product) {
   ].filter(Boolean);
 }
 
-function escapeHtml(value) {
+function escapeHtml(value: any) {
   return String(value)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -79,6 +79,6 @@ function escapeHtml(value) {
     .replace(/'/g, '&#39;');
 }
 
-function escapeAttribute(value) {
+function escapeAttribute(value: any) {
   return escapeHtml(value).replace(/`/g, '&#96;');
 }

@@ -59,6 +59,19 @@ describe('shared discount progress renderer', () => {
     expect(view).not.toContain('<strong>Save</strong>');
   });
 
+  it('renders trusted template markup only when explicitly requested', () => {
+    const view = renderDiscountProgress({
+      currentValue: 1,
+      targetValue: 2,
+      progressPercent: 50,
+      message: 'Add <span class="bundle-conditions-text">1 item</span>',
+      success: false,
+    }, { messageIsHtml: true });
+
+    expect(view).toContain('<span class="bundle-conditions-text">1 item</span>');
+    expect(view).not.toContain('&lt;span class=&quot;bundle-conditions-text&quot;&gt;');
+  });
+
   it('renders semantic milestone states and target positions', () => {
     const view = renderDiscountProgress({
       progressPercent: 25,

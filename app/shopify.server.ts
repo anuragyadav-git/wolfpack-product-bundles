@@ -23,7 +23,7 @@ const sessionStorage = new CachedSessionStorage(prisma);
 const shopify = shopifyApp({
   apiKey: process.env.SHOPIFY_API_KEY,
   apiSecretKey: process.env.SHOPIFY_API_SECRET || "",
-  apiVersion: ApiVersion.October25, // 2025-10: Required for functionHandle support in cart transforms
+  apiVersion: ApiVersion.July26, // 2026-07: Latest recommended Admin API version
   appUrl: process.env.SHOPIFY_APP_URL || "",
   authPathPrefix: "/auth",
   sessionStorage,
@@ -32,7 +32,7 @@ const shopify = shopifyApp({
     unstable_newEmbeddedAuthStrategy: true,
   },
   hooks: {
-    afterAuth: async ({ session, admin }) => {
+    afterAuth: async ({ session, admin }: any) => {
       AppLogger.info("afterAuth hook triggered", { shop: session.shop });
       const existingShop = await prisma.shop.findUnique({
         where: { shopDomain: session.shop },

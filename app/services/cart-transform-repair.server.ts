@@ -128,7 +128,7 @@ export async function runCartTransformRepair(
         shopDomain: shop.shopDomain,
         cartTransformId: result.cartTransformId ?? null,
       });
-    } catch (error) {
+    } catch (error: any) {
       const message = toErrorMessage(error);
       summary.failedShops += 1;
       summary.failures.push({ shopDomain: shop.shopDomain, error: message });

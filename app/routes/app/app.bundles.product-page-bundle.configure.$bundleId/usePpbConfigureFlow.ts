@@ -18,7 +18,6 @@ export function usePpbConfigureFlow() {
   const base = usePpbBaseConfigureState();
   const visibility = usePpbVisibilityState({
     bundle: base.bundle,
-    textOverrides: base.textOverrides,
   });
   const display = usePpbDisplayOptionsState({
     bundle: base.bundle,
@@ -33,6 +32,8 @@ export function usePpbConfigureFlow() {
     stepsState: base.stepsState,
     textOverridesByLocale: base.textOverridesByLocale,
     setTextOverridesByLocale: base.setTextOverridesByLocale,
+    bundleEmbedMultiLangText: visibility.bundleEmbedMultiLangText,
+    setBundleEmbedMultiLangText: visibility.setBundleEmbedMultiLangText,
     markAsDirty: base.markAsDirty,
   });
   const categoryHandlers = usePpbCategoryHandlers({

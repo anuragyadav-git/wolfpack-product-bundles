@@ -67,7 +67,7 @@ export async function discoverSalesChannels(admin: ShopifyAdmin): Promise<SalesC
       .map((edge) => edge.node)
       .filter((node): node is { id: string; name: string } => Boolean(node?.id && node?.name))
       .map((node) => ({ id: node.id, name: node.name }));
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.error("Failed to discover sales channels", {
       component: "shopify-publications",
       operation: "discover-sales-channels",
@@ -140,7 +140,7 @@ export async function publishProductToSalesChannels(
       channelCount: channels.length,
       channelNames: channels.map((channel) => channel.name).join(", "),
     });
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.error("Failed to publish product to sales channels", {
       component: "shopify-publications",
       operation,

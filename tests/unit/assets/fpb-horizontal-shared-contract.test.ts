@@ -12,3 +12,4 @@ describe('FPB Horizontal template config contract', () => {
     expect(FPB_HORIZONTAL_TEMPLATE_CONFIG.aliases).toEqual(expect.arrayContaining(['HORIZONTAL']));
   });
 });
+export {};

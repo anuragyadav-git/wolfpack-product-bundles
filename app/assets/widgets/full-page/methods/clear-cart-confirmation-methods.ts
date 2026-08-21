@@ -1,4 +1,4 @@
-const CLEAR_CART_CONFIRMATION_COPY = {
+const CLEAR_CART_CONFIRMATION_COPY: any = {
   title: 'Are you sure?',
   description: 'Are you sure you want to clear all items from your cart? This action cannot be undone...',
   cancel: 'Cancel',
@@ -9,7 +9,7 @@ const CLEAR_CART_CONFIRMATION_COPY = {
   mobileConfirm: 'Clear All',
 };
 
-function createIconButtonSvg(path) {
+function createIconButtonSvg(path: string) {
   return `<svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">${path}</svg>`;
 }
 
@@ -25,7 +25,7 @@ export const fullPageClearCartConfirmationMethods: Record<string, any> & ThisTyp
 showClearCartConfirmation() {
   this.hideClearCartConfirmation?.();
   this._clearCartConfirmationFocusOrigin = document.activeElement;
-  const mobileSummaryDialog = document.querySelector('.fpb-mobile-summary-dialog');
+  const mobileSummaryDialog = document.querySelector<HTMLDialogElement>('.fpb-mobile-summary-dialog');
   const usesMobileConfirmation = mobileSummaryDialog?.open === true;
 
   const modal = this.createClearCartConfirmationModal({ mobile: usesMobileConfirmation });
@@ -41,7 +41,7 @@ showClearCartConfirmation() {
     modal.showModal?.();
   }
 
-  const keydownHandler = (event) => {
+  const keydownHandler = (event: any) => {
     if (event.key === 'Escape') {
       event.preventDefault?.();
       this.hideClearCartConfirmation();
@@ -73,7 +73,7 @@ showClearCartConfirmation() {
   }
 },
 
-hideClearCartConfirmation({ restoreFocus = true } = {}) {
+hideClearCartConfirmation({ restoreFocus = true }: any = {}) {
   const focusOrigin = this._clearCartConfirmationFocusOrigin;
 
   if (this._clearCartConfirmationModal) {
@@ -110,8 +110,8 @@ confirmClearCartSelection() {
   this.clearFullPageSelections();
 
   const restoreFocus = () => {
-    const focusTarget = document.querySelector('.fpb-mobile-summary-count-badge')
-      || document.querySelector('.side-panel-btn-next');
+    const focusTarget = document.querySelector<HTMLElement>('.fpb-mobile-summary-count-badge')
+      || document.querySelector<HTMLElement>('.side-panel-btn-next');
     if (typeof focusTarget?.focus === 'function') {
       focusTarget.focus();
     } else if (typeof focusOrigin?.focus === 'function') {
@@ -128,7 +128,7 @@ confirmClearCartSelection() {
 
 clearFullPageSelections() {
   const steps = Array.isArray(this.selectedBundle?.steps) ? this.selectedBundle.steps : [];
-  this.selectedProducts = steps.map((_, stepIndex) => ({
+  this.selectedProducts = steps.map((_: any, stepIndex: any) => ({
     ...this._getDirectDefaultSelectionQuantities(stepIndex),
   }));
   this.currentStepIndex = 0;
@@ -141,7 +141,7 @@ clearFullPageSelections() {
   }
 },
 
-createClearCartConfirmationModal({ mobile = false } = {}) {
+createClearCartConfirmationModal({ mobile = false }: any = {}) {
   const modal = document.createElement(mobile ? 'dialog' : 'div');
   modal.className = mobile
     ? 'wpb-clear-cart-confirmation wpb-clear-cart-confirmation--mobile'
@@ -155,7 +155,7 @@ createClearCartConfirmationModal({ mobile = false } = {}) {
   const container = document.createElement('div');
   container.className = 'wpb-clear-cart-confirmation__container';
 
-  let closeButton = null;
+  let closeButton: any = null;
   if (!mobile) {
     closeButton = document.createElement('button');
     closeButton.className = 'wpb-clear-cart-confirmation__close';
@@ -172,15 +172,15 @@ createClearCartConfirmationModal({ mobile = false } = {}) {
   title.id = 'wpb-clear-cart-confirmation-title';
   title.className = 'wpb-clear-cart-confirmation__title';
   title.textContent = mobile
-    ? CLEAR_CART_CONFIRMATION_COPY.mobileTitle
-    : CLEAR_CART_CONFIRMATION_COPY.title;
+    ? this._resolveText?.('clearCartModalTitle', CLEAR_CART_CONFIRMATION_COPY.mobileTitle) ?? CLEAR_CART_CONFIRMATION_COPY.mobileTitle
+    : this._resolveText?.('clearCartModalTitle', CLEAR_CART_CONFIRMATION_COPY.title) ?? CLEAR_CART_CONFIRMATION_COPY.title;
 
   const description = document.createElement('p');
   description.id = 'wpb-clear-cart-confirmation-description';
   description.className = 'wpb-clear-cart-confirmation__description';
   description.textContent = mobile
-    ? CLEAR_CART_CONFIRMATION_COPY.mobileDescription
-    : CLEAR_CART_CONFIRMATION_COPY.description;
+    ? this._resolveText?.('clearCartModalDescription', CLEAR_CART_CONFIRMATION_COPY.mobileDescription) ?? CLEAR_CART_CONFIRMATION_COPY.mobileDescription
+    : this._resolveText?.('clearCartModalDescription', CLEAR_CART_CONFIRMATION_COPY.description) ?? CLEAR_CART_CONFIRMATION_COPY.description;
 
   const footer = document.createElement('div');
   footer.className = 'wpb-clear-cart-confirmation__footer';
@@ -189,16 +189,16 @@ createClearCartConfirmationModal({ mobile = false } = {}) {
   cancelButton.className = 'wpb-clear-cart-confirmation__cancel';
   cancelButton.type = 'button';
   cancelButton.textContent = mobile
-    ? CLEAR_CART_CONFIRMATION_COPY.mobileCancel
-    : CLEAR_CART_CONFIRMATION_COPY.cancel;
+    ? this._resolveText?.('clearCartCancelButtonText', CLEAR_CART_CONFIRMATION_COPY.mobileCancel) ?? CLEAR_CART_CONFIRMATION_COPY.mobileCancel
+    : this._resolveText?.('clearCartCancelButtonText', CLEAR_CART_CONFIRMATION_COPY.cancel) ?? CLEAR_CART_CONFIRMATION_COPY.cancel;
   cancelButton.addEventListener('click', () => this.hideClearCartConfirmation());
 
   const confirmButton = document.createElement('button');
   confirmButton.className = 'wpb-clear-cart-confirmation__confirm';
   confirmButton.type = 'button';
   const confirmLabel = mobile
-    ? CLEAR_CART_CONFIRMATION_COPY.mobileConfirm
-    : CLEAR_CART_CONFIRMATION_COPY.confirm;
+    ? this._resolveText?.('clearCartConfirmButtonText', CLEAR_CART_CONFIRMATION_COPY.mobileConfirm) ?? CLEAR_CART_CONFIRMATION_COPY.mobileConfirm
+    : this._resolveText?.('clearCartConfirmButtonText', CLEAR_CART_CONFIRMATION_COPY.confirm) ?? CLEAR_CART_CONFIRMATION_COPY.confirm;
   confirmButton.innerHTML = `${DELETE_ICON}<span>${confirmLabel}</span>`;
   confirmButton.addEventListener('click', () => this.confirmClearCartSelection());
 
@@ -212,11 +212,11 @@ createClearCartConfirmationModal({ mobile = false } = {}) {
   modal.appendChild(container);
 
   if (mobile) {
-    modal.addEventListener('cancel', (event) => {
+    modal.addEventListener('cancel', (event: any) => {
       event.preventDefault?.();
       this.hideClearCartConfirmation();
     });
-    modal.addEventListener('click', (event) => {
+    modal.addEventListener('click', (event: any) => {
       if (event.target === modal) this.hideClearCartConfirmation();
     });
   }

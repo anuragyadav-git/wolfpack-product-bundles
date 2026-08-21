@@ -37,7 +37,7 @@ export function usePpbPlacementHandlers({
       const formData = new FormData();
       formData.append("intent", "getThemeTemplates");
       base.fetcher.submit(formData, { method: "post" });
-    } catch (error) {
+    } catch (error: any) {
       AppLogger.error("Failed to load theme templates:", {}, error as any);
       base.shopify.toast.show("Failed to load theme templates", {
         isError: true,
@@ -53,7 +53,7 @@ export function usePpbPlacementHandlers({
       templateState.pendingPlacementModalRef.current = true;
       templateState.setIsPreparingPlacementTemplates(true);
       loadAvailablePages();
-    } catch (error) {
+    } catch (error: any) {
       AppLogger.error("Error opening page selection:", {}, error as any);
       base.shopify.toast.show("Failed to open page selection", {
         isError: true,
@@ -201,14 +201,15 @@ export function usePpbPlacementHandlers({
         const placementBlockHandle =
           base.activeSection === "bundle_widget"
             ? "bundle-upsell"
-            : base.blockHandle;
+            : "bundle-product-page-embed";
+        const isBundleEmbedPlacement = base.activeSection === "bundle_embed";
         const productIdForTemplate =
           base.bundleProduct?.id ??
           (base.bundle as any).shopifyProductId ??
           null;
         const productTemplateSuffix =
           resolveProductPageTemplateSuffix(template);
-        if (productIdForTemplate) {
+        if (productIdForTemplate && !isBundleEmbedPlacement) {
           const formData = new FormData();
           formData.append("intent", "assignProductTemplate");
           formData.append("productId", productIdForTemplate);
@@ -225,15 +226,21 @@ export function usePpbPlacementHandlers({
             );
           }
         }
-        const pageProductHandle =
-          base.bundleProduct?.handle ?? base.bundle.shopifyProductHandle;
+        const representativeProduct =
+          visibility.bundleEmbedSelectedProducts?.[0] ?? null;
+        const pageProductHandle = isBundleEmbedPlacement
+          ? representativeProduct?.handle ?? base.bundleProduct?.handle ?? base.bundle.shopifyProductHandle
+          : base.bundleProduct?.handle ?? base.bundle.shopifyProductHandle;
+        const productPreviewUrl = isBundleEmbedPlacement
+          ? representativeProduct?.onlineStorePreviewUrl ?? representativeProduct?.onlineStoreUrl
+          : base.bundleProduct?.onlineStorePreviewUrl;
         const themeEditorUrl = buildProductPageThemeEditorDeepLink({
           shop: base.shop,
           apiKey: base.apiKey,
           blockHandle: placementBlockHandle,
           bundleId: base.bundle.id,
           productHandle: pageProductHandle,
-          productPreviewUrl: base.bundleProduct?.onlineStorePreviewUrl,
+          productPreviewUrl,
           template,
         });
         base.setSelectedPage(template);
@@ -243,7 +250,7 @@ export function usePpbPlacementHandlers({
           { isError: false, duration: 5000 },
         );
         openThemeEditorInNewTab(themeEditorUrl);
-      } catch (error) {
+      } catch (error: any) {
         const errorMessage =
           error instanceof Error ? error.message : "Unknown error";
         AppLogger.error(
@@ -260,7 +267,7 @@ export function usePpbPlacementHandlers({
         );
       }
     },
-    [base],
+    [base, visibility.bundleEmbedSelectedProducts],
   );
 
   return {

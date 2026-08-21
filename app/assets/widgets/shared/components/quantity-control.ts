@@ -19,7 +19,7 @@ export function renderQuantityControl({
   increaseLabel = 'Increase quantity',
   removeLabel = 'Remove',
   soldOutAriaLabel = 'Out of stock',
-} = {}) {
+}: any = {}) {
   const key = escapeHtml(selectionId || '');
   const normalizedQuantity = Math.max(0, Number(quantity || 0));
   const safeProductName = String(productName || '').trim();
@@ -43,7 +43,7 @@ export function renderQuantityControl({
   `;
 }
 
-function escapeHtml(value) {
+function escapeHtml(value: string) {
   return String(value)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -52,6 +52,6 @@ function escapeHtml(value) {
     .replace(/'/g, '&#39;');
 }
 
-function escapeAttribute(value) {
+function escapeAttribute(value: string) {
   return escapeHtml(value).replace(/`/g, '&#96;');
 }

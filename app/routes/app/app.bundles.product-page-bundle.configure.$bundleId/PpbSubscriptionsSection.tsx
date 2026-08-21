@@ -6,15 +6,15 @@ export function PpbSubscriptionsSection() {
   return (
     <BundleSubscriptionsSection
       activeSection={flow.activeSection}
-      bundle={flow.bundle}
-      pricingState={flow.pricingState}
+      bundle={flow.bundle as any}
+      pricingState={flow.pricingState as any}
       setShowSubscriptionSetupGuide={flow.setShowSubscriptionSetupGuide}
       showSubscriptionSetupGuide={flow.showSubscriptionSetupGuide}
       shopLocales={flow.shopLocales}
-      stepsState={flow.stepsState}
+      stepsState={flow.stepsState as any}
       subscriptionConfig={flow.subscriptionConfig}
       setSubscriptionConfig={flow.setSubscriptionConfig}
-      subscriptionFetcher={flow.subscriptionFetcher}
+      subscriptionFetcher={flow.subscriptionFetcher as any}
       validationErrors={flow.validationErrors}
     />
   );

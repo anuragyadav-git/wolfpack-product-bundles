@@ -306,7 +306,7 @@ export function formatBundleForWidget(bundle: any): FormattedBundle {
         }
       : null,
     showProductPrices: bundle.showProductPrices ?? true,
-    showProductComparedAtPrice: resolveShowProductComparedAtPrice(bundle),
+    showProductComparedAtPrice: resolveShowProductComparedAtPrice(),
     cartRedirectToCheckout: bundle.cartRedirectToCheckout ?? false,
     allowQuantityChanges: bundle.allowQuantityChanges ?? true,
     showTextOnAddButton: bundle.showTextOnAddButton ?? false,

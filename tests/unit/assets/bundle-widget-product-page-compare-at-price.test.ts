@@ -1,33 +1,55 @@
-import { readProductPageWidgetSources } from './widget-source-helpers';
 import { resolveShowProductComparedAtPrice } from '../../../app/lib/bundle-config/product-page-display';
+import { renderSharedProductCard } from '../../../app/assets/widgets/shared/components/product-card';
+import { applyProductPageVariantSelection } from '../../../app/assets/widgets/product-page/methods/modal-methods';
+
 describe('PPB compare-at price visibility contract', () => {
-  const widgetSource = readProductPageWidgetSources();
-
-  it('maps the persisted compare-at setting into the product-page storefront flag', () => {
-    expect(resolveShowProductComparedAtPrice({ showCompareAtPrices: true })).toBe(true);
-    expect(resolveShowProductComparedAtPrice({ showCompareAtPrices: false })).toBe(false);
-    expect(resolveShowProductComparedAtPrice({})).toBe(false);
+  it('keeps compare-at capability enabled regardless of persisted bundle settings', () => {
+    expect(resolveShowProductComparedAtPrice()).toBe(true);
   });
 
-  it('gates compare-at strike prices behind the EB setting', () => {
-    expect(widgetSource).toContain('_shouldShowProductComparedAtPrice()');
-    expect(widgetSource).toContain('showCompareAtPrices');
-    expect(widgetSource).toContain('showCompareAtPrice');
-    expect(widgetSource).toContain('shouldRenderCompareAtPrice');
+  it('renders available product compare-at data even when a stale flag is false', () => {
+    const markup = renderSharedProductCard(
+      { selectionId: 'variant-1', title: 'Sale product', price: 800, compareAtPrice: 1000 },
+      0,
+      { currencySymbol: '$', decimalPlaces: 2 },
+      { showCompareAtPrice: false },
+    );
+
+    expect(markup).toContain('$10.00');
+    expect(markup).toContain('$8.00');
   });
 
-  it('uses runtime control flags as a fallback when the bundle payload flag is absent', () => {
-    const { ProductPageConfigLifecycleMethods } = require('../../../app/assets/widgets/product-page/methods/config-lifecycle-methods.js');
-    const context = {
-      selectedBundle: {
-        showProductComparedAtPrice: false,
-      },
-      _getProductPageControls: () => ({
-        showCompareAtPrices: 'true',
-      }),
-      _shouldShowProductComparedAtPrice: ProductPageConfigLifecycleMethods._shouldShowProductComparedAtPrice,
+  it('does not fabricate a compare-at price for regular products', () => {
+    const markup = renderSharedProductCard(
+      { selectionId: 'variant-1', title: 'Regular product', price: 800 },
+      0,
+      { currencySymbol: '$', decimalPlaces: 2 },
+      { showCompareAtPrice: true },
+    );
+
+    expect(markup).toContain('$8.00');
+    expect(markup).not.toContain('$10.00');
+  });
+
+  it('updates compare-at text when a selected variant provides it', () => {
+    const compareElement = { textContent: '', remove: jest.fn() };
+    const productCard = {
+      dataset: {},
+      querySelectorAll: () => [],
+      querySelector: (selector: string) => selector === '.product-price-strike'
+        ? compareElement
+        : null,
     };
 
-    expect(context._shouldShowProductComparedAtPrice()).toBe(true);
+    applyProductPageVariantSelection({
+      product: { id: 'product-1', price: 800 },
+      variantData: { id: 'variant-2', price: 800, compareAtPrice: 1000 },
+      productCard,
+      formatPrice: (price: number) => `$${(price / 100).toFixed(2)}`,
+      showCompareAtPrice: false,
+    });
+
+    expect(compareElement.textContent).toBe('$10.00');
+    expect(compareElement.remove).not.toHaveBeenCalled();
   });
 });

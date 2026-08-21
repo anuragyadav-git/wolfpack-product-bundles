@@ -17,7 +17,7 @@ function getFpbTemplateContracts() {
     : {};
 }
 
-export const FPB_TEMPLATE_CONFIGS = {
+export const FPB_TEMPLATE_CONFIGS: any = {
   get STANDARD() {
     return getFpbTemplateContracts().STANDARD || null;
   },

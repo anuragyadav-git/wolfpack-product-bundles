@@ -38,7 +38,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       restrictionMessage: "Shopify restricts direct theme file creation. Use Theme Customizer to add the Bundle Builder block to your product template."
     });
 
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.error('Unexpected error in ensure template', { operation: 'ensure-template' }, error);
     return json({
       success: false,

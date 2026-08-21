@@ -1,7 +1,11 @@
-import { useState } from "react";
+import { useBannerSessionState } from "../../../../lib/banner-session-state";
+
+export const DISCOUNT_PRICING_TIP_BANNER_KEY = "configure_discount_pricing_tip";
 
 export function DiscountPricingTipBanner() {
-  const [dismissed, setDismissed] = useState(false);
+  const [dismissed, dismiss] = useBannerSessionState(
+    DISCOUNT_PRICING_TIP_BANNER_KEY,
+  );
 
   if (dismissed) return null;
 
@@ -10,7 +14,7 @@ export function DiscountPricingTipBanner() {
       tone="info"
       heading="Discount setup tip"
       dismissible
-      onDismiss={() => setDismissed(true)}
+      onDismiss={dismiss}
     >
       Tip: Discounts are calculated based on the products in cart, make sure to
       add the &quot;Default Product&quot; quantity or amount while configuring

@@ -1,4 +1,7 @@
-import { shouldUseCascadeStepFlow } from "../../../app/assets/widgets/product-page/methods/layout-shell-methods.js";
+import {
+  shouldShowCompletedStepTitle,
+  shouldUseCascadeStepFlow,
+} from "../../../app/assets/widgets/product-page/methods/layout-shell-methods.js";
 
 describe("PPB Product Grid step flow", () => {
   it("uses one active step for a multi-step in-page Grid", () => {
@@ -26,5 +29,11 @@ describe("PPB Product Grid step flow", () => {
       isGrid: true,
       steps: [{ id: "step-1" }, { id: "step-2" }],
     })).toBe(false);
+  });
+
+  it("hides only completed step titles when the merchant enables that control", () => {
+    expect(shouldShowCompletedStepTitle({ isComplete: true, hideCompletedTitles: true })).toBe(false);
+    expect(shouldShowCompletedStepTitle({ isComplete: false, hideCompletedTitles: true })).toBe(true);
+    expect(shouldShowCompletedStepTitle({ isComplete: true, hideCompletedTitles: false })).toBe(true);
   });
 });

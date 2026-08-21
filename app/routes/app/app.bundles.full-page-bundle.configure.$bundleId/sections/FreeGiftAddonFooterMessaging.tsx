@@ -1,4 +1,5 @@
 import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
+import { DisabledConfigurationRegion } from "../../_shared/bundle-configure/DisabledConfigurationRegion";
 
 export function FpbAddonFooterMessaging({
   flow,
@@ -32,65 +33,69 @@ export function FpbAddonFooterMessaging({
 
   return (
     <>
-      <div
-        className={`${fullPageBundleStyles.card} ${fullPageBundleStyles.addonsFooterCard}`}
-      >
-        <div className={fullPageBundleStyles.panelHeader}>
-          <h3 className={fullPageBundleStyles.panelTitle}>Footer Messaging</h3>
-          <s-stack direction="inline" gap="small-100">
-            <s-button
-              variant="tertiary"
-              onClick={() => setIsAddonVariablesModalOpen(true)}
-            >
-              Show Variables
-            </s-button>
-            <s-button
-              variant="secondary"
-              icon="language-translate"
-              onClick={openAddonFooterMultiLanguageModal}
-            >
-              Multi Language
-            </s-button>
+      <DisabledConfigurationRegion disabled={!addonDraft.addonProductsEnabled}>
+        <div
+          className={`${fullPageBundleStyles.card} ${fullPageBundleStyles.addonsFooterCard}`}
+        >
+          <div className={fullPageBundleStyles.panelHeader}>
+            <h3 className={fullPageBundleStyles.panelTitle}>
+              Footer Messaging
+            </h3>
+            <s-stack direction="inline" gap="small-100">
+              <s-button
+                variant="tertiary"
+                onClick={() => setIsAddonVariablesModalOpen(true)}
+              >
+                Show Variables
+              </s-button>
+              <s-button
+                variant="secondary"
+                icon="language-translate"
+                onClick={openAddonFooterMultiLanguageModal}
+              >
+                Multi Language
+              </s-button>
+            </s-stack>
+          </div>
+          <s-stack direction="block" gap="small">
+            <h4 style={{ margin: 0, fontSize: 14, fontWeight: 650 }}>Tier 1</h4>
+            <s-text-field
+              label="Message when rule not met"
+              value={addonMessages.discountText}
+              placeholder="Add {{addonsConditionDiff}} more product(s) to claim {{addonsDiscountValue}}{{addonsDiscountValueUnit}} off on Add ons"
+              onInput={(e) => {
+                const value = (e.target as HTMLInputElement).value;
+                setRuleMessages((prev: Record<string, any>) => ({
+                  ...prev,
+                  [ADDON_MESSAGE_KEY]: {
+                    ...(prev[ADDON_MESSAGE_KEY] || addonMessages),
+                    discountText: value,
+                  },
+                }));
+                markAsDirty();
+              }}
+              autocomplete="off"
+            />
+            <s-text-field
+              label="Success Message"
+              value={addonMessages.successMessage}
+              placeholder="Congrats you are eligible for {{addonsDiscountValue}}{{addonsDiscountValueUnit}} off on Add ons"
+              onInput={(e) => {
+                const value = (e.target as HTMLInputElement).value;
+                setRuleMessages((prev: Record<string, any>) => ({
+                  ...prev,
+                  [ADDON_MESSAGE_KEY]: {
+                    ...(prev[ADDON_MESSAGE_KEY] || addonMessages),
+                    successMessage: value,
+                  },
+                }));
+                markAsDirty();
+              }}
+              autocomplete="off"
+            />
           </s-stack>
         </div>
-        <s-stack direction="block" gap="small">
-          <h4 style={{ margin: 0, fontSize: 14, fontWeight: 650 }}>Tier 1</h4>
-          <s-text-field
-            label="Message when rule not met"
-            value={addonMessages.discountText}
-            placeholder="Add {{addonsConditionDiff}} more product(s) to claim {{addonsDiscountValue}}{{addonsDiscountValueUnit}} off on Add ons"
-            onInput={(e) => {
-              const value = (e.target as HTMLInputElement).value;
-              setRuleMessages((prev: Record<string, any>) => ({
-                ...prev,
-                [ADDON_MESSAGE_KEY]: {
-                  ...(prev[ADDON_MESSAGE_KEY] || addonMessages),
-                  discountText: value,
-                },
-              }));
-              markAsDirty();
-            }}
-            autocomplete="off"
-          />
-          <s-text-field
-            label="Success Message"
-            value={addonMessages.successMessage}
-            placeholder="Congrats you are eligible for {{addonsDiscountValue}}{{addonsDiscountValueUnit}} off on Add ons"
-            onInput={(e) => {
-              const value = (e.target as HTMLInputElement).value;
-              setRuleMessages((prev: Record<string, any>) => ({
-                ...prev,
-                [ADDON_MESSAGE_KEY]: {
-                  ...(prev[ADDON_MESSAGE_KEY] || addonMessages),
-                  successMessage: value,
-                },
-              }));
-              markAsDirty();
-            }}
-            autocomplete="off"
-          />
-        </s-stack>
-      </div>
+      </DisabledConfigurationRegion>
     </>
   );
 }

@@ -1,4 +1,63 @@
+.bundle-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+  padding: env(safe-area-inset-top) 0 0;
+  background: rgba(24, 24, 24, 0.8);
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.3s ease,
+    visibility 0.3s ease;
+}
+
+.bundle-modal-overlay.active {
+  display: flex;
+  opacity: 1;
+  visibility: visible;
+}
+
+.bundle-modal-container {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  max-height: min(88dvh, 46rem);
+  padding-bottom: env(safe-area-inset-bottom);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  touch-action: pan-y;
+  background: #ffffff;
+  border-radius: 16px 16px 0 0;
+  box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.3);
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+  -webkit-overflow-scrolling: touch;
+}
+
+.bundle-modal-overlay.active .bundle-modal-container {
+  transform: translateY(0);
+}
+
 @media (min-width: 768px) {
+  .bundle-modal-overlay {
+    align-items: center;
+    padding: clamp(1rem, 3vw, 2rem);
+  }
+
+  .bundle-modal-container {
+    width: min(56rem, 100%);
+    max-width: 56rem;
+    max-height: min(46rem, calc(100dvh - 2rem));
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: none;
+    transform: scale(0.9);
+  }
+
   .bundle-modal-overlay.active .bundle-modal-container {
     transform: scale(1);
   }

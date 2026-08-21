@@ -9,7 +9,7 @@
 'use strict';
 
 const TemplateDesignSystem = (function () {
-  const FPB_PRESET_CONTRACTS = {
+  const FPB_PRESET_CONTRACTS: any = {
     STANDARD: {
       id: 'STANDARD',
       presetId: 'STANDARD',
@@ -128,7 +128,7 @@ const TemplateDesignSystem = (function () {
     },
   };
 
-  const PPB_TEMPLATE_CONTRACTS = {
+  const PPB_TEMPLATE_CONTRACTS: any = {
     GRID: {
       id: 'GRID',
       templateType: 'PDP_INPAGE',
@@ -199,11 +199,11 @@ const TemplateDesignSystem = (function () {
   const PPB_TEMPLATE_IDS = Object.keys(PPB_TEMPLATE_CONTRACTS);
 
   const FPB_PRESET_REGISTRY_BY_ALIAS = (() => {
-    const map = {};
+    const map: any = {};
     FPB_PRESET_IDS.forEach((presetId) => {
       const contract = FPB_PRESET_CONTRACTS[presetId];
       map[presetId] = contract;
-      contract.aliases.forEach((alias) => {
+      contract.aliases.forEach((alias: string|number) => {
         map[alias] = contract;
       });
     });
@@ -211,34 +211,34 @@ const TemplateDesignSystem = (function () {
   })();
 
   const PPB_TEMPLATE_REGISTRY_BY_ALIAS = (() => {
-    const map = {};
+    const map: any = {};
     PPB_TEMPLATE_IDS.forEach((templateId) => {
       const contract = PPB_TEMPLATE_CONTRACTS[templateId];
       map[templateId] = contract;
-      contract.aliases.forEach((alias) => {
+      contract.aliases.forEach((alias: string|number) => {
         map[alias] = contract;
       });
     });
     return map;
   })();
 
-  function normalizeFpbPresetId(rawValue, fallback = '') {
+  function normalizeFpbPresetId(rawValue: string, fallback = '') {
     if (typeof rawValue !== 'string' || rawValue.trim() === '') return fallback;
     const upper = rawValue.trim().toUpperCase();
     return FPB_PRESET_IDS.includes(upper) ? upper : fallback;
   }
 
-  function isSupportedFpbPreset(rawValue) {
+  function isSupportedFpbPreset(rawValue: string) {
     if (typeof rawValue !== 'string') return false;
     return FPB_PRESET_IDS.includes(rawValue.trim().toUpperCase());
   }
 
-  function getFpbPresetContract(rawValue) {
+  function getFpbPresetContract(rawValue: any) {
     const presetId = normalizeFpbPresetId(rawValue);
     return FPB_PRESET_CONTRACTS[presetId] || null;
   }
 
-  function getPpbTemplateContractByAlias(rawValue) {
+  function getPpbTemplateContractByAlias(rawValue: string) {
     if (typeof rawValue !== 'string' || rawValue.trim() === '') return null;
     return PPB_TEMPLATE_REGISTRY_BY_ALIAS[rawValue.trim().toUpperCase()] || null;
   }
@@ -246,7 +246,7 @@ const TemplateDesignSystem = (function () {
   function resolvePpbTemplate({
     templateType = '',
     designPreset = '',
-  } = {}) {
+  }: any = {}) {
     const normalizedTemplateType = typeof templateType === 'string' ? templateType.trim().toUpperCase() : '';
     const resolvedContract = getPpbTemplateContractByAlias(designPreset);
     if (!normalizedTemplateType || !resolvedContract) {

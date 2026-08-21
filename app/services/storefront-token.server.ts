@@ -97,7 +97,7 @@ export async function createStorefrontAccessToken(admin: AdminApiContext, shop: 
     });
 
     return accessToken;
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.error("[STOREFRONT_TOKEN] Error creating storefront token", { component: "storefront-token.server", shop }, error);
     throw error;
   }

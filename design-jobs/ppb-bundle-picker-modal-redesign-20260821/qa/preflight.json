@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "job_id": "ppb-bundle-picker-modal-redesign-20260821",
+  "revision": 6,
+  "status": "blocked",
+  "checked_at": "2026-08-21T11:32:17Z",
+  "environment": "SIT development storefront",
+  "selected_page": {"page_id": 6, "url": "https://agent-5sfidg3m.myshopify.com/products/ppb-mobile-modal-qa-2026-08-20", "title": "PPB Mobile Modal QA 2026-08-20 - agent"},
+  "checks": {
+    "chrome_mcp_connected": {"mandatory": true, "status": "passed", "evidence": "Direct mcp__chrome_devtools__list_pages returned the authenticated default-profile tab inventory.", "blocker": "", "recovery_action": ""},
+    "supported_chrome_available": {"mandatory": true, "status": "passed", "evidence": "Direct page selection, reload, emulation, snapshot, interaction, console, network, and inline screenshot operations succeeded.", "blocker": "", "recovery_action": ""},
+    "intended_page_selected": {"mandatory": true, "status": "passed", "evidence": "Page 6 is the deterministic PPB Mobile Modal QA storefront fixture.", "blocker": "", "recovery_action": ""},
+    "app_server_reachable": {"mandatory": true, "status": "blocked", "evidence": "The storefront document and version 14.0.0 asset load, but repeated cache-ignored reloads return HTTP 500 from the bundle, controls, language, and upsell app-proxy endpoints.", "blocker": "The existing SIT app-proxy service is not returning PPB configuration data.", "recovery_action": "Restore the user-owned SIT app-proxy service, then rerun revision-6 preflight without restarting it from this agent session."},
+    "environment_confirmed": {"mandatory": true, "status": "passed", "evidence": "The fixture served development extension assets and window.__BUNDLE_WIDGET_VERSION__ 14.0.0.", "blocker": "", "recovery_action": ""},
+    "fixture_route_exists": {"mandatory": true, "status": "blocked", "evidence": "The Horizontal route exists, but the widget cannot initialize while its bundle endpoint returns HTTP 500.", "blocker": "The deterministic fixture cannot reach its loaded state.", "recovery_action": "Rerun after the app-proxy endpoints return HTTP 200."},
+    "authentication_intentional": {"mandatory": true, "status": "passed", "evidence": "The existing default Chrome profile loaded the test storefront directly.", "blocker": "", "recovery_action": ""},
+    "sensitive_tabs_avoided": {"mandatory": true, "status": "passed", "evidence": "Only test-store storefront tabs were inspected; no Admin mutation was performed.", "blocker": "", "recovery_action": ""},
+    "viewport_resize_supported": {"mandatory": true, "status": "passed", "evidence": "Direct emulation succeeded at 1440x900, 1280x800, 768x1024, 390x844, and 360x800.", "blocker": "", "recovery_action": ""},
+    "accessibility_snapshot_supported": {"mandatory": true, "status": "passed", "evidence": "Fresh accessibility snapshots exposed the dialog, image-only details controls, independent Add actions, quantity controls, and exact focus restoration.", "blocker": "", "recovery_action": ""},
+    "screenshot_write_supported": {"mandatory": true, "status": "blocked", "evidence": "Direct Chrome returned inspectable inline PNG evidence, but revision-6 persistent writes were denied by the Chrome host workspace-root policy.", "blocker": "New revision-6 PNG evidence cannot be persisted by the direct Chrome tool.", "recovery_action": "Restore the Chrome tool workspace-root mapping before the accepted formal pass."},
+    "console_inspection_supported": {"mandatory": true, "status": "passed", "evidence": "After remediation and a cache-ignored hard reload, direct console inspection returned no PPB-owned warning; only the theme favicon 404 and Shopify/theme preload notices remain.", "blocker": "", "recovery_action": ""},
+    "network_inspection_supported": {"mandatory": true, "status": "passed", "evidence": "Widget assets and relevant PPB endpoints returned 200 or 304. No PPB mutation request occurred during the final reload.", "blocker": "", "recovery_action": ""},
+    "repository_identity_recorded": {"mandatory": true, "status": "passed", "evidence": "Repository wolfpack-product-bundles, branch feature/26.05-UI-changes, commit 334c731736e2ef1a2d0abb1805672ca03333d2c5.", "blocker": "", "recovery_action": ""},
+    "job_revision_recorded": {"mandatory": true, "status": "passed", "evidence": "Design job ppb-bundle-picker-modal-redesign-20260821 revision 6.", "blocker": "", "recovery_action": ""},
+    "baseline_identified": {"mandatory": true, "status": "passed", "evidence": "Revision-6 filled-slot and action-footprint contract is recorded in the approved handoff, locked decisions, responsive contract, and interaction contract.", "blocker": "", "recovery_action": ""}
+  },
+  "tool_inventory": ["mcp__chrome_devtools__list_pages", "mcp__chrome_devtools__select_page", "mcp__chrome_devtools__navigate_page", "mcp__chrome_devtools__emulate", "mcp__chrome_devtools__take_snapshot", "mcp__chrome_devtools__take_screenshot", "mcp__chrome_devtools__evaluate_script", "mcp__chrome_devtools__click", "mcp__chrome_devtools__press_key", "mcp__chrome_devtools__list_console_messages", "mcp__chrome_devtools__list_network_requests"],
+  "browser": {"product": "Chrome", "version": "direct DevTools session; exact version not exposed by page inventory", "profile_policy": "default-profile-only", "isolated_context_used": false},
+  "repository": {"path": "/Users/adityaawasthi/Developer/wolfpack-product-bundles", "branch": "feature/26.05-UI-changes", "commit": "334c731736e2ef1a2d0abb1805672ca03333d2c5"},
+  "baseline": {"id": "ppb-bundle-picker-modal-redesign-r6", "revision": 6, "path": "implementation-handoff.md"},
+  "artifact_directory": "qa",
+  "horizontal_observations": {
+    "served_version": "14.0.0",
+    "passes": ["filled-slot maximum height at all five required viewports", "complete selected product name in DOM and accessible replacement name", "44 by 44 cross badge contained without title collision", "zero horizontal overflow", "one remove-all mutation with same-index empty-slot focus recovery"],
+    "product_failures": ["Revision-6 focus-restoration and quantity-distribution reruns are blocked by repeated app-proxy HTTP 500 responses."]
+  },
+  "cleanup": "The tab-local session selection was restored to one 14k Dangling Obsidian Earrings after the remove-all probe; no server fixture was mutated.",
+  "blockers": ["SIT app-proxy endpoints return HTTP 500.", "Direct Chrome cannot persist new revision-6 screenshots under the current workspace-root policy."]
+}

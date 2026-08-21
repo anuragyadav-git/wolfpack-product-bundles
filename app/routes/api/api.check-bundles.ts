@@ -30,7 +30,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
       if (typeof value === "string") {
         try {
           return JSON.parse(value);
-        } catch (error) {
+        } catch (error: any) {
           return defaultValue;
         }
       }

@@ -94,7 +94,7 @@ export async function handleInventoryUpdate(
       try {
         const result = await syncBundleInventory(admin, bundleId);
         results.push({ bundleId, success: result.success });
-      } catch (error) {
+      } catch (error: any) {
         AppLogger.error("Failed to sync bundle during webhook", {
           component: "webhook-processor",
           operation: "handleInventoryUpdate",
@@ -118,7 +118,7 @@ export async function handleInventoryUpdate(
       success: true,
       message: `Inventory synced for ${successCount} bundle(s)`,
     };
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.error("Error handling inventory update", {
       component: "webhook-processor",
       operation: "handleInventoryUpdate",

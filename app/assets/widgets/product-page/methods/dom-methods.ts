@@ -1,6 +1,6 @@
 
 export const ProductPageDomMethods: Record<string, any> & ThisType<any> = {
-showThemeEditorPreview(bundleId) {
+showThemeEditorPreview(bundleId: any) {
 
   this.container.innerHTML = `
     <div style="
@@ -96,7 +96,7 @@ _relocateContainerToProductForm() {
 
     this.container.classList.add('bundle-widget-container--product-form-mounted');
     this.container.dataset.mountedAfterProductForm = 'true';
-  } catch (_error) {
+  } catch (_error: any) {
     // Placement is best-effort; the widget still renders at its original block location.
   }
 },
@@ -104,7 +104,7 @@ _relocateContainerToProductForm() {
 _findNativeProductForm() {
   if (typeof document === 'undefined') return null;
 
-  const selectors = [
+  const selectors: any[] = [
     'form[action*="/cart/add"]',
     'product-form form',
     '.product-form form',
@@ -117,7 +117,7 @@ _findNativeProductForm() {
     .find(form => form && !form.contains(this.container) && !this.container.contains(form)) || null;
 },
 
-_getNativeProductInfoRoot(productForm) {
+_getNativeProductInfoRoot(productForm: any) {
   return productForm?.closest?.(
     '[id^="ProductInformation-"], .product-details, .group-block-content, .product-information, .product__info-container, .product__info-wrapper, .product__info, product-info, .product'
   ) || productForm?.parentElement || null;
@@ -127,13 +127,24 @@ _hideNativeProductPrice() {
   try {
     if (!this.container || typeof document === 'undefined') return;
 
+    const customSelector = String(
+      this._getProductPageControls?.()?.selectors?.productPagePrice || '',
+    ).trim();
+    if (customSelector) {
+      const configuredPrice = document.querySelector(customSelector);
+      if (configuredPrice && !this.container.contains(configuredPrice)) {
+        this._nativeProductPriceElement = configuredPrice;
+      }
+      return;
+    }
+
     const productForm = this._findNativeProductForm();
     if (!productForm) return;
 
     const root = this._getNativeProductInfoRoot(productForm);
     if (!root) return;
 
-    const selectors = [
+    const selectors: any[] = [
       '[id^="price-"]',
       '.price.price--large',
       '.product__price',
@@ -143,7 +154,7 @@ _hideNativeProductPrice() {
     ];
 
     const priceElements = selectors.flatMap(selector => Array.from(root.querySelectorAll(selector)));
-    const uniquePriceElements = Array.from(new Set(priceElements));
+    const uniquePriceElements = Array.from(new Set(priceElements)) as HTMLElement[];
 
     uniquePriceElements
       .filter(element => !this.container.contains(element))
@@ -153,9 +164,29 @@ _hideNativeProductPrice() {
         element.setAttribute('data-wpb-native-product-price-hidden', 'true');
         element.style.setProperty('display', 'none', 'important');
       });
-  } catch (_error) {
+  } catch (_error: any) {
     // Native theme price hiding is best-effort; PPB controls still render if selectors differ.
   }
+},
+
+_updateNativeProductPrice(finalPriceText: any, compareAtPriceText: any, hasSelection: any) {
+  const price = this._nativeProductPriceElement;
+  if (!price) return;
+  price.hidden = !hasSelection;
+  if (!hasSelection) {
+    price.innerHTML = '';
+    return;
+  }
+  const escapeHtml = (value: any) => String(value || '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;');
+  const finalText = escapeHtml(finalPriceText);
+  const compareText = compareAtPriceText && compareAtPriceText !== finalPriceText
+    ? `<s>${escapeHtml(compareAtPriceText)}</s>`
+    : '';
+  price.innerHTML = `<span>${finalText}</span>${compareText ? ` ${compareText}` : ''}`;
 },
 
 _hideNativeDynamicCheckoutControls() {
@@ -168,7 +199,7 @@ _hideNativeDynamicCheckoutControls() {
     const root = this._getNativeProductInfoRoot(productForm);
     if (!root) return;
 
-    const selectors = [
+    const selectors: any[] = [
       '.shopify-payment-button',
       '.shopify-payment-button__button',
       'shopify-accelerated-checkout',
@@ -176,7 +207,7 @@ _hideNativeDynamicCheckoutControls() {
     ];
 
     const controls = selectors.flatMap(selector => Array.from(root.querySelectorAll(selector)));
-    const uniqueControls = Array.from(new Set(controls));
+    const uniqueControls = Array.from(new Set(controls)) as HTMLElement[];
 
     uniqueControls
       .filter(element => !this.container.contains(element))
@@ -186,7 +217,7 @@ _hideNativeDynamicCheckoutControls() {
         element.setAttribute('data-wpb-native-dynamic-checkout-hidden', 'true');
         element.style.setProperty('display', 'none', 'important');
       });
-  } catch (_error) {
+  } catch (_error: any) {
     // Native dynamic-checkout hiding is best-effort; PPB renders its own non-mutating visual surface.
   }
 },
@@ -281,6 +312,8 @@ ensureBottomSheet() {
     panel.className = 'bw-bs-panel bundle-builder-modal';
     panel.setAttribute('role', 'dialog');
     panel.setAttribute('aria-modal', 'true');
+    panel.setAttribute('aria-labelledby', 'bundle-picker-title');
+    panel.setAttribute('data-ppb-drawer-surface', 'bundle-picker');
     panel.setAttribute('aria-hidden', 'true');
     panel.setAttribute('inert', '');
     panel.hidden = true;
@@ -303,7 +336,7 @@ ensureBottomSheet() {
           <div class="modal-tabs bw-bs-tabs"></div>
         </div>
         <!-- "Choose X" step title -->
-        <div class="modal-step-title bw-bs-choose-title"></div>
+        <div id="bundle-picker-title" class="modal-step-title bw-bs-choose-title"></div>
         <!-- Current-step categories -->
         <div class="bw-bs-category-tabs" hidden></div>
         <!-- Discount / progress messaging -->
@@ -314,16 +347,18 @@ ensureBottomSheet() {
       </div>
       <div class="modal-footer bw-bs-footer">
         <!-- Cart count pill (white, floats above nav pill) -->
-        <div class="bw-bs-cart-pill">
-          <span class="bw-bs-cart-price">
-            <span class="total-price-strike"></span>
-            <span class="total-price-final">$0.00</span>
+        <div class="bw-bs-cart-pill" data-wpb-discount-feedback-pill role="status" aria-live="polite">
+          <span class="bw-bs-cart-items">
+            <svg class="bw-bs-cart-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+              <path fill-rule="evenodd" clip-rule="evenodd" d="M3 4.5C3 4.22386 3.22386 4 3.5 4H5.5C5.73 4 5.93 4.16 5.98 4.385L6.52 7H20.5C20.76 7 20.99 7.14 21.1 7.37C21.21 7.6 21.18 7.88 21.02 8.08L17.02 13.08C16.85 13.29 16.6 13.41 16.33 13.41H8.66L8.07 16H19.5C19.78 16 20 16.22 20 16.5C20 16.78 19.78 17 19.5 17H7.5C7.27 17 7.07 16.84 7.02 16.615L5.02 7.615L4.5 5H3.5C3.22 5 3 4.78 3 4.5ZM8 19.5C8 20.33 7.33 21 6.5 21C5.67 21 5 20.33 5 19.5C5 18.67 5.67 18 6.5 18C7.33 18 8 18.67 8 19.5ZM19 19.5C19 20.33 18.33 21 17.5 21C16.67 21 16 20.33 16 19.5C16 18.67 16.67 18 17.5 18C18.33 18 19 18.67 19 19.5Z" fill="currentColor"/>
+            </svg>
+            <span class="cart-badge-count">0</span>
           </span>
-          <span class="bw-bs-cart-divider"></span>
-          <span class="cart-badge-count">0</span>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path fill-rule="evenodd" clip-rule="evenodd" d="M3 4.5C3 4.22386 3.22386 4 3.5 4H5.5C5.73 4 5.93 4.16 5.98 4.385L6.52 7H20.5C20.76 7 20.99 7.14 21.1 7.37C21.21 7.6 21.18 7.88 21.02 8.08L17.02 13.08C16.85 13.29 16.6 13.41 16.33 13.41H8.66L8.07 16H19.5C19.78 16 20 16.22 20 16.5C20 16.78 19.78 17 19.5 17H7.5C7.27 17 7.07 16.84 7.02 16.615L5.02 7.615L4.5 5H3.5C3.22 5 3 4.78 3 4.5ZM8 19.5C8 20.33 7.33 21 6.5 21C5.67 21 5 20.33 5 19.5C5 18.67 5.67 18 6.5 18C7.33 18 8 18.67 8 19.5ZM19 19.5C19 20.33 18.33 21 17.5 21C16.67 21 16 20.33 16 19.5C16 18.67 16.67 18 17.5 18C18.33 18 19 18.67 19 19.5Z" fill="#333"/>
-          </svg>
+          <span class="bw-bs-cart-divider" aria-hidden="true"></span>
+          <span class="bw-bs-cart-price">
+            <span class="total-price-final">$0.00</span>
+            <span class="total-price-strike"></span>
+          </span>
         </div>
         <!-- PREV/NEXT nav pill (navy blue) -->
         <div class="bw-bs-nav-pill">
@@ -345,7 +380,7 @@ ensureBottomSheet() {
   return panel;
 },
 
-setBottomSheetVisibility(isOpen) {
+setBottomSheetVisibility(isOpen: any) {
   const modal = this.elements?.modal;
   if (!modal) return;
 
@@ -399,7 +434,7 @@ _createDynamicCheckoutVisual() {
   return button;
 },
 
-setupTabScrollArrows(modal) {
+setupTabScrollArrows(modal: any) {
   const tabsContainer = modal.querySelector('.modal-tabs');
   const leftArrow = modal.querySelector('.tab-arrow-left');
   const rightArrow = modal.querySelector('.tab-arrow-right');

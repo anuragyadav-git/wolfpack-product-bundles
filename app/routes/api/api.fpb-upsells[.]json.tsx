@@ -39,7 +39,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     const headers = { "Cache-Control": CACHE_CONTROL, ETag: etag, Vary: "Accept-Encoding" };
     if (request.headers.get("If-None-Match") === etag) return new Response(null, { status: 304, headers });
     return json({ offers }, { headers });
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof Response) {
       throw error;
     }

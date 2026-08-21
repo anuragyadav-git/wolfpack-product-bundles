@@ -24,11 +24,11 @@ createSearchInput() {
     </div>
   `;
 
-  const input = searchContainer.querySelector('.step-search-input');
-  const clearBtn = searchContainer.querySelector('.step-search-clear');
+  const input = searchContainer.querySelector<HTMLInputElement>('.step-search-input')!;
+  const clearBtn = searchContainer.querySelector<HTMLButtonElement>('.step-search-clear')!;
 
   // Handle input with debounce
-  input.addEventListener('input', (e) => {
+  input.addEventListener('input', (e: any) => {
     const value = e.target.value;
 
     // Show/hide clear button
@@ -55,7 +55,7 @@ createSearchInput() {
   });
 
   // Handle escape key to clear
-  input.addEventListener('keydown', (e) => {
+  input.addEventListener('keydown', (e: any) => {
     if (e.key === 'Escape') {
       input.value = '';
       clearBtn.hidden = true;
@@ -77,52 +77,52 @@ updateProductGridWithSearch() {
   gridContainer.appendChild(productGrid);
 },
 
-collectStepProductIds(step) {
-  const productIds = [];
-  const addProductId = (product) => {
+collectStepProductIds(step: any) {
+  const productIds: any[] = [];
+  const addProductId = (product: any) => {
     const id = product?.selectionId;
     if (id && !productIds.includes(id)) productIds.push(id);
   };
 
   (step.products || []).forEach(addProductId);
-  (step.categories || []).forEach(category => {
+  (step.categories || []).forEach((category: any)  => {
     (category.products || []).forEach(addProductId);
   });
 
   return productIds;
 },
 
-collectStepCollectionHandles(step) {
-  const handles = [];
-  const addCollectionHandle = (collection) => {
+collectStepCollectionHandles(step: any) {
+  const handles: any[] = [];
+  const addCollectionHandle = (collection: any) => {
     const handle = collection?.handle;
     if (handle && !handles.includes(handle)) handles.push(handle);
   };
 
   (step.collections || []).forEach(addCollectionHandle);
-  (step.categories || []).forEach(category => {
+  (step.categories || []).forEach((category: any)  => {
     (category.collections || []).forEach(addCollectionHandle);
   });
 
   return handles;
 },
 
-getStepCategoryTabEntries(step) {
+getStepCategoryTabEntries(step: any) {
   if (!Array.isArray(step.categories)) return [];
 
   return step.categories
-    .map((category, index) => {
+    .map((category: any, index: any) => {
       const id = category.id || `category-${index}`;
       const title = category.title || category.name;
       if (!id || !title) return null;
 
-      const handles = [];
-      const productIds = [];
-      const addHandle = (collection) => {
+      const handles: any[] = [];
+      const productIds: any[] = [];
+      const addHandle = (collection: any) => {
         const handle = collection?.handle;
         if (handle && !handles.includes(handle)) handles.push(handle);
       };
-      const addProductId = (product) => {
+      const addProductId = (product: any) => {
         const productId = product?.selectionId;
         if (productId && !productIds.includes(productId)) productIds.push(productId);
       };
@@ -142,22 +142,22 @@ getStepCategoryTabEntries(step) {
     .filter(Boolean);
 },
 
-getActiveStepCategoryId(step) {
+getActiveStepCategoryId(step: any) {
   const categoryEntries = this.getStepCategoryTabEntries(step);
   if (categoryEntries.length === 0) return this.activeCollectionId;
-  if (this.activeCollectionId && categoryEntries.some(entry => entry.id === this.activeCollectionId)) {
+  if (this.activeCollectionId && categoryEntries.some((entry: any)  => entry.id === this.activeCollectionId)) {
     return this.activeCollectionId;
   }
   return categoryEntries[0].id;
 },
 
-getActiveStepCategoryEntry(step) {
+getActiveStepCategoryEntry(step: any) {
   const categoryEntries = this.getStepCategoryTabEntries(step);
   const activeCategoryId = this.getActiveStepCategoryId(step);
-  return categoryEntries.find(entry => entry.id === activeCategoryId) || null;
+  return categoryEntries.find((entry: any)  => entry.id === activeCategoryId) || null;
 },
 
-shouldDisplayVariantsAsIndividualForProductGrid(step, activeCategory) {
+shouldDisplayVariantsAsIndividualForProductGrid(step: any, activeCategory: any) {
   const stepDisplaysVariantsAsIndividual =
     step?.displayVariantsAsIndividualProducts === true || step?.displayVariantsAsIndividual === true;
 
@@ -173,7 +173,7 @@ shouldDisplayVariantsAsIndividualForProductGrid(step, activeCategory) {
   return stepDisplaysVariantsAsIndividual;
 },
 
-createActiveCategoryTitle(stepIndex) {
+createActiveCategoryTitle(stepIndex: string|number) {
   if (!this.selectedBundle || !this.selectedBundle.steps || !this.selectedBundle.steps[stepIndex]) {
     return null;
   }

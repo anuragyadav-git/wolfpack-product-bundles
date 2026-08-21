@@ -42,7 +42,11 @@ describe("Settings loader critical path", () => {
 
     settings.resolve(null);
     bundles.resolve([]);
-    await expect((result as any).data.settingsPage).resolves.toBeNull();
+    await expect((result as any).data.settingsPage).resolves.toEqual(expect.objectContaining({
+      controls: expect.objectContaining({
+        "landingPage.checkout.providerId": "Shopify checkout",
+      }),
+    }));
     await expect((result as any).data.previewBundles).resolves.toEqual([]);
   });
 

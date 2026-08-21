@@ -21,7 +21,7 @@ export async function OPTIONS() {
  * POST /apps/product-bundles/api/widget-error
  * Body: { message, bundleId, bundleType, shop, url }
  */
-export const action: ActionFunction = async ({ request }) => {
+export const action: ActionFunction = async ({ request }: any) => {
   if (request.method !== "POST") {
     return json({ error: "Method not allowed" }, { status: 405, headers: CORS_HEADERS });
   }

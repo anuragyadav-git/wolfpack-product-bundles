@@ -4,15 +4,13 @@ import {
   getBogoDiscountStoredValue,
 } from "../../../lib/pricing-progress-tier-defaults";
 import { DiscountPricingTipBanner } from "../_shared/bundle-configure/DiscountPricingTipBanner";
+import { DisabledConfigurationRegion } from "../_shared/bundle-configure/DisabledConfigurationRegion";
 
 export function PpbDiscountRulesPanel() {
   const {
-    amountToCents,
-    centsToAmount,
     DISCOUNT_METHOD_OPTIONS,
     DiscountMethod,
     pricingState,
-    productPageBundleStyles,
     setGlobalSuccessMessage,
     setRuleMessages,
     setRuleMessagesByLocale,
@@ -23,7 +21,14 @@ export function PpbDiscountRulesPanel() {
     <s-section>
       <s-stack direction="block" gap="base">
         <s-stack direction="block" gap="small-400">
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              width: "100%",
+            }}
+          >
             <h3 style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>
               Discount &amp; Pricing
             </h3>
@@ -32,7 +37,7 @@ export function PpbDiscountRulesPanel() {
               checked={pricingState.discountEnabled || undefined}
               onChange={(e) =>
                 pricingState.setDiscountEnabled(
-                  (e.target as HTMLInputElement).checked,
+                  (e.target as HTMLInputElement).checked
                 )
               }
             />
@@ -42,12 +47,7 @@ export function PpbDiscountRulesPanel() {
           </p>
         </s-stack>
         <DiscountPricingTipBanner />
-        <div
-          style={{
-            opacity: pricingState.discountEnabled ? 1 : 0.45,
-            pointerEvents: pricingState.discountEnabled ? "auto" : "none",
-          }}
-        >
+        <DisabledConfigurationRegion disabled={!pricingState.discountEnabled}>
           <s-stack direction="block" gap="base">
             <div>
               <p style={{ margin: "0 0 4px", fontSize: 14, fontWeight: 600 }}>
@@ -78,7 +78,7 @@ export function PpbDiscountRulesPanel() {
               <PpbStandardDiscountRules />
             )}
           </s-stack>
-        </div>
+        </DisabledConfigurationRegion>
       </s-stack>
     </s-section>
   );
@@ -116,13 +116,15 @@ function PpbBuyXGetYRules() {
                 id={`configure-discount-rules-${rule.id}-customerBuys`}
                 label="Minimum quantity of items"
                 required
-                error={validationErrors[`discount.rules.${rule.id}.customerBuys`]}
+                error={
+                  validationErrors[`discount.rules.${rule.id}.customerBuys`]
+                }
                 value={String(rule.customerBuys ?? 2)}
                 onInput={(e) =>
                   pricingState.updateDiscountRule(rule.id, {
                     customerBuys: Math.max(
                       1,
-                      Number((e.target as HTMLInputElement).value) || 1,
+                      Number((e.target as HTMLInputElement).value) || 1
                     ),
                   })
                 }
@@ -135,13 +137,15 @@ function PpbBuyXGetYRules() {
                 id={`configure-discount-rules-${rule.id}-customerGets`}
                 label="Quantity"
                 required
-                error={validationErrors[`discount.rules.${rule.id}.customerGets`]}
+                error={
+                  validationErrors[`discount.rules.${rule.id}.customerGets`]
+                }
                 value={String(rule.customerGets ?? 1)}
                 onInput={(e) =>
                   pricingState.updateDiscountRule(rule.id, {
                     customerGets: Math.max(
                       1,
-                      Number((e.target as HTMLInputElement).value) || 1,
+                      Number((e.target as HTMLInputElement).value) || 1
                     ),
                   })
                 }
@@ -152,12 +156,14 @@ function PpbBuyXGetYRules() {
                   id={`configure-discount-rules-${rule.id}-discountValue`}
                   label="Discount value"
                   required
-                  error={validationErrors[`discount.rules.${rule.id}.discountValue`]}
+                  error={
+                    validationErrors[`discount.rules.${rule.id}.discountValue`]
+                  }
                   value={String(
                     getBogoDiscountInputValue(
                       rule.discountValue ?? 0,
-                      rule.bxyDiscountType ?? "percentage",
-                    ),
+                      rule.bxyDiscountType ?? "percentage"
+                    )
                   )}
                   onInput={(e) =>
                     pricingState.updateDiscountRule(rule.id, {
@@ -169,7 +175,7 @@ function PpbBuyXGetYRules() {
                           ? Math.min(100, Math.max(0, nextValue))
                           : getBogoDiscountStoredValue(
                               Math.max(0, nextValue),
-                              "fixed_amount",
+                              "fixed_amount"
                             );
                       })(),
                     })
@@ -199,7 +205,7 @@ function PpbBuyXGetYRules() {
                       .value as "percentage" | "fixed_amount";
                     const currentValue = getBogoDiscountInputValue(
                       Number(rule.discountValue ?? 0) || 0,
-                      rule.bxyDiscountType ?? "percentage",
+                      rule.bxyDiscountType ?? "percentage"
                     );
                     pricingState.updateDiscountRule(rule.id, {
                       bxyDiscountType,
@@ -208,7 +214,7 @@ function PpbBuyXGetYRules() {
                           ? Math.min(100, Math.max(0, currentValue))
                           : getBogoDiscountStoredValue(
                               Math.max(0, currentValue),
-                              "fixed_amount",
+                              "fixed_amount"
                             ),
                     });
                   }}
@@ -279,7 +285,9 @@ function PpbStandardDiscountRules() {
                   id={`configure-discount-rules-${rule.id}-conditionValue`}
                   label="Number of Products in Bundle"
                   required
-                  error={validationErrors[`discount.rules.${rule.id}.conditionValue`]}
+                  error={
+                    validationErrors[`discount.rules.${rule.id}.conditionValue`]
+                  }
                   value={String(rule.conditionValue ?? 0)}
                   onInput={(e) =>
                     pricingState.updateDiscountRule(rule.id, {
@@ -293,12 +301,14 @@ function PpbStandardDiscountRules() {
                   id={`configure-discount-rules-${rule.id}-discountValue`}
                   label="Price"
                   required
-                  error={validationErrors[`discount.rules.${rule.id}.discountValue`]}
+                  error={
+                    validationErrors[`discount.rules.${rule.id}.discountValue`]
+                  }
                   value={String(centsToAmount(rule.discountValue))}
                   onInput={(e) =>
                     pricingState.updateDiscountRule(rule.id, {
                       discountValue: amountToCents(
-                        Number((e.target as HTMLInputElement).value) || 0,
+                        Number((e.target as HTMLInputElement).value) || 0
                       ),
                     })
                   }
@@ -326,11 +336,13 @@ function PpbStandardDiscountRules() {
                   id={`configure-discount-rules-${rule.id}-conditionValue`}
                   label="is greater than or equal to"
                   required
-                  error={validationErrors[`discount.rules.${rule.id}.conditionValue`]}
+                  error={
+                    validationErrors[`discount.rules.${rule.id}.conditionValue`]
+                  }
                   value={String(
                     rule.conditionType === "amount"
                       ? centsToAmount(rule.conditionValue)
-                      : rule.conditionValue,
+                      : rule.conditionValue
                   )}
                   onInput={(e) => {
                     const numValue =
@@ -358,11 +370,13 @@ function PpbStandardDiscountRules() {
                       : "Fixed Amount Off"
                   }
                   required
-                  error={validationErrors[`discount.rules.${rule.id}.discountValue`]}
+                  error={
+                    validationErrors[`discount.rules.${rule.id}.discountValue`]
+                  }
                   value={String(
                     pricingState.discountType === DiscountMethod.PERCENTAGE_OFF
                       ? rule.discountValue
-                      : centsToAmount(rule.discountValue),
+                      : centsToAmount(rule.discountValue)
                   )}
                   onInput={(e) => {
                     const numValue =

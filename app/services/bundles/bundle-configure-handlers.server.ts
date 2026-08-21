@@ -14,7 +14,6 @@ import { AppLogger } from "../../lib/logger";
 import db from "../../db.server";
 import { ThemeTemplateService } from "../theme-template.server";
 import { BundleStatus } from "../../constants/bundle";
-import { SHOPIFY_REST_API_VERSION } from "../../constants/api";
 import { buildBundleProductDescriptionHtml } from "../../lib/bundle-product-description.server";
 
 // Re-export so route handlers can import it from this barrel file.
@@ -64,7 +63,7 @@ export const safeJsonParse = (value: any, defaultValue: any = []) => {
   if (typeof value === "string") {
     try {
       return JSON.parse(value);
-    } catch (error) {
+    } catch (error: any) {
       AppLogger.error("JSON parse failed", {
         component: 'bundle-config',
         operation: 'json-parse'
@@ -181,7 +180,7 @@ export async function handleUpdateBundleProduct(admin: ShopifyAdmin, session: Se
       message: "Product details updated successfully"
     });
 
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.error("[PRODUCT_UPDATE] Error updating product:", {}, error as any);
     return json({
       success: false,
@@ -230,23 +229,26 @@ export async function handleGetPages(admin: ShopifyAdmin, _session: Session) {
 /**
  * Handle getting theme templates
  */
-export async function handleGetThemeTemplates(admin: ShopifyAdmin, session: Session) {
+export async function handleGetThemeTemplates(admin: ShopifyAdmin, _session?: Session) {
   try {
-    // Get the published theme directly
     const GET_PUBLISHED_THEME = `
-      query getPublishedTheme {
+      query getPublishedThemeTemplates {
         themes(first: 1, roles: [MAIN]) {
           nodes {
             id
             name
             role
+            files(first: 250) {
+              nodes {
+                filename
+              }
+            }
           }
         }
       }
     `;
 
     const themesResponse = await admin.graphql(GET_PUBLISHED_THEME);
-
     const themesData = await themesResponse.json();
 
     if (!themesData.data?.themes?.nodes) {
@@ -256,7 +258,6 @@ export async function handleGetThemeTemplates(admin: ShopifyAdmin, session: Sess
       });
     }
 
-    // Get the published theme (should be the first and only one)
     const publishedTheme = themesData.data.themes.nodes[0];
 
     if (!publishedTheme) {
@@ -267,58 +268,32 @@ export async function handleGetThemeTemplates(admin: ShopifyAdmin, session: Sess
       });
     }
 
+    const themeId = publishedTheme.id.replace("gid://shopify/OnlineStoreTheme/", "");
+    const fileNodes: Array<{ filename?: string }> = publishedTheme.files?.nodes ?? [];
 
-    // Extract theme ID (remove gid prefix if present)
-    const themeId = publishedTheme.id.replace('gid://shopify/OnlineStoreTheme/', '');
-
-    // Now fetch theme assets using REST API (since GraphQL doesn't expose theme assets)
-    const shop = session.shop;
-    const accessToken = session.accessToken;
-
-    const assetsUrl = `https://${shop}/admin/api/${SHOPIFY_REST_API_VERSION}/themes/${themeId}/assets.json`;
-
-    const assetsResponse = await fetch(assetsUrl, {
-      headers: {
-        'X-Shopify-Access-Token': accessToken ?? "",
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!assetsResponse.ok) {
-      const errorText = await assetsResponse.text();
-      AppLogger.error("Assets response error:", {
-        status: assetsResponse.status,
-        statusText: assetsResponse.statusText,
-        body: errorText
-      });
-      throw new Error(`Failed to fetch theme assets: ${assetsResponse.status} ${assetsResponse.statusText}`);
-    }
-
-    const assetsData = await assetsResponse.json();
-
-    // Filter for product template files returned by the merchant's published theme.
-    const templates = assetsData.assets
-      .filter((asset: any) => asset.key.startsWith('templates/') &&
-        (asset.key.endsWith('.liquid') || asset.key.endsWith('.json')))
-      .map((asset: any) => {
-        const templateName = asset.key.replace('templates/', '').replace(/\.(liquid|json)$/, '');
-        const isJson = asset.key.endsWith('.json');
+    const templates = fileNodes
+      .filter((file) => typeof file.filename === "string" && file.filename.startsWith("templates/") &&
+        (file.filename.endsWith(".liquid") || file.filename.endsWith(".json")))
+      .map((file) => {
+        const fullKey = file.filename!;
+        const templateName = fullKey.replace("templates/", "").replace(/\.(liquid|json)$/, "");
+        const isJson = fullKey.endsWith(".json");
 
         return {
           id: templateName,
           title: templateName,
           handle: templateName,
-          description: asset.key,
+          description: fullKey,
           recommended: templateName === "product",
           bundleRelevant: true,
-          fileType: isJson ? 'JSON' : 'Liquid',
-          fullKey: asset.key
+          fileType: isJson ? "JSON" : "Liquid",
+          fullKey,
         };
       })
-      .filter((template: any) => {
+      .filter((template) => {
         return template.handle === "product" || template.handle.startsWith("product.");
       })
-      .sort((a: any, b: any) => {
+      .sort((a, b) => {
         if (a.recommended && !b.recommended) return -1;
         if (!a.recommended && b.recommended) return 1;
         return a.title.localeCompare(b.title);
@@ -334,12 +309,12 @@ export async function handleGetThemeTemplates(admin: ShopifyAdmin, session: Sess
       bundleContainerCount: 0
     });
 
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.error("Error fetching theme templates:", {}, error as any);
     return json({
       success: false,
-      error: "Failed to fetch theme templates"
-    });
+      error: (error as Error).message || "Failed to fetch theme templates"
+    }, { status: 500 });
   }
 }
 
@@ -479,7 +454,7 @@ export async function handleEnsureBundleTemplates(admin: ShopifyAdmin, session: 
       }
     });
 
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.error("[TEMPLATE_HANDLER] Error during template creation:", {}, error as any);
     return json({
       success: false,

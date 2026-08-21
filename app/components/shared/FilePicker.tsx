@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useId, useRef, useState, type ChangeEvent, type MouseEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type ChangeEvent,
+} from "react";
 import {
   useLazyGetUploadStoreFileStatusQuery,
   useLazyListStoreFilesQuery,
@@ -28,6 +35,7 @@ import {
 export function FilePicker({
   value,
   onChange,
+  disabled = false,
   label = "Choose background image",
   hint,
   uploadLabel = "Upload image",
@@ -42,8 +50,13 @@ export function FilePicker({
   autoOpen = false,
   onClose,
 }: FilePickerProps) {
-  const [open, setOpen] = useState(() => resolveFilePickerInitialOpen(autoOpen));
-  const previewActionsMenuId = `file-picker-preview-actions-${useId().replace(/:/g, "")}`;
+  const [open, setOpen] = useState(() =>
+    resolveFilePickerInitialOpen(autoOpen && !disabled)
+  );
+  const previewActionsMenuId = `file-picker-preview-actions-${useId().replace(
+    /:/g,
+    ""
+  )}`;
   const dialogRef = useRef<any>(null);
   const [files, setFiles] = useState<StoreFile[]>([]);
   const [search, setSearch] = useState("");
@@ -62,12 +75,17 @@ export function FilePicker({
 
   const [loadStoreFiles, filesQuery] = useLazyListStoreFilesQuery();
   const [uploadStoreFile, uploadResult] = useUploadStoreFileMutation();
-  const [loadUploadStatus, statusQuery] = useLazyGetUploadStoreFileStatusQuery();
+  const [loadUploadStatus, statusQuery] =
+    useLazyGetUploadStoreFileStatusQuery();
   const resetUploadMutationRef = useRef(uploadResult.reset);
   resetUploadMutationRef.current = uploadResult.reset;
 
   const filesLoading = filesQuery.isFetching;
   const isBlocked = uploadStatus === "uploading" || uploadStatus === "polling";
+
+  useEffect(() => {
+    if (disabled && open) setOpen(false);
+  }, [disabled, open]);
 
   useEffect(() => {
     if (open && files.length === 0) {
@@ -88,11 +106,16 @@ export function FilePicker({
   }, [filesQuery.data]);
 
   useEffect(() => {
-    if (!shouldApplyUploadMutationResult({
-      hasCurrentAttempt: hasCurrentUploadAttemptRef.current,
-      isSuccess: uploadResult.isSuccess,
-      isError: uploadResult.isError,
-    }) || !uploadResult.isSuccess || !uploadResult.data) return;
+    if (
+      !shouldApplyUploadMutationResult({
+        hasCurrentAttempt: hasCurrentUploadAttemptRef.current,
+        isSuccess: uploadResult.isSuccess,
+        isError: uploadResult.isError,
+      }) ||
+      !uploadResult.isSuccess ||
+      !uploadResult.data
+    )
+      return;
     const result = uploadResult.data;
     if (result.ok && result.fileId) {
       setPendingFileId(result.fileId);
@@ -108,11 +131,15 @@ export function FilePicker({
   }, [uploadResult.data, uploadResult.isError, uploadResult.isSuccess]);
 
   useEffect(() => {
-    if (!shouldApplyUploadMutationResult({
-      hasCurrentAttempt: hasCurrentUploadAttemptRef.current,
-      isSuccess: uploadResult.isSuccess,
-      isError: uploadResult.isError,
-    }) || !uploadResult.isError) return;
+    if (
+      !shouldApplyUploadMutationResult({
+        hasCurrentAttempt: hasCurrentUploadAttemptRef.current,
+        isSuccess: uploadResult.isSuccess,
+        isError: uploadResult.isError,
+      }) ||
+      !uploadResult.isError
+    )
+      return;
     setUploadStatus("error");
     setUploadError("Upload failed. Please try again.");
     setUploadFromTrigger(false);
@@ -137,7 +164,12 @@ export function FilePicker({
   }, [loadUploadStatus, pendingFileId, pollTrigger, uploadStatus]);
 
   useEffect(() => {
-    if (!statusQuery.isSuccess || !statusQuery.data || uploadStatus !== "polling") return;
+    if (
+      !statusQuery.isSuccess ||
+      !statusQuery.data ||
+      uploadStatus !== "polling"
+    )
+      return;
     const result = statusQuery.data;
 
     if (result.fileStatus === "READY" && result.file) {
@@ -168,7 +200,13 @@ export function FilePicker({
     }
 
     setPollTrigger((current) => current + 1);
-  }, [statusQuery.data, statusQuery.isSuccess, uploadStatus, uploadFromTrigger, onChange]);
+  }, [
+    statusQuery.data,
+    statusQuery.isSuccess,
+    uploadStatus,
+    uploadFromTrigger,
+    onChange,
+  ]);
 
   useEffect(() => {
     if (statusQuery.isError && uploadStatus === "polling") {
@@ -234,24 +272,26 @@ export function FilePicker({
   }, [open]);
 
   const handleOpen = useCallback(() => {
-    if (isBlocked) return;
+    if (disabled || isBlocked) return;
     setOpen(true);
     setSelectedUrl(null);
     setSearch("");
     resetUploadState();
-  }, [isBlocked, resetUploadState]);
+  }, [disabled, isBlocked, resetUploadState]);
 
   const handleSelect = useCallback(() => {
+    if (disabled) return;
     if (selectedUrl) onChange(selectedUrl);
     setOpen(false);
     setSelectedUrl(null);
     setSearch("");
     resetUploadState();
-  }, [selectedUrl, onChange, resetUploadState]);
+  }, [disabled, selectedUrl, onChange, resetUploadState]);
 
   const handleRemove = useCallback(() => {
+    if (disabled) return;
     onChange(null);
-  }, [onChange]);
+  }, [disabled, onChange]);
 
   const handleLoadMore = useCallback(() => {
     if (cursor) {
@@ -260,25 +300,27 @@ export function FilePicker({
   }, [cursor, loadStoreFiles]);
 
   const handleUploadClick = useCallback(() => {
+    if (disabled) return;
     setSizeError(null);
     setUploadError(null);
     fileInputRef.current?.click();
-  }, []);
+  }, [disabled]);
 
   const handleTriggerUpload = useCallback(
-    (event: MouseEvent) => {
+    (event: { stopPropagation: () => void }) => {
       event.stopPropagation();
-      if (isBlocked) return;
+      if (disabled || isBlocked) return;
       setUploadFromTrigger(true);
       setSizeError(null);
       setUploadError(null);
       fileInputRef.current?.click();
     },
-    [isBlocked],
+    [disabled, isBlocked]
   );
 
   const handleFileInputChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
+      if (disabled) return;
       const file = event.target.files?.[0];
       if (fileInputRef.current) fileInputRef.current.value = "";
 
@@ -310,23 +352,36 @@ export function FilePicker({
       form.append("file", file);
       void uploadStoreFile(form);
     },
-    [acceptedTypes, invalidTypeErrorMessage, maxUploadBytes, maxUploadErrorMessage, uploadStoreFile],
+    [
+      acceptedTypes,
+      disabled,
+      invalidTypeErrorMessage,
+      maxUploadBytes,
+      maxUploadErrorMessage,
+      uploadStoreFile,
+    ]
   );
 
   const filteredFiles = search
-    ? files.filter((file) => file.filename.toLowerCase().includes(search.toLowerCase()))
+    ? files.filter((file) =>
+        file.filename.toLowerCase().includes(search.toLowerCase())
+      )
     : files;
   const currentFilename = value ? filenameFromUrl(value) : null;
   const showProgressCircle =
-    uploadStatus === "uploading" || uploadStatus === "polling" || uploadStatus === "success";
-  const progressCircleStatus: "spinning" | "success" = uploadStatus === "success" ? "success" : "spinning";
+    uploadStatus === "uploading" ||
+    uploadStatus === "polling" ||
+    uploadStatus === "success";
+  const progressCircleStatus: "spinning" | "success" =
+    uploadStatus === "success" ? "success" : "spinning";
   const progressLabel =
     uploadStatus === "uploading"
       ? "Uploading…"
       : uploadStatus === "polling"
-        ? "Processing…"
-        : "Upload complete!";
-  const progressTone: "subdued" | "success" = uploadStatus === "success" ? "success" : "subdued";
+      ? "Processing…"
+      : "Upload complete!";
+  const progressTone: "subdued" | "success" =
+    uploadStatus === "success" ? "success" : "subdued";
   const triggerIsUploading = uploadFromTrigger && isBlocked;
 
   return (
@@ -345,17 +400,14 @@ export function FilePicker({
           previewActionsMenuId={previewActionsMenuId}
           triggerIsUploading={triggerIsUploading}
           uploadStatus={uploadStatus}
+          disabled={disabled}
           handleOpen={handleOpen}
           handleRemove={handleRemove}
           handleTriggerUpload={handleTriggerUpload}
         />
       )}
 
-      {!open && sizeError && (
-        <s-text tone="critical">
-          {sizeError}
-        </s-text>
-      )}
+      {!open && sizeError && <s-text tone="critical">{sizeError}</s-text>}
       {!open && uploadStatus === "error" && uploadError && (
         <s-banner
           heading="Upload failed"
@@ -370,6 +422,7 @@ export function FilePicker({
       <input
         ref={fileInputRef}
         type="file"
+        disabled={disabled}
         accept={acceptedTypes}
         style={{ display: "none" }}
         onChange={handleFileInputChange}

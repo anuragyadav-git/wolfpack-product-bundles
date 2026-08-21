@@ -17,7 +17,7 @@ export function ConfigureValidationSummary({
       border="base"
       borderRadius="base"
       padding="base"
-      background="critical-subdued"
+      background={"critical-subdued" as any}
     >
       <s-stack direction="block" gap="small">
         <s-text tone="critical">

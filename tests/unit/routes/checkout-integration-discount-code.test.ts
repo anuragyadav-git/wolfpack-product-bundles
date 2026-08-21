@@ -43,7 +43,7 @@ function makeSignedRequest(body: Record<string, unknown>, shop = "test-shop.mysh
   });
 
   const message = [...params.entries()]
-    .map(([key, value]) => `${key}=${value}`)
+    .map(([key, value]: any) => `${key}=${value}`)
     .sort()
     .join("");
 

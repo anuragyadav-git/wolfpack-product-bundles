@@ -1,6 +1,6 @@
 import { renderSelectedProductSlots } from '../../shared/components/selected-product-slots.js';
 
-function parseBoolean(value) {
+function parseBoolean(value: string) {
   if (typeof value === 'boolean') return value;
   if (typeof value !== 'string') return undefined;
   const normalized = value.trim().toLowerCase();
@@ -31,7 +31,7 @@ export const modalSlotTemplateMethods: Record<string, any> & ThisType<any> = {
     );
   },
 
-  _createModalSlotStepSection(step) {
+  _createModalSlotStepSection(step: any) {
     const section = document.createElement('div');
     const isVertical = this._usesVerticalModalSlotLayout();
 
@@ -56,11 +56,11 @@ export const modalSlotTemplateMethods: Record<string, any> & ThisType<any> = {
   },
 
   // Create an empty state card for a step (shown when no products selected)
-  createEmptyStateCard(step, stepIndex, instanceIndex = 0) {
+  createEmptyStateCard(step: any, stepIndex: number, instanceIndex = 0) {
     const stepBox = document.createElement('button');
     stepBox.type = 'button';
-    stepBox.dataset.stepIndex = stepIndex;
-    stepBox.dataset.cardIndex = instanceIndex;
+    stepBox.dataset.stepIndex = String(stepIndex);
+    stepBox.dataset.cardIndex = String(instanceIndex);
 
     stepBox.className = 'step-box bw-slot-card bw-slot-card--empty';
 
@@ -99,15 +99,15 @@ export const modalSlotTemplateMethods: Record<string, any> & ThisType<any> = {
     stepBox.appendChild(label);
 
     // Click handler to open modal
-    stepBox.addEventListener('click', () => {
+    stepBox.addEventListener('click', (event: any) => {
       this._modalSlotReplacementTarget = null;
-      this.openModal(stepIndex);
+      this.openModal(stepIndex, event.currentTarget);
     });
 
     return stepBox;
   },
 
-  _appendModalSlotEmptyCards(target, step, stepIndex, selectedCount = 0) {
+  _appendModalSlotEmptyCards(target: any, step: any, stepIndex: string|number, selectedCount = 0) {
     const controls = typeof this._getProductPageControls === 'function'
       ? this._getProductPageControls()
       : this.config?.controlsSettings?.activeControls
@@ -131,9 +131,8 @@ export const modalSlotTemplateMethods: Record<string, any> & ThisType<any> = {
     }
 
     const parsedRequired = Number.parseFloat(step?.conditionValue);
-    const rawRequired = Number.isFinite(parsedRequired) && parsedRequired >= 0
-      ? parsedRequired
-      : 0;
+    const hasRequiredCount = Number.isFinite(parsedRequired) && parsedRequired >= 0;
+    const rawRequired = hasRequiredCount ? parsedRequired : 1;
     const operator = String(step?.conditionOperator || '').toLowerCase();
     const requiredCount = ['greater_than', 'gt', '>'].includes(operator)
       ? rawRequired + 1
@@ -169,7 +168,7 @@ export const modalSlotTemplateMethods: Record<string, any> & ThisType<any> = {
     }
   },
 
-  _appendSlotIcon(iconWrapper) {
+  _appendSlotIcon(iconWrapper: any) {
     iconWrapper.innerHTML = `<svg width="28" height="28" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M20.202 3.06152V37.0082M37.1753 20.0348H3.22864" stroke="currentColor" stroke-width="5.09199" stroke-linecap="square" stroke-linejoin="round"/>
     </svg>`;

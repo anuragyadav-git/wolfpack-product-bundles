@@ -129,6 +129,19 @@
       "finishSetup": "Finish setup",
       "viewDetails": "Show status",
       "activate": "Enable",
+      "enableModal": {
+        "heading": "Activez Wolfpack Bundle sur votre boutique",
+        "description": "Activez l’intégration d’application Wolfpack Bundle dans l’éditeur de thème, cliquez sur Enregistrer, puis revenez ici.",
+        "mediaLabel": "Tutoriel montrant comment activer l’intégration Wolfpack Bundle et enregistrer le thème",
+        "openThemeEditor": "Ouvrir l’éditeur de thème",
+        "checking": "Vérification de votre thème…",
+        "enabled": "Intégration d’application activée",
+        "notDetected": "Intégration d’application non détectée",
+        "openThemeEditorAgain": "Rouvrir l’éditeur de thème",
+        "chatWithSupport": "Contacter l’assistance",
+        "done": "Terminé",
+        "cancel": "Annuler"
+      },
       "ready": "Ready",
       "checking": "Checking setup",
       "actionNeeded": "Action needed",
@@ -258,7 +271,11 @@
       },
       "previewOnly": "Preview only",
       "loading": "Loading preview",
-      "notApplicable": "This setting is not used by the selected template."
+      "notApplicable": "This setting is not used by the selected template.",
+      "feedback": {
+        "tierHit": "Palier atteint",
+        "complete": "Tous les paliers atteints"
+      }
     }
   },
   "tooltips": {

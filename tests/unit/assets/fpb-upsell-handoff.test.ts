@@ -20,7 +20,7 @@ describe("FPB upsell handoff", () => {
   });
 
   it("selects the exact available variant in the first matching enabled paid step and never doubles defaults", () => {
-    const selected = [{ v1: 1 }, {}];
+    const selected: Array<Record<string, number>> = [{ v1: 1 }, {}];
     const steps = [
       { position: 2, enabled: true, isFreeGift: false },
       { position: 1, enabled: true, isFreeGift: false },

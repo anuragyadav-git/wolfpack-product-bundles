@@ -42,7 +42,7 @@ function makeSignedRequest(bundleId = "1") {
   });
 
   const message = [...params.entries()]
-    .map(([key, value]) => `${key}=${value}`)
+    .map(([key, value]: any) => `${key}=${value}`)
     .sort()
     .join("");
   params.set("signature", createHmac("sha256", "test_api_secret").update(message).digest("hex"));
@@ -302,7 +302,7 @@ describe("FPB app proxy page", () => {
     const paramsWithoutSignature = new URLSearchParams(url.searchParams);
     paramsWithoutSignature.delete("signature");
     const message = [...paramsWithoutSignature.entries()]
-      .map(([key, value]) => `${key}=${value}`)
+      .map(([key, value]: any) => `${key}=${value}`)
       .sort()
       .join("");
     url.searchParams.set("signature", createHmac("sha256", "test_api_secret").update(message).digest("hex"));

@@ -1,287 +1,341 @@
-import type React from "react";
+import { DisabledConfigurationRegion } from "../_shared/bundle-configure/DisabledConfigurationRegion";
 import { usePpbConfigureContext } from "./PpbConfigureContext";
 
+const TARGETS = [
+  { value: "all_products", label: "All products in bundle" },
+  { value: "specific_products", label: "Specific products" },
+  { value: "specific_collections", label: "Specific collections" },
+] as const;
+
 export function PpbBundleEmbedSection() {
-  const {
-    activeSection,
-    bundleEmbedAddBrowsedProduct,
-    bundleEmbedCollectionsSelectedData,
-    bundleEmbedDisplayOn,
-    bundleEmbedEnabled,
-    bundleEmbedSelectedProducts,
-    bundleEmbedSubTitle,
-    bundleEmbedTitle,
-    getVisibilityResourceId,
-    handlePlaceWidget,
-    markAsDirty,
-    openMultiLanguageModal,
-    openVisibilityCollectionPicker,
-    openVisibilityProductPicker,
-    productPageBundleStyles,
-    removeVisibilityCollectionTarget,
-    removeVisibilityProductTarget,
-    setBundleEmbedAddBrowsedProduct,
-    setBundleEmbedDisplayOn,
-    setBundleEmbedEnabled,
-    setBundleEmbedSubTitle,
-    setBundleEmbedTitle,
-    validationErrors = {},
-    clearValidationError,
-  } = usePpbConfigureContext();
+  const flow = usePpbConfigureContext();
+  if (flow.activeSection !== "bundle_embed") return null;
+
+  const disabled = !flow.bundleEmbedEnabled;
+  const clearTargets = () => {
+    flow.setBundleEmbedSelectedProducts([]);
+    flow.setBundleEmbedSpecificProductPages([]);
+    flow.setBundleEmbedCollectionsSelectedData([]);
+    flow.setBundleEmbedSpecificCollectionPages([]);
+  };
+  const changeTarget = (value: string) => {
+    if (value === flow.bundleEmbedDisplayOn) return;
+    clearTargets();
+    flow.setBundleEmbedDisplayOn(value);
+    flow.clearValidationError("embed.products");
+    flow.clearValidationError("embed.collections");
+    flow.markAsDirty();
+  };
 
   return (
-    <>
-      {activeSection === "bundle_embed" && (
-        <div data-tour-target="ppb-bundle-embed">
-          <div className={productPageBundleStyles.visibilityPanel}>
-            <div className={productPageBundleStyles.visibilityTitleSwitchRow}>
-              <div>
-                <h3 className={productPageBundleStyles.visibilityPanelTitle}>
-                  Embed Bundle Builder on Product Pages
-                </h3>
-                <p className={productPageBundleStyles.visibilityCardText}>
-                  Directly embed the Bundle Builder block on product pages so
-                  customers can curate bundles there.
-                </p>
-              </div>
-              <s-switch
-                checked={bundleEmbedEnabled || undefined}
-                onChange={(e) => {
-                  setBundleEmbedEnabled((e.target as HTMLInputElement).checked);
-                  markAsDirty();
-                }}
-              />
-            </div>
-            <div
-              style={{
-                opacity: bundleEmbedEnabled ? 1 : 0.4,
-                pointerEvents: bundleEmbedEnabled ? undefined : "none",
+    <div data-tour-target="ppb-bundle-embed">
+      <s-stack direction="block" gap="base">
+        <s-section>
+          <s-stack
+            direction="inline"
+            justifyContent="space-between"
+            alignItems="start"
+            gap="base"
+          >
+            <s-stack direction="inline" alignItems="start" gap="small">
+              <s-icon type="product" />
+              <s-stack direction="block" gap="small-100">
+                <s-heading>Embed Bundle Builder on Product Pages</s-heading>
+                <s-text color="subdued">
+                  Directly embed the Bundle Builder block on product pages to
+                  let customers curate their bundles there.
+                </s-text>
+              </s-stack>
+            </s-stack>
+            <s-switch
+              accessibilityLabel="Embed Bundle Builder on Product Pages"
+              checked={flow.bundleEmbedEnabled || undefined}
+              onChange={(event: Event) => {
+                flow.setBundleEmbedEnabled(
+                  (event.target as HTMLInputElement).checked
+                );
+                flow.markAsDirty();
               }}
-            >
-              <div className={productPageBundleStyles.visibilitySectionHeader}>
-                <span />
-                <span title="Multi Language">
-                  <s-button
-                    variant="tertiary"
-                    icon="language-translate"
-                    accessibilityLabel="Multi Language"
-                    onClick={() =>
-                      openMultiLanguageModal("Bundle Embed", [
-                        {
-                          key: "embedTitle",
-                          label: "Title",
-                          fallback: bundleEmbedTitle,
-                        },
-                        {
-                          key: "embedSubTitle",
-                          label: "Sub Title",
-                          fallback: bundleEmbedSubTitle,
-                          multiline: true,
-                        },
-                      ])
-                    }
-                  >
-                    Multi Language
-                  </s-button>
-                </span>
-              </div>
-              <div className={productPageBundleStyles.visibilityFieldStack}>
-                <s-text-field
+            />
+          </s-stack>
+        </s-section>
+
+        {flow.bundleEmbedEnabled && !flow.appEmbedEnabled && (
+          <s-banner tone="critical" heading="Enable the store App Embed">
+            <s-stack direction="block" gap="small">
+              <s-text>
+                Bundle Embed cannot be saved until the Wolfpack Bundle app embed
+                is active on the store theme.
+              </s-text>
+              <s-button
+                variant="primary"
+                icon="globe"
+                onClick={flow.openThemeEditorForAppEmbed}
+              >
+                Enable app embed
+              </s-button>
+            </s-stack>
+          </s-banner>
+        )}
+
+        <DisabledConfigurationRegion disabled={disabled}>
+          <s-stack direction="block" gap="base">
+            <s-section>
+              <s-stack direction="block" gap="base">
+                <s-stack
+                  direction="inline"
+                  alignItems="center"
+                  justifyContent="space-between"
+                  gap="small"
+                >
+                  <s-heading>Storefront content</s-heading>
+                  <s-stack direction="inline" alignItems="center" gap="small">
+                    {disabled && <s-badge tone="neutral">Disabled</s-badge>}
+                    <s-button
+                      variant="secondary"
+                      icon="globe"
+                      disabled={disabled || undefined}
+                      onClick={() =>
+                        flow.openMultiLanguageModal(
+                          "Bundle Embed",
+                          [
+                            {
+                              key: "title",
+                              label: "Title",
+                              fallback: flow.bundleEmbedTitle,
+                            },
+                            {
+                              key: "subTitle",
+                              label: "Sub Title",
+                              fallback: flow.bundleEmbedSubTitle,
+                              multiline: true,
+                            },
+                          ],
+                          "embed"
+                        )
+                      }
+                    >
+                      Multi Language
+                    </s-button>
+                  </s-stack>
+                </s-stack>
+                <s-grid
+                  gridTemplateColumns="@container ppb-embed-copy (inline-size > 680px) minmax(0, 1fr) minmax(0, 1fr), 1fr"
+                  gap="base"
+                >
+                  <s-text-field
                     id="configure-embed-title"
                     label="Title"
-                    value={bundleEmbedTitle}
+                    value={flow.bundleEmbedTitle}
                     required
-                    disabled={!bundleEmbedEnabled || undefined}
-                    error={validationErrors["embed.title"]}
-                    onInput={(e: any) => {
-                      setBundleEmbedTitle(e.target.value);
-                      markAsDirty();
-                      clearValidationError("embed.title");
+                    disabled={disabled || undefined}
+                    error={flow.validationErrors["embed.title"]}
+                    onInput={(event: Event) => {
+                      flow.setBundleEmbedTitle(
+                        (event.target as HTMLInputElement).value
+                      );
+                      flow.clearValidationError("embed.title");
+                      flow.markAsDirty();
                     }}
-                />
-                <s-text-field
+                  />
+                  <s-text-field
                     label="Sub Title"
-                    value={bundleEmbedSubTitle}
-                    disabled={!bundleEmbedEnabled || undefined}
-                    onInput={(e: any) => {
-                      setBundleEmbedSubTitle(e.target.value);
-                      markAsDirty();
+                    value={flow.bundleEmbedSubTitle}
+                    disabled={disabled || undefined}
+                    onInput={(event: Event) => {
+                      flow.setBundleEmbedSubTitle(
+                        (event.target as HTMLInputElement).value
+                      );
+                      flow.markAsDirty();
                     }}
-                />
-              </div>
-              <div className={productPageBundleStyles.visibilityPanelSection}>
-                <h4 className={productPageBundleStyles.visibilitySectionTitle}>
-                  Display Bundle on
-                </h4>
-                <div
-                  className={productPageBundleStyles.visibilityTargetOptions}
+                  />
+                </s-grid>
+              </s-stack>
+            </s-section>
+
+            <s-section>
+              <s-stack direction="block" gap="base">
+                <s-heading>Display Bundle on</s-heading>
+                <s-choice-list
+                  label="Product-page targeting"
+                  labelAccessibilityVisibility="exclusive"
+                  name="ppbEmbedDisplayOn"
+                  values={[flow.bundleEmbedDisplayOn]}
+                  disabled={disabled || undefined}
+                  onChange={(event: Event) => {
+                    const value = (
+                      event.target as HTMLElement & { values?: string[] }
+                    ).values?.[0];
+                    if (
+                      value &&
+                      TARGETS.some((target) => target.value === value)
+                    )
+                      changeTarget(value);
+                  }}
                 >
-                  {[
-                    { value: "all_products", label: "All products in bundle" },
-                    { value: "specific_products", label: "Specific products" },
-                    {
-                      value: "specific_collections",
-                      label: "Specific collections",
-                    },
-                  ].map(({ value, label }) => (
-                    <label
-                      key={value}
-                      className={productPageBundleStyles.visibilityRadioLabel}
-                    >
-                      <input
-                        type="radio"
-                        name="embedDisplayOn"
-                        value={value}
-                        checked={bundleEmbedDisplayOn === value}
-                        onChange={() => {
-                          setBundleEmbedDisplayOn(value);
-                          markAsDirty();
-                        }}
-                      />
-                      <span>{label}</span>
-                    </label>
+                  {TARGETS.map((target) => (
+                    <s-choice key={target.value} value={target.value}>
+                      {target.label}
+                    </s-choice>
                   ))}
-                </div>
-                {bundleEmbedDisplayOn === "specific_products" && (
-                  <div
-                    className={productPageBundleStyles.visibilityTargetPicker}
-                  >
-                    <button
-                      type="button"
-                      className={
-                        productPageBundleStyles.visibilitySecondaryAction
-                      }
+                </s-choice-list>
+
+                {flow.bundleEmbedDisplayOn === "specific_products" && (
+                  <s-stack direction="block" gap="small">
+                    <s-button
+                      variant="secondary"
+                      icon="product"
+                      disabled={disabled || undefined}
                       onClick={async () => {
-                        await openVisibilityProductPicker("embed");
-                        clearValidationError("embed.products");
+                        await flow.openVisibilityProductPicker("embed");
+                        flow.clearValidationError("embed.products");
                       }}
                     >
                       Select products
-                    </button>
-                    <div
-                      className={
-                        productPageBundleStyles.visibilitySelectionList
-                      }
-                    >
-                      {bundleEmbedSelectedProducts.map(
-                        (product: any, index) => (
-                          <div
-                            key={getVisibilityResourceId(product) ?? index}
-                            className={
-                              productPageBundleStyles.visibilitySelectionItem
-                            }
+                    </s-button>
+                    {flow.bundleEmbedSelectedProducts.map(
+                      (product: any, index: number) => (
+                        <s-box
+                          key={flow.getVisibilityResourceId(product) ?? index}
+                          padding="small"
+                          background="subdued"
+                          borderRadius="base"
+                        >
+                          <s-stack
+                            direction="inline"
+                            alignItems="center"
+                            justifyContent="space-between"
+                            gap="small"
                           >
-                            <span>{product.title ?? "Untitled product"}</span>
-                            <button
-                              type="button"
+                            <s-text>
+                              {product.title ?? "Untitled product"}
+                            </s-text>
+                            <s-button
+                              variant="tertiary"
+                              icon="delete"
+                              disabled={disabled || undefined}
+                              accessibilityLabel={`Remove ${
+                                product.title ?? "product"
+                              }`}
                               onClick={() =>
-                                removeVisibilityProductTarget("embed", index)
+                                flow.removeVisibilityProductTarget(
+                                  "embed",
+                                  index
+                                )
                               }
-                            >
-                              Remove
-                            </button>
-                          </div>
-                        ),
-                      )}
-                    </div>
-                    {validationErrors["embed.products"] && (
+                            />
+                          </s-stack>
+                        </s-box>
+                      )
+                    )}
+                    {flow.validationErrors["embed.products"] && (
                       <s-text id="configure-embed-products" tone="critical">
-                        {validationErrors["embed.products"]}
+                        {flow.validationErrors["embed.products"]}
                       </s-text>
                     )}
-                  </div>
+                  </s-stack>
                 )}
-                {bundleEmbedDisplayOn === "specific_collections" && (
-                  <div
-                    className={productPageBundleStyles.visibilityTargetPicker}
-                  >
-                    <button
-                      type="button"
-                      className={
-                        productPageBundleStyles.visibilitySecondaryAction
-                      }
+
+                {flow.bundleEmbedDisplayOn === "specific_collections" && (
+                  <s-stack direction="block" gap="small">
+                    <s-button
+                      variant="secondary"
+                      icon="product"
+                      disabled={disabled || undefined}
                       onClick={async () => {
-                        await openVisibilityCollectionPicker("embed");
-                        clearValidationError("embed.collections");
+                        await flow.openVisibilityCollectionPicker("embed");
+                        flow.clearValidationError("embed.collections");
                       }}
                     >
                       Select collections
-                    </button>
-                    <div
-                      className={
-                        productPageBundleStyles.visibilitySelectionList
-                      }
-                    >
-                      {bundleEmbedCollectionsSelectedData.map(
-                        (collection: any, index) => (
-                          <div
-                            key={getVisibilityResourceId(collection) ?? index}
-                            className={
-                              productPageBundleStyles.visibilitySelectionItem
-                            }
+                    </s-button>
+                    {flow.bundleEmbedCollectionsSelectedData.map(
+                      (collection: any, index: number) => (
+                        <s-box
+                          key={
+                            flow.getVisibilityResourceId(collection) ?? index
+                          }
+                          padding="small"
+                          background="subdued"
+                          borderRadius="base"
+                        >
+                          <s-stack
+                            direction="inline"
+                            alignItems="center"
+                            justifyContent="space-between"
+                            gap="small"
                           >
-                            <span>
+                            <s-text>
                               {collection.title ?? "Untitled collection"}
-                            </span>
-                            <button
-                              type="button"
+                            </s-text>
+                            <s-button
+                              variant="tertiary"
+                              icon="delete"
+                              disabled={disabled || undefined}
+                              accessibilityLabel={`Remove ${
+                                collection.title ?? "collection"
+                              }`}
                               onClick={() =>
-                                removeVisibilityCollectionTarget("embed", index)
+                                flow.removeVisibilityCollectionTarget(
+                                  "embed",
+                                  index
+                                )
                               }
-                            >
-                              Remove
-                            </button>
-                          </div>
-                        ),
-                      )}
-                    </div>
-                    {validationErrors["embed.collections"] && (
+                            />
+                          </s-stack>
+                        </s-box>
+                      )
+                    )}
+                    {flow.validationErrors["embed.collections"] && (
                       <s-text id="configure-embed-collections" tone="critical">
-                        {validationErrors["embed.collections"]}
+                        {flow.validationErrors["embed.collections"]}
                       </s-text>
                     )}
-                  </div>
+                  </s-stack>
                 )}
-              </div>
-              <label
-                className={productPageBundleStyles.visibilityCheckboxLabel}
-              >
-                <input
-                  type="checkbox"
-                  checked={bundleEmbedAddBrowsedProduct}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    setBundleEmbedAddBrowsedProduct(e.target.checked);
-                    markAsDirty();
+
+                <s-checkbox
+                  label="Add browsed product to bundle"
+                  checked={flow.bundleEmbedAddBrowsedProduct || undefined}
+                  disabled={disabled || undefined}
+                  onChange={(event: Event) => {
+                    flow.setBundleEmbedAddBrowsedProduct(
+                      (event.target as HTMLInputElement).checked
+                    );
+                    flow.markAsDirty();
                   }}
                 />
-                <span>Add browsed product to bundle</span>
-              </label>
-            </div>
-          </div>
-          <div className={productPageBundleStyles.visibilityPlacementCard}>
-            <div>
-              <h4 className={productPageBundleStyles.visibilitySectionTitle}>
-                Put the Bundle Builder at a custom location
-              </h4>
-              <p className={productPageBundleStyles.visibilityCardText}>
-                By default, the bundle builder is added below the Buy Button.
-                You can move it to a custom spot on the product page if you
-                prefer.
-              </p>
-              <p className={productPageBundleStyles.visibilityCardText}>
-                Place app block on the theme
-              </p>
-            </div>
-            <button
-              type="button"
-              className={productPageBundleStyles.visibilityPrimaryAction}
-              onClick={handlePlaceWidget}
-            >
-              Place Block
-            </button>
-          </div>
-        </div>
-      )}
-    </>
+              </s-stack>
+            </s-section>
+
+            <s-section>
+              <s-stack
+                direction="inline"
+                alignItems="center"
+                justifyContent="space-between"
+                gap="base"
+              >
+                <s-stack direction="inline" alignItems="start" gap="small">
+                  <s-icon type="globe" />
+                  <s-stack direction="block" gap="small-100">
+                    <s-heading>Place app block on the theme</s-heading>
+                    <s-text color="subdued">
+                      Put the Bundle Builder at a custom product-page location.
+                    </s-text>
+                  </s-stack>
+                </s-stack>
+                <s-button
+                  variant="primary"
+                  disabled={disabled || undefined}
+                  onClick={flow.handlePlaceWidget}
+                >
+                  Place Block
+                </s-button>
+              </s-stack>
+            </s-section>
+          </s-stack>
+        </DisabledConfigurationRegion>
+      </s-stack>
+    </div>
   );
 }

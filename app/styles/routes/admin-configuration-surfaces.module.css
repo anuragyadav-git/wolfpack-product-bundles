@@ -334,6 +334,19 @@
   margin-top: 18px;
 }
 
+.languageLocaleRail {
+  min-width: 0;
+}
+
+.languageDesktopPanelNav {
+  display: grid;
+  gap: 4px;
+}
+
+.languageMobilePanelRail {
+  display: none;
+}
+
 .languageChip {
   border: 1px solid #dce4d6;
   border-radius: 999px;
@@ -1691,6 +1704,16 @@
     border-left: 0;
     padding-top: 16px;
     padding-left: 0;
+  }
+
+  .languageDesktopPanelNav {
+    display: none;
+  }
+
+  .languageMobilePanelRail {
+    display: block;
+    min-width: 0;
+    margin-top: 4px;
   }
 
   .responsiveSectionDisclosure {

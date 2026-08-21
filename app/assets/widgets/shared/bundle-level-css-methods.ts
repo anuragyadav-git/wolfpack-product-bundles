@@ -1,5 +1,5 @@
 export const bundleLevelCssMethods: Record<string, any> & ThisType<any> = {
-  getBundleLevelCssStyleId(bundleId) {
+  getBundleLevelCssStyleId(bundleId: any) {
     const safeId = String(bundleId || 'unknown').replace(/[^a-zA-Z0-9_-]/g, '-');
     return `wpb-bundle-level-css-${safeId}`;
   },
@@ -10,7 +10,7 @@ export const bundleLevelCssMethods: Record<string, any> & ThisType<any> = {
       .forEach((style) => style.remove());
   },
 
-  applyBundleLevelCss(bundle) {
+  applyBundleLevelCss(bundle: any) {
     this.removeExistingBundleLevelCss();
 
     const css = typeof bundle?.bundleLevelCss === 'string'

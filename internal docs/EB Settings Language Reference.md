@@ -5,7 +5,7 @@ title: EB Settings Language Reference
 type: reference
 status: active
 summary: Documents EB language settings evidence and the WPB storefront language-runtime contract.
-last_audited: 2026-08-13
+last_audited: 2026-08-21
 owners:
   - engineering
 domains:
@@ -137,14 +137,11 @@ Shared Cart & Checkout has 3 fields:
 - `bundleOriginalPriceLabel` -> original price line label, default `Retail Price`
 - `bundleDiscountDisplayLabel` -> savings line label, default `You Save`
 
-Landing Page / FPB (`en`) has 135 leaf text fields across these roots:
+Landing Page / FPB (`en`) stores text fields across these roots:
 
 - `landingPage`
 - `navigationSteps`
 - `productPage`
-- `giftBoxPage`
-- `videoMessage`
-- `personalizePage`
 - `reviewPage`
 - `discountRules`
 - `sortBy`
@@ -190,6 +187,25 @@ The raw `saveLanguage/read` document uses double braces. In the observed FPB act
 
 WPB should persist one EB-shaped language document in `DesignSettings.generalSettings.settingsLanguage` for both `full_page` and `product_page`.
 
+The Admin supports the 39 currently observed locale codes. Locale membership is
+layout-specific in the persisted FPB and PPB roots, while shared labels use the
+same configured locale set. English is mandatory; removing another locale
+deletes it from the FPB, PPB, and shared roots. Switching layouts or disabling
+multilanguage editing resets the selected editor locale to English without
+discarding saved locale documents.
+
+Adding a locale seeds locale-specific translated copy immediately. On
+2026-08-21, adding French changed the Landing Page product-card button default
+from the English copy to `Ajouter au coffret` before save. WPB therefore ships
+static generated presets for every supported locale; they seed editable copy at
+locale creation time and avoid a storefront translation dependency. Copying
+English into a new locale is not complete parity.
+
+Agent does not implement EB's customer gift-message, video-message, or
+personalization workflow. Those no-op roots and the hidden personalization-cost
+label are intentionally excluded from both the Admin surface and persisted
+language document.
+
 The storefront should receive a single app-proxy JSON response with:
 
 - `languageMode`
@@ -197,5 +213,11 @@ The storefront should receive a single app-proxy JSON response with:
 - active FPB locale object
 - PPB `customTextSettings`
 - shared cart labels
+
+In MULTIPLE mode, the storefront resolves a requested locale by exact
+case-insensitive match, then configured base-language match, then English. In
+SINGLE mode it always resolves English. The active shared labels are carried in
+`_bundle_display_properties` so the Cart Transform and checkout surfaces retain
+the shopper's locale.
 
 Widgets should consume this runtime data before rendering text. FPB should resolve Settings Language before per-bundle text fallback. PPB should use separate keys for product-card add text and bundle add-to-cart text because EB controls them independently.

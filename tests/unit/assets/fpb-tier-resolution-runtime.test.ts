@@ -18,3 +18,4 @@ describe('FPB runtime tier resolution', () => {
     expect(resolveTierConfig([], liquidTiers)).toEqual([]);
   });
 });
+export {};

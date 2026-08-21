@@ -1,0 +1,159 @@
+{
+  "schema_version": 1,
+  "job_id": "ppb-selected-slot-redesign-20260821",
+  "revision": 2,
+  "status": "approved",
+  "cases": [
+    {
+      "id": "long-product-title",
+      "data": {
+        "title": "A deliberately long product title that exceeds two visual lines",
+        "expected": "two-line clamp without hiding price or actions"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "short-product-title",
+      "data": {
+        "title": "Earrings",
+        "expected": "reserved geometry remains stable"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "high-price",
+      "data": {
+        "price": "$12,345.67",
+        "expected": "price remains inside identity owner"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "discounted-price",
+      "data": {
+        "price": "$829.00",
+        "compare_at": "$999.00",
+        "expected": "payable and compare-at remain readable"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "zero-discount",
+      "data": {
+        "price": "$829.00",
+        "compare_at": "$829.00",
+        "expected": "no redundant compare-at output"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "long-variant-name",
+      "data": {
+        "variant": "Sterling Silver / Extra Long Limited Edition",
+        "expected": "one bounded secondary line"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "multiple-variant-dimensions",
+      "data": {
+        "variant": "Blue / Large / Gift Wrap",
+        "expected": "existing resolved label remains bounded"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "missing-image",
+      "data": {
+        "image_url": null,
+        "expected": "fallback reserves media geometry"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "portrait-image",
+      "data": {
+        "aspect_ratio": "2:3",
+        "expected": "contained/cropped by existing product-media policy without distortion"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "landscape-image",
+      "data": {
+        "aspect_ratio": "3:2",
+        "expected": "contained/cropped by existing product-media policy without distortion"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "quantity-one",
+      "data": {
+        "quantity": 1,
+        "expected": "one selected instance; no slot quantity control"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "quantity-ten-plus",
+      "data": {
+        "quantity": 10,
+        "expected": "instances/capacity follow existing runtime; no duplicated quantity UI"
+      },
+      "required_in_browser_qa": false
+    },
+    {
+      "id": "zero-selected-products",
+      "data": {
+        "selected": 0,
+        "expected": "reachable empty geometry follows current capacity rules"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "many-selected-products",
+      "data": {
+        "selected": "configured maximum",
+        "expected": "responsive wrapping without horizontal overflow"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "long-translated-copy",
+      "data": {
+        "slot_label": "existing saved long localized label",
+        "expected": "clamp/wrap without fabricated fallback copy"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "wide-currency-format",
+      "data": {
+        "price": "CHF 12\u2019345.65",
+        "expected": "price group remains bounded"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "validation-error",
+      "data": {
+        "expected": "existing picker/widget feedback owns error; selected slot stays unchanged"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "slow-loading-state",
+      "data": {
+        "expected": "geometry-matched loading state without layout shift"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "restored-unavailable",
+      "data": {
+        "expected": "identity and removal remain available after hard reload"
+      },
+      "required_in_browser_qa": true
+    }
+  ]
+}

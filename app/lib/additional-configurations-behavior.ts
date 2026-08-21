@@ -1,20 +1,20 @@
 const CART_MESSAGING_CHILDREN = [
-  "Bundle Items",
-  "Original Bundle Price",
-  "Discount Display",
-  "Discount format",
+  "shared.cartMessaging.showBundleContains",
+  "shared.cartMessaging.showOriginalPrice",
+  "shared.cartMessaging.discountDisplay.isEnabled",
+  "shared.cartMessaging.discountDisplay.format",
 ] as const;
 
 const CART_INTEGRATION_FIELDS = [
-  "Cart Item Selectors",
-  "Cart Item Remove Parent Selectors",
-  "Cart Item Remove Selectors",
-  "Cart Item Quantity Button Selectors",
-  "Custom Cart Integration Script",
+  "landingPage.integrations.cartItemSelectors",
+  "landingPage.integrations.cartItemRemoveParentSelectors",
+  "landingPage.integrations.cartItemRemoveSelectors",
+  "landingPage.integrations.cartItemQuantityButtonSelectors",
+  "landingPage.integrations.customCartIntegrationScript",
 ] as const;
 
-function isChecked(values: Record<string, string>, label: string) {
-  return values[label] === "Checked";
+function isChecked(values: Record<string, string>, key: string) {
+  return values[key] === "Checked";
 }
 
 function hasField(values: Record<string, string>, label: string) {
@@ -26,49 +26,35 @@ export function getDisabledAdditionalConfigurationFields(
 ) {
   const disabled = new Set<string>();
 
-  if (hasField(values, "Cart Messaging") && !isChecked(values, "Cart Messaging")) {
-    CART_MESSAGING_CHILDREN.forEach((label) => disabled.add(label));
-  } else if (hasField(values, "Discount Display") && !isChecked(values, "Discount Display")) {
-    disabled.add("Discount format");
+  if (hasField(values, "shared.cartMessaging.isEnabled") && !isChecked(values, "shared.cartMessaging.isEnabled")) {
+    CART_MESSAGING_CHILDREN.forEach((key) => disabled.add(key));
+  } else if (hasField(values, "shared.cartMessaging.discountDisplay.isEnabled") && !isChecked(values, "shared.cartMessaging.discountDisplay.isEnabled")) {
+    disabled.add("shared.cartMessaging.discountDisplay.format");
   }
 
   if (
-    hasField(values, "Enable Custom Theme Integration Script")
-    && !isChecked(values, "Enable Custom Theme Integration Script")
+    hasField(values, "landingPage.integrations.customThemeScriptEnabled")
+    && !isChecked(values, "landingPage.integrations.customThemeScriptEnabled")
   ) {
-    disabled.add("Custom Theme Integration Script");
+    disabled.add("landingPage.integrations.customThemeIntegrationScript");
   }
 
-  if (hasField(values, "Enable Cart Integration") && !isChecked(values, "Enable Cart Integration")) {
-    CART_INTEGRATION_FIELDS.forEach((label) => disabled.add(label));
+  if (hasField(values, "landingPage.integrations.cartIntegrationEnabled") && !isChecked(values, "landingPage.integrations.cartIntegrationEnabled")) {
+    CART_INTEGRATION_FIELDS.forEach((key) => disabled.add(key));
   }
 
-  if (hasField(values, "Enable Judge Me Integration") && !isChecked(values, "Enable Judge Me Integration")) {
-    disabled.add("Public token");
+  if (hasField(values, "landingPage.integrations.judgeMeEnabled") && !isChecked(values, "landingPage.integrations.judgeMeEnabled")) {
+    disabled.add("landingPage.integrations.judgeMePublicToken");
   }
 
   return disabled;
 }
 
 export function isAdditionalConfigurationActionDisabled(
-  label: string,
+  key: string,
   values: Record<string, string>,
 ) {
-  return label === "Cart Messaging" && !isChecked(values, "Cart Messaging");
-}
-
-export function applyAdditionalConfigurationAction(
-  label: string,
-  values: Record<string, string>,
-) {
-  if (label !== "Update Image" || !values["Upload file"]) {
-    return values;
-  }
-
-  return {
-    ...values,
-    Logo: values["Upload file"],
-  };
+  return key === "shared.cartMessaging.isEnabled" && !isChecked(values, "shared.cartMessaging.isEnabled");
 }
 
 export function createDeferredSettingsNavigation() {

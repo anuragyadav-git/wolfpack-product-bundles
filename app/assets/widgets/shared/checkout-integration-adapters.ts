@@ -1,4 +1,4 @@
-const CHECKOUT_INTEGRATION_PROVIDERS = [
+const CHECKOUT_INTEGRATION_PROVIDERS: any[] = [
   {
     id: 'native',
     label: 'Shopify checkout',
@@ -39,6 +39,30 @@ const CHECKOUT_INTEGRATION_PROVIDERS = [
     timeoutMs: 1500,
     fallbackAction: 'checkout',
   },
+  {
+    id: 'zecpay', label: 'Zecpay', callbackMode: 'checkout_handoff', strategy: 'third_party_checkout',
+    requiresDiscountCode: true, requiresCartRefresh: false, timeoutMs: 1500, fallbackAction: 'checkout',
+  },
+  {
+    id: 'rebuy', label: 'Rebuy', callbackMode: 'side_cart', strategy: 'third_party_side_cart',
+    requiresDiscountCode: false, requiresCartRefresh: true, timeoutMs: 1500, fallbackAction: 'cart',
+  },
+  {
+    id: 'shiprocket_fastrr', label: 'Shiprocket / Fastrr', callbackMode: 'checkout_handoff', strategy: 'third_party_checkout',
+    requiresDiscountCode: true, requiresCartRefresh: false, timeoutMs: 1500, fallbackAction: 'checkout',
+  },
+  {
+    id: 'monster_cart', label: 'Monster Cart', callbackMode: 'side_cart', strategy: 'third_party_side_cart',
+    requiresDiscountCode: false, requiresCartRefresh: true, timeoutMs: 1500, fallbackAction: 'cart',
+  },
+  {
+    id: 'upcart', label: 'UpCart', callbackMode: 'side_cart', strategy: 'third_party_side_cart',
+    requiresDiscountCode: false, requiresCartRefresh: true, timeoutMs: 1500, fallbackAction: 'cart',
+  },
+  {
+    id: 'kaching_cart', label: 'Kaching Cart', callbackMode: 'side_cart', strategy: 'third_party_side_cart',
+    requiresDiscountCode: false, requiresCartRefresh: true, timeoutMs: 1500, fallbackAction: 'cart',
+  },
 ];
 
 const CHECKOUT_INTEGRATION_PROVIDER_IDS = CHECKOUT_INTEGRATION_PROVIDERS.map((provider) => provider.id);
@@ -54,7 +78,7 @@ const PROVIDERS_BY_ID = new Map(
 );
 
 const LABEL_TO_PROVIDER = new Map(
-  Object.entries(CHECKOUT_INTEGRATION_PROVIDER_LABELS).map(([id, label]) => [
+  Object.entries(CHECKOUT_INTEGRATION_PROVIDER_LABELS).map(([id, label]: any) => [
     String(label).toLowerCase(),
     id,
   ]),
@@ -64,7 +88,7 @@ export { CHECKOUT_INTEGRATION_PROVIDERS };
 export { CHECKOUT_INTEGRATION_PROVIDER_OPTIONS };
 export { CHECKOUT_INTEGRATION_PROVIDER_LABELS };
 
-export function normalizeCheckoutIntegrationProvider(value) {
+export function normalizeCheckoutIntegrationProvider(value: string) {
   if (typeof value !== 'string') return 'native';
   const normalized = value.trim().toLowerCase();
   if (!normalized) return 'native';
@@ -72,20 +96,20 @@ export function normalizeCheckoutIntegrationProvider(value) {
   return LABEL_TO_PROVIDER.get(normalized) ?? 'native';
 }
 
-export function getCheckoutIntegrationProvider(value) {
+export function getCheckoutIntegrationProvider(value: any) {
   return PROVIDERS_BY_ID.get(normalizeCheckoutIntegrationProvider(value))
     ?? CHECKOUT_INTEGRATION_PROVIDERS[0];
 }
 
-export function isDiscountCodeCheckoutIntegrationProvider(value) {
+export function isDiscountCodeCheckoutIntegrationProvider(value: any) {
   return getCheckoutIntegrationProvider(value).requiresDiscountCode;
 }
 
-export function isSupportedCheckoutIntegrationProvider(value) {
+export function isSupportedCheckoutIntegrationProvider(value: any) {
   return isDiscountCodeCheckoutIntegrationProvider(value);
 }
 
-function getCapability(providerId, runtimeWindow, options = {}) {
+function getCapability(providerId: string, runtimeWindow: any, options: any = {}) {
   const provider = getCheckoutIntegrationProvider(providerId);
   const shopifyActions = runtimeWindow?.Shopify?.actions;
 
@@ -137,17 +161,61 @@ function getCapability(providerId, runtimeWindow, options = {}) {
     };
   }
 
+  if (provider.id === 'zecpay') {
+    return {
+      available: typeof runtimeWindow?.zecpeCheckFunctionAndCall === 'function',
+      capability: 'zecpay_callback',
+      provider,
+    };
+  }
+  if (provider.id === 'shiprocket_fastrr') {
+    return {
+      available: typeof runtimeWindow?.shiprocketCheckoutBuyCartHandler === 'function',
+      capability: 'shiprocket_fastrr_callback',
+      provider,
+    };
+  }
+  if (provider.id === 'rebuy') {
+    return {
+      available: typeof runtimeWindow?.Cart?.getCart === 'function',
+      capability: 'rebuy_cart_callback',
+      provider,
+    };
+  }
+  if (provider.id === 'upcart') {
+    return {
+      available: typeof runtimeWindow?.upcartOpenCart === 'function',
+      capability: 'upcart_callback',
+      provider,
+    };
+  }
+  if (provider.id === 'kaching_cart') {
+    return {
+      available: typeof runtimeWindow?.kachingCartApi?.openCart === 'function'
+        && typeof runtimeWindow?.kachingCartApi?.refreshCart === 'function',
+      capability: 'kaching_cart_callback',
+      provider,
+    };
+  }
+  if (provider.id === 'monster_cart') {
+    return {
+      available: typeof options.openThemeCartDrawer === 'function',
+      capability: 'monster_cart_callback',
+      provider,
+    };
+  }
+
   return { available: false, capability: 'unknown', provider };
 }
 
-export function detectCheckoutIntegrationCapability(providerId, runtimeWindow, options = {}) {
+export function detectCheckoutIntegrationCapability(providerId: string, runtimeWindow: any, options: any = {}) {
   return getCapability(providerId, runtimeWindow, options);
 }
 
 export async function waitForCheckoutIntegrationCapability(
-  providerId,
-  runtimeWindow,
-  options = {},
+  providerId: string,
+  runtimeWindow: any,
+  options: any = {},
 ) {
   const provider = getCheckoutIntegrationProvider(providerId);
   const timeoutMs = options.timeoutMs ?? provider.timeoutMs;
@@ -165,7 +233,7 @@ export async function waitForCheckoutIntegrationCapability(
     : { ...capability, reason: 'capability-timeout' };
 }
 
-export function claimCheckoutIntegrationInvocation(state, lifecycleKey) {
+export function claimCheckoutIntegrationInvocation(state: Set<string>, lifecycleKey: string) {
   if (!state || typeof state.has !== 'function' || typeof state.add !== 'function') {
     return false;
   }
@@ -174,7 +242,7 @@ export function claimCheckoutIntegrationInvocation(state, lifecycleKey) {
   return true;
 }
 
-async function runProviderInvocation(provider, runtimeWindow, options, capability) {
+async function runProviderInvocation(provider: any, runtimeWindow: any, options: any, capability: string) {
   if (provider.id === 'native') {
     return true;
   }
@@ -205,20 +273,39 @@ async function runProviderInvocation(provider, runtimeWindow, options, capabilit
   if (capability === 'shopflo_callback') {
     return options.openShopfloCheckout();
   }
+  if (capability === 'zecpay_callback') {
+    return runtimeWindow.zecpeCheckFunctionAndCall('handleOcc');
+  }
+  if (capability === 'shiprocket_fastrr_callback') {
+    return runtimeWindow.shiprocketCheckoutBuyCartHandler();
+  }
+  if (capability === 'rebuy_cart_callback') {
+    return runtimeWindow.Cart.getCart();
+  }
+  if (capability === 'upcart_callback') {
+    return runtimeWindow.upcartOpenCart();
+  }
+  if (capability === 'kaching_cart_callback') {
+    await runtimeWindow.kachingCartApi.refreshCart();
+    return runtimeWindow.kachingCartApi.openCart();
+  }
+  if (capability === 'monster_cart_callback') {
+    return options.openThemeCartDrawer();
+  }
   return true;
 }
 
-function runProviderInvocationWithTimeout(invocationPromise, timeoutMs) {
-  if (timeoutMs <= 0) return invocationPromise;
+function runProviderInvocationWithTimeout(invocationPromise: Promise<any>, timeoutMs: number|undefined) {
+  if (timeoutMs === undefined || timeoutMs <= 0) return invocationPromise;
 
   return new Promise((resolve, reject) => {
     const timeoutId = setTimeout(() => resolve({ timedOut: true }), timeoutMs);
     invocationPromise.then(
-      (result) => {
+      (result: unknown) => {
         clearTimeout(timeoutId);
         resolve(result);
       },
-      (error) => {
+      (error: any) => {
         clearTimeout(timeoutId);
         reject(error);
       },
@@ -227,9 +314,9 @@ function runProviderInvocationWithTimeout(invocationPromise, timeoutMs) {
 }
 
 export async function invokeCheckoutIntegrationProvider(
-  providerId,
-  runtimeWindow,
-  options = {},
+  providerId: string,
+  runtimeWindow: any,
+  options: any = {},
 ) {
   const capability = getCapability(providerId, runtimeWindow, options);
   const provider = capability.provider;

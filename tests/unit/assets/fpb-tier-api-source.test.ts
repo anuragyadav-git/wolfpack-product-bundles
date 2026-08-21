@@ -172,3 +172,4 @@ describe('resolveTierConfig', () => {
     });
   });
 });
+export {};

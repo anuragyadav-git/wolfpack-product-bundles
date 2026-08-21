@@ -168,7 +168,7 @@ export class MetafieldValidationService {
           return true;
         }
 
-      } catch (parseError) {
+      } catch (parseError: any) {
         AppLogger.error('Error parsing shop metafield JSON', {
           component: 'validation',
           operation: 'validate-shop'
@@ -176,7 +176,7 @@ export class MetafieldValidationService {
         return false;
       }
 
-    } catch (error) {
+    } catch (error: any) {
       AppLogger.error('Error validating metafields', {
         component: 'validation',
         operation: 'validate-shop'
@@ -296,7 +296,7 @@ export class MetafieldValidationService {
 
       return true;
 
-    } catch (error) {
+    } catch (error: any) {
       AppLogger.error('Error validating product metafields', {
         component: 'validation',
         operation: 'validate-product'
@@ -383,7 +383,7 @@ export class MetafieldValidationService {
 
       return { validatedCount, cleanedCount };
 
-    } catch (error) {
+    } catch (error: any) {
       AppLogger.error('Error in bulk validation', {
         component: 'validation',
         operation: 'bulk-validate'
@@ -458,7 +458,7 @@ export class MetafieldValidationService {
 
       return audit;
 
-    } catch (error) {
+    } catch (error: any) {
       AppLogger.error('Error in consistency audit', {
         component: 'validation',
         operation: 'audit'

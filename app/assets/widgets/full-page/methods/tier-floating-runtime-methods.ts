@@ -1,7 +1,7 @@
 import { ToastManager } from '../../shared/toast-manager.js';
 import { buildStorefrontApiPath } from '../../../../config/storefront-proxy-routes.js';
 export const fullPageTierFloatingRuntimeMethods: Record<string, any> & ThisType<any> = {
-initTierPills(tiers) {
+initTierPills(tiers: any[]) {
   if (tiers.length < 2) return;
 
   const bar = document.createElement('div');
@@ -9,7 +9,7 @@ initTierPills(tiers) {
   bar.setAttribute('role', 'group');
   bar.setAttribute('aria-label', 'Bundle pricing tiers');
 
-  tiers.forEach((tier, i) => {
+  tiers.forEach((tier: any, i: number) => {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'bundle-tier-pill' + (i === 0 ? ' bundle-tier-pill--active' : '');
@@ -27,7 +27,7 @@ initTierPills(tiers) {
 /** Updates aria-pressed and active CSS class on all pills to match activeTierIndex. */
 updatePillActiveStates() {
   if (!this.elements.tierPillBar) return;
-  this.elements.tierPillBar.querySelectorAll('.bundle-tier-pill').forEach(pill => {
+  this.elements.tierPillBar.querySelectorAll('.bundle-tier-pill').forEach((pill: any)  => {
     const idx = parseInt(pill.dataset.tierIndex, 10);
     const active = idx === this.activeTierIndex;
     pill.classList.toggle('bundle-tier-pill--active', active);
@@ -36,7 +36,7 @@ updatePillActiveStates() {
 },
 
 /** Switches the active bundle tier — fetches new bundle data and re-renders the widget. */
-async switchTier(bundleId, tierIndex) {
+async switchTier(bundleId: any, tierIndex: number) {
   if (tierIndex === this.activeTierIndex) return;
 
   const pills = this.elements.tierPillBar
@@ -83,7 +83,7 @@ async switchTier(bundleId, tierIndex) {
 
     this.activeTierIndex = tierIndex;
     this.updatePillActiveStates();
-  } catch (err) {
+  } catch (err: any) {
     ToastManager.show('Failed to load tier: ' + err.message);
     // Restore previous active state styling
     this.updatePillActiveStates();
@@ -95,9 +95,9 @@ async switchTier(bundleId, tierIndex) {
   }
 },
 
-_mergeBundleSettings(settings) {
+_mergeBundleSettings(settings: any) {
   if (!settings || !this.selectedBundle) return;
-  const keys = [
+  const keys: any[] = [
     'promoBannerBgImage',
     'bundleBannerDesktopUrl', 'bundleBannerMobileUrl',
     'showStepTimeline', 'floatingBadgeEnabled', 'floatingBadgeText', 'tierConfig',
@@ -120,7 +120,7 @@ _initFloatingBadge() {
   badge.setAttribute('role', 'status');
   badge.innerHTML = `<span class="floating-promo-badge__text">${this._escapeHtml(text.trim())}</span><button class="floating-promo-badge__close" aria-label="Dismiss">&times;</button>`;
 
-  badge.querySelector('.floating-promo-badge__close').addEventListener('click', () => {
+  badge.querySelector('.floating-promo-badge__close')!.addEventListener('click', () => {
     sessionStorage.setItem(DISMISS_KEY, '1');
     badge.remove();
   });
@@ -128,19 +128,19 @@ _initFloatingBadge() {
   document.body.appendChild(badge);
 },
 
-_escapeHtml(str) {
-  return str.replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+_escapeHtml(str: string) {
+  return str.replace(/[&<>"']/g, (c: string) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c] || c));
 },
 
 attachEventListeners() {
   // Tier pill click handler
   if (this.elements.tierPillBar) {
-    this.elements.tierPillBar.addEventListener('click', e => {
+    this.elements.tierPillBar.addEventListener('click', (e: any)  => {
       const pill = e.target.closest('.bundle-tier-pill');
       if (!pill) return;
       this.switchTier(pill.dataset.bundleId, parseInt(pill.dataset.tierIndex, 10));
     });
-    this.elements.tierPillBar.addEventListener('keydown', e => {
+    this.elements.tierPillBar.addEventListener('keydown', (e: any)  => {
       if (e.key === 'Enter' || e.key === ' ') {
         const pill = e.target.closest('.bundle-tier-pill');
         if (!pill) return;
@@ -175,14 +175,14 @@ attachEventListeners() {
   }
 
   // Keyboard handlers
-  document.addEventListener('keydown', (e) => {
+  document.addEventListener('keydown', (e: any) => {
     if (!modal.hidden && e.key === 'Escape') {
       this.closeModal();
     }
   });
 },
 
-async navigateModal(direction) {
+async navigateModal(direction: number) {
   const newStepIndex = this.currentStepIndex + direction;
 
   if (direction < 0 && newStepIndex >= 0) {
@@ -252,7 +252,7 @@ showFallbackUI() {
   `;
 },
 
-showErrorUI(_error) {
+showErrorUI(_error: any) {
   this.container.innerHTML = `
     <div class="bundle-error">
       <h3>Bundle unavailable</h3>
@@ -267,9 +267,9 @@ showErrorUI(_error) {
  * Does NOT await — never blocks the render path.
  */
 
-_reportError(error) {
+_reportError(error: any) {
   try {
-    const payload = {
+    const payload: any = {
       message: error?.message ?? String(error),
       bundleId: this.config?.bundleId ?? null,
       bundleType: this.container?.dataset?.bundleType ?? null,
@@ -283,12 +283,12 @@ _reportError(error) {
       body: JSON.stringify(payload),
       keepalive: true,
     }).catch(() => { /* best-effort — ignore if proxy is also down */ });
-  } catch (_) {
+  } catch (_: any) {
     // Never throw from error reporting
   }
 },
 
-_resolveText(key, fallback) {
+_resolveText(key: string|number, fallback: any) {
   const locale = window.Shopify?.locale;
   if (locale && this.config?.textOverridesByLocale?.[locale]?.[key]) {
     return this.config.textOverridesByLocale[locale][key];
@@ -310,7 +310,7 @@ _recordView() {
       body: JSON.stringify({ shop }),
       keepalive: true,
     }).catch(() => { /* best-effort */ });
-  } catch (_) {
+  } catch (_: any) {
     // Never throw from analytics
   }
 },

@@ -1,9 +1,10 @@
 import {
-  THEME_EXTENSION_RESOURCES,
   type NormalizedThemeExtensionResource,
 } from "../../../lib/theme-extension-status";
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useBannerSessionState } from "../../../lib/banner-session-state";
+
+export const DASHBOARD_STOREFRONT_SETUP_BANNER_KEY = "dashboard_storefront_setup";
 
 type DashboardStatusGridProps = {
   resources: NormalizedThemeExtensionResource[];
@@ -11,6 +12,7 @@ type DashboardStatusGridProps = {
   appEmbedEnabled?: boolean;
   themeEditorUrl: string | null;
   onOpenThemeEditor: () => void;
+  enableActionRef?: { current: any };
 };
 
 const CORE_STORE_FRONT_RESOURCES = [
@@ -80,12 +82,7 @@ export function getStorefrontStatusRows(
 } {
   const resourceRows = resources.length > 0
     ? resources
-    : THEME_EXTENSION_RESOURCES.map((resource) => ({
-      ...resource,
-      status: "unavailable" as const,
-      enabled: false,
-      target: null,
-    }));
+    : [] as NormalizedThemeExtensionResource[];
 
   const coreResources = resourceRows.filter((resource) =>
     CORE_STORE_FRONT_RESOURCES.includes(resource.handle as (typeof CORE_STORE_FRONT_RESOURCES)[number]));
@@ -98,12 +95,13 @@ export function getStorefrontStatusRows(
 export function DashboardStatusGrid({
   error,
   appEmbedEnabled = false,
+  enableActionRef,
   onOpenThemeEditor,
   resources,
   themeEditorUrl,
 }: DashboardStatusGridProps) {
   const { t } = useTranslation();
-  const [dismissed, setDismissed] = useState(false);
+  const [dismissed, dismiss] = useBannerSessionState(DASHBOARD_STOREFRONT_SETUP_BANNER_KEY);
 
   if (dismissed) return null;
 
@@ -138,13 +136,14 @@ export function DashboardStatusGrid({
       heading={title}
       dismissible={true}
       hidden={false}
-      onDismiss={() => setDismissed(true)}
+      onDismiss={dismiss}
     >
       <s-box minBlockSize="28px">
         {!setupComplete ? (
           <s-stack direction="inline" justifyContent="space-between" alignItems="start" gap="base">
             <s-text>{summaryDescription}</s-text>
             <s-button
+              ref={enableActionRef}
               variant="tertiary"
               onClick={onOpenThemeEditor}
               disabled={!themeEditorUrl}

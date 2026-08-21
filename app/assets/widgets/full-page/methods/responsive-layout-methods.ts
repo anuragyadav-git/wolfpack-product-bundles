@@ -8,13 +8,13 @@ function getFpbPresetSummary() {
     : null;
 }
 
-function getFpbPresetContract(rawValue) {
+function getFpbPresetContract(rawValue: string) {
   const normalizedPreset = typeof rawValue === 'string' ? rawValue.trim().toUpperCase() : '';
   if (!normalizedPreset) return null;
 
-  const contracts = getFpbPresetSummary()?.fpb?.contracts;
+  const contracts = (getFpbPresetSummary() as any)?.fpb?.contracts;
   if (rawValue && contracts && typeof contracts === 'object') {
-    return Object.values(contracts).find((contract) => {
+    return Object.values<any>(contracts).find((contract: any) => {
       if (!contract || typeof contract !== 'object') return false;
       return contract.id === normalizedPreset
         || contract.presetId === normalizedPreset
@@ -29,7 +29,7 @@ function getFpbPresetContract(rawValue) {
   return null;
 }
 
-function isSupportedFpbPreset(rawValue) {
+function isSupportedFpbPreset(rawValue: string) {
   return getFpbPresetContract(rawValue) !== null;
 }
 
@@ -37,7 +37,7 @@ export function getSummaryPresentationMode({
   designPreset,
   layout,
   availableWidth,
-} = {}) {
+}: any = {}) {
   const preset = typeof designPreset === 'string'
     ? designPreset.trim().toUpperCase()
     : '';
@@ -133,14 +133,14 @@ async renderFullPageLayout() {
     this.hideLoadingOverlay();
     this.preloadNextStep();
     this._renderMobileSummaryTray();
-  } catch (error) {
+  } catch (error: any) {
     this.hideLoadingOverlay();
     productGridContainer.innerHTML = '<p class="error-message">Failed to load products. Please try again.</p>';
     this._renderMobileSummaryTray();
   }
 },
 
-_renderMobileSummaryTray({ preserveOpen = false } = {}) {
+_renderMobileSummaryTray({ preserveOpen = false }: any = {}) {
   const previousSheet = document.querySelector('.fpb-mobile-bottom-sheet');
   const wasCompactSummaryExpanded = preserveOpen
     && previousSheet?.classList.contains('fpb-mobile-summary-tray-expanded');

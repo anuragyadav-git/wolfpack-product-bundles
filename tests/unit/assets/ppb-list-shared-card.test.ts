@@ -114,7 +114,7 @@ describe('PPB List shared product cards', () => {
     expect(soldOutButton).toContain('Out of stock');
   });
 
-  it('honors disabled compare-at visibility for Product List rows', () => {
+  it('renders available compare-at pricing despite a stale disabled flag', () => {
     const target = new FakeTarget();
     const context = createContext({
       stepProductData: [[{
@@ -133,7 +133,7 @@ describe('PPB List shared product cards', () => {
 
     expect(target.innerHTML).toContain('Sale list product');
     expect(target.innerHTML).toContain('$12.99');
-    expect(target.innerHTML).not.toContain('$15.99');
+    expect(target.innerHTML).toContain('$15.99');
   });
 
   it('honors enabled compare-at visibility for Product List rows', () => {
@@ -232,3 +232,4 @@ describe('PPB List shared product cards', () => {
     expect(imageEl.src).toBe('https://cdn.shopify.com/new.jpg');
   });
 });
+export {};

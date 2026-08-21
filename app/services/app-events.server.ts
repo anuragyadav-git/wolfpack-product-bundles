@@ -164,7 +164,7 @@ export async function recordBusinessEvent(input: BusinessEventInput): Promise<un
     });
 
     return event;
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.error("Failed to record business event", {
       component: "app-events",
       shopId: input.shopDomain,
@@ -228,7 +228,7 @@ export async function emitShopifyAppEvent(input: ShopifyAppEventInput): Promise<
     }
 
     return { status: "failed", retryCount, error: truncateUtf8(lastError || "Retry limit reached", 512) };
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.warn("Shopify App Events delivery failed", { component: "app-events" }, error);
     return {
       status: "failed",
@@ -315,7 +315,7 @@ export async function ensureShopIdentity(admin: { graphql: (query: string) => Pr
     });
 
     return shopifyShopGid;
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.warn("Failed to ensure Shopify shop identity", {
       component: "app-events",
       shopId: shopDomain,
@@ -332,7 +332,7 @@ export async function getCachedShopifyShopGid(shopDomain: string): Promise<strin
     });
 
     return shop?.shopifyShopGid ?? null;
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.warn("Failed to load cached Shopify Shop GID", {
       component: "app-events",
       shopId: shopDomain,

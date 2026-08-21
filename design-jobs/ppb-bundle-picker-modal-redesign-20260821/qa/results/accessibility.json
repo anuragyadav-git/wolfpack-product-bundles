@@ -1,0 +1,6 @@
+{
+  "status": "passed",
+  "findings": [],
+  "scope": "PPB-owned picker and product-details sheets",
+  "evidence": ["lighthouse/mobile-report.json", "lighthouse/desktop-report.json"]
+}

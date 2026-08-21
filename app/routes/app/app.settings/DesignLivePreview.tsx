@@ -37,6 +37,10 @@ export type PreviewInteractionState = {
   quantities: Record<string, number>;
   progressStep: number;
   isMobileSummaryOpen: boolean;
+  discountFeedback: {
+    state: "tier" | "complete" | null;
+    replay: number;
+  };
 };
 
 export function createPreviewInteractionState(): PreviewInteractionState {
@@ -46,6 +50,7 @@ export function createPreviewInteractionState(): PreviewInteractionState {
     ),
     progressStep: 0,
     isMobileSummaryOpen: false,
+    discountFeedback: { state: null, replay: 0 },
   };
 }
 
@@ -67,6 +72,31 @@ export function advancePreviewProgress(state: PreviewInteractionState): PreviewI
 
 export function togglePreviewMobileSummary(state: PreviewInteractionState): PreviewInteractionState {
   return { ...state, isMobileSummaryOpen: !state.isMobileSummaryOpen };
+}
+
+export function triggerPreviewDiscountFeedback(
+  state: PreviewInteractionState,
+  feedbackState: "tier" | "complete",
+): PreviewInteractionState {
+  return {
+    ...state,
+    discountFeedback: {
+      state: feedbackState,
+      replay: state.discountFeedback.replay + 1,
+    },
+  };
+}
+
+export function clearPreviewDiscountFeedback(
+  state: PreviewInteractionState,
+  replay: number,
+): PreviewInteractionState {
+  if (state.discountFeedback.replay !== replay) return state;
+
+  return {
+    ...state,
+    discountFeedback: { state: null, replay },
+  };
 }
 
 type Translate = (key: string) => string;
@@ -346,7 +376,10 @@ function BundleSummary({
         </div>
       )}
       <footer>
-        <span><small>{t("settingsDcp.preview.surface.totalLabel")}</small><strong>{t("settingsDcp.preview.surface.totalPrice")}</strong></span>
+        <span
+          key={`discount-feedback-${interaction.discountFeedback.state}-${interaction.discountFeedback.replay}`}
+          data-preview-discount-feedback={interaction.discountFeedback.state || undefined}
+        ><small>{t("settingsDcp.preview.surface.totalLabel")}</small><strong>{t("settingsDcp.preview.surface.totalPrice")}</strong></span>
         <div>
           <button type="button" disabled>{t("settingsDcp.preview.surface.back")}</button>
           <button type="button" disabled>{t("settingsDcp.preview.surface.next")}</button>
@@ -603,6 +636,8 @@ export function DesignLivePreview({
   );
   const [fitScale, setFitScale] = useState(1);
   const [interaction, setInteraction] = useState(createPreviewInteractionState);
+  const discountFeedbackState = interaction.discountFeedback.state;
+  const discountFeedbackReplay = interaction.discountFeedback.replay;
   const availableTemplates = DESIGN_PREVIEW_TEMPLATES.filter(
     (template) => template.bundleType === previewState.bundleType,
   );
@@ -645,6 +680,16 @@ export function DesignLivePreview({
       surface: previewState.surface,
     });
   }, [onContextChange, previewState.bundleType, previewState.surface, previewState.templateKey]);
+
+  useEffect(() => {
+    if (!discountFeedbackState) return;
+
+    const timeout = window.setTimeout(
+      () => setInteraction((current) => clearPreviewDiscountFeedback(current, discountFeedbackReplay)),
+      discountFeedbackState === "complete" ? 1200 : 650,
+    );
+    return () => window.clearTimeout(timeout);
+  }, [discountFeedbackReplay, discountFeedbackState]);
 
   useEffect(() => {
     const stage = previewStageRef.current;
@@ -732,6 +777,18 @@ export function DesignLivePreview({
               );
             })}
           </div>
+          {previewState.surface === "cart-summary" ? (
+            <div className={styles.previewFeedbackActions}>
+              <s-button
+                variant="secondary"
+                onClick={() => setInteraction((current) => triggerPreviewDiscountFeedback(current, "tier"))}
+              >{t("settingsDcp.preview.feedback.tierHit")}</s-button>
+              <s-button
+                variant="secondary"
+                onClick={() => setInteraction((current) => triggerPreviewDiscountFeedback(current, "complete"))}
+              >{t("settingsDcp.preview.feedback.complete")}</s-button>
+            </div>
+          ) : null}
         </div>
       </div>
 

@@ -55,7 +55,6 @@ describe("recovered admin surfaces contract", () => {
       "Popups",
       "Toasts",
       "Addons",
-      "Messages",
     ]);
     expect(LANGUAGE_CONFIGURATION.productPageTemplateSections).toEqual([
       "Product Card",
@@ -84,7 +83,6 @@ describe("recovered admin surfaces contract", () => {
       "Configuration",
       "CSS & Scripts",
       "Integrations",
-      "Advanced",
     ]);
     expect(CONTROL_LAYOUTS[1]?.tabs.map((tab) => tab.title)).toEqual([
       "Configuration",
@@ -129,7 +127,6 @@ describe("recovered admin surfaces contract", () => {
     expect(productPageCss?.fields.map((field) => field.label)).toEqual([
       "Custom CSS for Mix And Match Bundles",
       "Execute Custom Script",
-      "Selectors",
       "Side cart selector",
       "Side cart section ID",
       "Cart page items selector",
@@ -139,7 +136,6 @@ describe("recovered admin surfaces contract", () => {
     ]);
     expect(productPageCss?.fields.map((field) => field.group)).toEqual([
       "CSS",
-      "JavaScript & Selectors",
       "JavaScript & Selectors",
       "JavaScript & Selectors",
       "JavaScript & Selectors",
@@ -194,6 +190,12 @@ describe("recovered admin surfaces contract", () => {
         "Theme cart drawer",
         "GoKwik",
         "Shopflo",
+        "Zecpay",
+        "Rebuy",
+        "Shiprocket / Fastrr",
+        "Monster Cart",
+        "UpCart",
+        "Kaching Cart",
       ],
     });
 
@@ -202,7 +204,6 @@ describe("recovered admin surfaces contract", () => {
       "CSS",
       "CSS",
       "CSS",
-      "JavaScript & Selectors",
       "JavaScript & Selectors",
       "JavaScript & Selectors",
       "JavaScript & Selectors",
@@ -222,41 +223,36 @@ describe("recovered admin surfaces contract", () => {
       "Integrate with Judge Me",
     ]);
 
-    const landingAdvanced = CONTROL_LAYOUTS[0]?.tabs.find((tab) => tab.title === "Advanced");
-    expect(landingAdvanced?.contentTitle).toBe("Video Player Page Settings");
-    expect(landingAdvanced?.contentDescription).toBe("Customize the video player page of the bundle video message");
-    expect(landingAdvanced?.fields.map((field) => field.label)).toEqual([
-      "Logo",
-      "Background Color",
-      "Upload file",
-      "Update Image",
-    ]);
-    expect(landingAdvanced?.fields.map((field) => field.group)).toEqual([
-      "Video Player Page Settings",
-      "Video Player Page Settings",
-      "Video Player Page Settings",
-      "Video Player Page Settings",
-    ]);
+    expect(CONTROL_LAYOUTS[0]?.tabs.some((tab) => tab.title === "Advanced")).toBe(false);
+    expect(CONTROL_LAYOUTS.flatMap((layout) => layout.tabs.flatMap((tab) => tab.fields))
+      .every((field) => typeof field.key === "string" && field.key.length > 0)).toBe(true);
   });
 
   it("keeps the recovered integrations inventory and action types", () => {
     expect(INTEGRATION_CATEGORIES.map((category) => category.title)).toEqual([
       "Reviews",
+      "Page Builders",
       "Checkout",
     ]);
-    expect(getIntegrationCardCount()).toBe(3);
+    expect(getIntegrationCardCount()).toBe(6);
 
     const cards = INTEGRATION_CATEGORIES.flatMap((category) => category.cards);
     expect(cards.map((card) => card.id)).toEqual([
       "judgeme",
+      "pagefly",
+      "gempages",
+      "shogun",
       "gokwik",
       "shopflo",
     ]);
-    expect(cards.filter((card) => card.ctaType === "guide")).toHaveLength(3);
+    expect(cards.filter((card) => card.ctaType === "guide")).toHaveLength(6);
     expect(cards.filter((card) => card.ctaType === "chat")).toHaveLength(0);
     expect(cards.every((card) => card.ctaLabel === "View Setup")).toBe(true);
     expect(cards.map((card) => card.id)).toEqual(expect.arrayContaining([
       "judgeme",
+      "pagefly",
+      "gempages",
+      "shogun",
       "gokwik",
       "shopflo",
     ]));
@@ -272,6 +268,12 @@ describe("recovered admin surfaces contract", () => {
       id: "shopflo",
       setupUrl: "https://wolfpackapps.com",
     }));
+    expect(cards.filter((card) => ["pagefly", "gempages", "shogun"].includes(card.id)))
+      .toEqual(expect.arrayContaining([
+        expect.objectContaining({ id: "pagefly", status: "Guided setup", setupUrl: "https://wolfpackapps.com" }),
+        expect.objectContaining({ id: "gempages", status: "Guided setup", setupUrl: "https://wolfpackapps.com" }),
+        expect.objectContaining({ id: "shogun", status: "Guided setup", setupUrl: "https://wolfpackapps.com" }),
+      ]));
     expect(new Set(cards.map((card) => card.status))).toEqual(new Set([
       "Supported",
       "Guided setup",

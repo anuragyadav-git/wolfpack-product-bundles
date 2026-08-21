@@ -1,6 +1,6 @@
 const PRODUCT_PAGE_SELECTION_STORAGE_VERSION = 2;
 
-function normalizeStepSelections(stepSelections) {
+function normalizeStepSelections(stepSelections: any) {
   if (
     !stepSelections ||
     typeof stepSelections !== "object" ||
@@ -10,7 +10,7 @@ function normalizeStepSelections(stepSelections) {
   }
 
   return Object.fromEntries(
-    Object.entries(stepSelections).flatMap(([selectionKey, rawQuantity]) => {
+    Object.entries(stepSelections).flatMap(([selectionKey, rawQuantity]: any) => {
       const quantity = Math.floor(Number(rawQuantity));
       if (!selectionKey || !Number.isFinite(quantity) || quantity <= 0)
         return [];
@@ -19,12 +19,12 @@ function normalizeStepSelections(stepSelections) {
   );
 }
 
-export function getProductPageSelectionStorageKey(bundle = {}) {
+export function getProductPageSelectionStorageKey(bundle: any = {}) {
   const bundleKey = bundle.offerId || bundle.id;
   return bundleKey ? `wpbPpb-cart-${String(bundleKey)}` : null;
 }
 
-export function normalizeProductPageSessionSelections(payload, stepCount) {
+export function normalizeProductPageSessionSelections(payload: any, stepCount: any) {
   if (
     !payload ||
     payload.v !== PRODUCT_PAGE_SELECTION_STORAGE_VERSION ||
@@ -40,9 +40,9 @@ export function normalizeProductPageSessionSelections(payload, stepCount) {
 }
 
 export function normalizeProductPageSessionSelectionCategories(
-  payload,
-  normalizedSelections,
-  stepCount,
+  payload: any,
+  normalizedSelections: {}[],
+  stepCount: any,
 ) {
   if (
     !payload
@@ -61,7 +61,7 @@ export function normalizeProductPageSessionSelectionCategories(
     }
 
     return Object.fromEntries(
-      Object.entries(categoryIndexes).flatMap(([selectionKey, rawCategoryIndex]) => {
+      Object.entries(categoryIndexes).flatMap(([selectionKey, rawCategoryIndex]: any) => {
         const categoryIndex = Number(rawCategoryIndex);
         if (
           !Object.prototype.hasOwnProperty.call(stepSelections, selectionKey)
@@ -77,8 +77,8 @@ export function normalizeProductPageSessionSelectionCategories(
 }
 
 export function createProductPageSessionSelectionPayload(
-  selectedProducts = [],
-  selectedProductCategoryIndexes = [],
+  selectedProducts: any[] = [],
+  selectedProductCategoryIndexes: any[] = [],
 ) {
   return {
     v: PRODUCT_PAGE_SELECTION_STORAGE_VERSION,
@@ -92,7 +92,7 @@ export function createProductPageSessionSelectionPayload(
           return {};
         }
         return Object.fromEntries(
-          Object.entries(categoryIndexes).flatMap(([selectionKey, rawCategoryIndex]) => {
+          Object.entries(categoryIndexes).flatMap(([selectionKey, rawCategoryIndex]: any) => {
             const categoryIndex = Number(rawCategoryIndex);
             if (
               !Object.prototype.hasOwnProperty.call(stepSelections, selectionKey)
@@ -113,7 +113,7 @@ export const ProductPageSelectionPersistenceMethods: Record<string, any> & ThisT
   _getProductPageSelectionStorage() {
     try {
       return window.sessionStorage;
-    } catch (_error) {
+    } catch (_error: any) {
       return null;
     }
   },
@@ -123,8 +123,8 @@ export const ProductPageSelectionPersistenceMethods: Record<string, any> & ThisT
   },
 
   _restoreSessionSelections() {
-    let restoredSelections = null;
-    let parsedPayload = null;
+    let restoredSelections: any = null;
+    let parsedPayload: any = null;
 
     try {
       const storage = this._getProductPageSelectionStorage();
@@ -138,7 +138,7 @@ export const ProductPageSelectionPersistenceMethods: Record<string, any> & ThisT
           this.selectedBundle?.steps?.length
         );
       }
-    } catch (_error) {
+    } catch (_error: any) {
       restoredSelections = null;
     }
 
@@ -149,13 +149,13 @@ export const ProductPageSelectionPersistenceMethods: Record<string, any> & ThisT
         this.selectedBundle?.steps?.length,
       ) || restoredSelections.map(() => ({}));
       this.selectedProducts = restoredSelections.map(
-        (stepSelections, stepIndex) => ({
+        (stepSelections: any, stepIndex: string|number) => ({
           ...(this.selectedProducts?.[stepIndex] || {}),
           ...stepSelections,
         })
       );
       this.selectedProductCategoryIndexes = restoredCategoryIndexes.map(
-        (categoryIndexes, stepIndex) => ({
+        (categoryIndexes: any, stepIndex: string|number) => ({
           ...(this.selectedProductCategoryIndexes?.[stepIndex] || {}),
           ...categoryIndexes,
         }),
@@ -184,18 +184,18 @@ export const ProductPageSelectionPersistenceMethods: Record<string, any> & ThisT
         )
       );
       return true;
-    } catch (_error) {
+    } catch (_error: any) {
       return false;
     }
   },
 
   async _preloadRestoredSelectionProducts() {
     const stepIndexes = (this.selectedProducts || []).flatMap(
-      (stepSelections, stepIndex) =>
+      (stepSelections: any, stepIndex: any) =>
         Object.keys(stepSelections || {}).length > 0 ? [stepIndex] : []
     );
     await Promise.all(
-      stepIndexes.map((stepIndex) =>
+      stepIndexes.map((stepIndex: any) =>
         this.loadStepProducts(stepIndex).catch(() => {})
       )
     );

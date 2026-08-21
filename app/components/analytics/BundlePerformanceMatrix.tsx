@@ -33,10 +33,10 @@ export function BundlePerformanceMatrix({ rows, formatRevenue, onRowClick }: Bun
   const [query, setQuery] = useState("");
   const [sortKey, setSortKey] = useState<BundleResultSortKey>("revenueCents");
   const [direction, setDirection] = useState<BundleResultSortDirection>("desc");
-  const searchRef = useRef<TextFieldElement>(null);
-  const sortChoiceRef = useRef<ChoiceListElement>(null);
-  const directionChoiceRef = useRef<ChoiceListElement>(null);
-  const sortTriggerRef = useRef<HTMLElement>(null);
+  const searchRef = useRef<any>(null);
+  const sortChoiceRef = useRef<any>(null);
+  const directionChoiceRef = useRef<any>(null);
+  const sortTriggerRef = useRef<any>(null);
   const filteredRows = useMemo(
     () => filterAndSortBundleResults(rows, query, sortKey, direction),
     [rows, query, sortKey, direction],

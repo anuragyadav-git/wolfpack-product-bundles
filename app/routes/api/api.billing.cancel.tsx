@@ -74,7 +74,7 @@ export async function action({ request }: ActionFunctionArgs) {
       message: "Subscription cancelled successfully"
     });
 
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.error("Error cancelling subscription", {
       component: "api.billing.cancel",
       operation: "action"

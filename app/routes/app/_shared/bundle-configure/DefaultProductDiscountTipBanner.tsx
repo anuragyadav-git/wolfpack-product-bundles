@@ -1,16 +1,20 @@
-import { useState } from "react";
+import { useBannerSessionState } from "../../../../lib/banner-session-state";
+
+export const DEFAULT_PRODUCT_DISCOUNT_TIP_BANNER_KEY = "configure_default_product_discount_tip";
 
 export function DefaultProductDiscountTipBanner() {
-  const [discountTipDismissed, setDiscountTipDismissed] = useState(false);
+  const [discountTipDismissed, dismiss] = useBannerSessionState(
+    DEFAULT_PRODUCT_DISCOUNT_TIP_BANNER_KEY,
+  );
 
   if (discountTipDismissed) return null;
 
   return (
     <s-banner
       tone="info"
-      title="Discount tip"
+      {...({ title: "Discount tip" } as any)}
       dismissible
-      onDismiss={() => setDiscountTipDismissed(true)}
+      onDismiss={dismiss}
     >
       Tip: Discounts are based on all items in your cart. Don&apos;t forget to
       include the Pre Selected Product&apos;s quantity or amount when setting up

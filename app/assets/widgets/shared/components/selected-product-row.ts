@@ -9,7 +9,7 @@
 
 const SELECTED_ROW_PLACEHOLDER_IMAGE = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96"%3E%3Crect width="96" height="96" fill="%23f3f4f6"/%3E%3C/svg%3E';
 
-export function renderSelectedProductRow(product = null, options = {}) {
+export function renderSelectedProductRow(product: any = null, options: any = {}) {
   if (!product) return renderEmptyRow(options);
 
   const selectionKey = String(product.selectionId || '');
@@ -51,13 +51,13 @@ export function renderSelectedProductRow(product = null, options = {}) {
   `;
 }
 
-function renderPrice(product) {
+function renderPrice(product: any) {
   if (!product.priceText) return '';
 
   return `<div class="bw-selected-row__price">${escapeHtml(product.priceText)}</div>`;
 }
 
-function renderEmptyRow(options) {
+function renderEmptyRow(options: any) {
   const label = options.emptyLabel || 'Empty slot';
 
   return `
@@ -80,8 +80,8 @@ function renderTrashIcon() {
   `;
 }
 
-function renderBadges(product) {
-  const badges = [];
+function renderBadges(product: any) {
+  const badges: any[] = [];
   if (product.isDefault) badges.push('Included');
   if (product.isFreeGift) badges.push(product.isLocked ? 'Locked gift' : 'Free gift');
   if (badges.length === 0) return '';
@@ -93,7 +93,7 @@ function renderBadges(product) {
   `;
 }
 
-function escapeHtml(value) {
+function escapeHtml(value: string) {
   return String(value)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -102,6 +102,6 @@ function escapeHtml(value) {
     .replace(/'/g, '&#39;');
 }
 
-function escapeAttribute(value) {
+function escapeAttribute(value: string) {
   return escapeHtml(value).replace(/`/g, '&#96;');
 }

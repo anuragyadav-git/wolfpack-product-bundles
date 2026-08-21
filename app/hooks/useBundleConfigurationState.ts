@@ -446,7 +446,7 @@ export function useBundleConfigurationState({
       setIsDirty(false);
 
       shopify.toast.show("Changes discarded", { isError: false });
-    } catch (error) {
+    } catch (error: any) {
       isResettingRef.current = false;
       shopify.toast.show("Error discarding changes", { isError: true, duration: 5000 });
     }

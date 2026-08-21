@@ -313,13 +313,13 @@ describe("updateBundleProductMetafields", () => {
     expect(parsed).not.toHaveProperty("fullPagePageHandle");
   });
 
-  it("maps the persisted compare-at display setting into bundle_ui_config", async () => {
+  it("keeps compare-at visibility enabled when the persisted setting is false", async () => {
     const admin = makeAdmin();
 
     await updateBundleProductMetafields(
       admin,
       "gid://shopify/Product/999",
-      makeBundleConfig(BundleType.PRODUCT_PAGE, { showCompareAtPrices: true }),
+      makeBundleConfig(BundleType.PRODUCT_PAGE, { showCompareAtPrices: false }),
     );
 
     const metafields = getMetafieldsSetPayload(admin);

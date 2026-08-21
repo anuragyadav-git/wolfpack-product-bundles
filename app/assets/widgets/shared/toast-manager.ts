@@ -11,7 +11,7 @@
 
 export class ToastManager {
   /** Escape HTML to prevent XSS in toast messages */
-  static _escapeHtml(str) {
+  static _escapeHtml(str: any) {
     if (!str) return '';
     return String(str)
       .replace(/&/g, '&amp;')
@@ -27,7 +27,7 @@ export class ToastManager {
       .trim() === '1';
   }
 
-  static show(message, duration = 4000, options = {}) {
+  static show(message: string, duration = 4000, options: any = {}) {
     // Remove any existing toast
     const existingToast = document.getElementById('bundle-toast');
     if (existingToast) {
@@ -44,10 +44,16 @@ export class ToastManager {
     if (this._isEnterFromBottom()) {
       toast.classList.add('bundle-toast-from-bottom');
     }
-    const closeControl = options.dismissible === false ? '' : `
-      <svg class="toast-close" width="20" height="20" viewBox="0 0 24 24" fill="none" style="cursor: pointer;">
+    if (options.role) toast.setAttribute('role', options.role);
+    const closeIcon = `
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
         <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>`;
+    const closeControl = options.dismissible === false
+      ? ''
+      : options.dismissButton === true
+        ? `<button type="button" class="toast-close" aria-label="Close">${closeIcon}</button>`
+        : closeIcon.replace('<svg ', '<svg class="toast-close" ');
     toast.innerHTML = `<span>${this._escapeHtml(message)}</span>${closeControl}`;
 
     // Attach close listener (consistent with showWithUndo pattern)
@@ -72,7 +78,7 @@ export class ToastManager {
   }
 
   // Show toast with undo action button
-  static showWithUndo(message, undoCallback, duration = 5000) {
+  static showWithUndo(message: string, undoCallback: any, duration = 5000) {
     // Remove any existing toast
     const existingToast = document.getElementById('bundle-toast');
     if (existingToast) {
@@ -95,11 +101,11 @@ export class ToastManager {
     `;
 
     // Attach event listeners
-    const undoBtn = toast.querySelector('.toast-undo-btn');
-    const closeBtn = toast.querySelector('.toast-close');
+    const undoBtn = toast.querySelector<HTMLElement>('.toast-undo-btn');
+    const closeBtn = toast.querySelector<HTMLElement>('.toast-close');
     let undoTriggered = false;
 
-    undoBtn.addEventListener('click', () => {
+    undoBtn?.addEventListener('click', () => {
       if (!undoTriggered && typeof undoCallback === 'function') {
         undoTriggered = true;
         undoCallback();
@@ -107,7 +113,7 @@ export class ToastManager {
       }
     });
 
-    closeBtn.addEventListener('click', () => {
+    closeBtn?.addEventListener('click', () => {
       toast.remove();
     });
 

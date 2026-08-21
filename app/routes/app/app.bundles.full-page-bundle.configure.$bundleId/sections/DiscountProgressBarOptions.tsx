@@ -1,4 +1,5 @@
 import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
+import { DisabledConfigurationRegion } from "../../_shared/bundle-configure/DisabledConfigurationRegion";
 
 export function FpbProgressBarOptions({
   flow,
@@ -39,7 +40,7 @@ export function FpbProgressBarOptions({
               checked={pricingState.showDiscountProgressBar || undefined}
               onChange={(e) =>
                 pricingState.setShowDiscountProgressBar(
-                  (e.target as HTMLInputElement).checked,
+                  (e.target as HTMLInputElement).checked
                 )
               }
             />
@@ -59,7 +60,9 @@ export function FpbProgressBarOptions({
             Multi Language
           </s-button>
         </s-stack>
-        {pricingState.showDiscountProgressBar && (
+        <DisabledConfigurationRegion
+          disabled={!pricingState.showDiscountProgressBar}
+        >
           <div className={fullPageBundleStyles.nestedDisplayOptions}>
             <s-stack direction="block" gap="small">
               <s-stack direction="inline" gap="small" alignItems="center">
@@ -133,14 +136,16 @@ export function FpbProgressBarOptions({
                               onInput={(e) => {
                                 const val = (e.target as HTMLInputElement)
                                   .value;
-                                setTierTextByRuleId((prev: Record<string, any>) => ({
-                                  ...prev,
-                                  [rule.id]: {
-                                    tierText: val,
-                                    tierSubtext:
-                                      prev[rule.id]?.tierSubtext ?? "",
-                                  },
-                                }));
+                                setTierTextByRuleId(
+                                  (prev: Record<string, any>) => ({
+                                    ...prev,
+                                    [rule.id]: {
+                                      tierText: val,
+                                      tierSubtext:
+                                        prev[rule.id]?.tierSubtext ?? "",
+                                    },
+                                  })
+                                );
                                 markAsDirty();
                               }}
                               autocomplete="off"
@@ -153,13 +158,15 @@ export function FpbProgressBarOptions({
                               onInput={(e) => {
                                 const val = (e.target as HTMLInputElement)
                                   .value;
-                                setTierTextByRuleId((prev: Record<string, any>) => ({
-                                  ...prev,
-                                  [rule.id]: {
-                                    tierText: prev[rule.id]?.tierText ?? "",
-                                    tierSubtext: val,
-                                  },
-                                }));
+                                setTierTextByRuleId(
+                                  (prev: Record<string, any>) => ({
+                                    ...prev,
+                                    [rule.id]: {
+                                      tierText: prev[rule.id]?.tierText ?? "",
+                                      tierSubtext: val,
+                                    },
+                                  })
+                                );
                                 markAsDirty();
                               }}
                               autocomplete="off"
@@ -173,7 +180,7 @@ export function FpbProgressBarOptions({
               ) : null}
             </s-stack>
           </div>
-        )}
+        </DisabledConfigurationRegion>
       </div>
     </>
   );

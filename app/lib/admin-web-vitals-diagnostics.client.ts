@@ -186,7 +186,7 @@ function buildLcpP75Summary(samples: LcpSample[]): Record<string, LcpP75Summary>
   }
 
   return Object.fromEntries(
-    Array.from(valuesByRoute.entries()).map(([route, values]) => {
+    Array.from(valuesByRoute.entries()).map(([route, values]: any) => {
       const p75 = calculateP75(values);
       return [route, {
         p75,

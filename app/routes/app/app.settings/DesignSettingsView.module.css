@@ -190,6 +190,13 @@
   padding-bottom: 1px;
 }
 
+.previewFeedbackActions {
+  display: flex;
+  grid-column: 1 / -1;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
 .viewportButton {
   display: inline-flex;
   border: 2px solid transparent;
@@ -706,6 +713,35 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 8px;
+}
+
+@keyframes previewDiscountFeedbackBeat {
+  50% {
+    background-color: var(--preview-discount-feedback-bg);
+    color: var(--preview-discount-feedback-text);
+  }
+}
+
+.previewSummary > footer > span[data-preview-discount-feedback="tier"] {
+  --preview-discount-feedback-bg: var(--preview-discount-feedback-tier-bg, #d1fae5);
+  --preview-discount-feedback-text: var(--preview-discount-feedback-tier-text, #065f46);
+  animation: previewDiscountFeedbackBeat 650ms ease-in-out;
+}
+
+.previewSummary > footer > span[data-preview-discount-feedback="complete"] {
+  --preview-discount-feedback-bg: var(--preview-discount-feedback-complete-bg, #047857);
+  --preview-discount-feedback-text: var(--preview-discount-feedback-complete-text, #ffffff);
+  animation:
+    previewDiscountFeedbackBeat 500ms ease-in-out,
+    previewDiscountFeedbackBeat 500ms ease-in-out 700ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .previewSummary > footer > span[data-preview-discount-feedback] {
+    animation: none;
+    background-color: var(--preview-discount-feedback-bg);
+    color: var(--preview-discount-feedback-text);
+  }
 }
 
 .previewSummary > header > button {

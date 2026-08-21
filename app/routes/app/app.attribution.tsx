@@ -159,7 +159,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         backfill: result,
         message: `Backfill complete: ${result.created} rows created, ${result.skipped} already present.`,
       });
-    } catch (error) {
+    } catch (error: any) {
       return json({
         success: false,
         error: error instanceof Error ? error.message : "Backfill failed. Please try again.",
@@ -298,7 +298,7 @@ async function loadAttributionDashboardData({
     byPlatformMap[src].orders += 1;
   }
   const byPlatform = Object.entries(byPlatformMap)
-    .map(([source, d]) => ({ source, ...d }))
+    .map(([source, d]: any) => ({ source, ...d }))
     .sort((a, b) => b.revenue - a.revenue);
 
   const byMediumMap: Record<string, { revenue: number; orders: number }> = {};
@@ -309,7 +309,7 @@ async function loadAttributionDashboardData({
     byMediumMap[med].orders += 1;
   }
   const byMedium = Object.entries(byMediumMap)
-    .map(([medium, d]) => ({ medium, ...d }))
+    .map(([medium, d]: any) => ({ medium, ...d }))
     .sort((a, b) => b.revenue - a.revenue);
 
   // Exclude attribution rows that have no bundleId — those represent UTM-tracked
@@ -328,7 +328,7 @@ async function loadAttributionDashboardData({
     byCampaignMap[campaign].orders += 1;
   }
   const byCampaign = Object.entries(byCampaignMap)
-    .map(([campaign, d]) => ({ campaign, ...d }))
+    .map(([campaign, d]: any) => ({ campaign, ...d }))
     .sort((a, b) => b.revenue - a.revenue);
 
   const byBundleMap: Record<string, { name: string; revenue: number; orders: number }> = {};
@@ -355,7 +355,7 @@ async function loadAttributionDashboardData({
     byLandingMap[page].orders += 1;
   }
   const byLandingPage = Object.entries(byLandingMap)
-    .map(([page, d]) => ({ page, ...d }))
+    .map(([page, d]: any) => ({ page, ...d }))
     .sort((a, b) => b.revenue - a.revenue)
     .slice(0, 10);
 
@@ -397,7 +397,7 @@ async function loadAttributionDashboardData({
   // bundleNameMap already covers every bundle id referenced by viewEvents (it was
   // included in allBundleIds above). No follow-up findMany needed.
   const viewsByBundle = Object.entries(viewsByBundleMap)
-    .map(([bundleId, views]) => ({ bundleId, name: bundleNameMap[bundleId] ?? "Unknown Bundle", views }))
+    .map(([bundleId, views]: any) => ({ bundleId, name: bundleNameMap[bundleId] ?? "Unknown Bundle", views }))
     .sort((a, b) => b.views - a.views)
     .slice(0, 10);
 

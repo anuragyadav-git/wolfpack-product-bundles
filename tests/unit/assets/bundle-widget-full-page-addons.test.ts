@@ -18,7 +18,7 @@ describe('Full Page widget direct Add-ons contract', () => {
     })).toBe(false);
   });
 
-  it('keeps selected add-on discount savings out of parent cart display properties', () => {
+  it('keeps selected add-on savings out of parent pricing metadata', () => {
     const originalWindow = (global as any).window;
     const paidStep = { id: 'paid-step' };
     const paidAddonStep = { id: 'addon-step', isFreeGift: true, addonDisplayFree: false };

@@ -313,7 +313,7 @@ export async function syncBundleInventory(
                 }
               }
           }
-        } catch (_err) {
+        } catch (_err: any) {
           AppLogger.warn("Could not fetch collection products for inventory sync", {
             component: "inventory-sync",
             operation: "syncBundleInventory",
@@ -370,7 +370,7 @@ export async function syncBundleInventory(
       bundleId,
       inventory: targetInventory,
     };
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.error("Failed to sync bundle inventory", {
       component: "inventory-sync",
       operation: "syncBundleInventory",

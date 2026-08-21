@@ -16,6 +16,7 @@ import { ERROR_MESSAGES } from "../../../../constants/errors";
 import { getBundleEditPath } from "../../../../lib/bundle-navigation";
 import { ensureBundleParentProduct } from "../../../../services/bundles/bundle-parent-product.server";
 import { createBundleWithPublicNumber } from "../../../../services/bundles/fpb-public-number.server";
+import { normalizePpbBundleEmbedConfig } from "../../../../lib/ppb-bundle-embed";
 
 const GET_PUBLICATIONS = `
   query {
@@ -101,7 +102,7 @@ export async function discoverSalesChannels(admin: any): Promise<Array<{ id: str
     const publicationsData = await publicationsResponse.json();
     const edges = publicationsData.data?.publications?.edges || [];
     return edges.map((edge: any) => ({ id: edge.node.id, name: edge.node.name }));
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.error('Failed to discover sales channels', { component: 'app.dashboard' }, error);
     return [];
   }
@@ -142,6 +143,10 @@ export async function handleCloneBundle(
         description: originalBundle.description,
         shopId: session.shop,
         bundleType: originalBundle.bundleType,
+        bundleUpsellConfig:
+          originalBundle.bundleType === BundleType.PRODUCT_PAGE
+            ? (normalizePpbBundleEmbedConfig(null) as any)
+            : undefined,
         status: BundleStatus.DRAFT,
         shopifyProductId: null,
         templateName: originalBundle.templateName,
@@ -215,7 +220,7 @@ export async function handleCloneBundle(
       redirectTo: `${getBundleEditPath(clonedBundle.id, originalBundle.bundleType)}?mode=create`,
     });
 
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.error("Failed to clone bundle", { component: "app.dashboard", operation: "clone-bundle" }, error);
     return json({ error: 'Failed to clone bundle' }, { status: 500 });
   }
@@ -266,7 +271,7 @@ export async function handleDeleteBundle(
         await admin.graphql(UPDATE_PRODUCT_STATUS, {
           variables: { id: bundle.shopifyProductId }
         });
-      } catch (productError) {
+      } catch (productError: any) {
         AppLogger.error("Error updating Shopify product status",
           { component: "app.dashboard", operation: "delete-bundle" },
           productError);
@@ -282,7 +287,7 @@ export async function handleDeleteBundle(
       { component: "app.dashboard", operation: "delete-bundle", bundleId });
 
     return json({ success: true, message: "Bundle deleted successfully" });
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.error("Failed to delete bundle", { component: "app.dashboard", operation: "delete-bundle" }, error);
     return json({ success: false, error: "Failed to delete bundle" }, { status: 500 });
   }
@@ -325,6 +330,10 @@ export async function handleCreateBundle(
         bundleType: bundleType as any,
         bundleDesignTemplate: bundleType === BundleType.FULL_PAGE ? "FBP_SIDE_FOOTER" : null,
         bundleDesignPresetId: bundleType === BundleType.FULL_PAGE ? "STANDARD" : null,
+        bundleUpsellConfig:
+          bundleType === BundleType.PRODUCT_PAGE
+            ? (normalizePpbBundleEmbedConfig(null) as any)
+            : undefined,
         status: BundleStatus.DRAFT,
         shopifyProductId: null,
         shopifyProductHandle: null,
@@ -371,7 +380,7 @@ export async function handleCreateBundle(
           requiresOneTimeSetup: widgetCheckResult.requiresOneTimeSetup,
           message: widgetCheckResult.message
         });
-      } catch (error) {
+      } catch (error: any) {
         AppLogger.warn(
           "Widget installation check failed after bundle creation",
           {
@@ -404,7 +413,7 @@ export async function handleCreateBundle(
       }
     });
 
-  } catch (error) {
+  } catch (error: any) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     AppLogger.error("Failed to create bundle", { component: "app.dashboard", operation: "create-bundle" }, error);
     return json({ error: `Failed to create bundle: ${errorMessage}` }, { status: 500 });

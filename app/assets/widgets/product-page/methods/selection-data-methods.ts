@@ -14,7 +14,7 @@ isInventoryTrackingOnAddToCartEnabled() {
  * Look up real stock for a variant. See full-page widget's getVariantAvailable
  * for field semantics.
  */
-getVariantAvailable(stepIndex, variantId) {
+getVariantAvailable(stepIndex: string|number, variantId: any) {
   const products = this.stepProductData[stepIndex] || [];
   const product = this.findProductBySelectionKey(products, variantId);
   if (!product) {
@@ -37,19 +37,19 @@ getVariantAvailable(stepIndex, variantId) {
   return { available: qty === 0 ? null : qty, outOfStock: false, acceptsBackorder: backorder };
 },
 
-findProductBySelectionKey(products, selectionKey) {
+findProductBySelectionKey(products: any[], selectionKey: any) {
   const normalized = this.normalizeSelectionKey(selectionKey);
   if (!normalized) return null;
 
-  return products.find((product) => (
+  return products.find((product: any) => (
     String(product?.selectionId || '') === normalized
-    || (Array.isArray(product?.variants) && product.variants.some(variant => (
+    || (Array.isArray(product?.variants) && product.variants.some((variant: any)  => (
       this.normalizeSelectionKey(variant?.selectionId || '') === normalized
     )))
   )) || null;
 },
 
-extractId(idString) {
+extractId(idString: any) {
   if (!idString) return null;
 
   // Handle GID format
@@ -62,13 +62,13 @@ extractId(idString) {
   return idString.toString().split('/').pop();
 },
 
-normalizeSelectionKey(variantId) {
+normalizeSelectionKey(variantId: any) {
   const normalized = this.extractId(variantId);
   if (normalized == null) return '';
   return String(normalized);
 },
 
-getSelectedQuantity(stepIndex, variantId) {
+getSelectedQuantity(stepIndex: string|number, variantId: any) {
   const selectedProducts = this.selectedProducts[stepIndex] || {};
   const normalized = this.normalizeSelectionKey(variantId);
   if (!normalized) return 0;
@@ -80,7 +80,7 @@ getSelectedQuantity(stepIndex, variantId) {
   return 0;
 },
 
-setSelectedQuantity(stepIndex, variantId, quantity) {
+setSelectedQuantity(stepIndex: string|number, variantId: any, quantity: number) {
   const selectedProducts = this.selectedProducts[stepIndex];
   if (!selectedProducts) return;
 
@@ -104,7 +104,7 @@ setSelectedQuantity(stepIndex, variantId, quantity) {
   this._persistSessionSelections?.();
 },
 
-getAddonLineDiscount(step) {
+getAddonLineDiscount(step: any) {
   const tier = this.getAddonTierEvaluation(step).tier;
   const discount = step?.addonDiscount || tier?.discount || {};
   const type = String(discount.type || '').toUpperCase();
@@ -117,11 +117,11 @@ getAddonLineDiscount(step) {
   };
 },
 
-getAddonTiers(step) {
+getAddonTiers(step: any) {
   return Array.isArray(step?.addonTiers) ? step.addonTiers.filter(Boolean) : [];
 },
 
-getAddonTierEvaluation(step) {
+getAddonTierEvaluation(step: any) {
   const { totalPrice, totalQuantity } = calculateBundleTotalForPurchaseOption(this,
     this.selectedProducts,
     this.stepProductData,
@@ -140,7 +140,7 @@ getAddonTierEvaluation(step) {
     return { tier: null, totalPrice, totalQuantity, currentValue: totalQuantity, tierIndex: -1, isEligible: false };
   }
 
-  const withState = candidates.map((candidate, index) => {
+  const withState = candidates.map((candidate: any, index: any) => {
     const condition = candidate?.eligibilityCondition || {};
     const conditionType = String(condition.type || 'QUANTITY').toUpperCase();
     const conditionValue = Number(condition.value || 0);
@@ -156,11 +156,11 @@ getAddonTierEvaluation(step) {
     };
   });
 
-  const eligible = withState.filter(candidate => candidate.isEligible)
-    .sort((a, b) => (a.threshold - b.threshold) || (a.tierIndex - b.tierIndex));
+  const eligible = withState.filter((candidate: any)  => candidate.isEligible)
+    .sort((a: any, b: any) => (a.threshold - b.threshold) || (a.tierIndex - b.tierIndex));
   const next = withState
-    .filter(candidate => !candidate.isEligible)
-    .sort((a, b) => (a.threshold - b.threshold) || (a.tierIndex - b.tierIndex));
+    .filter((candidate: any)  => !candidate.isEligible)
+    .sort((a: any, b: any) => (a.threshold - b.threshold) || (a.tierIndex - b.tierIndex));
   const selected = eligible[eligible.length - 1] || next[0] || withState[0];
 
   return {
@@ -173,14 +173,14 @@ getAddonTierEvaluation(step) {
   };
 },
 
-getAddonProductSelectionKeys(step) {
+getAddonProductSelectionKeys(step: any) {
   const keys = new Set();
-  const addKey = (value) => {
+  const addKey = (value: any) => {
     const selectionId = String(value?.selectionId || '');
     if (!selectionId) return;
     keys.add(selectionId);
   };
-  const products = [
+  const products: any[] = [
     ...(Array.isArray(step?.StepProduct) ? step.StepProduct : []),
     ...(Array.isArray(step?.products) ? step.products : []),
     ...(Array.isArray(step?.productsData1?.products) ? step.productsData1.products : []),
@@ -196,11 +196,11 @@ getAddonProductSelectionKeys(step) {
 
 calculateSelectedAddonDiscountAmount() {
   const steps = this.selectedBundle?.steps || [];
-  const chargeableAddonStep = steps.find(candidate => candidate?.isFreeGift === true && candidate?.addonDisplayFree !== true && this.getAddonLineDiscount(candidate));
+  const chargeableAddonStep = steps.find((candidate: any)  => candidate?.isFreeGift === true && candidate?.addonDisplayFree !== true && this.getAddonLineDiscount(candidate));
   const chargeableAddonStepIndex = steps.indexOf(chargeableAddonStep);
   const chargeableAddonProductKeys = this.getAddonProductSelectionKeys(chargeableAddonStep);
 
-  return this.getAllSelectedProductsData().reduce((total, item) => {
+  return this.getAllSelectedProductsData().reduce((total: number, item: any) => {
     const isChargeableAddonItem = Number(item.stepIndex) === chargeableAddonStepIndex || (item.isFreeGift === true && item.addonDisplayFree !== true);
     const isChargeableAddonProduct = chargeableAddonProductKeys.has(String(item.selectionId || ''));
     if (!isChargeableAddonItem && !isChargeableAddonProduct) return total;
@@ -215,7 +215,7 @@ calculateSelectedAddonDiscountAmount() {
   }, 0);
 },
 
-getDiscountInfoWithSelectedAddonDiscount(discountInfo, totalPrice) {
+getDiscountInfoWithSelectedAddonDiscount(discountInfo: any, totalPrice: number) {
   const baseDiscountAmount = Math.max(0, Number(discountInfo?.discountAmount || 0));
   const addonDiscountAmount = this.calculateSelectedAddonDiscountAmount();
   const combinedDiscountAmount = Math.min(totalPrice, baseDiscountAmount + addonDiscountAmount);
@@ -234,13 +234,13 @@ getDiscountInfoWithSelectedAddonDiscount(discountInfo, totalPrice) {
 },
 
   getAllSelectedProductsData() {
-    const allProducts = [];
+    const allProducts: { stepIndex: any; variantId: string; selectionId: string; quantity: unknown; title: any; parentTitle: any; variantTitle: any; imageUrl: any; image: any; price: any; productId: any; isDefault: any; isFreeGift: any; addonDisplayFree: boolean; }[] = [];
 
-  this.selectedBundle.steps.forEach((step, stepIndex) => {
+  this.selectedBundle.steps.forEach((step: any, stepIndex: string|number) => {
     const stepSelections = this.selectedProducts[stepIndex] || {};
     const productsInStep = this.stepProductData[stepIndex] || [];
 
-    Object.entries(stepSelections).forEach(([variantId, quantity]) => {
+    Object.entries(stepSelections).forEach(([variantId, quantity]: any) => {
       if (quantity > 0) {
         const normalizedVariantId = this.normalizeSelectionKey(variantId);
         const product = this.findProductBySelectionKey(productsInStep, normalizedVariantId);
@@ -249,7 +249,7 @@ getDiscountInfoWithSelectedAddonDiscount(discountInfo, totalPrice) {
         }
 
         const matchedVariant = Array.isArray(product.variants)
-          ? product.variants.find((candidateVariant) => (
+          ? product.variants.find((candidateVariant: any) => (
               this.normalizeSelectionKey(candidateVariant?.selectionId || '')
               === normalizedVariantId
             ))
@@ -297,8 +297,8 @@ getDiscountInfoWithSelectedAddonDiscount(discountInfo, totalPrice) {
 // Expand products with multiple variants into separate product entries
 // Each variant becomes its own card showing "Product Title - Variant Name"
 // This matches the full-page widget behavior for consistent UX
-expandProductsByVariant(products) {
-  return products.flatMap(product => {
+expandProductsByVariant(products: any[]) {
+  return products.flatMap((product: any)  => {
     // If product already has a parentProductId, it was already expanded
     if (product.parentProductId && product.variantId) {
       return [product];
@@ -307,8 +307,8 @@ expandProductsByVariant(products) {
     // If product has multiple variants, expand into separate cards
     if (product.variants && product.variants.length > 1) {
       return product.variants
-        .filter(variant => variant.available !== false) // Only show available variants
-        .map(variant => {
+        .filter((variant: any)  => variant.available !== false) // Only show available variants
+        .map((variant: any)  => {
           // Use variant image if available, fallback to product image
           const imageUrl = variant.image?.src || variant.image || product.imageUrl || BUNDLE_WIDGET.PLACEHOLDER_IMAGE;
 

@@ -270,7 +270,7 @@ describe("FPB product modal read-only quick view", () => {
     (globalThis as typeof globalThis & { document: any }).document = {
       getElementById: (id: string) => elements[id] ?? null,
     };
-    const modal = {
+    const modal: any = {
       currentProduct: {
         id: "product-2",
         title: "Single variant product",

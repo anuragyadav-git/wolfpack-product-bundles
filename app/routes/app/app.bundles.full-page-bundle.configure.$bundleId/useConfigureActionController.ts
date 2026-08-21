@@ -105,7 +105,7 @@ export function useConfigureActionController(flow: ConfigureBundleFlowDraft) {
     let preparedPreview;
     try {
       preparedPreview = await prepareStorefrontPreviewForOpen();
-    } catch (error) {
+    } catch (error: any) {
       closePendingDashboardPreview(pendingPreviewWindow);
       finishPreviewBundleLoading();
       flow.shopify.toast.show(
@@ -241,7 +241,7 @@ export function useConfigureActionController(flow: ConfigureBundleFlowDraft) {
       const openFallback = () => {
         try {
           flow.shopify.navigate(adminProductUrl);
-        } catch (error) {
+        } catch (error: any) {
           AppLogger.warn(
             "Falling back to a new tab for Admin product navigation",
             { productId },
@@ -270,7 +270,7 @@ export function useConfigureActionController(flow: ConfigureBundleFlowDraft) {
             });
           }
           return;
-        } catch (error) {
+        } catch (error: any) {
           AppLogger.warn(
             "Falling back after Product editor intent failed",
             { productId },

@@ -25,7 +25,7 @@ export function DashboardLoadingWorkspace() {
     <>
       <AdminRouteLoadingBar label="Loading Dashboard" />
       <div className="dashboardLoadingWorkspace" role="status" aria-live="polite">
-        <s-heading className="dashboardLoadingWorkspaceMessage">
+        <s-heading {...({ className: "dashboardLoadingWorkspaceMessage" } as any)}>
           Loading your workspace
         </s-heading>
       </div>

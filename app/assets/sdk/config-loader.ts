@@ -1,6 +1,6 @@
 'use strict';
 
-export function loadBundleConfig(container, state) {
+export function loadBundleConfig(container: HTMLElement, state: any) {
   var configValue = container && container.dataset && container.dataset.bundleConfig;
 
   if (!configValue || configValue.trim() === '' || configValue === 'null' || configValue === 'undefined') {
@@ -10,7 +10,7 @@ export function loadBundleConfig(container, state) {
   var bundleData;
   try {
     bundleData = JSON.parse(configValue);
-  } catch (e) {
+  } catch (e: any) {
     return { success: false, error: 'data-bundle-config is not valid JSON: ' + e.message };
   }
 
@@ -26,7 +26,7 @@ export function loadBundleConfig(container, state) {
   state.discountConfiguration = bundleData.pricing || null;
 
   // Initialise selections map for every step
-  state.steps.forEach(function (step) {
+  state.steps.forEach(function (step: any) {
     if (step.id && !state.selections[step.id]) {
       state.selections[step.id] = {};
     }
@@ -34,7 +34,7 @@ export function loadBundleConfig(container, state) {
 
   // stepProductData is populated lazily from bundle step products
   // (same shape as widget's stepProductData: array of arrays, indexed by step position)
-  state.stepProductData = state.steps.map(function (step) {
+  state.stepProductData = state.steps.map(function (step: any) {
     return Array.isArray(step.products) ? step.products : [];
   });
 

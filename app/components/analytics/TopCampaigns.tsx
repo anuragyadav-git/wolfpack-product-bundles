@@ -21,10 +21,10 @@ export function TopCampaigns({ rows, formatRevenue }: TopCampaignsProps) {
   const [query, setQuery] = useState("");
   const [sortKey, setSortKey] = useState<CampaignResultSortKey>("revenueCents");
   const [direction, setDirection] = useState<CampaignResultSortDirection>("desc");
-  const searchRef = useRef<HTMLElement & { value?: string }>(null);
-  const sortChoiceRef = useRef<HTMLElement & { values?: string[] }>(null);
-  const directionChoiceRef = useRef<HTMLElement & { values?: string[] }>(null);
-  const sortTriggerRef = useRef<HTMLElement>(null);
+  const searchRef = useRef<any>(null);
+  const sortChoiceRef = useRef<any>(null);
+  const directionChoiceRef = useRef<any>(null);
+  const sortTriggerRef = useRef<any>(null);
   const filteredRows = useMemo(
     () => filterAndSortCampaignResults(rows, query, sortKey, direction),
     [rows, query, sortKey, direction],

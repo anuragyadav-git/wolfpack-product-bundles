@@ -12,6 +12,7 @@ function makeContext(productPageControls: Record<string, any> = {}) {
     },
     _getProductPageControls: ProductPageConfigLifecycleMethods._getProductPageControls,
     _runControlsScript: ProductPageConfigLifecycleMethods._runControlsScript,
+    _refreshConfiguredCartSection: jest.fn(async () => false),
   };
 }
 
@@ -57,8 +58,8 @@ describe('Product Page post-add redirect handling', () => {
     expect(currentPathname()).toBe('/checkout');
   });
 
-  it('redirects to cart when the saved Product Page redirect mode is cart', () => {
-    ProductPageConfigLifecycleMethods._handlePostAddToCartAction.call(
+  it('redirects to cart when the saved Product Page redirect mode is cart', async () => {
+    await ProductPageConfigLifecycleMethods._handlePostAddToCartAction.call(
       makeContext(),
       { action: 'cart' },
     );
@@ -68,11 +69,11 @@ describe('Product Page post-add redirect handling', () => {
     expect(currentPathname()).toBe('/cart');
   });
 
-  it('clicks the configured side-cart trigger when the saved Product Page redirect mode is side_cart', () => {
+  it('clicks the configured side-cart trigger when the saved Product Page redirect mode is side_cart', async () => {
     const clickSpy = jest.fn();
     (global as any).document.querySelector.mockReturnValue({ click: clickSpy });
 
-    ProductPageConfigLifecycleMethods._handlePostAddToCartAction.call(
+    await ProductPageConfigLifecycleMethods._handlePostAddToCartAction.call(
       makeContext(),
       {
         action: 'side_cart',
@@ -108,8 +109,8 @@ describe('Product Page post-add redirect handling', () => {
     expect((global as any).document.querySelector).not.toHaveBeenCalled();
   });
 
-  it('runs redirect and custom scripts before applying the post-add action', () => {
-    ProductPageConfigLifecycleMethods._handlePostAddToCartAction.call(
+  it('runs only the redirect script during the post-add action', async () => {
+    await ProductPageConfigLifecycleMethods._handlePostAddToCartAction.call(
       makeContext({
         scripts: {
           executeCustomScript: 'window.__ppbCustomScript = (window.__ppbCustomScript || 0) + 1;',
@@ -122,10 +123,35 @@ describe('Product Page post-add redirect handling', () => {
     );
 
     expect((global as any).window.__ppbRedirectScript).toBe(1);
-    expect((global as any).window.__ppbCustomScript).toBe(1);
+    expect((global as any).window.__ppbCustomScript).toBeUndefined();
 
     jest.advanceTimersByTime(1000);
 
     expect(currentPathname()).toBe('/cart');
   });
+
+  it('runs the product-page load script once', () => {
+    const context = makeContext({
+      scripts: { executeCustomScript: 'window.__ppbCustomScript = (window.__ppbCustomScript || 0) + 1;' },
+    });
+
+    ProductPageConfigLifecycleMethods._runProductPageLoadScriptOnce.call(context);
+    ProductPageConfigLifecycleMethods._runProductPageLoadScriptOnce.call(context);
+
+    expect((global as any).window.__ppbCustomScript).toBe(1);
+  });
+
+  it('refreshes configured side-cart markup before opening it', async () => {
+    const context = makeContext({ selectors: { sideCartOpenButton: '.open-cart' } });
+    context._refreshConfiguredCartSection.mockResolvedValue(true);
+    (global as any).document.querySelector.mockReturnValue({ click: jest.fn() });
+
+    await ProductPageConfigLifecycleMethods._handlePostAddToCartAction.call(
+      context,
+      { action: 'side_cart' },
+    );
+
+    expect(context._refreshConfiguredCartSection).toHaveBeenCalledWith('side_cart');
+  });
 });
+export {};

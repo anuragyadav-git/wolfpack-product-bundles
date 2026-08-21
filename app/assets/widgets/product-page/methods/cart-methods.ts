@@ -9,25 +9,25 @@ import { areRequiredProductPageStepsValid } from './step-validation.js';
 import { preflightVariantOnStorefront, resolveRuntimeVariantNumericId } from '../../shared/variant-preflight.js';
 import { buildStorefrontApiPath } from '../../../../config/storefront-proxy-routes.js';
 
-function getProductPageSelectedQuantityTotal(selectedProducts = []) {
-  return selectedProducts.reduce((sum, stepSelections) => {
+function getProductPageSelectedQuantityTotal(selectedProducts: any[] = []) {
+  return selectedProducts.reduce((sum: number, stepSelections: any) => {
     if (!stepSelections || typeof stepSelections !== 'object') return sum;
-    return sum + Object.values(stepSelections).reduce((stepSum, quantity) => {
+    return sum + Object.values<any>(stepSelections).reduce((stepSum: number, quantity: any) => {
       const value = Number(quantity || 0);
       return stepSum + (Number.isFinite(value) && value > 0 ? value : 0);
     }, 0);
   }, 0);
 }
 
-function getProductPageActiveBoxSelectionRule(boxSelection) {
+function getProductPageActiveBoxSelectionRule(boxSelection: any) {
   const rules = Array.isArray(boxSelection?.rules) ? boxSelection.rules : [];
   return boxSelection?.activeRule
-    || rules.find(rule => rule?.isDefaultSelected === true)
+    || rules.find((rule: any)  => rule?.isDefaultSelected === true)
     || rules[0]
     || null;
 }
 
-function resolveRuntimeTokenProductId(product = {}) {
+function resolveRuntimeTokenProductId(product: any = {}) {
   return product.parentProductId
     || product.productId
     || product.productGraphqlId
@@ -140,12 +140,13 @@ export const ProductPageCartMethods: Record<string, any> & ThisType<any> = {
         // Shopify can return an HTML cart page after a successful multipart add.
       }
 
-      ToastManager.show('Bundle added to cart successfully!');
+      const successMessage = this._resolveText?.('addBundleSuccess', '');
+      if (successMessage) ToastManager.show(successMessage);
       await this._handlePostAddToCartAction(
         this._getProductPageControls()?.redirect,
         `${offerId}_${sessionKey}`,
       );
-    } catch (error) {
+    } catch (error: any) {
       ToastManager.show('Failed to add bundle to cart: ' + error.message);
     } finally {
       this.hideLoadingOverlay();
@@ -175,7 +176,7 @@ export const ProductPageCartMethods: Record<string, any> & ThisType<any> = {
     };
   },
 
-  buildCartLineSourceProperties(selectedLines) {
+  buildCartLineSourceProperties(selectedLines: any) {
     const { totalPrice, totalQuantity, unitPrices } = calculateBundleTotalForPurchaseOption(this,
       this.selectedProducts,
       this.stepProductData,
@@ -192,7 +193,6 @@ export const ProductPageCartMethods: Record<string, any> & ThisType<any> = {
     const discountAmount = Math.max(0, Number(combinedDiscountInfo.discountAmount || 0));
     const discountPercentage = combinedDiscountInfo.discountPercentage
       || (totalPrice > 0 ? (discountAmount / totalPrice) * 100 : 0);
-
     return buildCartLineSourceProperties({
       selectedLines,
       retailPrice: CurrencyManager.convertAndFormat(totalPrice, currencyInfo),
@@ -200,24 +200,27 @@ export const ProductPageCartMethods: Record<string, any> & ThisType<any> = {
         ? CurrencyManager.convertAndFormat(discountAmount, currencyInfo)
         : '',
       discountPercentage,
+      labels: this.getCartLineLabels?.(),
     });
   },
 
-  buildCartItems(offerId = this.resolveProductPageOfferId(), sessionKey = this.generateBundleSessionKey()) {
-    const cartItems = [];
-    const unavailableProducts = [];
-    const selectedLines = [];
+  buildCartItems(offerId: any = undefined, sessionKey: any = undefined) {
+    if (offerId === undefined) offerId = this.resolveProductPageOfferId();
+    if (sessionKey === undefined) sessionKey = this.generateBundleSessionKey();
+    const cartItems: { id: number; quantity: unknown; properties: Record<string, any>; _wpbProductId: any; }[] = [];
+    const unavailableProducts: any[] = [];
+    const selectedLines: { product: any; quantity: unknown; }[] = [];
     const baseOfferId = `${String(offerId)}_${String(sessionKey)}`;
-    const hasAddonStepConfigured = (this.selectedBundle?.steps || []).some((step) => {
+    const hasAddonStepConfigured = (this.selectedBundle?.steps || []).some((step: any) => {
       const addonEval = this.getAddonTierEvaluation?.(step);
       return step?.isFreeGift === true && step?.addonDisplayFree !== true && addonEval?.tier;
     });
     let hasSelectedAddonLine = false;
 
-    this.selectedProducts.forEach((stepSelections, stepIndex) => {
+    this.selectedProducts.forEach((stepSelections: any, stepIndex: string|number) => {
       const productsInStep = this.expandProductsByVariant(this.stepProductData[stepIndex] || []);
 
-      Object.entries(stepSelections).forEach(([variantId, quantity]) => {
+      Object.entries(stepSelections).forEach(([variantId, quantity]: any) => {
         if (quantity <= 0) return;
         const product = this.findProductBySelectionKey(productsInStep, variantId);
         if (!product) return;
@@ -231,7 +234,7 @@ export const ProductPageCartMethods: Record<string, any> & ThisType<any> = {
         const addonEval = this.getAddonTierEvaluation?.(step) || {};
         const addonDiscount = this.getAddonLineDiscount(step);
         const isChargeableAddonStep = step?.isFreeGift === true && step?.addonDisplayFree !== true;
-        const properties = {};
+        const properties: any = {};
           if (isChargeableAddonStep && addonEval?.tier) {
             hasSelectedAddonLine = true;
             properties._addon_product = 'true';
@@ -252,7 +255,7 @@ export const ProductPageCartMethods: Record<string, any> & ThisType<any> = {
           properties._bundle_step_type = 'default';
         }
 
-        const cartItem = {
+        const cartItem: any = {
           id: parseInt(this.extractId(variantId)),
           quantity,
           properties,
@@ -279,13 +282,13 @@ export const ProductPageCartMethods: Record<string, any> & ThisType<any> = {
     return cartItems;
   },
 
-  buildProductPageCartFormData(cartItems, {
+  buildProductPageCartFormData(cartItems: any, {
     bundleName = '',
     offerId = '',
     sessionKey = '',
     runtimeToken = '',
     sellingPlanId = '',
-  } = {}) {
+  }: any = {}) {
     return buildProductPageCartFormData(cartItems, {
       bundleName,
       offerId,
@@ -295,7 +298,7 @@ export const ProductPageCartMethods: Record<string, any> & ThisType<any> = {
     });
   },
 
-  parseRuntimeAddonDiscount(stepType) {
+  parseRuntimeAddonDiscount(stepType: string) {
     if (typeof stepType !== 'string') return null;
     const parts = stepType.split(':');
     if (parts.length !== 3 || parts[0] !== 'addon' || String(parts[1]).toUpperCase() !== 'PERCENTAGE') {
@@ -306,14 +309,14 @@ export const ProductPageCartMethods: Record<string, any> & ThisType<any> = {
     return { type: 'PERCENTAGE', value: Math.min(100, value) };
   },
 
-  async requestCartTransformRuntimeToken(cartItems, { offerGroupId, bundleType, sellingPlanId = '' }) {
-    const components = [];
-    const addons = [];
+  async requestCartTransformRuntimeToken(cartItems: any[], { offerGroupId, bundleType, sellingPlanId = '' }: any) {
+    const components: { variantId: any; productId: any; quantity: any; }[] = [];
+    const addons: { discount: any; variantId: any; productId: any; quantity: any; }[] = [];
 
-    cartItems.forEach((item) => {
+    cartItems.forEach((item: any) => {
       const stepType = item?.properties?._bundle_step_type;
       const isAddon = stepType === 'addon' || (typeof stepType === 'string' && stepType.startsWith('addon:'));
-      const line = {
+      const line: any = {
         variantId: item.id,
         productId: item._wpbProductId,
         quantity: item.quantity,
@@ -342,7 +345,7 @@ export const ProductPageCartMethods: Record<string, any> & ThisType<any> = {
           subscription: {
             sellingPlanGroupId: this.selectedBundle?.subscription?.selectedGroup?.id,
             sellingPlanId,
-            recurringBundleDiscount: subscription.recurringBundleDiscount === true,
+            recurringBundleDiscount: this.selectedBundle?.subscription?.recurringBundleDiscount === true,
           },
         } : {}),
       }),
@@ -354,7 +357,7 @@ export const ProductPageCartMethods: Record<string, any> & ThisType<any> = {
     return data.token;
   },
 
-  async syncBundleDetailsCartMetafield(bundleDetailsKey, sourceProperties) {
+  async syncBundleDetailsCartMetafield(bundleDetailsKey: any, sourceProperties: any) {
     try {
       const displayProperties = this.buildBundleDetailsDisplayProperties(sourceProperties);
       if (!bundleDetailsKey || Object.keys(displayProperties).length === 0) return;
@@ -372,13 +375,13 @@ export const ProductPageCartMethods: Record<string, any> & ThisType<any> = {
       if (!response.ok) throw new Error(`bundle_details sync failed (${response.status})`);
       const data = await response.json().catch(() => null);
       if (data?.ok !== true) throw new Error(data?.error || 'bundle_details sync failed');
-    } catch (error) {
+    } catch (error: any) {
       console.warn('[Wolfpack Bundles] Failed to sync bundle_details cart metafield', error);
     }
   },
 
-  buildBundleDetailsDisplayProperties(sourceProperties) {
-    const displayProperties = {};
+  buildBundleDetailsDisplayProperties(sourceProperties: any) {
+    const displayProperties: any = {};
     const raw = sourceProperties?._bundle_display_properties;
     const cartLineLabels = this.getCartLineLabels();
 

@@ -149,24 +149,18 @@ describe('PPB List Cascade selected entries integration', () => {
   it('toggles the selected drawer only when selected entries exist', () => {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { getNextCascadeSelectedDrawerExpandedState } = require('../../../app/assets/widgets/product-page/templates/cascade-template.js');
-    const onEmpty = jest.fn();
-
     expect(getNextCascadeSelectedDrawerExpandedState({
       hasSelectedProducts: true,
       isExpanded: false,
-      onEmpty,
     })).toBe(true);
     expect(getNextCascadeSelectedDrawerExpandedState({
       hasSelectedProducts: true,
       isExpanded: true,
-      onEmpty,
     })).toBe(false);
     expect(getNextCascadeSelectedDrawerExpandedState({
       hasSelectedProducts: false,
       isExpanded: false,
-      onEmpty,
     })).toBe(false);
-    expect(onEmpty).toHaveBeenCalledTimes(1);
   });
 
   it('sizes the selected drawer from list content plus the drawer border', () => {
@@ -214,7 +208,7 @@ describe('PPB List Cascade selected entries integration', () => {
     }
   });
 
-  it('prepares EB-style Cascade selected row display data', () => {
+  it('prepares Cascade selected rows with one quantity indicator', () => {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { prepareCascadeSelectedProductDisplay } = require('../../../app/assets/widgets/product-page/templates/cascade-template.js');
 
@@ -229,7 +223,7 @@ describe('PPB List Cascade selected entries integration', () => {
     });
 
     expect(product).toMatchObject({
-      title: '14k Dangling Obsidian Earrings x 2',
+      title: '14k Dangling Obsidian Earrings',
       priceText: '$829.00',
       quantityLabel: 'x 2',
       quantity: 2,
@@ -256,7 +250,7 @@ describe('PPB List Cascade selected entries integration', () => {
     });
 
     expect(product).toMatchObject({
-      title: '14k Dangling Obsidian Earrings x 1',
+      title: '14k Dangling Obsidian Earrings',
       priceText: '$829.00',
       quantityLabel: 'x 1',
       quantity: 1,
@@ -282,7 +276,7 @@ describe('PPB List Cascade selected entries integration', () => {
     });
 
     expect(product).toMatchObject({
-      title: '18k Pedal Ring - 8 x 1',
+      title: '18k Pedal Ring - 8',
       priceText: '$399.00',
       quantityLabel: 'x 1',
       quantity: 1,
@@ -296,7 +290,7 @@ describe('PPB List Cascade selected entries integration', () => {
     const { renderSelectedProductRow } = require('../../../app/assets/widgets/shared/components/selected-product-row.js');
 
     const view = renderSelectedProductRow({
-      title: '14k Dangling Obsidian Earrings x 2',
+      title: '14k Dangling Obsidian Earrings',
       variantId: 'variant_a',
       quantity: 2,
       quantityLabel: 'x 2',
@@ -305,7 +299,7 @@ describe('PPB List Cascade selected entries integration', () => {
       className: 'bw-ppb-cascade-selected-item',
     });
 
-    expect(view).toContain('14k Dangling Obsidian Earrings x 2');
+    expect(view).toContain('14k Dangling Obsidian Earrings');
     expect(view).toContain('$829.00');
     expect(view).toContain('>x 2</span>');
   });

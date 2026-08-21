@@ -121,7 +121,7 @@ export function parsePricingConfiguration(raw: unknown): PricingConfiguration {
   const rules = rawRules.map((r, i) => {
     try {
       return parsePricingRule(r);
-    } catch (err) {
+    } catch (err: any) {
       throw new Error(`parsePricingConfiguration: rule[${i}] invalid — ${(err as Error).message}`);
     }
   });

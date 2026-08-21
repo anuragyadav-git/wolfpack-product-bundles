@@ -1,5 +1,5 @@
 import { useFetcher, useNavigate, useLoaderData, useSearchParams } from "@remix-run/react";
-import { lazy, useCallback, useRef, useEffect, useMemo, useState, Suspense } from "react";
+import { lazy, useCallback, useRef, useEffect, useMemo, useReducer, useState, Suspense } from "react";
 import { useAppBridge } from "@shopify/app-bridge-react";
 import { useTranslation } from "react-i18next";
 import { OptimisedImage } from "../../../components/OptimisedImage";
@@ -39,6 +39,16 @@ import type { action, DashboardAppEmbedStatus, loader } from "./route";
 import { DashboardTopCards } from "./DashboardTopCards";
 import { DashboardStatusGrid } from "./DashboardStatusGrid";
 import { DashboardResourcesCard } from "./DashboardResourcesCard";
+import { AppEmbedEnableModal } from "./AppEmbedEnableModal";
+import {
+  checkAppEmbedActivation,
+  createAppEmbedReturnCheckCoordinator,
+  initialAppEmbedEnableFlow,
+  reduceAppEmbedEnableFlow,
+  restoreAppEmbedEnableActionFocus,
+  shouldCheckAppEmbedOnClose,
+} from "./dashboard-app-embed-enable-flow";
+import { hidePolarisModal } from "../_shared/bundle-configure/modal-utils";
 import {
   shouldRenderDashboardDeleteModal,
   shouldRenderDashboardPreviewModal,
@@ -84,6 +94,8 @@ export function DashboardPage({ appEmbedStatus, banners }: DashboardPageProps) {
   } = dashboardState;
 
   const deleteModalRef = useRef<any>(null);
+  const appEmbedModalRef = useRef<any>(null);
+  const appEmbedEnableActionRef = useRef<any>(null);
   const searchRef = useRef<any>(null);
   const langSelectRef = useRef<any>(null);
   const perPageButtonRef = useRef<any>(null);
@@ -98,9 +110,13 @@ export function DashboardPage({ appEmbedStatus, banners }: DashboardPageProps) {
   const [previewingBundleId, setPreviewingBundleId] = useState<string | null>(null);
   const [editingBundleId, setEditingBundleId] = useState<string | null>(null);
   const [activeActionMenuBundleId, setActiveActionMenuBundleId] = useState<string | null>(null);
-  const [appEmbedOpenOptimism, setAppEmbedOpenOptimism] = useState(false);
   const [currentThemeEditorUrl, setCurrentThemeEditorUrl] = useState<string | null>(null);
   const [currentAppEmbedEnabled, setCurrentAppEmbedEnabled] = useState<boolean | null>(null);
+  const [appEmbedEnableFlow, dispatchAppEmbedEnableFlow] = useReducer(
+    reduceAppEmbedEnableFlow,
+    initialAppEmbedEnableFlow,
+  );
+  const closingAppEmbedModalRef = useRef(false);
 
   const refreshAppEmbedFromBridge = useCallback(async () => {
     try {
@@ -113,36 +129,11 @@ export function DashboardPage({ appEmbedStatus, banners }: DashboardPageProps) {
     }
   }, [appEmbedStatus.appEmbedEnabled, shopify]);
 
-  const refreshAppEmbedFromBridgeAndClearOptimism = useCallback(async () => {
-    await refreshAppEmbedFromBridge();
-    setAppEmbedOpenOptimism(false);
-  }, [refreshAppEmbedFromBridge]);
-
   useEffect(() => {
     setCurrentThemeEditorUrl(appEmbedStatus.themeEditorUrl);
     setCurrentAppEmbedEnabled(null);
     void refreshAppEmbedFromBridge();
   }, [appEmbedStatus.appEmbedEnabled, appEmbedStatus.themeEditorUrl, refreshAppEmbedFromBridge]);
-
-  useEffect(() => {
-    if (!appEmbedOpenOptimism) return;
-    const onWindowFocus = () => {
-      void refreshAppEmbedFromBridgeAndClearOptimism();
-    };
-    const onVisibilityChange = () => {
-      if (document.visibilityState === "visible") {
-        void refreshAppEmbedFromBridgeAndClearOptimism();
-      }
-    };
-
-    window.addEventListener("focus", onWindowFocus);
-    document.addEventListener("visibilitychange", onVisibilityChange);
-
-    return () => {
-      window.removeEventListener("focus", onWindowFocus);
-      document.removeEventListener("visibilitychange", onVisibilityChange);
-    };
-  }, [appEmbedOpenOptimism, refreshAppEmbedFromBridgeAndClearOptimism]);
 
   useEffect(() => {
     if (fetcher.state !== 'idle' || !fetcher.data) return;
@@ -249,12 +240,64 @@ export function DashboardPage({ appEmbedStatus, banners }: DashboardPageProps) {
     onSilentBlock: () => shopify.toast.show(t("dashboard.actions.themeEditorUnavailable"), { isError: true }),
   });
 
-  const handleOpenThemeEditor = useCallback(() => {
+  const checkAppEmbedForEnableFlow = useCallback(async () => {
+    dispatchAppEmbedEnableFlow({ type: "check_started" });
+    const result = await checkAppEmbedActivation(
+      () => getThemeExtensionStatusFromAppBridge(shopify),
+    );
+    setCurrentAppEmbedEnabled(result.appEmbedEnabled);
+    dispatchAppEmbedEnableFlow({
+      type: result.phase === "success" ? "check_succeeded" : "check_failed",
+    });
+    return result;
+  }, [shopify]);
+
+  const appEmbedReturnCheck = useMemo(
+    () => createAppEmbedReturnCheckCoordinator(checkAppEmbedForEnableFlow),
+    [checkAppEmbedForEnableFlow],
+  );
+
+  const handleOpenAppEmbedEnableModal = useCallback(() => {
+    dispatchAppEmbedEnableFlow({ type: "open" });
+  }, []);
+
+  const handleLaunchAppEmbedThemeEditor = useCallback(() => {
     if (!currentThemeEditorUrl) return;
-    setAppEmbedOpenOptimism(true);
-    setCurrentAppEmbedEnabled(true);
+    appEmbedReturnCheck.arm();
+    dispatchAppEmbedEnableFlow({ type: "theme_editor_opened" });
     openThemeEditorInNewTab(currentThemeEditorUrl);
-  }, [currentThemeEditorUrl]);
+  }, [appEmbedReturnCheck, currentThemeEditorUrl]);
+
+  const closeAppEmbedEnableModal = useCallback(() => {
+    if (closingAppEmbedModalRef.current) return;
+    closingAppEmbedModalRef.current = true;
+    if (shouldCheckAppEmbedOnClose(appEmbedEnableFlow)) {
+      void appEmbedReturnCheck.checkNow();
+    }
+    hidePolarisModal(appEmbedModalRef);
+    dispatchAppEmbedEnableFlow({ type: "close" });
+    restoreAppEmbedEnableActionFocus(appEmbedEnableActionRef.current, (restoreFocus) => {
+      closingAppEmbedModalRef.current = false;
+      window.requestAnimationFrame(restoreFocus);
+    });
+  }, [appEmbedEnableFlow, appEmbedReturnCheck]);
+
+  useEffect(() => {
+    if (!appEmbedEnableFlow.open || !appEmbedEnableFlow.visitedThemeEditor) return;
+    const checkOnReturn = () => {
+      void appEmbedReturnCheck.requestOnReturn();
+    };
+    const checkOnVisibleReturn = () => {
+      if (document.visibilityState === "visible") checkOnReturn();
+    };
+
+    window.addEventListener("focus", checkOnReturn);
+    document.addEventListener("visibilitychange", checkOnVisibleReturn);
+    return () => {
+      window.removeEventListener("focus", checkOnReturn);
+      document.removeEventListener("visibilitychange", checkOnVisibleReturn);
+    };
+  }, [appEmbedEnableFlow.open, appEmbedEnableFlow.visitedThemeEditor, appEmbedReturnCheck]);
 
   const renderDeleteModal = shouldRenderDashboardDeleteModal({ bundleToDelete });
   const renderPreviewModal = shouldRenderDashboardPreviewModal({
@@ -515,6 +558,16 @@ export function DashboardPage({ appEmbedStatus, banners }: DashboardPageProps) {
 
   return (
     <>
+      {appEmbedEnableFlow.open && (
+        <AppEmbedEnableModal
+          modalRef={appEmbedModalRef}
+          phase={appEmbedEnableFlow.phase}
+          onOpenThemeEditor={handleLaunchAppEmbedThemeEditor}
+          onCancel={closeAppEmbedEnableModal}
+          onDone={closeAppEmbedEnableModal}
+          onSupport={handleDirectChat}
+        />
+      )}
       {renderDeleteModal && (
         <s-modal
           ref={deleteModalRef}
@@ -575,7 +628,8 @@ export function DashboardPage({ appEmbedStatus, banners }: DashboardPageProps) {
             error={themeExtensionStatus.error}
             themeEditorUrl={currentThemeEditorUrl}
             appEmbedEnabled={appEmbedEnabled}
-            onOpenThemeEditor={handleOpenThemeEditor}
+            onOpenThemeEditor={handleOpenAppEmbedEnableModal}
+            enableActionRef={appEmbedEnableActionRef}
           />
           {!banners.proxyHealthy && <ProxyHealthBanner shop={shop} appUrl={appUrl} />}
 

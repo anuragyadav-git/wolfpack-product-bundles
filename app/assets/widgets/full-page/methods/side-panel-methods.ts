@@ -10,14 +10,14 @@ import { readRenderedDiscountProgressPercent } from '../../shared/components/dis
 
 const sidePanelTemplateSystem = TemplateDesignSystem;
 
-function getSummarySlotQuantity(item = {}) {
+function getSummarySlotQuantity(item: any = {}) {
   const quantity = Number(item?.quantity);
   return Number.isFinite(quantity) ? Math.max(0, Math.floor(quantity)) : 0;
 }
 
-function expandSelectedItemsForSummarySlots(allSelectedProducts = []) {
+function expandSelectedItemsForSummarySlots(allSelectedProducts: any[] = []) {
   const selectedProducts = Array.isArray(allSelectedProducts) ? allSelectedProducts : [];
-  const expanded = [];
+  const expanded: any[] = [];
 
   selectedProducts.forEach((item) => {
     const normalizedQuantity = getSummarySlotQuantity(item);
@@ -29,43 +29,43 @@ function expandSelectedItemsForSummarySlots(allSelectedProducts = []) {
   return expanded;
 }
 
-function getSelectionId(item = {}) {
+function getSelectionId(item: any = {}) {
   return String(item?.selectionId || '');
 }
 
-function isSupportedFpbPreset(rawValue) {
+function isSupportedFpbPreset(rawValue: any) {
   if (typeof sidePanelTemplateSystem?.fpb?.isSupportedPreset === 'function') {
     return sidePanelTemplateSystem.fpb.isSupportedPreset(rawValue);
   }
   return Boolean(getFpbPresetContract(rawValue));
 }
 
-function getFpbPresetContract(designPreset) {
+function getFpbPresetContract(designPreset: any) {
   if (typeof sidePanelTemplateSystem?.fpb?.resolveContract !== 'function') return null;
   return sidePanelTemplateSystem.fpb.resolveContract(designPreset) || null;
 }
 
-function isHorizontalFpbPreset(designPreset) {
+function isHorizontalFpbPreset(designPreset: any) {
   return getFpbPresetContract(designPreset)?.productCard?.mode === 'row';
 }
 
-function isClassicFpbPreset(designPreset) {
+function isClassicFpbPreset(designPreset: any) {
   return getFpbPresetContract(designPreset)?.summary?.mode === 'slots';
 }
 
-function isStandardFpbPreset(designPreset) {
+function isStandardFpbPreset(designPreset: any) {
   const contract = getFpbPresetContract(designPreset);
   return contract?.summary?.mode === 'rows' && contract?.productCard?.mode === 'grid';
 }
 
-function isStandardOrClassicFpbPreset(designPreset) {
+function isStandardOrClassicFpbPreset(designPreset: any) {
   return isStandardFpbPreset(designPreset) || isClassicFpbPreset(designPreset);
 }
 
 export function shouldUseSharedDesktopSummarySlotTiles({
   designPreset,
   productSlotsEnabled,
-} = {}) {
+}: any = {}) {
   if (productSlotsEnabled !== true) return false;
   const contract = getFpbPresetContract(designPreset);
   return isSupportedFpbPreset(designPreset) && contract?.summary?.mode !== 'slots';
@@ -74,7 +74,7 @@ export function shouldUseSharedDesktopSummarySlotTiles({
 export function shouldUseClassicDesktopSummarySlotTiles({
   isClassicDesktopSidebar,
   productSlotsEnabled,
-} = {}) {
+}: any = {}) {
   return isClassicDesktopSidebar === true && productSlotsEnabled === true;
 }
 
@@ -82,7 +82,7 @@ export function shouldUseSharedDesktopSummaryRows({
   designPreset,
   isMobileSheet,
   productSlotsEnabled,
-} = {}) {
+}: any = {}) {
   return isSupportedFpbPreset(designPreset)
     && isMobileSheet !== true
     && productSlotsEnabled !== true;
@@ -93,7 +93,7 @@ export function getRemainingSummarySkeletonCount({
   productSlotsEnabled,
   requiredQuantity,
   selectedQuantity,
-} = {}) {
+}: any = {}) {
   if (productSlotsEnabled === true) return 0;
   if (!isSupportedFpbPreset(designPreset)) return 0;
 
@@ -106,17 +106,20 @@ export function getRemainingSummarySkeletonCount({
   return Math.max(0, target - (Number.isFinite(selected) ? Math.max(0, selected) : 0));
 }
 
-export function createSummaryClearButton(onClear) {
+export function createSummaryClearButton(onClear: any, label = 'Clear') {
   const clearButton = document.createElement('button');
   clearButton.className = 'side-panel-clear-btn';
   clearButton.type = 'button';
-  clearButton.innerHTML = `<svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" aria-hidden="true"><path d="M6 2h8a1 1 0 0 1 1 1v1H5V3a1 1 0 0 1 1-1Zm-2 3h12l-1 13H5L4 5Zm4 2v9m4-9v9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg><span>Clear</span>`;
+  clearButton.innerHTML = `<svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" aria-hidden="true"><path d="M6 2h8a1 1 0 0 1 1 1v1H5V3a1 1 0 0 1 1-1Zm-2 3h12l-1 13H5L4 5Zm4 2v9m4-9v9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>`;
+  const labelElement = document.createElement('span');
+  labelElement.textContent = label;
+  clearButton.appendChild(labelElement);
   clearButton.addEventListener('click', onClear);
   return clearButton;
 }
 
 export const fullPageSidePanelMethods: Record<string, any> & ThisType<any> = {
-renderSidePanel(panel) {
+renderSidePanel(panel: any) {
   if (!panel) return;
   const previousProgressPercent = readRenderedDiscountProgressPercent(
     panel.querySelector?.('.fpb-discount-progress')
@@ -209,7 +212,10 @@ renderSidePanel(panel) {
   header.appendChild(headerCopy);
 
   if (isStandardDesktopSidebar || allSelectedProducts.length > 0) {
-    header.appendChild(createSummaryClearButton(() => this.showClearCartConfirmation()));
+    header.appendChild(createSummaryClearButton(
+      () => this.showClearCartConfirmation(),
+      this._resolveText?.('clearCartButtonText', 'Clear') || 'Clear',
+    ));
   }
   panel.appendChild(header);
 
@@ -350,7 +356,7 @@ renderSidePanel(panel) {
     if (useSharedDesktopSummarySlotTiles) {
       this._renderStandardSidebarSlotTiles(productsContainer, allSelectedProducts);
     } else if (allSelectedProducts.length > 0) {
-      allSelectedProducts.forEach(item => {
+      allSelectedProducts.forEach((item: any)  => {
         if (useSharedDesktopSummaryRows) {
           const row = this.createStandardSidebarSelectedRow(item, currencyInfo);
           const removeBtn = row?.querySelector('[data-action="remove-selected-product"]');
@@ -514,7 +520,7 @@ renderSidePanel(panel) {
   totalSection.innerHTML = `
     <span class="side-panel-total-heading">
       <span class="side-panel-total-label">Total</span>
-      ${discountBadgeLabel ? `<span class="fpb-summary-discount-badge">${discountBadgeLabel}</span>` : ''}
+      ${discountBadgeLabel ? `<span class="fpb-summary-discount-badge" data-wpb-discount-feedback-pill>${discountBadgeLabel}</span>` : ''}
     </span>
     <div class="side-panel-total-prices">
       ${shouldShowOriginalTotal ? `<span class="side-panel-total-original">${CurrencyManager.convertAndFormat(totalPrice, currencyInfo)}</span>` : ''}
@@ -631,7 +637,7 @@ renderSidePanel(panel) {
   this.renderPurchaseOptions?.();
 },
 
-_renderStandardSidebarSlotTiles(container, allSelectedProducts = []) {
+_renderStandardSidebarSlotTiles(container: any, allSelectedProducts: any[] = []) {
   const selectedItems = expandSelectedItemsForSummarySlots(allSelectedProducts);
   const selectedCount = selectedItems.length;
   const slotCount = Math.max(
@@ -671,11 +677,11 @@ _renderStandardSidebarSlotTiles(container, allSelectedProducts = []) {
           removeBtn.classList.add('side-panel-inline-slot-remove--disabled');
           removeBtn.setAttribute('aria-disabled', 'true');
           removeBtn.title = removalState.blockedMessage;
-          removeBtn.addEventListener('click', (event) => {
+          removeBtn.addEventListener('click', (event: any) => {
             event.stopPropagation();
           });
         } else {
-          removeBtn.addEventListener('click', (event) => {
+          removeBtn.addEventListener('click', (event: any) => {
             event.stopPropagation();
             if (!Number.isFinite(selectedStepIndex) || !productId) return;
 
@@ -711,7 +717,7 @@ _renderStandardSidebarSlotTiles(container, allSelectedProducts = []) {
   container.appendChild(slots);
 },
 
-createSidebarTierCta(nextRule) {
+createSidebarTierCta(nextRule: any) {
   const content = this.getSidebarTierCtaContent(nextRule);
   if (!content) return null;
 
@@ -737,7 +743,7 @@ createSidebarTierCta(nextRule) {
   return cta;
 },
 
-getSummaryProductRemovalState(item = {}) {
+getSummaryProductRemovalState(item: any = {}) {
   const itemStepIndex = Number(item?.stepIndex);
   const currentStepIndex = Number(this.currentStepIndex || 0);
   const steps = Array.isArray(this.selectedBundle?.steps) ? this.selectedBundle.steps : [];
@@ -763,7 +769,7 @@ getSummaryProductRemoveButtonLabel(summaryTitle = '') {
   return `Delete ${normalizedTitle || 'product'}`;
 },
 
-removeSummarySelectedProduct(item = {}, summaryTitle = '') {
+removeSummarySelectedProduct(item: any = {}, summaryTitle = '') {
   const removalState = this.getSummaryProductRemovalState(item);
   if (!removalState.canRemove) {
     ToastManager.show(removalState.blockedMessage);
@@ -772,7 +778,7 @@ removeSummarySelectedProduct(item = {}, summaryTitle = '') {
 
   const stepIndex = item.stepIndex;
   const productId = getSelectionId(item);
-  const removedItem = { stepIndex, selectionId: productId, quantity: item.quantity, title: item.title };
+  const removedItem: any = { stepIndex, selectionId: productId, quantity: item.quantity, title: item.title };
   this.updateProductSelection(stepIndex, productId, 0);
   const displayTitle = summaryTitle || item.title || 'Product';
   const truncated = displayTitle.length > 25 ? displayTitle.substring(0, 25) + '...' : displayTitle;

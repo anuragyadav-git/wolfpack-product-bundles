@@ -1,5 +1,6 @@
 import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
 import { DefaultProductDiscountTipBanner } from "../../_shared/bundle-configure/DefaultProductDiscountTipBanner";
+import { DisabledConfigurationRegion } from "../../_shared/bundle-configure/DisabledConfigurationRegion";
 
 export function FpbDefaultProductsSettings({
   flow,
@@ -28,7 +29,7 @@ export function FpbDefaultProductsSettings({
           const defaultProductSelectionIds = selectedDefaultProducts
             .map(
               (product: any) =>
-                product.graphqlId || product.productId || product.id,
+                product.graphqlId || product.productId || product.id
             )
             .filter(Boolean)
             .map((id: string) => ({ id }));
@@ -44,10 +45,10 @@ export function FpbDefaultProductsSettings({
               .map(buildDefaultProductEntryFromPicker)
               .filter(
                 (
-                  p: any,
+                  p: any
                 ): p is NonNullable<
                   ReturnType<typeof buildDefaultProductEntryFromPicker>
-                > => Boolean(p),
+                > => Boolean(p)
               );
             setDefaultProductsData((prev: any) => ({
               isDefaultProductsEnabled: true,
@@ -85,27 +86,16 @@ export function FpbDefaultProductsSettings({
                   }}
                 />
               </s-stack>
-              <p style={{ margin: 0, fontSize: 13, color: "#6d7175" }}>
-                Choose products that should be added to bundle by default
-              </p>
-              <DefaultProductDiscountTipBanner />
-              {!defaultProductsEnabled && (
-                <p
-                  style={{
-                    margin: 0,
-                    fontSize: 13,
-                    color: "#6d7175",
-                  }}
-                >
-                  These products will be added to user&apos;s box automatically
-                  on the first step.
-                </p>
-              )}
-              {defaultProductsEnabled && (
-                <>
+              <DisabledConfigurationRegion disabled={!defaultProductsEnabled}>
+                <s-stack direction="block" gap="small">
+                  <p style={{ margin: 0, fontSize: 13, color: "#6d7175" }}>
+                    Choose products that should be added to bundle by default
+                  </p>
+                  <DefaultProductDiscountTipBanner />
                   <s-text-field
                     label="Default products title"
                     value={defaultProductsData.defaultProductsTitle ?? ""}
+                    disabled={!defaultProductsEnabled || undefined}
                     onInput={(e) => {
                       const value = (e.target as HTMLInputElement).value;
                       setDefaultProductsData((prev: any) => ({
@@ -128,7 +118,10 @@ export function FpbDefaultProductsSettings({
                     </p>
                     <s-stack direction="inline" alignItems="center" gap="small">
                       <s-button
-                        variant="primary"
+                        variant={
+                          defaultProductsEnabled ? "primary" : "secondary"
+                        }
+                        disabled={!defaultProductsEnabled || undefined}
                         onClick={handleDefaultProductPicker}
                       >
                         Browse Products
@@ -140,18 +133,16 @@ export function FpbDefaultProductsSettings({
                       )}
                     </s-stack>
                     {validationErrors["settings.defaultProducts"] && (
-                      <s-text id="configure-settings-defaultProducts" tone="critical">
+                      <s-text
+                        id="configure-settings-defaultProducts"
+                        tone="critical"
+                      >
                         {validationErrors["settings.defaultProducts"]}
                       </s-text>
                     )}
                   </div>
-                </>
-              )}
-              {!defaultProductsEnabled && (
-                <s-button variant="secondary" disabled>
-                  Browse Products
-                </s-button>
-              )}
+                </s-stack>
+              </DisabledConfigurationRegion>
             </s-stack>
           );
         })()}

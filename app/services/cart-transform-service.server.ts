@@ -141,7 +141,7 @@ export class CartTransformService {
         functionId: existingTransform?.node?.functionId,
         blockOnFailure: existingTransform?.node?.blockOnFailure,
       };
-    } catch (error) {
+    } catch (error: any) {
       AppLogger.warn('Error checking existing cart transforms', {
         component: 'cart-transform',
         operation: 'check-existing'
@@ -177,7 +177,7 @@ export class CartTransformService {
         id: match?.node?.id,
         functionId: match?.node?.functionId,
       };
-    } catch (error) {
+    } catch (error: any) {
       AppLogger.warn('Error finding cart transform by function ID', {
         component: 'cart-transform',
         operation: 'find-by-function-id'
@@ -238,7 +238,7 @@ export class CartTransformService {
         success: true,
         cartTransformId: cartTransformCreate.cartTransform.id
       };
-    } catch (error) {
+    } catch (error: any) {
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error during cart transform creation'
@@ -327,7 +327,7 @@ export class CartTransformService {
       }
 
       return result;
-    } catch (error) {
+    } catch (error: any) {
       AppLogger.error('Error during cart transform activation', {
         component: 'cart-transform',
         operation: 'activate'
@@ -426,7 +426,7 @@ export class CartTransformService {
         return { success: false, cartTransformId, error: message };
       }
       return { success: true, cartTransformId };
-    } catch (error) {
+    } catch (error: any) {
       const message = error instanceof Error ? error.message : 'Unknown runtime token secret sync error';
       AppLogger.error('Error syncing runtime token secret metafield', {
         component: 'cart-transform',
@@ -513,7 +513,7 @@ export class CartTransformService {
       }
 
       return { success: true, cartTransformId };
-    } catch (error) {
+    } catch (error: any) {
       const message = error instanceof Error ? error.message : 'Unknown cart transform metafield sync error';
       AppLogger.error('Error syncing cart line messaging metafield', {
         component: 'cart-transform',

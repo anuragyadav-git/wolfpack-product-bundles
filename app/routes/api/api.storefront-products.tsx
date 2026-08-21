@@ -266,7 +266,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
           migrateIfNeeded: false,
           refreshIfNeeded: false,
         });
-      } catch (error) {
+      } catch (error: any) {
         AppLogger.error("[STOREFRONT_API] Failed to create token on-demand", { component: "api.storefront-products", shop }, error);
         return json({ error: "Could not create storefront access token" }, { status: 500, headers: CORS_HEADERS });
       }
@@ -341,7 +341,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
             images,
             variants: variantEdges.map(mapStorefrontVariant)
           };
-        } catch (error) {
+        } catch (error: any) {
           AppLogger.warn("[STOREFRONT_API] Failed to fetch variants for product", { component: "api.storefront-products", productId: product.id });
           const fallbackVariants = (product.variants?.edges || []).map(mapStorefrontVariant);
 
@@ -375,7 +375,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
       }
     });
 
-  } catch (error) {
+  } catch (error: any) {
     AppLogger.error("[STOREFRONT_API] Internal error", { component: "api.storefront-products" }, error);
     return json({
       error: "Internal server error",

@@ -213,7 +213,6 @@ function buildSaveFormData(personalizationDataFixture: ReturnType<typeof buildPe
   fd.set("personalizationData", JSON.stringify(personalizationDataFixture));
   fd.set("searchBarEnabled", "false");
   fd.set("showProductPrices", "true");
-  fd.set("showCompareAtPrices", "false");
   fd.set("floatingBadgeEnabled", "false");
   fd.set("floatingBadgeText", "");
   fd.set("allowQuantityChanges", "true");
