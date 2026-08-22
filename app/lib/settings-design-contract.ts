@@ -51,7 +51,7 @@ function isNonNegativeSize(value: string) {
 
 function validateFieldValue(field: SettingsField, value: string) {
   if (field.kind === "color") return isCssColor(value);
-  if (field.kind === "loadingGif") {
+  if (field.kind === "loadingGif" || field.kind === "image" || field.kind === "file") {
     if (value === "") return true;
     try {
       const url = new URL(value);

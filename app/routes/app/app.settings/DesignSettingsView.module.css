@@ -884,6 +884,20 @@
   gap: 2px;
 }
 
+.previewEmptySlotIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  font-weight: 700;
+  font-size: 16px;
+  background-image: var(--preview-slot-icon-url, none);
+  background-size: var(--preview-slot-icon-fit, contain);
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
 .previewSlot[data-slot-orientation="vertical"] {
   grid-template-columns: auto minmax(0, 1fr) auto;
   min-height: 58px;

@@ -348,6 +348,8 @@ export function generateCSSVariables(ctx: CSSGenerationContext): string {
   --bundle-empty-state-text: ${s.emptyStateTextColor || globalSecondaryText};
   --bundle-empty-state-border-style: ${s.emptyStateBorderStyle || 'dashed'};
   --bundle-empty-slot-border-style: ${s.emptySlotBorderStyle || 'dashed'};
+  --bundle-slot-icon-url: ${s.slotIconUrl ? `url("${s.slotIconUrl}")` : 'none'};
+  --bundle-slot-icon-fit: ${s.slotIconFit === 'fill' ? 'fill' : s.slotIconFit === 'cover' ? 'cover' : 'contain'};
   /* Drawer */
   --bundle-drawer-bg: ${s.drawerBgColor || '#FFFFFF'};
   /* Add to Cart Button */

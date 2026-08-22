@@ -90,6 +90,8 @@ describe("buildSettingsDesignRuntime", () => {
       },
       images: {
         productImageFit: "contain",
+        slotIconFit: "fit",
+        slotIconUrl: "",
       },
       isExpertControlsEnabled: false,
     });

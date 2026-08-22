@@ -36,6 +36,8 @@ const DEFAULT_STYLE_PRESETS = {
   },
   images: {
     productImageFit: "cover",
+    slotIconUrl: "",
+    slotIconFit: "fit",
   },
   isExpertControlsEnabled: false,
 };
@@ -381,6 +383,13 @@ function normalizeImageFit(value: string) {
   return fit === "contain" || fit === "fill" ? fit : "cover";
 }
 
+export function normalizeSlotIconFit(value: string): "fit" | "fill" | "cover" {
+  const cleaned = value.trim().toLowerCase();
+  if (cleaned === "fill") return "fill";
+  if (cleaned === "cover") return "cover";
+  return "fit";
+}
+
 function normalizeRadiusStyle(value: string, allowRound: boolean) {
   const cleaned = value.trim().toLowerCase();
   if (cleaned === "sharp") return "Sharp";
@@ -441,6 +450,8 @@ export function buildSettingsDesignRuntime(payload: unknown, currentPageCustomiz
   const cardRadiusStyle = normalizeRadiusStyle(getField(fieldValues, "Product Card & Cart Corner Style", DEFAULT_STYLE_PRESETS.corners.productCardBorderRadiusStyle), false);
   const cardRadiusBase = numberFromPx(getField(fieldValues, "Product Card & Cart Base", `${DEFAULT_STYLE_PRESETS.corners.productCardBaseBorderRadius}px`), DEFAULT_STYLE_PRESETS.corners.productCardBaseBorderRadius);
   const productImageFit = normalizeImageFit(getField(fieldValues, "Image Fit", DEFAULT_STYLE_PRESETS.images.productImageFit));
+  const slotIconUrl = getField(fieldValues, "stylePresets.images.slotIconUrl", getField(fieldValues, "Slot Icon", DEFAULT_STYLE_PRESETS.images.slotIconUrl));
+  const slotIconFit = normalizeSlotIconFit(getField(fieldValues, "stylePresets.images.slotIconFit", getField(fieldValues, "Slot Icon Size", DEFAULT_STYLE_PRESETS.images.slotIconFit)));
   const loadingGifUrl = getField(fieldValues, "generalSettings.loadingGifUrl", "");
   const loadingBackgroundColor = getField(fieldValues, "generalSettings.loadingBgColor", "#ffffff");
   const buttonRadius = radiusForStyle(buttonRadiusStyle, buttonRadiusBase);
@@ -468,6 +479,10 @@ export function buildSettingsDesignRuntime(payload: unknown, currentPageCustomiz
   CARD_RADIUS_TARGETS.forEach((path) => setPath(designPatch, path, cardRadius));
   IMAGE_RADIUS_TARGETS.forEach((path) => setPath(designPatch, path, cardImageRadius));
   IMAGE_FIT_TARGETS.forEach((path) => setPath(designPatch, path, productImageFit));
+  setPath(designPatch, "stylePresets.images.slotIconUrl", slotIconUrl);
+  setPath(designPatch, "stylePresets.images.slotIconFit", slotIconFit);
+  setPath(designPatch, "mixAndMatchConfig.emptyStateCard.slotIconUrl", slotIconUrl);
+  setPath(designPatch, "mixAndMatchConfig.emptyStateCard.slotIconFit", slotIconFit);
   setPath(designPatch, "generalSettings.loadingGifUrl", loadingGifUrl);
   setPath(designPatch, "generalSettings.loadingBgColor", loadingBackgroundColor);
 
@@ -509,6 +524,8 @@ export function buildSettingsDesignRuntime(payload: unknown, currentPageCustomiz
     },
     images: {
       productImageFit,
+      slotIconUrl,
+      slotIconFit,
     },
     isExpertControlsEnabled,
   };
@@ -538,6 +555,8 @@ export function buildSettingsDesignRuntime(payload: unknown, currentPageCustomiz
     productCardFontSize: numberFromPx(primaryFontSize, 16),
     productCardFontWeight: weightToNumber(primaryFontWeight),
     productCardImageFit: productImageFit,
+    slotIconUrl,
+    slotIconFit,
     productCardBorderRadius: numberFromPx(cardRadius, 10),
     productImageBorderRadius: numberFromPx(cardImageRadius, 8),
     productFinalPriceColor: String((pageCustomization.productCard as JsonObject).finalPriceFontColor ?? primaryTextColor),
@@ -592,6 +611,8 @@ export function buildSettingsDesignRuntime(payload: unknown, currentPageCustomiz
         gifUrl: loadingGifUrl,
         backgroundColor: loadingBackgroundColor,
       },
+      slotIconUrl,
+      slotIconFit,
     },
   };
 

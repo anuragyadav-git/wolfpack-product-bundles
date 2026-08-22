@@ -16,12 +16,26 @@ export async function prepareStorefrontPreviewForOpen() {
   const formData = new FormData();
   formData.append("intent", "preparePreviewBundle");
 
-  const response = await fetch(getPrepareStorefrontPreviewUrl(window.location), {
-    method: "POST",
-    body: formData,
-  });
-  let data: PrepareStorefrontPreviewResponse | null = null;
+  let response: Response;
+  try {
+    response = await fetch(getPrepareStorefrontPreviewUrl(window.location), {
+      method: "POST",
+      body: formData,
+    });
+    if (!response.ok) {
+      response = await fetch(window.location.href, {
+        method: "POST",
+        body: formData,
+      });
+    }
+  } catch {
+    response = await fetch(window.location.href, {
+      method: "POST",
+      body: formData,
+    });
+  }
 
+  let data: PrepareStorefrontPreviewResponse | null = null;
   try {
     data = (await response.json()) as PrepareStorefrontPreviewResponse;
   } catch {

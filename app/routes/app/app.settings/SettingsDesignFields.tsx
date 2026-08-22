@@ -103,15 +103,16 @@ export function DesignFields({
                     />
                   );
                 }
-                if (field.kind === "loadingGif") {
+                if (field.kind === "loadingGif" || field.kind === "image" || field.kind === "file") {
+                  const isGif = field.kind === "loadingGif";
                   return (
                     <FilePicker
                       key={`${group.title}:${field.label}`}
                       label={field.label}
-                      hint="Click to upload a loading GIF"
+                      hint={isGif ? "Click to upload a loading GIF" : "Click to upload an image or icon"}
                       showUploadButton={false}
-                      acceptedTypes="image/gif"
-                      invalidTypeErrorMessage="Choose a GIF file."
+                      acceptedTypes={isGif ? "image/gif" : "image/*"}
+                      invalidTypeErrorMessage={isGif ? "Choose a GIF file." : "Choose a supported image file."}
                       value={value || null}
                       onChange={(url) => onFieldChange(fieldKey, url ?? "")}
                     />

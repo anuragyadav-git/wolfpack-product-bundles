@@ -14,6 +14,7 @@ import {
   buildFpbUpsellThemeEditorUrl,
   openThemeEditorInNewTab,
 } from "../../../lib/theme-editor-navigation.client";
+import { buildFpbStorefrontUrl } from "../../../lib/fpb-storefront-url";
 import { useSharedBundleHandlers } from "../../../hooks/useSharedBundleHandlers";
 import {
   getGuidedTourTransition,
@@ -97,47 +98,29 @@ export function useConfigureActionController(flow: ConfigureBundleFlowDraft) {
       },
     );
     if (!appEmbedEnabled) {
-      closePendingDashboardPreview(pendingPreviewWindow);
-      finishPreviewBundleLoading();
       flow.triggerAppEmbedBannerFeedback();
-      return false;
     }
-    let preparedPreview;
+    let preparedPreview: any = null;
     try {
       preparedPreview = await prepareStorefrontPreviewForOpen();
     } catch (error: any) {
-      closePendingDashboardPreview(pendingPreviewWindow);
-      finishPreviewBundleLoading();
-      flow.shopify.toast.show(
-        error instanceof Error
-          ? error.message
-          : "Preview is not ready. Please try preview again.",
-        { isError: true, duration: 5000 },
-      );
-      return false;
+      AppLogger.warn("Storefront preview preparation warning in FPB:", {}, error);
     }
-    if (
-      flow.bundle.bundleType === "full_page" &&
-      !preparedPreview.shareablePreviewUrl
-    ) {
-      closePendingDashboardPreview(pendingPreviewWindow);
-      finishPreviewBundleLoading();
-      flow.shopify.toast.show("Preview URL is unavailable.", {
-        isError: true,
-        duration: 5000,
-      });
-      return false;
-    }
+    const publicNumber = flow.bundle.publicNumber ?? 1;
+    const shareablePreviewUrl =
+      preparedPreview?.shareablePreviewUrl ||
+      buildFpbStorefrontUrl(flow.shop, publicNumber);
+
     const executePreviewBundle = (): "opened" => {
       if (flow.bundle.bundleType === "full_page") {
         if (
           !navigatePendingDashboardPreview(
             pendingPreviewWindow,
-            preparedPreview.shareablePreviewUrl!,
+            shareablePreviewUrl,
           )
         ) {
           window.open(
-            preparedPreview.shareablePreviewUrl!,
+            shareablePreviewUrl,
             "_blank",
             "noopener,noreferrer",
           );

@@ -1252,6 +1252,29 @@ mobile fixture each filled row was `64px` high with `50px` media and a `20px`
 remove control; minimum rules retain a following empty slot while exact rules
 do not.
 
+Fresh direct Chrome measurement on 2026-08-21 reconfirmed that contract against
+the live EB storefront at both `1280x800` and `390x844`. The row is full-width
+within its host (`345x64px` desktop and `360x64px` mobile), uses `display:flex`,
+`5px` padding and gap, a `2px` solid black border, `10px` radius, white surface,
+`50x50px` cover media, a bold `16px` identity, and a `20x20px` inline circular
+cross control at the trailing edge. The document had zero horizontal overflow.
+The Step Flow, Steps vs. Categories, and Rules help articles were reread in full;
+the template picker exposed no additional help link. No EB configuration was
+saved during this measurement; the live stylesheet was inspected with a
+temporary `SIMPLIFIED` body marker that disappeared on reload.
+
+A follow-up computed-style diff on 2026-08-21 corrected an earlier
+interpretation of the `64px` measurement. EB does not fix or cap the filled
+row at `64px`: it uses `height:auto`, `min-height:60px`, `max-height:none`, and
+visible overflow. The 50px media plus 5px padding and 2px borders produces the
+normal 64px row, while longer identity content may grow naturally. The identity
+and title use intrinsic flex sizing, visible overflow, normal wrapping, and no
+ellipsis. The filled row itself has no pointer action. Each selected unit
+renders as its own row; only the trailing cross mutates it, decrementing one
+unit and restoring one empty slot. Empty slots open the picker. Horizontal
+filled-slot replacement is a Wolfpack behavior and is not part of EB's Vertical
+filled-row design.
+
 ### PPB modal card, grouped variant, and product-details refinement
 
 Live findings supplied for the 2026-08-21 revision-2 implementation refine the

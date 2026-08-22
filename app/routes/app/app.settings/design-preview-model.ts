@@ -7,7 +7,7 @@ import {
   type TemplateKey,
   type TemplateSelection,
 } from "../../../lib/bundle-config/template-selection";
-import { buildSettingsDesignRuntime } from "../../../lib/settings-design-runtime";
+import { buildSettingsDesignRuntime, normalizeSlotIconFit } from "../../../lib/settings-design-runtime";
 import type { SettingsField } from "../../../lib/admin-configuration-surfaces";
 
 export type DesignPreviewSurface =
@@ -352,6 +352,8 @@ export const DESIGN_PREVIEW_FIELD_TARGETS: Readonly<Record<string, DesignPreview
   "Product Card & Cart Corner Style": sharedProductCartTarget("product cards", "cart"),
   "Product Card & Cart Base": sharedProductCartTarget("product cards", "cart", "product images"),
   "Image Fit": productTarget("product images"),
+  "stylePresets.images.slotIconUrl": target("product-slots", ["empty slot icon"], { templates: SLOT_TEMPLATES }),
+  "stylePresets.images.slotIconFit": target("product-slots", ["empty slot icon size"], { templates: SLOT_TEMPLATES }),
   "generalSettings.loadingGifUrl": target("loading", ["loading animation"], { templates: ALL_FPB_TEMPLATES }),
   "generalSettings.loadingBgColor": target("loading", ["loading screen background"], { templates: ALL_FPB_TEMPLATES }),
   "expert.navigationBanner.navigationBannerStepCompletionColor": target("navigation", ["completed steps"], { templates: ALL_FPB_TEMPLATES }),
@@ -561,6 +563,8 @@ export function buildDesignPreviewTheme(
     "--preview-empty-border": readFirstPath(page, ["mixAndMatchConfig.emptyStateCard.emptyStateCardBorderColor"], "#000000"),
     "--preview-empty-icon": readFirstPath(page, ["mixAndMatchConfig.emptyStateCard.emptyStateCardIconColor"], "#000000"),
     "--preview-empty-text": readFirstPath(page, ["mixAndMatchConfig.emptyStateCard.emptyStateCardTextColor"], "#3e3e3e"),
+    "--preview-slot-icon-url": readFirstPath(page, ["mixAndMatchConfig.emptyStateCard.slotIconUrl", "stylePresets.images.slotIconUrl"], ""),
+    "--preview-slot-icon-fit": normalizeSlotIconFit(readFirstPath(page, ["mixAndMatchConfig.emptyStateCard.slotIconFit", "stylePresets.images.slotIconFit"], "fit")),
     "--preview-cart-bg": readFirstPath(page, [`${footerRoot}.${isProductPage ? "footerBgColor" : "cartFooterBgColor"}`], "#ffffff"),
     "--preview-cart-text": readFirstPath(page, [`${footerRoot}.${isProductPage ? "footerTextColor" : "cartFooterTextColor"}`], "#000000"),
     "--preview-cart-next-bg": readFirstPath(page, [`${footerRoot}.${isProductPage ? "footerNextBtnBgColor" : "cartFooterNextButtonColor"}`], "#000000"),

@@ -77,16 +77,13 @@ export async function handlePrepareStorefrontPreview(
         where: { id: bundleId, shopId: session.shop },
         select: { id: true, publicNumber: true, bundleType: true, status: true },
       });
-      if (
-        !bundle
-        || bundle.bundleType !== "full_page"
-        || bundle.publicNumber === null
-      ) {
+      if (!bundle || bundle.bundleType !== "full_page") {
         throw new Error("Bundle not found");
       }
 
+      const publicNumber = bundle.publicNumber ?? 1;
       shareablePreviewUrl = appendFpbPreviewToken(
-        buildFpbStorefrontUrl(session.shop, bundle.publicNumber),
+        buildFpbStorefrontUrl(session.shop, publicNumber),
         previewToken,
       );
       await recordFirstBundlePreviewEvent({
