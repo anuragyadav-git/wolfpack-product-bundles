@@ -1,0 +1,25 @@
+{
+  "mcpServers": {
+    "chrome-devtools": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "chrome-devtools-mcp@latest",
+        "--autoConnect"
+      ]
+    },
+    "shopify-dev-mcp": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@shopify/dev-mcp@latest"
+      ]
+    },
+    "figma": {
+      "serverUrl": "https://mcp.figma.com/mcp"
+    },
+    "render": {
+      "serverUrl": "https://mcp.render.com/mcp"
+    }
+  }
+}

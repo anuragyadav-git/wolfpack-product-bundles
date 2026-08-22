@@ -26,7 +26,7 @@ keywords:
 # Visual Audit
 
 Artifact job ID: ppb-bundle-picker-modal-redesign-20260821
-Artifact revision: 6
+Artifact revision: 8
 Artifact status: complete
 
 ## Conditions
@@ -50,6 +50,8 @@ Artifact status: complete
 | VA-08 | Selected card | Quantity state | Revision 1 always hid modal quantity controls | Disabled validation and below-maximum states show controls; maximum replaces controls with `Added xN` | user-provided live finding plus maximum-one evidence | high | yes |
 | VA-09 | Details | Layer and density | Shared details overlay is centered desktop / bottom mobile and not explicitly PPB-stacked | Full-width PPB sheet above picker, constrained inner column, internal scroll, 88dvh ceiling | user-provided contract | high | yes |
 | VA-10 | Magnifier | Discoverability | Details affordance is inconsistent across pointer, keyboard, and touch | Reuse FPB magnifier; reveal on hover/focus, persist subtly on touch | user-provided contract and repository reuse requirement | high | yes |
+| VA-11 | Vertical filled row | Geometry and hierarchy | Revision 6 renders a 100px grid row with 72px media, filled-row price, and overlaid 44px badge | Live EB renders a full-width 64px flex row, 50px media, 5px padding/gap, 2px black border, 10px radius, bold 16px identity, no price, and inline 20px trailing circular-cross visual | fresh direct Chrome at 1280x800 and 390x844 | high | yes |
+| VA-12 | Vertical filled row | Intrinsic sizing and overflow | Revision 7 fixes and caps the row at 64px, clips card/title overflow, stretches the identity, and retains a pointer cursor | Live EB has `height:auto`, `min-height:60px`, no maximum, visible card/title overflow, intrinsic flex sizing, normal wrapping, and an inert cursor; 50px media plus padding/border produces the normal 64px row | fresh direct computed-style comparison at 390x844 | high | yes |
 
 ## Layout, geometry, typography, and surfaces
 
@@ -71,3 +73,5 @@ All existing selection, pricing, progress, inventory, persistence, slot, and car
 | GAP-06 | behavioral | Native selector updates variant image, price, and availability without Add | Variant identity and inventory rules | shared variant binding plus PPB card adapter | approved |
 | GAP-07 | accessibility | Only image opens details; affordance remains discoverable for pointer, keyboard, and touch | Add and title remain independent | PPB card semantics plus reused magnifier markup | approved |
 | GAP-08 | responsive | Product details is a stacked full-width sheet with 88dvh ceiling and safe-area handling | Editable Add/Update and originating-slot identity | PPB details renderer/state plus raw PPB CSS | approved |
+| GAP-09 | visual | Replace only the Vertical filled-row presentation with measured live EB geometry | Selection, replacement, removal, focus, Horizontal, Product List, and Product Grid behavior | modal-slots.css | approved |
+| GAP-10 | visual | Remove revision-7 WPB caps, clipping, flex fill, and pointer treatment from the Vertical filled row | Horizontal, Product List, and Product Grid presentation | modal-slots.css | approved |
