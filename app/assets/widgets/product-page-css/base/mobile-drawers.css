@@ -468,8 +468,9 @@
 }
 
 [data-ppb-drawer-surface="product-details"] .bundle-modal-container {
-  width: 100%;
-  max-width: none;
+  width: min(56rem, 100%);
+  max-width: 56rem;
+  margin-inline: auto;
   max-height: 88dvh;
   padding: 0 0 env(safe-area-inset-bottom, 0px);
   border-radius: var(--ppb-drawer-radius) var(--ppb-drawer-radius) 0 0;
