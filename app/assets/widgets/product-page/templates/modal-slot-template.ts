@@ -64,11 +64,22 @@ export const modalSlotTemplateMethods: Record<string, any> & ThisType<any> = {
 
     stepBox.className = 'step-box bw-slot-card bw-slot-card--empty';
 
-    const imgUrl = step.categoryImageUrl || null;
+    const slotIconUrl =
+      step.categoryImageUrl ||
+      this.config?.designSettings?.slotIconUrl ||
+      this.config?.pageCustomization?.mixAndMatchConfig?.emptyStateCard?.slotIconUrl ||
+      this.selectedBundle?.productSlotIconUrl ||
+      null;
+    const slotIconFit =
+      this.config?.designSettings?.slotIconFit ||
+      this.config?.pageCustomization?.mixAndMatchConfig?.emptyStateCard?.slotIconFit ||
+      'fit';
+    const bgSize = slotIconFit === 'fill' ? '100% 100%' : slotIconFit === 'cover' ? 'cover' : 'contain';
+
     const isModalSlotTemplate = this._isProductPageModalSlotTemplate();
-    if (imgUrl && !isModalSlotTemplate) {
-      stepBox.style.backgroundImage = `url('${imgUrl}')`;
-      stepBox.style.backgroundSize = 'contain';
+    if (slotIconUrl && !isModalSlotTemplate) {
+      stepBox.style.backgroundImage = `url('${slotIconUrl}')`;
+      stepBox.style.backgroundSize = bgSize;
       stepBox.style.backgroundRepeat = 'no-repeat';
       stepBox.style.backgroundPosition = 'center';
     }
@@ -76,8 +87,11 @@ export const modalSlotTemplateMethods: Record<string, any> & ThisType<any> = {
     if (isModalSlotTemplate) {
       const visual = document.createElement('div');
       visual.className = 'bw-slot-card__empty-visual';
-      if (imgUrl) {
-        visual.style.backgroundImage = `url('${imgUrl}')`;
+      if (slotIconUrl) {
+        visual.style.backgroundImage = `url('${slotIconUrl}')`;
+        visual.style.backgroundSize = bgSize;
+        visual.style.backgroundRepeat = 'no-repeat';
+        visual.style.backgroundPosition = 'center';
       }
       stepBox.appendChild(visual);
     } else {
