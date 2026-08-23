@@ -26,7 +26,7 @@ export function PixelStatusCard({ pixelActive }: { pixelActive: boolean }) {
     } else if (!data.success && data.error) {
       shopify.toast.show(data.error, { isError: true, duration: 6000 });
     }
-  }, [fetcher.data, shopify.toast]);
+  }, [fetcher.data, shopify]);
 
   const handleToggle = useCallback(() => {
     fetcher.submit(
