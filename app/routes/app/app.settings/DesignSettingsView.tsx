@@ -1,7 +1,18 @@
-import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
+import { useMemo, useState, type Dispatch, type SetStateAction } from "react";
 import { useTranslation } from "react-i18next";
-import { DESIGN_CONFIGURATION, EXPERT_COLOR_CONTROLS } from "../../../lib/admin-configuration-surfaces";
-import { BundlePreviewModal, DesignFields, getDesignIconKey } from "./SettingsDesignFields";
+import {
+  DESIGN_CONFIGURATION,
+  EXPERT_COLOR_CONTROLS,
+  type SettingsField,
+} from "../../../lib/admin-configuration-surfaces";
+import {
+  SETTINGS_DESIGN_DEFAULT_FIELD_VALUES,
+} from "../../../lib/settings-design-contract";
+import {
+  resolveDesignColor,
+  type ShopBrandColors,
+} from "../../../lib/shop-brand-colors";
+import { BundlePreviewModal, DesignFields } from "./SettingsDesignFields";
 import { DesignLivePreview } from "./DesignLivePreview";
 import type { DesignPreviewSurface } from "./design-preview-model";
 import { getDesignFieldsForPreviewContext } from "./design-preview-model";
@@ -13,103 +24,92 @@ import { AdminPageTitleBar } from "../../../components/AdminPageNavigation";
 type PreviewBundle = { id: string; name: string; type: string; viewUrl: string | null };
 
 type DesignSettingsViewProps = {
-  selectedDesignTab: (typeof DESIGN_CONFIGURATION)[number];
-  isExpertColorControls: boolean;
-  isExpertScopeActive: boolean;
-  activeDesignScope: string;
   designFieldValues: Record<string, string>;
-  designGateMessage: string | null;
+  inheritedColorFieldKeys: string[];
+  shopBrandColors: ShopBrandColors | null;
   isActiveSubpageDirty: boolean;
   isPreviewModalOpen: boolean;
   previewBundles: PreviewBundle[];
   saveMessage: string | null;
   setSettingsView: (view: "landing") => void;
   setIsPreviewModalOpen: (isOpen: boolean) => void;
-  setActiveDesignTab: (tab: string) => void;
-  setIsExpertScopeActive: (isActive: boolean) => void;
-  setDesignGateMessage: (message: string | null) => void;
-  setActiveDesignScope: (scope: string) => void;
   setDesignFieldValues: Dispatch<SetStateAction<Record<string, string>>>;
-  setIsExpertColorControls: (isEnabled: boolean) => void;
+  setInheritedColorFieldKeys: Dispatch<SetStateAction<string[]>>;
   setSaveMessage: (message: string | null) => void;
   discardActiveSettingsChanges: () => void;
   saveActiveSettingsChanges: () => void;
 };
 
+const CONTEXTUAL_INSPECTOR_SECTIONS: Array<{ title: string; fields: SettingsField[] }> = [
+  {
+    title: "Colors",
+    fields: Object.values(EXPERT_COLOR_CONTROLS).flat(),
+  },
+  ...DESIGN_CONFIGURATION
+    .filter((tab) => tab.title !== "Brand Colors")
+    .map((tab) => ({ title: tab.title, fields: tab.fields })),
+];
+
 export function DesignSettingsView({
-  selectedDesignTab,
-  isExpertColorControls,
-  isExpertScopeActive,
-  activeDesignScope,
   designFieldValues,
-  designGateMessage,
+  inheritedColorFieldKeys,
+  shopBrandColors,
   isActiveSubpageDirty,
   isPreviewModalOpen,
   previewBundles,
   saveMessage,
   setSettingsView,
   setIsPreviewModalOpen,
-  setActiveDesignTab,
-  setIsExpertScopeActive,
-  setDesignGateMessage,
-  setActiveDesignScope,
   setDesignFieldValues,
-  setIsExpertColorControls,
+  setInheritedColorFieldKeys,
   setSaveMessage,
   discardActiveSettingsChanges,
   saveActiveSettingsChanges,
 }: DesignSettingsViewProps) {
   const { t } = useTranslation();
   const [workspacePane, setWorkspacePane] = useState<"preview" | "customize">("preview");
-  const selectedDesignFields = isExpertColorControls && selectedDesignTab.title === "Brand Colors" && isExpertScopeActive
-    ? EXPERT_COLOR_CONTROLS[activeDesignScope] ?? EXPERT_COLOR_CONTROLS.General
-    : selectedDesignTab.fields;
-  const isBrandColorsPanelGated = isExpertColorControls && selectedDesignTab.title === "Brand Colors" && !isExpertScopeActive;
-  const hasPreviewableBundle = previewBundles.some((bundle) => Boolean(bundle.viewUrl));
   const [activePreviewFieldKey, setActivePreviewFieldKey] = useState<string | null>(null);
   const [activePreviewSurface, setActivePreviewSurface] = useState<DesignPreviewSurface>("product-card");
   const [activePreviewTemplate, setActivePreviewTemplate] = useState<TemplateKey>("standard");
-  const contextualDesignTabs = DESIGN_CONFIGURATION.map((tab) => ({
-    ...tab,
-    fields: getDesignFieldsForPreviewContext(tab.fields, activePreviewTemplate, activePreviewSurface),
-  })).filter((tab) => tab.fields.length > 0);
-  const contextualSelectedFields = getDesignFieldsForPreviewContext(
-    selectedDesignFields,
-    activePreviewTemplate,
-    activePreviewSurface,
-  );
-  const contextualExpertScopes = Object.entries(EXPERT_COLOR_CONTROLS)
-    .filter(([, fields]: any) => getDesignFieldsForPreviewContext(
-      fields,
-      activePreviewTemplate,
-      activePreviewSurface,
-    ).length > 0)
-    .map(([scope]: any) => scope);
+  const hasPreviewableBundle = previewBundles.some((bundle) => Boolean(bundle.viewUrl));
 
-  useEffect(() => {
-    if (isExpertScopeActive) {
-      if (contextualExpertScopes.length > 0 && !contextualExpertScopes.includes(activeDesignScope)) {
-        setActiveDesignScope(contextualExpertScopes[0]);
-      }
-      return;
+  const contextualSections = useMemo(() => CONTEXTUAL_INSPECTOR_SECTIONS
+    .map((section) => ({
+      ...section,
+      fields: getDesignFieldsForPreviewContext(
+        section.fields,
+        activePreviewTemplate,
+        activePreviewSurface,
+      ),
+    }))
+    .filter((section) => section.fields.length > 0), [activePreviewSurface, activePreviewTemplate]);
+
+  const visibleFields = contextualSections.flatMap((section) => section.fields);
+  const resolvedFieldValues = useMemo(() => {
+    const values = { ...designFieldValues };
+    for (const fieldKey of inheritedColorFieldKeys) {
+      values[fieldKey] = resolveDesignColor({
+        fieldKey,
+        explicitValue: values[fieldKey] ?? "",
+        inheritedColorFieldKeys,
+        shopBrandColors,
+        templateDefault: SETTINGS_DESIGN_DEFAULT_FIELD_VALUES[fieldKey] ?? "",
+      });
     }
-    if (contextualDesignTabs.length > 0 && !contextualDesignTabs.some((tab) => tab.title === selectedDesignTab.title)) {
-      setActiveDesignTab(contextualDesignTabs[0].title);
-    }
-  }, [
-    activeDesignScope,
-    contextualDesignTabs,
-    contextualExpertScopes,
-    isExpertScopeActive,
-    selectedDesignTab.title,
-    setActiveDesignScope,
-    setActiveDesignTab,
-  ]);
-  const resetSelectedDesignTab = () => {
-    setDesignFieldValues((current) => ({
-      ...current,
-      ...Object.fromEntries(selectedDesignFields.map((field) => [field.key ?? field.label, field.value ?? ""])),
-    }));
+    return values;
+  }, [designFieldValues, inheritedColorFieldKeys, shopBrandColors]);
+
+  const resetVisibleControls = () => {
+    const colorKeys = visibleFields
+      .filter((field) => field.kind === "color")
+      .map((field) => field.key ?? field.label);
+    const nonColorDefaults = Object.fromEntries(
+      visibleFields
+        .filter((field) => field.kind !== "color")
+        .map((field) => [field.key ?? field.label, field.value ?? ""]),
+    );
+    setDesignFieldValues((current) => ({ ...current, ...nonColorDefaults }));
+    setInheritedColorFieldKeys((current) => [...new Set([...current, ...colorKeys])]);
   };
 
   return (
@@ -120,173 +120,85 @@ export function DesignSettingsView({
         onBack={() => setSettingsView("landing")}
       />
       <s-query-container containerName="design-settings">
-      <main className={styles.page}>
-      <header className={styles.hero}>
-        <s-stack direction="inline" gap="small" alignItems="center">
-          <s-button
-            variant="tertiary"
-            icon="arrow-left"
-            accessibilityLabel="Back to Settings"
-            onClick={() => setSettingsView("landing")}
-          />
-          <s-heading>Design Control Panel</s-heading>
-        </s-stack>
-        <s-button icon="view" disabled={!hasPreviewableBundle} onClick={() => setIsPreviewModalOpen(true)}>
-          Preview Bundle
-        </s-button>
-      </header>
+        <main className={styles.page}>
+          <header className={styles.hero}>
+            <s-stack direction="inline" gap="small" alignItems="center">
+              <s-button
+                variant="tertiary"
+                icon="arrow-left"
+                accessibilityLabel="Back to Settings"
+                onClick={() => setSettingsView("landing")}
+              />
+              <s-heading>Design Control Panel</s-heading>
+            </s-stack>
+            <s-button icon="view" disabled={!hasPreviewableBundle} onClick={() => setIsPreviewModalOpen(true)}>
+              Preview Bundle
+            </s-button>
+          </header>
 
-        <div
-          className={styles.mobileWorkspaceTabs}
-          role="group"
-          aria-label={t("settingsDcp.preview.workspace.label")}
-        >
-          <s-button
-            variant={workspacePane === "preview" ? "primary" : "secondary"}
-            aria-pressed={workspacePane === "preview" ? "true" : "false"}
-            onClick={() => setWorkspacePane("preview")}
-          >
-            {t("settingsDcp.preview.workspace.preview")}
-          </s-button>
-          <s-button
-            variant={workspacePane === "customize" ? "primary" : "secondary"}
-            aria-pressed={workspacePane === "customize" ? "true" : "false"}
-            onClick={() => setWorkspacePane("customize")}
-          >
-            {t("settingsDcp.preview.workspace.customize")}
-          </s-button>
-        </div>
-
-        <section className={styles.layout} aria-label="Design">
-          <div
-            className={styles.previewPane}
-            data-phone-active={workspacePane === "preview" || undefined}
-          >
-            <DesignLivePreview
-              fieldValues={designFieldValues}
-              isExpertControlsEnabled={isExpertColorControls}
-              activeFieldKey={activePreviewFieldKey}
-              onSurfaceChange={setActivePreviewSurface}
-              onContextChange={({ templateKey }: any) => setActivePreviewTemplate(templateKey)}
-            />
-          </div>
-          <div
-            className={styles.customizePane}
-            data-phone-active={workspacePane === "customize" || undefined}
-          >
-            <aside className={styles.inspectorNavigation}>
-          <section className={styles.navigationSection}>
-            <h2>Bundle Design</h2>
-            <p>Customize your bundle in a few clicks</p>
-            <div className={styles.navList} role="tablist" aria-label="Design sections">
-              {contextualDesignTabs.map((tab) => (
-                <button
-                  key={tab.title}
-                  type="button"
-                  className={selectedDesignTab.title === tab.title && !isExpertScopeActive ? styles.navActive : styles.navButton}
-                  onClick={() => {
-                    setActiveDesignTab(tab.title);
-                    setIsExpertScopeActive(false);
-                    setActivePreviewFieldKey(tab.fields[0] ? tab.fields[0].key ?? tab.fields[0].label : null);
-                    if (tab.title === "Brand Colors" && isExpertColorControls) {
-                      setDesignGateMessage("Disable Expert Color Controls to access brand colors.");
-                      return;
-                    }
-                    setDesignGateMessage(null);
-                  }}
-                >
-                  <span className={styles.navIcon}>
-                    <s-icon type={getDesignIconKey(tab.title)} />
-                  </span>
-                  {tab.title}
-                </button>
-              ))}
-            </div>
-          </section>
-          <section className={`${styles.navigationSection} ${styles.expertControl}`}>
-            <s-switch
-              label="Expert Color Controls"
-              details="Change colors of individual elements of the bundle"
-              checked={isExpertColorControls}
-              onChange={(event: Event) => {
-                const isChecked = (event.target as HTMLInputElement).checked;
-                setIsExpertColorControls(isChecked);
-                if (isChecked) {
-                  setActiveDesignTab("Brand Colors");
-                  setIsExpertScopeActive(false);
-                  setActivePreviewFieldKey(null);
-                } else {
-                  setActivePreviewFieldKey("Primary Color");
-                }
-                setDesignGateMessage(isChecked ? "Disable Expert Color Controls to access brand colors." : null);
-              }}
-            />
-            {isExpertColorControls ? (
-              <div className={`${styles.navList} ${styles.expertScopes}`} role="tablist" aria-label="Color control scopes">
-                {contextualExpertScopes.map((scope) => (
-                  <button
-                    key={scope}
-                    type="button"
-                    className={activeDesignScope === scope && selectedDesignTab.title === "Brand Colors" && isExpertScopeActive ? styles.scopeActive : styles.scopeButton}
-                    onClick={() => {
-                      setDesignGateMessage(null);
-                      setActiveDesignTab("Brand Colors");
-                      setActiveDesignScope(scope);
-                      setIsExpertScopeActive(true);
-                      const firstField = EXPERT_COLOR_CONTROLS[scope]?.[0];
-                      setActivePreviewFieldKey(firstField ? firstField.key ?? firstField.label : null);
-                    }}
-                  >
-                    <span className={styles.navIcon}>
-                      <s-icon type={getDesignIconKey(scope)} />
-                    </span>
-                    {scope}
-                  </button>
-                ))}
-              </div>
-            ) : null}
-          </section>
-            <s-button variant="tertiary" tone="critical" onClick={resetSelectedDesignTab}>
-            Reset to default
-          </s-button>
-            </aside>
-            <section className={styles.inspectorContent}>
-          {isBrandColorsPanelGated || designGateMessage ? (
-            <s-banner
-              heading="Brand colors unavailable"
-              tone="warning"
-              dismissible={false}
-              hidden={false}
+          <div className={styles.mobileWorkspaceTabs} role="group" aria-label={t("settingsDcp.preview.workspace.label")}>
+            <s-button
+              variant={workspacePane === "preview" ? "primary" : "secondary"}
+              aria-pressed={workspacePane === "preview" ? "true" : "false"}
+              onClick={() => setWorkspacePane("preview")}
             >
-              {designGateMessage ?? "Disable Expert Color Controls to access brand colors."}
-            </s-banner>
-          ) : null}
-          <div className={isBrandColorsPanelGated ? styles.gatedPanel : undefined}>
-            <DesignFields
-              title={isExpertColorControls && selectedDesignTab.title === "Brand Colors" && isExpertScopeActive ? activeDesignScope : selectedDesignTab.title}
-              fields={contextualSelectedFields}
-              values={designFieldValues}
-              disabledFieldKeys={activePreviewSurface === "loading" ? ["Image Fit"] : []}
-              onFieldChange={(label, value) => {
-                if (isBrandColorsPanelGated) {
-                  return;
-                }
-                setActivePreviewFieldKey(label);
-                setDesignFieldValues((current) => ({ ...current, [label]: value }));
-              }}
-            />
+              {t("settingsDcp.preview.workspace.preview")}
+            </s-button>
+            <s-button
+              variant={workspacePane === "customize" ? "primary" : "secondary"}
+              aria-pressed={workspacePane === "customize" ? "true" : "false"}
+              onClick={() => setWorkspacePane("customize")}
+            >
+              {t("settingsDcp.preview.workspace.customize")}
+            </s-button>
           </div>
-            </section>
-          </div>
-        </section>
-        <SettingsContextualSaveBar isOpen={isActiveSubpageDirty} onDiscard={discardActiveSettingsChanges} onSave={saveActiveSettingsChanges} />
-        <BundlePreviewModal
-          isOpen={isPreviewModalOpen}
-          bundles={previewBundles}
-          onClose={() => setIsPreviewModalOpen(false)}
-        />
-        <SettingsToast message={saveMessage} onDismiss={() => setSaveMessage(null)} />
-      </main>
+
+          <section className={styles.layout} aria-label="Design">
+            <div className={styles.previewPane} data-phone-active={workspacePane === "preview" || undefined}>
+              <DesignLivePreview
+                fieldValues={designFieldValues}
+                inheritedColorFieldKeys={inheritedColorFieldKeys}
+                shopBrandColors={shopBrandColors}
+                activeFieldKey={activePreviewFieldKey}
+                onSurfaceChange={setActivePreviewSurface}
+                onContextChange={({ templateKey }: any) => setActivePreviewTemplate(templateKey)}
+              />
+            </div>
+            <aside className={styles.customizePane} data-phone-active={workspacePane === "customize" || undefined}>
+              <section className={styles.inspectorContent} aria-label="Contextual customization inspector">
+                <s-stack gap="base">
+                  <s-box>
+                    <s-heading>Customize this component</s-heading>
+                    <s-paragraph color="subdued">
+                      Controls update for the component visible in the preview.
+                    </s-paragraph>
+                  </s-box>
+                  {contextualSections.map((section) => (
+                    <DesignFields
+                      key={section.title}
+                      title={section.title}
+                      fields={section.fields}
+                      values={resolvedFieldValues}
+                      inheritedFieldKeys={inheritedColorFieldKeys}
+                      disabledFieldKeys={activePreviewSurface === "loading" ? ["Image Fit"] : []}
+                      onFieldChange={(fieldKey, value) => {
+                        setActivePreviewFieldKey(fieldKey);
+                        setDesignFieldValues((current) => ({ ...current, [fieldKey]: value }));
+                        setInheritedColorFieldKeys((current) => current.filter((key) => key !== fieldKey));
+                      }}
+                    />
+                  ))}
+                  <s-button variant="tertiary" tone="critical" onClick={resetVisibleControls}>
+                    Reset visible controls
+                  </s-button>
+                </s-stack>
+              </section>
+            </aside>
+          </section>
+          <SettingsContextualSaveBar isOpen={isActiveSubpageDirty} onDiscard={discardActiveSettingsChanges} onSave={saveActiveSettingsChanges} />
+          <BundlePreviewModal isOpen={isPreviewModalOpen} bundles={previewBundles} onClose={() => setIsPreviewModalOpen(false)} />
+          <SettingsToast message={saveMessage} onDismiss={() => setSaveMessage(null)} />
+        </main>
       </s-query-container>
     </>
   );

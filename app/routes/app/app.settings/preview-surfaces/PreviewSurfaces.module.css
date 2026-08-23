@@ -572,16 +572,21 @@
   text-align: center;
   position: relative;
   gap: 8px;
+  background-image: var(--preview-slot-icon-card-image, none);
+  background-size: var(--preview-slot-icon-card-size, contain);
+  background-repeat: no-repeat;
+  background-position: center;
 }
 
 .slotCard[data-filled="true"] {
   border-style: solid;
   border-width: 1px;
   border-color: #e5e7eb;
+  background-image: none;
 }
 
 .slotEmptyIcon {
-  display: flex;
+  display: var(--preview-slot-icon-badge-display, flex);
   align-items: center;
   justify-content: center;
   width: 32px;
@@ -589,10 +594,15 @@
   font-size: 20px;
   font-weight: 700;
   color: var(--preview-empty-icon, #111827);
-  background-image: var(--preview-slot-icon-url, none);
-  background-size: var(--preview-slot-icon-fit, contain);
+  background-image: var(--preview-slot-icon-badge-image, none);
+  background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
+}
+
+.slotEmptyIcon::before {
+  content: "+";
+  display: var(--preview-slot-icon-plus-display, flex);
 }
 
 .slotLabel {

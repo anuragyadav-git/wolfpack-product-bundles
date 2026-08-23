@@ -34,9 +34,7 @@ export function ProductSlotsSurface({
   descriptor: DesignPreviewTemplateDescriptor;
   t: Translate;
 }) {
-  if (!descriptor.slotOrientation) return null;
-
-  const orientation = descriptor.slotOrientation;
+  const orientation = descriptor.slotOrientation ?? "horizontal";
   const slotsRegion = `${orientation}-slots`;
   const filledProduct = DESIGN_PREVIEW_FIXTURE.products[0];
 

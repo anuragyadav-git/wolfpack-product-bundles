@@ -19,6 +19,8 @@ import {
 } from "../../lib/settings-controls-runtime";
 import { SETTINGS_DESIGN_BUNDLE_TYPES, buildSettingsDesignRuntime } from "../../lib/settings-design-runtime";
 import { parseSettingsDesignPayload } from "../../lib/settings-design-contract";
+import { isShopBrandColors } from "../../lib/shop-brand-colors";
+import { syncThemeColors } from "../../services/theme-colors.server";
 import {
   SETTINGS_LANGUAGE_BUNDLE_TYPES,
   buildSettingsLanguageFormState,
@@ -54,13 +56,14 @@ export function waitForSettingsRouteReady<TSettings, TPreviewBundles>(
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  const { session } = await requireAdminSession(request);
-  const settingsPage = prisma.designSettings.findUnique({
+  const { admin, session } = await requireAdminSession(request);
+  const shopBrandColors = syncThemeColors(admin, session.shop);
+  const settingsPage = Promise.all([shopBrandColors, prisma.designSettings.findUnique({
       where: { shopId_bundleType: { shopId: session.shop, bundleType: "product_page" } },
       select: {
         generalSettings: true,
       },
-    }).then((settings) => {
+    })]).then(([resolvedShopBrandColors, settings]) => {
       const generalSettings = settings?.generalSettings && typeof settings.generalSettings === "object"
         ? settings.generalSettings as Record<string, unknown>
         : {};
@@ -77,6 +80,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
         ...settingsPage,
         language: buildSettingsLanguageFormState(generalSettings.settingsLanguage),
         controls: buildSettingsControlsFormValues(runtime),
+        shopBrandColors: resolvedShopBrandColors,
       };
     });
   const previewBundles = prisma.bundle.findMany({
@@ -162,7 +166,10 @@ export async function action({ request }: ActionFunctionArgs) {
         && typeof currentBundleGeneralSettings.pageCustomization === "object"
         ? currentBundleGeneralSettings.pageCustomization as Record<string, unknown>
         : {};
-      const designRuntime = buildSettingsDesignRuntime(savedState, currentPageCustomization);
+      const shopBrandColors = isShopBrandColors(currentForBundleType?.themeColors)
+        ? currentForBundleType.themeColors
+        : null;
+      const designRuntime = buildSettingsDesignRuntime(savedState, currentPageCustomization, shopBrandColors);
       const nextBundleSettingsPage = {
         ...(currentBundleGeneralSettings.settingsPage && typeof currentBundleGeneralSettings.settingsPage === "object"
           ? currentBundleGeneralSettings.settingsPage as Record<string, unknown>

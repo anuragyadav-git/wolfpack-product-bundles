@@ -5,7 +5,7 @@ title: Admin Performance
 type: operations
 status: authoritative
 summary: Embedded Admin Web Vitals instrumentation, route-level LCP findings, and critical-path constraints.
-last_audited: 2026-08-21
+last_audited: 2026-08-23
 owners:
   - engineering
 domains:
@@ -340,3 +340,19 @@ Spot checks after the candidate fixes:
 
 These are dev tunnel spot checks, not Shopify field p75. Final BFS proof still
 comes from Shopify-collected field metrics after deployment.
+
+## 2026-08-23 Settings Design workspace follow-up
+
+Settings -> Design remains behind the existing lazy workspace boundary. Its
+preview is deterministic local React/CSS and does not import a storefront
+runtime, iframe, or remote bundle data. The workspace now presents the template,
+component, and viewport controls with the preview canvas and renders one
+contextual inspector; phone containers switch between Preview and Customize
+without creating a second preview or persisted pane state.
+
+The Settings loader starts the Storefront Shop Brand query alongside deferred
+workspace reads, so the Settings landing response is not held until Brand data
+resolves. A fresh Design-entry LCP measurement still requires the temporary
+`?wpbWebVitalsDebug=1` bridge in user-provided SIT. Do not commit that bridge;
+record the measured candidate and value here after direct Chrome verification,
+then remove the temporary runtime code before shipping.

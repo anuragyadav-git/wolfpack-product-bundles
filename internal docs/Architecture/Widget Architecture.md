@@ -5,7 +5,7 @@ title: Widget Architecture
 type: architecture
 status: authoritative
 summary: FPB and PPB bootstrap, hydration, extension-asset, and widget runtime architecture.
-last_audited: 2026-08-21
+last_audited: 2026-08-23
 owners:
   - engineering
 domains:
@@ -34,6 +34,7 @@ source_paths:
   - app/routes/api/api.ppb-embed[.]json.tsx
   - app/routes/api/api.page-builder-embed[.]json.tsx
   - app/routes/app/app.settings/design-preview-model.ts
+  - app/lib/shop-brand-colors.ts
   - app/routes/root/wpb.$bundleId.tsx
   - extensions/bundle-builder/blocks/bundle-app-embed.liquid
   - extensions/bundle-builder/blocks/bundle-product-page.liquid
@@ -113,6 +114,28 @@ available Admin panel; the scale must not change the storefront breakpoint
 being represented. Transient Product picker, Loading, Validation, and Upsell
 states remain deterministic representations and must not be described as exact
 storefront interactions.
+
+The Design workspace is preview-first: template, component surface, and logical
+desktop/mobile selectors stay with the canvas, while one inspector exposes only
+settings mapped to the visible component. Phones switch between Preview and
+Customize panes without duplicating the preview model. Component color controls
+have no Expert-mode gate. `inheritedColorFieldKeys` records which fields resolve
+from the first Storefront API Shop Brand primary or secondary pair; editing a
+field removes it from that list and reset restores it. Existing saved payloads
+without the list remain explicit. `buildSettingsDesignRuntime` and the public
+Design CSS endpoint both use the same pure resolver, so Admin and storefront
+precedence is explicit component value, Shop Brand semantic pair, then canonical
+template default.
+
+The store-level product-slot image is persisted inside the shared Design JSON,
+not as direct `DesignSettings` columns. `stylePresets.images.slotIconUrl` and
+`slotIconFit` feed both local previews and generated storefront CSS for all four
+FPB and all four PPB templates. `badge` replaces the native centered plus icon;
+`cover` fills the responsive slot; `fit` contains the image within it. Admin
+labels `badge` as Centered badge and recommends a transparent 96 x 96 px square;
+Fit recommends an 800 x 800 px square. The generated CSS variables are the
+store-level authority when a slot image is configured, so older bundle-level
+placeholder markup cannot override its presentation.
 
 Source module names should describe their storefront responsibility. Avoid mechanical names such as `chunk-01.js` or `part-01.css`; those hide ownership and make stale widget code harder to spot.
 

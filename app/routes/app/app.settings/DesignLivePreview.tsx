@@ -20,6 +20,7 @@ import {
   type DesignPreviewViewport,
 } from "./design-preview-model";
 import styles from "./DesignSettingsView.module.css";
+import type { ShopBrandColors } from "../../../lib/shop-brand-colors";
 import { BundleHeaderSurface } from "./preview-surfaces/BundleHeaderSurface";
 import { NavigationSurface } from "./preview-surfaces/NavigationSurface";
 import { CategoriesSurface } from "./preview-surfaces/CategoriesSurface";
@@ -260,14 +261,16 @@ function PreviewSurface({
 
 export function DesignLivePreview({
   fieldValues,
-  isExpertControlsEnabled,
+  inheritedColorFieldKeys,
+  shopBrandColors,
   activeFieldKey,
   initialState,
   onSurfaceChange,
   onContextChange,
 }: {
   fieldValues: Record<string, string>;
-  isExpertControlsEnabled: boolean;
+  inheritedColorFieldKeys?: string[];
+  shopBrandColors?: ShopBrandColors | null;
   activeFieldKey?: string | null;
   initialState?: DesignPreviewState;
   onSurfaceChange?: (surface: DesignPreviewSurface) => void;
@@ -299,8 +302,13 @@ export function DesignLivePreview({
   );
   const isApplicable = !activeFieldKey || isDesignPreviewFieldApplicable(activeFieldKey, activeTemplate.key);
   const previewTheme = useMemo(
-    () => buildDesignPreviewTheme(fieldValues, isExpertControlsEnabled, activeTemplate.key),
-    [activeTemplate.key, fieldValues, isExpertControlsEnabled],
+    () => buildDesignPreviewTheme(
+      fieldValues,
+      inheritedColorFieldKeys,
+      shopBrandColors,
+      activeTemplate.key,
+    ),
+    [activeTemplate.key, fieldValues, inheritedColorFieldKeys, shopBrandColors],
   );
   const previewViewport = DESIGN_PREVIEW_VIEWPORTS[previewState.viewport];
   const surfaceFidelity = getDesignPreviewSurfaceFidelity(

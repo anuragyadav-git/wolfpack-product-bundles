@@ -16,11 +16,8 @@
 
 .layout {
   display: grid;
-  grid-template-columns:
-    minmax(210px, 0.68fr)
-    minmax(720px, 2.2fr)
-    minmax(300px, 0.92fr);
-  grid-template-areas: "navigation preview fields";
+  grid-template-columns: minmax(720px, 1fr) minmax(300px, 380px);
+  grid-template-areas: "preview fields";
   gap: clamp(12px, 1.5vw, 22px);
   align-items: start;
   margin-top: 18px;
@@ -38,7 +35,8 @@
 }
 
 .customizePane {
-  display: contents;
+  min-width: 0;
+  grid-area: fields;
 }
 
 .inspectorNavigation,
@@ -1099,10 +1097,9 @@
 
 @container design-settings (max-width: 1340px) {
   .layout {
-    grid-template-columns: minmax(210px, 0.72fr) minmax(0, 1.28fr);
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
     grid-template-areas:
-      "preview preview"
-      "navigation fields";
+      "preview fields";
   }
 
   .previewPanel {

@@ -519,6 +519,24 @@
   transform: scale(0.95);
 }
 
+#bundle-builder-app[data-ppb-template-type="PDP_MODAL"] .bw-slot-card--empty,
+#bundle-builder-app[data-ppb-template-type="PDP_MODAL"] .step-box.add-more-card {
+  background-color: var(--bundle-empty-state-card-bg, #fff);
+  background-image: var(--bundle-slot-icon-card-image, none);
+  background-size: var(--bundle-slot-icon-card-size, contain);
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+#bundle-builder-app[data-ppb-template-type="PDP_MODAL"] .bw-slot-card__empty-visual,
+#bundle-builder-app[data-ppb-template-type="PDP_MODAL"] .plus-icon {
+  display: var(--bundle-slot-icon-badge-display, flex);
+  background-image: var(--bundle-slot-icon-badge-image, none);
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
 /* ==========================================================================
    Primary Add-To-Cart CTA & Dynamic Checkout
    ========================================================================== */
@@ -580,3 +598,70 @@
 
 @import "../../full-page-css/base/product-modal-shell.css";
 @import "../../full-page-css/base/product-modal-controls.css";
+
+/* Vertical Slots use compact, full-width rows instead of the horizontal tile grid. */
+.bw-selected-slots--mode-vertical {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.bw-selected-slots--mode-vertical > * {
+  inline-size: 100%;
+  max-inline-size: none;
+  min-block-size: var(--bw-ppb-slot-row-min-block);
+  max-block-size: none;
+  border-radius: var(--bw-ppb-slot-radius);
+}
+
+.bw-selected-slots--mode-vertical > button {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--bw-ppb-slot-space);
+  padding: var(--bw-ppb-slot-space);
+  border-style: dashed;
+}
+
+.bw-selected-slots--mode-vertical > button .bw-slot-card__empty-visual {
+  order: 2;
+  flex: 0 0 auto;
+  margin-inline-start: auto;
+}
+
+.bw-selected-slots--mode-vertical > :not(button) {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: clamp(0.3125rem, 1.5cqi, 0.5rem);
+  padding: clamp(0.3125rem, 1.5cqi, 0.5rem);
+}
+
+.bw-selected-slots--mode-vertical > :not(button) > button {
+  order: 3;
+  flex: 0 0 var(--bw-ppb-slot-target);
+  inline-size: var(--bw-ppb-slot-target);
+  block-size: var(--bw-ppb-slot-target);
+  margin-inline-start: auto;
+}
+
+.bw-selected-slots--mode-vertical > :not(button) > :has(> img) {
+  order: 1;
+  flex: 0 0 clamp(3rem, 15cqi, 3.125rem);
+  inline-size: clamp(3rem, 15cqi, 3.125rem);
+  block-size: clamp(3rem, 15cqi, 3.125rem);
+  border-radius: var(--bw-ppb-slot-radius);
+  overflow: hidden;
+}
+
+.bw-selected-slots--mode-vertical > :not(button) > :has(> img) > img {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+.bw-selected-slots--mode-vertical > :not(button) > :not(button):not(:has(> img)) {
+  order: 2;
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  text-align: start;
+}

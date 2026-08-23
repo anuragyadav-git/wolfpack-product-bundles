@@ -196,6 +196,8 @@ body[wpb-mix-consolidated-design="true"][wpbmix-template-type="PDP_INPAGE"] {
  */
 export function generateCSSVariables(ctx: CSSGenerationContext): string {
   const { settings: s, globalPrimaryButton, globalButtonText, globalPrimaryText, globalSecondaryText, globalFooterBg, globalFooterText } = ctx;
+  const slotIconImage = s.slotIconUrl ? `url("${s.slotIconUrl}")` : 'none';
+  const slotIconMode = s.slotIconFit === 'cover' ? 'cover' : s.slotIconFit === 'fit' ? 'fit' : 'badge';
 
   return `
   /* GLOBAL COLORS */
@@ -348,8 +350,16 @@ export function generateCSSVariables(ctx: CSSGenerationContext): string {
   --bundle-empty-state-text: ${s.emptyStateTextColor || globalSecondaryText};
   --bundle-empty-state-border-style: ${s.emptyStateBorderStyle || 'dashed'};
   --bundle-empty-slot-border-style: ${s.emptySlotBorderStyle || 'dashed'};
-  --bundle-slot-icon-url: ${s.slotIconUrl ? `url("${s.slotIconUrl}")` : 'none'};
-  --bundle-slot-icon-fit: ${s.slotIconFit === 'fill' ? 'fill' : s.slotIconFit === 'cover' ? 'cover' : 'contain'};
+  --bundle-slot-icon-url: ${slotIconImage};
+  --bundle-slot-icon-mode: ${slotIconMode};
+  --bundle-slot-icon-badge-image: ${slotIconMode === 'badge' ? slotIconImage : 'none'};
+  --bundle-slot-icon-card-image: ${slotIconMode === 'badge' ? 'none' : slotIconImage};
+  --bundle-slot-icon-card-size: ${slotIconMode === 'cover' ? 'cover' : 'contain'};
+  --bundle-slot-icon-plus-display: ${slotIconMode === 'badge' && slotIconImage !== 'none' ? 'none' : 'flex'};
+  --bundle-slot-icon-plus-color: ${slotIconMode === 'badge' && slotIconImage !== 'none' ? 'transparent' : 'currentColor'};
+  --bundle-slot-icon-badge-display: ${slotIconMode !== 'badge' && slotIconImage !== 'none' ? 'none' : 'flex'};
+  --bundle-slot-icon-native-visibility: ${slotIconImage !== 'none' ? 'hidden' : 'visible'};
+  --bundle-slot-icon-badge-overlay-display: ${slotIconMode === 'badge' && slotIconImage !== 'none' ? 'block' : 'none'};
   /* Drawer */
   --bundle-drawer-bg: ${s.drawerBgColor || '#FFFFFF'};
   /* Add to Cart Button */

@@ -55,7 +55,6 @@ describe("Settings Design Preview Surfaces Redesign", () => {
           const html = renderToStaticMarkup(
             React.createElement(DesignLivePreview, {
               fieldValues: sampleFieldValues,
-              isExpertControlsEnabled: false,
               initialState: state,
             }),
           );

@@ -4,8 +4,8 @@ id: settings-design-panel-redesign-spec
 title: Settings Design Panel Redesign Test Spec
 type: test-spec
 status: active
-summary: Behavior coverage for the responsive Settings Design workspace, isolated component preview surfaces, and local colour guides.
-last_audited: 2026-08-13
+summary: Behavior coverage for the preview-first Settings Design workspace, contextual inspector, and Shop Brand color inheritance.
+last_audited: 2026-08-23
 owners:
   - engineering
 domains:
@@ -32,11 +32,12 @@ keywords:
 
 ## Purpose
 
-Verify that the Design subpage keeps its existing settings behavior while each
+Verify that the Design subpage keeps its save behavior while each
 major bundle component has its own preview surface for every applicable
 landing-page and product-page template, responds to every previewable setting,
-and remains usable across Admin container sizes. The preview must not present a
-synthetic whole-builder surface.
+and remains usable across Admin container sizes. The workspace is preview-first,
+has one contextual inspector, and must not present a synthetic whole-builder
+surface or an Expert-controls mode.
 
 ## Test Cases
 
@@ -87,24 +88,30 @@ synthetic whole-builder surface.
 | 14 | Product preview actions | Add, increment, or decrement a fixture product | The local selection count and quantity control update without cart or network work | Preview-only interaction |
 | 15 | Progress preview action | Activate progress control | The deterministic progress state advances locally | Preview-only interaction |
 | 16 | Mobile summary disclosure | Mobile Cart / summary surface | Trigger expands and collapses the local footer preview | No storefront mutation |
+| 17 | Contextual color controls | Any visible component | Only color controls mapped to that component are shown | No global Brand Colors panel |
+| 18 | Inherited color edit | Inherited color field receives merchant input | The field leaves the inherited-key set | Explicit override becomes authoritative |
+| 19 | Inherited color reset | Reset an explicit visible color field | The field returns to the inherited-key set | Shop Brand resolution resumes |
+| 20 | Phone panes | Phone Admin container | Preview and Customize panes retain the same local state | No duplicate inspector |
 
-### ColourGuideLinks
+### ShopBrandPreview
 
 | # | Scenario | Input | Expected Output | Notes |
 | --- | --- | --- | --- | --- |
-| 1 | Render relevant Expert groups | General, Categories, Product Card, Bundle Cart, Upsell | Each group shows a `Show Colour Guide` link | Exact link copy |
-| 2 | Open guide | Activate a guide link | The matching local `.avif` URL opens in a new tab | AVIF generation remains CI-owned |
+| 1 | Resolve inherited colors | First primary and secondary Shop Brand pairs | Preview actions use primary pair and shells/inactive states use secondary pair | Same resolver as storefront runtime |
+| 2 | Resolve explicit color | Merchant edits a contextual color | Explicit value wins over Shop Brand and template default | Removes only that field from inheritance |
+| 3 | Resolve unavailable Brand | Missing or failed Brand response | Inherited colors use canonical template defaults | No stale cached color use |
 
 ## Acceptance Criteria
 
-- [x] All listed local test cases pass.
+- [ ] All listed local test cases pass.
 - [x] All eight template identifiers resolve from canonical storefront contracts and render dedicated desktop/mobile structures.
 - [x] Viewport and preview-surface switching preserve bundle type, template, and unsaved field values.
 - [x] Slot product-card controls reveal Product Picker and Product List cart controls reveal Cart / Summary.
 - [x] Every editable preview-relevant field is mapped through the correct FPB or PPB storefront runtime family.
 - [x] Deterministic fixture media is local and uses the optimized image pipeline without committed AVIF/WebP output.
 - [x] Design controls and local previews work without a storefront-ready bundle.
-- [x] All five relevant Expert groups expose local AVIF colour-guide links.
+- [ ] The global Brand Colors panel and Expert-controls distinction are absent.
+- [ ] Contextual colors use explicit override, then Shop Brand pair, then canonical template default.
 - [ ] Entering Design crosses one lazy workspace boundary and reaches a usable preview within 750ms p75 in SIT.
 - [x] Existing save, discard, and reset behavior remains unchanged; Preview Bundle remains separate and requires a real storefront URL.
 - [x] The synthetic Builder surface is removed; every applicable major component has an isolated preview surface at 1280×1136 and 390×844.

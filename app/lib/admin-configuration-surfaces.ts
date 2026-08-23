@@ -222,8 +222,8 @@ export const DESIGN_CONFIGURATION: SettingsTab[] = [
     description: "Image-fit, slot icon, and full-page bundle loading screen controls.",
     fields: [
       { label: "Image Fit", value: "Cover", kind: "select", options: ["Cover", "Contain", "Fill"] },
-      { key: "stylePresets.images.slotIconUrl", group: "Product Slot Icon", label: "Slot Icon", value: "", kind: "image", description: "Optional icon displayed in empty slots on PPB slot templates." },
-      { key: "stylePresets.images.slotIconFit", group: "Product Slot Icon", label: "Slot Icon Size", value: "Fit", kind: "select", options: ["Fit", "Fill", "Cover"], description: "Size format for the slot icon in empty slots." },
+      { key: "stylePresets.images.slotIconUrl", group: "Product Slot Icon", label: "Slot Icon", value: "", kind: "image", description: "Optional image displayed in empty FPB and PPB product slots." },
+      { key: "stylePresets.images.slotIconFit", group: "Product Slot Icon", label: "Slot Icon Presentation", value: "Centered badge", kind: "select", options: ["Centered badge", "Cover", "Fit"], description: "Choose whether the image replaces the centered plus icon or scales relative to the full slot." },
       { key: "generalSettings.loadingGifUrl", label: "FPB Loading GIF", value: "", kind: "loadingGif", description: "Optional GIF displayed instead of the default spinner on the full-page bundle loading screen." },
       { key: "generalSettings.loadingBgColor", label: "Loading Screen Background Color", value: "#ffffff", kind: "color", description: "Background color of the full-page bundle loading screen." },
       { label: "Checkout GIF", value: "Default spinner", kind: "loadingSpinner", description: "Displayed during checkout loading unless a merchant GIF is configured." },

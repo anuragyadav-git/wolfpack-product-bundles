@@ -1,6 +1,9 @@
 import { DESIGN_CONFIGURATION } from "../../../app/lib/admin-configuration-surfaces";
 import { generateCSSFromSettings } from "../../../app/lib/css-generators";
-import { buildSettingsDesignRuntime } from "../../../app/lib/settings-design-runtime";
+import {
+  buildSettingsDesignRuntime,
+  getSlotIconRecommendation,
+} from "../../../app/lib/settings-design-runtime";
 import {
   buildDesignPreviewTheme,
   getDesignFieldsForPreviewContext,
@@ -8,7 +11,7 @@ import {
 
 function makePayload(overrides: Record<string, string> = {}) {
   return {
-    isExpertControlsEnabled: false,
+    inheritedColorFieldKeys: [],
     fieldValues: {
       "Primary Color": "#111111",
       "Button Text Color": "#ffffff",
@@ -33,8 +36,8 @@ function makePayload(overrides: Record<string, string> = {}) {
   };
 }
 
-describe("Settings Design Slot Icon & Size Customization", () => {
-  it("exposes Slot Icon and Slot Icon Size in DESIGN_CONFIGURATION under Images & GIFs tab", () => {
+describe("Settings Design Slot Icon & Presentation Customization", () => {
+  it("exposes Slot Icon and Slot Icon Presentation in DESIGN_CONFIGURATION under Images & GIFs tab", () => {
     const imagesTab = DESIGN_CONFIGURATION.find((tab) => tab.title === "Images & GIFs");
     expect(imagesTab).toBeDefined();
 
@@ -45,17 +48,17 @@ describe("Settings Design Slot Icon & Size Customization", () => {
     expect(slotIconField?.kind).toBe("image");
 
     const slotIconFitField = imagesTab?.fields.find(
-      (f) => f.key === "stylePresets.images.slotIconFit" || f.label === "Slot Icon Size",
+      (f) => f.key === "stylePresets.images.slotIconFit" || f.label === "Slot Icon Presentation",
     );
     expect(slotIconFitField).toBeDefined();
     expect(slotIconFitField?.kind).toBe("select");
-    expect(slotIconFitField?.options).toEqual(["Fit", "Fill", "Cover"]);
+    expect(slotIconFitField?.options).toEqual(["Centered badge", "Cover", "Fit"]);
   });
 
-  it("extracts slotIconUrl and slotIconFit in buildSettingsDesignRuntime across fill, fit, cover formats", () => {
+  it("extracts slotIconUrl and slotIconFit across centered badge, cover, and fit formats", () => {
     const formats = [
+      { input: "Centered badge", expected: "badge" },
       { input: "Cover", expected: "cover" },
-      { input: "Fill", expected: "fill" },
       { input: "Fit", expected: "fit" },
     ];
 
@@ -73,59 +76,75 @@ describe("Settings Design Slot Icon & Size Customization", () => {
       expect(pageCustomization.stylePresets.images.slotIconFit).toBe(expected);
       expect(pageCustomization.mixAndMatchConfig.emptyStateCard.slotIconUrl).toBe("https://cdn.example.com/custom-slot-icon.png");
       expect(pageCustomization.mixAndMatchConfig.emptyStateCard.slotIconFit).toBe(expected);
-      expect(designSettings.slotIconUrl).toBe("https://cdn.example.com/custom-slot-icon.png");
-      expect(designSettings.slotIconFit).toBe(expected);
+      expect(designSettings.slotIconUrl).toBeUndefined();
+      expect(designSettings.slotIconFit).toBeUndefined();
+      expect(designSettings.generalSettings.slotIconUrl).toBe("https://cdn.example.com/custom-slot-icon.png");
+      expect(designSettings.generalSettings.slotIconFit).toBe(expected);
     }
   });
 
-  it("defaults slotIconFit to 'fit' when omitted", () => {
+  it("defaults slotIconFit to 'badge' when omitted", () => {
     const runtime = buildSettingsDesignRuntime(
       makePayload({
         "stylePresets.images.slotIconUrl": "https://cdn.example.com/slot.png",
       }),
     );
     const pageCustomization = runtime.pageCustomization as any;
-    expect(pageCustomization.stylePresets.images.slotIconFit).toBe("fit");
+    expect(pageCustomization.stylePresets.images.slotIconFit).toBe("badge");
   });
 
-  it("includes slot icon fields in preview context for PPB slot templates and excludes for non-slot templates", () => {
+  it("returns presentation-specific image guidance", () => {
+    expect(getSlotIconRecommendation("Centered badge")).toContain("96 × 96 px");
+    expect(getSlotIconRecommendation("Centered badge")).toContain("transparent");
+    expect(getSlotIconRecommendation("Fit")).toContain("800 × 800 px");
+    expect(getSlotIconRecommendation("Cover")).toBeNull();
+  });
+
+  it("includes slot icon fields and Product slots for every FPB and PPB template", () => {
     const imagesTab = DESIGN_CONFIGURATION.find((tab) => tab.title === "Images & GIFs")!;
-
-    const horizontalFields = getDesignFieldsForPreviewContext(imagesTab.fields, "horizontal-slots", "product-slots");
-    const hasHorizontalSlotIcon = horizontalFields.some(
-      (f) => f.key === "stylePresets.images.slotIconUrl" || f.label === "Slot Icon",
-    );
-    expect(hasHorizontalSlotIcon).toBe(true);
-
-    const verticalFields = getDesignFieldsForPreviewContext(imagesTab.fields, "vertical-slots", "product-slots");
-    const hasVerticalSlotIcon = verticalFields.some(
-      (f) => f.key === "stylePresets.images.slotIconUrl" || f.label === "Slot Icon",
-    );
-    expect(hasVerticalSlotIcon).toBe(true);
-
-    const listFields = getDesignFieldsForPreviewContext(imagesTab.fields, "product-list", "product-card");
-    const hasListSlotIcon = listFields.some(
-      (f) => f.key === "stylePresets.images.slotIconUrl" || f.label === "Slot Icon",
-    );
-    expect(hasListSlotIcon).toBe(false);
+    const templates = [
+      "standard", "classic", "compact", "horizontal",
+      "product-list", "product-grid", "horizontal-slots", "vertical-slots",
+    ] as const;
+    for (const template of templates) {
+      const fields = getDesignFieldsForPreviewContext(imagesTab.fields, template, "product-slots");
+      expect(fields.map((field) => field.key)).toEqual(expect.arrayContaining([
+        "stylePresets.images.slotIconUrl",
+        "stylePresets.images.slotIconFit",
+      ]));
+    }
   });
 
   it("builds live preview theme with --preview-slot-icon-url and --preview-slot-icon-fit", () => {
     const theme = buildDesignPreviewTheme(
       {
         "stylePresets.images.slotIconUrl": "https://cdn.example.com/preview-icon.svg",
-        "stylePresets.images.slotIconFit": "Cover",
+        "stylePresets.images.slotIconFit": "Centered badge",
       },
-      false,
+      [],
+      null,
       "horizontal-slots",
     );
 
     expect(theme["--preview-slot-icon-url"]).toBe("https://cdn.example.com/preview-icon.svg");
-    expect(theme["--preview-slot-icon-fit"]).toBe("cover");
+    expect(theme["--preview-slot-icon-fit"]).toBe("badge");
   });
 
   it("generates CSS variables --bundle-slot-icon-url and --bundle-slot-icon-fit", () => {
     const css = generateCSSFromSettings(
+      {
+        slotIconUrl: "https://cdn.example.com/slot.svg",
+        slotIconFit: "badge",
+      } as any,
+      "product_page",
+    );
+
+    expect(css).toContain('--bundle-slot-icon-badge-image: url("https://cdn.example.com/slot.svg")');
+    expect(css).toContain("--bundle-slot-icon-card-image: none");
+    expect(css).toContain("--bundle-slot-icon-native-visibility: hidden");
+    expect(css).toContain("--bundle-slot-icon-badge-overlay-display: block");
+
+    const coverCss = generateCSSFromSettings(
       {
         slotIconUrl: "https://cdn.example.com/slot.svg",
         slotIconFit: "cover",
@@ -133,7 +152,9 @@ describe("Settings Design Slot Icon & Size Customization", () => {
       "product_page",
     );
 
-    expect(css).toContain('--bundle-slot-icon-url: url("https://cdn.example.com/slot.svg")');
-    expect(css).toContain("--bundle-slot-icon-fit: cover");
+    expect(coverCss).toContain('--bundle-slot-icon-card-image: url("https://cdn.example.com/slot.svg")');
+    expect(coverCss).toContain("--bundle-slot-icon-card-size: cover");
+    expect(coverCss).toContain("--bundle-slot-icon-native-visibility: hidden");
+    expect(coverCss).toContain("--bundle-slot-icon-badge-overlay-display: none");
   });
 });

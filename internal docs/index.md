@@ -5,7 +5,7 @@ title: Wolfpack Product Bundles Internal Docs
 type: index
 status: authoritative
 summary: Index of durable Wolfpack Product Bundles architecture, integration, feature, and operations documentation.
-last_audited: 2026-08-21
+last_audited: 2026-08-23
 owners:
   - engineering
 domains:
@@ -64,7 +64,7 @@ Full evidence record: `docs/competitor-analysis/16-eb-full-data-flow-investigati
 - [[Architecture/Diagrams/index|Architecture Diagram Catalog]] — indexed Mermaid diagrams for Cart Transform, metafield ownership/consumption, storefront runtime, backend layers, and embedded Admin UI
 - [[Shopify Integration/Polaris Web Components Reference]] — source-of-truth link and policy for using `s-*` Admin web components
 - [[Shopify Integration/Admin API]] — Rate limits, GraphQL patterns, session handling
-- [[Shopify Integration/Storefront API]] — Storefront GraphQL field gotchas, including product description HTML handling
+- [[Shopify Integration/Storefront API]] — Storefront GraphQL field gotchas, product description HTML, and Shop Brand color-pair inheritance
 - [[Shopify Integration/Cart Transform API]] — Operations, targets, API versions (2025-10)
 - [[Shopify Integration/Checkout UI Extension]] — Preact targets, build rules
 - [[Shopify Integration/Metafields]] — Bundle config sync, payload limits, and PPB component quantity validation constraints

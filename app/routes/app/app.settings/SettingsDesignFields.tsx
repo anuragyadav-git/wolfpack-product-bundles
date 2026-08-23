@@ -1,4 +1,5 @@
 import type { SettingsField } from "../../../lib/admin-configuration-surfaces";
+import { getSlotIconRecommendation } from "../../../lib/settings-design-runtime";
 import { FilePicker } from "../../../components/shared/FilePicker";
 import styles from "../../../styles/routes/admin-configuration-surfaces.module.css";
 
@@ -15,12 +16,14 @@ export function DesignFields({
   fields,
   values,
   disabledFieldKeys = [],
+  inheritedFieldKeys = [],
   onFieldChange,
 }: {
   title?: string;
   fields: SettingsField[];
   values: Record<string, string>;
   disabledFieldKeys?: string[];
+  inheritedFieldKeys?: string[];
   onFieldChange: (label: string, value: string) => void;
 }) {
   const defaultGroup = title ?? "";
@@ -61,32 +64,41 @@ export function DesignFields({
 
                 if (field.kind === "color") {
                   return (
-                    <s-color-field
-                      key={`${group.title}:${field.label}`}
-                      label={field.label}
-                      name={fieldKey}
-                      value={colorValue}
-                      details={field.description}
-                      alpha
-                      onInput={handleInput}
-                    />
+                    <s-stack key={`${group.title}:${field.label}`} gap="small">
+                      <s-color-field
+                        label={field.label}
+                        name={fieldKey}
+                        value={colorValue}
+                        details={field.description}
+                        alpha
+                        onInput={handleInput}
+                      />
+                      {inheritedFieldKeys.includes(fieldKey) ? (
+                        <s-badge tone="info">Shop Brand</s-badge>
+                      ) : null}
+                    </s-stack>
                   );
                 }
                 if (field.kind === "select") {
+                  const recommendation = fieldKey === "stylePresets.images.slotIconFit"
+                    ? getSlotIconRecommendation(value)
+                    : null;
                   return (
-                    <s-select
-                      key={`${group.title}:${field.label}`}
-                      label={field.label}
-                      name={fieldKey}
-                      value={value || field.options?.[0] || ""}
-                      details={field.description}
-                      disabled={disabledFieldKeys.includes(fieldKey)}
-                      onChange={handleInput}
-                    >
-                      {(field.options?.length ? field.options : [field.value ?? ""]).map((option) => (
-                        <s-option key={option} value={option}>{option}</s-option>
-                      ))}
-                    </s-select>
+                    <s-stack key={`${group.title}:${field.label}`} gap="small">
+                      <s-select
+                        label={field.label}
+                        name={fieldKey}
+                        value={value || field.options?.[0] || ""}
+                        details={field.description}
+                        disabled={disabledFieldKeys.includes(fieldKey)}
+                        onChange={handleInput}
+                      >
+                        {(field.options?.length ? field.options : [field.value ?? ""]).map((option) => (
+                          <s-option key={option} value={option}>{option}</s-option>
+                        ))}
+                      </s-select>
+                      {recommendation ? <s-text color="subdued">{recommendation}</s-text> : null}
+                    </s-stack>
                   );
                 }
                 if (field.kind === "number") {

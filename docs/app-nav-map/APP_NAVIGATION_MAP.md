@@ -5,7 +5,7 @@ title: Wolfpack Product Bundles App Navigation and UI Map
 type: navigation-map
 status: authoritative
 summary: Routes, screens, actions, modals, and storefront-preview flows for the embedded app.
-last_audited: 2026-08-21
+last_audited: 2026-08-23
 owners:
   - engineering
 domains:
@@ -30,7 +30,7 @@ keywords:
 > Any time a new page, modal, tab, sidebar section, or user flow is added or removed,
 > this document **must** be updated. See CLAUDE.md for the enforcement rule.
 
-**Last Updated:** 2026-08-21
+**Last Updated:** 2026-08-23
 **Environment mapped:** SIT (`wolfpack-product-bundles-sit`)
 **Test store:** `wolfpack-store-test-1.myshopify.com`
 
@@ -203,7 +203,11 @@ Settings
 ├── App Bridge breadcrumb: Dashboard back action + Settings title
 ├── App-owned header: arrow-only back action + Settings title
 ├── Card: Design
-│   └── Shows Settings -> Design controls: brand colors, typography, corners, images and GIFs
+│   └── Opens the preview-first Design workspace
+│       ├── Template, component surface, and desktop/mobile selectors above the local preview canvas
+│       ├── One contextual inspector for the component visible in the preview
+│       ├── Phone panes: Preview / Customize
+│       └── Contextual colors inherit Shopify Shop Brand pairs until individually overridden
 ├── Card: Language
 │   └── Shows multilanguage mode, 39 add/remove locale choices, shared Cart & Checkout strings, Landing Page Layout strings, and Product Page Layout strings
 └── Card: Controls
@@ -216,10 +220,11 @@ Primary action:
 - Selecting Design opens the Settings -> Design subpage.
 - Selecting Controls immediately replaces the landing cards with the shared top-edge loading bar while `/app/additional-configurations` navigates and becomes ready.
 - While the lazy Design or Language workspace loads after selection, the route shows three skeleton cards instead of a spinner.
-- The Design Control Panel lazy-loads after entry and uses a responsive three-column workspace: section navigation on the left, the largest app-owned preview in the middle, and active fields on the right. At medium widths the preview spans the first row; at phone widths a Preview / Customize segmented control shows one workspace pane at a time.
+- The Design Control Panel lazy-loads after entry and uses a responsive preview-first workspace: the largest app-owned preview and its selectors sit beside one contextual inspector. At phone widths a Preview / Customize segmented control shows one workspace pane at a time.
 - Preview-only Bundle Type and Template selectors cover Landing Page Standard, Classic, Compact, and Horizontal plus Product Page Product List, Product Grid, Horizontal Slots, and Vertical Slots.
 - The template-aware Preview surface control exposes individual components only: Bundle header, Navigation, Categories, Product cards, Product slots, Product picker, Cart / summary, Loading, Validation, and Upsell. Each template shows only the components it owns, and there is no whole-Builder option. Desktop/mobile switching preserves the selected surface when it remains valid.
 - Images & GIFs owns the store-level FPB loading screen: merchants can retain the default spinner or select an uploaded GIF through one clickable drop zone, change its background color, and see both choices in the local Loading preview. Image Fit is disabled on the Loading surface because it does not affect that screen. The former per-bundle FPB loading animation control is not exposed.
+- Images & GIFs also owns one store-level FPB/PPB Slot Icon and a Slot Icon Presentation selector for every template. Centered badge replaces the native plus icon (recommended 96 x 96 px transparent square); Cover fills the responsive product slot; Fit contains an 800 x 800 px square image inside the responsive product slot.
 - Component scenes use fixed logical 1280×1136 desktop and 390×844 mobile canvases that scale to fit the Admin panel. The stage keeps one viewport-responsive block size so desktop/mobile toggles do not move the surrounding page. Product picker, Loading, Validation, and Upsell remain representative transient states.
 - Editing a preview-relevant field selects the scene where its effect is visible. Slot product-card fields reveal Product picker, cart/footer fields reveal Cart / summary, and loading, toast, and upsell fields reveal their matching surfaces.
 - Unsaved design values are applied through the normalized storefront Design runtime and a semantic field-target contract; arbitrary CSS, remote preview requests, and cart mutations are rejected.
@@ -567,7 +572,7 @@ PPB Configure Page
 │   │   ├── FPB only: Product Slots toggle
 │   │   ├── FPB only: Product Slots helper text
 │   │   ├── FPB only: Slot Icon [Change Icon] opens bundle-level image picker; [Reset] clears icon
-│   │   ├── FPB Slot Icon scope: per-bundle Bundle Settings control only; no Design Control Panel route
+│   │   ├── Settings -> Design: store-level FPB/PPB Slot Icon and Centered badge / Cover / Fit presentation control
 │   │   └── FPB only note: only applies when rules are quantity-based
 │   ├── Cart line item discount display
 │   │   └── [Button] "Edit Defaults" → /app/settings

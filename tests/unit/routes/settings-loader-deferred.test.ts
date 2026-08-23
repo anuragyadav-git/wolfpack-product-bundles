@@ -8,9 +8,13 @@ jest.mock("../../../app/db.server", () => ({
     bundle: { findMany: jest.fn() },
   },
 }));
+jest.mock("../../../app/services/theme-colors.server", () => ({
+  syncThemeColors: jest.fn().mockResolvedValue(null),
+}));
 
 const { requireAdminSession } = require("../../../app/lib/auth-guards.server");
 const { prisma } = require("../../../app/db.server");
+const { syncThemeColors } = require("../../../app/services/theme-colors.server");
 
 function makeDeferred<T>() {
   let resolve!: (value: T) => void;
@@ -21,8 +25,13 @@ function makeDeferred<T>() {
 }
 
 describe("Settings loader critical path", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    syncThemeColors.mockResolvedValue(null);
+  });
   it("returns the landing response before workspace data resolves", async () => {
     requireAdminSession.mockResolvedValue({
+      admin: {},
       session: { shop: "test-shop.myshopify.com" },
     });
     const settings = makeDeferred<null>();
@@ -48,6 +57,32 @@ describe("Settings loader critical path", () => {
       }),
     }));
     await expect((result as any).data.previewBundles).resolves.toEqual([]);
+  });
+
+  it("returns the freshly fetched Shop Brand pairs with the Design workspace", async () => {
+    const colors = {
+      primary: { background: "#123456", foreground: "#ffffff" },
+      secondary: { background: "#e8eef5", foreground: "#17202a" },
+    };
+    requireAdminSession.mockResolvedValue({
+      admin: { graphql: jest.fn() },
+      session: { shop: "test-shop.myshopify.com" },
+    });
+    syncThemeColors.mockResolvedValue(colors);
+    prisma.designSettings.findUnique.mockResolvedValue(null);
+    prisma.bundle.findMany.mockResolvedValue([]);
+    const { loader } = await import("../../../app/routes/app/app.settings");
+
+    const result = await loader({
+      request: new Request("https://app.test/app/settings"),
+      params: {},
+      context: {},
+    } as any);
+
+    await expect((result as any).data.settingsPage).resolves.toEqual(expect.objectContaining({
+      shopBrandColors: colors,
+    }));
+    expect(syncThemeColors).toHaveBeenCalledWith(expect.anything(), "test-shop.myshopify.com");
   });
 
   it("keeps the Settings landing page pending until data and the loading bar are ready", async () => {

@@ -37,24 +37,17 @@ describe("DesignSettingsView live preview", () => {
   it("renders live feedback inside the existing design settings view", () => {
     const view = renderToStaticMarkup(
       React.createElement(DesignSettingsView, {
-        selectedDesignTab: DESIGN_CONFIGURATION[0],
-        isExpertColorControls: false,
-        isExpertScopeActive: false,
-        activeDesignScope: "General",
         designFieldValues: { "Primary Color": "#123456" },
-        designGateMessage: null,
+        inheritedColorFieldKeys: [],
+        shopBrandColors: null,
         isActiveSubpageDirty: false,
         isPreviewModalOpen: false,
         previewBundles: [{ id: "bundle-1", name: "Summer Box", type: "Landing Page", viewUrl: "https://shop.test/pages/bundle" }],
         saveMessage: null,
         setSettingsView: jest.fn(),
         setIsPreviewModalOpen: jest.fn(),
-        setActiveDesignTab: jest.fn(),
-        setIsExpertScopeActive: jest.fn(),
-        setDesignGateMessage: jest.fn(),
-        setActiveDesignScope: jest.fn(),
         setDesignFieldValues: jest.fn(),
-        setIsExpertColorControls: jest.fn(),
+        setInheritedColorFieldKeys: jest.fn(),
         setSaveMessage: jest.fn(),
         discardActiveSettingsChanges: jest.fn(),
         saveActiveSettingsChanges: jest.fn(),
@@ -72,29 +65,52 @@ describe("DesignSettingsView live preview", () => {
     expect(view).toContain("disabled");
     expect(view).toContain("<s-color-field");
     expect(view).toContain("<s-button");
+    expect(view).toContain("Customize this component");
+    expect(view).not.toContain("Expert Color Controls");
+    expect(view).not.toContain("Brand Colors");
   });
 
-  it("keeps local Design controls and preview available without a storefront bundle", () => {
+  it("marks inherited contextual colors as Shop Brand values", () => {
     const view = renderToStaticMarkup(
       React.createElement(DesignSettingsView, {
-        selectedDesignTab: DESIGN_CONFIGURATION[0],
-        isExpertColorControls: false,
-        isExpertScopeActive: false,
-        activeDesignScope: "General",
         designFieldValues: {},
-        designGateMessage: null,
+        inheritedColorFieldKeys: ["expert.productCard.productCardButtonColor"],
+        shopBrandColors: {
+          primary: { background: "#123456", foreground: "#ffffff" },
+          secondary: { background: "#e8eef5", foreground: "#17202a" },
+        },
         isActiveSubpageDirty: false,
         isPreviewModalOpen: false,
         previewBundles: [],
         saveMessage: null,
         setSettingsView: jest.fn(),
         setIsPreviewModalOpen: jest.fn(),
-        setActiveDesignTab: jest.fn(),
-        setIsExpertScopeActive: jest.fn(),
-        setDesignGateMessage: jest.fn(),
-        setActiveDesignScope: jest.fn(),
         setDesignFieldValues: jest.fn(),
-        setIsExpertColorControls: jest.fn(),
+        setInheritedColorFieldKeys: jest.fn(),
+        setSaveMessage: jest.fn(),
+        discardActiveSettingsChanges: jest.fn(),
+        saveActiveSettingsChanges: jest.fn(),
+      }),
+    );
+
+    expect(view).toContain('<s-badge tone="info">Shop Brand</s-badge>');
+    expect(view).toContain('value="#123456"');
+  });
+
+  it("keeps local Design controls and preview available without a storefront bundle", () => {
+    const view = renderToStaticMarkup(
+      React.createElement(DesignSettingsView, {
+        designFieldValues: {},
+        inheritedColorFieldKeys: [],
+        shopBrandColors: null,
+        isActiveSubpageDirty: false,
+        isPreviewModalOpen: false,
+        previewBundles: [],
+        saveMessage: null,
+        setSettingsView: jest.fn(),
+        setIsPreviewModalOpen: jest.fn(),
+        setDesignFieldValues: jest.fn(),
+        setInheritedColorFieldKeys: jest.fn(),
         setSaveMessage: jest.fn(),
         discardActiveSettingsChanges: jest.fn(),
         saveActiveSettingsChanges: jest.fn(),
@@ -113,24 +129,17 @@ describe("DesignSettingsView live preview", () => {
 
     const view = renderToStaticMarkup(
       React.createElement(DesignSettingsView, {
-        selectedDesignTab: imagesTab ?? DESIGN_CONFIGURATION[0],
-        isExpertColorControls: false,
-        isExpertScopeActive: false,
-        activeDesignScope: "General",
         designFieldValues: {},
-        designGateMessage: null,
+        inheritedColorFieldKeys: [],
+        shopBrandColors: null,
         isActiveSubpageDirty: false,
         isPreviewModalOpen: false,
         previewBundles: [{ id: "bundle-1", name: "Summer Box", type: "Landing Page", viewUrl: "https://shop.test/pages/bundle" }],
         saveMessage: null,
         setSettingsView: jest.fn(),
         setIsPreviewModalOpen: jest.fn(),
-        setActiveDesignTab: jest.fn(),
-        setIsExpertScopeActive: jest.fn(),
-        setDesignGateMessage: jest.fn(),
-        setActiveDesignScope: jest.fn(),
         setDesignFieldValues: jest.fn(),
-        setIsExpertColorControls: jest.fn(),
+        setInheritedColorFieldKeys: jest.fn(),
         setSaveMessage: jest.fn(),
         discardActiveSettingsChanges: jest.fn(),
         saveActiveSettingsChanges: jest.fn(),
