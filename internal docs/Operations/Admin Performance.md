@@ -246,6 +246,13 @@ render a route-shaped skeleton during that interval. The `/app/dashboard`
 readiness boundary then retains the same loading treatment until all visible
 Dashboard content can be revealed together.
 
+The authenticated `/app` shell also owns the shared top-edge loading bar for
+every child-route transition. It renders while Remix is loading a pathname
+different from the current screen, then hides as soon as that destination
+pathname commits and yields to any destination-owned readiness boundary.
+Same-screen revalidation and form submission do not retain the shell bar. This
+keeps navigation feedback continuous without covering already-loaded content.
+
 Redux Toolkit, React Redux, Redux, Reselect, and Immer are isolated in
 `vendor-state`. Chart-only dependencies remain in `vendor-charts`. Production
 manifest verification must show that the app layout and every non-analytics

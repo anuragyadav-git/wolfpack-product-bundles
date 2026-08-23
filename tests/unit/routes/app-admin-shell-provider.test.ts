@@ -4,6 +4,8 @@ import { renderToStaticMarkup } from "react-dom/server";
 jest.mock("@remix-run/react", () => ({
   Outlet: () => React.createElement("main", null, "outlet"),
   useLoaderData: jest.fn(),
+  useLocation: jest.fn(),
+  useNavigation: jest.fn(),
   useNavigate: () => jest.fn(),
   useRouteError: () => null,
   isRouteErrorResponse: jest.fn(),
@@ -60,11 +62,13 @@ jest.mock("../../../app/components/ErrorPage", () => ({
   ErrorPage: () => null,
 }));
 
-const { useLoaderData } = require("@remix-run/react");
+const { useLoaderData, useLocation, useNavigation } = require("@remix-run/react");
 
 describe("app Admin shell provider", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    useLocation.mockReturnValue({ pathname: "/app/dashboard" });
+    useNavigation.mockReturnValue({ state: "idle" });
   });
 
   it("renders the Admin tree without global React Polaris or Redux providers", async () => {
@@ -80,5 +84,40 @@ describe("app Admin shell provider", () => {
     expect(markup).not.toContain("data-redux-provider");
     expect(markup).not.toContain("data-mantle-provider");
     expect(markup).toContain("<main>outlet</main>");
+  });
+
+  it("renders the shared top-edge loading bar while another Admin page is loading", async () => {
+    useLoaderData.mockReturnValue({
+      apiKey: "shopify-api-key",
+      locale: "en",
+      shop: "test-shop.myshopify.com",
+    });
+    useNavigation.mockReturnValue({
+      state: "loading",
+      location: { pathname: "/app/settings" },
+    });
+    const { default: App } = await import("../../../app/routes/app/app");
+
+    const view = renderToStaticMarkup(React.createElement(App));
+
+    expect(view).toContain('role="progressbar"');
+    expect(view).toContain('aria-label="Loading page"');
+  });
+
+  it.each([
+    ["loading", "/app/dashboard"],
+    ["submitting", "/app/settings"],
+  ])("hides the shell bar for %s state after the current screen is available", async (state, pathname) => {
+    useLoaderData.mockReturnValue({
+      apiKey: "shopify-api-key",
+      locale: "en",
+      shop: "test-shop.myshopify.com",
+    });
+    useNavigation.mockReturnValue({ state, location: { pathname } });
+    const { default: App } = await import("../../../app/routes/app/app");
+
+    const view = renderToStaticMarkup(React.createElement(App));
+
+    expect(view).not.toContain('aria-label="Loading page"');
   });
 });

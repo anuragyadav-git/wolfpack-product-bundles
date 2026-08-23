@@ -1,5 +1,5 @@
 import type { HeadersFunction, LoaderFunctionArgs } from "@remix-run/node";
-import { Outlet, useLoaderData, useNavigate, useRouteError, isRouteErrorResponse } from "@remix-run/react";
+import { Outlet, useLoaderData, useLocation, useNavigate, useNavigation, useRouteError, isRouteErrorResponse } from "@remix-run/react";
 import { boundary } from "@shopify/shopify-app-remix/server";
 import { authenticate, sessionStorage } from "../../shopify.server";
 import prisma from "../../db.server";
@@ -12,6 +12,7 @@ import { AppLogger } from "../../lib/logger";
 import { loadShopAdminLocale } from "../../services/admin-locale.server";
 import { installAdminWebVitalsDiagnostics } from "../../lib/admin-web-vitals-diagnostics.client";
 import { runAfterSaveBarLeaveConfirmation } from "../../lib/admin-savebar-navigation.client";
+import { AdminRouteLoadingBar } from "../../components/AdminRouteLoadingBar";
 
 function ensureExpiringOfflineSessionInBackground(shop: string, idToken?: string | null) {
   void ensureShopHasExpiringOfflineSession(prisma, shop, sessionStorage, { idToken }).catch((error) => {
@@ -77,6 +78,11 @@ function AdminNavigation() {
 
 export default function App() {
   const { locale } = useLoaderData<typeof loader>();
+  const location = useLocation();
+  const navigation = useNavigation();
+  const isPageNavigationLoading = navigation.state === "loading"
+    && navigation.location?.pathname !== undefined
+    && navigation.location.pathname !== location.pathname;
 
   useEffect(() => {
     if (i18n.language !== locale) {
@@ -91,6 +97,9 @@ export default function App() {
   return (
     <I18nextProvider i18n={i18n}>
       <AdminNavigation />
+      {isPageNavigationLoading ? (
+        <AdminRouteLoadingBar label="Loading page" />
+      ) : null}
       <Outlet />
     </I18nextProvider>
   );
