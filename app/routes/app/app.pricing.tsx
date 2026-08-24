@@ -7,7 +7,7 @@
 
 import { defer, json, type LoaderFunctionArgs, type ActionFunctionArgs } from "@remix-run/node";
 import { Await, useLoaderData, useFetcher, useNavigate } from "@remix-run/react";
-import { requireAdminSession } from "../../lib/auth-guards.server";
+import { authenticate } from "../../shopify.server";
 import { getCachedSubscriptionInfo, getSubscriptionInfoFromCache } from "../../services/subscription-cache.server";
 import { BillingService } from "../../services/billing.server";
 import { PLANS } from "../../constants/plans";
@@ -40,7 +40,7 @@ type PricingSubscriptionData = {
 };
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  const { session } = await requireAdminSession(request);
+  const { session } = await authenticate.admin(request);
   const shopDomain = session.shop;
 
   const subscription = (async () => {
@@ -84,7 +84,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 export async function action({ request }: ActionFunctionArgs) {
-  const { admin, session } = await requireAdminSession(request);
+  const { admin, session } = await authenticate.admin(request);
   const shopDomain = session.shop;
 
   const formData = await request.formData();

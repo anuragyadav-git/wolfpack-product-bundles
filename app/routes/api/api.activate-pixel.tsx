@@ -1,5 +1,5 @@
 import { json, type LoaderFunctionArgs } from "@remix-run/node";
-import { requireAdminSession } from "../../lib/auth-guards.server";
+import { authenticate } from "../../shopify.server";
 import { AppLogger } from "../../lib/logger";
 import { activateUtmPixel } from "../../services/pixel-activation.server";
 import db from "../../db.server";
@@ -16,7 +16,7 @@ import { normalizeSavedCustomUtmParameters } from "../../lib/analytics/attributi
  * exists on Shopify's servers.
  */
 export async function loader({ request }: LoaderFunctionArgs) {
-  const { admin, session } = await requireAdminSession(request);
+  const { admin, session } = await authenticate.admin(request);
   const appUrl = process.env.SHOPIFY_APP_URL;
 
   if (!appUrl) {

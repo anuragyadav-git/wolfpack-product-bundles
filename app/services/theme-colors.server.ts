@@ -6,8 +6,7 @@ import {
   parseShopBrandColorsResponse,
   type ShopBrandColors,
 } from "../lib/shop-brand-colors";
-import type { ShopifyAdmin } from "../lib/auth-guards.server";
-import { getStorefrontAccessToken } from "./storefront-token.server";
+import type { StorefrontApiContext } from "@shopify/shopify-app-remix/server";
 
 export type { ShopBrandColors } from "../lib/shop-brand-colors";
 
@@ -23,7 +22,6 @@ const SHOP_BRAND_COLORS_QUERY = `
     }
   }
 `;
-const SHOP_BRAND_STOREFRONT_API_VERSION = "2025-10";
 
 async function writeShopBrandColors(shopDomain: string, colors: ShopBrandColors) {
   await Promise.all([BundleType.PRODUCT_PAGE, BundleType.FULL_PAGE].map((bundleType) => (
@@ -50,23 +48,11 @@ async function clearShopBrandColors(shopDomain: string) {
 }
 
 export async function fetchShopBrandColors(
-  admin: ShopifyAdmin,
+  storefront: StorefrontApiContext,
   shopDomain: string,
 ): Promise<ShopBrandColors | null> {
   try {
-    const storefrontAccessToken = await getStorefrontAccessToken(admin as any, shopDomain);
-    const response = await fetch(
-      `https://${shopDomain}/api/${SHOP_BRAND_STOREFRONT_API_VERSION}/graphql.json`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Shopify-Storefront-Access-Token": storefrontAccessToken,
-        },
-        body: JSON.stringify({ query: SHOP_BRAND_COLORS_QUERY }),
-      },
-    );
-    if (!response.ok) throw new Error(`Storefront Brand query failed with ${response.status}`);
+    const response = await storefront.graphql(SHOP_BRAND_COLORS_QUERY);
     const colors = parseShopBrandColorsResponse(await response.json());
     if (!colors) throw new Error("Storefront Brand colors are missing or malformed");
     return colors;
@@ -85,10 +71,13 @@ export async function fetchShopBrandColors(
  * to canonical template defaults instead of stale merchant Brand data.
  */
 export async function syncThemeColors(
-  admin: ShopifyAdmin,
   shopDomain: string,
+  storefrontContext?: StorefrontApiContext,
 ): Promise<ShopBrandColors | null> {
-  const colors = await fetchShopBrandColors(admin, shopDomain);
+  const storefront = storefrontContext ?? (
+    await (await import("../shopify.server")).unauthenticated.storefront(shopDomain)
+  ).storefront;
+  const colors = await fetchShopBrandColors(storefront, shopDomain);
   if (!colors) {
     await clearShopBrandColors(shopDomain);
     return null;

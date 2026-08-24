@@ -1,7 +1,7 @@
 import type { LoaderFunctionArgs } from "@remix-run/node";
 import db from "../../db.server";
 import { AppLogger } from "../../lib/logger";
-import { requireAppProxy } from "../../lib/auth-guards.server";
+import { authenticate } from "../../shopify.server";
 import { BundleStatus } from "../../constants/bundle";
 import { formatBundleForWidget } from "../../lib/bundle-formatter.server";
 import { verifyBundlePreviewToken } from "../../lib/bundle-preview-token.server";
@@ -24,7 +24,8 @@ function escapeHtmlAttribute(value: string): string {
 export async function loader({ request, params }: LoaderFunctionArgs) {
   const startedAt = Date.now();
   const url = new URL(request.url);
-  const { session } = await requireAppProxy(request);
+  const { session } = await authenticate.public.appProxy(request);
+  if (!session) throw new Response("Unauthorized", { status: 401 });
   const shopDomain = session.shop;
   const bundleId = params.bundleId;
 

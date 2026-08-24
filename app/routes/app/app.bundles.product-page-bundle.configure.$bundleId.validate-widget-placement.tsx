@@ -3,7 +3,7 @@ import {
   type ActionFunctionArgs,
   type LoaderFunctionArgs,
 } from "@remix-run/node";
-import { requireAdminSession } from "../../lib/auth-guards.server";
+import { authenticate } from "../../shopify.server";
 import { handleValidateWidgetPlacement } from "./app.bundles.product-page-bundle.configure.$bundleId/handlers/widget-placement.server";
 
 export const loader = async (_args: LoaderFunctionArgs) =>
@@ -18,6 +18,6 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
     );
   }
 
-  const { admin, session } = await requireAdminSession(request);
+  const { admin, session } = await authenticate.admin(request);
   return handleValidateWidgetPlacement(admin, session, bundleId);
 };

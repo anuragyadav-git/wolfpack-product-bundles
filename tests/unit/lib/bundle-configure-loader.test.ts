@@ -1,127 +1,14 @@
 import {
-  buildThemeAppEmbedEditorUrl,
   fetchBundleProduct,
-  fetchEmbedData,
   fetchShopCurrencyCode,
   fetchShopLocales,
 } from "../../../app/lib/bundle-configure-loader.server";
-import { checkAppEmbedEnabled } from "../../../app/services/theme/app-embed-check.server";
 
 jest.mock("../../../app/lib/logger", () => ({
   AppLogger: {
     warn: jest.fn(),
   },
 }));
-
-jest.mock("../../../app/services/theme/app-embed-check.server", () => ({
-  checkAppEmbedEnabled: jest.fn(),
-}));
-
-const mockShopUpdate = jest.fn().mockResolvedValue({});
-const mockShopFindUnique = jest.fn();
-
-jest.mock("../../../app/db.server", () => ({
-  __esModule: true,
-  default: {
-    shop: {
-      findUnique: (...args: unknown[]) => mockShopFindUnique(...args),
-      update: (...args: unknown[]) => mockShopUpdate(...args),
-    },
-  },
-}));
-
-const THEME_GID = "gid://shopify/OnlineStoreTheme/123456";
-const SHOP = "test.myshopify.com";
-const API_KEY = "test-api-key";
-
-describe("fetchEmbedData — live Shopify app embed status", () => {
-  const mockAdmin = {};
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it("does not read app embed cache from DB", async () => {
-    mockShopFindUnique.mockRejectedValue(new Error("DB cache must not be read"));
-    (checkAppEmbedEnabled as jest.Mock).mockResolvedValue({ enabled: false, themeId: THEME_GID });
-
-    const result = await fetchEmbedData(mockAdmin, SHOP, API_KEY);
-
-    expect(result.appEmbedEnabled).toBe(false);
-    expect(result.themeEditorUrl).toContain("123456");
-    expect(checkAppEmbedEnabled).toHaveBeenCalledTimes(1);
-    expect(mockShopFindUnique).not.toHaveBeenCalled();
-    expect(mockShopUpdate).not.toHaveBeenCalled();
-  });
-
-  it("does not persist Shopify app embed status after a live read", async () => {
-    (checkAppEmbedEnabled as jest.Mock).mockResolvedValue({ enabled: true, themeId: THEME_GID });
-
-    const result = await fetchEmbedData(mockAdmin, SHOP, API_KEY);
-
-    expect(checkAppEmbedEnabled).toHaveBeenCalledTimes(1);
-    expect(mockShopFindUnique).not.toHaveBeenCalled();
-    expect(mockShopUpdate).not.toHaveBeenCalled();
-    expect(result.appEmbedEnabled).toBe(true);
-  });
-
-  it("returns disabled directly from Shopify without writing cache", async () => {
-    (checkAppEmbedEnabled as jest.Mock).mockResolvedValue({ enabled: false, themeId: THEME_GID });
-
-    const result = await fetchEmbedData(mockAdmin, SHOP, API_KEY);
-
-    expect(checkAppEmbedEnabled).toHaveBeenCalledTimes(1);
-    expect(mockShopFindUnique).not.toHaveBeenCalled();
-    expect(mockShopUpdate).not.toHaveBeenCalled();
-    expect(result.appEmbedEnabled).toBe(false);
-  });
-
-  it("does not write cache when Shopify returns themeId:null", async () => {
-    (checkAppEmbedEnabled as jest.Mock).mockResolvedValue({ enabled: false, themeId: null });
-
-    await fetchEmbedData(mockAdmin, SHOP, API_KEY);
-
-    expect(mockShopFindUnique).not.toHaveBeenCalled();
-    expect(mockShopUpdate).not.toHaveBeenCalled();
-  });
-
-  it("builds correct theme editor URL from the live themeId", async () => {
-    (checkAppEmbedEnabled as jest.Mock).mockResolvedValue({ enabled: true, themeId: THEME_GID });
-
-    const result = await fetchEmbedData(mockAdmin, SHOP, API_KEY, "bundle-app-embed");
-
-    expect(result.themeEditorUrl).toBe(
-      `https://${SHOP}/admin/themes/123456/editor?context=apps&activateAppId=${API_KEY}%2Fbundle-app-embed`,
-    );
-  });
-
-  it("delegates app identity to the embed checker's Shopify query", async () => {
-    (checkAppEmbedEnabled as jest.Mock).mockResolvedValue({
-      enabled: false,
-      themeId: THEME_GID,
-    });
-    const result = await fetchEmbedData(mockAdmin, SHOP, API_KEY, "bundle-app-embed");
-
-    expect(checkAppEmbedEnabled).toHaveBeenCalledWith(
-      mockAdmin,
-      SHOP,
-      {
-        blockHandles: ["bundle-app-embed"],
-      },
-    );
-    expect(mockShopFindUnique).not.toHaveBeenCalled();
-    expect(mockShopUpdate).not.toHaveBeenCalled();
-    expect(result.appEmbedEnabled).toBe(false);
-  });
-});
-
-describe("buildThemeAppEmbedEditorUrl", () => {
-  it("uses Shopify's activateAppId deep link parameter", () => {
-    expect(buildThemeAppEmbedEditorUrl(SHOP, THEME_GID, API_KEY, "bundle-app-embed")).toBe(
-      `https://${SHOP}/admin/themes/123456/editor?context=apps&activateAppId=${API_KEY}%2Fbundle-app-embed`,
-    );
-  });
-});
 
 describe("fetchBundleProduct", () => {
   it("queries current Shopify product media for the Admin bundle product card", async () => {

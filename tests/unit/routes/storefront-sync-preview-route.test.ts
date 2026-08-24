@@ -1,17 +1,17 @@
 import { action, loader } from "../../../app/routes/app/app.bundles.$bundleType.configure.$bundleId.prepare-preview";
-import { requireAdminSession } from "../../../app/lib/auth-guards.server";
+import { authenticate } from "../../../app/shopify.server";
 import { handlePrepareStorefrontPreview } from "../../../app/routes/app/shared/storefront-sync-action.server";
 
-jest.mock("../../../app/lib/auth-guards.server", () => ({
-  requireAdminSession: jest.fn(),
+jest.mock("../../../app/shopify.server", () => ({
+  authenticate: { admin: jest.fn() },
 }));
 
 jest.mock("../../../app/routes/app/shared/storefront-sync-action.server", () => ({
   handlePrepareStorefrontPreview: jest.fn(),
 }));
 
-const mockRequireAdminSession = requireAdminSession as jest.MockedFunction<
-  typeof requireAdminSession
+const mockRequireAdminSession = authenticate.admin as jest.MockedFunction<
+  typeof authenticate.admin
 >;
 const mockHandlePrepareStorefrontPreview =
   handlePrepareStorefrontPreview as jest.MockedFunction<
@@ -24,7 +24,7 @@ describe("/app/bundles/:bundleType/configure/:bundleId/prepare-preview", () => {
     mockRequireAdminSession.mockResolvedValue({
       admin: { graphql: jest.fn() } as any,
       session: { shop: "test-shop.myshopify.com" } as any,
-    });
+    } as any);
     mockHandlePrepareStorefrontPreview.mockResolvedValue(
       new Response(JSON.stringify({ success: true, ready: true }), {
         status: 200,

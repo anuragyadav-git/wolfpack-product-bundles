@@ -31,34 +31,7 @@ export const ProductPageProductDataMethods: Record<string, any> & ThisType<any> 
   },
 
 resolveStorefrontApiBase() {
-  const appProxyPrefix = STOREFRONT_PROXY_ROOT;
-  if (window.location?.pathname?.startsWith(`${appProxyPrefix}/`)) {
-    return appProxyPrefix;
-  }
-
-  const configuredAppUrl = window.__BUNDLE_APP_URL__ || '';
-  const currentOrigin = window.location.origin;
-  const currentHost = window.location.host;
-  const shopDomain = window.Shopify?.shop || this.container?.dataset.shop || '';
-
-  let configuredAppHost = '';
-  if (configuredAppUrl) {
-    try {
-      configuredAppHost = new URL(configuredAppUrl).host;
-    } catch (_error: any) {
-      configuredAppHost = '';
-    }
-  }
-
-  if (!configuredAppUrl) {
-    return appProxyPrefix;
-  }
-
-  if (shopDomain && configuredAppHost !== currentHost) {
-    return appProxyPrefix;
-  }
-
-  return configuredAppUrl || currentOrigin;
+  return STOREFRONT_PROXY_ROOT;
 },
 
 collectStepProductIds(step: any) {
@@ -109,14 +82,13 @@ async loadStepProducts(stepIndex: string|number) {
   let allProducts: any[] = [];
   let fetchFailed = false;
 
-  const shop = window.Shopify?.shop || window.location.host;
   const apiBaseUrl = this.resolveStorefrontApiBase();
 
   const productIds = this.collectStepProductIds(step);
   if (productIds.length > 0) {
     try {
       const response = await fetch(
-        `${apiBaseUrl}/api/storefront-products?ids=${encodeURIComponent(productIds.join(','))}&shop=${encodeURIComponent(shop)}`
+        `${apiBaseUrl}/api/storefront-products?ids=${encodeURIComponent(productIds.join(','))}`
       );
       if (response.ok) {
         const data = await response.json();
@@ -133,7 +105,7 @@ async loadStepProducts(stepIndex: string|number) {
   if (handles.length > 0) {
     try {
       const response = await fetch(
-        `${apiBaseUrl}/api/storefront-collections?handles=${encodeURIComponent(handles.join(','))}&shop=${encodeURIComponent(shop)}`
+        `${apiBaseUrl}/api/storefront-collections?handles=${encodeURIComponent(handles.join(','))}`
       );
       if (response.ok) {
         const data = await response.json();

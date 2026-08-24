@@ -5,7 +5,7 @@ title: Shopify Storefront API Notes
 type: reference
 status: authoritative
 summary: Storefront GraphQL contracts used for product data, Shop Brand colors, and bundle runtime behavior.
-last_audited: 2026-08-23
+last_audited: 2026-08-24
 owners:
   - engineering
 domains:
@@ -14,7 +14,9 @@ domains:
 systems:
   - storefront-api
 source_paths:
-  - app/services/storefront-token.server.ts
+  - app/routes/api/api.storefront-products.tsx
+  - app/routes/api/api.storefront-collections.tsx
+  - app/routes/api/api.cart-bundle-details.tsx
   - app/services/theme-colors.server.ts
   - app/lib/shop-brand-colors.ts
 related_docs:
@@ -40,8 +42,12 @@ For product detail modals, query and preserve both fields:
 
 ## Shop Brand color inheritance
 
-Settings -> Design reads `shop.brand.colors` through the existing delegated
-Storefront access token. `BrandColors.primary` and `BrandColors.secondary` are
+Settings -> Design reads `shop.brand.colors` through Shopify's native
+unauthenticated Storefront context. Signed app-proxy product, collection, and
+cart-metafield routes use the Storefront context returned by
+`authenticate.public.appProxy(request)`. Wolfpack does not create, persist, or
+send Storefront access tokens manually. `BrandColors.primary` and
+`BrandColors.secondary` are
 ordered lists of `BrandColorGroup` values; Wolfpack selects only index `0` from
 each list and requires both its `background` and `foreground` values.
 

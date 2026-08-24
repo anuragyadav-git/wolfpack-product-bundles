@@ -7,7 +7,6 @@
  */
 
 import { AppLogger } from "./logger";
-import { checkAppEmbedEnabled } from "../services/theme/app-embed-check.server";
 
 const GET_BUNDLE_PRODUCT = `
   query GetBundleProduct($id: ID!) {
@@ -131,30 +130,4 @@ export async function fetchShopLocales(
   } catch {
     return [];
   }
-}
-
-export async function fetchEmbedData(
-  admin: any,
-  shop: string,
-  apiKey: string,
-  embedBlockHandle = "bundle-app-embed",
-): Promise<{ appEmbedEnabled: boolean; themeEditorUrl: string | null }> {
-  const embedCheck = await checkAppEmbedEnabled(admin, shop, {
-    blockHandles: [embedBlockHandle],
-  });
-
-  const themeEditorUrl = embedCheck.themeId && apiKey
-    ? buildThemeAppEmbedEditorUrl(shop, embedCheck.themeId, apiKey, embedBlockHandle)
-    : null;
-  return { appEmbedEnabled: embedCheck.enabled, themeEditorUrl };
-}
-
-export function buildThemeAppEmbedEditorUrl(
-  shop: string,
-  themeGid: string,
-  apiKey: string,
-  blockHandle: string,
-): string {
-  const themeNumericId = themeGid.split("/").pop();
-  return `https://${shop}/admin/themes/${themeNumericId}/editor?context=apps&activateAppId=${apiKey}%2F${blockHandle}`;
 }

@@ -55,7 +55,7 @@ async function syncFullPageBundleFromDb(
   const bundleConfig = buildFullPageBundleMetafieldConfig(bundle);
   await updateBundleProductMetafields(admin, bundle.shopifyProductId, bundleConfig);
   stats.productMetafields = true;
-  syncThemeColors(admin, shopDomain).catch(() => {});
+  syncThemeColors(shopDomain).catch(() => {});
   stats.themeColors = true;
   return stats;
 }
@@ -81,7 +81,7 @@ async function syncProductPageBundleFromDb(
   const bundleConfig = buildSyncBundleConfiguration(bundle, bundle.shopifyProductId);
   await updateBundleProductMetafields(admin, bundle.shopifyProductId, bundleConfig);
   stats.productMetafields = true;
-  syncThemeColors(admin, shopDomain).catch(() => {});
+  syncThemeColors(shopDomain).catch(() => {});
   stats.themeColors = true;
   return stats;
 }

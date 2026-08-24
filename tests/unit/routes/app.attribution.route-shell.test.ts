@@ -11,8 +11,8 @@ jest.mock("@remix-run/react", () => ({
     React.createElement(React.Fragment, null, children({ active: false })),
 }));
 
-jest.mock("../../../app/lib/auth-guards.server", () => ({
-  requireAdminSession: jest.fn(),
+jest.mock("../../../app/shopify.server", () => ({
+  authenticate: { admin: jest.fn() },
 }));
 
 jest.mock("../../../app/services/pixel-activation.server", () => ({

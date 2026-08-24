@@ -62,8 +62,7 @@ model Session {
   expires               DateTime?
   accessToken           String
   refreshToken          String?
-  refreshTokenExpiresAt DateTime?
-  storefrontAccessToken String? // Delegated Storefront API access token
+  refreshTokenExpires   DateTime?
   userId                BigInt?
   firstName             String?
   lastName              String?
@@ -77,7 +76,6 @@ model Session {
 
   @@index([shop])
   @@index([shop, expires])
-  @@index([shop, storefrontAccessToken])
 }
 
 model Bundle {

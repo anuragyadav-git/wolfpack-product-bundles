@@ -1,9 +1,9 @@
 import { action, loader } from "../../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId.validate-widget-placement";
-import { requireAdminSession } from "../../../app/lib/auth-guards.server";
+import { authenticate } from "../../../app/shopify.server";
 import { handleValidateWidgetPlacement } from "../../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/widget-placement.server";
 
-jest.mock("../../../app/lib/auth-guards.server", () => ({
-  requireAdminSession: jest.fn(),
+jest.mock("../../../app/shopify.server", () => ({
+  authenticate: { admin: jest.fn() },
 }));
 
 jest.mock(
@@ -11,8 +11,8 @@ jest.mock(
   () => ({ handleValidateWidgetPlacement: jest.fn() }),
 );
 
-const mockRequireAdminSession = requireAdminSession as jest.MockedFunction<
-  typeof requireAdminSession
+const mockRequireAdminSession = authenticate.admin as jest.MockedFunction<
+  typeof authenticate.admin
 >;
 const mockHandleValidateWidgetPlacement =
   handleValidateWidgetPlacement as jest.MockedFunction<
@@ -25,7 +25,7 @@ describe("/app/bundles/product-page-bundle/configure/:bundleId/validate-widget-p
     mockRequireAdminSession.mockResolvedValue({
       admin: { graphql: jest.fn() } as any,
       session: { shop: "test-shop.myshopify.com" } as any,
-    });
+    } as any);
     mockHandleValidateWidgetPlacement.mockResolvedValue(
       new Response(JSON.stringify({ success: true }), {
         status: 200,

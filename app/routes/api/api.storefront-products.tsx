@@ -1,19 +1,9 @@
 import { json } from "@remix-run/node";
 import type { LoaderFunctionArgs } from "@remix-run/node";
-import prisma from "../../db.server";
 import { AppLogger } from "../../lib/logger";
-import { SHOPIFY_REST_API_VERSION } from "../../constants/api";
-import { createStorefrontAccessToken } from "../../services/storefront-token.server";
-import { getOfflineSessionForShop } from "../../services/offline-token.server";
-import { sessionStorage } from "../../shopify.server";
+import { authenticate } from "../../shopify.server";
+import type { StorefrontApiContext } from "@shopify/shopify-app-remix/server";
 import { normalizeStorefrontQuantityAvailable } from "../../lib/storefront-variant-inventory";
-// auth: public — fetched directly by the storefront widget (browser request, no Shopify session available)
-
-const CORS_HEADERS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type",
-};
 
 /**
  * Public API endpoint to fetch products using Storefront API
@@ -60,8 +50,7 @@ function mapStorefrontVariant(edge: any) {
  * When hasInventoryScope is true, requests quantityAvailable + currentlyNotInStock.
  */
 async function fetchAllVariants(
-  storefrontUrl: string,
-  storefrontAccessToken: string,
+  storefront: StorefrontApiContext,
   productId: string,
   country: string | null,
   hasInventoryScope: boolean,
@@ -108,20 +97,8 @@ async function fetchAllVariants(
   const variables: Record<string, string | undefined> = { id: productId, cursor };
   if (country) variables.country = country;
 
-  const response = await fetch(storefrontUrl, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Shopify-Storefront-Access-Token': storefrontAccessToken
-    },
-    body: JSON.stringify({ query: VARIANT_QUERY, variables })
-  });
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch variants: ${response.status}`);
-  }
-
-  const data = await response.json();
+  const response = await storefront.graphql(VARIANT_QUERY, { variables });
+  const data: any = await response.json();
 
   if (data.errors && !data.data?.product?.variants) {
     throw new Error(`GraphQL errors: ${JSON.stringify(data.errors)}`);
@@ -138,8 +115,7 @@ async function fetchAllVariants(
   // Recursively fetch next page if exists
   if (hasNextPage && endCursor) {
     const nextPageVariants = await fetchAllVariants(
-      storefrontUrl,
-      storefrontAccessToken,
+      storefront,
       productId,
       country,
       hasInventoryScope,
@@ -198,115 +174,49 @@ function buildProductsQuery(country: string | null, hasInventoryScope: boolean) 
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
+  const context = await authenticate.public.appProxy(request);
+  if (!context.session || !context.storefront) {
+    throw new Response("Unauthorized", { status: 401 });
+  }
+
   const url = new URL(request.url);
   const productIds = url.searchParams.get("ids");
-  const shop = url.searchParams.get("shop");
   // ISO 3166-1 alpha-2 country code from the customer's browser context (e.g. "CA", "DE").
   // When provided, Storefront API returns market-correct prices via @inContext.
   const country = url.searchParams.get("country") || null;
 
   if (!productIds) {
-    return json({ error: "Missing product IDs" }, { status: 400, headers: CORS_HEADERS });
-  }
-
-  if (!shop) {
-    return json({ error: "Missing shop parameter" }, { status: 400, headers: CORS_HEADERS });
+    return json({ error: "Missing product IDs" }, { status: 400 });
   }
 
   const requestedIds = productIds.split(",").map(id => id.trim()).filter(Boolean);
 
   if (requestedIds.length === 0) {
-    return json({ error: "No valid product IDs provided" }, { status: 400, headers: CORS_HEADERS });
+    return json({ error: "No valid product IDs provided" }, { status: 400 });
   }
 
   const normalizedIds = requestedIds.map(normalizeProductId);
   if (normalizedIds.some(id => id === null)) {
-    return json({ error: "Invalid product IDs" }, { status: 400, headers: CORS_HEADERS });
+    return json({ error: "Invalid product IDs" }, { status: 400 });
   }
   const ids = normalizedIds as string[];
 
   try {
-    // Storefront token is created at install time (lifecycle webhook / auth callback).
-    // If it is missing here, the install flow is broken — fail clearly and fast.
-    let session = await getOfflineSessionForShop(prisma, shop, sessionStorage);
-
-    if (!session) {
-      AppLogger.error("[STOREFRONT_API] No session found for shop", { component: "api.storefront-products", shop });
-      return json({ error: "Shop not configured. Please reinstall the app." }, { status: 404, headers: CORS_HEADERS });
-    }
-
-    // If no storefront token exists, try to create one on-demand (handles race condition)
-    if (!session.storefrontAccessToken && session.accessToken) {
-      AppLogger.warn("[STOREFRONT_API] No storefront token found. Creating on-demand for shop", { component: "api.storefront-products", shop });
-
-      try {
-        // Create admin-like object that matches AdminApiContext type
-        const admin = {
-          graphql: async (query: string, options?: any) => {
-            const response = await fetch(`https://${shop}/admin/api/${SHOPIFY_REST_API_VERSION}/graphql.json`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'X-Shopify-Access-Token': session!.accessToken
-              },
-              body: JSON.stringify({
-                query,
-                variables: options?.variables
-              })
-            });
-            return response;
-          }
-        } as any; // Type assertion since we're creating a minimal admin context
-
-        const token = await createStorefrontAccessToken(admin, shop);
-        AppLogger.info("[STOREFRONT_API] Created storefront token on-demand", { component: "api.storefront-products", shop });
-
-        // Refresh session to get the new token
-        session = await getOfflineSessionForShop(prisma, shop, sessionStorage, {
-          migrateIfNeeded: false,
-          refreshIfNeeded: false,
-        });
-      } catch (error: any) {
-        AppLogger.error("[STOREFRONT_API] Failed to create token on-demand", { component: "api.storefront-products", shop }, error);
-        return json({ error: "Could not create storefront access token" }, { status: 500, headers: CORS_HEADERS });
-      }
-    }
-
-    if (!session?.storefrontAccessToken) {
-      AppLogger.warn("[STOREFRONT_API] No storefront token for shop — install may be incomplete", { component: "api.storefront-products", shop });
-      return json({ error: "Shop not configured. Please reinstall the app." }, { status: 404, headers: CORS_HEADERS });
-    }
-
-    const storefrontAccessToken = session.storefrontAccessToken;
     // quantityAvailable + currentlyNotInStock require unauthenticated_read_product_inventory.
     // Scope is synced from Shopify on install and on every app/scopes_update webhook
     // (see handleScopesUpdate in lifecycle.server.ts), so session.scope is authoritative.
-    const hasInventoryScope = (session.scope ?? "").includes("unauthenticated_read_product_inventory");
+    const hasInventoryScope = (context.session.scope ?? "").includes("unauthenticated_read_product_inventory");
     const STOREFRONT_QUERY = buildProductsQuery(country, hasInventoryScope);
-    const storefrontUrl = `https://${shop}/api/${SHOPIFY_REST_API_VERSION}/graphql.json`;
 
     const mainVariables: Record<string, unknown> = { ids };
     if (country) mainVariables.country = country;
 
-    const response = await fetch(storefrontUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Shopify-Storefront-Access-Token': storefrontAccessToken
-      },
-      body: JSON.stringify({ query: STOREFRONT_QUERY, variables: mainVariables })
-    });
-
-    if (!response.ok) {
-      AppLogger.error("[STOREFRONT_API] Storefront API request failed", { component: "api.storefront-products", status: response.status });
-      return json({ error: "Failed to fetch from Storefront API" }, { status: 500, headers: CORS_HEADERS });
-    }
-
-    const data = await response.json();
+    const response = await context.storefront.graphql(STOREFRONT_QUERY, { variables: mainVariables });
+    const data: any = await response.json();
 
     if (data.errors && !data.data?.nodes) {
       AppLogger.error("[STOREFRONT_API] GraphQL errors", { component: "api.storefront-products" }, data.errors);
-      return json({ error: "GraphQL errors", details: data.errors }, { status: 500, headers: CORS_HEADERS });
+      return json({ error: "GraphQL errors", details: data.errors }, { status: 500 });
     }
 
     const nodes = data.data?.nodes || [];
@@ -324,8 +234,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
         try {
           // Fetch all variants with pagination; pass country for market-correct prices
           const variantEdges = await fetchAllVariants(
-            storefrontUrl,
-            storefrontAccessToken,
+            context.storefront,
             product.id,
             country,
             hasInventoryScope
@@ -369,7 +278,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
       count: validProducts.length
     }, {
       headers: {
-        ...CORS_HEADERS,
         "Cache-Control": "public, max-age=300, s-maxage=600",
         "Vary": "Accept-Encoding"
       }
@@ -380,17 +288,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
     return json({
       error: "Internal server error",
       message: error instanceof Error ? error.message : "Unknown error"
-    }, { status: 500, headers: CORS_HEADERS });
+    }, { status: 500 });
   }
-}
-
-// Handle OPTIONS for CORS
-export async function options() {
-  return new Response(null, {
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type"
-    }
-  });
 }

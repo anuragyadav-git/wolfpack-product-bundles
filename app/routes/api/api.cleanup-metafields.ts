@@ -20,12 +20,12 @@
  */
 
 import { json, type LoaderFunctionArgs } from "@remix-run/node";
-import { requireAdminSession } from "../../lib/auth-guards.server";
+import { authenticate } from "../../shopify.server";
 import { AppLogger } from "../../lib/logger";
 import { METAFIELD_NAMESPACE, METAFIELD_KEYS } from "../../constants/metafields";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const { admin } = await requireAdminSession(request);
+  const { admin } = await authenticate.admin(request);
 
   const url = new URL(request.url);
   const productId = url.searchParams.get("productId");

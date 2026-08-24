@@ -17,7 +17,7 @@
 
 import { json, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/node";
 import db from "../../db.server";
-import { requireAppProxy } from "../../lib/auth-guards.server";
+import { authenticate } from "../../shopify.server";
 import { AppLogger } from "../../lib/logger";
 import { recordBusinessEvent } from "../../services/app-events.server";
 
@@ -82,7 +82,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     return json({ error: "Method not allowed" }, { status: 405, headers: buildCorsHeaders(request) });
   }
 
-  const { session: proxySession } = await requireAppProxy(request);
+  const { session: proxySession } = await authenticate.public.appProxy(request);
+  if (!proxySession) throw new Response("Unauthorized", { status: 401 });
   const proxyShop = proxySession.shop;
 
   let eventContext: {

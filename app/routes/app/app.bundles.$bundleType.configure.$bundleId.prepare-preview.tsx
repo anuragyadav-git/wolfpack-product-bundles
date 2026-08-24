@@ -1,5 +1,5 @@
 import { json, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/node";
-import { requireAdminSession } from "../../lib/auth-guards.server";
+import { authenticate } from "../../shopify.server";
 import { handlePrepareStorefrontPreview } from "./shared/storefront-sync-action.server";
 
 function normalizeBundleType(bundleType: string | undefined) {
@@ -26,6 +26,6 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
     );
   }
 
-  const { admin, session } = await requireAdminSession(request);
+  const { admin, session } = await authenticate.admin(request);
   return handlePrepareStorefrontPreview(admin, session, bundleId, bundleType);
 };

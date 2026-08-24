@@ -5,7 +5,7 @@ title: Widget Architecture
 type: architecture
 status: authoritative
 summary: FPB and PPB bootstrap, hydration, extension-asset, and widget runtime architecture.
-last_audited: 2026-08-23
+last_audited: 2026-08-24
 owners:
   - engineering
 domains:
@@ -197,8 +197,8 @@ Product Page inventory normalization preserves `sourceVariantCount` after unavai
 ## Storefront Surfaces
 
 - Theme Editor exposes one FPB body app embed: `bundle-app-embed` (`Wolfpack Bundle`). It is the activation/status surface and hydrates the canonical app-proxy marker. The retired `bundle-full-page` Page block is not part of the extension contract.
-- Shopify stores enabled app embed blocks in `config/settings_data.json` under `current.blocks`. Per Shopify's Theme app extension configuration docs, an app embed appears there only after first enable; if the merchant disables it later, the block remains and has `disabled: true`. App embed status detection reads the active theme settings file, supports `OnlineStoreThemeFileBodyText.content`, `OnlineStoreThemeFileBodyBase64.contentBase64`, and `OnlineStoreThemeFileBodyUrl.url`, tolerates Shopify's generated comment header before parsing the settings JSON, matches the block `type` shape `shopify://apps/{app-handle}/blocks/{block-handle}/{unique-id}`, and treats `disabled: true` as inactive. Shopify Admin `currentAppInstallation.app.handle` is the sole app-identity source; environment, client-key, and hardcoded handle fallbacks are prohibited. A missing handle or unreadable settings file fails closed so merchants see the enable banner instead of a false Active state.
-- The embedded Admin enable flow opens Theme Editor in a new tab and hides the configure warning plus updates Bundle Visibility status optimistically after the merchant clicks `Enable here`. Configure page-load status comes from the server loader's parallel Shopify theme settings read. Every FPB preview action synchronously reserves a tab, requests a new stateless signed URL, and navigates the reserved tab after the response; the token is required for drafts and harmless for public statuses.
+- Embedded Admin status comes only from `shopify.app.extensions()` published-theme data. Server loaders do not parse `settings_data.json` or provide a status fallback. Theme Editor uses the documented `themes/current` `activateAppId` deep link.
+- Every product, collection, and cart-metafield Storefront request uses the signed `/apps/product-bundles` app proxy and Shopify's authenticated Storefront context. Widgets have no direct app-host or raw-shop fallback.
 - Parent-product PPB rendering continues to use the `bundle-product-page` app
   block. Greenfield Bundle Embed rendering is separately owned by the global
   `bundle-app-embed` runtime: it resolves an eligible PPB, lazily loads PPB
