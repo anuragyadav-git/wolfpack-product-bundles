@@ -1,12 +1,12 @@
 {
   "schema_version": 1,
   "job_id": "ppb-selected-slot-redesign-20260821",
-  "revision": 2,
+  "revision": 4,
   "status": "complete",
   "design": {
     "status": "approved",
     "approver": "user",
-    "at": "2026-08-20T20:49:52Z",
+    "at": "2026-08-24T15:21:06Z",
     "evidence": [
       "direction-comparison.md",
       "visual-audit.md",
@@ -19,15 +19,10 @@
     "waivers": []
   },
   "handoff": {
-    "status": "approved",
-    "approver": "user",
-    "at": "2026-08-20T20:57:24Z",
-    "evidence": [
-      "implementation-handoff.md",
-      "codex-task.md",
-      "acceptance-criteria.md",
-      "browser-test-plan.yaml"
-    ],
+    "status": "not-started",
+    "approver": "",
+    "at": "",
+    "evidence": [],
     "waivers": []
   },
   "implementation": {
@@ -44,5 +39,12 @@
     "evidence": [],
     "waivers": []
   },
-  "superseded_approvals": []
+  "superseded_approvals": [
+    {
+      "scope": "Revision 2 handoff",
+      "approver": "user",
+      "at": "2026-08-20T20:57:24Z",
+      "reason": "Revision 4 narrowed the component boundary and replaced the approved visual contract."
+    }
+  ]
 }

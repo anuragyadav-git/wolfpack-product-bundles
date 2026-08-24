@@ -1,11 +1,11 @@
 ---
 schema_version: 1
 id: ppb-selected-slot-redesign-implementation-handoff
-title: PPB Selected Slot Redesign Implementation Handoff
+title: PPB Vertical Slot Redesign Implementation Handoff
 type: implementation-handoff
 status: complete
-summary: Provides the approved Direction A architecture, state, responsive, interaction, and QA contract for PPB selected slots.
-last_audited: 2026-08-21
+summary: Provides the Revision 4 live-EB parity contract for PPB Vertical Slots empty and filled rows.
+last_audited: 2026-08-24
 owners:
   - wolfpack
 domains:
@@ -21,203 +21,86 @@ tags:
   - ppb
   - handoff
 keywords:
-  - selected-slot
+  - vertical-slots
   - implementation
 ---
 
 # Implementation Handoff
 
 Artifact job ID: ppb-selected-slot-redesign-20260821
-Artifact revision: 2
-Artifact status: approved
-
-## Identity and approved references
-
-- Approved direction: Direction A — Quiet Product Tile.
-- Approved contracts: component anatomy, state matrix, responsive contract, interaction contract, accessibility checklist, design tokens, and content stress cases.
-- EB evidence is structural inspiration only. It does not authorize copied dimensions, code, selectors, or runtime names.
+Artifact revision: 4
+Artifact status: complete
 
 ## Source-of-truth priority
 
-1. Existing product, pricing, capacity, persistence, replacement, removal, and cart semantics.
-2. Repository AGENTS.md and internal architecture.
-3. Approved state, responsive, interaction, and accessibility contracts in this design job.
-4. Approved Direction A hierarchy.
-5. Approved design tokens and content-stress fixtures.
-6. EB evidence for visual nuance only.
+Revision 4 copies the visible live EB Vertical Slots row treatment measured at 1280x800 and 390x844. Source priority is: Wolfpack business semantics; repository architecture and AGENTS.md; approved Revision 4 contracts; live EB visual evidence; current Wolfpack tokens. Copy geometry and hierarchy, never competitor code, selectors, or identifiers.
 
 ## Goal
 
-Redesign the selected state of PPB Horizontal Slots and Vertical Slots into one responsive product-led system. Horizontal renders readable equal-height tiles; Vertical renders compact full-width rows. Both expose product identity, optional variant, payable price, available compare-at price, exact replacement, and one remove action.
+Make PPB Vertical Slots empty and filled rows visually match the live EB target while retaining Wolfpack exact replacement, removal, capacity, persistence, accessibility, and cart behavior.
 
-## Non-goals
+## Exact visual contract
 
-- Product Grid or Product List cards and selected summaries.
-- Picker product-card redesign or quantity-selector behavior.
-- Pricing, discount, validation, capacity, persistence, step navigation, or cart changes.
-- Merchant settings, APIs, Prisma, Liquid configuration, or translations.
-- FPB presentation.
-- A new slot runtime, component family, overlay, or compatibility layer.
+- Filled row: full owner width; 64px target height; 5px padding; 50px square media; 5px internal gap; one bold product-title line in a flexible track; compact trailing remove affordance; white/surface background; 2px solid foreground border; 10px radius; no shadow.
+- Empty row: full owner width; 60px target height; saved label at start; plus affordance at end; white/surface background; 2px dashed foreground border; 10px radius.
+- Lists: one column; 14px row gap at the 390px target, 16px at the 1280px target, and 26px between step groups.
+- Content: no price, compare-at price, variant, quantity, badge, or new merchant-facing copy inside the row.
+- Accessibility: fixed target heights may grow for zoom/localization; full accessible product name remains when the visual title truncates; compact icons retain valid semantic owners and visible focus.
 
 ## Current architecture map
 
-- Render and event owner: app/assets/widgets/product-page/methods/inpage-render-methods.ts.
-- Orientation/empty-slot owner: app/assets/widgets/product-page/templates/modal-slot-template.ts.
-- Template presentation owner: app/assets/widgets/product-page-css/templates/modal-slots.css.
-- Shared primitive owner: app/assets/widgets/product-page-css/base/slot-cards-default-products.css.
-- Generated widget assets are built through npm run build:widgets.
-- Generated CSS is produced through npm run minify:assets css.
-- Graph community: shared storefront widget modules and PPB modal-slot template registry. The product-page widget is a high-blast-radius shared node; keep behavioral edits narrowly inside selected-slot rendering.
-
-## Exact component anatomy
-
-Use component-anatomy.md. One semantic tree serves both orientations:
-
-- filled instance wrapper and exact replacement action;
-- product media;
-- title and optional resolved variant;
-- payable and conditional compare-at price group;
-- conditional included/unavailable status;
-- independent semantic remove action;
-- existing empty slot with saved label/number.
-
-The renderer currently omits variant and price. Add only the conditional markup needed to expose existing data. Do not recalculate pricing or create a parallel formatter.
+- Rendering and exact action owner: `app/assets/widgets/product-page/methods/inpage-render-methods.ts`.
+- Empty-slot/orientation owner: `app/assets/widgets/product-page/templates/modal-slot-template.ts`.
+- Canonical template presentation owner: `app/assets/widgets/product-page-css/templates/modal-slots.css`.
+- Shared primitive CSS is inspected only if the canonical template owner cannot express the result without duplication.
+- Widget source changes require `npm run build:widgets`; CSS source changes require `npm run minify:assets css`.
 
 ## Required states
 
-Use every required state in state-matrix.md, especially:
-
-- empty reachable and ordinary filled;
-- focus-visible and keyboard activation;
-- long title/variant;
-- discounted and compare-at;
-- missing/slow image;
-- restored unavailable;
-- default included;
-- minimum trailing empty and exact full;
-- loading, removal recovery, reduced motion, and high zoom.
-
-## Responsive transformations
-
-- Horizontal: auto-fit/minmax-style intrinsic columns using one semantic minimum-tile token; equal-height auto rows; reduce columns before content collision.
-- Vertical: one full-width content-driven row at every viewport.
-- The widget/container width, not viewport width, determines Horizontal columns.
-- Selected and empty outer geometry is equal within an orientation.
-- No fixed 200px card height.
-- Slot anatomy does not change across the existing 767/768 picker boundary.
-- Verify 320x700, 390x844, 767x900, 768x900, and 1280x800.
-
-## Interaction contract
-
-- Filled replacement activates the exact clicked instance.
-- Remove stops replacement activation and removes only the clicked instance.
-- Empty activation opens the picker with no replacement target.
-- Enter and Space complete every action.
-- Picker dismissal returns focus to the exact invoking slot.
-- After removal, focus resolves to same-index empty, next slot, previous slot, then step heading.
-- No slot quantity selector is introduced.
-
-## Accessibility contract
-
-- Do not create invalid nested button semantics.
-- Replacement and remove have distinct names and focus stops.
-- Interactive targets are at least 44px.
-- Focus is visible, unclipped, and merchant-token-aware.
-- Truncated visual text does not truncate the accessible identity.
-- Selection/status is not color-only.
-- High zoom grows vertically without horizontal scrolling.
-- Reduced motion removes decorative transitions.
-
-## Tokens and merchant-configurable values
-
-- Reuse existing bundle surface, border, typography, muted-text, price, focus, and primary merchant tokens.
-- Add only selected-slot aliases listed in design-tokens.json.
-- Hairline border and 44px target are fixed primitives.
-- Spacing, card block size, radius, and column geometry are responsive/content-driven.
-- No hardcoded merchant color and no new merchant setting.
-
-## Content fixtures
-
-Use content-stress-cases.yaml. Required fixtures include long title, long variant, compare-at, wide currency, missing image, multi-selection, restored unavailable, zero selection, loading, and validation recovery.
+- Filled-row activation replaces the exact activated instance.
+- Remove affects only that instance and never opens the picker.
+- Empty activation opens the picker without a replacement target.
+- Minimum rules retain reachable empty capacity; exact rules expose no overflow slot.
+- Picker dismissal and removal follow `interaction-contract.md` focus recovery.
+- Hard-reload restoration, unavailable recovery, other-step selection, pricing, discounts, and cart payloads remain unchanged.
 
 ## Allowed production areas
 
-- app/assets/widgets/product-page/methods/inpage-render-methods.ts: selected-slot semantic markup only.
-- app/assets/widgets/product-page-css/templates/modal-slots.css: PPB modal-slot presentation.
-- Existing focused PPB selected-slot behavior tests.
-- test-spec/ppb-selected-slot-redesign.spec.md.
-- scripts/build-storefront.mjs: version-only bump to 12.2.0 if this is the next available minor version at implementation time.
-- Generated widget/CSS assets produced by required build commands.
-- Relevant Product Card Layout Contract or Widget Architecture note only if implementation changes durable ownership beyond what is already documented.
+- Canonical Vertical Slots presentation in `modal-slots.css`.
+- Existing selected-slot renderer only when semantic replacement/remove separation or accessible naming needs a minimal markup change.
+- Focused behavior tests and a mandatory TDD test spec when JavaScript behavior changes.
+- Required widget version bump and generated assets when storefront source changes.
 
 ## Prohibited changes
 
-- Selection quantities, validation conditions, replacement keys, persistence storage, cart payloads, pricing/discount calculation, or configuration loading.
-- FPB files or FPB selectors.
-- Product Grid/List renderers or picker product-card quantity behavior.
-- Runtime style injection, inline presentation styles, important declarations, copied EB measurements, legacy fallbacks, or new storefront copy.
-- New public fields, merchant settings, API routes, database changes, or deployment.
+- Horizontal Slots, Product Grid, Product List, picker cards, FPB, selection rules, quantities, replacement keys, persistence, pricing, discounts, cart payloads, public APIs, Prisma, Liquid config, or merchant settings.
+- Runtime style injection, inline presentation styles, `!important`, fallback chains, compatibility shims, hardcoded merchant colors, competitor identifiers, or new storefront copy.
+- Unit tests that inspect CSS, class names, selector order, or layout. Visual parity is Chrome-only.
 
-## Test commands discovered from repository
+## Responsive transformations
 
-1. Add test-spec/ppb-selected-slot-redesign.spec.md before implementation.
-2. Add behavior tests before renderer changes; do not assert CSS, class names, source order, or visual placement.
-3. Run focused existing tests:
-   - tests/unit/assets/ppb-vertical-filled-row.test.ts
-   - tests/unit/assets/ppb-modal-slot-keyboard-access.test.ts
-   - tests/unit/assets/ppb-modal-slot-selection-refresh.test.ts
-   - tests/unit/assets/ppb-horizontal-slots-empty-placeholders.test.ts
-   - tests/unit/assets/ppb-vertical-slots-shared-shell.test.ts
-4. Run node --check on each modified raw widget JS file when applicable.
-5. Run npx eslint --max-warnings 9999 on every modified source/test file.
-6. Run npm run build:widgets.
-7. Run npm run minify:assets css.
-8. Run npm run graphify:rebuild after code changes.
-9. Run git diff --check.
+Use `responsive-contract.md` as the implementation contract: one full-width Vertical column, 64px filled and 60px empty target rows, stable 50px media, measured mobile/desktop rhythm, accessible vertical growth, and zero horizontal overflow.
+
+## Accessibility contract
+
+Use `interaction-contract.md` and `accessibility-checklist.md`: distinct semantic action owners, complete accessible names, native keyboard activation, visible focus, deterministic focus return, non-color state, reduced motion, and high-zoom reflow are mandatory.
 
 ## Chrome DevTools QA plan
 
-Use browser-test-plan.yaml with direct Chrome DevTools MCP in the connected default profile.
-
-- Environment: development agent store.
-- Route: https://agent-5sfidg3m.myshopify.com/products/ppb-template-parity-2026-08-20
-- Fixture bundle: cmt1l6lt50000v0tlyp73d2ml.
-- Clear Cache Storage and hard reload with ignoreCache before each fixture group.
-- Carry compatible selection state Horizontal → Vertical; restore Product Grid only at the fixture-group boundary.
-- Record served widget version and asset URL before trusting visual evidence.
-- Capture accessibility-tree, semantic, geometry, viewport/element PNG, console, network, Lighthouse, performance trace, and non-regression evidence.
-- Never use a browser wrapper or alternate profile.
-
-## Acceptance criteria
-
-Use acceptance-criteria.md. All criteria are mandatory unless a waiver records reason, approver, and timestamp.
+1. Add/update `test-spec/ppb-selected-slot-redesign.spec.md` before behavior code.
+2. Run focused selected-slot behavior tests; add tests only for Wolfpack behavior, not CSS.
+3. Run ESLint on modified source/test files and raw JS syntax checks when applicable.
+4. Run `npm run build:widgets` and `npm run minify:assets css` for touched storefront sources.
+5. Run `npm run graphify:rebuild` and `git diff --check`.
+6. After the user-controlled SIT deploy/sync, hard reload with cache bypass and prove the served widget version/asset URL.
+7. Use direct Chrome DevTools MCP only at 320x700, 390x844, 767x900, 768x900, and 1280x800.
+8. Compare the 390 and 1280 Vertical states to `EB-VS-MOBILE-R4` and `EB-VS-DESKTOP-R4`; test empty, filled, long title, remove/replace, capacity, hard reload, keyboard focus, overflow, console, and network.
+9. Smoke Horizontal Slots and the other PPB templates for non-regression.
 
 ## Stopping criteria
 
-Stop and report when:
-
-- required product/variant/price data is absent from the existing selected item and exposing it would require a new public contract;
-- a change would alter selection, price, capacity, persistence, cart, FPB, or protected configuration loading;
-- the agent-store fixture cannot be safely restored;
-- direct Chrome DevTools MCP, the provided dev environment, or required signed-in state is unavailable;
-- a responsive/design decision outside this approved contract is required.
-
-## Expected final report format
-
-- Source and generated files changed.
-- Behavior tests, lint, syntax, builds, Graphify, and diff checks.
-- Chrome evidence by viewport/state, served version, overflow, focus, console, network, Lighthouse, and performance.
-- Fixture restoration result.
-- Remaining differences or blockers.
-- Commit batches and rollback points.
-
-## Unresolved risks
-
-- Existing selected item data must be inspected before assuming variant and compare-at fields.
-- Current selected-slot wrapper semantics must stay valid when remove remains independent.
-- Merchant theme typography and product-column widths may change intrinsic column count.
-- Live CDN may serve a stale version until the normal user-controlled deployment/sync cycle occurs.
+Stop if parity requires changing business semantics, adding row content absent from EB, touching an out-of-scope template, using a non-canonical style owner, deploying without user action, or proceeding without direct Chrome access.
 
 ## Rollback guidance
 
-Revert the selected-slot renderer markup, modal-slots source CSS, focused tests, version bump, and generated assets as one coherent batch. Do not reset unrelated work. Restore the development fixture to Product Grid and hard reload to confirm the original storefront state.
+The shared renderer is high blast radius; prefer the template CSS owner and scope any markup change to the existing Vertical presentation signal. Roll back the source CSS, minimal renderer change if any, version bump, tests, and generated assets as one coherent batch while preserving unrelated work.
