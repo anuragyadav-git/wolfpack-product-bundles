@@ -3,7 +3,7 @@ const findUnique = jest.fn();
 const upsert = jest.fn();
 const syncCartLineMessagingSettings = jest.fn();
 
-jest.mock("../../../app/lib/auth-guards.server", () => ({ requireAdminSession }));
+jest.mock("../../../app/shopify.server", () => ({ authenticate: { admin: requireAdminSession } }));
 jest.mock("../../../app/db.server", () => ({
   prisma: {
     designSettings: { findUnique, upsert },

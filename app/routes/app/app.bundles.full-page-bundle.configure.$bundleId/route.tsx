@@ -5,13 +5,12 @@ import {
 } from "@remix-run/node";
 import { AppLogger } from "../../../lib/logger";
 import { ERROR_MESSAGES } from "../../../constants/errors";
-import { requireAdminSession } from "../../../lib/auth-guards.server";
+import { authenticate } from "../../../shopify.server";
 import db from "../../../db.server";
 import {
   fetchBundleProduct,
   fetchShopCurrencyCode,
   fetchShopLocales,
-  fetchEmbedData,
 } from "../../../lib/bundle-configure-loader.server";
 import {
   handleSaveBundle,
@@ -30,7 +29,7 @@ import { ReduxProvider } from "../../../store/ReduxProvider";
 import { handleValidateSellingPlanGroups } from "../../../services/bundle-subscription-discovery.server";
 
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
-  const { session, admin } = await requireAdminSession(request);
+  const { session, admin } = await authenticate.admin(request);
   const { bundleId } = params;
   const url = new URL(request.url);
   const configureMode =
@@ -69,7 +68,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   // Reference: https://shopify.dev/docs/apps/build/online-store/theme-app-extensions/configuration
   const apiKey = process.env.SHOPIFY_API_KEY || "";
 
-  const [bundleProduct, shopCurrencyCode, shopLocales, availableBundles, embedData] =
+  const [bundleProduct, shopCurrencyCode, shopLocales, availableBundles] =
     await Promise.all([
       bundle.shopifyProductId
         ? fetchBundleProduct(admin, bundle.shopifyProductId, bundleId)
@@ -85,7 +84,6 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
         select: { id: true, name: true },
         orderBy: { name: "asc" },
       }),
-      fetchEmbedData(admin, session.shop, apiKey, "bundle-app-embed"),
     ]);
 
   return json({
@@ -98,14 +96,12 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
     apiKey,
     shopLocales,
     shopCurrencyCode,
-    appEmbedEnabled: embedData.appEmbedEnabled,
-    themeEditorUrl: embedData.themeEditorUrl,
   });
 };
 
 export const action = async ({ request, params }: ActionFunctionArgs) => {
   try {
-    const { session, admin } = await requireAdminSession(request);
+    const { session, admin } = await authenticate.admin(request);
     const { bundleId } = params;
 
     if (!session?.shop) {

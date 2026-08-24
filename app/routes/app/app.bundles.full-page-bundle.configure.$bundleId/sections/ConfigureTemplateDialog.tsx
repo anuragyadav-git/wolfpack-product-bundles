@@ -1,4 +1,3 @@
-import { Modal, TitleBar } from "@shopify/app-bridge-react";
 import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
 import { openThemeEditorInNewTab } from "../../../../lib/theme-editor-navigation.client";
 import { TemplateReadyScreen } from "../../../../components/bundle-configure/TemplateReadyScreen";
@@ -14,6 +13,7 @@ export function FpbTemplateDialog({
     handleTemplateNext,
     handleTemplatePreview,
     isPreviewBundleLoading,
+    isSelectTemplateModalOpen,
     OptimisedImage,
     pendingDesignPresetId,
     pendingDesignTemplate,
@@ -28,12 +28,13 @@ export function FpbTemplateDialog({
   } = flow;
 
   return (
-    <Modal
+    <s-modal
       id="fpb-template-customization-modal"
       ref={selectTemplateModalRef}
-      variant="max"
+      heading="Customization"
+      size="large-100"
     >
-      <TitleBar title="Customization" />
+      {isSelectTemplateModalOpen ? (
       <div className={fullPageBundleStyles.templateDialogContent}>
         {templateModalStep === "templates" ? (
           <>
@@ -347,6 +348,7 @@ export function FpbTemplateDialog({
               />
         )}
       </div>
-    </Modal>
+      ) : null}
+    </s-modal>
   );
 }

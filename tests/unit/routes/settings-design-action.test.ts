@@ -4,7 +4,7 @@ const findMany = jest.fn();
 const upsert = jest.fn();
 const transaction = jest.fn();
 
-jest.mock("../../../app/lib/auth-guards.server", () => ({ requireAdminSession }));
+jest.mock("../../../app/shopify.server", () => ({ authenticate: { admin: requireAdminSession } }));
 jest.mock("../../../app/db.server", () => ({
   prisma: {
     designSettings: { findUnique, findMany, upsert },

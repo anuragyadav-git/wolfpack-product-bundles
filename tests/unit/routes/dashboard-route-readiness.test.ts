@@ -24,7 +24,6 @@ describe("Dashboard route readiness", () => {
     const settled = jest.fn();
 
     const routeReady = waitForDashboardRouteReady(
-      Promise.resolve({ appEmbedEnabled: true, themeEditorUrl: null }),
       bannerData.promise,
       Promise.resolve(),
     );
@@ -34,7 +33,6 @@ describe("Dashboard route readiness", () => {
 
     bannerData.resolve({ proxyHealthy: true });
     await expect(routeReady).resolves.toEqual({
-      appEmbedStatus: { appEmbedEnabled: true, themeEditorUrl: null },
       banners: { proxyHealthy: true },
     });
   });

@@ -5,7 +5,7 @@ title: Admin Performance
 type: operations
 status: authoritative
 summary: Embedded Admin Web Vitals instrumentation, route-level LCP findings, and critical-path constraints.
-last_audited: 2026-08-23
+last_audited: 2026-08-24
 owners:
   - engineering
 domains:
@@ -16,7 +16,6 @@ systems:
   - remix
 source_paths:
   - app/components/AdminRouteLoadingBar.tsx
-  - app/lib/admin-web-vitals-diagnostics.client.ts
   - app/routes/app/app.settings.tsx
   - app/routes/app/app.settings/SettingsLandingShell.module.css
   - app/routes/app/app.settings/SettingsRoute.tsx
@@ -50,39 +49,7 @@ Shopify App Bridge is the source of embedded Admin Web Vitals used for Built for
 
 The App Bridge script should be the first script in `<head>` and should not be pinned to a versioned URL.
 
-The Admin shell registers `shopify.webVitals.onReport(...)` through `app/lib/admin-web-vitals-diagnostics.client.ts`. Shopify's callback reports metric data such as LCP value and ID; it does not include the DOM node. For LCP element attribution, the client pairs Shopify's LCP report with the browser `largest-contentful-paint` `PerformanceObserver` candidate.
-
-Debug usage:
-
-```js
-localStorage.setItem("wpb:web-vitals-debug", "1");
-location.reload();
-```
-
-For embedded Admin URLs where the parent page cannot write iframe storage, add
-`wpbWebVitalsDebug=1` to the Admin app URL. Shopify forwards it into the app
-iframe and the app logs `Admin Browser LCP Candidate` from the iframe's own
-`largest-contentful-paint` observer.
-
-When enabled, LCP reports are logged to the browser console as `Admin Web Vitals` with the metric value and latest candidate element selector. This is diagnostic only and does not persist data.
-
-The debug hook also keeps a local, iframe-only p75 sample set in
-`localStorage["wpb:web-vitals-debug:lcp-samples"]`. Each sample stores:
-
-- `route` and generated `routeLoadId` (single page-load correlation)
-- `id`, `value`, `timestamp`
-- `country` (from Shopify Web Vitals payload)
-- `candidate`, `candidateType`, `candidateResource`, `blockingTime`
-
-This does not send data to the app server and must not replace Shopify-collected
-field data for BFS.
-
-Console helpers:
-
-```js
-window.__wpbAdminWebVitals.getLcpP75Summary()
-window.__wpbAdminWebVitals.clearLcpSamples()
-```
+Wolfpack does not ship an Admin Web Vitals collector or endpoint. Shopify Web Vitals remains the field-data source. For a major Admin UI change, temporarily recreate the documented Chrome-only LCP bridge in dev/SIT, measure the exact embedded route and candidate, and remove the bridge before commit. Never restore app-owned persistence or `/api/web-vitals`.
 
 Temporary cross-origin verification bridge:
 
@@ -215,20 +182,22 @@ The previous app-owned Web Vitals pipeline was retired on 2026-06-12:
 
 Do not recreate custom `/api/web-vitals` telemetry for BFS eligibility. Use Shopify-collected metrics for BFS and Chrome Performance / Network `Server-Timing` for local diagnosis.
 
-`/api/web-vitals` remains only as a no-op tombstone route so stale browser sessions can POST old beacons without hitting authenticated code or emitting warning logs. It must not persist data, authenticate Admin sessions, or import app-owned Web Vitals collection code.
+The retired `/api/web-vitals` tombstone route has been removed. Stale clients
+receive the normal missing-route response; no app-owned collector, persistence,
+or compatibility endpoint remains.
 
 ## Critical Path Rule
 
-The `/app` layout loader must keep Shopify authentication on the critical path, but non-critical maintenance should not block the initial shell. Offline-session migration runs in the background and logs failures instead of delaying first render.
+The `/app` layout loader keeps Shopify authentication on the critical path.
+Expiring offline-token acquisition, refresh, and session serialization belong
+to Shopify's Remix authentication and Prisma session-storage integration; the
+loader does not run app-owned migration or refresh maintenance.
 
-The `/app/dashboard` loader must also keep non-critical Admin checks off the
-response path. App-embed refresh/status checks and web-pixel reconciliation are
-deferred or scheduled as post-response background tasks; the first dashboard
-payload should come from the shop and bundle summary. The client readiness
-boundary keeps the loading workspace surface visible until deferred App Embed
-and banner data resolve; this preserves a prompt streamed response without
-revealing partial Dashboard content. Web-pixel reconciliation remains a
-post-response background task.
+The `/app/dashboard` loader keeps non-critical Admin checks off the response
+path. App-embed status is read client-side from `shopify.app.extensions()`;
+web-pixel reconciliation remains a post-response background task. The initial
+payload contains the shop, bundle summary, and API key required for the native
+App Bridge check.
 
 The shared `/app` shell must not import or await providers that do not have
 runtime consumers on every Admin page. On 2026-07-10, the global Mantle provider

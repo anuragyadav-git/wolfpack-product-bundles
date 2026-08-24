@@ -30,10 +30,6 @@ jest.mock("../../../app/db.server", () => ({
   default: { session: {} },
 }));
 
-jest.mock("../../../app/services/offline-token.server", () => ({
-  ensureShopHasExpiringOfflineSession: jest.fn(),
-}));
-
 jest.mock("../../../app/lib/logger", () => ({
   AppLogger: {
     error: jest.fn(),

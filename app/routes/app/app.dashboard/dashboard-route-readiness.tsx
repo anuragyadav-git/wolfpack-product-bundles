@@ -3,19 +3,16 @@ import {
   waitForAdminRouteLoadingBar,
 } from "../../../components/AdminRouteLoadingBar";
 
-export async function waitForDashboardRouteReady<TAppEmbedStatus, TBanners>(
-  appEmbedStatus: Promise<TAppEmbedStatus>,
+export async function waitForDashboardRouteReady<TBanners>(
   banners: Promise<TBanners>,
   loadingBar: Promise<void> = waitForAdminRouteLoadingBar(),
 ) {
-  const [resolvedAppEmbedStatus, resolvedBanners] = await Promise.all([
-    appEmbedStatus,
+  const [resolvedBanners] = await Promise.all([
     banners,
     loadingBar,
   ]);
 
   return {
-    appEmbedStatus: resolvedAppEmbedStatus,
     banners: resolvedBanners,
   };
 }

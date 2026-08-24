@@ -9,7 +9,7 @@ import { lazy, Suspense, useMemo, useState } from "react";
 import type { Prisma } from "@prisma/client";
 import { BundleType } from "../../constants/bundle";
 import { prisma } from "../../db.server";
-import { requireAdminSession } from "../../lib/auth-guards.server";
+import { authenticate } from "../../shopify.server";
 import {
   SETTINGS_CONTROLS_BUNDLE_TYPES,
   SETTINGS_CONTROLS_SCHEMA_VERSION,
@@ -56,8 +56,8 @@ export function waitForSettingsRouteReady<TSettings, TPreviewBundles>(
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  const { admin, session } = await requireAdminSession(request);
-  const shopBrandColors = syncThemeColors(admin, session.shop);
+  const { admin, session } = await authenticate.admin(request);
+  const shopBrandColors = syncThemeColors(session.shop);
   const settingsPage = Promise.all([shopBrandColors, prisma.designSettings.findUnique({
       where: { shopId_bundleType: { shopId: session.shop, bundleType: "product_page" } },
       select: {
@@ -119,7 +119,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 export async function action({ request }: ActionFunctionArgs) {
-  const { admin, session } = await requireAdminSession(request);
+  const { admin, session } = await authenticate.admin(request);
   const formData = await request.formData();
   const intent = String(formData.get("intent") ?? "");
   const payloadValue = String(formData.get("payload") ?? "{}");

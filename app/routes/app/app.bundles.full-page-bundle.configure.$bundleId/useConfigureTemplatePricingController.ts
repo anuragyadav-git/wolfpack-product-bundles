@@ -9,7 +9,6 @@ import fullPageBundleStyles from "../../../styles/routes/full-page-bundle-config
 import { FPB_DESIGN_CONTROL_PANEL_URL } from "./configure-constants";
 import { buildVisibilityDisplayConfiguration } from "./visibility-helpers";
 import type { ConfigureBundleFlowDraft } from "./configure-flow-types";
-import { runAfterSaveBarLeaveConfirmation } from "../../../lib/admin-savebar-navigation.client";
 import {
   resolveTemplateReadyStep,
   shouldProcessTemplateResponse,
@@ -91,6 +90,11 @@ export function useConfigureTemplatePricingController(
     hidePolarisModal(selectTemplateModalRef);
     resetSelectTemplateModal();
   }, [resetSelectTemplateModal, selectTemplateModalRef]);
+  useEffect(() => {
+    isSelectTemplateModalOpen
+      ? showPolarisModal(selectTemplateModalRef)
+      : hidePolarisModal(selectTemplateModalRef);
+  }, [isSelectTemplateModalOpen, selectTemplateModalRef]);
   useModalHideListener(selectTemplateModalRef, resetSelectTemplateModal);
   const openSelectTemplateModal = useCallback(() => {
     setPendingDesignTemplate(bundleDesignTemplate);
@@ -114,16 +118,10 @@ export function useConfigureTemplatePricingController(
     templateSubmissionStartedRef,
   ]);
   const openDesignControlPanel = useCallback(() => {
-    void runAfterSaveBarLeaveConfirmation(flow.shopify, () =>
+    void flow.shopify.saveBar.leaveConfirmation().then(() =>
       navigate(FPB_DESIGN_CONTROL_PANEL_URL)
     );
   }, [flow.shopify, navigate]);
-
-  useEffect(() => {
-    isSelectTemplateModalOpen
-      ? showPolarisModal(selectTemplateModalRef)
-      : hidePolarisModal(selectTemplateModalRef);
-  }, [isSelectTemplateModalOpen, selectTemplateModalRef]);
 
   useEffect(() => {
     if (!lastTemplateRequestRef.current) {

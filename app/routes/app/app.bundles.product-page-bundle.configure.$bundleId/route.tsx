@@ -5,7 +5,7 @@ import {
 } from "@remix-run/node";
 import { AppLogger } from "../../../lib/logger";
 import { ERROR_MESSAGES } from "../../../constants/errors";
-import { requireAdminSession } from "../../../lib/auth-guards.server";
+import { authenticate } from "../../../shopify.server";
 import db from "../../../db.server";
 import {
   handleSaveBundle,
@@ -25,7 +25,6 @@ import {
   fetchBundleProduct,
   fetchShopCurrencyCode,
   fetchShopLocales,
-  fetchEmbedData,
 } from "../../../lib/bundle-configure-loader.server";
 import { handleRecordBundlePreview } from "../shared/bundle-preview-action.server";
 import {
@@ -36,7 +35,7 @@ import ConfigureBundleFlow from "./ConfigureBundleFlow";
 import { ReduxProvider } from "../../../store/ReduxProvider";
 
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
-  const { session, admin } = await requireAdminSession(request);
+  const { session, admin } = await authenticate.admin(request);
   const { bundleId } = params;
   const url = new URL(request.url);
   const configureMode =
@@ -78,13 +77,12 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   // File: extensions/bundle-builder/blocks/bundle-product-page.liquid
   const blockHandle = "bundle-product-page";
 
-  const [bundleProduct, shopCurrencyCode, shopLocales, embedData] = await Promise.all([
+  const [bundleProduct, shopCurrencyCode, shopLocales] = await Promise.all([
     bundle.shopifyProductId
       ? fetchBundleProduct(admin, bundle.shopifyProductId, bundleId)
       : Promise.resolve(null),
     fetchShopCurrencyCode(admin),
     fetchShopLocales(admin),
-    fetchEmbedData(admin, session.shop, apiKey, "bundle-app-embed"),
   ]);
 
   return json({
@@ -97,14 +95,12 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
     blockHandle,
     shopLocales,
     shopCurrencyCode,
-    appEmbedEnabled: embedData.appEmbedEnabled,
-    themeEditorUrl: embedData.themeEditorUrl,
   });
 };
 
 export const action = async ({ request, params }: ActionFunctionArgs) => {
   try {
-    const { session, admin } = await requireAdminSession(request);
+    const { session, admin } = await authenticate.admin(request);
     const { bundleId } = params;
 
     if (!session?.shop) {

@@ -5,7 +5,7 @@ title: Wolfpack Product Bundles App Navigation and UI Map
 type: navigation-map
 status: authoritative
 summary: Routes, screens, actions, modals, and storefront-preview flows for the embedded app.
-last_audited: 2026-08-23
+last_audited: 2026-08-24
 owners:
   - engineering
 domains:
@@ -745,6 +745,8 @@ Checkout order summary → Bundle & Save
 | `/apps/product-bundles/api/ppb-embed.json`                     | Signed, shop-scoped Product Page Bundle embed lookup by product, collections, and locale; returns the first eligible formatted PPB with localized copy and private ETag caching                                 |
 | `/apps/product-bundles/api/page-builder-embed.json`            | Signed direct page-builder lookup: resolves an Active or Unlisted PPB by generated parent-product handle or an FPB by shop-scoped public number; returns a formatted preloaded bundle with private ETag caching |
 | `/apps/product-bundles/api/cart-bundle-details`                | Signed storefront route that merges EB-style cart `bundle_details` metafield entries                                                                                                                            |
+| `/apps/product-bundles/api/storefront-products`                | Signed Storefront-context product hydration with ID validation and inventory normalization                                                                                                                       |
+| `/apps/product-bundles/api/storefront-collections`             | Signed Storefront-context collection hydration with product deduplication and membership mapping                                                                                                                 |
 | `/apps/product-bundles/api/cart-transform-runtime-token`       | Signed storefront route that validates selected bundle lines and returns `_wolfpack_bundle_runtime` for Cart Transform / Discount Function verification                                                         |
 | `/apps/product-bundles/api/checkout-integration-discount-code` | Signed storefront route that creates short-lived app discount codes for third-party FPB checkout integrations                                                                                                   |
 | `/api/checkout-bundle-offer-token`                             | Checkout-session-authenticated route that validates a signed parent and current merchant offer config, then authorizes one exact add-on variant and quantity                                                    |
@@ -755,11 +757,9 @@ Checkout order summary → Bundle & Save
 | `/api/billing/cancel`                                          | Cancel subscription                                                                                                                                                                                             |
 | `/api/activate-cart-transform`                                 | Deploy cart transform function                                                                                                                                                                                  |
 | `/api/activate-pixel`                                          | Activate UTM web pixel                                                                                                                                                                                          |
-| `/app/app-embed-status`                                        | Authenticated Admin resource route for Preview-button app embed revalidation                                                                                                                                    |
 | `/apps/product-bundles/api/proxy-health`                       | Proxy health check                                                                                                                                                                                              |
 | `/health`                                                      | Public Render HTTP health check; returns 2xx only when the app and DB are ready                                                                                                                                 |
 | `/api/attribution`                                             | UTM attribution analytics data                                                                                                                                                                                  |
-| `/api/web-vitals`                                              | No-op tombstone for retired custom Admin Web Vitals beacons; returns 204 for stale POSTs                                                                                                                        |
 | `/api/widget-error`                                            | Widget runtime error logging                                                                                                                                                                                    |
 | `/api/webhooks/pubsub`                                         | Pub/Sub webhook handler                                                                                                                                                                                         |
 | `/api/inngest`                                                 | Inngest background job handler                                                                                                                                                                                  |

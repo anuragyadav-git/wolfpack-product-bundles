@@ -8,7 +8,6 @@ import {
   PPB_DESIGN_CONTROL_PANEL_URL,
   resolveProductPageTemplateSelection,
 } from "./ConfigureBundleFlow.helpers";
-import { runAfterSaveBarLeaveConfirmation } from "../../../lib/admin-savebar-navigation.client";
 import { resolveTemplateReadyStep } from "../../../lib/template-ready-step";
 
 export function usePpbModalAndTemplateController({
@@ -67,6 +66,14 @@ export function usePpbModalAndTemplateController({
       ? showPolarisModal(display.discountVariablesModalRef)
       : hidePolarisModal(display.discountVariablesModalRef);
   }, [display.discountVariablesModalRef, display.isDiscountVariablesModalOpen]);
+  useEffect(() => {
+    templateState.isSelectTemplateModalOpen
+      ? showPolarisModal(templateState.selectTemplateDialogRef)
+      : hidePolarisModal(templateState.selectTemplateDialogRef);
+  }, [
+    templateState.isSelectTemplateModalOpen,
+    templateState.selectTemplateDialogRef,
+  ]);
   useModalHideListener(syncModalRef, () =>
     templateState.setIsSyncModalOpen(false)
   );
@@ -104,7 +111,7 @@ export function usePpbModalAndTemplateController({
   }, [resetSelectTemplateDialog, templateState.selectTemplateDialogRef]);
   useModalHideListener(
     templateState.selectTemplateDialogRef,
-    resetSelectTemplateDialog
+    resetSelectTemplateDialog,
   );
   const openSelectTemplateModal = useCallback(() => {
     const selectedTemplate = resolveProductPageTemplateSelection({
@@ -121,18 +128,10 @@ export function usePpbModalAndTemplateController({
     templateState.setIsSelectTemplateModalOpen(true);
   }, [templateState]);
   const openDesignControlPanel = useCallback(() => {
-    void runAfterSaveBarLeaveConfirmation(base.shopify, () =>
+    void base.shopify.saveBar.leaveConfirmation().then(() =>
       base.navigate(PPB_DESIGN_CONTROL_PANEL_URL)
     );
   }, [base]);
-  useEffect(() => {
-    templateState.isSelectTemplateModalOpen
-      ? showPolarisModal(templateState.selectTemplateDialogRef)
-      : hidePolarisModal(templateState.selectTemplateDialogRef);
-  }, [
-    templateState.isSelectTemplateModalOpen,
-    templateState.selectTemplateDialogRef,
-  ]);
   const handleTemplateNext = useCallback(() => {
     if (
       !templateState.pendingDesignTemplate ||

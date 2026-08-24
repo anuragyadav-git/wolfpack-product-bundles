@@ -16,6 +16,7 @@ import { handleAdminSaveLockedEvent } from "../../../lib/admin-save-lock";
 import { getParentProductStatusUi } from "../../../lib/parent-product-status-ui";
 import { openThemeEditorInNewTab } from "../../../lib/theme-editor-navigation.client";
 import { getThemeExtensionStatusFromAppBridge } from "../../../lib/app-embed-status-check.client";
+import { buildThemeAppEmbedEditorUrl } from "../../../lib/theme-extension-status";
 import { useBundleConfigurationState } from "../../../hooks/useBundleConfigurationState";
 import { useEnsureProductTemplateMutation } from "../../../store/api/adminApi";
 import type { LoaderData } from "./types";
@@ -36,9 +37,8 @@ export function useConfigureBundleController(): ConfigureBundleFlowDraft {
     apiKey,
     shopLocales = [],
     shopCurrencyCode,
-    appEmbedEnabled = true,
-    themeEditorUrl = null,
   } = loaderData as any;
+  const themeEditorUrl = buildThemeAppEmbedEditorUrl(shop, apiKey, "bundle-app-embed");
   const navigate = useNavigate();
   const shopify = useAppBridge();
   const fetcher = useFetcher<any>();
@@ -128,7 +128,7 @@ export function useConfigureBundleController(): ConfigureBundleFlowDraft {
         }
       })
       .catch(() => {
-        if (active) setCurrentAppEmbedEnabled(appEmbedEnabled);
+        if (active) setCurrentAppEmbedEnabled(false);
       })
       .finally(() => {
         if (active) {
@@ -138,7 +138,7 @@ export function useConfigureBundleController(): ConfigureBundleFlowDraft {
     return () => {
       active = false;
     };
-  }, [appEmbedEnabled, shopify, themeEditorUrl]);
+  }, [shopify, themeEditorUrl]);
   const refreshParentProductStatusFromShopify = useCallback(() => {
     const revalidateNow = () => {
       revalidator.revalidate();

@@ -2,10 +2,9 @@ import { defer, json, type ActionFunctionArgs, type HeadersFunction, type LinksF
 import { Await, useLoaderData } from "@remix-run/react";
 import { Suspense, useMemo } from "react";
 import { ServerTiming } from "../../../lib/server-timing.server";
-import { requireAdminSession } from "../../../lib/auth-guards.server";
+import { authenticate } from "../../../shopify.server";
 import db from "../../../db.server";
 import { AppLogger } from "../../../lib/logger";
-import { fetchEmbedData } from "../../../lib/bundle-configure-loader.server";
 import { getSubscriptionInfoFromCache } from "../../../services/subscription-cache.server";
 import { BundleStatus, BundleType } from "../../../constants/bundle";
 import { handleCreateFpbPreview, handleRecordBundlePreview } from "../shared/bundle-preview-action.server";
@@ -21,11 +20,6 @@ import {
 } from "./dashboard-route-readiness";
 import dashboardRouteLoadingStyles from "./dashboard-route-loading.css?url";
 import { buildStorefrontApiPath } from "../../../config/storefront-proxy-routes";
-
-export type DashboardAppEmbedStatus = {
-  appEmbedEnabled: boolean;
-  themeEditorUrl: string | null;
-};
 
 /**
  * Preload first-viewport dashboard images via real
@@ -93,7 +87,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   // Now: bundles first (required for the rest), then async work for optional metadata
   // backfill. billing + proxy-health are non-blocking and deferred where possible.
   const timing = new ServerTiming();
-  const { session, admin } = await timing.track("auth", () => requireAdminSession(request));
+  const { session, admin } = await timing.track("auth", () => authenticate.admin(request));
 
   const bundlesPromise = timing.track("db.bundles", () => db.bundle.findMany({
     where: {
@@ -109,17 +103,6 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   }));
 
   const apiKey = process.env.SHOPIFY_API_KEY || "";
-  const appEmbedStatus = timing.track("shopify.appEmbed", () =>
-    fetchEmbedData(admin, session.shop, apiKey),
-  ).catch((error): DashboardAppEmbedStatus => {
-    AppLogger.warn(
-      "Failed to resolve dashboard app embed status",
-      { component: "app.dashboard", operation: "shopify.appEmbed", shop: session.shop },
-      error,
-    );
-    return { appEmbedEnabled: false, themeEditorUrl: null };
-  });
-
   const bundles = await bundlesPromise;
   const bundlesNeedingBackfill = bundles.filter(
     b => b.bundleType === BundleType.PRODUCT_PAGE && b.shopifyProductId && !b.shopifyProductHandle
@@ -219,14 +202,14 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   return defer({
     bundles: bundlesWithPreview,
     shop: session.shop,
+    apiKey,
     appUrl,
-    appEmbedStatus,
     banners,
   }, { headers: timing.toHeaders() });
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
-  const { session, admin } = await requireAdminSession(request);
+  const { session, admin } = await authenticate.admin(request);
   const formData = await request.formData();
   const intent = formData.get("intent");
   if (intent === "cloneBundle") return handleCloneBundle(admin, session, formData);
@@ -253,10 +236,10 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 };
 
 export default function Dashboard() {
-  const { appEmbedStatus, banners } = useLoaderData<typeof loader>();
+  const { banners } = useLoaderData<typeof loader>();
   const dashboardReady = useMemo(
-    () => waitForDashboardRouteReady(appEmbedStatus, banners),
-    [appEmbedStatus, banners],
+    () => waitForDashboardRouteReady(banners),
+    [banners],
   );
 
   return (
@@ -265,7 +248,6 @@ export default function Dashboard() {
         {(resolved) => (
           <ReduxProvider>
             <DashboardPage
-              appEmbedStatus={resolved.appEmbedStatus}
               banners={resolved.banners}
             />
           </ReduxProvider>

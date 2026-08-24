@@ -6,7 +6,7 @@ const upsert = jest.fn();
 const findMany = jest.fn();
 const transaction = jest.fn(async (writes: Promise<unknown>[]) => Promise.all(writes));
 
-jest.mock("../../../app/lib/auth-guards.server", () => ({ requireAdminSession }));
+jest.mock("../../../app/shopify.server", () => ({ authenticate: { admin: requireAdminSession } }));
 jest.mock("../../../app/db.server", () => ({
   prisma: {
     $transaction: transaction,

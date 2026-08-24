@@ -24,7 +24,6 @@ import {
   SettingsHelpModal,
   SettingsToast,
 } from "./SettingsFeedback";
-import { runAfterSaveBarLeaveConfirmation } from "../../../lib/admin-savebar-navigation.client";
 import { createSettingsDesignState, type SettingsDesignPayload } from "../../../lib/settings-design-contract";
 import { isShopBrandColors } from "../../../lib/shop-brand-colors";
 import { DesignSettingsView } from "./DesignSettingsView";
@@ -164,7 +163,7 @@ export function SettingsRoute({
       navigateWithinControls(onExit);
       return;
     }
-    void runAfterSaveBarLeaveConfirmation(shopify, onExit);
+    void shopify.saveBar.leaveConfirmation().then(onExit);
   };
 
   const navigateToSettingsView = (nextView: "design" | "language" | "controls") => {
@@ -175,7 +174,7 @@ export function SettingsRoute({
       });
       return;
     }
-    void runAfterSaveBarLeaveConfirmation(shopify, () => {
+    void shopify.saveBar.leaveConfirmation().then(() => {
       setSettingsView(nextView);
       if (nextView === "language") setActiveLanguagePanel("cartCheckout");
     });

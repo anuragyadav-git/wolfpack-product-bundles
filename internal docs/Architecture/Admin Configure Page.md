@@ -5,7 +5,7 @@ title: Admin Configure Page
 type: architecture
 status: authoritative
 summary: Defines the shared FPB and PPB configure-page boundary and direct create, clone, edit, and save flows.
-last_audited: 2026-08-21
+last_audited: 2026-08-24
 owners:
   - engineering
 domains:
@@ -154,6 +154,13 @@ area. Escape, safe backdrop dismissal, focus trapping, internal scrolling, and
 focus restoration are shared behavior. `LocalAppModal` applies the same native
 dialog contract to app-owned discard and multi-language workflows; documented
 Polaris modal workflows continue to use `s-modal`.
+
+The FPB and PPB Select Template workflows use a mounted native `s-modal` with
+the `large-100` size. Route-owned state controls whether the workflow content
+is present, and the configure controllers use `showOverlay()`, `hideOverlay()`,
+and native hide events to keep dismissal and focus restoration synchronized.
+Do not render these workflows through the App Bridge React `Modal` wrapper;
+that wrapper emits `ui-modal`, which is not the Polaris web-component surface.
 
 ## First-Create Tour and State Boundary
 
