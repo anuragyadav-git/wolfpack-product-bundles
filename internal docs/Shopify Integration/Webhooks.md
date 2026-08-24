@@ -1,13 +1,35 @@
 ---
+schema_version: 1
+id: shopify-webhooks
 title: Webhooks
-type: shopify-integration
-audited: 2026-07-08
-sources: shopify.app.toml, shopify.app.wolfpack-product-bundles-sit.toml, app/services/webhooks/processor.server.ts
+type: architecture-note
+status: active
+summary: Defines Wolfpack's app-specific Shopify webhook subscriptions, payload version, processing ownership, and delivery-volume safeguards.
+last_audited: 2026-08-24
+owners:
+  - engineering
+domains:
+  - shopify-integration
+systems:
+  - webhook-processor
+source_paths:
+  - shopify.app.toml
+  - shopify.app.wolfpack-product-bundles-sit.toml
+  - app/services/webhooks/processor.server.ts
+related_docs:
+  - internal docs/Shopify Integration/Admin API.md
+tags:
+  - webhooks
+keywords:
+  - 2026-07
+  - events
 ---
 
 # Webhooks
 
 ## App Config Subscriptions
+
+Production and SIT use Shopify webhook API version `2026-07`. This version controls how Shopify serializes payloads for every app-specific subscription declared under `[webhooks]`; it does not change the API version used by unrelated Admin or Storefront API clients.
 
 The app subscribes only to operational webhook topics that are required across installs:
 
@@ -24,6 +46,12 @@ Broad topics that generated high delivery volume without a required runtime effe
 - `orders/create`
 
 Shopify sends every event matching a subscribed topic. Filtering after receipt still counts as a Shopify delivery, so broad product and inventory topics can create high delivery counts even when most payloads do not affect a Wolfpack bundle.
+
+## Events Validator Workaround
+
+The `[events]` block in both app configurations is a no-op with `api_version = "unstable"` and an empty `subscription` array. It exists only because Shopify's remote app-configuration schema began incorrectly requiring the developer-preview Events section on 2026-08-24, even for apps using only classic webhooks.
+
+Do not add a placeholder Events subscription. A real `[[events.subscription]]` entry registers a delivery contract with its own topic, actions, and handler URI. Remove the no-op block after Shopify resolves the validator regression and validation succeeds without it.
 
 ## Product Delete
 

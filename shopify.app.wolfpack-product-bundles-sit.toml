@@ -7,7 +7,7 @@ embedded = true
 handle = "wolfpack-product-bundles-sit"
 
 [webhooks]
-api_version = "2025-10"
+api_version = "2026-07"
 
   [[webhooks.subscriptions]]
   topics = [
@@ -19,6 +19,11 @@ api_version = "2025-10"
 ]
   uri = "https://wolfpack-staging-pubsub-worker.onrender.com/webhooks"
   compliance_topics = [ "customers/data_request", "customers/redact", "shop/redact" ]
+
+# No-op required while Shopify's remote schema incorrectly requires Events.
+[events]
+api_version = "unstable"
+subscription = []
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
