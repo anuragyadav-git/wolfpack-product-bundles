@@ -1,9 +1,11 @@
+import { Modal } from "@shopify/app-bridge-react";
 import { openThemeEditorInNewTab } from "../../../lib/theme-editor-navigation.client";
 import { TemplateReadyScreen } from "../../../components/bundle-configure/TemplateReadyScreen";
 import { usePpbConfigureContext } from "./PpbConfigureContext";
 
 export function PpbSelectTemplateDialog() {
   const {
+    closeSelectTemplateDialog,
     handleTemplateNext,
     handleTemplatePreview,
     isPreviewBundleLoading,
@@ -12,7 +14,6 @@ export function PpbSelectTemplateDialog() {
     pendingDesignTemplate,
     productPageBundleStyles,
     productPageTemplateOptions,
-    selectTemplateDialogRef,
     setPendingDesignPresetId,
     setPendingDesignTemplate,
     setTemplateModalStep,
@@ -23,12 +24,13 @@ export function PpbSelectTemplateDialog() {
   } = usePpbConfigureContext();
 
   return (
-    <s-modal
+    <Modal
       id="ppb-template-customization-modal"
-      ref={selectTemplateDialogRef}
-      heading="Customization"
-      size="large-100"
+      open={isSelectTemplateModalOpen}
+      onHide={closeSelectTemplateDialog}
+      variant="max"
     >
+      <ui-title-bar title="Customization" />
       {isSelectTemplateModalOpen ? (
       <div className={productPageBundleStyles.templateDialogContent}>
         {templateModalStep === "templates" ? (
@@ -376,6 +378,6 @@ export function PpbSelectTemplateDialog() {
         )}
       </div>
       ) : null}
-    </s-modal>
+    </Modal>
   );
 }

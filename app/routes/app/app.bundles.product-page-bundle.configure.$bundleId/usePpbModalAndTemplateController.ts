@@ -66,14 +66,6 @@ export function usePpbModalAndTemplateController({
       ? showPolarisModal(display.discountVariablesModalRef)
       : hidePolarisModal(display.discountVariablesModalRef);
   }, [display.discountVariablesModalRef, display.isDiscountVariablesModalOpen]);
-  useEffect(() => {
-    templateState.isSelectTemplateModalOpen
-      ? showPolarisModal(templateState.selectTemplateDialogRef)
-      : hidePolarisModal(templateState.selectTemplateDialogRef);
-  }, [
-    templateState.isSelectTemplateModalOpen,
-    templateState.selectTemplateDialogRef,
-  ]);
   useModalHideListener(syncModalRef, () =>
     templateState.setIsSyncModalOpen(false)
   );
@@ -106,13 +98,8 @@ export function usePpbModalAndTemplateController({
     });
   }, [templateState]);
   const closeSelectTemplateDialog = useCallback(() => {
-    hidePolarisModal(templateState.selectTemplateDialogRef);
     resetSelectTemplateDialog();
-  }, [resetSelectTemplateDialog, templateState.selectTemplateDialogRef]);
-  useModalHideListener(
-    templateState.selectTemplateDialogRef,
-    resetSelectTemplateDialog,
-  );
+  }, [resetSelectTemplateDialog]);
   const openSelectTemplateModal = useCallback(() => {
     const selectedTemplate = resolveProductPageTemplateSelection({
       bundleDesignTemplate: templateState.bundleDesignTemplate,

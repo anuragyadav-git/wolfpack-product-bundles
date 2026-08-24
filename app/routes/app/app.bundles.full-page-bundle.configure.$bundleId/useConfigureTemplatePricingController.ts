@@ -13,11 +13,6 @@ import {
   resolveTemplateReadyStep,
   shouldProcessTemplateResponse,
 } from "../../../lib/template-ready-step";
-import {
-  hidePolarisModal,
-  showPolarisModal,
-  useModalHideListener,
-} from "../_shared/bundle-configure/modal-utils";
 
 export function useConfigureTemplatePricingController(
   flow: ConfigureBundleFlowDraft
@@ -30,7 +25,6 @@ export function useConfigureTemplatePricingController(
     bundleDesignTemplate,
     conditionsState,
     formState,
-    isSelectTemplateModalOpen,
     lastTemplateRequestRef,
     lastTemplateResponseRef,
     loadedBundleProduct,
@@ -41,7 +35,6 @@ export function useConfigureTemplatePricingController(
     productStatus,
     ruleMessages,
     savedBundleUpsellConfig,
-    selectTemplateModalRef,
     selectTemplateOpenButtonRef,
     setBundleDesignPresetId,
     setBundleDesignTemplate,
@@ -87,15 +80,8 @@ export function useConfigureTemplatePricingController(
     templateSubmissionStartedRef,
   ]);
   const closeSelectTemplateModal = useCallback(() => {
-    hidePolarisModal(selectTemplateModalRef);
     resetSelectTemplateModal();
-  }, [resetSelectTemplateModal, selectTemplateModalRef]);
-  useEffect(() => {
-    isSelectTemplateModalOpen
-      ? showPolarisModal(selectTemplateModalRef)
-      : hidePolarisModal(selectTemplateModalRef);
-  }, [isSelectTemplateModalOpen, selectTemplateModalRef]);
-  useModalHideListener(selectTemplateModalRef, resetSelectTemplateModal);
+  }, [resetSelectTemplateModal]);
   const openSelectTemplateModal = useCallback(() => {
     setPendingDesignTemplate(bundleDesignTemplate);
     setPendingDesignPresetId(bundleDesignPresetId);

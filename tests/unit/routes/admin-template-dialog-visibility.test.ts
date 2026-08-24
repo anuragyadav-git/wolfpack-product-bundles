@@ -1,6 +1,11 @@
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
+jest.mock("@shopify/app-bridge-react", () => ({
+  Modal: ({ children, open }: { children: React.ReactNode; open?: boolean }) =>
+    open ? React.createElement("ui-modal", null, children) : null,
+}));
+
 jest.mock("../../../app/lib/theme-editor-navigation.client", () => ({
   openThemeEditorInNewTab: jest.fn(),
 }));
@@ -41,14 +46,18 @@ describe("Admin projected template dialog visibility", () => {
     );
 
     ppbContext.isSelectTemplateModalOpen = false;
-    expect(renderToStaticMarkup(React.createElement(PpbSelectTemplateDialog))).not.toContain(
-      "Customize your bundle",
+    let view = renderToStaticMarkup(
+      React.createElement(PpbSelectTemplateDialog),
     );
+    expect(view).not.toContain("<ui-modal");
+    expect(view).not.toContain("Customize your bundle");
 
     ppbContext.isSelectTemplateModalOpen = true;
-    expect(renderToStaticMarkup(React.createElement(PpbSelectTemplateDialog))).toContain(
-      "Customize your bundle",
+    view = renderToStaticMarkup(
+      React.createElement(PpbSelectTemplateDialog),
     );
+    expect(view).toContain("<ui-modal");
+    expect(view).toContain("Customize your bundle");
   });
 
   it("renders the FPB customization workflow only while app state is open", async () => {
@@ -76,13 +85,17 @@ describe("Admin projected template dialog visibility", () => {
       themeEditorUrl: null,
     };
 
-    expect(renderToStaticMarkup(React.createElement(FpbTemplateDialog, { flow: flow as any }))).not.toContain(
-      "Customize your bundle",
+    let view = renderToStaticMarkup(
+      React.createElement(FpbTemplateDialog, { flow: flow as any }),
     );
+    expect(view).not.toContain("<ui-modal");
+    expect(view).not.toContain("Customize your bundle");
 
     flow.isSelectTemplateModalOpen = true;
-    expect(renderToStaticMarkup(React.createElement(FpbTemplateDialog, { flow: flow as any }))).toContain(
-      "Customize your bundle",
+    view = renderToStaticMarkup(
+      React.createElement(FpbTemplateDialog, { flow: flow as any }),
     );
+    expect(view).toContain("<ui-modal");
+    expect(view).toContain("Customize your bundle");
   });
 });

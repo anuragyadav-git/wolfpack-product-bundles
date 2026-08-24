@@ -5,7 +5,7 @@ title: Template Ready Screen Test Spec
 type: test-spec
 status: active
 summary: Behavioral coverage for the shared FPB and PPB post-template preview screen.
-last_audited: 2026-07-30
+last_audited: 2026-08-25
 owners:
   - engineering
 domains:
@@ -41,6 +41,7 @@ Preserve the shared post-template preview behavior while FPB and PPB match the l
 | --- | --------------- | ------------------ | -------------------------------------------------------------- | ----------------------------------- |
 | 1   | Ready state     | Preview is idle    | Completion heading, supporting copy, and preview action render | Shared by FPB and PPB               |
 | 2   | Preview loading | Preview is running | Preview action is loading and disabled                         | Prevents duplicate preview requests |
+| 3   | Projected preview action | Preview is idle | Preview action renders as a semantic button | Nested Polaris controls do not hydrate in the host modal document |
 
 ### resolveTemplateReadyStep
 

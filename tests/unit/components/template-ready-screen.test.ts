@@ -29,4 +29,16 @@ describe("TemplateReadyScreen", () => {
     expect(view).toContain("disabled");
     expect(view).toContain('aria-busy="true"');
   });
+
+  it("renders the preview action as a semantic projected control", () => {
+    const view = renderToStaticMarkup(
+      React.createElement(TemplateReadyScreen, {
+        isPreviewLoading: false,
+        onPreview: jest.fn(),
+      })
+    );
+
+    expect(view).toContain('<button type="button"');
+    expect(view).toContain("Preview bundle</button>");
+  });
 });
