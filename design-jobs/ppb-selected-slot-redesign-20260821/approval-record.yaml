@@ -19,10 +19,15 @@
     "waivers": []
   },
   "handoff": {
-    "status": "not-started",
-    "approver": "",
-    "at": "",
-    "evidence": [],
+    "status": "approved",
+    "approver": "user",
+    "at": "2026-08-24T20:07:26Z",
+    "evidence": [
+      "implementation-handoff.md",
+      "codex-task.md",
+      "acceptance-criteria.md",
+      "browser-test-plan.yaml"
+    ],
     "waivers": []
   },
   "implementation": {

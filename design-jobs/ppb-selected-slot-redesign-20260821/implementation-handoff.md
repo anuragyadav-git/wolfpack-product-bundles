@@ -29,7 +29,7 @@ keywords:
 
 Artifact job ID: ppb-selected-slot-redesign-20260821
 Artifact revision: 4
-Artifact status: complete
+Artifact status: approved
 
 ## Source-of-truth priority
 

@@ -28,7 +28,7 @@ keywords:
 
 Artifact job ID: ppb-selected-slot-redesign-20260821
 Artifact revision: 4
-Artifact status: complete
+Artifact status: approved
 
 - [ ] Vertical filled slots match the live EB anatomy: 64px target row, 50px media, one bold title line, trailing remove, 2px solid border, 10px radius, and no shadow.
 - [ ] Vertical empty slots match the live EB anatomy: 60px target row, saved label, trailing plus affordance, 2px dashed border, and 10px radius.

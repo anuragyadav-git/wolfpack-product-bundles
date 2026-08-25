@@ -7,8 +7,14 @@
   --bw-ppb-slot-target: 44px;
   --bw-ppb-slot-tile-min-inline: 8.5rem;
   --bw-ppb-slot-tile-min-block: clamp(11rem, 48cqi, 13rem);
-  --bw-ppb-slot-row-min-block: clamp(3.25rem, 8cqi, 3.75rem);
+  --bw-ppb-slot-row-min-block: 4rem;
   --bw-ppb-slot-row-max-block: var(--bw-ppb-slot-row-min-block);
+  --bw-ppb-slot-empty-row-min-block: 3.75rem;
+  --bw-ppb-slot-row-padding: 5px;
+  --bw-ppb-slot-row-gap: 5px;
+  --bw-ppb-slot-list-gap: 14px;
+  --bw-ppb-slot-step-gap: 26px;
+  --bw-ppb-slot-media-size: 50px;
   width: 100%;
   max-width: 100%;
   margin: 0;
@@ -278,7 +284,7 @@
 }
 
 /* ==========================================================================
-   Vertical Slots (Vertically Stacked Step Sections with Card Tile Grids)
+   Vertical Slots (Vertically Stacked Compact Rows)
    ========================================================================== */
 
 #bundle-builder-app[data-ppb-design-preset="VERTICAL_SLOTS"],
@@ -294,12 +300,18 @@
 #bundle-builder-app[data-ppb-design-preset="SIMPLIFIED"] .bw-ppb-modal-slot-grid,
 #bundle-builder-app[data-ppb-slot-orientation="vertical"] .bw-ppb-modal-slot-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: clamp(10px, 3cqi, 16px);
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--bw-ppb-slot-list-gap);
   width: 100%;
   height: auto;
   align-items: stretch;
   justify-items: stretch;
+}
+
+#bundle-builder-app[data-ppb-design-preset="VERTICAL_SLOTS"] .bundle-steps,
+#bundle-builder-app[data-ppb-design-preset="SIMPLIFIED"] .bundle-steps,
+#bundle-builder-app[data-ppb-slot-orientation="vertical"] .bundle-steps {
+  gap: var(--bw-ppb-slot-step-gap);
 }
 
 #bundle-builder-app[data-ppb-design-preset="VERTICAL_SLOTS"] .bw-ppb-modal-slot-grid > .step-box,
@@ -309,12 +321,13 @@
 #bundle-builder-app[data-ppb-slot-orientation="vertical"] .bw-ppb-modal-slot-grid > .step-box,
 #bundle-builder-app[data-ppb-slot-orientation="vertical"] .bw-ppb-modal-slot-grid > .bw-slot-card {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   width: 100%;
   max-width: none;
-  min-height: clamp(150px, 38cqi, 178px);
-  height: 100%;
+  height: auto;
+  border-radius: var(--bw-ppb-slot-radius);
+  box-shadow: none;
 }
 
 /* Vertical Empty Slot */
@@ -325,10 +338,14 @@
 #bundle-builder-app[data-ppb-slot-orientation="vertical"] .bw-slot-card--empty,
 #bundle-builder-app[data-ppb-slot-orientation="vertical"] .add-more-card {
   justify-content: center;
-  padding: clamp(16px, 4cqi, 24px) 8px clamp(12px, 3cqi, 16px);
+  min-height: var(--bw-ppb-slot-empty-row-min-block);
+  padding: var(--bw-ppb-slot-row-padding) 10px;
+  gap: var(--bw-ppb-slot-row-gap);
   border: 2px dashed #000000;
+  border-radius: var(--bw-ppb-slot-radius);
   background: #ffffff;
   color: #000000;
+  text-align: left;
 }
 
 #bundle-builder-app[data-ppb-design-preset="VERTICAL_SLOTS"] .bw-slot-card--empty:hover,
@@ -347,9 +364,10 @@
 #bundle-builder-app[data-ppb-design-preset="SIMPLIFIED"] .plus-icon,
 #bundle-builder-app[data-ppb-slot-orientation="vertical"] .bw-slot-card__empty-visual,
 #bundle-builder-app[data-ppb-slot-orientation="vertical"] .plus-icon {
-  width: clamp(36px, 10cqi, 48px);
-  height: clamp(36px, 10cqi, 48px);
-  margin: 0 0 clamp(10px, 3cqi, 16px) 0;
+  order: 2;
+  width: 28px;
+  height: 28px;
+  margin: 0 0 0 auto;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -367,15 +385,19 @@
 #bundle-builder-app[data-ppb-slot-orientation="vertical"] .bw-slot-card__label,
 #bundle-builder-app[data-ppb-slot-orientation="vertical"] .step-name {
   color: #000000;
-  font-size: clamp(12px, 3cqi, 14px);
+  order: 1;
+  min-width: 0;
+  flex: 1 1 auto;
+  font-size: inherit;
   font-weight: 700;
   line-height: 1.25;
   margin: 0;
   padding: 0;
-  text-align: center;
-  width: 100%;
-  word-break: break-word;
-  white-space: normal;
+  text-align: left;
+  width: auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Vertical Filled Slot */
@@ -386,23 +408,29 @@
 #bundle-builder-app[data-ppb-slot-orientation="vertical"] .bw-slot-card--filled,
 #bundle-builder-app[data-ppb-slot-orientation="vertical"] .gbbMixSelectedProductCard {
   justify-content: flex-start;
-  padding: 6px;
+  min-height: var(--bw-ppb-slot-row-min-block);
+  padding: var(--bw-ppb-slot-row-padding);
+  gap: var(--bw-ppb-slot-row-gap);
   border: 2px solid #000000;
+  border-radius: var(--bw-ppb-slot-radius);
   background: #ffffff;
   position: relative;
   overflow: visible;
-  text-align: center;
+  text-align: left;
 }
 
 #bundle-builder-app[data-ppb-design-preset="VERTICAL_SLOTS"] .bw-slot-card--filled .bw-slot-card__image-wrapper,
 #bundle-builder-app[data-ppb-design-preset="SIMPLIFIED"] .bw-slot-card--filled .bw-slot-card__image-wrapper,
 #bundle-builder-app[data-ppb-slot-orientation="vertical"] .bw-slot-card--filled .bw-slot-card__image-wrapper {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  min-height: 0;
+  order: 1;
+  width: var(--bw-ppb-slot-media-size);
+  height: var(--bw-ppb-slot-media-size);
+  min-width: var(--bw-ppb-slot-media-size);
+  min-height: var(--bw-ppb-slot-media-size);
+  aspect-ratio: auto;
   border-radius: 8px;
   overflow: hidden;
-  margin: 0 0 6px 0;
+  margin: 0;
   display: block;
   flex: 0 0 auto;
 }
@@ -421,15 +449,16 @@
 #bundle-builder-app[data-ppb-design-preset="VERTICAL_SLOTS"] .bw-slot-card--filled .bw-slot-card__identity,
 #bundle-builder-app[data-ppb-design-preset="SIMPLIFIED"] .bw-slot-card--filled .bw-slot-card__identity,
 #bundle-builder-app[data-ppb-slot-orientation="vertical"] .bw-slot-card--filled .bw-slot-card__identity {
-  width: 100%;
-  padding: 0 2px;
+  order: 2;
+  width: auto;
+  min-width: 0;
+  padding: 0;
+  flex: 1 1 auto;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  text-align: center;
-  min-width: 0;
-  flex: 1 1 auto;
+  text-align: left;
 }
 
 #bundle-builder-app[data-ppb-design-preset="VERTICAL_SLOTS"] .bw-slot-card--filled .step-name,
@@ -438,27 +467,30 @@
 #bundle-builder-app[data-ppb-design-preset="SIMPLIFIED"] .bw-slot-card--filled .product-title-state,
 #bundle-builder-app[data-ppb-slot-orientation="vertical"] .bw-slot-card--filled .step-name,
 #bundle-builder-app[data-ppb-slot-orientation="vertical"] .bw-slot-card--filled .product-title-state {
-  font-size: clamp(12px, 3cqi, 14px);
+  font-size: inherit;
   font-weight: 700;
   line-height: 1.25;
   color: #000000;
-  text-align: center;
+  text-align: left;
   margin: 0;
   padding: 0;
   width: 100%;
-  word-break: break-word;
+  word-break: normal;
   overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
+  display: block;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 #bundle-builder-app[data-ppb-design-preset="VERTICAL_SLOTS"] .bw-slot-card--filled .bw-slot-card__prices,
 #bundle-builder-app[data-ppb-design-preset="VERTICAL_SLOTS"] .bw-slot-card--filled .bw-slot-card__variant,
+#bundle-builder-app[data-ppb-design-preset="VERTICAL_SLOTS"] .bw-slot-card--filled .bw-slot-discount-badge,
 #bundle-builder-app[data-ppb-design-preset="SIMPLIFIED"] .bw-slot-card--filled .bw-slot-card__prices,
 #bundle-builder-app[data-ppb-design-preset="SIMPLIFIED"] .bw-slot-card--filled .bw-slot-card__variant,
+#bundle-builder-app[data-ppb-design-preset="SIMPLIFIED"] .bw-slot-card--filled .bw-slot-discount-badge,
 #bundle-builder-app[data-ppb-slot-orientation="vertical"] .bw-slot-card--filled .bw-slot-card__prices,
-#bundle-builder-app[data-ppb-slot-orientation="vertical"] .bw-slot-card--filled .bw-slot-card__variant {
+#bundle-builder-app[data-ppb-slot-orientation="vertical"] .bw-slot-card--filled .bw-slot-card__variant,
+#bundle-builder-app[data-ppb-slot-orientation="vertical"] .bw-slot-card--filled .bw-slot-discount-badge {
   display: none;
 }
 
@@ -466,20 +498,18 @@
 #bundle-builder-app[data-ppb-design-preset="VERTICAL_SLOTS"] .bw-slot-card--filled .step-clear-badge,
 #bundle-builder-app[data-ppb-design-preset="SIMPLIFIED"] .bw-slot-card--filled .step-clear-badge,
 #bundle-builder-app[data-ppb-slot-orientation="vertical"] .bw-slot-card--filled .step-clear-badge {
-  position: absolute;
-  top: -8px;
-  right: -8px;
-  inset-block-start: -8px;
-  inset-inline-end: -8px;
-  width: 24px;
-  height: 24px;
-  min-width: 24px;
-  min-height: 24px;
+  position: static;
+  order: 3;
+  flex: 0 0 var(--bw-ppb-slot-target);
+  width: var(--bw-ppb-slot-target);
+  height: var(--bw-ppb-slot-target);
+  min-width: var(--bw-ppb-slot-target);
+  min-height: var(--bw-ppb-slot-target);
   padding: 0;
-  margin: 0;
-  border-radius: 50%;
-  background: #000000;
-  color: #ffffff;
+  margin: 0 0 0 auto;
+  border-radius: 0;
+  background: transparent;
+  color: #000000;
   border: none;
   display: flex;
   align-items: center;
@@ -488,9 +518,9 @@
   font-weight: 700;
   line-height: 1;
   cursor: pointer;
-  z-index: 10;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
-  transition: transform 0.15s ease;
+  z-index: auto;
+  box-shadow: none;
+  transition: none;
 }
 
 #bundle-builder-app[data-ppb-design-preset="VERTICAL_SLOTS"] .bw-slot-card--filled .step-clear-badge span,
@@ -500,23 +530,40 @@
   align-items: center;
   justify-content: center;
   line-height: 1;
-  color: #ffffff;
-  font-size: 16px;
+  color: #000000;
+  font-size: 20px;
   font-weight: 700;
 }
 
 #bundle-builder-app[data-ppb-design-preset="VERTICAL_SLOTS"] .bw-slot-card--filled .step-clear-badge:hover,
 #bundle-builder-app[data-ppb-design-preset="SIMPLIFIED"] .bw-slot-card--filled .step-clear-badge:hover,
 #bundle-builder-app[data-ppb-slot-orientation="vertical"] .bw-slot-card--filled .step-clear-badge:hover {
-  transform: scale(1.1);
-  background: #000000;
-  color: #ffffff;
+  transform: none;
+  background: transparent;
+  color: #000000;
+  opacity: 0.72;
 }
 
 #bundle-builder-app[data-ppb-design-preset="VERTICAL_SLOTS"] .bw-slot-card--filled .step-clear-badge:active,
 #bundle-builder-app[data-ppb-design-preset="SIMPLIFIED"] .bw-slot-card--filled .step-clear-badge:active,
 #bundle-builder-app[data-ppb-slot-orientation="vertical"] .bw-slot-card--filled .step-clear-badge:active {
-  transform: scale(0.95);
+  transform: none;
+  opacity: 1;
+}
+
+#bundle-builder-app[data-ppb-design-preset="VERTICAL_SLOTS"] .bw-slot-card--filled .step-clear-badge:focus-visible,
+#bundle-builder-app[data-ppb-design-preset="SIMPLIFIED"] .bw-slot-card--filled .step-clear-badge:focus-visible,
+#bundle-builder-app[data-ppb-slot-orientation="vertical"] .bw-slot-card--filled .step-clear-badge:focus-visible {
+  outline: 2px solid var(--bw-ppb-slot-accent, #000000);
+  outline-offset: -2px;
+}
+
+@media (min-width: 768px) {
+  #bundle-builder-app[data-ppb-design-preset="VERTICAL_SLOTS"],
+  #bundle-builder-app[data-ppb-design-preset="SIMPLIFIED"],
+  #bundle-builder-app[data-ppb-slot-orientation="vertical"] {
+    --bw-ppb-slot-list-gap: 16px;
+  }
 }
 
 #bundle-builder-app[data-ppb-template-type="PDP_MODAL"] .bw-slot-card--empty,

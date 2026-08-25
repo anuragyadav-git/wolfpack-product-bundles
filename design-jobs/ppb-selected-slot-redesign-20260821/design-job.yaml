@@ -3,11 +3,11 @@
   "job": {
     "id": "ppb-selected-slot-redesign-20260821",
     "title": "PPB Selected Slot Redesign",
-    "status": "active",
-    "stage": "HANDOFF_VALIDATION",
+    "status": "ready-for-handoff",
+    "stage": "IMPLEMENTATION_AWAITED",
     "revision": 4,
     "created_at": "2026-08-20T20:25:02Z",
-    "updated_at": "2026-08-24T15:27:15Z",
+    "updated_at": "2026-08-24T20:07:59Z",
     "owner": "wolfpack",
     "product": "Product Page Bundle",
     "repository": "/Users/adityaawasthi/Developer/wolfpack-product-bundles",
@@ -215,7 +215,7 @@
     "validation_status": "complete"
   },
   "handoff": {
-    "status": "draft",
+    "status": "approved",
     "package_path": "implementation-handoff.md",
     "implementation_owner": "Codex",
     "implementation_branch": "feature/26.05-UI-changes",
@@ -266,10 +266,10 @@
       "revision": 4
     },
     "handoff": {
-      "status": "not-started",
-      "approver": "",
-      "at": "",
-      "revision": null
+      "status": "approved",
+      "approver": "user",
+      "at": "2026-08-24T20:07:26Z",
+      "revision": 4
     },
     "implementation": {
       "status": "not-started",
@@ -289,12 +289,14 @@
     "current": {
       "acceptance-criteria.md": {
         "path": "acceptance-criteria.md",
-        "status": "complete",
+        "status": "approved",
         "revision": 4,
-        "sha256": "dca0bea42236c953bfc478c8f733589333b41baacaec5dadac4cfbc99cf26cdf",
-        "approved_by": "",
-        "approved_at": "",
-        "evidence": []
+        "sha256": "c0c95e4c74352ebb7093e49c1660f3a7c9d32f7f38f659a6c0828487e0f80eb7",
+        "approved_by": "user",
+        "approved_at": "2026-08-24T20:07:49Z",
+        "evidence": [
+          "approval-record.yaml"
+        ]
       },
       "accessibility-checklist.md": {
         "path": "accessibility-checklist.md",
@@ -309,19 +311,21 @@
         "path": "approval-record.yaml",
         "status": "complete",
         "revision": 4,
-        "sha256": "aaf2a86351f8a44bbbd26d66e9619b5987585075f2d333683dd7086c1d89a50d",
+        "sha256": "256803bfea04433f0847ac4e3b18fcc741252645deeb1a27377b33afd762fd46",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
       },
       "browser-test-plan.yaml": {
         "path": "browser-test-plan.yaml",
-        "status": "complete",
+        "status": "approved",
         "revision": 4,
-        "sha256": "f54209b6645a579c059d4aa023cc65ac3418caa9ad5aef2aad0931118ee86905",
-        "approved_by": "",
-        "approved_at": "",
-        "evidence": []
+        "sha256": "67f687c2306ffadbfd8c5e28a387d3bef9cd8693ab23b584fa6905b71341ddeb",
+        "approved_by": "user",
+        "approved_at": "2026-08-24T20:07:49Z",
+        "evidence": [
+          "approval-record.yaml"
+        ]
       },
       "browser-test-report.md": {
         "path": "browser-test-report.md",
@@ -343,12 +347,14 @@
       },
       "codex-task.md": {
         "path": "codex-task.md",
-        "status": "complete",
+        "status": "approved",
         "revision": 4,
-        "sha256": "2040e764a382733748cbd941ebfcfc137a3578d1c19313e6a72f8b94411f471d",
-        "approved_by": "",
-        "approved_at": "",
-        "evidence": []
+        "sha256": "b53bf2db7b8fb20069a5271491ae8afd6f27f50aa5fa5189700104486028255b",
+        "approved_by": "user",
+        "approved_at": "2026-08-24T20:07:49Z",
+        "evidence": [
+          "approval-record.yaml"
+        ]
       },
       "component-anatomy.md": {
         "path": "component-anatomy.md",
@@ -399,12 +405,14 @@
       },
       "implementation-handoff.md": {
         "path": "implementation-handoff.md",
-        "status": "complete",
+        "status": "approved",
         "revision": 4,
-        "sha256": "b5d806e29cb642de0941c556fb3e48844c927fc7ddfc8615f516388d55975b36",
-        "approved_by": "",
-        "approved_at": "",
-        "evidence": []
+        "sha256": "9a84fc9f380bf0798bf349f682d1cf8d6df8a46e00c4c359c19c130221d9bc4e",
+        "approved_by": "user",
+        "approved_at": "2026-08-24T20:07:49Z",
+        "evidence": [
+          "approval-record.yaml"
+        ]
       },
       "interaction-contract.md": {
         "path": "interaction-contract.md",
@@ -1191,6 +1199,19 @@
       "revision": 4,
       "reason": "Revision 4 implementation handoff, Codex task, acceptance criteria, and direct Chrome test plan are assembled.",
       "evidence": [
+        "implementation-handoff.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 44,
+      "at": "2026-08-24T20:07:59Z",
+      "from": "HANDOFF_VALIDATION",
+      "to": "IMPLEMENTATION_AWAITED",
+      "revision": 4,
+      "reason": "User approved the Revision 4 exact EB Vertical Slots handoff for implementation.",
+      "evidence": [
+        "approval-record.yaml",
         "implementation-handoff.md"
       ],
       "affected_artifacts": []
