@@ -3,7 +3,6 @@ import { lazy, useCallback, useRef, useEffect, useMemo, useReducer, useState, Su
 import { useAppBridge } from "@shopify/app-bridge-react";
 import { useTranslation } from "react-i18next";
 import { OptimisedImage } from "../../../components/OptimisedImage";
-import { ProxyHealthBanner } from "../../../components/ProxyHealthBanner";
 import { useDashboardState } from "../../../hooks/useDashboardState";
 import {
   buildDashboardCloneFormData,
@@ -40,6 +39,7 @@ import type { action, loader } from "./route";
 import { DashboardTopCards } from "./DashboardTopCards";
 import { DashboardStatusGrid } from "./DashboardStatusGrid";
 import { DashboardResourcesCard } from "./DashboardResourcesCard";
+import { DashboardDeferredProxyHealthBanner } from "./DashboardDeferredProxyHealthBanner";
 import { AppEmbedEnableModal } from "./AppEmbedEnableModal";
 import {
   checkAppEmbedActivation,
@@ -65,7 +65,6 @@ import {
   buildDashboardTableRows,
   getDashboardBundlesPerPageChoice,
 } from "./dashboard-table-model";
-import { DashboardLoadingWorkspace } from "./dashboard-route-readiness";
 import dashboardStyles from "./dashboard.module.css";
 
 const STATUS_TONE_MAP = { active: 'success', draft: 'info', unlisted: 'warning' } as const;
@@ -73,9 +72,9 @@ const EnablePreviewModal = lazy(() =>
   import("../../../components/EnablePreviewModal").then((module) => ({ default: module.EnablePreviewModal })),
 );
 type DashboardPageProps = {
-  banners: {
+  banners: Promise<{
     proxyHealthy: boolean;
-  };
+  }>;
 };
 
 export function DashboardPage({ banners }: DashboardPageProps) {
@@ -549,10 +548,6 @@ export function DashboardPage({ banners }: DashboardPageProps) {
     getBundleTypeDisplay,
   );
 
-  if (themeExtensionStatus.loading) {
-    return <DashboardLoadingWorkspace />;
-  }
-
   return (
     <>
       {appEmbedEnableFlow.open && (
@@ -625,10 +620,15 @@ export function DashboardPage({ banners }: DashboardPageProps) {
             error={themeExtensionStatus.error}
             themeEditorUrl={currentThemeEditorUrl}
             appEmbedEnabled={appEmbedEnabled}
+            appEmbedStatusLoading={currentAppEmbedEnabled === null}
             onOpenThemeEditor={handleOpenAppEmbedEnableModal}
             enableActionRef={appEmbedEnableActionRef}
           />
-          {!banners.proxyHealthy && <ProxyHealthBanner shop={shop} appUrl={appUrl} />}
+          <DashboardDeferredProxyHealthBanner
+            appUrl={appUrl}
+            banners={banners}
+            shop={shop}
+          />
 
           {/* Bundles panel */}
           <div className={dashboardStyles.bundlesQueryContainer}>

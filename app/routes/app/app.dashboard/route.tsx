@@ -1,6 +1,5 @@
 import { defer, json, type ActionFunctionArgs, type HeadersFunction, type LinksFunction, type LoaderFunctionArgs } from "@remix-run/node";
-import { Await, useLoaderData } from "@remix-run/react";
-import { Suspense, useMemo } from "react";
+import { useLoaderData } from "@remix-run/react";
 import { ServerTiming } from "../../../lib/server-timing.server";
 import { authenticate } from "../../../shopify.server";
 import db from "../../../db.server";
@@ -14,11 +13,6 @@ import { DashboardPage } from "./DashboardPage";
 import { ReduxProvider } from "../../../store/ReduxProvider";
 import { getDashboardInitialImagePreloads } from "./dashboard-media-state";
 import { queueDashboardBackgroundTask } from "./dashboard-background-tasks.server";
-import {
-  DashboardLoadingWorkspace,
-  waitForDashboardRouteReady,
-} from "./dashboard-route-readiness";
-import dashboardRouteLoadingStyles from "./dashboard-route-loading.css?url";
 import { buildStorefrontApiPath } from "../../../config/storefront-proxy-routes";
 
 /**
@@ -27,7 +21,6 @@ import { buildStorefrontApiPath } from "../../../config/storefront-proxy-routes"
  * The app embed card image is the measured embedded-app LCP candidate.
  */
 export const links: LinksFunction = () => [
-  { rel: "stylesheet", href: dashboardRouteLoadingStyles },
   ...getDashboardInitialImagePreloads().map((image) => ({
     rel: "preload",
     as: "image",
@@ -39,14 +32,19 @@ export const links: LinksFunction = () => [
   } as ReturnType<LinksFunction>[number])),
 ];
 
-export const headers: HeadersFunction = () => {
+export const headers: HeadersFunction = ({ loaderHeaders }) => {
+  const headers = new Headers(loaderHeaders);
+  headers.set("Timing-Allow-Origin", "https://admin.shopify.com");
   const imagePreloads = getDashboardInitialImagePreloads();
-  if (imagePreloads.length === 0) return new Headers();
-  return new Headers({
-    Link: imagePreloads
+  if (imagePreloads.length > 0) {
+    headers.set(
+      "Link",
+      imagePreloads
       .map((image) => `<${image.href}>; rel=preload; as=image; type=${image.type}; fetchpriority=high`)
       .join(", "),
-  });
+    );
+  }
+  return headers;
 };
 
 function queueProductHandleBackfill(
@@ -81,6 +79,17 @@ function queueProductHandleBackfill(
   })();
 }
 
+export const dashboardBundleListSelect = {
+  id: true,
+  publicNumber: true,
+  name: true,
+  status: true,
+  bundleType: true,
+  createdAt: true,
+  shopifyProductId: true,
+  shopifyProductHandle: true,
+} as const;
+
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   // Issue: admin-lcp-phase4-loaders-1.
   // Was: sequential awaits for bundles -> embed-check -> billing -> proxy-health -> shop-graphql.
@@ -94,11 +103,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       shopId: session.shop,
       status: { in: [BundleStatus.ACTIVE, BundleStatus.DRAFT, BundleStatus.UNLISTED] }
     },
-    select: {
-      id: true, publicNumber: true, name: true, status: true, bundleType: true, createdAt: true,
-      shopifyProductId: true, shopifyProductHandle: true,
-      pricing: { select: { enabled: true } },
-    },
+    select: dashboardBundleListSelect,
     orderBy: { createdAt: "desc" },
   }));
 
@@ -237,22 +242,10 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
 export default function Dashboard() {
   const { banners } = useLoaderData<typeof loader>();
-  const dashboardReady = useMemo(
-    () => waitForDashboardRouteReady(banners),
-    [banners],
-  );
 
   return (
-    <Suspense fallback={<DashboardLoadingWorkspace />}>
-      <Await resolve={dashboardReady}>
-        {(resolved) => (
-          <ReduxProvider>
-            <DashboardPage
-              banners={resolved.banners}
-            />
-          </ReduxProvider>
-        )}
-      </Await>
-    </Suspense>
+    <ReduxProvider>
+      <DashboardPage banners={banners} />
+    </ReduxProvider>
   );
 }
