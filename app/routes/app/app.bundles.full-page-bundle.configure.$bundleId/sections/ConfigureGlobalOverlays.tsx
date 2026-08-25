@@ -31,7 +31,6 @@ export function FpbGlobalOverlays({
     shopLocales,
     showDiscardModal,
     textOverridesLocale,
-    updateLocalizedTextOverride,
   } = flow;
 
   return (
@@ -60,7 +59,6 @@ export function FpbGlobalOverlays({
         fields={multiLanguageFields}
         valuesByLocale={activeMultiLanguageValues}
         onActiveLocaleChange={setTextOverridesLocale}
-        onChange={updateLocalizedTextOverride}
         onSave={saveStepSetupMultiLanguageValues}
         onClose={() => setIsMultiLanguageModalOpen(false)}
       />

@@ -10,6 +10,7 @@ export function FpbBundleCartSettings({
     markAsDirty,
     openMultiLanguageModal,
     setTextOverrides,
+    shopLocales,
     textOverrides,
   } = flow;
 
@@ -30,7 +31,8 @@ export function FpbBundleCartSettings({
             </h3>
             <s-button
               variant="secondary"
-              icon="language-translate"
+              icon="globe"
+              disabled={shopLocales.length === 0 || undefined}
               onClick={() =>
                 openMultiLanguageModal("Bundle Cart", [
                   {

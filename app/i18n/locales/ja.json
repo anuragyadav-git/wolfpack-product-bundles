@@ -330,6 +330,7 @@
   "common": {
     "actions": {
       "close": "閉じる",
+      "cancel": "キャンセル",
       "dismiss": "閉じる",
       "manage": "管理",
       "enable": "有効にする",

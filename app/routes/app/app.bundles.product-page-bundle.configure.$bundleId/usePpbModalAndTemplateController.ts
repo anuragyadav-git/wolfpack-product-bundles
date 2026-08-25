@@ -46,22 +46,6 @@ export function usePpbModalAndTemplateController({
       : hidePolarisModal(collectionsModalRef);
   }, [base.isCollectionsModalOpen]);
   useEffect(() => {
-    display.isProgressBarMultiLangModalOpen
-      ? showPolarisModal(display.progressBarMultiLangModalRef)
-      : hidePolarisModal(display.progressBarMultiLangModalRef);
-  }, [
-    display.isProgressBarMultiLangModalOpen,
-    display.progressBarMultiLangModalRef,
-  ]);
-  useEffect(() => {
-    display.isBundleQuantityMultiLangModalOpen
-      ? showPolarisModal(display.bundleQuantityMultiLangModalRef)
-      : hidePolarisModal(display.bundleQuantityMultiLangModalRef);
-  }, [
-    display.bundleQuantityMultiLangModalRef,
-    display.isBundleQuantityMultiLangModalOpen,
-  ]);
-  useEffect(() => {
     display.isDiscountVariablesModalOpen
       ? showPolarisModal(display.discountVariablesModalRef)
       : hidePolarisModal(display.discountVariablesModalRef);
@@ -73,12 +57,6 @@ export function usePpbModalAndTemplateController({
   useModalHideListener(
     collectionsModalRef,
     placement.handleCloseCollectionsModal
-  );
-  useModalHideListener(display.progressBarMultiLangModalRef, () =>
-    display.setIsProgressBarMultiLangModalOpen(false)
-  );
-  useModalHideListener(display.bundleQuantityMultiLangModalRef, () =>
-    display.setIsBundleQuantityMultiLangModalOpen(false)
   );
   useModalHideListener(display.discountVariablesModalRef, () =>
     display.setIsDiscountVariablesModalOpen(false)

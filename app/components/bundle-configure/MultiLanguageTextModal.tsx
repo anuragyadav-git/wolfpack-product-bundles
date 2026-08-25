@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { LocalAppModal } from "./LocalAppModal";
+import { normalizeTranslationValues } from "../../lib/bundle-configure-translations";
 
 interface ShopLocale {
   locale: string;
@@ -18,6 +18,7 @@ export interface MultiLanguageField {
 }
 
 interface MultiLanguageTextModalProps {
+  id?: string;
   open: boolean;
   title: string;
   layout?: "rich" | "compact";
@@ -27,55 +28,14 @@ interface MultiLanguageTextModalProps {
   fields: MultiLanguageField[];
   valuesByLocale: Record<string, Record<string, string>>;
   onActiveLocaleChange: (locale: string) => void;
-  onChange: (locale: string, key: string, value: string) => void;
-  onSave?: (valuesByLocale: Record<string, Record<string, string>>) => void;
+  onSave: (valuesByLocale: Record<string, Record<string, string>>) => void;
   onClose: () => void;
 }
 
-const DEFAULT_LOCALES: ShopLocale[] = [
-  { locale: "en", name: "English", primary: true },
-  { locale: "ar", name: "Arabic" },
-  { locale: "bg", name: "Bulgarian (BG)" },
-  { locale: "ca", name: "Catalan" },
-  { locale: "zh-CN", name: "Chinese (CN)" },
-  { locale: "zh-TW", name: "Chinese (TW)" },
-  { locale: "hr", name: "Croatian" },
-  { locale: "cs", name: "Czech" },
-  { locale: "da", name: "Danish" },
-  { locale: "nl", name: "Dutch" },
-  { locale: "et", name: "Estonian" },
-  { locale: "fi", name: "Finnish" },
-  { locale: "fr", name: "French" },
-  { locale: "ka", name: "Georgian" },
-  { locale: "de", name: "German" },
-  { locale: "el", name: "Greek" },
-  { locale: "he", name: "Hebrew" },
-  { locale: "hu", name: "Hungarian" },
-  { locale: "id", name: "Indonesian" },
-  { locale: "it", name: "Italian" },
-  { locale: "ja", name: "Japanese" },
-  { locale: "ko", name: "Korean" },
-  { locale: "lv", name: "Latvian" },
-  { locale: "lt", name: "Lithuanian" },
-  { locale: "nb", name: "Norwegian Bokmål" },
-  { locale: "pl", name: "Polish" },
-  { locale: "pt-BR", name: "Portuguese (BR)" },
-  { locale: "pt-PT", name: "Portuguese (PT)" },
-  { locale: "ro", name: "Romanian" },
-  { locale: "ru", name: "Russian" },
-  { locale: "sk", name: "Slovak (SK)" },
-  { locale: "sl", name: "Slovenian (SI)" },
-  { locale: "es", name: "Spanish" },
-  { locale: "sv", name: "Swedish" },
-  { locale: "th", name: "Thai" },
-  { locale: "tr", name: "Turkish" },
-  { locale: "vi", name: "Vietnamese" },
-  { locale: "no", name: "Norwegian" },
-];
-
 export function MultiLanguageTextModal({
+  id = "bundle-configure-translation-modal",
   open,
-  title: _title,
+  title,
   layout = "rich",
   saveLabel,
   locales,
@@ -83,30 +43,29 @@ export function MultiLanguageTextModal({
   fields,
   valuesByLocale,
   onActiveLocaleChange,
-  onChange,
   onSave,
   onClose,
 }: MultiLanguageTextModalProps) {
   const { t } = useTranslation();
+  const modalRef = useRef<any>(null);
+  const wasOpenRef = useRef(false);
   const [draftByLocale, setDraftByLocale] = useState<Record<string, Record<string, string>>>({});
 
-  const visibleLocales = useMemo(() => {
-    const merged = new Map<string, ShopLocale>();
-    DEFAULT_LOCALES.forEach((locale) => merged.set(locale.locale, locale));
-    locales.forEach((locale) => merged.set(locale.locale, locale));
-    return Array.from(merged.values());
-  }, [locales]);
-
-  const selectedLocale = visibleLocales.some((locale) => locale.locale === activeLocale)
+  const selectedLocale = locales.some((locale) => locale.locale === activeLocale)
     ? activeLocale
-    : visibleLocales[0].locale;
+    : locales.find((locale) => locale.primary)?.locale ?? locales[0]?.locale ?? "";
 
   useEffect(() => {
-    if (!open) return;
-    setDraftByLocale(valuesByLocale);
+    const modal = modalRef.current;
+    if (!modal) return;
+    if (open && !wasOpenRef.current) {
+      setDraftByLocale(valuesByLocale);
+      modal.showOverlay?.();
+    } else if (!open && wasOpenRef.current) {
+      modal.hideOverlay?.();
+    }
+    wasOpenRef.current = open;
   }, [open, valuesByLocale]);
-
-  if (!open) return null;
 
   const localeValues = draftByLocale[selectedLocale] ?? {};
 
@@ -121,18 +80,8 @@ export function MultiLanguageTextModal({
   };
 
   const saveAndClose = () => {
-    if (onSave) {
-      onSave(draftByLocale);
-    } else {
-      fields.forEach((field) => {
-        visibleLocales.forEach((locale) => {
-          const value = draftByLocale[locale.locale]?.[field.key];
-          if (value !== undefined) {
-            onChange(locale.locale, field.key, value);
-          }
-        });
-      });
-    }
+    const normalizedValues = normalizeTranslationValues(draftByLocale);
+    onSave(normalizedValues);
     onClose();
   };
 
@@ -144,14 +93,16 @@ export function MultiLanguageTextModal({
         <s-text-area
           key={`${field.key}-input`}
           label={field.label}
-          value={localeValues[field.key] ?? field.fallback}
+          value={localeValues[field.key] ?? ""}
+          placeholder={field.fallback}
           onInput={(event: Event) => updateDraft(field.key, (event.target as HTMLTextAreaElement).value)}
         />
       ) : (
         <s-text-field
           key={`${field.key}-input`}
           label={field.label}
-          value={localeValues[field.key] ?? field.fallback}
+          value={localeValues[field.key] ?? ""}
+          placeholder={field.fallback}
           autocomplete="off"
           onInput={(event: Event) => updateDraft(field.key, (event.target as HTMLInputElement).value)}
         />
@@ -179,7 +130,7 @@ export function MultiLanguageTextModal({
         value={selectedLocale}
         onChange={(event: Event) => onActiveLocaleChange((event.target as HTMLSelectElement).value)}
       >
-        {visibleLocales.map((locale) => (
+        {locales.map((locale) => (
           <s-option key={locale.locale} value={locale.locale}>
             {locale.name || locale.locale}
           </s-option>
@@ -204,7 +155,7 @@ export function MultiLanguageTextModal({
         value={selectedLocale}
         onChange={(event: Event) => onActiveLocaleChange((event.target as HTMLSelectElement).value)}
       >
-        {visibleLocales.map((locale) => (
+        {locales.map((locale) => (
           <s-option key={locale.locale} value={locale.locale}>
             {locale.name || locale.locale}
           </s-option>
@@ -224,16 +175,19 @@ export function MultiLanguageTextModal({
   );
 
   return (
-    <LocalAppModal
-      title={t("common.multiLanguage.title")}
-      onClose={onClose}
-      primaryAction={(
-        <s-button variant="primary" onClick={saveAndClose}>
-          {saveLabel ?? t("common.multiLanguage.saveAndClose")}
-        </s-button>
-      )}
+    <s-modal
+      id={id}
+      ref={modalRef}
+      heading={title || t("common.multiLanguage.title")}
+      onHide={onClose}
     >
       {layout === "compact" ? compactBody : richBody}
-    </LocalAppModal>
+      <s-button slot="primary-action" variant="primary" onClick={saveAndClose}>
+        {saveLabel ?? t("common.multiLanguage.saveAndClose")}
+      </s-button>
+      <s-button slot="secondary-actions" onClick={onClose}>
+        {t("common.actions.cancel")}
+      </s-button>
+    </s-modal>
   );
 }

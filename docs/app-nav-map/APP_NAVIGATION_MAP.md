@@ -5,7 +5,7 @@ title: Wolfpack Product Bundles App Navigation and UI Map
 type: navigation-map
 status: authoritative
 summary: Routes, screens, actions, modals, and storefront-preview flows for the embedded app.
-last_audited: 2026-08-24
+last_audited: 2026-08-25
 owners:
   - engineering
 domains:
@@ -30,7 +30,7 @@ keywords:
 > Any time a new page, modal, tab, sidebar section, or user flow is added or removed,
 > this document **must** be updated. See CLAUDE.md for the enforcement rule.
 
-**Last Updated:** 2026-08-23
+**Last Updated:** 2026-08-25
 **Environment mapped:** SIT (`wolfpack-product-bundles-sit`)
 **Test store:** `wolfpack-store-test-1.myshopify.com`
 
@@ -465,7 +465,7 @@ FPB Configure Page
     ├── Variables Modal (Discount Messaging variable reference)
     ├── Bundle Quantity Options Multi Language Modal (Box Label / Box Subtext)
     ├── Progress Bar Multi Language Modal (Tier Text / Tier Subtext)
-    └── Subscription Multi Language Modal
+    └── Subscription Multi Language Modal (shared staged Polaris workflow)
 ```
 
 FPB configure has no Shopify Page selector, Page slug editor, Page creation,
@@ -481,7 +481,7 @@ Responsive configure behavior:
 - Selecting a section closes the mobile disclosure without changing save, dirty-state, or route adapter behavior.
 - The compact readiness trigger remains floating without covering editor actions. Opening it uses a labelled native modal dialog: a bounded floating checklist on desktop and a full-width, safe-area-aware bottom sheet on phones.
 - The readiness dialog supports Escape, safe backdrop dismissal, focus trapping, internal scrolling, and focus restoration without changing the existing readiness calculation or route adapter props.
-- App-owned discard and multi-language workflows share the same native dialog and phone bottom-sheet contract; Polaris-owned modal workflows retain their existing semantics.
+- Configure multi-language workflows share one staged Polaris `s-modal`; Apply updates route-owned draft state and Cancel/Escape/backdrop-close discard edits.
 
 ---
 
@@ -512,9 +512,10 @@ PPB Configure Page
 │   ├── Bundle product picker (Shopify resource picker)
 │   ├── Accordion step cards (DnD reorder)
 │   │   ├── Step name, min/max qty
+│   │   ├── Multi Language actions for step and category copy
 │   │   ├── Products / Collections pickers
 │   │   ├── Step conditions
-│   │   └── isFreeGift toggle + addon fields (label, title, icon, displayFree, unlockAfterCompletion)
+│   │   └── isFreeGift toggle + add-on fields and Multi Language actions for step, section, and footer copy
 │   └── [+ Add Step] button
 │
 ├── Discount & Pricing
@@ -588,6 +589,7 @@ PPB Configure Page
 │   ├── [Button] "Get Subscription Plans" → POST validateSellingPlanGroups
 │   ├── One common selling-plan group and merchant-selected plan subset
 │   ├── Default purchase option, one-time copy, plan copy, and translations
+│   ├── Shared staged Polaris translation modal for common and per-plan copy
 │   ├── Uses the global configure SaveBar; no section-specific save action
 │   └── No-common-plan warning when every selectable variant does not share a plan
 │

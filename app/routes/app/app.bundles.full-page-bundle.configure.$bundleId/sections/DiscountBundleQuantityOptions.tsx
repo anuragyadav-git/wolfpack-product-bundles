@@ -53,7 +53,7 @@ export function FpbBundleQuantityOptions({
             </s-stack>
             <s-button
               variant="secondary"
-              icon="language-translate"
+              icon="globe"
               disabled={
                 !pricingState.pricingDisplayOptions.bundleQuantityOptions
                   .enabled ||

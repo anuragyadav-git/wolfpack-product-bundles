@@ -3,6 +3,7 @@ import {
   fetchShopCurrencyCode,
   fetchShopLocales,
 } from "../../../app/lib/bundle-configure-loader.server";
+import { AppLogger } from "../../../app/lib/logger";
 
 jest.mock("../../../app/lib/logger", () => ({
   AppLogger: {
@@ -65,11 +66,56 @@ describe("fetchShopCurrencyCode", () => {
 });
 
 describe("fetchShopLocales", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("returns only published shop locales and preserves the primary locale", async () => {
+    const graphql = jest.fn().mockResolvedValue({
+      json: async () => ({
+        data: {
+          shopLocales: [
+            { locale: "en", name: "English", primary: true, published: true },
+            { locale: "fr", name: "French", primary: false, published: true },
+            { locale: "de", name: "German", primary: false, published: false },
+          ],
+        },
+      }),
+    });
+
+    await expect(fetchShopLocales({ graphql })).resolves.toEqual([
+      { locale: "en", name: "English", primary: true },
+      { locale: "fr", name: "French", primary: false },
+    ]);
+    expect(graphql).toHaveBeenCalledWith(expect.stringContaining("shopLocales"));
+  });
+
+  it("reports Shopify GraphQL errors instead of silently hiding missing access", async () => {
+    const graphql = jest.fn().mockResolvedValue({
+      json: async () => ({
+        data: null,
+        errors: [{ message: "Access denied for shopLocales field" }],
+      }),
+    });
+
+    await expect(fetchShopLocales({ graphql })).resolves.toEqual([]);
+    expect(AppLogger.warn).toHaveBeenCalledWith(
+      "Failed to fetch published shop locales",
+      expect.objectContaining({ operation: "fetch-shop-locales" }),
+      expect.any(Error),
+    );
+  });
+
   it("keeps localization optional when the shop lacks locale access", async () => {
     const graphql = jest.fn().mockRejectedValue(
       new Error("Access denied for shopLocales field"),
     );
 
     await expect(fetchShopLocales({ graphql })).resolves.toEqual([]);
+    expect(AppLogger.warn).toHaveBeenCalledWith(
+      "Failed to fetch published shop locales",
+      expect.objectContaining({ operation: "fetch-shop-locales" }),
+      expect.any(Error),
+    );
   });
 });

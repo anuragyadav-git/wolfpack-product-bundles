@@ -65,7 +65,7 @@ const GET_SHOP_CURRENCY = `
 
 const GET_SHOP_LOCALES = `
   query GetShopLocales {
-    shopLocales {
+    shopLocales(published: true) {
       locale
       name
       primary
@@ -123,11 +123,21 @@ export async function fetchShopLocales(
           published: boolean;
         }[];
       };
+      errors?: { message?: string }[];
     };
+    if (data.errors?.length) {
+      throw new Error(
+        data.errors.map((error) => error.message ?? "Unknown Shopify error").join("; "),
+      );
+    }
     return (data.data?.shopLocales ?? [])
       .filter((locale) => locale.published)
       .map(({ locale, name, primary }: any) => ({ locale, name, primary }));
-  } catch {
+  } catch (error) {
+    AppLogger.warn("Failed to fetch published shop locales", {
+      component: "bundle-config",
+      operation: "fetch-shop-locales",
+    }, error);
     return [];
   }
 }

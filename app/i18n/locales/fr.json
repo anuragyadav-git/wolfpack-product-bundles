@@ -330,6 +330,7 @@
   "common": {
     "actions": {
       "close": "Fermer",
+      "cancel": "Annuler",
       "dismiss": "Ignorer",
       "manage": "Gérer",
       "enable": "Activer",

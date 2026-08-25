@@ -47,7 +47,7 @@ export function FpbProgressBarOptions({
           </s-stack>
           <s-button
             variant="secondary"
-            icon="language-translate"
+            icon="globe"
             disabled={
               !pricingState.showDiscountProgressBar ||
               (pricingState.pricingDisplayOptions.progressBar.type ||

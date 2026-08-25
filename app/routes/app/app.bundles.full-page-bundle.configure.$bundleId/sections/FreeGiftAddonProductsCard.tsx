@@ -12,6 +12,7 @@ export function FpbAddonProductsCard({
     ADDONS_HELP_ARTICLE_URL,
     fullPageBundleStyles,
     openAddonSectionMultiLanguageModal,
+    shopLocales,
     updateAddonDraft,
   } = flow;
 
@@ -53,8 +54,12 @@ export function FpbAddonProductsCard({
           <div className={fullPageBundleStyles.addonsHeaderActions}>
             <s-button
               variant="secondary"
-              icon="language-translate"
-              disabled={!addonDraft.addonProductsEnabled || undefined}
+              icon="globe"
+              disabled={
+                !addonDraft.addonProductsEnabled ||
+                shopLocales.length === 0 ||
+                undefined
+              }
               onClick={openAddonSectionMultiLanguageModal}
             >
               Multi Language
