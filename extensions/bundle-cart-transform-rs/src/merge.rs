@@ -5,7 +5,9 @@ use crate::helpers::{decimal_to_f64, is_addon_line, is_free_gift_line, parse_jso
 use crate::pricing::{
     calculate_buy_x_get_y_discount_percentage, calculate_discount_percentage, rounded_percentage,
 };
-use crate::runtime_token::{token_components_match, verify_runtime_token};
+use crate::runtime_token::{
+    token_components_match, verify_ppb_bundle_token, verify_ppb_line_token, verify_runtime_token,
+};
 use crate::schema;
 use crate::types::{CartLineMessagingSettings, ComponentParent, PricingMethod};
 
@@ -28,6 +30,132 @@ fn has_fixed_price_display_only_marker(
             .map(|value| value.as_str() == "fixed_price_display_only")
             .unwrap_or(false)
     })
+}
+
+fn ppb_role(step_type: Option<&str>) -> &'static str {
+    match step_type {
+        Some("default") => "default",
+        Some("free_gift") => "free_gift",
+        Some(value) if value == "addon" || value.starts_with("addon:") => "addon",
+        _ => "component",
+    }
+}
+
+fn ppb_policy_revision_matches(value: Option<&str>, bundle_id: &str, revision: &str) -> bool {
+    let Some(value) = value else {
+        return false;
+    };
+    let is_safe_token = |token: &str| {
+        !token.is_empty()
+            && token
+                .bytes()
+                .all(|byte| byte.is_ascii_alphanumeric() || byte == b'-' || byte == b'_')
+    };
+    if !is_safe_token(bundle_id) || !is_safe_token(revision) {
+        return false;
+    }
+    let mut expected = String::with_capacity(bundle_id.len() + revision.len() + 5);
+    expected.push('"');
+    expected.push_str(bundle_id);
+    expected.push_str("\":\"");
+    expected.push_str(revision);
+    expected.push('"');
+    value.contains(&expected)
+}
+
+fn validate_ppb_v2_group(
+    lines: &[schema::run::input::cart::Lines],
+    line_indices: &[usize],
+    token: &str,
+    secret: &str,
+    policy_revisions: Option<&str>,
+) -> Option<(ComponentParent, String)> {
+    let bundle = verify_ppb_bundle_token(token, secret)?;
+    if !ppb_policy_revision_matches(policy_revisions, &bundle.bundle_id, &bundle.revision) {
+        return None;
+    }
+    let mut group_quantities = vec![0_i64; bundle.groups.len()];
+    for &idx in line_indices {
+        let line = &lines[idx];
+        if line
+            .runtime_token()
+            .and_then(|value| value.value())
+            .map(|value| value.as_str())
+            != Some(token)
+        {
+            return None;
+        }
+        let authorization = line
+            .line_authorization()
+            .and_then(|value| value.value())
+            .map(|value| value.as_str())?;
+        let line_token = verify_ppb_line_token(authorization, secret)?;
+        if line_token.shop != bundle.shop
+            || line_token.bundle_id != bundle.bundle_id
+            || line_token.revision != bundle.revision
+            || line_token.role
+                != ppb_role(
+                    line.step_type()
+                        .and_then(|value| value.value())
+                        .map(|value| value.as_str()),
+                )
+            || *line.quantity() as i64 <= 0
+            || *line.quantity() as i64 > line_token.max_quantity
+        {
+            return None;
+        }
+        let group_index = bundle
+            .groups
+            .iter()
+            .position(|group| group.id == line_token.group_id && group.role == line_token.role)?;
+        let group = &bundle.groups[group_index];
+        if line_token.max_quantity > group.max_quantity {
+            return None;
+        }
+        let quantity = *line.quantity() as i64;
+        let authorized_quantity: i64 = line_indices
+            .iter()
+            .filter_map(|&line_index| {
+                let candidate = lines[line_index]
+                    .line_authorization()
+                    .and_then(|value| value.value())?;
+                (candidate.as_str() == authorization)
+                    .then_some(*lines[line_index].quantity() as i64)
+            })
+            .sum();
+        if authorized_quantity > line_token.max_quantity {
+            return None;
+        }
+        group_quantities[group_index] += quantity;
+        let schema::run::input::cart::lines::Merchandise::ProductVariant(variant) =
+            line.merchandise()
+        else {
+            return None;
+        };
+        let variant_matches =
+            !line_token.variant_id.is_empty() && line_token.variant_id == variant.id().to_string();
+        let product_matches =
+            line_token.product_id.as_deref() == Some(variant.product().id().as_str());
+        if !variant_matches && !product_matches {
+            return None;
+        }
+    }
+    for (group_index, group) in bundle.groups.iter().enumerate() {
+        if group.role == "addon" {
+            continue;
+        }
+        let quantity = group_quantities[group_index];
+        if quantity < group.min_quantity || quantity > group.max_quantity {
+            return None;
+        }
+    }
+    Some((
+        ComponentParent {
+            id: bundle.parent_variant_id,
+            price_adjustment: Some(bundle.price_adjustment),
+        },
+        token.to_string(),
+    ))
 }
 
 /// Process all MERGE operations for one cart pass.
@@ -60,6 +188,7 @@ pub fn process_merge_operations(
     presentment_currency_rate: f64,
     processed_line_ids: &mut std::collections::HashSet<String>,
     cart_line_messaging: &CartLineMessagingSettings,
+    runtime_token_secret: Option<&str>,
 ) -> Vec<schema::CartOperation> {
     let mut operations: Vec<schema::CartOperation> = Vec::new();
 
@@ -94,11 +223,10 @@ pub fn process_merge_operations(
     // -------------------------------------------------------------------------
     // Step 2: Build one MERGE operation per bundle group.
     // -------------------------------------------------------------------------
-    let runtime_token_secret = input
-        .cart_transform()
-        .runtime_token_secret()
-        .map(|metafield| metafield.value().as_str())
-        .filter(|value| !value.trim().is_empty());
+    let ppb_policy_revisions = input
+        .shop()
+        .ppb_policy_revisions()
+        .map(|metafield| metafield.value().as_str());
 
     for (offer_group_id, line_indices) in &bundle_groups {
         if line_indices
@@ -147,26 +275,34 @@ pub fn process_merge_operations(
                     .map(|value| value.as_str())
                     .filter(|value| !value.trim().is_empty())
             })?;
-            let payload = verify_runtime_token(token, secret)?;
-            let actual_components: Vec<(String, i64)> = merge_line_indices
-                .iter()
-                .filter_map(|&idx| match lines[idx].merchandise() {
-                    schema::run::input::cart::lines::Merchandise::ProductVariant(v) => {
-                        Some((v.id().to_string(), *lines[idx].quantity() as i64))
-                    }
-                    _ => None,
-                })
-                .collect();
-            if !token_components_match(&payload, offer_group_id, &actual_components) {
-                return None;
+            if let Some(payload) = verify_runtime_token(token, secret) {
+                let actual_components: Vec<(String, i64)> = merge_line_indices
+                    .iter()
+                    .filter_map(|&idx| match lines[idx].merchandise() {
+                        schema::run::input::cart::lines::Merchandise::ProductVariant(v) => {
+                            Some((v.id().to_string(), *lines[idx].quantity() as i64))
+                        }
+                        _ => None,
+                    })
+                    .collect();
+                if !token_components_match(&payload, offer_group_id, &actual_components) {
+                    return None;
+                }
+                return Some((
+                    ComponentParent {
+                        id: payload.parent_variant_id,
+                        price_adjustment: Some(payload.price_adjustment),
+                    },
+                    token.to_string(),
+                ));
             }
-            Some((
-                ComponentParent {
-                    id: payload.parent_variant_id,
-                    price_adjustment: Some(payload.price_adjustment),
-                },
-                token.to_string(),
-            ))
+            validate_ppb_v2_group(
+                lines,
+                &merge_line_indices,
+                token,
+                secret,
+                ppb_policy_revisions,
+            )
         });
 
         let (parent, validated_runtime_token) = if let Some(parent) = runtime_parent.as_ref() {

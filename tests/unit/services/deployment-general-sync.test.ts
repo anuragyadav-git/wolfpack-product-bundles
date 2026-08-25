@@ -72,6 +72,7 @@ function makeDeps() {
     updateStepProductVariants: jest.fn().mockResolvedValue({}),
     getAdmin: jest.fn().mockResolvedValue(admin),
     ensureMetafieldDefinitions: jest.fn().mockResolvedValue(true),
+    syncPpbRuntime: jest.fn().mockResolvedValue(true),
     syncBundle: jest.fn().mockResolvedValue({ synced: true }),
     setupAddonDiscount: jest.fn().mockResolvedValue({ success: true }),
     setupSubscriptionDiscount: jest.fn().mockResolvedValue({ success: true }),
@@ -121,6 +122,7 @@ describe("deployment general sync", () => {
       failedBundles: 0,
       failedShops: 0,
       metafieldDefinitionShopsSynced: 2,
+      ppbRuntimeShopsSynced: 2,
       addonDiscountShopsSynced: 1,
       subscriptionDiscountShopsSynced: 1,
       variantRemediation: {
@@ -133,6 +135,7 @@ describe("deployment general sync", () => {
       },
     });
     expect(deps.ensureMetafieldDefinitions).toHaveBeenCalledTimes(2);
+    expect(deps.syncPpbRuntime).toHaveBeenCalledTimes(2);
     expect(deps.syncBundle).toHaveBeenCalledWith({
       admin: expect.objectContaining({ graphql: expect.any(Function) }),
       shopDomain: "alpha.myshopify.com",

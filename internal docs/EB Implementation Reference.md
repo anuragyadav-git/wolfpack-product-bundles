@@ -5,7 +5,7 @@ title: EB Implementation Reference
 type: reference
 status: authoritative
 summary: Records directly verified reference-app contracts used for Wolfpack bundle implementation and parity decisions.
-last_audited: 2026-08-21
+last_audited: 2026-08-25
 owners:
   - engineering
 domains:
@@ -1503,6 +1503,15 @@ Admin location: Settings → Controls → Product Page Layout section.
 ---
 
 ## Cart Integration
+
+### Outage-resilience evidence boundary
+
+The captured live EB flows load widget assets from Shopify-hosted extension/CDN
+URLs and call the shop's Storefront GraphQL endpoint directly for product/cart
+data, including `cartMetafieldsSet`; the PPB sequence below does not require an
+EB web-service request for those buyer operations. This is evidence for the
+same simple hosting boundary adopted by Wolfpack, not proof of EB's private
+signing implementation or an undocumented Shopify app-proxy response cache.
 
 ### FPB Cart Add Flow
 

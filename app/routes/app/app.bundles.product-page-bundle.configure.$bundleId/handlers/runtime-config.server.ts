@@ -421,6 +421,7 @@ export function buildSyncBundleConfiguration(
 ): Record<string, unknown> {
   const bundleDesignPresetId = bundle.bundleDesignPresetId ?? null;
   return {
+    shopId: bundle.shopId,
     bundleId: bundle.id,
     id: bundle.id,
     name: bundle.name,

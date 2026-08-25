@@ -106,9 +106,9 @@ dependencies = [
 
 [[package]]
 name = "convert_case"
-version = "0.10.0"
+version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "633458d4ef8c78b72454de2d54fd6ab2e60f9e02be22f3c6104cdc8a4e0fceb9"
+checksum = "affbf0190ed2caf063e3def54ff444b449371d55c58e513a95ab98eca50adb49"
 dependencies = [
  "unicode-segmentation",
 ]
@@ -334,9 +334,9 @@ dependencies = [
 
 [[package]]
 name = "shopify_function"
-version = "2.1.0"
+version = "2.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f339b9bbeb15522d5b8a3c05f18d8214167d7b0e77fffad4b021e3f4fda7b75b"
+checksum = "e857e31fd15c8639ac5e33768f5f6b2832495983e75021717f6ea4dbde2d892a"
 dependencies = [
  "ryu",
  "serde_json",
@@ -346,13 +346,13 @@ dependencies = [
 
 [[package]]
 name = "shopify_function_macro"
-version = "2.1.0"
+version = "2.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6e24dcb54991d3574047fc14e1f23b080398f69064ee428b144fa177ce078a36"
+checksum = "03908a59e327bf35fce1dfd8f8d1d814f87b4a583039645e06ac5392758a9e41"
 dependencies = [
  "bluejay-core",
  "bluejay-typegen-codegen",
- "convert_case 0.10.0",
+ "convert_case 0.11.0",
  "proc-macro2",
  "quote",
  "syn",

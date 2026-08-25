@@ -711,7 +711,9 @@ Dirty Admin form
 
 ```
 Storefront bundle add
-  └── signed runtime token + component lines → Shopify cart pipeline
+  ├── parent-product PPB → Shopify-hosted schema-v3 snapshot + direct Storefront API hydration
+  │   └── synchronized signed bundle/line tokens + component lines → Shopify cart pipeline
+  └── FPB and service-dependent embed surfaces → online signed runtime token + component lines
       └── Cart Transform MERGE applies verified bundle pricing
           ├── success → transformed parent line proceeds to cart / checkout
           └── timeout, resource limit, or execution failure

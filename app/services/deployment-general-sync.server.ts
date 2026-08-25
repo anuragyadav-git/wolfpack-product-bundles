@@ -17,6 +17,7 @@ export interface DeploymentGeneralSyncSummary {
   failedBundles: number;
   failedShops: number;
   metafieldDefinitionShopsSynced: number;
+  ppbRuntimeShopsSynced: number;
   addonDiscountShopsSynced: number;
   subscriptionDiscountShopsSynced: number;
   variantRemediation: {
@@ -75,6 +76,7 @@ export interface DeploymentGeneralSyncDependencies {
   prisma: GeneralSyncPrisma;
   getAdmin: (shopDomain: string) => Promise<unknown>;
   ensureMetafieldDefinitions: (admin: unknown) => Promise<unknown>;
+  syncPpbRuntime: (admin: unknown, shopDomain: string) => Promise<unknown>;
   syncBundle: (input: {
     admin: unknown;
     shopDomain: string;
@@ -162,6 +164,7 @@ function emptySummary(mode: "disabled" | "apply"): DeploymentGeneralSyncSummary 
     failedBundles: 0,
     failedShops: 0,
     metafieldDefinitionShopsSynced: 0,
+    ppbRuntimeShopsSynced: 0,
     addonDiscountShopsSynced: 0,
     subscriptionDiscountShopsSynced: 0,
     variantRemediation: {
@@ -363,8 +366,10 @@ export async function runDeploymentGeneralSync(
     try {
       const admin = await deps.getAdmin(shopDomain);
       await deps.ensureMetafieldDefinitions(admin);
+      await deps.syncPpbRuntime(admin, shopDomain);
       adminByShop.set(shopDomain, admin);
       summary.metafieldDefinitionShopsSynced += 1;
+      summary.ppbRuntimeShopsSynced += 1;
     } catch (error: any) {
       const message = errorMessage(error);
       failedShops.add(shopDomain);

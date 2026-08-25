@@ -2,6 +2,7 @@ import { syncBundleStorefrontNow } from "../../../app/services/bundles/storefron
 import db from "../../../app/db.server";
 import { CartTransformService } from "../../../app/services/cart-transform-service.server";
 import { updateBundleProductMetafields } from "../../../app/services/bundles/metafield-sync.server";
+import { syncPpbStorefrontRuntime } from "../../../app/services/ppb-storefront-runtime.server";
 
 jest.mock("../../../app/db.server", () => ({
   bundle: {
@@ -44,6 +45,10 @@ jest.mock("../../../app/services/theme-colors.server", () => ({
   syncThemeColors: jest.fn().mockResolvedValue(undefined),
 }));
 
+jest.mock("../../../app/services/ppb-storefront-runtime.server", () => ({
+  syncPpbStorefrontRuntime: jest.fn(),
+}));
+
 jest.mock("../../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/shared.server", () => ({
   buildFullPageBundleMetafieldConfig: jest.fn(),
 }));
@@ -58,6 +63,7 @@ jest.mock("../../../app/routes/app/app.bundles.product-page-bundle.configure.$bu
 const mockDb = db as any;
 const mockCompleteSetup = CartTransformService.completeSetup as jest.Mock;
 const mockUpdateBundleProductMetafields = updateBundleProductMetafields as jest.Mock;
+const mockSyncPpbStorefrontRuntime = syncPpbStorefrontRuntime as jest.Mock;
 
 describe("storefront sync runtime token contract", () => {
   beforeEach(() => {
@@ -80,6 +86,7 @@ describe("storefront sync runtime token contract", () => {
       cartTransformId: "gid://shopify/CartTransform/1",
     });
     mockUpdateBundleProductMetafields.mockResolvedValue(undefined);
+    mockSyncPpbStorefrontRuntime.mockResolvedValue(undefined);
   });
 
   it("does not write component_parents from direct storefront sync", async () => {
@@ -93,5 +100,9 @@ describe("storefront sync runtime token contract", () => {
 
     expect(mockUpdateBundleProductMetafields).toHaveBeenCalled();
     expect(mockUpdateBundleProductMetafields).toHaveBeenCalledTimes(1);
+    expect(mockSyncPpbStorefrontRuntime).toHaveBeenCalledWith(
+      expect.any(Object),
+      "test-shop.myshopify.com",
+    );
   });
 });

@@ -19,8 +19,11 @@ source_paths:
   - app/routes/api/api.cart-bundle-details.tsx
   - app/services/theme-colors.server.ts
   - app/lib/shop-brand-colors.ts
+  - app/assets/widgets/product-page/storefront-client.ts
+  - app/services/ppb-storefront-runtime.server.ts
 related_docs:
   - Architecture/Widget Architecture.md
+  - Architecture/Storefront Outage Resilience.md
 tags:
   - graphql
   - shop-brand
@@ -30,6 +33,24 @@ keywords:
 ---
 
 # Shopify Storefront API Notes
+
+## Parent-product PPB direct client
+
+Bundle sync ensures one public Storefront access token titled
+`Wolfpack PPB Storefront Runtime` and stores it with API version `2026-07` in
+shop `$app.ppb_storefront_runtime`. The parent-product PPB client sends that
+public token directly to `https://{shop}/api/2026-07/graphql.json`.
+
+Product nodes are requested in batches of 50. The first 250 variants arrive
+with each product; products with more variants continue through explicit cursor
+pagination. Queries use Shopify market context and return live availability,
+inventory, prices, compare-at prices, options, images, and weight. A GraphQL or
+transport failure has no Wolfpack fallback.
+
+The same direct client reads and merges cart `$app.bundle_details` with
+`cartMetafieldsSet`. Shopify's Storefront schema requires
+`[CartMetafieldsSetInput!]!` for this mutation. This mutation is attribution
+only; Shopify documents that it does not itself trigger Functions.
 
 ## Product descriptions
 
@@ -45,8 +66,9 @@ For product detail modals, query and preserve both fields:
 Settings -> Design reads `shop.brand.colors` through Shopify's native
 unauthenticated Storefront context. Signed app-proxy product, collection, and
 cart-metafield routes use the Storefront context returned by
-`authenticate.public.appProxy(request)`. Wolfpack does not create, persist, or
-send Storefront access tokens manually. `BrandColors.primary` and
+`authenticate.public.appProxy(request)`. That server-side context is separate
+from the intentionally public token synchronized for the parent-product PPB
+browser client. `BrandColors.primary` and
 `BrandColors.secondary` are
 ordered lists of `BrandColorGroup` values; Wolfpack selects only index `0` from
 each list and requires both its `background` and `foreground` values.

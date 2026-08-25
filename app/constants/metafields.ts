@@ -12,6 +12,7 @@ export const METAFIELD_KEYS = {
   COMPONENT_QUANTITIES: "component_quantities",
   COMPONENT_PRICING: "component_pricing",
   BUNDLE_UI_CONFIG: "bundle_ui_config",
+  PPB_POLICY_REVISIONS: "ppb_policy_revisions",
   ALL_BUNDLES: "all_bundles",
   BUNDLE_INDEX: "bundleIndex",
   BUNDLE_CONFIG: "bundleConfig",

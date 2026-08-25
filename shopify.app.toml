@@ -56,6 +56,24 @@ description = "URL of the app server for widget API calls"
   admin = "merchant_read_write"
   storefront = "public_read"
 
+[shop.metafields.app.ppb_storefront_runtime]
+type = "json"
+name = "PPB Storefront Runtime"
+description = "Shopify-hosted Product Page Bundle runtime settings and public Storefront API client configuration"
+
+  [shop.metafields.app.ppb_storefront_runtime.access]
+  admin = "merchant_read_write"
+  storefront = "public_read"
+
+[shop.metafields.app.ppb_storefront_css]
+type = "multi_line_text_field"
+name = "PPB Storefront CSS"
+description = "Last successfully synchronized Product Page Bundle design CSS"
+
+  [shop.metafields.app.ppb_storefront_css.access]
+  admin = "merchant_read_write"
+  storefront = "public_read"
+
 [shop.metafields.app.lastSync]
 type = "single_line_text_field"
 name = "Last Sync Timestamp"

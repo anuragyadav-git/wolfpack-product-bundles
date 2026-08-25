@@ -5,7 +5,7 @@ title: Widget Architecture
 type: architecture
 status: authoritative
 summary: FPB and PPB bootstrap, hydration, extension-asset, and widget runtime architecture.
-last_audited: 2026-08-24
+last_audited: 2026-08-25
 owners:
   - engineering
 domains:
@@ -21,6 +21,8 @@ source_paths:
   - app/storefront/page-builder-embed.ts
   - app/assets/bundle-modal-component.ts
   - app/assets/widgets/shared
+  - app/assets/widgets/shared/localized-bundle-config.ts
+  - app/assets/sdk/config-loader.ts
   - app/assets/widgets/shared/discount-tier-feedback.ts
   - app/assets/widgets/shared-css/discount-tier-feedback.css
   - app/assets/widgets/shared/drawer-layer-manager.ts
@@ -63,6 +65,20 @@ keywords:
 | Product-Page (PDP)     | `app/assets/bundle-widget-product-page.ts` | `extensions/bundle-builder/assets/bundle-widget-product-page-bundled.js` | `bundle-product-page.liquid`                        |
 
 Shared runtime modules live under `app/assets/widgets/shared/`. Controllers, method modules, and template modules import each shared primitive directly from its owning module. The removed `bundle-widget-components` compatibility barrel must not be recreated: direct ownership lets esbuild close every method over real lexical bindings and prevents browser-only free-global failures. TypeScript entry points under `app/storefront/` import the required runtime graph, and esbuild resolves, tree-shakes, minifies, and emits browser IIFEs. Storefronts never load raw ESM source files.
+
+FPB, PPB, and SDK config selection pass the selected public bundle through the
+shared locale projector before exposing step, category, add-on, pricing,
+widget, embed, and general text fields to their existing renderers. Locale
+matching is case-insensitive, prefers the exact Shopify locale, then its base
+language, and finally retains the base configured copy. The projector is
+immutable and does not change the FPB metafield-first, proxy-fallback load
+priority. Subscription copy is excluded because its dedicated storefront
+resolver already performs exact/base locale resolution and deep-merges plan
+copy. Pricing projection includes the localized global success message as well
+as per-rule messages, progress tiers, and bundle-quantity labels. The dedicated
+PPB Bundle Embed selector follows the same case-insensitive exact/base matching
+and ignores blank overrides so its title and subtitle retain configured base
+copy.
 
 Template behavior is resolved through plain config modules and method modules:
 
@@ -198,7 +214,11 @@ Product Page inventory normalization preserves `sourceVariantCount` after unavai
 
 - Theme Editor exposes one FPB body app embed: `bundle-app-embed` (`Wolfpack Bundle`). It is the activation/status surface and hydrates the canonical app-proxy marker. The retired `bundle-full-page` Page block is not part of the extension contract.
 - Embedded Admin status comes only from `shopify.app.extensions()` published-theme data. Server loaders do not parse `settings_data.json` or provide a status fallback. Theme Editor uses the documented `themes/current` `activateAppId` deep link.
-- Every product, collection, and cart-metafield Storefront request uses the signed `/apps/product-bundles` app proxy and Shopify's authenticated Storefront context. Widgets have no direct app-host or raw-shop fallback.
+- FPB and embed/page-builder product, collection, and cart-metafield requests use
+  the signed `/apps/product-bundles` app proxy. The parent-product PPB block is
+  the deliberate exception: it uses the synchronized public Storefront token
+  and calls the shop's Storefront API directly, so its buyer path remains
+  available without the Wolfpack web service.
 - Parent-product PPB rendering continues to use the `bundle-product-page` app
   block. Greenfield Bundle Embed rendering is separately owned by the global
   `bundle-app-embed` runtime: it resolves an eligible PPB, lazily loads PPB
@@ -314,32 +334,27 @@ If metafield cache is absent/malformed → `GET /apps/product-bundles/api/bundle
 
 ## PPB Load Strategy
 
-### Product-Page Block Stage — Marker Bootstrap
+### Product-Page Block Stage — Shopify-Hosted Snapshot
 
-The PPB app block writes only a compact pointer into `data-bundle-config`:
-
-```liquid
-data-bundle-config='{"v":2,"type":"product_page","bundleType":"product_page","id":"{{ bundle_id }}"}'
-```
-
-`bundle_ui_config` is still read to validate bundle-type context for container detection, but it is no longer serialized as a full bundle payload into the DOM.
+The PPB app block serializes only a complete schema-v3
+`$app.bundle_ui_config` into `data-bundle-config`. Compact v2 pointers are
+retired for this surface and are not fetched through the app proxy.
 
 Runtime behavior in `app/assets/widgets/product-page/methods/config-lifecycle-methods.js`:
 
-1. Parse `data-bundle-config` as a bootstrap marker only when `data-bundle-type="product_page"`.
-2. If marker is valid, fetch from:
-   - `GET /apps/product-bundles/api/bundle/{bundleId}.json`
-   - accept the `response.bundle` payload and hydrate `this.bundleData`.
-3. If marker is missing/invalid:
+1. Accept only a complete schema-v3 Product Page snapshot with signed v2
+   authorization.
+2. Read store controls, locale data, Storefront API version/token, and generated
+   Design CSS from Shopify-hosted shop metafields emitted by Liquid.
+3. Hydrate product and variant state directly from Shopify Storefront API;
+   category and collection membership is already materialized at sync time.
+4. If the snapshot is missing/invalid:
    - show theme editor preview when in editor mode and `bundleId` exists
    - otherwise hide the container on storefront
-4. Preserve transient retry for `503`/`504` only (3-second delay).
 
-### Migration intent (PPB)
-
-- Remove full-bundle payload writes into PPB HTML attributes.
-- Keep API as source of truth for runtime hydration.
-- Keep non-bundle and theme-editor behavior stable.
+There is no Wolfpack fallback for this surface. Storefront API failure fails
+closed rather than rendering stale catalog or price data. See
+[[Architecture/Storefront Outage Resilience]].
 
 ---
 

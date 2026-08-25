@@ -27,6 +27,7 @@ import {
   buildSettingsLanguageRuntime,
 } from "../../lib/settings-language-runtime";
 import { CartTransformService } from "../../services/cart-transform-service.server";
+import { syncPpbStorefrontRuntime } from "../../services/ppb-storefront-runtime.server";
 import { buildFpbStorefrontUrl } from "../../lib/fpb-storefront-url";
 import { navigateBackOrFallback } from "../../lib/navigation";
 import { ReduxProvider } from "../../store/ReduxProvider";
@@ -198,6 +199,15 @@ export async function action({ request }: ActionFunctionArgs) {
     });
 
     await prisma.$transaction(writes);
+    try {
+      await syncPpbStorefrontRuntime(admin, session.shop);
+    } catch (error: any) {
+      return json({
+        success: false,
+        intent,
+        message: `Settings saved, but PPB storefront runtime sync failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+      }, { status: 500 });
+    }
     return json({
       success: true,
       intent,
@@ -252,6 +262,15 @@ export async function action({ request }: ActionFunctionArgs) {
     });
 
     await prisma.$transaction(writes);
+    try {
+      await syncPpbStorefrontRuntime(admin, session.shop);
+    } catch (error: any) {
+      return json({
+        success: false,
+        intent,
+        message: `Settings saved, but PPB storefront runtime sync failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+      }, { status: 500 });
+    }
 
     return json({ success: true, intent, message: "Settings saved successfully", savedState: payload });
   }
@@ -310,6 +329,15 @@ export async function action({ request }: ActionFunctionArgs) {
         message: syncResult.error
           ? `Settings saved, but cart transform messaging sync failed: ${syncResult.error}`
           : "Settings saved, but cart transform messaging sync failed",
+      }, { status: 500 });
+    }
+    try {
+      await syncPpbStorefrontRuntime(admin, session.shop);
+    } catch (error: any) {
+      return json({
+        success: false,
+        intent,
+        message: `Settings saved, but PPB storefront runtime sync failed: ${error instanceof Error ? error.message : "Unknown error"}`,
       }, { status: 500 });
     }
   }

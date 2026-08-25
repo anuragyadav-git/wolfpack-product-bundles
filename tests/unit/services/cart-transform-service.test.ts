@@ -328,10 +328,21 @@ describe('CartTransformService', () => {
             userErrors: []
           }
         }))
-        // 4. syncRuntimeTokenSecret
+        // 4. read current combined runtime configuration
+        .mockResolvedValueOnce(createMockGraphQLResponse({
+          node: {
+            runtimeConfiguration: {
+              value: JSON.stringify({
+                runtimeTokenSecret: 'old-secret',
+                bundleCartLineMessaging: { isEnabled: false }
+              })
+            }
+          }
+        }))
+        // 5. syncRuntimeTokenSecret
         .mockResolvedValueOnce(createMockGraphQLResponse({
           metafieldsSet: {
-            metafields: [{ key: 'runtime_token_secret', namespace: 'app', value: 'secret' }],
+            metafields: [{ key: 'runtime_configuration', namespace: 'app', value: '{}' }],
             userErrors: []
           }
         }));
@@ -343,6 +354,13 @@ describe('CartTransformService', () => {
 
       expect(result.success).toBe(true);
       expect(result.cartTransformId).toBe('gid://shopify/CartTransform/1');
+      const runtimeConfiguration = JSON.parse(
+        mockShopifyAdmin.graphql.mock.calls[4][1].variables.metafields[0].value
+      );
+      expect(runtimeConfiguration).toEqual({
+        runtimeTokenSecret: expect.any(String),
+        bundleCartLineMessaging: { isEnabled: false }
+      });
     });
 
     it('should handle setup failures', async () => {
@@ -384,7 +402,7 @@ describe('CartTransformService', () => {
   describe('syncCartLineMessagingSettings', () => {
     const shopDomain = 'test-shop.myshopify.com';
 
-    it('writes cart-line messaging settings and runtime token secret to the cart transform owner metafields', async () => {
+    it('writes cart-line messaging settings and runtime token secret in one cart transform configuration metafield', async () => {
       mockShopifyAdmin.graphql
         // 1. getRustFunctionId
         .mockResolvedValueOnce(rustFunctionsMock())
@@ -404,7 +422,7 @@ describe('CartTransformService', () => {
         .mockResolvedValueOnce(createMockGraphQLResponse({
           metafieldsSet: {
             metafields: [{
-              key: 'bundle_cart_line_messaging',
+              key: 'runtime_configuration',
               namespace: 'app',
               value: '{}'
             }],
@@ -436,19 +454,17 @@ describe('CartTransformService', () => {
         {
           ownerId: 'gid://shopify/CartTransform/existing',
           namespace: '$app',
-          key: 'bundle_cart_line_messaging',
+          key: 'runtime_configuration',
           type: 'json',
-          value: JSON.stringify(settings)
-        },
-        {
-          ownerId: 'gid://shopify/CartTransform/existing',
-          namespace: '$app',
-          key: 'runtime_token_secret',
-          type: 'single_line_text_field',
           value: expect.any(String)
         }
       ]);
-      expect(metafieldsCall[1].variables.metafields[1].value).toHaveLength(64);
+      const runtimeConfiguration = JSON.parse(metafieldsCall[1].variables.metafields[0].value);
+      expect(runtimeConfiguration).toEqual({
+        runtimeTokenSecret: expect.any(String),
+        bundleCartLineMessaging: settings
+      });
+      expect(runtimeConfiguration.runtimeTokenSecret).toHaveLength(64);
     });
 
     it('returns a failed result when metafield sync reports user errors', async () => {

@@ -52,6 +52,7 @@ export interface PriceAdjustment {
  * Bundle UI configuration for widget
  */
 export interface BundleUiConfig {
+  schemaVersion?: 3;
   id: string;
   bundleId: string;
   name: string;
@@ -97,6 +98,19 @@ export interface BundleUiConfig {
   textOverridesByLocale?: Record<string, Partial<BundleTextOverrides>> | null;
   /** When true, loads the headless SDK instead of the pre-built widget (product-page bundles only). */
   sdkMode?: boolean;
+  runtimeAuthorization?: {
+    version: 2;
+    revision: string;
+    bundleToken: string;
+    lines: Array<{
+      variantId: string;
+      productId?: string;
+      role: "component" | "default" | "free_gift" | "addon";
+      maxQuantity: number;
+      maxDiscountPercentage: number;
+      token: string;
+    }>;
+  };
 }
 
 export interface BundleUiStep {
@@ -150,6 +164,8 @@ export interface BundleUiPricing {
   enabled: boolean;
   method: string;
   rules: BundleUiPricingRule[];
+  messages?: Record<string, unknown>;
+  displayOptions?: Record<string, unknown> | null;
 }
 
 export interface BundleUiPricingRule {

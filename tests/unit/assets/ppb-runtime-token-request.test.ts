@@ -4,41 +4,62 @@ export {};
 const { ProductPageCartMethods } =
   require("../../../app/assets/widgets/product-page/methods/cart-methods.js");
 
-describe("PPB runtime-token request", () => {
-  it("uses POST through the signed storefront app proxy", async () => {
-    const originalFetch = (global as any).fetch;
-    const fetchMock = jest.fn(async () => ({
-      ok: true,
-      json: async () => ({ token: "runtime-token" }),
-    }));
-    (global as any).fetch = fetchMock;
-
-    try {
-      await ProductPageCartMethods.requestCartTransformRuntimeToken.call(
-        {
-          selectedBundle: { id: "bundle-1" },
-          parseRuntimeAddonDiscount:
-            ProductPageCartMethods.parseRuntimeAddonDiscount,
+describe("PPB Shopify-hosted runtime authorization", () => {
+  it("attaches synchronized bundle and line tokens without a network request", () => {
+    const cartItems: Array<{ id: string; _wpbProductId: string; _wpbAuthorizationGroup: string; quantity: number; properties: Record<string, string> }> = [{
+      id: "gid://shopify/ProductVariant/101",
+      _wpbProductId: "gid://shopify/Product/1",
+      _wpbAuthorizationGroup: "step-1",
+      quantity: 1,
+      properties: {},
+    }];
+    const context = {
+      selectedBundle: {
+        runtimeAuthorization: {
+          version: 2,
+          bundleToken: "bundle-token",
+          groups: [{ id: "step-1", role: "component", minQuantity: 1, maxQuantity: 2 }],
+          lines: [{
+            groupId: "step-1",
+            variantId: "gid://shopify/ProductVariant/101",
+            role: "component",
+            maxQuantity: 2,
+            maxDiscountPercentage: 0,
+            token: "line-token",
+          }],
         },
-        [{
-          id: "gid://shopify/ProductVariant/101",
-          _wpbProductId: "gid://shopify/Product/1",
-          quantity: 1,
-          properties: {},
-        }],
-        { offerGroupId: "MIX-bundle-1_ABC", bundleType: "product_page" },
-      );
-    } finally {
-      (global as any).fetch = originalFetch;
-    }
+      },
+      parseRuntimeAddonDiscount: ProductPageCartMethods.parseRuntimeAddonDiscount,
+    };
 
-    expect(fetchMock).toHaveBeenCalledWith(
-      "/apps/product-bundles/api/cart-transform-runtime-token",
-      expect.objectContaining({
-        method: "POST",
-        credentials: "same-origin",
-        headers: { "Content-Type": "application/json" },
-      }),
-    );
+    expect(ProductPageCartMethods.applyPpbStaticAuthorization.call(context, cartItems))
+      .toBe("bundle-token");
+    expect(cartItems[0].properties._wolfpack_line_auth).toBe("line-token");
+  });
+
+  it("rejects quantities above the synchronized line bound", () => {
+    expect(() => ProductPageCartMethods.applyPpbStaticAuthorization.call({
+      selectedBundle: {
+        runtimeAuthorization: {
+          version: 2,
+          bundleToken: "bundle-token",
+          groups: [{ id: "step-1", role: "component", minQuantity: 1, maxQuantity: 1 }],
+          lines: [{
+            groupId: "step-1",
+            productId: "gid://shopify/Product/1",
+            role: "component",
+            maxQuantity: 1,
+            token: "line-token",
+          }],
+        },
+      },
+      parseRuntimeAddonDiscount: ProductPageCartMethods.parseRuntimeAddonDiscount,
+    }, [{
+      id: "101",
+      _wpbProductId: "gid://shopify/Product/1",
+      _wpbAuthorizationGroup: "step-1",
+      quantity: 2,
+      properties: {},
+    }])).toThrow(/not authorized/);
   });
 });

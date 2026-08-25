@@ -5,6 +5,7 @@ const findUnique = jest.fn();
 const upsert = jest.fn();
 const findMany = jest.fn();
 const transaction = jest.fn(async (writes: Promise<unknown>[]) => Promise.all(writes));
+const syncPpbStorefrontRuntime = jest.fn();
 
 jest.mock("../../../app/shopify.server", () => ({ authenticate: { admin: requireAdminSession } }));
 jest.mock("../../../app/db.server", () => ({
@@ -17,6 +18,7 @@ jest.mock("../../../app/db.server", () => ({
 jest.mock("../../../app/services/cart-transform-service.server", () => ({
   CartTransformService: { syncCartLineMessagingSettings: jest.fn() },
 }));
+jest.mock("../../../app/services/ppb-storefront-runtime.server", () => ({ syncPpbStorefrontRuntime }));
 
 import { action } from "../../../app/routes/app/app.settings";
 
@@ -26,6 +28,7 @@ describe("Settings Language action", () => {
     findUnique.mockResolvedValue({ generalSettings: { settingsPage: { language: { legacy: true }, design: {} } } });
     findMany.mockResolvedValue([]);
     upsert.mockResolvedValue({});
+    syncPpbStorefrontRuntime.mockResolvedValue({});
     const form = new FormData();
     form.set("intent", "saveSettingsLanguage");
     form.set("payload", JSON.stringify({ languageMode: "SINGLE", localeFieldValues: { en: {} } }));
@@ -38,6 +41,7 @@ describe("Settings Language action", () => {
 
     expect(response.status).toBe(200);
     expect(transaction).toHaveBeenCalledTimes(1);
+    expect(syncPpbStorefrontRuntime).toHaveBeenCalledWith({}, "shop.test");
     expect(upsert).toHaveBeenCalledTimes(2);
     for (const [write] of upsert.mock.calls) {
       expect(write.update.generalSettings.settingsLanguage).toMatchObject({

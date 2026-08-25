@@ -8,7 +8,7 @@ import { METAFIELD_NAMESPACE, METAFIELD_KEYS } from "../../../../constants/metaf
 import { AppLogger } from "../../../../lib/logger";
 
 /**
- * Ensures variant-level bundle metafield definitions exist in Shopify
+ * Ensures bundle variant and shop-level metafield definitions exist in Shopify
  * (Shopify Standard - Approach 1: Hybrid)
  *
  * Creates 5 metafield definitions for ProductVariant owner type with access controls:
@@ -118,10 +118,22 @@ export async function ensureVariantBundleMetafieldDefinitions(admin: any): Promi
         admin: "MERCHANT_READ_WRITE",
         storefront: "PUBLIC_READ"  // Required for cart transform to add pricing attributes
       }
+    },
+    {
+      name: "PPB Policy Revisions",
+      namespace: METAFIELD_NAMESPACE,
+      key: METAFIELD_KEYS.PPB_POLICY_REVISIONS,
+      description: "Current PPB policy revision per bundle for Shopify Function authorization",
+      type: "json",
+      ownerType: "SHOP",
+      access: {
+        admin: "MERCHANT_READ_WRITE",
+        storefront: "NONE"
+      }
     }
   ];
 
-  AppLogger.info("[METAFIELD_DEF] Creating variant-level metafield definitions", {
+  AppLogger.info("[METAFIELD_DEF] Creating bundle metafield definitions", {
     component: "definitions.server",
   }, { count: definitions.length });
 
@@ -156,7 +168,7 @@ export async function ensureVariantBundleMetafieldDefinitions(admin: any): Promi
     }
   }
 
-  AppLogger.info("[METAFIELD_DEF] Finished ensuring variant metafield definitions", {
+  AppLogger.info("[METAFIELD_DEF] Finished ensuring bundle metafield definitions", {
     component: "definitions.server",
   });
   return true;

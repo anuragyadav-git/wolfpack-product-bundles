@@ -28,6 +28,7 @@ function makeAdmin() {
     graphql: jest.fn().mockResolvedValue({
       json: jest.fn().mockResolvedValue({
         data: {
+          shop: { id: "gid://shopify/Shop/1", policy: null },
           metafieldsSet: {
             metafields: [
               {
@@ -45,6 +46,7 @@ function makeAdmin() {
 
 function makeBundleConfig(bundleType: BundleType, overrides: Record<string, unknown> = {}) {
   return {
+    shopId: "test-shop.myshopify.com",
     id: "bundle-1",
     bundleId: "bundle-1",
     name: "Test Bundle",
@@ -273,7 +275,7 @@ describe("updateBundleProductMetafields", () => {
 
     await updateBundleProductMetafields(admin, "gid://shopify/Product/999", makeBundleConfig(BundleType.FULL_PAGE));
 
-    const metafields = admin.graphql.mock.calls[1][1].variables.metafields;
+    const metafields = getMetafieldsSetPayload(admin);
     const parsed = JSON.parse(metafields.find((f: any) => f.key === "bundle_ui_config").value);
 
     expect(parsed.steps[0].bannerImageUrl).toBeNull();
@@ -288,7 +290,7 @@ describe("updateBundleProductMetafields", () => {
       makeBundleConfig(BundleType.FULL_PAGE),
     );
 
-    const metafields = admin.graphql.mock.calls[1][1].variables.metafields;
+    const metafields = getMetafieldsSetPayload(admin);
     const bundleUiConfigField = metafields.find((field: any) => field.key === "bundle_ui_config");
     const parsed = JSON.parse(bundleUiConfigField.value);
 
@@ -305,7 +307,7 @@ describe("updateBundleProductMetafields", () => {
       makeBundleConfig(BundleType.PRODUCT_PAGE),
     );
 
-    const metafields = admin.graphql.mock.calls[1][1].variables.metafields;
+    const metafields = getMetafieldsSetPayload(admin);
     const bundleUiConfigField = metafields.find((field: any) => field.key === "bundle_ui_config");
     const parsed = JSON.parse(bundleUiConfigField.value);
 
@@ -377,7 +379,7 @@ describe("updateBundleProductMetafields", () => {
     const metafields = getMetafieldsSetPayload(admin);
     const parsed = JSON.parse(metafields.find((f: any) => f.key === "bundle_ui_config").value);
 
-    expect(parsed.steps[0].products).toEqual([]);
+    expect(parsed.steps[0].products).toEqual([{ id: "gid://shopify/Product/9427287703811" }]);
     expect(parsed.steps[0].collections).toEqual([]);
     expect(parsed.steps[0].categories).toEqual([
       {
@@ -495,7 +497,7 @@ describe("updateBundleProductMetafields", () => {
       }),
     );
 
-    const metafields = admin.graphql.mock.calls[1][1].variables.metafields;
+    const metafields = getMetafieldsSetPayload(admin);
     const parsed = JSON.parse(metafields.find((f: any) => f.key === "bundle_ui_config").value);
 
     expect(parsed).toEqual(expect.objectContaining(directContracts));
@@ -558,7 +560,7 @@ describe("updateBundleProductMetafields", () => {
       makeBundleConfig(BundleType.FULL_PAGE, { personalizationData }),
     );
 
-    const metafields = admin.graphql.mock.calls[1][1].variables.metafields;
+    const metafields = getMetafieldsSetPayload(admin);
     const parsed = JSON.parse(metafields.find((f: any) => f.key === "bundle_ui_config").value);
 
     expect(parsed.personalizationData).toEqual(personalizationData);
@@ -733,4 +735,87 @@ describe("updateBundleProductMetafields", () => {
       expect(uiConfig).not.toHaveProperty("subscription");
     },
   );
+
+  it("writes localized pricing and PPB add-on copy into bundle_ui_config", async () => {
+    const admin = makeAdmin();
+    const config = makeBundleConfig(BundleType.PRODUCT_PAGE, {
+      steps: [{
+        id: "step-1",
+        name: "Extras",
+        position: 0,
+        minQuantity: 0,
+        maxQuantity: 1,
+        StepProduct: [{
+          productId: "gid://shopify/Product/123",
+          variants: [{ id: "gid://shopify/ProductVariant/222", price: "12.00" }],
+        }],
+        collections: [],
+        isFreeGift: true,
+        addonAddText: "Add extra",
+        addonReplaceText: "Replace extra",
+        multiLangData: { fr: { addonAddText: "Ajouter" } },
+      }],
+      pricing: {
+        enabled: true,
+        method: "percentage_off",
+        rules: [],
+        messages: { ruleMessages: { "addons-step-1": { discountText: "Add more" } } },
+        ruleMessagesByLocale: {
+          fr: { "addons-step-1": { discountText: "Ajoutez-en plus" } },
+        },
+        displayOptions: {
+          bundleQuantityOptions: {
+            optionsByLocaleByRuleId: { fr: { "rule-1": { label: "Deux" } } },
+          },
+        },
+      },
+    });
+
+    await updateBundleProductMetafields(admin, "gid://shopify/Product/999", config);
+
+    const metafields = getMetafieldsSetPayload(admin);
+    const uiConfig = JSON.parse(
+      metafields.find((field: any) => field.key === "bundle_ui_config").value,
+    );
+    expect(uiConfig.steps[0]).toEqual(expect.objectContaining({
+      addonAddText: "Add extra",
+      addonReplaceText: "Replace extra",
+      multiLangData: { fr: { addonAddText: "Ajouter" } },
+    }));
+    expect(uiConfig.pricing.messages.ruleMessagesByLocale).toEqual({
+      fr: { "addons-step-1": { discountText: "Ajoutez-en plus" } },
+    });
+    expect(uiConfig.pricing.displayOptions.bundleQuantityOptions.optionsByLocaleByRuleId)
+      .toEqual({ fr: { "rule-1": { label: "Deux" } } });
+  });
+
+  it("writes the schema-v3 snapshot and current shop policy revision atomically", async () => {
+    const admin: any = {
+      graphql: jest.fn(async (query: string, _options?: any) => ({
+        json: async () => {
+          if (query.includes("PpbPolicyRevisions")) {
+            return { data: { shop: {
+              id: "gid://shopify/Shop/1",
+              policy: { value: '{"bundle-1":"old"}' },
+            } } };
+          }
+          return { data: { metafieldsSet: { metafields: [], userErrors: [] } } };
+        },
+      })),
+    };
+
+    await updateBundleProductMetafields(
+      admin,
+      "gid://shopify/Product/999",
+      makeBundleConfig(BundleType.PRODUCT_PAGE),
+    );
+
+    const write = admin.graphql.mock.calls.find((call: any[]) => call[0].includes("SetBundleVariantMetafields"));
+    const metafields = write?.[1]?.variables?.metafields ?? [];
+    const snapshot = JSON.parse(metafields.find((field: any) => field.key === "bundle_ui_config").value);
+    const revisionMap = JSON.parse(metafields.find((field: any) => field.key === "ppb_policy_revisions").value);
+
+    expect(snapshot).toMatchObject({ schemaVersion: 3, runtimeAuthorization: { version: 2 } });
+    expect(revisionMap["bundle-1"]).toBe(snapshot.runtimeAuthorization.revision);
+  });
 });

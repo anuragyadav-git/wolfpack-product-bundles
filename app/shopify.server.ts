@@ -15,6 +15,7 @@ import { activateUtmPixel } from "./services/pixel-activation.server";
 import { AppLogger } from "./lib/logger";
 import { ensureShopIdentity, recordBusinessEvent } from "./services/app-events.server";
 import { normalizeSavedCustomUtmParameters } from "./lib/analytics/attribution-controls";
+import { syncPpbStorefrontRuntime } from "./services/ppb-storefront-runtime.server";
 
 const sessionStorage = new PrismaSessionStorage(prisma);
 
@@ -106,6 +107,12 @@ const shopify = shopifyApp({
         await syncThemeColors(session.shop);
       } catch (error: any) {
         AppLogger.error("Failed to sync theme colors", { shop: session.shop }, error);
+      }
+
+      try {
+        await syncPpbStorefrontRuntime(setupAdmin, session.shop);
+      } catch (error: any) {
+        AppLogger.error("Failed to sync Shopify-hosted PPB runtime", { shop: session.shop }, error);
       }
 
       // Auto-activate UTM pixel on install/re-auth so bundle revenue tracking is on

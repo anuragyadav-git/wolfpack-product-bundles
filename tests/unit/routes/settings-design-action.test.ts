@@ -3,6 +3,7 @@ const findUnique = jest.fn();
 const findMany = jest.fn();
 const upsert = jest.fn();
 const transaction = jest.fn();
+const syncPpbStorefrontRuntime = jest.fn();
 
 jest.mock("../../../app/shopify.server", () => ({ authenticate: { admin: requireAdminSession } }));
 jest.mock("../../../app/db.server", () => ({
@@ -15,6 +16,7 @@ jest.mock("../../../app/db.server", () => ({
 jest.mock("../../../app/services/cart-transform-service.server", () => ({
   CartTransformService: { syncCartLineMessagingSettings: jest.fn() },
 }));
+jest.mock("../../../app/services/ppb-storefront-runtime.server", () => ({ syncPpbStorefrontRuntime }));
 
 // Route imports must follow the module mocks so the action receives the isolated test doubles.
 // eslint-disable-next-line import/first
@@ -45,6 +47,7 @@ describe("Settings Design action", () => {
     ]);
     upsert.mockResolvedValue({});
     transaction.mockImplementation(async (operations) => Promise.all(operations));
+    syncPpbStorefrontRuntime.mockResolvedValue({});
   });
 
   it("returns 400 for malformed JSON without touching persistence", async () => {
@@ -69,6 +72,7 @@ describe("Settings Design action", () => {
     }));
     expect(upsert).toHaveBeenCalledTimes(2);
     expect(transaction).toHaveBeenCalledTimes(1);
+    expect(syncPpbStorefrontRuntime).toHaveBeenCalledWith({}, "shop.test");
     expect(body).toEqual(expect.objectContaining({
       success: true,
       intent: "saveSettingsDesign",

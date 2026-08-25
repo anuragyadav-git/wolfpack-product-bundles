@@ -11,6 +11,7 @@ import {
   buildSyncBundleConfiguration,
 } from "../../routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/runtime-config.server";
 import { ensureBundleParentProduct } from "./bundle-parent-product.server";
+import { syncPpbStorefrontRuntime } from "../ppb-storefront-runtime.server";
 
 export type StorefrontSyncReason = "save" | "retry" | "sync_bundle" | "preview";
 
@@ -78,6 +79,7 @@ async function syncProductPageBundleFromDb(
 
   stats.productState = true;
 
+  await syncPpbStorefrontRuntime(admin, shopDomain);
   const bundleConfig = buildSyncBundleConfiguration(bundle, bundle.shopifyProductId);
   await updateBundleProductMetafields(admin, bundle.shopifyProductId, bundleConfig);
   stats.productMetafields = true;

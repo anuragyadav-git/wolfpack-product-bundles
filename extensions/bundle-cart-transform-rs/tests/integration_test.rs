@@ -4,6 +4,7 @@ mod tests {
         cart_transform_run, runtime_token::sign_runtime_token_for_test, schema,
     };
     use serde_json::Value;
+
     use shopify_function::run_function_with_input;
     use std::collections::{BTreeMap, HashMap};
 
@@ -138,12 +139,30 @@ mod tests {
 
     fn with_runtime_tokens(input: &str) -> String {
         let mut root: Value = serde_json::from_str(input).expect("test input should be valid JSON");
-        if root
+        let existing_runtime_secret = root
             .get("cartTransform")
             .and_then(|cart_transform| cart_transform.get("runtimeTokenSecret"))
-            .is_some()
-        {
-            return input.to_string();
+            .and_then(|metafield| metafield.get("value"))
+            .and_then(|value| value.as_str())
+            .map(str::to_string);
+        let existing_messaging = root
+            .get("cartTransform")
+            .and_then(|cart_transform| cart_transform.get("bundleCartLineMessaging"))
+            .and_then(|metafield| metafield.get("value"))
+            .and_then(|value| value.as_str())
+            .and_then(|value| serde_json::from_str::<Value>(value).ok());
+
+        if let Some(runtime_secret) = existing_runtime_secret {
+            let mut configuration = serde_json::json!({
+                "runtimeTokenSecret": runtime_secret,
+            });
+            if let Some(messaging) = existing_messaging {
+                configuration["bundleCartLineMessaging"] = messaging;
+            }
+            root["cartTransform"] = serde_json::json!({
+                "runtimeConfiguration": { "value": configuration.to_string() },
+            });
+            return root.to_string();
         }
 
         let Some(lines) = root
@@ -220,8 +239,15 @@ mod tests {
         }
 
         let runtime_secret = test_runtime_secret();
-        root["cartTransform"]["runtimeTokenSecret"] =
-            serde_json::json!({ "value": runtime_secret });
+        let mut configuration = serde_json::json!({
+            "runtimeTokenSecret": runtime_secret,
+        });
+        if let Some(messaging) = existing_messaging {
+            configuration["bundleCartLineMessaging"] = messaging;
+        }
+        root["cartTransform"] = serde_json::json!({
+            "runtimeConfiguration": { "value": configuration.to_string() },
+        });
         root.to_string()
     }
 
@@ -275,7 +301,7 @@ mod tests {
 
         format!(
             r#"{{
-            "presentmentCurrencyRate": "1.0",
+            "shop":{{"ppbPolicyRevisions":{{"value":"{{\"bundle-1\":\"rev-1\"}}"}}}},"presentmentCurrencyRate": "1.0",
             {cart_transform_fragment}
             "cart": {{
                 "lines": [
@@ -325,7 +351,7 @@ mod tests {
 
     #[test]
     fn test_empty_cart_no_operations() {
-        let input = r#"{"presentmentCurrencyRate":"1.0","cartTransform":{"bundleCartLineMessaging":null},"cart":{"lines":[]}}"#;
+        let input = r#"{"shop":{"ppbPolicyRevisions":{"value":"{\"bundle-1\":\"rev-1\"}"}},"presentmentCurrencyRate":"1.0","cartTransform":{"bundleCartLineMessaging":null},"cart":{"lines":[]}}"#;
         let output: schema::FunctionRunResult = run_cart_transform(input);
         assert!(output.operations.is_empty());
     }
@@ -333,7 +359,7 @@ mod tests {
     #[test]
     fn test_non_bundle_line_ignored() {
         let input = r#"{
-            "presentmentCurrencyRate": "1.0",
+            "shop":{"ppbPolicyRevisions":{"value":"{\"bundle-1\":\"rev-1\"}"}},"presentmentCurrencyRate": "1.0",
             "cartTransform": { "bundleCartLineMessaging": null },
             "cart": {
                 "lines": [{
@@ -364,7 +390,7 @@ mod tests {
         let runtime_token = sign_runtime_token_for_test(&runtime_merge_payload(), &runtime_secret);
         let input = format!(
             r#"{{
-            "presentmentCurrencyRate": "1.0",
+            "shop":{{"ppbPolicyRevisions":{{"value":"{{\"bundle-1\":\"rev-1\"}}"}}}},"presentmentCurrencyRate": "1.0",
             "cartTransform": {{
                 "bundleCartLineMessaging": null,
                 "runtimeTokenSecret": {{ "value": "{runtime_secret}" }}
@@ -452,7 +478,7 @@ mod tests {
         );
         let input = format!(
             r#"{{
-            "presentmentCurrencyRate": "1.0",
+            "shop":{{"ppbPolicyRevisions":{{"value":"{{\"bundle-1\":\"rev-1\"}}"}}}},"presentmentCurrencyRate": "1.0",
             "cartTransform": {{
                 "bundleCartLineMessaging": null,
                 "runtimeTokenSecret": {{ "value": "{runtime_secret}" }}
@@ -487,6 +513,144 @@ mod tests {
     }
 
     #[test]
+    fn test_ppb_v2_shopify_hosted_authorization_merges_current_policy() {
+        let runtime_secret = test_runtime_secret();
+        let bundle_token = sign_runtime_token_for_test(&serde_json::json!({
+            "version": 2, "kind": "bundle", "shop": "test-shop.myshopify.com",
+            "bundleId": "bundle-1", "revision": "rev-1",
+            "groups": [{ "id": "step-1", "role": "component", "minQuantity": 1, "maxQuantity": 2 }],
+            "parentVariantId": "gid://shopify/ProductVariant/999",
+            "priceAdjustment": { "method": "percentage_off", "value": 20 }
+        }).to_string(), &runtime_secret);
+        let line_token = sign_runtime_token_for_test(
+            &serde_json::json!({
+                "version": 2, "kind": "line", "shop": "test-shop.myshopify.com",
+                "bundleId": "bundle-1", "revision": "rev-1",
+                "groupId": "step-1",
+                "productId": "gid://shopify/Product/1", "role": "component",
+                "maxQuantity": 2, "maxDiscountPercentage": 0
+            })
+            .to_string(),
+            &runtime_secret,
+        );
+        let input = serde_json::json!({
+            "shop":{"ppbPolicyRevisions":{"value":"{\"bundle-1\":\"rev-1\"}"}},"presentmentCurrencyRate": "1.0",
+            "cartTransform": { "runtimeConfiguration": { "value": serde_json::json!({
+                "runtimeTokenSecret": runtime_secret
+            }).to_string() } },
+            "cart": { "lines": [{
+                "id": "line1", "quantity": 1,
+                "wolfpackProductBundleOfferId": { "value": "MIX-bundle-1_ABC_1" },
+                "wolfpackProductBundleName": { "value": "Runtime Bundle" },
+                "runtimeToken": { "value": bundle_token },
+                "lineAuthorization": { "value": line_token },
+                "stepType": null, "bundleDisplayProperties": null, "sellingPlanAllocation": null,
+                "merchandise": {
+                    "__typename": "ProductVariant", "id": "gid://shopify/ProductVariant/101",
+                    "product": { "id": "gid://shopify/Product/1", "ppbComponentPolicies": { "value": "{\"bundle-1\":\"rev-1\"}" } },
+                    "component_reference": null, "component_quantities": null,
+                    "price_adjustment": null, "component_pricing": null
+                },
+                "cost": { "amountPerQuantity": { "amount": "30.00" } }
+            }] }
+        });
+        let output = run_function_with_input(cart_transform_run, &input.to_string()).unwrap();
+        assert_eq!(output.operations.len(), 1);
+        assert_eq!(merge_discount_percentage(&output).as_deref(), Some("20.0"));
+    }
+
+    #[test]
+    fn test_ppb_v2_rejects_stale_component_policy_revision() {
+        let runtime_secret = test_runtime_secret();
+        let bundle_token = sign_runtime_token_for_test(&serde_json::json!({
+            "version": 2, "kind": "bundle", "shop": "test-shop.myshopify.com",
+            "bundleId": "bundle-1", "revision": "old-revision",
+            "groups": [{ "id": "step-1", "role": "component", "minQuantity": 1, "maxQuantity": 2 }],
+            "parentVariantId": "gid://shopify/ProductVariant/999",
+            "priceAdjustment": { "method": "percentage_off", "value": 20 }
+        }).to_string(), &runtime_secret);
+        let line_token = sign_runtime_token_for_test(
+            &serde_json::json!({
+                "version": 2, "kind": "line", "shop": "test-shop.myshopify.com",
+                "bundleId": "bundle-1", "revision": "old-revision",
+                "groupId": "step-1",
+                "productId": "gid://shopify/Product/1", "role": "component",
+                "maxQuantity": 2, "maxDiscountPercentage": 0
+            })
+            .to_string(),
+            &runtime_secret,
+        );
+        let input = serde_json::json!({
+            "shop":{"ppbPolicyRevisions":{"value":"{\"bundle-1\":\"rev-1\"}"}},"presentmentCurrencyRate": "1.0",
+            "cartTransform": { "bundleCartLineMessaging": null, "runtimeTokenSecret": { "value": runtime_secret } },
+            "cart": { "lines": [{
+                "id": "line1", "quantity": 1,
+                "wolfpackProductBundleOfferId": { "value": "MIX-bundle-1_ABC_1" },
+                "wolfpackProductBundleName": { "value": "Runtime Bundle" },
+                "runtimeToken": { "value": bundle_token },
+                "lineAuthorization": { "value": line_token },
+                "stepType": null, "bundleDisplayProperties": null, "sellingPlanAllocation": null,
+                "merchandise": {
+                    "__typename": "ProductVariant", "id": "gid://shopify/ProductVariant/101",
+                    "product": { "id": "gid://shopify/Product/1", "ppbComponentPolicies": { "value": "{\"bundle-1\":\"current-revision\"}" } },
+                    "component_reference": null, "component_quantities": null,
+                    "price_adjustment": null, "component_pricing": null
+                },
+                "cost": { "amountPerQuantity": { "amount": "30.00" } }
+            }] }
+        });
+        let output = run_function_with_input(cart_transform_run, &input.to_string()).unwrap();
+        assert!(output.operations.is_empty());
+    }
+
+    #[test]
+    fn test_ppb_v2_rejects_split_lines_that_exceed_signed_quantity() {
+        let runtime_secret = test_runtime_secret();
+        let bundle_token = sign_runtime_token_for_test(&serde_json::json!({
+            "version": 2, "kind": "bundle", "shop": "test-shop.myshopify.com",
+            "bundleId": "bundle-1", "revision": "rev-1",
+            "groups": [{ "id": "step-1", "role": "component", "minQuantity": 1, "maxQuantity": 1 }],
+            "parentVariantId": "gid://shopify/ProductVariant/999",
+            "priceAdjustment": { "method": "percentage_off", "value": 20 }
+        }).to_string(), &runtime_secret);
+        let line_token = sign_runtime_token_for_test(
+            &serde_json::json!({
+                "version": 2, "kind": "line", "shop": "test-shop.myshopify.com",
+                "bundleId": "bundle-1", "revision": "rev-1",
+                "groupId": "step-1",
+                "productId": "gid://shopify/Product/1", "role": "component",
+                "maxQuantity": 1, "maxDiscountPercentage": 0
+            })
+            .to_string(),
+            &runtime_secret,
+        );
+        let line = |id: &str| {
+            serde_json::json!({
+                "id": id, "quantity": 1,
+                "wolfpackProductBundleOfferId": { "value": "MIX-bundle-1_ABC_1" },
+                "wolfpackProductBundleName": { "value": "Runtime Bundle" },
+                "runtimeToken": { "value": bundle_token },
+                "lineAuthorization": { "value": line_token },
+                "stepType": null, "bundleDisplayProperties": null, "sellingPlanAllocation": null,
+                "merchandise": {
+                    "__typename": "ProductVariant", "id": "gid://shopify/ProductVariant/101",
+                    "product": { "id": "gid://shopify/Product/1", "ppbComponentPolicies": { "value": "{\"bundle-1\":\"rev-1\"}" } },
+                    "component_reference": null, "component_quantities": null,
+                    "price_adjustment": null, "component_pricing": null
+                },
+                "cost": { "amountPerQuantity": { "amount": "30.00" } }
+            })
+        };
+        let input = serde_json::json!({
+            "shop":{"ppbPolicyRevisions":{"value":"{\"bundle-1\":\"rev-1\"}"}},"presentmentCurrencyRate": "1.0",
+            "cartTransform": { "bundleCartLineMessaging": null, "runtimeTokenSecret": { "value": runtime_secret } },
+            "cart": { "lines": [line("line1"), line("line2")] }
+        });
+        let output = run_function_with_input(cart_transform_run, &input.to_string()).unwrap();
+        assert!(output.operations.is_empty());
+    }
+
+    #[test]
     fn test_merge_basic_percentage_off() {
         let cp = serde_json::json!([{
             "id": "gid://shopify/ProductVariant/999",
@@ -498,7 +662,7 @@ mod tests {
 
         let input = format!(
             r#"{{
-            "presentmentCurrencyRate": "1.0",
+            "shop":{{"ppbPolicyRevisions":{{"value":"{{\"bundle-1\":\"rev-1\"}}"}}}},"presentmentCurrencyRate": "1.0",
             "cartTransform": {{ "bundleCartLineMessaging": null }},
             "cart": {{
                 "lines": [
@@ -581,7 +745,7 @@ mod tests {
 
         let input = format!(
             r#"{{
-            "presentmentCurrencyRate": "1.0",
+            "shop":{{"ppbPolicyRevisions":{{"value":"{{\"bundle-1\":\"rev-1\"}}"}}}},"presentmentCurrencyRate": "1.0",
             "cartTransform": {{ "bundleCartLineMessaging": null }},
             "cart": {{
                 "lines": [
@@ -648,7 +812,7 @@ mod tests {
 
         let input = format!(
             r#"{{
-            "presentmentCurrencyRate": "1.0",
+            "shop":{{"ppbPolicyRevisions":{{"value":"{{\"bundle-1\":\"rev-1\"}}"}}}},"presentmentCurrencyRate": "1.0",
             "cartTransform": {{ "bundleCartLineMessaging": null }},
             "cart": {{
                 "lines": [
@@ -731,7 +895,7 @@ mod tests {
 
         let input = format!(
             r#"{{
-            "presentmentCurrencyRate": "1.0",
+            "shop":{{"ppbPolicyRevisions":{{"value":"{{\"bundle-1\":\"rev-1\"}}"}}}},"presentmentCurrencyRate": "1.0",
             "cartTransform": {{ "bundleCartLineMessaging": null }},
             "cart": {{
                 "lines": [
@@ -867,7 +1031,7 @@ mod tests {
 
         let input = format!(
             r#"{{
-            "presentmentCurrencyRate": "1.0",
+            "shop":{{"ppbPolicyRevisions":{{"value":"{{\"bundle-1\":\"rev-1\"}}"}}}},"presentmentCurrencyRate": "1.0",
             "cartTransform": {{ "bundleCartLineMessaging": null }},
             "cart": {{
                 "lines": [
@@ -961,7 +1125,7 @@ mod tests {
 
         let input = format!(
             r#"{{
-            "presentmentCurrencyRate": "1.0",
+            "shop":{{"ppbPolicyRevisions":{{"value":"{{\"bundle-1\":\"rev-1\"}}"}}}},"presentmentCurrencyRate": "1.0",
             "cartTransform": {{ "bundleCartLineMessaging": null }},
             "cart": {{
                 "lines": [
@@ -1113,7 +1277,7 @@ mod tests {
 
         let input = format!(
             r#"{{
-            "presentmentCurrencyRate": "1.0",
+            "shop":{{"ppbPolicyRevisions":{{"value":"{{\"bundle-1\":\"rev-1\"}}"}}}},"presentmentCurrencyRate": "1.0",
             "cartTransform": {{ "bundleCartLineMessaging": null }},
             "cart": {{
                 "lines": [
@@ -1290,7 +1454,7 @@ mod tests {
 
         let input = format!(
             r#"{{
-            "presentmentCurrencyRate": "1.0",
+            "shop":{{"ppbPolicyRevisions":{{"value":"{{\"bundle-1\":\"rev-1\"}}"}}}},"presentmentCurrencyRate": "1.0",
             "cartTransform": {{ "bundleCartLineMessaging": null }},
             "cart": {{
                 "lines": [
@@ -1366,7 +1530,7 @@ mod tests {
 
         let input = format!(
             r#"{{
-            "presentmentCurrencyRate": "1.0",
+            "shop":{{"ppbPolicyRevisions":{{"value":"{{\"bundle-1\":\"rev-1\"}}"}}}},"presentmentCurrencyRate": "1.0",
             "cartTransform": {{ "bundleCartLineMessaging": null }},
             "cart": {{
                 "lines": [
@@ -1454,7 +1618,7 @@ mod tests {
 
         let input = format!(
             r#"{{
-            "presentmentCurrencyRate": "1.0",
+            "shop":{{"ppbPolicyRevisions":{{"value":"{{\"bundle-1\":\"rev-1\"}}"}}}},"presentmentCurrencyRate": "1.0",
             "cartTransform": {{ "bundleCartLineMessaging": null }},
             "cart": {{
                 "lines": [
@@ -1579,7 +1743,7 @@ mod tests {
 
         let input = format!(
             r#"{{
-            "presentmentCurrencyRate": "1.0",
+            "shop":{{"ppbPolicyRevisions":{{"value":"{{\"bundle-1\":\"rev-1\"}}"}}}},"presentmentCurrencyRate": "1.0",
             "cartTransform": {{ "bundleCartLineMessaging": null }},
             "cart": {{
                 "lines": [
@@ -1673,7 +1837,7 @@ mod tests {
 
         let input = format!(
             r#"{{
-            "presentmentCurrencyRate": "1.0",
+            "shop":{{"ppbPolicyRevisions":{{"value":"{{\"bundle-1\":\"rev-1\"}}"}}}},"presentmentCurrencyRate": "1.0",
             "cartTransform": {{ "bundleCartLineMessaging": null }},
             "cart": {{
                 "lines": [{{
@@ -1727,7 +1891,7 @@ mod tests {
 
         let input = format!(
             r#"{{
-            "presentmentCurrencyRate": "1.0",
+            "shop":{{"ppbPolicyRevisions":{{"value":"{{\"bundle-1\":\"rev-1\"}}"}}}},"presentmentCurrencyRate": "1.0",
             "cartTransform": {{ "bundleCartLineMessaging": null }},
             "cart": {{
                 "lines": [{{
@@ -1767,7 +1931,7 @@ mod tests {
 
         let input = format!(
             r#"{{
-            "presentmentCurrencyRate": "1.0",
+            "shop":{{"ppbPolicyRevisions":{{"value":"{{\"bundle-1\":\"rev-1\"}}"}}}},"presentmentCurrencyRate": "1.0",
             "cartTransform": {{ "bundleCartLineMessaging": null }},
             "cart": {{
                 "lines": [{{
@@ -1816,7 +1980,7 @@ mod tests {
 
         let input = format!(
             r#"{{
-            "presentmentCurrencyRate": "1.0",
+            "shop":{{"ppbPolicyRevisions":{{"value":"{{\"bundle-1\":\"rev-1\"}}"}}}},"presentmentCurrencyRate": "1.0",
             "cartTransform": {{ "bundleCartLineMessaging": null }},
             "cart": {{
                 "lines": [{{
@@ -1858,7 +2022,7 @@ mod tests {
 
         let input = format!(
             r#"{{
-            "presentmentCurrencyRate": "1.0",
+            "shop":{{"ppbPolicyRevisions":{{"value":"{{\"bundle-1\":\"rev-1\"}}"}}}},"presentmentCurrencyRate": "1.0",
             "cartTransform": {{ "bundleCartLineMessaging": null }},
             "cart": {{
                 "lines": [{{
