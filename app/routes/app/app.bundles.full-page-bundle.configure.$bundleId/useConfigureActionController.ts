@@ -111,7 +111,7 @@ export function useConfigureActionController(flow: ConfigureBundleFlowDraft) {
       preparedPreview?.shareablePreviewUrl ||
       buildFpbStorefrontUrl(flow.shop, publicNumber);
 
-    const executePreviewBundle = (): "opened" => {
+    const executePreviewBundle = (): string | false => {
       if (flow.bundle.bundleType === "full_page") {
         if (
           !navigatePendingDashboardPreview(
@@ -133,7 +133,7 @@ export function useConfigureActionController(flow: ConfigureBundleFlowDraft) {
         flow.shopify.toast.show("Bundle preview opened in new tab", {
           isError: false,
         });
-        return "opened";
+        return shareablePreviewUrl;
       }
       let productUrl = null;
       const productHandle =
@@ -190,11 +190,11 @@ export function useConfigureActionController(flow: ConfigureBundleFlowDraft) {
           { isError: true, duration: 5000 },
         );
       }
-      return "opened";
+      return productUrl || false;
     };
-    executePreviewBundle();
+    const previewUrl = executePreviewBundle();
     finishPreviewBundleLoading();
-    return true;
+    return previewUrl;
   }, [finishPreviewBundleLoading, flow]);
   const handleSectionChange = useCallback(
     (section: string) => {
@@ -310,10 +310,15 @@ export function useConfigureActionController(flow: ConfigureBundleFlowDraft) {
     },
     [flow],
   );
-  const handleTemplatePreview = useCallback(async () => {
-    const previewStarted = await handlePreviewBundle();
-    if (previewStarted) {
-      window.setTimeout(flow.closeSelectTemplateModal, 500);
+  const handleTemplatePreview = useCallback(async (
+    onPreviewOpened?: (previewUrl: string) => void,
+  ) => {
+    const previewUrl = await handlePreviewBundle();
+    if (previewUrl) {
+      window.setTimeout(() => {
+        flow.closeSelectTemplateModal();
+        onPreviewOpened?.(previewUrl);
+      }, 500);
     }
   }, [flow, handlePreviewBundle]);
   const handleAddNewStep = useCallback(() => {

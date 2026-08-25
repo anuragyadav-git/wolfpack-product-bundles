@@ -111,7 +111,7 @@ export function DashboardStatusGrid({
     setHydrated(true);
   }, []);
 
-  if (dismissed) return null;
+  if (dismissed && !appEmbedStatusLoading) return null;
 
   const {
     core: coreResources,
@@ -144,9 +144,9 @@ export function DashboardStatusGrid({
     <s-banner
       tone={appEmbedStatusLoading ? "info" : setupComplete ? "success" : "warning"}
       heading={title}
-      dismissible={true}
+      dismissible={!appEmbedStatusLoading}
       hidden={false}
-      onDismiss={hydrated ? dismiss : undefined}
+      onDismiss={!appEmbedStatusLoading && hydrated ? dismiss : undefined}
     >
       <s-box minBlockSize="28px">
         {appEmbedStatusLoading ? (

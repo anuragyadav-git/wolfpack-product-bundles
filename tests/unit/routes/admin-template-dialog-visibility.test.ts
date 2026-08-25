@@ -10,9 +10,12 @@ jest.mock("../../../app/lib/theme-editor-navigation.client", () => ({
   openThemeEditorInNewTab: jest.fn(),
 }));
 
-jest.mock("../../../app/components/bundle-configure/TemplateReadyScreen", () => ({
-  TemplateReadyScreen: () => null,
-}));
+jest.mock(
+  "../../../app/components/bundle-configure/TemplateReadyScreen",
+  () => ({
+    TemplateReadyScreen: () => null,
+  })
+);
 
 const ppbContext = {
   closeSelectTemplateDialog: jest.fn(),
@@ -20,8 +23,8 @@ const ppbContext = {
   handleTemplatePreview: jest.fn(),
   isPreviewBundleLoading: false,
   isSelectTemplateModalOpen: false,
-  pendingDesignPresetId: null,
-  pendingDesignTemplate: null,
+  pendingDesignPresetId: null as string | null,
+  pendingDesignTemplate: null as string | null,
   productPageBundleStyles: {},
   productPageTemplateOptions: [],
   selectTemplateDialogRef: { current: null },
@@ -36,31 +39,31 @@ const ppbContext = {
 
 jest.mock(
   "../../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/PpbConfigureContext",
-  () => ({ usePpbConfigureContext: () => ppbContext }),
+  () => ({ usePpbConfigureContext: () => ppbContext })
 );
 
-describe("Admin projected template dialog visibility", () => {
-  it("renders the PPB customization workflow only while app state is open", async () => {
+describe("Admin template save loading", () => {
+  it("keeps the PPB template step visible with a loading Next action while saving", async () => {
     const { PpbSelectTemplateDialog } = await import(
       "../../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/PpbSelectTemplateDialog"
     );
 
-    ppbContext.isSelectTemplateModalOpen = false;
-    let view = renderToStaticMarkup(
-      React.createElement(PpbSelectTemplateDialog),
-    );
-    expect(view).not.toContain("<ui-modal");
-    expect(view).not.toContain("Customize your bundle");
-
     ppbContext.isSelectTemplateModalOpen = true;
-    view = renderToStaticMarkup(
-      React.createElement(PpbSelectTemplateDialog),
+    ppbContext.pendingDesignPresetId = "SIMPLIFIED";
+    ppbContext.pendingDesignTemplate = "PDP_MODAL";
+    ppbContext.templateFetcher.state = "submitting";
+
+    const view = renderToStaticMarkup(
+      React.createElement(PpbSelectTemplateDialog)
     );
-    expect(view).toContain("<ui-modal");
+
+    expect(view).toMatch(/<s-button[^>]*loading="true"[^>]*>Next<\/s-button>/);
     expect(view).toContain("Customize your bundle");
+
+    ppbContext.templateFetcher.state = "idle";
   });
 
-  it("renders the FPB customization workflow only while app state is open", async () => {
+  it("keeps the FPB template step visible with a loading Next action while saving", async () => {
     const { FpbTemplateDialog } = await import(
       "../../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/sections/ConfigureTemplateDialog"
     );
@@ -71,31 +74,23 @@ describe("Admin projected template dialog visibility", () => {
       handleTemplateNext: jest.fn(),
       handleTemplatePreview: jest.fn(),
       isPreviewBundleLoading: false,
-      isSelectTemplateModalOpen: false,
-      OptimisedImage: () => null,
-      pendingDesignPresetId: null,
-      pendingDesignTemplate: null,
-      selectTemplateModalRef: { current: null },
+      isSelectTemplateModalOpen: true,
+      pendingDesignPresetId: "DEFAULT_FBP",
+      pendingDesignTemplate: "FBP_SIDE_FOOTER",
       setPendingDesignPresetId: jest.fn(),
       setPendingDesignTemplate: jest.fn(),
       setTemplateModalStep: jest.fn(),
-      templateFetcher: { state: "idle" },
+      templateFetcher: { state: "submitting" },
       templateModalStep: "templates",
       templateSaveError: null,
       themeEditorUrl: null,
     };
 
-    let view = renderToStaticMarkup(
-      React.createElement(FpbTemplateDialog, { flow: flow as any }),
+    const view = renderToStaticMarkup(
+      React.createElement(FpbTemplateDialog, { flow: flow as any })
     );
-    expect(view).not.toContain("<ui-modal");
-    expect(view).not.toContain("Customize your bundle");
 
-    flow.isSelectTemplateModalOpen = true;
-    view = renderToStaticMarkup(
-      React.createElement(FpbTemplateDialog, { flow: flow as any }),
-    );
-    expect(view).toContain("<ui-modal");
+    expect(view).toMatch(/<s-button[^>]*loading="true"[^>]*>Next<\/s-button>/);
     expect(view).toContain("Customize your bundle");
   });
 });

@@ -75,6 +75,7 @@ export function ConfigureCanvasHeader({
           <s-button
             variant="secondary"
             icon="view"
+            accessibilityLabel="Preview Bundle"
             onClick={() => {
               void handlePreviewBundle();
             }}

@@ -7,7 +7,26 @@ import { I18nextProvider, useTranslation } from "react-i18next";
 import { useEffect, type MouseEvent } from "react";
 import { changeAdminI18nLanguage, i18n, loadAdminLocaleResources } from "../../i18n/config";
 import { loadShopAdminLocale } from "../../services/admin-locale.server";
-import { AdminRouteLoadingBar } from "../../components/AdminRouteLoadingBar";
+
+type AdminLoadingApi = (isLoading?: boolean) => void;
+
+export function isAdminPageNavigationLoading(
+  state: string,
+  currentPathname: string,
+  destinationPathname?: string,
+) {
+  return state === "loading"
+    && destinationPathname !== undefined
+    && destinationPathname !== currentPathname;
+}
+
+export function syncAdminNavigationLoading(
+  isLoading: boolean,
+  loading: AdminLoadingApi,
+) {
+  loading(isLoading);
+  return () => loading(false);
+}
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { session } = await authenticate.admin(request);
@@ -56,9 +75,11 @@ export default function App() {
   const { locale } = useLoaderData<typeof loader>();
   const location = useLocation();
   const navigation = useNavigation();
-  const isPageNavigationLoading = navigation.state === "loading"
-    && navigation.location?.pathname !== undefined
-    && navigation.location.pathname !== location.pathname;
+  const isPageNavigationLoading = isAdminPageNavigationLoading(
+    navigation.state,
+    location.pathname,
+    navigation.location?.pathname,
+  );
 
   useEffect(() => {
     if (i18n.language !== locale) {
@@ -66,12 +87,14 @@ export default function App() {
     }
   }, [locale]);
 
+  useEffect(
+    () => syncAdminNavigationLoading(isPageNavigationLoading, shopify.loading),
+    [isPageNavigationLoading],
+  );
+
   return (
     <I18nextProvider i18n={i18n}>
       <AdminNavigation />
-      {isPageNavigationLoading ? (
-        <AdminRouteLoadingBar label="Loading page" />
-      ) : null}
       <Outlet />
     </I18nextProvider>
   );

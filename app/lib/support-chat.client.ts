@@ -115,6 +115,18 @@ export function openSupportChatWithDraft(
   queueCrispCommand(win, ["do", "chat:open"]);
 }
 
+export function openSupportChatWithMessage(
+  message: string,
+  win: SupportChatWindow | undefined =
+    typeof window === "undefined" ? undefined : window,
+) {
+  if (!win) return;
+  win.__wpbLoadSupportChat?.();
+  queueCrispCommand(win, ["do", "chat:show"]);
+  queueCrispCommand(win, ["do", "chat:open"]);
+  queueCrispCommand(win, ["do", "message:send", ["text", message]]);
+}
+
 declare global {
   interface Window {
     __wpbLoadSupportChat?: () => void;

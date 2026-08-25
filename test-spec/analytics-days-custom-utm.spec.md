@@ -1,3 +1,31 @@
+---
+schema_version: 1
+id: analytics-days-custom-utm
+title: Analytics Days Filter and Custom UTM Tracking
+type: test-spec
+status: active
+summary: Verifies Analytics date windows, exports, backfills, and custom UTM tracking controls.
+last_audited: 2026-08-25
+owners:
+  - engineering
+domains:
+  - admin
+  - analytics
+systems:
+  - attribution
+source_paths:
+  - app/routes/app/app.attribution.tsx
+  - app/routes/app/app.attribution/AttributionDashboard.tsx
+related_docs:
+  - internal docs/Operations/Admin Performance.md
+tags:
+  - analytics
+  - utm
+keywords:
+  - date window
+  - custom UTM parameters
+---
+
 # Test Spec: Analytics Days Filter and Custom UTM Tracking
 **Spec ID:** analytics-days-custom-utm  **Created:** 2026-07-11
 
@@ -16,7 +44,6 @@ Keep Analytics date filtering consistent across presets, custom ranges, export, 
 | 6 | Custom UTM names | mixed comma/newline input | Lowercase sanitized names, max 10 | Prevents arbitrary payload keys |
 | 7 | Custom UTM help content | Card rendered | Learn More action opens modal with setup guidance, examples, limits, privacy guidance, and save behavior | Merchant understands comma/newline entry and what tracking will do |
 | 8 | Saved custom UTM chips | Saved names and remove action | Saved names render as removable chips; removing one submits the remaining names | Merchant can see and remove tracked custom attributes |
-| 9 | LCP no-data banner copy | Active pixel with no orders | Deferred no-data banner uses concise visible copy without late URL examples | No-data guidance should not become the LCP candidate after dashboard hydration |
 
 ### AttributionRoute
 | # | Scenario | Input | Expected Output | Notes |

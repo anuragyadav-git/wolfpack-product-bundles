@@ -15,6 +15,8 @@ systems:
 source_paths:
   - app/components/bundle-configure/TemplateReadyScreen.tsx
   - app/lib/template-ready-step.ts
+  - app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/useConfigureTemplatePricingController.ts
+  - app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/usePpbModalAndTemplateController.ts
 related_docs:
   - internal docs/EB Implementation Reference.md
 tags:
@@ -37,11 +39,20 @@ Preserve the shared post-template preview behavior while FPB and PPB match the l
 
 ### TemplateReadyScreen
 
-| #   | Scenario        | Input              | Expected Output                                                | Notes                               |
-| --- | --------------- | ------------------ | -------------------------------------------------------------- | ----------------------------------- |
-| 1   | Ready state     | Preview is idle    | Completion heading, supporting copy, and preview action render | Shared by FPB and PPB               |
-| 2   | Preview loading | Preview is running | Preview action is loading and disabled                         | Prevents duplicate preview requests |
-| 3   | Projected preview action | Preview is idle | Preview action renders as a semantic button | Nested Polaris controls do not hydrate in the host modal document |
+| #   | Scenario                 | Input              | Expected Output                                                | Notes                                                             |
+| --- | ------------------------ | ------------------ | -------------------------------------------------------------- | ----------------------------------------------------------------- |
+| 1   | Ready state              | Preview is idle    | Completion heading, supporting copy, and preview action render | Shared by FPB and PPB                                             |
+| 2   | Preview loading          | Preview is running | Preview action is disabled and marked busy                     | Prevents duplicate preview requests                               |
+| 3   | Projected preview action | Preview is idle    | Preview action renders as a semantic button                    | Nested Polaris controls do not hydrate in the host modal document |
+
+### TemplateSaveLoading
+
+| #   | Scenario          | Input                    | Expected Output                                      | Notes                           |
+| --- | ----------------- | ------------------------ | ---------------------------------------------------- | ------------------------------- |
+| 1   | FPB template save | Merchant activates Next  | Template step remains and Next shows native loading  | Ready screen follows success    |
+| 2   | PPB template save | Merchant activates Next  | Template step remains and Next shows native loading  | Shared merchant feedback        |
+| 3   | Save succeeds     | Fetcher returns success  | Workflow advances to the existing next modal step    | Respects app-embed gate         |
+| 4   | Save fails        | Fetcher returns an error | Template step remains and error feedback is rendered | Never shows a false-ready state |
 
 ### resolveTemplateReadyStep
 
@@ -52,15 +63,15 @@ Preserve the shared post-template preview behavior while FPB and PPB match the l
 
 ### shouldProcessTemplateResponse
 
-| #   | Scenario                                             | Input                                             | Expected Output | Notes                      |
-| --- | ---------------------------------------------------- | ------------------------------------------------- | --------------- | -------------------------- |
-| 1   | Optimistic screen renders before the request starts  | Idle fetcher, pending request, submission not started | `false`     | Prevents a false save error |
-| 2   | Request completes                                    | Idle fetcher, pending request, submission started | `true`          | Handles the real response  |
-| 3   | Request is active                                    | Submitting fetcher, pending request                | `false`         | Keeps Preview loading      |
-| 4   | No request exists                                    | Idle fetcher, no pending request                   | `false`         | Ignores unrelated state    |
+| #   | Scenario                                            | Input                                                 | Expected Output | Notes                       |
+| --- | --------------------------------------------------- | ----------------------------------------------------- | --------------- | --------------------------- |
+| 1   | Optimistic screen renders before the request starts | Idle fetcher, pending request, submission not started | `false`         | Prevents a false save error |
+| 2   | Request completes                                   | Idle fetcher, pending request, submission started     | `true`          | Handles the real response   |
+| 3   | Request is active                                   | Submitting fetcher, pending request                   | `false`         | Keeps Preview loading       |
+| 4   | No request exists                                   | Idle fetcher, no pending request                      | `false`         | Ignores unrelated state     |
 
 ## Acceptance Criteria
 
 - [x] All listed behavioral tests pass.
 - [x] FPB and PPB use the same completion-screen component.
-- [x] Visual parity is verified in Chrome rather than through CSS assertions.
+- [x] Visual behavior is verified in Chrome rather than through CSS assertions.

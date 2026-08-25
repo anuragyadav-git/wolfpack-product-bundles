@@ -1,7 +1,5 @@
 import {
-  fetchBundleProduct,
-  fetchShopCurrencyCode,
-  fetchShopLocales,
+  fetchBundleConfigureShopifyData,
 } from "../../../app/lib/bundle-configure-loader.server";
 import { AppLogger } from "../../../app/lib/logger";
 
@@ -11,111 +9,92 @@ jest.mock("../../../app/lib/logger", () => ({
   },
 }));
 
-describe("fetchBundleProduct", () => {
-  it("queries current Shopify product media for the Admin bundle product card", async () => {
-    const admin = {
-      graphql: jest.fn().mockResolvedValue({
-        json: async () => ({
-          data: {
-            product: {
-              id: "gid://shopify/Product/1",
-              title: "Product Page Fixture",
-              featuredMedia: {
-                image: { url: "https://cdn.shopify.com/placeholder.png" },
-              },
-            },
-          },
-        }),
-      }),
-    };
-
-    const product = await fetchBundleProduct(admin, "gid://shopify/Product/1", "bundle-1");
-
-    expect(product.title).toBe("Product Page Fixture");
-    expect(admin.graphql).toHaveBeenCalledWith(
-      expect.stringContaining("featuredMedia"),
-      expect.any(Object),
-    );
-    expect(admin.graphql).toHaveBeenCalledWith(
-      expect.stringContaining("media(first: 5)"),
-      expect.any(Object),
-    );
-  });
-});
-
-describe("fetchShopCurrencyCode", () => {
-  it("returns the shop currency from Shopify Admin", async () => {
+describe("fetchBundleConfigureShopifyData", () => {
+  it("loads product, currency, and published locales in one Shopify request", async () => {
     const graphql = jest.fn().mockResolvedValue({
       json: async () => ({
         data: {
+          product: { id: "gid://shopify/Product/1", title: "Bundle product" },
           shop: { currencyCode: "USD" },
-        },
-      }),
-    });
-
-    await expect(fetchShopCurrencyCode({ graphql })).resolves.toBe("USD");
-    expect(graphql).toHaveBeenCalledTimes(1);
-  });
-
-  it("propagates Shopify query failures instead of fabricating a currency", async () => {
-    const error = new Error("Shop query failed");
-    const graphql = jest.fn().mockRejectedValue(error);
-
-    await expect(fetchShopCurrencyCode({ graphql })).rejects.toBe(error);
-  });
-});
-
-describe("fetchShopLocales", () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it("returns only published shop locales and preserves the primary locale", async () => {
-    const graphql = jest.fn().mockResolvedValue({
-      json: async () => ({
-        data: {
           shopLocales: [
             { locale: "en", name: "English", primary: true, published: true },
-            { locale: "fr", name: "French", primary: false, published: true },
             { locale: "de", name: "German", primary: false, published: false },
           ],
         },
       }),
     });
 
-    await expect(fetchShopLocales({ graphql })).resolves.toEqual([
-      { locale: "en", name: "English", primary: true },
-      { locale: "fr", name: "French", primary: false },
-    ]);
-    expect(graphql).toHaveBeenCalledWith(expect.stringContaining("shopLocales"));
+    await expect(fetchBundleConfigureShopifyData(
+      { graphql },
+      "gid://shopify/Product/1",
+      "bundle-1",
+    )).resolves.toEqual({
+      bundleProduct: { id: "gid://shopify/Product/1", title: "Bundle product" },
+      shopCurrencyCode: "USD",
+      shopLocales: [{ locale: "en", name: "English", primary: true }],
+    });
+    expect(graphql).toHaveBeenCalledTimes(1);
+    expect(graphql).toHaveBeenCalledWith(
+      expect.stringContaining("product(id: $id)"),
+      { variables: { id: "gid://shopify/Product/1" } },
+    );
   });
 
-  it("reports Shopify GraphQL errors instead of silently hiding missing access", async () => {
+  it("loads shop data without a product query when the bundle has no Shopify product", async () => {
     const graphql = jest.fn().mockResolvedValue({
       json: async () => ({
-        data: null,
+        data: {
+          shop: { currencyCode: "GBP" },
+          shopLocales: [],
+        },
+      }),
+    });
+
+    await expect(fetchBundleConfigureShopifyData(
+      { graphql },
+      null,
+      "bundle-1",
+    )).resolves.toEqual({
+      bundleProduct: null,
+      shopCurrencyCode: "GBP",
+      shopLocales: [],
+    });
+    expect(graphql).toHaveBeenCalledTimes(1);
+    expect(graphql.mock.calls[0][0]).not.toContain("product(id:");
+  });
+
+  it("reports partial Shopify errors while keeping available required shop data", async () => {
+    const graphql = jest.fn().mockResolvedValue({
+      json: async () => ({
+        data: { shop: { currencyCode: "USD" } },
         errors: [{ message: "Access denied for shopLocales field" }],
       }),
     });
 
-    await expect(fetchShopLocales({ graphql })).resolves.toEqual([]);
+    await expect(fetchBundleConfigureShopifyData(
+      { graphql },
+      null,
+      "bundle-1",
+    )).resolves.toEqual({
+      bundleProduct: null,
+      shopCurrencyCode: "USD",
+      shopLocales: [],
+    });
     expect(AppLogger.warn).toHaveBeenCalledWith(
-      "Failed to fetch published shop locales",
-      expect.objectContaining({ operation: "fetch-shop-locales" }),
-      expect.any(Error),
+      "Shopify returned bundle configure data errors",
+      expect.objectContaining({ operation: "fetch-configure-data" }),
     );
   });
 
-  it("keeps localization optional when the shop lacks locale access", async () => {
-    const graphql = jest.fn().mockRejectedValue(
-      new Error("Access denied for shopLocales field"),
-    );
+  it("fails when Shopify omits the required shop currency", async () => {
+    const graphql = jest.fn().mockResolvedValue({
+      json: async () => ({ data: { shop: {}, shopLocales: [] } }),
+    });
 
-    await expect(fetchShopLocales({ graphql })).resolves.toEqual([]);
-    expect(AppLogger.warn).toHaveBeenCalledWith(
-      "Failed to fetch published shop locales",
-      expect.objectContaining({ operation: "fetch-shop-locales" }),
-      expect.any(Error),
-    );
+    await expect(fetchBundleConfigureShopifyData(
+      { graphql },
+      null,
+      "bundle-1",
+    )).rejects.toThrow("Shop currency is missing");
   });
 });

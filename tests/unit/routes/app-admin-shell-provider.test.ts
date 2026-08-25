@@ -82,7 +82,7 @@ describe("app Admin shell provider", () => {
     expect(markup).toContain("<main>outlet</main>");
   });
 
-  it("renders the shared top-edge loading bar while another Admin page is loading", async () => {
+  it("keeps the current Admin page rendered while another page is loading", async () => {
     useLoaderData.mockReturnValue({
       apiKey: "shopify-api-key",
       locale: "en",
@@ -96,14 +96,14 @@ describe("app Admin shell provider", () => {
 
     const view = renderToStaticMarkup(React.createElement(App));
 
-    expect(view).toContain('role="progressbar"');
-    expect(view).toContain('aria-label="Loading page"');
+    expect(view).toContain("<main>outlet</main>");
+    expect(view).not.toContain('role="progressbar"');
   });
 
   it.each([
     ["loading", "/app/dashboard"],
     ["submitting", "/app/settings"],
-  ])("hides the shell bar for %s state after the current screen is available", async (state, pathname) => {
+  ])("does not render app-owned navigation feedback for %s state", async (state, pathname) => {
     useLoaderData.mockReturnValue({
       apiKey: "shopify-api-key",
       locale: "en",
@@ -115,5 +115,24 @@ describe("app Admin shell provider", () => {
     const view = renderToStaticMarkup(React.createElement(App));
 
     expect(view).not.toContain('aria-label="Loading page"');
+  });
+
+  it("identifies only pathname-changing loader navigation", async () => {
+    const { isAdminPageNavigationLoading } = await import("../../../app/routes/app/app");
+
+    expect(isAdminPageNavigationLoading("loading", "/app/dashboard", "/app/settings")).toBe(true);
+    expect(isAdminPageNavigationLoading("loading", "/app/dashboard", "/app/dashboard")).toBe(false);
+    expect(isAdminPageNavigationLoading("submitting", "/app/dashboard", "/app/settings")).toBe(false);
+  });
+
+  it("starts and cleans up Shopify Admin navigation loading", async () => {
+    const { syncAdminNavigationLoading } = await import("../../../app/routes/app/app");
+    const loading = jest.fn();
+
+    const cleanup = syncAdminNavigationLoading(true, loading);
+
+    expect(loading).toHaveBeenCalledWith(true);
+    cleanup();
+    expect(loading).toHaveBeenLastCalledWith(false);
   });
 });

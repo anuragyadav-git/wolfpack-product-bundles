@@ -36,41 +36,15 @@ jest.mock("../../../app/db.server", () => ({
 }));
 
 describe("app.attribution route shell", () => {
-  it("renders only the loading bar before attribution content is ready", async () => {
+  it("renders the critical shell and inline loading feedback before attribution content is ready", async () => {
     const { default: AttributionRoute } = await import("../../../app/routes/app/app.attribution");
 
     const view = renderToStaticMarkup(React.createElement(AttributionRoute));
 
-    expect(view).toContain('role="progressbar"');
-    expect(view).toContain('aria-label="Loading Analytics"');
-    expect(view).not.toContain("<ui-title-bar");
-    expect(view).not.toContain("How shoppers move through your bundles");
+    expect(view).toContain("<ui-title-bar");
+    expect(view).toContain("How shoppers move through your bundles");
+    expect(view).toContain("common.loading.workspace");
     expect(view).not.toContain("UTM Pixel Tracking");
     expect(view).not.toContain("analyticsSkeletonCard");
-  });
-
-  it("keeps the shared readiness boundary pending until analytics and pixel status are both ready", async () => {
-    const { waitForAnalyticsRouteReady } = await import(
-      "../../../app/routes/app/app.attribution/AttributionRouteShell"
-    );
-    let resolvePixelStatus!: (value: { active: boolean }) => void;
-    const pixelStatus = new Promise<{ active: boolean }>((resolve) => {
-      resolvePixelStatus = resolve;
-    });
-    const ready = waitForAnalyticsRouteReady(
-      Promise.resolve({ bundleMetricTrend: [] }),
-      pixelStatus,
-    );
-    const settled = jest.fn();
-    void ready.then(settled);
-
-    await Promise.resolve();
-    expect(settled).not.toHaveBeenCalled();
-
-    resolvePixelStatus({ active: true });
-    await expect(ready).resolves.toEqual([
-      { bundleMetricTrend: [] },
-      { active: true },
-    ]);
   });
 });

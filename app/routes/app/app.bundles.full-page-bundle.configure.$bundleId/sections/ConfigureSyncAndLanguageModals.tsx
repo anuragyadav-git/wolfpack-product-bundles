@@ -1,3 +1,4 @@
+import { EnablePreviewModal } from "../../../../components/EnablePreviewModal";
 import { PricingTranslationModals } from "../../_shared/bundle-configure/PricingTranslationModals";
 import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
 
@@ -90,7 +91,7 @@ export function FpbSyncAndLanguageModals({
           onClose: () => flow.setIsProgressBarMultiLangModalOpen(false),
         }}
       />
-      <flow.EnablePreviewModal {...flow.enablePreviewGate.modalProps} />
+      <EnablePreviewModal {...flow.enablePreviewGate.modalProps} />
     </>
   );
 }

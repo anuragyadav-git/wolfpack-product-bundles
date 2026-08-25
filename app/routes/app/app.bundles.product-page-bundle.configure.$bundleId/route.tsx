@@ -22,9 +22,7 @@ import {
 } from "./handlers";
 import { handleValidateSellingPlanGroups } from "../../../services/bundle-subscription-discovery.server";
 import {
-  fetchBundleProduct,
-  fetchShopCurrencyCode,
-  fetchShopLocales,
+  fetchBundleConfigureShopifyData,
 } from "../../../lib/bundle-configure-loader.server";
 import { handleRecordBundlePreview } from "../shared/bundle-preview-action.server";
 import {
@@ -77,24 +75,22 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   // File: extensions/bundle-builder/blocks/bundle-product-page.liquid
   const blockHandle = "bundle-product-page";
 
-  const [bundleProduct, shopCurrencyCode, shopLocales] = await Promise.all([
-    bundle.shopifyProductId
-      ? fetchBundleProduct(admin, bundle.shopifyProductId, bundleId)
-      : Promise.resolve(null),
-    fetchShopCurrencyCode(admin),
-    fetchShopLocales(admin),
-  ]);
+  const shopifyData = await fetchBundleConfigureShopifyData(
+    admin,
+    bundle.shopifyProductId,
+    bundleId,
+  );
 
   return json({
     bundle,
-    bundleProduct,
+    bundleProduct: shopifyData.bundleProduct,
     shop: session.shop,
     configureMode,
     showFirstLoadTour,
     apiKey,
     blockHandle,
-    shopLocales,
-    shopCurrencyCode,
+    shopLocales: shopifyData.shopLocales,
+    shopCurrencyCode: shopifyData.shopCurrencyCode,
   });
 };
 

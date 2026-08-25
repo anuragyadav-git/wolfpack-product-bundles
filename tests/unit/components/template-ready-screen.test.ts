@@ -3,7 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { TemplateReadyScreen } from "../../../app/components/bundle-configure/TemplateReadyScreen";
 
 describe("TemplateReadyScreen", () => {
-  it("renders the EB-aligned preview completion content", () => {
+  it("renders the preview completion content", () => {
     const view = renderToStaticMarkup(
       React.createElement(TemplateReadyScreen, {
         isPreviewLoading: false,

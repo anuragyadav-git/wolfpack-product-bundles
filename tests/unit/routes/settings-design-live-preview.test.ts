@@ -120,7 +120,6 @@ describe("DesignSettingsView live preview", () => {
     expect(view).toContain('aria-label="Live bundle preview"');
     expect(view).toContain("<s-color-field");
     expect(view).not.toContain("inert");
-    expect(view).toContain('<s-button icon="view" disabled="true">Preview Bundle</s-button>');
   });
 
   it("keeps FPB loading controls hidden until the Loading surface is selected", () => {

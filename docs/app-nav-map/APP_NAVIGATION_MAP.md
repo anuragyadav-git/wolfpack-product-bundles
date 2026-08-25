@@ -73,6 +73,10 @@ Wolfpack Bundles SIT
 └── Updates & FAQs      → /app/events
 ```
 
+Pathname-changing navigation uses Shopify's native Admin header loading
+indicator and keeps the current route visible until the destination commits.
+Same-screen submissions and revalidation do not start it.
+
 **Screenshot:** `screenshots/02-dashboard.png`
 
 ---
@@ -218,8 +222,8 @@ Primary action:
 
 - The complete Design, Language, and Controls cards are the actions; they do not render separate `Configure` affordances.
 - Selecting Design opens the Settings -> Design subpage.
-- Selecting Controls immediately replaces the landing cards with the shared top-edge loading bar while `/app/additional-configurations` navigates and becomes ready.
-- While the lazy Design or Language workspace loads after selection, the route shows three skeleton cards instead of a spinner.
+- Selecting Controls keeps the landing cards visible while Shopify's native Admin loading indicator reports navigation to `/app/additional-configurations`.
+- While the lazy Design or Language workspace loads after selection, the destination title and a small Polaris spinner render without card skeletons or an artificial delay.
 - The Design Control Panel lazy-loads after entry and uses a responsive preview-first workspace: the largest app-owned preview and its selectors sit beside one contextual inspector. At phone widths a Preview / Customize segmented control shows one workspace pane at a time.
 - Preview-only Bundle Type and Template selectors cover Landing Page Standard, Classic, Compact, and Horizontal plus Product Page Product List, Product Grid, Horizontal Slots, and Vertical Slots.
 - The template-aware Preview surface control exposes individual components only: Bundle header, Navigation, Categories, Product cards, Product slots, Product picker, Cart / summary, Loading, Validation, and Upsell. Each template shows only the components it owns, and there is no whole-Builder option. Desktop/mobile switching preserves the selected surface when it remains valid.
@@ -290,7 +294,7 @@ Shopify Checkout and Theme Cart Drawer are configured in Settings and are not du
 
 Setup behavior:
 
-- The shared top-edge loading bar is the only route content shown while the compact catalog prepares.
+- The static catalog paints immediately and does not own a route-level loading gate.
 - Cards display Supported or Guided setup without claiming connection state.
 - `View Setup` opens the WPB-owned setup/support destination in a new browsing context.
 - `Request Integration` opens Crisp and pre-fills the composer; the merchant must send the message.
@@ -310,11 +314,12 @@ Setup behavior:
 ```
 Analytics Page (revamped — issue wpb-analytics-revamp-1)
 ├── Header: "Analytics" + App Bridge breadcrumb and app-owned back action
-├── No-data banner (s-banner) — pixel-active vs not-enabled copy
-├── Pixel toggle: Enable/disable UTM tracking pixel
+├── Top UTM Pixel Tracking banner (s-banner) — active vs not-enabled status
+│   ├── Dismissal persists in sessionStorage for the current browser tab
+│   └── Learn more modal → enable UTM tracking pixel
 ├── Toolbar: Compare-period chip · [Export CSV] · [Compare on/off] · Date range selector
 ├── Custom UTM card → App Bridge contextual Save Bar with Save and Discard
-├── Attribution backfill → persistent success/error banner
+├── Attribution backfill → Shopify success/error toast
 │
 ├── ── Section 1 ── FUNNEL HERO ── (app/components/analytics/FunnelHero.tsx)
 │   └── Engaged → Added-to-Cart → Checked Out → Revenue bars
@@ -345,7 +350,9 @@ Responsive analytics behavior:
 
 - The route owns a named `analytics-page` query container so toolbar, KPI, chart, and activity layouts respond to the embedded app width.
 - Date, comparison, and export actions stack without page-level clipping; matrices preserve every value inside their labelled internal scroller.
-- The lightweight route shell and its stylesheet render before the lazy dashboard module; the dashboard JavaScript and CSS resolve together behind the route skeleton.
+- The lightweight route shell, title, and critical funnel heading render before deferred Analytics data.
+- Pixel status resolves into the top native banner independently of the deferred dashboard.
+- Dashboard JavaScript and CSS are owned by the eager route shell, so deferred Analytics data cannot reveal components before their styles.
 
 **Visual tokens:** `app/components/analytics/shared/tokens.css`
 
@@ -380,6 +387,10 @@ Pricing Page
 │
 └── Modal: Upgrade Confirmation (before billing redirect)
 ```
+
+The App Bridge title renders immediately. A small Polaris spinner occupies the
+body while subscription data resolves; the route does not render card-shaped
+skeletons.
 
 At phone widths, the FPB Bundle Setup sidebar becomes a native disclosure whose
 summary shows the active section; selecting a parent or child section closes the
@@ -455,6 +466,7 @@ FPB Configure Page
 │       └── 2×2 template grid (FPB: Standard Design, Classic Design, Compact Design, Horizontal Design)
 │           └── Each card: preview placeholder + label + [Select]/[Selected] button
 │               Persists: wpbLayoutTemplate (always FBP_SIDE_FOOTER) + wpbPresetId (STANDARD | CLASSIC | COMPACT | HORIZONTAL)
+│       └── [Button] "Preview bundle" → opens signed storefront preview in a new tab, closes Customization, then opens Preview Feedback Modal
 │
 ├── Save Bar (App Bridge): [Discard] [Save]
 │   └── Save validates required fields for enabled persisted features; invalid drafts stay dirty, open/focus the first affected section, and show inline critical feedback without submitting
@@ -465,7 +477,10 @@ FPB Configure Page
     ├── Variables Modal (Discount Messaging variable reference)
     ├── Bundle Quantity Options Multi Language Modal (Box Label / Box Subtext)
     ├── Progress Bar Multi Language Modal (Tier Text / Tier Subtext)
-    └── Subscription Multi Language Modal (shared staged Polaris workflow)
+    ├── Subscription Multi Language Modal (shared staged Polaris workflow)
+    └── Preview Feedback Modal
+        ├── "Bundle is visible on store" → close
+        └── "Having issues with the bundle? Contact us" → open Crisp with the bundle preview URL
 ```
 
 FPB configure has no Shopify Page selector, Page slug editor, Page creation,
@@ -599,6 +614,9 @@ PPB Configure Page
 │   └── 2×2 template grid (PPB: Product List, Product Grid, Horizontal Slots, Vertical Slots)
 │       └── Each card: preview placeholder + label + [Select]/[Selected] button
 │           Persists: wpbLayoutTemplate (PDP_INPAGE | PDP_MODAL) + wpbPresetId (CASCADE | COGNIVE | MODAL | SIMPLIFIED)
+│   └── [Button] "Preview bundle" → opens signed product preview in a new tab, closes Customization, then opens Preview Feedback Modal
+│       ├── "Bundle is visible on store" → close
+│       └── "Having issues with the bundle? Contact us" → open Crisp with the bundle preview URL
 │
 └── Floating Readiness Gauge (position: fixed, bottom-left)
     ├── Circular SVG progress ring (score 0–100)

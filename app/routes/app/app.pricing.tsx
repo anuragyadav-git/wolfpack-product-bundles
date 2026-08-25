@@ -13,6 +13,7 @@ import { BillingService } from "../../services/billing.server";
 import { PLANS } from "../../constants/plans";
 import { AppLogger } from "../../lib/logger";
 import { Suspense, useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import pricingStyles from "../../styles/routes/app-pricing.module.css";
 
 // Import shared billing components
@@ -30,6 +31,7 @@ import {
   AdminPageBackTitle,
   AdminPageTitleBar,
 } from "../../components/AdminPageNavigation";
+import { AdminSectionLoadingState } from "../../components/AdminSectionLoadingState";
 
 type PricingSubscriptionData = {
   error?: "Failed to load pricing information";
@@ -224,27 +226,9 @@ function PricingBody({
   );
 }
 
-function PricingSkeleton() {
-  return (
-    <div className={pricingStyles.pageShell}>
-      <s-stack direction="block" gap="large">
-        <s-section>
-          <s-stack direction="block" gap="base">
-            <div style={{ height: 18, width: 220, background: "#f1f2f3", borderRadius: 4 }} />
-            <div style={{ height: 6, width: "100%", background: "#e3e3e3", borderRadius: 3 }} />
-          </s-stack>
-        </s-section>
-        <div className={pricingStyles.planCardsGrid}>
-          <s-section><div style={{ minHeight: 280, background: "#f6f6f7", borderRadius: 8 }} /></s-section>
-          <s-section><div style={{ minHeight: 280, background: "#f6f6f7", borderRadius: 8 }} /></s-section>
-        </div>
-      </s-stack>
-    </div>
-  );
-}
-
 export default function PricingPage() {
   const { plans, subscription } = useLoaderData<typeof loader>();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const handleBack = () =>
     navigateBackOrFallback(navigate, "/app/dashboard", {
@@ -258,7 +242,7 @@ export default function PricingPage() {
         breadcrumbLabel="Dashboard"
         onBack={handleBack}
       />
-      <Suspense fallback={<PricingSkeleton />}>
+      <Suspense fallback={<AdminSectionLoadingState label={t("common.loading.workspace")} />}>
         <Await resolve={subscription}>
           {(data) => <PricingBody data={data} plans={plans} onBack={handleBack} />}
         </Await>

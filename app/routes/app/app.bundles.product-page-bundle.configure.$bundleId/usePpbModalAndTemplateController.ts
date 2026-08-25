@@ -8,7 +8,6 @@ import {
   PPB_DESIGN_CONTROL_PANEL_URL,
   resolveProductPageTemplateSelection,
 } from "./ConfigureBundleFlow.helpers";
-import { resolveTemplateReadyStep } from "../../../lib/template-ready-step";
 
 export function usePpbModalAndTemplateController({
   base,
@@ -93,9 +92,9 @@ export function usePpbModalAndTemplateController({
     templateState.setIsSelectTemplateModalOpen(true);
   }, [templateState]);
   const openDesignControlPanel = useCallback(() => {
-    void base.shopify.saveBar.leaveConfirmation().then(() =>
-      base.navigate(PPB_DESIGN_CONTROL_PANEL_URL)
-    );
+    void base.shopify.saveBar
+      .leaveConfirmation()
+      .then(() => base.navigate(PPB_DESIGN_CONTROL_PANEL_URL));
   }, [base]);
   const handleTemplateNext = useCallback(() => {
     if (
@@ -122,22 +121,27 @@ export function usePpbModalAndTemplateController({
       templateState.pendingDesignPresetId ?? ""
     );
     templateState.templateFetcher.submit(fd, { method: "POST" });
-    templateState.setTemplateModalStep(
-      resolveTemplateReadyStep(base.appEmbedEnabled),
-    );
-  }, [base.appEmbedEnabled, templateState]);
-  const handleTemplatePreview = useCallback(() => {
+  }, [templateState]);
+  const handleTemplatePreview = useCallback((
+    onPreviewOpened?: (previewUrl: string) => void,
+  ) => {
     const previewStarted = previewReadiness.handlePreviewBundle();
     if (previewStarted instanceof Promise) {
-      void previewStarted.then((started: boolean) => {
-        if (started) {
-          window.setTimeout(closeSelectTemplateDialog, 500);
+      void previewStarted.then((previewUrl: string | false) => {
+        if (previewUrl) {
+          window.setTimeout(() => {
+            closeSelectTemplateDialog();
+            onPreviewOpened?.(previewUrl);
+          }, 500);
         }
       });
       return;
     }
     if (previewStarted) {
-      window.setTimeout(closeSelectTemplateDialog, 500);
+      window.setTimeout(() => {
+        closeSelectTemplateDialog();
+        onPreviewOpened?.(previewStarted);
+      }, 500);
     }
   }, [closeSelectTemplateDialog, previewReadiness]);
   const handleConfirmDiscard = useCallback(() => {

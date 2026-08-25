@@ -6,14 +6,18 @@ import {
   getUtmPixelStatusBannerModel,
   UTM_PIXEL_PRIVACY_MESSAGE,
 } from "../../../lib/utm-pixel-status-banner";
+import { useBannerSessionState } from "../../../lib/banner-session-state";
 import styles from "./AttributionRouteShell.module.css";
 
 // ─── Pixel Status Card ────────────────────────────────────────
+
+export const UTM_PIXEL_STATUS_BANNER_KEY = "analytics_utm_pixel_status";
 
 export function PixelStatusCard({ pixelActive }: { pixelActive: boolean }) {
   const shopify = useAppBridge();
   const fetcher = useFetcher<typeof action>();
   const isSubmitting = fetcher.state !== "idle";
+  const [dismissed, dismiss] = useBannerSessionState(UTM_PIXEL_STATUS_BANNER_KEY);
 
   const [active, setActive] = useState(pixelActive);
 
@@ -37,35 +41,30 @@ export function PixelStatusCard({ pixelActive }: { pixelActive: boolean }) {
 
   const model = getUtmPixelStatusBannerModel(active);
 
+  if (active && dismissed) return null;
+
   return (
     <>
-      <div className={styles.pixelStatusCard} data-status={model.statusDotTone}>
-        <div className={styles.pixelStatusBody}>
-          <div className={styles.pixelStatusIcon} aria-hidden="true">
-            <s-icon type="globe" />
-          </div>
-          <div className={styles.pixelStatusContent}>
-            <div className={styles.pixelStatusHeading}>
-              <h2 className={styles.pixelStatusTitle}>UTM Pixel Tracking</h2>
-              <s-badge tone={model.tone}>{model.statusLabel}</s-badge>
-            </div>
-            <p className={styles.pixelStatusDescription}>{model.description}</p>
-          </div>
-
+      <s-banner
+        tone={active ? "success" : "warning"}
+        heading="UTM Pixel Tracking"
+        dismissible={active}
+        hidden={false}
+        onDismiss={active ? dismiss : undefined}
+      >
+        <s-stack direction="inline" justifyContent="space-between" alignItems="center" gap="base">
+          <s-text>{model.description}</s-text>
           {model.actionLabel ? (
-            <div className={styles.pixelStatusAction}>
-              <s-button
-                variant="secondary"
-                icon="info"
-                commandFor="utm-pixel-tracking-disclosure"
-                command="--show"
-              >
-                {model.actionLabel}
-              </s-button>
-            </div>
+            <s-button
+              variant="tertiary"
+              commandFor="utm-pixel-tracking-disclosure"
+              command="--show"
+            >
+              {model.actionLabel}
+            </s-button>
           ) : null}
-        </div>
-      </div>
+        </s-stack>
+      </s-banner>
 
       {!active ? (
         <s-modal

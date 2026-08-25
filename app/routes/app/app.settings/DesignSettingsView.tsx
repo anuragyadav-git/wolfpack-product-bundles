@@ -131,7 +131,12 @@ export function DesignSettingsView({
               />
               <s-heading>Design Control Panel</s-heading>
             </s-stack>
-            <s-button icon="view" disabled={!hasPreviewableBundle} onClick={() => setIsPreviewModalOpen(true)}>
+            <s-button
+              icon="view"
+              accessibilityLabel="Preview Bundle"
+              disabled={!hasPreviewableBundle}
+              onClick={() => setIsPreviewModalOpen(true)}
+            >
               Preview Bundle
             </s-button>
           </header>

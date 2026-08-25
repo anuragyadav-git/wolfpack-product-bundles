@@ -8,9 +8,7 @@ import { ERROR_MESSAGES } from "../../../constants/errors";
 import { authenticate } from "../../../shopify.server";
 import db from "../../../db.server";
 import {
-  fetchBundleProduct,
-  fetchShopCurrencyCode,
-  fetchShopLocales,
+  fetchBundleConfigureShopifyData,
 } from "../../../lib/bundle-configure-loader.server";
 import {
   handleSaveBundle,
@@ -68,13 +66,8 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   // Reference: https://shopify.dev/docs/apps/build/online-store/theme-app-extensions/configuration
   const apiKey = process.env.SHOPIFY_API_KEY || "";
 
-  const [bundleProduct, shopCurrencyCode, shopLocales, availableBundles] =
-    await Promise.all([
-      bundle.shopifyProductId
-        ? fetchBundleProduct(admin, bundle.shopifyProductId, bundleId)
-        : Promise.resolve(null),
-      fetchShopCurrencyCode(admin),
-      fetchShopLocales(admin),
+  const [shopifyData, availableBundles] = await Promise.all([
+      fetchBundleConfigureShopifyData(admin, bundle.shopifyProductId, bundleId),
       db.bundle.findMany({
         where: {
           shopId: session.shop,
@@ -84,18 +77,18 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
         select: { id: true, name: true },
         orderBy: { name: "asc" },
       }),
-    ]);
+  ]);
 
   return json({
     bundle,
-    bundleProduct,
+    bundleProduct: shopifyData.bundleProduct,
     availableBundles,
     shop: session.shop,
     configureMode,
     showFirstLoadTour,
     apiKey,
-    shopLocales,
-    shopCurrencyCode,
+    shopLocales: shopifyData.shopLocales,
+    shopCurrencyCode: shopifyData.shopCurrencyCode,
   });
 };
 

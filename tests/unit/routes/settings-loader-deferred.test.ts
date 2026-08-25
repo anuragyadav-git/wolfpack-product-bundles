@@ -1,3 +1,19 @@
+import React from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+
+const pendingSettingsPage = new Promise(() => {});
+const pendingPreviewBundles = new Promise(() => {});
+
+jest.mock("@remix-run/react", () => ({
+  Await: () => React.createElement("span", null, "Await boundary"),
+  useLoaderData: jest.fn(() => ({
+    settingsPage: pendingSettingsPage,
+    previewBundles: pendingPreviewBundles,
+  })),
+  useNavigate: jest.fn(() => jest.fn()),
+  useNavigation: jest.fn(() => ({ state: "idle" })),
+}));
+
 jest.mock("../../../app/shopify.server", () => ({
   authenticate: { admin: jest.fn() },
 }));
@@ -85,29 +101,13 @@ describe("Settings loader critical path", () => {
     expect(syncThemeColors).toHaveBeenCalledWith("test-shop.myshopify.com");
   });
 
-  it("keeps the Settings landing page pending until data and the loading bar are ready", async () => {
-    const settings = makeDeferred<Record<string, unknown> | null>();
-    const bundles = makeDeferred<unknown[]>();
-    const loadingBar = makeDeferred<void>();
-    const routeReady = jest.fn();
-    const { waitForSettingsRouteReady } = await import(
+  it("renders the Settings landing before deferred workspace data resolves", async () => {
+    const { default: SettingsRoute } = await import(
       "../../../app/routes/app/app.settings"
     );
 
-    void waitForSettingsRouteReady(
-      settings.promise,
-      bundles.promise,
-      loadingBar.promise,
-    ).then(routeReady);
-
-    settings.resolve(null);
-    bundles.resolve([]);
-    await Promise.resolve();
-    expect(routeReady).not.toHaveBeenCalled();
-
-    loadingBar.resolve();
-    await Promise.resolve();
-    await Promise.resolve();
-    expect(routeReady).toHaveBeenCalledWith([null, [], undefined]);
+    const view = renderToStaticMarkup(React.createElement(SettingsRoute));
+    expect(view).toContain("Open Design settings");
+    expect(view).not.toContain("Await boundary");
   });
 });

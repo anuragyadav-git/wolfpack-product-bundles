@@ -154,7 +154,7 @@ export function usePpbPreviewReadinessHandlers({
         setHasPreview: templateState.setHasPreview,
       });
       base.shopify.toast.show(message, { isError: false });
-      return true;
+      return previewUrl;
     } catch (error: any) {
       closePendingDashboardPreview(pendingPreviewWindow);
       base.shopify.toast.show(

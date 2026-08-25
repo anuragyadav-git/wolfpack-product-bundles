@@ -104,9 +104,9 @@ export function useConfigureTemplatePricingController(
     templateSubmissionStartedRef,
   ]);
   const openDesignControlPanel = useCallback(() => {
-    void flow.shopify.saveBar.leaveConfirmation().then(() =>
-      navigate(FPB_DESIGN_CONTROL_PANEL_URL)
-    );
+    void flow.shopify.saveBar
+      .leaveConfirmation()
+      .then(() => navigate(FPB_DESIGN_CONTROL_PANEL_URL));
   }, [flow.shopify, navigate]);
 
   useEffect(() => {
@@ -187,28 +187,29 @@ export function useConfigureTemplatePricingController(
     fd.append("bundleDesignTemplate", pendingDesignTemplate ?? "");
     fd.append("bundleDesignPresetId", pendingDesignPresetId ?? "");
     templateFetcher.submit(fd, { method: "POST" });
-    setTemplateModalStep(resolveTemplateReadyStep(appEmbedEnabled));
   }, [
-    appEmbedEnabled,
     lastTemplateRequestRef,
     lastTemplateResponseRef,
     pendingDesignPresetId,
     pendingDesignTemplate,
-    setTemplateModalStep,
     setTemplateSaveError,
     templateSubmissionStartedRef,
     templateFetcher,
   ]);
   function buildBundleUpsellConfig() {
     const multiLangText = Object.fromEntries(
-      Object.entries(textOverridesByLocale ?? {}).flatMap(([locale, values]: any) => {
-        const widgetCopy = {
-          widgetTitle: values?.widgetTitle ?? "",
-          widgetDescription: values?.widgetDescription ?? "",
-          widgetButtonText: values?.widgetButtonText ?? "",
-        };
-        return Object.values(widgetCopy).some(Boolean) ? [[locale, widgetCopy]] : [];
-      }),
+      Object.entries(textOverridesByLocale ?? {}).flatMap(
+        ([locale, values]: any) => {
+          const widgetCopy = {
+            widgetTitle: values?.widgetTitle ?? "",
+            widgetDescription: values?.widgetDescription ?? "",
+            widgetButtonText: values?.widgetButtonText ?? "",
+          };
+          return Object.values(widgetCopy).some(Boolean)
+            ? [[locale, widgetCopy]]
+            : [];
+        }
+      )
     );
     return {
       multiLangText,

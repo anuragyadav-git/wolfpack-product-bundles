@@ -4,8 +4,9 @@ import {
   type ActionFunctionArgs,
   type LoaderFunctionArgs,
 } from "@remix-run/node";
-import { Await, useLoaderData, useNavigate, useNavigation } from "@remix-run/react";
+import { Await, useLoaderData, useNavigate } from "@remix-run/react";
 import { lazy, Suspense, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { Prisma } from "@prisma/client";
 import { BundleType } from "../../constants/bundle";
 import { prisma } from "../../db.server";
@@ -36,10 +37,7 @@ import {
   SettingsWorkspaceError,
   type SettingsWorkspaceView,
 } from "./app.settings/SettingsLandingShell";
-import {
-  AdminRouteLoadingBar,
-  waitForAdminRouteLoadingBar,
-} from "../../components/AdminRouteLoadingBar";
+import { AdminSectionLoadingState } from "../../components/AdminSectionLoadingState";
 
 const loadSettingsWorkspace = async () => {
   const module = await import("./app.settings/SettingsRoute");
@@ -47,14 +45,6 @@ const loadSettingsWorkspace = async () => {
 };
 
 const SettingsWorkspace = lazy(loadSettingsWorkspace);
-
-export function waitForSettingsRouteReady<TSettings, TPreviewBundles>(
-  settingsPage: Promise<TSettings>,
-  previewBundles: Promise<TPreviewBundles>,
-  loadingBar: Promise<void> = waitForAdminRouteLoadingBar(),
-) {
-  return Promise.all([settingsPage, previewBundles, loadingBar]);
-}
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const { admin, session } = await authenticate.admin(request);
@@ -351,81 +341,75 @@ export async function action({ request }: ActionFunctionArgs) {
 
 export default function SettingsRouteDefault() {
   const { settingsPage, previewBundles } = useLoaderData<typeof loader>();
+  const { t } = useTranslation();
   const [workspaceView, setWorkspaceView] = useState<SettingsWorkspaceView | null>(null);
-  const routeData = useMemo(
-    () => waitForSettingsRouteReady(settingsPage, previewBundles),
-    [previewBundles, settingsPage],
-  );
   const workspaceData = useMemo(
     () => workspaceView
-      ? Promise.all([settingsPage, previewBundles, waitForAdminRouteLoadingBar()])
+      ? Promise.all([settingsPage, previewBundles])
       : null,
     [previewBundles, settingsPage, workspaceView],
   );
   const navigate = useNavigate();
-  const navigation = useNavigation();
-  const isControlsNavigationPending = navigation.state !== "idle"
-    && navigation.location?.pathname === "/app/additional-configurations";
+
+  if (!workspaceView) {
+    return (
+      <>
+        <ui-title-bar title="Settings">
+          <button
+            variant="breadcrumb"
+            onClick={() =>
+              navigateBackOrFallback(navigate, "/app/dashboard", {
+                replaceFallback: true,
+              })
+            }
+          >
+            Dashboard
+          </button>
+        </ui-title-bar>
+        <SettingsLandingShell
+          onBack={() =>
+            navigateBackOrFallback(navigate, "/app/dashboard", {
+              replaceFallback: true,
+            })
+          }
+          onSelect={(view) => {
+            if (view === "controls") {
+              navigate("/app/additional-configurations");
+              return;
+            }
+            setWorkspaceView(view);
+          }}
+          onIntent={() => {
+            void loadSettingsWorkspace();
+          }}
+        />
+      </>
+    );
+  }
 
   return (
-    <Suspense fallback={<AdminRouteLoadingBar label="Loading Settings" />}>
+    <Suspense fallback={(
+      <>
+        <ui-title-bar title={workspaceView === "design" ? "Design Control Panel" : "Language Configurations"}>
+          <button variant="breadcrumb" onClick={() => setWorkspaceView(null)}>Settings</button>
+        </ui-title-bar>
+        <AdminSectionLoadingState label={t("common.loading.workspace")} />
+      </>
+    )}>
       <Await
-        resolve={routeData}
+        resolve={workspaceData as NonNullable<typeof workspaceData>}
         errorElement={<SettingsWorkspaceError onExit={() => setWorkspaceView(null)} />}
       >
         {([resolvedSettingsPage, resolvedPreviewBundles]: any) => {
-          if (!workspaceView) {
-            return (
-              <>
-                <ui-title-bar title="Settings">
-                  <button
-                    variant="breadcrumb"
-                    onClick={() =>
-                      navigateBackOrFallback(navigate, "/app/dashboard", {
-                        replaceFallback: true,
-                      })
-                  }
-                  >
-                    Dashboard
-                  </button>
-                </ui-title-bar>
-                <SettingsLandingShell
-                  isLoadingControls={isControlsNavigationPending}
-                  onBack={() =>
-                    navigateBackOrFallback(navigate, "/app/dashboard", {
-                      replaceFallback: true,
-                    })
-                  }
-                  onSelect={(view) => {
-                    if (view === "controls") {
-                      navigate("/app/additional-configurations");
-                      return;
-                    }
-                    setWorkspaceView(view);
-                  }}
-                  onIntent={() => {
-                    void loadSettingsWorkspace();
-                  }}
-                />
-              </>
-            );
-          }
-
           return (
-            <Suspense fallback={<AdminRouteLoadingBar label="Loading Settings" />}>
-              <Await resolve={workspaceData as NonNullable<typeof workspaceData>}>
-                {() => (
-                  <ReduxProvider>
-                    <SettingsWorkspace
-                      initialView={workspaceView}
-                      onExit={() => setWorkspaceView(null)}
-                      settingsPage={resolvedSettingsPage}
-                      previewBundles={resolvedPreviewBundles}
-                    />
-                  </ReduxProvider>
-                )}
-              </Await>
-            </Suspense>
+            <ReduxProvider>
+              <SettingsWorkspace
+                initialView={workspaceView}
+                onExit={() => setWorkspaceView(null)}
+                settingsPage={resolvedSettingsPage}
+                previewBundles={resolvedPreviewBundles}
+              />
+            </ReduxProvider>
           );
         }}
       </Await>

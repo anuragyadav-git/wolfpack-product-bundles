@@ -79,6 +79,25 @@ describe("dashboard status banner dismissal with session persistence", () => {
     expect(view).not.toContain("dashboard.storefrontSetup.activate");
   });
 
+  it("keeps the transient loading banner visible after a resolved banner was dismissed", () => {
+    dismissBannerInSession(DASHBOARD_STOREFRONT_SETUP_BANNER_KEY);
+
+    const view = renderToStaticMarkup(
+      React.createElement(DashboardStatusGrid, {
+        resources: [],
+        error: false,
+        appEmbedEnabled: false,
+        appEmbedStatusLoading: true,
+        themeEditorUrl: "https://theme-editor.test",
+        onOpenThemeEditor: jest.fn(),
+      }),
+    );
+
+    expect(view).toContain('tone="info"');
+    expect(view).toContain("<s-spinner");
+    expect(view).toContain('dismissible="false"');
+  });
+
   it("persists dismissal in session storage when dismissed", () => {
     expect(isBannerDismissedInSession(DASHBOARD_STOREFRONT_SETUP_BANNER_KEY)).toBe(false);
 

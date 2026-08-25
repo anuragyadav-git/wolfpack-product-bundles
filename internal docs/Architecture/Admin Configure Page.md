@@ -13,6 +13,7 @@ domains:
 systems:
   - bundle-configure
 source_paths:
+  - app/components/bundle-configure/TemplatePreviewFeedbackModal.tsx
   - app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/
   - app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/
   - app/routes/app/_shared/bundle-configure/
@@ -192,6 +193,13 @@ React wrapper portals the workflow into the host modal document, preserving
 React event handlers for the post-Next Preview bundle action. That projected
 action remains a semantic HTML button because nested `s-button` elements do
 not hydrate in the host modal document and render as non-interactive text.
+
+After a successful Select Template preview, the preview handler returns the
+exact URL opened in the reserved new tab. Closing the projected customization
+modal then opens one shared, small Polaris feedback modal. A merchant can
+confirm that the bundle is visible or open Crisp and automatically send
+`Having issues seeing the bundle on storefront: <Bundle link>` with that exact
+preview URL. Failed preview preparation does not open the feedback modal.
 
 ## First-Create Tour and State Boundary
 
