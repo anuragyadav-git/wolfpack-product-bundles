@@ -114,7 +114,8 @@ export function useConfigureBundleController(): ConfigureBundleFlowDraft {
     originalValuesRef,
   } = configState;
   const parentProductStatusUi = getParentProductStatusUi(
-    loadedBundleProduct?.status || bundleProduct?.status || productStatus
+    loadedBundleProduct?.status || bundleProduct?.status,
+    revalidator.state !== "idle",
   );
   useEffect(() => {
     let active = true;

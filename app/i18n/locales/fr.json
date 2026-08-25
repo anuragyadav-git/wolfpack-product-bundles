@@ -361,6 +361,10 @@
       "title": "Votre lot n'est pas répertorié",
       "body": "Pour le rendre visible, définissez le statut du produit du lot sur Actif dans Shopify Produits."
     },
+    "parentProductStatus": {
+      "loadingTitle": "Vérification du statut du produit parent",
+      "loadingBody": "Récupération du dernier statut dans Shopify Produits."
+    },
     "proxyHealth": {
       "title": "Proxy d'application non connecté",
       "body": "Les widgets de lots en pleine page ne se chargeront pas dans votre boutique. Réinstallez l'application pour résoudre ce problème."

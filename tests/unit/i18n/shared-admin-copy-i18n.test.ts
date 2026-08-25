@@ -23,6 +23,8 @@ const componentKeys: Record<string, string[]> = {
     "common.actions.setUpVisibility",
   ],
   "app/components/UnlistedBundleBanner.tsx": [
+    "common.parentProductStatus.loadingTitle",
+    "common.parentProductStatus.loadingBody",
     "common.unlistedBundle.title",
     "common.unlistedBundle.body",
     "common.actions.manage",

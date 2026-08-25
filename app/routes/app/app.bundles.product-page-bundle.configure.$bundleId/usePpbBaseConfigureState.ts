@@ -159,7 +159,8 @@ export function usePpbBaseConfigureState() {
     [markAsDirty]
   );
   const parentProductStatusUi = getParentProductStatusUi(
-    loadedBundleProduct?.status || bundleProduct?.status || productStatus
+    loadedBundleProduct?.status || bundleProduct?.status,
+    revalidator.state !== "idle",
   );
   useEffect(() => {
     let active = true;

@@ -361,6 +361,10 @@
       "title": "Tu paquete no está listado",
       "body": "Para que sea visible, cambia el estado del producto del paquete a Activo en Productos de Shopify."
     },
+    "parentProductStatus": {
+      "loadingTitle": "Comprobando el estado del producto principal",
+      "loadingBody": "Obteniendo el estado más reciente de Productos de Shopify."
+    },
     "proxyHealth": {
       "title": "Proxy de aplicación no conectado",
       "body": "Los widgets de paquetes de página completa no se cargarán en tu tienda. Reinstala la aplicación para solucionarlo."

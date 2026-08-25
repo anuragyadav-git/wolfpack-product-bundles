@@ -335,6 +335,10 @@
       "title": "Your bundle is Unlisted",
       "body": "For discoverability, change the bundle product's status to Active in Shopify Products."
     },
+    "parentProductStatus": {
+      "loadingTitle": "Checking parent product status",
+      "loadingBody": "Getting the latest status from Shopify Products."
+    },
     "proxyHealth": {
       "title": "App proxy not connected",
       "body": "Full-page bundle widgets won't load on your storefront. Reinstall the app to fix this."

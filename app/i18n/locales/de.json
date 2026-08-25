@@ -361,6 +361,10 @@
       "title": "Dein Bundle ist nicht gelistet",
       "body": "Stelle den Status des Bundle-Produkts in Shopify Produkte auf Aktiv, damit es gefunden werden kann."
     },
+    "parentProductStatus": {
+      "loadingTitle": "Status des übergeordneten Produkts wird geprüft",
+      "loadingBody": "Der aktuelle Status wird aus Shopify Produkte abgerufen."
+    },
     "proxyHealth": {
       "title": "App-Proxy nicht verbunden",
       "body": "Ganzseitige Bundle-Widgets werden in deinem Storefront nicht geladen. Installiere die App erneut, um das Problem zu beheben."
