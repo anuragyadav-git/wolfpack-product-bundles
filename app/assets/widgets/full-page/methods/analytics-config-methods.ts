@@ -8,6 +8,7 @@ import {
   waitForCheckoutIntegrationCapability,
 } from '../../shared/checkout-integration-adapters.js';
 import { buildStorefrontApiPath } from '../../../../config/storefront-proxy-routes.js';
+import { localizeBundleConfig } from '../../shared/localized-bundle-config.js';
 
 export const fullPageAnalyticsConfigMethods: Record<string, any> & ThisType<any> = {
 _ensureWpbSessionId() {
@@ -535,9 +536,16 @@ async loadBundleData() {
 },
 
 selectBundle() {
-  this.selectedBundle = BundleDataManager.selectBundle(this.bundleData, this.config);
+  this.selectedBundle = localizeBundleConfig(
+    BundleDataManager.selectBundle(this.bundleData, this.config),
+    window.Shopify?.locale || '',
+  );
   if (!this.selectedBundle && this.config?.bundleId && this.bundleData?.[this.config.bundleId]?.bundleType === BUNDLE_WIDGET.BUNDLE_TYPES.FULL_PAGE) {
     this.selectedBundle = this.bundleData[this.config.bundleId];
+    this.selectedBundle = localizeBundleConfig(
+      this.selectedBundle,
+      window.Shopify?.locale || '',
+    );
   }
   if (this.selectedBundle) {
     this.config.showStepTimeline = this.resolveShowStepTimeline(

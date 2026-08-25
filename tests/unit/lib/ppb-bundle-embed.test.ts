@@ -1,8 +1,10 @@
 import {
   PPB_BUNDLE_EMBED_DEFAULT,
   clearPpbBundleEmbedTargets,
+  extractPpbBundleWidgetTranslations,
   localizePpbBundleEmbed,
   mergePpbBundleEmbedTranslations,
+  mergePpbBundleWidgetTranslations,
   normalizePpbBundleEmbedConfig,
   removeLegacyPpbEmbedTextOverrides,
   serializePpbBundleEmbedConfig,
@@ -56,8 +58,8 @@ describe("PPB bundle embed configuration", () => {
         "fr-CA": { upsellConfiguration: { title: "Québécois" } },
       },
     });
-    expect(localizePpbBundleEmbed(config, "fr-CA")).toEqual({ title: "Québécois", subTitle: "" });
-    expect(localizePpbBundleEmbed(config, "fr-FR")).toEqual({ title: "Français", subTitle: "" });
+    expect(localizePpbBundleEmbed(config, "FR-ca")).toEqual({ title: "Québécois", subTitle: "Base sub" });
+    expect(localizePpbBundleEmbed(config, "fr-FR")).toEqual({ title: "Français", subTitle: "Base sub" });
     expect(localizePpbBundleEmbed(config, "de")).toEqual({ title: "Base", subTitle: "Base sub" });
   });
 
@@ -69,6 +71,33 @@ describe("PPB bundle embed configuration", () => {
       fr: {
         widgetTitle: "Widget",
         upsellConfiguration: { title: "New", subTitle: "Sous-titre" },
+      },
+    });
+  });
+
+  it("extracts and merges Bundle Widget translations without overwriting embed copy", () => {
+    const existing = {
+      fr: {
+        widgetTitle: "Widget",
+        widgetDescription: "Description",
+        widgetButtonText: "Acheter",
+        upsellConfiguration: { title: "Embed" },
+      },
+    };
+    expect(extractPpbBundleWidgetTranslations(existing)).toEqual({
+      fr: {
+        widgetTitle: "Widget",
+        widgetDescription: "Description",
+        widgetButtonText: "Acheter",
+      },
+    });
+    expect(mergePpbBundleWidgetTranslations(existing, {
+      fr: { widgetTitle: "Nouveau", widgetDescription: "", widgetButtonText: "Acheter" },
+    })).toEqual({
+      fr: {
+        widgetTitle: "Nouveau",
+        widgetButtonText: "Acheter",
+        upsellConfiguration: { title: "Embed" },
       },
     });
   });

@@ -123,20 +123,26 @@ export function localizePpbBundleEmbed(
   config: PpbBundleEmbedConfig,
   locale: string,
 ): { title: string; subTitle: string } {
-  const normalizedLocale = locale.trim();
+  const normalizedLocale = locale.trim().toLowerCase();
   const language = normalizedLocale.split("-")[0];
+  const translationFor = (targetLocale: string) => {
+    const key = Object.keys(config.multiLangText).find(
+      (candidate) => candidate.toLowerCase() === targetLocale,
+    );
+    return key ? config.multiLangText[key]?.upsellConfiguration : undefined;
+  };
   const localized = {
-    ...(config.multiLangText[language]?.upsellConfiguration ?? {}),
-    ...(config.multiLangText[normalizedLocale]?.upsellConfiguration ?? {}),
+    ...(translationFor(language) ?? {}),
+    ...(translationFor(normalizedLocale) ?? {}),
   };
   return {
     title:
-      typeof localized.title === "string"
-        ? localized.title
+      typeof localized.title === "string" && localized.title.trim()
+        ? localized.title.trim()
         : config.upsellConfiguration.title,
     subTitle:
-      typeof localized.subTitle === "string"
-        ? localized.subTitle
+      typeof localized.subTitle === "string" && localized.subTitle.trim()
+        ? localized.subTitle.trim()
         : config.upsellConfiguration.subTitle,
   };
 }
@@ -160,6 +166,51 @@ export function mergePpbBundleEmbedTranslations(
           record(existing[locale]?.upsellConfiguration),
       },
     ]),
+  );
+}
+
+export type PpbBundleWidgetTranslation = {
+  widgetTitle?: string;
+  widgetDescription?: string;
+  widgetButtonText?: string;
+};
+
+export function extractPpbBundleWidgetTranslations(
+  multiLangText: Record<string, Record<string, unknown>>,
+): Record<string, PpbBundleWidgetTranslation> {
+  return Object.fromEntries(
+    Object.entries(multiLangText).flatMap(([locale, rawValues]) => {
+      const values = record(rawValues);
+      const widgetValues = Object.fromEntries(
+        ["widgetTitle", "widgetDescription", "widgetButtonText"].flatMap((key) => (
+          typeof values[key] === "string" && values[key].trim()
+            ? [[key, values[key]]]
+            : []
+        )),
+      );
+      return Object.keys(widgetValues).length > 0 ? [[locale, widgetValues]] : [];
+    }),
+  );
+}
+
+export function mergePpbBundleWidgetTranslations(
+  existing: Record<string, Record<string, unknown>>,
+  widgetTranslations: Record<string, PpbBundleWidgetTranslation>,
+): Record<string, Record<string, unknown>> {
+  const locales = new Set([
+    ...Object.keys(existing),
+    ...Object.keys(widgetTranslations),
+  ]);
+  return Object.fromEntries(
+    [...locales].flatMap((locale) => {
+      const next = { ...(existing[locale] ?? {}) };
+      for (const key of ["widgetTitle", "widgetDescription", "widgetButtonText"] as const) {
+        const value = widgetTranslations[locale]?.[key];
+        if (typeof value === "string" && value.trim()) next[key] = value;
+        else delete next[key];
+      }
+      return Object.keys(next).length > 0 ? [[locale, next]] : [];
+    }),
   );
 }
 

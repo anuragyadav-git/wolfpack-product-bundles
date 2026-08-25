@@ -1,5 +1,7 @@
 'use strict';
 
+import { localizeBundleConfig } from '../widgets/shared/localized-bundle-config.js';
+
 export function loadBundleConfig(container: HTMLElement, state: any) {
   var configValue = container && container.dataset && container.dataset.bundleConfig;
 
@@ -9,7 +11,10 @@ export function loadBundleConfig(container: HTMLElement, state: any) {
 
   var bundleData;
   try {
-    bundleData = JSON.parse(configValue);
+    bundleData = localizeBundleConfig(
+      JSON.parse(configValue),
+      typeof window !== 'undefined' ? (window as any).Shopify?.locale || '' : '',
+    );
   } catch (e: any) {
     return { success: false, error: 'data-bundle-config is not valid JSON: ' + e.message };
   }

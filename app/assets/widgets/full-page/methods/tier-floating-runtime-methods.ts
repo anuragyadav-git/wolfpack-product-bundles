@@ -289,6 +289,9 @@ _reportError(error: any) {
 },
 
 _resolveText(key: string|number, fallback: any) {
+  if (this.selectedBundle?.textOverrides?.[key]) {
+    return this.selectedBundle.textOverrides[key];
+  }
   const locale = window.Shopify?.locale;
   if (locale && this.config?.textOverridesByLocale?.[locale]?.[key]) {
     return this.config.textOverridesByLocale[locale][key];

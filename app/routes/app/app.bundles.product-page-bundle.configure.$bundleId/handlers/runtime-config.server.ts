@@ -58,6 +58,7 @@ export function buildBundleBaseConfig(
     pricing?: {
       displayOptions?: unknown;
       messages?: unknown;
+      ruleMessagesByLocale?: unknown;
     } | null;
   },
   stepsData: any[],
@@ -96,7 +97,9 @@ export function buildBundleBaseConfig(
     categories: Array.isArray(step.StepCategory)
       ? step.StepCategory.map((cat: any) => ({
           name: cat.name || "",
+          title: cat.title || cat.name || "",
           sortOrder: cat.sortOrder ?? 0,
+          multiLangData: cat.multiLangData ?? {},
           products: (cat.products || []).map((p: any) => ({
             id: p.id,
             title: p.title || "Product",
@@ -112,6 +115,8 @@ export function buildBundleBaseConfig(
     freeGiftName: step.freeGiftName ?? null,
     addonLabel: step.addonLabel ?? null,
     addonTitle: step.addonTitle ?? null,
+    addonAddText: step.addonAddText ?? null,
+    addonReplaceText: step.addonReplaceText ?? null,
     addonDisplayFree: step.addonDisplayFree === true,
     addonTiers: Array.isArray(step.addonTiers) ? step.addonTiers : [],
     addonUnlockAfterCompletion: step.addonUnlockAfterCompletion !== false,
@@ -169,6 +174,10 @@ export function buildBundleBaseConfig(
         showDiscountMessaging: discountData.discountMessagingEnabled || false,
         showDiscountDisplay: savedPricingMessages.showDiscountDisplay ?? true,
         ruleMessages: pricingRuleMessages,
+        ruleMessagesByLocale:
+          updatedBundle.pricing?.ruleMessagesByLocale ??
+          discountData.ruleMessagesByLocale ??
+          null,
         successMessage:
           savedPricingMessages.successMessage ??
           discountData.successMessage ??
@@ -319,11 +328,15 @@ function buildSyncOptimizedSteps(steps: any[]): Array<Record<string, unknown>> {
     return {
       id: step.id,
       name: step.name,
+      pageTitle: step.pageTitle ?? null,
+      multiLangData: step.multiLangData ?? {},
       position: step.position,
-      stepImage: step.timelineIconUrl ?? null,
+      stepImage: step.stepImage ?? step.timelineIconUrl ?? null,
       minQuantity: step.minQuantity,
       maxQuantity: step.maxQuantity ?? null,
       enabled: step.enabled !== false,
+      displayVariantsAsIndividual: step.displayVariantsAsIndividual === true,
+      autoNextStepOnConditionMet: step.autoNextStepOnConditionMet === true,
       conditionType: step.conditionType,
       conditionOperator: step.conditionOperator,
       conditionValue: step.conditionValue,
@@ -335,11 +348,17 @@ function buildSyncOptimizedSteps(steps: any[]): Array<Record<string, unknown>> {
       StepCategory: categories,
       isFreeGift: step.isFreeGift === true,
       freeGiftName: step.freeGiftName ?? null,
+      isDefault: step.isDefault === true,
+      defaultVariantId: step.defaultVariantId ?? null,
+      primaryVariantOption: step.primaryVariantOption ?? null,
       addonLabel: step.addonLabel ?? null,
       addonTitle: step.addonTitle ?? null,
+      addonAddText: step.addonAddText ?? null,
+      addonReplaceText: step.addonReplaceText ?? null,
       addonDisplayFree: step.addonDisplayFree === true,
       addonTiers: Array.isArray(step.addonTiers) ? step.addonTiers : [],
       addonUnlockAfterCompletion: step.addonUnlockAfterCompletion !== false,
+      addonIconUrl: step.addonIconUrl ?? null,
     };
   });
 }
@@ -384,6 +403,7 @@ function buildSyncPricingConfig(pricing: any): Record<string, unknown> | null {
         "Congratulations! You got {discountText}",
       showDiscountMessaging: syncMsgs.showDiscountMessaging || false,
       ruleMessages: syncRuleMessages,
+      ruleMessagesByLocale: pricing.ruleMessagesByLocale ?? null,
       successMessage: syncMsgs.successMessage ?? null,
       successMessageByLocale: syncMsgs.successMessageByLocale ?? null,
       displayOptions: pricing.displayOptions ?? null,

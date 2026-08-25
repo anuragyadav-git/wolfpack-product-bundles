@@ -7,6 +7,7 @@ import {
 import { TemplateDesignSystem } from '../../shared/template-design-system.js';
 import { buildBundleConfigApiUrl } from '../../../../lib/bundle-preview-url.js';
 import { ppbExpandSingleStepCategoriesAsSteps } from '../single-step-categories.js';
+import { localizeBundleConfig } from '../../shared/localized-bundle-config.js';
 
 function getWindow() {
   return typeof window === 'undefined' ? null : window;
@@ -349,8 +350,9 @@ _parseBundleConfigPayload(rawValue: string) {
   },
 
 selectBundle() {
+  const selectedBundle = BundleDataManager.selectBundle(this.bundleData, this.config);
   this.selectedBundle = ppbExpandSingleStepCategoriesAsSteps(
-    BundleDataManager.selectBundle(this.bundleData, this.config)
+    localizeBundleConfig(selectedBundle, getWindow()?.Shopify?.locale || '')
   );
 
   this.widgetStyle = 'bottom-sheet';
