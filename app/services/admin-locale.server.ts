@@ -4,14 +4,21 @@ import {
   normalizeAdminLocale,
   type SupportedLocale,
 } from "../i18n/config";
+import { loaderCache } from "../lib/loader-cache.server";
+
+function getAdminLocaleCacheKey(shopDomain: string) {
+  return `admin-locale:${shopDomain}`;
+}
 
 export async function loadShopAdminLocale(shopDomain: string): Promise<SupportedLocale> {
-  const shop = await db.shop.findUnique({
-    where: { shopDomain },
-    select: { adminLocale: true },
-  });
+  return loaderCache.memo(getAdminLocaleCacheKey(shopDomain), async () => {
+    const shop = await db.shop.findUnique({
+      where: { shopDomain },
+      select: { adminLocale: true },
+    });
 
-  return normalizeAdminLocale(shop?.adminLocale);
+    return normalizeAdminLocale(shop?.adminLocale);
+  });
 }
 
 export async function saveShopAdminLocale(
@@ -29,5 +36,7 @@ export async function saveShopAdminLocale(
     select: { adminLocale: true },
   });
 
-  return normalizeAdminLocale(shop.adminLocale);
+  const normalizedLocale = normalizeAdminLocale(shop.adminLocale);
+  loaderCache.set(getAdminLocaleCacheKey(shopDomain), normalizedLocale);
+  return normalizedLocale;
 }
