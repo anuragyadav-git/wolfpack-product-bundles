@@ -7,7 +7,6 @@ import {
 } from "../../../app/lib/settings-controls-runtime";
 
 const values = {
-  "landingPage.showCompareAtPrice": "Checked",
   "landingPage.hideIrrelevantVariantImages": "Checked",
   "landingPage.trackInventoryOnAddToCart": "Checked",
   "landingPage.redirectCollectionQuickAddToBundle": "Checked",
@@ -71,7 +70,6 @@ describe("Settings Controls runtime mapping", () => {
         },
       },
       landingPage: {
-        showCompareAtPrice: true,
         checkout: { action: "checkout", providerId: "monster_cart" },
         scripts: { bundlePage: "window.__bundlePage = true;" },
         selectors: {
@@ -90,13 +88,11 @@ describe("Settings Controls runtime mapping", () => {
 
   it("never interprets presentation labels as persisted keys", () => {
     const result = buildSettingsControlsRuntime({
-      "Show Compare At Price": "Checked",
       "Cart Messaging": "Checked",
-      "landingPage.showCompareAtPrice": "",
       "shared.cartMessaging.isEnabled": "",
     });
 
-    expect(result.settingsControls.landingPage.showCompareAtPrice).toBe(false);
+    expect(result.settingsControls.landingPage).not.toHaveProperty("showCompareAtPrice");
     expect(result.settingsControls.shared.cartMessaging.isEnabled).toBe(false);
   });
 
@@ -159,7 +155,7 @@ describe("Settings Controls runtime mapping", () => {
       showOriginalPrice: true,
       discountDisplay: { isEnabled: true },
     });
-    expect(response.settingsControls.landingPage.showCompareAtPrice).toBe(true);
+    expect(response.settingsControls.landingPage).not.toHaveProperty("showCompareAtPrice");
     expect(response.settingsControls.productPage.hideOutOfStockProducts).toBe(true);
     expect(response.settingsControls.productPage.validateConditionsBeforeAddToCart).toBe(true);
   });

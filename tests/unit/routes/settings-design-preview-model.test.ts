@@ -138,7 +138,7 @@ describe("Settings Design preview model", () => {
         categories: "tabs",
         summary: "list-selected-drawer",
         areas: ["bundle-header", "navigation", "categories", "product-card", "product-slots", "cart-summary"],
-        scenarios: ["default", "validation", "upsell"],
+        scenarios: ["default", "validation"],
       },
       {
         key: "product-grid",
@@ -148,7 +148,7 @@ describe("Settings Design preview model", () => {
         categories: "tabs",
         summary: "pdp-footer",
         areas: ["bundle-header", "navigation", "categories", "product-card", "product-slots", "cart-summary"],
-        scenarios: ["default", "validation", "upsell"],
+        scenarios: ["default", "validation"],
       },
       {
         key: "horizontal-slots",
@@ -158,7 +158,7 @@ describe("Settings Design preview model", () => {
         categories: "none",
         summary: "modal-footer",
         areas: ["bundle-header", "product-slots", "cart-summary"],
-        scenarios: ["default", "product-picker", "validation", "upsell"],
+        scenarios: ["default", "product-picker", "validation"],
       },
       {
         key: "vertical-slots",
@@ -168,7 +168,7 @@ describe("Settings Design preview model", () => {
         categories: "none",
         summary: "modal-footer",
         areas: ["bundle-header", "product-slots", "cart-summary"],
-        scenarios: ["default", "product-picker", "validation", "upsell"],
+        scenarios: ["default", "product-picker", "validation"],
       },
     ]);
   });
@@ -212,9 +212,13 @@ describe("Settings Design preview model", () => {
       "expert.generalSettings.conditionToastBgColor",
       "product-grid",
     )?.target).toEqual({ kind: "scenario", value: "validation" });
-    expect(getDesignPreviewFieldTarget(
+    expect(isDesignPreviewFieldApplicable(
       "expert.mixAndMatchConfig.generalSettings.bundleUpsellButtonBg",
       "vertical-slots",
+    )).toBe(false);
+    expect(getDesignPreviewFieldTarget(
+      "expert.mixAndMatchConfig.generalSettings.bundleUpsellButtonBg",
+      "standard",
     )?.target).toEqual({ kind: "scenario", value: "upsell" });
   });
 
@@ -292,13 +296,22 @@ describe("Settings Design preview model", () => {
 
   it("builds the production storefront design CSS for unsaved preview values", () => {
     const css = buildDesignPreviewStorefrontCss({
-      fieldValues: { "Primary Color": "#123456", "Button Text Color": "#fedcba" },
+      fieldValues: {
+        "Primary Color": "#123456",
+        "Button Text Color": "#fedcba",
+        "expert.mixAndMatchConfig.generalSettings.bundleUpsellButtonBg": "#345678",
+        "expert.mixAndMatchConfig.generalSettings.bundleUpsellButtonTextColor": "#fefefe",
+        "expert.mixAndMatchConfig.generalSettings.bundleUpsellFontColor": "#234567",
+      },
       templateKey: "standard",
     });
 
-    expect(css).toContain("--bundle-global-primary-button: #123456");
-    expect(css).toContain("--bundle-global-button-text: #fedcba");
-    expect(css).toContain("Bundle Type: full_page");
+    expect(css).toEqual(expect.stringContaining("--bundle-global-primary-button: #123456"));
+    expect(css).toEqual(expect.stringContaining("--bundle-global-button-text: #fedcba"));
+    expect(css).toEqual(expect.stringContaining("--bundle-upsell-button-bg-color: #345678"));
+    expect(css).toEqual(expect.stringContaining("--bundle-upsell-text-color: #fefefe"));
+    expect(css).toEqual(expect.stringContaining("--bundle-upsell-font-color: #234567"));
+    expect(css).toEqual(expect.stringContaining("Bundle Type: full_page"));
   });
 
   it("provides deterministic multi-surface fixture data with local media", () => {

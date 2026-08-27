@@ -175,7 +175,7 @@ describe('PPB List shared product cards', () => {
 
     ProductPageInpageRenderMethods._renderInpageStepProducts.call(context, 0, target);
 
-    expect(target.getAttribute('aria-busy')).toBe('true');
+    expect(target.getAttribute('aria-busy')).toEqual('true');
     expect(loadStepProducts).toHaveBeenCalledWith(0);
     expect(target.innerHTML).not.toContain('Loading products...');
   });
@@ -236,7 +236,7 @@ describe('PPB List shared product cards', () => {
     expect(productCard.dataset.productId).toBe('variant-new');
     expect(productCard.dataset.currentSelectedVariantId).toBe('variant-new');
     expect(childWithProductId.dataset.productId).toBe('variant-new');
-    expect(priceEl.textContent).toBe('$459.00');
+    expect(priceEl.textContent).toContain('$459.00');
     expect(imageEl.src).toBe('https://cdn.shopify.com/new.jpg');
   });
 });

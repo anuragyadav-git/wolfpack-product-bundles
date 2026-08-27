@@ -7,7 +7,7 @@
     padding: 0 0 var(--classic-mobile-content-bottom-padding, 120px);
   }
 
-  .fpb-preset-classic > .category-tabs {
+  .fpb-preset-classic .sidebar-content > .category-tabs {
     display: flex;
     flex-wrap: nowrap;
     gap: 20px;
@@ -19,11 +19,11 @@
     scrollbar-width: none;
   }
 
-  .fpb-preset-classic > .category-tabs::-webkit-scrollbar {
+  .fpb-preset-classic .sidebar-content > .category-tabs::-webkit-scrollbar {
     display: none;
   }
 
-  .fpb-preset-classic > .category-tabs .category-tab {
+  .fpb-preset-classic .sidebar-content > .category-tabs .category-tab {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -44,13 +44,13 @@
     overflow: visible;
   }
 
-  .fpb-preset-classic > .category-tabs .category-tab.active {
+  .fpb-preset-classic .sidebar-content > .category-tabs .category-tab.active {
     border-color: #000;
     background: var(--bundle-side-panel-remove-icon-bg, #000);
     color: var(--bundle-side-panel-remove-icon-color, #fff);
   }
 
-  .fpb-preset-classic > .category-tabs .category-tab .tab-label {
+  .fpb-preset-classic .sidebar-content > .category-tabs .category-tab .tab-label {
     color: inherit;
     font-family: Assistant, sans-serif;
     font-size: 15px;
@@ -63,7 +63,7 @@
     text-overflow: clip;
   }
 
-  .fpb-preset-classic > .category-tabs .category-tab .tab-indicator {
+  .fpb-preset-classic .sidebar-content > .category-tabs .category-tab .tab-indicator {
     display: none;
   }
 

@@ -36,13 +36,15 @@
 
 .previewPane {
   min-width: 0;
-  align-self: start;
+  block-size: calc(100dvh - 32px);
+  min-block-size: 640px;
+  align-self: stretch;
   grid-area: preview;
 }
 
 .customizePane {
   position: sticky;
-  inset-block-start: 16px;
+  inset-block-start: 0;
   block-size: calc(100dvh - 32px);
   min-width: 0;
   min-block-size: 640px;
@@ -182,7 +184,10 @@
 
 .previewPanel {
   position: sticky;
-  top: 16px;
+  top: 0;
+  display: grid;
+  block-size: 100%;
+  grid-template-rows: auto minmax(0, 1fr);
   overflow: hidden;
 }
 
@@ -249,7 +254,7 @@
   position: relative;
   display: grid;
   box-sizing: border-box;
-  block-size: clamp(640px, calc(100dvh - 160px), 884px);
+  block-size: 100%;
   min-height: 0;
   place-items: center;
   overflow: hidden;
@@ -257,9 +262,8 @@
 }
 
 .previewStage[data-preview-viewport="desktop"] {
-  block-size: auto;
-  max-block-size: 920px;
-  aspect-ratio: 1320 / 920;
+  inline-size: 100%;
+  max-block-size: none;
 }
 
 .previewCanvas {
@@ -555,7 +559,11 @@
 
 .previewScaledShell[data-preview-viewport="mobile"] .previewSurface {
   border: 0;
-  border-radius: 0;
+  border-radius: 49px;
+}
+
+.previewScaledShell[data-preview-viewport="mobile"] .previewFrame {
+  border-radius: 49px;
 }
 
 .previewFrame {
@@ -1690,6 +1698,14 @@
     block-size: auto;
     min-block-size: 0;
     grid-area: workspace;
+  }
+
+  .previewPanel {
+    block-size: auto;
+  }
+
+  .previewStage {
+    block-size: clamp(640px, calc(100dvh - 160px), 884px);
   }
 
   .previewPane[data-phone-active="true"] {

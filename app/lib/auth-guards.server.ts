@@ -1,6 +1,6 @@
 import { json } from "@remix-run/node";
 import { timingSafeEqual, createHash } from "node:crypto";
-import { authenticate } from "../shopify.server";
+import type { authenticate } from "../shopify.server";
 import { AppLogger } from "./logger";
 
 // Admin context type derived from the configured shopify instance

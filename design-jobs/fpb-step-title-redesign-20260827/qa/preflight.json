@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "job_id": "fpb-step-title-redesign-20260827",
+  "revision": 2,
+  "status": "blocked",
+  "checked_at": "2026-08-27T13:19:54Z",
+  "environment": "SIT development",
+  "selected_page": {
+    "page_id": 15,
+    "url": "https://admin.shopify.com/store/agent-5sfidg3m/apps/wolfpack-product-bundles-sit/app/settings",
+    "title": "agent - Design Control Panel - Shopify Plus"
+  },
+  "checks": {
+    "chrome_mcp_connected": {"mandatory": true, "status": "passed", "evidence": "list_pages returned the connected default-profile Shopify Admin pages.", "blocker": "", "recovery_action": ""},
+    "supported_chrome_available": {"mandatory": true, "status": "passed", "evidence": "navigator.userAgent reported Chrome 151.0.0.0 on macOS.", "blocker": "", "recovery_action": ""},
+    "intended_page_selected": {"mandatory": true, "status": "passed", "evidence": "Page 15 was selected without bringing unrelated tabs forward.", "blocker": "", "recovery_action": ""},
+    "app_server_reachable": {"mandatory": true, "status": "passed", "evidence": "The signed-in embedded Settings route and preview frame loaded after cache-bypassed reload.", "blocker": "", "recovery_action": ""},
+    "environment_confirmed": {"mandatory": true, "status": "passed", "evidence": "The selected app is Wolfpack Bundles SIT and the Shopify dev console is connected.", "blocker": "", "recovery_action": ""},
+    "fixture_route_exists": {"mandatory": true, "status": "passed", "evidence": "The isolated /settings-design-preview-frame route rendered inside Settings Design.", "blocker": "", "recovery_action": ""},
+    "authentication_intentional": {"mandatory": true, "status": "passed", "evidence": "The existing signed-in default Chrome profile was used.", "blocker": "", "recovery_action": ""},
+    "sensitive_tabs_avoided": {"mandatory": true, "status": "passed", "evidence": "Only the Wolfpack SIT Settings page was selected and captured.", "blocker": "", "recovery_action": ""},
+    "viewport_resize_supported": {"mandatory": true, "status": "passed", "evidence": "resize_page completed for the selected page; reported viewport was 1890 by 844 CSS pixels at DPR 1.", "blocker": "", "recovery_action": ""},
+    "accessibility_snapshot_supported": {"mandatory": true, "status": "passed", "evidence": "A fresh accessibility snapshot included the Design controls and isolated preview frame.", "blocker": "", "recovery_action": ""},
+    "screenshot_write_supported": {"mandatory": true, "status": "blocked", "evidence": "Inline PNG capture succeeded, but filePath writes to the repository QA folder and /tmp were both rejected as outside configured Chrome MCP workspace roots.", "blocker": "Chrome MCP cannot persist PNG evidence to any permitted artifact path.", "recovery_action": "Configure the Chrome DevTools MCP workspace roots to include /Users/adityaawasthi/Developer/wolfpack-product-bundles/design-jobs/fpb-step-title-redesign-20260827/qa, then rerun preflight."},
+    "console_inspection_supported": {"mandatory": true, "status": "not-run", "evidence": "Preflight stopped at the mandatory screenshot-write failure.", "blocker": "", "recovery_action": ""},
+    "network_inspection_supported": {"mandatory": true, "status": "not-run", "evidence": "Preflight stopped at the mandatory screenshot-write failure.", "blocker": "", "recovery_action": ""},
+    "repository_identity_recorded": {"mandatory": true, "status": "passed", "evidence": "Repository, branch, and HEAD are recorded below.", "blocker": "", "recovery_action": ""},
+    "job_revision_recorded": {"mandatory": true, "status": "passed", "evidence": "Design job fpb-step-title-redesign-20260827 revision 2.", "blocker": "", "recovery_action": ""},
+    "baseline_identified": {"mandatory": true, "status": "blocked", "evidence": "No durable approved PNG baseline can be created while Chrome MCP screenshot writes are denied.", "blocker": "Approved baseline path is unavailable.", "recovery_action": "After enabling the QA directory as a Chrome MCP workspace root, save and approve the desktop and mobile baselines defined by browser-test-plan.yaml."}
+  },
+  "tool_inventory": [
+    "list_pages", "select_page", "navigate_page", "resize_page", "take_snapshot", "evaluate_script", "take_screenshot", "click", "fill", "press_key", "list_console_messages", "list_network_requests", "lighthouse_audit"
+  ],
+  "browser": {
+    "product": "Chrome",
+    "version": "151.0.0.0",
+    "profile_policy": "default-profile-only",
+    "isolated_context_used": false
+  },
+  "repository": {
+    "path": "/Users/adityaawasthi/Developer/wolfpack-product-bundles",
+    "branch": "feature/26.05-UI-changes",
+    "commit": "e3b3f2f031dfa7225efd88ce2840e09cae29bfba"
+  },
+  "baseline": {"id": "", "revision": null, "path": ""},
+  "artifact_directory": "qa",
+  "blockers": [
+    "Chrome MCP screenshot writes are denied for both the repository QA directory and /tmp.",
+    "A durable approved baseline cannot be identified until PNG persistence is available."
+  ]
+}

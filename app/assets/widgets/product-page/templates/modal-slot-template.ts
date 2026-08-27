@@ -1,4 +1,5 @@
 import { createSelectedProductSlotsElement } from '../../shared/components/selected-product-slots.js';
+import { resolveProductPageStepText } from '../methods/step-text-methods.js';
 import { createPlusIcon } from '../../shared/svg-icons.js';
 
 function parseBoolean(value: string) {
@@ -32,7 +33,7 @@ export const modalSlotTemplateMethods: Record<string, any> & ThisType<any> = {
     );
   },
 
-  _createModalSlotStepSection(step: any) {
+  _createModalSlotStepSection(step: any, stepIndex: number) {
     const section = document.createElement('div');
     const isVertical = this._usesVerticalModalSlotLayout();
 
@@ -40,7 +41,7 @@ export const modalSlotTemplateMethods: Record<string, any> & ThisType<any> = {
 
     const title = document.createElement('div');
     title.className = 'bw-ppb-modal-slot-title';
-    title.textContent = step.pageTitle || step.name || '';
+    title.textContent = resolveProductPageStepText(step, stepIndex).navigationLabel;
     section.appendChild(title);
 
     const grid = createSelectedProductSlotsElement([], {

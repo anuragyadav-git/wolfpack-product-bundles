@@ -19,9 +19,9 @@ describe("PPB Product Grid interaction parity", () => {
       },
     );
 
-    expect(view.textContent).toContain("Added x2");
-    expect(view.textContent).not.toContain("Decrease quantity");
-    expect(view.textContent).not.toContain("Increase quantity");
+    expect(view.textContent).toMatch(/Added x2/);
+    expect(view.textContent).not.toMatch(/Decrease quantity/);
+    expect(view.textContent).not.toMatch(/Increase quantity/);
   });
 
   it("omits the product description when Grid disables description rendering", () => {
@@ -38,7 +38,7 @@ describe("PPB Product Grid interaction parity", () => {
       { mode: "grid", description: "", document },
     );
 
-    expect(view.textContent).not.toContain("Description that must not render");
+    expect(view.textContent).not.toMatch(/Description that must not render/);
     expect(view.querySelector('[data-bw-card-description]')).toBeNull();
   });
 

@@ -49,6 +49,7 @@ export function PpbSelectTemplateDialog() {
                   </s-stack>
                   <s-button
                     variant="secondary"
+                    icon="paint-brush-flat"
                     onClick={() => setTemplateModalStep("colorsAndCorners")}
                   >
                     Customize Colors &amp; Language
@@ -126,6 +127,7 @@ export function PpbSelectTemplateDialog() {
               <div className={productPageBundleStyles.templateDialogFooter}>
                 <s-button
                   variant="primary"
+                  icon="arrow-right"
                   disabled={!pendingDesignPresetId || undefined}
                   loading={templateFetcher.state === "submitting" || undefined}
                   onClick={handleTemplateNext}
@@ -192,12 +194,14 @@ export function PpbSelectTemplateDialog() {
               <div className={productPageBundleStyles.templateDialogFooter}>
                 <s-button
                   variant="secondary"
+                  icon="arrow-left"
                   onClick={() => setTemplateModalStep("templates")}
                 >
                   Back
                 </s-button>
                 <s-button
                   variant="primary"
+                  icon="arrow-right"
                   onClick={() => setTemplateModalStep("textAndImages")}
                 >
                   Next
@@ -266,12 +270,14 @@ export function PpbSelectTemplateDialog() {
               <div className={productPageBundleStyles.templateDialogFooter}>
                 <s-button
                   variant="secondary"
+                  icon="arrow-left"
                   onClick={() => setTemplateModalStep("colorsAndCorners")}
                 >
                   Back
                 </s-button>
                 <s-button
                   variant="primary"
+                  icon="check"
                   disabled={!pendingDesignPresetId || undefined}
                   loading={templateFetcher.state === "submitting" || undefined}
                   onClick={handleTemplateNext}
@@ -306,6 +312,7 @@ export function PpbSelectTemplateDialog() {
                 >
                   <s-button
                     variant="secondary"
+                    icon="theme-edit"
                     onClick={() =>
                       themeEditorUrl
                         ? openThemeEditorInNewTab(themeEditorUrl)
@@ -316,6 +323,7 @@ export function PpbSelectTemplateDialog() {
                   </s-button>
                   <s-button
                     variant="primary"
+                    icon="check"
                     onClick={() => setTemplateModalStep("confirm")}
                   >
                     I've enabled it

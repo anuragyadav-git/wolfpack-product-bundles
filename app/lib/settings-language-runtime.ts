@@ -119,6 +119,7 @@ const FPB_DEFAULTS = {
 
 const PPB_DEFAULTS = {
   productCardAddBtnText: "Add to Cart",
+  productCardOutOfStockBtnText: "Out of Stock",
   productDetailsUpdateButtonText: "Update",
   productVariantLabelText: "Select variant",
   productAddedBtnText: "Added x{{allowedQuantity}}",
@@ -270,6 +271,7 @@ function buildPpbLanguage(values: Record<string, unknown>) {
   return {
     productCard: {
       productCardAddBtnText: languageField("productCardAddBtnText", "Product Add to Cart Button", getField(values, "ppb.productCard.productCardAddBtnText", PPB_DEFAULTS.productCardAddBtnText)),
+      productCardOutOfStockBtnText: languageField("productCardOutOfStockBtnText", "Product Out of Stock Button", getField(values, "ppb.productCard.productCardOutOfStockBtnText", PPB_DEFAULTS.productCardOutOfStockBtnText)),
       productVariantLabelText: languageField("productVariantLabelText", "Product Variant Label", getField(values, "ppb.productCard.productVariantLabelText", PPB_DEFAULTS.productVariantLabelText)),
       productAddedBtnText: languageField("productAddedBtnText", "Product Added label", getField(values, "ppb.productCard.productAddedBtnText", PPB_DEFAULTS.productAddedBtnText)),
       productCardAddBtnText_inPage: languageField("productCardAddBtnText_inPage", "Inline Product - Add Button Text", getField(values, "ppb.productCard.productCardAddBtnText_inPage", PPB_DEFAULTS.productCardAddBtnTextInPage)),
@@ -331,7 +333,7 @@ export function buildPpbCustomTextSettings(ppbLanguage: JsonObject) {
 
   return {
     productCardAddBtnText: productCard.productCardAddBtnText.value,
-    productCardOutOfStockBtnText: "Out of Stock",
+    productCardOutOfStockBtnText: productCard.productCardOutOfStockBtnText.value,
     productVariantLabelText: productCard.productVariantLabelText.value,
     footerPrevBtnText: footer.footerPrevBtnText.value,
     footerNextBtnText: footer.footerNextBtnText.value,
@@ -355,7 +357,7 @@ export function buildPpbCustomTextSettings(ppbLanguage: JsonObject) {
     discountRibbonSuffix: general.discountRibbonSuffix.value,
     selectSubscriptionPlanButtonText: general.selectSubscriptionPlanButtonText.value,
     stepsDrawerPillText: general.stepsDrawerPillText.value,
-    defaultProductUnavailableBtnText: "Out of Stock",
+    defaultProductUnavailableBtnText: productCard.productCardOutOfStockBtnText.value,
   };
 }
 
@@ -419,6 +421,7 @@ function buildPpbTextOverrides(customTextSettings: Record<string, unknown>) {
 
   return {
     productCardAddButton: String(customTextSettings.productCardAddBtnText),
+    productCardOutOfStockButton: String(customTextSettings.productCardOutOfStockBtnText),
     productCardInlineAddButton: String(customTextSettings.productCardAddBtnText_inPage),
     productDetailsUpdateButton: PPB_DEFAULTS.productDetailsUpdateButtonText,
     productVariantLabel: String(customTextSettings.productVariantLabelText),
@@ -527,9 +530,17 @@ export function buildSettingsLanguageFormState(settingsLanguage: unknown) {
   const document = isSettingsLanguageDocument(settingsLanguage)
     ? settingsLanguage
     : buildSettingsLanguageRuntime({ languageMode: "MULTIPLE", localeFieldValues: { en: {} } }).settingsLanguage;
+  const locales = Object.keys(document.mixAndMatchTextData);
+  const currentDefaults = buildSettingsLanguageRuntime({
+    languageMode: document.languageMode,
+    localeFieldValues: Object.fromEntries(locales.map((locale) => [locale, {}])),
+  }).settingsLanguage;
   const localeFieldValues: Record<string, Record<string, string>> = {};
-  for (const locale of Object.keys(document.mixAndMatchTextData)) {
+  for (const locale of locales) {
     const values: Record<string, string> = {};
+    collectFieldValues(values, "fpb", currentDefaults[locale]);
+    collectFieldValues(values, "ppb", currentDefaults.mixAndMatchTextData[locale]);
+    collectFieldValues(values, "shared", currentDefaults.sharedComponents[locale]);
     collectFieldValues(values, "fpb", document[locale]);
     collectFieldValues(values, "ppb", document.mixAndMatchTextData[locale]);
     collectFieldValues(values, "shared", document.sharedComponents[locale]);
@@ -556,9 +567,12 @@ export function buildSettingsLanguageFormState(settingsLanguage: unknown) {
 }
 
 export function buildSettingsLanguageResponse(settingsLanguage: unknown, bundleType: LanguageBundleType | string, requestedLocale?: string | null) {
-  const document = isSettingsLanguageDocument(settingsLanguage)
+  const savedDocument = isSettingsLanguageDocument(settingsLanguage)
     ? settingsLanguage
     : buildSettingsLanguageRuntime({}).settingsLanguage;
+  const document = buildSettingsLanguageRuntime(
+    buildSettingsLanguageFormState(savedDocument),
+  ).settingsLanguage;
   const activeLocale = resolveLocale(document, requestedLocale);
   const fpbLocale = document[activeLocale] as JsonObject;
   const ppbLocale = document.mixAndMatchTextData[activeLocale];

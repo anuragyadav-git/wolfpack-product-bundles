@@ -73,7 +73,7 @@ export function FpbSummaryTextSettings({
               />
               <s-button
                 variant="secondary"
-                icon="globe"
+              icon="language-translate"
                 disabled={!showTextOnAddButton || undefined}
                 onClick={() =>
                   openMultiLanguageModal("Add Button Text", [

@@ -84,14 +84,14 @@ describe('shared product card add button', () => {
 
     expect(card.querySelector('[aria-label="Précédente"]')).not.toBeNull();
     expect(card.querySelector('[aria-label="Suivante"]')).not.toBeNull();
-    expect(card.textContent).toContain('See all');
+    expect(card.textContent).toMatch(/See all/);
   });
 
   it('renders cards with keyboard focus metadata', () => {
     const card = createCard({ selectionId: 'variant-4', title: 'Accessible product', price: 1000 }, 0);
     expect(card.tabIndex).toBe(0);
-    expect(card.getAttribute('role')).toBe('group');
-    expect(card.getAttribute('aria-label')).toBe('Open product details (not selected)');
+    expect(card.getAttribute('role')).toEqual('group');
+    expect(card.getAttribute('aria-label')).toEqual('Open product details (not selected)');
     expect(card.hasAttribute('aria-pressed')).toBe(false);
   });
 });

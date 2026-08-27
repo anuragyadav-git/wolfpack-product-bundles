@@ -202,3 +202,30 @@ export function buildStorefrontPreviewFixture(templateKey: TemplateKey) {
     ],
   };
 }
+
+export function buildStorefrontPreviewUpsellFixture() {
+  return {
+    offer: {
+      bundleId: "settings-design-preview",
+      publicNumber: 1,
+      bundleName: "Bundle preview",
+      targetPath: "/apps/product-bundles/wpb/1",
+      mode: "block" as const,
+      copy: {
+        title: "Complete the set",
+        description: "Build a curated bundle with this product and complementary essentials.",
+        buttonText: "Build this bundle",
+      },
+      imageUrl: "/design-preview-product-4.png",
+      preselectBrowsedProduct: false,
+    },
+    context: {
+      productId: "9000000000001",
+      productHandle: "preview-product-1",
+      collectionIds: [],
+      locale: "en",
+      endpointUrl: "",
+      selectedVariantId: "9100000000001",
+    },
+  };
+}

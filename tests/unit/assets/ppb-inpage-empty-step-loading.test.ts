@@ -50,8 +50,8 @@ describe('PPB in-page empty step loading', () => {
     }
 
     expect(loadStepProducts).toHaveBeenCalledTimes(1);
-    expect(target.getAttribute('aria-busy')).toBe('false');
-    expect(target.textContent).toContain('No products are configured for this step.');
+    expect(target.getAttribute('aria-busy')).toEqual('false');
+    expect(target.textContent).toMatch(/No products are configured for this step\./);
   });
 });
 export {};

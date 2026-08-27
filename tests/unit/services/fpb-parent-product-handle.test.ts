@@ -48,6 +48,16 @@ function makeAdmin(returnedHandle: string) {
       if (query.includes("PublishBundleParentProduct")) {
         return response({ data: { publishablePublish: { userErrors: [] } } });
       }
+      if (query.includes("AddRebuySmartCartTag")) {
+        return response({
+          data: {
+            tagsAdd: {
+              node: { id: "gid://shopify/Product/10" },
+              userErrors: [],
+            },
+          },
+        });
+      }
       throw new Error(`Unexpected GraphQL operation: ${query}`);
     }),
   } as any;
@@ -93,6 +103,16 @@ function makeExistingAdmin(bundleType: "full_page" | "product_page") {
       }
       if (query.includes("PublishBundleParentProduct")) {
         return response({ data: { publishablePublish: { userErrors: [] } } });
+      }
+      if (query.includes("AddRebuySmartCartTag")) {
+        return response({
+          data: {
+            tagsAdd: {
+              node: { id: "gid://shopify/Product/10" },
+              userErrors: [],
+            },
+          },
+        });
       }
       throw new Error(`Unexpected ${bundleType} GraphQL operation: ${query}`);
     }),

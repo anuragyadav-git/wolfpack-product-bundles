@@ -234,7 +234,7 @@
 }
 
 @container fpb-shell (min-width: 800px) {
-  .layout-sidebar[data-fpb-design-preset="COMPACT"] > .category-tabs {
+  .layout-sidebar[data-fpb-design-preset="COMPACT"] .sidebar-content > .category-tabs {
     display: grid;
     grid-auto-flow: column;
     grid-auto-columns: max-content;
@@ -255,12 +255,12 @@
   }
 
   .layout-sidebar[data-fpb-design-preset="COMPACT"]
-    > .category-tabs::-webkit-scrollbar {
+    .sidebar-content > .category-tabs::-webkit-scrollbar {
     display: none;
   }
 
   .layout-sidebar[data-fpb-design-preset="COMPACT"]
-    > .category-tabs
+    .sidebar-content > .category-tabs
     .category-tab {
     display: grid;
     grid-template-columns: max-content 0;
@@ -282,7 +282,7 @@
   }
 
   .layout-sidebar[data-fpb-design-preset="COMPACT"]
-    > .category-tabs
+    .sidebar-content > .category-tabs
     .category-tab.active {
     border-color: #000;
     background: #000;
@@ -290,7 +290,7 @@
   }
 
   .layout-sidebar[data-fpb-design-preset="COMPACT"]
-    > .category-tabs
+    .sidebar-content > .category-tabs
     .category-tab
     .tab-label {
     color: inherit;
@@ -302,7 +302,7 @@
   }
 
   .layout-sidebar[data-fpb-design-preset="COMPACT"]
-    > .category-tabs
+    .sidebar-content > .category-tabs
     .category-tab
     .tab-indicator {
     display: none;
@@ -843,7 +843,7 @@
     margin-inline: 0;
   }
 
-  .layout-sidebar[data-fpb-design-preset="COMPACT"] > .category-tabs {
+  .layout-sidebar[data-fpb-design-preset="COMPACT"] .sidebar-content > .category-tabs {
     display: grid;
     grid-auto-flow: column;
     grid-auto-columns: max-content;
@@ -863,12 +863,12 @@
   }
 
   .layout-sidebar[data-fpb-design-preset="COMPACT"]
-    > .category-tabs::-webkit-scrollbar {
+    .sidebar-content > .category-tabs::-webkit-scrollbar {
     display: none;
   }
 
   .layout-sidebar[data-fpb-design-preset="COMPACT"]
-    > .category-tabs
+    .sidebar-content > .category-tabs
     .category-tab {
     display: grid;
     grid-template-columns: max-content 0;
@@ -890,7 +890,7 @@
   }
 
   .layout-sidebar[data-fpb-design-preset="COMPACT"]
-    > .category-tabs
+    .sidebar-content > .category-tabs
     .category-tab.active {
     border-color: #000;
     background: #000;
@@ -898,7 +898,7 @@
   }
 
   .layout-sidebar[data-fpb-design-preset="COMPACT"]
-    > .category-tabs
+    .sidebar-content > .category-tabs
     .category-tab
     .tab-label {
     color: inherit;
@@ -910,7 +910,7 @@
   }
 
   .layout-sidebar[data-fpb-design-preset="COMPACT"]
-    > .category-tabs
+    .sidebar-content > .category-tabs
     .category-tab
     .tab-indicator {
     display: none;

@@ -59,7 +59,7 @@ describe("global Settings Controls storefront runtime", () => {
     }, runtimeWindow, runtimeDocument);
 
     expect(styles).toHaveLength(1);
-    expect(styles[0].textContent).toContain(".merchant-theme");
+    expect(styles[0].textContent).toMatch(/\.merchant-theme/);
     expect(runtimeWindow.__merchantControlRuns).toBe(2);
   });
 

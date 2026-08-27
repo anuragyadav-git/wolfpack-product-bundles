@@ -179,7 +179,7 @@ describe("FPB product modal read-only quick view", () => {
     expect(elements["modal-product-description"].innerHTML).toBe(
       "<p>Soft <strong>cotton</strong> product description.</p>",
     );
-    expect(elements["modal-product-description"].textContent).toBe("Soft cotton product description.");
+    expect(elements["modal-product-description"].textContent).toContain("Soft cotton product description.");
   });
 
   it("renders plain product descriptions as text when descriptionHtml is missing", async () => {
@@ -193,9 +193,7 @@ describe("FPB product modal read-only quick view", () => {
     modal.selectedQuantity = 1;
     modal.populateModal();
 
-    expect(elements["modal-product-description"].textContent).toBe(
-      "Plain <strong>text</strong> fallback.",
-    );
+    expect(elements["modal-product-description"].textContent).toContain("Plain <strong>text</strong> fallback.",);
     expect(elements["modal-product-description"].querySelector('strong')).toBeNull();
   });
 

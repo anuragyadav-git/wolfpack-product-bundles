@@ -1,17 +1,17 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 320" role="img" aria-labelledby="title desc">
   <title id="title">Storefront hero banner placement</title>
-  <desc id="desc">A storefront browser with its large homepage hero section highlighted.</desc>
-  <rect width="640" height="360" rx="24" fill="#f1f2f4"/>
-  <rect x="30" y="30" width="580" height="300" rx="14" fill="#fff" stroke="#c9ccd0" stroke-width="3"/>
-  <rect x="30" y="30" width="580" height="42" rx="14" fill="#e5e7e9"/>
-  <circle cx="54" cy="51" r="6" fill="#9ca3aa"/><circle cx="74" cy="51" r="6" fill="#9ca3aa"/><circle cx="94" cy="51" r="6" fill="#9ca3aa"/>
-  <rect x="54" y="91" width="86" height="12" rx="6" fill="#202223"/>
-  <rect x="410" y="91" width="42" height="9" rx="4" fill="#8c9196"/><rect x="466" y="91" width="42" height="9" rx="4" fill="#8c9196"/><rect x="522" y="91" width="42" height="9" rx="4" fill="#8c9196"/>
-  <rect x="54" y="124" width="532" height="176" rx="10" fill="#dff3e7" stroke="#008060" stroke-width="4"/>
-  <rect x="82" y="159" width="196" height="20" rx="6" fill="#164d3d"/>
-  <rect x="82" y="193" width="154" height="10" rx="5" fill="#5c7c72"/><rect x="82" y="215" width="124" height="10" rx="5" fill="#5c7c72"/>
-  <rect x="82" y="247" width="104" height="30" rx="7" fill="#202223"/>
-  <rect x="359" y="147" width="183" height="130" rx="9" fill="#b8ddc8"/>
-  <circle cx="450" cy="191" r="31" fill="#fff" opacity=".68"/><path d="M404 258c18-42 48-65 93-83 20 22 29 50 25 83z" fill="#78b793"/>
-  <rect x="44" y="115" width="136" height="28" rx="14" fill="#008060"/><text x="112" y="134" fill="#fff" font-family="Arial,sans-serif" font-size="13" text-anchor="middle">HERO SECTION</text>
+  <desc id="desc">A compact storefront preview with a prominent homepage hero and bundle button.</desc>
+  <rect width="640" height="320" fill="#f8f5ef"/>
+  <rect width="640" height="58" fill="#fff"/>
+  <text x="28" y="36" fill="#1f1f1f" font-family="Arial,sans-serif" font-size="17" font-weight="700">NORTH &amp; PINE</text>
+  <g fill="#686868" font-family="Arial,sans-serif" font-size="11"><text x="364" y="34">SHOP</text><text x="410" y="34">COLLECTIONS</text><text x="495" y="34">JOURNAL</text><text x="556" y="34">ABOUT</text></g>
+  <rect y="58" width="640" height="262" fill="#d9c5aa"/>
+  <path d="M390 58h250v262H334c36-66 55-153 56-262z" fill="#a78b6d"/>
+  <circle cx="502" cy="148" r="62" fill="#eadcc8" opacity=".72"/>
+  <path d="M425 286c20-83 67-136 142-166 34 44 46 100 36 166z" fill="#6e8068"/>
+  <text x="46" y="132" fill="#fff" font-family="Arial,sans-serif" font-size="30" font-weight="700">BUILD YOUR PERFECT</text>
+  <text x="46" y="166" fill="#fff" font-family="Arial,sans-serif" font-size="30" font-weight="700">BUNDLE</text>
+  <text x="46" y="198" fill="#fff" font-family="Arial,sans-serif" font-size="14">Choose your favourites and save more together.</text>
+  <rect x="46" y="224" width="132" height="38" rx="5" fill="#202020"/>
+  <text x="112" y="248" fill="#fff" font-family="Arial,sans-serif" font-size="13" text-anchor="middle">Shop the bundle</text>
 </svg>

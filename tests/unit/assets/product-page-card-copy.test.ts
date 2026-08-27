@@ -37,6 +37,16 @@ describe('PPB product card button copy', () => {
     })).toBe('Added x2');
   });
 
+  it('uses the configured out-of-stock copy', () => {
+    expect(resolveProductPageCardButtonText({
+      currentQuantity: 0,
+      currentStep: {},
+      outOfStock: true,
+      outOfStockText: 'Sold Out Here',
+      defaultAddText: 'Add to Cart',
+    })).toBe('Sold Out Here');
+  });
+
   it('resolves PPB inline product-card add copy before modal add copy', () => {
     const resolveText = jest.fn((key: string, fallback: string) => ({
       productCardAddButton: 'Modal Add',
@@ -75,6 +85,6 @@ describe('PPB product card button copy', () => {
     global.document = originalDocument;
 
     expect(selector.querySelector('[aria-label="Choose Variant"]')).not.toBeNull();
-    expect(selector.textContent).toContain('Choose Variant');
+    expect(selector.textContent).toMatch(/Choose Variant/);
   });
 });

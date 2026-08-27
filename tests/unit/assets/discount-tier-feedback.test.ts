@@ -140,7 +140,7 @@ describe('mounted discount pill feedback', () => {
 
     root.dispatch({ bundleId: 'bundle-1', tierId: 'tier-1', tierIndex: 0, tierCount: 2, feedbackState: 'tier' });
 
-    expect(portalPills[0].getAttribute('data-wpb-discount-feedback')).toBe('tier');
+    expect(portalPills[0].getAttribute('data-wpb-discount-feedback')).toEqual('tier');
     jest.advanceTimersByTime(650);
     expect(portalPills[0].hasAttribute('data-wpb-discount-feedback')).toBe(false);
     cleanup();
@@ -155,7 +155,7 @@ describe('mounted discount pill feedback', () => {
     jest.advanceTimersByTime(900);
     root.dispatch(detail);
     jest.advanceTimersByTime(1199);
-    expect(pills[0].getAttribute('data-wpb-discount-feedback')).toBe('complete');
+    expect(pills[0].getAttribute('data-wpb-discount-feedback')).toEqual('complete');
     jest.advanceTimersByTime(1);
     expect(pills[0].hasAttribute('data-wpb-discount-feedback')).toBe(false);
     cleanup();

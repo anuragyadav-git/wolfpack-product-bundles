@@ -163,8 +163,8 @@ describe('PPB in-page rendering control wiring', () => {
     expect(target.querySelector('[aria-label^="Decrease quantity"]')).not.toBeNull();
     const increase = target.querySelector('button[aria-label^="Increase quantity"]') as HTMLButtonElement;
     expect(increase.disabled).toBe(true);
-    expect(increase.getAttribute('aria-disabled')).toBe('true');
-    expect(target.textContent).not.toContain('Added x3');
+    expect(increase.getAttribute('aria-disabled')).toEqual('true');
+    expect(target.textContent).not.toMatch(/Added x3/);
   });
 
   it.each([
@@ -281,7 +281,7 @@ describe('PPB in-page rendering control wiring', () => {
     expect(target.innerHTML).toContain('product-add-btn');
     expect(target.innerHTML).toContain('disabled');
     expect(target.innerHTML).toContain('aria-disabled="true"');
-    expect(target.textContent).toContain('Out of Stock');
+    expect(target.textContent).toMatch(/Out of Stock/);
   });
 
   it('uses selectionId as the shared card identity key in in-page rendering', () => {

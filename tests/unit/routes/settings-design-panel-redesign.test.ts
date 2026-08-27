@@ -258,7 +258,7 @@ describe("DesignLivePreview", () => {
     ["horizontal-slots", "product-picker"],
     ["standard", "loading"],
     ["product-grid", "validation"],
-    ["vertical-slots", "upsell"],
+    ["standard", "upsell"],
   ] as const)("renders the %s %s deterministic preview state", (templateKey, scenario) => {
     const template = DESIGN_PREVIEW_TEMPLATES.find((item) => item.key === templateKey);
     const view = renderToStaticMarkup(
@@ -276,6 +276,24 @@ describe("DesignLivePreview", () => {
 
     expect(view).toContain(`data-preview-scenario="${scenario}"`);
     expect(view).toContain(`settingsDcp.preview.stateSelector.${scenario}`);
+  });
+
+  it("falls back when an initial preview state is unsupported by the selected template", () => {
+    const view = renderToStaticMarkup(
+      React.createElement(DesignLivePreview, {
+        fieldValues: {},
+        initialState: {
+          bundleType: "product_page",
+          templateKey: "vertical-slots",
+          viewport: "desktop",
+          area: "product-slots",
+          scenario: "upsell",
+        },
+      }),
+    );
+
+    expect(view).toContain('data-preview-scenario="default"');
+    expect(view).not.toContain("settingsDcp.preview.stateSelector.upsell");
   });
 
   it("delegates the selected component to the production renderer frame", () => {

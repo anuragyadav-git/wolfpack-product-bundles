@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import type { ConfigureChildItem } from "../../../../lib/bundle-config/common-configure-page-model";
 import type { ParentProductStatusUi } from "../../../../lib/parent-product-status-ui";
 import { DiscountMethod } from "../../../../types/pricing";
+import { getConfigureActionIcon } from "../../../../lib/bundle-config/configure-action-icons";
 
 type StatusBadge = { label: string; tone?: string } | null;
 type CommonSetupItem = ConfigureChildItem & {
@@ -456,6 +457,7 @@ export function CommonConfigureSupplement({
           <span className={styles.bundleLivePlaceOnTheme}>{liveCard.label}</span>
           <s-button
             variant="secondary"
+            icon={getConfigureActionIcon("place")}
             loading={liveCard.loading || undefined}
             disabled={liveCard.disabled || undefined}
             onClick={liveCard.onAction}

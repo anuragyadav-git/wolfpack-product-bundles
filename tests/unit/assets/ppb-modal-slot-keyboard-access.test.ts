@@ -65,7 +65,7 @@ describe('PPB modal slot keyboard access', () => {
 
     const removeAction = getRemoveControl(card);
     expect(card.getAttribute('aria-label')).toBeNull();
-    expect(removeAction.getAttribute('aria-label')).toMatch(/^Remove/);
+    expect(removeAction.getAttribute('aria-label')).toEqual(expect.stringMatching(/^Remove/));
     const identity = card.children.at(-1);
     expect(identity?.children[0]?.textContent).toBe('Obsidian Earrings');
     expect(identity?.children[1]?.children[0]?.textContent).toBe('$ 829.00');
@@ -89,7 +89,7 @@ describe('PPB modal slot keyboard access', () => {
 
     expect(remove.tagName).toBe('BUTTON');
     expect(remove.type).toBe('button');
-    expect(remove.getAttribute('aria-label')).toBe(`Remove ${productTitle}`);
+    expect(remove.getAttribute('aria-label')).toEqual(`Remove ${productTitle}`);
     expect(remove.title).toBe(`Remove ${productTitle}`);
     expect(widget._resolveText).toHaveBeenCalledWith(
       'removeProductFromFooterText',

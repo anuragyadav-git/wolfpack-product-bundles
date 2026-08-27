@@ -47,6 +47,7 @@ export function FpbSyncAndLanguageModals({
         <s-button
           slot="primary-action"
           variant="primary"
+          icon="refresh"
           loading={flow.fetcher.state === "submitting" || undefined}
           onClick={flow.handleSyncBundleConfirm}
         >

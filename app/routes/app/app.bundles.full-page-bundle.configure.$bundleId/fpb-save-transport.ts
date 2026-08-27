@@ -45,7 +45,7 @@ function compactImage(value: unknown): Record<string, unknown> | null {
 
 function compactImages(value: unknown): Record<string, unknown>[] {
   return asArray(value)
-    .map(compactImage)
+    .map((value) => compactImage(value))
     .filter((image): image is Record<string, unknown> => image !== null)
     .slice(0, 1);
 }
@@ -119,7 +119,7 @@ function compactVariant(value: unknown): Record<string, unknown> | null {
 
 function compactVariants(value: unknown): Record<string, unknown>[] {
   return asArray(value)
-    .map(compactVariant)
+    .map((value) => compactVariant(value))
     .filter((variant): variant is Record<string, unknown> => variant !== null);
 }
 
@@ -166,7 +166,7 @@ function compactProduct(value: unknown): Record<string, unknown> | null {
 
 function compactProducts(value: unknown): Record<string, unknown>[] {
   return asArray(value)
-    .map(compactProduct)
+    .map((value) => compactProduct(value))
     .filter((product): product is Record<string, unknown> => product !== null);
 }
 
@@ -187,7 +187,7 @@ function compactCollection(value: unknown): Record<string, unknown> | null {
 
 function compactCollections(value: unknown): Record<string, unknown>[] {
   return asArray(value)
-    .map(compactCollection)
+    .map((value) => compactCollection(value))
     .filter((collection): collection is Record<string, unknown> => collection !== null);
 }
 
@@ -223,7 +223,7 @@ function compactCategory(value: unknown): Record<string, unknown> | null {
 
 function compactCategories(value: unknown): Record<string, unknown>[] {
   return asArray(value)
-    .map(compactCategory)
+    .map((value) => compactCategory(value))
     .filter((category): category is Record<string, unknown> => category !== null);
 }
 

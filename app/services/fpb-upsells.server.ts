@@ -74,7 +74,7 @@ export function selectEligibleFpbUpsells(
   context: { productId: string; collectionIds: string[]; locale: string },
 ): FpbUpsellOfferDto[] {
   const productId = id(context.productId);
-  const collectionIds = new Set(context.collectionIds.map(id).filter(Boolean));
+  const collectionIds = new Set(context.collectionIds.map((value) => id(value)).filter(Boolean));
   const seen = new Set<string>();
   return bundles
     .filter((bundle) => bundle.bundleType === "full_page")

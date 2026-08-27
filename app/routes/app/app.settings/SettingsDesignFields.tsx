@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useAppBridge } from "@shopify/app-bridge-react";
 import type { SettingsField } from "../../../lib/admin-configuration-surfaces";
 import { getSlotIconRecommendation } from "../../../lib/settings-design-runtime";
 import { FilePicker } from "../../../components/shared/FilePicker";
@@ -14,6 +15,7 @@ import {
   useModalHideListener,
 } from "../_shared/bundle-configure/modal-utils";
 import { useTranslation } from "react-i18next";
+import { showSettingsErrorToast } from "./settings-feedback";
 
 const isPolarisHexColor = (value: string) => {
   if (value.length !== 7 && value.length !== 9) return false;
@@ -194,9 +196,9 @@ export function BundlePreviewModal({
   onClose: () => void;
 }) {
   const { t } = useTranslation();
+  const shopify = useAppBridge();
   const modalRef = useRef<HTMLElement | null>(null);
   const [pendingBundleId, setPendingBundleId] = useState<string | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   useModalHideListener(modalRef, onClose);
 
   useEffect(() => {
@@ -206,15 +208,15 @@ export function BundlePreviewModal({
 
   const openPreview = async (bundle: SettingsPreviewBundle) => {
     setPendingBundleId(bundle.id);
-    setErrorMessage(null);
     try {
       await openSettingsBundleStorefrontPreview(bundle);
     } catch (error) {
-      setErrorMessage(error instanceof SettingsPreviewError
+      const message = error instanceof SettingsPreviewError
         ? t(`settingsDcp.preview.storefront.errors.${error.code}`)
         : error instanceof Error
           ? error.message
-          : t("settingsDcp.preview.storefront.errors.notReady"));
+          : t("settingsDcp.preview.storefront.errors.notReady");
+      showSettingsErrorToast(shopify, message);
     } finally {
       setPendingBundleId(null);
     }
@@ -231,7 +233,6 @@ export function BundlePreviewModal({
         {t("settingsDcp.preview.storefront.close")}
       </s-button>
       <s-stack gap="base">
-        {errorMessage ? <s-banner tone="critical">{errorMessage}</s-banner> : null}
         {bundles.length === 0 ? (
           <s-paragraph>{t("settingsDcp.preview.storefront.empty")}</s-paragraph>
         ) : (

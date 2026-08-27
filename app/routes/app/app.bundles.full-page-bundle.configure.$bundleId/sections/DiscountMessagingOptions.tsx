@@ -162,6 +162,7 @@ export function FpbDiscountMessagingOptions({
               <div style={{ textAlign: "right" }}>
                 <s-button
                   variant="tertiary"
+                  icon="code"
                   onClick={() => setIsDiscountVariablesModalOpen(true)}
                 >
                   Show Variables

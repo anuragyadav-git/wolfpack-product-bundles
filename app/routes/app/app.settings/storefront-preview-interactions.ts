@@ -12,11 +12,49 @@ type StorefrontPreviewRendererState = {
   templateKey: string;
 };
 
+type LoadingPreviewController = {
+  showLoadingOverlay?: (gifUrl: null, options: { bootstrap: true }) => unknown;
+  hideLoadingOverlay?: (...args: unknown[]) => unknown;
+};
+
+type LoadingPreviewState = {
+  persistent: boolean;
+  hide: ((...args: unknown[]) => unknown) | undefined;
+};
+
+const loadingPreviewStates = new WeakMap<object, LoadingPreviewState>();
+
 export function getStorefrontPreviewRendererKey(
   state: StorefrontPreviewRendererState | null | undefined,
   resetVersion: number,
 ) {
   return `${state?.bundleType ?? "pending"}:${state?.templateKey ?? "pending"}:${resetVersion}`;
+}
+
+export function setStorefrontPreviewLoadingPersistent(
+  controller: LoadingPreviewController,
+  persistent: boolean,
+) {
+  let previewState = loadingPreviewStates.get(controller);
+  if (!previewState) {
+    previewState = {
+      persistent: false,
+      hide: controller.hideLoadingOverlay?.bind(controller),
+    };
+    loadingPreviewStates.set(controller, previewState);
+    controller.hideLoadingOverlay = (...args: unknown[]) => {
+      if (previewState?.persistent) return;
+      return previewState?.hide?.(...args);
+    };
+  }
+
+  const wasPersistent = previewState.persistent;
+  previewState.persistent = persistent;
+  if (persistent) {
+    if (!wasPersistent) controller.showLoadingOverlay?.(null, { bootstrap: true });
+    return;
+  }
+  previewState.hide?.();
 }
 
 export function createStorefrontPreviewOverlayHost(documentRef: Document) {

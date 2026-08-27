@@ -81,7 +81,10 @@ export function normalizeAddonTier(tier: any, index: number) {
     tierId: tier?.tierId || `tier${index + 1}`,
     title: tier?.title || `Tier ${index + 1}`,
     selectedAddonProducts: Array.isArray(tier?.selectedAddonProducts)
-      ? tier.selectedAddonProducts.map(normalizeAddonPickerProduct)
+      ? tier.selectedAddonProducts.map(
+          (value: Parameters<typeof normalizeAddonPickerProduct>[0]) =>
+            normalizeAddonPickerProduct(value),
+        )
       : [],
     eligibilityCondition: {
       type: eligibilityType,
@@ -165,7 +168,12 @@ export function buildAddonDraftFromPersonalizationData(
   const addonProducts = personalizationData?.addonProducts || {};
   const tiers =
     Array.isArray(addonProducts?.tiers)
-      ? addonProducts.tiers.map(addonTierToDraft)
+      ? addonProducts.tiers.map(
+          (
+            value: Parameters<typeof addonTierToDraft>[0],
+            index: number,
+          ) => addonTierToDraft(value, index),
+        )
       : [];
 
   return {
@@ -193,7 +201,10 @@ export function buildPersonalizationDataFromDraft(
     Array.isArray(addonDraft?.addonTiers)
       ? addonDraft.addonTiers
       : [];
-  const tiers = addonTiers.map(normalizeAddonTier);
+  const tiers = addonTiers.map(
+    (value: Parameters<typeof normalizeAddonTier>[0], index: number) =>
+      normalizeAddonTier(value, index),
+  );
 
   const personalizationData: Record<string, any> = {
     isPersonalizationEnabled,

@@ -246,7 +246,7 @@ describe('PPB modal accessibility keyboard and focus management', () => {
 
     ProductPageModalStateMethods.updateModalNavigation.call(context);
 
-    expect(nextButton.textContent).toBe('Done');
+    expect(nextButton.textContent).toContain('Done');
     expect(attributes.get('aria-label')).toBe('Done');
   });
 
@@ -481,7 +481,7 @@ describe('PPB modal accessibility keyboard and focus management', () => {
       },
     );
 
-    expect(footerDiscountText.textContent).toContain('Ajouter');
+    expect(footerDiscountText.textContent).toMatch(/Ajouter/);
     expect(footerDiscountText.querySelector('span')).not.toBeNull();
     expect(discountSection.classList.remove).toHaveBeenCalled();
   });

@@ -284,7 +284,7 @@ export function normalizePricingDisplayOptions({
   const savedOptionsByRuleId = savedQuantityOptions?.optionsByRuleId || {};
   const savedOptionsByLocaleByRuleId = savedQuantityOptions?.optionsByLocaleByRuleId || {};
   const quantityRules = safeRules
-    .filter(isQuantityRule)
+    .filter((value) => isQuantityRule(value))
     .sort((a, b) => (Number(a.conditionValue ?? 0) || 0) - (Number(b.conditionValue ?? 0) || 0));
   const quantityRuleIds = new Set(quantityRules.map((rule) => rule.id));
   const savedDefaultRuleId = savedQuantityOptions?.defaultRuleId || null;

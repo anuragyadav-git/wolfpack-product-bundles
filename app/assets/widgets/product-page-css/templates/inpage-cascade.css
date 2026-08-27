@@ -97,15 +97,6 @@
   width: 100%;
 }
 
-.bw-ppb-inpage-step-title {
-  font-size: 14px;
-  font-weight: 700;
-  line-height: 1.4;
-  color: #111111;
-  margin: 0;
-  text-align: left;
-}
-
 .bw-ppb-inpage-category-tabs {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));

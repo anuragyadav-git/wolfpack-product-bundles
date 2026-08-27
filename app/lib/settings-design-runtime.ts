@@ -630,6 +630,7 @@ export function buildSettingsDesignRuntime(
       bundleUpsellButtonBgColor: String((pageCustomization.generalSettings as JsonObject).bundleUpSellButtonBg ?? primaryColor),
       bundleUpsellBorderColor: String((pageCustomization.generalSettings as JsonObject).bundleUpSellButtonBorderColor ?? primaryColor),
       bundleUpsellTextColor: String((pageCustomization.generalSettings as JsonObject).bundleUpsellTextColor ?? buttonTextColor),
+      bundleUpsellFontColor: String((pageCustomization.generalSettings as JsonObject).bundleUpsellFontColor ?? primaryTextColor),
       loadingScreen: {
         gifUrl: loadingGifUrl,
         backgroundColor: loadingBackgroundColor,

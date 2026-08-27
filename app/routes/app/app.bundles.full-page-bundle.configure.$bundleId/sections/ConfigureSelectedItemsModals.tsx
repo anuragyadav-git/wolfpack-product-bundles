@@ -11,7 +11,6 @@ export function FpbSelectedItemsModals({
     addonSelectedProductsModalRef,
     addonSelectedProductsTierIndex,
     addonVariablesModalRef,
-    bundle,
     collectionsModalRef,
     currentModalStepId,
     disableAddonStepModalRef,
@@ -205,6 +204,7 @@ export function FpbSelectedItemsModals({
         <s-button
           slot="primary-action"
           variant="primary"
+          icon="product-add"
           onClick={() =>
             handleAddonSelectedProductAdd(addonSelectedProductsTierIndex ?? 0, {
               reopenSelectedProductsModal: true,
@@ -304,6 +304,7 @@ export function FpbSelectedItemsModals({
         <s-button
           slot="primary-action"
           variant="primary"
+          icon="check"
           commandFor="template-variables-modal"
           command="--hide"
           onClick={() => hidePolarisModal(templateVariablesModalRef)}

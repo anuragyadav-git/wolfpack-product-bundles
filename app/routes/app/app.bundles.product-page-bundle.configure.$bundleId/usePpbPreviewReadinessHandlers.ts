@@ -1,13 +1,11 @@
 import { useCallback, useMemo, useState } from "react";
 import { AppLogger } from "../../../lib/logger";
 import { navigateBackOrFallback } from "../../../lib/navigation";
-import productPageBundleStyles from "../../../styles/routes/product-page-bundle-configure.module.css";
 import { markBundlePreviewComplete } from "../../../lib/bundle-preview-readiness";
 import { pickPpbPreviewUrl } from "../../../lib/ppb-preview-url";
 import { appendBundlePreviewToken } from "../../../lib/bundle-preview-url";
 import { prepareStorefrontPreviewForOpen } from "../../../lib/storefront-sync-preview.client";
 import { validatePpbWidgetPlacementBeforePreview } from "../../../lib/ppb-widget-placement.client";
-import { openThemeEditorInNewTab } from "../../../lib/theme-editor-navigation.client";
 import { blockUnsavedAdminNavigation } from "../../../lib/admin-unsaved-navigation";
 import {
   openPendingDashboardPreview,

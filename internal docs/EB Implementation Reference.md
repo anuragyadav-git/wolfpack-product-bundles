@@ -5,7 +5,7 @@ title: EB Implementation Reference
 type: reference
 status: authoritative
 summary: Records directly verified reference-app contracts used for Wolfpack bundle implementation and parity decisions.
-last_audited: 2026-08-25
+last_audited: 2026-08-27
 owners:
   - engineering
 domains:
@@ -1009,7 +1009,7 @@ Buy X, Get Y:
 
 ### Bundle Visibility — Product Page Widget and Embed
 
-Live authenticated EB evidence refreshed on 2026-08-20 separates the Product
+Live authenticated EB evidence refreshed on 2026-08-27 separates the Product
 Page Bundle **Bundle Embed** builder from the older upsell widget flow:
 
 - Bundle Embed is a two-card Admin flow. Its master control is **Embed Bundle
@@ -1017,6 +1017,9 @@ Page Bundle **Bundle Embed** builder from the older upsell widget flow:
   products in bundle / Specific products / Specific collections, and **Add
   browsed product to bundle**. Changing targeting mode clears both product and
   collection selections.
+- Disabling the master control leaves the saved configuration visible but
+  inert. The second card's **Place Block** action remains available because
+  theme placement is configured independently from storefront enablement.
 - The canonical configuration is
   `bundleUpsellConfig.upsellConfiguration`: `isEnabled`, `title`, `subTitle`,
   the five-array `displayConfiguration`, and
@@ -1056,6 +1059,17 @@ Reference URLs:
 
 - `https://help.skailama.com/en/article/setting-up-an-upsell-bundle-button-or-a-block-on-product-pages-for-bundles-1w2m8i7/`
 - `https://help.skailama.com/en/article/going-live-with-a-product-page-bundle-builder-ifuxvi/`
+
+### Bundle Visibility — Publishing Best Practices Grid
+
+Live authenticated FPB and PPB configure evidence refreshed on 2026-08-27 confirms one shared presentation contract:
+
+- Publishing Best Practices is a responsive two-column grid in the configure page's main content column and collapses to one column on narrow screens.
+- The four cards are Hero Banner, Navigation Menu, Announcement Banner, and Featured Product Card, in that order.
+- Each compact card uses an edge-to-edge roughly 2:1 storefront thumbnail, then a title, one short description, and a final row containing Quick Setup Guide plus the plain `5 min setup` estimate.
+- The time estimate is not a heading-level badge, and the thumbnail does not add instructional callouts that duplicate the card title.
+- All four Quick Setup Guide actions open the same complete visibility guide article, which documents placement-specific instructions for all four cards.
+- FPB and PPB display the same cards and guidance; only the bundle link and the additional placement options below the grid vary by bundle type.
 
 ### Default/Preselected Products Shape
 
@@ -1913,8 +1927,9 @@ Verified on the authenticated `agent-5sfidg3m` SIT store on 2026-08-21:
 Captured from the EB checkout/side-cart functions article on 2026-07-02:
 
 - EB lists post-add callbacks for checkout and cart apps. Article-listed entries are Theme cart drawer, GoKwik, Shopflo, Zecpay, Rebuy, Shiprocket/Fastrr, Monster cart, Upcart, and Kaching Cart.
-- Checkout handoff examples include GoKwik `window.gokwikSdk.initCheckout(merchantInfo);`, Shopflo `window.Shopflo.openCheckout()`, Zecpay `zecpeCheckFunctionAndCall("handleOcc")`, and Shiprocket/Fastrr `shiprocketCheckoutBuyCartHandler()`.
-- Side-cart/cart-refresh examples include Rebuy `Cart.getCart()`, Upcart `window.upcartOpenCart()`, and Kaching Cart `kachingCartApi.openCart()` plus `kachingCartApi.refreshCart()`. Theme cart drawer and Monster cart use EB-owned helper code in the article; WPB implements those as WPB-owned cart refresh/open callbacks rather than depending on competitor-owned globals.
+- Checkout handoff examples include GoKwik `window.gokwikSdk.initCheckout(merchantInfo);`, Shopflo's current documented `window.Shopflo.openFloCheckout(checkout_url)`, Zecpay `zecpeCheckFunctionAndCall("handleOcc")`, and Shiprocket/Fastrr `shiprocketCheckoutBuyCartHandler()`.
+- Side-cart/cart-refresh examples include Rebuy's current documented `window.Rebuy.Cart.getCart()`, Upcart `window.upcartOpenCart()`, and Kaching Cart `kachingCartApi.openCart()` plus `kachingCartApi.refreshCart()`. Theme cart drawer and Monster cart use EB-owned helper code in the article; WPB implements those as WPB-owned cart refresh/open callbacks rather than depending on competitor-owned globals.
+- Current provider contracts take precedence over the older EB help examples: Shopflo receives the generated checkout URL as its sole argument, and Rebuy is resolved through the `Rebuy` namespace rather than a root `Cart` global.
 - For some checkout apps EB persists the generated discount code into `sessionStorage` and the `discount_code` cookie before invoking the checkout app.
 - When the checkout handoff bypasses the native Shopify checkout path where Cart Transform grouping is applied, WPB uses the Discount Function to recreate the bundle price modification through a generated Shopify app discount code.
 - WPB-generated checkout-integration codes are created only for GoKwik, Shopflo, Zecpay, and Shiprocket/Fastrr. They use the `WPB-` prefix, one use, `PRODUCT` discount class, and a 30 minute expiry. The EB help article did not reveal a precise TTL, so 30 minutes is the documented default until live network/Admin discount evidence proves another value.

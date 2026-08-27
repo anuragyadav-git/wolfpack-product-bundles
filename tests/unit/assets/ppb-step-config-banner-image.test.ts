@@ -61,7 +61,7 @@ function createElement(tagName: string): any {
         }
         return null;
       };
-      return children.map(visit).find(Boolean) ?? null;
+      return children.map((value) => visit(value)).find(Boolean) ?? null;
     },
   };
   return element;

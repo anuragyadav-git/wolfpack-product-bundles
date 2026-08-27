@@ -37,14 +37,14 @@ describe('FPB Standard mobile variant drawer', () => {
       document: runtimeDocument,
     });
 
-    expect(view.textContent).toContain('Keto Fresh Meal Subscription');
-    expect(view.textContent).toContain('Choose Options');
-    expect(view.textContent).toContain('6 meals');
-    expect(view.textContent).toContain('$95.40');
-    expect(view.textContent).toContain('7 meals');
-    expect(view.textContent).toContain('$111.30');
+    expect(view.textContent).toMatch(/Keto Fresh Meal Subscription/);
+    expect(view.textContent).toMatch(/Choose Options/);
+    expect(view.textContent).toMatch(/6 meals/);
+    expect(view.textContent).toMatch(/\$95\.40/);
+    expect(view.textContent).toMatch(/7 meals/);
+    expect(view.textContent).toMatch(/\$111\.30/);
     expect(view.querySelector('[aria-disabled="true"]')).not.toBeNull();
     expect(view.querySelector('[aria-label="Close variant selector"]')).not.toBeNull();
-    expect(view.textContent).not.toContain('undefined');
+    expect(view.textContent).not.toMatch(/undefined/);
   });
 });

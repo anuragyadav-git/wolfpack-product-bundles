@@ -30,6 +30,8 @@ type ParentProductNode = {
   } | null;
 };
 
+const REBUY_SMART_CART_BUNDLE_TAG = "smart-cart-hide-bundle-options";
+
 export type BundleParentProductResult = {
   productId: string;
   variantId: string;
@@ -250,6 +252,37 @@ function throwUserErrors(operation: string, userErrors: ShopifyUserError[] | und
   }
 }
 
+async function addRebuySmartCartCompatibilityTag(
+  admin: ShopifyAdmin,
+  productId: string,
+) {
+  const response = await admin.graphql(
+    `
+      mutation AddRebuySmartCartTag($id: ID!, $tags: [String!]!) {
+        tagsAdd(id: $id, tags: $tags) {
+          node { id }
+          userErrors { field message }
+        }
+      }
+    `,
+    {
+      variables: {
+        id: productId,
+        tags: [REBUY_SMART_CART_BUNDLE_TAG],
+      },
+    },
+  );
+  const data = (await response.json()) as {
+    data?: { tagsAdd?: { userErrors?: ShopifyUserError[] } };
+    errors?: unknown[];
+  };
+  throwTransportErrors("add Rebuy Smart Cart compatibility tag", data.errors);
+  throwUserErrors(
+    "add Rebuy Smart Cart compatibility tag",
+    data.data?.tagsAdd?.userErrors,
+  );
+}
+
 async function loadParentProduct(
   admin: ShopifyAdmin,
   productId: string,
@@ -328,6 +361,7 @@ async function createParentProduct(input: {
           ...(input.bundle.bundleType === "full_page"
             ? { handle: buildFpbInternalParentHandle(input.bundle.id) }
             : {}),
+          claimOwnership: { bundles: true },
           status: "UNLISTED",
           descriptionHtml: buildBundleProductDescriptionHtml({
             bundleName: input.bundle.name,
@@ -336,7 +370,7 @@ async function createParentProduct(input: {
           tags: [
             "WP-Bundles",
             "wolfpack-bundle-parent",
-            "wolfpack-hide-bundle-options",
+            REBUY_SMART_CART_BUNDLE_TAG,
           ],
         },
         ...(media ? { media } : {}),
@@ -507,6 +541,7 @@ export async function ensureBundleParentProduct(input: {
         data: { shopifyProductHandle: product.handle },
       });
     }
+    await addRebuySmartCartCompatibilityTag(input.admin, product.id);
   }
 
   const variantId = product.variants?.nodes?.[0]?.id;

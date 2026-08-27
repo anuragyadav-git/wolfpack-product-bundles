@@ -7,7 +7,7 @@ export function ImagesVisibilitySection({
 }: {
   flow: ConfigureBundleFlowContext;
 }) {
-  const { activeSection, fullPageBundleStyles } = flow;
+  const { activeSection } = flow;
 
   if (
     activeSection !== "images_gifs" &&

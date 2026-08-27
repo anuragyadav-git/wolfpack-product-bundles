@@ -308,8 +308,8 @@ describe('PPB List Cascade selected entries integration', () => {
       document: new JSDOM('<!doctype html><html><body></body></html>').window.document,
     });
 
-    expect(row.textContent).toContain('14k Dangling Obsidian Earrings');
-    expect(row.textContent).toContain('$829.00');
+    expect(row.textContent).toMatch(/14k Dangling Obsidian Earrings/);
+    expect(row.textContent).toMatch(/\$829\.00/);
     expect(row.querySelector('[aria-label="Quantity 2"]')?.textContent).toBe('x 2');
   });
 

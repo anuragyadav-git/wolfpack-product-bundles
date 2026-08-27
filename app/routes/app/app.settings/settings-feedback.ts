@@ -9,6 +9,16 @@ type SettingsToastApi = {
   };
 };
 
+export function showSettingsErrorToast(
+  shopify: SettingsToastApi,
+  message: string,
+) {
+  const normalizedMessage = message.trim();
+  if (!normalizedMessage) return;
+
+  shopify.toast.show(normalizedMessage, { duration: 5000, isError: true });
+}
+
 export function showSettingsSaveFeedback(
   shopify: SettingsToastApi,
   response: SettingsSaveResponse,
@@ -22,7 +32,7 @@ export function showSettingsSaveFeedback(
     return;
   }
 
-  shopify.toast.show(message, { duration: 5000, isError: true });
+  showSettingsErrorToast(shopify, message);
 }
 
 export function createLanguageSettingsSnapshot(

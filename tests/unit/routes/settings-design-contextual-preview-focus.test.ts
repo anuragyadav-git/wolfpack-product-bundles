@@ -69,7 +69,6 @@ describe("Settings Design contextual preview focus", () => {
       "default",
       "product-picker",
       "validation",
-      "upsell",
     ]);
   });
 

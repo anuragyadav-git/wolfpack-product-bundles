@@ -74,7 +74,7 @@ export function PpbCategoryCollectionsPanel({
         Collections selected here will be displayed on this step
       </p>
       <div className={productPageBundleStyles.productActions}>
-        <s-button variant="primary" onClick={handlePickCollections}>
+        <s-button variant="primary" icon="collection" onClick={handlePickCollections}>
           Add Collections
         </s-button>
         {catCollections.length > 0 && (
@@ -153,6 +153,7 @@ export function PpbCategoryCollectionsPanel({
         <s-button
           slot="primary-action"
           variant="primary"
+          icon="collection"
           onClick={handlePickCollections}
         >
           Add Collections

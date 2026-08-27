@@ -46,7 +46,7 @@ function compactVariantImageReference(value: unknown): Record<string, unknown> |
 
 function compactImages(value: unknown): Record<string, unknown>[] {
   return asArray(value)
-    .map(compactImageReference)
+    .map((value) => compactImageReference(value))
     .filter((image): image is Record<string, unknown> => image !== null)
     .slice(0, 1);
 }
@@ -271,7 +271,7 @@ export function formatProductReferencesForRuntime(value: unknown, productSources
 
 function compactCollectionReferences(value: unknown): Record<string, unknown>[] {
   return asArray(value)
-    .map(compactCollectionReference)
+    .map((value) => compactCollectionReference(value))
     .filter((reference): reference is Record<string, unknown> => reference !== null);
 }
 

@@ -123,6 +123,10 @@
   text-align: center;
 }
 
+.fullPageIntro[hidden] {
+  display: none;
+}
+
 .eyebrow {
   margin: 0;
   color: var(--store-shell-muted);
@@ -223,8 +227,75 @@
   min-width: 0;
 }
 
+.bundlePreviewStage {
+  width: 100%;
+  min-width: 0;
+}
+
+.bundlePreviewStage[hidden] {
+  display: none;
+}
+
+.purchaseContext {
+  display: grid;
+  gap: clamp(14px, 2vw, 20px);
+}
+
+.purchaseOption {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  border-bottom: 1px solid var(--store-shell-line);
+  padding-bottom: 12px;
+  color: var(--store-shell-muted);
+  font-size: 13px;
+}
+
+.purchaseOption strong {
+  color: var(--store-shell-ink);
+  font-weight: 600;
+}
+
+.purchaseForm {
+  display: grid;
+  grid-template-columns: minmax(88px, 0.28fr) minmax(160px, 1fr);
+  gap: 12px;
+  align-items: end;
+}
+
+.quantityField {
+  display: grid;
+  gap: 7px;
+  color: var(--store-shell-muted);
+  font-size: 12px;
+}
+
+.quantityField input,
+.purchaseForm button {
+  box-sizing: border-box;
+  min-height: 46px;
+  border: 1px solid var(--store-shell-ink);
+  border-radius: 3px;
+  font: inherit;
+}
+
+.quantityField input {
+  width: 100%;
+  background: #ffffff;
+  color: var(--store-shell-ink);
+  padding-inline: 12px;
+}
+
+.purchaseForm button {
+  background: var(--store-shell-ink);
+  color: #ffffff;
+  padding: 10px 18px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
 .upsellAnchor {
-  margin-top: 22px;
+  margin-top: 2px;
 }
 
 .upsellAnchor[hidden] {
@@ -255,6 +326,14 @@
 
 :global(body[data-preview-viewport="mobile"]) .focusLabel {
   inset-block-start: 44px;
+}
+
+:global(body[data-preview-viewport="mobile"])
+  .store[data-preview-family="full_page"]
+  .widgetMount
+  > :global(.fpb-mobile-bottom-sheet.fpb-mobile-summary-tray[data-fpb-summary-mode="tray"]) {
+  position: fixed;
+  inset: auto 0 0;
 }
 
 :global([data-wpb-preview-focus]) {
@@ -330,6 +409,10 @@
 
   .productInfo .title {
     font-size: 29px;
+  }
+
+  .purchaseForm {
+    grid-template-columns: minmax(82px, 0.3fr) minmax(0, 1fr);
   }
 }
 

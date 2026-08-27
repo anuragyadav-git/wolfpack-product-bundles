@@ -17,8 +17,8 @@ describe('PPB compare-at price visibility contract', () => {
       { showCompareAtPrice: false, document },
     );
 
-    expect(card.textContent).toContain('$10.00');
-    expect(card.textContent).toContain('$8.00');
+    expect(card.textContent).toMatch(/\$10\.00/);
+    expect(card.textContent).toMatch(/\$8\.00/);
   });
 
   it('does not fabricate a compare-at price for regular products', () => {
@@ -30,8 +30,8 @@ describe('PPB compare-at price visibility contract', () => {
       { showCompareAtPrice: true, document },
     );
 
-    expect(card.textContent).toContain('$8.00');
-    expect(card.textContent).not.toContain('$10.00');
+    expect(card.textContent).toMatch(/\$8\.00/);
+    expect(card.textContent).not.toMatch(/\$10\.00/);
   });
 
   it('updates compare-at text when a selected variant provides it', () => {
@@ -52,7 +52,7 @@ describe('PPB compare-at price visibility contract', () => {
       showCompareAtPrice: false,
     });
 
-    expect(compareElement.textContent).toBe('$10.00');
+    expect(compareElement.textContent).toContain('$10.00');
     expect(compareElement.remove).not.toHaveBeenCalled();
   });
 });

@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useAppBridge } from "@shopify/app-bridge-react";
 import { useTranslation } from "react-i18next";
 import type {
   BundleContractType,
@@ -20,6 +21,7 @@ import {
 } from "./design-preview-model";
 import styles from "./DesignSettingsView.module.css";
 import type { ShopBrandColors } from "../../../lib/shop-brand-colors";
+import { showSettingsErrorToast } from "./settings-feedback";
 import {
   PREVIEW_PROTOCOL_VERSION,
   isStorefrontPreviewEvent,
@@ -260,15 +262,24 @@ export function DesignLivePreview({
   onContextChange?: (context: Pick<DesignPreviewState, "bundleType" | "templateKey" | "area" | "scenario">) => void;
 }) {
   const { t, i18n } = useTranslation();
+  const shopify = useAppBridge();
   const previewStageRef = useRef<HTMLDivElement>(null);
   const previewCanvasRef = useRef<HTMLDivElement>(null);
   const previewScaledShellRef = useRef<HTMLDivElement>(null);
   const previewFrameRef = useRef<HTMLIFrameElement>(null);
-  const [previewState, setPreviewState] = useState<DesignPreviewState>(
-    initialState ?? createDesignPreviewState(),
-  );
+  const [previewState, setPreviewState] = useState<DesignPreviewState>(() => {
+    const state = initialState ?? createDesignPreviewState();
+    return {
+      ...state,
+      area: isDesignPreviewAreaSupported(state.templateKey, state.area)
+        ? state.area
+        : getDefaultDesignPreviewArea(state.templateKey),
+      scenario: isDesignPreviewScenarioSupported(state.templateKey, state.scenario)
+        ? state.scenario
+        : "default",
+    };
+  });
   const [isFrameReady, setIsFrameReady] = useState(false);
-  const [frameError, setFrameError] = useState<string | null>(null);
   const availableTemplates = DESIGN_PREVIEW_TEMPLATES.filter(
     (template) => template.bundleType === previewState.bundleType,
   );
@@ -331,17 +342,16 @@ export function DesignLivePreview({
       const message: unknown = event.data;
       if (!isStorefrontPreviewEvent(message)) return;
       if (message.type === "READY") {
-        setFrameError(null);
         setIsFrameReady(true);
       } else if (message.type === "SCENARIO_CHANGED") {
         setPreviewState((current) => setDesignPreviewScenario(current, message.payload.scenario));
       } else if (message.type === "ERROR") {
-        setFrameError(message.payload.message);
+        showSettingsErrorToast(shopify, message.payload.message);
       }
     };
     window.addEventListener("message", onMessage);
     return () => window.removeEventListener("message", onMessage);
-  }, []);
+  }, [shopify]);
 
   useEffect(() => {
     if (!isFrameReady) return;
@@ -522,8 +532,6 @@ export function DesignLivePreview({
         </div>
       </div>
 
-      {frameError ? <s-banner tone="critical">{frameError}</s-banner> : null}
-
       <div
         ref={previewStageRef}
         className={styles.previewStage}
@@ -580,7 +588,6 @@ export function DesignLivePreview({
                           src="/settings-design-preview-frame"
                           title={t("settingsDcp.preview.heading")}
                           sandbox="allow-scripts allow-same-origin"
-                          onLoad={() => setFrameError(null)}
                         />
                       </div>
                     </div>

@@ -880,8 +880,8 @@ describe("FPB add-ons / gifting step separation", () => {
         0,
       );
 
-      expect(card.textContent).toContain("10% off");
-      expect(card.textContent).toContain("Add To Box");
+      expect(card.textContent).toMatch(/10% off/);
+      expect(card.textContent).toMatch(/Add To Box/);
     } finally {
       (global as any).document = originalDocument;
     }

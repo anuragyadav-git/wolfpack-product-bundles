@@ -23,11 +23,11 @@ describe('shared selected product row contract', () => {
     const remove = row.querySelector('[data-action="remove-selected-product"]');
     const quantity = row.querySelector('[aria-label="Quantity 2"]');
     expect(remove?.getAttribute('data-variant-id')).toBe('variant-1');
-    expect(row.textContent).toContain('The Complete Snowboard');
-    expect(row.textContent).toContain('Ice');
+    expect(row.textContent).toMatch(/The Complete Snowboard/);
+    expect(row.textContent).toMatch(/Ice/);
     expect(quantity?.textContent).toBe('x2');
-    expect(row.textContent).not.toContain('Remove');
-    expect(row.textContent).toContain('$699.95');
+    expect(row.textContent).not.toMatch(/Remove/);
+    expect(row.textContent).toMatch(/\$699\.95/);
   });
 
   it('marks default rows as included and non-removable', () => {
@@ -38,7 +38,7 @@ describe('shared selected product row contract', () => {
       isDefault: true,
     }, { document: createDocument() });
 
-    expect(row.textContent).toContain('Included');
+    expect(row.textContent).toMatch(/Included/);
     expect(row.querySelector('[data-action="remove-selected-product"]')).toBeNull();
   });
 
@@ -48,7 +48,7 @@ describe('shared selected product row contract', () => {
       document: createDocument(),
     });
 
-    expect(row.textContent).toContain('Choose an item');
+    expect(row.textContent).toMatch(/Choose an item/);
     expect(row.querySelector('[data-action="remove-selected-product"]')).toBeNull();
   });
 
@@ -59,7 +59,7 @@ describe('shared selected product row contract', () => {
       quantity: 1,
     }, { document: createDocument() });
 
-    expect(row.textContent).toContain('<strong>Snowboard</strong>');
+    expect(row.textContent).toMatch(/<strong>Snowboard<\/strong>/);
     expect(row.querySelector('strong')).toBeNull();
   });
 });
@@ -75,8 +75,8 @@ describe('shared selected product slots contract', () => {
 
     expect(slots.querySelector('[data-action="select-slot"]')).not.toBeNull();
     expect(slots.querySelector('[data-action="remove-selected-product"]')).not.toBeNull();
-    expect(slots.textContent).toContain('Default Wax');
-    expect(slots.textContent).toContain('Free Gift');
+    expect(slots.textContent).toMatch(/Default Wax/);
+    expect(slots.textContent).toMatch(/Free Gift/);
   });
 
   it('supports vertical mode without changing slot labels', () => {
@@ -84,7 +84,7 @@ describe('shared selected product slots contract', () => {
       { id: 'slot-1', label: 'Choose first item' },
     ], { mode: 'vertical', document: createDocument() });
 
-    expect(slots.textContent).toContain('Choose first item');
+    expect(slots.textContent).toMatch(/Choose first item/);
   });
 
   it('renders a merchant slot icon for empty selected slots', () => {

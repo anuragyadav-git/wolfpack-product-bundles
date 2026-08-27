@@ -31,8 +31,8 @@ describe("FPB product card description", () => {
         0,
       ) as HTMLElement;
 
-      expect(card.textContent).toContain("Daily Essential");
-      expect(card.textContent).not.toContain("Merchant description belongs in the product modal.");
+      expect(card.textContent).toMatch(/Daily Essential/);
+      expect(card.textContent).not.toMatch(/Merchant description belongs in the product modal\./);
     } finally {
       (global as { document?: unknown }).document = originalDocument;
     }

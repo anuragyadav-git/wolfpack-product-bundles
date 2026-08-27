@@ -60,7 +60,7 @@ describe('shared discount progress renderer', () => {
       success: false,
     }, { document });
 
-    expect(view.textContent).toContain('<strong>Save</strong>');
+    expect(view.textContent).toMatch(/<strong>Save<\/strong>/);
     expect(view.querySelector('strong')).toBeNull();
   });
 
@@ -80,7 +80,7 @@ describe('shared discount progress renderer', () => {
       ],
     });
 
-    expect(view.textContent).toContain('Add <b>1 item</b>');
+    expect(view.textContent).toMatch(/Add <b>1 item<\/b>/);
     expect(view.querySelector('b')).toBeNull();
     expect(view.querySelector('[data-message-segment="condition"]')).not.toBeNull();
   });

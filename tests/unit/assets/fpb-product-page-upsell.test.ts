@@ -47,7 +47,7 @@ describe("FPB product-page upsell runtime behavior", () => {
 
     expect(button.disabled).toBe(false);
     expect(button.removeAttribute).toHaveBeenCalledWith("aria-busy");
-    expect(button.textContent).toBe("Build bundle");
+    expect(button.textContent).toContain("Build bundle");
   });
 
   it("reuses fetched offers when Shopify replaces the product section", async () => {

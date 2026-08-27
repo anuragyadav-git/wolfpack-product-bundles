@@ -1,0 +1,447 @@
+{
+  "schema_version": 1,
+  "job_id": "fpb-step-title-redesign-20260827",
+  "revision": 2,
+  "status": "complete",
+  "chrome_mcp_required": true,
+  "environment": "development",
+  "base_url": "https://admin.shopify.com/store/agent-5sfidg3m/apps/wolfpack-product-bundles-sit/app/settings",
+  "fixture": "Settings Design deterministic FPB/PPB production-renderer fixtures plus storefront FPB /apps/product-bundles/wpb/2 and PPB /products/ppb-template-parity-2026-08-20",
+  "authentication_mode": "Connected default Chrome profile with existing Shopify Admin and storefront sessions",
+  "setup": {
+    "profile_policy": "default-profile-only",
+    "allow_isolated_context": false,
+    "zoom_percent": 100,
+    "artifact_directory": "qa",
+    "max_retries": 2,
+    "locale": "en",
+    "currency": "USD",
+    "theme": "neutral Settings Design context; bundle UI uses production tokens",
+    "feature_flags": [],
+    "random_time_control": "",
+    "device_pixel_ratio_policy": "record-actual",
+    "waits": [
+      "document.fonts.ready",
+      "images-complete",
+      "hydration-ready",
+      "target-state-ready"
+    ],
+    "scroll": {
+      "x": 0,
+      "y": 0
+    },
+    "disable_nonessential_animation": true,
+    "hide_caret_and_transient_cursors": true,
+    "dynamic_region_policy": "exclude-or-approved-mask"
+  },
+  "viewports": [
+    {
+      "id": "desktop",
+      "mode": "desktop",
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "id": "mobile",
+      "mode": "mobile",
+      "width": 390,
+      "height": 844
+    }
+  ],
+  "states": [
+    {
+      "id": "populated",
+      "description": "Distinct Step Name and non-empty Step Title"
+    },
+    {
+      "id": "long-content",
+      "description": "Multi-line and unbroken Step Title stress"
+    },
+    {
+      "id": "picker-open",
+      "description": "PPB slot picker with Step Name dialog identity and Step Title body heading"
+    },
+    {
+      "id": "empty-title",
+      "description": "Whitespace or absent Step Title leaves no heading gap"
+    }
+  ],
+  "interactions": [
+    {
+      "id": "fpb-desktop-template-matrix",
+      "purpose": "Verify Direction A and preview parity across all FPB templates at desktop width.",
+      "precondition": "Settings Design is loaded, cache bypassed, and Landing Page fixture is ready.",
+      "viewport": "desktop",
+      "state": "populated",
+      "steps": [
+        "Select each of Standard, Classic, Compact, and Horizontal",
+        "Select Product cards surface",
+        "Wait for READY and fonts/images",
+        "Inspect heading and catalog geometry"
+      ],
+      "expected_semantic_result": "Step Name remains navigation identity and one Step Title heading introduces the active catalog.",
+      "dom_assertions": [
+        "Exactly one non-empty active Step Title heading",
+        "Navigation label remains Step Name",
+        "No preview-only Step Title node"
+      ],
+      "style_geometry_assertions": [
+        "Heading and catalog leading edges differ by no more than 4 CSS px",
+        "Font is 18-24 px, weight 700, line-height about 1.25",
+        "No clipping or horizontal overflow"
+      ],
+      "screenshot_path": "qa/screenshots/fpb-desktop-template-matrix.png",
+      "baseline_path": "qa/baselines/fpb-desktop-template-matrix.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "errors": 0,
+        "new_repeated_warnings": 0
+      },
+      "network_expectations": {
+        "unexpected_failures": 0,
+        "mutations": 0
+      },
+      "cleanup": [
+        "Restore Standard template and Product cards surface"
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "fpb-mobile-long-content",
+      "purpose": "Verify FPB mobile alignment and long-content wrapping in storefront and preview.",
+      "precondition": "FPB fixture is loaded at the 390 x 844 logical mobile viewport.",
+      "viewport": "mobile",
+      "state": "long-content",
+      "steps": [
+        "Hard reload with cache bypass",
+        "Select Mobile preview",
+        "Exercise long and unbroken title non-persistently",
+        "Measure heading and catalog bounds"
+      ],
+      "expected_semantic_result": "One left-aligned heading wraps naturally inside the catalog without changing navigation.",
+      "dom_assertions": [
+        "One Step Title heading",
+        "No duplicate title in summary or navigation"
+      ],
+      "style_geometry_assertions": [
+        "Heading shares mobile content inset",
+        "No fixed height, clipping, overlap, or horizontal scroll"
+      ],
+      "screenshot_path": "qa/screenshots/fpb-mobile-long-content.png",
+      "baseline_path": "qa/baselines/fpb-mobile-long-content.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "errors": 0,
+        "new_repeated_warnings": 0
+      },
+      "network_expectations": {
+        "unexpected_failures": 0,
+        "mutations": 0
+      },
+      "cleanup": [
+        "Restore deterministic fixture title and desktop preview selection"
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "ppb-desktop-template-matrix",
+      "purpose": "Verify Step Name and Step Title separation across all PPB templates at desktop width.",
+      "precondition": "Settings Design Product Page fixture is loaded and READY.",
+      "viewport": "desktop",
+      "state": "populated",
+      "steps": [
+        "Select Product List, Product Grid, Horizontal Slots, and Vertical Slots",
+        "Inspect navigation/group identity",
+        "Inspect active content heading",
+        "Open slot picker where applicable"
+      ],
+      "expected_semantic_result": "Navigation and slot groups use Step Name; each active body uses Step Title once.",
+      "dom_assertions": [
+        "Navigation labels equal Step Name",
+        "One active body Step Title",
+        "Slot overview does not repeat Step Title"
+      ],
+      "style_geometry_assertions": [
+        "Heading aligns with active product/slot body",
+        "Responsive Direction A typography is consistent",
+        "Picker heading inset matches product grid"
+      ],
+      "screenshot_path": "qa/screenshots/ppb-desktop-template-matrix.png",
+      "baseline_path": "qa/baselines/ppb-desktop-template-matrix.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "errors": 0,
+        "new_repeated_warnings": 0
+      },
+      "network_expectations": {
+        "unexpected_failures": 0,
+        "mutations": 0
+      },
+      "cleanup": [
+        "Close picker and restore Product List"
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "ppb-mobile-picker",
+      "purpose": "Verify PPB mobile picker heading hierarchy, alignment, and focus invariants.",
+      "precondition": "Vertical Slots preview is loaded at 390 x 844 and a slot trigger is available.",
+      "viewport": "mobile",
+      "state": "picker-open",
+      "steps": [
+        "Hard reload with cache bypass",
+        "Select Mobile and Vertical Slots",
+        "Open the first slot picker",
+        "Inspect accessibility tree, focus, and body heading"
+      ],
+      "expected_semantic_result": "Dialog identity is Step Name and one Step Title heading appears above the product grid without stealing focus.",
+      "dom_assertions": [
+        "Dialog aria-labelledby remains Step Name header",
+        "One body Step Title heading",
+        "Existing close and product controls remain keyboard reachable"
+      ],
+      "style_geometry_assertions": [
+        "Heading inset matches the 20 px mobile product-grid inset",
+        "No overlap with fixed header/footer",
+        "Long title wraps naturally"
+      ],
+      "screenshot_path": "qa/screenshots/ppb-mobile-picker.png",
+      "baseline_path": "qa/baselines/ppb-mobile-picker.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "errors": 0,
+        "new_repeated_warnings": 0
+      },
+      "network_expectations": {
+        "unexpected_failures": 0,
+        "mutations": 0
+      },
+      "cleanup": [
+        "Close picker and restore desktop preview"
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "empty-title-no-gap",
+      "purpose": "Verify an empty Step Title leaves no semantic node or residual layout gap.",
+      "precondition": "A production renderer fixture is ready for reversible in-memory title clearing.",
+      "viewport": "desktop",
+      "state": "empty-title",
+      "steps": [
+        "Clear pageTitle in memory without persistence",
+        "Re-render the active step",
+        "Inspect DOM and adjacent geometry",
+        "Restore fixture and re-render"
+      ],
+      "expected_semantic_result": "No Step Title heading is emitted and surrounding content closes naturally.",
+      "dom_assertions": [
+        "No empty Step Title heading",
+        "Step Name navigation remains present"
+      ],
+      "style_geometry_assertions": [
+        "No title-only margin, padding, border, or blank surface remains"
+      ],
+      "screenshot_path": "qa/screenshots/empty-title-no-gap.png",
+      "baseline_path": "qa/baselines/empty-title-no-gap.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "errors": 0,
+        "new_repeated_warnings": 0
+      },
+      "network_expectations": {
+        "unexpected_failures": 0,
+        "mutations": 0
+      },
+      "cleanup": [
+        "Restore deterministic fixture and confirm populated title returns"
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "fpb-summary-nonregression",
+      "purpose": "Confirm FPB summary sidebar and mobile tray remain behaviorally and geometrically unchanged.",
+      "precondition": "FPB Standard fixture has one selected product.",
+      "viewport": "mobile",
+      "state": "populated",
+      "steps": [
+        "Inspect tray at 799 px",
+        "Inspect sidebar at 800 and 801 px",
+        "Advance and return between steps"
+      ],
+      "expected_semantic_result": "Summary ownership and navigation behavior remain unchanged while the heading stays in catalog content.",
+      "dom_assertions": [
+        "One summary owner per responsive mode",
+        "Existing step navigation remains operable"
+      ],
+      "style_geometry_assertions": [
+        "No heading overlap with sidebar/tray",
+        "No unexpected summary shift attributable to title"
+      ],
+      "screenshot_path": "qa/screenshots/fpb-summary-nonregression.png",
+      "baseline_path": "qa/baselines/fpb-summary-nonregression.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "errors": 0,
+        "new_repeated_warnings": 0
+      },
+      "network_expectations": {
+        "unexpected_failures": 0,
+        "mutations": 0
+      },
+      "cleanup": [
+        "Restore 390 x 844 or 1280 x 800 viewport"
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "ppb-picker-focus-nonregression",
+      "purpose": "Confirm PPB picker open, keyboard focus, Escape close, and focus return are unchanged.",
+      "precondition": "PPB slot trigger is focused in the production preview.",
+      "viewport": "desktop",
+      "state": "picker-open",
+      "steps": [
+        "Open picker by keyboard",
+        "Traverse first controls",
+        "Close with Escape",
+        "Verify focus return"
+      ],
+      "expected_semantic_result": "New body heading does not enter focus order or alter dialog focus management.",
+      "dom_assertions": [
+        "Heading has no tabindex",
+        "Focus remains contained while open",
+        "Focus returns to trigger after close"
+      ],
+      "style_geometry_assertions": [
+        "Focus outlines remain visible and unclipped",
+        "Heading does not overlap header or controls"
+      ],
+      "screenshot_path": "qa/screenshots/ppb-picker-focus-nonregression.png",
+      "baseline_path": "qa/baselines/ppb-picker-focus-nonregression.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "errors": 0,
+        "new_repeated_warnings": 0
+      },
+      "network_expectations": {
+        "unexpected_failures": 0,
+        "mutations": 0
+      },
+      "cleanup": [
+        "Close picker and restore pointer interaction state"
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    }
+  ],
+  "assertions": {
+    "library": "references/chrome-devtools-test-protocol.md",
+    "require_json_serializable_results": true
+  },
+  "screenshots": {
+    "format": "png",
+    "index_path": "qa/screenshot-index.json",
+    "element_required": true,
+    "viewport_required": true,
+    "before_after_critical_interactions": true,
+    "full_page_only_when_needed": true,
+    "metadata_required": [
+      "viewport",
+      "dpr",
+      "zoom",
+      "state",
+      "revision"
+    ]
+  },
+  "console_policy": {
+    "fail_on": [
+      "uncaught-exception",
+      "unhandled-promise-rejection",
+      "severe-application-error",
+      "failed-resource-parse",
+      "new-repeated-warning",
+      "accessibility-runtime-error",
+      "hydration-error",
+      "duplicate-key-warning",
+      "change-caused-csp-violation",
+      "tested-interaction-error"
+    ],
+    "allowlist": []
+  },
+  "network_policy": {
+    "fail_on": [
+      "unexpected-4xx-5xx",
+      "blocked-required-asset",
+      "implementation-caused-abort",
+      "cors-error",
+      "duplicate-mutation",
+      "missing-product-media",
+      "missing-translation",
+      "local-to-production-request",
+      "real-order-or-destructive-action"
+    ],
+    "expected_analytics": [],
+    "redact_secrets_and_private_bodies": true
+  },
+  "lighthouse": {
+    "required": true,
+    "devices": [
+      "desktop",
+      "mobile"
+    ],
+    "modes": [
+      "snapshot",
+      "navigation"
+    ],
+    "categories": [
+      "accessibility",
+      "best-practices",
+      "seo"
+    ],
+    "performance_excluded": true,
+    "report_paths": {
+      "desktop": "qa/lighthouse/desktop.json",
+      "mobile": "qa/lighthouse/mobile.json"
+    }
+  },
+  "performance": {
+    "required": false,
+    "triggers": [],
+    "not_applicable_reason": "The change is static heading markup and CSS with no new network, image, animation, or computation path; console/network and layout-shift checks remain required.",
+    "trace_paths": [],
+    "metrics": [
+      "LCP",
+      "CLS",
+      "interaction-findings",
+      "long-tasks",
+      "layout-shift-sources",
+      "image-font-loading"
+    ]
+  },
+  "visual_diff": {
+    "format": "png",
+    "comparison": "scripts/compare_images.py",
+    "diff_required": true,
+    "json_summary_required": true,
+    "approved_reference_and_actual_side_by_side": true,
+    "allowed_masks": []
+  },
+  "non_regression": {
+    "required": true,
+    "cases": [
+      "fpb-summary-nonregression",
+      "ppb-picker-focus-nonregression"
+    ]
+  },
+  "cleanup": [
+    "Remove injected capture styles.",
+    "Restore scroll position.",
+    "Restore reversible test state.",
+    "Delete temporary sensitive or transient evidence."
+  ]
+}

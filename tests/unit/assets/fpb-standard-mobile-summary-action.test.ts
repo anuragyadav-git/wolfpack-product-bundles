@@ -352,8 +352,8 @@ describe('FPB Standard mobile summary action', () => {
       discountSpy.mockRestore();
     }
 
-    expect(sheet.textContent).toContain('Add To Cart');
-    expect(sheet.textContent).toContain('$5.00');
+    expect(sheet.textContent).toMatch(/Add To Cart/);
+    expect(sheet.textContent).toMatch(/\$5\.00/);
   });
 
   it('renders qualified BOGO success copy when pricing qualifies without hasDiscount', () => {
@@ -455,9 +455,9 @@ describe('FPB Standard mobile summary action', () => {
       },
     );
 
-    expect(button.textContent).toContain('Add To Cart');
-    expect(button.textContent).toContain('5% off');
-    expect(button.textContent).not.toContain('$8.29');
+    expect(button.textContent).toMatch(/Add To Cart/);
+    expect(button.textContent).toMatch(/5% off/);
+    expect(button.textContent).not.toMatch(/\$8\.29/);
   });
 
   it('keeps Classic final-step underfilled add-to-cart clickable and validates on press', async () => {

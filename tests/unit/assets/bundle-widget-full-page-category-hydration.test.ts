@@ -308,7 +308,7 @@ describe('Full Page widget category hydration behavior', () => {
       const result = fullPageProductGridMethods.createFullPageProductGrid.call(context, 0);
 
       expect(result.innerHTML).toContain('No Products Available');
-      expect(result.textContent).toContain('No Products Available');
+      expect(result.textContent).toMatch(/No Products Available/);
     } finally {
       (global as any).document = previousDocument;
     }
@@ -549,8 +549,8 @@ describe('Full Page widget category hydration behavior', () => {
     try {
       fullPageModalProductMethods.renderModalProducts.call(context, 0);
 
-      expect(productGrid.textContent).toContain('Nothing available');
-      expect(productGrid.textContent).not.toContain('No products available for this step.');
+      expect(productGrid.textContent).toMatch(/Nothing available/);
+      expect(productGrid.textContent).not.toMatch(/No products available for this step\./);
     } finally {
       global.document = previousDocument;
     }

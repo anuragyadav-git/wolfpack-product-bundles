@@ -143,6 +143,7 @@ export function FpbStepRuleModeContent({
                               <s-button
                                 variant="tertiary"
                                 tone="critical"
+                                icon="delete"
                                 onClick={() =>
                                   removeCategoryConditionRule(
                                     step.id,
@@ -300,6 +301,7 @@ export function FpbStepRuleModeContent({
                       <s-button
                         variant="tertiary"
                         tone="critical"
+                        icon="delete"
                         onClick={() =>
                           conditionsState.removeConditionRule(step.id, rule.id)
                         }

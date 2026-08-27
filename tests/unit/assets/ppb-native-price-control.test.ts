@@ -32,6 +32,6 @@ describe('PPB product-page price selector control', () => {
     const price = new JSDOM('<!doctype html><html><body><div data-price>stale</div></body></html>').window.document.querySelector('[data-price]');
     ProductPageDomMethods._updateNativeProductPrice.call({ _nativeProductPriceElement: price }, '', '', false);
     expect(price.hidden).toBe(true);
-    expect(price.textContent).toBe('');
+    expect(price.textContent).toBe("");
   });
 });

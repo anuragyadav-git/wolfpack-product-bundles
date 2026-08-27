@@ -213,8 +213,8 @@ const FULL_PAGE_AREAS = ["navigation", "categories", "product-card", "product-sl
 const PRODUCT_PAGE_AREAS = ["bundle-header", "navigation", "categories", "product-card", "product-slots", "cart-summary"] as const;
 const SLOT_AREAS = ["bundle-header", "product-slots", "cart-summary"] as const;
 const FULL_PAGE_SCENARIOS = ["default", "loading", "validation", "upsell"] as const;
-const PRODUCT_PAGE_SCENARIOS = ["default", "validation", "upsell"] as const;
-const SLOT_SCENARIOS = ["default", "product-picker", "validation", "upsell"] as const;
+const PRODUCT_PAGE_SCENARIOS = ["default", "validation"] as const;
+const SLOT_SCENARIOS = ["default", "product-picker", "validation"] as const;
 
 export function getDesignPreviewContextKind(
   templateKey: TemplateKey,
@@ -457,9 +457,9 @@ export const DESIGN_PREVIEW_FIELD_TARGETS: Readonly<Record<string, DesignPreview
   "expert.cartFooter.cartFooterDiscountTextColor": cartTarget("discount message"),
   "expert.cartFooter.cartFooterDiscountProgressBarEmptyColor": cartTarget("discount progress remainder"),
   "expert.cartFooter.cartFooterDiscountProgressBarFilledColor": cartTarget("discount progress fill"),
-  "expert.mixAndMatchConfig.generalSettings.bundleUpsellButtonBg": scenarioTarget("upsell", ["upsell action"]),
-  "expert.mixAndMatchConfig.generalSettings.bundleUpsellButtonTextColor": scenarioTarget("upsell", ["upsell action text"]),
-  "expert.mixAndMatchConfig.generalSettings.bundleUpsellFontColor": scenarioTarget("upsell", ["upsell text"]),
+  "expert.mixAndMatchConfig.generalSettings.bundleUpsellButtonBg": scenarioTarget("upsell", ["upsell action"], { templates: ALL_FPB_TEMPLATES }),
+  "expert.mixAndMatchConfig.generalSettings.bundleUpsellButtonTextColor": scenarioTarget("upsell", ["upsell action text"], { templates: ALL_FPB_TEMPLATES }),
+  "expert.mixAndMatchConfig.generalSettings.bundleUpsellFontColor": scenarioTarget("upsell", ["upsell text"], { templates: ALL_FPB_TEMPLATES }),
 };
 const DESIGN_PREVIEW_FIELD_TARGET_MAP = new Map(Object.entries(DESIGN_PREVIEW_FIELD_TARGETS));
 

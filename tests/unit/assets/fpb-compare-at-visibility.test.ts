@@ -33,8 +33,8 @@ describe("FPB compare-at price visibility", () => {
           0,
         ) as HTMLElement;
 
-        expect(card.textContent).toContain("529.00");
-        expect(card.textContent).toContain("489.00");
+        expect(card.textContent).toMatch(/529\.00/);
+        expect(card.textContent).toMatch(/489\.00/);
       } finally {
         (global as { document?: unknown }).document = originalDocument;
       }
@@ -68,8 +68,8 @@ describe("FPB compare-at price visibility", () => {
         0,
       ) as HTMLElement;
 
-      expect(card.textContent).toContain("489.00");
-      expect(card.textContent).not.toContain("529.00");
+      expect(card.textContent).toMatch(/489\.00/);
+      expect(card.textContent).not.toMatch(/529\.00/);
     } finally {
       (global as { document?: unknown }).document = originalDocument;
     }

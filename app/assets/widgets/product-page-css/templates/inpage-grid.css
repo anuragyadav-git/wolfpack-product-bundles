@@ -81,15 +81,6 @@
   padding: 28px 0 20px;
 }
 
-.bw-ppb-inpage-step-title {
-  font-size: 14px;
-  font-weight: 700;
-  line-height: 1.4;
-  color: #111111;
-  margin: 0;
-  text-align: left;
-}
-
 .bw-ppb-inpage-category-tabs {
   display: grid;
   grid-template-columns: max-content minmax(0, 1fr);

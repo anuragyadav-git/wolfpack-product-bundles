@@ -35,6 +35,7 @@ export function PpbUtilityModals() {
         <s-button
           slot="primary-action"
           variant="primary"
+          icon="refresh"
           loading={fetcher.state === "submitting" || undefined}
           onClick={handleSyncBundleConfirm}
         >
@@ -73,6 +74,7 @@ export function PpbUtilityModals() {
         <s-button
           slot="primary-action"
           variant="primary"
+          icon="check"
           commandFor="ppb-template-variables-modal"
           command="--hide"
           onClick={() => hidePolarisModal(templateVariablesModalRef)}

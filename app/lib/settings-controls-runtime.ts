@@ -26,7 +26,6 @@ export type SettingsControlsRuntime = {
   schemaVersion: typeof SETTINGS_CONTROLS_SCHEMA_VERSION;
   shared: { cartMessaging: BundleCartLineMessagingRuntime };
   landingPage: {
-    showCompareAtPrice: boolean;
     hideIrrelevantVariantImages: boolean;
     trackInventoryOnAddToCart: boolean;
     redirectCollectionQuickAddToBundle: boolean;
@@ -132,7 +131,6 @@ export function buildSettingsControlsRuntime(payload: ControlsPayload): Settings
     schemaVersion: SETTINGS_CONTROLS_SCHEMA_VERSION,
     shared: { cartMessaging },
     landingPage: {
-      showCompareAtPrice: booleanValue(payload, "landingPage.showCompareAtPrice", true),
       hideIrrelevantVariantImages: booleanValue(payload, "landingPage.hideIrrelevantVariantImages"),
       trackInventoryOnAddToCart: booleanValue(payload, "landingPage.trackInventoryOnAddToCart"),
       redirectCollectionQuickAddToBundle: booleanValue(payload, "landingPage.redirectCollectionQuickAddToBundle", true),
@@ -253,7 +251,6 @@ export function buildSettingsControlsFormValues(runtime: SettingsControlsRuntime
     "shared.cartMessaging.showOriginalPrice": checkedValue(cart.showOriginalPrice),
     "shared.cartMessaging.discountDisplay.isEnabled": checkedValue(cart.discountDisplay.isEnabled),
     "shared.cartMessaging.discountDisplay.format": discountFormat,
-    "landingPage.showCompareAtPrice": checkedValue(landing.showCompareAtPrice),
     "landingPage.hideIrrelevantVariantImages": checkedValue(landing.hideIrrelevantVariantImages),
     "landingPage.trackInventoryOnAddToCart": checkedValue(landing.trackInventoryOnAddToCart),
     "landingPage.redirectCollectionQuickAddToBundle": checkedValue(landing.redirectCollectionQuickAddToBundle),

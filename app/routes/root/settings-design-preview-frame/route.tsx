@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type RefObject } from "react";
 import type { HeadersFunction } from "@remix-run/node";
 import { ToastManager } from "../../../assets/widgets/shared/toast-manager";
 import { replaceManagedStyle } from "../../../assets/widgets/shared/managed-style";
 import { renderFpbUpsellOffers } from "../../../storefront/fpb-product-page-upsell";
 import {
   buildStorefrontPreviewFixture,
+  buildStorefrontPreviewUpsellFixture,
   getStorefrontPreviewStylesheetManifest,
   type StorefrontPreviewStylesheetId,
 } from "../../app/app.settings/storefront-preview-fixtures";
@@ -25,9 +26,11 @@ import {
   getStorefrontPreviewRendererKey,
   mountStorefrontPreviewOverlays,
   openStorefrontPreviewProductPicker,
+  setStorefrontPreviewLoadingPersistent,
 } from "../../app/app.settings/storefront-preview-interactions";
 import type { TemplateKey } from "../../../lib/bundle-config/template-selection";
 import fpbBaseUrl from "../../../assets/widgets/full-page-css/bundle-widget-full-page.css?url";
+import fpbUpsellUrl from "../../../assets/widgets/full-page-css/base/fpb-product-page-upsell.css?url";
 import fpbMobileSummaryUrl from "../../../assets/widgets/full-page-css/shared/mobile-summary-footer.css?url";
 import fpbResponsiveUrl from "../../../assets/widgets/full-page-css/shared/responsive-layout.css?url";
 import fpbStandardUrl from "../../../assets/widgets/full-page-css/templates/side-footer-standard.css?url";
@@ -94,10 +97,17 @@ function postFrameEvent(event: StorefrontPreviewEvent) {
 async function syncStylesheets(templateKey: TemplateKey) {
   document.querySelectorAll("link[data-wpb-settings-preview-style]").forEach((link) => link.remove());
   const manifest = getStorefrontPreviewStylesheetManifest(templateKey);
-  const loads = manifest.stylesheets.map((stylesheetId) => new Promise<void>((resolve, reject) => {
+  const stylesheets: Array<{ stylesheetId: string; url: string }> = manifest.stylesheets.map((stylesheetId) => ({
+    stylesheetId,
+    url: STYLESHEET_URLS[stylesheetId],
+  }));
+  if (manifest.bundleType === "product_page") {
+    stylesheets.unshift({ stylesheetId: "fpb-upsell", url: fpbUpsellUrl });
+  }
+  const loads = stylesheets.map(({ stylesheetId, url }) => new Promise<void>((resolve, reject) => {
     const link = document.createElement("link");
     link.rel = "stylesheet";
-    link.href = STYLESHEET_URLS[stylesheetId];
+    link.href = url;
     link.dataset.wpbSettingsPreviewStyle = stylesheetId;
     link.addEventListener("load", () => resolve(), { once: true });
     link.addEventListener("error", () => reject(new Error(`Unable to load ${stylesheetId}`)), { once: true });
@@ -197,28 +207,32 @@ async function createPreviewController(
 }
 
 function renderUpsell(anchor: HTMLElement) {
+  const fixture = buildStorefrontPreviewUpsellFixture();
   anchor.hidden = false;
-  renderFpbUpsellOffers(anchor, [{
-    bundleId: "settings-design-preview",
-    publicNumber: 1,
-    bundleName: "Bundle preview",
-    targetPath: "/apps/product-bundles/wpb/1",
-    mode: "block",
-    copy: {
-      title: "Bundle preview",
-      description: "Preview the bundle offer with the current Design settings.",
-      buttonText: "View bundle",
-    },
-    imageUrl: "/design-preview-product-4.png",
-    preselectBrowsedProduct: false,
-  }], {
-    productId: "9000000000001",
-    productHandle: "preview-product-1",
-    collectionIds: [],
-    locale: "en",
-    endpointUrl: "",
-    selectedVariantId: "9100000000001",
-  });
+  renderFpbUpsellOffers(anchor, [fixture.offer], fixture.context);
+}
+
+function UpsellPurchaseContext({
+  upsellRef,
+}: {
+  upsellRef: RefObject<HTMLDivElement>;
+}) {
+  return (
+    <div className={styles.purchaseContext} data-wpb-upsell-context>
+      <div className={styles.purchaseOption}>
+        <span>Size</span>
+        <strong>One size</strong>
+      </div>
+      <form className={styles.purchaseForm} action="/cart/add" aria-label="Product purchase preview">
+        <label className={styles.quantityField}>
+          <span>Quantity</span>
+          <input type="number" min="1" value="1" readOnly />
+        </label>
+        <button type="submit">Add to cart</button>
+      </form>
+      <div ref={upsellRef} className={styles.upsellAnchor} data-wpb-fpb-upsell-anchor hidden />
+    </div>
+  );
 }
 
 function getAreaSelector(area: DesignPreviewArea) {
@@ -281,7 +295,7 @@ function applyPreviewContext(
 ) {
   if (!controller || !widgetRoot) return;
   clearAreaFocus(focusLabel);
-  controller.hideLoadingOverlay?.();
+  setStorefrontPreviewLoadingPersistent(controller, scenario === "loading");
   document.getElementById("bundle-toast")?.remove();
   const modal = document.getElementById("bundle-builder-modal");
   if (modal) modal.style.removeProperty("display");
@@ -295,7 +309,6 @@ function applyPreviewContext(
   if (upsellAnchor) upsellAnchor.hidden = scenario !== "upsell";
 
   if (scenario === "loading") {
-    controller.showLoadingOverlay?.(null, { bootstrap: true });
     return;
   }
   if (scenario === "validation") {
@@ -311,7 +324,7 @@ function applyPreviewContext(
   }
   if (scenario === "upsell" && upsellAnchor) {
     renderUpsell(upsellAnchor);
-    upsellAnchor.scrollIntoView({ block: "center" });
+    upsellAnchor.closest<HTMLElement>("section")?.scrollIntoView({ block: "start" });
     return;
   }
 
@@ -334,6 +347,7 @@ export default function SettingsDesignPreviewFrame() {
   const [resetVersion, setResetVersion] = useState(0);
   const pickerRendererState = state?.scenario === "product-picker";
   const rendererKey = getStorefrontPreviewRendererKey(state, resetVersion);
+  const isUpsellPreview = state?.scenario === "upsell";
 
   useEffect(() => {
     const { host, cleanup } = createStorefrontPreviewOverlayHost(document);
@@ -554,19 +568,47 @@ export default function SettingsDesignPreviewFrame() {
               <p className={styles.price}>$24.00</p>
               <p className={styles.subtitle}>Select the products and quantities that belong in this bundle.</p>
               <div className={styles.rule} />
-              <div ref={widgetRef} className={styles.widgetMount} />
-              <div ref={upsellRef} className={styles.upsellAnchor} data-wpb-fpb-upsell-anchor hidden />
+              <div className={styles.bundlePreviewStage} hidden={isUpsellPreview}>
+                <div ref={widgetRef} className={styles.widgetMount} />
+              </div>
+              {isUpsellPreview ? <UpsellPurchaseContext upsellRef={upsellRef} /> : null}
             </section>
           </div>
         ) : (
           <div className={styles.fullPageMain}>
-            <header className={styles.fullPageIntro}>
+            <header className={styles.fullPageIntro} hidden={isUpsellPreview}>
               <p className={styles.eyebrow}>Build your set</p>
               <h1 className={styles.title}>Create a bundle</h1>
               <p className={styles.subtitle}>Choose your favourites and review the complete set as you build.</p>
             </header>
-            <div ref={widgetRef} className={styles.widgetMount} />
-            <div ref={upsellRef} className={styles.upsellAnchor} data-wpb-fpb-upsell-anchor hidden />
+            <div className={styles.bundlePreviewStage} hidden={isUpsellPreview}>
+              <div ref={widgetRef} className={styles.widgetMount} />
+            </div>
+            {isUpsellPreview ? (
+              <div className={styles.productPageMain}>
+                <section className={styles.mediaColumn} aria-label="Product media">
+                  <div className={styles.thumbnails} aria-hidden="true">
+                    {[1, 2, 3].map((index) => (
+                      <div className={styles.thumbnail} key={index}>
+                        <img src={`/design-preview-product-${index}.png`} alt="" />
+                      </div>
+                    ))}
+                  </div>
+                  <div className={styles.heroMedia}>
+                    <img src="/design-preview-product-1.png" alt="Preview product" />
+                  </div>
+                </section>
+                <section className={styles.productInfo}>
+                  <p className={styles.eyebrow}>New arrival</p>
+                  <div className={styles.rating} aria-label="Five star rating">★★★★★</div>
+                  <h1 className={styles.title}>Everyday bottle</h1>
+                  <p className={styles.price}>$24.00</p>
+                  <p className={styles.subtitle}>A versatile everyday essential designed for work, travel, and weekends.</p>
+                  <div className={styles.rule} />
+                  <UpsellPurchaseContext upsellRef={upsellRef} />
+                </section>
+              </div>
+            ) : null}
           </div>
         )}
       </main>

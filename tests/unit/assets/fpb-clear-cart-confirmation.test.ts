@@ -103,7 +103,7 @@ class FakeElement {
   private find(predicate: (element: FakeElement) => boolean): FakeElement | null {
     for (const child of this.children) {
       if (predicate(child)) return child;
-      const nested = child.find(predicate);
+      const nested = child.find((value) => predicate(value));
       if (nested) return nested;
     }
     return null;

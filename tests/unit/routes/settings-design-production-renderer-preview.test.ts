@@ -5,6 +5,7 @@ import {
   isStorefrontPreviewEvent,
 } from "../../../app/routes/app/app.settings/storefront-preview-protocol";
 import {
+  buildStorefrontPreviewUpsellFixture,
   buildStorefrontPreviewFixture,
   getStorefrontPreviewStylesheetManifest,
 } from "../../../app/routes/app/app.settings/storefront-preview-fixtures";
@@ -13,6 +14,7 @@ import {
   createStorefrontPreviewOverlayHost,
   mountStorefrontPreviewOverlays,
   openStorefrontPreviewProductPicker,
+  setStorefrontPreviewLoadingPersistent,
 } from "../../../app/routes/app/app.settings/storefront-preview-interactions";
 
 describe("Settings Design production renderer preview", () => {
@@ -157,6 +159,27 @@ describe("Settings Design production renderer preview", () => {
       .toMatch(/^gid:\/\/shopify\/ProductVariant\//);
   });
 
+  it("provides one production-shaped FPB block offer beside a local product form", () => {
+    const fixture = buildStorefrontPreviewUpsellFixture();
+
+    expect(fixture.offer).toEqual(expect.objectContaining({
+      bundleId: "settings-design-preview",
+      mode: "block",
+      imageUrl: "/design-preview-product-4.png",
+      preselectBrowsedProduct: false,
+    }));
+    expect(fixture.offer.copy).toEqual({
+      title: "Complete the set",
+      description: "Build a curated bundle with this product and complementary essentials.",
+      buttonText: "Build this bundle",
+    });
+    expect(fixture.context).toEqual(expect.objectContaining({
+      productId: "9000000000001",
+      productHandle: "preview-product-1",
+      endpointUrl: "",
+    }));
+  });
+
   it("isolates only the dedicated preview-frame document", () => {
     expect(isStorefrontPreviewFramePath("/settings-design-preview-frame")).toBe(true);
     expect(isStorefrontPreviewFramePath("/settings-design-preview-frame/")).toBe(true);
@@ -233,5 +256,37 @@ describe("Settings Design production renderer preview", () => {
     result.cleanup();
 
     expect(host.remove).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps loading visible until the preview leaves the loading state", () => {
+    const showLoadingOverlay = jest.fn();
+    const hideLoadingOverlay = jest.fn();
+    const controller = { showLoadingOverlay, hideLoadingOverlay };
+
+    setStorefrontPreviewLoadingPersistent(controller, true);
+
+    expect(showLoadingOverlay).toHaveBeenCalledWith(null, { bootstrap: true });
+    controller.hideLoadingOverlay();
+    expect(hideLoadingOverlay).not.toHaveBeenCalled();
+
+    setStorefrontPreviewLoadingPersistent(controller, false);
+
+    expect(hideLoadingOverlay).toHaveBeenCalledTimes(1);
+    controller.hideLoadingOverlay();
+    expect(hideLoadingOverlay).toHaveBeenCalledTimes(2);
+  });
+
+  it("guards the loading controller only once across repeated preview updates", () => {
+    const showLoadingOverlay = jest.fn();
+    const hideLoadingOverlay = jest.fn();
+    const controller = { showLoadingOverlay, hideLoadingOverlay };
+
+    setStorefrontPreviewLoadingPersistent(controller, true);
+    const guardedHide = controller.hideLoadingOverlay;
+    setStorefrontPreviewLoadingPersistent(controller, true);
+
+    expect(controller.hideLoadingOverlay).toBe(guardedHide);
+    controller.hideLoadingOverlay();
+    expect(hideLoadingOverlay).not.toHaveBeenCalled();
   });
 });

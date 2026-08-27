@@ -28,6 +28,7 @@ export function PpbStepRulesList({ step }: { step: any }) {
                 <s-button
                   variant="tertiary"
                   tone="critical"
+                  icon="delete"
                   onClick={() =>
                     conditionsState.removeConditionRule(step.id, rule.id)
                   }

@@ -1,0 +1,812 @@
+{
+  "schema_version": 1,
+  "job": {
+    "id": "fpb-step-title-redesign-20260827",
+    "title": "FPB and PPB Step title redesign",
+    "status": "blocked",
+    "stage": "BLOCKED",
+    "revision": 2,
+    "created_at": "2026-08-27T12:27:25Z",
+    "updated_at": "2026-08-27T13:20:42Z",
+    "owner": "engineering",
+    "product": "wolfpack-product-bundles",
+    "repository": "/Users/adityaawasthi/Developer/wolfpack-product-bundles",
+    "branch": "feature/26.05-UI-changes",
+    "commit": "e3b3f2f031dfa7225efd88ce2840e09cae29bfba",
+    "artifact_root": "/Users/adityaawasthi/Developer/wolfpack-product-bundles/design-jobs",
+    "resume_stage": "CHROME_QA_PREFLIGHT"
+  },
+  "scope": {
+    "product_family": "FPB and PPB",
+    "template": "All FPB and PPB storefront templates",
+    "component": "Merchant-configurable storefront Step title",
+    "implementation_mode": "design-director",
+    "design_goal": "Create a coherent, well-positioned Step-title hierarchy across FPB and PPB without changing the configured content or step behavior.",
+    "user_problem": "The storefront Step title configured from the Configure Bundle Flow Step Config card is positioned poorly and needs a stronger presentation.",
+    "primary_user_action": "Understand the active bundle-building step and continue product selection.",
+    "out_of_scope": [
+      "Admin Step Config UI redesign",
+      "Step persistence or translation behavior changes",
+      "Product-card, pricing, selection, validation, or cart behavior changes",
+      "General store chrome used only as context inside the Settings Design preview"
+    ],
+    "merchant_configurability": [
+      "Existing Step title content and translations remain merchant controlled"
+    ],
+    "business_logic_constraints": [
+      "Preserve current step identity, active-step state, navigation, validation, selection, and cart semantics"
+    ]
+  },
+  "viewports": {
+    "reference": [],
+    "required": [
+      "desktop",
+      "mobile"
+    ],
+    "edge_cases": [],
+    "browser_zoom": 100,
+    "device_pixel_ratio_policy": "record-actual",
+    "locale": "",
+    "currency": "",
+    "color_scheme": "",
+    "reduced_motion": false
+  },
+  "references": {
+    "current": [],
+    "target": [],
+    "context": [],
+    "approved": [
+      "screenshot-inventory.yaml"
+    ],
+    "implementation": [
+      "implementation-handoff.md"
+    ],
+    "provenance": [],
+    "permissions_or_usage_notes": []
+  },
+  "decisions": {
+    "locked": [
+      {
+        "id": "D-001",
+        "question": "Which storefront product families are included in the Step-title redesign?",
+        "selected_value": "FPB and PPB, across all storefront templates and both desktop and mobile.",
+        "rationale": "The user expanded the initial FPB request to include PPB so the title treatment remains coherent across bundle families.",
+        "status": "locked",
+        "approver": "Aditya Awasthi",
+        "revision": 1,
+        "affected_artifacts": [
+          "component-brief.md",
+          "visual-audit.md",
+          "responsive-contract.md",
+          "browser-test-plan.yaml"
+        ]
+      },
+      {
+        "id": "D-002",
+        "question": "How should Step Name and Step Title divide responsibility on the storefront?",
+        "selected_value": "Step Name remains the short navigation and progress label; Step Title is one visually prominent local heading for the active product-selection area.",
+        "rationale": "This keeps merchant-configured long-form titles out of compact navigation and establishes one consistent hierarchy across FPB and PPB.",
+        "status": "locked",
+        "approver": "Aditya Awasthi",
+        "approved_at": "2026-08-27T12:43:39Z",
+        "revision": 1,
+        "affected_artifacts": [
+          "component-brief.md",
+          "direction-comparison.md",
+          "component-anatomy.md",
+          "state-matrix.md",
+          "responsive-contract.md"
+        ]
+      },
+      {
+        "id": "D-003",
+        "question": "Which visual treatment should define the active Step Title?",
+        "selected_value": "Direction A \u2014 Content Heading: responsive, strongly weighted, unboxed, left-aligned with the active selection content, naturally wrapping, and absent without residual spacing when unconfigured.",
+        "rationale": "It fixes the measured hierarchy and alignment problem with the lowest theme-compatibility and visual-noise risk across FPB and PPB.",
+        "status": "locked",
+        "approver": "Aditya Awasthi",
+        "approved_at": "2026-08-27T12:51:12Z",
+        "revision": 1,
+        "affected_artifacts": [
+          "direction-comparison.md",
+          "component-anatomy.md",
+          "responsive-contract.md",
+          "design-tokens.json",
+          "implementation-handoff.md"
+        ]
+      },
+      {
+        "id": "D-004",
+        "question": "Which preview surface must match the storefront Step Title design?",
+        "selected_value": "The Settings > Design isolated FPB/PPB production-renderer preview must match the bundle storefront UI exactly; its neutral general-store chrome is excluded.",
+        "rationale": "Merchants must see the same bundle component hierarchy in Design that production will render, while the surrounding shell remains contextual only.",
+        "status": "locked",
+        "approver": "Aditya Awasthi",
+        "approved_at": "2026-08-27T12:51:12Z",
+        "revision": 2,
+        "affected_artifacts": [
+          "component-brief.md",
+          "component-anatomy.md",
+          "implementation-handoff.md",
+          "acceptance-criteria.md",
+          "browser-test-plan.yaml"
+        ]
+      }
+    ],
+    "assumptions": [],
+    "rejected": [],
+    "open": [],
+    "recommendation_delegation": {
+      "status": "not-granted",
+      "scope": [],
+      "exclusions": [
+        "business-behavior",
+        "accessibility",
+        "data-semantics",
+        "approval-scope"
+      ],
+      "approved_by": "",
+      "approved_at": "",
+      "expires_at_stage": "FINAL_APPROVAL"
+    }
+  },
+  "states": {
+    "required": [
+      "S-01 Populated",
+      "S-02 Empty",
+      "S-03 Long content",
+      "S-04 Active step change",
+      "S-05 PPB slot overview",
+      "S-06 PPB picker open",
+      "S-07 Settings preview",
+      "S-08 High zoom/narrow width"
+    ],
+    "optional": [],
+    "not_applicable": [],
+    "coverage_status": "complete"
+  },
+  "responsive": {
+    "contract_status": "complete",
+    "breakpoints": [
+      "320px narrow stress",
+      "767/768/769px PPB picker boundary",
+      "799/800/801px FPB summary boundary",
+      "1280px desktop logical preview"
+    ],
+    "transformations": [
+      "FPB heading remains inside active catalog as summary changes between tray and sidebar",
+      "PPB picker heading reuses the product-grid inset across mobile and desktop",
+      "Settings Design outer scaling does not replace or restyle production heading geometry"
+    ]
+  },
+  "accessibility": {
+    "requirements": [
+      "Non-empty Step Title renders as a contextual heading without entering focus order",
+      "Step Name remains the accessible navigation, slot-group, and dialog identity",
+      "Empty and long titles preserve outline, reflow, and keyboard behavior"
+    ],
+    "known_risks": [],
+    "validation_status": "complete"
+  },
+  "handoff": {
+    "status": "approved",
+    "package_path": "implementation-handoff.md",
+    "implementation_owner": "Codex",
+    "implementation_branch": "feature/26.05-UI-changes",
+    "implementation_commit": "working-tree based on e3b3f2f031dfa7225efd88ce2840e09cae29bfba"
+  },
+  "qa": {
+    "chrome_mcp_required": true,
+    "profile_policy": "default-profile-only",
+    "allow_isolated_context": false,
+    "preflight_status": "blocked",
+    "preflight_result_path": "qa/preflight.json",
+    "baseline_status": "not-started",
+    "baseline_paths": [],
+    "summary_path": "qa/browser-artifact-summary.json",
+    "execution_status": "not-started",
+    "required_viewports": [],
+    "required_states": [],
+    "console_status": "not-started",
+    "network_status": "not-started",
+    "accessibility_status": "not-started",
+    "lighthouse_status": "not-started",
+    "performance_status": "not-started",
+    "visual_diff_status": "not-started",
+    "non_regression_status": "not-started",
+    "retry_history": [],
+    "artifacts_path": "qa",
+    "blockers": [
+      "Chrome MCP cannot persist PNG evidence to the design-job QA directory or /tmp.",
+      "An approved durable baseline cannot be recorded until screenshot persistence is available."
+    ]
+  },
+  "approvals": {
+    "design": {
+      "status": "approved",
+      "approver": "Aditya Awasthi",
+      "at": "2026-08-27T12:51:12Z",
+      "revision": 2
+    },
+    "handoff": {
+      "status": "approved",
+      "approver": "Aditya Awasthi",
+      "at": "2026-08-27T12:51:12Z",
+      "revision": 2
+    },
+    "implementation": {
+      "status": "not-started",
+      "approver": "",
+      "at": "",
+      "revision": null
+    },
+    "final": {
+      "status": "not-started",
+      "approver": "",
+      "at": "",
+      "revision": null
+    }
+  },
+  "artifacts": {
+    "immutable_after_approval": true,
+    "current": {
+      "acceptance-criteria.md": {
+        "path": "acceptance-criteria.md",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "74d1a7965d925d8087f4fff6a8c843f649ade951d465c212d24cec60a88b02dd",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "accessibility-checklist.md": {
+        "path": "accessibility-checklist.md",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "75565ffe2812da541adb3250a599f0870765c38ff281183ce3518d4363d87f78",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "approval-record.yaml": {
+        "path": "approval-record.yaml",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "8f5c32f50fb8ea040fe9a5ce2cfa223b1d98b698f16a3527c3ca7a585ade7b67",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "browser-test-plan.yaml": {
+        "path": "browser-test-plan.yaml",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "74473bfc6353907cf28a6249157e29dd389ba662c8cfb2dff83fbd52dae6b4b7",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "browser-test-report.md": {
+        "path": "browser-test-report.md",
+        "status": "draft",
+        "revision": 1,
+        "sha256": "e18796782509e1f377fe4b17d3a174a9560e2033a7d264db40dbb7a1c8429ebe",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "chrome-preflight-result.yaml": {
+        "path": "chrome-preflight-result.yaml",
+        "status": "draft",
+        "revision": 1,
+        "sha256": "879df4473f899f9dadd40d3584192643dec262f9f5ff2fa8168247cfb2d6ab88",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "codex-task.md": {
+        "path": "codex-task.md",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "64ab9e9faeaaee034720979a3104ab49d5f22dfe3af8ac38b9954a5d5b4542bb",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "component-anatomy.md": {
+        "path": "component-anatomy.md",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "eced38170a4d2ed741e723ce059362dcaafd637a2e8c7459a1fc7f5968fc6a4b",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "component-brief.md": {
+        "path": "component-brief.md",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "fe881c9a281fa00d363b039947f0be7ff2e92fccd6103c8cef51778ab6c0fb82",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "content-stress-cases.yaml": {
+        "path": "content-stress-cases.yaml",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "30fc148f650b17085bb3a13706eab0f16f027275c498b6f3d6fcf15457a772ed",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "design-tokens.json": {
+        "path": "design-tokens.json",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "afd002fe441b6aa09e099f5e87b20d145dea02aaff6a25a3e53f9ae6d28ea164",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "direction-comparison.md": {
+        "path": "direction-comparison.md",
+        "status": "approved",
+        "revision": 2,
+        "sha256": "7045db55d4ea3445dbb7572ad6852a362be080ece2b055c3687bae1da21ef38e",
+        "approved_by": "Aditya Awasthi",
+        "approved_at": "2026-08-27T12:58:23Z",
+        "evidence": [
+          "direction-comparison.md"
+        ]
+      },
+      "implementation-handoff.md": {
+        "path": "implementation-handoff.md",
+        "status": "approved",
+        "revision": 2,
+        "sha256": "bfa14f0dea50123584e57f6d17169cb133114baba9ffbe45c2d8692530617808",
+        "approved_by": "Aditya Awasthi",
+        "approved_at": "2026-08-27T13:07:55Z",
+        "evidence": [
+          "implementation-handoff.md"
+        ]
+      },
+      "interaction-contract.md": {
+        "path": "interaction-contract.md",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "63b59573e05111b8544ef3e33d6157da20a756e162cfa34729303e85dc6769ff",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "prototype/not-applicable.md": {
+        "path": "prototype/not-applicable.md",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "87b3f26551b92708bdfb21afba785b7f4639aa640d1b70913f5931efb943d21b",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "locked-decisions.yaml": {
+        "path": "locked-decisions.yaml",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "a2ca557f06cb4a7647cc405201509a844a9375cd73589d034b3099845b6e6ad1",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "remediation-list.md": {
+        "path": "remediation-list.md",
+        "status": "draft",
+        "revision": 1,
+        "sha256": "81d9c788e7aee16425b5271bedf003e7d65b02038ccacb69cfa003a1ae67efa8",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "responsive-contract.md": {
+        "path": "responsive-contract.md",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "002ca03fce441f1b1f93eb311296f44ee3ed3aa2d55dc69959f70e89ebc7167a",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "screenshot-inventory.yaml": {
+        "path": "screenshot-inventory.yaml",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "9558a41757e7dbd346e5407e5bd8b8a7cf4c6df5fc4dc0826499e1225125acf8",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "state-matrix.md": {
+        "path": "state-matrix.md",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "a9703355661453b72b3801161b94fafd3d3ef3914045b1f490de0d1da68b0422",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "visual-audit.md": {
+        "path": "visual-audit.md",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "70b09a4c4be8127c2e99698b684491d7fca28eee886de948dbedcaa5084c3551",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "visual-qa-report.md": {
+        "path": "visual-qa-report.md",
+        "status": "draft",
+        "revision": 1,
+        "sha256": "c8409d8e33d48c8cf3a281982953f35c18e07996880a316fa751aa0531cd24f5",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      }
+    },
+    "superseded": [
+      {
+        "path": "direction-comparison.md",
+        "status": "approved",
+        "revision": 1,
+        "sha256": "f0a8c1fa5cbfc34e8d29f9fc0e58abfa5823420fdae16d1251ca55c33a6ea270",
+        "approved_by": "Aditya Awasthi",
+        "approved_at": "2026-08-27T12:51:57Z",
+        "evidence": [
+          "direction-comparison.md"
+        ],
+        "superseded_at": "2026-08-27T12:58:23Z",
+        "superseded_by": "Aditya Awasthi",
+        "superseded_reason": "Revision 2 adds user-requested Settings Design preview parity without changing approved Direction A."
+      }
+    ]
+  },
+  "history": [
+    {
+      "sequence": 1,
+      "at": "2026-08-27T12:27:25Z",
+      "from": null,
+      "to": "DISCOVERY",
+      "revision": 1,
+      "reason": "Design job created",
+      "evidence": []
+    },
+    {
+      "sequence": 2,
+      "at": "2026-08-27T12:44:20Z",
+      "from": "DISCOVERY",
+      "to": "SCOPE",
+      "revision": 1,
+      "reason": "Discovery is complete: FPB and PPB are in scope, current placement and ownership are documented, and the Step Name versus Step Title semantic split is user-approved.",
+      "evidence": [],
+      "affected_artifacts": [
+        "component-brief.md",
+        "locked-decisions.yaml"
+      ]
+    },
+    {
+      "sequence": 3,
+      "at": "2026-08-27T12:44:46Z",
+      "from": "SCOPE",
+      "to": "REFERENCE_INTAKE",
+      "revision": 1,
+      "reason": "Scope is complete and user-confirmed: redesign only Step Title styling, hierarchy, wrapping, spacing, and placement across FPB and PPB.",
+      "evidence": [],
+      "affected_artifacts": [
+        "component-brief.md"
+      ]
+    },
+    {
+      "sequence": 4,
+      "at": "2026-08-27T12:46:29Z",
+      "from": "REFERENCE_INTAKE",
+      "to": "REFERENCE_VALIDATION",
+      "revision": 1,
+      "reason": "The current FPB and PPB desktop/mobile references are inventoried with viewport, provenance, intended use, and the browser screenshot persistence limitation recorded.",
+      "evidence": [],
+      "affected_artifacts": [
+        "screenshot-inventory.yaml"
+      ]
+    },
+    {
+      "sequence": 5,
+      "at": "2026-08-27T12:46:49Z",
+      "from": "REFERENCE_VALIDATION",
+      "to": "VISUAL_ANALYSIS",
+      "revision": 1,
+      "reason": "Current evidence is sufficient for an original hierarchy and positioning redesign; exact target pixel matching is explicitly out of scope.",
+      "evidence": [],
+      "affected_artifacts": [
+        "screenshot-inventory.yaml"
+      ]
+    },
+    {
+      "sequence": 6,
+      "at": "2026-08-27T12:47:58Z",
+      "from": "VISUAL_ANALYSIS",
+      "to": "DIRECTION_EXPLORATION",
+      "revision": 1,
+      "reason": "The visual audit now defines the measured FPB misalignment, PPB semantic overloading, responsive gaps, invariant behavior, and canonical ownership hypotheses.",
+      "evidence": [],
+      "affected_artifacts": [
+        "visual-audit.md"
+      ]
+    },
+    {
+      "sequence": 7,
+      "at": "2026-08-27T12:50:25Z",
+      "from": "DIRECTION_EXPLORATION",
+      "to": "DIRECTION_APPROVAL",
+      "revision": 1,
+      "reason": "Three behavior-equivalent, responsive styling directions are decision-ready, with Content Heading recommended for cross-template clarity and theme compatibility.",
+      "evidence": [
+        "direction-comparison.md"
+      ],
+      "affected_artifacts": [
+        "direction-comparison.md"
+      ]
+    },
+    {
+      "sequence": 8,
+      "at": "2026-08-27T12:52:02Z",
+      "from": "DIRECTION_APPROVAL",
+      "to": "SCOPE",
+      "revision": 2,
+      "reason": "The user added preview-surface parity after approving Direction A, expanding the component boundary beyond the live storefront renderers.",
+      "evidence": [
+        "direction-comparison.md"
+      ],
+      "affected_artifacts": [
+        "component-brief.md",
+        "component-anatomy.md",
+        "implementation-handoff.md",
+        "acceptance-criteria.md",
+        "browser-test-plan.yaml"
+      ]
+    },
+    {
+      "sequence": 9,
+      "at": "2026-08-27T12:56:43Z",
+      "from": "SCOPE",
+      "to": "REFERENCE_INTAKE",
+      "revision": 2,
+      "reason": "Revision 2 scope is complete: storefront FPB/PPB Step Title styling and the Settings Design bundle preview are included; neutral store chrome is excluded.",
+      "evidence": [],
+      "affected_artifacts": [
+        "component-brief.md",
+        "locked-decisions.yaml"
+      ]
+    },
+    {
+      "sequence": 10,
+      "at": "2026-08-27T12:57:23Z",
+      "from": "REFERENCE_INTAKE",
+      "to": "REFERENCE_VALIDATION",
+      "revision": 2,
+      "reason": "Revision 2 reference intake adds hard-reloaded Settings Design FPB and PPB production-renderer preview evidence alongside the storefront captures.",
+      "evidence": [],
+      "affected_artifacts": [
+        "screenshot-inventory.yaml"
+      ]
+    },
+    {
+      "sequence": 11,
+      "at": "2026-08-27T12:57:44Z",
+      "from": "REFERENCE_VALIDATION",
+      "to": "VISUAL_ANALYSIS",
+      "revision": 2,
+      "reason": "Preview and storefront evidence are comparable at the bundle-renderer level and confirm one shared ownership defect; preview-only CSS is explicitly prohibited.",
+      "evidence": [],
+      "affected_artifacts": [
+        "screenshot-inventory.yaml"
+      ]
+    },
+    {
+      "sequence": 12,
+      "at": "2026-08-27T12:58:03Z",
+      "from": "VISUAL_ANALYSIS",
+      "to": "DIRECTION_EXPLORATION",
+      "revision": 2,
+      "reason": "Revision 2 visual analysis confirms Settings Design must inherit the approved production-owned Content Heading and adds no separate visual direction.",
+      "evidence": [],
+      "affected_artifacts": [
+        "visual-audit.md"
+      ]
+    },
+    {
+      "sequence": 13,
+      "at": "2026-08-27T12:58:23Z",
+      "from": "DIRECTION_EXPLORATION",
+      "to": "DIRECTION_EXPLORATION",
+      "revision": 2,
+      "reason": "Revision 2 adds user-requested Settings Design preview parity without changing approved Direction A.",
+      "evidence": [
+        "direction-comparison.md"
+      ],
+      "event": "artifact-superseded",
+      "affected_artifacts": [
+        "direction-comparison.md"
+      ]
+    },
+    {
+      "sequence": 14,
+      "at": "2026-08-27T12:58:23Z",
+      "from": "DIRECTION_EXPLORATION",
+      "to": "DIRECTION_APPROVAL",
+      "revision": 2,
+      "reason": "Direction A remains approved at revision 2, with Settings Design preview parity added through the same production renderer and CSS owners.",
+      "evidence": [
+        "direction-comparison.md"
+      ],
+      "affected_artifacts": [
+        "direction-comparison.md"
+      ]
+    },
+    {
+      "sequence": 15,
+      "at": "2026-08-27T12:59:21Z",
+      "from": "DIRECTION_APPROVAL",
+      "to": "COMPONENT_ANATOMY",
+      "revision": 2,
+      "reason": "Direction A is approved at revision 2; storefront and preview rendering, state, styling, and responsive owners are mapped without parallel preview markup.",
+      "evidence": [
+        "component-anatomy.md"
+      ],
+      "affected_artifacts": [
+        "component-anatomy.md"
+      ]
+    },
+    {
+      "sequence": 16,
+      "at": "2026-08-27T13:00:07Z",
+      "from": "COMPONENT_ANATOMY",
+      "to": "STATE_CONTRACT",
+      "revision": 2,
+      "reason": "All applicable Step Title states, including empty, long content, active-step changes, PPB picker, preview parity, and narrow-width stress, are specified.",
+      "evidence": [
+        "state-matrix.md"
+      ],
+      "affected_artifacts": [
+        "state-matrix.md"
+      ]
+    },
+    {
+      "sequence": 17,
+      "at": "2026-08-27T13:01:06Z",
+      "from": "STATE_CONTRACT",
+      "to": "RESPONSIVE_CONTRACT",
+      "revision": 2,
+      "reason": "The responsive contract covers FPB tray/sidebar, PPB drawer, long-content, high-zoom, and Settings Design logical viewport parity.",
+      "evidence": [
+        "responsive-contract.md"
+      ],
+      "affected_artifacts": [
+        "responsive-contract.md"
+      ]
+    },
+    {
+      "sequence": 18,
+      "at": "2026-08-27T13:01:57Z",
+      "from": "RESPONSIVE_CONTRACT",
+      "to": "INTERACTION_ACCESSIBILITY",
+      "revision": 2,
+      "reason": "Interaction and accessibility contracts preserve all existing controls while making Step Title a non-interactive contextual heading and Step Name the accessible navigation identity.",
+      "evidence": [
+        "interaction-contract.md",
+        "accessibility-checklist.md"
+      ],
+      "affected_artifacts": [
+        "interaction-contract.md",
+        "accessibility-checklist.md"
+      ]
+    },
+    {
+      "sequence": 19,
+      "at": "2026-08-27T13:03:03Z",
+      "from": "INTERACTION_ACCESSIBILITY",
+      "to": "TOKENS_GEOMETRY",
+      "revision": 2,
+      "reason": "Approved responsive typography, existing color ownership, content spacing, picker inset, breakpoints, and stress fixtures are documented without adding preview-only tokens.",
+      "evidence": [
+        "design-tokens.json",
+        "content-stress-cases.yaml"
+      ],
+      "affected_artifacts": [
+        "design-tokens.json",
+        "content-stress-cases.yaml"
+      ]
+    },
+    {
+      "sequence": 20,
+      "at": "2026-08-27T13:03:35Z",
+      "from": "TOKENS_GEOMETRY",
+      "to": "PROTOTYPE_OPTIONAL",
+      "revision": 2,
+      "reason": "A standalone prototype is not applicable because the isolated Settings Design frame already supplies the production renderer and exact CSS as the authoritative preview surface.",
+      "evidence": [
+        "prototype/not-applicable.md"
+      ],
+      "affected_artifacts": [
+        "prototype/not-applicable.md"
+      ]
+    },
+    {
+      "sequence": 21,
+      "at": "2026-08-27T13:04:12Z",
+      "from": "PROTOTYPE_OPTIONAL",
+      "to": "HANDOFF_ASSEMBLY",
+      "revision": 2,
+      "reason": "The prototype stage is complete as not applicable; the production Settings Design renderer is the authoritative preview and no design ambiguity remains.",
+      "evidence": [
+        "prototype/not-applicable.md"
+      ],
+      "affected_artifacts": [
+        "prototype/not-applicable.md"
+      ]
+    },
+    {
+      "sequence": 22,
+      "at": "2026-08-27T13:08:29Z",
+      "from": "HANDOFF_ASSEMBLY",
+      "to": "HANDOFF_VALIDATION",
+      "revision": 2,
+      "reason": "The complete revision 2 handoff packet, state/responsive/accessibility contracts, browser plan, and approval records pass validate_handoff.py.",
+      "evidence": [
+        "implementation-handoff.md",
+        "browser-test-plan.yaml"
+      ],
+      "affected_artifacts": [
+        "implementation-handoff.md",
+        "browser-test-plan.yaml"
+      ]
+    },
+    {
+      "sequence": 23,
+      "at": "2026-08-27T13:08:34Z",
+      "from": "HANDOFF_VALIDATION",
+      "to": "IMPLEMENTATION_AWAITED",
+      "revision": 2,
+      "reason": "The approved handoff validates with no blocking ambiguity and the user explicitly requested implementation and parity remediation.",
+      "evidence": [
+        "implementation-handoff.md"
+      ],
+      "affected_artifacts": [
+        "implementation-handoff.md",
+        "codex-task.md"
+      ]
+    },
+    {
+      "sequence": 24,
+      "at": "2026-08-27T13:18:37Z",
+      "from": "IMPLEMENTATION_AWAITED",
+      "to": "CHROME_QA_PREFLIGHT",
+      "revision": 2,
+      "reason": "Implementation returned in the working tree with production-owned FPB and PPB heading semantics, green focused regressions, rebuilt assets, and refreshed graph.",
+      "evidence": [
+        "implementation-handoff.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 25,
+      "at": "2026-08-27T13:20:42Z",
+      "from": "CHROME_QA_PREFLIGHT",
+      "to": "BLOCKED",
+      "revision": 2,
+      "reason": "Chrome QA preflight cannot persist required PNG evidence or an approved baseline because the Chrome MCP host rejects all tested file destinations.",
+      "evidence": [
+        "qa/preflight.json"
+      ],
+      "affected_artifacts": []
+    }
+  ]
+}

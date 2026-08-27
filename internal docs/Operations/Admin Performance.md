@@ -151,7 +151,10 @@ only workspace disclosure.
 The desktop preview stage uses a decorative 1320×920 Mac-style display canvas.
 Its visible 1280×800 screen owns the desktop scrollbar and contains the unchanged
 1280×1136 storefront renderer, so the Admin frame stays proportionally wide
-without changing the storefront viewport contract. Mobile presentation adds a
+without changing the storefront viewport contract. The desktop stage explicitly
+owns the full available inline size; otherwise its aspect ratio and height cap
+can resolve the stage itself to the device width and leave the monitor aligned to
+the start after the inspector collapses. Mobile presentation adds a
 decorative 428×882 iPhone 14 Pro body adapted from the MIT-licensed Devices.css
 geometry outside the iframe; the production renderer still receives the
 unchanged 390×844 viewport and its scrollbar remains hidden. Frame padding sits
@@ -163,7 +166,26 @@ The desktop inspector is a sticky, full-available-height sidebar whose internal
 content scrolls independently. Its disclosure chevron is positioned against the
 sidebar edge rather than participating in document flow, keeping the inspector
 top aligned with the complete Live preview panel in expanded and collapsed
-states.
+states. Both sticky owners use the same zero top inset; applying a sticky offset
+to only the sidebar makes its card begin below the Live preview container before
+either surface reaches its sticky threshold.
+
+The Live preview panel and customization sidebar share the same viewport-height
+workspace row on desktop. The preview header occupies the first row and the
+device stage fills the remaining height, so changing viewport or collapsing the
+inspector cannot make the two cards end at different block positions. Narrow
+Admin containers return both panes to content-driven height.
+
+Inside the isolated 390x844 mobile preview frame, the FPB summary tray is pinned
+to the frame viewport bottom. This preview-only positioning prevents area-focus
+`scrollIntoView` calls from carrying the production sticky tray upward with the
+document while leaving the deployed storefront tray and its sticky contract
+unchanged.
+
+Design renderer failures and storefront-preview launch failures use Shopify's
+native App Bridge Toast API with `isError: true`. They must not render an inline
+critical banner inside the preview canvas or bundle-picker modal; this keeps all
+Design-page error feedback in the Shopify Admin host surface.
 
 Preview fitting must not use React state for ResizeObserver samples. Coalesce
 the latest content-box measurement to one requestAnimationFrame callback and
@@ -176,8 +198,13 @@ The preview toolbar separates template-filtered `Edit area` and `Preview state`
 selectors. Area changes reuse the mounted renderer, return transient state to
 Default, and scroll the selected production region into a persistent frame-owned
 outline. State changes open the existing production picker, loading, validation,
-or upsell implementation without replacing the neutral storefront context.
-Neither selector adds data loading, persistence, or another lazy boundary.
+or upsell implementation without replacing the neutral storefront chrome. The
+Upsell state hides the bundle builder and places the production offer immediately
+after a local product purchase form, matching the runtime's automatic product-page
+anchor contract. The frame guards production loading dismissal only while Loading
+is selected, then restores normal dismissal when the state changes; it does not add
+polling, timers, or a second loading renderer. Neither selector adds data loading,
+persistence, or another lazy boundary.
 
 Direct Chrome DevTools verification on 2026-08-27 used the agent store after a
 cache-bypassed reload. The 1881×900 expanded-inspector and collapsed-inspector

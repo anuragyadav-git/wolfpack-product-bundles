@@ -33,7 +33,7 @@ export function PpbDefaultProductsSettings() {
       (product: DefaultProductSelection) =>
         product.graphqlId || product.productId || product.id
     )
-    .filter(isString)
+    .filter((value) => isString(value))
     .map((id: string) => ({ id }));
 
   const handleDefaultProductPicker = async () => {
@@ -45,7 +45,10 @@ export function PpbDefaultProductsSettings() {
     });
     if (!picked) return;
     const defaultProducts = picked
-      .map(buildDefaultProductEntryFromPicker)
+      .map(
+        (value: Parameters<typeof buildDefaultProductEntryFromPicker>[0]) =>
+          buildDefaultProductEntryFromPicker(value),
+      )
       .filter(
         (
           product: ReturnType<typeof buildDefaultProductEntryFromPicker>
@@ -111,6 +114,7 @@ export function PpbDefaultProductsSettings() {
                 className={productPageBundleStyles.defaultProductsPickerActions}
               >
                 <s-button
+                  icon="product"
                   variant={defaultProductsEnabled ? "primary" : "secondary"}
                   disabled={!defaultProductsEnabled || undefined}
                   onClick={handleDefaultProductPicker}

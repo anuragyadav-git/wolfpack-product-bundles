@@ -77,12 +77,8 @@ export function usePpbPlacementHandlers({
       });
       const selection = getVisibilityPickerSelection(picked);
       if (!selection) return;
-      const selectedProducts = selection.map(
-        normalizeVisibilityProductForDisplayConfiguration,
-      );
-      const pageTargets = selectedProducts.map(
-        normalizeVisibilityProductPageTarget,
-      );
+      const selectedProducts = selection.map((value) => normalizeVisibilityProductForDisplayConfiguration(value));
+      const pageTargets = selectedProducts.map((value) => normalizeVisibilityProductPageTarget(value));
       if (target === "widget") {
         visibility.setUpsellWidgetSelectedProducts(selectedProducts);
         visibility.setUpsellWidgetSpecificProductPages(pageTargets);
@@ -108,12 +104,8 @@ export function usePpbPlacementHandlers({
       });
       const selection = getVisibilityPickerSelection(picked);
       if (!selection) return;
-      const collectionsSelectedData = selection.map(
-        normalizeVisibilityCollectionForDisplayConfiguration,
-      );
-      const pageTargets = collectionsSelectedData.map(
-        normalizeVisibilityCollectionPageTarget,
-      );
+      const collectionsSelectedData = selection.map((value) => normalizeVisibilityCollectionForDisplayConfiguration(value));
+      const pageTargets = collectionsSelectedData.map((value) => normalizeVisibilityCollectionPageTarget(value));
       if (target === "widget") {
         visibility.setUpsellWidgetCollectionsSelectedData(
           collectionsSelectedData,

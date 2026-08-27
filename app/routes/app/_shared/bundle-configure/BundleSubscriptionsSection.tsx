@@ -13,6 +13,7 @@ import {
   type TranslationFieldDefinition,
 } from "../../../../lib/bundle-configure-translations";
 import { MultiLanguageTextModal } from "../../../../components/bundle-configure/MultiLanguageTextModal";
+import { getConfigureActionIcon } from "../../../../lib/bundle-config/configure-action-icons";
 import { DisabledConfigurationRegion } from "./DisabledConfigurationRegion";
 
 type SubscriptionValidationResponse = {
@@ -312,7 +313,7 @@ export function BundleSubscriptionsSection(
                       )}
                       <s-button
                         variant="secondary"
-                        icon="refresh"
+                        icon={getConfigureActionIcon("replace")}
                         loading={
                           subscriptionFetcher.state === "submitting" ||
                           undefined
@@ -341,6 +342,7 @@ export function BundleSubscriptionsSection(
               ) : (
                 <s-button
                   variant="primary"
+                  icon={getConfigureActionIcon("subscription-plan")}
                   loading={
                     subscriptionFetcher.state === "submitting" || undefined
                   }
@@ -395,7 +397,7 @@ export function BundleSubscriptionsSection(
                     <s-heading>Plan Tiers</s-heading>
                     <s-button
                       variant="secondary"
-                      icon="refresh"
+                      icon={getConfigureActionIcon("refresh")}
                       loading={
                         subscriptionFetcher.state === "submitting" || undefined
                       }
@@ -522,7 +524,7 @@ export function BundleSubscriptionsSection(
                     <s-button
                       variant="tertiary"
                       tone="neutral"
-                      icon="globe"
+                      icon={getConfigureActionIcon("translate")}
                       disabled={
                         shopLocales.length === 0 ||
                         !subscriptionConfig.selectedGroup ||

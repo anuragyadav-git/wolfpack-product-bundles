@@ -450,6 +450,7 @@ export const LANGUAGE_CONFIGURATION: LanguageConfiguration = {
         description: "Product card labels for product-page bundles",
         fields: [
           { key: "ppb.productCard.productCardAddBtnText", label: "Product Add to Cart Button", value: "Add to Cart", kind: "text" },
+          { key: "ppb.productCard.productCardOutOfStockBtnText", label: "Product Out of Stock Button", value: "Out of Stock", kind: "text" },
           { key: "ppb.productCard.productVariantLabelText", label: "Product Variant Label", value: "Select variant", kind: "text" },
           { key: "ppb.productCard.productAddedBtnText", label: "Product Added label", value: "Added x{{allowedQuantity}}", kind: "text" },
           { key: "ppb.productCard.productCardAddBtnText_inPage", label: "Inline Product - Add Button Text", value: "Add +", kind: "text" },
@@ -527,7 +528,6 @@ export const CONTROL_LAYOUTS: ControlsLayout[] = [
         contentTitle: "Bundle Settings",
         contentDescription: "Additional bundle level settings applicable to all bundles created",
         fields: [
-          { key: "landingPage.showCompareAtPrice", label: "Show Compare At Price", kind: "toggle", value: "Checked", group: "Bundle Settings" },
           { key: "landingPage.hideIrrelevantVariantImages", label: "Hide Irrelevant variant images", kind: "toggle", group: "Bundle Settings" },
           { key: "landingPage.trackInventoryOnAddToCart", label: "Track inventory on Add To Cart (in beta)", kind: "toggle", group: "Bundle Settings", description: "Know More" },
           { key: "landingPage.redirectCollectionQuickAddToBundle", label: "Redirect Collection Page 'Quick Add' to Bundle", value: "Checked", kind: "toggle", group: "Bundle Settings" },

@@ -9,7 +9,7 @@ import {
   SettingsWorkspaceError,
 } from "./app.settings/SettingsLandingShell";
 import { SettingsRoute } from "./app.settings/SettingsRoute";
-import { loader as settingsLoader } from "./app.settings";
+import type { loader as settingsLoader } from "./app.settings";
 import { AdminSectionLoadingState } from "../../components/AdminSectionLoadingState";
 import { ReduxProvider } from "../../store/ReduxProvider";
 

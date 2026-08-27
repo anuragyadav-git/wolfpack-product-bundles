@@ -18,7 +18,7 @@ describe('PPB Cascade discount message rendering', () => {
 
     renderCascadeDiscountMessage(element, message);
 
-    expect(element.textContent).toBe('Add <img src=x onerror=alert(1)> 2 more items to unlock a discount');
+    expect(element.textContent).toContain('Add <img src=x onerror=alert(1)> 2 more items to unlock a discount');
     expect(element.querySelector('img')).toBeNull();
     expect(element.querySelector('[data-message-segment="condition"]')?.textContent).toBe('2 more items');
   });

@@ -9,9 +9,10 @@ export function resolveProductPageCardButtonText({
   currentQuantity = 0,
   currentStep = {},
   outOfStock = false,
+  outOfStockText = 'Out of Stock',
   defaultAddText = 'Add +',
 }: any = {}) {
-  if (outOfStock) return 'Out of stock';
+  if (outOfStock) return outOfStockText;
 
   const rawText = currentQuantity > 0
     ? (currentStep?.addonReplaceText || `Added x${currentQuantity}`)
