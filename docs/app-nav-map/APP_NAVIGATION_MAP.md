@@ -476,6 +476,7 @@ FPB Configure Page
 │       └── 2×2 template grid (FPB: Standard Design, Classic Design, Compact Design, Horizontal Design)
 │           └── Each card: preview placeholder + label + [Select]/[Selected] button
 │               Persists: wpbLayoutTemplate (always FBP_SIDE_FOOTER) + wpbPresetId (STANDARD | CLASSIC | COMPACT | HORIZONTAL)
+│       └── Sticky action footer keeps [Next] visible while the template grid scrolls
 │       └── [Button] "Preview bundle" → opens signed storefront preview in a new tab, closes Customization, then opens Preview Feedback Modal
 │
 ├── Save Bar (App Bridge): [Discard] [Save]
@@ -624,6 +625,7 @@ PPB Configure Page
 │   └── 2×2 template grid (PPB: Product List, Product Grid, Horizontal Slots, Vertical Slots)
 │       └── Each card: preview placeholder + label + [Select]/[Selected] button
 │           Persists: wpbLayoutTemplate (PDP_INPAGE | PDP_MODAL) + wpbPresetId (CASCADE | COGNIVE | MODAL | SIMPLIFIED)
+│   └── Sticky action footer keeps [Next] visible while the template grid scrolls
 │   └── [Button] "Preview bundle" → opens signed product preview in a new tab, closes Customization, then opens Preview Feedback Modal
 │       ├── "Bundle is visible on store" → close
 │       └── "Having issues with the bundle? Contact us" → open Crisp with the bundle preview URL

@@ -5,7 +5,7 @@ title: Admin Configure Page
 type: architecture
 status: authoritative
 summary: Defines the shared FPB and PPB configure-page boundary and direct create, clone, edit, and save flows.
-last_audited: 2026-08-25
+last_audited: 2026-08-27
 owners:
   - engineering
 domains:
@@ -193,6 +193,9 @@ React wrapper portals the workflow into the host modal document, preserving
 React event handlers for the post-Next Preview bundle action. That projected
 action remains a semantic HTML button because nested `s-button` elements do
 not hydrate in the host modal document and render as non-interactive text.
+The projected workflow fills the host modal viewport, keeps the template grid
+as its only vertical scroll region, and pins the action footer so `Next` stays
+available while merchants review every template.
 
 After a successful Select Template preview, the preview handler returns the
 exact URL opened in the reserved new tab. Closing the projected customization
