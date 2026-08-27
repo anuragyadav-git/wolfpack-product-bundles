@@ -1,12 +1,12 @@
 {
   "schema_version": 1,
   "job_id": "ppb-selected-slot-redesign-20260821",
-  "revision": 2,
+  "revision": 4,
   "status": "complete",
   "design": {
     "status": "approved",
     "approver": "user",
-    "at": "2026-08-20T20:49:52Z",
+    "at": "2026-08-24T15:21:06Z",
     "evidence": [
       "direction-comparison.md",
       "visual-audit.md",
@@ -21,7 +21,7 @@
   "handoff": {
     "status": "approved",
     "approver": "user",
-    "at": "2026-08-20T20:57:24Z",
+    "at": "2026-08-24T20:07:26Z",
     "evidence": [
       "implementation-handoff.md",
       "codex-task.md",
@@ -44,5 +44,12 @@
     "evidence": [],
     "waivers": []
   },
-  "superseded_approvals": []
+  "superseded_approvals": [
+    {
+      "scope": "Revision 2 handoff",
+      "approver": "user",
+      "at": "2026-08-20T20:57:24Z",
+      "reason": "Revision 4 narrowed the component boundary and replaced the approved visual contract."
+    }
+  ]
 }

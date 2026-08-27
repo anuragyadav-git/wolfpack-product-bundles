@@ -1,9 +1,8 @@
-import { useActionData, useFetcher, useSubmit } from "@remix-run/react";
+import { useActionData, useFetcher, useNavigation, useSubmit } from "@remix-run/react";
 import { useEffect, useRef, useState } from "react";
 import { useAppBridge } from "@shopify/app-bridge-react";
 import {
   CONTROL_LAYOUTS,
-  DESIGN_CONFIGURATION,
   LANGUAGE_CONFIGURATION,
 } from "../../../lib/admin-configuration-surfaces";
 import styles from "../../../styles/routes/admin-configuration-surfaces.module.css";
@@ -25,8 +24,8 @@ import {
   SettingsHelpModal,
   SettingsToast,
 } from "./SettingsFeedback";
-import { runAfterSaveBarLeaveConfirmation } from "../../../lib/admin-savebar-navigation.client";
 import { createSettingsDesignState, type SettingsDesignPayload } from "../../../lib/settings-design-contract";
+import { isShopBrandColors } from "../../../lib/shop-brand-colors";
 import { DesignSettingsView } from "./DesignSettingsView";
 import { AdminPageTitleBar } from "../../../components/AdminPageNavigation";
 import type { AdditionalConfigurationsNavigation } from "../../../lib/additional-configurations-navigation";
@@ -44,7 +43,8 @@ type SettingsRouteProps = {
     id: string;
     name: string;
     type: string;
-    viewUrl: string | null;
+    bundleType: "full_page" | "product_page";
+    viewUrl: string;
   }>;
 };
 
@@ -59,6 +59,7 @@ export function SettingsRoute({
   const actionData = useActionData<typeof action>();
   const controlsFetcher = useFetcher<typeof action>();
   const submit = useSubmit();
+  const navigation = useNavigation();
   const shopify = useAppBridge();
   const controlsNavigationRef = useRef<HTMLDetailsElement>(null);
   const deferredControlsNavigationRef = useRef(createDeferredSettingsNavigation());
@@ -82,6 +83,9 @@ export function SettingsRoute({
     ? settingsPage.controls as Record<string, string>
     : null;
   const persistedDesignState = createSettingsDesignState(settingsPage?.design);
+  const shopBrandColors = isShopBrandColors(settingsPage?.shopBrandColors)
+    ? settingsPage.shopBrandColors
+    : null;
   const [settingsView, setSettingsView] = useState<"landing" | "design" | "language" | "controls">(initialView);
   const initialLanguageLocaleValues = persistedLanguageState?.localeFieldValues ?? { en: getInitialLanguageFieldValues() };
   const [languageMode, setLanguageMode] = useState<"SINGLE" | "MULTIPLE">(persistedLanguageState?.languageMode ?? "MULTIPLE");
@@ -101,7 +105,6 @@ export function SettingsRoute({
     ...getInitialControlFieldValues(),
     ...(persistedControlState ?? {}),
   });
-  const [activeDesignTab, setActiveDesignTab] = useState(DESIGN_CONFIGURATION[0].title);
   const [designFieldValues, setDesignFieldValues] = useState<Record<string, string>>({
     ...getInitialDesignFieldValues(),
     ...persistedDesignState.fieldValues,
@@ -120,12 +123,12 @@ export function SettingsRoute({
     initialControlNavigation?.group ?? "",
   );
   const [isControlsNavigationOpen, setIsControlsNavigationOpen] = useState(true);
-  const [isExpertColorControls, setIsExpertColorControls] = useState(persistedDesignState.isExpertControlsEnabled);
-  const [savedIsExpertColorControls, setSavedIsExpertColorControls] = useState(persistedDesignState.isExpertControlsEnabled);
-  const [activeDesignScope, setActiveDesignScope] = useState("General");
-  const [isExpertScopeActive, setIsExpertScopeActive] = useState(false);
-  const [designGateMessage, setDesignGateMessage] = useState<string | null>(null);
-  const selectedDesignTab = DESIGN_CONFIGURATION.find((tab) => tab.title === activeDesignTab) ?? DESIGN_CONFIGURATION[0];
+  const [inheritedColorFieldKeys, setInheritedColorFieldKeys] = useState(
+    persistedDesignState.inheritedColorFieldKeys,
+  );
+  const [savedInheritedColorFieldKeys, setSavedInheritedColorFieldKeys] = useState(
+    persistedDesignState.inheritedColorFieldKeys,
+  );
   const selectedControlLayout = CONTROL_LAYOUTS.find((layout) => layout.label === activeControlLayout) ?? CONTROL_LAYOUTS[0];
   const selectedControlTab = selectedControlLayout.tabs.find((tab) => tab.title === activeControlTab) ?? selectedControlLayout.tabs[0];
   const selectedControlGroupTitles = Array.from(new Set(
@@ -142,9 +145,11 @@ export function SettingsRoute({
   const currentLanguageState = { languageMode, localeFieldValues: languageLocaleValues };
   const isLanguageDirty = JSON.stringify(currentLanguageState) !== JSON.stringify(savedLanguageState);
   const isControlsDirty = JSON.stringify(controlFieldValues) !== JSON.stringify(savedControlFieldValues);
-  const currentDesignState = { fieldValues: designFieldValues, isExpertControlsEnabled: isExpertColorControls };
-  const savedDesignState = { fieldValues: savedDesignFieldValues, isExpertControlsEnabled: savedIsExpertColorControls };
+  const currentDesignState = { fieldValues: designFieldValues, inheritedColorFieldKeys };
+  const savedDesignState = { fieldValues: savedDesignFieldValues, inheritedColorFieldKeys: savedInheritedColorFieldKeys };
   const isDesignDirty = JSON.stringify(currentDesignState) !== JSON.stringify(savedDesignState);
+  const isDesignSaving = navigation.state !== "idle"
+    && navigation.formData?.get("intent") === "saveSettingsDesign";
   const isActiveSubpageDirty =
     (settingsView === "design" && isDesignDirty) ||
     (settingsView === "language" && isLanguageDirty) ||
@@ -162,7 +167,7 @@ export function SettingsRoute({
       navigateWithinControls(onExit);
       return;
     }
-    void runAfterSaveBarLeaveConfirmation(shopify, onExit);
+    void shopify.saveBar.leaveConfirmation().then(onExit);
   };
 
   const navigateToSettingsView = (nextView: "design" | "language" | "controls") => {
@@ -173,7 +178,7 @@ export function SettingsRoute({
       });
       return;
     }
-    void runAfterSaveBarLeaveConfirmation(shopify, () => {
+    void shopify.saveBar.leaveConfirmation().then(() => {
       setSettingsView(nextView);
       if (nextView === "language") setActiveLanguagePanel("cartCheckout");
     });
@@ -182,8 +187,7 @@ export function SettingsRoute({
   const discardActiveSettingsChanges = () => {
     if (settingsView === "design") {
       setDesignFieldValues(savedDesignFieldValues);
-      setIsExpertColorControls(savedIsExpertColorControls);
-      setDesignGateMessage(null);
+      setInheritedColorFieldKeys(savedInheritedColorFieldKeys);
       return;
     }
     if (settingsView === "language") {
@@ -240,7 +244,7 @@ export function SettingsRoute({
     ) {
       const confirmedState = createSettingsDesignState(actionData.savedState);
       setSavedDesignFieldValues(confirmedState.fieldValues);
-      setSavedIsExpertColorControls(confirmedState.isExpertControlsEnabled);
+      setSavedInheritedColorFieldKeys(confirmedState.inheritedColorFieldKeys);
     }
     if (
       actionData.success
@@ -298,24 +302,18 @@ export function SettingsRoute({
   if (settingsView === "design") {
     return (
       <DesignSettingsView
-        selectedDesignTab={selectedDesignTab}
-        isExpertColorControls={isExpertColorControls}
-        isExpertScopeActive={isExpertScopeActive}
-        activeDesignScope={activeDesignScope}
         designFieldValues={designFieldValues}
-        designGateMessage={designGateMessage}
+        inheritedColorFieldKeys={inheritedColorFieldKeys}
+        shopBrandColors={shopBrandColors}
         isActiveSubpageDirty={isActiveSubpageDirty}
+        isDesignSaving={isDesignSaving}
         isPreviewModalOpen={isPreviewModalOpen}
         previewBundles={previewBundles}
         saveMessage={saveMessage}
         setSettingsView={() => returnToSettingsLanding()}
         setIsPreviewModalOpen={setIsPreviewModalOpen}
-        setActiveDesignTab={setActiveDesignTab}
-        setIsExpertScopeActive={setIsExpertScopeActive}
-        setDesignGateMessage={setDesignGateMessage}
-        setActiveDesignScope={setActiveDesignScope}
         setDesignFieldValues={setDesignFieldValues}
-        setIsExpertColorControls={setIsExpertColorControls}
+        setInheritedColorFieldKeys={setInheritedColorFieldKeys}
         setSaveMessage={setSaveMessage}
         discardActiveSettingsChanges={discardActiveSettingsChanges}
         saveActiveSettingsChanges={saveActiveSettingsChanges}

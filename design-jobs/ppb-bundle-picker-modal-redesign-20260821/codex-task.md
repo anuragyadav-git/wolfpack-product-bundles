@@ -26,12 +26,12 @@ keywords:
 # Codex Task
 
 Artifact job ID: ppb-bundle-picker-modal-redesign-20260821
-Artifact revision: 6
+Artifact revision: 8
 Artifact status: approved
 
 ## Job, revision, goal, and non-goals
 
-Implement revision 6 of `ppb-bundle-picker-modal-redesign-20260821`: preserve the approved shared picker/details work and cap filled Horizontal/Vertical slots using their existing responsive geometry owners. Product names wrap normally and visually clamp only at the cap while the complete name remains programmatically available. Replace the separate Remove action with a compact cross badge over the slot, retaining a 44px target, localized product-specific accessible name, existing single-removal mutation, replacement activation, and focus restoration. Exclude FPB presentation, Admin, APIs, data, cart semantics, and Product List/Grid redesign.
+Implement revision 8 of `ppb-bundle-picker-modal-redesign-20260821`: preserve the approved shared picker/details work and leave Horizontal filled tiles unchanged. Follow only live EB for the Vertical filled row: responsive full width, content-derived 64px normal height, 60px minimum, no maximum, visible wrapping/overflow, intrinsic flex sizing, 50px media, 5px padding and gap, 2px black border, 10px radius, bold 16px identity, no filled-row price, inert row surface, and a 20px inline trailing circular-cross Remove visual. The cross removes one represented unit. Exclude FPB presentation, Admin, APIs, data, cart semantics, and Product List/Grid redesign.
 
 ## Approved references and source-of-truth priority
 

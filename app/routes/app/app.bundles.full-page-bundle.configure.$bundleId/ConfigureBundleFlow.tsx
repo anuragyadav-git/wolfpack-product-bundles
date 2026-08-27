@@ -1,25 +1,27 @@
+import { lazy, Suspense, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { AdminSectionLoadingState } from "../../../components/AdminSectionLoadingState";
 import fullPageBundleStyles from "../../../styles/routes/full-page-bundle-configure.module.css";
 import { CommonConfigureShell } from "../_shared/bundle-configure/CommonConfigureShell";
+import { getDeferredConfigureSection } from "../_shared/bundle-configure/deferred-configure-sections";
 import { ConfigureCanvasHeader } from "./ConfigureCanvasHeader";
 import { ConfigureHiddenInputs } from "./ConfigureHiddenInputs";
 import { ConfigureSidebar } from "./ConfigureSidebar";
-import { ConfigureRouteLoadingWorkspace } from "../_shared/bundle-configure/ConfigureRouteLoadingWorkspace";
 import { useConfigureBundleFlow } from "./useConfigureBundleFlow";
 import { StepSetupSection } from "./sections/StepSetupSection";
-import { FreeGiftAddonsSection } from "./sections/FreeGiftAddonsSection";
-import { DiscountPricingSection } from "./sections/DiscountPricingSection";
-import { ImagesVisibilitySection } from "./sections/ImagesVisibilitySection";
-import { BundleSettingsSection } from "./sections/BundleSettingsSection";
-import { BundleWidgetSection } from "./sections/BundleWidgetSection";
-import { ConfigureRouteModals } from "./sections/ConfigureRouteModals";
 import { ConfigureValidationSummary } from "../_shared/bundle-configure/ConfigureValidationSummary";
-import { BundleSubscriptionsSection } from "../_shared/bundle-configure/BundleSubscriptionsSection";
+
+const FreeGiftAddonsSection = lazy(() => import("./sections/FreeGiftAddonsSection").then((module) => ({ default: module.FreeGiftAddonsSection })));
+const DiscountPricingSection = lazy(() => import("./sections/DiscountPricingSection").then((module) => ({ default: module.DiscountPricingSection })));
+const ImagesVisibilitySection = lazy(() => import("./sections/ImagesVisibilitySection").then((module) => ({ default: module.ImagesVisibilitySection })));
+const BundleSettingsSection = lazy(() => import("./sections/BundleSettingsSection").then((module) => ({ default: module.BundleSettingsSection })));
+const BundleWidgetSection = lazy(() => import("./sections/BundleWidgetSection").then((module) => ({ default: module.BundleWidgetSection })));
+const BundleSubscriptionsSection = lazy(() => import("../_shared/bundle-configure/BundleSubscriptionsSection").then((module) => ({ default: module.BundleSubscriptionsSection })));
+const ConfigureRouteModals = lazy(() => import("./sections/ConfigureRouteModals").then((module) => ({ default: module.ConfigureRouteModals })));
 
 function ConfigureBundleFlow() {
+  const { t } = useTranslation();
   const flow = useConfigureBundleFlow();
-  if (!flow.isCriticalStatusReady) {
-    return <ConfigureRouteLoadingWorkspace />;
-  }
   const {
     blockConfigurationChangeWhileSaving,
     fetcher,
@@ -30,6 +32,18 @@ function ConfigureBundleFlow() {
     SaveBar,
     setShowDiscardModal,
   } = flow;
+  const [showOverlays, setShowOverlays] = useState(false);
+  const deferredSection = getDeferredConfigureSection(flow.activeSection);
+
+  useEffect(() => {
+    const show = () => window.requestIdleCallback(() => setShowOverlays(true));
+    if (document.readyState === "complete") {
+      show();
+      return;
+    }
+    window.addEventListener("load", show, { once: true });
+    return () => window.removeEventListener("load", show);
+  }, []);
 
   return (
     <CommonConfigureShell
@@ -70,31 +84,43 @@ function ConfigureBundleFlow() {
       }
       header={<ConfigureCanvasHeader flow={flow} />}
       sidebar={<ConfigureSidebar flow={flow} />}
-      overlays={<ConfigureRouteModals flow={flow} />}
+      overlays={showOverlays ? (
+        <Suspense fallback={null}>
+          <ConfigureRouteModals flow={flow} />
+        </Suspense>
+      ) : null}
     >
       <ConfigureValidationSummary
         activeSection={flow.activeSection}
         issues={flow.validationIssues}
       />
-      <StepSetupSection flow={flow} />
-      <FreeGiftAddonsSection flow={flow} />
-      <DiscountPricingSection flow={flow} />
-      <ImagesVisibilitySection flow={flow} />
-      <BundleSettingsSection flow={flow} />
-      <BundleSubscriptionsSection
-        activeSection={flow.activeSection}
-        bundle={flow.bundle}
-        pricingState={flow.pricingState}
-        setShowSubscriptionSetupGuide={flow.setShowSubscriptionSetupGuide}
-        showSubscriptionSetupGuide={flow.showSubscriptionSetupGuide}
-        shopLocales={flow.shopLocales}
-        stepsState={flow.stepsState}
-        subscriptionConfig={flow.subscriptionConfig}
-        setSubscriptionConfig={flow.setSubscriptionConfig}
-        subscriptionFetcher={flow.subscriptionFetcher}
-        validationErrors={flow.validationErrors}
-      />
-      <BundleWidgetSection flow={flow} />
+      {flow.activeSection === "step_setup" ? <StepSetupSection flow={flow} /> : null}
+      <Suspense
+        fallback={(
+          <AdminSectionLoadingState label={t("common.loading.workspace")} />
+        )}
+      >
+        {deferredSection === "free_gift_addons" ? <FreeGiftAddonsSection flow={flow} /> : null}
+        {deferredSection === "discount_pricing" ? <DiscountPricingSection flow={flow} /> : null}
+        {deferredSection === "images_visibility" ? <ImagesVisibilitySection flow={flow} /> : null}
+        {deferredSection === "bundle_settings" ? <BundleSettingsSection flow={flow} /> : null}
+        {deferredSection === "subscriptions" ? (
+          <BundleSubscriptionsSection
+            activeSection={flow.activeSection}
+            bundle={flow.bundle}
+            pricingState={flow.pricingState}
+            setShowSubscriptionSetupGuide={flow.setShowSubscriptionSetupGuide}
+            showSubscriptionSetupGuide={flow.showSubscriptionSetupGuide}
+            shopLocales={flow.shopLocales}
+            stepsState={flow.stepsState}
+            subscriptionConfig={flow.subscriptionConfig}
+            setSubscriptionConfig={flow.setSubscriptionConfig}
+            subscriptionFetcher={flow.subscriptionFetcher}
+            validationErrors={flow.validationErrors}
+          />
+        ) : null}
+        {deferredSection === "bundle_widget" ? <BundleWidgetSection flow={flow} /> : null}
+      </Suspense>
     </CommonConfigureShell>
   );
 }

@@ -5,7 +5,7 @@ title: Admin Configure Page
 type: architecture
 status: authoritative
 summary: Defines the shared FPB and PPB configure-page boundary and direct create, clone, edit, and save flows.
-last_audited: 2026-08-21
+last_audited: 2026-08-25
 owners:
   - engineering
 domains:
@@ -13,9 +13,11 @@ domains:
 systems:
   - bundle-configure
 source_paths:
+  - app/components/bundle-configure/TemplatePreviewFeedbackModal.tsx
   - app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/
   - app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/
   - app/routes/app/_shared/bundle-configure/
+  - app/lib/bundle-configure-loader.server.ts
   - app/hooks/useBundleConfigurationState.ts
   - app/store/slices/configureRouteStateSlice.ts
 related_docs:
@@ -101,6 +103,34 @@ the supported lifecycle contract inside the embedded Admin iframe.
 
 SaveBar semantics remain route-owned. Shared configure UI should mark drafts dirty through the adapter but must not introduce autosave, wrap the canvas in a broad form, or make Enter keypresses submit the configure page.
 
+## Configure Translation Boundary
+
+FPB and PPB translation actions use the shared
+`MultiLanguageTextModal` Polaris web-component workflow. The modal renders only
+the shop locales returned by Shopify, selects the primary published locale when
+available, and treats blank translated values as an instruction to retain the
+base configured copy. Inputs are staged locally: Apply normalizes the locale
+map and updates the route-owned draft once, while Cancel, Escape, and
+backdrop-close discard the staged edits. The modal never submits or persists
+independently of the configure SaveBar.
+
+The Configure loaders query Shopify `shopLocales(published: true)` and both app
+configurations declare the required `read_locales` scope. Query or access
+failures are logged and return no locale options; they must not be hidden behind
+a fabricated default locale. A translation action is disabled only when the
+loader has no published locales or when its owning storefront feature is not
+enabled/configurable (for example, a disabled widget or an incompatible pricing
+display mode).
+
+Each surface keeps one canonical owner. Step and category translations stay on
+their `multiLangData`; general storefront labels stay in
+`textOverridesByLocale`; pricing messages and display-option labels stay in
+their pricing locale maps; bundle widget and embed copy stay with the upsell
+configuration; subscription translations stay on the provider-neutral
+subscription configuration. Shared modal adapters may flatten nested maps for
+editing, but must restore the canonical shape on Apply rather than create a
+second persistence path.
+
 ## Configure Validation Boundary
 
 FPB and PPB use one feature-aware validation contract at both sides of the
@@ -152,8 +182,24 @@ unchanged. Its checklist is a native modal dialog: desktop uses a bounded
 floating panel and phone containers use a full-width bottom sheet above the safe
 area. Escape, safe backdrop dismissal, focus trapping, internal scrolling, and
 focus restoration are shared behavior. `LocalAppModal` applies the same native
-dialog contract to app-owned discard and multi-language workflows; documented
-Polaris modal workflows continue to use `s-modal`.
+dialog contract to app-owned discard workflows. Configure multi-language
+workflows use the shared Polaris `s-modal` lifecycle and route-owned open state.
+
+The FPB and PPB Select Template workflows use the App Bridge React `Modal`
+with `variant="max"`. The current App Home `s-modal` API stops at
+`large-100`; it does not accept `max`. Route-owned state drives the wrapper's
+`open` prop, and `onHide` resets the workflow and restores trigger focus. The
+React wrapper portals the workflow into the host modal document, preserving
+React event handlers for the post-Next Preview bundle action. That projected
+action remains a semantic HTML button because nested `s-button` elements do
+not hydrate in the host modal document and render as non-interactive text.
+
+After a successful Select Template preview, the preview handler returns the
+exact URL opened in the reserved new tab. Closing the projected customization
+modal then opens one shared, small Polaris feedback modal. A merchant can
+confirm that the bundle is visible or open Crisp and automatically send
+`Having issues seeing the bundle on storefront: <Bundle link>` with that exact
+preview URL. Failed preview preparation does not open the feedback modal.
 
 ## First-Create Tour and State Boundary
 

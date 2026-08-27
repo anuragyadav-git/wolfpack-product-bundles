@@ -1,5 +1,4 @@
 import styles from "./SettingsLandingShell.module.css";
-import { AdminRouteLoadingBar } from "../../../components/AdminRouteLoadingBar";
 
 export type SettingsWorkspaceView = "design" | "language" | "controls";
 
@@ -33,17 +32,11 @@ export function SettingsLandingShell({
   onBack,
   onSelect,
   onIntent,
-  isLoadingControls = false,
 }: {
   onBack: () => void;
   onSelect: (view: SettingsWorkspaceView) => void;
   onIntent?: () => void;
-  isLoadingControls?: boolean;
 }) {
-  if (isLoadingControls) {
-    return <AdminRouteLoadingBar label="Loading Settings" />;
-  }
-
   return (
     <s-page inlineSize="large">
       <s-query-container

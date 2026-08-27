@@ -2,7 +2,7 @@ import { json, redirect, type ActionFunctionArgs, type HeadersFunction, type Lin
 import { Form, useActionData, useNavigate, useNavigation, useSearchParams } from "@remix-run/react";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { requireAdminSession } from "../../../lib/auth-guards.server";
+import { authenticate } from "../../../shopify.server";
 import { handleCreateBundle } from "../app.dashboard/handlers/handlers.server";
 import { BundleType } from "../../../constants/bundle";
 import { parseOnboardingBundleType } from "../../../lib/onboarding-bundle-type";
@@ -40,12 +40,12 @@ export const headers: HeadersFunction = () => ({
 });
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  await requireAdminSession(request);
+  await authenticate.admin(request);
   return json({});
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
-  const { admin, session } = await requireAdminSession(request);
+  const { admin, session } = await authenticate.admin(request);
   const shopifyShopGid = await ensureShopIdentity(admin, session.shop);
   const formData = await request.formData();
   const bundleName = formData.get("bundleName");

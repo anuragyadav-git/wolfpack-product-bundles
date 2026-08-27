@@ -8,10 +8,12 @@ export function PpbFreeGiftAddonsSection() {
     activeTabIndex,
     FilePicker,
     markAsDirty,
+    openAddonMultiLanguageModal,
     productPageBundleStyles,
     ruleMessages,
     setRuleMessages,
     setShowIconPickerForStep,
+    shopLocales = [],
     showIconPickerForStep,
     showPolarisModal,
     stepsState,
@@ -122,8 +124,13 @@ export function PpbFreeGiftAddonsSection() {
                       <s-stack direction="block" gap="small">
                         <s-button
                           variant="secondary"
-                          icon="language-translate"
-                          disabled
+                          icon="globe"
+                          disabled={
+                            !step.isFreeGift || shopLocales.length === 0 || undefined
+                          }
+                          onClick={() =>
+                            openAddonMultiLanguageModal(step.id, "step")
+                          }
                         >
                           Multi Language
                         </s-button>
@@ -245,8 +252,15 @@ export function PpbFreeGiftAddonsSection() {
                         </s-press-button>
                         <s-button
                           variant="secondary"
-                          icon="language-translate"
-                          disabled
+                          icon="globe"
+                          disabled={
+                            step.addonUnlockAfterCompletion === false ||
+                            shopLocales.length === 0 ||
+                            undefined
+                          }
+                          onClick={() =>
+                            openAddonMultiLanguageModal(step.id, "section")
+                          }
                         >
                           Multi Language
                         </s-button>
@@ -368,8 +382,15 @@ export function PpbFreeGiftAddonsSection() {
                             </s-button>
                             <s-button
                               variant="secondary"
-                              icon="language-translate"
-                              disabled
+                              icon="globe"
+                              disabled={
+                                step.addonUnlockAfterCompletion === false ||
+                                shopLocales.length === 0 ||
+                                undefined
+                              }
+                              onClick={() =>
+                                openAddonMultiLanguageModal(step.id, "footer")
+                              }
                             >
                               Multi Language
                             </s-button>

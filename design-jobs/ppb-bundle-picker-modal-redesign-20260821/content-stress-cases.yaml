@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
   "job_id": "ppb-bundle-picker-modal-redesign-20260821",
-  "revision": 6,
+  "revision": 8,
   "status": "complete",
   "cases": [
     {
       "id": "long-product-title",
       "data": {
-        "title": "Extra long product title that wraps normally, reaches the filled-slot height cap, visually clamps without collision, and remains complete in the accessible name"
+        "title": "Extra long product title that exercises the two-line Vertical identity area while remaining complete in the accessible name"
       },
       "required_in_browser_qa": true
     },

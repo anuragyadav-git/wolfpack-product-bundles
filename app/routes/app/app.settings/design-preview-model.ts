@@ -7,7 +7,8 @@ import {
   type TemplateKey,
   type TemplateSelection,
 } from "../../../lib/bundle-config/template-selection";
-import { buildSettingsDesignRuntime } from "../../../lib/settings-design-runtime";
+import { buildSettingsDesignRuntime, normalizeSlotIconFit } from "../../../lib/settings-design-runtime";
+import type { ShopBrandColors } from "../../../lib/shop-brand-colors";
 import type { SettingsField } from "../../../lib/admin-configuration-surfaces";
 
 export type DesignPreviewSurface =
@@ -23,6 +24,11 @@ export type DesignPreviewSurface =
   | "upsell";
 export type DesignPreviewFamily = "full-page" | "product-page";
 export type DesignPreviewViewport = "desktop" | "mobile";
+export type DesignPreviewAvailableSize = { width: number; height: number };
+export type DesignPreviewContextKind =
+  | "full-page"
+  | "product-page-inpage"
+  | "product-page-modal";
 export type DesignPreviewSurfaceFidelity = "storefront" | "representative";
 export type DesignPreviewNavigation =
   | "timeline"
@@ -71,6 +77,7 @@ export interface DesignPreviewFixtureProduct {
   imageUrl: string;
   selected: boolean;
   quantity: number;
+  priceCents: number;
 }
 
 export interface DesignPreviewFixture {
@@ -100,14 +107,20 @@ export const DESIGN_PREVIEW_VIEWPORTS: Readonly<
 };
 
 export function calculateDesignPreviewFitScale(
-  hostWidth: number,
+  availableSize: DesignPreviewAvailableSize,
   viewport: DesignPreviewViewport,
 ) {
-  if (!Number.isFinite(hostWidth) || hostWidth <= 0) return 1;
-  const logicalWidth = viewport === "desktop"
-    ? DESIGN_PREVIEW_VIEWPORTS.desktop.width
-    : DESIGN_PREVIEW_VIEWPORTS.mobile.width;
-  return Math.min(1, Math.max(0.5, hostWidth / logicalWidth));
+  const logicalViewport = DESIGN_PREVIEW_VIEWPORTS[viewport];
+  const ratios = [
+    Number.isFinite(availableSize.width) && availableSize.width > 0
+      ? availableSize.width / logicalViewport.width
+      : null,
+    Number.isFinite(availableSize.height) && availableSize.height > 0
+      ? availableSize.height / logicalViewport.height
+      : null,
+  ].filter((ratio): ratio is number => ratio !== null);
+
+  return ratios.length > 0 ? Math.min(1, ...ratios) : 1;
 }
 
 export function getDesignPreviewSurfaceFidelity(
@@ -163,11 +176,20 @@ function resolveProductPageSummary(mode: string | undefined): DesignPreviewSumma
 
 const ALL_FPB_TEMPLATES: readonly TemplateKey[] = ["standard", "classic", "compact", "horizontal"];
 const PRODUCT_PAGE_TEMPLATES: readonly TemplateKey[] = ["product-list", "product-grid", "horizontal-slots", "vertical-slots"];
-const SLOT_TEMPLATES: readonly TemplateKey[] = ["horizontal-slots", "vertical-slots"];
+const ALL_TEMPLATES: readonly TemplateKey[] = [...ALL_FPB_TEMPLATES, ...PRODUCT_PAGE_TEMPLATES];
 const CATEGORY_TEMPLATES: readonly TemplateKey[] = ["classic", "compact", "horizontal", "product-list", "product-grid"];
-const FULL_PAGE_SURFACES = ["navigation", "categories", "product-card", "cart-summary", "loading", "validation", "upsell"] as const;
-const PRODUCT_PAGE_SURFACES = ["bundle-header", "navigation", "categories", "product-card", "cart-summary", "loading", "validation", "upsell"] as const;
+const FULL_PAGE_SURFACES = ["navigation", "categories", "product-card", "product-slots", "cart-summary", "loading", "validation", "upsell"] as const;
+const PRODUCT_PAGE_SURFACES = ["bundle-header", "navigation", "categories", "product-card", "product-slots", "cart-summary", "loading", "validation", "upsell"] as const;
 const SLOT_SURFACES = ["bundle-header", "product-slots", "product-picker", "cart-summary", "loading", "validation", "upsell"] as const;
+
+export function getDesignPreviewContextKind(
+  templateKey: TemplateKey,
+): DesignPreviewContextKind {
+  if (ALL_FPB_TEMPLATES.includes(templateKey)) return "full-page";
+  return templateKey === "product-list" || templateKey === "product-grid"
+    ? "product-page-inpage"
+    : "product-page-modal";
+}
 
 function fullPageDescriptor(
   key: "standard" | "classic" | "compact" | "horizontal",
@@ -299,10 +321,10 @@ export const DESIGN_PREVIEW_FIXTURE: DesignPreviewFixture = {
     { id: "extras", translationKey: "settingsDcp.preview.surface.categoryThree" },
   ],
   products: [
-    { id: "first", translationKey: "settingsDcp.preview.surface.products.first", imageUrl: "/design-preview-product-1.png", selected: true, quantity: 1 },
-    { id: "second", translationKey: "settingsDcp.preview.surface.products.second", imageUrl: "/design-preview-product-2.png", selected: true, quantity: 1 },
-    { id: "third", translationKey: "settingsDcp.preview.surface.products.third", imageUrl: "/design-preview-product-3.png", selected: false, quantity: 0 },
-    { id: "fourth", translationKey: "settingsDcp.preview.surface.products.fourth", imageUrl: "/design-preview-product-4.png", selected: false, quantity: 0 },
+    { id: "first", translationKey: "settingsDcp.preview.surface.products.first", imageUrl: "/design-preview-product-1.png", selected: true, quantity: 1, priceCents: 2400 },
+    { id: "second", translationKey: "settingsDcp.preview.surface.products.second", imageUrl: "/design-preview-product-2.png", selected: true, quantity: 1, priceCents: 1800 },
+    { id: "third", translationKey: "settingsDcp.preview.surface.products.third", imageUrl: "/design-preview-product-3.png", selected: false, quantity: 0, priceCents: 1600 },
+    { id: "fourth", translationKey: "settingsDcp.preview.surface.products.fourth", imageUrl: "/design-preview-product-4.png", selected: false, quantity: 0, priceCents: 1200 },
   ],
   discountTiers: [
     { minimum: 2, percentage: 10 },
@@ -314,7 +336,7 @@ export const DESIGN_PREVIEW_FIXTURE: DesignPreviewFixture = {
     { id: "slot-3", position: 3 },
   ],
   validationMessage: "settingsDcp.preview.surface.validationMessage",
-  upsell: { id: "fourth", translationKey: "settingsDcp.preview.surface.products.fourth", imageUrl: "/design-preview-product-4.png", selected: false, quantity: 0 },
+  upsell: { id: "fourth", translationKey: "settingsDcp.preview.surface.products.fourth", imageUrl: "/design-preview-product-4.png", selected: false, quantity: 0, priceCents: 1200 },
 };
 
 const target = (
@@ -352,6 +374,8 @@ export const DESIGN_PREVIEW_FIELD_TARGETS: Readonly<Record<string, DesignPreview
   "Product Card & Cart Corner Style": sharedProductCartTarget("product cards", "cart"),
   "Product Card & Cart Base": sharedProductCartTarget("product cards", "cart", "product images"),
   "Image Fit": productTarget("product images"),
+  "stylePresets.images.slotIconUrl": target("product-slots", ["empty slot icon"], { templates: ALL_TEMPLATES }),
+  "stylePresets.images.slotIconFit": target("product-slots", ["empty slot icon presentation"], { templates: ALL_TEMPLATES }),
   "generalSettings.loadingGifUrl": target("loading", ["loading animation"], { templates: ALL_FPB_TEMPLATES }),
   "generalSettings.loadingBgColor": target("loading", ["loading screen background"], { templates: ALL_FPB_TEMPLATES }),
   "expert.navigationBanner.navigationBannerStepCompletionColor": target("navigation", ["completed steps"], { templates: ALL_FPB_TEMPLATES }),
@@ -369,8 +393,8 @@ export const DESIGN_PREVIEW_FIELD_TARGETS: Readonly<Record<string, DesignPreview
   "expert.productCard.productCardTextColor": productTarget("product titles"),
   "expert.productCard.productCardButtonColor": productTarget("product actions"),
   "expert.productCard.productCardButtonTextColor": productTarget("product action text"),
-  "expert.emptyStateCard.emptyStateCardBorderColor": target("product-slots", ["empty slot border", "empty slot icon"], { templates: SLOT_TEMPLATES }),
-  "expert.emptyStateCard.emptyStateCardTextColor": target("product-slots", ["empty slot text"], { templates: SLOT_TEMPLATES }),
+  "expert.emptyStateCard.emptyStateCardBorderColor": target("product-slots", ["empty slot border", "empty slot icon"], { templates: ALL_TEMPLATES }),
+  "expert.emptyStateCard.emptyStateCardTextColor": target("product-slots", ["empty slot text"], { templates: ALL_TEMPLATES }),
   "expert.cartFooter.cartFooterBgColor": cartTarget("cart"),
   "expert.cartFooter.cartFooterTextColor": cartTarget("cart text"),
   "expert.cartFooter.cartFooterNextButtonColor": cartTarget("next action"),
@@ -484,8 +508,8 @@ export function getDesignPreviewScene(
     regions.push(categoryRegion);
   } else if (surface === "product-card") {
     regions.push(descriptor.productCard.mode === "row" ? "product-rows" : "product-grid");
-  } else if (surface === "product-slots" && descriptor.slotOrientation) {
-    regions.push(`${descriptor.slotOrientation}-slots`);
+  } else if (surface === "product-slots") {
+    regions.push(`${descriptor.slotOrientation ?? "horizontal"}-slots`);
   } else if (surface === "product-picker" && descriptor.slotOrientation) {
     regions.push(viewport === "mobile" ? "product-picker-bottom-sheet" : "product-picker-modal");
   } else if (surface === "cart-summary") {
@@ -501,14 +525,15 @@ export function getDesignPreviewScene(
 
 export function buildDesignPreviewTheme(
   fieldValues: Record<string, string>,
-  isExpertControlsEnabled = false,
+  inheritedColorFieldKeys: string[] = [],
+  shopBrandColors: ShopBrandColors | null = null,
   templateKey: TemplateKey = "standard",
 ): DesignPreviewTheme {
   let runtime: ReturnType<typeof buildSettingsDesignRuntime>;
   try {
-    runtime = buildSettingsDesignRuntime({ fieldValues, isExpertControlsEnabled });
+    runtime = buildSettingsDesignRuntime({ fieldValues, inheritedColorFieldKeys }, {}, shopBrandColors);
   } catch {
-    runtime = buildSettingsDesignRuntime({ fieldValues: {}, isExpertControlsEnabled });
+    runtime = buildSettingsDesignRuntime({ fieldValues: {}, inheritedColorFieldKeys: [] });
   }
   const page = runtime.pageCustomization as JsonObject;
   const styles = page.stylePresets as JsonObject;
@@ -518,6 +543,9 @@ export function buildDesignPreviewTheme(
   const tabsRoot = isProductPage ? "mixAndMatchConfig.tabs" : "navigationBanner";
   const toastRoot = isProductPage ? "mixAndMatchConfig.toast" : "generalSettings";
   const upsellRoot = isProductPage ? "mixAndMatchConfig.generalSettings" : "generalSettings";
+  const slotIconUrl = readFirstPath(page, ["mixAndMatchConfig.emptyStateCard.slotIconUrl", "stylePresets.images.slotIconUrl"], "");
+  const slotIconFit = normalizeSlotIconFit(readFirstPath(page, ["mixAndMatchConfig.emptyStateCard.slotIconFit", "stylePresets.images.slotIconFit"], "badge"));
+  const slotIconImage = slotIconUrl ? `url("${slotIconUrl}")` : "none";
 
   return {
     "--preview-primary": readFirstPath(styles, ["colors.primaryColor"], "#000000"),
@@ -561,6 +589,13 @@ export function buildDesignPreviewTheme(
     "--preview-empty-border": readFirstPath(page, ["mixAndMatchConfig.emptyStateCard.emptyStateCardBorderColor"], "#000000"),
     "--preview-empty-icon": readFirstPath(page, ["mixAndMatchConfig.emptyStateCard.emptyStateCardIconColor"], "#000000"),
     "--preview-empty-text": readFirstPath(page, ["mixAndMatchConfig.emptyStateCard.emptyStateCardTextColor"], "#3e3e3e"),
+    "--preview-slot-icon-url": slotIconUrl,
+    "--preview-slot-icon-fit": slotIconFit,
+    "--preview-slot-icon-badge-image": slotIconFit === "badge" ? slotIconImage : "none",
+    "--preview-slot-icon-card-image": slotIconFit === "badge" ? "none" : slotIconImage,
+    "--preview-slot-icon-card-size": slotIconFit === "cover" ? "cover" : "contain",
+    "--preview-slot-icon-plus-display": slotIconFit === "badge" && slotIconUrl ? "none" : "flex",
+    "--preview-slot-icon-badge-display": slotIconFit !== "badge" && slotIconUrl ? "none" : "flex",
     "--preview-cart-bg": readFirstPath(page, [`${footerRoot}.${isProductPage ? "footerBgColor" : "cartFooterBgColor"}`], "#ffffff"),
     "--preview-cart-text": readFirstPath(page, [`${footerRoot}.${isProductPage ? "footerTextColor" : "cartFooterTextColor"}`], "#000000"),
     "--preview-cart-next-bg": readFirstPath(page, [`${footerRoot}.${isProductPage ? "footerNextBtnBgColor" : "cartFooterNextButtonColor"}`], "#000000"),

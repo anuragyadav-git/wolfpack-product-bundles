@@ -106,14 +106,21 @@ describe("cart transform runtime token route", () => {
     (unauthenticated.admin as jest.Mock).mockResolvedValue({
       admin: {
         graphql: jest.fn().mockImplementation(async (query: string) => ({
-          json: async () => query.includes("ResolveRuntimeSellingPlanVariant")
-            ? { data: { node: { product: { id: "gid://shopify/Product/1" } } } }
+          json: async () => query.includes("ResolveRuntimeSellingPlanVariants")
+            ? {
+                data: {
+                  nodes: [{
+                    id: "gid://shopify/ProductVariant/101",
+                    product: { id: "gid://shopify/Product/1" },
+                  }],
+                },
+              }
             : {
                 data: {
                   node: {
                     sellingPlans: { nodes: [{ id: "gid://shopify/SellingPlan/1" }] },
-                    appliesToProduct: true,
-                    appliesToProductVariant: false,
+                    product0: true,
+                    variant0: false,
                   },
                 },
               },

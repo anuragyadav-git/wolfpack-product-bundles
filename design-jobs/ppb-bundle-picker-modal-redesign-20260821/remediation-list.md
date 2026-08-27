@@ -27,7 +27,7 @@ keywords:
 # Remediation List
 
 Artifact job ID: ppb-bundle-picker-modal-redesign-20260821
-Artifact revision: 5
+Artifact revision: 8
 Artifact status: draft
 
 | ID | Finding | Canonical owner | Rerun evidence | Status |
@@ -41,6 +41,6 @@ Artifact status: draft
 | QA-R3-2 | Card entrance produced synthetic layout shift | PPB modal CSS | trusted-click CLS 0.00, INP 37 ms | resolved |
 | QA-R3-3 | Closing from the close button could hide focused content | PPB modal state owner | red/green focus-order test and clean Chrome console retest | resolved |
 | QA-R4-1 | Rigid footer-summary tracks displaced the count and left unused width | PPB bottom-sheet CSS | hard-reloaded five-viewport matrix plus long count/price stress | resolved |
-| QA-R5-1 | Filled slots clamp long product names and use an overlaid icon-only removal control | PPB selected-slot rendering and modal-slots CSS | Horizontal/Vertical five-viewport long-title removal matrix | pending implementation |
+| QA-R5-1 | Superseded revision-5 filled-slot treatment | PPB selected-slot rendering and modal-slots CSS | Revision-8 live-EB computed-style and long-title matrix | superseded |
 
 Revision-5 remediation remains open until implementation and direct Chrome reruns pass. The repository-wide pre-existing typecheck backlog remains an external release-baseline issue, not a waived PPB defect.

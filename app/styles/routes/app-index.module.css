@@ -1,5 +1,11 @@
 /* ── Landing Page ─────────────────────────────────────────── */
 
+.loadingWorkspace {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+}
+
 /* Outer wrapper fills the app chrome */
 .page {
   min-height: 100dvh;
@@ -8,27 +14,6 @@
   flex-direction: column;
   min-width: 0;
   overflow-x: clip;
-}
-
-.routeLoadingWorkspace {
-  box-sizing: border-box;
-  min-height: 100dvh;
-  display: grid;
-  place-items: center;
-  padding: 24px;
-  text-align: center;
-}
-
-.routeLoadingWorkspaceMessage {
-  font-size: 28px;
-  font-weight: 700;
-  line-height: 1.2;
-}
-
-@media (max-width: 767px) {
-  .routeLoadingWorkspaceMessage {
-    font-size: 24px;
-  }
 }
 
 /* ── Hero ─────────────────────────────────────────────────── */

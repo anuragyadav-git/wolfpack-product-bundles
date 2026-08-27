@@ -31,10 +31,10 @@ export function ErrorBoundary() {
         <meta name="shopify-api-key" content={apiKey} />
         <script src="https://cdn.shopify.com/shopifycloud/app-bridge.js" />
         <script src="https://cdn.shopify.com/shopifycloud/polaris.js" />
-        <link rel="preconnect" href="https://cdn.shopify.com/" />
         <link
           rel="stylesheet"
           href="https://cdn.shopify.com/static/fonts/inter/v4/styles.css"
+          crossOrigin=""
         />
         <title>Error — Wolfpack Bundles</title>
       </head>
@@ -64,53 +64,16 @@ export default function App() {
             <script> tag in <head>, before any other scripts. The unversioned
             CDN URL is the official auto-updating endpoint — do not pin. */}
         <meta name="shopify-api-key" content={apiKey} />
+        <Meta />
+        <Links />
         <script src="https://cdn.shopify.com/shopifycloud/app-bridge.js" />
         <script src="https://cdn.shopify.com/shopifycloud/polaris.js" />
-        {/*
-          Issue: admin-lcp-phase2-universal-wins-1 — font loading strategy.
-          Phase 1 baseline showed FCP == LCP at 4.4 s with the Inter stylesheet
-          blocking the first paint. We now:
-            1. `preconnect` with `crossorigin` so the font fetch can begin
-               immediately (no-cors preconnect is useless for fonts).
-            2. Load the stylesheet via `preload` + `media="print"` swap, which
-               downloads it as non-render-blocking and applies it as soon as it
-               lands.
-            3. Inline a `font-display: swap` override so first paint uses the
-               system font fallback if Inter hasn't arrived yet (FOIT → FOUT).
-        */}
-        <link
-          rel="preconnect"
-          href="https://cdn.shopify.com/"
-          crossOrigin="anonymous"
-        />
-        <link
-          rel="preload"
-          as="style"
-          href="https://cdn.shopify.com/static/fonts/inter/v4/styles.css"
-        />
+        {/* Keep one stable font link in the server and client trees. */}
         <link
           rel="stylesheet"
           href="https://cdn.shopify.com/static/fonts/inter/v4/styles.css"
-          media="print"
-          onLoad={(event) => {
-            event.currentTarget.media = "all";
-          }}
+          crossOrigin=""
         />
-        <noscript>
-          {/* Fallback if JS is disabled — accept the render-blocking cost. */}
-          <link
-            rel="stylesheet"
-            href="https://cdn.shopify.com/static/fonts/inter/v4/styles.css"
-          />
-        </noscript>
-        <style
-          // eslint-disable-next-line react/no-danger
-          dangerouslySetInnerHTML={{
-            __html: `@font-face{font-family:Inter;font-display:swap}`,
-          }}
-        />
-        <Meta />
-        <Links />
       </head>
       <body
         style={{

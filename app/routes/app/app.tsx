@@ -1,32 +1,35 @@
 import type { HeadersFunction, LoaderFunctionArgs } from "@remix-run/node";
-import { Outlet, useLoaderData, useNavigate, useRouteError, isRouteErrorResponse } from "@remix-run/react";
+import { Outlet, useLoaderData, useLocation, useNavigate, useNavigation, useRouteError, isRouteErrorResponse } from "@remix-run/react";
 import { boundary } from "@shopify/shopify-app-remix/server";
-import { authenticate, sessionStorage } from "../../shopify.server";
-import prisma from "../../db.server";
+import { authenticate } from "../../shopify.server";
 import { ErrorPage } from "../../components/ErrorPage";
 import { I18nextProvider, useTranslation } from "react-i18next";
 import { useEffect, type MouseEvent } from "react";
 import { changeAdminI18nLanguage, i18n, loadAdminLocaleResources } from "../../i18n/config";
-import { ensureShopHasExpiringOfflineSession } from "../../services/offline-token.server";
-import { AppLogger } from "../../lib/logger";
 import { loadShopAdminLocale } from "../../services/admin-locale.server";
-import { installAdminWebVitalsDiagnostics } from "../../lib/admin-web-vitals-diagnostics.client";
-import { runAfterSaveBarLeaveConfirmation } from "../../lib/admin-savebar-navigation.client";
 
-function ensureExpiringOfflineSessionInBackground(shop: string, idToken?: string | null) {
-  void ensureShopHasExpiringOfflineSession(prisma, shop, sessionStorage, { idToken }).catch((error) => {
-    AppLogger.error("Failed to ensure expiring offline session during app load", {
-      component: "app.app",
-      shop,
-    }, error);
-  });
+type AdminLoadingApi = (isLoading?: boolean) => void;
+
+export function isAdminPageNavigationLoading(
+  state: string,
+  currentPathname: string,
+  destinationPathname?: string,
+) {
+  return state === "loading"
+    && destinationPathname !== undefined
+    && destinationPathname !== currentPathname;
+}
+
+export function syncAdminNavigationLoading(
+  isLoading: boolean,
+  loading: AdminLoadingApi,
+) {
+  loading(isLoading);
+  return () => loading(false);
 }
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { session } = await authenticate.admin(request);
-  const url = new URL(request.url);
-  const idToken = url.searchParams.get("id_token");
-  ensureExpiringOfflineSessionInBackground(session.shop, idToken);
   const locale = await loadShopAdminLocale(session.shop);
   await loadAdminLocaleResources(locale);
   return {
@@ -54,14 +57,7 @@ function AdminNavigation() {
       navigate(href);
       return;
     }
-    void runAfterSaveBarLeaveConfirmation(
-      {
-        saveBar: {
-          leaveConfirmation: () => shopify.saveBar?.leaveConfirmation?.(),
-        },
-      },
-      () => navigate(href),
-    );
+    void shopify.saveBar.leaveConfirmation().then(() => navigate(href));
   };
 
   return (
@@ -77,6 +73,13 @@ function AdminNavigation() {
 
 export default function App() {
   const { locale } = useLoaderData<typeof loader>();
+  const location = useLocation();
+  const navigation = useNavigation();
+  const isPageNavigationLoading = isAdminPageNavigationLoading(
+    navigation.state,
+    location.pathname,
+    navigation.location?.pathname,
+  );
 
   useEffect(() => {
     if (i18n.language !== locale) {
@@ -84,9 +87,10 @@ export default function App() {
     }
   }, [locale]);
 
-  useEffect(() => {
-    return installAdminWebVitalsDiagnostics();
-  }, []);
+  useEffect(
+    () => syncAdminNavigationLoading(isPageNavigationLoading, shopify.loading),
+    [isPageNavigationLoading],
+  );
 
   return (
     <I18nextProvider i18n={i18n}>

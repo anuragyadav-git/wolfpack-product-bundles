@@ -1,23 +1,8 @@
-import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import {
-  AdminRouteLoadingBar,
-  waitForAdminRouteLoadingBar,
-} from "../../../components/AdminRouteLoadingBar";
 import { INTEGRATION_CATEGORIES } from "../../../lib/admin-configuration-surfaces";
 import { openSupportChatWithDraft } from "../../../lib/support-chat.client";
 import { AdminPageTitleBar } from "../../../components/AdminPageNavigation";
 import styles from "./IntegrationsRouteShell.module.css";
-
-export function waitForIntegrationsRouteReady(
-  loadingBar: Promise<void> = waitForAdminRouteLoadingBar(),
-) {
-  return loadingBar.then(() => null);
-}
-
-export function IntegrationsLoadingState() {
-  return <AdminRouteLoadingBar label="Loading Integrations" />;
-}
 
 function IntegrationsCatalog({ onBack }: { onBack: () => void }) {
   const { t } = useTranslation();
@@ -130,18 +115,5 @@ function IntegrationsCatalog({ onBack }: { onBack: () => void }) {
 }
 
 export default function IntegrationsRouteShell({ onBack }: { onBack: () => void }) {
-  const [ready, setReady] = useState(false);
-
-  useEffect(() => {
-    let active = true;
-    void waitForIntegrationsRouteReady().then(() => {
-      if (active) setReady(true);
-    });
-
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  return ready ? <IntegrationsCatalog onBack={onBack} /> : <IntegrationsLoadingState />;
+  return <IntegrationsCatalog onBack={onBack} />;
 }

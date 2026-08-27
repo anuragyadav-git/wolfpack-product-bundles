@@ -26,25 +26,17 @@ import {
   STEP_CONDITION_OPERATOR_OPTIONS,
   STEP_CONDITION_TYPE_OPTIONS,
 } from "../../../constants/bundle";
-import { OptimisedImage } from "../../../components/OptimisedImage";
 import { FilePicker } from "../../../components/shared/FilePicker";
-import { BundleReadinessOverlay } from "../../../components/bundle-configure/BundleReadinessOverlay";
-import { BundleGuidedTour } from "../../../components/bundle-configure/BundleGuidedTour";
-import { FPB_TOUR_STEPS } from "../../../components/bundle-configure/tourSteps";
-import { MultiLanguageTextModal } from "../../../components/bundle-configure/MultiLanguageTextModal";
-import { DiscardChangesModal } from "../../../components/bundle-configure/DiscardChangesModal";
 import { useBundleConfigurationState } from "../../../hooks/useBundleConfigurationState";
 import { useEnsureProductTemplateMutation } from "../../../store/api/adminApi";
 import { AppEmbedBanner } from "../../../components/AppEmbedBanner";
 import { UnlistedBundleBanner } from "../../../components/UnlistedBundleBanner";
-import { EnablePreviewModal } from "../../../components/EnablePreviewModal";
 import { useEnablePreviewGate } from "../../../hooks/useEnablePreviewGate";
 import {
   hidePolarisModal,
   showPolarisModal,
   useModalHideListener,
 } from "../_shared/bundle-configure/modal-utils";
-import { BundleStatusSection } from "../_shared/bundle-configure/BundleStatusSection";
 import { useSharedBundleHandlers } from "../../../hooks/useSharedBundleHandlers";
 import {
   buildDefaultProductEntryFromPicker,
@@ -86,16 +78,6 @@ import {
   createDefaultAddonTierCondition,
   normalizeAddonPickerProduct,
 } from "./addon-helpers";
-import { ConfigureCanvasHeader } from "./ConfigureCanvasHeader";
-import { ConfigureHiddenInputs } from "./ConfigureHiddenInputs";
-import { ConfigureSidebar } from "./ConfigureSidebar";
-import { StepSetupSection } from "./sections/StepSetupSection";
-import { FreeGiftAddonsSection } from "./sections/FreeGiftAddonsSection";
-import { DiscountPricingSection } from "./sections/DiscountPricingSection";
-import { ImagesVisibilitySection } from "./sections/ImagesVisibilitySection";
-import { BundleSettingsSection } from "./sections/BundleSettingsSection";
-import { BundleWidgetSection } from "./sections/BundleWidgetSection";
-import { ConfigureRouteModals } from "./sections/ConfigureRouteModals";
 import type {
   ConfigureBundleFlowContextValue,
   ConfigureBundleFlowDraft,
@@ -114,40 +96,24 @@ const configureFlowStaticValues = {
   buildPersonalizationDataFromDraft,
   buildVisibilityDisplayConfiguration,
   buildVisibilitySelectionIds,
-  BundleGuidedTour,
-  BundleReadinessOverlay,
-  BundleSettingsSection,
-  BundleStatusSection,
   bundleSetupItems,
-  BundleWidgetSection,
   bundleVisibilityChildItems,
   CATEGORY_CONDITION_OPERATOR_OPTIONS,
   centsToAmount,
-  ConfigureCanvasHeader,
-  ConfigureHiddenInputs,
-  ConfigureRouteModals,
-  ConfigureSidebar,
   createDefaultAddonDraftTier,
   createDefaultAddonTierCondition,
   createNewPricingRule,
   deriveControlDependencies,
-  DiscardChangesModal,
   DISCOUNT_METHOD_OPTIONS,
   DiscountMethod,
-  DiscountPricingSection,
-  EnablePreviewModal,
   FilePicker,
   FPB_DESIGN_CONTROL_PANEL_URL,
-  FPB_TOUR_STEPS,
-  FreeGiftAddonsSection,
   fullPageTemplateOptions,
   getDefaultDiscountRuleSuccessMessage,
   getDefaultDiscountRuleText,
   getVisibilityDisplayTarget,
   getVisibilityPickerSelection,
   hidePolarisModal,
-  ImagesVisibilitySection,
-  MultiLanguageTextModal,
   normalizeAddonPickerProduct,
   normalizeDefaultProductsData,
   normalizePricingDisplayOptions,
@@ -156,7 +122,6 @@ const configureFlowStaticValues = {
   normalizeVisibilityCollectionPageTarget,
   normalizeVisibilityProductForDisplayConfiguration,
   normalizeVisibilityProductPageTarget,
-  OptimisedImage,
   QuestionHelpTooltip,
   RichHelpTooltip,
   SaveBar,
@@ -165,7 +130,6 @@ const configureFlowStaticValues = {
   showPolarisModal,
   STEP_CONDITION_OPERATOR_OPTIONS,
   STEP_CONDITION_TYPE_OPTIONS,
-  StepSetupSection,
   stepSetupChildItems,
   TEMPLATE_VARIABLES,
   UnlistedBundleBanner,

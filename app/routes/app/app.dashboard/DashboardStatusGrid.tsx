@@ -2,6 +2,7 @@ import {
   type NormalizedThemeExtensionResource,
 } from "../../../lib/theme-extension-status";
 import { useTranslation } from "react-i18next";
+import { useEffect, useState } from "react";
 import { useBannerSessionState } from "../../../lib/banner-session-state";
 
 export const DASHBOARD_STOREFRONT_SETUP_BANNER_KEY = "dashboard_storefront_setup";
@@ -10,6 +11,7 @@ type DashboardStatusGridProps = {
   resources: NormalizedThemeExtensionResource[];
   error: boolean;
   appEmbedEnabled?: boolean;
+  appEmbedStatusLoading?: boolean;
   themeEditorUrl: string | null;
   onOpenThemeEditor: () => void;
   enableActionRef?: { current: any };
@@ -95,6 +97,7 @@ export function getStorefrontStatusRows(
 export function DashboardStatusGrid({
   error,
   appEmbedEnabled = false,
+  appEmbedStatusLoading = false,
   enableActionRef,
   onOpenThemeEditor,
   resources,
@@ -102,8 +105,13 @@ export function DashboardStatusGrid({
 }: DashboardStatusGridProps) {
   const { t } = useTranslation();
   const [dismissed, dismiss] = useBannerSessionState(DASHBOARD_STOREFRONT_SETUP_BANNER_KEY);
+  const [hydrated, setHydrated] = useState(false);
 
-  if (dismissed) return null;
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
+
+  if (dismissed && !appEmbedStatusLoading) return null;
 
   const {
     core: coreResources,
@@ -116,30 +124,37 @@ export function DashboardStatusGrid({
 
   const remainingCoreCount = Math.max(0, coreResourcesWithOverrides.length - coreResourcesWithOverrides.filter((resource) => resource.enabled).length);
   const storefrontSummary = getStorefrontSetupSummary({
-    loading: false,
+    loading: appEmbedStatusLoading,
     error,
     enabledCoreCount: coreResourcesWithOverrides.filter((resource) => resource.enabled).length,
     totalCoreCount: coreResourcesWithOverrides.length,
   });
-  const summaryDescription = t(appEmbedEnabled
-    ? "dashboard.storefrontSetup.completeDescription"
-    : storefrontSummary.descriptionKey,
-    {
+  const summaryDescriptionKey = appEmbedStatusLoading
+    ? storefrontSummary.descriptionKey
+    : appEmbedEnabled
+      ? "dashboard.storefrontSetup.completeDescription"
+      : storefrontSummary.descriptionKey;
+  const summaryDescription = t(summaryDescriptionKey, {
     count: remainingCoreCount,
-    });
+  });
   const setupComplete = appEmbedEnabled;
   const title = t("dashboard.storefrontSetup.incompleteTitle");
 
   return (
     <s-banner
-      tone={setupComplete ? "success" : "warning"}
+      tone={appEmbedStatusLoading ? "info" : setupComplete ? "success" : "warning"}
       heading={title}
-      dismissible={true}
+      dismissible={!appEmbedStatusLoading}
       hidden={false}
-      onDismiss={dismiss}
+      onDismiss={!appEmbedStatusLoading && hydrated ? dismiss : undefined}
     >
       <s-box minBlockSize="28px">
-        {!setupComplete ? (
+        {appEmbedStatusLoading ? (
+          <s-stack direction="inline" alignItems="center" gap="small">
+            <s-spinner size="base" accessibilityLabel={summaryDescription} />
+            <s-text>{summaryDescription}</s-text>
+          </s-stack>
+        ) : !setupComplete ? (
           <s-stack direction="inline" justifyContent="space-between" alignItems="start" gap="base">
             <s-text>{summaryDescription}</s-text>
             <s-button

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "job_id": "ppb-bundle-picker-modal-redesign-20260821",
-  "revision": 6,
+  "revision": 8,
   "status": "approved",
   "chrome_mcp_required": true,
   "environment": "development",
@@ -129,11 +129,11 @@
     },
     {
       "id": "filled-slot-identity",
-      "recipe": "Render a selected Horizontal or Vertical slot with a long product name, then activate Remove",
+      "recipe": "Render a selected Vertical slot with a long product name, compare it with live EB, then activate Remove",
       "assertions": [
-        "title wraps and visually clamps only at the responsive slot height cap",
+        "Vertical row and child geometry match the measured live EB contract",
         "complete product name remains exposed programmatically",
-        "cross badge overlays the slot without obscuring readable identity",
+        "20px circular-cross remove visual stays inline at the trailing edge",
         "one removal mutation occurs without replacement opening",
         "focus returns to the same-index empty slot or previous valid slot"
       ]
@@ -181,24 +181,24 @@
     },
     {
       "id": "filled-slot-title-remove",
-      "purpose": "Verify bounded selected-product identity and independent cross-badge removal",
+      "purpose": "Verify the Vertical selected row follows only the live-EB presentation and independent one-unit removal",
       "precondition": "Horizontal or Vertical Slots contains a selected product with a long name",
       "viewport": "wide-desktop",
       "state": "filled-slot-identity",
       "steps": [
         "Clear Cache Storage and hard reload with cache ignored",
         "Inspect the long selected title and its programmatic name",
-        "Activate the overlaid cross badge"
+        "Activate the inline trailing circular-cross Remove control"
       ],
-      "expected_semantic_result": "The complete name remains programmatically available and the cross badge deletes exactly one represented selection without opening replacement",
+      "expected_semantic_result": "The filled row surface is inert; the complete name remains programmatically available and the inline Remove control deletes exactly one represented unit without opening replacement",
       "dom_assertions": [
-        "Cross badge is a native button with a localized product-specific accessible name containing the complete product name",
+        "Remove is a native button with a localized product-specific accessible name containing the complete product name",
         "Removal returns focus to the same-index empty slot or the previous valid slot"
       ],
       "style_geometry_assertions": [
-        "Filled slot stays within its approved responsive maximum height",
-        "Title wraps and clamps only at the cap without badge collision",
-        "Cross badge overlays the top end corner with at least a 44px target",
+        "Vertical row is full-width with a content-derived 64px normal height, 60px minimum, and no maximum",
+        "Media is 50px square; padding and gap are 5px; border is 2px black with a 10px radius",
+        "Identity is intrinsically sized, bold 16px, visibly wraps without WPB clipping, filled-row price is absent, and the 20px remove visual is inline at the trailing edge",
         "No horizontal overflow"
       ],
       "screenshot_path": "qa/screenshots/filled-slot-title-remove.png",

@@ -4,8 +4,8 @@ id: attribution-lcp-critical-status
 title: Attribution LCP Critical Status
 type: test-spec
 status: active
-summary: Verifies that Analytics status and deferred dashboard loading preserve the critical first-paint path.
-last_audited: 2026-08-13
+summary: Verifies that Analytics uses one top status banner while deferred dashboard loading preserves the critical first-paint path.
+last_audited: 2026-08-25
 owners:
   - engineering
 domains:
@@ -23,7 +23,7 @@ tags:
   - lcp
 keywords:
   - pixel-status
-  - loading-bar
+  - progressive-loading
 ---
 
 # Test Spec: Attribution LCP Critical Status
@@ -36,13 +36,13 @@ Keep attribution's inactive-tracking state from becoming a delayed LCP-sized rou
 ### AttributionCriticalStatus
 | # | Scenario | Input | Expected Output | Notes |
 |---|---|---|---|---|
-| 1 | Pixel is active and analytics has no data | `pixelActive=true`, `hasNoData=true` | Render the analytics no-data banner after analytics resolves | Message depends on analytics summary |
-| 2 | Pixel is inactive and analytics has no data | `pixelActive=false`, `hasNoData=true` | Do not render the analytics no-data banner | Prevents a delayed inactive/no-data paragraph becoming the route LCP candidate |
-| 3 | Pixel status is still checking | pending `pixelStatus` promise | Render only the black top-edge loading bar | No early tracking banner |
-| 4 | Dashboard analytics are still delayed | pending `analytics` promise | Render only the shared top-edge loading bar | Keeps all Analytics content behind one readiness boundary |
+| 1 | Pixel status resolves | Active or inactive status | Render one native UTM Pixel Tracking banner at the top | Banner owns both status states |
+| 2 | Dashboard analytics are still delayed | Pending `analytics` promise | Keep the critical Analytics shell visible with one inline Polaris loading state | Pixel status does not gate dashboard data |
+| 3 | Analytics contains zero values | No attributed orders | Do not add a second no-data banner | Zero-value cards communicate the state |
+| 4 | Backfill completes or fails | Backfill action response | Show Shopify toast feedback | Does not stack a second page banner |
 
 ## Acceptance Criteria
-- [ ] The first-load inactive tracking state is contained to the compact status card.
-- [ ] The first-load status check stays behind the loading bar.
-- [ ] Analytics no-data copy only renders when tracking is active and analytics confirms no data.
-- [ ] The route shell reveals the title, status, and dashboard together after readiness.
+- [ ] Analytics renders at most one page-level banner.
+- [ ] Active and inactive tracking use the same top banner owner.
+- [ ] Backfill results use Shopify toast feedback.
+- [ ] The title and funnel heading render immediately while dashboard content remains deferred.

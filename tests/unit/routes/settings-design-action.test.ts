@@ -3,8 +3,9 @@ const findUnique = jest.fn();
 const findMany = jest.fn();
 const upsert = jest.fn();
 const transaction = jest.fn();
+const syncPpbStorefrontRuntime = jest.fn();
 
-jest.mock("../../../app/lib/auth-guards.server", () => ({ requireAdminSession }));
+jest.mock("../../../app/shopify.server", () => ({ authenticate: { admin: requireAdminSession } }));
 jest.mock("../../../app/db.server", () => ({
   prisma: {
     designSettings: { findUnique, findMany, upsert },
@@ -15,6 +16,7 @@ jest.mock("../../../app/db.server", () => ({
 jest.mock("../../../app/services/cart-transform-service.server", () => ({
   CartTransformService: { syncCartLineMessagingSettings: jest.fn() },
 }));
+jest.mock("../../../app/services/ppb-storefront-runtime.server", () => ({ syncPpbStorefrontRuntime }));
 
 // Route imports must follow the module mocks so the action receives the isolated test doubles.
 // eslint-disable-next-line import/first
@@ -45,6 +47,7 @@ describe("Settings Design action", () => {
     ]);
     upsert.mockResolvedValue({});
     transaction.mockImplementation(async (operations) => Promise.all(operations));
+    syncPpbStorefrontRuntime.mockResolvedValue({});
   });
 
   it("returns 400 for malformed JSON without touching persistence", async () => {
@@ -57,8 +60,8 @@ describe("Settings Design action", () => {
 
   it("atomically writes both rows and returns the confirmed Design DTO", async () => {
     const state = createSettingsDesignState({
-      isExpertControlsEnabled: false,
       fieldValues: { "Primary Color": "#123456" },
+      inheritedColorFieldKeys: ["Button Text Color"],
     });
     const response = await action({ request: requestFor(state), params: {}, context: {} } as any);
     const body = await response.json();
@@ -69,6 +72,7 @@ describe("Settings Design action", () => {
     }));
     expect(upsert).toHaveBeenCalledTimes(2);
     expect(transaction).toHaveBeenCalledTimes(1);
+    expect(syncPpbStorefrontRuntime).toHaveBeenCalledWith({}, "shop.test");
     expect(body).toEqual(expect.objectContaining({
       success: true,
       intent: "saveSettingsDesign",
@@ -77,5 +81,16 @@ describe("Settings Design action", () => {
     expect(upsert.mock.calls[0][0].update.generalSettings.pageCustomization.banners).toEqual({
       landingPageImageSrc: "banner.webp",
     });
+    expect(upsert.mock.calls[0][0].update.generalSettings.settingsPage.design.inheritedColorFieldKeys)
+      .toEqual(["Button Text Color"]);
+    expect(upsert.mock.calls[0][0].update).not.toHaveProperty("slotIconUrl");
+    expect(upsert.mock.calls[0][0].update).not.toHaveProperty("slotIconFit");
+    expect(upsert.mock.calls[0][0].update).not.toHaveProperty("discountTierBackgroundColor");
+    expect(upsert.mock.calls[0][0].update).not.toHaveProperty("discountTierTextColor");
+    expect(upsert.mock.calls[0][0].update).not.toHaveProperty("discountCompletionBackgroundColor");
+    expect(upsert.mock.calls[0][0].update).not.toHaveProperty("discountCompletionTextColor");
+    expect(upsert.mock.calls[0][0].update.generalSettings.slotIconFit).toBe("badge");
+    expect(upsert.mock.calls[0][0].update.generalSettings.pageCustomization.stylePresets.images.slotIconFit)
+      .toBe("badge");
   });
 });

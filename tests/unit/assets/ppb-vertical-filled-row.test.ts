@@ -21,7 +21,7 @@ describe('SelectedSlotTitle', () => {
     expect(resolveSelectedSlotTitle('Short title', false)).toBe('Short title');
   });
 
-  it('opens a filled exact-one slot so the selected product can be replaced', () => {
+  it('keeps a filled Vertical slot inert so only its remove action mutates the row', () => {
     const originalDocument = global.document;
     global.document = createFakeDocument() as unknown as Document;
     const openModal = jest.fn();
@@ -47,8 +47,9 @@ describe('SelectedSlotTitle', () => {
         child.tagName === 'BUTTON' && child.getAttribute('aria-label') === longTitle
       ));
 
-      replacementControl.dispatch('click');
-      expect(openModal).toHaveBeenCalledWith(0, replacementControl);
+      expect(replacementControl).toBeUndefined();
+      card.dispatch('click');
+      expect(openModal).not.toHaveBeenCalled();
     } finally {
       global.document = originalDocument;
     }

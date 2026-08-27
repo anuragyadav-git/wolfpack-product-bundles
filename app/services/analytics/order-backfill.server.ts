@@ -11,7 +11,7 @@
  */
 
 import db from "../../db.server";
-import { matchLineItemsToBundles, orderIdMatchForms } from "../../lib/analytics/bundle-matcher.server";
+import { matchLineItemGroupsToBundles, orderIdMatchForms } from "../../lib/analytics/bundle-matcher.server";
 import { AppLogger } from "../../lib/logger";
 
 export interface BackfillResult {
@@ -135,17 +135,19 @@ export async function backfillOrderAttribution(
       currency: string;
     }> = [];
 
-    for (const node of nodes) {
-      if (alreadyStored.has(node.id)) {
-        skipped += 1;
-        continue;
-      }
-
-      const lineItems = (node.lineItems?.nodes ?? []).map((li) => ({
+    const unstoredNodes = nodes.filter((node) => !alreadyStored.has(node.id));
+    skipped += nodes.length - unstoredNodes.length;
+    const lineItemGroups = unstoredNodes.map((node) =>
+      (node.lineItems?.nodes ?? []).map((li) => ({
         productId: li.product?.id ?? null,
-      }));
+      })),
+    );
+    const bundleIdsByOrder = lineItemGroups.length > 0
+      ? await matchLineItemGroupsToBundles(shopId, lineItemGroups)
+      : [];
 
-      const bundleIds = await matchLineItemsToBundles(shopId, lineItems);
+    for (const [nodeIndex, node] of unstoredNodes.entries()) {
+      const bundleIds = bundleIdsByOrder[nodeIndex] ?? [];
       const visit = node.customerJourneySummary?.lastVisit ?? null;
       const utm = visit?.utmParameters ?? null;
       const revenue = toRevenueCents(node.totalPriceSet?.shopMoney?.amount);

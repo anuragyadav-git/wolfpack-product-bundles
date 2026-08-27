@@ -1,10 +1,10 @@
 import { action, loader } from "../../../app/routes/app/app.upload-store-file";
 
-jest.mock("../../../app/lib/auth-guards.server", () => ({
-  requireAdminSession: jest.fn(),
+jest.mock("../../../app/shopify.server", () => ({
+  authenticate: { admin: jest.fn() },
 }));
 
-const { requireAdminSession } = jest.requireMock("../../../app/lib/auth-guards.server");
+const { authenticate: { admin: requireAdminSession } } = jest.requireMock("../../../app/shopify.server");
 
 describe("app.upload-store-file route", () => {
   const originalFetch = global.fetch;

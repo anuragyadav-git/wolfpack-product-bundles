@@ -5,6 +5,7 @@
  * Spec : test-spec/admin-ui-i18n.spec.md
  */
 import db from "../../../app/db.server";
+import { loaderCache } from "../../../app/lib/loader-cache.server";
 import {
   loadShopAdminLocale,
   saveShopAdminLocale,
@@ -25,6 +26,7 @@ const mockDb = db as jest.Mocked<typeof db>;
 describe("shop-wide Admin locale persistence", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    loaderCache.reset();
   });
 
   it("loads the saved shop locale", async () => {

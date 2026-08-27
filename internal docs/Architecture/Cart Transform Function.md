@@ -5,7 +5,7 @@ title: Cart Transform Function
 type: architecture
 status: authoritative
 summary: Runtime-token-verified Shopify Cart Transform architecture and fail-closed bundle pricing contract.
-last_audited: 2026-08-14
+last_audited: 2026-08-25
 owners:
   - engineering
 domains:
@@ -19,9 +19,11 @@ source_paths:
   - app/services/cart-transform-service.server.ts
   - app/services/cart-transform-runtime-token.server.ts
   - app/routes/api/api.cart-transform-runtime-token.tsx
+  - app/services/ppb-static-authorization.server.ts
 related_docs:
   - Shopify Integration/Cart Transform API.md
   - Features/Pricing Pipeline.md
+  - Architecture/Storefront Outage Resilience.md
 tags:
   - architecture
   - shopify-function
@@ -37,18 +39,31 @@ keywords:
 
 The cart transform function intercepts Shopify's checkout flow to merge individual product variants into logical bundle line items and apply bundle pricing. The active implementation is the Rust Shopify Function in `extensions/bundle-cart-transform-rs`, compiled to WASM.
 
-As of 2026-07-08, MERGE validation is runtime-token based. Storefront widgets POST the selected component/add-on variants to the signed app-proxy route `/apps/product-bundles/api/cart-transform-runtime-token` immediately before `/cart/add`. The route validates the selected variants against the current DB bundle config, signs a base64url payload with HMAC-SHA256, and returns `_wolfpack_bundle_runtime`. The Cart Transform and Discount Function verify that token with the same CartTransform owner metafield secret before trusting component, quantity, parent, pricing, or add-on discount data.
+MERGE validation has two explicit signed contracts. FPB and service-dependent PPB
+embed surfaces use v1: they POST the selected variants to
+`/apps/product-bundles/api/cart-transform-runtime-token` immediately before
+`/cart/add`. The parent-product PPB block uses v2: bundle sync signs the current
+Shopify-hosted bundle policy and bounded product/variant line policies before
+the outage occurs. Both use HMAC-SHA256 and the secret stored inside the
+CartTransform owner's `$app.runtime_configuration` JSON.
 
-FPB and PPB subscription requests add the saved selling-plan group and plan to that
-signed payload. The token route revalidates the plan and every exact selected
-variant against Shopify before signing. Cart Transform emits no merge, expand,
+For v2, Cart Transform and Discount Function also read the shop's
+`$app.ppb_policy_revisions` map. A stale snapshot, changed bundle,
+altered role or discount, mismatched product/variant, per-line excess, or an
+aggregate quantity split across duplicate lines fails closed. The client never
+receives the signing secret.
+
+FPB subscription requests add the saved selling-plan group and plan to the v1
+payload, and the token route revalidates the plan and selected variants. PPB v2
+embeds the public selected-plan contract in its signed bundle policy. Cart
+Transform emits no merge, expand,
 or update operation for a group containing a selling-plan allocation. The
 Discount Function's `subscription_initial` role accepts only a complete group
 whose lines, plan allocations, variants, and quantities exactly match the
 token, then applies bundle pricing through an automatic discount node with
 `recurringCycleLimit=1`.
 
-The request body is mandatory, so both FPB and PPB callers must use `POST`.
+The v1 request body is mandatory, so every v1 caller must use `POST`.
 The Remix resource route also exports a `GET` loader that returns controlled
 `405 Method Not Allowed` JSON with `Allow: POST, OPTIONS`; without that loader,
 an accidental or stale GET exposes Remix's missing-loader stack instead of the
@@ -90,8 +105,24 @@ No target migration remains for the active extension.
 
 - **Language**: Rust
 - **Compiled to**: WASM via Cargo and Shopify Functions
-- **Build command**: `cd extensions/bundle-cart-transform-rs && rustup run stable cargo build --target=wasm32-unknown-unknown --release`
+- **Crate**: `shopify_function` 2.2.0
+- **Build command**: `npm run build:cart-transform`
 - **Output**: `extensions/bundle-cart-transform-rs/target/wasm32-unknown-unknown/release/`
+
+The release build uses Rust size optimization and Shopify CLI's compatible
+WASM optimizer. Keep the authorization payload deserialization shared between
+v1 and v2 and deserialize only fields consumed by this Function; unknown signed
+payload fields are intentionally ignored. The resulting Shopify-optimized
+artifact was 255,623 bytes during the 2026-08-25 agent-store verification.
+
+Do not run `wasm-snip --snip-rust-panicking-code` on this Function. It can
+replace reachable Rust formatting and deserialization failure paths with
+`unreachable` instructions. A valid two-line v2 PPB request then trapped after
+five instructions and Shopify blocked `/cart/add` because `blockOnFailure` is
+enabled. The same captured input succeeded after removing panic snipping,
+emitting one `linesMerge` in 1,128,695 instructions. Also do not replace
+Shopify CLI's final optimizer with a newer standalone Binaryen release; the
+Shopify Function compiler has rejected otherwise smaller incompatible modules.
 
 ---
 
@@ -127,7 +158,7 @@ The token payload contains:
 - parent bundle variant GID
 - price adjustment config copied from current bundle pricing
 
-The HMAC covers the base64url payload string, so Rust verifies the signature before decoding JSON. If `runtime_token_secret` is configured on the CartTransform owner and a line token is missing, tampered, or mismatched against actual cart line variants/quantities, the function emits no merge or add-on discount.
+The HMAC covers the base64url payload string, so Rust verifies the signature before decoding JSON. If `runtimeTokenSecret` is configured inside the CartTransform owner's `$app.runtime_configuration` and a line token is missing, tampered, or mismatched against actual cart line variants/quantities, the function emits no merge or add-on discount. The same JSON also carries `bundleCartLineMessaging`; consolidating those settings keeps the Function input query at Shopify's complexity limit of 30.
 
 Parent bundle metafields are still written for EXPAND/display paths: `component_reference`, `component_quantities`, `price_adjustment`, and `component_pricing`. Component-variant `$app:component_parents` is no longer the configured MERGE source.
 
@@ -181,7 +212,7 @@ happens:
    then open the app iframe URL directly if the outer Admin shell hides the JSON.
 5. If the route reports `activated: true` and no stale transforms but lines
    still do not merge, inspect/resync the CartTransform owner metafield
-   `$app.runtime_token_secret` from app-context Admin API. The Rust MERGE path
+   `$app.runtime_configuration.runtimeTokenSecret` from app-context Admin API. The Rust MERGE path
    emits no operation when this secret is absent or mismatched.
 
 Concrete 2026-07-10 example:
@@ -197,10 +228,10 @@ Concrete 2026-07-10 example:
 - A generic `shopify store execute` query authenticated with
   `read_cart_transforms` but returned empty app-owned transforms/functions.
 
-Conclusion for that case: not a widget payload issue; repair by running
+Conclusion for that historical case: not a widget payload issue; repair by running
 `CartTransformService.completeSetup(admin, shopDomain)` in app context so the
-active CartTransform is present and the `$app.runtime_token_secret` owner
-metafield is synced.
+active CartTransform is present and the current `$app.runtime_configuration`
+owner metafield is synced.
 
 ### Repair script
 
@@ -215,7 +246,7 @@ WPB_CART_TRANSFORM_REPAIR_APPLY=true npm run cart-transform:repair
 Dry-run scans installed shops only and reports the target count. Apply mode
 runs `CartTransformService.completeSetup(admin, shopDomain)` through
 `unauthenticated.admin(shopDomain)` for every installed shop. That can create or
-replace CartTransform objects and sync the `$app.runtime_token_secret` owner
+replace CartTransform objects and sync the `$app.runtime_configuration` owner
 metafield. Do not run apply mode against production without explicit manual
 approval for that exact operation.
 
@@ -258,8 +289,10 @@ Verified state:
   `amount_only`, then `percentage_only`.
 - `CartTransformService.syncCartLineMessagingSettings()` returned success for
   CartTransform `gid://shopify/CartTransform/111771907`.
-- Direct Admin GraphQL read of `$app.bundle_cart_line_messaging` on that
-  CartTransform returned `discountDisplay.format: "percentage_only"`.
+- Direct Admin GraphQL read of the then-current
+  `$app.bundle_cart_line_messaging` owner metafield returned
+  `discountDisplay.format: "percentage_only"`. Current deployments store this
+  value under `$app.runtime_configuration.bundleCartLineMessaging`.
 - A fresh cache-cleared storefront add still produced public cart-line
   `You Save: "$72.40 (5%)"` instead of `"$72.40"` or `"5%"`.
 

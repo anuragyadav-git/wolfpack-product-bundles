@@ -77,9 +77,9 @@ function registryItem(field, group, expert) {
     allowed_values: field.options,
     default: field.value,
     nullable: false,
-    dependencies: expert ? ['isExpertControlsEnabled=true'] : [],
+    dependencies: [],
     mutual_exclusions: [],
-    visibility_condition: expert ? 'Expert Color Controls enabled' : 'always',
+    visibility_condition: expert ? 'visible component owns this color role' : 'visible component owns this setting',
     affected_components: [field.description || group],
     affected_states: ['default', 'selected', 'disabled', 'focus'],
     merchant_editable: !disabled,
@@ -148,34 +148,6 @@ function discoverDesignConfigurationFields(sourceText) {
       if (field) addField(field, group, true);
     }
   }
-
-  items.push({
-    id: 'design-expert-controls-enabled',
-    family: 'SHARED',
-    templates: ALL_TEMPLATES,
-    admin_label: 'Expert Color Controls',
-    admin_location: 'Settings > Design',
-    field_name: 'isExpertControlsEnabled',
-    persisted_location: 'DesignSettings.settingsData.isExpertControlsEnabled',
-    runtime_location: 'buildSettingsDesignRuntime.isExpertControlsEnabled',
-    type: 'boolean',
-    allowed_values: [true, false],
-    default: false,
-    nullable: false,
-    dependencies: [],
-    mutual_exclusions: [],
-    visibility_condition: 'always',
-    affected_components: ['Expert Design controls'],
-    affected_states: ['default', 'selected', 'disabled', 'focus'],
-    merchant_editable: true,
-    responsive_impact: 'Controls expert token propagation across every adapter',
-    accessibility_impact: 'Enabled expert colors require contrast validation',
-    fixture_ids: ['fpb-all-templates', 'ppb-all-templates'],
-    test_case_ids: ['fpb-all-template-summary', 'product-page-bundle-template-design-verification'],
-    status: 'CONFIRMED_CURRENT',
-    evidence: 'app/lib/settings-design-contract.ts; app/lib/settings-design-runtime.ts',
-    notes: 'Canonical switch for expert field applicability.',
-  });
 
   return items;
 }

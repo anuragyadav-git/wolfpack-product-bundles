@@ -4,9 +4,39 @@ import {
   buildSettingsDesignRuntime,
 } from "../../../app/lib/settings-design-runtime";
 
-function makePayload(overrides: Record<string, string> = {}, isExpertControlsEnabled = false) {
+function makePayload(overrides: Record<string, string> = {}, useComponentOverrides = false) {
   return {
-    isExpertControlsEnabled,
+    inheritedColorFieldKeys: useComponentOverrides ? [] : [
+      "expert.navigationBanner.navigationBannerStepCompletionColor",
+      "expert.navigationBanner.navigationCheckColor",
+      "expert.navigationBanner.navigationBannerStepTextColor",
+      "expert.generalSettings.productPageTitleColor",
+      "expert.navigationBanner.navigationBannerStepProgressBarEmptyColor",
+      "expert.generalSettings.conditionToastBgColor",
+      "expert.generalSettings.conditionToastTextColor",
+      "expert.navigationBanner.tabsActiveBgColor",
+      "expert.navigationBanner.tabsActiveTextColor",
+      "expert.navigationBanner.tabsInactiveBgColor",
+      "expert.navigationBanner.tabsInactiveTextColor",
+      "expert.productCard.productCardBgColor",
+      "expert.productCard.productCardTextColor",
+      "expert.productCard.productCardButtonColor",
+      "expert.productCard.productCardButtonTextColor",
+      "expert.emptyStateCard.emptyStateCardBorderColor",
+      "expert.emptyStateCard.emptyStateCardTextColor",
+      "expert.cartFooter.cartFooterBgColor",
+      "expert.cartFooter.cartFooterTextColor",
+      "expert.cartFooter.cartFooterNextButtonColor",
+      "expert.cartFooter.cartFooterNextButtonTextColor",
+      "expert.cartFooter.cartFooterBackButtonColor",
+      "expert.cartFooter.cartFooterBackButtonTextColor",
+      "expert.cartFooter.cartFooterDiscountTextColor",
+      "expert.cartFooter.cartFooterDiscountProgressBarEmptyColor",
+      "expert.cartFooter.cartFooterDiscountProgressBarFilledColor",
+      "expert.mixAndMatchConfig.generalSettings.bundleUpsellButtonBg",
+      "expert.mixAndMatchConfig.generalSettings.bundleUpsellButtonTextColor",
+      "expert.mixAndMatchConfig.generalSettings.bundleUpsellFontColor",
+    ],
     fieldValues: {
       "Primary Color": "#111111",
       "Button Text Color": "#fafafa",
@@ -90,8 +120,9 @@ describe("buildSettingsDesignRuntime", () => {
       },
       images: {
         productImageFit: "contain",
+        slotIconFit: "badge",
+        slotIconUrl: "",
       },
-      isExpertControlsEnabled: false,
     });
   });
 
@@ -171,7 +202,6 @@ describe("buildSettingsDesignRuntime", () => {
     const pageCustomization = runtime.pageCustomization as any;
 
     expect(pageCustomization.stylePresets.colors.primaryColor).toBe("#111111");
-    expect(pageCustomization.stylePresets.isExpertControlsEnabled).toBe(true);
     expect(pageCustomization.productCard.productCardBgColor).toBe("#ffeeee");
     expect(pageCustomization.productCard.productCardTextColor).toBe("#123456");
     expect(pageCustomization.productCard.productCardButtonColor).toBe("#654321");

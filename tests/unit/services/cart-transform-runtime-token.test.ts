@@ -9,11 +9,22 @@ import {
   verifyRuntimeCartToken,
 } from "../../../app/services/cart-transform-runtime-token.server";
 
-it("accepts native whole-product selling-plan assignments after resolving the exact variant product", async () => {
+it("batches live selling-plan validation across selected component variants", async () => {
   const graphql = jest.fn()
     .mockResolvedValueOnce({
       json: async () => ({
-        data: { node: { product: { id: "gid://shopify/Product/1" } } },
+        data: {
+          nodes: [
+            {
+              id: "gid://shopify/ProductVariant/101",
+              product: { id: "gid://shopify/Product/1" },
+            },
+            {
+              id: "gid://shopify/ProductVariant/202",
+              product: { id: "gid://shopify/Product/2" },
+            },
+          ],
+        },
       }),
     })
     .mockResolvedValueOnce({
@@ -21,8 +32,10 @@ it("accepts native whole-product selling-plan assignments after resolving the ex
         data: {
           node: {
             sellingPlans: { nodes: [{ id: "gid://shopify/SellingPlan/1" }] },
-            appliesToProduct: true,
-            appliesToProductVariant: false,
+            product0: true,
+            variant0: false,
+            product1: false,
+            variant1: true,
           },
         },
       }),
@@ -35,16 +48,31 @@ it("accepts native whole-product selling-plan assignments after resolving the ex
       sellingPlanId: "gid://shopify/SellingPlan/1",
       recurringBundleDiscount: false,
     },
-    [{ variantId: "gid://shopify/ProductVariant/101", quantity: 1 }],
+    [
+      { variantId: "gid://shopify/ProductVariant/101", quantity: 1 },
+      { variantId: "gid://shopify/ProductVariant/202", quantity: 1 },
+      { variantId: "gid://shopify/ProductVariant/101", quantity: 2 },
+    ],
   )).resolves.toBeUndefined();
 
-  expect(graphql.mock.calls[0][0]).toContain("ProductVariant");
-  expect(graphql.mock.calls[1][0]).toContain("appliesToProduct");
+  expect(graphql).toHaveBeenCalledTimes(2);
+  expect(graphql.mock.calls[0][0]).toContain("ResolveRuntimeSellingPlanVariants");
+  expect(graphql.mock.calls[0][1]).toEqual({
+    variables: {
+      ids: [
+        "gid://shopify/ProductVariant/101",
+        "gid://shopify/ProductVariant/202",
+      ],
+    },
+  });
+  expect(graphql.mock.calls[1][0]).toContain("ValidateRuntimeSellingPlanAssignments");
   expect(graphql.mock.calls[1][1]).toEqual({
     variables: {
       id: "gid://shopify/SellingPlanGroup/1",
-      variantId: "gid://shopify/ProductVariant/101",
-      productId: "gid://shopify/Product/1",
+      productId0: "gid://shopify/Product/1",
+      variantId0: "gid://shopify/ProductVariant/101",
+      productId1: "gid://shopify/Product/2",
+      variantId1: "gid://shopify/ProductVariant/202",
     },
   });
 });

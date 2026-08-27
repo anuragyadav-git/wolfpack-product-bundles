@@ -130,6 +130,15 @@ pub struct CartLineDiscountDisplaySettings {
     pub format: String,
 }
 
+#[derive(serde::Deserialize, Debug, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct CartTransformRuntimeConfiguration {
+    #[serde(default)]
+    pub runtime_token_secret: String,
+    #[serde(default)]
+    pub bundle_cart_line_messaging: CartLineMessagingSettings,
+}
+
 impl Default for CartLineDiscountDisplaySettings {
     fn default() -> Self {
         Self {
@@ -209,47 +218,50 @@ pub struct CartLineDisplaySavings {
 #[allow(dead_code)]
 pub struct RuntimeTokenPayload {
     pub version: i64,
+    #[serde(default)]
+    pub kind: String,
     pub shop: String,
+    #[serde(default)]
     pub bundle_id: String,
-    pub bundle_type: String,
+    #[serde(default)]
     pub offer_group_id: String,
+    #[serde(default)]
     pub parent_variant_id: String,
-    pub bundle_name: String,
+    #[serde(default)]
+    pub revision: String,
+    #[serde(default)]
+    pub group_id: String,
+    #[serde(default)]
+    pub variant_id: String,
+    #[serde(default)]
+    pub product_id: Option<String>,
+    #[serde(default)]
+    pub role: String,
+    #[serde(default)]
+    pub max_quantity: i64,
+    #[serde(default)]
+    pub groups: Vec<PpbSelectionGroupV2>,
     #[serde(default)]
     pub components: Vec<RuntimeTokenLine>,
-    #[serde(default)]
-    pub addons: Vec<RuntimeTokenAddonLine>,
     #[serde(default)]
     pub price_adjustment: PriceAdjustmentConfig,
 }
 
 #[derive(serde::Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-pub struct RuntimeTokenLine {
-    pub variant_id: String,
-    pub quantity: i64,
+pub struct PpbSelectionGroupV2 {
+    pub id: String,
+    pub role: String,
+    pub min_quantity: i64,
+    pub max_quantity: i64,
 }
+
+pub type PpbBundleTokenV2 = RuntimeTokenPayload;
+pub type PpbLineTokenV2 = RuntimeTokenPayload;
 
 #[derive(serde::Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-#[allow(dead_code)]
-pub struct RuntimeTokenAddonLine {
+pub struct RuntimeTokenLine {
     pub variant_id: String,
     pub quantity: i64,
-    #[serde(default)]
-    pub discount: Option<RuntimeTokenDiscount>,
-}
-
-#[derive(serde::Deserialize, Debug, Clone)]
-#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
-pub enum RuntimeTokenDiscountType {
-    Percentage,
-}
-
-#[derive(serde::Deserialize, Debug, Clone)]
-#[allow(dead_code)]
-pub struct RuntimeTokenDiscount {
-    #[serde(rename = "type")]
-    pub discount_type: RuntimeTokenDiscountType,
-    pub value: f64,
 }

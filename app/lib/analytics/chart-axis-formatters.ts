@@ -19,3 +19,27 @@ export function formatCompactCountAxisTick(value: number): string {
 export function formatCompactCurrencyAxisTick(cents: number): string {
   return `$${formatCompactNumber(cents / 100)}`;
 }
+
+export function formatBundleSplitDateAxisTick(
+  dateKey: string,
+  rangeDays: number,
+): string {
+  const date = new Date(`${dateKey}T00:00:00Z`);
+
+  if (
+    Number.isNaN(date.getTime()) ||
+    date.toISOString().slice(0, 10) !== dateKey
+  ) {
+    return dateKey;
+  }
+
+  if (rangeDays <= 30) {
+    return String(date.getUTCDate());
+  }
+
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    timeZone: "UTC",
+  }).format(date);
+}

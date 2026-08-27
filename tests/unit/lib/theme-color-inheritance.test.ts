@@ -6,15 +6,11 @@
  */
 
 import { generateCSSFromSettings } from "../../../app/lib/css-generators";
-import type { ThemeColors } from "../../../app/services/theme-colors.server";
+import type { ShopBrandColors } from "../../../app/services/theme-colors.server";
 
-const THEME_COLORS: ThemeColors = {
-  globalPrimaryButton: "#1A56DB",
-  globalButtonText: "#FFFFFF",
-  globalPrimaryText: "#111827",
-  globalSecondaryText: "#6B7280",
-  globalFooterBg: "#F9FAFB",
-  globalFooterText: "#111827",
+const THEME_COLORS: ShopBrandColors = {
+  primary: { background: "#1A56DB", foreground: "#FFFFFF" },
+  secondary: { background: "#F9FAFB", foreground: "#111827" },
   syncedAt: "2026-03-26T00:00:00.000Z",
 };
 
@@ -27,7 +23,7 @@ describe("generateCSSFromSettings — theme color cascade", () => {
         "",
         THEME_COLORS
       );
-      expect(css).toContain("--bundle-global-primary-button: #FF0000");
+      expect(css.includes("--bundle-global-primary-button: #FF0000")).toBe(true);
     });
 
     it("uses theme color when Settings design value is absent", () => {
@@ -37,7 +33,7 @@ describe("generateCSSFromSettings — theme color cascade", () => {
         "",
         THEME_COLORS
       );
-      expect(css).toContain("--bundle-global-primary-button: #1A56DB");
+      expect(css.includes("--bundle-global-primary-button: #1A56DB")).toBe(true);
     });
 
     it("uses hardcoded default when both Settings design and theme are absent", () => {
@@ -47,7 +43,7 @@ describe("generateCSSFromSettings — theme color cascade", () => {
         "",
         null
       );
-      expect(css).toContain("--bundle-global-primary-button: #000000");
+      expect(css.includes("--bundle-global-primary-button: #000000")).toBe(true);
     });
   });
 
@@ -59,17 +55,17 @@ describe("generateCSSFromSettings — theme color cascade", () => {
         "",
         THEME_COLORS
       );
-      expect(css).toContain("--bundle-global-button-text: #333333");
+      expect(css.includes("--bundle-global-button-text: #333333")).toBe(true);
     });
 
     it("uses theme color when Settings design value is absent", () => {
       const css = generateCSSFromSettings({}, "product_page", "", THEME_COLORS);
-      expect(css).toContain("--bundle-global-button-text: #FFFFFF");
+      expect(css.includes("--bundle-global-button-text: #FFFFFF")).toBe(true);
     });
 
     it("uses hardcoded default when both absent", () => {
       const css = generateCSSFromSettings({}, "product_page", "", null);
-      expect(css).toContain("--bundle-global-button-text: #FFFFFF");
+      expect(css.includes("--bundle-global-button-text: #FFFFFF")).toBe(true);
     });
   });
 
@@ -81,48 +77,48 @@ describe("generateCSSFromSettings — theme color cascade", () => {
         "",
         THEME_COLORS
       );
-      expect(css).toContain("--bundle-global-primary-text: #222222");
+      expect(css.includes("--bundle-global-primary-text: #222222")).toBe(true);
     });
 
     it("uses theme color when Settings design value is absent", () => {
       const css = generateCSSFromSettings({}, "product_page", "", THEME_COLORS);
-      expect(css).toContain("--bundle-global-primary-text: #111827");
+      expect(css.includes("--bundle-global-primary-text: #111827")).toBe(true);
     });
 
     it("uses hardcoded default when both absent", () => {
       const css = generateCSSFromSettings({}, "product_page", "", null);
-      expect(css).toContain("--bundle-global-primary-text: #000000");
+      expect(css.includes("--bundle-global-primary-text: #000000")).toBe(true);
     });
   });
 
   describe("globalSecondaryText", () => {
     it("uses theme color when Settings design value is absent", () => {
       const css = generateCSSFromSettings({}, "product_page", "", THEME_COLORS);
-      expect(css).toContain("--bundle-global-secondary-text: #6B7280");
+      expect(css.includes("--bundle-global-secondary-text: #111827")).toBe(true);
     });
 
     it("uses hardcoded default when both absent", () => {
       const css = generateCSSFromSettings({}, "product_page", "", null);
-      expect(css).toContain("--bundle-global-secondary-text: #6B7280"); // same as hardcoded
+      expect(css.includes("--bundle-global-secondary-text: #6B7280")).toBe(true); // same as hardcoded
     });
   });
 
   describe("globalFooterBg", () => {
     it("uses theme color when Settings design value is absent", () => {
       const css = generateCSSFromSettings({}, "product_page", "", THEME_COLORS);
-      expect(css).toContain("--bundle-global-footer-bg: #F9FAFB");
+      expect(css.includes("--bundle-global-footer-bg: #F9FAFB")).toBe(true);
     });
 
     it("uses hardcoded default when both absent", () => {
       const css = generateCSSFromSettings({}, "product_page", "", null);
-      expect(css).toContain("--bundle-global-footer-bg: #FFFFFF");
+      expect(css.includes("--bundle-global-footer-bg: #FFFFFF")).toBe(true);
     });
   });
 
   describe("globalFooterText", () => {
     it("uses theme color when Settings design value is absent", () => {
       const css = generateCSSFromSettings({}, "product_page", "", THEME_COLORS);
-      expect(css).toContain("--bundle-global-footer-text: #111827");
+      expect(css.includes("--bundle-global-footer-text: #111827")).toBe(true);
     });
   });
 
@@ -135,8 +131,8 @@ describe("generateCSSFromSettings — theme color cascade", () => {
 
     it("uses hardcoded defaults when Settings design color absent and themeColors omitted", () => {
       const css = generateCSSFromSettings({}, "product_page");
-      expect(css).toContain("--bundle-global-primary-button: #000000");
-      expect(css).toContain("--bundle-global-button-text: #FFFFFF");
+      expect(css.includes("--bundle-global-primary-button: #000000")).toBe(true);
+      expect(css.includes("--bundle-global-button-text: #FFFFFF")).toBe(true);
     });
   });
 
@@ -144,12 +140,12 @@ describe("generateCSSFromSettings — theme color cascade", () => {
     it("button-add-to-cart uses globalPrimaryButton when no explicit setting", () => {
       const css = generateCSSFromSettings({}, "product_page", "", THEME_COLORS);
       // --bundle-add-to-cart-button-bg falls back to globalPrimaryButton
-      expect(css).toContain("--bundle-add-to-cart-button-bg: #1A56DB");
+      expect(css.includes("--bundle-add-to-cart-button-bg: #1A56DB")).toBe(true);
     });
 
     it("tabs-active-bg uses globalPrimaryButton when no explicit setting", () => {
       const css = generateCSSFromSettings({}, "product_page", "", THEME_COLORS);
-      expect(css).toContain("--bundle-tabs-active-bg-color: #1A56DB");
+      expect(css.includes("--bundle-tabs-active-bg-color: #1A56DB")).toBe(true);
     });
   });
 });

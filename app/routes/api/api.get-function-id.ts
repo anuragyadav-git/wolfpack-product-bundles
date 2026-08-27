@@ -1,9 +1,9 @@
 import { json, type LoaderFunctionArgs } from "@remix-run/node";
-import { requireAdminSession } from "../../lib/auth-guards.server";
+import { authenticate } from "../../shopify.server";
 import { AppLogger } from "../../lib/logger";
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  const { admin } = await requireAdminSession(request);
+  const { admin } = await authenticate.admin(request);
 
   try {
     const response = await admin.graphql(`

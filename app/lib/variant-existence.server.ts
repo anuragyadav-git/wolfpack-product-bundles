@@ -13,6 +13,7 @@ export interface ShopifyStorefrontVariantLookupResult {
 }
 
 const PRODUCT_VARIANT_GID_PREFIX = "gid://shopify/ProductVariant/";
+const STOREFRONT_VARIANT_BATCH_SIZE = 50;
 
 function normalizeRawVariantId(rawVariantId: unknown): string {
   return String(rawVariantId ?? "").trim();
@@ -116,6 +117,68 @@ export async function isVariantExistsOnShopifyStorefront(
       available: false,
     };
   }
+}
+
+export async function batchCheckStorefrontVariants(
+  shopDomain: string,
+  variantNumericIds: string[],
+): Promise<Map<string, ShopifyStorefrontVariantLookupResult>> {
+  const uniqueIds = [...new Set(variantNumericIds)];
+  const results = new Map<string, ShopifyStorefrontVariantLookupResult>();
+  if (uniqueIds.length === 0) return results;
+
+  const invalidId = uniqueIds.find((id) => !/^\d+$/.test(id));
+  if (invalidId) {
+    throw new Error(`Variant id must be numeric: ${invalidId}`);
+  }
+
+  const { storefront } = await (await import("../shopify.server")).unauthenticated.storefront(shopDomain);
+  const query = `
+    query StorefrontVariantVisibilityBatch($ids: [ID!]!) {
+      nodes(ids: $ids) {
+        ... on ProductVariant {
+          id
+          availableForSale
+        }
+      }
+    }
+  `;
+
+  for (let index = 0; index < uniqueIds.length; index += STOREFRONT_VARIANT_BATCH_SIZE) {
+    const ids = uniqueIds.slice(index, index + STOREFRONT_VARIANT_BATCH_SIZE);
+    const gids = ids.map((id) => `${PRODUCT_VARIANT_GID_PREFIX}${id}`);
+    try {
+      const response = await storefront.graphql(query, { variables: { ids: gids } });
+      const payload = await response.json();
+      const nodes = payload.data?.nodes ?? [];
+      ids.forEach((id, resultIndex) => {
+        const node = nodes[resultIndex];
+        results.set(id, node?.id === `${PRODUCT_VARIANT_GID_PREFIX}${id}`
+          ? {
+              ok: true,
+              id,
+              status: 200,
+              available: typeof node.availableForSale === "boolean"
+                ? node.availableForSale
+                : undefined,
+            }
+          : {
+              ok: false,
+              id,
+              status: 404,
+              message: "Variant is not available on the storefront",
+              available: false,
+            });
+      });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Variant lookup request failed.";
+      ids.forEach((id) => {
+        results.set(id, { ok: false, id, status: 0, message, available: false });
+      });
+    }
+  }
+
+  return results;
 }
 
 export function resolveShopifyVariantNumericId(rawVariantId: unknown): string {

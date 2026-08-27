@@ -7,15 +7,15 @@
 
 import { action } from "../../../app/routes/app/app.attribution";
 
-import { requireAdminSession } from "../../../app/lib/auth-guards.server";
+import { authenticate } from "../../../app/shopify.server";
 import {
   activateUtmPixel,
   deactivateUtmPixel,
 } from "../../../app/services/pixel-activation.server";
 import { backfillOrderAttribution } from "../../../app/services/analytics/order-backfill.server";
 
-jest.mock("../../../app/lib/auth-guards.server", () => ({
-  requireAdminSession: jest.fn(),
+jest.mock("../../../app/shopify.server", () => ({
+  authenticate: { admin: jest.fn() },
 }));
 
 jest.mock("../../../app/services/pixel-activation.server", () => ({
@@ -47,7 +47,7 @@ jest.mock("../../../app/db.server", () => ({
   },
 }));
 
-const mockRequireAdminSession = requireAdminSession as jest.MockedFunction<typeof requireAdminSession>;
+const mockRequireAdminSession = authenticate.admin as jest.MockedFunction<typeof authenticate.admin>;
 const mockActivate = activateUtmPixel as jest.MockedFunction<typeof activateUtmPixel>;
 const mockDeactivate = deactivateUtmPixel as jest.MockedFunction<typeof deactivateUtmPixel>;
 const mockBackfill = backfillOrderAttribution as jest.MockedFunction<typeof backfillOrderAttribution>;

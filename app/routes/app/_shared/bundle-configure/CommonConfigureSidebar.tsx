@@ -1,5 +1,7 @@
 import { useState, type Ref } from "react";
+import { useTranslation } from "react-i18next";
 import type { ConfigureChildItem } from "../../../../lib/bundle-config/common-configure-page-model";
+import type { ParentProductStatusUi } from "../../../../lib/parent-product-status-ui";
 import { DiscountMethod } from "../../../../types/pricing";
 
 type StatusBadge = { label: string; tone?: string } | null;
@@ -37,7 +39,7 @@ export interface CommonConfigureSidebarAdapter {
   handleSyncProduct: () => void;
   openProductInAdmin: (productId: string) => void;
   openSelectTemplateModal: () => void;
-  parentProductStatusUi: { label: string; tone?: string };
+  parentProductStatusUi: ParentProductStatusUi;
   pricingState: {
     discountEnabled: boolean;
     discountType: string;
@@ -177,6 +179,7 @@ export function CommonConfigureSidebar({
 }: {
   adapter: CommonConfigureSidebarAdapter;
 }) {
+  const { t } = useTranslation();
   const {
     activeSection,
     bundleProduct,
@@ -386,9 +389,16 @@ export function CommonConfigureSidebar({
             </div>
             <div className={styles.parentProductStatus}>
               <span>Parent Product Status</span>
-              <s-badge tone={parentProductStatusUi.tone as any}>
-                {parentProductStatusUi.label}
-              </s-badge>
+              {parentProductStatusUi.isLoading ? (
+                <s-spinner
+                  size="base"
+                  accessibilityLabel={t("common.parentProductStatus.loadingTitle")}
+                />
+              ) : (
+                <s-badge tone={parentProductStatusUi.tone as any}>
+                  {parentProductStatusUi.label}
+                </s-badge>
+              )}
             </div>
           </s-stack>
         </s-section>

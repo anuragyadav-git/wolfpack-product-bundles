@@ -2,7 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import type { ValueType } from "recharts/types/component/DefaultTooltipContent";
 import type { BundleMetricTrendPoint } from "../../lib/analytics";
-import { formatCompactCurrencyAxisTick } from "../../lib/analytics/chart-axis-formatters";
+import {
+  formatBundleSplitDateAxisTick,
+  formatCompactCurrencyAxisTick,
+} from "../../lib/analytics/chart-axis-formatters";
 
 type BundleMetricKey = "revenueCents" | "views" | "orders" | "conversionRate" | "aovCents";
 type ChoiceListElement = HTMLElement & { values?: string[] };
@@ -17,10 +20,11 @@ const METRICS: Array<{ key: BundleMetricKey; label: string }> = [
 
 export interface BundleMetricChartProps {
   trend: BundleMetricTrendPoint[];
+  rangeDays: number;
   formatRevenue: (cents: number) => string;
 }
 
-export function BundleMetricChart({ trend, formatRevenue }: BundleMetricChartProps) {
+export function BundleMetricChart({ trend, rangeDays, formatRevenue }: BundleMetricChartProps) {
   const [metric, setMetric] = useState<BundleMetricKey>("revenueCents");
   const choiceListRef = useRef<any>(null);
   const metricTriggerRef = useRef<any>(null);
@@ -87,7 +91,13 @@ export function BundleMetricChart({ trend, formatRevenue }: BundleMetricChartPro
               </linearGradient>
             </defs>
             <CartesianGrid stroke="var(--wpb-line)" vertical={false} />
-            <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: "var(--wpb-ink-500)", fontSize: 11 }} />
+            <XAxis
+              dataKey="date"
+              axisLine={false}
+              tickLine={false}
+              tick={{ fill: "var(--wpb-ink-500)", fontSize: 11 }}
+              tickFormatter={(date: string) => formatBundleSplitDateAxisTick(date, rangeDays)}
+            />
             <YAxis
               axisLine={false}
               tickLine={false}
@@ -96,6 +106,7 @@ export function BundleMetricChart({ trend, formatRevenue }: BundleMetricChartPro
               width={56}
             />
             <Tooltip
+              labelFormatter={(date) => formatBundleSplitDateAxisTick(String(date), rangeDays)}
               labelStyle={{ font: "var(--wpb-micro)", color: "var(--wpb-ink-700)" }}
               contentStyle={{
                 border: "1px solid var(--wpb-line)",

@@ -22,6 +22,11 @@ type SellingPlanGroupResult = {
   eligibleVariantIds: string[];
 };
 
+const PRODUCT_BATCH_SIZE = 25;
+const COLLECTION_BATCH_SIZE = 50;
+const SELLING_PLAN_GROUP_BATCH_SIZE = 25;
+const CONNECTION_PAGE_SIZE = 250;
+
 function normalizePricingPolicy(policy: any): NormalizedSellingPlanPricingPolicy | null {
   const adjustmentType = String(policy?.adjustmentType ?? "").toUpperCase();
   const percentage = Number(policy?.adjustmentValue?.percentage);
@@ -54,16 +59,27 @@ async function fetchProductsWithSellingPlanGroups(
   productIds: string[],
   variantIdsByProductId: Record<string, string[]>,
 ) {
-  const products: Array<{
+  type ProductResult = {
     id: string;
     title: string;
     variantIds: string[];
     sellingPlanGroups: { nodes: SellingPlanGroupResult[] };
-  }> = [];
+  };
+  type ProductNode = {
+    id?: string;
+    title?: string;
+    variants?: {
+      nodes?: Array<{ id?: string }>;
+      pageInfo?: { hasNextPage?: boolean; endCursor?: string | null };
+    };
+    sellingPlanGroups?: { nodes?: any[] };
+  };
+
+  const productNodes: ProductNode[] = [];
 
   const query = `
-    query ProductWithSellingPlanGroups($id: ID!, $after: String) {
-      node(id: $id) {
+    query ProductsWithSellingPlanGroupsBatch($ids: [ID!]!) {
+      nodes(ids: $ids) {
         ... on Product {
           id
           title
@@ -73,8 +89,6 @@ async function fetchProductsWithSellingPlanGroups(
               name
               options
               position
-              appliesToProduct(productId: $id)
-              productVariants(first: 250) { nodes { id } }
               sellingPlans(first: 50) {
                 nodes {
                   id
@@ -102,7 +116,7 @@ async function fetchProductsWithSellingPlanGroups(
               }
             }
           }
-          variants(first: 100, after: $after) {
+          variants(first: ${CONNECTION_PAGE_SIZE}) {
             nodes { id }
             pageInfo { hasNextPage endCursor }
           }
@@ -110,83 +124,66 @@ async function fetchProductsWithSellingPlanGroups(
       }
     }
   `;
+  const uniqueProductIds = [...new Set(productIds)];
+  for (let index = 0; index < uniqueProductIds.length; index += PRODUCT_BATCH_SIZE) {
+    const ids = uniqueProductIds.slice(index, index + PRODUCT_BATCH_SIZE);
+    const response = await admin.graphql(query, { variables: { ids } });
+    const data = await response.json() as { data?: { nodes?: ProductNode[] } };
+    productNodes.push(...(data.data?.nodes ?? []).filter((node): node is ProductNode => Boolean(node?.id)));
+  }
 
-  const validateVariantAssignment = async (
-    groupId: string,
-    variantId: string,
-  ) => {
-    const response = await admin.graphql(`
-      query ValidateSellingPlanVariantAssignment($groupId: ID!, $variantId: ID!) {
-        node(id: $groupId) {
-          ... on SellingPlanGroup {
-            appliesToProductVariant(productVariantId: $variantId)
+  const groupIds = [...new Set(productNodes.flatMap((product) =>
+    (product.sellingPlanGroups?.nodes ?? [])
+      .map((group: any) => group?.id)
+      .filter((id: unknown): id is string => typeof id === "string"),
+  ))];
+  const groupAssignments = await fetchSellingPlanGroupAssignments(admin, groupIds);
+  const products: ProductResult[] = [];
+
+  for (const productData of productNodes) {
+    if (!productData.id) continue;
+    const configuredVariantIds = variantIdsByProductId[productData.id] ?? [];
+    const discoveredVariantIds = (productData.variants?.nodes ?? [])
+      .map((variant) => variant?.id)
+      .filter((id): id is string => typeof id === "string");
+    let after = configuredVariantIds.length === 0 && productData.variants?.pageInfo?.hasNextPage
+      ? productData.variants.pageInfo.endCursor ?? null
+      : null;
+    while (after) {
+      const response = await admin.graphql(`
+        query ProductVariantsForSellingPlanValidation($id: ID!, $after: String!) {
+          node(id: $id) {
+            ... on Product {
+              variants(first: ${CONNECTION_PAGE_SIZE}, after: $after) {
+                nodes { id }
+                pageInfo { hasNextPage endCursor }
+              }
+            }
           }
         }
-      }
-    `, { variables: { groupId, variantId } });
-    const data = await response.json() as {
-      data?: { node?: { appliesToProductVariant?: boolean } | null };
-    };
-    return data.data?.node?.appliesToProductVariant === true;
-  };
-
-  for (const id of productIds) {
-    let after: string | null = null;
-    let productData: {
-      id?: string;
-      title?: string;
-      sellingPlanGroups?: { nodes?: any[] };
-    } | null = null;
-    const discoveredVariantIds: string[] = [];
-    const configuredVariantIds = variantIdsByProductId[id] ?? [];
-    do {
-      const response = await admin.graphql(query, { variables: { id, after } });
-      const data = (await response.json()) as {
-      data?: {
-        node?: {
-          id?: string;
-          title?: string;
-          variants?: {
-            nodes?: Array<{ id?: string }>;
-            pageInfo?: { hasNextPage?: boolean; endCursor?: string | null };
-          };
-          sellingPlanGroups?: { nodes?: any[] };
-        } | null;
-      };
-      };
-      const product = data.data?.node;
-      if (!product?.id) break;
-      productData ??= product;
-      for (const variant of product.variants?.nodes ?? []) {
+      `, { variables: { id: productData.id, after } });
+      const data = await response.json();
+      const variants = data.data?.node?.variants;
+      for (const variant of variants?.nodes ?? []) {
         if (typeof variant?.id === "string" && !discoveredVariantIds.includes(variant.id)) {
           discoveredVariantIds.push(variant.id);
         }
       }
-      after = configuredVariantIds.length === 0 && product.variants?.pageInfo?.hasNextPage
-        ? product.variants.pageInfo.endCursor ?? null
-        : null;
-    } while (after);
+      after = variants?.pageInfo?.hasNextPage ? variants.pageInfo.endCursor ?? null : null;
+    }
 
-    if (!productData?.id) continue;
-    const variantIds = variantIdsByProductId[productData.id] ?? discoveredVariantIds;
+    const variantIds = configuredVariantIds.length > 0
+      ? configuredVariantIds
+      : discoveredVariantIds;
     const groups: SellingPlanGroupResult[] = [];
     for (const group of (productData.sellingPlanGroups?.nodes ?? []).filter(
       (candidate): candidate is any =>
         typeof candidate?.id === "string" && typeof candidate?.name === "string",
     )) {
-      const eligibleVariantIds = group.appliesToProduct === true
+      const assignments = groupAssignments.get(group.id);
+      const eligibleVariantIds = assignments?.productIds.has(productData.id)
         ? [...variantIds]
-        : (group.productVariants?.nodes ?? [])
-          .map((variant: any) => variant?.id)
-          .filter((variantId: unknown): variantId is string => typeof variantId === "string");
-      for (const variantId of variantIds) {
-        if (
-          !eligibleVariantIds.includes(variantId) &&
-          await validateVariantAssignment(group.id, variantId)
-        ) {
-          eligibleVariantIds.push(variantId);
-        }
-      }
+        : variantIds.filter((variantId) => assignments?.variantIds.has(variantId));
       groups.push({
         id: group.id,
         name: group.name,
@@ -207,14 +204,89 @@ async function fetchProductsWithSellingPlanGroups(
       });
     }
     products.push({
-        id: productData.id,
-        title: productData.title ?? "",
-        variantIds,
-        sellingPlanGroups: { nodes: groups },
-      });
+      id: productData.id,
+      title: productData.title ?? "",
+      variantIds,
+      sellingPlanGroups: { nodes: groups },
+    });
   }
 
   return products;
+}
+
+async function fetchSellingPlanGroupAssignments(
+  admin: ShopifyAdmin,
+  groupIds: string[],
+) {
+  const assignments = new Map<string, { productIds: Set<string>; variantIds: Set<string> }>();
+  const query = `
+    query SellingPlanGroupAssignmentsBatch($ids: [ID!]!) {
+      nodes(ids: $ids) {
+        ... on SellingPlanGroup {
+          id
+          products(first: ${CONNECTION_PAGE_SIZE}) {
+            nodes { id }
+            pageInfo { hasNextPage endCursor }
+          }
+          productVariants(first: ${CONNECTION_PAGE_SIZE}) {
+            nodes { id }
+            pageInfo { hasNextPage endCursor }
+          }
+        }
+      }
+    }
+  `;
+
+  for (let index = 0; index < groupIds.length; index += SELLING_PLAN_GROUP_BATCH_SIZE) {
+    const ids = groupIds.slice(index, index + SELLING_PLAN_GROUP_BATCH_SIZE);
+    const response = await admin.graphql(query, { variables: { ids } });
+    const data = await response.json();
+    for (const group of data.data?.nodes ?? []) {
+      if (typeof group?.id !== "string") continue;
+      const entry = {
+        productIds: new Set<string>((group.products?.nodes ?? []).map((product: any) => product?.id).filter(Boolean)),
+        variantIds: new Set<string>((group.productVariants?.nodes ?? []).map((variant: any) => variant?.id).filter(Boolean)),
+      };
+      assignments.set(group.id, entry);
+      await appendSellingPlanGroupAssignmentPages(admin, group.id, "products", group.products?.pageInfo, entry.productIds);
+      await appendSellingPlanGroupAssignmentPages(admin, group.id, "productVariants", group.productVariants?.pageInfo, entry.variantIds);
+    }
+  }
+
+  return assignments;
+}
+
+async function appendSellingPlanGroupAssignmentPages(
+  admin: ShopifyAdmin,
+  groupId: string,
+  connection: "products" | "productVariants",
+  initialPageInfo: { hasNextPage?: boolean; endCursor?: string | null } | undefined,
+  target: Set<string>,
+) {
+  let after = initialPageInfo?.hasNextPage ? initialPageInfo.endCursor ?? null : null;
+  while (after) {
+    const operationName = connection === "products"
+      ? "SellingPlanGroupProductsPage"
+      : "SellingPlanGroupVariantsPage";
+    const response = await admin.graphql(`
+      query ${operationName}($id: ID!, $after: String!) {
+        node(id: $id) {
+          ... on SellingPlanGroup {
+            ${connection}(first: ${CONNECTION_PAGE_SIZE}, after: $after) {
+              nodes { id }
+              pageInfo { hasNextPage endCursor }
+            }
+          }
+        }
+      }
+    `, { variables: { id: groupId, after } });
+    const data = await response.json();
+    const page = data.data?.node?.[connection];
+    for (const node of page?.nodes ?? []) {
+      if (typeof node?.id === "string") target.add(node.id);
+    }
+    after = page?.pageInfo?.hasNextPage ? page.pageInfo.endCursor ?? null : null;
+  }
 }
 
 async function fetchCollectionProductIds(
@@ -225,15 +297,12 @@ async function fetchCollectionProductIds(
   const seen = new Set<string>();
 
   const query = `
-    query CollectionProductsForSellingPlanValidation($id: ID!, $after: String) {
-      node(id: $id) {
+    query CollectionProductsForSellingPlanValidationBatch($ids: [ID!]!) {
+      nodes(ids: $ids) {
         ... on Collection {
-          products(first: 100, after: $after) {
-            edges {
-              node {
-                id
-              }
-            }
+          id
+          products(first: ${CONNECTION_PAGE_SIZE}) {
+            nodes { id }
             pageInfo { hasNextPage endCursor }
           }
         }
@@ -241,34 +310,45 @@ async function fetchCollectionProductIds(
     }
   `;
 
-  for (const id of collectionIds) {
-    let after: string | null = null;
-    do {
-    const response = await admin.graphql(query, { variables: { id, after } });
-    const data = (await response.json()) as {
-      data?: {
-        node?: {
-          id?: string;
-          products?: {
-            edges?: Array<{ node?: { id?: string } }>;
-            pageInfo?: { hasNextPage?: boolean; endCursor?: string | null };
-          };
-        };
-      };
-    };
-      const collection = data.data?.node;
-      const edges = collection?.products?.edges ?? [];
-      for (const edge of edges) {
-        const productId = edge.node?.id;
+  const uniqueCollectionIds = [...new Set(collectionIds)];
+  for (let index = 0; index < uniqueCollectionIds.length; index += COLLECTION_BATCH_SIZE) {
+    const ids = uniqueCollectionIds.slice(index, index + COLLECTION_BATCH_SIZE);
+    const response = await admin.graphql(query, { variables: { ids } });
+    const data = await response.json();
+    for (const collection of data.data?.nodes ?? []) {
+      for (const product of collection?.products?.nodes ?? []) {
+        const productId = product?.id;
         if (typeof productId !== "string" || productId.trim() === "") continue;
         if (seen.has(productId)) continue;
         seen.add(productId);
         products.push(productId);
       }
-      after = collection?.products?.pageInfo?.hasNextPage
+      let after = collection?.products?.pageInfo?.hasNextPage
         ? collection.products.pageInfo.endCursor ?? null
         : null;
-    } while (after);
+      while (after) {
+        const pageResponse = await admin.graphql(`
+          query CollectionProductsForSellingPlanValidationPage($id: ID!, $after: String!) {
+            node(id: $id) {
+              ... on Collection {
+                products(first: ${CONNECTION_PAGE_SIZE}, after: $after) {
+                  nodes { id }
+                  pageInfo { hasNextPage endCursor }
+                }
+              }
+            }
+          }
+        `, { variables: { id: collection.id, after } });
+        const pageData = await pageResponse.json();
+        const page = pageData.data?.node?.products;
+        for (const product of page?.nodes ?? []) {
+          if (typeof product?.id !== "string" || seen.has(product.id)) continue;
+          seen.add(product.id);
+          products.push(product.id);
+        }
+        after = page?.pageInfo?.hasNextPage ? page.pageInfo.endCursor ?? null : null;
+      }
+    }
   }
 
   return products;

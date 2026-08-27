@@ -10,6 +10,18 @@
   justify-items: stretch;
 }
 
+@media (min-width: 1440px) {
+  .modal-body .product-grid {
+    max-width: 1600px;
+  }
+}
+
+@media (min-width: 1800px) {
+  .modal-body .product-grid {
+    max-width: 1850px;
+  }
+}
+
 @media (min-width: 769px) {
   .modal-body .product-grid {
     grid-template-columns: repeat(var(--bundle-product-cards-per-row, 5), 1fr);
@@ -53,7 +65,7 @@
 }
 
 .modal-body .product-card:hover {
-  transform: none !important;
+  transform: none;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   border-color: #d1d5db;
   z-index: auto;
@@ -61,7 +73,7 @@
 
 .modal-body .product-card.selected,
 .modal-body .product-card.bw-product-card--selected {
-  transform: none !important;
+  transform: none;
 }
 
 .product-card.is-out-of-stock,
@@ -476,7 +488,7 @@
 .product-card:hover {
   border-color: #c0c0c0;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transform: none !important;
+  transform: none;
   z-index: auto;
   transition:
     border-color var(--bundle-card-transition-duration, 200ms) ease,
@@ -485,7 +497,7 @@
 
 .bw-product-card--hover-expanded,
 .product-card.bw-product-card--hover-expanded {
-  transform: none !important;
+  transform: none;
 }
 
 /* Keep card geometry stable across interaction states */

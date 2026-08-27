@@ -16,6 +16,7 @@ import { getParentProductStatusUi } from "../../../lib/parent-product-status-ui"
 import { handleAdminSaveLockedEvent } from "../../../lib/admin-save-lock";
 import { openThemeEditorInNewTab } from "../../../lib/theme-editor-navigation.client";
 import { getThemeExtensionStatusFromAppBridge } from "../../../lib/app-embed-status-check.client";
+import { buildThemeAppEmbedEditorUrl } from "../../../lib/theme-extension-status";
 import { useBundleConfigurationState } from "../../../hooks/useBundleConfigurationState";
 import type { LoaderData } from "./types";
 import {
@@ -53,9 +54,8 @@ export function usePpbBaseConfigureState() {
     blockHandle,
     shopLocales = [],
     shopCurrencyCode,
-    appEmbedEnabled = true,
-    themeEditorUrl = null,
   } = loaderData as any;
+  const themeEditorUrl = buildThemeAppEmbedEditorUrl(shop, apiKey, "bundle-app-embed");
   const navigate = useNavigate();
   const shopify = useAppBridge();
   const fetcher = useFetcher<any>();
@@ -159,7 +159,8 @@ export function usePpbBaseConfigureState() {
     [markAsDirty]
   );
   const parentProductStatusUi = getParentProductStatusUi(
-    loadedBundleProduct?.status || bundleProduct?.status || productStatus
+    loadedBundleProduct?.status || bundleProduct?.status,
+    revalidator.state !== "idle",
   );
   useEffect(() => {
     let active = true;
@@ -173,7 +174,7 @@ export function usePpbBaseConfigureState() {
         }
       })
       .catch(() => {
-        if (active) setCurrentAppEmbedEnabled(appEmbedEnabled);
+        if (active) setCurrentAppEmbedEnabled(false);
       })
       .finally(() => {
         if (active) {
@@ -183,7 +184,7 @@ export function usePpbBaseConfigureState() {
     return () => {
       active = false;
     };
-  }, [appEmbedEnabled, shopify, themeEditorUrl]);
+  }, [shopify, themeEditorUrl]);
   const refreshParentProductStatusFromShopify = useCallback(() => {
     const revalidateNow = () => {
       revalidator.revalidate();

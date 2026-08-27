@@ -5,7 +5,7 @@ title: Metafield Design and Consumption
 type: architecture-diagram
 status: authoritative
 summary: Maps current product-variant, CartTransform, cart, and order metafield ownership without a Shopify Page data path.
-last_audited: 2026-08-11
+last_audited: 2026-08-25
 owners:
   - engineering
 domains:
@@ -29,7 +29,7 @@ tags:
 keywords:
   - bundle_ui_config
   - component_reference
-  - runtime_token_secret
+  - runtime_configuration
   - bundle_details
 ---
 
@@ -57,8 +57,8 @@ flowchart LR
 | Bundle ProductVariant | `$app.bundle_ui_config` | Bundle product metafield writer | PPB Liquid bootstrap |
 | Bundle ProductVariant | `$app.component_reference`, `$app.component_quantities` | Bundle product metafield writer | Cart Transform |
 | Bundle ProductVariant | `$app.price_adjustment`, `$app.component_pricing` | Bundle product metafield writer | Cart Transform |
-| CartTransform | `$app.runtime_token_secret` | CartTransform setup service | Cart Transform and Discount Function |
-| CartTransform | `$app.bundle_cart_line_messaging` | CartTransform setup service | Cart Transform |
+| CartTransform | `$app.runtime_configuration` | CartTransform setup service | Cart Transform secret and cart-line messaging |
+| Discount | `$app.runtime_token_secret` | Discount setup service | Discount Function |
 | Cart | `$app.bundle_details` | Signed app-proxy route | Shopify cart-to-order copy pipeline |
 | Order | `$app.bundle_details` | Shopify cart-to-order copy | Order surfaces and downstream integrations |
 

@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 interface UnlistedBundleBannerProps {
   shop: string;
   bundleProductId: string | null;
+  loading: boolean;
   onManage: () => void;
 }
 
@@ -19,9 +20,31 @@ export function buildShopifyProductAdminUrl(
   return `https://admin.shopify.com/store/${storeSlug}/products/${numericId}`;
 }
 
-export function UnlistedBundleBanner({ shop, bundleProductId, onManage }: UnlistedBundleBannerProps) {
+export function UnlistedBundleBanner({
+  shop,
+  bundleProductId,
+  loading,
+  onManage,
+}: UnlistedBundleBannerProps) {
   const { t } = useTranslation();
   const adminUrl = buildShopifyProductAdminUrl(shop, bundleProductId);
+  if (loading) {
+    const loadingLabel = t("common.parentProductStatus.loadingTitle");
+    return (
+      <s-banner
+        tone="info"
+        heading={loadingLabel}
+        dismissible={false}
+        hidden={false}
+      >
+        <s-stack direction="inline" alignItems="center" gap="small">
+          <s-spinner size="base" accessibilityLabel={loadingLabel} />
+          <s-text>{t("common.parentProductStatus.loadingBody")}</s-text>
+        </s-stack>
+      </s-banner>
+    );
+  }
+
   if (!adminUrl) return null;
 
   return (

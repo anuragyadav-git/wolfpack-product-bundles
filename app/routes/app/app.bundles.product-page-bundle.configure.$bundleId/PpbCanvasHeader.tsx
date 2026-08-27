@@ -72,6 +72,7 @@ export function PpbCanvasHeader() {
           <s-button
             variant="secondary"
             icon="view"
+            accessibilityLabel="Preview Bundle"
             onClick={() => {
               void handlePreviewBundle();
             }}
@@ -87,13 +88,14 @@ export function PpbCanvasHeader() {
         themeEditorUrl={themeEditorUrl}
         onEnableClick={openThemeEditorForAppEmbed}
       />
-      {parentProductStatusUi.showUnlistedBanner && (
+      {(parentProductStatusUi.isLoading || parentProductStatusUi.showUnlistedBanner) && (
         <div className={productPageBundleStyles.unlistedBannerGap}>
           <UnlistedBundleBanner
             shop={shop}
             bundleProductId={
               loadedBundleProduct?.id ?? (bundle as any).shopifyProductId ?? null
             }
+            loading={parentProductStatusUi.isLoading}
             onManage={() => {
               const productId =
                 bundleProduct?.legacyResourceId ||

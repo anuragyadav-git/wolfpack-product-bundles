@@ -34,6 +34,13 @@ export function usePpbConfigureFlow() {
     setTextOverridesByLocale: base.setTextOverridesByLocale,
     bundleEmbedMultiLangText: visibility.bundleEmbedMultiLangText,
     setBundleEmbedMultiLangText: visibility.setBundleEmbedMultiLangText,
+    bundleWidgetMultiLangText: visibility.bundleWidgetMultiLangText,
+    setBundleWidgetMultiLangText: visibility.setBundleWidgetMultiLangText,
+    ruleMessages: base.ruleMessages,
+    ruleMessagesByLocale: display.ruleMessagesByLocale,
+    setRuleMessagesByLocale: display.setRuleMessagesByLocale,
+    setDiscountMessagingMultiLanguageEnabled:
+      display.setDiscountMessagingMultiLanguageEnabled,
     markAsDirty: base.markAsDirty,
   });
   const categoryHandlers = usePpbCategoryHandlers({

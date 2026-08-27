@@ -6,7 +6,7 @@
  */
 
 import type { CSSDesignSettings, CSSGenerationContext } from "./types";
-import type { ThemeColors } from "../../services/theme-colors.server";
+import type { ShopBrandColors } from "../shop-brand-colors";
 import { generateCSSVariables, generateEBDcpBridgeCSS, generateFullPageVariables } from "./css-variables-generator";
 import { generateProductCardCSS } from "./product-card-generator";
 import { generateButtonCSS } from "./button-generator";
@@ -16,7 +16,7 @@ import { generateResponsiveCSS } from "./responsive-generator";
 
 // Re-export types
 export type { CSSDesignSettings, CSSGenerationContext } from "./types";
-export type { ThemeColors } from "../../services/theme-colors.server";
+export type { ShopBrandColors } from "../shop-brand-colors";
 
 // Re-export individual generators for testing/direct access
 export { generateCSSVariables, generateEBDcpBridgeCSS, generateFullPageVariables } from "./css-variables-generator";
@@ -38,15 +38,14 @@ export function generateCSSFromSettings(
   settings: CSSDesignSettings,
   bundleType: string,
   customCss: string = "",
-  themeColors?: ThemeColors | null
+  themeColors?: ShopBrandColors | null
 ): string {
-  // Resolve global color anchors: Settings design value → theme color → hardcoded default
-  const globalPrimaryButton = settings.globalPrimaryButtonColor || themeColors?.globalPrimaryButton || '#000000';
-  const globalButtonText = settings.globalButtonTextColor || themeColors?.globalButtonText || '#FFFFFF';
-  const globalPrimaryText = settings.globalPrimaryTextColor || themeColors?.globalPrimaryText || '#000000';
-  const globalSecondaryText = settings.globalSecondaryTextColor || themeColors?.globalSecondaryText || '#6B7280';
-  const globalFooterBg = settings.globalFooterBgColor || themeColors?.globalFooterBg || '#FFFFFF';
-  const globalFooterText = settings.globalFooterTextColor || themeColors?.globalFooterText || '#000000';
+  const globalPrimaryButton = settings.globalPrimaryButtonColor || themeColors?.primary.background || '#000000';
+  const globalButtonText = settings.globalButtonTextColor || themeColors?.primary.foreground || '#FFFFFF';
+  const globalPrimaryText = settings.globalPrimaryTextColor || themeColors?.secondary.foreground || '#000000';
+  const globalSecondaryText = settings.globalSecondaryTextColor || themeColors?.secondary.foreground || '#6B7280';
+  const globalFooterBg = settings.globalFooterBgColor || themeColors?.secondary.background || '#FFFFFF';
+  const globalFooterText = settings.globalFooterTextColor || themeColors?.secondary.foreground || '#000000';
 
   // Create generation context
   const ctx: CSSGenerationContext = {

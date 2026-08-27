@@ -3,7 +3,6 @@ import { lazy, useCallback, useRef, useEffect, useMemo, useReducer, useState, Su
 import { useAppBridge } from "@shopify/app-bridge-react";
 import { useTranslation } from "react-i18next";
 import { OptimisedImage } from "../../../components/OptimisedImage";
-import { ProxyHealthBanner } from "../../../components/ProxyHealthBanner";
 import { useDashboardState } from "../../../hooks/useDashboardState";
 import {
   buildDashboardCloneFormData,
@@ -23,6 +22,7 @@ import { openThemeEditorInNewTab } from "../../../lib/theme-editor-navigation.cl
 import {
   getThemeExtensionStatusFromAppBridge,
 } from "../../../lib/app-embed-status-check.client";
+import { buildThemeAppEmbedEditorUrl } from "../../../lib/theme-extension-status";
 import {
   changeAdminI18nLanguage,
   normalizeAdminLocale,
@@ -35,10 +35,11 @@ import {
   setDashboardStatusFilter,
   setDashboardTypeFilter,
 } from "../../../store/slices/adminRouteStateSlice";
-import type { action, DashboardAppEmbedStatus, loader } from "./route";
+import type { action, loader } from "./route";
 import { DashboardTopCards } from "./DashboardTopCards";
 import { DashboardStatusGrid } from "./DashboardStatusGrid";
 import { DashboardResourcesCard } from "./DashboardResourcesCard";
+import { DashboardDeferredProxyHealthBanner } from "./DashboardDeferredProxyHealthBanner";
 import { AppEmbedEnableModal } from "./AppEmbedEnableModal";
 import {
   checkAppEmbedActivation,
@@ -64,7 +65,6 @@ import {
   buildDashboardTableRows,
   getDashboardBundlesPerPageChoice,
 } from "./dashboard-table-model";
-import { DashboardLoadingWorkspace } from "./dashboard-route-readiness";
 import dashboardStyles from "./dashboard.module.css";
 
 const STATUS_TONE_MAP = { active: 'success', draft: 'info', unlisted: 'warning' } as const;
@@ -72,14 +72,13 @@ const EnablePreviewModal = lazy(() =>
   import("../../../components/EnablePreviewModal").then((module) => ({ default: module.EnablePreviewModal })),
 );
 type DashboardPageProps = {
-  appEmbedStatus: DashboardAppEmbedStatus;
-  banners: {
+  banners: Promise<{
     proxyHealthy: boolean;
-  };
+  }>;
 };
 
-export function DashboardPage({ appEmbedStatus, banners }: DashboardPageProps) {
-  const { bundles, shop, appUrl } = useLoaderData<typeof loader>();
+export function DashboardPage({ banners }: DashboardPageProps) {
+  const { bundles, shop, apiKey, appUrl } = useLoaderData<typeof loader>();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const fetcher = useFetcher();
@@ -124,16 +123,16 @@ export function DashboardPage({ appEmbedStatus, banners }: DashboardPageProps) {
       setCurrentAppEmbedEnabled(status.appEmbedEnabled);
     } catch {
       setCurrentAppEmbedEnabled((current) => (
-        current ?? appEmbedStatus.appEmbedEnabled
+        current ?? false
       ));
     }
-  }, [appEmbedStatus.appEmbedEnabled, shopify]);
+  }, [shopify]);
 
   useEffect(() => {
-    setCurrentThemeEditorUrl(appEmbedStatus.themeEditorUrl);
+    setCurrentThemeEditorUrl(buildThemeAppEmbedEditorUrl(shop, apiKey, "bundle-app-embed"));
     setCurrentAppEmbedEnabled(null);
     void refreshAppEmbedFromBridge();
-  }, [appEmbedStatus.appEmbedEnabled, appEmbedStatus.themeEditorUrl, refreshAppEmbedFromBridge]);
+  }, [apiKey, refreshAppEmbedFromBridge, shop]);
 
   useEffect(() => {
     if (fetcher.state !== 'idle' || !fetcher.data) return;
@@ -203,35 +202,32 @@ export function DashboardPage({ appEmbedStatus, banners }: DashboardPageProps) {
       fetcher.submit(formData, { method: "post" });
       closeDeleteModal();
       deleteModalRef.current?.hideOverlay?.();
-      deleteModalRef.current?.hide?.();
     }
   }, [bundleToDelete, fetcher, closeDeleteModal]);
 
   const handleCancelDelete = useCallback(() => {
     closeDeleteModal();
     deleteModalRef.current?.hideOverlay?.();
-    deleteModalRef.current?.hide?.();
   }, [closeDeleteModal]);
 
   useEffect(() => {
     const modal = deleteModalRef.current;
     if (!modal) return;
     const handler = () => closeDeleteModal();
-    modal.addEventListener("dismiss", handler);
     modal.addEventListener("hide", handler);
+    modal.addEventListener("afterhide", handler);
     return () => {
-      modal.removeEventListener("dismiss", handler);
       modal.removeEventListener("hide", handler);
+      modal.removeEventListener("afterhide", handler);
     };
   }, [closeDeleteModal]);
 
   useEffect(() => {
     if (!bundleToDelete) return;
     deleteModalRef.current?.showOverlay?.();
-    deleteModalRef.current?.show?.();
   }, [bundleToDelete]);
 
-  const appEmbedEnabled = currentAppEmbedEnabled ?? appEmbedStatus.appEmbedEnabled;
+  const appEmbedEnabled = currentAppEmbedEnabled ?? false;
 
   const enablePreviewGate = useEnablePreviewGate({
     appEmbedEnabled,
@@ -552,10 +548,6 @@ export function DashboardPage({ appEmbedStatus, banners }: DashboardPageProps) {
     getBundleTypeDisplay,
   );
 
-  if (themeExtensionStatus.loading) {
-    return <DashboardLoadingWorkspace />;
-  }
-
   return (
     <>
       {appEmbedEnableFlow.open && (
@@ -628,10 +620,15 @@ export function DashboardPage({ appEmbedStatus, banners }: DashboardPageProps) {
             error={themeExtensionStatus.error}
             themeEditorUrl={currentThemeEditorUrl}
             appEmbedEnabled={appEmbedEnabled}
+            appEmbedStatusLoading={currentAppEmbedEnabled === null}
             onOpenThemeEditor={handleOpenAppEmbedEnableModal}
             enableActionRef={appEmbedEnableActionRef}
           />
-          {!banners.proxyHealthy && <ProxyHealthBanner shop={shop} appUrl={appUrl} />}
+          <DashboardDeferredProxyHealthBanner
+            appUrl={appUrl}
+            banners={banners}
+            shop={shop}
+          />
 
           {/* Bundles panel */}
           <div className={dashboardStyles.bundlesQueryContainer}>

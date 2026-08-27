@@ -5,7 +5,7 @@ title: Cart Transform API
 type: shopify-integration
 status: authoritative
 summary: Shopify Cart Transform API target, activation, failure policy, inputs, and checkout-pricing boundaries.
-last_audited: 2026-08-14
+last_audited: 2026-08-25
 owners:
   - engineering
 domains:
@@ -67,11 +67,11 @@ To keep duplicate bundle instances as separate line items: **append a unique suf
 
 ## Function Input Runtime Token
 
-The configured MERGE path reads `_wolfpack_bundle_runtime` from each selected cart line and verifies it with the CartTransform owner metafield:
+The configured MERGE path reads `_wolfpack_bundle_runtime` from each selected cart line and verifies it with the secret inside the CartTransform owner configuration metafield:
 
 ```graphql
 cartTransform {
-  runtimeTokenSecret: metafield(namespace: "$app", key: "runtime_token_secret") {
+  runtimeConfiguration: metafield(namespace: "$app", key: "runtime_configuration") {
     value
   }
 }
@@ -83,6 +83,14 @@ cart {
   }
 }
 ```
+
+`runtime_configuration` is JSON containing `runtimeTokenSecret` and
+`bundleCartLineMessaging`. Keeping both values in one metafield, together with
+querying only `__typename` to detect a selling-plan allocation, keeps the input
+query at Shopify's maximum calculated complexity of 30. Adding another leaf or
+metafield requires reducing or consolidating an existing selection first.
+Routine Cart Transform setup reads and merges the current JSON before rotating
+the deterministic secret so it does not erase saved cart-line messaging.
 
 The token is issued only by the signed app-proxy route `/apps/product-bundles/api/cart-transform-runtime-token`. It validates the current DB bundle config before signing selected component/add-on variant GIDs, quantities, parent variant, and pricing config.
 

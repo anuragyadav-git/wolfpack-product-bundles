@@ -159,7 +159,7 @@ export function useConfigureContentState(flow: ConfigureBundleFlowDraft) {
   const originalTextOverridesByLocaleRef = useRef<
     Record<string, Record<string, string>>
   >(initialTextOverridesByLocale);
-  const [textOverridesLocale, setTextOverridesLocale] = useState<string>("en");
+  const [textOverridesLocale, setTextOverridesLocale] = useState<string>("");
 
   Object.assign(flow, {
     allowQuantityChanges,

@@ -95,11 +95,9 @@ jest.mock("../../../app/lib/variant-existence.server", () => ({
       reason: "Variant id format is invalid. Expected numeric or gid://shopify/ProductVariant/<id>.",
     };
   }),
-  isVariantExistsOnShopifyStorefront: jest.fn(async () => ({
-    ok: true,
-    id: "",
-    status: 200,
-  })),
+  batchCheckStorefrontVariants: jest.fn(async (_shop: string, ids: string[]) => new Map(
+    ids.map((id) => [id, { ok: true, id, status: 200 }]),
+  )),
 }));
 
 jest.mock("../../../app/lib/css-sanitizer", () => ({
@@ -119,11 +117,6 @@ jest.mock("../../../app/services/widget-installation.server", () => ({
   WidgetInstallationService: {
     validateProductBundleWidgetSetup: jest.fn(),
   },
-}));
-
-jest.mock("../../../app/services/bundles/pricing-calculation.server", () => ({
-  calculateBundlePrice: jest.fn().mockResolvedValue("99.99"),
-  updateBundleProductPrice: jest.fn().mockResolvedValue(undefined),
 }));
 
 jest.mock("../../../app/services/theme-template.server", () => ({
@@ -558,13 +551,10 @@ describe("FPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
   });
 
   it("rejects save when a persisted variant does not exist on Shopify", async () => {
-    const { isVariantExistsOnShopifyStorefront } = require("../../../app/lib/variant-existence.server");
-    (isVariantExistsOnShopifyStorefront as jest.Mock).mockResolvedValueOnce({
-      ok: false,
-      id: "999",
-      status: 404,
-      message: "Variant lookup failed with status 404",
-    });
+    const { batchCheckStorefrontVariants } = require("../../../app/lib/variant-existence.server");
+    (batchCheckStorefrontVariants as jest.Mock).mockResolvedValueOnce(new Map([["999", {
+      ok: false, id: "999", status: 404, message: "Variant lookup failed with status 404",
+    }]]));
 
     const stepsData = makeStepsData({
       StepProduct: [
@@ -589,6 +579,34 @@ describe("FPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
     expect(body.error).toContain("is not available on storefront (404)");
     expect(body.context?.status).toBe(404);
     expect(getDb().bundle.update).not.toHaveBeenCalled();
+  });
+
+  it("validates unique persisted variants in one storefront batch", async () => {
+    const { batchCheckStorefrontVariants } = require("../../../app/lib/variant-existence.server");
+    const stepsData = makeStepsData({
+      StepProduct: [{
+        id: "gid://shopify/Product/111",
+        title: "Variants",
+        variants: [
+          { variantId: "gid://shopify/ProductVariant/111" },
+          { variantId: "222" },
+          { variantId: "gid://shopify/ProductVariant/111" },
+        ],
+      }],
+    });
+
+    await handleSaveBundle(
+      MOCK_ADMIN,
+      MOCK_SESSION,
+      "bundle-1",
+      makeFormData({ stepsData: JSON.stringify(stepsData) }),
+    );
+
+    expect(batchCheckStorefrontVariants).toHaveBeenCalledTimes(1);
+    expect(batchCheckStorefrontVariants).toHaveBeenCalledWith(
+      MOCK_SESSION.shop,
+      ["111", "222"],
+    );
   });
 
   it("calls db.bundle.update with the correct name and description", async () => {

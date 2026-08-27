@@ -9,16 +9,10 @@ import fullPageBundleStyles from "../../../styles/routes/full-page-bundle-config
 import { FPB_DESIGN_CONTROL_PANEL_URL } from "./configure-constants";
 import { buildVisibilityDisplayConfiguration } from "./visibility-helpers";
 import type { ConfigureBundleFlowDraft } from "./configure-flow-types";
-import { runAfterSaveBarLeaveConfirmation } from "../../../lib/admin-savebar-navigation.client";
 import {
   resolveTemplateReadyStep,
   shouldProcessTemplateResponse,
 } from "../../../lib/template-ready-step";
-import {
-  hidePolarisModal,
-  showPolarisModal,
-  useModalHideListener,
-} from "../_shared/bundle-configure/modal-utils";
 
 export function useConfigureTemplatePricingController(
   flow: ConfigureBundleFlowDraft
@@ -31,7 +25,6 @@ export function useConfigureTemplatePricingController(
     bundleDesignTemplate,
     conditionsState,
     formState,
-    isSelectTemplateModalOpen,
     lastTemplateRequestRef,
     lastTemplateResponseRef,
     loadedBundleProduct,
@@ -42,7 +35,6 @@ export function useConfigureTemplatePricingController(
     productStatus,
     ruleMessages,
     savedBundleUpsellConfig,
-    selectTemplateModalRef,
     selectTemplateOpenButtonRef,
     setBundleDesignPresetId,
     setBundleDesignTemplate,
@@ -88,10 +80,8 @@ export function useConfigureTemplatePricingController(
     templateSubmissionStartedRef,
   ]);
   const closeSelectTemplateModal = useCallback(() => {
-    hidePolarisModal(selectTemplateModalRef);
     resetSelectTemplateModal();
-  }, [resetSelectTemplateModal, selectTemplateModalRef]);
-  useModalHideListener(selectTemplateModalRef, resetSelectTemplateModal);
+  }, [resetSelectTemplateModal]);
   const openSelectTemplateModal = useCallback(() => {
     setPendingDesignTemplate(bundleDesignTemplate);
     setPendingDesignPresetId(bundleDesignPresetId);
@@ -114,16 +104,10 @@ export function useConfigureTemplatePricingController(
     templateSubmissionStartedRef,
   ]);
   const openDesignControlPanel = useCallback(() => {
-    void runAfterSaveBarLeaveConfirmation(flow.shopify, () =>
-      navigate(FPB_DESIGN_CONTROL_PANEL_URL)
-    );
+    void flow.shopify.saveBar
+      .leaveConfirmation()
+      .then(() => navigate(FPB_DESIGN_CONTROL_PANEL_URL));
   }, [flow.shopify, navigate]);
-
-  useEffect(() => {
-    isSelectTemplateModalOpen
-      ? showPolarisModal(selectTemplateModalRef)
-      : hidePolarisModal(selectTemplateModalRef);
-  }, [isSelectTemplateModalOpen, selectTemplateModalRef]);
 
   useEffect(() => {
     if (!lastTemplateRequestRef.current) {
@@ -203,28 +187,29 @@ export function useConfigureTemplatePricingController(
     fd.append("bundleDesignTemplate", pendingDesignTemplate ?? "");
     fd.append("bundleDesignPresetId", pendingDesignPresetId ?? "");
     templateFetcher.submit(fd, { method: "POST" });
-    setTemplateModalStep(resolveTemplateReadyStep(appEmbedEnabled));
   }, [
-    appEmbedEnabled,
     lastTemplateRequestRef,
     lastTemplateResponseRef,
     pendingDesignPresetId,
     pendingDesignTemplate,
-    setTemplateModalStep,
     setTemplateSaveError,
     templateSubmissionStartedRef,
     templateFetcher,
   ]);
   function buildBundleUpsellConfig() {
     const multiLangText = Object.fromEntries(
-      Object.entries(textOverridesByLocale ?? {}).flatMap(([locale, values]: any) => {
-        const widgetCopy = {
-          widgetTitle: values?.widgetTitle ?? "",
-          widgetDescription: values?.widgetDescription ?? "",
-          widgetButtonText: values?.widgetButtonText ?? "",
-        };
-        return Object.values(widgetCopy).some(Boolean) ? [[locale, widgetCopy]] : [];
-      }),
+      Object.entries(textOverridesByLocale ?? {}).flatMap(
+        ([locale, values]: any) => {
+          const widgetCopy = {
+            widgetTitle: values?.widgetTitle ?? "",
+            widgetDescription: values?.widgetDescription ?? "",
+            widgetButtonText: values?.widgetButtonText ?? "",
+          };
+          return Object.values(widgetCopy).some(Boolean)
+            ? [[locale, widgetCopy]]
+            : [];
+        }
+      )
     );
     return {
       multiLangText,

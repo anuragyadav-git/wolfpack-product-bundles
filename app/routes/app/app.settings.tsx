@@ -4,12 +4,13 @@ import {
   type ActionFunctionArgs,
   type LoaderFunctionArgs,
 } from "@remix-run/node";
-import { Await, useLoaderData, useNavigate, useNavigation } from "@remix-run/react";
+import { Await, useLoaderData, useNavigate } from "@remix-run/react";
 import { lazy, Suspense, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { Prisma } from "@prisma/client";
-import { BundleType } from "../../constants/bundle";
+import { BundleStatus, BundleType } from "../../constants/bundle";
 import { prisma } from "../../db.server";
-import { requireAdminSession } from "../../lib/auth-guards.server";
+import { authenticate } from "../../shopify.server";
 import {
   SETTINGS_CONTROLS_BUNDLE_TYPES,
   SETTINGS_CONTROLS_SCHEMA_VERSION,
@@ -19,12 +20,15 @@ import {
 } from "../../lib/settings-controls-runtime";
 import { SETTINGS_DESIGN_BUNDLE_TYPES, buildSettingsDesignRuntime } from "../../lib/settings-design-runtime";
 import { parseSettingsDesignPayload } from "../../lib/settings-design-contract";
+import { isShopBrandColors } from "../../lib/shop-brand-colors";
+import { syncThemeColors } from "../../services/theme-colors.server";
 import {
   SETTINGS_LANGUAGE_BUNDLE_TYPES,
   buildSettingsLanguageFormState,
   buildSettingsLanguageRuntime,
 } from "../../lib/settings-language-runtime";
 import { CartTransformService } from "../../services/cart-transform-service.server";
+import { syncPpbStorefrontRuntime } from "../../services/ppb-storefront-runtime.server";
 import { buildFpbStorefrontUrl } from "../../lib/fpb-storefront-url";
 import { navigateBackOrFallback } from "../../lib/navigation";
 import { ReduxProvider } from "../../store/ReduxProvider";
@@ -33,10 +37,7 @@ import {
   SettingsWorkspaceError,
   type SettingsWorkspaceView,
 } from "./app.settings/SettingsLandingShell";
-import {
-  AdminRouteLoadingBar,
-  waitForAdminRouteLoadingBar,
-} from "../../components/AdminRouteLoadingBar";
+import { AdminSectionLoadingState } from "../../components/AdminSectionLoadingState";
 
 const loadSettingsWorkspace = async () => {
   const module = await import("./app.settings/SettingsRoute");
@@ -45,22 +46,15 @@ const loadSettingsWorkspace = async () => {
 
 const SettingsWorkspace = lazy(loadSettingsWorkspace);
 
-export function waitForSettingsRouteReady<TSettings, TPreviewBundles>(
-  settingsPage: Promise<TSettings>,
-  previewBundles: Promise<TPreviewBundles>,
-  loadingBar: Promise<void> = waitForAdminRouteLoadingBar(),
-) {
-  return Promise.all([settingsPage, previewBundles, loadingBar]);
-}
-
 export async function loader({ request }: LoaderFunctionArgs) {
-  const { session } = await requireAdminSession(request);
-  const settingsPage = prisma.designSettings.findUnique({
+  const { admin, session } = await authenticate.admin(request);
+  const shopBrandColors = syncThemeColors(session.shop);
+  const settingsPage = Promise.all([shopBrandColors, prisma.designSettings.findUnique({
       where: { shopId_bundleType: { shopId: session.shop, bundleType: "product_page" } },
       select: {
         generalSettings: true,
       },
-    }).then((settings) => {
+    })]).then(([resolvedShopBrandColors, settings]) => {
       const generalSettings = settings?.generalSettings && typeof settings.generalSettings === "object"
         ? settings.generalSettings as Record<string, unknown>
         : {};
@@ -77,14 +71,16 @@ export async function loader({ request }: LoaderFunctionArgs) {
         ...settingsPage,
         language: buildSettingsLanguageFormState(generalSettings.settingsLanguage),
         controls: buildSettingsControlsFormValues(runtime),
+        shopBrandColors: resolvedShopBrandColors,
       };
     });
   const previewBundles = prisma.bundle.findMany({
       where: {
         shopId: session.shop,
+        status: { in: [BundleStatus.ACTIVE, BundleStatus.UNLISTED] },
         OR: [
-          { bundleType: BundleType.FULL_PAGE },
-          { shopifyProductHandle: { not: null } },
+          { bundleType: BundleType.FULL_PAGE, publicNumber: { not: null } },
+          { bundleType: BundleType.PRODUCT_PAGE, shopifyProductHandle: { not: null } },
         ],
       },
       orderBy: { updatedAt: "desc" },
@@ -95,19 +91,24 @@ export async function loader({ request }: LoaderFunctionArgs) {
         name: true,
         bundleType: true,
         shopifyProductHandle: true,
+        status: true,
       },
-    }).then((bundles) => bundles.map((bundle) => ({
-      id: bundle.id,
-      name: bundle.name,
-      type: bundle.bundleType === "full_page" ? "Landing Page" : "Product Page",
-      viewUrl: bundle.bundleType === "full_page"
+    }).then((bundles) => bundles.flatMap((bundle) => {
+      const viewUrl = bundle.bundleType === BundleType.FULL_PAGE
         ? bundle.publicNumber === null
           ? null
           : buildFpbStorefrontUrl(session.shop, bundle.publicNumber)
         : bundle.shopifyProductHandle
           ? `https://${session.shop}/products/${bundle.shopifyProductHandle}`
-          : null,
-    })));
+          : null;
+      return viewUrl ? [{
+        id: bundle.id,
+        name: bundle.name,
+        type: bundle.bundleType === BundleType.FULL_PAGE ? "Landing Page" : "Product Page",
+        bundleType: bundle.bundleType,
+        viewUrl,
+      }] : [];
+    }));
   return defer({
     settingsPage,
     previewBundles,
@@ -115,7 +116,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 export async function action({ request }: ActionFunctionArgs) {
-  const { admin, session } = await requireAdminSession(request);
+  const { admin, session } = await authenticate.admin(request);
   const formData = await request.formData();
   const intent = String(formData.get("intent") ?? "");
   const payloadValue = String(formData.get("payload") ?? "{}");
@@ -162,7 +163,10 @@ export async function action({ request }: ActionFunctionArgs) {
         && typeof currentBundleGeneralSettings.pageCustomization === "object"
         ? currentBundleGeneralSettings.pageCustomization as Record<string, unknown>
         : {};
-      const designRuntime = buildSettingsDesignRuntime(savedState, currentPageCustomization);
+      const shopBrandColors = isShopBrandColors(currentForBundleType?.themeColors)
+        ? currentForBundleType.themeColors
+        : null;
+      const designRuntime = buildSettingsDesignRuntime(savedState, currentPageCustomization, shopBrandColors);
       const nextBundleSettingsPage = {
         ...(currentBundleGeneralSettings.settingsPage && typeof currentBundleGeneralSettings.settingsPage === "object"
           ? currentBundleGeneralSettings.settingsPage as Record<string, unknown>
@@ -191,6 +195,15 @@ export async function action({ request }: ActionFunctionArgs) {
     });
 
     await prisma.$transaction(writes);
+    try {
+      await syncPpbStorefrontRuntime(admin, session.shop);
+    } catch (error: any) {
+      return json({
+        success: false,
+        intent,
+        message: `Settings saved, but PPB storefront runtime sync failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+      }, { status: 500 });
+    }
     return json({
       success: true,
       intent,
@@ -245,6 +258,15 @@ export async function action({ request }: ActionFunctionArgs) {
     });
 
     await prisma.$transaction(writes);
+    try {
+      await syncPpbStorefrontRuntime(admin, session.shop);
+    } catch (error: any) {
+      return json({
+        success: false,
+        intent,
+        message: `Settings saved, but PPB storefront runtime sync failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+      }, { status: 500 });
+    }
 
     return json({ success: true, intent, message: "Settings saved successfully", savedState: payload });
   }
@@ -305,6 +327,15 @@ export async function action({ request }: ActionFunctionArgs) {
           : "Settings saved, but cart transform messaging sync failed",
       }, { status: 500 });
     }
+    try {
+      await syncPpbStorefrontRuntime(admin, session.shop);
+    } catch (error: any) {
+      return json({
+        success: false,
+        intent,
+        message: `Settings saved, but PPB storefront runtime sync failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+      }, { status: 500 });
+    }
   }
 
   return json({
@@ -316,81 +347,75 @@ export async function action({ request }: ActionFunctionArgs) {
 
 export default function SettingsRouteDefault() {
   const { settingsPage, previewBundles } = useLoaderData<typeof loader>();
+  const { t } = useTranslation();
   const [workspaceView, setWorkspaceView] = useState<SettingsWorkspaceView | null>(null);
-  const routeData = useMemo(
-    () => waitForSettingsRouteReady(settingsPage, previewBundles),
-    [previewBundles, settingsPage],
-  );
   const workspaceData = useMemo(
     () => workspaceView
-      ? Promise.all([settingsPage, previewBundles, waitForAdminRouteLoadingBar()])
+      ? Promise.all([settingsPage, previewBundles])
       : null,
     [previewBundles, settingsPage, workspaceView],
   );
   const navigate = useNavigate();
-  const navigation = useNavigation();
-  const isControlsNavigationPending = navigation.state !== "idle"
-    && navigation.location?.pathname === "/app/additional-configurations";
+
+  if (!workspaceView) {
+    return (
+      <>
+        <ui-title-bar title="Settings">
+          <button
+            variant="breadcrumb"
+            onClick={() =>
+              navigateBackOrFallback(navigate, "/app/dashboard", {
+                replaceFallback: true,
+              })
+            }
+          >
+            Dashboard
+          </button>
+        </ui-title-bar>
+        <SettingsLandingShell
+          onBack={() =>
+            navigateBackOrFallback(navigate, "/app/dashboard", {
+              replaceFallback: true,
+            })
+          }
+          onSelect={(view) => {
+            if (view === "controls") {
+              navigate("/app/additional-configurations");
+              return;
+            }
+            setWorkspaceView(view);
+          }}
+          onIntent={() => {
+            void loadSettingsWorkspace();
+          }}
+        />
+      </>
+    );
+  }
 
   return (
-    <Suspense fallback={<AdminRouteLoadingBar label="Loading Settings" />}>
+    <Suspense fallback={(
+      <>
+        <ui-title-bar title={workspaceView === "design" ? "Design Control Panel" : "Language Configurations"}>
+          <button variant="breadcrumb" onClick={() => setWorkspaceView(null)}>Settings</button>
+        </ui-title-bar>
+        <AdminSectionLoadingState label={t("common.loading.workspace")} />
+      </>
+    )}>
       <Await
-        resolve={routeData}
+        resolve={workspaceData as NonNullable<typeof workspaceData>}
         errorElement={<SettingsWorkspaceError onExit={() => setWorkspaceView(null)} />}
       >
         {([resolvedSettingsPage, resolvedPreviewBundles]: any) => {
-          if (!workspaceView) {
-            return (
-              <>
-                <ui-title-bar title="Settings">
-                  <button
-                    variant="breadcrumb"
-                    onClick={() =>
-                      navigateBackOrFallback(navigate, "/app/dashboard", {
-                        replaceFallback: true,
-                      })
-                  }
-                  >
-                    Dashboard
-                  </button>
-                </ui-title-bar>
-                <SettingsLandingShell
-                  isLoadingControls={isControlsNavigationPending}
-                  onBack={() =>
-                    navigateBackOrFallback(navigate, "/app/dashboard", {
-                      replaceFallback: true,
-                    })
-                  }
-                  onSelect={(view) => {
-                    if (view === "controls") {
-                      navigate("/app/additional-configurations");
-                      return;
-                    }
-                    setWorkspaceView(view);
-                  }}
-                  onIntent={() => {
-                    void loadSettingsWorkspace();
-                  }}
-                />
-              </>
-            );
-          }
-
           return (
-            <Suspense fallback={<AdminRouteLoadingBar label="Loading Settings" />}>
-              <Await resolve={workspaceData as NonNullable<typeof workspaceData>}>
-                {() => (
-                  <ReduxProvider>
-                    <SettingsWorkspace
-                      initialView={workspaceView}
-                      onExit={() => setWorkspaceView(null)}
-                      settingsPage={resolvedSettingsPage}
-                      previewBundles={resolvedPreviewBundles}
-                    />
-                  </ReduxProvider>
-                )}
-              </Await>
-            </Suspense>
+            <ReduxProvider>
+              <SettingsWorkspace
+                initialView={workspaceView}
+                onExit={() => setWorkspaceView(null)}
+                settingsPage={resolvedSettingsPage}
+                previewBundles={resolvedPreviewBundles}
+              />
+            </ReduxProvider>
           );
         }}
       </Await>

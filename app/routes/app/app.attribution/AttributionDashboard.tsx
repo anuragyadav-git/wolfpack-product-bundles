@@ -1,5 +1,5 @@
 import { useFetcher, useNavigate } from "@remix-run/react";
-import { useState, useMemo, useEffect, useRef } from "react";
+import { Suspense, useState, useMemo, useEffect, useRef } from "react";
 import { useAppBridge } from "@shopify/app-bridge-react";
 import "../../../components/analytics/shared/tokens.css";
 import {
@@ -10,15 +10,7 @@ import {
 import { LazyBundleMetricChart } from "../../../components/analytics/lazy";
 import styles from "../../../styles/routes/app-attribution.module.css";
 import type { AttributionDashboardData } from "../app.attribution";
-import {
-  ANALYTICS_NO_DATA_BANNER_COPY,
-  shouldRenderAnalyticsNoDataBanner,
-} from "./attribution-lcp-state";
 import { analyzeCustomUtmInput } from "../../../lib/analytics/attribution-controls";
-
-type PixelStatusPayload = {
-  active: boolean;
-};
 
 type AttributionDashboardViewData = Omit<AttributionDashboardData, "from" | "to"> & {
   from?: string;
@@ -248,35 +240,6 @@ export function removeCustomUtmParameter(
   return parameters.filter((parameter) => parameter !== parameterToRemove);
 }
 
-function NoDataBanner({
-  hasNoData,
-  pixelStatus,
-}: {
-  hasNoData: boolean;
-  pixelStatus: PixelStatusPayload;
-}) {
-  if (!hasNoData) return null;
-
-  if (!shouldRenderAnalyticsNoDataBanner({ hasNoData, pixelActive: Boolean(pixelStatus.active) })) {
-    return null;
-  }
-
-  return (
-    <s-banner
-      heading={ANALYTICS_NO_DATA_BANNER_COPY.heading}
-      tone="info"
-      dismissible={false}
-      hidden={false}
-    >
-      <s-stack direction="block" gap="small-100">
-        <p className={styles.bodyText}>
-          {ANALYTICS_NO_DATA_BANNER_COPY.body}
-        </p>
-      </s-stack>
-    </s-banner>
-  );
-}
-
 export function CustomUtmTrackingCard({
   customUtmParameters,
 }: {
@@ -488,13 +451,11 @@ export function CustomUtmTrackingCard({
 
 function AttributionDashboardContent({
   data,
-  pixelStatus,
 }: {
   data: AttributionDashboardViewData;
-  pixelStatus: PixelStatusPayload;
 }) {
   const {
-    days, from, to, prevFrom, prevTo, summary,
+    days, from, to, prevFrom, prevTo,
     funnelSnapshot, bundleMetricTrend, bundleMatrix, topCampaignsRows,
     customUtmParameters,
   } = data;
@@ -520,8 +481,6 @@ function AttributionDashboardContent({
     return `${fmt(prevFrom)} – ${fmt(prevTo)}`;
   }, [prevFrom, prevTo]);
 
-  const hasNoData = summary.totalOrders === 0 && summary.prevTotalOrders === 0;
-
   useEffect(() => {
     const result = exportFetcher.data;
     if (!result) return;
@@ -545,6 +504,15 @@ function AttributionDashboardContent({
     shopify.toast.show("Analytics CSV exported");
   }, [exportFetcher.data, shopify]);
 
+  useEffect(() => {
+    const result = backfillFetcher.data;
+    if (result?.message) {
+      shopify.toast.show(result.message);
+    } else if (result?.error) {
+      shopify.toast.show(result.error, { isError: true, duration: 5000 });
+    }
+  }, [backfillFetcher.data, shopify]);
+
   function handleBackfillConfirm() {
     backfillFetcher.submit(
       from && to
@@ -566,9 +534,6 @@ function AttributionDashboardContent({
   return (
     <div className={styles.dashboardShell}>
         <div className={styles.dashboardStack}>
-
-          {/* No data banner */}
-          <NoDataBanner hasNoData={hasNoData} pixelStatus={pixelStatus} />
 
           {/* Date range selector + Compare toggle + Export */}
           <div className={styles.headerRow}>
@@ -626,26 +591,6 @@ function AttributionDashboardContent({
             isSubmitting={backfillFetcher.state !== "idle"}
             onConfirm={handleBackfillConfirm}
           />
-          {backfillFetcher.data?.message ? (
-            <s-banner
-              tone="success"
-              heading="Backfill completed"
-              dismissible={false}
-              hidden={false}
-            >
-              {backfillFetcher.data.message}
-            </s-banner>
-          ) : backfillFetcher.data?.error ? (
-            <s-banner
-              tone="critical"
-              heading="Backfill failed"
-              dismissible={false}
-              hidden={false}
-            >
-              {backfillFetcher.data.error}
-            </s-banner>
-          ) : null}
-
           {/* ────────── Revamped analytics sections (wpb-analytics-revamp-1) ─────── */}
 
           <FunnelHero
@@ -656,7 +601,13 @@ function AttributionDashboardContent({
             showHeader={false}
           />
 
-          <LazyBundleMetricChart trend={bundleMetricTrend} formatRevenue={formatRevenue} />
+          <Suspense fallback={null}>
+            <LazyBundleMetricChart
+              trend={bundleMetricTrend}
+              rangeDays={days}
+              formatRevenue={formatRevenue}
+            />
+          </Suspense>
 
           <BundlePerformanceMatrix
             rows={bundleMatrix}
@@ -675,10 +626,8 @@ function AttributionDashboardContent({
 
 export default function AttributionDashboard({
   data,
-  pixelStatus,
 }: {
   data: AttributionDashboardViewData;
-  pixelStatus: PixelStatusPayload;
 }) {
-  return <AttributionDashboardContent data={data} pixelStatus={pixelStatus} />;
+  return <AttributionDashboardContent data={data} />;
 }

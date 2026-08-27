@@ -26,11 +26,11 @@ describe("initial app destination", () => {
     expect(getInitialAppDestination(false)).toBeNull();
   });
 
-  it("renders the shared loading bar and workspace message while client routing resolves", () => {
+  it("renders Polaris workspace feedback while client routing resolves", () => {
     const markup = renderToStaticMarkup(React.createElement(AppRouteLoadingWorkspace));
 
-    expect(markup).toContain('role="progressbar"');
-    expect(markup).toContain('aria-label="Loading Dashboard"');
+    expect(markup).toContain("<s-spinner");
+    expect(markup).toContain('accessibilityLabel="Loading your workspace"');
     expect(markup).toContain("Loading your workspace");
   });
 });

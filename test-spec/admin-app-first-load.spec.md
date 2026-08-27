@@ -5,7 +5,7 @@ title: Admin App First Load Test Spec
 type: test-spec
 status: active
 summary: Verifies that the authenticated app entry renders stable loading content while client-side destination routing resolves.
-last_audited: 2026-08-13
+last_audited: 2026-08-25
 owners:
   - engineering
 domains:
@@ -22,7 +22,7 @@ tags:
   - first-load
 keywords:
   - app-index
-  - loading-bar
+  - polaris-spinner
 ---
 
 # Test Spec: Admin App First Load
@@ -40,11 +40,11 @@ Keep the embedded app iframe visibly stable while `/app` resolves the merchant's
 | # | Scenario | Input | Expected Output | Notes |
 |---|---|---|---|---|
 | 1 | Authentication destination | Auth parameters and first-create eligibility | Onboarding or dashboard destination | Existing routing contract |
-| 2 | Destination pending | Initial server/client render | Shared top-edge loading bar and centered workspace message | Must not return a blank iframe or a skeleton |
+| 2 | Destination pending | Initial server/client render | Inline Polaris spinner with the localized workspace message | Shopify's native loading indicator owns the redirect navigation |
 
 ## Acceptance Criteria
 
 - [x] The route never renders a blank initial state.
 - [x] The authenticated Dashboard transition does not render a skeleton.
-- [x] The transition uses the shared Admin loading bar.
+- [x] The transition uses a Polaris loading state and Shopify's native navigation indicator.
 - [x] Focused unit tests pass.

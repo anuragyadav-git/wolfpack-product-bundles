@@ -2,26 +2,8 @@
  * Unit Tests for app/lib/auth-guards.server.ts
  *
  * TDD — tests written before implementation.
- * Tests cover all three auth guards:
- *   - requireInternalSecret (novel logic: constant-time Bearer token check)
- *   - requireAdminSession   (delegates to authenticate.admin)
- *   - requireAppProxy       (delegates to authenticate.public.appProxy)
+ * Tests cover Wolfpack-owned constant-time secret authorization.
  */
-
-import { mockShopifyAdmin, mockSession } from '../../setup';
-
-// ─── Mocks ────────────────────────────────────────────────────────────────────
-
-jest.mock('../../../app/shopify.server', () => ({
-  authenticate: {
-    admin: jest.fn(),
-    public: {
-      appProxy: jest.fn(),
-    },
-  },
-}));
-
-const { authenticate } = require('../../../app/shopify.server');
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -117,102 +99,5 @@ describe('requireInternalSecret', () => {
     const result = requireInternalSecret(request);
     expect(result).toBeInstanceOf(Response);
     expect((result as Response).status).toBe(401);
-  });
-});
-
-// ─── requireAdminSession ──────────────────────────────────────────────────────
-
-describe('requireAdminSession', () => {
-  beforeEach(() => {
-    authenticate.admin.mockReset();
-  });
-
-  it('returns { admin, session } when authenticate.admin resolves', async () => {
-    authenticate.admin.mockResolvedValue({
-      admin: mockShopifyAdmin,
-      session: mockSession,
-    });
-
-    const { requireAdminSession } = await import('../../../app/lib/auth-guards.server');
-    const request = makeRequest();
-    const result = await requireAdminSession(request);
-
-    expect(result.admin).toBe(mockShopifyAdmin);
-    expect(result.session).toBe(mockSession);
-    expect(authenticate.admin).toHaveBeenCalledWith(request);
-  });
-
-  it('propagates a thrown Response when authenticate.admin rejects (e.g. redirect to login)', async () => {
-    const redirectResponse = new Response(null, { status: 302, headers: { Location: '/auth/login' } });
-    authenticate.admin.mockRejectedValue(redirectResponse);
-
-    const { requireAdminSession } = await import('../../../app/lib/auth-guards.server');
-    const request = makeRequest();
-
-    await expect(requireAdminSession(request)).rejects.toBe(redirectResponse);
-  });
-
-  it('calls authenticate.admin exactly once per request', async () => {
-    authenticate.admin.mockResolvedValue({ admin: mockShopifyAdmin, session: mockSession });
-
-    const { requireAdminSession } = await import('../../../app/lib/auth-guards.server');
-    await requireAdminSession(makeRequest());
-
-    expect(authenticate.admin).toHaveBeenCalledTimes(1);
-  });
-});
-
-// ─── requireAppProxy ──────────────────────────────────────────────────────────
-
-describe('requireAppProxy', () => {
-  beforeEach(() => {
-    authenticate.public.appProxy.mockReset();
-  });
-
-  it('returns { session } when authenticate.public.appProxy resolves', async () => {
-    authenticate.public.appProxy.mockResolvedValue({ session: mockSession });
-
-    const { requireAppProxy } = await import('../../../app/lib/auth-guards.server');
-    const request = makeRequest();
-    const result = await requireAppProxy(request);
-
-    expect(result.session).toBe(mockSession);
-    expect(authenticate.public.appProxy).toHaveBeenCalledWith(request);
-  });
-
-  it('propagates a thrown Response when authenticate.public.appProxy rejects', async () => {
-    const errorResponse = new Response(JSON.stringify({ error: 'Invalid proxy signature' }), { status: 401 });
-    authenticate.public.appProxy.mockRejectedValue(errorResponse);
-
-    const { requireAppProxy } = await import('../../../app/lib/auth-guards.server');
-    const request = makeRequest();
-
-    await expect(requireAppProxy(request)).rejects.toBe(errorResponse);
-  });
-
-  it('throws 401 Response when context.session is missing', async () => {
-    authenticate.public.appProxy.mockResolvedValue({ session: undefined });
-
-    const { requireAppProxy } = await import('../../../app/lib/auth-guards.server');
-    const request = makeRequest();
-
-    let thrown: Response | undefined;
-    try {
-      await requireAppProxy(request);
-    } catch (e: any) {
-      thrown = e;
-    }
-
-    expect(thrown).toBeInstanceOf(Response);
-    expect(thrown?.status).toBe(401);
-  });
-
-  it('calls authenticate.public.appProxy exactly once per request', async () => {
-    authenticate.public.appProxy.mockResolvedValue({ session: mockSession });
-
-    const { requireAppProxy } = await import('../../../app/lib/auth-guards.server');
-    await requireAppProxy(makeRequest());
-
-    expect(authenticate.public.appProxy).toHaveBeenCalledTimes(1);
   });
 });

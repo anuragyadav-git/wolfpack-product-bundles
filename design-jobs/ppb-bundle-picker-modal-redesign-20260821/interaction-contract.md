@@ -26,7 +26,7 @@ keywords:
 # Interaction Contract
 
 Artifact job ID: ppb-bundle-picker-modal-redesign-20260821
-Artifact revision: 6
+Artifact revision: 8
 Artifact status: complete
 
 | Control ID | Role | Accessible name | Pointer action | Keyboard action | State update | Focus behavior | Disabled or busy | Error recovery | Motion |
@@ -40,7 +40,8 @@ Artifact status: complete
 | add | button | Localized Add plus product | Adds active variant once | Enter/Space | quantity 0 -> selected | Stays in rerendered card context | Disabled when unavailable | Select sellable variant | Existing card transition |
 | quantity | grouped buttons | Product-specific decrease/increase/remove names | Changes quantity below maximum | Enter/Space | quantity changes within bounds | Remains on corresponding control | Increase disabled at limit | Decrease or remove | Stable action region |
 | maximum-reached | button | Localized Added xN plus product | Removes full selected quantity | Enter/Space | quantity N -> 0 | Returns to Add action | n/a | Add again | Stable action region |
-| filled-slot cross badge | button | Localized Remove plus the complete product name | Removes only the represented selected product | Enter/Space | one removal mutation | Returns focus to the same-index empty slot or previous valid slot | n/a | Re-add from reopened slot | Compact visual cross; 44px target; stops propagation so replacement does not open |
+| Vertical filled row | non-interactive group | Visible product identity | No activation | none | none | Remove remains the only focusable control | n/a | Use an empty slot to open the picker | Live EB row is inert |
+| filled-slot remove | button | Localized Remove plus the complete product name | Removes only the represented selected unit | Enter/Space | quantity N -> N-1 | Returns focus to the same-index empty/filled slot or previous valid slot | n/a | Re-add from an empty slot | Vertical uses the measured EB 20px inline circular-cross visual; Horizontal retains its 44px overlaid badge |
 | details-submit | button | Localized Add or Update plus product | Commits local variant/quantity | Enter/Space | adds or updates originating slot once | Returns to exact image trigger after close | Disabled for unavailable variant | Select sellable variant or cancel | Existing sheet close motion |
 | previous-next | button | Existing localized label | Changes step | Enter/Space | step transition | New context remains labelled | Existing validity rules | Existing toast/message | Reduced motion respected |
 
@@ -58,4 +59,4 @@ Desktop rail and mobile current-title controls are mutually exclusive and share 
 
 ## Business-rule invariants
 
-Do not change pricing, inventory, subscriptions, validation rules, cart payloads, restoration, or localization. The filled-slot cross badge reuses the localized `removeProductFromFooterText` accessible-name contract and performs the existing single removal mutation. Visual title clamping never changes the complete programmatic name. No new hardcoded merchant-facing copy is introduced.
+Do not change pricing, inventory, subscriptions, validation rules, cart payloads, restoration, or localization. The filled-slot Remove action reuses the localized `removeProductFromFooterText` accessible-name contract and decrements the represented unit. Vertical filled rows do not open replacement; Horizontal filled slots keep replacement. No new hardcoded merchant-facing copy is introduced.

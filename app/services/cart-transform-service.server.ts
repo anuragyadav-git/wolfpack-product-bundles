@@ -386,6 +386,39 @@ export class CartTransformService {
   ): Promise<CartTransformMetafieldSyncResult> {
     try {
       const secret = generateCartTransformRuntimeTokenSecret(shopDomain);
+      const CURRENT_CONFIGURATION_QUERY = `
+        query CartTransformRuntimeConfiguration($id: ID!) {
+          node(id: $id) {
+            ... on CartTransform {
+              runtimeConfiguration: metafield(namespace: "$app", key: "runtime_configuration") {
+                value
+              }
+            }
+          }
+        }
+      `;
+      const currentResponse = await admin.graphql(CURRENT_CONFIGURATION_QUERY, {
+        variables: { id: cartTransformId },
+      });
+      const currentData = await currentResponse.json() as any;
+      if (currentData.errors) {
+        const message = currentData.errors.map((error: any) => error.message).join(', ');
+        return { success: false, cartTransformId, error: message };
+      }
+      const currentValue = currentData.data?.node?.runtimeConfiguration?.value;
+      let currentConfiguration: Record<string, unknown> = {};
+      if (typeof currentValue === 'string' && currentValue.trim() !== '') {
+        try {
+          const parsed = JSON.parse(currentValue);
+          if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+            throw new Error('Cart Transform runtime configuration must be a JSON object');
+          }
+          currentConfiguration = parsed;
+        } catch (error) {
+          const message = error instanceof Error ? error.message : 'Invalid Cart Transform runtime configuration';
+          return { success: false, cartTransformId, error: message };
+        }
+      }
       const MUTATION = `
         mutation SyncRuntimeTokenSecret($metafields: [MetafieldsSetInput!]!) {
           metafieldsSet(metafields: $metafields) {
@@ -407,9 +440,12 @@ export class CartTransformService {
           metafields: [{
             ownerId: cartTransformId,
             namespace: '$app',
-            key: 'runtime_token_secret',
-            type: 'single_line_text_field',
-            value: secret,
+            key: 'runtime_configuration',
+            type: 'json',
+            value: JSON.stringify({
+              ...currentConfiguration,
+              runtimeTokenSecret: secret,
+            }),
           }],
         },
       });
@@ -481,22 +517,16 @@ export class CartTransformService {
       const runtimeTokenSecret = generateCartTransformRuntimeTokenSecret(shopDomain);
       const response = await admin.graphql(MUTATION, {
         variables: {
-          metafields: [
-            {
-              ownerId: cartTransformId,
-              namespace: '$app',
-              key: 'bundle_cart_line_messaging',
-              type: 'json',
-              value: JSON.stringify(settings ?? null),
-            },
-            {
-              ownerId: cartTransformId,
-              namespace: '$app',
-              key: 'runtime_token_secret',
-              type: 'single_line_text_field',
-              value: runtimeTokenSecret,
-            },
-          ],
+          metafields: [{
+            ownerId: cartTransformId,
+            namespace: '$app',
+            key: 'runtime_configuration',
+            type: 'json',
+            value: JSON.stringify({
+              runtimeTokenSecret,
+              bundleCartLineMessaging: settings ?? null,
+            }),
+          }],
         },
       });
       const data = await response.json() as any;

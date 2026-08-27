@@ -7,6 +7,7 @@ import { calculateBundleDiscountForPurchaseOption } from '../../shared/subscript
 import { calculateBundleTotalForPurchaseOption } from '../../shared/subscription-storefront-methods.js';
 import { areRequiredProductPageStepsValid } from './step-validation.js';
 import { preflightVariantOnStorefront, resolveRuntimeVariantNumericId } from '../../shared/variant-preflight.js';
+import { setPpbBundleDetailsCartMetafield } from '../storefront-client.js';
 import { buildStorefrontApiPath } from '../../../../config/storefront-proxy-routes.js';
 
 function getProductPageSelectedQuantityTotal(selectedProducts: any[] = []) {
@@ -103,11 +104,12 @@ export const ProductPageCartMethods: Record<string, any> & ThisType<any> = {
       this.elements.addToCartButton.textContent = this._resolveText('addingToCart', 'Adding to Cart...');
       this.showLoadingOverlay(this.selectedBundle?.loadingGif || null);
 
-      const runtimeToken = await this.requestCartTransformRuntimeToken(cartItems, {
-        offerGroupId: `${offerId}_${sessionKey}`,
-        bundleType: 'product_page',
-        sellingPlanId,
-      });
+      const runtimeToken = this.config?.isEmbedSource && this.selectedBundle?.runtimeAuthorization?.version !== 2
+        ? await this.requestEmbedCartTransformRuntimeToken(cartItems, {
+          offerGroupId: `${offerId}_${sessionKey}`,
+          sellingPlanId,
+        })
+        : this.applyPpbStaticAuthorization(cartItems, { sellingPlanId });
       const cartContext = this.buildProductPageCartFormData(cartItems, {
         bundleName,
         offerId,
@@ -259,7 +261,10 @@ export const ProductPageCartMethods: Record<string, any> & ThisType<any> = {
           id: parseInt(this.extractId(variantId)),
           quantity,
           properties,
-          _wpbProductId: resolveRuntimeTokenProductId(product)
+          _wpbProductId: resolveRuntimeTokenProductId(product),
+          _wpbAuthorizationGroup: this._isDirectDefaultVariant(variantId)
+            ? 'default-products'
+            : String(step?.id ?? stepIndex),
         };
         cartItems.push(cartItem);
         selectedLines.push({ product, quantity });
@@ -309,51 +314,92 @@ export const ProductPageCartMethods: Record<string, any> & ThisType<any> = {
     return { type: 'PERCENTAGE', value: Math.min(100, value) };
   },
 
-  async requestCartTransformRuntimeToken(cartItems: any[], { offerGroupId, bundleType, sellingPlanId = '' }: any) {
-    const components: { variantId: any; productId: any; quantity: any; }[] = [];
-    const addons: { discount: any; variantId: any; productId: any; quantity: any; }[] = [];
+  applyPpbStaticAuthorization(cartItems: any[], { sellingPlanId = '' }: any = {}) {
+    const authorization = this.selectedBundle?.runtimeAuthorization;
+    if (authorization?.version !== 2 || !authorization.bundleToken || !Array.isArray(authorization.lines)) {
+      throw new Error('Bundle authorization is unavailable. Sync this bundle before adding it to cart.');
+    }
+    if (sellingPlanId) {
+      const selectedPlanIds = this.selectedBundle?.subscription?.selectedPlanIds || [];
+      if (!selectedPlanIds.includes(sellingPlanId)) {
+        throw new Error('The selected subscription option is not authorized for this bundle.');
+      }
+    }
+    for (const item of cartItems) {
+      const rawStepType = String(item?.properties?._bundle_step_type || '');
+      const role = rawStepType.startsWith('addon:') || rawStepType === 'addon'
+        ? 'addon'
+        : rawStepType === 'free_gift'
+          ? 'free_gift'
+          : rawStepType === 'default'
+            ? 'default'
+            : 'component';
+      const variantId = `gid://shopify/ProductVariant/${resolveRuntimeVariantNumericId(item.id)}`;
+      const productId = String(item._wpbProductId || '');
+      const groupId = String(item._wpbAuthorizationGroup || '');
+      const line = authorization.lines.find((candidate: any) => (
+        candidate.role === role
+        && candidate.groupId === groupId
+        && (candidate.variantId === variantId || (candidate.productId && candidate.productId === productId))
+      ));
+      if (!line || Number(item.quantity) > Number(line.maxQuantity)) {
+        throw new Error(`Selected ${role} line is not authorized for this bundle.`);
+      }
+      const addonDiscount = this.parseRuntimeAddonDiscount(rawStepType);
+      if (addonDiscount && addonDiscount.value > Number(line.maxDiscountPercentage || 0)) {
+        throw new Error('Selected add-on discount exceeds the synchronized bundle policy.');
+      }
+      item.properties._wolfpack_line_auth = line.token;
+    }
+    const groupTotals = new Map<string, number>();
+    for (const item of cartItems) {
+      const groupId = String(item._wpbAuthorizationGroup || '');
+      groupTotals.set(groupId, (groupTotals.get(groupId) || 0) + Number(item.quantity || 0));
+    }
+    for (const group of authorization.groups || []) {
+      const quantity = groupTotals.get(String(group.id)) || 0;
+      if (quantity < Number(group.minQuantity) || quantity > Number(group.maxQuantity)) {
+        throw new Error(`Selected quantity is outside the synchronized bounds for ${group.id}.`);
+      }
+    }
+    return authorization.bundleToken;
+  },
 
-    cartItems.forEach((item: any) => {
+  async requestEmbedCartTransformRuntimeToken(cartItems: any[], { offerGroupId, sellingPlanId = '' }: any) {
+    const components: any[] = [];
+    const addons: any[] = [];
+    for (const item of cartItems) {
       const stepType = item?.properties?._bundle_step_type;
-      const isAddon = stepType === 'addon' || (typeof stepType === 'string' && stepType.startsWith('addon:'));
-      const line: any = {
+      const line = {
         variantId: item.id,
         productId: item._wpbProductId,
         quantity: item.quantity,
       };
-      if (isAddon) {
-        addons.push({
-          ...line,
-          discount: this.parseRuntimeAddonDiscount(stepType),
-        });
+      if (stepType === 'addon' || String(stepType || '').startsWith('addon:')) {
+        addons.push({ ...line, discount: this.parseRuntimeAddonDiscount(stepType) });
       } else {
         components.push(line);
       }
-    });
-
+    }
     const response = await fetch(buildStorefrontApiPath('cart-transform-runtime-token'), {
       method: 'POST',
       credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         bundleId: this.selectedBundle?.id,
-        bundleType,
+        bundleType: 'product_page',
         offerGroupId,
         components,
         addons,
-        ...(sellingPlanId ? {
-          subscription: {
-            sellingPlanGroupId: this.selectedBundle?.subscription?.selectedGroup?.id,
-            sellingPlanId,
-            recurringBundleDiscount: this.selectedBundle?.subscription?.recurringBundleDiscount === true,
-          },
-        } : {}),
+        ...(sellingPlanId ? { subscription: {
+          sellingPlanGroupId: this.selectedBundle?.subscription?.selectedGroup?.id,
+          sellingPlanId,
+          recurringBundleDiscount: this.selectedBundle?.subscription?.recurringBundleDiscount === true,
+        } } : {}),
       }),
     });
     const data = await response.json().catch(() => null);
-    if (!response.ok || !data?.token) {
-      throw new Error(data?.error || 'Unable to validate bundle selection');
-    }
+    if (!response.ok || !data?.token) throw new Error(data?.error || 'Unable to validate bundle selection');
     return data.token;
   },
 
@@ -365,16 +411,17 @@ export const ProductPageCartMethods: Record<string, any> & ThisType<any> = {
       const cartToken = await this.getBundleDetailsCartToken();
       if (!cartToken) return;
 
-      const response = await fetch(buildStorefrontApiPath('cart-bundle-details'), {
-        method: 'POST',
-        credentials: 'same-origin',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cartToken, bundleDetailsKey, displayProperties })
+      const runtime = this.config?.storefrontRuntime;
+      if (!runtime?.storefrontAccessToken) return;
+      await setPpbBundleDetailsCartMetafield({
+        shop: window.Shopify?.shop || this.container?.dataset?.shop,
+        apiVersion: runtime.storefrontApiVersion,
+        accessToken: runtime.storefrontAccessToken,
+        cartToken,
+        bundleDetailsKey,
+        displayProperties,
+        fetchImpl: fetch,
       });
-
-      if (!response.ok) throw new Error(`bundle_details sync failed (${response.status})`);
-      const data = await response.json().catch(() => null);
-      if (data?.ok !== true) throw new Error(data?.error || 'bundle_details sync failed');
     } catch (error: any) {
       console.warn('[Wolfpack Bundles] Failed to sync bundle_details cart metafield', error);
     }

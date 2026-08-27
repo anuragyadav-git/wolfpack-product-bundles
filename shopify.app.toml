@@ -7,7 +7,7 @@ embedded = true
 handle = "wolfpack-product-bundles"
 
 [webhooks]
-api_version = "2025-10"
+api_version = "2026-07"
 
   [[webhooks.subscriptions]]
   topics = [
@@ -20,9 +20,14 @@ api_version = "2025-10"
   uri = "https://wolfpack-production-webhook-processor.onrender.com/webhooks"
   compliance_topics = [ "customers/data_request", "customers/redact", "shop/redact" ]
 
+# No-op required while Shopify's remote schema incorrectly requires Events.
+[events]
+api_version = "unstable"
+subscription = []
+
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "read_customer_events,read_discounts,read_inventory,read_orders,read_product_listings,read_products,read_publications,read_themes,unauthenticated_read_checkouts,unauthenticated_read_content,unauthenticated_read_product_inventory,unauthenticated_read_product_listings,unauthenticated_write_checkouts,write_app_proxy,write_cart_transforms,write_content,write_discounts,write_inventory,write_pixels,write_products,write_publications,write_themes,write_online_store_navigation,write_orders"
+scopes = "read_customer_events,read_discounts,read_inventory,read_locales,read_orders,read_product_listings,read_products,read_publications,read_themes,unauthenticated_read_checkouts,unauthenticated_read_content,unauthenticated_read_product_inventory,unauthenticated_read_product_listings,unauthenticated_write_checkouts,write_app_proxy,write_cart_transforms,write_content,write_discounts,write_inventory,write_pixels,write_products,write_publications,write_themes,write_online_store_navigation,write_orders"
 
 [auth]
 redirect_urls = [
@@ -48,6 +53,24 @@ name = "App Server URL"
 description = "URL of the app server for widget API calls"
 
   [shop.metafields.app.serverUrl.access]
+  admin = "merchant_read_write"
+  storefront = "public_read"
+
+[shop.metafields.app.ppb_storefront_runtime]
+type = "json"
+name = "PPB Storefront Runtime"
+description = "Shopify-hosted Product Page Bundle runtime settings and public Storefront API client configuration"
+
+  [shop.metafields.app.ppb_storefront_runtime.access]
+  admin = "merchant_read_write"
+  storefront = "public_read"
+
+[shop.metafields.app.ppb_storefront_css]
+type = "multi_line_text_field"
+name = "PPB Storefront CSS"
+description = "Last successfully synchronized Product Page Bundle design CSS"
+
+  [shop.metafields.app.ppb_storefront_css.access]
   admin = "merchant_read_write"
   storefront = "public_read"
 

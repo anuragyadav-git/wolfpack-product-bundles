@@ -9,6 +9,11 @@ import { prepareStorefrontPreviewForOpen } from "../../../lib/storefront-sync-pr
 import { validatePpbWidgetPlacementBeforePreview } from "../../../lib/ppb-widget-placement.client";
 import { openThemeEditorInNewTab } from "../../../lib/theme-editor-navigation.client";
 import { blockUnsavedAdminNavigation } from "../../../lib/admin-unsaved-navigation";
+import {
+  openPendingDashboardPreview,
+  navigatePendingDashboardPreview,
+  closePendingDashboardPreview,
+} from "../../../lib/dashboard-preview-window";
 import type { BundleReadinessItem } from "../../../components/bundle-configure/BundleReadinessOverlay";
 import {
   getGuidedTourTransition,
@@ -50,9 +55,15 @@ export function usePpbPreviewReadinessHandlers({
       );
       return false;
     }
+    const pendingPreviewWindow = openPendingDashboardPreview();
     setIsPreviewBundleLoading(true);
     try {
-      const preview = await prepareStorefrontPreviewForOpen();
+      let preview: any = null;
+      try {
+        preview = await prepareStorefrontPreviewForOpen();
+      } catch (err: any) {
+        AppLogger.warn("Storefront preview preparation warning in PPB:", {}, err);
+      }
       const bundleStatusForPreview = String(
         (base.bundle as any).status ?? "",
       ).toLowerCase();
@@ -74,7 +85,14 @@ export function usePpbPreviewReadinessHandlers({
           : base.shop.split(".")[0];
         productUrl = `https://admin.shopify.com/store/${shopDomain}/products/${productId}`;
       }
+      if (!productUrl && base.bundle.shopifyProductHandle) {
+        const shopDomain = base.shop.includes(".myshopify.com")
+          ? base.shop.replace(".myshopify.com", "")
+          : base.shop.split(".")[0];
+        productUrl = `https://${shopDomain}.myshopify.com/products/${base.bundle.shopifyProductHandle}`;
+      }
       if (!productUrl) {
+        closePendingDashboardPreview(pendingPreviewWindow);
         AppLogger.error("Bundle product data:", {}, base.bundleProduct);
         base.shopify.toast.show(
           "Unable to determine bundle product URL. Please check bundle product configuration.",
@@ -83,7 +101,7 @@ export function usePpbPreviewReadinessHandlers({
             duration: 5000,
           },
         );
-        return true;
+        return false;
       }
       const isStorefrontUrl = !productUrl.includes("/admin.shopify.com/");
       if (isStorefrontUrl && base.bundleProduct?.id) {
@@ -105,31 +123,24 @@ export function usePpbPreviewReadinessHandlers({
         }
       }
       if (isStorefrontUrl) {
-        const placement = await validatePpbWidgetPlacementBeforePreview(
-          window.location.href,
-        );
-        if (!placement.ready) {
-          base.shopify.toast.show(
-            placement.message ?? "Place the bundle widget before previewing",
-            { isError: true, duration: 5000 },
+        try {
+          const placement = await validatePpbWidgetPlacementBeforePreview(
+            window.location.href,
           );
-          if (placement.installationLink) {
-            openThemeEditorInNewTab(placement.installationLink);
-          } else {
-            base.setActiveSection("bundle_visibility");
+          if (!placement.ready && placement.message) {
+            base.shopify.toast.show(placement.message, { duration: 4000 });
           }
-          return false;
+        } catch {
+          // Non-blocking placement validation
         }
       }
-      const previewUrl = isStorefrontUrl
-        ? appendBundlePreviewToken(
-            productUrl,
-            preview.previewToken ?? (() => {
-              throw new Error("Preview authorization is unavailable. Please try preview again.");
-            })(),
-          )
+      const previewUrl = isStorefrontUrl && preview?.previewToken
+        ? appendBundlePreviewToken(productUrl, preview.previewToken)
         : productUrl;
-      window.open(previewUrl, "_blank", "noopener,noreferrer");
+
+      if (!navigatePendingDashboardPreview(pendingPreviewWindow, previewUrl)) {
+        window.open(previewUrl, "_blank", "noopener,noreferrer");
+      }
       recordBundlePreview(productUrl);
       const isPreviewUrl =
         base.bundleProduct &&
@@ -143,8 +154,9 @@ export function usePpbPreviewReadinessHandlers({
         setHasPreview: templateState.setHasPreview,
       });
       base.shopify.toast.show(message, { isError: false });
-      return true;
+      return previewUrl;
     } catch (error: any) {
+      closePendingDashboardPreview(pendingPreviewWindow);
       base.shopify.toast.show(
         error instanceof Error
           ? error.message
