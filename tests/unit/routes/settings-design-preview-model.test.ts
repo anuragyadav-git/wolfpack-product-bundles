@@ -29,15 +29,15 @@ describe("Settings Design preview model", () => {
       desktop: { width: 1280, height: 1136 },
       mobile: { width: 390, height: 844 },
     });
-    expect(calculateDesignPreviewFitScale({ width: 1280, height: 1136 }, "desktop")).toBe(1);
-    expect(calculateDesignPreviewFitScale({ width: 1600, height: 1420 }, "desktop")).toBe(1.25);
-    expect(calculateDesignPreviewFitScale({ width: 960, height: 640 }, "desktop")).toBeCloseTo(640 / 1136);
-    expect(getDesignPreviewCanvasSize("desktop")).toEqual({ width: 1280, height: 1136 });
+    expect(calculateDesignPreviewFitScale({ width: 1320, height: 920 }, "desktop")).toBe(1);
+    expect(calculateDesignPreviewFitScale({ width: 1650, height: 1150 }, "desktop")).toBe(1.25);
+    expect(calculateDesignPreviewFitScale({ width: 960, height: 640 }, "desktop")).toBeCloseTo(640 / 920);
+    expect(getDesignPreviewCanvasSize("desktop")).toEqual({ width: 1320, height: 920 });
     expect(getDesignPreviewCanvasSize("mobile")).toEqual({ width: 428, height: 882 });
     expect(calculateDesignPreviewFitScale({ width: 780, height: 640 }, "mobile")).toBeCloseTo(640 / 882);
     expect(calculateDesignPreviewFitScale({ width: 342.4, height: 900 }, "mobile")).toBeCloseTo(0.8);
     expect(calculateDesignPreviewFitScale({ width: 0, height: 0 }, "desktop")).toBe(1);
-    expect(calculateDesignPreviewFitScale({ width: Number.NaN, height: 568 }, "desktop")).toBe(0.5);
+    expect(calculateDesignPreviewFitScale({ width: Number.NaN, height: 460 }, "desktop")).toBe(0.5);
   });
 
   it("calculates an atomic fit presentation without shrinking the logical storefront viewport", () => {

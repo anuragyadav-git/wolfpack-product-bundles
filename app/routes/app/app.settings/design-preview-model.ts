@@ -114,11 +114,12 @@ export const DESIGN_PREVIEW_VIEWPORTS: Readonly<
 };
 
 const DESIGN_PREVIEW_MOBILE_DEVICE_SIZE = { width: 428, height: 882 } as const;
+const DESIGN_PREVIEW_DESKTOP_DEVICE_SIZE = { width: 1320, height: 920 } as const;
 
 export function getDesignPreviewCanvasSize(viewport: DesignPreviewViewport) {
   return viewport === "mobile"
     ? DESIGN_PREVIEW_MOBILE_DEVICE_SIZE
-    : DESIGN_PREVIEW_VIEWPORTS.desktop;
+    : DESIGN_PREVIEW_DESKTOP_DEVICE_SIZE;
 }
 
 export function calculateDesignPreviewFitScale(

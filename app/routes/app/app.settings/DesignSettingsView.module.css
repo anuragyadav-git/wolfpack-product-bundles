@@ -19,7 +19,7 @@
   grid-template-columns: minmax(720px, 1fr) minmax(300px, 380px);
   grid-template-areas: "preview fields";
   gap: clamp(12px, 1.5vw, 22px);
-  align-items: start;
+  align-items: stretch;
   margin-top: 18px;
 }
 
@@ -36,21 +36,24 @@
 
 .previewPane {
   min-width: 0;
+  align-self: start;
   grid-area: preview;
 }
 
 .customizePane {
-  position: relative;
+  position: sticky;
+  inset-block-start: 16px;
+  block-size: calc(100dvh - 32px);
   min-width: 0;
-  min-block-size: clamp(640px, calc(100dvh - 160px), 884px);
+  min-block-size: 640px;
   align-self: stretch;
   grid-area: fields;
 }
 
 .inspectorToggle {
-  position: sticky;
+  position: absolute;
   z-index: 2;
-  inset-block-start: calc(50dvh - 34px);
+  inset-block-start: 50%;
   inset-inline-start: 0;
   display: inline-flex;
   box-sizing: border-box;
@@ -62,8 +65,7 @@
   border-radius: 999px;
   background: #ffffff;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.14);
-  margin-block-end: -68px;
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
 }
 
 .layout[data-inspector-collapsed="true"] .inspectorContent {
@@ -92,7 +94,8 @@
 .inspectorContent {
   grid-area: fields;
   box-sizing: border-box;
-  min-block-size: 100%;
+  block-size: 100%;
+  overflow-y: auto;
   padding: 20px 16px;
 }
 
@@ -255,8 +258,8 @@
 
 .previewStage[data-preview-viewport="desktop"] {
   block-size: auto;
-  max-block-size: 1136px;
-  aspect-ratio: 1280 / 1136;
+  max-block-size: 920px;
+  aspect-ratio: 1320 / 920;
 }
 
 .previewCanvas {
@@ -303,6 +306,69 @@
   color: var(--preview-primary-text, #202223);
   font-size: var(--preview-body-font-size, 14px);
   font-weight: var(--preview-body-font-weight, 400);
+}
+
+.desktopDevice,
+.desktopDeviceFrame {
+  display: contents;
+}
+
+.desktopDeviceStand {
+  display: none;
+}
+
+.previewScaledShell[data-preview-viewport="desktop"] .desktopDevice {
+  position: relative;
+  display: block;
+  width: 1320px;
+  height: 920px;
+}
+
+.previewScaledShell[data-preview-viewport="desktop"] .desktopDeviceFrame {
+  display: block;
+  box-sizing: border-box;
+  width: 1320px;
+  height: 850px;
+  padding: 16px 20px 34px;
+  border: 1px solid #a7a9ac;
+  border-radius: 22px;
+  background: linear-gradient(145deg, #f2f3f4 0%, #c9cbce 55%, #afb2b5 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 24px 48px rgba(0, 0, 0, 0.18),
+    0 8px 18px rgba(0, 0, 0, 0.12);
+}
+
+.previewScaledShell[data-preview-viewport="desktop"] .desktopDeviceStand {
+  position: absolute;
+  top: 850px;
+  left: 50%;
+  display: block;
+  width: 180px;
+  height: 70px;
+  transform: translateX(-50%);
+  background:
+    linear-gradient(165deg, #dfe1e3 0%, #b8bbbe 58%, #9da0a3 100%) center top / 92px 58px no-repeat,
+    linear-gradient(180deg, #c8cace 0%, #aeb1b4 100%) center bottom / 180px 14px no-repeat;
+  border-radius: 0 0 16px 16px;
+  filter: drop-shadow(0 8px 6px rgba(0, 0, 0, 0.15));
+}
+
+.previewScaledShell[data-preview-viewport="desktop"] .previewSurface {
+  border: 0;
+  border-radius: 8px;
+}
+
+.previewScaledShell[data-preview-viewport="desktop"] .mobileDeviceFrame,
+.previewScaledShell[data-preview-viewport="desktop"] .mobileDeviceScreen {
+  width: 1280px;
+  height: 800px;
+}
+
+.previewScaledShell[data-preview-viewport="desktop"] .mobileDeviceScreen {
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  border-radius: 8px;
 }
 
 .mobileDevice,
@@ -1619,7 +1685,9 @@
 
   .previewPane,
   .customizePane {
+    position: static;
     display: none;
+    block-size: auto;
     min-block-size: 0;
     grid-area: workspace;
   }
@@ -1636,6 +1704,11 @@
   .inspectorNavigation,
   .inspectorContent {
     grid-area: auto;
+  }
+
+  .inspectorContent {
+    block-size: auto;
+    overflow: visible;
   }
 
   .previewControls {

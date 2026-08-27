@@ -148,14 +148,22 @@ observer must respond to that width change. The chevron is absent in narrow
 containers, where the existing Preview and Customize pane control remains the
 only workspace disclosure.
 
-The desktop preview stage has no app-owned inner gutter and derives its height
-from the 1280×1136 storefront aspect ratio, so released inspector width visibly
-enlarges the renderer. Mobile presentation adds a decorative 428×882 iPhone 14
-Pro body adapted from the MIT-licensed Devices.css geometry outside the iframe;
-the production renderer still receives the unchanged 390×844 viewport. Frame
-padding sits outside that full viewport so storefront content is never cropped
-by the shell. A collapsed desktop state must not retain its 720px grid minimum
-after the Admin container crosses into the phone layout.
+The desktop preview stage uses a decorative 1320×920 Mac-style display canvas.
+Its visible 1280×800 screen owns the desktop scrollbar and contains the unchanged
+1280×1136 storefront renderer, so the Admin frame stays proportionally wide
+without changing the storefront viewport contract. Mobile presentation adds a
+decorative 428×882 iPhone 14 Pro body adapted from the MIT-licensed Devices.css
+geometry outside the iframe; the production renderer still receives the
+unchanged 390×844 viewport and its scrollbar remains hidden. Frame padding sits
+outside both production viewports so storefront content is never cropped by the
+shell. A collapsed desktop state must not retain its 720px grid minimum after
+the Admin container crosses into the phone layout.
+
+The desktop inspector is a sticky, full-available-height sidebar whose internal
+content scrolls independently. Its disclosure chevron is positioned against the
+sidebar edge rather than participating in document flow, keeping the inspector
+top aligned with the complete Live preview panel in expanded and collapsed
+states.
 
 Preview fitting must not use React state for ResizeObserver samples. Coalesce
 the latest content-box measurement to one requestAnimationFrame callback and

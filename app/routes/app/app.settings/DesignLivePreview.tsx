@@ -559,35 +559,40 @@ export function DesignLivePreview({
               transform: "scale(1)",
             }}
           >
-            <div className={styles.mobileDevice}>
-              <div className={styles.mobileDeviceFrame}>
-                <div className={styles.mobileDeviceScreen}>
-                  <div
-                    className={styles.previewSurface}
-                    data-template-key={previewState.templateKey}
-                    data-preview-area={previewState.area}
-                    data-preview-scenario={previewState.scenario}
-                    style={{
-                      width: `${previewViewport.width}px`,
-                      height: `${previewViewport.height}px`,
-                    }}
-                  >
-                    <iframe
-                      ref={previewFrameRef}
-                      className={styles.previewFrame}
-                      src="/settings-design-preview-frame"
-                      title={t("settingsDcp.preview.heading")}
-                      sandbox="allow-scripts allow-same-origin"
-                      onLoad={() => setFrameError(null)}
-                    />
+            <div className={styles.desktopDevice}>
+              <div className={styles.desktopDeviceFrame}>
+                <div className={styles.mobileDevice}>
+                  <div className={styles.mobileDeviceFrame}>
+                    <div className={styles.mobileDeviceScreen}>
+                      <div
+                        className={styles.previewSurface}
+                        data-template-key={previewState.templateKey}
+                        data-preview-area={previewState.area}
+                        data-preview-scenario={previewState.scenario}
+                        style={{
+                          width: `${previewViewport.width}px`,
+                          height: `${previewViewport.height}px`,
+                        }}
+                      >
+                        <iframe
+                          ref={previewFrameRef}
+                          className={styles.previewFrame}
+                          src="/settings-design-preview-frame"
+                          title={t("settingsDcp.preview.heading")}
+                          sandbox="allow-scripts allow-same-origin"
+                          onLoad={() => setFrameError(null)}
+                        />
+                      </div>
+                    </div>
                   </div>
+                  <span className={styles.mobileDeviceStripe} aria-hidden="true" />
+                  <span className={styles.mobileDeviceHeader} aria-hidden="true" />
+                  <span className={styles.mobileDeviceSensors} aria-hidden="true" />
+                  <span className={styles.mobileDeviceButtons} aria-hidden="true" />
+                  <span className={styles.mobileDevicePower} aria-hidden="true" />
                 </div>
               </div>
-              <span className={styles.mobileDeviceStripe} aria-hidden="true" />
-              <span className={styles.mobileDeviceHeader} aria-hidden="true" />
-              <span className={styles.mobileDeviceSensors} aria-hidden="true" />
-              <span className={styles.mobileDeviceButtons} aria-hidden="true" />
-              <span className={styles.mobileDevicePower} aria-hidden="true" />
+              <span className={styles.desktopDeviceStand} aria-hidden="true" />
             </div>
           </div>
         </div>
