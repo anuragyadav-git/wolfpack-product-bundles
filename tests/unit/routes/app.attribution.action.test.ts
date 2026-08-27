@@ -129,7 +129,7 @@ describe("action — export intent", () => {
 
     expect(data).toEqual({
       success: true,
-      filename: "wolfpack-analytics-2026-07-01-to-2026-07-20.csv",
+      filename: "only-bundles-analytics-2026-07-01-to-2026-07-20.csv",
       csv: "Date,Type,Bundle ID,Bundle Name,UTM Source,UTM Medium,UTM Campaign,Custom UTM Attributes,Revenue (USD),Order ID,Landing Page",
     });
   });

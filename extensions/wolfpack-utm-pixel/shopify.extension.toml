@@ -1,4 +1,4 @@
-name = "wolfpack-utm-pixel"
+name = "Only Bundles Attribution"
 uid = "9c39afc7-f730-af5d-e507-823597e5186693eb73cf"
 type = "web_pixel_extension"
 
@@ -21,7 +21,7 @@ type = "object"
 
 [settings.fields.app_server_url]
 name = "App Server URL"
-description = "The URL of the Wolfpack app server for attribution tracking"
+description = "The URL of the Only Bundles app server for attribution tracking"
 type = "single_line_text_field"
 validations = [
   { name = "min", value = "1" }
@@ -37,5 +37,5 @@ validations = [
 
 [settings.fields.custom_utm_parameters]
 name = "Custom UTM Parameters"
-description = "Comma-separated custom URL parameter names the merchant wants Wolfpack to capture for attribution"
+description = "Comma-separated custom URL parameter names the merchant wants Only Bundles to capture for attribution"
 type = "single_line_text_field"

@@ -12,7 +12,7 @@
     "requestMessage": "Olá, gostaria de solicitar suporte para uma nova integração."
   },
   "dashboard": {
-    "title": "Dashboard: Wolfpack Bundle Builder",
+    "title": "Dashboard: Only Bundles",
     "subtitle": "Acesse seus bundles, suporte ao cliente e muito mais.",
     "header": {
       "syncCollections": "Sincronizar coleções",
@@ -130,9 +130,9 @@
       "viewDetails": "Show status",
       "activate": "Enable",
       "enableModal": {
-        "heading": "Ative o Wolfpack Bundle na sua loja",
-        "description": "Ative a incorporação do app Wolfpack Bundle no editor de temas, clique em Salvar e volte aqui.",
-        "mediaLabel": "Tutorial mostrando como ativar a incorporação do Wolfpack Bundle e salvar o tema",
+        "heading": "Ative o Only Bundles na sua loja",
+        "description": "Ative a incorporação do app Only Bundles no editor de temas, clique em Salvar e volte aqui.",
+        "mediaLabel": "Tutorial mostrando como ativar a incorporação do Only Bundles e salvar o tema",
         "openThemeEditor": "Abrir editor de temas",
         "checking": "Verificando seu tema…",
         "enabled": "Incorporação do app ativada",
@@ -148,7 +148,7 @@
       "coreComponents": "Core components enabled",
       "activeBundles": "Active bundles",
       "modalHeading": "Storefront setup",
-      "modalDescription": "These components control how Wolfpack bundles appear on your storefront.",
+      "modalDescription": "These components control how bundles created with Only Bundles appear on your storefront.",
       "modalError": "Status unavailable. Reload to try again.",
       "coreHeading": "Core bundle components",
       "optionalHeading": "Optional placements",
@@ -332,7 +332,7 @@
     },
     "loadingAnimation": {
       "title": "Storefront Loading Animation",
-      "description": "Shown while Wolfpack Bundles loads bundle content on the storefront."
+      "description": "Shown while Only Bundles loads bundle content on the storefront."
     },
     "bundleVisibilityPending": {
       "description": "Tracks whether your bundle is discoverable by shoppers. Optimises when you copy your bundle link and place it on your store, enable the Bundle Widget, or set up the Bundle Embed."
@@ -378,13 +378,13 @@
       "continueEditing": "Continuar editando"
     },
     "loading": {
-      "appLabel": "Carregando o Wolfpack Product Bundles",
+      "appLabel": "Carregando o Only Bundles",
       "workspace": "Carregando seu espaço de trabalho"
     },
     "appEmbed": {
-      "body": "Ative a extensão de aplicativo do tema para Wolfpack Bundles para posicionar e visualizar o pacote.",
+      "body": "Ative a extensão de aplicativo do tema para Only Bundles para posicionar e visualizar o pacote.",
       "guideTitle": "Ativar incorporação do app",
-      "guideImageAlt": "Como ativar a incorporação do app Wolfpack Bundles"
+      "guideImageAlt": "Como ativar a incorporação do app Only Bundles"
     },
     "previewGate": {
       "title": "A visibilidade do seu pacote ainda não está configurada",

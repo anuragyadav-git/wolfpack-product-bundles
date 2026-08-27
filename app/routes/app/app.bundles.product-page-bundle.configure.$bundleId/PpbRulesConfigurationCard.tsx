@@ -2,6 +2,7 @@ import { PpbCategoryRulesList } from "./PpbCategoryRulesList";
 import { usePpbConfigureContext } from "./PpbConfigureContext";
 import { getStepCategories } from "./PpbStepSetupShared";
 import { PpbStepRulesList } from "./PpbStepRulesList";
+import { APP_BRAND } from "../../../lib/app-brand";
 
 export function PpbRulesConfigurationCard({ step }: { step: any }) {
   const {
@@ -84,7 +85,7 @@ export function PpbRulesConfigurationCard({ step }: { step: any }) {
         type="button"
         className={productPageBundleStyles.linkButton}
         style={{ marginBottom: 12, display: "inline-block" }}
-        onClick={() => window.open("https://wolfpackapps.com", "_blank")}
+        onClick={() => window.open(APP_BRAND.links.company, "_blank")}
       >
         Learn More
       </button>

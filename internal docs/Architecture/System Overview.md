@@ -4,8 +4,8 @@ id: system-overview
 title: System Overview
 type: architecture
 status: authoritative
-summary: High-level overview of the Wolfpack application stack, services, and deployment surfaces.
-last_audited: 2026-08-27
+summary: High-level overview of the Only Bundles application stack, services, and deployment surfaces.
+last_audited: 2026-08-28
 owners:
   - engineering
 domains:

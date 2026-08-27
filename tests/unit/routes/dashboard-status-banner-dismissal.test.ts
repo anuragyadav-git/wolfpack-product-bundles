@@ -27,7 +27,7 @@ class MockSessionStorage {
 
 const APP_EMBED_RESOURCE = {
   handle: "bundle-app-embed",
-  label: "Wolfpack Bundle",
+  label: "Only Bundles",
   kind: "embed" as const,
   status: "active" as const,
   enabled: true,
@@ -74,8 +74,12 @@ describe("dashboard status banner dismissal with session persistence", () => {
 
     const view = renderToStaticMarkup(React.createElement(DashboardStatusGrid, props));
 
+    expect(view).toContain("<s-banner");
+    expect(view).toContain('tone="info"');
+    expect(view).toContain('heading="dashboard.storefrontSetup.loadingTitle"');
     expect(view).toContain("<s-spinner");
     expect(view).toContain("dashboard.storefrontSetup.loadingDescription");
+    expect(view).not.toContain("dismissible");
     expect(view).not.toContain("dashboard.storefrontSetup.activate");
   });
 
@@ -93,8 +97,42 @@ describe("dashboard status banner dismissal with session persistence", () => {
       }),
     );
 
+    expect(view).toContain("<s-banner");
+    expect(view).toContain('tone="info"');
     expect(view).toContain("<s-spinner");
-    expect(view).not.toContain("<s-banner");
+  });
+
+  it("resolves the shared banner shell to success without a CTA", () => {
+    const view = renderToStaticMarkup(
+      React.createElement(DashboardStatusGrid, {
+        resources: [APP_EMBED_RESOURCE],
+        error: false,
+        appEmbedEnabled: true,
+        appEmbedStatusLoading: false,
+        themeEditorUrl: "https://theme-editor.test",
+        onOpenThemeEditor: jest.fn(),
+      }),
+    );
+
+    expect(view).toContain('tone="success"');
+    expect(view).toContain("dashboard.storefrontSetup.completeDescription");
+    expect(view).not.toContain("dashboard.storefrontSetup.activate");
+  });
+
+  it("resolves the shared banner shell to warning with the activation CTA", () => {
+    const view = renderToStaticMarkup(
+      React.createElement(DashboardStatusGrid, {
+        resources: [],
+        error: false,
+        appEmbedEnabled: false,
+        appEmbedStatusLoading: false,
+        themeEditorUrl: "https://theme-editor.test",
+        onOpenThemeEditor: jest.fn(),
+      }),
+    );
+
+    expect(view).toContain('tone="warning"');
+    expect(view).toContain("dashboard.storefrontSetup.activate");
   });
 
   it("persists dismissal in session storage when dismissed", () => {

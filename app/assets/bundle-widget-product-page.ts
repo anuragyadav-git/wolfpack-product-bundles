@@ -57,7 +57,7 @@
  * - No data migration or merchant action required
  *
  * @version 1.0.0
- * @author Wolfpack Team
+ * @author Only Bundles Team
  */
 
 'use strict';

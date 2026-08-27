@@ -10,6 +10,7 @@ import { showPolarisModal } from "../_shared/bundle-configure/modal-utils";
 import styles from "./create-bundle.module.css";
 import { ensureShopIdentity, recordBusinessEvent } from "../../../services/app-events.server";
 import { getCachedSubscriptionInfo, getSubscriptionInfoFromCache } from "../../../services/subscription-cache.server";
+import { APP_BRAND } from "../../../lib/app-brand";
 
 export const links: LinksFunction = () => [
   {
@@ -232,7 +233,7 @@ export default function CreateBundleEntry() {
           </div>
           <s-button
             variant="secondary"
-            href="https://wolfpackapps.com"
+            href={APP_BRAND.links.company}
             target="_blank"
           >
             {t("createBundle.help")}

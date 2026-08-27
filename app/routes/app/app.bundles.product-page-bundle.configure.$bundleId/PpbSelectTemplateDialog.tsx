@@ -305,7 +305,7 @@ export function PpbSelectTemplateDialog() {
                 </div>
                 <s-heading>Enable app embed</s-heading>
                 <s-paragraph color="subdued">
-                  Open your theme editor, enable the Wolfpack Bundles app embed,
+                  Open your theme editor, enable the Only Bundles app embed,
                   then return here to preview your bundle.
                 </s-paragraph>
                 <s-stack

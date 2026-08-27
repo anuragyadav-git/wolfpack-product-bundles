@@ -37,7 +37,7 @@ export function executeMerchantStorefrontScript(source: unknown, runtimeWindow: 
     Function("window", "document", `"use strict";\n${script}`)(runtimeWindow, runtimeWindow.document);
     return true;
   } catch (error: any) {
-    console.warn("[Wolfpack Bundles] Merchant Settings script failed", error);
+    console.warn("[Only Bundles] Merchant Settings script failed", error);
     return false;
   }
 }
@@ -58,7 +58,7 @@ export function executeMerchantCartIntegration(source: unknown, runtimeWindow: R
     instance.init();
     return true;
   } catch (error: any) {
-    console.warn("[Wolfpack Bundles] Merchant cart integration failed", error);
+    console.warn("[Only Bundles] Merchant cart integration failed", error);
     return false;
   }
 }
@@ -205,7 +205,7 @@ export async function loadAndApplyGlobalSettingsControls(
     applyGlobalSettingsControls(payload.settingsControls, runtimeWindow, runtimeDocument, payload.bundleLinks ?? []);
     return true;
   } catch (error: any) {
-    console.warn("[Wolfpack Bundles] Failed to load global Settings Controls", error);
+    console.warn("[Only Bundles] Failed to load global Settings Controls", error);
     return false;
   }
 }

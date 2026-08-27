@@ -56,7 +56,7 @@ export function PpbUtilityModals() {
       >
         <s-stack direction="block" gap="small">
           <p style={{ margin: 0, fontSize: 14, color: "#6d7175" }}>
-            Use these variables in Wolfpack Bundles messages. The widget
+            Use these variables in Only Bundles messages. The widget
             replaces them with live bundle and discount values.
           </p>
           <div className={productPageBundleStyles.templateVariableGrid}>

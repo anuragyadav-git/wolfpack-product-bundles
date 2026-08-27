@@ -1,7 +1,7 @@
 /**
  * Attribution API Route
  *
- * Receives UTM attribution data from the Wolfpack Web Pixel extension
+ * Receives UTM attribution data from the Only Bundles Web Pixel extension
  * when a checkout is completed. Creates OrderAttribution records in the database.
  *
  * Called directly from the web pixel sandbox via fetch() to /api/attribution.

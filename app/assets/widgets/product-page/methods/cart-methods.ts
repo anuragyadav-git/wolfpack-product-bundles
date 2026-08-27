@@ -423,7 +423,7 @@ export const ProductPageCartMethods: Record<string, any> & ThisType<any> = {
         fetchImpl: fetch,
       });
     } catch (error: any) {
-      console.warn('[Wolfpack Bundles] Failed to sync bundle_details cart metafield', error);
+      console.warn('[Only Bundles] Failed to sync bundle_details cart metafield', error);
     }
   },
 

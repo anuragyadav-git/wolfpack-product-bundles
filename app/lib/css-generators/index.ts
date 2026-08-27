@@ -73,7 +73,7 @@ export function generateCSSFromSettings(
   // Compose final CSS
   return `
 /*
- * Wolfpack Bundle Widget - Design Settings
+ * Only Bundles Widget - Design Settings
  * Bundle Type: ${bundleType}
  * Auto-generated from Settings -> Design
  *

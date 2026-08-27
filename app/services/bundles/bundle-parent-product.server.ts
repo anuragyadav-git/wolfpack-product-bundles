@@ -31,6 +31,15 @@ type ParentProductNode = {
 };
 
 const REBUY_SMART_CART_BUNDLE_TAG = "smart-cart-hide-bundle-options";
+const ONLY_BUNDLES_PARENT_TAGS = [
+  "Only Bundles",
+  "only-bundles-parent",
+  REBUY_SMART_CART_BUNDLE_TAG,
+] as const;
+const LEGACY_BUNDLE_PARENT_TAGS = [
+  "WP-Bundles",
+  "wolfpack-bundle-parent",
+] as const;
 
 export type BundleParentProductResult = {
   productId: string;
@@ -252,13 +261,13 @@ function throwUserErrors(operation: string, userErrors: ShopifyUserError[] | und
   }
 }
 
-async function addRebuySmartCartCompatibilityTag(
+async function syncOnlyBundlesParentTags(
   admin: ShopifyAdmin,
   productId: string,
 ) {
-  const response = await admin.graphql(
+  const addResponse = await admin.graphql(
     `
-      mutation AddRebuySmartCartTag($id: ID!, $tags: [String!]!) {
+      mutation AddOnlyBundlesParentTags($id: ID!, $tags: [String!]!) {
         tagsAdd(id: $id, tags: $tags) {
           node { id }
           userErrors { field message }
@@ -268,18 +277,44 @@ async function addRebuySmartCartCompatibilityTag(
     {
       variables: {
         id: productId,
-        tags: [REBUY_SMART_CART_BUNDLE_TAG],
+        tags: [...ONLY_BUNDLES_PARENT_TAGS],
       },
     },
   );
-  const data = (await response.json()) as {
+  const addData = (await addResponse.json()) as {
     data?: { tagsAdd?: { userErrors?: ShopifyUserError[] } };
     errors?: unknown[];
   };
-  throwTransportErrors("add Rebuy Smart Cart compatibility tag", data.errors);
+  throwTransportErrors("add Only Bundles parent tags", addData.errors);
   throwUserErrors(
-    "add Rebuy Smart Cart compatibility tag",
-    data.data?.tagsAdd?.userErrors,
+    "add Only Bundles parent tags",
+    addData.data?.tagsAdd?.userErrors,
+  );
+
+  const removeResponse = await admin.graphql(
+    `
+      mutation RemoveLegacyBundleParentTags($id: ID!, $tags: [String!]!) {
+        tagsRemove(id: $id, tags: $tags) {
+          node { id }
+          userErrors { field message }
+        }
+      }
+    `,
+    {
+      variables: {
+        id: productId,
+        tags: [...LEGACY_BUNDLE_PARENT_TAGS],
+      },
+    },
+  );
+  const removeData = (await removeResponse.json()) as {
+    data?: { tagsRemove?: { userErrors?: ShopifyUserError[] } };
+    errors?: unknown[];
+  };
+  throwTransportErrors("remove legacy bundle parent tags", removeData.errors);
+  throwUserErrors(
+    "remove legacy bundle parent tags",
+    removeData.data?.tagsRemove?.userErrors,
   );
 }
 
@@ -367,11 +402,7 @@ async function createParentProduct(input: {
             bundleName: input.bundle.name,
             status: "unlisted",
           }),
-          tags: [
-            "WP-Bundles",
-            "wolfpack-bundle-parent",
-            REBUY_SMART_CART_BUNDLE_TAG,
-          ],
+          tags: [...ONLY_BUNDLES_PARENT_TAGS],
         },
         ...(media ? { media } : {}),
       },
@@ -541,7 +572,7 @@ export async function ensureBundleParentProduct(input: {
         data: { shopifyProductHandle: product.handle },
       });
     }
-    await addRebuySmartCartCompatibilityTag(input.admin, product.id);
+    await syncOnlyBundlesParentTags(input.admin, product.id);
   }
 
   const variantId = product.variants?.nodes?.[0]?.id;

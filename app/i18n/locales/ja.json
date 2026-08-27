@@ -12,7 +12,7 @@
     "requestMessage": "新しい連携への対応をリクエストしたいです。"
   },
   "dashboard": {
-    "title": "Dashboard: Wolfpack Bundle Builder",
+    "title": "Dashboard: Only Bundles",
     "subtitle": "バンドル、カスタマーサポートなどにアクセスできます。",
     "header": {
       "syncCollections": "コレクションを同期",
@@ -130,9 +130,9 @@
       "viewDetails": "Show status",
       "activate": "Enable",
       "enableModal": {
-        "heading": "ストアで Wolfpack Bundle を有効にする",
-        "description": "テーマエディターで Wolfpack Bundle アプリ埋め込みをオンにして保存をクリックし、ここに戻ってください。",
-        "mediaLabel": "Wolfpack Bundle アプリ埋め込みを有効にしてテーマを保存する手順",
+        "heading": "ストアで Only Bundles を有効にする",
+        "description": "テーマエディターで Only Bundles アプリ埋め込みをオンにして保存をクリックし、ここに戻ってください。",
+        "mediaLabel": "Only Bundles アプリ埋め込みを有効にしてテーマを保存する手順",
         "openThemeEditor": "テーマエディターを開く",
         "checking": "テーマを確認しています…",
         "enabled": "アプリ埋め込みが有効になりました",
@@ -148,7 +148,7 @@
       "coreComponents": "Core components enabled",
       "activeBundles": "Active bundles",
       "modalHeading": "Storefront setup",
-      "modalDescription": "These components control how Wolfpack bundles appear on your storefront.",
+      "modalDescription": "These components control how bundles created with Only Bundles appear on your storefront.",
       "modalError": "Status unavailable. Reload to try again.",
       "coreHeading": "Core bundle components",
       "optionalHeading": "Optional placements",
@@ -332,7 +332,7 @@
     },
     "loadingAnimation": {
       "title": "Storefront Loading Animation",
-      "description": "Shown while Wolfpack Bundles loads bundle content on the storefront."
+      "description": "Shown while Only Bundles loads bundle content on the storefront."
     },
     "bundleVisibilityPending": {
       "description": "Tracks whether your bundle is discoverable by shoppers. Optimises when you copy your bundle link and place it on your store, enable the Bundle Widget, or set up the Bundle Embed."
@@ -378,13 +378,13 @@
       "continueEditing": "編集を続ける"
     },
     "loading": {
-      "appLabel": "Wolfpack Product Bundles を読み込んでいます",
+      "appLabel": "Only Bundles を読み込んでいます",
       "workspace": "ワークスペースを読み込んでいます"
     },
     "appEmbed": {
-      "body": "バンドルを配置してプレビューするには、Wolfpack Bundles のテーマアプリ拡張機能を有効にしてください。",
+      "body": "バンドルを配置してプレビューするには、Only Bundles のテーマアプリ拡張機能を有効にしてください。",
       "guideTitle": "アプリ埋め込みを有効にする",
-      "guideImageAlt": "Wolfpack Bundles のアプリ埋め込みを有効にする方法"
+      "guideImageAlt": "Only Bundles のアプリ埋め込みを有効にする方法"
     },
     "previewGate": {
       "title": "バンドルの公開設定がまだ完了していません",
