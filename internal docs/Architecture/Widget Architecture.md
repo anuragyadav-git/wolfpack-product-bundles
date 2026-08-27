@@ -146,7 +146,10 @@ the iframe by a 428×882 decorative iPhone 14 Pro footprint adapted from the
 MIT-licensed Devices.css geometry. The frame adds its chrome around the full
 renderer instead of reducing or cropping the iframe viewport. Fit calculation
 includes that body without changing the storefront breakpoint. Both modes stay
-centered within the available stage.
+centered within the available stage. The preview-frame document keeps its root
+vertical scrolling behavior but suppresses root scrollbar chrome so the live
+storefront remains scrollable without drawing a browser scrollbar inside the
+device body.
 Field-to-surface focus remains a one-shot request per edit so later manual
 surface selection stays authoritative.
 

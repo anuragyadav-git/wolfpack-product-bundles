@@ -3,7 +3,17 @@
   width: 100%;
   min-height: 100%;
   margin: 0;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
+
+:global(html::-webkit-scrollbar),
+:global(body::-webkit-scrollbar) {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
 :global(body) {
   overflow-x: hidden;
   background: #f7f5f2;

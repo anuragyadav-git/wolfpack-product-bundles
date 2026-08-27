@@ -65,6 +65,7 @@ Ensure Settings Design previews use the production storefront renderer and exact
 | 18 | Mobile device presentation | Mobile preview selected | The unchanged 390 x 844 storefront viewport renders without cropping inside an attributed Devices.css iPhone 14 Pro body | Device chrome wraps the iframe and never reduces its viewport |
 | 19 | Preview readiness feedback | Preview frame has not emitted READY | A Polaris spinner covers the canvas without shifting its geometry | Overlay clears only after trusted READY |
 | 20 | Atomic responsive fitting | Preview stage reports repeated size changes | The latest canvas dimensions and scale are calculated together without React render-state churn or animated interpolation | ResizeObserver work is coalesced to one browser-frame write |
+| 21 | Mobile preview scrolling | Preview content exceeds the 390 x 844 frame viewport | Wheel, trackpad, touch, and keyboard scrolling remain available without exposing scrollbar chrome inside the device | Direct Chrome DevTools verification; no styling unit test |
 
 ## Acceptance Criteria
 
@@ -78,3 +79,4 @@ Ensure Settings Design previews use the production storefront renderer and exact
 - [x] Desktop canvas growth and the unclipped mobile device shell pass refreshed wide, collapsed, and narrow-Admin Chrome verification.
 - [x] Preview readiness spinner and centered inspector notch pass refreshed Chrome verification.
 - [x] Preview resizing applies the latest fit atomically with no preview-shell transition.
+- [x] Mobile preview remains scrollable without visible scrollbar chrome.
