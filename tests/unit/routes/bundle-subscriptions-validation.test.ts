@@ -46,39 +46,42 @@ function makeBundleResponse(overrides: Partial<{
   const collectionId = "gid://shopify/Collection/555";
   const productIdsFromCollection = overrides.collectionProductIds ?? [];
 
-  return (query: string, options?: { variables?: { id?: string } }) => {
-    if (query.includes("CollectionProductsForSellingPlanValidation")) {
+  return (query: string, options?: { variables?: { ids?: string[] } }) => {
+    if (query.includes("CollectionProductsForSellingPlanValidationBatch")) {
       return Promise.resolve({
         json: async () => ({
           data: {
-            node: {
+            nodes: [{
                 id: collectionId,
                 products: {
-                  edges: productIdsFromCollection.map((id) => ({ node: { id } })),
+                  nodes: productIdsFromCollection.map((id) => ({ id })),
                   pageInfo: { hasNextPage: false, endCursor: null },
                 },
-              },
+              }],
           },
         }),
       } as any);
     }
 
-    if (query.includes("ProductWithSellingPlanGroups")) {
-      const product = (overrides.products ?? []).find(({ id }: any) => id === options?.variables?.id);
+    if (query.includes("ProductsWithSellingPlanGroupsBatch")) {
+      const requestedIds = options?.variables?.ids ?? [];
       return Promise.resolve({
         json: async () => ({
           data: {
-            node: product ? {
+            nodes: (overrides.products ?? [])
+              .filter(({ id }) => requestedIds.includes(id))
+              .map((product) => ({
               id: product.id,
               title: product.title,
-              variants: { nodes: product.variants.map((id) => ({ id })) },
+              variants: {
+                nodes: product.variants.map((id) => ({ id })),
+                pageInfo: { hasNextPage: false, endCursor: null },
+              },
               sellingPlanGroups: { nodes: product.sellingPlanGroups.map((group) => ({
                 id: group.id,
                 name: group.name,
                 options: ["Delivery every"],
                 position: 1,
-                appliesToProduct: group.appliesToWholeProduct ?? false,
-                productVariants: { nodes: group.eligibleVariantIds.map((id) => ({ id })) },
                 sellingPlans: { nodes: [{
                   id: "gid://shopify/SellingPlan/monthly",
                   name: "Monthly",
@@ -90,7 +93,36 @@ function makeBundleResponse(overrides: Partial<{
                   }],
                 }] },
               })) },
-            } : null,
+            })),
+          },
+        }),
+      } as any);
+    }
+
+    if (query.includes("SellingPlanGroupAssignmentsBatch")) {
+      const requestedIds = options?.variables?.ids ?? [];
+      const records = overrides.products ?? [];
+      return Promise.resolve({
+        json: async () => ({
+          data: {
+            nodes: requestedIds.map((groupId) => ({
+              id: groupId,
+              products: {
+                nodes: records
+                  .filter((product) => product.sellingPlanGroups.some(
+                    (group) => group.id === groupId && group.appliesToWholeProduct === true,
+                  ))
+                  .map((product) => ({ id: product.id })),
+                pageInfo: { hasNextPage: false, endCursor: null },
+              },
+              productVariants: {
+                nodes: records.flatMap((product) => product.sellingPlanGroups
+                  .filter((group) => group.id === groupId)
+                  .flatMap((group) => group.eligibleVariantIds)
+                  .map((id) => ({ id }))),
+                pageInfo: { hasNextPage: false, endCursor: null },
+              },
+            })),
           },
         }),
       } as any);
@@ -174,6 +206,12 @@ describe("bundle subscription validation handler", () => {
       ],
       message: null,
     });
+    expect(admin.graphql.mock.calls.filter(([query]: [string]) =>
+      query.includes("ProductsWithSellingPlanGroupsBatch"))).toHaveLength(1);
+    expect(admin.graphql).toHaveBeenCalledWith(
+      expect.stringContaining("ProductsWithSellingPlanGroupsBatch"),
+      { variables: { ids: ["gid://shopify/Product/111", "gid://shopify/Product/222"] } },
+    );
   });
 
   it("includes collection-backed products and returns no-common-plan when there is no overlap", async () => {
@@ -305,19 +343,18 @@ describe("bundle subscription validation handler", () => {
     const groupId = "gid://shopify/SellingPlanGroup/monthly";
     const admin = {
       graphql: jest.fn(async (query: string, options: any) => {
-        if (query.includes("ProductWithSellingPlanGroups")) {
-          const secondPage = options?.variables?.after === "variant-cursor";
+        if (query.includes("ProductsWithSellingPlanGroupsBatch")) {
           return {
             json: async () => ({
               data: {
-                node: {
+                nodes: [{
                   id: productId,
                   title: "Paginated product",
                   variants: {
-                    nodes: [{ id: secondPage ? secondVariant : firstVariant }],
+                    nodes: [{ id: firstVariant }],
                     pageInfo: {
-                      hasNextPage: !secondPage,
-                      endCursor: secondPage ? null : "variant-cursor",
+                      hasNextPage: true,
+                      endCursor: "variant-cursor",
                     },
                   },
                   sellingPlanGroups: { nodes: [{
@@ -325,8 +362,6 @@ describe("bundle subscription validation handler", () => {
                     name: "Monthly",
                     options: [],
                     position: 1,
-                    appliesToProduct: false,
-                    productVariants: { nodes: [{ id: firstVariant }] },
                     sellingPlans: { nodes: [{
                       id: "gid://shopify/SellingPlan/monthly",
                       name: "Monthly",
@@ -335,14 +370,42 @@ describe("bundle subscription validation handler", () => {
                       pricingPolicies: [],
                     }] },
                   }] },
+                }],
+              },
+            }),
+          } as any;
+        }
+        if (query.includes("ProductVariantsForSellingPlanValidation")) {
+          return {
+            json: async () => ({
+              data: {
+                node: {
+                  variants: {
+                    nodes: [{ id: secondVariant }],
+                    pageInfo: { hasNextPage: false, endCursor: null },
+                  },
                 },
               },
             }),
           } as any;
         }
-        if (query.includes("ValidateSellingPlanVariantAssignment")) {
+        if (query.includes("SellingPlanGroupAssignmentsBatch")) {
           return {
-            json: async () => ({ data: { node: { appliesToProductVariant: true } } }),
+            json: async () => ({
+              data: {
+                nodes: [{
+                  id: groupId,
+                  products: {
+                    nodes: [],
+                    pageInfo: { hasNextPage: false, endCursor: null },
+                  },
+                  productVariants: {
+                    nodes: [{ id: firstVariant }, { id: secondVariant }],
+                    pageInfo: { hasNextPage: false, endCursor: null },
+                  },
+                }],
+              },
+            }),
           } as any;
         }
         return { json: async () => ({ data: {} }) } as any;
@@ -371,10 +434,10 @@ describe("bundle subscription validation handler", () => {
 
     expect(body.isValid).toBe(true);
     expect(admin.graphql.mock.calls.filter(([query]: [string]) =>
-      query.includes("ProductWithSellingPlanGroups"))).toHaveLength(2);
-    expect(admin.graphql).toHaveBeenCalledWith(
-      expect.stringContaining("ValidateSellingPlanVariantAssignment"),
-      expect.objectContaining({ variables: { groupId, variantId: secondVariant } }),
-    );
+      query.includes("ProductsWithSellingPlanGroupsBatch"))).toHaveLength(1);
+    expect(admin.graphql.mock.calls.filter(([query]: [string]) =>
+      query.includes("ProductVariantsForSellingPlanValidation"))).toHaveLength(1);
+    expect(admin.graphql.mock.calls.filter(([query]: [string]) =>
+      query.includes("SellingPlanGroupAssignmentsBatch"))).toHaveLength(1);
   });
 });
