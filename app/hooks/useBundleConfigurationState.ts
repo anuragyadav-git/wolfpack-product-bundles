@@ -14,6 +14,7 @@
 import { useCallback, useRef, useMemo, useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import {
+  clearConfigureOperationAlert as clearConfigureOperationAlertAction,
   closeConfigureModal,
   initializeConfigureRouteState,
   markConfigureRouteDirty,
@@ -24,6 +25,7 @@ import {
   setAvailablePages as setAvailablePagesAction,
   setBundleProductDraft,
   setConfigureForceNavigation,
+  setConfigureOperationAlert as setConfigureOperationAlertAction,
   setConfigureLoadingPages,
   setConfigureProductImageUrl,
   setConfigureProductStatus,
@@ -35,6 +37,7 @@ import {
   setDismissedConfigureBanners,
   setShowAutoPlacementBanner as setShowAutoPlacementBannerAction,
 } from "../store/slices/configureRouteStateSlice";
+import { showAdminTransientErrorToast, type AdminTaskAlert } from "../lib/admin-alert-feedback";
 import { closeModal, openModal } from "../store/slices/uiSlice";
 import { useBundleForm } from "./useBundleForm";
 import { useBundleSteps } from "./useBundleSteps";
@@ -183,7 +186,7 @@ export function useBundleConfigurationState({
   const stepsState = useBundleSteps({
     initialSteps: transformedSteps,
     shopify,
-    onStateChange: markAsDirty
+    onStateChange: markAsDirty,
   });
 
   // Pricing management
@@ -372,6 +375,13 @@ export function useBundleConfigurationState({
     const nextValue = typeof value === "function" ? value(previous) : value;
     dispatch(setDismissedConfigureBanners(Array.from(nextValue)));
   }, [configureRouteState.dismissedBanners, dispatch]);
+  const operationAlert = configureRouteState.operationAlert;
+  const setOperationAlert = useCallback((value: AdminTaskAlert) => {
+    dispatch(setConfigureOperationAlertAction(value));
+  }, [dispatch]);
+  const clearOperationAlert = useCallback(() => {
+    dispatch(clearConfigureOperationAlertAction());
+  }, [dispatch]);
 
   // ===== ORIGINAL VALUES REF (for discard) =====
   const originalValuesRef = useRef({
@@ -444,11 +454,12 @@ export function useBundleConfigurationState({
 
       isResettingRef.current = false;
       setIsDirty(false);
+      dispatch(clearConfigureOperationAlertAction());
 
       shopify.toast.show("Changes discarded", { isError: false });
     } catch (error: any) {
       isResettingRef.current = false;
-      shopify.toast.show("Error discarding changes", { isError: true, duration: 5000 });
+      showAdminTransientErrorToast(shopify, "Changes not discarded");
     }
   }, [
     loadedBundleProduct,
@@ -462,6 +473,7 @@ export function useBundleConfigurationState({
     setSelectedCollections,
     setRuleMessages,
     setIsDirty,
+    dispatch,
   ]);
 
   // ===== MARK AS SAVED =====
@@ -583,6 +595,9 @@ export function useBundleConfigurationState({
     setShowAutoPlacementBanner,
     dismissedBanners,
     setDismissedBanners,
+    operationAlert,
+    setOperationAlert,
+    clearOperationAlert,
 
     // Original values ref
     originalValuesRef,

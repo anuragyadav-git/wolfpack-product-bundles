@@ -41,7 +41,6 @@ const components: Record<string, string[]> = {
     "billing.success.fullAccess",
     "billing.success.support",
     "billing.success.priority",
-    "common.actions.dismiss",
   ],
 };
 

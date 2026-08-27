@@ -1,21 +1,21 @@
 {
-  "timestamp": "2026-08-27T16:22:50.492Z",
+  "timestamp": "2026-08-27T17:34:54.097Z",
   "summary": {
     "totalSuites": 6,
-    "totalTests": 2180,
-    "totalPassed": 2180,
+    "totalTests": 2178,
+    "totalPassed": 2178,
     "totalFailed": 0,
     "totalSkipped": 0,
-    "totalDuration": 13406
+    "totalDuration": 36166
   },
-  "totalDuration": 13408,
+  "totalDuration": 36172,
   "suites": [
     {
       "suite": "Unit Tests - Services",
       "passed": 229,
       "failed": 0,
       "skipped": 0,
-      "duration": 2269,
+      "duration": 6121,
       "commandFailed": false
     },
     {
@@ -23,15 +23,15 @@
       "passed": 34,
       "failed": 0,
       "skipped": 0,
-      "duration": 1579,
+      "duration": 3310,
       "commandFailed": false
     },
     {
       "suite": "Unit Tests - Routes",
-      "passed": 584,
+      "passed": 582,
       "failed": 0,
       "skipped": 0,
-      "duration": 3073,
+      "duration": 8201,
       "commandFailed": false
     },
     {
@@ -39,7 +39,7 @@
       "passed": 1305,
       "failed": 0,
       "skipped": 0,
-      "duration": 4167,
+      "duration": 11694,
       "commandFailed": false
     },
     {
@@ -47,7 +47,7 @@
       "passed": 26,
       "failed": 0,
       "skipped": 0,
-      "duration": 1294,
+      "duration": 4176,
       "commandFailed": false
     },
     {
@@ -55,7 +55,7 @@
       "passed": 2,
       "failed": 0,
       "skipped": 0,
-      "duration": 1024,
+      "duration": 2664,
       "commandFailed": false
     }
   ],

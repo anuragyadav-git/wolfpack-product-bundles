@@ -79,7 +79,7 @@ describe("dashboard status banner dismissal with session persistence", () => {
     expect(view).not.toContain("dashboard.storefrontSetup.activate");
   });
 
-  it("keeps the transient loading banner visible after a resolved banner was dismissed", () => {
+  it("renders loading as ordinary status content after a resolved banner was dismissed", () => {
     dismissBannerInSession(DASHBOARD_STOREFRONT_SETUP_BANNER_KEY);
 
     const view = renderToStaticMarkup(
@@ -93,9 +93,8 @@ describe("dashboard status banner dismissal with session persistence", () => {
       }),
     );
 
-    expect(view).toContain('tone="info"');
     expect(view).toContain("<s-spinner");
-    expect(view).toContain('dismissible="false"');
+    expect(view).not.toContain("<s-banner");
   });
 
   it("persists dismissal in session storage when dismissed", () => {

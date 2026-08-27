@@ -17,7 +17,6 @@ export function FpbStepRuleModeContent({
     fullPageBundleStyles,
     removeCategoryConditionRule,
     setCategoryRulesOpen,
-    shopify,
     STEP_CONDITION_OPERATOR_OPTIONS,
     STEP_CONDITION_TYPE_OPTIONS,
     updateCategoryAutoNextRule,
@@ -401,15 +400,8 @@ export function FpbStepRuleModeContent({
           <button
             type="button"
             className={fullPageBundleStyles.addSectionButton}
-            onClick={() => {
-              if ((conditionsState.stepConditions[step.id] || []).length >= 2) {
-                shopify.toast.show("A step can have at most 2 rules", {
-                  isError: false,
-                });
-                return;
-              }
-              conditionsState.addConditionRule(step.id);
-            }}
+            disabled={(conditionsState.stepConditions[step.id] || []).length >= 2}
+            onClick={() => conditionsState.addConditionRule(step.id)}
           >
             <svg
               width="14"
@@ -427,6 +419,12 @@ export function FpbStepRuleModeContent({
             </svg>
             Add Rule
           </button>
+          {(conditionsState.stepConditions[step.id] || []).length >= 2 ? (
+            <s-stack direction="inline" alignItems="center" gap="small">
+              <s-icon type="alert-triangle" tone="caution" />
+              <s-text>A step can have at most 2 rules.</s-text>
+            </s-stack>
+          ) : null}
         </>
       )}
     </>

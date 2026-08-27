@@ -355,6 +355,12 @@
     }
   },
   "common": {
+    "alerts": {
+      "actionFailed": "Échec de l’action", "previewUnavailable": "Aperçu indisponible", "settingsNotSaved": "Paramètres non enregistrés", "exportUnavailable": "Exportation indisponible", "backfillUnavailable": "Rattrapage indisponible", "trackingNotUpdated": "Suivi non mis à jour", "bundleNotSaved": "Lot non enregistré", "operationFailed": "Échec de l’opération"
+    },
+    "success": {
+      "previewOpened": "Aperçu ouvert", "csvExported": "CSV exporté", "backfillComplete": "Rattrapage terminé", "trackingEnabled": "Suivi activé", "trackingDisabled": "Suivi désactivé", "changesSaved": "Modifications enregistrées", "productSynced": "Produit synchronisé", "bundleSynced": "Lot synchronisé", "operationComplete": "Opération terminée"
+    },
     "actions": {
       "close": "Fermer",
       "cancel": "Annuler",

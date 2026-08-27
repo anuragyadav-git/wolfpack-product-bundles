@@ -1,5 +1,6 @@
 import {
   closeConfigureModal,
+  clearConfigureOperationAlert,
   configureRouteStateReducer,
   initializeConfigureRouteState,
   markConfigureRouteDirty,
@@ -10,6 +11,7 @@ import {
   setAvailablePages,
   setBundleProductDraft,
   setConfigureForceNavigation,
+  setConfigureOperationAlert,
   setConfigureProductImageUrl,
   setConfigureProductStatus,
   setConfigureProductTitle,
@@ -137,5 +139,25 @@ describe("configureRouteStateSlice", () => {
     expect(state.showAutoPlacementBanner).toBe(true);
     expect(state.dismissedBanners).toEqual(["embed"]);
     expect(state.isDirty).toBe(false);
+  });
+
+  it("stores and clears contextual operation failures", () => {
+    let state = configureRouteStateReducer(
+      undefined,
+      setConfigureOperationAlert({
+        id: "bundle-save",
+        heading: "Bundle not saved",
+        message: "Review the bundle and try again.",
+      }),
+    );
+
+    expect(state.operationAlert).toEqual({
+      id: "bundle-save",
+      heading: "Bundle not saved",
+      message: "Review the bundle and try again.",
+    });
+
+    state = configureRouteStateReducer(state, clearConfigureOperationAlert());
+    expect(state.operationAlert).toBeNull();
   });
 });

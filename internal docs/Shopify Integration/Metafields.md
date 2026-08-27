@@ -67,7 +67,9 @@ The server reloads the bundle from DB, activates the Cart Transform, then writes
 the current product/variant metafields before responding. Configure pages do not
 show a separate storefront sync status or retry banner. Preview posts one compact
 `/prepare-preview` request and keeps the Preview Bundle spinner active until that
-promise resolves; failures surface through the existing preview error toast.
+promise resolves. Persistent configuration blockers surface through the
+configure page's contextual critical alert; retryable launch or synchronization
+attempt failures use transient error toasts.
 There is no persisted sync queue, status, attempt ID, timestamp, or error model.
 
 Storefront sync does not define or write `$app.component_parents`. FPB uses the

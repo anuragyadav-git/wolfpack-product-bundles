@@ -47,10 +47,9 @@ function renderSection(
 }
 
 describe("FPB Bundle Widget Admin controls", () => {
-  it("uses the shared tip, checkbox, placement action, and Block illustration", () => {
+  it("uses ordinary guidance, the checkbox, placement action, and Block illustration", () => {
     const markup = renderSection("block");
-    expect(markup).toContain("<s-banner");
-    expect(markup).not.toContain('heading="Widget visibility tip"');
+    expect(markup).not.toContain("<s-banner");
     expect(markup).toContain(
       "Select if you want the upsell block or button to appear on product pages.",
     );

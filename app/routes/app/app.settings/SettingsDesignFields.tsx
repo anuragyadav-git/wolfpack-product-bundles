@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useAppBridge } from "@shopify/app-bridge-react";
 import type { SettingsField } from "../../../lib/admin-configuration-surfaces";
+import { showAdminTransientErrorToast } from "../../../lib/admin-alert-feedback";
 import { getSlotIconRecommendation } from "../../../lib/settings-design-runtime";
 import { FilePicker } from "../../../components/shared/FilePicker";
 import styles from "../../../styles/routes/admin-configuration-surfaces.module.css";
@@ -15,7 +16,6 @@ import {
   useModalHideListener,
 } from "../_shared/bundle-configure/modal-utils";
 import { useTranslation } from "react-i18next";
-import { showSettingsErrorToast } from "./settings-feedback";
 
 const isPolarisHexColor = (value: string) => {
   if (value.length !== 7 && value.length !== 9) return false;
@@ -213,10 +213,8 @@ export function BundlePreviewModal({
     } catch (error) {
       const message = error instanceof SettingsPreviewError
         ? t(`settingsDcp.preview.storefront.errors.${error.code}`)
-        : error instanceof Error
-          ? error.message
-          : t("settingsDcp.preview.storefront.errors.notReady");
-      showSettingsErrorToast(shopify, message);
+        : t("settingsDcp.preview.storefront.errors.notReady");
+      showAdminTransientErrorToast(shopify, message);
     } finally {
       setPendingBundleId(null);
     }

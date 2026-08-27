@@ -56,7 +56,9 @@ export function PpbSelectTemplateDialog() {
                   </s-button>
                 </div>
                 {templateSaveError ? (
-                  <s-banner tone="critical">{templateSaveError}</s-banner>
+                  <s-box paddingBlockEnd="base">
+                    <s-banner heading="Template not saved" tone="critical">{templateSaveError}</s-banner>
+                  </s-box>
                 ) : null}
                 <div className={productPageBundleStyles.templateDialogGrid}>
                   {productPageTemplateOptions.map((templateOption) => {
@@ -248,7 +250,9 @@ export function PpbSelectTemplateDialog() {
                   </div>
                 </div>
                 {templateSaveError ? (
-                  <s-banner tone="critical">{templateSaveError}</s-banner>
+                  <s-box paddingBlockEnd="base">
+                    <s-banner heading="Template not saved" tone="critical">{templateSaveError}</s-banner>
+                  </s-box>
                 ) : null}
                 <div
                   className={productPageBundleStyles.templateCustomizationGrid}

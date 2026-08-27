@@ -236,36 +236,38 @@ export function BundleSubscriptionsSection(
               </s-grid>
 
               {subscriptionsBlocked ? (
-                <s-banner
-                  tone="warning"
-                  heading="Subscriptions unavailable"
-                  dismissible={false}
-                  hidden={false}
-                >
-                  {compatibilityIssues.map((issue) => issue.message).join(" ")}
-                </s-banner>
+                <s-box paddingBlockEnd="base">
+                  <s-banner
+                    tone="warning"
+                    heading="Subscriptions unavailable"
+                    dismissible={false}
+                    hidden={false}
+                  >
+                    {compatibilityIssues.map((issue) => issue.message).join(" ")}
+                  </s-banner>
+                </s-box>
               ) : null}
               {showSubscriptionSetupGuide ? (
-                <s-banner
-                  tone="info"
-                  heading="Subscription setup guide"
-                  dismissible={false}
-                  hidden={false}
-                >
-                  Configure every bundle product and selectable variant in one
-                  selling-plan group in your subscription app, then return here
-                  and get the shared plans.
-                </s-banner>
+                <s-box padding="base" background="subdued" borderRadius="base">
+                  <s-heading>Subscription setup guide</s-heading>
+                  <s-paragraph>
+                    Configure every bundle product and selectable variant in one
+                    selling-plan group in your subscription app, then return here
+                    and get the shared plans.
+                  </s-paragraph>
+                </s-box>
               ) : null}
               {validationMessage ? (
-                <s-banner
-                  tone="warning"
-                  heading="Action required"
-                  dismissible={false}
-                  hidden={false}
-                >
-                  {validationMessage}
-                </s-banner>
+                <s-box paddingBlockEnd="base">
+                  <s-banner
+                    tone="warning"
+                    heading="Action required"
+                    dismissible={false}
+                    hidden={false}
+                  >
+                    {validationMessage}
+                  </s-banner>
+                </s-box>
               ) : null}
 
               {groups.length > 0 ? (

@@ -169,7 +169,11 @@ export function CommonBundleVisibilityOverview({
               </s-button>
             </div>
           ) : (
-            <s-banner tone="warning">{link.emptyMessage}</s-banner>
+            <s-box paddingBlockEnd="base">
+              <s-banner heading="Bundle link unavailable" tone="warning">
+                {link.emptyMessage}
+              </s-banner>
+            </s-box>
           )}
         </div>
       </s-section>

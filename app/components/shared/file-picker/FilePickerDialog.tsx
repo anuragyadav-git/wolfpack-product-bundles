@@ -64,25 +64,29 @@ export function FilePickerDialog({
           ) : null}
 
           {uploadStatus === "error" && uploadError ? (
-            <s-banner
-              heading="Upload failed"
-              tone="critical"
-              dismissible={false}
-              hidden={false}
-            >
-              {uploadError}
-            </s-banner>
+            <s-box paddingBlockEnd="base">
+              <s-banner
+                heading="Upload failed"
+                tone="critical"
+                dismissible={false}
+                hidden={false}
+              >
+                {uploadError}
+              </s-banner>
+            </s-box>
           ) : null}
 
           {uploadStatus === "timeout" ? (
-            <s-banner
-              heading="Processing"
-              tone="info"
-              dismissible={false}
-              hidden={false}
-            >
-              Upload successful — image may take a moment to appear in your library. Close and re-open the picker to see it.
-            </s-banner>
+            <s-box paddingBlockEnd="base">
+              <s-banner
+                heading="Upload processing"
+                tone="success"
+                dismissible
+                hidden={false}
+              >
+                Upload successful — image may take a moment to appear in your library. Close and re-open the picker to see it.
+              </s-banner>
+            </s-box>
           ) : null}
 
           <FileGrid

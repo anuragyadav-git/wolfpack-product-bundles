@@ -182,10 +182,11 @@ to the frame viewport bottom. This preview-only positioning prevents area-focus
 document while leaving the deployed storefront tray and its sticky contract
 unchanged.
 
-Design renderer failures and storefront-preview launch failures use Shopify's
-native App Bridge Toast API with `isError: true`. They must not render an inline
-critical banner inside the preview canvas or bundle-picker modal; this keeps all
-Design-page error feedback in the Shopify Admin host surface.
+Design renderer failures use contextual, dismissible critical Polaris banners
+beside the affected preview because the surface remains unavailable. A failed
+storefront-preview launch belongs only to that attempt and uses a transient App
+Bridge error toast; retrying starts a clean operation. Banner wrappers retain
+Polaris block spacing from adjacent preview content.
 
 Preview fitting must not use React state for ResizeObserver samples. Coalesce
 the latest content-box measurement to one requestAnimationFrame callback and

@@ -1,6 +1,7 @@
 import { useFetcher, useNavigate } from "@remix-run/react";
 import { Suspense, useState, useMemo, useEffect, useRef } from "react";
 import { useAppBridge } from "@shopify/app-bridge-react";
+import { useTranslation } from "react-i18next";
 import "../../../components/analytics/shared/tokens.css";
 import {
   FunnelHero,
@@ -11,6 +12,7 @@ import { LazyBundleMetricChart } from "../../../components/analytics/lazy";
 import styles from "../../../styles/routes/app-attribution.module.css";
 import type { AttributionDashboardData } from "../app.attribution";
 import { analyzeCustomUtmInput } from "../../../lib/analytics/attribution-controls";
+import { showAdminTransientErrorToast } from "../../../lib/admin-alert-feedback";
 
 type AttributionDashboardViewData = Omit<AttributionDashboardData, "from" | "to"> & {
   from?: string;
@@ -207,14 +209,9 @@ export function BackfillWindowModal({
       </s-button>
 
         <s-stack direction="block" gap="base">
-        <s-banner
-          heading={`Selected window: ${selectedWindow}`}
-          tone="info"
-          dismissible={false}
-          hidden={false}
-        >
-          This queries Shopify orders for the selected period and creates attribution records that Analytics may have missed.
-        </s-banner>
+        <s-paragraph>
+          Selected window: {selectedWindow}. This queries Shopify orders for the selected period and creates attribution records that Analytics may have missed.
+        </s-paragraph>
         <s-unordered-list>
           <s-list-item>
             Matches order line items to bundles and imports available revenue, landing-page, and UTM details.
@@ -454,6 +451,7 @@ function AttributionDashboardContent({
 }: {
   data: AttributionDashboardViewData;
 }) {
+  const { t } = useTranslation();
   const {
     days, from, to, prevFrom, prevTo,
     funnelSnapshot, bundleMetricTrend, bundleMatrix, topCampaignsRows,
@@ -486,7 +484,7 @@ function AttributionDashboardContent({
     if (!result) return;
     if (!result.success || !result.csv || !result.filename) {
       if (result.error) {
-        shopify.toast.show(result.error, { isError: true, duration: 5000 });
+        showAdminTransientErrorToast(shopify, t("common.alerts.exportUnavailable"));
       }
       return;
     }
@@ -501,17 +499,17 @@ function AttributionDashboardContent({
     downloadLink.click();
     downloadLink.remove();
     URL.revokeObjectURL(objectUrl);
-    shopify.toast.show("Analytics CSV exported");
-  }, [exportFetcher.data, shopify]);
+    shopify.toast.show(t("common.success.csvExported"));
+  }, [exportFetcher.data, shopify, t]);
 
   useEffect(() => {
     const result = backfillFetcher.data;
     if (result?.message) {
-      shopify.toast.show(result.message);
+      shopify.toast.show(t("common.success.backfillComplete"));
     } else if (result?.error) {
-      shopify.toast.show(result.error, { isError: true, duration: 5000 });
+      showAdminTransientErrorToast(shopify, t("common.alerts.backfillUnavailable"));
     }
-  }, [backfillFetcher.data, shopify]);
+  }, [backfillFetcher.data, shopify, t]);
 
   function handleBackfillConfirm() {
     backfillFetcher.submit(
@@ -534,7 +532,6 @@ function AttributionDashboardContent({
   return (
     <div className={styles.dashboardShell}>
         <div className={styles.dashboardStack}>
-
           {/* Date range selector + Compare toggle + Export */}
           <div className={styles.headerRow}>
             <div className={styles.comparePillSlot}>

@@ -60,7 +60,9 @@ export function FpbTemplateDialog({
                   </s-button>
                 </div>
                 {templateSaveError ? (
-                  <s-banner tone="critical">{templateSaveError}</s-banner>
+                  <s-box paddingBlockEnd="base">
+                    <s-banner heading="Template not saved" tone="critical">{templateSaveError}</s-banner>
+                  </s-box>
                 ) : null}
                 <div className={fullPageBundleStyles.templateDialogGrid}>
                   {fullPageTemplateOptions.map((tpl) => {
@@ -247,7 +249,9 @@ export function FpbTemplateDialog({
                   </div>
                 </div>
                 {templateSaveError ? (
-                  <s-banner tone="critical">{templateSaveError}</s-banner>
+                  <s-box paddingBlockEnd="base">
+                    <s-banner heading="Template not saved" tone="critical">{templateSaveError}</s-banner>
+                  </s-box>
                 ) : null}
                 <div className={fullPageBundleStyles.templateCustomizationGrid}>
                   <s-section heading="Text and language">

@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { useAppBridge } from "@shopify/app-bridge-react";
 import { useTranslation } from "react-i18next";
+import { AdminTaskAlertBanner } from "../../../components/AdminTaskAlertBanner";
+import type { AdminTaskAlert } from "../../../lib/admin-alert-feedback";
 import type {
   BundleContractType,
   TemplateKey,
@@ -21,7 +22,6 @@ import {
 } from "./design-preview-model";
 import styles from "./DesignSettingsView.module.css";
 import type { ShopBrandColors } from "../../../lib/shop-brand-colors";
-import { showSettingsErrorToast } from "./settings-feedback";
 import {
   PREVIEW_PROTOCOL_VERSION,
   isStorefrontPreviewEvent,
@@ -262,7 +262,6 @@ export function DesignLivePreview({
   onContextChange?: (context: Pick<DesignPreviewState, "bundleType" | "templateKey" | "area" | "scenario">) => void;
 }) {
   const { t, i18n } = useTranslation();
-  const shopify = useAppBridge();
   const previewStageRef = useRef<HTMLDivElement>(null);
   const previewCanvasRef = useRef<HTMLDivElement>(null);
   const previewScaledShellRef = useRef<HTMLDivElement>(null);
@@ -280,6 +279,7 @@ export function DesignLivePreview({
     };
   });
   const [isFrameReady, setIsFrameReady] = useState(false);
+  const [previewAlert, setPreviewAlert] = useState<AdminTaskAlert | null>(null);
   const availableTemplates = DESIGN_PREVIEW_TEMPLATES.filter(
     (template) => template.bundleType === previewState.bundleType,
   );
@@ -342,16 +342,21 @@ export function DesignLivePreview({
       const message: unknown = event.data;
       if (!isStorefrontPreviewEvent(message)) return;
       if (message.type === "READY") {
+        setPreviewAlert(null);
         setIsFrameReady(true);
       } else if (message.type === "SCENARIO_CHANGED") {
         setPreviewState((current) => setDesignPreviewScenario(current, message.payload.scenario));
       } else if (message.type === "ERROR") {
-        showSettingsErrorToast(shopify, message.payload.message);
+        setPreviewAlert({
+          id: "design-preview",
+          heading: t("common.alerts.previewUnavailable"),
+          message: t("settingsDcp.preview.storefront.errors.notReady"),
+        });
       }
     };
     window.addEventListener("message", onMessage);
     return () => window.removeEventListener("message", onMessage);
-  }, [shopify]);
+  }, [t]);
 
   useEffect(() => {
     if (!isFrameReady) return;
@@ -531,6 +536,11 @@ export function DesignLivePreview({
           </div>
         </div>
       </div>
+
+      <AdminTaskAlertBanner
+        alert={previewAlert}
+        onDismiss={() => setPreviewAlert(null)}
+      />
 
       <div
         ref={previewStageRef}

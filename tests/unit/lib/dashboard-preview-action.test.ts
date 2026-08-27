@@ -40,7 +40,7 @@ describe("decideDashboardPreviewAction", () => {
     });
   });
 
-  it("returns error toast for PPB without a product handle", () => {
+  it("returns a contextual error message for PPB without a product handle", () => {
     const result = decideDashboardPreviewAction({
       bundleType: "product_page",
       bundleId: "abc",
@@ -49,7 +49,7 @@ describe("decideDashboardPreviewAction", () => {
     });
     expect(result).toEqual({
       kind: "error",
-      toast: "Save and place the bundle on a product first to preview it.",
+      message: "Save and place the bundle on a product first to preview it.",
     });
   });
 

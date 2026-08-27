@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 import { AppLogger } from "../../../lib/logger";
+import { showAdminTransientErrorToast } from "../../../lib/admin-alert-feedback";
 import { openThemeEditorInNewTab } from "../../../lib/theme-editor-navigation.client";
 import {
   buildProductPageThemeEditorDeepLink,
@@ -39,10 +40,7 @@ export function usePpbPlacementHandlers({
       base.fetcher.submit(formData, { method: "post" });
     } catch (error: any) {
       AppLogger.error("Failed to load theme templates:", {}, error as any);
-      base.shopify.toast.show("Failed to load theme templates", {
-        isError: true,
-        duration: 5000,
-      });
+      showAdminTransientErrorToast(base.shopify, "Templates not loaded");
       base.setIsLoadingPages(false);
       templateState.setIsPreparingPlacementTemplates(false);
       templateState.pendingPlacementModalRef.current = false;
@@ -55,10 +53,7 @@ export function usePpbPlacementHandlers({
       loadAvailablePages();
     } catch (error: any) {
       AppLogger.error("Error opening page selection:", {}, error as any);
-      base.shopify.toast.show("Failed to open page selection", {
-        isError: true,
-        duration: 5000,
-      });
+      showAdminTransientErrorToast(base.shopify, "Pages not available");
       templateState.setIsPreparingPlacementTemplates(false);
       templateState.pendingPlacementModalRef.current = false;
     }
@@ -172,22 +167,17 @@ export function usePpbPlacementHandlers({
             {},
             template,
           );
-          base.shopify.toast.show("Template data is invalid", {
-            isError: true,
-            duration: 5000,
-          });
+          showAdminTransientErrorToast(base.shopify, "Template unavailable");
           return;
         }
-        base.shopify.toast.show(
-          `Preparing theme editor for "${template.title}"...`,
-          { isError: false, duration: 3000 },
-        );
+        base.clearOperationAlert();
         if (!base.apiKey || !base.blockHandle) {
           AppLogger.error("🚨 [THEME_EDITOR] Missing app configuration");
-          base.shopify.toast.show(
-            "App configuration missing. Please check app setup.",
-            { isError: true, duration: 5000 },
-          );
+          base.setOperationAlert({
+            id: "theme-editor",
+            heading: "Theme editor unavailable",
+            message: "Check the app configuration and try again.",
+          });
           return;
         }
         const placementBlockHandle =
@@ -237,11 +227,8 @@ export function usePpbPlacementHandlers({
         });
         base.setSelectedPage(template);
         base.closePageSelectionModal();
-        base.shopify.toast.show(
-          `Opening theme editor for "${template.title}". You'll be able to add the bundle widget to your theme.`,
-          { isError: false, duration: 5000 },
-        );
         openThemeEditorInNewTab(themeEditorUrl);
+        base.shopify.toast.show("Editor opened");
       } catch (error: any) {
         const errorMessage =
           error instanceof Error ? error.message : "Unknown error";
@@ -250,13 +237,7 @@ export function usePpbPlacementHandlers({
           { errorMessage },
           error as any,
         );
-        base.shopify.toast.show(
-          `Failed to open theme editor: ${errorMessage}`,
-          {
-            isError: true,
-            duration: 5000,
-          },
-        );
+        showAdminTransientErrorToast(base.shopify, "Theme editor unavailable");
       }
     },
     [base, visibility.bundleEmbedSelectedProducts],

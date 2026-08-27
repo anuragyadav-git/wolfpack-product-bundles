@@ -57,14 +57,9 @@ export function UpgradeConfirmationModal({
       </s-button>
 
       <s-stack direction="block" gap="base">
-        <s-banner
-          tone="info"
-          heading={t("billing.upgradeModal.heading")}
-          dismissible={false}
-          hidden={false}
-        >
+        <s-paragraph>
           {t("billing.upgradeModal.redirect")}
-        </s-banner>
+        </s-paragraph>
 
         <s-stack direction="block" gap="small">
           <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>

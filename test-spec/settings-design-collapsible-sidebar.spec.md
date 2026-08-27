@@ -4,7 +4,7 @@ id: settings-design-collapsible-sidebar
 title: Settings Design Collapsible Sidebar Test Spec
 type: test-spec
 status: active
-summary: Verifies Design preview sizing, panel-top alignment, and native Shopify error feedback.
+summary: Verifies Design preview sizing, panel-top alignment, and contextual Shopify error feedback.
 last_audited: 2026-08-27
 owners:
   - engineering
@@ -26,7 +26,7 @@ tags:
 keywords:
   - inspector-collapse
   - desktop-preview-fit
-  - native-error-toast
+  - contextual-error-banner
 ---
 
 # Test Spec: Settings Design Collapsible Sidebar
@@ -35,7 +35,7 @@ keywords:
 ## Purpose
 
 Allow the Mac-style desktop preview to scale into width released by the collapsed customization sidebar without changing either storefront viewport contract or the mobile device-preview contract.
-Keep the customization sidebar aligned with the complete Live preview container and surface Design failures only through Shopify App Bridge error toasts.
+Keep the customization sidebar aligned with the complete Live preview container and surface Design failures through contextual, dismissible Polaris banners.
 
 ## Test Cases
 
@@ -52,9 +52,9 @@ Keep the customization sidebar aligned with the complete Live preview container 
 
 | # | Scenario | Input | Expected Output | Notes |
 |---|---|---|---|---|
-| 1 | Preview runtime failure | Non-empty renderer error message | App Bridge toast receives the message with `isError: true` | No inline critical banner |
-| 2 | Storefront-preview launch failure | Localized preview error message | App Bridge toast receives the message with `isError: true` | Modal remains available for retry |
-| 3 | Empty failure message | Whitespace-only message | No toast is shown | No fabricated fallback copy |
+| 1 | Preview runtime failure | Non-empty renderer error message | Critical banner persists beside the preview | Merchant can dismiss or retry |
+| 2 | Storefront-preview launch failure | Localized preview error message | Transient Shopify error toast | A fresh attempt starts cleanly |
+| 3 | Empty failure message | Whitespace-only message | No alert is shown | No fabricated fallback copy |
 
 ## Acceptance Criteria
 
@@ -64,5 +64,5 @@ Keep the customization sidebar aligned with the complete Live preview container 
 - [x] Mobile preview remains capped at 1×.
 - [x] No test asserts CSS, class names, selectors, or visual placement.
 - [x] Customization and Live preview container tops align in direct Chrome verification.
-- [x] Design errors use Shopify App Bridge error toasts with no inline error banner.
+- [x] Persistent renderer errors use contextual banners; transient preview-launch failures use error toasts.
 - [x] Collapsed desktop preview centers the monitor in the released inline space.

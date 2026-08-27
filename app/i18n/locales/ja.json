@@ -355,6 +355,12 @@
     }
   },
   "common": {
+    "alerts": {
+      "actionFailed": "操作に失敗しました", "previewUnavailable": "プレビューを利用できません", "settingsNotSaved": "設定を保存できませんでした", "exportUnavailable": "エクスポートを利用できません", "backfillUnavailable": "バックフィルを利用できません", "trackingNotUpdated": "トラッキングを更新できませんでした", "bundleNotSaved": "バンドルを保存できませんでした", "operationFailed": "処理に失敗しました"
+    },
+    "success": {
+      "previewOpened": "プレビューを開きました", "csvExported": "CSVをエクスポートしました", "backfillComplete": "バックフィルが完了しました", "trackingEnabled": "トラッキングを有効化しました", "trackingDisabled": "トラッキングを無効化しました", "changesSaved": "変更を保存しました", "productSynced": "商品を同期しました", "bundleSynced": "バンドルを同期しました", "operationComplete": "処理が完了しました"
+    },
     "actions": {
       "close": "閉じる",
       "cancel": "キャンセル",

@@ -10,6 +10,7 @@
 
 import { useState, useCallback } from "react";
 import { ERROR_MESSAGES } from "../constants/errors";
+import { showAdminTransientErrorToast } from "../lib/admin-alert-feedback";
 import { createBundleStep } from "../lib/bundle-config/step-defaults";
 
 interface BundleStep {
@@ -56,7 +57,7 @@ export function useBundleSteps({ initialSteps, shopify, onStateChange }: UseBund
     const newStep: BundleStep = createBundleStep(steps.length + 1);
     setSteps(prev => [...prev, newStep]);
     setExpandedSteps(prev => new Set([...prev, newStep.id]));
-    shopify.toast.show("Step added successfully", { isError: false });
+    shopify.toast.show("Step added", { isError: false });
     return newStep.id;
   }, [steps.length, shopify, setSteps]);
 
@@ -104,7 +105,7 @@ export function useBundleSteps({ initialSteps, shopify, onStateChange }: UseBund
       };
       setSteps(prev => [...prev, duplicatedStep]);
       setExpandedSteps(prev => new Set([...prev, duplicatedStep.id]));
-      shopify.toast.show("Step duplicated successfully", { isError: false });
+      shopify.toast.show("Step duplicated", { isError: false });
     }
   }, [steps, shopify, setSteps]);
 
@@ -151,7 +152,7 @@ export function useBundleSteps({ initialSteps, shopify, onStateChange }: UseBund
         error === null || error === undefined;
 
       if (!isCancellation && errorMessage && errorMessage.trim() !== '') {
-        shopify.toast.show(ERROR_MESSAGES.FAILED_TO_SELECT_COLLECTIONS, { isError: true });
+        showAdminTransientErrorToast(shopify, ERROR_MESSAGES.FAILED_TO_SELECT_COLLECTIONS);
       }
     }
   }, [selectedCollections, shopify]);

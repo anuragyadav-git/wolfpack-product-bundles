@@ -40,6 +40,9 @@ import { DashboardTopCards } from "./DashboardTopCards";
 import { DashboardStatusGrid } from "./DashboardStatusGrid";
 import { DashboardResourcesCard } from "./DashboardResourcesCard";
 import { DashboardDeferredProxyHealthBanner } from "./DashboardDeferredProxyHealthBanner";
+import { AdminTaskAlertBanner } from "../../../components/AdminTaskAlertBanner";
+import type { AdminTaskAlert } from "../../../lib/admin-alert-feedback";
+import { showAdminTransientErrorToast } from "../../../lib/admin-alert-feedback";
 import { AppEmbedEnableModal } from "./AppEmbedEnableModal";
 import {
   checkAppEmbedActivation,
@@ -85,6 +88,7 @@ export function DashboardPage({ banners }: DashboardPageProps) {
   const localeFetcher = useFetcher<typeof action>();
   const shopify = useAppBridge();
   const { t, i18n } = useTranslation();
+  const [taskAlert, setTaskAlert] = useState<AdminTaskAlert | null>(null);
 
   const dashboardState = useDashboardState();
   const themeExtensionStatus = useThemeExtensionStatus();
@@ -144,21 +148,24 @@ export function DashboardPage({ banners }: DashboardPageProps) {
       if (intent === 'createFpbPreview') {
         const previewUrl = typeof data.shareablePreviewUrl === 'string' ? data.shareablePreviewUrl : '';
         if (previewUrl) {
-          shopify.toast.show("Opening preview in new tab…", { duration: 2000 });
           const pendingWindow = pendingPreviewWindowRef.current;
           pendingPreviewWindowRef.current = null;
           if (!navigatePendingDashboardPreview(pendingWindow, previewUrl)) {
             window.open(previewUrl, "_blank", "noopener,noreferrer");
           }
+          setTaskAlert(null);
+          shopify.toast.show(t("common.success.previewOpened"));
         } else {
           closePendingDashboardPreview(pendingPreviewWindowRef.current);
           pendingPreviewWindowRef.current = null;
-          shopify.toast.show("No preview URL was returned.", { isError: true, duration: 5000 });
+          showAdminTransientErrorToast(shopify, t("common.alerts.previewUnavailable"));
         }
       } else if (intent === 'cloneBundle' && cloneRedirect) {
+        setTaskAlert(null);
         shopify.toast.show(t("dashboard.actions.cloneSuccess"));
         navigate(cloneRedirect);
       } else if (intent === 'deleteBundle') {
+        setTaskAlert(null);
         shopify.toast.show(t("dashboard.actions.deleteSuccess"));
       }
     } else if (data.error) {
@@ -166,7 +173,7 @@ export function DashboardPage({ banners }: DashboardPageProps) {
         closePendingDashboardPreview(pendingPreviewWindowRef.current);
         pendingPreviewWindowRef.current = null;
       }
-      shopify.toast.show(String(data.error), { isError: true, duration: 5000 });
+      showAdminTransientErrorToast(shopify, t("common.alerts.actionFailed"));
     }
     if (intent === 'createFpbPreview') {
       setPreviewingBundleId(null);
@@ -233,7 +240,11 @@ export function DashboardPage({ banners }: DashboardPageProps) {
     appEmbedEnabled,
     themeEditorUrl: currentThemeEditorUrl,
     refreshStatus: themeExtensionStatus.refresh,
-    onSilentBlock: () => shopify.toast.show(t("dashboard.actions.themeEditorUnavailable"), { isError: true }),
+    onSilentBlock: () => setTaskAlert({
+      id: "theme-editor",
+      heading: "Theme editor unavailable",
+      message: t("dashboard.actions.themeEditorUnavailable"),
+    }),
   });
 
   const checkAppEmbedForEnableFlow = useCallback(async () => {
@@ -325,7 +336,11 @@ export function DashboardPage({ banners }: DashboardPageProps) {
       });
 
       if (action.kind === "error") {
-        shopify.toast.show(action.toast, { isError: true });
+        setTaskAlert({
+          id: "bundle-preview",
+          heading: t("common.alerts.previewUnavailable"),
+          message: action.message,
+        });
         stopPreviewLoadingSoon();
         return;
       }
@@ -352,7 +367,7 @@ export function DashboardPage({ banners }: DashboardPageProps) {
     }
 
     executePreviewAction();
-  }, [appEmbedEnabled, shop, shopify, fetcher, enablePreviewGate, recordDashboardPreview]);
+  }, [appEmbedEnabled, enablePreviewGate, fetcher, recordDashboardPreview, shop, t]);
 
   const getStatusDisplay = (status: string) => {
     const tone = STATUS_TONE_MAP[status as keyof typeof STATUS_TONE_MAP] ?? 'info';
@@ -430,10 +445,11 @@ export function DashboardPage({ banners }: DashboardPageProps) {
       }
       const nextParams = buildDashboardLocaleSearchParams(searchParams, locale);
       if (nextParams) setSearchParams(nextParams, { replace: true });
+      setTaskAlert(null);
       shopify.toast.show(t("dashboard.language.saveSuccess"));
       return;
     }
-    shopify.toast.show(t("dashboard.language.saveError"), { isError: true });
+    showAdminTransientErrorToast(shopify, t("dashboard.language.saveError"));
   }, [i18n, localeFetcher.data, localeFetcher.state, searchParams, setSearchParams, shopify, t]);
 
   useEffect(() => {
@@ -615,6 +631,10 @@ export function DashboardPage({ banners }: DashboardPageProps) {
             </div>
           </div>
 
+          <AdminTaskAlertBanner
+            alert={taskAlert}
+            onDismiss={() => setTaskAlert(null)}
+          />
           <DashboardStatusGrid
             resources={themeExtensionStatus.resources}
             error={themeExtensionStatus.error}

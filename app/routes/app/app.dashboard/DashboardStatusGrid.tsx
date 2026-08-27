@@ -140,36 +140,44 @@ export function DashboardStatusGrid({
   const setupComplete = appEmbedEnabled;
   const title = t("dashboard.storefrontSetup.incompleteTitle");
 
-  return (
-    <s-banner
-      tone={appEmbedStatusLoading ? "info" : setupComplete ? "success" : "warning"}
-      heading={title}
-      dismissible={!appEmbedStatusLoading}
-      hidden={false}
-      onDismiss={!appEmbedStatusLoading && hydrated ? dismiss : undefined}
-    >
-      <s-box minBlockSize="28px">
-        {appEmbedStatusLoading ? (
-          <s-stack direction="inline" alignItems="center" gap="small">
-            <s-spinner size="base" accessibilityLabel={summaryDescription} />
-            <s-text>{summaryDescription}</s-text>
-          </s-stack>
-        ) : !setupComplete ? (
-          <s-stack direction="inline" justifyContent="space-between" alignItems="start" gap="base">
-            <s-text>{summaryDescription}</s-text>
-            <s-button
-              ref={enableActionRef}
-              variant="tertiary"
-              onClick={onOpenThemeEditor}
-              disabled={!themeEditorUrl}
-            >
-              {t("dashboard.storefrontSetup.activate")}
-            </s-button>
-          </s-stack>
-        ) : (
+  if (appEmbedStatusLoading) {
+    return (
+      <s-box minBlockSize="28px" padding="base">
+        <s-stack direction="inline" alignItems="center" gap="small">
+          <s-spinner size="base" accessibilityLabel={summaryDescription} />
           <s-text>{summaryDescription}</s-text>
-        )}
+        </s-stack>
       </s-box>
-    </s-banner>
+    );
+  }
+
+  return (
+    <s-box paddingBlockEnd="base">
+      <s-banner
+        tone={setupComplete ? "success" : "warning"}
+        heading={title}
+        dismissible
+        hidden={false}
+        onDismiss={hydrated ? dismiss : undefined}
+      >
+        <s-box minBlockSize="28px">
+          {!setupComplete ? (
+            <s-stack direction="inline" justifyContent="space-between" alignItems="start" gap="base">
+              <s-text>{summaryDescription}</s-text>
+              <s-button
+                ref={enableActionRef}
+                variant="tertiary"
+                onClick={onOpenThemeEditor}
+                disabled={!themeEditorUrl}
+              >
+                {t("dashboard.storefrontSetup.activate")}
+              </s-button>
+            </s-stack>
+          ) : (
+            <s-text>{summaryDescription}</s-text>
+          )}
+        </s-box>
+      </s-banner>
+    </s-box>
   );
 }

@@ -339,6 +339,12 @@
     }
   },
   "common": {
+    "alerts": {
+      "actionFailed": "Action failed", "previewUnavailable": "Preview unavailable", "settingsNotSaved": "Settings not saved", "exportUnavailable": "Export unavailable", "backfillUnavailable": "Backfill unavailable", "trackingNotUpdated": "Tracking not updated", "bundleNotSaved": "Bundle not saved", "operationFailed": "Operation failed"
+    },
+    "success": {
+      "previewOpened": "Preview opened", "csvExported": "CSV exported", "backfillComplete": "Backfill complete", "trackingEnabled": "Tracking enabled", "trackingDisabled": "Tracking disabled", "changesSaved": "Changes saved", "productSynced": "Product synced", "bundleSynced": "Bundle synced", "operationComplete": "Operation complete"
+    },
     "actions": {
       "close": "Close", "cancel": "Cancel", "dismiss": "Dismiss", "manage": "Manage", "enable": "Enable", "enableHere": "Enable Here", "learnMore": "Learn More",
       "maybeLater": "Maybe Later", "setUpVisibility": "Set Up Visibility", "reinstallApp": "Reinstall app",

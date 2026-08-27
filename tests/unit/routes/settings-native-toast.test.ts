@@ -1,6 +1,5 @@
 import {
   createLanguageSettingsSnapshot,
-  showSettingsErrorToast,
   showSettingsSaveFeedback,
 } from "../../../app/routes/app/app.settings/settings-feedback";
 
@@ -16,53 +15,34 @@ describe("Settings native save feedback", () => {
     expect(show).toHaveBeenCalledWith("Settings saved successfully");
   });
 
-  it("shows a longer native error toast with the server message", () => {
+  it("returns a contextual error message without showing an error toast", () => {
     const show = jest.fn();
 
-    showSettingsSaveFeedback({ toast: { show } }, {
+    const error = showSettingsSaveFeedback({ toast: { show } }, {
       success: false,
       message: "Runtime sync failed",
     });
 
-    expect(show).toHaveBeenCalledWith("Runtime sync failed", {
-      duration: 5000,
-      isError: true,
-    });
-  });
-
-  it("shows Design runtime failures as native error toasts", () => {
-    const show = jest.fn();
-
-    showSettingsErrorToast({ toast: { show } }, "Storefront preview failed");
-
-    expect(show).toHaveBeenCalledWith("Storefront preview failed", {
-      duration: 5000,
-      isError: true,
-    });
-  });
-
-  it("does not fabricate a Design error message", () => {
-    const show = jest.fn();
-
-    showSettingsErrorToast({ toast: { show } }, "   ");
-
     expect(show).not.toHaveBeenCalled();
+    expect(error).toBe("Runtime sync failed");
   });
 
   it("does nothing without a completed response", () => {
     const show = jest.fn();
 
-    showSettingsSaveFeedback({ toast: { show } }, null);
+    const error = showSettingsSaveFeedback({ toast: { show } }, null);
 
     expect(show).not.toHaveBeenCalled();
+    expect(error).toBeNull();
   });
 
   it("does not fabricate fallback copy when the server omits a message", () => {
     const show = jest.fn();
 
-    showSettingsSaveFeedback({ toast: { show } }, { success: false });
+    const error = showSettingsSaveFeedback({ toast: { show } }, { success: false });
 
     expect(show).not.toHaveBeenCalled();
+    expect(error).toBeNull();
   });
 
   it("creates a detached Language submission snapshot", () => {

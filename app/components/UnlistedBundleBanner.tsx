@@ -31,39 +31,36 @@ export function UnlistedBundleBanner({
   if (loading) {
     const loadingLabel = t("common.parentProductStatus.loadingTitle");
     return (
-      <s-banner
-        tone="info"
-        heading={loadingLabel}
-        dismissible={false}
-        hidden={false}
-      >
+      <s-box padding="base">
         <s-stack direction="inline" alignItems="center" gap="small">
           <s-spinner size="base" accessibilityLabel={loadingLabel} />
           <s-text>{t("common.parentProductStatus.loadingBody")}</s-text>
         </s-stack>
-      </s-banner>
+      </s-box>
     );
   }
 
   if (!adminUrl) return null;
 
   return (
-    <s-banner
-      tone="warning"
-      heading={t("common.unlistedBundle.title")}
-      dismissible={false}
-      hidden={false}
-    >
-      <s-stack direction="inline" justifyContent="space-between" alignItems="start" gap="base">
-        <s-text>{t("common.unlistedBundle.body")}</s-text>
-        <s-button
-          variant="secondary"
-          tone="auto"
-          onClick={onManage}
-        >
-          {t("common.actions.manage")}
-        </s-button>
-      </s-stack>
-    </s-banner>
+    <s-box paddingBlockEnd="base">
+      <s-banner
+        tone="warning"
+        heading={t("common.unlistedBundle.title")}
+        dismissible={false}
+        hidden={false}
+      >
+        <s-stack direction="inline" justifyContent="space-between" alignItems="start" gap="base">
+          <s-text>{t("common.unlistedBundle.body")}</s-text>
+          <s-button
+            variant="secondary"
+            tone="auto"
+            onClick={onManage}
+          >
+            {t("common.actions.manage")}
+          </s-button>
+        </s-stack>
+      </s-banner>
+    </s-box>
   );
 }

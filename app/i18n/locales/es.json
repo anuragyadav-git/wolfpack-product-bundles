@@ -355,6 +355,12 @@
     }
   },
   "common": {
+    "alerts": {
+      "actionFailed": "La acción falló", "previewUnavailable": "Vista previa no disponible", "settingsNotSaved": "Configuración no guardada", "exportUnavailable": "Exportación no disponible", "backfillUnavailable": "Recuperación no disponible", "trackingNotUpdated": "Seguimiento no actualizado", "bundleNotSaved": "Paquete no guardado", "operationFailed": "La operación falló"
+    },
+    "success": {
+      "previewOpened": "Vista previa abierta", "csvExported": "CSV exportado", "backfillComplete": "Recuperación completa", "trackingEnabled": "Seguimiento activado", "trackingDisabled": "Seguimiento desactivado", "changesSaved": "Cambios guardados", "productSynced": "Producto sincronizado", "bundleSynced": "Paquete sincronizado", "operationComplete": "Operación completa"
+    },
     "actions": {
       "close": "Cerrar",
       "cancel": "Cancelar",

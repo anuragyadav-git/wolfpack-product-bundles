@@ -9,30 +9,20 @@ type SettingsToastApi = {
   };
 };
 
-export function showSettingsErrorToast(
-  shopify: SettingsToastApi,
-  message: string,
-) {
-  const normalizedMessage = message.trim();
-  if (!normalizedMessage) return;
-
-  shopify.toast.show(normalizedMessage, { duration: 5000, isError: true });
-}
-
 export function showSettingsSaveFeedback(
   shopify: SettingsToastApi,
   response: SettingsSaveResponse,
-) {
-  if (!response) return;
+): string | null {
+  if (!response) return null;
 
   const message = response.message?.trim();
-  if (!message) return;
+  if (!message) return null;
   if (response.success) {
     shopify.toast.show(message);
-    return;
+    return null;
   }
 
-  showSettingsErrorToast(shopify, message);
+  return message;
 }
 
 export function createLanguageSettingsSnapshot(

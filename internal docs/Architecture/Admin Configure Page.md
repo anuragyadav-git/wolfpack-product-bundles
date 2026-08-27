@@ -153,6 +153,13 @@ affected control; validation failures never use transient toasts. Errors are
 not shown before the first Save attempt and clear as the merchant edits the
 affected value. Successful Save and Discard clear all validation state.
 
+Short-lived configure action constraints use concise App Bridge error toasts in
+both FPB and PPB. This includes attempting to delete the only step, an
+immediate picker, sync-invocation, discard, or preview-launch failure.
+Persistent unsaved-preview, save, placement, template, and
+preview-configuration failures remain contextual critical banners, while field
+validation remains inline as described above.
+
 Only persisted, enabled feature branches are validated. Step 1 is always
 enabled. Disabled later steps, disabled pricing/widget/embed/add-on features,
 inactive targeting branches, optional media and CSS, and optional localized

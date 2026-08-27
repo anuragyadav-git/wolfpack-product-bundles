@@ -66,14 +66,16 @@ export function SubscriptionQuotaCard({
         </s-stack>
         <CustomProgressBar progress={percentage} tone={progressBarTone} />
         {showBanner && (
-          <s-banner
-            tone={bannerTone}
-            heading="Bundle Subscription Quota"
-            dismissible={false}
-            hidden={false}
-          >
-            {bannerMessage}
-          </s-banner>
+          <s-box paddingBlockEnd="base">
+            <s-banner
+              tone={bannerTone}
+              heading="Bundle Subscription Quota"
+              dismissible
+              hidden={false}
+            >
+              {bannerMessage}
+            </s-banner>
+          </s-box>
         )}
       </s-stack>
     </s-section>

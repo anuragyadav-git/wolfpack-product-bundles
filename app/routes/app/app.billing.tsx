@@ -174,8 +174,6 @@ export default function BillingPage() {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
-  const [showCelebration, setShowCelebration] = useState(data.upgraded);
-
   const billingState = useBillingState({
     upgraded: data.upgraded,
     callbackError: data.callbackError,
@@ -202,13 +200,6 @@ export default function BillingPage() {
       open(fetcher.data.confirmationUrl, "_top");
     }
   }, [fetcher.data]);
-
-  useEffect(() => {
-    if (showCelebration) {
-      const timer = setTimeout(() => setShowCelebration(false), 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [showCelebration]);
 
   const currentPlan = data.subscription?.plan || "free";
   const isFreePlan = currentPlan === "free";
@@ -243,7 +234,6 @@ export default function BillingPage() {
 
           {showSuccessBanner && (
             <UpgradeSuccessBanner
-              showCelebration={showCelebration}
               onDismiss={dismissSuccessBanner}
             />
           )}

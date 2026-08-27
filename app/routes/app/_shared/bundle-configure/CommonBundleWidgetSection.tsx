@@ -106,9 +106,9 @@ export function CommonBundleWidgetSection(props: CommonBundleWidgetSectionProps)
                 </s-box>
               </div>
 
-              <s-banner tone="info" dismissible={false} hidden={false}>
+              <s-paragraph>
                 Select if you want the upsell block or button to appear on product pages.
-              </s-banner>
+              </s-paragraph>
 
               <s-stack direction="inline" alignItems="center" justifyContent="space-between" gap="small">
                 <s-heading>Widget Settings</s-heading>
