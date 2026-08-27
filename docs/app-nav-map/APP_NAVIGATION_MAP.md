@@ -5,7 +5,7 @@ title: Wolfpack Product Bundles App Navigation and UI Map
 type: navigation-map
 status: authoritative
 summary: Routes, screens, actions, modals, and storefront-preview flows for the embedded app.
-last_audited: 2026-08-25
+last_audited: 2026-08-27
 owners:
   - engineering
 domains:
@@ -30,7 +30,7 @@ keywords:
 > Any time a new page, modal, tab, sidebar section, or user flow is added or removed,
 > this document **must** be updated. See CLAUDE.md for the enforcement rule.
 
-**Last Updated:** 2026-08-25
+**Last Updated:** 2026-08-27
 **Environment mapped:** SIT (`wolfpack-product-bundles-sit`)
 **Test store:** `wolfpack-store-test-1.myshopify.com`
 
@@ -211,7 +211,8 @@ Settings
 │       ├── Template, component surface, and desktop/mobile selectors above the local preview canvas
 │       ├── One contextual inspector for the component visible in the preview
 │       ├── Phone panes: Preview / Customize
-│       └── Contextual colors inherit Shopify Shop Brand pairs until individually overridden
+│       ├── Contextual colors inherit Shopify Shop Brand pairs until individually overridden
+│       └── Preview Bundle modal lists saved, storefront-ready active/unlisted FPB and PPB bundles
 ├── Card: Language
 │   └── Shows multilanguage mode, 39 add/remove locale choices, shared Cart & Checkout strings, Landing Page Layout strings, and Product Page Layout strings
 └── Card: Controls
@@ -230,9 +231,9 @@ Primary action:
 - Images & GIFs owns the store-level FPB loading screen: merchants can retain the default spinner or select an uploaded GIF through one clickable drop zone, change its background color, and see both choices in the local Loading preview. Image Fit is disabled on the Loading surface because it does not affect that screen. The former per-bundle FPB loading animation control is not exposed.
 - Images & GIFs also owns one store-level FPB/PPB Slot Icon and a Slot Icon Presentation selector for every template. Centered badge replaces the native plus icon (recommended 96 x 96 px transparent square); Cover fills the responsive product slot; Fit contains an 800 x 800 px square image inside the responsive product slot.
 - Component scenes use fixed logical 1280×1136 desktop and 390×844 mobile canvases that scale to fit the Admin panel. The stage keeps one viewport-responsive block size so desktop/mobile toggles do not move the surrounding page. Product picker, Loading, Validation, and Upsell remain representative transient states.
-- Editing a preview-relevant field selects the scene where its effect is visible. Slot product-card fields reveal Product picker, cart/footer fields reveal Cart / summary, and loading, toast, and upsell fields reveal their matching surfaces.
-- Unsaved design values are applied through the normalized storefront Design runtime and a semantic field-target contract; arbitrary CSS, remote preview requests, and cart mutations are rejected.
-- Local Design controls and template previews remain available without a storefront-ready bundle. Only the separate Preview Bundle action requires a storefront URL.
+- Editing a preview-relevant field selects the scene where its effect is visible once per edit. Manual surface selection remains authoritative until the next field edit. Slot product-card fields reveal Product picker, cart/footer fields reveal Cart / summary, and loading, toast, and upsell fields reveal their matching surfaces.
+- Unsaved design values are applied through the normalized storefront Design runtime and a semantic field-target contract. Category, quantity, slot, picker, progress, mobile-summary, upsell, and feedback actions share deterministic in-memory state; arbitrary CSS, remote preview requests, and cart mutations are rejected.
+- Local Design controls and template previews remain available without a storefront-ready bundle. The separate Preview Bundle action is disabled while Design values are dirty or saving. Its Polaris modal lists only active/unlisted bundles with a valid FPB public number or PPB product handle, reserves a tab, posts the existing configure `/prepare-preview` action, and navigates to the signed FPB or tokenized PPB storefront URL.
 - Relevant Expert Colour Control groups expose `Show Colour Guide` links to the five app-owned AVIF guide paths generated from tracked public PNG sources by CI/CD.
 - Settings back actions await App Bridge Save Bar leave confirmation while unsaved changes exist.
 - Language uses Polaris web components for locale chips, layout/section navigation, fields, variable guidance, and the contextual save flow. English is mandatory; removing another locale removes it from Landing Page, Product Page, and shared language roots.

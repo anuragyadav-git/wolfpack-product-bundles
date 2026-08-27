@@ -5,7 +5,7 @@ title: Widget Architecture
 type: architecture
 status: authoritative
 summary: FPB and PPB bootstrap, hydration, extension-asset, and widget runtime architecture.
-last_audited: 2026-08-25
+last_audited: 2026-08-27
 owners:
   - engineering
 domains:
@@ -130,6 +130,22 @@ available Admin panel; the scale must not change the storefront breakpoint
 being represented. Transient Product picker, Loading, Validation, and Upsell
 states remain deterministic representations and must not be described as exact
 storefront interactions.
+
+All enabled preview controls share one Admin-only interaction state. Product,
+upsell, category, slot, picker, progress, mobile-summary, and discount-feedback
+actions update that state, and Cart / Summary derives its rows, item count, and
+total from the current quantities. These simulations must never call cart,
+checkout, bundle, or storefront APIs. Field-to-surface focus is a one-shot
+request per edit so a merchant's later manual surface selection is not
+overridden. The fixed logical canvas may scale below 0.5 when required to fit a
+narrow Admin host; it must not clip merely to preserve a minimum visual scale.
+
+The separate storefront Preview Bundle action consumes saved Design settings
+only. It lists active or unlisted bundles with a valid storefront identifier,
+reserves a browser tab synchronously, and posts the existing authenticated
+configure `/prepare-preview` route. FPB navigates to the signed shareable URL;
+PPB appends the returned preview token to the parent product URL. Preparation
+failure closes the reserved tab and leaves the Polaris modal open with an error.
 
 The Design workspace is preview-first: template, component surface, and logical
 desktop/mobile selectors stay with the canvas, while one inspector exposes only
