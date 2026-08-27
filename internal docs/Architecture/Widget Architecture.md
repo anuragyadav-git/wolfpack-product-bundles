@@ -38,7 +38,9 @@ source_paths:
   - app/routes/app/app.settings/DesignLivePreview.tsx
   - app/routes/app/app.settings/DesignSettingsView.module.css
   - app/routes/app/app.settings/design-preview-model.ts
-  - app/routes/app/app.settings/preview-surfaces/PreviewSurfaces.module.css
+  - app/routes/app/app.settings/storefront-preview-fixtures.ts
+  - app/routes/app/app.settings/storefront-preview-protocol.ts
+  - app/routes/root/settings-design-preview-frame/route.tsx
   - app/lib/shop-brand-colors.ts
   - app/routes/root/wpb.$bundleId.tsx
   - extensions/bundle-builder/blocks/bundle-app-embed.liquid
@@ -108,48 +110,31 @@ selling-plan group across every FPB and PPB template. Subscription submissions a
 same `selling_plan` to every component line and omit the merged-path public
 `Box` metadata; one-time submissions retain the existing merged-parent flow.
 
-## Admin Design Preview Adapter
+## Admin Design Production Renderer Adapter
 
-Settings -> Design resolves its eight local preview descriptors from
-`mapTemplateSelection` and the same FPB/PPB template config registries listed
-above. The descriptor reads canonical product-card mode, configured columns,
-timeline mode, summary mode, and slot orientation; its Admin-only adapter adds
-supported surfaces, semantic fixture regions, and responsive composition.
+Settings -> Design resolves its eight template selections through
+`mapTemplateSelection`, converts unsaved values with
+`buildSettingsDesignRuntime`, and sends them to the isolated
+`/settings-design-preview-frame` document through a versioned same-origin
+protocol. The frame dynamically imports only the selected production FPB or PPB
+controller and loads the same base, responsive, and template CSS sources used by
+the storefront asset build.
 
-The Admin preview must remain a local structural representation. It uses
-deterministic fixture records and `buildSettingsDesignRuntime` theme values, but
-does not import storefront CSS, instantiate a widget controller, fetch a bundle,
-embed an iframe, mutate a cart, or persist preview state. Public template images
-are reference evidence only. This boundary lets template IDs and runtime design
-tokens stay canonical without coupling the Settings chunk to the storefront
-runtime.
+Deterministic fixture bundles hydrate the controller without Shopify, app-proxy,
+or storefront requests. Controller persistence, analytics, add-to-cart,
+post-cart behavior, and external navigation are disabled; links, forms, and cart
+actions are also blocked at the frame boundary. Interactions otherwise use the
+production renderer. Product picker, Loading, Validation, and Upsell use their
+real modal, overlay, toast, and offer implementations.
 
-The Admin preview does not compose a synthetic whole builder. It renders each
-applicable major component independently: Bundle header, Navigation, Categories,
-Product cards, Product slots, Product picker, Cart / Summary, Loading,
-Validation, and Upsell. Component surfaces render inside fixed logical
-1280×1136 desktop and 390×844 mobile canvases, then scale as a whole to fit the
-available Admin panel using the smaller valid width or height ratio and center
-on both stage axes; the scale must not change the storefront breakpoint being
-represented. The selected component is composed into an Admin context frame
-whose decorative layer is accessibility-hidden and noninteractive: FPB uses a
-full-page product-grid and summary shell, Product List/Grid use an in-page
-product-media and product-form shell, and slot templates use a modal-oriented
-product-page shell. Components remain the only interactive preview content,
-and only modal or overlay states float above the context. Transient Product
-picker, Loading, Validation, and Upsell states remain deterministic
-representations and must not be described as exact storefront interactions.
-
-All enabled preview controls share one Admin-only interaction state. Product,
-upsell, category, slot, picker, progress, mobile-summary, and discount-feedback
-actions update that state, and Cart / Summary derives its rows, item count, and
-total from the current quantities. These simulations must never call cart,
-checkout, bundle, or storefront APIs. Field-to-surface focus is a one-shot
-request per edit so a merchant's later manual surface selection is not
-overridden. The fixed logical canvas may scale below 0.5 when required to fit a
-narrow Admin host; it must not clip merely to preserve a minimum visual scale.
-Preview product grids consume both canonical desktop and mobile column
-contracts; a mobile logical viewport must never retain the desktop track count.
+The frame supplies an adaptive neutral store shell: FPB is presented in a
+full-page collection context, while PPB is presented beside product media and
+product information. This context is intentionally theme-neutral; bundle DOM,
+styling, responsive behavior, and interactions remain production-owned. The
+logical 1280×1136 desktop and 390×844 mobile frames scale by the smaller valid
+host ratio and center on both axes without changing the storefront breakpoint.
+Field-to-surface focus remains a one-shot request per edit so later manual
+surface selection stays authoritative.
 
 The separate storefront Preview Bundle action consumes saved Design settings
 only. It lists active or unlisted bundles with a valid storefront identifier,

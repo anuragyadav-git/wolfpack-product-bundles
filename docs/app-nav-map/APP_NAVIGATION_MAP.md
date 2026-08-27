@@ -208,10 +208,11 @@ Settings
 ├── App-owned header: arrow-only back action + Settings title
 ├── Card: Design
 │   └── Opens the preview-first Design workspace
-│       ├── Template, component surface, and desktop/mobile selectors above the local preview canvas
+│       ├── Template, component surface, and desktop/mobile selectors above the isolated storefront preview canvas
 │       ├── One contextual inspector for the component visible in the preview
 │       ├── Phone panes: Preview / Customize
 │       ├── Contextual colors inherit Shopify Shop Brand pairs until individually overridden
+│       ├── Nested route `/settings-design-preview-frame` renders deterministic FPB/PPB fixtures with production controllers and CSS
 │       └── Preview Bundle modal lists saved, storefront-ready active/unlisted FPB and PPB bundles
 ├── Card: Language
 │   └── Shows multilanguage mode, 39 add/remove locale choices, shared Cart & Checkout strings, Landing Page Layout strings, and Product Page Layout strings
@@ -230,9 +231,9 @@ Primary action:
 - The template-aware Preview surface control exposes individual components only: Bundle header, Navigation, Categories, Product cards, Product slots, Product picker, Cart / summary, Loading, Validation, and Upsell. Each template shows only the components it owns, and there is no whole-Builder option. Desktop/mobile switching preserves the selected surface when it remains valid.
 - Images & GIFs owns the store-level FPB loading screen: merchants can retain the default spinner or select an uploaded GIF through one clickable drop zone, change its background color, and see both choices in the local Loading preview. Image Fit is disabled on the Loading surface because it does not affect that screen. The former per-bundle FPB loading animation control is not exposed.
 - Images & GIFs also owns one store-level FPB/PPB Slot Icon and a Slot Icon Presentation selector for every template. Centered badge replaces the native plus icon (recommended 96 x 96 px transparent square); Cover fills the responsive product slot; Fit contains an 800 x 800 px square image inside the responsive product slot.
-- Component scenes use fixed logical 1280×1136 desktop and 390×844 mobile canvases that scale to fit the Admin panel. The stage keeps one viewport-responsive block size so desktop/mobile toggles do not move the surrounding page. Product picker, Loading, Validation, and Upsell remain representative transient states.
+- Component scenes use fixed logical 1280×1136 desktop and 390×844 mobile canvases that scale and center within the Admin panel. The isolated same-origin frame composes a neutral store header and FPB page or PPB product-detail context around the production widget. Product picker, Loading, Validation, and Upsell invoke the production renderer's corresponding surface.
 - Editing a preview-relevant field selects the scene where its effect is visible once per edit. Manual surface selection remains authoritative until the next field edit. Slot product-card fields reveal Product picker, cart/footer fields reveal Cart / summary, and loading, toast, and upsell fields reveal their matching surfaces.
-- Unsaved design values are applied through the normalized storefront Design runtime and a semantic field-target contract. Category, quantity, slot, picker, progress, mobile-summary, upsell, and feedback actions share deterministic in-memory state; arbitrary CSS, remote preview requests, and cart mutations are rejected.
+- Unsaved design values are converted through the normalized storefront Design runtime and posted to the frame through a versioned same-origin protocol. The frame uses deterministic local media and fixture data, blocks navigation and cart submission, and disables persistence, analytics, and bundle fetching.
 - Local Design controls and template previews remain available without a storefront-ready bundle. The separate Preview Bundle action is disabled while Design values are dirty or saving. Its Polaris modal lists only active/unlisted bundles with a valid FPB public number or PPB product handle, reserves a tab, posts the existing configure `/prepare-preview` action, and navigates to the signed FPB or tokenized PPB storefront URL.
 - Relevant Expert Colour Control groups expose `Show Colour Guide` links to the five app-owned AVIF guide paths generated from tracked public PNG sources by CI/CD.
 - Settings back actions await App Bridge Save Bar leave confirmation while unsaved changes exist.
@@ -697,10 +698,10 @@ On tablet and phone containers, configure section changes use the compact curren
       ├── Existing Design sections and fields render in one inspector pane
       ├── Phone width → switch between Preview and Customize panes
       ├── Select preview-only bundle type, template, surface, and desktop/mobile viewport
-      ├── Change setting → app-owned live preview updates immediately (no persistence)
+      ├── Change setting → normalized Design CSS updates the isolated production renderer immediately (no persistence)
       ├── Slot product-card field → Product picker modal/bottom sheet is revealed
       ├── Cart/footer field → Cart / summary surface is revealed
-      ├── Loading, toast, or upsell field → matching deterministic surface is revealed
+      ├── Loading, toast, or upsell field → matching production-renderer surface is revealed
       ├── Preview blocks add-to-cart and form submission
       └── [Save] → Save Bar submits → toast confirmation
 ```

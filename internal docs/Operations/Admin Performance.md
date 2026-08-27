@@ -22,6 +22,7 @@ source_paths:
   - app/routes/app/app.settings/SettingsRoute.tsx
   - app/routes/app/app.settings/DesignSettingsView.tsx
   - app/routes/app/app.settings/DesignLivePreview.tsx
+  - app/routes/root/settings-design-preview-frame/route.tsx
   - app/routes/app/app.dashboard/route.tsx
   - app/routes/app/app.dashboard/DashboardPage.tsx
   - app/routes/app/app.dashboard/DashboardDeferredProxyHealthBanner.tsx
@@ -104,7 +105,9 @@ The workspace implementation remains behind a separate React lazy boundary. The 
 production build split the initial Settings route (`app.settings`, 2.99 kB /
 1.27 kB gzip) from the complete `SettingsRoute` workspace (81.39 kB / 18.60 kB
 gzip, plus 22.22 kB / 4.30 kB gzip CSS). The template-specific scene registry,
-fixture model, and local surface renderers account for the workspace increase.
+fixture model, and local surface renderers accounted for the historical
+workspace increase; the current production renderer is isolated behind its own
+post-click frame route.
 Design is statically part of that post-click workspace chunk, so entering Design
 does not wait for a second sequential JavaScript request. The workspace chunk is
 not required for the first Settings paint.
@@ -133,33 +136,25 @@ cards visible while Shopify's native Admin header indicator reports the Remix
 navigation. The Controls route renders its title and a small Polaris spinner
 until deferred Settings data is ready.
 
-The Settings workspace owns the Design inspector/preview layout and the
-eight-template representative preview. Wide containers use three columns for
-section navigation, the larger preview surface, and the active fields. Medium
-containers place the preview across the first row with navigation and fields
-beneath it. Phone containers expose Preview and Customize as a two-state
-segmented control so only one dense workspace pane renders at a time. All
-breakpoints are container-driven because the usable width of a Shopify Admin
-iframe is independent of the browser's top-level viewport.
+The Settings workspace owns a preview-first two-column layout: the centered
+preview canvas and selectors sit beside the active inspector. Phone containers
+expose Preview and Customize as a two-state segmented control so only one dense
+workspace pane renders at a time. Breakpoints are container-driven because the
+usable Shopify Admin iframe width is independent of the browser viewport.
 
-The preview uses local fixture markup and media, canonical template descriptors
-derived from the storefront registries, and theme values from the normalized
-storefront Design runtime. It renders Bundle header, Navigation, Categories,
-Product cards, Product slots, Product picker, Cart / Summary, Loading,
-Validation, and Upsell as separate deterministic local surfaces. It does not
-compose or claim parity for a whole builder. Preview scenes use fixed logical
-1280×1136 desktop and 390×844 mobile canvases that scale as a whole to fit their
-Admin host, preserving the storefront breakpoint under test. Only slot templates
-include Product slots and Product picker. The preview does not
-fetch bundle data, load remote media, embed a storefront iframe, duplicate the
-widget runtime, mutate a cart, or persist preview state. Local Design editing and
-preview rendering therefore remain available when the shop has no storefront-ready
-bundle; only the separate Preview Bundle action requires one.
+The preview frame route uses deterministic local fixture data with the actual
+FPB or PPB controller and exact family/template stylesheet manifest. A neutral
+store header plus full-page or product-detail shell supplies realistic context
+without coupling the preview to a merchant theme. Fixed logical 1280×1136 and
+390×844 canvases scale as a whole and center on both axes. The frame accepts only
+versioned same-origin commands, uses local media, blocks navigation and cart
+submission, and disables analytics, persistence, app-proxy loading, and post-cart
+effects. Local Design editing therefore remains available without a
+storefront-ready bundle; only the separate Preview Bundle action requires one.
 
-Fixture product PNGs are rendered through `OptimisedImage`, so production builds
-emit AVIF/WebP siblings while preserving explicit dimensions. Keep those sources
-compact and local; do not preload them on the Settings landing route because the
-Design workspace remains behind the post-click lazy boundary.
+Fixture product PNGs remain compact and local. Do not preload them on the
+Settings landing route because the Design workspace remains behind the
+post-click lazy boundary.
 
 For interaction acceptance, measure at least ten cache-bypassed Design entries
 from card activation until the live preview controls and surface are usable.
@@ -326,12 +321,12 @@ comes from Shopify-collected field metrics after deployment.
 
 ## 2026-08-23 Settings Design workspace follow-up
 
-Settings -> Design remains behind the existing lazy workspace boundary. Its
-preview is deterministic local React/CSS and does not import a storefront
-runtime, iframe, or remote bundle data. The workspace now presents the template,
-component, and viewport controls with the preview canvas and renders one
-contextual inspector; phone containers switch between Preview and Customize
-without creating a second preview or persisted pane state.
+Settings -> Design remains behind the existing lazy workspace boundary. This
+entry records the former handcrafted React/CSS preview; it was replaced on
+2026-08-27 by the isolated production-renderer frame described above. The
+workspace still presents template, component, and viewport controls with one
+contextual inspector, and phone containers still switch between Preview and
+Customize without creating a second preview or persisted pane state.
 
 The Settings loader starts the Storefront Shop Brand query alongside deferred
 workspace reads, so the Settings landing response is not held until Brand data
