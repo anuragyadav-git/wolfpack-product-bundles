@@ -194,8 +194,9 @@ React event handlers for the post-Next Preview bundle action. That projected
 action remains a semantic HTML button because nested `s-button` elements do
 not hydrate in the host modal document and render as non-interactive text.
 The projected workflow fills the host modal viewport, keeps the template grid
-as its only vertical scroll region, and pins the action footer so `Next` stays
-available while merchants review every template.
+as its only vertical scroll region, and pins both the customization header and
+action footer so the title, customization action, and `Next` stay available
+while merchants review every template.
 
 After a successful Select Template preview, the preview handler returns the
 exact URL opened in the reserved new tab. Closing the projected customization

@@ -1245,15 +1245,21 @@
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding: 24px calc(100% / 6);
+  padding: 0 calc(100% / 6) 24px;
 }
 
 .templateDialogIntro {
+  position: sticky;
+  top: 0;
+  z-index: 2;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 24px;
+  margin-bottom: 0;
+  padding: 24px 0;
+  border-bottom: 1px solid #e1e3e5;
+  background: #ffffff;
 }
 
 .templateDialogIntro > div {
@@ -3115,11 +3121,12 @@
   }
 
   .templateDialogBody {
-    padding: 16px;
+    padding: 0 16px 16px;
   }
 
   .templateDialogIntro {
     flex-direction: column;
+    padding: 16px 0;
   }
 
   .templateDialogGrid,
