@@ -46,7 +46,7 @@ keywords:
 ### Practical Guidance
 - Burst up to 1,000 points, then throttle
 - Use `X-Shopify-Shop-Api-Call-Limit` header to monitor remaining
-- For bulk operations (inventory sync): check `inventorySyncedAt` debounce (< 60s → skip) to avoid hammering the limit
+- Deduplicate identifiers, batch compatible reads, request at most 250 connection nodes per page, and follow cursors only for overflowing resources
 - REST API: separate rate limit, roughly 2 req/sec per store on Basic plans
 
 ---

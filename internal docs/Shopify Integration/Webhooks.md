@@ -5,7 +5,7 @@ title: Webhooks
 type: architecture-note
 status: active
 summary: Defines Wolfpack's app-specific Shopify webhook subscriptions, payload version, processing ownership, and delivery-volume safeguards.
-last_audited: 2026-08-24
+last_audited: 2026-08-27
 owners:
   - engineering
 domains:
@@ -72,6 +72,8 @@ The handler deletes old `BusinessEvent` rows before writing the final `app_unins
 `products/update` is not subscribed because Shopify cannot filter it by Wolfpack DB membership. Reintroducing it would deliver all product updates unless the app also writes and maintains a Shopify-side marker such as a tag or metafield.
 
 `inventory_levels/update` is not subscribed because each event requires a shop-wide bundle lookup before inventory sync. Runtime storefront inventory checks and explicit bundle sync flows should own this until there is a narrower, Shopify-side event filter.
+
+The retired inventory webhook handler and its shop-wide inventory synchronization service were removed. Do not restore either while the topic remains retired; doing so recreates dormant N+1 query paths without providing a reachable production flow.
 
 ## Storage Gotcha
 

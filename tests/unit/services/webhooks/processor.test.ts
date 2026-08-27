@@ -10,7 +10,6 @@ const mockDb = {
 
 const mockHandleProductDelete = jest.fn();
 const mockHandleProductUpdate = jest.fn();
-const mockHandleInventoryUpdate = jest.fn();
 const mockHandleOrderCreate = jest.fn();
 
 jest.mock("../../../../app/db.server", () => ({
@@ -47,10 +46,6 @@ jest.mock("../../../../app/services/webhooks/handlers/gdpr.server", () => ({
 jest.mock("../../../../app/services/webhooks/handlers/lifecycle.server", () => ({
   handleAppUninstalled: jest.fn(),
   handleScopesUpdate: jest.fn(),
-}));
-
-jest.mock("../../../../app/services/webhooks/handlers/inventory.server", () => ({
-  handleInventoryUpdate: mockHandleInventoryUpdate,
 }));
 
 jest.mock("../../../../app/services/webhooks/handlers/orders.server", () => ({
@@ -98,7 +93,6 @@ describe("WebhookProcessor retired topic ingestion", () => {
       expect(mockDb.webhookEvent.create).not.toHaveBeenCalled();
       expect(mockDb.webhookEvent.updateMany).not.toHaveBeenCalled();
       expect(mockHandleProductUpdate).not.toHaveBeenCalled();
-      expect(mockHandleInventoryUpdate).not.toHaveBeenCalled();
       expect(mockHandleOrderCreate).not.toHaveBeenCalled();
     }
   );
