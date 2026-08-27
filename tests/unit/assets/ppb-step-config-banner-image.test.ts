@@ -23,6 +23,9 @@ function createElement(tagName: string): any {
       children.push(child);
       return child;
     },
+    replaceChildren(...newChildren: any[]) {
+      children.splice(0, children.length, ...newChildren);
+    },
     prepend(child: any) {
       child.parentElement = element;
       children.unshift(child);

@@ -3,10 +3,21 @@ const {
   getModalSoleVariantDisplayTitle,
   ProductPageModalMethods,
 } = require('../../../app/assets/widgets/product-page/methods/modal-methods.js');
+const { JSDOM } = require('jsdom');
 
 export {};
 
 describe('PPB modal category tabs', () => {
+  const originalDocument = global.document;
+
+  beforeEach(() => {
+    global.document = new JSDOM('<!doctype html><html><body></body></html>').window.document;
+  });
+
+  afterEach(() => {
+    global.document = originalDocument;
+  });
+
   it('renders multi-category controls and rerenders the active category', () => {
     const categoryTabs = createElement();
     const renderModalProducts = jest.fn();
@@ -76,7 +87,7 @@ describe('PPB modal category tabs', () => {
       ],
     };
     const products = [{ id: 'product-1' }, { id: 'product-2' }];
-    const productGrid = { innerHTML: '' };
+    const productGrid = document.createElement('div');
     const body = { querySelector: () => null };
     const filterProducts = jest.fn(() => []);
     const expandProductsByVariant = jest.fn((items: unknown[]) => items);
@@ -115,7 +126,7 @@ describe('PPB modal category tabs', () => {
       categories: [{ name: 'One', displayVariantsAsIndividualProducts: true }],
     };
     const products = [{ id: 'product-1' }];
-    const productGrid = { innerHTML: '' };
+    const productGrid = document.createElement('div');
     const expandProductsByVariant = jest.fn(() => []);
     const widget = {
       currentStepIndex: 0,

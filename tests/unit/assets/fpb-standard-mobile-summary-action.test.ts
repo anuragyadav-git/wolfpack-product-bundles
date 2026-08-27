@@ -90,6 +90,12 @@ class FakeElement {
     return child;
   }
 
+  replaceChildren(...children: FakeElement[]) {
+    this.children = [];
+    this.ownText = '';
+    this.append(...children);
+  }
+
   getChildren() {
     return this.children;
   }
@@ -147,6 +153,17 @@ beforeEach(() => {
       const element = new FakeElement();
       element.tagName = tagName.toUpperCase();
       return element;
+    },
+    createElementNS: (_namespace: string, tagName: string) => {
+      const element = new FakeElement();
+      element.tagName = tagName.toUpperCase();
+      return element;
+    },
+    createDocumentFragment: () => new FakeElement(),
+    createTextNode: (value: string) => {
+      const node = new FakeElement();
+      node.textContent = value;
+      return node;
     },
   } as unknown as Document;
 });
@@ -403,7 +420,7 @@ describe('FPB Standard mobile summary action', () => {
       discountSpy.mockRestore();
     }
 
-    expect(locateFakeElementByClass(sheet, 'fpb-mobile-summary-discount-text')?.innerHTML)
+    expect(locateFakeElementByClass(sheet, 'fpb-mobile-summary-discount-text')?.textContent)
       .toContain('Success! You got 1 product(s) at 100% off');
   });
 
@@ -799,7 +816,7 @@ describe('FPB Standard mobile summary action', () => {
       1,
     );
 
-    expect(container.getChildren()[0].getChildren()).toHaveLength(0);
+    expect(locateInteractiveElements(container.getChildren()[0])).toHaveLength(0);
   });
 
   it('uses the normal category-switching path for Standard mobile tabs', () => {

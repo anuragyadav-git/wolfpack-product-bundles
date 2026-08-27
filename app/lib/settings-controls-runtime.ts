@@ -4,6 +4,7 @@ import {
   normalizeCheckoutIntegrationProvider,
   type CheckoutIntegrationProviderId,
 } from "./checkout-integrations";
+import { processCss } from "./css-sanitizer";
 
 export const SETTINGS_CONTROLS_SCHEMA_VERSION = 1 as const;
 export const SETTINGS_CONTROLS_BUNDLE_TYPES = [BundleType.PRODUCT_PAGE, BundleType.FULL_PAGE] as const;
@@ -83,6 +84,9 @@ export type SettingsControlsRuntimeResult = {
 };
 
 const textValue = (payload: ControlsPayload, key: string) => String(payload[key] ?? "").trim();
+const cssValue = (payload: ControlsPayload, key: string) => (
+  processCss(textValue(payload, key)).sanitizedCss
+);
 
 function booleanValue(payload: ControlsPayload, key: string, fallback = false) {
   const raw = payload[key];
@@ -139,9 +143,9 @@ export function buildSettingsControlsRuntime(payload: ControlsPayload): Settings
       },
       font: { customFont: textValue(payload, "landingPage.font.customFont") },
       css: {
-        bundleBuilderPages: textValue(payload, "landingPage.css.bundleBuilderPages"),
-        bundleDummyProductPage: textValue(payload, "landingPage.css.bundleDummyProductPage"),
-        themePages: textValue(payload, "landingPage.css.themePages"),
+        bundleBuilderPages: cssValue(payload, "landingPage.css.bundleBuilderPages"),
+        bundleDummyProductPage: cssValue(payload, "landingPage.css.bundleDummyProductPage"),
+        themePages: cssValue(payload, "landingPage.css.themePages"),
       },
       scripts: { bundlePage: textValue(payload, "landingPage.scripts.bundlePage") },
       selectors: {
@@ -175,7 +179,7 @@ export function buildSettingsControlsRuntime(payload: ControlsPayload): Settings
         action: productRedirect(payload),
         executeScript: textValue(payload, "productPage.redirect.executeScript"),
       },
-      css: { mixAndMatchBundles: textValue(payload, "productPage.css.mixAndMatchBundles") },
+      css: { mixAndMatchBundles: cssValue(payload, "productPage.css.mixAndMatchBundles") },
       scripts: { executeCustomScript: textValue(payload, "productPage.scripts.executeCustomScript") },
       selectors: {
         sideCart: textValue(payload, "productPage.selectors.sideCart"),
@@ -191,10 +195,7 @@ export function buildSettingsControlsRuntime(payload: ControlsPayload): Settings
   return {
     settingsControls,
     bundleCartLineMessaging: cartMessaging,
-    fullPageCustomCss: joinCss([
-      settingsControls.landingPage.css.bundleBuilderPages,
-      settingsControls.landingPage.css.bundleDummyProductPage,
-    ]),
+    fullPageCustomCss: null,
     productPageCustomCss: joinCss([settingsControls.productPage.css.mixAndMatchBundles]),
   };
 }
@@ -203,11 +204,28 @@ export function buildSettingsControlsResponse(
   settingsControls: unknown,
   bundleType: BundleType.PRODUCT_PAGE | BundleType.FULL_PAGE,
 ) {
-  const runtime = settingsControls
+  const candidate = settingsControls
     && typeof settingsControls === "object"
     && (settingsControls as Partial<SettingsControlsRuntime>).schemaVersion === SETTINGS_CONTROLS_SCHEMA_VERSION
     ? settingsControls as SettingsControlsRuntime
     : buildSettingsControlsRuntime({}).settingsControls;
+  const runtime: SettingsControlsRuntime = {
+    ...candidate,
+    landingPage: {
+      ...candidate.landingPage,
+      css: {
+        bundleBuilderPages: processCss(String(candidate.landingPage.css?.bundleBuilderPages ?? "")).sanitizedCss,
+        bundleDummyProductPage: processCss(String(candidate.landingPage.css?.bundleDummyProductPage ?? "")).sanitizedCss,
+        themePages: processCss(String(candidate.landingPage.css?.themePages ?? "")).sanitizedCss,
+      },
+    },
+    productPage: {
+      ...candidate.productPage,
+      css: {
+        mixAndMatchBundles: processCss(String(candidate.productPage.css?.mixAndMatchBundles ?? "")).sanitizedCss,
+      },
+    },
+  };
 
   return {
     schemaVersion: SETTINGS_CONTROLS_SCHEMA_VERSION,

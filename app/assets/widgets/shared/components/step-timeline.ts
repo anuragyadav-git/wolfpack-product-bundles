@@ -7,38 +7,32 @@
 
 'use strict';
 
-export function renderStepTimelineEntry({
+export function createStepTimelineEntryElement({
   stepIndex = 0,
   timelineType = 'step',
   label = '',
-  iconHtml = '',
+  iconElement = null,
   classes = [],
+  document: runtimeDocument = document,
 }: any = {}) {
   const className = [
     'timeline-step',
     ...classes,
   ].filter(Boolean).join(' ');
 
-  return `
-    <div class="${escapeAttribute(className)}" data-step-index="${escapeAttribute(stepIndex)}" data-timeline-type="${escapeAttribute(timelineType)}">
-      <div class="timeline-icon-wrapper">
-        ${iconHtml || ''}
-        <div class="timeline-checkmark"></div>
-      </div>
-      <span class="timeline-step-name">${escapeHtml(label)}</span>
-    </div>
-  `;
-}
-
-function escapeHtml(value: string) {
-  return String(value)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
-
-function escapeAttribute(value: string|number) {
-  return escapeHtml(String(value)).replace(/`/g, '&#96;');
+  const root = runtimeDocument.createElement('div');
+  root.className = className;
+  root.dataset.stepIndex = String(stepIndex);
+  root.dataset.timelineType = String(timelineType);
+  const iconWrapper = runtimeDocument.createElement('div');
+  iconWrapper.className = 'timeline-icon-wrapper';
+  if (iconElement?.nodeType) iconWrapper.append(iconElement);
+  const checkmark = runtimeDocument.createElement('div');
+  checkmark.className = 'timeline-checkmark';
+  iconWrapper.append(checkmark);
+  const name = runtimeDocument.createElement('span');
+  name.className = 'timeline-step-name';
+  name.textContent = String(label);
+  root.append(iconWrapper, name);
+  return root;
 }

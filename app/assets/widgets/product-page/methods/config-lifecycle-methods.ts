@@ -7,6 +7,7 @@ import {
 import { TemplateDesignSystem } from '../../shared/template-design-system.js';
 import { ppbExpandSingleStepCategoriesAsSteps } from '../single-step-categories.js';
 import { localizeBundleConfig } from '../../shared/localized-bundle-config.js';
+import { parseThemeSectionResponse } from '../../shared/theme-section-parser.js';
 
 function getWindow() {
   return typeof window === 'undefined' ? null : window;
@@ -121,11 +122,7 @@ async _refreshConfiguredCartSection(action: string) {
 
   try {
     const response = await fetch(`/?section_id=${encodeURIComponent(sectionId)}`, { credentials: 'same-origin' });
-    if (!response.ok) return false;
-    const html = await response.text();
-    const template = document.createElement('template');
-    template.innerHTML = html;
-    const replacement = template.content.querySelector(selector);
+    const replacement = await parseThemeSectionResponse(response, selector, document);
     const current = document.querySelector(selector);
     if (!replacement || !current) return false;
     current.replaceWith(replacement);
@@ -392,9 +389,23 @@ ensureProductPageTemplateStylesheet(templateType: any, designPreset: any) {
     ? modalAssetKey
     : presetKey];
 
-  if (!templateContract || (!isModalTemplate && !presetKey) || !href || typeof document === 'undefined') {
+  if (typeof document === 'undefined' || (!isModalTemplate && (!templateContract || !presetKey))) {
     return Promise.resolve();
   }
+
+  if (!href) {
+    const retryCount = Number(this._ppbTemplateStylesheetUrlRetryCount || 0);
+    if (!this._ppbTemplateStylesheetUrlRetryTimer && retryCount < 10) {
+      this._ppbTemplateStylesheetUrlRetryCount = retryCount + 1;
+      this._ppbTemplateStylesheetUrlRetryTimer = setTimeout(() => {
+        this._ppbTemplateStylesheetUrlRetryTimer = null;
+        void this.ensureProductPageTemplateStylesheet(templateType, designPreset);
+      }, 100);
+    }
+    return Promise.resolve();
+  }
+
+  this._ppbTemplateStylesheetUrlRetryCount = 0;
 
   if (!this._ppbTemplateStylesheetPromises) {
     this._ppbTemplateStylesheetPromises = new Map();

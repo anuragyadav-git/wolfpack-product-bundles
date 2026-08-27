@@ -147,7 +147,7 @@ function getCapability(providerId: string, runtimeWindow: any, options: any = {}
   }
 
   if (provider.id === 'shopflo') {
-    if (typeof runtimeWindow?.Shopflo?.openCheckout === 'function') {
+    if (typeof runtimeWindow?.Shopflo?.openFloCheckout === 'function') {
       return {
         available: true,
         capability: 'shopflo_sdk_callback',
@@ -177,7 +177,7 @@ function getCapability(providerId: string, runtimeWindow: any, options: any = {}
   }
   if (provider.id === 'rebuy') {
     return {
-      available: typeof runtimeWindow?.Cart?.getCart === 'function',
+      available: typeof runtimeWindow?.Rebuy?.Cart?.getCart === 'function',
       capability: 'rebuy_cart_callback',
       provider,
     };
@@ -268,10 +268,10 @@ async function runProviderInvocation(provider: any, runtimeWindow: any, options:
     return options.openGokwikCheckout();
   }
   if (capability === 'shopflo_sdk_callback') {
-    return runtimeWindow?.Shopflo?.openCheckout?.();
+    return runtimeWindow?.Shopflo?.openFloCheckout?.(options.checkoutUrl);
   }
   if (capability === 'shopflo_callback') {
-    return options.openShopfloCheckout();
+    return options.openShopfloCheckout(options.checkoutUrl);
   }
   if (capability === 'zecpay_callback') {
     return runtimeWindow.zecpeCheckFunctionAndCall('handleOcc');
@@ -280,7 +280,7 @@ async function runProviderInvocation(provider: any, runtimeWindow: any, options:
     return runtimeWindow.shiprocketCheckoutBuyCartHandler();
   }
   if (capability === 'rebuy_cart_callback') {
-    return runtimeWindow.Cart.getCart();
+    return runtimeWindow.Rebuy.Cart.getCart();
   }
   if (capability === 'upcart_callback') {
     return runtimeWindow.upcartOpenCart();

@@ -26,6 +26,10 @@ source_paths:
   - app/assets/widgets/shared/discount-tier-feedback.ts
   - app/assets/widgets/shared-css/discount-tier-feedback.css
   - app/assets/widgets/shared/drawer-layer-manager.ts
+  - app/assets/widgets/shared/rich-html.ts
+  - app/assets/widgets/shared/message-segments.ts
+  - app/assets/widgets/shared/managed-style.ts
+  - app/assets/widgets/shared/theme-section-parser.ts
   - app/assets/widgets/full-page/initialization-guard.js
   - app/assets/widgets/full-page-css/base/bootstrap-reservation.css
   - app/assets/bundle-widget-product-page.ts
@@ -134,6 +138,13 @@ storefront document before the controller renders. These are functional style
 scope owners, not decorative aliases: the shared responsive grid, template
 columns, and inline summary rules depend on them. PPB retains the host classes
 owned by its production controller.
+
+FPB category identity has one visual owner at a time. When category tabs are
+enabled, the selected tab is the active-category label and the standalone
+category title is omitted during both initial rendering and step navigation.
+The standalone title remains available only when category tabs are disabled.
+Because Settings -> Design runs the production controller, this rule is shared
+by its preview and the deployed storefront widget.
 
 Deterministic fixture bundles hydrate the controller without Shopify, app-proxy,
 or storefront requests. Controller persistence, analytics, add-to-cart,
@@ -483,7 +494,33 @@ nonexistent `presetSTANDARD` property and silently leave the widget with only
 base CSS. A base-only render can appear functional, so live verification must
 also confirm that the expected dedicated template stylesheet is loaded.
 
-### FPB Runtime Styling Boundary
+### Native DOM and trusted content boundaries
+
+Storefront browser renderers construct elements and fragments with DOM APIs.
+Dynamic text is assigned through `textContent`, mutable regions are replaced
+with `replaceChildren`, and handlers are attached with event listeners. Shared
+renderers return `HTMLElement` or `DocumentFragment` values through
+`create*Element` and `create*Fragment` APIs; string-returning component
+generators and HTML-valued child arguments are not part of the runtime
+contract.
+
+Two rich-content inputs retain formatting through
+`sanitizeRichHtmlFragment`: Shopify product descriptions use the
+`product-description` profile and provider review badges use the
+`review-badge` profile. Both profiles reject scripts, embedded documents,
+forms, inline styles, event attributes, and unsafe URLs, then return a detached
+sanitized fragment that callers append directly. Merchant discount templates
+never enter that boundary. `formatMessageSegments` produces text, condition,
+and discount segments, and `createMessageFragment` creates only the known
+emphasis elements while rendering templates and substituted values as text.
+
+Fetched Shopify section markup has one separate boundary:
+`parseThemeSectionResponse` accepts only successful same-origin HTML responses,
+requires the requested selector, and imports the selected node into the active
+document. Do not add another general HTML parser or move this boundary into
+ordinary component rendering.
+
+### Runtime styling boundary
 
 Static layout and presentation belong in source CSS. Runtime styling is limited
 to values that are inherently data-driven, such as measured timeline progress,
@@ -492,6 +529,16 @@ Custom CSS. The runtime must not inject structural widths, heights, spacing,
 display state, or template stylesheets. Native attributes such as `hidden` and
 state markers such as `data-fpb-summary-mode` own visibility and responsive
 branching.
+
+All legitimate runtime stylesheets are owned by `replaceManagedStyle`. A caller
+supplies a stable key and already validated CSS; the helper creates, replaces,
+or removes the single matching `<style>` element. Settings Controls CSS is
+processed by the existing CSS pipeline when saved and again when projected
+into the public runtime response. Generated Design CSS and bundle-level CSS
+retain their existing payload contracts but use the same managed-style
+lifecycle. Static presentation belongs in the raw widget CSS sources, while
+validated colors, counts, and percentages may cross the DOM boundary only as
+CSS custom properties.
 
 The FPB desktop summary and mobile tray rebuild their contents after selection
 changes. Simple and Step-Based discount-progress transitions must therefore

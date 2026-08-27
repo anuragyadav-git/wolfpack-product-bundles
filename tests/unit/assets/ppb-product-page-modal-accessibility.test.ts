@@ -23,6 +23,7 @@ const {
   ProductPageWidgetMiscMethods,
 } = require('../../../app/assets/widgets/product-page/methods/widget-misc-methods.js');
 const { ToastManager } = require('../../../app/assets/widgets/shared/toast-manager.js');
+const { JSDOM } = require('jsdom');
 
 beforeEach(() => {
   jest.restoreAllMocks();
@@ -194,6 +195,7 @@ function createContext({
       addToCartButton: { addEventListener: jest.fn() },
     },
     _resolveText: () => 'Next',
+    resolveProductPageStepText: (step: { name?: string }, fallback: string) => step?.name || fallback,
     setBottomSheetVisibility: jest.fn(),
     renderModalTabs: jest.fn(),
     renderModalProductsLoading: jest.fn(),
@@ -392,7 +394,8 @@ describe('PPB modal accessibility keyboard and focus management', () => {
   });
 
   it('resolves modal discount messaging through locale-aware TemplateManager templates', async () => {
-    const footerDiscountText = { textContent: '', innerHTML: '' };
+    const runtimeDocument = new JSDOM('<!doctype html><html><body></body></html>').window.document;
+    const footerDiscountText = runtimeDocument.createElement('div');
     const discountSection = {
       style: {},
       classList: {
@@ -406,7 +409,7 @@ describe('PPB modal accessibility keyboard and focus management', () => {
       prevButton: null as any,
       nextButton: null as any,
     } as any);
-    (globalThis as any).document = fakeDocument;
+    (globalThis as any).document = runtimeDocument;
     (globalThis as any).window = {
       ...(globalThis as any).window,
       Shopify: {
@@ -478,9 +481,8 @@ describe('PPB modal accessibility keyboard and focus management', () => {
       },
     );
 
-    expect(footerDiscountText.innerHTML).toContain('Ajouter <span');
-    expect(footerDiscountText.innerHTML).not.toContain('&lt;span');
-    expect(footerDiscountText.textContent).toBe('');
+    expect(footerDiscountText.textContent).toContain('Ajouter');
+    expect(footerDiscountText.querySelector('span')).not.toBeNull();
     expect(discountSection.classList.remove).toHaveBeenCalled();
   });
 });

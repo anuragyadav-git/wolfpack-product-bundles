@@ -17,6 +17,14 @@
 'use strict';
 
 import { BundleModalVariantMethods } from './widgets/full-page/modal/variant-methods.js';
+import { sanitizeRichHtmlFragment } from './widgets/shared/rich-html.js';
+import { createChevronIcon, createCloseIcon } from './widgets/shared/svg-icons.js';
+import { BUNDLE_WIDGET } from './widgets/shared/constants.js';
+import {
+  drawerLayerManager,
+  shouldDismissDrawerSwipe,
+} from './widgets/shared/drawer-layer-manager.js';
+import { resolvePpbDetailsCommit } from './widgets/product-page/ppb-modal-card-presentation.js';
 
 export function resolveBundleProductModalActionText({
   originalSelectionKey = '',
@@ -35,12 +43,6 @@ export function resolveBundleProductModalActionText({
 
   return { action, text };
 }
-import { BUNDLE_WIDGET } from './widgets/shared/constants.js';
-import {
-  drawerLayerManager,
-  shouldDismissDrawerSwipe,
-} from './widgets/shared/drawer-layer-manager.js';
-import { resolvePpbDetailsCommit } from './widgets/product-page/ppb-modal-card-presentation.js';
 
 export interface BundleProductModal {
   [key: string]: any;
@@ -140,69 +142,120 @@ export class BundleProductModal {
    * Create modal DOM structure
    */
   createModalHTML() {
-    const modalHTML = `
-      <div class="bundle-modal-overlay" id="bundle-product-modal"${this.isPpbOwned ? ' data-ppb-drawer-surface="product-details" role="dialog" aria-modal="true" aria-labelledby="modal-product-title"' : ''}>
-        <div class="bundle-modal-container">
-          <!-- Mobile Drag Handle for Swipe-to-Dismiss -->
-          ${this.isPpbOwned ? '<button type="button" class="bundle-modal-drag-handle" aria-label="Close modal">' : '<div class="bundle-modal-drag-handle" aria-hidden="true">'}
-            <div class="bundle-modal-drag-indicator"></div>
-          ${this.isPpbOwned ? '</button>' : '</div>'}
-          <button class="bundle-modal-close" aria-label="Close modal">&times;</button>
+    const modal = document.createElement('div');
+    modal.className = 'bundle-modal-overlay';
+    modal.id = 'bundle-product-modal';
+    if (this.isPpbOwned) {
+      modal.dataset.ppbDrawerSurface = 'product-details';
+      modal.setAttribute('role', 'dialog');
+      modal.setAttribute('aria-modal', 'true');
+      modal.setAttribute('aria-labelledby', 'modal-product-title');
+    }
+    const container = document.createElement('div');
+    container.className = 'bundle-modal-container';
+    const dragHandle = document.createElement(this.isPpbOwned ? 'button' : 'div');
+    dragHandle.className = 'bundle-modal-drag-handle';
+    if (this.isPpbOwned) {
+      (dragHandle as HTMLButtonElement).type = 'button';
+      dragHandle.setAttribute('aria-label', 'Close modal');
+    } else {
+      dragHandle.setAttribute('aria-hidden', 'true');
+    }
+    const dragIndicator = document.createElement('div');
+    dragIndicator.className = 'bundle-modal-drag-indicator';
+    dragHandle.appendChild(dragIndicator);
+    const close = document.createElement('button');
+    close.className = 'bundle-modal-close';
+    close.setAttribute('aria-label', 'Close modal');
+    close.appendChild(createCloseIcon(document));
 
-          <div class="bundle-modal-content">
-            <!-- Left Column: Product Image -->
-            <div class="bundle-modal-images">
-              <div class="bundle-modal-main-image-container">
-                <div class="bundle-modal-main-image">
-                  <img src="" alt="Product image" id="modal-main-image">
-                  <button type="button" class="bundle-modal-image-nav bundle-modal-image-nav--prev" data-modal-image-nav="prev" aria-label="Previous image" hidden>&#10094;</button>
-                  <button type="button" class="bundle-modal-image-nav bundle-modal-image-nav--next" data-modal-image-nav="next" aria-label="Next image" hidden>&#10095;</button>
-                </div>
-              </div>
-            </div>
+    const content = document.createElement('div');
+    content.className = 'bundle-modal-content';
+    const images = document.createElement('div');
+    images.className = 'bundle-modal-images';
+    const imageContainer = document.createElement('div');
+    imageContainer.className = 'bundle-modal-main-image-container';
+    const mainImageWrap = document.createElement('div');
+    mainImageWrap.className = 'bundle-modal-main-image';
+    const mainImage = document.createElement('img');
+    mainImage.id = 'modal-main-image';
+    mainImage.alt = 'Product image';
+    const previousImage = document.createElement('button');
+    previousImage.type = 'button';
+    previousImage.className = 'bundle-modal-image-nav bundle-modal-image-nav--prev';
+    previousImage.dataset.modalImageNav = 'prev';
+    previousImage.setAttribute('aria-label', 'Previous image');
+    previousImage.hidden = true;
+    previousImage.appendChild(createChevronIcon(document, 'left'));
+    const nextImage = document.createElement('button');
+    nextImage.type = 'button';
+    nextImage.className = 'bundle-modal-image-nav bundle-modal-image-nav--next';
+    nextImage.dataset.modalImageNav = 'next';
+    nextImage.setAttribute('aria-label', 'Next image');
+    nextImage.hidden = true;
+    nextImage.appendChild(createChevronIcon(document, 'right'));
+    mainImageWrap.append(mainImage, previousImage, nextImage);
+    imageContainer.appendChild(mainImageWrap);
+    images.appendChild(imageContainer);
 
-            <!-- Right Column: Product Details -->
-            <div class="bundle-modal-details">
-              <div class="bundle-modal-header">
-                <h2 class="bundle-modal-title" id="modal-product-title"></h2>
-                <div class="bundle-modal-selection-summary" id="modal-selection-summary" hidden>
-                  <svg class="selection-check-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <path d="M13 4L6 11L3 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                  <span>Selected: <strong id="modal-selection-text"></strong></span>
-                </div>
-                <div class="bundle-modal-price" id="modal-product-price"></div>
-              </div>
-
-              <div class="bundle-modal-description" id="modal-product-description"></div>
-
-              <!-- Variant Selectors (above quantity) -->
-              <div class="bundle-modal-variants" id="modal-variants-container">
-                <!-- Variant selectors will be inserted here -->
-              </div>
-
-              <!-- Quantity Selector (below variants) -->
-              <div class="bundle-modal-quantity">
-                <span class="bundle-modal-quantity-label">Quantity</span>
-                <div class="bundle-modal-quantity-controls">
-                  <button class="bundle-modal-qty-btn" id="modal-qty-decrease">−</button>
-                  <span class="bundle-modal-qty-display" id="modal-qty-display">1</span>
-                  <button class="bundle-modal-qty-btn" id="modal-qty-increase">+</button>
-                </div>
-              </div>
-
-              <button class="bundle-modal-add-btn" id="modal-add-to-box">
-                Add To Box
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
-
-    // Insert modal into document body
-    document.body.insertAdjacentHTML('beforeend', modalHTML);
-    this.modalElement = document.getElementById('bundle-product-modal');
+    const details = document.createElement('div');
+    details.className = 'bundle-modal-details';
+    const header = document.createElement('div');
+    header.className = 'bundle-modal-header';
+    const title = document.createElement('h2');
+    title.className = 'bundle-modal-title';
+    title.id = 'modal-product-title';
+    const selection = document.createElement('div');
+    selection.className = 'bundle-modal-selection-summary';
+    selection.id = 'modal-selection-summary';
+    selection.hidden = true;
+    const selectionTextWrap = document.createElement('span');
+    selectionTextWrap.append(document.createTextNode('Selected: '));
+    const selectionText = document.createElement('strong');
+    selectionText.id = 'modal-selection-text';
+    selectionTextWrap.appendChild(selectionText);
+    selection.appendChild(selectionTextWrap);
+    const price = document.createElement('div');
+    price.className = 'bundle-modal-price';
+    price.id = 'modal-product-price';
+    header.append(title, selection, price);
+    const description = document.createElement('div');
+    description.className = 'bundle-modal-description';
+    description.id = 'modal-product-description';
+    const variants = document.createElement('div');
+    variants.className = 'bundle-modal-variants';
+    variants.id = 'modal-variants-container';
+    const quantity = document.createElement('div');
+    quantity.className = 'bundle-modal-quantity';
+    const quantityLabel = document.createElement('span');
+    quantityLabel.className = 'bundle-modal-quantity-label';
+    quantityLabel.textContent = 'Quantity';
+    const quantityControls = document.createElement('div');
+    quantityControls.className = 'bundle-modal-quantity-controls';
+    const decrease = document.createElement('button');
+    decrease.className = 'bundle-modal-qty-btn';
+    decrease.id = 'modal-qty-decrease';
+    decrease.textContent = '−';
+    const quantityDisplay = document.createElement('span');
+    quantityDisplay.className = 'bundle-modal-qty-display';
+    quantityDisplay.id = 'modal-qty-display';
+    quantityDisplay.textContent = '1';
+    const increase = document.createElement('button');
+    increase.className = 'bundle-modal-qty-btn';
+    increase.id = 'modal-qty-increase';
+    increase.textContent = '+';
+    quantityControls.append(decrease, quantityDisplay, increase);
+    quantity.append(quantityLabel, quantityControls);
+    const add = document.createElement('button');
+    add.className = 'bundle-modal-add-btn';
+    add.id = 'modal-add-to-box';
+    add.textContent = 'Add To Box';
+    details.append(header, description, variants, quantity, add);
+    content.append(images, details);
+    container.append(dragHandle, close, content);
+    modal.appendChild(container);
+    document.body.appendChild(modal);
+    this.modalElement = modal;
   }
 
   /**
@@ -450,10 +503,8 @@ export class BundleProductModal {
     const descriptionHtml = typeof this.currentProduct.descriptionHtml === 'string'
       ? this.currentProduct.descriptionHtml.trim()
       : '';
-    descriptionEl.textContent = '';
-    descriptionEl.innerHTML = '';
     if (descriptionHtml) {
-      descriptionEl.innerHTML = descriptionHtml;
+      descriptionEl.replaceChildren(sanitizeRichHtmlFragment(descriptionHtml, 'product-description'));
     } else {
       descriptionEl.textContent = this.currentProduct.description || '';
     }

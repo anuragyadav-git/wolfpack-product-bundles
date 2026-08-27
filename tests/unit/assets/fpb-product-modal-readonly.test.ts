@@ -1,5 +1,8 @@
 export {};
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { JSDOM } = require('jsdom');
+
 describe("FPB product modal read-only quick view", () => {
   function createClassList() {
     const classes = new Set<string>();
@@ -74,23 +77,14 @@ describe("FPB product modal read-only quick view", () => {
 
   async function createModalForPopulate(widget: ReturnType<typeof buildWidget>) {
     const { BundleProductModal: Modal } = await import("../../../app/assets/bundle-modal-component.js");
+    const dom = new JSDOM('<!doctype html><html><body><h2 id="modal-product-title"></h2><div id="modal-product-description"></div><span id="modal-qty-display"></span></body></html>');
     const elements: Record<string, any> = {
-      "modal-product-title": { textContent: "" },
-      "modal-product-description": { textContent: "", innerHTML: "" },
-      "modal-qty-display": { textContent: "" },
+      "modal-product-title": dom.window.document.getElementById('modal-product-title'),
+      "modal-product-description": dom.window.document.getElementById('modal-product-description'),
+      "modal-qty-display": dom.window.document.getElementById('modal-qty-display'),
     };
-    (globalThis as typeof globalThis & { document: any }).document = {
-      body: {
-        classList: createClassList(),
-        style: createStyleDeclaration(),
-        scrollTop: 0,
-      },
-      documentElement: {
-        classList: createClassList(),
-        scrollTop: 0,
-      },
-      getElementById: (id: string) => elements[id] ?? null,
-    };
+    (globalThis as any).window = dom.window;
+    (globalThis as typeof globalThis & { document: any }).document = dom.window.document;
 
     class TestModal extends Modal {
       init() {
@@ -185,7 +179,7 @@ describe("FPB product modal read-only quick view", () => {
     expect(elements["modal-product-description"].innerHTML).toBe(
       "<p>Soft <strong>cotton</strong> product description.</p>",
     );
-    expect(elements["modal-product-description"].textContent).toBe("");
+    expect(elements["modal-product-description"].textContent).toBe("Soft cotton product description.");
   });
 
   it("renders plain product descriptions as text when descriptionHtml is missing", async () => {
@@ -202,7 +196,7 @@ describe("FPB product modal read-only quick view", () => {
     expect(elements["modal-product-description"].textContent).toBe(
       "Plain <strong>text</strong> fallback.",
     );
-    expect(elements["modal-product-description"].innerHTML).toBe("");
+    expect(elements["modal-product-description"].querySelector('strong')).toBeNull();
   });
 
   it("shows and cycles carousel navigation for multiple distinct product images", async () => {
@@ -257,6 +251,7 @@ describe("FPB product modal read-only quick view", () => {
     const elements: Record<string, any> = {
       "modal-variants-container": {
         innerHTML: "<button>Old variant</button>",
+        replaceChildren: jest.fn(function () { this.innerHTML = ''; }),
         querySelectorAll: jest.fn(() => []),
       },
       "modal-selection-summary": {
@@ -283,7 +278,7 @@ describe("FPB product modal read-only quick view", () => {
 
     modal.createVariantSelectors();
 
-    expect(elements["modal-variants-container"].innerHTML).toBe("");
+    expect(elements["modal-variants-container"].replaceChildren).toHaveBeenCalledTimes(1);
     expect(elements["modal-selection-summary"].hidden).toBe(true);
     expect(elements["modal-selection-text"].textContent).toBe("");
     expect(modal.selectedOptions).toEqual({});

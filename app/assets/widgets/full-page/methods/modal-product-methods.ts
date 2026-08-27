@@ -1,7 +1,7 @@
 import { BUNDLE_WIDGET } from '../../shared/constants.js';
 import { CurrencyManager } from '../../shared/currency-manager.js';
 import { ToastManager } from '../../shared/toast-manager.js';
-import { getProductImageUrls, renderSharedProductCard } from '../../shared/components/product-card.js';
+import { createSharedProductCardElement, getProductImageUrls } from '../../shared/components/product-card.js';
 import { VariantSelectorComponent } from '../../shared/variant-selector.js';
 import { shouldRenderInlineVariantSelector } from '../../shared/variant-selector-policy.js';
 import { BundleProductModal } from '../../../bundle-modal-component.js';
@@ -33,7 +33,7 @@ export const fullPageModalProductMethods: Record<string, any> & ThisType<any> = 
 renderModalTabs() {
   const tabsContainer = this.elements.modal?.querySelector('.modal-tabs');
   if (!tabsContainer) return; // Modal not active (full-page mode)
-  tabsContainer.innerHTML = '';
+  tabsContainer.replaceChildren();
 
   this.selectedBundle.steps.forEach((step: any, index: number) => {
     const isAccessible = this.isStepAccessible(index);
@@ -56,7 +56,7 @@ renderModalTabs() {
 
       // Update modal header
       const headerText = this.getFormattedHeaderText();
-      this.elements.modal.querySelector('.modal-step-title').innerHTML = headerText;
+      this.elements.modal.querySelector('.modal-step-title').textContent = headerText;
 
       // Load products for this step if not already loaded
       await this.loadStepProducts(index);
@@ -86,56 +86,54 @@ renderModalProducts(stepIndex: number, productsToRender: any = null) {
   const resolveText = (key: string, fallback: string) => (
     typeof this._resolveText === 'function' ? this._resolveText(key, fallback) : fallback
   );
-  const escapeText = (value: any) => (
-    typeof this._escapeHTML === 'function' ? this._escapeHTML(value) : String(value)
-  );
-
   if (products.length === 0) {
     if (!this._shouldRenderProductSlots()) {
       const emptyMessage = typeof this.getNoProductsAvailableMessage === 'function'
         ? this.getNoProductsAvailableMessage()
         : 'No Products Available';
-      const escapedEmptyMessage = typeof this._escapeHTML === 'function'
-        ? this._escapeHTML(emptyMessage)
-        : String(emptyMessage).replace(/[&<>"']/g, (char) => ({
-          '&': '&amp;',
-          '<': '&lt;',
-          '>': '&gt;',
-          '"': '&quot;',
-          "'": '&#39;',
-        } as Record<string, string>)[char] || char);
-      productGrid.innerHTML = `
-        <div class="empty-products-message">
-          <p>${escapedEmptyMessage}</p>
-        </div>
-      `;
+      const empty = document.createElement('div');
+      empty.className = 'empty-products-message';
+      const copy = document.createElement('p');
+      copy.textContent = emptyMessage;
+      empty.append(copy);
+      productGrid.replaceChildren(empty);
       return;
     }
 
     // Show empty state cards like in Settings design preview
     const currentStep = this.selectedBundle.steps[stepIndex];
-    const stepName = this._escapeHTML(currentStep?.name) || `Step ${stepIndex + 1}`;
+    const stepName = currentStep?.name || `Step ${stepIndex + 1}`;
     const labelText = `Select ${stepName}`;
-    const emptyStateIconUrl = this._escapeHTML(this.selectedBundle?.productSlotIconUrl || '');
-    const emptyStateIcon = emptyStateIconUrl
-      ? `<img class="empty-state-card-icon" src="${emptyStateIconUrl}" alt="" width="69" height="69">`
-      : `<svg class="empty-state-card-icon" width="69" height="69" viewBox="0 0 69 69" fill="none">
-          <line x1="34.5" y1="15" x2="34.5" y2="54" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
-          <line x1="15" y1="34.5" x2="54" y2="34.5" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
-        </svg>`;
-
-    const emptyStateCards = Array(3).fill(0).map((_, index) => `
-      <div class="empty-state-card">
-        ${emptyStateIcon}
-        <p class="empty-state-card-text">${labelText}</p>
-      </div>
-    `).join('');
-
-    productGrid.innerHTML = emptyStateCards;
+    const emptyStateIconUrl = String(this.selectedBundle?.productSlotIconUrl || '');
+    productGrid.replaceChildren();
+    Array(3).fill(0).forEach(() => {
+      const card = document.createElement('div');
+      card.className = 'empty-state-card';
+      if (emptyStateIconUrl) {
+        const image = document.createElement('img');
+        image.className = 'empty-state-card-icon';
+        image.src = emptyStateIconUrl;
+        image.alt = '';
+        image.width = 69;
+        image.height = 69;
+        card.append(image);
+      } else {
+        const icon = document.createElement('span');
+        icon.className = 'empty-state-card-icon';
+        icon.setAttribute('aria-hidden', 'true');
+        icon.textContent = '+';
+        card.append(icon);
+      }
+      const label = document.createElement('p');
+      label.className = 'empty-state-card-text';
+      label.textContent = labelText;
+      card.append(label);
+      productGrid.append(card);
+    });
     return;
   }
 
-  productGrid.innerHTML = products.map((product: any)  => {
+  const cards = products.map((product: any)  => {
     const selectionKey = getSelectionId(product);
     const currentQuantity = selectedProducts[selectionKey] || 0;
     const currencyInfo = CurrencyManager.getCurrencyInfo();
@@ -147,7 +145,7 @@ renderModalProducts(stepIndex: number, productsToRender: any = null) {
       product.imageUrl = BUNDLE_WIDGET.PLACEHOLDER_IMAGE;
     }
 
-    const variantSelectorHtml = this.renderVariantSelector(product, step);
+    const variantSelectorElement = this.renderVariantSelector(product, step);
 
     // Per-variant stock state derived from Storefront API quantityAvailable
     const { available, outOfStock } = this.getVariantAvailable(stepIndex, selectionKey);
@@ -160,13 +158,13 @@ renderModalProducts(stepIndex: number, productsToRender: any = null) {
     const lowStockLabel = lowStockTemplate.replace('{{count}}', String(available));
 
     // Low-stock / out-of-stock badge — shown on the image, not in the CTA.
-    const stockBadge = outOfStock
-      ? `<div class="product-stock-badge product-stock-badge--out">${escapeText(outOfStockLabel)}</div>`
-      : lowStock
-        ? `<div class="product-stock-badge product-stock-badge--low">${escapeText(lowStockLabel)}</div>`
-        : '';
+    const stockBadgeElement = outOfStock || lowStock ? document.createElement('div') : null;
+    if (stockBadgeElement) {
+      stockBadgeElement.className = `product-stock-badge ${outOfStock ? 'product-stock-badge--out' : 'product-stock-badge--low'}`;
+      stockBadgeElement.textContent = outOfStock ? outOfStockLabel : lowStockLabel;
+    }
 
-    return renderSharedProductCard(
+    return createSharedProductCardElement(
       {
         ...product,
         imageUrl,
@@ -175,8 +173,8 @@ renderModalProducts(stepIndex: number, productsToRender: any = null) {
       currencyInfo,
       {
         displayPrice: getSubscriptionProductCardPrice(this, product.price),
-        variantSelectorHtml,
-        stockBadgeHtml: stockBadge,
+        variantSelectorElement,
+        stockBadgeElement,
         showCompareAtPrice: this._getLandingPageControls?.()?.showCompareAtPrice === true,
         openImageLabel: resolveText('productImageLabel', 'Open product details'),
         openTitleLabel: resolveText('productTitleLabel', 'Open product details'),
@@ -197,7 +195,8 @@ renderModalProducts(stepIndex: number, productsToRender: any = null) {
         increaseDisabled,
       }
     );
-  }).join('');
+  });
+  productGrid.replaceChildren(...cards);
 
   // Attach event handlers
   this.attachProductEventHandlers(productGrid, stepIndex);
@@ -205,7 +204,7 @@ renderModalProducts(stepIndex: number, productsToRender: any = null) {
 
 renderVariantSelector(product: any, step: any) {
   if (!product.variants || product.variants.length <= 1) {
-    return '';
+    return null;
   }
   const primaryOptionName = step?.primaryVariantOption || null;
   const displayVariantsAsIndividualProducts = step?.displayVariantsAsIndividualProducts === true
@@ -215,9 +214,9 @@ renderVariantSelector(product: any, step: any) {
     product,
     displayVariantsAsIndividualProducts,
   })) {
-    return '';
+    return null;
   }
-  return VariantSelectorComponent.renderDropdownHtml(product, primaryOptionName, {
+  return VariantSelectorComponent.createDropdownElement(product, primaryOptionName, {
     placeholder: this._resolveText?.('chooseOptionsButton', 'Choose Options') || 'Choose Options',
     mobileMode: 'drawer',
     hideUnavailable: true,

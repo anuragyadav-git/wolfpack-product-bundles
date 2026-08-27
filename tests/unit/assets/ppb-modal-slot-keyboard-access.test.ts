@@ -195,13 +195,15 @@ function getRemoveControl(card: any) {
 }
 
 function createFakeDocument() {
-  return {
+  const fakeDocument = {
     documentElement: {},
-    createElement: (tagName: string) => createFakeElement(tagName),
+    createElement: (tagName: string) => createFakeElement(tagName, fakeDocument),
+    createElementNS: (_namespace: string, tagName: string) => createFakeElement(tagName, fakeDocument),
   };
+  return fakeDocument;
 }
 
-function createFakeElement(tagName: string) {
+function createFakeElement(tagName: string, ownerDocument?: any) {
   const attributes = new Map<string, string>();
   const listeners = new Map<string, (event: any) => void>();
   return {
@@ -215,6 +217,7 @@ function createFakeElement(tagName: string) {
     children: [] as any[],
     dataset: {} as Record<string, string>,
     style: { setProperty: jest.fn() },
+    ownerDocument,
     setAttribute(name: string, value: string) {
       attributes.set(name, value);
     },
@@ -224,6 +227,13 @@ function createFakeElement(tagName: string) {
     appendChild(child: any) {
       this.children.push(child);
       return child;
+    },
+    append(...children: any[]) {
+      children.forEach((child) => this.appendChild(child));
+    },
+    replaceChildren(...children: any[]) {
+      this.children = [];
+      this.append(...children);
     },
     addEventListener(name: string, listener: (event: any) => void) {
       listeners.set(name, listener);

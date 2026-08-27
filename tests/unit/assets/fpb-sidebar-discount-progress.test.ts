@@ -21,7 +21,8 @@ class FakeElement {
   textContent = '';
   innerHTML = '';
   children: FakeElement[] = [];
-  style: Record<string, string> = {};
+  dataset: Record<string, string> = {};
+  style = { setProperty: jest.fn(), removeProperty: jest.fn() };
   attributes: Record<string, string> = {};
   width = 0;
   listeners: Record<string, Array<() => unknown>> = {};
@@ -50,12 +51,22 @@ class FakeElement {
   }
 
   appendChild(child: FakeElement) {
+    if (child.tagName === '#FRAGMENT') {
+      child.children.forEach((fragmentChild) => this.appendChild(fragmentChild));
+      return child;
+    }
     this.children.push(child);
     return child;
   }
 
   append(...children: FakeElement[]) {
     children.forEach((child) => this.appendChild(child));
+  }
+
+  replaceChildren(...children: FakeElement[]) {
+    this.children = [];
+    this.textContent = '';
+    this.append(...children);
   }
 
   addEventListener(eventName: string, handler: () => unknown) {
@@ -111,6 +122,11 @@ function collectButtons(root: FakeElement): FakeElement[] {
   return buttons;
 }
 
+function collectText(root: any): string {
+  if (!root) return '';
+  return String(root.textContent || '') + Array.from<any>(root.children || []).map(child => collectText(child)).join('');
+}
+
 beforeEach(() => {
   const shopMoneyFormat = ['$', '{{amount}}'].join('');
   (global as any).window = {
@@ -124,6 +140,13 @@ beforeEach(() => {
   };
   (global as any).document = {
     createElement: (tagName: string) => new FakeElement(tagName),
+    createElementNS: (_namespace: string, tagName: string) => new FakeElement(tagName),
+    createTextNode: (value: string) => {
+      const node = new FakeElement('#text');
+      node.textContent = value;
+      return node;
+    },
+    createDocumentFragment: () => new FakeElement('#fragment'),
   };
 });
 
@@ -332,8 +355,8 @@ describe('FPB summary sidebar discount progress', () => {
       }
 
       const message = panel.querySelector('.side-panel-discount-message');
-      expect(message?.innerHTML).toContain('Add 5 more to save 20%');
-      expect(message?.innerHTML).not.toContain('Rule one reached');
+      expect(collectText(message)).toContain('Add 5 more to save 20%');
+      expect(collectText(message)).not.toContain('Rule one reached');
     },
   );
 
@@ -369,7 +392,7 @@ describe('FPB summary sidebar discount progress', () => {
       discountSpy.mockRestore();
     }
 
-    expect(panel.querySelector('.side-panel-discount-message')?.innerHTML)
+    expect(collectText(panel.querySelector('.side-panel-discount-message')))
       .toContain('Success! You got 1 product(s) at 100% off');
   });
 
@@ -401,9 +424,8 @@ describe('FPB summary sidebar discount progress', () => {
     }
 
     const total = panel.querySelector('.side-panel-total');
-    expect(total?.innerHTML).toContain('side-panel-total-final');
-    expect(total?.innerHTML).toContain('side-panel-total-original');
-    expect(total?.innerHTML).toContain('$5.00');
+    expect(total?.querySelector('.side-panel-total-final')?.textContent).toBe('$5.00');
+    expect(total?.querySelector('.side-panel-total-original')?.textContent).toBe('$1448.00');
   });
 });
 

@@ -2,10 +2,13 @@ export {};
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { VariantSelectorComponent } = require('../../../app/assets/widgets/shared/variant-selector.js');
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { JSDOM } = require('jsdom');
 
 describe('FPB Standard mobile variant drawer', () => {
   it('renders drawer content from variant data and formatted prices', () => {
-    const view = VariantSelectorComponent.renderStandardMobileDrawerHtml({
+    const runtimeDocument = new JSDOM('<!doctype html><html><body></body></html>').window.document;
+    const view = VariantSelectorComponent.createStandardMobileDrawerElement({
       title: 'Keto Fresh Meal Subscription',
       imageUrl: 'https://cdn.example.com/product.jpg',
       variantId: 'variant-6',
@@ -31,16 +34,17 @@ describe('FPB Standard mobile variant drawer', () => {
     }, {
       placeholder: 'Choose Options',
       formatPrice: (value: number) => `$${(value / 100).toFixed(2)}`,
+      document: runtimeDocument,
     });
 
-    expect(view).toContain('Keto Fresh Meal Subscription');
-    expect(view).toContain('Choose Options');
-    expect(view).toContain('6 meals');
-    expect(view).toContain('$95.40');
-    expect(view).toContain('7 meals');
-    expect(view).toContain('$111.30');
-    expect(view).toContain('aria-disabled="true"');
-    expect(view).toContain('aria-label="Close variant selector"');
-    expect(view).not.toContain('undefined');
+    expect(view.textContent).toContain('Keto Fresh Meal Subscription');
+    expect(view.textContent).toContain('Choose Options');
+    expect(view.textContent).toContain('6 meals');
+    expect(view.textContent).toContain('$95.40');
+    expect(view.textContent).toContain('7 meals');
+    expect(view.textContent).toContain('$111.30');
+    expect(view.querySelector('[aria-disabled="true"]')).not.toBeNull();
+    expect(view.querySelector('[aria-label="Close variant selector"]')).not.toBeNull();
+    expect(view.textContent).not.toContain('undefined');
   });
 });

@@ -1,5 +1,6 @@
 import { resolveShowProductComparedAtPrice } from '../../../app/lib/bundle-config/product-page-display';
-import { renderSharedProductCard } from '../../../app/assets/widgets/shared/components/product-card';
+import { createSharedProductCardElement } from '../../../app/assets/widgets/shared/components/product-card';
+import { JSDOM } from 'jsdom';
 import { applyProductPageVariantSelection } from '../../../app/assets/widgets/product-page/methods/modal-methods';
 
 describe('PPB compare-at price visibility contract', () => {
@@ -8,27 +9,29 @@ describe('PPB compare-at price visibility contract', () => {
   });
 
   it('renders available product compare-at data even when a stale flag is false', () => {
-    const markup = renderSharedProductCard(
+    const document = new JSDOM('<!doctype html>').window.document;
+    const card = createSharedProductCardElement(
       { selectionId: 'variant-1', title: 'Sale product', price: 800, compareAtPrice: 1000 },
       0,
       { currencySymbol: '$', decimalPlaces: 2 },
-      { showCompareAtPrice: false },
+      { showCompareAtPrice: false, document },
     );
 
-    expect(markup).toContain('$10.00');
-    expect(markup).toContain('$8.00');
+    expect(card.textContent).toContain('$10.00');
+    expect(card.textContent).toContain('$8.00');
   });
 
   it('does not fabricate a compare-at price for regular products', () => {
-    const markup = renderSharedProductCard(
+    const document = new JSDOM('<!doctype html>').window.document;
+    const card = createSharedProductCardElement(
       { selectionId: 'variant-1', title: 'Regular product', price: 800 },
       0,
       { currencySymbol: '$', decimalPlaces: 2 },
-      { showCompareAtPrice: true },
+      { showCompareAtPrice: true, document },
     );
 
-    expect(markup).toContain('$8.00');
-    expect(markup).not.toContain('$10.00');
+    expect(card.textContent).toContain('$8.00');
+    expect(card.textContent).not.toContain('$10.00');
   });
 
   it('updates compare-at text when a selected variant provides it', () => {

@@ -444,3 +444,66 @@
   );
   transform: translateY(-1px);
 }
+.bw-theme-editor-preview {
+  padding: 32px 24px;
+  border: 2px dashed #667eea;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  text-align: center;
+}
+
+.bw-theme-editor-preview__icon {
+  margin-bottom: 16px;
+  font-size: 48px;
+}
+
+.bw-theme-editor-preview__title {
+  margin: 0 0 12px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.bw-theme-editor-preview__bundle {
+  margin: 0 0 8px;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.bw-theme-editor-preview__bundle code {
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: rgb(255 255 255 / 20%);
+  font-family: monospace;
+}
+
+.bw-theme-editor-preview__status {
+  max-width: 400px;
+  margin: 20px auto 0;
+  padding: 16px;
+  border-radius: 8px;
+  background: rgb(255 255 255 / 15%);
+  font-size: 13px;
+  line-height: 1.6;
+  text-align: left;
+}
+
+.bw-theme-editor-preview__status-title {
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.bw-theme-editor-preview__status ol {
+  margin: 8px 0;
+  padding-left: 20px;
+}
+
+.bw-theme-editor-preview__tip {
+  margin-top: 20px;
+  padding: 12px;
+  border-radius: 6px;
+  background: rgb(255 255 255 / 10%);
+  font-size: 12px;
+  opacity: 0.8;
+}

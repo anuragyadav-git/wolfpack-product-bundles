@@ -1,5 +1,7 @@
 @import "../base/inpage-shared-footer.css";
 @import "../base/quantity-pills-skeletons.css";
+@import "../../full-page-css/base/product-modal-shell.css";
+@import "../../full-page-css/base/product-modal-controls.css";
 
 /* ==========================================================================
    Product Grid (PDP_INPAGE + GRID Template)
@@ -344,6 +346,3 @@
     font-size: 12px;
   }
 }
-
-@import "../../full-page-css/base/product-modal-shell.css";
-@import "../../full-page-css/base/product-modal-controls.css";

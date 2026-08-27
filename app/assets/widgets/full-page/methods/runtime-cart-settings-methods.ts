@@ -1,10 +1,20 @@
 import { CurrencyManager } from '../../shared/currency-manager.js';
 import { PricingCalculator } from '../../shared/pricing-calculator.js';
 import { TemplateManager } from '../../shared/template-manager.js';
+import { createMessageFragment } from '../../shared/message-segments.js';
 import { createDefaultLoadingAnimation } from '../../shared/default-loading-animation.js';
 import { hideLoadingOverlayElement, markLoadingOverlayVisible } from '../../shared/loading-overlay.js';
 import { TemplateDesignSystem } from '../../shared/template-design-system.js';
 import { buildStorefrontApiPath } from '../../../../config/storefront-proxy-routes.js';
+
+function replaceMessage(element: HTMLElement, template: string, variables: Record<string, unknown>) {
+  element.replaceChildren(createMessageFragment(
+    TemplateManager.formatMessageSegments(template, variables),
+    element.ownerDocument,
+  ));
+}
+
+const actionButtonContents = new WeakMap<HTMLElement, { nodes: Node[]; disabled: boolean }>();
 
 const runtimeCartTemplateSystem = TemplateDesignSystem;
 
@@ -58,7 +68,7 @@ updateModalHeaderText(totalPrice: any, totalQuantity: any, discountInfo: any, cu
   // If discount is not enabled, show step name (escaped)
   if (!this.selectedBundle?.pricing?.enabled) {
     const currentStep = this.selectedBundle?.steps?.[this.currentStepIndex];
-    modalStepTitle.innerHTML = this._escapeHTML(currentStep?.name) || 'Step ' + (this.currentStepIndex + 1);
+    modalStepTitle.textContent = currentStep?.name || 'Step ' + (this.currentStepIndex + 1);
     return;
   }
 
@@ -71,12 +81,7 @@ updateModalHeaderText(totalPrice: any, totalQuantity: any, discountInfo: any, cu
     { messageType: 'progress' }
   );
 
-  const headerText = TemplateManager.replaceVariables(
-    this.config.discountTextTemplate,
-    variables
-  );
-
-  modalStepTitle.innerHTML = headerText;
+  replaceMessage(modalStepTitle, this.config.discountTextTemplate, variables);
 },
 
 updateModalDiscountMessaging(totalPrice: any, totalQuantity: any, discountInfo: any, currencyInfo: any) {
@@ -96,21 +101,13 @@ updateModalDiscountMessaging(totalPrice: any, totalQuantity: any, discountInfo: 
   );
 
   if (nextRule) {
-    const progressMessage = TemplateManager.replaceVariables(
-      this.config.discountTextTemplate,
-      variables
-    );
-    footerDiscountText.innerHTML = progressMessage;
+    replaceMessage(footerDiscountText, this.config.discountTextTemplate, variables);
     if (discountSection) discountSection.classList.remove('qualified');
   } else if (discountInfo.qualifiesForDiscount) {
-    const successMessage = TemplateManager.replaceVariables(
-      this.config.successMessageTemplate,
-      variables
-    );
-    footerDiscountText.innerHTML = successMessage;
+    replaceMessage(footerDiscountText, this.config.successMessageTemplate, variables);
     if (discountSection) discountSection.classList.add('qualified');
   } else {
-    footerDiscountText.innerHTML = '';
+    footerDiscountText.replaceChildren();
     if (discountSection) discountSection.classList.remove('qualified');
   }
 
@@ -187,20 +184,27 @@ _setActionButtonLoadingState(button: any, isLoading: any) {
   const dataset = this._getButtonDataset(button);
 
   if (isLoading) {
-    if (dataset.fpbLoadingOriginalHtml === undefined) {
-      dataset.fpbLoadingOriginalHtml = button.innerHTML || '';
+    if (!actionButtonContents.has(button)) {
+      actionButtonContents.set(button, {
+        nodes: Array.from(button.childNodes),
+        disabled: button.disabled === true,
+      });
       dataset.fpbLoadingWasDisabled = String(button.disabled === true);
     }
     button.classList.add('fpb-inline-spinner-active');
     button.disabled = true;
-    button.innerHTML = '<span class="fpb-inline-spinner" aria-hidden="true"></span>';
+    const spinner = button.ownerDocument.createElement('span');
+    spinner.className = 'fpb-inline-spinner';
+    spinner.setAttribute('aria-hidden', 'true');
+    button.replaceChildren(spinner);
     return;
   }
 
-  if (dataset?.fpbLoadingOriginalHtml !== undefined) {
-    button.innerHTML = dataset.fpbLoadingOriginalHtml;
-    button.disabled = dataset.fpbLoadingWasDisabled === 'true';
-    delete dataset.fpbLoadingOriginalHtml;
+  const original = actionButtonContents.get(button);
+  if (original) {
+    button.replaceChildren(...original.nodes);
+    button.disabled = original.disabled;
+    actionButtonContents.delete(button);
     delete dataset.fpbLoadingWasDisabled;
   }
   button.classList.remove('fpb-inline-spinner-active');

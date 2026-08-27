@@ -2,21 +2,15 @@ import {
   BundleProductModal,
   resolveBundleProductModalActionText,
 } from '../../../app/assets/bundle-modal-component';
+import { JSDOM } from 'jsdom';
 
 describe('PPB product-details commit', () => {
   it('creates the PPB-owned details surface as a labelled modal dialog', () => {
     const modal = Object.create(BundleProductModal.prototype) as any;
     modal.isPpbOwned = true;
-    let renderedHtml = '';
+    const dom = new JSDOM('<!doctype html><html><body></body></html>');
     const originalDocument = global.document;
-    global.document = {
-      body: {
-        insertAdjacentHTML: (_position: string, html: string) => {
-          renderedHtml = html;
-        },
-      },
-      getElementById: () => ({}),
-    } as unknown as Document;
+    global.document = dom.window.document;
 
     try {
       modal.createModalHTML();
@@ -24,10 +18,11 @@ describe('PPB product-details commit', () => {
       global.document = originalDocument;
     }
 
-    expect(renderedHtml).toContain('role="dialog"');
-    expect(renderedHtml).toContain('aria-modal="true"');
-    expect(renderedHtml).toContain('aria-labelledby="modal-product-title"');
-    expect(renderedHtml).toContain('<span class="bundle-modal-quantity-label">Quantity</span>');
+    const rendered = dom.window.document.getElementById('bundle-product-modal');
+    expect(rendered?.getAttribute('role')).toBe('dialog');
+    expect(rendered?.getAttribute('aria-modal')).toBe('true');
+    expect(rendered?.getAttribute('aria-labelledby')).toBe('modal-product-title');
+    expect(rendered?.textContent).toContain('Quantity');
   });
 
   it('uses the localized product-details action for add and update states', () => {

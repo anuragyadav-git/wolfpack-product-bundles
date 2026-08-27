@@ -1,3 +1,5 @@
+import { replaceManagedStyle } from './managed-style.js';
+
 export const bundleLevelCssMethods: Record<string, any> & ThisType<any> = {
   getBundleLevelCssStyleId(bundleId: any) {
     const safeId = String(bundleId || 'unknown').replace(/[^a-zA-Z0-9_-]/g, '-');
@@ -6,7 +8,7 @@ export const bundleLevelCssMethods: Record<string, any> & ThisType<any> = {
 
   removeExistingBundleLevelCss() {
     document
-      .querySelectorAll('style[data-wpb-bundle-level-css]')
+      .querySelectorAll('style[data-wpb-managed-style^="bundle-level-"]')
       .forEach((style) => style.remove());
   },
 
@@ -18,12 +20,7 @@ export const bundleLevelCssMethods: Record<string, any> & ThisType<any> = {
       : '';
 
     if (!css) return;
-
-    const style = document.createElement('style');
-    style.id = this.getBundleLevelCssStyleId(bundle.id);
-    style.type = 'text/css';
-    style.dataset.wpbBundleLevelCss = String(bundle.id || '');
-    style.textContent = css;
-    document.head.appendChild(style);
+    const style = replaceManagedStyle(document, `bundle-level-${bundle.id || 'unknown'}`, css);
+    if (style) style.id = this.getBundleLevelCssStyleId(bundle.id);
   },
 };

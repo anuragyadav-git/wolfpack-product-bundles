@@ -55,6 +55,9 @@ describe('PPB List Cascade selected entries integration', () => {
     const footer = {
       innerHTML: 'existing drawer',
       querySelector: jest.fn(() => openDrawer),
+      replaceChildren() {
+        this.innerHTML = '';
+      },
     };
     const renderCascadeFooter = jest.fn();
     const context: {
@@ -88,6 +91,9 @@ describe('PPB List Cascade selected entries integration', () => {
     const footer = {
       innerHTML: 'existing grid drawer',
       querySelector: jest.fn(() => openDrawer),
+      replaceChildren() {
+        this.innerHTML = '';
+      },
     };
     const renderGridFooter = jest.fn();
     const context: {
@@ -287,9 +293,11 @@ describe('PPB List Cascade selected entries integration', () => {
 
   it('renders a caller-provided selected row quantity label', () => {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { renderSelectedProductRow } = require('../../../app/assets/widgets/shared/components/selected-product-row.js');
+    const { JSDOM } = require('jsdom');
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { createSelectedProductRowElement } = require('../../../app/assets/widgets/shared/components/selected-product-row.js');
 
-    const view = renderSelectedProductRow({
+    const row = createSelectedProductRowElement({
       title: '14k Dangling Obsidian Earrings',
       variantId: 'variant_a',
       quantity: 2,
@@ -297,11 +305,12 @@ describe('PPB List Cascade selected entries integration', () => {
       priceText: '$829.00',
     }, {
       className: 'bw-ppb-cascade-selected-item',
+      document: new JSDOM('<!doctype html><html><body></body></html>').window.document,
     });
 
-    expect(view).toContain('14k Dangling Obsidian Earrings');
-    expect(view).toContain('$829.00');
-    expect(view).toContain('>x 2</span>');
+    expect(row.textContent).toContain('14k Dangling Obsidian Earrings');
+    expect(row.textContent).toContain('$829.00');
+    expect(row.querySelector('[aria-label="Quantity 2"]')?.textContent).toBe('x 2');
   });
 
   it('mounts the Cascade add-to-cart button into the Cascade footer when it is outside', () => {

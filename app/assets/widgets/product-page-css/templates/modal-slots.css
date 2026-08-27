@@ -1,3 +1,6 @@
+@import "../../full-page-css/base/product-modal-shell.css";
+@import "../../full-page-css/base/product-modal-controls.css";
+
 #bundle-builder-app[data-ppb-template-type="PDP_MODAL"] {
   --bw-ppb-slot-surface: var(--bundle-surface-color, #ffffff);
   --bw-ppb-slot-accent: var(--bundle-global-primary-button, #1e3a8a);
@@ -642,9 +645,6 @@
   cursor: default;
   user-select: none;
 }
-
-@import "../../full-page-css/base/product-modal-shell.css";
-@import "../../full-page-css/base/product-modal-controls.css";
 
 /* Vertical Slots use compact, full-width rows instead of the horizontal tile grid. */
 .bw-selected-slots--mode-vertical {

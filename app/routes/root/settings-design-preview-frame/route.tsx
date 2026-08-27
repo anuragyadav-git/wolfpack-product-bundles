@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { HeadersFunction } from "@remix-run/node";
 import { ToastManager } from "../../../assets/widgets/shared/toast-manager";
+import { replaceManagedStyle } from "../../../assets/widgets/shared/managed-style";
 import { renderFpbUpsellOffers } from "../../../storefront/fpb-product-page-upsell";
 import {
   buildStorefrontPreviewFixture,
@@ -384,13 +385,8 @@ export default function SettingsDesignPreviewFrame() {
     stateRef.current = state;
     if (!state) return;
     document.body.dataset.previewViewport = state.viewport;
-    let designStyle = document.getElementById("wpb-settings-preview-design") as HTMLStyleElement | null;
-    if (!designStyle) {
-      designStyle = document.createElement("style");
-      designStyle.id = "wpb-settings-preview-design";
-      document.head.appendChild(designStyle);
-    }
-    designStyle.textContent = state.designCss;
+    const designStyle = replaceManagedStyle(document, "settings-preview-design", state.designCss);
+    if (designStyle) designStyle.id = "wpb-settings-preview-design";
   }, [state]);
 
   useEffect(() => {

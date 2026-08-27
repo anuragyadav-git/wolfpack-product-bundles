@@ -23,6 +23,8 @@ const { fullPageProductProcessingMethods } =
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { PricingCalculator } =
   require("../../../app/assets/widgets/shared/pricing-calculator.js");
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { JSDOM } = require("jsdom");
 
 const buildAddonStepFromPersonalization =
   fullPageInitialRenderMethods.buildAddonStepFromPersonalization;
@@ -82,7 +84,12 @@ function makeProduct(id = "gid://shopify/Product/1") {
 class FakeElement {
   className = "";
   textContent = "";
+  dataset: Record<string, string> = {};
   children: FakeElement[] = [];
+
+  append(...children: FakeElement[]) {
+    children.forEach((child) => this.appendChild(child));
+  }
 
   appendChild(child: FakeElement) {
     this.children.push(child);
@@ -859,25 +866,7 @@ describe("FPB add-ons / gifting step separation", () => {
       attachProductCardListeners: () => undefined,
     };
     const originalDocument = (global as any).document;
-    (global as any).document = {
-      createElement: () => {
-        const wrapper: { firstChild: { textContent: string }; innerHTML: string } = {
-          firstChild: { textContent: "" },
-          innerHTML: "",
-        };
-        Object.defineProperty(wrapper, "innerHTML", {
-          set(value: string) {
-            this.firstChild = {
-              textContent: value.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim(),
-            };
-          },
-          get() {
-            return this.firstChild.textContent;
-          },
-        });
-        return wrapper;
-      },
-    };
+    (global as any).document = new JSDOM('<!doctype html><html><body></body></html>').window.document;
 
     try {
       const card = createProductCard.call(

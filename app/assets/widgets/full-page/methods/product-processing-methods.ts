@@ -1,4 +1,5 @@
 import { BUNDLE_WIDGET } from '../../shared/constants.js';
+import { sanitizeRichHtmlFragment } from '../../shared/rich-html.js';
 
 function extractFullPageId(idString: any) {
   if (!idString) return null;
@@ -135,9 +136,8 @@ function normalizeProductDescription(product: any) {
     : '';
   if (!htmlDescription || typeof document === 'undefined') return '';
 
-  const scratch = document.createElement('div');
-  scratch.innerHTML = htmlDescription;
-  return (scratch.textContent || '').trim();
+  const fragment = sanitizeRichHtmlFragment(htmlDescription, 'product-description');
+  return (fragment.textContent || '').trim();
 }
 
 function normalizeProductDescriptionHtml(product: any) {

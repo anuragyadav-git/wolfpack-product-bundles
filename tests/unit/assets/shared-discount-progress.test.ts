@@ -1,11 +1,15 @@
+export {};
+
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { getDiscountProgressData } = require('../../../app/assets/widgets/shared/engine/bundle-selectors.js');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const {
   applyDiscountProgressTransition,
+  createDiscountProgressElement,
   readRenderedDiscountProgressPercent,
-  renderDiscountProgress,
 } = require('../../../app/assets/widgets/shared/components/discount-progress.js');
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { JSDOM } = require('jsdom');
 
 describe('shared discount progress data selector', () => {
   it('normalizes in-progress data', () => {
@@ -47,44 +51,53 @@ describe('shared discount progress data selector', () => {
 
 describe('shared discount progress renderer', () => {
   it('escapes progress message text', () => {
-    const view = renderDiscountProgress({
+    const document = new JSDOM('<!doctype html>').window.document;
+    const view = createDiscountProgressElement({
       currentValue: 1,
       targetValue: 2,
       progressPercent: 50,
       message: '<strong>Save</strong>',
       success: false,
-    });
+    }, { document });
 
-    expect(view).toContain('&lt;strong&gt;Save&lt;/strong&gt;');
-    expect(view).not.toContain('<strong>Save</strong>');
+    expect(view.textContent).toContain('<strong>Save</strong>');
+    expect(view.querySelector('strong')).toBeNull();
   });
 
-  it('renders trusted template markup only when explicitly requested', () => {
-    const view = renderDiscountProgress({
+  it('renders only owned message segments as elements', () => {
+    const document = new JSDOM('<!doctype html>').window.document;
+    const view = createDiscountProgressElement({
       currentValue: 1,
       targetValue: 2,
       progressPercent: 50,
-      message: 'Add <span class="bundle-conditions-text">1 item</span>',
+      message: '',
       success: false,
-    }, { messageIsHtml: true });
+    }, {
+      document,
+      messageSegments: [
+        { kind: 'text', value: 'Add ' },
+        { kind: 'condition', value: '<b>1 item</b>' },
+      ],
+    });
 
-    expect(view).toContain('<span class="bundle-conditions-text">1 item</span>');
-    expect(view).not.toContain('&lt;span class=&quot;bundle-conditions-text&quot;&gt;');
+    expect(view.textContent).toContain('Add <b>1 item</b>');
+    expect(view.querySelector('b')).toBeNull();
+    expect(view.querySelector('[data-message-segment="condition"]')).not.toBeNull();
   });
 
   it('renders semantic milestone states and target positions', () => {
-    const view = renderDiscountProgress({
+    const document = new JSDOM('<!doctype html>').window.document;
+    const view = createDiscountProgressElement({
       progressPercent: 25,
       milestones: [
         { title: '2 Pack', subTitle: 'Save 5%', position: 50, state: 'active' },
         { title: '4 Pack', subTitle: 'Save 15%', position: 100, state: 'pending' },
       ],
-    }, { mode: 'stepped' });
+    }, { mode: 'stepped', document });
 
-    expect(view).toContain('data-state="active"');
-    expect(view).toContain('data-state="pending"');
-    expect(view).toContain('--bw-discount-milestone-position:50%');
-    expect(view).toContain('aria-valuenow="25"');
+    expect(view.querySelector('[data-state="active"]')).not.toBeNull();
+    expect(view.querySelector('[data-state="pending"]')).not.toBeNull();
+    expect(view.querySelector('[role="progressbar"]')?.getAttribute('aria-valuenow')).toBe('25');
   });
 
   it('reads the currently visible fill percentage from rendered geometry', () => {

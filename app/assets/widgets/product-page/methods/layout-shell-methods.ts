@@ -1,10 +1,7 @@
 import { CurrencyManager } from '../../shared/currency-manager.js';
-import { ComponentGenerator } from '../../shared/component-generator.js';
 import { ToastManager } from '../../shared/toast-manager.js';
 import { BUNDLE_WIDGET } from '../../shared/constants.js';
 import { getDiscountProgressData } from '../../shared/engine/bundle-selectors.js';
-import { renderDiscountProgress } from '../../shared/components/discount-progress.js';
-import { renderSharedProductCard } from '../../shared/components/product-card.js';
 import { formatProductPageStepValidationToast } from './modal-state-methods.js';
 
 export function shouldHideInpageStepChrome({ isCascade = false, steps = [], step = null }: any = {}) {
@@ -77,7 +74,7 @@ renderUI() {
 
 renderSteps() {
   // Clear existing steps
-  this.elements.stepsContainer.innerHTML = '';
+  this.elements.stepsContainer.replaceChildren();
   this._markProductPageTemplate();
 
   if (!this.selectedBundle || !this.selectedBundle.steps) {
@@ -99,7 +96,7 @@ renderSteps() {
 _renderDirectDefaultProducts() {
   const el = this.elements.defaultProducts;
   if (!el) return;
-  el.innerHTML = '';
+  el.replaceChildren();
 
   const data = this._getDirectDefaultProductsData();
   const products = this.directDefaultProducts || [];
@@ -310,10 +307,16 @@ _createGridStepHeader(step: any, stepIndex: number) {
   button.className = `bw-ppb-grid-step${isActive ? ' is-active' : ''}${isComplete ? ' is-complete' : ''}`;
   button.setAttribute('aria-label', title);
   button.setAttribute('aria-current', isActive ? 'step' : 'false');
-  button.innerHTML = `
-    <span class="bw-ppb-grid-step__number">${stepIndex + 1}</span>
-    ${showTitle ? `<span class="bw-ppb-grid-step__label">${ComponentGenerator.escapeHtml(title)}</span>` : ''}
-  `;
+  const number = document.createElement('span');
+  number.className = 'bw-ppb-grid-step__number';
+  number.textContent = String(stepIndex + 1);
+  button.append(number);
+  if (showTitle) {
+    const label = document.createElement('span');
+    label.className = 'bw-ppb-grid-step__label';
+    label.textContent = title;
+    button.append(label);
+  }
   button.addEventListener('click', () => {
     if (isActive) return;
     if (!this.isStepAccessible(stepIndex)) {
@@ -364,10 +367,16 @@ _createCascadeStepFlowHeader() {
     button.setAttribute('aria-label', title);
     button.setAttribute('aria-current', stepIndex === this.currentStepIndex ? 'step' : 'false');
     button.disabled = stepIndex > this.currentStepIndex && !this.isStepAccessible(stepIndex);
-    button.innerHTML = `
-      <span class="bw-ppb-cascade-step-flow__number">${stepIndex + 1}</span>
-      ${showTitle ? `<span class="bw-ppb-cascade-step-flow__label">${ComponentGenerator.escapeHtml(title)}</span>` : ''}
-    `;
+    const number = document.createElement('span');
+    number.className = 'bw-ppb-cascade-step-flow__number';
+    number.textContent = String(stepIndex + 1);
+    button.append(number);
+    if (showTitle) {
+      const label = document.createElement('span');
+      label.className = 'bw-ppb-cascade-step-flow__label';
+      label.textContent = title;
+      button.append(label);
+    }
     button.addEventListener('click', () => {
       if (button.disabled || stepIndex === this.currentStepIndex) return;
       this.currentStepIndex = stepIndex;
@@ -437,7 +446,6 @@ _createInpageStepSection(step: any, stepIndex: any) {
       title.textContent = step.pageTitle || step.name || '';
       section.appendChild(title);
     }
-
     const tabs = this._createInpageCategoryTabs(step, stepIndex);
     if (tabs) section.appendChild(tabs);
   }

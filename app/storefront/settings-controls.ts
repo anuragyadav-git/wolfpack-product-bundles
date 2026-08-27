@@ -1,9 +1,11 @@
+import { replaceManagedStyle } from "../assets/widgets/shared/managed-style";
+
 type RuntimeWindow = Window & Record<string, unknown>;
 
 type GlobalSettingsControls = {
   landingPage?: {
     redirectCollectionQuickAddToBundle?: boolean;
-    css?: { themePages?: string };
+    css?: { themePages?: string; bundleDummyProductPage?: string };
     selectors?: { addToCartButtons?: string; buyNowButton?: string };
     integrations?: {
       customThemeScriptEnabled?: boolean;
@@ -155,17 +157,16 @@ export function applyGlobalSettingsControls(
   if (!landing) return;
 
   const themeCss = String(landing.css?.themePages ?? "").trim();
-  let style = runtimeDocument.querySelector<HTMLStyleElement>("style[data-wpb-settings-controls]");
-  if (themeCss) {
-    if (!style) {
-      style = runtimeDocument.createElement("style");
-      style.dataset.wpbSettingsControls = "true";
-      runtimeDocument.head.append(style);
-    }
-    style.textContent = themeCss;
-  } else {
-    style?.remove();
-  }
+  replaceManagedStyle(runtimeDocument, "settings-controls-theme", themeCss);
+
+  const currentHandle = getProductHandle(String(runtimeWindow.location?.href || ""));
+  const isFpbDummyProduct = Boolean(currentHandle && bundleLinks.some((link) => (
+    link.bundleType === "full_page" && link.productHandle === currentHandle
+  )));
+  const dummyProductCss = isFpbDummyProduct
+    ? String(landing.css?.bundleDummyProductPage ?? "").trim()
+    : "";
+  replaceManagedStyle(runtimeDocument, "settings-controls-dummy-product", dummyProductCss);
 
   const integrations = landing.integrations;
   runtimeWindow.__WPB_CART_INTEGRATION_SELECTORS__ = integrations ? {

@@ -1,87 +1,97 @@
+import { JSDOM } from 'jsdom';
+
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const { renderSelectedProductRow } = require('../../../app/assets/widgets/shared/components/selected-product-row.js');
+const { createSelectedProductRowElement } = require('../../../app/assets/widgets/shared/components/selected-product-row.js');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const { renderSelectedProductSlots } = require('../../../app/assets/widgets/shared/components/selected-product-slots.js');
+const { createSelectedProductSlotsElement } = require('../../../app/assets/widgets/shared/components/selected-product-slots.js');
+
+function createDocument() {
+  return new JSDOM('<!doctype html><html><body></body></html>').window.document;
+}
 
 describe('shared selected product row contract', () => {
   it('renders a removable selected row from prepared data', () => {
-    const html = renderSelectedProductRow({
+    const row = createSelectedProductRowElement({
       selectionId: 'variant-1',
       title: 'The Complete Snowboard',
       variantTitle: 'Ice',
       imageUrl: 'https://cdn.example.com/snowboard.jpg',
       quantity: 2,
       priceText: '$699.95',
-    });
+    }, { document: createDocument() });
 
-    expect(html).toContain('data-action="remove-selected-product"');
-    expect(html).toContain('data-variant-id="variant-1"');
-    expect(html).toContain('The Complete Snowboard');
-    expect(html).toContain('Ice');
-    expect(html).toContain('aria-label="Quantity 2">x2</span>');
-    expect(html).not.toContain('>Remove</button>');
-    expect(html).toContain('$699.95');
+    const remove = row.querySelector('[data-action="remove-selected-product"]');
+    const quantity = row.querySelector('[aria-label="Quantity 2"]');
+    expect(remove?.getAttribute('data-variant-id')).toBe('variant-1');
+    expect(row.textContent).toContain('The Complete Snowboard');
+    expect(row.textContent).toContain('Ice');
+    expect(quantity?.textContent).toBe('x2');
+    expect(row.textContent).not.toContain('Remove');
+    expect(row.textContent).toContain('$699.95');
   });
 
   it('marks default rows as included and non-removable', () => {
-    const html = renderSelectedProductRow({
+    const row = createSelectedProductRowElement({
       selectionId: 'variant-1',
       title: 'Included product',
       quantity: 1,
       isDefault: true,
-    });
+    }, { document: createDocument() });
 
-    expect(html).toContain('Included');
-    expect(html).not.toContain('data-action="remove-selected-product"');
+    expect(row.textContent).toContain('Included');
+    expect(row.querySelector('[data-action="remove-selected-product"]')).toBeNull();
   });
 
   it('renders an empty skeleton row', () => {
-    const html = renderSelectedProductRow(null, { emptyLabel: 'Choose an item' });
+    const row = createSelectedProductRowElement(null, {
+      emptyLabel: 'Choose an item',
+      document: createDocument(),
+    });
 
-    expect(html).toContain('Choose an item');
-    expect(html).not.toContain('data-action="remove-selected-product"');
+    expect(row.textContent).toContain('Choose an item');
+    expect(row.querySelector('[data-action="remove-selected-product"]')).toBeNull();
   });
 
   it('escapes row text', () => {
-    const html = renderSelectedProductRow({
+    const row = createSelectedProductRowElement({
       selectionId: 'variant-1',
       title: '<strong>Snowboard</strong>',
       quantity: 1,
-    });
+    }, { document: createDocument() });
 
-    expect(html).toContain('&lt;strong&gt;Snowboard&lt;/strong&gt;');
-    expect(html).not.toContain('<strong>Snowboard</strong>');
+    expect(row.textContent).toContain('<strong>Snowboard</strong>');
+    expect(row.querySelector('strong')).toBeNull();
   });
 });
 
 describe('shared selected product slots contract', () => {
   it('renders empty, filled, default, and locked free-gift slots', () => {
-    const html = renderSelectedProductSlots([
+    const slots = createSelectedProductSlotsElement([
       { id: 'slot-1', label: 'Choose first item' },
       { id: 'slot-2', label: 'Selected item', product: { selectionId: 'variant-2', title: 'Selected Snowboard', quantity: 1 } },
       { id: 'slot-3', label: 'Included item', product: { selectionId: 'variant-3', title: 'Default Wax', isDefault: true } },
       { id: 'slot-4', label: 'Gift item', product: { selectionId: 'variant-4', title: 'Free Gift', isFreeGift: true, isLocked: true } },
-    ]);
+    ], { document: createDocument() });
 
-    expect(html).toContain('data-action="select-slot"');
-    expect(html).toContain('data-action="remove-selected-product"');
-    expect(html).toContain('Default Wax');
-    expect(html).toContain('Free Gift');
+    expect(slots.querySelector('[data-action="select-slot"]')).not.toBeNull();
+    expect(slots.querySelector('[data-action="remove-selected-product"]')).not.toBeNull();
+    expect(slots.textContent).toContain('Default Wax');
+    expect(slots.textContent).toContain('Free Gift');
   });
 
   it('supports vertical mode without changing slot labels', () => {
-    const html = renderSelectedProductSlots([
+    const slots = createSelectedProductSlotsElement([
       { id: 'slot-1', label: 'Choose first item' },
-    ], { mode: 'vertical' });
+    ], { mode: 'vertical', document: createDocument() });
 
-    expect(html).toContain('Choose first item');
+    expect(slots.textContent).toContain('Choose first item');
   });
 
   it('renders a merchant slot icon for empty selected slots', () => {
-    const html = renderSelectedProductSlots([
+    const slots = createSelectedProductSlotsElement([
       { id: 'slot-1', label: 'Choose first item', iconUrl: 'https://cdn.shopify.com/slot-icon.png' },
-    ]);
+    ], { document: createDocument() });
 
-    expect(html).toContain('src="https://cdn.shopify.com/slot-icon.png"');
+    expect(slots.querySelector('img')?.src).toBe('https://cdn.shopify.com/slot-icon.png');
   });
 });

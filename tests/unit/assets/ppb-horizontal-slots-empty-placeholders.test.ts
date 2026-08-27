@@ -1,5 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { modalSlotTemplateMethods } = require('../../../app/assets/widgets/product-page/templates/modal-slot-template.js');
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { JSDOM } = require('jsdom');
 
 export {};
 
@@ -8,7 +10,7 @@ describe('PPB Horizontal Slots empty placeholders', () => {
 
   beforeEach(() => {
     originalDocument = global.document;
-    global.document = createFakeDocument() as unknown as Document;
+    global.document = new JSDOM('<!doctype html><html><body></body></html>').window.document;
   });
 
   afterEach(() => {
@@ -47,24 +49,24 @@ describe('PPB Horizontal Slots empty placeholders', () => {
       labels: ['Product 4'],
     },
   ])('$name', ({ step, selectedCount, labels }: any) => {
-    const target = createFakeElement('div');
+    const target = document.createElement('div');
     const widget = createWidget();
 
     widget._appendModalSlotEmptyCards(target, step, 0, selectedCount);
 
-    expect(target.children.map((card: any) => card.children.at(-1)?.textContent)).toEqual(labels);
+    expect(getSlotLabels(target)).toEqual(labels);
   });
 
   it('retains expanded slot capacity after selections are removed', () => {
     const widget = createWidget();
     const step = { name: 'Step 1', conditionOperator: 'greater_than_or_equal_to', conditionValue: 2 };
 
-    widget._appendModalSlotEmptyCards(createFakeElement('div'), step, 0, 3);
+    widget._appendModalSlotEmptyCards(document.createElement('div'), step, 0, 3);
 
-    const target = createFakeElement('div');
+    const target = document.createElement('div');
     widget._appendModalSlotEmptyCards(target, step, 0, 0);
 
-    expect(target.children.map((card: any) => card.children.at(-1)?.textContent)).toEqual([
+    expect(getSlotLabels(target)).toEqual([
       'Product 1',
       'Product 2',
       'Product 3',
@@ -73,7 +75,7 @@ describe('PPB Horizontal Slots empty placeholders', () => {
   });
 
   it('does not append an overflow slot when an exact target is reached', () => {
-    const target = createFakeElement('div');
+    const target = document.createElement('div');
     const widget = createWidget();
 
     widget._appendModalSlotEmptyCards(
@@ -83,11 +85,11 @@ describe('PPB Horizontal Slots empty placeholders', () => {
       1
     );
 
-    expect(target.children).toEqual([]);
+    expect(target.children).toHaveLength(0);
   });
 
   it('renders one empty slot when the global condition-based slot setting is disabled', () => {
-    const target = createFakeElement('div');
+    const target = document.createElement('div');
     const widget = createWidget({
       controlsSettings: {
         activeControls: {
@@ -103,13 +105,13 @@ describe('PPB Horizontal Slots empty placeholders', () => {
       0
     );
 
-    expect(target.children.map((card: any) => card.children.at(-1)?.textContent)).toEqual([
+    expect(getSlotLabels(target)).toEqual([
       'Product 1',
     ]);
   });
 
   it('keeps one operable empty slot when the step has no capacity condition', () => {
-    const target = createFakeElement('div');
+    const target = document.createElement('div');
     const widget = createWidget();
 
     widget._appendModalSlotEmptyCards(
@@ -119,13 +121,13 @@ describe('PPB Horizontal Slots empty placeholders', () => {
       0
     );
 
-    expect(target.children.map((card: any) => card.children.at(-1)?.textContent)).toEqual([
+    expect(getSlotLabels(target)).toEqual([
       'Product 1',
     ]);
   });
 
   it('keeps condition-sized slots when the global condition-based slot setting is enabled', () => {
-    const target = createFakeElement('div');
+    const target = document.createElement('div');
     const widget = createWidget({
       controlsSettings: {
         activeControls: {
@@ -141,7 +143,7 @@ describe('PPB Horizontal Slots empty placeholders', () => {
       0
     );
 
-    expect(target.children.map((card: any) => card.children.at(-1)?.textContent)).toEqual([
+    expect(getSlotLabels(target)).toEqual([
       'Product 1',
       'Product 2',
     ]);
@@ -160,24 +162,6 @@ function createWidget(config = {}) {
   return widget;
 }
 
-function createFakeDocument() {
-  return {
-    createElement: (tagName: string) => createFakeElement(tagName),
-  };
-}
-
-function createFakeElement(tagName: string) {
-  return {
-    tagName: tagName.toUpperCase(),
-    className: '',
-    textContent: '',
-    children: [] as any[],
-    dataset: {} as Record<string, string>,
-    style: { setProperty: jest.fn() },
-    appendChild(child: any) {
-      this.children.push(child);
-      return child;
-    },
-    addEventListener: jest.fn(),
-  };
+function getSlotLabels(target: Element) {
+  return Array.from(target.children).map((card) => card.lastElementChild?.textContent);
 }
