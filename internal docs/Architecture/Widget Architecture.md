@@ -35,7 +35,10 @@ source_paths:
   - app/routes/api/api.fpb-upsells[.]json.tsx
   - app/routes/api/api.ppb-embed[.]json.tsx
   - app/routes/api/api.page-builder-embed[.]json.tsx
+  - app/routes/app/app.settings/DesignLivePreview.tsx
+  - app/routes/app/app.settings/DesignSettingsView.module.css
   - app/routes/app/app.settings/design-preview-model.ts
+  - app/routes/app/app.settings/preview-surfaces/PreviewSurfaces.module.css
   - app/lib/shop-brand-colors.ts
   - app/routes/root/wpb.$bundleId.tsx
   - extensions/bundle-builder/blocks/bundle-app-embed.liquid
@@ -126,10 +129,16 @@ applicable major component independently: Bundle header, Navigation, Categories,
 Product cards, Product slots, Product picker, Cart / Summary, Loading,
 Validation, and Upsell. Component surfaces render inside fixed logical
 1280×1136 desktop and 390×844 mobile canvases, then scale as a whole to fit the
-available Admin panel; the scale must not change the storefront breakpoint
-being represented. Transient Product picker, Loading, Validation, and Upsell
-states remain deterministic representations and must not be described as exact
-storefront interactions.
+available Admin panel using the smaller valid width or height ratio and center
+on both stage axes; the scale must not change the storefront breakpoint being
+represented. The selected component is composed into an Admin context frame
+whose decorative layer is accessibility-hidden and noninteractive: FPB uses a
+full-page product-grid and summary shell, Product List/Grid use an in-page
+product-media and product-form shell, and slot templates use a modal-oriented
+product-page shell. Components remain the only interactive preview content,
+and only modal or overlay states float above the context. Transient Product
+picker, Loading, Validation, and Upsell states remain deterministic
+representations and must not be described as exact storefront interactions.
 
 All enabled preview controls share one Admin-only interaction state. Product,
 upsell, category, slot, picker, progress, mobile-summary, and discount-feedback
@@ -139,6 +148,8 @@ checkout, bundle, or storefront APIs. Field-to-surface focus is a one-shot
 request per edit so a merchant's later manual surface selection is not
 overridden. The fixed logical canvas may scale below 0.5 when required to fit a
 narrow Admin host; it must not clip merely to preserve a minimum visual scale.
+Preview product grids consume both canonical desktop and mobile column
+contracts; a mobile logical viewport must never retain the desktop track count.
 
 The separate storefront Preview Bundle action consumes saved Design settings
 only. It lists active or unlisted bundles with a valid storefront identifier,

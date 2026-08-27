@@ -5,7 +5,7 @@ title: Admin Performance
 type: operations
 status: authoritative
 summary: Embedded Admin Web Vitals instrumentation, route-level LCP findings, and critical-path constraints.
-last_audited: 2026-08-25
+last_audited: 2026-08-27
 owners:
   - engineering
 domains:
@@ -387,3 +387,19 @@ separate chunks for every inactive section and overlay group. Therefore the
 strict configure target is not proven by the dev tunnel; verify `<2500ms` with
 Shopify route/device field p75 after manual SIT deployment. Do not add more
 local-only loading placeholders or speculative preloads to force the lab metric.
+
+## 2026-08-27 Settings Design context-frame follow-up
+
+Direct Chrome DevTools repeated ten cache-bypassed Settings loads at 1440 x 900
+on `agent-5sfidg3m` while the temporary iframe-to-parent LCP bridge was active.
+Nine app-content candidates produced a 2416ms p75. One late 13832ms candidate
+was a 1050px data-URI SVG inside a `span`, distinct from the 10808px Settings
+content candidate; retaining it makes the raw ten-sample observer p75 2880ms.
+This is local dev-tunnel evidence, not an App Bridge or Shopify field p75 pass.
+
+The rapid mobile cache-bypass loop stopped mounting the Shopify app iframe and
+left it at `about:blank`, so no mobile LCP sample set was accepted. Mobile
+layout verification had already passed in the mounted iframe before the loop.
+The temporary observer and parent bridge were removed after measurement. The
+Design context-frame work remains behind the existing post-click lazy boundary
+and does not add work to the Settings landing render path.
