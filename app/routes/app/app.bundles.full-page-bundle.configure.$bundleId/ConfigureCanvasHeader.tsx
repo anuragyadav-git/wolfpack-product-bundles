@@ -75,6 +75,7 @@ export function ConfigureCanvasHeader({
           <s-button
             variant="secondary"
             icon="view"
+            accessibilityLabel="Preview Bundle"
             onClick={() => {
               void handlePreviewBundle();
             }}
@@ -90,11 +91,12 @@ export function ConfigureCanvasHeader({
         themeEditorUrl={themeEditorUrl}
         onEnableClick={openThemeEditorForAppEmbed}
       />
-      {parentProductStatusUi.showUnlistedBanner && (
+      {(parentProductStatusUi.isLoading || parentProductStatusUi.showUnlistedBanner) && (
         <div className={fullPageBundleStyles.unlistedBannerGap}>
           <UnlistedBundleBanner
             shop={shop}
             bundleProductId={bundleProduct?.id ?? bundle.shopifyProductId ?? null}
+            loading={parentProductStatusUi.isLoading}
             onManage={() => {
               const productId =
                 bundleProduct?.legacyResourceId ||

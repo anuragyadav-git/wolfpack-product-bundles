@@ -34,6 +34,7 @@ describe("ensureVariantBundleMetafieldDefinitions", () => {
       "price_adjustment",
       "bundle_ui_config",
       "component_pricing",
+      "ppb_policy_revisions",
     ]);
   });
 });

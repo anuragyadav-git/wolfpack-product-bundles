@@ -26,7 +26,7 @@ keywords:
 # State Matrix
 
 Artifact job ID: ppb-bundle-picker-modal-redesign-20260821
-Artifact revision: 6
+Artifact revision: 8
 Artifact status: complete
 
 | State ID | Trigger | Data precondition | Visible result | Available interaction | Accessibility | Desktop | Mobile | Screenshot | Automated assertion | Approval |
@@ -37,7 +37,7 @@ Artifact status: complete
 | empty | Request succeeds | No products | Existing empty feedback | Close/back | Feedback readable | Centered | Centered | No | Existing empty behavior | approved |
 | fetch-error | Request fails | Error | Existing retry/error feedback | Retry/close | Error perceivable | Same | Same | No | Existing error test | approved |
 | selected | Select product | Available product | Existing selected/check/quantity state | Change/remove/next | State not color-only | Stable card | Stable card | Yes | Selection regression | approved |
-| filled-slot-identity | Render selected slot | Selected product with short or long title | Title wraps within the responsive height cap, visually clamps only at the cap, and exposes the complete accessible name; cross badge overlays the slot | Reopen slot or remove | Cross badge is a product-specific named native button with a 44px target; card retains its own replacement activation | Badge overlays the top corner without covering readable identity | Same overlaid badge contract | Yes | Height-cap, complete-name semantics, and single-removal assertions | approved |
+| filled-slot-identity | Render selected slot | Selected product with short or long title | Vertical renders live EB's intrinsic full-width row with 60px minimum, no maximum, 50px media, visible title wrapping, no price, and inline 20px circular-cross visual; Horizontal retains its bounded tile | Remove one unit or open an empty slot | Remove remains a product-specific named native button; Vertical row is inert and Horizontal retains replacement activation | Orientation-owned presentation | Same orientation-owned presentation | Yes | Exact Vertical computed styles, complete-name semantics, inert-row behavior, and one-unit removal assertions | approved |
 | validation-error | Advance invalid | Requirement unmet | Existing toast/message | Correct selection | Error announced/focus not obscured | Footer visible | Footer visible | Yes | Existing validation test | approved |
 | nested-drawer | Details/variant control | Eligible product | Nested layer above picker | Complete/close nested | Escape closes top layer only | Picker retained | Picker retained | No | Layer regression | approved |
 | close-reopen | Close then reopen | Prior state | Restored selection/category | Continue | Opener focus round-trip | Same | Same | No | Restore regression | approved |

@@ -26,15 +26,6 @@ function makeSlotCardKeyboardAccessible(card: HTMLDivElement, activate: any) {
   });
 }
 
-function createSlotReplacementTrigger(accessibleName: string, activate: (event: Event) => void) {
-  const trigger = document.createElement('button');
-  trigger.type = 'button';
-  trigger.className = 'bw-slot-card__replace-trigger';
-  trigger.setAttribute('aria-label', accessibleName);
-  trigger.addEventListener('click', activate);
-  return trigger;
-}
-
 export function resolveSelectedSlotTitle(title: string, _isVertical: boolean) {
   return String(title || '');
 }
@@ -115,8 +106,7 @@ function focusModalSlotAfterRemoval(widget: any, stepIndex: any, slotIndex: numb
   const focusRecovery = () => {
     const sameStep = getStepSlotElements(widget, stepIndex);
     const nextFocus = sameStep[slotIndex] || sameStep.at(-1);
-    const nestedTrigger = nextFocus?.querySelector?.('.bw-slot-card__replace-trigger');
-    (nestedTrigger || nextFocus)?.focus?.();
+    nextFocus?.focus?.();
   };
 
   if (typeof globalThis.requestAnimationFrame === 'function') {
@@ -436,25 +426,10 @@ createSelectedProductCard(item: any, cardIndex: string|undefined) {
   const content = resolveSelectedSlotContent(product);
 
   const stepBox = document.createElement('div');
-  stepBox.className = 'step-box step-completed product-card-state bw-slot-card bw-slot-card--filled';
+  stepBox.className = 'step-box step-completed product-card-state bw-slot-card bw-slot-card--filled gbbMixSelectedProductCard';
   stepBox.dataset.stepIndex = stepIndex;
   stepBox.dataset.variantId = variantId;
   stepBox.dataset.cardIndex = cardIndex;
-
-  const replacementTrigger = createSlotReplacementTrigger(
-    [content.title, content.variantTitle].filter(Boolean).join(', '),
-    (event: any) => {
-      this._modalSlotReplacementTarget = {
-        stepIndex,
-        selectionKey: this.normalizeSelectionKey?.(variantId) || variantId,
-      };
-      this.openModal(stepIndex, event.currentTarget);
-    },
-  );
-  replacementTrigger.dataset.stepIndex = String(stepIndex);
-  replacementTrigger.dataset.cardIndex = String(cardIndex);
-  replacementTrigger.dataset.variantId = String(variantId);
-  stepBox.appendChild(replacementTrigger);
 
   // Remove button — hidden for default (non-removable) steps
   if (!isDefault) {
@@ -538,7 +513,7 @@ createSelectedProductCard(item: any, cardIndex: string|undefined) {
  */
 createDefaultProductCard(step: any, stepIndex: string|undefined, product: any) {
   const stepBox = document.createElement('div');
-  stepBox.className = 'step-box bw-slot-card bw-slot-card--filled';
+  stepBox.className = 'step-box bw-slot-card bw-slot-card--filled gbbMixSelectedProductCard';
   stepBox.dataset.stepIndex = stepIndex;
   stepBox.dataset.variantId = step.defaultVariantId || '';
   // Default cards are not clickable
@@ -578,7 +553,7 @@ createDefaultProductCard(step: any, stepIndex: string|undefined, product: any) {
  */
 _createDefaultLoadingCard(step: any, stepIndex: number) {
   const stepBox = document.createElement('div');
-  stepBox.className = 'step-box bw-slot-card bw-slot-card--filled';
+  stepBox.className = 'step-box bw-slot-card bw-slot-card--filled gbbMixSelectedProductCard is-loading';
   stepBox.dataset.stepIndex = String(stepIndex);
   stepBox.style.cursor = 'default';
   stepBox.style.opacity = '0.7';
@@ -617,16 +592,7 @@ createFreeGiftSlotCard(step: any, stepIndex: number) {
     const product = this.findProductBySelectionKey(products, variantId);
     if (product) {
       // Show filled state for free gift
-      stepBox.className = 'step-box step-completed product-card-state bw-slot-card bw-slot-card--filled';
-
-      const replacementTrigger = createSlotReplacementTrigger(
-        String(product.title || ''),
-        (event: any) => this.openModal(stepIndex, event.currentTarget),
-      );
-      replacementTrigger.dataset.stepIndex = String(stepIndex);
-      replacementTrigger.dataset.cardIndex = '0';
-      replacementTrigger.dataset.variantId = String(variantId);
-      stepBox.appendChild(replacementTrigger);
+      stepBox.className = 'step-box step-completed product-card-state bw-slot-card bw-slot-card--filled gbbMixSelectedProductCard';
 
       const imageWrapper = document.createElement('div');
       imageWrapper.className = 'bw-slot-card__image-wrapper';
@@ -724,7 +690,7 @@ _createRibbonSvg() {
   return ribbon;
 },
 
-// Remove a specific product from selection (decrease quantity by 1)
+// Remove a selected product entirely from a slot.
 removeProductFromSelection(stepIndex: string|number, variantId: any) {
   // Guard: default products are compulsory — they must always stay in selectedProducts
   const step = this.selectedBundle?.steps[stepIndex];
@@ -734,15 +700,7 @@ removeProductFromSelection(stepIndex: string|number, variantId: any) {
   if (step?.isDefault && this.normalizeSelectionKey(step.defaultVariantId) === normalizedVariantId) return;
   if (this._isDirectDefaultVariant(normalizedVariantId)) return;
 
-  const currentQuantity = this.getSelectedQuantity(stepIndex, normalizedVariantId);
-
-  if (currentQuantity > 1) {
-    // Decrease quantity
-    this.setSelectedQuantity(stepIndex, normalizedVariantId, currentQuantity - 1);
-  } else {
-    // Remove completely
-    this.setSelectedQuantity(stepIndex, normalizedVariantId, 0);
-  }
+  this.setSelectedQuantity(stepIndex, normalizedVariantId, 0);
 
   // Update UI
   this.renderSteps();

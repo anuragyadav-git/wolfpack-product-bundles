@@ -44,6 +44,52 @@ pub struct RuntimeTokenDiscount {
     pub value: f64,
 }
 
+#[derive(serde::Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct PpbBundleTokenV2 {
+    pub version: i64,
+    pub kind: String,
+    pub shop: String,
+    pub bundle_id: String,
+    pub revision: String,
+    #[serde(rename = "parentVariantId")]
+    pub _parent_variant_id: String,
+    #[serde(default)]
+    pub price_adjustment: serde_json::Value,
+    #[serde(default)]
+    pub subscription: Option<serde_json::Value>,
+    #[serde(default)]
+    pub groups: Vec<PpbSelectionGroupV2>,
+}
+
+#[derive(serde::Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct PpbSelectionGroupV2 {
+    pub id: String,
+    pub role: String,
+    pub min_quantity: i64,
+    pub max_quantity: i64,
+}
+
+#[derive(serde::Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct PpbLineTokenV2 {
+    pub version: i64,
+    pub kind: String,
+    pub shop: String,
+    pub bundle_id: String,
+    pub revision: String,
+    pub group_id: String,
+    #[serde(default)]
+    pub variant_id: String,
+    #[serde(default)]
+    pub product_id: Option<String>,
+    pub role: String,
+    pub max_quantity: i64,
+    #[serde(default)]
+    pub max_discount_percentage: f64,
+}
+
 const K: [u32; 64] = [
     0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
     0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
@@ -218,6 +264,33 @@ pub fn verify_runtime_token(token: &str, secret: &str) -> Option<RuntimeTokenPay
     let payload_bytes = base64url_decode(payload_part)?;
     let payload: RuntimeTokenPayload = serde_json::from_slice(&payload_bytes).ok()?;
     (payload.version == 1).then_some(payload)
+}
+
+fn verified_payload_bytes(token: &str, secret: &str) -> Option<Vec<u8>> {
+    let mut parts = token.split('.');
+    let payload_part = parts.next()?;
+    let signature_part = parts.next()?;
+    if parts.next().is_some() || payload_part.is_empty() || signature_part.is_empty() {
+        return None;
+    }
+    let expected_signature =
+        base64url_encode(&hmac_sha256(secret.as_bytes(), payload_part.as_bytes()));
+    if expected_signature.as_bytes() != signature_part.as_bytes() {
+        return None;
+    }
+    base64url_decode(payload_part)
+}
+
+pub fn verify_ppb_bundle_token(token: &str, secret: &str) -> Option<PpbBundleTokenV2> {
+    let payload: PpbBundleTokenV2 =
+        serde_json::from_slice(&verified_payload_bytes(token, secret)?).ok()?;
+    (payload.version == 2 && payload.kind == "bundle").then_some(payload)
+}
+
+pub fn verify_ppb_line_token(token: &str, secret: &str) -> Option<PpbLineTokenV2> {
+    let payload: PpbLineTokenV2 =
+        serde_json::from_slice(&verified_payload_bytes(token, secret)?).ok()?;
+    (payload.version == 2 && payload.kind == "line").then_some(payload)
 }
 
 #[cfg(test)]

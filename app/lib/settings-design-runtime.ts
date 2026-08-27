@@ -1,5 +1,12 @@
 import { BundleType } from "../constants/bundle";
-import { parseSettingsDesignPayload } from "./settings-design-contract";
+import {
+  SETTINGS_DESIGN_DEFAULT_FIELD_VALUES,
+  parseSettingsDesignPayload,
+} from "./settings-design-contract";
+import {
+  resolveDesignColor,
+  type ShopBrandColors,
+} from "./shop-brand-colors";
 
 type JsonObject = Record<string, unknown>;
 
@@ -36,8 +43,9 @@ const DEFAULT_STYLE_PRESETS = {
   },
   images: {
     productImageFit: "cover",
+    slotIconUrl: "",
+    slotIconFit: "badge",
   },
-  isExpertControlsEnabled: false,
 };
 
 const BRAND_COLOR_TARGETS: Record<string, string[]> = {
@@ -381,6 +389,24 @@ function normalizeImageFit(value: string) {
   return fit === "contain" || fit === "fill" ? fit : "cover";
 }
 
+export function normalizeSlotIconFit(value: string): "badge" | "fit" | "cover" {
+  const cleaned = value.trim().toLowerCase();
+  if (cleaned === "cover") return "cover";
+  if (cleaned === "fit") return "fit";
+  return "badge";
+}
+
+export function getSlotIconRecommendation(value: string): string | null {
+  const mode = normalizeSlotIconFit(value);
+  if (mode === "badge") {
+    return "Recommended: 96 × 96 px square artwork with a transparent background.";
+  }
+  if (mode === "fit") {
+    return "Recommended: 800 × 800 px square artwork so the full image stays clear inside responsive slots.";
+  }
+  return null;
+}
+
 function normalizeRadiusStyle(value: string, allowRound: boolean) {
   const cleaned = value.trim().toLowerCase();
   if (cleaned === "sharp") return "Sharp";
@@ -416,10 +442,22 @@ function flattenRuntimeSettings(designSettings: JsonObject, pageCustomization: J
   };
 }
 
-export function buildSettingsDesignRuntime(payload: unknown, currentPageCustomization: JsonObject = {}) {
+export function buildSettingsDesignRuntime(
+  payload: unknown,
+  currentPageCustomization: JsonObject = {},
+  shopBrandColors: ShopBrandColors | null = null,
+) {
   const parsedPayload = parseSettingsDesignPayload(payload);
-  const fieldValues = parsedPayload.fieldValues;
-  const isExpertControlsEnabled = parsedPayload.isExpertControlsEnabled;
+  const fieldValues = { ...parsedPayload.fieldValues };
+  for (const fieldKey of parsedPayload.inheritedColorFieldKeys) {
+    fieldValues[fieldKey] = resolveDesignColor({
+      fieldKey,
+      explicitValue: fieldValues[fieldKey] ?? "",
+      inheritedColorFieldKeys: parsedPayload.inheritedColorFieldKeys,
+      shopBrandColors,
+      templateDefault: SETTINGS_DESIGN_DEFAULT_FIELD_VALUES[fieldKey] ?? "",
+    });
+  }
 
   const primaryColor = getField(fieldValues, "Primary Color", DEFAULT_STYLE_PRESETS.colors.primaryColor);
   const buttonTextColor = getField(fieldValues, "Button Text Color", DEFAULT_STYLE_PRESETS.colors.buttonTextColor);
@@ -441,6 +479,8 @@ export function buildSettingsDesignRuntime(payload: unknown, currentPageCustomiz
   const cardRadiusStyle = normalizeRadiusStyle(getField(fieldValues, "Product Card & Cart Corner Style", DEFAULT_STYLE_PRESETS.corners.productCardBorderRadiusStyle), false);
   const cardRadiusBase = numberFromPx(getField(fieldValues, "Product Card & Cart Base", `${DEFAULT_STYLE_PRESETS.corners.productCardBaseBorderRadius}px`), DEFAULT_STYLE_PRESETS.corners.productCardBaseBorderRadius);
   const productImageFit = normalizeImageFit(getField(fieldValues, "Image Fit", DEFAULT_STYLE_PRESETS.images.productImageFit));
+  const slotIconUrl = getField(fieldValues, "stylePresets.images.slotIconUrl", DEFAULT_STYLE_PRESETS.images.slotIconUrl);
+  const slotIconFit = normalizeSlotIconFit(getField(fieldValues, "stylePresets.images.slotIconFit", DEFAULT_STYLE_PRESETS.images.slotIconFit));
   const loadingGifUrl = getField(fieldValues, "generalSettings.loadingGifUrl", "");
   const loadingBackgroundColor = getField(fieldValues, "generalSettings.loadingBgColor", "#ffffff");
   const buttonRadius = radiusForStyle(buttonRadiusStyle, buttonRadiusBase);
@@ -468,18 +508,23 @@ export function buildSettingsDesignRuntime(payload: unknown, currentPageCustomiz
   CARD_RADIUS_TARGETS.forEach((path) => setPath(designPatch, path, cardRadius));
   IMAGE_RADIUS_TARGETS.forEach((path) => setPath(designPatch, path, cardImageRadius));
   IMAGE_FIT_TARGETS.forEach((path) => setPath(designPatch, path, productImageFit));
+  setPath(designPatch, "stylePresets.images.slotIconUrl", slotIconUrl);
+  setPath(designPatch, "stylePresets.images.slotIconFit", slotIconFit);
+  setPath(designPatch, "mixAndMatchConfig.emptyStateCard.slotIconUrl", slotIconUrl);
+  setPath(designPatch, "mixAndMatchConfig.emptyStateCard.slotIconFit", slotIconFit);
   setPath(designPatch, "generalSettings.loadingGifUrl", loadingGifUrl);
   setPath(designPatch, "generalSettings.loadingBgColor", loadingBackgroundColor);
 
-  if (isExpertControlsEnabled) {
-    Object.entries(EXPERT_TARGETS).forEach(([fieldKey, paths]: any) => {
-      const value = fieldValues[fieldKey];
-      if (value === null || value === undefined || value === "") {
-        return;
-      }
-      paths.forEach((path: string) => setPath(designPatch, path, String(value)));
-    });
-  }
+  Object.entries(EXPERT_TARGETS).forEach(([fieldKey, paths]: any) => {
+    if (parsedPayload.inheritedColorFieldKeys.includes(fieldKey) && !shopBrandColors) {
+      return;
+    }
+    const value = fieldValues[fieldKey];
+    if (value === null || value === undefined || value === "") {
+      return;
+    }
+    paths.forEach((path: string) => setPath(designPatch, path, String(value)));
+  });
 
   designPatch.stylePresets = {
     colors: {
@@ -509,8 +554,9 @@ export function buildSettingsDesignRuntime(payload: unknown, currentPageCustomiz
     },
     images: {
       productImageFit,
+      slotIconUrl,
+      slotIconFit,
     },
-    isExpertControlsEnabled,
   };
   designPatch.quickSettings = {
     isQuickSettingsEnabled: true,
@@ -552,10 +598,6 @@ export function buildSettingsDesignRuntime(payload: unknown, currentPageCustomiz
     quantitySelectorBgColor: String((pageCustomization.productCard as JsonObject).productCardQuantitySelectorBgColor ?? accentColor),
     quantitySelectorTextColor: String((pageCustomization.productCard as JsonObject).quantitySelectorButtonTextColor ?? buttonTextColor),
     quantitySelectorBorderRadius: numberFromPx(buttonRadius, 5),
-    discountTierBackgroundColor,
-    discountTierTextColor,
-    discountCompletionBackgroundColor,
-    discountCompletionTextColor,
     variantSelectorTextColor: primaryTextColor,
     footerSettings: {
       footerBgColor: String((pageCustomization.cartFooter as JsonObject).cartFooterBgColor ?? backgroundColor),
@@ -592,6 +634,12 @@ export function buildSettingsDesignRuntime(payload: unknown, currentPageCustomiz
         gifUrl: loadingGifUrl,
         backgroundColor: loadingBackgroundColor,
       },
+      discountTierBackgroundColor,
+      discountTierTextColor,
+      discountCompletionBackgroundColor,
+      discountCompletionTextColor,
+      slotIconUrl,
+      slotIconFit,
     },
   };
 

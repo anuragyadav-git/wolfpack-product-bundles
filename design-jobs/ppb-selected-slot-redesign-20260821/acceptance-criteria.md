@@ -4,8 +4,8 @@ id: ppb-selected-slot-redesign-acceptance
 title: PPB Selected Slot Redesign Acceptance Criteria
 type: quality-contract
 status: complete
-summary: Defines independently testable completion criteria for the PPB selected-slot redesign.
-last_audited: 2026-08-21
+summary: Defines independently testable Revision 4 completion criteria for PPB Vertical Slots EB parity.
+last_audited: 2026-08-24
 owners:
   - wolfpack
 domains:
@@ -27,27 +27,27 @@ keywords:
 # Acceptance Criteria
 
 Artifact job ID: ppb-selected-slot-redesign-20260821
-Artifact revision: 2
+Artifact revision: 4
 Artifact status: approved
 
-- [ ] Horizontal selected slots render readable product-led tiles; Vertical selected slots render compact full-width rows.
-- [ ] Empty and filled slots have equal outer geometry within each orientation and cause no same-row layout shift.
-- [ ] Title, meaningful variant, payable price, and available compare-at price render from existing data without a new PPB setting.
-- [ ] Compare-at is absent when unavailable or not greater than payable price.
+- [ ] Vertical filled slots match the live EB anatomy: 64px target row, 50px media, one bold title line, trailing remove, 2px solid border, 10px radius, and no shadow.
+- [ ] Vertical empty slots match the live EB anatomy: 60px target row, saved label, trailing plus affordance, 2px dashed border, and 10px radius.
+- [ ] Price, compare-at price, variant, quantity, badges, and new copy do not appear inside the Vertical row.
+- [ ] The Vertical list remains one full-width column with measured row rhythm and no horizontal overflow.
 - [ ] Exact replacement changes only the activated instance.
 - [ ] Remove changes only the activated instance and does not open the picker.
 - [ ] Minimum rules retain one reachable empty slot; exact rules expose no overflow slot.
 - [ ] Hard-reload restoration, unavailable recovery, and other-step selections remain unchanged.
 - [ ] No inline quantity selector is added to selected slots.
-- [ ] Long title, variant, currency, missing image, loading, and high zoom do not hide price/actions or cause horizontal overflow.
+- [ ] Long title, localized label, missing image, loading, and high zoom do not hide actions or cause horizontal overflow.
 - [ ] Every action is keyboard-operable, has a distinct accessible name, visible focus, valid semantics, and a minimum 44px target.
 - [ ] Picker dismissal and removal restore focus according to interaction-contract.md.
 - [ ] Selection, availability, focus, and included status are not communicated by color alone.
-- [ ] No fixed 200px card height, viewport-specific column patch, runtime style injection, important declaration, or copied competitor measurement is introduced.
-- [ ] Product Grid, Product List, picker cards, PPB quantity validation, and FPB smoke checks show no regression.
+- [ ] Exact target primitives are implemented through the canonical source CSS, with no runtime style injection, important declaration, or competitor identifier.
+- [ ] Horizontal Slots, Product Grid, Product List, picker cards, PPB quantity validation, and FPB smoke checks show no regression.
 - [ ] document.scrollWidth equals document.clientWidth at 320x700, 390x844, 767x900, 768x900, and 1280x800.
 - [ ] First and last slots remain reachable and no card content overlaps the surrounding CTA.
 - [ ] Behavior-focused tests, ESLint, raw syntax checks, widget build, CSS minification, Graphify rebuild, and git diff --check pass.
 - [ ] Live served version and asset URL match the intended build after the user-controlled deployment/sync step.
 - [ ] Direct Chrome DevTools MCP preflight, semantic checks, viewport/element screenshots, console, network, accessibility, Lighthouse, performance, visual comparison, and non-regression gates pass.
-- [ ] Agent-store fixture is restored to Product Grid after the fixture group.
+- [ ] Agent-store fixture is restored after the fixture group; the EB reference fixture remains on Vertical Slots as the carried compatible parity state.

@@ -5,7 +5,7 @@ title: Widget Architecture
 type: architecture
 status: authoritative
 summary: FPB and PPB bootstrap, hydration, extension-asset, and widget runtime architecture.
-last_audited: 2026-08-21
+last_audited: 2026-08-27
 owners:
   - engineering
 domains:
@@ -21,6 +21,8 @@ source_paths:
   - app/storefront/page-builder-embed.ts
   - app/assets/bundle-modal-component.ts
   - app/assets/widgets/shared
+  - app/assets/widgets/shared/localized-bundle-config.ts
+  - app/assets/sdk/config-loader.ts
   - app/assets/widgets/shared/discount-tier-feedback.ts
   - app/assets/widgets/shared-css/discount-tier-feedback.css
   - app/assets/widgets/shared/drawer-layer-manager.ts
@@ -33,7 +35,11 @@ source_paths:
   - app/routes/api/api.fpb-upsells[.]json.tsx
   - app/routes/api/api.ppb-embed[.]json.tsx
   - app/routes/api/api.page-builder-embed[.]json.tsx
+  - app/routes/app/app.settings/DesignLivePreview.tsx
+  - app/routes/app/app.settings/DesignSettingsView.module.css
   - app/routes/app/app.settings/design-preview-model.ts
+  - app/routes/app/app.settings/preview-surfaces/PreviewSurfaces.module.css
+  - app/lib/shop-brand-colors.ts
   - app/routes/root/wpb.$bundleId.tsx
   - extensions/bundle-builder/blocks/bundle-app-embed.liquid
   - extensions/bundle-builder/blocks/bundle-product-page.liquid
@@ -62,6 +68,20 @@ keywords:
 | Product-Page (PDP)     | `app/assets/bundle-widget-product-page.ts` | `extensions/bundle-builder/assets/bundle-widget-product-page-bundled.js` | `bundle-product-page.liquid`                        |
 
 Shared runtime modules live under `app/assets/widgets/shared/`. Controllers, method modules, and template modules import each shared primitive directly from its owning module. The removed `bundle-widget-components` compatibility barrel must not be recreated: direct ownership lets esbuild close every method over real lexical bindings and prevents browser-only free-global failures. TypeScript entry points under `app/storefront/` import the required runtime graph, and esbuild resolves, tree-shakes, minifies, and emits browser IIFEs. Storefronts never load raw ESM source files.
+
+FPB, PPB, and SDK config selection pass the selected public bundle through the
+shared locale projector before exposing step, category, add-on, pricing,
+widget, embed, and general text fields to their existing renderers. Locale
+matching is case-insensitive, prefers the exact Shopify locale, then its base
+language, and finally retains the base configured copy. The projector is
+immutable and does not change the FPB metafield-first, proxy-fallback load
+priority. Subscription copy is excluded because its dedicated storefront
+resolver already performs exact/base locale resolution and deep-merges plan
+copy. Pricing projection includes the localized global success message as well
+as per-rule messages, progress tiers, and bundle-quantity labels. The dedicated
+PPB Bundle Embed selector follows the same case-insensitive exact/base matching
+and ignores blank overrides so its title and subtitle retain configured base
+copy.
 
 Template behavior is resolved through plain config modules and method modules:
 
@@ -109,10 +129,56 @@ applicable major component independently: Bundle header, Navigation, Categories,
 Product cards, Product slots, Product picker, Cart / Summary, Loading,
 Validation, and Upsell. Component surfaces render inside fixed logical
 1280×1136 desktop and 390×844 mobile canvases, then scale as a whole to fit the
-available Admin panel; the scale must not change the storefront breakpoint
-being represented. Transient Product picker, Loading, Validation, and Upsell
-states remain deterministic representations and must not be described as exact
-storefront interactions.
+available Admin panel using the smaller valid width or height ratio and center
+on both stage axes; the scale must not change the storefront breakpoint being
+represented. The selected component is composed into an Admin context frame
+whose decorative layer is accessibility-hidden and noninteractive: FPB uses a
+full-page product-grid and summary shell, Product List/Grid use an in-page
+product-media and product-form shell, and slot templates use a modal-oriented
+product-page shell. Components remain the only interactive preview content,
+and only modal or overlay states float above the context. Transient Product
+picker, Loading, Validation, and Upsell states remain deterministic
+representations and must not be described as exact storefront interactions.
+
+All enabled preview controls share one Admin-only interaction state. Product,
+upsell, category, slot, picker, progress, mobile-summary, and discount-feedback
+actions update that state, and Cart / Summary derives its rows, item count, and
+total from the current quantities. These simulations must never call cart,
+checkout, bundle, or storefront APIs. Field-to-surface focus is a one-shot
+request per edit so a merchant's later manual surface selection is not
+overridden. The fixed logical canvas may scale below 0.5 when required to fit a
+narrow Admin host; it must not clip merely to preserve a minimum visual scale.
+Preview product grids consume both canonical desktop and mobile column
+contracts; a mobile logical viewport must never retain the desktop track count.
+
+The separate storefront Preview Bundle action consumes saved Design settings
+only. It lists active or unlisted bundles with a valid storefront identifier,
+reserves a browser tab synchronously, and posts the existing authenticated
+configure `/prepare-preview` route. FPB navigates to the signed shareable URL;
+PPB appends the returned preview token to the parent product URL. Preparation
+failure closes the reserved tab and leaves the Polaris modal open with an error.
+
+The Design workspace is preview-first: template, component surface, and logical
+desktop/mobile selectors stay with the canvas, while one inspector exposes only
+settings mapped to the visible component. Phones switch between Preview and
+Customize panes without duplicating the preview model. Component color controls
+have no Expert-mode gate. `inheritedColorFieldKeys` records which fields resolve
+from the first Storefront API Shop Brand primary or secondary pair; editing a
+field removes it from that list and reset restores it. Existing saved payloads
+without the list remain explicit. `buildSettingsDesignRuntime` and the public
+Design CSS endpoint both use the same pure resolver, so Admin and storefront
+precedence is explicit component value, Shop Brand semantic pair, then canonical
+template default.
+
+The store-level product-slot image is persisted inside the shared Design JSON,
+not as direct `DesignSettings` columns. `stylePresets.images.slotIconUrl` and
+`slotIconFit` feed both local previews and generated storefront CSS for all four
+FPB and all four PPB templates. `badge` replaces the native centered plus icon;
+`cover` fills the responsive slot; `fit` contains the image within it. Admin
+labels `badge` as Centered badge and recommends a transparent 96 x 96 px square;
+Fit recommends an 800 x 800 px square. The generated CSS variables are the
+store-level authority when a slot image is configured, so older bundle-level
+placeholder markup cannot override its presentation.
 
 Source module names should describe their storefront responsibility. Avoid mechanical names such as `chunk-01.js` or `part-01.css`; those hide ownership and make stale widget code harder to spot.
 
@@ -174,8 +240,12 @@ Product Page inventory normalization preserves `sourceVariantCount` after unavai
 ## Storefront Surfaces
 
 - Theme Editor exposes one FPB body app embed: `bundle-app-embed` (`Wolfpack Bundle`). It is the activation/status surface and hydrates the canonical app-proxy marker. The retired `bundle-full-page` Page block is not part of the extension contract.
-- Shopify stores enabled app embed blocks in `config/settings_data.json` under `current.blocks`. Per Shopify's Theme app extension configuration docs, an app embed appears there only after first enable; if the merchant disables it later, the block remains and has `disabled: true`. App embed status detection reads the active theme settings file, supports `OnlineStoreThemeFileBodyText.content`, `OnlineStoreThemeFileBodyBase64.contentBase64`, and `OnlineStoreThemeFileBodyUrl.url`, tolerates Shopify's generated comment header before parsing the settings JSON, matches the block `type` shape `shopify://apps/{app-handle}/blocks/{block-handle}/{unique-id}`, and treats `disabled: true` as inactive. Shopify Admin `currentAppInstallation.app.handle` is the sole app-identity source; environment, client-key, and hardcoded handle fallbacks are prohibited. A missing handle or unreadable settings file fails closed so merchants see the enable banner instead of a false Active state.
-- The embedded Admin enable flow opens Theme Editor in a new tab and hides the configure warning plus updates Bundle Visibility status optimistically after the merchant clicks `Enable here`. Configure page-load status comes from the server loader's parallel Shopify theme settings read. Every FPB preview action synchronously reserves a tab, requests a new stateless signed URL, and navigates the reserved tab after the response; the token is required for drafts and harmless for public statuses.
+- Embedded Admin status comes only from `shopify.app.extensions()` published-theme data. Server loaders do not parse `settings_data.json` or provide a status fallback. Theme Editor uses the documented `themes/current` `activateAppId` deep link.
+- FPB and embed/page-builder product, collection, and cart-metafield requests use
+  the signed `/apps/product-bundles` app proxy. The parent-product PPB block is
+  the deliberate exception: it uses the synchronized public Storefront token
+  and calls the shop's Storefront API directly, so its buyer path remains
+  available without the Wolfpack web service.
 - Parent-product PPB rendering continues to use the `bundle-product-page` app
   block. Greenfield Bundle Embed rendering is separately owned by the global
   `bundle-app-embed` runtime: it resolves an eligible PPB, lazily loads PPB
@@ -291,32 +361,27 @@ If metafield cache is absent/malformed → `GET /apps/product-bundles/api/bundle
 
 ## PPB Load Strategy
 
-### Product-Page Block Stage — Marker Bootstrap
+### Product-Page Block Stage — Shopify-Hosted Snapshot
 
-The PPB app block writes only a compact pointer into `data-bundle-config`:
-
-```liquid
-data-bundle-config='{"v":2,"type":"product_page","bundleType":"product_page","id":"{{ bundle_id }}"}'
-```
-
-`bundle_ui_config` is still read to validate bundle-type context for container detection, but it is no longer serialized as a full bundle payload into the DOM.
+The PPB app block serializes only a complete schema-v3
+`$app.bundle_ui_config` into `data-bundle-config`. Compact v2 pointers are
+retired for this surface and are not fetched through the app proxy.
 
 Runtime behavior in `app/assets/widgets/product-page/methods/config-lifecycle-methods.js`:
 
-1. Parse `data-bundle-config` as a bootstrap marker only when `data-bundle-type="product_page"`.
-2. If marker is valid, fetch from:
-   - `GET /apps/product-bundles/api/bundle/{bundleId}.json`
-   - accept the `response.bundle` payload and hydrate `this.bundleData`.
-3. If marker is missing/invalid:
+1. Accept only a complete schema-v3 Product Page snapshot with signed v2
+   authorization.
+2. Read store controls, locale data, Storefront API version/token, and generated
+   Design CSS from Shopify-hosted shop metafields emitted by Liquid.
+3. Hydrate product and variant state directly from Shopify Storefront API;
+   category and collection membership is already materialized at sync time.
+4. If the snapshot is missing/invalid:
    - show theme editor preview when in editor mode and `bundleId` exists
    - otherwise hide the container on storefront
-4. Preserve transient retry for `503`/`504` only (3-second delay).
 
-### Migration intent (PPB)
-
-- Remove full-bundle payload writes into PPB HTML attributes.
-- Keep API as source of truth for runtime hydration.
-- Keep non-bundle and theme-editor behavior stable.
+There is no Wolfpack fallback for this surface. Storefront API failure fails
+closed rather than rendering stale catalog or price data. See
+[[Architecture/Storefront Outage Resilience]].
 
 ---
 

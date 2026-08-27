@@ -5,7 +5,7 @@ title: Build Process
 type: operations
 status: authoritative
 summary: Build, minification, lint, and pre-commit requirements for deployable application and storefront assets.
-last_audited: 2026-08-10
+last_audited: 2026-08-24
 owners:
   - engineering
 domains:
@@ -15,6 +15,13 @@ systems:
 source_paths:
   - scripts/build-storefront.mjs
   - scripts/minify-assets.js
+  - scripts/rebuild-graphify.mjs
+  - scripts/rebuild-graphify-core.cjs
+  - .graphifyignore
+  - .githooks/pre-commit
+  - .githooks/post-commit
+  - .githooks/post-checkout
+  - .gitattributes
 related_docs:
   - internal docs/index.md
 tags:
@@ -109,6 +116,13 @@ auto-stages `graphify-out/GRAPH_REPORT.md` plus `graphify-out/graph.json` when
 the rebuild succeeds. Local graphify runtime/configuration failures warn only so
 developer-specific Python or uv setup does not block unrelated commits.
 
+Graphify's official `post-commit` and `post-checkout` hooks share the tracked
+`.githooks/` path with Wolfpack's pre-commit hook. Run `graphify hook install`
+after installing or upgrading the uv tool; this also registers the `graphify`
+merge driver used by `.gitattributes`. Verify all three with
+`graphify hook status`, `git config --get core.hooksPath`, and
+`git config --get merge.graphify.driver`.
+
 ## Graphify Knowledge Graph
 
 After modifying code files:
@@ -116,16 +130,18 @@ After modifying code files:
 npm run graphify:rebuild
 ```
 
-The npm wrapper must use the same Python runtime as the installed `graphify`
-CLI and git hooks. Prefer the `graphify` executable shebang, then the uv
-`graphifyy` tool install. Do not hardcode a user profile path: local uv and
-pipx installs are machine-specific, and older graphify runtimes can miss lock
-handling, backup behavior, and current output conventions.
+The npm wrapper invokes the installed public CLI as `graphify update . --force`.
+Do not import underscore-prefixed Graphify Python functions or depend on the
+system Python: Graphify's uv tool environment owns the executable and its
+dependencies. The wrapper keeps Wolfpack-owned pre/post sanitization for invalid
+legacy file types, excluded generated sources, and duplicate hyperedge IDs.
 
 `graphify-out/GRAPH_REPORT.md` and `graphify-out/graph.json` are tracked.
 `graphify-out/.graphify_python`, caches, manifests, lock/temp files, dated
-protected-output backups, and `graph.html` are generated support artifacts and
-should stay ignored.
+protected-output backups, `graph.html`, and `GRAPH_TREE.html` are generated
+support artifacts and should stay ignored. Current Graphify versions emit an
+aggregated `graph.html` for graphs above 5,000 nodes; `graphify tree` remains a
+useful filesystem-oriented fallback.
 
 Keep `graphify-out/` in `.graphifyignore`. Graphify uses `.graphifyignore`
 instead of `.gitignore` when present, so the file must also list normal
@@ -134,13 +150,13 @@ outputs. Do not let graphify ingest its own `GRAPH_REPORT.md` or backup
 folders as source input.
 
 Also keep local agent/editor state out of graphify input: `.claude/`,
-`.codex/`, `.vscode/`, and Obsidian plugin state under
-`Wolfpack: Product Bundles/.obsidian/`.
+`.codex/`, and `.vscode/`. The entire generated `Wolfpack: Product Bundles/`
+wiki must be excluded, not only its Obsidian state; otherwise Graphify ingests
+its own generated pages and recursively degrades community and query signal.
 
-If ignored, deleted, or generated files were previously scanned, old nodes can
-stay in `graph.json` because code-only rebuilds preserve semantic/document
-nodes. Prune nodes whose `source_file` is outside live graphify detection before
-rebuilding.
+If ignored, deleted, or generated files were previously scanned, use the
+wrapper's forced public update. It explicitly prunes known generated-source
+nodes before and after Graphify updates the remaining corpus.
 
 If a rebuild warns about invalid `file_type: "concept"` nodes, those are stale
 semantic nodes preserved from an older graphify schema. Normalize them to

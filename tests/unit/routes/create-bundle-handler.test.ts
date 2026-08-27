@@ -19,6 +19,7 @@ jest.mock("../../../app/db.server", () => ({
       count: jest.fn(),
       create: jest.fn(),
       findUnique: jest.fn(),
+      update: jest.fn(),
     },
     bundleStep: {
       create: jest.fn(),
@@ -265,5 +266,69 @@ describe("handleCloneBundle", () => {
       bundleId: "cloned-bundle",
       redirectTo: expectedRedirect,
     });
+  });
+
+  it("clones all steps and step products in one nested bundle update", async () => {
+    (mockDb.bundle.findUnique as jest.Mock).mockResolvedValue({
+      id: "source-bundle",
+      name: "Source Bundle",
+      description: null,
+      bundleType: "full_page",
+      templateName: null,
+      pricing: null,
+      steps: [
+        {
+          name: "Step 1",
+          products: [],
+          collections: [],
+          displayVariantsAsIndividual: false,
+          icon: "box",
+          position: 0,
+          minQuantity: 1,
+          maxQuantity: 2,
+          enabled: true,
+          conditionType: null,
+          conditionOperator: null,
+          conditionValue: null,
+          conditionOperator2: null,
+          conditionValue2: null,
+          StepProduct: [{
+            productId: "gid://shopify/Product/100",
+            title: "Product 100",
+            variants: [],
+            imageUrl: null,
+            minQuantity: 0,
+            maxQuantity: 1,
+            position: 0,
+          }],
+        },
+      ],
+    });
+    (mockDb.bundle.update as jest.Mock).mockResolvedValue({ id: "cloned-bundle" });
+
+    await handleCloneBundle(
+      makeAdmin() as any,
+      { shop: "test-shop.myshopify.com" },
+      makeForm({ bundleId: "source-bundle" }),
+    );
+
+    expect(mockDb.bundle.update).toHaveBeenCalledTimes(1);
+    expect(mockDb.bundle.update).toHaveBeenCalledWith({
+      where: { id: "cloned-bundle" },
+      data: {
+        steps: {
+          create: [expect.objectContaining({
+            name: "Step 1",
+            StepProduct: {
+              create: [expect.objectContaining({
+                productId: "gid://shopify/Product/100",
+              })],
+            },
+          })],
+        },
+      },
+    });
+    expect(mockDb.bundleStep.create).not.toHaveBeenCalled();
+    expect(mockDb.stepProduct.createMany).not.toHaveBeenCalled();
   });
 });

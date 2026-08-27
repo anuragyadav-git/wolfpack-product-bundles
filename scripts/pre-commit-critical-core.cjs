@@ -215,7 +215,9 @@ function findBannedTestPatterns(fileContentsByPath) {
 
 function isGraphifyConfigurationFailure(output) {
   return /Graphify rebuild failed with/.test(output)
+    || /Graphify rebuild failed through the public CLI/.test(output)
     || /Failed to start graphify rebuild/.test(output)
+    || /Failed to start public graphify update/.test(output)
     || /No module named ['"]?graphify/.test(output)
     || /ModuleNotFoundError/.test(output)
     || /GRAPHIFY_PYTHON/.test(output)

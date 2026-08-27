@@ -6,7 +6,7 @@ use crate::expand::process_expand_operations;
 use crate::helpers::{decimal_to_f64, parse_json_or_default};
 use crate::merge::process_merge_operations;
 use crate::schema;
-use crate::types::CartLineMessagingSettings;
+use crate::types::CartTransformRuntimeConfiguration;
 
 /// Inner cart transform logic — called by the #[shopify_function] wrapper and
 /// directly by integration tests via run_function_with_input(cart_transform_run, json).
@@ -31,19 +31,22 @@ pub fn cart_transform_run(input: schema::run::Input) -> Result<schema::FunctionR
         .filter(|line| line.selling_plan_allocation().is_some())
         .map(|line| line.id().clone())
         .collect();
-    let cart_line_messaging: CartLineMessagingSettings = parse_json_or_default(
+    let runtime_configuration: CartTransformRuntimeConfiguration = parse_json_or_default(
         input
             .cart_transform()
-            .bundle_cart_line_messaging()
+            .runtime_configuration()
             .map(|metafield| metafield.value().as_str()),
     );
+    let runtime_token_secret = (!runtime_configuration.runtime_token_secret.trim().is_empty())
+        .then_some(runtime_configuration.runtime_token_secret.as_str());
 
     // Pass 1: MERGE — component lines grouped by EB `_wolfpackProductBundle:OfferId`
     let mut operations = process_merge_operations(
         &input,
         presentment_currency_rate,
         &mut processed_line_ids,
-        &cart_line_messaging,
+        &runtime_configuration.bundle_cart_line_messaging,
+        runtime_token_secret,
     );
 
     // Pass 2: EXPAND — Flex Bundle parent variants (skips MERGE-processed lines)

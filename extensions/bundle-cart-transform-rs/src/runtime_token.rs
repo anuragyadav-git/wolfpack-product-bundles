@@ -1,4 +1,4 @@
-use crate::types::RuntimeTokenPayload;
+use crate::types::{PpbBundleTokenV2, PpbLineTokenV2, RuntimeTokenPayload};
 
 const K: [u32; 64] = [
     0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
@@ -168,22 +168,33 @@ fn base64url_encode(input: &[u8]) -> String {
 }
 
 pub fn verify_runtime_token(token: &str, secret: &str) -> Option<RuntimeTokenPayload> {
+    let payload = verify_token_payload(token, secret)?;
+    (payload.version == 1).then_some(payload)
+}
+
+fn verify_token_payload(token: &str, secret: &str) -> Option<RuntimeTokenPayload> {
     let mut parts = token.split('.');
     let payload_part = parts.next()?;
     let signature_part = parts.next()?;
     if parts.next().is_some() || payload_part.is_empty() || signature_part.is_empty() {
         return None;
     }
-
     let expected_signature =
         base64url_encode(&hmac_sha256(secret.as_bytes(), payload_part.as_bytes()));
     if expected_signature.as_bytes() != signature_part.as_bytes() {
         return None;
     }
+    serde_json::from_slice(&base64url_decode(payload_part)?).ok()
+}
 
-    let payload_bytes = base64url_decode(payload_part)?;
-    let payload: RuntimeTokenPayload = serde_json::from_slice(&payload_bytes).ok()?;
-    (payload.version == 1).then_some(payload)
+pub fn verify_ppb_bundle_token(token: &str, secret: &str) -> Option<PpbBundleTokenV2> {
+    let payload = verify_token_payload(token, secret)?;
+    (payload.version == 2 && payload.kind == "bundle").then_some(payload)
+}
+
+pub fn verify_ppb_line_token(token: &str, secret: &str) -> Option<PpbLineTokenV2> {
+    let payload = verify_token_payload(token, secret)?;
+    (payload.version == 2 && payload.kind == "line").then_some(payload)
 }
 
 #[cfg(debug_assertions)]

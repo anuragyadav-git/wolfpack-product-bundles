@@ -4,7 +4,7 @@ id: ppb-bundle-picker-modal-redesign-browser-report
 title: PPB Bundle Picker Modal Browser Test Report
 type: browser-test-report
 status: draft
-summary: Records revision-6 implementation evidence and the external blockers preventing completion of formal Chrome QA.
+summary: Records revision-8 exact EB Vertical filled-row evidence and the missing persisted Vertical SIT fixture blocking full formal Chrome QA.
 last_audited: 2026-08-21
 owners:
   - Aditya Awasthi
@@ -27,8 +27,16 @@ keywords:
 # Browser Test Report
 
 Artifact job ID: ppb-bundle-picker-modal-redesign-20260821
-Artifact revision: 6
+Artifact revision: 8
 Artifact status: draft
+
+## Revision 8 exact EB Vertical filled-row result
+
+Direct Chrome re-audited the live EB Vertical filled row at desktop and mobile, then verified the served WPB `14.1.2` implementation after clearing Cache Storage and performing cache-ignored hard reloads. With the real Vertical container contract applied, WPB measured 358 by 64 pixels at 390 by 844, with a 50 by 50 image, 16px/700 natural title, inline 20 by 22 remove control, content-driven height, and zero horizontal overflow. The two-pixel outer-width difference from EB's 360-pixel row is the host theme gutter; internal offsets match the EB row. A long-title stress pass grew the row to 94 pixels and kept the complete name visible with no overflow.
+
+The persisted SIT fixture remains configured as Horizontal Slots. Its hard-reloaded regression retained the Horizontal grid card, bounded tile, and independent removal behavior at desktop and mobile. Product Grid also retained equal-height two-column mobile cards and zero horizontal overflow. The Vertical source behavior is covered by the focused behavior test, but a transient DOM contract switch is not accepted as persisted end-to-end evidence. Formal Vertical execution therefore remains blocked until a valid persisted Vertical Slots fixture is available; no Admin or production fixture was mutated.
+
+Current automated gates pass: 2171 repository tests, repository typecheck, scoped ESLint with zero errors, widget build, CSS minification and asset-size checks, generated JavaScript syntax checks, Graphify rebuild, design-job validation, handoff validation, and `git diff --check`.
 
 ## Revision 6 preflight result
 

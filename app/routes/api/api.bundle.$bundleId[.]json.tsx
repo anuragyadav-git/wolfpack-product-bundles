@@ -5,7 +5,7 @@ import { AppLogger } from "../../lib/logger";
 import { BundleStatus } from "../../constants/bundle";
 import { ERROR_MESSAGES } from "../../constants/errors";
 import { formatBundleForWidget } from "../../lib/bundle-formatter.server";
-import { requireAppProxy } from "../../lib/auth-guards.server";
+import { authenticate } from "../../shopify.server";
 import { verifyBundlePreviewToken } from "../../lib/bundle-preview-token.server";
 import { BUNDLE_PREVIEW_QUERY_PARAM } from "../../lib/bundle-preview-url";
 
@@ -78,7 +78,8 @@ export const loader: LoaderFunction = async ({ request, params }: any) => {
       return json({ error: ERROR_MESSAGES.BUNDLE_ID_REQUIRED }, { status: 400, headers: CORS_HEADERS });
     }
 
-    const { session } = await requireAppProxy(request);
+    const { session } = await authenticate.public.appProxy(request);
+    if (!session) throw new Response("Unauthorized", { status: 401 });
     const shopDomain = session.shop;
 
     AppLogger.info("Fetching bundle", {

@@ -3,7 +3,10 @@ import {
   asVisibilityArray,
   getVisibilityDisplayTarget,
 } from "./ConfigureBundleFlow.helpers";
-import { normalizePpbBundleEmbedConfig } from "../../../lib/ppb-bundle-embed";
+import {
+  extractPpbBundleWidgetTranslations,
+  normalizePpbBundleEmbedConfig,
+} from "../../../lib/ppb-bundle-embed";
 
 export function usePpbVisibilityState({
   bundle,
@@ -122,6 +125,9 @@ export function usePpbVisibilityState({
   const [bundleEmbedMultiLangText, setBundleEmbedMultiLangText] = useState(
     normalizedEmbedConfig.multiLangText,
   );
+  const [bundleWidgetMultiLangText, setBundleWidgetMultiLangText] = useState(
+    extractPpbBundleWidgetTranslations(savedBundleUpsellConfig?.multiLangText ?? {}),
+  );
   const originalUpsellWidgetEnabledRef = useRef<boolean>(
     savedWidgetConfiguration?.isEnabled ??
       (bundle as any).upsellWidgetEnabled ??
@@ -235,6 +241,8 @@ export function usePpbVisibilityState({
     setBundleEmbedSpecificCollectionPages,
     bundleEmbedMultiLangText,
     setBundleEmbedMultiLangText,
+    bundleWidgetMultiLangText,
+    setBundleWidgetMultiLangText,
     originalUpsellWidgetEnabledRef,
     originalUpsellWidgetDisplayModeRef,
     originalUpsellWidgetDisplayOnRef,

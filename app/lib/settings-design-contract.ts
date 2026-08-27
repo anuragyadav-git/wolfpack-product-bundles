@@ -6,7 +6,7 @@ import {
 
 export type SettingsDesignPayload = {
   fieldValues: Record<string, string>;
-  isExpertControlsEnabled: boolean;
+  inheritedColorFieldKeys: string[];
 };
 
 const DESIGN_FIELDS = [
@@ -21,6 +21,12 @@ const FIELD_BY_KEY = new Map(
 export const SETTINGS_DESIGN_DEFAULT_FIELD_VALUES = Object.freeze(Object.fromEntries(
   DESIGN_FIELDS.map((field) => [field.key ?? field.label, field.value ?? ""]),
 ));
+
+export const SETTINGS_DESIGN_COLOR_FIELD_KEYS = Object.freeze(
+  DESIGN_FIELDS
+    .filter((field) => field.kind === "color")
+    .map((field) => field.key ?? field.label),
+);
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -51,7 +57,7 @@ function isNonNegativeSize(value: string) {
 
 function validateFieldValue(field: SettingsField, value: string) {
   if (field.kind === "color") return isCssColor(value);
-  if (field.kind === "loadingGif") {
+  if (field.kind === "loadingGif" || field.kind === "image" || field.kind === "file") {
     if (value === "") return true;
     try {
       const url = new URL(value);
@@ -69,8 +75,19 @@ function validateFieldValue(field: SettingsField, value: string) {
 }
 
 export function parseSettingsDesignPayload(value: unknown): SettingsDesignPayload {
-  if (!isRecord(value) || !isRecord(value.fieldValues) || typeof value.isExpertControlsEnabled !== "boolean") {
+  if (!isRecord(value) || !isRecord(value.fieldValues)) {
     throw new Error("Invalid Settings Design payload");
+  }
+
+  const inheritedColorFieldKeys = value.inheritedColorFieldKeys === undefined
+    ? []
+    : Array.isArray(value.inheritedColorFieldKeys)
+      ? value.inheritedColorFieldKeys
+      : null;
+  if (!inheritedColorFieldKeys || inheritedColorFieldKeys.some((key) => (
+    typeof key !== "string" || !SETTINGS_DESIGN_COLOR_FIELD_KEYS.includes(key)
+  ))) {
+    throw new Error("Invalid inherited Design colors");
   }
 
   const fieldValues = { ...SETTINGS_DESIGN_DEFAULT_FIELD_VALUES } as Record<string, string>;
@@ -85,7 +102,7 @@ export function parseSettingsDesignPayload(value: unknown): SettingsDesignPayloa
 
   return {
     fieldValues,
-    isExpertControlsEnabled: value.isExpertControlsEnabled,
+    inheritedColorFieldKeys: [...new Set(inheritedColorFieldKeys)],
   };
 }
 
@@ -93,12 +110,12 @@ export function createSettingsDesignState(value?: unknown): SettingsDesignPayloa
   if (!isRecord(value)) {
     return {
       fieldValues: { ...SETTINGS_DESIGN_DEFAULT_FIELD_VALUES },
-      isExpertControlsEnabled: false,
+      inheritedColorFieldKeys: [...SETTINGS_DESIGN_COLOR_FIELD_KEYS],
     };
   }
 
   return parseSettingsDesignPayload({
     fieldValues: isRecord(value.fieldValues) ? value.fieldValues : {},
-    isExpertControlsEnabled: value.isExpertControlsEnabled === true,
+    inheritedColorFieldKeys: value.inheritedColorFieldKeys,
   });
 }

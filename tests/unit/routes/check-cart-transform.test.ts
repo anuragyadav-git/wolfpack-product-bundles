@@ -1,10 +1,10 @@
 import { loader } from "../../../app/routes/api/api.check-cart-transform";
 
-jest.mock("../../../app/lib/auth-guards.server", () => ({
-  requireAdminSession: jest.fn(),
+jest.mock("../../../app/shopify.server", () => ({
+  authenticate: { admin: jest.fn() },
 }));
 
-const { requireAdminSession } = jest.requireMock("../../../app/lib/auth-guards.server");
+const { authenticate: { admin: requireAdminSession } } = jest.requireMock("../../../app/shopify.server");
 
 describe("api.check-cart-transform route", () => {
   beforeEach(() => {

@@ -1,5 +1,8 @@
 use super::schema;
-use crate::runtime_token::{token_components_match, verify_runtime_token};
+use crate::runtime_token::{
+    token_components_match, verify_ppb_bundle_token, verify_ppb_line_token, verify_runtime_token,
+    PpbBundleTokenV2, PpbLineTokenV2,
+};
 use shopify_function::prelude::*;
 use shopify_function::Result;
 use std::collections::HashMap;
@@ -75,6 +78,93 @@ fn is_addon_line(step_type_value: Option<&str>) -> bool {
 
 fn is_free_gift_line(step_type_value: Option<&str>) -> bool {
     step_type_value == Some("free_gift")
+}
+
+fn ppb_role(step_type: Option<&str>) -> &'static str {
+    match step_type {
+        Some("default") => "default",
+        Some("free_gift") => "free_gift",
+        Some(value) if value == "addon" || value.starts_with("addon:") => "addon",
+        _ => "component",
+    }
+}
+
+fn ppb_policy_matches(value: Option<&str>, bundle_id: &str, revision: &str) -> bool {
+    let Some(value) = value else {
+        return false;
+    };
+    let Ok(policies) = serde_json::from_str::<HashMap<String, String>>(value) else {
+        return false;
+    };
+    policies
+        .get(bundle_id)
+        .map(|value| value == revision)
+        .unwrap_or(false)
+}
+
+fn validate_ppb_line(
+    line: &schema::cart_lines_discounts_generate_run::input::cart::Lines,
+    secret: &str,
+    policy_revisions: Option<&str>,
+) -> Option<(PpbBundleTokenV2, PpbLineTokenV2)> {
+    let bundle_token = line.runtime_token()?.value()?;
+    let bundle = verify_ppb_bundle_token(bundle_token, secret)?;
+    if !ppb_policy_matches(policy_revisions, &bundle.bundle_id, &bundle.revision) {
+        return None;
+    }
+    let authorization = line.line_authorization()?.value()?;
+    let line_token = verify_ppb_line_token(authorization, secret)?;
+    if line_token.shop != bundle.shop
+        || line_token.bundle_id != bundle.bundle_id
+        || line_token.revision != bundle.revision
+        || line_token.role
+            != ppb_role(
+                line.step_type()
+                    .and_then(|value| value.value())
+                    .map(|value| value.as_str()),
+            )
+        || *line.quantity() as i64 <= 0
+        || *line.quantity() as i64 > line_token.max_quantity
+    {
+        return None;
+    }
+    let group = bundle
+        .groups
+        .iter()
+        .find(|group| group.id == line_token.group_id && group.role == line_token.role)?;
+    if line_token.max_quantity > group.max_quantity {
+        return None;
+    }
+    let schema::cart_lines_discounts_generate_run::input::cart::lines::Merchandise::ProductVariant(
+        variant,
+    ) = line.merchandise()
+    else {
+        return None;
+    };
+    let variant_matches =
+        !line_token.variant_id.is_empty() && line_token.variant_id == variant.id().to_string();
+    let product_matches = line_token.product_id.as_deref() == Some(variant.product().id().as_str());
+    if !variant_matches && !product_matches {
+        return None;
+    }
+    Some((bundle, line_token))
+}
+
+fn ppb_subscription_allows(bundle: &PpbBundleTokenV2, plan_id: &str, recurring: bool) -> bool {
+    let Some(subscription) = bundle.subscription.as_ref() else {
+        return false;
+    };
+    let allowed = subscription
+        .get("selectedPlanIds")
+        .and_then(|value| value.as_array())
+        .map(|plans| plans.iter().any(|value| value.as_str() == Some(plan_id)))
+        .unwrap_or(false);
+    let recurring_matches = subscription
+        .get("recurringBundleDiscount")
+        .and_then(|value| value.as_bool())
+        .unwrap_or(false)
+        == recurring;
+    allowed && recurring_matches
 }
 
 fn has_generated_checkout_code(input: &schema::cart_lines_discounts_generate_run::Input) -> bool {
@@ -269,6 +359,30 @@ fn build_automatic_addon_candidates(
     else {
         return vec![];
     };
+    let policy_revisions = input
+        .shop()
+        .ppb_policy_revisions()
+        .map(|metafield| metafield.value().as_str());
+
+    let mut authorized_quantities: HashMap<(String, String, String), i64> = HashMap::new();
+    let mut line_authorized_quantities: HashMap<String, i64> = HashMap::new();
+    for line in input.cart().lines() {
+        if let Some((bundle, line_token)) =
+            validate_ppb_line(line, runtime_secret, policy_revisions)
+        {
+            *authorized_quantities
+                .entry((bundle.bundle_id, bundle.revision, line_token.group_id))
+                .or_default() += *line.quantity() as i64;
+            if let Some(authorization) = line
+                .line_authorization()
+                .and_then(|attribute| attribute.value())
+            {
+                *line_authorized_quantities
+                    .entry(authorization.clone())
+                    .or_default() += *line.quantity() as i64;
+            }
+        }
+    }
 
     input
         .cart()
@@ -284,21 +398,40 @@ fn build_automatic_addon_candidates(
                 .runtime_token()
                 .and_then(|attribute| attribute.value())
                 .map(|value| value.as_str())?;
-            let payload = verify_runtime_token(token, runtime_secret)?;
             let variant_id = match line.merchandise() {
                 schema::cart_lines_discounts_generate_run::input::cart::lines::Merchandise::ProductVariant(variant) => {
                     variant.id().to_string()
                 }
                 _ => return None,
             };
-            let authorized = payload.addons.iter().any(|addon| {
-                addon.variant_id == variant_id
-                    && addon.quantity == *line.quantity() as i64
-                    && addon.discount.as_ref().map(|discount| {
-                        discount.discount_type.eq_ignore_ascii_case("PERCENTAGE")
-                            && (discount.value - percentage).abs() < 0.0001
-                    }).unwrap_or(false)
-            });
+            let authorized = verify_runtime_token(token, runtime_secret)
+                .map(|payload| payload.addons.iter().any(|addon| {
+                    addon.variant_id == variant_id
+                        && addon.quantity == *line.quantity() as i64
+                        && addon.discount.as_ref().map(|discount| {
+                            discount.discount_type.eq_ignore_ascii_case("PERCENTAGE")
+                                && (discount.value - percentage).abs() < 0.0001
+                        }).unwrap_or(false)
+                }))
+                .or_else(|| validate_ppb_line(line, runtime_secret, policy_revisions).map(|(bundle, line_token)| {
+                    let group = bundle.groups.iter().find(|group| group.id == line_token.group_id);
+                    let line_quantity_is_authorized = line
+                        .line_authorization()
+                        .and_then(|attribute| attribute.value())
+                        .and_then(|authorization| line_authorized_quantities.get(authorization))
+                        .map(|quantity| *quantity <= line_token.max_quantity)
+                        .unwrap_or(false);
+                    line_token.role == "addon"
+                        && percentage <= line_token.max_discount_percentage
+                        && line_quantity_is_authorized
+                        && group
+                            .and_then(|group| authorized_quantities.get(&(
+                                bundle.bundle_id.clone(), bundle.revision.clone(), group.id.clone(),
+                            )).map(|quantity| (*quantity, group)))
+                            .map(|(quantity, group)| quantity >= group.min_quantity && quantity <= group.max_quantity)
+                            .unwrap_or(false)
+                }))
+                .unwrap_or(false);
             if !authorized {
                 return None;
             }
@@ -320,6 +453,10 @@ fn build_subscription_candidates(
     else {
         return vec![];
     };
+    let policy_revisions = input
+        .shop()
+        .ppb_policy_revisions()
+        .map(|metafield| metafield.value().as_str());
     let mut groups: HashMap<String, Vec<usize>> = HashMap::new();
     for (index, line) in input.cart().lines().iter().enumerate() {
         if line.selling_plan_allocation().is_none() {
@@ -345,24 +482,85 @@ fn build_subscription_candidates(
         }) else {
             continue;
         };
-        let Some(payload) = verify_runtime_token(token, runtime_secret) else {
-            continue;
+        let v1_payload = verify_runtime_token(token, runtime_secret);
+        let v2_bundle = if v1_payload.is_none() {
+            indices.iter().find_map(|&index| {
+                validate_ppb_line(
+                    &input.cart().lines()[index],
+                    runtime_secret,
+                    policy_revisions,
+                )
+                .map(|value| value.0)
+            })
+        } else {
+            None
         };
-        let Some(subscription) = payload.subscription.as_ref() else {
-            continue;
-        };
-        if subscription.selling_plan_group_id.trim().is_empty()
-            || subscription.recurring_bundle_discount != recurring_bundle_discount
-        {
+        if v1_payload.is_none() && v2_bundle.is_none() {
             continue;
         }
-
-        let plan_matches = indices.iter().all(|&index| {
-            input.cart().lines()[index]
-                .selling_plan_allocation()
-                .map(|allocation| allocation.selling_plan().id() == &subscription.selling_plan_id)
-                .unwrap_or(false)
-        });
+        let plan_matches = if let Some(payload) = v1_payload.as_ref() {
+            let Some(subscription) = payload.subscription.as_ref() else {
+                continue;
+            };
+            if subscription.selling_plan_group_id.trim().is_empty()
+                || subscription.recurring_bundle_discount != recurring_bundle_discount
+            {
+                continue;
+            }
+            indices.iter().all(|&index| {
+                input.cart().lines()[index]
+                    .selling_plan_allocation()
+                    .map(|allocation| {
+                        allocation.selling_plan().id() == &subscription.selling_plan_id
+                    })
+                    .unwrap_or(false)
+            })
+        } else {
+            let bundle = v2_bundle.as_ref().unwrap();
+            let mut group_quantities: HashMap<String, i64> = HashMap::new();
+            let mut line_quantities: HashMap<String, (i64, i64)> = HashMap::new();
+            let lines_match = indices.iter().all(|&index| {
+                let line = &input.cart().lines()[index];
+                let Some(plan_id) = line
+                    .selling_plan_allocation()
+                    .map(|allocation| allocation.selling_plan().id().as_str())
+                else {
+                    return false;
+                };
+                validate_ppb_line(line, runtime_secret, policy_revisions)
+                    .map(|(candidate, line_token)| {
+                        let Some(authorization) = line
+                            .line_authorization()
+                            .and_then(|attribute| attribute.value())
+                        else {
+                            return false;
+                        };
+                        *group_quantities
+                            .entry(line_token.group_id.clone())
+                            .or_default() += *line.quantity() as i64;
+                        let line_quantity = line_quantities
+                            .entry(authorization.clone())
+                            .or_insert((0, line_token.max_quantity));
+                        line_quantity.0 += *line.quantity() as i64;
+                        candidate.bundle_id == bundle.bundle_id
+                            && candidate.revision == bundle.revision
+                            && ppb_subscription_allows(
+                                &candidate,
+                                plan_id,
+                                recurring_bundle_discount,
+                            )
+                    })
+                    .unwrap_or(false)
+            });
+            lines_match
+                && line_quantities
+                    .values()
+                    .all(|(quantity, max_quantity)| quantity <= max_quantity)
+                && bundle.groups.iter().all(|group| {
+                    let quantity = *group_quantities.get(&group.id).unwrap_or(&0);
+                    quantity >= group.min_quantity && quantity <= group.max_quantity
+                })
+        };
         if !plan_matches {
             continue;
         }
@@ -387,14 +585,28 @@ fn build_subscription_candidates(
                 unit_prices.push(unit_price);
             }
             targets.push(schema::ProductDiscountCandidateTarget::CartLine(
-                schema::CartLineTarget { id: line.id().clone(), quantity: None },
+                schema::CartLineTarget {
+                    id: line.id().clone(),
+                    quantity: None,
+                },
             ));
         }
-        if !token_components_match(&payload, &group_id, &actual_components) {
-            continue;
+        if let Some(payload) = v1_payload.as_ref() {
+            if !token_components_match(payload, &group_id, &actual_components) {
+                continue;
+            }
         }
+        let price_adjustment = v1_payload
+            .as_ref()
+            .map(|payload| serde_json::to_string(&payload.price_adjustment).unwrap_or_default())
+            .or_else(|| {
+                v2_bundle.as_ref().map(|payload| {
+                    serde_json::to_string(&payload.price_adjustment).unwrap_or_default()
+                })
+            })
+            .unwrap_or_default();
         let percentage = calculate_parent_discount_percentage(
-            &serde_json::to_string(&payload.price_adjustment).unwrap_or_default(),
+            &price_adjustment,
             total,
             total,
             quantity,
@@ -409,9 +621,9 @@ fn build_subscription_candidates(
             message: Some(BUNDLE_DISCOUNT_MESSAGE.to_string()),
             prerequisites: None,
             targets,
-            value: schema::ProductDiscountCandidateValue::Percentage(
-                schema::Percentage { value: Decimal(percentage) },
-            ),
+            value: schema::ProductDiscountCandidateValue::Percentage(schema::Percentage {
+                value: Decimal(percentage),
+            }),
         });
     }
     candidates

@@ -1,3 +1,27 @@
+---
+schema_version: 1
+id: test-suite-readme
+title: Shopify Bundle App Test Suite
+type: testing-guide
+status: active
+summary: Commands, layout, and conventions for the Wolfpack automated test suite.
+last_audited: 2026-08-27
+owners:
+  - engineering
+domains:
+  - testing
+systems:
+  - jest
+source_paths:
+  - tests/
+related_docs:
+  - test-spec/n-plus-one-remediation.spec.md
+tags:
+  - tests
+keywords:
+  - unit tests
+---
+
 # Shopify Bundle App - Comprehensive Test Suite
 
 This directory contains a comprehensive test suite for the Shopify Bundle App, covering all aspects of the application from unit tests to end-to-end integration tests.
@@ -12,8 +36,7 @@ tests/
 ├── unit/                       # Unit tests for individual components
 │   ├── services/               # Service layer tests
 │   │   ├── bundle-product-manager.test.ts
-│   │   ├── cart-transform-service.test.ts
-│   │   └── metafield-validation.test.ts
+│   │   └── cart-transform-service.test.ts
 │   ├── extensions/             # Cart transform extension tests
 │   │   ├── cart-transform-run.test.ts
 │   │   └── cart-transform-bundle-utils.test.ts
@@ -57,7 +80,6 @@ Tests individual components in isolation with mocked dependencies.
 **Services Tests:**
 - `bundle-product-manager.test.ts`: Bundle product creation, publishing, pricing calculations
 - `cart-transform-service.test.ts`: Cart transform activation and management
-- `metafield-validation.test.ts`: Metafield validation, cleanup, and consistency
 
 **Extensions Tests:**
 - `cart-transform-run.test.ts`: Core cart transformation logic

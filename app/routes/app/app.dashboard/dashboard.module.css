@@ -14,54 +14,6 @@
   overflow: hidden;
 }
 
-.storefrontSetupLoadingCard {
-  overflow: hidden;
-  position: relative;
-}
-
-.storefrontSetupLoadingIcon {
-  width: 26px;
-  height: 26px;
-  border-radius: 7px;
-  background: #eceef1;
-  flex: 0 0 auto;
-  animation: storefront-loading-pulse 1.2s ease-in-out infinite;
-}
-
-.storefrontSetupLoadingLines {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  flex: 1;
-}
-
-.storefrontSetupLoadingLine {
-  width: 74%;
-  height: 12px;
-  border-radius: 999px;
-  background: #e9ebef;
-  animation: storefront-loading-pulse 1.2s ease-in-out infinite;
-}
-
-.storefrontSetupLoadingLineShort {
-  width: 48%;
-  height: 12px;
-  border-radius: 999px;
-  background: #eceef1;
-  animation: storefront-loading-pulse 1.2s ease-in-out infinite;
-}
-
-@keyframes storefront-loading-pulse {
-  0%,
-  100% {
-    opacity: 0.35;
-  }
-
-  50% {
-    opacity: 1;
-  }
-}
-
 .storefrontStatusBoardRow {
   display: flex;
   align-items: center;

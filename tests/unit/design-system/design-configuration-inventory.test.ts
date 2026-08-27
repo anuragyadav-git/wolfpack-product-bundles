@@ -17,7 +17,7 @@ describe('design-system Design configuration inventory', () => {
     };
   `;
 
-  it('extracts base, expert, disabled, and expert-mode fields', () => {
+  it('extracts base, contextual color, and disabled fields without an Expert mode', () => {
     const { discoverDesignConfigurationFields } = require(
       '../../../design-system/scripts/design-configuration-inventory.cjs'
     );
@@ -43,13 +43,13 @@ describe('design-system Design configuration inventory', () => {
       expect.objectContaining({
         id: 'design-expert-general-toast-bg',
         field_name: 'expert.general.toastBg',
-      }),
-      expect.objectContaining({
-        id: 'design-expert-controls-enabled',
-        type: 'boolean',
-        default: false,
+        dependencies: [],
+        visibility_condition: 'visible component owns this color role',
       }),
     ]);
+    expect(discoverDesignConfigurationFields(source)).not.toEqual(expect.arrayContaining([
+      expect.objectContaining({ id: 'design-expert-controls-enabled' }),
+    ]));
   });
 
   it('rejects duplicate field keys', () => {

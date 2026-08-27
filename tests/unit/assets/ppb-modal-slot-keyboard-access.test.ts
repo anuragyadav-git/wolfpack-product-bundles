@@ -36,7 +36,7 @@ describe('PPB modal slot keyboard access', () => {
     expect(widget.openModal).toHaveBeenCalledWith(0, card);
   });
 
-  it('reopens a filled slot through a labelled native replacement control', () => {
+  it('renders filled slots without a replacement control for modal details flow', () => {
     const widget = createWidget();
     const card = widget.createSelectedProductCard({
       product: { title: 'Obsidian Earrings', imageUrl: '/earrings.jpg' },
@@ -45,19 +45,12 @@ describe('PPB modal slot keyboard access', () => {
       variantId: 'variant-1',
       instanceIndex: 0,
     }, 0);
-    const replacement = card.children[0];
 
-    expect(replacement.tagName).toBe('BUTTON');
-    expect(replacement.type).toBe('button');
-    expect(replacement.getAttribute('aria-label')).toBe('Obsidian Earrings');
-    expect(replacement.dataset).toEqual({
-      stepIndex: '0',
-      cardIndex: '0',
-      variantId: 'variant-1',
-    });
-    replacement.dispatch('click', {});
-
-    expect(widget.openModal).toHaveBeenCalledWith(0, replacement);
+    expect(card.children.some((child: any) => (
+      child.tagName === 'BUTTON'
+      && child.type === 'button'
+      && child.getAttribute('aria-label') === 'Obsidian Earrings'
+    ))).toBe(false);
   });
 
   it('exposes a complete selected-slot name without folding in the nested remove action', () => {
@@ -70,8 +63,9 @@ describe('PPB modal slot keyboard access', () => {
       instanceIndex: 0,
     }, 0);
 
+    const removeAction = getRemoveControl(card);
     expect(card.getAttribute('aria-label')).toBeNull();
-    expect(card.children[0].getAttribute('aria-label')).toBe('Obsidian Earrings');
+    expect(removeAction.getAttribute('aria-label')).toMatch(/^Remove/);
     const identity = card.children.at(-1);
     expect(identity?.children[0]?.textContent).toBe('Obsidian Earrings');
     expect(identity?.children[1]?.children[0]?.textContent).toBe('$ 829.00');

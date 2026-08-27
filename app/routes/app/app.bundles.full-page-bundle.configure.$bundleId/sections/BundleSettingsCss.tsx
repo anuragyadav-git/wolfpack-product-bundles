@@ -1,3 +1,4 @@
+import { BundleStatusSection } from "../../_shared/bundle-configure/BundleStatusSection";
 import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
 
 export function FpbBundleCssSettings({
@@ -8,7 +9,6 @@ export function FpbBundleCssSettings({
   const {
     bundleLevelCss,
     bundleLevelCssExpanded,
-    BundleStatusSection,
     formState,
     markAsDirty,
     setBundleLevelCss,

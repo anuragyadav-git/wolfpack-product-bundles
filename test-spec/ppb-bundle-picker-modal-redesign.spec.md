@@ -84,9 +84,11 @@ Confirm that Horizontal Slots and Vertical Slots share one behaviorally complete
 
 | # | Scenario | Input | Expected Output | Notes |
 |---|---|---|---|---|
-| 1 | Long selected title | Filled Horizontal or Vertical slot with long product name | Complete title remains the programmatic name while visible text wraps and clamps only at the approved height cap | Visual wrapping/clamping is verified in Chrome, not Jest |
+| 1 | Long selected title | Filled Horizontal or Vertical slot with long product name | Complete title remains the programmatic name; Vertical follows EB's visible normal wrapping with no WPB height cap while Horizontal retains its existing clamp | Visual wrapping is verified in Chrome, not Jest |
 | 2 | Remove semantics | Activate the filled-slot cross badge | Exactly the represented selection is removed without opening replacement | Product-specific accessible name; no visible Remove copy required |
 | 3 | Remove focus recovery | Remove a filled slot among adjacent slots | Same-index empty slot or previous valid slot receives focus | Existing keyboard behavior preserved |
+| 4 | Vertical filled-row activation | Activate the image, title, or background of a filled Vertical slot | No picker opens and no selection mutates | EB parity: only empty slots open the picker; each cross removes one represented unit |
+| 5 | Horizontal filled-slot replacement | Activate a filled Horizontal slot | Picker opens with the represented selection as the replacement target | Horizontal behavior remains unchanged |
 
 ### Progression, restoration, capacity, and failure
 

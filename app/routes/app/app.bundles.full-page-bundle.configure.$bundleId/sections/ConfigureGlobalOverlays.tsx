@@ -1,3 +1,8 @@
+import { BundleGuidedTour } from "../../../../components/bundle-configure/BundleGuidedTour";
+import { BundleReadinessOverlay } from "../../../../components/bundle-configure/BundleReadinessOverlay";
+import { DiscardChangesModal } from "../../../../components/bundle-configure/DiscardChangesModal";
+import { MultiLanguageTextModal } from "../../../../components/bundle-configure/MultiLanguageTextModal";
+import { FPB_TOUR_STEPS } from "../../../../components/bundle-configure/tourSteps";
 import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
 
 export function FpbGlobalOverlays({
@@ -7,11 +12,7 @@ export function FpbGlobalOverlays({
 }) {
   const {
     activeMultiLanguageValues,
-    BundleGuidedTour,
-    BundleReadinessOverlay,
     closeDiscardModal,
-    DiscardChangesModal,
-    FPB_TOUR_STEPS,
     handleConfirmDiscard,
     handleGuidedTourStepChange,
     handleReadinessItemClick,
@@ -19,7 +20,6 @@ export function FpbGlobalOverlays({
     loaderData,
     multiLanguageFields,
     multiLanguageLayout,
-    MultiLanguageTextModal,
     multiLanguageTitle,
     readinessItems,
     readinessOpen,
@@ -31,7 +31,6 @@ export function FpbGlobalOverlays({
     shopLocales,
     showDiscardModal,
     textOverridesLocale,
-    updateLocalizedTextOverride,
   } = flow;
 
   return (
@@ -60,7 +59,6 @@ export function FpbGlobalOverlays({
         fields={multiLanguageFields}
         valuesByLocale={activeMultiLanguageValues}
         onActiveLocaleChange={setTextOverridesLocale}
-        onChange={updateLocalizedTextOverride}
         onSave={saveStepSetupMultiLanguageValues}
         onClose={() => setIsMultiLanguageModalOpen(false)}
       />

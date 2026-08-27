@@ -160,43 +160,40 @@ export async function handleCloneBundle(
 
     // Clone steps if they exist
     if (originalBundle.steps && originalBundle.steps.length > 0) {
-      for (const step of originalBundle.steps) {
-        const clonedStep = await db.bundleStep.create({
-          data: {
-            bundleId: clonedBundle.id,
-            name: step.name,
-            products: step.products || [],
-            collections: step.collections || [],
-            displayVariantsAsIndividual: step.displayVariantsAsIndividual,
-            icon: step.icon,
-            position: step.position,
-            minQuantity: step.minQuantity,
-            maxQuantity: step.maxQuantity,
-            enabled: step.enabled,
-            conditionType: step.conditionType,
-            conditionOperator: step.conditionOperator,
-            conditionValue: step.conditionValue,
-            conditionOperator2: step.conditionOperator2,
-            conditionValue2: step.conditionValue2,
-          },
-        });
-
-        // Clone step products if they exist
-        if (step.StepProduct && step.StepProduct.length > 0) {
-          await db.stepProduct.createMany({
-            data: step.StepProduct.map(stepProduct => ({
-              stepId: clonedStep.id,
-              productId: stepProduct.productId,
-              title: stepProduct.title,
-              variants: stepProduct.variants || [],
-              imageUrl: stepProduct.imageUrl,
-              minQuantity: stepProduct.minQuantity,
-              maxQuantity: stepProduct.maxQuantity,
-              position: stepProduct.position,
+      await db.bundle.update({
+        where: { id: clonedBundle.id },
+        data: {
+          steps: {
+            create: originalBundle.steps.map((step) => ({
+              name: step.name,
+              products: step.products || [],
+              collections: step.collections || [],
+              displayVariantsAsIndividual: step.displayVariantsAsIndividual,
+              icon: step.icon,
+              position: step.position,
+              minQuantity: step.minQuantity,
+              maxQuantity: step.maxQuantity,
+              enabled: step.enabled,
+              conditionType: step.conditionType,
+              conditionOperator: step.conditionOperator,
+              conditionValue: step.conditionValue,
+              conditionOperator2: step.conditionOperator2,
+              conditionValue2: step.conditionValue2,
+              StepProduct: {
+                create: step.StepProduct.map((stepProduct) => ({
+                  productId: stepProduct.productId,
+                  title: stepProduct.title,
+                  variants: stepProduct.variants || [],
+                  imageUrl: stepProduct.imageUrl,
+                  minQuantity: stepProduct.minQuantity,
+                  maxQuantity: stepProduct.maxQuantity,
+                  position: stepProduct.position,
+                })),
+              },
             })),
-          });
-        }
-      }
+          },
+        },
+      });
     }
 
     // Clone pricing if it exists

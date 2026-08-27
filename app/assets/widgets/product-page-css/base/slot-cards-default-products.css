@@ -1,6 +1,8 @@
-.bw-slot-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+.bw-slot-card {
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
 }
 
 .bw-slot-card--empty {
@@ -19,31 +21,84 @@
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
+  background-image: var(--bundle-slot-icon-card-image, none);
+  background-size: var(--bundle-slot-icon-card-size, contain);
+}
+
+.step-box.add-more-card,
+.empty-state-card {
+  position: relative;
+  background-image: var(--bundle-slot-icon-card-image, none);
+  background-size: var(--bundle-slot-icon-card-size, contain);
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.bw-slot-card--empty::before,
+.step-box.add-more-card::before,
+.empty-state-card::before {
+  content: "";
+  position: absolute;
+  inset: 50% auto auto 50%;
+  display: var(--bundle-slot-icon-badge-overlay-display, none);
+  width: clamp(2rem, 25%, 4.3125rem);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  background-image: var(--bundle-slot-icon-badge-image, none);
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
 }
 
 .bw-slot-card--filled {
+  display: flex;
+  flex-direction: column;
   border: var(--bundle-state-card-border-width, 2px) solid
     var(
       --bundle-empty-state-card-border,
       var(--bundle-global-primary-button, #1e3a8a)
     );
-  height: 200px;
+  overflow: hidden;
 }
 
 .bw-slot-card__plus-icon {
-  display: flex;
+  display: var(--bundle-slot-icon-badge-display, flex);
   align-items: center;
   justify-content: center;
   width: 32px;
   height: 32px;
   margin-bottom: 8px;
+  background-image: var(--bundle-slot-icon-badge-image, none);
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
 }
 
-.bw-slot-card__image {
-  width: 100%;
-  height: 140px;
-  object-fit: cover;
-  display: block;
+.bw-slot-card__plus-icon > svg,
+.bw-slot-card__plus-icon > span,
+.empty-state-card-icon > line {
+  display: var(--bundle-slot-icon-plus-display, flex);
+}
+
+.bw-slot-card__plus-icon,
+.step-box.add-more-card .plus-icon,
+.empty-state-card-icon,
+.bw-slot-card__empty-visual {
+  visibility: var(--bundle-slot-icon-native-visibility, visible);
+}
+
+.step-box.add-more-card .plus-icon,
+.empty-state-card-icon,
+.bw-slot-card__empty-visual {
+  display: var(--bundle-slot-icon-badge-display, flex);
+  background-image: var(--bundle-slot-icon-badge-image, none);
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.step-box.add-more-card .plus-icon {
+  color: var(--bundle-slot-icon-plus-color, currentColor);
 }
 
 .bw-slot-card__label {
@@ -127,18 +182,12 @@
   overflow: hidden;
 }
 
-.bw-slot-card__image-wrapper img {
+.bw-slot-card__image {
+  display: block;
   width: 100%;
   height: 140px;
   object-fit: cover;
-  display: block;
   border-radius: 8px 8px 0 0;
-}
-
-.bw-slot-card--filled {
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
 }
 
 .bw-bs-free-gift-promo {

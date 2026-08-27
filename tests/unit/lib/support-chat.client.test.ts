@@ -2,6 +2,7 @@ import {
   installSupportChatLoader,
   installSupportChatPresentation,
   openSupportChat,
+  openSupportChatWithMessage,
   openSupportChatWithDraft,
   type SupportChatWindow,
 } from "../../../app/lib/support-chat.client";
@@ -99,6 +100,28 @@ describe("support chat client", () => {
     expect(win.$crisp).not.toContainEqual(
       expect.arrayContaining(["message:send"]),
     );
+  });
+
+  it("opens chat and sends an explicit support message", () => {
+    const win: SupportChatWindow = {};
+
+    openSupportChatWithMessage(
+      "Having issues seeing the bundle on storefront: https://shop.test/bundle",
+      win,
+    );
+
+    expect(win.$crisp).toEqual([
+      ["do", "chat:show"],
+      ["do", "chat:open"],
+      [
+        "do",
+        "message:send",
+        [
+          "text",
+          "Having issues seeing the bundle on storefront: https://shop.test/bundle",
+        ],
+      ],
+    ]);
   });
 
   it("hides the floating launcher on narrow screens and after chat closes", () => {

@@ -14,6 +14,7 @@ export function FpbSummaryTextSettings({
     SettingsRow,
     setVariantSelectorEnabled,
     showTextOnAddButton,
+    shopLocales,
     textOverrides,
     variantSelectorEnabled,
   } = flow;
@@ -57,7 +58,9 @@ export function FpbSummaryTextSettings({
               <s-text-field
                 label="Button text"
                 value={textOverrides.addToCartButton ?? ""}
-                disabled={!showTextOnAddButton || undefined}
+                disabled={
+                  !showTextOnAddButton || shopLocales.length === 0 || undefined
+                }
                 placeholder="Add to Cart"
                 autocomplete="off"
                 onInput={(e) => {
@@ -70,7 +73,7 @@ export function FpbSummaryTextSettings({
               />
               <s-button
                 variant="secondary"
-                icon="language-translate"
+                icon="globe"
                 disabled={!showTextOnAddButton || undefined}
                 onClick={() =>
                   openMultiLanguageModal("Add Button Text", [

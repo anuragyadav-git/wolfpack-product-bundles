@@ -289,6 +289,9 @@
   bottom: 0;
   left: 0;
   right: 0;
+  margin-inline: auto;
+  width: 100%;
+  max-width: min(100%, 75rem);
   height: 0;
   overflow: hidden;
   background: var(--bundle-bs-panel-bg, rgb(244, 249, 249));
@@ -299,6 +302,18 @@
   z-index: 9999999;
   display: flex;
   flex-direction: column;
+}
+
+@media (min-width: 1440px) {
+  .bw-bs-panel {
+    max-width: min(94vw, 90rem);
+  }
+}
+
+@media (min-width: 1800px) {
+  .bw-bs-panel {
+    max-width: min(92vw, 105rem);
+  }
 }
 
 .bw-bs-panel--open {

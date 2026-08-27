@@ -4,9 +4,8 @@ import {
   AppDistribution,
   shopifyApp,
 } from "@shopify/shopify-app-remix/server";
-import { CachedSessionStorage } from "./lib/cached-session-storage.server";
+import { PrismaSessionStorage } from "@shopify/shopify-app-session-storage-prisma";
 import prisma from "./db.server";
-import { createStorefrontAccessToken } from "./services/storefront-token.server";
 import { CartTransformService } from "./services/cart-transform-service.server";
 import { AddOnDiscountFunctionService } from "./services/addon-discount-function-service.server";
 import { BillingService } from "./services/billing.server";
@@ -14,11 +13,11 @@ import { ensureVariantBundleMetafieldDefinitions } from "./services/bundles/meta
 import { syncThemeColors } from "./services/theme-colors.server";
 import { activateUtmPixel } from "./services/pixel-activation.server";
 import { AppLogger } from "./lib/logger";
-import { ensureShopHasExpiringOfflineSession } from "./services/offline-token.server";
 import { ensureShopIdentity, recordBusinessEvent } from "./services/app-events.server";
 import { normalizeSavedCustomUtmParameters } from "./lib/analytics/attribution-controls";
+import { syncPpbStorefrontRuntime } from "./services/ppb-storefront-runtime.server";
 
-const sessionStorage = new CachedSessionStorage(prisma);
+const sessionStorage = new PrismaSessionStorage(prisma);
 
 const shopify = shopifyApp({
   apiKey: process.env.SHOPIFY_API_KEY,
@@ -30,6 +29,7 @@ const shopify = shopifyApp({
   distribution: AppDistribution.AppStore,
   future: {
     unstable_newEmbeddedAuthStrategy: true,
+    expiringOfflineAccessTokens: true,
   },
   hooks: {
     afterAuth: async ({ session, admin }: any) => {
@@ -39,21 +39,7 @@ const shopify = shopifyApp({
         select: { id: true, shopifyShopGid: true },
       });
       let shopifyShopGid = existingShop?.shopifyShopGid ?? null;
-      let setupAdmin: Pick<typeof admin, "graphql"> = admin;
-
-      try {
-        const offlineSession = await ensureShopHasExpiringOfflineSession(
-          prisma,
-          session.shop,
-          sessionStorage,
-        );
-        if (offlineSession) {
-          const { admin: offlineAdmin } = await shopify.unauthenticated.admin(session.shop);
-          setupAdmin = offlineAdmin;
-        }
-      } catch (error: any) {
-        AppLogger.error("Failed to ensure expiring offline session before setup", { shop: session.shop }, error);
-      }
+      const setupAdmin: Pick<typeof admin, "graphql"> = admin;
 
       // Create variant-level metafield definitions with storefront access.
       // These enable the Liquid widget to read bundle_ui_config and other metafields.
@@ -78,13 +64,6 @@ const shopify = shopifyApp({
         });
       } catch (error: any) {
         AppLogger.error("Failed to create shop record", { shop: session.shop }, error);
-      }
-
-      // Create storefront access token after successful auth (optional, non-critical)
-      try {
-        await createStorefrontAccessToken(setupAdmin, session.shop);
-      } catch (error: any) {
-        AppLogger.error("Failed to create storefront access token", { shop: session.shop }, error);
       }
 
       // Sync $app:serverUrl metafield so the theme widget can read the app server URL.
@@ -125,9 +104,15 @@ const shopify = shopifyApp({
 
       // Sync theme colors for bundle widget color inheritance (non-critical)
       try {
-        await syncThemeColors(setupAdmin, session.shop);
+        await syncThemeColors(session.shop);
       } catch (error: any) {
         AppLogger.error("Failed to sync theme colors", { shop: session.shop }, error);
+      }
+
+      try {
+        await syncPpbStorefrontRuntime(setupAdmin, session.shop);
+      } catch (error: any) {
+        AppLogger.error("Failed to sync Shopify-hosted PPB runtime", { shop: session.shop }, error);
       }
 
       // Auto-activate UTM pixel on install/re-auth so bundle revenue tracking is on

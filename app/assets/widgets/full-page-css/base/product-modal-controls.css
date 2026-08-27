@@ -171,6 +171,14 @@
   overflow-y: auto;
 }
 
+@media (min-width: 1024px) {
+  .bundle-modal-description {
+    flex: 1 1 clamp(10rem, 24dvh, 16rem);
+    min-height: clamp(10rem, 24dvh, 16rem);
+    max-height: none;
+  }
+}
+
 .bundle-modal-add-btn.out-of-stock {
   background: #e0e0e0;
   color: #888;

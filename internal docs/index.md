@@ -5,7 +5,7 @@ title: Wolfpack Product Bundles Internal Docs
 type: index
 status: authoritative
 summary: Index of durable Wolfpack Product Bundles architecture, integration, feature, and operations documentation.
-last_audited: 2026-08-21
+last_audited: 2026-08-25
 owners:
   - engineering
 domains:
@@ -60,15 +60,16 @@ Full evidence record: `docs/competitor-analysis/16-eb-full-data-flow-investigati
 - [[Architecture/Bundle Field Ownership]] — canonical persistence/runtime ownership ledger, retired aliases, and the gated FPB Page-removal boundary
 - [[Architecture/FPB Host Evaluation]] — accepted signed app-proxy FPB document host, preview-token contract, and Page retirement sequence
 - [[Architecture/Storefront Draft Preview Authorization]] — shared stateless FPB/PPB draft-preview token, app-proxy authorization, and no-store caching contract
+- [[Architecture/Storefront Outage Resilience]] — Shopify-hosted parent-product PPB snapshot, direct catalog/cart access, and static fail-closed purchase authorization
 - [[Architecture/State Management]] — Redux Toolkit slices, RTK Query endpoint boundaries, and AppStateService migration rules
 - [[Architecture/Diagrams/index|Architecture Diagram Catalog]] — indexed Mermaid diagrams for Cart Transform, metafield ownership/consumption, storefront runtime, backend layers, and embedded Admin UI
 - [[Shopify Integration/Polaris Web Components Reference]] — source-of-truth link and policy for using `s-*` Admin web components
-- [[Shopify Integration/Admin API]] — Rate limits, GraphQL patterns, session handling
-- [[Shopify Integration/Storefront API]] — Storefront GraphQL field gotchas, including product description HTML handling
+- [[Shopify Integration/Admin API]] — Rate limits, native Prisma session storage, expiring-token migration gates
+- [[Shopify Integration/Storefront API]] — Storefront GraphQL field gotchas, product description HTML, and Shop Brand color-pair inheritance
 - [[Shopify Integration/Cart Transform API]] — Operations, targets, API versions (2025-10)
 - [[Shopify Integration/Checkout UI Extension]] — Preact targets, build rules
 - [[Shopify Integration/Metafields]] — Bundle config sync, payload limits, and PPB component quantity validation constraints
-- [[Shopify Integration/Theme App Extensions]] — Theme app extension handles, App Bridge status normalization, preview gates, and legacy MAIN-theme diagnostics
+- [[Shopify Integration/Theme App Extensions]] — Native App Bridge extension status, preview gates, and current-theme editor links
 - [[Shopify Integration/Web Pixels]] — UTM Web Pixel settings payload rules, including nonblank custom-parameter sentinel behavior
 - [[Shopify Integration/Webhooks]] — Subscribed webhook topics, removed broad topics, and delivery-volume rationale
 - [[Features/Bundle Types]] — FPB vs PDP, layout modes, step config
@@ -81,7 +82,7 @@ Full evidence record: `docs/competitor-analysis/16-eb-full-data-flow-investigati
 - [[Operations/Build Process]] — Widget bundles, WASM, CSS size limits
 - [[Operations/App Events Taxonomy]] — Shopify App Events taxonomy, flow tracing, feature usage, error events, and `wpb:*` migration boundaries
 - [[Operations/Mantle Integration]] — Admin Mantle provider bootstrap, required env vars, and the `MANTLE_API_KEY` vs Shopify client id gotcha
-- [[Operations/Admin Performance]] — App Bridge Web Vitals source, retired custom telemetry, Admin loader critical path
+- [[Operations/Admin Performance]] — Shopify Web Vitals ownership, temporary Chrome diagnostics, Admin loader critical path
 - [[Operations/LCP and CLS Playbook]] — Home bootstrap strategy, CLS stabilization order, and Knip-guided dead-code cleanup
 - [[Operations/Knip Prune Guardrails]] — known Knip false positives, convention-loaded runtime assets, and required skip rules for future dead-code pruning
 - [[Operations/Knip Candidate Inventory]] — dated Knip candidate snapshot from 2026-07-13; rerun Knip before using it for a current prune decision

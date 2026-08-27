@@ -1,4 +1,5 @@
 import { BUNDLE_WIDGET } from '../../shared/constants.js';
+import { fetchPpbStorefrontProducts } from '../storefront-client.js';
 import { STOREFRONT_PROXY_ROOT } from '../../../../config/storefront-proxy-routes.js';
 
 function normalizeWeightToGrams(weight: any, unit: any) {
@@ -31,40 +32,16 @@ export const ProductPageProductDataMethods: Record<string, any> & ThisType<any> 
   },
 
 resolveStorefrontApiBase() {
-  const appProxyPrefix = STOREFRONT_PROXY_ROOT;
-  if (window.location?.pathname?.startsWith(`${appProxyPrefix}/`)) {
-    return appProxyPrefix;
-  }
-
-  const configuredAppUrl = window.__BUNDLE_APP_URL__ || '';
-  const currentOrigin = window.location.origin;
-  const currentHost = window.location.host;
-  const shopDomain = window.Shopify?.shop || this.container?.dataset.shop || '';
-
-  let configuredAppHost = '';
-  if (configuredAppUrl) {
-    try {
-      configuredAppHost = new URL(configuredAppUrl).host;
-    } catch (_error: any) {
-      configuredAppHost = '';
-    }
-  }
-
-  if (!configuredAppUrl) {
-    return appProxyPrefix;
-  }
-
-  if (shopDomain && configuredAppHost !== currentHost) {
-    return appProxyPrefix;
-  }
-
-  return configuredAppUrl || currentOrigin;
+  return this.config?.storefrontRuntime || null;
 },
 
 collectStepProductIds(step: any) {
   const productIds: any[] = [];
   const addProductId = (product: any) => {
-    const id = this.normalizeProductSelectionId(product);
+    const raw = product?.productId ?? product?.id ?? product?.graphqlId;
+    const id = typeof raw === 'string' && raw.startsWith('gid://shopify/Product/')
+      ? raw
+      : this.extractId(raw) ? `gid://shopify/Product/${this.extractId(raw)}` : '';
     if (id && !productIds.includes(id)) productIds.push(id);
   };
 
@@ -109,40 +86,41 @@ async loadStepProducts(stepIndex: string|number) {
   let allProducts: any[] = [];
   let fetchFailed = false;
 
-  const shop = window.Shopify?.shop || window.location.host;
-  const apiBaseUrl = this.resolveStorefrontApiBase();
+  const storefrontRuntime = this.resolveStorefrontApiBase();
 
   const productIds = this.collectStepProductIds(step);
   if (productIds.length > 0) {
     try {
-      const response = await fetch(
-        `${apiBaseUrl}/api/storefront-products?ids=${encodeURIComponent(productIds.join(','))}&shop=${encodeURIComponent(shop)}`
-      );
-      if (response.ok) {
-        const data = await response.json();
-        if (data.products?.length > 0) allProducts = allProducts.concat(data.products);
-      } else {
-        fetchFailed = true;
-      }
+      const products = storefrontRuntime?.storefrontAccessToken
+        ? await fetchPpbStorefrontProducts({
+          shop: window.Shopify?.shop || this.container?.dataset?.shop,
+          apiVersion: storefrontRuntime.storefrontApiVersion,
+          accessToken: storefrontRuntime.storefrontAccessToken,
+          productIds,
+          country: window.Shopify?.country || null,
+          fetchImpl: fetch,
+        })
+        : this.config?.isEmbedSource
+          ? await fetch(`${STOREFRONT_PROXY_ROOT}/api/storefront-products?ids=${encodeURIComponent(productIds.join(','))}`)
+            .then(async (response) => response.ok ? (await response.json()).products ?? [] : Promise.reject(new Error('Product hydration failed')))
+          : Promise.reject(new Error('Missing Shopify Storefront runtime'));
+      if (products.length > 0) allProducts = allProducts.concat(products);
     } catch (_e: any) {
       fetchFailed = true;
     }
   }
 
-  const handles = this.collectStepCollectionHandles(step);
-  if (handles.length > 0) {
-    try {
-      const response = await fetch(
-        `${apiBaseUrl}/api/storefront-collections?handles=${encodeURIComponent(handles.join(','))}&shop=${encodeURIComponent(shop)}`
-      );
-      if (response.ok) {
+  if (this.config?.isEmbedSource && !storefrontRuntime?.storefrontAccessToken) {
+    const handles = this.collectStepCollectionHandles(step);
+    if (handles.length > 0) {
+      try {
+        const response = await fetch(`${STOREFRONT_PROXY_ROOT}/api/storefront-collections?handles=${encodeURIComponent(handles.join(','))}`);
+        if (!response.ok) throw new Error('Collection hydration failed');
         const data = await response.json();
         if (data.products?.length > 0) allProducts = allProducts.concat(data.products);
-      } else {
+      } catch {
         fetchFailed = true;
       }
-    } catch (_e: any) {
-      fetchFailed = true;
     }
   }
 

@@ -13,6 +13,7 @@ export function PpbStepSetupDetailsCard({
     markAsDirty,
     openStepMultiLanguageModal,
     productPageBundleStyles,
+    shopLocales,
     stepsState,
     validationErrors = {},
     clearValidationError,
@@ -41,8 +42,9 @@ export function PpbStepSetupDetailsCard({
           <span title="Multi Language">
             <s-button
               variant="tertiary"
-              icon="language-translate"
+              icon="globe"
               accessibilityLabel="Multi Language"
+              disabled={shopLocales.length === 0 || undefined}
               onClick={() => openStepMultiLanguageModal(step.id)}
             />
           </span>

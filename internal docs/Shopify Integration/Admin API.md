@@ -5,7 +5,7 @@ title: Shopify Admin API
 type: shopify-integration
 status: active
 summary: Authentication, rate-limit, and operational contracts for Wolfpack Admin API access.
-last_audited: 2026-08-13
+last_audited: 2026-08-27
 owners:
   - engineering
 domains:
@@ -15,8 +15,9 @@ systems:
   - offline-session-auth
 source_paths:
   - app/shopify.server.ts
-  - app/lib/cached-session-storage.server.ts
-  - app/services/offline-token.server.ts
+  - prisma/schema.prisma
+  - app/lib/legacy-offline-token-cutover.server.ts
+  - app/services/bundles/metafield-sync/operations/bundle-product.server.ts
 related_docs:
   - internal docs/Architecture/Bundle Field Ownership.md
 tags:
@@ -45,7 +46,7 @@ keywords:
 ### Practical Guidance
 - Burst up to 1,000 points, then throttle
 - Use `X-Shopify-Shop-Api-Call-Limit` header to monitor remaining
-- For bulk operations (inventory sync): check `inventorySyncedAt` debounce (< 60s → skip) to avoid hammering the limit
+- Deduplicate identifiers, batch compatible reads, request at most 250 connection nodes per page, and follow cursors only for overflowing resources
 - REST API: separate rate limit, roughly 2 req/sec per store on Basic plans
 
 ---
@@ -70,23 +71,13 @@ await admin.graphql(/* query */);
 
 Shopify requires public apps to use expiring offline access tokens for new apps created on or after 2026-04-01, and for all public apps by 2027-01-01.
 
-Wolfpack's offline token contract:
-- `Session` persists `expires`, `refreshToken`, and `refreshTokenExpiresAt` in Prisma.
-- `CachedSessionStorage.loadSession()` and `findSessionsByShop()` hydrate offline rows before returning them to `unauthenticated.admin(...)` or app-proxy callers: legacy rows with no refresh token are migrated to expiring offline tokens first, rows missing expiration metadata are refreshed, and rows that cannot be made compliant are withheld instead of returning a non-expiring token.
-- `app/services/offline-token.server.ts` requests new expiring offline tokens from embedded Admin `id_token` values with `expiring=1`.
-- `ensureShopHasExpiringOfflineSession()` also refreshes rows that already have a refresh token but are missing `expires` or `refreshTokenExpiresAt`; partial expiring-token rows are not accepted as compliant.
-- `getOfflineSessionForShop()` refreshes rows with missing expiration metadata before returning them to app-proxy callers. Do not bypass it for app-proxy Admin work.
-- Existing non-expiring offline tokens are migrated by token exchange with `subject_token_type=urn:shopify:params:oauth:token-type:offline-access-token`, `requested_token_type=urn:shopify:params:oauth:token-type:offline-access-token`, and `expiring=1`.
-- Token acquire, legacy migration, and refresh writes run under a transaction-scoped Postgres advisory lock keyed by shop domain. This prevents two jobs from rotating the same shop's refresh token concurrently.
-- Refresh requests retry transient failures once with the same refresh token. HTTP 429, HTTP 5xx, fetch network errors, aborts, and timeouts are treated as transient; Shopify 401/`invalid_grant` style responses are not retried.
-- If a refresh token expires or Shopify rejects it with `invalid_grant`/401, the stale session row is dropped so the next merchant app launch can re-acquire an expiring offline token from the browser session ID token.
-- If Prisma reports `Server has closed the connection` during the initial session row lookup, `CachedSessionStorage.loadSession()` retries the read once after reconnecting the Prisma client. This handles stale pooled connections without hiding persistent database outages such as `Can't reach database server`.
+Wolfpack uses Shopify's official `PrismaSessionStorage` adapter. `Session` persists the adapter fields `expires`, `refreshToken`, and `refreshTokenExpires`; `future.expiringOfflineAccessTokens` is enabled so the Remix package acquires and refreshes expiring offline tokens. Do not read `Session.accessToken` directly from Prisma. Request-bound routes call `authenticate.admin(request)` directly, while background work uses `unauthenticated.admin(shopDomain)`.
 
-Do not make background Admin API calls by reading `Session.accessToken` directly from Prisma. Use `unauthenticated.admin(shopDomain)` or `getOfflineSessionForShop(...)` so the refresh/migration path runs first.
+Existing non-expiring rows require a one-time operator cutover. Select only offline rows with no expiry or refresh metadata, then call Shopify's native `migrateToExpiringToken` and store the returned session through `PrismaSessionStorage`. Run this temporary utility in SIT first. Production apply requires explicit approval because each successful exchange irreversibly revokes the previous non-expiring token; abort and report the first failed shop.
 
 Production rollout requirement:
-- New merchant launches naturally acquire or migrate expiring offline tokens.
-- Existing installed shops only migrate when a compliant code path loads their offline session. For a full production sweep, run the deployment backfill in dry-run first, then only run apply mode after explicit operator approval because migration revokes legacy non-expiring tokens and bundle sync can mutate Shopify resources.
+- New merchant launches naturally acquire expiring offline tokens.
+- Do not deploy the schema cutover until the explicit SIT and production migration gates have completed successfully.
 
 Read-only Admin audits must classify credential state before interpreting a
 Shopify `401`. Enforcing PostgreSQL read-only transactions prevents an expiring
@@ -177,6 +168,10 @@ Note: **NOT** `inventoryAdjustQuantity` (deprecated singular form).
 
 ### Metafield Write
 Used by `bundle-config-metafield.server.ts` to cache bundle config for zero-latency widget load.
+
+### Collection lookup
+
+Admin GraphQL `2026-07` no longer accepts `collection(handle: ...)`. Resolve collection handles with `collectionByIdentifier(identifier: { handle: ... })`. Bundle metafield synchronization aliases unique handle lookups into bounded batches, requests the maximum 250 products in the first page, and follows cursors only for collections that overflow that page.
 
 ---
 

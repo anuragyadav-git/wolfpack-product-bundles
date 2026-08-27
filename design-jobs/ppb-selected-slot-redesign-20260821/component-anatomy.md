@@ -4,8 +4,8 @@ id: ppb-selected-slot-component-anatomy
 title: PPB Selected Slot Component Anatomy
 type: design-job-artifact
 status: complete
-summary: Defines the shared semantic and ownership model for Horizontal and Vertical PPB selected slots.
-last_audited: 2026-08-21
+summary: Defines Revision 4 anatomy and ownership for PPB Vertical Slots empty and filled rows.
+last_audited: 2026-08-24
 owners:
   - wolfpack
 domains:
@@ -29,7 +29,7 @@ keywords:
 # Component Anatomy
 
 Artifact job ID: ppb-selected-slot-redesign-20260821
-Artifact revision: 2
+Artifact revision: 4
 Artifact status: complete
 
 ## Component tree
@@ -41,12 +41,7 @@ PPB modal-slot step section
     ├── Filled slot
     │   ├── Replacement action surface
     │   ├── Product media
-    │   ├── Product identity
-    │   │   ├── Product title
-    │   │   └── Variant label (conditional)
-    │   ├── Price group (conditional)
-    │   │   ├── Payable price
-    │   │   └── Compare-at price (when available)
+    │   ├── Product title
     │   ├── Status indicator (conditional)
     │   └── Remove action (when removable)
     └── Empty slot
@@ -54,28 +49,26 @@ PPB modal-slot step section
         └── Existing saved slot label/number
 ~~~
 
-Horizontal and Vertical render the same semantic regions. Orientation changes layout only.
+Revision 4 covers the Vertical row presentation only. The shared runtime remains unchanged, but Horizontal presentation is a non-regression surface.
 
 ## Region ownership
 
 | Region ID | Responsibility | Semantic element | State owner | Event owner | Style owner | Token owner | Responsive replacement |
 |---|---|---|---|---|---|---|---|
 | SS-ROOT | Group slots for one configured step | Existing step section and labelled collection | PPB step selection state | Shared modal-slot runtime | product-page-css/templates/modal-slots.css | Existing PPB/theme tokens | None |
-| SS-GRID | Place repeated empty and filled slots | Existing selected-slots collection | Capacity calculation | Shared modal-slot runtime | product-page-css/templates/modal-slots.css | Component aliases | Intrinsic columns for Horizontal; one column for Vertical |
-| SS-FILLED | Bind one rendered slot to one exact selected instance | Non-nested interactive wrapper | Selected instance and replacement target | createSelectedProductCard plus accessibility helper | product-page-css/templates/modal-slots.css | Surface, border, radius aliases | Tile in Horizontal; row in Vertical |
+| SS-GRID | Place repeated empty and filled rows | Existing selected-slots collection | Capacity calculation | Shared modal-slot runtime | product-page-css/templates/modal-slots.css | Existing PPB/theme tokens | One full-width column |
+| SS-FILLED | Bind one rendered row to one exact selected instance | Non-nested interactive wrapper | Selected instance and replacement target | createSelectedProductCard plus accessibility helper | product-page-css/templates/modal-slots.css | Surface, border, radius aliases | 64px target row; accessible growth permitted |
 | SS-REPLACE | Open picker for the exact slot | Focusable replacement action that does not contain the remove button | _modalSlotReplacementTarget | Existing keyboard-accessible slot helper | Focus rules in canonical PPB CSS | Merchant focus/primary token | Same semantic owner in both orientations |
-| SS-MEDIA | Identify product visually | img with product-derived alternative text | Product data | None | Canonical PPB CSS | Media-size alias | Square media region; leading thumbnail in Vertical |
-| SS-IDENTITY | Expose title and optional variant | Text group | Selected product/variant data | None | Canonical PPB CSS | Inherited typography and muted-text token | Stacked block in both orientations |
-| SS-PRICE | Expose payable and available compare-at price | Text price group; compare-at remains semantically understandable | Existing pricing data | None | Canonical PPB CSS | Existing price/text tokens | Own line in Horizontal; compact line inside Vertical identity flow |
+| SS-MEDIA | Identify product visually | img with product-derived alternative text | Product data | None | Canonical PPB CSS | 50px media primitive | Leading square thumbnail |
+| SS-IDENTITY | Expose the product title | One-line visual text group with complete accessible name | Selected product data | None | Canonical PPB CSS | Inherited storefront typography | Flexible `minmax(0, 1fr)` track |
 | SS-STATUS | Identify included, unavailable, or locked state | Existing status text/icon where applicable | Step/product availability state | None | Canonical PPB CSS | Existing status tokens | Same region, content-driven |
-| SS-REMOVE | Remove only this selected instance | Native button | Selected instance | Existing removal handler with propagation stopped | Canonical PPB CSS | Target-size and focus aliases | Media-corner action in Horizontal; trailing action in Vertical |
-| SS-EMPTY | Open picker without a replacement target | Native button | Capacity and rule state | Existing empty-slot handler | Canonical PPB CSS | Same geometry aliases as filled state | Tile in Horizontal; row in Vertical |
+| SS-REMOVE | Remove only this selected instance | Native button or existing semantic button owner | Selected instance | Existing removal handler with propagation stopped | Canonical PPB CSS | 44px semantic target with compact visible icon | Trailing action |
+| SS-EMPTY | Open picker without a replacement target | Native button | Capacity and rule state | Existing empty-slot handler | Canonical PPB CSS | 60px row, dashed border, shared radius | Full-width row |
 
 ## Repeated, conditional, feedback, and overlay elements
 
 - One filled slot exists per selected instance; quantity expansion continues to use current instance targeting.
-- Variant text appears only when the resolved selection has a meaningful variant label.
-- Price appears only when existing product data supplies it. Compare-at appears whenever it is available and exceeds the payable price; no PPB configuration flag owns it.
+- Variant and price remain outside the Vertical slot row because the live EB target does not render them there.
 - Remove is absent for non-removable default/included slots. Their status remains visible without inventing new copy.
 - Unavailable restored selections retain media fallback, identity, status, and removal access.
 - Empty slots continue to be generated by existing minimum/exact capacity rules.
@@ -86,7 +79,7 @@ Horizontal and Vertical render the same semantic regions. Orientation changes la
 - Selected slots remain in normal widget flow.
 - No selected-slot region becomes sticky or fixed.
 - The slot grid never owns scrolling; page/widget flow owns vertical reachability.
-- Long identity content clamps within the slot and must not create horizontal scrolling.
+- Long titles truncate within the flexible track and must not create horizontal scrolling.
 
 ## Repository evidence and canonical conflict resolution
 
@@ -94,5 +87,5 @@ Horizontal and Vertical render the same semantic regions. Orientation changes la
 - Empty-slot and orientation ownership: app/assets/widgets/product-page/templates/modal-slot-template.ts.
 - Canonical presentation owner: app/assets/widgets/product-page-css/templates/modal-slots.css.
 - Shared low-level slot primitives exist in product-page-css/base/slot-cards-default-products.css; template-specific selected-slot geometry belongs in modal-slots.css.
-- The current renderer emits media and title but not variant or price regions. Direction A therefore needs one minimal conditional markup addition in the existing renderer plus CSS presentation. Selection, pricing calculations, persistence, and event ownership do not move.
-- Do not create a second Horizontal or Vertical runtime, inject styles at runtime, or solve ownership conflicts with higher-specificity compatibility overrides.
+- The current renderer already emits the required target content: media and title. Revision 4 should prefer CSS ownership and only adjust markup when semantic replacement/remove separation requires it.
+- Do not create a second Vertical runtime, change Horizontal selectors, inject styles at runtime, or solve ownership conflicts with compatibility overrides.

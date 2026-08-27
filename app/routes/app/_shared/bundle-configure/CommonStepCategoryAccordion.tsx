@@ -35,6 +35,7 @@ export interface CommonStepCategoryAccordionAdapter {
   stepsState: {
     updateStepField: (stepId: string, field: string, value: unknown) => void;
   };
+  translationActionsDisabled: boolean;
   styles: Record<string, string>;
   validationErrors?: Record<string, string>;
   clearValidationError?: (path: string) => void;
@@ -71,6 +72,7 @@ export function CommonStepCategoryAccordion({
     showPolarisModal,
     stepsState,
     styles,
+    translationActionsDisabled,
     validationErrors = {},
     clearValidationError,
   } = adapter;
@@ -339,16 +341,16 @@ export function CommonStepCategoryAccordion({
                     </s-text>
                   )}
                 </div>
-                <button
-                  type="button"
-                  className={styles.categoryTextButton}
+                <s-button
+                  variant="secondary"
+                  icon="globe"
+                  disabled={translationActionsDisabled || undefined}
                   onClick={() =>
                     openStepCategoryMultiLanguageModal(step.id, catIndex)
                   }
                 >
-                  <LanguageIcon />
                   Multi Language
-                </button>
+                </s-button>
               </div>
             </div>
           )}
@@ -685,20 +687,6 @@ function getProductImageUrl(product: any) {
     product.images?.[0]?.url ||
     product.images?.[0]?.originalSrc ||
     "/bundle.avif"
-  );
-}
-
-function LanguageIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-      <path
-        d="M2 3.25h5.25M4.63 2v1.25M6.5 3.25c-.38 1.97-1.75 3.5-3.75 4.25M3.38 4.75c.55 1.1 1.45 1.95 2.72 2.55M7.25 12l.7-1.75m0 0L9.5 6.5l1.55 3.75m-3.1 0h3.1M12 12l-.95-1.75"
-        stroke="currentColor"
-        strokeWidth="1.15"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
   );
 }
 

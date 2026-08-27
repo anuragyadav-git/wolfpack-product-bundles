@@ -1,385 +1,163 @@
 import { loader } from "../../../app/routes/api/api.storefront-products";
-import { getOfflineSessionForShop } from "../../../app/services/offline-token.server";
-
-jest.mock("../../../app/db.server", () => ({
-  __esModule: true,
-  default: {},
-}));
 
 jest.mock("../../../app/shopify.server", () => ({
-  sessionStorage: {},
+  authenticate: { public: { appProxy: jest.fn() } },
 }));
+
+const mockAppProxy = jest.requireMock("../../../app/shopify.server").authenticate.public.appProxy;
+const mockGraphql = jest.fn();
 
 jest.mock("../../../app/lib/logger", () => ({
-  AppLogger: {
-    debug: jest.fn(),
-    error: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-  },
+  AppLogger: { debug: jest.fn(), error: jest.fn(), warn: jest.fn() },
 }));
 
-jest.mock("../../../app/services/offline-token.server", () => ({
-  getOfflineSessionForShop: jest.fn(),
-}));
-
-jest.mock("../../../app/services/storefront-token.server", () => ({
-  createStorefrontAccessToken: jest.fn(),
-}));
-
-const mockFetch = jest.fn();
-
-describe("api.storefront-products loader", () => {
+describe("signed storefront products loader", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    global.fetch = mockFetch as any;
-    (getOfflineSessionForShop as jest.Mock).mockResolvedValue({
-      accessToken: "admin-token",
-      storefrontAccessToken: "storefront-token",
-      scope: "unauthenticated_read_product_inventory,unauthenticated_read_product_listings",
+    mockAppProxy.mockResolvedValue({
+      session: {
+        shop: "test.myshopify.com",
+        scope: "unauthenticated_read_product_inventory",
+      },
+      storefront: { graphql: mockGraphql },
     });
   });
 
-  afterEach(() => {
-    delete (global as any).fetch;
-  });
+  it("rejects a missing installed-shop session", async () => {
+    mockAppProxy.mockResolvedValue({ session: undefined, storefront: undefined });
 
-  it("normalizes numeric product IDs to Shopify product GIDs", async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({ data: { nodes: [] } }),
-    });
-
-    const response = await loader({
-      request: new Request("https://app.example/api/storefront-products?ids=111,222&shop=test.myshopify.com"),
+    await expect(loader({
+      request: new Request("https://app.example/api/storefront-products?ids=1"),
       params: {},
       context: {},
-    } as any);
-    const requestBody = JSON.parse(mockFetch.mock.calls[0][1].body);
-
-    expect(response.status).toBe(200);
-    expect(requestBody.variables.ids).toEqual([
-      "gid://shopify/Product/111",
-      "gid://shopify/Product/222",
-    ]);
+    } as any)).rejects.toMatchObject({ status: 401 });
   });
 
-  it("rejects malformed product IDs before calling Shopify", async () => {
+  it("rejects malformed product IDs before Storefront GraphQL", async () => {
     const response = await loader({
-      request: new Request("https://app.example/api/storefront-products?ids=111,not-a-product&shop=test.myshopify.com"),
+      request: new Request("https://app.example/api/storefront-products?ids=1,invalid"),
       params: {},
       context: {},
     } as any);
 
     expect(response.status).toBe(400);
-    await expect(response.json()).resolves.toEqual({ error: "Invalid product IDs" });
-    expect(mockFetch).not.toHaveBeenCalled();
+    expect(mockGraphql).not.toHaveBeenCalled();
   });
 
-  it("normalizes sellable zero-quantity fallback variants as unbounded inventory", async () => {
-    mockFetch
-      .mockResolvedValueOnce({
-        ok: true,
+  it("normalizes IDs and maps inventory through the native Storefront client", async () => {
+    mockGraphql.mockResolvedValueOnce({
         json: async () => ({
-          data: {
-            nodes: [
-              {
-                id: "gid://shopify/Product/111",
-                title: "Tracked Product",
-                handle: "tracked-product",
-                description: "Detailed product copy",
-                descriptionHtml: "<p>Detailed <strong>product</strong> copy</p>",
-                featuredImage: null,
-                variants: {
-                  edges: [
-                    {
-                      node: {
-                        id: "gid://shopify/ProductVariant/222",
-                        title: "Default Title",
-                        availableForSale: true,
-                        quantityAvailable: 0,
-                        currentlyNotInStock: false,
-                        price: { amount: "10.00", currencyCode: "USD" },
-                        compareAtPrice: null,
-                        image: null,
-                      },
-                    },
-                  ],
-                },
-              },
-            ],
-          },
+          data: { nodes: [{
+            id: "gid://shopify/Product/1",
+            title: "Product",
+            handle: "product",
+            description: "Description",
+            descriptionHtml: "<p>Description</p>",
+            featuredImage: null,
+            images: { edges: [] },
+            variants: {
+              pageInfo: { hasNextPage: false, endCursor: null },
+              edges: [{ node: {
+              id: "gid://shopify/ProductVariant/2",
+              title: "Default Title",
+              availableForSale: true,
+              quantityAvailable: 0,
+              currentlyNotInStock: false,
+              price: { amount: "10.00" },
+              compareAtPrice: null,
+              weight: 0,
+              weightUnit: "GRAMS",
+              image: null,
+              } }],
+            },
+          }] },
         }),
-      })
-      .mockResolvedValueOnce({
-        ok: false,
-        status: 500,
       });
 
     const response = await loader({
-      request: new Request("https://app.example/api/storefront-products?ids=gid://shopify/Product/111&shop=test.myshopify.com"),
+      request: new Request("https://app.example/api/storefront-products?ids=1"),
       params: {},
       context: {},
     } as any);
-    const body = await response.json() as { products: any[] };
-    const firstRequestBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+    const payload = await response.json() as any;
 
-    expect(firstRequestBody.query).toContain("quantityAvailable");
-    expect(firstRequestBody.query).toContain("currentlyNotInStock");
-    expect(body.products[0].variants[0]).toMatchObject({
+    expect(mockGraphql.mock.calls[0][1].variables.ids)
+      .toEqual(["gid://shopify/Product/1"]);
+    expect(mockGraphql.mock.calls[0][0]).toContain("quantityAvailable");
+    expect(mockGraphql.mock.calls[0][0]).toContain("variants(first: 250)");
+    expect(mockGraphql).toHaveBeenCalledTimes(1);
+    expect(payload.products[0].variants[0]).toMatchObject({
       available: true,
       quantityAvailable: null,
       currentlyNotInStock: false,
     });
-    expect(body.products[0].description).toBe("Detailed product copy");
-    expect(body.products[0].descriptionHtml).toBe("<p>Detailed <strong>product</strong> copy</p>");
   });
 
-  it("preserves multiple Shopify product images for the product details carousel", async () => {
-    mockFetch
+  it("requests only variant overflow pages after the initial product batch", async () => {
+    mockGraphql
       .mockResolvedValueOnce({
-        ok: true,
         json: async () => ({
-          data: {
-            nodes: [
-              {
-                id: "gid://shopify/Product/111",
-                title: "Gallery Product",
-                handle: "gallery-product",
-                description: "",
-                descriptionHtml: "",
-                featuredImage: { url: "https://cdn.example/primary.jpg" },
-                images: {
-                  edges: [
-                    { node: { url: "https://cdn.example/primary.jpg" } },
-                    { node: { url: "https://cdn.example/detail.jpg" } },
-                  ],
-                },
-                variants: { edges: [] },
-              },
-            ],
-          },
+          data: { nodes: [{
+            id: "gid://shopify/Product/1",
+            title: "Product",
+            handle: "product",
+            description: "",
+            descriptionHtml: "",
+            featuredImage: null,
+            images: { edges: [] },
+            variants: {
+              pageInfo: { hasNextPage: true, endCursor: "variant-250" },
+              edges: [{ node: {
+                id: "gid://shopify/ProductVariant/1",
+                title: "First",
+                availableForSale: true,
+                quantityAvailable: 3,
+                currentlyNotInStock: false,
+                price: { amount: "10.00" },
+                compareAtPrice: null,
+                weight: 0,
+                weightUnit: "GRAMS",
+                image: null,
+              } }],
+            },
+          }] },
         }),
       })
       .mockResolvedValueOnce({
-        ok: true,
         json: async () => ({
-          data: {
-            product: {
-              variants: {
-                pageInfo: { hasNextPage: false, endCursor: null },
-                edges: [],
-              },
-            },
-          },
+          data: { product: { variants: {
+            pageInfo: { hasNextPage: false, endCursor: null },
+            edges: [{ node: {
+              id: "gid://shopify/ProductVariant/251",
+              title: "Overflow",
+              availableForSale: true,
+              quantityAvailable: 2,
+              currentlyNotInStock: false,
+              price: { amount: "12.00" },
+              compareAtPrice: null,
+              weight: 0,
+              weightUnit: "GRAMS",
+              image: null,
+            } }],
+          } } },
         }),
       });
 
     const response = await loader({
-      request: new Request("https://app.example/api/storefront-products?ids=gid://shopify/Product/111&shop=test.myshopify.com"),
+      request: new Request("https://app.example/api/storefront-products?ids=1"),
       params: {},
       context: {},
     } as any);
-    const body = await response.json() as { products: any[] };
-    const requestBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+    const payload = await response.json() as any;
 
-    expect(requestBody.query).toContain("images(first:");
-    expect(body.products[0].images).toEqual([
-      { src: "https://cdn.example/primary.jpg" },
-      { src: "https://cdn.example/detail.jpg" },
-    ]);
-  });
-
-  it("hydrates all product variants without requesting selling plan allocations when scope is absent", async () => {
-    mockFetch
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          data: {
-            nodes: [
-              {
-                id: "gid://shopify/Product/111",
-                title: "Variant Product",
-                handle: "variant-product",
-                description: "",
-                descriptionHtml: "",
-                featuredImage: null,
-                variants: {
-                  edges: [
-                    {
-                      node: {
-                        id: "gid://shopify/ProductVariant/222",
-                        title: "6",
-                        availableForSale: true,
-                        quantityAvailable: 0,
-                        currentlyNotInStock: false,
-                        price: { amount: "10.00", currencyCode: "USD" },
-                        compareAtPrice: null,
-                        image: null,
-                      },
-                    },
-                  ],
-                },
-              },
-            ],
-          },
-        }),
-      })
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          errors: [
-            {
-              message: "Access denied for quantityAvailable field. Required access: `unauthenticated_read_product_inventory` access scope.",
-              extensions: { code: "ACCESS_DENIED" },
-            },
-          ],
-          data: {
-            product: {
-              variants: {
-                pageInfo: { hasNextPage: false, endCursor: null },
-                edges: [
-                  {
-                    node: {
-                      id: "gid://shopify/ProductVariant/222",
-                      title: "6",
-                      availableForSale: true,
-                      quantityAvailable: 0,
-                      currentlyNotInStock: false,
-                      price: { amount: "10.00", currencyCode: "USD" },
-                      compareAtPrice: null,
-                      weight: 0,
-                      weightUnit: "GRAMS",
-                      image: null,
-                    },
-                  },
-                  {
-                    node: {
-                      id: "gid://shopify/ProductVariant/444",
-                      title: "7",
-                      availableForSale: true,
-                      quantityAvailable: 3,
-                      currentlyNotInStock: false,
-                      price: { amount: "11.00", currencyCode: "USD" },
-                      compareAtPrice: null,
-                      weight: 0,
-                      weightUnit: "GRAMS",
-                      image: null,
-                    },
-                  },
-                ],
-              },
-            },
-          },
-        }),
-      });
-
-    const response = await loader({
-      request: new Request("https://app.example/api/storefront-products?ids=gid://shopify/Product/111&shop=test.myshopify.com"),
-      params: {},
-      context: {},
-    } as any);
-    const body = await response.json() as { products: any[] };
-    const variantsRequestBody = JSON.parse(mockFetch.mock.calls[1][1].body);
-
-    expect(variantsRequestBody.query).not.toContain("sellingPlanAllocations");
-    expect(body.products[0].variants).toHaveLength(2);
-    expect(body.products[0].variants.map((variant: any) => variant.title)).toEqual(["6", "7"]);
-  });
-
-  it("does not request or expose selling plan allocations when the obsolete integration scope is granted", async () => {
-    (getOfflineSessionForShop as jest.Mock).mockResolvedValue({
-      accessToken: "admin-token",
-      storefrontAccessToken: "storefront-token",
-      scope: "unauthenticated_read_product_inventory,unauthenticated_read_product_listings,unauthenticated_read_selling_plans",
+    expect(mockGraphql).toHaveBeenCalledTimes(2);
+    expect(mockGraphql.mock.calls[1][1].variables).toMatchObject({
+      id: "gid://shopify/Product/1",
+      cursor: "variant-250",
     });
-    mockFetch
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          data: {
-            nodes: [
-              {
-                id: "gid://shopify/Product/111",
-                title: "Subscription Product",
-                handle: "subscription-product",
-                description: "",
-                descriptionHtml: "",
-                featuredImage: null,
-                variants: {
-                  edges: [
-                    {
-                      node: {
-                        id: "gid://shopify/ProductVariant/222",
-                        title: "Default Title",
-                        availableForSale: true,
-                        quantityAvailable: 3,
-                        currentlyNotInStock: false,
-                        price: { amount: "10.00", currencyCode: "USD" },
-                        compareAtPrice: null,
-                        image: null,
-                      },
-                    },
-                  ],
-                },
-              },
-            ],
-          },
-        }),
-      })
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          data: {
-            product: {
-              variants: {
-                pageInfo: { hasNextPage: false, endCursor: null },
-                edges: [
-                  {
-                    node: {
-                      id: "gid://shopify/ProductVariant/222",
-                      title: "Default Title",
-                      availableForSale: true,
-                      quantityAvailable: 3,
-                      currentlyNotInStock: false,
-                      price: { amount: "10.00", currencyCode: "USD" },
-                      compareAtPrice: null,
-                      weight: 0,
-                      weightUnit: "GRAMS",
-                      image: null,
-                      sellingPlanAllocations: {
-                        edges: [
-                          {
-                            node: {
-                              priceAdjustments: [],
-                              sellingPlan: {
-                                id: "gid://shopify/SellingPlan/333",
-                                name: "Monthly",
-                              },
-                            },
-                          },
-                        ],
-                      },
-                    },
-                  },
-                ],
-              },
-            },
-          },
-        }),
-      });
-
-    const response = await loader({
-      request: new Request("https://app.example/api/storefront-products?ids=gid://shopify/Product/111&shop=test.myshopify.com"),
-      params: {},
-      context: {},
-    } as any);
-    const body = await response.json() as { products: any[] };
-    const variantsRequestBody = JSON.parse(mockFetch.mock.calls[1][1].body);
-
-    expect(variantsRequestBody.query).not.toContain("sellingPlanAllocations");
-    expect(body.products[0].variants[0]).not.toHaveProperty(
-      "sellingPlanAllocations",
-    );
+    expect(payload.products[0].variants.map((variant: any) => variant.id)).toEqual([
+      "gid://shopify/ProductVariant/1",
+      "gid://shopify/ProductVariant/251",
+    ]);
   });
 });

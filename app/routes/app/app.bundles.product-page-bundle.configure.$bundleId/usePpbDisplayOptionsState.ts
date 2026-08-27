@@ -71,16 +71,14 @@ export function usePpbDisplayOptionsState({
     tierTextByLocaleByRuleId,
     tierTextByRuleId,
   } = pricingState;
-  const progressBarMultiLangModalRef = useRef<any>(null);
   const [isProgressBarMultiLangModalOpen, setIsProgressBarMultiLangModalOpen] =
     useState(false);
   const [activeProgressBarLocale, setActiveProgressBarLocale] =
     useState<string>(
       shopLocales.find((l) => l.primary)?.locale ??
         shopLocales[0]?.locale ??
-        "en",
+        "",
     );
-  const bundleQuantityMultiLangModalRef = useRef<any>(null);
   const [
     isBundleQuantityMultiLangModalOpen,
     setIsBundleQuantityMultiLangModalOpen,
@@ -89,7 +87,7 @@ export function usePpbDisplayOptionsState({
     useState<string>(
       shopLocales.find((l) => l.primary)?.locale ??
         shopLocales[0]?.locale ??
-        "en",
+        "",
     );
   const [
     discountMessagingMultiLanguageEnabled,
@@ -109,7 +107,7 @@ export function usePpbDisplayOptionsState({
   const [activeDiscountLocale, setActiveDiscountLocale] = useState<string>(
     shopLocales.find((l) => l.primary)?.locale ??
       shopLocales[0]?.locale ??
-      "en",
+      "",
   );
   const [globalSuccessMessage, setGlobalSuccessMessage] = useState<string>(
     (bundle as any).pricing?.messages?.successMessage ?? "",
@@ -165,12 +163,10 @@ export function usePpbDisplayOptionsState({
     setTierTextByRuleId,
     tierTextByLocaleByRuleId,
     setTierTextByLocaleByRuleId,
-    progressBarMultiLangModalRef,
     isProgressBarMultiLangModalOpen,
     setIsProgressBarMultiLangModalOpen,
     activeProgressBarLocale,
     setActiveProgressBarLocale,
-    bundleQuantityMultiLangModalRef,
     isBundleQuantityMultiLangModalOpen,
     setIsBundleQuantityMultiLangModalOpen,
     activeBundleQuantityLocale,

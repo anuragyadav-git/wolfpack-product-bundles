@@ -223,13 +223,15 @@
         "upsellTitle": "Complete your bundle",
         "upsellBody": "Add a popular extra.",
         "upsellEyebrow": "Recommended for your bundle",
-        "selectedCount": "2 items",
+        "selectedCount": "{{count}} itens",
         "discount": "You are $8 away from 15% off",
         "totalLabel": "Bundle total",
         "totalPrice": "$42.00",
         "back": "Back",
         "emptySlot": "Choose a product",
         "chooseProduct": "Choose a product",
+        "removeProduct": "Remover produto",
+        "close": "Fechar",
         "slotNumber": "Product {{number}}",
         "addBundle": "Add bundle to cart",
         "loadingBody": "Preparing your bundle…",
@@ -275,6 +277,21 @@
       "feedback": {
         "tierHit": "Faixa atingida",
         "complete": "Todas as faixas concluídas"
+      },
+      "storefront": {
+        "open": "Pré-visualizar pacote",
+        "heading": "Pré-visualização do pacote",
+        "close": "Fechar",
+        "empty": "Não há pacotes da vitrine disponíveis para pré-visualização.",
+        "bundleName": "Nome do pacote",
+        "bundleType": "Tipo",
+        "actions": "Ações",
+        "view": "Ver",
+        "saveBeforePreview": "Salve as alterações de design antes de abrir a pré-visualização da vitrine.",
+        "errors": {
+          "popupBlocked": "Permita pop-ups para abrir a pré-visualização da vitrine.",
+          "notReady": "A pré-visualização da vitrine ainda não está pronta. Tente novamente."
+        }
       }
     }
   },
@@ -330,6 +347,7 @@
   "common": {
     "actions": {
       "close": "Fechar",
+      "cancel": "Cancelar",
       "dismiss": "Dispensar",
       "manage": "Gerenciar",
       "enable": "Ativar",
@@ -359,6 +377,10 @@
     "unlistedBundle": {
       "title": "Seu pacote não está listado",
       "body": "Para que ele seja encontrado, altere o status do produto do pacote para Ativo em Produtos da Shopify."
+    },
+    "parentProductStatus": {
+      "loadingTitle": "Verificando o status do produto principal",
+      "loadingBody": "Buscando o status mais recente em Produtos da Shopify."
     },
     "proxyHealth": {
       "title": "Proxy do aplicativo não conectado",

@@ -68,7 +68,7 @@ export function useConfigureLocalizationState(flow: ConfigureBundleFlowDraft) {
   const [activeDiscountLocale, setActiveDiscountLocale] = useState<string>(
     shopLocales.find((l: { primary: boolean }) => l.primary)?.locale ??
       shopLocales[0]?.locale ??
-      "en",
+      "",
   );
   const [globalSuccessMessage, setGlobalSuccessMessage] = useState<string>(
     (bundle as any).pricing?.messages?.successMessage ?? "",
@@ -81,16 +81,14 @@ export function useConfigureLocalizationState(flow: ConfigureBundleFlowDraft) {
       string
     >) ?? {},
   );
-  const progressBarMultiLangModalRef = useRef<any>(null);
   const [isProgressBarMultiLangModalOpen, setIsProgressBarMultiLangModalOpen] =
     useState(false);
   const [activeProgressBarLocale, setActiveProgressBarLocale] =
     useState<string>(
       shopLocales.find((l: { primary: boolean }) => l.primary)?.locale ??
         shopLocales[0]?.locale ??
-        "en",
+        "",
     );
-  const bundleQuantityMultiLangModalRef = useRef<any>(null);
   const [
     isBundleQuantityMultiLangModalOpen,
     setIsBundleQuantityMultiLangModalOpen,
@@ -99,14 +97,14 @@ export function useConfigureLocalizationState(flow: ConfigureBundleFlowDraft) {
     useState<string>(
       shopLocales.find((l: { primary: boolean }) => l.primary)?.locale ??
         shopLocales[0]?.locale ??
-        "en",
+        "",
     );
   const defaultMultiLanguageLocale = useCallback(
     () =>
       shopLocales.find((locale: { primary: boolean }) => locale.primary)
         ?.locale ??
       shopLocales[0]?.locale ??
-      "en",
+      "",
     [shopLocales],
   );
   const openMultiLanguageModal = useCallback(
@@ -254,16 +252,6 @@ export function useConfigureLocalizationState(flow: ConfigureBundleFlowDraft) {
     ruleMessages,
     setTextOverridesLocale,
   ]);
-  const updateLocalizedTextOverride = useCallback(
-    (locale: string, key: string, value: string) => {
-      setTextOverridesByLocale((prev: any) => ({
-        ...prev,
-        [locale]: { ...(prev[locale] ?? {}), [key]: value },
-      }));
-      markAsDirty();
-    },
-    [markAsDirty, setTextOverridesByLocale],
-  );
   const activeMultiLanguageValues = useMemo(() => {
     if (multiLanguageTarget?.type === "step") {
       const step = stepsState.steps.find(
@@ -323,10 +311,7 @@ export function useConfigureLocalizationState(flow: ConfigureBundleFlowDraft) {
           index === multiLanguageTarget.categoryIndex
             ? {
                 ...category,
-                multiLangData: {
-                  ...(category.multiLangData ?? {}),
-                  ...nextValues,
-                },
+                multiLangData: nextValues,
               }
             : category,
         );
@@ -363,7 +348,6 @@ export function useConfigureLocalizationState(flow: ConfigureBundleFlowDraft) {
     activeDiscountLocale,
     activeMultiLanguageValues,
     activeProgressBarLocale,
-    bundleQuantityMultiLangModalRef,
     discountMessagingMultiLanguageEnabled,
     globalSuccessMessage,
     isBundleQuantityMultiLangModalOpen,
@@ -381,7 +365,6 @@ export function useConfigureLocalizationState(flow: ConfigureBundleFlowDraft) {
     openStepMultiLanguageModal,
     originalDiscountMessagingMultiLanguageEnabledRef,
     originalRuleMessagesByLocaleRef,
-    progressBarMultiLangModalRef,
     ruleMessagesByLocale,
     saveStepSetupMultiLanguageValues,
     setActiveBundleQuantityLocale,
@@ -403,6 +386,5 @@ export function useConfigureLocalizationState(flow: ConfigureBundleFlowDraft) {
     successMessageByLocale,
     tierTextByLocaleByRuleId,
     tierTextByRuleId,
-    updateLocalizedTextOverride,
   });
 }

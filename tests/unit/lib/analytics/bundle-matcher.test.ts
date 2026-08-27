@@ -1,7 +1,7 @@
-import { matchLineItemsToBundles, normalizeToOrderGid, orderIdMatchForms, type LineItemInput } from "../../../../app/lib/analytics/bundle-matcher.server";
+import { matchLineItemGroupsToBundles, matchLineItemsToBundles, normalizeToOrderGid, orderIdMatchForms, type LineItemInput } from "../../../../app/lib/analytics/bundle-matcher.server";
 
 const mockBundleFindMany = jest.fn();
-const mockBundleStepFindMany = jest.fn();
+const mockStepProductFindMany = jest.fn();
 
 jest.mock("../../../../app/db.server", () => ({
   __esModule: true,
@@ -9,8 +9,8 @@ jest.mock("../../../../app/db.server", () => ({
     bundle: {
       findMany: (...args: unknown[]) => mockBundleFindMany(...args),
     },
-    bundleStep: {
-      findMany: (...args: unknown[]) => mockBundleStepFindMany(...args),
+    stepProduct: {
+      findMany: (...args: unknown[]) => mockStepProductFindMany(...args),
     },
   },
 }));
@@ -20,11 +20,11 @@ const SHOP = "test-bundle-store123.myshopify.com";
 describe("matchLineItemsToBundles", () => {
   beforeEach(() => {
     mockBundleFindMany.mockReset();
-    mockBundleStepFindMany.mockReset();
+    mockStepProductFindMany.mockReset();
   });
 
   it("Case 1: direct match on bundle container (GID input)", async () => {
-    mockBundleFindMany.mockResolvedValue([{ id: "bundle-1" }]);
+    mockBundleFindMany.mockResolvedValue([{ id: "bundle-1", shopifyProductId: "gid://shopify/Product/100" }]);
     const lineItems: LineItemInput[] = [{ productId: "gid://shopify/Product/100" }];
 
     const result = await matchLineItemsToBundles(SHOP, lineItems);
@@ -32,13 +32,13 @@ describe("matchLineItemsToBundles", () => {
     expect(result).toEqual(["bundle-1"]);
     expect(mockBundleFindMany).toHaveBeenCalledWith({
       where: { shopId: SHOP, shopifyProductId: { in: ["gid://shopify/Product/100"] } },
-      select: { id: true },
+      select: { id: true, shopifyProductId: true },
     });
-    expect(mockBundleStepFindMany).not.toHaveBeenCalled();
+    expect(mockStepProductFindMany).not.toHaveBeenCalled();
   });
 
   it("Case 2: direct match on bundle container (numeric input is normalized to GID)", async () => {
-    mockBundleFindMany.mockResolvedValue([{ id: "bundle-1" }]);
+    mockBundleFindMany.mockResolvedValue([{ id: "bundle-1", shopifyProductId: "gid://shopify/Product/100" }]);
     const lineItems: LineItemInput[] = [{ productId: "100" }];
 
     const result = await matchLineItemsToBundles(SHOP, lineItems);
@@ -46,25 +46,27 @@ describe("matchLineItemsToBundles", () => {
     expect(result).toEqual(["bundle-1"]);
     expect(mockBundleFindMany).toHaveBeenCalledWith({
       where: { shopId: SHOP, shopifyProductId: { in: ["gid://shopify/Product/100"] } },
-      select: { id: true },
+      select: { id: true, shopifyProductId: true },
     });
   });
 
   it("Case 3: component-product fallback (Pass 2) when Pass 1 has no match", async () => {
     mockBundleFindMany.mockResolvedValue([]);
-    mockBundleStepFindMany.mockResolvedValue([{ bundleId: "bundle-2" }]);
+    mockStepProductFindMany.mockResolvedValue([{
+      productId: "gid://shopify/Product/500",
+      step: { bundleId: "bundle-2" },
+    }]);
     const lineItems: LineItemInput[] = [{ productId: "gid://shopify/Product/500" }];
 
     const result = await matchLineItemsToBundles(SHOP, lineItems);
 
     expect(result).toEqual(["bundle-2"]);
-    expect(mockBundleStepFindMany).toHaveBeenCalledWith({
+    expect(mockStepProductFindMany).toHaveBeenCalledWith({
       where: {
-        StepProduct: { some: { productId: { in: ["gid://shopify/Product/500"] } } },
-        bundle: { shopId: SHOP },
+        productId: { in: ["gid://shopify/Product/500"] },
+        step: { bundle: { shopId: SHOP } },
       },
-      select: { bundleId: true },
-      distinct: ["bundleId"],
+      select: { productId: true, step: { select: { bundleId: true } } },
     });
   });
 
@@ -73,7 +75,7 @@ describe("matchLineItemsToBundles", () => {
 
     expect(result).toEqual([]);
     expect(mockBundleFindMany).not.toHaveBeenCalled();
-    expect(mockBundleStepFindMany).not.toHaveBeenCalled();
+    expect(mockStepProductFindMany).not.toHaveBeenCalled();
   });
 
   it("Case 5: line items with null/undefined productId are filtered out", async () => {
@@ -86,11 +88,11 @@ describe("matchLineItemsToBundles", () => {
 
     expect(result).toEqual([]);
     expect(mockBundleFindMany).not.toHaveBeenCalled();
-    expect(mockBundleStepFindMany).not.toHaveBeenCalled();
+    expect(mockStepProductFindMany).not.toHaveBeenCalled();
   });
 
   it("Case 6: Pass 2 does not run when Pass 1 finds any match", async () => {
-    mockBundleFindMany.mockResolvedValue([{ id: "bundle-A" }]);
+    mockBundleFindMany.mockResolvedValue([{ id: "bundle-A", shopifyProductId: "gid://shopify/Product/100" }]);
     const lineItems: LineItemInput[] = [
       { productId: "gid://shopify/Product/100" },
       { productId: "gid://shopify/Product/500" },
@@ -99,12 +101,12 @@ describe("matchLineItemsToBundles", () => {
     const result = await matchLineItemsToBundles(SHOP, lineItems);
 
     expect(result).toEqual(["bundle-A"]);
-    expect(mockBundleStepFindMany).not.toHaveBeenCalled();
+    expect(mockStepProductFindMany).not.toHaveBeenCalled();
   });
 
   it("Case 7: wrong shop returns no matches (shop scoping)", async () => {
     mockBundleFindMany.mockResolvedValue([]);
-    mockBundleStepFindMany.mockResolvedValue([]);
+    mockStepProductFindMany.mockResolvedValue([]);
     const lineItems: LineItemInput[] = [{ productId: "100" }];
 
     const result = await matchLineItemsToBundles("wrong-shop.myshopify.com", lineItems);
@@ -116,7 +118,10 @@ describe("matchLineItemsToBundles", () => {
   });
 
   it("Case 8: multiple bundles matched in Pass 1 returns all deduped", async () => {
-    mockBundleFindMany.mockResolvedValue([{ id: "bundle-A" }, { id: "bundle-B" }]);
+    mockBundleFindMany.mockResolvedValue([
+      { id: "bundle-A", shopifyProductId: "gid://shopify/Product/100" },
+      { id: "bundle-B", shopifyProductId: "gid://shopify/Product/200" },
+    ]);
     const lineItems: LineItemInput[] = [
       { productId: "gid://shopify/Product/100" },
       { productId: "gid://shopify/Product/200" },
@@ -129,7 +134,10 @@ describe("matchLineItemsToBundles", () => {
 
   it("Case 9: two component products matching the same bundle are deduped by Pass 2 distinct", async () => {
     mockBundleFindMany.mockResolvedValue([]);
-    mockBundleStepFindMany.mockResolvedValue([{ bundleId: "bundle-2" }]);
+    mockStepProductFindMany.mockResolvedValue([
+      { productId: "gid://shopify/Product/500", step: { bundleId: "bundle-2" } },
+      { productId: "gid://shopify/Product/501", step: { bundleId: "bundle-2" } },
+    ]);
     const lineItems: LineItemInput[] = [
       { productId: "gid://shopify/Product/500" },
       { productId: "gid://shopify/Product/501" },
@@ -138,6 +146,29 @@ describe("matchLineItemsToBundles", () => {
     const result = await matchLineItemsToBundles(SHOP, lineItems);
 
     expect(result).toEqual(["bundle-2"]);
+  });
+
+  it("matches an order page with one direct query and one fallback query", async () => {
+    mockBundleFindMany.mockResolvedValue([
+      { id: "bundle-direct", shopifyProductId: "gid://shopify/Product/100" },
+    ]);
+    mockStepProductFindMany.mockResolvedValue([
+      { productId: "gid://shopify/Product/500", step: { bundleId: "bundle-component" } },
+    ]);
+
+    const result = await matchLineItemGroupsToBundles(SHOP, [
+      [{ productId: "100" }],
+      [{ productId: "gid://shopify/Product/500" }],
+      [{ productId: null }],
+    ]);
+
+    expect(result).toEqual([
+      ["bundle-direct"],
+      ["bundle-component"],
+      [],
+    ]);
+    expect(mockBundleFindMany).toHaveBeenCalledTimes(1);
+    expect(mockStepProductFindMany).toHaveBeenCalledTimes(1);
   });
 });
 

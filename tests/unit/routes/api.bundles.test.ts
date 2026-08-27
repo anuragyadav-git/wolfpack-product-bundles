@@ -1,5 +1,5 @@
 import { loader } from "../../../app/routes/api/api.bundles.json";
-import { requireAppProxy } from "../../../app/lib/auth-guards.server";
+import { authenticate } from "../../../app/shopify.server";
 
 jest.mock("../../../app/lib/logger", () => ({
   AppLogger: {
@@ -11,8 +11,8 @@ jest.mock("../../../app/lib/logger", () => ({
   },
 }));
 
-jest.mock("../../../app/lib/auth-guards.server", () => ({
-  requireAppProxy: jest.fn(),
+jest.mock("../../../app/shopify.server", () => ({
+  authenticate: { public: { appProxy: jest.fn() } },
 }));
 
 jest.mock("../../../app/db.server", () => ({
@@ -24,7 +24,7 @@ jest.mock("../../../app/db.server", () => ({
   },
 }));
 
-const mockRequireAppProxy = requireAppProxy as jest.MockedFunction<typeof requireAppProxy>;
+const mockRequireAppProxy = authenticate.public.appProxy as jest.MockedFunction<typeof authenticate.public.appProxy>;
 const getDb = () => require("../../../app/db.server").default;
 const mockFindMany = () => getDb().bundle.findMany as jest.MockedFunction<any>;
 

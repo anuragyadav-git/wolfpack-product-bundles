@@ -5,7 +5,7 @@ title: Settings Design API, State, and UI
 type: test-spec
 status: active
 summary: Behavior coverage for the Settings Design DTO, persistence document, preview state, and lightweight route shell.
-last_audited: 2026-08-13
+last_audited: 2026-08-25
 owners:
   - engineering
 domains:
@@ -74,7 +74,7 @@ Keep the Design subpage state and save DTO aligned with the store-level EB-shape
 | 2 | Lightweight landing shell | Initial Settings route render | Three actionable cards render without Design workspace | Protects landing LCP |
 | 3 | Expert visual guides | Expert scope sections | Five local AVIF links open in a new tab | Guides use Wolfpack-owned assets |
 | 4 | Card actions | Initial and return-to-Settings landing views | Entire cards remain actionable without visible `Configure` labels | Removes nested button-like affordances |
-| 5 | Workspace transition | Select any Settings card while the lazy workspace or data loads | Top-edge progress bar replaces the landing skeleton | Readiness is owned by the Suspense boundary |
+| 5 | Workspace transition | Select any Settings card while the lazy workspace or data loads | Landing cards remain visible during navigation; the destination renders its title with an inline Polaris loading state | Navigation is owned by Shopify's native indicator and readiness by the Suspense boundary |
 
 ## Acceptance Criteria
 
@@ -86,5 +86,5 @@ Keep the Design subpage state and save DTO aligned with the store-level EB-shape
 - [x] Design form controls are Polaris-first.
 - [x] Expert color scopes link to Wolfpack AVIF guides in a new tab.
 - [x] Settings cards remain actionable without visible Configure affordances.
-- [x] Lazy workspace loading uses the shared top-edge progress bar and no skeleton cards.
+- [x] Lazy workspace loading uses Shopify-native navigation feedback plus an inline Polaris state and no skeleton cards.
 - [ ] Settings landing app-owned LCP p75 is at or below 2,000 ms with CLS below 0.1 across at least ten cache-bypassed loads.

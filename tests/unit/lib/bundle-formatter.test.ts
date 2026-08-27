@@ -613,4 +613,37 @@ describe("formatBundleForWidget", () => {
     const p = result.steps[0].products[0];
     expect(p.featuredImage).toBeNull();
   });
+
+  it("publishes PPB add-on and localized pricing fields for storefront rendering", () => {
+    const step = makeStep({
+      isFreeGift: true,
+      addonAddText: "Add extra",
+      addonReplaceText: "Replace extra",
+      multiLangData: { fr: { addonAddText: "Ajouter", addonReplaceText: "Remplacer" } },
+    });
+    const result = formatBundleForWidget(makeBundle({
+      bundleType: "product_page",
+      steps: [step],
+      pricing: {
+        enabled: true,
+        method: "percentage_off",
+        rules: [],
+        showFooter: true,
+        messages: { ruleMessages: { "addons-step-1": { discountText: "Add more" } } },
+        ruleMessagesByLocale: {
+          fr: { "addons-step-1": { discountText: "Ajoutez-en plus" } },
+        },
+        displayOptions: {},
+      },
+    }) as any);
+
+    expect(result.steps[0]).toEqual(expect.objectContaining({
+      addonAddText: "Add extra",
+      addonReplaceText: "Replace extra",
+      multiLangData: { fr: { addonAddText: "Ajouter", addonReplaceText: "Remplacer" } },
+    }));
+    expect((result.pricing?.messages as any).ruleMessagesByLocale).toEqual({
+      fr: { "addons-step-1": { discountText: "Ajoutez-en plus" } },
+    });
+  });
 });

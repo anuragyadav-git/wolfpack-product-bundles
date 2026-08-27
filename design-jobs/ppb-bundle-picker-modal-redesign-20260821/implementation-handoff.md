@@ -26,12 +26,12 @@ keywords:
 # Implementation Handoff
 
 Artifact job ID: ppb-bundle-picker-modal-redesign-20260821
-Artifact revision: 6
+Artifact revision: 8
 Artifact status: approved
 
 ## Identity and approved references
 
-PPB Horizontal Slots and Vertical Slots shared bundle-picker and stacked product-details sheets, revision 6. Approved references are the prior live WPB audit, accepted EB PPB modal/grouped-variant/quantity evidence, the user-supplied revision-2 findings, and the revision-4 footer capture. EB supplies density and interaction hierarchy; Wolfpack branding and accessibility remain authoritative.
+PPB Horizontal Slots and Vertical Slots shared bundle-picker and stacked product-details sheets, revision 8. Approved references include the fresh 2026-08-21 live EB desktop/mobile filled-row measurements, the mobile computed-style diff, and reread setup articles. Live EB alone owns the Vertical filled-row design; all other approved WPB contracts remain authoritative.
 
 ## Source-of-truth priority
 
@@ -44,7 +44,7 @@ PPB Horizontal Slots and Vertical Slots shared bundle-picker and stacked product
 
 ## Goal
 
-Deliver compact modal cards with independent native variant, image-details, and Add actions; filled slots capped by their existing responsive Horizontal tile or Vertical row geometry, with titles that wrap and clamp only at the cap while retaining the complete accessible name, plus a compact overlaid cross badge with a 44px target; validation-owned quantity presentation whose selector matches the full-width Add/Added action footprint; a content-responsive, footer-contained cart/price summary; and an editable 88dvh PPB details sheet stacked over the existing 85dvh picker.
+Deliver compact modal cards with independent native variant, image-details, and Add actions. Keep the approved Horizontal filled tile unchanged. Make the Vertical filled slot match live EB only: responsive full width, content-derived 64px normal height with 60px minimum and no maximum, 50px media, 5px padding and gap, 2px black border, 10px radius, visible normal title wrapping, bold 16px identity, no filled-row price, intrinsic flex sizing, inert row surface, and a 20px inline trailing circular-cross Remove visual. Retain validation-owned quantity presentation, the content-responsive footer summary, and the editable 88dvh details sheet above the 85dvh picker.
 
 ## Non-goals
 
@@ -64,7 +64,7 @@ Use every state in `state-matrix.md`, including filled-slot identity/removal, ad
 
 ## Responsive transformations
 
-Use `responsive-contract.md`: 85dvh picker, 88dvh details ceiling, five columns at 1440, four at 1280, two at 768/390/360, responsive filled-slot maximum heights owned by the existing Horizontal tile and Vertical row tokens, title clamping only at the cap, a top-end overlaid cross badge, start-aligned non-stretched sparse tracks, a shrink-wrapped footer summary capped inside its dock, no overflow, and safe-area-aware fixed regions.
+Use `responsive-contract.md`: 85dvh picker, 88dvh details ceiling, five columns at 1440, four at 1280, two at 768/390/360, the existing Horizontal filled tile, the intrinsic EB Vertical row with inline trailing remove visual, start-aligned non-stretched sparse tracks, a shrink-wrapped footer summary capped inside its dock, no horizontal overflow, and safe-area-aware fixed regions.
 
 ## Interaction contract
 
@@ -72,7 +72,7 @@ Use `interaction-contract.md`. Variant changes update card identity/image/price/
 
 ## Accessibility contract
 
-Dialog must be labelled by the dynamic title; keep `aria-modal`, initial focus, Escape/backdrop, scroll lock, visible focus, 44px close and cross-badge targets, product-specific Remove naming with the complete unclamped name, same-index focus restoration after removal, exact sheet focus restoration, and reduced-motion behavior.
+Dialog must be labelled by the dynamic title; keep `aria-modal`, initial focus, Escape/backdrop, scroll lock, visible focus, 44px modal controls, product-specific Remove naming with the complete product name, same-index focus restoration after removal, exact sheet focus restoration, and reduced-motion behavior. The exact-EB Vertical remove visual is the scoped 20px exception; Horizontal retains its 44px badge.
 
 ## Tokens and merchant-configurable values
 

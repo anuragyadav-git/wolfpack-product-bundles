@@ -27,11 +27,6 @@ jest.mock("../../../app/services/bundles/metafield-sync.server", () => ({
   updateComponentProductMetafields: jest.fn().mockResolvedValue(undefined),
 }));
 
-jest.mock("../../../app/services/bundles/pricing-calculation.server", () => ({
-  calculateBundlePrice: jest.fn().mockResolvedValue("99.99"),
-  updateBundleProductPrice: jest.fn().mockResolvedValue(undefined),
-}));
-
 jest.mock("../../../app/services/theme-colors.server", () => ({
   syncThemeColors: jest.fn().mockResolvedValue(undefined),
 }));

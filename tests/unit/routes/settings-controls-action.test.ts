@@ -2,8 +2,9 @@ const requireAdminSession = jest.fn();
 const findUnique = jest.fn();
 const upsert = jest.fn();
 const syncCartLineMessagingSettings = jest.fn();
+const syncPpbStorefrontRuntime = jest.fn();
 
-jest.mock("../../../app/lib/auth-guards.server", () => ({ requireAdminSession }));
+jest.mock("../../../app/shopify.server", () => ({ authenticate: { admin: requireAdminSession } }));
 jest.mock("../../../app/db.server", () => ({
   prisma: {
     designSettings: { findUnique, upsert },
@@ -13,6 +14,7 @@ jest.mock("../../../app/db.server", () => ({
 jest.mock("../../../app/services/cart-transform-service.server", () => ({
   CartTransformService: { syncCartLineMessagingSettings },
 }));
+jest.mock("../../../app/services/ppb-storefront-runtime.server", () => ({ syncPpbStorefrontRuntime }));
 
 // eslint-disable-next-line import/first
 import { action } from "../../../app/routes/app/app.settings";
@@ -35,6 +37,7 @@ describe("Settings Controls action", () => {
       .mockResolvedValue({ generalSettings: { settingsPage: { controls: {}, language: {} } } });
     upsert.mockResolvedValue({});
     syncCartLineMessagingSettings.mockResolvedValue({ success: true });
+    syncPpbStorefrontRuntime.mockResolvedValue({});
   });
 
   it("writes the canonical contract to both bundle types and removes label-keyed state", async () => {
@@ -62,5 +65,6 @@ describe("Settings Controls action", () => {
       "shop.test",
       expect.objectContaining({ isEnabled: true }),
     );
+    expect(syncPpbStorefrontRuntime).toHaveBeenCalledWith({}, "shop.test");
   });
 });

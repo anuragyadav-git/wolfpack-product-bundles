@@ -51,6 +51,11 @@ describe("pre-commit critical hook planner", () => {
         "Graphify rebuild failed with /Users/dev/.local/share/uv/tools/graphifyy/bin/python. If this is a runtime selection issue, set GRAPHIFY_PYTHON",
       ),
     ).toBe(true);
+    expect(
+      core.isGraphifyConfigurationFailure(
+        "Graphify rebuild failed through the public CLI. Install or upgrade the graphifyy uv tool and retry.",
+      ),
+    ).toBe(true);
     expect(core.isGraphifyConfigurationFailure("[Errno 1] Operation not permitted")).toBe(true);
     expect(core.isGraphifyConfigurationFailure("graphify graph contains 2 invalid file_type value(s)")).toBe(false);
   });

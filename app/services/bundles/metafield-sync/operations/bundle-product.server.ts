@@ -19,6 +19,9 @@ import { resolveShowProductComparedAtPrice } from "../../../../lib/bundle-config
 import { normalizeShopifyComponentQuantity } from "../utils/component-quantity";
 import { buildCheckoutOfferRuntime } from "../../../checkout-bundle-offers.server";
 import { buildPublicBundleSubscriptionConfig } from "../../../../lib/bundle-subscriptions";
+import { buildPpbPolicyRevisionMetafield, buildPpbStaticAuthorization } from "../../../ppb-static-authorization.server";
+import { generateCartTransformRuntimeTokenSecret } from "../../../cart-transform-runtime-token.server";
+import { assertPpbStorefrontSnapshotSize } from "../../../ppb-storefront-runtime.server";
 
 async function ensureBundleParentVariantRequiresComponents(
   admin: ShopifyAdmin,
@@ -150,6 +153,111 @@ function collectCachedStepVariants(
   return variants;
 }
 
+const COLLECTION_BATCH_SIZE = 25;
+const COLLECTION_PRODUCT_PAGE_SIZE = 250;
+
+function collectCollectionHandles(steps: any[]): string[] {
+  const handles = new Set<string>();
+
+  for (const step of Array.isArray(steps) ? steps : []) {
+    for (const collection of Array.isArray(step.collections) ? step.collections : []) {
+      if (typeof collection?.handle === "string" && collection.handle.trim()) {
+        handles.add(collection.handle.trim());
+      }
+    }
+
+    for (const category of Array.isArray(step.StepCategory) ? step.StepCategory : []) {
+      for (const collection of Array.isArray(category.collections) ? category.collections : []) {
+        if (typeof collection?.handle === "string" && collection.handle.trim()) {
+          handles.add(collection.handle.trim());
+        }
+      }
+    }
+  }
+
+  return [...handles];
+}
+
+async function resolveCollectionProductIds(
+  admin: ShopifyAdmin,
+  steps: any[],
+): Promise<Map<string, string[]>> {
+  const handles = collectCollectionHandles(steps);
+  const productsByHandle = new Map<string, string[]>();
+
+  for (let offset = 0; offset < handles.length; offset += COLLECTION_BATCH_SIZE) {
+    const batch = handles.slice(offset, offset + COLLECTION_BATCH_SIZE);
+    const variableDefinitions = batch.map((_, index) => `$handle${index}: String!`).join(", ");
+    const selections = batch.map((_, index) => `
+      collection${index}: collectionByIdentifier(identifier: { handle: $handle${index} }) {
+        products(first: ${COLLECTION_PRODUCT_PAGE_SIZE}) {
+          nodes { id }
+          pageInfo { hasNextPage endCursor }
+        }
+      }
+    `).join("\n");
+
+    try {
+      const response = await admin.graphql(`
+        query BatchCollectionProductIds(${variableDefinitions}) {
+          ${selections}
+        }
+      `, {
+        variables: Object.fromEntries(batch.map((handle, index) => [`handle${index}`, handle])),
+      });
+      const data = (await response.json()).data ?? {};
+
+      for (const [index, handle] of batch.entries()) {
+        const connection = data[`collection${index}`]?.products;
+        const productIds = (connection?.nodes ?? [])
+          .map((node: any) => node?.id)
+          .filter((id: unknown): id is string => typeof id === "string" && !isUUID(id));
+        let pageInfo = connection?.pageInfo;
+
+        while (pageInfo?.hasNextPage && pageInfo.endCursor) {
+          try {
+            const pageResponse = await admin.graphql(`
+              query CollectionProductIdsPage($handle: String!, $after: String!) {
+                collectionByIdentifier(identifier: { handle: $handle }) {
+                  products(first: ${COLLECTION_PRODUCT_PAGE_SIZE}, after: $after) {
+                    nodes { id }
+                    pageInfo { hasNextPage endCursor }
+                  }
+                }
+              }
+            `, { variables: { handle, after: pageInfo.endCursor } });
+            const pageConnection = (await pageResponse.json()).data?.collectionByIdentifier?.products;
+            for (const node of pageConnection?.nodes ?? []) {
+              if (typeof node?.id === "string" && !isUUID(node.id)) productIds.push(node.id);
+            }
+            pageInfo = pageConnection?.pageInfo;
+          } catch {
+            AppLogger.warn("Could not fetch the next collection product page", {
+              component: "metafield-sync",
+              operation: "updateBundleProductMetafields",
+              handle,
+            });
+            break;
+          }
+        }
+
+        productsByHandle.set(handle, productIds);
+      }
+    } catch {
+      for (const handle of batch) {
+        productsByHandle.set(handle, []);
+        AppLogger.warn("Could not fetch products from collection", {
+          component: "metafield-sync",
+          operation: "updateBundleProductMetafields",
+          handle,
+        });
+      }
+    }
+  }
+
+  return productsByHandle;
+}
+
 /**
  * Updates bundle variant metafields with Shopify Standard structure (Approach 1: Hybrid)
  *
@@ -186,9 +294,27 @@ export async function updateBundleProductMetafields(
 
   // PERFORMANCE OPTIMIZATION: Collect all product IDs first, then batch fetch variants
   const productIdMap: Array<{ productId: string; stepMinQuantity: number; source: string }> = [];
+  const resolvedStepProductIds = new Map<string, Set<string>>();
+  const resolvedCategoryProductIds = new Map<string, Set<string>>();
+  const addResolvedProduct = (stepKey: string, productId: string, categoryKey?: string) => {
+    const stepProducts = resolvedStepProductIds.get(stepKey) ?? new Set<string>();
+    stepProducts.add(productId);
+    resolvedStepProductIds.set(stepKey, stepProducts);
+    if (categoryKey) {
+      const categoryProducts = resolvedCategoryProductIds.get(categoryKey) ?? new Set<string>();
+      categoryProducts.add(productId);
+      resolvedCategoryProductIds.set(categoryKey, categoryProducts);
+    }
+  };
+
+  const collectionProductIds = await resolveCollectionProductIds(
+    admin,
+    bundleConfiguration.steps,
+  );
 
   if (bundleConfiguration.steps && Array.isArray(bundleConfiguration.steps)) {
-    for (const step of bundleConfiguration.steps) {
+    for (const [stepIndex, step] of bundleConfiguration.steps.entries()) {
+      const stepKey = String(step.id ?? stepIndex);
       // CRITICAL FIX: Process ONLY ONE source to prevent duplicates
       // Priority: StepProduct (database relation) > products array (UI config)
 
@@ -196,6 +322,7 @@ export async function updateBundleProductMetafields(
         // Use StepProduct entries from database
         for (const stepProduct of step.StepProduct) {
           if (stepProduct.productId && !isUUID(stepProduct.productId)) {
+            addResolvedProduct(stepKey, stepProduct.productId);
             productIdMap.push({
               productId: stepProduct.productId,
               stepMinQuantity: step.minQuantity,
@@ -212,6 +339,7 @@ export async function updateBundleProductMetafields(
         // Fallback: Use products array from UI config (only if StepProduct is empty)
         for (const product of step.products) {
           if (product.id && !isUUID(product.id)) {
+            addResolvedProduct(stepKey, product.id);
             productIdMap.push({
               productId: product.id,
               stepMinQuantity: step.minQuantity,
@@ -237,59 +365,37 @@ export async function updateBundleProductMetafields(
           const handle = collection.handle;
           if (!handle) continue;
 
-          try {
-            const collResponse = await admin.graphql(`
-              query getCollectionProductIds($handle: String!) {
-                collection(handle: $handle) {
-                  products(first: 250) {
-                    edges {
-                      node { id }
-                    }
-                  }
-                }
-              }
-            `, { variables: { handle } });
-
-            const collData = await collResponse.json();
-            const collProductEdges = collData.data?.collection?.products?.edges || [];
-
-            for (const edge of collProductEdges) {
-              const productId = edge.node?.id;
-              if (productId && !isUUID(productId)) {
-                // Avoid duplicates already added from StepProduct
-                const alreadyAdded = productIdMap.some(item => item.productId === productId);
-                if (!alreadyAdded) {
-                  productIdMap.push({
-                    productId,
-                    stepMinQuantity: step.minQuantity,
-                    source: `collection:${handle}`
-                  });
-                }
-              }
+          const productIds = collectionProductIds.get(handle) ?? [];
+          for (const productId of productIds) {
+            addResolvedProduct(stepKey, productId);
+            // Avoid duplicates already added from StepProduct
+            const alreadyAdded = productIdMap.some(item => item.productId === productId);
+            if (!alreadyAdded) {
+              productIdMap.push({
+                productId,
+                stepMinQuantity: step.minQuantity,
+                source: `collection:${handle}`
+              });
             }
-
-            AppLogger.debug("[METAFIELD] Fetched products from collection", {
-              component: "bundle-product.server",
-              handle,
-              count: collProductEdges.length,
-            });
-          } catch (collError: any) {
-            AppLogger.warn("Could not fetch products from collection", {
-              component: "metafield-sync",
-              operation: "updateBundleProductMetafields",
-              handle,
-            });
           }
+
+          AppLogger.debug("[METAFIELD] Fetched products from collection", {
+            component: "bundle-product.server",
+            handle,
+            count: productIds.length,
+          });
         }
       }
 
       // StepCategory: process per-category products (direct GIDs) and collections
       const stepCats = Array.isArray(step.StepCategory) ? step.StepCategory : [];
-      for (const cat of stepCats) {
+      for (const [categoryIndex, cat] of stepCats.entries()) {
+        const categoryKey = `${stepKey}:${String(cat.id ?? categoryIndex)}`;
         // Direct product GIDs in this category
         const catProducts = Array.isArray(cat.products) ? cat.products : [];
         for (const p of catProducts) {
           if (p.id && !isUUID(p.id) && !productIdMap.some(item => item.productId === p.id)) {
+            addResolvedProduct(stepKey, p.id, categoryKey);
             productIdMap.push({
               productId: p.id,
               stepMinQuantity: step.minQuantity,
@@ -303,33 +409,15 @@ export async function updateBundleProductMetafields(
         for (const collection of catCollections) {
           const handle = collection.handle;
           if (!handle) continue;
-          try {
-            const collResponse = await admin.graphql(`
-              query getCollectionProductIds($handle: String!) {
-                collection(handle: $handle) {
-                  products(first: 250) {
-                    edges { node { id } }
-                  }
-                }
-              }
-            `, { variables: { handle } });
-            const collData = await collResponse.json();
-            const edges = collData.data?.collection?.products?.edges || [];
-            for (const edge of edges) {
-              const productId = edge.node?.id;
-              if (productId && !isUUID(productId) && !productIdMap.some(item => item.productId === productId)) {
-                productIdMap.push({
-                  productId,
-                  stepMinQuantity: step.minQuantity,
-                  source: `StepCategory:${cat.name}:collection:${handle}`,
-                });
-              }
+          for (const productId of collectionProductIds.get(handle) ?? []) {
+            if (!productIdMap.some(item => item.productId === productId)) {
+              addResolvedProduct(stepKey, productId, categoryKey);
+              productIdMap.push({
+                productId,
+                stepMinQuantity: step.minQuantity,
+                source: `StepCategory:${cat.name}:collection:${handle}`,
+              });
             }
-          } catch {
-            AppLogger.warn("Could not fetch products from StepCategory collection", {
-              component: "bundle-product.server",
-              handle,
-            });
           }
         }
       }
@@ -461,7 +549,22 @@ export async function updateBundleProductMetafields(
   useSingleStepCategoriesAsBundleSteps: bundleConfiguration.useSingleStepCategoriesAsBundleSteps ?? false,
   showProductComparedAtPrice: resolveShowProductComparedAtPrice(),
     bundleVariantId: bundleVariantId, // Bundle parent variant ID for cart transform EXPAND operation
-    steps: (bundleConfiguration.steps || []).map((step: any) => ({
+    steps: (bundleConfiguration.steps || []).map((step: any, stepIndex: number) => {
+      const stepKey = String(step.id ?? stepIndex);
+      const products = new Map(collectStepProductReferences(step).map((product) => [product.id, product]));
+      for (const id of resolvedStepProductIds.get(stepKey) ?? []) products.set(id, { id });
+      const categories = formatStepCategoriesForRuntime(step, Array.isArray(step.StepProduct) ? step.StepProduct : [])
+        .map((category: any, categoryIndex: number) => {
+          const categoryKey = `${stepKey}:${String(category.id ?? categoryIndex)}`;
+          const categoryProducts = new Map(
+            (Array.isArray(category.products) ? category.products : []).map((product: any) => [product.id ?? product.selectionId, product]),
+          );
+          for (const id of resolvedCategoryProductIds.get(categoryKey) ?? []) {
+            if (!categoryProducts.has(id)) categoryProducts.set(id, { id });
+          }
+          return { ...category, products: [...categoryProducts.values()] };
+        });
+      return ({
       id: step.id,
       name: step.name,
       pageTitle: step.pageTitle ?? null,
@@ -469,9 +572,9 @@ export async function updateBundleProductMetafields(
       position: step.position || 0,
       minQuantity: step.minQuantity,
       maxQuantity: step.maxQuantity,
-      products: collectStepProductReferences(step),
+      products: [...products.values()],
       collections: Array.isArray(step.collections) ? step.collections : [],
-      categories: formatStepCategoriesForRuntime(step, Array.isArray(step.StepProduct) ? step.StepProduct : []),
+      categories,
       conditionType: step.conditionType,
       conditionOperator: step.conditionOperator,
       conditionValue: step.conditionValue,
@@ -496,7 +599,7 @@ export async function updateBundleProductMetafields(
       stepImage: step.stepImage ?? step.timelineIconUrl ?? null,
       primaryVariantOption: step.primaryVariantOption ?? null,
       filters: Array.isArray(step.filters) ? step.filters : null,
-    })),
+    }); }),
     pricing: bundleConfiguration.pricing ? {
       enabled: bundleConfiguration.pricing.enabled || false,
       method: bundleConfiguration.pricing.method || 'percentage_off',
@@ -513,6 +616,13 @@ export async function updateBundleProductMetafields(
         if (rule.bxyApplyMode !== undefined) flat.bxyApplyMode = rule.bxyApplyMode;
         return flat;
       }),
+      messages: {
+        ...((bundleConfiguration.pricing.messages as Record<string, unknown> | null) ?? {}),
+        ...(bundleConfiguration.pricing.ruleMessagesByLocale
+          ? { ruleMessagesByLocale: bundleConfiguration.pricing.ruleMessagesByLocale }
+          : {}),
+      },
+      displayOptions: bundleConfiguration.pricing.displayOptions ?? null,
     } : null,
     messaging: {
       progressTemplate: bundleConfiguration.pricing?.messages?.progress || bundleConfiguration.messaging?.progressTemplate || 'Add {conditionText} to get {discountText}',
@@ -533,13 +643,34 @@ export async function updateBundleProductMetafields(
     sdkMode: bundleConfiguration.sdkMode ?? false,
   };
 
+  let ppbPolicyRevisionMetafield: Record<string, unknown> | null = null;
+  if (bundleUiConfig.bundleType === BundleType.PRODUCT_PAGE) {
+    const shopDomain = String(bundleConfiguration.shopId ?? bundleConfiguration.shopDomain ?? "").trim();
+    if (!shopDomain) throw new Error("PPB Shopify-hosted sync requires shopId");
+    const staticAuthorization = buildPpbStaticAuthorization({
+      bundle: bundleUiConfig,
+      shop: shopDomain,
+      parentVariantId: bundleVariantId,
+      secret: generateCartTransformRuntimeTokenSecret(shopDomain),
+    });
+    bundleUiConfig.schemaVersion = 3;
+    bundleUiConfig.runtimeAuthorization = staticAuthorization.authorization;
+    ppbPolicyRevisionMetafield = await buildPpbPolicyRevisionMetafield({
+      admin,
+      bundleId: bundleUiConfig.id,
+      revision: staticAuthorization.policy.revision,
+      active: staticAuthorization.policy.active,
+    });
+    assertPpbStorefrontSnapshotSize("bundle_ui_config", bundleUiConfig);
+  }
+
   // Check metafield sizes and log warnings
   const uiConfigSizeCheck = checkMetafieldSize(bundleUiConfig, 'bundle_ui_config', 'updateBundleProductMetafields');
   const priceAdjustmentSizeCheck = checkMetafieldSize(priceAdjustment, 'price_adjustment', 'updateBundleProductMetafields');
   const componentPricingSizeCheck = checkMetafieldSize(componentPricing, 'component_pricing', 'updateBundleProductMetafields');
 
   // Abort if any metafield exceeds size limit
-  if (!uiConfigSizeCheck.withinLimit) {
+  if (bundleUiConfig.bundleType !== BundleType.PRODUCT_PAGE && !uiConfigSizeCheck.withinLimit) {
     throw new Error(`bundle_ui_config metafield exceeds Shopify's 64KB limit (size: ${uiConfigSizeCheck.size} bytes). Bundle has too many products or complex configuration.`);
   }
 
@@ -601,6 +732,7 @@ export async function updateBundleProductMetafields(
       type: "json",
       value: JSON.stringify(bundleUiConfig)
     },
+    ...(ppbPolicyRevisionMetafield ? [ppbPolicyRevisionMetafield] : []),
     {
       ownerId: bundleVariantId,
       namespace: "$app",

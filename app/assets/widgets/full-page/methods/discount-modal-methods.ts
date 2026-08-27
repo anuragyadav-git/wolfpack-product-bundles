@@ -198,28 +198,6 @@ closeModal() {
 },
 
 resolveStorefrontApiBase() {
-  const appProxyPrefix = STOREFRONT_PROXY_ROOT;
-  if (window.location?.pathname?.startsWith(`${appProxyPrefix}/`)) {
-    return appProxyPrefix;
-  }
-
-  const configuredAppUrl = window.__BUNDLE_APP_URL__ || '';
-  const currentHost = window.location.host;
-  const shopDomain = window.Shopify?.shop || this.container?.dataset.shop || '';
-
-  let configuredAppHost = '';
-  if (configuredAppUrl) {
-    try {
-      configuredAppHost = new URL(configuredAppUrl).host;
-    } catch (_error: any) {
-      configuredAppHost = '';
-    }
-  }
-
-  if (shopDomain && configuredAppHost !== currentHost) {
-    return appProxyPrefix;
-  }
-
-  return configuredAppUrl || window.location.origin;
+  return STOREFRONT_PROXY_ROOT;
 },
 };

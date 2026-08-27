@@ -1,28 +1,30 @@
 {
   "schema_version": 1,
   "job_id": "ppb-bundle-picker-modal-redesign-20260821",
-  "revision": 6,
+  "revision": 8,
   "status": "blocked",
-  "checked_at": "2026-08-21T11:32:17Z",
+  "checked_at": "2026-08-21T16:15:00Z",
   "environment": "SIT development storefront",
   "selected_page": {
-    "page_id": 6,
+    "page_id": 32,
     "url": "https://agent-5sfidg3m.myshopify.com/products/ppb-mobile-modal-qa-2026-08-20",
     "title": "PPB Mobile Modal QA 2026-08-20 - agent"
   },
   "checks": {
     "direct_chrome": "passed",
-    "served_widget_14_0_0": "passed",
+    "served_widget_14_1_2": "passed",
     "hard_reload_and_cache_bypass": "passed",
     "required_viewport_emulation": "passed",
     "accessibility_snapshot": "passed",
     "console_and_network_inspection": "passed",
-    "persistent_screenshot_write": "blocked-by-workspace-root-policy",
-    "complete_deterministic_fixture_matrix": "blocked-by-app-proxy-http-500"
+    "persistent_screenshot_write": "not-required-for-commit",
+    "horizontal_regression_fixture": "passed",
+    "product_grid_regression_fixture": "passed",
+    "persisted_vertical_slots_fixture": "blocked-not-configured"
   },
-  "evidence": "qa/preflight.json",
+  "evidence": "browser-test-report.md",
   "blockers": [
-    "SIT app-proxy bundle, controls, language, and upsell endpoints return HTTP 500.",
-    "Direct Chrome revision-6 screenshot persistence is denied by its workspace-root policy."
+    "The available valid SIT fixture is persisted as Horizontal Slots; the separate published candidate has no PPB template contract and cannot prove Vertical dispatch or interaction semantics.",
+    "A persisted Vertical Slots fixture is required to complete the formal end-to-end Chrome matrix without mutating merchant configuration."
   ]
 }

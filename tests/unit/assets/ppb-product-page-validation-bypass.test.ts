@@ -125,7 +125,7 @@ describe('PPB validation control disables cart gating when disabled', () => {
         getDiscountInfoWithSelectedAddonDiscount(value: Record<string, unknown>) {
           return value;
         },
-        requestCartTransformRuntimeToken: jest.fn().mockResolvedValue('runtime-token'),
+        applyPpbStaticAuthorization: jest.fn().mockReturnValue('runtime-token'),
         buildProductPageCartFormData() {
           return {
             formData: new FormData(),
@@ -149,7 +149,7 @@ describe('PPB validation control disables cart gating when disabled', () => {
         headers: { 'Accept': 'application/json' },
       }));
       expect(context.syncBundleDetailsCartMetafield).toHaveBeenCalled();
-      expect(context.requestCartTransformRuntimeToken).toHaveBeenCalled();
+      expect(context.applyPpbStaticAuthorization).toHaveBeenCalled();
       expect(toastSpy).not.toHaveBeenCalledWith('Please complete all bundle steps before adding to cart.');
     } finally {
       toastSpy.mockRestore();
@@ -234,7 +234,7 @@ describe('PPB validation control disables cart gating when disabled', () => {
         getDiscountInfoWithSelectedAddonDiscount(value: Record<string, unknown>) {
           return value;
         },
-        requestCartTransformRuntimeToken: jest.fn().mockResolvedValue('runtime-token'),
+        applyPpbStaticAuthorization: jest.fn().mockReturnValue('runtime-token'),
         buildProductPageCartFormData() {
           return {
             formData: new FormData(),

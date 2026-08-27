@@ -4,8 +4,8 @@ id: dashboard-route-readiness
 title: Dashboard Route Readiness
 type: test-spec
 status: active
-summary: Verifies that Dashboard content is revealed only after its data and shared loading-bar interval are ready.
-last_audited: 2026-08-13
+summary: Verifies that Dashboard content paints before noncritical status and proxy-banner lookups settle.
+last_audited: 2026-08-25
 owners:
   - engineering
 domains:
@@ -16,6 +16,7 @@ source_paths:
   - app/routes/app/app.dashboard/route.tsx
   - app/routes/app/app.dashboard/DashboardPage.tsx
   - app/routes/app/app.dashboard/DashboardStatusGrid.tsx
+  - app/routes/app/app.dashboard/DashboardDeferredProxyHealthBanner.tsx
 related_docs:
   - internal docs/Operations/Admin Performance.md
 tags:
@@ -23,26 +24,30 @@ tags:
   - dashboard
 keywords:
   - Loading your workspace
-  - AdminRouteLoadingBar
+  - progressive loading
 ---
 
 # Test Spec: Dashboard Route Readiness
 **Spec ID:** dashboard-route-readiness  **Created:** 2026-08-13
 
 ## Purpose
-Keep the complete Dashboard behind one readiness boundary and replace dashboard skeletons with a shared loading bar and centered workspace message.
+Keep useful Dashboard content on the initial render while noncritical status checks update their owned warning surfaces asynchronously.
 
 ## Test Cases
 ### DashboardRouteReadiness
 | # | Scenario | Input | Expected Output | Notes |
 |---|---|---|---|---|
-| 1 | One readiness dependency remains pending | Resolved App Embed status and loading interval with unresolved banner data | Dashboard readiness remains pending | Prevents partial Dashboard content |
-| 2 | Every readiness dependency resolves | Resolved App Embed status, banner data, and loading interval | Dashboard readiness resolves with both data payloads | Complete content can render together |
-| 3 | Dashboard is pending | Loading workspace fallback | Shared progress bar and `Loading your workspace` message render | No Dashboard skeleton is rendered |
-| 4 | Theme-extension client check is pending after route readiness | App Embed status banner with `loading=true` | The actual banner renders | Server readiness owns the loading transition |
+| 1 | Proxy-health data remains pending | Dashboard bundles are loaded and the deferred banner promise is unresolved | Dashboard content renders without a proxy warning | Proxy health is not page-critical |
+| 2 | Proxy-health resolves unhealthy | Deferred banner data has `proxyHealthy=false` | Proxy warning renders | Existing merchant warning remains |
+| 3 | App-embed client check is pending | No live status has resolved | Dashboard renders while the App Embed Status banner shows a native Polaris spinner and loading description | Prevents false enabled or disabled feedback |
+| 4 | App-embed client check resolves disabled | Live status is false | Dashboard warning and preview safeguards use disabled state | Existing setup guard remains |
+| 5 | Dashboard bundle list loads | Active, draft, and unlisted bundles exist | Query selects only fields rendered by the Dashboard | Avoids loading the unused pricing relation on the critical path |
+| 6 | App-embed banner hydrates | The dismissible banner is server-rendered, then hydrated in the browser | Hydration completes without a prop mismatch | Keeps the native dismiss action client-safe |
 
 ## Acceptance Criteria
-- [ ] Dashboard data and the minimum loading-bar interval share one readiness boundary.
-- [ ] Loading state contains the shared top-edge loading bar and centered workspace message.
-- [ ] No App Embed banner skeleton renders after Dashboard readiness.
-- [ ] Dashboard resources render with the rest of the Dashboard instead of after an idle delay.
+- [x] Dashboard content does not wait for proxy-health banner data.
+- [x] Dashboard content does not wait for the app-embed status lookup.
+- [x] The unresolved App Embed Status banner shows native Polaris loading feedback.
+- [x] Proxy and app-embed warnings appear after their owned checks resolve.
+- [x] Dashboard resources remain part of the initial Dashboard render.
+- [x] App Embed Status banner hydration does not emit a prop mismatch.

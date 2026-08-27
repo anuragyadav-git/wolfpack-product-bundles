@@ -1,0 +1,23 @@
+{
+  "graphify-guidance": {
+    "PreToolUse": [
+      {
+        "matcher": "grep_search",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"process.stdout.write(JSON.stringify({decision:'allow'}))\""
+          }
+        ]
+      }
+    ]
+  },
+  "task-completion-notifier": {
+    "Stop": [
+      {
+        "type": "command",
+        "command": "terminal-notifier -title \"\u2705 Antigravity: done\" -message \"Task completed\" 2>/dev/null || true; echo '{}'"
+      }
+    ]
+  }
+}

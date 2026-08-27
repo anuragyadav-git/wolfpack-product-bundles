@@ -4,38 +4,17 @@ id: wpb-cart-transform-runtime
 title: Cart Transform Runtime Architecture
 type: architecture-diagram
 status: authoritative
-last_audited: 2026-07-14
 summary: Signed runtime-token flow from storefront selection through Shopify Cart Transform merge and add-on Discount Function validation.
+last_audited: 2026-08-25
 owners:
-  - Engineering
+  - engineering
 domains:
   - checkout
   - cart-transform
   - pricing
 systems:
-  - Storefront widget
-  - Remix app proxy
-  - PostgreSQL
-  - Shopify Cart
-  - Rust Cart Transform Function
-  - Rust Discount Function
-operations:
-  - runtime token issuance
-  - cart line creation
-  - HMAC verification
-  - linesMerge
-  - lineExpand
-  - product discount generation
-data_entities:
-  - Bundle
-  - BundleStep
-  - RuntimeTokenPayload
-  - CartLine
-  - CartTransform
-data_classification:
-  - signed storefront input
-  - app-owned secret
-  - merchant configuration
+  - bundle-cart-transform-rs
+  - bundle-discount-function
 source_paths:
   - app/routes/api/api.cart-transform-runtime-token.tsx
   - app/services/cart-transform-runtime-token.server.ts
@@ -49,16 +28,6 @@ related_docs:
   - ../Cart Transform Function.md
   - ../../Shopify Integration/Cart Transform API.md
   - ../../Features/Bundle Instance Tracking.md
-related_diagrams:
-  - Metafield Design and Consumption.md
-  - Storefront Frontend Architecture.md
-graphify:
-  communities:
-    - Cart Transform Run Logic
-    - Cart Transform Logger
-    - Bundle Pricing Calculation
-  god_nodes:
-    - bundle-widget-full-page.js Widget Source
 tags:
   - architecture
   - mermaid
@@ -68,7 +37,7 @@ tags:
 keywords:
   - _wolfpack_bundle_runtime
   - _wolfpackProductBundle:OfferId
-  - runtime_token_secret
+  - runtime_configuration
   - linesMerge
   - lineExpand
   - HMAC-SHA256
@@ -99,7 +68,7 @@ sequenceDiagram
     TokenRoute-->>Widget: _wolfpack_bundle_runtime
     Widget->>Cart: Add component and add-on lines with bundle attributes
     Cart->>Transform: cart.transform.run input
-    Transform->>Transform: Read CartTransform $app.runtime_token_secret
+    Transform->>Transform: Read secret from CartTransform $app.runtime_configuration
     Transform->>Transform: Verify signature, offer group, variants, quantities, parent, pricing
     alt Valid base component group
         Transform-->>Cart: linesMerge to bundle parent
@@ -120,6 +89,6 @@ sequenceDiagram
 ## Trust boundaries
 
 - Storefront selections are untrusted until the signed app-proxy route validates them against the current database bundle.
-- The HMAC secret is derived server-side and synchronized to the active CartTransform owner as `$app.runtime_token_secret`.
+- The HMAC secret is derived server-side and synchronized inside the active CartTransform owner's `$app.runtime_configuration` JSON.
 - Cart Transform and Discount Function independently reject missing, tampered, or selection-mismatched tokens.
 - Add-on lines stay outside the parent `linesMerge`; authorized add-on savings are emitted by the Discount Function.

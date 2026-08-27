@@ -16,6 +16,7 @@ export function FpbAddonFooterMessaging({
     ruleMessages,
     setIsAddonVariablesModalOpen,
     setRuleMessages,
+    shopLocales,
   } = flow;
   const savedAddonMessages =
     (bundle as any).personalizationData?.addonProducts?.addonsMessaging
@@ -50,7 +51,12 @@ export function FpbAddonFooterMessaging({
               </s-button>
               <s-button
                 variant="secondary"
-                icon="language-translate"
+                icon="globe"
+                disabled={
+                  !addonDraft.addonProductsEnabled ||
+                  shopLocales.length === 0 ||
+                  undefined
+                }
                 onClick={openAddonFooterMultiLanguageModal}
               >
                 Multi Language

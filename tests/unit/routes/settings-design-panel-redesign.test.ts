@@ -55,14 +55,13 @@ describe("Settings Design preview state", () => {
       replay: 3,
     });
   });
-  it("applies expert preview overrides only while expert controls are enabled", () => {
+  it("treats a component color override as authoritative without an Expert mode", () => {
     const fieldValues = {
       "Primary Color": "#123456",
       "expert.productCard.productCardButtonColor": "#abcdef",
     };
 
-    expect(buildDesignPreviewTheme(fieldValues, false)["--preview-product-button-bg"]).toBe("#123456");
-    expect(buildDesignPreviewTheme(fieldValues, true)["--preview-product-button-bg"]).toBe("#abcdef");
+    expect(buildDesignPreviewTheme(fieldValues)["--preview-product-button-bg"]).toBe("#abcdef");
   });
 
   it("uses Landing Page Standard desktop Product card defaults", () => {
@@ -150,12 +149,11 @@ describe("Settings Design preview state", () => {
 describe("DesignLivePreview", () => {
   it("renders template-aware surface and viewport controls", () => {
     const view = renderToStaticMarkup(
-      React.createElement(DesignLivePreview, { fieldValues: {}, isExpertControlsEnabled: false }),
+      React.createElement(DesignLivePreview, { fieldValues: {} }),
     );
     const utils = renderToStaticMarkup(
       React.createElement(DesignLivePreview, {
         fieldValues: {},
-        isExpertControlsEnabled: false,
         initialState: {
           bundleType: "product_page",
           templateKey: "horizontal-slots",
@@ -178,7 +176,6 @@ describe("DesignLivePreview", () => {
     const cartView = renderToStaticMarkup(
       React.createElement(DesignLivePreview, {
         fieldValues: {},
-        isExpertControlsEnabled: false,
         initialState: {
           bundleType: "full_page",
           templateKey: "standard",
@@ -188,7 +185,7 @@ describe("DesignLivePreview", () => {
       }),
     );
     const productView = renderToStaticMarkup(
-      React.createElement(DesignLivePreview, { fieldValues: {}, isExpertControlsEnabled: false }),
+      React.createElement(DesignLivePreview, { fieldValues: {} }),
     );
 
     expect(cartView).toContain("settingsDcp.preview.feedback.tierHit");
@@ -203,7 +200,6 @@ describe("DesignLivePreview", () => {
         const view = renderToStaticMarkup(
           React.createElement(DesignLivePreview, {
             fieldValues: { "Primary Color": "#123456" },
-            isExpertControlsEnabled: false,
             initialState: {
               bundleType: template.bundleType,
               templateKey: template.key,
@@ -240,7 +236,6 @@ describe("DesignLivePreview", () => {
     const view = renderToStaticMarkup(
       React.createElement(DesignLivePreview, {
         fieldValues: {},
-        isExpertControlsEnabled: false,
         initialState: {
           bundleType: template?.bundleType ?? "full_page",
           templateKey,
@@ -258,7 +253,6 @@ describe("DesignLivePreview", () => {
     const view = renderToStaticMarkup(
       React.createElement(DesignLivePreview, {
         fieldValues: {},
-        isExpertControlsEnabled: false,
         initialState: {
           bundleType: "full_page",
           templateKey: "standard",
@@ -277,7 +271,7 @@ describe("DesignLivePreview", () => {
 
   it("renders optimized local fixture media without network or shopping work", () => {
     const view = renderToStaticMarkup(
-      React.createElement(DesignLivePreview, { fieldValues: {}, isExpertControlsEnabled: false }),
+      React.createElement(DesignLivePreview, { fieldValues: {} }),
     );
 
     expect(view).toContain("/design-preview-product-1.avif");
