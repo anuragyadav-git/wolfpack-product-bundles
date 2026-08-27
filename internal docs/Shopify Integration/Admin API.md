@@ -5,7 +5,7 @@ title: Shopify Admin API
 type: shopify-integration
 status: active
 summary: Authentication, rate-limit, and operational contracts for Wolfpack Admin API access.
-last_audited: 2026-08-24
+last_audited: 2026-08-27
 owners:
   - engineering
 domains:
@@ -17,6 +17,7 @@ source_paths:
   - app/shopify.server.ts
   - prisma/schema.prisma
   - app/lib/legacy-offline-token-cutover.server.ts
+  - app/services/bundles/metafield-sync/operations/bundle-product.server.ts
 related_docs:
   - internal docs/Architecture/Bundle Field Ownership.md
 tags:
@@ -167,6 +168,10 @@ Note: **NOT** `inventoryAdjustQuantity` (deprecated singular form).
 
 ### Metafield Write
 Used by `bundle-config-metafield.server.ts` to cache bundle config for zero-latency widget load.
+
+### Collection lookup
+
+Admin GraphQL `2026-07` no longer accepts `collection(handle: ...)`. Resolve collection handles with `collectionByIdentifier(identifier: { handle: ... })`. Bundle metafield synchronization aliases unique handle lookups into bounded batches, requests the maximum 250 products in the first page, and follows cursors only for collections that overflow that page.
 
 ---
 

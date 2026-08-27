@@ -412,6 +412,87 @@ describe("updateBundleProductMetafields", () => {
     ]);
   });
 
+  it("resolves a repeated collection handle once across steps and categories", async () => {
+    const admin = makeAdmin();
+    admin.graphql.mockImplementation(async (query: string) => {
+      if (query.includes("BatchCollectionProductIds")) {
+        return {
+          json: async () => ({
+            data: {
+              collection0: {
+                products: {
+                  nodes: [{ id: "gid://shopify/Product/777" }],
+                  pageInfo: { hasNextPage: false, endCursor: null },
+                },
+              },
+            },
+          }),
+        } as any;
+      }
+      return {
+        json: async () => ({
+          data: {
+            shop: { id: "gid://shopify/Shop/1", policy: null },
+            metafieldsSet: {
+              metafields: [{ key: "bundle_ui_config", value: "{}" }],
+              userErrors: [],
+            },
+          },
+        }),
+      } as any;
+    });
+    mockBatchGetFirstVariantsWithPrices.mockResolvedValue(
+      new Map([
+        [
+          "777",
+          {
+            success: true,
+            variantId: "gid://shopify/ProductVariant/888",
+            priceCents: 1500,
+            title: "Collection Product",
+          },
+        ],
+      ]),
+    );
+    const repeatedCollection = {
+      id: "gid://shopify/Collection/333",
+      handle: "frontpage",
+      title: "Home page",
+    };
+    const config = makeBundleConfig(BundleType.PRODUCT_PAGE, {
+      steps: [
+        {
+          id: "step-1",
+          name: "Step 1",
+          position: 0,
+          minQuantity: 1,
+          maxQuantity: 1,
+          StepProduct: [],
+          collections: [repeatedCollection],
+          StepCategory: [
+            {
+              id: "category-1",
+              name: "Category 1",
+              products: [],
+              collections: [repeatedCollection],
+            },
+          ],
+        },
+      ],
+    });
+
+    await updateBundleProductMetafields(admin, "gid://shopify/Product/999", config);
+
+    const collectionQueries = admin.graphql.mock.calls.filter(([query]) =>
+      String(query).includes("collectionByIdentifier"),
+    );
+    expect(collectionQueries).toHaveLength(1);
+    expect(mockBatchGetFirstVariantsWithPrices).toHaveBeenCalledWith(
+      admin,
+      ["gid://shopify/Product/777"],
+    );
+  });
+
   it("includes StepCategory cached variants in parent component metadata", async () => {
     const admin = makeAdmin();
     const config = makeBundleConfig(BundleType.FULL_PAGE, {

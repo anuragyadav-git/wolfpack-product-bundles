@@ -153,6 +153,111 @@ function collectCachedStepVariants(
   return variants;
 }
 
+const COLLECTION_BATCH_SIZE = 25;
+const COLLECTION_PRODUCT_PAGE_SIZE = 250;
+
+function collectCollectionHandles(steps: any[]): string[] {
+  const handles = new Set<string>();
+
+  for (const step of Array.isArray(steps) ? steps : []) {
+    for (const collection of Array.isArray(step.collections) ? step.collections : []) {
+      if (typeof collection?.handle === "string" && collection.handle.trim()) {
+        handles.add(collection.handle.trim());
+      }
+    }
+
+    for (const category of Array.isArray(step.StepCategory) ? step.StepCategory : []) {
+      for (const collection of Array.isArray(category.collections) ? category.collections : []) {
+        if (typeof collection?.handle === "string" && collection.handle.trim()) {
+          handles.add(collection.handle.trim());
+        }
+      }
+    }
+  }
+
+  return [...handles];
+}
+
+async function resolveCollectionProductIds(
+  admin: ShopifyAdmin,
+  steps: any[],
+): Promise<Map<string, string[]>> {
+  const handles = collectCollectionHandles(steps);
+  const productsByHandle = new Map<string, string[]>();
+
+  for (let offset = 0; offset < handles.length; offset += COLLECTION_BATCH_SIZE) {
+    const batch = handles.slice(offset, offset + COLLECTION_BATCH_SIZE);
+    const variableDefinitions = batch.map((_, index) => `$handle${index}: String!`).join(", ");
+    const selections = batch.map((_, index) => `
+      collection${index}: collectionByIdentifier(identifier: { handle: $handle${index} }) {
+        products(first: ${COLLECTION_PRODUCT_PAGE_SIZE}) {
+          nodes { id }
+          pageInfo { hasNextPage endCursor }
+        }
+      }
+    `).join("\n");
+
+    try {
+      const response = await admin.graphql(`
+        query BatchCollectionProductIds(${variableDefinitions}) {
+          ${selections}
+        }
+      `, {
+        variables: Object.fromEntries(batch.map((handle, index) => [`handle${index}`, handle])),
+      });
+      const data = (await response.json()).data ?? {};
+
+      for (const [index, handle] of batch.entries()) {
+        const connection = data[`collection${index}`]?.products;
+        const productIds = (connection?.nodes ?? [])
+          .map((node: any) => node?.id)
+          .filter((id: unknown): id is string => typeof id === "string" && !isUUID(id));
+        let pageInfo = connection?.pageInfo;
+
+        while (pageInfo?.hasNextPage && pageInfo.endCursor) {
+          try {
+            const pageResponse = await admin.graphql(`
+              query CollectionProductIdsPage($handle: String!, $after: String!) {
+                collectionByIdentifier(identifier: { handle: $handle }) {
+                  products(first: ${COLLECTION_PRODUCT_PAGE_SIZE}, after: $after) {
+                    nodes { id }
+                    pageInfo { hasNextPage endCursor }
+                  }
+                }
+              }
+            `, { variables: { handle, after: pageInfo.endCursor } });
+            const pageConnection = (await pageResponse.json()).data?.collectionByIdentifier?.products;
+            for (const node of pageConnection?.nodes ?? []) {
+              if (typeof node?.id === "string" && !isUUID(node.id)) productIds.push(node.id);
+            }
+            pageInfo = pageConnection?.pageInfo;
+          } catch {
+            AppLogger.warn("Could not fetch the next collection product page", {
+              component: "metafield-sync",
+              operation: "updateBundleProductMetafields",
+              handle,
+            });
+            break;
+          }
+        }
+
+        productsByHandle.set(handle, productIds);
+      }
+    } catch {
+      for (const handle of batch) {
+        productsByHandle.set(handle, []);
+        AppLogger.warn("Could not fetch products from collection", {
+          component: "metafield-sync",
+          operation: "updateBundleProductMetafields",
+          handle,
+        });
+      }
+    }
+  }
+
+  return productsByHandle;
+}
+
 /**
  * Updates bundle variant metafields with Shopify Standard structure (Approach 1: Hybrid)
  *
@@ -201,6 +306,11 @@ export async function updateBundleProductMetafields(
       resolvedCategoryProductIds.set(categoryKey, categoryProducts);
     }
   };
+
+  const collectionProductIds = await resolveCollectionProductIds(
+    admin,
+    bundleConfiguration.steps,
+  );
 
   if (bundleConfiguration.steps && Array.isArray(bundleConfiguration.steps)) {
     for (const [stepIndex, step] of bundleConfiguration.steps.entries()) {
@@ -255,50 +365,25 @@ export async function updateBundleProductMetafields(
           const handle = collection.handle;
           if (!handle) continue;
 
-          try {
-            const collResponse = await admin.graphql(`
-              query getCollectionProductIds($handle: String!) {
-                collection(handle: $handle) {
-                  products(first: 250) {
-                    edges {
-                      node { id }
-                    }
-                  }
-                }
-              }
-            `, { variables: { handle } });
-
-            const collData = await collResponse.json();
-            const collProductEdges = collData.data?.collection?.products?.edges || [];
-
-            for (const edge of collProductEdges) {
-              const productId = edge.node?.id;
-              if (productId && !isUUID(productId)) {
-                addResolvedProduct(stepKey, productId);
-                // Avoid duplicates already added from StepProduct
-                const alreadyAdded = productIdMap.some(item => item.productId === productId);
-                if (!alreadyAdded) {
-                  productIdMap.push({
-                    productId,
-                    stepMinQuantity: step.minQuantity,
-                    source: `collection:${handle}`
-                  });
-                }
-              }
+          const productIds = collectionProductIds.get(handle) ?? [];
+          for (const productId of productIds) {
+            addResolvedProduct(stepKey, productId);
+            // Avoid duplicates already added from StepProduct
+            const alreadyAdded = productIdMap.some(item => item.productId === productId);
+            if (!alreadyAdded) {
+              productIdMap.push({
+                productId,
+                stepMinQuantity: step.minQuantity,
+                source: `collection:${handle}`
+              });
             }
-
-            AppLogger.debug("[METAFIELD] Fetched products from collection", {
-              component: "bundle-product.server",
-              handle,
-              count: collProductEdges.length,
-            });
-          } catch (collError: any) {
-            AppLogger.warn("Could not fetch products from collection", {
-              component: "metafield-sync",
-              operation: "updateBundleProductMetafields",
-              handle,
-            });
           }
+
+          AppLogger.debug("[METAFIELD] Fetched products from collection", {
+            component: "bundle-product.server",
+            handle,
+            count: productIds.length,
+          });
         }
       }
 
@@ -324,34 +409,15 @@ export async function updateBundleProductMetafields(
         for (const collection of catCollections) {
           const handle = collection.handle;
           if (!handle) continue;
-          try {
-            const collResponse = await admin.graphql(`
-              query getCollectionProductIds($handle: String!) {
-                collection(handle: $handle) {
-                  products(first: 250) {
-                    edges { node { id } }
-                  }
-                }
-              }
-            `, { variables: { handle } });
-            const collData = await collResponse.json();
-            const edges = collData.data?.collection?.products?.edges || [];
-            for (const edge of edges) {
-              const productId = edge.node?.id;
-              if (productId && !isUUID(productId) && !productIdMap.some(item => item.productId === productId)) {
-                addResolvedProduct(stepKey, productId, categoryKey);
-                productIdMap.push({
-                  productId,
-                  stepMinQuantity: step.minQuantity,
-                  source: `StepCategory:${cat.name}:collection:${handle}`,
-                });
-              }
+          for (const productId of collectionProductIds.get(handle) ?? []) {
+            if (!productIdMap.some(item => item.productId === productId)) {
+              addResolvedProduct(stepKey, productId, categoryKey);
+              productIdMap.push({
+                productId,
+                stepMinQuantity: step.minQuantity,
+                source: `StepCategory:${cat.name}:collection:${handle}`,
+              });
             }
-          } catch {
-            AppLogger.warn("Could not fetch products from StepCategory collection", {
-              component: "bundle-product.server",
-              handle,
-            });
           }
         }
       }
