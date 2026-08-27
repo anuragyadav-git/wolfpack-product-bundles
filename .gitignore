@@ -37,8 +37,10 @@ light-quest-455608-i3-fb32f16e0e1a.json
 .venv-graphify/
 .graphify-venv/
 graphify-out/graph.html
+graphify-out/GRAPH_TREE.html
 graphify-out/.graphify_python
 graphify-out/.graphify_*.json
+graphify-out/.graphify_*.json.sig
 graphify-out/.graphify_*.txt
 graphify-out/.graphify_root
 graphify-out/.pending_changes

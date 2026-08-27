@@ -5,7 +5,7 @@ title: Admin Performance
 type: operations
 status: authoritative
 summary: Embedded Admin Web Vitals instrumentation, route-level LCP findings, and critical-path constraints.
-last_audited: 2026-08-21
+last_audited: 2026-08-27
 owners:
   - engineering
 domains:
@@ -15,17 +15,23 @@ systems:
   - app-bridge
   - remix
 source_paths:
-  - app/components/AdminRouteLoadingBar.tsx
-  - app/lib/admin-web-vitals-diagnostics.client.ts
+  - app/components/AdminSectionLoadingState.tsx
+  - app/routes/app/app.tsx
   - app/routes/app/app.settings.tsx
   - app/routes/app/app.settings/SettingsLandingShell.module.css
   - app/routes/app/app.settings/SettingsRoute.tsx
   - app/routes/app/app.settings/DesignSettingsView.tsx
   - app/routes/app/app.settings/DesignLivePreview.tsx
   - app/routes/app/app.dashboard/route.tsx
-  - app/routes/app/app.dashboard/dashboard-route-readiness.tsx
   - app/routes/app/app.dashboard/DashboardPage.tsx
+  - app/routes/app/app.dashboard/DashboardDeferredProxyHealthBanner.tsx
+  - app/routes/app/app.dashboard/dashboard-app-embed-presentation.ts
   - app/routes/app/app.dashboard/AppEmbedEnableModal.tsx
+  - app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/ConfigureBundleFlow.tsx
+  - app/routes/app/_shared/bundle-configure/deferred-configure-sections.ts
+  - app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/ConfigureBundleFlow.tsx
+  - app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/PpbConfigureOverlays.tsx
+  - app/lib/bundle-configure-loader.server.ts
   - app/routes/app/app._index.tsx
   - app/routes/app/app.attribution/AttributionRouteShell.tsx
   - app/routes/app/app.attribution/AttributionDashboard.tsx
@@ -50,39 +56,7 @@ Shopify App Bridge is the source of embedded Admin Web Vitals used for Built for
 
 The App Bridge script should be the first script in `<head>` and should not be pinned to a versioned URL.
 
-The Admin shell registers `shopify.webVitals.onReport(...)` through `app/lib/admin-web-vitals-diagnostics.client.ts`. Shopify's callback reports metric data such as LCP value and ID; it does not include the DOM node. For LCP element attribution, the client pairs Shopify's LCP report with the browser `largest-contentful-paint` `PerformanceObserver` candidate.
-
-Debug usage:
-
-```js
-localStorage.setItem("wpb:web-vitals-debug", "1");
-location.reload();
-```
-
-For embedded Admin URLs where the parent page cannot write iframe storage, add
-`wpbWebVitalsDebug=1` to the Admin app URL. Shopify forwards it into the app
-iframe and the app logs `Admin Browser LCP Candidate` from the iframe's own
-`largest-contentful-paint` observer.
-
-When enabled, LCP reports are logged to the browser console as `Admin Web Vitals` with the metric value and latest candidate element selector. This is diagnostic only and does not persist data.
-
-The debug hook also keeps a local, iframe-only p75 sample set in
-`localStorage["wpb:web-vitals-debug:lcp-samples"]`. Each sample stores:
-
-- `route` and generated `routeLoadId` (single page-load correlation)
-- `id`, `value`, `timestamp`
-- `country` (from Shopify Web Vitals payload)
-- `candidate`, `candidateType`, `candidateResource`, `blockingTime`
-
-This does not send data to the app server and must not replace Shopify-collected
-field data for BFS.
-
-Console helpers:
-
-```js
-window.__wpbAdminWebVitals.getLcpP75Summary()
-window.__wpbAdminWebVitals.clearLcpSamples()
-```
+Wolfpack does not ship an Admin Web Vitals collector or endpoint. Shopify Web Vitals remains the field-data source. For a major Admin UI change, temporarily recreate the documented Chrome-only LCP bridge in dev/SIT, measure the exact embedded route and candidate, and remove the bridge before commit. Never restore app-owned persistence or `/api/web-vitals`.
 
 Temporary cross-origin verification bridge:
 
@@ -100,22 +74,22 @@ Chrome session or dev tunnel run is not field p75 proof.
 
 ## Embedded Admin LCP Findings
 
-Measured in the Shopify Admin chrome on `wolfpack-store-test-1` / SIT using
+Measured in the Shopify Admin chrome on `agent-5sfidg3m` / SIT using
 `?wpbWebVitalsDebug=1`.
 
 | Route | Iframe LCP candidate / source-audited candidate | Fix status |
 |---|---|---|
-| `/app/dashboard` | Loading workspace message during readiness; historical content candidate: support card text | Keep the complete visible Dashboard behind one readiness boundary until App Embed status, banner data, the Dashboard module, and the shared black loading-bar interval are ready. During that interval render only the top-edge bar and centered `Loading your workspace` message. Reveal the header, App Embed banner, bundle panel, top cards, and resources card together. Do not restore banner skeletons or idle-delayed visible cards. Keep row action-menu content lazy until merchant intent because closed overlays are not Dashboard page content. Mount the app-embed tutorial media only after the merchant opens its instructional modal so the initial Dashboard route does not request either video source. |
+| `/app/dashboard` | Measured: support card description text | Render useful Dashboard content as soon as route data is available. Resolve proxy-health and App Embed status asynchronously in their owned warning surfaces; neither lookup may gate the whole workspace. Keep row action-menu content lazy until merchant intent because closed overlays are not Dashboard page content. Mount the app-embed tutorial media only after the merchant opens its instructional modal so the initial Dashboard route does not request either video source. |
 | `/app/bundles/create` | Measured: bundle type thumbnail rendered via `/ppb.avif` | Preloaded in route `links()` and HTTP `Link`; adjacent `/fpb.avif` also preloaded. The thumbnail is now a CSS background with stable dimensions, and local candidate paint was under target. |
-| `/app/integrations` | Measured: text subtitle (`p._subtitle...`) | No image preload fix; page LCP is text/bootstrap-bound |
+| `/app/integrations` | Measured: text content | Remove the artificial 800ms readiness interval; the static integration catalog paints immediately. |
 | `/app/events` | Source audit: no first-viewport owned image | No image preload fix |
 | `/app/billing` | Source audit: no first-viewport owned image | No image preload fix |
-| `/app/pricing` | Source audit: no first-viewport owned image | No image preload fix |
+| `/app/pricing` | Measured: pricing text | Render the title immediately and use a small Polaris loading state while deferred subscription data resolves. Do not render card-shaped skeleton geometry. |
 | `/app/bundles/cart-transform` | Source audit: no first-viewport owned image | No image preload fix |
-| `/app/attribution` | Loading bar during readiness; historical candidates: critical funnel heading, inactive tracking body copy, deferred funnel hero title | Keep the entire Analytics surface, including the title bar, funnel heading, and pixel-status banner, behind one readiness boundary. Reveal it only after data, lazy modules, and the black loading-bar fill are complete. |
-| `/app/settings` | Source audit: dynamic settings preview images are not route hero content | The complete Settings workspace, including Design, is lazy-loaded through one post-click boundary. Its representative preview uses local markup and CSS with no remote media, storefront iframe, widget runtime, or fake Images & GIFs loading state. Do not add speculative preloads; use repeated `?wpbWebVitalsDebug=1` samples for concrete settings-subview evidence. |
+| `/app/attribution` | Measured: critical funnel heading | Render the title and critical funnel heading before deferred data. Keep pixel status and the dashboard behind one inline Polaris loading boundary, with dashboard JavaScript and CSS resolving atomically. |
+| `/app/settings` | Measured: landing text | Paint the landing cards without awaiting deferred workspace data. The complete Settings workspace, including Design, remains lazy-loaded through one post-click boundary. Do not add speculative preloads. |
 | `/app/store-files` / `/app/upload-store-file` | Source audit: images are picker/file content, not initial route hero content | No route preload |
-| Configure routes | Source audit: dynamic product/template images depend on loaded bundle state and active section/modal | Do not globally preload; measure concrete FPB/PPB configure URLs and preload only confirmed above-fold candidates |
+| Configure routes | Measured: text paragraph in the initial configure canvas | Render the loaded configure canvas immediately, fetch product/currency/locales in one Admin GraphQL request, and split inactive sections and closed overlays from the initial production chunk. The App Embed lookup remains a live guard before Preview; it must not gate the editor. |
 
 Pages without first-viewport owned media should be treated as text/bootstrap-bound
 unless a future debug run logs an owned image candidate. For text LCP pages, do
@@ -124,13 +98,9 @@ first-render JavaScript instead.
 
 ## Settings Design Control Panel
 
-The Settings landing route keeps its small Polaris card shell behind the shared
-top-edge loading boundary until deferred Settings data and the minimum bar fill
-are complete. The bar uses a staged black fill over a subtle track, then keeps a
-moving highlight visible if route readiness takes longer than the initial fill.
-Reduced-motion users receive the complete static bar without animation. It keeps
-the workspace implementation behind a separate React
-lazy boundary. The 2026-07-23 local
+The Settings landing route paints its small Polaris card shell immediately;
+deferred workspace data is needed only after a merchant selects a workspace.
+The workspace implementation remains behind a separate React lazy boundary. The 2026-07-23 local
 production build split the initial Settings route (`app.settings`, 2.99 kB /
 1.27 kB gzip) from the complete `SettingsRoute` workspace (81.39 kB / 18.60 kB
 gzip, plus 22.22 kB / 4.30 kB gzip CSS). The template-specific scene registry,
@@ -153,16 +123,15 @@ hover, keyboard-focus, and reduced-motion states are owned by the landing shell.
 Their desktop content area uses the same two-of-twelve-column gutter on each
 side as the template selection surface, and the card group is centered in the
 available viewport. The grid uses three columns at wide widths and one column
-when the embedded app surface is narrow. The same shared
-top-edge loading bar is used for initial Settings route readiness and after a
-card is selected while the workspace chunk becomes ready. The black bar fills
-for a minimum of 800 milliseconds before content can replace it. It does not
-use a spinner or card skeleton.
+when the embedded app surface is narrow. After a Design or Language card is
+selected, the destination title remains visible and a small Polaris spinner
+occupies only the unresolved workspace region. There is no card skeleton or
+artificial minimum loading interval.
 
-Controls uses a dedicated route. Selecting its Settings card immediately
-replaces the landing cards with the same top-edge loading bar while Remix
-navigates, then the Controls route retains that loading treatment until its
-deferred Settings data and minimum fill interval are ready.
+Controls uses a dedicated route. Selecting its Settings card leaves the landing
+cards visible while Shopify's native Admin header indicator reports the Remix
+navigation. The Controls route renders its title and a small Polaris spinner
+until deferred Settings data is ready.
 
 The Settings workspace owns the Design inspector/preview layout and the
 eight-template representative preview. Wide containers use three columns for
@@ -215,20 +184,22 @@ The previous app-owned Web Vitals pipeline was retired on 2026-06-12:
 
 Do not recreate custom `/api/web-vitals` telemetry for BFS eligibility. Use Shopify-collected metrics for BFS and Chrome Performance / Network `Server-Timing` for local diagnosis.
 
-`/api/web-vitals` remains only as a no-op tombstone route so stale browser sessions can POST old beacons without hitting authenticated code or emitting warning logs. It must not persist data, authenticate Admin sessions, or import app-owned Web Vitals collection code.
+The retired `/api/web-vitals` tombstone route has been removed. Stale clients
+receive the normal missing-route response; no app-owned collector, persistence,
+or compatibility endpoint remains.
 
 ## Critical Path Rule
 
-The `/app` layout loader must keep Shopify authentication on the critical path, but non-critical maintenance should not block the initial shell. Offline-session migration runs in the background and logs failures instead of delaying first render.
+The `/app` layout loader keeps Shopify authentication on the critical path.
+Expiring offline-token acquisition, refresh, and session serialization belong
+to Shopify's Remix authentication and Prisma session-storage integration; the
+loader does not run app-owned migration or refresh maintenance.
 
-The `/app/dashboard` loader must also keep non-critical Admin checks off the
-response path. App-embed refresh/status checks and web-pixel reconciliation are
-deferred or scheduled as post-response background tasks; the first dashboard
-payload should come from the shop and bundle summary. The client readiness
-boundary keeps the loading workspace surface visible until deferred App Embed
-and banner data resolve; this preserves a prompt streamed response without
-revealing partial Dashboard content. Web-pixel reconciliation remains a
-post-response background task.
+The `/app/dashboard` loader keeps non-critical Admin checks off the response
+path. App-embed status is read client-side from `shopify.app.extensions()`;
+web-pixel reconciliation remains a post-response background task. The initial
+payload contains the shop, bundle summary, and API key required for the native
+App Bridge check.
 
 The shared `/app` shell must not import or await providers that do not have
 runtime consumers on every Admin page. On 2026-07-10, the global Mantle provider
@@ -239,12 +210,21 @@ analytics provider route-scoped until a shared runtime consumer exists.
 
 ## Admin Mobile and First-Load Contract
 
-The authenticated `/app` index must render the shared top-edge loading bar and
-centered `Loading your workspace` message while the client resolves auth
+The authenticated `/app` index renders a centered Polaris spinner with the
+localized `Loading your workspace` message while the client resolves auth
 parameters and the Dashboard destination. It must not return a blank iframe or
 render a route-shaped skeleton during that interval. The `/app/dashboard`
-readiness boundary then retains the same loading treatment until all visible
-Dashboard content can be revealed together.
+route then paints useful content without waiting for proxy-health or App Embed
+status; those checks update only their owned warning surfaces. The App Embed
+surface shows a non-dismissible informational spinner while its App Bridge
+check is unresolved, even when a resolved banner was dismissed earlier in the
+session.
+
+The authenticated `/app` shell calls Shopify's App Bridge `shopify.loading`
+API for every child-route transition to a different pathname and stops it when
+the destination commits or the effect cleans up. The existing route stays
+rendered during that transition. Same-screen revalidation and form submission
+do not start the Admin header indicator.
 
 Redux Toolkit, React Redux, Redux, Reselect, and Immer are isolated in
 `vendor-state`. Chart-only dependencies remain in `vendor-charts`. Production
@@ -261,14 +241,17 @@ include `dashboard-bundles`, `settings-landing`, `design-settings`,
 padding, and keep horizontal scrolling inside labelled data regions rather than
 on the document.
 
-Analytics keeps shell styles with `AttributionRouteShell` and dashboard styles
-with the lazy `AttributionDashboard` chunk. One outer readiness boundary owns
-the title bar, funnel heading, pixel-status banner, dashboard data, and lazy
-chart suspension. Its only fallback is the shared black top-edge loading bar,
-which fills for at least 800 milliseconds and remains visibly active while
-readiness is pending. Analytics content therefore appears as one
-ready surface without skeleton cards, an early banner, or partially assembled
-chart panels.
+Analytics imports the dashboard component and its CSS from the eager
+`AttributionRouteShell`. This is an intentional ownership boundary: keeping the
+CSS module behind a lazy React component produced a visible unstyled interval
+in the Vite-served embedded app, including after hot reloads.
+The pixel status promise resolves independently into a native top banner, while
+the title and critical funnel heading remain immediately available and the
+dashboard data/chart boundary uses the shared CSS-free Polaris loading state.
+Analytics has one page-level banner owner: UTM pixel status. Zero-value metric
+surfaces communicate the no-data state without a second banner, and backfill
+action results use Shopify toast feedback. Informational banners inside the
+pixel, backfill, and custom-UTM modals are local to those overlay contexts.
 
 ## 2026-07-30 Shared Shell and Onboarding Completion
 
@@ -294,8 +277,8 @@ always continue to the dashboard, so the shared layout no longer queries
 after required creation succeeds and uses it only to open the post-create
 configure tour. Settings returns its established `settingsPage` and
 `previewBundles` loader fields as deferred promises; the landing cards paint
-without awaiting them, and the selected workspace owns the route-shaped
-loading and error states.
+without awaiting them, and the selected workspace owns inline Polaris loading
+and its existing error state.
 
 First-create eligibility is claimed with one conditional `updateMany` only
 after the bundle and required Shopify parent product exist. A later widget
@@ -340,3 +323,83 @@ Spot checks after the candidate fixes:
 
 These are dev tunnel spot checks, not Shopify field p75. Final BFS proof still
 comes from Shopify-collected field metrics after deployment.
+
+## 2026-08-23 Settings Design workspace follow-up
+
+Settings -> Design remains behind the existing lazy workspace boundary. Its
+preview is deterministic local React/CSS and does not import a storefront
+runtime, iframe, or remote bundle data. The workspace now presents the template,
+component, and viewport controls with the preview canvas and renders one
+contextual inspector; phone containers switch between Preview and Customize
+without creating a second preview or persisted pane state.
+
+The Settings loader starts the Storefront Shop Brand query alongside deferred
+workspace reads, so the Settings landing response is not held until Brand data
+resolves. A fresh Design-entry LCP measurement still requires the temporary
+`?wpbWebVitalsDebug=1` bridge in user-provided SIT. Do not commit that bridge;
+record the measured candidate and value here after direct Chrome verification,
+then remove the temporary runtime code before shipping.
+
+## 2026-08-25 Agent-Store LCP Matrix
+
+Direct Chrome DevTools measured the signed-in `agent-5sfidg3m` SIT app iframe.
+Each row uses ten cache-bypassed iframe document loads at 1440 x 900 desktop and
+390 x 844 mobile, except PPB first-create mobile, which has nine valid entries.
+The temporary cross-origin observer was removed after the pass. Values are local
+development-tunnel p75, not Shopify field data.
+
+| Admin surface | Observed iframe candidate | Desktop p75 | Mobile p75 | Baseline result |
+|---|---|---:|---:|---|
+| App entry redirect (`/app`) | Dashboard text after redirect | 3328ms | 3008ms | Bootstrap flow fails; not a distinct page |
+| Dashboard | Support-card description / heading | 2268ms | 2004ms | Pass |
+| Create Bundle | PPB thumbnail | 1544ms | 1136ms | Pass |
+| Settings landing | Landing text | 3700ms | 2448ms | Desktop fail |
+| Additional Configurations | Description paragraph | 2072ms | 1860ms | Pass |
+| Integrations | Catalog text | 2876ms | 2412ms | Desktop fail |
+| Analytics | Critical funnel heading | 2412ms | 2472ms | Pass, narrow |
+| Pricing | Pricing text | 1588ms | 1352ms | Pass |
+| Updates and FAQs | Page text | 1304ms | 1064ms | Pass |
+| Billing | Plan heading | 2140ms | 2068ms | Pass |
+| FPB configure, edit | Step/category paragraph | 3332ms | 4324ms | Fail |
+| FPB configure, first-create | Step/category paragraph | 3140ms | 3772ms | Fail |
+| PPB configure, edit | Step Setup paragraph | 3012ms | 2592ms | Fail |
+| PPB configure, first-create | Step Setup paragraph | 2800ms | 2848ms | Fail |
+
+Candidate-owned fixes from this pass:
+
+- Dashboard, FPB, and PPB no longer gate useful content on App Embed or proxy
+  warning lookups.
+- Settings landing no longer waits for deferred workspace data or an artificial
+  loading-bar interval.
+- Integrations no longer waits for an artificial 800ms readiness interval.
+- FPB and PPB use one route-blocking Admin GraphQL request for product, currency,
+  and published locales instead of three concurrent requests.
+- Configure Step Setup stays in the initial module while inactive sections and
+  closed overlays are production code-split and loaded after document load.
+
+Ten-load desktop post-fix p75 was 2448ms for Settings and 1304ms for
+Integrations. FPB edit improved to 2876ms. PPB edit produced nine valid samples
+with a provisional 2900ms p75. Navigation timing showed two dev-only modes:
+2.2-2.9s route responses followed by paint within about 20-40ms, or fast
+0.5-0.6s responses followed by the unbundled Vite module graph. The production
+build emitted the two configure route chunks at 30.18 and 31.60 kB gzip and
+separate chunks for every inactive section and overlay group. Therefore the
+strict configure target is not proven by the dev tunnel; verify `<2500ms` with
+Shopify route/device field p75 after manual SIT deployment. Do not add more
+local-only loading placeholders or speculative preloads to force the lab metric.
+
+## 2026-08-27 Settings Design context-frame follow-up
+
+Direct Chrome DevTools repeated ten cache-bypassed Settings loads at 1440 x 900
+on `agent-5sfidg3m` while the temporary iframe-to-parent LCP bridge was active.
+Nine app-content candidates produced a 2416ms p75. One late 13832ms candidate
+was a 1050px data-URI SVG inside a `span`, distinct from the 10808px Settings
+content candidate; retaining it makes the raw ten-sample observer p75 2880ms.
+This is local dev-tunnel evidence, not an App Bridge or Shopify field p75 pass.
+
+The rapid mobile cache-bypass loop stopped mounting the Shopify app iframe and
+left it at `about:blank`, so no mobile LCP sample set was accepted. Mobile
+layout verification had already passed in the mounted iframe before the loop.
+The temporary observer and parent bridge were removed after measurement. The
+Design context-frame work remains behind the existing post-click lazy boundary
+and does not add work to the Settings landing render path.

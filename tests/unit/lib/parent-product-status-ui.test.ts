@@ -11,14 +11,25 @@ describe("getParentProductStatusUi", () => {
       label,
       tone,
       showUnlistedBanner,
+      isLoading: false,
     });
   });
 
-  it("does not show the unlisted banner for missing product status", () => {
+  it("treats missing product status as unresolved instead of showing a fallback", () => {
     expect(getParentProductStatusUi(null)).toEqual({
-      label: "Unknown",
-      tone: "warning",
+      label: null,
+      tone: null,
       showUnlistedBanner: false,
+      isLoading: true,
+    });
+  });
+
+  it("lets active revalidation override a stale unlisted status", () => {
+    expect(getParentProductStatusUi("UNLISTED", true)).toEqual({
+      label: null,
+      tone: null,
+      showUnlistedBanner: false,
+      isLoading: true,
     });
   });
 });

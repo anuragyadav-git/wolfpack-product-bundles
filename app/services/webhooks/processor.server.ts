@@ -37,9 +37,6 @@ import {
   handleScopesUpdate,
 } from "./handlers/lifecycle.server";
 import {
-  handleInventoryUpdate,
-} from "./handlers/inventory.server";
-import {
   handleOrderCreate,
 } from "./handlers/orders.server";
 
@@ -209,11 +206,6 @@ export class WebhookProcessor {
         case "app/scopes_update":
         case "APP_SCOPES_UPDATE":
           result = await handleScopesUpdate(shopDomain, payload);
-          break;
-
-        case "inventory_levels/update":
-        case "INVENTORY_LEVELS_UPDATE":
-          result = await handleInventoryUpdate(shopDomain, payload);
           break;
 
         case "orders/create":

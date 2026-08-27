@@ -62,8 +62,7 @@ model Session {
   expires               DateTime?
   accessToken           String
   refreshToken          String?
-  refreshTokenExpiresAt DateTime?
-  storefrontAccessToken String? // Delegated Storefront API access token
+  refreshTokenExpires   DateTime?
   userId                BigInt?
   firstName             String?
   lastName              String?
@@ -77,7 +76,6 @@ model Session {
 
   @@index([shop])
   @@index([shop, expires])
-  @@index([shop, storefrontAccessToken])
 }
 
 model Bundle {
@@ -446,8 +444,8 @@ model DesignSettings {
   // Advanced Settings - Custom CSS
   customCss String?
 
-  // Cached Shopify theme colors — used as fallback global color anchors when no Settings design values set.
-  // Populated on install and on Sync Bundle. Null = fall through to hardcoded defaults.
+  // Cached Storefront API Shop Brand primary/secondary background/foreground pairs.
+  // Refreshed on Settings load, install/auth, and Sync Bundle. Null = use template defaults.
   themeColors Json?
 
   createdAt DateTime @default(now())

@@ -218,6 +218,21 @@
         "tierHit": "Tier hit",
         "complete": "All tiers complete"
       },
+      "storefront": {
+        "open": "Preview bundle",
+        "heading": "Bundle preview",
+        "close": "Close",
+        "empty": "No storefront-ready bundles are available for preview.",
+        "bundleName": "Bundle name",
+        "bundleType": "Type",
+        "actions": "Actions",
+        "view": "View",
+        "saveBeforePreview": "Save your Design changes before opening a storefront preview.",
+        "errors": {
+          "popupBlocked": "Allow pop-ups to open the storefront preview.",
+          "notReady": "The storefront preview is not ready. Try again."
+        }
+      },
       "surface": {
         "bundleName": "Build your perfect bundle",
         "description": "Choose products to build your bundle.",
@@ -246,7 +261,7 @@
         "upsellBody": "Add a popular extra.",
         "upsellEyebrow": "Recommended for your bundle",
         "summary": "Bundle summary",
-        "selectedCount": "2 items",
+        "selectedCount": "{{count}} items",
         "discount": "You are $8 away from 15% off",
         "totalLabel": "Bundle total",
         "totalPrice": "$42.00",
@@ -255,6 +270,8 @@
         "next": "Continue",
         "emptySlot": "Choose a product",
         "chooseProduct": "Choose a product",
+        "removeProduct": "Remove product",
+        "close": "Close",
         "slotNumber": "Product {{number}}",
         "addBundle": "Add bundle to cart",
         "loadingBody": "Preparing your bundle…",
@@ -313,7 +330,7 @@
   },
   "common": {
     "actions": {
-      "close": "Close", "dismiss": "Dismiss", "manage": "Manage", "enable": "Enable", "enableHere": "Enable Here", "learnMore": "Learn More",
+      "close": "Close", "cancel": "Cancel", "dismiss": "Dismiss", "manage": "Manage", "enable": "Enable", "enableHere": "Enable Here", "learnMore": "Learn More",
       "maybeLater": "Maybe Later", "setUpVisibility": "Set Up Visibility", "reinstallApp": "Reinstall app",
       "upgradeNow": "Upgrade Now", "viewPlans": "View Plans", "discardChanges": "Discard Changes",
       "continueEditing": "Continue Editing"
@@ -334,6 +351,10 @@
     "unlistedBundle": {
       "title": "Your bundle is Unlisted",
       "body": "For discoverability, change the bundle product's status to Active in Shopify Products."
+    },
+    "parentProductStatus": {
+      "loadingTitle": "Checking parent product status",
+      "loadingBody": "Getting the latest status from Shopify Products."
     },
     "proxyHealth": {
       "title": "App proxy not connected",

@@ -26,7 +26,7 @@ keywords:
 # Direction Comparison
 
 Artifact job ID: ppb-bundle-picker-modal-redesign-20260821
-Artifact revision: 2
+Artifact revision: 8
 Artifact status: approved
 
 ## Shared functional requirements
@@ -61,3 +61,10 @@ Record each additional direction with the same fields.
 - Approved by and at: Aditya, 2026-08-21 through the supplied revision-2 implementation plan.
 - Evidence IDs: WPB-PICKER-DESKTOP-001, WPB-PICKER-MOBILE-001, EB-PICKER-DOC-001 through EB-PICKER-DOC-005, and user revision-2 plan.
 - Rejections and reasons: Revision-1 nested mobile variant drawer and unconditional `Added xN` card treatment are superseded because they conflict with the revised live behavior.
+
+## Revision 7 controlled direction
+
+- Selected direction: Exact live-EB matching for the Vertical filled-row anatomy only.
+- Measured target: responsive full width; content-derived 64px normal height with 60px minimum and no maximum; visible normal wrapping/overflow; intrinsic flex sizing; 50px media; 5px padding and gap; 2px solid black border; 10px radius; bold 16px identity; no filled-row price; 20px inline trailing circular-cross Remove visual.
+- Invariants: Horizontal filled tiles and every selection, replacement, removal, focus, persistence, validation, pricing, and cart behavior remain unchanged.
+- Approval: Aditya explicitly rejected revision 6 and required exact EB parity on 2026-08-21.

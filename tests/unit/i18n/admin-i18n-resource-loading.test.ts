@@ -32,4 +32,13 @@ describe("Admin i18n resource loading", () => {
     expect(i18n.hasResourceBundle("fr", "translation")).toBe(true);
     expect(i18n.t("nav.dashboard", { lng: "fr" })).toBe("Tableau de bord");
   });
+
+  it("provides the shared translation modal Cancel action in every Admin locale", async () => {
+    for (const locale of SUPPORTED_LOCALES) {
+      await loadAdminLocaleResources(locale);
+      expect(i18n.t("common.actions.cancel", { lng: locale })).not.toBe(
+        "common.actions.cancel",
+      );
+    }
+  });
 });

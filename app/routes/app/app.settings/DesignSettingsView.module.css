@@ -16,11 +16,8 @@
 
 .layout {
   display: grid;
-  grid-template-columns:
-    minmax(210px, 0.68fr)
-    minmax(720px, 2.2fr)
-    minmax(300px, 0.92fr);
-  grid-template-areas: "navigation preview fields";
+  grid-template-columns: minmax(720px, 1fr) minmax(300px, 380px);
+  grid-template-areas: "preview fields";
   gap: clamp(12px, 1.5vw, 22px);
   align-items: start;
   margin-top: 18px;
@@ -38,7 +35,8 @@
 }
 
 .customizePane {
-  display: contents;
+  min-width: 0;
+  grid-area: fields;
 }
 
 .inspectorNavigation,
@@ -223,7 +221,7 @@
   box-sizing: border-box;
   block-size: clamp(640px, calc(100dvh - 160px), 884px);
   min-height: 0;
-  place-items: start center;
+  place-items: center;
   overflow: hidden;
   background: #f1f2f3;
   padding: clamp(10px, 1.6vw, 20px);
@@ -245,6 +243,232 @@
   font-weight: var(--preview-body-font-weight, 400);
   transform-origin: top left;
   transition: transform 160ms ease;
+}
+
+.previewContextFrame {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  isolation: isolate;
+  background: var(--preview-product-bg, #ffffff);
+}
+
+.previewContextBackdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: grid;
+  pointer-events: none;
+}
+
+.previewContextBackdrop > span {
+  display: block;
+  min-width: 0;
+}
+
+.previewContextHeader {
+  border-bottom: 1px solid color-mix(in srgb, var(--preview-primary-text, #202223) 14%, transparent);
+  background:
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--preview-primary-text, #202223) 26%, transparent) 0 9%,
+      transparent 9% 14%,
+      color-mix(in srgb, var(--preview-primary-text, #202223) 12%, transparent) 14% 20%,
+      transparent 20% 23%,
+      color-mix(in srgb, var(--preview-primary-text, #202223) 12%, transparent) 23% 30%,
+      transparent 30% 100%
+    ) center / calc(100% - 40px) 12px no-repeat,
+    color-mix(in srgb, var(--preview-product-bg, #ffffff) 94%, #dfe3e8);
+}
+
+.previewContextMedia,
+.previewContextWorkspace,
+.previewContextRail,
+.previewContextTray {
+  border: 1px solid color-mix(in srgb, var(--preview-primary-text, #202223) 10%, transparent);
+  background-color: color-mix(in srgb, var(--preview-product-bg, #ffffff) 96%, var(--preview-accent, #eeeeee));
+}
+
+.previewContextMedia {
+  background-image:
+    radial-gradient(circle at 50% 43%, color-mix(in srgb, var(--preview-accent, #eeeeee) 76%, #ffffff) 0 19%, transparent 19.5%),
+    linear-gradient(145deg, transparent 43%, color-mix(in srgb, var(--preview-primary-text, #202223) 8%, transparent) 43.5% 58%, transparent 58.5%);
+}
+
+.previewContextWorkspace {
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--preview-primary-text, #202223) 7%, transparent) 0 1px,
+      transparent 1px 31%
+    ),
+    linear-gradient(
+      color-mix(in srgb, var(--preview-primary-text, #202223) 8%, transparent) 0 12px,
+      transparent 12px 28px,
+      color-mix(in srgb, var(--preview-primary-text, #202223) 5%, transparent) 28px 36px,
+      transparent 36px
+    );
+  background-position: center;
+  background-size: calc(100% - 48px) calc(100% - 48px);
+  background-repeat: no-repeat;
+}
+
+.previewContextRail,
+.previewContextTray {
+  background-image: repeating-linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--preview-primary-text, #202223) 9%, transparent) 0 10px,
+    transparent 10px 30px
+  );
+  background-position: center;
+  background-size: calc(100% - 36px) calc(100% - 42px);
+  background-repeat: no-repeat;
+}
+
+.previewContextFrame[data-preview-context="full-page"] .previewContextBackdrop {
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 31%);
+  grid-template-rows: clamp(64px, 7vw, 88px) minmax(0, 1fr);
+  gap: clamp(18px, 2.4vw, 34px);
+  padding: clamp(22px, 3vw, 42px);
+  background: color-mix(in srgb, var(--preview-accent, #eeeeee) 42%, #ffffff);
+}
+
+.previewContextFrame[data-preview-context="full-page"] .previewContextHeader,
+.previewContextFrame[data-preview-context="product-page-inpage"] .previewContextHeader,
+.previewContextFrame[data-preview-context="product-page-modal"] .previewContextHeader {
+  grid-column: 1 / -1;
+  border-radius: var(--preview-card-radius, 10px);
+}
+
+.previewContextFrame[data-preview-context="full-page"] .previewContextWorkspace,
+.previewContextFrame[data-preview-context="full-page"] .previewContextRail,
+.previewContextFrame[data-preview-context="product-page-inpage"] .previewContextMedia,
+.previewContextFrame[data-preview-context="product-page-inpage"] .previewContextWorkspace,
+.previewContextFrame[data-preview-context="product-page-modal"] .previewContextMedia,
+.previewContextFrame[data-preview-context="product-page-modal"] .previewContextWorkspace {
+  border-radius: var(--preview-card-radius, 10px);
+}
+
+.previewContextFrame[data-preview-context="full-page"] .previewContextMedia,
+.previewContextFrame[data-preview-context="full-page"] .previewContextTray,
+.previewContextFrame[data-preview-context="product-page-inpage"] .previewContextRail,
+.previewContextFrame[data-preview-context="product-page-inpage"] .previewContextTray,
+.previewContextFrame[data-preview-context="product-page-modal"] .previewContextRail,
+.previewContextFrame[data-preview-context="product-page-modal"] .previewContextTray {
+  display: none;
+}
+
+.previewContextFrame[data-preview-context="product-page-inpage"] .previewContextBackdrop,
+.previewContextFrame[data-preview-context="product-page-modal"] .previewContextBackdrop {
+  grid-template-columns: minmax(320px, 46%) minmax(0, 1fr);
+  grid-template-rows: clamp(58px, 6vw, 78px) minmax(0, 1fr);
+  gap: clamp(20px, 3vw, 44px);
+  padding: clamp(24px, 4vw, 54px);
+  background: #ffffff;
+}
+
+.previewContextFrame[data-preview-context="product-page-modal"] .previewContextBackdrop {
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 42%);
+  background: color-mix(in srgb, #ffffff 88%, var(--preview-accent, #eeeeee));
+}
+
+.previewContextSelected {
+  position: absolute;
+  z-index: 1;
+  box-sizing: border-box;
+  min-width: 0;
+  overflow: visible;
+  border-radius: var(--preview-card-radius, 10px);
+  background: transparent;
+}
+
+.previewContextFrame[data-preview-context="full-page"] .previewContextSelected {
+  inset: clamp(132px, 15%, 172px) clamp(330px, 33%, 420px) clamp(52px, 6%, 76px) clamp(52px, 5%, 72px);
+}
+
+.previewContextFrame[data-preview-context="full-page"][data-preview-context-surface="cart-summary"] .previewContextSelected {
+  inset: clamp(132px, 15%, 172px) clamp(42px, 4%, 64px) clamp(52px, 6%, 76px) auto;
+  width: min(360px, 31%);
+}
+
+.previewContextFrame[data-preview-context="product-page-inpage"] .previewContextSelected {
+  inset: clamp(142px, 15%, 184px) clamp(52px, 5%, 72px) clamp(72px, 8%, 96px) auto;
+  width: min(560px, 45%);
+}
+
+.previewContextFrame[data-preview-context="product-page-modal"] .previewContextSelected {
+  inset: clamp(116px, 12%, 148px) clamp(68px, 6%, 88px) clamp(56px, 6%, 76px) auto;
+  width: min(620px, 48%);
+  overflow: hidden;
+  background: var(--preview-product-bg, #ffffff);
+  box-shadow: 0 18px 48px rgba(31, 33, 36, 0.18);
+}
+
+.previewContextFrame[data-preview-context-surface="loading"] .previewContextSelected,
+.previewContextFrame[data-preview-context-surface="validation"] .previewContextSelected,
+.previewContextFrame[data-preview-context-surface="upsell"] .previewContextSelected {
+  inset: 50% auto auto 50%;
+  width: min(540px, 76%);
+  overflow: visible;
+  transform: translate(-50%, -50%);
+}
+
+.previewContextFrame[data-preview-context-surface="loading"] .previewContextSelected,
+.previewContextFrame[data-preview-context-surface="validation"] .previewContextSelected {
+  filter: drop-shadow(0 12px 30px rgba(31, 33, 36, 0.16));
+}
+
+.previewContextFrame[data-preview-context-surface="product-picker"] .previewContextSelected {
+  inset: auto clamp(42px, 4vw, 72px) clamp(34px, 4vw, 58px);
+  width: auto;
+  max-height: 78%;
+  overflow: hidden;
+}
+
+.previewContextFrame[data-preview-context-viewport="mobile"] .previewContextBackdrop {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: 58px minmax(0, 1fr) 92px;
+  gap: 14px;
+  padding: 16px;
+}
+
+.previewContextFrame[data-preview-context-viewport="mobile"] .previewContextHeader {
+  grid-column: 1;
+}
+
+.previewContextFrame[data-preview-context-viewport="mobile"] .previewContextMedia,
+.previewContextFrame[data-preview-context-viewport="mobile"] .previewContextRail {
+  display: none;
+}
+
+.previewContextFrame[data-preview-context-viewport="mobile"] .previewContextWorkspace,
+.previewContextFrame[data-preview-context-viewport="mobile"] .previewContextTray {
+  display: block;
+}
+
+.previewContextFrame[data-preview-context-viewport="mobile"] .previewContextTray {
+  border-radius: var(--preview-card-radius, 10px);
+}
+
+.previewContextFrame[data-preview-context-viewport="mobile"] .previewContextSelected {
+  inset: 98px 24px 122px;
+  width: auto;
+}
+
+.previewContextFrame[data-preview-context-viewport="mobile"][data-preview-context-surface="cart-summary"] .previewContextSelected,
+.previewContextFrame[data-preview-context-viewport="mobile"][data-preview-context-surface="product-picker"] .previewContextSelected {
+  inset: auto 16px 18px;
+  width: auto;
+  max-height: 74%;
+}
+
+.previewContextFrame[data-preview-context-viewport="mobile"][data-preview-context-surface="loading"] .previewContextSelected,
+.previewContextFrame[data-preview-context-viewport="mobile"][data-preview-context-surface="validation"] .previewContextSelected,
+.previewContextFrame[data-preview-context-viewport="mobile"][data-preview-context-surface="upsell"] .previewContextSelected {
+  inset: 50% 20px auto;
+  width: auto;
+  transform: translateY(-50%);
 }
 
 .previewComponentSurface {
@@ -884,6 +1108,20 @@
   gap: 2px;
 }
 
+.previewEmptySlotIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  font-weight: 700;
+  font-size: 16px;
+  background-image: var(--preview-slot-icon-url, none);
+  background-size: var(--preview-slot-icon-fit, contain);
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
 .previewSlot[data-slot-orientation="vertical"] {
   grid-template-columns: auto minmax(0, 1fr) auto;
   min-height: 58px;
@@ -1085,10 +1323,9 @@
 
 @container design-settings (max-width: 1340px) {
   .layout {
-    grid-template-columns: minmax(210px, 0.72fr) minmax(0, 1.28fr);
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
     grid-template-areas:
-      "preview preview"
-      "navigation fields";
+      "preview fields";
   }
 
   .previewPanel {

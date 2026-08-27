@@ -4,8 +4,8 @@ id: ppb-selected-slot-redesign-visual-audit
 title: PPB Selected Slot Visual Audit
 type: design-job-artifact
 status: complete
-summary: Records measured current-state gaps and EB-inspired structural targets for PPB selected slots.
-last_audited: 2026-08-21
+summary: Records live measured EB targets for Revision 4 of PPB Vertical Slots empty and filled rows.
+last_audited: 2026-08-24
 owners:
   - wolfpack
 domains:
@@ -28,47 +28,45 @@ keywords:
 # Visual Audit
 
 Artifact job ID: ppb-selected-slot-redesign-20260821
-Artifact revision: 2
+Artifact revision: 4
 Artifact status: complete
 
 ## Conditions
 
-- Reference IDs: `EB-DOC-HS-001`, `EB-DOC-VS-001`, `WPB-HS-MOBILE-001`, `WPB-HS-DESKTOP-001`, `WPB-VS-MOBILE-001`, `WPB-VS-DESKTOP-001`
-- Current viewports and states: 390x844 and 1280x800; one restored filled selection and one empty next-step slot
-- Served asset: `window.__BUNDLE_WIDGET_VERSION__ === "12.1.1"`
-- Fixture discipline: Product Grid → Horizontal Slots → Vertical Slots → Product Grid; compatible selection state carried forward
-- Comparison limit: EB evidence establishes hierarchy, density, and orientation behavior. It is not a current pixel baseline.
+- Reference IDs: `EB-VS-DESKTOP-R4`, `EB-VS-MOBILE-R4`, `WPB-VS-MOBILE-001`, `WPB-VS-DESKTOP-001`
+- Target viewports and states: live EB at 1280x800 and 390x844; two filled rows, a minimum-rule trailing empty row, and the next-step empty row
+- Target runtime: `gbbmix-template-id="SIMPLIFIED"`, `gbbmix-template-type="PDP_MODAL"`
+- Fixture discipline: the existing EB fixture moved from Horizontal Slots to Vertical Slots without resetting compatible step/category data; no order or cart mutation occurred
+- Comparison limit: exact visual parity applies to the visible row anatomy and measured geometry. Wolfpack retains its own semantic markup, event owners, tokens, and accessible target requirements.
 
 ## Observations
 
 | ID | Region | Dimension | Current | Target | Evidence type | Confidence | Required |
 |---|---|---|---|---|---|---|---|
-| O-01 | Horizontal filled slot | Geometry | Three equal columns; selected tile measured about 109x200 at 390 and 113x200 at 1280 | Responsive equal-height tile whose content remains legible at every viable column width | Chrome computed geometry + EB structural archive | High current / medium target | Yes |
-| O-02 | Horizontal identity | Hierarchy | Image dominates; title is isolated in a short footer and truncates to `14k Dan...`; variant and price are absent | Media, two-line identity, optional variant, and price form one product-led stack | Chrome visual + EB hierarchy | High | Yes |
-| O-03 | Horizontal actions | Interaction | Whole card is the replacement target; remove is a separate circular control over media | Preserve exact replacement target and one independent semantic remove action | Accessibility tree + repository contract | High | Yes |
-| O-04 | Vertical filled slot | Geometry | Full-width 64px row at both measured widths; 52px media track, flexible text, trailing action | Retain compact full-width row and improve breathing room through responsive spacing, not a fixed copied height | Chrome computed geometry + EB structural archive | High | Yes |
-| O-05 | Vertical identity | Hierarchy | Image → one-line title → remove; no variant or price | Image → title/variant stack → price when available → remove, with bounded wrapping | Chrome visual + EB hierarchy | High | Yes |
-| O-06 | State continuity | Layout stability | Empty and selected slot geometry is orientation-specific; current Horizontal preserves height but sacrifices identity | Empty, loading, unavailable-restored, and selected states reserve identical outer geometry within each orientation | Repository architecture contract | High | Yes |
-| O-07 | Selection treatment | Surface | Saturated blue 2px outline is the dominant selected signal | Quiet neutral hairline surface; merchant color reserved for focus/selected confirmation and not the only signal | Current computed style + design goal | Medium | Yes |
-| O-08 | Narrow widths | Responsive | Horizontal tile remains three columns at 390, compressing text | Use intrinsic responsive tracks and allow fewer columns only when content cannot remain legible | Current geometry + required viewport contract | High | Yes |
-| O-09 | Accessibility | Targets and naming | Filled slot exposes replacement target and nested semantic remove button | Keep 44px target ownership, visible focus, exact accessible names, and no action overlap | Accessibility tree + user contract | High | Yes |
-| O-10 | Overflow | Page shell | No horizontal overflow at measured Vertical mobile; Horizontal grid fits its owner | `document.scrollWidth === document.clientWidth` at every required viewport | Chrome geometry + acceptance contract | High | Yes |
+| O-01 | Filled row | Geometry | Wolfpack current compact row | EB row is 64px high at both measured widths, full owner width, with 5px padding and 5px internal gap | Live Chrome computed geometry | High | Yes |
+| O-02 | Filled media | Geometry | Wolfpack media treatment differs from target | EB uses a 50x50 leading image inside the 64px row | Live Chrome computed geometry | High | Yes |
+| O-03 | Filled identity | Hierarchy | Current Wolfpack selected-row hierarchy | EB shows one bold product-title line only; price and variant are absent from the row | Live Chrome visual and computed typography | High | Yes |
+| O-04 | Filled action | Interaction | Existing exact remove behavior | EB places one compact trailing remove icon; Wolfpack must retain a distinct semantic remove target without changing the visible hierarchy | Live Chrome visual + repository contract | High | Yes |
+| O-05 | Filled surface | Surface | Current border and radius differ | EB uses white fill, 2px solid black border, 10px radius, and no shadow | Live Chrome computed style | High | Yes |
+| O-06 | Empty row | Geometry | Current empty state differs from target | EB uses a 60px row, 2px dashed black border, 10px radius, label at start and plus affordance at end | Live Chrome computed style | High | Yes |
+| O-07 | Repeated spacing | Layout | Current slot rhythm differs | EB uses a 14px mobile / 16px desktop gap between rows and 26px between step groups | Live Chrome computed style | High | Yes |
+| O-08 | Responsive | Reflow | Existing Vertical one-column behavior | EB retains identical 64px/60px row geometry at 390 and 1280; width fills the containing column and no horizontal overflow occurs | Live Chrome desktop/mobile evidence | High | Yes |
+| O-09 | Content stress | Overflow | Long product or localized slot text may collide | Preserve EB one-line visual density using truncation/clamping while keeping the complete accessible name | Live target + accessibility recommendation | High visual / medium accessibility | Yes |
+| O-10 | Business behavior | Interaction | Exact replacement/removal and capacity are Wolfpack-owned | Visual parity must not change picker targeting, remove propagation, persistence, rules, or cart behavior | Repository contract | High | Yes |
 
 ## Layout, geometry, typography, and surfaces
 
-The strongest reusable pattern is the orientation logic. Horizontal Slots should remain an at-a-glance tile grid, while Vertical Slots should remain a compact full-width list. Both need the same information priority and action semantics.
+Revision 4 is Vertical Slots only. The target is deliberately sparse: a compact full-width row, square product media, one bold title, and one remove affordance. Price, compare-at price, variant, badges, quantity, and slot-number embellishments are excluded because they are not present in the live EB row.
 
-Horizontal currently allocates nearly all usable height to media and a one-line title footer. That makes the selected state recognizable by image but weak for long-title, variant, and price verification. The redesign should rebalance the existing tile rather than add badges or extra controls: a stable media region, a bounded identity stack, and one remove primitive.
-
-Vertical already has the correct structural base. Its redesign should be restrained: preserve the compact row, add a bounded secondary line for variant or price, refine neutral borders, and keep the remove action visually separate from the replacement surface.
+The empty and filled states are visually related but intentionally not equal-height: EB uses 60px empty rows and 64px filled rows. Revision 4 therefore supersedes the earlier equal-geometry requirement. Layout stability is evaluated as no unexpected shift outside the deliberate 4px state transition and no sibling overlap.
 
 ## Content, interaction, responsive, and accessibility
 
 - Tile or row activation replaces the exact clicked slot.
 - Remove never activates replacement and removes only that slot.
 - No new merchant-facing copy is introduced; saved slot labels and numbering remain authoritative.
-- Price is shown when the existing slot data supplies it. Compare-at price follows the product-driven display rule and is not gated by a separate PPB setting.
-- Long title and variant content clamp inside the identity region; actions never shrink below their target contract.
+- Price and variant remain in the picker/summary owners and do not render inside the Vertical slot row.
+- Long product titles remain one visual line with overflow handling; the complete accessible name remains available to assistive technology.
 - Minimum-rule capacity keeps one reachable empty slot; exact-rule capacity exposes no overflow slot.
 - Restored unavailable selections remain identifiable and removable without changing persistence behavior.
 - Selected and empty outer geometry must not shift siblings in the same orientation.
@@ -77,9 +75,9 @@ Vertical already has the correct structural base. Its redesign should be restrai
 
 | Gap ID | Type | Expected change | Invariant behavior | Canonical owner hypothesis | Status |
 |---|---|---|---|---|---|
-| G-01 | visual | Rebalance Horizontal media and identity hierarchy | Exact slot replacement/removal | PPB product-page source CSS | confirmed |
-| G-02 | responsive | Replace compressed fixed three-column outcome with intrinsic viable columns | Horizontal orientation remains tile-based | PPB product-page source CSS | confirmed |
-| G-03 | content | Reserve title, variant, price, and compare-at capacity | Existing data and localization only | Existing shared slot renderer + CSS | confirmed |
-| G-04 | visual | Refine Vertical row spacing and surface treatment | Compact full-width row | PPB product-page source CSS | confirmed |
-| G-05 | accessibility | Protect action hit targets, focus, and nested action separation | Current data/action hooks | Existing shared slot renderer | confirmed |
-| G-06 | ownership | Keep both orientations on one runtime with presentation-only variants | Shared picker and persistence | Shared PPB slots runtime | confirmed |
+| G-01 | visual | Match the measured 64px filled-row anatomy | Exact slot replacement/removal | PPB modal-slot renderer and canonical CSS | confirmed |
+| G-02 | visual | Match the measured 60px dashed empty row | Existing capacity and picker opening | PPB modal-slot template and canonical CSS | confirmed |
+| G-03 | content | Remove price/variant from the Revision 4 slot contract | Product data remains available elsewhere | Existing shared renderer | confirmed |
+| G-04 | responsive | Keep one full-width column at all required widths | No layout-mode switch | PPB modal-slot CSS | confirmed |
+| G-05 | accessibility | Preserve semantic 44px action ownership behind compact visible icons | Existing data/action hooks | Existing shared renderer | confirmed |
+| G-06 | non-regression | Exclude Horizontal Slots and other templates | Shared runtime remains intact | Scoped Vertical selectors | confirmed |

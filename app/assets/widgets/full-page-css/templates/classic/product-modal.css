@@ -72,10 +72,10 @@ body:has(.layout-sidebar[data-fpb-design-preset="CLASSIC"], .fpb-preset-classic)
   body:has(.layout-sidebar[data-fpb-design-preset="CLASSIC"], .fpb-preset-classic)
     .bundle-modal-overlay.active[data-read-only="true"]
     .bundle-modal-container {
-    width: min(100%, 56rem);
+    width: min(100%, 72rem);
     max-width: var(--classic-product-modal-max-width);
     max-height: calc(100dvh - (var(--classic-product-modal-gutter) * 2));
-    padding: 1.25rem;
+    padding: clamp(1.5rem, 3vw, 2.5rem);
     border-radius: var(--classic-product-modal-radius);
     transform: scale(1);
   }
@@ -84,10 +84,16 @@ body:has(.layout-sidebar[data-fpb-design-preset="CLASSIC"], .fpb-preset-classic)
     .bundle-modal-overlay[data-read-only="true"]
     .bundle-modal-content {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--bundle-product-card-spacing, 0.75rem);
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: clamp(1.5rem, 3vw, 3rem);
     align-items: stretch;
     padding: 0;
+  }
+
+  body:has(.layout-sidebar[data-fpb-design-preset="CLASSIC"], .fpb-preset-classic)
+    .bundle-modal-overlay[data-read-only="true"]
+    .bundle-modal-images {
+    align-self: center;
   }
 
   body:has(.layout-sidebar[data-fpb-design-preset="CLASSIC"], .fpb-preset-classic)
@@ -100,7 +106,7 @@ body:has(.layout-sidebar[data-fpb-design-preset="CLASSIC"], .fpb-preset-classic)
   body:has(.layout-sidebar[data-fpb-design-preset="CLASSIC"], .fpb-preset-classic)
     .bundle-modal-overlay[data-read-only="true"]
     .bundle-modal-details {
-    align-self: center;
+    align-self: stretch;
     gap: 1rem;
     padding: 0;
   }
@@ -167,4 +173,12 @@ body:has(.layout-sidebar[data-fpb-design-preset="CLASSIC"], .fpb-preset-classic)
     padding: 0;
   }
 
+}
+
+@media (min-width: 1024px) {
+  body:has(.layout-sidebar[data-fpb-design-preset="CLASSIC"], .fpb-preset-classic)
+    .bundle-modal-overlay[data-read-only="true"]
+    .bundle-modal-content {
+    min-height: min(68dvh, 40rem);
+  }
 }

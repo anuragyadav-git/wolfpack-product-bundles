@@ -5,8 +5,8 @@ import {
   invokeCheckoutIntegrationProvider,
 } from '../../shared/checkout-integration-adapters.js';
 import { TemplateDesignSystem } from '../../shared/template-design-system.js';
-import { buildBundleConfigApiUrl } from '../../../../lib/bundle-preview-url.js';
 import { ppbExpandSingleStepCategoriesAsSteps } from '../single-step-categories.js';
+import { localizeBundleConfig } from '../../shared/localized-bundle-config.js';
 
 function getWindow() {
   return typeof window === 'undefined' ? null : window;
@@ -195,7 +195,13 @@ parseConfiguration() {
   const runtimeWindow = getWindow();
   const dataset = this.container.dataset;
   const existingConfig = this.config || {};
-  const controlsSettings = existingConfig.controlsSettings || null;
+  const storefrontRuntime = (runtimeWindow as any)?.__WOLFPACK_PPB_STOREFRONT_RUNTIME__ || null;
+  const locale = String(runtimeWindow?.Shopify?.locale || 'en').toLowerCase();
+  const languageSettings = storefrontRuntime?.languages?.[locale]
+    || storefrontRuntime?.languages?.[locale.split('-')[0]]
+    || storefrontRuntime?.languages?.en
+    || null;
+  const controlsSettings = storefrontRuntime?.controls || existingConfig.controlsSettings || null;
   const controls = this._getProductPageControls() || {};
   const datasetShowQuantity = dataset.showQuantitySelectorOnCard !== 'false';
   const showQuantitySelectorOnCard = parseControlBoolean(
@@ -230,6 +236,15 @@ parseConfiguration() {
     displaySeeMoreLink,
     expandProductCardOnHover,
     controlsSettings,
+    storefrontRuntime,
+    languageSettings,
+    languageData: languageSettings?.activeLanguageData || null,
+    ppbCustomTextSettings: languageSettings?.ppbCustomTextSettings || null,
+    sharedCartLabels: languageSettings?.sharedCartLabels || null,
+    textOverrides: {
+      ...(existingConfig.textOverrides || {}),
+      ...(languageSettings?.textOverrides || {}),
+    },
     // Messages will be set from bundle.pricing.messages after bundle loads
     discountTextTemplate: 'Add {conditionText} to get {discountText}',
     successMessageTemplate: 'Congratulations! You got {discountText}!',
@@ -253,14 +268,16 @@ _parseBundleConfigPayload(rawValue: string) {
     }
   },
 
-  _isBundleConfigBootstrapPayload(payload: any) {
+  _isShopifyHostedPpbSnapshot(payload: any) {
     return !!(
       payload &&
       typeof payload === 'object' &&
-      payload.v &&
-      payload.type === 'product_page' &&
+      payload.schemaVersion === 3 &&
+      payload.bundleType === 'product_page' &&
       typeof payload.id === 'string' &&
-      payload.id.trim() !== ''
+      payload.id.trim() !== '' &&
+      Array.isArray(payload.steps) &&
+      payload.runtimeAuthorization?.version === 2
     );
   },
 
@@ -270,60 +287,17 @@ _parseBundleConfigPayload(rawValue: string) {
     const bundleId = this.container.dataset.bundleId;
     const configValue = this._parseBundleConfigPayload(this.container.dataset.bundleConfig);
 
-    if (
-      this.container.dataset.wpbPpbEmbedSource === 'true' &&
-      configValue &&
-      typeof configValue.id === 'string' &&
-      Array.isArray(configValue.steps)
-    ) {
+    if (this._isShopifyHostedPpbSnapshot(configValue)) {
       bundleData = { [configValue.id]: configValue };
     }
-
-    if (!bundleData && bundleType === 'product_page' && this._isBundleConfigBootstrapPayload(configValue)) {
-      const RETRY_DELAY_MS = 3000;
-      const RETRYABLE_STATUSES = new Set([503, 504]);
-
-      const fetchBundleData = async () => {
-        const apiUrl = buildBundleConfigApiUrl(
-          configValue.id,
-          getWindow()?.location?.search || '',
-        );
-        const response = await fetch(apiUrl);
-
-        if (!response.ok) {
-          let errorDetails = `${response.status} ${response.statusText}`;
-          try {
-            const errorData = await response.json();
-            errorDetails = JSON.stringify(errorData);
-          } catch (_: any) {
-            // Ignore parse failures for error body.
-          }
-          const err = new Error(`API request failed: ${errorDetails}`) as Error & { status?: number };
-          err.status = response.status;
-          throw err;
-        }
-
-        const data = await response.json();
-        if (data.success && data.bundle) {
-          return { [data.bundle.id]: data.bundle };
-        }
-
-        throw new Error('Invalid API response structure');
-      };
-
-      try {
-        try {
-          bundleData = await fetchBundleData();
-        } catch (firstErr: any) {
-          if (RETRYABLE_STATUSES.has(firstErr.status)) {
-            await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS));
-            bundleData = await fetchBundleData();
-          } else {
-            throw firstErr;
-          }
-        }
-      } catch (_error: any) {
-      }
+    if (
+      !bundleData
+      && this.container.dataset.wpbPpbEmbedSource === 'true'
+      && configValue
+      && typeof configValue.id === 'string'
+      && Array.isArray(configValue.steps)
+    ) {
+      bundleData = { [configValue.id]: configValue };
     }
 
     // Widget only works on container products with bundleConfig marker.
@@ -349,8 +323,9 @@ _parseBundleConfigPayload(rawValue: string) {
   },
 
 selectBundle() {
+  const selectedBundle = BundleDataManager.selectBundle(this.bundleData, this.config);
   this.selectedBundle = ppbExpandSingleStepCategoriesAsSteps(
-    BundleDataManager.selectBundle(this.bundleData, this.config)
+    localizeBundleConfig(selectedBundle, getWindow()?.Shopify?.locale || '')
   );
 
   this.widgetStyle = 'bottom-sheet';

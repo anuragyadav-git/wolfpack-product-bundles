@@ -127,9 +127,13 @@ type VisibilityDisplayConfiguration = {
 
 export type StepSetupMultiLanguageTarget =
   | { type: "text-overrides" }
+  | { type: "widget" }
   | { type: "embed" }
   | { type: "step"; stepId: string }
-  | { type: "step-category"; stepId: string; categoryIndex: number };
+  | { type: "step-category"; stepId: string; categoryIndex: number }
+  | { type: "addon-step"; stepId: string }
+  | { type: "addon-section"; stepId: string }
+  | { type: "addon-footer"; stepId: string };
 
 export function asVisibilityArray(value: unknown): unknown[] {
   return Array.isArray(value) ? value : [];

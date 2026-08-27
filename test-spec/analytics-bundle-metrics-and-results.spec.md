@@ -5,7 +5,7 @@ title: Analytics Bundle Metrics and Results Test Spec
 type: test-spec
 status: active
 summary: Defines behavior coverage for selectable bundle graph metrics and searchable sortable bundle results.
-last_audited: 2026-08-13
+last_audited: 2026-08-25
 owners:
   - Wolfpack Product Bundles
 domains:
@@ -63,8 +63,8 @@ Verify the data behavior behind the selectable Analytics graph and bundle search
 
 | # | Scenario | Input | Expected Output | Notes |
 |---|---|---|---|---|
-| 1 | Pixel status remains pending | Analytics data is ready | Route readiness remains pending | Only the loading bar may render |
-| 2 | All route data is ready | Analytics, pixel status, and loading-bar minimum resolve | Entire Analytics page may reveal | No partial top banners |
+| 1 | Pixel status remains pending | Analytics data is ready | Route readiness remains pending | Critical heading and inline Polaris loading state remain visible |
+| 2 | All route data is ready | Analytics and pixel status resolve | Deferred Analytics content may reveal | No partial data-dependent banners |
 
 ### CampaignResultControls
 

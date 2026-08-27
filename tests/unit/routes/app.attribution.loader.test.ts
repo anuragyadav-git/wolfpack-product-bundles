@@ -3,11 +3,11 @@
  */
 
 import { loader } from "../../../app/routes/app/app.attribution";
-import { requireAdminSession } from "../../../app/lib/auth-guards.server";
+import { authenticate } from "../../../app/shopify.server";
 import { getPixelStatus } from "../../../app/services/pixel-activation.server";
 
-jest.mock("../../../app/lib/auth-guards.server", () => ({
-  requireAdminSession: jest.fn(),
+jest.mock("../../../app/shopify.server", () => ({
+  authenticate: { admin: jest.fn() },
 }));
 
 jest.mock("../../../app/services/pixel-activation.server", () => ({
@@ -37,8 +37,8 @@ jest.mock("../../../app/db.server", () => ({
   },
 }));
 
-const mockRequireAdminSession = requireAdminSession as jest.MockedFunction<
-  typeof requireAdminSession
+const mockRequireAdminSession = authenticate.admin as jest.MockedFunction<
+  typeof authenticate.admin
 >;
 const mockGetPixelStatus = getPixelStatus as jest.MockedFunction<typeof getPixelStatus>;
 const getDb = () => require("../../../app/db.server").default;

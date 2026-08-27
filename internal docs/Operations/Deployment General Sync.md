@@ -5,7 +5,7 @@ title: Deployment General Sync
 type: operations
 status: active
 summary: Post-deploy replay of the current persisted bundle storefront contract behind one true or false flag.
-last_audited: 2026-08-14
+last_audited: 2026-08-25
 owners:
   - engineering
 domains:
@@ -17,8 +17,10 @@ source_paths:
   - app/services/deployment-general-sync.server.ts
   - app/services/bundles/storefront-sync.server.ts
   - app/services/addon-discount-function-service.server.ts
+  - app/services/ppb-storefront-runtime.server.ts
 related_docs:
   - Shopify Integration/Metafields.md
+  - Architecture/Storefront Outage Resilience.md
 tags:
   - deployment
   - synchronization
@@ -42,16 +44,18 @@ When enabled, it:
 1. Lists installed shops and their saved FPB and PPB bundle rows.
 2. Acquires each shop's compliant offline Admin client.
 3. Ensures the current variant metafield definitions.
-4. Calls `syncBundleStorefrontNow(... reason: "sync_bundle")`, which reloads
+4. Ensures the shop-level PPB Storefront token, controls/language runtime, and
+   generated Design CSS metafields.
+5. Calls `syncBundleStorefrontNow(... reason: "sync_bundle")`, which reloads
    each complete bundle graph from Prisma, activates the Cart Transform, and
    writes the current app-owned product/variant metafield values.
-5. Remediates invalid saved variant references through the current persistence contract.
-6. Ensures the automatic add-on discount once for every shop with an enabled
+6. Remediates invalid saved variant references through the current persistence contract.
+7. Ensures the automatic add-on discount once for every shop with an enabled
    saved FPB add-on configuration.
-7. Ensures the role-tagged subscription initial-order automatic discount once
+8. Ensures the role-tagged subscription initial-order automatic discount once
    for every shop with an enabled saved FPB or PPB subscription configuration.
    This node uses `recurringCycleLimit=1`.
-8. Ensures the separate recurring subscription discount for shops with at least
+9. Ensures the separate recurring subscription discount for shops with at least
    one enabled recurring bundle configuration. This node uses
    `recurringCycleLimit=0`, and the Function accepts it only when the signed
    bundle selection also authorizes recurring bundle pricing.

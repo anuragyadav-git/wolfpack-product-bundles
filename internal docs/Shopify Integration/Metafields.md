@@ -5,7 +5,7 @@ title: Metafields
 type: shopify-integration
 status: authoritative
 summary: Storefront bundle metafield ownership, synchronization, payload limits, and Shopify validation constraints.
-last_audited: 2026-08-13
+last_audited: 2026-08-25
 owners:
   - engineering
 domains:
@@ -18,9 +18,12 @@ source_paths:
   - app/routes/root/wpb.$bundleId.tsx
   - app/services/bundles/metafield-sync/
   - app/services/bundles/metafield-sync/operations/bundle-product.server.ts
+  - app/services/ppb-storefront-runtime.server.ts
+  - app/services/ppb-static-authorization.server.ts
   - app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/save-bundle.server.ts
 related_docs:
   - internal docs/Architecture/Widget Architecture.md
+  - internal docs/Architecture/Storefront Outage Resilience.md
 tags:
   - metafields
   - storefront
@@ -67,10 +70,12 @@ show a separate storefront sync status or retry banner. Preview posts one compac
 promise resolves; failures surface through the existing preview error toast.
 There is no persisted sync queue, status, attempt ID, timestamp, or error model.
 
-Storefront sync does not define or write `$app.component_parents`. MERGE and
-add-on discount validation use the signed runtime token route plus the
-CartTransform owner `$app.runtime_token_secret` metafield. Parent product
-metafields remain the source for EXPAND and display metadata.
+Storefront sync does not define or write `$app.component_parents`. FPB uses the
+online signed runtime-token route. Parent-product PPB uses synchronized signed
+v2 authorization plus shop `$app.ppb_policy_revisions`; Shopify Functions
+compare every line's revision with current Shopify state before applying a
+merge or discount. Parent product metafields remain the source for EXPAND and
+display metadata.
 
 ## Why Bootstrap Hydration
 
@@ -82,7 +87,11 @@ this order.
 
 ## Size Constraints
 
-Shopify metafield values have a 64KB hard limit. The bundle variant `$app.bundle_ui_config` payload is especially sensitive for category-backed FPB/PPB bundles because category products can include rich product, image, option, and variant objects.
+Wolfpack enforces 64KB for existing FPB JSON values and 128KB for the
+schema-v3 PPB `$app.bundle_ui_config`. The PPB writer rejects oversized data
+before its atomic mutation. Shopify Function input metafields are separately
+limited to 10KB, so the shop `$app.ppb_policy_revisions` map is checked against
+that smaller boundary.
 
 Runtime category payloads must be compacted at `app/lib/bundle-config/category-runtime.ts` before they are written by `app/services/bundles/metafield-sync/operations/bundle-product.server.ts`. Preserve storefront-required fields only: product IDs/title/handle/image/price/weight, compact product options, and compact variants with ID/title/price/compare-at/weight/availability/inventory/options/image/selling-plan data. Strip admin/cache-only fields such as metafields, SKU, selectedOptions blobs, inventory policy, timestamps, and extra image metadata.
 
@@ -116,9 +125,16 @@ minimum component quantity there, without changing Admin or runtime state.
 
 ## Bundle Details Order Attribution
 
-The storefront widgets write app-owned cart metafield `bundle_details` through the signed app-proxy route `/apps/product-bundles/api/cart-bundle-details`. The route uses Storefront API `cartMetafieldsSet` without a namespace, so Shopify stores the key in the app-owned namespace (`$app`).
+FPB writes app-owned cart metafield `bundle_details` through the signed
+app-proxy route `/apps/product-bundles/api/cart-bundle-details`. Parent-product
+PPB reads and merges the same metafield directly with Storefront API
+`cartMetafieldsSet` and the synchronized public Storefront token. Both omit a
+namespace so Shopify stores the key in the app-owned namespace (`$app`).
 
-The same storefront add flow first requests `/apps/product-bundles/api/cart-transform-runtime-token`; that route returns `_wolfpack_bundle_runtime` for cart line properties after server-side DB validation.
+FPB requests `/apps/product-bundles/api/cart-transform-runtime-token` before
+cart add. Parent-product PPB instead attaches the synchronized v2
+`_wolfpack_bundle_runtime` and `_wolfpack_line_auth` values without a network
+request to Wolfpack.
 
 `shopify.app.toml` and `shopify.app.wolfpack-product-bundles-sit.toml` define `[order.metafields.app.bundle_details]` with `capabilities.cart_to_order_copyable = true`. Shopify requires the cart and order metafields to have matching namespace and key before checkout completion can copy the cart value to the order.
 

@@ -3,7 +3,8 @@ import { AppLogger } from "../../lib/logger";
 import { prisma } from "../../db.server";
 import { sanitizeCss } from "../../lib/css-sanitizer";
 import { generateCSSFromSettings } from "../../lib/css-generators";
-import type { ThemeColors } from "../../lib/css-generators";
+import { isShopBrandColors } from "../../lib/shop-brand-colors";
+import { buildSettingsDesignRuntime } from "../../lib/settings-design-runtime";
 import { BundleType } from "../../constants/bundle";
 
 // auth: public — served via <link> tag in storefront theme; browser request, no session available.
@@ -213,9 +214,26 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
       });
     }
 
-    const themeColors =
-      ((designSettings as unknown as Record<string, unknown>)?.themeColors ??
-        null) as ThemeColors | null;
+    const rawThemeColors = (designSettings as unknown as Record<string, unknown>)?.themeColors;
+    const themeColors = isShopBrandColors(rawThemeColors) ? rawThemeColors : null;
+    const generalSettings = designSettings?.generalSettings && typeof designSettings.generalSettings === "object"
+      ? designSettings.generalSettings as Record<string, unknown>
+      : {};
+    const settingsPage = generalSettings.settingsPage && typeof generalSettings.settingsPage === "object"
+      ? generalSettings.settingsPage as Record<string, unknown>
+      : {};
+    const savedDesignState = settingsPage.design;
+    if (savedDesignState && typeof savedDesignState === "object") {
+      const currentPageCustomization = generalSettings.pageCustomization
+        && typeof generalSettings.pageCustomization === "object"
+        ? generalSettings.pageCustomization as Record<string, unknown>
+        : {};
+      finalSettings = buildSettingsDesignRuntime(
+        savedDesignState,
+        currentPageCustomization,
+        themeColors,
+      ).cssSettings as any;
+    }
     const css = generateCSSFromSettings(finalSettings, bundleTypeForCSS, customCss, themeColors);
 
     // Build a stable ETag from the design settings last-modified time.

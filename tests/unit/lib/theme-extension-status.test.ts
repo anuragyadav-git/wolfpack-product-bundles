@@ -1,5 +1,6 @@
 import {
   THEME_EXTENSION_RESOURCES,
+  buildThemeAppEmbedEditorUrl,
   normalizeThemeExtensionResources,
   type ShopifyThemeExtensionInfo,
 } from "../../../app/lib/theme-extension-status";
@@ -45,5 +46,15 @@ describe("theme extension status normalization", () => {
     ]);
     expect(result.every((item) => item.status === "unavailable")).toBe(true);
     expect(result.every((item) => item.enabled === false)).toBe(true);
+  });
+
+  it("builds Shopify's current-theme app-embed editor deep link", () => {
+    expect(buildThemeAppEmbedEditorUrl(
+      "test.myshopify.com",
+      "test-api-key",
+      "bundle-app-embed",
+    )).toBe(
+      "https://test.myshopify.com/admin/themes/current/editor?context=apps&activateAppId=test-api-key%2Fbundle-app-embed",
+    );
   });
 });

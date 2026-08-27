@@ -94,7 +94,9 @@ export function PpbBundleEmbedSection() {
                     <s-button
                       variant="secondary"
                       icon="globe"
-                      disabled={disabled || undefined}
+                      disabled={
+                        disabled || (flow.shopLocales?.length ?? 0) === 0 || undefined
+                      }
                       onClick={() =>
                         flow.openMultiLanguageModal(
                           "Bundle Embed",

@@ -33,6 +33,7 @@ export function FpbStepCategoryAccordion({
         showPolarisModal: flow.showPolarisModal,
         stepsState: flow.stepsState,
         styles: flow.fullPageBundleStyles,
+        translationActionsDisabled: (flow.shopLocales?.length ?? 0) === 0,
         validationErrors: flow.validationErrors,
         clearValidationError: flow.clearValidationError,
       }}

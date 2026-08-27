@@ -3,7 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { TemplateReadyScreen } from "../../../app/components/bundle-configure/TemplateReadyScreen";
 
 describe("TemplateReadyScreen", () => {
-  it("renders the EB-aligned preview completion content", () => {
+  it("renders the preview completion content", () => {
     const view = renderToStaticMarkup(
       React.createElement(TemplateReadyScreen, {
         isPreviewLoading: false,
@@ -28,5 +28,17 @@ describe("TemplateReadyScreen", () => {
 
     expect(view).toContain("disabled");
     expect(view).toContain('aria-busy="true"');
+  });
+
+  it("renders the preview action as a semantic projected control", () => {
+    const view = renderToStaticMarkup(
+      React.createElement(TemplateReadyScreen, {
+        isPreviewLoading: false,
+        onPreview: jest.fn(),
+      })
+    );
+
+    expect(view).toContain('<button type="button"');
+    expect(view).toContain("Preview bundle</button>");
   });
 });

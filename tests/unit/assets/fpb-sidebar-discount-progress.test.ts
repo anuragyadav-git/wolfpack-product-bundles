@@ -9,6 +9,8 @@ const {
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { fullPageMobileSummaryMethods } = require('../../../app/assets/widgets/full-page/methods/mobile-summary-methods.js');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
+const { fullPageTierFloatingRuntimeMethods } = require('../../../app/assets/widgets/full-page/methods/tier-floating-runtime-methods.js');
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { PricingCalculator } = require('../../../app/assets/widgets/shared/pricing-calculator.js');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { ToastManager } = require('../../../app/assets/widgets/shared/toast-manager.js');
@@ -437,6 +439,22 @@ describe('FPB shared desktop summary line items', () => {
 });
 
 describe('FPB configured summary header', () => {
+  it('resolves localized bundle copy before store-level copy', () => {
+    const context = makeContext('STANDARD', 'simple');
+    context.selectedBundle.textOverrides = {
+      reviewBundle: 'Translated Review Evidence',
+    };
+    context.config.textOverrides = {
+      reviewBundle: 'Store-level review copy',
+    };
+
+    expect(fullPageTierFloatingRuntimeMethods._resolveText.call(
+      context,
+      'reviewBundle',
+      'Review your bundle',
+    )).toBe('Translated Review Evidence');
+  });
+
   it('creates one shared clear action for desktop and mobile summaries', async () => {
     const showClearCartConfirmation = jest.fn();
     const desktopButton = createSummaryClearButton(showClearCartConfirmation);
@@ -499,6 +517,26 @@ describe('FPB configured summary header', () => {
     expect(fullPageMobileSummaryMethods.getBundleSummaryText.call(context)).toEqual({
       title: 'Daily Essentials',
       subTitle: 'Review your bundle',
+    });
+  });
+
+  it('projects localized Bundle Cart copy onto the visible summary surface', () => {
+    const context = makeContext('STANDARD', 'simple');
+    context.selectedBundle.name = 'Daily Essentials';
+    context.selectedBundle.bundleTextConfig = {
+      bundleSummary: {
+        title: '',
+        subTitle: '',
+      },
+    };
+    context._resolveText = (key: string, fallback: string) => ({
+      yourBundle: 'Translated Bundle Evidence',
+      reviewBundle: 'Translated Review Evidence',
+    }[key] || fallback);
+
+    expect(fullPageMobileSummaryMethods.getBundleSummaryText.call(context)).toEqual({
+      title: 'Translated Bundle Evidence',
+      subTitle: 'Translated Review Evidence',
     });
   });
 });

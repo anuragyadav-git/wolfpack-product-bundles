@@ -1,11 +1,11 @@
 import { json, type LoaderFunctionArgs } from "@remix-run/node";
 import { useNavigate } from "@remix-run/react";
-import { requireAdminSession } from "../../lib/auth-guards.server";
+import { authenticate } from "../../shopify.server";
 import { navigateBackOrFallback } from "../../lib/navigation";
 import IntegrationsRouteShell from "./app.integrations/IntegrationsRouteShell";
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  await requireAdminSession(request);
+  await authenticate.admin(request);
   return json(null);
 }
 

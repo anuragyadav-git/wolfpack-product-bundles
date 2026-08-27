@@ -1,6 +1,6 @@
 import { json } from "@remix-run/node";
 import type { LoaderFunction } from "@remix-run/node";
-import { requireAppProxy } from "../../lib/auth-guards.server";
+import { authenticate } from "../../shopify.server";
 import db from "../../db.server";
 import { AppLogger } from "../../lib/logger";
 import { BundleStatus } from "../../constants/bundle";
@@ -15,7 +15,8 @@ import { ERROR_MESSAGES } from "../../constants/errors";
 export const loader: LoaderFunction = async ({ request }: any) => {
   try {
     // Authenticate the request
-    const { session } = await requireAppProxy(request);
+    const { session } = await authenticate.public.appProxy(request);
+    if (!session) throw new Response("Unauthorized", { status: 401 });
 
     if (!session?.shop) {
       return json({ error: ERROR_MESSAGES.SHOP_NOT_FOUND }, { status: 400 });

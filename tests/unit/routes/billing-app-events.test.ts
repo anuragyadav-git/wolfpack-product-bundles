@@ -1,10 +1,10 @@
 import { action as createAction } from "../../../app/routes/api/api.billing.create";
 import { action as cancelAction } from "../../../app/routes/api/api.billing.cancel";
-import { requireAdminSession } from "../../../app/lib/auth-guards.server";
+import { authenticate } from "../../../app/shopify.server";
 import { BillingService } from "../../../app/services/billing.server";
 
-jest.mock("../../../app/lib/auth-guards.server", () => ({
-  requireAdminSession: jest.fn(),
+jest.mock("../../../app/shopify.server", () => ({
+  authenticate: { admin: jest.fn() },
 }));
 
 jest.mock("../../../app/services/billing.server", () => ({
@@ -26,7 +26,7 @@ jest.mock("../../../app/services/app-events.server", () => ({
   ensureShopIdentity: jest.fn().mockResolvedValue("gid://shopify/Shop/1"),
 }));
 
-const mockRequireAdminSession = requireAdminSession as jest.MockedFunction<typeof requireAdminSession>;
+const mockRequireAdminSession = authenticate.admin as jest.MockedFunction<typeof authenticate.admin>;
 const mockCreateSubscription = BillingService.createSubscription as jest.MockedFunction<any>;
 const mockCancelSubscription = BillingService.cancelSubscription as jest.MockedFunction<any>;
 const mockRecordBusinessEvent = () =>

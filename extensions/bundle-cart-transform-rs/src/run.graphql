@@ -1,10 +1,10 @@
 query Input {
   presentmentCurrencyRate
+  shop {
+    ppbPolicyRevisions: metafield(namespace: "$app", key: "ppb_policy_revisions") { value }
+  }
   cartTransform {
-    bundleCartLineMessaging: metafield(namespace: "$app", key: "bundle_cart_line_messaging") {
-      value
-    }
-    runtimeTokenSecret: metafield(namespace: "$app", key: "runtime_token_secret") {
+    runtimeConfiguration: metafield(namespace: "$app", key: "runtime_configuration") {
       value
     }
   }
@@ -21,17 +21,21 @@ query Input {
       runtimeToken: attribute(key: "_wolfpack_bundle_runtime") {
         value
       }
+      lineAuthorization: attribute(key: "_wolfpack_line_auth") {
+        value
+      }
       stepType: attribute(key: "_bundle_step_type") {
         value
       }
       bundleDisplayProperties: attribute(key: "_bundle_display_properties") {
         value
       }
-      sellingPlanAllocation { sellingPlan { id } }
+      sellingPlanAllocation { __typename }
       merchandise {
         __typename
         ... on ProductVariant {
           id
+          product { id }
           # For EXPAND: Check if this variant is a bundle parent
           component_reference: metafield(namespace: "$app", key: "component_reference") {
             value

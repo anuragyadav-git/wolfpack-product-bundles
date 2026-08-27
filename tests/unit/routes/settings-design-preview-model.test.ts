@@ -8,6 +8,7 @@ import {
   DESIGN_PREVIEW_VIEWPORTS,
   buildDesignPreviewTheme,
   calculateDesignPreviewFitScale,
+  getDesignPreviewContextKind,
   getDesignPreviewFieldTarget,
   getDesignPreviewScene,
   getDesignPreviewSurfaceFidelity,
@@ -24,11 +25,24 @@ describe("Settings Design preview model", () => {
       desktop: { width: 1280, height: 1136 },
       mobile: { width: 390, height: 844 },
     });
-    expect(calculateDesignPreviewFitScale(1280, "desktop")).toBe(1);
-    expect(calculateDesignPreviewFitScale(960, "desktop")).toBe(0.75);
-    expect(calculateDesignPreviewFitScale(780, "mobile")).toBe(1);
-    expect(calculateDesignPreviewFitScale(312, "mobile")).toBe(0.8);
-    expect(calculateDesignPreviewFitScale(0, "desktop")).toBe(1);
+    expect(calculateDesignPreviewFitScale({ width: 1280, height: 1136 }, "desktop")).toBe(1);
+    expect(calculateDesignPreviewFitScale({ width: 960, height: 640 }, "desktop")).toBeCloseTo(640 / 1136);
+    expect(calculateDesignPreviewFitScale({ width: 780, height: 640 }, "mobile")).toBeCloseTo(640 / 844);
+    expect(calculateDesignPreviewFitScale({ width: 312, height: 844 }, "mobile")).toBe(0.8);
+    expect(calculateDesignPreviewFitScale({ width: 0, height: 0 }, "desktop")).toBe(1);
+    expect(calculateDesignPreviewFitScale({ width: Number.NaN, height: 568 }, "desktop")).toBe(0.5);
+  });
+
+  it("resolves storefront context from canonical template families", () => {
+    for (const key of ["standard", "classic", "compact", "horizontal"] as const) {
+      expect(getDesignPreviewContextKind(key)).toBe("full-page");
+    }
+    for (const key of ["product-list", "product-grid"] as const) {
+      expect(getDesignPreviewContextKind(key)).toBe("product-page-inpage");
+    }
+    for (const key of ["horizontal-slots", "vertical-slots"] as const) {
+      expect(getDesignPreviewContextKind(key)).toBe("product-page-modal");
+    }
   });
 
   it("does not expose or claim fidelity for a synthetic Builder surface", () => {
@@ -59,7 +73,7 @@ describe("Settings Design preview model", () => {
         navigation: "timeline",
         categories: "accordion",
         summary: "rows",
-        surfaces: ["navigation", "categories", "product-card", "cart-summary", "loading", "validation", "upsell"],
+        surfaces: ["navigation", "categories", "product-card", "product-slots", "cart-summary", "loading", "validation", "upsell"],
       },
       {
         key: "classic",
@@ -68,7 +82,7 @@ describe("Settings Design preview model", () => {
         navigation: "timeline",
         categories: "pills",
         summary: "slot-grid",
-        surfaces: ["navigation", "categories", "product-card", "cart-summary", "loading", "validation", "upsell"],
+        surfaces: ["navigation", "categories", "product-card", "product-slots", "cart-summary", "loading", "validation", "upsell"],
       },
       {
         key: "compact",
@@ -77,7 +91,7 @@ describe("Settings Design preview model", () => {
         navigation: "compact-timeline",
         categories: "pills",
         summary: "compact-slots",
-        surfaces: ["navigation", "categories", "product-card", "cart-summary", "loading", "validation", "upsell"],
+        surfaces: ["navigation", "categories", "product-card", "product-slots", "cart-summary", "loading", "validation", "upsell"],
       },
       {
         key: "horizontal",
@@ -86,7 +100,7 @@ describe("Settings Design preview model", () => {
         navigation: "horizontal-timeline",
         categories: "underline",
         summary: "rows",
-        surfaces: ["navigation", "categories", "product-card", "cart-summary", "loading", "validation", "upsell"],
+        surfaces: ["navigation", "categories", "product-card", "product-slots", "cart-summary", "loading", "validation", "upsell"],
       },
       {
         key: "product-list",
@@ -95,7 +109,7 @@ describe("Settings Design preview model", () => {
         navigation: "list-steps",
         categories: "tabs",
         summary: "list-selected-drawer",
-        surfaces: ["bundle-header", "navigation", "categories", "product-card", "cart-summary", "loading", "validation", "upsell"],
+        surfaces: ["bundle-header", "navigation", "categories", "product-card", "product-slots", "cart-summary", "loading", "validation", "upsell"],
       },
       {
         key: "product-grid",
@@ -104,7 +118,7 @@ describe("Settings Design preview model", () => {
         navigation: "grid-steps",
         categories: "tabs",
         summary: "pdp-footer",
-        surfaces: ["bundle-header", "navigation", "categories", "product-card", "cart-summary", "loading", "validation", "upsell"],
+        surfaces: ["bundle-header", "navigation", "categories", "product-card", "product-slots", "cart-summary", "loading", "validation", "upsell"],
       },
       {
         key: "horizontal-slots",
@@ -172,7 +186,7 @@ describe("Settings Design preview model", () => {
     expect(isDesignPreviewFieldApplicable("expert.generalSettings.productPageTitleColor", "product-grid")).toBe(true);
     expect(isDesignPreviewFieldApplicable("expert.generalSettings.productPageTitleColor", "standard")).toBe(false);
     expect(isDesignPreviewFieldApplicable("expert.emptyStateCard.emptyStateCardBorderColor", "horizontal-slots")).toBe(true);
-    expect(isDesignPreviewFieldApplicable("expert.emptyStateCard.emptyStateCardBorderColor", "product-list")).toBe(false);
+    expect(isDesignPreviewFieldApplicable("expert.emptyStateCard.emptyStateCardBorderColor", "product-list")).toBe(true);
   });
 
   it("filters merchant controls to the selected template and component surface", () => {
@@ -216,8 +230,8 @@ describe("Settings Design preview model", () => {
       "expert.mixAndMatchConfig.generalSettings.bundleUpsellFontColor": "#060606",
     };
 
-    const fpbTheme = buildDesignPreviewTheme(fieldValues, true, "standard");
-    const ppbTheme = buildDesignPreviewTheme(fieldValues, true, "product-list");
+    const fpbTheme = buildDesignPreviewTheme(fieldValues, [], null, "standard");
+    const ppbTheme = buildDesignPreviewTheme(fieldValues, [], null, "product-list");
 
     expect(fpbTheme["--preview-primary-font-size"]).toBe("18px");
     expect(fpbTheme["--preview-primary-font-weight"]).toBe("700");

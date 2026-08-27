@@ -5,7 +5,7 @@ title: Checkout UI Extension
 type: shopify-integration
 status: authoritative
 summary: Checkout Bundle and Save reactive offers plus native total-savings rendering and signed cart mutation contracts.
-last_audited: 2026-08-13
+last_audited: 2026-08-24
 owners:
   - engineering
 domains:
@@ -92,7 +92,8 @@ The extension does not expose checkout controls that change their configuration.
 
 ## Build Rules
 
-- API version is `2026-04`.
+- API version is `2026-07`, paired with `@shopify/ui-extensions`
+  `~2026.7.0` so installs receive only compatible 2026.7 patch releases.
 - Preact entry modules require a default export.
 - The `export` field in `shopify.extension.toml` is unsupported for these targets.
 - `network_access = true` is required for the authenticated backend request.

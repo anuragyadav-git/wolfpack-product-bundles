@@ -223,13 +223,15 @@
         "upsellTitle": "Complete your bundle",
         "upsellBody": "Add a popular extra.",
         "upsellEyebrow": "Recommended for your bundle",
-        "selectedCount": "2 items",
+        "selectedCount": "{{count}} articles",
         "discount": "You are $8 away from 15% off",
         "totalLabel": "Bundle total",
         "totalPrice": "$42.00",
         "back": "Back",
         "emptySlot": "Choose a product",
         "chooseProduct": "Choose a product",
+        "removeProduct": "Retirer le produit",
+        "close": "Fermer",
         "slotNumber": "Product {{number}}",
         "addBundle": "Add bundle to cart",
         "loadingBody": "Preparing your bundle…",
@@ -275,6 +277,21 @@
       "feedback": {
         "tierHit": "Palier atteint",
         "complete": "Tous les paliers atteints"
+      },
+      "storefront": {
+        "open": "Aperçu du bundle",
+        "heading": "Aperçu du bundle",
+        "close": "Fermer",
+        "empty": "Aucun bundle de boutique n’est disponible pour l’aperçu.",
+        "bundleName": "Nom du bundle",
+        "bundleType": "Type",
+        "actions": "Actions",
+        "view": "Voir",
+        "saveBeforePreview": "Enregistrez vos modifications de design avant d’ouvrir l’aperçu de la boutique.",
+        "errors": {
+          "popupBlocked": "Autorisez les fenêtres contextuelles pour ouvrir l’aperçu de la boutique.",
+          "notReady": "L’aperçu de la boutique n’est pas encore prêt. Réessayez."
+        }
       }
     }
   },
@@ -330,6 +347,7 @@
   "common": {
     "actions": {
       "close": "Fermer",
+      "cancel": "Annuler",
       "dismiss": "Ignorer",
       "manage": "Gérer",
       "enable": "Activer",
@@ -359,6 +377,10 @@
     "unlistedBundle": {
       "title": "Votre lot n'est pas répertorié",
       "body": "Pour le rendre visible, définissez le statut du produit du lot sur Actif dans Shopify Produits."
+    },
+    "parentProductStatus": {
+      "loadingTitle": "Vérification du statut du produit parent",
+      "loadingBody": "Récupération du dernier statut dans Shopify Produits."
     },
     "proxyHealth": {
       "title": "Proxy d'application non connecté",

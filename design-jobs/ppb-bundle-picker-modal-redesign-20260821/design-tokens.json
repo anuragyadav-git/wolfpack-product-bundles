@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "job_id": "ppb-bundle-picker-modal-redesign-20260821",
-  "revision": 6,
+  "revision": 8,
   "status": "complete",
   "groups": {
     "color": [
@@ -92,14 +92,14 @@
         "notes": "True accessibility primitive."
       },
       {
-        "name": "filled-slot-remove-target",
+        "name": "filled-slot-horizontal-remove-target",
         "value": 44,
         "unit": "px",
         "source": "user-approved recommendation",
         "confidence": "high",
         "merchant_configurable": false,
         "owner": "modal-slots.css",
-        "notes": "Compact overlaid cross badge; the visual glyph may be smaller but its interactive target remains 44px."
+        "notes": "Horizontal-only overlaid cross badge; Vertical owns its measured inline remove visual separately."
       },
       {
         "name": "filled-slot-horizontal-max-block",
@@ -112,14 +112,44 @@
         "notes": "Existing Horizontal slot tile geometry becomes the maximum filled-slot block size."
       },
       {
-        "name": "filled-slot-vertical-max-block",
-        "value": "clamp(4.25rem, 16cqi, 4.75rem)",
-        "unit": "css",
-        "source": "repository-existing",
+        "name": "filled-slot-vertical-min-block",
+        "value": 60,
+        "unit": "px",
+        "source": "live-EB-measured",
         "confidence": "high",
         "merchant_configurable": false,
         "owner": "modal-slots.css",
-        "notes": "Existing Vertical row geometry becomes the maximum filled-slot block size."
+        "notes": "Live EB minimum. The normal row resolves to 64px from 50px media, 5px padding, and 2px borders; there is no maximum height."
+      },
+      {
+        "name": "filled-slot-vertical-media",
+        "value": 50,
+        "unit": "px",
+        "source": "live-EB-measured",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "modal-slots.css",
+        "notes": "Square cover media in the Vertical filled row."
+      },
+      {
+        "name": "filled-slot-vertical-space",
+        "value": 5,
+        "unit": "px",
+        "source": "live-EB-measured",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "modal-slots.css",
+        "notes": "Row padding and flex gap."
+      },
+      {
+        "name": "filled-slot-vertical-remove-visual",
+        "value": 20,
+        "unit": "px",
+        "source": "live-EB-measured",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "modal-slots.css",
+        "notes": "Inline trailing circular-cross button visual."
       }
     ],
     "radius": [],

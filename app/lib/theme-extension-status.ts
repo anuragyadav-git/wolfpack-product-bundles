@@ -51,3 +51,12 @@ export function hasActiveThemeExtension(
 ): boolean {
   return resources.some((resource) => resource.handle === handle && resource.enabled);
 }
+
+export function buildThemeAppEmbedEditorUrl(
+  shop: string,
+  apiKey: string,
+  blockHandle: string,
+): string {
+  const activateAppId = encodeURIComponent(`${apiKey}/${blockHandle}`);
+  return `https://${shop}/admin/themes/current/editor?context=apps&activateAppId=${activateAppId}`;
+}

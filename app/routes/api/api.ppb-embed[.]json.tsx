@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { json, type LoaderFunctionArgs } from "@remix-run/node";
 import db from "../../db.server";
-import { requireAppProxy } from "../../lib/auth-guards.server";
+import { authenticate } from "../../shopify.server";
 import { formatBundleForWidget } from "../../lib/bundle-formatter.server";
 import { AppLogger } from "../../lib/logger";
 import { selectEligiblePpbBundleEmbed } from "../../services/ppb-bundle-embed.server";
@@ -10,7 +10,8 @@ const CACHE_CONTROL = "private, max-age=30, must-revalidate";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
-  const { session } = await requireAppProxy(request);
+  const { session } = await authenticate.public.appProxy(request);
+  if (!session) throw new Response("Unauthorized", { status: 401 });
   const productId = url.searchParams.get("productId")?.trim() ?? "";
   const productHandle = url.searchParams.get("productHandle")?.trim() ?? "";
   const locale = url.searchParams.get("locale")?.trim() ?? "";

@@ -4,8 +4,8 @@ id: ppb-selected-slot-interaction-contract
 title: PPB Selected Slot Interaction Contract
 type: design-job-artifact
 status: complete
-summary: Defines exact replacement, removal, focus, keyboard, and recovery behavior for selected PPB slots.
-last_audited: 2026-08-21
+summary: Defines Revision 4 replacement, removal, focus, keyboard, and recovery behavior for PPB Vertical Slots.
+last_audited: 2026-08-24
 owners:
   - wolfpack
 domains:
@@ -27,8 +27,8 @@ keywords:
 # Interaction Contract
 
 Artifact job ID: ppb-selected-slot-redesign-20260821
-Artifact revision: 2
-Artifact status: approved
+Artifact revision: 4
+Artifact status: complete
 
 | Control ID | Role | Accessible name | Pointer action | Keyboard action | State update | Focus behavior | Disabled or busy | Error recovery | Motion |
 |---|---|---|---|---|---|---|---|---|---|
@@ -69,7 +69,7 @@ Selection updates must not reorder unrelated instances or reset compatible selec
 
 ## Responsive replacement and reduced motion
 
-- Horizontal and Vertical use the same controls and event owners; CSS reflow does not replace the semantic tree.
+- Vertical Slots keeps the existing shared controls and event owners; CSS changes do not replace the semantic tree.
 - Focus order follows DOM/slot order regardless of visual column count.
 - No interaction requires hover, swipe, animation, or precise pointer movement.
 - Reduced motion removes position/scale transitions; visible state and focus feedback remain.
@@ -82,4 +82,5 @@ Selection updates must not reorder unrelated instances or reset compatible selec
 - Replacement targets the clicked filled instance.
 - Removal targets the clicked instance.
 - Persistence, price calculation, discount calculation, cart payloads, and step navigation are unchanged.
-- Available compare-at price visibility is product-driven, not PPB-setting-driven.
+- Price and variant display remain outside the Vertical slot-row contract.
+- Horizontal Slots behavior and presentation remain unchanged.

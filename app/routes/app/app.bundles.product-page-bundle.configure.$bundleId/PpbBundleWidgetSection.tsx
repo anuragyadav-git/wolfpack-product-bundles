@@ -122,7 +122,9 @@ export function PpbBundleWidgetSection() {
                   <s-button
                     variant="secondary"
                     icon="globe"
-                    disabled={disabled || undefined}
+                    disabled={
+                      disabled || (flow.shopLocales?.length ?? 0) === 0 || undefined
+                    }
                     onClick={() =>
                       flow.openMultiLanguageModal("Bundle Widget", [
                         {
@@ -141,7 +143,7 @@ export function PpbBundleWidgetSection() {
                           label: "Widget Button Text",
                           fallback: flow.upsellWidgetButtonText,
                         },
-                      ])
+                      ], "widget")
                     }
                   >
                     Multi Language

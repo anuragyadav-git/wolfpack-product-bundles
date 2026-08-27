@@ -5,7 +5,7 @@ import {
 } from "@remix-run/node";
 import { AppLogger } from "../../../lib/logger";
 import { ERROR_MESSAGES } from "../../../constants/errors";
-import { requireAdminSession } from "../../../lib/auth-guards.server";
+import { authenticate } from "../../../shopify.server";
 import db from "../../../db.server";
 import {
   handleSaveBundle,
@@ -22,10 +22,7 @@ import {
 } from "./handlers";
 import { handleValidateSellingPlanGroups } from "../../../services/bundle-subscription-discovery.server";
 import {
-  fetchBundleProduct,
-  fetchShopCurrencyCode,
-  fetchShopLocales,
-  fetchEmbedData,
+  fetchBundleConfigureShopifyData,
 } from "../../../lib/bundle-configure-loader.server";
 import { handleRecordBundlePreview } from "../shared/bundle-preview-action.server";
 import {
@@ -36,7 +33,7 @@ import ConfigureBundleFlow from "./ConfigureBundleFlow";
 import { ReduxProvider } from "../../../store/ReduxProvider";
 
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
-  const { session, admin } = await requireAdminSession(request);
+  const { session, admin } = await authenticate.admin(request);
   const { bundleId } = params;
   const url = new URL(request.url);
   const configureMode =
@@ -78,33 +75,28 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   // File: extensions/bundle-builder/blocks/bundle-product-page.liquid
   const blockHandle = "bundle-product-page";
 
-  const [bundleProduct, shopCurrencyCode, shopLocales, embedData] = await Promise.all([
-    bundle.shopifyProductId
-      ? fetchBundleProduct(admin, bundle.shopifyProductId, bundleId)
-      : Promise.resolve(null),
-    fetchShopCurrencyCode(admin),
-    fetchShopLocales(admin),
-    fetchEmbedData(admin, session.shop, apiKey, "bundle-app-embed"),
-  ]);
+  const shopifyData = await fetchBundleConfigureShopifyData(
+    admin,
+    bundle.shopifyProductId,
+    bundleId,
+  );
 
   return json({
     bundle,
-    bundleProduct,
+    bundleProduct: shopifyData.bundleProduct,
     shop: session.shop,
     configureMode,
     showFirstLoadTour,
     apiKey,
     blockHandle,
-    shopLocales,
-    shopCurrencyCode,
-    appEmbedEnabled: embedData.appEmbedEnabled,
-    themeEditorUrl: embedData.themeEditorUrl,
+    shopLocales: shopifyData.shopLocales,
+    shopCurrencyCode: shopifyData.shopCurrencyCode,
   });
 };
 
 export const action = async ({ request, params }: ActionFunctionArgs) => {
   try {
-    const { session, admin } = await requireAdminSession(request);
+    const { session, admin } = await authenticate.admin(request);
     const { bundleId } = params;
 
     if (!session?.shop) {

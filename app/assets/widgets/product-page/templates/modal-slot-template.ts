@@ -64,32 +64,14 @@ export const modalSlotTemplateMethods: Record<string, any> & ThisType<any> = {
 
     stepBox.className = 'step-box bw-slot-card bw-slot-card--empty';
 
-    const imgUrl = step.categoryImageUrl || null;
     const isModalSlotTemplate = this._isProductPageModalSlotTemplate();
-    if (imgUrl && !isModalSlotTemplate) {
-      stepBox.style.backgroundImage = `url('${imgUrl}')`;
-      stepBox.style.backgroundSize = 'contain';
-      stepBox.style.backgroundRepeat = 'no-repeat';
-      stepBox.style.backgroundPosition = 'center';
-    }
-
-    if (isModalSlotTemplate) {
-      const visual = document.createElement('div');
-      visual.className = 'bw-slot-card__empty-visual';
-      if (imgUrl) {
-        visual.style.backgroundImage = `url('${imgUrl}')`;
-      }
-      stepBox.appendChild(visual);
-    } else {
-      // Circular background wrapper for the plus icon
-      const iconWrapper = document.createElement('div');
-      iconWrapper.className = 'bw-slot-card__plus-icon';
-      const primaryColor = globalThis.getComputedStyle?.(document.documentElement)
-        .getPropertyValue('--bundle-global-primary-button').trim() || '#1e3a8a';
-      iconWrapper.style.setProperty('--bw-slot-icon-color', primaryColor);
-      this._appendSlotIcon(iconWrapper);
-      stepBox.appendChild(iconWrapper);
-    }
+    const iconWrapper = document.createElement('div');
+    iconWrapper.className = isModalSlotTemplate ? 'bw-slot-card__empty-visual' : 'bw-slot-card__plus-icon';
+    const primaryColor = globalThis.getComputedStyle?.(document.documentElement)
+      .getPropertyValue('--bundle-global-primary-button').trim() || '#1e3a8a';
+    iconWrapper.style.setProperty('--bw-slot-icon-color', primaryColor);
+    this._appendSlotIcon(iconWrapper);
+    stepBox.appendChild(iconWrapper);
 
     // Step name label below icon
     const slotNumber = instanceIndex + 1;

@@ -337,46 +337,11 @@ export class BundleWidgetProductPage {
   }
 
   async loadLanguageSettings() {
-    try {
-      const shop = window.Shopify?.shop || this.container.dataset.shop;
-      if (!shop) return;
-
-      const locale = window.Shopify?.locale || 'en';
-      const endpoint = buildStorefrontApiPath(
-        `language-settings/${encodeURIComponent(shop)}?bundleType=product_page&locale=${encodeURIComponent(locale)}`,
-      );
-      const response = await fetch(endpoint, { credentials: 'same-origin' });
-      if (!response.ok) return;
-
-      const languageSettings = await response.json();
-      this.config.languageSettings = languageSettings;
-      this.config.languageData = languageSettings.activeLanguageData || null;
-      this.config.ppbCustomTextSettings = languageSettings.ppbCustomTextSettings || null;
-      this.config.sharedCartLabels = languageSettings.sharedCartLabels || null;
-      this.config.textOverrides = {
-        ...(this.config.textOverrides || {}),
-        ...(languageSettings.textOverrides || {})
-      };
-    } catch (_: any) {
-      // Non-critical: default and bundle-level text still render.
-    }
+    return this.config.languageSettings || null;
   }
 
   async loadControlsSettings() {
-    try {
-      const shop = window.Shopify?.shop || this.container.dataset.shop;
-      if (!shop) return;
-
-      const endpoint = buildStorefrontApiPath(
-        `controls-settings/${encodeURIComponent(shop)}?bundleType=product_page`,
-      );
-      const response = await fetch(endpoint, { credentials: 'same-origin' });
-      if (!response.ok) return;
-
-      this.config.controlsSettings = await response.json();
-    } catch (_: any) {
-      // Non-critical: the widget keeps its current default behavior.
-    }
+    return this.config.controlsSettings || null;
   }
 
 

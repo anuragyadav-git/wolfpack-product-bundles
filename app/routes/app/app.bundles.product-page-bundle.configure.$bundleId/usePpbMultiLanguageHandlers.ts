@@ -1,5 +1,10 @@
 import { useCallback, useMemo, useState } from "react";
 import type { MultiLanguageField } from "../../../components/bundle-configure/MultiLanguageTextModal";
+import {
+  buildPpbAddonTranslationFields,
+  getPpbAddonFooterTranslationValues,
+  mergePpbAddonFooterTranslationValues,
+} from "../../../lib/bundle-configure-translations";
 import type { StepSetupMultiLanguageTarget } from "./ConfigureBundleFlow.helpers";
 
 export function usePpbMultiLanguageHandlers({
@@ -9,6 +14,12 @@ export function usePpbMultiLanguageHandlers({
   setTextOverridesByLocale,
   bundleEmbedMultiLangText,
   setBundleEmbedMultiLangText,
+  bundleWidgetMultiLangText,
+  setBundleWidgetMultiLangText,
+  ruleMessages,
+  ruleMessagesByLocale,
+  setRuleMessagesByLocale,
+  setDiscountMessagingMultiLanguageEnabled,
   markAsDirty,
 }: {
   shopLocales: Array<{ primary: boolean; locale: string }>;
@@ -26,6 +37,19 @@ export function usePpbMultiLanguageHandlers({
       Record<string, { upsellConfiguration?: { title?: string; subTitle?: string } }>
     >
   >;
+  bundleWidgetMultiLangText: Record<string, Record<string, string>>;
+  setBundleWidgetMultiLangText: React.Dispatch<
+    React.SetStateAction<Record<string, Record<string, string>>>
+  >;
+  ruleMessages: Record<string, { discountText?: string; successMessage?: string }>;
+  ruleMessagesByLocale: Record<
+    string,
+    Record<string, { discountText?: string; successMessage?: string }>
+  >;
+  setRuleMessagesByLocale: React.Dispatch<React.SetStateAction<any>>;
+  setDiscountMessagingMultiLanguageEnabled: React.Dispatch<
+    React.SetStateAction<boolean>
+  >;
   markAsDirty: () => void;
 }) {
   const [multiLanguageFields, setMultiLanguageFields] = useState<
@@ -37,19 +61,19 @@ export function usePpbMultiLanguageHandlers({
     useState(false);
   const [multiLanguageTarget, setMultiLanguageTarget] =
     useState<StepSetupMultiLanguageTarget>({ type: "text-overrides" });
-  const [textOverridesLocale, setTextOverridesLocale] = useState<string>("en");
+  const [textOverridesLocale, setTextOverridesLocale] = useState<string>("");
   const defaultMultiLanguageLocale = useCallback(
     () =>
       shopLocales.find((locale) => locale.primary)?.locale ??
       shopLocales[0]?.locale ??
-      "en",
+      "",
     [shopLocales],
   );
   const openMultiLanguageModal = useCallback(
     (
       title: string,
       fields: MultiLanguageField[],
-      target: "text-overrides" | "embed" = "text-overrides",
+      target: "text-overrides" | "widget" | "embed" = "text-overrides",
     ) => {
       setMultiLanguageTarget({ type: target });
       setMultiLanguageTitle(title);
@@ -111,15 +135,26 @@ export function usePpbMultiLanguageHandlers({
     },
     [defaultMultiLanguageLocale, stepsState.steps],
   );
-  const updateLocalizedTextOverride = useCallback(
-    (locale: string, key: string, value: string) => {
-      setTextOverridesByLocale((prev) => ({
-        ...prev,
-        [locale]: { ...(prev[locale] ?? {}), [key]: value },
-      }));
-      markAsDirty();
+  const openAddonMultiLanguageModal = useCallback(
+    (stepId: string, target: "step" | "section" | "footer") => {
+      const step = stepsState.steps.find(
+        (candidate: any) => candidate.id === stepId,
+      ) as any;
+      if (!step) return;
+      const targetType = `addon-${target}` as StepSetupMultiLanguageTarget["type"];
+      setMultiLanguageTarget({ type: targetType, stepId } as StepSetupMultiLanguageTarget);
+      setMultiLanguageTitle("Customize Text for Multiple Languages");
+      setMultiLanguageFields(
+        buildPpbAddonTranslationFields(
+          target,
+          step,
+          ruleMessages[`addons-${stepId}`] ?? {},
+        ),
+      );
+      setTextOverridesLocale(defaultMultiLanguageLocale());
+      setIsMultiLanguageModalOpen(true);
     },
-    [markAsDirty, setTextOverridesByLocale],
+    [defaultMultiLanguageLocale, ruleMessages, stepsState.steps],
   );
   const activeMultiLanguageValues = useMemo(() => {
     if (multiLanguageTarget?.type === "step") {
@@ -142,6 +177,21 @@ export function usePpbMultiLanguageHandlers({
         Record<string, string>
       >;
     }
+    if (
+      multiLanguageTarget?.type === "addon-step" ||
+      multiLanguageTarget?.type === "addon-section"
+    ) {
+      const step = stepsState.steps.find(
+        (candidate: any) => candidate.id === multiLanguageTarget.stepId,
+      ) as any;
+      return (step?.multiLangData ?? {}) as Record<string, Record<string, string>>;
+    }
+    if (multiLanguageTarget?.type === "addon-footer") {
+      return getPpbAddonFooterTranslationValues(
+        ruleMessagesByLocale,
+        multiLanguageTarget.stepId,
+      );
+    }
     if (multiLanguageTarget?.type === "embed") {
       return Object.fromEntries(
         Object.entries(bundleEmbedMultiLangText).map(([locale, entry]: any) => [
@@ -150,8 +200,11 @@ export function usePpbMultiLanguageHandlers({
         ]),
       );
     }
+    if (multiLanguageTarget?.type === "widget") {
+      return bundleWidgetMultiLangText;
+    }
     return textOverridesByLocale;
-  }, [bundleEmbedMultiLangText, multiLanguageTarget, stepsState.steps, textOverridesByLocale]);
+  }, [bundleEmbedMultiLangText, bundleWidgetMultiLangText, multiLanguageTarget, ruleMessagesByLocale, stepsState.steps, textOverridesByLocale]);
   const saveStepSetupMultiLanguageValues = useCallback(
     (nextValues: Record<string, Record<string, string>>) => {
       if (multiLanguageTarget?.type === "step") {
@@ -173,10 +226,7 @@ export function usePpbMultiLanguageHandlers({
           index === multiLanguageTarget.categoryIndex
             ? {
                 ...category,
-                multiLangData: {
-                  ...(category.multiLangData ?? {}),
-                  ...nextValues,
-                },
+                multiLangData: nextValues,
               }
             : category,
         );
@@ -185,6 +235,30 @@ export function usePpbMultiLanguageHandlers({
           "StepCategory",
           updatedCategories,
         );
+        markAsDirty();
+        return;
+      }
+      if (
+        multiLanguageTarget?.type === "addon-step" ||
+        multiLanguageTarget?.type === "addon-section"
+      ) {
+        stepsState.updateStepField(
+          multiLanguageTarget.stepId,
+          "multiLangData",
+          nextValues,
+        );
+        markAsDirty();
+        return;
+      }
+      if (multiLanguageTarget?.type === "addon-footer") {
+        setRuleMessagesByLocale((current: typeof ruleMessagesByLocale) =>
+          mergePpbAddonFooterTranslationValues(
+            current,
+            multiLanguageTarget.stepId,
+            nextValues,
+          ),
+        );
+        setDiscountMessagingMultiLanguageEnabled(true);
         markAsDirty();
         return;
       }
@@ -205,10 +279,15 @@ export function usePpbMultiLanguageHandlers({
         markAsDirty();
         return;
       }
+      if (multiLanguageTarget?.type === "widget") {
+        setBundleWidgetMultiLangText(nextValues);
+        markAsDirty();
+        return;
+      }
       setTextOverridesByLocale(nextValues);
       markAsDirty();
     },
-    [markAsDirty, multiLanguageTarget, setBundleEmbedMultiLangText, setTextOverridesByLocale, stepsState],
+    [markAsDirty, multiLanguageTarget, ruleMessagesByLocale, setBundleEmbedMultiLangText, setBundleWidgetMultiLangText, setDiscountMessagingMultiLanguageEnabled, setRuleMessagesByLocale, setTextOverridesByLocale, stepsState],
   );
 
   return {
@@ -226,7 +305,7 @@ export function usePpbMultiLanguageHandlers({
     openMultiLanguageModal,
     openStepMultiLanguageModal,
     openStepCategoryMultiLanguageModal,
-    updateLocalizedTextOverride,
+    openAddonMultiLanguageModal,
     activeMultiLanguageValues,
     saveStepSetupMultiLanguageValues,
   };

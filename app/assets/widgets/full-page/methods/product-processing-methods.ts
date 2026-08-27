@@ -527,7 +527,6 @@ async loadStepProducts(stepIndex: string|number) {
         .filter(Boolean);
 
       if (missingProductIds.length > 0) {
-        const shop = window.Shopify?.shop || window.location.host;
         const apiBaseUrl = this.resolveStorefrontApiBase();
         const country = window.Shopify?.country
           || (window.Shopify?.locale?.includes('-') ? window.Shopify.locale.split('-')[1] : null)
@@ -535,7 +534,7 @@ async loadStepProducts(stepIndex: string|number) {
 
         try {
           const countryParam = country ? `&country=${encodeURIComponent(country)}` : '';
-          const response = await fetch(`${apiBaseUrl}/api/storefront-products?ids=${encodeURIComponent(missingProductIds.join(','))}&shop=${encodeURIComponent(shop)}${countryParam}`);
+          const response = await fetch(`${apiBaseUrl}/api/storefront-products?ids=${encodeURIComponent(missingProductIds.join(','))}${countryParam}`);
 
           if (response.ok) {
             const data = await response.json();
@@ -572,7 +571,6 @@ async loadStepProducts(stepIndex: string|number) {
     });
   } else if (!step?.isFreeGift) {
     if ((!hasEnrichedStepProducts || shouldRefreshRuntimeInventory) && productIds.length > 0) {
-      const shop = window.Shopify?.shop || window.location.host;
 
       // Get app URL from widget data attribute or window global
       const apiBaseUrl = this.resolveStorefrontApiBase();
@@ -584,7 +582,7 @@ async loadStepProducts(stepIndex: string|number) {
 
       try {
         const countryParam = country ? `&country=${encodeURIComponent(country)}` : '';
-        const response = await fetch(`${apiBaseUrl}/api/storefront-products?ids=${encodeURIComponent(productIds.join(','))}&shop=${encodeURIComponent(shop)}${countryParam}`);
+        const response = await fetch(`${apiBaseUrl}/api/storefront-products?ids=${encodeURIComponent(productIds.join(','))}${countryParam}`);
 
         if (!response.ok) {
           await response.text();
@@ -670,7 +668,6 @@ async loadStepProducts(stepIndex: string|number) {
     } else {
       // Fetch from storefront API if data is not enriched
       const productGids = step.StepProduct.map((sp: any)  => sp.productId).filter(Boolean);
-      const shop = window.Shopify?.shop || window.location.host;
 
       if (productGids.length > 0) {
 
@@ -683,7 +680,7 @@ async loadStepProducts(stepIndex: string|number) {
 
         try {
           const countryParam = country ? `&country=${encodeURIComponent(country)}` : '';
-          const response = await fetch(`${apiBaseUrl}/api/storefront-products?ids=${encodeURIComponent(productGids.join(','))}&shop=${encodeURIComponent(shop)}${countryParam}`);
+          const response = await fetch(`${apiBaseUrl}/api/storefront-products?ids=${encodeURIComponent(productGids.join(','))}${countryParam}`);
 
           if (!response.ok) {
           } else {
@@ -703,13 +700,12 @@ async loadStepProducts(stepIndex: string|number) {
 
   const collectionHandles = step?.isFreeGift ? [] : this.collectStepCollectionHandles(step);
   if (collectionHandles.length > 0) {
-    const shop = window.Shopify?.shop || window.location.host;
     const apiBaseUrl = this.resolveStorefrontApiBase();
 
 
     try {
       const response = await fetch(
-        `${apiBaseUrl}/api/storefront-collections?handles=${encodeURIComponent(collectionHandles.join(','))}&shop=${encodeURIComponent(shop)}`
+        `${apiBaseUrl}/api/storefront-collections?handles=${encodeURIComponent(collectionHandles.join(','))}`
       );
 
       if (response.ok) {
@@ -786,7 +782,6 @@ async _reconcileDirectDefaultProductsFromStorefront(stepIndex: number) {
     .map((productId: any)  => `gid://shopify/Product/${productId}`)));
   if (productIds.length === 0) return;
 
-  const shop = window.Shopify?.shop || window.location.host;
   const apiBaseUrl = this.resolveStorefrontApiBase();
   const country = window.Shopify?.country
     || (window.Shopify?.locale?.includes('-') ? window.Shopify.locale.split('-')[1] : null)
@@ -795,7 +790,7 @@ async _reconcileDirectDefaultProductsFromStorefront(stepIndex: number) {
   try {
     const countryParam = country ? `&country=${encodeURIComponent(country)}` : '';
     const response = await fetch(
-      `${apiBaseUrl}/api/storefront-products?ids=${encodeURIComponent(productIds.join(','))}&shop=${encodeURIComponent(shop)}${countryParam}`,
+      `${apiBaseUrl}/api/storefront-products?ids=${encodeURIComponent(productIds.join(','))}${countryParam}`,
       { cache: 'no-store' },
     );
     if (!response.ok) {
@@ -1207,7 +1202,6 @@ async enrichMissingProductDescriptions(products: any[]) {
 
   if (missingProductIds.length === 0) return products;
 
-  const shop = window.Shopify?.shop || window.location.host;
   const apiBaseUrl = this.resolveStorefrontApiBase();
   const country = window.Shopify?.country
     || (window.Shopify?.locale?.includes('-') ? window.Shopify.locale.split('-')[1] : null)
@@ -1215,7 +1209,7 @@ async enrichMissingProductDescriptions(products: any[]) {
 
   try {
     const countryParam = country ? `&country=${encodeURIComponent(country)}` : '';
-    const response = await fetch(`${apiBaseUrl}/api/storefront-products?ids=${encodeURIComponent(missingProductIds.join(','))}&shop=${encodeURIComponent(shop)}${countryParam}`);
+    const response = await fetch(`${apiBaseUrl}/api/storefront-products?ids=${encodeURIComponent(missingProductIds.join(','))}${countryParam}`);
     if (!response.ok) return products;
 
     const data = await response.json();

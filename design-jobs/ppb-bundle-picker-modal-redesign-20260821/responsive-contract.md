@@ -26,7 +26,7 @@ keywords:
 # Responsive Contract
 
 Artifact job ID: ppb-bundle-picker-modal-redesign-20260821
-Artifact revision: 6
+Artifact revision: 8
 Artifact status: complete
 
 ## Required viewports and container widths
@@ -54,7 +54,7 @@ Artifact status: complete
 | Footer | 1024+ | 300px x content | centered actions | third | none | none | flex-none | summary truncates safely | existing targets | bottom inset | no catalog overlap |
 | Footer | 0-1023 | 270px x content | centered actions | third | none | none | flex-none | summary truncates safely | existing targets | bottom inset | no catalog overlap |
 | Footer summary | all | intrinsic, capped to footer minus 24px | icon/count, divider, prices | above action | none | none | absolute within footer | one-line content grows naturally | fluid gaps and padding | inherited | contained with zero page overflow |
-| Filled slot | all | responsive maximum block size using the existing Horizontal tile and Vertical row geometry owners | media, identity, overlaid cross badge | selected-slot flow | same semantic tree at every width | none | fixed within slot flow | title wraps normally and visually clamps only when it reaches the cap; complete name remains accessible | compact badge with 44px target overlays the top end corner | n/a | no badge/title collision, slot overflow, or page overflow |
+| Filled slot | all | Horizontal keeps its responsive bounded tile; Vertical is full width with a content-derived 64px normal height, 60px minimum, and no maximum | Vertical: 50px media, intrinsic identity, inline circular-cross Remove; Horizontal: existing tile and overlaid badge | selected-slot flow | Vertical row is inert except Remove; Horizontal replacement remains | Vertical price is hidden; Horizontal unchanged | normal slot flow | Vertical title wraps visibly with EB's normal overflow; no WPB clamp or cap | Vertical remove visual is 20px inline at the trailing edge; Horizontal remains 44px overlaid | n/a | no horizontal page overflow |
 | Details sheet | all | full width, max 88dvh | one constrained content column | above picker | close/handle remain reachable | internal vertical only | fixed bottom, higher layer | gallery contains media; description wraps | native selector, quantity, Add/Update | top and bottom insets | no horizontal overflow or page scroll chaining |
 | Magnifier | pointer/keyboard | intrinsic badge | image overlay | image | reveal on hover/focus-visible | n/a | image-owned | does not obscure product | image remains sole trigger | n/a | clipped to media |
 | Magnifier | touch/coarse | intrinsic badge | image overlay | image | subtle persistent badge | n/a | image-owned | does not obscure product | image remains sole trigger | n/a | clipped to media |

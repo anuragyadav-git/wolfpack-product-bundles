@@ -26,7 +26,7 @@ keywords:
 # Accessibility Checklist
 
 Artifact job ID: ppb-bundle-picker-modal-redesign-20260821
-Artifact revision: 6
+Artifact revision: 8
 Artifact status: complete
 
 - [x] Correct semantics and accessible-name contract defined.
@@ -42,8 +42,8 @@ Artifact status: complete
 - [x] Product image is the only details trigger; title and card background are non-interactive.
 - [x] Native grouped-variant selector has a visible desktop label and a visually hidden mobile label with the same accessible name.
 - [x] Add, quantity, maximum-reached remove-all, and details Add/Update have product-specific accessible names.
-- [x] Filled-slot names wrap and may visually clamp only at the approved maximum height; the complete name remains programmatically available and visible in product details.
-- [x] The overlaid cross badge is a native button with a compact visual treatment, at least a 44px target, visible focus, and a localized product-specific accessible name.
+- [x] Vertical filled-slot names use live EB's visible normal wrapping with no WPB clamp or maximum-height constraint; the complete name remains programmatically available.
+- [x] Remove remains a native button with visible focus and a localized product-specific accessible name. Horizontal retains the 44px overlaid badge; Vertical uses the user-approved exact-EB 20px inline visual exception.
 - [x] Picker and product details each have unique labels and only the topmost sheet traps focus.
 - [x] Escape, backdrop, close, and swipe dismiss exactly one layer and preserve shared scroll-lock lifetime.
 - [x] Magnifier discovery is available on hover, focus-visible, and touch without becoming a separate focus target.

@@ -9,8 +9,8 @@ jest.mock("@remix-run/react", () => ({
   useNavigate: () => mockNavigate,
 }));
 
-jest.mock("../../../app/lib/auth-guards.server", () => ({
-  requireAdminSession: jest.fn(),
+jest.mock("../../../app/shopify.server", () => ({
+  authenticate: { admin: jest.fn() },
 }));
 
 jest.mock("../../../app/lib/navigation", () => ({

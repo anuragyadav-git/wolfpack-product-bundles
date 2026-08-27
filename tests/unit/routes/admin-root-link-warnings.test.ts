@@ -36,8 +36,8 @@ jest.mock("../../../app/lib/server-timing.server", () => ({
   ServerTiming: jest.fn(),
 }));
 
-jest.mock("../../../app/lib/auth-guards.server", () => ({
-  requireAdminSession: jest.fn(),
+jest.mock("../../../app/shopify.server", () => ({
+  authenticate: { admin: jest.fn() },
 }));
 
 jest.mock("../../../app/lib/logger", () => ({
@@ -50,10 +50,6 @@ jest.mock("../../../app/lib/logger", () => ({
 
 jest.mock("../../../app/services/billing.server", () => ({
   BillingService: {},
-}));
-
-jest.mock("../../../app/services/theme/app-embed-check.server", () => ({
-  checkAppEmbedEnabled: jest.fn(),
 }));
 
 jest.mock("../../../app/components/ProxyHealthBanner", () => ({
@@ -104,6 +100,16 @@ describe("admin root link warnings", () => {
       expect.anything(),
     );
     consoleError.mockRestore();
+  });
+
+  it("renders the Admin font stylesheet without a pre-hydration media mutation", async () => {
+    const { default: App } = await import("../../../app/root");
+    const documentMarkup = renderToStaticMarkup(React.createElement(App));
+
+    expect(documentMarkup).toContain(
+      'rel="stylesheet" href="https://cdn.shopify.com/static/fonts/inter/v4/styles.css"',
+    );
+    expect(documentMarkup).not.toContain('media="print"');
   });
 
   it("preloads only first-render dashboard media with React-safe responsive image attributes", async () => {

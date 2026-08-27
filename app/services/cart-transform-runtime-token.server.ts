@@ -232,50 +232,92 @@ export async function validateLiveSellingPlanSelection(
   selection: NonNullable<RuntimeTokenPayload["subscription"]>,
   components: RuntimeTokenLine[],
 ) {
+  if (components.length === 0) return;
+
+  const variantIds = [...new Set(components.map((component) => component.variantId))];
+  const productIdByVariantId = new Map<string, string>();
   const variantQuery = `
-    query ResolveRuntimeSellingPlanVariant($variantId: ID!) {
-      node(id: $variantId) {
-        ... on ProductVariant { product { id } }
-      }
-    }
-  `;
-  const groupQuery = `
-    query ValidateRuntimeSellingPlan($id: ID!, $variantId: ID!, $productId: ID!) {
-      node(id: $id) {
-        ... on SellingPlanGroup {
-          sellingPlans(first: 250) { nodes { id } }
-          appliesToProduct(productId: $productId)
-          appliesToProductVariant(productVariantId: $variantId)
+    query ResolveRuntimeSellingPlanVariants($ids: [ID!]!) {
+      nodes(ids: $ids) {
+        ... on ProductVariant {
+          id
+          product { id }
         }
       }
     }
   `;
-  for (const component of components) {
-    const variantResponse = await admin.graphql(variantQuery, {
-      variables: { variantId: component.variantId },
-    });
-    const variantData = await variantResponse.json();
-    const productId = variantData.data?.node?.product?.id;
-    if (typeof productId !== "string") {
-      throw new Error("Selected subscription variant no longer exists");
+
+  for (let index = 0; index < variantIds.length; index += 50) {
+    const ids = variantIds.slice(index, index + 50);
+    const response = await admin.graphql(variantQuery, { variables: { ids } });
+    const data = await response.json();
+    for (const node of data.data?.nodes ?? []) {
+      if (typeof node?.id === "string" && typeof node?.product?.id === "string") {
+        productIdByVariantId.set(node.id, node.product.id);
+      }
     }
-    const response = await admin.graphql(groupQuery, {
-      variables: {
-        id: selection.sellingPlanGroupId,
-        variantId: component.variantId,
-        productId,
-      },
+  }
+
+  const assignments = variantIds.map((variantId) => ({
+    variantId,
+    productId: productIdByVariantId.get(variantId),
+  }));
+  if (assignments.some(({ productId }) => typeof productId !== "string")) {
+    throw new Error("Selected subscription variant no longer exists");
+  }
+
+  let planValidated = false;
+  for (let start = 0; start < assignments.length; start += 25) {
+    const batch = assignments.slice(start, start + 25) as Array<{
+      variantId: string;
+      productId: string;
+    }>;
+    const variableDefinitions = batch.flatMap((_, index) => [
+      `$productId${index}: ID!`,
+      `$variantId${index}: ID!`,
+    ]).join(", ");
+    const assignmentFields = batch.map((_, index) => `
+      product${index}: appliesToProduct(productId: $productId${index})
+      variant${index}: appliesToProductVariant(productVariantId: $variantId${index})
+    `).join("\n");
+    const groupQuery = `
+      query ValidateRuntimeSellingPlanAssignments($id: ID!, ${variableDefinitions}) {
+        node(id: $id) {
+          ... on SellingPlanGroup {
+            ${planValidated ? "" : "sellingPlans(first: 250) { nodes { id } }"}
+            ${assignmentFields}
+          }
+        }
+      }
+    `;
+    const variables: Record<string, string> = { id: selection.sellingPlanGroupId };
+    batch.forEach((assignment, index) => {
+      variables[`productId${index}`] = assignment.productId;
+      variables[`variantId${index}`] = assignment.variantId;
     });
+
+    const response = await admin.graphql(groupQuery, { variables });
     const data = await response.json();
     const group = data.data?.node;
-    if (!group) throw new Error("Saved subscription selling-plan group no longer exists");
-    const planIds = new Set((group.sellingPlans?.nodes ?? []).map((plan: any) => plan?.id));
-    if (!planIds.has(selection.sellingPlanId)) {
-      throw new Error("Saved subscription selling plan no longer exists");
+    if (!group) {
+      throw new Error("Saved subscription selling-plan group no longer exists");
     }
-    if (group.appliesToProduct !== true && group.appliesToProductVariant !== true) {
-      throw new Error("Selected variant does not support the saved selling plan");
+    if (!planValidated) {
+      const planIds = new Set((group.sellingPlans?.nodes ?? []).map((plan: any) => plan?.id));
+      if (!planIds.has(selection.sellingPlanId)) {
+        throw new Error("Saved subscription selling plan no longer exists");
+      }
+      planValidated = true;
     }
+    for (let index = 0; index < batch.length; index += 1) {
+      if (group[`product${index}`] !== true && group[`variant${index}`] !== true) {
+        throw new Error("Selected variant does not support the saved selling plan");
+      }
+    }
+  }
+
+  if (!planValidated) {
+      throw new Error("Selected subscription variant no longer exists");
   }
 }
 

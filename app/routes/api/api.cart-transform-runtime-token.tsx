@@ -1,6 +1,6 @@
 import { json, type ActionFunctionArgs } from "@remix-run/node";
 import prisma from "../../db.server";
-import { requireAppProxy } from "../../lib/auth-guards.server";
+import { authenticate } from "../../shopify.server";
 import { AppLogger } from "../../lib/logger";
 import {
   buildRuntimeTokenPayload,
@@ -40,7 +40,8 @@ function sanitizeString(value: unknown) {
 }
 
 export async function action({ request }: ActionFunctionArgs) {
-  const { session } = await requireAppProxy(request);
+  const { session } = await authenticate.public.appProxy(request);
+  if (!session) throw new Response("Unauthorized", { status: 401 });
   const shop = session.shop;
 
   const body = await request.json().catch(() => null);

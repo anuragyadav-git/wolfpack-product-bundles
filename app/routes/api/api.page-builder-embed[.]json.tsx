@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { json, type LoaderFunctionArgs } from "@remix-run/node";
 import db from "../../db.server";
 import { formatBundleForWidget } from "../../lib/bundle-formatter.server";
-import { requireAppProxy } from "../../lib/auth-guards.server";
+import { authenticate } from "../../shopify.server";
 import { AppLogger } from "../../lib/logger";
 import { parsePageBuilderEmbedRequest } from "../../lib/page-builder-embed";
 import { resolvePageBuilderEmbed } from "../../services/page-builder-embed.server";
@@ -10,7 +10,8 @@ import { resolvePageBuilderEmbed } from "../../services/page-builder-embed.serve
 const CACHE_CONTROL = "private, max-age=30, must-revalidate";
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  const { session } = await requireAppProxy(request);
+  const { session } = await authenticate.public.appProxy(request);
+  if (!session) throw new Response("Unauthorized", { status: 401 });
   const embedRequest = parsePageBuilderEmbedRequest(new URL(request.url).searchParams);
   if (!embedRequest) {
     return json(

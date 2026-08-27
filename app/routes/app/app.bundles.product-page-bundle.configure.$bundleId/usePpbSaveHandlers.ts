@@ -6,6 +6,7 @@ import { useConfigureValidation } from "../_shared/bundle-configure/useConfigure
 import { validateBundleSubscriptionConfig } from "../../../lib/bundle-subscriptions";
 import {
   mergePpbBundleEmbedTranslations,
+  mergePpbBundleWidgetTranslations,
   removeLegacyPpbEmbedTextOverrides,
 } from "../../../lib/ppb-bundle-embed";
 
@@ -47,8 +48,10 @@ export function usePpbSaveHandlers({
   }, [settings.defaultProductsData]);
 
   const buildBundleUpsellConfig = useCallback(() => {
-    const existingMultiLangText =
-      visibility.savedBundleUpsellConfig?.multiLangText ?? {};
+    const existingMultiLangText = mergePpbBundleWidgetTranslations(
+      visibility.savedBundleUpsellConfig?.multiLangText ?? {},
+      visibility.bundleWidgetMultiLangText,
+    );
     return {
       multiLangText: mergePpbBundleEmbedTranslations(
         existingMultiLangText,
@@ -96,6 +99,7 @@ export function usePpbSaveHandlers({
     visibility.bundleEmbedSpecificProductPages,
     visibility.bundleEmbedSubTitle,
     visibility.bundleEmbedTitle,
+    visibility.bundleWidgetMultiLangText,
     visibility.savedBundleUpsellConfig?.multiLangText,
     visibility.upsellWidgetButtonText,
     visibility.upsellWidgetCollectionsSelectedData,

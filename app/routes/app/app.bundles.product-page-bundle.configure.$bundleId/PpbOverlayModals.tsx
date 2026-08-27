@@ -24,7 +24,6 @@ export function PpbOverlayModals() {
     shop,
     shopLocales,
     textOverridesLocale,
-    updateLocalizedTextOverride,
   } = usePpbConfigureContext();
 
   return (
@@ -49,7 +48,6 @@ export function PpbOverlayModals() {
         fields={multiLanguageFields}
         valuesByLocale={activeMultiLanguageValues}
         onActiveLocaleChange={setTextOverridesLocale}
-        onChange={updateLocalizedTextOverride}
         onSave={saveStepSetupMultiLanguageValues}
         onClose={() => setIsMultiLanguageModalOpen(false)}
       />

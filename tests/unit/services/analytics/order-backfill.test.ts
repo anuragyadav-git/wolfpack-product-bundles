@@ -2,7 +2,7 @@ import { backfillOrderAttribution } from "../../../../app/services/analytics/ord
 
 const mockOrderAttributionFindMany = jest.fn();
 const mockOrderAttributionCreateMany = jest.fn();
-const mockMatchLineItemsToBundles = jest.fn();
+const mockMatchLineItemGroupsToBundles = jest.fn();
 const mockAdminGraphql = jest.fn();
 
 jest.mock("../../../../app/db.server", () => ({
@@ -16,7 +16,7 @@ jest.mock("../../../../app/db.server", () => ({
 }));
 
 jest.mock("../../../../app/lib/analytics/bundle-matcher.server", () => ({
-  matchLineItemsToBundles: (...args: unknown[]) => mockMatchLineItemsToBundles(...args),
+  matchLineItemGroupsToBundles: (...args: unknown[]) => mockMatchLineItemGroupsToBundles(...args),
   orderIdMatchForms: (id: string) =>
     id.includes("/")
       ? [id, id.split("/").pop() ?? id]
@@ -79,14 +79,14 @@ describe("backfillOrderAttribution", () => {
   beforeEach(() => {
     mockOrderAttributionFindMany.mockReset();
     mockOrderAttributionCreateMany.mockReset();
-    mockMatchLineItemsToBundles.mockReset();
+    mockMatchLineItemGroupsToBundles.mockReset();
     mockAdminGraphql.mockReset();
   });
 
   it("Case 1: creates rows for new orders", async () => {
     mockAdminGraphql.mockResolvedValue(makeGraphqlResponse([makeOrderNode()]));
     mockOrderAttributionFindMany.mockResolvedValue([]);
-    mockMatchLineItemsToBundles.mockResolvedValue(["bundle-1"]);
+    mockMatchLineItemGroupsToBundles.mockResolvedValue([["bundle-1"]]);
     mockOrderAttributionCreateMany.mockResolvedValue({ count: 1 });
 
     const result = await backfillOrderAttribution(admin, SHOP, SINCE, UNTIL);
@@ -148,7 +148,7 @@ describe("backfillOrderAttribution", () => {
       .mockResolvedValueOnce(makeGraphqlResponse([makeOrderNode({ id: "gid://shopify/Order/1001" })], true, "cursor-1"))
       .mockResolvedValueOnce(makeGraphqlResponse([makeOrderNode({ id: "gid://shopify/Order/1002" })], false, null));
     mockOrderAttributionFindMany.mockResolvedValue([]);
-    mockMatchLineItemsToBundles.mockResolvedValue([]);
+    mockMatchLineItemGroupsToBundles.mockResolvedValue([[]]);
     mockOrderAttributionCreateMany.mockResolvedValue({ count: 1 });
 
     const result = await backfillOrderAttribution(admin, SHOP, SINCE, UNTIL);
@@ -162,7 +162,7 @@ describe("backfillOrderAttribution", () => {
       makeGraphqlResponse([makeOrderNode({ customerJourneySummary: null })])
     );
     mockOrderAttributionFindMany.mockResolvedValue([]);
-    mockMatchLineItemsToBundles.mockResolvedValue(["bundle-1"]);
+    mockMatchLineItemGroupsToBundles.mockResolvedValue([["bundle-1"]]);
     mockOrderAttributionCreateMany.mockResolvedValue({ count: 1 });
 
     const result = await backfillOrderAttribution(admin, SHOP, SINCE, UNTIL);
@@ -186,7 +186,7 @@ describe("backfillOrderAttribution", () => {
   it("Case 5: order with no bundle match writes a single row with null bundleId", async () => {
     mockAdminGraphql.mockResolvedValue(makeGraphqlResponse([makeOrderNode()]));
     mockOrderAttributionFindMany.mockResolvedValue([]);
-    mockMatchLineItemsToBundles.mockResolvedValue([]);
+    mockMatchLineItemGroupsToBundles.mockResolvedValue([[]]);
     mockOrderAttributionCreateMany.mockResolvedValue({ count: 1 });
 
     const result = await backfillOrderAttribution(admin, SHOP, SINCE, UNTIL);
@@ -210,15 +210,15 @@ describe("backfillOrderAttribution", () => {
   it("Case 7: bundle matched via component product - matcher returns bundleId", async () => {
     mockAdminGraphql.mockResolvedValue(makeGraphqlResponse([makeOrderNode()]));
     mockOrderAttributionFindMany.mockResolvedValue([]);
-    mockMatchLineItemsToBundles.mockResolvedValue(["bundle-X"]);
+    mockMatchLineItemGroupsToBundles.mockResolvedValue([["bundle-X"]]);
     mockOrderAttributionCreateMany.mockResolvedValue({ count: 1 });
 
     const result = await backfillOrderAttribution(admin, SHOP, SINCE, UNTIL);
 
     expect(result.created).toBe(1);
-    expect(mockMatchLineItemsToBundles).toHaveBeenCalledWith(
+    expect(mockMatchLineItemGroupsToBundles).toHaveBeenCalledWith(
       SHOP,
-      [{ productId: "gid://shopify/Product/100" }]
+      [[{ productId: "gid://shopify/Product/100" }]]
     );
     expect(mockOrderAttributionCreateMany).toHaveBeenCalledWith({
       data: [expect.objectContaining({ bundleId: "bundle-X" })],
@@ -234,7 +234,7 @@ describe("backfillOrderAttribution", () => {
       ])
     );
     mockOrderAttributionFindMany.mockResolvedValue([]);
-    mockMatchLineItemsToBundles.mockResolvedValue([]);
+    mockMatchLineItemGroupsToBundles.mockResolvedValue([[]]);
     mockOrderAttributionCreateMany.mockResolvedValue({ count: 1 });
 
     await backfillOrderAttribution(admin, SHOP, SINCE, UNTIL);
@@ -242,5 +242,26 @@ describe("backfillOrderAttribution", () => {
     expect(mockOrderAttributionCreateMany).toHaveBeenCalledWith({
       data: [expect.objectContaining({ revenue: 19529 })],
     });
+  });
+
+  it("matches all unstored orders in a page with one grouped matcher call", async () => {
+    mockAdminGraphql.mockResolvedValue(makeGraphqlResponse([
+      makeOrderNode({ id: "gid://shopify/Order/1001" }),
+      makeOrderNode({
+        id: "gid://shopify/Order/1002",
+        lineItems: { nodes: [{ product: { id: "gid://shopify/Product/500" } }] },
+      }),
+    ]));
+    mockOrderAttributionFindMany.mockResolvedValue([]);
+    mockMatchLineItemGroupsToBundles.mockResolvedValue([["bundle-1"], ["bundle-2"]]);
+    mockOrderAttributionCreateMany.mockResolvedValue({ count: 2 });
+
+    await backfillOrderAttribution(admin, SHOP, SINCE, UNTIL);
+
+    expect(mockMatchLineItemGroupsToBundles).toHaveBeenCalledTimes(1);
+    expect(mockMatchLineItemGroupsToBundles).toHaveBeenCalledWith(SHOP, [
+      [{ productId: "gid://shopify/Product/100" }],
+      [{ productId: "gid://shopify/Product/500" }],
+    ]);
   });
 });

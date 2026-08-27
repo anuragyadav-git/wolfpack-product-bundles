@@ -1,14 +1,14 @@
 import type { ActionFunctionArgs } from "@remix-run/node";
 import { action as fpbAction } from "../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/route";
 import { action as ppbAction } from "../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/route";
-import { requireAdminSession } from "../../app/lib/auth-guards.server";
+import { authenticate } from "../../app/shopify.server";
 import * as fpbHandlers from "../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers";
 import * as ppbHandlers from "../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers";
 import * as storefrontSyncAction from "../../app/routes/app/shared/storefront-sync-action.server";
 import * as subscriptionDiscovery from "../../app/services/bundle-subscription-discovery.server";
 
-jest.mock("../../app/lib/auth-guards.server", () => ({
-  requireAdminSession: jest.fn(),
+jest.mock("../../app/shopify.server", () => ({
+  authenticate: { admin: jest.fn() },
 }));
 
 jest.mock("../../app/db.server", () => ({
@@ -68,7 +68,7 @@ jest.mock("@shopify/app-bridge-react", () => ({
   useAppBridge: () => ({}),
 }));
 
-const mockRequireAdminSession = requireAdminSession as jest.MockedFunction<typeof requireAdminSession>;
+const mockRequireAdminSession = authenticate.admin as jest.MockedFunction<typeof authenticate.admin>;
 const mockSession = { shop: "test-shop.myshopify.com", accessToken: "token" } as any;
 const mockAdmin = { graphql: jest.fn() } as any;
 

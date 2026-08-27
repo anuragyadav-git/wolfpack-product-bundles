@@ -14,6 +14,7 @@ import {
   buildFpbUpsellThemeEditorUrl,
   openThemeEditorInNewTab,
 } from "../../../lib/theme-editor-navigation.client";
+import { buildFpbStorefrontUrl } from "../../../lib/fpb-storefront-url";
 import { useSharedBundleHandlers } from "../../../hooks/useSharedBundleHandlers";
 import {
   getGuidedTourTransition,
@@ -97,47 +98,29 @@ export function useConfigureActionController(flow: ConfigureBundleFlowDraft) {
       },
     );
     if (!appEmbedEnabled) {
-      closePendingDashboardPreview(pendingPreviewWindow);
-      finishPreviewBundleLoading();
       flow.triggerAppEmbedBannerFeedback();
-      return false;
     }
-    let preparedPreview;
+    let preparedPreview: any = null;
     try {
       preparedPreview = await prepareStorefrontPreviewForOpen();
     } catch (error: any) {
-      closePendingDashboardPreview(pendingPreviewWindow);
-      finishPreviewBundleLoading();
-      flow.shopify.toast.show(
-        error instanceof Error
-          ? error.message
-          : "Preview is not ready. Please try preview again.",
-        { isError: true, duration: 5000 },
-      );
-      return false;
+      AppLogger.warn("Storefront preview preparation warning in FPB:", {}, error);
     }
-    if (
-      flow.bundle.bundleType === "full_page" &&
-      !preparedPreview.shareablePreviewUrl
-    ) {
-      closePendingDashboardPreview(pendingPreviewWindow);
-      finishPreviewBundleLoading();
-      flow.shopify.toast.show("Preview URL is unavailable.", {
-        isError: true,
-        duration: 5000,
-      });
-      return false;
-    }
-    const executePreviewBundle = (): "opened" => {
+    const publicNumber = flow.bundle.publicNumber ?? 1;
+    const shareablePreviewUrl =
+      preparedPreview?.shareablePreviewUrl ||
+      buildFpbStorefrontUrl(flow.shop, publicNumber);
+
+    const executePreviewBundle = (): string | false => {
       if (flow.bundle.bundleType === "full_page") {
         if (
           !navigatePendingDashboardPreview(
             pendingPreviewWindow,
-            preparedPreview.shareablePreviewUrl!,
+            shareablePreviewUrl,
           )
         ) {
           window.open(
-            preparedPreview.shareablePreviewUrl!,
+            shareablePreviewUrl,
             "_blank",
             "noopener,noreferrer",
           );
@@ -150,7 +133,7 @@ export function useConfigureActionController(flow: ConfigureBundleFlowDraft) {
         flow.shopify.toast.show("Bundle preview opened in new tab", {
           isError: false,
         });
-        return "opened";
+        return shareablePreviewUrl;
       }
       let productUrl = null;
       const productHandle =
@@ -207,11 +190,11 @@ export function useConfigureActionController(flow: ConfigureBundleFlowDraft) {
           { isError: true, duration: 5000 },
         );
       }
-      return "opened";
+      return productUrl || false;
     };
-    executePreviewBundle();
+    const previewUrl = executePreviewBundle();
     finishPreviewBundleLoading();
-    return true;
+    return previewUrl;
   }, [finishPreviewBundleLoading, flow]);
   const handleSectionChange = useCallback(
     (section: string) => {
@@ -327,10 +310,15 @@ export function useConfigureActionController(flow: ConfigureBundleFlowDraft) {
     },
     [flow],
   );
-  const handleTemplatePreview = useCallback(async () => {
-    const previewStarted = await handlePreviewBundle();
-    if (previewStarted) {
-      window.setTimeout(flow.closeSelectTemplateModal, 500);
+  const handleTemplatePreview = useCallback(async (
+    onPreviewOpened?: (previewUrl: string) => void,
+  ) => {
+    const previewUrl = await handlePreviewBundle();
+    if (previewUrl) {
+      window.setTimeout(() => {
+        flow.closeSelectTemplateModal();
+        onPreviewOpened?.(previewUrl);
+      }, 500);
     }
   }, [flow, handlePreviewBundle]);
   const handleAddNewStep = useCallback(() => {

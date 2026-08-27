@@ -1,10 +1,25 @@
 import {
+  batchCheckStorefrontVariants,
   validateVariantIdFromShopify,
   isVariantExistsOnShopifyStorefront,
   resolveShopifyVariantNumericId,
 } from "../../../app/lib/variant-existence.server";
 
+const mockStorefrontGraphql = jest.fn();
+
+jest.mock("../../../app/shopify.server", () => ({
+  unauthenticated: {
+    storefront: jest.fn(async () => ({
+      storefront: { graphql: mockStorefrontGraphql },
+    })),
+  },
+}));
+
 describe("variant-existence helpers", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it("normalizes gid, numeric and slash-form variant ids to the same numeric form", async () => {
     await expect(validateVariantIdFromShopify("gid://shopify/ProductVariant/123456"))
       .resolves.toMatchObject({ numericId: "123456", isValidFormat: true });
@@ -47,5 +62,38 @@ describe("variant-existence helpers", () => {
     } finally {
       (globalThis as any).fetch = originalFetch;
     }
+  });
+
+  it("checks unique storefront-visible variants in one batch", async () => {
+    mockStorefrontGraphql.mockResolvedValue({
+      json: async () => ({
+        data: {
+          nodes: [
+            { id: "gid://shopify/ProductVariant/111", availableForSale: false },
+            null,
+          ],
+        },
+      }),
+    });
+
+    const result = await batchCheckStorefrontVariants(
+      "example.myshopify.com",
+      ["111", "404", "111"],
+    );
+
+    expect(mockStorefrontGraphql).toHaveBeenCalledTimes(1);
+    expect(mockStorefrontGraphql).toHaveBeenCalledWith(
+      expect.stringContaining("StorefrontVariantVisibilityBatch"),
+      {
+        variables: {
+          ids: [
+            "gid://shopify/ProductVariant/111",
+            "gid://shopify/ProductVariant/404",
+          ],
+        },
+      },
+    );
+    expect(result.get("111")).toMatchObject({ ok: true, status: 200, available: false });
+    expect(result.get("404")).toMatchObject({ ok: false, status: 404 });
   });
 });

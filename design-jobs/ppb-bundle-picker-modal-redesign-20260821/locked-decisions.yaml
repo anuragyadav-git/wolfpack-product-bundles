@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "job_id": "ppb-bundle-picker-modal-redesign-20260821",
-  "revision": 6,
+  "revision": 8,
   "status": "approved",
   "locked": [
     {
@@ -277,7 +277,7 @@
       "evidence_ids": [
         "user-2026-08-21-filled-slot-cross-badge"
       ],
-      "status": "approved",
+      "status": "superseded",
       "approved_by": "Aditya",
       "approved_at": "2026-08-21",
       "revision_introduced": 6,
@@ -305,7 +305,7 @@
       "evidence_ids": [
         "user-2026-08-21-filled-slot-height-approval"
       ],
-      "status": "approved",
+      "status": "superseded",
       "approved_by": "Aditya",
       "approved_at": "2026-08-21",
       "revision_introduced": 6,
@@ -318,6 +318,68 @@
         "design-tokens.json",
         "content-stress-cases.yaml",
         "implementation-handoff.md",
+        "browser-test-plan.yaml"
+      ]
+    },
+    {
+      "id": "DEC-014",
+      "question": "Vertical filled-slot parity target",
+      "options_considered": [
+        "retain revision-6 WPB bounded row and overlaid 44px badge",
+        "match the measured live EB compact row exactly"
+      ],
+      "recommendation": "match the measured live EB compact row exactly",
+      "selected_value": "64px full-width row, 50px media, 5px padding and gap, 2px black border, 10px radius, bold 16px identity, no price, and inline 20px circular-cross remove visual",
+      "rationale": "The user rejected revision 6 and explicitly required the Vertical filled state to match EB exactly; direct Chrome measurements agree at desktop and mobile.",
+      "evidence_ids": [
+        "user-2026-08-21-exact-eb-filled-row",
+        "live-eb-2026-08-21-1280x800",
+        "live-eb-2026-08-21-390x844"
+      ],
+      "status": "superseded",
+      "approved_by": "Aditya",
+      "approved_at": "2026-08-21",
+      "revision_introduced": 7,
+      "affected_artifacts": [
+        "component-anatomy.md",
+        "state-matrix.md",
+        "responsive-contract.md",
+        "interaction-contract.md",
+        "design-tokens.json",
+        "implementation-handoff.md",
+        "codex-task.md",
+        "acceptance-criteria.md",
+        "browser-test-plan.yaml"
+      ]
+    },
+    {
+      "id": "DEC-015",
+      "question": "Vertical filled-row design authority",
+      "options_considered": [
+        "retain revision-7 WPB caps, clipping, flex fill, and pointer treatment",
+        "follow only the measured live EB design"
+      ],
+      "recommendation": "follow only the measured live EB design",
+      "selected_value": "content-derived 64px normal row, 60px minimum, no maximum, visible wrapping and overflow, intrinsic flex sizing, inert filled row, and inline one-unit Remove control",
+      "rationale": "The user explicitly rejected revision 7 and required the live EB design alone; a fresh computed-style diff identified and removed the remaining WPB-specific constraints.",
+      "evidence_ids": [
+        "user-2026-08-21-eb-design-only",
+        "live-eb-computed-style-2026-08-21-390x844"
+      ],
+      "status": "approved",
+      "approved_by": "Aditya",
+      "approved_at": "2026-08-21",
+      "revision_introduced": 8,
+      "affected_artifacts": [
+        "component-brief.md",
+        "visual-audit.md",
+        "component-anatomy.md",
+        "responsive-contract.md",
+        "interaction-contract.md",
+        "design-tokens.json",
+        "implementation-handoff.md",
+        "codex-task.md",
+        "acceptance-criteria.md",
         "browser-test-plan.yaml"
       ]
     }
@@ -343,6 +405,11 @@
       "revision": 5,
       "decision": "full natural title with a separate outlined icon-and-text Remove action below product information",
       "reason": "Revision 6 replaces the separate action with an overlaid cross badge and introduces a filled-slot height cap"
+    },
+    {
+      "revision": 6,
+      "decision": "Vertical bounded responsive row with an overlaid 44px cross badge",
+      "reason": "Revision 7 replaces only the Vertical presentation with the freshly measured exact EB row; Horizontal remains unchanged"
     }
   ],
   "decision_shape": null

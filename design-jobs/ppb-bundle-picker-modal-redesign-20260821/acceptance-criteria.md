@@ -26,7 +26,7 @@ keywords:
 # Acceptance Criteria
 
 Artifact job ID: ppb-bundle-picker-modal-redesign-20260821
-Artifact revision: 6
+Artifact revision: 8
 Artifact status: approved
 
 - [ ] Required states follow business rules without duplicate updates.
@@ -49,9 +49,11 @@ Artifact status: approved
 - [ ] Horizontal Slots and Vertical Slots use the same redesigned picker.
 - [ ] The sheet is 85dvh at all five required viewports.
 - [ ] Header and footer remain visible while only the catalog scrolls.
-- [ ] Horizontal and Vertical filled slots do not exceed their approved responsive maximum height; titles wrap and visually clamp only when the cap is reached.
-- [ ] The complete product name remains available in the slot's programmatic name and product-details surface even when visible text is clamped.
-- [ ] Each removable filled slot exposes a compact overlaid cross badge with a 44px minimum target and localized product-specific accessible name; it removes exactly that selection and preserves same-index focus restoration.
+- [ ] Horizontal filled slots retain their approved bounded tile presentation.
+- [ ] Vertical filled slots follow live EB only: responsive full width, content-derived 64px normal height, 60px minimum, no maximum, visible normal title wrapping/overflow, intrinsic flex sizing, 50px media, 5px padding and gap, 2px black border, 10px radius, bold 16px identity, no price, and a 20px inline trailing circular-cross visual.
+- [ ] The Vertical filled row surface is inert; its cross removes exactly one represented unit. Horizontal filled-slot replacement remains unchanged.
+- [ ] The complete product name remains available in the slot's programmatic names.
+- [ ] Each Remove control retains its localized product-specific accessible name, removes exactly that selection, and preserves same-index focus restoration; the 20px exact-EB visual exception applies only to Vertical.
 - [ ] The footer summary shrink-wraps icon/count/price content, keeps the icon and count aligned, grows for longer values, and remains inside the footer without page overflow.
 - [ ] Product actions and focus rings are never covered by the footer.
 - [ ] Desktop provides intrinsic four/five-column capacity; tablet and mobile use two columns.

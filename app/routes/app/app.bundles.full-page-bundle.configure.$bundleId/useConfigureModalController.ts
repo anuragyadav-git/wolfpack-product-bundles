@@ -11,15 +11,11 @@ export function useConfigureModalController(flow: ConfigureBundleFlowDraft) {
     closeCollectionsModal,
     closeProductsModal,
     isAddonSelectedProductsModalOpen,
-    isBundleQuantityMultiLangModalOpen,
     isCollectionsModalOpen,
     isProductsModalOpen,
-    isProgressBarMultiLangModalOpen,
     isSyncModalOpen,
     setCurrentModalStepId,
     setIsAddonSelectedProductsModalOpen,
-    setIsBundleQuantityMultiLangModalOpen,
-    setIsProgressBarMultiLangModalOpen,
     setIsSyncModalOpen,
   } = flow;
   const productsModalRef = useRef<any>(null);
@@ -53,19 +49,6 @@ export function useConfigureModalController(flow: ConfigureBundleFlowDraft) {
       ? showPolarisModal(syncModalRef)
       : hidePolarisModal(syncModalRef);
   }, [isSyncModalOpen]);
-  useEffect(() => {
-    isProgressBarMultiLangModalOpen
-      ? showPolarisModal(flow.progressBarMultiLangModalRef)
-      : hidePolarisModal(flow.progressBarMultiLangModalRef);
-  }, [flow.progressBarMultiLangModalRef, isProgressBarMultiLangModalOpen]);
-  useEffect(() => {
-    isBundleQuantityMultiLangModalOpen
-      ? showPolarisModal(flow.bundleQuantityMultiLangModalRef)
-      : hidePolarisModal(flow.bundleQuantityMultiLangModalRef);
-  }, [
-    flow.bundleQuantityMultiLangModalRef,
-    isBundleQuantityMultiLangModalOpen,
-  ]);
   useEffect(() => {
     isDiscountVariablesModalOpen
       ? showPolarisModal(discountVariablesModalRef)
@@ -104,12 +87,6 @@ export function useConfigureModalController(flow: ConfigureBundleFlowDraft) {
   useModalHideListener(productsModalRef, handleCloseProductsModal);
   useModalHideListener(collectionsModalRef, handleCloseCollectionsModal);
   useModalHideListener(syncModalRef, () => setIsSyncModalOpen(false));
-  useModalHideListener(flow.progressBarMultiLangModalRef, () =>
-    setIsProgressBarMultiLangModalOpen(false),
-  );
-  useModalHideListener(flow.bundleQuantityMultiLangModalRef, () =>
-    setIsBundleQuantityMultiLangModalOpen(false),
-  );
   useModalHideListener(discountVariablesModalRef, () =>
     setIsDiscountVariablesModalOpen(false),
   );

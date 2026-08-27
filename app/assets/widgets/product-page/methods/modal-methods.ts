@@ -472,18 +472,26 @@ renderVariantSelector(product: any) {
   `;
 },
 
-// Render loading skeleton for modal product grid - solid pulsating cards
-// No internal button/quantity skeletons - just clean solid cards
-renderModalProductsLoading(stepIndex: any) {
-  const productGrid = this.elements.modal.querySelector('.product-grid');
+// Render loading animation for modal product grid using merchant-configured GIF or default spinner
+renderModalProductsLoading(_stepIndex?: any) {
+  const productGrid = this.elements?.modal?.querySelector('.product-grid');
+  if (!productGrid) return;
 
-  productGrid.innerHTML = `
-    ${Array(6).fill(0).map(() => `
-      <div class="product-card skeleton-loading">
-        <div class="skeleton-card-content"></div>
+  const gifUrl = this.selectedBundle?.loadingGif || this.config?.loadingGif || null;
+
+  if (gifUrl) {
+    productGrid.innerHTML = `
+      <div class="bw-bs-modal-loading" role="status" aria-label="Loading products">
+        <img class="bundle-loading-overlay__gif" src="${ComponentGenerator.escapeHtml(gifUrl)}" alt="Loading..." />
       </div>
-    `).join('')}
-  `;
+    `;
+  } else {
+    productGrid.innerHTML = `
+      <div class="bw-bs-modal-loading" role="status" aria-label="Loading products">
+        <div class="bundle-loading-overlay__spinner" role="status" aria-label="Loading"></div>
+      </div>
+    `;
+  }
 },
 
 // Preload next step's products in the background

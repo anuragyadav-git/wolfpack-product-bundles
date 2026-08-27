@@ -1,168 +1,171 @@
 {
   "schema_version": 1,
   "job_id": "ppb-selected-slot-redesign-20260821",
-  "revision": 2,
-  "status": "approved",
+  "revision": 4,
+  "status": "complete",
   "groups": {
     "color": [
       {
-        "name": "--bw-ppb-slot-surface",
-        "value": "var(--bundle-surface-color)",
-        "unit": "css-token",
+        "name": "slot-surface",
+        "value": "existing storefront surface token",
         "source": "repository-existing",
         "confidence": "high",
-        "merchant_configurable": true,
-        "owner": "existing bundle surface token",
-        "notes": "Neutral slot surface; do not add a separate merchant setting."
+        "owner": "PPB modal-slot CSS"
       },
       {
-        "name": "--bw-ppb-slot-accent",
-        "value": "var(--bundle-global-primary-button)",
-        "unit": "css-token",
-        "source": "repository-existing",
+        "name": "slot-border",
+        "value": "existing storefront foreground token",
+        "source": "repository-existing translated from EB black target",
         "confidence": "high",
-        "merchant_configurable": true,
-        "owner": "existing merchant primary token",
-        "notes": "Reserved for focus and restrained selected confirmation."
+        "owner": "PPB modal-slot CSS"
       }
     ],
     "typography": [
       {
-        "name": "--bw-ppb-slot-type",
-        "value": "inherit",
-        "unit": "keyword",
-        "source": "repository-existing",
+        "name": "filled-title",
+        "value": "inherit; bold; one visual line",
+        "source": "live EB target",
         "confidence": "high",
-        "merchant_configurable": true,
-        "owner": "storefront typography inheritance",
-        "notes": "Title, variant, and price use existing hierarchy; no isolated font system."
+        "owner": "storefront typography inheritance"
+      },
+      {
+        "name": "empty-label",
+        "value": "inherit; existing saved label",
+        "source": "live EB target and repository contract",
+        "confidence": "high",
+        "owner": "storefront typography inheritance"
       }
     ],
     "spacing": [
       {
-        "name": "--bw-ppb-slot-space",
-        "value": "clamp(0.5rem, 2cqi, 0.875rem)",
-        "unit": "css-expression",
-        "source": "recommendation",
-        "confidence": "medium",
-        "merchant_configurable": false,
-        "owner": "PPB modal-slot CSS",
-        "notes": "One restrained responsive spacing alias for card padding and internal gaps."
+        "name": "filled-padding",
+        "value": 5,
+        "unit": "px",
+        "source": "live EB desktop and mobile computed style",
+        "confidence": "high",
+        "owner": "PPB modal-slot CSS"
+      },
+      {
+        "name": "filled-internal-gap",
+        "value": 5,
+        "unit": "px",
+        "source": "live EB desktop and mobile computed style",
+        "confidence": "high",
+        "owner": "PPB modal-slot CSS"
+      },
+      {
+        "name": "row-gap-mobile",
+        "value": 14,
+        "unit": "px",
+        "source": "live EB 390px computed style",
+        "confidence": "high",
+        "owner": "PPB modal-slot CSS"
+      },
+      {
+        "name": "row-gap-desktop",
+        "value": 16,
+        "unit": "px",
+        "source": "live EB 1280px computed style",
+        "confidence": "high",
+        "owner": "PPB modal-slot CSS"
+      },
+      {
+        "name": "step-gap",
+        "value": 26,
+        "unit": "px",
+        "source": "live EB desktop and mobile computed style",
+        "confidence": "high",
+        "owner": "PPB modal-slot CSS"
       }
     ],
     "size": [
       {
-        "name": "--bw-ppb-slot-target",
+        "name": "filled-row-height",
+        "value": 64,
+        "unit": "px",
+        "source": "live EB desktop and mobile computed geometry",
+        "confidence": "high",
+        "owner": "PPB modal-slot CSS",
+        "notes": "Target height; accessible text zoom may increase it."
+      },
+      {
+        "name": "empty-row-height",
+        "value": 60,
+        "unit": "px",
+        "source": "live EB desktop and mobile computed geometry",
+        "confidence": "high",
+        "owner": "PPB modal-slot CSS",
+        "notes": "Target height; localization or zoom may increase it."
+      },
+      {
+        "name": "media-size",
+        "value": 50,
+        "unit": "px",
+        "source": "live EB desktop and mobile computed geometry",
+        "confidence": "high",
+        "owner": "PPB modal-slot CSS"
+      },
+      {
+        "name": "semantic-action-target",
         "value": 44,
         "unit": "px",
-        "source": "user-defined-accessibility-contract",
+        "source": "Wolfpack accessibility contract",
         "confidence": "high",
-        "merchant_configurable": false,
-        "owner": "PPB modal-slot CSS",
-        "notes": "True interaction primitive; visible icon may be smaller."
-      },
-      {
-        "name": "--bw-ppb-slot-tile-min-inline",
-        "value": "content-legibility threshold",
-        "unit": "constraint",
-        "source": "recommendation",
-        "confidence": "medium",
-        "merchant_configurable": false,
-        "owner": "PPB modal-slot CSS",
-        "notes": "Single minmax token validated in Chrome; column count reduces before title, price, or actions collide."
-      },
-      {
-        "name": "--bw-ppb-slot-tile-min-block",
-        "value": "clamp(11rem, 48cqi, 13rem)",
-        "unit": "css-expression",
-        "source": "recommendation",
-        "confidence": "medium",
-        "merchant_configurable": false,
-        "owner": "PPB modal-slot CSS",
-        "notes": "Replaces fixed 200px ownership while reserving equal empty/filled geometry."
-      },
-      {
-        "name": "--bw-ppb-slot-row-min-block",
-        "value": "max(4rem, max-content)",
-        "unit": "css-expression",
-        "source": "recommendation",
-        "confidence": "medium",
-        "merchant_configurable": false,
-        "owner": "PPB modal-slot CSS",
-        "notes": "Compact Vertical row that may grow for zoom or long content."
+        "owner": "existing slot interaction owner"
       }
     ],
     "radius": [
       {
-        "name": "--bw-ppb-slot-radius",
-        "value": "clamp(0.5rem, 1.5cqi, 0.75rem)",
-        "unit": "css-expression",
-        "source": "recommendation",
-        "confidence": "medium",
-        "merchant_configurable": false,
-        "owner": "PPB modal-slot CSS",
-        "notes": "Shared by empty and filled slots."
+        "name": "row-radius",
+        "value": 10,
+        "unit": "px",
+        "source": "live EB desktop and mobile computed style",
+        "confidence": "high",
+        "owner": "PPB modal-slot CSS"
       }
     ],
     "border": [
       {
-        "name": "--bw-ppb-slot-hairline",
-        "value": 1,
-        "unit": "px",
-        "source": "user-defined-design-contract",
+        "name": "filled-border",
+        "value": "2px solid",
+        "source": "live EB desktop and mobile computed style",
         "confidence": "high",
-        "merchant_configurable": false,
-        "owner": "PPB modal-slot CSS",
-        "notes": "True hairline primitive; selection is not a permanent heavy outline."
+        "owner": "PPB modal-slot CSS"
+      },
+      {
+        "name": "empty-border",
+        "value": "2px dashed",
+        "source": "live EB desktop and mobile computed style",
+        "confidence": "high",
+        "owner": "PPB modal-slot CSS"
       }
     ],
     "shadow": [
       {
-        "name": "--bw-ppb-slot-shadow",
+        "name": "row-shadow",
         "value": "none",
-        "unit": "keyword",
-        "source": "approved-direction",
+        "source": "live EB target",
         "confidence": "high",
-        "merchant_configurable": false,
-        "owner": "PPB modal-slot CSS",
-        "notes": "Quiet surface; focus treatment remains visible without a decorative card shadow."
+        "owner": "PPB modal-slot CSS"
       }
     ],
-    "z_index": [],
     "motion": [
       {
-        "name": "--bw-ppb-slot-motion",
-        "value": "short existing control transition",
-        "unit": "semantic-duration",
-        "source": "repository-existing",
-        "confidence": "medium",
-        "merchant_configurable": false,
-        "owner": "existing storefront motion system",
-        "notes": "No overshoot; resolves to none under prefers-reduced-motion."
+        "name": "row-motion",
+        "value": "none required",
+        "source": "accessibility contract",
+        "confidence": "high",
+        "owner": "PPB modal-slot CSS"
       }
     ],
     "breakpoint": [
       {
-        "name": "--bw-ppb-picker-desktop-boundary",
+        "name": "picker-desktop-boundary",
         "value": 768,
         "unit": "px",
         "source": "repository-existing",
         "confidence": "high",
-        "merchant_configurable": false,
-        "owner": "existing PPB picker contract",
-        "notes": "Does not change selected-slot anatomy; verify at 767 and 768."
-      }
-    ],
-    "component_alias": [
-      {
-        "name": "--bw-ppb-slot-grid-columns",
-        "value": "repeat(auto-fit, minmax(min(100%, var(--bw-ppb-slot-tile-min-inline)), 1fr))",
-        "unit": "css-expression",
-        "source": "recommendation",
-        "confidence": "medium",
-        "merchant_configurable": false,
-        "owner": "PPB modal-slot CSS",
-        "notes": "Horizontal only; Vertical remains one column."
+        "owner": "existing PPB picker contract"
       }
     ]
   }

@@ -5,7 +5,7 @@ title: Test Spec - Admin All Routes LCP
 type: test-spec
 status: active
 summary: Enforces strict route-level Admin LCP and production chunk isolation.
-last_audited: 2026-07-30
+last_audited: 2026-08-25
 owners:
   - engineering
 domains:
@@ -14,7 +14,8 @@ domains:
 systems:
   - remix
 source_paths:
-  - app/lib/admin-web-vitals-diagnostics.client.ts
+  - app/routes/app/app.dashboard/route.tsx
+  - app/routes/app/app.dashboard/DashboardPage.tsx
 related_docs:
   - internal docs/Operations/Admin Performance.md
 tags:
@@ -47,3 +48,4 @@ Keep the authenticated Admin shell lightweight and enforce the strict app-owned 
 - [x] The shared `/app` layout does not own Redux or React Polaris.
 - [x] The shared app loader does not read `firstCreateTourEligible`.
 - [x] Production manifest checks pass.
+- [x] The temporary diagnostics were removed after the measurement and optimization cycle.

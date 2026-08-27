@@ -4,6 +4,8 @@ import { renderToStaticMarkup } from "react-dom/server";
 jest.mock("@remix-run/react", () => ({
   Outlet: () => React.createElement("main", null, "outlet"),
   useLoaderData: jest.fn(),
+  useLocation: jest.fn(),
+  useNavigation: jest.fn(),
   useNavigate: () => jest.fn(),
   useRouteError: () => null,
   isRouteErrorResponse: jest.fn(),
@@ -26,10 +28,6 @@ jest.mock("../../../app/shopify.server", () => ({
 jest.mock("../../../app/db.server", () => ({
   __esModule: true,
   default: { session: {} },
-}));
-
-jest.mock("../../../app/services/offline-token.server", () => ({
-  ensureShopHasExpiringOfflineSession: jest.fn(),
 }));
 
 jest.mock("../../../app/lib/logger", () => ({
@@ -60,11 +58,13 @@ jest.mock("../../../app/components/ErrorPage", () => ({
   ErrorPage: () => null,
 }));
 
-const { useLoaderData } = require("@remix-run/react");
+const { useLoaderData, useLocation, useNavigation } = require("@remix-run/react");
 
 describe("app Admin shell provider", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    useLocation.mockReturnValue({ pathname: "/app/dashboard" });
+    useNavigation.mockReturnValue({ state: "idle" });
   });
 
   it("renders the Admin tree without global React Polaris or Redux providers", async () => {
@@ -80,5 +80,59 @@ describe("app Admin shell provider", () => {
     expect(markup).not.toContain("data-redux-provider");
     expect(markup).not.toContain("data-mantle-provider");
     expect(markup).toContain("<main>outlet</main>");
+  });
+
+  it("keeps the current Admin page rendered while another page is loading", async () => {
+    useLoaderData.mockReturnValue({
+      apiKey: "shopify-api-key",
+      locale: "en",
+      shop: "test-shop.myshopify.com",
+    });
+    useNavigation.mockReturnValue({
+      state: "loading",
+      location: { pathname: "/app/settings" },
+    });
+    const { default: App } = await import("../../../app/routes/app/app");
+
+    const view = renderToStaticMarkup(React.createElement(App));
+
+    expect(view).toContain("<main>outlet</main>");
+    expect(view).not.toContain('role="progressbar"');
+  });
+
+  it.each([
+    ["loading", "/app/dashboard"],
+    ["submitting", "/app/settings"],
+  ])("does not render app-owned navigation feedback for %s state", async (state, pathname) => {
+    useLoaderData.mockReturnValue({
+      apiKey: "shopify-api-key",
+      locale: "en",
+      shop: "test-shop.myshopify.com",
+    });
+    useNavigation.mockReturnValue({ state, location: { pathname } });
+    const { default: App } = await import("../../../app/routes/app/app");
+
+    const view = renderToStaticMarkup(React.createElement(App));
+
+    expect(view).not.toContain('aria-label="Loading page"');
+  });
+
+  it("identifies only pathname-changing loader navigation", async () => {
+    const { isAdminPageNavigationLoading } = await import("../../../app/routes/app/app");
+
+    expect(isAdminPageNavigationLoading("loading", "/app/dashboard", "/app/settings")).toBe(true);
+    expect(isAdminPageNavigationLoading("loading", "/app/dashboard", "/app/dashboard")).toBe(false);
+    expect(isAdminPageNavigationLoading("submitting", "/app/dashboard", "/app/settings")).toBe(false);
+  });
+
+  it("starts and cleans up Shopify Admin navigation loading", async () => {
+    const { syncAdminNavigationLoading } = await import("../../../app/routes/app/app");
+    const loading = jest.fn();
+
+    const cleanup = syncAdminNavigationLoading(true, loading);
+
+    expect(loading).toHaveBeenCalledWith(true);
+    cleanup();
+    expect(loading).toHaveBeenLastCalledWith(false);
   });
 });

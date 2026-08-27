@@ -1,11 +1,7 @@
 import {
-  buildThemeAppEmbedEditorUrl,
-  fetchBundleProduct,
-  fetchEmbedData,
-  fetchShopCurrencyCode,
-  fetchShopLocales,
+  fetchBundleConfigureShopifyData,
 } from "../../../app/lib/bundle-configure-loader.server";
-import { checkAppEmbedEnabled } from "../../../app/services/theme/app-embed-check.server";
+import { AppLogger } from "../../../app/lib/logger";
 
 jest.mock("../../../app/lib/logger", () => ({
   AppLogger: {
@@ -13,176 +9,92 @@ jest.mock("../../../app/lib/logger", () => ({
   },
 }));
 
-jest.mock("../../../app/services/theme/app-embed-check.server", () => ({
-  checkAppEmbedEnabled: jest.fn(),
-}));
-
-const mockShopUpdate = jest.fn().mockResolvedValue({});
-const mockShopFindUnique = jest.fn();
-
-jest.mock("../../../app/db.server", () => ({
-  __esModule: true,
-  default: {
-    shop: {
-      findUnique: (...args: unknown[]) => mockShopFindUnique(...args),
-      update: (...args: unknown[]) => mockShopUpdate(...args),
-    },
-  },
-}));
-
-const THEME_GID = "gid://shopify/OnlineStoreTheme/123456";
-const SHOP = "test.myshopify.com";
-const API_KEY = "test-api-key";
-
-describe("fetchEmbedData — live Shopify app embed status", () => {
-  const mockAdmin = {};
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it("does not read app embed cache from DB", async () => {
-    mockShopFindUnique.mockRejectedValue(new Error("DB cache must not be read"));
-    (checkAppEmbedEnabled as jest.Mock).mockResolvedValue({ enabled: false, themeId: THEME_GID });
-
-    const result = await fetchEmbedData(mockAdmin, SHOP, API_KEY);
-
-    expect(result.appEmbedEnabled).toBe(false);
-    expect(result.themeEditorUrl).toContain("123456");
-    expect(checkAppEmbedEnabled).toHaveBeenCalledTimes(1);
-    expect(mockShopFindUnique).not.toHaveBeenCalled();
-    expect(mockShopUpdate).not.toHaveBeenCalled();
-  });
-
-  it("does not persist Shopify app embed status after a live read", async () => {
-    (checkAppEmbedEnabled as jest.Mock).mockResolvedValue({ enabled: true, themeId: THEME_GID });
-
-    const result = await fetchEmbedData(mockAdmin, SHOP, API_KEY);
-
-    expect(checkAppEmbedEnabled).toHaveBeenCalledTimes(1);
-    expect(mockShopFindUnique).not.toHaveBeenCalled();
-    expect(mockShopUpdate).not.toHaveBeenCalled();
-    expect(result.appEmbedEnabled).toBe(true);
-  });
-
-  it("returns disabled directly from Shopify without writing cache", async () => {
-    (checkAppEmbedEnabled as jest.Mock).mockResolvedValue({ enabled: false, themeId: THEME_GID });
-
-    const result = await fetchEmbedData(mockAdmin, SHOP, API_KEY);
-
-    expect(checkAppEmbedEnabled).toHaveBeenCalledTimes(1);
-    expect(mockShopFindUnique).not.toHaveBeenCalled();
-    expect(mockShopUpdate).not.toHaveBeenCalled();
-    expect(result.appEmbedEnabled).toBe(false);
-  });
-
-  it("does not write cache when Shopify returns themeId:null", async () => {
-    (checkAppEmbedEnabled as jest.Mock).mockResolvedValue({ enabled: false, themeId: null });
-
-    await fetchEmbedData(mockAdmin, SHOP, API_KEY);
-
-    expect(mockShopFindUnique).not.toHaveBeenCalled();
-    expect(mockShopUpdate).not.toHaveBeenCalled();
-  });
-
-  it("builds correct theme editor URL from the live themeId", async () => {
-    (checkAppEmbedEnabled as jest.Mock).mockResolvedValue({ enabled: true, themeId: THEME_GID });
-
-    const result = await fetchEmbedData(mockAdmin, SHOP, API_KEY, "bundle-app-embed");
-
-    expect(result.themeEditorUrl).toBe(
-      `https://${SHOP}/admin/themes/123456/editor?context=apps&activateAppId=${API_KEY}%2Fbundle-app-embed`,
-    );
-  });
-
-  it("delegates app identity to the embed checker's Shopify query", async () => {
-    (checkAppEmbedEnabled as jest.Mock).mockResolvedValue({
-      enabled: false,
-      themeId: THEME_GID,
-    });
-    const result = await fetchEmbedData(mockAdmin, SHOP, API_KEY, "bundle-app-embed");
-
-    expect(checkAppEmbedEnabled).toHaveBeenCalledWith(
-      mockAdmin,
-      SHOP,
-      {
-        blockHandles: ["bundle-app-embed"],
-      },
-    );
-    expect(mockShopFindUnique).not.toHaveBeenCalled();
-    expect(mockShopUpdate).not.toHaveBeenCalled();
-    expect(result.appEmbedEnabled).toBe(false);
-  });
-});
-
-describe("buildThemeAppEmbedEditorUrl", () => {
-  it("uses Shopify's activateAppId deep link parameter", () => {
-    expect(buildThemeAppEmbedEditorUrl(SHOP, THEME_GID, API_KEY, "bundle-app-embed")).toBe(
-      `https://${SHOP}/admin/themes/123456/editor?context=apps&activateAppId=${API_KEY}%2Fbundle-app-embed`,
-    );
-  });
-});
-
-describe("fetchBundleProduct", () => {
-  it("queries current Shopify product media for the Admin bundle product card", async () => {
-    const admin = {
-      graphql: jest.fn().mockResolvedValue({
-        json: async () => ({
-          data: {
-            product: {
-              id: "gid://shopify/Product/1",
-              title: "Product Page Fixture",
-              featuredMedia: {
-                image: { url: "https://cdn.shopify.com/placeholder.png" },
-              },
-            },
-          },
-        }),
-      }),
-    };
-
-    const product = await fetchBundleProduct(admin, "gid://shopify/Product/1", "bundle-1");
-
-    expect(product.title).toBe("Product Page Fixture");
-    expect(admin.graphql).toHaveBeenCalledWith(
-      expect.stringContaining("featuredMedia"),
-      expect.any(Object),
-    );
-    expect(admin.graphql).toHaveBeenCalledWith(
-      expect.stringContaining("media(first: 5)"),
-      expect.any(Object),
-    );
-  });
-});
-
-describe("fetchShopCurrencyCode", () => {
-  it("returns the shop currency from Shopify Admin", async () => {
+describe("fetchBundleConfigureShopifyData", () => {
+  it("loads product, currency, and published locales in one Shopify request", async () => {
     const graphql = jest.fn().mockResolvedValue({
       json: async () => ({
         data: {
+          product: { id: "gid://shopify/Product/1", title: "Bundle product" },
           shop: { currencyCode: "USD" },
+          shopLocales: [
+            { locale: "en", name: "English", primary: true, published: true },
+            { locale: "de", name: "German", primary: false, published: false },
+          ],
         },
       }),
     });
 
-    await expect(fetchShopCurrencyCode({ graphql })).resolves.toBe("USD");
+    await expect(fetchBundleConfigureShopifyData(
+      { graphql },
+      "gid://shopify/Product/1",
+      "bundle-1",
+    )).resolves.toEqual({
+      bundleProduct: { id: "gid://shopify/Product/1", title: "Bundle product" },
+      shopCurrencyCode: "USD",
+      shopLocales: [{ locale: "en", name: "English", primary: true }],
+    });
     expect(graphql).toHaveBeenCalledTimes(1);
-  });
-
-  it("propagates Shopify query failures instead of fabricating a currency", async () => {
-    const error = new Error("Shop query failed");
-    const graphql = jest.fn().mockRejectedValue(error);
-
-    await expect(fetchShopCurrencyCode({ graphql })).rejects.toBe(error);
-  });
-});
-
-describe("fetchShopLocales", () => {
-  it("keeps localization optional when the shop lacks locale access", async () => {
-    const graphql = jest.fn().mockRejectedValue(
-      new Error("Access denied for shopLocales field"),
+    expect(graphql).toHaveBeenCalledWith(
+      expect.stringContaining("product(id: $id)"),
+      { variables: { id: "gid://shopify/Product/1" } },
     );
+  });
 
-    await expect(fetchShopLocales({ graphql })).resolves.toEqual([]);
+  it("loads shop data without a product query when the bundle has no Shopify product", async () => {
+    const graphql = jest.fn().mockResolvedValue({
+      json: async () => ({
+        data: {
+          shop: { currencyCode: "GBP" },
+          shopLocales: [],
+        },
+      }),
+    });
+
+    await expect(fetchBundleConfigureShopifyData(
+      { graphql },
+      null,
+      "bundle-1",
+    )).resolves.toEqual({
+      bundleProduct: null,
+      shopCurrencyCode: "GBP",
+      shopLocales: [],
+    });
+    expect(graphql).toHaveBeenCalledTimes(1);
+    expect(graphql.mock.calls[0][0]).not.toContain("product(id:");
+  });
+
+  it("reports partial Shopify errors while keeping available required shop data", async () => {
+    const graphql = jest.fn().mockResolvedValue({
+      json: async () => ({
+        data: { shop: { currencyCode: "USD" } },
+        errors: [{ message: "Access denied for shopLocales field" }],
+      }),
+    });
+
+    await expect(fetchBundleConfigureShopifyData(
+      { graphql },
+      null,
+      "bundle-1",
+    )).resolves.toEqual({
+      bundleProduct: null,
+      shopCurrencyCode: "USD",
+      shopLocales: [],
+    });
+    expect(AppLogger.warn).toHaveBeenCalledWith(
+      "Shopify returned bundle configure data errors",
+      expect.objectContaining({ operation: "fetch-configure-data" }),
+    );
+  });
+
+  it("fails when Shopify omits the required shop currency", async () => {
+    const graphql = jest.fn().mockResolvedValue({
+      json: async () => ({ data: { shop: {}, shopLocales: [] } }),
+    });
+
+    await expect(fetchBundleConfigureShopifyData(
+      { graphql },
+      null,
+      "bundle-1",
+    )).rejects.toThrow("Shop currency is missing");
   });
 });

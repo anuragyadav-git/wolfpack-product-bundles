@@ -1,48 +1,35 @@
-import { lazy, Suspense, useMemo } from "react";
+import { Suspense } from "react";
 import { Await, useLoaderData, useNavigate } from "@remix-run/react";
+import { useTranslation } from "react-i18next";
 import { navigateBackOrFallback } from "../../../lib/navigation";
 import type { loader } from "../app.attribution";
 import styles from "./AttributionRouteShell.module.css";
-import {
-  AdminRouteLoadingBar,
-} from "../../../components/AdminRouteLoadingBar";
+import { AdminSectionLoadingState } from "../../../components/AdminSectionLoadingState";
 import {
   AdminPageBackTitle,
   AdminPageTitleBar,
 } from "../../../components/AdminPageNavigation";
+import { PixelStatusCard } from "./PixelStatusCard";
+import AttributionDashboard from "./AttributionDashboard";
 
-const AttributionDashboard = lazy(() => import("./AttributionDashboard"));
-const PixelStatusCard = lazy(() =>
-  import("./PixelStatusCard").then((module) => ({
-    default: module.PixelStatusCard,
-  }))
-);
-
-function AttributionCriticalFunnelHeader({ onBack }: { onBack: () => void }) {
+function AttributionCriticalFunnelHeader() {
   return (
-    <div className={styles.criticalHeroShell}>
-      <AdminPageBackTitle
-        title="Analytics"
-        backLabel="Back to previous page"
-        onBack={onBack}
-      />
-      <section
-        className={styles.criticalHeroCard}
-        aria-labelledby="wpb-critical-funnel-hero-title"
-      >
-        <header className={styles.criticalHeroHeader}>
-          <div>
-            <p className={styles.criticalHeroKicker}>Bundle Funnel</p>
-            <h2
-              id="wpb-critical-funnel-hero-title"
-              className={styles.criticalHeroTitle}
-            >
-              How shoppers move through your bundles
-            </h2>
-          </div>
-        </header>
-      </section>
-    </div>
+    <section
+      className={styles.criticalHeroCard}
+      aria-labelledby="wpb-critical-funnel-hero-title"
+    >
+      <header className={styles.criticalHeroHeader}>
+        <div>
+          <p className={styles.criticalHeroKicker}>Bundle Funnel</p>
+          <h2
+            id="wpb-critical-funnel-hero-title"
+            className={styles.criticalHeroTitle}
+          >
+            How shoppers move through your bundles
+          </h2>
+        </div>
+      </header>
+    </section>
   );
 }
 
@@ -53,56 +40,54 @@ function AttributionCriticalStatus({
 }) {
   return (
     <div className={styles.pixelStatusBoundary}>
-      <div className={styles.pixelStatusShell}>
-        <PixelStatusCard pixelActive={Boolean(status.active)} />
-      </div>
+      <PixelStatusCard pixelActive={Boolean(status.active)} />
     </div>
   );
 }
 
-export function waitForAnalyticsRouteReady<TAnalytics, TPixelStatus>(
-  analytics: Promise<TAnalytics>,
-  pixelStatus: Promise<TPixelStatus>,
-) {
-  return Promise.all([analytics, pixelStatus]);
-}
-
 export default function AttributionRouteShell() {
   const { analytics, pixelStatus } = useLoaderData<typeof loader>();
+  const { t } = useTranslation();
   const navigate = useNavigate();
-  const routeReady = useMemo(
-    () => waitForAnalyticsRouteReady(analytics, pixelStatus),
-    [analytics, pixelStatus],
-  );
   const handleBack = () =>
     navigateBackOrFallback(navigate, "/app/dashboard", {
       replaceFallback: true,
     });
 
   return (
-    <Suspense fallback={<AdminRouteLoadingBar label="Loading Analytics" />}>
-      <Await resolve={routeReady}>
-        {([resolvedAnalytics, resolvedPixelStatus]: any) => (
-          <>
-            <AdminPageTitleBar
-              title="Analytics"
-              breadcrumbLabel="Dashboard"
-              onBack={handleBack}
-            />
-            <s-query-container
-              containerName="analytics-page"
-              {...({ className: styles.analyticsQueryContainer } as any)}
-            >
-              <AttributionCriticalFunnelHeader onBack={handleBack} />
-              <AttributionCriticalStatus status={resolvedPixelStatus} />
-              <AttributionDashboard
-                data={resolvedAnalytics}
-                pixelStatus={resolvedPixelStatus}
-              />
-            </s-query-container>
-          </>
-        )}
-      </Await>
-    </Suspense>
+    <>
+      <AdminPageTitleBar
+        title="Analytics"
+        breadcrumbLabel="Dashboard"
+        onBack={handleBack}
+      />
+      <s-query-container
+        containerName="analytics-page"
+        {...({ className: styles.analyticsQueryContainer } as any)}
+      >
+        <div className={styles.criticalHeroShell}>
+          <AdminPageBackTitle
+            title="Analytics"
+            backLabel="Back to previous page"
+            onBack={handleBack}
+          />
+          <Suspense fallback={null}>
+            <Await resolve={pixelStatus}>
+              {(resolvedPixelStatus: any) => (
+                <AttributionCriticalStatus status={resolvedPixelStatus} />
+              )}
+            </Await>
+          </Suspense>
+          <AttributionCriticalFunnelHeader />
+        </div>
+        <Suspense fallback={<AdminSectionLoadingState label={t("common.loading.workspace")} />}>
+          <Await resolve={analytics}>
+            {(resolvedAnalytics: any) => (
+              <AttributionDashboard data={resolvedAnalytics} />
+            )}
+          </Await>
+        </Suspense>
+      </s-query-container>
+    </>
   );
 }

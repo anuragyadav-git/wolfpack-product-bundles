@@ -6,7 +6,7 @@
  */
 
 import { defer, json, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/node";
-import { requireAdminSession } from "../../lib/auth-guards.server";
+import { authenticate } from "../../shopify.server";
 import { getPixelStatus, activateUtmPixel, deactivateUtmPixel } from "../../services/pixel-activation.server";
 import { backfillOrderAttribution } from "../../services/analytics/order-backfill.server";
 import {
@@ -26,7 +26,7 @@ export { default } from "./app.attribution/AttributionRouteShell";
 
 
 export const action = async ({ request }: ActionFunctionArgs) => {
-  const { admin, session } = await requireAdminSession(request);
+  const { admin, session } = await authenticate.admin(request);
   const formData = await request.formData();
   const intent = formData.get("intent") as string;
   const shopId = session.shop;
@@ -479,7 +479,7 @@ async function loadAttributionDashboardData({
 export type AttributionDashboardData = Awaited<ReturnType<typeof loadAttributionDashboardData>>;
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const { admin, session } = await requireAdminSession(request);
+  const { admin, session } = await authenticate.admin(request);
   const url = new URL(request.url);
 
   return defer({

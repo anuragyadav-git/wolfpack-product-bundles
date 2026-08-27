@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "job_id": "ppb-bundle-picker-modal-redesign-20260821",
-  "revision": 6,
+  "revision": 8,
   "status": "complete",
   "design": {
     "status": "approved",
@@ -11,7 +11,9 @@
       "direction-comparison.md",
       "locked-decisions.yaml",
       "user-supplied revision-2 implementation plan",
-      "user-approved revision-6 height-cap recommendation"
+      "user-approved revision-6 height-cap recommendation",
+      "user-2026-08-21-exact-eb-filled-row",
+      "user-2026-08-21-eb-design-only"
     ],
     "waivers": []
   },
@@ -24,7 +26,9 @@
       "codex-task.md",
       "acceptance-criteria.md",
       "browser-test-plan.yaml",
-      "user-2026-08-21-revision-6-handoff-approval"
+      "user-2026-08-21-revision-6-handoff-approval",
+      "user-2026-08-21-exact-eb-filled-row",
+      "user-2026-08-21-eb-design-only"
     ],
     "waivers": []
   },
@@ -63,6 +67,20 @@
       "handoff": "approved",
       "implementation": "not-started",
       "reason": "Revision 6 replaces the separate Remove action and unbounded filled-slot title growth"
+    },
+    {
+      "revision": 6,
+      "design": "approved",
+      "handoff": "approved",
+      "implementation": "approved",
+      "reason": "Revision 7 replaces only the Vertical filled-row presentation with exact live-EB geometry"
+    },
+    {
+      "revision": 7,
+      "design": "approved",
+      "handoff": "approved",
+      "implementation": "not-started",
+      "reason": "Revision 8 removes the remaining WPB-specific height, clipping, flex, cursor, and filled-row replacement treatment"
     }
   ]
 }

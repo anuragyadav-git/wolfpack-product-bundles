@@ -5,7 +5,7 @@ title: EB Settings Design Reference
 type: reference
 status: authoritative
 summary: Live EB Settings Design request, state, and storefront-mapping contract used to implement Wolfpack Design settings.
-last_audited: 2026-08-13
+last_audited: 2026-08-23
 owners:
   - engineering
 domains:
@@ -210,6 +210,16 @@ the pure Loading surface, which renders the merchant GIF or the default spinner
 without provisional bundle content. While Loading is selected, Image Fit is
 disabled. The empty GIF control is one clickable drop zone with the instruction
 `Click to upload a loading GIF`; it does not render a nested upload button.
+
+The Images & GIFs section also owns the store-level product-slot image for every
+FPB and PPB template. The persisted Design JSON uses
+`stylePresets.images.slotIconUrl` plus `slotIconFit`, normalized to `badge`,
+`cover`, or `fit`; these are deliberately not direct Prisma columns. Centered
+badge replaces the native plus icon at its existing position and recommends a
+transparent 96 x 96 px square. Cover fills the responsive slot. Fit contains
+the image relative to the responsive slot and recommends an 800 x 800 px
+square. The same normalized values drive the Admin preview and generated
+storefront CSS.
 
 Descriptor identity and layout modes come from `mapTemplateSelection` and the
 FPB/PPB storefront template registries. The Admin adapter owns only preview

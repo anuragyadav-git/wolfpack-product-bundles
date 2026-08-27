@@ -79,7 +79,7 @@ function PpbBundleQuantityOptions() {
         </s-stack>
         <s-button
           variant="secondary"
-          icon="language-translate"
+          icon="globe"
           disabled={!qtyOptionsEnabled || shopLocales.length === 0 || undefined}
           onClick={() => setIsBundleQuantityMultiLangModalOpen(true)}
         >
@@ -230,7 +230,7 @@ function PpbProgressBarOptions() {
         </s-stack>
         <s-button
           variant="secondary"
-          icon="language-translate"
+          icon="globe"
           disabled={
             !progressBarEnabled ||
             progressBarType !== "step_based" ||

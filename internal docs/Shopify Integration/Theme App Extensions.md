@@ -5,7 +5,7 @@ title: Theme App Extensions
 type: shopify-integration
 status: authoritative
 summary: Theme extension handles, activation status, and App Bridge status source for Wolfpack storefront resources.
-last_audited: 2026-08-21
+last_audited: 2026-08-24
 owners:
   - engineering
 domains:
@@ -47,25 +47,7 @@ success result; inactive and rejected checks remain unresolved and expose retry
 and support actions. Closing after visiting Theme Editor performs one final
 deduplicated check.
 
-The server-side MAIN-theme `settings_data.json` checker remains available for legacy banner hydration and migration diagnostics, but it is not the authoritative client-side status source for the homepage or preview gate.
+Dashboard and configure routes do not parse theme files and do not return an app-embed status payload. They call `shopify.app.extensions()` after mount and fail closed if native extension data is unavailable. Shopify documents this theme-extension data as sourced from the published theme.
 
-Configure pages must also reconcile their initial server state with `shopify.app.extensions()` after mount. Shopify app embeds are activated per theme, so a development-theme preview can have the embed active while the published MAIN theme checker reports inactive. Keeping only the loader result produces a false enablement banner even though the same preview theme is already executing the embed. FPB and PPB both use the App Bridge result for their visible banner and Bundle Visibility state. While that result is pending, the configure UI suppresses the disabled banner to avoid flashing stale MAIN-theme state; if the client lookup fails, it falls back to the loader result.
-
-Server-side app embed detection depends on the app handle and app embed block handle in Shopify's settings data, not the extension UID alone. The app handle is fetched only from:
-
-```graphql
-currentAppInstallation {
-  app {
-    handle
-  }
-}
-```
-
-No environment or hardcoded app-handle fallback is allowed. The detected theme
-block must start with `shopify://apps/{current-app-handle}/blocks/` and contain
-the requested block handle. Missing or mismatched handles fail closed.
-
-An earlier production capture found a mismatch between the queried current app
-handle and a legacy handle persisted in theme settings. The detector no longer
-masks that configuration mismatch; the Shopify app identity or theme embed must
-be corrected instead.
+Theme Editor links use Shopify's current-theme route:
+`https://{shop}/admin/themes/current/editor?context=apps&activateAppId={apiKey}%2F{blockHandle}`.

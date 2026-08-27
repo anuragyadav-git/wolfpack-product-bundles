@@ -1,13 +1,8 @@
 import { json } from "@remix-run/node";
 import type { LoaderFunctionArgs } from "@remix-run/node";
-import prisma from "../../db.server";
 import { AppLogger } from "../../lib/logger";
-import { SHOPIFY_REST_API_VERSION } from "../../constants/api";
-import { getOfflineSessionForShop } from "../../services/offline-token.server";
-import { sessionStorage } from "../../shopify.server";
+import { authenticate } from "../../shopify.server";
 import { normalizeStorefrontQuantityAvailable } from "../../lib/storefront-variant-inventory";
-
-// auth: public — fetched directly by the storefront widget (browser request, no Shopify session available)
 
 const INVENTORY_FIELDS = "quantityAvailable currentlyNotInStock";
 const PRODUCT_IMAGE_LIMIT = 50;
@@ -18,16 +13,16 @@ const PRODUCT_IMAGE_LIMIT = 50;
  * Route: /api/storefront-collections?handles=collection-1,collection-2&shop=store.myshopify.com
  */
 export async function loader({ request }: LoaderFunctionArgs) {
+  const context = await authenticate.public.appProxy(request);
+  if (!context.session || !context.storefront) {
+    throw new Response("Unauthorized", { status: 401 });
+  }
+
   const url = new URL(request.url);
   const collectionHandles = url.searchParams.get("handles");
-  const shop = url.searchParams.get("shop");
 
   if (!collectionHandles) {
     return json({ error: "Missing collection handles" }, { status: 400 });
-  }
-
-  if (!shop) {
-    return json({ error: "Missing shop parameter" }, { status: 400 });
   }
 
   const handles = collectionHandles.split(",").map(h => h.trim()).filter(Boolean);
@@ -37,14 +32,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   }
 
   try {
-    const session = await getOfflineSessionForShop(prisma, shop, sessionStorage);
-
-    if (!session?.storefrontAccessToken) {
-      AppLogger.warn("[STOREFRONT_COLLECTIONS] No storefront token found for shop", { component: "api.storefront-collections", shop });
-      return json({ error: "Shop not configured. Please reinstall the app." }, { status: 404 });
-    }
-
-    const hasInventoryScope = (session.scope ?? "").includes("unauthenticated_read_product_inventory");
+    const hasInventoryScope = (context.session.scope ?? "").includes("unauthenticated_read_product_inventory");
     const inventoryFields = hasInventoryScope ? ` ${INVENTORY_FIELDS}` : "";
     // GraphQL query to fetch products from multiple collections
     const STOREFRONT_QUERY = `
@@ -111,30 +99,13 @@ export async function loader({ request }: LoaderFunctionArgs) {
       }
     `;
 
-    const storefrontAccessToken = session.storefrontAccessToken;
-    const storefrontUrl = `https://${shop}/api/${SHOPIFY_REST_API_VERSION}/graphql.json`;
-
     // Build query filter for handles
     const queryFilter = handles.map(h => `handle:${h}`).join(" OR ");
 
-    const response = await fetch(storefrontUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Shopify-Storefront-Access-Token': storefrontAccessToken
-      },
-      body: JSON.stringify({
-        query: STOREFRONT_QUERY,
-        variables: { query: queryFilter }
-      })
+    const response = await context.storefront.graphql(STOREFRONT_QUERY, {
+      variables: { query: queryFilter },
     });
-
-    if (!response.ok) {
-      AppLogger.error("[STOREFRONT_COLLECTIONS] Storefront API request failed", { component: "api.storefront-collections", status: response.status });
-      return json({ error: "Failed to fetch from Storefront API" }, { status: 500 });
-    }
-
-    const data = await response.json();
+    const data: any = await response.json();
 
     if (data.errors) {
       AppLogger.error("[STOREFRONT_COLLECTIONS] GraphQL errors", { component: "api.storefront-collections" }, data.errors);
@@ -206,7 +177,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
       count: uniqueProducts.length
     }, {
       headers: {
-        "Access-Control-Allow-Origin": "*",
         "Cache-Control": "public, max-age=300, s-maxage=600",
         "Vary": "Accept-Encoding"
       }
@@ -219,15 +189,4 @@ export async function loader({ request }: LoaderFunctionArgs) {
       message: error instanceof Error ? error.message : "Unknown error"
     }, { status: 500 });
   }
-}
-
-// Handle OPTIONS for CORS
-export async function options() {
-  return new Response(null, {
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type"
-    }
-  });
 }

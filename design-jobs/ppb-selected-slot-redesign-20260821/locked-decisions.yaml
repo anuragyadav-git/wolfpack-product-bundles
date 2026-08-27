@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "job_id": "ppb-selected-slot-redesign-20260821",
-  "revision": 2,
+  "revision": 4,
   "status": "approved",
   "locked": [
     {
@@ -60,6 +60,39 @@
         "acceptance-criteria.md",
         "browser-test-plan.yaml"
       ]
+    },
+    {
+      "id": "D-006",
+      "question": "What is the Revision 4 component boundary and visual target?",
+      "options_considered": [
+        "Retain the Revision 2 cross-orientation interpretation",
+        "Copy the live EB Vertical Slots empty and filled row treatment"
+      ],
+      "recommendation": "Copy the live EB Vertical Slots empty and filled row treatment",
+      "selected_value": "Live EB Vertical Row",
+      "rationale": "The user explicitly requested Revision 4 for Vertical Slots copied from EB, and direct Chrome evidence established exact desktop and mobile anatomy.",
+      "evidence_ids": [
+        "direction-comparison.md",
+        "visual-audit.md",
+        "screenshot-inventory.yaml"
+      ],
+      "status": "approved",
+      "approved_by": "user",
+      "approved_at": "2026-08-24T15:21:06Z",
+      "revision_introduced": 4,
+      "affected_artifacts": [
+        "component-anatomy.md",
+        "state-matrix.md",
+        "responsive-contract.md",
+        "interaction-contract.md",
+        "accessibility-checklist.md",
+        "design-tokens.json",
+        "content-stress-cases.yaml",
+        "implementation-handoff.md",
+        "codex-task.md",
+        "acceptance-criteria.md",
+        "browser-test-plan.yaml"
+      ]
     }
   ],
   "assumptions": [
@@ -82,7 +115,13 @@
     }
   ],
   "open": [],
-  "superseded": [],
+  "superseded": [
+    {
+      "id": "D-004-vertical-scope",
+      "value": "Direction A Vertical row with variant and price and equal empty/filled geometry",
+      "reason": "Superseded for Vertical Slots by Revision 4 live EB parity; the historical approval remains valid only for its prior revision."
+    }
+  ],
   "decision_shape": {
     "id": "",
     "question": "",

@@ -5,7 +5,18 @@
  * Spec : test-spec/unlisted-bundle-banner.spec.md
  *
  */
-import { buildShopifyProductAdminUrl } from "../../../app/components/UnlistedBundleBanner";
+import React from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import {
+  buildShopifyProductAdminUrl,
+  UnlistedBundleBanner,
+} from "../../../app/components/UnlistedBundleBanner";
+
+jest.mock("react-i18next", () => ({
+  useTranslation: () => ({
+    t: (key: string) => key,
+  }),
+}));
 
 describe("buildShopifyProductAdminUrl", () => {
   it("converts a full GID and .myshopify shop into an admin product URL", () => {
@@ -29,5 +40,37 @@ describe("buildShopifyProductAdminUrl", () => {
 
   it("returns null for empty productId", () => {
     expect(buildShopifyProductAdminUrl("s.myshopify.com", "")).toBeNull();
+  });
+
+  it("renders native informational loading feedback without a Manage action", () => {
+    const view = renderToStaticMarkup(
+      React.createElement(UnlistedBundleBanner, {
+        shop: "s.myshopify.com",
+        bundleProductId: "gid://shopify/Product/12345",
+        loading: true,
+        onManage: jest.fn(),
+      }),
+    );
+
+    expect(view).toContain('tone="info"');
+    expect(view).toContain("<s-spinner");
+    expect(view).toContain("common.parentProductStatus.loadingTitle");
+    expect(view).not.toContain("common.actions.manage");
+  });
+
+  it("retains the Unlisted warning and Manage action after status resolves", () => {
+    const view = renderToStaticMarkup(
+      React.createElement(UnlistedBundleBanner, {
+        shop: "s.myshopify.com",
+        bundleProductId: "gid://shopify/Product/12345",
+        loading: false,
+        onManage: jest.fn(),
+      }),
+    );
+
+    expect(view).toContain('tone="warning"');
+    expect(view).toContain("common.unlistedBundle.title");
+    expect(view).toContain("common.actions.manage");
+    expect(view).not.toContain("<s-spinner");
   });
 });

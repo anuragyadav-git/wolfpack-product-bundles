@@ -13,6 +13,7 @@ export function FpbAddonReferenceStepCard({
     openAddonStepMultiLanguageModal,
     setIsDisableAddonStepModalOpen,
     setShowIconPickerForStep,
+    shopLocales,
     showIconPickerForStep,
     updateAddonDraft,
   } = flow;
@@ -43,8 +44,12 @@ export function FpbAddonReferenceStepCard({
           <div className={fullPageBundleStyles.addonsHeaderActions}>
             <s-button
               variant="secondary"
-              icon="language-translate"
-              disabled={!addonDraft.isPersonalizationEnabled || undefined}
+              icon="globe"
+              disabled={
+                !addonDraft.isPersonalizationEnabled ||
+                shopLocales.length === 0 ||
+                undefined
+              }
               onClick={openAddonStepMultiLanguageModal}
             >
               Multi Language

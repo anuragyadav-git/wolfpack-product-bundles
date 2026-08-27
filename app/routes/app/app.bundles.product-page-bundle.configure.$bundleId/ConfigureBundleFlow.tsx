@@ -1,3 +1,4 @@
+import { lazy, Suspense, useEffect, useState } from "react";
 import productPageBundleStyles from "../../../styles/routes/product-page-bundle-configure.module.css";
 
 import { CommonConfigureShell } from "../_shared/bundle-configure/CommonConfigureShell";
@@ -10,28 +11,29 @@ import {
   PpbConfigureSidebar,
   PpbConfigureSupplement,
 } from "./PpbConfigureSidebar";
-import { ConfigureRouteLoadingWorkspace } from "../_shared/bundle-configure/ConfigureRouteLoadingWorkspace";
-import { PpbDiscountLanguageModals } from "./PpbDiscountLanguageModals";
 import { PpbMainSections } from "./PpbMainSections";
-import { PpbOverlayModals } from "./PpbOverlayModals";
-import { PpbPageSelectionModal } from "./PpbPageSelectionModal";
 import { PpbSaveForm } from "./PpbSaveForm";
-import { PpbSelectTemplateDialog } from "./PpbSelectTemplateDialog";
-import { PpbSelectedItemsModals } from "./PpbSelectedItemsModals";
-import { PpbUtilityModals } from "./PpbUtilityModals";
 import { usePpbConfigureFlow } from "./usePpbConfigureFlow";
+
+const PpbConfigureOverlays = lazy(() => import("./PpbConfigureOverlays").then((module) => ({ default: module.PpbConfigureOverlays })));
 
 function ConfigureBundleCanvas() {
   const flow = usePpbConfigureContext();
   const {
     blockConfigurationChangeWhileSaving,
     isSaveInFlight,
-    isCriticalStatusReady,
   } = flow;
+  const [showOverlays, setShowOverlays] = useState(false);
 
-  if (!isCriticalStatusReady) {
-    return <ConfigureRouteLoadingWorkspace />;
-  }
+  useEffect(() => {
+    const show = () => window.requestIdleCallback(() => setShowOverlays(true));
+    if (document.readyState === "complete") {
+      show();
+      return;
+    }
+    window.addEventListener("load", show, { once: true });
+    return () => window.removeEventListener("load", show);
+  }, []);
 
   return (
     <CommonConfigureShell
@@ -42,16 +44,11 @@ function ConfigureBundleCanvas() {
       header={<PpbCanvasHeader />}
       sidebar={<PpbConfigureSidebar />}
       supplementaryContent={<PpbConfigureSupplement />}
-      overlays={
-        <>
-          <PpbPageSelectionModal />
-          <PpbSelectedItemsModals />
-          <PpbSelectTemplateDialog />
-          <PpbUtilityModals />
-          <PpbDiscountLanguageModals />
-          <PpbOverlayModals />
-        </>
-      }
+      overlays={showOverlays ? (
+        <Suspense fallback={null}>
+          <PpbConfigureOverlays />
+        </Suspense>
+      ) : null}
     >
       <PpbMainSections />
     </CommonConfigureShell>

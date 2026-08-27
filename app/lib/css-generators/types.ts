@@ -167,6 +167,8 @@ export interface CSSDesignSettings {
   tabsBorderRadius?: number;
 
   // General
+  slotIconUrl?: string;
+  slotIconFit?: string;
   emptyStateCardBgColor?: string;
   emptyStateCardBorderColor?: string;
   emptyStateTextColor?: string;

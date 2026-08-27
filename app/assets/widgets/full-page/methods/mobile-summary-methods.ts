@@ -804,11 +804,13 @@ getBundleSummaryText() {
   const bundleName = typeof this.selectedBundle?.name === 'string'
     ? this.selectedBundle.name.trim()
     : '';
+  const baseTitle = summaryTitle || bundleName;
+  const baseSubTitle = typeof summary.subTitle === 'string' && summary.subTitle.trim()
+    ? summary.subTitle.trim()
+    : 'Review your bundle';
   return {
-    title: summaryTitle || bundleName,
-    subTitle: typeof summary.subTitle === 'string' && summary.subTitle.trim()
-      ? summary.subTitle
-      : 'Review your bundle'
+    title: this._resolveText?.('yourBundle', baseTitle) || baseTitle,
+    subTitle: this._resolveText?.('reviewBundle', baseSubTitle) || baseSubTitle,
   };
 },
 

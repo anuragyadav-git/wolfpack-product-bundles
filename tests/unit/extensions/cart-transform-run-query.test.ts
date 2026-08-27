@@ -19,11 +19,18 @@ describe("Cart Transform input query", () => {
 
   it("queries cart-transform owner settings with the app namespace", () => {
     expect(query).toMatch(
-      /bundleCartLineMessaging:\s*metafield\(namespace:\s*"\$app",\s*key:\s*"bundle_cart_line_messaging"\)/,
+      /runtimeConfiguration:\s*metafield\(namespace:\s*"\$app",\s*key:\s*"runtime_configuration"\)/,
     );
-    expect(query).toMatch(
-      /runtimeTokenSecret:\s*metafield\(namespace:\s*"\$app",\s*key:\s*"runtime_token_secret"\)/,
-    );
+    expect(normalizedQuery).not.toContain('key: "bundle_cart_line_messaging"');
+    expect(normalizedQuery).not.toContain('key: "runtime_token_secret"');
+  });
+
+  it("stays within Shopify's maximum input-query complexity", () => {
+    const metafieldCost = (normalizedQuery.match(/\bmetafield\(/g) ?? []).length * 3;
+    const requiredLeafCost = 12;
+
+    expect(metafieldCost + requiredLeafCost).toBeLessThanOrEqual(30);
+    expect(normalizedQuery).toContain("sellingPlanAllocation { __typename }");
   });
 
   it("groups merge lines from EB public cart attributes instead of private bundle IDs", () => {

@@ -1,5 +1,21 @@
-jest.mock("../../../app/lib/auth-guards.server", () => ({
-  requireAdminSession: jest.fn(),
+import React from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+
+const pendingSettingsPage = new Promise(() => {});
+const pendingPreviewBundles = new Promise(() => {});
+
+jest.mock("@remix-run/react", () => ({
+  Await: () => React.createElement("span", null, "Await boundary"),
+  useLoaderData: jest.fn(() => ({
+    settingsPage: pendingSettingsPage,
+    previewBundles: pendingPreviewBundles,
+  })),
+  useNavigate: jest.fn(() => jest.fn()),
+  useNavigation: jest.fn(() => ({ state: "idle" })),
+}));
+
+jest.mock("../../../app/shopify.server", () => ({
+  authenticate: { admin: jest.fn() },
 }));
 
 jest.mock("../../../app/db.server", () => ({
@@ -8,9 +24,13 @@ jest.mock("../../../app/db.server", () => ({
     bundle: { findMany: jest.fn() },
   },
 }));
+jest.mock("../../../app/services/theme-colors.server", () => ({
+  syncThemeColors: jest.fn().mockResolvedValue(null),
+}));
 
-const { requireAdminSession } = require("../../../app/lib/auth-guards.server");
+const { authenticate: { admin: requireAdminSession } } = require("../../../app/shopify.server");
 const { prisma } = require("../../../app/db.server");
+const { syncThemeColors } = require("../../../app/services/theme-colors.server");
 
 function makeDeferred<T>() {
   let resolve!: (value: T) => void;
@@ -21,8 +41,13 @@ function makeDeferred<T>() {
 }
 
 describe("Settings loader critical path", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    syncThemeColors.mockResolvedValue(null);
+  });
   it("returns the landing response before workspace data resolves", async () => {
     requireAdminSession.mockResolvedValue({
+      admin: {},
       session: { shop: "test-shop.myshopify.com" },
     });
     const settings = makeDeferred<null>();
@@ -50,29 +75,82 @@ describe("Settings loader critical path", () => {
     await expect((result as any).data.previewBundles).resolves.toEqual([]);
   });
 
-  it("keeps the Settings landing page pending until data and the loading bar are ready", async () => {
-    const settings = makeDeferred<Record<string, unknown> | null>();
-    const bundles = makeDeferred<unknown[]>();
-    const loadingBar = makeDeferred<void>();
-    const routeReady = jest.fn();
-    const { waitForSettingsRouteReady } = await import(
+  it("returns the freshly fetched Shop Brand pairs with the Design workspace", async () => {
+    const colors = {
+      primary: { background: "#123456", foreground: "#ffffff" },
+      secondary: { background: "#e8eef5", foreground: "#17202a" },
+    };
+    requireAdminSession.mockResolvedValue({
+      admin: { graphql: jest.fn() },
+      session: { shop: "test-shop.myshopify.com" },
+    });
+    syncThemeColors.mockResolvedValue(colors);
+    prisma.designSettings.findUnique.mockResolvedValue(null);
+    prisma.bundle.findMany.mockResolvedValue([]);
+    const { loader } = await import("../../../app/routes/app/app.settings");
+
+    const result = await loader({
+      request: new Request("https://app.test/app/settings"),
+      params: {},
+      context: {},
+    } as any);
+
+    await expect((result as any).data.settingsPage).resolves.toEqual(expect.objectContaining({
+      shopBrandColors: colors,
+    }));
+    expect(syncThemeColors).toHaveBeenCalledWith("test-shop.myshopify.com");
+  });
+
+  it("loads only storefront-ready active or unlisted preview bundles", async () => {
+    requireAdminSession.mockResolvedValue({
+      admin: {},
+      session: { shop: "test-shop.myshopify.com" },
+    });
+    prisma.designSettings.findUnique.mockResolvedValue(null);
+    prisma.bundle.findMany.mockResolvedValue([
+      {
+        id: "fpb-1",
+        publicNumber: 7,
+        name: "Landing bundle",
+        bundleType: "full_page",
+        shopifyProductHandle: null,
+      },
+      {
+        id: "ppb-1",
+        publicNumber: null,
+        name: "Product bundle",
+        bundleType: "product_page",
+        shopifyProductHandle: "bundle-product",
+      },
+    ]);
+    const { loader } = await import("../../../app/routes/app/app.settings");
+
+    const result = await loader({
+      request: new Request("https://app.test/app/settings"),
+      params: {},
+      context: {},
+    } as any);
+
+    expect(prisma.bundle.findMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: expect.objectContaining({
+        shopId: "test-shop.myshopify.com",
+        status: { in: ["active", "unlisted"] },
+      }),
+      select: expect.objectContaining({ status: true }),
+    }));
+    await expect((result as any).data.previewBundles).resolves.toEqual([
+      expect.objectContaining({ id: "fpb-1", bundleType: "full_page" }),
+      expect.objectContaining({ id: "ppb-1", bundleType: "product_page" }),
+    ]);
+  });
+
+  it("renders the Settings landing before deferred workspace data resolves", async () => {
+    const { default: SettingsRoute } = await import(
       "../../../app/routes/app/app.settings"
     );
 
-    void waitForSettingsRouteReady(
-      settings.promise,
-      bundles.promise,
-      loadingBar.promise,
-    ).then(routeReady);
-
-    settings.resolve(null);
-    bundles.resolve([]);
-    await Promise.resolve();
-    expect(routeReady).not.toHaveBeenCalled();
-
-    loadingBar.resolve();
-    await Promise.resolve();
-    await Promise.resolve();
-    expect(routeReady).toHaveBeenCalledWith([null, [], undefined]);
+    const view = renderToStaticMarkup(React.createElement(SettingsRoute));
+    expect(view).toContain("Open Design settings");
+    expect(view).not.toContain("Await boundary");
   });
 });

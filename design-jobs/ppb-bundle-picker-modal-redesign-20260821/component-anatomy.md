@@ -26,7 +26,7 @@ keywords:
 # Component Anatomy
 
 Artifact job ID: ppb-bundle-picker-modal-redesign-20260821
-Artifact revision: 6
+Artifact revision: 8
 Artifact status: complete
 
 ## Component tree
@@ -38,7 +38,8 @@ Bundle picker dialog
     ├── header: handle, title, step rail, categories, close
     ├── catalog scroll region: loading/error/empty/product grid
     │   └── compact card: image-details trigger, title, price, native variant selector, action
-    ├── filled slot: image, bounded identity area, price, overlaid cross-badge Remove action
+    ├── Vertical filled slot: 50px image, identity, inline circular-cross Remove action
+    ├── Horizontal filled slot: bounded tile with overlaid cross-badge Remove action
     └── footer: selection summary, previous/next, validation feedback
 
 Product details dialog (stacked above picker)
@@ -58,12 +59,12 @@ Product details dialog (stacked above picker)
 | card media | Only product-details trigger plus gallery affordance | labelled button-like media region | modal-methods.ts | modal-methods.ts | modal-product-grid.css | shared product-card tokens | Hover/focus magnifier; persistent touch badge |
 | native variant | Change active card context without selection mutation | labelled native `select` | modal-methods.ts | modal-methods.ts | modal-product-grid.css | form-control tokens | Visible label desktop; visually hidden label mobile |
 | card action | Add, quantity, or maximum-reached remove-all | button or quantity group | pure card-presentation helper plus selection methods | modal-methods.ts | modal-product-grid.css | button/quantity tokens | Same semantics at every width |
-| filled-slot remove | Remove one selected slot product | product-specific labelled native button over the slot | selection methods | inpage-render-methods.ts | modal-slots.css | existing action/icon/surface tokens | Compact cross badge in the slot corner with a 44px minimum pointer target at every width |
+| filled-slot remove | Remove one represented selected unit | product-specific labelled native button | selection methods | inpage-render-methods.ts | modal-slots.css | orientation-owned action/icon tokens | Vertical uses the measured EB 20px inline trailing visual; Horizontal retains the approved overlaid 44px badge |
 | details | Editable quick-shop for originating slot | labelled modal dialog | BundleProductModal PPB mode | BundleProductModal | bottom-sheet-modal.css and mobile-drawers.css | existing modal/product tokens | Same bottom sheet at every width; constrained inner column |
 
 ## Repeated, conditional, feedback, and overlay elements
 
-Product cards repeat from existing data and preserve variant, quantity, inventory, subscription, compare-at-price, and selected states. Filled slots use a responsive maximum height and an overlaid cross badge that removes the selected product without activating slot replacement. Product names wrap normally and visually clamp only when they reach the cap; the complete name remains in the control's accessible name and product-details surface. Loading, empty, fetch-error, and validation feedback reuse existing copy and behavior. Only product details nests above the picker. Horizontal/Vertical no longer open a PPB mobile variant drawer because the native selector stays in-card.
+Product cards repeat from existing data and preserve variant, quantity, inventory, subscription, compare-at-price, and selected states. Vertical filled slots mirror live EB: a full-width intrinsic flex row whose 50px media, 5px padding, and 2px border produce the normal 64px height; the row has a 60px minimum, no maximum, visible title wrapping, no filled-row price, and a 20px inline trailing circular-cross control. The Vertical row itself is inert. Horizontal filled slots retain their bounded tile, replacement trigger, and overlaid badge. Loading, empty, fetch-error, and validation feedback reuse existing copy and behavior. Only product details nests above the picker. Horizontal/Vertical no longer open a PPB mobile variant drawer because the native selector stays in-card.
 
 ## Scroll, sticky, and fixed regions
 

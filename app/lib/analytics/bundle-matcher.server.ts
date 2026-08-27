@@ -56,38 +56,56 @@ export async function matchLineItemsToBundles(
   shopId: string,
   lineItems: LineItemInput[]
 ): Promise<string[]> {
-  if (!lineItems || lineItems.length === 0) {
-    return [];
-  }
+  return (await matchLineItemGroupsToBundles(shopId, [lineItems]))[0] ?? [];
+}
 
-  const productGids = lineItems
-    .map((item) => item.productId)
-    .filter((id): id is string => Boolean(id))
-    .map(normalizeToProductGid);
+export async function matchLineItemGroupsToBundles(
+  shopId: string,
+  lineItemGroups: LineItemInput[][],
+): Promise<string[][]> {
+  const productGidsByGroup = lineItemGroups.map((lineItems) => [
+    ...new Set(
+      (lineItems ?? [])
+        .map((item) => item.productId)
+        .filter((id): id is string => Boolean(id))
+        .map(normalizeToProductGid),
+    ),
+  ]);
+  const allProductGids = [...new Set(productGidsByGroup.flat())];
 
-  if (productGids.length === 0) {
-    return [];
+  if (allProductGids.length === 0) {
+    return lineItemGroups.map(() => []);
   }
 
   // Pass 1: direct match on bundle container product
   const directBundles = await db.bundle.findMany({
-    where: { shopId, shopifyProductId: { in: productGids } },
-    select: { id: true },
+    where: { shopId, shopifyProductId: { in: allProductGids } },
+    select: { id: true, shopifyProductId: true },
   });
+  const directMatches = productGidsByGroup.map((productGids) => directBundles
+    .filter((bundle) => bundle.shopifyProductId && productGids.includes(bundle.shopifyProductId))
+    .map((bundle) => bundle.id));
+  const unresolvedProductGids = [...new Set(productGidsByGroup
+    .filter((productGids, index) => productGids.length > 0 && directMatches[index].length === 0)
+    .flat())];
 
-  if (directBundles.length > 0) {
-    return directBundles.map((b: { id: string }) => b.id);
+  if (unresolvedProductGids.length === 0) {
+    return directMatches;
   }
 
   // Pass 2: fallback — match component products through bundle steps
-  const matchedSteps = await db.bundleStep.findMany({
+  const matchedProducts = await db.stepProduct.findMany({
     where: {
-      StepProduct: { some: { productId: { in: productGids } } },
-      bundle: { shopId },
+      productId: { in: unresolvedProductGids },
+      step: { bundle: { shopId } },
     },
-    select: { bundleId: true },
-    distinct: ["bundleId"],
+    select: { productId: true, step: { select: { bundleId: true } } },
   });
 
-  return matchedSteps.map((s: { bundleId: string }) => s.bundleId);
+  return productGidsByGroup.map((productGids, index) => {
+    if (directMatches[index].length > 0) return directMatches[index];
+    return [...new Set(matchedProducts
+      .filter((product) => productGids.includes(product.productId))
+      .map((product) => product.step.bundleId))];
+  });
 }

@@ -1,5 +1,5 @@
 import { type LoaderFunctionArgs, redirect } from "@remix-run/node";
-import { requireAdminSession } from "../../lib/auth-guards.server";
+import { authenticate } from "../../shopify.server";
 import { BillingService } from "../../services/billing.server";
 import { AppLogger } from "../../lib/logger";
 
@@ -17,7 +17,7 @@ import { AppLogger } from "../../lib/logger";
  * URL: /app/billing/callback?charge_id=gid://shopify/AppSubscription/12345
  */
 export async function loader({ request }: LoaderFunctionArgs) {
-  const { session, admin } = await requireAdminSession(request);
+  const { session, admin } = await authenticate.admin(request);
   const shopDomain = session.shop;
 
   try {

@@ -5,9 +5,9 @@
     "title": "PPB bundle picker modal redesign",
     "status": "blocked",
     "stage": "BLOCKED",
-    "revision": 6,
+    "revision": 8,
     "created_at": "2026-08-21T00:51:07Z",
-    "updated_at": "2026-08-21T11:33:05Z",
+    "updated_at": "2026-08-21T15:58:39Z",
     "owner": "Aditya",
     "product": "Wolfpack Product Bundles",
     "repository": "/Users/adityaawasthi/Developer/wolfpack-product-bundles",
@@ -21,7 +21,7 @@
     "template": "Horizontal Slots and Vertical Slots",
     "component": "Shared bundle-picker modal and stacked PPB product-details sheet",
     "implementation_mode": "design-director",
-    "design_goal": "EB-inspired responsive picker hierarchy with Wolfpack merchant branding and stronger accessibility",
+    "design_goal": "Exact live-EB geometry for Vertical filled rows within the shared WPB picker, while preserving existing behavior and all other approved surfaces",
     "user_problem": "The current PPB picker is shallow and its floating footer obscures product actions, especially on mobile",
     "primary_user_action": "Open a slot, choose or replace products directly or through editable details, advance steps, and close or reopen without losing state",
     "out_of_scope": [
@@ -101,7 +101,7 @@
       "repository accepted parity evidence"
     ],
     "permissions_or_usage_notes": [
-      "EB is inspiration rather than an exact-match target",
+      "Exact live-EB matching applies only to the Vertical filled-row anatomy; other approved WPB surfaces retain their existing contracts",
       "No Chrome screenshots are committed"
     ]
   },
@@ -109,7 +109,7 @@
     "locked": [
       "PPB only",
       "Horizontal and Vertical Slots share one modal",
-      "EB UX with Wolfpack branding",
+      "EB UX with Wolfpack branding outside the exact Vertical filled-row target",
       "85dvh bottom sheet",
       "fixed header and footer with catalog-only scrolling",
       "Product List and Product Grid unchanged",
@@ -119,8 +119,8 @@
       "product details is a stacked PPB-owned sheet",
       "modal quantity selectors match the Add and Added action footprint",
       "footer summary shrink-wraps its content and remains contained",
-      "filled-slot Remove uses a cross badge over the slot",
-      "filled-slot maximum height takes precedence and visually clamps only overflowing titles while preserving the complete accessible name"
+      "Horizontal filled slots retain their approved bounded tile and overlaid cross badge",
+      "Vertical filled slots use the measured EB 64px row, 50px media, full identity, and inline 20px remove visual"
     ],
     "assumptions": [
       "existing merchant tokens remain authoritative",
@@ -131,7 +131,7 @@
     "rejected": [
       "FPB scope",
       "template-specific picker forks",
-      "exact EB visual cloning",
+      "exact EB branding outside the scoped Vertical filled-row anatomy",
       "shallow content-height modal",
       "PPB custom mobile variant drawer",
       "card-wide product-details activation"
@@ -293,19 +293,19 @@
       "acceptance-criteria.md": {
         "path": "acceptance-criteria.md",
         "status": "approved",
-        "revision": 6,
-        "sha256": "04b9373ce199cb51a714355a29261689c41eea75e16680b004a0f232419af1cd",
+        "revision": 8,
+        "sha256": "fd8533e072c26b419b585f9b99b40971d30d0f96f493f2b5f52c5f3379100f08",
         "approved_by": "Aditya",
-        "approved_at": "2026-08-21T11:03:52Z",
+        "approved_at": "2026-08-21T15:46:22Z",
         "evidence": [
-          "implementation-handoff.md"
+          "visual-audit.md"
         ]
       },
       "accessibility-checklist.md": {
         "path": "accessibility-checklist.md",
         "status": "complete",
-        "revision": 6,
-        "sha256": "8addfcab6651386fb1a6bb09a83ff706a1f7bc84df2d0fe51ff54b26404a34a2",
+        "revision": 8,
+        "sha256": "886a9b02c8b68e213217e349a55249cfeec791677f625c083bbde4b22e3aae11",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -313,8 +313,8 @@
       "approval-record.yaml": {
         "path": "approval-record.yaml",
         "status": "complete",
-        "revision": 6,
-        "sha256": "95f3ed1e2d95dcbb70501d9e9a381e62eddf61588b57c116dbefad3f2dfa7abd",
+        "revision": 8,
+        "sha256": "0cc9f35880935e9927c66ec6351873ada1722301456bdfc2e1b1fc24b4473683",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -322,19 +322,19 @@
       "browser-test-plan.yaml": {
         "path": "browser-test-plan.yaml",
         "status": "approved",
-        "revision": 6,
-        "sha256": "ac984be894cb619c33d24fe552114070e236ab5211ca59107023a77f26173e9d",
+        "revision": 8,
+        "sha256": "5e06bbec38602395ff6ae6c896629af8e2b63c76b13b37bccaa0fca201cf66d2",
         "approved_by": "Aditya",
-        "approved_at": "2026-08-21T11:03:52Z",
+        "approved_at": "2026-08-21T15:46:22Z",
         "evidence": [
-          "acceptance-criteria.md"
+          "visual-audit.md"
         ]
       },
       "browser-test-report.md": {
         "path": "browser-test-report.md",
         "status": "draft",
-        "revision": 6,
-        "sha256": "e657ab68604222c62b9bd0147b2468987fd95f3a02faf8128575d637a05ca815",
+        "revision": 8,
+        "sha256": "a004af53fa6f9b826ee20371187187245853af81803f37549295b3e4a0406f44",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -342,8 +342,8 @@
       "chrome-preflight-result.yaml": {
         "path": "chrome-preflight-result.yaml",
         "status": "blocked",
-        "revision": 6,
-        "sha256": "8527ac28e65a9c7f066989196da71a646cef03f7673862d3e3197ecc855957ac",
+        "revision": 8,
+        "sha256": "f667b733e6c31067912783784b057efe0b64b25f0ca33d5cbba78a9cff8cff4c",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -351,19 +351,19 @@
       "codex-task.md": {
         "path": "codex-task.md",
         "status": "approved",
-        "revision": 6,
-        "sha256": "b4207eeb7d5bb17ce369a4f81713bc0542cb8924445b3f87a8a4af3c3c69c87c",
+        "revision": 8,
+        "sha256": "788ec2bc7b9eb6a24cdf57f9c3700c351a891735ef73cdf3dd1e097d5d3c1c75",
         "approved_by": "Aditya",
-        "approved_at": "2026-08-21T11:03:52Z",
+        "approved_at": "2026-08-21T15:46:22Z",
         "evidence": [
-          "implementation-handoff.md"
+          "visual-audit.md"
         ]
       },
       "component-anatomy.md": {
         "path": "component-anatomy.md",
         "status": "complete",
-        "revision": 6,
-        "sha256": "28946ae36baf62873d25eb23592ceb3352e88e7ef5f778d9a439064fc1713434",
+        "revision": 8,
+        "sha256": "dbf9120ebd0316ba877b2e0c2906d1253bdbda97a9dc7bdd75373ea3e0cb44e6",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -371,8 +371,8 @@
       "component-brief.md": {
         "path": "component-brief.md",
         "status": "complete",
-        "revision": 6,
-        "sha256": "eed032453253f0c21e4e3b73f2153533a6f36ff9741690b2cb6784b7d7c43110",
+        "revision": 8,
+        "sha256": "87242e62d4a9cd67e58fe69e4b2665c1f23c9da6e1b12f23401ffc98dafc2b83",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -380,8 +380,8 @@
       "content-stress-cases.yaml": {
         "path": "content-stress-cases.yaml",
         "status": "complete",
-        "revision": 6,
-        "sha256": "4801459e0cd3bd5bd13ba45b3722e625d4aeaa2eb9852ce370f85485a9032519",
+        "revision": 8,
+        "sha256": "0b17a87a541cf0d8973c594a9b6563ea66f221c5c767160fcf46baf43e3fe994",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -389,8 +389,8 @@
       "design-tokens.json": {
         "path": "design-tokens.json",
         "status": "complete",
-        "revision": 6,
-        "sha256": "fd0a83d258636938ca01bfbe18b6264a4ce71c50cd6531c0d2d4ef7291b14008",
+        "revision": 8,
+        "sha256": "5a065a9074e60c11b5ccf7103b4f32bc187bd715c30659efabaede84b9ace61a",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -398,10 +398,10 @@
       "direction-comparison.md": {
         "path": "direction-comparison.md",
         "status": "approved",
-        "revision": 2,
-        "sha256": "bbb1a7b18094cff177d2e2d8f7c2f5f59cdd86e3b7893ced5c83a05bb7a41b24",
+        "revision": 8,
+        "sha256": "df050e4659933827b3e9c622c558361e87223bddaeda3f82067f5ff672cdb637",
         "approved_by": "Aditya",
-        "approved_at": "2026-08-21T07:56:54Z",
+        "approved_at": "2026-08-21T15:46:22Z",
         "evidence": [
           "visual-audit.md"
         ]
@@ -409,19 +409,19 @@
       "implementation-handoff.md": {
         "path": "implementation-handoff.md",
         "status": "approved",
-        "revision": 6,
-        "sha256": "3ee199be70f7c6c7b1dc42340ad02be9adbb5cfec258ffcfa760febcdbc5424d",
+        "revision": 8,
+        "sha256": "b61fcd541bd30760db61cf4eb76104c1dc654623513806297f0926f914144ed1",
         "approved_by": "Aditya",
-        "approved_at": "2026-08-21T11:03:52Z",
+        "approved_at": "2026-08-21T15:46:22Z",
         "evidence": [
-          "locked-decisions.yaml"
+          "visual-audit.md"
         ]
       },
       "interaction-contract.md": {
         "path": "interaction-contract.md",
         "status": "complete",
-        "revision": 6,
-        "sha256": "93f32c41afd1b36ac520449e3fd8367c0b444875ee1aaaa96e961ff067fe91bc",
+        "revision": 8,
+        "sha256": "594498f995c1ccfb8f34fa45da5771583c0918f9cbf655e6a846d5855d28166b",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -429,19 +429,19 @@
       "locked-decisions.yaml": {
         "path": "locked-decisions.yaml",
         "status": "approved",
-        "revision": 6,
-        "sha256": "b67200ec061056f4ac66736c3b42d90c93a99ea0a406485a5328662d6eb01419",
+        "revision": 8,
+        "sha256": "2da73515860e0ed39659c1c74e35c64f32d893762b636439004b450161cfde18",
         "approved_by": "Aditya",
-        "approved_at": "2026-08-21T10:57:02Z",
+        "approved_at": "2026-08-21T15:46:21Z",
         "evidence": [
-          "component-anatomy.md"
+          "visual-audit.md"
         ]
       },
       "remediation-list.md": {
         "path": "remediation-list.md",
         "status": "draft",
-        "revision": 5,
-        "sha256": "68179e19b871f5969cc91a43bf26c541160929fa9869452ffc4bb7364afd0373",
+        "revision": 8,
+        "sha256": "9f9730e399252a22c4f8cf69bf9f82d2a96432c1cf7efce29657d6dc9eb2beb2",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -449,8 +449,8 @@
       "responsive-contract.md": {
         "path": "responsive-contract.md",
         "status": "complete",
-        "revision": 6,
-        "sha256": "9dfcf4e58ce40915aa45277342fbfdca23564374b2b9dfc9cfcab3721dd064b3",
+        "revision": 8,
+        "sha256": "d7f70b549e5df7bfc65f33901e2a2beb3ae3f51d9db2bad23da308c1861e8a89",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -458,8 +458,8 @@
       "screenshot-inventory.yaml": {
         "path": "screenshot-inventory.yaml",
         "status": "complete",
-        "revision": 6,
-        "sha256": "eb890cbec7f03e53dcbb7e33dca4c2fac5e1b27d295643f3fe918612294d6495",
+        "revision": 8,
+        "sha256": "bb6d9fc90bd09b54585d9443a39907a19b91c42f9762d84d4709f57fcfff6fb2",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -467,8 +467,8 @@
       "state-matrix.md": {
         "path": "state-matrix.md",
         "status": "complete",
-        "revision": 6,
-        "sha256": "a952a5ff7bd39cbff753c2f0e429fc26cffbb065768c9d0504da5b28194b51b7",
+        "revision": 8,
+        "sha256": "a1eb94b99596d89e51fa3c97f287585ecb77f0c5c8c15c03766acc60b2af4525",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -476,8 +476,8 @@
       "visual-audit.md": {
         "path": "visual-audit.md",
         "status": "complete",
-        "revision": 6,
-        "sha256": "1195cfff60b6d074175f814a352a04dc1a0c0337d0a193b126442518ad05d337",
+        "revision": 8,
+        "sha256": "f2c5ec54621fcdeea484b4b0819762f5921b61738e06012c8d3387c755afdd8e",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -688,6 +688,174 @@
         "superseded_at": "2026-08-21T10:57:47Z",
         "superseded_by": "",
         "superseded_reason": "Revision 6 implementation task now owns bounded filled slots and the overlaid cross badge."
+      },
+      {
+        "path": "direction-comparison.md",
+        "status": "approved",
+        "revision": 2,
+        "sha256": "bbb1a7b18094cff177d2e2d8f7c2f5f59cdd86e3b7893ced5c83a05bb7a41b24",
+        "approved_by": "Aditya",
+        "approved_at": "2026-08-21T07:56:54Z",
+        "evidence": [
+          "visual-audit.md"
+        ],
+        "superseded_at": "2026-08-21T15:21:04Z",
+        "superseded_by": "Aditya",
+        "superseded_reason": "Revision 7 replaces only the Vertical filled-row presentation with freshly measured live-EB geometry"
+      },
+      {
+        "path": "locked-decisions.yaml",
+        "status": "approved",
+        "revision": 6,
+        "sha256": "b67200ec061056f4ac66736c3b42d90c93a99ea0a406485a5328662d6eb01419",
+        "approved_by": "Aditya",
+        "approved_at": "2026-08-21T10:57:02Z",
+        "evidence": [
+          "component-anatomy.md"
+        ],
+        "superseded_at": "2026-08-21T15:21:04Z",
+        "superseded_by": "Aditya",
+        "superseded_reason": "Revision 7 replaces only the Vertical filled-row presentation with freshly measured live-EB geometry"
+      },
+      {
+        "path": "implementation-handoff.md",
+        "status": "approved",
+        "revision": 6,
+        "sha256": "3ee199be70f7c6c7b1dc42340ad02be9adbb5cfec258ffcfa760febcdbc5424d",
+        "approved_by": "Aditya",
+        "approved_at": "2026-08-21T11:03:52Z",
+        "evidence": [
+          "locked-decisions.yaml"
+        ],
+        "superseded_at": "2026-08-21T15:21:04Z",
+        "superseded_by": "Aditya",
+        "superseded_reason": "Revision 7 replaces only the Vertical filled-row presentation with freshly measured live-EB geometry"
+      },
+      {
+        "path": "codex-task.md",
+        "status": "approved",
+        "revision": 6,
+        "sha256": "b4207eeb7d5bb17ce369a4f81713bc0542cb8924445b3f87a8a4af3c3c69c87c",
+        "approved_by": "Aditya",
+        "approved_at": "2026-08-21T11:03:52Z",
+        "evidence": [
+          "implementation-handoff.md"
+        ],
+        "superseded_at": "2026-08-21T15:21:05Z",
+        "superseded_by": "Aditya",
+        "superseded_reason": "Revision 7 replaces only the Vertical filled-row presentation with freshly measured live-EB geometry"
+      },
+      {
+        "path": "acceptance-criteria.md",
+        "status": "approved",
+        "revision": 6,
+        "sha256": "04b9373ce199cb51a714355a29261689c41eea75e16680b004a0f232419af1cd",
+        "approved_by": "Aditya",
+        "approved_at": "2026-08-21T11:03:52Z",
+        "evidence": [
+          "implementation-handoff.md"
+        ],
+        "superseded_at": "2026-08-21T15:21:05Z",
+        "superseded_by": "Aditya",
+        "superseded_reason": "Revision 7 replaces only the Vertical filled-row presentation with freshly measured live-EB geometry"
+      },
+      {
+        "path": "browser-test-plan.yaml",
+        "status": "approved",
+        "revision": 6,
+        "sha256": "ac984be894cb619c33d24fe552114070e236ab5211ca59107023a77f26173e9d",
+        "approved_by": "Aditya",
+        "approved_at": "2026-08-21T11:03:52Z",
+        "evidence": [
+          "acceptance-criteria.md"
+        ],
+        "superseded_at": "2026-08-21T15:21:05Z",
+        "superseded_by": "Aditya",
+        "superseded_reason": "Revision 7 replaces only the Vertical filled-row presentation with freshly measured live-EB geometry"
+      },
+      {
+        "path": "locked-decisions.yaml",
+        "status": "approved",
+        "revision": 7,
+        "sha256": "19eda50e654b44645e1897b7359d8c409dae8c32321aed26f4001a9401966395",
+        "approved_by": "Aditya",
+        "approved_at": "2026-08-21T15:21:04Z",
+        "evidence": [
+          "visual-audit.md"
+        ],
+        "superseded_at": "2026-08-21T15:46:21Z",
+        "superseded_by": "Aditya",
+        "superseded_reason": "User locked live EB as sole Vertical filled-row design authority"
+      },
+      {
+        "path": "direction-comparison.md",
+        "status": "approved",
+        "revision": 7,
+        "sha256": "fa86365b089116ef9712d450334f12b8672786264f11527a9e821fc40c2ce267",
+        "approved_by": "Aditya",
+        "approved_at": "2026-08-21T15:21:04Z",
+        "evidence": [
+          "visual-audit.md"
+        ],
+        "superseded_at": "2026-08-21T15:46:22Z",
+        "superseded_by": "Aditya",
+        "superseded_reason": "User locked live EB as sole Vertical filled-row design authority"
+      },
+      {
+        "path": "implementation-handoff.md",
+        "status": "approved",
+        "revision": 7,
+        "sha256": "a33e9a9e10d3e55e1f0ee15f6b81924f9e5f3b2d43f075aaab20bc87cbf3d114",
+        "approved_by": "Aditya",
+        "approved_at": "2026-08-21T15:21:04Z",
+        "evidence": [
+          "visual-audit.md"
+        ],
+        "superseded_at": "2026-08-21T15:46:22Z",
+        "superseded_by": "Aditya",
+        "superseded_reason": "User locked live EB as sole Vertical filled-row design authority"
+      },
+      {
+        "path": "codex-task.md",
+        "status": "approved",
+        "revision": 7,
+        "sha256": "572a0c93b040003e3a84872a20ddc342faefd8ce299315490a04c10d20e7409a",
+        "approved_by": "Aditya",
+        "approved_at": "2026-08-21T15:21:05Z",
+        "evidence": [
+          "visual-audit.md"
+        ],
+        "superseded_at": "2026-08-21T15:46:22Z",
+        "superseded_by": "Aditya",
+        "superseded_reason": "User locked live EB as sole Vertical filled-row design authority"
+      },
+      {
+        "path": "acceptance-criteria.md",
+        "status": "approved",
+        "revision": 7,
+        "sha256": "f7a7b713d297272a19ddbbbd11788f5d45d432dcd643d9ef7aee1f3a33d3a19a",
+        "approved_by": "Aditya",
+        "approved_at": "2026-08-21T15:21:05Z",
+        "evidence": [
+          "visual-audit.md"
+        ],
+        "superseded_at": "2026-08-21T15:46:22Z",
+        "superseded_by": "Aditya",
+        "superseded_reason": "User locked live EB as sole Vertical filled-row design authority"
+      },
+      {
+        "path": "browser-test-plan.yaml",
+        "status": "approved",
+        "revision": 7,
+        "sha256": "30dfa97ad1f862197699526eb08e46da78ee55f529896ab5565385543d9902b3",
+        "approved_by": "Aditya",
+        "approved_at": "2026-08-21T15:21:05Z",
+        "evidence": [
+          "visual-audit.md"
+        ],
+        "superseded_at": "2026-08-21T15:46:22Z",
+        "superseded_by": "Aditya",
+        "superseded_reason": "User locked live EB as sole Vertical filled-row design authority"
       }
     ]
   },
@@ -1819,6 +1987,604 @@
         "browser-test-report.md"
       ],
       "affected_artifacts": []
+    },
+    {
+      "sequence": 85,
+      "at": "2026-08-21T15:11:44Z",
+      "from": "BLOCKED",
+      "to": "CHROME_QA_PREFLIGHT",
+      "revision": 6,
+      "reason": "User rejected revision-6 filled-slot appearance and requested exact live-EB parity; resume only to perform the required backward revision transition.",
+      "evidence": [],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 86,
+      "at": "2026-08-21T15:11:45Z",
+      "from": "CHROME_QA_PREFLIGHT",
+      "to": "SCOPE",
+      "revision": 7,
+      "reason": "User replaced the revision-6 bounded row and overlaid cross badge with an exact-EB Vertical filled-row target.",
+      "evidence": [],
+      "affected_artifacts": [
+        "component-anatomy.md",
+        "responsive-contract.md",
+        "interaction-contract.md",
+        "design-tokens.json",
+        "implementation-handoff.md",
+        "codex-task.md",
+        "acceptance-criteria.md",
+        "browser-test-plan.yaml"
+      ]
+    },
+    {
+      "sequence": 87,
+      "at": "2026-08-21T15:21:04Z",
+      "from": "SCOPE",
+      "to": "SCOPE",
+      "revision": 7,
+      "reason": "Revision 7 replaces only the Vertical filled-row presentation with freshly measured live-EB geometry",
+      "evidence": [
+        "visual-audit.md"
+      ],
+      "event": "artifact-superseded",
+      "affected_artifacts": [
+        "direction-comparison.md"
+      ]
+    },
+    {
+      "sequence": 88,
+      "at": "2026-08-21T15:21:04Z",
+      "from": "SCOPE",
+      "to": "SCOPE",
+      "revision": 7,
+      "reason": "Revision 7 replaces only the Vertical filled-row presentation with freshly measured live-EB geometry",
+      "evidence": [
+        "visual-audit.md"
+      ],
+      "event": "artifact-superseded",
+      "affected_artifacts": [
+        "locked-decisions.yaml"
+      ]
+    },
+    {
+      "sequence": 89,
+      "at": "2026-08-21T15:21:04Z",
+      "from": "SCOPE",
+      "to": "SCOPE",
+      "revision": 7,
+      "reason": "Revision 7 replaces only the Vertical filled-row presentation with freshly measured live-EB geometry",
+      "evidence": [
+        "visual-audit.md"
+      ],
+      "event": "artifact-superseded",
+      "affected_artifacts": [
+        "implementation-handoff.md"
+      ]
+    },
+    {
+      "sequence": 90,
+      "at": "2026-08-21T15:21:05Z",
+      "from": "SCOPE",
+      "to": "SCOPE",
+      "revision": 7,
+      "reason": "Revision 7 replaces only the Vertical filled-row presentation with freshly measured live-EB geometry",
+      "evidence": [
+        "visual-audit.md"
+      ],
+      "event": "artifact-superseded",
+      "affected_artifacts": [
+        "codex-task.md"
+      ]
+    },
+    {
+      "sequence": 91,
+      "at": "2026-08-21T15:21:05Z",
+      "from": "SCOPE",
+      "to": "SCOPE",
+      "revision": 7,
+      "reason": "Revision 7 replaces only the Vertical filled-row presentation with freshly measured live-EB geometry",
+      "evidence": [
+        "visual-audit.md"
+      ],
+      "event": "artifact-superseded",
+      "affected_artifacts": [
+        "acceptance-criteria.md"
+      ]
+    },
+    {
+      "sequence": 92,
+      "at": "2026-08-21T15:21:05Z",
+      "from": "SCOPE",
+      "to": "SCOPE",
+      "revision": 7,
+      "reason": "Revision 7 replaces only the Vertical filled-row presentation with freshly measured live-EB geometry",
+      "evidence": [
+        "visual-audit.md"
+      ],
+      "event": "artifact-superseded",
+      "affected_artifacts": [
+        "browser-test-plan.yaml"
+      ]
+    },
+    {
+      "sequence": 93,
+      "at": "2026-08-21T15:21:26Z",
+      "from": "SCOPE",
+      "to": "REFERENCE_INTAKE",
+      "revision": 7,
+      "reason": "Fresh live EB desktop/mobile measurements and current help links are inventoried.",
+      "evidence": [
+        "visual-audit.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 94,
+      "at": "2026-08-21T15:21:26Z",
+      "from": "REFERENCE_INTAKE",
+      "to": "REFERENCE_VALIDATION",
+      "revision": 7,
+      "reason": "Direct Chrome measurements are comparable at 1280x800 and 390x844.",
+      "evidence": [
+        "visual-audit.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 95,
+      "at": "2026-08-21T15:21:26Z",
+      "from": "REFERENCE_VALIDATION",
+      "to": "VISUAL_ANALYSIS",
+      "revision": 7,
+      "reason": "Revision-6 and live-EB filled-row delta is confidence-labelled.",
+      "evidence": [
+        "visual-audit.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 96,
+      "at": "2026-08-21T15:21:27Z",
+      "from": "VISUAL_ANALYSIS",
+      "to": "DIRECTION_EXPLORATION",
+      "revision": 7,
+      "reason": "User requested one controlled exact-EB Vertical filled-row revision.",
+      "evidence": [
+        "direction-comparison.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 97,
+      "at": "2026-08-21T15:21:27Z",
+      "from": "DIRECTION_EXPLORATION",
+      "to": "DIRECTION_APPROVAL",
+      "revision": 7,
+      "reason": "User explicitly approved exact EB matching for the scoped Vertical filled row.",
+      "evidence": [
+        "locked-decisions.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 98,
+      "at": "2026-08-21T15:21:27Z",
+      "from": "DIRECTION_APPROVAL",
+      "to": "COMPONENT_ANATOMY",
+      "revision": 7,
+      "reason": "Orientation-specific filled-slot ownership is defined.",
+      "evidence": [
+        "component-anatomy.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 99,
+      "at": "2026-08-21T15:21:27Z",
+      "from": "COMPONENT_ANATOMY",
+      "to": "STATE_CONTRACT",
+      "revision": 7,
+      "reason": "Filled-slot identity and removal state is updated without business changes.",
+      "evidence": [
+        "state-matrix.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 100,
+      "at": "2026-08-21T15:21:27Z",
+      "from": "STATE_CONTRACT",
+      "to": "RESPONSIVE_CONTRACT",
+      "revision": 7,
+      "reason": "Exact Vertical row and unchanged Horizontal transformations are defined.",
+      "evidence": [
+        "responsive-contract.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 101,
+      "at": "2026-08-21T15:21:27Z",
+      "from": "RESPONSIVE_CONTRACT",
+      "to": "INTERACTION_ACCESSIBILITY",
+      "revision": 7,
+      "reason": "Remove semantics and the scoped 20px visual exception are recorded.",
+      "evidence": [
+        "interaction-contract.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 102,
+      "at": "2026-08-21T15:21:27Z",
+      "from": "INTERACTION_ACCESSIBILITY",
+      "to": "TOKENS_GEOMETRY",
+      "revision": 7,
+      "reason": "Fresh live-EB geometry is recorded with high-confidence ownership.",
+      "evidence": [
+        "design-tokens.json"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 103,
+      "at": "2026-08-21T15:21:27Z",
+      "from": "TOKENS_GEOMETRY",
+      "to": "PROTOTYPE_OPTIONAL",
+      "revision": 7,
+      "reason": "A prototype is unnecessary because direct live EB DOM and computed geometry resolve the visual target.",
+      "evidence": [
+        "visual-audit.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 104,
+      "at": "2026-08-21T15:21:27Z",
+      "from": "PROTOTYPE_OPTIONAL",
+      "to": "HANDOFF_ASSEMBLY",
+      "revision": 7,
+      "reason": "Revision-7 implementation and browser packets are complete.",
+      "evidence": [
+        "implementation-handoff.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 105,
+      "at": "2026-08-21T15:21:27Z",
+      "from": "HANDOFF_ASSEMBLY",
+      "to": "HANDOFF_VALIDATION",
+      "revision": 7,
+      "reason": "Mechanical handoff validation passed with zero blockers or advisories.",
+      "evidence": [
+        "implementation-handoff.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 106,
+      "at": "2026-08-21T15:21:27Z",
+      "from": "HANDOFF_VALIDATION",
+      "to": "IMPLEMENTATION_AWAITED",
+      "revision": 7,
+      "reason": "User explicitly requested implementation of the approved exact-EB revision.",
+      "evidence": [
+        "codex-task.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 107,
+      "at": "2026-08-21T15:41:33Z",
+      "from": "IMPLEMENTATION_AWAITED",
+      "to": "SCOPE",
+      "revision": 8,
+      "reason": "User rejected WPB-specific Vertical filled-row constraints and locked live EB as the sole visual source of truth",
+      "evidence": [
+        "visual-audit.md"
+      ],
+      "affected_artifacts": [
+        "component-brief.md",
+        "visual-audit.md",
+        "locked-decisions.yaml",
+        "component-anatomy.md",
+        "responsive-contract.md",
+        "interaction-contract.md",
+        "design-tokens.json",
+        "implementation-handoff.md",
+        "codex-task.md",
+        "acceptance-criteria.md",
+        "browser-test-plan.yaml",
+        "approval-record.yaml"
+      ]
+    },
+    {
+      "sequence": 108,
+      "at": "2026-08-21T15:46:21Z",
+      "from": "SCOPE",
+      "to": "SCOPE",
+      "revision": 8,
+      "reason": "User locked live EB as sole Vertical filled-row design authority",
+      "evidence": [
+        "visual-audit.md"
+      ],
+      "event": "artifact-superseded",
+      "affected_artifacts": [
+        "locked-decisions.yaml"
+      ]
+    },
+    {
+      "sequence": 109,
+      "at": "2026-08-21T15:46:22Z",
+      "from": "SCOPE",
+      "to": "SCOPE",
+      "revision": 8,
+      "reason": "User locked live EB as sole Vertical filled-row design authority",
+      "evidence": [
+        "visual-audit.md"
+      ],
+      "event": "artifact-superseded",
+      "affected_artifacts": [
+        "direction-comparison.md"
+      ]
+    },
+    {
+      "sequence": 110,
+      "at": "2026-08-21T15:46:22Z",
+      "from": "SCOPE",
+      "to": "SCOPE",
+      "revision": 8,
+      "reason": "User locked live EB as sole Vertical filled-row design authority",
+      "evidence": [
+        "visual-audit.md"
+      ],
+      "event": "artifact-superseded",
+      "affected_artifacts": [
+        "implementation-handoff.md"
+      ]
+    },
+    {
+      "sequence": 111,
+      "at": "2026-08-21T15:46:22Z",
+      "from": "SCOPE",
+      "to": "SCOPE",
+      "revision": 8,
+      "reason": "User locked live EB as sole Vertical filled-row design authority",
+      "evidence": [
+        "visual-audit.md"
+      ],
+      "event": "artifact-superseded",
+      "affected_artifacts": [
+        "codex-task.md"
+      ]
+    },
+    {
+      "sequence": 112,
+      "at": "2026-08-21T15:46:22Z",
+      "from": "SCOPE",
+      "to": "SCOPE",
+      "revision": 8,
+      "reason": "User locked live EB as sole Vertical filled-row design authority",
+      "evidence": [
+        "visual-audit.md"
+      ],
+      "event": "artifact-superseded",
+      "affected_artifacts": [
+        "acceptance-criteria.md"
+      ]
+    },
+    {
+      "sequence": 113,
+      "at": "2026-08-21T15:46:22Z",
+      "from": "SCOPE",
+      "to": "SCOPE",
+      "revision": 8,
+      "reason": "User locked live EB as sole Vertical filled-row design authority",
+      "evidence": [
+        "visual-audit.md"
+      ],
+      "event": "artifact-superseded",
+      "affected_artifacts": [
+        "browser-test-plan.yaml"
+      ]
+    },
+    {
+      "sequence": 114,
+      "at": "2026-08-21T15:47:00Z",
+      "from": "SCOPE",
+      "to": "REFERENCE_INTAKE",
+      "revision": 8,
+      "reason": "Reused fresh live EB evidence and reread help content",
+      "evidence": [
+        "screenshot-inventory.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 115,
+      "at": "2026-08-21T15:47:00Z",
+      "from": "REFERENCE_INTAKE",
+      "to": "REFERENCE_VALIDATION",
+      "revision": 8,
+      "reason": "Validated live EB as the sole Vertical filled-row visual reference",
+      "evidence": [
+        "visual-audit.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 116,
+      "at": "2026-08-21T15:47:00Z",
+      "from": "REFERENCE_VALIDATION",
+      "to": "VISUAL_ANALYSIS",
+      "revision": 8,
+      "reason": "Recorded the revision-7 versus live-EB computed-style differences",
+      "evidence": [
+        "visual-audit.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 117,
+      "at": "2026-08-21T15:47:00Z",
+      "from": "VISUAL_ANALYSIS",
+      "to": "DIRECTION_EXPLORATION",
+      "revision": 8,
+      "reason": "Compared retaining WPB constraints with live-EB-only treatment",
+      "evidence": [
+        "direction-comparison.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 118,
+      "at": "2026-08-21T15:47:00Z",
+      "from": "DIRECTION_EXPLORATION",
+      "to": "DIRECTION_APPROVAL",
+      "revision": 8,
+      "reason": "User explicitly selected live EB only",
+      "evidence": [
+        "locked-decisions.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 119,
+      "at": "2026-08-21T15:47:01Z",
+      "from": "DIRECTION_APPROVAL",
+      "to": "COMPONENT_ANATOMY",
+      "revision": 8,
+      "reason": "Updated intrinsic Vertical filled-row anatomy",
+      "evidence": [
+        "component-anatomy.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 120,
+      "at": "2026-08-21T15:47:01Z",
+      "from": "COMPONENT_ANATOMY",
+      "to": "STATE_CONTRACT",
+      "revision": 8,
+      "reason": "Updated inert-row and one-unit Remove state",
+      "evidence": [
+        "state-matrix.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 121,
+      "at": "2026-08-21T15:47:01Z",
+      "from": "STATE_CONTRACT",
+      "to": "RESPONSIVE_CONTRACT",
+      "revision": 8,
+      "reason": "Updated content-derived height and visible wrapping",
+      "evidence": [
+        "responsive-contract.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 122,
+      "at": "2026-08-21T15:47:01Z",
+      "from": "RESPONSIVE_CONTRACT",
+      "to": "INTERACTION_ACCESSIBILITY",
+      "revision": 8,
+      "reason": "Updated Vertical inert-row interaction while retaining named Remove",
+      "evidence": [
+        "interaction-contract.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 123,
+      "at": "2026-08-21T15:47:01Z",
+      "from": "INTERACTION_ACCESSIBILITY",
+      "to": "TOKENS_GEOMETRY",
+      "revision": 8,
+      "reason": "Replaced the false 64px maximum with EB 60px minimum",
+      "evidence": [
+        "design-tokens.json"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 124,
+      "at": "2026-08-21T15:47:10Z",
+      "from": "TOKENS_GEOMETRY",
+      "to": "PROTOTYPE_OPTIONAL",
+      "revision": 8,
+      "reason": "No separate prototype required for measured source-owned CSS remediation",
+      "evidence": [
+        "visual-audit.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 125,
+      "at": "2026-08-21T15:47:10Z",
+      "from": "PROTOTYPE_OPTIONAL",
+      "to": "HANDOFF_ASSEMBLY",
+      "revision": 8,
+      "reason": "Reassembled revision-8 implementation handoff",
+      "evidence": [
+        "implementation-handoff.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 126,
+      "at": "2026-08-21T15:47:10Z",
+      "from": "HANDOFF_ASSEMBLY",
+      "to": "HANDOFF_VALIDATION",
+      "revision": 8,
+      "reason": "Revision-8 handoff validates without blockers",
+      "evidence": [
+        "acceptance-criteria.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 127,
+      "at": "2026-08-21T15:47:10Z",
+      "from": "HANDOFF_VALIDATION",
+      "to": "IMPLEMENTATION_AWAITED",
+      "revision": 8,
+      "reason": "Revision-8 source implementation is ready for verification",
+      "evidence": [
+        "codex-task.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 128,
+      "at": "2026-08-21T15:57:56Z",
+      "from": "IMPLEMENTATION_AWAITED",
+      "to": "CHROME_QA_PREFLIGHT",
+      "revision": 8,
+      "reason": "Revision 8 implementation returned locally and direct Chrome capability, served version 14.1.2, cache-bypass, EB reference, and SIT routes were rechecked",
+      "evidence": [
+        "browser-test-report.md"
+      ],
+      "affected_artifacts": [
+        "chrome-preflight-result.yaml"
+      ]
+    },
+    {
+      "sequence": 129,
+      "at": "2026-08-21T15:58:05Z",
+      "from": "CHROME_QA_PREFLIGHT",
+      "to": "BLOCKED",
+      "revision": 8,
+      "reason": "Formal persisted Vertical Slots execution cannot proceed because the valid SIT fixture is Horizontal and the published Vertical candidate lacks a PPB template contract; merchant fixture mutation is outside scope",
+      "evidence": [
+        "chrome-preflight-result.yaml"
+      ],
+      "affected_artifacts": [
+        "browser-test-report.md"
+      ]
     }
   ]
 }

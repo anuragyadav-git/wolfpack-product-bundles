@@ -1,9 +1,8 @@
 import { json, type ActionFunctionArgs } from "@remix-run/node";
-import { requireAppProxy } from "../../lib/auth-guards.server";
+import { authenticate, unauthenticated } from "../../shopify.server";
 import { isSupportedCheckoutIntegrationProvider } from "../../lib/checkout-integrations";
 import { AppLogger } from "../../lib/logger";
 import { CheckoutIntegrationDiscountCodeService } from "../../services/checkout-integration-discount-code-service.server";
-import { unauthenticated } from "../../shopify.server";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -16,7 +15,8 @@ export function OPTIONS() {
 }
 
 export async function action({ request }: ActionFunctionArgs) {
-  const { session } = await requireAppProxy(request);
+  const { session } = await authenticate.public.appProxy(request);
+  if (!session) throw new Response("Unauthorized", { status: 401 });
   const shopDomain = session.shop;
 
   const body = await request.json().catch(() => null);

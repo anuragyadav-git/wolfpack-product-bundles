@@ -81,6 +81,8 @@ interface FormattedStep {
   freeGiftName: string | null;
   addonLabel: string | null;
   addonTitle: string | null;
+  addonAddText: string | null;
+  addonReplaceText: string | null;
   addonDisplayFree: boolean;
   addonTiers: unknown[];
   addonUnlockAfterCompletion: boolean;
@@ -252,6 +254,8 @@ export function formatBundleForWidget(bundle: any): FormattedBundle {
       freeGiftName: step.freeGiftName ?? null,
       addonLabel: step.addonLabel ?? null,
       addonTitle: step.addonTitle ?? null,
+      addonAddText: step.addonAddText ?? null,
+      addonReplaceText: step.addonReplaceText ?? null,
       addonDisplayFree: step.addonDisplayFree === true,
       addonTiers: Array.isArray(step.addonTiers) ? step.addonTiers : [],
       addonUnlockAfterCompletion: step.addonUnlockAfterCompletion !== false,
@@ -301,7 +305,12 @@ export function formatBundleForWidget(bundle: any): FormattedBundle {
           method: bundle.pricing.method,
           rules: bundle.pricing.rules ?? [],
           showFooter: bundle.pricing.showFooter,
-          messages: bundle.pricing.messages ?? {},
+          messages: {
+            ...((bundle.pricing.messages as Record<string, unknown> | null) ?? {}),
+            ...(bundle.pricing.ruleMessagesByLocale
+              ? { ruleMessagesByLocale: bundle.pricing.ruleMessagesByLocale }
+              : {}),
+          },
           displayOptions: bundle.pricing.displayOptions ?? null,
         }
       : null,
