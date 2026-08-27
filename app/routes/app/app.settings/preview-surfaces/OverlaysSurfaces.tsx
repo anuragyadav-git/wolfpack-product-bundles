@@ -32,7 +32,15 @@ export function ValidationSurface({ t }: { t: Translate }) {
   );
 }
 
-export function UpsellSurface({ t }: { t: Translate }) {
+export function UpsellSurface({
+  t,
+  isAdded,
+  onAdd,
+}: {
+  t: Translate;
+  isAdded: boolean;
+  onAdd: () => void;
+}) {
   const upsellProduct = DESIGN_PREVIEW_FIXTURE.upsell;
 
   return (
@@ -58,8 +66,8 @@ export function UpsellSurface({ t }: { t: Translate }) {
         </p>
         <strong>{t(`${upsellProduct.translationKey}.price`)}</strong>
       </div>
-      <button type="button" className={styles.upsellButton} disabled>
-        {t("settingsDcp.preview.surface.add")}
+      <button type="button" className={styles.upsellButton} onClick={onAdd}>
+        {t(isAdded ? "settingsDcp.preview.surface.added" : "settingsDcp.preview.surface.add")}
       </button>
     </section>
   );

@@ -2,7 +2,7 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { DESIGN_CONFIGURATION } from "../../../app/lib/admin-configuration-surfaces";
 import { DesignSettingsView } from "../../../app/routes/app/app.settings/DesignSettingsView";
-import { DesignFields } from "../../../app/routes/app/app.settings/SettingsDesignFields";
+import { BundlePreviewModal, DesignFields } from "../../../app/routes/app/app.settings/SettingsDesignFields";
 
 jest.mock("react-i18next", () => ({
   useTranslation: () => ({ t: (key: string) => key }),
@@ -42,7 +42,7 @@ describe("DesignSettingsView live preview", () => {
         shopBrandColors: null,
         isActiveSubpageDirty: false,
         isPreviewModalOpen: false,
-        previewBundles: [{ id: "bundle-1", name: "Summer Box", type: "Landing Page", viewUrl: "https://shop.test/pages/bundle" }],
+        previewBundles: [{ id: "bundle-1", name: "Summer Box", type: "Landing Page", bundleType: "full_page", viewUrl: "https://shop.test/pages/bundle" }],
         saveMessage: null,
         setSettingsView: jest.fn(),
         setIsPreviewModalOpen: jest.fn(),
@@ -133,7 +133,7 @@ describe("DesignSettingsView live preview", () => {
         shopBrandColors: null,
         isActiveSubpageDirty: false,
         isPreviewModalOpen: false,
-        previewBundles: [{ id: "bundle-1", name: "Summer Box", type: "Landing Page", viewUrl: "https://shop.test/pages/bundle" }],
+        previewBundles: [{ id: "bundle-1", name: "Summer Box", type: "Landing Page", bundleType: "full_page", viewUrl: "https://shop.test/pages/bundle" }],
         saveMessage: null,
         setSettingsView: jest.fn(),
         setIsPreviewModalOpen: jest.fn(),
@@ -149,5 +149,56 @@ describe("DesignSettingsView live preview", () => {
     expect(view).not.toContain("FPB Loading GIF");
     expect(view).not.toContain("Loading Screen Background Color");
     expect(view).toContain('<s-option value="loading">');
+  });
+
+  it("requires saved Design settings before storefront preview", () => {
+    const view = renderToStaticMarkup(
+      React.createElement(DesignSettingsView, {
+        designFieldValues: {},
+        inheritedColorFieldKeys: [],
+        shopBrandColors: null,
+        isActiveSubpageDirty: true,
+        isDesignSaving: false,
+        isPreviewModalOpen: false,
+        previewBundles: [{
+          id: "bundle-1",
+          name: "Summer Box",
+          type: "Landing Page",
+          bundleType: "full_page",
+          viewUrl: "https://shop.test/apps/product-bundles/wpb/1",
+        }],
+        saveMessage: null,
+        setSettingsView: jest.fn(),
+        setIsPreviewModalOpen: jest.fn(),
+        setDesignFieldValues: jest.fn(),
+        setInheritedColorFieldKeys: jest.fn(),
+        setSaveMessage: jest.fn(),
+        discardActiveSettingsChanges: jest.fn(),
+        saveActiveSettingsChanges: jest.fn(),
+      }),
+    );
+
+    expect(view).toContain("settingsDcp.preview.storefront.saveBeforePreview");
+    expect(view).toContain('accessibilityLabel="settingsDcp.preview.storefront.open" disabled="true"');
+  });
+
+  it("renders the storefront bundle chooser as a Polaris modal and table", () => {
+    const view = renderToStaticMarkup(
+      React.createElement(BundlePreviewModal, {
+        bundles: [{
+          id: "bundle-1",
+          name: "Summer Box",
+          type: "Landing Page",
+          bundleType: "full_page",
+          viewUrl: "https://shop.test/apps/product-bundles/wpb/1",
+        }],
+        onClose: jest.fn(),
+      }),
+    );
+
+    expect(view).toContain('<s-modal id="settings-design-bundle-preview"');
+    expect(view).toContain("<s-table");
+    expect(view).toContain("settingsDcp.preview.storefront.view");
+    expect(view).not.toContain('role="dialog"');
   });
 });

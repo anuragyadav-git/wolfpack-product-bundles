@@ -7,9 +7,13 @@ type Translate = (key: string) => string;
 export function CategoriesSurface({
   descriptor,
   t,
+  activeCategoryId,
+  onCategorySelect,
 }: {
   descriptor: DesignPreviewTemplateDescriptor;
   t: Translate;
+  activeCategoryId: string;
+  onCategorySelect: (categoryId: string) => void;
 }) {
   if (descriptor.categories === "none") return null;
 
@@ -43,12 +47,14 @@ export function CategoriesSurface({
           data-preview-region={region}
           aria-label={t("settingsDcp.preview.surface.navigationLabel")}
         >
-          {DESIGN_PREVIEW_FIXTURE.categories.map((category, index) => (
+          {DESIGN_PREVIEW_FIXTURE.categories.map((category) => (
             <button
               key={category.id}
               type="button"
               className={styles.categoryPillItem}
-              data-active={index === 0 || undefined}
+              data-active={category.id === activeCategoryId || undefined}
+              aria-pressed={category.id === activeCategoryId}
+              onClick={() => onCategorySelect(category.id)}
             >
               {t(category.translationKey)}
             </button>
@@ -61,14 +67,17 @@ export function CategoriesSurface({
           data-preview-region={region}
           aria-label={t("settingsDcp.preview.surface.navigationLabel")}
         >
-          {DESIGN_PREVIEW_FIXTURE.categories.map((category, index) => (
-            <span
+          {DESIGN_PREVIEW_FIXTURE.categories.map((category) => (
+            <button
+              type="button"
               key={category.id}
               className={styles.categoryUnderlineItem}
-              data-active={index === 0 || undefined}
+              data-active={category.id === activeCategoryId || undefined}
+              aria-pressed={category.id === activeCategoryId}
+              onClick={() => onCategorySelect(category.id)}
             >
               {t(category.translationKey)}
-            </span>
+            </button>
           ))}
         </nav>
       ) : (
@@ -78,12 +87,14 @@ export function CategoriesSurface({
           data-preview-region={region}
           aria-label={t("settingsDcp.preview.surface.navigationLabel")}
         >
-          {DESIGN_PREVIEW_FIXTURE.categories.map((category, index) => (
+          {DESIGN_PREVIEW_FIXTURE.categories.map((category) => (
             <button
               key={category.id}
               type="button"
               className={styles.categoryTabItem}
-              data-active={index === 0 || undefined}
+              data-active={category.id === activeCategoryId || undefined}
+              aria-pressed={category.id === activeCategoryId}
+              onClick={() => onCategorySelect(category.id)}
             >
               {t(category.translationKey)}
             </button>

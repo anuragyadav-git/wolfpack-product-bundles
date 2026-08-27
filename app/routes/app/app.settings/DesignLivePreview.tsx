@@ -42,6 +42,7 @@ export type DesignPreviewState = {
 
 export type PreviewInteractionState = {
   quantities: Record<string, number>;
+  activeCategoryId: string;
   progressStep: number;
   isMobileSummaryOpen: boolean;
   discountFeedback: {
@@ -55,6 +56,7 @@ export function createPreviewInteractionState(): PreviewInteractionState {
     quantities: Object.fromEntries(
       DESIGN_PREVIEW_FIXTURE.products.map((product) => [product.id, product.quantity]),
     ),
+    activeCategoryId: DESIGN_PREVIEW_FIXTURE.categories[0].id,
     progressStep: 0,
     isMobileSummaryOpen: false,
     discountFeedback: { state: null, replay: 0 },
@@ -70,11 +72,55 @@ export function updatePreviewProductQuantity(
   return { ...state, quantities: { ...state.quantities, [productId]: quantity } };
 }
 
-export function advancePreviewProgress(state: PreviewInteractionState): PreviewInteractionState {
+export function setPreviewProductQuantity(
+  state: PreviewInteractionState,
+  productId: string,
+  quantity: number,
+): PreviewInteractionState {
   return {
     ...state,
-    progressStep: (state.progressStep + 1) % (DESIGN_PREVIEW_FIXTURE.discountTiers.length + 1),
+    quantities: {
+      ...state.quantities,
+      [productId]: Math.max(0, quantity),
+    },
   };
+}
+
+export function selectPreviewCategory(
+  state: PreviewInteractionState,
+  categoryId: string,
+): PreviewInteractionState {
+  return { ...state, activeCategoryId: categoryId };
+}
+
+export function getPreviewSelectionSummary(state: PreviewInteractionState) {
+  const products = DESIGN_PREVIEW_FIXTURE.products.flatMap((product) => {
+    const quantity = Math.max(0, state.quantities[product.id] ?? 0);
+    return quantity > 0 ? [{ product, quantity }] : [];
+  });
+  return {
+    products,
+    itemCount: products.reduce((total, item) => total + item.quantity, 0),
+    totalCents: products.reduce(
+      (total, item) => total + item.product.priceCents * item.quantity,
+      0,
+    ),
+  };
+}
+
+export function advancePreviewProgress(state: PreviewInteractionState): PreviewInteractionState {
+  const finalStep = DESIGN_PREVIEW_FIXTURE.discountTiers.length;
+  if (state.progressStep >= finalStep) {
+    return triggerPreviewDiscountFeedback(state, "complete");
+  }
+  return {
+    ...state,
+    progressStep: state.progressStep + 1,
+  };
+}
+
+export function retreatPreviewProgress(state: PreviewInteractionState): PreviewInteractionState {
+  return { ...state, progressStep: Math.max(0, state.progressStep - 1) };
 }
 
 export function togglePreviewMobileSummary(state: PreviewInteractionState): PreviewInteractionState {
@@ -185,6 +231,26 @@ export function setDesignPreviewSurface(
     : state;
 }
 
+export type DesignPreviewFieldFocusRequest = {
+  fieldKey: string;
+  requestId: number;
+};
+
+export function applyDesignPreviewFieldFocus(
+  state: DesignPreviewState,
+  request: DesignPreviewFieldFocusRequest | null | undefined,
+  handledRequestId: number,
+): { state: DesignPreviewState; handledRequestId: number } {
+  if (!request || request.requestId <= handledRequestId) {
+    return { state, handledRequestId };
+  }
+  const target = getDesignPreviewFieldTarget(request.fieldKey, state.templateKey);
+  const nextState = target && isDesignPreviewFieldApplicable(request.fieldKey, state.templateKey)
+    ? setDesignPreviewSurface(state, target.surface)
+    : state;
+  return { state: nextState, handledRequestId: request.requestId };
+}
+
 
 
 function PreviewSurface({
@@ -195,6 +261,8 @@ function PreviewSurface({
   t,
   interaction,
   onInteractionChange,
+  onSurfaceRequest,
+  locale,
 }: {
   descriptor: DesignPreviewTemplateDescriptor;
   surface: DesignPreviewSurface;
@@ -203,6 +271,8 @@ function PreviewSurface({
   t: Translate;
   interaction: PreviewInteractionState;
   onInteractionChange: (state: PreviewInteractionState) => void;
+  onSurfaceRequest: (surface: DesignPreviewSurface) => void;
+  locale?: string;
 }) {
   if (surface === "bundle-header") {
     return (
@@ -217,7 +287,16 @@ function PreviewSurface({
     return <NavigationSurface descriptor={descriptor} t={t} />;
   }
   if (surface === "categories") {
-    return <CategoriesSurface descriptor={descriptor} t={t} />;
+    return (
+      <CategoriesSurface
+        descriptor={descriptor}
+        t={t}
+        activeCategoryId={interaction.activeCategoryId}
+        onCategorySelect={(categoryId) =>
+          onInteractionChange(selectPreviewCategory(interaction, categoryId))
+        }
+      />
+    );
   }
   if (surface === "product-card") {
     return (
@@ -232,10 +311,32 @@ function PreviewSurface({
     );
   }
   if (surface === "product-slots") {
-    return <ProductSlotsSurface descriptor={descriptor} t={t} />;
+    return (
+      <ProductSlotsSurface
+        descriptor={descriptor}
+        t={t}
+        interaction={interaction}
+        onRemoveProduct={(productId) =>
+          onInteractionChange(setPreviewProductQuantity(interaction, productId, 0))
+        }
+        onOpenPicker={() => onSurfaceRequest("product-picker")}
+      />
+    );
   }
   if (surface === "product-picker") {
-    return <ProductPickerSurface descriptor={descriptor} viewport={viewport} t={t} />;
+    return (
+      <ProductPickerSurface
+        descriptor={descriptor}
+        viewport={viewport}
+        t={t}
+        interaction={interaction}
+        onClose={() => onSurfaceRequest("product-slots")}
+        onAddProduct={(productId) => {
+          onInteractionChange(updatePreviewProductQuantity(interaction, productId, 1));
+          onSurfaceRequest("product-slots");
+        }}
+      />
+    );
   }
   if (surface === "cart-summary") {
     return (
@@ -246,6 +347,9 @@ function PreviewSurface({
         interaction={interaction}
         onToggleMobileSummary={() => onInteractionChange(togglePreviewMobileSummary(interaction))}
         onAdvanceProgress={() => onInteractionChange(advancePreviewProgress(interaction))}
+        onRetreatProgress={() => onInteractionChange(retreatPreviewProgress(interaction))}
+        onComplete={() => onInteractionChange(triggerPreviewDiscountFeedback(interaction, "complete"))}
+        locale={locale}
       />
     );
   }
@@ -253,7 +357,17 @@ function PreviewSurface({
     return <LoadingSurface loadingGifUrl={loadingGifUrl} t={t} />;
   }
   if (surface === "upsell") {
-    return <UpsellSurface t={t} />;
+    return (
+      <UpsellSurface
+        t={t}
+        isAdded={(interaction.quantities[DESIGN_PREVIEW_FIXTURE.upsell.id] ?? 0) > 0}
+        onAdd={() => onInteractionChange(updatePreviewProductQuantity(
+          interaction,
+          DESIGN_PREVIEW_FIXTURE.upsell.id,
+          1,
+        ))}
+      />
+    );
   }
 
   return <ValidationSurface t={t} />;
@@ -263,7 +377,7 @@ export function DesignLivePreview({
   fieldValues,
   inheritedColorFieldKeys,
   shopBrandColors,
-  activeFieldKey,
+  fieldFocusRequest,
   initialState,
   onSurfaceChange,
   onContextChange,
@@ -271,13 +385,14 @@ export function DesignLivePreview({
   fieldValues: Record<string, string>;
   inheritedColorFieldKeys?: string[];
   shopBrandColors?: ShopBrandColors | null;
-  activeFieldKey?: string | null;
+  fieldFocusRequest?: DesignPreviewFieldFocusRequest | null;
   initialState?: DesignPreviewState;
   onSurfaceChange?: (surface: DesignPreviewSurface) => void;
   onContextChange?: (context: Pick<DesignPreviewState, "bundleType" | "templateKey" | "surface">) => void;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const previewStageRef = useRef<HTMLDivElement>(null);
+  const handledFieldFocusRequestRef = useRef(0);
   const [previewState, setPreviewState] = useState<DesignPreviewState>(
     initialState ?? createDesignPreviewState(),
   );
@@ -292,14 +407,7 @@ export function DesignLivePreview({
     (template) => template.key === previewState.templateKey,
   ) ?? DESIGN_PREVIEW_TEMPLATES[0];
   const supportedSurfaces = activeTemplate.supportedSurfaces;
-  const fieldTarget = activeFieldKey
-    ? getDesignPreviewFieldTarget(activeFieldKey, activeTemplate.key)
-    : undefined;
-  const fieldTargetSurface = fieldTarget?.surface;
-  const isFieldOnActiveSurface = Boolean(
-    fieldTarget
-    && (fieldTarget.surface === previewState.surface || fieldTarget.surfaces?.includes(previewState.surface)),
-  );
+  const activeFieldKey = fieldFocusRequest?.fieldKey ?? null;
   const isApplicable = !activeFieldKey || isDesignPreviewFieldApplicable(activeFieldKey, activeTemplate.key);
   const previewTheme = useMemo(
     () => buildDesignPreviewTheme(
@@ -317,9 +425,17 @@ export function DesignLivePreview({
   );
 
   useEffect(() => {
-    if (!fieldTargetSurface || !isApplicable || isFieldOnActiveSurface) return;
-    setPreviewState((current) => setDesignPreviewSurface(current, fieldTargetSurface));
-  }, [activeFieldKey, fieldTargetSurface, isApplicable, isFieldOnActiveSurface]);
+    if (!fieldFocusRequest) return;
+    setPreviewState((current) => {
+      const result = applyDesignPreviewFieldFocus(
+        current,
+        fieldFocusRequest,
+        handledFieldFocusRequestRef.current,
+      );
+      handledFieldFocusRequestRef.current = result.handledRequestId;
+      return result.state;
+    });
+  }, [fieldFocusRequest]);
 
   useEffect(() => {
     onSurfaceChange?.(previewState.surface);
@@ -483,6 +599,10 @@ export function DesignLivePreview({
               t={t}
               interaction={interaction}
               onInteractionChange={setInteraction}
+              onSurfaceRequest={(surface) =>
+                setPreviewState((current) => setDesignPreviewSurface(current, surface))
+              }
+              locale={i18n?.resolvedLanguage ?? i18n?.language}
             />
           </div>
         </div>

@@ -101,6 +101,49 @@ describe("Settings loader critical path", () => {
     expect(syncThemeColors).toHaveBeenCalledWith("test-shop.myshopify.com");
   });
 
+  it("loads only storefront-ready active or unlisted preview bundles", async () => {
+    requireAdminSession.mockResolvedValue({
+      admin: {},
+      session: { shop: "test-shop.myshopify.com" },
+    });
+    prisma.designSettings.findUnique.mockResolvedValue(null);
+    prisma.bundle.findMany.mockResolvedValue([
+      {
+        id: "fpb-1",
+        publicNumber: 7,
+        name: "Landing bundle",
+        bundleType: "full_page",
+        shopifyProductHandle: null,
+      },
+      {
+        id: "ppb-1",
+        publicNumber: null,
+        name: "Product bundle",
+        bundleType: "product_page",
+        shopifyProductHandle: "bundle-product",
+      },
+    ]);
+    const { loader } = await import("../../../app/routes/app/app.settings");
+
+    const result = await loader({
+      request: new Request("https://app.test/app/settings"),
+      params: {},
+      context: {},
+    } as any);
+
+    expect(prisma.bundle.findMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: expect.objectContaining({
+        shopId: "test-shop.myshopify.com",
+        status: { in: ["active", "unlisted"] },
+      }),
+      select: expect.objectContaining({ status: true }),
+    }));
+    await expect((result as any).data.previewBundles).resolves.toEqual([
+      expect.objectContaining({ id: "fpb-1", bundleType: "full_page" }),
+      expect.objectContaining({ id: "ppb-1", bundleType: "product_page" }),
+    ]);
+  });
+
   it("renders the Settings landing before deferred workspace data resolves", async () => {
     const { default: SettingsRoute } = await import(
       "../../../app/routes/app/app.settings"

@@ -1,4 +1,4 @@
-import { useActionData, useFetcher, useSubmit } from "@remix-run/react";
+import { useActionData, useFetcher, useNavigation, useSubmit } from "@remix-run/react";
 import { useEffect, useRef, useState } from "react";
 import { useAppBridge } from "@shopify/app-bridge-react";
 import {
@@ -43,7 +43,8 @@ type SettingsRouteProps = {
     id: string;
     name: string;
     type: string;
-    viewUrl: string | null;
+    bundleType: "full_page" | "product_page";
+    viewUrl: string;
   }>;
 };
 
@@ -58,6 +59,7 @@ export function SettingsRoute({
   const actionData = useActionData<typeof action>();
   const controlsFetcher = useFetcher<typeof action>();
   const submit = useSubmit();
+  const navigation = useNavigation();
   const shopify = useAppBridge();
   const controlsNavigationRef = useRef<HTMLDetailsElement>(null);
   const deferredControlsNavigationRef = useRef(createDeferredSettingsNavigation());
@@ -146,6 +148,8 @@ export function SettingsRoute({
   const currentDesignState = { fieldValues: designFieldValues, inheritedColorFieldKeys };
   const savedDesignState = { fieldValues: savedDesignFieldValues, inheritedColorFieldKeys: savedInheritedColorFieldKeys };
   const isDesignDirty = JSON.stringify(currentDesignState) !== JSON.stringify(savedDesignState);
+  const isDesignSaving = navigation.state !== "idle"
+    && navigation.formData?.get("intent") === "saveSettingsDesign";
   const isActiveSubpageDirty =
     (settingsView === "design" && isDesignDirty) ||
     (settingsView === "language" && isLanguageDirty) ||
@@ -302,6 +306,7 @@ export function SettingsRoute({
         inheritedColorFieldKeys={inheritedColorFieldKeys}
         shopBrandColors={shopBrandColors}
         isActiveSubpageDirty={isActiveSubpageDirty}
+        isDesignSaving={isDesignSaving}
         isPreviewModalOpen={isPreviewModalOpen}
         previewBundles={previewBundles}
         saveMessage={saveMessage}

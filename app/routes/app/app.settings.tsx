@@ -8,7 +8,7 @@ import { Await, useLoaderData, useNavigate } from "@remix-run/react";
 import { lazy, Suspense, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { Prisma } from "@prisma/client";
-import { BundleType } from "../../constants/bundle";
+import { BundleStatus, BundleType } from "../../constants/bundle";
 import { prisma } from "../../db.server";
 import { authenticate } from "../../shopify.server";
 import {
@@ -77,9 +77,10 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const previewBundles = prisma.bundle.findMany({
       where: {
         shopId: session.shop,
+        status: { in: [BundleStatus.ACTIVE, BundleStatus.UNLISTED] },
         OR: [
-          { bundleType: BundleType.FULL_PAGE },
-          { shopifyProductHandle: { not: null } },
+          { bundleType: BundleType.FULL_PAGE, publicNumber: { not: null } },
+          { bundleType: BundleType.PRODUCT_PAGE, shopifyProductHandle: { not: null } },
         ],
       },
       orderBy: { updatedAt: "desc" },
@@ -90,19 +91,24 @@ export async function loader({ request }: LoaderFunctionArgs) {
         name: true,
         bundleType: true,
         shopifyProductHandle: true,
+        status: true,
       },
-    }).then((bundles) => bundles.map((bundle) => ({
-      id: bundle.id,
-      name: bundle.name,
-      type: bundle.bundleType === "full_page" ? "Landing Page" : "Product Page",
-      viewUrl: bundle.bundleType === "full_page"
+    }).then((bundles) => bundles.flatMap((bundle) => {
+      const viewUrl = bundle.bundleType === BundleType.FULL_PAGE
         ? bundle.publicNumber === null
           ? null
           : buildFpbStorefrontUrl(session.shop, bundle.publicNumber)
         : bundle.shopifyProductHandle
           ? `https://${session.shop}/products/${bundle.shopifyProductHandle}`
-          : null,
-    })));
+          : null;
+      return viewUrl ? [{
+        id: bundle.id,
+        name: bundle.name,
+        type: bundle.bundleType === BundleType.FULL_PAGE ? "Landing Page" : "Product Page",
+        bundleType: bundle.bundleType,
+        viewUrl,
+      }] : [];
+    }));
   return defer({
     settingsPage,
     previewBundles,

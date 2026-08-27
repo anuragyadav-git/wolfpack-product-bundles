@@ -5,6 +5,7 @@ import {
   type DesignPreviewFixtureProduct,
   type DesignPreviewTemplateDescriptor,
 } from "../design-preview-model";
+import type { PreviewInteractionState } from "../DesignLivePreview";
 import styles from "./PreviewSurfaces.module.css";
 
 type Translate = (key: string) => string;
@@ -30,13 +31,41 @@ function SlotProductThumbnail({
 export function ProductSlotsSurface({
   descriptor,
   t,
+  interaction,
+  onRemoveProduct,
+  onOpenPicker,
 }: {
   descriptor: DesignPreviewTemplateDescriptor;
   t: Translate;
+  interaction: PreviewInteractionState;
+  onRemoveProduct: (productId: string) => void;
+  onOpenPicker: () => void;
 }) {
   const orientation = descriptor.slotOrientation ?? "horizontal";
   const slotsRegion = `${orientation}-slots`;
-  const filledProduct = DESIGN_PREVIEW_FIXTURE.products[0];
+  const slotProducts = DESIGN_PREVIEW_FIXTURE.products.slice(0, 3);
+  const renderSlot = (product: DesignPreviewFixtureProduct, index: number) => {
+    const isFilled = (interaction.quantities[product.id] ?? 0) > 0;
+    return isFilled ? (
+      <div key={product.id} className={styles.slotCard} data-filled="true">
+        <SlotProductThumbnail product={product} />
+        <span className={styles.slotLabel}>{t(`${product.translationKey}.name`)}</span>
+        <button
+          type="button"
+          className={styles.slotClearButton}
+          aria-label={t("settingsDcp.preview.surface.removeProduct")}
+          onClick={() => onRemoveProduct(product.id)}
+        >×</button>
+      </div>
+    ) : (
+      <button key={product.id} type="button" className={styles.slotCard} onClick={onOpenPicker}>
+        <span className={styles.slotEmptyIcon} aria-hidden="true" />
+        <span className={styles.slotLabel}>
+          {t("settingsDcp.preview.surface.slotNumber").replace("{{number}}", String(index + 1))}
+        </span>
+      </button>
+    );
+  };
 
   if (orientation === "vertical") {
     return (
@@ -50,23 +79,7 @@ export function ProductSlotsSurface({
           <div className={styles.slotStepSection}>
             <div className={styles.slotStepTitle}>{t("settingsDcp.preview.surface.slotNumber").replace("{{number}}", "1")}</div>
             <div className={styles.horizontalSlotsGrid}>
-              <div className={styles.slotCard} data-filled="true">
-                <SlotProductThumbnail product={filledProduct} />
-                <span className={styles.slotLabel}>{t(`${filledProduct.translationKey}.name`)}</span>
-                <button type="button" className={styles.slotClearButton} aria-label="Remove item">×</button>
-              </div>
-              <div className={styles.slotCard}>
-                <span className={styles.slotEmptyIcon} aria-hidden="true" />
-                <span className={styles.slotLabel}>
-                  {t("settingsDcp.preview.surface.slotNumber").replace("{{number}}", "2")}
-                </span>
-              </div>
-              <div className={styles.slotCard}>
-                <span className={styles.slotEmptyIcon} aria-hidden="true" />
-                <span className={styles.slotLabel}>
-                  {t("settingsDcp.preview.surface.slotNumber").replace("{{number}}", "3")}
-                </span>
-              </div>
+              {slotProducts.map((product, index) => renderSlot(product, index))}
             </div>
           </div>
         </div>
@@ -82,28 +95,7 @@ export function ProductSlotsSurface({
         data-slot-direction="horizontal"
         data-preview-region={slotsRegion}
       >
-        {/* Filled Slot */}
-        <div className={styles.slotCard} data-filled="true">
-          <SlotProductThumbnail product={filledProduct} />
-          <span className={styles.slotLabel}>{t(`${filledProduct.translationKey}.name`)}</span>
-          <button type="button" className={styles.slotClearButton} aria-label="Remove item">×</button>
-        </div>
-
-        {/* Empty Slot 2 */}
-        <div className={styles.slotCard}>
-          <span className={styles.slotEmptyIcon} aria-hidden="true" />
-          <span className={styles.slotLabel}>
-            {t("settingsDcp.preview.surface.slotNumber").replace("{{number}}", "2")}
-          </span>
-        </div>
-
-        {/* Empty Slot 3 */}
-        <div className={styles.slotCard}>
-          <span className={styles.slotEmptyIcon} aria-hidden="true" />
-          <span className={styles.slotLabel}>
-            {t("settingsDcp.preview.surface.slotNumber").replace("{{number}}", "3")}
-          </span>
-        </div>
+        {slotProducts.map((product, index) => renderSlot(product, index))}
       </div>
     </section>
   );

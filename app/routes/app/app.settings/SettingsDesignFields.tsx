@@ -1,7 +1,36 @@
+import { useEffect, useRef, useState } from "react";
 import type { SettingsField } from "../../../lib/admin-configuration-surfaces";
 import { getSlotIconRecommendation } from "../../../lib/settings-design-runtime";
 import { FilePicker } from "../../../components/shared/FilePicker";
 import styles from "../../../styles/routes/admin-configuration-surfaces.module.css";
+import {
+  SettingsPreviewError,
+  openSettingsBundleStorefrontPreview,
+  type SettingsPreviewBundle,
+} from "../../../lib/settings-design-storefront-preview.client";
+import {
+  hidePolarisModal,
+  showPolarisModal,
+  useModalHideListener,
+} from "../_shared/bundle-configure/modal-utils";
+import { useTranslation } from "react-i18next";
+
+const isPolarisHexColor = (value: string) => {
+  if (value.length !== 7 && value.length !== 9) return false;
+  if (!value.startsWith("#")) return false;
+  return [...value.slice(1).toLowerCase()].every((character) =>
+    "0123456789abcdef".includes(character),
+  );
+};
+
+export function normalizePolarisColorValue(value: string, fallback: string): string {
+  if (isPolarisHexColor(value)) return value;
+  if (isPolarisHexColor(fallback)) return fallback;
+  const shortHex = /^#([0-9a-f])([0-9a-f])([0-9a-f])$/i.exec(fallback);
+  return shortHex
+    ? `#${shortHex[1]}${shortHex[1]}${shortHex[2]}${shortHex[2]}${shortHex[3]}${shortHex[3]}`
+    : "#000000";
+}
 
 export function SettingsCardIcon({ icon }: { icon: string }) {
   return (
@@ -37,15 +66,6 @@ export function DesignFields({
     }
     return groups;
   }, []);
-  const colorPickerValue = (value: string, fallback: string) => {
-    const hex = /^#[0-9a-f]{6}$/i.test(value) ? value : fallback;
-    if (/^#[0-9a-f]{6}$/i.test(hex)) {
-      return hex;
-    }
-    const shortHex = /^#([0-9a-f])([0-9a-f])([0-9a-f])$/i.exec(hex);
-    return shortHex ? `#${shortHex[1]}${shortHex[1]}${shortHex[2]}${shortHex[2]}${shortHex[3]}${shortHex[3]}` : "#000000";
-  };
-
   return (
     <s-stack gap="base">
       {groupedFields.map((group) => {
@@ -57,7 +77,7 @@ export function DesignFields({
               {group.fields.map((field) => {
                 const fieldKey = field.key ?? field.label;
                 const value = values[fieldKey] ?? field.value ?? "";
-                const colorValue = colorPickerValue(value, field.value || "#000000");
+                const colorValue = normalizePolarisColorValue(value, field.value || "#000000");
                 const handleInput = (event: Event) => {
                   onFieldChange(fieldKey, (event.target as HTMLInputElement).value);
                 };
@@ -167,56 +187,82 @@ export function DesignFields({
 }
 
 export function BundlePreviewModal({
-  isOpen,
   bundles,
   onClose,
 }: {
-  isOpen: boolean;
-  bundles: Array<{ id: string; name: string; type: string; viewUrl: string | null }>;
+  bundles: SettingsPreviewBundle[];
   onClose: () => void;
 }) {
-  if (!isOpen) {
-    return null;
-  }
+  const { t } = useTranslation();
+  const modalRef = useRef<HTMLElement | null>(null);
+  const [pendingBundleId, setPendingBundleId] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  useModalHideListener(modalRef, onClose);
+
+  useEffect(() => {
+    showPolarisModal(modalRef);
+    return () => hidePolarisModal(modalRef);
+  }, []);
+
+  const openPreview = async (bundle: SettingsPreviewBundle) => {
+    setPendingBundleId(bundle.id);
+    setErrorMessage(null);
+    try {
+      await openSettingsBundleStorefrontPreview(bundle);
+    } catch (error) {
+      setErrorMessage(error instanceof SettingsPreviewError
+        ? t(`settingsDcp.preview.storefront.errors.${error.code}`)
+        : error instanceof Error
+          ? error.message
+          : t("settingsDcp.preview.storefront.errors.notReady"));
+    } finally {
+      setPendingBundleId(null);
+    }
+  };
 
   return (
-    <div className={styles.settingsModalBackdrop} role="presentation">
-      <section className={styles.bundlePreviewModal} role="dialog" aria-modal="true" aria-labelledby="bundle-preview-title">
-        <div className={styles.bundlePreviewHeader}>
-          <h2 id="bundle-preview-title">Bundle Preview</h2>
-          <button type="button" className={styles.settingsModalDismiss} aria-label="Dismiss Bundle Preview" onClick={onClose}>
-            X
-          </button>
-        </div>
-        <div className={styles.bundlePreviewGridHeader}>
-          <span>Bundle Name</span>
-          <span>Type</span>
-          <span aria-hidden="true" />
-        </div>
-        <div className={styles.bundlePreviewRows}>
-          {bundles.length === 0 ? (
-            <p className={styles.emptyLanguageState}>No storefront-ready bundles are available for preview.</p>
-          ) : bundles.map((bundle) => (
-            <div key={bundle.id} className={styles.bundlePreviewRow}>
-              <span className={styles.bundlePreviewName}>{bundle.name}</span>
-              <span>{bundle.type}</span>
-              <button
-                type="button"
-                className={styles.bundlePreviewViewButton}
-                disabled={!bundle.viewUrl}
-                onClick={() => {
-                  if (bundle.viewUrl) {
-                    window.open(bundle.viewUrl, "_blank", "noopener,noreferrer");
-                  }
-                }}
-              >
-                View
-              </button>
-            </div>
-          ))}
-        </div>
-      </section>
-    </div>
+    <s-modal
+      ref={modalRef as any}
+      id="settings-design-bundle-preview"
+      heading={t("settingsDcp.preview.storefront.heading")}
+      size="large"
+    >
+      <s-button slot="secondary-actions" onClick={onClose}>
+        {t("settingsDcp.preview.storefront.close")}
+      </s-button>
+      <s-stack gap="base">
+        {errorMessage ? <s-banner tone="critical">{errorMessage}</s-banner> : null}
+        {bundles.length === 0 ? (
+          <s-paragraph>{t("settingsDcp.preview.storefront.empty")}</s-paragraph>
+        ) : (
+          <s-table variant="auto">
+            <s-table-header-row>
+              <s-table-header listSlot="primary">{t("settingsDcp.preview.storefront.bundleName")}</s-table-header>
+              <s-table-header listSlot="labeled">{t("settingsDcp.preview.storefront.bundleType")}</s-table-header>
+              <s-table-header listSlot="labeled">{t("settingsDcp.preview.storefront.actions")}</s-table-header>
+            </s-table-header-row>
+            <s-table-body>
+              {bundles.map((bundle) => (
+                <s-table-row key={bundle.id}>
+                  <s-table-cell>{bundle.name}</s-table-cell>
+                  <s-table-cell>{bundle.type}</s-table-cell>
+                  <s-table-cell>
+                    <s-button
+                      variant="primary"
+                      loading={pendingBundleId === bundle.id || undefined}
+                      disabled={pendingBundleId !== null || undefined}
+                      onClick={() => void openPreview(bundle)}
+                    >
+                      {t("settingsDcp.preview.storefront.view")}
+                    </s-button>
+                  </s-table-cell>
+                </s-table-row>
+              ))}
+            </s-table-body>
+          </s-table>
+        )}
+      </s-stack>
+    </s-modal>
   );
 }
 

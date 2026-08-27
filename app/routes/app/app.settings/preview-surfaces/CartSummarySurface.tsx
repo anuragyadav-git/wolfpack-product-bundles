@@ -6,10 +6,17 @@ import {
   type DesignPreviewTemplateDescriptor,
   type DesignPreviewViewport,
 } from "../design-preview-model";
-import type { PreviewInteractionState } from "../DesignLivePreview";
+import { getPreviewSelectionSummary, type PreviewInteractionState } from "../DesignLivePreview";
 import styles from "./PreviewSurfaces.module.css";
 
-type Translate = (key: string) => string;
+type Translate = (key: string, options?: { count?: number }) => string;
+
+function formatPreviewCurrency(totalCents: number, locale?: string) {
+  return new Intl.NumberFormat(locale ?? "en", {
+    style: "currency",
+    currency: "USD",
+  }).format(totalCents / 100);
+}
 
 function SummaryProductThumb({ product }: { product: DesignPreviewFixtureProduct }) {
   return (
@@ -32,6 +39,9 @@ export function CartSummarySurface({
   interaction,
   onToggleMobileSummary,
   onAdvanceProgress,
+  onRetreatProgress,
+  onComplete,
+  locale,
 }: {
   descriptor: DesignPreviewTemplateDescriptor;
   viewport: DesignPreviewViewport;
@@ -39,10 +49,15 @@ export function CartSummarySurface({
   interaction: PreviewInteractionState;
   onToggleMobileSummary: () => void;
   onAdvanceProgress: () => void;
+  onRetreatProgress: () => void;
+  onComplete: () => void;
+  locale?: string;
 }) {
   const isFullPage = descriptor.family === "full-page";
   const progressPercent = Math.min(100, 25 + interaction.progressStep * 25);
-  const selectedProducts = DESIGN_PREVIEW_FIXTURE.products.filter((p) => p.selected);
+  const selection = getPreviewSelectionSummary(interaction);
+  const total = formatPreviewCurrency(selection.totalCents, locale);
+  const feedback = interaction.discountFeedback.state;
 
   // PPB In-Page and Slot Templates
   if (!isFullPage) {
@@ -52,14 +67,14 @@ export function CartSummarySurface({
         <div className={styles.summarySidebarCard}>
           <div className={styles.summaryHeader}>
             <span>{t("settingsDcp.preview.surface.summary")}</span>
-            <small>{t("settingsDcp.preview.surface.selectedCount")}</small>
+            <small>{t("settingsDcp.preview.surface.selectedCount", { count: selection.itemCount })}</small>
           </div>
           <div className={styles.summaryItemsList}>
-            {selectedProducts.map((p) => (
-              <div key={p.id} className={styles.summaryItemRow}>
-                <SummaryProductThumb product={p} />
-                <strong>{t(`${p.translationKey}.name`)}</strong>
-                <span>{t(`${p.translationKey}.price`)}</span>
+            {selection.products.map(({ product, quantity }) => (
+              <div key={product.id} className={styles.summaryItemRow}>
+                <SummaryProductThumb product={product} />
+                <strong>{t(`${product.translationKey}.name`)} ×{quantity}</strong>
+                <span>{formatPreviewCurrency(product.priceCents * quantity, locale)}</span>
               </div>
             ))}
           </div>
@@ -69,12 +84,17 @@ export function CartSummarySurface({
         <footer className={styles.pdpStickyFooter} data-preview-region={region}>
           <div className={styles.pdpTotalBlock}>
             <small>{t("settingsDcp.preview.surface.totalLabel")}</small>
-            <strong>{t("settingsDcp.preview.surface.totalPrice")}</strong>
+            <strong>{total}</strong>
           </div>
-          <button type="button" className={styles.pdpAddBundleButton} disabled>
+          <button type="button" className={styles.pdpAddBundleButton} onClick={onComplete}>
             {t("settingsDcp.preview.surface.addBundle")}
           </button>
         </footer>
+        {feedback ? (
+          <div className={styles.discountFeedback} data-preview-discount-feedback={feedback} role="status">
+            {t(`settingsDcp.preview.feedback.${feedback === "tier" ? "tierHit" : "complete"}`)}
+          </div>
+        ) : null}
       </section>
     );
   }
@@ -85,10 +105,16 @@ export function CartSummarySurface({
     : descriptor.sceneRegions.desktop;
   const region = viewportRegions.at(-1) ?? "summary-sidebar";
   const usesSlots = descriptor.summary === "slot-grid" || descriptor.summary === "compact-slots";
+  const isExpanded = viewport !== "mobile" || interaction.isMobileSummaryOpen;
 
   return (
     <section className={styles.cartSummarySurface}>
-      <aside className={styles.summarySidebarCard} data-summary={descriptor.summary} data-preview-region={region}>
+      <aside
+        className={styles.summarySidebarCard}
+        data-summary={descriptor.summary}
+        data-preview-region={region}
+        data-expanded={isExpanded}
+      >
         <div className={styles.summaryHeader}>
           <button
             type="button"
@@ -97,11 +123,11 @@ export function CartSummarySurface({
           >
             {t("settingsDcp.preview.surface.summary")}
           </button>
-          <small>{t("settingsDcp.preview.surface.selectedCount")}</small>
+          <small>{t("settingsDcp.preview.surface.selectedCount", { count: selection.itemCount })}</small>
         </div>
 
-        {/* Discount Progress */}
-        <button
+        {isExpanded ? <>
+          <button
           type="button"
           className={styles.discountProgressBar}
           onClick={onAdvanceProgress}
@@ -116,28 +142,31 @@ export function CartSummarySurface({
           <span className={styles.discountProgressTrack}>
             <span className={styles.discountProgressFill} style={{ width: `${progressPercent}%` }} />
           </span>
-        </button>
+          </button>
 
         {/* Slot vs Row Items */}
         {usesSlots ? (
           <div className={styles.horizontalSlotsGrid}>
-            <div className={styles.slotCard} data-filled="true">
-              <SummaryProductThumb product={DESIGN_PREVIEW_FIXTURE.products[0]} />
-              <small>{t(`${DESIGN_PREVIEW_FIXTURE.products[0].translationKey}.name`)}</small>
-            </div>
-            {DESIGN_PREVIEW_FIXTURE.emptySlots.map((slot) => (
-              <div key={slot.id} className={styles.slotCard}>
-                <span className={styles.slotEmptyIcon}>+</span>
-              </div>
+            {DESIGN_PREVIEW_FIXTURE.products.slice(0, 3).map((product) => (
+              (interaction.quantities[product.id] ?? 0) > 0 ? (
+                <div key={product.id} className={styles.slotCard} data-filled="true">
+                  <SummaryProductThumb product={product} />
+                  <small>{t(`${product.translationKey}.name`)}</small>
+                </div>
+              ) : (
+                <div key={product.id} className={styles.slotCard}>
+                  <span className={styles.slotEmptyIcon}>+</span>
+                </div>
+              )
             ))}
           </div>
         ) : (
           <div className={styles.summaryItemsList}>
-            {selectedProducts.map((p) => (
-              <div key={p.id} className={styles.summaryItemRow}>
-                <SummaryProductThumb product={p} />
-                <strong>{t(`${p.translationKey}.name`)}</strong>
-                <span>{t(`${p.translationKey}.price`)}</span>
+            {selection.products.map(({ product, quantity }) => (
+              <div key={product.id} className={styles.summaryItemRow}>
+                <SummaryProductThumb product={product} />
+                <strong>{t(`${product.translationKey}.name`)} ×{quantity}</strong>
+                <span>{formatPreviewCurrency(product.priceCents * quantity, locale)}</span>
               </div>
             ))}
           </div>
@@ -145,17 +174,29 @@ export function CartSummarySurface({
 
         <div className={styles.summaryFooterRow}>
           <small>{t("settingsDcp.preview.surface.totalLabel")}</small>
-          <strong>{t("settingsDcp.preview.surface.totalPrice")}</strong>
+          <strong>{total}</strong>
         </div>
 
+        {feedback ? (
+          <div className={styles.discountFeedback} data-preview-discount-feedback={feedback} role="status">
+            {t(`settingsDcp.preview.feedback.${feedback === "tier" ? "tierHit" : "complete"}`)}
+          </div>
+        ) : null}
+
         <div className={styles.summaryNavButtons}>
-          <button type="button" className={styles.summaryBackButton} disabled>
+          <button
+            type="button"
+            className={styles.summaryBackButton}
+            disabled={interaction.progressStep === 0}
+            onClick={onRetreatProgress}
+          >
             {t("settingsDcp.preview.surface.back")}
           </button>
-          <button type="button" className={styles.summaryNextButton} disabled>
+          <button type="button" className={styles.summaryNextButton} onClick={onAdvanceProgress}>
             {t("settingsDcp.preview.surface.next")}
           </button>
         </div>
+        </> : null}
       </aside>
     </section>
   );

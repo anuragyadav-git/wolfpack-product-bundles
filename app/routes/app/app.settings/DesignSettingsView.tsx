@@ -1,4 +1,4 @@
-import { useMemo, useState, type Dispatch, type SetStateAction } from "react";
+import { useMemo, useRef, useState, type Dispatch, type SetStateAction } from "react";
 import { useTranslation } from "react-i18next";
 import {
   DESIGN_CONFIGURATION,
@@ -13,23 +13,23 @@ import {
   type ShopBrandColors,
 } from "../../../lib/shop-brand-colors";
 import { BundlePreviewModal, DesignFields } from "./SettingsDesignFields";
-import { DesignLivePreview } from "./DesignLivePreview";
+import { DesignLivePreview, type DesignPreviewFieldFocusRequest } from "./DesignLivePreview";
 import type { DesignPreviewSurface } from "./design-preview-model";
 import { getDesignFieldsForPreviewContext } from "./design-preview-model";
 import type { TemplateKey } from "../../../lib/bundle-config/template-selection";
 import styles from "./DesignSettingsView.module.css";
 import { SettingsContextualSaveBar, SettingsToast } from "./SettingsFeedback";
 import { AdminPageTitleBar } from "../../../components/AdminPageNavigation";
-
-type PreviewBundle = { id: string; name: string; type: string; viewUrl: string | null };
+import type { SettingsPreviewBundle } from "../../../lib/settings-design-storefront-preview.client";
 
 type DesignSettingsViewProps = {
   designFieldValues: Record<string, string>;
   inheritedColorFieldKeys: string[];
   shopBrandColors: ShopBrandColors | null;
   isActiveSubpageDirty: boolean;
+  isDesignSaving?: boolean;
   isPreviewModalOpen: boolean;
-  previewBundles: PreviewBundle[];
+  previewBundles: SettingsPreviewBundle[];
   saveMessage: string | null;
   setSettingsView: (view: "landing") => void;
   setIsPreviewModalOpen: (isOpen: boolean) => void;
@@ -55,6 +55,7 @@ export function DesignSettingsView({
   inheritedColorFieldKeys,
   shopBrandColors,
   isActiveSubpageDirty,
+  isDesignSaving = false,
   isPreviewModalOpen,
   previewBundles,
   saveMessage,
@@ -68,10 +69,14 @@ export function DesignSettingsView({
 }: DesignSettingsViewProps) {
   const { t } = useTranslation();
   const [workspacePane, setWorkspacePane] = useState<"preview" | "customize">("preview");
-  const [activePreviewFieldKey, setActivePreviewFieldKey] = useState<string | null>(null);
+  const fieldFocusRequestIdRef = useRef(0);
+  const [fieldFocusRequest, setFieldFocusRequest] = useState<DesignPreviewFieldFocusRequest | null>(null);
   const [activePreviewSurface, setActivePreviewSurface] = useState<DesignPreviewSurface>("product-card");
   const [activePreviewTemplate, setActivePreviewTemplate] = useState<TemplateKey>("standard");
-  const hasPreviewableBundle = previewBundles.some((bundle) => Boolean(bundle.viewUrl));
+  const hasPreviewableBundle = previewBundles.length > 0;
+  const isStorefrontPreviewDisabled = !hasPreviewableBundle
+    || isActiveSubpageDirty
+    || isDesignSaving;
 
   const contextualSections = useMemo(() => CONTEXTUAL_INSPECTOR_SECTIONS
     .map((section) => ({
@@ -131,14 +136,20 @@ export function DesignSettingsView({
               />
               <s-heading>Design Control Panel</s-heading>
             </s-stack>
-            <s-button
-              icon="view"
-              accessibilityLabel="Preview Bundle"
-              disabled={!hasPreviewableBundle}
-              onClick={() => setIsPreviewModalOpen(true)}
-            >
-              Preview Bundle
-            </s-button>
+            <s-stack gap="small" alignItems="end">
+              <s-button
+                icon="view"
+                accessibilityLabel={t("settingsDcp.preview.storefront.open")}
+                disabled={isStorefrontPreviewDisabled}
+                loading={isDesignSaving || undefined}
+                onClick={() => setIsPreviewModalOpen(true)}
+              >
+                {t("settingsDcp.preview.storefront.open")}
+              </s-button>
+              {isActiveSubpageDirty ? (
+                <s-text color="subdued">{t("settingsDcp.preview.storefront.saveBeforePreview")}</s-text>
+              ) : null}
+            </s-stack>
           </header>
 
           <div className={styles.mobileWorkspaceTabs} role="group" aria-label={t("settingsDcp.preview.workspace.label")}>
@@ -164,7 +175,7 @@ export function DesignSettingsView({
                 fieldValues={designFieldValues}
                 inheritedColorFieldKeys={inheritedColorFieldKeys}
                 shopBrandColors={shopBrandColors}
-                activeFieldKey={activePreviewFieldKey}
+                fieldFocusRequest={fieldFocusRequest}
                 onSurfaceChange={setActivePreviewSurface}
                 onContextChange={({ templateKey }: any) => setActivePreviewTemplate(templateKey)}
               />
@@ -187,7 +198,11 @@ export function DesignSettingsView({
                       inheritedFieldKeys={inheritedColorFieldKeys}
                       disabledFieldKeys={activePreviewSurface === "loading" ? ["Image Fit"] : []}
                       onFieldChange={(fieldKey, value) => {
-                        setActivePreviewFieldKey(fieldKey);
+                        fieldFocusRequestIdRef.current += 1;
+                        setFieldFocusRequest({
+                          fieldKey,
+                          requestId: fieldFocusRequestIdRef.current,
+                        });
                         setDesignFieldValues((current) => ({ ...current, [fieldKey]: value }));
                         setInheritedColorFieldKeys((current) => current.filter((key) => key !== fieldKey));
                       }}
@@ -201,7 +216,9 @@ export function DesignSettingsView({
             </aside>
           </section>
           <SettingsContextualSaveBar isOpen={isActiveSubpageDirty} onDiscard={discardActiveSettingsChanges} onSave={saveActiveSettingsChanges} />
-          <BundlePreviewModal isOpen={isPreviewModalOpen} bundles={previewBundles} onClose={() => setIsPreviewModalOpen(false)} />
+          {isPreviewModalOpen ? (
+            <BundlePreviewModal bundles={previewBundles} onClose={() => setIsPreviewModalOpen(false)} />
+          ) : null}
           <SettingsToast message={saveMessage} onDismiss={() => setSaveMessage(null)} />
         </main>
       </s-query-container>

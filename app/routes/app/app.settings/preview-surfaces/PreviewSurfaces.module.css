@@ -347,6 +347,9 @@
 
 .categoryUnderlineItem {
   padding: 8px 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
   font-size: 13px;
   font-weight: 600;
   color: var(--preview-tab-inactive-text, #6b7280);
@@ -571,6 +574,8 @@
   padding: 12px 8px;
   text-align: center;
   position: relative;
+  font: inherit;
+  cursor: pointer;
   gap: 8px;
   background-image: var(--preview-slot-icon-card-image, none);
   background-size: var(--preview-slot-icon-card-size, contain);
@@ -755,6 +760,37 @@
   display: grid;
   grid-template-columns: 1fr 1.5fr;
   gap: 8px;
+}
+
+.discountFeedback {
+  padding: 8px 10px;
+  border-radius: var(--preview-button-radius, 6px);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+@keyframes previewSurfaceFeedbackBeat {
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+.discountFeedback[data-preview-discount-feedback="tier"] {
+  background: var(--preview-discount-feedback-tier-bg, #d1fae5);
+  color: var(--preview-discount-feedback-tier-text, #065f46);
+  animation: previewSurfaceFeedbackBeat 650ms ease-in-out;
+}
+
+.discountFeedback[data-preview-discount-feedback="complete"] {
+  background: var(--preview-discount-feedback-complete-bg, #047857);
+  color: var(--preview-discount-feedback-complete-text, #ffffff);
+  animation: previewSurfaceFeedbackBeat 500ms ease-in-out 2;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .discountFeedback[data-preview-discount-feedback] {
+    animation: none;
+  }
 }
 
 .summaryBackButton {

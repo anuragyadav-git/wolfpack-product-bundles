@@ -72,6 +72,7 @@ export interface DesignPreviewFixtureProduct {
   imageUrl: string;
   selected: boolean;
   quantity: number;
+  priceCents: number;
 }
 
 export interface DesignPreviewFixture {
@@ -108,7 +109,7 @@ export function calculateDesignPreviewFitScale(
   const logicalWidth = viewport === "desktop"
     ? DESIGN_PREVIEW_VIEWPORTS.desktop.width
     : DESIGN_PREVIEW_VIEWPORTS.mobile.width;
-  return Math.min(1, Math.max(0.5, hostWidth / logicalWidth));
+  return Math.min(1, hostWidth / logicalWidth);
 }
 
 export function getDesignPreviewSurfaceFidelity(
@@ -300,10 +301,10 @@ export const DESIGN_PREVIEW_FIXTURE: DesignPreviewFixture = {
     { id: "extras", translationKey: "settingsDcp.preview.surface.categoryThree" },
   ],
   products: [
-    { id: "first", translationKey: "settingsDcp.preview.surface.products.first", imageUrl: "/design-preview-product-1.png", selected: true, quantity: 1 },
-    { id: "second", translationKey: "settingsDcp.preview.surface.products.second", imageUrl: "/design-preview-product-2.png", selected: true, quantity: 1 },
-    { id: "third", translationKey: "settingsDcp.preview.surface.products.third", imageUrl: "/design-preview-product-3.png", selected: false, quantity: 0 },
-    { id: "fourth", translationKey: "settingsDcp.preview.surface.products.fourth", imageUrl: "/design-preview-product-4.png", selected: false, quantity: 0 },
+    { id: "first", translationKey: "settingsDcp.preview.surface.products.first", imageUrl: "/design-preview-product-1.png", selected: true, quantity: 1, priceCents: 2400 },
+    { id: "second", translationKey: "settingsDcp.preview.surface.products.second", imageUrl: "/design-preview-product-2.png", selected: true, quantity: 1, priceCents: 1800 },
+    { id: "third", translationKey: "settingsDcp.preview.surface.products.third", imageUrl: "/design-preview-product-3.png", selected: false, quantity: 0, priceCents: 1600 },
+    { id: "fourth", translationKey: "settingsDcp.preview.surface.products.fourth", imageUrl: "/design-preview-product-4.png", selected: false, quantity: 0, priceCents: 1200 },
   ],
   discountTiers: [
     { minimum: 2, percentage: 10 },
@@ -315,7 +316,7 @@ export const DESIGN_PREVIEW_FIXTURE: DesignPreviewFixture = {
     { id: "slot-3", position: 3 },
   ],
   validationMessage: "settingsDcp.preview.surface.validationMessage",
-  upsell: { id: "fourth", translationKey: "settingsDcp.preview.surface.products.fourth", imageUrl: "/design-preview-product-4.png", selected: false, quantity: 0 },
+  upsell: { id: "fourth", translationKey: "settingsDcp.preview.surface.products.fourth", imageUrl: "/design-preview-product-4.png", selected: false, quantity: 0, priceCents: 1200 },
 };
 
 const target = (
