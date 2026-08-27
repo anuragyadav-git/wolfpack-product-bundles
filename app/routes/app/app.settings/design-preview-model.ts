@@ -8,6 +8,7 @@ import {
   type TemplateSelection,
 } from "../../../lib/bundle-config/template-selection";
 import { buildSettingsDesignRuntime, normalizeSlotIconFit } from "../../../lib/settings-design-runtime";
+import { generateCSSFromSettings } from "../../../lib/css-generators";
 import type { ShopBrandColors } from "../../../lib/shop-brand-colors";
 import type { SettingsField } from "../../../lib/admin-configuration-surfaces";
 
@@ -125,11 +126,9 @@ export function calculateDesignPreviewFitScale(
 
 export function getDesignPreviewSurfaceFidelity(
   _templateKey: TemplateKey,
-  surface: DesignPreviewSurface,
+  _surface: DesignPreviewSurface,
 ): DesignPreviewSurfaceFidelity {
-  return ["bundle-header", "navigation", "categories", "product-card", "product-slots", "cart-summary"].includes(surface)
-    ? "storefront"
-    : "representative";
+  return "storefront";
 }
 
 type RuntimeTemplateConfig = {
@@ -611,4 +610,29 @@ export function buildDesignPreviewTheme(
     "--preview-upsell-button-text": readFirstPath(page, [`${upsellRoot}.${isProductPage ? "bundleUpsellButtonTextColor" : "bundleUpsellTextColor"}`], "#ffffff"),
     "--preview-upsell-text": readFirstPath(page, [`${upsellRoot}.bundleUpsellFontColor`], "#000000"),
   };
+}
+
+export function buildDesignPreviewStorefrontCss({
+  fieldValues,
+  inheritedColorFieldKeys = [],
+  shopBrandColors = null,
+  templateKey,
+}: {
+  fieldValues: Record<string, string>;
+  inheritedColorFieldKeys?: string[];
+  shopBrandColors?: ShopBrandColors | null;
+  templateKey: TemplateKey;
+}) {
+  const runtime = buildSettingsDesignRuntime(
+    { fieldValues, inheritedColorFieldKeys },
+    {},
+    shopBrandColors,
+  );
+  const bundleType = getDesignPreviewTemplate(templateKey)?.bundleType ?? "full_page";
+  return generateCSSFromSettings(
+    runtime.cssSettings,
+    bundleType,
+    "",
+    shopBrandColors,
+  );
 }

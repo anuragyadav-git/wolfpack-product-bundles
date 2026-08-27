@@ -12,8 +12,16 @@ import {
 import CrispChat from "./components/CrispChat";
 import { ErrorPage } from "./components/ErrorPage";
 
-export const loader = async (_args: LoaderFunctionArgs) => {
-  return { apiKey: process.env.SHOPIFY_API_KEY || "" };
+export function isStorefrontPreviewFramePath(pathname: string) {
+  return pathname === "/settings-design-preview-frame"
+    || pathname === "/settings-design-preview-frame/";
+}
+
+export const loader = async ({ request }: LoaderFunctionArgs) => {
+  return {
+    apiKey: process.env.SHOPIFY_API_KEY || "",
+    isStorefrontPreviewFrame: isStorefrontPreviewFramePath(new URL(request.url).pathname),
+  };
 };
 
 export function ErrorBoundary() {
@@ -53,7 +61,7 @@ export function ErrorBoundary() {
 }
 
 export default function App() {
-  const { apiKey } = useLoaderData<typeof loader>();
+  const { apiKey, isStorefrontPreviewFrame } = useLoaderData<typeof loader>();
 
   return (
     <html>
@@ -63,17 +71,23 @@ export default function App() {
         {/* Shopify mandate (March 13, 2024): app-bridge.js must be the first
             <script> tag in <head>, before any other scripts. The unversioned
             CDN URL is the official auto-updating endpoint — do not pin. */}
-        <meta name="shopify-api-key" content={apiKey} />
+        {!isStorefrontPreviewFrame ? <meta name="shopify-api-key" content={apiKey} /> : null}
         <Meta />
         <Links />
-        <script src="https://cdn.shopify.com/shopifycloud/app-bridge.js" />
-        <script src="https://cdn.shopify.com/shopifycloud/polaris.js" />
+        {!isStorefrontPreviewFrame ? (
+          <>
+            <script src="https://cdn.shopify.com/shopifycloud/app-bridge.js" />
+            <script src="https://cdn.shopify.com/shopifycloud/polaris.js" />
+          </>
+        ) : null}
         {/* Keep one stable font link in the server and client trees. */}
-        <link
-          rel="stylesheet"
-          href="https://cdn.shopify.com/static/fonts/inter/v4/styles.css"
-          crossOrigin=""
-        />
+        {!isStorefrontPreviewFrame ? (
+          <link
+            rel="stylesheet"
+            href="https://cdn.shopify.com/static/fonts/inter/v4/styles.css"
+            crossOrigin=""
+          />
+        ) : null}
       </head>
       <body
         style={{
@@ -82,8 +96,8 @@ export default function App() {
         }}
       >
         <Outlet />
-        <CrispChat />
-        <ScrollRestoration />
+        {!isStorefrontPreviewFrame ? <CrispChat /> : null}
+        {!isStorefrontPreviewFrame ? <ScrollRestoration /> : null}
         <Scripts />
       </body>
     </html>

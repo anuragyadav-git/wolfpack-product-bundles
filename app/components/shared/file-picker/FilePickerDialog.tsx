@@ -37,7 +37,7 @@ export function FilePickerDialog({
       <s-query-container containerName="file-picker">
         <s-stack direction="block" gap="base">
           <s-grid
-            gridTemplateColumns="@container file-picker (inline-size > 480px) minmax(0, 1fr) auto, minmax(0, 1fr)"
+            gridTemplateColumns="@container (inline-size > 480px) 1fr auto, 1fr"
             gap="small"
             alignItems="end"
           >

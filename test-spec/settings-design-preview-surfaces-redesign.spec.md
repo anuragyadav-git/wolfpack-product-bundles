@@ -1,8 +1,37 @@
+---
+schema_version: 1
+id: settings-design-preview-surfaces-redesign
+title: Settings Design Preview Surfaces Redesign Test Spec
+type: test-spec
+status: superseded
+summary: Records the retired modular synthetic preview surfaces superseded by the isolated production-renderer frame.
+last_audited: 2026-08-27
+owners:
+  - engineering
+domains:
+  - admin
+  - storefront
+systems:
+  - settings-design
+  - design-preview
+source_paths:
+  - app/routes/app/app.settings/DesignLivePreview.tsx
+  - app/routes/root/settings-design-preview-frame/route.tsx
+related_docs:
+  - test-spec/settings-design-production-renderer-preview.spec.md
+tags:
+  - tdd
+  - superseded
+keywords:
+  - preview-surfaces
+  - production-renderer
+---
+
 # Test Spec: Settings Design Preview Surfaces Redesign
 **Spec ID:** settings-design-preview-surfaces-redesign  **Created:** 2026-08-22
 
 ## Purpose
-Redesign and modularize all preview surfaces in Settings -> Design across all eight (8) bundle templates (Standard, Classic, Compact, Horizontal, Product List, Product Grid, Horizontal Slots, Vertical Slots) to faithfully mirror their actual storefront layouts, components, and interaction states.
+Historical specification for modular handcrafted surfaces. The live preview now routes all eight templates and their supported states through the isolated production renderer; use the replacement production-renderer spec for acceptance.
 
 ## Test Cases
 ### SettingsDesignPreviewSurfacesSuite
@@ -20,6 +49,5 @@ Redesign and modularize all preview surfaces in Settings -> Design across all ei
 | 10 | Interactive state updates | Quantity changes, progress stepping, mobile summary expansion | State updates reflect in surface DOM without full page refresh | Interactive preview |
 
 ## Acceptance Criteria
-- [ ] All 8 templates render their respective supported surfaces cleanly without distortion
-- [ ] Modular preview surface components created under `app/routes/app/app.settings/preview-surfaces/`
-- [ ] 0 ESLint errors and 100% test suite pass rate
+- [x] Superseded by `settings-design-production-renderer-preview`.
+- [x] Retired preview-surface components are removed from the live implementation.

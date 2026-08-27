@@ -7,6 +7,7 @@ import {
   DESIGN_PREVIEW_TEMPLATES,
   DESIGN_PREVIEW_VIEWPORTS,
   buildDesignPreviewTheme,
+  buildDesignPreviewStorefrontCss,
   calculateDesignPreviewFitScale,
   getDesignPreviewContextKind,
   getDesignPreviewFieldTarget,
@@ -45,15 +46,15 @@ describe("Settings Design preview model", () => {
     }
   });
 
-  it("does not expose or claim fidelity for a synthetic Builder surface", () => {
+  it("marks every supported surface as production storefront fidelity", () => {
     for (const template of DESIGN_PREVIEW_TEMPLATES) {
       expect(template.supportedSurfaces).not.toContain("builder");
       expect(getDesignPreviewSurfaceFidelity(template.key, "cart-summary")).toBe("storefront");
-      expect(getDesignPreviewSurfaceFidelity(template.key, "loading")).toBe("representative");
-      expect(getDesignPreviewSurfaceFidelity(template.key, "validation")).toBe("representative");
-      expect(getDesignPreviewSurfaceFidelity(template.key, "upsell")).toBe("representative");
+      expect(getDesignPreviewSurfaceFidelity(template.key, "loading")).toBe("storefront");
+      expect(getDesignPreviewSurfaceFidelity(template.key, "validation")).toBe("storefront");
+      expect(getDesignPreviewSurfaceFidelity(template.key, "upsell")).toBe("storefront");
     }
-    expect(getDesignPreviewSurfaceFidelity("horizontal-slots", "product-picker")).toBe("representative");
+    expect(getDesignPreviewSurfaceFidelity("horizontal-slots", "product-picker")).toBe("storefront");
   });
 
   it("derives all eight descriptors from canonical storefront contracts", () => {
@@ -252,6 +253,17 @@ describe("Settings Design preview model", () => {
     expect(ppbTheme["--preview-add-bundle-bg"]).toBe("#112233");
     expect(ppbTheme["--preview-upsell-text"]).toBe("#060606");
     expect(ppbTheme["--preview-product-button-bg"]).toBe("#112233");
+  });
+
+  it("builds the production storefront design CSS for unsaved preview values", () => {
+    const css = buildDesignPreviewStorefrontCss({
+      fieldValues: { "Primary Color": "#123456", "Button Text Color": "#fedcba" },
+      templateKey: "standard",
+    });
+
+    expect(css).toContain("--bundle-global-primary-button: #123456");
+    expect(css).toContain("--bundle-global-button-text: #fedcba");
+    expect(css).toContain("Bundle Type: full_page");
   });
 
   it("provides deterministic multi-surface fixture data with local media", () => {

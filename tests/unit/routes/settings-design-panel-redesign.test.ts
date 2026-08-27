@@ -172,7 +172,7 @@ describe("DesignLivePreview", () => {
     expect(view).toContain('aria-pressed="true"');
   });
 
-  it("renders localized discount feedback actions only for Cart / summary", () => {
+  it("uses the production renderer for Cart / summary without synthetic feedback actions", () => {
     const cartView = renderToStaticMarkup(
       React.createElement(DesignLivePreview, {
         fieldValues: {},
@@ -184,13 +184,10 @@ describe("DesignLivePreview", () => {
         },
       }),
     );
-    const productView = renderToStaticMarkup(
-      React.createElement(DesignLivePreview, { fieldValues: {} }),
-    );
-
-    expect(cartView).toContain("settingsDcp.preview.feedback.tierHit");
-    expect(cartView).toContain("settingsDcp.preview.feedback.complete");
-    expect(productView).not.toContain("settingsDcp.preview.feedback.tierHit");
+    expect(cartView).toContain('data-preview-surface="cart-summary"');
+    expect(cartView).toContain('src="/settings-design-preview-frame"');
+    expect(cartView).not.toContain("settingsDcp.preview.feedback.tierHit");
+    expect(cartView).not.toContain("settingsDcp.preview.feedback.complete");
   });
 
   it.each(DESIGN_PREVIEW_TEMPLATES)(
@@ -212,8 +209,8 @@ describe("DesignLivePreview", () => {
         expect(view).toContain(`data-template-key="${template.key}"`);
         expect(view).toContain(`data-preview-viewport="${viewport}"`);
         expect(view).toContain(`data-preview-surface="${template.slotOrientation ? "product-slots" : "product-card"}"`);
-        expect(view).toContain(`data-preview-region="${template.slotOrientation ? `${template.slotOrientation}-slots` : template.productCard.mode === "row" ? "product-rows" : "product-grid"}"`);
-        expect(view).not.toContain("<iframe");
+        expect(view).toContain('src="/settings-design-preview-frame"');
+        expect(view).toContain('sandbox="allow-scripts allow-same-origin"');
         expect(view).not.toContain("http://");
         expect(view).not.toContain("https://");
       }
@@ -249,7 +246,7 @@ describe("DesignLivePreview", () => {
     expect(view).toContain(`settingsDcp.preview.surfaceSelector.${surface}`);
   });
 
-  it("renders a selected component without composing the whole builder", () => {
+  it("delegates the selected component to the production renderer frame", () => {
     const view = renderToStaticMarkup(
       React.createElement(DesignLivePreview, {
         fieldValues: {},
@@ -262,23 +259,20 @@ describe("DesignLivePreview", () => {
       }),
     );
 
-    expect(view).toContain('data-preview-region="product-grid"');
-    expect(view).not.toContain('data-preview-region="timeline"');
-    expect(view).not.toContain('data-preview-region="category-accordion"');
-    expect(view).not.toContain('data-preview-region="summary-sidebar"');
+    expect(view).toContain('data-preview-surface="product-card"');
+    expect(view).toContain('src="/settings-design-preview-frame"');
+    expect(view).not.toContain("data-preview-region");
     expect(view).not.toContain('value="builder"');
   });
 
-  it("renders optimized local fixture media without network or shopping work", () => {
+  it("loads only the same-origin renderer document from the Admin preview", () => {
     const view = renderToStaticMarkup(
       React.createElement(DesignLivePreview, { fieldValues: {} }),
     );
 
-    expect(view).toContain("/design-preview-product-1.avif");
-    expect(view).toContain("/design-preview-product-1.webp");
-    expect(view).toContain("/design-preview-product-1.png");
     expect(view).toContain('aria-label="Live bundle preview"');
-    expect(view).not.toContain("<iframe");
+    expect(view).toContain('src="/settings-design-preview-frame"');
     expect(view).not.toContain("fetch(");
+    expect(view).not.toContain("https://");
   });
 });

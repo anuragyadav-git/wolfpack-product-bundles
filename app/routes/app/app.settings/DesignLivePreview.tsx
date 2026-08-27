@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type {
   BundleContractType,
@@ -8,28 +8,23 @@ import {
   DESIGN_PREVIEW_FIXTURE,
   DESIGN_PREVIEW_TEMPLATES,
   DESIGN_PREVIEW_VIEWPORTS,
-  buildDesignPreviewTheme,
+  buildDesignPreviewStorefrontCss,
   calculateDesignPreviewFitScale,
   getDefaultDesignPreviewSurface,
-  getDesignPreviewContextKind,
   getDesignPreviewFieldTarget,
-  getDesignPreviewSurfaceFidelity,
   getSupportedDesignPreviewSurfaces,
   isDesignPreviewFieldApplicable,
   type DesignPreviewSurface,
-  type DesignPreviewTemplateDescriptor,
   type DesignPreviewViewport,
 } from "./design-preview-model";
 import styles from "./DesignSettingsView.module.css";
 import type { ShopBrandColors } from "../../../lib/shop-brand-colors";
-import { BundleHeaderSurface } from "./preview-surfaces/BundleHeaderSurface";
-import { NavigationSurface } from "./preview-surfaces/NavigationSurface";
-import { CategoriesSurface } from "./preview-surfaces/CategoriesSurface";
-import { ProductCardsSurface } from "./preview-surfaces/ProductCardsSurface";
-import { ProductSlotsSurface } from "./preview-surfaces/ProductSlotsSurface";
-import { ProductPickerSurface } from "./preview-surfaces/ProductPickerSurface";
-import { CartSummarySurface } from "./preview-surfaces/CartSummarySurface";
-import { LoadingSurface, ValidationSurface, UpsellSurface } from "./preview-surfaces/OverlaysSurfaces";
+import {
+  PREVIEW_PROTOCOL_VERSION,
+  isStorefrontPreviewEvent,
+  isTrustedStorefrontPreviewMessage,
+  type StorefrontPreviewCommand,
+} from "./storefront-preview-protocol";
 
 export { DESIGN_PREVIEW_TEMPLATES } from "./design-preview-model";
 export type { DesignPreviewViewport } from "./design-preview-model";
@@ -153,40 +148,6 @@ export function clearPreviewDiscountFeedback(
   };
 }
 
-type Translate = (key: string) => string;
-
-function PreviewContextFrame({
-  descriptor,
-  surface,
-  viewport,
-  children,
-}: {
-  descriptor: DesignPreviewTemplateDescriptor;
-  surface: DesignPreviewSurface;
-  viewport: DesignPreviewViewport;
-  children: ReactNode;
-}) {
-  const contextKind = getDesignPreviewContextKind(descriptor.key);
-
-  return (
-    <div
-      className={styles.previewContextFrame}
-      data-preview-context={contextKind}
-      data-preview-context-surface={surface}
-      data-preview-context-viewport={viewport}
-    >
-      <div className={styles.previewContextBackdrop} aria-hidden="true">
-        <span className={styles.previewContextHeader} />
-        <span className={styles.previewContextMedia} />
-        <span className={styles.previewContextWorkspace} />
-        <span className={styles.previewContextRail} />
-        <span className={styles.previewContextTray} />
-      </div>
-      <div className={styles.previewContextSelected}>{children}</div>
-    </div>
-  );
-}
-
 export function getDefaultTemplateKey(bundleType: BundleContractType): TemplateKey {
   return bundleType === "full_page" ? "standard" : "product-list";
 }
@@ -286,126 +247,6 @@ export function applyDesignPreviewFieldFocus(
 
 
 
-function PreviewSurface({
-  descriptor,
-  surface,
-  viewport,
-  loadingGifUrl,
-  t,
-  interaction,
-  onInteractionChange,
-  onSurfaceRequest,
-  locale,
-}: {
-  descriptor: DesignPreviewTemplateDescriptor;
-  surface: DesignPreviewSurface;
-  viewport: DesignPreviewViewport;
-  loadingGifUrl: string;
-  t: Translate;
-  interaction: PreviewInteractionState;
-  onInteractionChange: (state: PreviewInteractionState) => void;
-  onSurfaceRequest: (surface: DesignPreviewSurface) => void;
-  locale?: string;
-}) {
-  if (surface === "bundle-header") {
-    return (
-      <BundleHeaderSurface
-        t={t}
-        progressStep={interaction.progressStep}
-        onAdvanceProgress={() => onInteractionChange(advancePreviewProgress(interaction))}
-      />
-    );
-  }
-  if (surface === "navigation") {
-    return <NavigationSurface descriptor={descriptor} t={t} />;
-  }
-  if (surface === "categories") {
-    return (
-      <CategoriesSurface
-        descriptor={descriptor}
-        t={t}
-        activeCategoryId={interaction.activeCategoryId}
-        onCategorySelect={(categoryId) =>
-          onInteractionChange(selectPreviewCategory(interaction, categoryId))
-        }
-      />
-    );
-  }
-  if (surface === "product-card") {
-    return (
-      <ProductCardsSurface
-        descriptor={descriptor}
-        t={t}
-        interaction={interaction}
-        onProductQuantityChange={(productId, delta) =>
-          onInteractionChange(updatePreviewProductQuantity(interaction, productId, delta))
-        }
-      />
-    );
-  }
-  if (surface === "product-slots") {
-    return (
-      <ProductSlotsSurface
-        descriptor={descriptor}
-        t={t}
-        interaction={interaction}
-        onRemoveProduct={(productId) =>
-          onInteractionChange(setPreviewProductQuantity(interaction, productId, 0))
-        }
-        onOpenPicker={() => onSurfaceRequest("product-picker")}
-      />
-    );
-  }
-  if (surface === "product-picker") {
-    return (
-      <ProductPickerSurface
-        descriptor={descriptor}
-        viewport={viewport}
-        t={t}
-        interaction={interaction}
-        onClose={() => onSurfaceRequest("product-slots")}
-        onAddProduct={(productId) => {
-          onInteractionChange(updatePreviewProductQuantity(interaction, productId, 1));
-          onSurfaceRequest("product-slots");
-        }}
-      />
-    );
-  }
-  if (surface === "cart-summary") {
-    return (
-      <CartSummarySurface
-        descriptor={descriptor}
-        viewport={viewport}
-        t={t}
-        interaction={interaction}
-        onToggleMobileSummary={() => onInteractionChange(togglePreviewMobileSummary(interaction))}
-        onAdvanceProgress={() => onInteractionChange(advancePreviewProgress(interaction))}
-        onRetreatProgress={() => onInteractionChange(retreatPreviewProgress(interaction))}
-        onComplete={() => onInteractionChange(triggerPreviewDiscountFeedback(interaction, "complete"))}
-        locale={locale}
-      />
-    );
-  }
-  if (surface === "loading") {
-    return <LoadingSurface loadingGifUrl={loadingGifUrl} t={t} />;
-  }
-  if (surface === "upsell") {
-    return (
-      <UpsellSurface
-        t={t}
-        isAdded={(interaction.quantities[DESIGN_PREVIEW_FIXTURE.upsell.id] ?? 0) > 0}
-        onAdd={() => onInteractionChange(updatePreviewProductQuantity(
-          interaction,
-          DESIGN_PREVIEW_FIXTURE.upsell.id,
-          1,
-        ))}
-      />
-    );
-  }
-
-  return <ValidationSurface t={t} />;
-}
-
 export function DesignLivePreview({
   fieldValues,
   inheritedColorFieldKeys,
@@ -425,14 +266,14 @@ export function DesignLivePreview({
 }) {
   const { t, i18n } = useTranslation();
   const previewStageRef = useRef<HTMLDivElement>(null);
+  const previewFrameRef = useRef<HTMLIFrameElement>(null);
   const handledFieldFocusRequestRef = useRef(0);
   const [previewState, setPreviewState] = useState<DesignPreviewState>(
     initialState ?? createDesignPreviewState(),
   );
   const [fitScale, setFitScale] = useState(1);
-  const [interaction, setInteraction] = useState(createPreviewInteractionState);
-  const discountFeedbackState = interaction.discountFeedback.state;
-  const discountFeedbackReplay = interaction.discountFeedback.replay;
+  const [isFrameReady, setIsFrameReady] = useState(false);
+  const [frameError, setFrameError] = useState<string | null>(null);
   const availableTemplates = DESIGN_PREVIEW_TEMPLATES.filter(
     (template) => template.bundleType === previewState.bundleType,
   );
@@ -442,20 +283,34 @@ export function DesignLivePreview({
   const supportedSurfaces = activeTemplate.supportedSurfaces;
   const activeFieldKey = fieldFocusRequest?.fieldKey ?? null;
   const isApplicable = !activeFieldKey || isDesignPreviewFieldApplicable(activeFieldKey, activeTemplate.key);
-  const previewTheme = useMemo(
-    () => buildDesignPreviewTheme(
+  const designCss = useMemo(
+    () => buildDesignPreviewStorefrontCss({
       fieldValues,
       inheritedColorFieldKeys,
       shopBrandColors,
-      activeTemplate.key,
-    ),
+      templateKey: activeTemplate.key,
+    }),
     [activeTemplate.key, fieldValues, inheritedColorFieldKeys, shopBrandColors],
   );
   const previewViewport = DESIGN_PREVIEW_VIEWPORTS[previewState.viewport];
-  const surfaceFidelity = getDesignPreviewSurfaceFidelity(
-    activeTemplate.key,
-    previewState.surface,
-  );
+  const initializePayloadRef = useRef({
+    bundleType: previewState.bundleType,
+    templateKey: previewState.templateKey,
+    viewport: previewState.viewport,
+    surface: previewState.surface,
+    designCss,
+    locale: i18n?.resolvedLanguage ?? i18n?.language ?? "en",
+    currency: "USD",
+  });
+  initializePayloadRef.current = {
+    bundleType: previewState.bundleType,
+    templateKey: previewState.templateKey,
+    viewport: previewState.viewport,
+    surface: previewState.surface,
+    designCss,
+    locale: i18n?.resolvedLanguage ?? i18n?.language ?? "en",
+    currency: "USD",
+  };
 
   useEffect(() => {
     if (!fieldFocusRequest) return;
@@ -483,14 +338,70 @@ export function DesignLivePreview({
   }, [onContextChange, previewState.bundleType, previewState.surface, previewState.templateKey]);
 
   useEffect(() => {
-    if (!discountFeedbackState) return;
+    const onMessage = (event: MessageEvent) => {
+      const frameWindow = previewFrameRef.current?.contentWindow ?? null;
+      if (!isTrustedStorefrontPreviewMessage(event, window.location.origin, frameWindow)) return;
+      if (!isStorefrontPreviewEvent(event.data)) return;
+      if (event.data.type === "READY") {
+        setFrameError(null);
+        setIsFrameReady(true);
+      } else if (event.data.type === "ERROR") {
+        setFrameError(event.data.payload.message);
+      }
+    };
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+  }, []);
 
-    const timeout = window.setTimeout(
-      () => setInteraction((current) => clearPreviewDiscountFeedback(current, discountFeedbackReplay)),
-      discountFeedbackState === "complete" ? 1200 : 650,
-    );
-    return () => window.clearTimeout(timeout);
-  }, [discountFeedbackReplay, discountFeedbackState]);
+  useEffect(() => {
+    if (!isFrameReady) return;
+    const command: StorefrontPreviewCommand = {
+      version: PREVIEW_PROTOCOL_VERSION,
+      type: "INITIALIZE",
+      payload: initializePayloadRef.current,
+    };
+    previewFrameRef.current?.contentWindow?.postMessage(command, window.location.origin);
+  }, [isFrameReady]);
+
+  useEffect(() => {
+    if (!isFrameReady) return;
+    const command: StorefrontPreviewCommand = {
+      version: PREVIEW_PROTOCOL_VERSION,
+      type: "UPDATE_DESIGN",
+      payload: { designCss },
+    };
+    previewFrameRef.current?.contentWindow?.postMessage(command, window.location.origin);
+  }, [designCss, isFrameReady]);
+
+  useEffect(() => {
+    if (!isFrameReady) return;
+    const command: StorefrontPreviewCommand = {
+      version: PREVIEW_PROTOCOL_VERSION,
+      type: "SET_TEMPLATE",
+      payload: { bundleType: previewState.bundleType, templateKey: previewState.templateKey },
+    };
+    previewFrameRef.current?.contentWindow?.postMessage(command, window.location.origin);
+  }, [isFrameReady, previewState.bundleType, previewState.templateKey]);
+
+  useEffect(() => {
+    if (!isFrameReady) return;
+    const command: StorefrontPreviewCommand = {
+      version: PREVIEW_PROTOCOL_VERSION,
+      type: "SET_VIEWPORT",
+      payload: { viewport: previewState.viewport },
+    };
+    previewFrameRef.current?.contentWindow?.postMessage(command, window.location.origin);
+  }, [isFrameReady, previewState.viewport]);
+
+  useEffect(() => {
+    if (!isFrameReady) return;
+    const command: StorefrontPreviewCommand = {
+      version: PREVIEW_PROTOCOL_VERSION,
+      type: "SET_SURFACE",
+      payload: { surface: previewState.surface },
+    };
+    previewFrameRef.current?.contentWindow?.postMessage(command, window.location.origin);
+  }, [isFrameReady, previewState.surface]);
 
   useEffect(() => {
     const stage = previewStageRef.current;
@@ -584,18 +495,6 @@ export function DesignLivePreview({
               );
             })}
           </div>
-          {previewState.surface === "cart-summary" ? (
-            <div className={styles.previewFeedbackActions}>
-              <s-button
-                variant="secondary"
-                onClick={() => setInteraction((current) => triggerPreviewDiscountFeedback(current, "tier"))}
-              >{t("settingsDcp.preview.feedback.tierHit")}</s-button>
-              <s-button
-                variant="secondary"
-                onClick={() => setInteraction((current) => triggerPreviewDiscountFeedback(current, "complete"))}
-              >{t("settingsDcp.preview.feedback.complete")}</s-button>
-            </div>
-          ) : null}
         </div>
       </div>
 
@@ -605,6 +504,8 @@ export function DesignLivePreview({
           <span>{t("settingsDcp.preview.notApplicable")}</span>
         </div>
       ) : null}
+
+      {frameError ? <s-banner tone="critical">{frameError}</s-banner> : null}
 
       <div
         ref={previewStageRef}
@@ -622,33 +523,20 @@ export function DesignLivePreview({
             className={styles.previewSurface}
             data-template-key={previewState.templateKey}
             data-preview-surface={previewState.surface}
-            data-fidelity={surfaceFidelity}
             style={{
-              ...previewTheme,
               width: `${previewViewport.width}px`,
               height: `${previewViewport.height}px`,
               transform: `scale(${fitScale})`,
             }}
           >
-            <PreviewContextFrame
-              descriptor={activeTemplate}
-              surface={previewState.surface}
-              viewport={previewState.viewport}
-            >
-              <PreviewSurface
-                descriptor={activeTemplate}
-                surface={previewState.surface}
-                viewport={previewState.viewport}
-                loadingGifUrl={fieldValues["generalSettings.loadingGifUrl"] ?? ""}
-                t={t}
-                interaction={interaction}
-                onInteractionChange={setInteraction}
-                onSurfaceRequest={(surface) =>
-                  setPreviewState((current) => setDesignPreviewSurface(current, surface))
-                }
-                locale={i18n?.resolvedLanguage ?? i18n?.language}
-              />
-            </PreviewContextFrame>
+            <iframe
+              ref={previewFrameRef}
+              className={styles.previewFrame}
+              src="/settings-design-preview-frame"
+              title={t("settingsDcp.preview.heading")}
+              sandbox="allow-scripts allow-same-origin"
+              onLoad={() => setFrameError(null)}
+            />
           </div>
         </div>
       </div>

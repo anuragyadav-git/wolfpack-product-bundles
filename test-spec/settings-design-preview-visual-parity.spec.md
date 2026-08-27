@@ -3,8 +3,8 @@ schema_version: 1
 id: settings-design-preview-visual-parity
 title: Settings Design Preview Visual Parity Test Spec
 type: test-spec
-status: active
-summary: Verifies two-axis preview fitting and template-specific storefront context for Settings Design surfaces.
+status: superseded
+summary: Records the retired handcrafted Settings Design preview contract superseded by the isolated production-renderer frame.
 last_audited: 2026-08-27
 owners:
   - engineering
@@ -18,9 +18,10 @@ source_paths:
   - app/routes/app/app.settings/DesignLivePreview.tsx
   - app/routes/app/app.settings/design-preview-model.ts
   - app/routes/app/app.settings/DesignSettingsView.module.css
-  - app/routes/app/app.settings/preview-surfaces/PreviewSurfaces.module.css
+  - app/routes/root/settings-design-preview-frame/route.tsx
 related_docs:
   - internal docs/Architecture/Widget Architecture.md
+  - test-spec/settings-design-production-renderer-preview.spec.md
 tags:
   - tdd
   - visual-parity
@@ -34,7 +35,7 @@ keywords:
 
 ## Purpose
 
-Keep the deterministic Settings Design preview centered inside its Admin canvas and present each selected surface inside the correct FPB or PPB storefront context without importing storefront runtime behavior.
+Historical contract for the handcrafted deterministic preview. The centering helper remains valid, but the live preview now imports production controllers and storefront CSS inside an isolated frame; the replacement acceptance contract is `settings-design-production-renderer-preview`.
 
 ## Test Cases
 
@@ -57,5 +58,5 @@ Keep the deterministic Settings Design preview centered inside its Admin canvas 
 - [x] All eight templates use the correct storefront context family.
 - [x] All supported surfaces render in desktop and mobile logical viewports.
 - [x] Context decoration is noninteractive and accessibility-hidden.
-- [x] No storefront CSS, widget controller, bundle fetch, or cart behavior is imported.
+- [x] Superseded by the production-renderer preview contract; no handcrafted surface remains on the live path.
 - [x] Focused tests, lint, typecheck/build, direct Chrome QA, and Graphify pass.

@@ -188,13 +188,6 @@
   padding-bottom: 1px;
 }
 
-.previewFeedbackActions {
-  display: flex;
-  grid-column: 1 / -1;
-  justify-content: flex-end;
-  gap: 6px;
-}
-
 .viewportButton {
   display: inline-flex;
   border: 2px solid transparent;
@@ -243,6 +236,14 @@
   font-weight: var(--preview-body-font-weight, 400);
   transform-origin: top left;
   transition: transform 160ms ease;
+}
+
+.previewFrame {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #faf9f7;
 }
 
 .previewContextFrame {
