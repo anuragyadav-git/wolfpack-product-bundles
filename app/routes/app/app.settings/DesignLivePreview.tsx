@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import type {
   BundleContractType,
@@ -11,6 +11,7 @@ import {
   buildDesignPreviewTheme,
   calculateDesignPreviewFitScale,
   getDefaultDesignPreviewSurface,
+  getDesignPreviewContextKind,
   getDesignPreviewFieldTarget,
   getDesignPreviewSurfaceFidelity,
   getSupportedDesignPreviewSurfaces,
@@ -153,6 +154,38 @@ export function clearPreviewDiscountFeedback(
 }
 
 type Translate = (key: string) => string;
+
+function PreviewContextFrame({
+  descriptor,
+  surface,
+  viewport,
+  children,
+}: {
+  descriptor: DesignPreviewTemplateDescriptor;
+  surface: DesignPreviewSurface;
+  viewport: DesignPreviewViewport;
+  children: ReactNode;
+}) {
+  const contextKind = getDesignPreviewContextKind(descriptor.key);
+
+  return (
+    <div
+      className={styles.previewContextFrame}
+      data-preview-context={contextKind}
+      data-preview-context-surface={surface}
+      data-preview-context-viewport={viewport}
+    >
+      <div className={styles.previewContextBackdrop} aria-hidden="true">
+        <span className={styles.previewContextHeader} />
+        <span className={styles.previewContextMedia} />
+        <span className={styles.previewContextWorkspace} />
+        <span className={styles.previewContextRail} />
+        <span className={styles.previewContextTray} />
+      </div>
+      <div className={styles.previewContextSelected}>{children}</div>
+    </div>
+  );
+}
 
 export function getDefaultTemplateKey(bundleType: BundleContractType): TemplateKey {
   return bundleType === "full_page" ? "standard" : "product-list";
@@ -468,9 +501,15 @@ export function DesignLivePreview({
       const horizontalPadding =
         Number.parseFloat(computedStyle.paddingLeft) +
         Number.parseFloat(computedStyle.paddingRight);
+      const verticalPadding =
+        Number.parseFloat(computedStyle.paddingTop) +
+        Number.parseFloat(computedStyle.paddingBottom);
       setFitScale(
         calculateDesignPreviewFitScale(
-          Math.max(0, stage.clientWidth - horizontalPadding),
+          {
+            width: Math.max(0, stage.clientWidth - horizontalPadding),
+            height: Math.max(0, stage.clientHeight - verticalPadding),
+          },
           previewState.viewport,
         ),
       );
@@ -591,19 +630,25 @@ export function DesignLivePreview({
               transform: `scale(${fitScale})`,
             }}
           >
-            <PreviewSurface
+            <PreviewContextFrame
               descriptor={activeTemplate}
               surface={previewState.surface}
               viewport={previewState.viewport}
-              loadingGifUrl={fieldValues["generalSettings.loadingGifUrl"] ?? ""}
-              t={t}
-              interaction={interaction}
-              onInteractionChange={setInteraction}
-              onSurfaceRequest={(surface) =>
-                setPreviewState((current) => setDesignPreviewSurface(current, surface))
-              }
-              locale={i18n?.resolvedLanguage ?? i18n?.language}
-            />
+            >
+              <PreviewSurface
+                descriptor={activeTemplate}
+                surface={previewState.surface}
+                viewport={previewState.viewport}
+                loadingGifUrl={fieldValues["generalSettings.loadingGifUrl"] ?? ""}
+                t={t}
+                interaction={interaction}
+                onInteractionChange={setInteraction}
+                onSurfaceRequest={(surface) =>
+                  setPreviewState((current) => setDesignPreviewSurface(current, surface))
+                }
+                locale={i18n?.resolvedLanguage ?? i18n?.language}
+              />
+            </PreviewContextFrame>
           </div>
         </div>
       </div>

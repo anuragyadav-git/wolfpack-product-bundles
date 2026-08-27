@@ -24,6 +24,11 @@ export type DesignPreviewSurface =
   | "upsell";
 export type DesignPreviewFamily = "full-page" | "product-page";
 export type DesignPreviewViewport = "desktop" | "mobile";
+export type DesignPreviewAvailableSize = { width: number; height: number };
+export type DesignPreviewContextKind =
+  | "full-page"
+  | "product-page-inpage"
+  | "product-page-modal";
 export type DesignPreviewSurfaceFidelity = "storefront" | "representative";
 export type DesignPreviewNavigation =
   | "timeline"
@@ -102,14 +107,20 @@ export const DESIGN_PREVIEW_VIEWPORTS: Readonly<
 };
 
 export function calculateDesignPreviewFitScale(
-  hostWidth: number,
+  availableSize: DesignPreviewAvailableSize,
   viewport: DesignPreviewViewport,
 ) {
-  if (!Number.isFinite(hostWidth) || hostWidth <= 0) return 1;
-  const logicalWidth = viewport === "desktop"
-    ? DESIGN_PREVIEW_VIEWPORTS.desktop.width
-    : DESIGN_PREVIEW_VIEWPORTS.mobile.width;
-  return Math.min(1, hostWidth / logicalWidth);
+  const logicalViewport = DESIGN_PREVIEW_VIEWPORTS[viewport];
+  const ratios = [
+    Number.isFinite(availableSize.width) && availableSize.width > 0
+      ? availableSize.width / logicalViewport.width
+      : null,
+    Number.isFinite(availableSize.height) && availableSize.height > 0
+      ? availableSize.height / logicalViewport.height
+      : null,
+  ].filter((ratio): ratio is number => ratio !== null);
+
+  return ratios.length > 0 ? Math.min(1, ...ratios) : 1;
 }
 
 export function getDesignPreviewSurfaceFidelity(
@@ -170,6 +181,15 @@ const CATEGORY_TEMPLATES: readonly TemplateKey[] = ["classic", "compact", "horiz
 const FULL_PAGE_SURFACES = ["navigation", "categories", "product-card", "product-slots", "cart-summary", "loading", "validation", "upsell"] as const;
 const PRODUCT_PAGE_SURFACES = ["bundle-header", "navigation", "categories", "product-card", "product-slots", "cart-summary", "loading", "validation", "upsell"] as const;
 const SLOT_SURFACES = ["bundle-header", "product-slots", "product-picker", "cart-summary", "loading", "validation", "upsell"] as const;
+
+export function getDesignPreviewContextKind(
+  templateKey: TemplateKey,
+): DesignPreviewContextKind {
+  if (ALL_FPB_TEMPLATES.includes(templateKey)) return "full-page";
+  return templateKey === "product-list" || templateKey === "product-grid"
+    ? "product-page-inpage"
+    : "product-page-modal";
+}
 
 function fullPageDescriptor(
   key: "standard" | "classic" | "compact" | "horizontal",

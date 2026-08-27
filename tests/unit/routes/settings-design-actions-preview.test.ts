@@ -87,7 +87,7 @@ describe("Settings Design connected preview actions", () => {
   });
 
   it("fits narrow hosts and preserves six- and eight-digit Polaris colors", () => {
-    expect(calculateDesignPreviewFitScale(390, "desktop")).toBeCloseTo(390 / 1280);
+    expect(calculateDesignPreviewFitScale({ width: 390, height: 640 }, "desktop")).toBeCloseTo(390 / 1280);
     expect(normalizePolarisColorValue("#112233", "#000000")).toBe("#112233");
     expect(normalizePolarisColorValue("#11223380", "#000000")).toBe("#11223380");
     expect(normalizePolarisColorValue("invalid", "#abc")).toBe("#aabbcc");

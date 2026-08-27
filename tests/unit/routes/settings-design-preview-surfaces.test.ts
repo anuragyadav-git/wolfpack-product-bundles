@@ -62,6 +62,8 @@ describe("Settings Design Preview Surfaces Redesign", () => {
           expect(html).toContain(`data-template-key="${template.key}"`);
           expect(html).toContain(`data-preview-surface="${surface}"`);
           expect(html).toContain(`data-preview-viewport="${viewport}"`);
+          expect(html).toContain('aria-hidden="true"');
+          expect(html).toContain(`data-preview-context=`);
         }
       }
     }
