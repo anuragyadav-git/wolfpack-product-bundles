@@ -343,6 +343,11 @@ export default function SettingsDesignPreviewFrame() {
     if (!activeState || !widgetRef.current) return;
     const widgetRoot = widgetRef.current;
     widgetRoot.replaceChildren();
+    widgetRoot.className = styles.widgetMount;
+    widgetRoot.classList.add("bundle-widget-container");
+    if (activeState.bundleType === "full_page") {
+      widgetRoot.classList.add("bundle-widget-full-page");
+    }
     document.querySelectorAll("#bundle-builder-modal, #bw-bs-overlay, .fpb-mobile-bottom-sheet, #bundle-toast")
       .forEach((element) => element.remove());
     widgetRoot.id = "bundle-builder-app";
