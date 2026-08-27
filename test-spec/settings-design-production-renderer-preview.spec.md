@@ -63,6 +63,7 @@ Ensure Settings Design previews use the production storefront renderer and exact
 | 16 | FPB responsive parity | Standard, Classic, Compact, and Horizontal at desktop and mobile widths | Production grid, sidebar/tray, cards, and component surfaces use their storefront geometry | Direct Chrome DevTools verification |
 | 17 | Gutterless desktop canvas | Desktop preview with expanded or collapsed inspector | Stage has no app-owned inner gutter and grows with released workspace width | Production storefront context remains centered |
 | 18 | Mobile device presentation | Mobile preview selected | The unchanged 390 x 844 storefront viewport renders inside an iPhone-style outer body | Device chrome is decorative and outside the iframe |
+| 19 | Preview readiness feedback | Preview frame has not emitted READY | A Polaris spinner covers the canvas without shifting its geometry | Overlay clears only after trusted READY |
 
 ## Acceptance Criteria
 
@@ -74,3 +75,4 @@ Ensure Settings Design previews use the production storefront renderer and exact
 - [x] Focused behavior tests, lint, build, Graphify, and direct Chrome QA pass.
 - [x] All four FPB templates mount with the storefront full-page host contract and pass refreshed desktop/mobile Chrome comparison.
 - [x] Desktop canvas growth and the mobile device shell pass refreshed wide, collapsed, and narrow-Admin Chrome verification.
+- [x] Preview readiness spinner and centered inspector notch pass refreshed Chrome verification.

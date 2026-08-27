@@ -82,6 +82,7 @@ describe("DesignSettingsView live preview", () => {
     expect(view).toContain('aria-label="Live bundle preview"');
     expect(view).toContain('aria-expanded="true"');
     expect(view).toContain('accessibilityLabel="settingsDcp.preview.inspector.collapse"');
+    expect(view).toContain('<s-spinner size="large" accessibilityLabel="settingsDcp.preview.loading">');
     expect(view).not.toContain('aria-label="settingsDcp.preview.previewOnly"');
     expect(view).toContain("disabled");
     expect(view).toContain("<s-color-field");

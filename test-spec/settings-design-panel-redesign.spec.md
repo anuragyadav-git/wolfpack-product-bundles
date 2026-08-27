@@ -99,6 +99,7 @@ surface or an Expert-controls mode.
 | 24 | Narrow workspace | Collapsed desktop state followed by a narrow container | Preview / Customize tabs remain authoritative and inspector content stays available | Side chevron is desktop-only |
 | 25 | Desktop canvas growth | Collapse the inspector at a wide Admin width | Desktop stage expands with the preview column and the production surface scales up | No app-owned canvas gutter |
 | 26 | Mobile device shell | Select Mobile at wide or narrow Admin width | Storefront content remains 390 x 844 inside decorative phone hardware | Phone shell does not alter runtime viewport |
+| 27 | Inspector notch | Expanded or collapsed desktop inspector | Disclosure is vertically centered on the sidebar edge and retains its accessible button state | Narrow Admin hides it |
 
 ### ShopBrandPreview
 
@@ -125,3 +126,4 @@ surface or an Expert-controls mode.
 - [x] Phone-sized Admin containers expose Preview and Customize panes without losing local preview or unsaved Design state.
 - [x] Loading disables Image Fit, keeps loading controls active, and presents one clickable GIF drop zone without a nested button.
 - [x] Unit tests verify behavior and model outputs only; visual placement and styling are verified with Chrome, not source or CSS assertions.
+- [x] Desktop expanded/collapsed notch centering, released preview width, and narrow-Admin fallback pass refreshed Chrome verification.

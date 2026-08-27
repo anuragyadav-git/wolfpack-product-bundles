@@ -43,15 +43,26 @@
 .customizePane {
   position: relative;
   min-width: 0;
+  align-self: stretch;
   grid-area: fields;
 }
 
 .inspectorToggle {
-  position: absolute;
+  position: sticky;
   z-index: 2;
-  inset-block-start: 16px;
+  inset-block-start: calc(50dvh - 34px);
   inset-inline-start: 0;
   display: inline-flex;
+  box-sizing: border-box;
+  inline-size: 32px;
+  min-block-size: 68px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #c9cccf;
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.14);
+  margin-block-end: -68px;
   transform: translateX(-50%);
 }
 
@@ -230,6 +241,7 @@
 }
 
 .previewStage {
+  position: relative;
   display: grid;
   box-sizing: border-box;
   block-size: clamp(640px, calc(100dvh - 160px), 884px);
@@ -248,6 +260,32 @@
 .previewCanvas {
   position: relative;
   flex: none;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.previewCanvas[data-preview-ready="true"] {
+  opacity: 1;
+}
+
+.previewLoading {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: #f1f2f3;
+}
+
+.previewLoadingIndicator {
+  display: grid;
+  inline-size: 64px;
+  block-size: 64px;
+  place-items: center;
+  border: 1px solid #d9d9d9;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
 .previewScaledShell {
@@ -1080,6 +1118,10 @@
 
 @media (prefers-reduced-motion: reduce) {
   .layout {
+    transition: none;
+  }
+
+  .previewCanvas {
     transition: none;
   }
 

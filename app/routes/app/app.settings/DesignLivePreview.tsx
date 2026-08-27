@@ -513,9 +513,21 @@ export function DesignLivePreview({
         ref={previewStageRef}
         className={styles.previewStage}
         data-preview-viewport={previewState.viewport}
+        aria-busy={!isFrameReady}
       >
+        {!isFrameReady ? (
+          <div className={styles.previewLoading} role="status">
+            <s-box className={styles.previewLoadingIndicator}>
+              <s-spinner
+                size="large"
+                accessibilityLabel={t("settingsDcp.preview.loading")}
+              />
+            </s-box>
+          </div>
+        ) : null}
         <div
           className={styles.previewCanvas}
+          data-preview-ready={isFrameReady || undefined}
           style={{
             width: `${previewCanvasSize.width * fitScale}px`,
             height: `${previewCanvasSize.height * fitScale}px`,

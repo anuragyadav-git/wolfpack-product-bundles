@@ -416,3 +416,31 @@ layout verification had already passed in the mounted iframe before the loop.
 The temporary observer and parent bridge were removed after measurement. The
 Design context-frame work remains behind the existing post-click lazy boundary
 and does not add work to the Settings landing render path.
+
+### 2026-08-27 preview-readiness and notch verification
+
+Direct Chrome DevTools on the signed-in `agent-5sfidg3m` Admin verified the
+Design canvas readiness overlay under Fast 3G: the centered Polaris spinner
+card remained visible while the preview frame was `about:blank`, then cleared
+only after the same-origin frame rendered and sent `READY`. Desktop expanded
+and collapsed states kept the inspector disclosure notch centered on the
+visible sidebar edge; the collapsed state widened the desktop preview. At a
+900 x 900 narrow-Admin viewport, the notch remained hidden and Preview /
+Customize navigation remained available.
+
+After one warm-up load, the stable temporary app-frame observer recorded ten
+cache-bypassed desktop route loads at 1881 x 900 with no throttling: 2460,
+2108, 2188, 1876, 1920, 2492, 1664, 2144, 4440, and 2164ms. The resulting p75
+was 2460ms: below the 2500ms hard gate, but above the planned 2000ms target.
+The observer could not retain a stable element reference for these samples, so
+this pass does not attribute the remaining delay to a specific app-owned
+candidate. Earlier samples collected while the diagnostic source itself was
+hot-reloading were discarded because Vite recompilation contaminated them. A
+separate outer-Admin Chrome trace reported LCP 5574ms and CLS 0.00; its LCP
+element was Shopify's
+Polaris page-title `h1`, with 433ms TTFB and 5141ms render delay, and therefore
+is not app-frame candidate proof. The spinner remains behind the post-click
+Design lazy boundary and cannot account for Settings landing LCP. Treat this as
+local dev-tunnel evidence requiring a focused route-response and candidate
+follow-up, not Shopify field p75. The temporary observer and parent bridge were
+removed before commit.
