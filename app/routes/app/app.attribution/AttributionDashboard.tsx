@@ -1,5 +1,5 @@
 import { useFetcher, useNavigate } from "@remix-run/react";
-import { useState, useMemo, useEffect, useRef } from "react";
+import { Suspense, useState, useMemo, useEffect, useRef } from "react";
 import { useAppBridge } from "@shopify/app-bridge-react";
 import "../../../components/analytics/shared/tokens.css";
 import {
@@ -601,11 +601,13 @@ function AttributionDashboardContent({
             showHeader={false}
           />
 
-          <LazyBundleMetricChart
-            trend={bundleMetricTrend}
-            rangeDays={days}
-            formatRevenue={formatRevenue}
-          />
+          <Suspense fallback={null}>
+            <LazyBundleMetricChart
+              trend={bundleMetricTrend}
+              rangeDays={days}
+              formatRevenue={formatRevenue}
+            />
+          </Suspense>
 
           <BundlePerformanceMatrix
             rows={bundleMatrix}

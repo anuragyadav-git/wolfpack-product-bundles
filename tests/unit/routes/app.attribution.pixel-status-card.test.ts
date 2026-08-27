@@ -70,7 +70,7 @@ describe("PixelStatusCard", () => {
     expect(view).toContain('dismissible="true"');
   });
 
-  it("renders no success banner after dismissal for the current session", async () => {
+  it("keeps the first success render stable when the banner was dismissed in session", async () => {
     const {
       PixelStatusCard,
       UTM_PIXEL_STATUS_BANNER_KEY,
@@ -78,8 +78,10 @@ describe("PixelStatusCard", () => {
 
     dismissBannerInSession(UTM_PIXEL_STATUS_BANNER_KEY);
 
-    expect(renderToStaticMarkup(
+    const view = renderToStaticMarkup(
       React.createElement(PixelStatusCard, { pixelActive: true }),
-    )).toBe("");
+    );
+
+    expect(view).toContain('<s-banner tone="success" heading="UTM Pixel Tracking"');
   });
 });

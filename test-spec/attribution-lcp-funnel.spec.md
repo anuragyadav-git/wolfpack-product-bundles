@@ -5,7 +5,7 @@ title: Attribution LCP Funnel
 type: test-spec
 status: active
 summary: Verifies Analytics funnel loading behavior and persisted event calculations.
-last_audited: 2026-08-25
+last_audited: 2026-08-27
 owners:
   - engineering
 domains:
@@ -37,6 +37,11 @@ Keep the analytics route LCP path fast while preserving merchant feedback during
 | # | Scenario | Input | Expected Output | Notes |
 |---|---|---|---|---|
 | 1 | Analytics payload is still loading | Pending analytics promise | The critical Analytics title and funnel heading render with one inline Polaris loading state | Banner, dashboard, and chart content remain behind the readiness boundary |
+
+### AttributionDashboard
+| # | Scenario | Input | Expected Output | Notes |
+|---|---|---|---|---|
+| 1 | Chart code chunk is still loading | Resolved Analytics data and a pending chart module | Bundle results remain rendered behind a chart-local suspense boundary | Prevents the chart from replacing or mis-hydrating the whole resolved dashboard |
 
 ### computeBundleFunnel
 | # | Scenario | Input | Expected Output | Notes |

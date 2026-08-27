@@ -18,8 +18,13 @@ export function PixelStatusCard({ pixelActive }: { pixelActive: boolean }) {
   const fetcher = useFetcher<typeof action>();
   const isSubmitting = fetcher.state !== "idle";
   const [dismissed, dismiss] = useBannerSessionState(UTM_PIXEL_STATUS_BANNER_KEY);
+  const [hydrated, setHydrated] = useState(false);
 
   const [active, setActive] = useState(pixelActive);
+
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
 
   useEffect(() => {
     if (!fetcher.data) return;
@@ -41,7 +46,7 @@ export function PixelStatusCard({ pixelActive }: { pixelActive: boolean }) {
 
   const model = getUtmPixelStatusBannerModel(active);
 
-  if (active && dismissed) return null;
+  if (active && hydrated && dismissed) return null;
 
   return (
     <>
@@ -50,7 +55,7 @@ export function PixelStatusCard({ pixelActive }: { pixelActive: boolean }) {
         heading="UTM Pixel Tracking"
         dismissible={active}
         hidden={false}
-        onDismiss={active ? dismiss : undefined}
+        onDismiss={active && hydrated ? dismiss : undefined}
       >
         <s-stack direction="inline" justifyContent="space-between" alignItems="center" gap="base">
           <s-text>{model.description}</s-text>
