@@ -141,6 +141,12 @@ preview canvas and selectors sit beside the active inspector. Phone containers
 expose Preview and Customize as a two-state segmented control so only one dense
 workspace pane renders at a time. Breakpoints are container-driven because the
 usable Shopify Admin iframe width is independent of the browser viewport.
+On desktop, the inspector can collapse from a Polaris chevron that straddles the
+column boundary. Collapse state is page-local, releases the inspector column to
+the preview, and preserves unsaved values and preview context. The preview fit
+observer must respond to that width change. The chevron is absent in narrow
+containers, where the existing Preview and Customize pane control remains the
+only workspace disclosure.
 
 The preview frame route uses deterministic local fixture data with the actual
 FPB or PPB controller and exact family/template stylesheet manifest. A neutral
@@ -151,6 +157,11 @@ versioned same-origin commands, uses local media, blocks navigation and cart
 submission, and disables analytics, persistence, app-proxy loading, and post-cart
 effects. Local Design editing therefore remains available without a
 storefront-ready bundle; only the separate Preview Bundle action requires one.
+Before the FPB controller mounts, its frame root must carry the production
+`bundle-widget-container bundle-widget-full-page` host classes. The shared
+responsive and template styles are scoped through that contract; omitting it can
+silently turn a desktop template into a single-column card list with its summary
+below the products even though the production controller itself rendered.
 
 Fixture product PNGs remain compact and local. Do not preload them on the
 Settings landing route because the Design workspace remains behind the

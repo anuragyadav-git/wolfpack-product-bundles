@@ -120,6 +120,13 @@ protocol. The frame dynamically imports only the selected production FPB or PPB
 controller and loads the same base, responsive, and template CSS sources used by
 the storefront asset build.
 
+The FPB frame initializes its mount with the same
+`bundle-widget-container bundle-widget-full-page` host classes as the app-embed
+storefront document before the controller renders. These are functional style
+scope owners, not decorative aliases: the shared responsive grid, template
+columns, and inline summary rules depend on them. PPB retains the host classes
+owned by its production controller.
+
 Deterministic fixture bundles hydrate the controller without Shopify, app-proxy,
 or storefront requests. Controller persistence, analytics, add-to-cart,
 post-cart behavior, and external navigation are disabled; links, forms, and cart
@@ -145,7 +152,10 @@ failure closes the reserved tab and leaves the Polaris modal open with an error.
 
 The Design workspace is preview-first: template, component surface, and logical
 desktop/mobile selectors stay with the canvas, while one inspector exposes only
-settings mapped to the visible component. Phones switch between Preview and
+settings mapped to the visible component. Desktop merchants can collapse that
+inspector from a Polaris boundary chevron so the fit-scaled canvas consumes the
+released width; disclosure state is local and does not reset the preview or
+unsaved values. Phones hide the boundary control and switch between Preview and
 Customize panes without duplicating the preview model. Component color controls
 have no Expert-mode gate. `inheritedColorFieldKeys` records which fields resolve
 from the first Storefront API Shop Brand primary or secondary pair; editing a

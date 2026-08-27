@@ -226,7 +226,7 @@ Primary action:
 - Selecting Design opens the Settings -> Design subpage.
 - Selecting Controls keeps the landing cards visible while Shopify's native Admin loading indicator reports navigation to `/app/additional-configurations`.
 - While the lazy Design or Language workspace loads after selection, the destination title and a small Polaris spinner render without card skeletons or an artificial delay.
-- The Design Control Panel lazy-loads after entry and uses a responsive preview-first workspace: the largest app-owned preview and its selectors sit beside one contextual inspector. At phone widths a Preview / Customize segmented control shows one workspace pane at a time.
+- The Design Control Panel lazy-loads after entry and uses a responsive preview-first workspace: the largest app-owned preview and its selectors sit beside one contextual inspector. On desktop, a Polaris chevron straddles the preview/inspector boundary and collapses the inspector to release its width without clearing unsaved settings or preview context. At phone widths the chevron is hidden and a Preview / Customize segmented control remains the authoritative one-pane-at-a-time navigation.
 - Preview-only Bundle Type and Template selectors cover Landing Page Standard, Classic, Compact, and Horizontal plus Product Page Product List, Product Grid, Horizontal Slots, and Vertical Slots.
 - The template-aware Preview surface control exposes individual components only: Bundle header, Navigation, Categories, Product cards, Product slots, Product picker, Cart / summary, Loading, Validation, and Upsell. Each template shows only the components it owns, and there is no whole-Builder option. Desktop/mobile switching preserves the selected surface when it remains valid.
 - Images & GIFs owns the store-level FPB loading screen: merchants can retain the default spinner or select an uploaded GIF through one clickable drop zone, change its background color, and see both choices in the local Loading preview. Image Fit is disabled on the Loading surface because it does not affect that screen. The former per-bundle FPB loading animation control is not exposed.
@@ -696,6 +696,7 @@ On tablet and phone containers, configure section changes use the compact curren
 /app/settings
   └── Click Design card → Settings -> Design panel opens
       ├── Existing Design sections and fields render in one inspector pane
+      ├── Desktop → collapse or restore the inspector from its boundary chevron
       ├── Phone width → switch between Preview and Customize panes
       ├── Select preview-only bundle type, template, surface, and desktop/mobile viewport
       ├── Change setting → normalized Design CSS updates the isolated production renderer immediately (no persistence)
