@@ -177,6 +177,10 @@
         "preview": "Aperçu",
         "customize": "Personnaliser"
       },
+      "inspector": {
+        "collapse": "Réduire le panneau de personnalisation",
+        "expand": "Développer le panneau de personnalisation"
+      },
       "surface": {
         "description": "Choisissez des produits pour créer votre bundle.",
         "stepOne": "1. Choisir les produits",

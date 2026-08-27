@@ -21,6 +21,12 @@
   gap: clamp(12px, 1.5vw, 22px);
   align-items: start;
   margin-top: 18px;
+  transition: grid-template-columns 160ms ease, gap 160ms ease;
+}
+
+.layout[data-inspector-collapsed="true"] {
+  grid-template-columns: minmax(720px, 1fr) 0;
+  gap: 0;
 }
 
 .mobileWorkspaceTabs {
@@ -35,8 +41,22 @@
 }
 
 .customizePane {
+  position: relative;
   min-width: 0;
   grid-area: fields;
+}
+
+.inspectorToggle {
+  position: absolute;
+  z-index: 2;
+  inset-block-start: 16px;
+  inset-inline-start: 0;
+  display: inline-flex;
+  transform: translateX(-50%);
+}
+
+.layout[data-inspector-collapsed="true"] .inspectorContent {
+  display: none;
 }
 
 .inspectorNavigation,
@@ -962,6 +982,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .layout {
+    transition: none;
+  }
+
   .previewSummary > footer > span[data-preview-discount-feedback] {
     animation: none;
     background-color: var(--preview-discount-feedback-bg);
@@ -1335,6 +1359,10 @@
 }
 
 @container design-settings (max-width: 760px) {
+  .inspectorToggle {
+    display: none;
+  }
+
   .mobileWorkspaceTabs {
     display: flex;
     margin-top: 14px;
@@ -1348,6 +1376,10 @@
   .layout {
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas: "workspace";
+  }
+
+  .layout[data-inspector-collapsed="true"] .inspectorContent {
+    display: block;
   }
 
   .previewPane,

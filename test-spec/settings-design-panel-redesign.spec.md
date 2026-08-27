@@ -92,6 +92,10 @@ surface or an Expert-controls mode.
 | 18 | Inherited color edit | Inherited color field receives merchant input | The field leaves the inherited-key set | Explicit override becomes authoritative |
 | 19 | Inherited color reset | Reset an explicit visible color field | The field returns to the inherited-key set | Shop Brand resolution resumes |
 | 20 | Phone panes | Phone Admin container | Preview and Customize panes retain the same local state | No duplicate inspector |
+| 21 | Inspector disclosure | Expanded inspector toggle | Inspector collapses to the right, preview receives the released width, and the toggle remains available | Page-local state only |
+| 22 | Inspector restoration | Collapsed inspector toggle | Inspector reopens with the same unsaved values and preview context | No persistence or data reset |
+| 23 | Inspector accessibility | Expanded or collapsed inspector | Polaris chevron, translated label, `aria-expanded`, and `aria-controls` describe the next action | Keyboard operable |
+| 24 | Narrow workspace | Collapsed desktop state followed by a narrow container | Preview / Customize tabs remain authoritative and inspector content stays available | Side chevron is desktop-only |
 
 ### ShopBrandPreview
 

@@ -177,6 +177,10 @@
         "preview": "Vista previa",
         "customize": "Personalizar"
       },
+      "inspector": {
+        "collapse": "Contraer el panel de personalización",
+        "expand": "Expandir el panel de personalización"
+      },
       "surface": {
         "description": "Elige productos para crear tu paquete.",
         "stepOne": "1. Elegir productos",

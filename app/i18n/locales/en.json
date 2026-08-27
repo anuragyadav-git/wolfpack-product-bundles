@@ -177,6 +177,10 @@
         "preview": "Preview",
         "customize": "Customize"
       },
+      "inspector": {
+        "collapse": "Collapse customization panel",
+        "expand": "Expand customization panel"
+      },
       "bundleType": {
         "label": "Bundle type",
         "landingPage": "Landing Page",

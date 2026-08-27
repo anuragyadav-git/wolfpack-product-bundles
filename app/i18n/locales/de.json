@@ -177,6 +177,10 @@
         "preview": "Vorschau",
         "customize": "Anpassen"
       },
+      "inspector": {
+        "collapse": "Anpassungsbereich einklappen",
+        "expand": "Anpassungsbereich ausklappen"
+      },
       "surface": {
         "description": "Wählen Sie Produkte für Ihr Bundle aus.",
         "stepOne": "1. Produkte auswählen",

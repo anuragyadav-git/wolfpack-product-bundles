@@ -1,7 +1,10 @@
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { DESIGN_CONFIGURATION } from "../../../app/lib/admin-configuration-surfaces";
-import { DesignSettingsView } from "../../../app/routes/app/app.settings/DesignSettingsView";
+import {
+  DesignSettingsView,
+  getDesignInspectorDisclosureState,
+} from "../../../app/routes/app/app.settings/DesignSettingsView";
 import { BundlePreviewModal, DesignFields } from "../../../app/routes/app/app.settings/SettingsDesignFields";
 
 jest.mock("react-i18next", () => ({
@@ -17,6 +20,21 @@ jest.mock("../../../app/components/shared/FilePicker", () => ({
 }));
 
 describe("DesignSettingsView live preview", () => {
+  it("describes the page-local inspector disclosure in both states", () => {
+    expect(getDesignInspectorDisclosureState(false)).toEqual({
+      isCollapsed: false,
+      isExpanded: true,
+      icon: "chevron-right",
+      labelKey: "settingsDcp.preview.inspector.collapse",
+    });
+    expect(getDesignInspectorDisclosureState(true)).toEqual({
+      isCollapsed: true,
+      isExpanded: false,
+      icon: "chevron-left",
+      labelKey: "settingsDcp.preview.inspector.expand",
+    });
+  });
+
   it("disables Image Fit while the Loading preview surface is active", () => {
     const imageFields = DESIGN_CONFIGURATION.find((tab) => tab.title === "Images & GIFs")?.fields ?? [];
     const view = renderToStaticMarkup(
@@ -62,6 +80,8 @@ describe("DesignSettingsView live preview", () => {
     expect(view).toContain("settingsDcp.preview.workspace.customize");
     expect(view).toContain('aria-pressed="true"');
     expect(view).toContain('aria-label="Live bundle preview"');
+    expect(view).toContain('aria-expanded="true"');
+    expect(view).toContain('accessibilityLabel="settingsDcp.preview.inspector.collapse"');
     expect(view).not.toContain('aria-label="settingsDcp.preview.previewOnly"');
     expect(view).toContain("disabled");
     expect(view).toContain("<s-color-field");

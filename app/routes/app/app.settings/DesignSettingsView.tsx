@@ -50,6 +50,17 @@ const CONTEXTUAL_INSPECTOR_SECTIONS: Array<{ title: string; fields: SettingsFiel
     .map((tab) => ({ title: tab.title, fields: tab.fields })),
 ];
 
+export function getDesignInspectorDisclosureState(isCollapsed: boolean) {
+  return {
+    isCollapsed,
+    isExpanded: !isCollapsed,
+    icon: isCollapsed ? "chevron-left" : "chevron-right",
+    labelKey: isCollapsed
+      ? "settingsDcp.preview.inspector.expand"
+      : "settingsDcp.preview.inspector.collapse",
+  } as const;
+}
+
 export function DesignSettingsView({
   designFieldValues,
   inheritedColorFieldKeys,
@@ -69,6 +80,7 @@ export function DesignSettingsView({
 }: DesignSettingsViewProps) {
   const { t } = useTranslation();
   const [workspacePane, setWorkspacePane] = useState<"preview" | "customize">("preview");
+  const [isInspectorCollapsed, setIsInspectorCollapsed] = useState(false);
   const fieldFocusRequestIdRef = useRef(0);
   const [fieldFocusRequest, setFieldFocusRequest] = useState<DesignPreviewFieldFocusRequest | null>(null);
   const [activePreviewSurface, setActivePreviewSurface] = useState<DesignPreviewSurface>("product-card");
@@ -77,6 +89,7 @@ export function DesignSettingsView({
   const isStorefrontPreviewDisabled = !hasPreviewableBundle
     || isActiveSubpageDirty
     || isDesignSaving;
+  const inspectorDisclosure = getDesignInspectorDisclosureState(isInspectorCollapsed);
 
   const contextualSections = useMemo(() => CONTEXTUAL_INSPECTOR_SECTIONS
     .map((section) => ({
@@ -169,7 +182,11 @@ export function DesignSettingsView({
             </s-button>
           </div>
 
-          <section className={styles.layout} aria-label="Design">
+          <section
+            className={styles.layout}
+            aria-label="Design"
+            data-inspector-collapsed={inspectorDisclosure.isCollapsed || undefined}
+          >
             <div className={styles.previewPane} data-phone-active={workspacePane === "preview" || undefined}>
               <DesignLivePreview
                 fieldValues={designFieldValues}
@@ -181,7 +198,25 @@ export function DesignSettingsView({
               />
             </div>
             <aside className={styles.customizePane} data-phone-active={workspacePane === "customize" || undefined}>
-              <section className={styles.inspectorContent} aria-label="Contextual customization inspector">
+              <s-box className={styles.inspectorToggle}>
+                <s-button
+                  variant="tertiary"
+                  icon={inspectorDisclosure.icon}
+                  accessibilityLabel={t(inspectorDisclosure.labelKey)}
+                  interestFor="settings-design-inspector-toggle-tooltip"
+                  aria-controls="settings-design-customization-panel"
+                  aria-expanded={inspectorDisclosure.isExpanded}
+                  onClick={() => setIsInspectorCollapsed((current) => !current)}
+                />
+                <s-tooltip id="settings-design-inspector-toggle-tooltip">
+                  {t(inspectorDisclosure.labelKey)}
+                </s-tooltip>
+              </s-box>
+              <section
+                id="settings-design-customization-panel"
+                className={styles.inspectorContent}
+                aria-label="Contextual customization inspector"
+              >
                 <s-stack gap="base">
                   <s-box>
                     <s-heading>Customize this component</s-heading>
