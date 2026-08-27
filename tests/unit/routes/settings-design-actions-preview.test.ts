@@ -1,8 +1,6 @@
 import {
   advancePreviewProgress,
-  applyDesignPreviewFieldFocus,
   clearPreviewDiscountFeedback,
-  createDesignPreviewState,
   createPreviewInteractionState,
   getPreviewSelectionSummary,
   retreatPreviewProgress,
@@ -65,25 +63,6 @@ describe("Settings Design connected preview actions", () => {
     expect(complete.discountFeedback).toEqual({ state: "complete", replay: 2 });
     expect(clearPreviewDiscountFeedback(complete, 1)).toBe(complete);
     expect(clearPreviewDiscountFeedback(complete, 2).discountFeedback.state).toBeNull();
-  });
-
-  it("routes each field focus request once without overriding later manual selection", () => {
-    const initial = createDesignPreviewState("full_page");
-    const request = { fieldKey: "stylePresets.colors.discountTierBackgroundColor", requestId: 1 };
-    const focused = applyDesignPreviewFieldFocus(initial, request, 0);
-
-    expect(focused.state.surface).toBe("cart-summary");
-    expect(focused.handledRequestId).toBe(1);
-
-    const manuallySelected = { ...focused.state, surface: "product-card" as const };
-    expect(applyDesignPreviewFieldFocus(manuallySelected, request, 1).state.surface).toBe("product-card");
-
-    const repeatedEdit = applyDesignPreviewFieldFocus(
-      manuallySelected,
-      { ...request, requestId: 2 },
-      1,
-    );
-    expect(repeatedEdit.state.surface).toBe("cart-summary");
   });
 
   it("fits narrow hosts and preserves six- and eight-digit Polaris colors", () => {

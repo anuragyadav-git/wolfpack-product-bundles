@@ -24,7 +24,7 @@
 }
 
 .layout[data-inspector-collapsed="true"] {
-  grid-template-columns: minmax(720px, 1fr) 0;
+  grid-template-columns: minmax(0, 1fr) 0;
   gap: 0;
 }
 
@@ -42,6 +42,7 @@
 .customizePane {
   position: relative;
   min-width: 0;
+  min-block-size: clamp(640px, calc(100dvh - 160px), 884px);
   align-self: stretch;
   grid-area: fields;
 }
@@ -90,6 +91,8 @@
 
 .inspectorContent {
   grid-area: fields;
+  box-sizing: border-box;
+  min-block-size: 100%;
   padding: 20px 16px;
 }
 
@@ -206,7 +209,7 @@
 
 .previewControls {
   display: grid;
-  grid-template-columns: repeat(3, minmax(118px, 1fr)) auto;
+  grid-template-columns: repeat(4, minmax(112px, 1fr)) auto;
   gap: 8px;
   align-items: end;
 }
@@ -1617,6 +1620,7 @@
   .previewPane,
   .customizePane {
     display: none;
+    min-block-size: 0;
     grid-area: workspace;
   }
 

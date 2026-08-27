@@ -15,9 +15,13 @@ import {
   type StorefrontPreviewEvent,
   type StorefrontPreviewInitializePayload,
 } from "../../app/app.settings/storefront-preview-protocol";
-import type { DesignPreviewSurface } from "../../app/app.settings/design-preview-model";
+import type {
+  DesignPreviewArea,
+  DesignPreviewScenario,
+} from "../../app/app.settings/design-preview-model";
 import {
   createStorefrontPreviewOverlayHost,
+  getStorefrontPreviewRendererKey,
   mountStorefrontPreviewOverlays,
   openStorefrontPreviewProductPicker,
 } from "../../app/app.settings/storefront-preview-interactions";
@@ -136,10 +140,13 @@ async function initializeController(controller: PreviewController, templateKey: 
   controller.stepProductData = fixture.stepProductData;
   fixture.stepProductData.forEach((products, stepIndex) => {
     const selected = products[stepIndex % products.length];
+    if (!selected) return;
+    const selectionId = selected.selectionId;
+    if (typeof selectionId !== "string" || !selectionId) return;
     if (typeof controller.setSelectedQuantity === "function") {
-      controller.setSelectedQuantity(stepIndex, selected.selectionId, 1);
+      controller.setSelectedQuantity(stepIndex, selectionId, 1);
     } else {
-      controller.selectedProducts[stepIndex][selected.selectionId] = 1;
+      controller.selectedProducts[stepIndex][selectionId] = 1;
     }
   });
   controller.setupDOMElements();
@@ -165,7 +172,7 @@ async function createPreviewController(
       override init() {
         const templateKey = this.container.getAttribute("data-preview-template") as TemplateKey;
         this.__previewReady = initializeController(this as unknown as PreviewController, templateKey);
-        return this.__previewReady;
+        return this.__previewReady.then(() => undefined);
       }
     }
     const controller = new SettingsPreviewFullPageWidget(widgetRoot);
@@ -180,7 +187,7 @@ async function createPreviewController(
     override init() {
       const templateKey = this.container.getAttribute("data-preview-template") as TemplateKey;
       this.__previewReady = initializeController(this as unknown as PreviewController, templateKey);
-      return this.__previewReady;
+      return this.__previewReady.then(() => undefined);
     }
   }
   const controller = new SettingsPreviewProductPageWidget(widgetRoot);
@@ -213,56 +220,101 @@ function renderUpsell(anchor: HTMLElement) {
   });
 }
 
-function focusSurface(
-  surface: DesignPreviewSurface,
+function getAreaSelector(area: DesignPreviewArea) {
+  if (area === "bundle-header") return ".bw-ppb-inpage-step-title, .bundle-header, .bw-ppb-cascade-step-flow";
+  if (area === "navigation") return ".step-timeline, .bundle-step-timeline, .bw-ppb-cascade-step-flow";
+  if (area === "categories") return ".category-tabs, .fpb-category-section-rows, .bw-ppb-inpage-category-tabs";
+  if (area === "product-card") return ".full-page-product-grid-container, .bw-ppb-inpage-step-grid, .product-grid";
+  if (area === "product-slots") return ".bw-ppb-modal-slot-grid, .bw-selected-slots, [data-bw-selected-slots], .bw-slot-card";
+  return ".full-page-side-panel, .fpb-mobile-bottom-sheet, .bundle-footer-messaging, .add-bundle-to-cart";
+}
+
+function findAreaTarget(area: DesignPreviewArea, widgetRoot: HTMLElement) {
+  const candidates = Array.from(
+    widgetRoot.querySelectorAll<HTMLElement>(getAreaSelector(area)),
+  );
+  const candidate = candidates.find((element) => element.getClientRects().length > 0)
+    ?? candidates[0]
+    ?? null;
+  if (area !== "product-slots" || !candidate?.classList.contains("bw-slot-card")) {
+    return candidate;
+  }
+  return candidate.closest<HTMLElement>(
+    ".bw-ppb-modal-slot-grid, .bw-selected-slots, .bw-ppb-inpage-step-grid",
+  ) ?? candidate;
+}
+
+function clearAreaFocus(label: HTMLElement | null) {
+  document.querySelectorAll("[data-wpb-preview-focus]").forEach((element) => {
+    element.removeAttribute("data-wpb-preview-focus");
+  });
+  if (label) label.hidden = true;
+}
+
+function focusArea(
+  area: DesignPreviewArea,
+  areaLabel: string,
+  widgetRoot: HTMLElement,
+  label: HTMLElement | null,
+) {
+  clearAreaFocus(label);
+  const target = findAreaTarget(area, widgetRoot);
+  if (!target) return false;
+  target.dataset.wpbPreviewFocus = area;
+  target.scrollIntoView({ block: "center", inline: "nearest" });
+  if (label) {
+    label.textContent = areaLabel;
+    label.hidden = false;
+  }
+  return true;
+}
+
+function applyPreviewContext(
+  area: DesignPreviewArea,
+  areaLabel: string,
+  scenario: DesignPreviewScenario,
   controller: PreviewController | null,
   widgetRoot: HTMLElement | null,
   upsellAnchor: HTMLElement | null,
+  focusLabel: HTMLElement | null,
 ) {
   if (!controller || !widgetRoot) return;
+  clearAreaFocus(focusLabel);
   controller.hideLoadingOverlay?.();
+  document.getElementById("bundle-toast")?.remove();
   const modal = document.getElementById("bundle-builder-modal");
   if (modal) modal.style.removeProperty("display");
-  if (surface !== "product-picker") {
+  if (scenario !== "product-picker") {
     controller.closeModal?.();
     if (modal) {
       modal.hidden = true;
       modal.style.display = "none";
     }
   }
-  if (upsellAnchor) upsellAnchor.hidden = surface !== "upsell";
+  if (upsellAnchor) upsellAnchor.hidden = scenario !== "upsell";
 
-  if (surface === "loading") {
+  if (scenario === "loading") {
     controller.showLoadingOverlay?.(null, { bootstrap: true });
     return;
   }
-  if (surface === "validation") {
-    ToastManager.show("Please meet the quantity conditions for the current step before proceeding.", 4000, {
+  if (scenario === "validation") {
+    ToastManager.show("Please meet the quantity conditions for the current step before proceeding.", 0, {
       dismissible: false,
     });
     return;
   }
-  if (surface === "product-picker") {
+  if (scenario === "product-picker") {
     if (modal) modal.style.removeProperty("display");
     openStorefrontPreviewProductPicker(controller, widgetRoot);
     return;
   }
-  if (surface === "upsell" && upsellAnchor) {
+  if (scenario === "upsell" && upsellAnchor) {
     renderUpsell(upsellAnchor);
     upsellAnchor.scrollIntoView({ block: "center" });
     return;
   }
 
-  const selectors: Partial<Record<DesignPreviewSurface, string>> = {
-    "bundle-header": ".bundle-header, .bw-ppb-cascade-step-flow, .bw-ppb-grid-step",
-    navigation: ".bundle-step-timeline, .step-timeline, .bw-ppb-cascade-step-flow, .bw-ppb-grid-step",
-    categories: ".category-tabs, .category-section, .bw-ppb-inpage-category-tabs",
-    "product-card": ".product-card, .bw-product-card, .bw-ppb-inpage-product-card",
-    "product-slots": ".bw-ppb-modal-slot-grid, .bundle-step, .selected-product-slot",
-    "cart-summary": ".full-page-side-panel, .fpb-mobile-bottom-sheet, .bundle-footer-messaging, .add-bundle-to-cart",
-  };
-  const target = selectors[surface] ? widgetRoot.querySelector(selectors[surface]!) : null;
-  target?.scrollIntoView({ block: "center", inline: "nearest" });
+  focusArea(area, areaLabel, widgetRoot, focusLabel);
 }
 
 function selectedQuantity(controller: PreviewController | null) {
@@ -273,12 +325,14 @@ function selectedQuantity(controller: PreviewController | null) {
 export default function SettingsDesignPreviewFrame() {
   const widgetRef = useRef<HTMLDivElement>(null);
   const upsellRef = useRef<HTMLDivElement>(null);
-  const overlayHostRef = useRef<HTMLDivElement>(null);
+  const focusLabelRef = useRef<HTMLDivElement>(null);
+  const overlayHostRef = useRef<HTMLDivElement | null>(null);
   const controllerRef = useRef<PreviewController | null>(null);
   const stateRef = useRef<StorefrontPreviewInitializePayload | null>(null);
   const [state, setState] = useState<StorefrontPreviewInitializePayload | null>(null);
   const [resetVersion, setResetVersion] = useState(0);
-  const pickerRendererState = state?.surface === "product-picker";
+  const pickerRendererState = state?.scenario === "product-picker";
+  const rendererKey = getStorefrontPreviewRendererKey(state, resetVersion);
 
   useEffect(() => {
     const { host, cleanup } = createStorefrontPreviewOverlayHost(document);
@@ -316,7 +370,8 @@ export default function SettingsDesignPreviewFrame() {
         if (command.type === "UPDATE_DESIGN") return { ...current, designCss: command.payload.designCss };
         if (command.type === "SET_TEMPLATE") return { ...current, ...command.payload };
         if (command.type === "SET_VIEWPORT") return { ...current, viewport: command.payload.viewport };
-        if (command.type === "SET_SURFACE") return { ...current, surface: command.payload.surface };
+        if (command.type === "SET_AREA") return { ...current, ...command.payload };
+        if (command.type === "SET_SCENARIO") return { ...current, scenario: command.payload.scenario };
         return current;
       });
     };
@@ -364,11 +419,19 @@ export default function SettingsDesignPreviewFrame() {
           mountStorefrontPreviewOverlays(controller, overlayHostRef.current);
         }
         const latestState = stateRef.current ?? activeState;
-        focusSurface(latestState.surface, controller, widgetRoot, upsellRef.current);
+        applyPreviewContext(
+          latestState.area,
+          latestState.areaLabel,
+          latestState.scenario,
+          controller,
+          widgetRoot,
+          upsellRef.current,
+          focusLabelRef.current,
+        );
         postFrameEvent({
           version: PREVIEW_PROTOCOL_VERSION,
-          type: "STATE_CHANGED",
-          payload: { surface: latestState.surface, selectedQuantity: selectedQuantity(controller) },
+          type: "INTERACTION_CHANGED",
+          payload: { selectedQuantity: selectedQuantity(controller) },
         });
       })
       .catch((error: unknown) => {
@@ -378,7 +441,7 @@ export default function SettingsDesignPreviewFrame() {
     return () => {
       cancelled = true;
     };
-  }, [pickerRendererState, resetVersion, state?.bundleType, state?.templateKey]);
+  }, [rendererKey]);
 
   useEffect(() => {
     const announceState = () => {
@@ -387,9 +450,8 @@ export default function SettingsDesignPreviewFrame() {
       window.setTimeout(() => {
         postFrameEvent({
           version: PREVIEW_PROTOCOL_VERSION,
-          type: "STATE_CHANGED",
+          type: "INTERACTION_CHANGED",
           payload: {
-            surface: activeState.surface,
             selectedQuantity: selectedQuantity(controllerRef.current),
           },
         });
@@ -407,13 +469,42 @@ export default function SettingsDesignPreviewFrame() {
   useEffect(() => {
     const activeState = stateRef.current;
     if (!activeState) return;
-    focusSurface(activeState.surface, controllerRef.current, widgetRef.current, upsellRef.current);
+    applyPreviewContext(
+      activeState.area,
+      activeState.areaLabel,
+      activeState.scenario,
+      controllerRef.current,
+      widgetRef.current,
+      upsellRef.current,
+      focusLabelRef.current,
+    );
     postFrameEvent({
       version: PREVIEW_PROTOCOL_VERSION,
-      type: "STATE_CHANGED",
-      payload: { surface: activeState.surface, selectedQuantity: selectedQuantity(controllerRef.current) },
+      type: "INTERACTION_CHANGED",
+      payload: { selectedQuantity: selectedQuantity(controllerRef.current) },
     });
-  }, [state?.surface, state?.viewport]);
+  }, [state?.area, state?.areaLabel, state?.scenario, state?.viewport]);
+
+  useEffect(() => {
+    if (state?.scenario !== "product-picker") return;
+    const modal = document.getElementById("bundle-builder-modal");
+    if (!modal || typeof MutationObserver === "undefined") return;
+    let observedOpenState = modal.classList.contains("bw-bs-panel--open");
+    const observer = new MutationObserver(() => {
+      const isOpen = modal.classList.contains("bw-bs-panel--open");
+      if (observedOpenState && !isOpen) {
+        setState((current) => current ? { ...current, scenario: "default" } : current);
+        postFrameEvent({
+          version: PREVIEW_PROTOCOL_VERSION,
+          type: "SCENARIO_CHANGED",
+          payload: { scenario: "default" },
+        });
+      }
+      observedOpenState = isOpen;
+    });
+    observer.observe(modal, { attributes: true, attributeFilter: ["class", "hidden", "aria-hidden"] });
+    return () => observer.disconnect();
+  }, [pickerRendererState, state?.scenario]);
 
   useEffect(() => {
     const blockUnsafeAction = (event: Event) => {
@@ -432,6 +523,7 @@ export default function SettingsDesignPreviewFrame() {
 
   return (
     <div className={styles.store} data-preview-family={state?.bundleType ?? "full_page"}>
+      <div ref={focusLabelRef} className={styles.focusLabel} aria-hidden="true" hidden />
       <div className={styles.announcement} aria-hidden="true">
         <span className={styles.announcementLine} />
       </div>

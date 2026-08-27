@@ -22,8 +22,11 @@ import { LanguageSettingsView } from "./LanguageSettingsView";
 import {
   SettingsContextualSaveBar,
   SettingsHelpModal,
-  SettingsToast,
 } from "./SettingsFeedback";
+import {
+  createLanguageSettingsSnapshot,
+  showSettingsSaveFeedback,
+} from "./settings-feedback";
 import { createSettingsDesignState, type SettingsDesignPayload } from "../../../lib/settings-design-contract";
 import { isShopBrandColors } from "../../../lib/shop-brand-colors";
 import { DesignSettingsView } from "./DesignSettingsView";
@@ -69,7 +72,6 @@ export function SettingsRoute({
     localeFieldValues: Record<string, Record<string, string>>;
   } | null>(null);
   const previousSavedControlValuesRef = useRef<Record<string, string> | null>(null);
-  const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const [settingsHelpArticle, setSettingsHelpArticle] = useState<"inventory" | null>(null);
   const [settingsVariablesModal, setSettingsVariablesModal] = useState<{ title: string; variables: string[] } | null>(null);
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
@@ -142,7 +144,7 @@ export function SettingsRoute({
     ? selectedControlTab.fields.filter((field) => (field.group ?? selectedControlTab.contentTitle ?? selectedControlTab.title) === selectedControlGroupTitle)
     : selectedControlTab.fields;
   const languageFieldValues = languageLocaleValues[selectedLanguage] ?? getInitialLanguageFieldValues(selectedLanguage);
-  const currentLanguageState = { languageMode, localeFieldValues: languageLocaleValues };
+  const currentLanguageState = createLanguageSettingsSnapshot(languageMode, languageLocaleValues);
   const isLanguageDirty = JSON.stringify(currentLanguageState) !== JSON.stringify(savedLanguageState);
   const isControlsDirty = JSON.stringify(controlFieldValues) !== JSON.stringify(savedControlFieldValues);
   const currentDesignState = { fieldValues: designFieldValues, inheritedColorFieldKeys };
@@ -213,10 +215,11 @@ export function SettingsRoute({
       return;
     }
     if (settingsView === "language") {
-      pendingSavedLanguageStateRef.current = currentLanguageState;
+      const submittedLanguageState = createLanguageSettingsSnapshot(languageMode, languageLocaleValues);
+      pendingSavedLanguageStateRef.current = submittedLanguageState;
       submit({
         intent: "saveSettingsLanguage",
-        payload: JSON.stringify(currentLanguageState),
+        payload: JSON.stringify(submittedLanguageState),
       }, { method: "post" });
       return;
     }
@@ -247,14 +250,23 @@ export function SettingsRoute({
       setSavedInheritedColorFieldKeys(confirmedState.inheritedColorFieldKeys);
     }
     if (
-      actionData.success
+      (actionData.success || ("persisted" in actionData && actionData.persisted === true))
       && "intent" in actionData
       && actionData.intent === "saveSettingsLanguage"
     ) {
-      if (pendingSavedLanguageStateRef.current) {
-        setSavedLanguageState(pendingSavedLanguageStateRef.current);
-        pendingSavedLanguageStateRef.current = null;
-      }
+      const savedState = "savedState" in actionData
+        && actionData.savedState
+        && typeof actionData.savedState === "object"
+        ? actionData.savedState as {
+          languageMode?: "SINGLE" | "MULTIPLE";
+          localeFieldValues?: Record<string, Record<string, string>>;
+        }
+        : null;
+      const confirmedState = savedState?.languageMode && savedState.localeFieldValues
+        ? createLanguageSettingsSnapshot(savedState.languageMode, savedState.localeFieldValues)
+        : pendingSavedLanguageStateRef.current;
+      if (confirmedState) setSavedLanguageState(confirmedState);
+      pendingSavedLanguageStateRef.current = null;
     } else if (
       actionData.success === false
       && "intent" in actionData
@@ -262,8 +274,8 @@ export function SettingsRoute({
     ) {
       pendingSavedLanguageStateRef.current = null;
     }
-    setSaveMessage(actionData.success ? "Settings saved successfully" : actionData.message || "Something went wrong");
-  }, [actionData]);
+    showSettingsSaveFeedback(shopify, actionData);
+  }, [actionData, shopify]);
 
   useEffect(() => {
     const response = controlsFetcher.data;
@@ -281,8 +293,8 @@ export function SettingsRoute({
       pendingSavedControlValuesRef.current = null;
       previousSavedControlValuesRef.current = null;
     }
-    setSaveMessage(response.success ? "Settings saved successfully" : response.message || "Something went wrong");
-  }, [controlsFetcher.data, controlFieldValues]);
+    showSettingsSaveFeedback(shopify, response);
+  }, [controlsFetcher.data, controlFieldValues, shopify]);
 
   useEffect(() => {
     if (settingsView !== "controls") return;
@@ -309,12 +321,10 @@ export function SettingsRoute({
         isDesignSaving={isDesignSaving}
         isPreviewModalOpen={isPreviewModalOpen}
         previewBundles={previewBundles}
-        saveMessage={saveMessage}
         setSettingsView={() => returnToSettingsLanding()}
         setIsPreviewModalOpen={setIsPreviewModalOpen}
         setDesignFieldValues={setDesignFieldValues}
         setInheritedColorFieldKeys={setInheritedColorFieldKeys}
-        setSaveMessage={setSaveMessage}
         discardActiveSettingsChanges={discardActiveSettingsChanges}
         saveActiveSettingsChanges={saveActiveSettingsChanges}
       />
@@ -381,7 +391,6 @@ export function SettingsRoute({
         />
           <SettingsContextualSaveBar isOpen={isActiveSubpageDirty} onDiscard={discardActiveSettingsChanges} onSave={saveActiveSettingsChanges} />
           <SettingsVariablesModal modal={settingsVariablesModal} onClose={() => setSettingsVariablesModal(null)} />
-          <SettingsToast message={saveMessage} onDismiss={() => setSaveMessage(null)} />
       </>
     );
   }
@@ -514,7 +523,6 @@ export function SettingsRoute({
           <SettingsContextualSaveBar isOpen={isActiveSubpageDirty} onDiscard={discardActiveSettingsChanges} onSave={saveActiveSettingsChanges} />
           <SettingsHelpModal article={settingsHelpArticle} onClose={() => setSettingsHelpArticle(null)} />
           <SettingsVariablesModal modal={settingsVariablesModal} onClose={() => setSettingsVariablesModal(null)} />
-          <SettingsToast message={saveMessage} onDismiss={() => setSaveMessage(null)} />
         </main>
       </>
     );

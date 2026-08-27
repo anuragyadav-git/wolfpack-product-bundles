@@ -3,12 +3,16 @@
   width: 100%;
   min-height: 100%;
   margin: 0;
+}
+
+:global(html:has(body[data-preview-viewport="mobile"])),
+:global(body[data-preview-viewport="mobile"]) {
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
 
-:global(html::-webkit-scrollbar),
-:global(body::-webkit-scrollbar) {
+:global(html:has(body[data-preview-viewport="mobile"])::-webkit-scrollbar),
+:global(body[data-preview-viewport="mobile"]::-webkit-scrollbar) {
   width: 0;
   height: 0;
   display: none;
@@ -225,6 +229,39 @@
 
 .upsellAnchor[hidden] {
   display: none;
+}
+
+.focusLabel {
+  position: fixed;
+  z-index: 2147483647;
+  inset-block-start: 12px;
+  inset-inline-start: 12px;
+  max-width: min(280px, calc(100vw - 24px));
+  border: 1px solid #ffffff;
+  border-radius: 999px;
+  background: #005bd3;
+  box-shadow: 0 4px 14px rgba(0, 91, 211, 0.28);
+  color: #ffffff;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.2;
+  pointer-events: none;
+}
+
+.focusLabel[hidden] {
+  display: none;
+}
+
+:global(body[data-preview-viewport="mobile"]) .focusLabel {
+  inset-block-start: 44px;
+}
+
+:global([data-wpb-preview-focus]) {
+  outline: 3px solid #005bd3;
+  outline-offset: 4px;
+  box-shadow: 0 0 0 7px rgba(0, 91, 211, 0.16);
+  scroll-margin-block: 72px;
 }
 
 @media (max-width: 700px) {

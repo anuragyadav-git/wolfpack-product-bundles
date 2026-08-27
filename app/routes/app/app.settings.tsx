@@ -264,6 +264,9 @@ export async function action({ request }: ActionFunctionArgs) {
       return json({
         success: false,
         intent,
+        persisted: true,
+        runtimeSynced: false,
+        savedState: payload,
         message: `Settings saved, but PPB storefront runtime sync failed: ${error instanceof Error ? error.message : "Unknown error"}`,
       }, { status: 500 });
     }
@@ -322,6 +325,9 @@ export async function action({ request }: ActionFunctionArgs) {
       return json({
         success: false,
         intent,
+        persisted: true,
+        runtimeSynced: false,
+        savedState: payload,
         message: syncResult.error
           ? `Settings saved, but cart transform messaging sync failed: ${syncResult.error}`
           : "Settings saved, but cart transform messaging sync failed",
@@ -333,6 +339,9 @@ export async function action({ request }: ActionFunctionArgs) {
       return json({
         success: false,
         intent,
+        persisted: true,
+        runtimeSynced: false,
+        savedState: payload,
         message: `Settings saved, but PPB storefront runtime sync failed: ${error instanceof Error ? error.message : "Unknown error"}`,
       }, { status: 500 });
     }

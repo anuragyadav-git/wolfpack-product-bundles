@@ -120,6 +120,14 @@ protocol. The frame dynamically imports only the selected production FPB or PPB
 controller and loads the same base, responsive, and template CSS sources used by
 the storefront asset build.
 
+Protocol version 2 separates the persistent editable area from transient
+preview state. Bundle header, navigation, categories, product cards, product
+slots, and cart/summary are template-filtered edit areas. Default, product
+picker, loading, validation, and upsell are independently filtered preview
+states. Choosing an area returns to Default; choosing a temporary state retains
+the previous area so closing or resetting the state restores the same editing
+context. No version-1 surface compatibility path is retained.
+
 The FPB frame initializes its mount with the same
 `bundle-widget-container bundle-widget-full-page` host classes as the app-embed
 storefront document before the controller renders. These are functional style
@@ -133,6 +141,13 @@ post-cart behavior, and external navigation are disabled; links, forms, and cart
 actions are also blocked at the frame boundary. Interactions otherwise use the
 production renderer. Product picker, Loading, Validation, and Upsell use their
 real modal, overlay, toast, and offer implementations.
+
+In Default state, the frame scrolls the selected production region into view
+and applies a preview-only focus attribute. The frame-owned stylesheet renders
+a persistent outline and localized `Editing` label without altering production
+widget CSS or intercepting storefront interactions. Temporary states suspend
+the region focus; validation remains visible while selected and product-picker
+dismissal is reported to the parent so the state selector returns to Default.
 
 The frame supplies an adaptive neutral store shell: FPB is presented in a
 full-page collection context, while PPB is presented beside product media and

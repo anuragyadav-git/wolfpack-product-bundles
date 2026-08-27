@@ -121,7 +121,9 @@ function buildProduct(index: number) {
 
 export function buildStorefrontPreviewFixture(templateKey: TemplateKey) {
   const manifest = getStorefrontPreviewStylesheetManifest(templateKey);
-  const selection = mapTemplateSelection(manifest.bundleType, templateKey);
+  const selection = manifest.bundleType === "full_page"
+    ? mapTemplateSelection("full_page", templateKey)
+    : mapTemplateSelection("product_page", templateKey);
   const products = [1, 2, 3, 4].map((index) => buildProduct(index));
   const rendererProducts = manifest.bundleType === "product_page"
     ? products.map((product) => ({

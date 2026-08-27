@@ -47,7 +47,7 @@ Ensure Settings Design previews use the production storefront renderer and exact
 |---|---|---|---|---|
 | 1 | Valid parent command | Version 1 command with canonical template and surface | Command is accepted | Pure protocol validation |
 | 2 | Invalid parent command | Wrong version, template, viewport, or missing payload | Command is rejected | No silent fallback |
-| 3 | Valid child event | READY, STATE_CHANGED, or ERROR event | Event is accepted | Pure protocol validation |
+| 3 | Valid child event | READY, INTERACTION_CHANGED, SCENARIO_CHANGED, or ERROR event | Event is accepted | Pure protocol validation |
 | 4 | Template stylesheet selection | Each of eight canonical template keys | Exact family base and template stylesheet manifest | Matches Liquid asset composition |
 | 5 | Deterministic fixture | FPB or PPB template | Canonical bundle payload and hydrated product cache | No network source is required |
 | 6 | Preview safety | Deterministic fixture | Cart, analytics, persistence, and external navigation capabilities remain disabled | Frame actions are visual only |

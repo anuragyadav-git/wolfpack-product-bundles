@@ -24,7 +24,9 @@ describe("Settings Design production renderer preview", () => {
         bundleType: "full_page",
         templateKey: "standard",
         viewport: "desktop",
-        surface: "product-card",
+        area: "product-card",
+        areaLabel: "Product cards",
+        scenario: "default",
         designCss: ":root{--bundle-global-primary-button:#123456}",
         locale: "en",
         currency: "USD",
@@ -32,7 +34,7 @@ describe("Settings Design production renderer preview", () => {
     };
 
     expect(isStorefrontPreviewCommand(initialize)).toBe(true);
-    expect(isStorefrontPreviewCommand({ ...initialize, version: 2 })).toBe(false);
+    expect(isStorefrontPreviewCommand({ ...initialize, version: 1 })).toBe(false);
     expect(isStorefrontPreviewCommand({
       ...initialize,
       payload: { ...initialize.payload, templateKey: "legacy-template" },
@@ -46,35 +48,46 @@ describe("Settings Design production renderer preview", () => {
       payload: { ...initialize.payload, templateKey: "product-grid" },
     })).toBe(false);
     expect(isStorefrontPreviewCommand({
-      version: 1,
+      version: 2,
       type: "SET_TEMPLATE",
       payload: { bundleType: "product_page", templateKey: "classic" },
     })).toBe(false);
-    expect(isStorefrontPreviewCommand({ version: 1, type: "UPDATE_DESIGN", payload: {} })).toBe(false);
+    expect(isStorefrontPreviewCommand({ version: 2, type: "UPDATE_DESIGN", payload: {} })).toBe(false);
+    expect(isStorefrontPreviewCommand({
+      version: 1,
+      type: "SET_SURFACE",
+      payload: { surface: "validation" },
+    })).toBe(false);
   });
 
   it("accepts the complete command and event vocabulary", () => {
     const commands = [
-      { version: 1, type: "UPDATE_DESIGN", payload: { designCss: "body{}" } },
-      { version: 1, type: "SET_TEMPLATE", payload: { bundleType: "product_page", templateKey: "product-grid" } },
-      { version: 1, type: "SET_VIEWPORT", payload: { viewport: "mobile" } },
-      { version: 1, type: "SET_SURFACE", payload: { surface: "validation" } },
-      { version: 1, type: "RESET_INTERACTION", payload: {} },
+      { version: 2, type: "UPDATE_DESIGN", payload: { designCss: "body{}" } },
+      { version: 2, type: "SET_TEMPLATE", payload: { bundleType: "product_page", templateKey: "product-grid" } },
+      { version: 2, type: "SET_VIEWPORT", payload: { viewport: "mobile" } },
+      { version: 2, type: "SET_AREA", payload: { area: "cart-summary", areaLabel: "Cart / summary" } },
+      { version: 2, type: "SET_SCENARIO", payload: { scenario: "validation" } },
+      { version: 2, type: "RESET_INTERACTION", payload: {} },
     ];
     commands.forEach((command) => expect(isStorefrontPreviewCommand(command)).toBe(true));
 
-    expect(isStorefrontPreviewEvent({ version: 1, type: "READY", payload: {} })).toBe(true);
+    expect(isStorefrontPreviewEvent({ version: 2, type: "READY", payload: {} })).toBe(true);
     expect(isStorefrontPreviewEvent({
-      version: 1,
-      type: "STATE_CHANGED",
-      payload: { surface: "product-picker", selectedQuantity: 2 },
+      version: 2,
+      type: "INTERACTION_CHANGED",
+      payload: { selectedQuantity: 2 },
     })).toBe(true);
     expect(isStorefrontPreviewEvent({
-      version: 1,
+      version: 2,
+      type: "SCENARIO_CHANGED",
+      payload: { scenario: "default" },
+    })).toBe(true);
+    expect(isStorefrontPreviewEvent({
+      version: 2,
       type: "ERROR",
       payload: { message: "Preview failed" },
     })).toBe(true);
-    expect(isStorefrontPreviewEvent({ version: 0, type: "READY", payload: {} })).toBe(false);
+    expect(isStorefrontPreviewEvent({ version: 1, type: "READY", payload: {} })).toBe(false);
   });
 
   it.each([

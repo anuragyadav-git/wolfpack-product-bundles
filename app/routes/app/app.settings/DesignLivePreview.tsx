@@ -11,11 +11,11 @@ import {
   buildDesignPreviewStorefrontCss,
   getDesignPreviewCanvasSize,
   getDesignPreviewFitPresentation,
-  getDefaultDesignPreviewSurface,
-  getDesignPreviewFieldTarget,
-  getSupportedDesignPreviewSurfaces,
-  isDesignPreviewFieldApplicable,
-  type DesignPreviewSurface,
+  getDefaultDesignPreviewArea,
+  getSupportedDesignPreviewAreas,
+  getSupportedDesignPreviewScenarios,
+  type DesignPreviewArea,
+  type DesignPreviewScenario,
   type DesignPreviewViewport,
 } from "./design-preview-model";
 import styles from "./DesignSettingsView.module.css";
@@ -34,7 +34,8 @@ export type DesignPreviewState = {
   bundleType: BundleContractType;
   templateKey: TemplateKey;
   viewport: DesignPreviewViewport;
-  surface: DesignPreviewSurface;
+  area: DesignPreviewArea;
+  scenario: DesignPreviewScenario;
 };
 
 export type PreviewInteractionState = {
@@ -162,11 +163,18 @@ export function isTemplateValidForBundleType(
   );
 }
 
-export function isDesignPreviewSurfaceSupported(
+export function isDesignPreviewAreaSupported(
   templateKey: TemplateKey,
-  surface: DesignPreviewSurface,
+  area: DesignPreviewArea,
 ) {
-  return getSupportedDesignPreviewSurfaces(templateKey).includes(surface);
+  return getSupportedDesignPreviewAreas(templateKey).includes(area);
+}
+
+export function isDesignPreviewScenarioSupported(
+  templateKey: TemplateKey,
+  scenario: DesignPreviewScenario,
+) {
+  return getSupportedDesignPreviewScenarios(templateKey).includes(scenario);
 }
 
 export function createDesignPreviewState(
@@ -177,7 +185,8 @@ export function createDesignPreviewState(
     bundleType,
     templateKey,
     viewport: "desktop",
-    surface: getDefaultDesignPreviewSurface(templateKey),
+    area: getDefaultDesignPreviewArea(templateKey),
+    scenario: "default",
   };
 }
 
@@ -190,7 +199,8 @@ export function setDesignPreviewBundleType(
     ...state,
     bundleType,
     templateKey,
-    surface: getDefaultDesignPreviewSurface(templateKey),
+    area: getDefaultDesignPreviewArea(templateKey),
+    scenario: "default",
   };
 }
 
@@ -204,9 +214,10 @@ export function setDesignPreviewTemplate(
   return {
     ...state,
     templateKey,
-    surface: isDesignPreviewSurfaceSupported(templateKey, state.surface)
-      ? state.surface
-      : getDefaultDesignPreviewSurface(templateKey),
+    area: isDesignPreviewAreaSupported(templateKey, state.area)
+      ? state.area
+      : getDefaultDesignPreviewArea(templateKey),
+    scenario: "default",
   };
 }
 
@@ -217,60 +228,42 @@ export function setDesignPreviewViewport(
   return { ...state, viewport };
 }
 
-export function setDesignPreviewSurface(
+export function setDesignPreviewArea(
   state: DesignPreviewState,
-  surface: DesignPreviewSurface,
+  area: DesignPreviewArea,
 ): DesignPreviewState {
-  return isDesignPreviewSurfaceSupported(state.templateKey, surface)
-    ? { ...state, surface }
+  return isDesignPreviewAreaSupported(state.templateKey, area)
+    ? { ...state, area, scenario: "default" }
     : state;
 }
 
-export type DesignPreviewFieldFocusRequest = {
-  fieldKey: string;
-  requestId: number;
-};
-
-export function applyDesignPreviewFieldFocus(
+export function setDesignPreviewScenario(
   state: DesignPreviewState,
-  request: DesignPreviewFieldFocusRequest | null | undefined,
-  handledRequestId: number,
-): { state: DesignPreviewState; handledRequestId: number } {
-  if (!request || request.requestId <= handledRequestId) {
-    return { state, handledRequestId };
-  }
-  const target = getDesignPreviewFieldTarget(request.fieldKey, state.templateKey);
-  const nextState = target && isDesignPreviewFieldApplicable(request.fieldKey, state.templateKey)
-    ? setDesignPreviewSurface(state, target.surface)
+  scenario: DesignPreviewScenario,
+): DesignPreviewState {
+  return isDesignPreviewScenarioSupported(state.templateKey, scenario)
+    ? { ...state, scenario }
     : state;
-  return { state: nextState, handledRequestId: request.requestId };
 }
-
-
 
 export function DesignLivePreview({
   fieldValues,
   inheritedColorFieldKeys,
   shopBrandColors,
-  fieldFocusRequest,
   initialState,
-  onSurfaceChange,
   onContextChange,
 }: {
   fieldValues: Record<string, string>;
   inheritedColorFieldKeys?: string[];
   shopBrandColors?: ShopBrandColors | null;
-  fieldFocusRequest?: DesignPreviewFieldFocusRequest | null;
   initialState?: DesignPreviewState;
-  onSurfaceChange?: (surface: DesignPreviewSurface) => void;
-  onContextChange?: (context: Pick<DesignPreviewState, "bundleType" | "templateKey" | "surface">) => void;
+  onContextChange?: (context: Pick<DesignPreviewState, "bundleType" | "templateKey" | "area" | "scenario">) => void;
 }) {
   const { t, i18n } = useTranslation();
   const previewStageRef = useRef<HTMLDivElement>(null);
   const previewCanvasRef = useRef<HTMLDivElement>(null);
   const previewScaledShellRef = useRef<HTMLDivElement>(null);
   const previewFrameRef = useRef<HTMLIFrameElement>(null);
-  const handledFieldFocusRequestRef = useRef(0);
   const [previewState, setPreviewState] = useState<DesignPreviewState>(
     initialState ?? createDesignPreviewState(),
   );
@@ -282,9 +275,8 @@ export function DesignLivePreview({
   const activeTemplate = DESIGN_PREVIEW_TEMPLATES.find(
     (template) => template.key === previewState.templateKey,
   ) ?? DESIGN_PREVIEW_TEMPLATES[0];
-  const supportedSurfaces = activeTemplate.supportedSurfaces;
-  const activeFieldKey = fieldFocusRequest?.fieldKey ?? null;
-  const isApplicable = !activeFieldKey || isDesignPreviewFieldApplicable(activeFieldKey, activeTemplate.key);
+  const supportedAreas = activeTemplate.supportedAreas;
+  const supportedScenarios = activeTemplate.supportedScenarios;
   const designCss = useMemo(
     () => buildDesignPreviewStorefrontCss({
       fieldValues,
@@ -300,7 +292,11 @@ export function DesignLivePreview({
     bundleType: previewState.bundleType,
     templateKey: previewState.templateKey,
     viewport: previewState.viewport,
-    surface: previewState.surface,
+    area: previewState.area,
+    areaLabel: t("settingsDcp.preview.focusLabel", {
+      context: t(`settingsDcp.preview.areaSelector.${previewState.area}`),
+    }),
+    scenario: previewState.scenario,
     designCss,
     locale: i18n?.resolvedLanguage ?? i18n?.language ?? "en",
     currency: "USD",
@@ -309,47 +305,38 @@ export function DesignLivePreview({
     bundleType: previewState.bundleType,
     templateKey: previewState.templateKey,
     viewport: previewState.viewport,
-    surface: previewState.surface,
+    area: previewState.area,
+    areaLabel: t("settingsDcp.preview.focusLabel", {
+      context: t(`settingsDcp.preview.areaSelector.${previewState.area}`),
+    }),
+    scenario: previewState.scenario,
     designCss,
     locale: i18n?.resolvedLanguage ?? i18n?.language ?? "en",
     currency: "USD",
   };
 
   useEffect(() => {
-    if (!fieldFocusRequest) return;
-    setPreviewState((current) => {
-      const result = applyDesignPreviewFieldFocus(
-        current,
-        fieldFocusRequest,
-        handledFieldFocusRequestRef.current,
-      );
-      handledFieldFocusRequestRef.current = result.handledRequestId;
-      return result.state;
-    });
-  }, [fieldFocusRequest]);
-
-  useEffect(() => {
-    onSurfaceChange?.(previewState.surface);
-  }, [onSurfaceChange, previewState.surface]);
-
-  useEffect(() => {
     onContextChange?.({
       bundleType: previewState.bundleType,
       templateKey: previewState.templateKey,
-      surface: previewState.surface,
+      area: previewState.area,
+      scenario: previewState.scenario,
     });
-  }, [onContextChange, previewState.bundleType, previewState.surface, previewState.templateKey]);
+  }, [onContextChange, previewState.area, previewState.bundleType, previewState.scenario, previewState.templateKey]);
 
   useEffect(() => {
     const onMessage = (event: MessageEvent) => {
       const frameWindow = previewFrameRef.current?.contentWindow ?? null;
       if (!isTrustedStorefrontPreviewMessage(event, window.location.origin, frameWindow)) return;
-      if (!isStorefrontPreviewEvent(event.data)) return;
-      if (event.data.type === "READY") {
+      const message: unknown = event.data;
+      if (!isStorefrontPreviewEvent(message)) return;
+      if (message.type === "READY") {
         setFrameError(null);
         setIsFrameReady(true);
-      } else if (event.data.type === "ERROR") {
-        setFrameError(event.data.payload.message);
+      } else if (message.type === "SCENARIO_CHANGED") {
+        setPreviewState((current) => setDesignPreviewScenario(current, message.payload.scenario));
+      } else if (message.type === "ERROR") {
+        setFrameError(message.payload.message);
       }
     };
     window.addEventListener("message", onMessage);
@@ -400,11 +387,26 @@ export function DesignLivePreview({
     if (!isFrameReady) return;
     const command: StorefrontPreviewCommand = {
       version: PREVIEW_PROTOCOL_VERSION,
-      type: "SET_SURFACE",
-      payload: { surface: previewState.surface },
+      type: "SET_AREA",
+      payload: {
+        area: previewState.area,
+        areaLabel: t("settingsDcp.preview.focusLabel", {
+          context: t(`settingsDcp.preview.areaSelector.${previewState.area}`),
+        }),
+      },
     };
     previewFrameRef.current?.contentWindow?.postMessage(command, window.location.origin);
-  }, [isFrameReady, previewState.surface]);
+  }, [isFrameReady, previewState.area, t]);
+
+  useEffect(() => {
+    if (!isFrameReady) return;
+    const command: StorefrontPreviewCommand = {
+      version: PREVIEW_PROTOCOL_VERSION,
+      type: "SET_SCENARIO",
+      payload: { scenario: previewState.scenario },
+    };
+    previewFrameRef.current?.contentWindow?.postMessage(command, window.location.origin);
+  }, [isFrameReady, previewState.scenario]);
 
   useLayoutEffect(() => {
     const stage = previewStageRef.current;
@@ -474,15 +476,27 @@ export function DesignLivePreview({
             ))}
           </s-select>
           <s-select
-            label={t("settingsDcp.preview.surfaceSelector.label")}
-            value={previewState.surface}
+            label={t("settingsDcp.preview.areaSelector.label")}
+            value={previewState.area}
             onChange={(event: Event) => {
-              const surface = (event.target as HTMLSelectElement).value as DesignPreviewSurface;
-              setPreviewState((current) => setDesignPreviewSurface(current, surface));
+              const area = (event.target as HTMLSelectElement).value as DesignPreviewArea;
+              setPreviewState((current) => setDesignPreviewArea(current, area));
             }}
           >
-            {supportedSurfaces.map((surface) => (
-              <s-option key={surface} value={surface}>{t(`settingsDcp.preview.surfaceSelector.${surface}`)}</s-option>
+            {supportedAreas.map((area) => (
+              <s-option key={area} value={area}>{t(`settingsDcp.preview.areaSelector.${area}`)}</s-option>
+            ))}
+          </s-select>
+          <s-select
+            label={t("settingsDcp.preview.stateSelector.label")}
+            value={previewState.scenario}
+            onChange={(event: Event) => {
+              const scenario = (event.target as HTMLSelectElement).value as DesignPreviewScenario;
+              setPreviewState((current) => setDesignPreviewScenario(current, scenario));
+            }}
+          >
+            {supportedScenarios.map((scenario) => (
+              <s-option key={scenario} value={scenario}>{t(`settingsDcp.preview.stateSelector.${scenario}`)}</s-option>
             ))}
           </s-select>
           <div className={styles.viewportButtons} aria-label={t("settingsDcp.preview.viewport.label")}>
@@ -508,13 +522,6 @@ export function DesignLivePreview({
         </div>
       </div>
 
-      {!isApplicable ? (
-        <div className={styles.previewApplicability}>
-          <s-icon type="info" size="small" />
-          <span>{t("settingsDcp.preview.notApplicable")}</span>
-        </div>
-      ) : null}
-
       {frameError ? <s-banner tone="critical">{frameError}</s-banner> : null}
 
       <div
@@ -525,12 +532,12 @@ export function DesignLivePreview({
       >
         {!isFrameReady ? (
           <div className={styles.previewLoading} role="status">
-            <s-box className={styles.previewLoadingIndicator}>
+            <div className={styles.previewLoadingIndicator}>
               <s-spinner
                 size="large"
                 accessibilityLabel={t("settingsDcp.preview.loading")}
               />
-            </s-box>
+            </div>
           </div>
         ) : null}
         <div
@@ -558,7 +565,8 @@ export function DesignLivePreview({
                   <div
                     className={styles.previewSurface}
                     data-template-key={previewState.templateKey}
-                    data-preview-surface={previewState.surface}
+                    data-preview-area={previewState.area}
+                    data-preview-scenario={previewState.scenario}
                     style={{
                       width: `${previewViewport.width}px`,
                       height: `${previewViewport.height}px`,

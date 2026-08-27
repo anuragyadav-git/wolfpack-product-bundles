@@ -60,21 +60,6 @@ export function SettingsHelpModal({
   );
 }
 
-export function SettingsToast({ message, onDismiss }: { message: string | null; onDismiss: () => void }) {
-  if (!message) {
-    return null;
-  }
-
-  return (
-    <div className={styles.settingsToast} role="status" aria-live="polite">
-      <span>{message}</span>
-      <button type="button" onClick={onDismiss} aria-label="Dismiss save message">
-        x
-      </button>
-    </div>
-  );
-}
-
 export function DetailGroup({
   title,
   description,

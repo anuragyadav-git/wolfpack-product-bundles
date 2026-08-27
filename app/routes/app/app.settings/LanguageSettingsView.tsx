@@ -101,10 +101,7 @@ export function LanguageSettingsView({
           </s-stack>
         </s-section>
 
-        <s-grid
-          gridTemplateColumns="@container (inline-size > 760px) 240px minmax(0, 1fr), 1fr"
-          gap="@container (inline-size > 760px) large, base"
-        >
+        <div className={styles.languageContentLayout}>
           <s-section>
             <s-stack gap="large">
               <s-stack gap="small">
@@ -200,7 +197,7 @@ export function LanguageSettingsView({
               );
             })}
           </s-stack>
-        </s-grid>
+        </div>
       </s-stack>
     </s-page>
   );

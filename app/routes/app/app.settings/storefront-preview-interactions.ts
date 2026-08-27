@@ -7,6 +7,18 @@ type ProductPickerController = {
   };
 };
 
+type StorefrontPreviewRendererState = {
+  bundleType: string;
+  templateKey: string;
+};
+
+export function getStorefrontPreviewRendererKey(
+  state: StorefrontPreviewRendererState | null | undefined,
+  resetVersion: number,
+) {
+  return `${state?.bundleType ?? "pending"}:${state?.templateKey ?? "pending"}:${resetVersion}`;
+}
+
 export function createStorefrontPreviewOverlayHost(documentRef: Document) {
   const host = documentRef.createElement("div");
   documentRef.body.append(host);

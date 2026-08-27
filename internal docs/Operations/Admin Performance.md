@@ -164,6 +164,13 @@ readiness opacity, and scale must not interpolate with CSS transitions; this
 keeps sidebar collapse and Admin-width changes immediate without repeatedly
 reconciling the production iframe subtree.
 
+The preview toolbar separates template-filtered `Edit area` and `Preview state`
+selectors. Area changes reuse the mounted renderer, return transient state to
+Default, and scroll the selected production region into a persistent frame-owned
+outline. State changes open the existing production picker, loading, validation,
+or upsell implementation without replacing the neutral storefront context.
+Neither selector adds data loading, persistence, or another lazy boundary.
+
 Direct Chrome DevTools verification on 2026-08-27 used the agent store after a
 cache-bypassed reload. The 1881×900 expanded-inspector and collapsed-inspector
 states, plus the 900×900 narrow-Admin state, kept the live 390×844 mobile

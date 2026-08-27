@@ -61,12 +61,10 @@ describe("DesignSettingsView live preview", () => {
         isActiveSubpageDirty: false,
         isPreviewModalOpen: false,
         previewBundles: [{ id: "bundle-1", name: "Summer Box", type: "Landing Page", bundleType: "full_page", viewUrl: "https://shop.test/pages/bundle" }],
-        saveMessage: null,
         setSettingsView: jest.fn(),
         setIsPreviewModalOpen: jest.fn(),
         setDesignFieldValues: jest.fn(),
         setInheritedColorFieldKeys: jest.fn(),
-        setSaveMessage: jest.fn(),
         discardActiveSettingsChanges: jest.fn(),
         saveActiveSettingsChanges: jest.fn(),
       }),
@@ -87,7 +85,7 @@ describe("DesignSettingsView live preview", () => {
     expect(view).toContain("disabled");
     expect(view).toContain("<s-color-field");
     expect(view).toContain("<s-button");
-    expect(view).toContain("Customize this component");
+    expect(view).toContain("settingsDcp.preview.inspector.customize");
     expect(view).not.toContain("Expert Color Controls");
     expect(view).not.toContain("Brand Colors");
   });
@@ -104,12 +102,10 @@ describe("DesignSettingsView live preview", () => {
         isActiveSubpageDirty: false,
         isPreviewModalOpen: false,
         previewBundles: [],
-        saveMessage: null,
         setSettingsView: jest.fn(),
         setIsPreviewModalOpen: jest.fn(),
         setDesignFieldValues: jest.fn(),
         setInheritedColorFieldKeys: jest.fn(),
-        setSaveMessage: jest.fn(),
         discardActiveSettingsChanges: jest.fn(),
         saveActiveSettingsChanges: jest.fn(),
       }),
@@ -128,12 +124,10 @@ describe("DesignSettingsView live preview", () => {
         isActiveSubpageDirty: false,
         isPreviewModalOpen: false,
         previewBundles: [],
-        saveMessage: null,
         setSettingsView: jest.fn(),
         setIsPreviewModalOpen: jest.fn(),
         setDesignFieldValues: jest.fn(),
         setInheritedColorFieldKeys: jest.fn(),
-        setSaveMessage: jest.fn(),
         discardActiveSettingsChanges: jest.fn(),
         saveActiveSettingsChanges: jest.fn(),
       }),
@@ -156,12 +150,10 @@ describe("DesignSettingsView live preview", () => {
         isActiveSubpageDirty: false,
         isPreviewModalOpen: false,
         previewBundles: [{ id: "bundle-1", name: "Summer Box", type: "Landing Page", bundleType: "full_page", viewUrl: "https://shop.test/pages/bundle" }],
-        saveMessage: null,
         setSettingsView: jest.fn(),
         setIsPreviewModalOpen: jest.fn(),
         setDesignFieldValues: jest.fn(),
         setInheritedColorFieldKeys: jest.fn(),
-        setSaveMessage: jest.fn(),
         discardActiveSettingsChanges: jest.fn(),
         saveActiveSettingsChanges: jest.fn(),
       }),
@@ -189,12 +181,10 @@ describe("DesignSettingsView live preview", () => {
           bundleType: "full_page",
           viewUrl: "https://shop.test/apps/product-bundles/wpb/1",
         }],
-        saveMessage: null,
         setSettingsView: jest.fn(),
         setIsPreviewModalOpen: jest.fn(),
         setDesignFieldValues: jest.fn(),
         setInheritedColorFieldKeys: jest.fn(),
-        setSaveMessage: jest.fn(),
         discardActiveSettingsChanges: jest.fn(),
         saveActiveSettingsChanges: jest.fn(),
       }),

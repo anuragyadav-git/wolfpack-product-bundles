@@ -4,7 +4,8 @@ import {
   DESIGN_PREVIEW_TEMPLATES,
   DesignLivePreview,
   createDesignPreviewState,
-  setDesignPreviewSurface,
+  setDesignPreviewArea,
+  setDesignPreviewScenario,
   setDesignPreviewTemplate,
   setDesignPreviewViewport,
 } from "../../../app/routes/app/app.settings/DesignLivePreview";
@@ -23,14 +24,14 @@ describe("Settings Design production renderer surfaces", () => {
     "Product Background Color": "#ffffff",
   };
 
-  it("routes every supported template, surface, and viewport through the isolated renderer frame", () => {
+  it("routes every supported template, edit area, and viewport through the isolated renderer frame", () => {
     for (const template of DESIGN_PREVIEW_TEMPLATES) {
-      for (const surface of template.supportedSurfaces) {
+      for (const area of template.supportedAreas) {
         for (const viewport of ["desktop", "mobile"] as const) {
           const state = setDesignPreviewViewport(
-            setDesignPreviewSurface(
+            setDesignPreviewArea(
               setDesignPreviewTemplate(createDesignPreviewState(template.bundleType), template.key),
-              surface,
+              area,
             ),
             viewport,
           );
@@ -42,7 +43,8 @@ describe("Settings Design production renderer surfaces", () => {
           );
 
           expect(html).toContain(`data-template-key="${template.key}"`);
-          expect(html).toContain(`data-preview-surface="${surface}"`);
+          expect(html).toContain(`data-preview-area="${area}"`);
+          expect(html).toContain('data-preview-scenario="default"');
           expect(html).toContain(`data-preview-viewport="${viewport}"`);
           expect(html).toContain('src="/settings-design-preview-frame"');
           expect(html).toContain('sandbox="allow-scripts allow-same-origin"');
@@ -52,18 +54,18 @@ describe("Settings Design production renderer surfaces", () => {
   });
 
   it("keeps transient states in the same production renderer frame", () => {
-    for (const surface of ["product-picker", "loading", "validation", "upsell"] as const) {
-      const templateKey = surface === "product-picker" ? "vertical-slots" : "standard";
-      const bundleType = surface === "product-picker" ? "product_page" : "full_page";
-      const state = setDesignPreviewSurface(
+    for (const scenario of ["product-picker", "loading", "validation", "upsell"] as const) {
+      const templateKey = scenario === "product-picker" ? "vertical-slots" : "standard";
+      const bundleType = scenario === "product-picker" ? "product_page" : "full_page";
+      const state = setDesignPreviewScenario(
         setDesignPreviewTemplate(createDesignPreviewState(bundleType), templateKey),
-        surface,
+        scenario,
       );
       const html = renderToStaticMarkup(
         React.createElement(DesignLivePreview, { fieldValues: sampleFieldValues, initialState: state }),
       );
 
-      expect(html).toContain(`data-preview-surface="${surface}"`);
+      expect(html).toContain(`data-preview-scenario="${scenario}"`);
       expect(html).toContain('src="/settings-design-preview-frame"');
       expect(html).not.toContain("data-preview-region");
     }

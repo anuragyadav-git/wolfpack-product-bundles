@@ -179,7 +179,8 @@
       },
       "inspector": {
         "collapse": "Réduire le panneau de personnalisation",
-        "expand": "Développer le panneau de personnalisation"
+        "expand": "Développer le panneau de personnalisation",
+        "customize": "Personnaliser {{context}}"
       },
       "surface": {
         "description": "Choisissez des produits pour créer votre bundle.",
@@ -247,15 +248,20 @@
         "productPage": "Product Page"
       },
       "templateLabel": "Template",
-      "surfaceSelector": {
-        "label": "Preview surface",
+      "focusLabel": "Modification : {{context}}",
+      "areaSelector": {
+        "label": "Edit area",
         "bundle-header": "Bundle header",
         "navigation": "Navigation",
         "categories": "Categories",
         "product-card": "Product cards",
         "product-slots": "Product slots",
+        "cart-summary": "Cart / summary"
+      },
+      "stateSelector": {
+        "label": "Preview state",
+        "default": "Default",
         "product-picker": "Product picker",
-        "cart-summary": "Cart / summary",
         "loading": "Loading",
         "validation": "Validation",
         "upsell": "Upsell"

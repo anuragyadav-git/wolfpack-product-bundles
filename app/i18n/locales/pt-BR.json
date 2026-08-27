@@ -179,7 +179,8 @@
       },
       "inspector": {
         "collapse": "Recolher painel de personalização",
-        "expand": "Expandir painel de personalização"
+        "expand": "Expandir painel de personalização",
+        "customize": "Personalizar {{context}}"
       },
       "surface": {
         "description": "Escolha produtos para montar seu pacote.",
@@ -247,15 +248,20 @@
         "productPage": "Product Page"
       },
       "templateLabel": "Template",
-      "surfaceSelector": {
-        "label": "Preview surface",
+      "focusLabel": "Editando: {{context}}",
+      "areaSelector": {
+        "label": "Edit area",
         "bundle-header": "Bundle header",
         "navigation": "Navigation",
         "categories": "Categories",
         "product-card": "Product cards",
         "product-slots": "Product slots",
+        "cart-summary": "Cart / summary"
+      },
+      "stateSelector": {
+        "label": "Preview state",
+        "default": "Default",
         "product-picker": "Product picker",
-        "cart-summary": "Cart / summary",
         "loading": "Loading",
         "validation": "Validation",
         "upsell": "Upsell"

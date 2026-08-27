@@ -107,7 +107,11 @@ describe("Settings Design Slot Icon & Presentation Customization", () => {
       "product-list", "product-grid", "horizontal-slots", "vertical-slots",
     ] as const;
     for (const template of templates) {
-      const fields = getDesignFieldsForPreviewContext(imagesTab.fields, template, "product-slots");
+      const fields = getDesignFieldsForPreviewContext(
+        imagesTab.fields,
+        template,
+        { kind: "area", value: "product-slots" },
+      );
       expect(fields.map((field) => field.key)).toEqual(expect.arrayContaining([
         "stylePresets.images.slotIconUrl",
         "stylePresets.images.slotIconFit",

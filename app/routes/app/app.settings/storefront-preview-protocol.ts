@@ -1,7 +1,13 @@
 import type { BundleContractType, TemplateKey } from "../../../lib/bundle-config/template-selection";
-import type { DesignPreviewSurface, DesignPreviewViewport } from "./design-preview-model";
+import {
+  getSupportedDesignPreviewAreas,
+  getSupportedDesignPreviewScenarios,
+  type DesignPreviewArea,
+  type DesignPreviewScenario,
+  type DesignPreviewViewport,
+} from "./design-preview-model";
 
-export const PREVIEW_PROTOCOL_VERSION = 1 as const;
+export const PREVIEW_PROTOCOL_VERSION = 2 as const;
 
 const TEMPLATE_KEYS = new Set<TemplateKey>([
   "standard",
@@ -13,14 +19,17 @@ const TEMPLATE_KEYS = new Set<TemplateKey>([
   "horizontal-slots",
   "vertical-slots",
 ]);
-const SURFACES = new Set<DesignPreviewSurface>([
+const AREAS = new Set<DesignPreviewArea>([
   "bundle-header",
   "navigation",
   "categories",
   "product-card",
   "product-slots",
-  "product-picker",
   "cart-summary",
+]);
+const SCENARIOS = new Set<DesignPreviewScenario>([
+  "default",
+  "product-picker",
   "loading",
   "validation",
   "upsell",
@@ -37,24 +46,28 @@ export type StorefrontPreviewInitializePayload = {
   bundleType: BundleContractType;
   templateKey: TemplateKey;
   viewport: DesignPreviewViewport;
-  surface: DesignPreviewSurface;
+  area: DesignPreviewArea;
+  areaLabel: string;
+  scenario: DesignPreviewScenario;
   designCss: string;
   locale: string;
   currency: string;
 };
 
 export type StorefrontPreviewCommand =
-  | { version: 1; type: "INITIALIZE"; payload: StorefrontPreviewInitializePayload }
-  | { version: 1; type: "UPDATE_DESIGN"; payload: { designCss: string } }
-  | { version: 1; type: "SET_TEMPLATE"; payload: { bundleType: BundleContractType; templateKey: TemplateKey } }
-  | { version: 1; type: "SET_VIEWPORT"; payload: { viewport: DesignPreviewViewport } }
-  | { version: 1; type: "SET_SURFACE"; payload: { surface: DesignPreviewSurface } }
-  | { version: 1; type: "RESET_INTERACTION"; payload: Record<string, never> };
+  | { version: 2; type: "INITIALIZE"; payload: StorefrontPreviewInitializePayload }
+  | { version: 2; type: "UPDATE_DESIGN"; payload: { designCss: string } }
+  | { version: 2; type: "SET_TEMPLATE"; payload: { bundleType: BundleContractType; templateKey: TemplateKey } }
+  | { version: 2; type: "SET_VIEWPORT"; payload: { viewport: DesignPreviewViewport } }
+  | { version: 2; type: "SET_AREA"; payload: { area: DesignPreviewArea; areaLabel: string } }
+  | { version: 2; type: "SET_SCENARIO"; payload: { scenario: DesignPreviewScenario } }
+  | { version: 2; type: "RESET_INTERACTION"; payload: Record<string, never> };
 
 export type StorefrontPreviewEvent =
-  | { version: 1; type: "READY"; payload: Record<string, never> }
-  | { version: 1; type: "STATE_CHANGED"; payload: { surface: DesignPreviewSurface; selectedQuantity: number } }
-  | { version: 1; type: "ERROR"; payload: { message: string } };
+  | { version: 2; type: "READY"; payload: Record<string, never> }
+  | { version: 2; type: "INTERACTION_CHANGED"; payload: { selectedQuantity: number } }
+  | { version: 2; type: "SCENARIO_CHANGED"; payload: { scenario: DesignPreviewScenario } }
+  | { version: 2; type: "ERROR"; payload: { message: string } };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -76,7 +89,11 @@ export function isStorefrontPreviewCommand(value: unknown): value is StorefrontP
       && TEMPLATE_KEYS.has(payload.templateKey as TemplateKey)
       && templateMatchesBundleType(payload.templateKey as TemplateKey, payload.bundleType as BundleContractType)
       && VIEWPORTS.has(payload.viewport as DesignPreviewViewport)
-      && SURFACES.has(payload.surface as DesignPreviewSurface)
+      && AREAS.has(payload.area as DesignPreviewArea)
+      && getSupportedDesignPreviewAreas(payload.templateKey as TemplateKey).includes(payload.area as DesignPreviewArea)
+      && typeof payload.areaLabel === "string"
+      && SCENARIOS.has(payload.scenario as DesignPreviewScenario)
+      && getSupportedDesignPreviewScenarios(payload.templateKey as TemplateKey).includes(payload.scenario as DesignPreviewScenario)
       && typeof payload.designCss === "string"
       && typeof payload.locale === "string"
       && typeof payload.currency === "string";
@@ -88,7 +105,10 @@ export function isStorefrontPreviewCommand(value: unknown): value is StorefrontP
       && templateMatchesBundleType(payload.templateKey as TemplateKey, payload.bundleType as BundleContractType);
   }
   if (value.type === "SET_VIEWPORT") return VIEWPORTS.has(payload.viewport as DesignPreviewViewport);
-  if (value.type === "SET_SURFACE") return SURFACES.has(payload.surface as DesignPreviewSurface);
+  if (value.type === "SET_AREA") {
+    return AREAS.has(payload.area as DesignPreviewArea) && typeof payload.areaLabel === "string";
+  }
+  if (value.type === "SET_SCENARIO") return SCENARIOS.has(payload.scenario as DesignPreviewScenario);
   return value.type === "RESET_INTERACTION";
 }
 
@@ -96,10 +116,8 @@ export function isStorefrontPreviewEvent(value: unknown): value is StorefrontPre
   if (!hasProtocolEnvelope(value)) return false;
   const payload = value.payload as Record<string, unknown>;
   if (value.type === "READY") return true;
-  if (value.type === "STATE_CHANGED") {
-    return SURFACES.has(payload.surface as DesignPreviewSurface)
-      && Number.isFinite(payload.selectedQuantity);
-  }
+  if (value.type === "INTERACTION_CHANGED") return Number.isFinite(payload.selectedQuantity);
+  if (value.type === "SCENARIO_CHANGED") return SCENARIOS.has(payload.scenario as DesignPreviewScenario);
   return value.type === "ERROR" && typeof payload.message === "string";
 }
 

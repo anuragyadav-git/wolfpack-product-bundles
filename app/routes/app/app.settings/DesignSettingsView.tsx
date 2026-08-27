@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState, type Dispatch, type SetStateAction } from "react";
+import { useMemo, useState, type Dispatch, type SetStateAction } from "react";
 import { useTranslation } from "react-i18next";
 import {
   DESIGN_CONFIGURATION,
@@ -13,12 +13,12 @@ import {
   type ShopBrandColors,
 } from "../../../lib/shop-brand-colors";
 import { BundlePreviewModal, DesignFields } from "./SettingsDesignFields";
-import { DesignLivePreview, type DesignPreviewFieldFocusRequest } from "./DesignLivePreview";
-import type { DesignPreviewSurface } from "./design-preview-model";
+import { DesignLivePreview } from "./DesignLivePreview";
+import type { DesignPreviewArea, DesignPreviewContext, DesignPreviewScenario } from "./design-preview-model";
 import { getDesignFieldsForPreviewContext } from "./design-preview-model";
 import type { TemplateKey } from "../../../lib/bundle-config/template-selection";
 import styles from "./DesignSettingsView.module.css";
-import { SettingsContextualSaveBar, SettingsToast } from "./SettingsFeedback";
+import { SettingsContextualSaveBar } from "./SettingsFeedback";
 import { AdminPageTitleBar } from "../../../components/AdminPageNavigation";
 import type { SettingsPreviewBundle } from "../../../lib/settings-design-storefront-preview.client";
 
@@ -30,12 +30,10 @@ type DesignSettingsViewProps = {
   isDesignSaving?: boolean;
   isPreviewModalOpen: boolean;
   previewBundles: SettingsPreviewBundle[];
-  saveMessage: string | null;
   setSettingsView: (view: "landing") => void;
   setIsPreviewModalOpen: (isOpen: boolean) => void;
   setDesignFieldValues: Dispatch<SetStateAction<Record<string, string>>>;
   setInheritedColorFieldKeys: Dispatch<SetStateAction<string[]>>;
-  setSaveMessage: (message: string | null) => void;
   discardActiveSettingsChanges: () => void;
   saveActiveSettingsChanges: () => void;
 };
@@ -69,21 +67,18 @@ export function DesignSettingsView({
   isDesignSaving = false,
   isPreviewModalOpen,
   previewBundles,
-  saveMessage,
   setSettingsView,
   setIsPreviewModalOpen,
   setDesignFieldValues,
   setInheritedColorFieldKeys,
-  setSaveMessage,
   discardActiveSettingsChanges,
   saveActiveSettingsChanges,
 }: DesignSettingsViewProps) {
   const { t } = useTranslation();
   const [workspacePane, setWorkspacePane] = useState<"preview" | "customize">("preview");
   const [isInspectorCollapsed, setIsInspectorCollapsed] = useState(false);
-  const fieldFocusRequestIdRef = useRef(0);
-  const [fieldFocusRequest, setFieldFocusRequest] = useState<DesignPreviewFieldFocusRequest | null>(null);
-  const [activePreviewSurface, setActivePreviewSurface] = useState<DesignPreviewSurface>("product-card");
+  const [activePreviewArea, setActivePreviewArea] = useState<DesignPreviewArea>("product-card");
+  const [activePreviewScenario, setActivePreviewScenario] = useState<DesignPreviewScenario>("default");
   const [activePreviewTemplate, setActivePreviewTemplate] = useState<TemplateKey>("standard");
   const hasPreviewableBundle = previewBundles.length > 0;
   const isStorefrontPreviewDisabled = !hasPreviewableBundle
@@ -91,16 +86,25 @@ export function DesignSettingsView({
     || isDesignSaving;
   const inspectorDisclosure = getDesignInspectorDisclosureState(isInspectorCollapsed);
 
+  const activePreviewContext = useMemo<DesignPreviewContext>(
+    () => activePreviewScenario === "default"
+      ? { kind: "area", value: activePreviewArea }
+      : { kind: "scenario", value: activePreviewScenario },
+    [activePreviewArea, activePreviewScenario],
+  );
   const contextualSections = useMemo(() => CONTEXTUAL_INSPECTOR_SECTIONS
     .map((section) => ({
       ...section,
       fields: getDesignFieldsForPreviewContext(
         section.fields,
         activePreviewTemplate,
-        activePreviewSurface,
+        activePreviewContext,
       ),
     }))
-    .filter((section) => section.fields.length > 0), [activePreviewSurface, activePreviewTemplate]);
+    .filter((section) => section.fields.length > 0), [activePreviewContext, activePreviewTemplate]);
+  const activeContextLabel = activePreviewScenario === "default"
+    ? t(`settingsDcp.preview.areaSelector.${activePreviewArea}`)
+    : t(`settingsDcp.preview.stateSelector.${activePreviewScenario}`);
 
   const visibleFields = contextualSections.flatMap((section) => section.fields);
   const resolvedFieldValues = useMemo(() => {
@@ -192,13 +196,15 @@ export function DesignSettingsView({
                 fieldValues={designFieldValues}
                 inheritedColorFieldKeys={inheritedColorFieldKeys}
                 shopBrandColors={shopBrandColors}
-                fieldFocusRequest={fieldFocusRequest}
-                onSurfaceChange={setActivePreviewSurface}
-                onContextChange={({ templateKey }: any) => setActivePreviewTemplate(templateKey)}
+                onContextChange={({ templateKey, area, scenario }) => {
+                  setActivePreviewTemplate(templateKey);
+                  setActivePreviewArea(area);
+                  setActivePreviewScenario(scenario);
+                }}
               />
             </div>
             <aside className={styles.customizePane} data-phone-active={workspacePane === "customize" || undefined}>
-              <s-box className={styles.inspectorToggle}>
+              <div className={styles.inspectorToggle}>
                 <s-button
                   variant="tertiary"
                   icon={inspectorDisclosure.icon}
@@ -211,7 +217,7 @@ export function DesignSettingsView({
                 <s-tooltip id="settings-design-inspector-toggle-tooltip">
                   {t(inspectorDisclosure.labelKey)}
                 </s-tooltip>
-              </s-box>
+              </div>
               <section
                 id="settings-design-customization-panel"
                 className={styles.inspectorContent}
@@ -219,7 +225,7 @@ export function DesignSettingsView({
               >
                 <s-stack gap="base">
                   <s-box>
-                    <s-heading>Customize this component</s-heading>
+                    <s-heading>{t("settingsDcp.preview.inspector.customize", { context: activeContextLabel })}</s-heading>
                     <s-paragraph color="subdued">
                       Controls update for the component visible in the preview.
                     </s-paragraph>
@@ -231,13 +237,8 @@ export function DesignSettingsView({
                       fields={section.fields}
                       values={resolvedFieldValues}
                       inheritedFieldKeys={inheritedColorFieldKeys}
-                      disabledFieldKeys={activePreviewSurface === "loading" ? ["Image Fit"] : []}
+                      disabledFieldKeys={activePreviewScenario === "loading" ? ["Image Fit"] : []}
                       onFieldChange={(fieldKey, value) => {
-                        fieldFocusRequestIdRef.current += 1;
-                        setFieldFocusRequest({
-                          fieldKey,
-                          requestId: fieldFocusRequestIdRef.current,
-                        });
                         setDesignFieldValues((current) => ({ ...current, [fieldKey]: value }));
                         setInheritedColorFieldKeys((current) => current.filter((key) => key !== fieldKey));
                       }}
@@ -254,7 +255,6 @@ export function DesignSettingsView({
           {isPreviewModalOpen ? (
             <BundlePreviewModal bundles={previewBundles} onClose={() => setIsPreviewModalOpen(false)} />
           ) : null}
-          <SettingsToast message={saveMessage} onDismiss={() => setSaveMessage(null)} />
         </main>
       </s-query-container>
     </>
