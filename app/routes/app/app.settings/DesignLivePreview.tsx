@@ -10,6 +10,7 @@ import {
   DESIGN_PREVIEW_VIEWPORTS,
   buildDesignPreviewStorefrontCss,
   calculateDesignPreviewFitScale,
+  getDesignPreviewCanvasSize,
   getDefaultDesignPreviewSurface,
   getDesignPreviewFieldTarget,
   getSupportedDesignPreviewSurfaces,
@@ -293,6 +294,7 @@ export function DesignLivePreview({
     [activeTemplate.key, fieldValues, inheritedColorFieldKeys, shopBrandColors],
   );
   const previewViewport = DESIGN_PREVIEW_VIEWPORTS[previewState.viewport];
+  const previewCanvasSize = getDesignPreviewCanvasSize(previewState.viewport);
   const initializePayloadRef = useRef({
     bundleType: previewState.bundleType,
     templateKey: previewState.templateKey,
@@ -515,28 +517,44 @@ export function DesignLivePreview({
         <div
           className={styles.previewCanvas}
           style={{
-            width: `${previewViewport.width * fitScale}px`,
-            height: `${previewViewport.height * fitScale}px`,
+            width: `${previewCanvasSize.width * fitScale}px`,
+            height: `${previewCanvasSize.height * fitScale}px`,
           }}
         >
           <div
-            className={styles.previewSurface}
-            data-template-key={previewState.templateKey}
-            data-preview-surface={previewState.surface}
+            className={styles.previewScaledShell}
+            data-preview-viewport={previewState.viewport}
             style={{
-              width: `${previewViewport.width}px`,
-              height: `${previewViewport.height}px`,
+              width: `${previewCanvasSize.width}px`,
+              height: `${previewCanvasSize.height}px`,
               transform: `scale(${fitScale})`,
             }}
           >
-            <iframe
-              ref={previewFrameRef}
-              className={styles.previewFrame}
-              src="/settings-design-preview-frame"
-              title={t("settingsDcp.preview.heading")}
-              sandbox="allow-scripts allow-same-origin"
-              onLoad={() => setFrameError(null)}
-            />
+            <div className={styles.mobileDevice}>
+              <span className={styles.mobileDeviceSideButton} aria-hidden="true" />
+              <span className={styles.mobileDeviceIsland} aria-hidden="true" />
+              <div className={styles.mobileDeviceScreen}>
+                <div
+                  className={styles.previewSurface}
+                  data-template-key={previewState.templateKey}
+                  data-preview-surface={previewState.surface}
+                  style={{
+                    width: `${previewViewport.width}px`,
+                    height: `${previewViewport.height}px`,
+                  }}
+                >
+                  <iframe
+                    ref={previewFrameRef}
+                    className={styles.previewFrame}
+                    src="/settings-design-preview-frame"
+                    title={t("settingsDcp.preview.heading")}
+                    sandbox="allow-scripts allow-same-origin"
+                    onLoad={() => setFrameError(null)}
+                  />
+                </div>
+              </div>
+              <span className={styles.mobileDeviceHomeIndicator} aria-hidden="true" />
+            </div>
           </div>
         </div>
       </div>

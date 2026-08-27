@@ -9,6 +9,7 @@ import {
   buildDesignPreviewTheme,
   buildDesignPreviewStorefrontCss,
   calculateDesignPreviewFitScale,
+  getDesignPreviewCanvasSize,
   getDesignPreviewContextKind,
   getDesignPreviewFieldTarget,
   getDesignPreviewScene,
@@ -28,8 +29,10 @@ describe("Settings Design preview model", () => {
     });
     expect(calculateDesignPreviewFitScale({ width: 1280, height: 1136 }, "desktop")).toBe(1);
     expect(calculateDesignPreviewFitScale({ width: 960, height: 640 }, "desktop")).toBeCloseTo(640 / 1136);
-    expect(calculateDesignPreviewFitScale({ width: 780, height: 640 }, "mobile")).toBeCloseTo(640 / 844);
-    expect(calculateDesignPreviewFitScale({ width: 312, height: 844 }, "mobile")).toBe(0.8);
+    expect(getDesignPreviewCanvasSize("desktop")).toEqual({ width: 1280, height: 1136 });
+    expect(getDesignPreviewCanvasSize("mobile")).toEqual({ width: 430, height: 900 });
+    expect(calculateDesignPreviewFitScale({ width: 780, height: 640 }, "mobile")).toBeCloseTo(640 / 900);
+    expect(calculateDesignPreviewFitScale({ width: 344, height: 900 }, "mobile")).toBe(0.8);
     expect(calculateDesignPreviewFitScale({ width: 0, height: 0 }, "desktop")).toBe(1);
     expect(calculateDesignPreviewFitScale({ width: Number.NaN, height: 568 }, "desktop")).toBe(0.5);
   });

@@ -148,6 +148,13 @@ observer must respond to that width change. The chevron is absent in narrow
 containers, where the existing Preview and Customize pane control remains the
 only workspace disclosure.
 
+The desktop preview stage has no app-owned inner gutter and derives its height
+from the 1280×1136 storefront aspect ratio, so released inspector width visibly
+enlarges the renderer. Mobile presentation adds a decorative 430×900
+iPhone-style body outside the iframe; the production renderer still receives
+the unchanged 390×844 viewport. A collapsed desktop state must not retain its
+720px grid minimum after the Admin container crosses into the phone layout.
+
 The preview frame route uses deterministic local fixture data with the actual
 FPB or PPB controller and exact family/template stylesheet manifest. A neutral
 store header plus full-page or product-detail shell supplies realistic context

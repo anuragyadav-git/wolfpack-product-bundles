@@ -237,12 +237,23 @@
   place-items: center;
   overflow: hidden;
   background: #f1f2f3;
-  padding: clamp(10px, 1.6vw, 20px);
+}
+
+.previewStage[data-preview-viewport="desktop"] {
+  block-size: auto;
+  max-block-size: 1136px;
+  aspect-ratio: 1280 / 1136;
 }
 
 .previewCanvas {
   position: relative;
   flex: none;
+}
+
+.previewScaledShell {
+  position: relative;
+  transform-origin: top left;
+  transition: transform 160ms ease;
 }
 
 .previewSurface {
@@ -254,8 +265,94 @@
   color: var(--preview-primary-text, #202223);
   font-size: var(--preview-body-font-size, 14px);
   font-weight: var(--preview-body-font-weight, 400);
-  transform-origin: top left;
-  transition: transform 160ms ease;
+}
+
+.mobileDevice,
+.mobileDeviceScreen {
+  width: 100%;
+  height: 100%;
+}
+
+.mobileDevice {
+  position: relative;
+}
+
+.previewScaledShell[data-preview-viewport="mobile"] .mobileDevice {
+  box-sizing: border-box;
+  border: 8px solid #171717;
+  border-radius: 54px;
+  background: #171717;
+  padding: 18px 12px 22px;
+  box-shadow:
+    0 24px 48px rgba(0, 0, 0, 0.2),
+    0 8px 18px rgba(0, 0, 0, 0.14),
+    inset 0 0 0 1px #454545;
+}
+
+.previewScaledShell[data-preview-viewport="desktop"] .mobileDevice {
+  display: contents;
+}
+
+.mobileDeviceScreen {
+  position: relative;
+  overflow: hidden;
+  border-radius: 38px;
+  background: #ffffff;
+}
+
+.previewScaledShell[data-preview-viewport="desktop"] .mobileDeviceScreen {
+  border-radius: 0;
+}
+
+.mobileDeviceIsland,
+.mobileDeviceHomeIndicator,
+.mobileDeviceSideButton {
+  display: none;
+}
+
+.previewScaledShell[data-preview-viewport="mobile"] .mobileDeviceIsland {
+  position: absolute;
+  z-index: 2;
+  inset-block-start: 16px;
+  inset-inline-start: 50%;
+  display: block;
+  inline-size: 112px;
+  block-size: 30px;
+  border-radius: 18px;
+  background: #090909;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.previewScaledShell[data-preview-viewport="mobile"] .mobileDeviceHomeIndicator {
+  position: absolute;
+  z-index: 2;
+  inset-block-end: 8px;
+  inset-inline-start: 50%;
+  display: block;
+  inline-size: 132px;
+  block-size: 5px;
+  border-radius: 999px;
+  background: #f4f4f4;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.previewScaledShell[data-preview-viewport="mobile"] .mobileDeviceSideButton {
+  position: absolute;
+  inset-block-start: 136px;
+  inset-inline-end: -13px;
+  display: block;
+  inline-size: 5px;
+  block-size: 92px;
+  border-radius: 0 4px 4px 0;
+  background: #292929;
+  pointer-events: none;
+}
+
+.previewScaledShell[data-preview-viewport="mobile"] .previewSurface {
+  border: 0;
+  border-radius: 0;
 }
 
 .previewFrame {
@@ -1376,6 +1473,11 @@
   .layout {
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas: "workspace";
+  }
+
+  .layout[data-inspector-collapsed="true"] {
+    grid-template-columns: minmax(0, 1fr);
+    gap: clamp(12px, 1.5vw, 22px);
   }
 
   .layout[data-inspector-collapsed="true"] .inspectorContent {

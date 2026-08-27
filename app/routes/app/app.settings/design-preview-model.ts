@@ -107,11 +107,19 @@ export const DESIGN_PREVIEW_VIEWPORTS: Readonly<
   mobile: { width: 390, height: 844 },
 };
 
+const DESIGN_PREVIEW_MOBILE_DEVICE_SIZE = { width: 430, height: 900 } as const;
+
+export function getDesignPreviewCanvasSize(viewport: DesignPreviewViewport) {
+  return viewport === "mobile"
+    ? DESIGN_PREVIEW_MOBILE_DEVICE_SIZE
+    : DESIGN_PREVIEW_VIEWPORTS.desktop;
+}
+
 export function calculateDesignPreviewFitScale(
   availableSize: DesignPreviewAvailableSize,
   viewport: DesignPreviewViewport,
 ) {
-  const logicalViewport = DESIGN_PREVIEW_VIEWPORTS[viewport];
+  const logicalViewport = getDesignPreviewCanvasSize(viewport);
   const ratios = [
     Number.isFinite(availableSize.width) && availableSize.width > 0
       ? availableSize.width / logicalViewport.width

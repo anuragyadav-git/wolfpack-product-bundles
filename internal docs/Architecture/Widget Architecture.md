@@ -138,8 +138,13 @@ The frame supplies an adaptive neutral store shell: FPB is presented in a
 full-page collection context, while PPB is presented beside product media and
 product information. This context is intentionally theme-neutral; bundle DOM,
 styling, responsive behavior, and interactions remain production-owned. The
-logical 1280×1136 desktop and 390×844 mobile frames scale by the smaller valid
-host ratio and center on both axes without changing the storefront breakpoint.
+logical desktop renderer remains 1280×1136, while its gutterless stage uses the
+preview-column width to establish the same aspect ratio. Releasing the inspector
+column therefore enlarges the rendered storefront instead of leaving unused
+canvas space. The mobile renderer remains exactly 390×844 and is wrapped outside
+the iframe by a 430×900 decorative device footprint; fit calculation includes
+that body without changing the storefront breakpoint. Both modes stay centered
+within the available stage.
 Field-to-surface focus remains a one-shot request per edit so later manual
 surface selection stays authoritative.
 

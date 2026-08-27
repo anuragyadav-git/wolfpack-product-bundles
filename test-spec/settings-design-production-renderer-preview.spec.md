@@ -61,6 +61,8 @@ Ensure Settings Design previews use the production storefront renderer and exact
 | 14 | PPB drawer stylesheet composition | PPB preview manifest | Every production base module used by the picker drawer is loaded explicitly | Protects Vite-served Admin preview composition |
 | 15 | FPB storefront host contract | Each Landing Page template | The production controller mounts inside the same full-page host contract as the storefront app embed | Chrome geometry evidence; no class-name unit assertion |
 | 16 | FPB responsive parity | Standard, Classic, Compact, and Horizontal at desktop and mobile widths | Production grid, sidebar/tray, cards, and component surfaces use their storefront geometry | Direct Chrome DevTools verification |
+| 17 | Gutterless desktop canvas | Desktop preview with expanded or collapsed inspector | Stage has no app-owned inner gutter and grows with released workspace width | Production storefront context remains centered |
+| 18 | Mobile device presentation | Mobile preview selected | The unchanged 390 x 844 storefront viewport renders inside an iPhone-style outer body | Device chrome is decorative and outside the iframe |
 
 ## Acceptance Criteria
 
@@ -71,3 +73,4 @@ Ensure Settings Design previews use the production storefront renderer and exact
 - [x] The preview frame is isolated from Admin-only document dependencies.
 - [x] Focused behavior tests, lint, build, Graphify, and direct Chrome QA pass.
 - [x] All four FPB templates mount with the storefront full-page host contract and pass refreshed desktop/mobile Chrome comparison.
+- [x] Desktop canvas growth and the mobile device shell pass refreshed wide, collapsed, and narrow-Admin Chrome verification.
