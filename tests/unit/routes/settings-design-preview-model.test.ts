@@ -10,6 +10,7 @@ import {
   buildDesignPreviewStorefrontCss,
   calculateDesignPreviewFitScale,
   getDesignPreviewCanvasSize,
+  getDesignPreviewFitPresentation,
   getDesignPreviewContextKind,
   getDesignPreviewFieldTarget,
   getDesignPreviewScene,
@@ -30,11 +31,27 @@ describe("Settings Design preview model", () => {
     expect(calculateDesignPreviewFitScale({ width: 1280, height: 1136 }, "desktop")).toBe(1);
     expect(calculateDesignPreviewFitScale({ width: 960, height: 640 }, "desktop")).toBeCloseTo(640 / 1136);
     expect(getDesignPreviewCanvasSize("desktop")).toEqual({ width: 1280, height: 1136 });
-    expect(getDesignPreviewCanvasSize("mobile")).toEqual({ width: 430, height: 900 });
-    expect(calculateDesignPreviewFitScale({ width: 780, height: 640 }, "mobile")).toBeCloseTo(640 / 900);
-    expect(calculateDesignPreviewFitScale({ width: 344, height: 900 }, "mobile")).toBe(0.8);
+    expect(getDesignPreviewCanvasSize("mobile")).toEqual({ width: 428, height: 882 });
+    expect(calculateDesignPreviewFitScale({ width: 780, height: 640 }, "mobile")).toBeCloseTo(640 / 882);
+    expect(calculateDesignPreviewFitScale({ width: 342.4, height: 900 }, "mobile")).toBeCloseTo(0.8);
     expect(calculateDesignPreviewFitScale({ width: 0, height: 0 }, "desktop")).toBe(1);
     expect(calculateDesignPreviewFitScale({ width: Number.NaN, height: 568 }, "desktop")).toBe(0.5);
+  });
+
+  it("calculates an atomic fit presentation without shrinking the logical storefront viewport", () => {
+    expect(getDesignPreviewFitPresentation({ width: 856, height: 882 }, "mobile")).toEqual({
+      scale: 1,
+      canvasWidth: 428,
+      canvasHeight: 882,
+    });
+    const constrainedPresentation = getDesignPreviewFitPresentation(
+      { width: 342.4, height: 705.6 },
+      "mobile",
+    );
+    expect(constrainedPresentation.scale).toBeCloseTo(0.8);
+    expect(constrainedPresentation.canvasWidth).toBeCloseTo(342.4);
+    expect(constrainedPresentation.canvasHeight).toBeCloseTo(705.6);
+    expect(DESIGN_PREVIEW_VIEWPORTS.mobile).toEqual({ width: 390, height: 844 });
   });
 
   it("resolves storefront context from canonical template families", () => {

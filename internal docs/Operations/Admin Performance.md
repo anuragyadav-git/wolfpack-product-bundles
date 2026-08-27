@@ -150,10 +150,27 @@ only workspace disclosure.
 
 The desktop preview stage has no app-owned inner gutter and derives its height
 from the 1280×1136 storefront aspect ratio, so released inspector width visibly
-enlarges the renderer. Mobile presentation adds a decorative 430×900
-iPhone-style body outside the iframe; the production renderer still receives
-the unchanged 390×844 viewport. A collapsed desktop state must not retain its
-720px grid minimum after the Admin container crosses into the phone layout.
+enlarges the renderer. Mobile presentation adds a decorative 428×882 iPhone 14
+Pro body adapted from the MIT-licensed Devices.css geometry outside the iframe;
+the production renderer still receives the unchanged 390×844 viewport. Frame
+padding sits outside that full viewport so storefront content is never cropped
+by the shell. A collapsed desktop state must not retain its 720px grid minimum
+after the Admin container crosses into the phone layout.
+
+Preview fitting must not use React state for ResizeObserver samples. Coalesce
+the latest content-box measurement to one requestAnimationFrame callback and
+write canvas width, canvas height, and shell scale together. The workspace grid,
+readiness opacity, and scale must not interpolate with CSS transitions; this
+keeps sidebar collapse and Admin-width changes immediate without repeatedly
+reconciling the production iframe subtree.
+
+Direct Chrome DevTools verification on 2026-08-27 used the agent store after a
+cache-bypassed reload. The 1881×900 expanded-inspector and collapsed-inspector
+states, plus the 900×900 narrow-Admin state, kept the live 390×844 mobile
+renderer inside the full device screen and allowed the desktop renderer to
+consume released width. A traced inspector-collapse interaction reported 33ms
+observed INP and 0.00 CLS with no throttling. This is interaction diagnostic
+evidence, not Shopify field-performance data.
 
 The preview frame route uses deterministic local fixture data with the actual
 FPB or PPB controller and exact family/template stylesheet manifest. A neutral

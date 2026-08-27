@@ -21,7 +21,6 @@
   gap: clamp(12px, 1.5vw, 22px);
   align-items: start;
   margin-top: 18px;
-  transition: grid-template-columns 160ms ease, gap 160ms ease;
 }
 
 .layout[data-inspector-collapsed="true"] {
@@ -261,7 +260,6 @@
   position: relative;
   flex: none;
   opacity: 0;
-  transition: opacity 120ms ease;
 }
 
 .previewCanvas[data-preview-ready="true"] {
@@ -291,7 +289,6 @@
 .previewScaledShell {
   position: relative;
   transform-origin: top left;
-  transition: transform 160ms ease;
 }
 
 .previewSurface {
@@ -306,86 +303,185 @@
 }
 
 .mobileDevice,
+.mobileDeviceFrame,
 .mobileDeviceScreen {
   width: 100%;
   height: 100%;
 }
 
+/*
+ * iPhone 14 Pro geometry adapted from Devices.css by Yan Zhu.
+ * https://github.com/picturepan2/devices.css (MIT License)
+ * The screen height is extended to preserve Wolfpack's full 390 x 844
+ * responsive storefront viewport without cropping.
+ */
 .mobileDevice {
   position: relative;
 }
 
 .previewScaledShell[data-preview-viewport="mobile"] .mobileDevice {
   box-sizing: border-box;
-  border: 8px solid #171717;
-  border-radius: 54px;
-  background: #171717;
-  padding: 18px 12px 22px;
-  box-shadow:
-    0 24px 48px rgba(0, 0, 0, 0.2),
-    0 8px 18px rgba(0, 0, 0, 0.14),
-    inset 0 0 0 1px #454545;
+  width: 428px;
+  height: 882px;
 }
 
 .previewScaledShell[data-preview-viewport="desktop"] .mobileDevice {
   display: contents;
 }
 
+.mobileDeviceFrame {
+  position: relative;
+  z-index: 1;
+}
+
+.previewScaledShell[data-preview-viewport="mobile"] .mobileDeviceFrame {
+  box-sizing: border-box;
+  width: 428px;
+  height: 882px;
+  padding: 19px;
+  border: 1px solid #5c5956;
+  border-radius: 68px;
+  background: #010101;
+  box-shadow:
+    inset 0 0 4px 2px #ffffff,
+    inset 0 0 0 6px #76726f,
+    0 24px 48px rgba(0, 0, 0, 0.2),
+    0 8px 18px rgba(0, 0, 0, 0.14);
+}
+
 .mobileDeviceScreen {
   position: relative;
   overflow: hidden;
-  border-radius: 38px;
   background: #ffffff;
+}
+
+.previewScaledShell[data-preview-viewport="mobile"] .mobileDeviceScreen {
+  width: 390px;
+  height: 844px;
+  border-radius: 49px;
 }
 
 .previewScaledShell[data-preview-viewport="desktop"] .mobileDeviceScreen {
   border-radius: 0;
 }
 
-.mobileDeviceIsland,
-.mobileDeviceHomeIndicator,
-.mobileDeviceSideButton {
+.mobileDeviceStripe,
+.mobileDeviceHeader,
+.mobileDeviceSensors,
+.mobileDeviceButtons,
+.mobileDevicePower {
   display: none;
 }
 
-.previewScaledShell[data-preview-viewport="mobile"] .mobileDeviceIsland {
-  position: absolute;
-  z-index: 2;
-  inset-block-start: 16px;
-  inset-inline-start: 50%;
+.previewScaledShell[data-preview-viewport="mobile"] .mobileDeviceStripe,
+.previewScaledShell[data-preview-viewport="mobile"] .mobileDeviceHeader,
+.previewScaledShell[data-preview-viewport="mobile"] .mobileDeviceSensors,
+.previewScaledShell[data-preview-viewport="mobile"] .mobileDeviceButtons,
+.previewScaledShell[data-preview-viewport="mobile"] .mobileDevicePower {
   display: block;
-  inline-size: 112px;
-  block-size: 30px;
-  border-radius: 18px;
-  background: #090909;
-  transform: translateX(-50%);
   pointer-events: none;
 }
 
-.previewScaledShell[data-preview-viewport="mobile"] .mobileDeviceHomeIndicator {
+.previewScaledShell[data-preview-viewport="mobile"] .mobileDeviceStripe::before,
+.previewScaledShell[data-preview-viewport="mobile"] .mobileDeviceStripe::after {
   position: absolute;
   z-index: 2;
-  inset-block-end: 8px;
-  inset-inline-start: 50%;
-  display: block;
-  inline-size: 132px;
-  block-size: 5px;
-  border-radius: 999px;
-  background: #f4f4f4;
-  transform: translateX(-50%);
-  pointer-events: none;
+  left: 0;
+  width: 100%;
+  height: 7px;
+  box-sizing: border-box;
+  border: solid rgba(1, 1, 1, 0.25);
+  border-width: 0 7px;
+  content: "";
 }
 
-.previewScaledShell[data-preview-viewport="mobile"] .mobileDeviceSideButton {
+.previewScaledShell[data-preview-viewport="mobile"] .mobileDeviceStripe::before {
+  top: 85px;
+}
+
+.previewScaledShell[data-preview-viewport="mobile"] .mobileDeviceStripe::after {
+  bottom: 85px;
+}
+
+.previewScaledShell[data-preview-viewport="mobile"] .mobileDeviceHeader {
   position: absolute;
-  inset-block-start: 136px;
-  inset-inline-end: -13px;
-  display: block;
-  inline-size: 5px;
-  block-size: 92px;
-  border-radius: 0 4px 4px 0;
-  background: #292929;
-  pointer-events: none;
+  z-index: 2;
+  top: 29px;
+  left: 50%;
+  width: 120px;
+  height: 35px;
+  margin-left: -60px;
+  border-radius: 20px;
+  background: #010101;
+}
+
+.previewScaledShell[data-preview-viewport="mobile"] .mobileDeviceSensors::before,
+.previewScaledShell[data-preview-viewport="mobile"] .mobileDeviceSensors::after {
+  position: absolute;
+  z-index: 2;
+  content: "";
+}
+
+.previewScaledShell[data-preview-viewport="mobile"] .mobileDeviceSensors::before {
+  top: 30px;
+  left: 50%;
+  width: 74px;
+  height: 33px;
+  margin-left: -60px;
+  border-radius: 17px;
+  background: #010101;
+}
+
+.previewScaledShell[data-preview-viewport="mobile"] .mobileDeviceSensors::after {
+  top: 42px;
+  left: 50%;
+  width: 9px;
+  height: 9px;
+  margin-left: 36px;
+  border-radius: 50%;
+  background:
+    radial-gradient(farthest-corner at 20% 20%, #6074bf 0, transparent 40%),
+    radial-gradient(farthest-corner at 80% 80%, #513785 0, #24555e 20%, transparent 50%);
+  box-shadow: 0 0 1px 1px rgba(255, 255, 255, 0.05);
+}
+
+.previewScaledShell[data-preview-viewport="mobile"] .mobileDeviceButtons {
+  position: absolute;
+  top: 115px;
+  left: -2px;
+  width: 3px;
+  height: 32px;
+  border-radius: 2px;
+  background: #5c5956;
+}
+
+.previewScaledShell[data-preview-viewport="mobile"] .mobileDeviceButtons::before,
+.previewScaledShell[data-preview-viewport="mobile"] .mobileDeviceButtons::after {
+  position: absolute;
+  left: 0;
+  width: 3px;
+  height: 62px;
+  border-radius: 2px;
+  background: #5c5956;
+  content: "";
+}
+
+.previewScaledShell[data-preview-viewport="mobile"] .mobileDeviceButtons::before {
+  top: 60px;
+}
+
+.previewScaledShell[data-preview-viewport="mobile"] .mobileDeviceButtons::after {
+  top: 140px;
+}
+
+.previewScaledShell[data-preview-viewport="mobile"] .mobileDevicePower {
+  position: absolute;
+  top: 200px;
+  right: -2px;
+  width: 3px;
+  height: 100px;
+  border-radius: 2px;
+  background: #5c5956;
 }
 
 .previewScaledShell[data-preview-viewport="mobile"] .previewSurface {
@@ -1117,14 +1213,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .layout {
-    transition: none;
-  }
-
-  .previewCanvas {
-    transition: none;
-  }
-
   .previewSummary > footer > span[data-preview-discount-feedback] {
     animation: none;
     background-color: var(--preview-discount-feedback-bg);

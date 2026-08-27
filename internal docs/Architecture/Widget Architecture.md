@@ -142,9 +142,11 @@ logical desktop renderer remains 1280×1136, while its gutterless stage uses the
 preview-column width to establish the same aspect ratio. Releasing the inspector
 column therefore enlarges the rendered storefront instead of leaving unused
 canvas space. The mobile renderer remains exactly 390×844 and is wrapped outside
-the iframe by a 430×900 decorative device footprint; fit calculation includes
-that body without changing the storefront breakpoint. Both modes stay centered
-within the available stage.
+the iframe by a 428×882 decorative iPhone 14 Pro footprint adapted from the
+MIT-licensed Devices.css geometry. The frame adds its chrome around the full
+renderer instead of reducing or cropping the iframe viewport. Fit calculation
+includes that body without changing the storefront breakpoint. Both modes stay
+centered within the available stage.
 Field-to-surface focus remains a one-shot request per edit so later manual
 surface selection stays authoritative.
 
@@ -160,7 +162,9 @@ desktop/mobile selectors stay with the canvas, while one inspector exposes only
 settings mapped to the visible component. Desktop merchants can collapse that
 inspector from a Polaris boundary chevron so the fit-scaled canvas consumes the
 released width; disclosure state is local and does not reset the preview or
-unsaved values. Phones hide the boundary control and switch between Preview and
+unsaved values. ResizeObserver updates are coalesced into one browser-frame
+style write without React render state or scale transitions. Phones hide the
+boundary control and switch between Preview and
 Customize panes without duplicating the preview model. Component color controls
 have no Expert-mode gate. `inheritedColorFieldKeys` records which fields resolve
 from the first Storefront API Shop Brand primary or secondary pair; editing a

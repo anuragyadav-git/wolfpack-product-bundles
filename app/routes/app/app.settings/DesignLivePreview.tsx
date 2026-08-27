@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type {
   BundleContractType,
@@ -9,8 +9,8 @@ import {
   DESIGN_PREVIEW_TEMPLATES,
   DESIGN_PREVIEW_VIEWPORTS,
   buildDesignPreviewStorefrontCss,
-  calculateDesignPreviewFitScale,
   getDesignPreviewCanvasSize,
+  getDesignPreviewFitPresentation,
   getDefaultDesignPreviewSurface,
   getDesignPreviewFieldTarget,
   getSupportedDesignPreviewSurfaces,
@@ -267,12 +267,13 @@ export function DesignLivePreview({
 }) {
   const { t, i18n } = useTranslation();
   const previewStageRef = useRef<HTMLDivElement>(null);
+  const previewCanvasRef = useRef<HTMLDivElement>(null);
+  const previewScaledShellRef = useRef<HTMLDivElement>(null);
   const previewFrameRef = useRef<HTMLIFrameElement>(null);
   const handledFieldFocusRequestRef = useRef(0);
   const [previewState, setPreviewState] = useState<DesignPreviewState>(
     initialState ?? createDesignPreviewState(),
   );
-  const [fitScale, setFitScale] = useState(1);
   const [isFrameReady, setIsFrameReady] = useState(false);
   const [frameError, setFrameError] = useState<string | null>(null);
   const availableTemplates = DESIGN_PREVIEW_TEMPLATES.filter(
@@ -405,33 +406,40 @@ export function DesignLivePreview({
     previewFrameRef.current?.contentWindow?.postMessage(command, window.location.origin);
   }, [isFrameReady, previewState.surface]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const stage = previewStageRef.current;
-    if (!stage || typeof ResizeObserver === "undefined") return;
+    const canvas = previewCanvasRef.current;
+    const scaledShell = previewScaledShellRef.current;
+    if (!stage || !canvas || !scaledShell || typeof ResizeObserver === "undefined") return;
 
-    const updateFitScale = () => {
-      const computedStyle = window.getComputedStyle(stage);
-      const horizontalPadding =
-        Number.parseFloat(computedStyle.paddingLeft) +
-        Number.parseFloat(computedStyle.paddingRight);
-      const verticalPadding =
-        Number.parseFloat(computedStyle.paddingTop) +
-        Number.parseFloat(computedStyle.paddingBottom);
-      setFitScale(
-        calculateDesignPreviewFitScale(
-          {
-            width: Math.max(0, stage.clientWidth - horizontalPadding),
-            height: Math.max(0, stage.clientHeight - verticalPadding),
-          },
-          previewState.viewport,
-        ),
-      );
+    let animationFrame = 0;
+    let latestSize = { width: stage.clientWidth, height: stage.clientHeight };
+
+    const applyLatestFit = () => {
+      animationFrame = 0;
+      const presentation = getDesignPreviewFitPresentation(latestSize, previewState.viewport);
+      canvas.style.width = `${presentation.canvasWidth}px`;
+      canvas.style.height = `${presentation.canvasHeight}px`;
+      scaledShell.style.transform = `scale(${presentation.scale})`;
     };
 
-    updateFitScale();
-    const observer = new ResizeObserver(updateFitScale);
+    const scheduleFit = (size: { width: number; height: number }) => {
+      latestSize = size;
+      if (animationFrame !== 0) return;
+      animationFrame = window.requestAnimationFrame(applyLatestFit);
+    };
+
+    scheduleFit(latestSize);
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries[entries.length - 1];
+      if (!entry) return;
+      scheduleFit({ width: entry.contentRect.width, height: entry.contentRect.height });
+    });
     observer.observe(stage);
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      if (animationFrame !== 0) window.cancelAnimationFrame(animationFrame);
+    };
   }, [previewState.viewport]);
 
   return (
@@ -526,46 +534,52 @@ export function DesignLivePreview({
           </div>
         ) : null}
         <div
+          ref={previewCanvasRef}
           className={styles.previewCanvas}
           data-preview-ready={isFrameReady || undefined}
           style={{
-            width: `${previewCanvasSize.width * fitScale}px`,
-            height: `${previewCanvasSize.height * fitScale}px`,
+            width: `${previewCanvasSize.width}px`,
+            height: `${previewCanvasSize.height}px`,
           }}
         >
           <div
+            ref={previewScaledShellRef}
             className={styles.previewScaledShell}
             data-preview-viewport={previewState.viewport}
             style={{
               width: `${previewCanvasSize.width}px`,
               height: `${previewCanvasSize.height}px`,
-              transform: `scale(${fitScale})`,
+              transform: "scale(1)",
             }}
           >
             <div className={styles.mobileDevice}>
-              <span className={styles.mobileDeviceSideButton} aria-hidden="true" />
-              <span className={styles.mobileDeviceIsland} aria-hidden="true" />
-              <div className={styles.mobileDeviceScreen}>
-                <div
-                  className={styles.previewSurface}
-                  data-template-key={previewState.templateKey}
-                  data-preview-surface={previewState.surface}
-                  style={{
-                    width: `${previewViewport.width}px`,
-                    height: `${previewViewport.height}px`,
-                  }}
-                >
-                  <iframe
-                    ref={previewFrameRef}
-                    className={styles.previewFrame}
-                    src="/settings-design-preview-frame"
-                    title={t("settingsDcp.preview.heading")}
-                    sandbox="allow-scripts allow-same-origin"
-                    onLoad={() => setFrameError(null)}
-                  />
+              <div className={styles.mobileDeviceFrame}>
+                <div className={styles.mobileDeviceScreen}>
+                  <div
+                    className={styles.previewSurface}
+                    data-template-key={previewState.templateKey}
+                    data-preview-surface={previewState.surface}
+                    style={{
+                      width: `${previewViewport.width}px`,
+                      height: `${previewViewport.height}px`,
+                    }}
+                  >
+                    <iframe
+                      ref={previewFrameRef}
+                      className={styles.previewFrame}
+                      src="/settings-design-preview-frame"
+                      title={t("settingsDcp.preview.heading")}
+                      sandbox="allow-scripts allow-same-origin"
+                      onLoad={() => setFrameError(null)}
+                    />
+                  </div>
                 </div>
               </div>
-              <span className={styles.mobileDeviceHomeIndicator} aria-hidden="true" />
+              <span className={styles.mobileDeviceStripe} aria-hidden="true" />
+              <span className={styles.mobileDeviceHeader} aria-hidden="true" />
+              <span className={styles.mobileDeviceSensors} aria-hidden="true" />
+              <span className={styles.mobileDeviceButtons} aria-hidden="true" />
+              <span className={styles.mobileDevicePower} aria-hidden="true" />
             </div>
           </div>
         </div>

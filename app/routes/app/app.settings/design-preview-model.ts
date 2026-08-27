@@ -107,7 +107,7 @@ export const DESIGN_PREVIEW_VIEWPORTS: Readonly<
   mobile: { width: 390, height: 844 },
 };
 
-const DESIGN_PREVIEW_MOBILE_DEVICE_SIZE = { width: 430, height: 900 } as const;
+const DESIGN_PREVIEW_MOBILE_DEVICE_SIZE = { width: 428, height: 882 } as const;
 
 export function getDesignPreviewCanvasSize(viewport: DesignPreviewViewport) {
   return viewport === "mobile"
@@ -130,6 +130,20 @@ export function calculateDesignPreviewFitScale(
   ].filter((ratio): ratio is number => ratio !== null);
 
   return ratios.length > 0 ? Math.min(1, ...ratios) : 1;
+}
+
+export function getDesignPreviewFitPresentation(
+  availableSize: DesignPreviewAvailableSize,
+  viewport: DesignPreviewViewport,
+) {
+  const logicalCanvas = getDesignPreviewCanvasSize(viewport);
+  const scale = calculateDesignPreviewFitScale(availableSize, viewport);
+
+  return {
+    scale,
+    canvasWidth: logicalCanvas.width * scale,
+    canvasHeight: logicalCanvas.height * scale,
+  };
 }
 
 export function getDesignPreviewSurfaceFidelity(
