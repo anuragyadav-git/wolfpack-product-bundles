@@ -19,6 +19,8 @@ import { normalizeStorefrontQuantityAvailable } from "../../lib/storefront-varia
 const INVENTORY_FIELDS = "quantityAvailable currentlyNotInStock";
 const PRODUCT_GID_PATTERN = /^gid:\/\/shopify\/Product\/(\d+)$/;
 const PRODUCT_IMAGE_LIMIT = 50;
+const PRODUCT_BATCH_SIZE = 50;
+const VARIANT_PAGE_SIZE = 250;
 
 function normalizeProductId(productId: string): string | null {
   if (/^\d+$/.test(productId)) {
@@ -61,7 +63,7 @@ async function fetchAllVariants(
   const VARIANT_QUERY = country
     ? `query getProductVariants($id: ID!, $cursor: String, $country: CountryCode!) @inContext(country: $country) {
         product(id: $id) {
-          variants(first: 100, after: $cursor) {
+          variants(first: ${VARIANT_PAGE_SIZE}, after: $cursor) {
             pageInfo { hasNextPage endCursor }
             edges {
               node {
@@ -78,7 +80,7 @@ async function fetchAllVariants(
       }`
     : `query getProductVariants($id: ID!, $cursor: String) {
         product(id: $id) {
-          variants(first: 100, after: $cursor) {
+          variants(first: ${VARIANT_PAGE_SIZE}, after: $cursor) {
             pageInfo { hasNextPage endCursor }
             edges {
               node {
@@ -138,12 +140,15 @@ function buildProductsQuery(country: string | null, hasInventoryScope: boolean) 
             images(first: ${PRODUCT_IMAGE_LIMIT}) {
               edges { node { url } }
             }
-            variants(first: 1) {
+            variants(first: ${VARIANT_PAGE_SIZE}) {
+              pageInfo { hasNextPage endCursor }
               edges {
                 node {
                   id title availableForSale${inventoryFields}
                   price { amount currencyCode }
                   compareAtPrice { amount currencyCode }
+                  weight
+                  weightUnit
                   image { url }
                 }
               }
@@ -158,12 +163,15 @@ function buildProductsQuery(country: string | null, hasInventoryScope: boolean) 
             images(first: ${PRODUCT_IMAGE_LIMIT}) {
               edges { node { url } }
             }
-            variants(first: 1) {
+            variants(first: ${VARIANT_PAGE_SIZE}) {
+              pageInfo { hasNextPage endCursor }
               edges {
                 node {
                   id title availableForSale${inventoryFields}
                   price { amount currencyCode }
                   compareAtPrice { amount currencyCode }
+                  weight
+                  weightUnit
                   image { url }
                 }
               }
@@ -199,7 +207,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   if (normalizedIds.some(id => id === null)) {
     return json({ error: "Invalid product IDs" }, { status: 400 });
   }
-  const ids = normalizedIds as string[];
+  const ids = [...new Set(normalizedIds as string[])];
 
   try {
     // quantityAvailable + currentlyNotInStock require unauthenticated_read_product_inventory.
@@ -211,64 +219,70 @@ export async function loader({ request }: LoaderFunctionArgs) {
     const mainVariables: Record<string, unknown> = { ids };
     if (country) mainVariables.country = country;
 
-    const response = await context.storefront.graphql(STOREFRONT_QUERY, { variables: mainVariables });
-    const data: any = await response.json();
-
-    if (data.errors && !data.data?.nodes) {
-      AppLogger.error("[STOREFRONT_API] GraphQL errors", { component: "api.storefront-products" }, data.errors);
-      return json({ error: "GraphQL errors", details: data.errors }, { status: 500 });
+    const nodes: any[] = [];
+    for (let index = 0; index < ids.length; index += PRODUCT_BATCH_SIZE) {
+      const batchVariables = {
+        ...mainVariables,
+        ids: ids.slice(index, index + PRODUCT_BATCH_SIZE),
+      };
+      const response = await context.storefront.graphql(STOREFRONT_QUERY, { variables: batchVariables });
+      const data: any = await response.json();
+      if (data.errors && !data.data?.nodes) {
+        AppLogger.error("[STOREFRONT_API] GraphQL errors", { component: "api.storefront-products" }, data.errors);
+        return json({ error: "GraphQL errors", details: data.errors }, { status: 500 });
+      }
+      nodes.push(...(data.data?.nodes ?? []));
     }
 
-    const nodes = data.data?.nodes || [];
+    const products: any[] = [];
+    for (const product of nodes) {
+      if (!product) continue;
 
-    // Fetch variants for each product using cursor-based pagination
-    // This ensures we get ALL variants even for products with 100+ variants
-    const products = await Promise.all(
-      nodes.map(async (product: any) => {
-        if (!product) return null;
+      const images = (product.images?.edges || [])
+        .map((edge: any) => edge.node?.url ? { src: edge.node.url } : null)
+        .filter(Boolean);
+      const initialVariants = product.variants?.edges ?? [];
 
-        const images = (product.images?.edges || [])
-          .map((edge: any) => edge.node?.url ? { src: edge.node.url } : null)
-          .filter(Boolean);
-
-        try {
-          // Fetch all variants with pagination; pass country for market-correct prices
-          const variantEdges = await fetchAllVariants(
+      try {
+        let variantEdges = initialVariants;
+        const pageInfo = product.variants?.pageInfo;
+        if (pageInfo?.hasNextPage && pageInfo.endCursor) {
+          const overflowVariants = await fetchAllVariants(
             context.storefront,
             product.id,
             country,
-            hasInventoryScope
+            hasInventoryScope,
+            pageInfo.endCursor,
           );
-
-          return {
-            id: product.id,
-            title: product.title,
-            handle: product.handle,
-            description: product.description || '',
-            descriptionHtml: product.descriptionHtml || '',
-            imageUrl: product.featuredImage?.url || '',
-            images,
-            variants: variantEdges.map(mapStorefrontVariant)
-          };
-        } catch (error: any) {
-          AppLogger.warn("[STOREFRONT_API] Failed to fetch variants for product", { component: "api.storefront-products", productId: product.id });
-          const fallbackVariants = (product.variants?.edges || []).map(mapStorefrontVariant);
-
-          return {
-            id: product.id,
-            title: product.title,
-            handle: product.handle,
-            description: product.description || '',
-            descriptionHtml: product.descriptionHtml || '',
-            imageUrl: product.featuredImage?.url || '',
-            images,
-            variants: fallbackVariants
-          };
+          variantEdges = [...initialVariants, ...overflowVariants];
         }
-      })
-    );
 
-    const validProducts = products.filter(Boolean);
+        products.push({
+          id: product.id,
+          title: product.title,
+          handle: product.handle,
+          description: product.description || '',
+          descriptionHtml: product.descriptionHtml || '',
+          imageUrl: product.featuredImage?.url || '',
+          images,
+          variants: variantEdges.map(mapStorefrontVariant),
+        });
+      } catch (error: any) {
+        AppLogger.warn("[STOREFRONT_API] Failed to fetch variants for product", { component: "api.storefront-products", productId: product.id });
+        products.push({
+          id: product.id,
+          title: product.title,
+          handle: product.handle,
+          description: product.description || '',
+          descriptionHtml: product.descriptionHtml || '',
+          imageUrl: product.featuredImage?.url || '',
+          images,
+          variants: initialVariants.map(mapStorefrontVariant),
+        });
+      }
+    }
+
+    const validProducts = products;
     const totalVariants = validProducts.reduce((sum, p) => sum + (p?.variants?.length || 0), 0);
 
     AppLogger.debug("[STOREFRONT_API] Fetched products", { component: "api.storefront-products", productCount: validProducts.length, variantCount: totalVariants });

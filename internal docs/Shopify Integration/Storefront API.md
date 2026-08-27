@@ -5,7 +5,7 @@ title: Shopify Storefront API Notes
 type: reference
 status: authoritative
 summary: Storefront GraphQL contracts used for product data, Shop Brand colors, and bundle runtime behavior.
-last_audited: 2026-08-24
+last_audited: 2026-08-27
 owners:
   - engineering
 domains:

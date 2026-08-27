@@ -45,8 +45,7 @@ describe("signed storefront products loader", () => {
   });
 
   it("normalizes IDs and maps inventory through the native Storefront client", async () => {
-    mockGraphql
-      .mockResolvedValueOnce({
+    mockGraphql.mockResolvedValueOnce({
         json: async () => ({
           data: { nodes: [{
             id: "gid://shopify/Product/1",
@@ -56,7 +55,71 @@ describe("signed storefront products loader", () => {
             descriptionHtml: "<p>Description</p>",
             featuredImage: null,
             images: { edges: [] },
-            variants: { edges: [] },
+            variants: {
+              pageInfo: { hasNextPage: false, endCursor: null },
+              edges: [{ node: {
+              id: "gid://shopify/ProductVariant/2",
+              title: "Default Title",
+              availableForSale: true,
+              quantityAvailable: 0,
+              currentlyNotInStock: false,
+              price: { amount: "10.00" },
+              compareAtPrice: null,
+              weight: 0,
+              weightUnit: "GRAMS",
+              image: null,
+              } }],
+            },
+          }] },
+        }),
+      });
+
+    const response = await loader({
+      request: new Request("https://app.example/api/storefront-products?ids=1"),
+      params: {},
+      context: {},
+    } as any);
+    const payload = await response.json() as any;
+
+    expect(mockGraphql.mock.calls[0][1].variables.ids)
+      .toEqual(["gid://shopify/Product/1"]);
+    expect(mockGraphql.mock.calls[0][0]).toContain("quantityAvailable");
+    expect(mockGraphql.mock.calls[0][0]).toContain("variants(first: 250)");
+    expect(mockGraphql).toHaveBeenCalledTimes(1);
+    expect(payload.products[0].variants[0]).toMatchObject({
+      available: true,
+      quantityAvailable: null,
+      currentlyNotInStock: false,
+    });
+  });
+
+  it("requests only variant overflow pages after the initial product batch", async () => {
+    mockGraphql
+      .mockResolvedValueOnce({
+        json: async () => ({
+          data: { nodes: [{
+            id: "gid://shopify/Product/1",
+            title: "Product",
+            handle: "product",
+            description: "",
+            descriptionHtml: "",
+            featuredImage: null,
+            images: { edges: [] },
+            variants: {
+              pageInfo: { hasNextPage: true, endCursor: "variant-250" },
+              edges: [{ node: {
+                id: "gid://shopify/ProductVariant/1",
+                title: "First",
+                availableForSale: true,
+                quantityAvailable: 3,
+                currentlyNotInStock: false,
+                price: { amount: "10.00" },
+                compareAtPrice: null,
+                weight: 0,
+                weightUnit: "GRAMS",
+                image: null,
+              } }],
+            },
           }] },
         }),
       })
@@ -65,12 +128,12 @@ describe("signed storefront products loader", () => {
           data: { product: { variants: {
             pageInfo: { hasNextPage: false, endCursor: null },
             edges: [{ node: {
-              id: "gid://shopify/ProductVariant/2",
-              title: "Default Title",
+              id: "gid://shopify/ProductVariant/251",
+              title: "Overflow",
               availableForSale: true,
-              quantityAvailable: 0,
+              quantityAvailable: 2,
               currentlyNotInStock: false,
-              price: { amount: "10.00" },
+              price: { amount: "12.00" },
               compareAtPrice: null,
               weight: 0,
               weightUnit: "GRAMS",
@@ -87,13 +150,14 @@ describe("signed storefront products loader", () => {
     } as any);
     const payload = await response.json() as any;
 
-    expect(mockGraphql.mock.calls[0][1].variables.ids)
-      .toEqual(["gid://shopify/Product/1"]);
-    expect(mockGraphql.mock.calls[0][0]).toContain("quantityAvailable");
-    expect(payload.products[0].variants[0]).toMatchObject({
-      available: true,
-      quantityAvailable: null,
-      currentlyNotInStock: false,
+    expect(mockGraphql).toHaveBeenCalledTimes(2);
+    expect(mockGraphql.mock.calls[1][1].variables).toMatchObject({
+      id: "gid://shopify/Product/1",
+      cursor: "variant-250",
     });
+    expect(payload.products[0].variants.map((variant: any) => variant.id)).toEqual([
+      "gid://shopify/ProductVariant/1",
+      "gid://shopify/ProductVariant/251",
+    ]);
   });
 });
