@@ -58,7 +58,7 @@
  * 5. TESTABILITY: Can test utilities independently of widgets
  *
  * @version 4.0.0
- * @author Wolfpack Team
+ * @author Only Bundles Team
  */
 
 'use strict';

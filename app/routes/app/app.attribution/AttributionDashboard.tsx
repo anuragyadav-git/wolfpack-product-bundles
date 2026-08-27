@@ -280,7 +280,7 @@ export function CustomUtmTrackingCard({
   const isSaving = fetcher.state !== "idle";
   const feedback = fetcher.data?.error ?? fetcher.data?.message;
   const previewLabel = inputAnalysis.accepted.length > 0
-    ? `Wolfpack will track: ${inputAnalysis.accepted.join(", ")}`
+    ? `Only Bundles will track: ${inputAnalysis.accepted.join(", ")}`
     : null;
   const savedLabel = savedParameters.length > 0
     ? "Currently tracking"
@@ -316,7 +316,7 @@ export function CustomUtmTrackingCard({
         <div>
           <h2 className={styles.sectionTitle}>Custom UTM attributes</h2>
           <p className={styles.mutedBodyText}>
-            Enter parameter names separated by commas or new lines. Wolfpack captures matching URL values on future visits and stores them with checkout attribution.
+            Enter parameter names separated by commas or new lines. Only Bundles captures matching URL values on future visits and stores them with checkout attribution.
           </p>
         </div>
         <s-button
@@ -426,7 +426,7 @@ export function CustomUtmTrackingCard({
           <div>
             <h3 className={styles.sectionTitle}>What happens after saving</h3>
             <p className={styles.mutedBodyText}>
-              Wolfpack saves up to 10 valid names, updates the tracking pixel settings, and starts capturing those attributes for new visits after you save.
+              Only Bundles saves up to 10 valid names, updates the tracking pixel settings, and starts capturing those attributes for new visits after you save.
             </p>
             <p className={styles.mutedBodyText}>
               When a shopper reaches checkout from a matching link, the saved values are stored with the order attribution record and included in analytics exports.

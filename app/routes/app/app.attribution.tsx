@@ -21,6 +21,7 @@ import {
   parseCustomUtmInput,
 } from "../../lib/analytics/attribution-controls";
 import db from "../../db.server";
+import { APP_BRAND } from "../../lib/app-brand";
 
 export { default } from "./app.attribution/AttributionRouteShell";
 
@@ -107,7 +108,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     return json({
       success: true,
       csv,
-      filename: `wolfpack-analytics-${fromLabel}-to-${toLabel}.csv`,
+      filename: `${APP_BRAND.exportSlug}-analytics-${fromLabel}-to-${toLabel}.csv`,
     });
   }
 

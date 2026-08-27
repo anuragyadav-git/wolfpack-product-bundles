@@ -14,7 +14,7 @@ export function initDebugMode(state: any, sdk: any) {
   if (!isDebugMode()) return;
   _debugEnabled = true;
 
-  console.group('[WolfpackBundles SDK] Debug mode active (?wbp_debug=true)');
+  console.group('[Only Bundles SDK] Debug mode active (?wbp_debug=true)');
   console.log('State:', state);
   console.log('SDK:', sdk);
   console.groupEnd();
@@ -26,12 +26,12 @@ export function initDebugMode(state: any, sdk: any) {
   ];
   events.forEach(function (name) {
     window.addEventListener(name, function (e: any) {
-      console.log('[WolfpackBundles] Event:', name, e.detail);
+      console.log('[Only Bundles] Event:', name, e.detail);
     });
   });
 }
 
 export function debugLog(...args: any[]) {
   if (!_debugEnabled) return;
-  console.log.apply(console, ['[WolfpackBundles]'].concat(args));
+  console.log.apply(console, ['[Only Bundles]'].concat(args));
 }

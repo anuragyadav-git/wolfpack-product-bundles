@@ -4,8 +4,8 @@ id: bundle-product-configuration-extension
 title: Bundle Product Configuration Extension
 type: extension-readme
 status: active
-summary: Renders Wolfpack bundle ownership in Shopify Admin product configuration surfaces.
-last_audited: 2026-08-27
+summary: Renders Only Bundles ownership in Shopify Admin product configuration surfaces.
+last_audited: 2026-08-28
 owners:
   - engineering
 domains:

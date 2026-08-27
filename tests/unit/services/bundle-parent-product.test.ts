@@ -103,10 +103,20 @@ function makeCreateAdmin(options: { publicationErrors?: unknown[]; variantErrors
           },
         });
       }
-      if (query.includes("AddRebuySmartCartTag")) {
+      if (query.includes("AddOnlyBundlesParentTags")) {
         return response({
           data: {
             tagsAdd: {
+              node: { id: "gid://shopify/Product/10" },
+              userErrors: [],
+            },
+          },
+        });
+      }
+      if (query.includes("RemoveLegacyBundleParentTags")) {
+        return response({
+          data: {
+            tagsRemove: {
               node: { id: "gid://shopify/Product/10" },
               userErrors: [],
             },
@@ -161,8 +171,8 @@ describe("ensureBundleParentProduct", () => {
           claimOwnership: { bundles: true },
           descriptionHtml: expect.stringContaining("Your Bundle is Unlisted"),
           tags: [
-            "WP-Bundles",
-            "wolfpack-bundle-parent",
+            "Only Bundles",
+            "only-bundles-parent",
             "smart-cart-hide-bundle-options",
           ],
         }),
@@ -325,8 +335,11 @@ describe("ensureBundleParentProduct", () => {
       if (query.includes("ConfigureBundleParentVariant")) {
         return response({ data: { productVariantsBulkUpdate: { productVariants: [], userErrors: [] } } });
       }
-      if (query.includes("AddRebuySmartCartTag")) {
+      if (query.includes("AddOnlyBundlesParentTags")) {
         return response({ data: { tagsAdd: { node: { id: "gid://shopify/Product/10" }, userErrors: [] } } });
+      }
+      if (query.includes("RemoveLegacyBundleParentTags")) {
+        return response({ data: { tagsRemove: { node: { id: "gid://shopify/Product/10" }, userErrors: [] } } });
       }
       if (query.includes("GetOnlineStorePublication")) {
         return response({
@@ -365,11 +378,24 @@ describe("ensureBundleParentProduct", () => {
     expect(admin.graphql.mock.calls.some(([query]: [string]) => query.includes("productUpdate"))).toBe(false);
     expect(admin.graphql.mock.calls.some(([query]: [string]) => query.includes("productCreate"))).toBe(false);
     expect(admin.graphql).toHaveBeenCalledWith(
-      expect.stringContaining("AddRebuySmartCartTag"),
+      expect.stringContaining("AddOnlyBundlesParentTags"),
       {
         variables: {
           id: "gid://shopify/Product/10",
-          tags: ["smart-cart-hide-bundle-options"],
+          tags: [
+            "Only Bundles",
+            "only-bundles-parent",
+            "smart-cart-hide-bundle-options",
+          ],
+        },
+      },
+    );
+    expect(admin.graphql).toHaveBeenCalledWith(
+      expect.stringContaining("RemoveLegacyBundleParentTags"),
+      {
+        variables: {
+          id: "gid://shopify/Product/10",
+          tags: ["WP-Bundles", "wolfpack-bundle-parent"],
         },
       },
     );
@@ -379,7 +405,7 @@ describe("ensureBundleParentProduct", () => {
     });
   });
 
-  it("fails existing-parent sync when Shopify rejects the Rebuy compatibility tag", async () => {
+  it("fails existing-parent sync when Shopify rejects the Only Bundles parent tags", async () => {
     const existingBundle = {
       ...bundle,
       shopifyProductId: "gid://shopify/Product/10",
@@ -399,7 +425,7 @@ describe("ensureBundleParentProduct", () => {
           },
         });
       }
-      if (query.includes("AddRebuySmartCartTag")) {
+      if (query.includes("AddOnlyBundlesParentTags")) {
         return response({
           data: {
             tagsAdd: {
@@ -418,8 +444,55 @@ describe("ensureBundleParentProduct", () => {
       appUrl: process.env.SHOPIFY_APP_URL,
       bundle: existingBundle,
     })).rejects.toMatchObject({
-      operation: "add Rebuy Smart Cart compatibility tag",
+      operation: "add Only Bundles parent tags",
       userErrors: [{ field: ["tags"], message: "Tag rejected" }],
+    });
+  });
+
+  it("fails existing-parent sync when Shopify rejects legacy brand tag removal", async () => {
+    const existingBundle = {
+      ...bundle,
+      shopifyProductId: "gid://shopify/Product/10",
+      shopifyProductHandle: "merchant-handle",
+    };
+    const admin = makeCreateAdmin();
+    admin.graphql.mockImplementation(async (query: string) => {
+      if (query.includes("GetBundleParentProduct")) {
+        return response({
+          data: {
+            product: {
+              id: "gid://shopify/Product/10",
+              handle: "merchant-handle",
+              status: "ACTIVE",
+              variants: { nodes: [{ id: "gid://shopify/ProductVariant/20" }] },
+            },
+          },
+        });
+      }
+      if (query.includes("AddOnlyBundlesParentTags")) {
+        return response({ data: { tagsAdd: { node: { id: "gid://shopify/Product/10" }, userErrors: [] } } });
+      }
+      if (query.includes("RemoveLegacyBundleParentTags")) {
+        return response({
+          data: {
+            tagsRemove: {
+              node: { id: "gid://shopify/Product/10" },
+              userErrors: [{ field: ["tags"], message: "Removal rejected" }],
+            },
+          },
+        });
+      }
+      throw new Error(`Unexpected GraphQL operation: ${query}`);
+    });
+
+    await expect(ensureBundleParentProduct({
+      admin,
+      shopDomain: "test-shop.myshopify.com",
+      appUrl: process.env.SHOPIFY_APP_URL,
+      bundle: existingBundle,
+    })).rejects.toMatchObject({
+      operation: "remove legacy bundle parent tags",
+      userErrors: [{ field: ["tags"], message: "Removal rejected" }],
     });
   });
 
@@ -500,8 +573,11 @@ describe("ensureBundleParentProduct", () => {
       if (query.includes("ConfigureBundleParentVariant")) {
         return response({ data: { productVariantsBulkUpdate: { productVariants: [], userErrors: [] } } });
       }
-      if (query.includes("AddRebuySmartCartTag")) {
+      if (query.includes("AddOnlyBundlesParentTags")) {
         return response({ data: { tagsAdd: { node: { id: "gid://shopify/Product/10" }, userErrors: [] } } });
+      }
+      if (query.includes("RemoveLegacyBundleParentTags")) {
+        return response({ data: { tagsRemove: { node: { id: "gid://shopify/Product/10" }, userErrors: [] } } });
       }
       if (query.includes("GetOnlineStorePublication")) {
         return response({

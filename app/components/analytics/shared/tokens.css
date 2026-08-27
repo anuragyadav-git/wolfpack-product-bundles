@@ -1,5 +1,5 @@
 /*
- * Wolfpack Analytics — Design Tokens
+ * Only Bundles Analytics — Design Tokens
  *
  * Single source of truth for the revamped analytics page. Every component
  * under app/components/analytics/ consumes these vars; no ad-hoc hex codes.

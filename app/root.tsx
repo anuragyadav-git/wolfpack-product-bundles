@@ -11,6 +11,7 @@ import {
 } from "@remix-run/react";
 import CrispChat from "./components/CrispChat";
 import { ErrorPage } from "./components/ErrorPage";
+import { APP_BRAND } from "./lib/app-brand";
 
 export function isStorefrontPreviewFramePath(pathname: string) {
   return pathname === "/settings-design-preview-frame"
@@ -44,7 +45,8 @@ export function ErrorBoundary() {
           href="https://cdn.shopify.com/static/fonts/inter/v4/styles.css"
           crossOrigin=""
         />
-        <title>Error — Wolfpack Bundles</title>
+        <title>{`Error — ${APP_BRAND.name}`}</title>
+        <link rel="icon" href={APP_BRAND.faviconPath} />
       </head>
       <body
         style={{
@@ -68,6 +70,7 @@ export default function App() {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <link rel="icon" href={APP_BRAND.faviconPath} />
         {/* Shopify mandate (March 13, 2024): app-bridge.js must be the first
             <script> tag in <head>, before any other scripts. The unversioned
             CDN URL is the official auto-updating endpoint — do not pin. */}

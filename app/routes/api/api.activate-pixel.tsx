@@ -8,7 +8,7 @@ import { normalizeSavedCustomUtmParameters } from "../../lib/analytics/attributi
 /**
  * GET /api/activate-pixel
  *
- * Re-activates the Wolfpack UTM web pixel for an already-installed store.
+ * Re-activates the Only Bundles UTM web pixel for an already-installed store.
  * Useful when the pixel extension has been (re)deployed and the store didn't
  * go through the afterAuth flow (no reinstall).
  *

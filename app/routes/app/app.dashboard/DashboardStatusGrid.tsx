@@ -138,30 +138,35 @@ export function DashboardStatusGrid({
     count: remainingCoreCount,
   });
   const setupComplete = appEmbedEnabled;
-  const title = t("dashboard.storefrontSetup.incompleteTitle");
-
-  if (appEmbedStatusLoading) {
-    return (
-      <s-box minBlockSize="28px" padding="base">
-        <s-stack direction="inline" alignItems="center" gap="small">
-          <s-spinner size="base" accessibilityLabel={summaryDescription} />
-          <s-text>{summaryDescription}</s-text>
-        </s-stack>
-      </s-box>
-    );
-  }
+  const title = t(appEmbedStatusLoading
+    ? storefrontSummary.titleKey
+    : "dashboard.storefrontSetup.incompleteTitle");
+  const tone = appEmbedStatusLoading
+    ? "info"
+    : setupComplete
+      ? "success"
+      : "warning";
 
   return (
     <s-box paddingBlockEnd="base">
       <s-banner
-        tone={setupComplete ? "success" : "warning"}
+        tone={tone}
         heading={title}
-        dismissible
         hidden={false}
-        onDismiss={hydrated ? dismiss : undefined}
+        {...(!appEmbedStatusLoading
+          ? {
+              dismissible: true,
+              onDismiss: hydrated ? dismiss : undefined,
+            }
+          : {})}
       >
         <s-box minBlockSize="28px">
-          {!setupComplete ? (
+          {appEmbedStatusLoading ? (
+            <s-stack direction="inline" alignItems="center" gap="small">
+              <s-spinner size="base" accessibilityLabel={summaryDescription} />
+              <s-text>{summaryDescription}</s-text>
+            </s-stack>
+          ) : !setupComplete ? (
             <s-stack direction="inline" justifyContent="space-between" alignItems="start" gap="base">
               <s-text>{summaryDescription}</s-text>
               <s-button

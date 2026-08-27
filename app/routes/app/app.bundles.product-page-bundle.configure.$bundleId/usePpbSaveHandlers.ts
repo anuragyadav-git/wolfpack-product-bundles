@@ -123,7 +123,7 @@ export function usePpbSaveHandlers({
           validation.setServerFieldErrors([
             {
               path: "embed.appEmbed",
-              message: "Enable the Wolfpack Bundle app embed before saving Bundle Embed.",
+              message: "Enable the Only Bundles app embed before saving Bundle Embed.",
             },
           ]);
           return;

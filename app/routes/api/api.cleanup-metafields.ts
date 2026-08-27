@@ -110,7 +110,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       success: true,
       message: `Cleanup complete. Deleted ${deletedCount} unstructured metafields. Metafield definitions are now in place.`,
       nextSteps: [
-        "Go to Shopify Admin → Apps → Wolfpack: Product Bundles",
+        "Go to Shopify Admin → Apps → Only Bundles",
         "Open the bundle configuration",
         "Click 'Save' to write metafield VALUES to the now-properly-defined metafields",
         "Refresh the storefront product page to test"

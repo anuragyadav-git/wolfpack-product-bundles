@@ -230,7 +230,7 @@ _withWidgetActionBusy(action: () => any, options: any = {}) {
     .then(() => action())
     .then(() => true)
     .catch((error) => {
-      console.error('[Wolfpack Bundles] Widget action failed:', error);
+      console.error('[Only Bundles] Widget action failed:', error);
       throw error;
     })
     .finally(() => {
@@ -302,7 +302,7 @@ async syncBundleDetailsCartMetafield(bundleDetailsKey: any, sourceProperties: an
       throw new Error(data?.error || 'bundle_details sync failed');
     }
   } catch (error: any) {
-    console.warn('[Wolfpack Bundles] Failed to sync bundle_details cart metafield', error);
+    console.warn('[Only Bundles] Failed to sync bundle_details cart metafield', error);
   }
 },
 

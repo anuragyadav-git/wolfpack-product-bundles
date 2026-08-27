@@ -76,7 +76,7 @@ export const safeJsonParse = (value: any, defaultValue: any = []) => {
 
 // ─── Shared Handlers ─────────────────────────────────────────────────────────
 
-/** Handle updating Wolfpack bundle availability without changing Shopify discoverability. */
+/** Handle updating Only Bundles availability without changing Shopify discoverability. */
 export async function handleUpdateBundleStatus(_admin: ShopifyAdmin, session: Session, bundleId: string, formData: FormData) {
   const status = formData.get("status") as string | null;
   if (!Object.values(BundleStatus).includes(status as BundleStatus)) {
