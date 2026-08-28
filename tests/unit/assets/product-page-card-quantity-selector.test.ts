@@ -315,7 +315,7 @@ describe('PPB shared card quantity selector state', () => {
     expect(updates).toEqual([[0, 'variant-1', 2]]);
   });
 
-  it('opens modal product details from the image without activating card-click Add', () => {
+  it('keeps PPB product images informational without opening product details', () => {
     const productGrid = new FakeElement('div');
     const card = new FakeElement('div', 'product-card');
     const image = new FakeElement('div', 'product-image');
@@ -344,21 +344,16 @@ describe('PPB shared card quantity selector state', () => {
     productGrid.listeners.click.forEach(listener => listener(clickEvent));
 
     expect(activateCardClickAdd).not.toHaveBeenCalled();
-    expect(openDetails).toHaveBeenCalledTimes(1);
-    expect(openDetails).toHaveBeenCalledWith(product, {}, {
-      originalSelectionKey: '',
-      selectedQuantity: 1,
-    });
+    expect(openDetails).not.toHaveBeenCalled();
   });
 
-  it('keeps modal card backgrounds independent from Add and product details', () => {
+  it('keeps modal card backgrounds independent from Add', () => {
     const productGrid = new FakeElement('div');
     const card = new FakeElement('div', 'product-card');
     card.dataset.productId = 'variant-1';
     productGrid.appendChild(card);
     (productGrid as any).parentNode = { replaceChild: jest.fn() };
     const activateCardClickAdd = jest.fn(() => true);
-    const openDetails = jest.fn();
     const product = { id: 'product-1', selectionId: 'variant-1' };
 
     ProductPageModalMethods.attachProductEventHandlers.call({
@@ -367,7 +362,6 @@ describe('PPB shared card quantity selector state', () => {
       findProductBySelectionKey: () => product,
       getSelectedQuantity: () => 0,
       _activateProductCardClickAdd: activateCardClickAdd,
-      productModal: { open: openDetails },
     }, productGrid, 0);
 
     const clickEvent = {
@@ -378,6 +372,5 @@ describe('PPB shared card quantity selector state', () => {
     productGrid.listeners.click.forEach(listener => listener(clickEvent));
 
     expect(activateCardClickAdd).not.toHaveBeenCalled();
-    expect(openDetails).not.toHaveBeenCalled();
   });
 });

@@ -4,8 +4,8 @@ id: product-details-drawer-gesture
 title: Product Details Drawer Gesture Test Spec
 type: test-spec
 status: active
-summary: Verifies intentional downward-swipe detection for the shared mobile product-details drawer.
-last_audited: 2026-08-13
+summary: Verifies intentional downward-swipe detection for the FPB mobile product-details drawer.
+last_audited: 2026-08-28
 owners:
   - storefront
 domains:
@@ -30,7 +30,7 @@ keywords:
 
 ## Purpose
 
-Dismiss the shared product-details drawer only for an intentional downward
+Dismiss the FPB product-details drawer only for an intentional downward
 gesture, without treating vertical scrolling or horizontal movement as a close.
 
 ## Test Cases

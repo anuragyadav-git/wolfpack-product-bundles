@@ -136,6 +136,7 @@ createProductCard(product: any, stepIndex: string|number, options: any = {}) {
       currentQuantity,
       currencyInfo,
       {
+        productDetailsEnabled: true,
         displayPrice: getSubscriptionProductCardPrice(this, displayProduct.price),
         description: '',
         variantSelectorElement,

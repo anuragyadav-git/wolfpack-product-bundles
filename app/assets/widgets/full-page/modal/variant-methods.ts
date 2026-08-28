@@ -44,48 +44,6 @@ export const BundleModalVariantMethods: Record<string, any> & ThisType<any> = {
       return;
     }
 
-    if (this.isPpbOwned) {
-      const firstOption = this.currentProduct.options?.[0];
-      const optionLabel = (typeof firstOption === 'string' ? firstOption : firstOption?.name)
-        || this.currentProduct.title;
-      const variantLabel = this.widget?._resolveText?.('productVariantLabel', optionLabel) || optionLabel;
-      const currentVariantId = String(this.currentProduct.variantId || this.currentProduct.selectionId || variants[0]?.id || '');
-      const label = document.createElement('label');
-      label.className = 'bundle-modal-variant-label';
-      label.htmlFor = 'bundle-modal-native-variant';
-      label.textContent = variantLabel;
-      const nativeSelect = document.createElement('select');
-      nativeSelect.id = 'bundle-modal-native-variant';
-      nativeSelect.className = 'bundle-modal-native-variant';
-      nativeSelect.setAttribute('aria-label', variantLabel);
-      variants.forEach((variant: any) => {
-        const id = String(variant.id || variant.variantId || '');
-        const option = document.createElement('option');
-        option.value = id;
-        option.selected = id === currentVariantId;
-        option.disabled = variant.available === false || variant.availableForSale === false;
-        option.textContent = String(variant.title || id);
-        nativeSelect.appendChild(option);
-      });
-      variantsContainer.replaceChildren(label, nativeSelect);
-      const select = variantsContainer.querySelector<HTMLSelectElement>('.bundle-modal-native-variant');
-      this.selectedVariant = variants.find((variant: any) => String(variant.id || variant.variantId || '') === currentVariantId)
-        || variants[0];
-      select?.addEventListener('change', () => {
-        this.selectedVariant = variants.find((variant: any) => String(variant.id || variant.variantId || '') === String(select.value))
-          || variants[0];
-        this.updateSelectionSummary();
-        this.updatePrice();
-        this.updateAvailability();
-        this.updateVariantImage();
-      });
-      this.updateSelectionSummary();
-      this.updatePrice();
-      this.updateAvailability();
-      this.updateVariantImage();
-      return;
-    }
-
     // Extract option names (e.g., Size, Color)
     // Handle different data structures: options can be array of strings or array of objects
     let optionNames = this.currentProduct.options || [];

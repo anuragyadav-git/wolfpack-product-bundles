@@ -556,8 +556,6 @@ attachProductEventHandlers(productGrid: any, stepIndex: string|number) {
   const newProductGrid = productGrid.cloneNode(true);
   productGrid.parentNode.replaceChild(newProductGrid, productGrid);
 
-  // Get step data for modal
-  const step = this.selectedBundle.steps[stepIndex];
   // Helper to find product by ID
   const findProduct = (productId: any) => {
     return this.findProductBySelectionKey(this.stepProductData[stepIndex] || [], productId);
@@ -567,42 +565,6 @@ attachProductEventHandlers(productGrid: any, stepIndex: string|number) {
     if (!eventTarget) return null;
     if (!hasDomElement) return eventTarget;
     return eventTarget instanceof Element ? eventTarget : eventTarget.parentElement;
-  };
-
-  const matchesSelector = (element: any, selector: string) => {
-    if (!element) return false;
-    if (typeof element.matches === 'function') {
-      return element.matches(selector);
-    }
-
-    if (selector.startsWith('.')) {
-      return element.classList?.contains(selector.slice(1));
-    }
-
-    const dataProductId = selector.match(/^\[data-product-id="(.+)"\]$/);
-    if (dataProductId) {
-      return element.dataset?.productId === dataProductId[1];
-    }
-
-    return false;
-  };
-
-  const findClosest = (element: any, selector: string) => {
-    if (!element) return null;
-    const selectors = selector
-      .split(',')
-      .map((part: string) => part.trim())
-      .filter(Boolean);
-
-    let current = element;
-    while (current) {
-      if (selectors.some((candidate: any) => matchesSelector(current, candidate))) {
-        return current;
-      }
-      current = current.parentElement;
-    }
-
-    return null;
   };
 
   // Quantity button handlers
@@ -619,15 +581,6 @@ attachProductEventHandlers(productGrid: any, stepIndex: string|number) {
       const newQuantity = isIncrease ? currentQuantity + 1 : Math.max(0, currentQuantity - 1);
       this.updateProductSelection(stepIndex, productId, newQuantity);
     }
-  });
-
-  newProductGrid.addEventListener('keydown', (e: any) => {
-    if (e.key !== 'Enter' && e.key !== ' ') return;
-    const eventTarget = getEventTarget(e.target);
-    const productImage = findClosest(eventTarget, '.product-image');
-    if (!productImage) return;
-    e.preventDefault();
-    productImage.click?.();
   });
 
   // Add to Bundle button handler
@@ -653,31 +606,6 @@ attachProductEventHandlers(productGrid: any, stepIndex: string|number) {
       if (toggleQuantity > 0 || currentQuantity > 0) {
         this.updateProductSelection(stepIndex, productId, toggleQuantity);
       }
-    }
-  });
-
-  // Modal cards keep details, variants, and Add as separate actions.
-  newProductGrid.addEventListener('click', (e: any) => {
-    const eventTarget = getEventTarget(e.target);
-    if (!eventTarget) return;
-
-    const productCard = findClosest(eventTarget, '.product-card');
-    if (!productCard) return;
-    if (findClosest(eventTarget, '.product-add-btn, .qty-btn, .inline-qty-btn, .variant-selector, button, input, select, a')) return;
-
-    const productImage = findClosest(eventTarget, '.product-image');
-    if (!productImage) return;
-
-    const productId = productCard.dataset.productId;
-    const product = findProduct(productId);
-    if (!product) return;
-
-    if (this.productModal && step) {
-      const currentQuantity = this.getSelectedQuantity(stepIndex, productId);
-      this.productModal.open(product, step, {
-        originalSelectionKey: currentQuantity > 0 ? productId : '',
-        selectedQuantity: currentQuantity || 1,
-      });
     }
   });
 

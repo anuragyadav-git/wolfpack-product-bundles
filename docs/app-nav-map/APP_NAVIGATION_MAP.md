@@ -5,7 +5,7 @@ title: Wolfpack Product Bundles App Navigation and UI Map
 type: navigation-map
 status: authoritative
 summary: Routes, screens, actions, modals, and storefront-preview flows for the embedded app.
-last_audited: 2026-08-27
+last_audited: 2026-08-28
 owners:
   - engineering
 domains:
@@ -30,7 +30,7 @@ keywords:
 > Any time a new page, modal, tab, sidebar section, or user flow is added or removed,
 > this document **must** be updated. See CLAUDE.md for the enforcement rule.
 
-**Last Updated:** 2026-08-27
+**Last Updated:** 2026-08-28
 **Environment mapped:** SIT (`wolfpack-product-bundles-sit`)
 **Test store:** `wolfpack-store-test-1.myshopify.com`
 
@@ -644,6 +644,11 @@ items.
 
 **Widget storefront features (as of v2.9.0):**
 
+- Product details and the magnifying-glass image affordance are FPB-only. PPB
+  product images and titles are informational; explicit Add, quantity, and
+  variant controls own PPB product selection.
+- PPB Horizontal Slots and Vertical Slots retain the bundle-picker modal opened
+  from empty/replacement slots; this picker is distinct from product details.
 - Step slot cards (empty/filled/locked states) with `addonLabel` for free gift tabs
 - Quantity option pills (from `displayOptions.bundleQuantityOptions`)
 - Gift message UI: textarea + optional From/To fields + char counter

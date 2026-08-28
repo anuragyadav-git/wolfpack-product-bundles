@@ -172,6 +172,7 @@ renderModalProducts(stepIndex: number, productsToRender: any = null) {
       currentQuantity,
       currencyInfo,
       {
+        productDetailsEnabled: true,
         displayPrice: getSubscriptionProductCardPrice(this, product.price),
         variantSelectorElement,
         stockBadgeElement,

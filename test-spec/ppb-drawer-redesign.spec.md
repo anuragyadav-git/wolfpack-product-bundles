@@ -5,7 +5,7 @@ title: PPB Drawer Redesign Test Spec
 type: test-spec
 status: active
 summary: Defines behavior coverage for the shared responsive PPB drawer system.
-last_audited: 2026-08-20
+last_audited: 2026-08-28
 owners:
   - storefront
 domains:
@@ -71,7 +71,8 @@ replacement, and capacity behavior while leaving layout verification to Chrome.
 ## Acceptance Criteria
 
 - [ ] Drawer layers share one topmost-only Escape and scroll-lock owner.
-- [ ] Picker, product details, and variant selector restore exact trigger focus.
+- [ ] Picker and variant selector restore exact trigger focus.
+- [ ] PPB product cards do not construct a product-details drawer.
 - [ ] Variant selection commits immediately and exposes no Apply action.
 - [ ] Selected summary never locks page scrolling or opens when empty.
 - [ ] Existing slot replacement, capacity, persistence, and trusted-markup tests pass.

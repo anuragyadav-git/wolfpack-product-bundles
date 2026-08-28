@@ -31,6 +31,7 @@ describe('shared product card add button', () => {
   it('passes localized modal card labels and aria text', () => {
     const card = createCard(
       { selectionId: 'variant-1', title: 'Test product', price: 1000, variantTitle: 'Red' }, 0, {
+        productDetailsEnabled: true,
         openImageLabel: 'Open localized image',
         openTitleLabel: 'Open localized title',
         selectedStateLabel: 'Added localized',
@@ -72,6 +73,7 @@ describe('shared product card add button', () => {
         description: 'This is a long product description for parity testing.',
       },
       1, {
+        productDetailsEnabled: true,
         displaySeeMoreLink: true,
         descriptionMaxLength: 6,
         seeMoreText: 'See all',
@@ -87,11 +89,25 @@ describe('shared product card add button', () => {
     expect(card.textContent).toMatch(/See all/);
   });
 
-  it('renders cards with keyboard focus metadata', () => {
-    const card = createCard({ selectionId: 'variant-4', title: 'Accessible product', price: 1000 }, 0);
+  it('renders product-details cards with keyboard focus metadata', () => {
+    const card = createCard(
+      { selectionId: 'variant-4', title: 'Accessible product', price: 1000 },
+      0,
+      { productDetailsEnabled: true },
+    );
     expect(card.tabIndex).toBe(0);
     expect(card.getAttribute('role')).toEqual('group');
     expect(card.getAttribute('aria-label')).toEqual('Open product details (not selected)');
     expect(card.hasAttribute('aria-pressed')).toBe(false);
+  });
+
+  it('keeps product media informational when product details are disabled', () => {
+    const card = createCard({ selectionId: 'variant-5', title: 'Static product', price: 1000 }, 0);
+    const media = card.querySelector('[data-bw-product-media="true"]');
+
+    expect(card.tabIndex).toBe(-1);
+    expect(media?.getAttribute('role')).toBeNull();
+    expect((media as HTMLElement | null)?.tabIndex).toBe(-1);
+    expect(media?.getAttribute('aria-label')).toBeNull();
   });
 });

@@ -56,9 +56,10 @@ export function createSharedProductCardElement(product: any = {}, currentQuantit
   const seeMoreLabel = options.seeMoreText || 'See more';
   const decreaseQuantityLabel = options.decreaseQuantityAriaLabel || options.decreaseLabel || 'Decrease quantity';
   const increaseQuantityLabel = options.increaseQuantityAriaLabel || options.increaseLabel || 'Increase quantity';
-  const activationLabel = openImageLabel || openTitleLabel || title;
-  const cardInteractive = options.cardInteractive !== false;
-  const titleInteractive = options.titleInteractive !== false;
+  const productDetailsEnabled = options.productDetailsEnabled === true;
+  const activationLabel = productDetailsEnabled ? (openImageLabel || openTitleLabel || title) : title;
+  const cardInteractive = productDetailsEnabled && options.cardInteractive !== false;
+  const titleInteractive = productDetailsEnabled && options.titleInteractive !== false;
   const rootClasses = [
     'bw-product-card',
     'product-card',
@@ -91,9 +92,11 @@ export function createSharedProductCardElement(product: any = {}, currentQuantit
   const media = runtimeDocument.createElement('div');
   media.className = 'bw-product-card__media product-image';
   media.dataset.bwProductMedia = 'true';
-  media.setAttribute('role', 'button');
-  media.tabIndex = 0;
-  media.setAttribute('aria-label', openImageLabel);
+  if (productDetailsEnabled) {
+    media.setAttribute('role', 'button');
+    media.tabIndex = 0;
+    media.setAttribute('aria-label', openImageLabel);
+  }
   const image = runtimeDocument.createElement('img');
   image.className = 'bw-product-card__image';
   image.src = normalizeSafeImageUrl(imageUrl, runtimeDocument) || DEFAULT_PLACEHOLDER_IMAGE;
@@ -104,19 +107,21 @@ export function createSharedProductCardElement(product: any = {}, currentQuantit
     if (image.src !== fallbackUrl) image.src = fallbackUrl;
   }, { once: true });
   media.append(image);
-  if (hasMultipleImages) {
+  if (productDetailsEnabled && hasMultipleImages) {
     media.append(
       createImageNavButton('prev', imageNavPrevLabel, runtimeDocument),
       createImageNavButton('next', imageNavNextLabel, runtimeDocument),
     );
   }
-  const overlay = runtimeDocument.createElement('span');
-  overlay.className = 'bw-product-card__image-overlay product-image-overlay';
-  overlay.setAttribute('aria-hidden', 'true');
-  const magnifier = runtimeDocument.createElement('span');
-  magnifier.className = 'bw-product-card__magnifier';
-  overlay.append(magnifier);
-  media.append(overlay);
+  if (productDetailsEnabled) {
+    const overlay = runtimeDocument.createElement('span');
+    overlay.className = 'bw-product-card__image-overlay product-image-overlay';
+    overlay.setAttribute('aria-hidden', 'true');
+    const magnifier = runtimeDocument.createElement('span');
+    magnifier.className = 'bw-product-card__magnifier';
+    overlay.append(magnifier);
+    media.append(overlay);
+  }
   if (options.stockBadgeElement?.nodeType) media.append(options.stockBadgeElement);
   root.append(media);
   if (options.cardBadgeElement?.nodeType) root.append(options.cardBadgeElement);

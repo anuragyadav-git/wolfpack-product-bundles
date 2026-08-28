@@ -96,7 +96,6 @@ import { ProductPageWidgetMiscMethods } from './widgets/product-page/methods/wid
 import { renderBundlePurchaseOptions } from './widgets/shared/components/purchase-options.js';
 import { bundleSubscriptionStorefrontMethods } from './widgets/shared/subscription-storefront-methods.js';
 import { applyBrowsedProductPreselection } from './widgets/product-page/embed-preselection.js';
-import { BundleProductModal } from './bundle-modal-component.js';
 import { installDiscountTierPillFeedback } from './widgets/shared/discount-tier-feedback.js';
 
 // ============================================================
@@ -130,11 +129,6 @@ if (typeof window !== 'undefined') {
     ppbExpandSingleStepCategoriesAsSteps,
   };
 }
-
-export function createProductPageProductModal(widget: any, ModalConstructor = BundleProductModal) {
-  return new ModalConstructor(widget, { drawerOwner: 'ppb' });
-}
-
 
 export class BundleWidgetProductPage {
 
@@ -175,8 +169,6 @@ export class BundleWidgetProductPage {
     this.config = {};
     this.elements = {};
     this.selectedSellingPlanId = undefined;
-
-    this.productModal = createProductPageProductModal(this);
 
     // Call async init but don't block constructor
     this.init().catch(error => {

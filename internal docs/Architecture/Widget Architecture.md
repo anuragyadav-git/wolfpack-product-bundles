@@ -5,7 +5,7 @@ title: Widget Architecture
 type: architecture
 status: authoritative
 summary: FPB and PPB bootstrap, hydration, extension-asset, and widget runtime architecture.
-last_audited: 2026-08-27
+last_audited: 2026-08-28
 owners:
   - engineering
 domains:
@@ -101,9 +101,9 @@ PPB Horizontal Slots (`PDP_MODAL/MODAL`) and Vertical Slots (`PDP_MODAL/SIMPLIFI
 
 The shared picker is an 85dvh bottom sheet with three regions: a non-scrolling header, the only vertically scrolling catalog body, and a non-scrolling footer in normal flex flow. Footer geometry must never overlap product actions or focus rings. The catalog renders five tracks at 1440px, four at 1280px, and two at 768px and below; fixed track counts keep sparse rows from stretching. Modal lifecycle and exact opener-focus restoration remain owned by `modal-state-methods.ts`, while the global keyboard listener contains Tab focus only when the picker is the topmost drawer layer.
 
-Horizontal/Vertical modal cards keep native grouped-variant selectors inline at every viewport. A selector change updates only active card context; Add remains the selection mutation. A pure PPB modal-card presentation helper resolves `add`, `quantity`, or `maximum-reached` from per-product quantity validation. At maximum the localized `Added xN` action removes the full selected quantity. These overrides ignore `showQuantitySelectorOnCard` only for modal cards; Product List/Grid retain their in-page behavior.
+Horizontal/Vertical modal cards keep native grouped-variant selectors inline at every viewport. A selector change updates only active card context; Add remains the selection mutation. Product images and titles are informational and do not open a nested product-details surface. A pure PPB modal-card presentation helper resolves `add`, `quantity`, or `maximum-reached` from per-product quantity validation. At maximum the localized `Added xN` action removes the full selected quantity. These overrides ignore `showQuantitySelectorOnCard` only for modal cards; Product List/Grid retain their in-page behavior.
 
-Filled Horizontal slots remain bounded by the existing responsive tile block-size token, while filled Vertical slots use the existing responsive row block-size as both their minimum and maximum. Product names wrap and visually clamp only within that boundary; their complete value remains in the DOM, the product-details surface, and the product-specific accessible name of the overlaid cross-badge remove control. The cross badge keeps a 44px interaction target, stops propagation so it cannot open replacement, and uses the existing single-removal and same-index focus-recovery paths.
+Filled Horizontal slots remain bounded by the existing responsive tile block-size token, while filled Vertical slots use the existing responsive row block-size as both their minimum and maximum. Product names wrap and visually clamp only within that boundary; their complete value remains in the DOM and the product-specific accessible name of the overlaid cross-badge remove control. The cross badge keeps a 44px interaction target, stops propagation so it cannot open replacement, and uses the existing single-removal and same-index focus-recovery paths.
 
 Template installer/prototype patch functions have been removed. Widget entry files compose exported template method objects in the same central `Object.assign` used for controller method modules.
 
@@ -223,7 +223,7 @@ placeholder markup cannot override its presentation.
 
 Source module names should describe their storefront responsibility. Avoid mechanical names such as `chunk-01.js` or `part-01.css`; those hide ownership and make stale widget code harder to spot.
 
-The shared Bundle Product Modal owns the product image carousel, name,
+The FPB-only Bundle Product Modal owns the product image carousel, name,
 description, variant controls when needed, quantity, and Add To Box. Direct
 product and collection hydration preserve up to 50 Shopify product images in
 source order. One image renders without navigation; multiple distinct images
@@ -238,7 +238,7 @@ compact single-image record is also hydrated through the existing storefront
 products endpoint before rendering; product identifiers may arrive in `id`,
 `selectionId`, or `productId`, and must resolve to the same product lookup key.
 
-Because the shared product-details overlay is mounted under `document.body`, its responsive surface is viewport-owned rather than widget-container-owned. In PPB modal templates, only the product image activates a full-width bottom sheet above the picker; the sheet has an 88dvh ceiling, a constrained content column, safe-area padding, and internal vertical scrolling on desktop and mobile. It restores the selected variant and quantity when editing, and commits through the originating-slot replacement target so Update cannot create a duplicate. FPB retains its existing responsive presentation.
+Because the FPB product-details overlay is mounted under `document.body`, its responsive surface is viewport-owned rather than widget-container-owned. FPB product cards explicitly opt into the shared card's image/title details affordance; PPB cards do not render that affordance or construct the product-details overlay.
 
 While product details are open, the storefront document root and body are both
 scroll-locked. The modal or drawer remains the only vertical scroll owner, and
@@ -249,15 +249,14 @@ The shared multi-step FPB timeline sizes its navigation track from the rendered 
 PPB Product List (`PDP_INPAGE + CASCADE`) owns its multi-step navigation in the Product Page layout, footer, and validation method modules. A multi-step Product List renders only `currentStepIndex`; intermediate primary actions navigate Next after current-step validation, the final step uses Add Bundle to Cart, and Back preserves selections across steps. Single-step Product List and the other PPB templates keep their existing rendering paths. Product List exact-rule over-selection is blocked before state mutation so the current step and selected-items drawer remain stable.
 
 PPB drawer ownership is explicit through `data-ppb-drawer-surface` values for
-`selected-summary`, `bundle-picker`, `product-details`, and, where still used by
-in-page templates, `variant-selector`.
+`selected-summary`, `bundle-picker`, and, where still used by in-page templates,
+`variant-selector`.
 The selected summary belongs to widget flow and never participates in document
-scroll locking. The other three surfaces share the drawer layer manager: only
+scroll locking. The modal surfaces share the drawer layer manager: only
 the top layer owns Escape and backdrop dismissal, document scroll locks once
 across nested overlays, and the final close restores the prior scroll styles.
-Product details uses a semantic handle on mobile and a close control on desktop.
 Horizontal/Vertical variants remain native and inline on both viewport classes.
-Focus returns to the originating product, slot, or variant trigger after the
+Focus returns to the originating slot or variant trigger after the
 owning layer closes.
 
 FPB product grids do not pre-disable or dim unselected cards when a step reaches its exact or maximum quantity. Returning to a completed step keeps the full product set interactive; an attempted increase beyond the configured rule is rejected by `validateStepCondition` before selection state changes, and the rule toast explains the limit.

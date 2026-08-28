@@ -20,29 +20,7 @@ import { BundleModalVariantMethods } from './widgets/full-page/modal/variant-met
 import { sanitizeRichHtmlFragment } from './widgets/shared/rich-html.js';
 import { createChevronIcon, createCloseIcon } from './widgets/shared/svg-icons.js';
 import { BUNDLE_WIDGET } from './widgets/shared/constants.js';
-import {
-  drawerLayerManager,
-  shouldDismissDrawerSwipe,
-} from './widgets/shared/drawer-layer-manager.js';
-import { resolvePpbDetailsCommit } from './widgets/product-page/ppb-modal-card-presentation.js';
-
-export function resolveBundleProductModalActionText({
-  originalSelectionKey = '',
-  currentStep = {},
-  resolveText,
-  fallbackText = '',
-}: any = {}) {
-  const action = originalSelectionKey ? 'update' : 'add';
-  const text = action === 'update'
-    ? (currentStep?.addonReplaceText
-      || resolveText?.('productDetailsUpdateButton', fallbackText)
-      || fallbackText)
-    : (currentStep?.addonAddText
-      || resolveText?.('productCardAddButton', fallbackText)
-      || fallbackText);
-
-  return { action, text };
-}
+import { shouldDismissDrawerSwipe } from './widgets/shared/drawer-layer-manager.js';
 
 export interface BundleProductModal {
   [key: string]: any;
@@ -79,12 +57,8 @@ export class BundleProductModal {
   readOnly: boolean;
   lockedScrollY: number;
   isDocumentScrollLocked: boolean;
-  isPpbOwned: boolean;
-  drawerLayer: any;
-  focusOrigin: any;
-  originalSelectionKey: string;
 
-  constructor(widget: any, options: any = {}) {
+  constructor(widget: any) {
     this.widget = widget;
     this.modalElement = null;
     this.currentProduct = null;
@@ -96,11 +70,6 @@ export class BundleProductModal {
     this.readOnly = false;
     this.lockedScrollY = 0;
     this.isDocumentScrollLocked = false;
-    this.isPpbOwned = options.drawerOwner === 'ppb'
-      || Boolean(widget?.container?.closest?.('[data-ppb-template-type]'));
-    this.drawerLayer = null;
-    this.focusOrigin = null;
-    this.originalSelectionKey = '';
 
     this.init();
   }
@@ -145,22 +114,11 @@ export class BundleProductModal {
     const modal = document.createElement('div');
     modal.className = 'bundle-modal-overlay';
     modal.id = 'bundle-product-modal';
-    if (this.isPpbOwned) {
-      modal.dataset.ppbDrawerSurface = 'product-details';
-      modal.setAttribute('role', 'dialog');
-      modal.setAttribute('aria-modal', 'true');
-      modal.setAttribute('aria-labelledby', 'modal-product-title');
-    }
     const container = document.createElement('div');
     container.className = 'bundle-modal-container';
-    const dragHandle = document.createElement(this.isPpbOwned ? 'button' : 'div');
+    const dragHandle = document.createElement('div');
     dragHandle.className = 'bundle-modal-drag-handle';
-    if (this.isPpbOwned) {
-      (dragHandle as HTMLButtonElement).type = 'button';
-      dragHandle.setAttribute('aria-label', 'Close modal');
-    } else {
-      dragHandle.setAttribute('aria-hidden', 'true');
-    }
+    dragHandle.setAttribute('aria-hidden', 'true');
     const dragIndicator = document.createElement('div');
     dragIndicator.className = 'bundle-modal-drag-indicator';
     dragHandle.appendChild(dragIndicator);
@@ -265,38 +223,21 @@ export class BundleProductModal {
     // Close button
     const closeBtn = this.modalElement.querySelector('.bundle-modal-close');
     closeBtn.addEventListener('click', () => this.close());
-    if (this.isPpbOwned) {
-      this.modalElement.querySelector('.bundle-modal-drag-handle')?.addEventListener('click', () => this.close());
-    }
 
     // Close on overlay click
     this.modalElement.addEventListener('click', (e: any) => {
       if (e.target === this.modalElement) {
-        if (!this.drawerLayer || drawerLayerManager.isTopmost(this.drawerLayer)) this.close();
+        this.close();
       }
     });
 
     // Close on ESC key
     document.addEventListener('keydown', (e: any) => {
       if (!this.modalElement.classList.contains('active')) return;
-      if (this.drawerLayer && !drawerLayerManager.isTopmost(this.drawerLayer)) return;
       if (e.key === 'Escape') {
         e.preventDefault();
         e.stopImmediatePropagation?.();
         this.close();
-        return;
-      }
-      if (e.key === 'Tab' && this.isPpbOwned) {
-        const focusable = Array.from(this.modalElement.querySelectorAll(
-          'button:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
-        )).filter((element: any) => element.getClientRects?.().length !== 0) as HTMLElement[];
-        if (focusable.length === 0) return;
-        const currentIndex = focusable.indexOf(document.activeElement as HTMLElement);
-        const nextIndex = e.shiftKey
-          ? (currentIndex <= 0 ? focusable.length - 1 : currentIndex - 1)
-          : (currentIndex < 0 || currentIndex === focusable.length - 1 ? 0 : currentIndex + 1);
-        e.preventDefault();
-        focusable[nextIndex]?.focus?.();
       }
     });
 
@@ -433,10 +374,8 @@ export class BundleProductModal {
     this.currentStep = step;
     this.selectedVariant = null;
     this.selectedOptions = {};
-    this.originalSelectionKey = String(options.originalSelectionKey || '');
     this.selectedQuantity = Math.max(1, Number(options.selectedQuantity || 1));
     this.readOnly = options.readOnly === true;
-    this.focusOrigin = document.activeElement;
     const imageCount = this.getProductImages().length;
     const initialImageIndex = Number(options.initialImageIndex || 0);
     this.currentImageIndex = imageCount > 0
@@ -449,21 +388,7 @@ export class BundleProductModal {
 
     // Show modal
     this.modalElement.classList.add('active');
-    if (this.isPpbOwned) {
-      this.drawerLayer = drawerLayerManager.open({
-        id: 'product-details',
-        requestClose: () => this.close(),
-        trigger: this.focusOrigin,
-      });
-      const isMobileDrawer = window.matchMedia?.('(max-width: 767px)').matches
-        || window.innerWidth <= 767;
-      const initialControl = this.modalElement.querySelector(
-        isMobileDrawer ? '.bundle-modal-drag-handle' : '.bundle-modal-close',
-      );
-      initialControl?.focus?.({ preventScroll: true });
-    } else {
-      this.lockDocumentScroll();
-    }
+    this.lockDocumentScroll();
   }
 
   /**
@@ -471,13 +396,7 @@ export class BundleProductModal {
    */
   close() {
     this.modalElement.classList.remove('active');
-    if (this.drawerLayer) {
-      drawerLayerManager.close(this.drawerLayer, { restoreFocus: true });
-      this.drawerLayer = null;
-    } else {
-      this.unlockDocumentScroll();
-    }
-    this.focusOrigin = null;
+    this.unlockDocumentScroll();
 
     // Reset state
     this.currentProduct = null;
@@ -486,7 +405,6 @@ export class BundleProductModal {
     this.selectedQuantity = 1;
     this.currentImageIndex = 0;
     this.readOnly = false;
-    this.originalSelectionKey = '';
     this.updateReadOnlyState();
   }
 
@@ -517,18 +435,6 @@ export class BundleProductModal {
 
     // Set initial price
     this.updatePrice();
-
-    const actionButton = document.getElementById('modal-add-to-box');
-    if (this.isPpbOwned && actionButton) {
-      const presentation = resolveBundleProductModalActionText({
-        originalSelectionKey: this.originalSelectionKey,
-        currentStep: this.currentStep,
-        resolveText: this.widget?._resolveText?.bind(this.widget),
-        fallbackText: actionButton.textContent,
-      });
-      actionButton.textContent = presentation.text;
-      actionButton.dataset.action = presentation.action;
-    }
 
     // Reset quantity display
     document.getElementById('modal-qty-display')!.textContent = String(this.selectedQuantity);
@@ -648,26 +554,12 @@ export class BundleProductModal {
     }
 
     const productId = variant.variantId || variant.id || this.currentProduct.id;
-    const commit = resolvePpbDetailsCommit({
-      stepIndex,
-      originalSelectionKey: this.isPpbOwned ? this.originalSelectionKey : '',
-      nextSelectionKey: productId,
-      quantity: this.selectedQuantity,
-    });
-
-
     // Call widget's method to add product
     if (this.widget.updateProductSelection) {
-      if (this.isPpbOwned && commit.removeSelectionKey) {
-        this.widget._modalSlotReplacementTarget = {
-          stepIndex: commit.stepIndex,
-          selectionKey: commit.removeSelectionKey,
-        };
-      }
       this.widget.updateProductSelection(
-        commit.stepIndex,
-        commit.nextSelectionKey,
-        commit.quantity
+        stepIndex,
+        productId,
+        this.selectedQuantity
       );
     } else {
       return;
