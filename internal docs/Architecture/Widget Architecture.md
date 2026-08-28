@@ -254,7 +254,8 @@ PPB drawer ownership is explicit through `data-ppb-drawer-surface` values for
 The selected summary belongs to widget flow and never participates in document
 scroll locking. The modal surfaces share the drawer layer manager: only
 the top layer owns Escape and backdrop dismissal, document scroll locks once
-across nested overlays, and the final close restores the prior scroll styles.
+across nested overlays, the root reserves its existing scrollbar gutter while
+locked, and the final close restores the prior scroll styles and gutter value.
 Horizontal/Vertical variants remain native and inline on both viewport classes.
 Focus returns to the originating slot or variant trigger after the
 owning layer closes.

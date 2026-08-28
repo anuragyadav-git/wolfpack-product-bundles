@@ -57,6 +57,7 @@ export class BundleProductModal {
   readOnly: boolean;
   lockedScrollY: number;
   isDocumentScrollLocked: boolean;
+  previousRootScrollbarGutter: string;
 
   constructor(widget: any) {
     this.widget = widget;
@@ -70,6 +71,7 @@ export class BundleProductModal {
     this.readOnly = false;
     this.lockedScrollY = 0;
     this.isDocumentScrollLocked = false;
+    this.previousRootScrollbarGutter = '';
 
     this.init();
   }
@@ -78,6 +80,8 @@ export class BundleProductModal {
     if (this.isDocumentScrollLocked) return;
 
     this.lockedScrollY = Math.max(0, Number(window.scrollY) || 0);
+    this.previousRootScrollbarGutter = document.documentElement.style.scrollbarGutter;
+    document.documentElement.style.scrollbarGutter = 'stable';
     document.documentElement.classList.add('modal-open');
     document.body.classList.add('modal-open');
     document.body.style.setProperty(
@@ -92,11 +96,13 @@ export class BundleProductModal {
 
     document.documentElement.classList.remove('modal-open');
     document.body.classList.remove('modal-open');
+    document.documentElement.style.scrollbarGutter = this.previousRootScrollbarGutter;
     document.body.style.removeProperty('--bundle-modal-scroll-offset');
     document.documentElement.scrollTop = this.lockedScrollY;
     document.body.scrollTop = this.lockedScrollY;
     this.lockedScrollY = 0;
     this.isDocumentScrollLocked = false;
+    this.previousRootScrollbarGutter = '';
   }
 
   /**

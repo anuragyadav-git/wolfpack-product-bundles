@@ -1,10 +1,10 @@
 ---
 schema_version: 1
 id: product-details-drawer-gesture
-title: Product Details Drawer Gesture Test Spec
+title: Product Details Drawer Behavior Test Spec
 type: test-spec
 status: active
-summary: Verifies intentional downward-swipe detection for the FPB mobile product-details drawer.
+summary: Verifies scroll locking and intentional downward-swipe detection for the FPB product-details drawer.
 last_audited: 2026-08-28
 owners:
   - storefront
@@ -35,6 +35,13 @@ gesture, without treating vertical scrolling or horizontal movement as a close.
 
 ## Test Cases
 
+### Document Scroll Lock
+
+| # | Scenario | Input | Expected Output | Notes |
+|---|---|---|---|---|
+| 1 | Open product details | Desktop document with a vertical scrollbar | Root reserves its scrollbar gutter while locked | Prevents horizontal viewport shift |
+| 2 | Close product details | Previously unlocked document | Prior gutter value is restored | No global style leak |
+
 ### Downward Swipe Detection
 
 | # | Scenario | Input | Expected Output | Notes |
@@ -48,3 +55,4 @@ gesture, without treating vertical scrolling or horizontal movement as a close.
 
 - [x] Long and fast downward swipes dismiss the drawer.
 - [x] Horizontal, upward, and slow short gestures do not dismiss it.
+- [x] Product-details scroll locking preserves and restores the root scrollbar gutter.

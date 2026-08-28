@@ -47,6 +47,7 @@ replacement, and capacity behavior while leaving layout verification to Chrome.
 | 2 | Nested overlay Escape | Picker with variant selector above it | Only variant selector closes | Picker remains registered and scroll stays locked |
 | 3 | Close final layer | Last registered layer closes | Original root/body overflow restores | Exact prior inline values are preserved |
 | 4 | Focus restoration | Trigger remains connected | Exact trigger regains focus | Uses prevent-scroll focus when supported |
+| 5 | Desktop scroll lock | First layer hides document overflow | Root reserves its scrollbar gutter until final close | Prevents horizontal viewport shift |
 
 ### DrawerGesturesAndSelection
 
@@ -71,6 +72,7 @@ replacement, and capacity behavior while leaving layout verification to Chrome.
 ## Acceptance Criteria
 
 - [ ] Drawer layers share one topmost-only Escape and scroll-lock owner.
+- [x] Document scroll locking preserves and restores the root scrollbar gutter.
 - [ ] Picker and variant selector restore exact trigger focus.
 - [ ] PPB product cards do not construct a product-details drawer.
 - [ ] Variant selection commits immediately and exposes no Apply action.

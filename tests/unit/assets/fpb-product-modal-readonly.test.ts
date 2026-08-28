@@ -16,6 +16,7 @@ describe("FPB product modal read-only quick view", () => {
   function createStyleDeclaration() {
     const values = new Map<string, string>();
     return {
+      scrollbarGutter: '',
       setProperty: (name: string, value: string) => values.set(name, value),
       removeProperty: (name: string) => values.delete(name),
     };
@@ -41,6 +42,7 @@ describe("FPB product modal read-only quick view", () => {
       },
       documentElement: {
         classList: rootClassList as any,
+        style: createStyleDeclaration(),
         scrollTop: 240,
       },
     };
@@ -157,11 +159,13 @@ describe("FPB product modal read-only quick view", () => {
     window.scrollBy(0, 100);
 
     expect(window.scrollY).toBe(240);
+    expect((document.documentElement.style as any).scrollbarGutter).toBe("stable");
 
     modal.close();
     window.scrollBy(0, 100);
 
     expect(window.scrollY).toBe(340);
+    expect((document.documentElement.style as any).scrollbarGutter).toBe("");
   });
 
   it("renders Shopify product descriptionHtml as modal HTML", async () => {
