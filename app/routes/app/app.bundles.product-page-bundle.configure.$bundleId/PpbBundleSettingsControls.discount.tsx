@@ -1,4 +1,6 @@
+import { useNavigate } from "@remix-run/react";
 import { usePpbConfigureContext } from "./PpbConfigureContext";
+import { navigateToProductPageDefaults } from "../../../lib/bundle-config/product-page-admin-sections";
 
 const CART_DISCOUNT_DISPLAY_OPTIONS = [
   {
@@ -16,9 +18,9 @@ const CART_DISCOUNT_DISPLAY_OPTIONS = [
 ];
 
 export function PpbCartDiscountDisplaySettings() {
+  const navigate = useNavigate();
   const {
     markAsDirty,
-    PRODUCT_PAGE_EDIT_DEFAULTS_HREF,
     QuestionHelpTooltip,
     setTextOverrides,
     shopify,
@@ -43,11 +45,10 @@ export function PpbCartDiscountDisplaySettings() {
           <button
             type="button"
             onClick={() => {
-              const authSearch = window.location.search.replace(/^\?/, "");
-              const targetHref = authSearch
-                ? `${PRODUCT_PAGE_EDIT_DEFAULTS_HREF}&${authSearch}`
-                : PRODUCT_PAGE_EDIT_DEFAULTS_HREF;
-              void shopify.saveBar.leaveConfirmation().then(() => window.location.assign(targetHref));
+              void navigateToProductPageDefaults(
+                () => shopify.saveBar.leaveConfirmation(),
+                navigate,
+              );
             }}
             style={{
               display: "inline-flex",
