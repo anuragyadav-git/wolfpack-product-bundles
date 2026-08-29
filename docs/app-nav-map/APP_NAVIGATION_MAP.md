@@ -391,6 +391,7 @@ Responsive analytics behavior:
 Pricing Page
 ├── App Bridge breadcrumb + app-owned back action → previous page, Dashboard fallback
 ├── Subscription quota card (current usage)
+│   └── Threshold prompt → Dismiss removes it for the current page mount
 │
 ├── Plan cards: Free vs Growth
 │   ├── [Button] "Choose Growth monthly" → Shopify-hosted App Pricing

@@ -6,6 +6,7 @@ import {
   getUpgradePromptTone,
 } from "../../utils/pricing";
 import { useTranslation } from "react-i18next";
+import { useState } from "react";
 import brandStyles from "../../styles/billing/subscription-brand.module.css";
 
 export interface SubscriptionQuotaCardProps {
@@ -36,6 +37,7 @@ export function SubscriptionQuotaCard({
   showUpgradePrompt = true,
 }: SubscriptionQuotaCardProps) {
   const { t } = useTranslation();
+  const [upgradePromptDismissed, setUpgradePromptDismissed] = useState(false);
   const percentage = calculateUsagePercentage(currentBundleCount, bundleLimit);
   const badgeTone = getBadgeTone(percentage);
   const progressBarTone = getProgressBarTone(percentage);
@@ -46,7 +48,9 @@ export function SubscriptionQuotaCard({
     })
     : t("billing.planFeatures.unlimitedBundlesSteps");
 
-  const showBanner = showUpgradePrompt && shouldShowUpgradePrompt(percentage, isFreePlan);
+  const showBanner = showUpgradePrompt
+    && !upgradePromptDismissed
+    && shouldShowUpgradePrompt(percentage, isFreePlan);
   const bannerMessage = t(percentage >= 80
     ? "common.upgradePrompt.limitReachedBody"
     : "common.upgradePrompt.approachingBody", {
@@ -75,9 +79,14 @@ export function SubscriptionQuotaCard({
             <s-banner
               tone={bannerTone}
               heading={t("billing.route.bundleUsage")}
-              dismissible
-              hidden={false}
+              dismissible={false}
             >
+              <s-button
+                slot="primary-action"
+                onClick={() => setUpgradePromptDismissed(true)}
+              >
+                {t("common.actions.dismiss")}
+              </s-button>
               {bannerMessage}
             </s-banner>
           </s-box>
