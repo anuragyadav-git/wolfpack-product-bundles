@@ -5,7 +5,7 @@ title: Shopify App Pricing Setup Runbook
 type: runbook
 status: sit-configured-prod-pending
 summary: Records the completed SIT App Pricing setup and the equivalent production setup still required for Free and Growth.
-last_audited: 2026-08-29
+last_audited: 2026-08-30
 owners:
   - product
   - engineering
@@ -79,6 +79,17 @@ Partner organization `4162406`, Partner API version `2026-07`, and stable plan h
 | App handle | `wolfpack-product-bundles` | `wolfpack-product-bundles-sit` | `handle` in the matching `shopify.app*.toml` |
 
 Create the Partner API client under Partner Dashboard **Settings → Partner API clients** with **Manage apps** permission, then store its token only in the corresponding server environment. The dev tunnel is only the SIT transport; Partner API eligibility comes from SIT being a public app. The live Dashboard currently labels SIT **Public app / Draft**, so it is eligible even though it is unpublished.
+
+Treat `activeSubscription.items[].handle` as the plan entitlement source for an
+active contract. In a no-charge development-store trial, Shopify can return the
+Growth item with `price.active: false`; that price flag does not invalidate the
+active subscription. Do not filter active-subscription items by `price.active`.
+
+An HTTP `401` from the Partner API means the configured Partner API client token
+is no longer accepted for that organization/client. Keep the entitlement state
+Unknown, replace the server secret with the current token, restart the process
+that owns the environment, and verify the active subscription again. Never
+present a failed verification as Free.
 
 When creating the plans, explicitly set the Free plan handle to `free` and the Growth plan handle to `growth`. Shopify asks developers to define stable plan handles. During SIT testing, confirm that `activeSubscription.items[].handle` returns those values; there is nothing to copy into environment files.
 

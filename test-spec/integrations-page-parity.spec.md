@@ -5,7 +5,7 @@ title: Integrations Page Parity Test Spec
 type: test-spec
 status: active
 summary: Verifies the immediately rendered supported-integration catalog and unsent Crisp request draft.
-last_audited: 2026-08-25
+last_audited: 2026-08-30
 owners:
   - Wolfpack Product Bundles
 domains:
@@ -56,7 +56,7 @@ by Settings rather than appearing as duplicate catalog entries.
 | --- | --- | --- | --- | --- |
 | 1 | Initial route paint | Route mount | Integration catalog renders immediately | No artificial readiness interval |
 | 2 | Compact route | Ready | Three cards, statuses, and setup actions appear | Uses Polaris web components first |
-| 3 | Request Integration | Explicit click | Opens Crisp with a prefilled unsent request | Merchant must press Send |
+| 3 | Request Integration | Explicit click | Opens Crisp, then prefills an unsent request after the chat-open lifecycle event | Merchant must press Send; the draft must not race widget initialization |
 | 4 | Responsive traversal | Desktop and mobile | One predictable card order | Visual proof via direct DevTools |
 
 ## Acceptance Criteria

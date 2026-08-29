@@ -99,7 +99,6 @@ export function ConfigureCanvasHeader({
             loading={parentProductStatusUi.isLoading}
             onManage={() => {
               const productId =
-                bundleProduct?.legacyResourceId ||
                 bundleProduct?.id?.split("/").pop() ||
                 bundle.shopifyProductId?.split("/").pop();
               if (productId) openProductInAdmin(productId);

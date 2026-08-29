@@ -292,7 +292,6 @@ export function useConfigureActionController(flow: ConfigureBundleFlowDraft) {
           break;
         case "product_active": {
           const productId =
-            flow.bundleProduct?.legacyResourceId ||
             flow.bundleProduct?.id?.split("/").pop() ||
             flow.bundle.shopifyProductId?.split("/").pop();
           if (productId) {

@@ -111,6 +111,9 @@ export function useConfigureBundleController(): ConfigureBundleFlowDraft {
     setActiveSection,
     forceNavigation,
     setForceNavigation,
+    operationAlert,
+    setOperationAlert,
+    clearOperationAlert,
     originalValuesRef,
   } = configState;
   const parentProductStatusUi = getParentProductStatusUi(
@@ -214,6 +217,7 @@ export function useConfigureBundleController(): ConfigureBundleFlowDraft {
     navigate,
     openCollectionsModal,
     openProductsModal,
+    operationAlert,
     originalValuesRef,
     parentProductStatusUi,
     pricingState,
@@ -233,6 +237,7 @@ export function useConfigureBundleController(): ConfigureBundleFlowDraft {
     setCurrentModalStepId,
     setForceNavigation,
     setIsDirty,
+    setOperationAlert,
     setProductImageUrl,
     setProductStatus,
     setProductTitle,
@@ -246,5 +251,6 @@ export function useConfigureBundleController(): ConfigureBundleFlowDraft {
     themeEditorUrl: currentThemeEditorUrl,
     triggerAppEmbedBannerFeedback,
     triggerSaveBarIrritation,
+    clearOperationAlert,
   };
 }

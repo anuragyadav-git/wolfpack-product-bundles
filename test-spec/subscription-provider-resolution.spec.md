@@ -5,7 +5,7 @@ title: "Test Spec: Subscription Provider Resolution"
 type: test-spec
 status: active
 summary: Verification precedence, outage grace, and Shopify App Pricing mapping for subscription state.
-last_audited: 2026-08-29
+last_audited: 2026-08-30
 owners:
   - wolfpack-engineering
 domains:
@@ -16,6 +16,7 @@ systems:
 source_paths:
   - app/services/subscriptions/subscription-resolution.server.ts
   - app/services/subscriptions/shopify-app-pricing.server.ts
+  - app/routes/app/app.pricing.tsx
 related_docs:
   - internal docs/Subscriptions/04-subscription-architecture-adr.md
 tags:
@@ -47,12 +48,14 @@ Prove that Shopify remains the billing source of truth while paid merchants are 
 | 5 | Expired outage grace | Old active snapshot | Unknown | Never silently downgrade |
 | 6 | App Pricing request | Partner API config and shop GID | Versioned authenticated GraphQL request | No Admin token used |
 | 7 | Unknown item handle | Active contract with unrecognized item | Unknown | Fails closed |
-| 8 | Growth trial | Active Growth item, `trialEndsAt`, no current cycle | Growth | Shopify owns consumed trial accounting |
+| 8 | No-charge Growth trial | Active Growth contract with `trialEndsAt`, no current cycle, and an inactive price record | Growth | The active contract and stable item handle are authoritative; Shopify owns consumed trial accounting |
 | 9 | Provider configuration | Environment with Partner token | Token only | App identity comes from Admin; handles and API coordinates are code-owned |
+| 10 | Provider verification unavailable | Unknown entitlement state | Verification error without a current Free plan or usable quota | Unknown must never be presented as verified Free |
 
 ## Acceptance Criteria
 
 - [ ] All listed test cases pass.
 - [ ] A provider error never resolves directly to Free.
+- [ ] The Pricing surface never presents an Unknown provider state as Free.
 - [ ] A verified managed absence maps to Free.
 - [ ] Partner credentials are validated server-side and never returned.

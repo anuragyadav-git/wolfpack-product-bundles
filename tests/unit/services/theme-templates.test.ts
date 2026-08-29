@@ -80,6 +80,36 @@ describe("handleGetThemeTemplates", () => {
     expect(mockGraphql).toHaveBeenCalled();
   });
 
+  it("filters theme files to product templates at the GraphQL boundary", async () => {
+    const mockGraphql = jest.fn().mockResolvedValue({
+      json: async () => ({
+        data: {
+          themes: {
+            nodes: [
+              {
+                id: "gid://shopify/OnlineStoreTheme/123456789",
+                name: "Horizon",
+                role: "MAIN",
+                files: {
+                  nodes: [{ filename: "templates/product.json" }],
+                },
+              },
+            ],
+          },
+        },
+      }),
+    });
+
+    const admin = { graphql: mockGraphql } as any;
+
+    await handleGetThemeTemplates(admin, session);
+
+    const query = mockGraphql.mock.calls[0][0] as string;
+    expect(query).toContain(
+      'files(first: 250, filenames: ["templates/product*.json", "templates/product*.liquid"])',
+    );
+  });
+
   it("handles case where no published theme is found", async () => {
     const mockGraphql = jest.fn().mockResolvedValue({
       json: async () => ({

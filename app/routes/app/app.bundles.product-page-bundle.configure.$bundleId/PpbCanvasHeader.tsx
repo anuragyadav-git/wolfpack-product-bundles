@@ -98,7 +98,6 @@ export function PpbCanvasHeader() {
             loading={parentProductStatusUi.isLoading}
             onManage={() => {
               const productId =
-                bundleProduct?.legacyResourceId ||
                 bundleProduct?.id?.split("/").pop() ||
                 (bundle as any).shopifyProductId?.split("/").pop();
               if (productId) openProductInAdmin(productId);

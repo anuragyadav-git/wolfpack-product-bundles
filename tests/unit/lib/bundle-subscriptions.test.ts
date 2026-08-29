@@ -195,6 +195,16 @@ describe("bundle subscription config", () => {
     expect(result.defaultPurchaseOption).toEqual(config.defaultPurchaseOption);
   });
 
+  it("selects the only discovered group when the saved config has no group", () => {
+    const result = reconcileBundleSubscriptionPlanDiscovery(
+      normalizeBundleSubscriptionConfig({ enabled: false }),
+      [config.selectedGroup],
+    );
+
+    expect(result.selectedGroup?.id).toBe(config.selectedGroup.id);
+    expect(result.selectedPlanIds).toEqual(config.selectedPlanIds);
+  });
+
   it("calculates percentage, fixed amount, fixed price, and staged policies", () => {
     expect(applySellingPlanPricingPolicies(10000, [{ kind: "percentage", value: 10, afterCycle: 0 }], 1)).toBe(9000);
     expect(applySellingPlanPricingPolicies(10000, [{ kind: "fixed_amount", value: 1250, afterCycle: 0 }], 1)).toBe(8750);
