@@ -5,7 +5,7 @@ title: Webhooks
 type: architecture-note
 status: active
 summary: Defines Wolfpack's app-specific Shopify webhook subscriptions, payload version, processing ownership, and delivery-volume safeguards.
-last_audited: 2026-08-27
+last_audited: 2026-08-28
 owners:
   - engineering
 domains:
@@ -33,14 +33,16 @@ Production and SIT use Shopify webhook API version `2026-07`. This version contr
 
 The app subscribes only to operational webhook topics that are required across installs:
 
-- `app_purchases_one_time/update`
-- `app_subscriptions/update`
 - `app/uninstalled`
 - `app/scopes_update`
 - `products/delete`
 
+Shopify App Pricing state is verified through the Partner API, the hosted return route, and hourly reconciliation. The app does not subscribe to app-subscription or one-time-purchase billing webhooks.
+
 Broad topics that generated high delivery volume without a required runtime effect are intentionally not subscribed:
 
+- `app_purchases_one_time/update`
+- `app_subscriptions/update`
 - `products/update`
 - `inventory_levels/update`
 - `orders/create`

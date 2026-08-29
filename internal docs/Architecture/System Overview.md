@@ -66,7 +66,7 @@ See [[Architecture/Widget Architecture]] for FPB/PDP load strategy and versionin
 
 - **`bundles/`**: Core bundle CRUD, settings merge, CSS generation
 - **`bundles/metafield-sync/`**: Writes bundle config to Shopify metafield for zero-latency widget load
-- **`billing/`**: Shopify Billing API integration
+- **`subscriptions/`**: Shopify App Pricing verification and entitlement enforcement
 - **`unauthenticated.admin(shopDomain)`**: Admin GraphQL client for webhooks/background jobs — exported from `app/shopify.server.ts:140`
 
 ---

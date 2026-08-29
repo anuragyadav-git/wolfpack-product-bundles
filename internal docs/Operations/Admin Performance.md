@@ -5,7 +5,7 @@ title: Admin Performance
 type: operations
 status: authoritative
 summary: Embedded Admin Web Vitals instrumentation, route-level LCP findings, and critical-path constraints.
-last_audited: 2026-08-27
+last_audited: 2026-08-29
 owners:
   - engineering
 domains:
@@ -96,6 +96,21 @@ Pages without first-viewport owned media should be treated as text/bootstrap-bou
 unless a future debug run logs an owned image candidate. For text LCP pages, do
 not add image preloads speculatively; focus on loader critical path and reducing
 first-render JavaScript instead.
+
+### Billing progressive first paint
+
+The `/app/pricing` route must keep its visible Billing heading outside the
+deferred subscription boundary. Entitlement verification and the active bundle
+count can resolve in parallel without withholding useful route content; only the
+quota, value proposition, plan, comparison, and FAQ regions depend on that
+result. While those regions are pending, the route uses the shared small Polaris
+loading state beneath the already-painted heading.
+
+This render-path contract is covered by
+`tests/unit/routes/admin-billing-progressive-render.test.ts`. A fresh SIT iframe
+measurement is still required after source changes; Shopify Admin outer-shell
+LCP is not evidence for the embedded route and must not be reported as Billing
+LCP.
 
 ## Settings Design Control Panel
 
@@ -277,9 +292,9 @@ App Bridge check.
 The shared `/app` shell must not import or await providers that do not have
 runtime consumers on every Admin page. On 2026-07-10, the global Mantle provider
 and server-side Mantle identify call were removed from the app shell after an
-audit found no `@heymantle/react` hook usage in Admin routes. Billing still uses
-the Shopify billing service directly. Keep any future third-party billing or
-analytics provider route-scoped until a shared runtime consumer exists.
+audit found no runtime consumers. The remaining unused server helper and package
+dependency were removed with the managed-pricing cutover on 2026-08-28. Keep
+future analytics providers route-scoped until a shared runtime consumer exists.
 
 ## Admin Mobile and First-Load Contract
 

@@ -5,7 +5,7 @@ title: Wolfpack Product Bundles App Navigation and UI Map
 type: navigation-map
 status: authoritative
 summary: Routes, screens, actions, modals, and storefront-preview flows for the embedded app.
-last_audited: 2026-08-28
+last_audited: 2026-08-29
 owners:
   - engineering
 domains:
@@ -30,7 +30,7 @@ keywords:
 > Any time a new page, modal, tab, sidebar section, or user flow is added or removed,
 > this document **must** be updated. See CLAUDE.md for the enforcement rule.
 
-**Last Updated:** 2026-08-28
+**Last Updated:** 2026-08-29
 **Environment mapped:** SIT (`wolfpack-product-bundles-sit`)
 **Test store:** `wolfpack-store-test-1.myshopify.com`
 
@@ -69,7 +69,7 @@ Wolfpack Bundles SIT
 ├── Settings            → /app/settings
 ├── Integrations        → /app/integrations
 ├── Analytics           → /app/attribution
-├── Pricing             → /app/pricing
+├── Billing             → /app/pricing          (Subscription & Billing)
 └── Updates & FAQs      → /app/events
 ```
 
@@ -387,8 +387,9 @@ Pricing Page
 ├── App Bridge breadcrumb + app-owned back action → previous page, Dashboard fallback
 ├── Subscription quota card (current usage)
 │
-├── Plan cards: Free vs Grow
-│   └── [Button] "Upgrade to Grow" → POST → Shopify billing redirect
+├── Plan cards: Free vs Growth
+│   ├── [Button] "Choose Growth monthly" → Shopify-hosted App Pricing
+│   └── [Button] "Choose Growth annual" → Shopify-hosted App Pricing
 │
 ├── Feature comparison table
 │
@@ -671,10 +672,11 @@ Billing Page
 ├── Success / Error banners (conditional on ?upgraded=true or error param)
 ├── Subscription quota card
 ├── Current plan display
-└── [Button] "Upgrade" / "Cancel subscription"
+└── [Button] "Upgrade" / "Manage plan" → Shopify-hosted App Pricing
 ```
 
-**Billing callback:** `/app/billing/callback` — confirms charge, redirects back.
+**Managed-pricing return:** `/app/billing/return` — ignores redirect hints for
+authorization, force-verifies the Partner API subscription, then redirects back.
 
 ---
 
@@ -749,11 +751,11 @@ Dirty Admin form
 
 ```
 /app/pricing
-  └── [Upgrade to Grow]
+  └── [Choose Growth monthly / annual]
       └── Upgrade Confirmation Modal → confirm
-          └── POST /api/billing/create → Shopify billing URL
-              └── Merchant approves → /app/billing/callback?charge_id=...
-                  └── confirm charge → /app/billing?upgraded=true
+          └── POST /app/pricing → configured Shopify-hosted plan URL
+              └── Merchant selects or approves plan → /app/billing/return?plan_handle=...
+                  └── Partner API verification → /app/billing?upgraded=true
 ```
 
 ### Flow E: Bundle Checkout Pricing Safety
@@ -805,9 +807,7 @@ Checkout order summary → Bundle & Save
 | `/api/checkout-bundle-offer-token`                             | Checkout-session-authenticated route that validates a signed parent and current merchant offer config, then authorizes one exact add-on variant and quantity                                                    |
 | `/apps/product-bundles/api/design-settings/:shop`              | CSS vars for storefront widgets                                                                                                                                                                                 |
 | `/apps/product-bundles/api/language-settings/:shop`            | Settings -> Language JSON for storefront widget text and cart labels                                                                                                                                            |
-| `/api/billing/create`                                          | Initiate subscription                                                                                                                                                                                           |
-| `/api/billing/confirm`                                         | Confirm subscription                                                                                                                                                                                            |
-| `/api/billing/cancel`                                          | Cancel subscription                                                                                                                                                                                             |
+| `/app/billing/return`                                          | Verify Shopify App Pricing state through the Partner API after a hosted-plan redirect                                                                                                                           |
 | `/api/activate-cart-transform`                                 | Deploy cart transform function                                                                                                                                                                                  |
 | `/api/activate-pixel`                                          | Activate UTM web pixel                                                                                                                                                                                          |
 | `/apps/product-bundles/api/proxy-health`                       | Proxy health check                                                                                                                                                                                              |

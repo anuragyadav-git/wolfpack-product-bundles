@@ -1,0 +1,7 @@
+entitlement_key,free,growth,server_enforcement,ui_surface,storefront_effect,test_owner
+bundle.public.limit,1,unlimited,"public status transaction; sync jobs","bundle status and dashboard","only authorized public bundles sync",subscription-bundle-gates
+bundle.steps.limit,2,unlimited,"FPB and PPB publish assertion","configure validation and publish feedback","public snapshot excludes unauthorized state",subscription-bundle-gates
+bundle.template.premium,"FPB Standard; PPB Product List",all,"candidate requirement detector","template selector","premium draft preview only until authorized",subscription-entitlement-domain
+design.advanced,no,yes,"Settings Design action payload diff","Settings Design","last authorized saved design remains active",subscription-design-gates
+analytics.advanced,no,yes,"Analytics loader/action query boundary","Analytics","not applicable",subscription-analytics-gates
+support.priority,no,yes,"support routing metadata","support entry points","not applicable",subscription-entitlement-domain
