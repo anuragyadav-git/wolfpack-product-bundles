@@ -7,11 +7,8 @@ export { WebhookProcessor } from './processor.server';
 
 // Types
 export type {
-  ShopifySubscriptionStatus,
   PubSubMessage,
   WebhookProcessResult,
-  SubscriptionPayload,
-  PurchasePayload,
   ProductPayload,
   CustomerDataRequestPayload,
   CustomerRedactPayload,
@@ -20,11 +17,6 @@ export type {
 
 // Handlers (for testing/direct access)
 export {
-  handleSubscriptionUpdate,
-  handleSubscriptionCancelled,
-  handleSubscriptionApproachingCap,
-  handlePurchaseUpdate,
-  mapSubscriptionStatus,
   handleProductUpdate,
   handleProductDelete,
   handleCustomerDataRequest,

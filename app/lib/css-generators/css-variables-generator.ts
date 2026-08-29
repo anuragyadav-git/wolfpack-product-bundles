@@ -400,6 +400,7 @@ export function generateCSSVariables(ctx: CSSGenerationContext): string {
   --bundle-upsell-button-bg-color: ${s.bundleUpsellButtonBgColor || globalPrimaryButton};
   --bundle-upsell-border-color: ${s.bundleUpsellBorderColor || globalPrimaryButton};
   --bundle-upsell-text-color: ${s.bundleUpsellTextColor || globalButtonText};
+  --bundle-upsell-font-color: ${s.bundleUpsellFontColor || globalPrimaryText};
   /* Filters */
   --bundle-filter-icon-color: ${s.filterIconColor || globalPrimaryButton};
   --bundle-filter-bg-color: ${s.filterBgColor || '#FFFFFF'};

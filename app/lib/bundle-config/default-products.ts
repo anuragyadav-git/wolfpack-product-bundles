@@ -109,7 +109,7 @@ export function normalizeDefaultProductsData(input: unknown): DefaultProductsDat
 
   const products = Array.isArray(data.products)
     ? data.products
-        .map(buildDefaultProductEntryFromPicker)
+        .map((value) => buildDefaultProductEntryFromPicker(value))
         .filter((product): product is DefaultProductEntry => Boolean(product))
     : [];
 

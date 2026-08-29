@@ -90,12 +90,14 @@ export class DrawerLayerManager {
   documentRef: any;
   layers: any[];
   previousRootOverflow: string;
+  previousRootScrollbarGutter: string;
   previousBodyOverflow: string;
 
   constructor(documentRef: any = globalThis.document) {
     this.documentRef = documentRef;
     this.layers = [];
     this.previousRootOverflow = '';
+    this.previousRootScrollbarGutter = '';
     this.previousBodyOverflow = '';
     this.handleKeyDown = this.handleKeyDown.bind(this);
   }
@@ -106,8 +108,12 @@ export class DrawerLayerManager {
       const root = this.documentRef?.documentElement;
       const body = this.documentRef?.body;
       this.previousRootOverflow = root?.style?.overflow || '';
+      this.previousRootScrollbarGutter = root?.style?.scrollbarGutter || '';
       this.previousBodyOverflow = body?.style?.overflow || '';
-      if (root?.style) root.style.overflow = 'hidden';
+      if (root?.style) {
+        root.style.scrollbarGutter = 'stable';
+        root.style.overflow = 'hidden';
+      }
       if (body?.style) body.style.overflow = 'hidden';
       this.documentRef?.addEventListener?.('keydown', this.handleKeyDown);
     }
@@ -127,7 +133,10 @@ export class DrawerLayerManager {
     if (this.layers.length > 0) return;
     const root = this.documentRef?.documentElement;
     const body = this.documentRef?.body;
-    if (root?.style) root.style.overflow = this.previousRootOverflow;
+    if (root?.style) {
+      root.style.overflow = this.previousRootOverflow;
+      root.style.scrollbarGutter = this.previousRootScrollbarGutter;
+    }
     if (body?.style) body.style.overflow = this.previousBodyOverflow;
     this.documentRef?.removeEventListener?.('keydown', this.handleKeyDown);
   }

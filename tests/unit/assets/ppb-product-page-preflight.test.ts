@@ -6,6 +6,8 @@ const { ProductPageCartMethods } = require('../../../app/assets/widgets/product-
 const { PricingCalculator } = require('../../../app/assets/widgets/shared/pricing-calculator.js');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { CurrencyManager } = require('../../../app/assets/widgets/shared/currency-manager.js');
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { ToastManager } = require('../../../app/assets/widgets/shared/toast-manager.js');
 
 (globalThis as any).PricingCalculator = PricingCalculator;
 (globalThis as any).CurrencyManager = CurrencyManager;
@@ -35,6 +37,14 @@ function createButton() {
 }
 
 describe('PPB product-page preflight validation', () => {
+  beforeEach(() => {
+    jest.spyOn(ToastManager, 'show').mockImplementation(() => undefined);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it('blocks add to cart when storefront preflight returns non-200 for any selected variant', async () => {
     const fetchMock = jest.fn(async (url: string) => {
       if (url === '/variants/101.js') {

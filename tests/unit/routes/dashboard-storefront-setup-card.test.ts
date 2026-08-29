@@ -5,7 +5,7 @@ import {
 
 const APP_EMBED_RESOURCE = {
   handle: "bundle-app-embed",
-  label: "Wolfpack Bundle",
+  label: "Only Bundles",
   kind: "embed",
   status: "unavailable" as const,
   enabled: false,

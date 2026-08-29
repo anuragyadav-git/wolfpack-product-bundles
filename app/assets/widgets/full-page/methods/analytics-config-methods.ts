@@ -9,6 +9,7 @@ import {
 } from '../../shared/checkout-integration-adapters.js';
 import { buildStorefrontApiPath } from '../../../../config/storefront-proxy-routes.js';
 import { localizeBundleConfig } from '../../shared/localized-bundle-config.js';
+import { replaceManagedStyle } from '../../shared/managed-style.js';
 
 export const fullPageAnalyticsConfigMethods: Record<string, any> & ThisType<any> = {
 _ensureWpbSessionId() {
@@ -114,6 +115,9 @@ async loadControlsSettings() {
 
     this.config.controlsSettings = await response.json();
     const controls = this._getLandingPageControls();
+    const builderCss = String(controls?.css?.bundleBuilderPages || '').trim();
+    const runtimeDocument = typeof document === 'undefined' ? null : document;
+    if (runtimeDocument) replaceManagedStyle(runtimeDocument, 'settings-controls-builder', builderCss);
     const customFont = String(controls?.font?.customFont || '').trim();
     if (customFont) {
       this.container.style.setProperty('--wpb-controls-font-family', customFont);
@@ -218,10 +222,10 @@ _openGokwikCheckout(checkoutUrl: any) {
   }
 },
 
-_openShopfloCheckout() {
+_openShopfloCheckout(checkoutUrl: any) {
   try {
-    if (typeof window.Shopflo?.openCheckout !== 'function') return false;
-    window.Shopflo.openCheckout();
+    if (typeof window.Shopflo?.openFloCheckout !== 'function') return false;
+    window.Shopflo.openFloCheckout(checkoutUrl);
     return true;
   } catch {
     return false;
@@ -274,7 +278,7 @@ async _invokeCheckoutIntegrationProvider(providerId: any, options: any = {}) {
     ...options,
     openThemeCartDrawer: () => this._openThemeCartDrawer(),
     openGokwikCheckout: (checkoutUrl: any) => this._openGokwikCheckout(checkoutUrl),
-    openShopfloCheckout: () => this._openShopfloCheckout(),
+    openShopfloCheckout: (checkoutUrl: any) => this._openShopfloCheckout(checkoutUrl),
   };
   const capability: any = await waitForCheckoutIntegrationCapability(
     providerId,

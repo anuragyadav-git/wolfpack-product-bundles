@@ -1,5 +1,7 @@
 export {};
 
+const { JSDOM } = require('jsdom');
+
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const {
   fullPageSearchCategoryMethods,
@@ -277,17 +279,8 @@ describe('Full Page widget category hydration behavior', () => {
 
   it('renders the empty state for an active category with no product sources', () => {
     const previousDocument = (global as any).document;
-    const grid = {
-      className: '',
-      innerHTML: '',
-      children: [] as any[],
-      appendChild(child: any) {
-        this.children.push(child);
-      },
-    };
-    (global as any).document = {
-      createElement: () => grid,
-    };
+    const runtimeDocument = new JSDOM('<!doctype html><html><body></body></html>').window.document;
+    (global as any).document = runtimeDocument;
 
     const emptyCategory = {
       id: 'cat-empty',
@@ -315,7 +308,7 @@ describe('Full Page widget category hydration behavior', () => {
       const result = fullPageProductGridMethods.createFullPageProductGrid.call(context, 0);
 
       expect(result.innerHTML).toContain('No Products Available');
-      expect(result.children).toHaveLength(0);
+      expect(result.textContent).toMatch(/No Products Available/);
     } finally {
       (global as any).document = previousDocument;
     }
@@ -534,7 +527,10 @@ describe('Full Page widget category hydration behavior', () => {
   });
 
   it('uses the same empty-product copy in modal product rendering', () => {
-    const productGrid = { innerHTML: '' };
+    const previousDocument = global.document;
+    const runtimeDocument = new JSDOM('<!doctype html><html><body></body></html>').window.document;
+    global.document = runtimeDocument;
+    const productGrid = runtimeDocument.createElement('div');
     const context = {
       stepProductData: [[]],
       selectedProducts: [{}],
@@ -550,11 +546,13 @@ describe('Full Page widget category hydration behavior', () => {
       getNoProductsAvailableMessage: () => 'Nothing available',
     };
 
-    fullPageModalProductMethods.renderModalProducts.call(context, 0);
+    try {
+      fullPageModalProductMethods.renderModalProducts.call(context, 0);
 
-    expect(productGrid.innerHTML).toContain('Nothing available');
-    expect(productGrid.innerHTML).not.toContain(
-      'No products available for this step.',
-    );
+      expect(productGrid.textContent).toMatch(/Nothing available/);
+      expect(productGrid.textContent).not.toMatch(/No products available for this step\./);
+    } finally {
+      global.document = previousDocument;
+    }
   });
 });

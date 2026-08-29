@@ -1,21 +1,11 @@
 export {};
 
+const { JSDOM } = require('jsdom');
+
 function createFakeElement() {
-  return {
-    _innerHTML: '',
-    querySelector: () => null,
-    querySelectorAll: () => [],
-    style: {
-      setProperty: () => {},
-      display: '',
-    },
-    get innerHTML() {
-      return this._innerHTML;
-    },
-    set innerHTML(value: string) {
-      this._innerHTML = String(value || '');
-    },
-  } as any;
+  const runtimeDocument = global.document
+    || new JSDOM('<!doctype html><html><body></body></html>').window.document;
+  return runtimeDocument.createElement('div');
 }
 
 function withDocumentShim(body: () => void) {
@@ -23,11 +13,7 @@ function withDocumentShim(body: () => void) {
   const originalWindow = (global as any).window;
   const originalGetComputedStyle = (global as any).getComputedStyle;
 
-  const fakeDocument = {
-    documentElement: {},
-    querySelector: () => null,
-    createElement: () => createFakeElement(),
-  } as any;
+  const fakeDocument = new JSDOM('<!doctype html><html><body></body></html>').window.document;
 
   (global as any).document = fakeDocument;
   (global as any).window = {

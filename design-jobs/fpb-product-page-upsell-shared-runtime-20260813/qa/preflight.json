@@ -3,12 +3,12 @@
   "job_id": "fpb-product-page-upsell-shared-runtime-20260813",
   "revision": 3,
   "status": "blocked",
-  "checked_at": "2026-08-13T17:09:42Z",
+  "checked_at": "2026-08-27T16:27:27Z",
   "environment": "staging",
   "selected_page": {
-    "page_id": 5,
-    "url": "https://agent-5sfidg3m.myshopify.com/apps/product-bundles/wpb/1",
-    "title": "agent"
+    "page_id": 15,
+    "url": "https://admin.shopify.com/store/agent-5sfidg3m/apps/wolfpack-product-bundles-sit/app/settings",
+    "title": "agent · Design Control Panel · Shopify Plus"
   },
   "checks": {
     "chrome_mcp_connected": {
@@ -19,16 +19,16 @@
       "recovery_action": ""
     },
     "supported_chrome_available": { "mandatory": true, "status": "passed", "evidence": "Chrome DevTools MCP navigation, emulation, snapshot, evaluation, screenshot, console, and network tools responded.", "blocker": "", "recovery_action": "" },
-    "intended_page_selected": { "mandatory": true, "status": "passed", "evidence": "Selected existing FPB fixture page 5 and Shopify Admin configure page 3 without bringing either tab to front.", "blocker": "", "recovery_action": "" },
+    "intended_page_selected": { "mandatory": true, "status": "passed", "evidence": "Selected the existing Settings Design page in the connected default Chrome profile and inspected its nested preview frame.", "blocker": "", "recovery_action": "" },
     "app_server_reachable": { "mandatory": true, "status": "passed", "evidence": "The existing SIT dev tunnel served current Admin source and Shopify dev extension assets after cache-bypassed reloads; no deploy or restart was performed.", "blocker": "", "recovery_action": "" },
     "environment_confirmed": { "mandatory": true, "status": "passed", "evidence": "browser-test-plan.yaml specifies staging SIT.", "blocker": "", "recovery_action": "" },
-    "fixture_route_exists": { "mandatory": true, "status": "passed", "evidence": "FPB fixture /apps/product-bundles/wpb/1 loaded bundle cmse8sp170000v0ytaqqzsvtw.", "blocker": "", "recovery_action": "" },
+    "fixture_route_exists": { "mandatory": true, "status": "passed", "evidence": "The deterministic Settings Design preview rendered the production-shaped FPB block offer after the local product purchase form on desktop and mobile.", "blocker": "", "recovery_action": "" },
     "authentication_intentional": { "mandatory": true, "status": "passed", "evidence": "Used only the connected default Chrome profile and its existing Shopify sessions.", "blocker": "", "recovery_action": "" },
     "sensitive_tabs_avoided": { "mandatory": true, "status": "passed", "evidence": "Page inventory was reviewed; only the intended agent storefront and Admin tabs were selected.", "blocker": "", "recovery_action": "" },
-    "viewport_resize_supported": { "mandatory": true, "status": "passed", "evidence": "Emulated 390x844 mobile storefront and 1280x800 desktop Admin viewports.", "blocker": "", "recovery_action": "" },
-    "accessibility_snapshot_supported": { "mandatory": true, "status": "passed", "evidence": "Fresh storefront and Admin accessibility snapshots exposed carousel and Polaris control semantics.", "blocker": "", "recovery_action": "" },
+    "viewport_resize_supported": { "mandatory": true, "status": "passed", "evidence": "The Design preview's 1280 desktop renderer and 390x844 mobile renderer were exercised through their native viewport controls.", "blocker": "", "recovery_action": "" },
+    "accessibility_snapshot_supported": { "mandatory": true, "status": "passed", "evidence": "Fresh snapshots exposed the product purchase form, Complete the set offer copy, Build this bundle action, and PPB state-selector options.", "blocker": "", "recovery_action": "" },
     "screenshot_write_supported": { "mandatory": true, "status": "blocked", "evidence": "Inline screenshot capture succeeded, but Chrome MCP rejected both relative and absolute qa file paths as outside its configured roots.", "blocker": "Durable screenshot file output is unavailable from the Chrome MCP filesystem policy.", "recovery_action": "Allow the repository qa directory in the Chrome MCP workspace roots, then save the evidence PNGs." },
-    "console_inspection_supported": { "mandatory": true, "status": "passed", "evidence": "Console inspection tools are exposed and callable.", "blocker": "", "recovery_action": "" },
+    "console_inspection_supported": { "mandatory": true, "status": "passed", "evidence": "The cache-bypassed parity pass completed with no console errors.", "blocker": "", "recovery_action": "" },
     "network_inspection_supported": { "mandatory": true, "status": "passed", "evidence": "Network request listing confirmed the current dev extension asset and storefront data endpoint responses.", "blocker": "", "recovery_action": "" },
     "repository_identity_recorded": { "mandatory": true, "status": "passed", "evidence": "Repository, branch, and base commit are recorded below.", "blocker": "", "recovery_action": "" },
     "job_revision_recorded": { "mandatory": true, "status": "passed", "evidence": "Job fpb-product-page-upsell-shared-runtime-20260813 revision 3.", "blocker": "", "recovery_action": "" },

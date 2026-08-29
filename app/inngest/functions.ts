@@ -1,6 +1,7 @@
 import { inngest } from "./client";
 import { WebhookProcessor } from "../services/webhooks/processor.server";
 import type { ShopifyWebhookEventData } from "./types";
+import { runSubscriptionReconciliation } from "../services/subscriptions/subscription-reconciliation-runner.server";
 
 /**
  * Inngest function: shopify-webhook
@@ -39,4 +40,10 @@ export const webhookFunction = inngest.createFunction(
 
     return { processed: true, message: result.message };
   },
+);
+
+export const subscriptionReconciliationFunction = inngest.createFunction(
+  { id: "subscription-reconciliation", retries: 2 },
+  { cron: "0 * * * *" },
+  async () => runSubscriptionReconciliation(),
 );

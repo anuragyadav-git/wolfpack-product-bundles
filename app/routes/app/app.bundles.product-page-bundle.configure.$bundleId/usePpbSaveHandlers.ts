@@ -4,6 +4,7 @@ import { normalizeDefaultProductsData } from "../../../lib/bundle-config/default
 import { buildVisibilityDisplayConfiguration } from "./ConfigureBundleFlow.helpers";
 import { useConfigureValidation } from "../_shared/bundle-configure/useConfigureValidation";
 import { validateBundleSubscriptionConfig } from "../../../lib/bundle-subscriptions";
+import { i18n } from "../../../i18n/config";
 import {
   mergePpbBundleEmbedTranslations,
   mergePpbBundleWidgetTranslations,
@@ -122,7 +123,7 @@ export function usePpbSaveHandlers({
           validation.setServerFieldErrors([
             {
               path: "embed.appEmbed",
-              message: "Enable the Wolfpack Bundle app embed before saving Bundle Embed.",
+              message: "Enable the Only Bundles app embed before saving Bundle Embed.",
             },
           ]);
           return;
@@ -348,13 +349,11 @@ export function usePpbSaveHandlers({
       return;
     } catch (error: any) {
       AppLogger.error("Save failed:", {}, error as any);
-      base.shopify.toast.show(
-        (error as Error).message || "Failed to save changes",
-        {
-          isError: true,
-          duration: 5000,
-        },
-      );
+      base.setOperationAlert({
+        id: "bundle-save",
+        heading: i18n.t("common.alerts.bundleNotSaved"),
+        message: "Review the bundle and try again.",
+      });
     }
   }, [
     base,

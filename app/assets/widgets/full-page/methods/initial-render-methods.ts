@@ -1,4 +1,84 @@
 import { FullPagePreset } from '../../shared/full-page-preset.js';
+import { createCartIcon } from '../../shared/svg-icons.js';
+
+function createFullPagePickerModal(runtimeDocument: Document) {
+  const modal = runtimeDocument.createElement('div');
+  modal.id = 'bundle-builder-modal';
+  modal.className = 'bundle-builder-modal';
+  modal.hidden = true;
+  const overlay = runtimeDocument.createElement('div');
+  overlay.className = 'modal-overlay';
+  const content = runtimeDocument.createElement('div');
+  content.className = 'modal-content';
+  const header = runtimeDocument.createElement('div');
+  header.className = 'modal-header';
+  const stepTitle = runtimeDocument.createElement('div');
+  stepTitle.className = 'modal-step-title';
+  const tabsWrapper = runtimeDocument.createElement('div');
+  tabsWrapper.className = 'modal-tabs-wrapper';
+  const left = runtimeDocument.createElement('button');
+  left.className = 'tab-arrow tab-arrow-left';
+  left.setAttribute('aria-label', 'Scroll tabs left');
+  left.textContent = '‹';
+  const tabs = runtimeDocument.createElement('div');
+  tabs.className = 'modal-tabs';
+  const right = runtimeDocument.createElement('button');
+  right.className = 'tab-arrow tab-arrow-right';
+  right.setAttribute('aria-label', 'Scroll tabs right');
+  right.textContent = '›';
+  tabsWrapper.append(left, tabs, right);
+  const close = runtimeDocument.createElement('span');
+  close.className = 'close-button';
+  close.textContent = '×';
+  header.append(stepTitle, tabsWrapper, close);
+  const body = runtimeDocument.createElement('div');
+  body.className = 'modal-body';
+  const grid = runtimeDocument.createElement('div');
+  grid.className = 'product-grid';
+  body.appendChild(grid);
+  const footer = runtimeDocument.createElement('div');
+  footer.className = 'modal-footer';
+  const grouped = runtimeDocument.createElement('div');
+  grouped.className = 'modal-footer-grouped-content';
+  const totalPill = runtimeDocument.createElement('div');
+  totalPill.className = 'modal-footer-total-pill';
+  totalPill.setAttribute('data-wpb-discount-feedback-pill', '');
+  const strike = runtimeDocument.createElement('span');
+  strike.className = 'total-price-strike';
+  const final = runtimeDocument.createElement('span');
+  final.className = 'total-price-final';
+  const separator = runtimeDocument.createElement('span');
+  separator.className = 'price-cart-separator';
+  separator.textContent = '|';
+  const cartWrapper = runtimeDocument.createElement('span');
+  cartWrapper.className = 'cart-badge-wrapper';
+  const count = runtimeDocument.createElement('span');
+  count.className = 'cart-badge-count';
+  count.textContent = '0';
+  const cartIcon = createCartIcon(runtimeDocument);
+  cartIcon.classList.add('cart-icon');
+  cartWrapper.append(count, cartIcon);
+  totalPill.append(strike, final, separator, cartWrapper);
+  const buttons = runtimeDocument.createElement('div');
+  buttons.className = 'modal-footer-buttons-row';
+  const previous = runtimeDocument.createElement('button');
+  previous.className = 'modal-nav-button prev-button';
+  previous.textContent = 'BACK';
+  const next = runtimeDocument.createElement('button');
+  next.className = 'modal-nav-button next-button';
+  next.textContent = 'NEXT';
+  buttons.append(previous, next);
+  const messaging = runtimeDocument.createElement('div');
+  messaging.className = 'modal-footer-discount-messaging';
+  const message = runtimeDocument.createElement('div');
+  message.className = 'footer-discount-text';
+  messaging.appendChild(message);
+  grouped.append(totalPill, buttons, messaging);
+  footer.appendChild(grouped);
+  content.append(header, body, footer);
+  modal.append(overlay, content);
+  return modal;
+}
 
 export function getEnabledFullPageSteps(steps: any[]) {
   if (!Array.isArray(steps)) return [];
@@ -205,57 +285,7 @@ ensureModal() {
   let modal = document.getElementById('bundle-builder-modal');
 
   if (!modal) {
-    modal = document.createElement('div');
-    modal.id = 'bundle-builder-modal';
-    modal.className = 'bundle-builder-modal';
-    modal.hidden = true;
-    modal.innerHTML = `
-      <div class="modal-overlay"></div>
-      <div class="modal-content">
-        <div class="modal-header">
-          <div class="modal-step-title"></div>
-          <div class="modal-tabs-wrapper">
-            <button class="tab-arrow tab-arrow-left" aria-label="Scroll tabs left">&lsaquo;</button>
-            <div class="modal-tabs"></div>
-            <button class="tab-arrow tab-arrow-right" aria-label="Scroll tabs right">&rsaquo;</button>
-          </div>
-          <span class="close-button">&times;</span>
-        </div>
-        <div class="modal-body">
-          <div class="product-grid"></div>
-        </div>
-        <div class="modal-footer">
-          <!-- Centered Grouped Content Container -->
-          <div class="modal-footer-grouped-content">
-            <!-- Total Pill - Sits Above Buttons -->
-            <div class="modal-footer-total-pill" data-wpb-discount-feedback-pill>
-              <span class="total-price-strike"></span>
-              <span class="total-price-final"></span>
-              <span class="price-cart-separator">|</span>
-              <span class="cart-badge-wrapper">
-                <span class="cart-badge-count">0</span>
-                <svg class="cart-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="9" cy="21" r="1" fill="currentColor" stroke="none"/>
-                  <circle cx="20" cy="21" r="1" fill="currentColor" stroke="none"/>
-                  <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
-                </svg>
-              </span>
-            </div>
-
-            <!-- Buttons Row - Below Pill -->
-            <div class="modal-footer-buttons-row">
-              <button class="modal-nav-button prev-button">BACK</button>
-              <button class="modal-nav-button next-button">NEXT</button>
-            </div>
-
-            <!-- Discount Messaging Section -->
-            <div class="modal-footer-discount-messaging">
-              <div class="footer-discount-text"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
+    modal = createFullPagePickerModal(document);
 
     document.body.appendChild(modal);
 
@@ -312,7 +342,7 @@ async renderUI() {
 
 async renderSteps() {
   // Clear existing steps
-  this.elements.stepsContainer.innerHTML = '';
+  this.elements.stepsContainer.replaceChildren();
 
   if (!this.selectedBundle || !this.selectedBundle.steps) {
     return;

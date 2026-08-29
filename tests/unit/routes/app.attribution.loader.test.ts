@@ -5,6 +5,7 @@
 import { loader } from "../../../app/routes/app/app.attribution";
 import { authenticate } from "../../../app/shopify.server";
 import { getPixelStatus } from "../../../app/services/pixel-activation.server";
+import { resolveShopEntitlements } from "../../../app/services/subscriptions/subscription-service.server";
 
 jest.mock("../../../app/shopify.server", () => ({
   authenticate: { admin: jest.fn() },
@@ -16,17 +17,28 @@ jest.mock("../../../app/services/pixel-activation.server", () => ({
   deactivateUtmPixel: jest.fn(),
 }));
 
+jest.mock("../../../app/services/subscriptions/subscription-service.server", () => ({
+  resolveShopEntitlements: jest.fn().mockResolvedValue({
+    planCode: "GROWTH",
+    entitlements: {
+      capabilities: { advancedAnalytics: true },
+    },
+  }),
+}));
+
 jest.mock("../../../app/db.server", () => ({
   __esModule: true,
   default: {
     orderAttribution: {
       findMany: jest.fn(),
+      aggregate: jest.fn(),
     },
     bundle: {
       findMany: jest.fn(),
     },
     bundleAnalytics: {
       findMany: jest.fn(),
+      count: jest.fn(),
     },
     bundleEngagement: {
       findMany: jest.fn(),
@@ -41,6 +53,9 @@ const mockRequireAdminSession = authenticate.admin as jest.MockedFunction<
   typeof authenticate.admin
 >;
 const mockGetPixelStatus = getPixelStatus as jest.MockedFunction<typeof getPixelStatus>;
+const mockResolveShopEntitlements = resolveShopEntitlements as jest.MockedFunction<
+  typeof resolveShopEntitlements
+>;
 const getDb = () => require("../../../app/db.server").default;
 
 function getDeferredPayload(response: unknown) {
@@ -68,6 +83,12 @@ describe("app.attribution loader — campaign aggregation", () => {
     } as any);
 
     mockGetPixelStatus.mockResolvedValue({ active: true } as any);
+    mockResolveShopEntitlements.mockResolvedValue({
+      planCode: "GROWTH",
+      entitlements: {
+        capabilities: { advancedAnalytics: true },
+      },
+    } as any);
     getDb().shop.findUnique.mockResolvedValue({
       customUtmParameters: [],
     });
@@ -349,5 +370,38 @@ describe("app.attribution loader — campaign aggregation", () => {
     expect(payload.timeSeries).toHaveLength(7);
     expect(payload.timeSeries[0].date).toBe("2026-06-01");
     expect(payload.timeSeries[6].date).toBe("2026-06-07");
+  });
+
+  it("fails closed to summary analytics when billing cannot be verified", async () => {
+    mockResolveShopEntitlements.mockResolvedValueOnce({
+      planCode: "FREE",
+      entitlements: null,
+    } as any);
+    getDb().bundleAnalytics.count
+      .mockResolvedValueOnce(8)
+      .mockResolvedValueOnce(3)
+      .mockResolvedValueOnce(2);
+    getDb().orderAttribution.aggregate.mockResolvedValueOnce({
+      _count: { _all: 2 },
+      _sum: { revenue: 4500 },
+    });
+
+    const response = await loader({
+      request: new Request("https://test.myshopify.com/app/attribution?days=90"),
+      params: {},
+      context: {},
+    } as any);
+
+    const payload = (await getDeferredPayload(response).analytics) as any;
+
+    expect(payload).toMatchObject({
+      accessMode: "SUMMARY",
+      days: 30,
+      summary: {
+        totalRevenue: 4500,
+        totalOrders: 2,
+      },
+    });
+    expect(getDb().orderAttribution.findMany).not.toHaveBeenCalled();
   });
 });

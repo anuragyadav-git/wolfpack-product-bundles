@@ -40,7 +40,7 @@ describe('loading overlay helpers', () => {
     markLoadingOverlayVisible(overlay);
 
     expect(overlay.classList.contains('is-visible')).toBe(true);
-    expect(overlay.getAttribute('aria-hidden')).toBe('false');
+    expect(overlay.getAttribute('aria-hidden')).toEqual('false');
   });
 
   it('removes and hides the overlay when transitionend fires', () => {
@@ -52,7 +52,7 @@ describe('loading overlay helpers', () => {
     overlay.dispatchEvent('transitionend');
 
     expect(overlay.removed).toBe(true);
-    expect(overlay.getAttribute('aria-hidden')).toBe('true');
+    expect(overlay.getAttribute('aria-hidden')).toEqual('true');
   });
 
   it('removes and hides the overlay when no transitionend event fires', () => {
@@ -64,6 +64,6 @@ describe('loading overlay helpers', () => {
     jest.advanceTimersByTime(250);
 
     expect(overlay.removed).toBe(true);
-    expect(overlay.getAttribute('aria-hidden')).toBe('true');
+    expect(overlay.getAttribute('aria-hidden')).toEqual('true');
   });
 });

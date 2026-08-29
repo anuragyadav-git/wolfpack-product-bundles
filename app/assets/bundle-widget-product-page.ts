@@ -57,10 +57,46 @@
  * - No data migration or merchant action required
  *
  * @version 1.0.0
- * @author Wolfpack Team
+ * @author Only Bundles Team
  */
 
 'use strict';
+
+import { BUNDLE_WIDGET } from './widgets/shared/constants.js';
+import { CurrencyManager } from './widgets/shared/currency-manager.js';
+import { BundleDataManager } from './widgets/shared/bundle-data-manager.js';
+import { PricingCalculator } from './widgets/shared/pricing-calculator.js';
+import { ToastManager } from './widgets/shared/toast-manager.js';
+import { TemplateManager } from './widgets/shared/template-manager.js';
+import { ConditionValidator } from './widgets/shared/condition-validator.js';
+import { createDefaultLoadingAnimation } from './widgets/shared/default-loading-animation.js';
+import { hideLoadingOverlayElement, markLoadingOverlayVisible } from './widgets/shared/loading-overlay.js';
+import { bundleLevelCssMethods } from './widgets/shared/bundle-level-css-methods.js';
+import { modalSlotTemplateMethods } from './widgets/product-page/templates/modal-slot-template.js';
+import { cascadeTemplateMethods } from './widgets/product-page/templates/cascade-template.js';
+import { gridTemplateMethods } from './widgets/product-page/templates/grid-template.js';
+import { ppbExpandSingleStepCategoriesAsSteps } from './widgets/product-page/single-step-categories.js';
+import { getDiscountProgressData, getSelectedQuantity } from './widgets/shared/engine/bundle-selectors.js';
+import { installControllerMethods } from './widgets/shared/controller-methods.js';
+import { buildStorefrontApiPath } from '../config/storefront-proxy-routes.js';
+import { ProductPageCartMethods } from './widgets/product-page/methods/cart-methods.js';
+import { ProductPageModalMethods } from './widgets/product-page/methods/modal-methods.js';
+import { ProductPageSelectionMethods } from './widgets/product-page/methods/selection-methods.js';
+import { ProductPageProductDataMethods } from './widgets/product-page/methods/product-data-methods.js';
+import { ProductPageSelectionDataMethods } from './widgets/product-page/methods/selection-data-methods.js';
+import { ProductPageSelectionPersistenceMethods } from './widgets/product-page/methods/selection-persistence-methods.js';
+import { ProductPageLayoutShellMethods } from './widgets/product-page/methods/layout-shell-methods.js';
+import { ProductPageInpageRenderMethods } from './widgets/product-page/methods/inpage-render-methods.js';
+import { ProductPageConfigLifecycleMethods } from './widgets/product-page/methods/config-lifecycle-methods.js';
+import { ProductPageDefaultProductMethods } from './widgets/product-page/methods/default-product-methods.js';
+import { ProductPageDomMethods } from './widgets/product-page/methods/dom-methods.js';
+import { ProductPageFooterModalStateMethods } from './widgets/product-page/methods/footer-modal-state-methods.js';
+import { ProductPageModalStateMethods } from './widgets/product-page/methods/modal-state-methods.js';
+import { ProductPageWidgetMiscMethods } from './widgets/product-page/methods/widget-misc-methods.js';
+import { renderBundlePurchaseOptions } from './widgets/shared/components/purchase-options.js';
+import { bundleSubscriptionStorefrontMethods } from './widgets/shared/subscription-storefront-methods.js';
+import { applyBrowsedProductPreselection } from './widgets/product-page/embed-preselection.js';
+import { installDiscountTierPillFeedback } from './widgets/shared/discount-tier-feedback.js';
 
 // ============================================================
 // BOTTOM-SHEET HELPER FUNCTIONS (pure — exposed for unit tests)
@@ -93,52 +129,6 @@ if (typeof window !== 'undefined') {
     ppbExpandSingleStepCategoriesAsSteps,
   };
 }
-
-// Import shared components and utilities
-import { BUNDLE_WIDGET } from './widgets/shared/constants.js';
-import { CurrencyManager } from './widgets/shared/currency-manager.js';
-import { BundleDataManager } from './widgets/shared/bundle-data-manager.js';
-import { PricingCalculator } from './widgets/shared/pricing-calculator.js';
-import { ToastManager } from './widgets/shared/toast-manager.js';
-import { TemplateManager } from './widgets/shared/template-manager.js';
-import { ComponentGenerator } from './widgets/shared/component-generator.js';
-import { ConditionValidator } from './widgets/shared/condition-validator.js';
-import { createDefaultLoadingAnimation } from './widgets/shared/default-loading-animation.js';
-import { hideLoadingOverlayElement, markLoadingOverlayVisible } from './widgets/shared/loading-overlay.js';
-import { bundleLevelCssMethods } from './widgets/shared/bundle-level-css-methods.js';
-import { modalSlotTemplateMethods } from './widgets/product-page/templates/modal-slot-template.js';
-import { cascadeTemplateMethods } from './widgets/product-page/templates/cascade-template.js';
-import { gridTemplateMethods } from './widgets/product-page/templates/grid-template.js';
-import { ppbExpandSingleStepCategoriesAsSteps } from './widgets/product-page/single-step-categories.js';
-import { getDiscountProgressData, getSelectedQuantity } from './widgets/shared/engine/bundle-selectors.js';
-import { renderDiscountProgress } from './widgets/shared/components/discount-progress.js';
-import { renderSharedProductCard } from './widgets/shared/components/product-card.js';
-import { installControllerMethods } from './widgets/shared/controller-methods.js';
-import { buildStorefrontApiPath } from '../config/storefront-proxy-routes.js';
-import { ProductPageCartMethods } from './widgets/product-page/methods/cart-methods.js';
-import { ProductPageModalMethods } from './widgets/product-page/methods/modal-methods.js';
-import { ProductPageSelectionMethods } from './widgets/product-page/methods/selection-methods.js';
-import { ProductPageProductDataMethods } from './widgets/product-page/methods/product-data-methods.js';
-import { ProductPageSelectionDataMethods } from './widgets/product-page/methods/selection-data-methods.js';
-import { ProductPageSelectionPersistenceMethods } from './widgets/product-page/methods/selection-persistence-methods.js';
-import { ProductPageLayoutShellMethods } from './widgets/product-page/methods/layout-shell-methods.js';
-import { ProductPageInpageRenderMethods } from './widgets/product-page/methods/inpage-render-methods.js';
-import { ProductPageConfigLifecycleMethods } from './widgets/product-page/methods/config-lifecycle-methods.js';
-import { ProductPageDefaultProductMethods } from './widgets/product-page/methods/default-product-methods.js';
-import { ProductPageDomMethods } from './widgets/product-page/methods/dom-methods.js';
-import { ProductPageFooterModalStateMethods } from './widgets/product-page/methods/footer-modal-state-methods.js';
-import { ProductPageModalStateMethods } from './widgets/product-page/methods/modal-state-methods.js';
-import { ProductPageWidgetMiscMethods } from './widgets/product-page/methods/widget-misc-methods.js';
-import { renderBundlePurchaseOptions } from './widgets/shared/components/purchase-options.js';
-import { bundleSubscriptionStorefrontMethods } from './widgets/shared/subscription-storefront-methods.js';
-import { applyBrowsedProductPreselection } from './widgets/product-page/embed-preselection.js';
-import { BundleProductModal } from './bundle-modal-component.js';
-import { installDiscountTierPillFeedback } from './widgets/shared/discount-tier-feedback.js';
-
-export function createProductPageProductModal(widget: any, ModalConstructor = BundleProductModal) {
-  return new ModalConstructor(widget, { drawerOwner: 'ppb' });
-}
-
 
 export class BundleWidgetProductPage {
 
@@ -179,8 +169,6 @@ export class BundleWidgetProductPage {
     this.config = {};
     this.elements = {};
     this.selectedSellingPlanId = undefined;
-
-    this.productModal = createProductPageProductModal(this);
 
     // Call async init but don't block constructor
     this.init().catch(error => {

@@ -2,6 +2,8 @@ export {};
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { fullPageProductCardFooterMethods } = require('../../../app/assets/widgets/full-page/methods/product-card-footer-methods.js');
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { JSDOM } = require('jsdom');
 
 class FakeTarget {
   classList = { contains: (name: string) => name === 'product-add-btn' };
@@ -49,17 +51,7 @@ describe('FPB disabled variant-selector behavior', () => {
     'renders the configured quick-look action for grouped %s cards',
     (designPreset) => {
       const originalDocument = (global as { document?: unknown }).document;
-      let renderedHtml = '';
-      (global as { document?: unknown }).document = {
-        createElement: () => ({
-          firstChild: null as null | { html: string },
-          get innerHTML() { return renderedHtml; },
-          set innerHTML(value: string) {
-            renderedHtml = value;
-            this.firstChild = { html: value };
-          },
-        }),
-      };
+      (global as { document?: unknown }).document = new JSDOM('<!doctype html><html><body></body></html>').window.document;
 
       try {
         const card = fullPageProductCardFooterMethods.createProductCard.call(
@@ -81,10 +73,10 @@ describe('FPB disabled variant-selector behavior', () => {
           },
           { ...groupedProduct, variants: [...groupedProduct.variants] },
           0,
-        ) as { html: string };
+        ) as HTMLElement;
 
-        expect(card.html).toContain('Choose Options');
-        expect(card.html).not.toContain('vs-wrapper');
+        expect(card.querySelector('button[data-product-id]')?.textContent).toBe('Choose Options');
+        expect(card.querySelector('[data-vs-product-id]')).toBeNull();
       } finally {
         (global as { document?: unknown }).document = originalDocument;
       }

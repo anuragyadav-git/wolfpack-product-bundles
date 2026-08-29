@@ -9,8 +9,9 @@ import {
   SettingsWorkspaceError,
 } from "./app.settings/SettingsLandingShell";
 import { SettingsRoute } from "./app.settings/SettingsRoute";
-import { loader as settingsLoader } from "./app.settings";
+import type { loader as settingsLoader } from "./app.settings";
 import { AdminSectionLoadingState } from "../../components/AdminSectionLoadingState";
+import { ReduxProvider } from "../../store/ReduxProvider";
 
 export { action, loader } from "./app.settings";
 
@@ -52,14 +53,16 @@ export default function AdditionalConfigurationsRoute() {
         errorElement={<SettingsWorkspaceError onExit={() => navigate("/app/settings")} />}
       >
         {([resolvedSettingsPage, resolvedPreviewBundles]: any) => (
-          <SettingsRoute
-            initialView="controls"
-            initialControlNavigation={initialNavigation}
-            onControlNavigationChange={handleNavigationChange}
-            onExit={() => navigate("/app/settings")}
-            settingsPage={resolvedSettingsPage}
-            previewBundles={resolvedPreviewBundles}
-          />
+          <ReduxProvider>
+            <SettingsRoute
+              initialView="controls"
+              initialControlNavigation={initialNavigation}
+              onControlNavigationChange={handleNavigationChange}
+              onExit={() => navigate("/app/settings")}
+              settingsPage={resolvedSettingsPage}
+              previewBundles={resolvedPreviewBundles}
+            />
+          </ReduxProvider>
         )}
       </Await>
     </Suspense>

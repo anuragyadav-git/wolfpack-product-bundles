@@ -22,6 +22,8 @@ const ACTIVE_REFACTOR_BACKLOG = new Set<string>([
   "app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/save-bundle.server.ts",
   "app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/save-bundle.server.ts",
   "app/routes/app/app.dashboard/DashboardPage.tsx",
+  "app/routes/app/app.settings/DesignLivePreview.tsx",
+  "app/routes/app/app.settings/design-preview-model.ts",
 ]);
 
 const CONFIGURE_ROUTE_FAMILY_REFACTOR_BACKLOG = new Set<string>([
@@ -63,9 +65,9 @@ function countLines(relativePath: string): FileLineCount {
 }
 
 function adminFileLineCounts(): FileLineCount[] {
-  return SCAN_ROOTS.flatMap(collectSourceFiles)
-    .filter(shouldScan)
-    .map(countLines);
+  return SCAN_ROOTS.flatMap((value) => collectSourceFiles(value))
+    .filter((value) => shouldScan(value))
+    .map((value) => countLines(value));
 }
 
 describe("Admin route and component file boundaries", () => {

@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "job_id": "fpb-step-title-redesign-20260827",
+  "revision": 2,
+  "status": "complete",
+  "cases": [
+    {
+      "id": "step-title-empty",
+      "data": {
+        "name": "Step 1",
+        "pageTitle": "   "
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "step-name-title-distinct",
+      "data": {
+        "name": "Step 1",
+        "pageTitle": "Choose products for your bundle"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "step-title-two-line",
+      "data": {
+        "name": "Choose a base",
+        "pageTitle": "Choose the products you would like to include in this personalised bundle"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "step-title-unbroken",
+      "data": {
+        "name": "Step 2",
+        "pageTitle": "ChooseYourFavouriteProductsForThisPersonalisedBundleWithoutSpaces"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "step-title-localized",
+      "data": {
+        "name": "Schritt 1",
+        "pageTitle": "W\u00e4hlen Sie die Produkte aus, die Sie Ihrem pers\u00f6nlichen Paket hinzuf\u00fcgen m\u00f6chten"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "preview-template-matrix",
+      "data": {
+        "fpb": [
+          "STANDARD",
+          "CLASSIC",
+          "COMPACT",
+          "HORIZONTAL"
+        ],
+        "ppb": [
+          "LIST",
+          "GRID",
+          "HORIZONTAL_SLOTS",
+          "VERTICAL_SLOTS"
+        ],
+        "viewports": [
+          "desktop",
+          "mobile"
+        ]
+      },
+      "required_in_browser_qa": true
+    }
+  ]
+}

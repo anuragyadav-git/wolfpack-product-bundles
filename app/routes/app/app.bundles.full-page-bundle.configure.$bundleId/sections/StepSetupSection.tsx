@@ -82,7 +82,7 @@ export function StepSetupSection({
             className={fullPageBundleStyles.addStepBtn}
             onClick={handleAddNewStep}
           >
-            <span aria-hidden="true">+</span> <span>Add Step</span>
+            <span aria-hidden="true"><s-icon type="plus" /></span> <span>Add Step</span>
           </button>
         </div>
         {stepsState.steps.map(

@@ -5,7 +5,7 @@ title: PPB Bundle Embed Test Spec
 type: test-spec
 status: implemented
 summary: Behavioral coverage for PPB bundle embed configuration, eligibility, routing, placement, and preselection.
-last_audited: 2026-08-20
+last_audited: 2026-08-27
 owners:
   - engineering
 domains:
@@ -72,8 +72,15 @@ purchase controls.
 | 4 | Preselection | Matching available current variant | Quantity one in matching step | Never overwrites restored state |
 | 5 | Parent-product path | Existing direct PPB container | Embed runtime no-ops | Existing behavior preserved |
 
+### PpbBundleEmbedAdmin
+| # | Scenario | Input | Expected Output | Notes |
+|---|---|---|---|---|
+| 1 | Disabled configuration | Master switch off | Saved fields remain visible and inert | Matches live EB |
+| 2 | Custom placement | Master switch off | Place Block remains available | Placement anchor is configured independently |
+| 3 | Target transition | New targeting mode | Product and collection selections clear | Prevents mixed targeting state |
+
 ## Acceptance Criteria
-- [ ] All listed test cases pass
-- [ ] Storefront assets load only after an eligible embed resolves
+- [x] All listed test cases pass
+- [x] Storefront assets load only after an eligible embed resolves
 - [ ] Native price, dynamic checkout, and ordinary product form remain untouched
 - [ ] Parent-product PPB and Bundle Widget behavior regressions pass

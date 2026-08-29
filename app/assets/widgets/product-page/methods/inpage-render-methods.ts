@@ -1,14 +1,13 @@
 import { BUNDLE_WIDGET } from '../../shared/constants.js';
 import { CurrencyManager } from '../../shared/currency-manager.js';
-import { ComponentGenerator } from '../../shared/component-generator.js';
 import { ToastManager } from '../../shared/toast-manager.js';
 import { ConditionValidator } from '../../shared/condition-validator.js';
 import { getDiscountProgressData } from '../../shared/engine/bundle-selectors.js';
-import { renderDiscountProgress } from '../../shared/components/discount-progress.js';
-import { renderSharedProductCard } from '../../shared/components/product-card.js';
+import { createSharedProductCardElement } from '../../shared/components/product-card.js';
 import { shouldRenderInlineVariantSelector } from '../../shared/variant-selector-policy.js';
 import { resolveProductPageCardButtonText, resolveProductPageInlineAddText } from './modal-methods.js';
 import { getSubscriptionProductCardPrice } from '../../shared/subscription-storefront-methods.js';
+import { createGiftBadgeIcon } from '../../shared/svg-icons.js';
 
 function bsIsDefaultStep(step: any) { return !!step?.isDefault; }
 
@@ -53,7 +52,10 @@ function createFilledSlotRemoveButton({ label, onRemove }: any) {
   button.className = 'step-clear-badge';
   button.title = label;
   button.setAttribute('aria-label', label);
-  button.innerHTML = '<span aria-hidden="true">&times;</span>';
+  const icon = document.createElement('span');
+  icon.setAttribute('aria-hidden', 'true');
+  icon.textContent = '×';
+  button.appendChild(icon);
   button.addEventListener('click', (event: any) => {
     event.stopPropagation();
     onRemove(event);
@@ -116,23 +118,31 @@ function focusModalSlotAfterRemoval(widget: any, stepIndex: any, slotIndex: numb
   }
 }
 
-function renderInpageProductLoadingRows(rowCount = 3) {
-  const rows = Array.from({ length: rowCount }, (_, index) => `
-    <div class="bw-ppb-inpage-loading-row" aria-hidden="true" data-loading-row="${index + 1}">
-      <span class="bw-ppb-inpage-loading-media"></span>
-      <span class="bw-ppb-inpage-loading-body">
-        <span class="bw-ppb-inpage-loading-line bw-ppb-inpage-loading-line--title"></span>
-        <span class="bw-ppb-inpage-loading-line bw-ppb-inpage-loading-line--price"></span>
-      </span>
-      <span class="bw-ppb-inpage-loading-action"></span>
-    </div>
-  `).join('');
-
-  return `
-    <div class="bw-ppb-inpage-loading" role="status" aria-label="Loading products">
-      ${rows}
-    </div>
-  `;
+function createInpageProductLoadingElement(rowCount = 3) {
+  const root = document.createElement('div');
+  root.className = 'bw-ppb-inpage-loading';
+  root.setAttribute('role', 'status');
+  root.setAttribute('aria-label', 'Loading products');
+  Array.from({ length: rowCount }, (_, index) => {
+    const row = document.createElement('div');
+    row.className = 'bw-ppb-inpage-loading-row';
+    row.setAttribute('aria-hidden', 'true');
+    row.dataset.loadingRow = String(index + 1);
+    const media = document.createElement('span');
+    media.className = 'bw-ppb-inpage-loading-media';
+    const body = document.createElement('span');
+    body.className = 'bw-ppb-inpage-loading-body';
+    const title = document.createElement('span');
+    title.className = 'bw-ppb-inpage-loading-line bw-ppb-inpage-loading-line--title';
+    const price = document.createElement('span');
+    price.className = 'bw-ppb-inpage-loading-line bw-ppb-inpage-loading-line--price';
+    body.append(title, price);
+    const action = document.createElement('span');
+    action.className = 'bw-ppb-inpage-loading-action';
+    row.append(media, body, action);
+    root.append(row);
+  });
+  return root;
 }
 
 export function shouldDisplayVariantsAsIndividualForInpageCategory(step: any, stepIndex: string|number, activeCategoryIndexes: any = {}) {
@@ -222,7 +232,7 @@ _renderInpageStepProducts(stepIndex: string|number, target: any) {
   const stepProductsLoaded = this._inpageStepProductsLoaded[stepIndex] === true;
   if (rawProducts.length === 0 && !stepProductsLoaded && !(this._stepFetchFailed && this._stepFetchFailed[stepIndex])) {
     target.setAttribute?.('aria-busy', 'true');
-    target.innerHTML = renderInpageProductLoadingRows();
+    target.replaceChildren(createInpageProductLoadingElement());
     prependStepBanner();
     this.loadStepProducts(stepIndex).then(() => {
       this._inpageStepProductsLoaded[stepIndex] = true;
@@ -249,9 +259,12 @@ _renderInpageStepProducts(stepIndex: string|number, target: any) {
   );
   target.setAttribute?.('aria-busy', 'false');
   if (products.length === 0) {
-    target.innerHTML = this._stepFetchFailed?.[stepIndex]
-      ? '<p class="modal-fetch-error">Could not load products. Please check your connection and try again.</p>'
-      : '<p class="no-products-message">No products are configured for this step.</p>';
+    const message = document.createElement('p');
+    message.className = this._stepFetchFailed?.[stepIndex] ? 'modal-fetch-error' : 'no-products-message';
+    message.textContent = this._stepFetchFailed?.[stepIndex]
+      ? 'Could not load products. Please check your connection and try again.'
+      : 'No products are configured for this step.';
+    target.replaceChildren(message);
     prependStepBanner();
     return;
   }
@@ -265,7 +278,7 @@ _renderInpageStepProducts(stepIndex: string|number, target: any) {
   const currencyInfo = CurrencyManager.getCurrencyInfo();
   const inlineAddText = resolveProductPageInlineAddText(this._resolveText?.bind(this));
 
-  target.innerHTML = products.map((product: any)  => {
+  const cards = products.map((product: any)  => {
     const directSelectionKey = product.selectionId || product.variantId || product.id;
     const restoredGridSelection = usesGridCards
       ? resolveInpageProductSelection(
@@ -281,17 +294,20 @@ _renderInpageStepProducts(stepIndex: string|number, target: any) {
     const currentQuantity = restoredGridSelection?.quantity
       ?? this.getSelectedQuantity(stepIndex, selectionKey);
     const { available, outOfStock } = this.getVariantAvailable(stepIndex, selectionKey);
+    const outOfStockText = this._resolveText('productCardOutOfStockButton', 'Out of Stock');
     const atMaxStock = available !== null && currentQuantity >= available;
     const atMaxProductQuantity = productQuantityLimit !== null && currentQuantity >= productQuantityLimit;
     const increaseDisabled = outOfStock || atMaxStock || atMaxProductQuantity;
-    const stockBadge = outOfStock
-      ? '<div class="product-stock-badge product-stock-badge--out">Out of stock</div>'
-      : '';
-    const variantSelectorHtml = this.renderInlineCardVariantSelector(product, currentStep);
+    const stockBadgeElement = outOfStock ? document.createElement('div') : null;
+    if (stockBadgeElement) {
+      stockBadgeElement.className = 'product-stock-badge product-stock-badge--out';
+      stockBadgeElement.textContent = outOfStockText;
+    }
+    const variantSelectorElement = this.renderInlineCardVariantSelector(product, currentStep);
 
     if (usesCascadeCards) {
       const cascadeProduct = getCascadeSoleVariantDisplayProduct(productSelection);
-      return renderSharedProductCard(
+      return createSharedProductCardElement(
         cascadeProduct,
         currentQuantity,
         currencyInfo,
@@ -301,66 +317,67 @@ _renderInpageStepProducts(stepIndex: string|number, target: any) {
           className: [
             'bw-ppb-cascade-product-row',
             'wpbMixCascadeProductWrapper',
-            variantSelectorHtml ? 'bw-ppb-cascade-product-row--has-variant-selector' : '',
+            variantSelectorElement ? 'bw-ppb-cascade-product-row--has-variant-selector' : '',
             currentQuantity > 0 ? 'selected' : '',
             outOfStock ? 'is-out-of-stock' : '',
           ].filter(Boolean).join(' '),
           description: '',
           displaySeeMoreLink: false,
           expandProductCardOnHover: false,
-          variantSelectorHtml,
-          addButtonText: resolveProductPageCardButtonText({ currentQuantity, currentStep, outOfStock, defaultAddText: inlineAddText }),
+          variantSelectorElement,
+          addButtonText: resolveProductPageCardButtonText({ currentQuantity, currentStep, outOfStock, outOfStockText, defaultAddText: inlineAddText }),
           addDisabled: outOfStock,
           increaseDisabled,
-          stockBadgeHtml: stockBadge,
+          stockBadgeElement,
         }
       );
     }
 
     if (usesGridCards) {
-      return renderSharedProductCard(
+      return createSharedProductCardElement(
         productSelection,
         currentQuantity,
         currencyInfo,
         {
           displayPrice: getSubscriptionProductCardPrice(this, product.price),
-          variantSelectorHtml,
+          variantSelectorElement,
           description: '',
           displaySeeMoreLink: false,
           expandProductCardOnHover: false,
           mode: 'grid',
           className: `bw-ppb-grid-product-card ${outOfStock ? 'is-out-of-stock' : ''}`.trim(),
-          addButtonText: resolveProductPageCardButtonText({ currentQuantity, currentStep, outOfStock, defaultAddText: inlineAddText }),
+          addButtonText: resolveProductPageCardButtonText({ currentQuantity, currentStep, outOfStock, outOfStockText, defaultAddText: inlineAddText }),
           selectedAction: productQuantityLimit === 1 ? 'button' : undefined,
-          selectedButtonText: resolveProductPageCardButtonText({ currentQuantity, currentStep, outOfStock, defaultAddText: inlineAddText }),
+          selectedButtonText: resolveProductPageCardButtonText({ currentQuantity, currentStep, outOfStock, outOfStockText, defaultAddText: inlineAddText }),
           addDisabled: outOfStock,
           increaseDisabled,
-          stockBadgeHtml: stockBadge,
+          stockBadgeElement,
         }
       );
     }
 
-    return renderSharedProductCard(
+    return createSharedProductCardElement(
       productSelection,
       currentQuantity,
       currencyInfo,
       {
         displayPrice: getSubscriptionProductCardPrice(this, product.price),
-        variantSelectorHtml,
+        variantSelectorElement,
         className: `bw-product-card--legacy ${usesGridCards ? 'bw-ppb-grid-product-card' : ''} ${outOfStock ? 'is-out-of-stock' : ''}`.trim(),
         description: '',
         displaySeeMoreLink: false,
         expandProductCardOnHover: false,
         mode: usesGridCards ? 'grid' : 'row',
-        addButtonText: resolveProductPageCardButtonText({ currentQuantity, currentStep, outOfStock, defaultAddText: inlineAddText }),
+        addButtonText: resolveProductPageCardButtonText({ currentQuantity, currentStep, outOfStock, outOfStockText, defaultAddText: inlineAddText }),
         selectedAction: productQuantityLimit === 1 ? 'button' : undefined,
-        selectedButtonText: resolveProductPageCardButtonText({ currentQuantity, currentStep, outOfStock, defaultAddText: inlineAddText }),
+        selectedButtonText: resolveProductPageCardButtonText({ currentQuantity, currentStep, outOfStock, outOfStockText, defaultAddText: inlineAddText }),
         addDisabled: outOfStock,
         increaseDisabled,
-        stockBadgeHtml: stockBadge,
+        stockBadgeElement,
       }
     );
-  }).join('');
+  });
+  target.replaceChildren(...cards);
 
   prependStepBanner();
   this.attachProductEventHandlers(target, stepIndex);
@@ -372,7 +389,7 @@ renderInlineCardVariantSelector(product: any, step: any) {
     product,
     displayVariantsAsIndividualProducts: step?.displayVariantsAsIndividual === true || step?.displayVariantsAsIndividualProducts === true,
   })) {
-    return '';
+    return null;
   }
 
   return this.renderVariantSelector(product);
@@ -542,7 +559,10 @@ createDefaultProductCard(step: any, stepIndex: string|undefined, product: any) {
   // "Included" badge — bottom-left
   const badge = document.createElement('span');
   badge.className = 'bw-slot-card__included-badge';
-  badge.innerHTML = `<svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> Included`;
+  const checkmark = document.createElement('span');
+  checkmark.setAttribute('aria-hidden', 'true');
+  checkmark.textContent = '✓';
+  badge.append(checkmark, document.createTextNode(' Included'));
   stepBox.appendChild(badge);
 
   return stepBox;
@@ -631,21 +651,8 @@ createFreeGiftSlotCard(step: any, stepIndex: number) {
   stepBox.className = `step-box bw-slot-card bw-slot-card--empty${!unlocked ? ' bw-slot-card--locked' : ''}`;
 
   const iconWrapper = document.createElement('div');
-  iconWrapper.className = 'bw-slot-card__plus-icon';
-  const primaryColorBS = getComputedStyle(document.documentElement)
-    .getPropertyValue('--bundle-global-primary-button').trim() || '#1e3a8a';
-  iconWrapper.style.cssText = `
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    background: color-mix(in srgb, ${primaryColorBS} 8%, transparent);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 10px;
-  `;
+  iconWrapper.className = 'bw-slot-card__plus-icon bw-slot-card__plus-icon--free-gift';
   this._appendSlotIcon(iconWrapper);
-  iconWrapper.style.color = primaryColorBS;
   stepBox.appendChild(iconWrapper);
 
   const label = document.createElement('p');
@@ -683,9 +690,7 @@ _createRibbonSvg() {
     img.style.display = 'block';
     ribbon.appendChild(img);
   } else {
-    ribbon.innerHTML = `<svg viewBox="0 0 24 24" fill="#e53e3e" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <path d="M20 7h-1.586l1.293-1.293a1 1 0 0 0-1.414-1.414L16 6.586V5a1 1 0 0 0-2 0v1.586l-1.293-1.293a1 1 0 0 0-1.414 1.414L12.586 8H11a1 1 0 1 0 0 2h1v2h-2a1 1 0 1 0 0 2h2v7l3-1.5 3 1.5V14h2a1 1 0 1 0 0-2h-2v-2h2a1 1 0 1 0 0-2zm-4 2v2h-2V9h2z"/>
-    </svg>`;
+    ribbon.append(createGiftBadgeIcon(document));
   }
   return ribbon;
 },

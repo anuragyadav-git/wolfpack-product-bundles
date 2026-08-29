@@ -1,3 +1,5 @@
+import { createCloseIcon, createTrashIcon } from '../../shared/svg-icons.js';
+
 const CLEAR_CART_CONFIRMATION_COPY: any = {
   title: 'Are you sure?',
   description: 'Are you sure you want to clear all items from your cart? This action cannot be undone...',
@@ -8,18 +10,6 @@ const CLEAR_CART_CONFIRMATION_COPY: any = {
   mobileCancel: 'Go Back',
   mobileConfirm: 'Clear All',
 };
-
-function createIconButtonSvg(path: string) {
-  return `<svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">${path}</svg>`;
-}
-
-const CLOSE_ICON = createIconButtonSvg(
-  '<path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/>'
-);
-
-const DELETE_ICON = createIconButtonSvg(
-  '<path d="M6 2h8a1 1 0 0 1 1 1v1H5V3a1 1 0 0 1 1-1Zm-2 3h12l-1 13H5L4 5Zm4 2v9m4-9v9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/>'
-);
 
 export const fullPageClearCartConfirmationMethods: Record<string, any> & ThisType<any> = {
 showClearCartConfirmation() {
@@ -161,7 +151,7 @@ createClearCartConfirmationModal({ mobile = false }: any = {}) {
     closeButton.className = 'wpb-clear-cart-confirmation__close';
     closeButton.type = 'button';
     closeButton.setAttribute('aria-label', 'Close');
-    closeButton.innerHTML = CLOSE_ICON;
+    closeButton.appendChild(createCloseIcon(document));
     closeButton.addEventListener('click', () => this.hideClearCartConfirmation());
   }
 
@@ -199,7 +189,9 @@ createClearCartConfirmationModal({ mobile = false }: any = {}) {
   const confirmLabel = mobile
     ? this._resolveText?.('clearCartConfirmButtonText', CLEAR_CART_CONFIRMATION_COPY.mobileConfirm) ?? CLEAR_CART_CONFIRMATION_COPY.mobileConfirm
     : this._resolveText?.('clearCartConfirmButtonText', CLEAR_CART_CONFIRMATION_COPY.confirm) ?? CLEAR_CART_CONFIRMATION_COPY.confirm;
-  confirmButton.innerHTML = `${DELETE_ICON}<span>${confirmLabel}</span>`;
+  const confirmText = document.createElement('span');
+  confirmText.textContent = confirmLabel;
+  confirmButton.append(createTrashIcon(document, 20), confirmText);
   confirmButton.addEventListener('click', () => this.confirmClearCartSelection());
 
   content.append(title, description);

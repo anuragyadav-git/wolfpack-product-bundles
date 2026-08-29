@@ -1,10 +1,10 @@
 .wpb-fpb-upsell {
-  --wpb-fpb-upsell-body-text: var(--bundle-global-secondary-text, currentColor);
+  --wpb-fpb-upsell-body-text: var(--bundle-upsell-font-color, var(--bundle-global-secondary-text, currentColor));
   container-type: inline-size;
   display: grid;
   gap: clamp(12px, 2cqi, 20px);
   margin-block: clamp(12px, 2cqi, 24px);
-  color: var(--bundle-global-primary-text, currentColor);
+  color: var(--bundle-upsell-font-color, var(--bundle-global-primary-text, currentColor));
 }
 
 .wpb-fpb-upsell__offer {
@@ -13,7 +13,7 @@
   align-items: center;
   gap: clamp(12px, 2cqi, 20px);
   padding: clamp(12px, 2cqi, 20px);
-  border: 1px solid var(--bundle-border-color, color-mix(in srgb, currentColor 18%, transparent));
+  border: 1px solid var(--bundle-upsell-border-color, var(--bundle-border-color, color-mix(in srgb, currentColor 18%, transparent)));
   border-radius: var(--bundle-card-border-radius, 10px);
   background: var(--bundle-surface-color, transparent);
 }
@@ -44,8 +44,8 @@
   padding: 10px 18px;
   border: 0;
   border-radius: var(--bundle-upsell-button-radius, var(--bundle-button-border-radius, 8px));
-  background: var(--bundle-global-primary-button, #111);
-  color: var(--bundle-global-button-text, #fff);
+  background: var(--bundle-upsell-button-bg-color, var(--bundle-global-primary-button, #111));
+  color: var(--bundle-upsell-text-color, var(--bundle-global-button-text, #fff));
   font: inherit;
   font-weight: 600;
   cursor: pointer;

@@ -1,9 +1,11 @@
+import { replaceManagedStyle } from "../assets/widgets/shared/managed-style";
+
 type RuntimeWindow = Window & Record<string, unknown>;
 
 type GlobalSettingsControls = {
   landingPage?: {
     redirectCollectionQuickAddToBundle?: boolean;
-    css?: { themePages?: string };
+    css?: { themePages?: string; bundleDummyProductPage?: string };
     selectors?: { addToCartButtons?: string; buyNowButton?: string };
     integrations?: {
       customThemeScriptEnabled?: boolean;
@@ -35,7 +37,7 @@ export function executeMerchantStorefrontScript(source: unknown, runtimeWindow: 
     Function("window", "document", `"use strict";\n${script}`)(runtimeWindow, runtimeWindow.document);
     return true;
   } catch (error: any) {
-    console.warn("[Wolfpack Bundles] Merchant Settings script failed", error);
+    console.warn("[Only Bundles] Merchant Settings script failed", error);
     return false;
   }
 }
@@ -56,7 +58,7 @@ export function executeMerchantCartIntegration(source: unknown, runtimeWindow: R
     instance.init();
     return true;
   } catch (error: any) {
-    console.warn("[Wolfpack Bundles] Merchant cart integration failed", error);
+    console.warn("[Only Bundles] Merchant cart integration failed", error);
     return false;
   }
 }
@@ -155,17 +157,16 @@ export function applyGlobalSettingsControls(
   if (!landing) return;
 
   const themeCss = String(landing.css?.themePages ?? "").trim();
-  let style = runtimeDocument.querySelector<HTMLStyleElement>("style[data-wpb-settings-controls]");
-  if (themeCss) {
-    if (!style) {
-      style = runtimeDocument.createElement("style");
-      style.dataset.wpbSettingsControls = "true";
-      runtimeDocument.head.append(style);
-    }
-    style.textContent = themeCss;
-  } else {
-    style?.remove();
-  }
+  replaceManagedStyle(runtimeDocument, "settings-controls-theme", themeCss);
+
+  const currentHandle = getProductHandle(String(runtimeWindow.location?.href || ""));
+  const isFpbDummyProduct = Boolean(currentHandle && bundleLinks.some((link) => (
+    link.bundleType === "full_page" && link.productHandle === currentHandle
+  )));
+  const dummyProductCss = isFpbDummyProduct
+    ? String(landing.css?.bundleDummyProductPage ?? "").trim()
+    : "";
+  replaceManagedStyle(runtimeDocument, "settings-controls-dummy-product", dummyProductCss);
 
   const integrations = landing.integrations;
   runtimeWindow.__WPB_CART_INTEGRATION_SELECTORS__ = integrations ? {
@@ -204,7 +205,7 @@ export async function loadAndApplyGlobalSettingsControls(
     applyGlobalSettingsControls(payload.settingsControls, runtimeWindow, runtimeDocument, payload.bundleLinks ?? []);
     return true;
   } catch (error: any) {
-    console.warn("[Wolfpack Bundles] Failed to load global Settings Controls", error);
+    console.warn("[Only Bundles] Failed to load global Settings Controls", error);
     return false;
   }
 }

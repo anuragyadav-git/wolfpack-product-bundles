@@ -125,7 +125,9 @@ function collectAllowedSelectionIds(bundle: any): { variantIds: Set<string>; pro
     const productId = getCachedProductGid(product);
     if (productId) productIds.add(productId);
     const variants = Array.isArray(product?.variants) ? product.variants : [];
-    variants.forEach(addVariant);
+    variants.forEach((value: Parameters<typeof addVariant>[0]) =>
+      addVariant(value),
+    );
     const directVariantId = normalizeProductVariantGid(product?.variantId ?? product?.selectedVariantId);
     if (directVariantId) variantIds.add(directVariantId);
   };

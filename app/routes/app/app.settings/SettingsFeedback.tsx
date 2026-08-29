@@ -3,7 +3,17 @@ import { useAppBridge } from "@shopify/app-bridge-react";
 import type { SettingsField } from "../../../lib/admin-configuration-surfaces";
 import styles from "../../../styles/routes/admin-configuration-surfaces.module.css";
 
-export function SettingsContextualSaveBar({ isOpen, onDiscard, onSave }: { isOpen: boolean; onDiscard: () => void; onSave: () => void }) {
+export function SettingsContextualSaveBar({
+  isOpen,
+  isSaving = false,
+  onDiscard,
+  onSave,
+}: {
+  isOpen: boolean;
+  isSaving?: boolean;
+  onDiscard: () => void;
+  onSave: () => void;
+}) {
   const shopify = useAppBridge();
   useEffect(() => {
     if (isOpen) {
@@ -13,12 +23,16 @@ export function SettingsContextualSaveBar({ isOpen, onDiscard, onSave }: { isOpe
     }
   }, [isOpen, shopify]);
 
+  useEffect(() => () => {
+    void shopify.saveBar.hide("settings-contextual-save-bar");
+  }, [shopify]);
+
   return (
     <ui-save-bar id="settings-contextual-save-bar">
-      <button type="button" onClick={onDiscard}>
+      <button type="button" disabled={isSaving} onClick={onDiscard}>
         Discard
       </button>
-      <button type="button" variant="primary" onClick={onSave}>
+      <button type="button" variant="primary" disabled={isSaving} onClick={onSave}>
         Save
       </button>
     </ui-save-bar>
@@ -56,21 +70,6 @@ export function SettingsHelpModal({
           </ul>
         </div>
       </section>
-    </div>
-  );
-}
-
-export function SettingsToast({ message, onDismiss }: { message: string | null; onDismiss: () => void }) {
-  if (!message) {
-    return null;
-  }
-
-  return (
-    <div className={styles.settingsToast} role="status" aria-live="polite">
-      <span>{message}</span>
-      <button type="button" onClick={onDismiss} aria-label="Dismiss save message">
-        x
-      </button>
     </div>
   );
 }

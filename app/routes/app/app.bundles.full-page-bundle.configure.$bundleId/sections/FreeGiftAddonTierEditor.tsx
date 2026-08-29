@@ -222,6 +222,7 @@ export function FpbAddonTierEditor({
                         >
                           <s-button
                             variant="primary"
+                            icon="product-add"
                             onClick={() => handleAddonSelectedProductAdd(idx)}
                           >
                             Add Products
@@ -376,6 +377,7 @@ export function FpbAddonTierEditor({
                                       <s-button
                                         variant="tertiary"
                                         tone="critical"
+                                        icon="delete"
                                         onClick={() =>
                                           removeAddonTierCondition(
                                             idx,

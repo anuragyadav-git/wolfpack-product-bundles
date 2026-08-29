@@ -10,7 +10,7 @@ describe('PPB drawer layer manager', () => {
   beforeEach(() => {
     const listeners = new Map<string, Set<(event: any) => void>>();
     documentRef = {
-      documentElement: { style: { overflow: 'clip' } },
+      documentElement: { style: { overflow: 'clip', scrollbarGutter: 'auto' } },
       body: { style: { overflow: 'auto' } },
       addEventListener: (type: string, listener: (event: any) => void) => {
         const handlers = listeners.get(type) || new Set();
@@ -35,6 +35,7 @@ describe('PPB drawer layer manager', () => {
     const variant = manager.open({ id: 'variant', requestClose: variantClose });
 
     expect(documentRef.documentElement.style.overflow).toBe('hidden');
+    expect(documentRef.documentElement.style.scrollbarGutter).toBe('stable');
     expect(documentRef.body.style.overflow).toBe('hidden');
 
     documentRef.dispatch('keydown', { key: 'Escape', preventDefault: jest.fn() });
@@ -48,6 +49,7 @@ describe('PPB drawer layer manager', () => {
 
     manager.close(picker);
     expect(documentRef.documentElement.style.overflow).toBe('clip');
+    expect(documentRef.documentElement.style.scrollbarGutter).toBe('auto');
     expect(documentRef.body.style.overflow).toBe('auto');
   });
 

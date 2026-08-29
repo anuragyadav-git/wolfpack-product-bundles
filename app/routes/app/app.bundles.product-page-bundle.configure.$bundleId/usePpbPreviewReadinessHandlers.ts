@@ -1,13 +1,11 @@
 import { useCallback, useMemo, useState } from "react";
 import { AppLogger } from "../../../lib/logger";
 import { navigateBackOrFallback } from "../../../lib/navigation";
-import productPageBundleStyles from "../../../styles/routes/product-page-bundle-configure.module.css";
 import { markBundlePreviewComplete } from "../../../lib/bundle-preview-readiness";
 import { pickPpbPreviewUrl } from "../../../lib/ppb-preview-url";
 import { appendBundlePreviewToken } from "../../../lib/bundle-preview-url";
 import { prepareStorefrontPreviewForOpen } from "../../../lib/storefront-sync-preview.client";
 import { validatePpbWidgetPlacementBeforePreview } from "../../../lib/ppb-widget-placement.client";
-import { openThemeEditorInNewTab } from "../../../lib/theme-editor-navigation.client";
 import { blockUnsavedAdminNavigation } from "../../../lib/admin-unsaved-navigation";
 import {
   openPendingDashboardPreview,
@@ -15,6 +13,8 @@ import {
   closePendingDashboardPreview,
 } from "../../../lib/dashboard-preview-window";
 import type { BundleReadinessItem } from "../../../components/bundle-configure/BundleReadinessOverlay";
+import { i18n } from "../../../i18n/config";
+import { showAdminTransientErrorToast } from "../../../lib/admin-alert-feedback";
 import {
   getGuidedTourTransition,
   type TourStep,
@@ -49,10 +49,11 @@ export function usePpbPreviewReadinessHandlers({
   };
   const handlePreviewBundle = useCallback(async () => {
     if (base.isDirty) {
-      base.shopify.toast.show(
-        "Please save your changes before previewing the bundle",
-        { isError: true, duration: 4000 },
-      );
+      base.setOperationAlert({
+        id: "unsaved-preview",
+        heading: "Save before previewing",
+        message: "Save your changes before previewing the bundle.",
+      });
       return false;
     }
     const pendingPreviewWindow = openPendingDashboardPreview();
@@ -94,13 +95,11 @@ export function usePpbPreviewReadinessHandlers({
       if (!productUrl) {
         closePendingDashboardPreview(pendingPreviewWindow);
         AppLogger.error("Bundle product data:", {}, base.bundleProduct);
-        base.shopify.toast.show(
-          "Unable to determine bundle product URL. Please check bundle product configuration.",
-          {
-            isError: true,
-            duration: 5000,
-          },
-        );
+        base.setOperationAlert({
+          id: "bundle-preview",
+          heading: "Preview unavailable",
+          message: "Check the bundle product configuration and try again.",
+        });
         return false;
       }
       const isStorefrontUrl = !productUrl.includes("/admin.shopify.com/");
@@ -128,7 +127,11 @@ export function usePpbPreviewReadinessHandlers({
             window.location.href,
           );
           if (!placement.ready && placement.message) {
-            base.shopify.toast.show(placement.message, { duration: 4000 });
+            base.setOperationAlert({
+              id: "widget-placement",
+              heading: "Widget placement needed",
+              message: placement.message,
+            });
           }
         } catch {
           // Non-blocking placement validation
@@ -145,24 +148,21 @@ export function usePpbPreviewReadinessHandlers({
       const isPreviewUrl =
         base.bundleProduct &&
         productUrl === base.bundleProduct.onlineStorePreviewUrl;
-      const message = isPreviewUrl
-        ? "Bundle product preview opened in new tab"
-        : "Bundle product opened in new tab";
       markBundlePreviewComplete({
         bundleId: base.bundle.id,
         storage: window.localStorage,
         setHasPreview: templateState.setHasPreview,
       });
-      base.shopify.toast.show(message, { isError: false });
+      base.clearOperationAlert();
+      base.shopify.toast.show(
+        isPreviewUrl ? i18n.t("common.success.previewOpened") : "Product opened",
+        { isError: false },
+      );
       return previewUrl;
     } catch (error: any) {
       closePendingDashboardPreview(pendingPreviewWindow);
-      base.shopify.toast.show(
-        error instanceof Error
-          ? error.message
-          : "Preview is not ready. Please try preview again.",
-        { isError: true, duration: 5000 },
-      );
+      AppLogger.error("Product-page bundle preview failed", {}, error as any);
+      showAdminTransientErrorToast(base.shopify, "Preview unavailable");
       return false;
     } finally {
       window.setTimeout(() => setIsPreviewBundleLoading(false), 500);

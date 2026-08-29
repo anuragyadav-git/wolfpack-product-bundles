@@ -4,7 +4,7 @@ import { ServerTiming } from "../../../lib/server-timing.server";
 import { authenticate } from "../../../shopify.server";
 import db from "../../../db.server";
 import { AppLogger } from "../../../lib/logger";
-import { getSubscriptionInfoFromCache } from "../../../services/subscription-cache.server";
+import { resolveShopEntitlements } from "../../../services/subscriptions/subscription-service.server";
 import { BundleStatus, BundleType } from "../../../constants/bundle";
 import { handleCreateFpbPreview, handleRecordBundlePreview } from "../shared/bundle-preview-action.server";
 import { saveShopAdminLocale } from "../../../services/admin-locale.server";
@@ -135,7 +135,17 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   // Dashboard content together.
   const billingPromise = (async () => {
     try {
-      return await getSubscriptionInfoFromCache(session.shop);
+      const subscription = await resolveShopEntitlements({ shopDomain: session.shop });
+      const currentBundleCount = bundles.filter((bundle) =>
+        bundle.status === BundleStatus.ACTIVE || bundle.status === BundleStatus.UNLISTED).length;
+      const bundleLimit = subscription.entitlements?.limits.publicBundles
+        ?? Number.MAX_SAFE_INTEGER;
+      return {
+        plan: subscription.planCode === "GROWTH" ? "growth" as const : "free" as const,
+        currentBundleCount,
+        bundleLimit,
+        canCreateBundle: currentBundleCount < bundleLimit,
+      };
     } catch (error: any) {
       AppLogger.error("Failed to fetch subscription info", { component: "app.dashboard", operation: "get-subscription-info" }, error);
       return null;

@@ -1,0 +1,130 @@
+{
+  "schema_version": 1,
+  "job_id": "fpb-step-title-redesign-20260827",
+  "revision": 2,
+  "status": "complete",
+  "locked": [
+    {
+      "id": "D-001",
+      "question": "Which storefront product families are included in the Step-title redesign?",
+      "options_considered": [
+        "FPB only",
+        "FPB and PPB"
+      ],
+      "recommendation": "FPB and PPB",
+      "selected_value": "FPB and PPB, across all storefront templates and both desktop and mobile.",
+      "rationale": "The user expanded the initial FPB request to include PPB so the title treatment remains coherent across bundle families.",
+      "evidence_ids": [
+        "user-approval-2026-08-27"
+      ],
+      "status": "locked",
+      "approved_by": "Aditya Awasthi",
+      "approved_at": "2026-08-27T12:27:25Z",
+      "revision_introduced": 1,
+      "affected_artifacts": [
+        "component-brief.md",
+        "visual-audit.md",
+        "responsive-contract.md",
+        "browser-test-plan.yaml"
+      ]
+    },
+    {
+      "id": "D-002",
+      "question": "How should Step Name and Step Title divide responsibility on the storefront?",
+      "options_considered": [
+        "Use Step Title as both navigation and local content text",
+        "Keep Step Name for navigation and Step Title for the active-area heading"
+      ],
+      "recommendation": "Keep Step Name for navigation and Step Title for the active-area heading",
+      "selected_value": "Step Name remains the short navigation and progress label; Step Title is one visually prominent local heading for the active product-selection area.",
+      "rationale": "This supports longer merchant copy without crowding PPB navigation and establishes a consistent hierarchy across FPB and PPB.",
+      "evidence_ids": [
+        "user-approval-2026-08-27"
+      ],
+      "status": "locked",
+      "approved_by": "Aditya Awasthi",
+      "approved_at": "2026-08-27T12:43:39Z",
+      "revision_introduced": 1,
+      "affected_artifacts": [
+        "component-brief.md",
+        "direction-comparison.md",
+        "component-anatomy.md",
+        "state-matrix.md",
+        "responsive-contract.md"
+      ]
+    },
+    {
+      "id": "D-003",
+      "question": "Which visual treatment should define the active Step Title?",
+      "options_considered": [
+        "Direction A \u2014 Content Heading",
+        "Direction B \u2014 Accent Rail",
+        "Direction C \u2014 Soft Section Surface"
+      ],
+      "recommendation": "Direction A \u2014 Content Heading",
+      "selected_value": "A responsive, strongly weighted, unboxed heading that is left-aligned with the active selection content, wraps naturally, and leaves no residual spacing when absent.",
+      "rationale": "It fixes the measured hierarchy and alignment problem with the lowest theme-compatibility and visual-noise risk across FPB and PPB.",
+      "evidence_ids": [
+        "direction-comparison.md",
+        "user-approval-2026-08-27"
+      ],
+      "status": "locked",
+      "approved_by": "Aditya Awasthi",
+      "approved_at": "2026-08-27T12:51:12Z",
+      "revision_introduced": 1,
+      "affected_artifacts": [
+        "direction-comparison.md",
+        "component-anatomy.md",
+        "responsive-contract.md",
+        "design-tokens.json",
+        "implementation-handoff.md"
+      ]
+    },
+    {
+      "id": "D-004",
+      "question": "Which preview surface must match the storefront Step Title design?",
+      "options_considered": [
+        "Settings > Design isolated FPB/PPB preview bundle UI",
+        "The neutral general-store context chrome",
+        "The external Preview Bundle storefront tab"
+      ],
+      "recommendation": "Settings > Design isolated FPB/PPB preview bundle UI",
+      "selected_value": "The Settings > Design isolated FPB/PPB production-renderer preview must match the bundle storefront UI exactly; neutral general-store chrome is excluded.",
+      "rationale": "The preview already uses production controllers and CSS, so shared renderer ownership prevents preview-only drift.",
+      "evidence_ids": [
+        "user-scope-confirmation-2026-08-27",
+        "internal-docs-widget-architecture",
+        "chrome-settings-design-fpb-desktop-2026-08-27"
+      ],
+      "status": "locked",
+      "approved_by": "Aditya Awasthi",
+      "approved_at": "2026-08-27T12:51:12Z",
+      "revision_introduced": 2,
+      "affected_artifacts": [
+        "component-brief.md",
+        "component-anatomy.md",
+        "implementation-handoff.md",
+        "acceptance-criteria.md",
+        "browser-test-plan.yaml"
+      ]
+    }
+  ],
+  "assumptions": [],
+  "rejected": [],
+  "open": [],
+  "superseded": [],
+  "decision_shape": {
+    "id": "",
+    "question": "",
+    "options_considered": [],
+    "recommendation": "",
+    "selected_value": "",
+    "rationale": "",
+    "evidence_ids": [],
+    "status": "open",
+    "approved_by": "",
+    "approved_at": "",
+    "revision_introduced": 1,
+    "affected_artifacts": []
+  }
+}

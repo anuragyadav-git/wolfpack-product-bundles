@@ -70,6 +70,7 @@ export function FpbStepConfigCard({
           <div className={fullPageBundleStyles.iconUploadButton}>
             <s-button
               inlineSize="fill"
+              icon="replace"
               onClick={() =>
                 setShowIconPickerForStep((prev: string | null) =>
                   prev === step.id ? null : step.id,

@@ -9,14 +9,9 @@ export interface SubscriptionErrorBannerProps {
 }
 
 function getErrorMessage(errorCode: string | null, t: TFunction): string {
-  switch (errorCode) {
-    case "missing_charge_id":
-      return t("billing.error.missingChargeId");
-    case "confirmation_failed":
-      return t("billing.error.confirmationFailed");
-    default:
-      return t("billing.error.unexpected");
-  }
+  return errorCode === "billing_unverified"
+    ? t("billing.error.verificationFailed")
+    : t("billing.error.unexpected");
 }
 
 export function SubscriptionErrorBanner({

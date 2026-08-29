@@ -1,0 +1,239 @@
+{
+  "schema_version": 1,
+  "job_id": "fpb-step-title-redesign-20260827",
+  "revision": 2,
+  "status": "complete",
+  "items": [
+    {
+      "id": "CUR-FPB-DESKTOP-001",
+      "original_filename": "",
+      "artifact_path": "",
+      "roles": [
+        "CURRENT",
+        "DESKTOP",
+        "CONTEXT"
+      ],
+      "component": "FPB active Step Title and product-content shell",
+      "state": "Standard preset, active first step, representative configured title injected without persistence",
+      "viewport": {
+        "width": 1280,
+        "height": 800,
+        "status": "known"
+      },
+      "browser_zoom": 100,
+      "pixel_dimensions": {
+        "width": 1280,
+        "height": 800
+      },
+      "crop_status": "viewport capture",
+      "surrounding_context_included": true,
+      "source": "https://agent-5sfidg3m.myshopify.com/apps/product-bundles/wpb/2",
+      "provenance": "Direct Chrome DevTools MCP capture after cache clear and hard reload on 2026-08-27",
+      "intended_use": "structural reference",
+      "quality_issues": [
+        "Browser tool returned the complete image inline but rejected the design-job file path, so no local PNG artifact was persisted"
+      ],
+      "comparable_counterparts": [
+        "CUR-FPB-MOBILE-001"
+      ],
+      "permissions_or_usage_notes": "Wolfpack SIT storefront fixture; current-state design evidence only",
+      "approval_status": "accepted-current-evidence"
+    },
+    {
+      "id": "CUR-FPB-MOBILE-001",
+      "original_filename": "",
+      "artifact_path": "",
+      "roles": [
+        "CURRENT",
+        "MOBILE",
+        "CONTEXT"
+      ],
+      "component": "FPB active Step Title and product-content shell",
+      "state": "Standard preset, active first step, representative configured title injected without persistence",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "status": "known"
+      },
+      "browser_zoom": 100,
+      "pixel_dimensions": {
+        "width": 390,
+        "height": 844
+      },
+      "crop_status": "viewport capture",
+      "surrounding_context_included": true,
+      "source": "https://agent-5sfidg3m.myshopify.com/apps/product-bundles/wpb/2",
+      "provenance": "Direct Chrome DevTools MCP mobile emulation after cache clear and hard reload on 2026-08-27",
+      "intended_use": "structural reference",
+      "quality_issues": [
+        "Browser tool returned the complete image inline but rejected the design-job file path, so no local PNG artifact was persisted"
+      ],
+      "comparable_counterparts": [
+        "CUR-FPB-DESKTOP-001"
+      ],
+      "permissions_or_usage_notes": "Wolfpack SIT storefront fixture; current-state design evidence only",
+      "approval_status": "accepted-current-evidence"
+    },
+    {
+      "id": "CUR-PPB-DESKTOP-001",
+      "original_filename": "",
+      "artifact_path": "",
+      "roles": [
+        "CURRENT",
+        "DESKTOP",
+        "CONTEXT"
+      ],
+      "component": "PPB Vertical Slots Step Title and slot sections",
+      "state": "PDP modal Vertical Slots preset with representative configured titles injected without persistence",
+      "viewport": {
+        "width": 1280,
+        "height": 800,
+        "status": "known"
+      },
+      "browser_zoom": 100,
+      "pixel_dimensions": {
+        "width": 1280,
+        "height": 800
+      },
+      "crop_status": "viewport capture",
+      "surrounding_context_included": true,
+      "source": "https://agent-5sfidg3m.myshopify.com/products/ppb-template-parity-2026-08-20",
+      "provenance": "Direct Chrome DevTools MCP capture after cache clear and hard reload on 2026-08-27",
+      "intended_use": "structural reference",
+      "quality_issues": [
+        "Browser tool returned the complete image inline but rejected the design-job file path, so no local PNG artifact was persisted"
+      ],
+      "comparable_counterparts": [
+        "CUR-PPB-MOBILE-001"
+      ],
+      "permissions_or_usage_notes": "Wolfpack SIT storefront fixture; current-state design evidence only",
+      "approval_status": "accepted-current-evidence"
+    },
+    {
+      "id": "CUR-PPB-MOBILE-001",
+      "original_filename": "",
+      "artifact_path": "",
+      "roles": [
+        "CURRENT",
+        "MOBILE",
+        "CONTEXT"
+      ],
+      "component": "PPB Vertical Slots Step Title and slot sections",
+      "state": "PDP modal Vertical Slots preset with representative configured titles injected without persistence",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "status": "known"
+      },
+      "browser_zoom": 100,
+      "pixel_dimensions": {
+        "width": 390,
+        "height": 844
+      },
+      "crop_status": "viewport capture",
+      "surrounding_context_included": true,
+      "source": "https://agent-5sfidg3m.myshopify.com/products/ppb-template-parity-2026-08-20",
+      "provenance": "Direct Chrome DevTools MCP mobile emulation after cache clear and hard reload on 2026-08-27",
+      "intended_use": "structural reference",
+      "quality_issues": [
+        "Browser tool returned the complete image inline but rejected the design-job file path, so no local PNG artifact was persisted"
+      ],
+      "comparable_counterparts": [
+        "CUR-PPB-DESKTOP-001"
+      ],
+      "permissions_or_usage_notes": "Wolfpack SIT storefront fixture; current-state design evidence only",
+      "approval_status": "accepted-current-evidence"
+    },
+    {
+      "id": "CUR-DCP-FPB-DESKTOP-001",
+      "original_filename": "",
+      "artifact_path": "",
+      "roles": [
+        "CURRENT",
+        "DESKTOP",
+        "CONTEXT"
+      ],
+      "component": "Settings Design isolated FPB production-renderer preview",
+      "state": "Landing Page Standard, Product cards surface",
+      "viewport": {
+        "width": 1280,
+        "height": 1136,
+        "status": "known logical canvas"
+      },
+      "browser_zoom": 100,
+      "pixel_dimensions": {
+        "width": null,
+        "height": null
+      },
+      "crop_status": "scaled viewport inside Admin preview stage",
+      "surrounding_context_included": true,
+      "source": "https://admin.shopify.com/store/agent-5sfidg3m/apps/wolfpack-product-bundles-sit/app/settings",
+      "provenance": "Direct Chrome DevTools MCP capture after hard reload on 2026-08-27",
+      "intended_use": "structural reference",
+      "quality_issues": [
+        "Inline-only capture; the logical renderer is scaled by the Admin preview canvas"
+      ],
+      "comparable_counterparts": [
+        "CUR-FPB-DESKTOP-001"
+      ],
+      "permissions_or_usage_notes": "Wolfpack Settings Design preview; bundle UI only, neutral store chrome excluded",
+      "approval_status": "accepted-current-evidence"
+    },
+    {
+      "id": "CUR-DCP-PPB-DESKTOP-001",
+      "original_filename": "",
+      "artifact_path": "",
+      "roles": [
+        "CURRENT",
+        "DESKTOP",
+        "CONTEXT"
+      ],
+      "component": "Settings Design isolated PPB production-renderer preview",
+      "state": "Product Page Product List, Product cards surface",
+      "viewport": {
+        "width": 1280,
+        "height": 1136,
+        "status": "known logical canvas"
+      },
+      "browser_zoom": 100,
+      "pixel_dimensions": {
+        "width": null,
+        "height": null
+      },
+      "crop_status": "scaled viewport inside Admin preview stage",
+      "surrounding_context_included": true,
+      "source": "https://admin.shopify.com/store/agent-5sfidg3m/apps/wolfpack-product-bundles-sit/app/settings",
+      "provenance": "Direct Chrome DevTools MCP capture after hard reload on 2026-08-27",
+      "intended_use": "structural reference",
+      "quality_issues": [
+        "Inline-only capture; the logical renderer is scaled by the Admin preview canvas"
+      ],
+      "comparable_counterparts": [
+        "CUR-PPB-DESKTOP-001"
+      ],
+      "permissions_or_usage_notes": "Wolfpack Settings Design preview; bundle UI only, neutral store chrome excluded",
+      "approval_status": "accepted-current-evidence"
+    }
+  ],
+  "reference_gaps": [
+    "No user-supplied target design exists; direction work will be original and evidence-led rather than an exact-match exercise",
+    "Current PPB Grid and Cascade production ownership is source-observed; Product List and the production preview adapter provide the primary preview evidence"
+  ],
+  "capture_restriction": "Direct Chrome evidence was visible and measurable, but the MCP path policy rejected screenshot persistence into the design-job directory. No alternate browser tooling was used.",
+  "validation": {
+    "status": "sufficient-with-limitations",
+    "safe_inferences": [
+      "FPB title alignment is owned independently from the product-content track and visibly detaches on mobile",
+      "PPB Vertical Slots title is aligned to its slot section but lacks heading hierarchy",
+      "Desktop and mobile evidence supports a shared content-aligned, naturally wrapping heading contract",
+      "Repository ownership evidence identifies the additional PPB modal, Grid, and Cascade render owners that must conform to the same semantic contract",
+      "The Settings Design preview reproduces the same FPB small helper-style title and PPB pageTitle-as-navigation behavior because it mounts the production controllers and CSS"
+    ],
+    "unsafe_inferences": [
+      "No exact target pixel values can be approved because no target design was supplied",
+      "The captured Vertical Slots geometry must not be copied verbatim into PPB Grid or Cascade templates"
+    ],
+    "smallest_missing_capture": "No additional current capture is required before implementation; post-change Chrome QA must cover every FPB and PPB template at desktop and mobile logical viewports.",
+    "decision": "Proceed using the approved Direction A contract. Preview parity is production-owned and must not be implemented with preview-only CSS."
+  }
+}

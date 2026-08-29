@@ -5,10 +5,12 @@ import {
   DesignLivePreview,
   createDesignPreviewState,
   getDefaultTemplateKey,
-  isDesignPreviewSurfaceSupported,
+  isDesignPreviewAreaSupported,
+  isDesignPreviewScenarioSupported,
   isTemplateValidForBundleType,
   setDesignPreviewBundleType,
-  setDesignPreviewSurface,
+  setDesignPreviewArea,
+  setDesignPreviewScenario,
   setDesignPreviewTemplate,
   setDesignPreviewViewport,
   type DesignPreviewState,
@@ -69,7 +71,8 @@ describe("Settings Design preview state", () => {
       bundleType: "full_page",
       templateKey: "standard",
       viewport: "desktop",
-      surface: "product-card",
+      area: "product-card",
+      scenario: "default",
     });
   });
 
@@ -94,60 +97,64 @@ describe("Settings Design preview state", () => {
     )).toThrow('Invalid Design preview template "product-grid" for full_page');
   });
 
-  it("preserves viewport and resets the surface when bundle type changes", () => {
+  it("preserves viewport and resets the context when bundle type changes", () => {
     const state: DesignPreviewState = {
       bundleType: "product_page",
       templateKey: "horizontal-slots",
       viewport: "mobile",
-      surface: "product-picker",
+      area: "product-slots",
+      scenario: "product-picker",
     };
 
     expect(setDesignPreviewBundleType(state, "full_page")).toEqual({
       bundleType: "full_page",
       templateKey: "standard",
       viewport: "mobile",
-      surface: "product-card",
+      area: "product-card",
+      scenario: "default",
     });
   });
 
-  it("preserves a supported surface and falls back when a template does not support it", () => {
-    const slotState = setDesignPreviewSurface(
+  it("preserves a supported area and resets transient state when templates change", () => {
+    const slotState = setDesignPreviewArea(
       createDesignPreviewState("product_page"),
-      "product-picker",
+      "product-slots",
     );
-    expect(slotState.surface).toBe("product-card");
+    expect(slotState.area).toBe("product-slots");
 
     const horizontalSlots = setDesignPreviewTemplate(
       createDesignPreviewState("product_page"),
       "horizontal-slots",
     );
-    const pickerState = setDesignPreviewSurface(horizontalSlots, "product-picker");
-    expect(pickerState.surface).toBe("product-picker");
-    expect(setDesignPreviewTemplate(pickerState, "vertical-slots").surface).toBe("product-picker");
-    expect(setDesignPreviewTemplate(pickerState, "product-list").surface).toBe("product-card");
+    const pickerState = setDesignPreviewScenario(horizontalSlots, "product-picker");
+    expect(pickerState.scenario).toBe("product-picker");
+    expect(setDesignPreviewTemplate(pickerState, "vertical-slots")).toMatchObject({ area: "product-slots", scenario: "default" });
+    expect(setDesignPreviewTemplate(pickerState, "product-list")).toMatchObject({ area: "product-slots", scenario: "default" });
   });
 
-  it("switches viewport and surface without changing the selected template", () => {
+  it("switches viewport, area, and state without changing the selected template", () => {
     const state = setDesignPreviewTemplate(
       createDesignPreviewState("product_page"),
       "vertical-slots",
     );
     const mobile = setDesignPreviewViewport(state, "mobile");
-    const picker = setDesignPreviewSurface(mobile, "product-picker");
+    const picker = setDesignPreviewScenario(mobile, "product-picker");
 
     expect(picker).toEqual({
       bundleType: "product_page",
       templateKey: "vertical-slots",
       viewport: "mobile",
-      surface: "product-picker",
+      area: "product-slots",
+      scenario: "product-picker",
     });
-    expect(isDesignPreviewSurfaceSupported("vertical-slots", "product-picker")).toBe(true);
-    expect(isDesignPreviewSurfaceSupported("product-list", "product-picker")).toBe(false);
+    expect(isDesignPreviewAreaSupported("vertical-slots", "product-slots")).toBe(true);
+    expect(isDesignPreviewScenarioSupported("vertical-slots", "product-picker")).toBe(true);
+    expect(isDesignPreviewScenarioSupported("product-list", "product-picker")).toBe(false);
   });
 });
 
 describe("DesignLivePreview", () => {
-  it("renders template-aware surface and viewport controls", () => {
+  it("renders template-aware area, state, and viewport controls", () => {
     const view = renderToStaticMarkup(
       React.createElement(DesignLivePreview, { fieldValues: {} }),
     );
@@ -158,21 +165,23 @@ describe("DesignLivePreview", () => {
           bundleType: "product_page",
           templateKey: "horizontal-slots",
           viewport: "desktop",
-          surface: "product-slots",
+          area: "product-slots",
+          scenario: "default",
         },
       }),
     );
 
-    expect(view).toContain('label="settingsDcp.preview.surfaceSelector.label"');
+    expect(view).toContain('label="settingsDcp.preview.areaSelector.label"');
+    expect(view).toContain('label="settingsDcp.preview.stateSelector.label"');
     expect(view).not.toContain('value="product-picker"');
     expect(utils).toContain('value="product-picker"');
-    expect(utils).toContain("settingsDcp.preview.surfaceSelector.product-picker");
+    expect(utils).toContain("settingsDcp.preview.stateSelector.product-picker");
     expect(view).toContain('accessibilityLabel="settingsDcp.preview.viewport.desktop"');
     expect(view).toContain('accessibilityLabel="settingsDcp.preview.viewport.mobile"');
     expect(view).toContain('aria-pressed="true"');
   });
 
-  it("renders localized discount feedback actions only for Cart / summary", () => {
+  it("uses the production renderer for Cart / summary without synthetic feedback actions", () => {
     const cartView = renderToStaticMarkup(
       React.createElement(DesignLivePreview, {
         fieldValues: {},
@@ -180,17 +189,15 @@ describe("DesignLivePreview", () => {
           bundleType: "full_page",
           templateKey: "standard",
           viewport: "desktop",
-          surface: "cart-summary",
+          area: "cart-summary",
+          scenario: "default",
         },
       }),
     );
-    const productView = renderToStaticMarkup(
-      React.createElement(DesignLivePreview, { fieldValues: {} }),
-    );
-
-    expect(cartView).toContain("settingsDcp.preview.feedback.tierHit");
-    expect(cartView).toContain("settingsDcp.preview.feedback.complete");
-    expect(productView).not.toContain("settingsDcp.preview.feedback.tierHit");
+    expect(cartView).toContain('data-preview-area="cart-summary"');
+    expect(cartView).toContain('src="/settings-design-preview-frame"');
+    expect(cartView).not.toContain("settingsDcp.preview.feedback.tierHit");
+    expect(cartView).not.toContain("settingsDcp.preview.feedback.complete");
   });
 
   it.each(DESIGN_PREVIEW_TEMPLATES)(
@@ -204,16 +211,17 @@ describe("DesignLivePreview", () => {
               bundleType: template.bundleType,
               templateKey: template.key,
               viewport,
-              surface: template.slotOrientation ? "product-slots" : "product-card",
+              area: template.slotOrientation ? "product-slots" : "product-card",
+              scenario: "default",
             },
           }),
         );
 
         expect(view).toContain(`data-template-key="${template.key}"`);
         expect(view).toContain(`data-preview-viewport="${viewport}"`);
-        expect(view).toContain(`data-preview-surface="${template.slotOrientation ? "product-slots" : "product-card"}"`);
-        expect(view).toContain(`data-preview-region="${template.slotOrientation ? `${template.slotOrientation}-slots` : template.productCard.mode === "row" ? "product-rows" : "product-grid"}"`);
-        expect(view).not.toContain("<iframe");
+        expect(view).toContain(`data-preview-area="${template.slotOrientation ? "product-slots" : "product-card"}"`);
+        expect(view).toContain('src="/settings-design-preview-frame"');
+        expect(view).toContain('sandbox="allow-scripts allow-same-origin"');
         expect(view).not.toContain("http://");
         expect(view).not.toContain("https://");
       }
@@ -226,12 +234,8 @@ describe("DesignLivePreview", () => {
     ["classic", "categories"],
     ["product-grid", "product-card"],
     ["vertical-slots", "product-slots"],
-    ["horizontal-slots", "product-picker"],
     ["product-list", "cart-summary"],
-    ["standard", "loading"],
-    ["product-grid", "validation"],
-    ["vertical-slots", "upsell"],
-  ] as const)("renders the %s %s deterministic surface", (templateKey, surface) => {
+  ] as const)("renders the %s %s deterministic edit area", (templateKey, area) => {
     const template = DESIGN_PREVIEW_TEMPLATES.find((item) => item.key === templateKey);
     const view = renderToStaticMarkup(
       React.createElement(DesignLivePreview, {
@@ -240,16 +244,59 @@ describe("DesignLivePreview", () => {
           bundleType: template?.bundleType ?? "full_page",
           templateKey,
           viewport: "desktop",
-          surface,
+          area,
+          scenario: "default",
         },
       }),
     );
 
-    expect(view).toContain(`data-preview-surface="${surface}"`);
-    expect(view).toContain(`settingsDcp.preview.surfaceSelector.${surface}`);
+    expect(view).toContain(`data-preview-area="${area}"`);
+    expect(view).toContain(`settingsDcp.preview.areaSelector.${area}`);
   });
 
-  it("renders a selected component without composing the whole builder", () => {
+  it.each([
+    ["horizontal-slots", "product-picker"],
+    ["standard", "loading"],
+    ["product-grid", "validation"],
+    ["standard", "upsell"],
+  ] as const)("renders the %s %s deterministic preview state", (templateKey, scenario) => {
+    const template = DESIGN_PREVIEW_TEMPLATES.find((item) => item.key === templateKey);
+    const view = renderToStaticMarkup(
+      React.createElement(DesignLivePreview, {
+        fieldValues: {},
+        initialState: {
+          bundleType: template?.bundleType ?? "full_page",
+          templateKey,
+          viewport: "desktop",
+          area: template?.slotOrientation ? "product-slots" : "product-card",
+          scenario,
+        },
+      }),
+    );
+
+    expect(view).toContain(`data-preview-scenario="${scenario}"`);
+    expect(view).toContain(`settingsDcp.preview.stateSelector.${scenario}`);
+  });
+
+  it("falls back when an initial preview state is unsupported by the selected template", () => {
+    const view = renderToStaticMarkup(
+      React.createElement(DesignLivePreview, {
+        fieldValues: {},
+        initialState: {
+          bundleType: "product_page",
+          templateKey: "vertical-slots",
+          viewport: "desktop",
+          area: "product-slots",
+          scenario: "upsell",
+        },
+      }),
+    );
+
+    expect(view).toContain('data-preview-scenario="default"');
+    expect(view).not.toContain("settingsDcp.preview.stateSelector.upsell");
+  });
+
+  it("delegates the selected component to the production renderer frame", () => {
     const view = renderToStaticMarkup(
       React.createElement(DesignLivePreview, {
         fieldValues: {},
@@ -257,28 +304,26 @@ describe("DesignLivePreview", () => {
           bundleType: "full_page",
           templateKey: "standard",
           viewport: "desktop",
-          surface: "product-card",
+          area: "product-card",
+          scenario: "default",
         },
       }),
     );
 
-    expect(view).toContain('data-preview-region="product-grid"');
-    expect(view).not.toContain('data-preview-region="timeline"');
-    expect(view).not.toContain('data-preview-region="category-accordion"');
-    expect(view).not.toContain('data-preview-region="summary-sidebar"');
+    expect(view).toContain('data-preview-area="product-card"');
+    expect(view).toContain('src="/settings-design-preview-frame"');
+    expect(view).not.toContain("data-preview-region");
     expect(view).not.toContain('value="builder"');
   });
 
-  it("renders optimized local fixture media without network or shopping work", () => {
+  it("loads only the same-origin renderer document from the Admin preview", () => {
     const view = renderToStaticMarkup(
       React.createElement(DesignLivePreview, { fieldValues: {} }),
     );
 
-    expect(view).toContain("/design-preview-product-1.avif");
-    expect(view).toContain("/design-preview-product-1.webp");
-    expect(view).toContain("/design-preview-product-1.png");
     expect(view).toContain('aria-label="Live bundle preview"');
-    expect(view).not.toContain("<iframe");
+    expect(view).toContain('src="/settings-design-preview-frame"');
     expect(view).not.toContain("fetch(");
+    expect(view).not.toContain("https://");
   });
 });

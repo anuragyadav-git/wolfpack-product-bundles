@@ -1,7 +1,7 @@
 /**
  * UTM Attribution Pixel Activation Service
  *
- * Encapsulates lifecycle management for the Wolfpack UTM web pixel.
+ * Encapsulates lifecycle management for the Only Bundles UTM web pixel.
  * Called from:
  *  - app.attribution.tsx action handler (enable/disable toggle)
  *  - api.activate-pixel route (manual re-activation for existing stores)
@@ -90,7 +90,7 @@ export async function deactivateUtmPixel(admin: any): Promise<PixelDeactivationR
 }
 
 /**
- * Activates (or re-activates) the Wolfpack UTM Attribution web pixel for a shop.
+ * Activates (or re-activates) the Only Bundles UTM Attribution web pixel for a shop.
  *
  * Strategy: delete-then-recreate on every call. This ensures the pixel record
  * always binds to the CURRENT deployed extension version.

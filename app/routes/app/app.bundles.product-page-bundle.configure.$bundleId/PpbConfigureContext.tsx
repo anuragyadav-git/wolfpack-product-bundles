@@ -1,6 +1,6 @@
 import { createContext, useContext, type ReactNode } from "react";
 
-import { usePpbConfigureFlow } from "./usePpbConfigureFlow";
+import type { usePpbConfigureFlow } from "./usePpbConfigureFlow";
 
 type PpbConfigureFlow = ReturnType<typeof usePpbConfigureFlow>;
 

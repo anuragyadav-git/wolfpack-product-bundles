@@ -22,7 +22,7 @@ function filesBelow(directory: string): string[] {
 describe('storefront TypeScript architecture', () => {
   it('contains no JavaScript source modules in the storefront runtime graph', () => {
     const javascriptSources = runtimeRoots
-      .flatMap(filesBelow)
+      .flatMap((value) => filesBelow(value))
       .filter((file) => extname(file) === '.js')
       .map((file) => relative(root, join(root, file)));
 

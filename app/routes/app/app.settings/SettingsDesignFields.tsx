@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
+import { useAppBridge } from "@shopify/app-bridge-react";
 import type { SettingsField } from "../../../lib/admin-configuration-surfaces";
+import { showAdminTransientErrorToast } from "../../../lib/admin-alert-feedback";
 import { getSlotIconRecommendation } from "../../../lib/settings-design-runtime";
 import { FilePicker } from "../../../components/shared/FilePicker";
 import styles from "../../../styles/routes/admin-configuration-surfaces.module.css";
@@ -15,7 +17,7 @@ import {
 } from "../_shared/bundle-configure/modal-utils";
 import { useTranslation } from "react-i18next";
 
-const isPolarisHexColor = (value: string) => {
+export const isPolarisHexColorInput = (value: string) => {
   if (value.length !== 7 && value.length !== 9) return false;
   if (!value.startsWith("#")) return false;
   return [...value.slice(1).toLowerCase()].every((character) =>
@@ -23,9 +25,27 @@ const isPolarisHexColor = (value: string) => {
   );
 };
 
+export const isPolarisNumberInput = (value: string) => {
+  if (!value || value.length > 7) return false;
+  let decimalCount = 0;
+  for (const character of value) {
+    if (character === ".") {
+      decimalCount += 1;
+      if (decimalCount > 1) return false;
+      continue;
+    }
+    if (character < "0" || character > "9") return false;
+  }
+  const [integer, fraction] = value.split(".");
+  return Boolean(integer)
+    && integer.length <= 3
+    && (fraction === undefined || (fraction.length > 0 && fraction.length <= 3))
+    && Number(value) <= 999;
+};
+
 export function normalizePolarisColorValue(value: string, fallback: string): string {
-  if (isPolarisHexColor(value)) return value;
-  if (isPolarisHexColor(fallback)) return fallback;
+  if (isPolarisHexColorInput(value)) return value;
+  if (isPolarisHexColorInput(fallback)) return fallback;
   const shortHex = /^#([0-9a-f])([0-9a-f])([0-9a-f])$/i.exec(fallback);
   return shortHex
     ? `#${shortHex[1]}${shortHex[1]}${shortHex[2]}${shortHex[2]}${shortHex[3]}${shortHex[3]}`
@@ -76,10 +96,29 @@ export function DesignFields({
             <s-stack gap="base">
               {group.fields.map((field) => {
                 const fieldKey = field.key ?? field.label;
+                const disabled = disabledFieldKeys.includes(fieldKey);
                 const value = values[fieldKey] ?? field.value ?? "";
                 const colorValue = normalizePolarisColorValue(value, field.value || "#000000");
                 const handleInput = (event: Event) => {
-                  onFieldChange(fieldKey, (event.target as HTMLInputElement).value);
+                  onFieldChange(fieldKey, (event.currentTarget as HTMLInputElement).value);
+                };
+                const handleColorInput = (event: Event) => {
+                  const input = event.currentTarget as HTMLInputElement;
+                  const nextValue = input.value;
+                  if (isPolarisHexColorInput(nextValue)) {
+                    onFieldChange(fieldKey, nextValue);
+                  } else {
+                    input.value = colorValue;
+                  }
+                };
+                const numberValue = value.replace(/(px|rem|em)$/i, "");
+                const handleNumberInput = (event: Event) => {
+                  const input = event.currentTarget as HTMLInputElement;
+                  if (isPolarisNumberInput(input.value)) {
+                    onFieldChange(fieldKey, input.value);
+                  } else {
+                    input.value = numberValue;
+                  }
                 };
 
                 if (field.kind === "color") {
@@ -91,7 +130,8 @@ export function DesignFields({
                         value={colorValue}
                         details={field.description}
                         alpha
-                        onInput={handleInput}
+                        disabled={disabled}
+                        onChange={handleColorInput}
                       />
                       {inheritedFieldKeys.includes(fieldKey) ? (
                         <s-badge tone="info">Shop Brand</s-badge>
@@ -110,7 +150,7 @@ export function DesignFields({
                         name={fieldKey}
                         value={value || field.options?.[0] || ""}
                         details={field.description}
-                        disabled={disabledFieldKeys.includes(fieldKey)}
+                        disabled={disabled}
                         onChange={handleInput}
                       >
                         {(field.options?.length ? field.options : [field.value ?? ""]).map((option) => (
@@ -127,11 +167,12 @@ export function DesignFields({
                       key={`${group.title}:${field.label}`}
                       label={field.label}
                       name={fieldKey}
-                      value={value.replace(/(px|rem|em)$/i, "")}
+                      value={numberValue}
                       details={field.description}
                       min={0}
                       max={999}
-                      onInput={handleInput}
+                      disabled={disabled}
+                      onChange={handleNumberInput}
                     />
                   );
                 }
@@ -146,6 +187,7 @@ export function DesignFields({
                       acceptedTypes={isGif ? "image/gif" : "image/*"}
                       invalidTypeErrorMessage={isGif ? "Choose a GIF file." : "Choose a supported image file."}
                       value={value || null}
+                      disabled={disabled}
                       onChange={(url) => onFieldChange(fieldKey, url ?? "")}
                     />
                   );
@@ -157,7 +199,7 @@ export function DesignFields({
                     name={fieldKey}
                     value={value}
                     details={field.description}
-                    disabled={field.kind === "loadingSpinner"}
+                    disabled={field.kind === "loadingSpinner" || disabled}
                     onInput={handleInput}
                   />
                 );
@@ -194,9 +236,9 @@ export function BundlePreviewModal({
   onClose: () => void;
 }) {
   const { t } = useTranslation();
+  const shopify = useAppBridge();
   const modalRef = useRef<HTMLElement | null>(null);
   const [pendingBundleId, setPendingBundleId] = useState<string | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   useModalHideListener(modalRef, onClose);
 
   useEffect(() => {
@@ -206,15 +248,13 @@ export function BundlePreviewModal({
 
   const openPreview = async (bundle: SettingsPreviewBundle) => {
     setPendingBundleId(bundle.id);
-    setErrorMessage(null);
     try {
       await openSettingsBundleStorefrontPreview(bundle);
     } catch (error) {
-      setErrorMessage(error instanceof SettingsPreviewError
+      const message = error instanceof SettingsPreviewError
         ? t(`settingsDcp.preview.storefront.errors.${error.code}`)
-        : error instanceof Error
-          ? error.message
-          : t("settingsDcp.preview.storefront.errors.notReady"));
+        : t("settingsDcp.preview.storefront.errors.notReady");
+      showAdminTransientErrorToast(shopify, message);
     } finally {
       setPendingBundleId(null);
     }
@@ -231,7 +271,6 @@ export function BundlePreviewModal({
         {t("settingsDcp.preview.storefront.close")}
       </s-button>
       <s-stack gap="base">
-        {errorMessage ? <s-banner tone="critical">{errorMessage}</s-banner> : null}
         {bundles.length === 0 ? (
           <s-paragraph>{t("settingsDcp.preview.storefront.empty")}</s-paragraph>
         ) : (

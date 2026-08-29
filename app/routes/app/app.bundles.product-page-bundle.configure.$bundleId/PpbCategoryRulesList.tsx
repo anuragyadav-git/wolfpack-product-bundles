@@ -97,6 +97,7 @@ function PpbCategoryRuleBody({
                 <s-button
                   variant="tertiary"
                   tone="critical"
+                  icon="delete"
                   onClick={() =>
                     removeCategoryConditionRule(step.id, catIndex, ruleId)
                   }

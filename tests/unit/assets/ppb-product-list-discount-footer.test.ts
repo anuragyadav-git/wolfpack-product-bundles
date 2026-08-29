@@ -85,13 +85,17 @@ describe('PPB Product List discount footer messaging', () => {
   it('targets the next unmet discount rule after the first tier is already qualified', () => {
     const context = makeDiscountFooterContext(2);
 
-    expect(cascadeTemplateMethods._getCascadeFooterMessage.call(context)).toBe('Tier 2 needs 2 for 20%');
+    expect(cascadeTemplateMethods._getCascadeFooterMessage.call(context)).toEqual([
+      { kind: 'text', value: 'Tier 2 needs 2 for 20%' },
+    ]);
   });
 
   it('uses the applied best-tier success message when all discount tiers are qualified', () => {
     const context = makeDiscountFooterContext(4);
 
-    expect(cascadeTemplateMethods._getCascadeFooterMessage.call(context)).toBe('Tier 2 success 20%');
+    expect(cascadeTemplateMethods._getCascadeFooterMessage.call(context)).toEqual([
+      { kind: 'text', value: 'Tier 2 success 20%' },
+    ]);
   });
 
   it('builds EB-style Product List add-to-cart content for a qualified percentage discount', () => {

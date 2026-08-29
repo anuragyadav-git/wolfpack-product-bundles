@@ -5,7 +5,7 @@ title: Knip Candidate Inventory
 type: operations
 status: active
 summary: Snapshot of Knip candidates that require manual validation before removal.
-last_audited: 2026-07-31
+last_audited: 2026-08-28
 owners:
   - engineering
 domains:
@@ -540,7 +540,6 @@ Generated from `./node_modules/.bin/knip --reporter json --no-exit-code --no-pro
 - app/types/state.types.ts: StateSelector
 - app/types/state.types.ts: Unsubscribe
 - app/services/addon-discount-function-service.server.ts: AddOnDiscountActivationResult
-- app/services/mantle.server.ts: MantleProviderConfig
 - app/services/shopify-publications.server.ts: SalesChannelPublication
 - app/components/OptimisedImage.tsx: OptimisedImageProps
 - app/constants/help-tooltips.ts: HelpTooltipDetails

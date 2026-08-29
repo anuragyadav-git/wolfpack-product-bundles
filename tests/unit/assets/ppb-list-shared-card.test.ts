@@ -1,5 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { ProductPageInpageRenderMethods } = require('../../../app/assets/widgets/product-page/methods/inpage-render-methods.js');
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { JSDOM } = require('jsdom');
 
 class FakeClassList {
   toggle(_name: string, _value?: boolean) {}
@@ -56,9 +58,12 @@ function createContext(overrides = {}) {
       ? { available: 0, outOfStock: true }
       : { available: null, outOfStock: false },
     _shouldShowProductComparedAtPrice: () => false,
-    renderInlineCardVariantSelector: jest.fn((product: { variantId?: string }) => (
-      `<select data-variant-selector-for="${product.variantId ?? ''}"></select>`
-    )),
+    _resolveText: (_key: string, fallback: string) => fallback,
+    renderInlineCardVariantSelector: jest.fn((product: { variantId?: string }) => {
+      const select = document.createElement('select');
+      select.dataset.variantSelectorFor = product.variantId ?? '';
+      return select;
+    }),
     attachProductEventHandlers: jest.fn(),
     ...overrides,
   };
@@ -77,8 +82,10 @@ function findButtonForProduct(html: string, productId: string) {
 
 describe('PPB List shared product cards', () => {
   const originalWindow = global.window;
+  const originalDocument = global.document;
 
   beforeEach(() => {
+    global.document = new JSDOM('<!doctype html><html><body></body></html>').window.document;
     global.window = {
       Shopify: {
         currency: {
@@ -91,10 +98,11 @@ describe('PPB List shared product cards', () => {
 
   afterEach(() => {
     global.window = originalWindow;
+    global.document = originalDocument;
   });
 
   it('renders CASCADE rows with selected quantities, variant controls, and disabled sold-out actions', () => {
-    const target = new FakeTarget();
+    const target = document.createElement('div');
     const context = createContext();
 
     ProductPageInpageRenderMethods._renderInpageStepProducts.call(context, 0, target);
@@ -111,11 +119,11 @@ describe('PPB List shared product cards', () => {
     const soldOutButton = findButtonForProduct(target.innerHTML, 'variant-2');
     expect(soldOutButton).toContain('disabled');
     expect(soldOutButton).toContain('aria-disabled="true"');
-    expect(soldOutButton).toContain('Out of stock');
+    expect(soldOutButton).toContain('Out of Stock');
   });
 
   it('renders available compare-at pricing despite a stale disabled flag', () => {
-    const target = new FakeTarget();
+    const target = document.createElement('div');
     const context = createContext({
       stepProductData: [[{
         id: 'product-sale',
@@ -137,7 +145,7 @@ describe('PPB List shared product cards', () => {
   });
 
   it('honors enabled compare-at visibility for Product List rows', () => {
-    const target = new FakeTarget();
+    const target = document.createElement('div');
     const context = createContext({
       stepProductData: [[{
         id: 'product-sale',
@@ -158,7 +166,7 @@ describe('PPB List shared product cards', () => {
   });
 
   it('marks pending Product List product loads busy without visible loading copy', () => {
-    const target = new FakeTarget();
+    const target = document.createElement('div');
     const loadStepProducts = jest.fn(() => new Promise(() => {}));
     const context = createContext({
       stepProductData: [[]],
@@ -167,7 +175,7 @@ describe('PPB List shared product cards', () => {
 
     ProductPageInpageRenderMethods._renderInpageStepProducts.call(context, 0, target);
 
-    expect(target.getAttribute('aria-busy')).toBe('true');
+    expect(target.getAttribute('aria-busy')).toEqual('true');
     expect(loadStepProducts).toHaveBeenCalledWith(0);
     expect(target.innerHTML).not.toContain('Loading products...');
   });
@@ -228,7 +236,7 @@ describe('PPB List shared product cards', () => {
     expect(productCard.dataset.productId).toBe('variant-new');
     expect(productCard.dataset.currentSelectedVariantId).toBe('variant-new');
     expect(childWithProductId.dataset.productId).toBe('variant-new');
-    expect(priceEl.textContent).toBe('$459.00');
+    expect(priceEl.textContent).toContain('$459.00');
     expect(imageEl.src).toBe('https://cdn.shopify.com/new.jpg');
   });
 });

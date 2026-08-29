@@ -67,10 +67,17 @@ describe("recovered admin surfaces contract", () => {
     ]);
     expect(LANGUAGE_CONFIGURATION.productPageTemplateFields["Product Card"]?.[0]?.fields.map((field) => field.value)).toEqual([
       "Add to Cart",
+      "Out of Stock",
       "Select variant",
       "Added x{{allowedQuantity}}",
       "Add +",
     ]);
+    const editableLanguageFields = [
+      ...LANGUAGE_CONFIGURATION.sharedCartFields,
+      ...Object.values(LANGUAGE_CONFIGURATION.templateFields).flatMap((groups) => groups.flatMap((group) => group.fields)),
+      ...Object.values(LANGUAGE_CONFIGURATION.productPageTemplateFields).flatMap((groups) => groups.flatMap((group) => group.fields)),
+    ];
+    expect(editableLanguageFields).toHaveLength(71);
   });
 
   it("separates landing-page and product-page controls with setup-specific tabs", () => {
@@ -149,7 +156,6 @@ describe("recovered admin surfaces contract", () => {
     expect(landingConfiguration?.contentTitle).toBe("Bundle Settings");
     expect(landingConfiguration?.contentDescription).toBe("Additional bundle level settings applicable to all bundles created");
     expect(landingConfiguration?.fields.map((field) => field.label)).toEqual([
-      "Show Compare At Price",
       "Hide Irrelevant variant images",
       "Track inventory on Add To Cart (in beta)",
       "Redirect Collection Page 'Quick Add' to Bundle",
@@ -169,7 +175,6 @@ describe("recovered admin surfaces contract", () => {
       "Percentage only (Eg: \"You save 19%\")",
     ]);
     expect(landingConfiguration?.fields.map((field) => field.group)).toEqual([
-      "Bundle Settings",
       "Bundle Settings",
       "Bundle Settings",
       "Bundle Settings",

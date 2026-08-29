@@ -103,7 +103,7 @@ class FakeElement {
   private find(predicate: (element: FakeElement) => boolean): FakeElement | null {
     for (const child of this.children) {
       if (predicate(child)) return child;
-      const nested = child.find(predicate);
+      const nested = child.find((value) => predicate(value));
       if (nested) return nested;
     }
     return null;
@@ -117,6 +117,7 @@ function installFakeDocument() {
     body,
     activeElement: body as FakeElement,
     createElement: (tagName: string) => new FakeElement(tagName),
+    createElementNS: (_namespace: string, tagName: string) => new FakeElement(tagName),
     querySelector: (selector: string) => body.querySelector(selector),
     addEventListener: (type: string, listener: Listener) => {
       const listeners = documentListeners.get(type) || [];
@@ -186,7 +187,9 @@ describe('fullPageClearCartConfirmationMethods', () => {
     expect(modal?.getAttribute('data-wpb-clear-cart-mode')).toBe('mobile');
     expect(mobileSummary.inert).toBe(true);
     expect(modal?.querySelector('.wpb-clear-cart-confirmation__cancel')?.textContent).toBe('Go Back');
-    expect(modal?.querySelector('.wpb-clear-cart-confirmation__confirm')?.innerHTML).toContain('Clear All');
+    expect(modal?.querySelector('.wpb-clear-cart-confirmation__confirm')?.children.some(
+      (child: FakeElement) => child.textContent === 'Clear All',
+    )).toBe(true);
 
     modal?.querySelector('.wpb-clear-cart-confirmation__cancel')?.click();
 

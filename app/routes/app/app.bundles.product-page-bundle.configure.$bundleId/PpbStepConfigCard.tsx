@@ -63,6 +63,7 @@ export function PpbStepConfigCard({ step }: { step: any }) {
         <div className={productPageBundleStyles.iconUploadButton}>
           <s-button
             inlineSize="fill"
+            icon="replace"
             onClick={() =>
               setShowIconPickerForStep((prev) =>
                 prev === step.id ? null : step.id,

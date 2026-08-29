@@ -4,8 +4,8 @@ id: ppb-bundle-picker-modal-redesign
 title: Test Spec: PPB Bundle Picker Modal Redesign
 type: test-spec
 status: active
-summary: Verifies modal-card presentation, grouped variants, product details, layered dismissal, restoration, and regression behavior for the shared PPB picker.
-last_audited: 2026-08-21
+summary: Verifies modal-card presentation, grouped variants, picker dismissal, restoration, and regression behavior without PPB product details.
+last_audited: 2026-08-28
 owners:
   - Aditya Awasthi
 domains:
@@ -28,7 +28,7 @@ keywords:
 
 ## Purpose
 
-Confirm that Horizontal Slots and Vertical Slots share one behaviorally complete picker and product-details flow while Product List and Product Grid retain their existing behavior. Tests cover semantics, state transitions, and mutations only; visual geometry remains a Chrome QA responsibility.
+Confirm that Horizontal Slots and Vertical Slots share one behaviorally complete picker while Product List and Product Grid retain their existing behavior. PPB product images and titles remain informational and do not open product details. Tests cover semantics, state transitions, and mutations only; visual geometry remains a Chrome QA responsibility.
 
 ## Test Cases
 
@@ -52,20 +52,10 @@ Confirm that Horizontal Slots and Vertical Slots share one behaviorally complete
 | 2 | Single-variant product | Render modal card | No unnecessary variant selector is exposed | Add remains available when sellable |
 | 3 | Select grouped variant | Change selector to a different variant | Active variant identity, image, price, compare-at context, and availability update | Selection state and add call count remain unchanged |
 | 4 | Unavailable variant | Select an unavailable option | Card state reflects unavailability and Add cannot mutate selection | Existing inventory semantics remain authoritative |
-| 5 | Product image activation | Activate the image control | Product details opens for the active variant | Trigger identity is retained for focus restoration |
+| 5 | Product image activation | Click or keyboard-activate the image | No product-details surface opens and no selection mutates | Image is informational |
 | 6 | Title activation | Activate or click title text | Product details does not open | Title is informational, not an implicit control |
 | 7 | Card-background activation | Activate or click non-control card area | Product details does not open | No card-wide click target |
 | 8 | Add activation | Activate Add | Exactly one selection mutation occurs without opening details | Independent primary card action |
-
-### Product-details editing
-
-| # | Scenario | Input | Expected Output | Notes |
-|---|---|---|---|---|
-| 1 | Add from details | Open unselected product, choose variant and quantity, activate Add | Product is added once to the originating slot | Uses selected variant and quantity |
-| 2 | Update from details | Open an existing selected product, change variant or quantity, activate Update | Originating slot is updated in place | No duplicate selected record |
-| 3 | Exact-slot replacement | Open details from a replacement flow and confirm | Existing slot selection is replaced | Capacity does not grow |
-| 4 | Cancel details | Change local variant or quantity, then dismiss | No selection mutation occurs | Picker state remains intact |
-| 5 | Reopen details | Reopen an existing selection | Current variant and quantity are restored | Uses originating selection identity |
 
 ### Layer ownership, focus, and scroll
 
@@ -73,12 +63,9 @@ Confirm that Horizontal Slots and Vertical Slots share one behaviorally complete
 |---|---|---|---|---|
 | 1 | Forward Tab at final picker control | Picker topmost, focus final control, press Tab | First visible picker control receives focus | Default traversal is prevented |
 | 2 | Reverse Tab at first picker control | Picker topmost, focus first control, press Shift+Tab | Final visible picker control receives focus | Default traversal is prevented |
-| 3 | Details owns keyboard | Picker and details open, press Tab | Picker does not move focus or prevent default | Topmost details layer traps focus |
-| 4 | Topmost Escape | Picker and details open, press Escape | Details closes; picker stays open | Focus returns to the exact image trigger |
-| 5 | Topmost backdrop | Picker and details open, activate details backdrop | Details closes; picker stays open | Underlying backdrop does not also dismiss |
-| 6 | Topmost swipe | Swipe details beyond the dismissal threshold | Details closes; picker stays open | Mobile only; one layer is removed |
-| 7 | Picker dismissal | Close final PPB sheet | Document scroll styles are restored | Lock persists while any PPB sheet remains |
-| 8 | Exact picker focus restoration | Close picker opened from empty or filled slot | Focus returns to the exact originating slot control | Works after rerender |
+| 3 | Variant selector owns keyboard | Picker and variant selector open, press Escape | Variant selector closes; picker stays open | Only the top layer dismisses |
+| 4 | Picker dismissal | Close final PPB sheet | Document scroll styles are restored | Lock persists while any PPB sheet remains |
+| 5 | Exact picker focus restoration | Close picker opened from empty or filled slot | Focus returns to the exact originating slot control | Works after rerender |
 
 ### Filled-slot identity and removal
 
@@ -124,5 +111,6 @@ Confirm that Horizontal Slots and Vertical Slots share one behaviorally complete
 - [ ] The pure card-presentation helper covers `add`, `quantity`, and `maximum-reached`
 - [ ] Existing selection, pricing, inventory, persistence, slot, and cart tests remain green
 - [ ] Existing Escape, arrow navigation, initial focus, and exact focus restoration tests remain green
-- [ ] Horizontal and Vertical use the shared modal behavior; Product List and Grid remain unchanged
+- [ ] Horizontal and Vertical use the shared picker behavior; Product List and Grid remain unchanged
+- [ ] No PPB product card constructs or opens a product-details surface
 - [ ] Tests assert behavior only and do not inspect CSS or class placement

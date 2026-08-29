@@ -8,7 +8,7 @@
 // Components
 export { SubscriptionQuotaCard, type SubscriptionQuotaCardProps } from "./SubscriptionQuotaCard";
 export { FreePlanCard, type FreePlanCardProps } from "./FreePlanCard";
-export { GrowPlanCard, type GrowPlanCardProps } from "./GrowPlanCard";
+export { GrowthPlanCard, type GrowthPlanCardProps } from "./GrowthPlanCard";
 export { FeatureComparisonTable, type FeatureComparisonTableProps } from "./FeatureComparisonTable";
 export { UpgradeSuccessBanner, type UpgradeSuccessBannerProps } from "./UpgradeSuccessBanner";
 export { SubscriptionErrorBanner, type SubscriptionErrorBannerProps } from "./SubscriptionErrorBanner";

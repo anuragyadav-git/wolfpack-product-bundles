@@ -1,6 +1,6 @@
 import { json, type ActionFunctionArgs } from "@remix-run/node";
 import { requireInternalSecret } from "../../lib/auth-guards.server";
-import { WebhookProcessor } from "../../services/webhook-processor.server";
+import { WebhookProcessor } from "../../services/webhooks/processor.server";
 import { AppLogger } from "../../lib/logger";
 
 /**
@@ -17,7 +17,7 @@ import { AppLogger } from "../../lib/logger";
  *   message: {
  *     data: "base64-encoded-json",
  *     attributes: {
- *       "X-Shopify-Topic": "app_subscriptions/update",
+ *       "X-Shopify-Topic": "products/delete",
  *       "X-Shopify-Shop-Domain": "store.myshopify.com",
  *       "X-Shopify-Webhook-Id": "unique-webhook-id"
  *     }

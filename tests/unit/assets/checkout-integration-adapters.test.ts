@@ -113,7 +113,7 @@ describe("checkout integration capability detection", () => {
   it("prefers Shopflo checkout SDK callback when available", () => {
     const runtimeWindow = {
       Shopflo: {
-        openCheckout: jest.fn(),
+        openFloCheckout: jest.fn(),
       },
     };
 
@@ -138,7 +138,7 @@ describe("checkout integration capability detection", () => {
   it.each([
     ["zecpay", { zecpeCheckFunctionAndCall: jest.fn() }, "zecpay_callback"],
     ["shiprocket_fastrr", { shiprocketCheckoutBuyCartHandler: jest.fn() }, "shiprocket_fastrr_callback"],
-    ["rebuy", { Cart: { getCart: jest.fn() } }, "rebuy_cart_callback"],
+    ["rebuy", { Rebuy: { Cart: { getCart: jest.fn() } } }, "rebuy_cart_callback"],
     ["upcart", { upcartOpenCart: jest.fn() }, "upcart_callback"],
     ["kaching_cart", { kachingCartApi: { refreshCart: jest.fn(), openCart: jest.fn() } }, "kaching_cart_callback"],
   ])("detects the documented %s storefront callback", (providerId, runtimeWindow, capability) => {
@@ -298,6 +298,25 @@ describe("checkout integration invocation lifecycle", () => {
       capability: "shopflo_callback",
     });
     expect(options.openShopfloCheckout).toHaveBeenCalledTimes(1);
+  });
+
+  it("passes the checkout URL to the Shopflo SDK", async () => {
+    const openFloCheckout = jest.fn(() => true);
+    const runtimeWindow = { Shopflo: { openFloCheckout } };
+
+    await expect(invokeCheckoutIntegrationProvider("shopflo", runtimeWindow, {
+      checkoutUrl: "https://shop.test/checkouts/123",
+    })).resolves.toMatchObject({ ok: true, capability: "shopflo_sdk_callback" });
+    expect(openFloCheckout).toHaveBeenCalledWith("https://shop.test/checkouts/123");
+  });
+
+  it("refreshes Rebuy through window.Rebuy.Cart", async () => {
+    const getCart = jest.fn(() => true);
+
+    await expect(invokeCheckoutIntegrationProvider("rebuy", {
+      Rebuy: { Cart: { getCart } },
+    })).resolves.toMatchObject({ ok: true, capability: "rebuy_cart_callback" });
+    expect(getCart).toHaveBeenCalledTimes(1);
   });
 
   it("invokes Zecpay and Shiprocket checkout callbacks", async () => {

@@ -74,6 +74,22 @@
   background-position: center;
 }
 
+.bw-slot-card__plus-icon--free-gift {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  margin-bottom: 10px;
+  border-radius: 50%;
+  color: var(--bundle-global-primary-button, #1e3a8a);
+  background-color: color-mix(
+    in srgb,
+    var(--bundle-global-primary-button, #1e3a8a) 8%,
+    transparent
+  );
+}
+
 .bw-slot-card__plus-icon > svg,
 .bw-slot-card__plus-icon > span,
 .empty-state-card-icon > line {

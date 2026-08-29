@@ -17,12 +17,25 @@ jest.mock("../../../app/services/cart-transform-service.server", () => ({
   CartTransformService: { syncCartLineMessagingSettings: jest.fn() },
 }));
 jest.mock("../../../app/services/ppb-storefront-runtime.server", () => ({ syncPpbStorefrontRuntime }));
+jest.mock("../../../app/services/subscriptions/subscription-service.server", () => ({
+  resolveShopEntitlements: jest.fn().mockResolvedValue({
+    entitlements: {
+      capabilities: { advancedDesign: true },
+    },
+  }),
+}));
 
 // Route imports must follow the module mocks so the action receives the isolated test doubles.
 // eslint-disable-next-line import/first
 import { createSettingsDesignState } from "../../../app/lib/settings-design-contract";
 // eslint-disable-next-line import/first
 import { action } from "../../../app/routes/app/app.settings";
+// eslint-disable-next-line import/first
+import { resolveShopEntitlements } from "../../../app/services/subscriptions/subscription-service.server";
+
+const resolveEntitlements = resolveShopEntitlements as jest.MockedFunction<
+  typeof resolveShopEntitlements
+>;
 
 function requestFor(payload: unknown) {
   const formData = new FormData();
@@ -48,6 +61,11 @@ describe("Settings Design action", () => {
     upsert.mockResolvedValue({});
     transaction.mockImplementation(async (operations) => Promise.all(operations));
     syncPpbStorefrontRuntime.mockResolvedValue({});
+    resolveEntitlements.mockResolvedValue({
+      entitlements: {
+        capabilities: { advancedDesign: true },
+      },
+    } as any);
   });
 
   it("returns 400 for malformed JSON without touching persistence", async () => {
@@ -92,5 +110,44 @@ describe("Settings Design action", () => {
     expect(upsert.mock.calls[0][0].update.generalSettings.slotIconFit).toBe("badge");
     expect(upsert.mock.calls[0][0].update.generalSettings.pageCustomization.stylePresets.images.slotIconFit)
       .toBe("badge");
+  });
+
+  it("reports the committed Design snapshot when storefront runtime sync fails", async () => {
+    const state = createSettingsDesignState({
+      fieldValues: { "Primary Color": "#654321" },
+      inheritedColorFieldKeys: ["Button Text Color"],
+    });
+    syncPpbStorefrontRuntime.mockRejectedValueOnce(new Error("runtime unavailable"));
+
+    const response = await action({ request: requestFor(state), params: {}, context: {} } as any);
+    const body = await response.json();
+
+    expect(response.status).toBe(500);
+    expect(transaction).toHaveBeenCalledTimes(1);
+    expect(body).toEqual(expect.objectContaining({
+      success: false,
+      intent: "saveSettingsDesign",
+      persisted: true,
+      runtimeSynced: false,
+      savedState: state,
+    }));
+  });
+
+  it("does not persist when entitlement evaluation fails unexpectedly", async () => {
+    const state = createSettingsDesignState({
+      fieldValues: { "Bundle Buttons Base": "12px" },
+    });
+    resolveEntitlements.mockResolvedValueOnce({
+      entitlements: { capabilities: null },
+    } as any);
+
+    await expect(action({
+      request: requestFor(state),
+      params: {},
+      context: {},
+    } as any)).rejects.toThrow();
+
+    expect(findMany).not.toHaveBeenCalled();
+    expect(upsert).not.toHaveBeenCalled();
   });
 });

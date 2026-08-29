@@ -35,6 +35,7 @@ export function PpbUtilityModals() {
         <s-button
           slot="primary-action"
           variant="primary"
+          icon="refresh"
           loading={fetcher.state === "submitting" || undefined}
           onClick={handleSyncBundleConfirm}
         >
@@ -55,7 +56,7 @@ export function PpbUtilityModals() {
       >
         <s-stack direction="block" gap="small">
           <p style={{ margin: 0, fontSize: 14, color: "#6d7175" }}>
-            Use these variables in Wolfpack Bundles messages. The widget
+            Use these variables in Only Bundles messages. The widget
             replaces them with live bundle and discount values.
           </p>
           <div className={productPageBundleStyles.templateVariableGrid}>
@@ -73,6 +74,7 @@ export function PpbUtilityModals() {
         <s-button
           slot="primary-action"
           variant="primary"
+          icon="check"
           commandFor="ppb-template-variables-modal"
           command="--hide"
           onClick={() => hidePolarisModal(templateVariablesModalRef)}

@@ -1,5 +1,10 @@
 import { generateCSSFromSettings } from "../../../app/lib/css-generators";
 import {
+  DESIGN_CONFIGURATION,
+  EXPERT_COLOR_CONTROLS,
+} from "../../../app/lib/admin-configuration-surfaces";
+import { SETTINGS_DESIGN_DEFAULT_FIELD_VALUES } from "../../../app/lib/settings-design-contract";
+import {
   SETTINGS_DESIGN_BUNDLE_TYPES,
   buildSettingsDesignRuntime,
 } from "../../../app/lib/settings-design-runtime";
@@ -68,6 +73,45 @@ function expectGeneratedCssToInclude(css: string, declarations: string[]) {
 }
 
 describe("buildSettingsDesignRuntime", () => {
+  it("gives every configurable Design control a persisted runtime effect", () => {
+    const fields = [
+      ...DESIGN_CONFIGURATION.flatMap((section) => section.fields),
+      ...Object.values(EXPERT_COLOR_CONTROLS).flat(),
+    ].filter((field) => field.kind !== "loadingSpinner");
+    const baselinePayload = {
+      fieldValues: { ...SETTINGS_DESIGN_DEFAULT_FIELD_VALUES },
+      inheritedColorFieldKeys: [],
+    };
+    const baselineRuntime = JSON.stringify(buildSettingsDesignRuntime(baselinePayload));
+
+    for (const field of fields) {
+      const fieldKey = field.key ?? field.label;
+      const changedValue = field.kind === "color"
+        ? field.value?.toLowerCase() === "#123456" ? "#654321" : "#123456"
+        : field.kind === "number"
+          ? String(Number.parseFloat(field.value ?? "0") + 1)
+          : field.kind === "select"
+            ? field.options?.find((option) => option !== field.value) ?? field.value ?? ""
+            : field.kind === "image"
+              ? "https://cdn.example.test/slot-icon.png"
+              : field.kind === "loadingGif"
+                ? "https://cdn.example.test/loading.gif"
+                : "audit-value";
+      const changedRuntime = JSON.stringify(buildSettingsDesignRuntime({
+        ...baselinePayload,
+        fieldValues: {
+          ...baselinePayload.fieldValues,
+          [fieldKey]: changedValue,
+        },
+      }));
+
+      expect({ fieldKey, changesRuntime: changedRuntime !== baselineRuntime }).toEqual({
+        fieldKey,
+        changesRuntime: true,
+      });
+    }
+  });
+
   it("fans out brand colors to EB pageCustomization targets when expert controls are disabled", () => {
     const runtime = buildSettingsDesignRuntime(makePayload());
     const pageCustomization = runtime.pageCustomization as any;

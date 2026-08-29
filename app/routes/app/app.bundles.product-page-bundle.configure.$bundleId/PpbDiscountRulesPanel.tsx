@@ -103,6 +103,7 @@ function PpbBuyXGetYRules() {
               <s-button
                 variant="tertiary"
                 tone="critical"
+                icon="delete"
                 onClick={() => pricingState.removeDiscountRule(rule.id)}
               >
                 Remove
@@ -274,6 +275,7 @@ function PpbStandardDiscountRules() {
               <s-button
                 variant="tertiary"
                 tone="critical"
+                icon="delete"
                 onClick={() => pricingState.removeDiscountRule(rule.id)}
               >
                 Remove

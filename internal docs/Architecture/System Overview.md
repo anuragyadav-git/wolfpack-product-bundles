@@ -4,8 +4,8 @@ id: system-overview
 title: System Overview
 type: architecture
 status: authoritative
-summary: High-level overview of the Wolfpack application stack, services, and deployment surfaces.
-last_audited: 2026-08-27
+summary: High-level overview of the Only Bundles application stack, services, and deployment surfaces.
+last_audited: 2026-08-28
 owners:
   - engineering
 domains:
@@ -66,7 +66,7 @@ See [[Architecture/Widget Architecture]] for FPB/PDP load strategy and versionin
 
 - **`bundles/`**: Core bundle CRUD, settings merge, CSS generation
 - **`bundles/metafield-sync/`**: Writes bundle config to Shopify metafield for zero-latency widget load
-- **`billing/`**: Shopify Billing API integration
+- **`subscriptions/`**: Shopify App Pricing verification and entitlement enforcement
 - **`unauthenticated.admin(shopDomain)`**: Admin GraphQL client for webhooks/background jobs — exported from `app/shopify.server.ts:140`
 
 ---

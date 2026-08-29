@@ -439,6 +439,14 @@ Two-stage load strategy:
 
 Use only direct Chrome DevTools MCP tools (`mcp__chrome_devtools__*`) for all browser investigation, interaction, evidence gathering, responsive testing, and implementation verification. Do not use browser plugins, browser-control wrappers, Playwright, Puppeteer, Selenium, or alternate browser automation tools as substitutes. If direct Chrome DevTools MCP is unavailable or stalls, report the browser verification as blocked rather than switching tools.
 
+For responsive testing, resize the actual Chrome window with the Chrome
+DevTools `resize_page` tool. Do not use custom viewport emulation, device
+emulation, browser zoom, CSS scaling, or JavaScript overrides to simulate a
+smaller screen. Custom viewport shrinking can make the Shopify Admin shell and
+embedded app iframe behave differently from a genuinely resized browser window
+and creates misleading screenshots. Restore the Chrome window to the required
+desktop dimensions before desktop verification.
+
 Access embedded app via Shopify Admin URL:
 ```
 https://admin.shopify.com/store/wolfpack-store-test-1/apps/wolfpack-product-bundles-sit/app/...
@@ -583,7 +591,7 @@ This doc is the distilled, topic-organized reference captured from a live authen
 
 When auditing storefront UI, test **both viewports**:
 1. Desktop screenshot (1280×800+)
-2. Mobile screenshot (emulate iPhone 14, 390×844)
+2. Mobile screenshot (resize the actual Chrome window to 390×844)
 3. Report findings for both
 
 Before gathering evidence or verifying any storefront asset/UI implementation, empty/bypass the browser cache and hard reload the storefront in Chrome. This applies after source, build, or deploy changes and before every storefront UI review (Chrome DevTools MCP: `navigate_page` reload with `ignoreCache: true`; also clear Cache Storage via `caches.keys()` when available). Do not trust a normal refresh for storefront parity checks or implementation verification.

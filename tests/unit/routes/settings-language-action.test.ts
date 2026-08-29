@@ -23,6 +23,10 @@ jest.mock("../../../app/services/ppb-storefront-runtime.server", () => ({ syncPp
 import { action } from "../../../app/routes/app/app.settings";
 
 describe("Settings Language action", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it("transactionally writes only the canonical language document to both layouts", async () => {
     requireAdminSession.mockResolvedValue({ admin: {}, session: { shop: "shop.test" } });
     findUnique.mockResolvedValue({ generalSettings: { settingsPage: { language: { legacy: true }, design: {} } } });
@@ -52,5 +56,34 @@ describe("Settings Language action", () => {
       });
       expect(write.update.generalSettings.settingsPage.language).toBeUndefined();
     }
+  });
+
+  it("reports persisted language state when the PPB runtime sync fails", async () => {
+    requireAdminSession.mockResolvedValue({ admin: {}, session: { shop: "shop.test" } });
+    findUnique.mockResolvedValue({ generalSettings: {} });
+    findMany.mockResolvedValue([]);
+    upsert.mockResolvedValue({});
+    syncPpbStorefrontRuntime.mockRejectedValue(new Error("metafield unavailable"));
+    const payload = { languageMode: "SINGLE", localeFieldValues: { en: {} } };
+    const form = new FormData();
+    form.set("intent", "saveSettingsLanguage");
+    form.set("payload", JSON.stringify(payload));
+
+    const response = await action({
+      request: new Request("https://app.test/app/settings", { method: "POST", body: form }),
+      params: {},
+      context: {},
+    } as never);
+    const body = await response.json();
+
+    expect(response.status).toBe(500);
+    expect(transaction).toHaveBeenCalledTimes(1);
+    expect(body).toMatchObject({
+      success: false,
+      intent: "saveSettingsLanguage",
+      persisted: true,
+      runtimeSynced: false,
+      savedState: payload,
+    });
   });
 });

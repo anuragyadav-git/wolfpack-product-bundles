@@ -37,8 +37,8 @@ function createFakeDocument() {
           if (index >= 0) styles.splice(index, 1);
         },
         getAttribute: (name: string) => {
-          if (name === "data-wpb-bundle-level-css") {
-            return style.dataset.wpbBundleLevelCss ?? null;
+          if (name === "data-wpb-managed-style") {
+            return style.dataset.wpbManagedStyle ?? null;
           }
           return null;
         },
@@ -50,10 +50,10 @@ function createFakeDocument() {
       return documentRef.querySelectorAll(selector)[0] ?? null;
     },
     querySelectorAll(selector: string) {
-      if (selector !== "style[data-wpb-bundle-level-css]") {
+      if (!selector.startsWith("style[data-wpb-managed-style")) {
         return [];
       }
-      return styles.filter((style) => style.dataset.wpbBundleLevelCss !== undefined);
+      return styles.filter((style) => style.dataset.wpbManagedStyle !== undefined);
     },
   };
 
@@ -71,10 +71,10 @@ describe("Bundle Level CSS storefront runtime helper", () => {
       bundleLevelCss: "#bundle-builder-app { --proof: applied; }",
     });
 
-    const style = document.querySelector("style[data-wpb-bundle-level-css]");
+    const style = document.querySelector("style[data-wpb-managed-style]");
 
     expect(style?.id).toBe("wpb-bundle-level-css-bundle-with-unsafe-chars");
-    expect(style?.getAttribute("data-wpb-bundle-level-css")).toBe("bundle/with unsafe chars");
+    expect(style?.getAttribute("data-wpb-managed-style")).toBe("bundle-level-bundle-with-unsafe-chars");
     expect(style?.textContent).toBe("#bundle-builder-app { --proof: applied; }");
   });
 
@@ -88,7 +88,7 @@ describe("Bundle Level CSS storefront runtime helper", () => {
       bundleLevelCss: "#bundle-builder-app { --proof: second; }",
     });
 
-    const styles = document.querySelectorAll("style[data-wpb-bundle-level-css]");
+    const styles = document.querySelectorAll("style[data-wpb-managed-style]");
 
     expect(styles).toHaveLength(1);
     expect(styles[0]?.id).toBe("wpb-bundle-level-css-second");

@@ -39,7 +39,7 @@ export function findPpbBundleEmbedMount(root: ParentNode = document): {
 } | null {
   const custom = Array.from(
     root.querySelectorAll<HTMLElement>("[data-wpb-ppb-embed-anchor]"),
-  ).find(isVisible);
+  ).find((value) => isVisible(value));
   if (custom) return { kind: "custom", element: custom };
   const selectors = [
     'form[action*="/cart/add"] button[name="add"]',
@@ -88,7 +88,7 @@ function resolveCurrentVariantId(context: EmbedContext, root: ParentNode) {
     ...Array.from(root.querySelectorAll<HTMLElement>('form[action*="/cart/add"]')),
     ...Array.from(root.querySelectorAll<HTMLElement>('product-form form')),
   ];
-  const form = forms.find(isVisible);
+  const form = forms.find((value) => isVisible(value));
   const selected = form?.querySelector<HTMLInputElement | HTMLSelectElement>(
     '[name="id"]:checked, select[name="id"], input[name="id"]',
   );
@@ -237,7 +237,7 @@ export function reconcilePpbBundleEmbedPlacement(root: ParentNode = document) {
   const host = root.querySelector<HTMLElement>("[data-wpb-ppb-embed-root]");
   const custom = Array.from(
     root.querySelectorAll<HTMLElement>("[data-wpb-ppb-embed-anchor]"),
-  ).find(isVisible);
+  ).find((value) => isVisible(value));
   if (host && custom && host.parentElement !== custom) custom.append(host);
   return host;
 }

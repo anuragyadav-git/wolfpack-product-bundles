@@ -95,15 +95,15 @@ async _sidebarAdvanceToNextStep() {
   // 1. Update step timeline tabs in-place (active/completed/locked state + click listeners)
   this.updateStepTimeline();
 
-  // 2. Rebuild search input for the new step (search query was cleared by the caller)
-  const existingSearch = contentSection.querySelector('.step-search-container');
-  if (existingSearch && this.shouldRenderFullPageSearch()) {
-    existingSearch.replaceWith(this.createSearchInput());
-  } else if (existingSearch) {
-    existingSearch.remove();
-  } else if (this.shouldRenderFullPageSearch()) {
-    const firstAnchor = contentSection.querySelector('.category-tabs, .fpb-step-category-title, .full-page-product-grid-container');
-    if (firstAnchor) contentSection.insertBefore(this.createSearchInput(), firstAnchor);
+  // 2. Rebuild the active step title before the rest of the catalog controls
+  const existingContentHeader = contentSection.querySelector('.fpb-full-page-content-header');
+  const newContentHeader = this.createStepContentHeader(this.currentStepIndex);
+  if (existingContentHeader && newContentHeader) {
+    existingContentHeader.replaceWith(newContentHeader);
+  } else if (existingContentHeader && !newContentHeader) {
+    existingContentHeader.remove();
+  } else if (!existingContentHeader && newContentHeader) {
+    contentSection.prepend(newContentHeader);
   }
 
   // 3. Rebuild category tabs for the new step
@@ -115,15 +115,32 @@ async _sidebarAdvanceToNextStep() {
     } else if (existingTabs && !newTabs) {
       existingTabs.remove();
     } else if (!existingTabs && newTabs) {
-      const gridContainer = contentSection.querySelector('.full-page-product-grid-container');
-      if (gridContainer) contentSection.insertBefore(newTabs, gridContainer);
+      const firstCatalogControl = contentSection.querySelector(
+        '.step-banner-image, .step-search-container, .fpb-category-section-rows, .fpb-step-category-title, .full-page-product-grid-container'
+      );
+      if (firstCatalogControl) contentSection.insertBefore(newTabs, firstCatalogControl);
     }
   } else if (existingTabs) {
     existingTabs.remove();
   }
 
+  // 4. Rebuild search input for the new step (search query was cleared by the caller)
+  const existingSearch = contentSection.querySelector('.step-search-container');
+  if (existingSearch && this.shouldRenderFullPageSearch()) {
+    existingSearch.replaceWith(this.createSearchInput());
+  } else if (existingSearch) {
+    existingSearch.remove();
+  } else if (this.shouldRenderFullPageSearch()) {
+    const firstAnchor = contentSection.querySelector(
+      '.fpb-category-section-rows, .fpb-step-category-title, .full-page-product-grid-container'
+    );
+    if (firstAnchor) contentSection.insertBefore(this.createSearchInput(), firstAnchor);
+  }
+
   const existingCategoryTitle = contentSection.querySelector('.fpb-step-category-title');
-  const newCategoryTitle = this.createActiveCategoryTitle(this.currentStepIndex);
+  const newCategoryTitle = this.config.showCategoryTabs
+    ? null
+    : this.createActiveCategoryTitle(this.currentStepIndex);
   if (existingCategoryTitle && newCategoryTitle) {
     existingCategoryTitle.replaceWith(newCategoryTitle);
   } else if (existingCategoryTitle && !newCategoryTitle) {
@@ -144,7 +161,7 @@ async _sidebarAdvanceToNextStep() {
     if (gridContainer) gridContainer.insertAdjacentElement('afterend', newCategoryRows);
   }
 
-  // 4. Show product-grid loading state
+  // 5. Show product-grid loading state
   const productGridContainer = contentSection.querySelector('.full-page-product-grid-container');
   if (!productGridContainer) {
     this.renderFullPageLayout();
@@ -152,15 +169,15 @@ async _sidebarAdvanceToNextStep() {
   }
   this.renderProductGridLoadingState(productGridContainer);
 
-  // 5. Immediately update side panel to reflect current selections
+  // 6. Immediately update side panel to reflect current selections
   const sidePanel = this.elements.stepsContainer.querySelector('.full-page-side-panel');
   if (sidePanel) this.renderSidePanel(sidePanel);
 
-  // 6. Async: load products for the new step and swap in the grid
+  // 7. Async: load products for the new step and swap in the grid
   try {
     await this.loadStepProducts(this.currentStepIndex);
     const productGrid = this.createFullPageProductGrid(this.currentStepIndex);
-    productGridContainer.innerHTML = '';
+    productGridContainer.replaceChildren();
     productGridContainer.appendChild(productGrid);
     if (sidePanel) this.renderSidePanel(sidePanel);
     this.hideLoadingOverlay();
@@ -168,7 +185,10 @@ async _sidebarAdvanceToNextStep() {
     this._renderMobileSummaryTray();
   } catch (error: any) {
     this.hideLoadingOverlay();
-    productGridContainer.innerHTML = '<p class="error-message">Failed to load products. Please try again.</p>';
+    const errorMessage = document.createElement('p');
+    errorMessage.className = 'error-message';
+    errorMessage.textContent = 'Failed to load products. Please try again.';
+    productGridContainer.replaceChildren(errorMessage);
     this._renderMobileSummaryTray();
   }
 },
@@ -718,9 +738,19 @@ _renderStandardSidebarEmptySlots(container: any, options: any = {}) {
     for (let i = 0; i < emptySlotCount; i += 1) {
       const slot = document.createElement('div');
       slot.className = 'side-panel-inline-slot';
-      slot.innerHTML = emptyStateIconUrl
-        ? `<img class="side-panel-inline-slot-icon" src="${emptyStateIconUrl}" alt="" loading="lazy">`
-        : '<span class="side-panel-inline-slot-placeholder">+</span>';
+      if (emptyStateIconUrl) {
+        const icon = document.createElement('img');
+        icon.className = 'side-panel-inline-slot-icon';
+        icon.src = emptyStateIconUrl;
+        icon.alt = '';
+        icon.loading = 'lazy';
+        slot.appendChild(icon);
+      } else {
+        const placeholder = document.createElement('span');
+        placeholder.className = 'side-panel-inline-slot-placeholder';
+        placeholder.textContent = '+';
+        slot.appendChild(placeholder);
+      }
       slots.appendChild(slot);
     }
 
@@ -733,23 +763,29 @@ _renderStandardSidebarEmptySlots(container: any, options: any = {}) {
   const emptyStateIconUrl = this._shouldRenderProductSlots()
     ? this._escapeHTML(this.selectedBundle?.productSlotIconUrl || '')
     : '';
-  const thumbnailMarkup = emptyStateIconUrl
-    ? `<img class="side-panel-product-img side-panel-product-slot-icon" src="${emptyStateIconUrl}" alt="" loading="lazy">`
-    : '<div class="side-panel-product-img-placeholder side-panel-skeleton-thumb"></div>';
-
   for (let i = 0; i < slotCount; i += 1) {
     const slot = document.createElement('div');
     slot.className = 'side-panel-product-row side-panel-skeleton-slot side-panel-skeleton-slot--standard-empty';
-    slot.innerHTML = `
-      <div class="side-panel-product-img-wrap">
-        ${thumbnailMarkup}
-      </div>
-      <div class="side-panel-product-info side-panel-skeleton-lines">
-        <span class="side-panel-product-title side-panel-skeleton-line line-name"></span>
-        <span class="side-panel-product-variant side-panel-skeleton-line line-variant"></span>
-        <span class="side-panel-product-price side-panel-skeleton-line line-price"></span>
-      </div>
-    `;
+    const imageWrap = document.createElement('div');
+    imageWrap.className = 'side-panel-product-img-wrap';
+    const thumbnail = document.createElement(emptyStateIconUrl ? 'img' : 'div');
+    thumbnail.className = emptyStateIconUrl
+      ? 'side-panel-product-img side-panel-product-slot-icon'
+      : 'side-panel-product-img-placeholder side-panel-skeleton-thumb';
+    if (emptyStateIconUrl) {
+      (thumbnail as HTMLImageElement).src = emptyStateIconUrl;
+      (thumbnail as HTMLImageElement).alt = '';
+      (thumbnail as HTMLImageElement).loading = 'lazy';
+    }
+    imageWrap.appendChild(thumbnail);
+    const info = document.createElement('div');
+    info.className = 'side-panel-product-info side-panel-skeleton-lines';
+    ['side-panel-product-title side-panel-skeleton-line line-name', 'side-panel-product-variant side-panel-skeleton-line line-variant', 'side-panel-product-price side-panel-skeleton-line line-price'].forEach((className) => {
+      const line = document.createElement('span');
+      line.className = className;
+      info.appendChild(line);
+    });
+    slot.append(imageWrap, info);
     container.appendChild(slot);
   }
 },
@@ -762,16 +798,21 @@ _renderSidebarProductSkeletons(container: any, slotCountOverride: any) {
   for (let i = 0; i < slotCount; i++) {
     const slot = document.createElement('div');
     slot.className = 'side-panel-product-row side-panel-skeleton-slot';
-    slot.innerHTML = `
-      <div class="side-panel-product-img-wrap">
-        <div class="side-panel-product-img-placeholder side-panel-skeleton-thumb"></div>
-      </div>
-      <div class="side-panel-product-info side-panel-skeleton-lines">
-        <span class="side-panel-product-title side-panel-skeleton-line line-name"></span>
-        <span class="side-panel-product-variant side-panel-skeleton-line line-variant"></span>
-      </div>
-      <span class="side-panel-product-price side-panel-skeleton-line line-price"></span>
-    `;
+    const imageWrap = document.createElement('div');
+    imageWrap.className = 'side-panel-product-img-wrap';
+    const thumbnail = document.createElement('div');
+    thumbnail.className = 'side-panel-product-img-placeholder side-panel-skeleton-thumb';
+    imageWrap.appendChild(thumbnail);
+    const info = document.createElement('div');
+    info.className = 'side-panel-product-info side-panel-skeleton-lines';
+    ['side-panel-product-title side-panel-skeleton-line line-name', 'side-panel-product-variant side-panel-skeleton-line line-variant'].forEach((className) => {
+      const line = document.createElement('span');
+      line.className = className;
+      info.appendChild(line);
+    });
+    const price = document.createElement('span');
+    price.className = 'side-panel-product-price side-panel-skeleton-line line-price';
+    slot.append(imageWrap, info, price);
     container.appendChild(slot);
   }
 },

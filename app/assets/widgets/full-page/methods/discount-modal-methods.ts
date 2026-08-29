@@ -1,15 +1,17 @@
 import { CurrencyManager } from '../../shared/currency-manager.js';
 import { PricingCalculator } from '../../shared/pricing-calculator.js';
-import { calculateBundleDiscountForPurchaseOption } from '../../shared/subscription-storefront-methods.js';
+import {
+  calculateBundleDiscountForPurchaseOption,
+  calculateBundleTotalForPurchaseOption,
+} from '../../shared/subscription-storefront-methods.js';
 import { ToastManager } from '../../shared/toast-manager.js';
 import { TemplateManager } from '../../shared/template-manager.js';
 import { getDiscountProgressData } from '../../shared/engine/bundle-selectors.js';
 import {
   applyDiscountProgressTransition,
-  renderDiscountProgress,
+  createDiscountProgressElement,
 } from '../../shared/components/discount-progress.js';
 import { STOREFRONT_PROXY_ROOT } from '../../../../config/storefront-proxy-routes.js';
-import { calculateBundleTotalForPurchaseOption } from '../../shared/subscription-storefront-methods.js';
 
 export const fullPageDiscountModalMethods: Record<string, any> & ThisType<any> = {
 _renderDiscountProgress(options: any = {}) {
@@ -87,8 +89,7 @@ _renderDiscountProgress(options: any = {}) {
   progressData.success = isReached;
   progressData.milestones = progressBarType === 'step_based' ? milestones : [];
 
-  const wrapper = document.createElement('div');
-  wrapper.innerHTML = renderDiscountProgress(progressData, {
+  const bar = createDiscountProgressElement(progressData, {
     mode: progressBarType === 'simple' ? 'bar' : 'stepped',
     messagePlacement: placement === 'sidebar' ? 'external' : 'inline',
     className: progressBarType === 'simple'
@@ -108,8 +109,7 @@ _renderDiscountProgress(options: any = {}) {
     milestonesOnTrack: progressBarType === 'step_based',
     renderInlineSubtitles: true,
     renderSubtitleList: false,
-  }).trim();
-  const bar = wrapper.firstElementChild as HTMLElement | null;
+  });
   const previousProgressPercent = Number(options.previousProgressPercent);
   if (
     options.previousProgressPercent !== null
@@ -170,7 +170,7 @@ openModal(stepIndex: any) {
   const modal = this.elements.modal;
   const headerText = this.getFormattedHeaderText();
 
-  modal.querySelector('.modal-step-title').innerHTML = headerText;
+  modal.querySelector('.modal-step-title').textContent = headerText;
 
   // Load and render products for this step
   this.loadStepProducts(stepIndex).then(() => {

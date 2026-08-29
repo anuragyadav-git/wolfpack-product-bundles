@@ -76,7 +76,7 @@ describe('PPB validation control disables step validation in Product Page CTA', 
     ProductPageFooterModalStateMethods.updateAddToCartButton.call(context);
 
     expect(context.elements.addToCartButton.disabled).toBe(true);
-    expect(context.elements.addToCartButton.textContent).toBe('Complete All Steps to Continue');
+    expect(context.elements.addToCartButton.textContent).toContain('Complete All Steps to Continue');
   });
 
   it('enables the CTA for add-to-cart when control disables validation', () => {

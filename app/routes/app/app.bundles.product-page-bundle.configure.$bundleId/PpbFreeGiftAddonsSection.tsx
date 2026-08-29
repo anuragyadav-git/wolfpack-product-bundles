@@ -1,4 +1,4 @@
-import type React from "react";
+import React from "react";
 import { usePpbConfigureContext } from "./PpbConfigureContext";
 import { DisabledConfigurationRegion } from "../_shared/bundle-configure/DisabledConfigurationRegion";
 
@@ -124,7 +124,7 @@ export function PpbFreeGiftAddonsSection() {
                       <s-stack direction="block" gap="small">
                         <s-button
                           variant="secondary"
-                          icon="globe"
+                          icon="language-translate"
                           disabled={
                             !step.isFreeGift || shopLocales.length === 0 || undefined
                           }
@@ -252,7 +252,7 @@ export function PpbFreeGiftAddonsSection() {
                         </s-press-button>
                         <s-button
                           variant="secondary"
-                          icon="globe"
+                          icon="language-translate"
                           disabled={
                             step.addonUnlockAfterCompletion === false ||
                             shopLocales.length === 0 ||
@@ -314,6 +314,7 @@ export function PpbFreeGiftAddonsSection() {
                                   </h4>
                                   <s-button
                                     variant="tertiary"
+                                    icon="delete"
                                     onClick={() => {
                                       updateAddonTiers(
                                         addonTiers.filter((_, i) => i !== idx)
@@ -374,6 +375,7 @@ export function PpbFreeGiftAddonsSection() {
                           <s-stack direction="inline" gap="small-100">
                             <s-button
                               variant="tertiary"
+                              icon="code"
                               onClick={() =>
                                 showPolarisModal(templateVariablesModalRef)
                               }
@@ -382,7 +384,7 @@ export function PpbFreeGiftAddonsSection() {
                             </s-button>
                             <s-button
                               variant="secondary"
-                              icon="globe"
+                              icon="language-translate"
                               disabled={
                                 step.addonUnlockAfterCompletion === false ||
                                 shopLocales.length === 0 ||

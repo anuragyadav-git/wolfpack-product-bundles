@@ -1,4 +1,31 @@
-# 🎁 Wolfpack Product Bundles
+---
+schema_version: 1
+id: only-bundles-readme
+title: Only Bundles
+type: repository-readme
+status: active
+summary: Development and architecture guide for the Only Bundles Shopify application.
+last_audited: 2026-08-28
+owners:
+  - engineering
+domains:
+  - application
+systems:
+  - repository
+source_paths:
+  - app/
+  - extensions/
+related_docs:
+  - internal docs/index.md
+tags:
+  - shopify-app
+  - bundles
+keywords:
+  - Only Bundles
+  - product bundles
+---
+
+# 🎁 Only Bundles
 
 > A powerful Shopify app that enables merchants to create customizable product bundles with dynamic pricing and real-time cart transformation.
 
@@ -29,7 +56,7 @@
 
 ## 🌟 Overview
 
-Wolfpack Product Bundles is a comprehensive Shopify application that allows merchants to:
+Only Bundles is a comprehensive Shopify application that allows merchants to:
 
 - **Create Multi-Step Bundle Builders** - Guide customers through a structured product selection process
 - **Apply Dynamic Pricing** - Offer percentage-based, fixed amount, or tiered discounts
@@ -702,6 +729,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Made with ❤️ by Wolfpack**
+**Made with ❤️ by Only Bundles**
 
 **Last Updated:** December 28, 2025

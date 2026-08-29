@@ -1,21 +1,24 @@
 export {};
 
+const { JSDOM } = require('jsdom');
+
 const { ProductPageConfigLifecycleMethods } = require('../../../app/assets/widgets/product-page/methods/config-lifecycle-methods.js');
 const { ProductPageInpageRenderMethods } = require('../../../app/assets/widgets/product-page/methods/inpage-render-methods.js');
 const { ProductPageModalMethods } = require('../../../app/assets/widgets/product-page/methods/modal-methods.js');
-const { renderSharedProductCard } = require('../../../app/assets/widgets/shared/components/product-card.js');
 
 function createTarget() {
-  const classList = {
-    toggle: jest.fn(),
-  } as any;
-  return {
-    innerHTML: '',
-    classList,
-    setAttribute: jest.fn(),
-    isConnected: true,
-  } as any;
+  return document.createElement('div');
 }
+
+const originalDocument = global.document;
+
+beforeEach(() => {
+  global.document = new JSDOM('<!doctype html><html><body></body></html>').window.document;
+});
+
+afterEach(() => {
+  global.document = originalDocument;
+});
 
 function createBaseContext(overrides: Record<string, unknown> = {}) {
   return {
@@ -37,6 +40,8 @@ function createBaseContext(overrides: Record<string, unknown> = {}) {
     _isProductPageGridTemplate: () => false,
     _usesCompactInpageProductCards: () => false,
     _shouldShowProductComparedAtPrice: () => false,
+    _resolveText: (_key: string, fallback: string) => fallback,
+    resolveProductPageStepText: (_step: unknown, fallback: string) => fallback,
     renderInlineCardVariantSelector: () => '',
     attachProductEventHandlers: jest.fn(),
     normalizeTitle: (value: unknown) => String(value || ''),
@@ -155,9 +160,11 @@ describe('PPB in-page rendering control wiring', () => {
 
     ProductPageInpageRenderMethods._renderInpageStepProducts.call(context, 0, target);
 
-    expect(target.innerHTML).toContain('Decrease quantity');
-    expect(target.innerHTML).toMatch(/aria-label="Increase quantity[^>]*disabled aria-disabled="true"/);
-    expect(target.innerHTML).not.toContain('Added x3');
+    expect(target.querySelector('[aria-label^="Decrease quantity"]')).not.toBeNull();
+    const increase = target.querySelector('button[aria-label^="Increase quantity"]') as HTMLButtonElement;
+    expect(increase.disabled).toBe(true);
+    expect(increase.getAttribute('aria-disabled')).toEqual('true');
+    expect(target.textContent).not.toMatch(/Added x3/);
   });
 
   it.each([
@@ -274,7 +281,7 @@ describe('PPB in-page rendering control wiring', () => {
     expect(target.innerHTML).toContain('product-add-btn');
     expect(target.innerHTML).toContain('disabled');
     expect(target.innerHTML).toContain('aria-disabled="true"');
-    expect(target.innerHTML).toContain('Out of stock');
+    expect(target.textContent).toMatch(/Out of Stock/);
   });
 
   it('uses selectionId as the shared card identity key in in-page rendering', () => {
@@ -301,44 +308,9 @@ describe('PPB in-page rendering control wiring', () => {
   });
 });
 
-describe('PPB shared product card control classes', () => {
-  it('adds see-more rendering for long descriptions when display toggle is on', () => {
-    const html = renderSharedProductCard({
-      id: 'variant-1',
-      title: 'Widget',
-      price: 1200,
-      description: 'A'.repeat(200),
-    }, 0, { display: { format: '$ {{amount}}' } }, {
-      displaySeeMoreLink: true,
-      expandProductCardOnHover: false,
-    });
-
-    expect(html).toContain('bw-product-card--see-more');
-    expect(html).toContain('bw-product-card__see-more');
-  });
-
-  it('adds hover-expand class when the option is enabled', () => {
-    const html = renderSharedProductCard({
-      id: 'variant-2',
-      title: 'Widget Hover',
-      price: 1200,
-      description: 'Short desc',
-    }, 0, { display: { format: '$ {{amount}}' } }, {
-      expandProductCardOnHover: true,
-      description: '',
-    });
-
-    expect(html).toContain('bw-product-card--hover-expand');
-  });
-});
-
 describe('PPB modal product-card description wiring', () => {
   it('uses the shared product card markup in modal views', () => {
-    const productGrid = {
-      innerHTML: '',
-      classList: { add: jest.fn(), remove: jest.fn() },
-      offsetWidth: 0,
-    } as any;
+    const productGrid = document.createElement('div');
 
     const context = {
       ...ProductPageModalMethods,
@@ -367,7 +339,8 @@ describe('PPB modal product-card description wiring', () => {
       getSelectedQuantity: () => 0,
       getVariantAvailable: () => ({ available: null, outOfStock: false }),
       _shouldShowProductComparedAtPrice: () => false,
-      renderVariantSelector: () => '',
+      _resolveText: (_key: string, fallback: string) => fallback,
+      renderVariantSelector: () => document.createElement('select'),
       attachProductEventHandlers: jest.fn(),
     } as any;
 
@@ -380,11 +353,7 @@ describe('PPB modal product-card description wiring', () => {
   });
 
   it('omits populated descriptions from Horizontal and Vertical Slots product cards', () => {
-    const productGrid = {
-      innerHTML: '',
-      classList: { add: jest.fn(), remove: jest.fn() },
-      offsetWidth: 0,
-    } as any;
+    const productGrid = document.createElement('div');
     const context = {
       ...ProductPageModalMethods,
       config: { displaySeeMoreLink: true, expandProductCardOnHover: true },
@@ -413,7 +382,8 @@ describe('PPB modal product-card description wiring', () => {
       getSelectedQuantity: () => 0,
       getVariantAvailable: () => ({ available: null, outOfStock: false }),
       _shouldShowProductComparedAtPrice: () => false,
-      renderVariantSelector: () => '',
+      _resolveText: (_key: string, fallback: string) => fallback,
+      renderVariantSelector: () => document.createElement('select'),
       attachProductEventHandlers: jest.fn(),
     } as any;
 
@@ -425,11 +395,7 @@ describe('PPB modal product-card description wiring', () => {
   });
 
   it('omits empty Shopify HTML descriptions from modal product cards', () => {
-    const productGrid = {
-      innerHTML: '',
-      classList: { add: jest.fn(), remove: jest.fn() },
-      offsetWidth: 0,
-    } as any;
+    const productGrid = document.createElement('div');
     const context = {
       ...ProductPageModalMethods,
       config: { displaySeeMoreLink: true },
@@ -458,7 +424,8 @@ describe('PPB modal product-card description wiring', () => {
       getSelectedQuantity: () => 0,
       getVariantAvailable: () => ({ available: null, outOfStock: false }),
       _shouldShowProductComparedAtPrice: () => false,
-      renderVariantSelector: () => '',
+      _resolveText: (_key: string, fallback: string) => fallback,
+      renderVariantSelector: () => document.createElement('select'),
       attachProductEventHandlers: jest.fn(),
     } as any;
 

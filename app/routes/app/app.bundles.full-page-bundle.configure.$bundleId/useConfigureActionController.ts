@@ -16,6 +16,7 @@ import {
 } from "../../../lib/theme-editor-navigation.client";
 import { buildFpbStorefrontUrl } from "../../../lib/fpb-storefront-url";
 import { useSharedBundleHandlers } from "../../../hooks/useSharedBundleHandlers";
+import { i18n } from "../../../i18n/config";
 import {
   getGuidedTourTransition,
   type TourStep,
@@ -46,6 +47,7 @@ export function useConfigureActionController(flow: ConfigureBundleFlowDraft) {
     markAsDirty: flow.markAsDirty,
     activeTabIndex: flow.activeTabIndex,
     setActiveTabIndex: flow.setActiveTabIndex,
+    clearOperationAlert: flow.clearOperationAlert,
     shopify: flow.shopify,
     fetcher: flow.fetcher,
     setIsSyncModalOpen: flow.setIsSyncModalOpen,
@@ -82,10 +84,11 @@ export function useConfigureActionController(flow: ConfigureBundleFlowDraft) {
   }, []);
   const handlePreviewBundle = useCallback(async () => {
     if (flow.isDirty) {
-      flow.shopify.toast.show(
-        "Please save your changes before previewing the bundle",
-        { isError: true, duration: 4000 },
-      );
+      flow.setOperationAlert({
+        id: "unsaved-preview",
+        heading: "Save before previewing",
+        message: "Save your changes before previewing the bundle.",
+      });
       return false;
     }
     const pendingPreviewWindow = openPendingDashboardPreview();
@@ -130,7 +133,8 @@ export function useConfigureActionController(flow: ConfigureBundleFlowDraft) {
           storage: window.localStorage,
           setHasPreview: flow.setHasPreview,
         });
-        flow.shopify.toast.show("Bundle preview opened in new tab", {
+        flow.clearOperationAlert();
+        flow.shopify.toast.show(i18n.t("common.success.previewOpened"), {
           isError: false,
         });
         return shareablePreviewUrl;
@@ -173,22 +177,24 @@ export function useConfigureActionController(flow: ConfigureBundleFlowDraft) {
         const isPreviewUrl =
           flow.bundleProduct &&
           productUrl === flow.bundleProduct.onlineStorePreviewUrl;
-        const message = isPreviewUrl
-          ? "Bundle product preview opened in new tab"
-          : "Bundle product opened in new tab";
         markBundlePreviewComplete({
           bundleId: flow.bundle.id,
           storage: window.localStorage,
           setHasPreview: flow.setHasPreview,
         });
-        flow.shopify.toast.show(message, { isError: false });
+        flow.clearOperationAlert();
+        flow.shopify.toast.show(
+          isPreviewUrl ? i18n.t("common.success.previewOpened") : "Product opened",
+          { isError: false },
+        );
       } else {
         closePendingDashboardPreview(pendingPreviewWindow);
         AppLogger.error("Bundle product data:", {}, flow.bundleProduct);
-        flow.shopify.toast.show(
-          "Unable to determine bundle product URL. Please check bundle product configuration.",
-          { isError: true, duration: 5000 },
-        );
+        flow.setOperationAlert({
+          id: "bundle-preview",
+          heading: "Preview unavailable",
+          message: "Check the bundle product configuration and try again.",
+        });
       }
       return productUrl || false;
     };
@@ -329,9 +335,10 @@ export function useConfigureActionController(flow: ConfigureBundleFlowDraft) {
   }, [flow]);
   const handlePlaceWidget = useCallback(() => {
     if (!flow.apiKey) {
-      flow.shopify.toast.show("App configuration is unavailable.", {
-        isError: true,
-        duration: 5000,
+      flow.setOperationAlert({
+        id: "widget-placement",
+        heading: "Placement unavailable",
+        message: "Check the app configuration and try again.",
       });
       return;
     }

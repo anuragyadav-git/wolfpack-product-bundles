@@ -62,15 +62,10 @@ export function PpbDiscountMessagingOptions() {
         )}
       </s-stack>
       {pricingState.discountType === DiscountMethod.BUY_X_GET_Y && (
-        <s-banner
-          tone="info"
-          heading="Discount messaging tip"
-          dismissible={false}
-          hidden={false}
-        >
+        <s-paragraph>
           Discount messaging displays the Total Quantity to Claim Offer (Buy +
           Get) to ensure customers add their rewards to the cart
-        </s-banner>
+        </s-paragraph>
       )}
       <DisabledConfigurationRegion
         disabled={!pricingState.discountMessagingEnabled}
@@ -95,6 +90,7 @@ export function PpbDiscountMessagingOptions() {
             <div style={{ textAlign: "right" }}>
               <s-button
                 variant="tertiary"
+                icon="code"
                 onClick={() => setIsDiscountVariablesModalOpen(true)}
               >
                 Show Variables

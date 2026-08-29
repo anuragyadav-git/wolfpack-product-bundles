@@ -414,13 +414,7 @@ describe("FPB create + configure parity flow (scaffolded E2E path)", () => {
     });
     expect(updateCall.data.steps.create[1].minQuantity).toBe(1);
 
-    expect(syncBundleStorefrontNow).toHaveBeenCalledWith({
-      admin: saveAdmin,
-      shopDomain: mockSession.shop,
-      bundleId: "bundle-1",
-      bundleType: "full_page",
-      reason: "save",
-    });
+    expect(syncBundleStorefrontNow).not.toHaveBeenCalled();
   });
 
   it("rejects a zero add-on threshold before saving a fresh bundle", async () => {

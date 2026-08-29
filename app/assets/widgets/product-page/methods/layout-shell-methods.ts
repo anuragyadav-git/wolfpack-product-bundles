@@ -1,11 +1,11 @@
 import { CurrencyManager } from '../../shared/currency-manager.js';
-import { ComponentGenerator } from '../../shared/component-generator.js';
 import { ToastManager } from '../../shared/toast-manager.js';
 import { BUNDLE_WIDGET } from '../../shared/constants.js';
 import { getDiscountProgressData } from '../../shared/engine/bundle-selectors.js';
-import { renderDiscountProgress } from '../../shared/components/discount-progress.js';
-import { renderSharedProductCard } from '../../shared/components/product-card.js';
 import { formatProductPageStepValidationToast } from './modal-state-methods.js';
+import { resolveProductPageStepText } from './step-text-methods.js';
+
+export { resolveProductPageStepText } from './step-text-methods.js';
 
 export function shouldHideInpageStepChrome({ isCascade = false, steps = [], step = null }: any = {}) {
   if (!isCascade) return false;
@@ -66,6 +66,10 @@ export function getGridStepRenderSequence({ stepCount = 0, currentStepIndex = 0 
 }
 
 export const ProductPageLayoutShellMethods: Record<string, any> & ThisType<any> = {
+resolveProductPageStepText(step: any, stepIndex: number) {
+  return resolveProductPageStepText(step, stepIndex);
+},
+
 renderUI() {
   this._renderDirectDefaultProducts();
   this.renderPurchaseOptions?.();
@@ -77,7 +81,7 @@ renderUI() {
 
 renderSteps() {
   // Clear existing steps
-  this.elements.stepsContainer.innerHTML = '';
+  this.elements.stepsContainer.replaceChildren();
   this._markProductPageTemplate();
 
   if (!this.selectedBundle || !this.selectedBundle.steps) {
@@ -99,7 +103,7 @@ renderSteps() {
 _renderDirectDefaultProducts() {
   const el = this.elements.defaultProducts;
   if (!el) return;
-  el.innerHTML = '';
+  el.replaceChildren();
 
   const data = this._getDirectDefaultProductsData();
   const products = this.directDefaultProducts || [];
@@ -208,7 +212,7 @@ renderProductPageLayout() {
     }
 
     const section = this._isProductPageModalSlotTemplate()
-      ? this._createModalSlotStepSection(step)
+      ? this._createModalSlotStepSection(step, stepIndex)
       : this._isProductPageGridTemplate?.()
         ? this._createInpageStepSection(step, stepIndex)
       : null;
@@ -301,19 +305,25 @@ _createGridStepHeader(step: any, stepIndex: number) {
   const button = document.createElement('button');
   const isActive = stepIndex === this.currentStepIndex;
   const isComplete = this.validateStep(stepIndex);
-  const title = step.pageTitle || step.name || `Step ${stepIndex + 1}`;
+  const { navigationLabel } = resolveProductPageStepText(step, stepIndex);
   const showTitle = shouldShowCompletedStepTitle({
     isComplete,
     hideCompletedTitles: this._getProductPageControls?.()?.hideStepTitlesInCompletedState === true,
   });
   button.type = 'button';
   button.className = `bw-ppb-grid-step${isActive ? ' is-active' : ''}${isComplete ? ' is-complete' : ''}`;
-  button.setAttribute('aria-label', title);
+  button.setAttribute('aria-label', navigationLabel);
   button.setAttribute('aria-current', isActive ? 'step' : 'false');
-  button.innerHTML = `
-    <span class="bw-ppb-grid-step__number">${stepIndex + 1}</span>
-    ${showTitle ? `<span class="bw-ppb-grid-step__label">${ComponentGenerator.escapeHtml(title)}</span>` : ''}
-  `;
+  const number = document.createElement('span');
+  number.className = 'bw-ppb-grid-step__number';
+  number.textContent = String(stepIndex + 1);
+  button.append(number);
+  if (showTitle) {
+    const label = document.createElement('span');
+    label.className = 'bw-ppb-grid-step__label';
+    label.textContent = navigationLabel;
+    button.append(label);
+  }
   button.addEventListener('click', () => {
     if (isActive) return;
     if (!this.isStepAccessible(stepIndex)) {
@@ -356,18 +366,24 @@ _createCascadeStepFlowHeader() {
     button.className = 'bw-ppb-cascade-step-flow__step';
     button.classList.toggle('is-active', stepIndex === this.currentStepIndex);
     button.classList.toggle('is-complete', this.validateStep(stepIndex));
-    const title = step.pageTitle || step.name || `Step ${stepIndex + 1}`;
+    const { navigationLabel } = resolveProductPageStepText(step, stepIndex);
     const showTitle = shouldShowCompletedStepTitle({
       isComplete: this.validateStep(stepIndex),
       hideCompletedTitles: this._getProductPageControls?.()?.hideStepTitlesInCompletedState === true,
     });
-    button.setAttribute('aria-label', title);
+    button.setAttribute('aria-label', navigationLabel);
     button.setAttribute('aria-current', stepIndex === this.currentStepIndex ? 'step' : 'false');
     button.disabled = stepIndex > this.currentStepIndex && !this.isStepAccessible(stepIndex);
-    button.innerHTML = `
-      <span class="bw-ppb-cascade-step-flow__number">${stepIndex + 1}</span>
-      ${showTitle ? `<span class="bw-ppb-cascade-step-flow__label">${ComponentGenerator.escapeHtml(title)}</span>` : ''}
-    `;
+    const number = document.createElement('span');
+    number.className = 'bw-ppb-cascade-step-flow__number';
+    number.textContent = String(stepIndex + 1);
+    button.append(number);
+    if (showTitle) {
+      const label = document.createElement('span');
+      label.className = 'bw-ppb-cascade-step-flow__label';
+      label.textContent = navigationLabel;
+      button.append(label);
+    }
     button.addEventListener('click', () => {
       if (button.disabled || stepIndex === this.currentStepIndex) return;
       this.currentStepIndex = stepIndex;
@@ -429,15 +445,15 @@ _createInpageStepSection(step: any, stepIndex: any) {
   ].filter(Boolean).join(' ');
   section.className = sectionClass;
 
-  if (!hideStepChrome) {
-    const usesCascadeStepFlow = this._usesCascadeStepFlow();
-    if (!usesCascadeStepFlow) {
-      const title = document.createElement('div');
-      title.className = `bw-ppb-inpage-step-title${isCascade ? ' wpbMixCascadeBodyHeaderCategoryName' : ''}`;
-      title.textContent = step.pageTitle || step.name || '';
-      section.appendChild(title);
-    }
+  const { contentTitle } = resolveProductPageStepText(step, stepIndex);
+  if (contentTitle) {
+    const title = document.createElement('h2');
+    title.className = 'bw-ppb-step-content-title';
+    title.textContent = contentTitle;
+    section.appendChild(title);
+  }
 
+  if (!hideStepChrome) {
     const tabs = this._createInpageCategoryTabs(step, stepIndex);
     if (tabs) section.appendChild(tabs);
   }

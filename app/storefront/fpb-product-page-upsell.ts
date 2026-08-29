@@ -40,7 +40,7 @@ function isVisible(element: HTMLElement) {
 
 export function findFpbUpsellAnchor(root: ParentNode = document) {
   const custom = Array.from(root.querySelectorAll<HTMLElement>("[data-wpb-fpb-upsell-anchor]"));
-  return custom.find(isVisible) ?? null;
+  return custom.find((value) => isVisible(value)) ?? null;
 }
 
 function findPrimaryProductForm(root: ParentNode = document) {
@@ -50,7 +50,7 @@ function findPrimaryProductForm(root: ParentNode = document) {
     '[data-type="add-to-cart-form"] form',
   ];
   for (const selector of selectors) {
-    const form = Array.from(root.querySelectorAll<HTMLElement>(selector)).find(isVisible);
+    const form = Array.from(root.querySelectorAll<HTMLElement>(selector)).find((value) => isVisible(value));
     if (form) return form;
   }
   return null;

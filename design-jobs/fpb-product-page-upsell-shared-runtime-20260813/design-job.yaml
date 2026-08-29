@@ -3,18 +3,18 @@
   "job": {
     "id": "fpb-product-page-upsell-shared-runtime-20260813",
     "title": "FPB product-page upsell shared runtime",
-    "status": "active",
-    "stage": "CHROME_QA_PREFLIGHT",
+    "status": "blocked",
+    "stage": "BLOCKED",
     "revision": 3,
     "created_at": "2026-08-13T16:26:22Z",
-    "updated_at": "2026-08-13T16:56:31Z",
+    "updated_at": "2026-08-27T16:28:00Z",
     "owner": "Aditya Awasthi",
     "product": "Wolfpack Product Bundles",
     "repository": "/Users/adityaawasthi/Developer/wolfpack-product-bundles",
     "branch": "feature/26.05-UI-changes",
     "commit": "c6a67ee8092675098f93fa6b1f13b92b58bb82e8",
     "artifact_root": "/Users/adityaawasthi/Developer/wolfpack-product-bundles/design-jobs",
-    "resume_stage": null
+    "resume_stage": "CHROME_QA_PREFLIGHT"
   },
   "scope": {
     "product_family": "FPB",
@@ -807,6 +807,42 @@
       "reason": "User confirmed the current tunnel is sufficient and direct default-profile Chrome DevTools MCP is connected.",
       "evidence": [
         "qa/preflight.json"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 25,
+      "at": "2026-08-27T16:11:53Z",
+      "from": "CHROME_QA_PREFLIGHT",
+      "to": "BLOCKED",
+      "revision": 3,
+      "reason": "Chrome QA preflight cannot persist required preview screenshots, and no live eligible FPB product-page offer fixture is currently available for the target comparison.",
+      "evidence": [
+        "/Users/adityaawasthi/Developer/wolfpack-product-bundles/design-jobs/fpb-product-page-upsell-shared-runtime-20260813/qa/preflight.json"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 26,
+      "at": "2026-08-27T16:17:50Z",
+      "from": "BLOCKED",
+      "to": "CHROME_QA_PREFLIGHT",
+      "revision": 3,
+      "reason": "User authorized deterministic fixture modification and the recommended FPB-only upsell preview parity scope.",
+      "evidence": [
+        "/Users/adityaawasthi/Developer/wolfpack-product-bundles/design-jobs/fpb-product-page-upsell-shared-runtime-20260813/qa/preflight.json"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 27,
+      "at": "2026-08-27T16:28:00Z",
+      "from": "CHROME_QA_PREFLIGHT",
+      "to": "BLOCKED",
+      "revision": 3,
+      "reason": "Desktop and mobile parity checks passed inline, but Chrome MCP still cannot persist the mandatory QA screenshots under the design-job artifact directory.",
+      "evidence": [
+        "/Users/adityaawasthi/Developer/wolfpack-product-bundles/design-jobs/fpb-product-page-upsell-shared-runtime-20260813/qa/preflight.json"
       ],
       "affected_artifacts": []
     }

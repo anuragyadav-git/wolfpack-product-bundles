@@ -7,10 +7,13 @@
 
 'use strict';
 
+import { createTrashIcon } from '../svg-icons.js';
+
 const SELECTED_ROW_PLACEHOLDER_IMAGE = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96"%3E%3Crect width="96" height="96" fill="%23f3f4f6"/%3E%3C/svg%3E';
 
-export function renderSelectedProductRow(product: any = null, options: any = {}) {
-  if (!product) return renderEmptyRow(options);
+export function createSelectedProductRowElement(product: any = null, options: any = {}) {
+  const runtimeDocument: Document = options.document || document;
+  if (!product) return createEmptyRow(options, runtimeDocument);
 
   const selectionKey = String(product.selectionId || '');
   const title = product.title || product.parentTitle || '';
@@ -28,80 +31,91 @@ export function renderSelectedProductRow(product: any = null, options: any = {})
     options.className || '',
   ].filter(Boolean).join(' ');
 
-  return `
-    <div class="${classes}" data-bw-selected-row="true" data-variant-id="${escapeAttribute(selectionKey)}">
-      <div class="bw-selected-row__media">
-        <img class="bw-selected-row__image" src="${escapeAttribute(imageUrl)}" alt="${escapeAttribute(title)}" loading="lazy">
-      </div>
-      <div class="bw-selected-row__body">
-        <div class="bw-selected-row__title">${escapeHtml(title)}</div>
-        ${variantTitle ? `<div class="bw-selected-row__variant">${escapeHtml(variantTitle)}</div>` : ''}
-        ${renderPrice(product)}
-        ${renderBadges(product)}
-      </div>
-      <div class="bw-selected-row__action">
-        <span class="bw-selected-row__quantity" aria-label="Quantity ${quantity}">${escapeHtml(quantityLabel)}</span>
-        ${removable ? `
-          <button type="button" class="bw-selected-row__remove" data-action="remove-selected-product" data-variant-id="${escapeAttribute(selectionKey)}" aria-label="Delete ${escapeAttribute(title)}">
-            ${renderTrashIcon()}
-          </button>
-        ` : ''}
-      </div>
-    </div>
-  `;
+  const root = runtimeDocument.createElement('div');
+  root.className = classes;
+  root.dataset.bwSelectedRow = 'true';
+  root.dataset.variantId = selectionKey;
+  const media = runtimeDocument.createElement('div');
+  media.className = 'bw-selected-row__media';
+  const image = runtimeDocument.createElement('img');
+  image.className = 'bw-selected-row__image';
+  image.src = imageUrl;
+  image.alt = title;
+  image.loading = 'lazy';
+  media.append(image);
+  const body = runtimeDocument.createElement('div');
+  body.className = 'bw-selected-row__body';
+  const titleElement = runtimeDocument.createElement('div');
+  titleElement.className = 'bw-selected-row__title';
+  titleElement.textContent = title;
+  body.append(titleElement);
+  if (variantTitle) {
+    const variant = runtimeDocument.createElement('div');
+    variant.className = 'bw-selected-row__variant';
+    variant.textContent = variantTitle;
+    body.append(variant);
+  }
+  if (product.priceText) {
+    const price = runtimeDocument.createElement('div');
+    price.className = 'bw-selected-row__price';
+    price.textContent = product.priceText;
+    body.append(price);
+  }
+  appendBadges(body, product, runtimeDocument);
+  const action = runtimeDocument.createElement('div');
+  action.className = 'bw-selected-row__action';
+  const quantityElement = runtimeDocument.createElement('span');
+  quantityElement.className = 'bw-selected-row__quantity';
+  quantityElement.setAttribute('aria-label', `Quantity ${quantity}`);
+  quantityElement.textContent = quantityLabel;
+  action.append(quantityElement);
+  if (removable) {
+    const remove = runtimeDocument.createElement('button');
+    remove.type = 'button';
+    remove.className = 'bw-selected-row__remove';
+    remove.dataset.action = 'remove-selected-product';
+    remove.dataset.variantId = selectionKey;
+    remove.setAttribute('aria-label', `Delete ${title}`);
+    remove.append(createTrashIcon(runtimeDocument));
+    action.append(remove);
+  }
+  root.append(media, body, action);
+  return root;
 }
 
-function renderPrice(product: any) {
-  if (!product.priceText) return '';
-
-  return `<div class="bw-selected-row__price">${escapeHtml(product.priceText)}</div>`;
-}
-
-function renderEmptyRow(options: any) {
+function createEmptyRow(options: any, runtimeDocument: Document) {
   const label = options.emptyLabel || 'Empty slot';
-
-  return `
-    <div class="bw-selected-row bw-selected-row--empty ${options.className || ''}" data-bw-selected-row="true">
-      <div class="bw-selected-row__media bw-selected-row__media--empty"></div>
-      <div class="bw-selected-row__body">
-        <div class="bw-selected-row__title bw-selected-row__title--empty">${escapeHtml(label)}</div>
-        <div class="bw-selected-row__skeleton-line"></div>
-      </div>
-      <div class="bw-selected-row__action bw-selected-row__action--empty"></div>
-    </div>
-  `;
+  const root = runtimeDocument.createElement('div');
+  root.className = `bw-selected-row bw-selected-row--empty ${options.className || ''}`.trim();
+  root.dataset.bwSelectedRow = 'true';
+  const media = runtimeDocument.createElement('div');
+  media.className = 'bw-selected-row__media bw-selected-row__media--empty';
+  const body = runtimeDocument.createElement('div');
+  body.className = 'bw-selected-row__body';
+  const title = runtimeDocument.createElement('div');
+  title.className = 'bw-selected-row__title bw-selected-row__title--empty';
+  title.textContent = label;
+  const skeleton = runtimeDocument.createElement('div');
+  skeleton.className = 'bw-selected-row__skeleton-line';
+  body.append(title, skeleton);
+  const action = runtimeDocument.createElement('div');
+  action.className = 'bw-selected-row__action bw-selected-row__action--empty';
+  root.append(media, body, action);
+  return root;
 }
 
-function renderTrashIcon() {
-  return `
-    <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" aria-hidden="true" focusable="false">
-      <path d="M6 2h8a1 1 0 0 1 1 1v1H5V3a1 1 0 0 1 1-1Zm-2 3h12l-1 13H5L4 5Zm4 2v9m4-9v9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/>
-    </svg>
-  `;
-}
-
-function renderBadges(product: any) {
+function appendBadges(parent: HTMLElement, product: any, runtimeDocument: Document) {
   const badges: any[] = [];
   if (product.isDefault) badges.push('Included');
   if (product.isFreeGift) badges.push(product.isLocked ? 'Locked gift' : 'Free gift');
-  if (badges.length === 0) return '';
-
-  return `
-    <div class="bw-selected-row__badges">
-      ${badges.map((badge) => `<span class="bw-selected-row__badge">${escapeHtml(badge)}</span>`).join('')}
-    </div>
-  `;
-}
-
-function escapeHtml(value: string) {
-  return String(value)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
-
-function escapeAttribute(value: string) {
-  return escapeHtml(value).replace(/`/g, '&#96;');
+  if (badges.length === 0) return;
+  const list = runtimeDocument.createElement('div');
+  list.className = 'bw-selected-row__badges';
+  badges.forEach((badge) => {
+    const element = runtimeDocument.createElement('span');
+    element.className = 'bw-selected-row__badge';
+    element.textContent = badge;
+    list.append(element);
+  });
+  parent.append(list);
 }

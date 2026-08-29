@@ -1,21 +1,22 @@
 import { CurrencyManager } from '../../shared/currency-manager.js';
 import { PricingCalculator } from '../../shared/pricing-calculator.js';
-import { calculateBundleDiscountForPurchaseOption } from '../../shared/subscription-storefront-methods.js';
-import { calculateBundleTotalForPurchaseOption } from '../../shared/subscription-storefront-methods.js';
+import { calculateBundleDiscountForPurchaseOption, calculateBundleTotalForPurchaseOption } from '../../shared/subscription-storefront-methods.js';
 import { ToastManager } from '../../shared/toast-manager.js';
 import { TemplateManager } from '../../shared/template-manager.js';
 import { getDiscountProgressData } from '../../shared/engine/bundle-selectors.js';
 import {
   readRenderedDiscountProgressPercent,
-  renderDiscountProgress,
+  createDiscountProgressElement,
 } from '../../shared/components/discount-progress.js';
-import { renderSelectedProductRow } from '../../shared/components/selected-product-row.js';
+import { createSelectedProductRowElement } from '../../shared/components/selected-product-row.js';
 import { getSummaryDiscountBadgeLabel } from '../shared/summary-discount-badge.js';
 import {
   createSummaryClearButton,
   getRemainingSummarySkeletonCount,
 } from './side-panel-methods.js';
 import { TemplateDesignSystem } from '../../shared/template-design-system.js';
+import { createMessageFragment, type MessageSegment } from '../../shared/message-segments.js';
+import { createChevronIcon, createTrashIcon } from '../../shared/svg-icons.js';
 
 const mobileSummaryTemplateSystem = TemplateDesignSystem;
 
@@ -178,7 +179,7 @@ _populateCompactMobileSummaryTray(sheet: any) {
   const previousProgressPercent = readRenderedDiscountProgressPercent(
     sheet.querySelector?.('.fpb-discount-progress')
   );
-  sheet.innerHTML = '';
+  sheet.replaceChildren();
 
   const { totalPrice, totalQuantity, unitPrices } = calculateBundleTotalForPurchaseOption(this,
     this.selectedProducts,
@@ -272,11 +273,7 @@ _populateCompactMobileSummaryTray(sheet: any) {
   const toggleIcon = document.createElement('span');
   toggleIcon.className = 'fpb-mobile-summary-toggle-icon';
   toggleIcon.setAttribute('aria-hidden', 'true');
-  toggleIcon.innerHTML = `
-    <svg width="20" height="20" viewBox="0 0 20 19" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path fill-rule="evenodd" clip-rule="evenodd" d="M6.07827 11.2095C6.36662 11.4773 6.81745 11.4606 7.0852 11.1722L9.65059 8.4095L12.216 11.1722C12.4837 11.4606 12.9346 11.4773 13.2229 11.2095C13.5113 10.9418 13.528 10.4909 13.2602 10.2026L10.1727 6.87758C10.0379 6.73239 9.84871 6.6499 9.65059 6.6499C9.45247 6.6499 9.26329 6.73239 9.12847 6.87758L6.04097 10.2026C5.77321 10.4909 5.78991 10.9418 6.07827 11.2095Z" fill="currentColor"></path>
-    </svg>
-  `;
+  toggleIcon.append(createChevronIcon(document, 'up'));
   countBadge.append(toggleCopy, togglePrices, toggleIcon);
   countBadge.setAttribute('aria-label', summaryToggleLabel);
   countBadge.setAttribute('aria-expanded', this.compactMobileSummaryTrayExpanded ? 'true' : 'false');
@@ -314,7 +311,7 @@ _populateCompactMobileSummaryTray(sheet: any) {
         currencyInfo,
         { messageType: nextRule ? 'progress' : 'success' }
       );
-      let discountMessage = '';
+      let discountMessage: MessageSegment[] = [];
       if (nextRule) {
         const progressTemplate = TemplateManager.getDiscountMessageTemplate({
           bundle: this.selectedBundle,
@@ -325,7 +322,7 @@ _populateCompactMobileSummaryTray(sheet: any) {
           fallbackTemplate: this.config.discountTextTemplate || 'Add {conditionText} to get {discountText}',
           locale: window.Shopify?.locale,
         });
-        discountMessage = TemplateManager.replaceVariables(
+        discountMessage = TemplateManager.formatMessageSegments(
           progressTemplate,
           variables
         );
@@ -342,15 +339,15 @@ _populateCompactMobileSummaryTray(sheet: any) {
           fallbackTemplate: this.config.successMessageTemplate || '🎉 You unlocked {{discountText}}!',
           locale: window.Shopify?.locale,
         });
-        discountMessage = TemplateManager.replaceVariables(
+        discountMessage = TemplateManager.formatMessageSegments(
           successTemplate,
           variables
         );
       }
-      if (discountMessage) {
+      if (discountMessage.length > 0) {
         const msgEl = document.createElement('div');
         msgEl.className = 'fpb-mobile-summary-discount-text';
-        msgEl.innerHTML = discountMessage;
+        msgEl.append(createMessageFragment(discountMessage, msgEl.ownerDocument));
         discountBlock.appendChild(msgEl);
       }
     }
@@ -607,19 +604,38 @@ _renderCompactMobileSummaryBundleItems(currencyInfo: any, totalQuantity: number)
       currencyInfo
     );
 
-    row.innerHTML = `
-      <div class="fpb-mobile-summary-product-image-wrap">
-        ${imgSrc ? `<img src="${imgSrc}" alt="${this._escapeHTML(summaryTitle)}" class="fpb-mobile-summary-product-image">` : '<div class="fpb-mobile-summary-product-image-placeholder"></div>'}
-      </div>
-      <div class="fpb-mobile-summary-product-info">
-        <span class="fpb-mobile-summary-product-title">${this._escapeHTML(summaryTitle)}</span>
-        ${variantInfo ? `<span class="fpb-mobile-summary-product-variant">${this._escapeHTML(variantInfo)}</span>` : ''}
-        <span class="fpb-mobile-summary-product-price">${priceText}</span>
-      </div>
-      <div class="fpb-mobile-summary-product-action">
-        <span class="fpb-mobile-summary-product-qty">x${item.quantity}</span>
-      </div>
-    `;
+    const imageWrap = document.createElement('div');
+    imageWrap.className = 'fpb-mobile-summary-product-image-wrap';
+    const image = document.createElement(imgSrc ? 'img' : 'div');
+    image.className = imgSrc ? 'fpb-mobile-summary-product-image' : 'fpb-mobile-summary-product-image-placeholder';
+    if (imgSrc) {
+      (image as HTMLImageElement).src = imgSrc;
+      (image as HTMLImageElement).alt = summaryTitle;
+    }
+    imageWrap.appendChild(image);
+    const info = document.createElement('div');
+    info.className = 'fpb-mobile-summary-product-info';
+    const title = document.createElement('span');
+    title.className = 'fpb-mobile-summary-product-title';
+    title.textContent = summaryTitle;
+    info.appendChild(title);
+    if (variantInfo) {
+      const variant = document.createElement('span');
+      variant.className = 'fpb-mobile-summary-product-variant';
+      variant.textContent = variantInfo;
+      info.appendChild(variant);
+    }
+    const price = document.createElement('span');
+    price.className = 'fpb-mobile-summary-product-price';
+    price.textContent = priceText;
+    info.appendChild(price);
+    const action = document.createElement('div');
+    action.className = 'fpb-mobile-summary-product-action';
+    const quantity = document.createElement('span');
+    quantity.className = 'fpb-mobile-summary-product-qty';
+    quantity.textContent = `x${item.quantity}`;
+    action.appendChild(quantity);
+    row.append(imageWrap, info, action);
 
     if (!item.isDefault) {
       const removeBtn = document.createElement('button');
@@ -635,11 +651,11 @@ _renderCompactMobileSummaryBundleItems(currencyInfo: any, totalQuantity: number)
         removeBtn.setAttribute('aria-disabled', 'true');
         removeBtn.title = removalState.blockedMessage;
       }
-      removeBtn.innerHTML = `<svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" aria-hidden="true" focusable="false"><path d="M6 2h8a1 1 0 0 1 1 1v1H5V3a1 1 0 0 1 1-1Zm-2 3h12l-1 13H5L4 5Zm4 2v9m4-9v9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>`;
+      removeBtn.append(createTrashIcon(document, 22));
       removeBtn.addEventListener('click', () => {
         this.removeSummarySelectedProduct(item, summaryTitle);
       });
-      row.querySelector('.fpb-mobile-summary-product-action')?.appendChild(removeBtn);
+      action.appendChild(removeBtn);
     }
 
     productsList.appendChild(row);
@@ -677,18 +693,29 @@ _renderCompactMobileSummaryBundleItems(currencyInfo: any, totalQuantity: number)
     for (let slotIndex = 0; slotIndex < emptySlots; slotIndex += 1) {
       const emptyCard = document.createElement('div');
       emptyCard.className = 'fpb-mobile-summary-empty-product-card';
-      const emptyStateIcon = emptyStateIconUrl
-        ? `<img class="fpb-mobile-summary-slot-icon-img" src="${emptyStateIconUrl}" alt="" width="63" height="63">`
-        : '<span class="fpb-mobile-summary-slot-plus">+</span>';
-      emptyCard.innerHTML = `
-        <div class="fpb-mobile-summary-empty-product-image">${emptyStateIcon}</div>
-        <div class="fpb-mobile-summary-empty-product-info">
-          <span class="fpb-mobile-summary-empty-product-title"></span>
-          <span class="fpb-mobile-summary-empty-product-variant"></span>
-          <span class="fpb-mobile-summary-empty-product-price"></span>
-        </div>
-        <span class="fpb-mobile-summary-empty-product-action"></span>
-      `;
+      const emptyImage = document.createElement('div');
+      emptyImage.className = 'fpb-mobile-summary-empty-product-image';
+      const emptyIcon = document.createElement(emptyStateIconUrl ? 'img' : 'span');
+      emptyIcon.className = emptyStateIconUrl ? 'fpb-mobile-summary-slot-icon-img' : 'fpb-mobile-summary-slot-plus';
+      if (emptyStateIconUrl) {
+        (emptyIcon as HTMLImageElement).src = emptyStateIconUrl;
+        (emptyIcon as HTMLImageElement).alt = '';
+        (emptyIcon as HTMLImageElement).width = 63;
+        (emptyIcon as HTMLImageElement).height = 63;
+      } else {
+        emptyIcon.textContent = '+';
+      }
+      emptyImage.appendChild(emptyIcon);
+      const emptyInfo = document.createElement('div');
+      emptyInfo.className = 'fpb-mobile-summary-empty-product-info';
+      ['fpb-mobile-summary-empty-product-title', 'fpb-mobile-summary-empty-product-variant', 'fpb-mobile-summary-empty-product-price'].forEach((className) => {
+        const placeholder = document.createElement('span');
+        placeholder.className = className;
+        emptyInfo.appendChild(placeholder);
+      });
+      const emptyAction = document.createElement('span');
+      emptyAction.className = 'fpb-mobile-summary-empty-product-action';
+      emptyCard.append(emptyImage, emptyInfo, emptyAction);
       productsList.appendChild(emptyCard);
     }
   }
@@ -720,13 +747,23 @@ _renderCompactMobileSummarySlotTiles(container: any, allSelectedProducts: any[] 
     if (item) {
       const summaryTitle = this.getSummaryProductDisplayTitle(item);
       const imgSrc = this._getSelectedProductImageSrc(item);
-      card.innerHTML = imgSrc
-        ? `<img src="${imgSrc}" alt="${this._escapeHTML(summaryTitle)}" class="fpb-mobile-summary-slot-image">`
-        : '<div class="fpb-mobile-summary-slot-image-placeholder"></div>';
+      const image = document.createElement(imgSrc ? 'img' : 'div');
+      image.className = imgSrc ? 'fpb-mobile-summary-slot-image' : 'fpb-mobile-summary-slot-image-placeholder';
+      if (imgSrc) {
+        (image as HTMLImageElement).src = imgSrc;
+        (image as HTMLImageElement).alt = summaryTitle;
+      }
+      card.appendChild(image);
     } else {
-      card.innerHTML = emptyStateIconUrl
-        ? `<img class="fpb-mobile-summary-slot-icon-img" src="${emptyStateIconUrl}" alt="">`
-        : '<span class="fpb-mobile-summary-slot-plus">+</span>';
+      const empty = document.createElement(emptyStateIconUrl ? 'img' : 'span');
+      empty.className = emptyStateIconUrl ? 'fpb-mobile-summary-slot-icon-img' : 'fpb-mobile-summary-slot-plus';
+      if (emptyStateIconUrl) {
+        (empty as HTMLImageElement).src = emptyStateIconUrl;
+        (empty as HTMLImageElement).alt = '';
+      } else {
+        empty.textContent = '+';
+      }
+      card.appendChild(empty);
     }
 
     container.appendChild(card);
@@ -838,10 +875,10 @@ createStepContentHeader(stepIndex: any) {
   const header = document.createElement('div');
   header.className = 'fpb-full-page-content-header';
 
-  const subtitle = document.createElement('p');
-  subtitle.className = 'fpb-full-page-content-subtitle fpb-step-subtext';
-  subtitle.textContent = contentText.subtext;
-  header.appendChild(subtitle);
+  const title = document.createElement('h2');
+  title.className = 'fpb-full-page-step-title';
+  title.textContent = contentText.subtext;
+  header.appendChild(title);
 
   return header;
 },
@@ -871,9 +908,7 @@ createStandardSidebarSelectedRow(item: any, currencyInfo: any) {
   const priceText = isFreeGiftItem
     ? CurrencyManager.convertAndFormat(0, currencyInfo)
     : CurrencyManager.convertAndFormat(item.price * item.quantity, currencyInfo);
-  const wrapper = document.createElement('div');
-
-  wrapper.innerHTML = renderSelectedProductRow({
+  const row = createSelectedProductRowElement({
     id: getSelectionId(item),
     title: summaryTitle,
     variantTitle: variantInfo,
@@ -882,9 +917,7 @@ createStandardSidebarSelectedRow(item: any, currencyInfo: any) {
     priceText,
     isDefault: item.isDefault === true,
     isFreeGift: isFreeGiftItem,
-  }).trim();
-
-  const row = wrapper.firstElementChild;
+  });
   row?.classList?.add('side-panel-product-row');
   return row;
 },
@@ -901,8 +934,7 @@ createStandardSidebarDiscountProgress({ discountMessage, combinedDiscountInfo, t
     PricingCalculator.getDiscountMethod(this.selectedBundle)
   );
   const currentValue = conditionType === 'amount' ? totalPrice : totalQuantity;
-  const wrapper = document.createElement('div');
-  wrapper.innerHTML = renderDiscountProgress(
+  const progress = createDiscountProgressElement(
     getDiscountProgressData({
       currentValue,
       targetValue,
@@ -912,9 +944,7 @@ createStandardSidebarDiscountProgress({ discountMessage, combinedDiscountInfo, t
       mode: this.config.discountProgressBarType === 'simple' ? 'bar' : 'stepped',
       messagePlacement: 'external',
     }
-  ).trim();
-
-  const progress = wrapper.firstElementChild;
+  );
   progress?.classList?.add('bw-discount-progress--standard-sidebar');
   progress?.classList?.add('fpb-dp-sidebar');
   return progress;

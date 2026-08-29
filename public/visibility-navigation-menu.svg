@@ -1,16 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 320" role="img" aria-labelledby="title desc">
   <title id="title">Storefront navigation menu placement</title>
-  <desc id="desc">A storefront header with the main navigation menu highlighted.</desc>
-  <rect width="640" height="360" rx="24" fill="#f1f2f4"/>
-  <rect x="30" y="30" width="580" height="300" rx="14" fill="#fff" stroke="#c9ccd0" stroke-width="3"/>
-  <rect x="30" y="30" width="580" height="42" rx="14" fill="#e5e7e9"/>
-  <circle cx="54" cy="51" r="6" fill="#9ca3aa"/><circle cx="74" cy="51" r="6" fill="#9ca3aa"/><circle cx="94" cy="51" r="6" fill="#9ca3aa"/>
-  <rect x="48" y="86" width="544" height="58" rx="8" fill="#e4f5eb" stroke="#008060" stroke-width="4"/>
-  <rect x="68" y="106" width="92" height="16" rx="6" fill="#202223"/>
-  <rect x="252" y="108" width="52" height="11" rx="5" fill="#5b625f"/><rect x="324" y="108" width="52" height="11" rx="5" fill="#008060"/><rect x="396" y="108" width="52" height="11" rx="5" fill="#5b625f"/><rect x="468" y="108" width="52" height="11" rx="5" fill="#5b625f"/>
-  <circle cx="556" cy="114" r="10" fill="none" stroke="#5b625f" stroke-width="3"/>
-  <rect x="54" y="164" width="532" height="136" rx="10" fill="#eef0f1"/>
-  <rect x="78" y="190" width="214" height="18" rx="6" fill="#60666b"/><rect x="78" y="222" width="164" height="10" rx="5" fill="#a0a5aa"/><rect x="78" y="244" width="132" height="10" rx="5" fill="#a0a5aa"/>
-  <rect x="382" y="184" width="158" height="92" rx="8" fill="#d4d8db"/>
-  <rect x="44" y="76" width="150" height="28" rx="14" fill="#008060"/><text x="119" y="95" fill="#fff" font-family="Arial,sans-serif" font-size="13" text-anchor="middle">MAIN MENU</text>
+  <desc id="desc">A compact storefront preview with Bundle Builder selected in the main navigation.</desc>
+  <rect width="640" height="320" fill="#fafafa"/>
+  <rect width="640" height="68" fill="#fff" stroke="#e3e3e3"/>
+  <circle cx="34" cy="34" r="17" fill="none" stroke="#2f2f2f" stroke-width="2"/>
+  <text x="34" y="39" fill="#2f2f2f" font-family="Georgia,serif" font-size="15" text-anchor="middle">M</text>
+  <g fill="#545454" font-family="Arial,sans-serif" font-size="11"><text x="184" y="38">HOME</text><text x="233" y="38">SHOP</text><text x="278" y="38">COLLECTIONS</text><text x="352" y="38" fill="#171717" font-weight="700">BUNDLE BUILDER</text><text x="453" y="38">ABOUT</text></g>
+  <rect x="350" y="51" width="88" height="2" fill="#171717"/>
+  <g transform="translate(28 94)">
+    <g fill="#e7e0d6"><rect width="132" height="126"/><rect x="150" width="132" height="126"/><rect x="300" width="132" height="126"/><rect x="450" width="132" height="126"/></g>
+    <g fill="#c4ae91"><circle cx="66" cy="58" r="34"/><rect x="183" y="24" width="66" height="72" rx="18"/><path d="M326 96c12-48 39-73 79-82 18 25 26 52 22 82z"/><rect x="474" y="20" width="84" height="78" rx="8"/></g>
+    <g fill="#292929" font-family="Arial,sans-serif" font-size="12"><text y="150">Wellness set</text><text x="150" y="150">Ceramic edit</text><text x="300" y="150">Home ritual</text><text x="450" y="150">Gift collection</text></g>
+    <g fill="#777" font-family="Arial,sans-serif" font-size="11"><text y="170">$42.00</text><text x="150" y="170">$56.00</text><text x="300" y="170">$64.00</text><text x="450" y="170">$48.00</text></g>
+  </g>
 </svg>

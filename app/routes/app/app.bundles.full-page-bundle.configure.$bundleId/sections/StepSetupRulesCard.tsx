@@ -1,5 +1,6 @@
 import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
 import { FpbStepRuleModeContent } from "./StepSetupRuleModeContent";
+import { APP_BRAND } from "../../../../lib/app-brand";
 
 export function FpbStepRulesCard({
   flow,
@@ -40,7 +41,7 @@ export function FpbStepRulesCard({
           type="button"
           className={fullPageBundleStyles.linkButton}
           style={{ marginBottom: 12, display: "inline-block" }}
-          onClick={() => window.open("https://wolfpackapps.com", "_blank")}
+          onClick={() => window.open(APP_BRAND.links.company, "_blank")}
         >
           Learn More
         </button>
