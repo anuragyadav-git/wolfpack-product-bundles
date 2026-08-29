@@ -5,7 +5,7 @@ title: Admin Configure Page
 type: architecture
 status: authoritative
 summary: Defines the shared FPB and PPB configure-page boundary and direct create, clone, edit, and save flows.
-last_audited: 2026-08-27
+last_audited: 2026-08-29
 owners:
   - engineering
 domains:
@@ -121,6 +121,13 @@ a fabricated default locale. A translation action is disabled only when the
 loader has no published locales or when its owning storefront feature is not
 enabled/configurable (for example, a disabled widget or an incompatible pricing
 display mode).
+
+Required shop currency, optional published locales, and optional bundle-product
+metadata use isolated Admin GraphQL documents and execute concurrently. A
+scope or field error in optional product or locale data must not discard the
+required currency response or fail either Configure route. The bundle-product
+query stays within the declared `read_products` scope; do not add product media
+selections whose broader access requirements can invalidate the whole query.
 
 Each surface keeps one canonical owner. Step and category translations stay on
 their `multiLangData`; general storefront labels stay in
