@@ -174,6 +174,12 @@ export default function BillingPage() {
   } = billingState;
 
   const isCancelling = fetcher.state === "submitting" && fetcher.formData?.get("intent") === "cancel";
+  const isOpeningPlanManagement = fetcher.state === "submitting"
+    && fetcher.formData?.get("intent") === "upgrade";
+
+  const handleUpgradeSubscription = useCallback(() => {
+    fetcher.submit({ intent: "upgrade" }, { method: "post" });
+  }, [fetcher]);
 
   const handleCancelSubscription = useCallback(() => {
     fetcher.submit({ intent: "cancel" }, { method: "post" });
@@ -289,6 +295,19 @@ export default function BillingPage() {
                   </s-banner>
                 )}
               </s-stack>
+
+              {isFreePlan && (
+                <>
+                  <s-divider />
+                  <s-button
+                    variant="primary"
+                    onClick={handleUpgradeSubscription}
+                    loading={isOpeningPlanManagement || undefined}
+                  >
+                    {t("common.actions.upgradeNow")}
+                  </s-button>
+                </>
+              )}
 
               {/* Quick Stats */}
               {data.stats && (
