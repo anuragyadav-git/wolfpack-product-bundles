@@ -15,6 +15,7 @@ import {
 import { MultiLanguageTextModal } from "../../../../components/bundle-configure/MultiLanguageTextModal";
 import { getConfigureActionIcon } from "../../../../lib/bundle-config/configure-action-icons";
 import { DisabledConfigurationRegion } from "./DisabledConfigurationRegion";
+import { AdminWarningGroup } from "../../../../components/AdminWarningGroup";
 
 type SubscriptionValidationResponse = {
   success?: boolean;
@@ -116,6 +117,22 @@ export function BundleSubscriptionsSection(
       : validation?.isValid === false
       ? validation.message ?? SUBSCRIPTION_NO_COMMON_PLAN_MESSAGE
       : null;
+  const subscriptionWarnings = [
+    ...(subscriptionsBlocked
+      ? [{
+          id: "subscription-compatibility",
+          heading: "Subscriptions unavailable",
+          message: compatibilityIssues.map((issue) => issue.message).join(" "),
+        }]
+      : []),
+    ...(validationMessage
+      ? [{
+          id: "subscription-validation",
+          heading: "Action required",
+          message: validationMessage,
+        }]
+      : []),
+  ];
   const setGroup = (groupId: string) => {
     const selectedGroup =
       groups.find((group: any) => group?.id === groupId) ?? null;
@@ -235,18 +252,7 @@ export function BundleSubscriptionsSection(
                 </s-stack>
               </s-grid>
 
-              {subscriptionsBlocked ? (
-                <s-box paddingBlockEnd="base">
-                  <s-banner
-                    tone="warning"
-                    heading="Subscriptions unavailable"
-                    dismissible={false}
-                    hidden={false}
-                  >
-                    {compatibilityIssues.map((issue) => issue.message).join(" ")}
-                  </s-banner>
-                </s-box>
-              ) : null}
+              <AdminWarningGroup warnings={subscriptionWarnings} />
               {showSubscriptionSetupGuide ? (
                 <s-box padding="base" background="subdued" borderRadius="base">
                   <s-heading>Subscription setup guide</s-heading>
@@ -257,19 +263,6 @@ export function BundleSubscriptionsSection(
                   </s-paragraph>
                 </s-box>
               ) : null}
-              {validationMessage ? (
-                <s-box paddingBlockEnd="base">
-                  <s-banner
-                    tone="warning"
-                    heading="Action required"
-                    dismissible={false}
-                    hidden={false}
-                  >
-                    {validationMessage}
-                  </s-banner>
-                </s-box>
-              ) : null}
-
               {groups.length > 0 ? (
                 <DisabledConfigurationRegion
                   disabled={!subscriptionConfig.enabled}
