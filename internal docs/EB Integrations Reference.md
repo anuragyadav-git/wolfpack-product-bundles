@@ -5,7 +5,7 @@ title: EB Integrations Reference
 type: implementation-reference
 status: authoritative
 summary: Records live EB integration setup evidence and Wolfpack support boundaries.
-last_audited: 2026-08-21
+last_audited: 2026-08-30
 owners:
   - engineering
 domains:
@@ -14,6 +14,8 @@ systems:
   - integrations
 source_paths:
   - app/lib/admin-configuration-surfaces.ts
+  - app/lib/support-chat.client.ts
+  - app/routes/app/app.integrations/IntegrationsRouteShell.tsx
   - app/assets/widgets/full-page/fpb-controls-integrations.ts
   - app/storefront/page-builder-embed.ts
   - app/routes/api/api.page-builder-embed[.]json.tsx
@@ -52,7 +54,12 @@ Current WPB Admin inventory:
 - Settings > Controls > Checkout Integration dropdown keeps the complete redirect/cart callback provider list: Shopify checkout, Theme cart drawer, GoKwik, Shopflo, Zecpay, Rebuy, Shiprocket/Fastrr, Monster cart, Upcart, and Kaching Cart.
 
 WPB interim setup destination:
-- All card setup actions and `Request Integration` should point to `https://wolfpackapps.com` until WPB-hosted guides are written.
+- All card setup actions point to `https://wolfpackapps.com` until WPB-hosted guides are written.
+- `Request Integration` opens Crisp with an unsent, prefilled request so the merchant remains in control of sending it.
+
+WPB Crisp lifecycle gotcha, verified against the SIT dev tunnel in Chrome on 2026-08-30:
+- Crisp initializes and opens asynchronously. Setting `message:text` immediately before or after `chat:open` can still produce a visibly blank composer even though a queue-only unit test sees the draft command.
+- Register a one-use `chat:opened` callback before requesting the open, then set the unsent draft from that callback.
 
 ## Quick Setup Link Findings
 
