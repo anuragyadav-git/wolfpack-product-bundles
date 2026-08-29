@@ -156,35 +156,22 @@
 }
 
 .fpb-full-page-content-header {
-  text-align: center;
-  margin: 0;
-  padding: 0 16px;
-  max-width: 760px;
+  width: 100%;
+  max-width: 100%;
+  margin: 0 0 clamp(0.75rem, 1.5vw, 1rem);
+  padding: 0;
+  text-align: left;
   box-sizing: border-box;
 }
 
-.fpb-full-page-content-title {
-  margin: 0;
-  color: var(--bundle-full-page-title-color, #111111);
-  font-size: 18px;
-  font-weight: 700;
-  line-height: 1.35;
-}
-
-.fpb-full-page-content-subtitle {
-  margin: 4px 0 0;
-  color: var(--bundle-side-panel-text-color, #6b7280);
-  font-size: 13px;
-  font-weight: 500;
-  line-height: 1.35;
-}
-
-.fpb-step-subtext {
+.fpb-full-page-step-title {
+  max-width: min(100%, 42ch);
   margin: 0;
   color: var(--bundle-full-page-title-color, #252525);
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 1.4;
+  font-size: clamp(1.125rem, 1rem + 0.5vw, 1.5rem);
+  font-weight: 700;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
 }
 
 .fpb-step-category-title {

@@ -206,6 +206,7 @@ export function FpbQuantitySettings({
                 >
                   <s-button
                     variant="secondary"
+                    icon="replace"
                     disabled={!productSlotsAvailable}
                     onClick={() => setShowSlotIconPicker(true)}
                   >

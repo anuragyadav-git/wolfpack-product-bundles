@@ -62,6 +62,21 @@ function languageLocales(settingsLanguage: unknown) {
   return [...new Set(["en", ...locales])];
 }
 
+function buildPpbLanguageSnapshot(settingsLanguage: unknown, locale: string) {
+  const response = buildSettingsLanguageResponse(
+    settingsLanguage,
+    BundleType.PRODUCT_PAGE,
+    locale,
+  );
+  return {
+    bundleType: response.bundleType,
+    languageMode: response.languageMode,
+    activeLocale: response.activeLocale,
+    sharedCartLabels: response.sharedCartLabels,
+    textOverrides: response.textOverrides,
+  };
+}
+
 export function buildPpbStorefrontRuntime(input: {
   storefrontAccessToken: string;
   generalSettings: Record<string, unknown>;
@@ -72,7 +87,7 @@ export function buildPpbStorefrontRuntime(input: {
   );
   const languages = Object.fromEntries(languageLocales(input.generalSettings.settingsLanguage).map((locale) => [
     locale,
-    buildSettingsLanguageResponse(input.generalSettings.settingsLanguage, BundleType.PRODUCT_PAGE, locale),
+    buildPpbLanguageSnapshot(input.generalSettings.settingsLanguage, locale),
   ]));
   return {
     schemaVersion: 1,

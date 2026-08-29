@@ -161,7 +161,10 @@ export function buildBundleBaseConfig(
     pricing: {
       enabled: discountData.discountEnabled,
       method: discountData.discountType,
-      rules: (discountData.discountRules || []).map(buildRuntimePricingRule),
+      rules: (discountData.discountRules || []).map(
+        (value: Parameters<typeof buildRuntimePricingRule>[0]) =>
+          buildRuntimePricingRule(value),
+      ),
       display: { showFooter: discountData.showFooter !== false },
       displayOptions: pricingDisplayOptions,
       messages: {
@@ -292,10 +295,18 @@ function normalizeSyncCategories(step: any): Array<Record<string, unknown>> {
       return {
         ...formatted,
         products: Array.isArray(category.products)
-          ? category.products.map(normalizeSyncProduct).filter(Boolean)
+          ? category.products
+              .map((value: Parameters<typeof normalizeSyncProduct>[0]) =>
+                normalizeSyncProduct(value),
+              )
+              .filter(Boolean)
           : [],
         collections: Array.isArray(formatted.collections)
-          ? formatted.collections.map(normalizeSyncCollection).filter(Boolean)
+          ? formatted.collections
+              .map((value: Parameters<typeof normalizeSyncCollection>[0]) =>
+                normalizeSyncCollection(value),
+              )
+              .filter(Boolean)
           : [],
       };
     },

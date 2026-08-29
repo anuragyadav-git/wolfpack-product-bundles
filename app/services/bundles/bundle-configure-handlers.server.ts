@@ -15,6 +15,9 @@ import db from "../../db.server";
 import { ThemeTemplateService } from "../theme-template.server";
 import { BundleStatus } from "../../constants/bundle";
 import { buildBundleProductDescriptionHtml } from "../../lib/bundle-product-description.server";
+import { resolveShopEntitlements } from "../subscriptions/subscription-service.server";
+import { shopUsesAdvancedDesign } from "../subscriptions/design-entitlement-state.server";
+import { updateBundleWithPublicationGate } from "../subscriptions/bundle-entitlement-gate.server";
 
 // Re-export so route handlers can import it from this barrel file.
 export { buildBundleProductDescriptionHtml };
@@ -76,25 +79,65 @@ export const safeJsonParse = (value: any, defaultValue: any = []) => {
 
 // ─── Shared Handlers ─────────────────────────────────────────────────────────
 
-/** Handle updating Wolfpack bundle availability without changing Shopify discoverability. */
-export async function handleUpdateBundleStatus(_admin: ShopifyAdmin, session: Session, bundleId: string, formData: FormData) {
+/** Handle updating Only Bundles availability without changing Shopify discoverability. */
+export async function handleUpdateBundleStatus(admin: ShopifyAdmin, session: Session, bundleId: string, formData: FormData) {
   const status = formData.get("status") as string | null;
   if (!Object.values(BundleStatus).includes(status as BundleStatus)) {
     return json({ success: false, error: "Invalid bundle status" }, { status: 400 });
   }
 
   const finalStatus = status as BundleStatus;
+  const needsEvaluation = finalStatus === BundleStatus.ACTIVE
+    || finalStatus === BundleStatus.UNLISTED;
 
-  const updatedBundle = await db.bundle.update({
-    where: {
-      id: bundleId,
-      shopId: session.shop
+  if (!needsEvaluation) {
+    const updatedBundle = await db.bundle.update({
+      where: { id: bundleId, shopId: session.shop },
+      data: { status: finalStatus },
+      include: { steps: true, pricing: true },
+    });
+    return json({
+      success: true,
+      bundle: updatedBundle,
+      message: `Bundle status updated to ${status}`,
+    });
+  }
+
+  const currentBundle = await db.bundle.findUnique({
+    where: { id: bundleId, shopId: session.shop },
+    include: { steps: true },
+  });
+  if (!currentBundle) {
+    return json({ success: false, error: "Bundle not found" }, { status: 404 });
+  }
+  const entitlementContext = needsEvaluation
+    ? await resolveShopEntitlements({
+        shopDomain: session.shop,
+        forceRefresh: true,
+      })
+    : null;
+  const updatedBundle = await updateBundleWithPublicationGate<any>({
+    database: db,
+    shopDomain: session.shop,
+    bundleId,
+    candidate: {
+      bundleType: currentBundle.bundleType.toUpperCase() as "FULL_PAGE" | "PRODUCT_PAGE",
+      status: finalStatus.toUpperCase() as "ACTIVE" | "UNLISTED" | "DRAFT" | "ARCHIVED",
+      enabledStepCount: currentBundle.steps.filter((step) => step.enabled).length,
+      designTemplate: currentBundle.bundleDesignTemplate,
+      designPresetId: currentBundle.bundleDesignPresetId,
+      usesAdvancedDesign: entitlementContext
+        ? await shopUsesAdvancedDesign(session.shop)
+        : false,
+      usesBundleSubscriptions: Boolean(currentBundle.bundleSubscriptionConfig),
+      usesCustomCode: false,
     },
+    entitlements: entitlementContext?.entitlements ?? null,
     data: { status: finalStatus },
     include: {
       steps: true,
       pricing: true
-    }
+    },
   });
 
   return json({

@@ -42,7 +42,7 @@ export function PpbStepSetupDetailsCard({
           <span title="Multi Language">
             <s-button
               variant="tertiary"
-              icon="globe"
+              icon="language-translate"
               accessibilityLabel="Multi Language"
               disabled={shopLocales.length === 0 || undefined}
               onClick={() => openStepMultiLanguageModal(step.id)}
@@ -56,12 +56,13 @@ export function PpbStepSetupDetailsCard({
               onClick={() => cloneStep(step.id)}
             />
           </span>
-          <span title="Delete current step">
+          <span title={stepsState.steps.length <= 1 ? "At least one step is required" : "Delete current step"}>
             <s-button
               variant="tertiary"
               icon="delete"
               tone="critical"
               accessibilityLabel="Delete current step"
+              disabled={stepsState.steps.length <= 1 || undefined}
               onClick={() => deleteStep(step.id)}
             />
           </span>

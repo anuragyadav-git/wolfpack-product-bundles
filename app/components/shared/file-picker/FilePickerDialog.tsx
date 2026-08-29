@@ -37,7 +37,7 @@ export function FilePickerDialog({
       <s-query-container containerName="file-picker">
         <s-stack direction="block" gap="base">
           <s-grid
-            gridTemplateColumns="@container file-picker (inline-size > 480px) minmax(0, 1fr) auto, minmax(0, 1fr)"
+            gridTemplateColumns="@container (inline-size > 480px) 1fr auto, 1fr"
             gap="small"
             alignItems="end"
           >
@@ -64,25 +64,29 @@ export function FilePickerDialog({
           ) : null}
 
           {uploadStatus === "error" && uploadError ? (
-            <s-banner
-              heading="Upload failed"
-              tone="critical"
-              dismissible={false}
-              hidden={false}
-            >
-              {uploadError}
-            </s-banner>
+            <s-box paddingBlockEnd="base">
+              <s-banner
+                heading="Upload failed"
+                tone="critical"
+                dismissible={false}
+                hidden={false}
+              >
+                {uploadError}
+              </s-banner>
+            </s-box>
           ) : null}
 
           {uploadStatus === "timeout" ? (
-            <s-banner
-              heading="Processing"
-              tone="info"
-              dismissible={false}
-              hidden={false}
-            >
-              Upload successful — image may take a moment to appear in your library. Close and re-open the picker to see it.
-            </s-banner>
+            <s-box paddingBlockEnd="base">
+              <s-banner
+                heading="Upload processing"
+                tone="success"
+                dismissible
+                hidden={false}
+              >
+                Upload successful — image may take a moment to appear in your library. Close and re-open the picker to see it.
+              </s-banner>
+            </s-box>
           ) : null}
 
           <FileGrid

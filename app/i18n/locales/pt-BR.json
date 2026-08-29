@@ -5,14 +5,14 @@
     "settings": "Configurações",
     "integrations": "Integrações",
     "analytics": "Análises",
-    "pricing": "Preços",
+    "billing": "Cobrança",
     "events": "Atualizações e perguntas frequentes"
   },
   "integrations": {
     "requestMessage": "Olá, gostaria de solicitar suporte para uma nova integração."
   },
   "dashboard": {
-    "title": "Dashboard: Wolfpack Bundle Builder",
+    "title": "Dashboard: Only Bundles",
     "subtitle": "Acesse seus bundles, suporte ao cliente e muito mais.",
     "header": {
       "syncCollections": "Sincronizar coleções",
@@ -130,9 +130,9 @@
       "viewDetails": "Show status",
       "activate": "Enable",
       "enableModal": {
-        "heading": "Ative o Wolfpack Bundle na sua loja",
-        "description": "Ative a incorporação do app Wolfpack Bundle no editor de temas, clique em Salvar e volte aqui.",
-        "mediaLabel": "Tutorial mostrando como ativar a incorporação do Wolfpack Bundle e salvar o tema",
+        "heading": "Ative o Only Bundles na sua loja",
+        "description": "Ative a incorporação do app Only Bundles no editor de temas, clique em Salvar e volte aqui.",
+        "mediaLabel": "Tutorial mostrando como ativar a incorporação do Only Bundles e salvar o tema",
         "openThemeEditor": "Abrir editor de temas",
         "checking": "Verificando seu tema…",
         "enabled": "Incorporação do app ativada",
@@ -148,7 +148,7 @@
       "coreComponents": "Core components enabled",
       "activeBundles": "Active bundles",
       "modalHeading": "Storefront setup",
-      "modalDescription": "These components control how Wolfpack bundles appear on your storefront.",
+      "modalDescription": "These components control how bundles created with Only Bundles appear on your storefront.",
       "modalError": "Status unavailable. Reload to try again.",
       "coreHeading": "Core bundle components",
       "optionalHeading": "Optional placements",
@@ -169,6 +169,10 @@
     }
   },
   "settingsDcp": {
+    "growthGate": {
+      "heading": "Controles de design do Growth",
+      "body": "As cores básicas da marca e a tipografia continuam editáveis no Free. Faça upgrade para o Growth para alterar cores avançadas, cantos, imagens e GIFs."
+    },
     "preview": {
       "heading": "Prévia ao vivo",
       "unsaved": "As alterações não salvas aparecem aqui.",
@@ -176,6 +180,11 @@
         "label": "Visualização do espaço de design",
         "preview": "Prévia",
         "customize": "Personalizar"
+      },
+      "inspector": {
+        "collapse": "Recolher painel de personalização",
+        "expand": "Expandir painel de personalização",
+        "customize": "Personalizar {{context}}"
       },
       "surface": {
         "description": "Escolha produtos para montar seu pacote.",
@@ -243,15 +252,20 @@
         "productPage": "Product Page"
       },
       "templateLabel": "Template",
-      "surfaceSelector": {
-        "label": "Preview surface",
+      "focusLabel": "Editando: {{context}}",
+      "areaSelector": {
+        "label": "Edit area",
         "bundle-header": "Bundle header",
         "navigation": "Navigation",
         "categories": "Categories",
         "product-card": "Product cards",
         "product-slots": "Product slots",
+        "cart-summary": "Cart / summary"
+      },
+      "stateSelector": {
+        "label": "Preview state",
+        "default": "Default",
         "product-picker": "Product picker",
-        "cart-summary": "Cart / summary",
         "loading": "Loading",
         "validation": "Validation",
         "upsell": "Upsell"
@@ -322,7 +336,7 @@
     },
     "loadingAnimation": {
       "title": "Storefront Loading Animation",
-      "description": "Shown while Wolfpack Bundles loads bundle content on the storefront."
+      "description": "Shown while Only Bundles loads bundle content on the storefront."
     },
     "bundleVisibilityPending": {
       "description": "Tracks whether your bundle is discoverable by shoppers. Optimises when you copy your bundle link and place it on your store, enable the Bundle Widget, or set up the Bundle Embed."
@@ -345,6 +359,12 @@
     }
   },
   "common": {
+    "alerts": {
+      "actionFailed": "Falha na ação", "previewUnavailable": "Prévia indisponível", "settingsNotSaved": "Configurações não salvas", "exportUnavailable": "Exportação indisponível", "backfillUnavailable": "Preenchimento indisponível", "trackingNotUpdated": "Rastreamento não atualizado", "bundleNotSaved": "Pacote não salvo", "operationFailed": "Falha na operação"
+    },
+    "success": {
+      "previewOpened": "Prévia aberta", "csvExported": "CSV exportado", "backfillComplete": "Preenchimento concluído", "trackingEnabled": "Rastreamento ativado", "trackingDisabled": "Rastreamento desativado", "changesSaved": "Alterações salvas", "productSynced": "Produto sincronizado", "bundleSynced": "Pacote sincronizado", "operationComplete": "Operação concluída"
+    },
     "actions": {
       "close": "Fechar",
       "cancel": "Cancelar",
@@ -362,13 +382,13 @@
       "continueEditing": "Continuar editando"
     },
     "loading": {
-      "appLabel": "Carregando o Wolfpack Product Bundles",
+      "appLabel": "Carregando o Only Bundles",
       "workspace": "Carregando seu espaço de trabalho"
     },
     "appEmbed": {
-      "body": "Ative a extensão de aplicativo do tema para Wolfpack Bundles para posicionar e visualizar o pacote.",
+      "body": "Ative a extensão de aplicativo do tema para Only Bundles para posicionar e visualizar o pacote.",
       "guideTitle": "Ativar incorporação do app",
-      "guideImageAlt": "Como ativar a incorporação do app Wolfpack Bundles"
+      "guideImageAlt": "Como ativar a incorporação do app Only Bundles"
     },
     "previewGate": {
       "title": "A visibilidade do seu pacote ainda não está configurada",
@@ -388,10 +408,10 @@
     },
     "upgradePrompt": {
       "limitReachedTitle": "Limite de pacotes atingido",
-      "limitReachedBody": "Você usou todos os {{limit}} pacotes do plano Gratuito. Faça upgrade para Grow e tenha até 20 pacotes.",
+      "limitReachedBody": "Você usou o limite de pacotes públicos do plano Grátis. Growth inclui pacotes públicos ilimitados.",
       "approachingTitle": "Limite de pacotes próximo",
-      "approachingBody": "Você está usando {{current}} de {{limit}} pacotes. Faça upgrade para Grow e tenha até 20 pacotes.",
-      "usageBody": "Você está usando {{current}} de {{limit}} pacotes no plano Gratuito. Precisa de mais? Faça upgrade para Grow e tenha 20 pacotes."
+      "approachingBody": "Você usa {{current}} de {{limit}} pacotes públicos. Growth inclui pacotes públicos ilimitados.",
+      "usageBody": "Você usa {{current}} de {{limit}} pacotes públicos no Grátis. Growth inclui pacotes públicos ilimitados."
     },
     "discardChanges": {
       "title": "Descartar todas as alterações não salvas",
@@ -460,32 +480,32 @@
     "actions": {
       "tryAgain": "Tentar novamente",
       "contactSupport": "Falar com o suporte",
-      "cancel": "Cancelar"
+      "cancel": "Cancelar",
+      "back": "Voltar à página anterior"
     },
     "error": {
       "heading": "Problema na assinatura",
-      "missingChargeId": "Falha na confirmação da assinatura: ID da cobrança ausente.",
-      "confirmationFailed": "Não foi possível confirmar a assinatura com a Shopify.",
+      "verificationFailed": "A Shopify não conseguiu verificar a assinatura atual. Tente novamente.",
       "unexpected": "Ocorreu um erro inesperado durante a configuração da assinatura."
     },
     "upgradeModal": {
-      "heading": "Fazer upgrade para o plano Grow",
-      "confirm": "Confirmar upgrade - US$ {{price}}/mês",
-      "redirect": "Você será redirecionado para a Shopify para concluir sua assinatura.",
-      "benefitsHeading": "O que você recebe com o Grow:",
-      "bundleLimit": "Até 20 pacotes (atualmente {{current}}/{{limit}})",
-      "billedMonthly": "Cobrado mensalmente pela Shopify",
+      "heading": "Escolher Growth",
+      "confirm": "Continuar para a Shopify",
+      "redirect": "Você será redirecionado para a Shopify para escolher cobrança mensal ou anual.",
+      "benefitsHeading": "Growth inclui:",
+      "managedByShopify": "A seleção e cobrança do plano são gerenciadas pela Shopify",
       "benefits": {
-        "noRevenueCap": "Sem limite de receita de pacotes - o plano gratuito é limitado a US$ 500/mês",
-        "advancedDiscounts": "Regras avançadas de desconto",
+        "unlimitedPublicBundles": "Pacotes públicos e etapas ilimitados",
+        "allTemplatesDesign": "Todos os modelos e controles de design avançados",
+        "advancedAnalytics": "Análises avançadas de pacotes",
         "prioritySupport": "Suporte prioritário"
       }
     },
     "success": {
-      "heading": "Boas-vindas ao plano Grow!",
+      "heading": "Growth está ativo",
       "body": "Sua assinatura foi ativada. Agora você tem acesso a todos os recursos premium.",
       "bundleLimit": "Limite de pacotes",
-      "bundleLimitValue": "20 pacotes",
+      "bundleLimitValue": "Ilimitados",
       "designControl": "Controle de design",
       "fullAccess": "Acesso completo",
       "support": "Suporte",
@@ -493,26 +513,83 @@
     },
     "cards": {
       "currentPlan": "Plano atual",
-      "freePrice": "Grátis",
-      "freeDescription": "Para vendas de pacotes de até US$ 500/mês - grátis até você crescer",
+      "freePrice": "$0",
+      "freeDescription": "Crie, publique e venda com um pacote completo",
       "includes": "Inclui:",
       "freePlan": "Plano gratuito",
       "mostPopular": "Mais popular",
       "perMonth": "/ mês",
-      "growDescription": "Para vendas de pacotes acima de US$ 500/mês - sem limite de receita",
-      "growIncludes": "Tudo do plano Grátis, mais:",
-      "upgradeToGrow": "Fazer upgrade para Grow",
-      "cancelAnytimeBilled": "Cancele quando quiser. Cobrado pela Shopify."
+      "growthDescription": "Merchandising, personalização, análises e escala avançados",
+      "growthIncludes": "Tudo do plano Grátis, mais:",
+      "chooseGrowth": "Escolher Growth",
+      "annualPrice": "Ou US$ {{price}} por ano",
+      "trialAndBilling": "Teste grátis de {{days}} dias. Escolha cobrança mensal ou anual na Shopify."
+    },
+    "planFeatures": {
+      "onePublicBundle": "Um pacote público",
+      "twoSteps": "Duas etapas ou categorias habilitadas",
+      "productPageBundles": "Pacotes de página de produto",
+      "fullPageBundles": "Pacotes de página inteira",
+      "brandTypography": "Cores e tipografia da marca",
+      "summary30": "Resumo de análises de 30 dias",
+      "merchandising": "Todos os recursos de merchandising",
+      "standardSupport": "Suporte padrão",
+      "unlimitedBundlesSteps": "Pacotes públicos e etapas ilimitados",
+      "allTemplates": "Todos os modelos de pacote",
+      "advancedDesign": "Controles de design avançados",
+      "advancedAnalytics": "Análises avançadas de pacotes",
+      "prioritySupport": "Suporte prioritário"
+    },
+    "comparison": {
+      "publicBundles": "Pacotes públicos",
+      "steps": "Etapas ou categorias habilitadas",
+      "productPageBundles": "Pacotes de página de produto",
+      "fullPageBundles": "Pacotes de página inteira",
+      "merchandising": "Descontos, brindes, complementos e upsells",
+      "customerSubscriptions": "Assinaturas de pacotes para clientes",
+      "customization": "Textos, traduções, CSS e scripts",
+      "templates": "Modelos",
+      "design": "Design",
+      "analytics": "Análises",
+      "prioritySupport": "Suporte prioritário"
+    },
+    "values": {
+      "unlimited": "Ilimitado",
+      "standard": "Padrão",
+      "all": "Todos",
+      "brandTypography": "Cores e tipografia da marca",
+      "allControls": "Todos os controles",
+      "summary30": "Resumo de 30 dias",
+      "advanced": "Avançado"
+    },
+    "valueProps": {
+      "scaleTitle": "Amplie seus pacotes públicos",
+      "scaleDescription": "Publique campanhas de pacotes ilimitadas e use etapas ou categorias ilimitadas",
+      "designTitle": "Use todos os modelos e controles de design avançados",
+      "designDescription": "Desbloqueie todos os modelos FPB e PPB, além de controles visuais por componente",
+      "analyticsTitle": "Analise e otimize",
+      "analyticsDescription": "Use períodos personalizados, detalhes de pacotes e campanhas, preenchimento retroativo e exportação CSV"
+    },
+    "faq": {
+      "heading": "Perguntas frequentes",
+      "changeQuestion": "Posso mudar de plano a qualquer momento?",
+      "changeAnswer": "Sim. A Shopify gerencia as mudanças entre os planos mensal, anual e Grátis na página de Cobrança.",
+      "downgradeQuestion": "O que acontece com meus pacotes se eu mudar para o plano Grátis?",
+      "downgradeAnswer": "Toda a configuração dos pacotes é preservada. O pacote compatível com o plano Grátis publicado mais recentemente permanece público imediatamente; os demais pacotes públicos passam para Rascunho.",
+      "billingQuestion": "Como funciona a cobrança?",
+      "billingAnswer": "O Growth está disponível com cobrança mensal ou anual pelo Shopify App Pricing. Os dois períodos incluem os mesmos recursos.",
+      "refundQuestion": "Vocês oferecem reembolsos?",
+      "refundAnswer": "As assinaturas são cobradas pela Shopify. Entre em contato com nossa equipe de suporte para dúvidas sobre cobrança."
     },
     "cta": {
       "heading": "Pronto para expandir seu negócio de pacotes?",
-      "body": "Faça upgrade para o plano Grow para duplicar os pacotes, personalizar totalmente o design e ter suporte prioritário.",
+      "body": "Escolha Growth para pacotes públicos ilimitados, todos os modelos, design e análises avançados e suporte prioritário.",
       "highlights": {
-        "bundles": "20 pacotes",
+        "bundles": "Pacotes públicos ilimitados",
         "design": "Painel de controle de design",
         "support": "Suporte prioritário"
       },
-      "upgrade": "Fazer upgrade para Grow - US$ {{price}}/mês",
+      "upgrade": "Ver Growth",
       "cancelAnytime": "Cancele quando quiser"
     },
     "route": {
@@ -524,21 +601,22 @@
       "bundleUsage": "Uso de pacotes",
       "bundleCount": "{{current}} / {{limit}} pacotes",
       "limitReached": "Você atingiu seu limite de pacotes.",
-      "limitUpgrade": "Faça upgrade para Grow para ter mais pacotes.",
+      "limitUpgrade": "Veja Growth para pacotes públicos ilimitados.",
       "overview": "Visão geral dos pacotes",
       "activeBundles": "Pacotes ativos",
       "totalSteps": "Total de etapas",
       "productPage": "Página do produto",
       "fullPage": "Página inteira",
-      "cancelSubscription": "Cancelar assinatura",
-      "cancelHeading": "Cancelar assinatura?",
-      "downgradeBody": "Você mudará para o plano Gratuito com limite de {{limit}} pacotes.",
-      "archiveWarning": "Aviso: você tem {{current}} pacotes. Os {{excess}} pacotes excedentes serão arquivados (não excluídos).",
-      "confirmCancellation": "Confirmar cancelamento",
+      "cancelSubscription": "Gerenciar assinatura",
+      "cancelHeading": "Gerenciar assinatura na Shopify?",
+      "downgradeBody": "A Shopify mostra a data efetiva antes da mudança de plano.",
+      "archiveWarning": "Toda a configuração dos pacotes é preservada após a redução.",
+      "confirmCancellation": "Abrir o gerenciamento de planos da Shopify",
       "keepSubscription": "Manter assinatura",
       "features": "Recursos do seu plano",
       "needHelp": "Precisa de ajuda?",
       "helpBody": "Tem dúvidas sobre cobrança ou precisa de um plano personalizado? Nossa equipe está aqui para ajudar."
     }
-  }
+  },
+  "subscription": { "analytics": { "summaryNotice": "Grátis inclui um resumo de atividade de 30 dias. Growth adiciona intervalos personalizados, detalhes, UTM, preenchimento e exportação CSV." } }
 }

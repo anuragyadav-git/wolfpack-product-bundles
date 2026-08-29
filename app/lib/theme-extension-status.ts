@@ -15,7 +15,7 @@ export type ShopifyThemeExtensionInfo = {
 };
 
 export const THEME_EXTENSION_RESOURCES = [
-  { handle: "bundle-app-embed", label: "Wolfpack Bundle", kind: "embed" },
+  { handle: "bundle-app-embed", label: "Only Bundles", kind: "embed" },
   { handle: "bundle-product-page", label: "Bundle Builder", kind: "block" },
   { handle: "bundle-product-page-embed", label: "Bundle Builder placement", kind: "block" },
   { handle: "bundle-page-builder-embed", label: "Page Builder bundle", kind: "block" },

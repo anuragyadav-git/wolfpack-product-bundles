@@ -1,3 +1,27 @@
+---
+schema_version: 1
+id: theme-color-inheritance-po-requirements
+title: Theme Color Inheritance Product Requirements
+type: requirements
+status: draft
+summary: Defines product requirements for inheriting Shopify theme colors in Free-plan bundle widgets.
+last_audited: 2026-08-29
+owners:
+  - product
+domains:
+  - storefront-design
+systems:
+  - design-settings
+source_paths:
+  - app/services/theme-colors.server.ts
+related_docs:
+  - docs/theme-color-inheritance/03-architecture.md
+tags:
+  - theme-colors
+keywords:
+  - Shopify theme inheritance
+---
+
 # Product Owner Requirements: Theme Color Inheritance for Free Plan Bundle Widget
 
 ## Overview
@@ -19,7 +43,6 @@ Free plan merchants should see their bundle widget automatically adopt the store
 - [ ] Given a merchant is on Free plan, when their storefront renders the bundle widget, then all downstream CSS vars that fall back to `globalPrimaryButton` (buttons, tabs, tier pills, step timeline, search focus border, footer scrollbar, toast bg, tile badge) automatically use the theme color — no individual overrides needed
 - [ ] Given a merchant is on Free plan AND their `DesignSettings` record has no `themeColors` stored (pre-existing install), then the widget falls back to existing hardcoded defaults (`#000000` buttons etc.) — no regression
 - [ ] Given a merchant is on Grow plan, when the CSS endpoint is called, then theme color inheritance is NOT applied — Grow plan always uses the DCP-configured values (or hardcoded defaults if no DCP settings saved)
-- [ ] Given `ENFORCE_PLAN_GATES` is not set (SIT environment), when the CSS endpoint is called, theme color inheritance is NOT applied (SIT uses hardcoded defaults, same as current behavior)
 
 ---
 

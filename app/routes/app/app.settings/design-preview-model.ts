@@ -8,20 +8,26 @@ import {
   type TemplateSelection,
 } from "../../../lib/bundle-config/template-selection";
 import { buildSettingsDesignRuntime, normalizeSlotIconFit } from "../../../lib/settings-design-runtime";
+import { generateCSSFromSettings } from "../../../lib/css-generators";
 import type { ShopBrandColors } from "../../../lib/shop-brand-colors";
 import type { SettingsField } from "../../../lib/admin-configuration-surfaces";
 
-export type DesignPreviewSurface =
+export type DesignPreviewArea =
   | "bundle-header"
   | "navigation"
   | "categories"
   | "product-card"
   | "product-slots"
+  | "cart-summary";
+export type DesignPreviewScenario =
+  | "default"
   | "product-picker"
-  | "cart-summary"
   | "loading"
   | "validation"
   | "upsell";
+export type DesignPreviewContext =
+  | { kind: "area"; value: DesignPreviewArea }
+  | { kind: "scenario"; value: Exclude<DesignPreviewScenario, "default"> };
 export type DesignPreviewFamily = "full-page" | "product-page";
 export type DesignPreviewViewport = "desktop" | "mobile";
 export type DesignPreviewAvailableSize = { width: number; height: number };
@@ -29,7 +35,7 @@ export type DesignPreviewContextKind =
   | "full-page"
   | "product-page-inpage"
   | "product-page-modal";
-export type DesignPreviewSurfaceFidelity = "storefront" | "representative";
+export type DesignPreviewContextFidelity = "storefront" | "representative";
 export type DesignPreviewNavigation =
   | "timeline"
   | "compact-timeline"
@@ -59,16 +65,17 @@ export interface DesignPreviewTemplateDescriptor {
   categories: DesignPreviewCategories;
   summary: DesignPreviewSummary;
   slotOrientation?: "horizontal" | "vertical";
-  supportedSurfaces: readonly DesignPreviewSurface[];
+  supportedAreas: readonly DesignPreviewArea[];
+  supportedScenarios: readonly DesignPreviewScenario[];
   sceneRegions: Record<DesignPreviewViewport, readonly string[]>;
 }
 
 export interface DesignPreviewFieldTarget {
-  surface: DesignPreviewSurface;
-  surfaces?: readonly DesignPreviewSurface[];
+  target: DesignPreviewContext;
+  targets?: readonly DesignPreviewContext[];
   elements: readonly string[];
   templates?: readonly TemplateKey[];
-  surfaceOverrides?: Partial<Record<TemplateKey, DesignPreviewSurface>>;
+  targetOverrides?: Partial<Record<TemplateKey, DesignPreviewContext>>;
 }
 
 export interface DesignPreviewFixtureProduct {
@@ -92,7 +99,7 @@ export interface DesignPreviewFixture {
 
 export interface DesignPreviewScene {
   templateKey: TemplateKey;
-  surface: DesignPreviewSurface;
+  context: DesignPreviewContext;
   viewport: DesignPreviewViewport;
   regions: readonly string[];
 }
@@ -106,11 +113,20 @@ export const DESIGN_PREVIEW_VIEWPORTS: Readonly<
   mobile: { width: 390, height: 844 },
 };
 
+const DESIGN_PREVIEW_MOBILE_DEVICE_SIZE = { width: 428, height: 882 } as const;
+const DESIGN_PREVIEW_DESKTOP_DEVICE_SIZE = { width: 1320, height: 920 } as const;
+
+export function getDesignPreviewCanvasSize(viewport: DesignPreviewViewport) {
+  return viewport === "mobile"
+    ? DESIGN_PREVIEW_MOBILE_DEVICE_SIZE
+    : DESIGN_PREVIEW_DESKTOP_DEVICE_SIZE;
+}
+
 export function calculateDesignPreviewFitScale(
   availableSize: DesignPreviewAvailableSize,
   viewport: DesignPreviewViewport,
 ) {
-  const logicalViewport = DESIGN_PREVIEW_VIEWPORTS[viewport];
+  const logicalViewport = getDesignPreviewCanvasSize(viewport);
   const ratios = [
     Number.isFinite(availableSize.width) && availableSize.width > 0
       ? availableSize.width / logicalViewport.width
@@ -120,16 +136,31 @@ export function calculateDesignPreviewFitScale(
       : null,
   ].filter((ratio): ratio is number => ratio !== null);
 
-  return ratios.length > 0 ? Math.min(1, ...ratios) : 1;
+  if (ratios.length === 0) return 1;
+
+  const fitScale = Math.min(...ratios);
+  return viewport === "desktop" ? fitScale : Math.min(1, fitScale);
 }
 
-export function getDesignPreviewSurfaceFidelity(
+export function getDesignPreviewFitPresentation(
+  availableSize: DesignPreviewAvailableSize,
+  viewport: DesignPreviewViewport,
+) {
+  const logicalCanvas = getDesignPreviewCanvasSize(viewport);
+  const scale = calculateDesignPreviewFitScale(availableSize, viewport);
+
+  return {
+    scale,
+    canvasWidth: logicalCanvas.width * scale,
+    canvasHeight: logicalCanvas.height * scale,
+  };
+}
+
+export function getDesignPreviewContextFidelity(
   _templateKey: TemplateKey,
-  surface: DesignPreviewSurface,
-): DesignPreviewSurfaceFidelity {
-  return ["bundle-header", "navigation", "categories", "product-card", "product-slots", "cart-summary"].includes(surface)
-    ? "storefront"
-    : "representative";
+  _context: DesignPreviewArea | DesignPreviewScenario,
+): DesignPreviewContextFidelity {
+  return "storefront";
 }
 
 type RuntimeTemplateConfig = {
@@ -178,9 +209,12 @@ const ALL_FPB_TEMPLATES: readonly TemplateKey[] = ["standard", "classic", "compa
 const PRODUCT_PAGE_TEMPLATES: readonly TemplateKey[] = ["product-list", "product-grid", "horizontal-slots", "vertical-slots"];
 const ALL_TEMPLATES: readonly TemplateKey[] = [...ALL_FPB_TEMPLATES, ...PRODUCT_PAGE_TEMPLATES];
 const CATEGORY_TEMPLATES: readonly TemplateKey[] = ["classic", "compact", "horizontal", "product-list", "product-grid"];
-const FULL_PAGE_SURFACES = ["navigation", "categories", "product-card", "product-slots", "cart-summary", "loading", "validation", "upsell"] as const;
-const PRODUCT_PAGE_SURFACES = ["bundle-header", "navigation", "categories", "product-card", "product-slots", "cart-summary", "loading", "validation", "upsell"] as const;
-const SLOT_SURFACES = ["bundle-header", "product-slots", "product-picker", "cart-summary", "loading", "validation", "upsell"] as const;
+const FULL_PAGE_AREAS = ["navigation", "categories", "product-card", "product-slots", "cart-summary"] as const;
+const PRODUCT_PAGE_AREAS = ["bundle-header", "navigation", "categories", "product-card", "product-slots", "cart-summary"] as const;
+const SLOT_AREAS = ["bundle-header", "product-slots", "cart-summary"] as const;
+const FULL_PAGE_SCENARIOS = ["default", "loading", "validation", "upsell"] as const;
+const PRODUCT_PAGE_SCENARIOS = ["default", "validation"] as const;
+const SLOT_SCENARIOS = ["default", "product-picker", "validation"] as const;
 
 export function getDesignPreviewContextKind(
   templateKey: TemplateKey,
@@ -215,7 +249,8 @@ function fullPageDescriptor(
         mobile: configuredColumns?.mobile ?? 2,
       },
     },
-    supportedSurfaces: FULL_PAGE_SURFACES,
+    supportedAreas: FULL_PAGE_AREAS,
+    supportedScenarios: FULL_PAGE_SCENARIOS,
     ...adapter,
   };
 }
@@ -246,7 +281,8 @@ function productPageDescriptor(
           : { desktop: 3, mobile: 2 },
     },
     slotOrientation,
-    supportedSurfaces: isSlotTemplate ? SLOT_SURFACES : PRODUCT_PAGE_SURFACES,
+    supportedAreas: isSlotTemplate ? SLOT_AREAS : PRODUCT_PAGE_AREAS,
+    supportedScenarios: isSlotTemplate ? SLOT_SCENARIOS : PRODUCT_PAGE_SCENARIOS,
     ...adapter,
   };
 }
@@ -340,18 +376,35 @@ export const DESIGN_PREVIEW_FIXTURE: DesignPreviewFixture = {
 };
 
 const target = (
-  surface: DesignPreviewSurface,
+  previewTarget: DesignPreviewContext,
   elements: readonly string[],
-  options: Pick<DesignPreviewFieldTarget, "templates" | "surfaceOverrides"> = {},
-): DesignPreviewFieldTarget => ({ surface, elements, ...options });
-const productTarget = (...elements: string[]) => target("product-card", elements, {
-  surfaceOverrides: { "horizontal-slots": "product-picker", "vertical-slots": "product-picker" },
+  options: Pick<DesignPreviewFieldTarget, "templates" | "targetOverrides"> = {},
+): DesignPreviewFieldTarget => ({ target: previewTarget, elements, ...options });
+const areaTarget = (
+  area: DesignPreviewArea,
+  elements: readonly string[],
+  options: Pick<DesignPreviewFieldTarget, "templates" | "targetOverrides"> = {},
+) => target({ kind: "area", value: area }, elements, options);
+const scenarioTarget = (
+  scenario: Exclude<DesignPreviewScenario, "default">,
+  elements: readonly string[],
+  options: Pick<DesignPreviewFieldTarget, "templates" | "targetOverrides"> = {},
+) => target({ kind: "scenario", value: scenario }, elements, options);
+const productTarget = (...elements: string[]) => areaTarget("product-card", elements, {
+  targetOverrides: {
+    "horizontal-slots": { kind: "scenario", value: "product-picker" },
+    "vertical-slots": { kind: "scenario", value: "product-picker" },
+  },
 });
 const sharedProductCartTarget = (...elements: string[]) => ({
   ...productTarget(...elements),
-  surfaces: ["product-card", "product-picker", "cart-summary"] as const,
+  targets: [
+    { kind: "area", value: "product-card" },
+    { kind: "scenario", value: "product-picker" },
+    { kind: "area", value: "cart-summary" },
+  ] as const,
 });
-const cartTarget = (...elements: string[]) => target("cart-summary", elements);
+const cartTarget = (...elements: string[]) => areaTarget("cart-summary", elements);
 
 export const DESIGN_PREVIEW_FIELD_TARGETS: Readonly<Record<string, DesignPreviewFieldTarget>> = {
   "Primary Color": sharedProductCartTarget("product action"),
@@ -374,39 +427,39 @@ export const DESIGN_PREVIEW_FIELD_TARGETS: Readonly<Record<string, DesignPreview
   "Product Card & Cart Corner Style": sharedProductCartTarget("product cards", "cart"),
   "Product Card & Cart Base": sharedProductCartTarget("product cards", "cart", "product images"),
   "Image Fit": productTarget("product images"),
-  "stylePresets.images.slotIconUrl": target("product-slots", ["empty slot icon"], { templates: ALL_TEMPLATES }),
-  "stylePresets.images.slotIconFit": target("product-slots", ["empty slot icon presentation"], { templates: ALL_TEMPLATES }),
-  "generalSettings.loadingGifUrl": target("loading", ["loading animation"], { templates: ALL_FPB_TEMPLATES }),
-  "generalSettings.loadingBgColor": target("loading", ["loading screen background"], { templates: ALL_FPB_TEMPLATES }),
-  "expert.navigationBanner.navigationBannerStepCompletionColor": target("navigation", ["completed steps"], { templates: ALL_FPB_TEMPLATES }),
-  "expert.navigationBanner.navigationCheckColor": target("navigation", ["completed step checks"], { templates: ALL_FPB_TEMPLATES }),
-  "expert.navigationBanner.navigationBannerStepTextColor": target("navigation", ["step labels"], { templates: ALL_FPB_TEMPLATES }),
-  "expert.generalSettings.productPageTitleColor": target("bundle-header", ["product-page title"], { templates: PRODUCT_PAGE_TEMPLATES }),
-  "expert.navigationBanner.navigationBannerStepProgressBarEmptyColor": target("navigation", ["step progress"], { templates: ALL_FPB_TEMPLATES }),
-  "expert.generalSettings.conditionToastBgColor": target("validation", ["condition toast"]),
-  "expert.generalSettings.conditionToastTextColor": target("validation", ["condition toast text"]),
-  "expert.navigationBanner.tabsActiveBgColor": target("categories", ["active categories"], { templates: CATEGORY_TEMPLATES }),
-  "expert.navigationBanner.tabsActiveTextColor": target("categories", ["active category text"], { templates: CATEGORY_TEMPLATES }),
-  "expert.navigationBanner.tabsInactiveBgColor": target("categories", ["inactive categories"], { templates: CATEGORY_TEMPLATES }),
-  "expert.navigationBanner.tabsInactiveTextColor": target("categories", ["inactive category text"], { templates: CATEGORY_TEMPLATES }),
+  "stylePresets.images.slotIconUrl": areaTarget("product-slots", ["empty slot icon"], { templates: ALL_TEMPLATES }),
+  "stylePresets.images.slotIconFit": areaTarget("product-slots", ["empty slot icon presentation"], { templates: ALL_TEMPLATES }),
+  "generalSettings.loadingGifUrl": scenarioTarget("loading", ["loading animation"], { templates: ALL_FPB_TEMPLATES }),
+  "generalSettings.loadingBgColor": scenarioTarget("loading", ["loading screen background"], { templates: ALL_FPB_TEMPLATES }),
+  "expert.navigationBanner.navigationBannerStepCompletionColor": areaTarget("navigation", ["completed steps"], { templates: ALL_FPB_TEMPLATES }),
+  "expert.navigationBanner.navigationCheckColor": areaTarget("navigation", ["completed step checks"], { templates: ALL_FPB_TEMPLATES }),
+  "expert.navigationBanner.navigationBannerStepTextColor": areaTarget("navigation", ["step labels"], { templates: ALL_FPB_TEMPLATES }),
+  "expert.generalSettings.productPageTitleColor": areaTarget("bundle-header", ["product-page title"], { templates: PRODUCT_PAGE_TEMPLATES }),
+  "expert.navigationBanner.navigationBannerStepProgressBarEmptyColor": areaTarget("navigation", ["step progress"], { templates: ALL_FPB_TEMPLATES }),
+  "expert.generalSettings.conditionToastBgColor": scenarioTarget("validation", ["condition toast"]),
+  "expert.generalSettings.conditionToastTextColor": scenarioTarget("validation", ["condition toast text"]),
+  "expert.navigationBanner.tabsActiveBgColor": areaTarget("categories", ["active categories"], { templates: CATEGORY_TEMPLATES }),
+  "expert.navigationBanner.tabsActiveTextColor": areaTarget("categories", ["active category text"], { templates: CATEGORY_TEMPLATES }),
+  "expert.navigationBanner.tabsInactiveBgColor": areaTarget("categories", ["inactive categories"], { templates: CATEGORY_TEMPLATES }),
+  "expert.navigationBanner.tabsInactiveTextColor": areaTarget("categories", ["inactive category text"], { templates: CATEGORY_TEMPLATES }),
   "expert.productCard.productCardBgColor": productTarget("product cards"),
   "expert.productCard.productCardTextColor": productTarget("product titles"),
   "expert.productCard.productCardButtonColor": productTarget("product actions"),
   "expert.productCard.productCardButtonTextColor": productTarget("product action text"),
-  "expert.emptyStateCard.emptyStateCardBorderColor": target("product-slots", ["empty slot border", "empty slot icon"], { templates: ALL_TEMPLATES }),
-  "expert.emptyStateCard.emptyStateCardTextColor": target("product-slots", ["empty slot text"], { templates: ALL_TEMPLATES }),
+  "expert.emptyStateCard.emptyStateCardBorderColor": areaTarget("product-slots", ["empty slot border", "empty slot icon"], { templates: ALL_TEMPLATES }),
+  "expert.emptyStateCard.emptyStateCardTextColor": areaTarget("product-slots", ["empty slot text"], { templates: ALL_TEMPLATES }),
   "expert.cartFooter.cartFooterBgColor": cartTarget("cart"),
   "expert.cartFooter.cartFooterTextColor": cartTarget("cart text"),
   "expert.cartFooter.cartFooterNextButtonColor": cartTarget("next action"),
   "expert.cartFooter.cartFooterNextButtonTextColor": cartTarget("next action text"),
-  "expert.cartFooter.cartFooterBackButtonColor": target("cart-summary", ["back action"], { templates: ALL_FPB_TEMPLATES }),
+  "expert.cartFooter.cartFooterBackButtonColor": areaTarget("cart-summary", ["back action"], { templates: ALL_FPB_TEMPLATES }),
   "expert.cartFooter.cartFooterBackButtonTextColor": cartTarget("back action text"),
   "expert.cartFooter.cartFooterDiscountTextColor": cartTarget("discount message"),
   "expert.cartFooter.cartFooterDiscountProgressBarEmptyColor": cartTarget("discount progress remainder"),
   "expert.cartFooter.cartFooterDiscountProgressBarFilledColor": cartTarget("discount progress fill"),
-  "expert.mixAndMatchConfig.generalSettings.bundleUpsellButtonBg": target("upsell", ["upsell action"]),
-  "expert.mixAndMatchConfig.generalSettings.bundleUpsellButtonTextColor": target("upsell", ["upsell action text"]),
-  "expert.mixAndMatchConfig.generalSettings.bundleUpsellFontColor": target("upsell", ["upsell text"]),
+  "expert.mixAndMatchConfig.generalSettings.bundleUpsellButtonBg": scenarioTarget("upsell", ["upsell action"], { templates: ALL_FPB_TEMPLATES }),
+  "expert.mixAndMatchConfig.generalSettings.bundleUpsellButtonTextColor": scenarioTarget("upsell", ["upsell action text"], { templates: ALL_FPB_TEMPLATES }),
+  "expert.mixAndMatchConfig.generalSettings.bundleUpsellFontColor": scenarioTarget("upsell", ["upsell text"], { templates: ALL_FPB_TEMPLATES }),
 };
 const DESIGN_PREVIEW_FIELD_TARGET_MAP = new Map(Object.entries(DESIGN_PREVIEW_FIELD_TARGETS));
 
@@ -439,21 +492,25 @@ export function getDesignPreviewTemplate(templateKey: TemplateKey) {
   return DESIGN_PREVIEW_TEMPLATES.find((template) => template.key === templateKey);
 }
 
-export function getSupportedDesignPreviewSurfaces(templateKey: TemplateKey) {
-  return getDesignPreviewTemplate(templateKey)?.supportedSurfaces ?? FULL_PAGE_SURFACES;
+export function getSupportedDesignPreviewAreas(templateKey: TemplateKey) {
+  return getDesignPreviewTemplate(templateKey)?.supportedAreas ?? FULL_PAGE_AREAS;
 }
 
-export function getDefaultDesignPreviewSurface(templateKey: TemplateKey): DesignPreviewSurface {
+export function getSupportedDesignPreviewScenarios(templateKey: TemplateKey) {
+  return getDesignPreviewTemplate(templateKey)?.supportedScenarios ?? FULL_PAGE_SCENARIOS;
+}
+
+export function getDefaultDesignPreviewArea(templateKey: TemplateKey): DesignPreviewArea {
   return getDesignPreviewTemplate(templateKey)?.slotOrientation ? "product-slots" : "product-card";
 }
 
 export function getDesignPreviewFieldTarget(fieldKey: string, templateKey?: TemplateKey) {
   const fieldTarget = DESIGN_PREVIEW_FIELD_TARGET_MAP.get(fieldKey);
   if (!fieldTarget || !templateKey) return fieldTarget;
-  const override = fieldTarget.surfaceOverrides
-    ? new Map(Object.entries(fieldTarget.surfaceOverrides)).get(templateKey)
+  const override = fieldTarget.targetOverrides
+    ? new Map(Object.entries(fieldTarget.targetOverrides)).get(templateKey)
     : undefined;
-  return override ? { ...fieldTarget, surface: override } : fieldTarget;
+  return override ? { ...fieldTarget, target: override } : fieldTarget;
 }
 
 export function isDesignPreviewFieldApplicable(fieldKey: string, templateKey: TemplateKey) {
@@ -464,7 +521,7 @@ export function isDesignPreviewFieldApplicable(fieldKey: string, templateKey: Te
 export function getDesignFieldsForPreviewContext(
   fields: readonly SettingsField[],
   templateKey: TemplateKey,
-  surface: DesignPreviewSurface,
+  context: DesignPreviewContext,
 ) {
   return fields.filter((field) => {
     if (field.kind === "loadingSpinner") return false;
@@ -472,15 +529,22 @@ export function getDesignFieldsForPreviewContext(
     const fieldTarget = getDesignPreviewFieldTarget(fieldKey, templateKey);
     return Boolean(
       fieldTarget
-      && (fieldTarget.surface === surface || fieldTarget.surfaces?.includes(surface))
+      && (
+        contextsMatch(fieldTarget.target, context)
+        || fieldTarget.targets?.some((targetContext) => contextsMatch(targetContext, context))
+      )
       && isDesignPreviewFieldApplicable(fieldKey, templateKey),
     );
   });
 }
 
+function contextsMatch(left: DesignPreviewContext, right: DesignPreviewContext) {
+  return left.kind === right.kind && left.value === right.value;
+}
+
 export function getDesignPreviewScene(
   templateKey: TemplateKey,
-  surface: DesignPreviewSurface,
+  context: DesignPreviewContext,
   viewport: DesignPreviewViewport,
 ): DesignPreviewScene {
   const descriptor = getDesignPreviewTemplate(templateKey);
@@ -500,19 +564,20 @@ export function getDesignPreviewScene(
         : "category-tabs";
   const regions: string[] = [];
 
-  if (surface === "bundle-header") {
+  const surface = context.value;
+  if (context.kind === "area" && surface === "bundle-header") {
     regions.push("bundle-header");
-  } else if (surface === "navigation" && navigationRegion !== "none") {
+  } else if (context.kind === "area" && surface === "navigation" && navigationRegion !== "none") {
     regions.push(navigationRegion);
-  } else if (surface === "categories" && descriptor.categories !== "none") {
+  } else if (context.kind === "area" && surface === "categories" && descriptor.categories !== "none") {
     regions.push(categoryRegion);
-  } else if (surface === "product-card") {
+  } else if (context.kind === "area" && surface === "product-card") {
     regions.push(descriptor.productCard.mode === "row" ? "product-rows" : "product-grid");
-  } else if (surface === "product-slots") {
+  } else if (context.kind === "area" && surface === "product-slots") {
     regions.push(`${descriptor.slotOrientation ?? "horizontal"}-slots`);
-  } else if (surface === "product-picker" && descriptor.slotOrientation) {
+  } else if (context.kind === "scenario" && surface === "product-picker" && descriptor.slotOrientation) {
     regions.push(viewport === "mobile" ? "product-picker-bottom-sheet" : "product-picker-modal");
-  } else if (surface === "cart-summary") {
+  } else if (context.kind === "area" && surface === "cart-summary") {
     if (templateKey === "product-list") regions.push("product-list-selected-drawer", "pdp-footer");
     else if (descriptor.family === "product-page") regions.push(descriptor.summary);
     else regions.push(viewport === "mobile" ? descriptor.sceneRegions.mobile.at(-1) ?? "sticky-summary-tray" : "summary-sidebar");
@@ -520,7 +585,7 @@ export function getDesignPreviewScene(
     regions.push(`${surface}-overlay`);
   }
 
-  return { templateKey, surface, viewport, regions: [...new Set(regions)] };
+  return { templateKey, context, viewport, regions: [...new Set(regions)] };
 }
 
 export function buildDesignPreviewTheme(
@@ -611,4 +676,29 @@ export function buildDesignPreviewTheme(
     "--preview-upsell-button-text": readFirstPath(page, [`${upsellRoot}.${isProductPage ? "bundleUpsellButtonTextColor" : "bundleUpsellTextColor"}`], "#ffffff"),
     "--preview-upsell-text": readFirstPath(page, [`${upsellRoot}.bundleUpsellFontColor`], "#000000"),
   };
+}
+
+export function buildDesignPreviewStorefrontCss({
+  fieldValues,
+  inheritedColorFieldKeys = [],
+  shopBrandColors = null,
+  templateKey,
+}: {
+  fieldValues: Record<string, string>;
+  inheritedColorFieldKeys?: string[];
+  shopBrandColors?: ShopBrandColors | null;
+  templateKey: TemplateKey;
+}) {
+  const runtime = buildSettingsDesignRuntime(
+    { fieldValues, inheritedColorFieldKeys },
+    {},
+    shopBrandColors,
+  );
+  const bundleType = getDesignPreviewTemplate(templateKey)?.bundleType ?? "full_page";
+  return generateCSSFromSettings(
+    runtime.cssSettings,
+    bundleType,
+    "",
+    shopBrandColors,
+  );
 }

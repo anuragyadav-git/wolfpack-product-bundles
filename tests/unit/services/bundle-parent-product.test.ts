@@ -103,6 +103,26 @@ function makeCreateAdmin(options: { publicationErrors?: unknown[]; variantErrors
           },
         });
       }
+      if (query.includes("AddOnlyBundlesParentTags")) {
+        return response({
+          data: {
+            tagsAdd: {
+              node: { id: "gid://shopify/Product/10" },
+              userErrors: [],
+            },
+          },
+        });
+      }
+      if (query.includes("RemoveLegacyBundleParentTags")) {
+        return response({
+          data: {
+            tagsRemove: {
+              node: { id: "gid://shopify/Product/10" },
+              userErrors: [],
+            },
+          },
+        });
+      }
       throw new Error(`Unexpected GraphQL operation: ${query}`);
     }),
   } as any;
@@ -148,11 +168,12 @@ describe("ensureBundleParentProduct", () => {
           productType: "product",
           vendor: "Merchant Shop",
           status: "UNLISTED",
+          claimOwnership: { bundles: true },
           descriptionHtml: expect.stringContaining("Your Bundle is Unlisted"),
           tags: [
-            "WP-Bundles",
-            "wolfpack-bundle-parent",
-            "wolfpack-hide-bundle-options",
+            "Only Bundles",
+            "only-bundles-parent",
+            "smart-cart-hide-bundle-options",
           ],
         }),
         media: [
@@ -164,6 +185,9 @@ describe("ensureBundleParentProduct", () => {
         ],
       },
     });
+    expect(fpbCreate?.[1].variables.product.tags).not.toContain(
+      "wolfpack-hide-bundle-options",
+    );
   });
 
   it("persists Shopify's actual handle before configuring the variant and publication", async () => {
@@ -311,6 +335,12 @@ describe("ensureBundleParentProduct", () => {
       if (query.includes("ConfigureBundleParentVariant")) {
         return response({ data: { productVariantsBulkUpdate: { productVariants: [], userErrors: [] } } });
       }
+      if (query.includes("AddOnlyBundlesParentTags")) {
+        return response({ data: { tagsAdd: { node: { id: "gid://shopify/Product/10" }, userErrors: [] } } });
+      }
+      if (query.includes("RemoveLegacyBundleParentTags")) {
+        return response({ data: { tagsRemove: { node: { id: "gid://shopify/Product/10" }, userErrors: [] } } });
+      }
       if (query.includes("GetOnlineStorePublication")) {
         return response({
           data: {
@@ -341,11 +371,128 @@ describe("ensureBundleParentProduct", () => {
     });
 
     expect(result).toMatchObject({ handle: "merchant-handle", status: "ACTIVE", created: false });
+    expect(
+      admin.graphql.mock.calls.some(([, options]: [string, { variables?: { product?: { claimOwnership?: unknown } } }?]) =>
+        options?.variables?.product?.claimOwnership !== undefined),
+    ).toBe(false);
     expect(admin.graphql.mock.calls.some(([query]: [string]) => query.includes("productUpdate"))).toBe(false);
     expect(admin.graphql.mock.calls.some(([query]: [string]) => query.includes("productCreate"))).toBe(false);
+    expect(admin.graphql).toHaveBeenCalledWith(
+      expect.stringContaining("AddOnlyBundlesParentTags"),
+      {
+        variables: {
+          id: "gid://shopify/Product/10",
+          tags: [
+            "Only Bundles",
+            "only-bundles-parent",
+            "smart-cart-hide-bundle-options",
+          ],
+        },
+      },
+    );
+    expect(admin.graphql).toHaveBeenCalledWith(
+      expect.stringContaining("RemoveLegacyBundleParentTags"),
+      {
+        variables: {
+          id: "gid://shopify/Product/10",
+          tags: ["WP-Bundles", "wolfpack-bundle-parent"],
+        },
+      },
+    );
     expect(mockedDb.bundle.update).toHaveBeenCalledWith({
       where: { id: "bundle-1", shopId: "test-shop.myshopify.com" },
       data: { shopifyProductHandle: "merchant-handle" },
+    });
+  });
+
+  it("fails existing-parent sync when Shopify rejects the Only Bundles parent tags", async () => {
+    const existingBundle = {
+      ...bundle,
+      shopifyProductId: "gid://shopify/Product/10",
+      shopifyProductHandle: "merchant-handle",
+    };
+    const admin = makeCreateAdmin();
+    admin.graphql.mockImplementation(async (query: string) => {
+      if (query.includes("GetBundleParentProduct")) {
+        return response({
+          data: {
+            product: {
+              id: "gid://shopify/Product/10",
+              handle: "merchant-handle",
+              status: "ACTIVE",
+              variants: { nodes: [{ id: "gid://shopify/ProductVariant/20" }] },
+            },
+          },
+        });
+      }
+      if (query.includes("AddOnlyBundlesParentTags")) {
+        return response({
+          data: {
+            tagsAdd: {
+              node: { id: "gid://shopify/Product/10" },
+              userErrors: [{ field: ["tags"], message: "Tag rejected" }],
+            },
+          },
+        });
+      }
+      throw new Error(`Unexpected GraphQL operation: ${query}`);
+    });
+
+    await expect(ensureBundleParentProduct({
+      admin,
+      shopDomain: "test-shop.myshopify.com",
+      appUrl: process.env.SHOPIFY_APP_URL,
+      bundle: existingBundle,
+    })).rejects.toMatchObject({
+      operation: "add Only Bundles parent tags",
+      userErrors: [{ field: ["tags"], message: "Tag rejected" }],
+    });
+  });
+
+  it("fails existing-parent sync when Shopify rejects legacy brand tag removal", async () => {
+    const existingBundle = {
+      ...bundle,
+      shopifyProductId: "gid://shopify/Product/10",
+      shopifyProductHandle: "merchant-handle",
+    };
+    const admin = makeCreateAdmin();
+    admin.graphql.mockImplementation(async (query: string) => {
+      if (query.includes("GetBundleParentProduct")) {
+        return response({
+          data: {
+            product: {
+              id: "gid://shopify/Product/10",
+              handle: "merchant-handle",
+              status: "ACTIVE",
+              variants: { nodes: [{ id: "gid://shopify/ProductVariant/20" }] },
+            },
+          },
+        });
+      }
+      if (query.includes("AddOnlyBundlesParentTags")) {
+        return response({ data: { tagsAdd: { node: { id: "gid://shopify/Product/10" }, userErrors: [] } } });
+      }
+      if (query.includes("RemoveLegacyBundleParentTags")) {
+        return response({
+          data: {
+            tagsRemove: {
+              node: { id: "gid://shopify/Product/10" },
+              userErrors: [{ field: ["tags"], message: "Removal rejected" }],
+            },
+          },
+        });
+      }
+      throw new Error(`Unexpected GraphQL operation: ${query}`);
+    });
+
+    await expect(ensureBundleParentProduct({
+      admin,
+      shopDomain: "test-shop.myshopify.com",
+      appUrl: process.env.SHOPIFY_APP_URL,
+      bundle: existingBundle,
+    })).rejects.toMatchObject({
+      operation: "remove legacy bundle parent tags",
+      userErrors: [{ field: ["tags"], message: "Removal rejected" }],
     });
   });
 
@@ -425,6 +572,12 @@ describe("ensureBundleParentProduct", () => {
       }
       if (query.includes("ConfigureBundleParentVariant")) {
         return response({ data: { productVariantsBulkUpdate: { productVariants: [], userErrors: [] } } });
+      }
+      if (query.includes("AddOnlyBundlesParentTags")) {
+        return response({ data: { tagsAdd: { node: { id: "gid://shopify/Product/10" }, userErrors: [] } } });
+      }
+      if (query.includes("RemoveLegacyBundleParentTags")) {
+        return response({ data: { tagsRemove: { node: { id: "gid://shopify/Product/10" }, userErrors: [] } } });
       }
       if (query.includes("GetOnlineStorePublication")) {
         return response({

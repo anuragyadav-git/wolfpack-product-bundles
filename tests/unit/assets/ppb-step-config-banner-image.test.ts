@@ -23,6 +23,9 @@ function createElement(tagName: string): any {
       children.push(child);
       return child;
     },
+    replaceChildren(...newChildren: any[]) {
+      children.splice(0, children.length, ...newChildren);
+    },
     prepend(child: any) {
       child.parentElement = element;
       children.unshift(child);
@@ -58,7 +61,7 @@ function createElement(tagName: string): any {
         }
         return null;
       };
-      return children.map(visit).find(Boolean) ?? null;
+      return children.map((value) => visit(value)).find(Boolean) ?? null;
     },
   };
   return element;

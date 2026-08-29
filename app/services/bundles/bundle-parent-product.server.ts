@@ -30,6 +30,17 @@ type ParentProductNode = {
   } | null;
 };
 
+const REBUY_SMART_CART_BUNDLE_TAG = "smart-cart-hide-bundle-options";
+const ONLY_BUNDLES_PARENT_TAGS = [
+  "Only Bundles",
+  "only-bundles-parent",
+  REBUY_SMART_CART_BUNDLE_TAG,
+] as const;
+const LEGACY_BUNDLE_PARENT_TAGS = [
+  "WP-Bundles",
+  "wolfpack-bundle-parent",
+] as const;
+
 export type BundleParentProductResult = {
   productId: string;
   variantId: string;
@@ -250,6 +261,63 @@ function throwUserErrors(operation: string, userErrors: ShopifyUserError[] | und
   }
 }
 
+async function syncOnlyBundlesParentTags(
+  admin: ShopifyAdmin,
+  productId: string,
+) {
+  const addResponse = await admin.graphql(
+    `
+      mutation AddOnlyBundlesParentTags($id: ID!, $tags: [String!]!) {
+        tagsAdd(id: $id, tags: $tags) {
+          node { id }
+          userErrors { field message }
+        }
+      }
+    `,
+    {
+      variables: {
+        id: productId,
+        tags: [...ONLY_BUNDLES_PARENT_TAGS],
+      },
+    },
+  );
+  const addData = (await addResponse.json()) as {
+    data?: { tagsAdd?: { userErrors?: ShopifyUserError[] } };
+    errors?: unknown[];
+  };
+  throwTransportErrors("add Only Bundles parent tags", addData.errors);
+  throwUserErrors(
+    "add Only Bundles parent tags",
+    addData.data?.tagsAdd?.userErrors,
+  );
+
+  const removeResponse = await admin.graphql(
+    `
+      mutation RemoveLegacyBundleParentTags($id: ID!, $tags: [String!]!) {
+        tagsRemove(id: $id, tags: $tags) {
+          node { id }
+          userErrors { field message }
+        }
+      }
+    `,
+    {
+      variables: {
+        id: productId,
+        tags: [...LEGACY_BUNDLE_PARENT_TAGS],
+      },
+    },
+  );
+  const removeData = (await removeResponse.json()) as {
+    data?: { tagsRemove?: { userErrors?: ShopifyUserError[] } };
+    errors?: unknown[];
+  };
+  throwTransportErrors("remove legacy bundle parent tags", removeData.errors);
+  throwUserErrors(
+    "remove legacy bundle parent tags",
+    removeData.data?.tagsRemove?.userErrors,
+  );
+}
+
 async function loadParentProduct(
   admin: ShopifyAdmin,
   productId: string,
@@ -328,16 +396,13 @@ async function createParentProduct(input: {
           ...(input.bundle.bundleType === "full_page"
             ? { handle: buildFpbInternalParentHandle(input.bundle.id) }
             : {}),
+          claimOwnership: { bundles: true },
           status: "UNLISTED",
           descriptionHtml: buildBundleProductDescriptionHtml({
             bundleName: input.bundle.name,
             status: "unlisted",
           }),
-          tags: [
-            "WP-Bundles",
-            "wolfpack-bundle-parent",
-            "wolfpack-hide-bundle-options",
-          ],
+          tags: [...ONLY_BUNDLES_PARENT_TAGS],
         },
         ...(media ? { media } : {}),
       },
@@ -507,6 +572,7 @@ export async function ensureBundleParentProduct(input: {
         data: { shopifyProductHandle: product.handle },
       });
     }
+    await syncOnlyBundlesParentTags(input.admin, product.id);
   }
 
   const variantId = product.variants?.nodes?.[0]?.id;

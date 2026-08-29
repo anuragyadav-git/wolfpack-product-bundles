@@ -8,8 +8,11 @@ import {
 function storefrontHarness() {
   const styles: Array<{ dataset: Record<string, string>; textContent: string; remove: () => void }> = [];
   const runtimeDocument = {
-    head: { append: (style: typeof styles[number]) => styles.push(style) },
-    querySelector: () => styles[0] ?? null,
+    head: { appendChild: (style: typeof styles[number]) => styles.push(style) },
+    querySelectorAll: (selector: string) => selector.startsWith("style") ? styles : [],
+    querySelector: (selector: string) => styles.find((style) => (
+      selector.includes(style.dataset.wpbManagedStyle)
+    )) ?? null,
     createElement: () => {
       const style = {
         dataset: {} as Record<string, string>,
@@ -56,7 +59,7 @@ describe("global Settings Controls storefront runtime", () => {
     }, runtimeWindow, runtimeDocument);
 
     expect(styles).toHaveLength(1);
-    expect(styles[0].textContent).toContain(".merchant-theme");
+    expect(styles[0].textContent).toMatch(/\.merchant-theme/);
     expect(runtimeWindow.__merchantControlRuns).toBe(2);
   });
 
@@ -102,5 +105,26 @@ describe("global Settings Controls storefront runtime", () => {
       [...links],
       { productPage: { redirectCollectionQuickAddToBundle: false } },
     )).toBeNull();
+  });
+
+  it("mounts dummy-product CSS only on a matching FPB parent product", () => {
+    const { runtimeDocument, runtimeWindow, styles } = storefrontHarness();
+    Object.assign(runtimeWindow, { location: { href: "https://shop.test/products/fpb-parent" } });
+
+    applyGlobalSettingsControls({
+      landingPage: { css: {
+        themePages: ".theme-marker { color: green; }",
+        bundleDummyProductPage: ".dummy-marker { color: blue; }",
+      } },
+    }, runtimeWindow, runtimeDocument, [{
+      bundleType: "full_page",
+      productHandle: "fpb-parent",
+      targetUrl: "/apps/product-bundles/wpb/12",
+    }]);
+
+    expect(styles.map((style) => style.textContent)).toEqual([
+      ".theme-marker { color: green; }",
+      ".dummy-marker { color: blue; }",
+    ]);
   });
 });

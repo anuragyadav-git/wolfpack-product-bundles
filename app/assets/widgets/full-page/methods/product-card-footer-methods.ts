@@ -1,9 +1,8 @@
 import { BUNDLE_WIDGET } from '../../shared/constants.js';
 import { CurrencyManager } from '../../shared/currency-manager.js';
 import { ToastManager } from '../../shared/toast-manager.js';
-import { ComponentGenerator } from '../../shared/component-generator.js';
 import { ConditionValidator } from '../../shared/condition-validator.js';
-import { getProductImageUrls, renderSharedProductCard } from '../../shared/components/product-card.js';
+import { createSharedProductCardElement, getProductImageUrls } from '../../shared/components/product-card.js';
 import { VariantSelectorComponent } from '../../shared/variant-selector.js';
 import {
   getInlineVariantSelectorPresentation,
@@ -30,11 +29,6 @@ function getFpbProductCardMode(designPreset: any) {
 
 function isClassicFpbPreset(designPreset: any) {
   return getFpbPresetContract(designPreset)?.summary?.mode === 'slots';
-}
-
-function shouldUseSharedProductCard(designPreset: any) {
-  const mode = getFpbProductCardMode(designPreset);
-  return mode === 'grid' || mode === 'compact' || mode === 'row';
 }
 
 function shouldUseAddonDiscountBadge(designPreset: any) {
@@ -96,17 +90,17 @@ createProductCard(product: any, stepIndex: string|number, options: any = {}) {
   const addButtonText = openVariantModalOnAdd
     ? resolveText('chooseOptionsButton', 'Choose Options')
     : this.getProductCardAddButtonText(step);
-  const variantSelectorHtml = shouldRenderVariantSelector
+  const variantSelectorElement = shouldRenderVariantSelector
     ? usesDropdownVariantSelector
-      ? VariantSelectorComponent.renderDropdownHtml(product, primaryOptionName, {
+      ? VariantSelectorComponent.createDropdownElement(product, primaryOptionName, {
         placeholder: getFpbProductCardMode(designPreset) === 'row'
           ? ''
           : resolveText('chooseOptionsButton', 'Choose Options'),
         mobileMode: variantSelectorPresentation.mobileMode,
         hideUnavailable: true,
       })
-      : VariantSelectorComponent.renderHtml(product, primaryOptionName)
-    : '';
+      : VariantSelectorComponent.createElement(product, primaryOptionName)
+    : null;
 
   const displayProduct = this.buildPaidAddonProductDisplayData(product, step);
   const outOfStock = typeof this.isVariantOutOfStock === 'function'
@@ -130,19 +124,22 @@ createProductCard(product: any, stepIndex: string|number, options: any = {}) {
     .replace('{{quantity}}', String(currentQuantity));
   const supportsAddonDiscountBadge = shouldUseAddonDiscountBadge(designPreset);
   const hasAddonDiscountBadge = supportsAddonDiscountBadge && displayProduct.addonDiscountBadgeText;
-  const stockBadgeHtml = hasAddonDiscountBadge
-    ? `<span class="fpb-addon-discount-badge">${ComponentGenerator.escapeHtml(displayProduct.addonDiscountBadgeText)}</span>`
-    : '';
-  let htmlString;
-  if (shouldUseSharedProductCard(designPreset)) {
-    htmlString = renderSharedProductCard(
+  const cardBadgeElement = hasAddonDiscountBadge
+    ? document.createElement('span')
+    : null;
+  if (cardBadgeElement) {
+    cardBadgeElement.className = 'fpb-addon-discount-badge';
+    cardBadgeElement.textContent = displayProduct.addonDiscountBadgeText;
+  }
+  const cardElement = createSharedProductCardElement(
       displayProduct,
       currentQuantity,
       currencyInfo,
       {
+        productDetailsEnabled: true,
         displayPrice: getSubscriptionProductCardPrice(this, displayProduct.price),
         description: '',
-        variantSelectorHtml,
+        variantSelectorElement,
         mode: getFpbProductCardMode(designPreset) || 'grid',
         className: outOfStock ? 'is-out-of-stock' : '',
         showCompareAtPrice: this._getLandingPageControls?.()?.showCompareAtPrice === true,
@@ -161,30 +158,10 @@ createProductCard(product: any, stepIndex: string|number, options: any = {}) {
         addButtonAriaLabel: resolveText('addButtonText', 'Add'),
         addButtonText,
         increaseDisabled,
-        cardBadgeHtml: stockBadgeHtml,
+        cardBadgeElement,
         variantSelectorPlacement: usesDropdownVariantSelector ? 'beforePrice' : undefined,
       }
     );
-  } else {
-    htmlString = ComponentGenerator.renderProductCard(
-      {
-        ...product,
-        price: getSubscriptionProductCardPrice(this, product.price),
-      },
-      currentQuantity,
-      currencyInfo,
-      {
-        variantSelectorHtml,
-        actionMode: 'expandingQuantity',
-        addButtonText,
-      }
-    );
-  }
-
-  // Convert HTML string to DOM element
-  const wrapper = document.createElement('div');
-  wrapper.innerHTML = htmlString.trim();
-  const cardElement = wrapper.firstChild as HTMLElement;
 
   this.applyStandardExpandedVariantTitle(cardElement, displayProduct);
 
@@ -244,7 +221,13 @@ createProductCard(product: any, stepIndex: string|number, options: any = {}) {
     if (priceEl) {
       const originalPriceText = priceEl.textContent;
       const _ci = CurrencyManager.getCurrencyInfo();
-      priceEl.innerHTML = `${CurrencyManager.convertAndFormat(0, _ci)} <span class="side-panel-product-original-price">${originalPriceText}</span>`;
+      const originalPrice = document.createElement('span');
+      originalPrice.className = 'side-panel-product-original-price';
+      originalPrice.textContent = originalPriceText;
+      priceEl.replaceChildren(
+        document.createTextNode(`${CurrencyManager.convertAndFormat(0, _ci)} `),
+        originalPrice,
+      );
     }
   }
 

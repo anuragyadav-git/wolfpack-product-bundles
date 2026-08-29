@@ -56,7 +56,7 @@ type StaticTokenPayload = {
 };
 
 function stable(value: unknown): unknown {
-  if (Array.isArray(value)) return value.map(stable);
+  if (Array.isArray(value)) return value.map((value) => stable(value));
   if (!value || typeof value !== "object") return value;
   return Object.fromEntries(
     Object.entries(value as Record<string, unknown>)

@@ -45,13 +45,14 @@ export function FpbAddonFooterMessaging({
             <s-stack direction="inline" gap="small-100">
               <s-button
                 variant="tertiary"
+                icon="code"
                 onClick={() => setIsAddonVariablesModalOpen(true)}
               >
                 Show Variables
               </s-button>
               <s-button
                 variant="secondary"
-                icon="globe"
+                icon="language-translate"
                 disabled={
                   !addonDraft.addonProductsEnabled ||
                   shopLocales.length === 0 ||

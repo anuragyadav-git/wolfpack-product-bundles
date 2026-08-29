@@ -5,7 +5,7 @@ title: Metafields
 type: shopify-integration
 status: authoritative
 summary: Storefront bundle metafield ownership, synchronization, payload limits, and Shopify validation constraints.
-last_audited: 2026-08-25
+last_audited: 2026-08-27
 owners:
   - engineering
 domains:
@@ -67,7 +67,9 @@ The server reloads the bundle from DB, activates the Cart Transform, then writes
 the current product/variant metafields before responding. Configure pages do not
 show a separate storefront sync status or retry banner. Preview posts one compact
 `/prepare-preview` request and keeps the Preview Bundle spinner active until that
-promise resolves; failures surface through the existing preview error toast.
+promise resolves. Persistent configuration blockers surface through the
+configure page's contextual critical alert; retryable launch or synchronization
+attempt failures use transient error toasts.
 There is no persisted sync queue, status, attempt ID, timestamp, or error model.
 
 Storefront sync does not define or write `$app.component_parents`. FPB uses the
@@ -88,10 +90,13 @@ this order.
 ## Size Constraints
 
 Wolfpack enforces 64KB for existing FPB JSON values and 128KB for the
-schema-v3 PPB `$app.bundle_ui_config`. The PPB writer rejects oversized data
-before its atomic mutation. Shopify Function input metafields are separately
-limited to 10KB, so the shop `$app.ppb_policy_revisions` map is checked against
-that smaller boundary.
+schema-v3 PPB `$app.bundle_ui_config` and shop `$app.ppb_storefront_runtime`.
+The PPB writers reject oversized data before their mutations. The storefront
+runtime stores one compact resolved copy per configured locale rather than
+embedding the complete multilingual Settings document in every entry; the
+39-locale translated-preset boundary fixture is 94,989 bytes. Shopify Function
+input metafields are separately limited to 10KB, so the shop
+`$app.ppb_policy_revisions` map is checked against that smaller boundary.
 
 Runtime category payloads must be compacted at `app/lib/bundle-config/category-runtime.ts` before they are written by `app/services/bundles/metafield-sync/operations/bundle-product.server.ts`. Preserve storefront-required fields only: product IDs/title/handle/image/price/weight, compact product options, and compact variants with ID/title/price/compare-at/weight/availability/inventory/options/image/selling-plan data. Strip admin/cache-only fields such as metafields, SKU, selectedOptions blobs, inventory policy, timestamps, and extra image metadata.
 

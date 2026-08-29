@@ -62,6 +62,23 @@ class FakeElement {
     return child;
   }
 
+  append(...children: FakeElement[]) {
+    children.forEach((child) => this.appendChild(child));
+  }
+
+  get childNodes() {
+    return this.children;
+  }
+
+  get ownerDocument() {
+    return (global as any).document;
+  }
+
+  replaceChildren(...children: FakeElement[]) {
+    this.children = [];
+    this.append(...children);
+  }
+
   addEventListener() {}
 
   setAttribute(name: string, value: string) {

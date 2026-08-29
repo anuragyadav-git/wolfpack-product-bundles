@@ -52,29 +52,6 @@ export function getBadgeTone(percentage: number): BadgeTone {
 }
 
 /**
- * Get remaining bundle count message
- *
- * @param currentCount - Current number of bundles
- * @param limit - Maximum bundle limit
- * @param planName - Name of the current plan
- * @returns Human-readable message about remaining bundles
- */
-export function getRemainingBundlesMessage(
-  currentCount: number,
-  limit: number,
-  planName: string
-): string {
-  const remaining = limit - currentCount;
-
-  if (remaining > 0) {
-    const bundleWord = remaining !== 1 ? "bundles" : "bundle";
-    return `You have ${remaining} ${bundleWord} remaining on your ${planName}.`;
-  }
-
-  return "You've reached your bundle limit. Upgrade to create more bundles.";
-}
-
-/**
  * Check if user should see upgrade prompt based on usage
  *
  * @param percentage - Usage percentage (0-100)
@@ -83,19 +60,6 @@ export function getRemainingBundlesMessage(
  */
 export function shouldShowUpgradePrompt(percentage: number, isFreePlan: boolean): boolean {
   return isFreePlan && percentage >= 50;
-}
-
-/**
- * Get upgrade prompt message based on usage level
- *
- * @param percentage - Usage percentage (0-100)
- * @returns Upgrade prompt message
- */
-export function getUpgradePromptMessage(percentage: number): string {
-  if (percentage >= 80) {
-    return "You're running low on bundles! Upgrade to Grow for 20 bundles.";
-  }
-  return "Need more bundles? Upgrade to Grow for double the capacity.";
 }
 
 /**

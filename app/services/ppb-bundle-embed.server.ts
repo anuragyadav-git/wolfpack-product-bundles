@@ -23,7 +23,7 @@ function resourceIdentifiers(value: unknown, kind: "product" | "collection") {
   const values = kind === "product"
     ? [item.productId, item.graphqlId, item.admin_graphql_api_id, item.id, item.handle, item.parentProductId]
     : [item.collectionId, item.graphqlId, item.admin_graphql_api_id, item.id, item.handle];
-  return new Set(values.flatMap(identifiers));
+  return new Set(values.flatMap((value) => identifiers(value)));
 }
 
 function resources(value: unknown): unknown[] {

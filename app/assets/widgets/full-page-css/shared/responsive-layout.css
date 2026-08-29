@@ -54,20 +54,6 @@
 }
 
 #bundle-builder-app.bundle-widget-full-page[data-bundle-type="full_page"]
-  .layout-sidebar[data-fpb-summary-mode="tray"]
-  .fpb-full-page-content-header {
-  width: 100%;
-  max-width: 100%;
-}
-
-#bundle-builder-app.bundle-widget-full-page[data-bundle-type="full_page"]
-  .layout-sidebar[data-fpb-summary-mode="sidebar"]
-  .fpb-full-page-content-header {
-  width: var(--fpb-catalog-track-width, 59%);
-  max-width: var(--fpb-catalog-track-width, 59%);
-}
-
-#bundle-builder-app.bundle-widget-full-page[data-bundle-type="full_page"]
   .layout-sidebar[data-fpb-summary-mode="sidebar"]
   .full-page-side-panel {
   display: flex;
@@ -549,7 +535,7 @@
 
 #bundle-builder-app.bundle-widget-full-page[data-bundle-type="full_page"]
   .layout-sidebar
-  > :is(.bundle-banners, .step-timeline, .category-tabs, .sidebar-layout-wrapper) {
+  > :is(.bundle-banners, .step-timeline, .sidebar-layout-wrapper) {
   width: 96%;
   max-width: none;
   margin-inline: auto;

@@ -22,7 +22,7 @@ function _findStep(state: any, stepId: any) {
 
 export function addItem(state: any, stepId: string, variantId: string|number, qty: number) {
   if (!state.isReady) {
-    return { success: false, error: 'WolfpackBundles SDK not ready yet.' };
+    return { success: false, error: 'Only Bundles SDK not ready yet.' };
   }
   const step = _findStep(state, stepId);
   if (!step) {
@@ -46,7 +46,7 @@ export function addItem(state: any, stepId: string, variantId: string|number, qt
 
 export function removeItem(state: any, stepId: string, variantId: string|number, qty: number) {
   if (!state.isReady) {
-    return { success: false, error: 'WolfpackBundles SDK not ready yet.' };
+    return { success: false, error: 'Only Bundles SDK not ready yet.' };
   }
   const step = _findStep(state, stepId);
   if (!step) {
@@ -67,7 +67,7 @@ export function removeItem(state: any, stepId: string, variantId: string|number,
 
 export function clearStep(state: any, stepId: string) {
   if (!state.isReady) {
-    return { success: false, error: 'WolfpackBundles SDK not ready yet.' };
+    return { success: false, error: 'Only Bundles SDK not ready yet.' };
   }
   const step = _findStep(state, stepId);
   if (!step) {

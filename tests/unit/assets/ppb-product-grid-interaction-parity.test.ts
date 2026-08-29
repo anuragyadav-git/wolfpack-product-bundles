@@ -1,11 +1,13 @@
-import { renderSharedProductCard } from "../../../app/assets/widgets/shared/components/product-card.js";
+import { createSharedProductCardElement } from "../../../app/assets/widgets/shared/components/product-card.js";
+import { JSDOM } from "jsdom";
 import { getGridStepRenderSequence } from "../../../app/assets/widgets/product-page/methods/layout-shell-methods.js";
 import { shouldDisableIntermediateProductPageCta } from "../../../app/assets/widgets/product-page/methods/footer-modal-state-methods.js";
 import { resolveInpageProductSelection } from "../../../app/assets/widgets/product-page/methods/inpage-render-methods.js";
 
 describe("PPB Product Grid interaction parity", () => {
   it("renders a selected Grid card as a quantity-aware Added action", () => {
-    const view = renderSharedProductCard(
+    const document = new JSDOM('<!doctype html>').window.document;
+    const view = createSharedProductCardElement(
       { id: "variant-1", title: "Grid product", price: 1299 },
       2,
       { display: { format: ["$", "{{amount}}"].join("") } },
@@ -13,16 +15,18 @@ describe("PPB Product Grid interaction parity", () => {
         mode: "grid",
         selectedAction: "button",
         selectedButtonText: "Added x2",
+        document,
       },
     );
 
-    expect(view).toContain("Added x2");
-    expect(view).not.toContain("Decrease quantity");
-    expect(view).not.toContain("Increase quantity");
+    expect(view.textContent).toMatch(/Added x2/);
+    expect(view.textContent).not.toMatch(/Decrease quantity/);
+    expect(view.textContent).not.toMatch(/Increase quantity/);
   });
 
   it("omits the product description when Grid disables description rendering", () => {
-    const view = renderSharedProductCard(
+    const document = new JSDOM('<!doctype html>').window.document;
+    const view = createSharedProductCardElement(
       {
         id: "variant-1",
         title: "Grid product",
@@ -31,11 +35,11 @@ describe("PPB Product Grid interaction parity", () => {
       },
       0,
       { display: { format: ["$", "{{amount}}"].join("") } },
-      { mode: "grid", description: "" },
+      { mode: "grid", description: "", document },
     );
 
-    expect(view).not.toContain("Description that must not render");
-    expect(view).not.toContain("bw-product-card__description");
+    expect(view.textContent).not.toMatch(/Description that must not render/);
+    expect(view.querySelector('[data-bw-card-description]')).toBeNull();
   });
 
   it("places the active Grid body directly after its step header", () => {

@@ -135,6 +135,14 @@ export type StepSetupMultiLanguageTarget =
   | { type: "addon-section"; stepId: string }
   | { type: "addon-footer"; stepId: string };
 
+export type UpsellWidgetDisplayMode = "block" | "button";
+
+export function normalizeUpsellWidgetDisplayMode(
+  value: unknown,
+): UpsellWidgetDisplayMode {
+  return value === "button" ? "button" : "block";
+}
+
 export function asVisibilityArray(value: unknown): unknown[] {
   return Array.isArray(value) ? value : [];
 }

@@ -2,8 +2,6 @@ import * as fs from "node:fs";
 import { join } from "node:path";
 
 const requiredTopics = [
-  "app_purchases_one_time/update",
-  "app_subscriptions/update",
   "app/uninstalled",
   "app/scopes_update",
   "products/delete",
@@ -13,6 +11,8 @@ const removedTopics = [
   "orders/create",
   "products/update",
   "inventory_levels/update",
+  "app_purchases_one_time/update",
+  "app_subscriptions/update",
 ];
 
 const webhookApiVersion = "2026-07";

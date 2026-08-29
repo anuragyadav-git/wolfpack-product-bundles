@@ -21,6 +21,36 @@ jest.mock("../../../app/db.server", () => ({
   },
 }));
 
+jest.mock("../../../app/services/subscriptions/subscription-service.server", () => ({
+  resolveShopEntitlements: jest.fn().mockResolvedValue({
+    entitlements: {
+      planCode: "GROWTH",
+      billingInterval: "MONTHLY",
+      limits: { publicBundles: null, enabledSteps: null },
+      capabilities: {
+        premiumTemplates: true,
+        advancedDesign: true,
+        advancedAnalytics: true,
+        prioritySupport: true,
+        unlimitedDrafts: true,
+      },
+    },
+  }),
+}));
+
+jest.mock("../../../app/services/subscriptions/design-entitlement-state.server", () => ({
+  shopUsesAdvancedDesign: jest.fn().mockResolvedValue(false),
+}));
+
+jest.mock("../../../app/services/subscriptions/bundle-entitlement-gate.server", () => ({
+  updateBundleWithPublicationGate: jest.fn((input) => input.database.bundle.update({
+    where: { id: input.bundleId, shopId: input.shopDomain },
+    data: input.data,
+    ...(input.include ? { include: input.include } : {}),
+  })),
+}));
+
+
 jest.mock("../../../app/lib/logger", () => ({
   AppLogger: {
     info: jest.fn(),
@@ -166,6 +196,10 @@ describe("handleUpdateBundleStatus", () => {
     id: "bundle-1",
     name: "Bundle Status",
     description: "Status managed by WPB",
+    bundleType: "product_page",
+    bundleDesignTemplate: "PDP_INPAGE",
+    bundleDesignPresetId: "LIST",
+    bundleSubscriptionConfig: null,
     shopifyProductId: PRODUCT_ID,
     status,
     steps: [],
@@ -181,6 +215,7 @@ describe("handleUpdateBundleStatus", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     const db = require("../../../app/db.server").default;
+    db.bundle.findUnique.mockResolvedValue(makeBundle(BundleStatus.ACTIVE));
     db.bundle.update.mockResolvedValue(makeBundle(BundleStatus.ACTIVE));
   });
 

@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { AppLogger } from "../../../lib/logger";
 import { serializePricingDisplayOptions } from "../../../lib/pricing-display-options";
 import { markBundlePreviewComplete } from "../../../lib/bundle-preview-readiness";
@@ -7,8 +7,15 @@ import { ADDON_MESSAGE_KEY } from "./configure-constants";
 import type { ConfigureBundleFlowDraft } from "./configure-flow-types";
 import { serializeFpbSaveSteps } from "./fpb-save-transport";
 import { useConfigureValidation } from "../_shared/bundle-configure/useConfigureValidation";
+import { i18n } from "../../../i18n/config";
+import {
+  isPersistentAdminOperationError,
+  showAdminTransientErrorToast,
+} from "../../../lib/admin-alert-feedback";
+import { getEntitlementAlertCopyKeys } from "../../../lib/subscriptions/alerts";
 
 export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
+  const lastFetcherIntentRef = useRef<string | null>(null);
   const validation = useConfigureValidation({
     kind: "fpb",
     setActiveSection: flow.setActiveSection,
@@ -202,23 +209,27 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
       return;
     } catch (error: any) {
       AppLogger.error("Save failed:", {}, error as any);
-      flow.shopify.toast.show(
-        (error as Error).message || "Failed to save changes",
-        {
-          isError: true,
-          duration: 5000,
-        },
-      );
+      flow.setOperationAlert({
+        id: "bundle-save",
+        heading: i18n.t("common.alerts.bundleNotSaved"),
+        message: "Review the bundle and try again.",
+      });
     }
   }, [buildDefaultProductsData, flow, validation]);
 
   useEffect(() => {
+    const submittedIntent = flow.fetcher.formData?.get("intent");
+    if (typeof submittedIntent === "string") {
+      lastFetcherIntentRef.current = submittedIntent;
+    }
     if (flow.fetcher.data && flow.fetcher.state === "idle") {
       if (flow.fetcher.data === flow.lastProcessedFetcherDataRef.current) {
         return;
       }
       flow.lastProcessedFetcherDataRef.current = flow.fetcher.data;
       const result = flow.fetcher.data;
+      const requestIntent = lastFetcherIntentRef.current;
+      lastFetcherIntentRef.current = null;
       if (result.success) {
         validation.clearValidationErrors();
         if ("bundle" in result && result.bundle) {
@@ -277,25 +288,17 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
           flow.originalSubscriptionConfigRef.current =
             flow.subscriptionConfig;
           flow.setIsDirty(false);
-          flow.shopify.toast.show(
-            ("message" in result ? result.message : null) ||
-              "Changes saved successfully",
-            { isError: false },
-          );
+          flow.clearOperationAlert();
+          flow.shopify.toast.show(i18n.t("common.success.changesSaved"), { isError: false });
         } else if ("productId" in result && result.productId) {
-          const syncMessage =
-            ("message" in result ? result.message : null) ||
-            "Product synced successfully";
-          flow.shopify.toast.show(syncMessage, { isError: false });
+          flow.clearOperationAlert();
+          flow.shopify.toast.show(i18n.t("common.success.productSynced"), { isError: false });
         } else if ("themeId" in result && result.themeId) {
           // No-op: handled by individual callbacks.
         } else if (
           "shareablePreviewUrl" in result &&
           result.shareablePreviewUrl
         ) {
-          flow.shopify.toast.show("Opening preview in new tab…", {
-            duration: 2000,
-          });
           window.open(result.shareablePreviewUrl as string, "_blank");
           markBundlePreviewComplete({
             bundleId: flow.bundle.id,
@@ -304,23 +307,19 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
           });
           flow.finishPreviewBundleLoading?.();
           flow.revalidator.revalidate();
+          flow.clearOperationAlert();
+          flow.shopify.toast.show(i18n.t("common.success.previewOpened"));
         } else if ("synced" in result && result.synced) {
-          flow.shopify.toast.show(
-            ("message" in result ? result.message : null) ||
-              "Bundle synced successfully",
-            { isError: false },
-          );
+          flow.clearOperationAlert();
+          flow.shopify.toast.show(i18n.t("common.success.bundleSynced"), { isError: false });
           flow.revalidator.revalidate();
           const syncInstallLink = (result as any).widgetInstallationLink;
           if (syncInstallLink) {
             setTimeout(() => window.open(syncInstallLink, "_blank"), 800);
           }
         } else {
-          flow.shopify.toast.show(
-            ("message" in result ? result.message : null) ||
-              "Operation completed successfully",
-            { isError: false },
-          );
+          flow.clearOperationAlert();
+          flow.shopify.toast.show(i18n.t("common.success.operationComplete"), { isError: false });
         }
       } else {
         if (Array.isArray((result as any).fieldErrors)) {
@@ -328,12 +327,21 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
           flow.finishPreviewBundleLoading?.();
           return;
         }
-        const errorMessage =
-          ("error" in result ? result.error : null) || "Operation failed";
-        flow.shopify.toast.show(errorMessage, {
-          isError: true,
-          duration: 5000,
-        });
+        if (isPersistentAdminOperationError(requestIntent)) {
+          const alertCopy = getEntitlementAlertCopyKeys(
+            (result as any).entitlementFailure?.code,
+          );
+          flow.setOperationAlert({
+            id: "bundle-save",
+            heading: i18n.t(alertCopy.heading),
+            message: i18n.t(alertCopy.message),
+          });
+        } else {
+          showAdminTransientErrorToast(
+            flow.shopify,
+            i18n.t("common.alerts.operationFailed"),
+          );
+        }
         flow.finishPreviewBundleLoading?.();
       }
     }

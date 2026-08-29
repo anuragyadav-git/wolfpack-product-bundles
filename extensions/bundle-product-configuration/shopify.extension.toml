@@ -1,0 +1,19 @@
+api_version = "2025-10"
+[[extensions]]
+name = "t:name"
+handle = "bundle-product-configuration"
+type = "ui_extension"
+uid = "0ed8de9a-ab45-930e-6513-e136c5a67ff442c24c34"
+
+# Both extension points are required
+[[extensions.targeting]]
+module = "./src/ProductDetailsConfigurationExtension.tsx"
+target = "admin.product-details.configuration.render"
+[extensions.targeting.urls]
+edit = "/app/bundles/products/{product_id}"
+
+
+[[extensions.targeting]]
+module = "./src/ProductVariantDetailsConfigurationExtension.tsx"
+# The target used here must match the target used in the module file (./src/ProductVariantDetailsConfigurationExtension.tsx)
+target = "admin.product-variant-details.configuration.render"

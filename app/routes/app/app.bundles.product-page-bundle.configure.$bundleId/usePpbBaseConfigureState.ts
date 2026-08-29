@@ -144,6 +144,9 @@ export function usePpbBaseConfigureState() {
     setActiveSection,
     forceNavigation,
     originalValuesRef,
+    operationAlert,
+    setOperationAlert,
+    clearOperationAlert,
   } = configState;
   const setSubscriptionConfig = useCallback(
     (
@@ -351,6 +354,9 @@ export function usePpbBaseConfigureState() {
     setActiveSection,
     forceNavigation,
     originalValuesRef,
+    operationAlert,
+    setOperationAlert,
+    clearOperationAlert,
     parentProductStatusUi,
     refreshParentProductStatusFromShopify,
     loadingGif,

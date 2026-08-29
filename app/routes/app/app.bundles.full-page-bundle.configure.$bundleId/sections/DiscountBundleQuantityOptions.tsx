@@ -7,7 +7,6 @@ export function FpbBundleQuantityOptions({
   flow: ConfigureBundleFlowContext;
 }) {
   const {
-    bundle,
     bundleQuantityOptionsEligible,
     DiscountMethod,
     fullPageBundleStyles,
@@ -53,7 +52,7 @@ export function FpbBundleQuantityOptions({
             </s-stack>
             <s-button
               variant="secondary"
-              icon="globe"
+              icon="language-translate"
               disabled={
                 !pricingState.pricingDisplayOptions.bundleQuantityOptions
                   .enabled ||

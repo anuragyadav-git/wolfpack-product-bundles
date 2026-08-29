@@ -19,6 +19,36 @@ jest.mock("../../../app/db.server", () => ({
   },
 }));
 
+jest.mock("../../../app/services/subscriptions/subscription-service.server", () => ({
+  resolveShopEntitlements: jest.fn().mockResolvedValue({
+    entitlements: {
+      planCode: "GROWTH",
+      billingInterval: "MONTHLY",
+      limits: { publicBundles: null, enabledSteps: null },
+      capabilities: {
+        premiumTemplates: true,
+        advancedDesign: true,
+        advancedAnalytics: true,
+        prioritySupport: true,
+        unlimitedDrafts: true,
+      },
+    },
+  }),
+}));
+
+jest.mock("../../../app/services/subscriptions/design-entitlement-state.server", () => ({
+  shopUsesAdvancedDesign: jest.fn().mockResolvedValue(false),
+}));
+
+jest.mock("../../../app/services/subscriptions/bundle-entitlement-gate.server", () => ({
+  updateBundleWithPublicationGate: jest.fn((input) => input.database.bundle.update({
+    where: { id: input.bundleId, shopId: input.shopDomain },
+    data: input.data,
+    ...(input.include ? { include: input.include } : {}),
+  })),
+}));
+
+
 jest.mock("../../../app/lib/logger", () => ({
   AppLogger: {
     info: jest.fn(),
@@ -728,22 +758,18 @@ describe("FPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
   it("does NOT call metafield services when shopifyProductId is absent", async () => {
     await handleSaveBundle(MOCK_ADMIN, MOCK_SESSION, "bundle-1", makeFormData());
     expect(updateBundleProductMetafields).not.toHaveBeenCalled();
-    expect(syncBundleStorefrontNow).toHaveBeenCalledWith({
-      admin: MOCK_ADMIN,
-      shopDomain: MOCK_SESSION.shop,
-      bundleId: "bundle-1",
-      bundleType: "full_page",
-      reason: "save",
-    });
+    expect(syncBundleStorefrontNow).not.toHaveBeenCalled();
   });
 
-  it("syncs storefront data directly through the shared sync service", async () => {
+  it("syncs an explicitly active bundle through the shared sync service", async () => {
     const updatedBundle = makeUpdatedBundle({
       bundleDesignPresetId: "CLASSIC",
     });
     getDb().bundle.update.mockResolvedValue(updatedBundle);
 
-    await handleSaveBundle(MOCK_ADMIN, MOCK_SESSION, "bundle-1", makeFormData());
+    await handleSaveBundle(MOCK_ADMIN, MOCK_SESSION, "bundle-1", makeFormData({
+      bundleStatus: "active",
+    }));
 
     expect(syncBundleStorefrontNow).toHaveBeenCalledWith({
       admin: MOCK_ADMIN,
@@ -769,7 +795,7 @@ describe("FPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
     );
   });
 
-  it("auto-activates a draft bundle when a step has StepProduct", async () => {
+  it("preserves an explicit draft when a step has StepProduct", async () => {
     const stepsData = makeStepsData({
       StepProduct: [
         { id: "gid://shopify/Product/111", title: "Product A", imageUrl: null },
@@ -779,12 +805,12 @@ describe("FPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
     await handleSaveBundle(MOCK_ADMIN, MOCK_SESSION, "bundle-1", fd);
     expect(getDb().bundle.update).toHaveBeenCalledWith(
       expect.objectContaining({
-        data: expect.objectContaining({ status: "active" }),
+        data: expect.objectContaining({ status: "draft" }),
       })
     );
   });
 
-  it("auto-activates a draft bundle when a step category has products", async () => {
+  it("preserves an explicit draft when a step category has products", async () => {
     const stepsData = makeStepsData({
       StepCategory: [
         {
@@ -802,7 +828,7 @@ describe("FPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
     await handleSaveBundle(MOCK_ADMIN, MOCK_SESSION, "bundle-1", fd);
     expect(getDb().bundle.update).toHaveBeenCalledWith(
       expect.objectContaining({
-        data: expect.objectContaining({ status: "active" }),
+        data: expect.objectContaining({ status: "draft" }),
       })
     );
   });
@@ -816,7 +842,7 @@ describe("FPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
     );
   });
 
-  it("auto-activates when a step has collections", async () => {
+  it("preserves an explicit draft when a step has collections", async () => {
     const stepsData = makeStepsData({
       collections: [{ id: "gid://shopify/Collection/1", handle: "shirts", title: "Shirts" }],
     });
@@ -824,7 +850,7 @@ describe("FPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
     await handleSaveBundle(MOCK_ADMIN, MOCK_SESSION, "bundle-1", fd);
     expect(getDb().bundle.update).toHaveBeenCalledWith(
       expect.objectContaining({
-        data: expect.objectContaining({ status: "active" }),
+        data: expect.objectContaining({ status: "draft" }),
       })
     );
   });
@@ -1366,6 +1392,7 @@ describe("FPB handleSaveBundle — with shopifyProductId (direct storefront sync
     const fd = makeFormData({
       stepsData: JSON.stringify(makeStepWithProduct()),
       bundleProduct: JSON.stringify({ id: PRODUCT_ID }),
+      bundleStatus: "active",
     });
 
     const res = await handleSaveBundle(MOCK_ADMIN, MOCK_SESSION, "bundle-1", fd);
@@ -1396,6 +1423,7 @@ describe("FPB handleSaveBundle — with shopifyProductId (direct storefront sync
       makeFormData({
         stepsData: JSON.stringify(makeStepWithProduct()),
         bundleProduct: JSON.stringify({ id: PRODUCT_ID }),
+        bundleStatus: "active",
       }),
     );
     const body = await res.json() as any;
@@ -1417,7 +1445,10 @@ describe("FPB handleSaveBundle — with shopifyProductId (direct storefront sync
       MOCK_ADMIN,
       MOCK_SESSION,
       "bundle-1",
-      makeFormData({ bundleProduct: JSON.stringify({ id: PRODUCT_ID }) }),
+      makeFormData({
+        bundleProduct: JSON.stringify({ id: PRODUCT_ID }),
+        bundleStatus: "active",
+      }),
     );
     const body = await res.json();
 

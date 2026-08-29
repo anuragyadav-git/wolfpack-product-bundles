@@ -7,12 +7,13 @@
 
 'use strict';
 
-import { renderQuantityControl } from './quantity-control.js';
+import { createQuantityControlElement } from './quantity-control.js';
 
 const DEFAULT_PLACEHOLDER_IMAGE = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400"%3E%3Crect width="400" height="400" fill="%23f3f4f6"/%3E%3C/svg%3E';
 const PRODUCT_DESCRIPTION_PREVIEW_LENGTH = 110;
 
-export function renderSharedProductCard(product: any = {}, currentQuantity = 0, currencyInfo: any = {}, options: any = {}) {
+export function createSharedProductCardElement(product: any = {}, currentQuantity = 0, currencyInfo: any = {}, options: any = {}) {
+  const runtimeDocument: Document = options.document || document;
   const selectionKey = String(product.selectionId || '');
   const quantity = Math.max(0, Number(currentQuantity || 0));
   const isSelected = quantity > 0;
@@ -55,13 +56,14 @@ export function renderSharedProductCard(product: any = {}, currentQuantity = 0, 
   const seeMoreLabel = options.seeMoreText || 'See more';
   const decreaseQuantityLabel = options.decreaseQuantityAriaLabel || options.decreaseLabel || 'Decrease quantity';
   const increaseQuantityLabel = options.increaseQuantityAriaLabel || options.increaseLabel || 'Increase quantity';
-  const activationLabel = openImageLabel || openTitleLabel || title;
-  const cardInteractive = options.cardInteractive !== false;
-  const titleInteractive = options.titleInteractive !== false;
+  const productDetailsEnabled = options.productDetailsEnabled === true;
+  const activationLabel = productDetailsEnabled ? (openImageLabel || openTitleLabel || title) : title;
+  const cardInteractive = productDetailsEnabled && options.cardInteractive !== false;
+  const titleInteractive = productDetailsEnabled && options.titleInteractive !== false;
   const rootClasses = [
     'bw-product-card',
     'product-card',
-    `bw-product-card--mode-${escapeAttribute(mode)}`,
+    `bw-product-card--mode-${mode}`,
     variantText ? 'bw-product-card--has-variant product-card--has-variant' : '',
     isIndividualVariantCard ? 'bw-product-card--individual-variant product-card--individual-variant' : '',
     isSelected ? 'bw-product-card--selected' : '',
@@ -72,69 +74,151 @@ export function renderSharedProductCard(product: any = {}, currentQuantity = 0, 
 
   const rootAriaLabel = resolveProductCardSelectionAriaLabel(activationLabel, isSelected);
 
-  return `
-    <div class="${rootClasses}" data-bw-product-card="true" data-product-id="${escapeAttribute(selectionKey)}" data-current-selected-variant-id="${escapeAttribute(selectionKey)}" data-bw-card-image-count="${imageUrls.length}" data-bw-card-image-index="0"${isIndividualVariantCard ? ' data-bw-card-individual-variant="true"' : ''}${hasMultipleImages ? ' data-bw-card-has-multiple-images="true"' : ''}${cardInteractive ? ' tabindex="0"' : ''} role="group" aria-label="${escapeAttribute(rootAriaLabel)}">
-      <div class="bw-product-card__media product-image" data-bw-product-media="true" role="button" tabindex="0" aria-label="${escapeAttribute(openImageLabel)}">
-        <img class="bw-product-card__image" src="${escapeAttribute(imageUrl)}" alt="${escapeAttribute(title)}" loading="lazy">
-        ${hasMultipleImages ? renderImageNavButton('prev', imageNavPrevLabel) : ''}
-        ${hasMultipleImages ? renderImageNavButton('next', imageNavNextLabel) : ''}
-        <span class="bw-product-card__image-overlay product-image-overlay" aria-hidden="true">
-          <span class="bw-product-card__magnifier"></span>
-        </span>
-        ${options.stockBadgeHtml || ''}
-      </div>
-      ${options.cardBadgeHtml || ''}
-      <div class="bw-product-card__body product-content-wrapper">
-      <div class="bw-product-card__text product-text-container ${variantText ? 'bw-product-card__text--has-variant product-text-container--has-variant' : ''}">
-          <div class="bw-product-card__title product-title"${titleInteractive ? ` role="button" tabindex="0" aria-label="${escapeAttribute(openTitleLabel)}"` : ''}>${escapeHtml(title)}</div>
-          ${variantText ? `<div class="bw-product-card__variant product-variant-row" data-bw-card-variant-row="true" aria-label="${escapeAttribute(`${variantLabel}: ${variantText}`)}">${escapeHtml(variantText)}</div>` : ''}
-          ${renderProductDescription({
-            description: descriptionText,
-            displaySeeMoreLink: options.displaySeeMoreLink === true,
-            descriptionMaxLength: options.descriptionMaxLength,
-            seeMoreText: seeMoreLabel,
-          })}
-        </div>
-        <div class="product-card-price-action" role="group" aria-label="${escapeAttribute(`${quantityControlLabel} controls`)}" aria-expanded="${isSelected ? 'true' : 'false'}">
-          ${variantSelectorBeforePrice ? options.variantSelectorHtml || '' : ''}
-          ${shouldRenderPriceRow ? `
-            <div class="bw-product-card__price product-price-row">
-              ${compareAtPrice ? `<span class="bw-product-card__compare-price product-price-strike">${escapeHtml(compareAtPrice)}</span>` : ''}
-              ${price ? `<span class="bw-product-card__current-price product-price">${escapeHtml(price)}</span>` : ''}
-            </div>
-          ` : ''}
-          ${variantSelectorBeforePrice ? '' : options.variantSelectorHtml || ''}
-          <div class="bw-product-card__action product-card-action ${isSelected ? 'is-expanded' : ''}">
-            ${isSelected && options.selectedAction === 'button'
-            ? renderAddButton(selectionKey, {
-                ...options,
-                addButtonText: options.selectedButtonText || options.addButtonText,
-                addButtonAriaLabel: `${resolvedSelectedLabel} ${title}`,
-                isPressed: true,
-              })
-              : isSelected
-              ? renderQuantityControl({
-                selectionId: selectionKey,
-                quantity,
-                productName: title,
-                quantityAriaLabel: quantityControlLabel,
-                decreaseLabel: decreaseQuantityLabel,
-                increaseLabel: increaseQuantityLabel,
-                removeLabel,
-                soldOutAriaLabel: soldOutLabel,
-                decreaseDisabled: options.decreaseDisabled === true,
-                increaseDisabled: options.increaseDisabled === true,
-              })
-              : renderAddButton(selectionKey, {
-                ...options,
-                addButtonText,
-                addButtonAriaLabel: `${resolvedAddButtonLabel} ${title}`,
-              })}
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
+  const root = runtimeDocument.createElement('div');
+  root.className = rootClasses;
+  Object.assign(root.dataset, {
+    bwProductCard: 'true',
+    productId: selectionKey,
+    currentSelectedVariantId: selectionKey,
+    bwCardImageCount: String(imageUrls.length),
+    bwCardImageIndex: '0',
+  });
+  if (isIndividualVariantCard) root.dataset.bwCardIndividualVariant = 'true';
+  if (hasMultipleImages) root.dataset.bwCardHasMultipleImages = 'true';
+  if (cardInteractive) root.tabIndex = 0;
+  root.setAttribute('role', 'group');
+  root.setAttribute('aria-label', rootAriaLabel);
+
+  const media = runtimeDocument.createElement('div');
+  media.className = 'bw-product-card__media product-image';
+  media.dataset.bwProductMedia = 'true';
+  if (productDetailsEnabled) {
+    media.setAttribute('role', 'button');
+    media.tabIndex = 0;
+    media.setAttribute('aria-label', openImageLabel);
+  }
+  const image = runtimeDocument.createElement('img');
+  image.className = 'bw-product-card__image';
+  image.src = normalizeSafeImageUrl(imageUrl, runtimeDocument) || DEFAULT_PLACEHOLDER_IMAGE;
+  image.alt = title;
+  image.loading = 'lazy';
+  const fallbackUrl = normalizeSafeImageUrl(options.imageFallbackUrl, runtimeDocument);
+  if (fallbackUrl) image.addEventListener('error', () => {
+    if (image.src !== fallbackUrl) image.src = fallbackUrl;
+  }, { once: true });
+  media.append(image);
+  if (productDetailsEnabled && hasMultipleImages) {
+    media.append(
+      createImageNavButton('prev', imageNavPrevLabel, runtimeDocument),
+      createImageNavButton('next', imageNavNextLabel, runtimeDocument),
+    );
+  }
+  if (productDetailsEnabled) {
+    const overlay = runtimeDocument.createElement('span');
+    overlay.className = 'bw-product-card__image-overlay product-image-overlay';
+    overlay.setAttribute('aria-hidden', 'true');
+    const magnifier = runtimeDocument.createElement('span');
+    magnifier.className = 'bw-product-card__magnifier';
+    overlay.append(magnifier);
+    media.append(overlay);
+  }
+  if (options.stockBadgeElement?.nodeType) media.append(options.stockBadgeElement);
+  root.append(media);
+  if (options.cardBadgeElement?.nodeType) root.append(options.cardBadgeElement);
+
+  const body = runtimeDocument.createElement('div');
+  body.className = 'bw-product-card__body product-content-wrapper';
+  const text = runtimeDocument.createElement('div');
+  text.className = [
+    'bw-product-card__text product-text-container',
+    variantText ? 'bw-product-card__text--has-variant product-text-container--has-variant' : '',
+  ].filter(Boolean).join(' ');
+  const titleElement = runtimeDocument.createElement('div');
+  titleElement.className = 'bw-product-card__title product-title';
+  titleElement.textContent = title;
+  if (titleInteractive) {
+    titleElement.setAttribute('role', 'button');
+    titleElement.tabIndex = 0;
+    titleElement.setAttribute('aria-label', openTitleLabel);
+  }
+  text.append(titleElement);
+  if (variantText) {
+    const variant = runtimeDocument.createElement('div');
+    variant.className = 'bw-product-card__variant product-variant-row';
+    variant.dataset.bwCardVariantRow = 'true';
+    variant.setAttribute('aria-label', `${variantLabel}: ${variantText}`);
+    variant.textContent = variantText;
+    text.append(variant);
+  }
+  const description = createProductDescription({
+    description: descriptionText,
+    displaySeeMoreLink: options.displaySeeMoreLink === true,
+    descriptionMaxLength: options.descriptionMaxLength,
+    seeMoreText: seeMoreLabel,
+  }, runtimeDocument);
+  if (description) text.append(description);
+  body.append(text);
+
+  const priceAction = runtimeDocument.createElement('div');
+  priceAction.className = 'product-card-price-action';
+  priceAction.setAttribute('role', 'group');
+  priceAction.setAttribute('aria-label', `${quantityControlLabel} controls`);
+  priceAction.setAttribute('aria-expanded', isSelected ? 'true' : 'false');
+  if (variantSelectorBeforePrice && options.variantSelectorElement?.nodeType) {
+    priceAction.append(options.variantSelectorElement);
+  }
+  if (shouldRenderPriceRow) {
+    const priceRow = runtimeDocument.createElement('div');
+    priceRow.className = 'bw-product-card__price product-price-row';
+    if (compareAtPrice) {
+      const compare = runtimeDocument.createElement('span');
+      compare.className = 'bw-product-card__compare-price product-price-strike';
+      compare.textContent = compareAtPrice;
+      priceRow.append(compare);
+    }
+    if (price) {
+      const current = runtimeDocument.createElement('span');
+      current.className = 'bw-product-card__current-price product-price';
+      current.textContent = price;
+      priceRow.append(current);
+    }
+    priceAction.append(priceRow);
+  }
+  if (!variantSelectorBeforePrice && options.variantSelectorElement?.nodeType) {
+    priceAction.append(options.variantSelectorElement);
+  }
+  const action = runtimeDocument.createElement('div');
+  action.className = `bw-product-card__action product-card-action${isSelected ? ' is-expanded' : ''}`;
+  action.append(isSelected && options.selectedAction === 'button'
+    ? createAddButton(selectionKey, {
+      ...options,
+      addButtonText: options.selectedButtonText || options.addButtonText,
+      addButtonAriaLabel: `${resolvedSelectedLabel} ${title}`,
+      isPressed: true,
+    }, runtimeDocument)
+    : isSelected
+      ? createQuantityControlElement({
+        selectionId: selectionKey,
+        quantity,
+        productName: title,
+        quantityAriaLabel: quantityControlLabel,
+        decreaseLabel: decreaseQuantityLabel,
+        increaseLabel: increaseQuantityLabel,
+        removeLabel,
+        soldOutAriaLabel: soldOutLabel,
+        decreaseDisabled: options.decreaseDisabled === true,
+        increaseDisabled: options.increaseDisabled === true,
+        document: runtimeDocument,
+      })
+      : createAddButton(selectionKey, {
+        ...options,
+        addButtonText,
+        addButtonAriaLabel: `${resolvedAddButtonLabel} ${title}`,
+      }, runtimeDocument));
+  priceAction.append(action);
+  body.append(priceAction);
+  root.append(body);
+  return root;
 }
 
 export function resolveProductCardSelectionAriaLabel(label = '', isSelected = false) {
@@ -199,43 +283,48 @@ function getVariantDisplayText(product: any) {
   return '';
 }
 
-function renderAddButton(selectionKey: string, options: any) {
+function createAddButton(selectionKey: string, options: any, runtimeDocument: Document) {
   const disabled = options.addDisabled === true;
   const text = options.addButtonText || '+';
   const addLabel = options.addButtonAriaLabel || 'Add';
-  const isPressed = options.isPressed === true ? 'true' : 'false';
-
-  return `
-    <button type="button" class="bw-product-card__add-button product-add-btn" data-product-id="${escapeAttribute(selectionKey)}" aria-label="${escapeAttribute(addLabel)}" aria-pressed="${isPressed}" ${disabled ? 'disabled aria-disabled="true"' : ''}>
-      ${escapeHtml(text)}
-    </button>
-  `;
+  const button = runtimeDocument.createElement('button');
+  button.type = 'button';
+  button.className = 'bw-product-card__add-button product-add-btn';
+  button.dataset.productId = selectionKey;
+  button.setAttribute('aria-label', addLabel);
+  button.setAttribute('aria-pressed', options.isPressed === true ? 'true' : 'false');
+  button.disabled = disabled;
+  if (disabled) button.setAttribute('aria-disabled', 'true');
+  button.textContent = text;
+  return button;
 }
 
-function renderImageNavButton(direction: string, label: any) {
+function createImageNavButton(direction: string, label: any, runtimeDocument: Document) {
   const safeLabel = String(label || (direction === 'prev' ? 'Previous image' : 'Next image'));
-  const symbol = direction === 'prev' ? '&#10094;' : '&#10095;';
-  return `
-    <button type="button" class="bw-product-card__image-nav bw-product-card__image-nav--${direction}" data-bw-image-nav="${direction}" aria-label="${escapeAttribute(safeLabel)}">
-      ${symbol}
-    </button>
-  `;
+  const button = runtimeDocument.createElement('button');
+  button.type = 'button';
+  button.className = `bw-product-card__image-nav bw-product-card__image-nav--${direction}`;
+  button.dataset.bwImageNav = direction;
+  button.setAttribute('aria-label', safeLabel);
+  button.textContent = direction === 'prev' ? '❮' : '❯';
+  return button;
 }
 
-function renderProductDescription({
+function createProductDescription({
   description = '',
   displaySeeMoreLink = false,
   descriptionMaxLength = PRODUCT_DESCRIPTION_PREVIEW_LENGTH,
   seeMoreText = 'See more',
-}: any) {
+}: any, runtimeDocument: Document) {
   const descriptionText = resolveProductDescriptionText(description);
-  if (!descriptionText) return '';
+  if (!descriptionText) return null;
 
   const showToggle = displaySeeMoreLink === true;
   if (!showToggle) {
-    return `
-      <div class="bw-product-card__description">${escapeHtml(descriptionText)}</div>
-    `;
+    const descriptionElement = runtimeDocument.createElement('div');
+    descriptionElement.className = 'bw-product-card__description';
+    descriptionElement.textContent = descriptionText;
+    return descriptionElement;
   }
 
   const maxLength = Math.max(24, Number(descriptionMaxLength) || PRODUCT_DESCRIPTION_PREVIEW_LENGTH);
@@ -244,19 +333,46 @@ function renderProductDescription({
     ? `${descriptionText.slice(0, maxLength)}...`
     : descriptionText;
 
-  return `
-    <div class="bw-product-card__description" data-bw-card-description="true" data-bw-card-description-expanded="false">
-      <span class="bw-product-card__description-short"${isClamped ? '' : ' hidden'}>${escapeHtml(shortDescription)}</span>
-      <span class="bw-product-card__description-full"${isClamped ? ' hidden' : ''}>${escapeHtml(descriptionText)}</span>
-      ${isClamped ? `<button type="button" class="bw-product-card__see-more" aria-expanded="false">${escapeHtml(seeMoreText)}</button>` : ''}
-    </div>
-  `;
+  const root = runtimeDocument.createElement('div');
+  root.className = 'bw-product-card__description';
+  root.dataset.bwCardDescription = 'true';
+  root.dataset.bwCardDescriptionExpanded = 'false';
+  const short = runtimeDocument.createElement('span');
+  short.className = 'bw-product-card__description-short';
+  short.hidden = !isClamped;
+  short.textContent = shortDescription;
+  const full = runtimeDocument.createElement('span');
+  full.className = 'bw-product-card__description-full';
+  full.hidden = isClamped;
+  full.textContent = descriptionText;
+  root.append(short, full);
+  if (isClamped) {
+    const toggle = runtimeDocument.createElement('button');
+    toggle.type = 'button';
+    toggle.className = 'bw-product-card__see-more';
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.textContent = seeMoreText;
+    root.append(toggle);
+  }
+  return root;
 }
 
 function normalizeImageUrl(value: any) {
   if (!value) return '';
   if (typeof value === 'string') return value;
   return value.url || value.src || value.originalSrc || value.transformedSrc || '';
+}
+
+function normalizeSafeImageUrl(value: any, runtimeDocument: Document) {
+  const source = normalizeImageUrl(value).trim();
+  if (!source) return '';
+  if (/^data:image\/(?:avif|gif|jpeg|png|svg\+xml|webp);/i.test(source)) return source;
+  try {
+    const parsed = new URL(source, runtimeDocument.location?.href || 'https://storefront.invalid');
+    return ['http:', 'https:', 'blob:'].includes(parsed.protocol) ? parsed.href : '';
+  } catch {
+    return '';
+  }
 }
 
 function formatPrice(value: string|null, currencyInfo: any) {
@@ -271,17 +387,4 @@ function resolveProductDescriptionText(value: string|null) {
   if (value == null) return '';
 
   return String(value);
-}
-
-function escapeHtml(value: string) {
-  return String(value)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
-
-function escapeAttribute(value: string) {
-  return escapeHtml(value).replace(/`/g, '&#96;');
 }

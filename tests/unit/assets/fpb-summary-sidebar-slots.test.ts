@@ -27,6 +27,9 @@ function makeContext(steps: any[]) {
 class FakeElement {
   tagName: string;
   className = '';
+  textContent = '';
+  src = '';
+  alt = '';
   private _innerHTML = '';
   attributes: Record<string, string> = {};
   dataset: Record<string, string> = {};
@@ -52,6 +55,10 @@ class FakeElement {
     child.parent = this;
     this.children.push(child);
     return child;
+  }
+
+  append(...children: FakeElement[]) {
+    children.forEach((child) => this.appendChild(child));
   }
 
   getChildren() {
@@ -141,6 +148,8 @@ class FakeElement {
         && node.dataset.action === 'remove-selected-product'
       ) {
         results.push(node);
+      } else if (selector === 'img' && node.tagName === 'IMG') {
+        results.push(node);
       } else if (selector === '[data-slot-id]' && node.dataset.slotId) {
         results.push(node);
       }
@@ -171,7 +180,9 @@ const originalShowWithUndo = ToastManager.showWithUndo;
 beforeEach(() => {
   ToastManager.showWithUndo = jest.fn(() => ({} as HTMLElement));
   global.document = {
-    createElement: () => new FakeElement(),
+    createElement: (tagName: string) => new FakeElement(tagName),
+    createElementNS: (_namespace: string, tagName: string) => new FakeElement(tagName),
+    createTextNode: (value: string) => Object.assign(new FakeElement('#text'), { textContent: value }),
     getElementById: () => null,
     body: {
       appendChild: jest.fn(),
@@ -440,8 +451,7 @@ describe('fullPageValidationAddonsMethods.getSummarySidebarEmptyStateMode', () =
 
     const slotContainer = container.children[0];
     const emptySlot = slotContainer?.children?.[1];
-    expect(emptySlot?.innerHTML || '').toContain('slot-icon');
-    expect(emptySlot?.innerHTML || '').toContain('custom-slot.png');
+    expect(emptySlot?.querySelector('img')?.src).toBe('https://cdn.example.com/custom-slot.png');
   });
 
   it('uses the custom slot icon for empty compact/horizontal mobile summary slots', () => {
@@ -456,7 +466,6 @@ describe('fullPageValidationAddonsMethods.getSummarySidebarEmptyStateMode', () =
     }, container, [], { minQuantity: 1 }, 0);
 
     const emptySlot = container.children?.[1];
-    expect(emptySlot?.innerHTML || '').toContain('slot-icon');
-    expect(emptySlot?.innerHTML || '').toContain('custom-slot.png');
+    expect(emptySlot?.querySelector('img')?.src).toBe('https://cdn.example.com/custom-slot.png');
   });
 });

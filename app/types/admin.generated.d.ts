@@ -3,13 +3,7 @@
 /* eslint-disable */
 import type * as AdminTypes from './admin.types.js';
 
-export type MantleShopIdentityQueryVariables = AdminTypes.Exact<{ [key: string]: never; }>;
-
-
-export type MantleShopIdentityQuery = { shop: Pick<AdminTypes.Shop, 'id' | 'name' | 'email' | 'myshopifyDomain'> };
-
 interface GeneratedQueryTypes {
-  "#graphql\n  query MantleShopIdentity {\n    shop {\n      id\n      name\n      email\n      myshopifyDomain\n    }\n  }\n": {return: MantleShopIdentityQuery, variables: MantleShopIdentityQueryVariables},
 }
 
 interface GeneratedMutationTypes {

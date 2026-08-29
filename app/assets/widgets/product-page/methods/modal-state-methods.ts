@@ -6,6 +6,7 @@ import {
 } from '../../shared/subscription-storefront-methods.js';
 import { TemplateManager } from '../../shared/template-manager.js';
 import { ToastManager } from '../../shared/toast-manager.js';
+import { createMessageFragment } from '../../shared/message-segments.js';
 import { ConditionValidator } from '../../shared/condition-validator.js';
 import { drawerLayerManager } from '../../shared/drawer-layer-manager.js';
 
@@ -204,7 +205,18 @@ _focusFirstModalControl() {
 
 getFormattedHeaderText() {
   const currentStep = this.selectedBundle?.steps?.[this.currentStepIndex];
-  return currentStep?.name || `Step ${this.currentStepIndex + 1}`;
+  return this.resolveProductPageStepText(currentStep, this.currentStepIndex).navigationLabel;
+},
+
+syncProductPageStepContentTitle(stepIndex?: number) {
+  const resolvedStepIndex = stepIndex ?? this.currentStepIndex;
+  const title = this.elements?.modal?.querySelector?.('.bw-ppb-step-content-title--picker');
+  if (!title) return;
+
+  const step = this.selectedBundle?.steps?.[resolvedStepIndex];
+  const contentTitle = this.resolveProductPageStepText(step, resolvedStepIndex).contentTitle;
+  title.textContent = contentTitle;
+  title.hidden = !contentTitle;
 },
 
 openModal(stepIndex: any, originFocusElement: any = null) {
@@ -218,6 +230,7 @@ openModal(stepIndex: any, originFocusElement: any = null) {
   if (header) {
     header.textContent = headerText;
   }
+  this.syncProductPageStepContentTitle(stepIndex);
 
   // OPTIMISTIC RENDERING: Show modal immediately with loading state
   this.renderModalTabs();
@@ -493,7 +506,11 @@ updateModalHeaderText(totalPrice: any, totalQuantity: any, discountInfo: any, cu
 
   // Always show step name in header - discount messaging is in footer only
   const currentStep = this.selectedBundle?.steps?.[this.currentStepIndex];
-  modalStepTitle.textContent = currentStep?.name || `Step ${this.currentStepIndex + 1}`;
+  modalStepTitle.textContent = this.resolveProductPageStepText(
+    currentStep,
+    this.currentStepIndex,
+  ).navigationLabel;
+  this.syncProductPageStepContentTitle(this.currentStepIndex);
 },
 
 updateModalDiscountMessaging(totalPrice: any, totalQuantity: any, discountInfo: any, currencyInfo: any) {
@@ -539,11 +556,8 @@ updateModalDiscountMessaging(totalPrice: any, totalQuantity: any, discountInfo: 
     currencyInfo,
     { rule: ruleToUse, messageType }
   );
-  const message = TemplateManager.replaceVariables(template, variables);
-
-  footerDiscountText.innerHTML = discountInfo.qualifiesForDiscount && !nextRule
-    ? message
-    : message || '';
+  const message = TemplateManager.formatMessageSegments(template, variables);
+  footerDiscountText.replaceChildren(createMessageFragment(message, footerDiscountText.ownerDocument));
   if (discountSection) {
     if (discountInfo.qualifiesForDiscount && !nextRule) {
       discountSection.classList.add('qualified');

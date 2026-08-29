@@ -44,7 +44,7 @@ export function FpbAddonReferenceStepCard({
           <div className={fullPageBundleStyles.addonsHeaderActions}>
             <s-button
               variant="secondary"
-              icon="globe"
+              icon="language-translate"
               disabled={
                 !addonDraft.isPersonalizationEnabled ||
                 shopLocales.length === 0 ||

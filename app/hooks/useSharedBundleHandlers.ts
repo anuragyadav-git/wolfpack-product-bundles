@@ -12,6 +12,7 @@
 import { useState, useCallback } from "react";
 import { AppLogger } from "../lib/logger";
 import { ERROR_MESSAGES } from "../constants/errors";
+import { showAdminTransientErrorToast } from "../lib/admin-alert-feedback";
 
 const cloneValue = (value: any): any => {
   if (value === null || typeof value !== "object") {
@@ -85,6 +86,7 @@ export interface SharedBundleHandlersParams {
   markAsDirty: () => void;
   activeTabIndex: number;
   setActiveTabIndex: (v: number) => void;
+  clearOperationAlert: () => void;
 
   // External objects
   shopify: any;
@@ -112,6 +114,7 @@ export function useSharedBundleHandlers(params: SharedBundleHandlersParams) {
     markAsDirty,
     activeTabIndex,
     setActiveTabIndex,
+    clearOperationAlert,
     shopify,
     fetcher,
     setIsSyncModalOpen,
@@ -230,6 +233,7 @@ export function useSharedBundleHandlers(params: SharedBundleHandlersParams) {
               ? "All products removed"
               : "Products updated successfully!";
 
+        clearOperationAlert();
         shopify.toast.show(message);
       }
     } catch (error: any) {
@@ -244,21 +248,19 @@ export function useSharedBundleHandlers(params: SharedBundleHandlersParams) {
         errorMessage?.toLowerCase().includes('close') ||
         error === null || error === undefined;
 
-      // Only show error toast for actual errors, not user cancellations
+      // Only show a contextual error for actual errors, not user cancellations.
       if (!isCancellation && errorMessage && errorMessage.trim() !== '') {
-        shopify.toast.show(ERROR_MESSAGES.FAILED_TO_SELECT_PRODUCTS, { isError: true, duration: 5000 });
+        showAdminTransientErrorToast(shopify, ERROR_MESSAGES.FAILED_TO_SELECT_PRODUCTS);
       }
     }
-  }, [stepsState.steps, stepsState.setSteps, shopify]);
+  }, [clearOperationAlert, shopify, stepsState.setSteps, stepsState.steps]);
 
   // ── Sync product ─────────────────────────────────────────────────────────────
   const handleSyncProduct = useCallback(() => {
     try {
 
-      // Show loading toast
-      shopify.toast.show("Syncing bundle product with Shopify...", { isError: false });
-
       // Prepare form data for sync operation
+      clearOperationAlert();
       const formData = new FormData();
       formData.append("intent", "syncProduct");
 
@@ -268,9 +270,9 @@ export function useSharedBundleHandlers(params: SharedBundleHandlersParams) {
       // Response will be handled by the existing useEffect
     } catch (error: any) {
       AppLogger.error("Product sync failed:", {}, error as any);
-      shopify.toast.show((error as Error).message || ERROR_MESSAGES.FAILED_TO_SYNC_PRODUCT, { isError: true, duration: 5000 });
+      showAdminTransientErrorToast(shopify, ERROR_MESSAGES.FAILED_TO_SYNC_PRODUCT);
     }
-  }, [fetcher, shopify]);
+  }, [clearOperationAlert, fetcher, shopify]);
 
   // ── Sync bundle confirm ──────────────────────────────────────────────────────
   const handleSyncBundleConfirm = useCallback(() => {
@@ -294,7 +296,8 @@ export function useSharedBundleHandlers(params: SharedBundleHandlersParams) {
         setProductTitle(selectedProduct.title || "");
         setProductImageUrl(selectedProduct.featuredImage?.url || selectedProduct.images?.[0]?.originalSrc || "");
 
-        shopify.toast.show("Bundle product updated successfully", { isError: false });
+        clearOperationAlert();
+        shopify.toast.show("Bundle product updated", { isError: false });
       }
     } catch (error: any) {
       // Resource picker throws an error when user cancels - this is expected behavior
@@ -308,12 +311,12 @@ export function useSharedBundleHandlers(params: SharedBundleHandlersParams) {
         errorMessage?.toLowerCase().includes('close') ||
         error === null || error === undefined;
 
-      // Only show error toast for actual errors, not user cancellations
+      // Only show a contextual error for actual errors, not user cancellations.
       if (!isCancellation && errorMessage && errorMessage.trim() !== '') {
-        shopify.toast.show(ERROR_MESSAGES.FAILED_TO_SELECT_BUNDLE_PRODUCT, { isError: true, duration: 5000 });
+        showAdminTransientErrorToast(shopify, ERROR_MESSAGES.FAILED_TO_SELECT_BUNDLE_PRODUCT);
       }
     }
-  }, [shopify]);
+  }, [clearOperationAlert, shopify]);
 
   // ── Step management ──────────────────────────────────────────────────────────
   // Step management handlers
@@ -328,13 +331,13 @@ export function useSharedBundleHandlers(params: SharedBundleHandlersParams) {
         newSteps.splice(stepIndex + 1, 0, newStep);
         return newSteps;
       });
-      shopify.toast.show("Step cloned successfully", { isError: false });
+      clearOperationAlert();
+      shopify.toast.show("Step cloned", { isError: false });
     }
-  }, [stepsState.steps, stepsState.setSteps, shopify]);
+  }, [clearOperationAlert, shopify, stepsState.setSteps, stepsState.steps]);
 
   const deleteStep = useCallback((stepId: string) => {
     if (stepsState.steps.length <= 1) {
-      shopify.toast.show(ERROR_MESSAGES.CANNOT_DELETE_LAST_STEP, { isError: true, duration: 5000 });
       return;
     }
 
@@ -400,12 +403,13 @@ export function useSharedBundleHandlers(params: SharedBundleHandlersParams) {
         return newSteps;
       });
 
-      shopify.toast.show("Step reordered successfully", { isError: false });
+      clearOperationAlert();
+      shopify.toast.show("Step reordered", { isError: false });
     }
 
     setDraggedStep(null);
     setDragOverIndex(null);
-  }, [draggedStep, stepsState.steps, stepsState.setSteps, shopify]);
+  }, [clearOperationAlert, draggedStep, shopify, stepsState.setSteps, stepsState.steps]);
 
   // ── Category drag-and-drop ───────────────────────────────────────────────────
   const handleCatDragStart = useCallback((e: React.DragEvent, stepId: string, catKey: string) => {
@@ -484,6 +488,7 @@ export function useSharedBundleHandlers(params: SharedBundleHandlersParams) {
             ? `Removed ${Math.abs(addedCount)} collection${Math.abs(addedCount) !== 1 ? 's' : ''}!`
             : "Collections updated successfully!";
 
+        clearOperationAlert();
         shopify.toast.show(message, { isError: false });
       } else if (collections && collections.length === 0) {
         // User deselected all collections
@@ -491,6 +496,7 @@ export function useSharedBundleHandlers(params: SharedBundleHandlersParams) {
           ...prev,
           [stepId]: []
         }));
+        clearOperationAlert();
         shopify.toast.show("All collections removed", { isError: false });
       }
     } catch (error: any) {
@@ -505,12 +511,12 @@ export function useSharedBundleHandlers(params: SharedBundleHandlersParams) {
         errorMessage?.toLowerCase().includes('close') ||
         error === null || error === undefined;
 
-      // Only show error toast for actual errors, not user cancellations
+      // Only show a contextual error for actual errors, not user cancellations.
       if (!isCancellation && errorMessage && errorMessage.trim() !== '') {
-        shopify.toast.show(ERROR_MESSAGES.FAILED_TO_SELECT_COLLECTIONS, { isError: true, duration: 5000 });
+        showAdminTransientErrorToast(shopify, ERROR_MESSAGES.FAILED_TO_SELECT_COLLECTIONS);
       }
     }
-  }, [shopify, selectedCollections]);
+  }, [clearOperationAlert, selectedCollections, setSelectedCollections, shopify]);
 
   // ── Rule messages ────────────────────────────────────────────────────────────
   const updateRuleMessage = useCallback((ruleId: string, field: 'discountText' | 'successMessage', value: string) => {

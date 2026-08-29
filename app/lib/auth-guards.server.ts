@@ -1,6 +1,6 @@
 import { json } from "@remix-run/node";
 import { timingSafeEqual, createHash } from "node:crypto";
-import { authenticate } from "../shopify.server";
+import type { authenticate } from "../shopify.server";
 import { AppLogger } from "./logger";
 
 // Admin context type derived from the configured shopify instance
@@ -37,47 +37,6 @@ export function requireInternalSecret(request: Request): Response | null {
   // Constant-time comparison via hashing both sides to equal-length buffers.
   // timingSafeEqual requires equal-length inputs; hashing guarantees that
   // regardless of token length, preventing timing side-channel attacks.
-  try {
-    const a = createHash("sha256").update(provided).digest();
-    const b = createHash("sha256").update(secret).digest();
-    if (!timingSafeEqual(a, b)) {
-      return json({ error: "Unauthorized" }, { status: 401 });
-    }
-  } catch {
-    return json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  return null; // Authorized — caller proceeds
-}
-
-// ─── Owner API Guard ──────────────────────────────────────────────────────────
-// Use on owner-only routes (e.g., the grant-plan endpoint).
-// Checks Authorization: Bearer <OWNER_API_SECRET> with constant-time comparison.
-// Only the app owner (who holds OWNER_API_SECRET) can call these routes.
-//
-// Returns null when authorized (caller may proceed).
-// Returns a 401 Response when unauthorized (caller must return it immediately).
-//
-// Usage:
-//   const authError = requireOwnerSecret(request);
-//   if (authError) return authError;
-export function requireOwnerSecret(request: Request): Response | null {
-  const secret = process.env.OWNER_API_SECRET;
-
-  if (!secret) {
-    AppLogger.warn("[auth-guards] OWNER_API_SECRET is not set — rejecting all owner API requests (fail-closed)", { component: "auth-guards.server" });
-    return json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const authHeader = request.headers.get("Authorization") ?? "";
-  const prefix = "Bearer ";
-
-  if (!authHeader.startsWith(prefix)) {
-    return json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const provided = authHeader.slice(prefix.length);
-
   try {
     const a = createHash("sha256").update(provided).digest();
     const b = createHash("sha256").update(secret).digest();

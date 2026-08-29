@@ -31,6 +31,7 @@ export function PpbPageSelectionModal() {
             <s-button
               key={template.id ?? template.handle ?? template.title}
               variant="secondary"
+              icon="theme-template"
               inlineSize="fill"
               onClick={() => handlePageSelection(template)}
             >
@@ -41,7 +42,7 @@ export function PpbPageSelectionModal() {
       ) : (
         <s-stack direction="block" gap="base" alignItems="center">
           <s-text color="subdued">No templates available</s-text>
-          <s-button href="https://admin.shopify.com/admin/pages" target="_blank">Create page</s-button>
+          <s-button icon="page-add" href="https://admin.shopify.com/admin/pages" target="_blank">Create page</s-button>
         </s-stack>
       )}
     </s-modal>

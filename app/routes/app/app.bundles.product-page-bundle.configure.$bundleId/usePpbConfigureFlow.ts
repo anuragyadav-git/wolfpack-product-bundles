@@ -67,6 +67,7 @@ export function usePpbConfigureFlow() {
     markAsDirty: base.markAsDirty,
     activeTabIndex: templateState.activeTabIndex,
     setActiveTabIndex: templateState.setActiveTabIndex,
+    clearOperationAlert: base.clearOperationAlert,
     shopify: base.shopify,
     fetcher: base.fetcher,
     setIsSyncModalOpen: templateState.setIsSyncModalOpen,
@@ -82,11 +83,8 @@ export function usePpbConfigureFlow() {
     saveHandlers,
   });
   const handleAddToStorefront = useCallback(() => {
+    base.clearOperationAlert();
     base.openThemeEditorForAppEmbed();
-    base.shopify.toast.show(
-      "Activate the Wolfpack Bundle embed in Theme Settings to go live.",
-      { isError: false, duration: 8000 },
-    );
   }, [base]);
   const previewReadiness = usePpbPreviewReadinessHandlers({
     base,

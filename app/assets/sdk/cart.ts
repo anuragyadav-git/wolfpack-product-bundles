@@ -214,11 +214,11 @@ function syncBundleDetailsCartMetafield(bundleDetailsKey: any, sourceProperties:
     })
     .then(function (data) {
       if (data && data.ok !== true) {
-        console.warn('[Wolfpack Bundles] Failed to sync bundle_details cart metafield', data.error || data);
+        console.warn('[Only Bundles] Failed to sync bundle_details cart metafield', data.error || data);
       }
     })
     .catch(function (error) {
-      console.warn('[Wolfpack Bundles] Failed to sync bundle_details cart metafield', error);
+      console.warn('[Only Bundles] Failed to sync bundle_details cart metafield', error);
     });
 }
 

@@ -10,24 +10,24 @@
  * Used in the feature comparison table on the pricing page
  */
 export interface FeatureComparisonRow {
-  feature: string;
+  featureMessageId: string;
   free: boolean | string;
-  grow: boolean | string;
+  growth: boolean | string;
   highlight?: boolean;
 }
 
 export const FEATURE_COMPARISON: FeatureComparisonRow[] = [
-  { feature: "Bundle limit", free: "10 bundles", grow: "20 bundles", highlight: true },
-  { feature: "Bundle sales threshold", free: "Up to $500/mo", grow: "Unlimited", highlight: true },
-  { feature: "Product Page Bundles", free: true, grow: true },
-  { feature: "Full Page Bundles", free: true, grow: true },
-  { feature: "Settings -> Design", free: true, grow: true },
-  { feature: "Basic discount rules", free: true, grow: true },
-  { feature: "Advanced discount rules", free: false, grow: true, highlight: true },
-  { feature: "Bundle analytics", free: false, grow: true, highlight: true },
-  { feature: "Priority support", free: false, grow: true, highlight: true },
-  { feature: "Early access to features", free: false, grow: true },
-  { feature: "Community access", free: true, grow: true },
+  { featureMessageId: "billing.comparison.publicBundles", free: "1", growth: "billing.values.unlimited", highlight: true },
+  { featureMessageId: "billing.comparison.steps", free: "2", growth: "billing.values.unlimited", highlight: true },
+  { featureMessageId: "billing.comparison.productPageBundles", free: true, growth: true },
+  { featureMessageId: "billing.comparison.fullPageBundles", free: true, growth: true },
+  { featureMessageId: "billing.comparison.merchandising", free: true, growth: true },
+  { featureMessageId: "billing.comparison.customerSubscriptions", free: true, growth: true },
+  { featureMessageId: "billing.comparison.customization", free: true, growth: true },
+  { featureMessageId: "billing.comparison.templates", free: "billing.values.standard", growth: "billing.values.all", highlight: true },
+  { featureMessageId: "billing.comparison.design", free: "billing.values.brandTypography", growth: "billing.values.allControls", highlight: true },
+  { featureMessageId: "billing.comparison.analytics", free: "billing.values.summary30", growth: "billing.values.advanced", highlight: true },
+  { featureMessageId: "billing.comparison.prioritySupport", free: false, growth: true, highlight: true },
 ];
 
 /**
@@ -35,63 +35,56 @@ export const FEATURE_COMPARISON: FeatureComparisonRow[] = [
  * Used in the "Why Upgrade" section on the pricing page
  */
 export interface ValueProp {
-  title: string;
-  description: string;
-  icon: string;
+  titleMessageId: string;
+  descriptionMessageId: string;
+  icon: "chart-histogram-growth" | "edit" | "view";
 }
 
 export const VALUE_PROPS: ValueProp[] = [
   {
-    title: "Double your bundle capacity",
-    description: "Create up to 20 bundles to maximize your product offerings",
-    icon: "📦",
+    titleMessageId: "billing.valueProps.scaleTitle",
+    descriptionMessageId: "billing.valueProps.scaleDescription",
+    icon: "chart-histogram-growth",
   },
   {
-    title: "Unlimited bundle revenue",
-    description: "No revenue cap — keep all your bundle sales income as you scale",
-    icon: "💰",
+    titleMessageId: "billing.valueProps.designTitle",
+    descriptionMessageId: "billing.valueProps.designDescription",
+    icon: "edit",
   },
   {
-    title: "Priority support",
-    description: "Get help faster with dedicated support for Grow plan members",
-    icon: "⚡",
+    titleMessageId: "billing.valueProps.analyticsTitle",
+    descriptionMessageId: "billing.valueProps.analyticsDescription",
+    icon: "view",
   },
 ];
 
 /**
- * Grow plan upgrade benefits
+ * Growth plan benefits
  * Used in the upgrade confirmation modal
  */
-export const GROW_PLAN_BENEFITS = [
-  "Up to 20 bundles (2× the free limit)",
-  "No bundle revenue cap — free plan is limited to $500/mo",
-  "Advanced discount rules",
-  "Priority support",
-] as const;
-
 /**
  * FAQ items for pricing page
  */
 export interface FAQItem {
-  question: string;
-  answer: string;
+  questionMessageId: string;
+  answerMessageId: string;
 }
 
 export const PRICING_FAQ: FAQItem[] = [
   {
-    question: "Can I change plans at any time?",
-    answer: "Yes! You can upgrade to Grow anytime. If you need to downgrade, you can cancel from the Billing page.",
+    questionMessageId: "billing.faq.changeQuestion",
+    answerMessageId: "billing.faq.changeAnswer",
   },
   {
-    question: "What happens to my bundles if I downgrade?",
-    answer: "If you have more than 10 bundles when downgrading to Free, the excess bundles will be archived but not deleted. You can upgrade again to access them.",
+    questionMessageId: "billing.faq.downgradeQuestion",
+    answerMessageId: "billing.faq.downgradeAnswer",
   },
   {
-    question: "How does billing work?",
-    answer: "All subscriptions are billed monthly through your Shopify account. The charge will appear on your Shopify invoice.",
+    questionMessageId: "billing.faq.billingQuestion",
+    answerMessageId: "billing.faq.billingAnswer",
   },
   {
-    question: "Do you offer refunds?",
-    answer: "Subscriptions are billed through Shopify. Please contact our support team for any billing inquiries.",
+    questionMessageId: "billing.faq.refundQuestion",
+    answerMessageId: "billing.faq.refundAnswer",
   },
 ];

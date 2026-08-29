@@ -33,7 +33,7 @@ export function PpbBundleVisibilitySection() {
           {
             title: "Bundle Widget",
             description:
-              "This will display an upsell block or button on the product pages of your choice.",
+              "Show an upsell button or block on selected product pages.",
             actionLabel: "Set up Bundle Widget",
             variant: "primary",
             onAction: () => flow.handleSectionChange("bundle_widget"),
@@ -41,7 +41,7 @@ export function PpbBundleVisibilitySection() {
           {
             title: "Bundle Embed",
             description:
-              "Directly embed the Bundle Builder block on product pages so customers can curate bundles there.",
+              "Place the bundle builder directly on selected product pages.",
             actionLabel: "Set up Bundle Embed",
             variant: "secondary",
             onAction: () => flow.handleSectionChange("bundle_embed"),

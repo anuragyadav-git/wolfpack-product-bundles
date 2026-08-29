@@ -77,7 +77,7 @@ async switchTier(bundleId: any, tierIndex: number) {
 
     // Clear existing step content and re-render
     if (this.elements.stepsContainer) {
-      this.elements.stepsContainer.innerHTML = '';
+      this.elements.stepsContainer.replaceChildren();
     }
     await this.renderUI();
 
@@ -118,7 +118,14 @@ _initFloatingBadge() {
   const badge = document.createElement('div');
   badge.className = 'floating-promo-badge';
   badge.setAttribute('role', 'status');
-  badge.innerHTML = `<span class="floating-promo-badge__text">${this._escapeHtml(text.trim())}</span><button class="floating-promo-badge__close" aria-label="Dismiss">&times;</button>`;
+  const badgeText = document.createElement('span');
+  badgeText.className = 'floating-promo-badge__text';
+  badgeText.textContent = text.trim();
+  const close = document.createElement('button');
+  close.className = 'floating-promo-badge__close';
+  close.setAttribute('aria-label', 'Dismiss');
+  close.textContent = '×';
+  badge.append(badgeText, close);
 
   badge.querySelector('.floating-promo-badge__close')!.addEventListener('click', () => {
     sessionStorage.setItem(DISMISS_KEY, '1');
@@ -191,7 +198,7 @@ async navigateModal(direction: number) {
 
     // Update modal header
     const headerText = this.getFormattedHeaderText();
-    this.elements.modal.querySelector('.modal-step-title').innerHTML = headerText;
+    this.elements.modal.querySelector('.modal-step-title').textContent = headerText;
 
     // Load products for this step
     await this.loadStepProducts(newStepIndex);
@@ -208,7 +215,7 @@ async navigateModal(direction: number) {
 
         // Update modal header
         const headerText = this.getFormattedHeaderText();
-        this.elements.modal.querySelector('.modal-step-title').innerHTML = headerText;
+        this.elements.modal.querySelector('.modal-step-title').textContent = headerText;
 
         // Load products for this step
         await this.loadStepProducts(newStepIndex);
@@ -236,30 +243,37 @@ async navigateModal(direction: number) {
 // ========================================================================
 
 showFallbackUI() {
-  this.container.innerHTML = `
-    <div class="bundle-fallback">
-      <h3>Bundle Configuration</h3>
-      <p>No active bundles found for this product.</p>
-      <details>
-        <summary>Debug Information</summary>
-        <pre>${JSON.stringify({
+  const fallback = document.createElement('div');
+  fallback.className = 'bundle-fallback';
+  const title = document.createElement('h3');
+  title.textContent = 'Bundle Configuration';
+  const message = document.createElement('p');
+  message.textContent = 'No active bundles found for this product.';
+  const details = document.createElement('details');
+  const summary = document.createElement('summary');
+  summary.textContent = 'Debug Information';
+  const debug = document.createElement('pre');
+  debug.textContent = JSON.stringify({
     config: this.config,
     bundleDataKeys: this.bundleData ? Object.keys(this.bundleData) : 'No data',
     currentProductId: this.config.currentProductId
-  }, null, 2)}</pre>
-      </details>
-    </div>
-  `;
+  }, null, 2);
+  details.append(summary, debug);
+  fallback.append(title, message, details);
+  this.container.replaceChildren(fallback);
 },
 
 showErrorUI(_error: any) {
-  this.container.innerHTML = `
-    <div class="bundle-error">
-      <h3>Bundle unavailable</h3>
-      <p>We couldn&apos;t load this bundle right now. Please refresh the page or try again later.</p>
-      <p>If the problem persists, please contact the store owner.</p>
-    </div>
-  `;
+  const error = document.createElement('div');
+  error.className = 'bundle-error';
+  const title = document.createElement('h3');
+  title.textContent = 'Bundle unavailable';
+  const message = document.createElement('p');
+  message.textContent = "We couldn't load this bundle right now. Please refresh the page or try again later.";
+  const help = document.createElement('p');
+  help.textContent = 'If the problem persists, please contact the store owner.';
+  error.append(title, message, help);
+  this.container.replaceChildren(error);
 },
 
 /**

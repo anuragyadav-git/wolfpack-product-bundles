@@ -54,7 +54,7 @@ export function FpbAddonProductsCard({
           <div className={fullPageBundleStyles.addonsHeaderActions}>
             <s-button
               variant="secondary"
-              icon="globe"
+              icon="language-translate"
               disabled={
                 !addonDraft.addonProductsEnabled ||
                 shopLocales.length === 0 ||

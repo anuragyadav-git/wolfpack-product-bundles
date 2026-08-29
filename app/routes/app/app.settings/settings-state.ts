@@ -63,10 +63,10 @@ export function getFieldValueKey(field: SettingsField) {
 }
 
 export function getConfirmedControlValues(
-  response: { success?: boolean; intent?: string } | undefined,
+  response: { success?: boolean; intent?: string; persisted?: boolean } | undefined,
   pendingValues: Record<string, string> | null,
 ) {
-  return response?.success === true
+  return (response?.success === true || response?.persisted === true)
     && response.intent === "saveSettingsControls"
     && pendingValues
     ? pendingValues

@@ -13,7 +13,7 @@ import {
 import { ensureBundleParentProduct } from "./bundle-parent-product.server";
 import { syncPpbStorefrontRuntime } from "../ppb-storefront-runtime.server";
 
-export type StorefrontSyncReason = "save" | "retry" | "sync_bundle" | "preview";
+export type StorefrontSyncReason = "save" | "retry" | "sync_bundle" | "preview" | "downgrade";
 
 async function loadBundleForStorefrontSync(shopDomain: string, bundleId: string) {
   return (db.bundle as any).findUnique({

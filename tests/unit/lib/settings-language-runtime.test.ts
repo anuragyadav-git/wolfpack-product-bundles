@@ -20,6 +20,7 @@ describe("settings language runtime", () => {
       "fpb.conditions.amount.greaterThanOrEqualTo": "Spend at least {{conditionAmount}}",
       "fpb.conditions.weight.lessThanOrEqualTo": "Keep weight below {{conditionWeight}}",
       "ppb.productCard.productCardAddBtnText": "Pick Product",
+      "ppb.productCard.productCardOutOfStockBtnText": "Sold Out Here",
       "ppb.productCard.productVariantLabelText": "Choose Variant",
       "ppb.productCard.productAddedBtnText": "Picked x{{allowedQuantity}}",
       "ppb.productCard.productCardAddBtnText_inPage": "Quick Pick +",
@@ -76,6 +77,7 @@ describe("settings language runtime", () => {
     expect(response.bundleType).toBe("product_page");
     expect(response.ppbCustomTextSettings).toMatchObject({
       productCardAddBtnText: "Pick Product",
+      productCardOutOfStockBtnText: "Sold Out Here",
       productVariantLabelText: "Choose Variant",
       productAddedBtnText: "Picked x{{allowedQuantity}}",
       productCardAddBtnText_inPage: "Quick Pick +",
@@ -100,6 +102,7 @@ describe("settings language runtime", () => {
     });
     expect(response.textOverrides).toMatchObject({
       productCardAddButton: "Pick Product",
+      productCardOutOfStockButton: "Sold Out Here",
       productCardInlineAddButton: "Quick Pick +",
       productDetailsUpdateButton: "Update",
       productVariantLabel: "Choose Variant",
@@ -239,5 +242,23 @@ describe("settings language runtime", () => {
       activeLocale: "en",
       textOverrides: { productAddButton: "Add To Box" },
     });
+  });
+
+  it("completes current fields in an otherwise canonical saved document", () => {
+    const complete = buildSettingsLanguageRuntime({}).settingsLanguage;
+    const expected = (buildSettingsLanguageResponse(
+      complete,
+      "product_page",
+      "en",
+    ).textOverrides as Record<string, string>).productCardOutOfStockButton;
+    const saved = structuredClone(complete);
+    delete (saved.mixAndMatchTextData.en.productCard as Record<string, unknown>)
+      .productCardOutOfStockBtnText;
+
+    expect(buildSettingsLanguageFormState(saved).localeFieldValues.en[
+      "ppb.productCard.productCardOutOfStockBtnText"
+    ]).toBe(expected);
+    expect(buildSettingsLanguageResponse(saved, "product_page", "en").textOverrides)
+      .toMatchObject({ productCardOutOfStockButton: expected });
   });
 });

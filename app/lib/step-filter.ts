@@ -29,7 +29,7 @@ export function filterProductsByCollectionIds<T extends FilterableProduct>(
     return parts[parts.length - 1];
   };
 
-  const normalizedCollectionIds = new Set(collectionProductIds.map(extractNumericId));
+  const normalizedCollectionIds = new Set(collectionProductIds.map((value) => extractNumericId(value)));
 
   return products.filter(p => {
     const numericPid = extractNumericId(String(p.parentProductId || p.id || ""));

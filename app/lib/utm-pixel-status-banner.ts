@@ -1,5 +1,5 @@
 export const UTM_PIXEL_PRIVACY_MESSAGE =
-  "Wolfpack uses Shopify's pixel privacy controls and only records campaign details when Shopify allows tracking. Your store data stays in your app, and privacy requests are handled through Shopify's required compliance process.";
+  "Only Bundles uses Shopify's pixel privacy controls and only records campaign details when Shopify allows tracking. Your store data stays in your app, and privacy requests are handled through Shopify's required compliance process.";
 
 export type UtmPixelStatusBannerModel = {
   description: string;

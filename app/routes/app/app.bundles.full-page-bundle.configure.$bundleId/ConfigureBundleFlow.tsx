@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AdminSectionLoadingState } from "../../../components/AdminSectionLoadingState";
+import { AdminTaskAlertBanner } from "../../../components/AdminTaskAlertBanner";
 import fullPageBundleStyles from "../../../styles/routes/full-page-bundle-configure.module.css";
 import { CommonConfigureShell } from "../_shared/bundle-configure/CommonConfigureShell";
 import { getDeferredConfigureSection } from "../_shared/bundle-configure/deferred-configure-sections";
@@ -90,6 +91,10 @@ function ConfigureBundleFlow() {
         </Suspense>
       ) : null}
     >
+      <AdminTaskAlertBanner
+        alert={flow.operationAlert}
+        onDismiss={flow.clearOperationAlert}
+      />
       <ConfigureValidationSummary
         activeSection={flow.activeSection}
         issues={flow.validationIssues}

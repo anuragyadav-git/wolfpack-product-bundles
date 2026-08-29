@@ -9,6 +9,9 @@ describe('FPB product loading screen behavior', () => {
   function createContainer() {
     return {
       innerHTML: 'stale',
+      replaceChildren() {
+        this.innerHTML = '';
+      },
     };
   }
 

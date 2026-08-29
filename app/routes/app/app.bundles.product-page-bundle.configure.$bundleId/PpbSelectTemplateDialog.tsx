@@ -49,13 +49,16 @@ export function PpbSelectTemplateDialog() {
                   </s-stack>
                   <s-button
                     variant="secondary"
+                    icon="paint-brush-flat"
                     onClick={() => setTemplateModalStep("colorsAndCorners")}
                   >
                     Customize Colors &amp; Language
                   </s-button>
                 </div>
                 {templateSaveError ? (
-                  <s-banner tone="critical">{templateSaveError}</s-banner>
+                  <s-box paddingBlockEnd="base">
+                    <s-banner heading="Template not saved" tone="critical">{templateSaveError}</s-banner>
+                  </s-box>
                 ) : null}
                 <div className={productPageBundleStyles.templateDialogGrid}>
                   {productPageTemplateOptions.map((templateOption) => {
@@ -126,6 +129,7 @@ export function PpbSelectTemplateDialog() {
               <div className={productPageBundleStyles.templateDialogFooter}>
                 <s-button
                   variant="primary"
+                  icon="arrow-right"
                   disabled={!pendingDesignPresetId || undefined}
                   loading={templateFetcher.state === "submitting" || undefined}
                   onClick={handleTemplateNext}
@@ -192,12 +196,14 @@ export function PpbSelectTemplateDialog() {
               <div className={productPageBundleStyles.templateDialogFooter}>
                 <s-button
                   variant="secondary"
+                  icon="arrow-left"
                   onClick={() => setTemplateModalStep("templates")}
                 >
                   Back
                 </s-button>
                 <s-button
                   variant="primary"
+                  icon="arrow-right"
                   onClick={() => setTemplateModalStep("textAndImages")}
                 >
                   Next
@@ -244,7 +250,9 @@ export function PpbSelectTemplateDialog() {
                   </div>
                 </div>
                 {templateSaveError ? (
-                  <s-banner tone="critical">{templateSaveError}</s-banner>
+                  <s-box paddingBlockEnd="base">
+                    <s-banner heading="Template not saved" tone="critical">{templateSaveError}</s-banner>
+                  </s-box>
                 ) : null}
                 <div
                   className={productPageBundleStyles.templateCustomizationGrid}
@@ -266,12 +274,14 @@ export function PpbSelectTemplateDialog() {
               <div className={productPageBundleStyles.templateDialogFooter}>
                 <s-button
                   variant="secondary"
+                  icon="arrow-left"
                   onClick={() => setTemplateModalStep("colorsAndCorners")}
                 >
                   Back
                 </s-button>
                 <s-button
                   variant="primary"
+                  icon="check"
                   disabled={!pendingDesignPresetId || undefined}
                   loading={templateFetcher.state === "submitting" || undefined}
                   onClick={handleTemplateNext}
@@ -295,7 +305,7 @@ export function PpbSelectTemplateDialog() {
                 </div>
                 <s-heading>Enable app embed</s-heading>
                 <s-paragraph color="subdued">
-                  Open your theme editor, enable the Wolfpack Bundles app embed,
+                  Open your theme editor, enable the Only Bundles app embed,
                   then return here to preview your bundle.
                 </s-paragraph>
                 <s-stack
@@ -306,6 +316,7 @@ export function PpbSelectTemplateDialog() {
                 >
                   <s-button
                     variant="secondary"
+                    icon="theme-edit"
                     onClick={() =>
                       themeEditorUrl
                         ? openThemeEditorInNewTab(themeEditorUrl)
@@ -316,6 +327,7 @@ export function PpbSelectTemplateDialog() {
                   </s-button>
                   <s-button
                     variant="primary"
+                    icon="check"
                     onClick={() => setTemplateModalStep("confirm")}
                   >
                     I've enabled it

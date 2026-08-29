@@ -187,7 +187,11 @@ export function validatePricingConfiguration(config: any): config is PricingConf
     return false;
   }
 
-  if (!config.rules.every(validatePricingRule)) {
+  if (
+    !config.rules.every((value: Parameters<typeof validatePricingRule>[0]) =>
+      validatePricingRule(value),
+    )
+  ) {
     return false;
   }
 

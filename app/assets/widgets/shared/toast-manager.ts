@@ -9,6 +9,8 @@
 
 'use strict';
 
+import { createCloseIcon } from './svg-icons.js';
+
 export class ToastManager {
   /** Escape HTML to prevent XSS in toast messages */
   static _escapeHtml(str: any) {
@@ -45,16 +47,25 @@ export class ToastManager {
       toast.classList.add('bundle-toast-from-bottom');
     }
     if (options.role) toast.setAttribute('role', options.role);
-    const closeIcon = `
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>`;
-    const closeControl = options.dismissible === false
-      ? ''
-      : options.dismissButton === true
-        ? `<button type="button" class="toast-close" aria-label="Close">${closeIcon}</button>`
-        : closeIcon.replace('<svg ', '<svg class="toast-close" ');
-    toast.innerHTML = `<span>${this._escapeHtml(message)}</span>${closeControl}`;
+    const messageElement = document.createElement('span');
+    messageElement.textContent = String(message ?? '');
+    toast.appendChild(messageElement);
+    if (options.dismissible !== false) {
+      const closeIcon = createCloseIcon(document, {
+        size: 20,
+        className: options.dismissButton === true ? '' : 'toast-close',
+      });
+      if (options.dismissButton === true) {
+        const closeButton = document.createElement('button');
+        closeButton.type = 'button';
+        closeButton.className = 'toast-close';
+        closeButton.setAttribute('aria-label', 'Close');
+        closeButton.appendChild(closeIcon);
+        toast.appendChild(closeButton);
+      } else {
+        toast.appendChild(closeIcon);
+      }
+    }
 
     // Attach close listener (consistent with showWithUndo pattern)
     toast.querySelector('.toast-close')?.addEventListener('click', () => {
@@ -92,13 +103,19 @@ export class ToastManager {
     if (this._isEnterFromBottom()) {
       toast.classList.add('bundle-toast-from-bottom');
     }
-    toast.innerHTML = `
-      <span class="toast-message">${this._escapeHtml(message)}</span>
-      <button class="toast-undo-btn" type="button">Undo</button>
-      <svg class="toast-close" width="18" height="18" viewBox="0 0 24 24" fill="none">
-        <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    `;
+    const messageElement = document.createElement('span');
+    messageElement.className = 'toast-message';
+    messageElement.textContent = String(message ?? '');
+    const undoButton = document.createElement('button');
+    undoButton.className = 'toast-undo-btn';
+    undoButton.type = 'button';
+    undoButton.textContent = 'Undo';
+    toast.appendChild(messageElement);
+    toast.appendChild(undoButton);
+    toast.appendChild(createCloseIcon(document, {
+      size: 18,
+      className: 'toast-close',
+    }));
 
     // Attach event listeners
     const undoBtn = toast.querySelector<HTMLElement>('.toast-undo-btn');

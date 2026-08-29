@@ -1,104 +1,50 @@
 export {};
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const {
-  ProductPageModalMethods,
-} = require('../../../app/assets/widgets/product-page/methods/modal-methods.js');
+const { JSDOM } = require('jsdom');
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { ProductPageModalMethods } = require('../../../app/assets/widgets/product-page/methods/modal-methods.js');
 
-type MockElement = {
-  innerHTML: string;
-  className: string;
-  querySelector: (selector: string) => MockElement | null;
-  querySelectorAll: (selector: string) => MockElement[];
-};
-
-function createMockModal(gridInitialHtml = ''): { modal: MockElement; productGrid: MockElement } {
-  const productGrid: MockElement = {
-    innerHTML: gridInitialHtml,
-    className: 'product-grid bw-bs-product-grid',
-    querySelector(selector: string) {
-      if (selector === '.bw-bs-modal-loading' && this.innerHTML.includes('bw-bs-modal-loading')) {
-        return { innerHTML: this.innerHTML, className: 'bw-bs-modal-loading', querySelector: () => null, queryAll: () => [] } as any;
-      }
-      if (selector === '.bundle-loading-overlay__gif' && this.innerHTML.includes('bundle-loading-overlay__gif')) {
-        return { innerHTML: '', className: 'bundle-loading-overlay__gif', querySelector: () => null, queryAll: () => [] } as any;
-      }
-      if (selector === '.bundle-loading-overlay__spinner' && this.innerHTML.includes('bundle-loading-overlay__spinner')) {
-        return { innerHTML: '', className: 'bundle-loading-overlay__spinner', querySelector: () => null, queryAll: () => [] } as any;
-      }
-      return null;
-    },
-    querySelectorAll(selector: string) {
-      if (selector === '.skeleton-loading' && this.innerHTML.includes('skeleton-loading')) {
-        return [{ innerHTML: '', className: 'skeleton-loading' }] as any;
-      }
-      return [];
-    },
+function createModal() {
+  const dom = new JSDOM('<!doctype html><html><body><div role="dialog"><div data-product-grid></div></div></body></html>');
+  const productGrid = dom.window.document.querySelector('[data-product-grid]');
+  const originalDocument = (global as { document?: unknown }).document;
+  (global as { document?: unknown }).document = dom.window.document;
+  return {
+    modal: { querySelector: (selector: string) => selector === '.product-grid' ? productGrid : null },
+    productGrid,
+    restore: () => { (global as { document?: unknown }).document = originalDocument; },
   };
-
-  const modal: MockElement = {
-    innerHTML: '',
-    className: 'bw-bs-panel bundle-builder-modal',
-    querySelector(selector: string) {
-      if (selector === '.product-grid') {
-        return productGrid;
-      }
-      return null;
-    },
-    querySelectorAll: () => [],
-  };
-
-  return { modal, productGrid };
 }
 
 describe('ProductPageModalMethods.renderModalProductsLoading', () => {
-  it('renders merchant loading GIF inside modal when loadingGif is configured', () => {
+  it('renders merchant loading media as a status when configured', () => {
     const customGifUrl = 'https://cdn.shopify.com/custom-spinner.gif';
-    const { modal, productGrid } = createMockModal();
-    const widgetContext = {
-      elements: { modal },
-      selectedBundle: { loadingGif: customGifUrl },
-    };
-
-    ProductPageModalMethods.renderModalProductsLoading.call(widgetContext, 0);
-
-    expect(productGrid.innerHTML).toContain('bw-bs-modal-loading');
-    expect(productGrid.innerHTML).toContain('bundle-loading-overlay__gif');
-    expect(productGrid.innerHTML).toContain(customGifUrl);
-    expect(productGrid.innerHTML).not.toContain('skeleton-loading');
-    expect(productGrid.querySelectorAll('.skeleton-loading')).toHaveLength(0);
+    const { modal, productGrid, restore } = createModal();
+    try {
+      ProductPageModalMethods.renderModalProductsLoading.call({ elements: { modal }, selectedBundle: { loadingGif: customGifUrl } }, 0);
+      expect(productGrid.querySelector('[role="status"]')).not.toBeNull();
+      expect(productGrid.querySelector('img')?.src).toBe(customGifUrl);
+    } finally {
+      restore();
+    }
   });
 
-  it('renders default CSS loading spinner inside modal when loadingGif is null/empty', () => {
-    const { modal, productGrid } = createMockModal();
-    const widgetContext = {
-      elements: { modal },
-      selectedBundle: { loadingGif: null },
-    };
-
-    ProductPageModalMethods.renderModalProductsLoading.call(widgetContext, 0);
-
-    expect(productGrid.innerHTML).toContain('bw-bs-modal-loading');
-    expect(productGrid.innerHTML).toContain('bundle-loading-overlay__spinner');
-    expect(productGrid.innerHTML).not.toContain('bundle-loading-overlay__gif');
-    expect(productGrid.innerHTML).not.toContain('skeleton-loading');
-    expect(productGrid.querySelectorAll('.skeleton-loading')).toHaveLength(0);
+  it('renders the default accessible loading status when media is absent', () => {
+    const { modal, productGrid, restore } = createModal();
+    try {
+      ProductPageModalMethods.renderModalProductsLoading.call({ elements: { modal }, selectedBundle: { loadingGif: null } }, 0);
+      expect(productGrid.querySelector('[role="status"]')?.getAttribute('aria-label')).toBe('Loading products');
+      expect(productGrid.querySelector('img')).toBeNull();
+    } finally {
+      restore();
+    }
   });
 
-  it('handles missing productGrid safely without throwing an exception', () => {
-    const emptyModal: MockElement = {
-      innerHTML: '',
-      className: 'bw-bs-panel bundle-builder-modal',
-      querySelector: () => null,
-      querySelectorAll: () => [],
-    };
-    const widgetContext = {
-      elements: { modal: emptyModal },
+  it('handles a missing product grid safely', () => {
+    expect(() => ProductPageModalMethods.renderModalProductsLoading.call({
+      elements: { modal: { querySelector: () => null } },
       selectedBundle: { loadingGif: null },
-    };
-
-    expect(() => {
-      ProductPageModalMethods.renderModalProductsLoading.call(widgetContext, 0);
-    }).not.toThrow();
+    }, 0)).not.toThrow();
   });
 });

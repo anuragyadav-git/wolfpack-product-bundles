@@ -1,4 +1,4 @@
-import type { HeadersFunction, LoaderFunctionArgs } from "@remix-run/node";
+import { type HeadersFunction, type LoaderFunctionArgs } from "@remix-run/node";
 import { Outlet, useLoaderData, useLocation, useNavigate, useNavigation, useRouteError, isRouteErrorResponse } from "@remix-run/react";
 import { boundary } from "@shopify/shopify-app-remix/server";
 import { authenticate } from "../../shopify.server";
@@ -66,6 +66,7 @@ function AdminNavigation() {
       <a href="/app/settings" onClick={handleNavigation("/app/settings")}>{t("nav.settings")}</a>
       <a href="/app/integrations" onClick={handleNavigation("/app/integrations")}>{t("nav.integrations")}</a>
       <a href="/app/attribution" onClick={handleNavigation("/app/attribution")}>{t("nav.analytics")}</a>
+      <a href="/app/pricing" onClick={handleNavigation("/app/pricing")}>{t("nav.billing")}</a>
       <a href="/app/events" onClick={handleNavigation("/app/events")}>{t("nav.events")}</a>
     </ui-nav-menu>
   );

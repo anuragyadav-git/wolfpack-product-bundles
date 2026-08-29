@@ -194,6 +194,7 @@ export interface CSSDesignSettings {
   bundleUpsellButtonBgColor?: string;
   bundleUpsellBorderColor?: string;
   bundleUpsellTextColor?: string;
+  bundleUpsellFontColor?: string;
   filterIconColor?: string;
   filterBgColor?: string;
   filterTextColor?: string;

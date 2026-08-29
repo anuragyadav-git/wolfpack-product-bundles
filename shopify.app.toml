@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "a383172f42c2ab283901a663d485a03d"
-name = "Wolfpack Bundles"
+name = "Only Bundles"
 application_url = "https://wolfpack-product-bundle-app.onrender.com"
 embedded = true
 handle = "wolfpack-product-bundles"
@@ -11,8 +11,6 @@ api_version = "2026-07"
 
   [[webhooks.subscriptions]]
   topics = [
-  "app_purchases_one_time/update",
-  "app_subscriptions/update",
   "products/delete",
   "app/uninstalled",
   "app/scopes_update",

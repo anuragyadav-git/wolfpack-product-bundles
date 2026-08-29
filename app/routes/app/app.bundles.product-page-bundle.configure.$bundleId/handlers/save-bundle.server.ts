@@ -37,6 +37,11 @@ import {
   validateBundleSubscriptionConfig,
 } from "../../../../lib/bundle-subscriptions";
 import { AddOnDiscountFunctionService } from "../../../../services/addon-discount-function-service.server";
+import { EntitlementDeniedError } from "../../../../lib/subscriptions/entitlements";
+import { resolveShopEntitlements } from "../../../../services/subscriptions/subscription-service.server";
+import { updateBundleWithPublicationGate } from "../../../../services/subscriptions/bundle-entitlement-gate.server";
+import { shopUsesAdvancedDesign } from "../../../../services/subscriptions/design-entitlement-state.server";
+import { recordSubscriptionEvent } from "../../../../services/subscriptions/subscription-telemetry.server";
 
 type ParsedVariantRef = string | number;
 
@@ -443,6 +448,8 @@ export async function handleSaveBundle(
         shopifyProductId: true,
         shopifyProductHandle: true,
         personalizationData: true,
+        bundleDesignTemplate: true,
+        bundleDesignPresetId: true,
       },
     });
     if (subscriptionConfig?.enabled && existingBundle?.personalizationData) {
@@ -459,13 +466,40 @@ export async function handleSaveBundle(
       );
     }
 
+    const isPublicMutation = finalStatus === BundleStatus.ACTIVE
+      || finalStatus === BundleStatus.UNLISTED;
+    const entitlementContext = isPublicMutation
+      ? await resolveShopEntitlements({
+          shopDomain: session.shop,
+          forceRefresh: true,
+        })
+      : null;
+    const enabledStepCount = stepsData.reduce(
+      (count: number, step: any, index: number) =>
+        count + (resolveBundleStepEnabled(index, step.enabled) ? 1 : 0),
+      0,
+    );
+    const usesAdvancedDesign = entitlementContext
+      ? await shopUsesAdvancedDesign(session.shop)
+      : false;
+
     // Update bundle in database
     AppLogger.debug("[BUNDLE_CONFIG] Updating bundle in database");
-    const updatedBundle = await db.bundle.update({
-      where: {
-        id: bundleId,
-        shopId: session.shop,
+    const updatedBundle = await updateBundleWithPublicationGate<any>({
+      database: db,
+      shopDomain: session.shop,
+      bundleId,
+      candidate: {
+        bundleType: "PRODUCT_PAGE",
+        status: finalStatus.toUpperCase() as "ACTIVE" | "UNLISTED" | "DRAFT" | "ARCHIVED",
+        enabledStepCount,
+        designTemplate: existingBundle?.bundleDesignTemplate,
+        designPresetId: existingBundle?.bundleDesignPresetId,
+        usesAdvancedDesign,
+        usesBundleSubscriptions: subscriptionConfig?.enabled === true,
+        usesCustomCode: false,
       },
+      entitlements: entitlementContext?.entitlements ?? null,
       data: {
         name: bundleName,
         description: bundleDescription,
@@ -623,13 +657,15 @@ export async function handleSaveBundle(
       },
     });
 
-    await syncBundleStorefrontNow({
-      admin,
-      shopDomain: session.shop,
-      bundleId,
-      bundleType: "product_page",
-      reason: "save",
-    });
+    if (finalStatus === BundleStatus.ACTIVE || finalStatus === BundleStatus.UNLISTED) {
+      await syncBundleStorefrontNow({
+        admin,
+        shopDomain: session.shop,
+        bundleId,
+        bundleType: "product_page",
+        reason: "save",
+      });
+    }
     if (subscriptionConfig?.enabled) {
       const activation =
         await AddOnDiscountFunctionService.completeSubscriptionInitialSetup(
@@ -668,6 +704,26 @@ export async function handleSaveBundle(
       message: "Updated Successfully!",
     });
   } catch (error: any) {
+    if (error instanceof EntitlementDeniedError) {
+      await recordSubscriptionEvent({
+        eventHandle: "entitlement_publish_blocked",
+        shopDomain: session.shop,
+        planCode: null,
+        billingInterval: "NONE",
+        featureKey: error.entitlement,
+        gateLocation: "ppb_save",
+        bundleId,
+        bundleType: "PRODUCT_PAGE",
+        action: "publish",
+        result: "blocked",
+        errorCode: error.code,
+      });
+      return json({
+        success: false,
+        error: error.code,
+        entitlementFailure: error.toJSON(),
+      }, { status: error.status });
+    }
     const message =
       error instanceof Error
         ? error.message

@@ -28,6 +28,12 @@ jest.mock("../../../app/services/theme-colors.server", () => ({
   syncThemeColors: jest.fn().mockResolvedValue(null),
 }));
 
+jest.mock("../../../app/services/subscriptions/subscription-service.server", () => ({
+  resolveShopEntitlements: jest.fn().mockResolvedValue({
+    entitlements: { capabilities: { advancedDesign: true } },
+  }),
+}));
+
 const { authenticate: { admin: requireAdminSession } } = require("../../../app/shopify.server");
 const { prisma } = require("../../../app/db.server");
 const { syncThemeColors } = require("../../../app/services/theme-colors.server");

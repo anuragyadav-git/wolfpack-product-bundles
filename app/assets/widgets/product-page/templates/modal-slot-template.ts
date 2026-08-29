@@ -1,4 +1,6 @@
-import { renderSelectedProductSlots } from '../../shared/components/selected-product-slots.js';
+import { createSelectedProductSlotsElement } from '../../shared/components/selected-product-slots.js';
+import { resolveProductPageStepText } from '../methods/step-text-methods.js';
+import { createPlusIcon } from '../../shared/svg-icons.js';
 
 function parseBoolean(value: string) {
   if (typeof value === 'boolean') return value;
@@ -31,7 +33,7 @@ export const modalSlotTemplateMethods: Record<string, any> & ThisType<any> = {
     );
   },
 
-  _createModalSlotStepSection(step: any) {
+  _createModalSlotStepSection(step: any, stepIndex: number) {
     const section = document.createElement('div');
     const isVertical = this._usesVerticalModalSlotLayout();
 
@@ -39,15 +41,13 @@ export const modalSlotTemplateMethods: Record<string, any> & ThisType<any> = {
 
     const title = document.createElement('div');
     title.className = 'bw-ppb-modal-slot-title';
-    title.textContent = step.pageTitle || step.name || '';
+    title.textContent = resolveProductPageStepText(step, stepIndex).navigationLabel;
     section.appendChild(title);
 
-    const gridHost = document.createElement('div');
-    gridHost.innerHTML = renderSelectedProductSlots([], {
+    const grid = createSelectedProductSlotsElement([], {
       mode: isVertical ? 'vertical' : 'horizontal',
       className: `bw-ppb-modal-slot-grid${isVertical ? ' bw-ppb-modal-slot-grid--simplified' : ''}`,
-    }).trim();
-    const grid = gridHost.firstElementChild;
+    });
     if (grid?.matches('[data-bw-selected-slots="true"]')) {
       section.appendChild(grid);
     }
@@ -151,8 +151,6 @@ export const modalSlotTemplateMethods: Record<string, any> & ThisType<any> = {
   },
 
   _appendSlotIcon(iconWrapper: any) {
-    iconWrapper.innerHTML = `<svg width="28" height="28" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M20.202 3.06152V37.0082M37.1753 20.0348H3.22864" stroke="currentColor" stroke-width="5.09199" stroke-linecap="square" stroke-linejoin="round"/>
-    </svg>`;
+    iconWrapper.replaceChildren(createPlusIcon(iconWrapper.ownerDocument));
   },
 };

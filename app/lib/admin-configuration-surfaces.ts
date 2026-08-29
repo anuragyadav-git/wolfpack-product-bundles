@@ -1,4 +1,5 @@
 import { CHECKOUT_INTEGRATION_PROVIDER_OPTIONS } from "./checkout-integrations";
+import { APP_BRAND } from "./app-brand";
 
 export type SettingsCardId = "design" | "language" | "controls";
 
@@ -450,6 +451,7 @@ export const LANGUAGE_CONFIGURATION: LanguageConfiguration = {
         description: "Product card labels for product-page bundles",
         fields: [
           { key: "ppb.productCard.productCardAddBtnText", label: "Product Add to Cart Button", value: "Add to Cart", kind: "text" },
+          { key: "ppb.productCard.productCardOutOfStockBtnText", label: "Product Out of Stock Button", value: "Out of Stock", kind: "text" },
           { key: "ppb.productCard.productVariantLabelText", label: "Product Variant Label", value: "Select variant", kind: "text" },
           { key: "ppb.productCard.productAddedBtnText", label: "Product Added label", value: "Added x{{allowedQuantity}}", kind: "text" },
           { key: "ppb.productCard.productCardAddBtnText_inPage", label: "Inline Product - Add Button Text", value: "Add +", kind: "text" },
@@ -527,7 +529,6 @@ export const CONTROL_LAYOUTS: ControlsLayout[] = [
         contentTitle: "Bundle Settings",
         contentDescription: "Additional bundle level settings applicable to all bundles created",
         fields: [
-          { key: "landingPage.showCompareAtPrice", label: "Show Compare At Price", kind: "toggle", value: "Checked", group: "Bundle Settings" },
           { key: "landingPage.hideIrrelevantVariantImages", label: "Hide Irrelevant variant images", kind: "toggle", group: "Bundle Settings" },
           { key: "landingPage.trackInventoryOnAddToCart", label: "Track inventory on Add To Cart (in beta)", kind: "toggle", group: "Bundle Settings", description: "Know More" },
           { key: "landingPage.redirectCollectionQuickAddToBundle", label: "Redirect Collection Page 'Quick Add' to Bundle", value: "Checked", kind: "toggle", group: "Bundle Settings" },
@@ -703,7 +704,7 @@ export const INTEGRATION_CATEGORIES: IntegrationCategory[] = [
         status: "Guided setup",
         ctaLabel: "View Setup",
         ctaType: "guide",
-        setupUrl: "https://wolfpackapps.com",
+        setupUrl: APP_BRAND.links.company,
         guideSummary: [
           "Configure the authenticated public token in Additional Configurations.",
           "Apply any required review badge visibility override through theme-page CSS.",
@@ -725,7 +726,7 @@ export const INTEGRATION_CATEGORIES: IntegrationCategory[] = [
         status: "Guided setup",
         ctaLabel: "View Setup",
         ctaType: "guide",
-        setupUrl: "https://wolfpackapps.com",
+        setupUrl: APP_BRAND.links.company,
         guideSummary: [
           "Use PageFly's Shopify App Block element with the Page Builder bundle block on Online Store 2.0 themes.",
           "Use the provider-neutral HTML/Liquid marker when an app block is unavailable.",
@@ -740,7 +741,7 @@ export const INTEGRATION_CATEGORIES: IntegrationCategory[] = [
         status: "Guided setup",
         ctaLabel: "View Setup",
         ctaType: "guide",
-        setupUrl: "https://wolfpackapps.com",
+        setupUrl: APP_BRAND.links.company,
         guideSummary: [
           "Use the GemPages Shopify App Element with the Page Builder bundle block.",
           "Use the provider-neutral Custom Code marker when an app block is unavailable.",
@@ -754,7 +755,7 @@ export const INTEGRATION_CATEGORIES: IntegrationCategory[] = [
         status: "Guided setup",
         ctaLabel: "View Setup",
         ctaType: "guide",
-        setupUrl: "https://wolfpackapps.com",
+        setupUrl: APP_BRAND.links.company,
         guideSummary: [
           "Use the Page Builder bundle app block with a Shopify 2.0 or existing theme layout.",
           "Use the Liquid-free HTML marker for Shogun custom layouts.",
@@ -776,7 +777,7 @@ export const INTEGRATION_CATEGORIES: IntegrationCategory[] = [
         status: "Supported",
         ctaLabel: "View Setup",
         ctaType: "guide",
-        setupUrl: "https://wolfpackapps.com",
+        setupUrl: APP_BRAND.links.company,
         guideSummary: [
           "Use your store's GoKwik checkout configuration and keep native fallback routing enabled.",
           "Verify callback setup for GoKwik checkout handoff in theme script tags.",
@@ -791,7 +792,7 @@ export const INTEGRATION_CATEGORIES: IntegrationCategory[] = [
         status: "Supported",
         ctaLabel: "View Setup",
         ctaType: "guide",
-        setupUrl: "https://wolfpackapps.com",
+        setupUrl: APP_BRAND.links.company,
         guideSummary: [
           "Enable the Shopflo checkout integration and confirm SDK loading on storefront pages.",
           "Use discount-code handoff flow so order discounting continues through checkout.",

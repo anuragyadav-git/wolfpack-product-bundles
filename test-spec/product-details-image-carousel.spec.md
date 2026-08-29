@@ -4,8 +4,8 @@ id: product-details-image-carousel
 title: Product Details Image Carousel
 type: test-spec
 status: active
-summary: Verifies multi-image hydration and carousel navigation for the shared storefront product-details overlay.
-last_audited: 2026-08-13
+summary: Verifies multi-image hydration and carousel navigation for the FPB storefront product-details overlay.
+last_audited: 2026-08-28
 owners:
   - engineering
 domains:
@@ -34,7 +34,7 @@ keywords:
 ## Purpose
 
 Ensure product and collection hydration retain Shopify product images and the
-shared desktop modal/mobile drawer exposes navigation only when more than one
+FPB desktop modal/mobile drawer exposes navigation only when more than one
 distinct image is available.
 
 ## Test Cases
@@ -45,7 +45,7 @@ distinct image is available.
 |---|---|---|---|---|
 | 1 | Direct product hydration | Product with two Shopify images | Both images are returned in source order | Used by product-ID steps |
 | 2 | Collection product hydration | Collection product with two Shopify images | Both images are returned in source order | Used by collection categories |
-| 3 | Shared overlay navigation | Product with two distinct images | Navigation is visible and advances/wraps the active image | Same component owns desktop and mobile |
+| 3 | FPB overlay navigation | Product with two distinct images | Navigation is visible and advances/wraps the active image | Same component owns desktop and mobile |
 | 4 | Mobile image swipe | Horizontal gesture over the image | Left/right swipe advances/reverses; short or vertical gestures do nothing | Does not conflict with drawer dismissal |
 
 ## Acceptance Criteria

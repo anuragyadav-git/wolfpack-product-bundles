@@ -252,33 +252,41 @@ async navigateModal(direction: number) {
 // ========================================================================
 
 showFallbackUI() {
-  this.container.innerHTML = `
-    <div class="bundle-fallback">
-      <h3>Bundle Configuration</h3>
-      <p>No active bundles found for this product.</p>
-      <details>
-        <summary>Debug Information</summary>
-        <pre>${JSON.stringify({
+  const fallback = document.createElement('div');
+  fallback.className = 'bundle-fallback';
+  const title = document.createElement('h3');
+  title.textContent = 'Bundle Configuration';
+  const message = document.createElement('p');
+  message.textContent = 'No active bundles found for this product.';
+  const details = document.createElement('details');
+  const summary = document.createElement('summary');
+  summary.textContent = 'Debug Information';
+  const debug = document.createElement('pre');
+  debug.textContent = JSON.stringify({
     config: this.config,
     bundleDataKeys: this.bundleData ? Object.keys(this.bundleData) : 'No data',
     currentProductId: this.config.currentProductId
-  }, null, 2)}</pre>
-      </details>
-    </div>
-  `;
+  }, null, 2);
+  details.append(summary, debug);
+  fallback.append(title, message, details);
+  this.container.replaceChildren(fallback);
 },
 
 showErrorUI(error: any) {
-  this.container.innerHTML = `
-    <div class="bundle-error">
-      <h3>Bundle Widget Error</h3>
-      <p>Failed to initialize bundle widget.</p>
-      <details>
-        <summary>Error Details</summary>
-        <pre>${error.message}\n${error.stack}</pre>
-      </details>
-    </div>
-  `;
+  const root = document.createElement('div');
+  root.className = 'bundle-error';
+  const title = document.createElement('h3');
+  title.textContent = 'Bundle Widget Error';
+  const message = document.createElement('p');
+  message.textContent = 'Failed to initialize bundle widget.';
+  const details = document.createElement('details');
+  const summary = document.createElement('summary');
+  summary.textContent = 'Error Details';
+  const debug = document.createElement('pre');
+  debug.textContent = `${error.message}\n${error.stack}`;
+  details.append(summary, debug);
+  root.append(title, message, details);
+  this.container.replaceChildren(root);
 },
 
 _resolveText(key: string|number, fallback: any) {

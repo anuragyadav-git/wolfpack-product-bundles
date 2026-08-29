@@ -130,7 +130,7 @@ const ConditionValidator = (function () {
   }
 
   /**
-   * Normalize an operator name. The validator accepts both Wolfpack-style
+   * Normalize an operator name. The validator accepts both Only Bundles-style
    * snake_case (`greater_than_or_equal_to`) and camelCase
    * (`greaterThanOrEqualTo`) so the same evaluator works against step rules
    * (snake_case) and category rules (camelCase, persisted from the admin

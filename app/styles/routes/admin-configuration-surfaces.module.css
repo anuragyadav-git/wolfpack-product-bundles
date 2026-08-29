@@ -1323,34 +1323,6 @@
   color: #202223;
 }
 
-.settingsToast {
-  position: fixed;
-  right: 24px;
-  bottom: 86px;
-  z-index: 45;
-  display: flex;
-  min-width: 260px;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  border-radius: 8px;
-  background: #202223;
-  color: #ffffff;
-  padding: 12px 14px;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2);
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.settingsToast button {
-  border: 0;
-  background: transparent;
-  color: #ffffff;
-  cursor: pointer;
-  font-size: 18px;
-  line-height: 1;
-}
-
 .settingsModalBackdrop {
   position: fixed;
   inset: 0;

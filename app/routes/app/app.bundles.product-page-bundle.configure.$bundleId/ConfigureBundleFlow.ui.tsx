@@ -1,5 +1,4 @@
-import type React from "react";
-import { memo, useRef, useState } from "react";
+import React, { memo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { HelpTooltipImage } from "../../../components/HelpTooltipImage";
 import {
@@ -29,7 +28,7 @@ export const BundleProductCard = memo(
           <h3 style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>
             Bundle Product
           </h3>
-          <s-button variant="tertiary" tone="critical" onClick={onSync}>
+          <s-button variant="tertiary" tone="critical" icon="refresh" onClick={onSync}>
             Sync Product
           </s-button>
         </s-stack>
@@ -58,6 +57,7 @@ export const BundleProductCard = memo(
                 </s-button>
                 <s-button
                   variant="tertiary"
+                  icon="product"
                   onClick={onSelect}
                   aria-label="Change bundle product"
                 >
@@ -70,7 +70,7 @@ export const BundleProductCard = memo(
           <div className={productPageBundleStyles.productSelectionPlaceholder}>
             <s-stack direction="block" gap="small-400" alignItems="center">
               <s-icon type="product" />
-              <s-button variant="tertiary" onClick={onSelect}>
+              <s-button variant="tertiary" icon="product" onClick={onSelect}>
                 Select Bundle Product
               </s-button>
             </s-stack>

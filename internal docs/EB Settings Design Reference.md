@@ -5,7 +5,7 @@ title: EB Settings Design Reference
 type: reference
 status: authoritative
 summary: Live EB Settings Design request, state, and storefront-mapping contract used to implement Wolfpack Design settings.
-last_audited: 2026-08-23
+last_audited: 2026-08-28
 owners:
   - engineering
 domains:
@@ -100,6 +100,17 @@ configuration, add-ons, banners, template configuration, and mix-and-match
 data. Wolfpack applies the same merged Design runtime atomically to its
 `product_page` and `full_page` DesignSettings rows so both storefront surfaces
 receive one store-level state.
+
+Settings Design uses one programmatic App Bridge `ui-save-bar`; it does not
+combine the Save Bar API with automatic `data-save-bar` form tracking. Dirty
+state shows the bar, programmatic Discard immediately restores the confirmed
+snapshot, and both actions are disabled while the Design request is in flight. Back and
+cross-Settings navigation call `shopify.saveBar.leaveConfirmation()` before
+changing views. After both Design rows commit, a downstream PPB runtime-sync
+failure is a persisted partial success: the response returns the confirmed
+Design snapshot with `persisted: true` and `runtimeSynced: false`, so the Save
+Bar clears without misrepresenting the database state while the sync error
+remains visible to the merchant.
 
 The same save also posts loading/control-related data to:
 

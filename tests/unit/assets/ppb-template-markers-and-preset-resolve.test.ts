@@ -202,6 +202,125 @@ describe('PPB template markers and preset resolution', () => {
     expect(context._isProductPageCascadeTemplate()).toBe(false);
   });
 
+  it('loads the modal stylesheet when the payload has no template contract', async () => {
+    const originalWindow = (global as any).window;
+    const originalDocument = (global as any).document;
+    const originalHtmlLinkElement = (global as any).HTMLLinkElement;
+    const appendedLinks: any[] = [];
+
+    class FakeLink {
+      rel = '';
+      href = '';
+      dataset: Record<string, string> = {};
+      sheet = null;
+      private listeners: Record<string, () => void> = {};
+
+      addEventListener(name: string, listener: () => void) {
+        this.listeners[name] = listener;
+      }
+
+      dispatch(name: string) {
+        this.listeners[name]?.();
+      }
+    }
+
+    (global as any).HTMLLinkElement = FakeLink;
+    (global as any).window = {
+      __WOLFPACK_PPB_TEMPLATE_CSS_URLS__: {
+        HORIZONTAL_SLOTS: '/assets/modal.css',
+      },
+    };
+    (global as any).document = {
+      querySelectorAll: () => [],
+      createElement: () => new FakeLink(),
+      head: {
+        appendChild(link: FakeLink) {
+          appendedLinks.push(link);
+        },
+      },
+    };
+
+    try {
+      const context = {
+        ...ProductPageConfigLifecycleMethods,
+        _getProductPageTemplateContract: () => null,
+      } as any;
+      const stylesheetReady = context.ensureProductPageTemplateStylesheet('', null);
+
+      expect(appendedLinks).toHaveLength(1);
+      expect(appendedLinks[0]).toMatchObject({
+        rel: 'stylesheet',
+        href: '/assets/modal.css',
+        dataset: { wpbPpbTemplateCss: 'HORIZONTAL_SLOTS' },
+      });
+
+      appendedLinks[0].dispatch('load');
+      await stylesheetReady;
+    } finally {
+      (global as any).window = originalWindow;
+      (global as any).document = originalDocument;
+      (global as any).HTMLLinkElement = originalHtmlLinkElement;
+    }
+  });
+
+  it('retries the modal stylesheet after template asset URLs become available', async () => {
+    jest.useFakeTimers();
+    const originalWindow = (global as any).window;
+    const originalDocument = (global as any).document;
+    const originalHtmlLinkElement = (global as any).HTMLLinkElement;
+    const appendedLinks: any[] = [];
+
+    class FakeLink {
+      rel = '';
+      href = '';
+      dataset: Record<string, string> = {};
+      sheet = null;
+      private listeners: Record<string, () => void> = {};
+
+      addEventListener(name: string, listener: () => void) {
+        this.listeners[name] = listener;
+      }
+    }
+
+    (global as any).HTMLLinkElement = FakeLink;
+    (global as any).window = {};
+    (global as any).document = {
+      querySelectorAll: () => [],
+      createElement: () => new FakeLink(),
+      head: {
+        appendChild(link: FakeLink) {
+          appendedLinks.push(link);
+        },
+      },
+    };
+
+    try {
+      const context = {
+        ...ProductPageConfigLifecycleMethods,
+        _getProductPageTemplateContract: () => null,
+      } as any;
+
+      await context.ensureProductPageTemplateStylesheet('', null);
+      expect(appendedLinks).toHaveLength(0);
+
+      (global as any).window.__WOLFPACK_PPB_TEMPLATE_CSS_URLS__ = {
+        HORIZONTAL_SLOTS: '/assets/modal.css',
+      };
+      await jest.advanceTimersByTimeAsync(100);
+
+      expect(appendedLinks).toHaveLength(1);
+      expect(appendedLinks[0]).toMatchObject({
+        href: '/assets/modal.css',
+        dataset: { wpbPpbTemplateCss: 'HORIZONTAL_SLOTS' },
+      });
+    } finally {
+      jest.useRealTimers();
+      (global as any).window = originalWindow;
+      (global as any).document = originalDocument;
+      (global as any).HTMLLinkElement = originalHtmlLinkElement;
+    }
+  });
+
   it('removes slot orientation markers for in-page templates', () => {
     const bodySetAttribute = jest.fn();
     const body = { setAttribute: bodySetAttribute };

@@ -1,8 +1,6 @@
 import {
   advancePreviewProgress,
-  applyDesignPreviewFieldFocus,
   clearPreviewDiscountFeedback,
-  createDesignPreviewState,
   createPreviewInteractionState,
   getPreviewSelectionSummary,
   retreatPreviewProgress,
@@ -13,7 +11,11 @@ import {
   updatePreviewProductQuantity,
 } from "../../../app/routes/app/app.settings/DesignLivePreview";
 import { calculateDesignPreviewFitScale } from "../../../app/routes/app/app.settings/design-preview-model";
-import { normalizePolarisColorValue } from "../../../app/routes/app/app.settings/SettingsDesignFields";
+import {
+  isPolarisHexColorInput,
+  isPolarisNumberInput,
+  normalizePolarisColorValue,
+} from "../../../app/routes/app/app.settings/SettingsDesignFields";
 
 describe("Settings Design connected preview actions", () => {
   it("derives selected rows, count, and total from shared quantities", () => {
@@ -67,29 +69,24 @@ describe("Settings Design connected preview actions", () => {
     expect(clearPreviewDiscountFeedback(complete, 2).discountFeedback.state).toBeNull();
   });
 
-  it("routes each field focus request once without overriding later manual selection", () => {
-    const initial = createDesignPreviewState("full_page");
-    const request = { fieldKey: "stylePresets.colors.discountTierBackgroundColor", requestId: 1 };
-    const focused = applyDesignPreviewFieldFocus(initial, request, 0);
-
-    expect(focused.state.surface).toBe("cart-summary");
-    expect(focused.handledRequestId).toBe(1);
-
-    const manuallySelected = { ...focused.state, surface: "product-card" as const };
-    expect(applyDesignPreviewFieldFocus(manuallySelected, request, 1).state.surface).toBe("product-card");
-
-    const repeatedEdit = applyDesignPreviewFieldFocus(
-      manuallySelected,
-      { ...request, requestId: 2 },
-      1,
-    );
-    expect(repeatedEdit.state.surface).toBe("cart-summary");
-  });
-
   it("fits narrow hosts and preserves six- and eight-digit Polaris colors", () => {
-    expect(calculateDesignPreviewFitScale({ width: 390, height: 640 }, "desktop")).toBeCloseTo(390 / 1280);
+    expect(calculateDesignPreviewFitScale({ width: 390, height: 640 }, "desktop")).toBeCloseTo(390 / 1320);
     expect(normalizePolarisColorValue("#112233", "#000000")).toBe("#112233");
     expect(normalizePolarisColorValue("#11223380", "#000000")).toBe("#11223380");
     expect(normalizePolarisColorValue("invalid", "#abc")).toBe("#aabbcc");
+  });
+
+  it("rejects transient color values before they reach the live preview runtime", () => {
+    expect(isPolarisHexColorInput("")).toBe(false);
+    expect(isPolarisHexColorInput("#")).toBe(false);
+    expect(isPolarisHexColorInput("#112233")).toBe(true);
+    expect(isPolarisHexColorInput("#11223380")).toBe(true);
+  });
+
+  it("rejects transient number values before they reach the live preview runtime", () => {
+    expect(isPolarisNumberInput("")).toBe(false);
+    expect(isPolarisNumberInput("18")).toBe(true);
+    expect(isPolarisNumberInput("18.5")).toBe(true);
+    expect(isPolarisNumberInput("1000")).toBe(false);
   });
 });
