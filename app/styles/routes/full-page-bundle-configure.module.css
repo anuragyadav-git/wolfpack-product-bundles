@@ -3192,6 +3192,20 @@
 }
 
 @container bundle-configure (inline-size <= 480px) {
+  .addonsHeaderLine {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .addonsTitleCluster {
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .addonsHeaderActions {
+    align-self: flex-start;
+  }
+
   .addonsReferenceStepCard .addonsMediaFieldGrid {
     grid-template-columns: 1fr;
   }
