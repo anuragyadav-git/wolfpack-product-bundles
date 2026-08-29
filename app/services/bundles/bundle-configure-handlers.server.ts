@@ -281,7 +281,7 @@ export async function handleGetThemeTemplates(admin: ShopifyAdmin, _session?: Se
             id
             name
             role
-            files(first: 250) {
+            files(first: 250, filenames: ["templates/product*.json", "templates/product*.liquid"]) {
               nodes {
                 filename
               }
