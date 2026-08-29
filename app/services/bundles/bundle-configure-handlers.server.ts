@@ -447,7 +447,6 @@ export async function handleEnsureBundleTemplates(admin: ShopifyAdmin, session: 
             id
             handle
             title
-            legacyResourceId
           }
         }
       }

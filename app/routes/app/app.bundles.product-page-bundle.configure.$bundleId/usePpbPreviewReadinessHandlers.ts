@@ -350,7 +350,6 @@ export function usePpbPreviewReadinessHandlers({
           break;
         case "product_active": {
           const productId =
-            base.bundleProduct?.legacyResourceId ||
             base.bundleProduct?.id?.split("/").pop() ||
             (base.bundle as any).shopifyProductId?.split("/").pop();
           if (productId) {
