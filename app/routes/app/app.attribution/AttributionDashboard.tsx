@@ -14,9 +14,10 @@ import type { AttributionDashboardData } from "../app.attribution";
 import { analyzeCustomUtmInput } from "../../../lib/analytics/attribution-controls";
 import { showAdminTransientErrorToast } from "../../../lib/admin-alert-feedback";
 
-type AttributionDashboardViewData = Omit<AttributionDashboardData, "from" | "to"> & {
+type AttributionDashboardViewData = Omit<AttributionDashboardData, "from" | "to" | "accessMode"> & {
   from?: string;
   to?: string;
+  accessMode: "SUMMARY" | "ADVANCED";
 };
 
 // ─── Helpers ─────────────────────────────────────────────────
@@ -455,7 +456,7 @@ function AttributionDashboardContent({
   const {
     days, from, to, prevFrom, prevTo,
     funnelSnapshot, bundleMetricTrend, bundleMatrix, topCampaignsRows,
-    customUtmParameters,
+    customUtmParameters, accessMode = "ADVANCED",
   } = data;
   const navigate = useNavigate();
   const shopify = useAppBridge();
@@ -533,7 +534,12 @@ function AttributionDashboardContent({
     <div className={styles.dashboardShell}>
         <div className={styles.dashboardStack}>
           {/* Date range selector + Compare toggle + Export */}
-          <div className={styles.headerRow}>
+          {accessMode === "SUMMARY" && (
+            <s-banner tone="info">
+              {t("subscription.analytics.summaryNotice")}
+            </s-banner>
+          )}
+          {accessMode === "ADVANCED" && <div className={styles.headerRow}>
             <div className={styles.comparePillSlot}>
               <div className={styles.datePickerWrap}>
                 <DateRangeSelector days={days} from={from} to={to} />
@@ -580,14 +586,14 @@ function AttributionDashboardContent({
                 </s-button>
               </div>
             </div>
-          </div>
-          <BackfillWindowModal
+          </div>}
+          {accessMode === "ADVANCED" && <BackfillWindowModal
             days={days}
             from={from}
             to={to}
             isSubmitting={backfillFetcher.state !== "idle"}
             onConfirm={handleBackfillConfirm}
-          />
+          />}
           {/* ────────── Revamped analytics sections (wpb-analytics-revamp-1) ─────── */}
 
           <FunnelHero
@@ -598,23 +604,23 @@ function AttributionDashboardContent({
             showHeader={false}
           />
 
-          <Suspense fallback={null}>
+          {accessMode === "ADVANCED" && <Suspense fallback={null}>
             <LazyBundleMetricChart
               trend={bundleMetricTrend}
               rangeDays={days}
               formatRevenue={formatRevenue}
             />
-          </Suspense>
+          </Suspense>}
 
-          <BundlePerformanceMatrix
+          {accessMode === "ADVANCED" && <BundlePerformanceMatrix
             rows={bundleMatrix}
             formatRevenue={formatRevenue}
             onRowClick={(bundleId) => navigate(`/app/bundles/full-page-bundle/configure/${bundleId}`)}
-          />
+          />}
 
-          <CustomUtmTrackingCard customUtmParameters={customUtmParameters} />
+          {accessMode === "ADVANCED" && <CustomUtmTrackingCard customUtmParameters={customUtmParameters} />}
 
-          <TopCampaigns rows={topCampaignsRows} formatRevenue={formatRevenue} />
+          {accessMode === "ADVANCED" && <TopCampaigns rows={topCampaignsRows} formatRevenue={formatRevenue} />}
 
         </div>
     </div>

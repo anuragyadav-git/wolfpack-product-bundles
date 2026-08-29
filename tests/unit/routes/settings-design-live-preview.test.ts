@@ -6,6 +6,7 @@ import {
   getDesignInspectorDisclosureState,
 } from "../../../app/routes/app/app.settings/DesignSettingsView";
 import { BundlePreviewModal, DesignFields } from "../../../app/routes/app/app.settings/SettingsDesignFields";
+import { SettingsContextualSaveBar } from "../../../app/routes/app/app.settings/SettingsFeedback";
 
 jest.mock("react-i18next", () => ({
   useTranslation: () => ({ t: (key: string) => key }),
@@ -20,6 +21,23 @@ jest.mock("../../../app/components/shared/FilePicker", () => ({
 }));
 
 describe("DesignSettingsView live preview", () => {
+  it("protects in-flight Design saves without serializing an invalid discard-confirmation attribute", () => {
+    const view = renderToStaticMarkup(
+      React.createElement(SettingsContextualSaveBar, {
+        isOpen: true,
+        isSaving: true,
+        onDiscard: jest.fn(),
+        onSave: jest.fn(),
+      }),
+    );
+
+    expect(view).toContain('id="settings-contextual-save-bar"');
+    expect(view).not.toContain("discardConfirmation");
+    expect(view).not.toContain("discardconfirmation");
+    expect(view).toContain('<button type="button" disabled="">Discard</button>');
+    expect(view).toContain('<button type="button" variant="primary" disabled="">Save</button>');
+  });
+
   it("describes the page-local inspector disclosure in both states", () => {
     expect(getDesignInspectorDisclosureState(false)).toEqual({
       isCollapsed: false,

@@ -480,7 +480,8 @@
     "actions": {
       "tryAgain": "Réessayer",
       "contactSupport": "Contacter l'assistance",
-      "cancel": "Annuler"
+      "cancel": "Annuler",
+      "back": "Retour à la page précédente"
     },
     "error": {
       "heading": "Problème d'abonnement",
@@ -523,6 +524,62 @@
       "chooseGrowth": "Choisir Growth",
       "annualPrice": "Ou {{price}} $ par an",
       "trialAndBilling": "Essai gratuit de {{days}} jours. Choisissez la facturation mensuelle ou annuelle dans Shopify."
+    },
+    "planFeatures": {
+      "onePublicBundle": "Un lot public",
+      "twoSteps": "Deux étapes ou catégories activées",
+      "productPageBundles": "Lots de page produit",
+      "fullPageBundles": "Lots pleine page",
+      "brandTypography": "Couleurs et typographie de la marque",
+      "summary30": "Résumé analytique sur 30 jours",
+      "merchandising": "Toutes les fonctionnalités de marchandisage",
+      "standardSupport": "Assistance standard",
+      "unlimitedBundlesSteps": "Lots publics et étapes illimités",
+      "allTemplates": "Tous les modèles de lots",
+      "advancedDesign": "Contrôles de design avancés",
+      "advancedAnalytics": "Analyses avancées des lots",
+      "prioritySupport": "Assistance prioritaire"
+    },
+    "comparison": {
+      "publicBundles": "Lots publics",
+      "steps": "Étapes ou catégories activées",
+      "productPageBundles": "Lots de page produit",
+      "fullPageBundles": "Lots pleine page",
+      "merchandising": "Réductions, cadeaux, suppléments et ventes incitatives",
+      "customerSubscriptions": "Abonnements clients aux lots",
+      "customization": "Texte, traductions, CSS et scripts",
+      "templates": "Modèles",
+      "design": "Design",
+      "analytics": "Analyses",
+      "prioritySupport": "Assistance prioritaire"
+    },
+    "values": {
+      "unlimited": "Illimité",
+      "standard": "Standard",
+      "all": "Tous",
+      "brandTypography": "Couleurs et typographie de la marque",
+      "allControls": "Tous les contrôles",
+      "summary30": "Résumé sur 30 jours",
+      "advanced": "Avancé"
+    },
+    "valueProps": {
+      "scaleTitle": "Développez vos lots publics",
+      "scaleDescription": "Publiez un nombre illimité de campagnes de lots et utilisez un nombre illimité d'étapes ou de catégories",
+      "designTitle": "Utilisez tous les modèles et contrôles de design avancés",
+      "designDescription": "Débloquez tous les modèles FPB et PPB ainsi que les contrôles visuels au niveau des composants",
+      "analyticsTitle": "Analysez et optimisez",
+      "analyticsDescription": "Utilisez des périodes personnalisées, le détail des lots et campagnes, le rattrapage et l'export CSV"
+    },
+    "faq": {
+      "heading": "Questions fréquentes",
+      "changeQuestion": "Puis-je changer de forfait à tout moment ?",
+      "changeAnswer": "Oui. Shopify gère les changements entre les forfaits mensuel, annuel et Gratuit depuis la page Facturation.",
+      "downgradeQuestion": "Qu'advient-il de mes lots si je passe au forfait Gratuit ?",
+      "downgradeAnswer": "Toute la configuration des lots est conservée. Le lot compatible avec le forfait Gratuit publié le plus récemment reste immédiatement public ; les autres lots publics deviennent des brouillons.",
+      "billingQuestion": "Comment fonctionne la facturation ?",
+      "billingAnswer": "Growth est disponible avec une facturation mensuelle ou annuelle via Shopify App Pricing. Les deux périodicités incluent les mêmes fonctionnalités.",
+      "refundQuestion": "Proposez-vous des remboursements ?",
+      "refundAnswer": "Les abonnements sont facturés par Shopify. Contactez notre équipe d'assistance pour toute question de facturation."
     },
     "cta": {
       "heading": "Prêt à développer votre activité de lots ?",

@@ -93,6 +93,7 @@ export function SettingsRoute({
   const shopBrandColors = isShopBrandColors(settingsPage?.shopBrandColors)
     ? settingsPage.shopBrandColors
     : null;
+  const advancedDesignAvailable = settingsPage?.advancedDesignAvailable !== false;
   const [settingsView, setSettingsView] = useState<"landing" | "design" | "language" | "controls">(initialView);
   const initialLanguageLocaleValues = persistedLanguageState?.localeFieldValues ?? { en: getInitialLanguageFieldValues() };
   const [languageMode, setLanguageMode] = useState<"SINGLE" | "MULTIPLE">(persistedLanguageState?.languageMode ?? "MULTIPLE");
@@ -245,7 +246,7 @@ export function SettingsRoute({
       return;
     }
     if (
-      actionData.success
+      (actionData.success || ("persisted" in actionData && actionData.persisted === true))
       && "intent" in actionData
       && actionData.intent === "saveSettingsDesign"
       && "savedState" in actionData
@@ -344,6 +345,7 @@ export function SettingsRoute({
           setInheritedColorFieldKeys={setInheritedColorFieldKeys}
           discardActiveSettingsChanges={discardActiveSettingsChanges}
           saveActiveSettingsChanges={saveActiveSettingsChanges}
+          advancedDesignAvailable={advancedDesignAvailable}
         />
       </>
     );

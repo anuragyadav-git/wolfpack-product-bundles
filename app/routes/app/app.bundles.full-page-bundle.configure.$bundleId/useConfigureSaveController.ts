@@ -12,6 +12,7 @@ import {
   isPersistentAdminOperationError,
   showAdminTransientErrorToast,
 } from "../../../lib/admin-alert-feedback";
+import { getEntitlementAlertCopyKeys } from "../../../lib/subscriptions/alerts";
 
 export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
   const lastFetcherIntentRef = useRef<string | null>(null);
@@ -327,10 +328,13 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
           return;
         }
         if (isPersistentAdminOperationError(requestIntent)) {
+          const alertCopy = getEntitlementAlertCopyKeys(
+            (result as any).entitlementFailure?.code,
+          );
           flow.setOperationAlert({
             id: "bundle-save",
-            heading: i18n.t("common.alerts.bundleNotSaved"),
-            message: "Review the bundle and try again.",
+            heading: i18n.t(alertCopy.heading),
+            message: i18n.t(alertCopy.message),
           });
         } else {
           showAdminTransientErrorToast(

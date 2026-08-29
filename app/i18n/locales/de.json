@@ -480,7 +480,8 @@
     "actions": {
       "tryAgain": "Erneut versuchen",
       "contactSupport": "Support kontaktieren",
-      "cancel": "Abbrechen"
+      "cancel": "Abbrechen",
+      "back": "Zur vorherigen Seite"
     },
     "error": {
       "heading": "Abonnementproblem",
@@ -523,6 +524,62 @@
       "chooseGrowth": "Growth wählen",
       "annualPrice": "Oder ${{price}} pro Jahr",
       "trialAndBilling": "{{days}} Tage kostenlos testen. Monatliche oder jährliche Abrechnung in Shopify wählen."
+    },
+    "planFeatures": {
+      "onePublicBundle": "Ein öffentliches Bundle",
+      "twoSteps": "Zwei aktivierte Schritte oder Kategorien",
+      "productPageBundles": "Produktseiten-Bundles",
+      "fullPageBundles": "Ganzseiten-Bundles",
+      "brandTypography": "Markenfarben und Typografie",
+      "summary30": "30-Tage-Analyseübersicht",
+      "merchandising": "Alle Merchandising-Funktionen",
+      "standardSupport": "Standard-Support",
+      "unlimitedBundlesSteps": "Unbegrenzte öffentliche Bundles und Schritte",
+      "allTemplates": "Alle Bundle-Vorlagen",
+      "advancedDesign": "Erweiterte Design-Steuerelemente",
+      "advancedAnalytics": "Erweiterte Bundle-Analysen",
+      "prioritySupport": "Priorisierter Support"
+    },
+    "comparison": {
+      "publicBundles": "Öffentliche Bundles",
+      "steps": "Aktivierte Schritte oder Kategorien",
+      "productPageBundles": "Produktseiten-Bundles",
+      "fullPageBundles": "Ganzseiten-Bundles",
+      "merchandising": "Rabatte, Geschenke, Add-ons und Upsells",
+      "customerSubscriptions": "Bundle-Abonnements für Kunden",
+      "customization": "Texte, Übersetzungen, CSS und Skripte",
+      "templates": "Vorlagen",
+      "design": "Design",
+      "analytics": "Analysen",
+      "prioritySupport": "Priorisierter Support"
+    },
+    "values": {
+      "unlimited": "Unbegrenzt",
+      "standard": "Standard",
+      "all": "Alle",
+      "brandTypography": "Markenfarben und Typografie",
+      "allControls": "Alle Steuerelemente",
+      "summary30": "30-Tage-Übersicht",
+      "advanced": "Erweitert"
+    },
+    "valueProps": {
+      "scaleTitle": "Öffentliche Bundles skalieren",
+      "scaleDescription": "Veröffentliche unbegrenzt viele Bundle-Kampagnen mit unbegrenzt vielen Schritten oder Kategorien",
+      "designTitle": "Alle Vorlagen und erweiterten Design-Steuerelemente nutzen",
+      "designDescription": "Schalte alle FPB- und PPB-Vorlagen sowie visuelle Steuerelemente auf Komponentenebene frei",
+      "analyticsTitle": "Analysieren und optimieren",
+      "analyticsDescription": "Nutze benutzerdefinierte Zeiträume, Bundle- und Kampagnendetails, Nachverarbeitung und CSV-Export"
+    },
+    "faq": {
+      "heading": "Häufig gestellte Fragen",
+      "changeQuestion": "Kann ich den Tarif jederzeit wechseln?",
+      "changeAnswer": "Ja. Shopify verwaltet Wechsel zwischen monatlichem, jährlichem und kostenlosem Tarif auf der Abrechnungsseite.",
+      "downgradeQuestion": "Was passiert mit meinen Bundles beim Wechsel zum kostenlosen Tarif?",
+      "downgradeAnswer": "Die gesamte Bundle-Konfiguration bleibt erhalten. Das zuletzt veröffentlichte, mit dem kostenlosen Tarif kompatible Bundle bleibt sofort öffentlich; andere öffentliche Bundles werden zu Entwürfen.",
+      "billingQuestion": "Wie funktioniert die Abrechnung?",
+      "billingAnswer": "Growth ist monatlich oder jährlich über Shopify App Pricing verfügbar. Beide Abrechnungszeiträume enthalten dieselben Funktionen.",
+      "refundQuestion": "Bietet ihr Rückerstattungen an?",
+      "refundAnswer": "Abonnements werden über Shopify abgerechnet. Wende dich bei Fragen zur Abrechnung an unser Support-Team."
     },
     "cta": {
       "heading": "Bereit, dein Bundle-Geschäft auszubauen?",

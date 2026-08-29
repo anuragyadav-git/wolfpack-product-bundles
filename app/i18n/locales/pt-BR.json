@@ -480,7 +480,8 @@
     "actions": {
       "tryAgain": "Tentar novamente",
       "contactSupport": "Falar com o suporte",
-      "cancel": "Cancelar"
+      "cancel": "Cancelar",
+      "back": "Voltar à página anterior"
     },
     "error": {
       "heading": "Problema na assinatura",
@@ -523,6 +524,62 @@
       "chooseGrowth": "Escolher Growth",
       "annualPrice": "Ou US$ {{price}} por ano",
       "trialAndBilling": "Teste grátis de {{days}} dias. Escolha cobrança mensal ou anual na Shopify."
+    },
+    "planFeatures": {
+      "onePublicBundle": "Um pacote público",
+      "twoSteps": "Duas etapas ou categorias habilitadas",
+      "productPageBundles": "Pacotes de página de produto",
+      "fullPageBundles": "Pacotes de página inteira",
+      "brandTypography": "Cores e tipografia da marca",
+      "summary30": "Resumo de análises de 30 dias",
+      "merchandising": "Todos os recursos de merchandising",
+      "standardSupport": "Suporte padrão",
+      "unlimitedBundlesSteps": "Pacotes públicos e etapas ilimitados",
+      "allTemplates": "Todos os modelos de pacote",
+      "advancedDesign": "Controles de design avançados",
+      "advancedAnalytics": "Análises avançadas de pacotes",
+      "prioritySupport": "Suporte prioritário"
+    },
+    "comparison": {
+      "publicBundles": "Pacotes públicos",
+      "steps": "Etapas ou categorias habilitadas",
+      "productPageBundles": "Pacotes de página de produto",
+      "fullPageBundles": "Pacotes de página inteira",
+      "merchandising": "Descontos, brindes, complementos e upsells",
+      "customerSubscriptions": "Assinaturas de pacotes para clientes",
+      "customization": "Textos, traduções, CSS e scripts",
+      "templates": "Modelos",
+      "design": "Design",
+      "analytics": "Análises",
+      "prioritySupport": "Suporte prioritário"
+    },
+    "values": {
+      "unlimited": "Ilimitado",
+      "standard": "Padrão",
+      "all": "Todos",
+      "brandTypography": "Cores e tipografia da marca",
+      "allControls": "Todos os controles",
+      "summary30": "Resumo de 30 dias",
+      "advanced": "Avançado"
+    },
+    "valueProps": {
+      "scaleTitle": "Amplie seus pacotes públicos",
+      "scaleDescription": "Publique campanhas de pacotes ilimitadas e use etapas ou categorias ilimitadas",
+      "designTitle": "Use todos os modelos e controles de design avançados",
+      "designDescription": "Desbloqueie todos os modelos FPB e PPB, além de controles visuais por componente",
+      "analyticsTitle": "Analise e otimize",
+      "analyticsDescription": "Use períodos personalizados, detalhes de pacotes e campanhas, preenchimento retroativo e exportação CSV"
+    },
+    "faq": {
+      "heading": "Perguntas frequentes",
+      "changeQuestion": "Posso mudar de plano a qualquer momento?",
+      "changeAnswer": "Sim. A Shopify gerencia as mudanças entre os planos mensal, anual e Grátis na página de Cobrança.",
+      "downgradeQuestion": "O que acontece com meus pacotes se eu mudar para o plano Grátis?",
+      "downgradeAnswer": "Toda a configuração dos pacotes é preservada. O pacote compatível com o plano Grátis publicado mais recentemente permanece público imediatamente; os demais pacotes públicos passam para Rascunho.",
+      "billingQuestion": "Como funciona a cobrança?",
+      "billingAnswer": "O Growth está disponível com cobrança mensal ou anual pelo Shopify App Pricing. Os dois períodos incluem os mesmos recursos.",
+      "refundQuestion": "Vocês oferecem reembolsos?",
+      "refundAnswer": "As assinaturas são cobradas pela Shopify. Entre em contato com nossa equipe de suporte para dúvidas sobre cobrança."
     },
     "cta": {
       "heading": "Pronto para expandir seu negócio de pacotes?",

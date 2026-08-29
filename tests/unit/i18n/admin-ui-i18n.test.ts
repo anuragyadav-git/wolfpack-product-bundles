@@ -65,6 +65,18 @@ describe("embedded Admin locale configuration", () => {
     }
   });
 
+  it("provides a localized Billing navigation label in every supported locale", () => {
+    const localeDir = path.join(process.cwd(), "app/i18n/locales");
+
+    for (const locale of SUPPORTED_LOCALES) {
+      const catalog = JSON.parse(
+        fs.readFileSync(path.join(localeDir, `${locale}.json`), "utf8"),
+      );
+      expect(catalog.nav.billing).toEqual(expect.any(String));
+      expect(catalog.nav.billing).not.toHaveLength(0);
+    }
+  });
+
 });
 
 describe("shop-wide Admin locale wiring contract", () => {
@@ -97,6 +109,7 @@ describe("shop-wide Admin locale wiring contract", () => {
     expect(appShell).toContain('t("nav.settings")');
     expect(appShell).toContain('t("nav.integrations")');
     expect(appShell).toContain('t("nav.analytics")');
+    expect(appShell).toContain('t("nav.billing")');
     expect(appShell).toContain('t("nav.events")');
   });
 

@@ -11,7 +11,11 @@ import {
   updatePreviewProductQuantity,
 } from "../../../app/routes/app/app.settings/DesignLivePreview";
 import { calculateDesignPreviewFitScale } from "../../../app/routes/app/app.settings/design-preview-model";
-import { normalizePolarisColorValue } from "../../../app/routes/app/app.settings/SettingsDesignFields";
+import {
+  isPolarisHexColorInput,
+  isPolarisNumberInput,
+  normalizePolarisColorValue,
+} from "../../../app/routes/app/app.settings/SettingsDesignFields";
 
 describe("Settings Design connected preview actions", () => {
   it("derives selected rows, count, and total from shared quantities", () => {
@@ -70,5 +74,19 @@ describe("Settings Design connected preview actions", () => {
     expect(normalizePolarisColorValue("#112233", "#000000")).toBe("#112233");
     expect(normalizePolarisColorValue("#11223380", "#000000")).toBe("#11223380");
     expect(normalizePolarisColorValue("invalid", "#abc")).toBe("#aabbcc");
+  });
+
+  it("rejects transient color values before they reach the live preview runtime", () => {
+    expect(isPolarisHexColorInput("")).toBe(false);
+    expect(isPolarisHexColorInput("#")).toBe(false);
+    expect(isPolarisHexColorInput("#112233")).toBe(true);
+    expect(isPolarisHexColorInput("#11223380")).toBe(true);
+  });
+
+  it("rejects transient number values before they reach the live preview runtime", () => {
+    expect(isPolarisNumberInput("")).toBe(false);
+    expect(isPolarisNumberInput("18")).toBe(true);
+    expect(isPolarisNumberInput("18.5")).toBe(true);
+    expect(isPolarisNumberInput("1000")).toBe(false);
   });
 });

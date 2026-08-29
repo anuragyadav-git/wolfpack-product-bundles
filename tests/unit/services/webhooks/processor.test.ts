@@ -25,13 +25,6 @@ jest.mock("../../../../app/lib/logger", () => ({
   },
 }));
 
-jest.mock("../../../../app/services/webhooks/handlers/subscription.server", () => ({
-  handleSubscriptionUpdate: jest.fn(),
-  handleSubscriptionCancelled: jest.fn(),
-  handleSubscriptionApproachingCap: jest.fn(),
-  handlePurchaseUpdate: jest.fn(),
-}));
-
 jest.mock("../../../../app/services/webhooks/handlers/product.server", () => ({
   handleProductUpdate: mockHandleProductUpdate,
   handleProductDelete: mockHandleProductDelete,

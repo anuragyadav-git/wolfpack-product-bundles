@@ -2,13 +2,12 @@
  * Webhook Processor Service
  *
  * Processes webhooks delivered via Google Cloud Pub/Sub.
- * Handles subscription updates, product changes, and GDPR compliance.
+ * Handles product changes and GDPR compliance.
  *
  * Architecture:
  * - Idempotent processing using WebhookEvent table
  * - Quick response pattern (mark processed, return immediately)
  * - Background queue processing for heavy operations
- * - Automatic downgrade handling with bundle archiving
  *
  * Validated against Shopify best practices:
  * https://shopify.dev/docs/apps/build/webhooks/best-practices
@@ -17,12 +16,6 @@
 import db from "../../db.server";
 import { AppLogger } from "../../lib/logger";
 import type { PubSubMessage, WebhookProcessResult } from "./types";
-import {
-  handleSubscriptionUpdate,
-  handleSubscriptionCancelled,
-  handleSubscriptionApproachingCap,
-  handlePurchaseUpdate,
-} from "./handlers/subscription.server";
 import {
   handleProductUpdate,
   handleProductDelete,
@@ -153,26 +146,6 @@ export class WebhookProcessor {
       let result: WebhookProcessResult;
 
       switch (topic) {
-        case "app_subscriptions/update":
-        case "APP_SUBSCRIPTIONS_UPDATE":
-          result = await handleSubscriptionUpdate(shopDomain, payload);
-          break;
-
-        case "app_subscriptions/cancelled":
-        case "APP_SUBSCRIPTIONS_CANCELLED":
-          result = await handleSubscriptionCancelled(shopDomain, payload);
-          break;
-
-        case "app_subscriptions/approaching_capped_amount":
-        case "APP_SUBSCRIPTIONS_APPROACHING_CAPPED_AMOUNT":
-          result = await handleSubscriptionApproachingCap(shopDomain, payload);
-          break;
-
-        case "app_purchases_one_time/update":
-        case "APP_PURCHASES_ONE_TIME_UPDATE":
-          result = await handlePurchaseUpdate(shopDomain, payload);
-          break;
-
         case "products/update":
         case "PRODUCTS_UPDATE":
           result = await handleProductUpdate(shopDomain, payload);

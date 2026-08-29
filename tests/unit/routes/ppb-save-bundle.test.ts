@@ -19,6 +19,36 @@ jest.mock("../../../app/db.server", () => ({
   },
 }));
 
+jest.mock("../../../app/services/subscriptions/subscription-service.server", () => ({
+  resolveShopEntitlements: jest.fn().mockResolvedValue({
+    entitlements: {
+      planCode: "GROWTH",
+      billingInterval: "MONTHLY",
+      limits: { publicBundles: null, enabledSteps: null },
+      capabilities: {
+        premiumTemplates: true,
+        advancedDesign: true,
+        advancedAnalytics: true,
+        prioritySupport: true,
+        unlimitedDrafts: true,
+      },
+    },
+  }),
+}));
+
+jest.mock("../../../app/services/subscriptions/design-entitlement-state.server", () => ({
+  shopUsesAdvancedDesign: jest.fn().mockResolvedValue(false),
+}));
+
+jest.mock("../../../app/services/subscriptions/bundle-entitlement-gate.server", () => ({
+  updateBundleWithPublicationGate: jest.fn((input) => input.database.bundle.update({
+    where: { id: input.bundleId, shopId: input.shopDomain },
+    data: input.data,
+    ...(input.include ? { include: input.include } : {}),
+  })),
+}));
+
+
 jest.mock("../../../app/lib/logger", () => ({
   AppLogger: {
     info: jest.fn(),
@@ -550,13 +580,7 @@ describe("PPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
   it("does NOT call metafield services when shopifyProductId is absent", async () => {
     await handleSaveBundle(MOCK_ADMIN, MOCK_SESSION, "bundle-1", makeFormData());
     expect(updateBundleProductMetafields).not.toHaveBeenCalled();
-    expect(syncBundleStorefrontNow).toHaveBeenCalledWith({
-      admin: MOCK_ADMIN,
-      shopDomain: MOCK_SESSION.shop,
-      bundleId: "bundle-1",
-      bundleType: "product_page",
-      reason: "save",
-    });
+    expect(syncBundleStorefrontNow).not.toHaveBeenCalled();
   });
 
   it("preserves draft status when a step has StepProduct", async () => {
@@ -1269,6 +1293,7 @@ describe("PPB handleSaveBundle — with shopifyProductId (direct storefront sync
     const fd = makeFormData({
       stepsData: JSON.stringify(makeStepWithProduct()),
       bundleProduct: JSON.stringify({ id: PRODUCT_ID, handle: "bundle-123" }),
+      bundleStatus: "active",
     });
 
     const res = await handleSaveBundle(MOCK_ADMIN, MOCK_SESSION, "bundle-1", fd);
@@ -1299,6 +1324,7 @@ describe("PPB handleSaveBundle — with shopifyProductId (direct storefront sync
       makeFormData({
         stepsData: JSON.stringify(makeStepWithProduct()),
         bundleProduct: JSON.stringify({ id: PRODUCT_ID, handle: "bundle-123" }),
+        bundleStatus: "active",
       }),
     );
     const body = await res.json() as any;
@@ -1320,7 +1346,10 @@ describe("PPB handleSaveBundle — with shopifyProductId (direct storefront sync
       MOCK_ADMIN,
       MOCK_SESSION,
       "bundle-1",
-      makeFormData({ bundleProduct: JSON.stringify({ id: PRODUCT_ID }) }),
+      makeFormData({
+        bundleProduct: JSON.stringify({ id: PRODUCT_ID }),
+        bundleStatus: "active",
+      }),
     );
     const body = await res.json() as any;
 

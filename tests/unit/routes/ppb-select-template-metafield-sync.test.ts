@@ -8,8 +8,37 @@ import { updateBundleProductMetafields } from "../../../app/services/bundles/met
 jest.mock("../../../app/db.server", () => ({
   __esModule: true,
   default: {
-    bundle: { update: jest.fn() },
+    bundle: { findUnique: jest.fn(), update: jest.fn() },
   },
+}));
+
+jest.mock("../../../app/services/subscriptions/subscription-service.server", () => ({
+  resolveShopEntitlements: jest.fn().mockResolvedValue({
+    entitlements: {
+      planCode: "GROWTH",
+      billingInterval: "MONTHLY",
+      limits: { publicBundles: null, enabledSteps: null },
+      capabilities: {
+        premiumTemplates: true,
+        advancedDesign: true,
+        advancedAnalytics: true,
+        prioritySupport: true,
+        unlimitedDrafts: true,
+      },
+    },
+  }),
+}));
+
+jest.mock("../../../app/services/subscriptions/design-entitlement-state.server", () => ({
+  shopUsesAdvancedDesign: jest.fn().mockResolvedValue(false),
+}));
+
+jest.mock("../../../app/services/subscriptions/bundle-entitlement-gate.server", () => ({
+  updateBundleWithPublicationGate: jest.fn((input) => input.database.bundle.update({
+    where: { id: input.bundleId, shopId: input.shopDomain },
+    data: input.data,
+    ...(input.include ? { include: input.include } : {}),
+  })),
 }));
 
 jest.mock("../../../app/lib/logger", () => ({
@@ -71,6 +100,12 @@ function makeForm(fields: Record<string, string>) {
 describe("PPB Select Template metafield sync", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    getDb().bundle.findUnique.mockResolvedValue({
+      id: "bundle-1",
+      status: "active",
+      steps: [{ enabled: true }],
+      bundleSubscriptionConfig: null,
+    });
   });
 
   it("rewrites bundle product metafields with the saved template config", async () => {

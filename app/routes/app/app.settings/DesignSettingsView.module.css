@@ -370,8 +370,6 @@
 }
 
 .previewScaledShell[data-preview-viewport="desktop"] .mobileDeviceScreen {
-  overflow-y: auto;
-  scrollbar-gutter: stable;
   border-radius: 8px;
 }
 
@@ -1650,7 +1648,7 @@
   grid-column: auto;
 }
 
-@container design-settings (max-width: 1340px) {
+@media (max-width: 1340px) {
   .layout {
     grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
     grid-template-areas:
@@ -1662,7 +1660,7 @@
   }
 }
 
-@container design-settings (max-width: 760px) {
+@media (max-width: 760px) {
   .inspectorToggle {
     display: none;
   }
@@ -1737,7 +1735,7 @@
 
 }
 
-@container design-settings (max-width: 460px) {
+@media (max-width: 460px) {
   .previewControls {
     grid-template-columns: minmax(0, 1fr);
   }

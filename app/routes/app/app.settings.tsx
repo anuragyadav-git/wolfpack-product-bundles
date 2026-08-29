@@ -38,6 +38,9 @@ import {
   type SettingsWorkspaceView,
 } from "./app.settings/SettingsLandingShell";
 import { AdminSectionLoadingState } from "../../components/AdminSectionLoadingState";
+import { EntitlementDeniedError } from "../../lib/subscriptions/entitlements";
+import { assertDesignSaveAllowed } from "../../lib/subscriptions/design-entitlements";
+import { resolveShopEntitlements } from "../../services/subscriptions/subscription-service.server";
 
 const loadSettingsWorkspace = async () => {
   const module = await import("./app.settings/SettingsRoute");
@@ -47,14 +50,15 @@ const loadSettingsWorkspace = async () => {
 const SettingsWorkspace = lazy(loadSettingsWorkspace);
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  const { admin, session } = await authenticate.admin(request);
+  const { session } = await authenticate.admin(request);
   const shopBrandColors = syncThemeColors(session.shop);
+  const designAccess = resolveShopEntitlements({ shopDomain: session.shop });
   const settingsPage = Promise.all([shopBrandColors, prisma.designSettings.findUnique({
       where: { shopId_bundleType: { shopId: session.shop, bundleType: "product_page" } },
       select: {
         generalSettings: true,
       },
-    })]).then(([resolvedShopBrandColors, settings]) => {
+    }), designAccess]).then(([resolvedShopBrandColors, settings, subscription]) => {
       const generalSettings = settings?.generalSettings && typeof settings.generalSettings === "object"
         ? settings.generalSettings as Record<string, unknown>
         : {};
@@ -72,6 +76,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
         language: buildSettingsLanguageFormState(generalSettings.settingsLanguage),
         controls: buildSettingsControlsFormValues(runtime),
         shopBrandColors: resolvedShopBrandColors,
+        advancedDesignAvailable: subscription
+          ? Boolean(subscription.entitlements?.capabilities.advancedDesign)
+          : true,
       };
     });
   const previewBundles = prisma.bundle.findMany({
@@ -147,6 +154,24 @@ export async function action({ request }: ActionFunctionArgs) {
       }, { status: 400 });
     }
 
+    const entitlementContext = await resolveShopEntitlements({
+      shopDomain: session.shop,
+      forceRefresh: true,
+    });
+    try {
+      assertDesignSaveAllowed(savedState, entitlementContext.entitlements);
+    } catch (error) {
+      if (error instanceof EntitlementDeniedError) {
+        return json({
+          success: false,
+          intent,
+          error: error.code,
+          entitlementFailure: error.toJSON(),
+        }, { status: error.status });
+      }
+      throw error;
+    }
+
     const currentRows = await prisma.designSettings.findMany({
       where: {
         shopId: session.shop,
@@ -201,6 +226,9 @@ export async function action({ request }: ActionFunctionArgs) {
       return json({
         success: false,
         intent,
+        persisted: true,
+        runtimeSynced: false,
+        savedState,
         message: `Settings saved, but PPB storefront runtime sync failed: ${error instanceof Error ? error.message : "Unknown error"}`,
       }, { status: 500 });
     }

@@ -13,6 +13,7 @@ import {
   deactivateUtmPixel,
 } from "../../../app/services/pixel-activation.server";
 import { backfillOrderAttribution } from "../../../app/services/analytics/order-backfill.server";
+import { resolveShopEntitlements } from "../../../app/services/subscriptions/subscription-service.server";
 
 jest.mock("../../../app/shopify.server", () => ({
   authenticate: { admin: jest.fn() },
@@ -26,6 +27,14 @@ jest.mock("../../../app/services/pixel-activation.server", () => ({
 
 jest.mock("../../../app/services/analytics/order-backfill.server", () => ({
   backfillOrderAttribution: jest.fn(),
+}));
+
+jest.mock("../../../app/services/subscriptions/subscription-service.server", () => ({
+  resolveShopEntitlements: jest.fn().mockResolvedValue({
+    entitlements: {
+      capabilities: { advancedAnalytics: true },
+    },
+  }),
 }));
 
 jest.mock("../../../app/db.server", () => ({
@@ -51,6 +60,9 @@ const mockRequireAdminSession = authenticate.admin as jest.MockedFunction<typeof
 const mockActivate = activateUtmPixel as jest.MockedFunction<typeof activateUtmPixel>;
 const mockDeactivate = deactivateUtmPixel as jest.MockedFunction<typeof deactivateUtmPixel>;
 const mockBackfill = backfillOrderAttribution as jest.MockedFunction<typeof backfillOrderAttribution>;
+const mockResolveShopEntitlements = resolveShopEntitlements as jest.MockedFunction<
+  typeof resolveShopEntitlements
+>;
 const getDb = () => require("../../../app/db.server").default;
 
 function makeRequest(intent: string, fields: Record<string, string> = {}): Request {
@@ -74,6 +86,11 @@ beforeEach(() => {
   getDb().orderAttribution.findMany.mockResolvedValue([]);
   getDb().bundleAnalytics.findMany.mockResolvedValue([]);
   getDb().bundle.findMany.mockResolvedValue([]);
+  mockResolveShopEntitlements.mockResolvedValue({
+    entitlements: {
+      capabilities: { advancedAnalytics: true },
+    },
+  } as any);
   process.env.SHOPIFY_APP_URL = "https://app.example.com";
 });
 
@@ -132,6 +149,39 @@ describe("action — export intent", () => {
       filename: "only-bundles-analytics-2026-07-01-to-2026-07-20.csv",
       csv: "Date,Type,Bundle ID,Bundle Name,UTM Source,UTM Medium,UTM Campaign,Custom UTM Attributes,Revenue (USD),Order ID,Landing Page",
     });
+  });
+
+  it("returns a billing-unverified denial when subscription state is unknown", async () => {
+    mockResolveShopEntitlements.mockResolvedValueOnce({ entitlements: null } as any);
+
+    const response = await action({
+      request: makeRequest("export"),
+      params: {},
+      context: {},
+    });
+    const data: any = await response.json();
+
+    expect(response.status).toBe(503);
+    expect(data.entitlementFailure).toMatchObject({
+      code: "BILLING_UNVERIFIED",
+      entitlement: "analytics.advanced",
+      remediation: "RETRY",
+    });
+    expect(getDb().orderAttribution.findMany).not.toHaveBeenCalled();
+  });
+
+  it("does not swallow unexpected entitlement evaluation errors", async () => {
+    mockResolveShopEntitlements.mockResolvedValueOnce({
+      entitlements: { capabilities: null },
+    } as any);
+
+    await expect(action({
+      request: makeRequest("export"),
+      params: {},
+      context: {},
+    })).rejects.toThrow();
+
+    expect(getDb().orderAttribution.findMany).not.toHaveBeenCalled();
   });
 });
 

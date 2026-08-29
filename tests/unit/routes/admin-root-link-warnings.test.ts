@@ -48,10 +48,6 @@ jest.mock("../../../app/lib/logger", () => ({
   },
 }));
 
-jest.mock("../../../app/services/billing.server", () => ({
-  BillingService: {},
-}));
-
 jest.mock("../../../app/components/ProxyHealthBanner", () => ({
   ProxyHealthBanner: () => null,
 }));
@@ -106,8 +102,8 @@ describe("admin root link warnings", () => {
     const { default: App } = await import("../../../app/root");
     const documentMarkup = renderToStaticMarkup(React.createElement(App));
 
-    expect(documentMarkup).toContain(
-      'rel="stylesheet" href="https://cdn.shopify.com/static/fonts/inter/v4/styles.css"',
+    expect(documentMarkup).toMatch(
+      /rel="stylesheet" href="https:\/\/cdn\.shopify\.com\/static\/fonts\/inter\/v4\/styles\.css"/,
     );
     expect(documentMarkup).not.toContain('media="print"');
   });
@@ -136,31 +132,19 @@ describe("admin root link warnings", () => {
   it("renders OptimisedImage fetch priority without the React DOM prop warning", async () => {
     const consoleError = jest.spyOn(console, "error").mockImplementation(() => {});
     const { OptimisedImage } = await import("../../../app/components/OptimisedImage");
+    const view = renderToStaticMarkup(
+      React.createElement(OptimisedImage, {
+        src: "/Parth.jpg",
+        alt: "Parth",
+        width: 120,
+        height: 120,
+        loading: "eager",
+        fetchPriority: "high",
+      }),
+    );
 
-    expect(
-      renderToStaticMarkup(
-        React.createElement(OptimisedImage, {
-          src: "/Parth.jpg",
-          alt: "Parth",
-          width: 120,
-          height: 120,
-          loading: "eager",
-          fetchPriority: "high",
-        }),
-      ),
-    ).toContain('fetchpriority="high"');
-    expect(
-      renderToStaticMarkup(
-        React.createElement(OptimisedImage, {
-          src: "/Parth.jpg",
-          alt: "Parth",
-          width: 120,
-          height: 120,
-          loading: "eager",
-          fetchPriority: "high",
-        }),
-      ),
-    ).not.toContain("fetchPriority");
+    expect(view).toContain('fetchpriority="high"');
+    expect(view).not.toContain("fetchPriority");
     expect(consoleError).not.toHaveBeenCalledWith(
       expect.stringContaining("React does not recognize the `%s` prop on a DOM element"),
       "fetchPriority",

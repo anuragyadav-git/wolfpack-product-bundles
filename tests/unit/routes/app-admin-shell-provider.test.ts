@@ -78,8 +78,20 @@ describe("app Admin shell provider", () => {
     const markup = renderToStaticMarkup(React.createElement(App));
     expect(markup).not.toContain("data-shopify-app-provider");
     expect(markup).not.toContain("data-redux-provider");
-    expect(markup).not.toContain("data-mantle-provider");
     expect(markup).toContain("<main>outlet</main>");
+  });
+
+  it("links Subscription and Billing from the main app navigation", async () => {
+    useLoaderData.mockReturnValue({
+      apiKey: "shopify-api-key",
+      locale: "en",
+      shop: "test-shop.myshopify.com",
+    });
+    const { default: App } = await import("../../../app/routes/app/app");
+
+    const view = renderToStaticMarkup(React.createElement(App));
+
+    expect(view).toContain('<a href="/app/pricing">nav.billing</a>');
   });
 
   it("keeps the current Admin page rendered while another page is loading", async () => {

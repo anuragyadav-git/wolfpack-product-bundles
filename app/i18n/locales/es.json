@@ -480,7 +480,8 @@
     "actions": {
       "tryAgain": "Intentar de nuevo",
       "contactSupport": "Contactar con soporte",
-      "cancel": "Cancelar"
+      "cancel": "Cancelar",
+      "back": "Volver a la página anterior"
     },
     "error": {
       "heading": "Problema de suscripción",
@@ -523,6 +524,62 @@
       "chooseGrowth": "Elegir Growth",
       "annualPrice": "O ${{price}} al año",
       "trialAndBilling": "Prueba gratis de {{days}} días. Elige facturación mensual o anual en Shopify."
+    },
+    "planFeatures": {
+      "onePublicBundle": "Un paquete público",
+      "twoSteps": "Dos pasos o categorías habilitados",
+      "productPageBundles": "Paquetes de página de producto",
+      "fullPageBundles": "Paquetes de página completa",
+      "brandTypography": "Colores y tipografía de la marca",
+      "summary30": "Resumen de análisis de 30 días",
+      "merchandising": "Todas las funciones de comercialización",
+      "standardSupport": "Soporte estándar",
+      "unlimitedBundlesSteps": "Paquetes públicos y pasos ilimitados",
+      "allTemplates": "Todas las plantillas de paquetes",
+      "advancedDesign": "Controles de diseño avanzados",
+      "advancedAnalytics": "Análisis avanzados de paquetes",
+      "prioritySupport": "Soporte prioritario"
+    },
+    "comparison": {
+      "publicBundles": "Paquetes públicos",
+      "steps": "Pasos o categorías habilitados",
+      "productPageBundles": "Paquetes de página de producto",
+      "fullPageBundles": "Paquetes de página completa",
+      "merchandising": "Descuentos, regalos, complementos y ventas adicionales",
+      "customerSubscriptions": "Suscripciones de clientes a paquetes",
+      "customization": "Textos, traducciones, CSS y scripts",
+      "templates": "Plantillas",
+      "design": "Diseño",
+      "analytics": "Análisis",
+      "prioritySupport": "Soporte prioritario"
+    },
+    "values": {
+      "unlimited": "Ilimitado",
+      "standard": "Estándar",
+      "all": "Todas",
+      "brandTypography": "Colores y tipografía de la marca",
+      "allControls": "Todos los controles",
+      "summary30": "Resumen de 30 días",
+      "advanced": "Avanzado"
+    },
+    "valueProps": {
+      "scaleTitle": "Amplía tus paquetes públicos",
+      "scaleDescription": "Publica campañas de paquetes ilimitadas y usa pasos o categorías ilimitados",
+      "designTitle": "Usa todas las plantillas y controles de diseño avanzados",
+      "designDescription": "Desbloquea todas las plantillas FPB y PPB, además de controles visuales por componente",
+      "analyticsTitle": "Analiza y optimiza",
+      "analyticsDescription": "Usa intervalos personalizados, detalles de paquetes y campañas, recuperación de datos y exportación CSV"
+    },
+    "faq": {
+      "heading": "Preguntas frecuentes",
+      "changeQuestion": "¿Puedo cambiar de plan en cualquier momento?",
+      "changeAnswer": "Sí. Shopify gestiona los cambios entre los planes mensual, anual y Gratis desde la página de Facturación.",
+      "downgradeQuestion": "¿Qué ocurre con mis paquetes si cambio al plan Gratis?",
+      "downgradeAnswer": "Se conserva toda la configuración de los paquetes. El paquete compatible con el plan Gratis publicado más recientemente permanece público de inmediato; los demás paquetes públicos pasan a Borrador.",
+      "billingQuestion": "¿Cómo funciona la facturación?",
+      "billingAnswer": "Growth está disponible con facturación mensual o anual mediante Shopify App Pricing. Ambos períodos incluyen las mismas funciones.",
+      "refundQuestion": "¿Ofrecen reembolsos?",
+      "refundAnswer": "Las suscripciones se facturan mediante Shopify. Contacta con nuestro equipo de soporte para consultas de facturación."
     },
     "cta": {
       "heading": "¿Listo para hacer crecer tu negocio de paquetes?",

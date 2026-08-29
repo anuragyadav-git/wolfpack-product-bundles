@@ -21,6 +21,7 @@ import styles from "./DesignSettingsView.module.css";
 import { SettingsContextualSaveBar } from "./SettingsFeedback";
 import { AdminPageTitleBar } from "../../../components/AdminPageNavigation";
 import type { SettingsPreviewBundle } from "../../../lib/settings-design-storefront-preview.client";
+import { getAdvancedDesignFieldKeys } from "../../../lib/subscriptions/design-entitlements";
 
 type DesignSettingsViewProps = {
   designFieldValues: Record<string, string>;
@@ -36,6 +37,7 @@ type DesignSettingsViewProps = {
   setInheritedColorFieldKeys: Dispatch<SetStateAction<string[]>>;
   discardActiveSettingsChanges: () => void;
   saveActiveSettingsChanges: () => void;
+  advancedDesignAvailable?: boolean;
 };
 
 const CONTEXTUAL_INSPECTOR_SECTIONS: Array<{ title: string; fields: SettingsField[] }> = [
@@ -73,6 +75,7 @@ export function DesignSettingsView({
   setInheritedColorFieldKeys,
   discardActiveSettingsChanges,
   saveActiveSettingsChanges,
+  advancedDesignAvailable = true,
 }: DesignSettingsViewProps) {
   const { t } = useTranslation();
   const [workspacePane, setWorkspacePane] = useState<"preview" | "customize">("preview");
@@ -224,6 +227,11 @@ export function DesignSettingsView({
                 aria-label="Contextual customization inspector"
               >
                 <s-stack gap="base">
+                  {!advancedDesignAvailable ? (
+                    <s-banner tone="info" heading={t("settingsDcp.growthGate.heading")}>
+                      {t("settingsDcp.growthGate.body")}
+                    </s-banner>
+                  ) : null}
                   <s-box>
                     <s-heading>{t("settingsDcp.preview.inspector.customize", { context: activeContextLabel })}</s-heading>
                     <s-paragraph color="subdued">
@@ -237,7 +245,10 @@ export function DesignSettingsView({
                       fields={section.fields}
                       values={resolvedFieldValues}
                       inheritedFieldKeys={inheritedColorFieldKeys}
-                      disabledFieldKeys={activePreviewScenario === "loading" ? ["Image Fit"] : []}
+                      disabledFieldKeys={[
+                        ...(activePreviewScenario === "loading" ? ["Image Fit"] : []),
+                        ...(!advancedDesignAvailable ? getAdvancedDesignFieldKeys() : []),
+                      ]}
                       onFieldChange={(fieldKey, value) => {
                         setDesignFieldValues((current) => ({ ...current, [fieldKey]: value }));
                         setInheritedColorFieldKeys((current) => current.filter((key) => key !== fieldKey));
@@ -251,7 +262,12 @@ export function DesignSettingsView({
               </section>
             </aside>
           </section>
-          <SettingsContextualSaveBar isOpen={isActiveSubpageDirty} onDiscard={discardActiveSettingsChanges} onSave={saveActiveSettingsChanges} />
+          <SettingsContextualSaveBar
+            isOpen={isActiveSubpageDirty}
+            isSaving={isDesignSaving}
+            onDiscard={discardActiveSettingsChanges}
+            onSave={saveActiveSettingsChanges}
+          />
           {isPreviewModalOpen ? (
             <BundlePreviewModal bundles={previewBundles} onClose={() => setIsPreviewModalOpen(false)} />
           ) : null}

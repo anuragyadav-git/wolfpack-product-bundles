@@ -22,6 +22,12 @@ import {
 } from "../../lib/analytics/attribution-controls";
 import db from "../../db.server";
 import { APP_BRAND } from "../../lib/app-brand";
+import { EntitlementDeniedError } from "../../lib/subscriptions/entitlements";
+import {
+  assertAdvancedAnalyticsAllowed,
+  getAnalyticsAccessMode,
+} from "../../lib/subscriptions/analytics-entitlements";
+import { resolveShopEntitlements } from "../../services/subscriptions/subscription-service.server";
 
 export { default } from "./app.attribution/AttributionRouteShell";
 
@@ -31,6 +37,25 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
   const intent = formData.get("intent") as string;
   const shopId = session.shop;
+
+  if (["export", "backfill", "saveCustomUtms"].includes(intent)) {
+    const subscription = await resolveShopEntitlements({
+      shopDomain: shopId,
+      forceRefresh: true,
+    });
+    try {
+      assertAdvancedAnalyticsAllowed(subscription.entitlements);
+    } catch (error) {
+      if (error instanceof EntitlementDeniedError) {
+        return json({
+          success: false,
+          error: error.code,
+          entitlementFailure: error.toJSON(),
+        }, { status: error.status });
+      }
+      throw error;
+    }
+  }
 
   const getSavedCustomUtmParameters = async () => {
     const shop = await db.shop.findUnique({
@@ -451,6 +476,7 @@ async function loadAttributionDashboardData({
     : null;
 
   return {
+    accessMode: "ADVANCED" as const,
     days,
     from: fromStr,
     to: toStr,
@@ -477,17 +503,86 @@ async function loadAttributionDashboardData({
   };
 }
 
+async function loadFreeAttributionSummary(shopId: string) {
+  const now = new Date();
+  const until = new Date(now);
+  until.setUTCHours(23, 59, 59, 999);
+  const since = new Date(until);
+  since.setUTCDate(since.getUTCDate() - 29);
+  since.setUTCHours(0, 0, 0, 0);
+  const createdAt = { gte: since, lte: until };
+  const [views, addsToCart, purchases, orders] = await Promise.all([
+    db.bundleAnalytics.count({ where: { shopId, event: "view", createdAt } }),
+    db.bundleAnalytics.count({ where: { shopId, event: "add_to_cart", createdAt } }),
+    db.bundleAnalytics.count({ where: { shopId, event: "purchase", createdAt } }),
+    db.orderAttribution.aggregate({
+      where: { shopId, bundleId: { not: null }, createdAt },
+      _count: { _all: true },
+      _sum: { revenue: true },
+    }),
+  ]);
+  const checkedOut = Math.max(purchases, orders._count._all);
+  const revenueCents = orders._sum.revenue ?? 0;
+  const from = since.toISOString().slice(0, 10);
+  const to = until.toISOString().slice(0, 10);
+  return {
+    accessMode: "SUMMARY" as const,
+    days: 30,
+    from,
+    to,
+    prevFrom: null,
+    prevTo: null,
+    summary: {
+      totalRevenue: revenueCents,
+      totalOrders: checkedOut,
+      bundleOrders: checkedOut,
+      aov: checkedOut > 0 ? Math.round(revenueCents / checkedOut) : 0,
+      prevTotalRevenue: 0,
+      prevTotalOrders: 0,
+      prevAov: 0,
+    },
+    timeSeries: [],
+    byPlatform: [],
+    byMedium: [],
+    byCampaign: [],
+    byBundle: [],
+    byLandingPage: [],
+    bundleMetricTrend: [],
+    views: { totalViews: views, prevTotalViews: 0, viewsByBundle: [] },
+    funnelSnapshot: {
+      impressions: views,
+      engaged: views,
+      addedToCart: addsToCart,
+      checkedOut,
+      revenueCents,
+      dropOffEngagedToAtc: views > 0
+        ? Math.max(0, 100 - Math.round((addsToCart / views) * 100))
+        : 0,
+      dropOffAtcToCheckout: addsToCart > 0
+        ? Math.max(0, 100 - Math.round((checkedOut / addsToCart) * 100))
+        : 0,
+    },
+    engagementToOrderPct: views > 0 ? Math.round((checkedOut / views) * 100) : null,
+    bundleMatrix: [],
+    topCampaignsRows: [],
+    customUtmParameters: [],
+  };
+}
+
 export type AttributionDashboardData = Awaited<ReturnType<typeof loadAttributionDashboardData>>;
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { admin, session } = await authenticate.admin(request);
   const url = new URL(request.url);
+  const subscription = await resolveShopEntitlements({ shopDomain: session.shop });
+  const accessMode = subscription?.entitlements
+    ? getAnalyticsAccessMode(subscription.entitlements)
+    : "SUMMARY";
 
   return defer({
     pixelStatus: getPixelStatus(admin),
-    analytics: loadAttributionDashboardData({
-      shopId: session.shop,
-      url,
-    }),
+    analytics: accessMode === "SUMMARY"
+      ? loadFreeAttributionSummary(session.shop)
+      : loadAttributionDashboardData({ shopId: session.shop, url }),
   });
 };
