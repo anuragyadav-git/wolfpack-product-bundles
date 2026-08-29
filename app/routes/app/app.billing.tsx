@@ -296,7 +296,7 @@ export default function BillingPage() {
                   <s-divider />
                   <s-stack direction="block" gap="small-100">
                     <p style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>{t("billing.route.overview")}</p>
-                    <s-grid gridTemplateColumns="@container billing-page (inline-size > 560px) repeat(4, minmax(0, 1fr)), repeat(2, minmax(0, 1fr))" gap="base">
+                    <s-grid gridTemplateColumns="@container billing-page (inline-size > 560px) 1fr 1fr 1fr 1fr, 1fr 1fr" gap="base">
                       <s-stack direction="block" gap="small-400">
                         <span style={{ fontSize: 16, fontWeight: 700 }}>{data.stats.activeBundles}</span>
                         <span style={{ fontSize: 12, color: "#6d7175" }}>{t("billing.route.activeBundles")}</span>
