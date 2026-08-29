@@ -1,3 +1,33 @@
+---
+schema_version: 1
+id: bundle-subscriptions
+title: Bundle Subscriptions
+type: test-spec
+status: active
+summary: Defines the provider-neutral subscription discovery, persistence, storefront, cart, and Shopify Function contracts for bundles.
+last_audited: 2026-08-29
+owners:
+  - engineering
+domains:
+  - bundles
+systems:
+  - admin-configure
+  - storefront-runtime
+  - cart-transform
+  - discount-function
+source_paths:
+  - app/lib/bundle-subscriptions.ts
+  - app/routes/app/_shared/bundle-configure/BundleSubscriptionsSection.tsx
+related_docs:
+  - internal docs/Architecture/Bundle Subscriptions.md
+tags:
+  - subscriptions
+  - selling-plans
+keywords:
+  - selling plan discovery
+  - bundle subscriptions
+---
+
 # Test Spec: Bundle Subscriptions
 **Spec ID:** bundle-subscriptions  **Created:** 2026-08-14
 
@@ -32,6 +62,7 @@ Define the provider-neutral Shopify selling-plan contract shared by Full Page Bu
 | 9 | Complete localized presentation | Merchant translates title, one-time label, and every selected plan's name, pill, and description | Exact locale then language locale overrides each saved base field | No runtime marketing fallback |
 | 10 | Plan refresh | Provider changes the selected group's plans or policies | Refresh replaces provider-owned plan data, preserves copy for surviving plans, and removes stale selections/defaults | Change Plan remains single-group selection |
 | 11 | Recurring bundle discount | Merchant enables recurring discounts | Signed subscription selection authorizes recurring pricing and recurring role setup uses cycle limit 0 | Initial-only role remains cycle limit 1 |
+| 12 | One common group discovered from an empty config | Discovery returns exactly one valid shared group | The group and all of its plans become selected so the merchant can complete required copy | A single-group UI has no manual group selector |
 
 ### RuntimeToken
 | # | Scenario | Input | Expected Output | Notes |
