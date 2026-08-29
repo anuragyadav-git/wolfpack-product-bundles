@@ -8,10 +8,11 @@
 
 import { AppLogger } from "./logger";
 
-const GET_BUNDLE_CONFIGURE_DATA_WITH_PRODUCT = `
-  query GetBundleConfigureData($id: ID!) {
+const GET_BUNDLE_PRODUCT = `
+  query GetBundleProduct($id: ID!) {
     product(id: $id) {
       id
+      legacyResourceId
       title
       handle
       status
@@ -21,27 +22,6 @@ const GET_BUNDLE_CONFIGURE_DATA_WITH_PRODUCT = `
       productType
       vendor
       tags
-      featuredMedia {
-        ... on MediaImage {
-          id
-          image {
-            url
-            altText
-          }
-        }
-      }
-      media(first: 5) {
-        nodes {
-          ... on MediaImage {
-            id
-            alt
-            image {
-              url
-              altText
-            }
-          }
-        }
-      }
       variants(first: 1) {
         edges {
           node {
@@ -52,9 +32,19 @@ const GET_BUNDLE_CONFIGURE_DATA_WITH_PRODUCT = `
         }
       }
     }
+  }
+`;
+
+const GET_SHOP_CURRENCY = `
+  query GetShopCurrency {
     shop {
       currencyCode
     }
+  }
+`;
+
+const GET_SHOP_LOCALES = `
+  query GetShopLocales {
     shopLocales(published: true) {
       locale
       name
@@ -64,63 +54,97 @@ const GET_BUNDLE_CONFIGURE_DATA_WITH_PRODUCT = `
   }
 `;
 
-const GET_BUNDLE_CONFIGURE_SHOP_DATA = `
-  query GetBundleConfigureShopData {
-    shop {
-      currencyCode
-    }
-    shopLocales(published: true) {
-      locale
-      name
-      primary
-      published
-    }
-  }
-`;
+type ShopifyGraphqlResult<T> = {
+  data?: T;
+  errors?: { message?: string }[];
+};
 
-export async function fetchBundleConfigureShopifyData(
+async function fetchBundleProduct(
   admin: any,
-  shopifyProductId: string | null,
+  shopifyProductId: string,
   bundleId: string,
-) {
-  const response = shopifyProductId
-    ? await admin.graphql(GET_BUNDLE_CONFIGURE_DATA_WITH_PRODUCT, {
-        variables: { id: shopifyProductId },
-      })
-    : await admin.graphql(GET_BUNDLE_CONFIGURE_SHOP_DATA);
-  const result = (await response.json()) as {
-    data?: {
+): Promise<any> {
+  try {
+    const response = await admin.graphql(GET_BUNDLE_PRODUCT, {
+      variables: { id: shopifyProductId },
+    });
+    const result = (await response.json()) as ShopifyGraphqlResult<{
       product?: any;
-      shop?: { currencyCode?: string };
+    }>;
+    if (result.errors?.length) {
+      throw new Error(
+        result.errors.map((error) => error.message ?? "Unknown Shopify error").join("; "),
+      );
+    }
+    return result.data?.product ?? null;
+  } catch (error) {
+    AppLogger.warn("Failed to fetch bundle product", {
+      component: "bundle-config",
+      bundleId,
+      operation: "fetch-product",
+    }, error);
+    return null;
+  }
+}
+
+async function fetchShopCurrencyCode(admin: any): Promise<string> {
+  const response = await admin.graphql(GET_SHOP_CURRENCY);
+  const result = (await response.json()) as ShopifyGraphqlResult<{
+    shop?: { currencyCode?: string };
+  }>;
+  const shopCurrencyCode = result.data?.shop?.currencyCode;
+  if (!shopCurrencyCode) {
+    throw new Error("Shop currency is missing from Shopify Admin response");
+  }
+  return shopCurrencyCode;
+}
+
+async function fetchShopLocales(
+  admin: any,
+): Promise<{ locale: string; name: string; primary: boolean }[]> {
+  try {
+    const response = await admin.graphql(GET_SHOP_LOCALES);
+    const result = (await response.json()) as ShopifyGraphqlResult<{
       shopLocales?: {
         locale: string;
         name: string;
         primary: boolean;
         published: boolean;
       }[];
-    };
-    errors?: { message?: string }[];
-  };
-
-  if (result.errors?.length) {
-    AppLogger.warn("Shopify returned bundle configure data errors", {
+    }>;
+    if (result.errors?.length) {
+      throw new Error(
+        result.errors.map((error) => error.message ?? "Unknown Shopify error").join("; "),
+      );
+    }
+    return (result.data?.shopLocales ?? [])
+      .filter((locale) => locale.published)
+      .map(({ locale, name, primary }) => ({ locale, name, primary }));
+  } catch (error) {
+    AppLogger.warn("Failed to fetch published shop locales", {
       component: "bundle-config",
-      bundleId,
-      operation: "fetch-configure-data",
-      errors: result.errors.map((error) => error.message ?? "Unknown Shopify error"),
-    });
+      operation: "fetch-shop-locales",
+    }, error);
+    return [];
   }
+}
 
-  const shopCurrencyCode = result.data?.shop?.currencyCode;
-  if (!shopCurrencyCode) {
-    throw new Error("Shop currency is missing from Shopify Admin response");
-  }
+export async function fetchBundleConfigureShopifyData(
+  admin: any,
+  shopifyProductId: string | null,
+  bundleId: string,
+) {
+  const [bundleProduct, shopCurrencyCode, shopLocales] = await Promise.all([
+    shopifyProductId
+      ? fetchBundleProduct(admin, shopifyProductId, bundleId)
+      : Promise.resolve(null),
+    fetchShopCurrencyCode(admin),
+    fetchShopLocales(admin),
+  ]);
 
   return {
-    bundleProduct: result.data?.product ?? null,
+    bundleProduct,
     shopCurrencyCode,
-    shopLocales: (result.data?.shopLocales ?? [])
-      .filter((locale) => locale.published)
-      .map(({ locale, name, primary }) => ({ locale, name, primary })),
+    shopLocales,
   };
 }
