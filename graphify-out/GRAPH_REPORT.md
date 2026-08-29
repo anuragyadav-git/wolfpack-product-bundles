@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `52bc8431`
+- Built from commit: `e9743d44`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -209,7 +209,7 @@
 - Business Requirements — Beco-Style Pricing Tier Selection for Full-Page Bundle Widget
 - Google Cloud Pub/Sub Setup Guide for Shopify Webhooks
 - Progress Log
-- BundleDataManager
+- cart_transform_run.ts
 - wolfpack-bundles-sdk.js
 - 2026-03-17 22:00 - All Phases Completed
 - Architecture Decision Record: Multi-Condition Step Support
@@ -247,7 +247,7 @@
 - Issue: Fix GraphQL Query Errors
 - Architecture Decision Record: Loading GIF Overlay
 - BundleSubscriptionsSection.tsx
-- cart_transform_run.ts
+- BundleDataManager
 - Product Owner Requirements: Sync Bundle (Hard Reset)
 - DashboardPage.tsx
 - Acceptance Criteria
@@ -1511,7 +1511,7 @@
 - EB-Style Save And Preview Flow Plan
 - Best Practices
 - Storefront Parity Placement Board
-- Render Webhook Worker HTTP Server
+- calculateDiscount
 - 2026-05-22 Live Validation Result
 - FakeElement
 - js-minifier.js
@@ -1663,7 +1663,7 @@
 - storefront-client.ts
 - Ot
 - Issue: PDP Widget — Theme Template Write Fails with 404
-- app.upload-store-file.tsx
+- Issue: FPB Default Product Selection — Grid, Footer & Tab UX
 - modal-discount-bar.js
 - bundle-widget.test.ts
 - billing-feedback-i18n.test.ts
@@ -1748,7 +1748,7 @@
 - Test Spec: Admin Progressive Loading
 - 2. Readiness Score System
 - Extension: wolfpack-utm-pixel/src/index.ts
-- order-backfill.test.ts
+- Render Webhook Worker HTTP Server
 - SUB-004 — Classify each feature
 - Test Spec: Only Bundles Rebrand
 - UUID Prevention Solution
@@ -1761,7 +1761,7 @@
 - Size Comparison
 - Widget Features
 - Feature Entitlement Audit
-- calculateDiscount
+- app.upload-store-file.tsx
 - Recommended Implementation Plan
 - Risks and Constraints
 - product-page/templates/registry.ts
@@ -1801,7 +1801,7 @@
 - Production 504 Root Cause Fix
 - 12. Wolfpack Implementation Blueprint (Updated)
 - useBundleConfigurationState.ts
-- Admin Tier Config SDE Implementation Plan
+- order-backfill.test.ts
 - Issue: Codebase Refactoring Plan — Separation of Concerns
 - Interaction Contract
 - PPB Product List Agentic Parity Spec
@@ -1813,7 +1813,7 @@
 - Current Wolfpack Architecture
 - Test Spec: Template Preview Feedback
 - Test Spec: Subscription Entitlement Domain
-- Issue: FPB Default Product Selection — Grid, Footer & Tab UX
+- Admin Tier Config SDE Implementation Plan
 - Test Spec: Settings Design Preview Scenario Persistence
 - designSettingsSlice.ts
 - Test Spec: Subscription Entitlement Service
@@ -3159,6 +3159,10 @@ Nodes (19): Cost Estimates, Google Cloud Pub/Sub Setup Guide for Shopify Webhook
 Cohesion: 0.10
 Nodes (19): 2026-01-22 00:00 - Planning Complete, 2026-01-22 12:00 - Phase 1: Common Form Components Completed, 2026-01-22 12:30 - Phase 2: Settings Panel Extraction Completed, 2026-01-22 13:00 - Phase 3: Preview Panel Extraction Completed, 2026-01-22 13:15 - Phase 4: Modal Layout Extraction Completed, 2026-01-22 13:30 - Phase 5: Final Integration Completed, 2026-01-22 14:00 - Additional Improvements: Polaris ColorPicker, 2026-01-22 14:15 - Additional Improvements: Config Extraction (+11 more)
 
+### Community 194 - "cart_transform_run.ts"
+Cohesion: 0.13
+Nodes (21): pricing.ts (Metafield Sync Pricing Utility), _bundle_components Cart Line Attribute, calculateDiscountPercentage (Cart Transform Pricing), EXPAND Path calculateDiscountPercentage Arg Mismatch Bug, cart-transform-logger.ts, cart_transform_run.ts, Fix _bundle_components JSON Exceeding Shopify Attribute Limit, Cart Transform InstructionCountLimitExceededError (+13 more)
+
 ### Community 195 - "wolfpack-bundles-sdk.js"
 Cohesion: 0.08
 Nodes (68): a(), Ae(), b(), Be(), c(), calculateBundleTotal(), calculateBuyXGetYDiscountAmount(), calculateDiscount() (+60 more)
@@ -3306,10 +3310,6 @@ Nodes (17): Architecture Decision Record: Loading GIF Overlay, Call Sites, Const
 ### Community 231 - "BundleSubscriptionsSection.tsx"
 Cohesion: 0.10
 Nodes (33): MultiLanguageField, MultiLanguageTextModal(), MultiLanguageTextModalProps, ShopLocale, buildPpbAddonTranslationFields(), BundleConfigureLocale, expandSubscriptionTranslationValues(), flattenSubscriptionTranslations() (+25 more)
-
-### Community 232 - "cart_transform_run.ts"
-Cohesion: 0.13
-Nodes (21): pricing.ts (Metafield Sync Pricing Utility), _bundle_components Cart Line Attribute, calculateDiscountPercentage (Cart Transform Pricing), EXPAND Path calculateDiscountPercentage Arg Mismatch Bug, cart-transform-logger.ts, cart_transform_run.ts, Fix _bundle_components JSON Exceeding Shopify Attribute Limit, Cart Transform InstructionCountLimitExceededError (+13 more)
 
 ### Community 233 - "Product Owner Requirements: Sync Bundle (Hard Reset)"
 Cohesion: 0.11
@@ -8333,9 +8333,9 @@ Nodes (6): 1. Run Tests Before Committing, 2. Run Pre-Deploy Before Deploying, 3
 Cohesion: 0.22
 Nodes (8): Evidence To Capture, Guardrails, Known Gotchas, PPB product-form ownership constraint, Probe Pattern, Recommended Cases, Storefront Parity Placement Board, When To Use
 
-### Community 1497 - "Render Webhook Worker HTTP Server"
-Cohesion: 0.22
-Nodes (9): Concept: Webhook Worker (HTTP server on Render), GCP Pub/Sub Removal (@google-cloud/pubsub), Pub/Sub → Render Webhook Migration — Architecture ADR, Pub/Sub → Render Webhook Migration — Business Requirement, Pub/Sub → Render Webhook Migration — PO Requirements, Pub/Sub → Render Webhook Migration — SDE Implementation, Render Webhook Worker HTTP Server, Shopify HMAC-SHA256 Webhook Signature Validation (+1 more)
+### Community 1497 - "calculateDiscount"
+Cohesion: 0.33
+Nodes (10): calculateBuyXGetYDiscountAmount(), calculateDiscount(), checkCondition(), getDiscountMethod(), getNextDiscountRule(), getRuleConditionOperator(), getRuleConditionType(), getRuleConditionValue() (+2 more)
 
 ### Community 1498 - "2026-05-22 Live Validation Result"
 Cohesion: 0.29
@@ -8853,9 +8853,9 @@ Nodes (10): Dt(), buildBundleDetailsDisplayProperties(), getBundleDetailsCartTok
 Cohesion: 0.22
 Nodes (8): 2026-03-20 00:30 - Starting fix, 2026-03-20 00:45 - Completed, Issue: PDP Widget — Theme Template Write Fails with 404, Overview, Phases Checklist, Progress Log, removeRest + unstable_newEmbeddedAuthStrategy Config, Shopify Admin GraphQL Theme API (themeFilesUpsert)
 
-### Community 1652 - "app.upload-store-file.tsx"
-Cohesion: 0.39
-Nodes (6): action(), ALLOWED_MIME_TYPES, errorResponse(), filenameFromUrl(), loader(), { authenticate: { admin: requireAdminSession } }
+### Community 1652 - "Issue: FPB Default Product Selection — Grid, Footer & Tab UX"
+Cohesion: 0.22
+Nodes (8): Concept: FPB Default Step (isDefault, defaultVariantId), 2026-04-09 16:30 - Phase 1 Completed, 2026-04-09 17:00 - All Phases Completed, Issue: FPB Default Product Selection — Grid, Footer & Tab UX, Overview, Phases Checklist, Progress Log, Root Cause (confirmed via Chrome DevTools)
 
 ### Community 1668 - "Test Spec: FPB Standard Mobile Summary Action"
 Cohesion: 0.33
@@ -8885,9 +8885,9 @@ Nodes (5): Acceptance Criteria, AdminProgressiveLoading, Purpose, Test Cases, Te
 Cohesion: 0.40
 Nodes (5): 2. Readiness Score System, Observed values, Scoring breakdown (inferred from what changed), What it implies for Wolfpack, What the panel shows
 
-### Community 1741 - "order-backfill.test.ts"
-Cohesion: 0.25
-Nodes (5): admin, mockAdminGraphql, mockMatchLineItemGroupsToBundles, mockOrderAttributionCreateMany, mockOrderAttributionFindMany
+### Community 1741 - "Render Webhook Worker HTTP Server"
+Cohesion: 0.22
+Nodes (9): Concept: Webhook Worker (HTTP server on Render), GCP Pub/Sub Removal (@google-cloud/pubsub), Pub/Sub → Render Webhook Migration — Architecture ADR, Pub/Sub → Render Webhook Migration — Business Requirement, Pub/Sub → Render Webhook Migration — PO Requirements, Pub/Sub → Render Webhook Migration — SDE Implementation, Render Webhook Worker HTTP Server, Shopify HMAC-SHA256 Webhook Signature Validation (+1 more)
 
 ### Community 1742 - "SUB-004 — Classify each feature"
 Cohesion: 0.22
@@ -8939,9 +8939,9 @@ Nodes (6): Box Selection (FPB only), Bundle Text Config (FPB), Collection Pagina
 Cohesion: 0.33
 Nodes (5): Approved monetized capabilities, Draft/public policy, Explicitly Free, Feature Entitlement Audit, Non-monetizable obligations
 
-### Community 1754 - "calculateDiscount"
-Cohesion: 0.33
-Nodes (10): calculateBuyXGetYDiscountAmount(), calculateDiscount(), checkCondition(), getDiscountMethod(), getNextDiscountRule(), getRuleConditionOperator(), getRuleConditionType(), getRuleConditionValue() (+2 more)
+### Community 1754 - "app.upload-store-file.tsx"
+Cohesion: 0.39
+Nodes (6): action(), ALLOWED_MIME_TYPES, errorResponse(), filenameFromUrl(), loader(), { authenticate: { admin: requireAdminSession } }
 
 ### Community 1755 - "Recommended Implementation Plan"
 Cohesion: 0.50
@@ -9021,9 +9021,9 @@ Nodes (9): 12.1 Feature Scope & Priority, 12.2 Theme Extension Banner — Wolfpa
 Cohesion: 0.05
 Nodes (50): AdminTaskAlertBanner(), AdminTaskAlertBannerProps, ConditionRule, useBundleConditions(), UseBundleConditionsProps, BundleData, BundleProductData, getBundleProductImageUrl() (+42 more)
 
-### Community 1858 - "Admin Tier Config SDE Implementation Plan"
-Cohesion: 0.40
-Nodes (5): Admin Tier Config BR, Admin Tier Config PO Requirements, PricingTiersSection UI Component, Admin Tier Config SDE Implementation Plan, validateTierConfig Server Function
+### Community 1858 - "order-backfill.test.ts"
+Cohesion: 0.25
+Nodes (5): admin, mockAdminGraphql, mockMatchLineItemGroupsToBundles, mockOrderAttributionCreateMany, mockOrderAttributionFindMany
 
 ### Community 1859 - "Issue: Codebase Refactoring Plan — Separation of Concerns"
 Cohesion: 0.28
@@ -9069,9 +9069,9 @@ Nodes (5): Acceptance Criteria, Purpose, TemplatePreviewFeedback, Test Cases, Te
 Cohesion: 0.33
 Nodes (5): Acceptance Criteria, PlanEntitlements, Purpose, Test Cases, Test Spec: Subscription Entitlement Domain
 
-### Community 1870 - "Issue: FPB Default Product Selection — Grid, Footer & Tab UX"
-Cohesion: 0.22
-Nodes (8): Concept: FPB Default Step (isDefault, defaultVariantId), 2026-04-09 16:30 - Phase 1 Completed, 2026-04-09 17:00 - All Phases Completed, Issue: FPB Default Product Selection — Grid, Footer & Tab UX, Overview, Phases Checklist, Progress Log, Root Cause (confirmed via Chrome DevTools)
+### Community 1870 - "Admin Tier Config SDE Implementation Plan"
+Cohesion: 0.40
+Nodes (5): Admin Tier Config BR, Admin Tier Config PO Requirements, PricingTiersSection UI Component, Admin Tier Config SDE Implementation Plan, validateTierConfig Server Function
 
 ### Community 1871 - "Test Spec: Settings Design Preview Scenario Persistence"
 Cohesion: 0.33
@@ -10965,11 +10965,11 @@ Nodes (11): {
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `buildStorefrontApiPath()` connect `bundle-widget-product-page.ts` to `cart.ts`, `app.dashboard/route.tsx`, `useConfigureActionController.ts`, `mobile-summary-methods.ts`, `config-lifecycle-methods.ts`?**
+- **Why does `en()` connect `n` to `updateAddToCartButton`, `config.ts`, `bundle-widget-product-page-bundled.js`?**
   _High betweenness centrality (0.005) - this node is a cross-community bridge._
-- **Why does `AttributionDashboardContent()` connect `show` to `useBundleConfigurationState.ts`, `AttributionDashboard.tsx`?**
-  _High betweenness centrality (0.004) - this node is a cross-community bridge._
-- **Why does `to()` connect `show` to `createElement`, `bundle-widget-full-page-bundled.js`, `t`?**
+- **Why does `bundle-widget-full-page.js Widget Source` connect `bundle-widget-full-page.js Widget Source` to `Prisma Schema (prisma/schema.prisma)`, `Concept: Full-Page Bundle Widget (FPB)`, `FPB Widget JS Source (bundle-widget-full-page.js)`, `Design Control Panel (DCP)`, `Issue: Default Lottie Loading Animation`, `Full-Page Bundle Preview Fix`, `Widget Loading Architecture Upgrade`, `Issue: Full-Page Footer Discount Message Uses Templates`, `Promo Banner Crop — Architecture ADR`, `bundle-widget.css / bundle-widget-full-page.css`, `Issue: Fix All Step Conditions in Full-Page Bundles`, `cart_transform_run.ts`, `Issue: Fix 504 Gateway Timeouts on DCP and Bundle API Endpoints`, `Issue: Full-Page Bundle Product Page Redirect`, `Issue: FPB Widget — Free Gift Footer Counter and Currency Bugs`, `Bundle Auto Re-sync — Requirements & Discussion Notes`, `Issue: DCP Settings Silently Not Saved to DB`, `Default Lottie Loading Animation Feature`, `FPB Sidebar Step Tabs Position + Tier Pills Not Showing in DCP Preview`, `Issue: FPB Default Product Selection — Grid, Footer & Tab UX`, `PDP Bundle Redesign Feature`?**
+  _High betweenness centrality (0.005) - this node is a cross-community bridge._
+- **Why does `Application Architecture Document` connect `Application Architecture Document` to `Wolfpack Product Bundles - Application Architecture`, `🎁 Wolfpack Product Bundles`, `Subscription Billing Deployment Guide`?**
   _High betweenness centrality (0.004) - this node is a cross-community bridge._
 - **What connects `AbandonedCheckout`, `AbandonedCheckoutConnection`, `AbandonedCheckoutEdge` to the rest of the system?**
   _20431 weakly-connected nodes found - possible documentation gaps or missing edges._
