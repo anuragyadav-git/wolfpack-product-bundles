@@ -93,13 +93,43 @@ describe("support chat client", () => {
     openSupportChatWithDraft("Please add an integration for Acme Checkout.", win);
 
     expect(win.$crisp).toEqual([
-      ["set", "message:text", ["Please add an integration for Acme Checkout."]],
+      ["on", "chat:opened", expect.any(Function)],
       ["do", "chat:show"],
       ["do", "chat:open"],
     ]);
+
+    const openRegistration = win.$crisp?.[0] as [string, string, () => void];
+    openRegistration[2]();
+
+    expect(win.$crisp?.slice(-2)).toEqual([
+      ["off", "chat:opened"],
+      ["set", "message:text", ["Please add an integration for Acme Checkout."]],
+    ]);
+    openRegistration[2]();
+    expect(
+      win.$crisp?.filter(
+        (command: any) => command[0] === "set" && command[1] === "message:text",
+      ),
+    ).toHaveLength(1);
     expect(win.$crisp).not.toContainEqual(
       expect.arrayContaining(["message:send"]),
     );
+  });
+
+  it("sets the draft immediately when chat is already open", () => {
+    const commands = Object.assign([] as unknown[], {
+      is: jest.fn(() => true),
+    });
+    const win = { $crisp: commands } as SupportChatWindow;
+
+    openSupportChatWithDraft("Please add Acme Checkout.", win);
+
+    expect(commands.is).toHaveBeenCalledWith("chat:opened");
+    expect(commands.slice()).toEqual([
+      ["set", "message:text", ["Please add Acme Checkout."]],
+      ["do", "chat:show"],
+      ["do", "chat:open"],
+    ]);
   });
 
   it("opens chat and sends an explicit support message", () => {

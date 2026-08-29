@@ -1,4 +1,5 @@
 .page {
+  box-sizing: border-box;
   width: min(100%, 1080px);
   margin: 0 auto;
   padding: clamp(20px, 4vw, 40px) clamp(20px, 5vw, 56px) 64px;

@@ -91,7 +91,7 @@ describe("ShopifyAppPricingClient", () => {
         cancelAtEndOfCycle: false,
         trialEndsAt: "2026-09-12T12:00:00.000Z",
         currentBillingCycle: null,
-        items: [{ handle: "growth", price: { active: true } }],
+        items: [{ handle: "growth", price: { active: false } }],
         pendingUpdate: null,
       } },
     }), { status: 200 })) as typeof fetch;
@@ -104,6 +104,7 @@ describe("ShopifyAppPricingClient", () => {
       outcome: "ACTIVE_GROWTH",
       planCode: "GROWTH",
       billingInterval: "MONTHLY",
+      itemHandles: ["growth"],
     });
   });
 

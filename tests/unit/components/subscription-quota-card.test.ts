@@ -1,5 +1,8 @@
 import React from "react";
+import { flushSync } from "react-dom";
 import { renderToStaticMarkup } from "react-dom/server";
+import { createRoot } from "react-dom/client";
+import { JSDOM } from "jsdom";
 import "../../../app/i18n/config";
 import { SubscriptionQuotaCard } from "../../../app/components/billing/SubscriptionQuotaCard";
 
@@ -26,5 +29,39 @@ describe("SubscriptionQuotaCard", () => {
 
     expect(view).toContain("Unlimited");
     expect(view).not.toContain(String(Number.MAX_SAFE_INTEGER));
+  });
+
+  it("removes the Free usage prompt when the merchant activates Dismiss", () => {
+    const dom = new JSDOM("<!doctype html><html><body></body></html>");
+    Object.assign(globalThis, {
+      window: dom.window,
+      document: dom.window.document,
+      Event: dom.window.Event,
+      MouseEvent: dom.window.MouseEvent,
+      IS_REACT_ACT_ENVIRONMENT: true,
+    });
+    const container = document.createElement("div");
+    const root = createRoot(container);
+
+    flushSync(() => {
+      root.render(React.createElement(SubscriptionQuotaCard, {
+        currentBundleCount: 1,
+        bundleLimit: 1,
+        isFreePlan: true,
+      }));
+    });
+
+    const banner = container.querySelector("s-banner");
+    expect(banner).not.toBeNull();
+    const dismissButton = banner?.querySelector("s-button");
+    expect(dismissButton?.textContent).toBe("Dismiss");
+
+    flushSync(() => {
+      dismissButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+
+    expect(container.querySelector("s-banner")).toBeNull();
+
+    flushSync(() => root.unmount());
   });
 });

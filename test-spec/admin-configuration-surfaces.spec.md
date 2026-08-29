@@ -5,7 +5,7 @@ title: Recovered Admin Surfaces
 type: test-spec
 status: active
 summary: Covers recovered Admin configuration surfaces and their current product contracts.
-last_audited: 2026-08-13
+last_audited: 2026-08-30
 owners:
   - engineering
 domains:
@@ -41,7 +41,7 @@ Lock the recovered Settings and Integrations Admin contracts so route UI stays a
 | 6 | Detailed Settings fields | Settings detail config | Design tabs, shared language fields, template sections, controls tabs, and per-layout control fields are present | Moves route beyond summary-only parity |
 | 7 | Request Integration flow | Integrations route source | Request Integration reveals sanitized request guidance and does not route to unrelated app events | Captured deployed bundle behavior is request/chat-backed |
 | 8 | Integrations logos | Integration config and route source | Gokwik and Shopflo render public logo images with text fallback | Captured from live Checkout integration inventory |
-| 9 | Integrations CTA type behavior | Integrations route source | Checkout cards render standard setup guide actions with visible CTA labels as `View Setup` | Captured from deployed Integrations bundle behavior |
+| 9 | Integrations CTA type behavior | Integrations route source | Checkout cards render `View Setup` actions that open app-owned guide summaries without external placeholder URLs | Captured from deployed Integrations behavior and hardened after PROD link QA |
 
 ## Acceptance Criteria
 - [ ] All listed test cases pass.

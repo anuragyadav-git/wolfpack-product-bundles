@@ -1,4 +1,6 @@
-import { action, loader } from "../../../app/routes/app/app.pricing";
+import React from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { action, loader, PricingBody } from "../../../app/routes/app/app.pricing";
 import { authenticate } from "../../../app/shopify.server";
 import { getShopifyAppPricingUrl } from "../../../app/services/subscriptions/app-pricing-navigation.server";
 import { recordBusinessEvent } from "../../../app/services/app-events.server";
@@ -30,6 +32,15 @@ jest.mock("../../../app/db.server", () => ({
   default: { bundle: { count: jest.fn() } },
 }));
 
+jest.mock("@remix-run/react", () => ({
+  ...jest.requireActual("@remix-run/react"),
+  useFetcher: jest.fn(),
+}));
+
+jest.mock("react-i18next", () => ({
+  useTranslation: () => ({ t: (key: string) => key }),
+}));
+
 const authenticateAdmin = authenticate.admin as jest.MockedFunction<typeof authenticate.admin>;
 const pricingUrl = getShopifyAppPricingUrl as jest.MockedFunction<typeof getShopifyAppPricingUrl>;
 const recordEvent = recordBusinessEvent as jest.MockedFunction<typeof recordBusinessEvent>;
@@ -40,6 +51,7 @@ const resolveEntitlements = resolveShopEntitlements as jest.MockedFunction<
   typeof resolveShopEntitlements
 >;
 const getDb = () => require("../../../app/db.server").default;
+const useFetcher = () => (require("@remix-run/react") as { useFetcher: jest.Mock }).useFetcher;
 
 function makeRequest(plan: string): Request {
   return new Request("https://app.example.com/app/pricing", {
@@ -101,8 +113,27 @@ describe("app pricing action", () => {
 
     expect(subscription).toMatchObject({
       error: "Failed to load pricing information",
-      currentPlan: "free",
+      currentPlan: null,
+      bundleLimit: null,
+      canCreateBundle: false,
     });
+  });
+
+  it("renders verification feedback instead of a Free plan for an unknown subscription", () => {
+    useFetcher().mockReturnValue({ state: "idle", data: null, submit: jest.fn() });
+
+    const view = renderToStaticMarkup(React.createElement(PricingBody, {
+      data: {
+        error: "Failed to load pricing information",
+        currentPlan: null,
+        currentBundleCount: 0,
+        bundleLimit: null,
+        canCreateBundle: false,
+      },
+    }));
+
+    expect(view).toContain("billing.error.verificationFailed");
+    expect(view).not.toContain("Public Bundle Usage");
   });
 
   it("returns the shop-specific hosted page for the single Growth plan", async () => {

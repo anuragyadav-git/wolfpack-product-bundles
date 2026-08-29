@@ -5,7 +5,7 @@ title: Wolfpack Product Bundles App Navigation and UI Map
 type: navigation-map
 status: authoritative
 summary: Routes, screens, actions, modals, and storefront-preview flows for the embedded app.
-last_audited: 2026-08-29
+last_audited: 2026-08-30
 owners:
   - engineering
 domains:
@@ -30,7 +30,7 @@ keywords:
 > Any time a new page, modal, tab, sidebar section, or user flow is added or removed,
 > this document **must** be updated. See CLAUDE.md for the enforcement rule.
 
-**Last Updated:** 2026-08-29
+**Last Updated:** 2026-08-30
 **Environment mapped:** SIT (`wolfpack-product-bundles-sit`)
 **Test store:** `wolfpack-store-test-1.myshopify.com`
 
@@ -109,6 +109,12 @@ Dashboard
 │           └── [Button] "Delete" → opens Delete Confirmation Modal
 ├── Existing founder support card → direct support chat
 ├── Existing support issues card → feature/storefront/uninstall help and direct support chat
+├── Resources
+│   ├── Bundle Inspiration → selects the gallery preview panel
+│   ├── Support → opens Crisp
+│   ├── Explore Update → /app/events
+│   ├── SDK Documentation → unavailable, non-interactive Coming soon state
+│   └── Bundle Gallery previews → unavailable, non-interactive Coming soon state
 │
 ├── Section: "Bundle Setup Steps" (visible when no bundles)
 │   └── 6-step numbered guide
@@ -301,19 +307,18 @@ Integrations Hub
     └── Shopflo → View Setup
 ```
 
-Shopify Checkout and Theme Cart Drawer are configured in Settings and are not duplicated in this catalog. All setup actions currently open `https://wolfpackapps.com` until WPB-owned quick setup guides are published.
+Shopify Checkout and Theme Cart Drawer are configured in Settings and are not duplicated in this catalog.
 
 Setup behavior:
 
 - The static catalog paints immediately and does not own a route-level loading gate.
 - Cards display Supported or Guided setup without claiming connection state.
-- `View Setup` opens the WPB-owned setup/support destination in a new browsing context.
+- `View Setup` opens an app-owned Polaris modal populated from that integration's maintained `guideSummary` instructions.
 - `Request Integration` opens Crisp and pre-fills the composer; the merchant must send the message.
 - External competitor help URLs are intentionally not embedded in source code; sanitized evidence remains in `docs/competitor-analysis/18-eb-settings-integrations-replication-evidence.md`.
 - Page-builder cards describe guided compatibility through the provider-neutral
-  Theme App Extension block and HTML marker. Until dedicated WPB guides are
-  published, their setup actions use the same `https://wolfpackapps.com`
-  destination as the other catalog cards.
+  Theme App Extension block and HTML marker. Their setup actions remain inside
+  the app and do not depend on an external placeholder domain.
 
 ---
 
@@ -386,6 +391,7 @@ Responsive analytics behavior:
 Pricing Page
 ├── App Bridge breadcrumb + app-owned back action → previous page, Dashboard fallback
 ├── Subscription quota card (current usage)
+│   └── Threshold prompt → Dismiss removes it for the current page mount
 │
 ├── Plan cards: Free vs Growth
 │   ├── [Button] "Choose Growth monthly" → Shopify-hosted App Pricing

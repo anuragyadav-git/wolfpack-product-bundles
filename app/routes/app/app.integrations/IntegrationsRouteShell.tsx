@@ -1,11 +1,53 @@
+import { useEffect, useRef, useState, type ElementRef } from "react";
 import { useTranslation } from "react-i18next";
-import { INTEGRATION_CATEGORIES } from "../../../lib/admin-configuration-surfaces";
+import {
+  INTEGRATION_CATEGORIES,
+  type IntegrationCard,
+} from "../../../lib/admin-configuration-surfaces";
 import { openSupportChatWithDraft } from "../../../lib/support-chat.client";
 import { AdminPageTitleBar } from "../../../components/AdminPageNavigation";
 import styles from "./IntegrationsRouteShell.module.css";
 
+type IntegrationGuide = IntegrationCard & { category: string };
+type PolarisModalElement = ElementRef<"s-modal">;
+
+function IntegrationSetupGuide({
+  integration,
+  onClose,
+}: {
+  integration: IntegrationGuide;
+  onClose: () => void;
+}) {
+  const modalRef = useRef<PolarisModalElement | null>(null);
+
+  useEffect(() => {
+    const modal = modalRef.current;
+    modal?.showOverlay?.();
+    return () => modal?.hideOverlay?.();
+  }, []);
+
+  return (
+    <s-modal
+      ref={modalRef}
+      id={`integration-setup-${integration.id}`}
+      heading={integration.title}
+      onHide={onClose}
+    >
+      <s-stack direction="block" gap="base">
+        {integration.guideSummary.map((instruction, index) => (
+          <s-stack key={instruction} direction="inline" gap="small" alignItems="start">
+            <s-badge>{String(index + 1)}</s-badge>
+            <s-paragraph>{instruction}</s-paragraph>
+          </s-stack>
+        ))}
+      </s-stack>
+    </s-modal>
+  );
+}
+
 function IntegrationsCatalog({ onBack }: { onBack: () => void }) {
   const { t } = useTranslation();
+  const [selectedIntegration, setSelectedIntegration] = useState<IntegrationGuide | null>(null);
   const integrations = INTEGRATION_CATEGORIES.flatMap((category) =>
     category.cards.map((integration) => ({
       ...integration,
@@ -96,9 +138,8 @@ function IntegrationsCatalog({ onBack }: { onBack: () => void }) {
 
                     <div className={`${styles.cardRow} ${styles.actionRow}`}>
                       <s-button
-                        href={integration.setupUrl}
-                        target="_blank"
                         inlineSize="fill"
+                        onClick={() => setSelectedIntegration(integration)}
                       >
                         {integration.ctaLabel}
                       </s-button>
@@ -110,6 +151,12 @@ function IntegrationsCatalog({ onBack }: { onBack: () => void }) {
           </s-section>
         </main>
       </s-query-container>
+      {selectedIntegration ? (
+        <IntegrationSetupGuide
+          integration={selectedIntegration}
+          onClose={() => setSelectedIntegration(null)}
+        />
+      ) : null}
     </>
   );
 }

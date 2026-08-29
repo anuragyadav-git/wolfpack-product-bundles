@@ -5,7 +5,7 @@ title: Bundle Subscriptions
 type: architecture
 status: implemented
 summary: Defines the provider-neutral FPB and PPB selling-plan, cart, discount, and release-validation architecture.
-last_audited: 2026-08-14
+last_audited: 2026-08-29
 owners:
   - engineering
 domains:
@@ -56,6 +56,8 @@ Subscriptions use one shared provider-neutral contract for Full Page Bundles and
 ## Discovery and validation
 
 Discovery must paginate every configured collection and inspect every selectable variant. Product-level group membership alone is insufficient: every selectable variant must expose the same compatible group and plan IDs. Returned groups include deterministic group/plan ordering, option names, positions, and normalized pricing policies.
+
+When discovery returns exactly one common group and the bundle has no saved group, Admin selects that group and all of its plans automatically. This is required because the single-group surface displays a label instead of a manual group selector; leaving the group unset would make the required subscription fields impossible to save. Multiple discovered groups still require an explicit merchant choice.
 
 Shopify supports both whole-product and explicit-variant selling-plan assignments. A group for which `SellingPlanGroup.appliesToProduct(productId:)` is true covers every selectable variant of that product. Otherwise, Wolfpack requires every selectable variant to be explicitly eligible. This distinction is required for Shopify Subscriptions, which creates whole-product assignments.
 

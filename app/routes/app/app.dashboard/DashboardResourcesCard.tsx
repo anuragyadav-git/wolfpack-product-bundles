@@ -2,7 +2,6 @@ import { useNavigate } from "@remix-run/react";
 import type { Dispatch, SetStateAction } from "react";
 import { useTranslation } from "react-i18next";
 import dashboardStyles from "./dashboard.module.css";
-import { APP_BRAND } from "../../../lib/app-brand";
 
 type DashboardResourcesCardProps = {
   activeResource: string;
@@ -16,10 +15,6 @@ export function DashboardResourcesCard({ activeResource, setActiveResource, hand
 
   const handleExploreUpdatesClick = () => {
     navigate("/app/events");
-  };
-
-  const handleSdkDocumentationClick = () => {
-    window.open(APP_BRAND.links.company, "_blank", "noopener,noreferrer");
   };
 
   return (
@@ -49,32 +44,39 @@ export function DashboardResourcesCard({ activeResource, setActiveResource, hand
         <button
           type="button"
           className={dashboardStyles.resourceItem}
-          onClick={handleSdkDocumentationClick}
+          disabled
         >
           <div className={dashboardStyles.resourceItemIcon}><s-icon type="code" /></div>
           <span className={dashboardStyles.resourceItemLabel}>{t("dashboard.resources.sdkDocumentation")}</span>
+          <s-badge>{t("dashboard.resources.comingSoon")}</s-badge>
         </button>
       </div>
 
       <div className={dashboardStyles.resourcesThumbnails}>
-        <a href={APP_BRAND.links.company} target="_blank" rel="noopener noreferrer" className={dashboardStyles.resourceThumbnailCard}>
+        <div
+          className={`${dashboardStyles.resourceThumbnailCard} ${dashboardStyles.resourceThumbnailCardUnavailable}`}
+          aria-disabled="true"
+        >
           <span aria-hidden="true" className={dashboardStyles.resourceThumbnailImage}>
             <s-icon type="image" />
           </span>
           <div className={dashboardStyles.resourceThumbnailFooter}>
             <span>{t("dashboard.resources.bundleGallery")}</span>
-            <s-icon type="external" color="subdued" />
+            <s-badge>{t("dashboard.resources.comingSoon")}</s-badge>
           </div>
-        </a>
-        <a href={APP_BRAND.links.company} target="_blank" rel="noopener noreferrer" className={dashboardStyles.resourceThumbnailCard}>
+        </div>
+        <div
+          className={`${dashboardStyles.resourceThumbnailCard} ${dashboardStyles.resourceThumbnailCardUnavailable}`}
+          aria-disabled="true"
+        >
           <span aria-hidden="true" className={dashboardStyles.resourceThumbnailImage}>
             <s-icon type="image" />
           </span>
           <div className={dashboardStyles.resourceThumbnailFooter}>
             <span>{t("dashboard.resources.bundleGallery")}</span>
-            <s-icon type="external" color="subdued" />
+            <s-badge>{t("dashboard.resources.comingSoon")}</s-badge>
           </div>
-        </a>
+        </div>
       </div>
     </div>
   </div>
