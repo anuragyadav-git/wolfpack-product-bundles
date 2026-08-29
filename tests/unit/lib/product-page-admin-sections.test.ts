@@ -5,6 +5,7 @@ import {
   PRODUCT_PAGE_SETUP_ITEMS,
   buildProductPageThemeEditorDeepLink,
   deriveCommonSellingPlanGroups,
+  navigateToProductPageDefaults,
   resolveProductPageTemplateSuffix,
   resolveProductPageThemeEditorTemplateHandle,
 } from "../../../app/lib/bundle-config/product-page-admin-sections";
@@ -43,6 +44,24 @@ describe("product page admin sections", () => {
 
   it("routes Bundle Settings Edit Defaults to Settings", () => {
     expect(PRODUCT_PAGE_EDIT_DEFAULTS_HREF).toBe("/app/settings");
+  });
+
+  it("navigates to Settings only after the Save Bar permits leaving", async () => {
+    let allowNavigation: (() => void) | undefined;
+    const leaveConfirmation = jest.fn(
+      () => new Promise<void>((resolve) => { allowNavigation = resolve; }),
+    );
+    const navigate = jest.fn();
+
+    const result = navigateToProductPageDefaults(leaveConfirmation, navigate);
+
+    expect(leaveConfirmation).toHaveBeenCalledTimes(1);
+    expect(navigate).not.toHaveBeenCalled();
+
+    allowNavigation?.();
+    await result;
+
+    expect(navigate).toHaveBeenCalledWith("/app/settings");
   });
 
   it("uses the captured no-common-selling-plan validation message", () => {

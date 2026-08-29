@@ -17,7 +17,6 @@ type ActiveSubscriptionResponse = {
       billingPeriod?: string;
       items?: Array<{
         handle?: string | null;
-        price?: { active?: boolean } | null;
       }>;
     } | null;
   };
@@ -30,10 +29,6 @@ const ACTIVE_SUBSCRIPTION_QUERY = `
       billingPeriod
       items {
         handle
-        price {
-          __typename
-          active
-        }
       }
     }
   }
@@ -102,7 +97,6 @@ export class ShopifyAppPricingClient {
       if (!subscription) return this.unknown(verifiedAt, "missing_active_subscription_field");
 
       const handles = (subscription.items ?? [])
-        .filter((item) => item.price?.active !== false)
         .map((item) => item.handle?.trim())
         .filter((handle): handle is string => Boolean(handle));
       const hasGrowth = handles.includes(GROWTH_PLAN_HANDLE);

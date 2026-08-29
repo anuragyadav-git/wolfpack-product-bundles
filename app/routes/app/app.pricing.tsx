@@ -23,6 +23,7 @@ import {
   UpgradeConfirmationModal,
   ValuePropsSection,
   FAQSection,
+  SubscriptionErrorBanner,
 } from "../../components/billing";
 import { navigateBackOrFallback } from "../../lib/navigation";
 import {
@@ -36,12 +37,20 @@ import { resolveShopEntitlements } from "../../services/subscriptions/subscripti
 import { getCurrentShopifyAppIdentity } from "../../services/subscriptions/shopify-app-identity.server";
 import db from "../../db.server";
 
-type PricingSubscriptionData = {
-  error?: "Failed to load pricing information";
+type VerifiedPricingSubscriptionData = {
+  error?: undefined;
   currentPlan: keyof typeof PLANS;
   currentBundleCount: number;
   bundleLimit: number;
   canCreateBundle: boolean;
+};
+
+type PricingSubscriptionData = VerifiedPricingSubscriptionData | {
+  error: "Failed to load pricing information";
+  currentPlan: null;
+  currentBundleCount: 0;
+  bundleLimit: null;
+  canCreateBundle: false;
 };
 
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -78,10 +87,10 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
       return {
         error: "Failed to load pricing information" as const,
-        currentPlan: "free",
-        currentBundleCount: 0,
-        bundleLimit: PLANS.free.bundleLimit,
-        canCreateBundle: true,
+        currentPlan: null,
+        currentBundleCount: 0 as const,
+        bundleLimit: null,
+        canCreateBundle: false as const,
       } satisfies PricingSubscriptionData;
     }
   })();
@@ -131,7 +140,7 @@ export async function action({ request }: ActionFunctionArgs) {
   return json({ error: "Invalid plan" }, { status: 400 });
 }
 
-function PricingBody({
+export function PricingBody({
   data,
 }: {
   data: PricingSubscriptionData;
@@ -161,6 +170,17 @@ function PricingBody({
       open(fetcher.data.hostedPlanUrl, '_top');
     }
   }, [fetcher.data]);
+
+  if (data.error) {
+    const reloadPricing = () => window.location.reload();
+    return (
+      <SubscriptionErrorBanner
+        errorCode="billing_unverified"
+        onRetry={reloadPricing}
+        onDismiss={reloadPricing}
+      />
+    );
+  }
 
   const isFreePlan = data.currentPlan === "free";
   const isGrowthPlan = data.currentPlan === "growth";

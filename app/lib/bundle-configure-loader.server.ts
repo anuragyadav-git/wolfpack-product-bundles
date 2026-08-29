@@ -12,7 +12,6 @@ const GET_BUNDLE_PRODUCT = `
   query GetBundleProduct($id: ID!) {
     product(id: $id) {
       id
-      legacyResourceId
       title
       handle
       status

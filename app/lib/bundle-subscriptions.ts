@@ -355,7 +355,9 @@ export function reconcileBundleSubscriptionPlanDiscovery(
   groups: Array<BundleSubscriptionConfigV1["selectedGroup"]>,
 ): BundleSubscriptionConfigV1 {
   const config = normalizeBundleSubscriptionConfig(value);
-  const selectedGroup = groups.find((group) => group?.id === config.selectedGroup?.id) ?? null;
+  const selectedGroup = groups.find(
+    (group) => group?.id === config.selectedGroup?.id,
+  ) ?? (groups.length === 1 ? groups[0] : null);
   if (!selectedGroup) {
     return {
       ...config,

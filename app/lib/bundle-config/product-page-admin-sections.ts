@@ -22,6 +22,14 @@ export interface ProductPageThemeEditorDeepLinkInput {
 
 export const PRODUCT_PAGE_EDIT_DEFAULTS_HREF = "/app/settings";
 
+export async function navigateToProductPageDefaults(
+  leaveConfirmation: () => Promise<void> | void,
+  navigate: (href: string) => void,
+): Promise<void> {
+  await leaveConfirmation();
+  navigate(PRODUCT_PAGE_EDIT_DEFAULTS_HREF);
+}
+
 export const PRODUCT_PAGE_SETUP_ITEMS: ProductPageSetupItem[] = [
   { id: "step_setup",         label: "Step Setup",         iconType: "note" },
   { id: "discount_pricing",   label: "Discount & Pricing", iconType: "filter" },

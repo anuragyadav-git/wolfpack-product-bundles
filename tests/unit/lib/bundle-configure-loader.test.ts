@@ -48,6 +48,7 @@ describe("fetchBundleConfigureShopifyData", () => {
       { variables: { id: "gid://shopify/Product/1" } },
     );
     const productQuery = graphql.mock.calls.find(([query]) => query.includes("product(id: $id)"))?.[0];
+    expect(productQuery).not.toContain("legacyResourceId");
     expect(productQuery).not.toContain("featuredMedia");
     expect(productQuery).not.toContain("media(first:");
   });

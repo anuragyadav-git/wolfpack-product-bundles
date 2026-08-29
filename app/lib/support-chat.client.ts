@@ -1,6 +1,10 @@
+interface CrispCommandQueue extends Array<unknown> {
+  is?: (state: string) => boolean;
+}
+
 export interface SupportChatWindow {
   __wpbLoadSupportChat?: () => void;
-  $crisp?: unknown[];
+  $crisp?: CrispCommandQueue;
   matchMedia?: (query: string) => {
     matches: boolean;
     addEventListener: (name: "change", listener: (event: { matches: boolean }) => void) => void;
@@ -110,7 +114,23 @@ export function openSupportChatWithDraft(
 ) {
   if (!win) return;
   win.__wpbLoadSupportChat?.();
-  queueCrispCommand(win, ["set", "message:text", [message]]);
+
+  let draftApplied = false;
+  const applyDraft = () => {
+    if (draftApplied) return;
+    draftApplied = true;
+    queueCrispCommand(win, ["set", "message:text", [message]]);
+  };
+  const handleChatOpened = () => {
+    queueCrispCommand(win, ["off", "chat:opened"]);
+    applyDraft();
+  };
+
+  if (win.$crisp?.is?.("chat:opened")) {
+    applyDraft();
+  } else {
+    queueCrispCommand(win, ["on", "chat:opened", handleChatOpened]);
+  }
   queueCrispCommand(win, ["do", "chat:show"]);
   queueCrispCommand(win, ["do", "chat:open"]);
 }
@@ -130,6 +150,6 @@ export function openSupportChatWithMessage(
 declare global {
   interface Window {
     __wpbLoadSupportChat?: () => void;
-    $crisp?: unknown[];
+    $crisp?: CrispCommandQueue;
   }
 }

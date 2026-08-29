@@ -261,23 +261,13 @@ describe("recovered admin surfaces contract", () => {
       "gokwik",
       "shopflo",
     ]));
-    expect(cards).toContainEqual(expect.objectContaining({
-      id: "judgeme",
-      setupUrl: "https://wolfpackapps.com",
-    }));
-    expect(cards).toContainEqual(expect.objectContaining({
-      id: "gokwik",
-      setupUrl: "https://wolfpackapps.com",
-    }));
-    expect(cards).toContainEqual(expect.objectContaining({
-      id: "shopflo",
-      setupUrl: "https://wolfpackapps.com",
-    }));
+    expect(cards.every((card) => !("setupUrl" in card))).toBe(true);
+    expect(cards.every((card) => card.guideSummary.length > 0)).toBe(true);
     expect(cards.filter((card) => ["pagefly", "gempages", "shogun"].includes(card.id)))
       .toEqual(expect.arrayContaining([
-        expect.objectContaining({ id: "pagefly", status: "Guided setup", setupUrl: "https://wolfpackapps.com" }),
-        expect.objectContaining({ id: "gempages", status: "Guided setup", setupUrl: "https://wolfpackapps.com" }),
-        expect.objectContaining({ id: "shogun", status: "Guided setup", setupUrl: "https://wolfpackapps.com" }),
+        expect.objectContaining({ id: "pagefly", status: "Guided setup" }),
+        expect.objectContaining({ id: "gempages", status: "Guided setup" }),
+        expect.objectContaining({ id: "shogun", status: "Guided setup" }),
       ]));
     expect(new Set(cards.map((card) => card.status))).toEqual(new Set([
       "Supported",

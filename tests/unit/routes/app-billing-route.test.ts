@@ -1,4 +1,6 @@
-import { action, loader } from "../../../app/routes/app/app.billing";
+import React from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import BillingPage, { action, loader } from "../../../app/routes/app/app.billing";
 import { authenticate } from "../../../app/shopify.server";
 import { BundleAnalyticsService } from "../../../app/services/bundle-analytics.server";
 import { resolveShopEntitlements } from "../../../app/services/subscriptions/subscription-service.server";
@@ -30,6 +32,16 @@ jest.mock("../../../app/db.server", () => ({
   default: { bundle: { count: jest.fn() } },
 }));
 
+jest.mock("@remix-run/react", () => ({
+  useLoaderData: jest.fn(),
+  useFetcher: jest.fn(),
+  useNavigate: () => jest.fn(),
+}));
+
+jest.mock("react-i18next", () => ({
+  useTranslation: () => ({ t: (key: string) => key }),
+}));
+
 const authenticateAdmin = authenticate.admin as jest.MockedFunction<typeof authenticate.admin>;
 const getQuickStats = BundleAnalyticsService.getQuickStats as jest.MockedFunction<
   typeof BundleAnalyticsService.getQuickStats
@@ -44,6 +56,10 @@ const pricingUrl = getShopifyAppPricingUrl as jest.MockedFunction<
   typeof getShopifyAppPricingUrl
 >;
 const getDb = () => require("../../../app/db.server").default;
+const remixHooks = () => require("@remix-run/react") as {
+  useLoaderData: jest.Mock;
+  useFetcher: jest.Mock;
+};
 
 function makeActionRequest(intent: string) {
   return new Request("https://app.example.com/app/billing", {
@@ -159,5 +175,32 @@ describe("app billing route", () => {
     });
 
     expect(response.status).toBe(500);
+  });
+
+  it("renders a Shopify-managed plan action for a verified Free plan", () => {
+    remixHooks().useLoaderData.mockReturnValue({
+      subscription: {
+        plan: "free",
+        status: "active",
+        isActive: true,
+        billingInterval: null,
+        bundleLimit: 1,
+        currentBundleCount: 1,
+        canCreateBundle: false,
+      },
+      stats: null,
+      upgraded: false,
+      callbackError: null,
+    });
+    remixHooks().useFetcher.mockReturnValue({
+      state: "idle",
+      formData: null,
+      data: null,
+      submit: jest.fn(),
+    });
+
+    const view = renderToStaticMarkup(React.createElement(BillingPage));
+
+    expect(view).toContain("common.actions.upgradeNow");
   });
 });

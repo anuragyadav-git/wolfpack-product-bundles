@@ -29,7 +29,6 @@ export interface CommonConfigureSidebarAdapter {
   };
   bundleProduct?: {
     id?: string | null;
-    legacyResourceId?: string | null;
     title?: string | null;
   } | null;
   bundleSetupItems: CommonSetupItem[];
@@ -57,7 +56,6 @@ export interface CommonConfigureSidebarAdapter {
 
 function getProductId(adapter: CommonConfigureSidebarAdapter) {
   return (
-    adapter.bundleProduct?.legacyResourceId ||
     adapter.bundleProduct?.id?.split("/").pop() ||
     adapter.bundle.shopifyProductId?.split("/").pop() ||
     null
