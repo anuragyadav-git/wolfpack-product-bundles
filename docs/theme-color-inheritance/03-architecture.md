@@ -1,3 +1,27 @@
+---
+schema_version: 1
+id: theme-color-inheritance-architecture
+title: Theme Color Inheritance Architecture
+type: architecture-decision
+status: proposed
+summary: Evaluates how Shopify theme colors should feed bundle-widget design defaults.
+last_audited: 2026-08-29
+owners:
+  - engineering
+domains:
+  - storefront-design
+systems:
+  - design-settings
+source_paths:
+  - app/services/theme-colors.server.ts
+related_docs:
+  - docs/theme-color-inheritance/02-PO-requirements.md
+tags:
+  - theme-colors
+keywords:
+  - CSS color inheritance
+---
+
 # Architecture Decision Record: Theme Color Inheritance for Free Plan Bundle Widget
 
 ## Context
@@ -14,7 +38,7 @@ We need to substitute the store's active Shopify theme colors as those fallback 
 - Theme colors must be cached in DB and fetched via Admin API at a different time (install, sync).
 - No plan-gating logic should be added to the CSS hot path — the endpoint is performance-critical (every storefront page load with a bundle widget hits it).
 - Must not require DB migrations that affect existing data or change existing columns.
-- The `generateCSSFromSettings` function signature change must be backward-compatible.
+- Update `generateCSSFromSettings` and its callers together; do not add a compatibility shim.
 
 ---
 
@@ -55,7 +79,7 @@ Add a subscription check in `api.design-settings.$shopDomain.tsx`. If plan === "
 **Cons:**
 - Extra DB query (subscription table) on every CSS request — adds ~5–10ms to each storefront page load
 - Adds plan-awareness to a public unauthenticated endpoint (security surface increase)
-- If `ENFORCE_PLAN_GATES` is not set (SIT), the plan check becomes a no-op — complex conditional
+- A deployment-specific plan-gate switch would create divergent SIT and production behavior.
 
 **Verdict:** ❌ Rejected — adds latency and complexity with no meaningful benefit
 
