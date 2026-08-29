@@ -1,9 +1,14 @@
 import type { ComponentType, useState } from "react";
 import type { FilePickerProps } from "../../../components/shared/file-picker/types";
+import type { AdminTaskAlert } from "../../../lib/admin-alert-feedback";
 
 type StateSetter<T> = (value: T | ((prev: T) => T)) => void;
 
-export type ConfigureBundleFlowDraft = Record<string, any>;
+export type ConfigureBundleFlowDraft = Record<string, any> & {
+  operationAlert: AdminTaskAlert | null;
+  setOperationAlert: (alert: AdminTaskAlert) => void;
+  clearOperationAlert: () => void;
+};
 
 export type ConfigureBundleFlowContextValue = ConfigureBundleFlowDraft & {
   ADDON_TEMPLATE_VARIABLES: [string, string][];
