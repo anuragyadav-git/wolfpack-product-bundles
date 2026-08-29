@@ -5,7 +5,7 @@ title: Page Builder Integrations
 type: test-spec
 status: implemented
 summary: Verifies provider-neutral page-builder bundle resolution, storefront mounting, and Admin catalog behavior.
-last_audited: 2026-08-21
+last_audited: 2026-08-30
 owners:
   - engineering
 domains:
@@ -70,7 +70,7 @@ Verify the provider-neutral GemPages, PageFly, and Shogun integration contract f
 | # | Scenario | Input | Expected Output | Notes |
 |---|---|---|---|---|
 | 1 | Page-builder inventory | Integration categories | PageFly, GemPages, and Shogun cards | Source constant owns inventory |
-| 2 | Temporary setup destinations | Page-builder cards | `https://wolfpackapps.com` | Dedicated guides are a later docs change |
+| 2 | Setup guide destinations | Page-builder cards | App-owned modal populated from each card's `guideSummary` | No external placeholder dependency |
 
 ## Acceptance Criteria
 - [x] All listed test cases pass

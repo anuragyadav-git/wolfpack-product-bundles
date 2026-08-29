@@ -174,14 +174,12 @@ export default function AppIndex() {
           Contact Support
         </button>
         <span className={styles.footerDot} />
-        <a
+        <span
           className={styles.footerLink}
-          href={APP_BRAND.links.documentation}
-          target="_blank"
-          rel="noreferrer"
+          aria-disabled="true"
         >
           Documentation
-        </a>
+        </span>
       </div>
     </div>
   );

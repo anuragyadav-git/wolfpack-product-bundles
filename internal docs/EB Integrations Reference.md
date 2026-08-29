@@ -53,8 +53,10 @@ Current WPB Admin inventory:
 - Checkout: GoKwik, Shopflo.
 - Settings > Controls > Checkout Integration dropdown keeps the complete redirect/cart callback provider list: Shopify checkout, Theme cart drawer, GoKwik, Shopflo, Zecpay, Rebuy, Shiprocket/Fastrr, Monster cart, Upcart, and Kaching Cart.
 
-WPB interim setup destination:
-- All card setup actions point to `https://wolfpackapps.com` until WPB-hosted guides are written.
+WPB setup destination:
+- Every card setup action opens an app-owned Polaris guide modal populated from the card's maintained `guideSummary` instructions.
+- The former `https://wolfpackapps.com` destination was retired on 2026-08-30 after direct Chrome verification showed that the domain was parked and redirected merchants to unrelated advertising content.
+- Shared company and listing links use the verified Shopify App Store developer and Only Bundles listing surfaces. Unpublished SDK documentation and gallery resources remain non-interactive instead of falling back to an unrelated destination.
 - `Request Integration` opens Crisp with an unsent, prefilled request so the merchant remains in control of sending it.
 
 WPB Crisp lifecycle gotcha, verified against the SIT dev tunnel in Chrome on 2026-08-30:
@@ -142,7 +144,7 @@ WPB supportability:
 - Direct PPB resolves by the generated parent-product handle. Direct FPB resolves by its per-shop public number. Eligible-product mode reuses canonical Bundle Embed targeting and preselection.
 - Manual fallback snippets emit the same marker contract and never load storefront JS/CSS themselves. The globally enabled `bundle-app-embed` owns Shopify `asset_url` assets and signed API resolution.
 - PageFly and GemPages use their Shopify App elements first. Shogun custom layouts use the Liquid-free marker fallback with concrete parent handle or public number.
-- The three WPB cards temporarily open `https://wolfpackapps.com` until dedicated provider guides are published.
+- The three WPB cards open their app-owned setup summaries and do not navigate to an external placeholder.
 
 ### Checkout and Side-Cart Handoff Providers
 
@@ -168,7 +170,7 @@ WPB supportability:
 
 ## Implementation Notes
 
-- Do not use EB article URLs in WPB card CTAs for now. Point to `https://wolfpackapps.com`.
+- Do not use EB article URLs or placeholder company domains in WPB card CTAs. Keep the sanitized setup instructions in the app-owned guide summaries.
 - Keep quick setup findings in docs only.
 - Code must not contain EB or Skailama competitor references.
 - Gokwik and Shopflo logos were visible in EB, but local logo downloads were blocked by the execution environment on 2026-06-04, so WPB may temporarily render text-logo fallbacks for those two until assets are added.

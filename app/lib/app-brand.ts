@@ -12,7 +12,7 @@ export const APP_BRAND = {
     accent: "#FE8A65",
   },
   links: {
-    company: "https://wolfpackapps.com",
-    documentation: "https://docs.wolfpack-bundles.com",
+    company: "https://apps.shopify.com/partners/wolfpack6",
+    listing: "https://apps.shopify.com/wolfpack-product-bundles-1",
   },
 } as const;
