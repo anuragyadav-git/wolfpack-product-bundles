@@ -225,6 +225,13 @@ as its only vertical scroll region, and pins both the customization header and
 action footer so the title, customization action, and `Next` stay available
 while merchants review every template.
 
+The PPB Place Widget product-template chooser uses a Polaris `s-modal`. Its
+projected Cancel action targets the modal with the native `--hide` command so
+it does not depend on a projected React click handler. Template choices must
+not use that native command because it suppresses their React selection
+callback; they imperatively hide the overlay and clear route state before
+opening Theme Editor.
+
 After a successful Select Template preview, the preview handler returns the
 exact URL opened in the reserved new tab. Closing the projected customization
 modal then opens one shared, small Polaris feedback modal. A merchant can
