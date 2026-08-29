@@ -10,15 +10,17 @@ export function DefaultProductDiscountTipBanner() {
   if (discountTipDismissed) return null;
 
   return (
-    <s-banner
-      tone="info"
-      {...({ title: "Discount tip" } as any)}
-      dismissible
-      onDismiss={dismiss}
-    >
-      Tip: Discounts are based on all items in your cart. Don&apos;t forget to
-      include the Pre Selected Product&apos;s quantity or amount when setting up
-      discounts.
-    </s-banner>
+    <s-box paddingBlockEnd="base">
+      <s-banner
+        tone="info"
+        heading="Discount tip"
+        dismissible
+        onDismiss={dismiss}
+      >
+        Tip: Discounts are based on all items in your cart. Don&apos;t forget to
+        include the Pre Selected Product&apos;s quantity or amount when setting up
+        discounts.
+      </s-banner>
+    </s-box>
   );
 }

@@ -1,6 +1,7 @@
 import { useFetcher } from "@remix-run/react";
 import { useAppBridge } from "@shopify/app-bridge-react";
 import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { action } from "../app.attribution";
 import {
   getUtmPixelStatusBannerModel,
@@ -8,12 +9,14 @@ import {
 } from "../../../lib/utm-pixel-status-banner";
 import { useBannerSessionState } from "../../../lib/banner-session-state";
 import styles from "./AttributionRouteShell.module.css";
+import { showAdminTransientErrorToast } from "../../../lib/admin-alert-feedback";
 
 // ─── Pixel Status Card ────────────────────────────────────────
 
 export const UTM_PIXEL_STATUS_BANNER_KEY = "analytics_utm_pixel_status";
 
 export function PixelStatusCard({ pixelActive }: { pixelActive: boolean }) {
+  const { t } = useTranslation();
   const shopify = useAppBridge();
   const fetcher = useFetcher<typeof action>();
   const isSubmitting = fetcher.state !== "idle";
@@ -31,11 +34,14 @@ export function PixelStatusCard({ pixelActive }: { pixelActive: boolean }) {
     const data = fetcher.data as { success: boolean; pixelActive?: boolean; message?: string; error?: string };
     if (data.success && data.pixelActive !== undefined) {
       setActive(data.pixelActive);
-      shopify.toast.show(data.message ?? "Done", { isError: false });
+      shopify.toast.show(
+        t(data.pixelActive ? "common.success.trackingEnabled" : "common.success.trackingDisabled"),
+        { isError: false },
+      );
     } else if (!data.success && data.error) {
-      shopify.toast.show(data.error, { isError: true, duration: 6000 });
+      showAdminTransientErrorToast(shopify, t("common.alerts.trackingNotUpdated"));
     }
-  }, [fetcher.data, shopify]);
+  }, [fetcher.data, shopify, t]);
 
   const handleToggle = useCallback(() => {
     fetcher.submit(
@@ -95,14 +101,9 @@ export function PixelStatusCard({ pixelActive }: { pixelActive: boolean }) {
           </s-button>
 
           <s-stack direction="block" gap="base">
-            <s-banner
-              tone="info"
-              heading="UTM pixel status"
-              dismissible={false}
-              hidden={false}
-            >
+            <s-paragraph>
               {UTM_PIXEL_PRIVACY_MESSAGE}
-            </s-banner>
+            </s-paragraph>
             <s-stack direction="block" gap="small">
               <p className={styles.pixelDisclosureText}>
                 Turn this on to connect ad clicks with bundle orders when shoppers visit through UTM-tagged links.

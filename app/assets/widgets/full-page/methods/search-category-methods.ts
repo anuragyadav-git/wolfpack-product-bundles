@@ -1,31 +1,28 @@
+import { createCloseIcon, createSearchIcon } from '../../shared/svg-icons.js';
+
 export const fullPageSearchCategoryMethods: Record<string, any> & ThisType<any> = {
 createSearchInput() {
   const searchContainer = document.createElement('div');
   searchContainer.className = 'step-search-container';
 
-  searchContainer.innerHTML = `
-    <div class="step-search-input-wrapper">
-      <svg class="step-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="11" cy="11" r="8"/>
-        <path d="M21 21l-4.35-4.35"/>
-      </svg>
-      <input
-        type="text"
-        class="step-search-input"
-        placeholder="Search products..."
-        value="${this.searchQuery}"
-        autocomplete="off"
-      />
-      <button class="step-search-clear" type="button"${this.searchQuery ? '' : ' hidden'}>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M18 6L6 18M6 6l12 12"/>
-        </svg>
-      </button>
-    </div>
-  `;
+  const wrapper = document.createElement('div');
+  wrapper.className = 'step-search-input-wrapper';
+  const searchIcon = createSearchIcon(document);
+  searchIcon.classList.add('step-search-icon');
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.className = 'step-search-input';
+  input.placeholder = 'Search products...';
+  input.value = this.searchQuery;
+  input.autocomplete = 'off';
+  const clearBtn = document.createElement('button');
+  clearBtn.className = 'step-search-clear';
+  clearBtn.type = 'button';
+  clearBtn.hidden = !this.searchQuery;
+  clearBtn.append(createCloseIcon(document, { size: 16 }));
+  wrapper.append(searchIcon, input, clearBtn);
+  searchContainer.append(wrapper);
 
-  const input = searchContainer.querySelector<HTMLInputElement>('.step-search-input')!;
-  const clearBtn = searchContainer.querySelector<HTMLButtonElement>('.step-search-clear')!;
 
   // Handle input with debounce
   input.addEventListener('input', (e: any) => {
@@ -73,7 +70,7 @@ updateProductGridWithSearch() {
   if (!gridContainer) return;
 
   const productGrid = this.createFullPageProductGrid(this.currentStepIndex);
-  gridContainer.innerHTML = '';
+  gridContainer.replaceChildren();
   gridContainer.appendChild(productGrid);
 },
 

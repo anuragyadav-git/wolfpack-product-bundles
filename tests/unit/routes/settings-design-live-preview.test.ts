@@ -1,8 +1,12 @@
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { DESIGN_CONFIGURATION } from "../../../app/lib/admin-configuration-surfaces";
-import { DesignSettingsView } from "../../../app/routes/app/app.settings/DesignSettingsView";
+import {
+  DesignSettingsView,
+  getDesignInspectorDisclosureState,
+} from "../../../app/routes/app/app.settings/DesignSettingsView";
 import { BundlePreviewModal, DesignFields } from "../../../app/routes/app/app.settings/SettingsDesignFields";
+import { SettingsContextualSaveBar } from "../../../app/routes/app/app.settings/SettingsFeedback";
 
 jest.mock("react-i18next", () => ({
   useTranslation: () => ({ t: (key: string) => key }),
@@ -17,6 +21,38 @@ jest.mock("../../../app/components/shared/FilePicker", () => ({
 }));
 
 describe("DesignSettingsView live preview", () => {
+  it("protects in-flight Design saves without serializing an invalid discard-confirmation attribute", () => {
+    const view = renderToStaticMarkup(
+      React.createElement(SettingsContextualSaveBar, {
+        isOpen: true,
+        isSaving: true,
+        onDiscard: jest.fn(),
+        onSave: jest.fn(),
+      }),
+    );
+
+    expect(view).toContain('id="settings-contextual-save-bar"');
+    expect(view).not.toContain("discardConfirmation");
+    expect(view).not.toContain("discardconfirmation");
+    expect(view).toContain('<button type="button" disabled="">Discard</button>');
+    expect(view).toContain('<button type="button" variant="primary" disabled="">Save</button>');
+  });
+
+  it("describes the page-local inspector disclosure in both states", () => {
+    expect(getDesignInspectorDisclosureState(false)).toEqual({
+      isCollapsed: false,
+      isExpanded: true,
+      icon: "chevron-right",
+      labelKey: "settingsDcp.preview.inspector.collapse",
+    });
+    expect(getDesignInspectorDisclosureState(true)).toEqual({
+      isCollapsed: true,
+      isExpanded: false,
+      icon: "chevron-left",
+      labelKey: "settingsDcp.preview.inspector.expand",
+    });
+  });
+
   it("disables Image Fit while the Loading preview surface is active", () => {
     const imageFields = DESIGN_CONFIGURATION.find((tab) => tab.title === "Images & GIFs")?.fields ?? [];
     const view = renderToStaticMarkup(
@@ -43,29 +79,31 @@ describe("DesignSettingsView live preview", () => {
         isActiveSubpageDirty: false,
         isPreviewModalOpen: false,
         previewBundles: [{ id: "bundle-1", name: "Summer Box", type: "Landing Page", bundleType: "full_page", viewUrl: "https://shop.test/pages/bundle" }],
-        saveMessage: null,
         setSettingsView: jest.fn(),
         setIsPreviewModalOpen: jest.fn(),
         setDesignFieldValues: jest.fn(),
         setInheritedColorFieldKeys: jest.fn(),
-        setSaveMessage: jest.fn(),
         discardActiveSettingsChanges: jest.fn(),
         saveActiveSettingsChanges: jest.fn(),
       }),
     );
 
-    expect(view).not.toContain("<iframe");
+    expect(view).toContain('src="/settings-design-preview-frame"');
+    expect(view).toContain('sandbox="allow-scripts allow-same-origin"');
     expect(view).toContain('<s-query-container containerName="design-settings">');
     expect(view).toContain('aria-label="settingsDcp.preview.workspace.label"');
     expect(view).toContain("settingsDcp.preview.workspace.preview");
     expect(view).toContain("settingsDcp.preview.workspace.customize");
     expect(view).toContain('aria-pressed="true"');
     expect(view).toContain('aria-label="Live bundle preview"');
-    expect(view).toContain('aria-label="settingsDcp.preview.previewOnly"');
+    expect(view).toContain('aria-expanded="true"');
+    expect(view).toContain('accessibilityLabel="settingsDcp.preview.inspector.collapse"');
+    expect(view).toContain('<s-spinner size="large" accessibilityLabel="settingsDcp.preview.loading">');
+    expect(view).not.toContain('aria-label="settingsDcp.preview.previewOnly"');
     expect(view).toContain("disabled");
     expect(view).toContain("<s-color-field");
     expect(view).toContain("<s-button");
-    expect(view).toContain("Customize this component");
+    expect(view).toContain("settingsDcp.preview.inspector.customize");
     expect(view).not.toContain("Expert Color Controls");
     expect(view).not.toContain("Brand Colors");
   });
@@ -82,12 +120,10 @@ describe("DesignSettingsView live preview", () => {
         isActiveSubpageDirty: false,
         isPreviewModalOpen: false,
         previewBundles: [],
-        saveMessage: null,
         setSettingsView: jest.fn(),
         setIsPreviewModalOpen: jest.fn(),
         setDesignFieldValues: jest.fn(),
         setInheritedColorFieldKeys: jest.fn(),
-        setSaveMessage: jest.fn(),
         discardActiveSettingsChanges: jest.fn(),
         saveActiveSettingsChanges: jest.fn(),
       }),
@@ -106,12 +142,10 @@ describe("DesignSettingsView live preview", () => {
         isActiveSubpageDirty: false,
         isPreviewModalOpen: false,
         previewBundles: [],
-        saveMessage: null,
         setSettingsView: jest.fn(),
         setIsPreviewModalOpen: jest.fn(),
         setDesignFieldValues: jest.fn(),
         setInheritedColorFieldKeys: jest.fn(),
-        setSaveMessage: jest.fn(),
         discardActiveSettingsChanges: jest.fn(),
         saveActiveSettingsChanges: jest.fn(),
       }),
@@ -134,12 +168,10 @@ describe("DesignSettingsView live preview", () => {
         isActiveSubpageDirty: false,
         isPreviewModalOpen: false,
         previewBundles: [{ id: "bundle-1", name: "Summer Box", type: "Landing Page", bundleType: "full_page", viewUrl: "https://shop.test/pages/bundle" }],
-        saveMessage: null,
         setSettingsView: jest.fn(),
         setIsPreviewModalOpen: jest.fn(),
         setDesignFieldValues: jest.fn(),
         setInheritedColorFieldKeys: jest.fn(),
-        setSaveMessage: jest.fn(),
         discardActiveSettingsChanges: jest.fn(),
         saveActiveSettingsChanges: jest.fn(),
       }),
@@ -167,12 +199,10 @@ describe("DesignSettingsView live preview", () => {
           bundleType: "full_page",
           viewUrl: "https://shop.test/apps/product-bundles/wpb/1",
         }],
-        saveMessage: null,
         setSettingsView: jest.fn(),
         setIsPreviewModalOpen: jest.fn(),
         setDesignFieldValues: jest.fn(),
         setInheritedColorFieldKeys: jest.fn(),
-        setSaveMessage: jest.fn(),
         discardActiveSettingsChanges: jest.fn(),
         saveActiveSettingsChanges: jest.fn(),
       }),

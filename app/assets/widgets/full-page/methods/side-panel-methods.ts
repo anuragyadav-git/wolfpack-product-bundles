@@ -1,12 +1,13 @@
 import { CurrencyManager } from '../../shared/currency-manager.js';
 import { PricingCalculator } from '../../shared/pricing-calculator.js';
-import { calculateBundleDiscountForPurchaseOption } from '../../shared/subscription-storefront-methods.js';
-import { calculateBundleTotalForPurchaseOption } from '../../shared/subscription-storefront-methods.js';
+import { calculateBundleDiscountForPurchaseOption, calculateBundleTotalForPurchaseOption } from '../../shared/subscription-storefront-methods.js';
 import { ToastManager } from '../../shared/toast-manager.js';
 import { TemplateManager } from '../../shared/template-manager.js';
 import { getSummaryDiscountBadgeLabel } from '../shared/summary-discount-badge.js';
 import { TemplateDesignSystem } from '../../shared/template-design-system.js';
 import { readRenderedDiscountProgressPercent } from '../../shared/components/discount-progress.js';
+import { createMessageFragment, type MessageSegment } from '../../shared/message-segments.js';
+import { createChevronIcon, createTrashIcon } from '../../shared/svg-icons.js';
 
 const sidePanelTemplateSystem = TemplateDesignSystem;
 
@@ -110,7 +111,7 @@ export function createSummaryClearButton(onClear: any, label = 'Clear') {
   const clearButton = document.createElement('button');
   clearButton.className = 'side-panel-clear-btn';
   clearButton.type = 'button';
-  clearButton.innerHTML = `<svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" aria-hidden="true"><path d="M6 2h8a1 1 0 0 1 1 1v1H5V3a1 1 0 0 1 1-1Zm-2 3h12l-1 13H5L4 5Zm4 2v9m4-9v9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>`;
+  clearButton.append(createTrashIcon(document, 13));
   const labelElement = document.createElement('span');
   labelElement.textContent = label;
   clearButton.appendChild(labelElement);
@@ -124,7 +125,7 @@ renderSidePanel(panel: any) {
   const previousProgressPercent = readRenderedDiscountProgressPercent(
     panel.querySelector?.('.fpb-discount-progress')
   );
-  panel.innerHTML = '';
+  panel.replaceChildren();
 
   const { totalPrice, totalQuantity, unitPrices } = calculateBundleTotalForPurchaseOption(this,
     this.selectedProducts,
@@ -251,7 +252,7 @@ renderSidePanel(panel: any) {
         currencyInfo,
         { messageType: nextRule ? 'progress' : 'success' }
       );
-      let discountMessage = '';
+      let discountMessage: MessageSegment[] = [];
       if (nextRule) {
         const progressTemplate = TemplateManager.getDiscountMessageTemplate({
           bundle: this.selectedBundle,
@@ -262,7 +263,7 @@ renderSidePanel(panel: any) {
           fallbackTemplate: this.config.discountTextTemplate || 'Add {conditionText} to get {discountText}',
           locale: window.Shopify?.locale,
         });
-        discountMessage = TemplateManager.replaceVariables(
+        discountMessage = TemplateManager.formatMessageSegments(
           progressTemplate,
           variables
         );
@@ -279,16 +280,17 @@ renderSidePanel(panel: any) {
           fallbackTemplate: this.config.successMessageTemplate || '🎉 You unlocked {{discountText}}!',
           locale: window.Shopify?.locale,
         });
-        discountMessage = TemplateManager.replaceVariables(
+        discountMessage = TemplateManager.formatMessageSegments(
           successTemplate,
           variables
         );
       }
-      if (discountMessage) {
-        discountMessage = this._formatSidebarDiscountMessage(discountMessage);
+      if (discountMessage.length > 0) {
+        const lastSegment = discountMessage.at(-1);
+        if (lastSegment) lastSegment.value = lastSegment.value.replace(/!+\s*$/, '');
         const msgEl = document.createElement('div');
         msgEl.className = 'side-panel-discount-message';
-        msgEl.innerHTML = discountMessage;
+        msgEl.append(createMessageFragment(discountMessage, msgEl.ownerDocument));
         summaryContent.appendChild(msgEl);
       }
     }
@@ -387,36 +389,57 @@ renderSidePanel(panel: any) {
         const imgSrc = this._getSelectedProductImageSrc(item);
 
         const isFreeGiftItem = item.isFreeGift === true && item.addonDisplayFree === true;
-        const qtySpan = `<span class="side-panel-product-qty" aria-label="Quantity ${item.quantity}">x${item.quantity}</span>`;
-        const priceHtml = isFreeGiftItem
-          ? `<span class="side-panel-product-price free-gift-price">${CurrencyManager.convertAndFormat(0, currencyInfo)}</span><span class="side-panel-product-original-price">${CurrencyManager.convertAndFormat(item.price * item.quantity, currencyInfo)} ${qtySpan}</span>`
-          : `<span class="side-panel-product-price">${CurrencyManager.convertAndFormat(item.price * item.quantity, currencyInfo)} ${qtySpan}</span>`;
+        const imageWrap = document.createElement('div');
+        imageWrap.className = 'side-panel-product-img-wrap';
+        const image = document.createElement(imgSrc ? 'img' : 'div');
+        image.className = imgSrc ? 'side-panel-product-img' : 'side-panel-product-img-placeholder';
+        if (imgSrc) {
+          (image as HTMLImageElement).src = imgSrc;
+          (image as HTMLImageElement).alt = summaryTitle;
+        }
+        imageWrap.appendChild(image);
+        if (item.quantity > 1) {
+          const badge = document.createElement('span');
+          badge.className = 'side-panel-qty-badge';
+          badge.textContent = String(item.quantity);
+          imageWrap.appendChild(badge);
+        }
 
-        if (isStandardDesktopSidebar) {
-          row.innerHTML = `
-            <div class="side-panel-product-img-wrap">
-              ${imgSrc ? `<img src="${imgSrc}" alt="${this._escapeHTML(summaryTitle)}" class="side-panel-product-img">` : '<div class="side-panel-product-img-placeholder"></div>'}
-              ${item.quantity > 1 ? `<span class="side-panel-qty-badge">${item.quantity}</span>` : ''}
-            </div>
-            <div class="side-panel-product-info">
-              <span class="side-panel-product-title">${this._escapeHTML(summaryTitle)}</span>
-              ${variantInfo ? `<span class="side-panel-product-variant">${this._escapeHTML(variantInfo)}</span>` : ''}
-              ${priceHtml}
-            </div>
-            <div class="side-panel-product-action"></div>
-          `;
+        const info = document.createElement('div');
+        info.className = 'side-panel-product-info';
+        const title = document.createElement('span');
+        title.className = 'side-panel-product-title';
+        title.textContent = summaryTitle;
+        info.appendChild(title);
+        if (variantInfo) {
+          const variant = document.createElement('span');
+          variant.className = 'side-panel-product-variant';
+          variant.textContent = variantInfo;
+          info.appendChild(variant);
+        }
+        const quantity = document.createElement('span');
+        quantity.className = 'side-panel-product-qty';
+        quantity.setAttribute('aria-label', `Quantity ${item.quantity}`);
+        quantity.textContent = `x${item.quantity}`;
+        if (isFreeGiftItem) {
+          const freePrice = document.createElement('span');
+          freePrice.className = 'side-panel-product-price free-gift-price';
+          freePrice.textContent = CurrencyManager.convertAndFormat(0, currencyInfo);
+          const originalPrice = document.createElement('span');
+          originalPrice.className = 'side-panel-product-original-price';
+          originalPrice.append(document.createTextNode(`${CurrencyManager.convertAndFormat(item.price * item.quantity, currencyInfo)} `), quantity);
+          info.append(freePrice, originalPrice);
         } else {
-          row.innerHTML = `
-            <div class="side-panel-product-img-wrap">
-              ${imgSrc ? `<img src="${imgSrc}" alt="${this._escapeHTML(summaryTitle)}" class="side-panel-product-img">` : '<div class="side-panel-product-img-placeholder"></div>'}
-              ${item.quantity > 1 ? `<span class="side-panel-qty-badge">${item.quantity}</span>` : ''}
-            </div>
-            <div class="side-panel-product-info">
-              <span class="side-panel-product-title">${this._escapeHTML(summaryTitle)}</span>
-              ${variantInfo ? `<span class="side-panel-product-variant">${this._escapeHTML(variantInfo)}</span>` : ''}
-            </div>
-            ${priceHtml}
-          `;
+          const price = document.createElement('span');
+          price.className = 'side-panel-product-price';
+          price.append(document.createTextNode(`${CurrencyManager.convertAndFormat(item.price * item.quantity, currencyInfo)} `), quantity);
+          info.appendChild(price);
+        }
+        row.append(imageWrap, info);
+        if (isStandardDesktopSidebar) {
+          const action = document.createElement('div');
+          action.className = 'side-panel-product-action';
+          row.appendChild(action);
         }
 
         // Remove button — hidden for default (mandatory) products
@@ -434,7 +457,7 @@ renderSidePanel(panel: any) {
             removeBtn.setAttribute('aria-disabled', 'true');
             removeBtn.title = removalState.blockedMessage;
           }
-          removeBtn.innerHTML = `<svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" aria-hidden="true" focusable="false"><path d="M6 2h8a1 1 0 0 1 1 1v1H5V3a1 1 0 0 1 1-1Zm-2 3h12l-1 13H5L4 5Zm4 2v9m4-9v9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>`;
+          removeBtn.append(createTrashIcon(document));
           removeBtn.addEventListener('click', () => {
             this.removeSummarySelectedProduct(item, summaryTitle);
           });
@@ -517,16 +540,32 @@ renderSidePanel(panel: any) {
   // Total
   const totalSection = document.createElement('div');
   totalSection.className = 'side-panel-total';
-  totalSection.innerHTML = `
-    <span class="side-panel-total-heading">
-      <span class="side-panel-total-label">Total</span>
-      ${discountBadgeLabel ? `<span class="fpb-summary-discount-badge" data-wpb-discount-feedback-pill>${discountBadgeLabel}</span>` : ''}
-    </span>
-    <div class="side-panel-total-prices">
-      ${shouldShowOriginalTotal ? `<span class="side-panel-total-original">${CurrencyManager.convertAndFormat(totalPrice, currencyInfo)}</span>` : ''}
-      <span class="side-panel-total-final">${CurrencyManager.convertAndFormat(finalPrice, currencyInfo)}</span>
-    </div>
-  `;
+  const totalHeading = document.createElement('span');
+  totalHeading.className = 'side-panel-total-heading';
+  const totalLabel = document.createElement('span');
+  totalLabel.className = 'side-panel-total-label';
+  totalLabel.textContent = 'Total';
+  totalHeading.appendChild(totalLabel);
+  if (discountBadgeLabel) {
+    const discountBadge = document.createElement('span');
+    discountBadge.className = 'fpb-summary-discount-badge';
+    discountBadge.setAttribute('data-wpb-discount-feedback-pill', '');
+    discountBadge.textContent = discountBadgeLabel;
+    totalHeading.appendChild(discountBadge);
+  }
+  const prices = document.createElement('div');
+  prices.className = 'side-panel-total-prices';
+  if (shouldShowOriginalTotal) {
+    const original = document.createElement('span');
+    original.className = 'side-panel-total-original';
+    original.textContent = CurrencyManager.convertAndFormat(totalPrice, currencyInfo);
+    prices.appendChild(original);
+  }
+  const final = document.createElement('span');
+  final.className = 'side-panel-total-final';
+  final.textContent = CurrencyManager.convertAndFormat(finalPrice, currencyInfo);
+  prices.appendChild(final);
+  totalSection.append(totalHeading, prices);
   if (isMobileSheet) {
     panel.appendChild(totalSection);
     return;
@@ -557,11 +596,7 @@ renderSidePanel(panel: any) {
     backBtn.className = 'side-panel-btn side-panel-btn-back';
     backBtn.type = 'button';
     backBtn.setAttribute('aria-label', this._resolveText('backButton', 'Back'));
-    backBtn.innerHTML = `
-      <svg viewBox="0 0 19 20" aria-hidden="true" focusable="false">
-        <path fill-rule="evenodd" clip-rule="evenodd" d="M15.5522 10.1839C15.5522 10.5719 15.2377 10.8865 14.8497 10.8865L5.77346 10.8865L8.32121 13.434C8.59557 13.7083 8.5956 14.1531 8.32126 14.4275C8.04692 14.7018 7.6021 14.7019 7.32774 14.4275L3.58056 10.6807C3.4488 10.549 3.37477 10.3703 3.37477 10.1839C3.37477 9.99761 3.4488 9.81891 3.58056 9.68716L7.32774 5.94036C7.6021 5.66602 8.04692 5.66604 8.32126 5.94041C8.5956 6.21478 8.59557 6.65959 8.32121 6.93393L5.77346 9.48142L14.8497 9.48142C15.2377 9.48142 15.5522 9.79595 15.5522 10.1839Z" fill="currentColor"></path>
-      </svg>
-    `;
+    backBtn.appendChild(createChevronIcon(document, 'left'));
     backBtn.addEventListener('click', async () => {
       if (this._isWidgetActionBusy || this.currentStepIndex <= 0) return;
 
@@ -661,9 +696,13 @@ _renderStandardSidebarSlotTiles(container: any, allSelectedProducts: any[] = [])
       const productId = getSelectionId(item);
       const selectedStepIndex = Number(item.stepIndex);
       const imgSrc = this._getSelectedProductImageSrc(item);
-      slot.innerHTML = imgSrc
-        ? `<img src="${imgSrc}" alt="${this._escapeHTML(summaryTitle)}" class="side-panel-inline-slot-image">`
-        : '<div class="side-panel-inline-slot-image-placeholder"></div>';
+      const image = document.createElement(imgSrc ? 'img' : 'div');
+      image.className = imgSrc ? 'side-panel-inline-slot-image' : 'side-panel-inline-slot-image-placeholder';
+      if (imgSrc) {
+        (image as HTMLImageElement).src = imgSrc;
+        (image as HTMLImageElement).alt = summaryTitle;
+      }
+      slot.appendChild(image);
 
       if (!item.isDefault) {
         const removeBtn = document.createElement('button');
@@ -706,9 +745,16 @@ _renderStandardSidebarSlotTiles(container: any, allSelectedProducts: any[] = [])
         slot.appendChild(removeBtn);
       }
     } else {
-      slot.innerHTML = emptyStateIconUrl
-        ? `<img class="side-panel-inline-slot-icon" src="${emptyStateIconUrl}" alt="" loading="lazy">`
-        : '<span class="side-panel-inline-slot-placeholder">+</span>';
+      const empty = document.createElement(emptyStateIconUrl ? 'img' : 'span');
+      empty.className = emptyStateIconUrl ? 'side-panel-inline-slot-icon' : 'side-panel-inline-slot-placeholder';
+      if (emptyStateIconUrl) {
+        (empty as HTMLImageElement).src = emptyStateIconUrl;
+        (empty as HTMLImageElement).alt = '';
+        (empty as HTMLImageElement).loading = 'lazy';
+      } else {
+        empty.textContent = '+';
+      }
+      slot.appendChild(empty);
     }
 
     slots.appendChild(slot);

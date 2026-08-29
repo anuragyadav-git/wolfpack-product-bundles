@@ -1,12 +1,14 @@
 import { CurrencyManager } from '../../shared/currency-manager.js';
 import { PricingCalculator } from '../../shared/pricing-calculator.js';
-import { calculateBundleDiscountForPurchaseOption } from '../../shared/subscription-storefront-methods.js';
-import { calculateBundleTotalForPurchaseOption } from '../../shared/subscription-storefront-methods.js';
+import {
+  calculateBundleDiscountForPurchaseOption,
+  calculateBundleTotalForPurchaseOption,
+} from '../../shared/subscription-storefront-methods.js';
 import { TemplateManager } from '../../shared/template-manager.js';
 import { ToastManager } from '../../shared/toast-manager.js';
 import { BUNDLE_WIDGET } from '../../shared/constants.js';
 import { getDiscountProgressData } from '../../shared/engine/bundle-selectors.js';
-import { renderDiscountProgress } from '../../shared/components/discount-progress.js';
+import { createDiscountProgressElement } from '../../shared/components/discount-progress.js';
 import {
   areRequiredProductPageStepsValid,
   getLastRequiredProductPageStepIndex,
@@ -119,7 +121,7 @@ renderFooter() {
       };
     }
   }
-  el.innerHTML = '';
+  el.replaceChildren();
 
   if (this._isProductPageCascadeTemplate()) {
     this._renderCascadeFooter(el);
@@ -207,7 +209,7 @@ renderFooter() {
     message,
   });
   progressData.milestones = milestones;
-  const progressMarkup = renderDiscountProgress(progressData, {
+  const progressElement = createDiscountProgressElement(progressData, {
     className: `bundle-footer-messaging bw-ppb-discount-progress${met ? ' bw-ppb-discount-progress--met' : ''}`,
     messageClassName: 'bw-ppb-discount-progress__message',
     trackClassName: 'bw-ppb-discount-progress__track',
@@ -219,14 +221,13 @@ renderFooter() {
     milestoneSubtitleClassName: 'bw-discount-progress__milestone-subtitle',
     renderInlineSubtitles: false,
     renderSubtitleList: false,
-    messageIsHtml: true,
     mode: progressMode === 'simple' ? 'bar' : 'stepped',
   });
   const modeClassName = progressMode === 'simple'
     ? 'bw-discount-progress--mode-bar'
     : 'bw-discount-progress--mode-stepped';
   el.className = `bundle-footer-messaging bw-ppb-discount-progress${met ? ' bw-ppb-discount-progress--met' : ''} ${modeClassName}`;
-  el.innerHTML = progressMarkup;
+  el.replaceChildren(progressElement);
   el.style.setProperty('--bw-discount-progress-color', primary);
 },
 
@@ -237,7 +238,7 @@ updateFooterMessaging() {
 renderQuantityOptionPills() {
   const el = this.elements.qtyPillsEl;
   if (!el) return;
-  el.innerHTML = '';
+  el.replaceChildren();
 
   const displayOptions = this.selectedBundle?.messaging?.displayOptions;
   const qtyOpts = displayOptions?.bundleQuantityOptions;

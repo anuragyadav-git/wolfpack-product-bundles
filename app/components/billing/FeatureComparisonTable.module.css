@@ -1,11 +1,15 @@
 .scrollRegion {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
   max-width: 100%;
+  contain: inline-size;
   overflow-x: auto;
   overscroll-behavior-inline: contain;
 }
 
 .scrollRegion:focus-visible {
-  outline: 2px solid #005bd3;
+  outline: 2px solid #1f3d2e;
   outline-offset: 2px;
 }
 
@@ -24,20 +28,20 @@
 }
 
 .featureHeading {
-  color: #202223;
+  color: #1f3d2e;
   font-weight: 600;
   text-align: left;
 }
 
 .planHeading {
   width: clamp(96px, 18vw, 120px);
-  color: #202223;
+  color: #1f3d2e;
   font-weight: 600;
   text-align: center;
 }
 
 .featureCell {
-  color: #202223;
+  color: #1f3d2e;
 }
 
 .featureCell[data-highlight="true"] {
@@ -48,9 +52,38 @@
   text-align: center;
 }
 
-.growColumn {
-  background: #f0f5ff;
-  color: #005bd3;
+.value {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.growthColumn {
+  color: #1f3d2e;
+  background: rgb(167 194 154 / 22%);
+}
+
+.check {
+  display: flex;
+  justify-content: center;
+  color: #557f57;
+}
+
+.unavailable {
+  display: flex;
+  justify-content: center;
+  color: #7d887f;
+}
+
+.headerRow {
+  border-bottom: 2px solid rgb(31 61 46 / 20%);
+}
+
+.bodyRow {
+  border-bottom: 1px solid rgb(31 61 46 / 14%);
+}
+
+.highlightRow {
+  background: rgb(244 237 226 / 55%);
 }
 
 @media (max-width: 767px) {
@@ -60,7 +93,7 @@
     left: 0;
     z-index: 1;
     min-width: 180px;
-    background: #ffffff;
-    box-shadow: 1px 0 0 #e1e3e5;
+    background: #fffdf8;
+    box-shadow: 1px 0 0 rgb(31 61 46 / 16%);
   }
 }

@@ -2,6 +2,7 @@ import { useNavigate } from "@remix-run/react";
 import type { Dispatch, SetStateAction } from "react";
 import { useTranslation } from "react-i18next";
 import dashboardStyles from "./dashboard.module.css";
+import { APP_BRAND } from "../../../lib/app-brand";
 
 type DashboardResourcesCardProps = {
   activeResource: string;
@@ -18,7 +19,7 @@ export function DashboardResourcesCard({ activeResource, setActiveResource, hand
   };
 
   const handleSdkDocumentationClick = () => {
-    window.open("https://wolfpackapps.com/", "_blank", "noopener,noreferrer");
+    window.open(APP_BRAND.links.company, "_blank", "noopener,noreferrer");
   };
 
   return (
@@ -56,7 +57,7 @@ export function DashboardResourcesCard({ activeResource, setActiveResource, hand
       </div>
 
       <div className={dashboardStyles.resourcesThumbnails}>
-        <a href="https://wolfpackapps.com/" target="_blank" rel="noopener noreferrer" className={dashboardStyles.resourceThumbnailCard}>
+        <a href={APP_BRAND.links.company} target="_blank" rel="noopener noreferrer" className={dashboardStyles.resourceThumbnailCard}>
           <span aria-hidden="true" className={dashboardStyles.resourceThumbnailImage}>
             <s-icon type="image" />
           </span>
@@ -65,7 +66,7 @@ export function DashboardResourcesCard({ activeResource, setActiveResource, hand
             <s-icon type="external" color="subdued" />
           </div>
         </a>
-        <a href="https://wolfpackapps.com/" target="_blank" rel="noopener noreferrer" className={dashboardStyles.resourceThumbnailCard}>
+        <a href={APP_BRAND.links.company} target="_blank" rel="noopener noreferrer" className={dashboardStyles.resourceThumbnailCard}>
           <span aria-hidden="true" className={dashboardStyles.resourceThumbnailImage}>
             <s-icon type="image" />
           </span>

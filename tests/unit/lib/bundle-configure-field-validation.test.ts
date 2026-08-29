@@ -202,4 +202,25 @@ describe("validateBundleConfigureFormData", () => {
     expect(submit).toHaveBeenCalledTimes(1);
     expect(submit).toHaveBeenCalledWith(valid);
   });
+
+  it("submits a valid enabled FPB add-on configuration once", () => {
+    const submit = jest.fn();
+    const valid = form({
+      validationAddonDraft: JSON.stringify({
+        addonProductsEnabled: true,
+        addonProductsTitle: "Choose an add-on",
+        addonTiers: [{
+          tierId: "tier-1",
+          title: "Tier one",
+          selectedAddonProducts: [{ id: "gid://shopify/Product/1" }],
+          eligibilityValue: 2,
+          discountValue: 10,
+        }],
+      }),
+    });
+
+    expect(submitValidBundleConfigureForm(valid, "fpb", submit)).toEqual([]);
+    expect(submit).toHaveBeenCalledTimes(1);
+    expect(submit).toHaveBeenCalledWith(valid);
+  });
 });

@@ -1,4 +1,5 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import type { AdminTaskAlert } from "../../lib/admin-alert-feedback";
 
 export type ConfigureModalKey = "pageSelection" | "widgetInstall" | "products" | "collections";
 
@@ -20,6 +21,7 @@ export interface ConfigureRouteState {
   forceNavigation: boolean;
   showAutoPlacementBanner: boolean;
   dismissedBanners: string[];
+  operationAlert: AdminTaskAlert | null;
 }
 
 export const defaultConfigureRouteState: ConfigureRouteState = {
@@ -45,6 +47,7 @@ export const defaultConfigureRouteState: ConfigureRouteState = {
   forceNavigation: false,
   showAutoPlacementBanner: false,
   dismissedBanners: [],
+  operationAlert: null,
 };
 
 function markDirty(state: ConfigureRouteState) {
@@ -147,10 +150,17 @@ export const configureRouteStateSlice = createSlice({
     setDismissedConfigureBanners(state, action: PayloadAction<string[]>) {
       state.dismissedBanners = action.payload;
     },
+    setConfigureOperationAlert(state, action: PayloadAction<AdminTaskAlert>) {
+      state.operationAlert = action.payload;
+    },
+    clearConfigureOperationAlert(state) {
+      state.operationAlert = null;
+    },
   },
 });
 
 export const {
+  clearConfigureOperationAlert,
   closeConfigureModal,
   initializeConfigureRouteState,
   markConfigureRouteDirty,
@@ -161,6 +171,7 @@ export const {
   setAvailablePages,
   setBundleProductDraft,
   setConfigureForceNavigation,
+  setConfigureOperationAlert,
   setConfigureLoadingPages,
   setConfigureProductImageUrl,
   setConfigureProductStatus,

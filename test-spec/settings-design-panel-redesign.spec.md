@@ -5,7 +5,7 @@ title: Settings Design Panel Redesign Test Spec
 type: test-spec
 status: active
 summary: Behavior coverage for the preview-first Settings Design workspace, contextual inspector, and Shop Brand color inheritance.
-last_audited: 2026-08-23
+last_audited: 2026-08-27
 owners:
   - engineering
 domains:
@@ -55,6 +55,7 @@ surface or an Expert-controls mode.
 | 8 | Change template with incompatible surface | Product Picker, then Product List | Surface falls back to Product card | Valid state is always preserved |
 | 9 | Resolve logical viewport | Desktop or mobile selector | Desktop uses 1280×1136 and mobile uses 390×844 | Both canvases fill the stable preview stage at wide Admin widths |
 | 10 | Fit logical viewport | Host width and selected logical viewport | Scale is capped at 1 and never drops below the minimum usable scale | Preview retains storefront breakpoints while fitting the Admin surface |
+| 11 | Resolve canvas footprint | Desktop or mobile selector | Desktop uses the storefront viewport; mobile adds an outer 430 x 900 device footprint around the unchanged 390 x 844 viewport | Device shell participates in fit calculation |
 
 ### DesignPreviewModel
 
@@ -92,6 +93,13 @@ surface or an Expert-controls mode.
 | 18 | Inherited color edit | Inherited color field receives merchant input | The field leaves the inherited-key set | Explicit override becomes authoritative |
 | 19 | Inherited color reset | Reset an explicit visible color field | The field returns to the inherited-key set | Shop Brand resolution resumes |
 | 20 | Phone panes | Phone Admin container | Preview and Customize panes retain the same local state | No duplicate inspector |
+| 21 | Inspector disclosure | Expanded inspector toggle | Inspector collapses to the right, preview receives the released width, and the toggle remains available | Page-local state only |
+| 22 | Inspector restoration | Collapsed inspector toggle | Inspector reopens with the same unsaved values and preview context | No persistence or data reset |
+| 23 | Inspector accessibility | Expanded or collapsed inspector | Polaris chevron, translated label, `aria-expanded`, and `aria-controls` describe the next action | Keyboard operable |
+| 24 | Narrow workspace | Collapsed desktop state followed by a narrow container | Preview / Customize tabs remain authoritative and inspector content stays available | Side chevron is desktop-only |
+| 25 | Desktop canvas growth | Collapse the inspector at a wide Admin width | Desktop stage expands with the preview column and the production surface scales up | No app-owned canvas gutter |
+| 26 | Mobile device shell | Select Mobile at wide or narrow Admin width | Storefront content remains 390 x 844 inside decorative phone hardware | Phone shell does not alter runtime viewport |
+| 27 | Inspector notch | Expanded or collapsed desktop inspector | Disclosure is vertically centered on the sidebar edge and retains its accessible button state | Narrow Admin hides it |
 
 ### ShopBrandPreview
 
@@ -118,3 +126,4 @@ surface or an Expert-controls mode.
 - [x] Phone-sized Admin containers expose Preview and Customize panes without losing local preview or unsaved Design state.
 - [x] Loading disables Image Fit, keeps loading controls active, and presents one clickable GIF drop zone without a nested button.
 - [x] Unit tests verify behavior and model outputs only; visual placement and styling are verified with Chrome, not source or CSS assertions.
+- [x] Desktop expanded/collapsed notch centering, released preview width, and narrow-Admin fallback pass refreshed Chrome verification.

@@ -11,6 +11,7 @@ import { shouldDisplayClassicFixedBundleRawTotal } from '../shared/summary-prici
 import { preflightVariantOnStorefront } from '../../shared/variant-preflight.js';
 import { buildStorefrontApiPath } from '../../../../config/storefront-proxy-routes.js';
 import { applySellingPlanToJsonCartItems } from '../../shared/engine/cart-submit.js';
+import { createCloseIcon } from '../../shared/svg-icons.js';
 
 function shouldIncludeBundleQuantityCartProperties(context: any) {
   const pricing = context?.selectedBundle?.pricing || {};
@@ -481,12 +482,7 @@ createStepElement(step: any, index: number) {
     // Add close icon badge at top right to clear all selections
     const clearBadge = document.createElement('div');
     clearBadge.className = 'step-clear-badge';
-    clearBadge.innerHTML = `
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-        <circle cx="12" cy="12" r="12" fill="#f3f4f6"/>
-        <path d="M8 8L16 16M16 8L8 16" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    `;
+    clearBadge.appendChild(createCloseIcon(document, { size: 24 }));
     clearBadge.title = 'Remove all products from this step';
     clearBadge.addEventListener('click', (e: any) => {
       e.stopPropagation(); // Prevent opening modal

@@ -5,7 +5,7 @@ title: EB Settings Language Reference
 type: reference
 status: active
 summary: Documents EB language settings evidence and the WPB storefront language-runtime contract.
-last_audited: 2026-08-21
+last_audited: 2026-08-27
 owners:
   - engineering
 domains:
@@ -213,6 +213,16 @@ The storefront should receive a single app-proxy JSON response with:
 - active FPB locale object
 - PPB `customTextSettings`
 - shared cart labels
+
+PPB additionally synchronizes a Shopify-hosted `$app.ppb_storefront_runtime`
+snapshot for outage-resistant startup. That snapshot must not repeat the full
+multilingual document for every locale. Each locale entry contains only the
+resolved locale, language mode, shared cart labels, and flattened PPB text
+overrides consumed by the widget. With all 39 translated presets, the compact
+snapshot is 94,989 bytes, below Shopify's 131,072-byte JSON metafield boundary;
+the former repeated-document shape was 18,296,378 bytes. The app-proxy response
+retains the complete language document because it is not the Shopify metafield
+storage boundary.
 
 In MULTIPLE mode, the storefront resolves a requested locale by exact
 case-insensitive match, then configured base-language match, then English. In

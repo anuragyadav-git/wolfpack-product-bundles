@@ -9,7 +9,7 @@ import { parseOnboardingBundleType } from "../../../lib/onboarding-bundle-type";
 import { showPolarisModal } from "../_shared/bundle-configure/modal-utils";
 import styles from "./create-bundle.module.css";
 import { ensureShopIdentity, recordBusinessEvent } from "../../../services/app-events.server";
-import { getCachedSubscriptionInfo, getSubscriptionInfoFromCache } from "../../../services/subscription-cache.server";
+import { APP_BRAND } from "../../../lib/app-brand";
 
 export const links: LinksFunction = () => [
   {
@@ -65,31 +65,6 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       entry_point: "create_route",
     },
   });
-  const cachedSubscriptionInfo = getCachedSubscriptionInfo(session.shop);
-  const subscriptionInfo = cachedSubscriptionInfo !== undefined
-    ? cachedSubscriptionInfo
-    : await getSubscriptionInfoFromCache(session.shop);
-  if (
-    subscriptionInfo &&
-    subscriptionInfo.currentBundleCount >= subscriptionInfo.bundleLimit
-  ) {
-    await recordBusinessEvent({
-      eventHandle: "pricing_limit_hit",
-      shopDomain: session.shop,
-      shopifyShopGid,
-      bundleType: typeof bundleType === "string" ? bundleType : null,
-      surface: "admin",
-      actor: "merchant",
-      routeFamily: "create",
-      result: "failure",
-      attributes: {
-        limit_key: "bundles",
-        plan: subscriptionInfo.plan,
-        current_value: subscriptionInfo.currentBundleCount,
-        limit_value: subscriptionInfo.bundleLimit,
-      },
-    });
-  }
   const result = await handleCreateBundle(admin, session, createFormData);
   const data = (await result.json()) as {
     error?: string;
@@ -232,7 +207,7 @@ export default function CreateBundleEntry() {
           </div>
           <s-button
             variant="secondary"
-            href="https://wolfpackapps.com"
+            href={APP_BRAND.links.company}
             target="_blank"
           >
             {t("createBundle.help")}

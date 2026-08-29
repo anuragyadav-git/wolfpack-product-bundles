@@ -45,6 +45,20 @@ function pageDeleteResponse(input: {
   }), { headers: { "content-type": "application/json" } }));
 }
 
+function productDeleteResponse(input: {
+  deletedProductId?: string | null;
+  userErrors?: Array<{ message: string }>;
+}) {
+  return Promise.resolve(new Response(JSON.stringify({
+    data: {
+      productDelete: {
+        deletedProductId: input.deletedProductId ?? null,
+        userErrors: input.userErrors ?? [],
+      },
+    },
+  }), { headers: { "content-type": "application/json" } }));
+}
+
 function formData(bundleId = "bundle-1") {
   const data = new FormData();
   data.set("bundleId", bundleId);
@@ -140,13 +154,16 @@ describe("handleDeleteBundle Page cleanup", () => {
     expect(mockDb.bundle.delete).not.toHaveBeenCalled();
   });
 
-  it("does not call Page APIs when deleting a PPB", async () => {
+  it("deletes a PPB parent product before deleting the bundle row", async () => {
     mockDb.bundle.findUnique.mockResolvedValue(bundle({
       bundleType: "product_page",
+      shopifyProductId: "gid://shopify/Product/42",
       shopifyPageId: null,
       shopifyPreviewPageId: null,
     }));
-    const admin = { graphql: jest.fn() };
+    const admin = { graphql: jest.fn(() => productDeleteResponse({
+      deletedProductId: "gid://shopify/Product/42",
+    })) };
 
     const response = await handleDeleteBundle(
       admin as any,
@@ -155,7 +172,34 @@ describe("handleDeleteBundle Page cleanup", () => {
     );
 
     expect(response.status).toBe(200);
-    expect(admin.graphql).not.toHaveBeenCalled();
+    expect(admin.graphql).toHaveBeenCalledWith(
+      expect.stringContaining("productDelete"),
+      { variables: { input: { id: "gid://shopify/Product/42" } } },
+    );
+    expect(admin.graphql.mock.invocationCallOrder[0]).toBeLessThan(
+      mockDb.bundle.delete.mock.invocationCallOrder[0],
+    );
     expect(mockDb.bundle.delete).toHaveBeenCalledTimes(1);
+  });
+
+  it("retains the bundle row when parent-product deletion fails", async () => {
+    mockDb.bundle.findUnique.mockResolvedValue(bundle({
+      bundleType: "product_page",
+      shopifyProductId: "gid://shopify/Product/42",
+      shopifyPageId: null,
+      shopifyPreviewPageId: null,
+    }));
+    const admin = { graphql: jest.fn(() => productDeleteResponse({
+      userErrors: [{ message: "Product cannot be deleted" }],
+    })) };
+
+    const response = await handleDeleteBundle(
+      admin as any,
+      { shop: "test-shop.myshopify.com" },
+      formData(),
+    );
+
+    expect(response.status).toBe(500);
+    expect(mockDb.bundle.delete).not.toHaveBeenCalled();
   });
 });

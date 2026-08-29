@@ -5,7 +5,7 @@ title: Bundle Types
 type: feature
 status: authoritative
 summary: Defines the storefront hosts and runtime responsibilities of full-page and product-page bundles.
-last_audited: 2026-08-11
+last_audited: 2026-08-28
 owners:
   - engineering
 domains:
@@ -60,9 +60,32 @@ Embeds the bundle selector directly on a Shopify product page.
 
 Bundle status does not mutate the Shopify parent product status. Parent-product discoverability is merchant-owned after creation and is changed through **Edit Product** in Shopify Admin. See [[Architecture/Bundle Parent Product]].
 
-## Inventory Sync
+## Inventory Handling
 
-Bundle stock = `MIN(component_inventory / component_quantity)` across all steps.
+FPB and PPB are customized bundles implemented with Cart Transform, not fixed
+bundles created through Shopify's product bundle API. Inventory therefore stays
+attached to the selected component variants instead of being copied to the
+parent bundle variant.
 
-- Updated via `inventoryAdjustQuantities` mutation
-- Debounced: skip if `inventorySyncedAt` is less than 60 seconds old
+- The storefront reads current component availability from Shopify's Storefront
+  API. When **Track inventory on Add To Cart** is enabled, FPB and PPB block
+  tracked zero-stock variants while preserving Shopify's continue-selling
+  behavior.
+- Shopify validates the real component variants again in cart and checkout and
+  deducts their inventory when the bundle is purchased. Cart Transform groups
+  those component lines for bundle presentation; it does not create a separate
+  inventory pool.
+- The parent bundle variant is a neutral bundle identity with
+  `inventoryPolicy: CONTINUE`. Wolfpack does not calculate or write an
+  artificial parent quantity such as
+  `MIN(component_inventory / component_quantity)`.
+- `inventory_levels/update` is not subscribed, and there is no webhook-driven
+  parent-inventory synchronization service. See [[Shopify Integration/Webhooks]].
+- Exact component quantities require the
+  `unauthenticated_read_product_inventory` Storefront scope. Without that scope,
+  quantity is treated as unknown rather than fabricating a stock limit.
+
+This matches Shopify's customized-bundle model: the app owns storefront
+availability, while Shopify provides component checks after add-to-cart. Fixed
+bundles use a different model in which Shopify maintains the parent variant's
+sellable quantity. See [Shopify's bundle implementation comparison](https://shopify.dev/docs/apps/build/product-merchandising/bundles/start-building).

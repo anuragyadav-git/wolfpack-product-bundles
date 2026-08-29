@@ -1,9 +1,15 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import {
   resolveTemplateReadyStep,
   shouldProcessTemplateResponse,
 } from "../../../lib/template-ready-step";
 import { removeLegacyPpbEmbedTextOverrides } from "../../../lib/ppb-bundle-embed";
+import { i18n } from "../../../i18n/config";
+import {
+  isPersistentAdminOperationError,
+  showAdminTransientErrorToast,
+} from "../../../lib/admin-alert-feedback";
+import { getEntitlementAlertCopyKeys } from "../../../lib/subscriptions/alerts";
 
 export function usePpbFetcherEffects({
   base,
@@ -21,6 +27,7 @@ export function usePpbFetcherEffects({
   saveHandlers: any;
 }) {
   const { fetcher } = base;
+  const lastFetcherIntentRef = useRef<string | null>(null);
   const {
     templateFetcher,
     lastTemplateRequestRef,
@@ -29,12 +36,18 @@ export function usePpbFetcherEffects({
   } = templateState;
 
   useEffect(() => {
+    const submittedIntent = fetcher.formData?.get("intent");
+    if (typeof submittedIntent === "string") {
+      lastFetcherIntentRef.current = submittedIntent;
+    }
     if (fetcher.data && fetcher.state === "idle") {
       if (fetcher.data === base.lastProcessedFetcherDataRef.current) {
         return;
       }
       base.lastProcessedFetcherDataRef.current = fetcher.data;
       const result = fetcher.data;
+      const requestIntent = lastFetcherIntentRef.current;
+      lastFetcherIntentRef.current = null;
       if (result.success) {
         saveHandlers.clearValidationErrors?.();
         if ("bundle" in result && result.bundle) {
@@ -103,16 +116,11 @@ export function usePpbFetcherEffects({
           visibility.originalBundleEmbedMultiLangTextRef.current =
             visibility.bundleEmbedMultiLangText;
           base.markAsSaved();
-          base.shopify.toast.show(
-            ("message" in result ? result.message : null) ||
-              "Changes saved successfully",
-            { isError: false },
-          );
+          base.clearOperationAlert();
+          base.shopify.toast.show(i18n.t("common.success.changesSaved"), { isError: false });
         } else if ("productId" in result && result.productId) {
-          const syncMessage =
-            ("message" in result ? result.message : null) ||
-            "Product synced successfully";
-          base.shopify.toast.show(syncMessage, { isError: false });
+          base.clearOperationAlert();
+          base.shopify.toast.show(i18n.t("common.success.productSynced"), { isError: false });
         } else if ("templates" in result && result.templates) {
           const rawTemplates = (result as any).templates || [];
           const enhancedTemplates =
@@ -127,18 +135,12 @@ export function usePpbFetcherEffects({
         } else if ("themeId" in result && result.themeId) {
           // Handled by individual callbacks.
         } else if ("synced" in result && result.synced) {
-          base.shopify.toast.show(
-            ("message" in result ? result.message : null) ||
-              "Bundle synced successfully",
-            { isError: false },
-          );
+          base.clearOperationAlert();
+          base.shopify.toast.show(i18n.t("common.success.bundleSynced"), { isError: false });
           base.revalidator.revalidate();
         } else {
-          base.shopify.toast.show(
-            ("message" in result ? result.message : null) ||
-              "Operation completed successfully",
-            { isError: false },
-          );
+          base.clearOperationAlert();
+          base.shopify.toast.show(i18n.t("common.success.operationComplete"), { isError: false });
         }
       } else {
         if (Array.isArray((result as any).fieldErrors)) {
@@ -146,11 +148,22 @@ export function usePpbFetcherEffects({
           return;
         }
         const errorMessage =
-          ("error" in result ? result.error : null) || "Operation failed";
-        base.shopify.toast.show(errorMessage, {
-          isError: true,
-          duration: 5000,
-        });
+          ("error" in result ? result.error : null) ?? "";
+        if (isPersistentAdminOperationError(requestIntent)) {
+          const alertCopy = getEntitlementAlertCopyKeys(
+            (result as any).entitlementFailure?.code,
+          );
+          base.setOperationAlert({
+            id: "bundle-save",
+            heading: i18n.t(alertCopy.heading),
+            message: i18n.t(alertCopy.message),
+          });
+        } else {
+          showAdminTransientErrorToast(
+            base.shopify,
+            i18n.t("common.alerts.operationFailed"),
+          );
+        }
         if (
           errorMessage.includes("pages") ||
           errorMessage.includes("templates")

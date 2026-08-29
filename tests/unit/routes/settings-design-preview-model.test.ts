@@ -7,12 +7,16 @@ import {
   DESIGN_PREVIEW_TEMPLATES,
   DESIGN_PREVIEW_VIEWPORTS,
   buildDesignPreviewTheme,
+  buildDesignPreviewStorefrontCss,
   calculateDesignPreviewFitScale,
+  getDesignPreviewCanvasSize,
+  getDesignPreviewFitPresentation,
   getDesignPreviewContextKind,
   getDesignPreviewFieldTarget,
   getDesignPreviewScene,
-  getDesignPreviewSurfaceFidelity,
-  getSupportedDesignPreviewSurfaces,
+  getDesignPreviewContextFidelity,
+  getSupportedDesignPreviewAreas,
+  getSupportedDesignPreviewScenarios,
   getDesignFieldsForPreviewContext,
   isDesignPreviewFieldApplicable,
 } from "../../../app/routes/app/app.settings/design-preview-model";
@@ -25,12 +29,31 @@ describe("Settings Design preview model", () => {
       desktop: { width: 1280, height: 1136 },
       mobile: { width: 390, height: 844 },
     });
-    expect(calculateDesignPreviewFitScale({ width: 1280, height: 1136 }, "desktop")).toBe(1);
-    expect(calculateDesignPreviewFitScale({ width: 960, height: 640 }, "desktop")).toBeCloseTo(640 / 1136);
-    expect(calculateDesignPreviewFitScale({ width: 780, height: 640 }, "mobile")).toBeCloseTo(640 / 844);
-    expect(calculateDesignPreviewFitScale({ width: 312, height: 844 }, "mobile")).toBe(0.8);
+    expect(calculateDesignPreviewFitScale({ width: 1320, height: 920 }, "desktop")).toBe(1);
+    expect(calculateDesignPreviewFitScale({ width: 1650, height: 1150 }, "desktop")).toBe(1.25);
+    expect(calculateDesignPreviewFitScale({ width: 960, height: 640 }, "desktop")).toBeCloseTo(640 / 920);
+    expect(getDesignPreviewCanvasSize("desktop")).toEqual({ width: 1320, height: 920 });
+    expect(getDesignPreviewCanvasSize("mobile")).toEqual({ width: 428, height: 882 });
+    expect(calculateDesignPreviewFitScale({ width: 780, height: 640 }, "mobile")).toBeCloseTo(640 / 882);
+    expect(calculateDesignPreviewFitScale({ width: 342.4, height: 900 }, "mobile")).toBeCloseTo(0.8);
     expect(calculateDesignPreviewFitScale({ width: 0, height: 0 }, "desktop")).toBe(1);
-    expect(calculateDesignPreviewFitScale({ width: Number.NaN, height: 568 }, "desktop")).toBe(0.5);
+    expect(calculateDesignPreviewFitScale({ width: Number.NaN, height: 460 }, "desktop")).toBe(0.5);
+  });
+
+  it("calculates an atomic fit presentation without shrinking the logical storefront viewport", () => {
+    expect(getDesignPreviewFitPresentation({ width: 856, height: 882 }, "mobile")).toEqual({
+      scale: 1,
+      canvasWidth: 428,
+      canvasHeight: 882,
+    });
+    const constrainedPresentation = getDesignPreviewFitPresentation(
+      { width: 342.4, height: 705.6 },
+      "mobile",
+    );
+    expect(constrainedPresentation.scale).toBeCloseTo(0.8);
+    expect(constrainedPresentation.canvasWidth).toBeCloseTo(342.4);
+    expect(constrainedPresentation.canvasHeight).toBeCloseTo(705.6);
+    expect(DESIGN_PREVIEW_VIEWPORTS.mobile).toEqual({ width: 390, height: 844 });
   });
 
   it("resolves storefront context from canonical template families", () => {
@@ -45,15 +68,15 @@ describe("Settings Design preview model", () => {
     }
   });
 
-  it("does not expose or claim fidelity for a synthetic Builder surface", () => {
+  it("marks every supported area and state as production storefront fidelity", () => {
     for (const template of DESIGN_PREVIEW_TEMPLATES) {
-      expect(template.supportedSurfaces).not.toContain("builder");
-      expect(getDesignPreviewSurfaceFidelity(template.key, "cart-summary")).toBe("storefront");
-      expect(getDesignPreviewSurfaceFidelity(template.key, "loading")).toBe("representative");
-      expect(getDesignPreviewSurfaceFidelity(template.key, "validation")).toBe("representative");
-      expect(getDesignPreviewSurfaceFidelity(template.key, "upsell")).toBe("representative");
+      expect(template.supportedAreas).not.toContain("builder");
+      expect(getDesignPreviewContextFidelity(template.key, "cart-summary")).toBe("storefront");
+      expect(getDesignPreviewContextFidelity(template.key, "loading")).toBe("storefront");
+      expect(getDesignPreviewContextFidelity(template.key, "validation")).toBe("storefront");
+      expect(getDesignPreviewContextFidelity(template.key, "upsell")).toBe("storefront");
     }
-    expect(getDesignPreviewSurfaceFidelity("horizontal-slots", "product-picker")).toBe("representative");
+    expect(getDesignPreviewContextFidelity("horizontal-slots", "product-picker")).toBe("storefront");
   });
 
   it("derives all eight descriptors from canonical storefront contracts", () => {
@@ -64,7 +87,8 @@ describe("Settings Design preview model", () => {
       navigation: template.navigation,
       categories: template.categories,
       summary: template.summary,
-      surfaces: template.supportedSurfaces,
+      areas: template.supportedAreas,
+      scenarios: template.supportedScenarios,
     }))).toEqual([
       {
         key: "standard",
@@ -73,7 +97,8 @@ describe("Settings Design preview model", () => {
         navigation: "timeline",
         categories: "accordion",
         summary: "rows",
-        surfaces: ["navigation", "categories", "product-card", "product-slots", "cart-summary", "loading", "validation", "upsell"],
+        areas: ["navigation", "categories", "product-card", "product-slots", "cart-summary"],
+        scenarios: ["default", "loading", "validation", "upsell"],
       },
       {
         key: "classic",
@@ -82,7 +107,8 @@ describe("Settings Design preview model", () => {
         navigation: "timeline",
         categories: "pills",
         summary: "slot-grid",
-        surfaces: ["navigation", "categories", "product-card", "product-slots", "cart-summary", "loading", "validation", "upsell"],
+        areas: ["navigation", "categories", "product-card", "product-slots", "cart-summary"],
+        scenarios: ["default", "loading", "validation", "upsell"],
       },
       {
         key: "compact",
@@ -91,7 +117,8 @@ describe("Settings Design preview model", () => {
         navigation: "compact-timeline",
         categories: "pills",
         summary: "compact-slots",
-        surfaces: ["navigation", "categories", "product-card", "product-slots", "cart-summary", "loading", "validation", "upsell"],
+        areas: ["navigation", "categories", "product-card", "product-slots", "cart-summary"],
+        scenarios: ["default", "loading", "validation", "upsell"],
       },
       {
         key: "horizontal",
@@ -100,7 +127,8 @@ describe("Settings Design preview model", () => {
         navigation: "horizontal-timeline",
         categories: "underline",
         summary: "rows",
-        surfaces: ["navigation", "categories", "product-card", "product-slots", "cart-summary", "loading", "validation", "upsell"],
+        areas: ["navigation", "categories", "product-card", "product-slots", "cart-summary"],
+        scenarios: ["default", "loading", "validation", "upsell"],
       },
       {
         key: "product-list",
@@ -109,7 +137,8 @@ describe("Settings Design preview model", () => {
         navigation: "list-steps",
         categories: "tabs",
         summary: "list-selected-drawer",
-        surfaces: ["bundle-header", "navigation", "categories", "product-card", "product-slots", "cart-summary", "loading", "validation", "upsell"],
+        areas: ["bundle-header", "navigation", "categories", "product-card", "product-slots", "cart-summary"],
+        scenarios: ["default", "validation"],
       },
       {
         key: "product-grid",
@@ -118,7 +147,8 @@ describe("Settings Design preview model", () => {
         navigation: "grid-steps",
         categories: "tabs",
         summary: "pdp-footer",
-        surfaces: ["bundle-header", "navigation", "categories", "product-card", "product-slots", "cart-summary", "loading", "validation", "upsell"],
+        areas: ["bundle-header", "navigation", "categories", "product-card", "product-slots", "cart-summary"],
+        scenarios: ["default", "validation"],
       },
       {
         key: "horizontal-slots",
@@ -127,7 +157,8 @@ describe("Settings Design preview model", () => {
         navigation: "none",
         categories: "none",
         summary: "modal-footer",
-        surfaces: ["bundle-header", "product-slots", "product-picker", "cart-summary", "loading", "validation", "upsell"],
+        areas: ["bundle-header", "product-slots", "cart-summary"],
+        scenarios: ["default", "product-picker", "validation"],
       },
       {
         key: "vertical-slots",
@@ -136,7 +167,8 @@ describe("Settings Design preview model", () => {
         navigation: "none",
         categories: "none",
         summary: "modal-footer",
-        surfaces: ["bundle-header", "product-slots", "product-picker", "cart-summary", "loading", "validation", "upsell"],
+        areas: ["bundle-header", "product-slots", "cart-summary"],
+        scenarios: ["default", "product-picker", "validation"],
       },
     ]);
   });
@@ -152,9 +184,13 @@ describe("Settings Design preview model", () => {
       expect(getDesignPreviewFieldTarget(fieldKey)).toBeDefined();
       for (const template of DESIGN_PREVIEW_TEMPLATES) {
         const target = getDesignPreviewFieldTarget(fieldKey, template.key);
-        const isMappedToSupportedSurface = !isDesignPreviewFieldApplicable(fieldKey, template.key)
-          || Boolean(target && getSupportedDesignPreviewSurfaces(template.key).includes(target.surface));
-        expect(isMappedToSupportedSurface).toBe(true);
+        const isMappedToSupportedContext = !isDesignPreviewFieldApplicable(fieldKey, template.key)
+          || Boolean(target && (
+            target.target.kind === "area"
+              ? getSupportedDesignPreviewAreas(template.key).includes(target.target.value)
+              : getSupportedDesignPreviewScenarios(template.key).includes(target.target.value)
+          ));
+        expect(isMappedToSupportedContext).toBe(true);
       }
     }
   });
@@ -163,23 +199,27 @@ describe("Settings Design preview model", () => {
     expect(getDesignPreviewFieldTarget(
       "expert.productCard.productCardButtonColor",
       "horizontal-slots",
-    )?.surface).toBe("product-picker");
+    )?.target).toEqual({ kind: "scenario", value: "product-picker" });
     expect(getDesignPreviewFieldTarget(
       "expert.cartFooter.cartFooterBgColor",
       "product-list",
-    )?.surface).toBe("cart-summary");
+    )?.target).toEqual({ kind: "area", value: "cart-summary" });
     expect(getDesignPreviewFieldTarget(
       "generalSettings.loadingBgColor",
       "standard",
-    )?.surface).toBe("loading");
+    )?.target).toEqual({ kind: "scenario", value: "loading" });
     expect(getDesignPreviewFieldTarget(
       "expert.generalSettings.conditionToastBgColor",
       "product-grid",
-    )?.surface).toBe("validation");
-    expect(getDesignPreviewFieldTarget(
+    )?.target).toEqual({ kind: "scenario", value: "validation" });
+    expect(isDesignPreviewFieldApplicable(
       "expert.mixAndMatchConfig.generalSettings.bundleUpsellButtonBg",
       "vertical-slots",
-    )?.surface).toBe("upsell");
+    )).toBe(false);
+    expect(getDesignPreviewFieldTarget(
+      "expert.mixAndMatchConfig.generalSettings.bundleUpsellButtonBg",
+      "standard",
+    )?.target).toEqual({ kind: "scenario", value: "upsell" });
   });
 
   it("reports template-specific applicability without fabricating an effect", () => {
@@ -192,11 +232,11 @@ describe("Settings Design preview model", () => {
   it("filters merchant controls to the selected template and component surface", () => {
     const fields = DESIGN_CONFIGURATION.flatMap((section) => section.fields);
 
-    expect(getDesignFieldsForPreviewContext(fields, "standard", "product-card").map((field) => field.label))
+    expect(getDesignFieldsForPreviewContext(fields, "standard", { kind: "area", value: "product-card" }).map((field) => field.label))
       .toEqual(expect.arrayContaining(["Primary Color", "Image Fit"]));
-    expect(getDesignFieldsForPreviewContext(fields, "standard", "loading").map((field) => field.label))
+    expect(getDesignFieldsForPreviewContext(fields, "standard", { kind: "scenario", value: "loading" }).map((field) => field.label))
       .toEqual(["FPB Loading GIF", "Loading Screen Background Color"]);
-    expect(getDesignFieldsForPreviewContext(fields, "product-list", "loading").map((field) => field.label))
+    expect(getDesignFieldsForPreviewContext(fields, "product-list", { kind: "scenario", value: "loading" }).map((field) => field.label))
       .toEqual([]);
   });
 
@@ -254,6 +294,26 @@ describe("Settings Design preview model", () => {
     expect(ppbTheme["--preview-product-button-bg"]).toBe("#112233");
   });
 
+  it("builds the production storefront design CSS for unsaved preview values", () => {
+    const css = buildDesignPreviewStorefrontCss({
+      fieldValues: {
+        "Primary Color": "#123456",
+        "Button Text Color": "#fedcba",
+        "expert.mixAndMatchConfig.generalSettings.bundleUpsellButtonBg": "#345678",
+        "expert.mixAndMatchConfig.generalSettings.bundleUpsellButtonTextColor": "#fefefe",
+        "expert.mixAndMatchConfig.generalSettings.bundleUpsellFontColor": "#234567",
+      },
+      templateKey: "standard",
+    });
+
+    expect(css).toEqual(expect.stringContaining("--bundle-global-primary-button: #123456"));
+    expect(css).toEqual(expect.stringContaining("--bundle-global-button-text: #fedcba"));
+    expect(css).toEqual(expect.stringContaining("--bundle-upsell-button-bg-color: #345678"));
+    expect(css).toEqual(expect.stringContaining("--bundle-upsell-text-color: #fefefe"));
+    expect(css).toEqual(expect.stringContaining("--bundle-upsell-font-color: #234567"));
+    expect(css).toEqual(expect.stringContaining("Bundle Type: full_page"));
+  });
+
   it("provides deterministic multi-surface fixture data with local media", () => {
     expect(DESIGN_PREVIEW_FIXTURE.steps).toHaveLength(2);
     expect(DESIGN_PREVIEW_FIXTURE.categories.length).toBeGreaterThan(1);
@@ -273,18 +333,18 @@ describe("Settings Design preview model", () => {
   });
 
   it("resolves required storefront-owned regions for representative scenes", () => {
-    expect(getDesignPreviewScene("standard", "navigation", "desktop").regions).toEqual(["timeline"]);
-    expect(getDesignPreviewScene("classic", "categories", "mobile").regions).toEqual(["pill-categories"]);
-    expect(getDesignPreviewScene("horizontal", "product-card", "desktop").regions).toEqual(["product-rows"]);
-    expect(getDesignPreviewScene("product-list", "cart-summary", "desktop").regions).toEqual(
+    expect(getDesignPreviewScene("standard", { kind: "area", value: "navigation" }, "desktop").regions).toEqual(["timeline"]);
+    expect(getDesignPreviewScene("classic", { kind: "area", value: "categories" }, "mobile").regions).toEqual(["pill-categories"]);
+    expect(getDesignPreviewScene("horizontal", { kind: "area", value: "product-card" }, "desktop").regions).toEqual(["product-rows"]);
+    expect(getDesignPreviewScene("product-list", { kind: "area", value: "cart-summary" }, "desktop").regions).toEqual(
       expect.arrayContaining(["product-list-selected-drawer", "pdp-footer"]),
     );
-    expect(getDesignPreviewScene("product-grid", "navigation", "mobile").regions).toEqual(["product-grid-step-headers"]);
-    expect(getDesignPreviewScene("horizontal-slots", "product-slots", "desktop").regions).toEqual(["horizontal-slots"]);
-    expect(getDesignPreviewScene("horizontal-slots", "product-picker", "desktop").regions).toEqual(
+    expect(getDesignPreviewScene("product-grid", { kind: "area", value: "navigation" }, "mobile").regions).toEqual(["product-grid-step-headers"]);
+    expect(getDesignPreviewScene("horizontal-slots", { kind: "area", value: "product-slots" }, "desktop").regions).toEqual(["horizontal-slots"]);
+    expect(getDesignPreviewScene("horizontal-slots", { kind: "scenario", value: "product-picker" }, "desktop").regions).toEqual(
       ["product-picker-modal"],
     );
-    expect(getDesignPreviewScene("vertical-slots", "product-picker", "mobile").regions).toEqual(
+    expect(getDesignPreviewScene("vertical-slots", { kind: "scenario", value: "product-picker" }, "mobile").regions).toEqual(
       ["product-picker-bottom-sheet"],
     );
   });

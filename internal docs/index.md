@@ -1,11 +1,11 @@
 ---
 schema_version: 1
 id: internal-docs-index
-title: Wolfpack Product Bundles Internal Docs
+title: Only Bundles Internal Docs
 type: index
 status: authoritative
-summary: Index of durable Wolfpack Product Bundles architecture, integration, feature, and operations documentation.
-last_audited: 2026-08-25
+summary: Index of durable Only Bundles architecture, integration, feature, and operations documentation.
+last_audited: 2026-08-29
 owners:
   - engineering
 domains:
@@ -23,9 +23,9 @@ keywords:
   - operations
 ---
 
-# Wolfpack Product Bundles — Internal Docs
+# Only Bundles — Internal Docs
 
-This vault contains audited, authoritative documentation for the Wolfpack Product Bundles app. All files have been cross-referenced against the actual codebase, Prisma schema, extension TOMLs, and the Shopify Dev MCP before writing.
+This vault contains audited, authoritative documentation for the Only Bundles app. All files have been cross-referenced against the actual codebase, Prisma schema, extension TOMLs, and the Shopify Dev MCP before writing.
 
 This tracked vault is the authoritative architecture and operations reference for the application. The broader feature, audit, and implementation-record index is [`docs/README.md`](../docs/README.md).
 
@@ -50,6 +50,7 @@ Full evidence record: `docs/competitor-analysis/16-eb-full-data-flow-investigati
 
 - [[Audit Report]] — What was stale or incorrect in the original `docs/` folder
 - [[Architecture/System Overview]] — App stack, services, deployment
+- [[Architecture/Only Bundles Brand and Compatibility Boundary]] — visible brand identity, preserved runtime identifiers, legacy URL boundary, and parent-tag transition
 - [[Architecture/Database Schema]] — Authoritative Prisma schema summary
 - [[Architecture/Cart Transform Function]] — Rust Shopify Function cart transform and checkout discount contract
 - [[Architecture/Widget Architecture]] — FPB + PDP widgets, app-embed-owned product-page upsells, load strategy, versioning
@@ -81,10 +82,26 @@ Full evidence record: `docs/competitor-analysis/16-eb-full-data-flow-investigati
 - [[Operations/Development]] — SIT Shopify dev command and direct configure sync flow
 - [[Operations/Build Process]] — Widget bundles, WASM, CSS size limits
 - [[Operations/App Events Taxonomy]] — Shopify App Events taxonomy, flow tracing, feature usage, error events, and `wpb:*` migration boundaries
-- [[Operations/Mantle Integration]] — Admin Mantle provider bootstrap, required env vars, and the `MANTLE_API_KEY` vs Shopify client id gotcha
 - [[Operations/Admin Performance]] — Shopify Web Vitals ownership, temporary Chrome diagnostics, Admin loader critical path
 - [[Operations/LCP and CLS Playbook]] — Home bootstrap strategy, CLS stabilization order, and Knip-guided dead-code cleanup
 - [[Operations/Knip Prune Guardrails]] — known Knip false positives, convention-loaded runtime assets, and required skip rules for future dead-code pruning
 - [[Operations/Knip Candidate Inventory]] — dated Knip candidate snapshot from 2026-07-13; rerun Knip before using it for a current prune decision
 - [[Operations/Storefront Parity Placement Board]] — Chrome DevTools MCP placement-board method for EB/WPB storefront responsiveness proof across narrow, column, mobile, and wide widget contexts
 - [[Operations/Local Dev Process and Runtime Logs]] — safe runtime process-tree tracing for local dev shells and where to capture logs when output is TTY-bound
+
+## Subscriptions and Entitlements
+
+- [[Subscriptions/00-repository-subscription-inventory]] — Audited billing, Admin, storefront, analytics, test, and deployment surface inventory
+- [[Subscriptions/01-current-billing-state]] — Current Shopify App Pricing state and removed billing surfaces
+- [[Subscriptions/02-feature-entitlement-audit]] — Approved Free and Growth feature policy
+- [[Subscriptions/04-subscription-architecture-adr]] — Canonical provider, entitlement, storefront, and Free-plan policy architecture
+- [[Subscriptions/05-pricing-decision-record]] — Approved production pricing decision
+- [[Subscriptions/06-single-cutover-policy]] — Existing-merchant single-cutover policy with no migration support
+- [[Subscriptions/07-shopify-app-pricing-setup-runbook]] — Manual Partner Dashboard and environment setup
+- [[Subscriptions/13-partner-dashboard-pricing-content-en]] — English Partner Dashboard pricing copy and verified app identifiers
+- [[Subscriptions/08-app-store-pricing-content-delta]] — Required listing and locale changes
+- [[Subscriptions/09-alert-and-gating-copy-inventory]] — Typed merchant alert states and localized copy ownership
+- [[Subscriptions/10-test-matrix]] — Automated and manual subscription verification matrix
+- [[Subscriptions/11-rollout-and-rollback-runbook]] — Atomic cutover, immediate enforcement, monitoring, and recovery without a runtime bypass
+- [[Subscriptions/12-final-implementation-report]] — Implementation status and evidence handoff
+- [[Subscriptions/shopify-platform-research-log]] — Official Shopify documentation checks and implementation consequences

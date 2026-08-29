@@ -1,3 +1,5 @@
+import { sanitizeRichHtmlFragment } from '../shared/rich-html.js';
+
 type ProductMedia = { id?: string | number; alt?: string | null; src?: string; url?: string };
 
 function mediaUrl(media: ProductMedia | string | null | undefined) {
@@ -81,9 +83,14 @@ export async function hydrateJudgeMeReviewCards({ root, products, shop, token }:
     const productId = product?.parentProductId || product?.productId || product?.id;
     const badge = result.badges[String(productId)] || '';
     if (!badge) return;
-    const mount = document.createElement('div');
+    const runtimeDocument = root.ownerDocument || document;
+    const mount = runtimeDocument.createElement('div');
     mount.setAttribute('data-wpb-judgeme-badge', String(productId));
-    mount.innerHTML = badge;
+    mount.append(sanitizeRichHtmlFragment(
+      badge,
+      'review-badge',
+      runtimeDocument.defaultView as unknown as Window,
+    ));
     card.appendChild(mount);
   });
 }

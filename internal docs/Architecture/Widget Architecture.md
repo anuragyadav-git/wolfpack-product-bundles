@@ -5,7 +5,7 @@ title: Widget Architecture
 type: architecture
 status: authoritative
 summary: FPB and PPB bootstrap, hydration, extension-asset, and widget runtime architecture.
-last_audited: 2026-08-27
+last_audited: 2026-08-28
 owners:
   - engineering
 domains:
@@ -26,6 +26,10 @@ source_paths:
   - app/assets/widgets/shared/discount-tier-feedback.ts
   - app/assets/widgets/shared-css/discount-tier-feedback.css
   - app/assets/widgets/shared/drawer-layer-manager.ts
+  - app/assets/widgets/shared/rich-html.ts
+  - app/assets/widgets/shared/message-segments.ts
+  - app/assets/widgets/shared/managed-style.ts
+  - app/assets/widgets/shared/theme-section-parser.ts
   - app/assets/widgets/full-page/initialization-guard.js
   - app/assets/widgets/full-page-css/base/bootstrap-reservation.css
   - app/assets/bundle-widget-product-page.ts
@@ -38,7 +42,9 @@ source_paths:
   - app/routes/app/app.settings/DesignLivePreview.tsx
   - app/routes/app/app.settings/DesignSettingsView.module.css
   - app/routes/app/app.settings/design-preview-model.ts
-  - app/routes/app/app.settings/preview-surfaces/PreviewSurfaces.module.css
+  - app/routes/app/app.settings/storefront-preview-fixtures.ts
+  - app/routes/app/app.settings/storefront-preview-protocol.ts
+  - app/routes/root/settings-design-preview-frame/route.tsx
   - app/lib/shop-brand-colors.ts
   - app/routes/root/wpb.$bundleId.tsx
   - extensions/bundle-builder/blocks/bundle-app-embed.liquid
@@ -95,9 +101,9 @@ PPB Horizontal Slots (`PDP_MODAL/MODAL`) and Vertical Slots (`PDP_MODAL/SIMPLIFI
 
 The shared picker is an 85dvh bottom sheet with three regions: a non-scrolling header, the only vertically scrolling catalog body, and a non-scrolling footer in normal flex flow. Footer geometry must never overlap product actions or focus rings. The catalog renders five tracks at 1440px, four at 1280px, and two at 768px and below; fixed track counts keep sparse rows from stretching. Modal lifecycle and exact opener-focus restoration remain owned by `modal-state-methods.ts`, while the global keyboard listener contains Tab focus only when the picker is the topmost drawer layer.
 
-Horizontal/Vertical modal cards keep native grouped-variant selectors inline at every viewport. A selector change updates only active card context; Add remains the selection mutation. A pure PPB modal-card presentation helper resolves `add`, `quantity`, or `maximum-reached` from per-product quantity validation. At maximum the localized `Added xN` action removes the full selected quantity. These overrides ignore `showQuantitySelectorOnCard` only for modal cards; Product List/Grid retain their in-page behavior.
+Horizontal/Vertical modal cards keep native grouped-variant selectors inline at every viewport. A selector change updates only active card context; Add remains the selection mutation. Product images and titles are informational and do not open a nested product-details surface. A pure PPB modal-card presentation helper resolves `add`, `quantity`, or `maximum-reached` from per-product quantity validation. At maximum the localized `Added xN` action removes the full selected quantity. These overrides ignore `showQuantitySelectorOnCard` only for modal cards; Product List/Grid retain their in-page behavior.
 
-Filled Horizontal slots remain bounded by the existing responsive tile block-size token, while filled Vertical slots use the existing responsive row block-size as both their minimum and maximum. Product names wrap and visually clamp only within that boundary; their complete value remains in the DOM, the product-details surface, and the product-specific accessible name of the overlaid cross-badge remove control. The cross badge keeps a 44px interaction target, stops propagation so it cannot open replacement, and uses the existing single-removal and same-index focus-recovery paths.
+Filled Horizontal slots remain bounded by the existing responsive tile block-size token, while filled Vertical slots use the existing responsive row block-size as both their minimum and maximum. Product names wrap and visually clamp only within that boundary; their complete value remains in the DOM and the product-specific accessible name of the overlaid cross-badge remove control. The cross badge keeps a 44px interaction target, stops propagation so it cannot open replacement, and uses the existing single-removal and same-index focus-recovery paths.
 
 Template installer/prototype patch functions have been removed. Widget entry files compose exported template method objects in the same central `Object.assign` used for controller method modules.
 
@@ -108,48 +114,78 @@ selling-plan group across every FPB and PPB template. Subscription submissions a
 same `selling_plan` to every component line and omit the merged-path public
 `Box` metadata; one-time submissions retain the existing merged-parent flow.
 
-## Admin Design Preview Adapter
+## Admin Design Production Renderer Adapter
 
-Settings -> Design resolves its eight local preview descriptors from
-`mapTemplateSelection` and the same FPB/PPB template config registries listed
-above. The descriptor reads canonical product-card mode, configured columns,
-timeline mode, summary mode, and slot orientation; its Admin-only adapter adds
-supported surfaces, semantic fixture regions, and responsive composition.
+Settings -> Design resolves its eight template selections through
+`mapTemplateSelection`, converts unsaved values with
+`buildSettingsDesignRuntime`, and sends them to the isolated
+`/settings-design-preview-frame` document through a versioned same-origin
+protocol. The frame dynamically imports only the selected production FPB or PPB
+controller and loads the same base, responsive, and template CSS sources used by
+the storefront asset build.
 
-The Admin preview must remain a local structural representation. It uses
-deterministic fixture records and `buildSettingsDesignRuntime` theme values, but
-does not import storefront CSS, instantiate a widget controller, fetch a bundle,
-embed an iframe, mutate a cart, or persist preview state. Public template images
-are reference evidence only. This boundary lets template IDs and runtime design
-tokens stay canonical without coupling the Settings chunk to the storefront
-runtime.
+Protocol version 2 separates the persistent editable area from transient
+preview state. Bundle header, navigation, categories, product cards, product
+slots, and cart/summary are template-filtered edit areas. Default, product
+picker, loading, validation, and upsell are independently filtered preview
+states. Upsell is FPB-only because it renders the external FPB product-page
+offer; PPB templates do not expose a synthetic equivalent. Choosing an area
+returns to Default; choosing a temporary state retains the previous area so
+closing or resetting the state restores the same editing context. No version-1
+surface compatibility path is retained.
 
-The Admin preview does not compose a synthetic whole builder. It renders each
-applicable major component independently: Bundle header, Navigation, Categories,
-Product cards, Product slots, Product picker, Cart / Summary, Loading,
-Validation, and Upsell. Component surfaces render inside fixed logical
-1280×1136 desktop and 390×844 mobile canvases, then scale as a whole to fit the
-available Admin panel using the smaller valid width or height ratio and center
-on both stage axes; the scale must not change the storefront breakpoint being
-represented. The selected component is composed into an Admin context frame
-whose decorative layer is accessibility-hidden and noninteractive: FPB uses a
-full-page product-grid and summary shell, Product List/Grid use an in-page
-product-media and product-form shell, and slot templates use a modal-oriented
-product-page shell. Components remain the only interactive preview content,
-and only modal or overlay states float above the context. Transient Product
-picker, Loading, Validation, and Upsell states remain deterministic
-representations and must not be described as exact storefront interactions.
+The FPB frame initializes its mount with the same
+`bundle-widget-container bundle-widget-full-page` host classes as the app-embed
+storefront document before the controller renders. These are functional style
+scope owners, not decorative aliases: the shared responsive grid, template
+columns, and inline summary rules depend on them. PPB retains the host classes
+owned by its production controller.
 
-All enabled preview controls share one Admin-only interaction state. Product,
-upsell, category, slot, picker, progress, mobile-summary, and discount-feedback
-actions update that state, and Cart / Summary derives its rows, item count, and
-total from the current quantities. These simulations must never call cart,
-checkout, bundle, or storefront APIs. Field-to-surface focus is a one-shot
-request per edit so a merchant's later manual surface selection is not
-overridden. The fixed logical canvas may scale below 0.5 when required to fit a
-narrow Admin host; it must not clip merely to preserve a minimum visual scale.
-Preview product grids consume both canonical desktop and mobile column
-contracts; a mobile logical viewport must never retain the desktop track count.
+FPB category identity has one visual owner at a time. When category tabs are
+enabled, the selected tab is the active-category label and the standalone
+category title is omitted during both initial rendering and step navigation.
+The standalone title remains available only when category tabs are disabled.
+Because Settings -> Design runs the production controller, this rule is shared
+by its preview and the deployed storefront widget.
+
+Deterministic fixture bundles hydrate the controller without Shopify, app-proxy,
+or storefront requests. Controller persistence, analytics, add-to-cart,
+post-cart behavior, and external navigation are disabled; links, forms, and cart
+actions are also blocked at the frame boundary. Interactions otherwise use the
+production renderer. Product picker, Loading, Validation, and Upsell use their
+real modal, overlay, toast, and offer implementations.
+
+The FPB Upsell preview uses a deterministic production-shaped block offer after
+the local product purchase form and delegates its markup to
+`renderFpbUpsellOffers`. Its action background, action text, border, and body
+text consume the same generated `--bundle-upsell-*` variables as the deployed
+offer, so unsaved Design values and storefront output share one token contract.
+
+In Default state, the frame scrolls the selected production region into view
+and applies a preview-only focus attribute. The frame-owned stylesheet renders
+a persistent outline and localized `Editing` label without altering production
+widget CSS or intercepting storefront interactions. Temporary states suspend
+the region focus; validation remains visible while selected and product-picker
+dismissal is reported to the parent so the state selector returns to Default.
+
+The frame supplies an adaptive neutral store shell: FPB is presented in a
+full-page collection context, while PPB is presented beside product media and
+product information. This context is intentionally theme-neutral; bundle DOM,
+styling, responsive behavior, and interactions remain production-owned. The
+logical desktop renderer remains 1280×1136, while its gutterless stage uses the
+preview-column width to establish the same aspect ratio. Releasing the inspector
+column therefore enlarges the rendered storefront instead of leaving unused
+canvas space. The mobile renderer remains exactly 390×844 and is wrapped outside
+the iframe by a 428×882 decorative iPhone 14 Pro footprint adapted from the
+MIT-licensed Devices.css geometry. The frame adds its chrome around the full
+renderer instead of reducing or cropping the iframe viewport. Fit calculation
+includes that body without changing the storefront breakpoint. Both modes stay
+centered within the available stage. The preview-frame document keeps its root
+vertical scrolling behavior but suppresses root scrollbar chrome so the live
+storefront remains scrollable without drawing a browser scrollbar inside the
+device body.
+Field-to-surface focus remains a one-shot request per edit so later manual
+surface selection stays authoritative.
 
 The separate storefront Preview Bundle action consumes saved Design settings
 only. It lists active or unlisted bundles with a valid storefront identifier,
@@ -160,7 +196,12 @@ failure closes the reserved tab and leaves the Polaris modal open with an error.
 
 The Design workspace is preview-first: template, component surface, and logical
 desktop/mobile selectors stay with the canvas, while one inspector exposes only
-settings mapped to the visible component. Phones switch between Preview and
+settings mapped to the visible component. Desktop merchants can collapse that
+inspector from a Polaris boundary chevron so the fit-scaled canvas consumes the
+released width; disclosure state is local and does not reset the preview or
+unsaved values. ResizeObserver updates are coalesced into one browser-frame
+style write without React render state or scale transitions. Phones hide the
+boundary control and switch between Preview and
 Customize panes without duplicating the preview model. Component color controls
 have no Expert-mode gate. `inheritedColorFieldKeys` records which fields resolve
 from the first Storefront API Shop Brand primary or secondary pair; editing a
@@ -182,7 +223,7 @@ placeholder markup cannot override its presentation.
 
 Source module names should describe their storefront responsibility. Avoid mechanical names such as `chunk-01.js` or `part-01.css`; those hide ownership and make stale widget code harder to spot.
 
-The shared Bundle Product Modal owns the product image carousel, name,
+The FPB-only Bundle Product Modal owns the product image carousel, name,
 description, variant controls when needed, quantity, and Add To Box. Direct
 product and collection hydration preserve up to 50 Shopify product images in
 source order. One image renders without navigation; multiple distinct images
@@ -197,7 +238,7 @@ compact single-image record is also hydrated through the existing storefront
 products endpoint before rendering; product identifiers may arrive in `id`,
 `selectionId`, or `productId`, and must resolve to the same product lookup key.
 
-Because the shared product-details overlay is mounted under `document.body`, its responsive surface is viewport-owned rather than widget-container-owned. In PPB modal templates, only the product image activates a full-width bottom sheet above the picker; the sheet has an 88dvh ceiling, a constrained content column, safe-area padding, and internal vertical scrolling on desktop and mobile. It restores the selected variant and quantity when editing, and commits through the originating-slot replacement target so Update cannot create a duplicate. FPB retains its existing responsive presentation.
+Because the FPB product-details overlay is mounted under `document.body`, its responsive surface is viewport-owned rather than widget-container-owned. FPB product cards explicitly opt into the shared card's image/title details affordance; PPB cards do not render that affordance or construct the product-details overlay.
 
 While product details are open, the storefront document root and body are both
 scroll-locked. The modal or drawer remains the only vertical scroll owner, and
@@ -208,15 +249,15 @@ The shared multi-step FPB timeline sizes its navigation track from the rendered 
 PPB Product List (`PDP_INPAGE + CASCADE`) owns its multi-step navigation in the Product Page layout, footer, and validation method modules. A multi-step Product List renders only `currentStepIndex`; intermediate primary actions navigate Next after current-step validation, the final step uses Add Bundle to Cart, and Back preserves selections across steps. Single-step Product List and the other PPB templates keep their existing rendering paths. Product List exact-rule over-selection is blocked before state mutation so the current step and selected-items drawer remain stable.
 
 PPB drawer ownership is explicit through `data-ppb-drawer-surface` values for
-`selected-summary`, `bundle-picker`, `product-details`, and, where still used by
-in-page templates, `variant-selector`.
+`selected-summary`, `bundle-picker`, and, where still used by in-page templates,
+`variant-selector`.
 The selected summary belongs to widget flow and never participates in document
-scroll locking. The other three surfaces share the drawer layer manager: only
+scroll locking. The modal surfaces share the drawer layer manager: only
 the top layer owns Escape and backdrop dismissal, document scroll locks once
-across nested overlays, and the final close restores the prior scroll styles.
-Product details uses a semantic handle on mobile and a close control on desktop.
+across nested overlays, the root reserves its existing scrollbar gutter while
+locked, and the final close restores the prior scroll styles and gutter value.
 Horizontal/Vertical variants remain native and inline on both viewport classes.
-Focus returns to the originating product, slot, or variant trigger after the
+Focus returns to the originating slot or variant trigger after the
 owning layer closes.
 
 FPB product grids do not pre-disable or dim unselected cards when a step reaches its exact or maximum quantity. Returning to a completed step keeps the full product set interactive; an attempted increase beyond the configured rule is rejected by `validateStepCondition` before selection state changes, and the rule toast explains the limit.
@@ -461,7 +502,33 @@ nonexistent `presetSTANDARD` property and silently leave the widget with only
 base CSS. A base-only render can appear functional, so live verification must
 also confirm that the expected dedicated template stylesheet is loaded.
 
-### FPB Runtime Styling Boundary
+### Native DOM and trusted content boundaries
+
+Storefront browser renderers construct elements and fragments with DOM APIs.
+Dynamic text is assigned through `textContent`, mutable regions are replaced
+with `replaceChildren`, and handlers are attached with event listeners. Shared
+renderers return `HTMLElement` or `DocumentFragment` values through
+`create*Element` and `create*Fragment` APIs; string-returning component
+generators and HTML-valued child arguments are not part of the runtime
+contract.
+
+Two rich-content inputs retain formatting through
+`sanitizeRichHtmlFragment`: Shopify product descriptions use the
+`product-description` profile and provider review badges use the
+`review-badge` profile. Both profiles reject scripts, embedded documents,
+forms, inline styles, event attributes, and unsafe URLs, then return a detached
+sanitized fragment that callers append directly. Merchant discount templates
+never enter that boundary. `formatMessageSegments` produces text, condition,
+and discount segments, and `createMessageFragment` creates only the known
+emphasis elements while rendering templates and substituted values as text.
+
+Fetched Shopify section markup has one separate boundary:
+`parseThemeSectionResponse` accepts only successful same-origin HTML responses,
+requires the requested selector, and imports the selected node into the active
+document. Do not add another general HTML parser or move this boundary into
+ordinary component rendering.
+
+### Runtime styling boundary
 
 Static layout and presentation belong in source CSS. Runtime styling is limited
 to values that are inherently data-driven, such as measured timeline progress,
@@ -470,6 +537,16 @@ Custom CSS. The runtime must not inject structural widths, heights, spacing,
 display state, or template stylesheets. Native attributes such as `hidden` and
 state markers such as `data-fpb-summary-mode` own visibility and responsive
 branching.
+
+All legitimate runtime stylesheets are owned by `replaceManagedStyle`. A caller
+supplies a stable key and already validated CSS; the helper creates, replaces,
+or removes the single matching `<style>` element. Settings Controls CSS is
+processed by the existing CSS pipeline when saved and again when projected
+into the public runtime response. Generated Design CSS and bundle-level CSS
+retain their existing payload contracts but use the same managed-style
+lifecycle. Static presentation belongs in the raw widget CSS sources, while
+validated colors, counts, and percentages may cross the DOM boundary only as
+CSS custom properties.
 
 The FPB desktop summary and mobile tray rebuild their contents after selection
 changes. Simple and Step-Based discount-progress transitions must therefore

@@ -1,8 +1,7 @@
 import { ConditionValidator } from '../../shared/condition-validator.js';
 import { CurrencyManager } from '../../shared/currency-manager.js';
 import { ToastManager } from '../../shared/toast-manager.js';
-import { ComponentGenerator } from '../../shared/component-generator.js';
-import { renderSharedProductCard } from '../../shared/components/product-card.js';
+import { createSharedProductCardElement } from '../../shared/components/product-card.js';
 import { getSubscriptionProductCardPrice } from '../../shared/subscription-storefront-methods.js';
 import { resolvePpbModalCardPresentation } from '../ppb-modal-card-presentation.js';
 
@@ -10,9 +9,10 @@ export function resolveProductPageCardButtonText({
   currentQuantity = 0,
   currentStep = {},
   outOfStock = false,
+  outOfStockText = 'Out of Stock',
   defaultAddText = 'Add +',
 }: any = {}) {
-  if (outOfStock) return 'Out of stock';
+  if (outOfStock) return outOfStockText;
 
   const rawText = currentQuantity > 0
     ? (currentStep?.addonReplaceText || `Added x${currentQuantity}`)
@@ -184,7 +184,7 @@ function resolveVariantImageUrl(variantData: any = {}) {
 export const ProductPageModalMethods: Record<string, any> & ThisType<any> = {
 renderModalTabs() {
   const tabsContainer = this.elements.modal.querySelector('.modal-tabs');
-  tabsContainer.innerHTML = '';
+  tabsContainer.replaceChildren();
 
   // Set CSS variable for equal-column grid (bottom-sheet mode)
   const stepCount = this.selectedBundle.steps.length;
@@ -338,22 +338,28 @@ renderModalProducts(stepIndex: string|number, productsToRender: any = null) {
     const priceStr = firstProduct?.price
       ? CurrencyManager.convertAndFormat(firstProduct.price, CurrencyManager.getCurrencyInfo())
       : '';
-    promo.innerHTML = `
-      <p class="bw-bs-free-gift-heading">Free ${ComponentGenerator.escapeHtml(stepName)}!</p>
-      <p class="bw-bs-free-gift-subheading">Add ${this.paidSteps.length} items to unlock</p>
-    `;
+    const heading = document.createElement('p');
+    heading.className = 'bw-bs-free-gift-heading';
+    heading.textContent = `Free ${stepName}!`;
+    const subheading = document.createElement('p');
+    subheading.className = 'bw-bs-free-gift-subheading';
+    subheading.textContent = `Add ${this.paidSteps.length} items to unlock`;
+    promo.append(heading, subheading);
     bodyEl.insertBefore(promo, productGrid);
   }
 
   if (products.length === 0) {
     // Show error state if the fetch failed, otherwise a neutral "no products" message
     if (this._stepFetchFailed && this._stepFetchFailed[stepIndex]) {
-      productGrid.innerHTML = `
-        <div class="modal-fetch-error">
-          <p>Could not load products. Please check your connection and try again.</p>
-          <button class="modal-retry-btn">Retry</button>
-        </div>
-      `;
+      const error = document.createElement('div');
+      error.className = 'modal-fetch-error';
+      const message = document.createElement('p');
+      message.textContent = 'Could not load products. Please check your connection and try again.';
+      const retry = document.createElement('button');
+      retry.className = 'modal-retry-btn';
+      retry.textContent = 'Retry';
+      error.append(message, retry);
+      productGrid.replaceChildren(error);
       const retryBtn = productGrid.querySelector('.modal-retry-btn');
       if (retryBtn) {
         retryBtn.addEventListener('click', () => {
@@ -367,7 +373,10 @@ renderModalProducts(stepIndex: string|number, productsToRender: any = null) {
         });
       }
     } else {
-      productGrid.innerHTML = `<p class="no-products-message">No products are configured for this step.</p>`;
+      const noProducts = document.createElement('p');
+      noProducts.className = 'no-products-message';
+      noProducts.textContent = 'No products are configured for this step.';
+      productGrid.replaceChildren(noProducts);
     }
     return;
   }
@@ -378,7 +387,7 @@ renderModalProducts(stepIndex: string|number, productsToRender: any = null) {
     this.selectedBundle?.validateQuantityPerProduct
   );
 
-  productGrid.innerHTML = products.map((product: any)  => {
+  const cards = products.map((product: any)  => {
     const selectionKey = product.selectionId || product.variantId || product.id;
     const productSelection = product.selectionId
       ? product
@@ -392,13 +401,16 @@ renderModalProducts(stepIndex: string|number, productsToRender: any = null) {
 
     // Per-variant stock state derived from Storefront API quantityAvailable
     const { available, outOfStock } = this.getVariantAvailable(stepIndex, selectionKey);
+    const outOfStockText = this._resolveText('productCardOutOfStockButton', 'Out of Stock');
     const atMaxStock = available !== null && currentQuantity >= available;
     const atMaxProductQuantity = productQuantityLimit !== null && currentQuantity >= productQuantityLimit;
     const increaseDisabled = outOfStock || atMaxStock || atMaxProductQuantity;
-    const stockBadge = outOfStock
-      ? `<div class="product-stock-badge product-stock-badge--out">Out of stock</div>`
-      : '';
-    return renderSharedProductCard(
+    const stockBadgeElement = outOfStock ? document.createElement('div') : null;
+    if (stockBadgeElement) {
+      stockBadgeElement.className = 'product-stock-badge product-stock-badge--out';
+      stockBadgeElement.textContent = outOfStockText;
+    }
+    return createSharedProductCardElement(
       {
         ...productSelection,
         title: product.title,
@@ -416,18 +428,20 @@ renderModalProducts(stepIndex: string|number, productsToRender: any = null) {
         cardInteractive: false,
         titleInteractive: false,
         className: `${freeGiftCardClass} ${currentQuantity > 0 ? 'bw-product-card--selected' : ''} ${outOfStock ? 'is-out-of-stock' : ''}`.trim(),
-        variantSelectorHtml: this.renderVariantSelector(product),
-        stockBadgeHtml: stockBadge,
+        variantSelectorElement: this.renderVariantSelector(product),
+        stockBadgeElement,
         addButtonText: resolveProductPageCardButtonText({
           currentQuantity,
           currentStep,
           outOfStock,
+          outOfStockText,
           defaultAddText: 'Add to Cart',
         }),
         selectedButtonText: resolveProductPageCardButtonText({
           currentQuantity,
           currentStep,
           outOfStock,
+          outOfStockText,
           defaultAddText: 'Add to Cart',
         }),
         selectedAction: cardPresentation.mode === 'maximum-reached' ? 'button' : undefined,
@@ -435,7 +449,8 @@ renderModalProducts(stepIndex: string|number, productsToRender: any = null) {
         increaseDisabled,
       },
     );
-  }).join('');
+  });
+  productGrid.replaceChildren(...cards);
 
   // Trigger slide-up animation for cards
   productGrid.classList.remove('bw-animate-in');
@@ -448,7 +463,7 @@ renderModalProducts(stepIndex: string|number, productsToRender: any = null) {
 
 renderVariantSelector(product: any) {
   if (!product.variants || product.variants.length <= 1) {
-    return '';
+    return null;
   }
 
   const trackInventoryOnAddToCart = typeof this.isInventoryTrackingOnAddToCartEnabled === 'function'
@@ -456,20 +471,28 @@ renderVariantSelector(product: any) {
     : false;
   const variantLabel = this._resolveText?.('productVariantLabel', 'Select variant') || 'Select variant';
 
-  return `
-    <div class="variant-selector-wrapper">
-      <label class="ppb-modal-variant-label" for="variant-selector-${product.id}">${ComponentGenerator.escapeHtml(variantLabel)}</label>
-      <select id="variant-selector-${product.id}" class="variant-selector" data-base-product-id="${product.id}" aria-label="${ComponentGenerator.escapeHtml(variantLabel)}">
-        ${product.variants.map((v: any)  => {
-          const isHardOOS = shouldDisableProductPageVariantOption(v, trackInventoryOnAddToCart);
-          const label = isHardOOS ? `${v.title} — out of stock` : v.title;
-          const selected = v.id === product.variantId ? 'selected' : '';
-          const disabled = isHardOOS ? 'disabled' : '';
-          return `<option value="${v.id}" ${selected} ${disabled}>${label}</option>`;
-        }).join('')}
-      </select>
-    </div>
-  `;
+  const wrapper = document.createElement('div');
+  wrapper.className = 'variant-selector-wrapper';
+  const label = document.createElement('label');
+  label.className = 'ppb-modal-variant-label';
+  label.htmlFor = `variant-selector-${product.id}`;
+  label.textContent = variantLabel;
+  const select = document.createElement('select');
+  select.id = `variant-selector-${product.id}`;
+  select.className = 'variant-selector';
+  select.dataset.baseProductId = String(product.id);
+  select.setAttribute('aria-label', variantLabel);
+  product.variants.forEach((variant: any) => {
+    const isHardOOS = shouldDisableProductPageVariantOption(variant, trackInventoryOnAddToCart);
+    const option = document.createElement('option');
+    option.value = String(variant.id);
+    option.textContent = isHardOOS ? `${variant.title} — out of stock` : variant.title;
+    option.selected = variant.id === product.variantId;
+    option.disabled = isHardOOS;
+    select.append(option);
+  });
+  wrapper.append(label, select);
+  return wrapper;
 },
 
 // Render loading animation for modal product grid using merchant-configured GIF or default spinner
@@ -480,17 +503,27 @@ renderModalProductsLoading(_stepIndex?: any) {
   const gifUrl = this.selectedBundle?.loadingGif || this.config?.loadingGif || null;
 
   if (gifUrl) {
-    productGrid.innerHTML = `
-      <div class="bw-bs-modal-loading" role="status" aria-label="Loading products">
-        <img class="bundle-loading-overlay__gif" src="${ComponentGenerator.escapeHtml(gifUrl)}" alt="Loading..." />
-      </div>
-    `;
+    const loading = document.createElement('div');
+    loading.className = 'bw-bs-modal-loading';
+    loading.setAttribute('role', 'status');
+    loading.setAttribute('aria-label', 'Loading products');
+    const image = document.createElement('img');
+    image.className = 'bundle-loading-overlay__gif';
+    image.src = gifUrl;
+    image.alt = 'Loading...';
+    loading.append(image);
+    productGrid.replaceChildren(loading);
   } else {
-    productGrid.innerHTML = `
-      <div class="bw-bs-modal-loading" role="status" aria-label="Loading products">
-        <div class="bundle-loading-overlay__spinner" role="status" aria-label="Loading"></div>
-      </div>
-    `;
+    const loading = document.createElement('div');
+    loading.className = 'bw-bs-modal-loading';
+    loading.setAttribute('role', 'status');
+    loading.setAttribute('aria-label', 'Loading products');
+    const spinner = document.createElement('div');
+    spinner.className = 'bundle-loading-overlay__spinner';
+    spinner.setAttribute('role', 'status');
+    spinner.setAttribute('aria-label', 'Loading');
+    loading.append(spinner);
+    productGrid.replaceChildren(loading);
   }
 },
 
@@ -523,8 +556,6 @@ attachProductEventHandlers(productGrid: any, stepIndex: string|number) {
   const newProductGrid = productGrid.cloneNode(true);
   productGrid.parentNode.replaceChild(newProductGrid, productGrid);
 
-  // Get step data for modal
-  const step = this.selectedBundle.steps[stepIndex];
   // Helper to find product by ID
   const findProduct = (productId: any) => {
     return this.findProductBySelectionKey(this.stepProductData[stepIndex] || [], productId);
@@ -534,42 +565,6 @@ attachProductEventHandlers(productGrid: any, stepIndex: string|number) {
     if (!eventTarget) return null;
     if (!hasDomElement) return eventTarget;
     return eventTarget instanceof Element ? eventTarget : eventTarget.parentElement;
-  };
-
-  const matchesSelector = (element: any, selector: string) => {
-    if (!element) return false;
-    if (typeof element.matches === 'function') {
-      return element.matches(selector);
-    }
-
-    if (selector.startsWith('.')) {
-      return element.classList?.contains(selector.slice(1));
-    }
-
-    const dataProductId = selector.match(/^\[data-product-id="(.+)"\]$/);
-    if (dataProductId) {
-      return element.dataset?.productId === dataProductId[1];
-    }
-
-    return false;
-  };
-
-  const findClosest = (element: any, selector: string) => {
-    if (!element) return null;
-    const selectors = selector
-      .split(',')
-      .map((part: string) => part.trim())
-      .filter(Boolean);
-
-    let current = element;
-    while (current) {
-      if (selectors.some((candidate: any) => matchesSelector(current, candidate))) {
-        return current;
-      }
-      current = current.parentElement;
-    }
-
-    return null;
   };
 
   // Quantity button handlers
@@ -586,15 +581,6 @@ attachProductEventHandlers(productGrid: any, stepIndex: string|number) {
       const newQuantity = isIncrease ? currentQuantity + 1 : Math.max(0, currentQuantity - 1);
       this.updateProductSelection(stepIndex, productId, newQuantity);
     }
-  });
-
-  newProductGrid.addEventListener('keydown', (e: any) => {
-    if (e.key !== 'Enter' && e.key !== ' ') return;
-    const eventTarget = getEventTarget(e.target);
-    const productImage = findClosest(eventTarget, '.product-image');
-    if (!productImage) return;
-    e.preventDefault();
-    productImage.click?.();
   });
 
   // Add to Bundle button handler
@@ -620,31 +606,6 @@ attachProductEventHandlers(productGrid: any, stepIndex: string|number) {
       if (toggleQuantity > 0 || currentQuantity > 0) {
         this.updateProductSelection(stepIndex, productId, toggleQuantity);
       }
-    }
-  });
-
-  // Modal cards keep details, variants, and Add as separate actions.
-  newProductGrid.addEventListener('click', (e: any) => {
-    const eventTarget = getEventTarget(e.target);
-    if (!eventTarget) return;
-
-    const productCard = findClosest(eventTarget, '.product-card');
-    if (!productCard) return;
-    if (findClosest(eventTarget, '.product-add-btn, .qty-btn, .inline-qty-btn, .variant-selector, button, input, select, a')) return;
-
-    const productImage = findClosest(eventTarget, '.product-image');
-    if (!productImage) return;
-
-    const productId = productCard.dataset.productId;
-    const product = findProduct(productId);
-    if (!product) return;
-
-    if (this.productModal && step) {
-      const currentQuantity = this.getSelectedQuantity(stepIndex, productId);
-      this.productModal.open(product, step, {
-        originalSelectionKey: currentQuantity > 0 ? productId : '',
-        selectedQuantity: currentQuantity || 1,
-      });
     }
   });
 

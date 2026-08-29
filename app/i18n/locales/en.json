@@ -5,14 +5,14 @@
     "settings": "Settings",
     "integrations": "Integrations",
     "analytics": "Analytics",
-    "pricing": "Pricing",
+    "billing": "Billing",
     "events": "Updates & FAQs"
   },
   "integrations": {
     "requestMessage": "Hi, I'd like to request support for a new integration."
   },
   "dashboard": {
-    "title": "Dashboard: Wolfpack Bundles",
+    "title": "Dashboard: Only Bundles",
     "subtitle": "Access your bundles, Customer support and more.",
     "header": {
       "syncCollections": "Sync Collections",
@@ -130,9 +130,9 @@
       "viewDetails": "Show status",
       "activate": "Enable",
       "enableModal": {
-        "heading": "Enable Wolfpack Bundle on your store",
-        "description": "Turn on the Wolfpack Bundle app embed in Theme Editor, click Save, then return here.",
-        "mediaLabel": "Tutorial showing how to enable the Wolfpack Bundle app embed and save the theme",
+        "heading": "Enable Only Bundles on your store",
+        "description": "Turn on the Only Bundles app embed in Theme Editor, click Save, then return here.",
+        "mediaLabel": "Tutorial showing how to enable the Only Bundles app embed and save the theme",
         "openThemeEditor": "Open Theme Editor",
         "checking": "Checking your theme…",
         "enabled": "App embed enabled",
@@ -148,7 +148,7 @@
       "coreComponents": "Core components enabled",
       "activeBundles": "Active bundles",
       "modalHeading": "Storefront setup",
-      "modalDescription": "These components control how Wolfpack bundles appear on your storefront.",
+      "modalDescription": "These components control how bundles created with Only Bundles appear on your storefront.",
       "modalError": "Status unavailable. Reload to try again.",
       "coreHeading": "Core bundle components",
       "optionalHeading": "Optional placements",
@@ -169,6 +169,10 @@
     }
   },
   "settingsDcp": {
+    "growthGate": {
+      "heading": "Growth design controls",
+      "body": "Basic brand colors and typography remain editable on Free. Upgrade to Growth to change advanced colors, corners, images, and GIFs."
+    },
     "preview": {
       "heading": "Live preview",
       "unsaved": "Unsaved changes appear here.",
@@ -177,21 +181,31 @@
         "preview": "Preview",
         "customize": "Customize"
       },
+      "inspector": {
+        "collapse": "Collapse customization panel",
+        "expand": "Expand customization panel",
+        "customize": "Customize {{context}}"
+      },
       "bundleType": {
         "label": "Bundle type",
         "landingPage": "Landing Page",
         "productPage": "Product Page"
       },
       "templateLabel": "Template",
-      "surfaceSelector": {
-        "label": "Preview surface",
+      "focusLabel": "Editing: {{context}}",
+      "areaSelector": {
+        "label": "Edit area",
         "bundle-header": "Bundle header",
         "navigation": "Navigation",
         "categories": "Categories",
         "product-card": "Product cards",
         "product-slots": "Product slots",
+        "cart-summary": "Cart / summary"
+      },
+      "stateSelector": {
+        "label": "Preview state",
+        "default": "Default",
         "product-picker": "Product picker",
-        "cart-summary": "Cart / summary",
         "loading": "Loading",
         "validation": "Validation",
         "upsell": "Upsell"
@@ -306,7 +320,7 @@
     },
     "loadingAnimation": {
       "title": "Storefront Loading Animation",
-      "description": "Shown while Wolfpack Bundles loads bundle content on the storefront."
+      "description": "Shown while Only Bundles loads bundle content on the storefront."
     },
     "bundleVisibilityPending": {
       "description": "Tracks whether your bundle is discoverable by shoppers. Optimises when you copy your bundle link and place it on your store, enable the Bundle Widget, or set up the Bundle Embed."
@@ -329,6 +343,12 @@
     }
   },
   "common": {
+    "alerts": {
+      "actionFailed": "Action failed", "previewUnavailable": "Preview unavailable", "settingsNotSaved": "Settings not saved", "exportUnavailable": "Export unavailable", "backfillUnavailable": "Backfill unavailable", "trackingNotUpdated": "Tracking not updated", "bundleNotSaved": "Bundle not saved", "operationFailed": "Operation failed"
+    },
+    "success": {
+      "previewOpened": "Preview opened", "csvExported": "CSV exported", "backfillComplete": "Backfill complete", "trackingEnabled": "Tracking enabled", "trackingDisabled": "Tracking disabled", "changesSaved": "Changes saved", "productSynced": "Product synced", "bundleSynced": "Bundle synced", "operationComplete": "Operation complete"
+    },
     "actions": {
       "close": "Close", "cancel": "Cancel", "dismiss": "Dismiss", "manage": "Manage", "enable": "Enable", "enableHere": "Enable Here", "learnMore": "Learn More",
       "maybeLater": "Maybe Later", "setUpVisibility": "Set Up Visibility", "reinstallApp": "Reinstall app",
@@ -336,13 +356,13 @@
       "continueEditing": "Continue Editing"
     },
     "loading": {
-      "appLabel": "Loading Wolfpack Product Bundles",
+      "appLabel": "Loading Only Bundles",
       "workspace": "Loading your workspace"
     },
     "appEmbed": {
-      "body": "Enable the Theme app extension for Wolfpack Bundles to place and preview the bundle.",
+      "body": "Enable the Theme app extension for Only Bundles to place and preview the bundle.",
       "guideTitle": "Enable app embed",
-      "guideImageAlt": "How to enable the Wolfpack Bundles app embed"
+      "guideImageAlt": "How to enable the Only Bundles app embed"
     },
     "previewGate": {
       "title": "Your bundle visibility is not set up yet",
@@ -362,10 +382,10 @@
     },
     "upgradePrompt": {
       "limitReachedTitle": "Bundle Limit Reached",
-      "limitReachedBody": "You've used all {{limit}} bundles on the Free plan. Upgrade to Grow for up to 20 bundles.",
+      "limitReachedBody": "You've used the Free public-bundle allowance. View Growth for unlimited public bundles.",
       "approachingTitle": "Approaching Bundle Limit",
-      "approachingBody": "You're using {{current}} of {{limit}} bundles. Upgrade to Grow for up to 20 bundles.",
-      "usageBody": "You're using {{current}} of {{limit}} bundles on the Free plan. Need more? Upgrade to Grow for 20 bundles."
+      "approachingBody": "You're using {{current}} of {{limit}} public bundles. Growth includes unlimited public bundles.",
+      "usageBody": "You're using {{current}} of {{limit}} public bundles on Free. Growth includes unlimited public bundles."
     },
     "discardChanges": {
       "title": "Discard all unsaved changes",
@@ -400,16 +420,26 @@
   },
   "billing": {
     "pricePerMonth": "${{price}}/month",
-    "actions": { "tryAgain": "Try Again", "contactSupport": "Contact Support", "cancel": "Cancel" },
-    "error": { "heading": "Subscription Issue", "missingChargeId": "Subscription confirmation failed: Missing charge ID.", "confirmationFailed": "Failed to confirm subscription with Shopify.", "unexpected": "An unexpected error occurred during subscription setup." },
+    "actions": { "tryAgain": "Try Again", "contactSupport": "Contact Support", "cancel": "Cancel", "back": "Back to previous page" },
+    "error": { "heading": "Subscription Issue", "verificationFailed": "Shopify could not verify the current subscription. Try again.", "unexpected": "An unexpected error occurred during subscription setup." },
     "upgradeModal": {
-      "heading": "Upgrade to Grow Plan", "confirm": "Confirm Upgrade - ${{price}}/month", "redirect": "You'll be redirected to Shopify to complete your subscription.",
-      "benefitsHeading": "What you'll get with Grow:", "bundleLimit": "Up to 20 bundles (currently {{current}}/{{limit}})", "billedMonthly": "Billed monthly through Shopify",
-      "benefits": { "noRevenueCap": "No bundle revenue cap - free plan is limited to $500/mo", "advancedDiscounts": "Advanced discount rules", "prioritySupport": "Priority support" }
+      "heading": "Choose Growth", "confirm": "Continue to Shopify", "redirect": "You'll be redirected to Shopify to choose monthly or annual billing.",
+      "benefitsHeading": "Growth includes:", "managedByShopify": "Plan selection and billing are managed by Shopify",
+      "benefits": { "unlimitedPublicBundles": "Unlimited public bundles and steps", "allTemplatesDesign": "All templates and advanced Design controls", "advancedAnalytics": "Advanced bundle analytics", "prioritySupport": "Priority support" }
     },
-    "success": { "heading": "Welcome to the Grow Plan!", "body": "Your subscription has been activated. You now have access to all premium features.", "bundleLimit": "Bundle Limit", "bundleLimitValue": "20 bundles", "designControl": "Design Control", "fullAccess": "Full Access", "support": "Support", "priority": "Priority" },
-    "cards": { "currentPlan": "Current Plan", "freePrice": "Free", "freeDescription": "For bundle sales up to $500/month - free until you grow", "includes": "Includes:", "freePlan": "Free Plan", "mostPopular": "Most Popular", "perMonth": "/ month", "growDescription": "For bundle sales above $500/month - no revenue cap", "growIncludes": "Everything in Free, plus:", "upgradeToGrow": "Upgrade to Grow", "cancelAnytimeBilled": "Cancel anytime. Billed through Shopify." },
-    "cta": { "heading": "Ready to grow your bundle business?", "body": "Upgrade to the Grow plan for double the bundles, full design customization, and priority support.", "highlights": { "bundles": "20 bundles", "design": "Design Control Panel", "support": "Priority Support" }, "upgrade": "Upgrade to Grow - ${{price}}/month", "cancelAnytime": "Cancel anytime" },
-    "route": { "title": "Subscription & Billing", "dashboard": "Dashboard", "currentPlan": "Current Plan", "active": "Active", "inactive": "Inactive", "bundleUsage": "Bundle Usage", "bundleCount": "{{current}} / {{limit}} bundles", "limitReached": "You've reached your bundle limit.", "limitUpgrade": "Upgrade to Grow for more bundles.", "overview": "Bundle Overview", "activeBundles": "Active Bundles", "totalSteps": "Total Steps", "productPage": "Product Page", "fullPage": "Full Page", "cancelSubscription": "Cancel Subscription", "cancelHeading": "Cancel Subscription?", "downgradeBody": "You will be downgraded to the Free plan with a limit of {{limit}} bundles.", "archiveWarning": "Warning: You have {{current}} bundles. The excess {{excess}} bundles will be archived (not deleted).", "confirmCancellation": "Confirm Cancellation", "keepSubscription": "Keep Subscription", "features": "Your Plan Features", "needHelp": "Need Help?", "helpBody": "Have questions about billing or need a custom plan? Our team is here to help." }
+    "success": { "heading": "Growth is active", "body": "Shopify verified your Growth subscription.", "bundleLimit": "Public bundles", "bundleLimitValue": "Unlimited", "designControl": "Advanced Design", "fullAccess": "Included", "support": "Support", "priority": "Priority" },
+    "cards": { "currentPlan": "Current Plan", "freePrice": "$0", "freeDescription": "Create, publish, and sell with one complete bundle", "includes": "Includes:", "freePlan": "Free Plan", "mostPopular": "Most Popular", "perMonth": "/ month", "growthDescription": "Advanced merchandising, customization, analytics, and scale", "growthIncludes": "Everything in Free, plus:", "chooseGrowth": "Choose Growth", "annualPrice": "Or ${{price}} per year", "trialAndBilling": "{{days}}-day free trial. Choose monthly or annual billing in Shopify." },
+    "planFeatures": { "onePublicBundle": "One public bundle", "twoSteps": "Two enabled steps or categories", "productPageBundles": "Product Page Bundles", "fullPageBundles": "Full Page Bundles", "brandTypography": "Brand colors and typography", "summary30": "30-day analytics summary", "merchandising": "All merchandising features", "standardSupport": "Standard support", "unlimitedBundlesSteps": "Unlimited public bundles and steps", "allTemplates": "All bundle templates", "advancedDesign": "Advanced Design controls", "advancedAnalytics": "Advanced bundle analytics", "prioritySupport": "Priority support" },
+    "comparison": { "publicBundles": "Public bundles", "steps": "Enabled steps or categories", "productPageBundles": "Product Page Bundles", "fullPageBundles": "Full Page Bundles", "merchandising": "Discounts, gifts, add-ons, and upsells", "customerSubscriptions": "Customer bundle subscriptions", "customization": "Copy, translations, CSS, and scripts", "templates": "Templates", "design": "Design", "analytics": "Analytics", "prioritySupport": "Priority support" },
+    "values": { "unlimited": "Unlimited", "standard": "Standard", "all": "All", "brandTypography": "Brand colors and typography", "allControls": "All controls", "summary30": "30-day summary", "advanced": "Advanced" },
+    "valueProps": { "scaleTitle": "Scale public bundles", "scaleDescription": "Publish unlimited bundle campaigns and use unlimited steps or categories", "designTitle": "Use every template and advanced Design control", "designDescription": "Unlock all FPB and PPB templates plus component-level visual controls", "analyticsTitle": "Analyze and optimize", "analyticsDescription": "Use custom ranges, bundle and campaign detail, backfill, and CSV export" },
+    "faq": { "heading": "Frequently asked questions", "changeQuestion": "Can I change plans at any time?", "changeAnswer": "Yes. Shopify hosts monthly, annual, and Free plan changes from the Billing page.", "downgradeQuestion": "What happens to my bundles if I change to Free?", "downgradeAnswer": "All bundle configuration is preserved. The most recently published Free-compatible bundle remains public immediately; other public bundles become Draft.", "billingQuestion": "How does billing work?", "billingAnswer": "Growth is available monthly or annually through Shopify App Pricing. Both intervals include the same features.", "refundQuestion": "Do you offer refunds?", "refundAnswer": "Subscriptions are billed through Shopify. Please contact our support team for billing inquiries." },
+    "cta": { "heading": "Need more scale and control?", "body": "Choose Growth for unlimited public bundles, all templates, advanced Design and analytics, and priority support.", "highlights": { "bundles": "Unlimited public bundles", "design": "Advanced Design", "support": "Priority Support" }, "upgrade": "View Growth", "cancelAnytime": "Managed by Shopify" },
+    "route": { "title": "Subscription & Billing", "dashboard": "Dashboard", "currentPlan": "Current Plan", "active": "Active", "inactive": "Inactive", "bundleUsage": "Public Bundle Usage", "bundleCount": "{{current}} / {{limit}} public bundles", "limitReached": "You've reached the Free public-bundle limit.", "limitUpgrade": "View Growth for unlimited public bundles.", "overview": "Bundle Overview", "activeBundles": "Active Bundles", "totalSteps": "Total Steps", "productPage": "Product Page", "fullPage": "Full Page", "cancelSubscription": "Manage Subscription", "cancelHeading": "Manage subscription in Shopify?", "downgradeBody": "Shopify shows the effective date before a plan change.", "archiveWarning": "All bundle configuration is preserved after a downgrade.", "confirmCancellation": "Open Shopify plan management", "keepSubscription": "Keep Subscription", "features": "Your Plan Features", "needHelp": "Need Help?", "helpBody": "Have questions about billing or need a custom plan? Our team is here to help." }
+  },
+  "subscription": {
+    "analytics": {
+      "summaryNotice": "Free includes a 30-day activity summary. Growth adds custom ranges, bundle and campaign detail, custom UTM settings, backfill, and CSV export."
+    }
   }
 }

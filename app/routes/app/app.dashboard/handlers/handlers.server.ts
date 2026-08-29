@@ -31,17 +31,11 @@ const GET_PUBLICATIONS = `
   }
 `;
 
-const UPDATE_PRODUCT_STATUS = `
-  mutation UpdateProductStatus($id: ID!) {
-    productUpdate(input: {id: $id, status: DRAFT}) {
-      product {
-        id
-        status
-      }
-      userErrors {
-        field
-        message
-      }
+const DELETE_PRODUCT = `#graphql
+  mutation DeleteBundleParentProduct($input: ProductDeleteInput!) {
+    productDelete(input: $input, synchronous: true) {
+      deletedProductId
+      userErrors { field message }
     }
   }
 `;
@@ -89,6 +83,36 @@ async function deleteBundlePage(admin: ShopifyAdmin, pageId: string) {
   }
   if (!payload?.deletedPageId && !alreadyDeleted) {
     throw new Error(`Failed to delete Shopify Page ${pageId}: Shopify returned no deleted Page ID`);
+  }
+}
+
+async function deleteBundleParentProduct(admin: ShopifyAdmin, productId: string) {
+  const response = await admin.graphql(DELETE_PRODUCT, {
+    variables: { input: { id: productId } },
+  });
+  const data = await response.json() as {
+    errors?: Array<{ message?: string }>;
+    data?: {
+      productDelete?: {
+        deletedProductId?: string | null;
+        userErrors?: Array<{ message?: string }>;
+      } | null;
+    };
+  };
+  if (data.errors?.length) {
+    throw new Error(`Failed to delete Shopify Product ${productId}: ${data.errors[0]?.message ?? "unknown error"}`);
+  }
+
+  const payload = data.data?.productDelete;
+  const errors = payload?.userErrors ?? [];
+  const alreadyDeleted = errors.length > 0 && errors.every((error) => (
+    /not found|does not exist|invalid global id/i.test(error.message ?? "")
+  ));
+  if (errors.length > 0 && !alreadyDeleted) {
+    throw new Error(`Failed to delete Shopify Product ${productId}: ${errors[0]?.message ?? "unknown error"}`);
+  }
+  if (!payload?.deletedProductId && !alreadyDeleted) {
+    throw new Error(`Failed to delete Shopify Product ${productId}: Shopify returned no deleted Product ID`);
   }
 }
 
@@ -260,19 +284,10 @@ export async function handleDeleteBundle(
       }
     }
 
-    // Clean up metafields and set product to draft
+    // Clean up app references and the app-owned generated parent product.
     if (bundle.shopifyProductId) {
       await MetafieldCleanupService.updateShopMetafieldsAfterDeletion(admin, bundleId);
-
-      try {
-        await admin.graphql(UPDATE_PRODUCT_STATUS, {
-          variables: { id: bundle.shopifyProductId }
-        });
-      } catch (productError: any) {
-        AppLogger.error("Error updating Shopify product status",
-          { component: "app.dashboard", operation: "delete-bundle" },
-          productError);
-      }
+      await deleteBundleParentProduct(admin, bundle.shopifyProductId);
     }
 
     // Delete the bundle from database (cascade will handle related records)

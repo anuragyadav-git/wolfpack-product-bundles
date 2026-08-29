@@ -1,7 +1,7 @@
 import {
-  LegacyOfflineTokenCutoverError,
   runLegacyOfflineTokenCutover,
   selectLegacyOfflineSessions,
+  type LegacyOfflineTokenCutoverError,
   type LegacyOfflineSessionRow,
 } from "../../../app/lib/legacy-offline-token-cutover.server";
 

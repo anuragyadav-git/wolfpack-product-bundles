@@ -203,7 +203,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     return json({ error: "No valid product IDs provided" }, { status: 400 });
   }
 
-  const normalizedIds = requestedIds.map(normalizeProductId);
+  const normalizedIds = requestedIds.map((value) => normalizeProductId(value));
   if (normalizedIds.some(id => id === null)) {
     return json({ error: "Invalid product IDs" }, { status: 400 });
   }
@@ -265,7 +265,10 @@ export async function loader({ request }: LoaderFunctionArgs) {
           descriptionHtml: product.descriptionHtml || '',
           imageUrl: product.featuredImage?.url || '',
           images,
-          variants: variantEdges.map(mapStorefrontVariant),
+          variants: variantEdges.map(
+            (value: Parameters<typeof mapStorefrontVariant>[0]) =>
+              mapStorefrontVariant(value),
+          ),
         });
       } catch (error: any) {
         AppLogger.warn("[STOREFRONT_API] Failed to fetch variants for product", { component: "api.storefront-products", productId: product.id });
@@ -277,7 +280,10 @@ export async function loader({ request }: LoaderFunctionArgs) {
           descriptionHtml: product.descriptionHtml || '',
           imageUrl: product.featuredImage?.url || '',
           images,
-          variants: initialVariants.map(mapStorefrontVariant),
+          variants: initialVariants.map(
+            (value: Parameters<typeof mapStorefrontVariant>[0]) =>
+              mapStorefrontVariant(value),
+          ),
         });
       }
     }

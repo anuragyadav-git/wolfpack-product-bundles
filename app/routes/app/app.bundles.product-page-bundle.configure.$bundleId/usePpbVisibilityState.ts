@@ -2,11 +2,38 @@ import { useRef, useState } from "react";
 import {
   asVisibilityArray,
   getVisibilityDisplayTarget,
+  normalizeUpsellWidgetDisplayMode,
+  type UpsellWidgetDisplayMode,
 } from "./ConfigureBundleFlow.helpers";
 import {
   extractPpbBundleWidgetTranslations,
   normalizePpbBundleEmbedConfig,
 } from "../../../lib/ppb-bundle-embed";
+
+type VisibilityResource = {
+  id?: string;
+  title?: string;
+  [key: string]: unknown;
+};
+
+type UpsellWidgetDisplayOn =
+  | "all"
+  | "specific_products"
+  | "specific_collections";
+
+function asVisibilityResources(value: unknown): VisibilityResource[] {
+  return asVisibilityArray(value).filter(
+    (resource): resource is VisibilityResource =>
+      typeof resource === "object" && resource !== null,
+  );
+}
+
+function normalizeWidgetDisplayOn(value: unknown): UpsellWidgetDisplayOn {
+  if (value === "specific_products" || value === "specific_collections") {
+    return value;
+  }
+  return "all";
+}
 
 export function usePpbVisibilityState({
   bundle,
@@ -31,11 +58,18 @@ export function usePpbVisibilityState({
       false,
   );
   const [upsellWidgetDisplayMode, setUpsellWidgetDisplayMode] =
-    useState<string>((bundle as any).upsellWidgetDisplayMode ?? "block");
-  const [upsellWidgetDisplayOn, setUpsellWidgetDisplayOn] = useState<string>(
-    (bundle as any).upsellWidgetDisplayOn ??
-      getVisibilityDisplayTarget(savedWidgetDisplayConfiguration, "all"),
-  );
+    useState<UpsellWidgetDisplayMode>(
+      normalizeUpsellWidgetDisplayMode(
+        (bundle as any).upsellWidgetDisplayMode,
+      ),
+    );
+  const [upsellWidgetDisplayOn, setUpsellWidgetDisplayOn] =
+    useState<UpsellWidgetDisplayOn>(
+      normalizeWidgetDisplayOn(
+        (bundle as any).upsellWidgetDisplayOn ??
+          getVisibilityDisplayTarget(savedWidgetDisplayConfiguration, "all"),
+      ),
+    );
   const [upsellWidgetTitle, setUpsellWidgetTitle] = useState<string>(
     savedWidgetConfiguration?.title ?? "Bundle & Save",
   );
@@ -48,8 +82,10 @@ export function usePpbVisibilityState({
     savedWidgetConfiguration?.imageUrl ?? "",
   );
   const [upsellWidgetSelectedProducts, setUpsellWidgetSelectedProducts] =
-    useState<unknown[]>(
-      asVisibilityArray(savedWidgetDisplayConfiguration?.selectedProducts),
+    useState<VisibilityResource[]>(
+      asVisibilityResources(
+        savedWidgetDisplayConfiguration?.selectedProducts,
+      ),
     );
   const [
     upsellWidgetSpecificProductPages,
@@ -62,8 +98,10 @@ export function usePpbVisibilityState({
   const [
     upsellWidgetCollectionsSelectedData,
     setUpsellWidgetCollectionsSelectedData,
-  ] = useState<unknown[]>(
-    asVisibilityArray(savedWidgetDisplayConfiguration?.collectionsSelectedData),
+  ] = useState<VisibilityResource[]>(
+    asVisibilityResources(
+      savedWidgetDisplayConfiguration?.collectionsSelectedData,
+    ),
   );
   const [
     upsellWidgetSpecificCollectionPages,
@@ -99,8 +137,10 @@ export function usePpbVisibilityState({
       canonicalEmbedConfiguration.useLinkProductAsDefaultProduct,
     );
   const [bundleEmbedSelectedProducts, setBundleEmbedSelectedProducts] =
-    useState<unknown[]>(
-      asVisibilityArray(canonicalEmbedConfiguration.displayConfiguration.selectedProducts),
+    useState<VisibilityResource[]>(
+      asVisibilityResources(
+        canonicalEmbedConfiguration.displayConfiguration.selectedProducts,
+      ),
     );
   const [bundleEmbedSpecificProductPages, setBundleEmbedSpecificProductPages] =
     useState<unknown[]>(
@@ -111,8 +151,10 @@ export function usePpbVisibilityState({
   const [
     bundleEmbedCollectionsSelectedData,
     setBundleEmbedCollectionsSelectedData,
-  ] = useState<unknown[]>(
-      asVisibilityArray(canonicalEmbedConfiguration.displayConfiguration.collectionsSelectedData),
+  ] = useState<VisibilityResource[]>(
+    asVisibilityResources(
+      canonicalEmbedConfiguration.displayConfiguration.collectionsSelectedData,
+    ),
   );
   const [
     bundleEmbedSpecificCollectionPages,

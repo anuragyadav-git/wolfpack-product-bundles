@@ -4,16 +4,6 @@
  * Extracted from the main processor file for better organization.
  */
 
-// Shopify AppSubscriptionStatus enum values
-// https://shopify.dev/docs/api/admin-graphql/latest/enums/AppSubscriptionStatus
-export type ShopifySubscriptionStatus =
-  | "ACTIVE"
-  | "CANCELLED"
-  | "DECLINED"
-  | "EXPIRED"
-  | "FROZEN"
-  | "PENDING";
-
 export interface PubSubMessage {
   data: string; // base64 encoded JSON
   attributes: {
@@ -28,32 +18,6 @@ export interface WebhookProcessResult {
   success: boolean;
   message: string;
   error?: string;
-}
-
-// Payload interfaces for different webhook topics
-export interface SubscriptionPayload {
-  app_subscription?: {
-    admin_graphql_api_id: string;
-    name: string;
-    status: ShopifySubscriptionStatus;
-    created_at: string;
-    updated_at: string;
-    currency: string;
-    capped_amount?: string;
-  };
-}
-
-export interface PurchasePayload {
-  app_purchase_one_time?: {
-    admin_graphql_api_id: string;
-    name: string;
-    status: string;
-    price: {
-      amount: string;
-      currency_code: string;
-    };
-    created_at: string;
-  };
 }
 
 export interface ProductPayload {

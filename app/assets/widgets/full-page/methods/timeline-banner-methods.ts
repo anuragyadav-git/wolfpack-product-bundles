@@ -5,7 +5,7 @@ import {
   shouldShowTimelineCompletedState,
 } from '../../shared/engine/bundle-selectors.js';
 import { createBundleBannerElement, createStepBannerImageElement } from '../../shared/components/bundle-banners.js';
-import { renderStepTimelineEntry } from '../../shared/components/step-timeline.js';
+import { createStepTimelineEntryElement } from '../../shared/components/step-timeline.js';
 
 export const fullPageTimelineBannerMethods: Record<string, any> & ThisType<any> = {
 getStandardTimelineVisibleEntries(timelineEntries: any, activeEntryIndex: number) {
@@ -137,23 +137,21 @@ createStepTimeline() {
     });
 
     const tabLabel = entry.label;
-    const escapedName = this._escapeHTML(tabLabel) || `Step ${index + 1}`;
+    const accessibleName = tabLabel || `Step ${index + 1}`;
 
     // Icon: addon-uploaded, then Step Config image, else default SVG.
     const uploadedIconUrl = (step.isFreeGift && step.addonIconUrl) ? step.addonIconUrl : step.stepImage;
-    const iconContent = uploadedIconUrl
-      ? `<img class="timeline-step-icon" src="${uploadedIconUrl}" alt="${escapedName}">`
-      : this._getDefaultTimelineIcon(step);
-
-    const stepWrapper = document.createElement('div');
-    stepWrapper.innerHTML = renderStepTimelineEntry({
+    const icon = document.createElement('img');
+    icon.className = 'timeline-step-icon';
+    icon.src = uploadedIconUrl || this._getDefaultTimelineIconDataUri(step);
+    icon.alt = accessibleName;
+    const stepEl = createStepTimelineEntryElement({
       stepIndex: index,
       timelineType: entry.type,
       label: tabLabel || `Step ${index + 1}`,
-      iconHtml: iconContent,
+      iconElement: icon,
       classes: timelineState.classes,
-    }).trim();
-    const stepEl = stepWrapper.firstElementChild as HTMLElement;
+    });
 
     // Click handler — accessible steps only
     if (entry.type === 'step' && timelineState.isAccessible && !timelineState.isDefaultStep) {
@@ -299,18 +297,24 @@ createStandardStepTimeline() {
     });
     timelineState.classes.forEach((className) => itemEl.classList.add(className));
 
-    const escapedName = this._escapeHTML(entry.label) || `Step ${index + 1}`;
+    const displayName = String(entry.label || `Step ${index + 1}`);
     const uploadedIconUrl = (step.isFreeGift && step.addonIconUrl) ? step.addonIconUrl : step.stepImage;
     const iconUrl = uploadedIconUrl || this._getDefaultTimelineIconDataUri(step);
 
-    itemEl.innerHTML = `
-      <div class="standard-navigation-step-img-container timeline-icon-wrapper">
-        <img class="standard-navigation-image timeline-step-icon" src="${this._escapeHTML(iconUrl)}" alt="${escapedName}">
-      </div>
-      <div class="standard-navigation-title-container">
-        <p class="standard-navigation-title timeline-step-name">${escapedName}</p>
-      </div>
-    `;
+    const imageContainer = document.createElement('div');
+    imageContainer.className = 'standard-navigation-step-img-container timeline-icon-wrapper';
+    const image = document.createElement('img');
+    image.className = 'standard-navigation-image timeline-step-icon';
+    image.src = String(iconUrl || '');
+    image.alt = displayName;
+    imageContainer.appendChild(image);
+    const titleContainer = document.createElement('div');
+    titleContainer.className = 'standard-navigation-title-container';
+    const title = document.createElement('p');
+    title.className = 'standard-navigation-title timeline-step-name';
+    title.textContent = displayName;
+    titleContainer.appendChild(title);
+    itemEl.append(imageContainer, titleContainer);
 
     if (entry.type === 'step' && timelineState.isAccessible && !timelineState.isDefaultStep) {
       itemEl.classList.add('timeline-step--interactive');
@@ -336,11 +340,12 @@ createStandardStepTimeline() {
   if (entryCount > 1) {
     const progressContainer = document.createElement('div');
     progressContainer.className = 'standard-steps-progress-bar-container';
-    progressContainer.innerHTML = `
-      <div class="standard-steps-progress-bar">
-        <div class="standard-steps-progress-bar-filled"></div>
-      </div>
-    `;
+    const progressBar = document.createElement('div');
+    progressBar.className = 'standard-steps-progress-bar';
+    const progressFill = document.createElement('div');
+    progressFill.className = 'standard-steps-progress-bar-filled';
+    progressBar.appendChild(progressFill);
+    progressContainer.appendChild(progressBar);
     itemsContainer.appendChild(progressContainer);
   }
 

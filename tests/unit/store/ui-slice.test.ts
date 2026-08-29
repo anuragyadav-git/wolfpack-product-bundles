@@ -11,14 +11,14 @@ import {
 
 describe("uiSlice", () => {
   it("opens, closes, and toggles keyed modals", () => {
-    let state = uiReducer(undefined, openModal("billing_cancelConfirm"));
-    expect(state.modals.billing_cancelConfirm).toBe(true);
+    let state = uiReducer(undefined, openModal("bundle_deleteConfirm"));
+    expect(state.modals.bundle_deleteConfirm).toBe(true);
 
-    state = uiReducer(state, closeModal("billing_cancelConfirm"));
-    expect(state.modals.billing_cancelConfirm).toBe(false);
+    state = uiReducer(state, closeModal("bundle_deleteConfirm"));
+    expect(state.modals.bundle_deleteConfirm).toBe(false);
 
-    state = uiReducer(state, toggleModal("billing_cancelConfirm"));
-    expect(state.modals.billing_cancelConfirm).toBe(true);
+    state = uiReducer(state, toggleModal("bundle_deleteConfirm"));
+    expect(state.modals.bundle_deleteConfirm).toBe(true);
   });
 
   it("adds and hides toasts", () => {

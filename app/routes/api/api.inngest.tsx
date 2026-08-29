@@ -10,11 +10,17 @@
  */
 import { serve } from "inngest/remix";
 import { inngest } from "~/inngest/client";
-import { webhookFunction } from "~/inngest/functions";
+import {
+  subscriptionReconciliationFunction,
+  webhookFunction,
+} from "~/inngest/functions";
 
 const handler = serve({
   client: inngest,
-  functions: [webhookFunction],
+  functions: [
+    webhookFunction,
+    subscriptionReconciliationFunction,
+  ],
 });
 
 export const action = handler;

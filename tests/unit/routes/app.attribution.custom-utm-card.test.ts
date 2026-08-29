@@ -57,7 +57,7 @@ describe("CustomUtmTrackingCard", () => {
     expect(view).toContain("How custom attributes work");
     expect(view).toContain("Add parameter names one per line or separated by commas");
     expect(view).toContain("utm_influencer, partner_id");
-    expect(view).toContain("Wolfpack saves up to 10 valid names");
+    expect(view).toContain("Only Bundles saves up to 10 valid names");
     expect(view).toContain("Do not track shopper identifiers");
     expect(view).toContain("new visits after you save");
     expect(view).toContain('id="analytics-custom-utm-save-bar"');

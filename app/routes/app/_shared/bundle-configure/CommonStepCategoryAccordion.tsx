@@ -1,7 +1,7 @@
-import { useRef, useState } from "react";
-import type React from "react";
+import React, { useRef, useState } from "react";
 
 import { moveArrayItem } from "../../../../lib/bundle-config/reorder-items";
+import { getConfigureActionIcon } from "../../../../lib/bundle-config/configure-action-icons";
 
 export interface CommonStepCategoryAccordionAdapter {
   categoryActiveTabs: Record<string, number>;
@@ -343,7 +343,7 @@ export function CommonStepCategoryAccordion({
                 </div>
                 <s-button
                   variant="secondary"
-                  icon="globe"
+                  icon={getConfigureActionIcon("translate")}
                   disabled={translationActionsDisabled || undefined}
                   onClick={() =>
                     openStepCategoryMultiLanguageModal(step.id, catIndex)
@@ -462,7 +462,7 @@ function SelectedProductsPanel({
         Products selected here will be displayed on this step
       </p>
       <div className={styles.productActions}>
-        <s-button variant="primary" onClick={handlePickProducts}>
+        <s-button variant="primary" icon={getConfigureActionIcon("add-product")} onClick={handlePickProducts}>
           Add Products
         </s-button>
         {products.length > 0 && (
@@ -546,7 +546,7 @@ function SelectedProductsPanel({
         >
           Close
         </s-button>
-        <s-button slot="primary-action" variant="primary" onClick={handlePickProducts}>
+        <s-button slot="primary-action" variant="primary" icon={getConfigureActionIcon("add-product")} onClick={handlePickProducts}>
           Add Products
         </s-button>
       </s-modal>
@@ -585,7 +585,7 @@ function SelectedCollectionsPanel({
         Collections selected here will be displayed on this step
       </p>
       <div className={styles.productActions}>
-        <s-button variant="primary" onClick={handlePickCollections}>
+        <s-button variant="primary" icon={getConfigureActionIcon("add-collection")} onClick={handlePickCollections}>
           Add Collections
         </s-button>
         {collections.length > 0 && (
@@ -671,6 +671,7 @@ function SelectedCollectionsPanel({
         <s-button
           slot="primary-action"
           variant="primary"
+          icon={getConfigureActionIcon("add-collection")}
           onClick={handlePickCollections}
         >
           Add Collections

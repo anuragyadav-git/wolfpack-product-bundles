@@ -1,9 +1,13 @@
+export {};
+
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const {
   ProductPageModalMethods,
   resolveProductPageCardButtonText,
   resolveProductPageInlineAddText,
 } = require('../../../app/assets/widgets/product-page/methods/modal-methods.js');
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { JSDOM } = require('jsdom');
 
 describe('PPB product card button copy', () => {
   it('interpolates selected quantity tokens instead of rendering raw template copy', () => {
@@ -33,6 +37,16 @@ describe('PPB product card button copy', () => {
     })).toBe('Added x2');
   });
 
+  it('uses the configured out-of-stock copy', () => {
+    expect(resolveProductPageCardButtonText({
+      currentQuantity: 0,
+      currentStep: {},
+      outOfStock: true,
+      outOfStockText: 'Sold Out Here',
+      defaultAddText: 'Add to Cart',
+    })).toBe('Sold Out Here');
+  });
+
   it('resolves PPB inline product-card add copy before modal add copy', () => {
     const resolveText = jest.fn((key: string, fallback: string) => ({
       productCardAddButton: 'Modal Add',
@@ -51,7 +65,10 @@ describe('PPB product card button copy', () => {
   });
 
   it('renders the active Product Page variant label on variant selectors', () => {
-    const html = ProductPageModalMethods.renderVariantSelector.call(
+    const dom = new JSDOM('<!doctype html><html><body></body></html>');
+    const originalDocument = global.document;
+    global.document = dom.window.document;
+    const selector = ProductPageModalMethods.renderVariantSelector.call(
       {
         _resolveText: (key: string, fallback: any) => (key === 'productVariantLabel' ? 'Choose Variant' : fallback),
         isInventoryTrackingOnAddToCartEnabled: () => false,
@@ -65,8 +82,9 @@ describe('PPB product card button copy', () => {
         ],
       },
     );
+    global.document = originalDocument;
 
-    expect(html).toContain('aria-label="Choose Variant"');
-    expect(html).toContain('Choose Variant');
+    expect(selector.querySelector('[aria-label="Choose Variant"]')).not.toBeNull();
+    expect(selector.textContent).toMatch(/Choose Variant/);
   });
 });

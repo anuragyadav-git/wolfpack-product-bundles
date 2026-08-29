@@ -28,11 +28,10 @@ export function FpbSyncAndLanguageModals({
 
   return (
     <>
-      <s-modal ref={flow.syncModalRef} heading="Sync Wolfpack bundle?">
+      <s-modal ref={flow.syncModalRef} heading="Sync bundle with Only Bundles?">
         <s-stack direction="block" gap="small">
           <s-paragraph>
-            Syncing refreshes the Shopify data used by this Wolfpack Bundles
-            configuration.
+            Syncing refreshes the Shopify data used by this bundle in Only Bundles.
           </s-paragraph>
           <s-paragraph>
             The Shopify page will be deleted and re-created.
@@ -47,6 +46,7 @@ export function FpbSyncAndLanguageModals({
         <s-button
           slot="primary-action"
           variant="primary"
+          icon="refresh"
           loading={flow.fetcher.state === "submitting" || undefined}
           onClick={flow.handleSyncBundleConfirm}
         >

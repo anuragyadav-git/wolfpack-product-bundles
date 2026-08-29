@@ -46,6 +46,11 @@
   background: transparent;
 }
 
+#bundle-builder-modal.bw-bs-panel .bw-ppb-step-content-title--picker {
+  margin: 0 clamp(20px, 5vw, 65px);
+  padding-top: clamp(0.75rem, 1.5vw, 1rem);
+}
+
 #bundle-builder-modal.bw-bs-panel .bw-bs-body {
   min-height: 0;
   padding: 0;
@@ -111,6 +116,10 @@
     min-height: 0;
     overflow-x: hidden;
     overflow-y: auto;
+  }
+
+  #bundle-builder-modal.bw-bs-panel .bw-ppb-step-content-title--picker {
+    margin-inline: 20px;
   }
 
   #bundle-builder-modal.bw-bs-panel .bw-bs-product-grid {

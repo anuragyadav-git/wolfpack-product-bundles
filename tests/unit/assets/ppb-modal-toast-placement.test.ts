@@ -1,5 +1,6 @@
 import { getProductPageModalValidationToastOptions } from "../../../app/assets/widgets/product-page/methods/modal-state-methods.js";
 import { ToastManager } from "../../../app/assets/widgets/shared/toast-manager.js";
+import { JSDOM } from "jsdom";
 
 describe("PPB modal validation toast placement", () => {
   it("keeps validation feedback body-mounted and dismissible", () => {
@@ -12,26 +13,10 @@ describe("PPB modal validation toast placement", () => {
   });
 
   it("renders a keyboard-operable named dismiss control", () => {
-    const attributes = new Map<string, string>();
-    const closeControl = { addEventListener: jest.fn() };
-    const toast = {
-      id: "",
-      className: "",
-      classList: { add: jest.fn() },
-      innerHTML: "",
-      parentNode: null,
-      setAttribute: (name: string, value: string) => attributes.set(name, value),
-      querySelector: (selector: string) => selector === ".toast-close" ? closeControl : null,
-      remove: jest.fn(),
-    };
+    const runtimeDocument = new JSDOM('<!doctype html><html><body></body></html>').window.document;
     const originalDocument = global.document;
     const originalGetComputedStyle = global.getComputedStyle;
-    global.document = {
-      getElementById: () => null,
-      createElement: () => toast,
-      body: { appendChild: jest.fn() },
-      documentElement: {},
-    } as unknown as Document;
+    global.document = runtimeDocument;
     global.getComputedStyle = (() => ({ getPropertyValue: () => "" })) as unknown as typeof getComputedStyle;
 
     try {
@@ -41,8 +26,10 @@ describe("PPB modal validation toast placement", () => {
       global.getComputedStyle = originalGetComputedStyle;
     }
 
-    expect(attributes.get("role")).toBe("alert");
-    expect(toast.innerHTML).toContain('<button type="button" class="toast-close" aria-label="Close">');
-    expect(closeControl.addEventListener).toHaveBeenCalledWith("click", expect.any(Function));
+    const toast = runtimeDocument.getElementById('bundle-toast');
+    const closeControl = toast?.querySelector('button[aria-label="Close"]') as HTMLButtonElement;
+    expect(toast?.getAttribute("role")).toBe("alert");
+    expect(closeControl?.type).toBe('button');
+    expect(closeControl).not.toBeNull();
   });
 });

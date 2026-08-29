@@ -349,6 +349,9 @@ function createStepFlowDocument() {
           this.children.push(child);
           return child;
         },
+        append(...children: any[]) {
+          children.forEach((child) => this.appendChild(child));
+        },
         dispatch(name: string) {
           listeners.get(name)?.();
         },

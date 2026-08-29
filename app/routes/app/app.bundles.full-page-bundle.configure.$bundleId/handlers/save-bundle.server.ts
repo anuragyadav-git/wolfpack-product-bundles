@@ -38,6 +38,13 @@ import {
   getBundleSubscriptionCompatibilityIssues,
   validateBundleSubscriptionConfig,
 } from "../../../../lib/bundle-subscriptions";
+import {
+  EntitlementDeniedError,
+} from "../../../../lib/subscriptions/entitlements";
+import { resolveShopEntitlements } from "../../../../services/subscriptions/subscription-service.server";
+import { updateBundleWithPublicationGate } from "../../../../services/subscriptions/bundle-entitlement-gate.server";
+import { shopUsesAdvancedDesign } from "../../../../services/subscriptions/design-entitlement-state.server";
+import { recordSubscriptionEvent } from "../../../../services/subscriptions/subscription-telemetry.server";
 
 type ParsedVariantRef = string | number;
 
@@ -451,56 +458,52 @@ export async function handleSaveBundle(
         }
       : null;
 
-    // Automatically set status to 'active' if bundle has configured steps
-    let finalStatus = bundleStatus as any;
-    if (
-      bundleStatus === BundleStatus.DRAFT &&
-      stepsData &&
-      stepsData.length > 0
-    ) {
-      const hasConfiguredSteps = stepsData.some((step: any) => {
-        const hasCategoryContent =
-          Array.isArray(step.StepCategory) &&
-          step.StepCategory.some(
-            (category: any) =>
-              (Array.isArray(category.products) &&
-                category.products.length > 0) ||
-              (Array.isArray(category.collections) &&
-                category.collections.length > 0),
-          );
-
-        return (
-          (Array.isArray(step.StepProduct) && step.StepProduct.length > 0) ||
-          (Array.isArray(step.collections) && step.collections.length > 0) ||
-          hasCategoryContent
-        );
-      });
-      AppLogger.debug("[BUNDLE_CONFIG] Status evaluation:", {
-        originalStatus: bundleStatus,
-        hasConfiguredSteps,
-        stepsCount: stepsData.length,
-      });
-      if (hasConfiguredSteps) {
-        finalStatus = BundleStatus.ACTIVE;
-        AppLogger.debug(
-          "[BUNDLE_CONFIG] Auto-activating bundle with configured steps",
-        );
-      }
-    }
+    const finalStatus = bundleStatus as BundleStatus;
 
     // Get existing bundle to preserve shopifyProductId if not provided
     const existingBundle = await db.bundle.findUnique({
       where: { id: bundleId, shopId: session.shop },
-      select: { shopifyProductId: true },
+      select: {
+        shopifyProductId: true,
+        bundleDesignTemplate: true,
+        bundleDesignPresetId: true,
+      },
     });
+
+    const isPublicMutation = finalStatus === BundleStatus.ACTIVE
+      || finalStatus === BundleStatus.UNLISTED;
+    const entitlementContext = isPublicMutation
+      ? await resolveShopEntitlements({
+          shopDomain: session.shop,
+          forceRefresh: true,
+        })
+      : null;
+    const enabledStepCount = stepsData.reduce(
+      (count: number, step: any, index: number) =>
+        count + (resolveBundleStepEnabled(index, step.enabled) ? 1 : 0),
+      0,
+    );
+    const usesAdvancedDesign = entitlementContext
+      ? await shopUsesAdvancedDesign(session.shop)
+      : false;
 
     // Update bundle in database
     AppLogger.debug("[BUNDLE_CONFIG] Updating bundle in database");
-    const updatedBundle = await db.bundle.update({
-      where: {
-        id: bundleId,
-        shopId: session.shop,
+    const updatedBundle = await updateBundleWithPublicationGate({
+      database: db,
+      shopDomain: session.shop,
+      bundleId,
+      candidate: {
+        bundleType: "FULL_PAGE",
+        status: finalStatus.toUpperCase() as "ACTIVE" | "UNLISTED" | "DRAFT" | "ARCHIVED",
+        enabledStepCount,
+        designTemplate: existingBundle?.bundleDesignTemplate,
+        designPresetId: existingBundle?.bundleDesignPresetId,
+        usesAdvancedDesign,
+        usesBundleSubscriptions: bundleSubscriptionConfig?.enabled === true,
+        usesCustomCode: Boolean(bundleLevelCss),
       },
+      entitlements: entitlementContext?.entitlements ?? null,
       data: {
         name: bundleName,
         description: bundleDescription,
@@ -697,13 +700,15 @@ export async function handleSaveBundle(
       },
     });
 
-    await syncBundleStorefrontNow({
-      admin,
-      shopDomain: session.shop,
-      bundleId,
-      bundleType: "full_page",
-      reason: "save",
-    });
+    if (finalStatus === BundleStatus.ACTIVE || finalStatus === BundleStatus.UNLISTED) {
+      await syncBundleStorefrontNow({
+        admin,
+        shopDomain: session.shop,
+        bundleId,
+        bundleType: "full_page",
+        reason: "save",
+      });
+    }
 
     if (hasEnabledAddonProducts(personalizationData)) {
       try {
@@ -775,6 +780,26 @@ export async function handleSaveBundle(
       message: "Updated Successfully!",
     });
   } catch (error: any) {
+    if (error instanceof EntitlementDeniedError) {
+      await recordSubscriptionEvent({
+        eventHandle: "entitlement_publish_blocked",
+        shopDomain: session.shop,
+        planCode: null,
+        billingInterval: "NONE",
+        featureKey: error.entitlement,
+        gateLocation: "fpb_save",
+        bundleId,
+        bundleType: "FULL_PAGE",
+        action: "publish",
+        result: "blocked",
+        errorCode: error.code,
+      });
+      return json({
+        success: false,
+        error: error.code,
+        entitlementFailure: error.toJSON(),
+      }, { status: error.status });
+    }
     const message =
       error instanceof Error
         ? error.message

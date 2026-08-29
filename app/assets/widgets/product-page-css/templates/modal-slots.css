@@ -643,9 +643,6 @@
   user-select: none;
 }
 
-@import "../../full-page-css/base/product-modal-shell.css";
-@import "../../full-page-css/base/product-modal-controls.css";
-
 /* Vertical Slots use compact, full-width rows instead of the horizontal tile grid. */
 .bw-selected-slots--mode-vertical {
   grid-template-columns: minmax(0, 1fr);

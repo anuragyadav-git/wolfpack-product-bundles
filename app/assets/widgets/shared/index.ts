@@ -27,7 +27,6 @@
  * - TemplateManager: Dynamic message templating with variables
  *
  * UI COMPONENTS:
- * - ComponentGenerator: Generates HTML for all UI elements
  *   - Product cards (with variants, quantities, pricing)
  *   - Empty state cards (placeholder UI)
  *   - Modal structure (for full-page bundles)
@@ -47,7 +46,6 @@
  *   PricingCalculator,
  *   ToastManager,
  *   TemplateManager,
- *   ComponentGenerator
  * } from './widgets/shared/index.js';
  *
  * ============================================================================
@@ -60,7 +58,7 @@
  * 5. TESTABILITY: Can test utilities independently of widgets
  *
  * @version 4.0.0
- * @author Wolfpack Team
+ * @author Only Bundles Team
  */
 
 'use strict';
@@ -72,19 +70,18 @@ export { BundleDataManager } from './bundle-data-manager.js';
 export { PricingCalculator } from './pricing-calculator.js';
 export { ToastManager } from './toast-manager.js';
 export { TemplateManager } from './template-manager.js';
-export { ComponentGenerator } from './component-generator.js';
 export { createDefaultLoadingAnimation } from './default-loading-animation.js';
 export { VariantSelectorComponent } from './variant-selector.js';
-export { renderDiscountProgress } from './components/discount-progress.js';
+export { createDiscountProgressElement } from './components/discount-progress.js';
 export {
   createBundleBannerElement,
   createStepBannerImageElement,
 } from './components/bundle-banners.js';
-export { renderQuantityControl } from './components/quantity-control.js';
-export { renderSelectedProductRow } from './components/selected-product-row.js';
-export { renderSelectedProductSlots } from './components/selected-product-slots.js';
-export { renderSharedProductCard } from './components/product-card.js';
-export { renderStepTimelineEntry } from './components/step-timeline.js';
+export { createQuantityControlElement } from './components/quantity-control.js';
+export { createSelectedProductRowElement } from './components/selected-product-row.js';
+export { createSelectedProductSlotsElement } from './components/selected-product-slots.js';
+export { createSharedProductCardElement } from './components/product-card.js';
+export { createStepTimelineEntryElement } from './components/step-timeline.js';
 export { createBundleState } from './engine/create-bundle-state.js';
 export {
   getCurrentStep,

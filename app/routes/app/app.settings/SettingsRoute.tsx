@@ -1,6 +1,7 @@
 import { useActionData, useFetcher, useNavigation, useSubmit } from "@remix-run/react";
 import { useEffect, useRef, useState } from "react";
 import { useAppBridge } from "@shopify/app-bridge-react";
+import { useTranslation } from "react-i18next";
 import {
   CONTROL_LAYOUTS,
   LANGUAGE_CONFIGURATION,
@@ -22,12 +23,17 @@ import { LanguageSettingsView } from "./LanguageSettingsView";
 import {
   SettingsContextualSaveBar,
   SettingsHelpModal,
-  SettingsToast,
 } from "./SettingsFeedback";
+import {
+  createLanguageSettingsSnapshot,
+  showSettingsSaveFeedback,
+} from "./settings-feedback";
 import { createSettingsDesignState, type SettingsDesignPayload } from "../../../lib/settings-design-contract";
 import { isShopBrandColors } from "../../../lib/shop-brand-colors";
 import { DesignSettingsView } from "./DesignSettingsView";
 import { AdminPageTitleBar } from "../../../components/AdminPageNavigation";
+import { AdminTaskAlertBanner } from "../../../components/AdminTaskAlertBanner";
+import type { AdminTaskAlert } from "../../../lib/admin-alert-feedback";
 import type { AdditionalConfigurationsNavigation } from "../../../lib/additional-configurations-navigation";
 import {
   createDeferredSettingsNavigation,
@@ -56,6 +62,7 @@ export function SettingsRoute({
   settingsPage,
   previewBundles,
 }: SettingsRouteProps) {
+  const { t } = useTranslation();
   const actionData = useActionData<typeof action>();
   const controlsFetcher = useFetcher<typeof action>();
   const submit = useSubmit();
@@ -69,10 +76,10 @@ export function SettingsRoute({
     localeFieldValues: Record<string, Record<string, string>>;
   } | null>(null);
   const previousSavedControlValuesRef = useRef<Record<string, string> | null>(null);
-  const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const [settingsHelpArticle, setSettingsHelpArticle] = useState<"inventory" | null>(null);
   const [settingsVariablesModal, setSettingsVariablesModal] = useState<{ title: string; variables: string[] } | null>(null);
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
+  const [taskAlert, setTaskAlert] = useState<AdminTaskAlert | null>(null);
   const persistedLanguageState = settingsPage?.language && typeof settingsPage.language === "object"
       ? settingsPage.language as {
         languageMode?: "SINGLE" | "MULTIPLE";
@@ -86,6 +93,7 @@ export function SettingsRoute({
   const shopBrandColors = isShopBrandColors(settingsPage?.shopBrandColors)
     ? settingsPage.shopBrandColors
     : null;
+  const advancedDesignAvailable = settingsPage?.advancedDesignAvailable !== false;
   const [settingsView, setSettingsView] = useState<"landing" | "design" | "language" | "controls">(initialView);
   const initialLanguageLocaleValues = persistedLanguageState?.localeFieldValues ?? { en: getInitialLanguageFieldValues() };
   const [languageMode, setLanguageMode] = useState<"SINGLE" | "MULTIPLE">(persistedLanguageState?.languageMode ?? "MULTIPLE");
@@ -142,7 +150,7 @@ export function SettingsRoute({
     ? selectedControlTab.fields.filter((field) => (field.group ?? selectedControlTab.contentTitle ?? selectedControlTab.title) === selectedControlGroupTitle)
     : selectedControlTab.fields;
   const languageFieldValues = languageLocaleValues[selectedLanguage] ?? getInitialLanguageFieldValues(selectedLanguage);
-  const currentLanguageState = { languageMode, localeFieldValues: languageLocaleValues };
+  const currentLanguageState = createLanguageSettingsSnapshot(languageMode, languageLocaleValues);
   const isLanguageDirty = JSON.stringify(currentLanguageState) !== JSON.stringify(savedLanguageState);
   const isControlsDirty = JSON.stringify(controlFieldValues) !== JSON.stringify(savedControlFieldValues);
   const currentDesignState = { fieldValues: designFieldValues, inheritedColorFieldKeys };
@@ -213,10 +221,11 @@ export function SettingsRoute({
       return;
     }
     if (settingsView === "language") {
-      pendingSavedLanguageStateRef.current = currentLanguageState;
+      const submittedLanguageState = createLanguageSettingsSnapshot(languageMode, languageLocaleValues);
+      pendingSavedLanguageStateRef.current = submittedLanguageState;
       submit({
         intent: "saveSettingsLanguage",
-        payload: JSON.stringify(currentLanguageState),
+        payload: JSON.stringify(submittedLanguageState),
       }, { method: "post" });
       return;
     }
@@ -237,7 +246,7 @@ export function SettingsRoute({
       return;
     }
     if (
-      actionData.success
+      (actionData.success || ("persisted" in actionData && actionData.persisted === true))
       && "intent" in actionData
       && actionData.intent === "saveSettingsDesign"
       && "savedState" in actionData
@@ -247,14 +256,23 @@ export function SettingsRoute({
       setSavedInheritedColorFieldKeys(confirmedState.inheritedColorFieldKeys);
     }
     if (
-      actionData.success
+      (actionData.success || ("persisted" in actionData && actionData.persisted === true))
       && "intent" in actionData
       && actionData.intent === "saveSettingsLanguage"
     ) {
-      if (pendingSavedLanguageStateRef.current) {
-        setSavedLanguageState(pendingSavedLanguageStateRef.current);
-        pendingSavedLanguageStateRef.current = null;
-      }
+      const savedState = "savedState" in actionData
+        && actionData.savedState
+        && typeof actionData.savedState === "object"
+        ? actionData.savedState as {
+          languageMode?: "SINGLE" | "MULTIPLE";
+          localeFieldValues?: Record<string, Record<string, string>>;
+        }
+        : null;
+      const confirmedState = savedState?.languageMode && savedState.localeFieldValues
+        ? createLanguageSettingsSnapshot(savedState.languageMode, savedState.localeFieldValues)
+        : pendingSavedLanguageStateRef.current;
+      if (confirmedState) setSavedLanguageState(confirmedState);
+      pendingSavedLanguageStateRef.current = null;
     } else if (
       actionData.success === false
       && "intent" in actionData
@@ -262,8 +280,13 @@ export function SettingsRoute({
     ) {
       pendingSavedLanguageStateRef.current = null;
     }
-    setSaveMessage(actionData.success ? "Settings saved successfully" : actionData.message || "Something went wrong");
-  }, [actionData]);
+    const error = showSettingsSaveFeedback(shopify, actionData);
+    setTaskAlert(error ? {
+      id: "settings-save",
+      heading: t("common.alerts.settingsNotSaved"),
+      message: error,
+    } : null);
+  }, [actionData, shopify, t]);
 
   useEffect(() => {
     const response = controlsFetcher.data;
@@ -281,8 +304,13 @@ export function SettingsRoute({
       pendingSavedControlValuesRef.current = null;
       previousSavedControlValuesRef.current = null;
     }
-    setSaveMessage(response.success ? "Settings saved successfully" : response.message || "Something went wrong");
-  }, [controlsFetcher.data, controlFieldValues]);
+    const error = showSettingsSaveFeedback(shopify, response);
+    setTaskAlert(error ? {
+      id: "settings-save",
+      heading: t("common.alerts.settingsNotSaved"),
+      message: error,
+    } : null);
+  }, [controlsFetcher.data, controlFieldValues, shopify, t]);
 
   useEffect(() => {
     if (settingsView !== "controls") return;
@@ -301,23 +329,25 @@ export function SettingsRoute({
 
   if (settingsView === "design") {
     return (
-      <DesignSettingsView
-        designFieldValues={designFieldValues}
-        inheritedColorFieldKeys={inheritedColorFieldKeys}
-        shopBrandColors={shopBrandColors}
-        isActiveSubpageDirty={isActiveSubpageDirty}
-        isDesignSaving={isDesignSaving}
-        isPreviewModalOpen={isPreviewModalOpen}
-        previewBundles={previewBundles}
-        saveMessage={saveMessage}
-        setSettingsView={() => returnToSettingsLanding()}
-        setIsPreviewModalOpen={setIsPreviewModalOpen}
-        setDesignFieldValues={setDesignFieldValues}
-        setInheritedColorFieldKeys={setInheritedColorFieldKeys}
-        setSaveMessage={setSaveMessage}
-        discardActiveSettingsChanges={discardActiveSettingsChanges}
-        saveActiveSettingsChanges={saveActiveSettingsChanges}
-      />
+      <>
+        <AdminTaskAlertBanner alert={taskAlert} onDismiss={() => setTaskAlert(null)} />
+        <DesignSettingsView
+          designFieldValues={designFieldValues}
+          inheritedColorFieldKeys={inheritedColorFieldKeys}
+          shopBrandColors={shopBrandColors}
+          isActiveSubpageDirty={isActiveSubpageDirty}
+          isDesignSaving={isDesignSaving}
+          isPreviewModalOpen={isPreviewModalOpen}
+          previewBundles={previewBundles}
+          setSettingsView={() => returnToSettingsLanding()}
+          setIsPreviewModalOpen={setIsPreviewModalOpen}
+          setDesignFieldValues={setDesignFieldValues}
+          setInheritedColorFieldKeys={setInheritedColorFieldKeys}
+          discardActiveSettingsChanges={discardActiveSettingsChanges}
+          saveActiveSettingsChanges={saveActiveSettingsChanges}
+          advancedDesignAvailable={advancedDesignAvailable}
+        />
+      </>
     );
   }
 
@@ -337,6 +367,7 @@ export function SettingsRoute({
     return (
       <>
         <AdminPageTitleBar title="Language Configurations" breadcrumbLabel="Settings" onBack={returnToSettingsLanding} />
+        <AdminTaskAlertBanner alert={taskAlert} onDismiss={() => setTaskAlert(null)} />
         <LanguageSettingsView
           activeLayout={activeLanguageLayout}
           activePanel={activeLanguagePanel}
@@ -381,7 +412,6 @@ export function SettingsRoute({
         />
           <SettingsContextualSaveBar isOpen={isActiveSubpageDirty} onDiscard={discardActiveSettingsChanges} onSave={saveActiveSettingsChanges} />
           <SettingsVariablesModal modal={settingsVariablesModal} onClose={() => setSettingsVariablesModal(null)} />
-          <SettingsToast message={saveMessage} onDismiss={() => setSaveMessage(null)} />
       </>
     );
   }
@@ -395,6 +425,7 @@ export function SettingsRoute({
           onBack={returnToSettingsLanding}
         />
         <main className={styles.page}>
+          <AdminTaskAlertBanner alert={taskAlert} onDismiss={() => setTaskAlert(null)} />
           <header className={styles.hero}>
             <div className={styles.settingsSubpageHeaderLeft}>
               <button
@@ -514,7 +545,6 @@ export function SettingsRoute({
           <SettingsContextualSaveBar isOpen={isActiveSubpageDirty} onDiscard={discardActiveSettingsChanges} onSave={saveActiveSettingsChanges} />
           <SettingsHelpModal article={settingsHelpArticle} onClose={() => setSettingsHelpArticle(null)} />
           <SettingsVariablesModal modal={settingsVariablesModal} onClose={() => setSettingsVariablesModal(null)} />
-          <SettingsToast message={saveMessage} onDismiss={() => setSaveMessage(null)} />
         </main>
       </>
     );

@@ -79,8 +79,8 @@ export function buildEmbedStatusModel(
     label: enabled ? "Enabled" : "Disabled",
     tone: enabled ? "success" : "warning",
     description: enabled
-      ? "Your store is connected and ready. Your bundle can now render on your storefront."
-      : "Enable the Theme app extension for Wolfpack Bundles to place and preview the bundle.",
+      ? "Connected and ready to render on your storefront."
+      : "Enable the app embed to place and preview this bundle.",
   };
 }
 

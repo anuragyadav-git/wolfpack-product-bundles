@@ -31,6 +31,7 @@ export function FpbBundleTemplateSettings({
             <QuestionHelpTooltip tooltipKey="cartLineItemDiscountDisplay" />
             <s-button
               variant="secondary"
+              icon="edit"
               onClick={() => handleSectionChange("discount_pricing")}
             >
               Edit Defaults

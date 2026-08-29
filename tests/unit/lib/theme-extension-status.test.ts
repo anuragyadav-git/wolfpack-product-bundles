@@ -26,7 +26,7 @@ describe("theme extension status normalization", () => {
       handle: "bundle-builder",
       type: "theme_app_extension",
       activations: [
-        { handle: "bundle-app-embed", name: "Wolfpack Bundle", target: "body", status: "active", activations: [] },
+        { handle: "bundle-app-embed", name: "Only Bundles", target: "body", status: "active", activations: [] },
         { handle: "bundle-product-page", name: "Bundle Builder", target: "section", status: "available", activations: [] },
       ],
     }];
@@ -40,7 +40,7 @@ describe("theme extension status normalization", () => {
     expect(result.map((item) => item.handle)).not.toContain("bundle-full-page");
   });
 
-  it("does not treat unrelated extensions as Wolfpack resources", () => {
+  it("does not treat unrelated extensions as Only Bundles resources", () => {
     const result = normalizeThemeExtensionResources([
       { handle: "other-extension", type: "theme_app_extension", activations: [] },
     ]);

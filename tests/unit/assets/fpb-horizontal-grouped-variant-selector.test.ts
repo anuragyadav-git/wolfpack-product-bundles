@@ -6,6 +6,8 @@ const { getInlineVariantSelectorPresentation } = require('../../../app/assets/wi
 const { VariantSelectorComponent } = require('../../../app/assets/widgets/shared/variant-selector.js');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { fullPageProductCardFooterMethods } = require('../../../app/assets/widgets/full-page/methods/product-card-footer-methods.js');
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { JSDOM } = require('jsdom');
 
 describe('FPB Horizontal grouped variant selector', () => {
   const product = {
@@ -41,33 +43,26 @@ describe('FPB Horizontal grouped variant selector', () => {
   });
 
   it('marks Horizontal dropdowns for inline mobile interaction and retains variant identities', () => {
-    const view = VariantSelectorComponent.renderDropdownHtml(product, 'Scent', {
+    const runtimeDocument = new JSDOM('<!doctype html><html><body></body></html>').window.document;
+    const view = VariantSelectorComponent.createDropdownElement(product, 'Scent', {
       placeholder: 'Cherry',
       mobileMode: 'inline',
       hideUnavailable: true,
+      document: runtimeDocument,
     });
 
-    expect(view).toContain('data-vs-mobile-mode="inline"');
-    expect(view).toContain('data-variant-id="variant-cherry"');
-    expect(view).toContain('data-variant-id="variant-vanilla"');
-    expect(view).not.toContain('data-variant-id="variant-peach"');
+    expect(view.dataset.vsMobileMode).toBe('inline');
+    expect(view.querySelector('[data-variant-id="variant-cherry"]')).not.toBeNull();
+    expect(view.querySelector('[data-variant-id="variant-vanilla"]')).not.toBeNull();
+    expect(view.querySelector('[data-variant-id="variant-peach"]')).toBeNull();
   });
 
   it.each(['STANDARD', 'CLASSIC', 'COMPACT', 'HORIZONTAL'])(
     'omits unavailable grouped variants from %s cards',
     (designPreset) => {
       const originalDocument = (global as { document?: unknown }).document;
-      let renderedHtml = '';
-      (global as { document?: unknown }).document = {
-        createElement: () => ({
-          firstChild: null as null | { html: string },
-          get innerHTML() { return renderedHtml; },
-          set innerHTML(value: string) {
-            renderedHtml = value;
-            this.firstChild = { html: value };
-          },
-        }),
-      };
+      const runtimeDocument = new JSDOM('<!doctype html><html><body></body></html>').window.document;
+      (global as { document?: unknown }).document = runtimeDocument;
 
       try {
         const card = fullPageProductCardFooterMethods.createProductCard.call(
@@ -88,10 +83,15 @@ describe('FPB Horizontal grouped variant selector', () => {
           },
           product,
           0,
-        ) as { html: string };
+        ) as HTMLElement;
 
-        expect(card.html).toContain('variant-cherry');
-        expect(card.html).not.toContain('variant-peach');
+        if (designPreset === 'COMPACT') {
+          expect(card.querySelector('[data-primary-value="Cherry"]')).not.toBeNull();
+          expect(card.querySelector('[data-primary-value="Peach"]')).toBeNull();
+        } else {
+          expect(card.querySelector('[data-variant-id="variant-cherry"]')).not.toBeNull();
+          expect(card.querySelector('[data-variant-id="variant-peach"]')).toBeNull();
+        }
       } finally {
         (global as { document?: unknown }).document = originalDocument;
       }

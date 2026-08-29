@@ -1,4 +1,3 @@
-import { ComponentGenerator } from '../../shared/component-generator.js';
 import { CurrencyManager } from '../../shared/currency-manager.js';
 import { PricingCalculator } from '../../shared/pricing-calculator.js';
 import {
@@ -8,12 +7,14 @@ import {
 import { getCascadeSummaryPillContent } from './cascade-summary.js';
 import { TemplateManager } from '../../shared/template-manager.js';
 import { ToastManager } from '../../shared/toast-manager.js';
-import { renderSelectedProductRow } from '../../shared/components/selected-product-row.js';
+import { createSelectedProductRowElement } from '../../shared/components/selected-product-row.js';
 import { getSelectedProductEntries } from '../../shared/engine/bundle-selectors.js';
+import { createMessageFragment, type MessageSegment } from '../../shared/message-segments.js';
+import { createCartIcon } from '../../shared/svg-icons.js';
 
-export function renderCascadeDiscountMessage(element: HTMLParagraphElement, message = '') {
+export function renderCascadeDiscountMessage(element: HTMLParagraphElement, message: MessageSegment[] = []) {
   if (!element) return;
-  element.innerHTML = typeof message === 'string' ? message : '';
+  element.replaceChildren(createMessageFragment(message, element.ownerDocument));
 }
 
 export function getCascadeSelectedDrawerState(selectedEntries: any[] = [], isOpen = false) {
@@ -243,13 +244,13 @@ export const cascadeTemplateMethods: Record<string, any> & ThisType<any> = {
       locale: window.Shopify?.locale,
     });
 
-    return TemplateManager.replaceVariables(template, variables);
+    return TemplateManager.formatMessageSegments(template, variables);
   },
 
   _renderCascadeFooter(el: any) {
     el.className = 'bundle-footer-messaging bw-ppb-cascade-footer wpbMixCascadeFooterWrapper wpbMixCascadeFooterWrapper--bundleATCBtnV2 wpbMixCascadeFooterWrapper--cartDrawerUI';
     el.style.display = '';
-    el.style.cssText = '';
+    el.removeAttribute('style');
 
     const selectedEntries = this._getSelectedProductEntries();
     const { totalQuantity, totalPrice, unitPrices } = calculateBundleTotalForPurchaseOption(this,
@@ -291,25 +292,40 @@ export const cascadeTemplateMethods: Record<string, any> & ThisType<any> = {
       'aria-label',
       `${toggleLabel}: ${summaryContent.selectedQuantity}, ${summaryContent.finalPriceText}`,
     );
-    toggle.innerHTML = `
-      <span class="bw-ppb-cascade-selected-toggle-surface">
-        <span class="bw-ppb-cascade-selected-toggle-chevron wpbMixCascadeCartChevronIcon" aria-hidden="true"></span>
-        <span class="bw-ppb-cascade-selected-toggle-label wpbMixCascadeCartDrawerBtnText">${ComponentGenerator.escapeHtml(toggleLabel)}</span>
-        <span class="bw-ppb-cascade-selected-toggle-summary" aria-hidden="true">
-          <span class="bw-ppb-cascade-selected-toggle-cart">
-            <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
-              <path fill-rule="evenodd" clip-rule="evenodd" d="M3 4.5C3 4.22386 3.22386 4 3.5 4H5.5C5.73 4 5.93 4.16 5.98 4.385L6.52 7H20.5C20.76 7 20.99 7.14 21.1 7.37C21.21 7.6 21.18 7.88 21.02 8.08L17.02 13.08C16.85 13.29 16.6 13.41 16.33 13.41H8.66L8.07 16H19.5C19.78 16 20 16.22 20 16.5C20 16.78 19.78 17 19.5 17H7.5C7.27 17 7.07 16.84 7.02 16.615L5.02 7.615L4.5 5H3.5C3.22 5 3 4.78 3 4.5ZM8 19.5C8 20.33 7.33 21 6.5 21C5.67 21 5 20.33 5 19.5C5 18.67 5.67 18 6.5 18C7.33 18 8 18.67 8 19.5ZM19 19.5C19 20.33 18.33 21 17.5 21C16.67 21 16 20.33 16 19.5C16 18.67 16.67 18 17.5 18C18.33 18 19 18.67 19 19.5Z" fill="currentColor"/>
-            </svg>
-            <span class="bw-ppb-cascade-selected-toggle-count wpbMixCascadeSelectedItemsInCart">${summaryContent.selectedQuantity}</span>
-          </span>
-          <span class="bw-ppb-cascade-selected-toggle-divider"></span>
-          <span class="bw-ppb-cascade-selected-toggle-prices">
-            <span class="bw-ppb-cascade-selected-toggle-final-price">${ComponentGenerator.escapeHtml(summaryContent.finalPriceText)}</span>
-            ${summaryContent.compareAtPriceText ? `<s class="bw-ppb-cascade-selected-toggle-compare-price">${ComponentGenerator.escapeHtml(summaryContent.compareAtPriceText)}</s>` : ''}
-          </span>
-        </span>
-      </span>
-    `;
+    const surface = document.createElement('span');
+    surface.className = 'bw-ppb-cascade-selected-toggle-surface';
+    const chevron = document.createElement('span');
+    chevron.className = 'bw-ppb-cascade-selected-toggle-chevron wpbMixCascadeCartChevronIcon';
+    chevron.setAttribute('aria-hidden', 'true');
+    const label = document.createElement('span');
+    label.className = 'bw-ppb-cascade-selected-toggle-label wpbMixCascadeCartDrawerBtnText';
+    label.textContent = toggleLabel;
+    const summary = document.createElement('span');
+    summary.className = 'bw-ppb-cascade-selected-toggle-summary';
+    summary.setAttribute('aria-hidden', 'true');
+    const cart = document.createElement('span');
+    cart.className = 'bw-ppb-cascade-selected-toggle-cart';
+    const cartCount = document.createElement('span');
+    cartCount.className = 'bw-ppb-cascade-selected-toggle-count wpbMixCascadeSelectedItemsInCart';
+    cartCount.textContent = String(summaryContent.selectedQuantity);
+    cart.append(createCartIcon(document), cartCount);
+    const divider = document.createElement('span');
+    divider.className = 'bw-ppb-cascade-selected-toggle-divider';
+    const prices = document.createElement('span');
+    prices.className = 'bw-ppb-cascade-selected-toggle-prices';
+    const finalPrice = document.createElement('span');
+    finalPrice.className = 'bw-ppb-cascade-selected-toggle-final-price';
+    finalPrice.textContent = summaryContent.finalPriceText;
+    prices.append(finalPrice);
+    if (summaryContent.compareAtPriceText) {
+      const comparePrice = document.createElement('s');
+      comparePrice.className = 'bw-ppb-cascade-selected-toggle-compare-price';
+      comparePrice.textContent = summaryContent.compareAtPriceText;
+      prices.append(comparePrice);
+    }
+    summary.append(cart, divider, prices);
+    surface.append(chevron, label, summary);
+    toggle.append(surface);
     drawer.appendChild(toggle);
 
     let list: HTMLDivElement|null = null;
@@ -320,23 +336,24 @@ export const cascadeTemplateMethods: Record<string, any> & ThisType<any> = {
       const title = document.createElement('div');
       title.className = 'bw-ppb-cascade-selected-list-title wpbMixCascadeCartSectionHeading wpbMixCascadeCartItemsTitle';
       title.dataset.sectionId = 'selectedProducts';
-      title.innerHTML = `
-        <span class="bw-ppb-cascade-selected-list-title-text wpbMixCascadeCartSectionHeadingTitle">${ComponentGenerator.escapeHtml(this._resolveText('bundleCartSelectedProductsText', 'Selected Products'))}</span>
-        <span class="bw-ppb-cascade-selected-list-title-line wpbMixCascadeCartSectionHeadingLine" aria-hidden="true"></span>
-      `;
+      const titleText = document.createElement('span');
+      titleText.className = 'bw-ppb-cascade-selected-list-title-text wpbMixCascadeCartSectionHeadingTitle';
+      titleText.textContent = this._resolveText('bundleCartSelectedProductsText', 'Selected Products');
+      const titleLine = document.createElement('span');
+      titleLine.className = 'bw-ppb-cascade-selected-list-title-line wpbMixCascadeCartSectionHeadingLine';
+      titleLine.setAttribute('aria-hidden', 'true');
+      title.append(titleText, titleLine);
       list.appendChild(title);
 
       selectedEntries.forEach(({ stepIndex, variantId, quantity, product }: any) => {
-        const item = document.createElement('div');
-        item.innerHTML = renderSelectedProductRow(prepareCascadeSelectedProductDisplay({
+        const row = createSelectedProductRowElement(prepareCascadeSelectedProductDisplay({
           product,
           variantId,
           quantity,
           formatPrice: (amount: any) => CurrencyManager.convertAndFormat(amount, CurrencyManager.getCurrencyInfo()),
         }), {
           className: 'bw-ppb-cascade-selected-item wpbMixCascadeBundleCartItem',
-        }).trim();
-        const row = item.firstElementChild as HTMLElement | null;
+        });
         row?.querySelector('[data-action="remove-selected-product"]')?.addEventListener('click', () => {
           this.removeProductFromSelection(stepIndex, variantId);
         });
@@ -395,7 +412,9 @@ export const cascadeTemplateMethods: Record<string, any> & ThisType<any> = {
         backButton.type = 'button';
         backButton.className = 'bw-ppb-cascade-step-back';
         backButton.setAttribute('aria-label', 'Previous step');
-        backButton.innerHTML = '<span aria-hidden="true"></span>';
+        const backIcon = document.createElement('span');
+        backIcon.setAttribute('aria-hidden', 'true');
+        backButton.append(backIcon);
         backButton.addEventListener('click', () => this.navigateCascadeStep(-1));
         actions.appendChild(backButton);
       }

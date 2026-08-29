@@ -117,11 +117,11 @@ describe("PPB disabled configuration surfaces", () => {
     expect(view).toContain("inert");
     expect(view).toContain('aria-disabled="true"');
     expect(view).toMatch(
-      /<s-button[^>]*disabled="true"[^>]*>Place Widget<\/s-button>/
+      /<s-button[^>]*disabled="true"[^>]*>Embed Upsell Block<\/s-button>/
     );
   });
 
-  it("keeps saved Embed settings visible and disables placement", () => {
+  it("keeps saved Embed settings inert while leaving placement available", () => {
     mockUsePpbConfigureContext.mockReturnValue(
       makeFlow({ activeSection: "bundle_embed" })
     );
@@ -134,7 +134,8 @@ describe("PPB disabled configuration surfaces", () => {
     expect(view).toContain("Saved embed subtitle");
     expect(view).toContain("inert");
     expect(view).toContain('aria-disabled="true"');
-    expect(view).toMatch(
+    expect(view).toMatch(/<s-button[^>]*>Place Block<\/s-button>/);
+    expect(view).not.toMatch(
       /<s-button[^>]*disabled="true"[^>]*>Place Block<\/s-button>/
     );
   });
@@ -151,6 +152,40 @@ describe("PPB disabled configuration surfaces", () => {
     expect(view).toContain("Saved widget title");
     expect(view).not.toContain("inert");
     expect(view).not.toContain('aria-disabled="true"');
+  });
+
+  it("clears incompatible Embed targets before changing targeting mode", () => {
+    const setBundleEmbedCollectionsSelectedData = jest.fn();
+    const setBundleEmbedSpecificCollectionPages = jest.fn();
+    const setBundleEmbedSelectedProducts = jest.fn();
+    const setBundleEmbedSpecificProductPages = jest.fn();
+    const setBundleEmbedDisplayOn = jest.fn();
+    mockUsePpbConfigureContext.mockReturnValue(
+      makeFlow({
+        activeSection: "bundle_embed",
+        bundleEmbedEnabled: true,
+        setBundleEmbedCollectionsSelectedData,
+        setBundleEmbedDisplayOn,
+        setBundleEmbedSelectedProducts,
+        setBundleEmbedSpecificCollectionPages,
+        setBundleEmbedSpecificProductPages,
+      })
+    );
+
+    const view = PpbBundleEmbedSection();
+    const targeting = findElement(
+      view,
+      (element) =>
+        element.type === "s-choice-list" &&
+        element.props.name === "ppbEmbedDisplayOn"
+    );
+    targeting!.props.onChange({ target: { values: ["specific_products"] } });
+
+    expect(setBundleEmbedSelectedProducts).toHaveBeenCalledWith([]);
+    expect(setBundleEmbedSpecificProductPages).toHaveBeenCalledWith([]);
+    expect(setBundleEmbedCollectionsSelectedData).toHaveBeenCalledWith([]);
+    expect(setBundleEmbedSpecificCollectionPages).toHaveBeenCalledWith([]);
+    expect(setBundleEmbedDisplayOn).toHaveBeenCalledWith("specific_products");
   });
 
   it("disables the PPB gifting step without clearing its saved configuration", () => {

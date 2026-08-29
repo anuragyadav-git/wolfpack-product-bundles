@@ -1,3 +1,28 @@
+---
+schema_version: 1
+id: app-events-implementation
+title: Shopify App Events Implementation Test Spec
+type: test-spec
+status: active
+summary: Verifies redacted internal business events and optional Shopify App Events delivery without affecting merchant flows.
+last_audited: 2026-08-28
+owners:
+  - engineering
+domains:
+  - observability
+systems:
+  - business-events
+source_paths:
+  - app/services/app-events.server.ts
+related_docs:
+  - internal docs/Operations/App Events Taxonomy.md
+tags:
+  - tdd
+keywords:
+  - app events
+  - telemetry
+---
+
 # Test Spec: Shopify App Events Implementation
 **Spec ID:** app-events-implementation  **Created:** 2026-06-21
 
@@ -24,7 +49,7 @@ Verify that WPB records canonical business events internally and emits eligible 
 | 1 | Auth lifecycle emits install vs reauth | `afterAuth` with existing/new shop | `app_installed` or `app_reauthorized` recorded | Uses shop row existence |
 | 2 | Runtime widget error records redacted event | `/api/widget-error` invalid runtime report | `widget_runtime_error_reported` recorded | No raw URL/stack |
 | 3 | Engagement failures report operational event | Invalid/persist-failed engagement | `engagement_failed` recorded | Success remains internal analytics |
-| 4 | Billing create/cancel paths record starts/failures | Billing API requests | Billing App Events recorded | No meter events |
+| 4 | Managed subscription paths record verification and gates | Pricing return and entitlement assertions | Internal Business Events recorded | No meter events |
 | 5 | Cart transform heal records started/success/failure | Heal API requests | Heal events recorded around service result | Non-blocking |
 
 ## Acceptance Criteria

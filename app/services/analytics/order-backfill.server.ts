@@ -110,7 +110,7 @@ export async function backfillOrderAttribution(
     // both GID and numeric forms because early pixel writes may have stored the
     // raw sandbox id (numeric) while backfill always writes canonical GID.
     const orderIds = nodes.map((n) => n.id);
-    const lookupForms = orderIds.flatMap(orderIdMatchForms);
+    const lookupForms = orderIds.flatMap((value) => orderIdMatchForms(value));
     const existing = await db.orderAttribution.findMany({
       where: { shopId, orderId: { in: lookupForms } },
       select: { orderId: true },

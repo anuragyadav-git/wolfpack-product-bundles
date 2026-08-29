@@ -1,25 +1,10 @@
 import { fullPageProductCardFooterMethods } from "../../../app/assets/widgets/full-page/methods/product-card-footer-methods.js";
+import { JSDOM } from "jsdom";
 
 describe("FPB product card description", () => {
   it("omits merchant product descriptions from storefront cards", () => {
     const originalDocument = (global as { document?: unknown }).document;
-    let renderedHtml = "";
-
-    (global as { document?: unknown }).document = {
-      createElement: () => {
-        const wrapper = {
-          firstChild: null as null | { html: string },
-          get innerHTML() {
-            return renderedHtml;
-          },
-          set innerHTML(value: string) {
-            renderedHtml = value;
-            this.firstChild = { html: value };
-          },
-        };
-        return wrapper;
-      },
-    };
+    (global as { document?: unknown }).document = new JSDOM('<!doctype html><html><body></body></html>').window.document;
 
     try {
       const card = fullPageProductCardFooterMethods.createProductCard.call(
@@ -44,11 +29,10 @@ describe("FPB product card description", () => {
           imageUrl: "https://cdn.example.test/product.jpg",
         },
         0,
-      ) as { html: string };
+      ) as HTMLElement;
 
-      expect(card.html).toContain("Daily Essential");
-      expect(card.html).not.toContain("Merchant description belongs in the product modal.");
-      expect(card.html).not.toContain("bw-product-card__description");
+      expect(card.textContent).toMatch(/Daily Essential/);
+      expect(card.textContent).not.toMatch(/Merchant description belongs in the product modal\./);
     } finally {
       (global as { document?: unknown }).document = originalDocument;
     }

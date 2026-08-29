@@ -68,7 +68,7 @@ export async function matchLineItemGroupsToBundles(
       (lineItems ?? [])
         .map((item) => item.productId)
         .filter((id): id is string => Boolean(id))
-        .map(normalizeToProductGid),
+        .map((value) => normalizeToProductGid(value)),
     ),
   ]);
   const allProductGids = [...new Set(productGidsByGroup.flat())];

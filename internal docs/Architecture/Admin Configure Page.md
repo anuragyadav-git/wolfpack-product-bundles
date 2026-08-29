@@ -5,7 +5,7 @@ title: Admin Configure Page
 type: architecture
 status: authoritative
 summary: Defines the shared FPB and PPB configure-page boundary and direct create, clone, edit, and save flows.
-last_audited: 2026-08-25
+last_audited: 2026-08-27
 owners:
   - engineering
 domains:
@@ -153,6 +153,13 @@ affected control; validation failures never use transient toasts. Errors are
 not shown before the first Save attempt and clear as the merchant edits the
 affected value. Successful Save and Discard clear all validation state.
 
+Short-lived configure action constraints use concise App Bridge error toasts in
+both FPB and PPB. This includes attempting to delete the only step, an
+immediate picker, sync-invocation, discard, or preview-launch failure.
+Persistent unsaved-preview, save, placement, template, and
+preview-configuration failures remain contextual critical banners, while field
+validation remains inline as described above.
+
 Only persisted, enabled feature branches are validated. Step 1 is always
 enabled. Disabled later steps, disabled pricing/widget/embed/add-on features,
 inactive targeting branches, optional media and CSS, and optional localized
@@ -193,6 +200,10 @@ React wrapper portals the workflow into the host modal document, preserving
 React event handlers for the post-Next Preview bundle action. That projected
 action remains a semantic HTML button because nested `s-button` elements do
 not hydrate in the host modal document and render as non-interactive text.
+The projected workflow fills the host modal viewport, keeps the template grid
+as its only vertical scroll region, and pins both the customization header and
+action footer so the title, customization action, and `Next` stay available
+while merchants review every template.
 
 After a successful Select Template preview, the preview handler returns the
 exact URL opened in the reserved new tab. Closing the projected customization

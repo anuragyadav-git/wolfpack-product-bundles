@@ -138,38 +138,51 @@ export function DashboardStatusGrid({
     count: remainingCoreCount,
   });
   const setupComplete = appEmbedEnabled;
-  const title = t("dashboard.storefrontSetup.incompleteTitle");
+  const title = t(appEmbedStatusLoading
+    ? storefrontSummary.titleKey
+    : "dashboard.storefrontSetup.incompleteTitle");
+  const tone = appEmbedStatusLoading
+    ? "info"
+    : setupComplete
+      ? "success"
+      : "warning";
 
   return (
-    <s-banner
-      tone={appEmbedStatusLoading ? "info" : setupComplete ? "success" : "warning"}
-      heading={title}
-      dismissible={!appEmbedStatusLoading}
-      hidden={false}
-      onDismiss={!appEmbedStatusLoading && hydrated ? dismiss : undefined}
-    >
-      <s-box minBlockSize="28px">
-        {appEmbedStatusLoading ? (
-          <s-stack direction="inline" alignItems="center" gap="small">
-            <s-spinner size="base" accessibilityLabel={summaryDescription} />
+    <s-box paddingBlockEnd="base">
+      <s-banner
+        tone={tone}
+        heading={title}
+        hidden={false}
+        {...(!appEmbedStatusLoading
+          ? {
+              dismissible: true,
+              onDismiss: hydrated ? dismiss : undefined,
+            }
+          : {})}
+      >
+        <s-box minBlockSize="28px">
+          {appEmbedStatusLoading ? (
+            <s-stack direction="inline" alignItems="center" gap="small">
+              <s-spinner size="base" accessibilityLabel={summaryDescription} />
+              <s-text>{summaryDescription}</s-text>
+            </s-stack>
+          ) : !setupComplete ? (
+            <s-stack direction="inline" justifyContent="space-between" alignItems="start" gap="base">
+              <s-text>{summaryDescription}</s-text>
+              <s-button
+                ref={enableActionRef}
+                variant="tertiary"
+                onClick={onOpenThemeEditor}
+                disabled={!themeEditorUrl}
+              >
+                {t("dashboard.storefrontSetup.activate")}
+              </s-button>
+            </s-stack>
+          ) : (
             <s-text>{summaryDescription}</s-text>
-          </s-stack>
-        ) : !setupComplete ? (
-          <s-stack direction="inline" justifyContent="space-between" alignItems="start" gap="base">
-            <s-text>{summaryDescription}</s-text>
-            <s-button
-              ref={enableActionRef}
-              variant="tertiary"
-              onClick={onOpenThemeEditor}
-              disabled={!themeEditorUrl}
-            >
-              {t("dashboard.storefrontSetup.activate")}
-            </s-button>
-          </s-stack>
-        ) : (
-          <s-text>{summaryDescription}</s-text>
-        )}
-      </s-box>
-    </s-banner>
+          )}
+        </s-box>
+      </s-banner>
+    </s-box>
   );
 }

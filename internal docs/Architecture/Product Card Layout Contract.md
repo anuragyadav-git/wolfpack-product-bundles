@@ -5,7 +5,7 @@ title: Product Card Layout Contract
 type: architecture
 status: authoritative
 summary: Defines stable and display-safe storefront product-card layout and content boundaries.
-last_audited: 2026-08-21
+last_audited: 2026-08-28
 owners:
   - engineering
 domains:
@@ -67,17 +67,19 @@ This is a hard requirement:
 - Avoid state transitions that change intrinsic card height (for example by showing additional in-card fields, tall selected chips, or expanding rows inside the card).
 - Keep hover/focus feedback non-expanding (outline, border, iconography, color) so cards do not visually overlap neighbors while hovered.
 - Keep selection/hover feedback on the existing card frame via overlays, borders, iconography, text color, opacity, and icon badges.
-- On pointer-capable desktop viewports, hovering the product image reveals a
+- On pointer-capable desktop FPB viewports, hovering the product image reveals a
   circular magnifying-glass affordance at the image's top-right corner. Render
   the icon with CSS geometry so it does not depend on a theme-root asset URL;
-  touch/mobile cards do not show this hover-only affordance.
+  touch/mobile cards and all PPB cards do not show this affordance. PPB product
+  images and titles are informational; selection remains on explicit Add,
+  quantity, and variant controls.
 - Replace a product card's Add To Box button with its inline quantity selector immediately; do not animate width, radius, opacity, or geometry during that state swap.
 - Product Grid is the sole PPB exception when per-product quantity validation is enabled with a maximum of one: its selected action remains the compact quantity-aware button. When validation is disabled or its maximum exceeds one, Product Grid uses the shared inline selector and disables increment at the configured maximum.
 - Standard FPB cards use the same card, media, title, price, and sizing rules in text and icon CTA modes. Icon mode may override only the compact action geometry and place that action beside the price.
 - Reserve the Standard FPB variant-selector row only when the runtime renders `.vs-wrapper--standard`. The runtime renders that wrapper only when Bundle Settings enables variant selectors and the grouped product has more than one variant.
 - Prefer fixed row contracts (`min-height`, `height`, flex stretch, consistent padding/line-clamp) so selected/unselected variants stay layout-stable.
 - Keep PPB/inpage and PPB/modal states non-expanding on `selected` and hover-expanded transitions.
-- Keep merchant product descriptions out of compact FPB and PPB product cards. Preserve `description` and `descriptionHtml` in runtime product data for the product-details modal only.
+- Keep merchant product descriptions out of compact FPB and PPB product cards. Preserve `description` and `descriptionHtml` in runtime product data for the FPB product-details modal and existing product payload consumers.
 - In the product-details modal, render descriptions display-safe: sanitize Shopify HTML through the modal contract, escape plain-text fallbacks, and avoid trimming or normalizing merchant copy.
 - Product title/description are merchant-owned values; do not normalize case/spacing/punctuation in runtime.
 - Render those values with text APIs (`textContent`/`innerText`) rather than HTML assignment to avoid XSS and avoid forcing normalization.
@@ -130,26 +132,15 @@ selected and empty slot reserve the same row geometry, and a filled slot keeps
 its exact replacement target through picker selection.
 
 PPB modal surfaces declare their owner with `data-ppb-drawer-surface`. The
-bundle picker, product-details drawer, and variant selector participate in one
-layer stack; only its top layer handles Escape or backdrop dismissal. The first
+bundle picker and variant selector participate in one layer stack; only its top
+layer handles Escape or backdrop dismissal. The first
 modal layer locks document scrolling, the final close restores the previous
 scroll styles, and every layer restores focus to its exact trigger. The
 selected-summary disclosure is intentionally outside this modal stack.
 
-All storefront mobile drawers follow the same close-control boundary. At widths
-below `768px`, product details use the bottom-sheet anatomy with a drag handle,
-swipe dismissal, backdrop dismissal, and no cross button. The mobile variant
-selector also omits a cross and dismisses from its backdrop or after a variant
-choice. At `768px` and wider, product details use the centered desktop modal and
-retain its cross button. Desktop modal controls must not be copied into mobile
-drawer markup.
-
-The product-details drag handle is a 44px touch target and uses pointer capture
-for mouse, pen, and touch input. Only a downward, vertically dominant drag or
-flick dismisses the drawer; horizontal, upward, and short slow movement resets
-the sheet. The content surface keeps native momentum scrolling and contained
-vertical overscroll. Mobile details reserve only 4px below Add To Box, with
-device safe-area spacing owned separately by the drawer container.
+The PPB mobile variant selector omits a cross and dismisses from its backdrop or
+after a variant choice. PPB does not construct a product-details drawer at any
+viewport.
 
 Mobile add-to-cart actions show the active discount label badge beside the
 merchant-authored action label and do not repeat the bundle price. Price remains

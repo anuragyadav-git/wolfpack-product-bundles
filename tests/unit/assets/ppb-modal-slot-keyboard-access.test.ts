@@ -65,7 +65,7 @@ describe('PPB modal slot keyboard access', () => {
 
     const removeAction = getRemoveControl(card);
     expect(card.getAttribute('aria-label')).toBeNull();
-    expect(removeAction.getAttribute('aria-label')).toMatch(/^Remove/);
+    expect(removeAction.getAttribute('aria-label')).toEqual(expect.stringMatching(/^Remove/));
     const identity = card.children.at(-1);
     expect(identity?.children[0]?.textContent).toBe('Obsidian Earrings');
     expect(identity?.children[1]?.children[0]?.textContent).toBe('$ 829.00');
@@ -89,7 +89,7 @@ describe('PPB modal slot keyboard access', () => {
 
     expect(remove.tagName).toBe('BUTTON');
     expect(remove.type).toBe('button');
-    expect(remove.getAttribute('aria-label')).toBe(`Remove ${productTitle}`);
+    expect(remove.getAttribute('aria-label')).toEqual(`Remove ${productTitle}`);
     expect(remove.title).toBe(`Remove ${productTitle}`);
     expect(widget._resolveText).toHaveBeenCalledWith(
       'removeProductFromFooterText',
@@ -195,13 +195,15 @@ function getRemoveControl(card: any) {
 }
 
 function createFakeDocument() {
-  return {
+  const fakeDocument = {
     documentElement: {},
-    createElement: (tagName: string) => createFakeElement(tagName),
+    createElement: (tagName: string) => createFakeElement(tagName, fakeDocument),
+    createElementNS: (_namespace: string, tagName: string) => createFakeElement(tagName, fakeDocument),
   };
+  return fakeDocument;
 }
 
-function createFakeElement(tagName: string) {
+function createFakeElement(tagName: string, ownerDocument?: any) {
   const attributes = new Map<string, string>();
   const listeners = new Map<string, (event: any) => void>();
   return {
@@ -215,6 +217,7 @@ function createFakeElement(tagName: string) {
     children: [] as any[],
     dataset: {} as Record<string, string>,
     style: { setProperty: jest.fn() },
+    ownerDocument,
     setAttribute(name: string, value: string) {
       attributes.set(name, value);
     },
@@ -224,6 +227,13 @@ function createFakeElement(tagName: string) {
     appendChild(child: any) {
       this.children.push(child);
       return child;
+    },
+    append(...children: any[]) {
+      children.forEach((child) => this.appendChild(child));
+    },
+    replaceChildren(...children: any[]) {
+      this.children = [];
+      this.append(...children);
     },
     addEventListener(name: string, listener: (event: any) => void) {
       listeners.set(name, listener);

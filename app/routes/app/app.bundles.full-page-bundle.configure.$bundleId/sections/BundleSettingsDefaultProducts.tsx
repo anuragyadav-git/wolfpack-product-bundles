@@ -42,7 +42,13 @@ export function FpbDefaultProductsSettings({
             });
             if (!picked) return;
             const defaultProducts = picked
-              .map(buildDefaultProductEntryFromPicker)
+              .map(
+                (
+                  value: Parameters<
+                    typeof buildDefaultProductEntryFromPicker
+                  >[0],
+                ) => buildDefaultProductEntryFromPicker(value),
+              )
               .filter(
                 (
                   p: any
@@ -118,6 +124,7 @@ export function FpbDefaultProductsSettings({
                     </p>
                     <s-stack direction="inline" alignItems="center" gap="small">
                       <s-button
+                        icon="product"
                         variant={
                           defaultProductsEnabled ? "primary" : "secondary"
                         }

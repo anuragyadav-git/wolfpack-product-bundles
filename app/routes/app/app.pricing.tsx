@@ -8,8 +8,6 @@
 import { defer, json, type LoaderFunctionArgs, type ActionFunctionArgs } from "@remix-run/node";
 import { Await, useLoaderData, useFetcher, useNavigate } from "@remix-run/react";
 import { authenticate } from "../../shopify.server";
-import { getCachedSubscriptionInfo, getSubscriptionInfoFromCache } from "../../services/subscription-cache.server";
-import { BillingService } from "../../services/billing.server";
 import { PLANS } from "../../constants/plans";
 import { AppLogger } from "../../lib/logger";
 import { Suspense, useCallback, useEffect, useState } from "react";
@@ -20,7 +18,7 @@ import pricingStyles from "../../styles/routes/app-pricing.module.css";
 import {
   SubscriptionQuotaCard,
   FreePlanCard,
-  GrowPlanCard,
+  GrowthPlanCard,
   FeatureComparisonTable,
   UpgradeConfirmationModal,
   ValuePropsSection,
@@ -32,6 +30,11 @@ import {
   AdminPageTitleBar,
 } from "../../components/AdminPageNavigation";
 import { AdminSectionLoadingState } from "../../components/AdminSectionLoadingState";
+import { getShopifyAppPricingUrl } from "../../services/subscriptions/app-pricing-navigation.server";
+import { recordBusinessEvent } from "../../services/app-events.server";
+import { resolveShopEntitlements } from "../../services/subscriptions/subscription-service.server";
+import { getCurrentShopifyAppIdentity } from "../../services/subscriptions/shopify-app-identity.server";
+import db from "../../db.server";
 
 type PricingSubscriptionData = {
   error?: "Failed to load pricing information";
@@ -48,20 +51,24 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const subscription = (async () => {
     // Reuse cached subscription info from dashboard/bootstrap whenever available.
     try {
-      const cachedSubscriptionInfo = getCachedSubscriptionInfo(shopDomain);
-      const subscriptionInfo = cachedSubscriptionInfo !== undefined
-        ? cachedSubscriptionInfo
-        : await getSubscriptionInfoFromCache(shopDomain);
-
-      if (!subscriptionInfo) {
-        throw new Error("Could not retrieve subscription information");
+      const [subscriptionInfo, currentBundleCount] = await Promise.all([
+        resolveShopEntitlements({ shopDomain }),
+        db.bundle.count({
+          where: { shopId: shopDomain, status: { in: ["active", "unlisted"] } },
+        }),
+      ]);
+      if (!subscriptionInfo.entitlements) {
+        throw new Error("Could not verify subscription information");
       }
+      const bundleLimit = subscriptionInfo.entitlements.limits.publicBundles
+        ?? Number.MAX_SAFE_INTEGER;
 
       return {
-        currentPlan: subscriptionInfo.plan,
-        currentBundleCount: subscriptionInfo.currentBundleCount,
-        bundleLimit: subscriptionInfo.bundleLimit,
-        canCreateBundle: subscriptionInfo.canCreateBundle,
+        currentPlan: subscriptionInfo.planCode === "GROWTH" ? "growth" : "free",
+        currentBundleCount,
+        bundleLimit,
+        canCreateBundle: bundleLimit === Number.MAX_SAFE_INTEGER
+          || currentBundleCount < bundleLimit,
       } satisfies PricingSubscriptionData;
     } catch (error: any) {
       AppLogger.error("Error loading pricing page", {
@@ -80,7 +87,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
   })();
 
   return defer({
-    plans: PLANS,
     subscription,
   });
 }
@@ -92,28 +98,21 @@ export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
   const plan = formData.get("plan");
 
-  if (plan === "grow") {
+  if (plan === "growth") {
     try {
-      const storeHandle = shopDomain.replace(".myshopify.com", "");
-      const apiKey = process.env.SHOPIFY_API_KEY;
-      const returnUrl = `https://admin.shopify.com/store/${storeHandle}/apps/${apiKey}/app/billing/callback`;
-
-      const result = await BillingService.createSubscription(admin, {
+      const app = await getCurrentShopifyAppIdentity(admin);
+      const hostedPlanUrl = getShopifyAppPricingUrl(shopDomain, app.handle);
+      await recordBusinessEvent({
+        eventHandle: "subscription_checkout_started",
         shopDomain,
-        plan: "grow",
-        returnUrl,
+        surface: "pricing",
+        result: "redirect",
+        attributes: { plan_code: "GROWTH" },
+        sendToShopify: false,
       });
-
-      if (!result.success) {
-        return json(
-          { error: result.error },
-          { status: 400 }
-        );
-      }
-
       return json({
         success: true,
-        confirmationUrl: result.confirmationUrl,
+        hostedPlanUrl,
       });
 
     } catch (error: any) {
@@ -123,7 +122,7 @@ export async function action({ request }: ActionFunctionArgs) {
       }, error);
 
       return json(
-        { error: "Failed to create subscription" },
+        { error: "Failed to open Shopify plan selection" },
         { status: 500 }
       );
     }
@@ -134,12 +133,8 @@ export async function action({ request }: ActionFunctionArgs) {
 
 function PricingBody({
   data,
-  plans,
-  onBack,
 }: {
   data: PricingSubscriptionData;
-  plans: typeof PLANS;
-  onBack: () => void;
 }) {
   const fetcher = useFetcher<typeof action>();
 
@@ -147,7 +142,7 @@ function PricingBody({
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   const handleSelectPlan = useCallback((planId: string) => {
-    if (planId === "grow") {
+    if (planId === "growth") {
       setShowUpgradeModal(true);
     }
   }, []);
@@ -155,26 +150,25 @@ function PricingBody({
   const handleConfirmUpgrade = useCallback(() => {
     setShowUpgradeModal(false);
     fetcher.submit(
-      { plan: "grow" },
+      { plan: "growth" },
       { method: "post" }
     );
   }, [fetcher]);
 
   // Handle redirect to Shopify billing confirmation
   useEffect(() => {
-    if (fetcher.data && "confirmationUrl" in fetcher.data && fetcher.data.confirmationUrl) {
-      open(fetcher.data.confirmationUrl, '_top');
+    if (fetcher.data && "hostedPlanUrl" in fetcher.data && fetcher.data.hostedPlanUrl) {
+      open(fetcher.data.hostedPlanUrl, '_top');
     }
   }, [fetcher.data]);
 
   const isFreePlan = data.currentPlan === "free";
-  const isGrowPlan = data.currentPlan === "grow";
+  const isGrowthPlan = data.currentPlan === "growth";
   const isUpgrading = fetcher.state === "submitting";
 
   // Bundle quota data
   const currentBundleCount = data.currentBundleCount;
   const bundleLimit = data.bundleLimit;
-  const currentPlanConfig = plans[data.currentPlan as keyof typeof plans];
 
   return (
     <>
@@ -182,52 +176,40 @@ function PricingBody({
         <UpgradeConfirmationModal
           open={showUpgradeModal}
           isLoading={isUpgrading}
-          currentBundleCount={currentBundleCount}
-          bundleLimit={bundleLimit}
           onConfirm={handleConfirmUpgrade}
           onClose={() => setShowUpgradeModal(false)}
         />
       )}
 
-      <s-query-container containerName="pricing-page">
-        <div className={pricingStyles.pageShell}>
-          <AdminPageBackTitle
-            title="Pricing"
-            backLabel="Back to previous page"
-            onBack={onBack}
+      <div className={pricingStyles.contentStack}>
+        <SubscriptionQuotaCard
+          currentBundleCount={currentBundleCount}
+          bundleLimit={bundleLimit}
+          isFreePlan={isFreePlan}
+          showUpgradePrompt={true}
+        />
+
+        {isFreePlan && <ValuePropsSection />}
+
+        <div className={pricingStyles.planCardsGrid}>
+          <FreePlanCard isCurrentPlan={isFreePlan} />
+          <GrowthPlanCard
+            isCurrentPlan={isGrowthPlan}
+            isUpgrading={isUpgrading}
+            onSelectPlan={() => handleSelectPlan("growth")}
           />
-          <s-stack direction="block" gap="large">
-          <SubscriptionQuotaCard
-            currentBundleCount={currentBundleCount}
-            bundleLimit={bundleLimit}
-            planName={currentPlanConfig.name}
-            isFreePlan={isFreePlan}
-            showUpgradePrompt={true}
-          />
-
-          {isFreePlan && <ValuePropsSection />}
-
-          <div className={pricingStyles.planCardsGrid}>
-            <FreePlanCard isCurrentPlan={isFreePlan} />
-            <GrowPlanCard
-              isCurrentPlan={isGrowPlan}
-              isUpgrading={isUpgrading}
-              onSelectPlan={() => handleSelectPlan("grow")}
-            />
-          </div>
-
-          <FeatureComparisonTable />
-
-          <FAQSection />
-          </s-stack>
         </div>
-      </s-query-container>
+
+        <FeatureComparisonTable />
+
+        <FAQSection />
+      </div>
     </>
   );
 }
 
 export default function PricingPage() {
-  const { plans, subscription } = useLoaderData<typeof loader>();
+  const { subscription } = useLoaderData<typeof loader>();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const handleBack = () =>
@@ -238,15 +220,24 @@ export default function PricingPage() {
   return (
     <>
       <AdminPageTitleBar
-        title="Pricing"
-        breadcrumbLabel="Dashboard"
+        title={t("billing.route.title")}
+        breadcrumbLabel={t("billing.route.dashboard")}
         onBack={handleBack}
       />
-      <Suspense fallback={<AdminSectionLoadingState label={t("common.loading.workspace")} />}>
-        <Await resolve={subscription}>
-          {(data) => <PricingBody data={data} plans={plans} onBack={handleBack} />}
-        </Await>
-      </Suspense>
+      <s-query-container containerName="pricing-page">
+        <div className={pricingStyles.pageShell}>
+          <AdminPageBackTitle
+            title={t("billing.route.title")}
+            backLabel={t("billing.actions.back")}
+            onBack={handleBack}
+          />
+          <Suspense fallback={<AdminSectionLoadingState label={t("common.loading.workspace")} />}>
+            <Await resolve={subscription}>
+              {(data) => <PricingBody data={data} />}
+            </Await>
+          </Suspense>
+        </div>
+      </s-query-container>
     </>
   );
 }

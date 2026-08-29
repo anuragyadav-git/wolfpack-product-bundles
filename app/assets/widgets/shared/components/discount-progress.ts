@@ -7,91 +7,126 @@
 
 'use strict';
 
-export function renderDiscountProgress(progressData: any = {}, options: any = {}) {
+import { createMessageFragment } from '../message-segments.js';
+
+export function createDiscountProgressElement(progressData: any = {}, options: any = {}) {
+  const runtimeDocument: Document = options.document || document;
   const progressPercent = normalizePercent(progressData.progressPercent);
   const mode = options.mode || 'bar';
   const message = progressData.message || '';
-  const shouldRenderMessage = options.messagePlacement !== 'external' && message;
-  const renderedMessage = options.messageIsHtml ? String(message) : escapeHtml(message);
+  const shouldRenderMessage = options.messagePlacement !== 'external'
+    && (message || options.messageSegments?.length);
   const milestones = Array.isArray(progressData.milestones) ? progressData.milestones : [];
-  const trackMarkup = renderTrack(progressPercent, options);
-  const rootClasses = [
+  const root = runtimeDocument.createElement('div');
+  root.className = [
     'bw-discount-progress',
-    `bw-discount-progress--mode-${escapeAttribute(mode)}`,
+    `bw-discount-progress--mode-${mode}`,
     progressData.success ? 'bw-discount-progress--success' : '',
     options.className || '',
   ].filter(Boolean).join(' ');
+  root.dataset.bwDiscountProgress = 'true';
+  root.style.setProperty('--bw-discount-progress-width', `${progressPercent}%`);
 
-  return `
-    <div class="${rootClasses}" data-bw-discount-progress="true" style="--bw-discount-progress-width:${progressPercent}%">
-      ${shouldRenderMessage ? `<div class="bw-discount-progress__message ${escapeAttribute(options.messageClassName || '')}">${renderedMessage}</div>` : ''}
-      ${renderMilestones(milestones, options, options.milestonesOnTrack ? trackMarkup : '')}
-      ${options.milestonesOnTrack && milestones.length ? '' : trackMarkup}
-      ${options.renderSubtitleList ? renderMilestoneSubtitleList(milestones, options) : ''}
-    </div>
-  `;
+  if (shouldRenderMessage) {
+    const messageElement = runtimeDocument.createElement('div');
+    messageElement.className = ['bw-discount-progress__message', options.messageClassName || '']
+      .filter(Boolean).join(' ');
+    if (options.messageSegments?.length) {
+      messageElement.append(createMessageFragment(options.messageSegments, runtimeDocument));
+    } else {
+      messageElement.textContent = String(message);
+    }
+    root.append(messageElement);
+  }
+
+  const track = createTrackElement(progressPercent, options, runtimeDocument);
+  if (options.milestonesOnTrack && milestones.length) {
+    root.append(createMilestonesElement(milestones, options, runtimeDocument, track));
+  } else {
+    if (milestones.length) root.append(createMilestonesElement(milestones, options, runtimeDocument));
+    root.append(track);
+  }
+  if (options.renderSubtitleList && milestones.length) {
+    root.append(createMilestoneSubtitleList(milestones, options, runtimeDocument));
+  }
+  return root;
 }
 
-function renderTrack(progressPercent: number, options: any) {
-  return `<div class="bw-discount-progress__track ${escapeAttribute(options.trackClassName || '')}" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progressPercent}">
-    <div class="bw-discount-progress__fill ${escapeAttribute(options.fillClassName || '')}" data-bw-discount-progress-fill="true"></div>
-  </div>`;
+function createTrackElement(progressPercent: number, options: any, runtimeDocument: Document) {
+  const track = runtimeDocument.createElement('div');
+  track.className = ['bw-discount-progress__track', options.trackClassName || ''].filter(Boolean).join(' ');
+  track.setAttribute('role', 'progressbar');
+  track.setAttribute('aria-valuemin', '0');
+  track.setAttribute('aria-valuemax', '100');
+  track.setAttribute('aria-valuenow', String(progressPercent));
+  const fill = runtimeDocument.createElement('div');
+  fill.className = ['bw-discount-progress__fill', options.fillClassName || ''].filter(Boolean).join(' ');
+  fill.dataset.bwDiscountProgressFill = 'true';
+  track.append(fill);
+  return track;
 }
 
-function renderMilestones(milestones: any[], options: any, trackMarkup = '') {
-  if (!milestones.length) return '';
-
-  const listClassName = escapeAttribute(options.milestoneListClassName || 'bw-discount-progress__milestones');
+function createMilestonesElement(milestones: any[], options: any, runtimeDocument: Document, track?: HTMLElement) {
+  const list = runtimeDocument.createElement('div');
+  list.className = options.milestoneListClassName || 'bw-discount-progress__milestones';
+  list.style.setProperty('--bw-discount-milestone-count', String(milestones.length));
+  if (track) list.append(track);
   const itemClassName = options.milestoneClassName || 'bw-discount-progress__milestone';
   const reachedClassName = options.milestoneReachedClassName || 'bw-discount-progress__milestone--reached';
   const activeClassName = options.milestoneActiveClassName || 'bw-discount-progress__milestone--active';
   const pendingClassName = options.milestonePendingClassName || 'bw-discount-progress__milestone--pending';
-  const titleClassName = escapeAttribute(options.milestoneTitleClassName || 'bw-discount-progress__milestone-title');
-  const subtitleClassName = escapeAttribute(options.milestoneSubtitleClassName || 'bw-discount-progress__milestone-subtitle');
-  const markerClassName = escapeAttribute(options.milestoneMarkerClassName || 'bw-discount-progress__milestone-marker');
+  const titleClassName = options.milestoneTitleClassName || 'bw-discount-progress__milestone-title';
+  const subtitleClassName = options.milestoneSubtitleClassName || 'bw-discount-progress__milestone-subtitle';
+  const markerClassName = options.milestoneMarkerClassName || 'bw-discount-progress__milestone-marker';
   const includeInlineSubtitle = options.renderInlineSubtitles !== false;
 
-  const items = milestones.map((milestone: any, index: number) => {
+  milestones.forEach((milestone: any, index: number) => {
     const state = normalizeMilestoneState(milestone);
     const position = normalizePercent(milestone?.position);
-    const classes = [
+    const item = runtimeDocument.createElement('div');
+    item.className = [
       itemClassName,
       state === 'reached' ? reachedClassName : '',
       state === 'active' ? activeClassName : '',
       state === 'pending' ? pendingClassName : '',
-    ].filter(Boolean).map(escapeAttribute).join(' ');
-    const title = escapeHtml(milestone?.title || '');
-    const subtitle = escapeHtml(milestone?.subTitle || '');
-    const markerContent = state === 'reached' ? '&#10003;' : '';
-
-    return `
-      <div class="${classes}" data-state="${state}" style="--bw-discount-milestone-index:${index + 1};--bw-discount-milestone-position:${position}%">
-        <span class="${titleClassName}">${title}</span>
-        <span class="${markerClassName}" aria-hidden="true">${markerContent}</span>
-        ${includeInlineSubtitle && subtitle ? `<span class="${subtitleClassName}">${subtitle}</span>` : ''}
-      </div>
-    `;
-  }).join('');
-
-  return `<div class="${listClassName}" style="--bw-discount-milestone-count:${milestones.length}">${trackMarkup}${items}</div>`;
+    ].filter(Boolean).join(' ');
+    item.dataset.state = state;
+    item.style.setProperty('--bw-discount-milestone-index', String(index + 1));
+    item.style.setProperty('--bw-discount-milestone-position', `${position}%`);
+    const title = runtimeDocument.createElement('span');
+    title.className = titleClassName;
+    title.textContent = String(milestone?.title || '');
+    const marker = runtimeDocument.createElement('span');
+    marker.className = markerClassName;
+    marker.setAttribute('aria-hidden', 'true');
+    marker.textContent = state === 'reached' ? '✓' : '';
+    item.append(title, marker);
+    if (includeInlineSubtitle && milestone?.subTitle) {
+      const subtitle = runtimeDocument.createElement('span');
+      subtitle.className = subtitleClassName;
+      subtitle.textContent = String(milestone.subTitle);
+      item.append(subtitle);
+    }
+    list.append(item);
+  });
+  return list;
 }
 
-function renderMilestoneSubtitleList(milestones: any[], options: any) {
-  if (!milestones.length) return '';
-
-  const listClassName = escapeAttribute(options.subtitleListClassName || 'bw-discount-progress__milestone-subtitles');
+function createMilestoneSubtitleList(milestones: any[], options: any, runtimeDocument: Document) {
+  const list = runtimeDocument.createElement('div');
+  list.className = options.subtitleListClassName || 'bw-discount-progress__milestone-subtitles';
   const subtitleClassName = options.milestoneSubtitleClassName || 'bw-discount-progress__milestone-subtitle';
   const reachedClassName = options.milestoneReachedClassName || 'bw-discount-progress__milestone--reached';
-  const items = milestones.map((milestone: any) => {
-    const classes = [
+  milestones.forEach((milestone: any) => {
+    const subtitle = runtimeDocument.createElement('span');
+    subtitle.className = [
       subtitleClassName,
       milestone?.isReached ? reachedClassName : '',
-    ].filter(Boolean).map(escapeAttribute).join(' ');
-
-    return `<span class="${classes}">${escapeHtml(milestone?.subTitle || '')}</span>`;
-  }).join('');
-
-  return `<div class="${listClassName}">${items}</div>`;
+    ].filter(Boolean).join(' ');
+    subtitle.textContent = String(milestone?.subTitle || '');
+    list.append(subtitle);
+  });
+  return list;
 }
 
 function normalizePercent(value: number) {
@@ -143,17 +178,4 @@ export function applyDiscountProgressTransition(progressElement: HTMLElement | n
   scheduleFrame(() => {
     scheduleFrame(() => setProgress(target));
   });
-}
-
-function escapeHtml(value: any) {
-  return String(value)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
-
-function escapeAttribute(value: any) {
-  return escapeHtml(value).replace(/`/g, '&#96;');
 }

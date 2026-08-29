@@ -5,7 +5,7 @@ title: Wolfpack Product Bundles App Navigation and UI Map
 type: navigation-map
 status: authoritative
 summary: Routes, screens, actions, modals, and storefront-preview flows for the embedded app.
-last_audited: 2026-08-27
+last_audited: 2026-08-29
 owners:
   - engineering
 domains:
@@ -30,7 +30,7 @@ keywords:
 > Any time a new page, modal, tab, sidebar section, or user flow is added or removed,
 > this document **must** be updated. See CLAUDE.md for the enforcement rule.
 
-**Last Updated:** 2026-08-27
+**Last Updated:** 2026-08-29
 **Environment mapped:** SIT (`wolfpack-product-bundles-sit`)
 **Test store:** `wolfpack-store-test-1.myshopify.com`
 
@@ -69,7 +69,7 @@ Wolfpack Bundles SIT
 ├── Settings            → /app/settings
 ├── Integrations        → /app/integrations
 ├── Analytics           → /app/attribution
-├── Pricing             → /app/pricing
+├── Billing             → /app/pricing          (Subscription & Billing)
 └── Updates & FAQs      → /app/events
 ```
 
@@ -176,6 +176,14 @@ required Shopify parent product are created. The subsequent widget-status check
 is noncritical; a timeout or error leaves creation successful and the configure
 redirect intact.
 
+#### Shopify Bundled Products Edit Bridge
+
+**Route file:** `app/routes/app/app.bundles.products.$productId/route.tsx`
+
+**URL:** `/app/bundles/products/:productId`
+
+Shopify's product-configuration extension supplies the numeric `{product_id}`. The authenticated loader resolves the matching `Bundle.shopifyProductId` within the current shop and redirects to the existing FPB or PPB configure page. Invalid IDs return `400`; missing or foreign bundles return `404`. The route renders no separate page.
+
 Configure page storefront sync status:
 
 - Full-page and product-page configure pages do not show a separate Storefront sync status or retry banner.
@@ -208,10 +216,11 @@ Settings
 ├── App-owned header: arrow-only back action + Settings title
 ├── Card: Design
 │   └── Opens the preview-first Design workspace
-│       ├── Template, component surface, and desktop/mobile selectors above the local preview canvas
+│       ├── Template, component surface, and desktop/mobile selectors above the isolated storefront preview canvas
 │       ├── One contextual inspector for the component visible in the preview
 │       ├── Phone panes: Preview / Customize
 │       ├── Contextual colors inherit Shopify Shop Brand pairs until individually overridden
+│       ├── Nested route `/settings-design-preview-frame` renders deterministic FPB/PPB fixtures with production controllers and CSS
 │       └── Preview Bundle modal lists saved, storefront-ready active/unlisted FPB and PPB bundles
 ├── Card: Language
 │   └── Shows multilanguage mode, 39 add/remove locale choices, shared Cart & Checkout strings, Landing Page Layout strings, and Product Page Layout strings
@@ -225,14 +234,15 @@ Primary action:
 - Selecting Design opens the Settings -> Design subpage.
 - Selecting Controls keeps the landing cards visible while Shopify's native Admin loading indicator reports navigation to `/app/additional-configurations`.
 - While the lazy Design or Language workspace loads after selection, the destination title and a small Polaris spinner render without card skeletons or an artificial delay.
-- The Design Control Panel lazy-loads after entry and uses a responsive preview-first workspace: the largest app-owned preview and its selectors sit beside one contextual inspector. At phone widths a Preview / Customize segmented control shows one workspace pane at a time.
+- The Design Control Panel lazy-loads after entry and uses a responsive preview-first workspace: the gutterless preview stage and its selectors sit beside one contextual inspector. On desktop, a vertically centered notch with a Polaris chevron straddles the preview/inspector boundary, remains centered in the visible sidebar edge while scrolling, and collapses the inspector so the width-driven storefront canvas grows without clearing unsaved settings or preview context. Canvas fitting is applied once per browser frame without React resize state or scale transitions. The canvas shows a centered Polaris spinner card and remains visually withheld until the isolated preview frame sends its trusted `READY` event. Mobile selection preserves the full 390 x 844 storefront viewport inside a decorative iPhone body whose chrome sits outside the iframe. At phone Admin widths the notch is hidden and a Preview / Customize segmented control remains the authoritative one-pane-at-a-time navigation.
 - Preview-only Bundle Type and Template selectors cover Landing Page Standard, Classic, Compact, and Horizontal plus Product Page Product List, Product Grid, Horizontal Slots, and Vertical Slots.
-- The template-aware Preview surface control exposes individual components only: Bundle header, Navigation, Categories, Product cards, Product slots, Product picker, Cart / summary, Loading, Validation, and Upsell. Each template shows only the components it owns, and there is no whole-Builder option. Desktop/mobile switching preserves the selected surface when it remains valid.
+- The template-aware Edit area control exposes only persistent regions owned by the selected template: Bundle header, Navigation, Categories, Product cards, Product slots, and Cart / summary. Selecting an area returns the separate Preview state control to Default, scrolls the production region into view, and identifies it with a persistent outline and localized `Editing` label.
+- The separate Preview state control exposes only applicable transient states: Default, Product picker, Loading, Validation, and Upsell. Product picker is limited to PPB slot templates, Loading to FPB templates, and state dismissal/default restores the previously selected edit area.
 - Images & GIFs owns the store-level FPB loading screen: merchants can retain the default spinner or select an uploaded GIF through one clickable drop zone, change its background color, and see both choices in the local Loading preview. Image Fit is disabled on the Loading surface because it does not affect that screen. The former per-bundle FPB loading animation control is not exposed.
 - Images & GIFs also owns one store-level FPB/PPB Slot Icon and a Slot Icon Presentation selector for every template. Centered badge replaces the native plus icon (recommended 96 x 96 px transparent square); Cover fills the responsive product slot; Fit contains an 800 x 800 px square image inside the responsive product slot.
-- Component scenes use fixed logical 1280×1136 desktop and 390×844 mobile canvases that scale to fit the Admin panel. The stage keeps one viewport-responsive block size so desktop/mobile toggles do not move the surrounding page. Product picker, Loading, Validation, and Upsell remain representative transient states.
-- Editing a preview-relevant field selects the scene where its effect is visible once per edit. Manual surface selection remains authoritative until the next field edit. Slot product-card fields reveal Product picker, cart/footer fields reveal Cart / summary, and loading, toast, and upsell fields reveal their matching surfaces.
-- Unsaved design values are applied through the normalized storefront Design runtime and a semantic field-target contract. Category, quantity, slot, picker, progress, mobile-summary, upsell, and feedback actions share deterministic in-memory state; arbitrary CSS, remote preview requests, and cart mutations are rejected.
+- Component scenes use fixed logical 1280×1136 desktop and 390×844 mobile canvases that scale and center within the Admin panel. The isolated same-origin frame composes a neutral store header and FPB page or PPB product-detail context around the production widget. Product picker, Loading, Validation, and Upsell invoke the production renderer's corresponding state.
+- The contextual inspector follows the selected edit area or non-default preview state. Editing a shared field preserves the current area instead of jumping to another region; the inspector heading names the active context.
+- Unsaved design values are converted through the normalized storefront Design runtime and posted to the frame through a versioned same-origin protocol. The frame uses deterministic local media and fixture data, blocks navigation and cart submission, and disables persistence, analytics, and bundle fetching.
 - Local Design controls and template previews remain available without a storefront-ready bundle. The separate Preview Bundle action is disabled while Design values are dirty or saving. Its Polaris modal lists only active/unlisted bundles with a valid FPB public number or PPB product handle, reserves a tab, posts the existing configure `/prepare-preview` action, and navigates to the signed FPB or tokenized PPB storefront URL.
 - Relevant Expert Colour Control groups expose `Show Colour Guide` links to the five app-owned AVIF guide paths generated from tracked public PNG sources by CI/CD.
 - Settings back actions await App Bridge Save Bar leave confirmation while unsaved changes exist.
@@ -377,8 +387,9 @@ Pricing Page
 ├── App Bridge breadcrumb + app-owned back action → previous page, Dashboard fallback
 ├── Subscription quota card (current usage)
 │
-├── Plan cards: Free vs Grow
-│   └── [Button] "Upgrade to Grow" → POST → Shopify billing redirect
+├── Plan cards: Free vs Growth
+│   ├── [Button] "Choose Growth monthly" → Shopify-hosted App Pricing
+│   └── [Button] "Choose Growth annual" → Shopify-hosted App Pricing
 │
 ├── Feature comparison table
 │
@@ -467,6 +478,7 @@ FPB Configure Page
 │       └── 2×2 template grid (FPB: Standard Design, Classic Design, Compact Design, Horizontal Design)
 │           └── Each card: preview placeholder + label + [Select]/[Selected] button
 │               Persists: wpbLayoutTemplate (always FBP_SIDE_FOOTER) + wpbPresetId (STANDARD | CLASSIC | COMPACT | HORIZONTAL)
+│       └── Sticky header and action footer keep the customization action and [Next] visible while the template grid scrolls
 │       └── [Button] "Preview bundle" → opens signed storefront preview in a new tab, closes Customization, then opens Preview Feedback Modal
 │
 ├── Save Bar (App Bridge): [Discard] [Save]
@@ -615,6 +627,7 @@ PPB Configure Page
 │   └── 2×2 template grid (PPB: Product List, Product Grid, Horizontal Slots, Vertical Slots)
 │       └── Each card: preview placeholder + label + [Select]/[Selected] button
 │           Persists: wpbLayoutTemplate (PDP_INPAGE | PDP_MODAL) + wpbPresetId (CASCADE | COGNIVE | MODAL | SIMPLIFIED)
+│   └── Sticky header and action footer keep the customization action and [Next] visible while the template grid scrolls
 │   └── [Button] "Preview bundle" → opens signed product preview in a new tab, closes Customization, then opens Preview Feedback Modal
 │       ├── "Bundle is visible on store" → close
 │       └── "Having issues with the bundle? Contact us" → open Crisp with the bundle preview URL
@@ -632,6 +645,11 @@ items.
 
 **Widget storefront features (as of v2.9.0):**
 
+- Product details and the magnifying-glass image affordance are FPB-only. PPB
+  product images and titles are informational; explicit Add, quantity, and
+  variant controls own PPB product selection.
+- PPB Horizontal Slots and Vertical Slots retain the bundle-picker modal opened
+  from empty/replacement slots; this picker is distinct from product details.
 - Step slot cards (empty/filled/locked states) with `addonLabel` for free gift tabs
 - Quantity option pills (from `displayOptions.bundleQuantityOptions`)
 - Gift message UI: textarea + optional From/To fields + char counter
@@ -654,10 +672,11 @@ Billing Page
 ├── Success / Error banners (conditional on ?upgraded=true or error param)
 ├── Subscription quota card
 ├── Current plan display
-└── [Button] "Upgrade" / "Cancel subscription"
+└── [Button] "Upgrade" / "Manage plan" → Shopify-hosted App Pricing
 ```
 
-**Billing callback:** `/app/billing/callback` — confirms charge, redirects back.
+**Managed-pricing return:** `/app/billing/return` — ignores redirect hints for
+authorization, force-verifies the Partner API subscription, then redirects back.
 
 ---
 
@@ -689,18 +708,31 @@ Billing Page
 
 On tablet and phone containers, configure section changes use the compact current-section disclosure.
 
+### Flow B2: Edit from Shopify Bundled Products
+
+```
+Shopify Admin product or variant details
+  └── Bundled products card → [Edit]
+      └── /app/bundles/products/{product_id}
+          └── authenticated shop-scoped lookup
+              ├── FPB → /app/bundles/full-page-bundle/configure/{bundleId}
+              └── PPB → /app/bundles/product-page-bundle/configure/{bundleId}
+```
+
 ### Flow C: Design Customisation
 
 ```
 /app/settings
   └── Click Design card → Settings -> Design panel opens
       ├── Existing Design sections and fields render in one inspector pane
+      ├── Desktop → collapse or restore the inspector from its boundary chevron
+      │   └── Canvas refits immediately without an animated size transition
       ├── Phone width → switch between Preview and Customize panes
-      ├── Select preview-only bundle type, template, surface, and desktop/mobile viewport
-      ├── Change setting → app-owned live preview updates immediately (no persistence)
-      ├── Slot product-card field → Product picker modal/bottom sheet is revealed
-      ├── Cart/footer field → Cart / summary surface is revealed
-      ├── Loading, toast, or upsell field → matching deterministic surface is revealed
+      ├── Select preview-only bundle type, template, edit area, preview state, and desktop/mobile viewport
+      │   ├── Edit area → return to Default, scroll to the region, and show its persistent focus outline
+      │   └── Preview state → show the production picker/loading/validation/upsell state while retaining the edit area
+      ├── Change setting → normalized Design CSS updates the isolated production renderer immediately (no persistence)
+      ├── Inspector controls remain scoped to the active area or state
       ├── Preview blocks add-to-cart and form submission
       └── [Save] → Save Bar submits → toast confirmation
 ```
@@ -719,11 +751,11 @@ Dirty Admin form
 
 ```
 /app/pricing
-  └── [Upgrade to Grow]
+  └── [Choose Growth monthly / annual]
       └── Upgrade Confirmation Modal → confirm
-          └── POST /api/billing/create → Shopify billing URL
-              └── Merchant approves → /app/billing/callback?charge_id=...
-                  └── confirm charge → /app/billing?upgraded=true
+          └── POST /app/pricing → configured Shopify-hosted plan URL
+              └── Merchant selects or approves plan → /app/billing/return?plan_handle=...
+                  └── Partner API verification → /app/billing?upgraded=true
 ```
 
 ### Flow E: Bundle Checkout Pricing Safety
@@ -775,9 +807,7 @@ Checkout order summary → Bundle & Save
 | `/api/checkout-bundle-offer-token`                             | Checkout-session-authenticated route that validates a signed parent and current merchant offer config, then authorizes one exact add-on variant and quantity                                                    |
 | `/apps/product-bundles/api/design-settings/:shop`              | CSS vars for storefront widgets                                                                                                                                                                                 |
 | `/apps/product-bundles/api/language-settings/:shop`            | Settings -> Language JSON for storefront widget text and cart labels                                                                                                                                            |
-| `/api/billing/create`                                          | Initiate subscription                                                                                                                                                                                           |
-| `/api/billing/confirm`                                         | Confirm subscription                                                                                                                                                                                            |
-| `/api/billing/cancel`                                          | Cancel subscription                                                                                                                                                                                             |
+| `/app/billing/return`                                          | Verify Shopify App Pricing state through the Partner API after a hosted-plan redirect                                                                                                                           |
 | `/api/activate-cart-transform`                                 | Deploy cart transform function                                                                                                                                                                                  |
 | `/api/activate-pixel`                                          | Activate UTM web pixel                                                                                                                                                                                          |
 | `/apps/product-bundles/api/proxy-health`                       | Proxy health check                                                                                                                                                                                              |

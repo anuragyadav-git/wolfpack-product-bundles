@@ -4,17 +4,12 @@ import { BundleDataManager } from '../../shared/bundle-data-manager.js';
 import { PricingCalculator } from '../../shared/pricing-calculator.js';
 import { ToastManager } from '../../shared/toast-manager.js';
 import { TemplateManager } from '../../shared/template-manager.js';
-import { ComponentGenerator } from '../../shared/component-generator.js';
 import { ConditionValidator } from '../../shared/condition-validator.js';
 import { createDefaultLoadingAnimation } from '../../shared/default-loading-animation.js';
 import { hideLoadingOverlayElement, markLoadingOverlayVisible } from '../../shared/loading-overlay.js';
 import { getDiscountProgressData, getSelectedQuantity, getTimelineEntryState } from '../../shared/engine/bundle-selectors.js';
-import { renderDiscountProgress } from '../../shared/components/discount-progress.js';
 import { createBundleBannerElement, createStepBannerImageElement } from '../../shared/components/bundle-banners.js';
-import { renderSharedProductCard } from '../../shared/components/product-card.js';
-import { renderSelectedProductRow } from '../../shared/components/selected-product-row.js';
-import { renderSelectedProductSlots } from '../../shared/components/selected-product-slots.js';
-import { renderStepTimelineEntry } from '../../shared/components/step-timeline.js';
+import { createSelectedProductSlotsElement } from '../../shared/components/selected-product-slots.js';
 import {
   buildCartLineDisplayProperties,
   buildCartLineSourceProperties,
@@ -279,14 +274,12 @@ renderClassicSidebarSlots(allSelectedProducts: any[] = [], slotCount = 0) {
     }
   }
 
-  const wrapper = document.createElement('div');
-  wrapper.innerHTML = renderSelectedProductSlots(slotData, {
+  const slots = createSelectedProductSlotsElement(slotData, {
     className: 'classic-sidebar-slots bw-selected-slots--classic-sidebar',
     emptySlotIconUrl: this._shouldRenderProductSlots()
       ? this.selectedBundle?.productSlotIconUrl || ''
       : '',
-  }).trim();
-  const slots = wrapper.firstElementChild;
+  });
 
   slots?.querySelectorAll<HTMLElement>('[data-action="remove-selected-product"]').forEach(removeBtn => {
     removeBtn.addEventListener('click', (event: any) => {
@@ -342,7 +335,7 @@ renderClassicSidebarSlots(allSelectedProducts: any[] = [], slotCount = 0) {
   return slots;
 },
 
-// Escape HTML special characters to prevent innerHTML injection
+// Escape text for the remaining server/string serialization boundaries.
 _escapeHTML(str: string) {
   if (!str) return '';
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');

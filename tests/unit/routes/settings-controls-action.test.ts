@@ -67,4 +67,29 @@ describe("Settings Controls action", () => {
     );
     expect(syncPpbStorefrontRuntime).toHaveBeenCalledWith({}, "shop.test");
   });
+
+  it("reports persisted Controls state when downstream cart synchronization fails", async () => {
+    const payload = { "shared.cartMessaging.isEnabled": "Checked" };
+    syncCartLineMessagingSettings.mockResolvedValue({
+      success: false,
+      error: "cart transform unavailable",
+    });
+
+    const response = await action({
+      request: requestFor(payload),
+      params: {},
+      context: {},
+    } as never);
+    const body = await response.json();
+
+    expect(response.status).toBe(500);
+    expect(upsert).toHaveBeenCalledTimes(2);
+    expect(body).toMatchObject({
+      success: false,
+      intent: "saveSettingsControls",
+      persisted: true,
+      runtimeSynced: false,
+      savedState: payload,
+    });
+  });
 });

@@ -4,16 +4,10 @@ import { BundleDataManager } from '../../shared/bundle-data-manager.js';
 import { PricingCalculator } from '../../shared/pricing-calculator.js';
 import { ToastManager } from '../../shared/toast-manager.js';
 import { TemplateManager } from '../../shared/template-manager.js';
-import { ComponentGenerator } from '../../shared/component-generator.js';
 import { createDefaultLoadingAnimation } from '../../shared/default-loading-animation.js';
 import { hideLoadingOverlayElement, markLoadingOverlayVisible } from '../../shared/loading-overlay.js';
 import { getDiscountProgressData, getSelectedQuantity, getTimelineEntryState } from '../../shared/engine/bundle-selectors.js';
-import { renderDiscountProgress } from '../../shared/components/discount-progress.js';
 import { createBundleBannerElement, createStepBannerImageElement } from '../../shared/components/bundle-banners.js';
-import { renderSharedProductCard } from '../../shared/components/product-card.js';
-import { renderSelectedProductRow } from '../../shared/components/selected-product-row.js';
-import { renderSelectedProductSlots } from '../../shared/components/selected-product-slots.js';
-import { renderStepTimelineEntry } from '../../shared/components/step-timeline.js';
 import {
   buildCartLineDisplayProperties,
   buildCartLineSourceProperties,
@@ -70,7 +64,7 @@ scrollActiveCategoryTitleIntoView() {
 
 activateStepCategory(categoryId: any) {
   this.activeCollectionId = categoryId;
-  Promise.resolve(this.reRenderFullPage()).then(() => {
+  void Promise.resolve(this.reRenderFullPage()).then(() => {
     this.scrollActiveCategoryTitleIntoView();
   });
 },
@@ -167,7 +161,10 @@ createCategoryTabs(stepIndex: string|number) {
     if (!this.activeCollectionId) {
       allTab.classList.add('active');
     }
-    allTab.innerHTML = `<span class="tab-label">All</span>`;
+    const allLabel = document.createElement('span');
+    allLabel.className = 'tab-label';
+    allLabel.textContent = 'All';
+    allTab.append(allLabel);
     allTab.addEventListener('click', () => {
       this.activeCollectionId = null;
       this.reRenderFullPage();
@@ -181,7 +178,10 @@ createCategoryTabs(stepIndex: string|number) {
     if (activeCategoryId === entry.id) {
       tab.classList.add('active');
     }
-    tab.innerHTML = `<span class="tab-label">${ComponentGenerator.escapeHtml(entry.title)}</span>`;
+    const label = document.createElement('span');
+    label.className = 'tab-label';
+    label.textContent = entry.title;
+    tab.append(label);
     tab.addEventListener('click', () => {
       if (shouldCategoryTabActivateProducts({
         designPreset: this.getFullPageDesignPreset?.(),
@@ -293,15 +293,16 @@ createFullPageProductGrid(stepIndex: string|number) {
   }
 
   if (expandedProducts.length === 0) {
-    // Show appropriate message based on whether there's a search query
-    const message = this.searchQuery
-      ? `No products match "${ComponentGenerator.escapeHtml(this.searchQuery)}"`
-      : ComponentGenerator.escapeHtml(this.getNoProductsAvailableMessage());
-    grid.innerHTML = `<p class="no-products">${message}</p>`;
+    const noProducts = document.createElement('p');
+    noProducts.className = 'no-products';
+    noProducts.textContent = this.searchQuery
+      ? `No products match "${this.searchQuery}"`
+      : this.getNoProductsAvailableMessage();
+    grid.replaceChildren(noProducts);
     return grid;
   }
 
-  // Create product cards using ComponentGenerator
+  // Create native product-card elements.
   expandedProducts.forEach((product: any)  => {
     const productCard = this.createProductCard(product, stepIndex, {
       displayVariantsAsIndividualProducts: shouldDisplayVariantsAsIndividual,
@@ -417,7 +418,7 @@ shouldUseProductGridSpinnerOnly() {
 renderProductGridLoadingState(productGridContainer: any) {
   if (!productGridContainer) return;
 
-  productGridContainer.innerHTML = this.createProductGridLoadingState();
+  productGridContainer.replaceChildren();
 
   this.showLoadingOverlay();
 },

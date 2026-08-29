@@ -562,9 +562,7 @@ body:has([data-fpb-design-preset]) {
     text-align: left;
   }
   .layout-sidebar[data-fpb-design-preset="STANDARD"]
-    .fpb-full-page-content-title,
-  .layout-sidebar[data-fpb-design-preset="STANDARD"]
-    .fpb-full-page-content-subtitle {
+    .fpb-full-page-step-title {
     font-weight: 700;
     text-align: left;
   }

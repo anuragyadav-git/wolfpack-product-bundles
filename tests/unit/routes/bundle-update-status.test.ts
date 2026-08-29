@@ -14,6 +14,36 @@ jest.mock("../../../app/db.server", () => ({
   },
 }));
 
+jest.mock("../../../app/services/subscriptions/subscription-service.server", () => ({
+  resolveShopEntitlements: jest.fn().mockResolvedValue({
+    entitlements: {
+      planCode: "GROWTH",
+      billingInterval: "MONTHLY",
+      limits: { publicBundles: null, enabledSteps: null },
+      capabilities: {
+        premiumTemplates: true,
+        advancedDesign: true,
+        advancedAnalytics: true,
+        prioritySupport: true,
+        unlimitedDrafts: true,
+      },
+    },
+  }),
+}));
+
+jest.mock("../../../app/services/subscriptions/design-entitlement-state.server", () => ({
+  shopUsesAdvancedDesign: jest.fn().mockResolvedValue(false),
+}));
+
+jest.mock("../../../app/services/subscriptions/bundle-entitlement-gate.server", () => ({
+  updateBundleWithPublicationGate: jest.fn((input) => input.database.bundle.update({
+    where: { id: input.bundleId, shopId: input.shopDomain },
+    data: input.data,
+    ...(input.include ? { include: input.include } : {}),
+  })),
+}));
+
+
 jest.mock("../../../app/lib/logger", () => ({
   AppLogger: {
     info: jest.fn(),
@@ -56,6 +86,15 @@ function makeForm(status: string): FormData {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  getDb().bundle.findUnique.mockResolvedValue({
+    id: "b1",
+    bundleType: "product_page",
+    bundleDesignTemplate: "PDP_INPAGE",
+    bundleDesignPresetId: "LIST",
+    status: "active",
+    steps: [],
+    bundleSubscriptionConfig: null,
+  });
 });
 
 describe("handleUpdateBundleStatus", () => {

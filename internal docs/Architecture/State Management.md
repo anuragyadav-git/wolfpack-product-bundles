@@ -5,7 +5,7 @@ title: State Management
 type: architecture
 status: authoritative
 summary: Defines route-owned Redux boundaries and the client state that remains outside Remix loaders and actions.
-last_audited: 2026-07-30
+last_audited: 2026-08-27
 owners:
   - engineering
 domains:
@@ -16,6 +16,8 @@ systems:
 source_paths:
   - app/store/
   - app/routes/app/app.dashboard/route.tsx
+  - app/routes/app/app.settings.tsx
+  - app/routes/app/app.additional-configurations.tsx
   - app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/route.tsx
   - app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/route.tsx
 related_docs:
@@ -42,16 +44,19 @@ Admin client state uses Redux Toolkit under `app/store/`.
   - `POST /app/upload-store-file`
   - `GET /app/upload-store-file?fileId=...`
   - `POST /api/ensure-product-template`
-- Shopify App Bridge side effects stay in route code and hooks.
+- Shopify App Bridge side effects stay in route code and hooks. Settings Design,
+  Language, and Controls save feedback uses the native App Bridge Toast API;
+  failed saves use its error state and a five-second duration.
 - Storefront widget runtime state stays outside Redux.
 
 ## Provider
 
-The shared authenticated layout does not mount `ReduxProvider`. Dashboard and
-the FPB/PPB configure routes own the provider because they consume Redux/RTK
-Query state. Billing feedback and cancellation confirmation use route-local
-React state. Routes without state consumers must not import `ReduxProvider`;
-this keeps `vendor-state` out of their production manifest entries.
+The shared authenticated layout does not mount `ReduxProvider`. Dashboard, the
+FPB/PPB configure routes, and each route that directly renders the Settings
+workspace own the provider because they consume Redux/RTK Query state. Billing
+feedback and cancellation confirmation use route-local React state. Routes
+without state consumers must not import `ReduxProvider`; this keeps
+`vendor-state` out of their production manifest entries.
 
 ## Slices
 

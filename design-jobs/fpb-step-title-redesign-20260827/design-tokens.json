@@ -1,0 +1,134 @@
+{
+  "schema_version": 1,
+  "job_id": "fpb-step-title-redesign-20260827",
+  "revision": 2,
+  "status": "complete",
+  "groups": {
+    "color": [
+      {
+        "name": "step-title-color-fpb",
+        "value": "var(--bundle-full-page-title-color, #252525)",
+        "unit": "css-color",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": true,
+        "owner": "existing FPB title color runtime",
+        "notes": "Reuse; do not add a preview-only or Step Title color alias."
+      },
+      {
+        "name": "step-title-color-ppb",
+        "value": "var(--bundle-global-primary-text, #111111)",
+        "unit": "css-color",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": true,
+        "owner": "existing PPB global primary text runtime",
+        "notes": "Reuse across in-page and picker body headings."
+      }
+    ],
+    "typography": [
+      {
+        "name": "step-title-font-size",
+        "value": "clamp(1.125rem, 1rem + 0.5vw, 1.5rem)",
+        "unit": "css-length",
+        "source": "approved-recommendation",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "shared Step Title component styling",
+        "notes": "Approved Direction A 18-24 px responsive range."
+      },
+      {
+        "name": "step-title-font-weight",
+        "value": 700,
+        "unit": "number",
+        "source": "approved-recommendation",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "shared Step Title component styling",
+        "notes": "Strong local heading hierarchy."
+      },
+      {
+        "name": "step-title-line-height",
+        "value": 1.25,
+        "unit": "unitless",
+        "source": "approved-recommendation",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "shared Step Title component styling",
+        "notes": "Compact multi-line heading rhythm."
+      }
+    ],
+    "spacing": [
+      {
+        "name": "step-title-downstream-gap",
+        "value": "clamp(0.75rem, 1.5vw, 1rem)",
+        "unit": "css-length",
+        "source": "approved-recommendation",
+        "confidence": "medium",
+        "merchant_configurable": false,
+        "owner": "family content-section spacing owner",
+        "notes": "May be supplied by an existing section gap; do not duplicate margins."
+      },
+      {
+        "name": "ppb-picker-inline-inset",
+        "value": "clamp(20px, 5vw, 65px)",
+        "unit": "css-length",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "PPB picker product-grid geometry",
+        "notes": "Heading must reuse the exact product-grid inset; mobile resolves to 20 px."
+      }
+    ],
+    "size": [
+      {
+        "name": "step-title-readable-measure",
+        "value": "42ch",
+        "unit": "css-length",
+        "source": "recommendation",
+        "confidence": "medium",
+        "merchant_configurable": false,
+        "owner": "Step Title text node only",
+        "notes": "Maximum text measure; never constrains the surrounding catalog or grid."
+      }
+    ],
+    "radius": [],
+    "border": [],
+    "shadow": [],
+    "z_index": [],
+    "motion": [],
+    "breakpoint": [
+      {
+        "name": "fpb-summary-mode-boundary",
+        "value": 800,
+        "unit": "px",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "FPB responsive layout",
+        "notes": "Heading ownership does not change across the boundary."
+      },
+      {
+        "name": "ppb-picker-mobile-boundary",
+        "value": 768,
+        "unit": "px",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "PPB bottom-sheet layout",
+        "notes": "Heading inset follows the product grid below and above this boundary."
+      }
+    ],
+    "component_alias": []
+  },
+  "token_shape": {
+    "name": "",
+    "value": null,
+    "unit": "",
+    "source": "recommendation",
+    "confidence": "low",
+    "merchant_configurable": false,
+    "owner": "",
+    "notes": ""
+  }
+}

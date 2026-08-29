@@ -16,6 +16,13 @@ jest.mock("../../../app/services/webhooks/processor.server", () => ({
   },
 }));
 
+jest.mock(
+  "../../../app/services/subscriptions/subscription-reconciliation-runner.server",
+  () => ({
+    runSubscriptionReconciliation: jest.fn(),
+  }),
+);
+
 // Mock the inngest client so createFunction captures the handler synchronously
 jest.mock("../../../app/inngest/client", () => ({
   inngest: {

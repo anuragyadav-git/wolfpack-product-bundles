@@ -5,14 +5,14 @@
     "settings": "Paramètres",
     "integrations": "Intégrations",
     "analytics": "Analyses",
-    "pricing": "Tarification",
+    "billing": "Facturation",
     "events": "Mises à jour et FAQ"
   },
   "integrations": {
     "requestMessage": "Bonjour, je souhaite demander la prise en charge d'une nouvelle intégration."
   },
   "dashboard": {
-    "title": "Tableau de bord : Wolfpack Bundle Builder",
+    "title": "Tableau de bord : Only Bundles",
     "subtitle": "Accédez à vos bundles, au support client et bien plus.",
     "header": {
       "syncCollections": "Synchroniser les collections",
@@ -130,9 +130,9 @@
       "viewDetails": "Show status",
       "activate": "Enable",
       "enableModal": {
-        "heading": "Activez Wolfpack Bundle sur votre boutique",
-        "description": "Activez l’intégration d’application Wolfpack Bundle dans l’éditeur de thème, cliquez sur Enregistrer, puis revenez ici.",
-        "mediaLabel": "Tutoriel montrant comment activer l’intégration Wolfpack Bundle et enregistrer le thème",
+        "heading": "Activez Only Bundles sur votre boutique",
+        "description": "Activez l’intégration d’application Only Bundles dans l’éditeur de thème, cliquez sur Enregistrer, puis revenez ici.",
+        "mediaLabel": "Tutoriel montrant comment activer l’intégration Only Bundles et enregistrer le thème",
         "openThemeEditor": "Ouvrir l’éditeur de thème",
         "checking": "Vérification de votre thème…",
         "enabled": "Intégration d’application activée",
@@ -148,7 +148,7 @@
       "coreComponents": "Core components enabled",
       "activeBundles": "Active bundles",
       "modalHeading": "Storefront setup",
-      "modalDescription": "These components control how Wolfpack bundles appear on your storefront.",
+      "modalDescription": "These components control how bundles created with Only Bundles appear on your storefront.",
       "modalError": "Status unavailable. Reload to try again.",
       "coreHeading": "Core bundle components",
       "optionalHeading": "Optional placements",
@@ -169,6 +169,10 @@
     }
   },
   "settingsDcp": {
+    "growthGate": {
+      "heading": "Contrôles de design Growth",
+      "body": "Les couleurs de marque de base et la typographie restent modifiables avec Free. Passez à Growth pour modifier les couleurs avancées, les angles, les images et les GIF."
+    },
     "preview": {
       "heading": "Aperçu en direct",
       "unsaved": "Les modifications non enregistrées apparaissent ici.",
@@ -176,6 +180,11 @@
         "label": "Affichage de l’espace de conception",
         "preview": "Aperçu",
         "customize": "Personnaliser"
+      },
+      "inspector": {
+        "collapse": "Réduire le panneau de personnalisation",
+        "expand": "Développer le panneau de personnalisation",
+        "customize": "Personnaliser {{context}}"
       },
       "surface": {
         "description": "Choisissez des produits pour créer votre bundle.",
@@ -243,15 +252,20 @@
         "productPage": "Product Page"
       },
       "templateLabel": "Template",
-      "surfaceSelector": {
-        "label": "Preview surface",
+      "focusLabel": "Modification : {{context}}",
+      "areaSelector": {
+        "label": "Edit area",
         "bundle-header": "Bundle header",
         "navigation": "Navigation",
         "categories": "Categories",
         "product-card": "Product cards",
         "product-slots": "Product slots",
+        "cart-summary": "Cart / summary"
+      },
+      "stateSelector": {
+        "label": "Preview state",
+        "default": "Default",
         "product-picker": "Product picker",
-        "cart-summary": "Cart / summary",
         "loading": "Loading",
         "validation": "Validation",
         "upsell": "Upsell"
@@ -322,7 +336,7 @@
     },
     "loadingAnimation": {
       "title": "Storefront Loading Animation",
-      "description": "Shown while Wolfpack Bundles loads bundle content on the storefront."
+      "description": "Shown while Only Bundles loads bundle content on the storefront."
     },
     "bundleVisibilityPending": {
       "description": "Tracks whether your bundle is discoverable by shoppers. Optimises when you copy your bundle link and place it on your store, enable the Bundle Widget, or set up the Bundle Embed."
@@ -345,6 +359,12 @@
     }
   },
   "common": {
+    "alerts": {
+      "actionFailed": "Échec de l’action", "previewUnavailable": "Aperçu indisponible", "settingsNotSaved": "Paramètres non enregistrés", "exportUnavailable": "Exportation indisponible", "backfillUnavailable": "Rattrapage indisponible", "trackingNotUpdated": "Suivi non mis à jour", "bundleNotSaved": "Lot non enregistré", "operationFailed": "Échec de l’opération"
+    },
+    "success": {
+      "previewOpened": "Aperçu ouvert", "csvExported": "CSV exporté", "backfillComplete": "Rattrapage terminé", "trackingEnabled": "Suivi activé", "trackingDisabled": "Suivi désactivé", "changesSaved": "Modifications enregistrées", "productSynced": "Produit synchronisé", "bundleSynced": "Lot synchronisé", "operationComplete": "Opération terminée"
+    },
     "actions": {
       "close": "Fermer",
       "cancel": "Annuler",
@@ -362,13 +382,13 @@
       "continueEditing": "Continuer la modification"
     },
     "loading": {
-      "appLabel": "Chargement de Wolfpack Product Bundles",
+      "appLabel": "Chargement de Only Bundles",
       "workspace": "Chargement de votre espace de travail"
     },
     "appEmbed": {
-      "body": "Activez l'extension d'application de thème Wolfpack Bundles pour placer et prévisualiser le lot.",
+      "body": "Activez l'extension d'application de thème Only Bundles pour placer et prévisualiser le lot.",
       "guideTitle": "Activer l'intégration d'application",
-      "guideImageAlt": "Comment activer l'intégration d'application Wolfpack Bundles"
+      "guideImageAlt": "Comment activer l'intégration d'application Only Bundles"
     },
     "previewGate": {
       "title": "La visibilité de votre lot n'est pas encore configurée",
@@ -388,10 +408,10 @@
     },
     "upgradePrompt": {
       "limitReachedTitle": "Limite de lots atteinte",
-      "limitReachedBody": "Vous avez utilisé les {{limit}} lots du forfait Gratuit. Passez à Grow pour obtenir jusqu'à 20 lots.",
+      "limitReachedBody": "Vous avez utilisé la limite de lots publics de Gratuit. Growth inclut des lots publics illimités.",
       "approachingTitle": "Limite de lots bientôt atteinte",
-      "approachingBody": "Vous utilisez {{current}} lots sur {{limit}}. Passez à Grow pour obtenir jusqu'à 20 lots.",
-      "usageBody": "Vous utilisez {{current}} lots sur {{limit}} avec le forfait Gratuit. Besoin de plus ? Passez à Grow pour obtenir 20 lots."
+      "approachingBody": "Vous utilisez {{current}} lots publics sur {{limit}}. Growth inclut des lots publics illimités.",
+      "usageBody": "Vous utilisez {{current}} lots publics sur {{limit}} avec Gratuit. Growth inclut des lots publics illimités."
     },
     "discardChanges": {
       "title": "Ignorer toutes les modifications non enregistrées",
@@ -460,32 +480,32 @@
     "actions": {
       "tryAgain": "Réessayer",
       "contactSupport": "Contacter l'assistance",
-      "cancel": "Annuler"
+      "cancel": "Annuler",
+      "back": "Retour à la page précédente"
     },
     "error": {
       "heading": "Problème d'abonnement",
-      "missingChargeId": "Échec de la confirmation de l'abonnement : identifiant de paiement manquant.",
-      "confirmationFailed": "Impossible de confirmer l'abonnement auprès de Shopify.",
+      "verificationFailed": "Shopify n'a pas pu vérifier l'abonnement actuel. Réessayez.",
       "unexpected": "Une erreur inattendue s'est produite lors de la configuration de l'abonnement."
     },
     "upgradeModal": {
-      "heading": "Passer au forfait Grow",
-      "confirm": "Confirmer la mise à niveau - {{price}} $/mois",
-      "redirect": "Vous serez redirigé vers Shopify pour finaliser votre abonnement.",
-      "benefitsHeading": "Ce que vous obtenez avec Grow :",
-      "bundleLimit": "Jusqu'à 20 lots (actuellement {{current}}/{{limit}})",
-      "billedMonthly": "Facturé mensuellement via Shopify",
+      "heading": "Choisir Growth",
+      "confirm": "Continuer vers Shopify",
+      "redirect": "Vous serez redirigé vers Shopify pour choisir la facturation mensuelle ou annuelle.",
+      "benefitsHeading": "Growth comprend :",
+      "managedByShopify": "La sélection et la facturation du forfait sont gérées par Shopify",
       "benefits": {
-        "noRevenueCap": "Aucun plafond de revenus pour les lots - le forfait gratuit est limité à 500 $/mois",
-        "advancedDiscounts": "Règles de réduction avancées",
+        "unlimitedPublicBundles": "Lots publics et étapes illimités",
+        "allTemplatesDesign": "Tous les modèles et contrôles de design avancés",
+        "advancedAnalytics": "Analyses avancées des lots",
         "prioritySupport": "Assistance prioritaire"
       }
     },
     "success": {
-      "heading": "Bienvenue dans le forfait Grow !",
+      "heading": "Growth est actif",
       "body": "Votre abonnement a été activé. Vous avez maintenant accès à toutes les fonctionnalités premium.",
       "bundleLimit": "Limite de lots",
-      "bundleLimitValue": "20 lots",
+      "bundleLimitValue": "Illimités",
       "designControl": "Contrôle du design",
       "fullAccess": "Accès complet",
       "support": "Assistance",
@@ -493,26 +513,83 @@
     },
     "cards": {
       "currentPlan": "Forfait actuel",
-      "freePrice": "Gratuit",
-      "freeDescription": "Pour les ventes de lots jusqu'à 500 $/mois - gratuit jusqu'à votre croissance",
+      "freePrice": "$0",
+      "freeDescription": "Créez, publiez et vendez avec un lot complet",
       "includes": "Comprend :",
       "freePlan": "Forfait gratuit",
       "mostPopular": "Le plus populaire",
       "perMonth": "/ mois",
-      "growDescription": "Pour les ventes de lots supérieures à 500 $/mois - aucun plafond de revenus",
-      "growIncludes": "Tout ce qui est inclus dans Gratuit, plus :",
-      "upgradeToGrow": "Passer à Grow",
-      "cancelAnytimeBilled": "Annulez à tout moment. Facturé via Shopify."
+      "growthDescription": "Marchandisage, personnalisation, analyses et capacité avancés",
+      "growthIncludes": "Tout ce qui est inclus dans Gratuit, plus :",
+      "chooseGrowth": "Choisir Growth",
+      "annualPrice": "Ou {{price}} $ par an",
+      "trialAndBilling": "Essai gratuit de {{days}} jours. Choisissez la facturation mensuelle ou annuelle dans Shopify."
+    },
+    "planFeatures": {
+      "onePublicBundle": "Un lot public",
+      "twoSteps": "Deux étapes ou catégories activées",
+      "productPageBundles": "Lots de page produit",
+      "fullPageBundles": "Lots pleine page",
+      "brandTypography": "Couleurs et typographie de la marque",
+      "summary30": "Résumé analytique sur 30 jours",
+      "merchandising": "Toutes les fonctionnalités de marchandisage",
+      "standardSupport": "Assistance standard",
+      "unlimitedBundlesSteps": "Lots publics et étapes illimités",
+      "allTemplates": "Tous les modèles de lots",
+      "advancedDesign": "Contrôles de design avancés",
+      "advancedAnalytics": "Analyses avancées des lots",
+      "prioritySupport": "Assistance prioritaire"
+    },
+    "comparison": {
+      "publicBundles": "Lots publics",
+      "steps": "Étapes ou catégories activées",
+      "productPageBundles": "Lots de page produit",
+      "fullPageBundles": "Lots pleine page",
+      "merchandising": "Réductions, cadeaux, suppléments et ventes incitatives",
+      "customerSubscriptions": "Abonnements clients aux lots",
+      "customization": "Texte, traductions, CSS et scripts",
+      "templates": "Modèles",
+      "design": "Design",
+      "analytics": "Analyses",
+      "prioritySupport": "Assistance prioritaire"
+    },
+    "values": {
+      "unlimited": "Illimité",
+      "standard": "Standard",
+      "all": "Tous",
+      "brandTypography": "Couleurs et typographie de la marque",
+      "allControls": "Tous les contrôles",
+      "summary30": "Résumé sur 30 jours",
+      "advanced": "Avancé"
+    },
+    "valueProps": {
+      "scaleTitle": "Développez vos lots publics",
+      "scaleDescription": "Publiez un nombre illimité de campagnes de lots et utilisez un nombre illimité d'étapes ou de catégories",
+      "designTitle": "Utilisez tous les modèles et contrôles de design avancés",
+      "designDescription": "Débloquez tous les modèles FPB et PPB ainsi que les contrôles visuels au niveau des composants",
+      "analyticsTitle": "Analysez et optimisez",
+      "analyticsDescription": "Utilisez des périodes personnalisées, le détail des lots et campagnes, le rattrapage et l'export CSV"
+    },
+    "faq": {
+      "heading": "Questions fréquentes",
+      "changeQuestion": "Puis-je changer de forfait à tout moment ?",
+      "changeAnswer": "Oui. Shopify gère les changements entre les forfaits mensuel, annuel et Gratuit depuis la page Facturation.",
+      "downgradeQuestion": "Qu'advient-il de mes lots si je passe au forfait Gratuit ?",
+      "downgradeAnswer": "Toute la configuration des lots est conservée. Le lot compatible avec le forfait Gratuit publié le plus récemment reste immédiatement public ; les autres lots publics deviennent des brouillons.",
+      "billingQuestion": "Comment fonctionne la facturation ?",
+      "billingAnswer": "Growth est disponible avec une facturation mensuelle ou annuelle via Shopify App Pricing. Les deux périodicités incluent les mêmes fonctionnalités.",
+      "refundQuestion": "Proposez-vous des remboursements ?",
+      "refundAnswer": "Les abonnements sont facturés par Shopify. Contactez notre équipe d'assistance pour toute question de facturation."
     },
     "cta": {
       "heading": "Prêt à développer votre activité de lots ?",
-      "body": "Passez au forfait Grow pour doubler le nombre de lots, personnaliser entièrement le design et bénéficier d'une assistance prioritaire.",
+      "body": "Choisissez Growth pour des lots publics illimités, tous les modèles, le design et les analyses avancés et l'assistance prioritaire.",
       "highlights": {
-        "bundles": "20 lots",
+        "bundles": "Lots publics illimités",
         "design": "Panneau de contrôle du design",
         "support": "Assistance prioritaire"
       },
-      "upgrade": "Passer à Grow - {{price}} $/mois",
+      "upgrade": "Voir Growth",
       "cancelAnytime": "Annulez à tout moment"
     },
     "route": {
@@ -524,21 +601,22 @@
       "bundleUsage": "Utilisation des lots",
       "bundleCount": "{{current}} / {{limit}} lots",
       "limitReached": "Vous avez atteint votre limite de lots.",
-      "limitUpgrade": "Passez à Grow pour obtenir plus de lots.",
+      "limitUpgrade": "Voir Growth pour des lots publics illimités.",
       "overview": "Aperçu des lots",
       "activeBundles": "Lots actifs",
       "totalSteps": "Total des étapes",
       "productPage": "Page produit",
       "fullPage": "Pleine page",
-      "cancelSubscription": "Annuler l'abonnement",
-      "cancelHeading": "Annuler l'abonnement ?",
-      "downgradeBody": "Vous passerez au forfait Gratuit avec une limite de {{limit}} lots.",
-      "archiveWarning": "Attention : vous avez {{current}} lots. Les {{excess}} lots excédentaires seront archivés (pas supprimés).",
-      "confirmCancellation": "Confirmer l'annulation",
+      "cancelSubscription": "Gérer l'abonnement",
+      "cancelHeading": "Gérer l'abonnement dans Shopify ?",
+      "downgradeBody": "Shopify affiche la date d'effet avant le changement de forfait.",
+      "archiveWarning": "Toute la configuration des lots est conservée après une rétrogradation.",
+      "confirmCancellation": "Ouvrir la gestion des forfaits Shopify",
       "keepSubscription": "Conserver l'abonnement",
       "features": "Fonctionnalités de votre forfait",
       "needHelp": "Besoin d'aide ?",
       "helpBody": "Vous avez des questions sur la facturation ou besoin d'un forfait personnalisé ? Notre équipe est là pour vous aider."
     }
-  }
+  },
+  "subscription": { "analytics": { "summaryNotice": "Gratuit inclut un résumé d'activité sur 30 jours. Growth ajoute les périodes personnalisées, les détails, les UTM, le rattrapage et l'export CSV." } }
 }

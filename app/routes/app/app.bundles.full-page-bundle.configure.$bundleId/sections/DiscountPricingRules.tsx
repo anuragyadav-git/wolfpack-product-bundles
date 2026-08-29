@@ -105,6 +105,7 @@ export function FpbDiscountRulesSection({
                       <s-button
                         variant="tertiary"
                         tone="critical"
+                        icon="delete"
                         onClick={() => pricingState.removeDiscountRule(rule.id)}
                       >
                         Remove

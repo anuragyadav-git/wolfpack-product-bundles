@@ -11,9 +11,9 @@ export type DashboardPreviewInput = {
 export type DashboardPreviewAction =
   | { kind: "open_url"; url: string }
   | { kind: "create_fpb_preview" }
-  | { kind: "error"; toast: string };
+  | { kind: "error"; message: string };
 
-const PPB_MISSING_HANDLE_TOAST =
+const PPB_MISSING_HANDLE_MESSAGE =
   "Save and place the bundle on a product first to preview it.";
 
 export function decideDashboardPreviewAction(
@@ -26,7 +26,7 @@ export function decideDashboardPreviewAction(
   }
 
   if (!input.shopifyProductHandle) {
-    return { kind: "error", toast: PPB_MISSING_HANDLE_TOAST };
+    return { kind: "error", message: PPB_MISSING_HANDLE_MESSAGE };
   }
 
   const shop = normalizeShop(input.shop);

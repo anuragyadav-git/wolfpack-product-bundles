@@ -39,42 +39,8 @@ export const BundleModalVariantMethods: Record<string, any> & ThisType<any> = {
 
     // If only one variant (no options) or no variants, hide variant selectors
     if (variants.length <= 1) {
-      variantsContainer.innerHTML = '';
+      variantsContainer.replaceChildren();
       this.selectedVariant = variants[0] || this.currentProduct;
-      return;
-    }
-
-    if (this.isPpbOwned) {
-      const firstOption = this.currentProduct.options?.[0];
-      const optionLabel = (typeof firstOption === 'string' ? firstOption : firstOption?.name)
-        || this.currentProduct.title;
-      const variantLabel = this.widget?._resolveText?.('productVariantLabel', optionLabel) || optionLabel;
-      const currentVariantId = String(this.currentProduct.variantId || this.currentProduct.selectionId || variants[0]?.id || '');
-      variantsContainer.innerHTML = `
-        <label class="bundle-modal-variant-label" for="bundle-modal-native-variant">${variantLabel}</label>
-        <select id="bundle-modal-native-variant" class="bundle-modal-native-variant" aria-label="${variantLabel}">
-          ${variants.map((variant: any) => {
-            const id = String(variant.id || variant.variantId || '');
-            const unavailable = variant.available === false || variant.availableForSale === false;
-            return `<option value="${id}"${id === currentVariantId ? ' selected' : ''}${unavailable ? ' disabled' : ''}>${variant.title || id}</option>`;
-          }).join('')}
-        </select>
-      `;
-      const select = variantsContainer.querySelector<HTMLSelectElement>('.bundle-modal-native-variant');
-      this.selectedVariant = variants.find((variant: any) => String(variant.id || variant.variantId || '') === currentVariantId)
-        || variants[0];
-      select?.addEventListener('change', () => {
-        this.selectedVariant = variants.find((variant: any) => String(variant.id || variant.variantId || '') === String(select.value))
-          || variants[0];
-        this.updateSelectionSummary();
-        this.updatePrice();
-        this.updateAvailability();
-        this.updateVariantImage();
-      });
-      this.updateSelectionSummary();
-      this.updatePrice();
-      this.updateAvailability();
-      this.updateVariantImage();
       return;
     }
 
@@ -99,7 +65,7 @@ export const BundleModalVariantMethods: Record<string, any> & ThisType<any> = {
     if (optionNames.length === 0) {
       // No variant options, use first variant
       this.selectedVariant = variants[0];
-      variantsContainer.innerHTML = '';
+      variantsContainer.replaceChildren();
       return;
     }
 
@@ -112,7 +78,7 @@ export const BundleModalVariantMethods: Record<string, any> & ThisType<any> = {
     const currentVariant = variants.find((v: any)  => String(v.id) === String(currentVariantId));
 
     // Create button-style selector for each option
-    variantsContainer.innerHTML = optionNames.map((optionName: any, optionIndex: number) => {
+    const selectorGroups = optionNames.map((optionName: any, optionIndex: number) => {
       // Get unique values for this option, filtering out undefined/null
       const optionValues: any[] = [...new Set(
         variants
@@ -120,7 +86,7 @@ export const BundleModalVariantMethods: Record<string, any> & ThisType<any> = {
           .filter((val: string|null|undefined)  => val !== undefined && val !== null && val !== '')
       )];
 
-      if (optionValues.length === 0) return '';
+      if (optionValues.length === 0) return null;
 
       // Pre-select current variant's option value, or fall back to first value
       const preSelectedValue = currentVariant?.[`option${optionIndex + 1}`] || optionValues[0];
@@ -129,28 +95,37 @@ export const BundleModalVariantMethods: Record<string, any> & ThisType<any> = {
       // Detect if this is likely a color option
       const isColorOption = this.isColorOption(optionName, optionValues);
 
-      return `
-        <div class="bundle-modal-variant-group">
-          <label class="bundle-modal-variant-label">${optionName}: <span class="bundle-modal-variant-selected-value" data-option-index="${optionIndex}">${preSelectedValue}</span></label>
-          <div class="bundle-modal-variant-options ${isColorOption ? 'color-options' : ''}" data-option-index="${optionIndex}">
-            ${optionValues.map((value) => {
-              const isSelected = value === preSelectedValue;
-              const colorValue = isColorOption ? this.getColorValue(value) : '';
-              return `
-                <button type="button"
-                  class="bundle-modal-variant-btn ${isSelected ? 'selected' : ''} ${isColorOption ? 'color-swatch' : ''}"
-                  data-option-index="${optionIndex}"
-                  data-value="${value}"
-                  ${isColorOption && colorValue ? `style="--bundle-modal-swatch-color: ${colorValue}"` : ''}
-                  title="${value}">
-                  ${isColorOption ? '' : value}
-                </button>
-              `;
-            }).join('')}
-          </div>
-        </div>
-      `;
-    }).filter((html: string)  => html !== '').join('');
+      const group = document.createElement('div');
+      group.className = 'bundle-modal-variant-group';
+      const label = document.createElement('label');
+      label.className = 'bundle-modal-variant-label';
+      label.append(document.createTextNode(`${String(optionName)}: `));
+      const selectedValue = document.createElement('span');
+      selectedValue.className = 'bundle-modal-variant-selected-value';
+      selectedValue.dataset.optionIndex = String(optionIndex);
+      selectedValue.textContent = String(preSelectedValue);
+      label.appendChild(selectedValue);
+
+      const options = document.createElement('div');
+      options.className = `bundle-modal-variant-options${isColorOption ? ' color-options' : ''}`;
+      options.dataset.optionIndex = String(optionIndex);
+      optionValues.forEach((value) => {
+        const valueText = String(value);
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = `bundle-modal-variant-btn${value === preSelectedValue ? ' selected' : ''}${isColorOption ? ' color-swatch' : ''}`;
+        button.dataset.optionIndex = String(optionIndex);
+        button.dataset.value = valueText;
+        button.title = valueText;
+        if (!isColorOption) button.textContent = valueText;
+        const colorValue = isColorOption ? this.getColorValue(valueText) : '';
+        if (colorValue) button.style.setProperty('--bundle-modal-swatch-color', colorValue);
+        options.appendChild(button);
+      });
+      group.append(label, options);
+      return group;
+    }).filter((group: HTMLElement | null): group is HTMLElement => group !== null);
+    variantsContainer.replaceChildren(...selectorGroups);
 
     // Add click handlers to variant buttons
     variantsContainer.querySelectorAll<HTMLButtonElement>('.bundle-modal-variant-btn').forEach((btn) => {
@@ -394,18 +369,18 @@ export const BundleModalVariantMethods: Record<string, any> & ThisType<any> = {
     const compareAtPrice = resolveCompareAtPrice(variant)
       || resolveCompareAtPrice(this.currentProduct);
 
-    let priceHTML = '';
-
+    priceEl.replaceChildren();
     if (compareAtPrice && Number(compareAtPrice) > Number(price)) {
-      priceHTML = `
-        <span class="bundle-modal-price-strike">${this.formatPrice(compareAtPrice)}</span>
-        <span class="bundle-modal-price-sale">${this.formatPrice(price)}</span>
-      `;
+      const strike = document.createElement('span');
+      strike.className = 'bundle-modal-price-strike';
+      strike.textContent = this.formatPrice(compareAtPrice);
+      const sale = document.createElement('span');
+      sale.className = 'bundle-modal-price-sale';
+      sale.textContent = this.formatPrice(price);
+      priceEl.append(strike, sale);
     } else {
-      priceHTML = this.formatPrice(price);
+      priceEl.textContent = this.formatPrice(price);
     }
-
-    priceEl.innerHTML = priceHTML;
   },
 
   /**

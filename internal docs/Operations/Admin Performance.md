@@ -5,7 +5,7 @@ title: Admin Performance
 type: operations
 status: authoritative
 summary: Embedded Admin Web Vitals instrumentation, route-level LCP findings, and critical-path constraints.
-last_audited: 2026-08-27
+last_audited: 2026-08-29
 owners:
   - engineering
 domains:
@@ -22,6 +22,7 @@ source_paths:
   - app/routes/app/app.settings/SettingsRoute.tsx
   - app/routes/app/app.settings/DesignSettingsView.tsx
   - app/routes/app/app.settings/DesignLivePreview.tsx
+  - app/routes/root/settings-design-preview-frame/route.tsx
   - app/routes/app/app.dashboard/route.tsx
   - app/routes/app/app.dashboard/DashboardPage.tsx
   - app/routes/app/app.dashboard/DashboardDeferredProxyHealthBanner.tsx
@@ -96,6 +97,21 @@ unless a future debug run logs an owned image candidate. For text LCP pages, do
 not add image preloads speculatively; focus on loader critical path and reducing
 first-render JavaScript instead.
 
+### Billing progressive first paint
+
+The `/app/pricing` route must keep its visible Billing heading outside the
+deferred subscription boundary. Entitlement verification and the active bundle
+count can resolve in parallel without withholding useful route content; only the
+quota, value proposition, plan, comparison, and FAQ regions depend on that
+result. While those regions are pending, the route uses the shared small Polaris
+loading state beneath the already-painted heading.
+
+This render-path contract is covered by
+`tests/unit/routes/admin-billing-progressive-render.test.ts`. A fresh SIT iframe
+measurement is still required after source changes; Shopify Admin outer-shell
+LCP is not evidence for the embedded route and must not be reported as Billing
+LCP.
+
 ## Settings Design Control Panel
 
 The Settings landing route paints its small Polaris card shell immediately;
@@ -104,7 +120,9 @@ The workspace implementation remains behind a separate React lazy boundary. The 
 production build split the initial Settings route (`app.settings`, 2.99 kB /
 1.27 kB gzip) from the complete `SettingsRoute` workspace (81.39 kB / 18.60 kB
 gzip, plus 22.22 kB / 4.30 kB gzip CSS). The template-specific scene registry,
-fixture model, and local surface renderers account for the workspace increase.
+fixture model, and local surface renderers accounted for the historical
+workspace increase; the current production renderer is isolated behind its own
+post-click frame route.
 Design is statically part of that post-click workspace chunk, so entering Design
 does not wait for a second sequential JavaScript request. The workspace chunk is
 not required for the first Settings paint.
@@ -133,33 +151,103 @@ cards visible while Shopify's native Admin header indicator reports the Remix
 navigation. The Controls route renders its title and a small Polaris spinner
 until deferred Settings data is ready.
 
-The Settings workspace owns the Design inspector/preview layout and the
-eight-template representative preview. Wide containers use three columns for
-section navigation, the larger preview surface, and the active fields. Medium
-containers place the preview across the first row with navigation and fields
-beneath it. Phone containers expose Preview and Customize as a two-state
-segmented control so only one dense workspace pane renders at a time. All
-breakpoints are container-driven because the usable width of a Shopify Admin
-iframe is independent of the browser's top-level viewport.
+The Settings workspace owns a preview-first two-column layout: the centered
+preview canvas and selectors sit beside the active inspector. Phone containers
+expose Preview and Customize as a two-state segmented control so only one dense
+workspace pane renders at a time. Breakpoints are container-driven because the
+usable Shopify Admin iframe width is independent of the browser viewport.
+On desktop, the inspector can collapse from a Polaris chevron that straddles the
+column boundary. Collapse state is page-local, releases the inspector column to
+the preview, and preserves unsaved values and preview context. The preview fit
+observer must respond to that width change. The chevron is absent in narrow
+containers, where the existing Preview and Customize pane control remains the
+only workspace disclosure.
 
-The preview uses local fixture markup and media, canonical template descriptors
-derived from the storefront registries, and theme values from the normalized
-storefront Design runtime. It renders Bundle header, Navigation, Categories,
-Product cards, Product slots, Product picker, Cart / Summary, Loading,
-Validation, and Upsell as separate deterministic local surfaces. It does not
-compose or claim parity for a whole builder. Preview scenes use fixed logical
-1280×1136 desktop and 390×844 mobile canvases that scale as a whole to fit their
-Admin host, preserving the storefront breakpoint under test. Only slot templates
-include Product slots and Product picker. The preview does not
-fetch bundle data, load remote media, embed a storefront iframe, duplicate the
-widget runtime, mutate a cart, or persist preview state. Local Design editing and
-preview rendering therefore remain available when the shop has no storefront-ready
-bundle; only the separate Preview Bundle action requires one.
+The desktop preview stage uses a decorative 1320×920 Mac-style display canvas.
+Its visible 1280×800 screen owns the desktop scrollbar and contains the unchanged
+1280×1136 storefront renderer, so the Admin frame stays proportionally wide
+without changing the storefront viewport contract. The desktop stage explicitly
+owns the full available inline size; otherwise its aspect ratio and height cap
+can resolve the stage itself to the device width and leave the monitor aligned to
+the start after the inspector collapses. Mobile presentation adds a
+decorative 428×882 iPhone 14 Pro body adapted from the MIT-licensed Devices.css
+geometry outside the iframe; the production renderer still receives the
+unchanged 390×844 viewport and its scrollbar remains hidden. Frame padding sits
+outside both production viewports so storefront content is never cropped by the
+shell. A collapsed desktop state must not retain its 720px grid minimum after
+the Admin container crosses into the phone layout.
 
-Fixture product PNGs are rendered through `OptimisedImage`, so production builds
-emit AVIF/WebP siblings while preserving explicit dimensions. Keep those sources
-compact and local; do not preload them on the Settings landing route because the
-Design workspace remains behind the post-click lazy boundary.
+The desktop inspector is a sticky, full-available-height sidebar whose internal
+content scrolls independently. Its disclosure chevron is positioned against the
+sidebar edge rather than participating in document flow, keeping the inspector
+top aligned with the complete Live preview panel in expanded and collapsed
+states. Both sticky owners use the same zero top inset; applying a sticky offset
+to only the sidebar makes its card begin below the Live preview container before
+either surface reaches its sticky threshold.
+
+The Live preview panel and customization sidebar share the same viewport-height
+workspace row on desktop. The preview header occupies the first row and the
+device stage fills the remaining height, so changing viewport or collapsing the
+inspector cannot make the two cards end at different block positions. Narrow
+Admin containers return both panes to content-driven height.
+
+Inside the isolated 390x844 mobile preview frame, the FPB summary tray is pinned
+to the frame viewport bottom. This preview-only positioning prevents area-focus
+`scrollIntoView` calls from carrying the production sticky tray upward with the
+document while leaving the deployed storefront tray and its sticky contract
+unchanged.
+
+Design renderer failures use contextual, dismissible critical Polaris banners
+beside the affected preview because the surface remains unavailable. A failed
+storefront-preview launch belongs only to that attempt and uses a transient App
+Bridge error toast; retrying starts a clean operation. Banner wrappers retain
+Polaris block spacing from adjacent preview content.
+
+Preview fitting must not use React state for ResizeObserver samples. Coalesce
+the latest content-box measurement to one requestAnimationFrame callback and
+write canvas width, canvas height, and shell scale together. The workspace grid,
+readiness opacity, and scale must not interpolate with CSS transitions; this
+keeps sidebar collapse and Admin-width changes immediate without repeatedly
+reconciling the production iframe subtree.
+
+The preview toolbar separates template-filtered `Edit area` and `Preview state`
+selectors. Area changes reuse the mounted renderer, return transient state to
+Default, and scroll the selected production region into a persistent frame-owned
+outline. State changes open the existing production picker, loading, validation,
+or upsell implementation without replacing the neutral storefront chrome. The
+Upsell state hides the bundle builder and places the production offer immediately
+after a local product purchase form, matching the runtime's automatic product-page
+anchor contract. The frame guards production loading dismissal only while Loading
+is selected, then restores normal dismissal when the state changes; it does not add
+polling, timers, or a second loading renderer. Neither selector adds data loading,
+persistence, or another lazy boundary.
+
+Direct Chrome DevTools verification on 2026-08-27 used the agent store after a
+cache-bypassed reload. The 1881×900 expanded-inspector and collapsed-inspector
+states, plus the 900×900 narrow-Admin state, kept the live 390×844 mobile
+renderer inside the full device screen and allowed the desktop renderer to
+consume released width. A traced inspector-collapse interaction reported 33ms
+observed INP and 0.00 CLS with no throttling. This is interaction diagnostic
+evidence, not Shopify field-performance data.
+
+The preview frame route uses deterministic local fixture data with the actual
+FPB or PPB controller and exact family/template stylesheet manifest. A neutral
+store header plus full-page or product-detail shell supplies realistic context
+without coupling the preview to a merchant theme. Fixed logical 1280×1136 and
+390×844 canvases scale as a whole and center on both axes. The frame accepts only
+versioned same-origin commands, uses local media, blocks navigation and cart
+submission, and disables analytics, persistence, app-proxy loading, and post-cart
+effects. Local Design editing therefore remains available without a
+storefront-ready bundle; only the separate Preview Bundle action requires one.
+Before the FPB controller mounts, its frame root must carry the production
+`bundle-widget-container bundle-widget-full-page` host classes. The shared
+responsive and template styles are scoped through that contract; omitting it can
+silently turn a desktop template into a single-column card list with its summary
+below the products even though the production controller itself rendered.
+
+Fixture product PNGs remain compact and local. Do not preload them on the
+Settings landing route because the Design workspace remains behind the
+post-click lazy boundary.
 
 For interaction acceptance, measure at least ten cache-bypassed Design entries
 from card activation until the live preview controls and surface are usable.
@@ -204,9 +292,9 @@ App Bridge check.
 The shared `/app` shell must not import or await providers that do not have
 runtime consumers on every Admin page. On 2026-07-10, the global Mantle provider
 and server-side Mantle identify call were removed from the app shell after an
-audit found no `@heymantle/react` hook usage in Admin routes. Billing still uses
-the Shopify billing service directly. Keep any future third-party billing or
-analytics provider route-scoped until a shared runtime consumer exists.
+audit found no runtime consumers. The remaining unused server helper and package
+dependency were removed with the managed-pricing cutover on 2026-08-28. Keep
+future analytics providers route-scoped until a shared runtime consumer exists.
 
 ## Admin Mobile and First-Load Contract
 
@@ -326,12 +414,12 @@ comes from Shopify-collected field metrics after deployment.
 
 ## 2026-08-23 Settings Design workspace follow-up
 
-Settings -> Design remains behind the existing lazy workspace boundary. Its
-preview is deterministic local React/CSS and does not import a storefront
-runtime, iframe, or remote bundle data. The workspace now presents the template,
-component, and viewport controls with the preview canvas and renders one
-contextual inspector; phone containers switch between Preview and Customize
-without creating a second preview or persisted pane state.
+Settings -> Design remains behind the existing lazy workspace boundary. This
+entry records the former handcrafted React/CSS preview; it was replaced on
+2026-08-27 by the isolated production-renderer frame described above. The
+workspace still presents template, component, and viewport controls with one
+contextual inspector, and phone containers still switch between Preview and
+Customize without creating a second preview or persisted pane state.
 
 The Settings loader starts the Storefront Shop Brand query alongside deferred
 workspace reads, so the Settings landing response is not held until Brand data
@@ -403,3 +491,31 @@ layout verification had already passed in the mounted iframe before the loop.
 The temporary observer and parent bridge were removed after measurement. The
 Design context-frame work remains behind the existing post-click lazy boundary
 and does not add work to the Settings landing render path.
+
+### 2026-08-27 preview-readiness and notch verification
+
+Direct Chrome DevTools on the signed-in `agent-5sfidg3m` Admin verified the
+Design canvas readiness overlay under Fast 3G: the centered Polaris spinner
+card remained visible while the preview frame was `about:blank`, then cleared
+only after the same-origin frame rendered and sent `READY`. Desktop expanded
+and collapsed states kept the inspector disclosure notch centered on the
+visible sidebar edge; the collapsed state widened the desktop preview. At a
+900 x 900 narrow-Admin viewport, the notch remained hidden and Preview /
+Customize navigation remained available.
+
+After one warm-up load, the stable temporary app-frame observer recorded ten
+cache-bypassed desktop route loads at 1881 x 900 with no throttling: 2460,
+2108, 2188, 1876, 1920, 2492, 1664, 2144, 4440, and 2164ms. The resulting p75
+was 2460ms: below the 2500ms hard gate, but above the planned 2000ms target.
+The observer could not retain a stable element reference for these samples, so
+this pass does not attribute the remaining delay to a specific app-owned
+candidate. Earlier samples collected while the diagnostic source itself was
+hot-reloading were discarded because Vite recompilation contaminated them. A
+separate outer-Admin Chrome trace reported LCP 5574ms and CLS 0.00; its LCP
+element was Shopify's
+Polaris page-title `h1`, with 433ms TTFB and 5141ms render delay, and therefore
+is not app-frame candidate proof. The spinner remains behind the post-click
+Design lazy boundary and cannot account for Settings landing LCP. Treat this as
+local dev-tunnel evidence requiring a focused route-response and candidate
+follow-up, not Shopify field p75. The temporary observer and parent bridge were
+removed before commit.

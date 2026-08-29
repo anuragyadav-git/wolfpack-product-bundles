@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react";
 import { useTranslation } from "react-i18next";
 import { AdminSectionLoadingState } from "../../../components/AdminSectionLoadingState";
+import { AdminTaskAlertBanner } from "../../../components/AdminTaskAlertBanner";
 import { usePpbConfigureContext } from "./PpbConfigureContext";
 import { PpbStepSetupSection } from "./PpbStepSetupSection";
 import { ConfigureValidationSummary } from "../_shared/bundle-configure/ConfigureValidationSummary";
@@ -22,6 +23,10 @@ export function PpbMainSections() {
 
   return (
     <>
+      <AdminTaskAlertBanner
+        alert={flow.operationAlert}
+        onDismiss={flow.clearOperationAlert}
+      />
       <ConfigureValidationSummary
         activeSection={flow.activeSection}
         issues={flow.validationIssues}

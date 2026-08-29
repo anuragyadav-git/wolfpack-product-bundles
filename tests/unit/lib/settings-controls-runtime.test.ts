@@ -7,7 +7,6 @@ import {
 } from "../../../app/lib/settings-controls-runtime";
 
 const values = {
-  "landingPage.showCompareAtPrice": "Checked",
   "landingPage.hideIrrelevantVariantImages": "Checked",
   "landingPage.trackInventoryOnAddToCart": "Checked",
   "landingPage.redirectCollectionQuickAddToBundle": "Checked",
@@ -71,7 +70,6 @@ describe("Settings Controls runtime mapping", () => {
         },
       },
       landingPage: {
-        showCompareAtPrice: true,
         checkout: { action: "checkout", providerId: "monster_cart" },
         scripts: { bundlePage: "window.__bundlePage = true;" },
         selectors: {
@@ -90,24 +88,41 @@ describe("Settings Controls runtime mapping", () => {
 
   it("never interprets presentation labels as persisted keys", () => {
     const result = buildSettingsControlsRuntime({
-      "Show Compare At Price": "Checked",
       "Cart Messaging": "Checked",
-      "landingPage.showCompareAtPrice": "",
       "shared.cartMessaging.isEnabled": "",
     });
 
-    expect(result.settingsControls.landingPage.showCompareAtPrice).toBe(false);
+    expect(result.settingsControls.landingPage).not.toHaveProperty("showCompareAtPrice");
     expect(result.settingsControls.shared.cartMessaging.isEnabled).toBe(false);
   });
 
   it("keeps theme CSS global instead of projecting it into either widget CSS column", () => {
     const result = buildSettingsControlsRuntime(values);
 
-    expect(result.fullPageCustomCss).toContain(".builder");
-    expect(result.fullPageCustomCss).toContain(".dummy");
-    expect(result.fullPageCustomCss).not.toContain(".theme");
+    expect(result.fullPageCustomCss).toBeNull();
     expect(result.productPageCustomCss).toContain(".mix");
     expect(result.productPageCustomCss).not.toContain(".theme");
+  });
+
+  it("processes every Settings Controls CSS field on save and public response", () => {
+    const hostileCss = '.safe { color: red; } .bad { background: url(javascript:alert(1)); }';
+    const saved = buildSettingsControlsRuntime({
+      "landingPage.css.bundleBuilderPages": hostileCss,
+      "landingPage.css.bundleDummyProductPage": hostileCss,
+      "landingPage.css.themePages": hostileCss,
+      "productPage.css.mixAndMatchBundles": hostileCss,
+    }).settingsControls;
+
+    expect(JSON.stringify(saved)).toContain('.safe');
+    expect(JSON.stringify(saved)).not.toContain('javascript:');
+
+    const stored = structuredClone(saved);
+    stored.landingPage.css.themePages = hostileCss;
+    stored.productPage.css.mixAndMatchBundles = hostileCss;
+    const response = buildSettingsControlsResponse(stored, BundleType.PRODUCT_PAGE);
+
+    expect(response.settingsControls.landingPage.css.themePages).not.toContain('javascript:');
+    expect(response.settingsControls.productPage.css.mixAndMatchBundles).not.toContain('javascript:');
   });
 
   it("returns schema metadata and the requested active layout", () => {
@@ -115,8 +130,8 @@ describe("Settings Controls runtime mapping", () => {
     const response = buildSettingsControlsResponse(runtime, BundleType.PRODUCT_PAGE);
 
     expect(response.schemaVersion).toBe(1);
-    expect(response.activeControls).toBe(runtime.productPage);
-    expect(response.settingsControls).toBe(runtime);
+    expect(response.activeControls).toEqual(runtime.productPage);
+    expect(response.settingsControls).toEqual(runtime);
   });
 
   it("hydrates the Admin form from the canonical contract using stable keys", () => {
@@ -140,7 +155,7 @@ describe("Settings Controls runtime mapping", () => {
       showOriginalPrice: true,
       discountDisplay: { isEnabled: true },
     });
-    expect(response.settingsControls.landingPage.showCompareAtPrice).toBe(true);
+    expect(response.settingsControls.landingPage).not.toHaveProperty("showCompareAtPrice");
     expect(response.settingsControls.productPage.hideOutOfStockProducts).toBe(true);
     expect(response.settingsControls.productPage.validateConditionsBeforeAddToCart).toBe(true);
   });

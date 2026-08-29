@@ -1,80 +1,133 @@
 
+import { createCartIcon, createChevronIcon, createCloseIcon } from '../../shared/svg-icons.js';
+
+function createProductPageBottomSheet(runtimeDocument: Document) {
+  const panel = runtimeDocument.createElement('div');
+  panel.id = 'bundle-builder-modal';
+  panel.className = 'bw-bs-panel bundle-builder-modal';
+  panel.setAttribute('role', 'dialog');
+  panel.setAttribute('aria-modal', 'true');
+  panel.setAttribute('aria-labelledby', 'bundle-picker-title');
+  panel.dataset.ppbDrawerSurface = 'bundle-picker';
+  panel.setAttribute('aria-hidden', 'true');
+  panel.setAttribute('inert', '');
+  panel.hidden = true;
+
+  const header = runtimeDocument.createElement('div');
+  header.className = 'modal-header bw-bs-header';
+  const desktopClose = runtimeDocument.createElement('button');
+  desktopClose.className = 'close-button bw-bs-close-desktop';
+  desktopClose.setAttribute('aria-label', 'Close');
+  desktopClose.appendChild(createCloseIcon(runtimeDocument));
+  const mobileClose = runtimeDocument.createElement('button');
+  mobileClose.className = 'close-button bw-bs-close-mobile';
+  mobileClose.setAttribute('aria-label', 'Close');
+  mobileClose.appendChild(createChevronIcon(runtimeDocument, 'down'));
+  const tabsWrapper = runtimeDocument.createElement('div');
+  tabsWrapper.className = 'modal-tabs-wrapper bw-bs-tabs-wrapper';
+  const tabs = runtimeDocument.createElement('div');
+  tabs.className = 'modal-tabs bw-bs-tabs';
+  tabsWrapper.appendChild(tabs);
+  const title = runtimeDocument.createElement('div');
+  title.id = 'bundle-picker-title';
+  title.className = 'modal-step-title bw-bs-choose-title';
+  const categories = runtimeDocument.createElement('div');
+  categories.className = 'bw-bs-category-tabs';
+  categories.hidden = true;
+  const discount = runtimeDocument.createElement('div');
+  discount.className = 'bw-bs-discount-bar footer-discount-text';
+  header.append(desktopClose, mobileClose, tabsWrapper, title, categories, discount);
+
+  const body = runtimeDocument.createElement('div');
+  body.className = 'modal-body bw-bs-body';
+  const contentTitle = runtimeDocument.createElement('h2');
+  contentTitle.className = 'bw-ppb-step-content-title bw-ppb-step-content-title--picker';
+  contentTitle.hidden = true;
+  const grid = runtimeDocument.createElement('div');
+  grid.className = 'product-grid bw-bs-product-grid';
+  body.append(contentTitle, grid);
+
+  const footer = runtimeDocument.createElement('div');
+  footer.className = 'modal-footer bw-bs-footer';
+  const cartPill = runtimeDocument.createElement('div');
+  cartPill.className = 'bw-bs-cart-pill';
+  cartPill.setAttribute('data-wpb-discount-feedback-pill', '');
+  cartPill.setAttribute('role', 'status');
+  cartPill.setAttribute('aria-live', 'polite');
+  const cartItems = runtimeDocument.createElement('span');
+  cartItems.className = 'bw-bs-cart-items';
+  const cartIcon = createCartIcon(runtimeDocument);
+  cartIcon.classList.add('bw-bs-cart-icon');
+  const count = runtimeDocument.createElement('span');
+  count.className = 'cart-badge-count';
+  count.textContent = '0';
+  cartItems.append(cartIcon, count);
+  const divider = runtimeDocument.createElement('span');
+  divider.className = 'bw-bs-cart-divider';
+  divider.setAttribute('aria-hidden', 'true');
+  const cartPrice = runtimeDocument.createElement('span');
+  cartPrice.className = 'bw-bs-cart-price';
+  const final = runtimeDocument.createElement('span');
+  final.className = 'total-price-final';
+  final.textContent = '$0.00';
+  const strike = runtimeDocument.createElement('span');
+  strike.className = 'total-price-strike';
+  cartPrice.append(final, strike);
+  cartPill.append(cartItems, divider, cartPrice);
+  const navigation = runtimeDocument.createElement('div');
+  navigation.className = 'bw-bs-nav-pill';
+  const previous = runtimeDocument.createElement('button');
+  previous.className = 'modal-nav-button prev-button bw-bs-nav-btn';
+  previous.setAttribute('aria-label', 'Previous step');
+  previous.textContent = 'Prev';
+  const next = runtimeDocument.createElement('button');
+  next.className = 'modal-nav-button next-button bw-bs-nav-btn';
+  next.setAttribute('aria-label', 'Next step');
+  next.append(runtimeDocument.createTextNode('Next '), createChevronIcon(runtimeDocument, 'right'));
+  navigation.append(previous, next);
+  footer.append(cartPill, navigation);
+  panel.append(header, body, footer);
+  return panel;
+}
+
 export const ProductPageDomMethods: Record<string, any> & ThisType<any> = {
 showThemeEditorPreview(bundleId: any) {
-
-  this.container.innerHTML = `
-    <div style="
-      padding: 32px 24px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      border: 2px dashed #667eea;
-      border-radius: 12px;
-      text-align: center;
-      color: white;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    ">
-      <div style="
-        font-size: 48px;
-        margin-bottom: 16px;
-      ">📦</div>
-      <h3 style="
-        margin: 0 0 12px 0;
-        font-size: 20px;
-        font-weight: 600;
-      ">Bundle Widget Preview</h3>
-      <p style="
-        margin: 0 0 8px 0;
-        font-size: 14px;
-        opacity: 0.9;
-      ">
-        Bundle ID: <code style="
-          background: rgba(255, 255, 255, 0.2);
-          padding: 4px 8px;
-          border-radius: 4px;
-          font-family: monospace;
-        ">${bundleId}</code>
-      </p>
-      <div style="
-        margin: 20px auto 0;
-        padding: 16px;
-        background: rgba(255, 255, 255, 0.15);
-        border-radius: 8px;
-        max-width: 400px;
-        text-align: left;
-        font-size: 13px;
-        line-height: 1.6;
-      ">
-        <div style="
-          font-weight: 600;
-          margin-bottom: 8px;
-        ">✅ Widget Configured Successfully</div>
-        <div style="
-          opacity: 0.9;
-        ">
-          This widget will automatically display on <strong>bundle container products</strong>.
-          <br><br>
-          <strong>To see it in action:</strong>
-          <ol style="
-            margin: 8px 0;
-            padding-left: 20px;
-          ">
-            <li>Save your theme</li>
-            <li>Navigate to a bundle product page</li>
-            <li>The widget will appear with product selection steps</li>
-          </ol>
-        </div>
-      </div>
-      <div style="
-        margin-top: 20px;
-        padding: 12px;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 6px;
-        font-size: 12px;
-        opacity: 0.8;
-      ">
-        💡 <strong>Tip:</strong> You're currently previewing on a regular product. The widget only activates on products configured as bundle containers.
-      </div>
-    </div>
-  `;
+  const preview = document.createElement('div');
+  preview.className = 'bw-theme-editor-preview';
+  const icon = document.createElement('div');
+  icon.className = 'bw-theme-editor-preview__icon';
+  icon.textContent = '📦';
+  const title = document.createElement('h3');
+  title.className = 'bw-theme-editor-preview__title';
+  title.textContent = 'Bundle Widget Preview';
+  const bundle = document.createElement('p');
+  bundle.className = 'bw-theme-editor-preview__bundle';
+  bundle.append(document.createTextNode('Bundle ID: '));
+  const code = document.createElement('code');
+  code.textContent = String(bundleId ?? '');
+  bundle.append(code);
+  const status = document.createElement('div');
+  status.className = 'bw-theme-editor-preview__status';
+  const statusTitle = document.createElement('div');
+  statusTitle.className = 'bw-theme-editor-preview__status-title';
+  statusTitle.textContent = '✅ Widget Configured Successfully';
+  const statusCopy = document.createElement('div');
+  statusCopy.textContent = 'This widget will automatically display on bundle container products.';
+  const instructions = document.createElement('strong');
+  instructions.textContent = 'To see it in action:';
+  const list = document.createElement('ol');
+  ['Save your theme', 'Navigate to a bundle product page', 'The widget will appear with product selection steps']
+    .forEach((text) => {
+      const item = document.createElement('li');
+      item.textContent = text;
+      list.append(item);
+    });
+  status.append(statusTitle, statusCopy, instructions, list);
+  const tip = document.createElement('div');
+  tip.className = 'bw-theme-editor-preview__tip';
+  tip.textContent = "💡 Tip: You're currently previewing on a regular product. The widget only activates on products configured as bundle containers.";
+  preview.append(icon, title, bundle, status, tip);
+  this.container.replaceChildren(preview);
 },
 
 // ========================================================================
@@ -174,19 +227,21 @@ _updateNativeProductPrice(finalPriceText: any, compareAtPriceText: any, hasSelec
   if (!price) return;
   price.hidden = !hasSelection;
   if (!hasSelection) {
-    price.innerHTML = '';
+    price.replaceChildren();
     return;
   }
-  const escapeHtml = (value: any) => String(value || '')
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;');
-  const finalText = escapeHtml(finalPriceText);
+  const finalText = String(finalPriceText || '');
   const compareText = compareAtPriceText && compareAtPriceText !== finalPriceText
-    ? `<s>${escapeHtml(compareAtPriceText)}</s>`
+    ? String(compareAtPriceText)
     : '';
-  price.innerHTML = `<span>${finalText}</span>${compareText ? ` ${compareText}` : ''}`;
+  const finalPrice = document.createElement('span');
+  finalPrice.textContent = finalText;
+  price.replaceChildren(finalPrice);
+  if (compareText) {
+    const comparePrice = document.createElement('s');
+    comparePrice.textContent = compareText;
+    price.append(document.createTextNode(' '), comparePrice);
+  }
 },
 
 _hideNativeDynamicCheckoutControls() {
@@ -306,72 +361,7 @@ ensureBottomSheet() {
   let panel = document.getElementById('bundle-builder-modal');
 
   if (!panel) {
-    panel = document.createElement('div');
-    panel.id = 'bundle-builder-modal';
-    // bundle-builder-modal class required so Settings design CSS selectors apply to this panel
-    panel.className = 'bw-bs-panel bundle-builder-modal';
-    panel.setAttribute('role', 'dialog');
-    panel.setAttribute('aria-modal', 'true');
-    panel.setAttribute('aria-labelledby', 'bundle-picker-title');
-    panel.setAttribute('data-ppb-drawer-surface', 'bundle-picker');
-    panel.setAttribute('aria-hidden', 'true');
-    panel.setAttribute('inert', '');
-    panel.hidden = true;
-    panel.innerHTML = `
-      <div class="modal-header bw-bs-header">
-        <!-- Desktop close: × absolute top-right -->
-        <button class="close-button bw-bs-close-desktop" aria-label="Close">
-          <svg viewBox="0 0 20 20" width="20" height="20" focusable="false" aria-hidden="true" fill="currentColor">
-            <path d="M13.97 15.03a.75.75 0 1 0 1.06-1.06l-3.97-3.97 3.97-3.97a.75.75 0 0 0-1.06-1.06l-3.97 3.97-3.97-3.97a.75.75 0 0 0-1.06 1.06l3.97 3.97-3.97 3.97a.75.75 0 1 0 1.06 1.06l3.97-3.97 3.97 3.97Z"/>
-          </svg>
-        </button>
-        <!-- Mobile close: chevron-down absolute top-center -->
-        <button class="close-button bw-bs-close-mobile" aria-label="Close">
-          <svg width="40" height="24" viewBox="0 0 70 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path fill-rule="evenodd" clip-rule="evenodd" d="M20.0188 8.6438C21.044 7.6187 22.706 7.6187 23.7312 8.6438L35.875 20.7877L48.0188 8.6438C49.044 7.6187 50.706 7.6187 51.7312 8.6438C52.7563 9.669 52.7563 11.331 51.7312 12.3562L37.7312 26.3562C36.706 27.3813 35.044 27.3813 34.0188 26.3562L20.0188 12.3562C18.9937 11.331 18.9937 9.669 20.0188 8.6438Z" fill="#4A4A4A"/>
-          </svg>
-        </button>
-        <!-- Category tabs — grid layout, equal columns -->
-        <div class="modal-tabs-wrapper bw-bs-tabs-wrapper">
-          <div class="modal-tabs bw-bs-tabs"></div>
-        </div>
-        <!-- "Choose X" step title -->
-        <div id="bundle-picker-title" class="modal-step-title bw-bs-choose-title"></div>
-        <!-- Current-step categories -->
-        <div class="bw-bs-category-tabs" hidden></div>
-        <!-- Discount / progress messaging -->
-        <div class="bw-bs-discount-bar footer-discount-text"></div>
-      </div>
-      <div class="modal-body bw-bs-body">
-        <div class="product-grid bw-bs-product-grid"></div>
-      </div>
-      <div class="modal-footer bw-bs-footer">
-        <!-- Cart count pill (white, floats above nav pill) -->
-        <div class="bw-bs-cart-pill" data-wpb-discount-feedback-pill role="status" aria-live="polite">
-          <span class="bw-bs-cart-items">
-            <svg class="bw-bs-cart-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-              <path fill-rule="evenodd" clip-rule="evenodd" d="M3 4.5C3 4.22386 3.22386 4 3.5 4H5.5C5.73 4 5.93 4.16 5.98 4.385L6.52 7H20.5C20.76 7 20.99 7.14 21.1 7.37C21.21 7.6 21.18 7.88 21.02 8.08L17.02 13.08C16.85 13.29 16.6 13.41 16.33 13.41H8.66L8.07 16H19.5C19.78 16 20 16.22 20 16.5C20 16.78 19.78 17 19.5 17H7.5C7.27 17 7.07 16.84 7.02 16.615L5.02 7.615L4.5 5H3.5C3.22 5 3 4.78 3 4.5ZM8 19.5C8 20.33 7.33 21 6.5 21C5.67 21 5 20.33 5 19.5C5 18.67 5.67 18 6.5 18C7.33 18 8 18.67 8 19.5ZM19 19.5C19 20.33 18.33 21 17.5 21C16.67 21 16 20.33 16 19.5C16 18.67 16.67 18 17.5 18C18.33 18 19 18.67 19 19.5Z" fill="currentColor"/>
-            </svg>
-            <span class="cart-badge-count">0</span>
-          </span>
-          <span class="bw-bs-cart-divider" aria-hidden="true"></span>
-          <span class="bw-bs-cart-price">
-            <span class="total-price-final">$0.00</span>
-            <span class="total-price-strike"></span>
-          </span>
-        </div>
-        <!-- PREV/NEXT nav pill (navy blue) -->
-        <div class="bw-bs-nav-pill">
-          <button class="modal-nav-button prev-button bw-bs-nav-btn" aria-label="Previous step">
-            Prev
-          </button>
-          <button class="modal-nav-button next-button bw-bs-nav-btn" aria-label="Next step">
-            Next
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-          </button>
-        </div>
-      </div>
-    `;
+    panel = createProductPageBottomSheet(document);
 
     document.body.appendChild(panel);
     // No tab scroll arrows needed — tabs use CSS grid layout

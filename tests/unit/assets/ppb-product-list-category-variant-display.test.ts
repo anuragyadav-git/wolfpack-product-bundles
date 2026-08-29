@@ -9,6 +9,8 @@ const {
 const { ProductPageLayoutShellMethods } = require('../../../app/assets/widgets/product-page/methods/layout-shell-methods.js');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { ProductPageSelectionDataMethods } = require('../../../app/assets/widgets/product-page/methods/selection-data-methods.js');
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { JSDOM } = require('jsdom');
 
 class FakeClassList {
   toggle(_name: string, _value?: boolean) {}
@@ -69,19 +71,23 @@ function createContext(displayVariantsAsIndividualProducts: boolean) {
     getSelectedQuantity: () => 0,
     getVariantAvailable: () => ({ available: null, outOfStock: false }),
     _shouldShowProductComparedAtPrice: () => false,
-    renderInlineCardVariantSelector: jest.fn((product: { variants?: unknown[]; title?: string }) => (
-      Array.isArray(product.variants)
-        ? `<select data-grouped-product="${product.title ?? ''}"></select>`
-        : ''
-    )),
+    _resolveText: (_key: string, fallback: string) => fallback,
+    renderInlineCardVariantSelector: jest.fn((product: { variants?: unknown[]; title?: string }) => {
+      if (!Array.isArray(product.variants)) return null;
+      const select = document.createElement('select');
+      select.dataset.groupedProduct = product.title ?? '';
+      return select;
+    }),
     attachProductEventHandlers: jest.fn(),
   };
 }
 
 describe('PPB Product List category variant display', () => {
   const originalWindow = global.window;
+  const originalDocument = global.document;
 
   beforeEach(() => {
+    global.document = new JSDOM('<!doctype html><html><body></body></html>').window.document;
     global.window = {
       Shopify: {
         currency: {
@@ -94,10 +100,11 @@ describe('PPB Product List category variant display', () => {
 
   afterEach(() => {
     global.window = originalWindow;
+    global.document = originalDocument;
   });
 
   it('keeps grouped variants when the active category flag is false', () => {
-    const target = new FakeTarget();
+    const target = document.createElement('div');
     const context = createContext(false);
 
     ProductPageInpageRenderMethods._renderInpageStepProducts.call(context, 0, target);
@@ -117,7 +124,7 @@ describe('PPB Product List category variant display', () => {
   });
 
   it('expands available variants when the active category flag is true', () => {
-    const target = new FakeTarget();
+    const target = document.createElement('div');
     const context = createContext(true);
 
     ProductPageInpageRenderMethods._renderInpageStepProducts.call(context, 0, target);

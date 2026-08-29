@@ -1,6 +1,7 @@
 import { useFetcher, useNavigate } from "@remix-run/react";
 import { Suspense, useState, useMemo, useEffect, useRef } from "react";
 import { useAppBridge } from "@shopify/app-bridge-react";
+import { useTranslation } from "react-i18next";
 import "../../../components/analytics/shared/tokens.css";
 import {
   FunnelHero,
@@ -11,10 +12,12 @@ import { LazyBundleMetricChart } from "../../../components/analytics/lazy";
 import styles from "../../../styles/routes/app-attribution.module.css";
 import type { AttributionDashboardData } from "../app.attribution";
 import { analyzeCustomUtmInput } from "../../../lib/analytics/attribution-controls";
+import { showAdminTransientErrorToast } from "../../../lib/admin-alert-feedback";
 
-type AttributionDashboardViewData = Omit<AttributionDashboardData, "from" | "to"> & {
+type AttributionDashboardViewData = Omit<AttributionDashboardData, "from" | "to" | "accessMode"> & {
   from?: string;
   to?: string;
+  accessMode: "SUMMARY" | "ADVANCED";
 };
 
 // ─── Helpers ─────────────────────────────────────────────────
@@ -207,14 +210,9 @@ export function BackfillWindowModal({
       </s-button>
 
         <s-stack direction="block" gap="base">
-        <s-banner
-          heading={`Selected window: ${selectedWindow}`}
-          tone="info"
-          dismissible={false}
-          hidden={false}
-        >
-          This queries Shopify orders for the selected period and creates attribution records that Analytics may have missed.
-        </s-banner>
+        <s-paragraph>
+          Selected window: {selectedWindow}. This queries Shopify orders for the selected period and creates attribution records that Analytics may have missed.
+        </s-paragraph>
         <s-unordered-list>
           <s-list-item>
             Matches order line items to bundles and imports available revenue, landing-page, and UTM details.
@@ -283,7 +281,7 @@ export function CustomUtmTrackingCard({
   const isSaving = fetcher.state !== "idle";
   const feedback = fetcher.data?.error ?? fetcher.data?.message;
   const previewLabel = inputAnalysis.accepted.length > 0
-    ? `Wolfpack will track: ${inputAnalysis.accepted.join(", ")}`
+    ? `Only Bundles will track: ${inputAnalysis.accepted.join(", ")}`
     : null;
   const savedLabel = savedParameters.length > 0
     ? "Currently tracking"
@@ -319,7 +317,7 @@ export function CustomUtmTrackingCard({
         <div>
           <h2 className={styles.sectionTitle}>Custom UTM attributes</h2>
           <p className={styles.mutedBodyText}>
-            Enter parameter names separated by commas or new lines. Wolfpack captures matching URL values on future visits and stores them with checkout attribution.
+            Enter parameter names separated by commas or new lines. Only Bundles captures matching URL values on future visits and stores them with checkout attribution.
           </p>
         </div>
         <s-button
@@ -429,7 +427,7 @@ export function CustomUtmTrackingCard({
           <div>
             <h3 className={styles.sectionTitle}>What happens after saving</h3>
             <p className={styles.mutedBodyText}>
-              Wolfpack saves up to 10 valid names, updates the tracking pixel settings, and starts capturing those attributes for new visits after you save.
+              Only Bundles saves up to 10 valid names, updates the tracking pixel settings, and starts capturing those attributes for new visits after you save.
             </p>
             <p className={styles.mutedBodyText}>
               When a shopper reaches checkout from a matching link, the saved values are stored with the order attribution record and included in analytics exports.
@@ -454,10 +452,11 @@ function AttributionDashboardContent({
 }: {
   data: AttributionDashboardViewData;
 }) {
+  const { t } = useTranslation();
   const {
     days, from, to, prevFrom, prevTo,
     funnelSnapshot, bundleMetricTrend, bundleMatrix, topCampaignsRows,
-    customUtmParameters,
+    customUtmParameters, accessMode = "ADVANCED",
   } = data;
   const navigate = useNavigate();
   const shopify = useAppBridge();
@@ -486,7 +485,7 @@ function AttributionDashboardContent({
     if (!result) return;
     if (!result.success || !result.csv || !result.filename) {
       if (result.error) {
-        shopify.toast.show(result.error, { isError: true, duration: 5000 });
+        showAdminTransientErrorToast(shopify, t("common.alerts.exportUnavailable"));
       }
       return;
     }
@@ -501,17 +500,17 @@ function AttributionDashboardContent({
     downloadLink.click();
     downloadLink.remove();
     URL.revokeObjectURL(objectUrl);
-    shopify.toast.show("Analytics CSV exported");
-  }, [exportFetcher.data, shopify]);
+    shopify.toast.show(t("common.success.csvExported"));
+  }, [exportFetcher.data, shopify, t]);
 
   useEffect(() => {
     const result = backfillFetcher.data;
     if (result?.message) {
-      shopify.toast.show(result.message);
+      shopify.toast.show(t("common.success.backfillComplete"));
     } else if (result?.error) {
-      shopify.toast.show(result.error, { isError: true, duration: 5000 });
+      showAdminTransientErrorToast(shopify, t("common.alerts.backfillUnavailable"));
     }
-  }, [backfillFetcher.data, shopify]);
+  }, [backfillFetcher.data, shopify, t]);
 
   function handleBackfillConfirm() {
     backfillFetcher.submit(
@@ -534,9 +533,13 @@ function AttributionDashboardContent({
   return (
     <div className={styles.dashboardShell}>
         <div className={styles.dashboardStack}>
-
           {/* Date range selector + Compare toggle + Export */}
-          <div className={styles.headerRow}>
+          {accessMode === "SUMMARY" && (
+            <s-banner tone="info">
+              {t("subscription.analytics.summaryNotice")}
+            </s-banner>
+          )}
+          {accessMode === "ADVANCED" && <div className={styles.headerRow}>
             <div className={styles.comparePillSlot}>
               <div className={styles.datePickerWrap}>
                 <DateRangeSelector days={days} from={from} to={to} />
@@ -583,14 +586,14 @@ function AttributionDashboardContent({
                 </s-button>
               </div>
             </div>
-          </div>
-          <BackfillWindowModal
+          </div>}
+          {accessMode === "ADVANCED" && <BackfillWindowModal
             days={days}
             from={from}
             to={to}
             isSubmitting={backfillFetcher.state !== "idle"}
             onConfirm={handleBackfillConfirm}
-          />
+          />}
           {/* ────────── Revamped analytics sections (wpb-analytics-revamp-1) ─────── */}
 
           <FunnelHero
@@ -601,23 +604,23 @@ function AttributionDashboardContent({
             showHeader={false}
           />
 
-          <Suspense fallback={null}>
+          {accessMode === "ADVANCED" && <Suspense fallback={null}>
             <LazyBundleMetricChart
               trend={bundleMetricTrend}
               rangeDays={days}
               formatRevenue={formatRevenue}
             />
-          </Suspense>
+          </Suspense>}
 
-          <BundlePerformanceMatrix
+          {accessMode === "ADVANCED" && <BundlePerformanceMatrix
             rows={bundleMatrix}
             formatRevenue={formatRevenue}
             onRowClick={(bundleId) => navigate(`/app/bundles/full-page-bundle/configure/${bundleId}`)}
-          />
+          />}
 
-          <CustomUtmTrackingCard customUtmParameters={customUtmParameters} />
+          {accessMode === "ADVANCED" && <CustomUtmTrackingCard customUtmParameters={customUtmParameters} />}
 
-          <TopCampaigns rows={topCampaignsRows} formatRevenue={formatRevenue} />
+          {accessMode === "ADVANCED" && <TopCampaigns rows={topCampaignsRows} formatRevenue={formatRevenue} />}
 
         </div>
     </div>

@@ -3,6 +3,8 @@ export {};
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { VariantSelectorComponent } = require('../../../app/assets/widgets/shared/variant-selector.js');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
+const { JSDOM } = require('jsdom');
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { fullPageProductProcessingMethods } = require('../../../app/assets/widgets/full-page/methods/product-processing-methods.js');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { fullPageSearchCategoryMethods } = require('../../../app/assets/widgets/full-page/methods/search-category-methods.js');
@@ -28,7 +30,8 @@ class FakeCard {
 
 describe('FPB Standard variant availability', () => {
   it('filters unavailable-only primary values from grouped selector choices', () => {
-    const view = VariantSelectorComponent.renderHtml({
+    const runtimeDocument = new JSDOM('<!doctype html><html><body></body></html>').window.document;
+    const view = VariantSelectorComponent.createElement({
       variantId: 'available-small',
       options: ['Size'],
       variants: [
@@ -43,10 +46,10 @@ describe('FPB Standard variant availability', () => {
           available: false,
         },
       ],
-    }, 'Size');
+    }, 'Size', runtimeDocument);
 
-    expect(view).toContain('data-primary-value="Small"');
-    expect(view).not.toContain('data-primary-value="Large"');
+    expect(view.querySelector('[data-primary-value="Small"]')).not.toBeNull();
+    expect(view.querySelector('[data-primary-value="Large"]')).toBeNull();
   });
 
   it('ignores unavailable-only primary variant selections', () => {

@@ -101,7 +101,7 @@ export function getDefaultPurchaseOptionFromOneTimeToggle(
 const text = (value: unknown) => typeof value === "string" ? value.trim() : "";
 const bool = (value: unknown) => value === true;
 const stringList = (value: unknown) => Array.from(new Set(
-  (Array.isArray(value) ? value : []).map(text).filter(Boolean),
+  (Array.isArray(value) ? value : []).map((value) => text(value)).filter(Boolean),
 ));
 
 function normalizeProductId(value: unknown): string | null {
@@ -200,7 +200,9 @@ function normalizePlan(value: any): BundleSubscriptionPlan | null {
     position: Number.isFinite(Number(value?.position)) ? Number(value.position) : 0,
     options: stringList(value?.options),
     pricingPolicies: (Array.isArray(value?.pricingPolicies) ? value.pricingPolicies : [])
-      .map(normalizePolicy)
+      .map((value: Parameters<typeof normalizePolicy>[0]) =>
+        normalizePolicy(value),
+      )
       .filter((policy: NormalizedSellingPlanPricingPolicy | null): policy is NormalizedSellingPlanPricingPolicy => policy !== null),
   };
 }
@@ -221,7 +223,7 @@ export function normalizeBundleSubscriptionConfig(value: unknown): BundleSubscri
   const plans: BundleSubscriptionPlan[] = dedupePlansById(
     [...(Array.isArray(input.selectedGroup?.plans) ? input.selectedGroup.plans : [])]
     .sort((left: any, right: any) => Number(left?.position ?? 0) - Number(right?.position ?? 0) || text(left?.id).localeCompare(text(right?.id)))
-    .map(normalizePlan)
+    .map((value) => normalizePlan(value))
     .filter((plan: BundleSubscriptionPlan | null): plan is BundleSubscriptionPlan => plan !== null),
   );
   const selectedPlanIds = Array.from(new Set(

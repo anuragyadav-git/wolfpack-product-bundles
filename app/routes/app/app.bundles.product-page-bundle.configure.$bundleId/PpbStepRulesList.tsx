@@ -5,7 +5,6 @@ export function PpbStepRulesList({ step }: { step: any }) {
   const {
     conditionsState,
     productPageBundleStyles,
-    shopify,
     STEP_CONDITION_OPERATOR_OPTIONS,
     STEP_CONDITION_TYPE_OPTIONS,
   } = usePpbConfigureContext();
@@ -28,6 +27,7 @@ export function PpbStepRulesList({ step }: { step: any }) {
                 <s-button
                   variant="tertiary"
                   tone="critical"
+                  icon="delete"
                   onClick={() =>
                     conditionsState.removeConditionRule(step.id, rule.id)
                   }
@@ -123,19 +123,18 @@ export function PpbStepRulesList({ step }: { step: any }) {
       <button
         type="button"
         className={productPageBundleStyles.addSectionButton}
-        onClick={() => {
-          if (rules.length >= 2) {
-            shopify.toast.show("A step can have at most 2 rules", {
-              isError: false,
-            });
-            return;
-          }
-          conditionsState.addConditionRule(step.id);
-        }}
+        disabled={rules.length >= 2}
+        onClick={() => conditionsState.addConditionRule(step.id)}
       >
         <PlusIcon />
         Add Rule
       </button>
+      {rules.length >= 2 ? (
+        <s-stack direction="inline" alignItems="center" gap="small">
+          <s-icon type="alert-triangle" tone="caution" />
+          <s-text>A step can have at most 2 rules.</s-text>
+        </s-stack>
+      ) : null}
     </>
   );
 }

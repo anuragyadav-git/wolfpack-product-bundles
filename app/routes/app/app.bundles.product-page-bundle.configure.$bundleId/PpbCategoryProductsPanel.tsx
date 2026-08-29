@@ -76,7 +76,7 @@ export function PpbCategoryProductsPanel({
         Products selected here will be displayed on this step
       </p>
       <div className={productPageBundleStyles.productActions}>
-        <s-button variant="primary" onClick={handlePickProducts}>
+        <s-button variant="primary" icon="product-add" onClick={handlePickProducts}>
           Add Products
         </s-button>
         {catProducts.length > 0 && (
@@ -148,7 +148,7 @@ export function PpbCategoryProductsPanel({
         >
           Close
         </s-button>
-        <s-button slot="primary-action" variant="primary" onClick={handlePickProducts}>
+        <s-button slot="primary-action" variant="primary" icon="product-add" onClick={handlePickProducts}>
           Add Products
         </s-button>
       </s-modal>

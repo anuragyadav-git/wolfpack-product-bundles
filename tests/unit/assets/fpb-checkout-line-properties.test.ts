@@ -6,6 +6,16 @@ const { fullPageStepFooterMethods } =
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { fullPageValidationAddonsMethods } =
   require("../../../app/assets/widgets/full-page/methods/validation-addons-methods.js");
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { ToastManager } = require("../../../app/assets/widgets/shared/toast-manager.js");
+
+beforeEach(() => {
+  jest.spyOn(ToastManager, "show").mockImplementation(() => undefined);
+});
+
+afterEach(() => {
+  jest.restoreAllMocks();
+});
 function createCartAddFetchMock() {
   return jest.fn(async (url: string, _options?: RequestInit) => ({
     ok: true,
@@ -620,9 +630,9 @@ describe("FPB checkout cart-line properties", () => {
       "/cart/add.js",
       expect.anything(),
     );
-    expect(appendedToasts.some((toast) =>
-      String(toast.innerHTML).includes("out of stock")
-    )).toBe(true);
+    expect(ToastManager.show).toHaveBeenCalledWith(
+      expect.stringContaining("out of stock"),
+    );
   });
 
   it("blocks selections that exceed available stock before posting the full-page bundle to cart", async () => {
@@ -715,9 +725,9 @@ describe("FPB checkout cart-line properties", () => {
       "/cart/add.js",
       expect.anything(),
     );
-    expect(appendedToasts.some((toast) =>
-      String(toast.innerHTML).includes("only has 1 in stock")
-    )).toBe(true);
+    expect(ToastManager.show).toHaveBeenCalledWith(
+      expect.stringContaining("only has 1 in stock"),
+    );
   });
 
   it("surfaces Shopify sold-out message when /cart/add.js returns 422", async () => {
@@ -837,9 +847,9 @@ describe("FPB checkout cart-line properties", () => {
         },
       }),
     );
-    expect(appendedToasts.some((toast) =>
-      String(toast.innerHTML).includes("already sold out")
-    )).toBe(true);
+    expect(ToastManager.show).toHaveBeenCalledWith(
+      expect.stringContaining("already sold out"),
+    );
   });
 
   it("keeps active 100 percent add-on tier lines separate from free-gift merge semantics", async () => {

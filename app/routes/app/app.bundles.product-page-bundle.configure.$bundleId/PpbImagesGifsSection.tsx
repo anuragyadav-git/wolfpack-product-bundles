@@ -1,4 +1,4 @@
-import type React from "react";
+import React from "react";
 import { usePpbConfigureContext } from "./PpbConfigureContext";
 
 export function PpbImagesGifsSection() {

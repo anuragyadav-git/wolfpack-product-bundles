@@ -52,7 +52,7 @@ export function getSummaryPresentationMode({
 
 export const fullPageResponsiveLayoutMethods: Record<string, any> & ThisType<any> = {
 async renderFullPageLayout() {
-  this.elements.stepsContainer.innerHTML = '';
+  this.elements.stepsContainer.replaceChildren();
   this.elements.stepsContainer.classList.add('full-page-layout', 'layout-sidebar');
   this.applyFullPageDesignPresetMarker();
 
@@ -67,14 +67,6 @@ async renderFullPageLayout() {
     this.elements.stepsContainer.appendChild(this.createStepTimeline());
   }
 
-  const contentHeader = this.createStepContentHeader(this.currentStepIndex);
-  if (contentHeader) this.elements.stepsContainer.appendChild(contentHeader);
-
-  if (this.config.showCategoryTabs) {
-    const categoryTabs = this.createCategoryTabs(this.currentStepIndex);
-    if (categoryTabs) this.elements.stepsContainer.appendChild(categoryTabs);
-  }
-
   // Two-column wrapper: content (center) | sidebar (right)
   const twoColWrapper = document.createElement('div');
   twoColWrapper.className = 'sidebar-layout-wrapper';
@@ -82,6 +74,14 @@ async renderFullPageLayout() {
   // CENTER: Main content (same as footer_bottom minus the footer)
   const contentSection = document.createElement('div');
   contentSection.className = 'full-page-content-section sidebar-content';
+
+  const contentHeader = this.createStepContentHeader(this.currentStepIndex);
+  if (contentHeader) contentSection.appendChild(contentHeader);
+
+  if (this.config.showCategoryTabs) {
+    const categoryTabs = this.createCategoryTabs(this.currentStepIndex);
+    if (categoryTabs) contentSection.appendChild(categoryTabs);
+  }
 
   const stepBanner = this.createStepBannerImage(this.currentStepIndex);
   if (stepBanner) contentSection.appendChild(stepBanner);
@@ -93,8 +93,10 @@ async renderFullPageLayout() {
   const categoryRowsBefore = this.createCategorySectionRows(this.currentStepIndex, 'before');
   if (categoryRowsBefore) contentSection.appendChild(categoryRowsBefore);
 
-  const activeCategoryTitle = this.createActiveCategoryTitle(this.currentStepIndex);
-  if (activeCategoryTitle) contentSection.appendChild(activeCategoryTitle);
+  if (!this.config.showCategoryTabs) {
+    const activeCategoryTitle = this.createActiveCategoryTitle(this.currentStepIndex);
+    if (activeCategoryTitle) contentSection.appendChild(activeCategoryTitle);
+  }
 
   // Add-on step custom heading — only shown when merchant explicitly sets addonTitle
   const currentStep = (this.selectedBundle?.steps || [])[this.currentStepIndex];
@@ -127,7 +129,7 @@ async renderFullPageLayout() {
   try {
     await this.loadStepProducts(this.currentStepIndex);
     const productGrid = this.createFullPageProductGrid(this.currentStepIndex);
-    productGridContainer.innerHTML = '';
+    productGridContainer.replaceChildren();
     productGridContainer.appendChild(productGrid);
     this.renderSidePanel(sidePanel);
     this.hideLoadingOverlay();
@@ -135,7 +137,10 @@ async renderFullPageLayout() {
     this._renderMobileSummaryTray();
   } catch (error: any) {
     this.hideLoadingOverlay();
-    productGridContainer.innerHTML = '<p class="error-message">Failed to load products. Please try again.</p>';
+    const errorMessage = document.createElement('p');
+    errorMessage.className = 'error-message';
+    errorMessage.textContent = 'Failed to load products. Please try again.';
+    productGridContainer.replaceChildren(errorMessage);
     this._renderMobileSummaryTray();
   }
 },

@@ -12,6 +12,7 @@
 import { BUNDLE_WIDGET } from './constants.js';
 import { CurrencyManager } from './currency-manager.js';
 import { PricingCalculator } from './pricing-calculator.js';
+import { formatMessageSegments, type MessageSegment } from './message-segments.js';
 
 export class TemplateManager {
   static getQualificationGap(currentValue: number, targetValue: number, operator: any, unitStep = 1) {
@@ -33,25 +34,13 @@ export class TemplateManager {
   }
 
   static replaceVariables(template: string, variables: any) {
-    if (!template) return '';
+    return this.formatMessageSegments(template, variables)
+      .map((segment) => segment.value)
+      .join('');
+  }
 
-    let result = template;
-
-    // Replace variables — double braces first to prevent single-brace partial matches
-    Object.entries(variables).forEach(([key, value]: any) => {
-      // Wrap conditionText and discountText with styled spans
-      let replacementValue = value;
-      if (key === 'conditionText') {
-        replacementValue = `<span class="bundle-conditions-text" style="color: var(--bundle-conditions-text-color, inherit);">${value}</span>`;
-      } else if (key === 'discountText') {
-        replacementValue = `<span class="bundle-discount-text" style="color: var(--bundle-discount-text-color, inherit);">${value}</span>`;
-      }
-
-      // Single pass: match {{key}} or {key} (double-brace variant matched first)
-      const combined = new RegExp(`\\{\\{${key}\\}\\}|\\{${key}\\}`, 'g');
-      result = result.replace(combined, replacementValue);
-    });
-    return result;
+  static formatMessageSegments(template: string, variables: any): MessageSegment[] {
+    return formatMessageSegments(template, variables);
   }
 
   static getDiscountMessageRule({
@@ -161,17 +150,6 @@ export class TemplateManager {
     const byLocale = pricingMessages?.ruleMessagesByLocale;
     const localeRuleMessages = locale && byLocale?.[locale];
     return localeRuleMessages || pricingMessages?.ruleMessages || {};
-  }
-
-  static getRuleTierMessage(bundle: any, rule: any) {
-    const ruleId = rule?.id ? String(rule.id) : '';
-    if (!ruleId) return '';
-
-    const tierText = bundle?.pricing?.messages?.tierTextByRuleId?.[ruleId];
-    const title = typeof tierText?.tierText === 'string' ? tierText.tierText.trim() : '';
-    const subtext = typeof tierText?.tierSubtext === 'string' ? tierText.tierSubtext.trim() : '';
-
-    return [title, subtext].filter(Boolean).join('<br>');
   }
 
   static getDiscountMessageTemplate({

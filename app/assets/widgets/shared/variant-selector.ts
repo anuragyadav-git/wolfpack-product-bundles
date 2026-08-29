@@ -1,12 +1,11 @@
-'use strict';
-
-let standardMobileDrawerCleanup: (() => void) | null = null;
-
 import { CurrencyManager } from './currency-manager.js';
 import {
   drawerLayerManager,
   shouldDismissDrawerSwipe,
 } from './drawer-layer-manager.js';
+import { createChevronIcon, createCloseIcon } from './svg-icons.js';
+
+let standardMobileDrawerCleanup: (() => void) | null = null;
 
 export function getStandardMobileDrawerContract({ isPpbOwned = false }: any = {}) {
   return {
@@ -27,7 +26,7 @@ export function getStandardMobileDrawerContract({ isPpbOwned = false }: any = {}
  *   - Pill button(s) for remaining dimensions (tap to open dropdown panel)
  *
  * Usage:
- *   const html = VariantSelectorComponent.renderHtml(product, primaryOptionName);
+ *   const selector = VariantSelectorComponent.createElement(product, primaryOptionName);
  *   VariantSelectorComponent.attachListeners(cardEl, product, onVariantChange);
  *
  *   onVariantChange(newVariantId, oldVariantId) is called after product is mutated.
@@ -42,15 +41,15 @@ class VariantSelectorComponent {
    * @param {string|null} primaryOptionName - Merchant-configured primary dimension (e.g. "Size")
    * @returns {string} HTML string, or '' if no selector needed
    */
-  static renderHtml(product: any, primaryOptionName: any) {
+  static createElement(product: any, primaryOptionName: any, runtimeDocument: Document = document) {
     const variants = product.variants || [];
     const options = product.options || [];
 
-    if (variants.length <= 1 || options.length === 0) return '';
+    if (variants.length <= 1 || options.length === 0) return null;
 
     const primaryIdx = VariantSelectorComponent._primaryIdx(options, primaryOptionName);
     const primaryValues = VariantSelectorComponent._uniqueSelectableValues(variants, primaryIdx);
-    if (primaryValues.length === 0) return '';
+    if (primaryValues.length === 0) return null;
 
     const selectedVariant = variants.find((v: any)  => v.id === product.variantId);
     const selectedPrimaryVal = selectedVariant
@@ -61,38 +60,60 @@ class VariantSelectorComponent {
     const visible = primaryValues.slice(0, MAX_VISIBLE);
     const overflowCount = primaryValues.length - MAX_VISIBLE;
 
-    const btnGroupHtml = visible.map(val => {
+    const root = runtimeDocument.createElement('div');
+    root.className = 'vs-wrapper';
+    root.dataset.vsProductId = String(product.id || product.variantId || '');
+    const buttonGroup = runtimeDocument.createElement('div');
+    buttonGroup.className = 'vs-btn-group';
+    visible.forEach(val => {
       const sel = val === selectedPrimaryVal;
-      const cls = ['vs-btn', sel ? 'vs-btn--selected' : ''].filter(Boolean).join(' ');
-      return `<button type="button" class="${cls}" data-primary-opt-idx="${primaryIdx}" data-primary-value="${VariantSelectorComponent._esc(val)}">${VariantSelectorComponent._esc(val)}</button>`;
-    }).join('');
-
-    const overflowHtml = overflowCount > 0
-      ? `<button type="button" class="vs-btn vs-btn--overflow" data-overflow="1" data-primary-opt-idx="${primaryIdx}" data-all-values="${VariantSelectorComponent._esc(JSON.stringify(primaryValues))}">+${overflowCount}</button>`
-      : '';
+      const button = runtimeDocument.createElement('button');
+      button.type = 'button';
+      button.className = ['vs-btn', sel ? 'vs-btn--selected' : ''].filter(Boolean).join(' ');
+      button.dataset.primaryOptIdx = String(primaryIdx);
+      button.dataset.primaryValue = String(val);
+      button.textContent = String(val);
+      buttonGroup.append(button);
+    });
+    if (overflowCount > 0) {
+      const overflow = runtimeDocument.createElement('button');
+      overflow.type = 'button';
+      overflow.className = 'vs-btn vs-btn--overflow';
+      overflow.dataset.overflow = '1';
+      overflow.dataset.primaryOptIdx = String(primaryIdx);
+      overflow.dataset.allValues = JSON.stringify(primaryValues);
+      overflow.textContent = `+${overflowCount}`;
+      buttonGroup.append(overflow);
+    }
+    root.append(buttonGroup);
 
     // Secondary dimension pills (options beyond primary)
-    const secondaryHtml = (() => {
-      if (options.length <= 1 || !selectedVariant) return '';
-      const pills = options.map((optName: any, i: number) => {
-        if (i === primaryIdx - 1) return '';
+    if (options.length > 1 && selectedVariant) {
+      const secondary = runtimeDocument.createElement('div');
+      secondary.className = 'vs-secondary';
+      options.forEach((optName: any, i: number) => {
+        if (i === primaryIdx - 1) return;
         const optIdx = i + 1;
         const val = selectedVariant[`option${optIdx}`];
-        if (!val) return '';
-        return `<button type="button" class="vs-secondary-pill" data-opt-idx="${optIdx}"><span class="vs-secondary-label">${VariantSelectorComponent._esc(optName)}:</span> <strong>${VariantSelectorComponent._esc(val)}</strong> <span class="vs-chevron">&#9662;</span></button>`;
-      }).filter(Boolean).join('');
-      return pills ? `<div class="vs-secondary">${pills}</div>` : '';
-    })();
-
-    const productId = product.id || product.variantId;
-    return `<div class="vs-wrapper" data-vs-product-id="${productId}"><div class="vs-btn-group">${btnGroupHtml}${overflowHtml}</div>${secondaryHtml}</div>`;
+        if (!val) return;
+        const pill = runtimeDocument.createElement('button');
+        pill.type = 'button';
+        pill.className = 'vs-secondary-pill';
+        pill.dataset.optIdx = String(optIdx);
+        VariantSelectorComponent._replaceSecondaryPillContent(pill, optName, val);
+        secondary.append(pill);
+      });
+      if (secondary.childElementCount > 0) root.append(secondary);
+    }
+    return root;
   }
 
-  static renderDropdownHtml(product: any, primaryOptionName: any, options: any = {}) {
+  static createDropdownElement(product: any, primaryOptionName: any, options: any = {}) {
+    const runtimeDocument: Document = options.document || document;
     const variants = product.variants || [];
     const optionNames = product.options || [];
 
-    if (variants.length <= 1 || optionNames.length === 0) return '';
+    if (variants.length <= 1 || optionNames.length === 0) return null;
 
     const primaryIdx = VariantSelectorComponent._primaryIdx(optionNames, primaryOptionName);
     const selectedVariant = variants.find((variant: any)  => String(variant.id) === String(product.variantId)) || variants[0];
@@ -104,37 +125,58 @@ class VariantSelectorComponent {
     const dropdownVariants = options.hideUnavailable === true
       ? variants.filter(VariantSelectorComponent._isSelectableVariant)
       : variants;
-    const optionHtml = dropdownVariants.map((variant: any) => {
+    const root = runtimeDocument.createElement('div');
+    root.className = 'vs-wrapper vs-wrapper--standard';
+    Object.assign(root.dataset, {
+      vsProductId: String(productId || ''),
+      vsPrimaryIdx: String(primaryIdx),
+      vsPlaceholder: String(selectedLabel),
+      vsMobileMode: mobileMode,
+    });
+    const selected = runtimeDocument.createElement('button');
+    selected.type = 'button';
+    selected.className = 'vs-selected';
+    selected.setAttribute('aria-expanded', 'false');
+    const selectedText = runtimeDocument.createElement('span');
+    selectedText.className = 'vs-selected-label';
+    selectedText.textContent = String(selectedLabel);
+    const selectedIcon = runtimeDocument.createElement('span');
+    selectedIcon.className = 'vs-selected-icon';
+    selectedIcon.setAttribute('aria-hidden', 'true');
+    selectedIcon.append(createChevronIcon(runtimeDocument));
+    selected.append(selectedText, selectedIcon);
+    const list = runtimeDocument.createElement('ul');
+    list.className = 'vs-options';
+    list.hidden = true;
+    dropdownVariants.forEach((variant: any) => {
       const primaryValue = variant[`option${primaryIdx}`] || variant.title || '';
       const value = optionNames.length > 1 && variant.title ? variant.title : primaryValue;
       const imageUrl = VariantSelectorComponent._variantImageUrl(variant);
       const isAvailable = variant.available !== false;
-      return `
-        <li class="vs-option" data-variant-id="${VariantSelectorComponent._esc(variant.id)}" data-primary-value="${VariantSelectorComponent._esc(value)}" ${!isAvailable ? 'aria-disabled="true"' : ''}>
-          ${imageUrl ? `<img class="vs-option-image" src="${VariantSelectorComponent._esc(imageUrl)}" alt="">` : ''}
-          <span class="vs-option-label">${VariantSelectorComponent._esc(value)}</span>
-        </li>
-      `;
-    }).join('');
-
-    return `
-      <div class="vs-wrapper vs-wrapper--standard" data-vs-product-id="${VariantSelectorComponent._esc(productId)}" data-vs-primary-idx="${primaryIdx}" data-vs-placeholder="${VariantSelectorComponent._esc(selectedLabel)}" data-vs-mobile-mode="${mobileMode}">
-        <button type="button" class="vs-selected" aria-expanded="false">
-          <span class="vs-selected-label">${VariantSelectorComponent._esc(selectedLabel)}</span>
-          <span class="vs-selected-icon" aria-hidden="true">
-            <svg viewBox="0 0 20 20" focusable="false">
-              <path d="M5 7.5 10 12.5 15 7.5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"></path>
-            </svg>
-          </span>
-        </button>
-        <ul class="vs-options" hidden>
-          ${optionHtml}
-        </ul>
-      </div>
-    `;
+      const item = runtimeDocument.createElement('li');
+      item.className = 'vs-option';
+      item.dataset.variantId = String(variant.id ?? '');
+      item.dataset.primaryValue = String(value);
+      if (!isAvailable) item.setAttribute('aria-disabled', 'true');
+      if (imageUrl) {
+        const image = runtimeDocument.createElement('img');
+        image.className = 'vs-option-image';
+        image.src = imageUrl;
+        image.alt = '';
+        item.append(image);
+      }
+      const label = runtimeDocument.createElement('span');
+      label.className = 'vs-option-label';
+      label.textContent = String(value);
+      item.append(label);
+      list.append(item);
+    });
+    root.append(selected, list);
+    return root;
   }
 
-  static renderStandardMobileDrawerHtml(product: any, options: any = {}) {
+  static createStandardMobileDrawerElement(product: any, options: any = {}) {
+    const runtimeDocument: Document = options.document || document;
     const variants = product.variants || [];
     const optionNames = product.options || [];
     const primaryIdx = options.primaryIdx || VariantSelectorComponent._primaryIdx(optionNames, options.primaryOptionName);
@@ -149,48 +191,95 @@ class VariantSelectorComponent {
     const isPpbDrawer = options.drawerOwner === 'ppb';
     const drawerContract = getStandardMobileDrawerContract({ isPpbOwned: isPpbDrawer });
 
-    const optionHtml = variants.map((variant: any) => {
+    const drawer = runtimeDocument.createElement('div');
+    drawer.className = 'vs-mobile-drawer vs-mobile-drawer--standard';
+    drawer.dataset.vsMobileDrawer = '';
+    if (isPpbDrawer) drawer.dataset.ppbDrawerSurface = 'variant-selector';
+    const sheet = runtimeDocument.createElement('div');
+    sheet.className = 'vs-mobile-drawer-sheet';
+    sheet.setAttribute('role', 'dialog');
+    sheet.setAttribute('aria-modal', 'true');
+    if (drawerContract.closeControl === 'handle') {
+      const handle = runtimeDocument.createElement('button');
+      handle.type = 'button';
+      handle.className = 'vs-mobile-drawer-handle';
+      handle.dataset.vsDrawerHandle = '';
+      handle.setAttribute('aria-label', 'Close variant selector');
+      const grip = runtimeDocument.createElement('span');
+      grip.className = 'vs-mobile-drawer-grip';
+      grip.setAttribute('aria-hidden', 'true');
+      handle.append(grip);
+      sheet.append(handle);
+    } else {
+      const close = runtimeDocument.createElement('button');
+      close.type = 'button';
+      close.className = 'vs-mobile-drawer-close';
+      close.setAttribute('aria-label', 'Close variant selector');
+      close.append(createCloseIcon(runtimeDocument));
+      sheet.append(close);
+    }
+    const header = runtimeDocument.createElement('div');
+    header.className = 'vs-mobile-drawer-header';
+    if (productImageUrl) {
+      const image = runtimeDocument.createElement('img');
+      image.className = 'vs-mobile-drawer-product-image';
+      image.src = productImageUrl;
+      image.alt = '';
+      header.append(image);
+    }
+    const info = runtimeDocument.createElement('div');
+    info.className = 'vs-mobile-drawer-product-info';
+    const title = runtimeDocument.createElement('p');
+    title.className = 'vs-mobile-drawer-product-title';
+    title.textContent = String(productTitle);
+    const price = runtimeDocument.createElement('p');
+    price.className = 'vs-mobile-drawer-product-price';
+    price.textContent = String(formatPrice(productPrice));
+    info.append(title, price);
+    header.append(info);
+    sheet.append(header);
+    const body = runtimeDocument.createElement('div');
+    body.className = 'vs-mobile-drawer-body';
+    const drawerTitle = runtimeDocument.createElement('div');
+    drawerTitle.className = 'vs-mobile-drawer-title';
+    drawerTitle.textContent = String(placeholder);
+    const optionList = runtimeDocument.createElement('div');
+    optionList.className = 'vs-mobile-options';
+    variants.forEach((variant: any) => {
       const label = VariantSelectorComponent.getStandardVariantLabel(variant, optionNames, primaryIdx);
       const imageUrl = VariantSelectorComponent._variantImageUrl(variant) || productImageUrl;
       const isAvailable = variant.available !== false;
       const isSelected = String(variant.id) === String(selectedVariant.id);
-      return `
-        <button type="button" class="vs-mobile-option${isSelected ? ' vs-mobile-option--selected' : ''}" data-variant-id="${VariantSelectorComponent._esc(variant.id)}" aria-disabled="${isAvailable ? 'false' : 'true'}">
-          ${imageUrl ? `<img class="vs-mobile-option-image" src="${VariantSelectorComponent._esc(imageUrl)}" alt="">` : '<span class="vs-mobile-option-image vs-mobile-option-image--empty" aria-hidden="true"></span>'}
-          <span class="vs-mobile-option-label">${VariantSelectorComponent._esc(label)}</span>
-          <span class="vs-mobile-option-price">${VariantSelectorComponent._esc(formatPrice(variant.price ?? 0))}</span>
-        </button>
-      `;
-    }).join('');
-
-    return `
-      <div class="vs-mobile-drawer vs-mobile-drawer--standard" data-vs-mobile-drawer${isPpbDrawer ? ' data-ppb-drawer-surface="variant-selector"' : ''}>
-        <div class="vs-mobile-drawer-sheet" role="dialog" aria-modal="true">
-          ${drawerContract.closeControl === 'handle' ? `
-          <button type="button" class="vs-mobile-drawer-handle" data-vs-drawer-handle aria-label="Close variant selector">
-            <span class="vs-mobile-drawer-grip" aria-hidden="true"></span>
-          </button>` : `
-          <button type="button" class="vs-mobile-drawer-close" aria-label="Close variant selector">
-            <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
-              <path d="M6 6 18 18M18 6 6 18" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"></path>
-            </svg>
-          </button>`}
-          <div class="vs-mobile-drawer-header">
-            ${productImageUrl ? `<img class="vs-mobile-drawer-product-image" src="${VariantSelectorComponent._esc(productImageUrl)}" alt="">` : ''}
-            <div class="vs-mobile-drawer-product-info">
-              <p class="vs-mobile-drawer-product-title">${VariantSelectorComponent._esc(productTitle)}</p>
-              <p class="vs-mobile-drawer-product-price">${VariantSelectorComponent._esc(formatPrice(productPrice))}</p>
-            </div>
-          </div>
-          <div class="vs-mobile-drawer-body">
-            <div class="vs-mobile-drawer-title">${VariantSelectorComponent._esc(placeholder)}</div>
-            <div class="vs-mobile-options">
-              ${optionHtml}
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
+      const button = runtimeDocument.createElement('button');
+      button.type = 'button';
+      button.className = `vs-mobile-option${isSelected ? ' vs-mobile-option--selected' : ''}`;
+      button.dataset.variantId = String(variant.id ?? '');
+      button.setAttribute('aria-disabled', isAvailable ? 'false' : 'true');
+      if (imageUrl) {
+        const image = runtimeDocument.createElement('img');
+        image.className = 'vs-mobile-option-image';
+        image.src = imageUrl;
+        image.alt = '';
+        button.append(image);
+      } else {
+        const imagePlaceholder = runtimeDocument.createElement('span');
+        imagePlaceholder.className = 'vs-mobile-option-image vs-mobile-option-image--empty';
+        imagePlaceholder.setAttribute('aria-hidden', 'true');
+        button.append(imagePlaceholder);
+      }
+      const optionLabel = runtimeDocument.createElement('span');
+      optionLabel.className = 'vs-mobile-option-label';
+      optionLabel.textContent = String(label);
+      const optionPrice = runtimeDocument.createElement('span');
+      optionPrice.className = 'vs-mobile-option-price';
+      optionPrice.textContent = String(formatPrice(variant.price ?? 0));
+      button.append(optionLabel, optionPrice);
+      optionList.append(button);
+    });
+    body.append(drawerTitle, optionList);
+    sheet.append(body);
+    drawer.append(sheet);
+    return drawer;
   }
 
   /**
@@ -325,7 +414,7 @@ class VariantSelectorComponent {
         const label = pill.querySelector('.vs-secondary-label');
         const optName = label ? label.textContent.replace(':', '').trim() : `Option ${optIdx}`;
         const newVal = newVariant[`option${optIdx}`] || '';
-        pill.innerHTML = `<span class="vs-secondary-label">${VariantSelectorComponent._esc(optName)}:</span> <strong>${VariantSelectorComponent._esc(newVal)}</strong> <span class="vs-chevron">&#9662;</span>`;
+        VariantSelectorComponent._replaceSecondaryPillContent(pill, optName, newVal);
       });
     }
 
@@ -410,7 +499,7 @@ class VariantSelectorComponent {
         product.currentlyNotInStock = candidate.currentlyNotInStock === true;
         // Update the pill text
         const optName = pill.querySelector('.vs-secondary-label')?.textContent?.replace(':', '').trim() || `Option ${optIdx}`;
-        pill.innerHTML = `<span class="vs-secondary-label">${VariantSelectorComponent._esc(optName)}:</span> <strong>${VariantSelectorComponent._esc(val)}</strong> <span class="vs-chevron">&#9662;</span>`;
+        VariantSelectorComponent._replaceSecondaryPillContent(pill, optName, val);
         onVariantChange(candidate.id, oldVariantId);
         VariantSelectorComponent._closePanel(cardEl);
       });
@@ -427,6 +516,19 @@ class VariantSelectorComponent {
     panel.className = ['vs-panel', extraClass].filter(Boolean).join(' ');
     panel.dataset.vsPanel = '1';
     return panel;
+  }
+
+  static _replaceSecondaryPillContent(pill: HTMLElement, optionName: unknown, value: unknown) {
+    const runtimeDocument = pill.ownerDocument;
+    const label = runtimeDocument.createElement('span');
+    label.className = 'vs-secondary-label';
+    label.textContent = `${String(optionName ?? '')}:`;
+    const selected = runtimeDocument.createElement('strong');
+    selected.textContent = String(value ?? '');
+    const chevron = runtimeDocument.createElement('span');
+    chevron.className = 'vs-chevron';
+    chevron.textContent = '▾';
+    pill.replaceChildren(label, runtimeDocument.createTextNode(' '), selected, runtimeDocument.createTextNode(' '), chevron);
   }
 
   static handleStandardSelectorClick(selected: any, cardEl: any, product: any, onVariantChange: any) {
@@ -457,7 +559,7 @@ class VariantSelectorComponent {
 
     const ppbOwner = cardEl.closest?.('#bundle-builder-app[data-ppb-template-type], [data-ppb-template-type="PDP_INPAGE"], [data-ppb-template-type="PDP_MODAL"]');
     const isPpbDrawer = Boolean(ppbOwner);
-    document.body.insertAdjacentHTML('beforeend', VariantSelectorComponent.renderStandardMobileDrawerHtml(product, {
+    document.body.append(VariantSelectorComponent.createStandardMobileDrawerElement(product, {
       placeholder,
       primaryIdx,
       drawerOwner: isPpbDrawer ? 'ppb' : 'shared',

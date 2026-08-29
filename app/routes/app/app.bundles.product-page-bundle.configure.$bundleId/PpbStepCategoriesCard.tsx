@@ -1,6 +1,6 @@
 import { PpbCategoryAccordion } from "./PpbCategoryAccordion";
 import { usePpbConfigureContext } from "./PpbConfigureContext";
-import { getStepCategories, PlusIcon } from "./PpbStepSetupShared";
+import { getStepCategories } from "./PpbStepSetupShared";
 
 export function PpbStepCategoriesCard({ step }: { step: any }) {
   const {
@@ -74,7 +74,7 @@ export function PpbStepCategoriesCard({ step }: { step: any }) {
           markAsDirty();
         }}
       >
-        <PlusIcon />
+        <span aria-hidden="true"><s-icon type="plus" /></span>
         Add Category
       </button>
     </div>

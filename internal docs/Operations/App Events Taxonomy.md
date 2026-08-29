@@ -5,7 +5,7 @@ title: Shopify App Events Taxonomy
 type: operations
 status: authoritative
 summary: Defines the canonical Shopify App Events vocabulary and merchant-flow tracing guidance.
-last_audited: 2026-08-13
+last_audited: 2026-08-28
 owners:
   - engineering
 domains:
@@ -56,7 +56,11 @@ Shopify's App Events docs define these constraints:
 
 ## Current WPB Telemetry
 
-Current repo state has no Shopify App Events emitter.
+The repository now has a shared emitter in `app/services/app-events.server.ts`.
+It sanitizes scalar attributes, creates bounded idempotency keys, persists an
+internal `BusinessEvent`, and can deliver selected events to Shopify. Subscription
+funnel events currently remain internal (`sendToShopify: false`) until their
+production taxonomy and expected volume are approved.
 
 Existing telemetry surfaces:
 
@@ -66,7 +70,21 @@ Existing telemetry surfaces:
 - `/apps/product-bundles/api/widget-error` records storefront widget runtime errors.
 - `extensions/wolfpack-utm-pixel` subscribes to Shopify Web Pixel customer events such as `page_viewed` and `checkout_completed`.
 
-These surfaces serve storefront analytics and merchant integrations. App Events should be added alongside them for Dev Dashboard tracing and future billing meters.
+These surfaces serve storefront analytics and merchant integrations. App Events
+operate alongside them for Dev Dashboard tracing and future billing meters.
+
+## Subscription and Entitlement Events
+
+`app/services/subscriptions/subscription-telemetry.server.ts` owns the typed
+subscription vocabulary. Approved dimensions are `plan_code`,
+`billing_interval`, `feature_key`, `gate_location`, `action`, `result`,
+`error_code`, bundle identity/type, and app version. Do not
+add plan price, merchant content, token values, or provider payloads.
+
+The vocabulary covers pricing views and interval selection, hosted checkout
+redirects, provider verification, Growth activation and lifecycle transitions,
+locked-feature impressions/clicks, limit warnings, blocked actions, and Growth
+draft saves.
 
 ## Event Design Rules
 
@@ -392,13 +410,12 @@ Implemented v1 emitted events:
 | Configure | `pricing_configured`, `bundle_saved` |
 | Sync | `bundle_sync_started`, `bundle_synced`, `bundle_sync_failed` |
 | Storefront runtime | `widget_runtime_error_reported`, internal-only `bundle_engaged`, internal-only `engagement_failed` |
-| Billing APIs | `billing_upgrade_started`, `billing_upgraded`, `billing_upgrade_failed`, `billing_cancel_started`, `billing_cancelled`, `billing_cancel_failed` |
-| Subscription webhooks | `subscription_webhook_processed`, `subscription_webhook_failed` |
+| Managed subscriptions | Internal-only pricing, verification, activation, lifecycle, and entitlement gate events from `subscription-telemetry.server.ts` |
 
 Dev Dashboard tracing recipes:
 
 - Install health: filter `app_installed`, `app_reauthorized`, `pixel_activation_failed`, and `cart_transform_enabled` by shop.
 - Create funnel: `bundle_create_started` -> `bundle_created` or `bundle_create_failed`, followed by configure and save events.
-- Monetization: `pricing_limit_hit` -> `billing_upgrade_started` -> `billing_upgraded` or `billing_upgrade_failed`.
+- Monetization: use the internal managed-subscription and entitlement event vocabulary; app-owned Billing API events are retired.
 - Sync reliability: group `bundle_sync_failed` by `bundle_type`, `route_family`, and `error_code`.
 - Storefront breakage: filter `widget_runtime_error_reported` by `bundle_type` and `category`.
