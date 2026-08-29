@@ -5,7 +5,7 @@
     "settings": "設定",
     "integrations": "連携",
     "analytics": "分析",
-    "pricing": "料金",
+    "billing": "請求",
     "events": "アップデートとFAQ"
   },
   "integrations": {
@@ -169,6 +169,10 @@
     }
   },
   "settingsDcp": {
+    "growthGate": {
+      "heading": "Growth のデザインコントロール",
+      "body": "Free でも基本のブランドカラーとタイポグラフィは編集できます。高度なカラー、角、画像、GIF を変更するには Growth にアップグレードしてください。"
+    },
     "preview": {
       "heading": "ライブプレビュー",
       "unsaved": "未保存の変更がここに表示されます。",
@@ -404,10 +408,10 @@
     },
     "upgradePrompt": {
       "limitReachedTitle": "バンドル数の上限に達しました",
-      "limitReachedBody": "無料プランのバンドル {{limit}} 件をすべて使用しました。Grow にアップグレードすると最大20件まで利用できます。",
+      "limitReachedBody": "無料プランの公開バンドル上限に達しました。Growthでは公開バンドルが無制限です。",
       "approachingTitle": "バンドル数の上限が近づいています",
-      "approachingBody": "{{limit}} 件中 {{current}} 件のバンドルを使用しています。Grow にアップグレードすると最大20件まで利用できます。",
-      "usageBody": "無料プランで {{limit}} 件中 {{current}} 件のバンドルを使用しています。さらに必要ですか？Grow にアップグレードすると20件まで利用できます。"
+      "approachingBody": "{{limit}}件中{{current}}件の公開バンドルを使用しています。Growthでは公開バンドルが無制限です。",
+      "usageBody": "無料プランで{{limit}}件中{{current}}件の公開バンドルを使用しています。Growthでは公開バンドルが無制限です。"
     },
     "discardChanges": {
       "title": "未保存の変更をすべて破棄",
@@ -480,28 +484,27 @@
     },
     "error": {
       "heading": "サブスクリプションの問題",
-      "missingChargeId": "サブスクリプションの確認に失敗しました：請求IDがありません。",
-      "confirmationFailed": "Shopifyでサブスクリプションを確認できませんでした。",
+      "verificationFailed": "Shopifyで現在のサブスクリプションを確認できませんでした。もう一度お試しください。",
       "unexpected": "サブスクリプションの設定中に予期しないエラーが発生しました。"
     },
     "upgradeModal": {
-      "heading": "Growプランにアップグレード",
-      "confirm": "アップグレードを確認 - ${{price}}/月",
-      "redirect": "サブスクリプションを完了するためShopifyに移動します。",
-      "benefitsHeading": "Growで利用できる内容：",
-      "bundleLimit": "最大20件のバンドル（現在 {{current}}/{{limit}}）",
-      "billedMonthly": "Shopify経由で毎月請求",
+      "heading": "Growthを選択",
+      "confirm": "Shopifyへ進む",
+      "redirect": "月額または年額請求を選択するためShopifyへ移動します。",
+      "benefitsHeading": "Growthの内容：",
+      "managedByShopify": "プラン選択と請求はShopifyで管理されます",
       "benefits": {
-        "noRevenueCap": "バンドル売上の上限なし - 無料プランは月額$500まで",
-        "advancedDiscounts": "高度な割引ルール",
+        "unlimitedPublicBundles": "公開バンドルとステップが無制限",
+        "allTemplatesDesign": "すべてのテンプレートと高度なデザイン設定",
+        "advancedAnalytics": "高度なバンドル分析",
         "prioritySupport": "優先サポート"
       }
     },
     "success": {
-      "heading": "Growプランへようこそ！",
+      "heading": "Growthが有効になりました",
       "body": "サブスクリプションが有効になりました。すべてのプレミアム機能をご利用いただけます。",
       "bundleLimit": "バンドル上限",
-      "bundleLimitValue": "20件のバンドル",
+      "bundleLimitValue": "無制限",
       "designControl": "デザイン管理",
       "fullAccess": "フルアクセス",
       "support": "サポート",
@@ -509,26 +512,27 @@
     },
     "cards": {
       "currentPlan": "現在のプラン",
-      "freePrice": "無料",
-      "freeDescription": "バンドル売上が月額$500まで - 成長するまで無料",
+      "freePrice": "$0",
+      "freeDescription": "1つの完全なバンドルを作成、公開、販売できます",
       "includes": "含まれる内容：",
       "freePlan": "無料プラン",
       "mostPopular": "一番人気",
       "perMonth": "/ 月",
-      "growDescription": "バンドル売上が月額$500以上 - 売上上限なし",
-      "growIncludes": "無料プランのすべてに加えて：",
-      "upgradeToGrow": "Growにアップグレード",
-      "cancelAnytimeBilled": "いつでもキャンセルできます。Shopify経由で請求されます。"
+      "growthDescription": "高度な販売促進、カスタマイズ、分析、拡張性",
+      "growthIncludes": "無料プランのすべてに加えて：",
+      "chooseGrowth": "Growthを選択",
+      "annualPrice": "または年額${{price}}",
+      "trialAndBilling": "{{days}}日間の無料体験。Shopifyで月額または年額請求を選択できます。"
     },
     "cta": {
       "heading": "バンドルビジネスを成長させる準備はできましたか？",
-      "body": "Growプランにアップグレードすると、バンドル数が倍増し、デザインを完全にカスタマイズでき、優先サポートを利用できます。",
+      "body": "Growthでは公開バンドル無制限、すべてのテンプレート、高度なデザインと分析、優先サポートを利用できます。",
       "highlights": {
-        "bundles": "20件のバンドル",
+        "bundles": "公開バンドル無制限",
         "design": "デザインコントロールパネル",
         "support": "優先サポート"
       },
-      "upgrade": "Growにアップグレード - ${{price}}/月",
+      "upgrade": "Growthを見る",
       "cancelAnytime": "いつでもキャンセル可能"
     },
     "route": {
@@ -540,21 +544,22 @@
       "bundleUsage": "バンドル使用状況",
       "bundleCount": "{{current}} / {{limit}} バンドル",
       "limitReached": "バンドルの上限に達しました。",
-      "limitUpgrade": "バンドル数を増やすにはGrowにアップグレードしてください。",
+      "limitUpgrade": "Growthでは公開バンドルが無制限です。",
       "overview": "バンドル概要",
       "activeBundles": "有効なバンドル",
       "totalSteps": "合計ステップ",
       "productPage": "商品ページ",
       "fullPage": "フルページ",
-      "cancelSubscription": "サブスクリプションをキャンセル",
-      "cancelHeading": "サブスクリプションをキャンセルしますか？",
-      "downgradeBody": "{{limit}}件のバンドル上限がある無料プランに変更されます。",
-      "archiveWarning": "注意：{{current}}件のバンドルがあります。超過した{{excess}}件のバンドルはアーカイブされます（削除はされません）。",
-      "confirmCancellation": "キャンセルを確定",
+      "cancelSubscription": "サブスクリプションを管理",
+      "cancelHeading": "Shopifyでサブスクリプションを管理しますか？",
+      "downgradeBody": "プラン変更前にShopifyで適用日が表示されます。",
+      "archiveWarning": "ダウングレード後もすべてのバンドル設定が保持されます。",
+      "confirmCancellation": "Shopifyのプラン管理を開く",
       "keepSubscription": "サブスクリプションを維持",
       "features": "プランの機能",
       "needHelp": "お困りですか？",
       "helpBody": "請求に関する質問やカスタムプランのご相談がありますか？サポートチームがお手伝いします。"
     }
-  }
+  },
+  "subscription": { "analytics": { "summaryNotice": "無料プランには30日間のアクティビティ概要が含まれます。Growthでは期間指定、詳細、UTM、バックフィル、CSV出力を利用できます。" } }
 }

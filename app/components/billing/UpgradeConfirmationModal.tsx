@@ -1,40 +1,49 @@
 import { useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { PLANS } from "../../constants/plans";
+import brandStyles from "../../styles/billing/subscription-brand.module.css";
 
 export interface UpgradeConfirmationModalProps {
   open: boolean;
   isLoading: boolean;
-  currentBundleCount: number;
-  bundleLimit: number;
   onConfirm: () => void;
   onClose: () => void;
+}
+
+type PolarisModalRef = {
+  current: {
+    showOverlay?: () => void;
+    hideOverlay?: () => void;
+  } | null;
+};
+
+export function syncUpgradeConfirmationModal(
+  modalRef: PolarisModalRef,
+  open: boolean,
+): void {
+  if (open) {
+    modalRef.current?.showOverlay?.();
+  } else {
+    modalRef.current?.hideOverlay?.();
+  }
 }
 
 export function UpgradeConfirmationModal({
   open,
   isLoading,
-  currentBundleCount,
-  bundleLimit,
   onConfirm,
   onClose,
 }: UpgradeConfirmationModalProps) {
   const { t } = useTranslation();
   const modalRef = useRef<any>(null);
   const benefits = [
-    t("billing.upgradeModal.benefits.noRevenueCap"),
-    t("billing.upgradeModal.benefits.advancedDiscounts"),
+    t("billing.upgradeModal.benefits.unlimitedPublicBundles"),
+    t("billing.upgradeModal.benefits.allTemplatesDesign"),
+    t("billing.upgradeModal.benefits.advancedAnalytics"),
     t("billing.upgradeModal.benefits.prioritySupport"),
   ];
 
   useEffect(() => {
-    const el = modalRef.current;
-    if (!el) return;
-    if (open) {
-      el.show?.();
-    } else {
-      el.hide?.();
-    }
+    syncUpgradeConfirmationModal(modalRef, open);
   }, [open]);
 
   return (
@@ -50,7 +59,7 @@ export function UpgradeConfirmationModal({
         loading={isLoading || undefined}
         onClick={onConfirm}
       >
-        {t("billing.upgradeModal.confirm", { price: PLANS.grow.price })}
+        {t("billing.upgradeModal.confirm")}
       </s-button>
       <s-button slot="secondary-actions" onClick={onClose}>
         {t("billing.actions.cancel")}
@@ -62,21 +71,13 @@ export function UpgradeConfirmationModal({
         </s-paragraph>
 
         <s-stack direction="block" gap="small">
-          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>
+          <h3 className={brandStyles.sectionTitle}>
             {t("billing.upgradeModal.benefitsHeading")}
           </h3>
           <s-stack direction="block" gap="small-100">
-            <s-stack direction="inline" alignItems="center" gap="small-100">
-              <div style={{ color: "#008060" }}>
-                <s-icon type="check" />
-              </div>
-              <span style={{ fontSize: 14 }}>
-                {t("billing.upgradeModal.bundleLimit", { current: currentBundleCount, limit: bundleLimit })}
-              </span>
-            </s-stack>
             {benefits.map((benefit, index) => (
               <s-stack key={index} direction="inline" alignItems="center" gap="small-100">
-                <div style={{ color: "#008060" }}>
+                <div className={brandStyles.check}>
                   <s-icon type="check" />
                 </div>
                 <span style={{ fontSize: 14 }}>{benefit}</span>
@@ -88,8 +89,7 @@ export function UpgradeConfirmationModal({
         <s-divider />
 
         <s-stack direction="inline" justifyContent="space-between">
-          <s-text tone="neutral" color="subdued">{t("billing.upgradeModal.billedMonthly")}</s-text>
-          <strong style={{ fontSize: 16 }}>{t("billing.pricePerMonth", { price: PLANS.grow.price })}</strong>
+          <s-text tone="neutral" color="subdued">{t("billing.upgradeModal.managedByShopify")}</s-text>
         </s-stack>
       </s-stack>
     </s-modal>

@@ -54,25 +54,25 @@ enum BundleType {
 }
 
 model Session {
-  id                    String    @id
-  shop                  String
-  state                 String
-  isOnline              Boolean   @default(false)
-  scope                 String?
-  expires               DateTime?
-  accessToken           String
-  refreshToken          String?
-  refreshTokenExpires   DateTime?
-  userId                BigInt?
-  firstName             String?
-  lastName              String?
-  email                 String?
-  accountOwner          Boolean   @default(false)
-  locale                String?
-  collaborator          Boolean?  @default(false)
-  emailVerified         Boolean?  @default(false)
-  createdAt             DateTime  @default(now())
-  updatedAt             DateTime  @updatedAt
+  id                  String    @id
+  shop                String
+  state               String
+  isOnline            Boolean   @default(false)
+  scope               String?
+  expires             DateTime?
+  accessToken         String
+  refreshToken        String?
+  refreshTokenExpires DateTime?
+  userId              BigInt?
+  firstName           String?
+  lastName            String?
+  email               String?
+  accountOwner        Boolean   @default(false)
+  locale              String?
+  collaborator        Boolean?  @default(false)
+  emailVerified       Boolean?  @default(false)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 
   @@index([shop])
   @@index([shop, expires])
@@ -80,7 +80,7 @@ model Session {
 
 model Bundle {
   id                                   String            @id @default(cuid())
-  publicNumber                         Int?              // Per-shop public FPB URL identifier; null for PPB
+  publicNumber                         Int? // Per-shop public FPB URL identifier; null for PPB
   name                                 String
   description                          String?
   shopId                               String
@@ -138,6 +138,9 @@ model Bundle {
   bundleDesignPresetId                 String? // "STANDARD" | "CLASSIC" | "COMPACT" | "HORIZONTAL" | "CASCADE" | "COGNIVE" | "MODAL" | "SIMPLIFIED"
   bundleType                           BundleType        @default(product_page)
   status                               BundleStatus      @default(draft)
+  publishedAt                          DateTime?
+  planRestrictedAt                     DateTime?
+  planRestrictionReason                String?
   inventorySyncedAt                    DateTime? // Last successful inventory sync timestamp
   inventoryStaleAt                     DateTime? // Set when webhook indicates component inventory changed
   createdAt                            DateTime          @default(now())
@@ -146,8 +149,8 @@ model Bundle {
   pricing                              BundlePricing?
   analytics                            BundleAnalytics[]
 
-  @@index([shopId])
   @@unique([shopId, publicNumber])
+  @@index([shopId])
   @@index([status])
   @@index([bundleType])
   @@index([shopifyPageHandle])
@@ -498,12 +501,22 @@ enum SubscriptionStatus {
   cancelled // Subscription cancelled
   frozen // Shop billing frozen
   expired // Subscription expired
-  declined // Merchant declined subscription
+  unknown // Provider state could not be verified
 }
 
 enum SubscriptionPlan {
-  free // Free tier: 3 bundles max
-  grow // Grow tier: 20 bundles max, $9.99/month
+  free
+  growth
+}
+
+enum SubscriptionBillingInterval {
+  none
+  monthly
+  annual
+}
+
+enum SubscriptionProvider {
+  shopify_app_pricing
 }
 
 // Shop model - represents a Shopify store
@@ -518,7 +531,6 @@ model Shop {
   firstCreateTourEligible Boolean        @default(false) // True only for newly installed shops until their first create flow
   lastFpbPublicNumber     Int            @default(0) // Atomically incremented when an FPB is created
   subscriptions           Subscription[] // Subscription history
-  currentSubscriptionId   String? // Current active subscription
   adminLocale             String? // Shop-wide embedded Admin UI language preference; null defaults to English
   customUtmParameters     Json           @default("[]") // Merchant-configured query parameters captured by the UTM pixel
   createdAt               DateTime       @default(now())
@@ -526,7 +538,6 @@ model Shop {
 
   @@index([shopDomain])
   @@index([shopifyShopGid])
-  @@index([currentSubscriptionId])
 }
 
 model BusinessEvent {
@@ -562,35 +573,32 @@ model BusinessEvent {
 
 // Subscription model - tracks app subscriptions
 model Subscription {
-  id                    String             @id @default(uuid())
-  shopId                String
-  shop                  Shop               @relation(fields: [shopId], references: [id], onDelete: Cascade)
-  shopifySubscriptionId String?            @unique // Shopify's subscription ID (GID)
-  plan                  SubscriptionPlan   @default(free)
-  status                SubscriptionStatus @default(pending)
-  name                  String // Plan display name (e.g., "Grow Plan")
-  price                 Float              @default(0) // Monthly price in USD
-  currencyCode          String             @default("USD")
-  trialDaysRemaining    Int? // Null for non-trial subscriptions
-  currentPeriodStart    DateTime? // Start of current billing period
-  currentPeriodEnd      DateTime? // End of current billing period
-  cancelledAt           DateTime? // When subscription was cancelled
-  confirmationUrl       String? // Shopify confirmation URL
-  returnUrl             String? // Return URL after approval
-  createdAt             DateTime           @default(now())
-  updatedAt             DateTime           @updatedAt
+  id                     String                      @id @default(uuid())
+  shopId                 String
+  shop                   Shop                        @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  provider               SubscriptionProvider        @default(shopify_app_pricing)
+  plan                   SubscriptionPlan            @default(free)
+  billingInterval        SubscriptionBillingInterval @default(none)
+  status                 SubscriptionStatus          @default(pending)
+  name                   String
+  itemHandles            Json                        @default("[]")
+  lastVerifiedAt         DateTime?
+  verificationErrorCode  String?
+  createdAt              DateTime                    @default(now())
+  updatedAt              DateTime                    @updatedAt
 
   @@index([shopId])
-  @@index([shopifySubscriptionId])
   @@index([status])
   @@index([plan])
+  @@index([provider])
+  @@index([lastVerifiedAt])
 }
 
 // WebhookEvent model - tracks processed webhooks for idempotency
 model WebhookEvent {
   id          String    @id @default(uuid())
   shopDomain  String
-  topic       String // e.g., "APP_SUBSCRIPTIONS_UPDATE"
+  topic       String // e.g., "PRODUCTS_DELETE"
   webhookId   String? // Shopify webhook ID if available
   payload     Json // Full webhook payload
   processed   Boolean   @default(false)

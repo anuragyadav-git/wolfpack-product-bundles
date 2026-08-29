@@ -8,12 +8,10 @@
 import { json, type LoaderFunctionArgs, type ActionFunctionArgs } from "@remix-run/node";
 import { useLoaderData, useFetcher, useNavigate } from "@remix-run/react";
 import { authenticate } from "../../shopify.server";
-import { BillingService } from "../../services/billing.server";
-import { getCachedSubscriptionInfo, getSubscriptionInfoFromCache } from "../../services/subscription-cache.server";
 import { BundleAnalyticsService } from "../../services/bundle-analytics.server";
 import { PLANS } from "../../constants/plans";
 import { AppLogger } from "../../lib/logger";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import billingStyles from "../../styles/routes/app-billing.module.css";
 import { useBillingState } from "../../hooks/useBillingState";
@@ -27,6 +25,12 @@ import {
   AdminPageBackTitle,
   AdminPageTitleBar,
 } from "../../components/AdminPageNavigation";
+import { resolveShopEntitlements } from "../../services/subscriptions/subscription-service.server";
+import {
+  getShopifyAppPricingUrl,
+} from "../../services/subscriptions/app-pricing-navigation.server";
+import db from "../../db.server";
+import { getCurrentShopifyAppIdentity } from "../../services/subscriptions/shopify-app-identity.server";
 
 // Import shared billing components
 import {
@@ -43,34 +47,34 @@ export async function loader({ request }: LoaderFunctionArgs) {
     const upgraded = url.searchParams.get("upgraded");
     const error = url.searchParams.get("error");
 
-    const cachedSubscriptionInfo = getCachedSubscriptionInfo(shopDomain);
-    const subscriptionInfoPromise = cachedSubscriptionInfo !== undefined
-      ? Promise.resolve(cachedSubscriptionInfo)
-      : getSubscriptionInfoFromCache(shopDomain);
-
-    const [subscriptionInfo, quickStats] = await Promise.all([
-      subscriptionInfoPromise,
+    const [subscriptionInfo, quickStats, currentBundleCount] = await Promise.all([
+    resolveShopEntitlements({ shopDomain }),
       BundleAnalyticsService.getQuickStats(shopDomain),
+      db.bundle.count({
+        where: { shopId: shopDomain, status: { in: ["active", "unlisted"] } },
+      }),
     ]);
 
-    if (!subscriptionInfo) {
+    if (!subscriptionInfo.entitlements || !subscriptionInfo.planCode) {
       throw new Error("Could not retrieve subscription information");
     }
 
+    const publicLimit = subscriptionInfo.entitlements.limits.publicBundles;
+
     return json({
       subscription: {
-        plan: subscriptionInfo.plan,
-        status: subscriptionInfo.status,
-        isActive: subscriptionInfo.isActive,
-        bundleLimit: subscriptionInfo.bundleLimit,
-        currentBundleCount: subscriptionInfo.currentBundleCount,
-        canCreateBundle: subscriptionInfo.canCreateBundle,
+        plan: subscriptionInfo.planCode.toLowerCase() as "free" | "growth",
+        status: subscriptionInfo.status.toLowerCase(),
+        isActive: subscriptionInfo.status === "ACTIVE" || subscriptionInfo.planCode === "FREE",
+        billingInterval: subscriptionInfo.billingInterval,
+        bundleLimit: publicLimit ?? Number.MAX_SAFE_INTEGER,
+        currentBundleCount,
+        canCreateBundle: publicLimit === null || currentBundleCount < publicLimit,
       },
       stats: quickStats,
       plans: PLANS,
-      appUrl: process.env.SHOPIFY_APP_URL || "",
       upgraded: upgraded === "true",
-      callbackError: error || null,
+      callbackError: error ?? null,
     });
   } catch (error: any) {
     AppLogger.error("Error loading billing page", {
@@ -84,7 +88,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
         subscription: null,
         stats: null,
         plans: PLANS,
-        appUrl: process.env.SHOPIFY_APP_URL || "",
         upgraded: false,
         callbackError: null,
       },
@@ -95,54 +98,41 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 export async function action({ request }: ActionFunctionArgs) {
   const { admin, session } = await authenticate.admin(request);
-  const shopDomain = session.shop;
 
   const formData = await request.formData();
   const intent = formData.get("intent");
 
   if (intent === "upgrade") {
     try {
-      const storeHandle = shopDomain.replace(".myshopify.com", "");
-      const apiKey = process.env.SHOPIFY_API_KEY;
-      const returnUrl = `https://admin.shopify.com/store/${storeHandle}/apps/${apiKey}/app/billing/callback`;
-
-      const result = await BillingService.createSubscription(admin, {
-        shopDomain,
-        plan: "grow",
-        returnUrl,
+      const app = await getCurrentShopifyAppIdentity(admin);
+      return json({
+        success: true,
+        hostedPlanUrl: getShopifyAppPricingUrl(session.shop, app.handle),
       });
-
-      if (!result.success) {
-        return json({ error: result.error }, { status: 400 });
-      }
-
-      return json({ success: true, confirmationUrl: result.confirmationUrl });
     } catch (error: any) {
-      AppLogger.error("Error creating subscription", {
+      AppLogger.error("Error opening the hosted Growth plan", {
         component: "app.billing",
         operation: "action-upgrade"
       }, error);
 
-      return json({ error: "Failed to create subscription" }, { status: 500 });
+      return json({ error: "Failed to open the hosted Growth plan" }, { status: 500 });
     }
   }
 
   if (intent === "cancel") {
     try {
-      const result = await BillingService.cancelSubscription(admin, shopDomain);
-
-      if (!result.success) {
-        return json({ error: result.error }, { status: 400 });
-      }
-
-      return json({ success: true, message: "Subscription cancelled successfully" });
+      const app = await getCurrentShopifyAppIdentity(admin);
+      return json({
+        success: true,
+        hostedPlanUrl: getShopifyAppPricingUrl(session.shop, app.handle),
+      });
     } catch (error: any) {
-      AppLogger.error("Error cancelling subscription", {
+      AppLogger.error("Error opening Shopify plan management", {
         component: "app.billing",
         operation: "action-cancel"
       }, error);
 
-      return json({ error: "Failed to cancel subscription" }, { status: 500 });
+      return json({ error: "Failed to open Shopify plan management" }, { status: 500 });
     }
   }
 
@@ -150,18 +140,13 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 function CustomProgressBar({ progress, tone }: { progress: number; tone: string }) {
-  const barColor =
-    tone === "success" ? "#008060" :
-    tone === "warning" ? "#ffc453" : "#d82c0d";
   return (
-    <div style={{ height: 6, background: "#e3e3e3", borderRadius: 3, overflow: "hidden" }}>
+    <div className={billingStyles.progressTrack}>
       <div
+        className={billingStyles.progressBar}
+        data-tone={tone}
         style={{
-          height: "100%",
           width: `${Math.min(100, Math.max(0, progress))}%`,
-          background: barColor,
-          borderRadius: 3,
-          transition: "width 0.3s ease",
         }}
       />
     </div>
@@ -196,14 +181,14 @@ export default function BillingPage() {
   }, [fetcher, closeCancelConfirm]);
 
   useEffect(() => {
-    if (fetcher.data && "confirmationUrl" in fetcher.data && fetcher.data.confirmationUrl) {
-      open(fetcher.data.confirmationUrl, "_top");
+    if (fetcher.data && "hostedPlanUrl" in fetcher.data && fetcher.data.hostedPlanUrl) {
+      open(fetcher.data.hostedPlanUrl, "_top");
     }
   }, [fetcher.data]);
 
-  const currentPlan = data.subscription?.plan || "free";
+  const currentPlan = data.subscription?.plan ?? "free";
   const isFreePlan = currentPlan === "free";
-  const isGrowPlan = currentPlan === "grow";
+  const isGrowthPlan = currentPlan === "growth";
 
   const usagePercentage = data.subscription
     ? calculateUsagePercentage(data.subscription.currentBundleCount, data.subscription.bundleLimit)
@@ -227,7 +212,7 @@ export default function BillingPage() {
         <div className={billingStyles.pageShell}>
           <AdminPageBackTitle
             title={t("billing.route.title")}
-            backLabel="Back to previous page"
+            backLabel={t("billing.actions.back")}
             onBack={handleBack}
           />
           <s-stack direction="block" gap="large">
@@ -253,7 +238,7 @@ export default function BillingPage() {
                 <s-stack direction="block" gap="small-100">
                   <s-stack direction="inline" alignItems="center" gap="small-100">
                     <h2 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>{t("billing.route.currentPlan")}</h2>
-                    {isGrowPlan && (
+                    {isGrowthPlan && (
                       <div className={billingStyles.starIcon}>
                         <s-icon type="check" />
                       </div>
@@ -261,14 +246,14 @@ export default function BillingPage() {
                   </s-stack>
                   <s-stack direction="inline" alignItems="center" gap="small">
                     <span style={{ fontSize: 20, fontWeight: 700 }}>{PLANS[currentPlan].name}</span>
-                    <s-badge tone={isGrowPlan ? "success" : "info"}>
+                    <s-badge tone={isGrowthPlan ? "success" : "info"}>
                       {data.subscription?.isActive ? t("billing.route.active") : t("billing.route.inactive")}
                     </s-badge>
                   </s-stack>
                 </s-stack>
-                {isGrowPlan && (
+                {isGrowthPlan && (
                   <s-stack direction="block" gap="small-400" alignItems="end">
-                    <span style={{ fontSize: 28, fontWeight: 700 }}>${PLANS.grow.price}</span>
+                    <span style={{ fontSize: 28, fontWeight: 700 }}>${PLANS.growth.price}</span>
                     <p style={{ margin: 0, fontSize: 13, color: "#6d7175" }}>{t("billing.cards.perMonth")}</p>
                   </s-stack>
                 )}
@@ -286,14 +271,16 @@ export default function BillingPage() {
                       usagePercentage >= 70 ? "warning" : "success"
                     }
                   >
-                    {t("billing.route.bundleCount", { current: data.subscription?.currentBundleCount || 0, limit: data.subscription?.bundleLimit || 0 })}
+                    {isFreePlan
+                      ? t("billing.route.bundleCount", { current: data.subscription?.currentBundleCount ?? 0, limit: data.subscription?.bundleLimit ?? 0 })
+                      : t("billing.values.unlimited")}
                   </s-badge>
                 </s-stack>
-                <CustomProgressBar progress={usagePercentage} tone={progressBarTone} />
+                {isFreePlan && <CustomProgressBar progress={usagePercentage} tone={progressBarTone} />}
                 {!data.subscription?.canCreateBundle && (
                   <s-banner
                     tone="warning"
-                    heading="Bundle limit reached"
+                    heading={t("common.upgradePrompt.limitReachedTitle")}
                     dismissible={false}
                     hidden={false}
                   >
@@ -332,24 +319,17 @@ export default function BillingPage() {
               )}
 
               {/* Cancel Subscription */}
-              {isGrowPlan && !showCancelConfirm && (
+              {isGrowthPlan && !showCancelConfirm && (
                 <>
                   <s-divider />
-                  <button
-                    style={{
-                      background: "none",
-                      border: "none",
-                      padding: 0,
-                      color: "#d82c0d",
-                      cursor: "pointer",
-                      fontSize: 14,
-                      textAlign: "left",
-                    }}
+                  <s-button
+                    variant="tertiary"
+                    tone="critical"
                     onClick={openCancelConfirm}
-                    disabled={isCancelling}
+                    disabled={isCancelling || undefined}
                   >
                     {t("billing.route.cancelSubscription")}
-                  </button>
+                  </s-button>
                 </>
               )}
 
@@ -393,14 +373,14 @@ export default function BillingPage() {
           {/* Plan Features */}
           <s-section>
             <s-stack direction="block" gap="base">
-              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>{t("billing.route.features")}</h3>
+              <s-heading>{t("billing.route.features")}</s-heading>
               <div className={billingStyles.featuresGrid}>
-                {PLANS[currentPlan].features.map((feature, index) => (
-                  <s-stack key={index} direction="inline" alignItems="center" gap="small-100">
+                {PLANS[currentPlan].featureMessageIds.map((messageId) => (
+                  <s-stack key={messageId} direction="inline" alignItems="center" gap="small-100">
                     <div className={billingStyles.checkIcon}>
                       <s-icon type="check" />
                     </div>
-                    <span style={{ fontSize: 14 }}>{feature}</span>
+                    <s-text>{t(messageId)}</s-text>
                   </s-stack>
                 ))}
               </div>

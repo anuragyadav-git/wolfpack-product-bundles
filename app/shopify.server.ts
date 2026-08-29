@@ -8,7 +8,6 @@ import { PrismaSessionStorage } from "@shopify/shopify-app-session-storage-prism
 import prisma from "./db.server";
 import { CartTransformService } from "./services/cart-transform-service.server";
 import { AddOnDiscountFunctionService } from "./services/addon-discount-function-service.server";
-import { BillingService } from "./services/billing.server";
 import { ensureVariantBundleMetafieldDefinitions } from "./services/bundles/metafield-sync.server";
 import { syncThemeColors } from "./services/theme-colors.server";
 import { activateUtmPixel } from "./services/pixel-activation.server";
@@ -49,9 +48,13 @@ const shopify = shopifyApp({
         AppLogger.error("Failed to create metafield definitions", { shop: session.shop }, error);
       }
 
-      // Create or get shop record with free plan subscription
+      // Create or reactivate the shop record. Shopify App Pricing is verified separately.
       try {
-        await BillingService.ensureShop(session.shop, session.shop);
+        await prisma.shop.upsert({
+          where: { shopDomain: session.shop },
+          create: { shopDomain: session.shop, name: session.shop },
+          update: { uninstalledAt: null },
+        });
         shopifyShopGid = await ensureShopIdentity(setupAdmin, session.shop);
         await recordBusinessEvent({
           eventHandle: existingShop ? "app_reauthorized" : "app_installed",

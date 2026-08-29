@@ -5,7 +5,7 @@
     "settings": "Configurações",
     "integrations": "Integrações",
     "analytics": "Análises",
-    "pricing": "Preços",
+    "billing": "Cobrança",
     "events": "Atualizações e perguntas frequentes"
   },
   "integrations": {
@@ -169,6 +169,10 @@
     }
   },
   "settingsDcp": {
+    "growthGate": {
+      "heading": "Controles de design do Growth",
+      "body": "As cores básicas da marca e a tipografia continuam editáveis no Free. Faça upgrade para o Growth para alterar cores avançadas, cantos, imagens e GIFs."
+    },
     "preview": {
       "heading": "Prévia ao vivo",
       "unsaved": "As alterações não salvas aparecem aqui.",
@@ -404,10 +408,10 @@
     },
     "upgradePrompt": {
       "limitReachedTitle": "Limite de pacotes atingido",
-      "limitReachedBody": "Você usou todos os {{limit}} pacotes do plano Gratuito. Faça upgrade para Grow e tenha até 20 pacotes.",
+      "limitReachedBody": "Você usou o limite de pacotes públicos do plano Grátis. Growth inclui pacotes públicos ilimitados.",
       "approachingTitle": "Limite de pacotes próximo",
-      "approachingBody": "Você está usando {{current}} de {{limit}} pacotes. Faça upgrade para Grow e tenha até 20 pacotes.",
-      "usageBody": "Você está usando {{current}} de {{limit}} pacotes no plano Gratuito. Precisa de mais? Faça upgrade para Grow e tenha 20 pacotes."
+      "approachingBody": "Você usa {{current}} de {{limit}} pacotes públicos. Growth inclui pacotes públicos ilimitados.",
+      "usageBody": "Você usa {{current}} de {{limit}} pacotes públicos no Grátis. Growth inclui pacotes públicos ilimitados."
     },
     "discardChanges": {
       "title": "Descartar todas as alterações não salvas",
@@ -480,28 +484,27 @@
     },
     "error": {
       "heading": "Problema na assinatura",
-      "missingChargeId": "Falha na confirmação da assinatura: ID da cobrança ausente.",
-      "confirmationFailed": "Não foi possível confirmar a assinatura com a Shopify.",
+      "verificationFailed": "A Shopify não conseguiu verificar a assinatura atual. Tente novamente.",
       "unexpected": "Ocorreu um erro inesperado durante a configuração da assinatura."
     },
     "upgradeModal": {
-      "heading": "Fazer upgrade para o plano Grow",
-      "confirm": "Confirmar upgrade - US$ {{price}}/mês",
-      "redirect": "Você será redirecionado para a Shopify para concluir sua assinatura.",
-      "benefitsHeading": "O que você recebe com o Grow:",
-      "bundleLimit": "Até 20 pacotes (atualmente {{current}}/{{limit}})",
-      "billedMonthly": "Cobrado mensalmente pela Shopify",
+      "heading": "Escolher Growth",
+      "confirm": "Continuar para a Shopify",
+      "redirect": "Você será redirecionado para a Shopify para escolher cobrança mensal ou anual.",
+      "benefitsHeading": "Growth inclui:",
+      "managedByShopify": "A seleção e cobrança do plano são gerenciadas pela Shopify",
       "benefits": {
-        "noRevenueCap": "Sem limite de receita de pacotes - o plano gratuito é limitado a US$ 500/mês",
-        "advancedDiscounts": "Regras avançadas de desconto",
+        "unlimitedPublicBundles": "Pacotes públicos e etapas ilimitados",
+        "allTemplatesDesign": "Todos os modelos e controles de design avançados",
+        "advancedAnalytics": "Análises avançadas de pacotes",
         "prioritySupport": "Suporte prioritário"
       }
     },
     "success": {
-      "heading": "Boas-vindas ao plano Grow!",
+      "heading": "Growth está ativo",
       "body": "Sua assinatura foi ativada. Agora você tem acesso a todos os recursos premium.",
       "bundleLimit": "Limite de pacotes",
-      "bundleLimitValue": "20 pacotes",
+      "bundleLimitValue": "Ilimitados",
       "designControl": "Controle de design",
       "fullAccess": "Acesso completo",
       "support": "Suporte",
@@ -509,26 +512,27 @@
     },
     "cards": {
       "currentPlan": "Plano atual",
-      "freePrice": "Grátis",
-      "freeDescription": "Para vendas de pacotes de até US$ 500/mês - grátis até você crescer",
+      "freePrice": "$0",
+      "freeDescription": "Crie, publique e venda com um pacote completo",
       "includes": "Inclui:",
       "freePlan": "Plano gratuito",
       "mostPopular": "Mais popular",
       "perMonth": "/ mês",
-      "growDescription": "Para vendas de pacotes acima de US$ 500/mês - sem limite de receita",
-      "growIncludes": "Tudo do plano Grátis, mais:",
-      "upgradeToGrow": "Fazer upgrade para Grow",
-      "cancelAnytimeBilled": "Cancele quando quiser. Cobrado pela Shopify."
+      "growthDescription": "Merchandising, personalização, análises e escala avançados",
+      "growthIncludes": "Tudo do plano Grátis, mais:",
+      "chooseGrowth": "Escolher Growth",
+      "annualPrice": "Ou US$ {{price}} por ano",
+      "trialAndBilling": "Teste grátis de {{days}} dias. Escolha cobrança mensal ou anual na Shopify."
     },
     "cta": {
       "heading": "Pronto para expandir seu negócio de pacotes?",
-      "body": "Faça upgrade para o plano Grow para duplicar os pacotes, personalizar totalmente o design e ter suporte prioritário.",
+      "body": "Escolha Growth para pacotes públicos ilimitados, todos os modelos, design e análises avançados e suporte prioritário.",
       "highlights": {
-        "bundles": "20 pacotes",
+        "bundles": "Pacotes públicos ilimitados",
         "design": "Painel de controle de design",
         "support": "Suporte prioritário"
       },
-      "upgrade": "Fazer upgrade para Grow - US$ {{price}}/mês",
+      "upgrade": "Ver Growth",
       "cancelAnytime": "Cancele quando quiser"
     },
     "route": {
@@ -540,21 +544,22 @@
       "bundleUsage": "Uso de pacotes",
       "bundleCount": "{{current}} / {{limit}} pacotes",
       "limitReached": "Você atingiu seu limite de pacotes.",
-      "limitUpgrade": "Faça upgrade para Grow para ter mais pacotes.",
+      "limitUpgrade": "Veja Growth para pacotes públicos ilimitados.",
       "overview": "Visão geral dos pacotes",
       "activeBundles": "Pacotes ativos",
       "totalSteps": "Total de etapas",
       "productPage": "Página do produto",
       "fullPage": "Página inteira",
-      "cancelSubscription": "Cancelar assinatura",
-      "cancelHeading": "Cancelar assinatura?",
-      "downgradeBody": "Você mudará para o plano Gratuito com limite de {{limit}} pacotes.",
-      "archiveWarning": "Aviso: você tem {{current}} pacotes. Os {{excess}} pacotes excedentes serão arquivados (não excluídos).",
-      "confirmCancellation": "Confirmar cancelamento",
+      "cancelSubscription": "Gerenciar assinatura",
+      "cancelHeading": "Gerenciar assinatura na Shopify?",
+      "downgradeBody": "A Shopify mostra a data efetiva antes da mudança de plano.",
+      "archiveWarning": "Toda a configuração dos pacotes é preservada após a redução.",
+      "confirmCancellation": "Abrir o gerenciamento de planos da Shopify",
       "keepSubscription": "Manter assinatura",
       "features": "Recursos do seu plano",
       "needHelp": "Precisa de ajuda?",
       "helpBody": "Tem dúvidas sobre cobrança ou precisa de um plano personalizado? Nossa equipe está aqui para ajudar."
     }
-  }
+  },
+  "subscription": { "analytics": { "summaryNotice": "Grátis inclui um resumo de atividade de 30 dias. Growth adiciona intervalos personalizados, detalhes, UTM, preenchimento e exportação CSV." } }
 }

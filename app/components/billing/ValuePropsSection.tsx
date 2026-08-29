@@ -1,5 +1,7 @@
 import { VALUE_PROPS, type ValueProp } from "../../constants/pricing-data";
 import valuePropStyles from "../../styles/billing/value-props.module.css";
+import brandStyles from "../../styles/billing/subscription-brand.module.css";
+import { useTranslation } from "react-i18next";
 
 export interface ValuePropsSectionProps {
   valueProps?: ValueProp[];
@@ -8,30 +10,28 @@ export interface ValuePropsSectionProps {
 export function ValuePropsSection({
   valueProps = VALUE_PROPS,
 }: ValuePropsSectionProps) {
+  const { t } = useTranslation();
   return (
     <s-section>
       <s-stack direction="block" gap="base">
         <s-stack direction="inline" alignItems="center" gap="small-100">
-          <div style={{ color: "#ffc453" }}>
+          <div className={brandStyles.accent}>
             <s-icon type="check" />
           </div>
-          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>Why Upgrade to Grow?</h3>
+          <h3 className={brandStyles.sectionTitle}>{t("billing.cta.heading")}</h3>
         </s-stack>
         <div className={valuePropStyles.grid}>
           {valueProps.map((prop, index) => (
             <div
               key={index}
-              style={{
-                padding: "1rem",
-                backgroundColor: "#f6f6f7",
-                borderRadius: "8px",
-                textAlign: "center",
-              }}
+              className={valuePropStyles.card}
             >
               <s-stack direction="block" gap="small-100">
-                <span style={{ fontSize: 28 }}>{prop.icon}</span>
-                <h4 style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>{prop.title}</h4>
-                <p style={{ margin: 0, fontSize: 13, color: "#6d7175" }}>{prop.description}</p>
+                <span className={valuePropStyles.icon}>
+                  <s-icon type={prop.icon} size="base" />
+                </span>
+                <h4 className={valuePropStyles.title}>{t(prop.titleMessageId)}</h4>
+                <p className={valuePropStyles.description}>{t(prop.descriptionMessageId)}</p>
               </s-stack>
             </div>
           ))}

@@ -5,7 +5,7 @@
     "settings": "Einstellungen",
     "integrations": "Integrationen",
     "analytics": "Analysen",
-    "pricing": "Preise",
+    "billing": "Abrechnung",
     "events": "Updates und FAQs"
   },
   "integrations": {
@@ -169,6 +169,10 @@
     }
   },
   "settingsDcp": {
+    "growthGate": {
+      "heading": "Design-Steuerelemente in Growth",
+      "body": "Grundlegende Markenfarben und Typografie bleiben im Free-Tarif bearbeitbar. Wechsle zu Growth, um erweiterte Farben, Ecken, Bilder und GIFs zu ändern."
+    },
     "preview": {
       "heading": "Live-Vorschau",
       "unsaved": "Nicht gespeicherte Änderungen werden hier angezeigt.",
@@ -404,10 +408,10 @@
     },
     "upgradePrompt": {
       "limitReachedTitle": "Bundle-Limit erreicht",
-      "limitReachedBody": "Du hast alle {{limit}} Bundles im kostenlosen Tarif verwendet. Upgrade auf Grow für bis zu 20 Bundles.",
+      "limitReachedBody": "Du hast das Limit öffentlicher Bundles im kostenlosen Tarif erreicht. Growth enthält unbegrenzte öffentliche Bundles.",
       "approachingTitle": "Bundle-Limit fast erreicht",
-      "approachingBody": "Du verwendest {{current}} von {{limit}} Bundles. Upgrade auf Grow für bis zu 20 Bundles.",
-      "usageBody": "Du verwendest {{current}} von {{limit}} Bundles im kostenlosen Tarif. Benötigst du mehr? Upgrade auf Grow für 20 Bundles."
+      "approachingBody": "Du verwendest {{current}} von {{limit}} öffentlichen Bundles. Growth enthält unbegrenzte öffentliche Bundles.",
+      "usageBody": "Du verwendest {{current}} von {{limit}} öffentlichen Bundles im kostenlosen Tarif. Growth enthält unbegrenzte öffentliche Bundles."
     },
     "discardChanges": {
       "title": "Alle nicht gespeicherten Änderungen verwerfen",
@@ -480,28 +484,27 @@
     },
     "error": {
       "heading": "Abonnementproblem",
-      "missingChargeId": "Abonnementbestätigung fehlgeschlagen: Zahlungs-ID fehlt.",
-      "confirmationFailed": "Abonnement konnte nicht bei Shopify bestätigt werden.",
+      "verificationFailed": "Shopify konnte das aktuelle Abonnement nicht bestätigen. Versuche es erneut.",
       "unexpected": "Beim Einrichten des Abonnements ist ein unerwarteter Fehler aufgetreten."
     },
     "upgradeModal": {
-      "heading": "Auf den Grow-Tarif upgraden",
-      "confirm": "Upgrade bestätigen - ${{price}}/Monat",
-      "redirect": "Du wirst zu Shopify weitergeleitet, um dein Abonnement abzuschließen.",
-      "benefitsHeading": "Das erhältst du mit Grow:",
-      "bundleLimit": "Bis zu 20 Bundles (aktuell {{current}}/{{limit}})",
-      "billedMonthly": "Monatliche Abrechnung über Shopify",
+      "heading": "Growth wählen",
+      "confirm": "Weiter zu Shopify",
+      "redirect": "Du wirst zu Shopify weitergeleitet, um monatliche oder jährliche Abrechnung zu wählen.",
+      "benefitsHeading": "Growth enthält:",
+      "managedByShopify": "Tarifauswahl und Abrechnung werden von Shopify verwaltet",
       "benefits": {
-        "noRevenueCap": "Kein Umsatzlimit für Bundles - der kostenlose Tarif ist auf $500/Monat begrenzt",
-        "advancedDiscounts": "Erweiterte Rabattregeln",
+        "unlimitedPublicBundles": "Unbegrenzte öffentliche Bundles und Schritte",
+        "allTemplatesDesign": "Alle Vorlagen und erweiterten Design-Steuerelemente",
+        "advancedAnalytics": "Erweiterte Bundle-Analysen",
         "prioritySupport": "Priorisierter Support"
       }
     },
     "success": {
-      "heading": "Willkommen im Grow-Tarif!",
+      "heading": "Growth ist aktiv",
       "body": "Dein Abonnement wurde aktiviert. Du hast jetzt Zugriff auf alle Premium-Funktionen.",
       "bundleLimit": "Bundle-Limit",
-      "bundleLimitValue": "20 Bundles",
+      "bundleLimitValue": "Unbegrenzt",
       "designControl": "Designsteuerung",
       "fullAccess": "Voller Zugriff",
       "support": "Support",
@@ -509,26 +512,27 @@
     },
     "cards": {
       "currentPlan": "Aktueller Tarif",
-      "freePrice": "Kostenlos",
-      "freeDescription": "Für Bundle-Umsätze bis $500/Monat - kostenlos, bis du wächst",
+      "freePrice": "$0",
+      "freeDescription": "Erstelle, veröffentliche und verkaufe mit einem vollständigen Bundle",
       "includes": "Enthält:",
       "freePlan": "Kostenloser Tarif",
       "mostPopular": "Am beliebtesten",
       "perMonth": "/ Monat",
-      "growDescription": "Für Bundle-Umsätze über $500/Monat - kein Umsatzlimit",
-      "growIncludes": "Alles aus Kostenlos, plus:",
-      "upgradeToGrow": "Auf Grow upgraden",
-      "cancelAnytimeBilled": "Jederzeit kündbar. Abrechnung über Shopify."
+      "growthDescription": "Erweitertes Merchandising, Anpassung, Analysen und Skalierung",
+      "growthIncludes": "Alles aus Kostenlos, plus:",
+      "chooseGrowth": "Growth wählen",
+      "annualPrice": "Oder ${{price}} pro Jahr",
+      "trialAndBilling": "{{days}} Tage kostenlos testen. Monatliche oder jährliche Abrechnung in Shopify wählen."
     },
     "cta": {
       "heading": "Bereit, dein Bundle-Geschäft auszubauen?",
-      "body": "Upgrade auf Grow für doppelt so viele Bundles, vollständige Designanpassung und priorisierten Support.",
+      "body": "Wähle Growth für unbegrenzte öffentliche Bundles, alle Vorlagen, erweitertes Design und Analysen sowie priorisierten Support.",
       "highlights": {
-        "bundles": "20 Bundles",
+        "bundles": "Unbegrenzte öffentliche Bundles",
         "design": "Design-Kontrollpanel",
         "support": "Priorisierter Support"
       },
-      "upgrade": "Auf Grow upgraden - ${{price}}/Monat",
+      "upgrade": "Growth ansehen",
       "cancelAnytime": "Jederzeit kündbar"
     },
     "route": {
@@ -540,21 +544,22 @@
       "bundleUsage": "Bundle-Nutzung",
       "bundleCount": "{{current}} / {{limit}} Bundles",
       "limitReached": "Du hast dein Bundle-Limit erreicht.",
-      "limitUpgrade": "Upgrade auf Grow für mehr Bundles.",
+      "limitUpgrade": "Growth bietet unbegrenzte öffentliche Bundles.",
       "overview": "Bundle-Übersicht",
       "activeBundles": "Aktive Bundles",
       "totalSteps": "Schritte insgesamt",
       "productPage": "Produktseite",
       "fullPage": "Ganze Seite",
-      "cancelSubscription": "Abonnement kündigen",
-      "cancelHeading": "Abonnement kündigen?",
-      "downgradeBody": "Du wirst auf den kostenlosen Tarif mit einem Limit von {{limit}} Bundles herabgestuft.",
-      "archiveWarning": "Warnung: Du hast {{current}} Bundles. Die überschüssigen {{excess}} Bundles werden archiviert (nicht gelöscht).",
-      "confirmCancellation": "Kündigung bestätigen",
+      "cancelSubscription": "Abonnement verwalten",
+      "cancelHeading": "Abonnement in Shopify verwalten?",
+      "downgradeBody": "Shopify zeigt das Wirksamkeitsdatum vor dem Tarifwechsel an.",
+      "archiveWarning": "Alle Bundle-Konfigurationen bleiben nach einem Downgrade erhalten.",
+      "confirmCancellation": "Shopify-Tarifverwaltung öffnen",
       "keepSubscription": "Abonnement behalten",
       "features": "Funktionen deines Tarifs",
       "needHelp": "Brauchst du Hilfe?",
       "helpBody": "Hast du Fragen zur Abrechnung oder benötigst einen individuellen Tarif? Unser Team hilft dir gerne."
     }
-  }
+  },
+  "subscription": { "analytics": { "summaryNotice": "Kostenlos enthält eine 30-Tage-Aktivitätsübersicht. Growth ergänzt benutzerdefinierte Zeiträume, Details, UTM, Nachfüllung und CSV-Export." } }
 }

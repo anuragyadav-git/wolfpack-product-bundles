@@ -5,11 +5,13 @@
   margin: 0 auto;
   padding: 0 clamp(16px, 3vw, 32px) 88px;
   overflow-x: clip;
+  color: #1f3d2e;
+  background: linear-gradient(180deg, rgb(244 237 226 / 55%), transparent 28rem);
 }
 
-/* Star icon color for Grow plan */
+/* Star icon color for Growth plan */
 .starIcon {
-  color: #ffc453;
+  color: #fe8a65;
 }
 
 /* Features grid layout */
@@ -21,5 +23,27 @@
 
 /* Check icon color for features */
 .checkIcon {
-  color: #008060;
+  color: #557f57;
+}
+
+.progressTrack {
+  height: 6px;
+  overflow: hidden;
+  background: rgb(167 194 154 / 30%);
+  border-radius: 3px;
+}
+
+.progressBar {
+  height: 100%;
+  background: #1f3d2e;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.progressBar[data-tone="highlight"] {
+  background: #fe8a65;
+}
+
+.progressBar[data-tone="critical"] {
+  background: #b42318;
 }

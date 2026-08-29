@@ -13,8 +13,7 @@ const readSource = (file: string) =>
 const components: Record<string, string[]> = {
   "app/components/billing/SubscriptionErrorBanner.tsx": [
     "billing.error.heading",
-    "billing.error.missingChargeId",
-    "billing.error.confirmationFailed",
+    "billing.error.verificationFailed",
     "billing.error.unexpected",
     "billing.actions.tryAgain",
     "billing.actions.contactSupport",
@@ -25,12 +24,11 @@ const components: Record<string, string[]> = {
     "billing.actions.cancel",
     "billing.upgradeModal.redirect",
     "billing.upgradeModal.benefitsHeading",
-    "billing.upgradeModal.bundleLimit",
-    "billing.upgradeModal.benefits.noRevenueCap",
-    "billing.upgradeModal.benefits.advancedDiscounts",
+    "billing.upgradeModal.benefits.unlimitedPublicBundles",
+    "billing.upgradeModal.benefits.allTemplatesDesign",
+    "billing.upgradeModal.benefits.advancedAnalytics",
     "billing.upgradeModal.benefits.prioritySupport",
-    "billing.upgradeModal.billedMonthly",
-    "billing.pricePerMonth",
+    "billing.upgradeModal.managedByShopify",
   ],
   "app/components/billing/UpgradeSuccessBanner.tsx": [
     "billing.success.heading",

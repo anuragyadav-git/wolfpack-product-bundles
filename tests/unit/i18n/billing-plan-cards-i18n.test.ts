@@ -15,10 +15,10 @@ const components: Record<string, string[]> = {
     "billing.cards.currentPlan", "billing.cards.freePrice", "billing.cards.freeDescription",
     "billing.cards.includes", "billing.cards.freePlan",
   ],
-  "app/components/billing/GrowPlanCard.tsx": [
+  "app/components/billing/GrowthPlanCard.tsx": [
     "billing.cards.mostPopular", "billing.cards.currentPlan", "billing.cards.perMonth",
-    "billing.cards.growDescription", "billing.cards.growIncludes", "billing.cards.upgradeToGrow",
-    "billing.cards.cancelAnytimeBilled",
+    "billing.cards.growthDescription", "billing.cards.growthIncludes", "billing.cards.chooseGrowth",
+    "billing.cards.annualPrice", "billing.cards.trialAndBilling",
   ],
 };
 

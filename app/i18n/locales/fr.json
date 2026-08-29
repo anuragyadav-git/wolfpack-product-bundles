@@ -5,7 +5,7 @@
     "settings": "Paramètres",
     "integrations": "Intégrations",
     "analytics": "Analyses",
-    "pricing": "Tarification",
+    "billing": "Facturation",
     "events": "Mises à jour et FAQ"
   },
   "integrations": {
@@ -169,6 +169,10 @@
     }
   },
   "settingsDcp": {
+    "growthGate": {
+      "heading": "Contrôles de design Growth",
+      "body": "Les couleurs de marque de base et la typographie restent modifiables avec Free. Passez à Growth pour modifier les couleurs avancées, les angles, les images et les GIF."
+    },
     "preview": {
       "heading": "Aperçu en direct",
       "unsaved": "Les modifications non enregistrées apparaissent ici.",
@@ -404,10 +408,10 @@
     },
     "upgradePrompt": {
       "limitReachedTitle": "Limite de lots atteinte",
-      "limitReachedBody": "Vous avez utilisé les {{limit}} lots du forfait Gratuit. Passez à Grow pour obtenir jusqu'à 20 lots.",
+      "limitReachedBody": "Vous avez utilisé la limite de lots publics de Gratuit. Growth inclut des lots publics illimités.",
       "approachingTitle": "Limite de lots bientôt atteinte",
-      "approachingBody": "Vous utilisez {{current}} lots sur {{limit}}. Passez à Grow pour obtenir jusqu'à 20 lots.",
-      "usageBody": "Vous utilisez {{current}} lots sur {{limit}} avec le forfait Gratuit. Besoin de plus ? Passez à Grow pour obtenir 20 lots."
+      "approachingBody": "Vous utilisez {{current}} lots publics sur {{limit}}. Growth inclut des lots publics illimités.",
+      "usageBody": "Vous utilisez {{current}} lots publics sur {{limit}} avec Gratuit. Growth inclut des lots publics illimités."
     },
     "discardChanges": {
       "title": "Ignorer toutes les modifications non enregistrées",
@@ -480,28 +484,27 @@
     },
     "error": {
       "heading": "Problème d'abonnement",
-      "missingChargeId": "Échec de la confirmation de l'abonnement : identifiant de paiement manquant.",
-      "confirmationFailed": "Impossible de confirmer l'abonnement auprès de Shopify.",
+      "verificationFailed": "Shopify n'a pas pu vérifier l'abonnement actuel. Réessayez.",
       "unexpected": "Une erreur inattendue s'est produite lors de la configuration de l'abonnement."
     },
     "upgradeModal": {
-      "heading": "Passer au forfait Grow",
-      "confirm": "Confirmer la mise à niveau - {{price}} $/mois",
-      "redirect": "Vous serez redirigé vers Shopify pour finaliser votre abonnement.",
-      "benefitsHeading": "Ce que vous obtenez avec Grow :",
-      "bundleLimit": "Jusqu'à 20 lots (actuellement {{current}}/{{limit}})",
-      "billedMonthly": "Facturé mensuellement via Shopify",
+      "heading": "Choisir Growth",
+      "confirm": "Continuer vers Shopify",
+      "redirect": "Vous serez redirigé vers Shopify pour choisir la facturation mensuelle ou annuelle.",
+      "benefitsHeading": "Growth comprend :",
+      "managedByShopify": "La sélection et la facturation du forfait sont gérées par Shopify",
       "benefits": {
-        "noRevenueCap": "Aucun plafond de revenus pour les lots - le forfait gratuit est limité à 500 $/mois",
-        "advancedDiscounts": "Règles de réduction avancées",
+        "unlimitedPublicBundles": "Lots publics et étapes illimités",
+        "allTemplatesDesign": "Tous les modèles et contrôles de design avancés",
+        "advancedAnalytics": "Analyses avancées des lots",
         "prioritySupport": "Assistance prioritaire"
       }
     },
     "success": {
-      "heading": "Bienvenue dans le forfait Grow !",
+      "heading": "Growth est actif",
       "body": "Votre abonnement a été activé. Vous avez maintenant accès à toutes les fonctionnalités premium.",
       "bundleLimit": "Limite de lots",
-      "bundleLimitValue": "20 lots",
+      "bundleLimitValue": "Illimités",
       "designControl": "Contrôle du design",
       "fullAccess": "Accès complet",
       "support": "Assistance",
@@ -509,26 +512,27 @@
     },
     "cards": {
       "currentPlan": "Forfait actuel",
-      "freePrice": "Gratuit",
-      "freeDescription": "Pour les ventes de lots jusqu'à 500 $/mois - gratuit jusqu'à votre croissance",
+      "freePrice": "$0",
+      "freeDescription": "Créez, publiez et vendez avec un lot complet",
       "includes": "Comprend :",
       "freePlan": "Forfait gratuit",
       "mostPopular": "Le plus populaire",
       "perMonth": "/ mois",
-      "growDescription": "Pour les ventes de lots supérieures à 500 $/mois - aucun plafond de revenus",
-      "growIncludes": "Tout ce qui est inclus dans Gratuit, plus :",
-      "upgradeToGrow": "Passer à Grow",
-      "cancelAnytimeBilled": "Annulez à tout moment. Facturé via Shopify."
+      "growthDescription": "Marchandisage, personnalisation, analyses et capacité avancés",
+      "growthIncludes": "Tout ce qui est inclus dans Gratuit, plus :",
+      "chooseGrowth": "Choisir Growth",
+      "annualPrice": "Ou {{price}} $ par an",
+      "trialAndBilling": "Essai gratuit de {{days}} jours. Choisissez la facturation mensuelle ou annuelle dans Shopify."
     },
     "cta": {
       "heading": "Prêt à développer votre activité de lots ?",
-      "body": "Passez au forfait Grow pour doubler le nombre de lots, personnaliser entièrement le design et bénéficier d'une assistance prioritaire.",
+      "body": "Choisissez Growth pour des lots publics illimités, tous les modèles, le design et les analyses avancés et l'assistance prioritaire.",
       "highlights": {
-        "bundles": "20 lots",
+        "bundles": "Lots publics illimités",
         "design": "Panneau de contrôle du design",
         "support": "Assistance prioritaire"
       },
-      "upgrade": "Passer à Grow - {{price}} $/mois",
+      "upgrade": "Voir Growth",
       "cancelAnytime": "Annulez à tout moment"
     },
     "route": {
@@ -540,21 +544,22 @@
       "bundleUsage": "Utilisation des lots",
       "bundleCount": "{{current}} / {{limit}} lots",
       "limitReached": "Vous avez atteint votre limite de lots.",
-      "limitUpgrade": "Passez à Grow pour obtenir plus de lots.",
+      "limitUpgrade": "Voir Growth pour des lots publics illimités.",
       "overview": "Aperçu des lots",
       "activeBundles": "Lots actifs",
       "totalSteps": "Total des étapes",
       "productPage": "Page produit",
       "fullPage": "Pleine page",
-      "cancelSubscription": "Annuler l'abonnement",
-      "cancelHeading": "Annuler l'abonnement ?",
-      "downgradeBody": "Vous passerez au forfait Gratuit avec une limite de {{limit}} lots.",
-      "archiveWarning": "Attention : vous avez {{current}} lots. Les {{excess}} lots excédentaires seront archivés (pas supprimés).",
-      "confirmCancellation": "Confirmer l'annulation",
+      "cancelSubscription": "Gérer l'abonnement",
+      "cancelHeading": "Gérer l'abonnement dans Shopify ?",
+      "downgradeBody": "Shopify affiche la date d'effet avant le changement de forfait.",
+      "archiveWarning": "Toute la configuration des lots est conservée après une rétrogradation.",
+      "confirmCancellation": "Ouvrir la gestion des forfaits Shopify",
       "keepSubscription": "Conserver l'abonnement",
       "features": "Fonctionnalités de votre forfait",
       "needHelp": "Besoin d'aide ?",
       "helpBody": "Vous avez des questions sur la facturation ou besoin d'un forfait personnalisé ? Notre équipe est là pour vous aider."
     }
-  }
+  },
+  "subscription": { "analytics": { "summaryNotice": "Gratuit inclut un résumé d'activité sur 30 jours. Growth ajoute les périodes personnalisées, les détails, les UTM, le rattrapage et l'export CSV." } }
 }
