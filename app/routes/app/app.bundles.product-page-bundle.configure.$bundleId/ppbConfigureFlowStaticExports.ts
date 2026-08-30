@@ -21,7 +21,7 @@ import {
 import { getParentProductStatusUi } from "../../../lib/parent-product-status-ui";
 import { handleAdminSaveLockedEvent } from "../../../lib/admin-save-lock";
 import { FilePicker } from "../../../components/shared/FilePicker";
-import { useAppBridge, SaveBar } from "@shopify/app-bridge-react";
+import { useAppBridge } from "@shopify/app-bridge-react";
 import { useBundleConfigurationState } from "../../../hooks/useBundleConfigurationState";
 import productPageBundleStyles from "../../../styles/routes/product-page-bundle-configure.module.css";
 import { UnlistedBundleBanner } from "../../../components/UnlistedBundleBanner";
@@ -100,7 +100,6 @@ export const ppbConfigureFlowStaticExports = {
   handleAdminSaveLockedEvent,
   FilePicker,
   useAppBridge,
-  SaveBar,
   useBundleConfigurationState,
   productPageBundleStyles,
   UnlistedBundleBanner,

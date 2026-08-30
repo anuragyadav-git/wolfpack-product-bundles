@@ -32,6 +32,9 @@ const applyFreePolicy = applyFreePlanBundlePolicy as jest.MockedFunction<
   typeof applyFreePlanBundlePolicy
 >;
 const recordEvent = recordBusinessEvent as jest.MockedFunction<typeof recordBusinessEvent>;
+const embeddedRedirect = jest.fn((destination: string) =>
+  new Response(null, { status: 302, headers: { Location: destination } }),
+);
 
 describe("App Pricing return loader", () => {
   beforeEach(() => {
@@ -39,6 +42,7 @@ describe("App Pricing return loader", () => {
     authenticateAdmin.mockResolvedValue({
       admin: {},
       session: { shop: "test-shop.myshopify.com" },
+      redirect: embeddedRedirect,
     } as any);
     applyFreePolicy.mockResolvedValue({
       retainedBundleId: null,
@@ -63,6 +67,7 @@ describe("App Pricing return loader", () => {
 
     expect(response.status).toBe(302);
     expect(response.headers.get("Location")).toBe("/app/billing?upgraded=true");
+    expect(embeddedRedirect).toHaveBeenCalledWith("/app/billing?upgraded=true");
     expect(resolveEntitlements).toHaveBeenCalledWith({
       shopDomain: "test-shop.myshopify.com",
       forceRefresh: true,
@@ -83,6 +88,7 @@ describe("App Pricing return loader", () => {
     });
 
     expect(response.headers.get("Location")).toBe("/app/billing");
+    expect(embeddedRedirect).toHaveBeenCalledWith("/app/billing");
     expect(applyFreePolicy).toHaveBeenCalledWith(expect.objectContaining({
       shopDomain: "test-shop.myshopify.com",
     }));
@@ -103,6 +109,9 @@ describe("App Pricing return loader", () => {
     });
 
     expect(response.headers.get("Location")).toBe(
+      "/app/billing?error=billing_unverified",
+    );
+    expect(embeddedRedirect).toHaveBeenCalledWith(
       "/app/billing?error=billing_unverified",
     );
     expect(applyFreePolicy).not.toHaveBeenCalled();

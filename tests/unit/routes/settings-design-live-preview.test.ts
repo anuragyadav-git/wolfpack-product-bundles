@@ -133,6 +133,29 @@ describe("DesignSettingsView live preview", () => {
     expect(view).toContain('value="#123456"');
   });
 
+  it("makes the brand-colors information banner dismissible", () => {
+    const view = renderToStaticMarkup(
+      React.createElement(DesignSettingsView, {
+        designFieldValues: {},
+        inheritedColorFieldKeys: [],
+        shopBrandColors: null,
+        isActiveSubpageDirty: false,
+        isPreviewModalOpen: false,
+        previewBundles: [],
+        setSettingsView: jest.fn(),
+        setIsPreviewModalOpen: jest.fn(),
+        setDesignFieldValues: jest.fn(),
+        setInheritedColorFieldKeys: jest.fn(),
+        discardActiveSettingsChanges: jest.fn(),
+        saveActiveSettingsChanges: jest.fn(),
+        advancedDesignAvailable: false,
+      }),
+    );
+
+    expect(view).toContain('heading="settingsDcp.growthGate.heading"');
+    expect(view).toContain("dismissible");
+  });
+
   it("keeps local Design controls and preview available without a storefront bundle", () => {
     const view = renderToStaticMarkup(
       React.createElement(DesignSettingsView, {

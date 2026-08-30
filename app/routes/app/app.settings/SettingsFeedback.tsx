@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useAppBridge } from "@shopify/app-bridge-react";
 import type { SettingsField } from "../../../lib/admin-configuration-surfaces";
 import styles from "../../../styles/routes/admin-configuration-surfaces.module.css";
@@ -15,17 +15,17 @@ export function SettingsContextualSaveBar({
   onSave: () => void;
 }) {
   const shopify = useAppBridge();
+  const isSaveBarShown = useRef(false);
+
   useEffect(() => {
     if (isOpen) {
+      isSaveBarShown.current = true;
       void shopify.saveBar.show("settings-contextual-save-bar");
-    } else {
+    } else if (isSaveBarShown.current) {
+      isSaveBarShown.current = false;
       void shopify.saveBar.hide("settings-contextual-save-bar");
     }
   }, [isOpen, shopify]);
-
-  useEffect(() => () => {
-    void shopify.saveBar.hide("settings-contextual-save-bar");
-  }, [shopify]);
 
   return (
     <ui-save-bar id="settings-contextual-save-bar">
