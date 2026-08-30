@@ -25,6 +25,7 @@ Admin editing, storefront rendering, and color-swatch tooltip behavior.
 | 11 | Color tooltip | Tooltip enabled in color mode | Hover/focus description and edge-aware placement | Suppressed on coarse/mobile pointers |
 | 12 | Image swatch | Variant with image | Semantic radio uses variant image and accessible label | Unavailable values disabled |
 | 13 | Delegated storefront selection | Radio swatch change event | Active product variant, price, image, inventory context, and render path update | Add remains separate mutation |
+| 14 | Category-filtered rerender after selection | Product has a selected variant that remains in the configured category subset | Rerender preserves that variant's identity, price, image, and inventory context | Prevents swatches from resetting to the first available variant |
 
 ## Acceptance Criteria
 

@@ -92,4 +92,46 @@ describe('PPB category-scoped variants', () => {
 
     expect(result).toEqual([hydratedProduct]);
   });
+
+  it('preserves the selected configured variant when rebuilding a category card', () => {
+    const step = {
+      categories: [{
+        categoryId: 'cat-configured-variants',
+        products: [{
+          selectionId: 'gid://shopify/Product/101',
+          variants: [
+            { selectionId: 'gid://shopify/ProductVariant/1001' },
+            { selectionId: 'gid://shopify/ProductVariant/1002' },
+          ],
+        }],
+      }],
+    };
+    const selectedProduct = {
+      ...hydratedProduct,
+      selectionId: '1002',
+      variantId: '1002',
+      variantTitle: '10',
+      price: 42900,
+      compareAtPrice: 44900,
+      imageUrl: 'https://cdn.example/ring-10.jpg',
+    };
+
+    const result = ProductPageLayoutShellMethods._filterProductsForInpageCategory.call(
+      createContext(),
+      step,
+      [selectedProduct],
+      0,
+    );
+
+    expect(result).toEqual([
+      expect.objectContaining({
+        selectionId: '1002',
+        variantId: '1002',
+        variantTitle: '10',
+        price: 42900,
+        compareAtPrice: 44900,
+        imageUrl: 'https://cdn.example/ring-10.jpg',
+      }),
+    ]);
+  });
 });
