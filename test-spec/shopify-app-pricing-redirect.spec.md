@@ -5,7 +5,7 @@ title: Shopify App Pricing Redirect Test Spec
 type: test-spec
 status: active
 summary: Defines secure hosted plan redirect and return verification behavior for Shopify App Pricing.
-last_audited: 2026-08-29
+last_audited: 2026-08-30
 owners:
   - engineering
 domains:
@@ -56,6 +56,7 @@ Send merchants to Shopify-hosted plan management and verify the resulting subscr
 | 9 | Manage plan | Upgrade or cancel action | Same Shopify-hosted plan management URL | No app-owned billing mutation. |
 | 10 | Unknown return state | Growth hint with failed verification | Billing error redirect | Redirect hints never grant access. |
 | 11 | Growth confirmation lifecycle | Modal state opens and closes | Polaris overlay opens and closes | Uses supported `showOverlay` and `hideOverlay` methods. |
+| 12 | Verified return navigation | Growth, Free, or unverified provider state | Authenticated Shopify redirect to the matching Billing destination | Preserve the embedded Admin session after Shopify-hosted plan approval. |
 
 ## Acceptance Criteria
 
@@ -63,3 +64,4 @@ Send merchants to Shopify-hosted plan management and verify the resulting subscr
 - [ ] Every merchant receives a pricing URL built from its authenticated shop and deployed app handle.
 - [ ] Monthly and annual billing are options on one Shopify-managed Growth plan.
 - [ ] Return handling grants access only after Partner API verification.
+- [ ] Return handling keeps merchants inside the authenticated embedded Admin app.
