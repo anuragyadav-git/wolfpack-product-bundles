@@ -205,7 +205,7 @@ describe("buildCategoryContract", () => {
     });
   });
 
-  it("builds a product-page direct-products category with variant flags", () => {
+  it("builds a product-page direct-products category with variant selector configuration", () => {
     expect(buildCategoryContract({
       bundleType: "product_page",
       id: "category3",
@@ -218,7 +218,9 @@ describe("buildCategoryContract", () => {
       conditions: [condition],
       categoryBanner: "https://cdn.example/category.png",
       displayVariantsAsIndividualProducts: true,
-      displayVariantsAsSwatches: true,
+      variantSelectorMode: "color_swatch",
+      swatchTooltipEnabled: true,
+      variantColorMap: { Gold: "#D4AF37" },
       autoNextStepOnConditionMet: true,
       multiLangData: { en: { name: "Featured products" } },
     })).toEqual({
@@ -233,7 +235,9 @@ describe("buildCategoryContract", () => {
       collections: [collection],
       categoryBanner: "https://cdn.example/category.png",
       displayVariantsAsIndividualProducts: true,
-      displayVariantsAsSwatches: true,
+      variantSelectorMode: "color_swatch",
+      swatchTooltipEnabled: true,
+      variantColorMap: { Gold: "#D4AF37" },
       multiLangData: { en: { name: "Featured products" } },
     });
   });
@@ -252,13 +256,29 @@ describe("buildCategoryContract", () => {
       subTitle: "",
       categoryBanner: "",
       displayVariantsAsIndividualProducts: false,
-      displayVariantsAsSwatches: false,
+      variantSelectorMode: "dropdown",
+      swatchTooltipEnabled: false,
+      variantColorMap: {},
       multiLangData: {},
     });
   });
 });
 
 describe("formatStepCategoryForRuntime", () => {
+  it("projects the canonical PPB selector configuration", () => {
+    expect(formatStepCategoryForRuntime({
+      id: "category-selector",
+      name: "Colors",
+      variantSelectorMode: "color_swatch",
+      swatchTooltipEnabled: true,
+      variantColorMap: { Navy: "#001F3F" },
+    }, 0)).toMatchObject({
+      variantSelectorMode: "color_swatch",
+      swatchTooltipEnabled: true,
+      variantColorMap: { Navy: "#001F3F" },
+    });
+  });
+
   it("preserves render-critical category product data for runtime/metafield output", () => {
     const hydratedProduct = {
       id: "gid://shopify/Product/111",

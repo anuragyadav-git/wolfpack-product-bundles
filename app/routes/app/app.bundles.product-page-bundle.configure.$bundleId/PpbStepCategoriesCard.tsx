@@ -68,7 +68,9 @@ export function PpbStepCategoriesCard({ step }: { step: any }) {
               collections: [],
               displayVariantsAsIndividualProducts:
                 displayVariantsForAllCategories,
-              displayVariantsAsSwatches: false,
+              variantSelectorMode: "dropdown",
+              swatchTooltipEnabled: false,
+              variantColorMap: {},
             },
           ]);
           markAsDirty();

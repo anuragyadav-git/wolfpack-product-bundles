@@ -5,7 +5,7 @@ title: Bundle Field Ownership
 type: architecture
 status: authoritative
 summary: Canonical ownership ledger for persisted bundle fields, public runtime fields, Shopify custom data, and retired aliases.
-last_audited: 2026-08-13
+last_audited: 2026-08-30
 owners:
   - engineering
 domains:
@@ -50,7 +50,7 @@ second persisted owner. The app's Sync Bundle action is the upgrade path.
 | --- | --- | --- |
 | `KEEP_USED` | Bundle identity, status, type, Shopify parent linkage, FPB design template/preset, steps, `StepProduct`, canonical `StepCategory`, pricing rules, direct `BundlePricing.displayOptions`, box selection, defaults, text, media, add-ons, visibility | Current Admin save, storefront formatter, widget, Cart Transform, or Shopify sync reads the field. |
 | `KEEP_PLATFORM` | Shopify product/variant IDs and handles, publication state, inventory settings, analytics/event identifiers | Required to address Shopify resources or provide an explicit platform capability. |
-| `KEEP_FOR_IMPLEMENTATION` | `showProductPrices`, `cartRedirectToCheckout`, `allowQuantityChanges`, `discountDisplayOverride`, and other merchant-visible controls whose runtime wiring is incomplete | The control is visible and merchant-authored. It must be wired or removed as a product decision; it must not be silently deleted as database debris. |
+| `KEEP_FOR_IMPLEMENTATION` | PPB category `variantSelectorMode`, `swatchTooltipEnabled`, and `variantColorMap`; `showProductPrices`, `cartRedirectToCheckout`, `allowQuantityChanges`, `discountDisplayOverride`, and other merchant-visible controls whose runtime wiring is incomplete | The contract is approved or merchant-visible and its Admin/storefront wiring is incomplete. It must be wired or removed as a product decision; it must not be silently deleted as database debris. |
 | `DERIVED` | Public `bundle_ui_config`, runtime `messaging`, compact product/category records, component references/quantities/pricing, signed runtime token payload | Generated at the server/Shopify boundary. Never write these shapes back as a second bundle source. |
 | `CONSOLIDATE_DUPLICATE` | Pricing display options | `BundlePricing.displayOptions` is the only persisted owner. `messages.displayOptions` is removed; runtime `messaging.displayOptions` is derived from the direct field. |
 | `REMOVE_LEGACY` | `Bundle.fullPageLayout`; `StepCategory.categoryRank`, `selectedProducts`, `collectionsData`, `collectionsSelectedData`; sparse `fields=bootstrap`; response timestamp; `$app.component_parents`; duplicate standard/camel-case metafield writers | Superseded aliases or abandoned contracts with no current owner. They are migrated once and removed, not read through fallbacks. |
@@ -75,12 +75,18 @@ field implicitly.
 
 Persisted and runtime category identity is `id`. Ordering is `sortOrder`.
 Selection sources are exactly `products` and `collections`. Category presentation,
-conditions, variant display options, translations, and auto-advance stay alongside
-those fields when configured.
+conditions, translations, and auto-advance stay alongside those fields when
+configured. PPB variant presentation uses exactly `variantSelectorMode`
+(`dropdown`, `pill`, `color_swatch`, or `image_swatch`),
+`swatchTooltipEnabled`, and the explicit `variantColorMap`. The color map accepts
+only merchant-authored six-digit hex values; storefront code must not infer CSS
+colors from arbitrary option names.
 
 There is no runtime or persistence fallback to `categoryId`, `rank`,
 `categoryRank`, `selectedProducts`, `collectionsData`, or
-`collectionsSelectedData`.
+`collectionsSelectedData`. The retired `displayVariantsAsSwatches` boolean is
+also not read or migrated into the selector enum; merchants use Sync Bundle to
+publish the current canonical defaults.
 
 ## Public Bundle API
 

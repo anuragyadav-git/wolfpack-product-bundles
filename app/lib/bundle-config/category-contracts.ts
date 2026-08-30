@@ -1,3 +1,8 @@
+import {
+  parseVariantSelectorConfiguration,
+  type VariantSelectorMode,
+} from "./variant-selector-config";
+
 export type CategoryBundleType = "full_page" | "product_page";
 
 export interface CategoryConditionContract {
@@ -41,7 +46,9 @@ export interface CategoryContractInput {
   autoNextStepOnConditionMet?: boolean;
   multiLangData?: Record<string, unknown>;
   displayVariantsAsIndividualProducts?: boolean;
-  displayVariantsAsSwatches?: boolean;
+  variantSelectorMode?: VariantSelectorMode;
+  swatchTooltipEnabled?: boolean;
+  variantColorMap?: Record<string, string>;
 }
 
 export function buildCategoryContract(input: CategoryContractInput) {
@@ -68,6 +75,8 @@ export function buildCategoryContract(input: CategoryContractInput) {
     };
   }
 
+  const variantSelector = parseVariantSelectorConfiguration(input);
+
   return {
     id: input.id,
     ...(input.title ? { title: input.title } : {}),
@@ -80,7 +89,7 @@ export function buildCategoryContract(input: CategoryContractInput) {
     collections,
     categoryBanner,
     displayVariantsAsIndividualProducts: input.displayVariantsAsIndividualProducts === true,
-    displayVariantsAsSwatches: input.displayVariantsAsSwatches === true,
+    ...variantSelector,
     multiLangData,
   };
 }

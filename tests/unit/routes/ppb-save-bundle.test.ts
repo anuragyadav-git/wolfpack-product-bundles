@@ -792,7 +792,9 @@ describe("PPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
             collections: [selectedCollection],
             categoryBanner: "https://cdn.example/category.png",
             displayVariantsAsIndividualProducts: true,
-            displayVariantsAsSwatches: true,
+            variantSelectorMode: "color_swatch",
+            swatchTooltipEnabled: true,
+            variantColorMap: { Gold: "#D4AF37" },
             multiLangData: { en: { title: "Pick audit items" } },
           },
         ],
@@ -818,7 +820,9 @@ describe("PPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
       collections: [selectedCollection],
       categoryBanner: "https://cdn.example/category.png",
       displayVariantsAsIndividualProducts: true,
-      displayVariantsAsSwatches: true,
+      variantSelectorMode: "color_swatch",
+      swatchTooltipEnabled: true,
+      variantColorMap: { Gold: "#D4AF37" },
       multiLangData: { en: { title: "Pick audit items" } },
     });
   });
