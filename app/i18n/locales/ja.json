@@ -374,6 +374,7 @@
       "enable": "有効にする",
       "enableHere": "ここで有効にする",
       "learnMore": "詳しく見る",
+      "view": "表示",
       "maybeLater": "後で行う",
       "setUpVisibility": "公開設定を行う",
       "reinstallApp": "アプリを再インストール",
@@ -398,6 +399,11 @@
     "unlistedBundle": {
       "title": "バンドルは非掲載です",
       "body": "見つけられるようにするには、Shopifyの商品でバンドル商品のステータスを有効に変更してください。"
+    },
+    "warningGroup": {
+      "heading": "操作が必要です",
+      "summary": "バンドルを公開するには、いくつかの操作が必要です。",
+      "modalTitle": "必要な操作"
     },
     "parentProductStatus": {
       "loadingTitle": "親商品のステータスを確認しています",

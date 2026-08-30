@@ -10,11 +10,15 @@ export function parseFpbPublicNumber(value: string | undefined): number | null {
   return Number.isSafeInteger(publicNumber) ? publicNumber : null;
 }
 
-export function buildFpbStorefrontUrl(shop: string, publicNumber: number): string {
+export function buildFpbStorefrontUrl(
+  shop: string,
+  publicNumber: number,
+  proxyRoot?: string,
+): string {
   if (!Number.isSafeInteger(publicNumber) || publicNumber < 1) {
     throw new Error("FPB public number must be a positive integer");
   }
-  return `https://${normalizeShopDomain(shop)}${buildStorefrontProxyPath(`wpb/${publicNumber}`)}`;
+  return `https://${normalizeShopDomain(shop)}${buildStorefrontProxyPath(`wpb/${publicNumber}`, proxyRoot)}`;
 }
 
 export function appendFpbPreviewToken(url: string, token: string): string {

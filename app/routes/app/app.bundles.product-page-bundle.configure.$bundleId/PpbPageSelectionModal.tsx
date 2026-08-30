@@ -6,6 +6,16 @@ import {
 } from "../_shared/bundle-configure/modal-utils";
 import { usePpbConfigureContext } from "./PpbConfigureContext";
 
+const PPB_PAGE_SELECTION_MODAL_ID = "ppb-page-selection-modal";
+
+export function dismissPpbPageSelectionModal(
+  modalRef: { current: { hideOverlay?: () => void } | null },
+  closePageSelectionModal: () => void,
+): void {
+  hidePolarisModal(modalRef);
+  closePageSelectionModal();
+}
+
 export function PpbPageSelectionModal() {
   const {
     availablePages,
@@ -23,8 +33,19 @@ export function PpbPageSelectionModal() {
   useModalHideListener(modalRef, closePageSelectionModal);
 
   return (
-    <s-modal ref={modalRef} heading="Select product page template" size="base">
-      <s-button slot="secondary-actions" onClick={closePageSelectionModal}>Cancel</s-button>
+    <s-modal
+      id={PPB_PAGE_SELECTION_MODAL_ID}
+      ref={modalRef}
+      heading="Select product page template"
+      size="base"
+    >
+      <s-button
+        slot="secondary-actions"
+        commandFor={PPB_PAGE_SELECTION_MODAL_ID}
+        command="--hide"
+      >
+        Cancel
+      </s-button>
       {availablePages.length > 0 ? (
         <s-stack direction="block" gap="small">
           {availablePages.map((template: { id?: string; handle?: string; title?: string }) => (
@@ -33,7 +54,10 @@ export function PpbPageSelectionModal() {
               variant="secondary"
               icon="theme-template"
               inlineSize="fill"
-              onClick={() => handlePageSelection(template)}
+              onClick={() => {
+                dismissPpbPageSelectionModal(modalRef, closePageSelectionModal);
+                void handlePageSelection(template);
+              }}
             >
               {template.title}
             </s-button>

@@ -374,6 +374,7 @@
       "enable": "Activer",
       "enableHere": "Activer ici",
       "learnMore": "En savoir plus",
+      "view": "Voir",
       "maybeLater": "Peut-être plus tard",
       "setUpVisibility": "Configurer la visibilité",
       "reinstallApp": "Réinstaller l'application",
@@ -398,6 +399,11 @@
     "unlistedBundle": {
       "title": "Votre lot n'est pas répertorié",
       "body": "Pour le rendre visible, définissez le statut du produit du lot sur Actif dans Shopify Produits."
+    },
+    "warningGroup": {
+      "heading": "Action requise",
+      "summary": "Quelques actions sont nécessaires pour publier le lot.",
+      "modalTitle": "Actions nécessaires"
     },
     "parentProductStatus": {
       "loadingTitle": "Vérification du statut du produit parent",

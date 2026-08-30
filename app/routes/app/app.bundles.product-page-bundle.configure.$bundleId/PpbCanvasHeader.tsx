@@ -1,14 +1,16 @@
 import { AppEmbedBanner } from "../../../components/AppEmbedBanner";
+import { AdminWarningGroup } from "../../../components/AdminWarningGroup";
 import { AdminPageTitleBar } from "../../../components/AdminPageNavigation";
 import { getReadinessScoreColor } from "../../../components/bundle-configure/BundleReadinessOverlay";
+import { useTranslation } from "react-i18next";
 import { usePpbConfigureContext } from "./PpbConfigureContext";
 
 export function PpbCanvasHeader() {
+  const { t } = useTranslation();
   const {
     UnlistedBundleBanner,
     appEmbedEnabled,
     bundle,
-    bundleProduct,
     fetcher,
     handleBackClick,
     handlePreviewBundle,
@@ -23,6 +25,13 @@ export function PpbCanvasHeader() {
     shop,
     themeEditorUrl,
   } = usePpbConfigureContext();
+  const bundleProductId =
+    loadedBundleProduct?.id ?? (bundle as any).shopifyProductId ?? null;
+  const numericProductId = bundleProductId?.split("/").pop() || null;
+  const hasUnlistedWarning =
+    parentProductStatusUi.showUnlistedBanner && Boolean(numericProductId);
+  const hasMultiplePublishWarnings =
+    !appEmbedEnabled && !parentProductStatusUi.isLoading && hasUnlistedWarning;
 
   return (
     <>
@@ -83,27 +92,49 @@ export function PpbCanvasHeader() {
           </s-button>
         </div>
       </div>
-      <AppEmbedBanner
-        appEmbedEnabled={appEmbedEnabled}
-        themeEditorUrl={themeEditorUrl}
-        onEnableClick={openThemeEditorForAppEmbed}
-      />
-      {(parentProductStatusUi.isLoading || parentProductStatusUi.showUnlistedBanner) && (
-        <div className={productPageBundleStyles.unlistedBannerGap}>
-          <UnlistedBundleBanner
-            shop={shop}
-            bundleProductId={
-              loadedBundleProduct?.id ?? (bundle as any).shopifyProductId ?? null
-            }
-            loading={parentProductStatusUi.isLoading}
-            onManage={() => {
-              const productId =
-                bundleProduct?.id?.split("/").pop() ||
-                (bundle as any).shopifyProductId?.split("/").pop();
-              if (productId) openProductInAdmin(productId);
-            }}
+      {hasMultiplePublishWarnings ? (
+        <AdminWarningGroup
+          warnings={[
+            {
+              id: "app-embed",
+              heading: t("common.appEmbed.guideTitle"),
+              message: t("common.appEmbed.body"),
+              ...(themeEditorUrl
+                ? {
+                    actionLabel: t("common.actions.enableHere"),
+                    onAction: openThemeEditorForAppEmbed,
+                  }
+                : {}),
+            },
+            {
+              id: "unlisted-bundle",
+              heading: t("common.unlistedBundle.title"),
+              message: t("common.unlistedBundle.body"),
+              actionLabel: t("common.actions.manage"),
+              onAction: () => openProductInAdmin(numericProductId!),
+            },
+          ]}
+        />
+      ) : (
+        <>
+          <AppEmbedBanner
+            appEmbedEnabled={appEmbedEnabled}
+            themeEditorUrl={themeEditorUrl}
+            onEnableClick={openThemeEditorForAppEmbed}
           />
-        </div>
+          {(parentProductStatusUi.isLoading || parentProductStatusUi.showUnlistedBanner) && (
+            <div className={productPageBundleStyles.unlistedBannerGap}>
+              <UnlistedBundleBanner
+                shop={shop}
+                bundleProductId={bundleProductId}
+                loading={parentProductStatusUi.isLoading}
+                onManage={() => {
+                  if (numericProductId) openProductInAdmin(numericProductId);
+                }}
+              />
+            </div>
+          )}
+        </>
       )}
     </>
   );
