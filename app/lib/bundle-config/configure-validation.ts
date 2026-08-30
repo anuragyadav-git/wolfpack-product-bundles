@@ -6,6 +6,7 @@ import {
   parsePricingTierBadge,
   validatePricingTierBadgeForMethod,
 } from "../pricing-tier-badge";
+import { parseVariantSelectorConfiguration } from "./variant-selector-config";
 
 export type BundleConfigureKind = "fpb" | "ppb";
 
@@ -433,6 +434,22 @@ export function validateBundleConfigureFormData(
       }
       if (list(category?.products).length === 0 && list(category?.collections).length === 0) {
         issues.push(issue(`${categoryBase}.resources`, "Add at least one product or collection.", "step_setup", { stepId, categoryId }));
+      }
+      if (kind === "ppb") {
+        try {
+          parseVariantSelectorConfiguration(category ?? {});
+        } catch (error) {
+          const message = error instanceof Error ? error.message : "Invalid variant selector configuration";
+          const field = message.includes("mode")
+            ? "variantSelectorMode"
+            : "variantColorMap";
+          issues.push(issue(
+            `${categoryBase}.${field}`,
+            message,
+            "step_setup",
+            { stepId, categoryId },
+          ));
+        }
       }
       validateConditions(issues, stepId, category?.conditions, `${categoryBase}.conditions`, categoryId);
     });

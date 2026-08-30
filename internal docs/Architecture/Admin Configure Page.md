@@ -89,7 +89,18 @@ Step Name, Category, Rules Configuration, and Step Config content is visually
 muted and inert until the merchant enables the step again. The save boundary
 also enforces Step 1 as enabled rather than relying only on the Admin control.
 
-PPB-only controls are explicit slots inside the shared rhythm. Category-level variant display controls update PPB `StepCategory.displayVariantsAsIndividualProducts` and `StepCategory.displayVariantsAsSwatches` fields; they are not step-wide FPB controls. Bundle Settings follows the same rule: shared rows cover overlapping settings, while FPB-only Product Slots / Slot Icon and PPB-only Variant Selector, discount display, banner, CSS, Bundle Embed, and Place Widget controls remain route-owned slots.
+PPB-only controls are explicit slots inside the shared rhythm. Category-level
+variant controls update `StepCategory.displayVariantsAsIndividualProducts`,
+`variantSelectorMode`, `swatchTooltipEnabled`, and `variantColorMap`; they are
+not step-wide FPB controls. Grouped variants support Dropdown, Pills, Color
+swatches, and Image swatches. Color mode alone exposes the tooltip switch and
+merchant-authored `option value = #RRGGBB` mappings. Invalid mappings remain in
+draft state and block Save instead of being discarded or interpreted as CSS.
+Individual-variant mode disables these grouped-variant controls without
+clearing their saved values. Bundle Settings follows the same ownership rule:
+shared rows cover overlapping settings, while FPB-only Product Slots / Slot
+Icon and PPB-only discount display, banner, CSS, Bundle Embed, and Place Widget
+controls remain route-owned slots.
 
 The former `Pre-order & Subscription Integration` Bundle Settings row is absent
 from both FPB and PPB. Its `individualSellingPlanSelection` state and form field

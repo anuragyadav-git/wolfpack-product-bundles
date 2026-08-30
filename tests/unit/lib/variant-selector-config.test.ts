@@ -1,5 +1,7 @@
 import {
+  parseVariantColorMapText,
   parseVariantSelectorConfiguration,
+  serializeVariantColorMap,
   VARIANT_SELECTOR_DEFAULTS,
 } from "../../../app/lib/bundle-config/variant-selector-config";
 
@@ -49,5 +51,17 @@ describe("PPB variant selector configuration", () => {
       variantSelectorMode: "color_swatch",
       variantColorMap: { Navy: "red;display:none" },
     })).toThrow("hex color");
+  });
+
+  it("round-trips merchant color mapping text", () => {
+    const mapping = parseVariantColorMapText("Navy = #001F3F\nSoft pink = #F8BBD0");
+    expect(mapping).toEqual({ Navy: "#001F3F", "Soft pink": "#F8BBD0" });
+    expect(serializeVariantColorMap(mapping)).toBe(
+      "Navy = #001F3F\nSoft pink = #F8BBD0",
+    );
+  });
+
+  it("reports the invalid color mapping line", () => {
+    expect(() => parseVariantColorMapText("Navy #001F3F")).toThrow("line 1");
   });
 });

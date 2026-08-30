@@ -303,7 +303,7 @@ _renderInpageStepProducts(stepIndex: string|number, target: any) {
       stockBadgeElement.className = 'product-stock-badge product-stock-badge--out';
       stockBadgeElement.textContent = outOfStockText;
     }
-    const variantSelectorElement = this.renderInlineCardVariantSelector(product, currentStep);
+    const variantSelectorElement = this.renderInlineCardVariantSelector(product, currentStep, stepIndex);
 
     if (usesCascadeCards) {
       const cascadeProduct = getCascadeSoleVariantDisplayProduct(productSelection);
@@ -383,7 +383,7 @@ _renderInpageStepProducts(stepIndex: string|number, target: any) {
   this.attachProductEventHandlers(target, stepIndex);
 },
 
-renderInlineCardVariantSelector(product: any, step: any) {
+renderInlineCardVariantSelector(product: any, step: any, stepIndex?: string | number) {
   if (!shouldRenderInlineVariantSelector({
     bundleVariantSelectorEnabled: this.selectedBundle?.variantSelectorEnabled !== false,
     product,
@@ -392,7 +392,7 @@ renderInlineCardVariantSelector(product: any, step: any) {
     return null;
   }
 
-  return this.renderVariantSelector(product);
+  return this.renderVariantSelector(product, stepIndex ?? this.currentStepIndex ?? 0, step);
 },
 
 // Create an "add more" card for incomplete steps

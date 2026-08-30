@@ -561,6 +561,8 @@ PPB Configure Page
 │   │   ├── Step name, min/max qty
 │   │   ├── Multi Language actions for step and category copy
 │   │   ├── Products / Collections pickers
+│   │   ├── Per-category grouped variant style: Dropdown / Pills / Color swatches / Image swatches
+│   │   ├── Color swatches: optional hover/focus tooltip and explicit `option value = #RRGGBB` mappings
 │   │   ├── Step conditions
 │   │   └── isFreeGift toggle + add-on fields and Multi Language actions for step, section, and footer copy
 │   └── [+ Add Step] button
@@ -668,6 +670,10 @@ items.
 - Product details and the magnifying-glass image affordance are FPB-only. PPB
   product images and titles are informational; explicit Add, quantity, and
   variant controls own PPB product selection.
+- PPB grouped products use each active category's Dropdown, Pills, Color
+  swatches, or Image swatches selector. Color is applied only from explicit
+  merchant mappings; optional tooltips support desktop hover and keyboard focus,
+  while mobile/coarse pointers retain a persistent selected-value label.
 - PPB Horizontal Slots and Vertical Slots retain the bundle-picker modal opened
   from empty/replacement slots; this picker is distinct from product details.
 - Step slot cards (empty/filled/locked states) with `addonLabel` for free gift tabs

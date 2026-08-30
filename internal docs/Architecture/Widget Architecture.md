@@ -101,7 +101,24 @@ PPB Horizontal Slots (`PDP_MODAL/MODAL`) and Vertical Slots (`PDP_MODAL/SIMPLIFI
 
 The shared picker is an 85dvh bottom sheet with three regions: a non-scrolling header, the only vertically scrolling catalog body, and a non-scrolling footer in normal flex flow. Footer geometry must never overlap product actions or focus rings. The catalog renders five tracks at 1440px, four at 1280px, and two at 768px and below; fixed track counts keep sparse rows from stretching. Modal lifecycle and exact opener-focus restoration remain owned by `modal-state-methods.ts`, while the global keyboard listener contains Tab focus only when the picker is the topmost drawer layer.
 
-Horizontal/Vertical modal cards keep native grouped-variant selectors inline at every viewport. A selector change updates only active card context; Add remains the selection mutation. Product images and titles are informational and do not open a nested product-details surface. A pure PPB modal-card presentation helper resolves `add`, `quantity`, or `maximum-reached` from per-product quantity validation. At maximum the localized `Added xN` action removes the full selected quantity. These overrides ignore `showQuantitySelectorOnCard` only for modal cards; Product List/Grid retain their in-page behavior.
+All four PPB templates resolve grouped-variant presentation from the active
+category's canonical `variantSelectorMode`: Dropdown, Pills, Color swatches, or
+Image swatches. Non-dropdown modes are semantic radio groups with unavailable
+values disabled. Color swatches use only the merchant's exact
+`variantColorMap`; unmapped values retain a neutral labeled presentation rather
+than inferring a CSS color. Optional color tooltips are described to keyboard
+focus, clamp/flip at viewport edges on precise pointers, and are replaced by a
+persistent selected-value label on coarse/mobile pointers. The existing
+delegated change path updates the active card variant, price, image, and
+inventory context; Add remains the bundle-selection mutation.
+
+Horizontal/Vertical modal cards keep these grouped-variant selectors inline at
+every viewport. Product images and titles are informational and do not open a
+nested product-details surface. A pure PPB modal-card presentation helper
+resolves `add`, `quantity`, or `maximum-reached` from per-product quantity
+validation. At maximum the localized `Added xN` action removes the full
+selected quantity. These overrides ignore `showQuantitySelectorOnCard` only for
+modal cards; Product List/Grid retain their in-page behavior.
 
 Filled Horizontal slots remain bounded by the existing responsive tile block-size token, while filled Vertical slots use the existing responsive row block-size as both their minimum and maximum. Product names wrap and visually clamp only within that boundary; their complete value remains in the DOM and the product-specific accessible name of the overlaid cross-badge remove control. The cross badge keeps a 44px interaction target, stops propagation so it cannot open replacement, and uses the existing single-removal and same-index focus-recovery paths.
 

@@ -35,13 +35,16 @@ function makeFlow() {
 }
 
 describe("PPB category variant control", () => {
-  it("renders the category's persisted checkbox inside its expanded accordion", () => {
+  it("renders the category's persisted variant merchandising controls", () => {
     const category = {
       id: "cat-1",
       name: "Category 1",
       products: [],
       collections: [],
       displayVariantsAsIndividualProducts: true,
+      variantSelectorMode: "color_swatch",
+      swatchTooltipEnabled: true,
+      variantColorMap: { Navy: "#001F3F" },
     };
     const step = { id: "step-1", StepCategory: [category] };
     mockUsePpbConfigureContext.mockReturnValue(makeFlow());
@@ -56,5 +59,10 @@ describe("PPB category variant control", () => {
 
     expect(view).toContain('label="Display variants as individual products"');
     expect(view).toContain('checked="true"');
+    expect(view).toContain('label="Variant selector style"');
+    expect(view).toContain('value="color_swatch"');
+    expect(view).toContain('label="Show color name on hover and focus"');
+    expect(view).toContain('label="Color mappings"');
+    expect(view).toContain("Navy = #001F3F");
   });
 });

@@ -138,6 +138,50 @@ describe("validateBundleConfigureFormData", () => {
     );
   });
 
+  it("validates PPB category selector mode and explicit color mappings", () => {
+    const issues = validateBundleConfigureFormData(
+      form({
+        stepsData: JSON.stringify([
+          {
+            id: "step-1",
+            name: "Step",
+            enabled: true,
+            StepCategory: [
+              {
+                id: "cat-1",
+                name: "Colors",
+                products: [{ id: "gid://shopify/Product/1" }],
+                collections: [],
+                variantSelectorMode: "tiles",
+              },
+              {
+                id: "cat-2",
+                name: "More colors",
+                products: [{ id: "gid://shopify/Product/2" }],
+                collections: [],
+                variantSelectorMode: "color_swatch",
+                swatchTooltipEnabled: true,
+                variantColorMap: { Navy: "red;display:none" },
+              },
+            ],
+          },
+        ]),
+      }),
+      "ppb",
+    );
+
+    expect(issues).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        path: "steps.step-1.categories.cat-1.variantSelectorMode",
+        section: "step_setup",
+      }),
+      expect.objectContaining({
+        path: "steps.step-1.categories.cat-2.variantColorMap",
+        section: "step_setup",
+      }),
+    ]));
+  });
+
   it.each(["fpb", "ppb"] as const)(
     "validates tier badge copy and method-compatible variables for %s",
     (kind) => {
