@@ -3,8 +3,8 @@ schema_version: 1
 id: shopify-app-pricing-setup-runbook
 title: Shopify App Pricing Setup Runbook
 type: runbook
-status: sit-configured-prod-pending
-summary: Records the completed SIT App Pricing setup and the equivalent production setup still required for Free and Growth.
+status: configured
+summary: Records the verified SIT and production Shopify App Pricing setup for Free and Growth.
 last_audited: 2026-08-30
 owners:
   - product
@@ -15,6 +15,7 @@ systems:
   - shopify-partner-dashboard
   - shopify-partner-api
 source_paths:
+  - app/routes/app/app.billing.return.tsx
   - app/services/subscriptions/shopify-app-pricing.server.ts
   - app/services/subscriptions/app-pricing-navigation.server.ts
 related_docs:
@@ -41,17 +42,16 @@ keywords:
 | Growth annual price | `$199 USD`; approved 2026-08-28 |
 | Growth trial | 14 days |
 | Growth top features | Unlimited public bundles and steps; all templates; advanced Design; advanced analytics; priority support |
-| Welcome link | Embedded `/app/billing/return`; exact Dashboard field pending |
-| Development-store treatment | SIT is a draft public app in the same Partner organization and can use Partner API plus no-charge development-store plan testing |
+| Welcome link | Embedded `/app/billing/return`; verified in SIT and PROD |
+| Development-store treatment | The Agent development store can test SIT and PROD plans without a charge; regular pricing applies if the store goes live |
 | Plan handles | Define as `free` and `growth` in Partner Dashboard |
 | Published locales | English only; primary |
 | Cutover | Single release; immediate enforcement |
 | Reviewer | Aditya Awasthi |
 
-SIT now has the Free and Growth plans configured with handles `free` and
+SIT and PROD have the Free and Growth plans configured with handles `free` and
 `growth`, the approved feature copy, monthly/yearly billing, and the 14-day
-trial. SIT remains an unpublished internal development app. Repeat the same
-configuration for PROD only when production cutover is approved.
+trial. SIT remains an unpublished internal development app.
 
 Create one Growth plan using Shopify's **monthly with yearly option** billing model. Set its monthly charge to `$19.99`, yearly charge to `$199`, and free trial duration to `14`. Shopify then owns the trial, billing-period changes, and proration. Do not create a local trial ledger or two separate Growth plans.
 
@@ -66,6 +66,11 @@ SHOPIFY_PARTNER_API_ACCESS_TOKEN
 ```
 
 The application queries Shopify Admin `app { id handle }` using the existing app session. The GID feeds `activeSubscription(appId, shopId)` and the handle builds the shop-specific hosted pricing destination. The return route treats `plan_handle` only as a hint and force-verifies the active subscription before granting Growth.
+
+After verification, the return loader must use the `redirect` function returned
+by `authenticate.admin(request)`. A plain Remix redirect to `/app/billing`
+resolves against the app server origin after Shopify-hosted approval, loses the
+embedded Admin context, and falls through to `/auth/login`.
 
 Partner organization `4162406`, Partner API version `2026-07`, and stable plan handles `free` and `growth` are application constants. Cache duration and the 24-hour paid outage grace use code-owned defaults. None require deployment-specific environment overrides. Subscription enforcement has no environment flag and begins when the released code runs.
 

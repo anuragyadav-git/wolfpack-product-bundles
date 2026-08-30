@@ -5,7 +5,7 @@ title: Only Bundles Rebrand Test Spec
 type: test-spec
 status: active
 summary: Defines behavior coverage for the Only Bundles visible rebrand and parent-product tag transition.
-last_audited: 2026-08-28
+last_audited: 2026-08-30
 owners:
   - engineering
 domains:
@@ -41,7 +41,7 @@ Verify that every newly exposed application identity uses Only Bundles while com
 
 | # | Scenario | Input | Expected Output | Notes |
 |---|---|---|---|---|
-| 1 | Canonical application identity | Brand constants | Name and publisher are `Only Bundles` | Palette matches approved concept |
+| 1 | Canonical application identity | Brand constants | Name and publisher are `Only Bundles`; mark and wordmark use `only-bundles-icon.png` | Palette matches approved concept |
 | 2 | Admin locale branding | Every supported locale | Brand-bearing messages contain `Only Bundles` and no `Wolfpack` | Brand name is not translated |
 | 3 | Shopify configuration | Production and SIT TOML | Display names are rebranded; handles and client IDs are unchanged | Prevent broken Admin links |
 | 4 | Extension identity | Theme, product configuration, and pixel configuration | Merchant-visible names use Only Bundles | Extension UIDs and handles remain stable |

@@ -228,7 +228,11 @@ export function DesignSettingsView({
               >
                 <s-stack gap="base">
                   {!advancedDesignAvailable ? (
-                    <s-banner tone="info" heading={t("settingsDcp.growthGate.heading")}>
+                    <s-banner
+                      tone="info"
+                      heading={t("settingsDcp.growthGate.heading")}
+                      dismissible
+                    >
                       {t("settingsDcp.growthGate.body")}
                     </s-banner>
                   ) : null}

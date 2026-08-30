@@ -1,4 +1,4 @@
-import { redirect, type LoaderFunctionArgs } from "@remix-run/node";
+import type { LoaderFunctionArgs } from "@remix-run/node";
 import { authenticate } from "../../shopify.server";
 import { resolveShopEntitlements } from "../../services/subscriptions/subscription-service.server";
 import { recordBusinessEvent } from "../../services/app-events.server";
@@ -6,7 +6,7 @@ import { applyFreePlanBundlePolicy } from "../../services/subscriptions/free-pla
 import { syncBundleStorefrontNow } from "../../services/bundles/storefront-sync.server";
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  const { admin, session } = await authenticate.admin(request);
+  const { admin, session, redirect } = await authenticate.admin(request);
   const url = new URL(request.url);
   const planHandleHint = url.searchParams.get("plan_handle");
   const state = await resolveShopEntitlements({

@@ -15,6 +15,8 @@ systems:
   - shopify-pages
 source_paths:
   - app/routes/app/app.dashboard/handlers/handlers.server.ts
+  - app/routes/app/app.dashboard/DashboardPage.tsx
+  - app/routes/app/app.dashboard/dashboard-table-model.ts
 related_docs:
   - internal docs/Architecture/FPB Host Evaluation.md
 tags:
@@ -45,6 +47,7 @@ Shopify cleanup failure.
 | 2 | Delete FPB whose Page is already gone | `NOT_FOUND` Page error | Bundle deletion continues | Idempotent retry |
 | 3 | Shopify rejects Page deletion | GraphQL or user error | Returns an error and retains bundle row | References remain recoverable |
 | 4 | Delete PPB | Product-page bundle | No Page mutation; existing deletion continues | FPB-only behavior |
+| 5 | Successful dashboard deletion | Action returns success while loader revalidation is settling | Deleted row is removed immediately and remaining rows stay interactive | Prevents stale deleted records until hard reload |
 
 ## Acceptance Criteria
 
@@ -53,3 +56,4 @@ Shopify cleanup failure.
 - [x] Already-missing Pages do not block deletion.
 - [x] Other Page deletion failures preserve the bundle row.
 - [x] PPB deletion makes no Page API call.
+- [x] A successful deletion immediately removes the row from the current dashboard.

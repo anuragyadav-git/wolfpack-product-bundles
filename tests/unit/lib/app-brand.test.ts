@@ -6,8 +6,8 @@ describe("Only Bundles brand contract", () => {
       name: "Only Bundles",
       publisher: "Only Bundles",
       exportSlug: "only-bundles",
-      markPath: "/branding/only-bundles/only-bundles-app-icon-512.png",
-      wordmarkPath: "/branding/only-bundles/only-bundles-app-icon-512.png",
+      markPath: "/branding/only-bundles/only-bundles-icon.png",
+      wordmarkPath: "/branding/only-bundles/only-bundles-icon.png",
       faviconPath: "/branding/only-bundles/only-bundles-favicon-32.png",
     });
   });
