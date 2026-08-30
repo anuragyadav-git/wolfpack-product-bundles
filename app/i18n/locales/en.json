@@ -351,7 +351,7 @@
       "previewOpened": "Preview opened", "csvExported": "CSV exported", "backfillComplete": "Backfill complete", "trackingEnabled": "Tracking enabled", "trackingDisabled": "Tracking disabled", "changesSaved": "Changes saved", "productSynced": "Product synced", "bundleSynced": "Bundle synced", "operationComplete": "Operation complete"
     },
     "actions": {
-      "close": "Close", "cancel": "Cancel", "dismiss": "Dismiss", "manage": "Manage", "enable": "Enable", "enableHere": "Enable Here", "learnMore": "Learn More",
+      "close": "Close", "cancel": "Cancel", "dismiss": "Dismiss", "manage": "Manage", "enable": "Enable", "enableHere": "Enable Here", "learnMore": "Learn More", "view": "View",
       "maybeLater": "Maybe Later", "setUpVisibility": "Set Up Visibility", "reinstallApp": "Reinstall app",
       "upgradeNow": "Upgrade Now", "viewPlans": "View Plans", "discardChanges": "Discard Changes",
       "continueEditing": "Continue Editing"
@@ -372,6 +372,11 @@
     "unlistedBundle": {
       "title": "Your bundle is Unlisted",
       "body": "For discoverability, change the bundle product's status to Active in Shopify Products."
+    },
+    "warningGroup": {
+      "heading": "Action required",
+      "summary": "Few actions are needed to publish the bundle.",
+      "modalTitle": "Actions needed"
     },
     "parentProductStatus": {
       "loadingTitle": "Checking parent product status",

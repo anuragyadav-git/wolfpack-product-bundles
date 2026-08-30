@@ -15,6 +15,14 @@ describe("Only Bundles Shopify configuration", () => {
     expect(sit).toContain('handle = "wolfpack-product-bundles-sit"');
   });
 
+  it("isolates the SIT storefront app proxy from production", () => {
+    const production = read("shopify.app.toml");
+    const sit = read("shopify.app.wolfpack-product-bundles-sit.toml");
+
+    expect(production).toContain('subpath = "product-bundles"');
+    expect(sit).toContain('subpath = "product-bundles-sit"');
+  });
+
   it("uses Only Bundles in merchant-visible extension metadata", () => {
     const themeSchema = JSON.parse(
       read("extensions/bundle-builder/locales/en.default.schema.json"),

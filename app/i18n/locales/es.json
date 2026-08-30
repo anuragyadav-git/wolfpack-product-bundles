@@ -374,6 +374,7 @@
       "enable": "Activar",
       "enableHere": "Activar aquí",
       "learnMore": "Más información",
+      "view": "Ver",
       "maybeLater": "Quizás más tarde",
       "setUpVisibility": "Configurar visibilidad",
       "reinstallApp": "Reinstalar aplicación",
@@ -398,6 +399,11 @@
     "unlistedBundle": {
       "title": "Tu paquete no está listado",
       "body": "Para que sea visible, cambia el estado del producto del paquete a Activo en Productos de Shopify."
+    },
+    "warningGroup": {
+      "heading": "Acción necesaria",
+      "summary": "Se necesitan algunas acciones para publicar el paquete.",
+      "modalTitle": "Acciones necesarias"
     },
     "parentProductStatus": {
       "loadingTitle": "Comprobando el estado del producto principal",

@@ -1,12 +1,15 @@
 import type { ConfigureBundleFlowContext } from "./useConfigureBundleFlow";
 import { AdminPageTitleBar } from "../../../components/AdminPageNavigation";
+import { AdminWarningGroup } from "../../../components/AdminWarningGroup";
 import { getReadinessScoreColor } from "../../../components/bundle-configure/BundleReadinessOverlay";
+import { useTranslation } from "react-i18next";
 
 export function ConfigureCanvasHeader({
   flow,
 }: {
   flow: ConfigureBundleFlowContext;
 }) {
+  const { t } = useTranslation();
   const {
     AppEmbedBanner,
     appEmbedEnabled,
@@ -26,6 +29,12 @@ export function ConfigureCanvasHeader({
     themeEditorUrl,
     UnlistedBundleBanner,
   } = flow;
+  const bundleProductId = bundleProduct?.id ?? bundle.shopifyProductId ?? null;
+  const numericProductId = bundleProductId?.split("/").pop() || null;
+  const hasUnlistedWarning =
+    parentProductStatusUi.showUnlistedBanner && Boolean(numericProductId);
+  const hasMultiplePublishWarnings =
+    !appEmbedEnabled && !parentProductStatusUi.isLoading && hasUnlistedWarning;
 
   return (
     <>
@@ -86,25 +95,49 @@ export function ConfigureCanvasHeader({
           </s-button>
         </div>
       </div>
-      <AppEmbedBanner
-        appEmbedEnabled={appEmbedEnabled}
-        themeEditorUrl={themeEditorUrl}
-        onEnableClick={openThemeEditorForAppEmbed}
-      />
-      {(parentProductStatusUi.isLoading || parentProductStatusUi.showUnlistedBanner) && (
-        <div className={fullPageBundleStyles.unlistedBannerGap}>
-          <UnlistedBundleBanner
-            shop={shop}
-            bundleProductId={bundleProduct?.id ?? bundle.shopifyProductId ?? null}
-            loading={parentProductStatusUi.isLoading}
-            onManage={() => {
-              const productId =
-                bundleProduct?.id?.split("/").pop() ||
-                bundle.shopifyProductId?.split("/").pop();
-              if (productId) openProductInAdmin(productId);
-            }}
+      {hasMultiplePublishWarnings ? (
+        <AdminWarningGroup
+          warnings={[
+            {
+              id: "app-embed",
+              heading: t("common.appEmbed.guideTitle"),
+              message: t("common.appEmbed.body"),
+              ...(themeEditorUrl
+                ? {
+                    actionLabel: t("common.actions.enableHere"),
+                    onAction: openThemeEditorForAppEmbed,
+                  }
+                : {}),
+            },
+            {
+              id: "unlisted-bundle",
+              heading: t("common.unlistedBundle.title"),
+              message: t("common.unlistedBundle.body"),
+              actionLabel: t("common.actions.manage"),
+              onAction: () => openProductInAdmin(numericProductId!),
+            },
+          ]}
+        />
+      ) : (
+        <>
+          <AppEmbedBanner
+            appEmbedEnabled={appEmbedEnabled}
+            themeEditorUrl={themeEditorUrl}
+            onEnableClick={openThemeEditorForAppEmbed}
           />
-        </div>
+          {(parentProductStatusUi.isLoading || parentProductStatusUi.showUnlistedBanner) && (
+            <div className={fullPageBundleStyles.unlistedBannerGap}>
+              <UnlistedBundleBanner
+                shop={shop}
+                bundleProductId={bundleProductId}
+                loading={parentProductStatusUi.isLoading}
+                onManage={() => {
+                  if (numericProductId) openProductInAdmin(numericProductId);
+                }}
+              />
+            </div>
+          )}
+        </>
       )}
     </>
   );

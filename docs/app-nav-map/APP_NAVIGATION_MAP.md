@@ -438,6 +438,14 @@ Updates & FAQs Page
 **Route file:** `app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/route.tsx`
 **URL:** `/app/bundles/full-page-bundle/configure/:bundleId`
 
+When the app embed and parent-product status both require attention, FPB and
+PPB show one `Few actions are needed to publish the bundle.` warning. `View`
+opens the shared Actions Needed modal, which lists each warning with its
+original remediation action. A single active warning remains directly
+actionable without the modal. The subscriptions section uses the same
+single-banner/modal behavior when compatibility and plan-validation warnings
+coexist.
+
 ```
 FPB Configure Page
 ├── Header: guarded App Bridge breadcrumb + guarded app-owned back action
@@ -491,6 +499,7 @@ FPB Configure Page
 │   └── Save validates required fields for enabled persisted features; invalid drafts stay dirty, open/focus the first affected section, and show inline critical feedback without submitting
 │
 └── Modals:
+    ├── Actions Needed Modal (multiple warnings + one remediation action per warning)
     ├── Bundle Status Modal (Draft / Active / Unlisted)
     ├── Product Picker Modal (Shopify resource picker)
     ├── Variables Modal (Discount Messaging variable reference)
@@ -530,6 +539,9 @@ Unlisted, and Active saves are blocked before the route action and displayed as
 inline critical field errors. Disabled branches are excluded. Subscription
 drafts are validated only when enabled and use the same shared configuration
 contract as FPB.
+
+The shared Actions Needed modal described in FPB is also mounted by PPB when
+multiple publish or subscription warnings are simultaneously active.
 
 ```
 PPB Configure Page

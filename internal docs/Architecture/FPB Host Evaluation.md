@@ -5,7 +5,7 @@ title: FPB App Proxy Host
 type: architecture-decision
 status: accepted
 summary: Full Page Bundles use the signed app proxy as their sole storefront document host.
-last_audited: 2026-08-13
+last_audited: 2026-08-30
 owners:
   - engineering
 domains:
@@ -13,11 +13,17 @@ domains:
 systems:
   - fpb-app-proxy
 source_paths:
+  - app/config/storefront-proxy-routes.ts
+  - scripts/build-storefront.mjs
+  - extensions/bundle-builder/assets/bundle-widget-full-page-bundled.js
+  - app/lib/fpb-storefront-url.ts
   - app/routes/root/wpb.$bundleId.tsx
   - app/services/bundles/fpb-public-number.server.ts
   - app/services/bundles/bundle-parent-product.server.ts
   - app/routes/app/app.dashboard/handlers/handlers.server.ts
   - extensions/bundle-builder/blocks/bundle-app-embed.liquid
+  - shopify.app.toml
+  - shopify.app.wolfpack-product-bundles-sit.toml
 related_docs:
   - Architecture/Widget Architecture.md
 tags:
@@ -59,6 +65,28 @@ the established root avoids split proxy contracts and preserves existing FPB
 links and every signed FPB/PPB storefront API call. Merchant-customized proxy
 paths remain unsupported by this host contract. PPB remains at
 `/products/{handle}`.
+
+The internal SIT app is the deliberate exception to the production root. Its
+Shopify configuration and QA-store installation use
+`/apps/product-bundles-sit`, and the SIT server sets
+`STOREFRONT_PROXY_ROOT=/apps/product-bundles-sit`. This prevents PROD and SIT
+from competing for one store-owned proxy path when both apps are installed on
+the same QA store. Production does not set an override and therefore continues
+to use `/apps/product-bundles`. An FPB document also infers its active proxy
+root from the current `/wpb/` pathname so subsequent same-page requests remain
+on the signed path that served the document.
+
+The storefront proxy resolver is bundled into the generated widget and SDK
+assets. Any change to `app/config/storefront-proxy-routes.ts` must therefore be
+followed by `npm run build:widgets`; committing only the TypeScript source leaves
+Shopify serving a generated bundle that still calls the previous proxy root.
+Chrome verification must inspect both the FPB document pathname and the actual
+runtime-token request URL before the environments are considered isolated.
+
+Changing only the SIT TOML is insufficient for an existing installation.
+Shopify keeps the installed prefix and subpath until the merchant customizes
+the App Proxy URL in Admin or reinstalls the app. The code configuration, SIT
+environment value, and installed SIT proxy URL must agree.
 
 ## Parent product routing
 

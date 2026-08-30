@@ -374,6 +374,7 @@
       "enable": "Aktivieren",
       "enableHere": "Hier aktivieren",
       "learnMore": "Mehr erfahren",
+      "view": "Anzeigen",
       "maybeLater": "Vielleicht später",
       "setUpVisibility": "Sichtbarkeit einrichten",
       "reinstallApp": "App neu installieren",
@@ -398,6 +399,11 @@
     "unlistedBundle": {
       "title": "Dein Bundle ist nicht gelistet",
       "body": "Stelle den Status des Bundle-Produkts in Shopify Produkte auf Aktiv, damit es gefunden werden kann."
+    },
+    "warningGroup": {
+      "heading": "Aktion erforderlich",
+      "summary": "Einige Aktionen sind erforderlich, um das Bundle zu veröffentlichen.",
+      "modalTitle": "Erforderliche Aktionen"
     },
     "parentProductStatus": {
       "loadingTitle": "Status des übergeordneten Produkts wird geprüft",
