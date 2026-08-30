@@ -49,6 +49,8 @@ app-proxy path when both are installed on one QA store.
 | 4 | Invalid override | Absolute URL or malformed path | `/apps/product-bundles` | Do not emit unsafe storefront URLs |
 | 5 | FPB preview URL | Shop, public number, SIT root | SIT-rooted storefront URL | Preview must not route into PROD |
 | 6 | Shopify app configs | PROD and SIT TOML files | Distinct subpaths | Prevents installation-level collisions |
+| 7 | Built FPB runtime request | Signed SIT FPB page | Token request uses `/apps/product-bundles-sit/api/cart-transform-runtime-token` | Generated assets must contain the resolver change |
+| 8 | SIT Cart Transform transaction | One authorized SIT component | Shopify returns one merged parent line at the component total | Proves the current tunnel Function and signed token agree |
 
 ## Acceptance Criteria
 
@@ -57,4 +59,5 @@ app-proxy path when both are installed on one QA store.
 - [x] FPB browser runtime can infer the proxy root from its signed document URL.
 - [x] Focused tests, lint, typecheck, build, and Graphify pass.
 - [x] The signed SIT FPB document renders in Chrome at 1280 x 800.
+- [x] A corrected SIT token request produces a Shopify-merged parent line in Chrome.
 - [ ] Mobile Chrome verification passes after the actual-window resize tool recovers.

@@ -14,6 +14,8 @@ systems:
   - fpb-app-proxy
 source_paths:
   - app/config/storefront-proxy-routes.ts
+  - scripts/build-storefront.mjs
+  - extensions/bundle-builder/assets/bundle-widget-full-page-bundled.js
   - app/lib/fpb-storefront-url.ts
   - app/routes/root/wpb.$bundleId.tsx
   - app/services/bundles/fpb-public-number.server.ts
@@ -73,6 +75,13 @@ the same QA store. Production does not set an override and therefore continues
 to use `/apps/product-bundles`. An FPB document also infers its active proxy
 root from the current `/wpb/` pathname so subsequent same-page requests remain
 on the signed path that served the document.
+
+The storefront proxy resolver is bundled into the generated widget and SDK
+assets. Any change to `app/config/storefront-proxy-routes.ts` must therefore be
+followed by `npm run build:widgets`; committing only the TypeScript source leaves
+Shopify serving a generated bundle that still calls the previous proxy root.
+Chrome verification must inspect both the FPB document pathname and the actual
+runtime-token request URL before the environments are considered isolated.
 
 Changing only the SIT TOML is insufficient for an existing installation.
 Shopify keeps the installed prefix and subpath until the merchant customizes
