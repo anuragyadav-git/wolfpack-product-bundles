@@ -1,8 +1,32 @@
 ---
+schema_version: 1
+id: database-schema
 title: Database Schema
 type: architecture
-audited: 2026-07-11
-source: prisma/schema.prisma
+status: authoritative
+summary: Documents the canonical Prisma models, enums, ownership boundaries, and migration rules for Wolfpack persistence.
+last_audited: 2026-08-30
+owners:
+  - engineering
+domains:
+  - architecture
+  - persistence
+systems:
+  - prisma
+  - postgresql
+source_paths:
+  - prisma/schema.prisma
+  - prisma/migrations/
+related_docs:
+  - internal docs/Architecture/System Overview.md
+  - docs/competitor-analysis/22-bogos-bundlex-wolfpack-feasibility.md
+tags:
+  - database
+  - schema
+keywords:
+  - prisma
+  - offer-policy
+  - offer-condition
 ---
 
 # Database Schema
@@ -52,6 +76,19 @@ Tracks installed-shop metadata and app-level settings. `customUtmParameters` JSO
 ### DiscountSettings
 
 Discount configuration linked to `Bundle`. Fields: `discountMethod`, `discountValue`, `discountType`.
+
+### OfferPolicy and OfferCondition
+
+`OfferPolicy` is the optional one-to-one operational eligibility owner for a
+bundle. It starts disabled, records a monotonically increasing `ruleVersion`,
+and owns normalized `OfferCondition` rows. The initial condition type is
+`specific_link`.
+
+A specific-link condition stores a public token identifier and a one-way token
+hash, never the raw campaign token. Optional `expiresAt` and `revokedAt` instants
+make expiry and revocation server-enforceable. A compound unique constraint on
+`(offerPolicyId, type)` permits one specific-link condition per policy in the
+initial contract. Bundle deletion cascades through the policy and conditions.
 
 ### Session
 

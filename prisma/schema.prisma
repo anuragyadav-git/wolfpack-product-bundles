@@ -148,6 +148,7 @@ model Bundle {
   steps                                BundleStep[]
   pricing                              BundlePricing?
   analytics                            BundleAnalytics[]
+  offerPolicy                          OfferPolicy?
 
   @@unique([shopId, publicNumber])
   @@index([shopId])
@@ -277,6 +278,42 @@ model BundlePricing {
   updatedAt            DateTime           @updatedAt
 
   @@index([bundleId])
+}
+
+enum OfferConditionType {
+  specific_link
+}
+
+model OfferPolicy {
+  id          String           @id @default(cuid())
+  shopId      String
+  bundleId    String           @unique
+  bundle      Bundle           @relation(fields: [bundleId], references: [id], onDelete: Cascade)
+  enabled     Boolean          @default(false)
+  ruleVersion Int              @default(1)
+  conditions  OfferCondition[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([shopId, enabled])
+}
+
+model OfferCondition {
+  id              String             @id @default(cuid())
+  offerPolicyId   String
+  offerPolicy     OfferPolicy        @relation(fields: [offerPolicyId], references: [id], onDelete: Cascade)
+  type            OfferConditionType
+  position        Int                @default(0)
+  tokenIdentifier String             @unique
+  tokenHash       String             @unique
+  expiresAt       DateTime?
+  revokedAt       DateTime?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  @@unique([offerPolicyId, type])
+  @@index([offerPolicyId, position])
+  @@index([expiresAt])
 }
 
 model BundleAnalytics {
