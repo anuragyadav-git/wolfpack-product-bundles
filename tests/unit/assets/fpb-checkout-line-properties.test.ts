@@ -235,6 +235,7 @@ describe("FPB checkout cart-line properties", () => {
     const originalSetTimeout = (global as any).setTimeout;
     (global as any).fetch = fetchMock;
     (global as any).window = {
+      location: { pathname: "/" },
       Shopify: {
         currency: { active: "USD", format: ["$", "{{amount}}"].join("") },
       },
@@ -328,6 +329,7 @@ describe("FPB checkout cart-line properties", () => {
     const originalSetTimeout = (global as any).setTimeout;
     (global as any).fetch = fetchMock;
     (global as any).window = {
+      location: { pathname: "/" },
       Shopify: {
         currency: { active: "USD", format: ["$", "{{amount}}"].join("") },
       },
@@ -451,6 +453,7 @@ describe("FPB checkout cart-line properties", () => {
     const originalSetTimeout = (global as any).setTimeout;
     (global as any).fetch = fetchMock;
     (global as any).window = {
+      location: { pathname: "/" },
       Shopify: {
         currency: { active: "USD", format: ["$", "{{amount}}"].join("") },
       },
@@ -762,6 +765,7 @@ describe("FPB checkout cart-line properties", () => {
     const appendedToasts: any[] = [];
     (global as any).fetch = fetchMock;
     (global as any).window = {
+      location: { pathname: "/" },
       Shopify: {
         currency: { active: "USD", format: ["$", "{{amount}}"].join("") },
       },
@@ -861,6 +865,7 @@ describe("FPB checkout cart-line properties", () => {
     const originalSetTimeout = (global as any).setTimeout;
     (global as any).fetch = fetchMock;
     (global as any).window = {
+      location: { pathname: "/" },
       Shopify: {
         currency: { active: "USD", format: ["$", "{{amount}}"].join("") },
       },
@@ -995,6 +1000,7 @@ describe("FPB checkout cart-line properties", () => {
     const originalSetTimeout = (global as any).setTimeout;
     (global as any).fetch = fetchMock;
     (global as any).window = {
+      location: { pathname: "/" },
       Shopify: {
         currency: { active: "USD", format: ["$", "{{amount}}"].join("") },
       },
@@ -1119,6 +1125,7 @@ describe("FPB checkout cart-line properties", () => {
     const originalSetTimeout = (global as any).setTimeout;
     (global as any).fetch = fetchMock;
     (global as any).window = {
+      location: { pathname: "/" },
       Shopify: {
         currency: { active: "USD", format: ["$", "{{amount}}"].join("") },
       },

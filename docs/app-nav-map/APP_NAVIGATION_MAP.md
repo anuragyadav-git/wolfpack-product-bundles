@@ -466,6 +466,7 @@ FPB Configure Page
 │   ├── Discount & Pricing
 │   │   ├── Discount type selector: Fixed Amount Off / Percentage Off / Fixed Bundle Price / Buy X, get Y
 │   │   ├── Rule cards; Buy X, get Y uses Customer buys/gets, Discount value/type, and Apply Discount to
+│   │   ├── Per-rule Tier Badge: enable, text/variables, shape, visibility, text color, and background color
 │   │   ├── Bundle Quantity Options: Box Label/Subtext per eligible rule + Multi Language modal
 │   │   ├── Progress Bar: Simple Bar / Step-Based Bar + Multi Language modal
 │   │   └── Discount Messaging: per-rule Discount Text, one Success Message, Variables modal
@@ -569,6 +570,7 @@ PPB Configure Page
 │   ├── Buy X, get Y rule builder (shown when selected)
 │   │   └── Per-rule: Customer buys, Customer gets, Discount value/type, Apply Discount to
 │   ├── Standard and Fixed Bundle Price rule builders (shown for other types)
+│   ├── Per-rule Tier Badge: enable, text/variables, shape, visibility, text color, and background color
 │   ├── Bundle Quantity Options sub-section
 │   │   ├── Per-rule: Box Label + Box Subtext inputs + Make this rule default action
 │   │   └── Multi Language modal: Select Language, Box Label, Box Subtext

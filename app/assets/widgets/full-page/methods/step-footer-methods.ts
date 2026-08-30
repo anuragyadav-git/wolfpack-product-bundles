@@ -12,6 +12,7 @@ import { preflightVariantOnStorefront } from '../../shared/variant-preflight.js'
 import { buildStorefrontApiPath } from '../../../../config/storefront-proxy-routes.js';
 import { applySellingPlanToJsonCartItems } from '../../shared/engine/cart-submit.js';
 import { createCloseIcon } from '../../shared/svg-icons.js';
+import { getPricingTierBadgeTemplateValues } from '../../shared/components/pricing-tier-badge.js';
 
 function shouldIncludeBundleQuantityCartProperties(context: any) {
   const pricing = context?.selectedBundle?.pricing || {};
@@ -605,6 +606,7 @@ getDiscountProgressState(totalPrice = 0, totalQuantity = 0) {
     );
   });
   const activeIndex = reachedByIndex.findIndex((isReached: any)  => !isReached);
+  const selectedTierIndex = reachedByIndex.lastIndexOf(true);
   const milestoneCount = eligibleRules.length;
   const milestones = eligibleRules
     .map((rule: any, index: number) => {
@@ -637,6 +639,15 @@ getDiscountProgressState(totalPrice = 0, totalQuantity = 0) {
         position: milestoneCount > 0 ? Math.round(((index + 1) / milestoneCount) * 100) : 0,
         state,
         isReached,
+        ...(rule.tierBadge ? {
+          isSelectedTier: index === selectedTierIndex,
+          tierBadge: rule.tierBadge,
+          tierBadgeValues: getPricingTierBadgeTemplateValues(
+            rule,
+            discountMethod,
+            (cents) => CurrencyManager.convertAndFormat(cents, CurrencyManager.getCurrencyInfo()),
+          ),
+        } : {}),
       };
     })
     .filter((milestone: any)  => milestone.ruleId && milestone.title);

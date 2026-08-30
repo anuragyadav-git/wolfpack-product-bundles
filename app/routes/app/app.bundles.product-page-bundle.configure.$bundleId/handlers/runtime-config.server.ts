@@ -31,6 +31,9 @@ function buildRuntimePricingRule(rule: any): Record<string, unknown> {
   if (rule.bxyApplyMode !== undefined) {
     flatRule.bxyApplyMode = rule.bxyApplyMode;
   }
+  if (rule.tierBadge !== undefined) {
+    flatRule.tierBadge = rule.tierBadge;
+  }
 
   return flatRule;
 }

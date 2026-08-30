@@ -51,6 +51,7 @@ function buildFullPageBundlePricing(pricing: any) {
         flat.bxyApplyMode = rule.bxyApplyMode;
       if (rule.fixedBundlePrice !== undefined)
         flat.fixedBundlePrice = Number(rule.fixedBundlePrice) || 0;
+      if (rule.tierBadge !== undefined) flat.tierBadge = rule.tierBadge;
       return flat;
     }),
     display: {
@@ -342,6 +343,7 @@ export function buildFpbBaseConfig(
           flat.bxyApplyMode = rule.bxyApplyMode;
         if (rule.fixedBundlePrice !== undefined)
           flat.fixedBundlePrice = Number(rule.fixedBundlePrice) || 0;
+        if (rule.tierBadge !== undefined) flat.tierBadge = rule.tierBadge;
         return flat;
       }),
       display: {

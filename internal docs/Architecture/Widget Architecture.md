@@ -5,7 +5,7 @@ title: Widget Architecture
 type: architecture
 status: authoritative
 summary: FPB and PPB bootstrap, hydration, extension-asset, and widget runtime architecture.
-last_audited: 2026-08-28
+last_audited: 2026-08-30
 owners:
   - engineering
 domains:
@@ -596,6 +596,25 @@ published as `--bundle-discount-feedback-tier-bg`,
 `--bundle-discount-feedback-tier-text`,
 `--bundle-discount-feedback-complete-bg`, and
 `--bundle-discount-feedback-complete-text`.
+
+### Merchant Pricing Tier Badges
+
+Widget version `16.0.2` projects the optional canonical
+`pricing.rules[].tierBadge` object to FPB and PPB. The shared renderer supports
+`pill`, `folded`, and `banner_rounded` shapes and either `always` or `selected`
+visibility. PPB attaches badges to its bundle-quantity tier pills; FPB attaches
+them to stepped progress milestones. Badge presentation is owned by the shared
+raw stylesheet and uses validated CSS custom properties for merchant-selected
+foreground and background colors.
+
+Static badge copy is valid for every pricing method. The
+`{{saved_percentage}}` variable is valid only for percentage rules and
+percentage Buy X, get Y rules; `{{saved_total}}` is valid only for fixed-amount
+rules. The Admin and runtime share this truthfulness boundary. Missing or
+invalid values suppress the badge instead of presenting fabricated savings.
+The rendered text remains part of the tier's accessible description, and
+selected-only badges follow the existing keyboard-operable tier-selection
+state.
 
 ---
 

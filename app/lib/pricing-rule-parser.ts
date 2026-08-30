@@ -1,4 +1,5 @@
 import type { PricingConfiguration, PricingMessages, PricingRule } from "../types/pricing";
+import { parsePricingTierBadge } from "./pricing-tier-badge";
 
 type BxyDiscountType = 'percentage' | 'fixed_amount';
 type BxyApplyMode = 'lowest_priced' | 'latest_added';
@@ -63,6 +64,13 @@ export function parsePricingRule(raw: unknown): PricingRule {
     if (VALID_BXY_APPLY_MODES.has(r.bxyApplyMode as BxyApplyMode)) {
       rule.bxyApplyMode = r.bxyApplyMode as BxyApplyMode;
     }
+  }
+
+  try {
+    const tierBadge = parsePricingTierBadge(r.tierBadge);
+    if (tierBadge) rule.tierBadge = tierBadge;
+  } catch (error) {
+    throw new Error(`parsePricingRule: tierBadge invalid — ${(error as Error).message}`);
   }
 
   return rule;

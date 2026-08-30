@@ -39,6 +39,17 @@ The only bundle configuration routes are the type-specific FPB and PPB configure
 
 Shared configure primitives should accept adapter props for route-owned state and actions. FPB continues to use `useConfigureBundleFlow()`, and PPB continues to use `usePpbConfigureFlow()`. Shared components must not read route loaders or submit forms directly.
 
+Discount and Pricing rule cards share `PricingTierBadgeFields`. Each rule owns
+an optional `tierBadge` object inside the canonical `BundlePricing.rules` JSON,
+so the fields participate in the existing route-owned dirty state, SaveBar,
+discard, and save flows without a separate persistence boundary. The Polaris
+surface exposes an enable switch, merchant-authored badge text, supported
+template variables, shape, visibility, and validated foreground/background hex
+colors. Dependent fields remain visible but disabled while the badge is off.
+Save validation rejects blank enabled badges, unsupported variables, unsafe
+colors, and variables that cannot be truthfully resolved for the selected
+pricing method.
+
 Feature switches follow one shared disabled-configuration contract across FPB
 and PPB. The master switch remains interactive, while every dependent setting
 stays rendered with its saved value, is visually subdued, and sits inside an

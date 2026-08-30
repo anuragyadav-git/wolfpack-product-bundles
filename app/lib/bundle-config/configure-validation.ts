@@ -2,6 +2,10 @@ import {
   getBundleSubscriptionCompatibilityIssues,
   validateBundleSubscriptionConfig,
 } from "../bundle-subscriptions";
+import {
+  parsePricingTierBadge,
+  validatePricingTierBadgeForMethod,
+} from "../pricing-tier-badge";
 
 export type BundleConfigureKind = "fpb" | "ppb";
 
@@ -242,6 +246,44 @@ function validateDiscounts(
         "discount_pricing",
         { ruleId },
       ));
+    }
+
+    if (rule?.tierBadge !== undefined) {
+      try {
+        const tierBadge = parsePricingTierBadge(rule.tierBadge);
+        if (tierBadge) {
+          const methodError = validatePricingTierBadgeForMethod(
+            tierBadge,
+            method,
+            rule?.bxyDiscountType,
+          );
+          if (methodError) {
+            issues.push(issue(
+              `${base}.tierBadge.text`,
+              methodError,
+              "discount_pricing",
+              { ruleId },
+            ));
+          }
+        }
+      } catch (error) {
+        const message = (error as Error).message;
+        const field = message.includes("shape")
+          ? "shape"
+          : message.includes("visibility")
+            ? "visibility"
+            : message.includes("foreground")
+              ? "foregroundColor"
+              : message.includes("background")
+                ? "backgroundColor"
+                : "text";
+        issues.push(issue(
+          `${base}.tierBadge.${field}`,
+          message.replace("pricing tier badge: ", ""),
+          "discount_pricing",
+          { ruleId },
+        ));
+      }
     }
   });
 

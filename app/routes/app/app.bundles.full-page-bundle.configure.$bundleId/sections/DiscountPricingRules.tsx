@@ -6,6 +6,7 @@ import {
 } from "../../../../lib/pricing-progress-tier-defaults";
 import { DiscountPricingTipBanner } from "../../_shared/bundle-configure/DiscountPricingTipBanner";
 import { DisabledConfigurationRegion } from "../../_shared/bundle-configure/DisabledConfigurationRegion";
+import { PricingTierBadgeFields } from "../../_shared/bundle-configure/PricingTierBadgeFields";
 
 export function fixedBundlePriceInputToCents(value: string): number {
   return amountToCents(Number(value) || 0);
@@ -438,6 +439,13 @@ export function FpbDiscountRulesSection({
                         )}
                       </s-stack>
                     )}
+                    <PricingTierBadgeFields
+                      rule={rule}
+                      validationErrors={validationErrors}
+                      onChange={(updates) =>
+                        pricingState.updateDiscountRule(rule.id, updates)
+                      }
+                    />
                   </s-stack>
                 </div>
               ))}
