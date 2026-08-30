@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useState } from "react";
 import productPageBundleStyles from "../../../styles/routes/product-page-bundle-configure.module.css";
 
 import { CommonConfigureShell } from "../_shared/bundle-configure/CommonConfigureShell";
+import { revealDeferredConfigureOverlays } from "../_shared/bundle-configure/deferred-configure-overlays";
 import {
   PpbConfigureProvider,
   usePpbConfigureContext,
@@ -26,7 +27,9 @@ function ConfigureBundleCanvas() {
   const [showOverlays, setShowOverlays] = useState(false);
 
   useEffect(() => {
-    const show = () => window.requestIdleCallback(() => setShowOverlays(true));
+    const show = () => window.requestIdleCallback(() => {
+      revealDeferredConfigureOverlays(() => setShowOverlays(true));
+    });
     if (document.readyState === "complete") {
       show();
       return;

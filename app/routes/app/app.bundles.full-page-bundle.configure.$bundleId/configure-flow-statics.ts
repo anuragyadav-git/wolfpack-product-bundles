@@ -5,7 +5,7 @@ import {
   useNavigate,
   useRevalidator,
 } from "@remix-run/react";
-import { SaveBar, useAppBridge } from "@shopify/app-bridge-react";
+import { useAppBridge } from "@shopify/app-bridge-react";
 import { AppLogger } from "../../../lib/logger";
 import {
   getDefaultDiscountRuleSuccessMessage,
@@ -124,7 +124,6 @@ const configureFlowStaticValues = {
   normalizeVisibilityProductPageTarget,
   QuestionHelpTooltip,
   RichHelpTooltip,
-  SaveBar,
   serializePricingDisplayOptions,
   SettingsRow,
   showPolarisModal,

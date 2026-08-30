@@ -76,6 +76,26 @@ describe("Dashboard responsive table model", () => {
     });
   });
 
+  it("omits a successfully deleted bundle before loader revalidation settles", () => {
+    const bundles = [
+      { id: "deleted", name: "Deleted box", status: "draft", bundleType: "full_page" },
+      { id: "retained", name: "Retained box", status: "active", bundleType: "product_page" },
+    ];
+
+    expect(buildDashboardTablePage({
+      bundles,
+      excludedBundleIds: new Set(["deleted"]),
+      bundleFilter: "",
+      typeFilter: "all",
+      statusFilter: "all",
+      currentPage: 1,
+      bundlesPerPage: 20,
+    })).toMatchObject({
+      filteredBundles: [bundles[1]],
+      pagedBundles: [bundles[1]],
+    });
+  });
+
   it("accepts only supported single-choice bundle page sizes", () => {
     expect(getDashboardBundlesPerPageChoice(["10"])).toBe(10);
     expect(getDashboardBundlesPerPageChoice(["20"])).toBe(20);

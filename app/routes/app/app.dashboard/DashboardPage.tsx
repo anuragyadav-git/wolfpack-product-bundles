@@ -108,11 +108,13 @@ export function DashboardPage({ banners }: DashboardPageProps) {
   const statusPopoverRef = useRef<any>(null);
   const typePopoverRef = useRef<any>(null);
   const fetcherIntentRef = useRef<string | null>(null);
+  const pendingDeleteBundleIdRef = useRef<string | null>(null);
   const pendingPreviewWindowRef = useRef<Window | null>(null);
   const lastAppliedLocaleSaveRef = useRef<string | null>(null);
   const [previewingBundleId, setPreviewingBundleId] = useState<string | null>(null);
   const [editingBundleId, setEditingBundleId] = useState<string | null>(null);
   const [activeActionMenuBundleId, setActiveActionMenuBundleId] = useState<string | null>(null);
+  const [deletedBundleIds, setDeletedBundleIds] = useState<ReadonlySet<string>>(() => new Set());
   const [currentThemeEditorUrl, setCurrentThemeEditorUrl] = useState<string | null>(null);
   const [currentAppEmbedEnabled, setCurrentAppEmbedEnabled] = useState<boolean | null>(null);
   const [appEmbedEnableFlow, dispatchAppEmbedEnableFlow] = useReducer(
@@ -165,6 +167,10 @@ export function DashboardPage({ banners }: DashboardPageProps) {
         shopify.toast.show(t("dashboard.actions.cloneSuccess"));
         navigate(cloneRedirect);
       } else if (intent === 'deleteBundle') {
+        const deletedBundleId = pendingDeleteBundleIdRef.current;
+        if (deletedBundleId) {
+          setDeletedBundleIds((current) => new Set(current).add(deletedBundleId));
+        }
         setTaskAlert(null);
         shopify.toast.show(t("dashboard.actions.deleteSuccess"));
       }
@@ -177,6 +183,9 @@ export function DashboardPage({ banners }: DashboardPageProps) {
     }
     if (intent === 'createFpbPreview') {
       setPreviewingBundleId(null);
+    }
+    if (intent === 'deleteBundle') {
+      pendingDeleteBundleIdRef.current = null;
     }
     fetcherIntentRef.current = null;
   }, [fetcher.state, fetcher.data, navigate, shopify, t]);
@@ -203,6 +212,7 @@ export function DashboardPage({ banners }: DashboardPageProps) {
   const handleConfirmDelete = useCallback(() => {
     if (bundleToDelete) {
       fetcherIntentRef.current = 'deleteBundle';
+      pendingDeleteBundleIdRef.current = bundleToDelete;
       const formData = new FormData();
       formData.append("intent", "deleteBundle");
       formData.append("bundleId", bundleToDelete);
@@ -543,6 +553,7 @@ export function DashboardPage({ banners }: DashboardPageProps) {
     () =>
       buildDashboardTablePage({
         bundles,
+        excludedBundleIds: deletedBundleIds,
         bundleFilter,
         typeFilter,
         statusFilter,
@@ -554,6 +565,7 @@ export function DashboardPage({ banners }: DashboardPageProps) {
       bundles,
       bundlesPerPage,
       currentPage,
+      deletedBundleIds,
       statusFilter,
       typeFilter,
     ],
@@ -700,7 +712,7 @@ export function DashboardPage({ banners }: DashboardPageProps) {
               </div>
 
               <div className={dashboardStyles.bundlesTableShell}>
-                {bundles.length === 0 ? (
+                {!bundles.some((bundle) => !deletedBundleIds.has(bundle.id)) ? (
                   <div className={dashboardStyles.emptyBundlesState}>
                     <div className={dashboardStyles.emptyBundlesIcon}>
                       <OptimisedImage

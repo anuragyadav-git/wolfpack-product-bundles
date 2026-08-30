@@ -5,12 +5,14 @@ import { AdminTaskAlertBanner } from "../../../components/AdminTaskAlertBanner";
 import fullPageBundleStyles from "../../../styles/routes/full-page-bundle-configure.module.css";
 import { CommonConfigureShell } from "../_shared/bundle-configure/CommonConfigureShell";
 import { getDeferredConfigureSection } from "../_shared/bundle-configure/deferred-configure-sections";
+import { revealDeferredConfigureOverlays } from "../_shared/bundle-configure/deferred-configure-overlays";
 import { ConfigureCanvasHeader } from "./ConfigureCanvasHeader";
 import { ConfigureHiddenInputs } from "./ConfigureHiddenInputs";
 import { ConfigureSidebar } from "./ConfigureSidebar";
 import { useConfigureBundleFlow } from "./useConfigureBundleFlow";
 import { StepSetupSection } from "./sections/StepSetupSection";
 import { ConfigureValidationSummary } from "../_shared/bundle-configure/ConfigureValidationSummary";
+import { ConfigureContextualSaveBar } from "../_shared/bundle-configure/ConfigureContextualSaveBar";
 
 const FreeGiftAddonsSection = lazy(() => import("./sections/FreeGiftAddonsSection").then((module) => ({ default: module.FreeGiftAddonsSection })));
 const DiscountPricingSection = lazy(() => import("./sections/DiscountPricingSection").then((module) => ({ default: module.DiscountPricingSection })));
@@ -30,14 +32,15 @@ function ConfigureBundleFlow() {
     isDirty,
     isSaveInFlight,
     saveBarRef,
-    SaveBar,
     setShowDiscardModal,
   } = flow;
   const [showOverlays, setShowOverlays] = useState(false);
   const deferredSection = getDeferredConfigureSection(flow.activeSection);
 
   useEffect(() => {
-    const show = () => window.requestIdleCallback(() => setShowOverlays(true));
+    const show = () => window.requestIdleCallback(() => {
+      revealDeferredConfigureOverlays(() => setShowOverlays(true));
+    });
     if (document.readyState === "complete") {
       show();
       return;
@@ -63,23 +66,13 @@ function ConfigureBundleFlow() {
             setShowDiscardModal(true);
           }}
         >
-          <SaveBar ref={saveBarRef} id="bundle-save-bar" open={isDirty}>
-            <button
-              type="submit"
-              variant="primary"
-              loading={fetcher.state !== "idle" ? "" : undefined}
-              disabled={fetcher.state !== "idle"}
-            >
-              Save
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowDiscardModal(true)}
-              disabled={fetcher.state !== "idle"}
-            >
-              Discard
-            </button>
-          </SaveBar>
+          <ConfigureContextualSaveBar
+            isOpen={isDirty}
+            isSaving={fetcher.state !== "idle"}
+            onSave={() => void handleSave()}
+            onDiscard={() => setShowDiscardModal(true)}
+            saveBarRef={saveBarRef}
+          />
           <ConfigureHiddenInputs flow={flow} />
         </form>
       }
