@@ -34,6 +34,8 @@ source_paths:
   - app/assets/widgets/full-page-css/base/bootstrap-reservation.css
   - app/assets/bundle-widget-product-page.ts
   - app/assets/widgets/product-page/ppb-modal-card-presentation.ts
+  - app/assets/widgets/product-page/methods/modal-methods.ts
+  - app/assets/widgets/product-page/methods/modal-state-methods.ts
   - app/routes/api/api.storefront-products.tsx
   - app/routes/api/api.storefront-collections.tsx
   - app/routes/api/api.fpb-upsells[.]json.tsx
@@ -110,7 +112,11 @@ than inferring a CSS color. Optional color tooltips are described to keyboard
 focus, clamp/flip at viewport edges on precise pointers, and are replaced by a
 persistent selected-value label on coarse/mobile pointers. The existing
 delegated change path updates the active card variant, price, image, and
-inventory context; Add remains the bundle-selection mutation.
+inventory context; Add remains the bundle-selection mutation. The modal focus
+trap queries native interactive controls as one combined selector so results
+stay in document order and variant radios remain keyboard reachable. A variant
+rerender restores focus to the replacement selected radio without scrolling,
+preserving arrow-key exploration and its focus tooltip.
 
 Horizontal/Vertical modal cards keep these grouped-variant selectors inline at
 every viewport. Product images and titles are informational and do not open a

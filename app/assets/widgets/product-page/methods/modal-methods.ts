@@ -641,6 +641,13 @@ attachProductEventHandlers(productGrid: any, stepIndex: string|number) {
 
           // Re-render the active card context without mutating the bundle selection.
           this.renderModalProducts(stepIndex);
+          const replacementInputs = this.elements?.modal?.querySelectorAll?.(
+            '.ppb-variant-selector-input',
+          ) ?? [];
+          const replacementInput = Array.from(replacementInputs as ArrayLike<any>).find((input: any) => (
+            String(input?.value ?? '') === String(newVariantId)
+          ));
+          replacementInput?.focus?.({ preventScroll: true });
           this.updateModalNavigation();
           this.updateModalFooterMessaging();
         }

@@ -342,10 +342,19 @@ describe('PPB shared card quantity selector state', () => {
     const renderModalProducts = jest.fn();
     const updateModalNavigation = jest.fn();
     const updateModalFooterMessaging = jest.fn();
+    const rerenderedInput = {
+      value: 'variant-2',
+      focus: jest.fn(),
+    };
 
     ProductPageModalMethods.attachProductEventHandlers.call({
       selectedBundle: { steps: [{}] },
       stepProductData: [[product]],
+      elements: {
+        modal: {
+          querySelectorAll: () => [rerenderedInput],
+        },
+      },
       findProductBySelectionKey: () => product,
       getSelectedQuantity: () => 0,
       renderModalProducts,
@@ -371,6 +380,7 @@ describe('PPB shared card quantity selector state', () => {
     expect(renderModalProducts).toHaveBeenCalledWith(0);
     expect(updateModalNavigation).toHaveBeenCalled();
     expect(updateModalFooterMessaging).toHaveBeenCalled();
+    expect(rerenderedInput.focus).toHaveBeenCalledTimes(1);
   });
 
   it('keeps PPB product images informational without opening product details', () => {

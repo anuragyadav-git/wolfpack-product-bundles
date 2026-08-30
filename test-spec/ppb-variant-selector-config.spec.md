@@ -26,6 +26,8 @@ Admin editing, storefront rendering, and color-swatch tooltip behavior.
 | 12 | Image swatch | Variant with image | Semantic radio uses variant image and accessible label | Unavailable values disabled |
 | 13 | Delegated storefront selection | Radio swatch change event | Active product variant, price, image, inventory context, and render path update | Add remains separate mutation |
 | 14 | Category-filtered rerender after selection | Product has a selected variant that remains in the configured category subset | Rerender preserves that variant's identity, price, image, and inventory context | Prevents swatches from resetting to the first available variant |
+| 15 | Modal keyboard traversal | Enabled variant radio inside the picker | Focus trap includes the radio in document order | Makes focus tooltip and keyboard selection reachable |
+| 16 | Keyboard selection rerender | Focused radio changes variant and card rerenders | Focus moves to the replacement selected radio | Preserves continuous arrow-key exploration |
 
 ## Acceptance Criteria
 
@@ -34,4 +36,4 @@ Admin editing, storefront rendering, and color-swatch tooltip behavior.
 - [x] Prisma schema and migration use direct fields with sensible defaults
 - [x] No legacy read or migration shim is introduced
 - [x] Admin and storefront behavior tests pass
-- [ ] Desktop and mobile Chrome QA passes against the served widget asset
+- [x] Desktop and mobile Chrome QA passes against served widget `17.0.3`
