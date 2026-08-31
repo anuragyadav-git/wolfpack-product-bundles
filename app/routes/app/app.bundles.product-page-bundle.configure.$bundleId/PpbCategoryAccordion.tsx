@@ -1,10 +1,6 @@
-import { useEffect, useState } from "react";
-
 import { CommonStepCategoryAccordion } from "../_shared/bundle-configure/CommonStepCategoryAccordion";
 import { updatePpbCategoryVariantFlag } from "../../../lib/bundle-config/common-configure-page-model";
 import {
-  parseVariantColorMapText,
-  serializeVariantColorMap,
   type VariantSelectorMode,
 } from "../../../lib/bundle-config/variant-selector-config";
 import { usePpbConfigureContext } from "./PpbConfigureContext";
@@ -20,16 +16,8 @@ export function PpbCategoryAccordion({
 }) {
   const flow = usePpbConfigureContext();
   const categories = ((step.StepCategory as any[]) ?? []);
-  const persistedColorMapText = serializeVariantColorMap(cat.variantColorMap);
-  const [colorMapText, setColorMapText] = useState(persistedColorMapText);
-  const [colorMapError, setColorMapError] = useState<string | undefined>();
   const selectorMode: VariantSelectorMode = cat.variantSelectorMode ?? "dropdown";
   const categoryBase = `steps.${step.id}.categories.${cat.id}`;
-
-  useEffect(() => {
-    setColorMapText(persistedColorMapText);
-    setColorMapError(undefined);
-  }, [cat.id, persistedColorMapText]);
 
   const updateCategory = (patch: Record<string, unknown>) => {
     flow.stepsState.updateStepField(
@@ -107,48 +95,21 @@ export function PpbCategoryAccordion({
             <s-option value="image_swatch">Image swatches</s-option>
           </s-select>
           {selectorMode === "color_swatch" ? (
-            <>
-              <s-switch
-                label="Show color name on hover and focus"
-                checked={cat.swatchTooltipEnabled || undefined}
-                disabled={cat.displayVariantsAsIndividualProducts || undefined}
-                onChange={(event) =>
-                  updateCategory({
-                    swatchTooltipEnabled: event.currentTarget.checked,
-                  })
-                }
-              />
-              <s-stack gap="small">
-                <s-text-area
-                  label="Color mappings"
-                  value={colorMapText}
-                  disabled={cat.displayVariantsAsIndividualProducts || undefined}
-                  error={
-                    colorMapError ??
-                    flow.validationErrors?.[`${categoryBase}.variantColorMap`]
-                  }
-                  onInput={(event) => {
-                    const value = event.currentTarget.value ?? "";
-                    setColorMapText(value);
-                    try {
-                      const variantColorMap = parseVariantColorMapText(value);
-                      setColorMapError(undefined);
-                      updateCategory({ variantColorMap });
-                      flow.clearValidationError?.(`${categoryBase}.variantColorMap`);
-                    } catch (error) {
-                      const message = error instanceof Error
-                        ? error.message
-                        : "Enter valid color mappings.";
-                      setColorMapError(message);
-                      updateCategory({ variantColorMap: value });
-                    }
-                  }}
-                />
-                <s-paragraph>
-                  Use one mapping per line: option value = #RRGGBB.
-                </s-paragraph>
-              </s-stack>
-            </>
+            <s-switch
+              label="Show color name on hover and focus"
+              checked={cat.swatchTooltipEnabled || undefined}
+              disabled={cat.displayVariantsAsIndividualProducts || undefined}
+              onChange={(event) =>
+                updateCategory({
+                  swatchTooltipEnabled: event.currentTarget.checked,
+                })
+              }
+            />
+          ) : null}
+          {selectorMode === "color_swatch" || selectorMode === "image_swatch" ? (
+            <s-paragraph>
+              Color and image values come from Shopify product option swatches.
+            </s-paragraph>
           ) : null}
         </s-stack>
       }

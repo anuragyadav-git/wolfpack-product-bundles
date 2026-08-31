@@ -44,7 +44,6 @@ describe("PPB category variant control", () => {
       displayVariantsAsIndividualProducts: true,
       variantSelectorMode: "color_swatch",
       swatchTooltipEnabled: true,
-      variantColorMap: { Navy: "#001F3F" },
     };
     const step = { id: "step-1", StepCategory: [category] };
     mockUsePpbConfigureContext.mockReturnValue(makeFlow());
@@ -62,7 +61,29 @@ describe("PPB category variant control", () => {
     expect(view).toContain('label="Variant selector style"');
     expect(view).toContain('value="color_swatch"');
     expect(view).toContain('label="Show color name on hover and focus"');
-    expect(view).toContain('label="Color mappings"');
-    expect(view).toContain("Navy = #001F3F");
+    expect(view).toContain("Shopify product option swatches");
+    expect(view).not.toContain('label="Color mappings"');
+  });
+
+  it("explains Shopify option swatches for image mode", () => {
+    const category = {
+      id: "cat-1",
+      name: "Category 1",
+      products: [],
+      collections: [],
+      variantSelectorMode: "image_swatch",
+    };
+    mockUsePpbConfigureContext.mockReturnValue(makeFlow());
+
+    const view = renderToStaticMarkup(
+      React.createElement(PpbCategoryAccordion, {
+        step: { id: "step-1", StepCategory: [category] },
+        cat: category,
+        catIndex: 0,
+      }),
+    );
+
+    expect(view).toContain("Shopify product option swatches");
+    expect(view).not.toContain('label="Show color name on hover and focus"');
   });
 });

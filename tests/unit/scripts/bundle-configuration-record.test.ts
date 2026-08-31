@@ -145,7 +145,6 @@ function makeBundle(overrides: Record<string, unknown> = {}) {
             displayVariantsAsIndividualProducts: false,
             variantSelectorMode: "dropdown",
             swatchTooltipEnabled: false,
-            variantColorMap: {},
             multiLangData: {},
           },
         ],

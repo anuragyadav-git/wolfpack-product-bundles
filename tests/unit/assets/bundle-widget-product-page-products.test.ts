@@ -7,7 +7,10 @@ const { ToastManager } = require('../../../app/assets/widgets/shared/toast-manag
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { shouldDisableProductPageVariantOption } = require('../../../app/assets/widgets/product-page/methods/modal-methods.js');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const { ProductPageProductDataMethods } = require('../../../app/assets/widgets/product-page/methods/product-data-methods.js');
+const {
+  ProductPageProductDataMethods,
+  requiresPpbCanonicalSwatchHydration,
+} = require('../../../app/assets/widgets/product-page/methods/product-data-methods.js');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { ProductPageDefaultProductMethods } = require('../../../app/assets/widgets/product-page/methods/default-product-methods.js');
 /**
@@ -29,6 +32,7 @@ interface StorefrontVariant {
   image?: { src?: string } | null;
   weight?: number;
   weightUnit?: string;
+  selectedOptions?: Array<{ name: string; value: string }>;
 }
 
 interface StorefrontProduct {
@@ -36,7 +40,18 @@ interface StorefrontProduct {
   title: string;
   imageUrl?: string;
   variants?: StorefrontVariant[];
-  options?: Array<string | { name: string }>;
+  options?: Array<string | {
+    id?: string;
+    name: string;
+    optionValues?: Array<{
+      id?: string;
+      name: string;
+      swatch?: {
+        color?: string | null;
+        image?: { src?: string; altText?: string | null } | null;
+      } | null;
+    }>;
+  }>;
   images?: Array<{ src?: string }>;
   description?: string;
   descriptionHtml?: string;
@@ -69,6 +84,28 @@ function processProductPageProductsForStep(
 }
 
 describe('processProductPageProductsForStep', () => {
+  it('requires Storefront hydration when a swatch category has only legacy product snapshots', () => {
+    const step = {
+      categories: [{ variantSelectorMode: 'color_swatch' }],
+    };
+    expect(requiresPpbCanonicalSwatchHydration(step, [{
+      id: '1',
+      variants: [{ id: '11', option1: 'Navy' }],
+      options: ['Color'],
+    }])).toBe(true);
+    expect(requiresPpbCanonicalSwatchHydration(step, [{
+      id: '1',
+      variants: [{ id: '11', selectedOptions: [{ name: 'Color', value: 'Navy' }] }],
+      options: [{ name: 'Color', optionValues: [{ name: 'Navy', swatch: null }] }],
+    }])).toBe(false);
+  });
+
+  it('does not require swatch hydration for non-swatch category modes', () => {
+    expect(requiresPpbCanonicalSwatchHydration({
+      categories: [{ variantSelectorMode: 'pill' }],
+    }, [{ id: '1', variants: [{ id: '11' }] }])).toBe(false);
+  });
+
   it('normalizes Shopify variant weight to grams for step-rule validation', () => {
     const products = processProductPageProductsForStep([{
       id: 'gid://shopify/Product/900',
@@ -137,6 +174,34 @@ describe('processProductPageProductsForStep', () => {
       sourceVariantCount: 2,
     });
     expect(products[0].variants.map((variant: StorefrontVariant) => variant.id)).toEqual(['222']);
+  });
+
+  it('preserves Shopify option-value swatches and variant selected options', () => {
+    const options = [{
+      id: 'gid://shopify/ProductOption/1',
+      name: 'Color',
+      optionValues: [{
+        id: 'gid://shopify/ProductOptionValue/1',
+        name: 'Navy',
+        swatch: { color: '#001F3F', image: null },
+      }],
+    }];
+    const selectedOptions = [{ name: 'Color', value: 'Navy' }];
+    const products = processProductPageProductsForStep([{
+      id: 'gid://shopify/Product/900',
+      title: 'Canonical swatch product',
+      options,
+      variants: [{
+        id: 'gid://shopify/ProductVariant/901',
+        title: 'Navy',
+        price: '12.00',
+        available: true,
+        selectedOptions,
+      }],
+    }], { displayVariantsAsIndividual: false });
+
+    expect(products[0].options).toEqual(options);
+    expect(products[0].variants[0].selectedOptions).toEqual(selectedOptions);
   });
 
   it('omits true unavailable variants from individual Product List rows without hiding sellable zero-quantity variants', () => {

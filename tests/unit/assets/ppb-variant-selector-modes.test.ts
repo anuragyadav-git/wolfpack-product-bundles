@@ -4,7 +4,7 @@ const { JSDOM } = require("jsdom");
 const {
   createPpbVariantSelectorElement,
   resolvePpbCategoryVariantSelectorConfiguration,
-  resolvePpbSwatchColor,
+  resolvePpbVariantSwatch,
   resolvePpbTooltipPosition,
 } = require("../../../app/assets/widgets/product-page/variant-selector-modes.js");
 
@@ -12,12 +12,36 @@ function product() {
   return {
     id: "gid://shopify/Product/1",
     variantId: "gid://shopify/ProductVariant/11",
-    options: ["Color"],
+    options: [{
+      id: "gid://shopify/ProductOption/1",
+      name: "Color",
+      optionValues: [
+        {
+          id: "gid://shopify/ProductOptionValue/1",
+          name: "Navy",
+          swatch: { color: "#001F3F", image: null },
+        },
+        {
+          id: "gid://shopify/ProductOptionValue/2",
+          name: "Soft pink",
+          swatch: {
+            color: null,
+            image: { src: "https://cdn.example/shopify-pink.jpg", altText: "Soft pink" },
+          },
+        },
+        {
+          id: "gid://shopify/ProductOptionValue/3",
+          name: "Sold out",
+          swatch: null,
+        },
+      ],
+    }],
     variants: [
       {
         id: "gid://shopify/ProductVariant/11",
         title: "Navy",
         option1: "Navy",
+        selectedOptions: [{ name: "Color", value: "Navy" }],
         available: true,
         image: { src: "https://cdn.example/navy.jpg" },
       },
@@ -25,6 +49,7 @@ function product() {
         id: "gid://shopify/ProductVariant/12",
         title: "Soft pink",
         option1: "Soft pink",
+        selectedOptions: [{ name: "Color", value: "Soft pink" }],
         available: true,
         image: { src: "https://cdn.example/pink.jpg" },
       },
@@ -32,6 +57,7 @@ function product() {
         id: "gid://shopify/ProductVariant/13",
         title: "Sold out",
         option1: "Sold out",
+        selectedOptions: [{ name: "Color", value: "Sold out" }],
         available: false,
       },
     ],
@@ -48,15 +74,43 @@ describe("PPB variant selector modes", () => {
         {
           variantSelectorMode: "color_swatch",
           swatchTooltipEnabled: true,
-          variantColorMap: { Navy: "#001F3F" },
         },
       ],
     }, 0, { 0: 1 })).toEqual({
       variantSelectorMode: "color_swatch",
       swatchTooltipEnabled: true,
-      variantColorMap: { Navy: "#001F3F" },
     });
-    expect(resolvePpbSwatchColor("Unknown", { Navy: "#001F3F" })).toBeNull();
+    expect(resolvePpbVariantSwatch(product(), product().variants[0])).toEqual({
+      color: "#001F3F",
+      image: null,
+      label: "Navy",
+    });
+  });
+
+  it("skips selected options without Shopify swatches", () => {
+    const multiOptionProduct = product();
+    multiOptionProduct.options.unshift({
+      id: "gid://shopify/ProductOption/2",
+      name: "Size",
+      optionValues: [{
+        id: "gid://shopify/ProductOptionValue/4",
+        name: "Small",
+        swatch: null,
+      }],
+    });
+    multiOptionProduct.variants[0].selectedOptions.unshift({
+      name: "Size",
+      value: "Small",
+    });
+
+    expect(resolvePpbVariantSwatch(
+      multiOptionProduct,
+      multiOptionProduct.variants[0],
+    )).toEqual({
+      color: "#001F3F",
+      image: null,
+      label: "Navy",
+    });
   });
 
   it("renders semantic pills and reports an exact selected variant", () => {
@@ -79,13 +133,12 @@ describe("PPB variant selector modes", () => {
     expect(selector.querySelector('[aria-live="polite"]').textContent).toBe("Soft pink");
   });
 
-  it("renders mapped color swatches with focus descriptions and no guessed color", () => {
+  it("renders Shopify color swatches with focus descriptions and no guessed color", () => {
     const selector = createPpbVariantSelectorElement({
       product: product(),
       configuration: {
         variantSelectorMode: "color_swatch",
         swatchTooltipEnabled: true,
-        variantColorMap: { Navy: "#001F3F" },
       },
       label: "Select color",
       document: runtimeDocument,
@@ -102,7 +155,7 @@ describe("PPB variant selector modes", () => {
     expect(pink.closest("label").style.getPropertyValue("--wpb-ppb-swatch-color")).toBe("");
   });
 
-  it("uses variant imagery for image swatches and removes unavailable values from focus", () => {
+  it("uses Shopify option-value imagery for image swatches and removes unavailable values from focus", () => {
     const selector = createPpbVariantSelectorElement({
       product: product(),
       configuration: { variantSelectorMode: "image_swatch" },
@@ -111,8 +164,10 @@ describe("PPB variant selector modes", () => {
       isUnavailable: (variant: { available?: boolean }) => variant.available === false,
     });
 
-    expect(selector.querySelector('input[value="gid://shopify/ProductVariant/11"] + span img').src)
-      .toBe("https://cdn.example/navy.jpg");
+    expect(selector.querySelector('input[value="gid://shopify/ProductVariant/11"] + span img'))
+      .toBeNull();
+    expect(selector.querySelector('input[value="gid://shopify/ProductVariant/12"] + span img').src)
+      .toBe("https://cdn.example/shopify-pink.jpg");
     expect(selector.querySelector('input[value="gid://shopify/ProductVariant/13"]').disabled).toBe(true);
   });
 

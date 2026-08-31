@@ -107,10 +107,14 @@ The shared picker is an 85dvh bottom sheet with three regions: a non-scrolling h
 All four PPB templates resolve grouped-variant presentation from the active
 category's canonical `variantSelectorMode`: Dropdown, Pills, Color swatches, or
 Image swatches. Non-dropdown modes are semantic radio groups with unavailable
-values disabled. Color swatches use only the merchant's exact
-`variantColorMap`; unmapped values retain a neutral labeled presentation rather
-than inferring a CSS color. Optional color tooltips are described to keyboard
-focus, clamp/flip at viewport edges on precise pointers, and are replaced by a
+values disabled. Color and image swatches use Shopify Storefront API
+`ProductOptionValue.swatch` data matched through each variant's
+`selectedOptions`. Missing Shopify swatches retain a neutral labeled
+presentation; the runtime does not infer colors or substitute variant images.
+Cached product snapshots that lack canonical option values and selected options
+are rehydrated before a swatch selector renders. Optional color tooltips are
+described to keyboard focus, clamp/flip at viewport edges on precise pointers,
+and are replaced by a
 persistent selected-value label on coarse/mobile pointers. The existing
 delegated change path updates the active card variant, price, image, and
 inventory context; Add remains the bundle-selection mutation. The modal focus
@@ -565,7 +569,7 @@ ordinary component rendering.
 
 Static layout and presentation belong in source CSS. Runtime styling is limited
 to values that are inherently data-driven, such as measured timeline progress,
-timeline entry counts, validated variant swatch color, and merchant-authored
+timeline entry counts, Shopify-provided variant swatch color, and merchant-authored
 Custom CSS. The runtime must not inject structural widths, heights, spacing,
 display state, or template stylesheets. Native attributes such as `hidden` and
 state markers such as `data-fpb-summary-mode` own visibility and responsive

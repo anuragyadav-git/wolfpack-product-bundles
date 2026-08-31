@@ -226,7 +226,6 @@ model StepCategory {
   displayVariantsAsIndividualProducts Boolean             @default(false)
   variantSelectorMode                 VariantSelectorMode @default(dropdown)
   swatchTooltipEnabled                Boolean             @default(false)
-  variantColorMap                     Json                @default("{}")
   multiLangData                       Json?
   createdAt                           DateTime            @default(now())
   updatedAt                           DateTime            @updatedAt

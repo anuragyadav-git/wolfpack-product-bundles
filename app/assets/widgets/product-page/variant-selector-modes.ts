@@ -5,14 +5,6 @@ const SELECTOR_MODES = new Set([
   "image_swatch",
 ]);
 
-const HEX_COLOR = /^#[0-9A-Fa-f]{6}$/;
-
-function asColorMap(value: any) {
-  return value && typeof value === "object" && !Array.isArray(value)
-    ? value
-    : {};
-}
-
 function normalizeConfiguration(value: any = {}) {
   const variantSelectorMode = value.variantSelectorMode ?? "dropdown";
   if (!SELECTOR_MODES.has(variantSelectorMode)) {
@@ -22,7 +14,6 @@ function normalizeConfiguration(value: any = {}) {
     variantSelectorMode,
     swatchTooltipEnabled:
       variantSelectorMode === "color_swatch" && value.swatchTooltipEnabled === true,
-    variantColorMap: asColorMap(value.variantColorMap),
   };
 }
 
@@ -39,14 +30,36 @@ export function resolvePpbCategoryVariantSelectorConfiguration(
   return normalizeConfiguration(categories[activeIndex] ?? categories[0]);
 }
 
-export function resolvePpbSwatchColor(
-  optionValue: unknown,
-  colorMap: Record<string, unknown> = {},
-) {
-  const resolved = colorMap[String(optionValue ?? "")];
-  return typeof resolved === "string" && HEX_COLOR.test(resolved)
-    ? resolved
-    : null;
+export function resolvePpbVariantSwatch(product: any, variant: any) {
+  const productOptions = Array.isArray(product?.options) ? product.options : [];
+  const selectedOptions = Array.isArray(variant?.selectedOptions)
+    ? variant.selectedOptions
+    : [];
+
+  for (const selectedOption of selectedOptions) {
+    const option = productOptions.find(
+      (candidate: any) => String(candidate?.name ?? "") === String(selectedOption?.name ?? ""),
+    );
+    const optionValue = option?.optionValues?.find(
+      (candidate: any) => String(candidate?.name ?? "") === String(selectedOption?.value ?? ""),
+    );
+    if (!optionValue) continue;
+    const color = optionValue.swatch?.color ?? null;
+    const image = optionValue.swatch?.image ?? null;
+    if (color || image) {
+      return {
+        color,
+        image,
+        label: String(optionValue.name ?? selectedOption.value ?? ""),
+      };
+    }
+  }
+
+  return {
+    color: null,
+    image: null,
+    label: variantLabel(variant),
+  };
 }
 
 export function resolvePpbTooltipPosition({
@@ -67,33 +80,8 @@ export function resolvePpbTooltipPosition({
   };
 }
 
-function variantImageUrl(variant: any) {
-  return variant?.image?.src
-    || variant?.image?.url
-    || variant?.image?.originalSrc
-    || variant?.imageUrl
-    || "";
-}
-
 function variantLabel(variant: any) {
   return String(variant?.title || variant?.option1 || variant?.id || "").trim();
-}
-
-function swatchColorForVariant(variant: any, colorMap: Record<string, unknown>) {
-  const candidates = [
-    variant?.title,
-    variant?.option1,
-    variant?.option2,
-    variant?.option3,
-    ...(Array.isArray(variant?.selectedOptions)
-      ? variant.selectedOptions.map((option: any) => option?.value)
-      : []),
-  ];
-  for (const candidate of candidates) {
-    const color = resolvePpbSwatchColor(candidate, colorMap);
-    if (color) return color;
-  }
-  return null;
 }
 
 function stableDomId(value: unknown) {
@@ -163,7 +151,8 @@ export function createPpbVariantSelectorElement({
 
   variants.forEach((variant: any, index: number) => {
     const value = String(variant.id ?? "");
-    const optionLabel = variantLabel(variant);
+    const swatch = resolvePpbVariantSwatch(product, variant);
+    const optionLabel = swatch.label || variantLabel(variant);
     const unavailable = isUnavailable(variant);
     const control = runtimeDocument.createElement("label");
     control.className = `ppb-variant-selector-option ppb-variant-selector-option--${config.variantSelectorMode}`;
@@ -185,7 +174,7 @@ export function createPpbVariantSelectorElement({
     const visual = runtimeDocument.createElement("span");
     visual.className = "ppb-variant-selector-visual";
     if (config.variantSelectorMode === "image_swatch") {
-      const imageUrl = variantImageUrl(variant);
+      const imageUrl = swatch.image?.src || swatch.image?.url || "";
       if (imageUrl) {
         const image = runtimeDocument.createElement("img");
         image.src = imageUrl;
@@ -197,7 +186,7 @@ export function createPpbVariantSelectorElement({
       accessibleText.textContent = optionLabel;
       visual.append(accessibleText);
     } else if (config.variantSelectorMode === "color_swatch") {
-      const color = swatchColorForVariant(variant, config.variantColorMap);
+      const color = typeof swatch.color === "string" ? swatch.color : null;
       control.dataset.colorMapped = color ? "true" : "false";
       if (color) control.style.setProperty("--wpb-ppb-swatch-color", color);
       const accessibleText = runtimeDocument.createElement("span");

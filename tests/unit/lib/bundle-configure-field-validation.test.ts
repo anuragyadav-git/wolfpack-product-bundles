@@ -138,7 +138,7 @@ describe("validateBundleConfigureFormData", () => {
     );
   });
 
-  it("validates PPB category selector mode and explicit color mappings", () => {
+  it("validates the PPB category selector mode", () => {
     const issues = validateBundleConfigureFormData(
       form({
         stepsData: JSON.stringify([
@@ -154,15 +154,6 @@ describe("validateBundleConfigureFormData", () => {
                 collections: [],
                 variantSelectorMode: "tiles",
               },
-              {
-                id: "cat-2",
-                name: "More colors",
-                products: [{ id: "gid://shopify/Product/2" }],
-                collections: [],
-                variantSelectorMode: "color_swatch",
-                swatchTooltipEnabled: true,
-                variantColorMap: { Navy: "red;display:none" },
-              },
             ],
           },
         ]),
@@ -173,10 +164,6 @@ describe("validateBundleConfigureFormData", () => {
     expect(issues).toEqual(expect.arrayContaining([
       expect.objectContaining({
         path: "steps.step-1.categories.cat-1.variantSelectorMode",
-        section: "step_setup",
-      }),
-      expect.objectContaining({
-        path: "steps.step-1.categories.cat-2.variantColorMap",
         section: "step_setup",
       }),
     ]));

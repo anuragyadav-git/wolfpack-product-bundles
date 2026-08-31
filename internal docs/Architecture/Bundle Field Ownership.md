@@ -5,7 +5,7 @@ title: Bundle Field Ownership
 type: architecture
 status: authoritative
 summary: Canonical ownership ledger for persisted bundle fields, public runtime fields, Shopify custom data, and retired aliases.
-last_audited: 2026-08-30
+last_audited: 2026-08-31
 owners:
   - engineering
 domains:
@@ -48,12 +48,12 @@ second persisted owner. The app's Sync Bundle action is the upgrade path.
 
 | Classification | Fields or contract | Owner and reason |
 | --- | --- | --- |
-| `KEEP_USED` | Bundle identity, status, type, Shopify parent linkage, FPB design template/preset, steps, `StepProduct`, canonical `StepCategory` including PPB `variantSelectorMode`, `swatchTooltipEnabled`, and `variantColorMap`, pricing rules, direct `BundlePricing.displayOptions`, box selection, defaults, text, media, add-ons, visibility | Current Admin save, storefront formatter, widget, Cart Transform, or Shopify sync reads the field. |
+| `KEEP_USED` | Bundle identity, status, type, Shopify parent linkage, FPB design template/preset, steps, `StepProduct`, canonical `StepCategory` including PPB `variantSelectorMode` and `swatchTooltipEnabled`, pricing rules, direct `BundlePricing.displayOptions`, box selection, defaults, text, media, add-ons, visibility | Current Admin save, storefront formatter, widget, Cart Transform, or Shopify sync reads the field. |
 | `KEEP_PLATFORM` | Shopify product/variant IDs and handles, publication state, inventory settings, analytics/event identifiers | Required to address Shopify resources or provide an explicit platform capability. |
 | `KEEP_FOR_IMPLEMENTATION` | `showProductPrices`, `cartRedirectToCheckout`, `allowQuantityChanges`, `discountDisplayOverride`, and other merchant-visible controls whose runtime wiring is incomplete | The contract is approved or merchant-visible and its Admin/storefront wiring is incomplete. It must be wired or removed as a product decision; it must not be silently deleted as database debris. |
 | `DERIVED` | Public `bundle_ui_config`, runtime `messaging`, compact product/category records, component references/quantities/pricing, signed runtime token payload | Generated at the server/Shopify boundary. Never write these shapes back as a second bundle source. |
 | `CONSOLIDATE_DUPLICATE` | Pricing display options | `BundlePricing.displayOptions` is the only persisted owner. `messages.displayOptions` is removed; runtime `messaging.displayOptions` is derived from the direct field. |
-| `REMOVE_LEGACY` | `Bundle.fullPageLayout`; `StepCategory.categoryRank`, `selectedProducts`, `collectionsData`, `collectionsSelectedData`; sparse `fields=bootstrap`; response timestamp; `$app.component_parents`; duplicate standard/camel-case metafield writers | Superseded aliases or abandoned contracts with no current owner. They are migrated once and removed, not read through fallbacks. |
+| `REMOVE_LEGACY` | `Bundle.fullPageLayout`; `StepCategory.categoryRank`, `selectedProducts`, `collectionsData`, `collectionsSelectedData`, `variantColorMap`; sparse `fields=bootstrap`; response timestamp; `$app.component_parents`; duplicate standard/camel-case metafield writers | Superseded aliases, duplicate platform data, or abandoned contracts with no current owner. They are migrated once and removed, not read through fallbacks. |
 | `REMOVE_DEAD` | Storefront sync status/attempt/timestamp/error columns; `BundleCustomField`; `DesignSettings.productPriceVisibility`, `loadingOverlayBgColor`, `loadingOverlayTextColor`, `emptySlotBorderColor`; `Bundle.individualSellingPlanSelection`; empty metaobject replay hook | No current merchant, runtime, platform, or operational reader. |
 
 ## Removed Pre-order and Subscription Integration Contract
@@ -77,10 +77,12 @@ Persisted and runtime category identity is `id`. Ordering is `sortOrder`.
 Selection sources are exactly `products` and `collections`. Category presentation,
 conditions, translations, and auto-advance stay alongside those fields when
 configured. PPB variant presentation uses exactly `variantSelectorMode`
-(`dropdown`, `pill`, `color_swatch`, or `image_swatch`),
-`swatchTooltipEnabled`, and the explicit `variantColorMap`. The color map accepts
-only merchant-authored six-digit hex values; storefront code must not infer CSS
-colors from arbitrary option names.
+(`dropdown`, `pill`, `color_swatch`, or `image_swatch`) and
+`swatchTooltipEnabled`. Swatch color and image values are Shopify-owned
+`ProductOptionValue.swatch` data fetched through the Storefront API. Variant
+association uses Shopify `selectedOptions`; storefront code must not infer
+colors from option names, substitute variant imagery, or restore a parallel
+merchant color map.
 
 There is no runtime or persistence fallback to `categoryId`, `rank`,
 `categoryRank`, `selectedProducts`, `collectionsData`, or

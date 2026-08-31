@@ -48,7 +48,6 @@ export interface CategoryContractInput {
   displayVariantsAsIndividualProducts?: boolean;
   variantSelectorMode?: VariantSelectorMode;
   swatchTooltipEnabled?: boolean;
-  variantColorMap?: Record<string, string>;
 }
 
 export function buildCategoryContract(input: CategoryContractInput) {

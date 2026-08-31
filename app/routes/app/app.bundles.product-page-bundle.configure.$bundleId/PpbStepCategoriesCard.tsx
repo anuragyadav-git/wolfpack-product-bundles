@@ -70,7 +70,6 @@ export function PpbStepCategoriesCard({ step }: { step: any }) {
                 displayVariantsForAllCategories,
               variantSelectorMode: "dropdown",
               swatchTooltipEnabled: false,
-              variantColorMap: {},
             },
           ]);
           markAsDirty();

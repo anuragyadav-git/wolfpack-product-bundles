@@ -166,7 +166,6 @@ describe("common configure page model", () => {
         displayVariantsAsIndividualProducts: false,
         variantSelectorMode: "color_swatch",
         swatchTooltipEnabled: true,
-        variantColorMap: { Gold: "#D4AF37" },
       },
       {
         id: "cat-2",
@@ -175,7 +174,6 @@ describe("common configure page model", () => {
         displayVariantsAsIndividualProducts: false,
         variantSelectorMode: "dropdown",
         swatchTooltipEnabled: false,
-        variantColorMap: {},
       },
     ];
 
@@ -191,7 +189,6 @@ describe("common configure page model", () => {
         displayVariantsAsIndividualProducts: true,
         variantSelectorMode: "color_swatch",
         swatchTooltipEnabled: true,
-        variantColorMap: { Gold: "#D4AF37" },
       },
       {
         id: "cat-2",
@@ -200,7 +197,6 @@ describe("common configure page model", () => {
         displayVariantsAsIndividualProducts: true,
         variantSelectorMode: "dropdown",
         swatchTooltipEnabled: false,
-        variantColorMap: {},
       },
     ]);
   });

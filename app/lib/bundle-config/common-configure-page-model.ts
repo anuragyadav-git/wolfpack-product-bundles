@@ -174,7 +174,6 @@ export function applyPpbCategoryVariantConfiguration<T extends Record<string, un
     displayVariantsAsIndividualProducts?: boolean;
     variantSelectorMode?: "dropdown" | "pill" | "color_swatch" | "image_swatch";
     swatchTooltipEnabled?: boolean;
-    variantColorMap?: Record<string, string>;
   },
 ): T[] {
   return categories.map((category) => ({
@@ -190,9 +189,6 @@ export function applyPpbCategoryVariantConfiguration<T extends Record<string, un
       : {}),
     ...(typeof configuration.swatchTooltipEnabled === "boolean"
       ? { swatchTooltipEnabled: configuration.swatchTooltipEnabled }
-      : {}),
-    ...(configuration.variantColorMap
-      ? { variantColorMap: configuration.variantColorMap }
       : {}),
   }));
 }

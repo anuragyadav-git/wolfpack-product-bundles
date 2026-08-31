@@ -220,7 +220,6 @@ describe("buildCategoryContract", () => {
       displayVariantsAsIndividualProducts: true,
       variantSelectorMode: "color_swatch",
       swatchTooltipEnabled: true,
-      variantColorMap: { Gold: "#D4AF37" },
       autoNextStepOnConditionMet: true,
       multiLangData: { en: { name: "Featured products" } },
     })).toEqual({
@@ -237,7 +236,6 @@ describe("buildCategoryContract", () => {
       displayVariantsAsIndividualProducts: true,
       variantSelectorMode: "color_swatch",
       swatchTooltipEnabled: true,
-      variantColorMap: { Gold: "#D4AF37" },
       multiLangData: { en: { name: "Featured products" } },
     });
   });
@@ -258,7 +256,6 @@ describe("buildCategoryContract", () => {
       displayVariantsAsIndividualProducts: false,
       variantSelectorMode: "dropdown",
       swatchTooltipEnabled: false,
-      variantColorMap: {},
       multiLangData: {},
     });
   });
@@ -271,11 +268,9 @@ describe("formatStepCategoryForRuntime", () => {
       name: "Colors",
       variantSelectorMode: "color_swatch",
       swatchTooltipEnabled: true,
-      variantColorMap: { Navy: "#001F3F" },
     }, 0)).toMatchObject({
       variantSelectorMode: "color_swatch",
       swatchTooltipEnabled: true,
-      variantColorMap: { Navy: "#001F3F" },
     });
   });
 

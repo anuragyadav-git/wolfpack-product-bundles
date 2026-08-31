@@ -404,7 +404,6 @@ describe("formatBundleForWidget", () => {
           displayVariantsAsIndividualProducts: true,
           variantSelectorMode: "dropdown",
           swatchTooltipEnabled: false,
-          variantColorMap: {},
           multiLangData: { en: { title: "Pick audit items" } },
         },
       ],
@@ -439,7 +438,6 @@ describe("formatBundleForWidget", () => {
         displayVariantsAsIndividualProducts: true,
         variantSelectorMode: "dropdown",
         swatchTooltipEnabled: false,
-        variantColorMap: {},
         multiLangData: { en: { title: "Pick audit items" } },
       },
     ]);

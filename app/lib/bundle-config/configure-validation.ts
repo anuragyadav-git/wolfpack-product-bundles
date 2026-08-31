@@ -440,11 +440,8 @@ export function validateBundleConfigureFormData(
           parseVariantSelectorConfiguration(category ?? {});
         } catch (error) {
           const message = error instanceof Error ? error.message : "Invalid variant selector configuration";
-          const field = message.includes("mode")
-            ? "variantSelectorMode"
-            : "variantColorMap";
           issues.push(issue(
-            `${categoryBase}.${field}`,
+            `${categoryBase}.variantSelectorMode`,
             message,
             "step_setup",
             { stepId, categoryId },

@@ -794,7 +794,6 @@ describe("PPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
             displayVariantsAsIndividualProducts: true,
             variantSelectorMode: "color_swatch",
             swatchTooltipEnabled: true,
-            variantColorMap: { Gold: "#D4AF37" },
             multiLangData: { en: { title: "Pick audit items" } },
           },
         ],
@@ -822,7 +821,6 @@ describe("PPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
       displayVariantsAsIndividualProducts: true,
       variantSelectorMode: "color_swatch",
       swatchTooltipEnabled: true,
-      variantColorMap: { Gold: "#D4AF37" },
       multiLangData: { en: { title: "Pick audit items" } },
     });
   });
