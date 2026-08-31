@@ -65,6 +65,15 @@ export function useConfigureContentState(flow: ConfigureBundleFlowDraft) {
   const [allowQuantityChanges, setAllowQuantityChanges] = useState<boolean>(
     (bundle as any).allowQuantityChanges ?? true,
   );
+  const [lowStockAlertEnabled, setLowStockAlertEnabled] = useState<boolean>(
+    (bundle as any).lowStockAlertEnabled ?? false,
+  );
+  const [lowStockAlertThreshold, setLowStockAlertThreshold] = useState<string>(
+    String((bundle as any).lowStockAlertThreshold ?? 5),
+  );
+  const [lowStockAlertMessage, setLowStockAlertMessage] = useState<string>(
+    (bundle as any).lowStockAlertMessage ?? "Only {{stock}} left",
+  );
   const initialValidateQuantityPerProduct =
     ((bundle as any).validateQuantityPerProduct as {
       isEnabled?: boolean;
@@ -111,6 +120,15 @@ export function useConfigureContentState(flow: ConfigureBundleFlowDraft) {
   );
   const originalAllowQuantityChangesRef = useRef<boolean>(
     (bundle as any).allowQuantityChanges ?? true,
+  );
+  const originalLowStockAlertEnabledRef = useRef<boolean>(
+    (bundle as any).lowStockAlertEnabled ?? false,
+  );
+  const originalLowStockAlertThresholdRef = useRef<string>(
+    String((bundle as any).lowStockAlertThreshold ?? 5),
+  );
+  const originalLowStockAlertMessageRef = useRef<string>(
+    (bundle as any).lowStockAlertMessage ?? "Only {{stock}} left",
   );
   const directBundleSummary =
     (
@@ -175,6 +193,9 @@ export function useConfigureContentState(flow: ConfigureBundleFlowDraft) {
     initialTextOverrides,
     initialValidateQuantityPerProduct,
     loadingGif,
+    lowStockAlertEnabled,
+    lowStockAlertMessage,
+    lowStockAlertThreshold,
     maxQtyPerProduct,
     normalizeDefaultProductsData,
     originalAllowQuantityChangesRef,
@@ -183,6 +204,9 @@ export function useConfigureContentState(flow: ConfigureBundleFlowDraft) {
     originalFloatingBadgeEnabledRef,
     originalFloatingBadgeTextRef,
     originalLoadingGifRef,
+    originalLowStockAlertEnabledRef,
+    originalLowStockAlertMessageRef,
+    originalLowStockAlertThresholdRef,
     originalPromoBannerBgImageRef,
     originalShowProductPricesRef,
     originalShowStepTimelineRef,
@@ -199,6 +223,9 @@ export function useConfigureContentState(flow: ConfigureBundleFlowDraft) {
     setFloatingBadgeEnabled,
     setFloatingBadgeText,
     setLoadingGif,
+    setLowStockAlertEnabled,
+    setLowStockAlertMessage,
+    setLowStockAlertThreshold,
     setMaxQtyPerProduct,
     setProductSlotIconUrl,
     setProductSlotsEnabled,

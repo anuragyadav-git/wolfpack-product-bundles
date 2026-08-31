@@ -1,4 +1,5 @@
 import { processCss } from "../../../../lib/css-sanitizer";
+import { parseLowStockAlertSettings } from "../../../../lib/low-stock-alert";
 import { normalizeFpbUpsellSave } from "../../../../lib/fpb-upsell-config.server";
 import { normalizeBundleSubscriptionConfig } from "../../../../lib/bundle-subscriptions";
 
@@ -171,6 +172,7 @@ export function parseFpbSaveBundleForm(formData: FormData) {
   const bundleSubscriptionConfig = typeof bundleSubscriptionConfigRaw === "string"
     ? normalizeBundleSubscriptionConfig(JSON.parse(bundleSubscriptionConfigRaw))
     : null;
+  const lowStockAlertSettings = parseLowStockAlertSettings(formData);
 
   return {
     allowQuantityChanges,
@@ -191,6 +193,7 @@ export function parseFpbSaveBundleForm(formData: FormData) {
     floatingBadgeEnabled,
     floatingBadgeText,
     loadingGif,
+    ...lowStockAlertSettings,
     maxQtyPerProduct,
     personalizationData,
     productSlotIconUrl,

@@ -174,6 +174,26 @@ describe("formatBundleForWidget", () => {
     expect(result.variantSelectorEnabled).toBe(true);
   });
 
+  it("emits the direct low-stock alert storefront contract", () => {
+    const configured = formatBundleForWidget(makeBundle({
+      lowStockAlertEnabled: true,
+      lowStockAlertThreshold: 8,
+      lowStockAlertMessage: "Hurry, {{stock}} remaining",
+    }) as any);
+    const defaults = formatBundleForWidget(makeBundle() as any);
+
+    expect(configured.lowStockAlert).toEqual({
+      enabled: true,
+      threshold: 8,
+      message: "Hurry, {{stock}} remaining",
+    });
+    expect(defaults.lowStockAlert).toEqual({
+      enabled: false,
+      threshold: 5,
+      message: "Only {{stock}} left",
+    });
+  });
+
   it("keeps product-page compare-at visibility enabled despite a stale persisted setting", () => {
     const result = formatBundleForWidget(makeBundle({
       bundleType: "product_page",

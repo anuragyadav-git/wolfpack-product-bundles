@@ -8,6 +8,7 @@ import { shouldRenderInlineVariantSelector } from '../../shared/variant-selector
 import { resolveProductPageCardButtonText, resolveProductPageInlineAddText } from './modal-methods.js';
 import { getSubscriptionProductCardPrice } from '../../shared/subscription-storefront-methods.js';
 import { createGiftBadgeIcon } from '../../shared/svg-icons.js';
+import { resolveLowStockAlert } from '../../../../lib/low-stock-alert.js';
 
 function bsIsDefaultStep(step: any) { return !!step?.isDefault; }
 
@@ -298,10 +299,22 @@ _renderInpageStepProducts(stepIndex: string|number, target: any) {
     const atMaxStock = available !== null && currentQuantity >= available;
     const atMaxProductQuantity = productQuantityLimit !== null && currentQuantity >= productQuantityLimit;
     const increaseDisabled = outOfStock || atMaxStock || atMaxProductQuantity;
-    const stockBadgeElement = outOfStock ? document.createElement('div') : null;
+    const lowStockAlert = this.selectedBundle?.lowStockAlert
+      ? resolveLowStockAlert(this.selectedBundle.lowStockAlert, [{
+        quantityAvailable: typeof product.quantityAvailable === 'number'
+          ? product.quantityAvailable
+          : null,
+        currentlyNotInStock: product.currentlyNotInStock === true,
+        availableForSale: product.available !== false,
+        requiredQuantity: 1,
+      }])
+      : null;
+    const stockBadgeElement = outOfStock || lowStockAlert ? document.createElement('div') : null;
     if (stockBadgeElement) {
-      stockBadgeElement.className = 'product-stock-badge product-stock-badge--out';
-      stockBadgeElement.textContent = outOfStockText;
+      stockBadgeElement.className = `product-stock-badge ${outOfStock ? 'product-stock-badge--out' : 'product-stock-badge--low'}`;
+      stockBadgeElement.textContent = outOfStock
+        ? outOfStockText
+        : lowStockAlert?.message ?? '';
     }
     const variantSelectorElement = this.renderInlineCardVariantSelector(product, currentStep, stepIndex);
 

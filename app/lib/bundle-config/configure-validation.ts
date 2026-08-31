@@ -7,6 +7,10 @@ import {
   validatePricingTierBadgeForMethod,
 } from "../pricing-tier-badge";
 import { parseVariantSelectorConfiguration } from "./variant-selector-config";
+import {
+  parseLowStockAlertSettings,
+  validateLowStockAlertSettings,
+} from "../low-stock-alert";
 
 export type BundleConfigureKind = "fpb" | "ppb";
 
@@ -360,6 +364,11 @@ function validateSettings(issues: ConfigureValidationIssue[], formData: FormData
       }
     });
   }
+  validateLowStockAlertSettings(parseLowStockAlertSettings(formData)).forEach(
+    ({ path, message }) => {
+      issues.push(issue(path, message, "bundle_settings"));
+    },
+  );
 }
 
 function validateFpbAddons(issues: ConfigureValidationIssue[], formData: FormData) {

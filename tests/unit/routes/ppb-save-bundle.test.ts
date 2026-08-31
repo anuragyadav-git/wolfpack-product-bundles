@@ -761,6 +761,25 @@ describe("PPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
     );
   });
 
+  it("persists direct low-stock alert settings", async () => {
+    const fd = makeFormData({
+      lowStockAlertEnabled: "true",
+      lowStockAlertThreshold: "8",
+      lowStockAlertMessage: "Hurry, {{stock}} remaining",
+    });
+    await handleSaveBundle(MOCK_ADMIN, MOCK_SESSION, "bundle-1", fd);
+
+    expect(getDb().bundle.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          lowStockAlertEnabled: true,
+          lowStockAlertThreshold: 8,
+          lowStockAlertMessage: "Hurry, {{stock}} remaining",
+        }),
+      }),
+    );
+  });
+
   it("creates StepCategory records in DB with correct shape", async () => {
     const categoryCondition = { type: "quantity", condition: "greaterThanOrEqualTo", value: "01" };
     const categoryProduct = {

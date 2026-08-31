@@ -60,6 +60,11 @@ export interface FormattedBundle {
   showProductComparedAtPrice: boolean;
   cartRedirectToCheckout: boolean;
   allowQuantityChanges: boolean;
+  lowStockAlert: {
+    enabled: boolean;
+    threshold: number;
+    message: string;
+  };
   showTextOnAddButton: boolean;
   // Per-bundle text overrides
   textOverrides: Record<string, string> | null;
@@ -327,6 +332,11 @@ export function formatBundleForWidget(bundle: any): FormattedBundle {
     showProductComparedAtPrice: resolveShowProductComparedAtPrice(),
     cartRedirectToCheckout: bundle.cartRedirectToCheckout ?? false,
     allowQuantityChanges: bundle.allowQuantityChanges ?? true,
+    lowStockAlert: {
+      enabled: bundle.lowStockAlertEnabled ?? false,
+      threshold: bundle.lowStockAlertThreshold ?? 5,
+      message: bundle.lowStockAlertMessage ?? "Only {{stock}} left",
+    },
     showTextOnAddButton: bundle.showTextOnAddButton ?? false,
     textOverrides: (bundle.textOverrides as Record<string, string> | null) ?? null,
     textOverridesByLocale: (bundle.textOverridesByLocale as Record<string, Record<string, string>> | null) ?? null,

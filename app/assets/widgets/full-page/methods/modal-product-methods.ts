@@ -7,6 +7,7 @@ import { shouldRenderInlineVariantSelector } from '../../shared/variant-selector
 import { BundleProductModal } from '../../../bundle-modal-component.js';
 import { TemplateDesignSystem } from '../../shared/template-design-system.js';
 import { getSubscriptionProductCardPrice } from '../../shared/subscription-storefront-methods.js';
+import { resolveLowStockAlert } from '../../../../lib/low-stock-alert.js';
 
 const modalProductTemplateSystem = TemplateDesignSystem;
 
@@ -150,18 +151,27 @@ renderModalProducts(stepIndex: number, productsToRender: any = null) {
     // Per-variant stock state derived from Storefront API quantityAvailable
     const { available, outOfStock } = this.getVariantAvailable(stepIndex, selectionKey);
     const atMaxStock = available !== null && available > 0 && currentQuantity >= available;
-    const lowStock = available !== null && available > 0 && available <= 3;
     const increaseDisabled = outOfStock || atMaxStock;
     const addDisabled = outOfStock;
     const outOfStockLabel = resolveText('outOfStockText', 'Out of stock');
-    const lowStockTemplate = resolveText('lowStockText', 'Only {{count}} left');
-    const lowStockLabel = lowStockTemplate.replace('{{count}}', String(available));
+    const lowStockAlert = this.selectedBundle?.lowStockAlert
+      ? resolveLowStockAlert(this.selectedBundle.lowStockAlert, [{
+        quantityAvailable: typeof product.quantityAvailable === 'number'
+          ? product.quantityAvailable
+          : null,
+        currentlyNotInStock: product.currentlyNotInStock === true,
+        availableForSale: product.available !== false,
+        requiredQuantity: 1,
+      }])
+      : null;
 
     // Low-stock / out-of-stock badge — shown on the image, not in the CTA.
-    const stockBadgeElement = outOfStock || lowStock ? document.createElement('div') : null;
+    const stockBadgeElement = outOfStock || lowStockAlert ? document.createElement('div') : null;
     if (stockBadgeElement) {
       stockBadgeElement.className = `product-stock-badge ${outOfStock ? 'product-stock-badge--out' : 'product-stock-badge--low'}`;
-      stockBadgeElement.textContent = outOfStock ? outOfStockLabel : lowStockLabel;
+      stockBadgeElement.textContent = outOfStock
+        ? outOfStockLabel
+        : lowStockAlert?.message ?? '';
     }
 
     return createSharedProductCardElement(

@@ -79,6 +79,12 @@ export function usePpbFetcherEffects({
             canonicalTextOverridesByLocale;
           settings.originalDefaultProductsDataRef.current =
             settings.defaultProductsData;
+          settings.originalLowStockAlertEnabledRef.current =
+            settings.lowStockAlertEnabled;
+          settings.originalLowStockAlertThresholdRef.current =
+            settings.lowStockAlertThreshold;
+          settings.originalLowStockAlertMessageRef.current =
+            settings.lowStockAlertMessage;
           visibility.originalUpsellWidgetEnabledRef.current =
             visibility.upsellWidgetEnabled;
           visibility.originalUpsellWidgetDisplayModeRef.current =

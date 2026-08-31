@@ -104,6 +104,9 @@ model Bundle {
   allowQuantityChanges                 Boolean           @default(true) // Allow customers to change per-product quantity
   sdkMode                              Boolean           @default(false) // Load headless SDK instead of pre-built widget (product-page bundles only)
   searchBarEnabled                     Boolean           @default(false) // Show search bar in the bundle widget (all bundle types)
+  lowStockAlertEnabled                 Boolean           @default(false) // Show truthful component-variant low-stock messaging
+  lowStockAlertThreshold               Int               @default(5) // Inclusive Shopify sellable-quantity threshold
+  lowStockAlertMessage                 String            @default("Only {{stock}} left") // Merchant copy; must include {{stock}}
   // Per-bundle text overrides
   textOverrides                        Json? // { addToCartButton, nextButton, doneButton, freeBadge, includedBadge, yourBundle, addingToCart, completeSteps }
   textOverridesByLocale                Json? // { "fr": { addToCartButton: "Ajouter au panier", ... }, ... }

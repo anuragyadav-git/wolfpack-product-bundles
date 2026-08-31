@@ -42,6 +42,21 @@ describe("parsePPBBundleSettings", () => {
     expect(result.validateQuantityPerProduct).toEqual({ isEnabled: false, allowedQuantity: 1 });
     expect(result.bundleTextConfig).toBeNull();
     expect(result.useSingleStepCategoriesAsBundleSteps).toBe(false);
+    expect(result.lowStockAlertEnabled).toBe(false);
+    expect(result.lowStockAlertThreshold).toBe(5);
+    expect(result.lowStockAlertMessage).toBe("Only {{stock}} left");
+  });
+
+  it("parses direct low-stock alert settings", () => {
+    const result = parsePPBBundleSettings(makeForm({
+      lowStockAlertEnabled: "true",
+      lowStockAlertThreshold: "8",
+      lowStockAlertMessage: "Hurry, {{stock}} remaining",
+    }));
+
+    expect(result.lowStockAlertEnabled).toBe(true);
+    expect(result.lowStockAlertThreshold).toBe(8);
+    expect(result.lowStockAlertMessage).toBe("Hurry, {{stock}} remaining");
   });
 
   it("parses variantSelectorEnabled defaults to true when missing", () => {

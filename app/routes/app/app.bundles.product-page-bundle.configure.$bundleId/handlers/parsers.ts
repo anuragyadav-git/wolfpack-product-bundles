@@ -1,4 +1,5 @@
 import { processCss } from "../../../../lib/css-sanitizer";
+import { parseLowStockAlertSettings } from "../../../../lib/low-stock-alert";
 
 function str(formData: FormData, key: string): string | null {
   const val = formData.get(key);
@@ -95,5 +96,6 @@ export function parsePPBBundleSettings(formData: FormData) {
       "useSingleStepCategoriesAsBundleSteps",
       false,
     ),
+    ...parseLowStockAlertSettings(formData),
   };
 }

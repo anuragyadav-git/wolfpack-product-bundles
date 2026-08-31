@@ -8,6 +8,7 @@ import {
   createPpbVariantSelectorElement,
   resolvePpbCategoryVariantSelectorConfiguration,
 } from '../variant-selector-modes.js';
+import { resolveLowStockAlert } from '../../../../lib/low-stock-alert.js';
 
 export function resolveProductPageCardButtonText({
   currentQuantity = 0,
@@ -409,10 +410,22 @@ renderModalProducts(stepIndex: string|number, productsToRender: any = null) {
     const atMaxStock = available !== null && currentQuantity >= available;
     const atMaxProductQuantity = productQuantityLimit !== null && currentQuantity >= productQuantityLimit;
     const increaseDisabled = outOfStock || atMaxStock || atMaxProductQuantity;
-    const stockBadgeElement = outOfStock ? document.createElement('div') : null;
+    const lowStockAlert = this.selectedBundle?.lowStockAlert
+      ? resolveLowStockAlert(this.selectedBundle.lowStockAlert, [{
+        quantityAvailable: typeof product.quantityAvailable === 'number'
+          ? product.quantityAvailable
+          : null,
+        currentlyNotInStock: product.currentlyNotInStock === true,
+        availableForSale: product.available !== false,
+        requiredQuantity: 1,
+      }])
+      : null;
+    const stockBadgeElement = outOfStock || lowStockAlert ? document.createElement('div') : null;
     if (stockBadgeElement) {
-      stockBadgeElement.className = 'product-stock-badge product-stock-badge--out';
-      stockBadgeElement.textContent = outOfStockText;
+      stockBadgeElement.className = `product-stock-badge ${outOfStock ? 'product-stock-badge--out' : 'product-stock-badge--low'}`;
+      stockBadgeElement.textContent = outOfStock
+        ? outOfStockText
+        : lowStockAlert?.message ?? '';
     }
     return createSharedProductCardElement(
       {

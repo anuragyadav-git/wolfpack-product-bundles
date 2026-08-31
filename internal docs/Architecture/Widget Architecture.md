@@ -5,7 +5,7 @@ title: Widget Architecture
 type: architecture
 status: authoritative
 summary: FPB and PPB bootstrap, hydration, extension-asset, and widget runtime architecture.
-last_audited: 2026-08-31
+last_audited: 2026-09-01
 owners:
   - engineering
 domains:
@@ -303,6 +303,19 @@ substituting `{{conditionQuantity}}`, `{{conditionAmount}}`, or
 Before PPB category-as-step expansion, the runtime removes steps whose persisted `enabled` value is `false`. This visibility normalization also applies when category expansion is off, so a disabled Admin step can never render or prevent a single enabled multi-category step from expanding into navigable category steps.
 
 Product Page inventory normalization preserves `sourceVariantCount` after unavailable variants are filtered. Product List uses that metadata only when a grouped product originally had multiple variants but now has one sellable variant: the shared row shows the surviving variant title as static identity while keeping the selector absent. Fully unavailable products and unavailable options remain filtered.
+
+FPB and PPB low-stock alerts consume the same Shopify Storefront API variant
+fields already used by selection and cart guards: `quantityAvailable`,
+`currentlyNotInStock`, and `availableForSale`. The public bundle DTO exposes one
+per-bundle `lowStockAlert` object with `enabled`, `threshold`, and tokenized
+`message`. The shared decision helper shows a claim only for a positive exact
+sellable quantity at or below the threshold. Unknown quantity, zero stock,
+unavailable variants, continue-selling/backorder variants, and failed or stale
+reads suppress the claim. Out-of-stock UI remains a separate state, and Shopify
+cart/checkout validation remains authoritative. Aggregate calculations use the
+minimum `floor(quantityAvailable / requiredQuantity)` across required selected
+component variants; optional components are ignored. Parent bundle inventory is
+never read or synthesized.
 
 ---
 

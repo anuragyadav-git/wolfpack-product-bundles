@@ -125,6 +125,12 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
         "allowQuantityChanges",
         String(flow.allowQuantityChanges),
       );
+      formData.append(
+        "lowStockAlertEnabled",
+        String(flow.lowStockAlertEnabled),
+      );
+      formData.append("lowStockAlertThreshold", flow.lowStockAlertThreshold);
+      formData.append("lowStockAlertMessage", flow.lowStockAlertMessage);
       formData.append("searchBarEnabled", String(flow.searchBarEnabled));
       formData.append(
         "variantSelectorEnabled",
@@ -278,6 +284,12 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
             flow.cartRedirectToCheckout;
           flow.originalAllowQuantityChangesRef.current =
             flow.allowQuantityChanges;
+          flow.originalLowStockAlertEnabledRef.current =
+            flow.lowStockAlertEnabled;
+          flow.originalLowStockAlertThresholdRef.current =
+            flow.lowStockAlertThreshold;
+          flow.originalLowStockAlertMessageRef.current =
+            flow.lowStockAlertMessage;
           flow.originalTextOverridesRef.current = flow.textOverrides;
           flow.originalTextOverridesByLocaleRef.current =
             flow.textOverridesByLocale;
@@ -372,6 +384,15 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
       flow.originalCartRedirectToCheckoutRef.current,
     );
     flow.setAllowQuantityChanges(flow.originalAllowQuantityChangesRef.current);
+    flow.setLowStockAlertEnabled(
+      flow.originalLowStockAlertEnabledRef.current,
+    );
+    flow.setLowStockAlertThreshold(
+      flow.originalLowStockAlertThresholdRef.current,
+    );
+    flow.setLowStockAlertMessage(
+      flow.originalLowStockAlertMessageRef.current,
+    );
     flow.setTextOverrides(flow.originalTextOverridesRef.current);
     flow.setTextOverridesByLocale(
       flow.originalTextOverridesByLocaleRef.current,

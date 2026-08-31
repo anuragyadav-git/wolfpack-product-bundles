@@ -291,6 +291,15 @@ export function usePpbSaveHandlers({
         String(settings.variantSelectorEnabled),
       );
       formData.append(
+        "lowStockAlertEnabled",
+        String(settings.lowStockAlertEnabled),
+      );
+      formData.append(
+        "lowStockAlertThreshold",
+        settings.lowStockAlertThreshold,
+      );
+      formData.append("lowStockAlertMessage", settings.lowStockAlertMessage);
+      formData.append(
         "showTextOnAddButton",
         String(settings.showTextOnAddButton),
       );
@@ -395,6 +404,15 @@ export function usePpbSaveHandlers({
     base.discardSpecificLinkOfferChanges();
     settings.setDefaultProductsData(
       settings.originalDefaultProductsDataRef.current,
+    );
+    settings.setLowStockAlertEnabled(
+      settings.originalLowStockAlertEnabledRef.current,
+    );
+    settings.setLowStockAlertThreshold(
+      settings.originalLowStockAlertThresholdRef.current,
+    );
+    settings.setLowStockAlertMessage(
+      settings.originalLowStockAlertMessageRef.current,
     );
     visibility.setUpsellWidgetEnabled(
       visibility.originalUpsellWidgetEnabledRef.current,
