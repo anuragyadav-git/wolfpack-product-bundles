@@ -80,8 +80,14 @@ describe("FPB checkout cart-line properties", () => {
         _isWidgetActionBusy: false,
         container: null,
         selectedBundle: {
+          id: "bundle-1",
           name: "Daily Essentials",
           steps: [{ id: "paid-step", isFreeGift: false }],
+          offerDelivery: {
+            offerPolicyId: "policy-1",
+            ruleVersion: 5,
+            eligibilitySource: "specific_link",
+          },
         },
         selectedProducts: [{ "gid://shopify/ProductVariant/111": 1 }],
         stepProductData: [[{
@@ -277,8 +283,14 @@ describe("FPB checkout cart-line properties", () => {
         _isWidgetActionBusy: false,
         container: null,
         selectedBundle: {
+          id: "bundle-1",
           name: "Daily Essentials",
           steps: [{ id: "paid-step", isFreeGift: false }],
+          offerDelivery: {
+            offerPolicyId: "policy-1",
+            ruleVersion: 5,
+            eligibilitySource: "specific_link",
+          },
         },
         selectedProducts: [
           { "gid://shopify/ProductVariant/111": 1 },
@@ -327,6 +339,12 @@ describe("FPB checkout cart-line properties", () => {
     expect(body.items).toEqual([
       expect.objectContaining({
         id: "111",
+        properties: expect.objectContaining({
+          _wpb_bundle_id: "bundle-1",
+          _wpb_offer_policy_id: "policy-1",
+          _wpb_offer_rule_version: "5",
+          _wpb_offer_eligibility_source: "specific_link",
+        }),
       }),
     ]);
   });

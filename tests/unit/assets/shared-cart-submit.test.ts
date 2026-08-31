@@ -2,11 +2,39 @@ import { readProductPageWidgetSources } from './widget-source-helpers';
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const {
   applySellingPlanToJsonCartItems,
+  buildOfferAnalyticsCartProperties,
   buildProductPageCartFormData,
   extractBundleDetailsSourceProperties,
 } = require('../../../app/assets/widgets/shared/engine/cart-submit.js');
 
 describe('shared cart-submit helpers', () => {
+  it('builds privacy-safe Shopify line properties for offer attribution', () => {
+    expect(buildOfferAnalyticsCartProperties({
+      bundleId: ' bundle-1 ',
+      offerDelivery: {
+        offerPolicyId: ' policy-1 ',
+        ruleVersion: 3,
+        eligibilitySource: 'specific_link',
+      },
+      tierId: ' tier-2 ',
+    })).toEqual({
+      _wpb_bundle_id: 'bundle-1',
+      _wpb_offer_policy_id: 'policy-1',
+      _wpb_offer_rule_version: '3',
+      _wpb_offer_tier_id: 'tier-2',
+      _wpb_offer_eligibility_source: 'specific_link',
+    });
+
+    expect(buildOfferAnalyticsCartProperties({
+      bundleId: 'bundle-1',
+      offerDelivery: {
+        offerPolicyId: 'x'.repeat(129),
+        ruleVersion: -1,
+        eligibilitySource: 'customer_email',
+      },
+    })).toEqual({ _wpb_bundle_id: 'bundle-1' });
+  });
+
   it('builds EB-compatible product-page multipart cart form data', () => {
     const context = buildProductPageCartFormData([
       {
@@ -90,7 +118,7 @@ describe('shared cart-submit helpers', () => {
   it('is used by the product-page widget controller', () => {
     const source = readProductPageWidgetSources();
 
-    expect(source).toContain("import { buildProductPageCartFormData } from '../../shared/engine/cart-submit.js';");
+    expect(source).toContain('buildProductPageCartFormData,');
     expect(source).toContain('return buildProductPageCartFormData(cartItems, {');
   });
 });

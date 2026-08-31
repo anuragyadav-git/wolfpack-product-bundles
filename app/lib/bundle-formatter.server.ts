@@ -51,7 +51,9 @@ export interface FormattedBundle {
   offerDelivery: {
     decisionRequired: boolean;
     specificLinkRequired: boolean;
+    offerPolicyId: string | null;
     ruleVersion: number | null;
+    eligibilitySource: 'always' | 'specific_link' | 'schedule' | 'priority' | null;
   };
   // Per-bundle behavioral settings
   showProductPrices: boolean;

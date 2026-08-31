@@ -529,6 +529,57 @@ pub fn process_merge_operations(
             });
         }
 
+        let offer_analytics_attributes = [
+            (
+                "_wpb_bundle_id",
+                merge_line_indices.iter().find_map(|&idx| {
+                    lines[idx].offer_analytics_bundle_id()
+                        .and_then(|attribute| attribute.value())
+                        .and_then(|value| non_empty(&Some(value.to_string())))
+                }),
+            ),
+            (
+                "_wpb_offer_policy_id",
+                merge_line_indices.iter().find_map(|&idx| {
+                    lines[idx].offer_analytics_policy_id()
+                        .and_then(|attribute| attribute.value())
+                        .and_then(|value| non_empty(&Some(value.to_string())))
+                }),
+            ),
+            (
+                "_wpb_offer_rule_version",
+                merge_line_indices.iter().find_map(|&idx| {
+                    lines[idx].offer_analytics_rule_version()
+                        .and_then(|attribute| attribute.value())
+                        .and_then(|value| non_empty(&Some(value.to_string())))
+                }),
+            ),
+            (
+                "_wpb_offer_tier_id",
+                merge_line_indices.iter().find_map(|&idx| {
+                    lines[idx].offer_analytics_tier_id()
+                        .and_then(|attribute| attribute.value())
+                        .and_then(|value| non_empty(&Some(value.to_string())))
+                }),
+            ),
+            (
+                "_wpb_offer_eligibility_source",
+                merge_line_indices.iter().find_map(|&idx| {
+                    lines[idx].offer_analytics_eligibility_source()
+                        .and_then(|attribute| attribute.value())
+                        .and_then(|value| non_empty(&Some(value.to_string())))
+                }),
+            ),
+        ];
+        for (key, value) in offer_analytics_attributes {
+            if let Some(value) = value {
+                attributes.push(schema::AttributeOutput {
+                    key: key.into(),
+                    value,
+                });
+            }
+        }
+
         let source_display_properties: crate::types::CartLineDisplayProperties =
             parse_json_or_default(merge_line_indices.iter().find_map(|&idx| {
                 lines[idx]

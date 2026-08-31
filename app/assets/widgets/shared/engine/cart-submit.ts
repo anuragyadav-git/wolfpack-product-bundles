@@ -7,6 +7,39 @@
 
 'use strict';
 
+import { normalizeOfferAnalyticsDimensions } from '../../../../lib/analytics/offer-dimensions.js';
+
+function normalizeBundleId(value: unknown) {
+  if (typeof value !== 'string') return null;
+  const normalized = value.trim();
+  return normalized.length > 0 && normalized.length <= 128 ? normalized : null;
+}
+
+export function buildOfferAnalyticsCartProperties({
+  bundleId,
+  offerDelivery,
+  tierId = null,
+}: any = {}) {
+  const normalizedBundleId = normalizeBundleId(bundleId);
+  const dimensions = normalizeOfferAnalyticsDimensions({
+    offerPolicyId: offerDelivery?.offerPolicyId,
+    offerRuleVersion: offerDelivery?.ruleVersion,
+    offerTierId: tierId,
+    offerEligibilitySource: offerDelivery?.eligibilitySource,
+  });
+  const properties: Record<string, string> = {};
+  if (normalizedBundleId) properties._wpb_bundle_id = normalizedBundleId;
+  if (dimensions.offerPolicyId) properties._wpb_offer_policy_id = dimensions.offerPolicyId;
+  if (dimensions.offerRuleVersion) {
+    properties._wpb_offer_rule_version = String(dimensions.offerRuleVersion);
+  }
+  if (dimensions.offerTierId) properties._wpb_offer_tier_id = dimensions.offerTierId;
+  if (dimensions.offerEligibilitySource) {
+    properties._wpb_offer_eligibility_source = dimensions.offerEligibilitySource;
+  }
+  return properties;
+}
+
 export function extractBundleDetailsSourceProperties(cartItems: any[] = []) {
   const firstItem = cartItems.find(item => item?.properties?._bundle_display_properties);
   return firstItem?.properties || {};

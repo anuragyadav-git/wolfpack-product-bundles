@@ -15,6 +15,44 @@ import db from "../../db.server";
 import { AppLogger } from "../../lib/logger";
 import { matchLineItemsToBundles, normalizeToOrderGid } from "../../lib/analytics/bundle-matcher.server";
 import { sanitizeCustomUtmAttributes } from "../../lib/analytics/attribution-controls";
+import { normalizeOfferAnalyticsDimensions } from "../../lib/analytics/offer-dimensions";
+
+function linePropertyMap(value: unknown): Record<string, unknown> {
+  if (Array.isArray(value)) {
+    return Object.fromEntries(value.flatMap((property) => (
+      property && typeof property === "object" && typeof property.key === "string"
+        ? [[property.key, property.value]]
+        : []
+    )));
+  }
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : {};
+}
+
+function offerDimensionsForBundle(lineItems: unknown, bundleId: string) {
+  const empty = normalizeOfferAnalyticsDimensions({});
+  if (!Array.isArray(lineItems)) return empty;
+
+  for (const lineItem of lineItems) {
+    if (!lineItem || typeof lineItem !== "object") continue;
+    const normalizedLineItem = lineItem as Record<string, any>;
+    const candidates = [normalizedLineItem, ...(
+      Array.isArray(normalizedLineItem.lineComponents) ? normalizedLineItem.lineComponents : []
+    )];
+    for (const candidate of candidates) {
+      const properties = linePropertyMap(candidate?.properties);
+      if (String(properties._wpb_bundle_id ?? "").trim() !== bundleId) continue;
+      return normalizeOfferAnalyticsDimensions({
+        offerPolicyId: properties._wpb_offer_policy_id,
+        offerRuleVersion: Number(properties._wpb_offer_rule_version),
+        offerTierId: properties._wpb_offer_tier_id,
+        offerEligibilitySource: properties._wpb_offer_eligibility_source,
+      });
+    }
+  }
+  return empty;
+}
 
 // CORS headers required for cross-origin fetch() calls from the web pixel sandbox.
 // The sandbox runs in an isolated iframe with an opaque (null) origin, so we must
@@ -80,6 +118,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     if (bundleIds.length > 0) {
       await db.orderAttribution.createMany({
         data: bundleIds.map((bundleId) => ({
+          ...offerDimensionsForBundle(lineItems, bundleId),
           shopId,
           bundleId,
           orderId: normalizedOrderId,

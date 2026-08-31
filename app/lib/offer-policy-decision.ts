@@ -1,3 +1,5 @@
+import type { OfferEligibilitySource } from './analytics/offer-dimensions';
+
 export type OfferScheduleState = 'active' | 'scheduled' | 'expired';
 
 export type OfferPolicyTiming = {
@@ -22,8 +24,11 @@ type PrioritizedOffer = {
 };
 
 type OfferDecisionPolicy = OfferPolicyTiming & {
+  id: string;
   ruleVersion: number;
   specificLinkRequired: boolean;
+  priority?: number | null;
+  stopLowerPriority?: boolean | null;
 };
 
 function instant(value: Date | string | null | undefined): Date | null {
@@ -82,11 +87,22 @@ export function applyOfferPriority<T extends PrioritizedOffer>(
 
 export function buildOfferDecisionMarker(policy: OfferDecisionPolicy | null) {
   const specificLinkRequired = policy?.specificLinkRequired === true;
+  const eligibilitySource: OfferEligibilitySource | null = !policy
+    ? null
+    : specificLinkRequired
+      ? 'specific_link'
+      : policy.startsAt != null || policy.endsAt != null
+        ? 'schedule'
+        : (policy.priority ?? 100) !== 100 || policy.stopLowerPriority === true
+          ? 'priority'
+          : 'always';
   return {
     decisionRequired: specificLinkRequired
       || policy?.startsAt != null
       || policy?.endsAt != null,
     specificLinkRequired,
+    offerPolicyId: policy?.id ?? null,
     ruleVersion: policy?.ruleVersion ?? null,
+    eligibilitySource,
   };
 }

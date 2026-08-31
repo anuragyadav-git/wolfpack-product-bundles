@@ -20,6 +20,7 @@ import db from "../../db.server";
 import { authenticate } from "../../shopify.server";
 import { AppLogger } from "../../lib/logger";
 import { recordBusinessEvent } from "../../services/app-events.server";
+import { normalizeOfferAnalyticsDimensions } from "../../lib/analytics/offer-dimensions";
 
 type EngagementPayload = {
   shopId?: unknown;
@@ -30,6 +31,10 @@ type EngagementPayload = {
   eventName?: unknown;
   landingPage?: unknown;
   userAgent?: unknown;
+  offerPolicyId?: unknown;
+  offerRuleVersion?: unknown;
+  offerTierId?: unknown;
+  offerEligibilitySource?: unknown;
 };
 
 const CORS_HEADERS = {
@@ -114,6 +119,10 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       eventName,
       landingPage,
       userAgent,
+      offerPolicyId,
+      offerRuleVersion,
+      offerTierId,
+      offerEligibilitySource,
     } = payload;
 
     const normalizedShopId = sanitizeOptionalString(shopId);
@@ -124,6 +133,12 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     const normalizedLandingPage = sanitizeOptionalString(landingPage);
     const normalizedUserAgent = sanitizeOptionalString(userAgent);
     const normalizedEventName = sanitizeEventName(eventName);
+    const offerDimensions = normalizeOfferAnalyticsDimensions({
+      offerPolicyId,
+      offerRuleVersion,
+      offerTierId,
+      offerEligibilitySource,
+    });
     eventContext = {
       shopDomain: normalizedShopId ?? proxyShop,
       bundleId: normalizedBundleId,
@@ -180,6 +195,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
           eventName: normalizedEventName,
           landingPage: normalizedLandingPage,
           userAgent: normalizedUserAgent,
+          ...offerDimensions,
         },
       ],
       skipDuplicates: true,

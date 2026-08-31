@@ -11,6 +11,7 @@ import { getPixelStatus, activateUtmPixel, deactivateUtmPixel } from "../../serv
 import { backfillOrderAttribution } from "../../services/analytics/order-backfill.server";
 import {
   computeBundleFunnel,
+  computeOfferFunnel,
   buildBundlePerformanceMatrix,
   buildBundleMetricTrendSeries,
   type OrderAttributionRow,
@@ -20,6 +21,7 @@ import {
   normalizeSavedCustomUtmParameters,
   parseCustomUtmInput,
 } from "../../lib/analytics/attribution-controls";
+import { normalizeOfferAnalyticsDimensions } from "../../lib/analytics/offer-dimensions";
 import db from "../../db.server";
 import { APP_BRAND } from "../../lib/app-brand";
 import { EntitlementDeniedError } from "../../lib/subscriptions/entitlements";
@@ -72,10 +74,17 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       if (typeof value === "string") params.set(key, value);
     }
     const { since, until } = normalizeAttributionWindow(params);
+    const selectedOfferPolicyId = normalizeOfferAnalyticsDimensions({
+      offerPolicyId: formData.get("offerPolicyId"),
+    }).offerPolicyId;
 
     const [attributions, viewEvents] = await Promise.all([
       db.orderAttribution.findMany({
-        where: { shopId, createdAt: { gte: since, lte: until } },
+        where: {
+          shopId,
+          createdAt: { gte: since, lte: until },
+          ...(selectedOfferPolicyId ? { offerPolicyId: selectedOfferPolicyId } : {}),
+        },
         orderBy: { createdAt: "asc" },
       }),
       db.bundleAnalytics.findMany({
@@ -97,7 +106,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       v == null ? "" : `"${String(v).replace(/"/g, '""')}"`;
 
     const rows: string[] = [
-      ["Date", "Type", "Bundle ID", "Bundle Name", "UTM Source", "UTM Medium", "UTM Campaign", "Custom UTM Attributes", "Revenue (USD)", "Order ID", "Landing Page"].join(","),
+      ["Date", "Type", "Bundle ID", "Bundle Name", "Offer Policy ID", "Offer Rule Version", "Offer Tier ID", "Offer Eligibility Source", "UTM Source", "UTM Medium", "UTM Campaign", "Custom UTM Attributes", "Revenue (USD)", "Order ID", "Landing Page"].join(","),
     ];
 
     for (const a of attributions) {
@@ -106,6 +115,10 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         "order",
         escape(a.bundleId),
         escape(a.bundleId ? nameMap[a.bundleId] : null),
+        escape(a.offerPolicyId),
+        a.offerRuleVersion == null ? "" : String(a.offerRuleVersion),
+        escape(a.offerTierId),
+        escape(a.offerEligibilitySource),
         escape(a.utmSource),
         escape(a.utmMedium),
         escape(a.utmCampaign),
@@ -122,7 +135,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         "view",
         escape(v.bundleId),
         escape(v.bundleId ? nameMap[v.bundleId] : null),
-        "", "", "", "", "", "", "",
+        "", "", "", "", "", "", "", "", "", "", "",
       ].join(","));
     }
 
@@ -247,6 +260,9 @@ async function loadAttributionDashboardData({
     from: fromStr,
     to: toStr,
   } = normalizeAttributionWindow(url.searchParams);
+  const requestedOfferPolicyId = normalizeOfferAnalyticsDimensions({
+    offerPolicyId: url.searchParams.get("offerPolicyId"),
+  }).offerPolicyId;
 
   const prevSince = new Date(since);
   prevSince.setDate(prevSince.getDate() - days);
@@ -277,7 +293,17 @@ async function loadAttributionDashboardData({
     }),
     db.bundleEngagement.findMany({
       where: { shopId, createdAt: { gte: since, lte: until } },
-      select: { bundleId: true, sessionId: true, presetId: true, eventName: true, createdAt: true },
+      select: {
+        bundleId: true,
+        sessionId: true,
+        presetId: true,
+        eventName: true,
+        createdAt: true,
+        offerPolicyId: true,
+        offerRuleVersion: true,
+        offerTierId: true,
+        offerEligibilitySource: true,
+      },
     }),
   ]);
 
@@ -430,6 +456,7 @@ async function loadAttributionDashboardData({
   // ── Engagement-funnel data plumbing (wpb-analytics-revamp-1) ──
   const engagementRowsTyped = engagementRows.map(r => ({
     bundleId: r.bundleId,
+    offerPolicyId: r.offerPolicyId,
     sessionId: r.sessionId,
     eventName: r.eventName,
     presetId: r.presetId ?? null,
@@ -438,6 +465,49 @@ async function loadAttributionDashboardData({
   const funnelSnapshot = computeBundleFunnel(
     engagementRowsTyped,
     currentAttributions.map(a => ({ bundleId: a.bundleId, revenue: a.revenue, createdAt: a.createdAt })),
+  );
+  const offerOptionMap = new Map<string, {
+    bundleId: string | null;
+    ruleVersion: number | null;
+    eligibilitySource: string | null;
+    tierIds: Set<string>;
+  }>();
+  for (const row of [...currentAttributions, ...engagementRows]) {
+    if (!row.offerPolicyId) continue;
+    const existing = offerOptionMap.get(row.offerPolicyId) ?? {
+      bundleId: row.bundleId ?? null,
+      ruleVersion: row.offerRuleVersion ?? null,
+      eligibilitySource: row.offerEligibilitySource ?? null,
+      tierIds: new Set<string>(),
+    };
+    if (row.offerTierId) existing.tierIds.add(row.offerTierId);
+    offerOptionMap.set(row.offerPolicyId, existing);
+  }
+  const offerOptions = Array.from(offerOptionMap.entries())
+    .map(([id, option]) => ({
+      id,
+      bundleId: option.bundleId,
+      label: option.bundleId
+        ? `${bundleNameMap[option.bundleId] ?? "Unknown Bundle"} · ${id}`
+        : id,
+      ruleVersion: option.ruleVersion,
+      eligibilitySource: option.eligibilitySource,
+      tierIds: Array.from(option.tierIds).sort(),
+    }))
+    .sort((left, right) => left.label.localeCompare(right.label));
+  const selectedOfferPolicyId = requestedOfferPolicyId
+    && offerOptionMap.has(requestedOfferPolicyId)
+    ? requestedOfferPolicyId
+    : null;
+  const offerFunnelSnapshot = computeOfferFunnel(
+    engagementRowsTyped,
+    currentAttributions.map(a => ({
+      bundleId: a.bundleId,
+      offerPolicyId: a.offerPolicyId,
+      revenue: a.revenue,
+      createdAt: a.createdAt,
+    })),
+    selectedOfferPolicyId,
   );
 
   // fullBundleMap already covers every bundle id from views + engagement + attributions
@@ -499,6 +569,11 @@ async function loadAttributionDashboardData({
     engagementToOrderPct,
     bundleMatrix,
     topCampaignsRows,
+    offerAnalytics: {
+      selectedOfferPolicyId,
+      options: offerOptions,
+      funnelSnapshot: offerFunnelSnapshot,
+    },
     customUtmParameters: normalizeSavedCustomUtmParameters(shop?.customUtmParameters),
   };
 }
@@ -565,6 +640,19 @@ async function loadFreeAttributionSummary(shopId: string) {
     engagementToOrderPct: views > 0 ? Math.round((checkedOut / views) * 100) : null,
     bundleMatrix: [],
     topCampaignsRows: [],
+    offerAnalytics: {
+      selectedOfferPolicyId: null,
+      options: [],
+      funnelSnapshot: {
+        impressions: 0,
+        engaged: 0,
+        addedToCart: 0,
+        checkedOut: 0,
+        revenueCents: 0,
+        dropOffEngagedToAtc: 0,
+        dropOffAtcToCheckout: 0,
+      },
+    },
     customUtmParameters: [],
   };
 }

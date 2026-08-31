@@ -51,6 +51,26 @@ describe('buildCartItems', () => {
     expect(itemA.properties).not.toHaveProperty('_step_index');
   });
 
+  it('carries the public offer decision marker in private Shopify line properties', () => {
+    const state = makeState({
+      bundleData: {
+        offerDelivery: {
+          offerPolicyId: 'policy-1',
+          ruleVersion: 4,
+          eligibilitySource: 'priority',
+        },
+      },
+    });
+    const { items } = buildCartItems(state);
+
+    expect(items[0].properties).toMatchObject({
+      _wpb_bundle_id: 'bundle_1',
+      _wpb_offer_policy_id: 'policy-1',
+      _wpb_offer_rule_version: '4',
+      _wpb_offer_eligibility_source: 'priority',
+    });
+  });
+
   it('all items in one call share the same EB offer-session key with unique item indexes', () => {
     const state = makeState();
     const { items } = buildCartItems(state);

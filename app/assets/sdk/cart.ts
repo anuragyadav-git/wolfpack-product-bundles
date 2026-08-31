@@ -1,6 +1,7 @@
 'use strict';
 
 import { buildStorefrontApiPath } from '../../config/storefront-proxy-routes.js';
+import { buildOfferAnalyticsCartProperties } from '../widgets/shared/engine/cart-submit.js';
 
 function _generateBundleInstanceId(bundleId: string) {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
@@ -122,8 +123,13 @@ export function buildCartItems(state: any) {
   }
 
   var sourceProperties = _buildCartLineSourceProperties(state, selectedLines);
+  var offerAnalyticsProperties = buildOfferAnalyticsCartProperties({
+    bundleId: state.bundleId,
+    offerDelivery: state.bundleData && state.bundleData.offerDelivery,
+  });
   items.forEach(function (item) {
     Object.assign(item.properties, sourceProperties);
+    Object.assign(item.properties, offerAnalyticsProperties);
   });
 
   return {

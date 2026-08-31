@@ -10,7 +10,11 @@ import {
 import { shouldDisplayClassicFixedBundleRawTotal } from '../shared/summary-pricing-display.js';
 import { preflightVariantOnStorefront } from '../../shared/variant-preflight.js';
 import { buildStorefrontApiPath } from '../../../../config/storefront-proxy-routes.js';
-import { applySellingPlanToJsonCartItems } from '../../shared/engine/cart-submit.js';
+import {
+  applySellingPlanToJsonCartItems,
+  buildOfferAnalyticsCartProperties,
+} from '../../shared/engine/cart-submit.js';
+import { captureDiscountTierState } from '../../shared/discount-tier-feedback.js';
 import { createCloseIcon } from '../../shared/svg-icons.js';
 import { getPricingTierBadgeTemplateValues } from '../../shared/components/pricing-tier-badge.js';
 
@@ -329,6 +333,11 @@ export const fullPageStepFooterMethods: Record<string, any> & ThisType<any> = {
     const sourceProperties = this.buildCartLineSourceProperties(selectedLines);
     items.forEach(item => {
       Object.assign(item.properties, sourceProperties);
+      Object.assign(item.properties, buildOfferAnalyticsCartProperties({
+        bundleId: this.selectedBundle?.id,
+        offerDelivery: this.selectedBundle?.offerDelivery,
+        tierId: captureDiscountTierState(this).tierId,
+      }));
       if (hasSelectedAddonLine && hasAddonStepConfigured) {
         item.properties._addon_offer_id = item.properties._addon_offer_id || baseOfferId;
       }

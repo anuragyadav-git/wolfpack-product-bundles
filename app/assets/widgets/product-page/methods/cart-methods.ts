@@ -1,5 +1,8 @@
 import { buildCartLineSourceProperties } from '../../shared/engine/cart-lines.js';
-import { buildProductPageCartFormData } from '../../shared/engine/cart-submit.js';
+import {
+  buildOfferAnalyticsCartProperties,
+  buildProductPageCartFormData,
+} from '../../shared/engine/cart-submit.js';
 import { ToastManager } from '../../shared/toast-manager.js';
 import { CurrencyManager } from '../../shared/currency-manager.js';
 import { PricingCalculator } from '../../shared/pricing-calculator.js';
@@ -9,6 +12,7 @@ import { areRequiredProductPageStepsValid } from './step-validation.js';
 import { preflightVariantOnStorefront, resolveRuntimeVariantNumericId } from '../../shared/variant-preflight.js';
 import { setPpbBundleDetailsCartMetafield } from '../storefront-client.js';
 import { buildStorefrontApiPath } from '../../../../config/storefront-proxy-routes.js';
+import { captureDiscountTierState } from '../../shared/discount-tier-feedback.js';
 
 function getProductPageSelectedQuantityTotal(selectedProducts: any[] = []) {
   return selectedProducts.reduce((sum: number, stepSelections: any) => {
@@ -279,6 +283,11 @@ export const ProductPageCartMethods: Record<string, any> & ThisType<any> = {
     const sourceProperties = this.buildCartLineSourceProperties(selectedLines);
     cartItems.forEach(item => {
       Object.assign(item.properties, sourceProperties);
+      Object.assign(item.properties, buildOfferAnalyticsCartProperties({
+        bundleId: this.selectedBundle?.id,
+        offerDelivery: this.selectedBundle?.offerDelivery,
+        tierId: captureDiscountTierState(this).tierId,
+      }));
       if (hasSelectedAddonLine && hasAddonStepConfigured) {
         item.properties._addon_offer_id = item.properties._addon_offer_id || baseOfferId;
       }

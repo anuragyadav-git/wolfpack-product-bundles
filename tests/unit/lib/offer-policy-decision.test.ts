@@ -87,9 +87,12 @@ describe('buildOfferDecisionMarker', () => {
     expect(buildOfferDecisionMarker(null)).toEqual({
       decisionRequired: false,
       specificLinkRequired: false,
+      offerPolicyId: null,
       ruleVersion: null,
+      eligibilitySource: null,
     });
     expect(buildOfferDecisionMarker({
+      id: 'policy-scheduled',
       ruleVersion: 4,
       specificLinkRequired: false,
       startsAt: now,
@@ -97,9 +100,12 @@ describe('buildOfferDecisionMarker', () => {
     })).toEqual({
       decisionRequired: true,
       specificLinkRequired: false,
+      offerPolicyId: 'policy-scheduled',
       ruleVersion: 4,
+      eligibilitySource: 'schedule',
     });
     expect(buildOfferDecisionMarker({
+      id: 'policy-link',
       ruleVersion: 5,
       specificLinkRequired: true,
       startsAt: null,
@@ -107,7 +113,36 @@ describe('buildOfferDecisionMarker', () => {
     })).toEqual({
       decisionRequired: true,
       specificLinkRequired: true,
+      offerPolicyId: 'policy-link',
       ruleVersion: 5,
+      eligibilitySource: 'specific_link',
+    });
+  });
+
+  it('marks operational policies without eligibility conditions as priority or always', () => {
+    expect(buildOfferDecisionMarker({
+      id: 'policy-priority',
+      ruleVersion: 2,
+      specificLinkRequired: false,
+      startsAt: null,
+      endsAt: null,
+      priority: 10,
+      stopLowerPriority: true,
+    })).toMatchObject({
+      offerPolicyId: 'policy-priority',
+      eligibilitySource: 'priority',
+    });
+    expect(buildOfferDecisionMarker({
+      id: 'policy-always',
+      ruleVersion: 1,
+      specificLinkRequired: false,
+      startsAt: null,
+      endsAt: null,
+      priority: 100,
+      stopLowerPriority: false,
+    })).toMatchObject({
+      offerPolicyId: 'policy-always',
+      eligibilitySource: 'always',
     });
   });
 });

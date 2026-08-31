@@ -402,6 +402,11 @@ mod tests {
                         "wolfpackProductBundleOfferId": {{ "value": "FBP-bundle-1_ABC_1" }},
                         "wolfpackProductBundleName": {{ "value": "Runtime Bundle" }},
                         "runtimeToken": {{ "value": "{runtime_token}" }},
+                        "offerAnalyticsBundleId": {{ "value": "bundle-1" }},
+                        "offerAnalyticsPolicyId": {{ "value": "policy-1" }},
+                        "offerAnalyticsRuleVersion": {{ "value": "8" }},
+                        "offerAnalyticsTierId": {{ "value": "tier-3" }},
+                        "offerAnalyticsEligibilitySource": {{ "value": "schedule" }},
                         "stepType": null,
                         "bundleDisplayProperties": null,
                         "merchandise": {{
@@ -419,6 +424,11 @@ mod tests {
                         "wolfpackProductBundleOfferId": {{ "value": "FBP-bundle-1_ABC_2" }},
                         "wolfpackProductBundleName": {{ "value": "Runtime Bundle" }},
                         "runtimeToken": {{ "value": "{runtime_token}" }},
+                        "offerAnalyticsBundleId": {{ "value": "bundle-1" }},
+                        "offerAnalyticsPolicyId": {{ "value": "policy-1" }},
+                        "offerAnalyticsRuleVersion": {{ "value": "8" }},
+                        "offerAnalyticsTierId": {{ "value": "tier-3" }},
+                        "offerAnalyticsEligibilitySource": {{ "value": "schedule" }},
                         "stepType": null,
                         "bundleDisplayProperties": null,
                         "merchandise": {{
@@ -452,6 +462,14 @@ mod tests {
                 .get("_wolfpack_bundle_runtime")
                 .map(String::as_str),
             Some(runtime_token.as_str())
+        );
+        assert_eq!(attributes.get("_wpb_bundle_id").map(String::as_str), Some("bundle-1"));
+        assert_eq!(attributes.get("_wpb_offer_policy_id").map(String::as_str), Some("policy-1"));
+        assert_eq!(attributes.get("_wpb_offer_rule_version").map(String::as_str), Some("8"));
+        assert_eq!(attributes.get("_wpb_offer_tier_id").map(String::as_str), Some("tier-3"));
+        assert_eq!(
+            attributes.get("_wpb_offer_eligibility_source").map(String::as_str),
+            Some("schedule")
         );
     }
 

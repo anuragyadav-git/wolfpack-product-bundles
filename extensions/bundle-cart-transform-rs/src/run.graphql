@@ -30,6 +30,11 @@ query Input {
       bundleDisplayProperties: attribute(key: "_bundle_display_properties") {
         value
       }
+      offerAnalyticsBundleId: attribute(key: "_wpb_bundle_id") { value }
+      offerAnalyticsPolicyId: attribute(key: "_wpb_offer_policy_id") { value }
+      offerAnalyticsRuleVersion: attribute(key: "_wpb_offer_rule_version") { value }
+      offerAnalyticsTierId: attribute(key: "_wpb_offer_tier_id") { value }
+      offerAnalyticsEligibilitySource: attribute(key: "_wpb_offer_eligibility_source") { value }
       sellingPlanAllocation { __typename }
       merchandise {
         __typename

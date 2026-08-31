@@ -5,7 +5,7 @@ title: Wolfpack Product Bundles App Navigation and UI Map
 type: navigation-map
 status: authoritative
 summary: Routes, screens, actions, modals, and storefront-preview flows for the embedded app.
-last_audited: 2026-08-31
+last_audited: 2026-09-01
 owners:
   - engineering
 domains:
@@ -30,7 +30,7 @@ keywords:
 > Any time a new page, modal, tab, sidebar section, or user flow is added or removed,
 > this document **must** be updated. See CLAUDE.md for the enforcement rule.
 
-**Last Updated:** 2026-08-31
+**Last Updated:** 2026-09-01
 **Environment mapped:** SIT (`wolfpack-product-bundles-sit`)
 **Test store:** `wolfpack-store-test-1.myshopify.com`
 
@@ -334,6 +334,10 @@ Analytics Page (revamped — issue wpb-analytics-revamp-1)
 │   ├── Dismissal persists in sessionStorage for the current browser tab
 │   └── Learn more modal → enable UTM tracking pixel
 ├── Toolbar: Compare-period chip · [Export CSV] · [Compare on/off] · Date range selector
+├── Offer performance (Polaris section)
+│   ├── Offer-policy selector persisted in the `offerPolicyId` URL query
+│   ├── Safe rule-version, eligibility-source, and reached-tier context
+│   └── Engaged → Added-to-Cart → Completed Orders → Revenue metrics
 ├── Custom UTM card → App Bridge contextual Save Bar with Save and Discard
 ├── Attribution backfill → Shopify success/error toast
 │
@@ -377,7 +381,7 @@ Responsive analytics behavior:
 
 **Server helpers:** `app/lib/analytics/engagement-helpers.ts`
 
-- `computeBundleFunnel`, `buildEngagementTrendSeries`, `buildBundlePerformanceMatrix`
+- `computeBundleFunnel`, `computeOfferFunnel`, `buildEngagementTrendSeries`, `buildBundlePerformanceMatrix`
 - Pure-fn, unit-tested at `tests/unit/lib/engagement-helpers.test.ts`
 
 ---
@@ -854,7 +858,8 @@ Checkout order summary → Bundle & Save
 | `/api/activate-pixel`                                          | Activate UTM web pixel                                                                                                                                                                                          |
 | `/apps/product-bundles/api/proxy-health`                       | Proxy health check                                                                                                                                                                                              |
 | `/health`                                                      | Public Render HTTP health check; returns 2xx only when the app and DB are ready                                                                                                                                 |
-| `/api/attribution`                                             | UTM attribution analytics data                                                                                                                                                                                  |
+| `/apps/product-bundles/api/attribution/engagement`             | Signed storefront engagement ingestion; records normalized offer policy, rule-version, tier, and safe eligibility-source dimensions when present                                                               |
+| `/api/attribution`                                             | Web Pixel checkout attribution; consumes Shopify checkout line/component properties and persists normalized offer dimensions only for the matching bundle                                                      |
 | `/api/widget-error`                                            | Widget runtime error logging                                                                                                                                                                                    |
 | `/api/inngest`                                                 | Inngest background job handler                                                                                                                                                                                  |
 

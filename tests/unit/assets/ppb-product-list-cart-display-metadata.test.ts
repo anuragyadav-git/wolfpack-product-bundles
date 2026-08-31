@@ -64,6 +64,11 @@ function makeProductPageContext() {
       name: 'PPB Product List Fixture',
       steps: [{ id: 'productsData1' }],
       pricing: { enabled: false },
+      offerDelivery: {
+        offerPolicyId: 'policy-1',
+        ruleVersion: 4,
+        eligibilitySource: 'always',
+      },
     },
     config: {},
     expandProductsByVariant(products: unknown[]) {
@@ -102,6 +107,12 @@ describe('PPB Product List cart display metadata', () => {
     expect(items).toHaveLength(3);
     for (const item of items) {
       expect(item.properties._bundle_display_properties).toBeDefined();
+      expect(item.properties).toMatchObject({
+        _wpb_bundle_id: 'bundle-1',
+        _wpb_offer_policy_id: 'policy-1',
+        _wpb_offer_rule_version: '4',
+        _wpb_offer_eligibility_source: 'always',
+      });
     }
 
     const displayProperties = JSON.parse(items[0].properties._bundle_display_properties);

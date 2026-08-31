@@ -101,7 +101,9 @@ export interface BundleUiConfig {
   offerDelivery?: {
     decisionRequired: boolean;
     specificLinkRequired: boolean;
+    offerPolicyId: string | null;
     ruleVersion: number | null;
+    eligibilitySource: 'always' | 'specific_link' | 'schedule' | 'priority' | null;
   };
   runtimeAuthorization?: {
     version: 2;

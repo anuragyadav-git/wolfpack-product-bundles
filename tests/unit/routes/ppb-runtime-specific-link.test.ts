@@ -1,7 +1,7 @@
 import { buildSyncBundleConfiguration } from '../../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/runtime-config.server';
 
 describe('PPB specific-link runtime snapshot', () => {
-  it('publishes only the required flag and policy revision', () => {
+  it('publishes the privacy-safe offer decision marker', () => {
     const config = buildSyncBundleConfiguration({
       id: 'bundle-1',
       shopId: 'test.myshopify.com',
@@ -12,6 +12,7 @@ describe('PPB specific-link runtime snapshot', () => {
       steps: [],
       pricing: null,
       offerPolicy: {
+        id: 'policy-1',
         specificLinkRequired: true,
         startsAt: null,
         endsAt: null,
@@ -22,7 +23,9 @@ describe('PPB specific-link runtime snapshot', () => {
     expect(config.offerDelivery).toEqual({
       decisionRequired: true,
       specificLinkRequired: true,
+      offerPolicyId: 'policy-1',
       ruleVersion: 8,
+      eligibilitySource: 'specific_link',
     });
   });
 });

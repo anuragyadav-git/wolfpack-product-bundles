@@ -64,4 +64,71 @@ describe("api.attribution", () => {
       }),
     });
   });
+
+  it("persists offer dimensions from Shopify checkout line properties for the matched bundle", async () => {
+    mockMatchLineItemsToBundles.mockResolvedValue(["bundle-123"]);
+
+    const response = await action({
+      request: makeRequest({
+        orderId: "456",
+        shopId: "test.myshopify.com",
+        totalPrice: "25.00",
+        currencyCode: "USD",
+        lineItems: [{
+          productId: "gid://shopify/Product/1",
+          properties: [
+            { key: "_wpb_bundle_id", value: "bundle-123" },
+            { key: "_wpb_offer_policy_id", value: "policy-1" },
+            { key: "_wpb_offer_rule_version", value: "8" },
+            { key: "_wpb_offer_tier_id", value: "tier-3" },
+            { key: "_wpb_offer_eligibility_source", value: "schedule" },
+          ],
+        }],
+      }),
+      params: {},
+      context: {},
+    });
+
+    expect(response.status).toBe(200);
+    expect(getDb().orderAttribution.createMany).toHaveBeenCalledWith({
+      data: [expect.objectContaining({
+        bundleId: "bundle-123",
+        offerPolicyId: "policy-1",
+        offerRuleVersion: 8,
+        offerTierId: "tier-3",
+        offerEligibilitySource: "schedule",
+      })],
+    });
+  });
+
+  it("does not attach offer dimensions from an unrelated or invalid cart line", async () => {
+    mockMatchLineItemsToBundles.mockResolvedValue(["bundle-123"]);
+
+    await action({
+      request: makeRequest({
+        orderId: "789",
+        shopId: "test.myshopify.com",
+        lineItems: [{
+          productId: "gid://shopify/Product/1",
+          properties: {
+            _wpb_bundle_id: "bundle-other",
+            _wpb_offer_policy_id: "policy-private",
+            _wpb_offer_eligibility_source: "customer_email",
+          },
+        }],
+      }),
+      params: {},
+      context: {},
+    });
+
+    expect(getDb().orderAttribution.createMany).toHaveBeenCalledWith({
+      data: [expect.objectContaining({
+        bundleId: "bundle-123",
+        offerPolicyId: null,
+        offerRuleVersion: null,
+        offerTierId: null,
+        offerEligibilitySource: null,
+      })],
+    });
+  });
 });
