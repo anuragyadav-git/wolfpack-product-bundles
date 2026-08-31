@@ -8,6 +8,8 @@ import { formatBundleForWidget } from "../../lib/bundle-formatter.server";
 import { authenticate } from "../../shopify.server";
 import { verifyBundlePreviewToken } from "../../lib/bundle-preview-token.server";
 import { BUNDLE_PREVIEW_QUERY_PARAM } from "../../lib/bundle-preview-url";
+import { resolveSpecificLinkOfferEligibility } from "../../lib/specific-link-offer-eligibility.server";
+import { SPECIFIC_LINK_OFFER_QUERY_PARAM } from "../../lib/specific-link-offer-token.server";
 
 /**
  * Public API endpoint to fetch a single bundle by ID
@@ -111,7 +113,10 @@ export const loader: LoaderFunction = async ({ request, params }: any) => {
             position: 'asc'
           }
         },
-        pricing: true
+        pricing: true,
+        offerPolicy: {
+          include: { conditions: true },
+        },
       }
     });
 
@@ -137,6 +142,19 @@ export const loader: LoaderFunction = async ({ request, params }: any) => {
       }, { status: 404, headers: CORS_HEADERS });
     }
 
+    const offerDecision = isAuthorizedDraftPreview
+      ? { eligible: true, reasonCode: 'not_required' as const }
+      : resolveSpecificLinkOfferEligibility({
+        policy: bundle.offerPolicy,
+        token: url.searchParams.get(SPECIFIC_LINK_OFFER_QUERY_PARAM),
+      });
+    if (!offerDecision.eligible) {
+      return json({
+        success: false,
+        error: "Bundle not found or not active",
+      }, { status: 404, headers: CORS_HEADERS });
+    }
+
     AppLogger.info("Found bundle", {
       component: "api.bundle",
       operation: "loader",
@@ -154,7 +172,7 @@ export const loader: LoaderFunction = async ({ request, params }: any) => {
     const etag = `bundle:${bundle.id}:${updatedAt ? updatedAt.getTime() : 0}`;
     const commonHeaders = {
       ...CORS_HEADERS,
-      'Cache-Control': isAuthorizedDraftPreview
+      'Cache-Control': isAuthorizedDraftPreview || bundle.offerPolicy?.enabled
         ? 'private, no-store'
         : 'public, max-age=10, s-maxage=30, must-revalidate',
       'Vary': 'Accept-Encoding',
@@ -162,7 +180,11 @@ export const loader: LoaderFunction = async ({ request, params }: any) => {
       'ETag': `"${etag}"`
     };
 
-    if (!isAuthorizedDraftPreview && isFreshByCacheHeaders(request, `"${etag}"`, lastModified)) {
+    if (
+      !isAuthorizedDraftPreview
+      && !bundle.offerPolicy?.enabled
+      && isFreshByCacheHeaders(request, `"${etag}"`, lastModified)
+    ) {
       return new Response(null, {
         status: 304,
         headers: commonHeaders,

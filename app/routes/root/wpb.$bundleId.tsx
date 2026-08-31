@@ -10,6 +10,8 @@ import {
   renderFpbLoadingScreen,
   resolveFpbLoadingScreenSettings,
 } from "../../lib/fpb-loading-screen";
+import { resolveSpecificLinkOfferEligibility } from "../../lib/specific-link-offer-eligibility.server";
+import { SPECIFIC_LINK_OFFER_QUERY_PARAM } from "../../lib/specific-link-offer-token.server";
 
 function escapeHtmlAttribute(value: string): string {
   return value
@@ -81,6 +83,9 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
           },
         },
         pricing: true,
+        offerPolicy: {
+          include: { conditions: true },
+        },
       },
     }),
     db.designSettings.findUnique({
@@ -126,6 +131,28 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
       publicNumber,
       status: 404,
       failureCategory: "status_not_public",
+      renderDurationMs: Date.now() - startedAt,
+    });
+    return new Response("Bundle not found", {
+      status: 404,
+      headers: { "Cache-Control": "no-store" },
+    });
+  }
+
+  const offerDecision = hasValidDraftPreview
+    ? { eligible: true, reasonCode: "not_required" as const }
+    : resolveSpecificLinkOfferEligibility({
+      policy: bundle.offerPolicy,
+      token: url.searchParams.get(SPECIFIC_LINK_OFFER_QUERY_PARAM),
+    });
+  if (!offerDecision.eligible) {
+    AppLogger.info("FPB proxy page hidden by offer eligibility", {
+      component: "wpb.proxy",
+      shop: shopDomain,
+      bundleId: bundle.id,
+      publicNumber,
+      status: 404,
+      failureCategory: offerDecision.reasonCode,
       renderDurationMs: Date.now() - startedAt,
     });
     return new Response("Bundle not found", {

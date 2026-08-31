@@ -5,7 +5,7 @@ title: BOGOS and Bundlex Wolfpack Feasibility
 type: feasibility-analysis
 status: current
 summary: Prioritizes the best BOGOS and Bundlex capabilities for Wolfpack and defines Admin, data, storefront, analytics, Shopify, testing, and rollout boundaries.
-last_audited: 2026-08-30
+last_audited: 2026-08-31
 owners:
   - product
   - engineering
@@ -69,6 +69,14 @@ Adopt BOGOS's operational model and Bundlex's merchandising polish in small, ind
 
 This ordering avoids coupling the first wins to protected customer data or a new scheduling platform.
 
+Before each slice, apply a **Shopify-native ownership gate**: if Shopify already
+owns the authoritative discount, inventory, customer-context, analytics, or
+product-option contract, replace competing Wolfpack logic with that canonical
+resource or API and make Shopify the end-to-end source of truth. Wolfpack may
+retain only behavior Shopify does not provide, plus the smallest projection
+needed to render it. Do not preserve an incorrect app-owned path alongside the
+canonical path.
+
 ## Adopt, adapt, defer, reject
 
 | Competitor capability | Decision | Why | Wolfpack owner |
@@ -76,7 +84,7 @@ This ordering avoids coupling the first wins to protected customer data or a new
 | Per-tier badge copy and shapes | **Adopt** | Clear value hierarchy; small model/runtime surface. | Bundle pricing rules, Configure pricing UI, shared storefront offer card. |
 | Color-swatch tooltip | **Adopt** | Improves variant comprehension without permanent vertical space. | `StepCategory`, PPB option renderer, later shared variant selector. |
 | Broad visual presets/live preview | **Adapt** | Wolfpack already has a production-renderer preview; add semantic presets rather than clone raw controls. | Settings → Design runtime and template tokens. |
-| Specific-link eligibility | **Adopt** | Useful personalization without customer data. | New eligibility service plus signed campaign token. |
+| Specific-link eligibility | **Adopt** | Useful personalization without customer data. | New eligibility service plus a random bearer token stored only as a digest. |
 | Explicit priority and stop-lower policy | **Adopt** | Deterministic conflict resolution is required once multiple offers share scope. | New offer decision engine. |
 | Start/end and recurring schedules | **Adapt** | Valuable, but must be timezone-safe and runtime-enforced. | Schedule model, resolver, jobs/reconciliation. |
 | Offer import/export | **Defer** | High operational leverage after schema/versioning is stable. | Backend import pipeline and Admin jobs surface. |
@@ -275,6 +283,31 @@ App proxy `logged_in_customer_id` is empty for anonymous visitors. Verify the re
 
 Shopify supports automatic and code discounts. Discount Functions can implement real-time custom logic such as volume thresholds. Eligibility UI does not itself guarantee checkout enforcement: every discount result must be represented in a Shopify-supported discount or Cart Transform contract and tested for combinations.
 
+Shopify code discounts expose native `DiscountShareableUrl` values, and cart
+permalinks can apply discount codes. Use those URLs when a campaign link's job
+is to apply a Shopify discount. They do not authorize or hide a bundle before
+cart, so an app-owned opaque random token remains justified only for the
+distinct **storefront visibility** requirement.
+
+Shopify discount nodes own `startsAt`, `endsAt`, customer/segment/Market
+contexts, activation status, and combination rules. Wolfpack may mirror those
+values to decide whether to render a bundle, but must not create a second
+discount scheduler or checkout priority system. The Discount Function remains
+the final price-enforcement owner.
+
+### Native ownership matrix
+
+| Capability | Shopify owner to use first | Wolfpack-only gap |
+| --- | --- | --- |
+| Shareable discount campaign | `DiscountShareableUrl` or cart permalink with `discount` | Signed/opaque link only when the bundle itself must be hidden before cart. |
+| Discount start/end | Discount node `startsAt` / `endsAt` | Mirror the same instants for truthful storefront visibility and countdown. No transition job is required for correctness. |
+| Customer, segment, and Market eligibility | Discount `context`; Discount Function cart buyer identity | Pre-cart visibility only when Shopify does not expose the required authenticated context. |
+| Discount combinations and result selection | Discount node combination rules and Discount Function candidate selection | Visual ordering of competing storefront offers only. |
+| Product color swatches | Shopify product-option linked metafields/metaobjects and option values | Tooltip/presentation around the canonical Shopify option value; app mapping only when explicitly merchant-authored. |
+| Component stock | Shopify variant inventory policy and contextual quantity/availability | Aggregate the selected bundle components and suppress claims when the source is unknown or non-binding. |
+| Store/order analytics | ShopifyQL and Shopify Analytics where available; Web Pixels for standard customer events | Private bundle decision/tier dimensions not exposed by Shopify. The app's current `2026-07` surface must not depend on `2026-10` early-access Analytics features. |
+| Bundle CSV operations | None for Wolfpack-owned bundle policy records | Versioned validation/import/export remains app-owned; Shopify bulk operations are only adapters for Shopify resource lookup. |
+
 ### Inventory
 
 Shopify `available` inventory is the sellable quantity. Wolfpack must use component variants and the same inventory context as cart/checkout. Suppress low-stock claims for untracked, continue-selling, unknown, or stale cases.
@@ -305,7 +338,7 @@ Each slice below is intentionally independently shippable and should become its 
 
 ### Slice B — PPB selector modes and swatch tooltip
 
-**Scope:** replace ambiguous swatch boolean with canonical selector mode, explicit color mapping, tooltip on hover/focus, mobile selected label.
+**Scope:** replace ambiguous swatch boolean with canonical selector mode, consume Shopify-linked product-option swatch data when available, tooltip on hover/focus, mobile selected label. A merchant-authored mapping is optional presentation data, not a replacement for Shopify's product option contract.
 
 **Data:** direct Prisma columns or category contract fields with defaults; bump widget version when deployed.
 
@@ -317,9 +350,9 @@ Each slice below is intentionally independently shippable and should become its 
 
 ### Slice C — Specific-link eligibility
 
-**Scope:** one condition type, generated/revocable signed token, destination builder, eligibility summary, internal decision event.
+**Scope:** one storefront-visibility condition type, generated/revocable opaque token, destination builder, eligibility summary, internal decision event. Do not use this token to duplicate a Shopify discount code; use Shopify's shareable discount URL when applying a code is the requirement.
 
-**Data:** `OfferPolicy`, `OfferCondition`, token hash/identifier; never store only a predictable public ID.
+**Data:** `OfferPolicy`, `OfferCondition`, and one token digest; never persist the raw token or add a redundant identifier/signature layer.
 
 **Tests first:** signing/verification/expiry/revocation, existing query strings, wrong shop/offer, malformed token, runtime winner, no-token fallback.
 
@@ -329,11 +362,11 @@ Each slice below is intentionally independently shippable and should become its 
 
 ### Slice D — Priority and one-shot scheduling
 
-**Scope:** priority, exclusive/continue policy, start/end in shop timezone, derived status/list filters, next transition, job reconciliation.
+**Scope:** visual offer priority, exclusive/continue display policy, and a storefront mirror of the Shopify discount node's start/end instants in shop timezone. Derived status/list filters and next transition are computed from those instants; no app job is required for correctness.
 
 **Data:** direct policy and schedule records; expand job types only when a real executor owns them.
 
-**Tests first:** tie breaking, overlapping offers, boundary instants, DST, deactivated bundle, missed job reconciliation, idempotent transitions.
+**Tests first:** tie breaking, overlapping offers, boundary instants, DST, deactivated bundle, Shopify discount-reference mismatch, and runtime evaluation after a missed browser/server interval.
 
 **Browser QA:** collision warnings, upcoming/current/expired states, edit while active, desktop/mobile summary.
 
@@ -342,6 +375,11 @@ Each slice below is intentionally independently shippable and should become its 
 ### Slice E — Offer-aware Analytics
 
 **Scope:** offer/tier/rule-version dimensions in engagement and order attribution; offer filter; CSV fields; decision-to-revenue funnel.
+
+**Platform boundary:** retain current internal event/attribution owners for the
+`2026-07` app. Re-evaluate Shopify's `2026-10` Analytics/App Events and embedded
+ShopifyQL components only after the store/app has access and the surface is no
+longer an early-access dependency.
 
 **Data:** direct indexed dimensions for primary filters; backfill policy explicitly states what cannot be reconstructed.
 
@@ -383,7 +421,11 @@ Each slice below is intentionally independently shippable and should become its 
 
 ### Slice I — Identity personalization
 
-**Scope:** Markets first, then customer tags, then purchase history after data approval.
+**Scope:** Shopify Markets and discount customer-segment contexts first. Prefer
+Discount Function buyer-identity fields (including tag predicates) for
+checkout enforcement so raw customer records never enter Wolfpack. Customer
+tags or purchase history for **pre-cart visibility** remain deferred until the
+protected-data and authenticated-identity gate is explicitly approved.
 
 **Tests first:** authenticated/anonymous, redacted API response, missing scope, include/exclude, unknown market/country, tag changes, order-window boundaries, cache invalidation.
 
@@ -443,5 +485,9 @@ No products, variants, inventory, customers, or orders were created or deleted f
 - [Shopify Markets](https://shopify.dev/docs/apps/build/markets)
 - [Shopify bulk operations](https://shopify.dev/docs/api/usage/bulk-operations)
 - [Shopify discounts](https://shopify.dev/docs/apps/build/discounts)
+- [Shopify discount shareable URL](https://shopify.dev/docs/api/admin-graphql/2026-10/objects/DiscountShareableUrl)
+- [Shopify cart permalinks](https://shopify.dev/docs/apps/build/checkout/create-cart-permalinks)
+- [Shopify metafield-linked product options](https://shopify.dev/docs/apps/build/product-merchandising/products-and-collections/metafield-linked)
+- [Shopify Analytics for apps](https://shopify.dev/docs/apps/build/analytics)
 - [Shopify Web Pixel privacy](https://shopify.dev/docs/api/web-pixels-api/pixel-privacy)
 - [ShopifyQL schema reference](https://shopify.dev/docs/api/shopifyql/2026-07/schemas)

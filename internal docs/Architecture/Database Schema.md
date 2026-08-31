@@ -84,9 +84,10 @@ bundle. It starts disabled, records a monotonically increasing `ruleVersion`,
 and owns normalized `OfferCondition` rows. The initial condition type is
 `specific_link`.
 
-A specific-link condition stores a public token identifier and a one-way token
-hash, never the raw campaign token. Optional `expiresAt` and `revokedAt` instants
-make expiry and revocation server-enforceable. A compound unique constraint on
+A specific-link condition stores one SHA-256 token digest, never the raw
+campaign token. The generated Admin response is the only surface that returns
+the random bearer token. Optional `expiresAt` and `revokedAt` instants make
+expiry and revocation server-enforceable. A compound unique constraint on
 `(offerPolicyId, type)` permits one specific-link condition per policy in the
 initial contract. Bundle deletion cascades through the policy and conditions.
 

@@ -304,7 +304,6 @@ model OfferCondition {
   offerPolicy     OfferPolicy        @relation(fields: [offerPolicyId], references: [id], onDelete: Cascade)
   type            OfferConditionType
   position        Int                @default(0)
-  tokenIdentifier String             @unique
   tokenHash       String             @unique
   expiresAt       DateTime?
   revokedAt       DateTime?
