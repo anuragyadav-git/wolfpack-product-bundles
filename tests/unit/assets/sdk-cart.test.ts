@@ -63,11 +63,11 @@ describe('buildCartItems', () => {
     });
     const { items } = buildCartItems(state);
 
-    expect(items[0].properties).toMatchObject({
-      _wpb_bundle_id: 'bundle_1',
-      _wpb_offer_policy_id: 'policy-1',
-      _wpb_offer_rule_version: '4',
-      _wpb_offer_eligibility_source: 'priority',
+    expect(JSON.parse(items[0].properties._bundle_display_properties).offerAnalytics).toEqual({
+      bundleId: 'bundle_1',
+      offerPolicyId: 'policy-1',
+      offerRuleVersion: 4,
+      offerEligibilitySource: 'priority',
     });
   });
 
@@ -131,6 +131,9 @@ describe('buildCartItems', () => {
       box: '1',
       items: '2 x Product A, 1 x Product B (Gift)',
       retailPrice: '$20.00',
+      offerAnalytics: {
+        bundleId: 'bundle_1',
+      },
       youSave: {
         amount: '$5.00',
         percentage: '25%',

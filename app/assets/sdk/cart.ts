@@ -122,14 +122,13 @@ export function buildCartItems(state: any) {
     );
   }
 
-  var sourceProperties = _buildCartLineSourceProperties(state, selectedLines);
-  var offerAnalyticsProperties = buildOfferAnalyticsCartProperties({
+  var sourceProperties = buildOfferAnalyticsCartProperties({
+    sourceProperties: _buildCartLineSourceProperties(state, selectedLines),
     bundleId: state.bundleId,
     offerDelivery: state.bundleData && state.bundleData.offerDelivery,
   });
   items.forEach(function (item) {
     Object.assign(item.properties, sourceProperties);
-    Object.assign(item.properties, offerAnalyticsProperties);
   });
 
   return {

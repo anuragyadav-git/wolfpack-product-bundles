@@ -64,13 +64,16 @@ Shopify-owned line properties as the completed-order transport for the app-owned
 privacy-safe dimensions `offerPolicyId`, `offerRuleVersion`, `offerTierId`, and
 `offerEligibilitySource`.
 
-The storefront writes only private `_wpb_*` line properties. The Cart Transform
-copies those properties onto the merged parent line, and the Web Pixel forwards
-the top-level and component property arrays to `/api/attribution`. The server
-accepts dimensions only from a line whose `_wpb_bundle_id` matches the bundle
-being attributed, then applies the shared normalization allowlist. Raw link
-tokens, customer identifiers, customer tags, purchase history, full URLs, and
-arbitrary eligibility labels are never part of this transport.
+The storefront nests a normalized `offerAnalytics` object inside the existing
+private `_bundle_display_properties` JSON line property. The Cart Transform
+emits one `_wpb_offer_analytics` JSON property on a merged parent line; unmerged
+component lines, including subscription lines, retain the nested display
+envelope. The Web Pixel forwards both top-level and component property arrays to
+`/api/attribution`. The server accepts dimensions only when the nested
+`bundleId` matches the bundle being attributed, then applies the shared
+normalization allowlist. Raw link tokens, customer identifiers, customer tags,
+purchase history, full URLs, and arbitrary eligibility labels are never part of
+this transport.
 
 When Shopify does not expose properties or a bundle was added without offer
 metadata, attribution still succeeds and all offer dimensions remain null.

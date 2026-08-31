@@ -27,10 +27,16 @@ describe("Cart Transform input query", () => {
 
   it("stays within Shopify's maximum input-query complexity", () => {
     const metafieldCost = (normalizedQuery.match(/\bmetafield\(/g) ?? []).length * 3;
-    const requiredLeafCost = 12;
+    const attributeCost = (normalizedQuery.match(/\battribute\(/g) ?? []).length;
+    const requiredLeafCost = 6;
 
-    expect(metafieldCost + requiredLeafCost).toBeLessThanOrEqual(30);
+    expect(metafieldCost + attributeCost + requiredLeafCost).toBeLessThanOrEqual(30);
     expect(normalizedQuery).toContain("sellingPlanAllocation { __typename }");
+  });
+
+  it("reuses bundle display properties instead of adding offer-analytics query leaves", () => {
+    expect(normalizedQuery).toContain('bundleDisplayProperties: attribute(key: "_bundle_display_properties")');
+    expect(normalizedQuery).not.toContain('attribute(key: "_wpb_');
   });
 
   it("groups merge lines from EB public cart attributes instead of private bundle IDs", () => {

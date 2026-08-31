@@ -388,6 +388,16 @@ mod tests {
     fn test_runtime_token_merge_without_component_parents() {
         let runtime_secret = test_runtime_secret();
         let runtime_token = sign_runtime_token_for_test(&runtime_merge_payload(), &runtime_secret);
+        let offer_analytics_display = serde_json::json!({
+            "offerAnalytics": {
+                "bundleId": "bundle-1",
+                "offerPolicyId": "policy-1",
+                "offerRuleVersion": 8,
+                "offerTierId": "tier-3",
+                "offerEligibilitySource": "schedule"
+            }
+        })
+        .to_string();
         let input = format!(
             r#"{{
             "shop":{{"ppbPolicyRevisions":{{"value":"{{\"bundle-1\":\"rev-1\"}}"}}}},"presentmentCurrencyRate": "1.0",
@@ -402,13 +412,8 @@ mod tests {
                         "wolfpackProductBundleOfferId": {{ "value": "FBP-bundle-1_ABC_1" }},
                         "wolfpackProductBundleName": {{ "value": "Runtime Bundle" }},
                         "runtimeToken": {{ "value": "{runtime_token}" }},
-                        "offerAnalyticsBundleId": {{ "value": "bundle-1" }},
-                        "offerAnalyticsPolicyId": {{ "value": "policy-1" }},
-                        "offerAnalyticsRuleVersion": {{ "value": "8" }},
-                        "offerAnalyticsTierId": {{ "value": "tier-3" }},
-                        "offerAnalyticsEligibilitySource": {{ "value": "schedule" }},
                         "stepType": null,
-                        "bundleDisplayProperties": null,
+                        "bundleDisplayProperties": {{ "value": {offer_analytics_display:?} }},
                         "merchandise": {{
                             "__typename": "ProductVariant",
                             "id": "gid://shopify/ProductVariant/101",
@@ -424,13 +429,8 @@ mod tests {
                         "wolfpackProductBundleOfferId": {{ "value": "FBP-bundle-1_ABC_2" }},
                         "wolfpackProductBundleName": {{ "value": "Runtime Bundle" }},
                         "runtimeToken": {{ "value": "{runtime_token}" }},
-                        "offerAnalyticsBundleId": {{ "value": "bundle-1" }},
-                        "offerAnalyticsPolicyId": {{ "value": "policy-1" }},
-                        "offerAnalyticsRuleVersion": {{ "value": "8" }},
-                        "offerAnalyticsTierId": {{ "value": "tier-3" }},
-                        "offerAnalyticsEligibilitySource": {{ "value": "schedule" }},
                         "stepType": null,
-                        "bundleDisplayProperties": null,
+                        "bundleDisplayProperties": {{ "value": {offer_analytics_display:?} }},
                         "merchandise": {{
                             "__typename": "ProductVariant",
                             "id": "gid://shopify/ProductVariant/102",
@@ -463,14 +463,17 @@ mod tests {
                 .map(String::as_str),
             Some(runtime_token.as_str())
         );
-        assert_eq!(attributes.get("_wpb_bundle_id").map(String::as_str), Some("bundle-1"));
-        assert_eq!(attributes.get("_wpb_offer_policy_id").map(String::as_str), Some("policy-1"));
-        assert_eq!(attributes.get("_wpb_offer_rule_version").map(String::as_str), Some("8"));
-        assert_eq!(attributes.get("_wpb_offer_tier_id").map(String::as_str), Some("tier-3"));
-        assert_eq!(
-            attributes.get("_wpb_offer_eligibility_source").map(String::as_str),
-            Some("schedule")
-        );
+        let offer_analytics: serde_json::Value = serde_json::from_str(
+            attributes
+                .get("_wpb_offer_analytics")
+                .expect("merged parent should preserve consolidated offer analytics"),
+        )
+        .expect("offer analytics should remain valid JSON");
+        assert_eq!(offer_analytics["bundleId"], "bundle-1");
+        assert_eq!(offer_analytics["offerPolicyId"], "policy-1");
+        assert_eq!(offer_analytics["offerRuleVersion"], 8);
+        assert_eq!(offer_analytics["offerTierId"], "tier-3");
+        assert_eq!(offer_analytics["offerEligibilitySource"], "schedule");
     }
 
     #[test]

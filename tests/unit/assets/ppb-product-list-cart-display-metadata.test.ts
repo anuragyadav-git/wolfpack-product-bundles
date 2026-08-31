@@ -107,11 +107,11 @@ describe('PPB Product List cart display metadata', () => {
     expect(items).toHaveLength(3);
     for (const item of items) {
       expect(item.properties._bundle_display_properties).toBeDefined();
-      expect(item.properties).toMatchObject({
-        _wpb_bundle_id: 'bundle-1',
-        _wpb_offer_policy_id: 'policy-1',
-        _wpb_offer_rule_version: '4',
-        _wpb_offer_eligibility_source: 'always',
+      expect(JSON.parse(item.properties._bundle_display_properties).offerAnalytics).toEqual({
+        bundleId: 'bundle-1',
+        offerPolicyId: 'policy-1',
+        offerRuleVersion: 4,
+        offerEligibilitySource: 'always',
       });
     }
 
@@ -120,6 +120,12 @@ describe('PPB Product List cart display metadata', () => {
       box: '1',
       items: '2 x 14k Dangling Obsidian Earrings, 1 x 14k Dangling Pendant Earrings, 1 x 18k Pedal Ring - 8 (8)',
       retailPrice: '$2676.00',
+      offerAnalytics: {
+        bundleId: 'bundle-1',
+        offerPolicyId: 'policy-1',
+        offerRuleVersion: 4,
+        offerEligibilitySource: 'always',
+      },
       labels: {
         items: 'Items',
         retailPrice: 'Retail Price',

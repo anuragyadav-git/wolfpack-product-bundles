@@ -10,6 +10,9 @@ const {
 describe('shared cart-submit helpers', () => {
   it('builds privacy-safe Shopify line properties for offer attribution', () => {
     expect(buildOfferAnalyticsCartProperties({
+      sourceProperties: {
+        _bundle_display_properties: JSON.stringify({ box: '2', items: '2 x Product A' }),
+      },
       bundleId: ' bundle-1 ',
       offerDelivery: {
         offerPolicyId: ' policy-1 ',
@@ -18,21 +21,35 @@ describe('shared cart-submit helpers', () => {
       },
       tierId: ' tier-2 ',
     })).toEqual({
-      _wpb_bundle_id: 'bundle-1',
-      _wpb_offer_policy_id: 'policy-1',
-      _wpb_offer_rule_version: '3',
-      _wpb_offer_tier_id: 'tier-2',
-      _wpb_offer_eligibility_source: 'specific_link',
+      _bundle_display_properties: JSON.stringify({
+        box: '2',
+        items: '2 x Product A',
+        offerAnalytics: {
+          bundleId: 'bundle-1',
+          offerPolicyId: 'policy-1',
+          offerRuleVersion: 3,
+          offerTierId: 'tier-2',
+          offerEligibilitySource: 'specific_link',
+        },
+      }),
     });
 
     expect(buildOfferAnalyticsCartProperties({
+      sourceProperties: {
+        _bundle_display_properties: JSON.stringify({ box: '1' }),
+      },
       bundleId: 'bundle-1',
       offerDelivery: {
         offerPolicyId: 'x'.repeat(129),
         ruleVersion: -1,
         eligibilitySource: 'customer_email',
       },
-    })).toEqual({ _wpb_bundle_id: 'bundle-1' });
+    })).toEqual({
+      _bundle_display_properties: JSON.stringify({
+        box: '1',
+        offerAnalytics: { bundleId: 'bundle-1' },
+      }),
+    });
   });
 
   it('builds EB-compatible product-page multipart cart form data', () => {

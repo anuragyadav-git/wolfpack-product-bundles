@@ -336,17 +336,13 @@ describe("FPB checkout cart-line properties", () => {
     const addRequest: any = fetchMock.mock.calls.find(([url]: any) => url === "/cart/add.js")!;
     expect(addRequest).toBeDefined();
     const body = JSON.parse(String(addRequest[1]?.body));
-    expect(body.items).toEqual([
-      expect.objectContaining({
-        id: "111",
-        properties: expect.objectContaining({
-          _wpb_bundle_id: "bundle-1",
-          _wpb_offer_policy_id: "policy-1",
-          _wpb_offer_rule_version: "5",
-          _wpb_offer_eligibility_source: "specific_link",
-        }),
-      }),
-    ]);
+    expect(body.items).toEqual([expect.objectContaining({ id: "111" })]);
+    expect(JSON.parse(body.items[0].properties._bundle_display_properties).offerAnalytics).toEqual({
+      bundleId: "bundle-1",
+      offerPolicyId: "policy-1",
+      offerRuleVersion: 5,
+      offerEligibilitySource: "specific_link",
+    });
   });
 
   it("omits Box cart properties for BXY when bundle quantity options are hidden", async () => {
@@ -469,6 +465,10 @@ describe("FPB checkout cart-line properties", () => {
       expect(JSON.parse(item.properties._bundle_display_properties)).toEqual({
         items: "1 x First product, 1 x Second product",
         retailPrice: "$1448.00",
+        offerAnalytics: {
+          bundleId: "bundle-1",
+          offerTierId: "rule-1",
+        },
       });
     });
   });

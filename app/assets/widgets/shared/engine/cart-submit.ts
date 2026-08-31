@@ -16,6 +16,7 @@ function normalizeBundleId(value: unknown) {
 }
 
 export function buildOfferAnalyticsCartProperties({
+  sourceProperties = {},
   bundleId,
   offerDelivery,
   tierId = null,
@@ -27,17 +28,24 @@ export function buildOfferAnalyticsCartProperties({
     offerTierId: tierId,
     offerEligibilitySource: offerDelivery?.eligibilitySource,
   });
-  const properties: Record<string, string> = {};
-  if (normalizedBundleId) properties._wpb_bundle_id = normalizedBundleId;
-  if (dimensions.offerPolicyId) properties._wpb_offer_policy_id = dimensions.offerPolicyId;
-  if (dimensions.offerRuleVersion) {
-    properties._wpb_offer_rule_version = String(dimensions.offerRuleVersion);
-  }
-  if (dimensions.offerTierId) properties._wpb_offer_tier_id = dimensions.offerTierId;
+  const rawDisplayProperties = sourceProperties?._bundle_display_properties;
+  const displayProperties = typeof rawDisplayProperties === 'string'
+    ? JSON.parse(rawDisplayProperties)
+    : {};
+  const offerAnalytics: Record<string, string | number> = {};
+  if (normalizedBundleId) offerAnalytics.bundleId = normalizedBundleId;
+  if (dimensions.offerPolicyId) offerAnalytics.offerPolicyId = dimensions.offerPolicyId;
+  if (dimensions.offerRuleVersion) offerAnalytics.offerRuleVersion = dimensions.offerRuleVersion;
+  if (dimensions.offerTierId) offerAnalytics.offerTierId = dimensions.offerTierId;
   if (dimensions.offerEligibilitySource) {
-    properties._wpb_offer_eligibility_source = dimensions.offerEligibilitySource;
+    offerAnalytics.offerEligibilitySource = dimensions.offerEligibilitySource;
   }
-  return properties;
+  if (Object.keys(offerAnalytics).length > 0) {
+    displayProperties.offerAnalytics = offerAnalytics;
+  }
+  return {
+    _bundle_display_properties: JSON.stringify(displayProperties),
+  };
 }
 
 export function extractBundleDetailsSourceProperties(cartItems: any[] = []) {

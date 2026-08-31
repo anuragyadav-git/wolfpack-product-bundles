@@ -330,14 +330,14 @@ export const fullPageStepFooterMethods: Record<string, any> & ThisType<any> = {
       return;
     }
 
-    const sourceProperties = this.buildCartLineSourceProperties(selectedLines);
+    const sourceProperties = buildOfferAnalyticsCartProperties({
+      sourceProperties: this.buildCartLineSourceProperties(selectedLines),
+      bundleId: this.selectedBundle?.id,
+      offerDelivery: this.selectedBundle?.offerDelivery,
+      tierId: captureDiscountTierState(this).tierId,
+    });
     items.forEach(item => {
       Object.assign(item.properties, sourceProperties);
-      Object.assign(item.properties, buildOfferAnalyticsCartProperties({
-        bundleId: this.selectedBundle?.id,
-        offerDelivery: this.selectedBundle?.offerDelivery,
-        tierId: captureDiscountTierState(this).tierId,
-      }));
       if (hasSelectedAddonLine && hasAddonStepConfigured) {
         item.properties._addon_offer_id = item.properties._addon_offer_id || baseOfferId;
       }

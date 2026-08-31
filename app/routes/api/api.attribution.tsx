@@ -30,6 +30,29 @@ function linePropertyMap(value: unknown): Record<string, unknown> {
     : {};
 }
 
+function jsonRecord(value: unknown): Record<string, unknown> {
+  if (typeof value !== "string") return {};
+  try {
+    const parsed = JSON.parse(value);
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed)
+      ? parsed as Record<string, unknown>
+      : {};
+  } catch {
+    return {};
+  }
+}
+
+function offerAnalyticsProperty(properties: Record<string, unknown>): Record<string, unknown> {
+  const mergedParent = jsonRecord(properties._wpb_offer_analytics);
+  if (Object.keys(mergedParent).length > 0) return mergedParent;
+  const displayProperties = jsonRecord(properties._bundle_display_properties);
+  return displayProperties.offerAnalytics
+    && typeof displayProperties.offerAnalytics === "object"
+    && !Array.isArray(displayProperties.offerAnalytics)
+    ? displayProperties.offerAnalytics as Record<string, unknown>
+    : {};
+}
+
 function offerDimensionsForBundle(lineItems: unknown, bundleId: string) {
   const empty = normalizeOfferAnalyticsDimensions({});
   if (!Array.isArray(lineItems)) return empty;
@@ -42,12 +65,13 @@ function offerDimensionsForBundle(lineItems: unknown, bundleId: string) {
     )];
     for (const candidate of candidates) {
       const properties = linePropertyMap(candidate?.properties);
-      if (String(properties._wpb_bundle_id ?? "").trim() !== bundleId) continue;
+      const offerAnalytics = offerAnalyticsProperty(properties);
+      if (String(offerAnalytics.bundleId ?? "").trim() !== bundleId) continue;
       return normalizeOfferAnalyticsDimensions({
-        offerPolicyId: properties._wpb_offer_policy_id,
-        offerRuleVersion: Number(properties._wpb_offer_rule_version),
-        offerTierId: properties._wpb_offer_tier_id,
-        offerEligibilitySource: properties._wpb_offer_eligibility_source,
+        offerPolicyId: offerAnalytics.offerPolicyId,
+        offerRuleVersion: offerAnalytics.offerRuleVersion,
+        offerTierId: offerAnalytics.offerTierId,
+        offerEligibilitySource: offerAnalytics.offerEligibilitySource,
       });
     }
   }

@@ -280,14 +280,14 @@ export const ProductPageCartMethods: Record<string, any> & ThisType<any> = {
       throw new Error(`The following product${unavailableProducts.length > 1 ? 's are' : ' is'} currently unavailable: ${productList}. Please remove ${unavailableProducts.length > 1 ? 'them' : 'it'} from your bundle or try again later.`);
     }
 
-    const sourceProperties = this.buildCartLineSourceProperties(selectedLines);
+    const sourceProperties = buildOfferAnalyticsCartProperties({
+      sourceProperties: this.buildCartLineSourceProperties(selectedLines),
+      bundleId: this.selectedBundle?.id,
+      offerDelivery: this.selectedBundle?.offerDelivery,
+      tierId: captureDiscountTierState(this).tierId,
+    });
     cartItems.forEach(item => {
       Object.assign(item.properties, sourceProperties);
-      Object.assign(item.properties, buildOfferAnalyticsCartProperties({
-        bundleId: this.selectedBundle?.id,
-        offerDelivery: this.selectedBundle?.offerDelivery,
-        tierId: captureDiscountTierState(this).tierId,
-      }));
       if (hasSelectedAddonLine && hasAddonStepConfigured) {
         item.properties._addon_offer_id = item.properties._addon_offer_id || baseOfferId;
       }

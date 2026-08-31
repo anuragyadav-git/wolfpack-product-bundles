@@ -77,11 +77,16 @@ describe("api.attribution", () => {
         lineItems: [{
           productId: "gid://shopify/Product/1",
           properties: [
-            { key: "_wpb_bundle_id", value: "bundle-123" },
-            { key: "_wpb_offer_policy_id", value: "policy-1" },
-            { key: "_wpb_offer_rule_version", value: "8" },
-            { key: "_wpb_offer_tier_id", value: "tier-3" },
-            { key: "_wpb_offer_eligibility_source", value: "schedule" },
+            {
+              key: "_wpb_offer_analytics",
+              value: JSON.stringify({
+                bundleId: "bundle-123",
+                offerPolicyId: "policy-1",
+                offerRuleVersion: 8,
+                offerTierId: "tier-3",
+                offerEligibilitySource: "schedule",
+              }),
+            },
           ],
         }],
       }),
@@ -111,9 +116,13 @@ describe("api.attribution", () => {
         lineItems: [{
           productId: "gid://shopify/Product/1",
           properties: {
-            _wpb_bundle_id: "bundle-other",
-            _wpb_offer_policy_id: "policy-private",
-            _wpb_offer_eligibility_source: "customer_email",
+            _bundle_display_properties: JSON.stringify({
+              offerAnalytics: {
+                bundleId: "bundle-other",
+                offerPolicyId: "policy-private",
+                offerEligibilitySource: "customer_email",
+              },
+            }),
           },
         }],
       }),
@@ -128,6 +137,43 @@ describe("api.attribution", () => {
         offerRuleVersion: null,
         offerTierId: null,
         offerEligibilitySource: null,
+      })],
+    });
+  });
+
+  it("reads offer dimensions from the component display envelope when Cart Transform is skipped", async () => {
+    mockMatchLineItemsToBundles.mockResolvedValue(["bundle-123"]);
+
+    await action({
+      request: makeRequest({
+        orderId: "790",
+        shopId: "test.myshopify.com",
+        lineItems: [{
+          productId: "gid://shopify/Product/1",
+          properties: {
+            _bundle_display_properties: JSON.stringify({
+              offerAnalytics: {
+                bundleId: "bundle-123",
+                offerPolicyId: "policy-2",
+                offerRuleVersion: 9,
+                offerTierId: "tier-4",
+                offerEligibilitySource: "priority",
+              },
+            }),
+          },
+        }],
+      }),
+      params: {},
+      context: {},
+    });
+
+    expect(getDb().orderAttribution.createMany).toHaveBeenCalledWith({
+      data: [expect.objectContaining({
+        bundleId: "bundle-123",
+        offerPolicyId: "policy-2",
+        offerRuleVersion: 9,
+        offerTierId: "tier-4",
+        offerEligibilitySource: "priority",
       })],
     });
   });
