@@ -343,6 +343,10 @@ export function usePpbSaveHandlers({
         "useSingleStepCategoriesAsBundleSteps",
         String(settings.useSingleStepCategoriesAsBundleSteps),
       );
+      formData.append(
+        "specificLinkOfferEnabled",
+        String(base.offerDeliveryState.enabled),
+      );
       validation.validateConfigureForm(formData, (validFormData) => {
         base.fetcher.submit(validFormData, { method: "post" });
       });
@@ -381,6 +385,7 @@ export function usePpbSaveHandlers({
     base.setTextOverridesByLocale(
       base.originalTextOverridesByLocaleRef.current,
     );
+    base.discardSpecificLinkOfferChanges();
     settings.setDefaultProductsData(
       settings.originalDefaultProductsDataRef.current,
     );

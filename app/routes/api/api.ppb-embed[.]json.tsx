@@ -42,6 +42,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
           },
         },
         pricing: true,
+        offerPolicy: { select: { enabled: true } },
       },
       orderBy: [{ createdAt: "asc" }, { id: "asc" }],
     });

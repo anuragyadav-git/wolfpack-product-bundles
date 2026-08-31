@@ -115,6 +115,7 @@ export function usePpbFetcherEffects({
             visibility.bundleEmbedSpecificCollectionPages;
           visibility.originalBundleEmbedMultiLangTextRef.current =
             visibility.bundleEmbedMultiLangText;
+          base.markSpecificLinkOfferSaved();
           base.markAsSaved();
           base.clearOperationAlert();
           base.shopify.toast.show(i18n.t("common.success.changesSaved"), { isError: false });

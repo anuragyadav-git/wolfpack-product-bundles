@@ -27,6 +27,9 @@ async function loadBundleForStorefrontSync(shopDomain: string, bundleId: string)
         orderBy: { position: "asc" },
       },
       pricing: true,
+      offerPolicy: {
+        select: { enabled: true, ruleVersion: true },
+      },
     },
   });
 }

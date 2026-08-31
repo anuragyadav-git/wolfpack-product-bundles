@@ -102,6 +102,7 @@ export function selectEligiblePpbBundleEmbed(
   const selected = bundles
     .filter((bundle) => bundle.bundleType === "product_page")
     .filter((bundle) => bundle.status === "active" || bundle.status === "unlisted")
+    .filter((bundle) => bundle.offerPolicy?.enabled !== true)
     .filter((bundle) => bundleMatches(bundle, context))
     .sort((left, right) => {
       const dateOrder = new Date(left.createdAt).getTime() - new Date(right.createdAt).getTime();

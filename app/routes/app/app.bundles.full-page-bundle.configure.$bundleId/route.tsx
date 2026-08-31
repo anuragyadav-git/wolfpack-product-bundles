@@ -25,6 +25,11 @@ import {
 import ConfigureBundleFlow from "./ConfigureBundleFlow";
 import { ReduxProvider } from "../../../store/ReduxProvider";
 import { handleValidateSellingPlanGroups } from "../../../services/bundle-subscription-discovery.server";
+import { buildSpecificLinkOfferAdminState } from "../../../lib/specific-link-offer-admin";
+import {
+  handleGenerateSpecificLinkOffer,
+  handleRevokeSpecificLinkOffer,
+} from "../shared/specific-link-offer-action.server";
 
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   const { session, admin } = await authenticate.admin(request);
@@ -54,6 +59,18 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
         },
       },
       pricing: true,
+      offerPolicy: {
+        select: {
+          enabled: true,
+          ruleVersion: true,
+          conditions: {
+            where: { type: "specific_link" },
+            orderBy: { position: "asc" },
+            take: 1,
+            select: { expiresAt: true, revokedAt: true },
+          },
+        },
+      },
     },
   });
 
@@ -79,8 +96,10 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
       }),
   ]);
 
+  const { offerPolicy, ...safeBundle } = bundle;
   return json({
-    bundle,
+    bundle: safeBundle,
+    offerDelivery: buildSpecificLinkOfferAdminState(offerPolicy),
     bundleProduct: shopifyData.bundleProduct,
     availableBundles,
     shop: session.shop,
@@ -135,6 +154,10 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
         );
       case "recordBundlePreview":
         return await handleRecordBundlePreview(admin, session, bundleId, formData);
+      case "generateSpecificLinkOffer":
+        return await handleGenerateSpecificLinkOffer(session, bundleId, formData);
+      case "revokeSpecificLinkOffer":
+        return await handleRevokeSpecificLinkOffer(admin, session, bundleId);
       case "syncBundle":
         return await handleSyncStorefrontNow(admin, session, bundleId, "full_page", "sync_bundle");
       case "preparePreviewBundle":

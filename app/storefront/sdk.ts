@@ -10,6 +10,7 @@ import {
   captureDiscountTierState,
   getDiscountTierTransition,
 } from '../assets/widgets/shared/discount-tier-feedback.js';
+import { resolveSpecificLinkOfferStorefrontEligibility } from '../assets/widgets/shared/specific-link-offer-eligibility.js';
 
 function captureSdkDiscountTierState(state: any) {
   return captureDiscountTierState({
@@ -74,13 +75,21 @@ export function createSdk(state: any) {
   };
 }
 
-function mount(): void {
+async function mount(): Promise<void> {
   const container = document.querySelector<HTMLElement>('[data-sdk-mode="true"]');
   if (!container) return;
 
   const state = createState();
   const result = loadBundleConfig(container, state);
   if (!result.success) throw new Error(result.error);
+  const eligible = await resolveSpecificLinkOfferStorefrontEligibility({
+    bundle: state.bundleData,
+    locationSearch: window.location.search,
+  });
+  if (!eligible) {
+    container.style.display = 'none';
+    return;
+  }
 
   const sdk = createSdk(state);
   (window as Window & { WolfpackBundles?: ReturnType<typeof createSdk> }).WolfpackBundles = sdk;
@@ -90,8 +99,8 @@ function mount(): void {
 
 if (typeof document !== 'undefined') {
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', mount, { once: true });
+    document.addEventListener('DOMContentLoaded', () => { void mount(); }, { once: true });
   } else {
-    mount();
+    void mount();
   }
 }

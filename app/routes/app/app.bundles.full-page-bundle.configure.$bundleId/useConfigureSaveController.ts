@@ -203,6 +203,10 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
         "defaultProductsData",
         JSON.stringify(buildDefaultProductsData()),
       );
+      formData.append(
+        "specificLinkOfferEnabled",
+        String(flow.offerDeliveryState.enabled),
+      );
       validation.validateConfigureForm(formData, (validFormData) => {
         flow.fetcher.submit(validFormData, { method: "post" });
       });
@@ -287,6 +291,7 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
             flow.autoSelectBrowsedProduct;
           flow.originalSubscriptionConfigRef.current =
             flow.subscriptionConfig;
+          flow.markSpecificLinkOfferSaved();
           flow.setIsDirty(false);
           flow.clearOperationAlert();
           flow.shopify.toast.show(i18n.t("common.success.changesSaved"), { isError: false });
@@ -385,6 +390,7 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
     flow.resetSubscriptionConfig(
       flow.originalSubscriptionConfigRef.current,
     );
+    flow.discardSpecificLinkOfferChanges();
     validation.clearValidationErrors();
   }, [flow, validation]);
   const handleConfirmDiscard = useCallback(() => {

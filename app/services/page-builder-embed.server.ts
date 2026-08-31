@@ -40,12 +40,20 @@ export async function resolvePageBuilderEmbed(
         bundleType: "product_page",
         shopifyProductHandle: request.parentProductHandle,
         status: { in: ["active", "unlisted"] },
+        OR: [
+          { offerPolicy: { is: null } },
+          { offerPolicy: { is: { enabled: false } } },
+        ],
       }
     : {
         shopId: shopDomain,
         bundleType: "full_page",
         publicNumber: request.publicNumber,
         status: { in: ["active", "unlisted"] },
+        OR: [
+          { offerPolicy: { is: null } },
+          { offerPolicy: { is: { enabled: false } } },
+        ],
       };
   const bundle = await database.bundle.findFirst({ where, include: bundleInclude });
   if (!bundle) return null;

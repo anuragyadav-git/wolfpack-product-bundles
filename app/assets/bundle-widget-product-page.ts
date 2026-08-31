@@ -97,6 +97,7 @@ import { renderBundlePurchaseOptions } from './widgets/shared/components/purchas
 import { bundleSubscriptionStorefrontMethods } from './widgets/shared/subscription-storefront-methods.js';
 import { applyBrowsedProductPreselection } from './widgets/product-page/embed-preselection.js';
 import { installDiscountTierPillFeedback } from './widgets/shared/discount-tier-feedback.js';
+import { resolveSpecificLinkOfferStorefrontEligibility } from './widgets/shared/specific-link-offer-eligibility.js';
 
 // ============================================================
 // BOTTOM-SHEET HELPER FUNCTIONS (pure — exposed for unit tests)
@@ -224,6 +225,18 @@ export class BundleWidgetProductPage {
 
       // loadBundleData() hides the container and returns early on non-bundle products
       if (!this.bundleData) return;
+
+      const storefrontBundle = this.bundleData[this.config.bundleId]
+        || Object.values(this.bundleData)[0];
+      const eligible = await resolveSpecificLinkOfferStorefrontEligibility({
+        bundle: storefrontBundle,
+        locationSearch: window.location.search,
+      });
+      if (!eligible) {
+        this.hideLoadingOverlay();
+        this.container.style.display = 'none';
+        return;
+      }
 
       // Select appropriate bundle
       this.selectBundle();

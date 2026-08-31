@@ -2,11 +2,13 @@ import { json } from '@remix-run/node';
 import type { Session } from '@shopify/shopify-api';
 import db from '../../../db.server';
 import { BundleType } from '../../../constants/bundle';
+import type { ShopifyAdmin } from '../../../lib/auth-guards.server';
 import { buildFpbStorefrontUrl } from '../../../lib/fpb-storefront-url';
 import {
   buildSpecificLinkOfferUrl,
   createSpecificLinkOfferToken,
 } from '../../../lib/specific-link-offer-token.server';
+import { syncBundleStorefrontNow } from '../../../services/bundles/storefront-sync.server';
 
 const bundleSelect = {
   id: true,
@@ -129,20 +131,25 @@ export async function handleGenerateSpecificLinkOffer(
 }
 
 export async function handleRevokeSpecificLinkOffer(
+  admin: ShopifyAdmin,
   session: Session,
   bundleId: string,
   now = new Date(),
 ) {
   const bundle = await db.bundle.findFirst({
     where: { id: bundleId, shopId: session.shop },
-    select: { id: true, offerPolicy: { select: { id: true } } },
+    select: {
+      id: true,
+      bundleType: true,
+      offerPolicy: { select: { id: true } },
+    },
   });
   if (!bundle) {
     return json({ success: false, errorCode: 'bundle_not_found' }, { status: 404 });
   }
 
   if (bundle.offerPolicy) {
-    await db.$transaction(async (tx) => {
+    const policy = await db.$transaction(async (tx) => {
       await tx.offerCondition.updateMany({
         where: {
           offerPolicyId: bundle.offerPolicy!.id,
@@ -150,8 +157,31 @@ export async function handleRevokeSpecificLinkOffer(
         },
         data: { revokedAt: now },
       });
+      return tx.offerPolicy.update({
+        where: { id: bundle.offerPolicy!.id },
+        data: {
+          enabled: false,
+          ruleVersion: { increment: 1 },
+        },
+        select: { ruleVersion: true },
+      });
+    });
+    await syncBundleStorefrontNow({
+      admin,
+      shopDomain: session.shop,
+      bundleId: bundle.id,
+      bundleType: bundle.bundleType === BundleType.FULL_PAGE
+        ? 'full_page'
+        : 'product_page',
+      reason: 'save',
+    });
+    return json({
+      success: true,
+      revoked: true,
+      enabled: false,
+      ruleVersion: policy.ruleVersion,
     });
   }
 
-  return json({ success: true, revoked: true });
+  return json({ success: true, revoked: true, enabled: false, ruleVersion: null });
 }

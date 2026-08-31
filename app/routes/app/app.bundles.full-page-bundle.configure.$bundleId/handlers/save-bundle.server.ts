@@ -45,6 +45,7 @@ import { resolveShopEntitlements } from "../../../../services/subscriptions/subs
 import { updateBundleWithPublicationGate } from "../../../../services/subscriptions/bundle-entitlement-gate.server";
 import { shopUsesAdvancedDesign } from "../../../../services/subscriptions/design-entitlement-state.server";
 import { recordSubscriptionEvent } from "../../../../services/subscriptions/subscription-telemetry.server";
+import { resolveSpecificLinkOfferSave } from "../../../../lib/specific-link-offer-admin";
 
 type ParsedVariantRef = string | number;
 
@@ -467,8 +468,33 @@ export async function handleSaveBundle(
         shopifyProductId: true,
         bundleDesignTemplate: true,
         bundleDesignPresetId: true,
+        offerPolicy: {
+          select: {
+            enabled: true,
+            ruleVersion: true,
+            conditions: {
+              where: { type: "specific_link" },
+              orderBy: { position: "asc" },
+              take: 1,
+              select: { expiresAt: true, revokedAt: true },
+            },
+          },
+        },
       },
     });
+    const specificLinkOfferSave = resolveSpecificLinkOfferSave(
+      formData.get("specificLinkOfferEnabled"),
+      existingBundle?.offerPolicy ?? null,
+    );
+    if ("issue" in specificLinkOfferSave) {
+      return json({
+        success: false,
+        error: specificLinkOfferSave.issue.message,
+        fieldErrors: [specificLinkOfferSave.issue],
+      }, { status: 400 });
+    }
+    const specificLinkDeliveryChanged =
+      specificLinkOfferSave.updateData.offerPolicy !== undefined;
 
     const isPublicMutation = finalStatus === BundleStatus.ACTIVE
       || finalStatus === BundleStatus.UNLISTED;
@@ -525,6 +551,7 @@ export async function handleSaveBundle(
         searchBarEnabled,
         textOverrides,
         textOverridesByLocale,
+        ...specificLinkOfferSave.updateData,
         bundleTextConfig,
         ...(bundleSubscriptionConfig ? { bundleSubscriptionConfig } : {}),
         personalizationData,
@@ -700,7 +727,12 @@ export async function handleSaveBundle(
       },
     });
 
-    if (finalStatus === BundleStatus.ACTIVE || finalStatus === BundleStatus.UNLISTED) {
+    if (
+      finalStatus === BundleStatus.ACTIVE
+      || finalStatus === BundleStatus.UNLISTED
+      || (specificLinkDeliveryChanged
+        && Boolean(bundleProductData?.id || existingBundle?.shopifyProductId))
+    ) {
       await syncBundleStorefrontNow({
         admin,
         shopDomain: session.shop,

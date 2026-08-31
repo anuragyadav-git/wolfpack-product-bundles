@@ -468,6 +468,10 @@ export function buildSyncBundleConfiguration(
     textOverrides: bundle.textOverrides ?? null,
     textOverridesByLocale: bundle.textOverridesByLocale ?? null,
     sdkMode: bundle.sdkMode ?? false,
+    offerDelivery: {
+      specificLinkRequired: bundle.offerPolicy?.enabled === true,
+      ruleVersion: bundle.offerPolicy?.ruleVersion ?? null,
+    },
     updatedAt: new Date().toISOString(),
     ...extra,
   };

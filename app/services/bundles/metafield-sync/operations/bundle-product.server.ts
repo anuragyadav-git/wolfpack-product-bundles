@@ -642,6 +642,10 @@ export async function updateBundleProductMetafields(
     textOverrides: bundleConfiguration.textOverrides ?? null,
     textOverridesByLocale: bundleConfiguration.textOverridesByLocale ?? null,
     sdkMode: bundleConfiguration.sdkMode ?? false,
+    offerDelivery: bundleConfiguration.offerDelivery ?? {
+      specificLinkRequired: false,
+      ruleVersion: null,
+    },
   };
 
   let ppbPolicyRevisionMetafield: Record<string, unknown> | null = null;

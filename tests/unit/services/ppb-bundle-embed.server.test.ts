@@ -26,6 +26,7 @@ describe("selectEligiblePpbBundleEmbed", () => {
       bundle({ id: "draft", status: "draft" }),
       bundle({ id: "fpb", bundleType: "full_page" }),
       bundle({ id: "disabled", bundleUpsellConfig: { upsellConfiguration: { isEnabled: false } } }),
+      bundle({ id: "link-only", offerPolicy: { enabled: true } }),
       bundle({ id: "gift", steps: [{ enabled: true, isFreeGift: true, StepProduct: [{ productId: "123" }] }] }),
       bundle({ id: "off-step", steps: [{ enabled: false, StepProduct: [{ productId: "123" }] }] }),
     ], { productId: "123", productHandle: "sample", collectionIds: [], locale: "en" });

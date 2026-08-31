@@ -80,6 +80,7 @@ export function selectEligibleFpbUpsells(
     .filter((bundle) => bundle.bundleType === "full_page")
     .filter((bundle) => bundle.status === "active" || bundle.status === "unlisted")
     .filter((bundle) => bundle.upsellWidgetEnabled === true)
+    .filter((bundle) => bundle.offerPolicy?.enabled !== true)
     .filter((bundle) => Number.isInteger(bundle.publicNumber) && bundle.publicNumber > 0)
     .filter((bundle) => selectedTargetMatches(bundle, productId, collectionIds))
     .sort((a, b) => a.publicNumber - b.publicNumber)

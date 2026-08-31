@@ -25,6 +25,7 @@ describe("selectEligibleFpbUpsells", () => {
       bundle({ id: "ppb", bundleType: "product_page", publicNumber: 22 }),
       bundle({ id: "disabled", upsellWidgetEnabled: false, publicNumber: 23 }),
       bundle({ id: "private", publicNumber: null }),
+      bundle({ id: "link-only", publicNumber: 25, offerPolicy: { enabled: true } }),
       bundle({ id: "unlisted", status: "unlisted", publicNumber: 24 }),
     ], { productId: "123", collectionIds: [], locale: "en" });
     expect(offers.map((offer) => offer.publicNumber)).toEqual([20, 24]);

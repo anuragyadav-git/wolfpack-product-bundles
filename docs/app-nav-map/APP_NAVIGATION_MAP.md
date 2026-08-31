@@ -5,7 +5,7 @@ title: Wolfpack Product Bundles App Navigation and UI Map
 type: navigation-map
 status: authoritative
 summary: Routes, screens, actions, modals, and storefront-preview flows for the embedded app.
-last_audited: 2026-08-30
+last_audited: 2026-08-31
 owners:
   - engineering
 domains:
@@ -30,7 +30,7 @@ keywords:
 > Any time a new page, modal, tab, sidebar section, or user flow is added or removed,
 > this document **must** be updated. See CLAUDE.md for the enforcement rule.
 
-**Last Updated:** 2026-08-30
+**Last Updated:** 2026-08-31
 **Environment mapped:** SIT (`wolfpack-product-bundles-sit`)
 **Test store:** `wolfpack-store-test-1.myshopify.com`
 
@@ -456,7 +456,10 @@ FPB Configure Page
 │   │   ├── Bundle name / description
 │   │   ├── Status selector → opens Status Modal
 │   │   ├── Product selector → opens Product Picker Modal
-│   │   └── Bundle Visibility → app-embed status + read-only proxy URL + Copy Link
+│   │   └── Bundle Visibility → app-embed status + proxy URL + specific-link access controls
+│   │       ├── Generate/regenerate returns one copyable private link for the current response only
+│   │       ├── Require the specific link uses the global configure SaveBar
+│   │       └── Revoke immediately disables link-only delivery and invalidates the link
 │   │
 │   ├── Steps
 │   │   ├── List of configured steps
@@ -588,6 +591,11 @@ PPB Configure Page
 │   ├── App Embed Status (inline enable action and status badge)
 │   ├── Publishing Best Practices (responsive placement cards with expandable setup guides)
 │   ├── Your Bundle Link (read-only field + copy action)
+│   ├── Specific Link Access
+│   │   ├── Status: Not generated / Active / Revoked / Expired
+│   │   ├── Generate or regenerate returns one copyable private link for the current response only
+│   │   ├── Require the specific link uses the global configure SaveBar
+│   │   └── Revoke immediately disables link-only delivery and invalidates the link
 │   └── Bundle Widget sub-section
 │       ├── Toggle: upsellWidgetEnabled
 │       ├── Disabled state keeps all saved settings visible, subdued, and inert
@@ -821,6 +829,7 @@ Checkout order summary → Bundle & Save
 | URL Pattern                                                    | Purpose                                                                                                                                                                                                         |
 | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `/apps/product-bundles/api/bundle/:id.json`                    | HMAC-verified canonical storefront bundle response: exact `{ success, bundle }`; field-projection queries do not change the response shape                                                                      |
+| `/apps/product-bundles/api/offer-eligibility.json`             | Signed app-proxy eligibility check for app-owned pre-cart specific-link visibility; accepts one opaque bearer token and never returns its stored SHA-256 digest                                                 |
 | `/apps/product-bundles/api/bundles.json`                       | All active bundles for shop                                                                                                                                                                                     |
 | `/apps/product-bundles/api/fpb-upsells.json`                   | Signed, shop-scoped FPB product-page offer lookup by product, collections, and locale; returns eligible minimal DTOs with private ETag caching                                                                  |
 | `/apps/product-bundles/api/ppb-embed.json`                     | Signed, shop-scoped Product Page Bundle embed lookup by product, collections, and locale; returns the first eligible formatted PPB with localized copy and private ETag caching                                 |
@@ -840,7 +849,6 @@ Checkout order summary → Bundle & Save
 | `/health`                                                      | Public Render HTTP health check; returns 2xx only when the app and DB are ready                                                                                                                                 |
 | `/api/attribution`                                             | UTM attribution analytics data                                                                                                                                                                                  |
 | `/api/widget-error`                                            | Widget runtime error logging                                                                                                                                                                                    |
-| `/api/webhooks/pubsub`                                         | Pub/Sub webhook handler                                                                                                                                                                                         |
 | `/api/inngest`                                                 | Inngest background job handler                                                                                                                                                                                  |
 
 ---

@@ -5,7 +5,7 @@ title: Widget Architecture
 type: architecture
 status: authoritative
 summary: FPB and PPB bootstrap, hydration, extension-asset, and widget runtime architecture.
-last_audited: 2026-08-30
+last_audited: 2026-08-31
 owners:
   - engineering
 domains:
@@ -21,6 +21,7 @@ source_paths:
   - app/storefront/page-builder-embed.ts
   - app/assets/bundle-modal-component.ts
   - app/assets/widgets/shared
+  - app/assets/widgets/shared/specific-link-offer-eligibility.ts
   - app/assets/widgets/shared/localized-bundle-config.ts
   - app/assets/sdk/config-loader.ts
   - app/assets/widgets/shared/discount-tier-feedback.ts
@@ -442,6 +443,15 @@ Runtime behavior in `app/assets/widgets/product-page/methods/config-lifecycle-me
 4. If the snapshot is missing/invalid:
    - show theme editor preview when in editor mode and `bundleId` exists
    - otherwise hide the container on storefront
+
+The schema-v3 snapshot also carries a safe `offerDelivery` marker containing
+only `specificLinkRequired` and `ruleVersion`. When the marker is enabled, both
+the standard PPB widget and SDK mode forward the one opaque `wpb_offer` URL
+token to the signed app-proxy eligibility endpoint before exposing bundle state.
+Missing tokens, rejected decisions, and endpoint failures hide the widget. When
+the marker is disabled, initialization remains network-free. Link-only bundles
+are excluded from PPB embed, page-builder, and FPB upsell discovery surfaces so
+the generated direct link remains the sole entry point.
 
 There is no Wolfpack fallback for this surface. Storefront API failure fails
 closed rather than rendering stale catalog or price data. See

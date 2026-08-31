@@ -26,6 +26,10 @@ describe("page builder embed service", () => {
         bundleType: "product_page",
         shopifyProductHandle: "summer-bundle",
         status: { in: ["active", "unlisted"] },
+        OR: [
+          { offerPolicy: { is: null } },
+          { offerPolicy: { is: { enabled: false } } },
+        ],
       },
     }));
     expect(db.designSettings.findUnique).not.toHaveBeenCalled();
@@ -52,6 +56,10 @@ describe("page builder embed service", () => {
         bundleType: "full_page",
         publicNumber: 7,
         status: { in: ["active", "unlisted"] },
+        OR: [
+          { offerPolicy: { is: null } },
+          { offerPolicy: { is: { enabled: false } } },
+        ],
       },
     }));
   });

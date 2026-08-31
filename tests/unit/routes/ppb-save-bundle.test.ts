@@ -1293,6 +1293,34 @@ describe("PPB handleSaveBundle — with shopifyProductId (direct storefront sync
     );
   });
 
+  it("syncs an existing draft product when specific-link delivery changes", async () => {
+    getDb().bundle.findUnique.mockResolvedValue({
+      shopifyProductId: PRODUCT_ID,
+      shopifyProductHandle: "bundle-123",
+      offerPolicy: {
+        enabled: false,
+        ruleVersion: 1,
+        conditions: [{ expiresAt: null, revokedAt: null }],
+      },
+    });
+
+    const response = await handleSaveBundle(
+      MOCK_ADMIN,
+      MOCK_SESSION,
+      "bundle-1",
+      makeFormData({ specificLinkOfferEnabled: "true" }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(syncBundleStorefrontNow).toHaveBeenCalledWith({
+      admin: MOCK_ADMIN,
+      shopDomain: MOCK_SESSION.shop,
+      bundleId: "bundle-1",
+      bundleType: "product_page",
+      reason: "save",
+    });
+  });
+
   it("saves the bundle and syncs storefront data through the shared service", async () => {
     const fd = makeFormData({
       stepsData: JSON.stringify(makeStepWithProduct()),

@@ -32,6 +32,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
           orderBy: { position: "asc" },
           include: { StepProduct: true, StepCategory: { orderBy: { sortOrder: "asc" } } },
         },
+        offerPolicy: { select: { enabled: true } },
       },
       orderBy: { publicNumber: "asc" },
     });

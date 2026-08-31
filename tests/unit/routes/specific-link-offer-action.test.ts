@@ -7,10 +7,19 @@ jest.mock('../../../app/db.server', () => ({
   },
 }));
 
+jest.mock('../../../app/services/bundles/storefront-sync.server', () => ({
+  syncBundleStorefrontNow: jest.fn().mockResolvedValue({
+    skipped: false,
+    synced: true,
+    stats: {},
+  }),
+}));
+
 import {
   handleGenerateSpecificLinkOffer,
   handleRevokeSpecificLinkOffer,
 } from '../../../app/routes/app/shared/specific-link-offer-action.server';
+import { syncBundleStorefrontNow } from '../../../app/services/bundles/storefront-sync.server';
 
 const getDb = () => require('../../../app/db.server').default;
 const findBundle = () => getDb().bundle.findFirst as jest.MockedFunction<any>;
@@ -21,6 +30,7 @@ function session(shop = 'test.myshopify.com') {
 }
 
 describe('specific-link offer Admin actions', () => {
+  const admin = { graphql: jest.fn() } as any;
   const policyCreate = jest.fn();
   const policyUpdate = jest.fn();
   const conditionUpsert = jest.fn();
@@ -109,11 +119,13 @@ describe('specific-link offer Admin actions', () => {
     findBundle()
       .mockResolvedValueOnce({
         id: 'bundle-1',
+        bundleType: 'product_page',
         offerPolicy: { id: 'policy-1' },
       })
       .mockResolvedValueOnce(null);
 
     const revoked = await handleRevokeSpecificLinkOffer(
+      admin,
       session(),
       'bundle-1',
       new Date('2026-08-31T12:00:00.000Z'),
@@ -123,8 +135,23 @@ describe('specific-link offer Admin actions', () => {
       where: { offerPolicyId: 'policy-1', type: 'specific_link' },
       data: { revokedAt: new Date('2026-08-31T12:00:00.000Z') },
     });
+    expect(policyUpdate).toHaveBeenCalledWith({
+      where: { id: 'policy-1' },
+      data: {
+        enabled: false,
+        ruleVersion: { increment: 1 },
+      },
+      select: { ruleVersion: true },
+    });
+    expect(syncBundleStorefrontNow).toHaveBeenCalledWith({
+      admin,
+      shopDomain: 'test.myshopify.com',
+      bundleId: 'bundle-1',
+      bundleType: 'product_page',
+      reason: 'save',
+    });
 
-    const missing = await handleRevokeSpecificLinkOffer(session(), 'bundle-2');
+    const missing = await handleRevokeSpecificLinkOffer(admin, session(), 'bundle-2');
     expect(missing.status).toBe(404);
   });
 

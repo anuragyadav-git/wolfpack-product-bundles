@@ -343,6 +343,27 @@
       "description": "Control how bundle savings appear on the cart line item, including retail price and You Save messaging."
     }
   },
+  "specificLinkOffer": {
+    "title": "Specific link access",
+    "description": "Show the bundle builder only when shoppers open this product through a generated private link.",
+    "statusLabel": "Link status",
+    "enableLabel": "Require the specific link",
+    "enableDetails": "Save the bundle after changing this setting.",
+    "generate": "Generate link",
+    "regenerate": "Regenerate link",
+    "revoke": "Revoke link",
+    "copy": "Copy link",
+    "oneTimeNotice": "Copy this link now. For security, it cannot be shown again after you leave or reload this page.",
+    "generatedSuccess": "Specific link generated",
+    "revokedSuccess": "Specific link revoked",
+    "copiedSuccess": "Specific link copied",
+    "status": {
+      "not_generated": "Not generated",
+      "active": "Active",
+      "revoked": "Revoked",
+      "expired": "Expired"
+    }
+  },
   "common": {
     "alerts": {
       "actionFailed": "Action failed", "previewUnavailable": "Preview unavailable", "settingsNotSaved": "Settings not saved", "exportUnavailable": "Export unavailable", "backfillUnavailable": "Backfill unavailable", "trackingNotUpdated": "Tracking not updated", "bundleNotSaved": "Bundle not saved", "operationFailed": "Operation failed"
