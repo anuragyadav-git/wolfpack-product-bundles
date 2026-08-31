@@ -142,6 +142,10 @@ describe("updateBundleWithPublicationGate", () => {
       now: new Date("2026-08-28T12:00:00.000Z"),
     })).resolves.toMatchObject({ id: "bundle-1" });
 
+    expect(database.$transaction).toHaveBeenCalledWith(
+      expect.any(Function),
+      { timeout: 10_000 },
+    );
     expect(tx.$queryRaw).toHaveBeenCalledTimes(1);
     expect(tx.bundle.count).toHaveBeenCalledWith({
       where: {

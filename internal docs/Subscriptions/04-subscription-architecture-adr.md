@@ -5,7 +5,7 @@ title: Subscription Architecture ADR
 type: adr
 status: accepted
 summary: Defines managed Shopify App Pricing, centralized entitlements, immediate Free-plan policy application, and no-data-loss enforcement.
-last_audited: 2026-08-29
+last_audited: 2026-09-01
 owners:
   - engineering
 domains:
@@ -42,6 +42,11 @@ Use Shopify App Pricing for a permanent Free plan and one Growth plan with month
 3. The resolver maps the code-owned `free` and `growth` plan handles into stable plan and entitlement types.
 4. Bundle requirement detection identifies step, template, and advanced-Design needs.
 5. Public bundle limits and publication are asserted transactionally under a Shop row lock.
+   The interactive transaction contains only database work and uses a 10-second
+   per-transaction timeout because the final bundle update is an atomic Prisma
+   nested write across bundle configuration relations. Do not move Shopify or
+   other network calls inside this transaction, and do not apply this timeout
+   globally.
 6. All route, service, job, sync, and analytics mutations call the same assertions.
 7. Typed failures map to localized Shopify-native alerts.
 8. `BusinessEvent` records safe subscription and gate telemetry.
