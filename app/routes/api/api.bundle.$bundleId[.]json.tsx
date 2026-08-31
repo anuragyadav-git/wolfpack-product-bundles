@@ -9,6 +9,7 @@ import { authenticate } from "../../shopify.server";
 import { verifyBundlePreviewToken } from "../../lib/bundle-preview-token.server";
 import { BUNDLE_PREVIEW_QUERY_PARAM } from "../../lib/bundle-preview-url";
 import { resolveSpecificLinkOfferEligibility } from "../../lib/specific-link-offer-eligibility.server";
+import { buildOfferDecisionMarker } from "../../lib/offer-policy-decision";
 import { SPECIFIC_LINK_OFFER_QUERY_PARAM } from "../../lib/specific-link-offer-token.server";
 
 /**
@@ -170,9 +171,10 @@ export const loader: LoaderFunction = async ({ request, params }: any) => {
     const updatedAt = bundle.updatedAt ? new Date(bundle.updatedAt) : null;
     const lastModified = updatedAt;
     const etag = `bundle:${bundle.id}:${updatedAt ? updatedAt.getTime() : 0}`;
+    const offerDecisionRequired = buildOfferDecisionMarker(bundle.offerPolicy).decisionRequired;
     const commonHeaders = {
       ...CORS_HEADERS,
-      'Cache-Control': isAuthorizedDraftPreview || bundle.offerPolicy?.enabled
+      'Cache-Control': isAuthorizedDraftPreview || offerDecisionRequired
         ? 'private, no-store'
         : 'public, max-age=10, s-maxage=30, must-revalidate',
       'Vary': 'Accept-Encoding',
@@ -182,7 +184,7 @@ export const loader: LoaderFunction = async ({ request, params }: any) => {
 
     if (
       !isAuthorizedDraftPreview
-      && !bundle.offerPolicy?.enabled
+      && !offerDecisionRequired
       && isFreshByCacheHeaders(request, `"${etag}"`, lastModified)
     ) {
       return new Response(null, {

@@ -19,7 +19,7 @@ function createPolicy(overrides: Record<string, unknown> = {}) {
     token: created.token,
     policy: {
       id: 'policy-1',
-      enabled: true,
+      specificLinkRequired: true,
       ruleVersion: 3,
       conditions: [{
         type: 'specific_link',
@@ -33,7 +33,7 @@ function createPolicy(overrides: Record<string, unknown> = {}) {
 }
 
 describe('specific-link offer eligibility', () => {
-  it.each([null, { id: 'policy-1', enabled: false, ruleVersion: 1, conditions: [] }])(
+  it.each([null, { id: 'policy-1', specificLinkRequired: false, ruleVersion: 1, conditions: [] }])(
     'keeps the bundle eligible when no enabled policy applies',
     (policy) => {
       expect(resolveSpecificLinkOfferEligibility({ ...baseInput, policy, token: null })).toEqual({

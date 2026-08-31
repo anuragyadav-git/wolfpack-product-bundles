@@ -8,7 +8,11 @@ const now = new Date('2026-08-31T12:00:00.000Z');
 describe('specific-link offer Admin state', () => {
   it('returns only safe status metadata for a usable link', () => {
     const state = buildSpecificLinkOfferAdminState({
-      enabled: true,
+      specificLinkRequired: true,
+      priority: 10,
+      stopLowerPriority: true,
+      startsAt: null,
+      endsAt: null,
       ruleVersion: 4,
       conditions: [{
         expiresAt: new Date('2026-09-30T12:00:00.000Z'),
@@ -18,6 +22,10 @@ describe('specific-link offer Admin state', () => {
 
     expect(state).toEqual({
       enabled: true,
+      priority: 10,
+      stopLowerPriority: true,
+      startsAt: null,
+      endsAt: null,
       status: 'active',
       expiresAt: '2026-09-30T12:00:00.000Z',
       ruleVersion: 4,
@@ -27,13 +35,17 @@ describe('specific-link offer Admin state', () => {
       'status',
       'expiresAt',
       'ruleVersion',
+      'priority',
+      'stopLowerPriority',
+      'startsAt',
+      'endsAt',
     ]);
   });
 
   it.each([
     [null, 'not_generated'],
-    [{ enabled: false, ruleVersion: 2, conditions: [{ expiresAt: null, revokedAt: now }] }, 'revoked'],
-    [{ enabled: false, ruleVersion: 3, conditions: [{ expiresAt: now, revokedAt: null }] }, 'expired'],
+    [{ specificLinkRequired: false, priority: 100, stopLowerPriority: false, startsAt: null, endsAt: null, ruleVersion: 2, conditions: [{ expiresAt: null, revokedAt: now }] }, 'revoked'],
+    [{ specificLinkRequired: false, priority: 100, stopLowerPriority: false, startsAt: null, endsAt: null, ruleVersion: 3, conditions: [{ expiresAt: now, revokedAt: null }] }, 'expired'],
   ] as const)('reports unusable link state', (policy, status) => {
     expect(buildSpecificLinkOfferAdminState(policy, now).status).toBe(status);
   });
@@ -41,7 +53,11 @@ describe('specific-link offer Admin state', () => {
 
 describe('specific-link offer Save Bar persistence', () => {
   const activePolicy = {
-    enabled: false,
+    specificLinkRequired: false,
+    priority: 100,
+    stopLowerPriority: false,
+    startsAt: null,
+    endsAt: null,
     ruleVersion: 3,
     conditions: [{ expiresAt: null, revokedAt: null }],
   };
@@ -51,7 +67,7 @@ describe('specific-link offer Save Bar persistence', () => {
       updateData: {
         offerPolicy: {
           update: {
-            enabled: true,
+            specificLinkRequired: true,
             ruleVersion: { increment: 1 },
           },
         },
@@ -61,9 +77,9 @@ describe('specific-link offer Save Bar persistence', () => {
 
   it.each([
     null,
-    { enabled: false, ruleVersion: 1, conditions: [] },
-    { enabled: false, ruleVersion: 1, conditions: [{ expiresAt: null, revokedAt: now }] },
-    { enabled: false, ruleVersion: 1, conditions: [{ expiresAt: now, revokedAt: null }] },
+    { specificLinkRequired: false, priority: 100, stopLowerPriority: false, startsAt: null, endsAt: null, ruleVersion: 1, conditions: [] },
+    { specificLinkRequired: false, priority: 100, stopLowerPriority: false, startsAt: null, endsAt: null, ruleVersion: 1, conditions: [{ expiresAt: null, revokedAt: now }] },
+    { specificLinkRequired: false, priority: 100, stopLowerPriority: false, startsAt: null, endsAt: null, ruleVersion: 1, conditions: [{ expiresAt: now, revokedAt: null }] },
   ])('rejects enabling without a usable link', (policy) => {
     expect(resolveSpecificLinkOfferSave('true', policy, now)).toEqual({
       issue: {

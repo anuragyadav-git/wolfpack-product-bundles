@@ -456,10 +456,11 @@ FPB Configure Page
 │   │   ├── Bundle name / description
 │   │   ├── Status selector → opens Status Modal
 │   │   ├── Product selector → opens Product Picker Modal
-│   │   └── Bundle Visibility → app-embed status + proxy URL + specific-link access controls
+│   │   └── Bundle Visibility → app-embed status + proxy URL + storefront offer controls
 │   │       ├── Generate/regenerate returns one copyable private link for the current response only
 │   │       ├── Require the specific link uses the global configure SaveBar
 │   │       └── Revoke immediately disables link-only delivery and invalidates the link
+│   │       └── Offer Operations → priority, stop-lower-priority, and optional storefront visibility window
 │   │
 │   ├── Steps
 │   │   ├── List of configured steps
@@ -596,6 +597,11 @@ PPB Configure Page
 │   │   ├── Generate or regenerate returns one copyable private link for the current response only
 │   │   ├── Require the specific link uses the global configure SaveBar
 │   │   └── Revoke immediately disables link-only delivery and invalidates the link
+│   ├── Offer Operations
+│   │   ├── Priority: lower values are evaluated first across discovery results
+│   │   ├── Stop lower-priority offers after this eligible offer
+│   │   ├── Optional inclusive start and exclusive end instants in ISO 8601 format
+│   │   └── Shopify remains the owner of checkout discount dates and combinations
 │   └── Bundle Widget sub-section
 │       ├── Toggle: upsellWidgetEnabled
 │       ├── Disabled state keeps all saved settings visible, subdued, and inert
@@ -830,10 +836,10 @@ Checkout order summary → Bundle & Save
 | URL Pattern                                                    | Purpose                                                                                                                                                                                                         |
 | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `/apps/product-bundles/api/bundle/:id.json`                    | HMAC-verified canonical storefront bundle response: exact `{ success, bundle }`; field-projection queries do not change the response shape                                                                      |
-| `/apps/product-bundles/api/offer-eligibility.json`             | Signed app-proxy eligibility check for app-owned pre-cart specific-link visibility; accepts one opaque bearer token and never returns its stored SHA-256 digest                                                 |
+| `/apps/product-bundles/api/offer-eligibility.json`             | Signed app-proxy decision for app-owned pre-cart schedule and specific-link visibility; requires an opaque bearer token only for link-restricted offers and never returns its stored SHA-256 digest             |
 | `/apps/product-bundles/api/bundles.json`                       | All active bundles for shop                                                                                                                                                                                     |
-| `/apps/product-bundles/api/fpb-upsells.json`                   | Signed, shop-scoped FPB product-page offer lookup by product, collections, and locale; returns eligible minimal DTOs with private ETag caching                                                                  |
-| `/apps/product-bundles/api/ppb-embed.json`                     | Signed, shop-scoped Product Page Bundle embed lookup by product, collections, and locale; returns the first eligible formatted PPB with localized copy and private ETag caching                                 |
+| `/apps/product-bundles/api/fpb-upsells.json`                   | Signed, shop-scoped FPB product-page offer lookup by product, collections, and locale; filters storefront schedules and returns priority-ordered eligible DTOs with private ETag caching                        |
+| `/apps/product-bundles/api/ppb-embed.json`                     | Signed, shop-scoped Product Page Bundle embed lookup by product, collections, and locale; filters storefront schedules and returns the highest-priority eligible formatted PPB with private ETag caching       |
 | `/apps/product-bundles/api/page-builder-embed.json`            | Signed direct page-builder lookup: resolves an Active or Unlisted PPB by generated parent-product handle or an FPB by shop-scoped public number; returns a formatted preloaded bundle with private ETag caching |
 | `/apps/product-bundles/api/cart-bundle-details`                | Signed storefront route that merges EB-style cart `bundle_details` metafield entries                                                                                                                            |
 | `/apps/product-bundles/api/storefront-products`                | Signed Storefront-context product hydration with ID validation and inventory normalization                                                                                                                       |

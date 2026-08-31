@@ -99,6 +99,7 @@ export interface BundleUiConfig {
   /** When true, loads the headless SDK instead of the pre-built widget (product-page bundles only). */
   sdkMode?: boolean;
   offerDelivery?: {
+    decisionRequired: boolean;
     specificLinkRequired: boolean;
     ruleVersion: number | null;
   };

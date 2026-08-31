@@ -11,6 +11,7 @@ import {
   normalizePricingDisplayOptions,
   serializePricingDisplayOptions,
 } from "../../../../lib/pricing-display-options";
+import { buildOfferDecisionMarker } from "../../../../lib/offer-policy-decision";
 
 const DEFAULT_PROGRESS_MESSAGE = "Add {conditionText} to get {discountText}";
 const DEFAULT_SUCCESS_MESSAGE = "Congratulations! You got {discountText}";
@@ -230,6 +231,7 @@ export function buildFullPageBundleMetafieldConfig(
     type: "cart_transform",
     steps: buildFullPageBundleMetafieldSteps(bundle.steps || []),
     pricing: buildFullPageBundlePricing(bundle.pricing),
+    offerDelivery: buildOfferDecisionMarker(bundle.offerPolicy ?? null),
     boxSelection: bundle.boxSelection ?? null,
     updatedAt: new Date().toISOString(),
     ...overrides,

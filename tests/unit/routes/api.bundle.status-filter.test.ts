@@ -188,7 +188,7 @@ describe('api.bundle.$bundleId.json — status filtering', () => {
       status: BundleStatus.ACTIVE,
       offerPolicy: {
         id: 'policy-1',
-        enabled: true,
+        specificLinkRequired: true,
         ruleVersion: 1,
         conditions: [{
           type: 'specific_link',
@@ -279,7 +279,7 @@ describe('wpb.$bundleId (FPB proxy page) — draft access control', () => {
       pricing: null,
       offerPolicy: {
         id: 'policy-1',
-        enabled: true,
+        specificLinkRequired: true,
         ruleVersion: 1,
         conditions: [{
           type: 'specific_link',

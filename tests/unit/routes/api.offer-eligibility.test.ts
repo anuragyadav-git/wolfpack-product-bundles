@@ -52,7 +52,7 @@ describe('api.offer-eligibility', () => {
       shopId: 'test.myshopify.com',
       offerPolicy: {
         id: 'policy-1',
-        enabled: true,
+        specificLinkRequired: true,
         ruleVersion: 2,
         conditions: [{
           type: 'specific_link',
@@ -105,7 +105,7 @@ describe('api.offer-eligibility', () => {
       shopId: 'test.myshopify.com',
       offerPolicy: {
         id: 'policy-1',
-        enabled: true,
+        specificLinkRequired: true,
         ruleVersion: 1,
         conditions: [],
       },
@@ -124,6 +124,33 @@ describe('api.offer-eligibility', () => {
       context: {},
     } as any);
     expect(missingBundleId.status).toBe(400);
+  });
+
+  it('enforces a scheduled storefront decision without a link token', async () => {
+    findBundle().mockResolvedValue({
+      id: 'bundle-1',
+      shopId: 'test.myshopify.com',
+      offerPolicy: {
+        id: 'policy-1',
+        specificLinkRequired: false,
+        startsAt: new Date('2999-01-01T00:00:00.000Z'),
+        endsAt: null,
+        ruleVersion: 3,
+        conditions: [],
+      },
+    });
+    const response = await loader({ request: request(), params: {}, context: {} } as any);
+    expect(await response.json()).toEqual({
+      eligible: false,
+      reasonCode: 'schedule_not_started',
+      offerPolicyId: 'policy-1',
+      ruleVersion: 3,
+    });
+    expect(createAnalytics()).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({
+        metadata: expect.objectContaining({ eligibilitySource: 'schedule' }),
+      }),
+    }));
   });
 
   it('returns 404 for another shop or non-public bundle and 500 without caching on failure', async () => {

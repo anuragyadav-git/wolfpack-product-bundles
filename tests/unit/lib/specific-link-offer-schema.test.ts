@@ -16,13 +16,26 @@ const simplificationMigration = fs.readFileSync(
   ),
   'utf8',
 );
+const operationsMigration = fs.readFileSync(
+  path.join(
+    process.cwd(),
+    'prisma/migrations/20260831170000_add_offer_operations/migration.sql',
+  ),
+  'utf8',
+);
 
 describe('specific-link offer schema', () => {
   it('gives each bundle one optional normalized offer policy', () => {
     expect(schema).toMatch(/offerPolicy\s+OfferPolicy\?/);
     expect(schema).toMatch(/model OfferPolicy \{[\s\S]*bundleId\s+String\s+@unique/);
-    expect(schema).toMatch(/model OfferPolicy \{[\s\S]*enabled\s+Boolean\s+@default\(false\)/);
+    expect(schema).toMatch(/model OfferPolicy \{[\s\S]*specificLinkRequired\s+Boolean\s+@default\(false\)/);
+    expect(schema).toMatch(/model OfferPolicy \{[\s\S]*priority\s+Int\s+@default\(100\)/);
+    expect(schema).toMatch(/model OfferPolicy \{[\s\S]*stopLowerPriority\s+Boolean\s+@default\(false\)/);
+    expect(schema).toMatch(/model OfferPolicy \{[\s\S]*startsAt\s+DateTime\?/);
+    expect(schema).toMatch(/model OfferPolicy \{[\s\S]*endsAt\s+DateTime\?/);
+    expect(schema).not.toMatch(/model OfferPolicy \{[\s\S]*\benabled\s+Boolean/);
     expect(schema).toMatch(/model OfferPolicy \{[\s\S]*ruleVersion\s+Int\s+@default\(1\)/);
+    expect(operationsMigration).toContain('RENAME COLUMN "enabled" TO "specificLinkRequired"');
   });
 
   it('persists only a one-way token hash for a link condition', () => {

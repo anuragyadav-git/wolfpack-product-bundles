@@ -347,6 +347,13 @@ export function usePpbSaveHandlers({
         "specificLinkOfferEnabled",
         String(base.offerDeliveryState.enabled),
       );
+      formData.append("offerPriority", String(base.offerDeliveryState.priority));
+      formData.append(
+        "offerStopLowerPriority",
+        String(base.offerDeliveryState.stopLowerPriority),
+      );
+      formData.append("offerStartsAt", base.offerDeliveryState.startsAt ?? "");
+      formData.append("offerEndsAt", base.offerDeliveryState.endsAt ?? "");
       validation.validateConfigureForm(formData, (validFormData) => {
         base.fetcher.submit(validFormData, { method: "post" });
       });

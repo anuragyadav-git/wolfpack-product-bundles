@@ -1392,7 +1392,7 @@ describe("FPB handleSaveBundle — with shopifyProductId (direct storefront sync
     getDb().bundle.findUnique.mockResolvedValue({
       shopifyProductId: PRODUCT_ID,
       offerPolicy: {
-        enabled: false,
+        specificLinkRequired: false,
         ruleVersion: 1,
         conditions: [{ expiresAt: null, revokedAt: null }],
       },

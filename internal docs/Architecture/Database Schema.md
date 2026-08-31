@@ -5,7 +5,7 @@ title: Database Schema
 type: architecture
 status: authoritative
 summary: Documents the canonical Prisma models, enums, ownership boundaries, and migration rules for Wolfpack persistence.
-last_audited: 2026-08-30
+last_audited: 2026-08-31
 owners:
   - engineering
 domains:
@@ -79,10 +79,23 @@ Discount configuration linked to `Bundle`. Fields: `discountMethod`, `discountVa
 
 ### OfferPolicy and OfferCondition
 
-`OfferPolicy` is the optional one-to-one operational eligibility owner for a
-bundle. It starts disabled, records a monotonically increasing `ruleVersion`,
-and owns normalized `OfferCondition` rows. The initial condition type is
-`specific_link`.
+`OfferPolicy` is the optional one-to-one owner for app-managed storefront offer
+selection. It records a monotonically increasing `ruleVersion`, owns normalized
+`OfferCondition` rows, and stores direct operational fields:
+
+- `specificLinkRequired`: whether storefront delivery requires the generated
+  opaque link token
+- `priority`: deterministic ascending selection order; the default is `100`
+- `stopLowerPriority`: when true, eligible lower-priority discovery results are
+  omitted after this offer
+- `startsAt` / `endsAt`: optional UTC instants for storefront visibility;
+  `startsAt` is inclusive and `endsAt` is exclusive
+
+These fields govern Wolfpack merchandising surfaces only. Shopify automatic app
+discounts remain the canonical owner of checkout discount `startsAt`, `endsAt`,
+and combination settings whenever a Shopify discount node exists.
+
+The initial normalized condition type is `specific_link`.
 
 A specific-link condition stores one SHA-256 token digest, never the raw
 campaign token. The generated Admin response is the only surface that returns

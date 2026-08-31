@@ -42,7 +42,15 @@ export async function loader({ request }: LoaderFunctionArgs) {
           },
         },
         pricing: true,
-        offerPolicy: { select: { enabled: true } },
+        offerPolicy: {
+          select: {
+            specificLinkRequired: true,
+            priority: true,
+            stopLowerPriority: true,
+            startsAt: true,
+            endsAt: true,
+          },
+        },
       },
       orderBy: [{ createdAt: "asc" }, { id: "asc" }],
     });

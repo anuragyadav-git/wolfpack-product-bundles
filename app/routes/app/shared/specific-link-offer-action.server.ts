@@ -19,7 +19,7 @@ const bundleSelect = {
   offerPolicy: {
     select: {
       id: true,
-      enabled: true,
+      specificLinkRequired: true,
       ruleVersion: true,
     },
   },
@@ -79,16 +79,16 @@ export async function handleGenerateSpecificLinkOffer(
       ? await tx.offerPolicy.update({
         where: { id: bundle.offerPolicy.id },
         data: { ruleVersion: { increment: 1 } },
-        select: { id: true, enabled: true, ruleVersion: true },
+        select: { id: true, specificLinkRequired: true, ruleVersion: true },
       })
       : await tx.offerPolicy.create({
         data: {
           bundleId: bundle.id,
           shopId: bundle.shopId,
-          enabled: false,
+          specificLinkRequired: false,
           ruleVersion: 1,
         },
-        select: { id: true, enabled: true, ruleVersion: true },
+        select: { id: true, specificLinkRequired: true, ruleVersion: true },
       });
 
     await tx.offerCondition.upsert({
@@ -123,7 +123,7 @@ export async function handleGenerateSpecificLinkOffer(
       destination,
       token: credential.token,
     }),
-    enabled: policy.enabled,
+    enabled: policy.specificLinkRequired,
     ruleVersion: policy.ruleVersion,
     expiresAt: expiry.expiresAt?.toISOString() ?? null,
     revoked: false,
@@ -160,7 +160,7 @@ export async function handleRevokeSpecificLinkOffer(
       return tx.offerPolicy.update({
         where: { id: bundle.offerPolicy!.id },
         data: {
-          enabled: false,
+          specificLinkRequired: false,
           ruleVersion: { increment: 1 },
         },
         select: { ruleVersion: true },

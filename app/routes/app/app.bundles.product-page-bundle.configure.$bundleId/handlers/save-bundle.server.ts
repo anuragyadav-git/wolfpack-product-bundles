@@ -43,6 +43,10 @@ import { updateBundleWithPublicationGate } from "../../../../services/subscripti
 import { shopUsesAdvancedDesign } from "../../../../services/subscriptions/design-entitlement-state.server";
 import { recordSubscriptionEvent } from "../../../../services/subscriptions/subscription-telemetry.server";
 import { resolveSpecificLinkOfferSave } from "../../../../lib/specific-link-offer-admin";
+import {
+  buildOfferPolicyMutation,
+  resolveOfferOperationsSave,
+} from "../../../../lib/offer-policy-admin";
 
 type ParsedVariantRef = string | number;
 
@@ -453,7 +457,11 @@ export async function handleSaveBundle(
         bundleDesignPresetId: true,
         offerPolicy: {
           select: {
-            enabled: true,
+            specificLinkRequired: true,
+            priority: true,
+            stopLowerPriority: true,
+            startsAt: true,
+            endsAt: true,
             ruleVersion: true,
             conditions: {
               where: { type: "specific_link" },
@@ -476,8 +484,32 @@ export async function handleSaveBundle(
         fieldErrors: [specificLinkOfferSave.issue],
       }, { status: 400 });
     }
-    const specificLinkDeliveryChanged =
-      specificLinkOfferSave.updateData.offerPolicy !== undefined;
+    const offerOperationsSave = resolveOfferOperationsSave({
+      priority: formData.get("offerPriority"),
+      stopLowerPriority: formData.get("offerStopLowerPriority"),
+      startsAt: formData.get("offerStartsAt"),
+      endsAt: formData.get("offerEndsAt"),
+    }, existingBundle?.offerPolicy ?? null);
+    if ("issue" in offerOperationsSave) {
+      return json({
+        success: false,
+        error: offerOperationsSave.issue.message,
+        fieldErrors: [offerOperationsSave.issue],
+      }, { status: 400 });
+    }
+    const specificLinkUpdate = specificLinkOfferSave.updateData.offerPolicy
+      ? {
+          specificLinkRequired:
+            specificLinkOfferSave.updateData.offerPolicy.update.specificLinkRequired,
+        }
+      : null;
+    const offerPolicyMutation = buildOfferPolicyMutation({
+      shopId: session.shop,
+      policyExists: existingBundle?.offerPolicy != null,
+      specificLinkUpdate,
+      operations: offerOperationsSave,
+    });
+    const offerPolicyChanged = offerPolicyMutation.offerPolicy !== undefined;
     if (subscriptionConfig?.enabled && existingBundle?.personalizationData) {
       return json(
         {
@@ -545,7 +577,7 @@ export async function handleSaveBundle(
         sdkMode,
         textOverrides,
         textOverridesByLocale,
-        ...specificLinkOfferSave.updateData,
+        ...offerPolicyMutation,
         ...(subscriptionConfig ? { bundleSubscriptionConfig: subscriptionConfig } : {}),
         ...parsePPBBundleVisibility(formData),
         ...parsedBundleSettings,
@@ -687,7 +719,7 @@ export async function handleSaveBundle(
     if (
       finalStatus === BundleStatus.ACTIVE
       || finalStatus === BundleStatus.UNLISTED
-      || (specificLinkDeliveryChanged
+      || (offerPolicyChanged
         && Boolean(bundleProductData?.id || existingBundle?.shopifyProductId))
     ) {
       await syncBundleStorefrontNow({

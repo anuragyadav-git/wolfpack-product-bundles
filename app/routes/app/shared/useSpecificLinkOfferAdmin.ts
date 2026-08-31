@@ -44,6 +44,7 @@ export function useSpecificLinkOfferAdmin({
 
     if (result.campaignLink) {
       const persistedState: SpecificLinkOfferAdminState = {
+        ...originalStateRef.current,
         enabled: result.enabled === true,
         status: 'active',
         expiresAt: result.expiresAt ?? null,
@@ -51,8 +52,10 @@ export function useSpecificLinkOfferAdmin({
       };
       originalStateRef.current = persistedState;
       setOfferDeliveryState((current) => ({
-        ...persistedState,
-        enabled: current.enabled,
+        ...current,
+        status: persistedState.status,
+        expiresAt: persistedState.expiresAt,
+        ruleVersion: persistedState.ruleVersion,
       }));
       setGeneratedSpecificLink(result.campaignLink);
       shopify.toast.show(i18n.t('specificLinkOffer.generatedSuccess'));
@@ -61,13 +64,20 @@ export function useSpecificLinkOfferAdmin({
 
     if (result.revoked) {
       const persistedState: SpecificLinkOfferAdminState = {
+        ...originalStateRef.current,
         enabled: false,
         status: 'revoked',
         expiresAt: null,
         ruleVersion: result.ruleVersion ?? null,
       };
       originalStateRef.current = persistedState;
-      setOfferDeliveryState(persistedState);
+      setOfferDeliveryState((current) => ({
+        ...current,
+        enabled: false,
+        status: 'revoked',
+        expiresAt: null,
+        ruleVersion: result.ruleVersion ?? null,
+      }));
       setGeneratedSpecificLink(null);
       shopify.toast.show(i18n.t('specificLinkOffer.revokedSuccess'));
     }
@@ -75,6 +85,26 @@ export function useSpecificLinkOfferAdmin({
 
   const setSpecificLinkOfferEnabled = useCallback((enabled: boolean) => {
     setOfferDeliveryState((current) => ({ ...current, enabled }));
+    markAsDirty();
+  }, [markAsDirty]);
+
+  const setOfferPriority = useCallback((priority: number) => {
+    setOfferDeliveryState((current) => ({ ...current, priority }));
+    markAsDirty();
+  }, [markAsDirty]);
+
+  const setOfferStopLowerPriority = useCallback((stopLowerPriority: boolean) => {
+    setOfferDeliveryState((current) => ({ ...current, stopLowerPriority }));
+    markAsDirty();
+  }, [markAsDirty]);
+
+  const setOfferStartsAt = useCallback((startsAt: string | null) => {
+    setOfferDeliveryState((current) => ({ ...current, startsAt }));
+    markAsDirty();
+  }, [markAsDirty]);
+
+  const setOfferEndsAt = useCallback((endsAt: string | null) => {
+    setOfferDeliveryState((current) => ({ ...current, endsAt }));
     markAsDirty();
   }, [markAsDirty]);
 
@@ -108,6 +138,10 @@ export function useSpecificLinkOfferAdmin({
     generatedSpecificLink,
     specificLinkOfferBusy: fetcher.state !== 'idle',
     setSpecificLinkOfferEnabled,
+    setOfferPriority,
+    setOfferStopLowerPriority,
+    setOfferStartsAt,
+    setOfferEndsAt,
     generateSpecificLinkOffer,
     revokeSpecificLinkOffer,
     copySpecificLinkOffer,

@@ -1296,7 +1296,7 @@ describe("PPB handleSaveBundle — with shopifyProductId (direct storefront sync
       shopifyProductId: PRODUCT_ID,
       shopifyProductHandle: "bundle-123",
       offerPolicy: {
-        enabled: false,
+        specificLinkRequired: false,
         ruleVersion: 1,
         conditions: [{ expiresAt: null, revokedAt: null }],
       },

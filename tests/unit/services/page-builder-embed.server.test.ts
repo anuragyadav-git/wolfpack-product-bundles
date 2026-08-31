@@ -28,7 +28,7 @@ describe("page builder embed service", () => {
         status: { in: ["active", "unlisted"] },
         OR: [
           { offerPolicy: { is: null } },
-          { offerPolicy: { is: { enabled: false } } },
+          { offerPolicy: { is: { specificLinkRequired: false } } },
         ],
       },
     }));
@@ -58,7 +58,7 @@ describe("page builder embed service", () => {
         status: { in: ["active", "unlisted"] },
         OR: [
           { offerPolicy: { is: null } },
-          { offerPolicy: { is: { enabled: false } } },
+          { offerPolicy: { is: { specificLinkRequired: false } } },
         ],
       },
     }));
@@ -72,5 +72,19 @@ describe("page builder embed service", () => {
       publicNumber: 99,
       locale: "en",
     })).resolves.toBeNull();
+  });
+
+  it("returns null while the selected bundle schedule is not effective", async () => {
+    const db = database();
+    db.bundle.findFirst.mockResolvedValue({
+      id: "scheduled",
+      bundleType: "product_page",
+      offerPolicy: { startsAt: "2026-09-01T00:00:00.000Z", endsAt: null },
+    });
+    await expect(resolvePageBuilderEmbed(db as any, "shop.myshopify.com", {
+      bundleType: "product_page",
+      parentProductHandle: "scheduled",
+      locale: "en",
+    }, new Date("2026-08-31T12:00:00.000Z"))).resolves.toBeNull();
   });
 });

@@ -14,6 +14,7 @@ import {
   buildPublicBundleSubscriptionConfig,
   type BundleSubscriptionConfigV1,
 } from "./bundle-subscriptions";
+import { buildOfferDecisionMarker } from "./offer-policy-decision";
 
 /** Convert a Shopify GID to its numeric ID for storefront cart operations. */
 function extractNumericId(gid: string): string {
@@ -47,6 +48,11 @@ export interface FormattedBundle {
   shopifyProductId: string | null;
   steps: FormattedStep[];
   pricing: FormattedPricing | null;
+  offerDelivery: {
+    decisionRequired: boolean;
+    specificLinkRequired: boolean;
+    ruleVersion: number | null;
+  };
   // Per-bundle behavioral settings
   showProductPrices: boolean;
   showProductComparedAtPrice: boolean;
@@ -314,6 +320,7 @@ export function formatBundleForWidget(bundle: any): FormattedBundle {
           displayOptions: bundle.pricing.displayOptions ?? null,
         }
       : null,
+    offerDelivery: buildOfferDecisionMarker(bundle.offerPolicy ?? null),
     showProductPrices: bundle.showProductPrices ?? true,
     showProductComparedAtPrice: resolveShowProductComparedAtPrice(),
     cartRedirectToCheckout: bundle.cartRedirectToCheckout ?? false,

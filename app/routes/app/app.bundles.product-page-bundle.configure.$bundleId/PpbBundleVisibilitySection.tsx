@@ -5,6 +5,7 @@ import {
 import { CommonBundleVisibilityOverview } from "../_shared/bundle-configure/CommonBundleVisibilityOverview";
 import { usePpbConfigureContext } from "./PpbConfigureContext";
 import { SpecificLinkOfferSection } from "../shared/SpecificLinkOfferSection";
+import { OfferOperationsSection } from "../shared/OfferOperationsSection";
 
 export function PpbBundleVisibilitySection() {
   const flow = usePpbConfigureContext();
@@ -60,6 +61,14 @@ export function PpbBundleVisibilitySection() {
           onGenerate={flow.generateSpecificLinkOffer}
           onCopy={flow.copySpecificLinkOffer}
           onRevoke={flow.revokeSpecificLinkOffer}
+        />
+        <OfferOperationsSection
+          active={flow.activeSection === "bundle_visibility"}
+          state={flow.offerDeliveryState}
+          onPriorityChange={flow.setOfferPriority}
+          onStopLowerPriorityChange={flow.setOfferStopLowerPriority}
+          onStartsAtChange={flow.setOfferStartsAt}
+          onEndsAtChange={flow.setOfferEndsAt}
         />
       </s-stack>
     </div>

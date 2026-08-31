@@ -643,6 +643,7 @@ export async function updateBundleProductMetafields(
     textOverridesByLocale: bundleConfiguration.textOverridesByLocale ?? null,
     sdkMode: bundleConfiguration.sdkMode ?? false,
     offerDelivery: bundleConfiguration.offerDelivery ?? {
+      decisionRequired: false,
       specificLinkRequired: false,
       ruleVersion: null,
     },

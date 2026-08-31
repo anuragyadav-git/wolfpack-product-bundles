@@ -449,13 +449,22 @@ Runtime behavior in `app/assets/widgets/product-page/methods/config-lifecycle-me
    - otherwise hide the container on storefront
 
 The schema-v3 snapshot also carries a safe `offerDelivery` marker containing
-only `specificLinkRequired` and `ruleVersion`. When the marker is enabled, both
-the standard PPB widget and SDK mode forward the one opaque `wpb_offer` URL
-token to the signed app-proxy eligibility endpoint before exposing bundle state.
-Missing tokens, rejected decisions, and endpoint failures hide the widget. When
-the marker is disabled, initialization remains network-free. Link-only bundles
-are excluded from PPB embed, page-builder, and FPB upsell discovery surfaces so
-the generated direct link remains the sole entry point.
+`decisionRequired`, `specificLinkRequired`, and `ruleVersion`. When a link or
+schedule requires a decision, both the standard PPB widget and SDK mode call the
+signed app-proxy eligibility endpoint before exposing bundle state. The opaque
+`wpb_offer` URL token is forwarded only when present and is mandatory only for a
+specific-link policy. Missing required tokens, inactive schedules, rejected
+decisions, and endpoint failures hide the widget. When no decision is required,
+initialization remains network-free.
+
+Server discovery for PPB embeds and FPB upsells filters inactive schedules,
+orders effective offers by ascending `OfferPolicy.priority` with bundle ID as a
+stable tie-break, and truncates after the first eligible
+`stopLowerPriority=true` policy. Page-builder delivery enforces the same
+schedule decision. Link-only bundles remain excluded from discovery surfaces so
+the generated direct link is their sole entry point. These rules govern
+Wolfpack storefront visibility and selection; Shopify discount dates and
+combination rules remain owned by Shopify discount APIs.
 
 There is no Wolfpack fallback for this surface. Storefront API failure fails
 closed rather than rendering stale catalog or price data. See

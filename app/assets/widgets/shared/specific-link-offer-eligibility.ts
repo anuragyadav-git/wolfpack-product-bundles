@@ -10,16 +10,18 @@ export async function resolveSpecificLinkOfferStorefrontEligibility({
   locationSearch: string;
   fetchImpl?: typeof fetch;
 }): Promise<boolean> {
-  if (bundle?.offerDelivery?.specificLinkRequired !== true) return true;
+  if (bundle?.offerDelivery?.decisionRequired !== true) return true;
 
   const bundleId = String(bundle?.id ?? bundle?.bundleId ?? '').trim();
   const token = new URLSearchParams(locationSearch).get(
     SPECIFIC_LINK_OFFER_QUERY_PARAM,
   );
-  if (!bundleId || !token) return false;
+  if (!bundleId || (bundle.offerDelivery.specificLinkRequired === true && !token)) {
+    return false;
+  }
 
   const params = new URLSearchParams({ bundleId });
-  params.set(SPECIFIC_LINK_OFFER_QUERY_PARAM, token);
+  if (token) params.set(SPECIFIC_LINK_OFFER_QUERY_PARAM, token);
   try {
     const response = await fetchImpl(
       `${buildStorefrontApiPath('offer-eligibility.json')}?${params.toString()}`,

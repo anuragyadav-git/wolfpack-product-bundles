@@ -38,7 +38,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
         offerPolicy: {
           select: {
             id: true,
-            enabled: true,
+            specificLinkRequired: true,
+            startsAt: true,
+            endsAt: true,
             ruleVersion: true,
             conditions: {
               select: {
@@ -65,7 +67,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
       token: url.searchParams.get(SPECIFIC_LINK_OFFER_QUERY_PARAM),
     });
 
-    if (bundle.offerPolicy?.enabled) {
+    if (bundle.offerPolicy) {
       try {
         await db.bundleAnalytics.create({
           data: {
@@ -73,7 +75,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
             shopId: session.shop,
             event: 'offer_eligibility_decision',
             metadata: {
-              eligibilitySource: 'specific_link',
+              eligibilitySource: bundle.offerPolicy.specificLinkRequired
+                ? 'specific_link'
+                : 'schedule',
               reasonCode: decision.reasonCode,
               ruleVersion: bundle.offerPolicy.ruleVersion,
             },

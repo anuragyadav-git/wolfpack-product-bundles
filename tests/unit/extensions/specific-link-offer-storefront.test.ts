@@ -6,7 +6,7 @@ describe('specific-link offer storefront eligibility', () => {
   it('uses the Shopify-hosted snapshot without a request when link delivery is disabled', async () => {
     const fetchImpl = jest.fn();
     await expect(resolveSpecificLinkOfferStorefrontEligibility({
-      bundle: { id: 'bundle-1', offerDelivery: { specificLinkRequired: false } },
+      bundle: { id: 'bundle-1', offerDelivery: { decisionRequired: false, specificLinkRequired: false } },
       locationSearch: '',
       fetchImpl,
     })).resolves.toBe(true);
@@ -19,7 +19,7 @@ describe('specific-link offer storefront eligibility', () => {
       json: jest.fn().mockResolvedValue({ eligible: true }),
     });
     await expect(resolveSpecificLinkOfferStorefrontEligibility({
-      bundle: { id: 'bundle-1', offerDelivery: { specificLinkRequired: true } },
+      bundle: { id: 'bundle-1', offerDelivery: { decisionRequired: true, specificLinkRequired: true } },
       locationSearch: '?wpb_offer=opaque-token&ignored=value',
       fetchImpl,
     })).resolves.toBe(true);
@@ -36,9 +36,28 @@ describe('specific-link offer storefront eligibility', () => {
     ['?wpb_offer=invalid', jest.fn().mockRejectedValue(new Error('offline'))],
   ])('fails closed when a required decision is unavailable', async (locationSearch, fetchImpl) => {
     await expect(resolveSpecificLinkOfferStorefrontEligibility({
-      bundle: { id: 'bundle-1', offerDelivery: { specificLinkRequired: true } },
+      bundle: { id: 'bundle-1', offerDelivery: { decisionRequired: true, specificLinkRequired: true } },
       locationSearch,
       fetchImpl,
     })).resolves.toBe(false);
+  });
+
+  it('requests a schedule decision without requiring a link token', async () => {
+    const fetchImpl = jest.fn().mockResolvedValue({
+      ok: true,
+      json: jest.fn().mockResolvedValue({ eligible: true }),
+    });
+    await expect(resolveSpecificLinkOfferStorefrontEligibility({
+      bundle: {
+        id: 'bundle-1',
+        offerDelivery: { decisionRequired: true, specificLinkRequired: false },
+      },
+      locationSearch: '',
+      fetchImpl,
+    })).resolves.toBe(true);
+    expect(fetchImpl).toHaveBeenCalledWith(
+      '/apps/product-bundles/api/offer-eligibility.json?bundleId=bundle-1',
+      { credentials: 'same-origin', cache: 'no-store' },
+    );
   });
 });

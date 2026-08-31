@@ -1,10 +1,15 @@
+import {
+  buildOfferOperationsAdminState,
+  type OfferOperationsAdminState,
+} from './offer-policy-admin';
+
 export type SpecificLinkOfferStatus =
   | 'not_generated'
   | 'active'
   | 'revoked'
   | 'expired';
 
-export interface SpecificLinkOfferAdminState {
+export interface SpecificLinkOfferAdminState extends OfferOperationsAdminState {
   enabled: boolean;
   status: SpecificLinkOfferStatus;
   expiresAt: string | null;
@@ -17,7 +22,11 @@ interface SpecificLinkConditionState {
 }
 
 export interface SpecificLinkPolicyState {
-  enabled: boolean;
+  specificLinkRequired: boolean;
+  priority: number;
+  stopLowerPriority: boolean;
+  startsAt: Date | string | null;
+  endsAt: Date | string | null;
   ruleVersion: number;
   conditions: ReadonlyArray<SpecificLinkConditionState>;
 }
@@ -27,7 +36,7 @@ type SpecificLinkOfferSaveResult =
       updateData: {
         offerPolicy?: {
           update: {
-            enabled: boolean;
+            specificLinkRequired: boolean;
             ruleVersion: { increment: number };
           };
         };
@@ -62,10 +71,11 @@ export function buildSpecificLinkOfferAdminState(
   }
 
   return {
-    enabled: policy?.enabled ?? false,
+    enabled: policy?.specificLinkRequired ?? false,
     status,
     expiresAt: expiresAt?.toISOString() ?? null,
     ruleVersion: policy?.ruleVersion ?? null,
+    ...buildOfferOperationsAdminState(policy),
   };
 }
 
@@ -87,7 +97,7 @@ export function resolveSpecificLinkOfferSave(
     };
   }
 
-  if (!policy || enabled === policy.enabled) {
+  if (!policy || enabled === policy.specificLinkRequired) {
     return { updateData: {} };
   }
 
@@ -95,7 +105,7 @@ export function resolveSpecificLinkOfferSave(
     updateData: {
       offerPolicy: {
         update: {
-          enabled,
+          specificLinkRequired: enabled,
           ruleVersion: { increment: 1 },
         },
       },

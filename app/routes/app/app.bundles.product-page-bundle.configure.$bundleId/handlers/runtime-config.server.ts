@@ -1,4 +1,5 @@
 import type { ShopifyAdmin } from "../../../../lib/auth-guards.server";
+import { buildOfferDecisionMarker } from "../../../../lib/offer-policy-decision";
 import { AppLogger } from "../../../../lib/logger";
 import {
   updateBundleProductMetafields,
@@ -468,10 +469,7 @@ export function buildSyncBundleConfiguration(
     textOverrides: bundle.textOverrides ?? null,
     textOverridesByLocale: bundle.textOverridesByLocale ?? null,
     sdkMode: bundle.sdkMode ?? false,
-    offerDelivery: {
-      specificLinkRequired: bundle.offerPolicy?.enabled === true,
-      ruleVersion: bundle.offerPolicy?.ruleVersion ?? null,
-    },
+    offerDelivery: buildOfferDecisionMarker(bundle.offerPolicy ?? null),
     updatedAt: new Date().toISOString(),
     ...extra,
   };

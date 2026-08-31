@@ -42,8 +42,8 @@ describe('specific-link offer Admin actions', () => {
       offerPolicy: { create: policyCreate, update: policyUpdate },
       offerCondition: { upsert: conditionUpsert, updateMany: conditionUpdateMany },
     }));
-    policyCreate.mockResolvedValue({ id: 'policy-1', enabled: false, ruleVersion: 1 });
-    policyUpdate.mockResolvedValue({ id: 'policy-1', enabled: true, ruleVersion: 4 });
+    policyCreate.mockResolvedValue({ id: 'policy-1', specificLinkRequired: false, ruleVersion: 1 });
+    policyUpdate.mockResolvedValue({ id: 'policy-1', specificLinkRequired: true, ruleVersion: 4 });
     conditionUpsert.mockResolvedValue({ id: 'condition-1' });
     conditionUpdateMany.mockResolvedValue({ count: 1 });
   });
@@ -78,7 +78,7 @@ describe('specific-link offer Admin actions', () => {
       data: expect.objectContaining({
         bundleId: 'bundle-1',
         shopId: 'test.myshopify.com',
-        enabled: false,
+        specificLinkRequired: false,
         ruleVersion: 1,
       }),
     }));
@@ -95,7 +95,7 @@ describe('specific-link offer Admin actions', () => {
       bundleType: 'full_page',
       shopifyProductHandle: null,
       publicNumber: 12,
-      offerPolicy: { id: 'policy-1', enabled: true, ruleVersion: 3 },
+      offerPolicy: { id: 'policy-1', specificLinkRequired: true, ruleVersion: 3 },
     });
 
     const response = await handleGenerateSpecificLinkOffer(
@@ -110,7 +110,7 @@ describe('specific-link offer Admin actions', () => {
     expect(policyUpdate).toHaveBeenCalledWith({
       where: { id: 'policy-1' },
       data: { ruleVersion: { increment: 1 } },
-      select: { id: true, enabled: true, ruleVersion: true },
+      select: { id: true, specificLinkRequired: true, ruleVersion: true },
     });
     expect(payload.ruleVersion).toBe(4);
   });
@@ -138,7 +138,7 @@ describe('specific-link offer Admin actions', () => {
     expect(policyUpdate).toHaveBeenCalledWith({
       where: { id: 'policy-1' },
       data: {
-        enabled: false,
+        specificLinkRequired: false,
         ruleVersion: { increment: 1 },
       },
       select: { ruleVersion: true },

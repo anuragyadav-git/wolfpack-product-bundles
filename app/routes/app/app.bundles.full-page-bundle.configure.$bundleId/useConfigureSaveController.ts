@@ -207,6 +207,13 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
         "specificLinkOfferEnabled",
         String(flow.offerDeliveryState.enabled),
       );
+      formData.append("offerPriority", String(flow.offerDeliveryState.priority));
+      formData.append(
+        "offerStopLowerPriority",
+        String(flow.offerDeliveryState.stopLowerPriority),
+      );
+      formData.append("offerStartsAt", flow.offerDeliveryState.startsAt ?? "");
+      formData.append("offerEndsAt", flow.offerDeliveryState.endsAt ?? "");
       validation.validateConfigureForm(formData, (validFormData) => {
         flow.fetcher.submit(validFormData, { method: "post" });
       });

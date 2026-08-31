@@ -61,7 +61,11 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
       pricing: true,
       offerPolicy: {
         select: {
-          enabled: true,
+          specificLinkRequired: true,
+          priority: true,
+          stopLowerPriority: true,
+          startsAt: true,
+          endsAt: true,
           ruleVersion: true,
           conditions: {
             where: { type: "specific_link" },

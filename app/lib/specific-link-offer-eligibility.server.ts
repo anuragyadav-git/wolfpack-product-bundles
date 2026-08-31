@@ -2,9 +2,12 @@ import { timingSafeEqual } from 'node:crypto';
 import {
   hashSpecificLinkOfferToken,
 } from './specific-link-offer-token.server';
+import { resolveOfferSchedule } from './offer-policy-decision';
 
 export type SpecificLinkEligibilityReasonCode =
   | 'not_required'
+  | 'schedule_not_started'
+  | 'schedule_ended'
   | 'condition_missing'
   | 'token_missing'
   | 'token_invalid'
@@ -21,7 +24,9 @@ interface SpecificLinkOfferCondition {
 
 interface SpecificLinkOfferPolicy {
   id: string;
-  enabled: boolean;
+  specificLinkRequired: boolean;
+  startsAt?: Date | string | null;
+  endsAt?: Date | string | null;
   ruleVersion: number;
   conditions: SpecificLinkOfferCondition[];
 }
@@ -55,7 +60,21 @@ export function resolveSpecificLinkOfferEligibility(input: {
   token: string | null;
   now?: Date;
 }): SpecificLinkEligibilityDecision {
-  if (!input.policy?.enabled) {
+  if (!input.policy) {
+    return { eligible: true, reasonCode: 'not_required' };
+  }
+
+  const schedule = resolveOfferSchedule(input.policy, input.now);
+  if (!schedule.effective) {
+    return withPolicyContext(input.policy, {
+      eligible: false,
+      reasonCode: schedule.state === 'scheduled'
+        ? 'schedule_not_started'
+        : 'schedule_ended',
+    });
+  }
+
+  if (!input.policy.specificLinkRequired) {
     return { eligible: true, reasonCode: 'not_required' };
   }
 

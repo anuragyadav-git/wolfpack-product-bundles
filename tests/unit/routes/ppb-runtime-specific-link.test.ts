@@ -11,10 +11,16 @@ describe('PPB specific-link runtime snapshot', () => {
       bundleType: 'product_page',
       steps: [],
       pricing: null,
-      offerPolicy: { enabled: true, ruleVersion: 8 },
+      offerPolicy: {
+        specificLinkRequired: true,
+        startsAt: null,
+        endsAt: null,
+        ruleVersion: 8,
+      },
     }, 'gid://shopify/Product/1');
 
     expect(config.offerDelivery).toEqual({
+      decisionRequired: true,
       specificLinkRequired: true,
       ruleVersion: 8,
     });
