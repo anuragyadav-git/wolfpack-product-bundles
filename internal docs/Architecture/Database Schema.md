@@ -65,6 +65,14 @@ Product variant selections per step.
 **Not documented in APPLICATION_ARCHITECTURE.md.** Tracks order → bundle attribution for analytics.
 Includes standard UTM columns (`utmSource`, `utmMedium`, `utmCampaign`, `utmContent`, `utmTerm`) plus `customUtmAttributes` JSON for merchant-configured URL parameters captured by the Web Pixel.
 
+Offer-aware analytics adds nullable `offerPolicyId`, `offerRuleVersion`,
+`offerTierId`, and `offerEligibilitySource` columns to `OrderAttribution` and
+`BundleEngagement`. These are historical scalar dimensions rather than foreign
+keys, so deleting or replacing an offer policy does not rewrite completed
+analytics. Both models index `(shopId, offerPolicyId, createdAt)` for the
+offer-filtered dashboard and CSV paths. Bundle-only rows keep all four values
+null.
+
 ### Shop
 
 Tracks installed-shop metadata and app-level settings. `customUtmParameters` JSON stores the merchant-configured allowlist of extra URL parameter names the UTM Web Pixel should capture.
@@ -103,6 +111,13 @@ the random bearer token. Optional `expiresAt` and `revokedAt` instants make
 expiry and revocation server-enforceable. A compound unique constraint on
 `(offerPolicyId, type)` permits one specific-link condition per policy in the
 initial contract. Bundle deletion cascades through the policy and conditions.
+
+The shared SIT database currently reports that the already-applied
+`20260828090000_growth_subscription_architecture` migration differs from its
+checked-in file because the live `Subscription` columns already exist. Do not
+run `prisma migrate reset` against SIT. New schema changes must remain additive,
+use a new forward migration, and be applied with `prisma migrate deploy` until
+that historical drift is reconciled separately.
 
 ### Session
 
