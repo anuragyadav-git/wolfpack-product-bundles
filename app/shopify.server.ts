@@ -113,7 +113,11 @@ const shopify = shopifyApp({
       }
 
       try {
-        await syncPpbStorefrontRuntime(setupAdmin, session.shop);
+        await syncPpbStorefrontRuntime(
+          setupAdmin,
+          session.shop,
+          process.env.STOREFRONT_PROXY_ROOT,
+        );
       } catch (error: any) {
         AppLogger.error("Failed to sync Shopify-hosted PPB runtime", { shop: session.shop }, error);
       }

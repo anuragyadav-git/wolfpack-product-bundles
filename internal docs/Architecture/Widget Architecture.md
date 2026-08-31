@@ -398,12 +398,15 @@ the marker exists.
 
 Proxy URL ownership is centralized at each build boundary. TypeScript callers use
 `app/config/storefront-proxy-routes.ts` for the installed proxy root and API or
-document path composition. Theme-extension blocks use the canonical relative
-proxy root directly. Do not capture a theme-app-extension snippet to construct a
-URL: Shopify wraps rendered extension snippets in diagnostic HTML comments, and
-capturing that output corrupts URL attributes. The production and SIT TOMLs
-retain their required literal `subpath` values because Shopify reads those
-deployment manifests directly.
+document path composition. Theme-extension blocks read `storefrontProxyRoot`
+from the existing Shopify-hosted `$app.ppb_storefront_runtime` JSON. The app
+embed, direct Product Page entrypoint, and SDK initialize the bundled resolver
+from that value before issuing proxy requests. Do not capture a
+theme-app-extension snippet to construct a URL: Shopify wraps rendered extension
+snippets in diagnostic HTML comments, and capturing that output corrupts URL
+attributes. The production and SIT TOMLs retain the same `apps` prefix and their
+required literal environment-specific `subpath` values because Shopify reads
+those deployment manifests directly.
 
 ## FPB Load Strategy
 

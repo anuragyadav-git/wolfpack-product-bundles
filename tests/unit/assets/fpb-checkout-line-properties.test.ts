@@ -9,12 +9,23 @@ const { fullPageValidationAddonsMethods } =
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { ToastManager } = require("../../../app/assets/widgets/shared/toast-manager.js");
 
+const originalStorefrontProxyRoot = process.env.STOREFRONT_PROXY_ROOT;
+
 beforeEach(() => {
+  process.env.STOREFRONT_PROXY_ROOT = "/apps/product-bundles";
   jest.spyOn(ToastManager, "show").mockImplementation(() => undefined);
 });
 
 afterEach(() => {
   jest.restoreAllMocks();
+});
+
+afterAll(() => {
+  if (originalStorefrontProxyRoot === undefined) {
+    delete process.env.STOREFRONT_PROXY_ROOT;
+  } else {
+    process.env.STOREFRONT_PROXY_ROOT = originalStorefrontProxyRoot;
+  }
 });
 function createCartAddFetchMock() {
   return jest.fn(async (url: string, _options?: RequestInit) => ({
