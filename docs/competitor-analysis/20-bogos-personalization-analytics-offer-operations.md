@@ -5,7 +5,7 @@ title: BOGOS Personalization, Analytics, and Offer Operations
 type: competitor-analysis
 status: current
 summary: Documents installed-app and vendor evidence for BOGOS targeting, analytics, prioritization, scheduling, and bulk offer operations, with Shopify and Wolfpack implications.
-last_audited: 2026-08-30
+last_audited: 2026-09-01
 owners:
   - product
   - engineering
@@ -118,12 +118,18 @@ Recommended Wolfpack boundary:
 
 ### Location and Markets
 
-BOGOS separates IP-country targeting from Shopify Markets. Wolfpack should preserve that distinction:
+BOGOS separates IP-country targeting from Shopify Markets. Current Shopify
+guidance changes the recommended Wolfpack implementation boundary:
 
-- **Market targeting** uses Shopify's buyer market/localization context and follows the merchant's market configuration.
-- **Country targeting** uses the effective storefront country where available. If an external IP service is used, it introduces consent, accuracy, VPN, caching, and data-processing concerns and should be a later opt-in capability.
+- **Country targeting** uses `localization.country.iso_code`, Shopify's effective storefront country context. It needs no `read_markets` or protected-customer scope.
+- **IP-country targeting** is rejected for the first implementation. It adds consent, accuracy, VPN, caching, and data-processing concerns while duplicating Shopify's localization surface.
+- **Market IDs and handles are not persisted for buyer targeting.** Shopify now warns that nested markets make those identifiers unstable because deprecated single-market surfaces return only the most-specific match.
 
-Shopify describes a Market as a group of buyers matched by conditions and applies the most specific matching market. A buyer may match more than one market. That makes a stable market identifier safer than persisting a display name. A location rule should also define its behavior when country is unknown rather than silently treating unknown as excluded.
+The first direct persistence contract therefore stores include/exclude mode plus
+canonical uppercase ISO country codes. An include rule fails closed when the
+country is unknown; an exclude rule remains eligible. Checkout enforcement
+must independently use Shopify Function localization rather than trusting a
+browser-supplied country or eligibility flag.
 
 ### Admin design lessons
 

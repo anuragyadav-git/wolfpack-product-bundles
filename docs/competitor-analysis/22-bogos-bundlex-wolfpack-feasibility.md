@@ -5,7 +5,7 @@ title: BOGOS and Bundlex Wolfpack Feasibility
 type: feasibility-analysis
 status: current
 summary: Prioritizes the best BOGOS and Bundlex capabilities for Wolfpack and defines Admin, data, storefront, analytics, Shopify, testing, and rollout boundaries.
-last_audited: 2026-08-31
+last_audited: 2026-09-01
 owners:
   - product
   - engineering
@@ -421,7 +421,7 @@ longer an early-access dependency.
 
 ### Slice I — Identity personalization
 
-**Scope:** Shopify Markets and discount customer-segment contexts first. Prefer
+**Scope:** Shopify-selected ISO country context and discount customer-segment contexts first. Do not persist market IDs or handles: Shopify now documents those single-market identifiers as unstable when nested markets change the most-specific match. Prefer
 Discount Function buyer-identity fields (including tag predicates) for
 checkout enforcement so raw customer records never enter Wolfpack. Customer
 tags or purchase history for **pre-cart visibility** remain deferred until the

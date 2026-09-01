@@ -365,6 +365,12 @@
   "offerOperations": {
     "title": "Offer scheduling and priority", "description": "Control when this bundle can appear in Only Bundles storefront placements and which matching offer is shown first.", "shopifyOwnership": "Shopify controls checkout discount dates and combinations. These settings only control Only Bundles storefront visibility and offer selection.", "priorityLabel": "Storefront priority", "priorityDetails": "Lower numbers are considered first when multiple Only Bundles offers match the same placement.", "stopLowerLabel": "Stop lower-priority storefront offers", "stopLowerDetails": "After this offer is selected, hide matching Only Bundles offers with a larger priority number.", "startsAtLabel": "Starts at", "endsAtLabel": "Ends at", "dateDetails": "Enter an ISO 8601 instant with a time-zone offset. Leave blank for no boundary.", "datePlaceholder": "2026-09-01T10:00:00Z", "validation": { "priority": "Enter a whole-number priority from 1 to 9999.", "startsAt": "Enter a valid ISO 8601 start instant.", "endsAt": "Enter a valid ISO 8601 end instant.", "range": "The end instant must be later than the start instant." }
   },
+  "countryTargeting": {
+    "validation": {
+      "mode": "選択した国を対象に含めるか除外するかを選択してください。",
+      "countries": "国別ターゲティングを有効にする場合は、有効な国を1つ以上選択してください。"
+    }
+  },
   "countdown": {
     "title": "カウントダウンタイマー",
     "description": "このバンドルオファーの設定された終了時刻までの残り時間を表示します。",

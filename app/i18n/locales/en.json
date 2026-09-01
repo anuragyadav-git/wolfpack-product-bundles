@@ -383,6 +383,12 @@
       "range": "The end instant must be later than the start instant."
     }
   },
+  "countryTargeting": {
+    "validation": {
+      "mode": "Choose whether the selected countries are included or excluded.",
+      "countries": "Select at least one valid country when country targeting is enabled."
+    }
+  },
   "countdown": {
     "title": "Countdown timer",
     "description": "Show the time remaining until this bundle's scheduled offer end.",
