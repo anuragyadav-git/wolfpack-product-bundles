@@ -48,6 +48,7 @@ import {
   resolveOfferOperationsSave,
 } from "../../../../lib/offer-policy-admin";
 import { resolveOfferCountryTargetingSave } from "../../../../lib/offer-country-targeting";
+import { fetchShopConfiguration } from "../../../../lib/bundle-configure-loader.server";
 
 type ParsedVariantRef = string | number;
 
@@ -461,8 +462,17 @@ export async function handleSaveBundle(
             specificLinkRequired: true,
             priority: true,
             stopLowerPriority: true,
+            scheduleMode: true,
             startsAt: true,
             endsAt: true,
+            recurrenceFrequency: true,
+            recurrenceTimezone: true,
+            recurrenceAnchorDate: true,
+            recurrenceWindowStartMinute: true,
+            recurrenceWindowEndMinute: true,
+            recurrenceTermination: true,
+            recurrenceEndsOn: true,
+            recurrenceRunCount: true,
             countryTargetingEnabled: true,
             countryTargetingMode: true,
             countryCodes: true,
@@ -488,12 +498,30 @@ export async function handleSaveBundle(
         fieldErrors: [specificLinkOfferSave.issue],
       }, { status: 400 });
     }
-    const offerOperationsSave = resolveOfferOperationsSave({
+    const rawOfferOperations = {
       priority: formData.get("offerPriority"),
       stopLowerPriority: formData.get("offerStopLowerPriority"),
+      scheduleMode: formData.get("offerScheduleMode"),
       startsAt: formData.get("offerStartsAt"),
       endsAt: formData.get("offerEndsAt"),
-    }, existingBundle?.offerPolicy ?? null);
+      recurrenceFrequency: formData.get("offerRecurrenceFrequency"),
+      recurrenceAnchorDate: formData.get("offerRecurrenceAnchorDate"),
+      recurrenceWindowStart: formData.get("offerRecurrenceWindowStart"),
+      recurrenceWindowEnd: formData.get("offerRecurrenceWindowEnd"),
+      recurrenceTermination: formData.get("offerRecurrenceTermination"),
+      recurrenceEndsOn: formData.get("offerRecurrenceEndsOn"),
+      recurrenceRunCount: formData.get("offerRecurrenceRunCount"),
+    };
+    const offerOperationsWereSubmitted = Object.values(rawOfferOperations)
+      .some((value) => value !== null);
+    const shopIanaTimezone = offerOperationsWereSubmitted
+      ? (await fetchShopConfiguration(admin)).shopIanaTimezone
+      : '';
+    const offerOperationsSave = resolveOfferOperationsSave(
+      rawOfferOperations,
+      existingBundle?.offerPolicy ?? null,
+      shopIanaTimezone,
+    );
     if ("issue" in offerOperationsSave) {
       return json({
         success: false,

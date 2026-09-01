@@ -386,8 +386,39 @@ export function usePpbSaveHandlers({
         "offerStopLowerPriority",
         String(base.offerDeliveryState.stopLowerPriority),
       );
+      formData.append("offerScheduleMode", base.offerDeliveryState.scheduleMode);
       formData.append("offerStartsAt", base.offerDeliveryState.startsAt ?? "");
       formData.append("offerEndsAt", base.offerDeliveryState.endsAt ?? "");
+      formData.append(
+        "offerRecurrenceFrequency",
+        base.offerDeliveryState.recurrenceFrequency ?? "",
+      );
+      formData.append(
+        "offerRecurrenceAnchorDate",
+        base.offerDeliveryState.recurrenceAnchorDate ?? "",
+      );
+      formData.append(
+        "offerRecurrenceWindowStart",
+        base.offerDeliveryState.recurrenceWindowStart ?? "",
+      );
+      formData.append(
+        "offerRecurrenceWindowEnd",
+        base.offerDeliveryState.recurrenceWindowEnd ?? "",
+      );
+      formData.append(
+        "offerRecurrenceTermination",
+        base.offerDeliveryState.recurrenceTermination,
+      );
+      formData.append(
+        "offerRecurrenceEndsOn",
+        base.offerDeliveryState.recurrenceEndsOn ?? "",
+      );
+      formData.append(
+        "offerRecurrenceRunCount",
+        base.offerDeliveryState.recurrenceRunCount == null
+          ? ""
+          : String(base.offerDeliveryState.recurrenceRunCount),
+      );
       formData.append(
         "countryTargetingEnabled",
         String(base.offerDeliveryState.countryTargetingEnabled),

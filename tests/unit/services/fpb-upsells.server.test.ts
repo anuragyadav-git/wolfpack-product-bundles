@@ -58,7 +58,7 @@ describe("selectEligibleFpbUpsells", () => {
       bundle({ id: "lower", publicNumber: 40, offerPolicy: { priority: 40 } }),
       bundle({ id: "winner", publicNumber: 30, offerPolicy: { priority: 20, stopLowerPriority: true } }),
       bundle({ id: "first", publicNumber: 20, offerPolicy: { priority: 10 } }),
-      bundle({ id: "future", publicNumber: 10, offerPolicy: { priority: 1, startsAt: "2026-09-01T00:00:00.000Z" } }),
+      bundle({ id: "future", publicNumber: 10, offerPolicy: { scheduleMode: "one_time", priority: 1, startsAt: "2026-09-01T00:00:00.000Z" } }),
     ], {
       productId: "123",
       collectionIds: [],

@@ -43,7 +43,7 @@ describe('offer operations route', () => {
     } as any) as Response;
     expect(exportOfferPolicyCsv).toHaveBeenCalledWith('test.myshopify.com');
     expect(response.headers.get('content-type')).toContain('text/csv');
-    expect(response.headers.get('content-disposition')).toContain('offer-policies-v1.csv');
+    expect(response.headers.get('content-disposition')).toContain('offer-policies-v2.csv');
   });
 
   it.each([
@@ -59,6 +59,7 @@ describe('offer operations route', () => {
       params: {}, context: {},
     } as any) as Response;
     expect(handler).toHaveBeenCalledWith(expect.objectContaining({
+      admin: expect.any(Object),
       shopId: 'test.myshopify.com',
       csv: 'csv body',
     }));

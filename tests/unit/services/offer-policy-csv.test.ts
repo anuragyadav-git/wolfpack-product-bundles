@@ -17,6 +17,13 @@ jest.mock('../../../app/services/bundles/storefront-sync.server', () => ({
   syncBundleStorefrontNow: jest.fn(),
 }));
 
+jest.mock('../../../app/lib/bundle-configure-loader.server', () => ({
+  fetchShopConfiguration: jest.fn().mockResolvedValue({
+    shopCurrencyCode: 'USD',
+    shopIanaTimezone: 'America/New_York',
+  }),
+}));
+
 const database = require('../../../app/db.server').default;
 const findMany = database.bundle.findMany as jest.Mock;
 const transaction = database.$transaction as jest.Mock;
@@ -37,9 +44,12 @@ const bundle = {
 
 function csv(overrides: Record<string, string> = {}) {
   const row: Record<string, string> = {
-    schema_version: '1', bundle_id: 'bundle-1', bundle_name: 'Starter bundle',
+    schema_version: '2', bundle_id: 'bundle-1', bundle_name: 'Starter bundle',
     bundle_type: 'full_page', bundle_status: 'draft', specific_link_required: 'false',
     priority: '10', stop_lower_priority: 'true', starts_at: '', ends_at: '',
+    schedule_mode: 'always', recurrence_frequency: '', recurrence_timezone: '',
+    recurrence_anchor_date: '', recurrence_window_start: '', recurrence_window_end: '',
+    recurrence_termination: 'never', recurrence_ends_on: '', recurrence_run_count: '',
     country_targeting_enabled: 'false', country_targeting_mode: 'include',
     country_codes: '', rule_version: '0', ...overrides,
   };
@@ -70,6 +80,7 @@ describe('offer policy CSV service', () => {
 
   it('validates without writing or syncing', async () => {
     const result = await validateOfferPolicyCsvImport({
+      admin: { graphql: jest.fn() } as any,
       shopId: 'test.myshopify.com',
       csv: csv(),
     });
@@ -118,12 +129,46 @@ describe('offer policy CSV service', () => {
     expect(result).toEqual(expect.objectContaining({ valid: true, appliedCount: 1, syncedCount: 1 }));
   });
 
+  it('imports normalized recurrence fields without a separate scheduling job', async () => {
+    await applyOfferPolicyCsvImport({
+      admin: { graphql: jest.fn() } as any,
+      shopId: 'test.myshopify.com',
+      csv: csv({
+        schedule_mode: 'recurring',
+        recurrence_frequency: 'weekly',
+        recurrence_timezone: 'America/New_York',
+        recurrence_anchor_date: '2026-09-06',
+        recurrence_window_start: '09:00',
+        recurrence_window_end: '17:00',
+        recurrence_termination: 'on_date',
+        recurrence_ends_on: '2026-10-04',
+      }),
+    });
+
+    expect(offerPolicyCreate).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({
+        scheduleMode: 'recurring',
+        recurrenceFrequency: 'weekly',
+        recurrenceTimezone: 'America/New_York',
+        recurrenceAnchorDate: new Date('2026-09-06T00:00:00.000Z'),
+        recurrenceWindowStartMinute: 540,
+        recurrenceWindowEndMinute: 1020,
+        recurrenceTermination: 'on_date',
+        recurrenceEndsOn: new Date('2026-10-04T00:00:00.000Z'),
+      }),
+    }));
+  });
+
   it('updates by shop, bundle, and expected version and revokes link credentials when disabled', async () => {
     findMany.mockResolvedValue([{
       ...bundle,
       offerPolicy: {
         id: 'policy-1', specificLinkRequired: true, priority: 10,
-        stopLowerPriority: true, startsAt: null, endsAt: null,
+        stopLowerPriority: true, scheduleMode: 'always', startsAt: null, endsAt: null,
+        recurrenceFrequency: null, recurrenceTimezone: null,
+        recurrenceAnchorDate: null, recurrenceWindowStartMinute: null,
+        recurrenceWindowEndMinute: null, recurrenceTermination: 'never',
+        recurrenceEndsOn: null, recurrenceRunCount: null,
         countryTargetingEnabled: false, countryTargetingMode: 'include',
         countryCodes: [], ruleVersion: 4,
         conditions: [{ type: 'specific_link', revokedAt: null, expiresAt: null }],

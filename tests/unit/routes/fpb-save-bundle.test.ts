@@ -873,6 +873,47 @@ describe("FPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
     );
   });
 
+  it("persists a recurring offer in Shopify's store timezone", async () => {
+    MOCK_ADMIN.graphql.mockResolvedValueOnce({
+      json: async () => ({
+        data: { shop: { currencyCode: "USD", ianaTimezone: "America/New_York" } },
+      }),
+    });
+    const fd = makeFormData({
+      offerPriority: "20",
+      offerStopLowerPriority: "false",
+      offerScheduleMode: "recurring",
+      offerStartsAt: "",
+      offerEndsAt: "",
+      offerRecurrenceFrequency: "weekly",
+      offerRecurrenceAnchorDate: "2026-09-06",
+      offerRecurrenceWindowStart: "09:00",
+      offerRecurrenceWindowEnd: "17:00",
+      offerRecurrenceTermination: "after_runs",
+      offerRecurrenceEndsOn: "",
+      offerRecurrenceRunCount: "4",
+    });
+
+    await handleSaveBundle(MOCK_ADMIN, MOCK_SESSION, "bundle-1", fd);
+
+    expect(getDb().bundle.update).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({
+        offerPolicy: {
+          create: expect.objectContaining({
+            scheduleMode: "recurring",
+            recurrenceFrequency: "weekly",
+            recurrenceTimezone: "America/New_York",
+            recurrenceAnchorDate: new Date("2026-09-06T00:00:00.000Z"),
+            recurrenceWindowStartMinute: 540,
+            recurrenceWindowEndMinute: 1020,
+            recurrenceTermination: "after_runs",
+            recurrenceRunCount: 4,
+          }),
+        },
+      }),
+    }));
+  });
+
   it("preserves an explicit draft when a step has StepProduct", async () => {
     const stepsData = makeStepsData({
       StepProduct: [

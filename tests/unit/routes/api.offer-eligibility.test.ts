@@ -134,6 +134,7 @@ describe('api.offer-eligibility', () => {
       offerPolicy: {
         id: 'policy-1',
         specificLinkRequired: false,
+        scheduleMode: 'one_time',
         startsAt: new Date('2999-01-01T00:00:00.000Z'),
         endsAt: null,
         ruleVersion: 3,

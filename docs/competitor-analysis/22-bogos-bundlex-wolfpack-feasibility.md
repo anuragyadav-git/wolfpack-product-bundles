@@ -433,15 +433,15 @@ protected-data and authenticated-identity gate is explicitly approved.
 
 **Effort/risk:** Large / very high privacy and platform risk.
 
-### Slice J — Offer import/export and recurring schedules
+### Slice J — Offer import/export and recurring schedules — implemented
 
-**Scope:** versioned CSV round trip, validate-only, draft import, job progress/errors, weekly/monthly recurrence.
+**Delivered scope:** strict version 2 CSV round trip for existing bundle policies, validate-only and atomic apply flows, optimistic rule-version checks, post-write storefront sync reporting, and timezone-safe weekly/monthly recurrence. The importer does not create or publish bundles, does not accept campaign secrets, and rejects recurrence timezones that differ from Shopify's current shop timezone.
 
-**Tests first:** CSV injection, encoding, duplicate keys, missing SKU/handle, partial validation, idempotent retry, recurrence/DST/run-count termination.
+**Tests:** CSV injection, encoding, duplicate bundle IDs, strict headers and row limits, stale versions, link prerequisites, recurrence/DST/month-end/run-count termination, and FPB/PPB persistence.
 
-**Browser QA:** small/large imports, cancellation, retry, downloadable errors, post-import draft review, schedule calendar/list states.
+**Remaining browser QA:** hard-reload FPB/PPB schedule editing and persistence on desktop/mobile, then validate/apply a small version 2 CSV through the authenticated Offer operations surface.
 
-**Effort/risk:** Large / high.
+**Constraint:** storefront eligibility is request-time enforced. Shopify checkout discount dates remain Shopify-owned; the current single shop-wide automatic app-discount node cannot represent independent per-bundle calendars.
 
 ## Cross-cutting acceptance gates
 

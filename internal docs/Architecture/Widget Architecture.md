@@ -520,6 +520,14 @@ the generated direct link is their sole entry point. These rules govern
 Wolfpack storefront visibility and selection; Shopify discount dates and
 combination rules remain owned by Shopify discount APIs.
 
+Recurring schedules are evaluated at request time from the saved local calendar
+rule and Shopify's `shop.ianaTimezone`; there is no transition job. Weekly and
+monthly windows use start-inclusive/end-exclusive boundaries, monthly anchors
+skip months that do not contain the requested day, and malformed rules fail
+closed. The PPB Shopify-hosted snapshot carries only the safe decision marker;
+when recurrence requires a server decision, the widget calls the signed
+eligibility endpoint before exposing the static bundle data.
+
 There is no Wolfpack fallback for this surface. Storefront API failure fails
 closed rather than rendering stale catalog or price data. See
 [[Architecture/Storefront Outage Resilience]].

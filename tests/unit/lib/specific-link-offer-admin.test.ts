@@ -1,18 +1,49 @@
 import {
   buildSpecificLinkOfferAdminState,
   resolveSpecificLinkOfferSave,
+  type SpecificLinkPolicyState,
 } from '../../../app/lib/specific-link-offer-admin';
 
 const now = new Date('2026-08-31T12:00:00.000Z');
+const shopTimezone = 'America/New_York';
+
+function policy(overrides: Partial<SpecificLinkPolicyState> = {}): SpecificLinkPolicyState {
+  return {
+    specificLinkRequired: false,
+    priority: 100,
+    stopLowerPriority: false,
+    scheduleMode: 'always',
+    startsAt: null,
+    endsAt: null,
+    recurrenceFrequency: null,
+    recurrenceTimezone: null,
+    recurrenceAnchorDate: null,
+    recurrenceWindowStartMinute: null,
+    recurrenceWindowEndMinute: null,
+    recurrenceTermination: 'never',
+    recurrenceEndsOn: null,
+    recurrenceRunCount: null,
+    countryTargetingEnabled: false,
+    countryTargetingMode: 'include',
+    countryCodes: [],
+    ruleVersion: 1,
+    conditions: [],
+    ...overrides,
+  };
+}
 
 describe('specific-link offer Admin state', () => {
-  it('returns only safe status metadata for a usable link', () => {
-    const state = buildSpecificLinkOfferAdminState({
+  it('returns safe link metadata with the shared operations state', () => {
+    const state = buildSpecificLinkOfferAdminState(policy({
       specificLinkRequired: true,
       priority: 10,
       stopLowerPriority: true,
-      startsAt: null,
-      endsAt: null,
+      scheduleMode: 'recurring',
+      recurrenceFrequency: 'weekly',
+      recurrenceTimezone: shopTimezone,
+      recurrenceAnchorDate: new Date('2026-09-01T00:00:00.000Z'),
+      recurrenceWindowStartMinute: 540,
+      recurrenceWindowEndMinute: 1020,
       countryTargetingEnabled: true,
       countryTargetingMode: 'exclude',
       countryCodes: ['US', 'CA'],
@@ -21,58 +52,46 @@ describe('specific-link offer Admin state', () => {
         expiresAt: new Date('2026-09-30T12:00:00.000Z'),
         revokedAt: null,
       }],
-    }, now);
+    }), shopTimezone, now);
 
     expect(state).toEqual({
       enabled: true,
-      priority: 10,
-      stopLowerPriority: true,
-      startsAt: null,
-      endsAt: null,
-      countryTargetingEnabled: true,
-      countryTargetingMode: 'exclude',
-      countryCodes: ['CA', 'US'],
       status: 'active',
       expiresAt: '2026-09-30T12:00:00.000Z',
       ruleVersion: 4,
+      priority: 10,
+      stopLowerPriority: true,
+      scheduleMode: 'recurring',
+      startsAt: null,
+      endsAt: null,
+      recurrenceFrequency: 'weekly',
+      recurrenceTimezone: shopTimezone,
+      recurrenceAnchorDate: '2026-09-01',
+      recurrenceWindowStart: '09:00',
+      recurrenceWindowEnd: '17:00',
+      recurrenceTermination: 'never',
+      recurrenceEndsOn: null,
+      recurrenceRunCount: null,
+      countryTargetingEnabled: true,
+      countryTargetingMode: 'exclude',
+      countryCodes: ['CA', 'US'],
     });
-    expect(Object.keys(state)).toEqual([
-      'enabled',
-      'status',
-      'expiresAt',
-      'ruleVersion',
-      'priority',
-      'stopLowerPriority',
-      'startsAt',
-      'endsAt',
-      'countryTargetingEnabled',
-      'countryTargetingMode',
-      'countryCodes',
-    ]);
   });
 
   it.each([
     [null, 'not_generated'],
-    [{ specificLinkRequired: false, priority: 100, stopLowerPriority: false, startsAt: null, endsAt: null, countryTargetingEnabled: false, countryTargetingMode: 'include', countryCodes: [], ruleVersion: 2, conditions: [{ expiresAt: null, revokedAt: now }] }, 'revoked'],
-    [{ specificLinkRequired: false, priority: 100, stopLowerPriority: false, startsAt: null, endsAt: null, countryTargetingEnabled: false, countryTargetingMode: 'include', countryCodes: [], ruleVersion: 3, conditions: [{ expiresAt: now, revokedAt: null }] }, 'expired'],
-  ] as const)('reports unusable link state', (policy, status) => {
-    expect(buildSpecificLinkOfferAdminState(policy, now).status).toBe(status);
+    [policy({ conditions: [{ expiresAt: null, revokedAt: now }] }), 'revoked'],
+    [policy({ conditions: [{ expiresAt: now, revokedAt: null }] }), 'expired'],
+  ] as const)('reports unusable link state', (input, status) => {
+    expect(buildSpecificLinkOfferAdminState(input, shopTimezone, now).status).toBe(status);
   });
 });
 
 describe('specific-link offer Save Bar persistence', () => {
-  const activePolicy = {
-    specificLinkRequired: false,
-    priority: 100,
-    stopLowerPriority: false,
-    startsAt: null,
-    endsAt: null,
-    countryTargetingEnabled: false,
-    countryTargetingMode: 'include' as const,
-    countryCodes: [],
+  const activePolicy = policy({
     ruleVersion: 3,
     conditions: [{ expiresAt: null, revokedAt: null }],
-  };
+  });
 
   it('builds an atomic nested update when delivery changes', () => {
     expect(resolveSpecificLinkOfferSave('true', activePolicy, now)).toEqual({
@@ -89,11 +108,11 @@ describe('specific-link offer Save Bar persistence', () => {
 
   it.each([
     null,
-    { specificLinkRequired: false, priority: 100, stopLowerPriority: false, startsAt: null, endsAt: null, countryTargetingEnabled: false, countryTargetingMode: 'include' as const, countryCodes: [], ruleVersion: 1, conditions: [] },
-    { specificLinkRequired: false, priority: 100, stopLowerPriority: false, startsAt: null, endsAt: null, countryTargetingEnabled: false, countryTargetingMode: 'include' as const, countryCodes: [], ruleVersion: 1, conditions: [{ expiresAt: null, revokedAt: now }] },
-    { specificLinkRequired: false, priority: 100, stopLowerPriority: false, startsAt: null, endsAt: null, countryTargetingEnabled: false, countryTargetingMode: 'include' as const, countryCodes: [], ruleVersion: 1, conditions: [{ expiresAt: now, revokedAt: null }] },
-  ])('rejects enabling without a usable link', (policy) => {
-    expect(resolveSpecificLinkOfferSave('true', policy, now)).toEqual({
+    policy(),
+    policy({ conditions: [{ expiresAt: null, revokedAt: now }] }),
+    policy({ conditions: [{ expiresAt: now, revokedAt: null }] }),
+  ])('rejects enabling without a usable link', (input) => {
+    expect(resolveSpecificLinkOfferSave('true', input, now)).toEqual({
       issue: {
         path: 'offerDelivery.enabled',
         message: 'Generate an active specific link before enabling link-only delivery.',

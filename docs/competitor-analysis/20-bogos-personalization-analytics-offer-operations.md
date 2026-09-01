@@ -52,7 +52,7 @@ keywords:
 
 BOGOS has the stronger operational offer engine of the two competitors studied. Its most reusable ideas are a composable eligibility builder, an explicit conflict priority, scheduled lifecycle states, CSV-scale maintenance, and an offer-centric analytics surface. The installed free plan proved link, tag, location, market, scheduling, and analytics controls. Purchase-history targeting and priority editing were visibly present but plan-locked, so their detailed behavior is supported by BOGOS documentation rather than a live saved execution.
 
-Wolfpack already has stronger bundle-funnel and campaign-attribution plumbing than BOGOS exposed in the empty account. It does not yet have a general offer eligibility model, offer priority, recurring schedules, or offer import/export. The recommended direction is therefore to add BOGOS-like operations around Wolfpack's existing bundle/config/runtime contracts, not replace Wolfpack Analytics with a clone of BOGOS's dashboard.
+Wolfpack already has stronger bundle-funnel and campaign-attribution plumbing than BOGOS exposed in the empty account. The adopted implementation now adds normalized storefront priority, one-time and recurring schedules, country/link eligibility, and strict CSV operations around Wolfpack's existing bundle/config/runtime contracts rather than replacing Wolfpack Analytics with a clone of BOGOS's dashboard. Customer-tag and purchase-history targeting remain deferred behind the protected-data gate.
 
 ## Research method and confidence
 
@@ -255,7 +255,7 @@ Recommended Wolfpack schedule contract:
 - record schedule transition events with idempotency keys;
 - show next run and next stop in Admin.
 
-`QueuedJob` currently supports only `publish`, `unpublish`, and `sync`. It can participate in one-shot transitions, but recurring schedules need a schedule model and a durable scheduler/reconciliation strategy rather than placing an unbounded series of opaque jobs in `data`.
+The adopted runtime evaluates normalized weekly/monthly rules at request time with a maintained Temporal implementation, so correctness does not depend on queued transition jobs. Shopify's `shop.ianaTimezone` is the sole timezone authority. Monthly dates are skipped rather than clamped when a month does not contain the anchor day, and invalid stored rules fail closed. Jobs remain appropriate only for future cache warming or reconciliation when evidence shows they are needed.
 
 ### Import and export
 

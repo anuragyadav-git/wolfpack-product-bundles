@@ -58,6 +58,25 @@ describe('specific-link offer eligibility', () => {
     });
   });
 
+  it('evaluates recurring storefront eligibility before link matching', () => {
+    const { policy, token } = createPolicy({
+      scheduleMode: 'recurring',
+      recurrenceFrequency: 'weekly',
+      recurrenceTimezone: 'UTC',
+      recurrenceAnchorDate: '2026-08-30',
+      recurrenceWindowStartMinute: 600,
+      recurrenceWindowEndMinute: 660,
+      recurrenceTermination: 'never',
+    });
+
+    expect(resolveSpecificLinkOfferEligibility({ ...baseInput, policy, token })).toEqual({
+      eligible: false,
+      reasonCode: 'schedule_not_started',
+      offerPolicyId: 'policy-1',
+      ruleVersion: 3,
+    });
+  });
+
   it('accepts a matching active token', () => {
     const { policy, token } = createPolicy();
 

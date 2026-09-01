@@ -393,7 +393,7 @@ Responsive analytics behavior:
 ```
 Offer operations
 ├── Export offer policies
-│   └── [Export CSV] → authenticated version 1 CSV attachment
+│   └── [Export CSV] → authenticated version 2 CSV attachment with one-time and recurring schedules
 └── Validate and import
     ├── Polaris CSV drop zone (1 MiB and 500-row bounds)
     ├── [Validate CSV] → read-only row validation
@@ -405,7 +405,8 @@ The CSV addresses existing bundles by authenticated-shop bundle ID. Bundle
 name, type, and status are export context only: import never creates, changes,
 or publishes a bundle. Campaign tokens and token digests are excluded. Enabling
 link-only delivery requires an existing active campaign link managed by the
-bundle Configure action.
+bundle Configure action. Recurring rows must use the current Shopify store IANA
+timezone; validation rejects a different or invalid timezone before any write.
 
 ---
 
@@ -487,7 +488,7 @@ FPB Configure Page
 │   │       ├── Generate/regenerate returns one copyable private link for the current response only
 │   │       ├── Require the specific link uses the global configure SaveBar
 │   │       └── Revoke immediately disables link-only delivery and invalidates the link
-│   │       └── Offer Operations → priority, stop-lower-priority, and optional storefront visibility window
+│   │       └── Offer Operations → priority, stop-lower-priority, always/one-time/recurring storefront schedule, live state, and next transition
 │   │       └── Country Targeting → Shopify storefront-country include/exclude rule with searchable ISO country choices
 │   │
 │   ├── Steps
@@ -628,7 +629,9 @@ PPB Configure Page
 │   ├── Offer Operations
 │   │   ├── Priority: lower values are evaluated first across discovery results
 │   │   ├── Stop lower-priority offers after this eligible offer
-│   │   ├── Optional inclusive start and exclusive end instants in ISO 8601 format
+│   │   ├── Schedule: always active, one-time UTC window, or recurring local calendar window
+│   │   ├── Recurrence: Shopify store timezone, weekly/monthly cadence, same-day time window, and date/run termination
+│   │   ├── Current storefront state and next transition preview
 │   │   └── Shopify remains the owner of checkout discount dates and combinations
 │   ├── Country Targeting
 │   │   ├── Shopify-selected storefront country is the only geography signal

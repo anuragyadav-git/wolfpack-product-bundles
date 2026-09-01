@@ -227,8 +227,39 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
         "offerStopLowerPriority",
         String(flow.offerDeliveryState.stopLowerPriority),
       );
+      formData.append("offerScheduleMode", flow.offerDeliveryState.scheduleMode);
       formData.append("offerStartsAt", flow.offerDeliveryState.startsAt ?? "");
       formData.append("offerEndsAt", flow.offerDeliveryState.endsAt ?? "");
+      formData.append(
+        "offerRecurrenceFrequency",
+        flow.offerDeliveryState.recurrenceFrequency ?? "",
+      );
+      formData.append(
+        "offerRecurrenceAnchorDate",
+        flow.offerDeliveryState.recurrenceAnchorDate ?? "",
+      );
+      formData.append(
+        "offerRecurrenceWindowStart",
+        flow.offerDeliveryState.recurrenceWindowStart ?? "",
+      );
+      formData.append(
+        "offerRecurrenceWindowEnd",
+        flow.offerDeliveryState.recurrenceWindowEnd ?? "",
+      );
+      formData.append(
+        "offerRecurrenceTermination",
+        flow.offerDeliveryState.recurrenceTermination,
+      );
+      formData.append(
+        "offerRecurrenceEndsOn",
+        flow.offerDeliveryState.recurrenceEndsOn ?? "",
+      );
+      formData.append(
+        "offerRecurrenceRunCount",
+        flow.offerDeliveryState.recurrenceRunCount == null
+          ? ""
+          : String(flow.offerDeliveryState.recurrenceRunCount),
+      );
       formData.append(
         "countryTargetingEnabled",
         String(flow.offerDeliveryState.countryTargetingEnabled),

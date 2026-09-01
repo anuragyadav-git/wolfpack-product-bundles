@@ -7,6 +7,7 @@ import {
   type OfferPolicyCsvValidationBundle,
 } from '../lib/offer-policy-csv';
 import { syncBundleStorefrontNow } from './bundles/storefront-sync.server';
+import { fetchShopConfiguration } from '../lib/bundle-configure-loader.server';
 
 const offerPolicyCsvBundleSelect = {
   id: true,
@@ -40,8 +41,17 @@ async function loadOfferPolicyBundles(shopId: string) {
       specificLinkRequired: boolean;
       priority: number;
       stopLowerPriority: boolean;
+      scheduleMode: 'always' | 'one_time' | 'recurring';
       startsAt: Date | null;
       endsAt: Date | null;
+      recurrenceFrequency: 'weekly' | 'monthly' | null;
+      recurrenceTimezone: string | null;
+      recurrenceAnchorDate: Date | null;
+      recurrenceWindowStartMinute: number | null;
+      recurrenceWindowEndMinute: number | null;
+      recurrenceTermination: 'never' | 'on_date' | 'after_runs';
+      recurrenceEndsOn: Date | null;
+      recurrenceRunCount: number | null;
       countryTargetingEnabled: boolean;
       countryTargetingMode: 'include' | 'exclude';
       countryCodes: string[];
@@ -61,11 +71,16 @@ function toValidationBundle(bundle: LoadedBundle, now: Date): OfferPolicyCsvVali
   };
 }
 
-function validate(csv: string, bundles: readonly LoadedBundle[]) {
+function validate(
+  csv: string,
+  bundles: readonly LoadedBundle[],
+  shopIanaTimezone: string,
+) {
   const parsed = parseOfferPolicyCsv(csv);
   const validation = validateOfferPolicyCsvRows(
     parsed,
     bundles.map((bundle) => toValidationBundle(bundle, new Date())),
+    shopIanaTimezone,
   );
   return {
     ...validation,
@@ -79,8 +94,16 @@ export async function exportOfferPolicyCsv(shopId: string): Promise<string> {
   return serializeOfferPolicyCsv(await loadOfferPolicyBundles(shopId));
 }
 
-export async function validateOfferPolicyCsvImport(input: { shopId: string; csv: string }) {
-  return validate(input.csv, await loadOfferPolicyBundles(input.shopId));
+export async function validateOfferPolicyCsvImport(input: {
+  admin: ShopifyAdmin;
+  shopId: string;
+  csv: string;
+}) {
+  const [bundles, shopConfiguration] = await Promise.all([
+    loadOfferPolicyBundles(input.shopId),
+    fetchShopConfiguration(input.admin),
+  ]);
+  return validate(input.csv, bundles, shopConfiguration.shopIanaTimezone);
 }
 
 export async function applyOfferPolicyCsvImport(input: {
@@ -88,8 +111,11 @@ export async function applyOfferPolicyCsvImport(input: {
   shopId: string;
   csv: string;
 }) {
-  const bundles = await loadOfferPolicyBundles(input.shopId);
-  const validation = validate(input.csv, bundles);
+  const [bundles, shopConfiguration] = await Promise.all([
+    loadOfferPolicyBundles(input.shopId),
+    fetchShopConfiguration(input.admin),
+  ]);
+  const validation = validate(input.csv, bundles, shopConfiguration.shopIanaTimezone);
   if (!validation.valid) {
     return {
       ...validation,

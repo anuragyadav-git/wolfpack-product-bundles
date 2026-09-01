@@ -17,7 +17,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     return new Response(csv, {
       headers: {
         'Content-Type': 'text/csv; charset=utf-8',
-        'Content-Disposition': 'attachment; filename="offer-policies-v1.csv"',
+        'Content-Disposition': 'attachment; filename="offer-policies-v2.csv"',
         'Cache-Control': 'no-store',
       },
     });
@@ -32,7 +32,7 @@ export async function action({ request }: ActionFunctionArgs) {
   const csv = String(formData.get('csv') ?? '');
   if (!csv) return json({ valid: false, error: 'missing_csv' }, { status: 400 });
   if (intent === 'validate') {
-    return json(await validateOfferPolicyCsvImport({ shopId: session.shop, csv }));
+    return json(await validateOfferPolicyCsvImport({ admin, shopId: session.shop, csv }));
   }
   if (intent === 'apply') {
     return json(await applyOfferPolicyCsvImport({ admin, shopId: session.shop, csv }));

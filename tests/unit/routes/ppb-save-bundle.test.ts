@@ -854,6 +854,47 @@ describe("PPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
     );
   });
 
+  it("persists a recurring offer in Shopify's store timezone", async () => {
+    MOCK_ADMIN.graphql.mockResolvedValueOnce({
+      json: async () => ({
+        data: { shop: { currencyCode: "CAD", ianaTimezone: "America/Toronto" } },
+      }),
+    });
+    const fd = makeFormData({
+      offerPriority: "30",
+      offerStopLowerPriority: "true",
+      offerScheduleMode: "recurring",
+      offerStartsAt: "",
+      offerEndsAt: "",
+      offerRecurrenceFrequency: "monthly",
+      offerRecurrenceAnchorDate: "2026-09-30",
+      offerRecurrenceWindowStart: "10:30",
+      offerRecurrenceWindowEnd: "18:00",
+      offerRecurrenceTermination: "never",
+      offerRecurrenceEndsOn: "",
+      offerRecurrenceRunCount: "",
+    });
+
+    await handleSaveBundle(MOCK_ADMIN, MOCK_SESSION, "bundle-1", fd);
+
+    expect(getDb().bundle.update).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({
+        offerPolicy: {
+          create: expect.objectContaining({
+            scheduleMode: "recurring",
+            recurrenceFrequency: "monthly",
+            recurrenceTimezone: "America/Toronto",
+            recurrenceAnchorDate: new Date("2026-09-30T00:00:00.000Z"),
+            recurrenceWindowStartMinute: 630,
+            recurrenceWindowEndMinute: 1080,
+            recurrenceTermination: "never",
+            recurrenceRunCount: null,
+          }),
+        },
+      }),
+    }));
+  });
+
   it("creates StepCategory records in DB with correct shape", async () => {
     const categoryCondition = { type: "quantity", condition: "greaterThanOrEqualTo", value: "01" };
     const categoryProduct = {

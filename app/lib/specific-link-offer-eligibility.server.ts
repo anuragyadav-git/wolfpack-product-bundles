@@ -3,6 +3,7 @@ import {
   hashSpecificLinkOfferToken,
 } from './specific-link-offer-token.server';
 import { resolveOfferSchedule } from './offer-policy-decision';
+import type { OfferPolicyTiming } from './offer-policy-decision';
 import { resolveOfferCountryEligibility } from './offer-country-eligibility';
 
 export type SpecificLinkEligibilityReasonCode =
@@ -25,11 +26,9 @@ interface SpecificLinkOfferCondition {
   revokedAt: Date | string | null;
 }
 
-export interface SpecificLinkOfferPolicy {
+export interface SpecificLinkOfferPolicy extends OfferPolicyTiming {
   id: string;
   specificLinkRequired: boolean;
-  startsAt?: Date | string | null;
-  endsAt?: Date | string | null;
   countryTargetingEnabled?: boolean | null;
   countryTargetingMode?: 'include' | 'exclude' | null;
   countryCodes?: readonly string[] | null;
