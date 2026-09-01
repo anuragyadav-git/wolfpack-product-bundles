@@ -66,6 +66,7 @@ introduce protected customer-data access.
 | 4 | Query budget | Cart Transform input | Calculated complexity remains at most 30 | Consolidate an existing line envelope before adding a leaf |
 | 5 | Function binary budget | Shopify CLI optimized Cart Transform WASM | Less than 256,000 bytes | Conservative threshold; measure the post-optimizer artifact, not raw Cargo output |
 | 6 | Signed rule encoding | Normalized include, exclude, or disabled rule | Compact `countryRule` string consumed by both Functions | Avoid a second nested Rust JSON deserializer |
+| 7 | Manual storefront sync | Saved priority, schedule, and country policy | Sync reloads every storefront-consumed policy field | Prevents Sync Bundle from reverting to defaults |
 
 ## Acceptance Criteria
 

@@ -30,8 +30,13 @@ async function loadBundleForStorefrontSync(shopDomain: string, bundleId: string)
       offerPolicy: {
         select: {
           specificLinkRequired: true,
+          priority: true,
+          stopLowerPriority: true,
           startsAt: true,
           endsAt: true,
+          countryTargetingEnabled: true,
+          countryTargetingMode: true,
+          countryCodes: true,
           ruleVersion: true,
         },
       },
