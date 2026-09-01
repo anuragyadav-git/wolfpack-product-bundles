@@ -366,12 +366,12 @@
   },
   "offerOperations": {
     "title": "Offer scheduling and priority",
-    "description": "Control when this bundle can appear in Wolfpack storefront placements and which matching offer is shown first.",
-    "shopifyOwnership": "Shopify controls checkout discount dates and combinations. These settings only control Wolfpack storefront visibility and offer selection.",
+    "description": "Control when this bundle can appear in Only Bundles storefront placements and which matching offer is shown first.",
+    "shopifyOwnership": "Shopify controls checkout discount dates and combinations. These settings only control Only Bundles storefront visibility and offer selection.",
     "priorityLabel": "Storefront priority",
-    "priorityDetails": "Lower numbers are considered first when multiple Wolfpack offers match the same placement.",
+    "priorityDetails": "Lower numbers are considered first when multiple Only Bundles offers match the same placement.",
     "stopLowerLabel": "Stop lower-priority storefront offers",
-    "stopLowerDetails": "After this offer is selected, hide matching Wolfpack offers with a larger priority number.",
+    "stopLowerDetails": "After this offer is selected, hide matching Only Bundles offers with a larger priority number.",
     "startsAtLabel": "Starts at",
     "endsAtLabel": "Ends at",
     "dateDetails": "Enter an ISO 8601 instant with a time-zone offset. Leave blank for no boundary.",
@@ -382,6 +382,23 @@
       "endsAt": "Enter a valid ISO 8601 end instant.",
       "range": "The end instant must be later than the start instant."
     }
+  },
+  "countdown": {
+    "title": "Countdown timer",
+    "description": "Show the time remaining until this bundle's scheduled offer end.",
+    "missingSchedule": "Add an offer schedule end time in Bundle visibility before enabling the countdown.",
+    "layoutLabel": "Layout",
+    "layoutCompact": "Compact time",
+    "layoutFull": "Days, hours, minutes, and seconds",
+    "positionLabel": "Position",
+    "positionAbove": "Above bundle",
+    "positionBelow": "Below bundle",
+    "timerTitleLabel": "Timer title",
+    "expiryActionLabel": "When the countdown ends",
+    "expiryHide": "Hide the countdown",
+    "expiryZeros": "Show zeros",
+    "expiryMessage": "Show a message",
+    "expiredMessageLabel": "Expired message"
   },
   "common": {
     "alerts": {

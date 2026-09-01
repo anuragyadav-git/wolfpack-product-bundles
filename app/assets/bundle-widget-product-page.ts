@@ -99,6 +99,7 @@ import { bundleSubscriptionStorefrontMethods } from './widgets/shared/subscripti
 import { applyBrowsedProductPreselection } from './widgets/product-page/embed-preselection.js';
 import { installDiscountTierPillFeedback } from './widgets/shared/discount-tier-feedback.js';
 import { resolveSpecificLinkOfferStorefrontEligibility } from './widgets/shared/specific-link-offer-eligibility.js';
+import { SharedCountdownMethods } from './widgets/shared/countdown-timer.js';
 
 // ============================================================
 // BOTTOM-SHEET HELPER FUNCTIONS (pure — exposed for unit tests)
@@ -144,6 +145,7 @@ export class BundleWidgetProductPage {
       ProductPageModalStateMethods,
       ProductPageWidgetMiscMethods,
       ProductPageStickyAddToCartMethods,
+      SharedCountdownMethods,
       ProductPageLayoutShellMethods,
       ProductPageInpageRenderMethods,
       ProductPageProductDataMethods,
@@ -298,6 +300,7 @@ export class BundleWidgetProductPage {
 
       // Attach event listeners
       this.attachEventListeners();
+      this.setupCountdown();
       this.setupStickyAddToCart();
 
       // Mark as initialized

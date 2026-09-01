@@ -564,6 +564,7 @@ export async function updateBundleProductMetafields(
           ? "add_selected_offer"
           : "scroll_to_offers",
     },
+    countdown: bundleConfiguration.countdown ?? null,
     bundleVariantId: bundleVariantId, // Bundle parent variant ID for cart transform EXPAND operation
     steps: (bundleConfiguration.steps || []).map((step: any, stepIndex: number) => {
       const stepKey = String(step.id ?? stepIndex);

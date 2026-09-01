@@ -1,5 +1,6 @@
 import type { ShopifyAdmin } from "../../../../lib/auth-guards.server";
 import { buildOfferDecisionMarker } from "../../../../lib/offer-policy-decision";
+import { buildCountdownRuntimeConfig } from "../../../../lib/bundle-countdown";
 import { AppLogger } from "../../../../lib/logger";
 import {
   updateBundleProductMetafields,
@@ -470,6 +471,7 @@ export function buildSyncBundleConfiguration(
       bundle.stickyAddToCartAction === "add_selected_offer"
         ? "add_selected_offer"
         : "scroll_to_offers",
+    countdown: buildCountdownRuntimeConfig(bundle, bundle.offerPolicy),
     useSingleStepCategoriesAsBundleSteps:
       bundle.useSingleStepCategoriesAsBundleSteps ?? false,
     steps: buildSyncOptimizedSteps(bundle.steps || []),

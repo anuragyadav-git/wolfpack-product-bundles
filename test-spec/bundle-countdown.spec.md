@@ -62,5 +62,5 @@ fixed-duration, visitor-reset, shopper-midnight, or parallel scheduling state.
 
 - [x] Direct Prisma presentation fields use documented defaults.
 - [x] PPB and FPB save flows preserve one canonical presentation contract.
-- [ ] Runtime deadline is derived only from `OfferPolicy.endsAt`.
-- [ ] Desktop and mobile Chrome QA pass after the Prisma restart.
+- [x] Runtime deadline is derived only from `OfferPolicy.endsAt`.
+- [x] Desktop and mobile Chrome QA pass after the Prisma restart.

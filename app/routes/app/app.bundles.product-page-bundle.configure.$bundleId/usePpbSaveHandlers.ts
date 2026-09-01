@@ -299,6 +299,15 @@ export function usePpbSaveHandlers({
         settings.lowStockAlertThreshold,
       );
       formData.append("lowStockAlertMessage", settings.lowStockAlertMessage);
+      formData.append("countdownEnabled", String(settings.countdownEnabled));
+      formData.append("countdownLayout", settings.countdownLayout);
+      formData.append("countdownPosition", settings.countdownPosition);
+      formData.append("countdownTitle", settings.countdownTitle);
+      formData.append("countdownExpiryAction", settings.countdownExpiryAction);
+      formData.append(
+        "countdownExpiredMessage",
+        settings.countdownExpiredMessage,
+      );
       formData.append(
         "stickyAddToCartEnabled",
         String(settings.stickyAddToCartEnabled),
@@ -429,6 +438,16 @@ export function usePpbSaveHandlers({
     );
     settings.setLowStockAlertMessage(
       settings.originalLowStockAlertMessageRef.current,
+    );
+    settings.setCountdownEnabled(settings.originalCountdownEnabledRef.current);
+    settings.setCountdownLayout(settings.originalCountdownLayoutRef.current);
+    settings.setCountdownPosition(settings.originalCountdownPositionRef.current);
+    settings.setCountdownTitle(settings.originalCountdownTitleRef.current);
+    settings.setCountdownExpiryAction(
+      settings.originalCountdownExpiryActionRef.current,
+    );
+    settings.setCountdownExpiredMessage(
+      settings.originalCountdownExpiredMessageRef.current,
     );
     settings.setStickyAddToCartEnabled(
       settings.originalStickyAddToCartEnabledRef.current,

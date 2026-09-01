@@ -359,6 +359,29 @@
       "description": "Control how bundle savings appear on the cart line item, including retail price and You Save messaging."
     }
   },
+  "specificLinkOffer": {
+    "title": "Specific link access", "description": "Show the bundle builder only when shoppers open this product through a generated private link.", "statusLabel": "Link status", "enableLabel": "Require the specific link", "enableDetails": "Save the bundle after changing this setting.", "generate": "Generate link", "regenerate": "Regenerate link", "revoke": "Revoke link", "copy": "Copy link", "oneTimeNotice": "Copy this link now. For security, it cannot be shown again after you leave or reload this page.", "generatedSuccess": "Specific link generated", "revokedSuccess": "Specific link revoked", "copiedSuccess": "Specific link copied", "status": { "not_generated": "Not generated", "active": "Active", "revoked": "Revoked", "expired": "Expired" }
+  },
+  "offerOperations": {
+    "title": "Offer scheduling and priority", "description": "Control when this bundle can appear in Only Bundles storefront placements and which matching offer is shown first.", "shopifyOwnership": "Shopify controls checkout discount dates and combinations. These settings only control Only Bundles storefront visibility and offer selection.", "priorityLabel": "Storefront priority", "priorityDetails": "Lower numbers are considered first when multiple Only Bundles offers match the same placement.", "stopLowerLabel": "Stop lower-priority storefront offers", "stopLowerDetails": "After this offer is selected, hide matching Only Bundles offers with a larger priority number.", "startsAtLabel": "Starts at", "endsAtLabel": "Ends at", "dateDetails": "Enter an ISO 8601 instant with a time-zone offset. Leave blank for no boundary.", "datePlaceholder": "2026-09-01T10:00:00Z", "validation": { "priority": "Enter a whole-number priority from 1 to 9999.", "startsAt": "Enter a valid ISO 8601 start instant.", "endsAt": "Enter a valid ISO 8601 end instant.", "range": "The end instant must be later than the start instant." }
+  },
+  "countdown": {
+    "title": "Temporizador de cuenta regresiva",
+    "description": "Muestra el tiempo restante hasta el fin programado de la oferta de este paquete.",
+    "missingSchedule": "Añade una hora de finalización de la oferta en Visibilidad del paquete antes de activar la cuenta regresiva.",
+    "layoutLabel": "Diseño",
+    "layoutCompact": "Tiempo compacto",
+    "layoutFull": "Días, horas, minutos y segundos",
+    "positionLabel": "Posición",
+    "positionAbove": "Encima del paquete",
+    "positionBelow": "Debajo del paquete",
+    "timerTitleLabel": "Título del temporizador",
+    "expiryActionLabel": "Cuando termine la cuenta regresiva",
+    "expiryHide": "Ocultar la cuenta regresiva",
+    "expiryZeros": "Mostrar ceros",
+    "expiryMessage": "Mostrar un mensaje",
+    "expiredMessageLabel": "Mensaje de expiración"
+  },
   "common": {
     "alerts": {
       "actionFailed": "La acción falló", "previewUnavailable": "Vista previa no disponible", "settingsNotSaved": "Configuración no guardada", "exportUnavailable": "Exportación no disponible", "backfillUnavailable": "Recuperación no disponible", "trackingNotUpdated": "Seguimiento no actualizado", "bundleNotSaved": "Paquete no guardado", "operationFailed": "La operación falló"
@@ -625,5 +648,6 @@
       "helpBody": "¿Tienes preguntas sobre la facturación o necesitas un plan personalizado? Nuestro equipo está aquí para ayudarte."
     }
   },
+  "analyticsPage": { "offers": { "title": "Offer performance", "description": "Compare privacy-safe offer decisions with bundle engagement, add-to-cart activity, completed orders, and revenue.", "filterLabel": "Offer policy", "allOffers": "All offers", "ruleVersion": "Rule version {{version}}", "tierCount_one": "{{count}} reached tier", "tierCount_other": "{{count}} reached tiers", "engaged": "Engaged sessions", "addedToCart": "Added to cart", "checkedOut": "Completed orders", "revenue": "Revenue" } },
   "subscription": { "analytics": { "summaryNotice": "Gratis incluye un resumen de actividad de 30 días. Growth añade rangos personalizados, detalles, UTM, relleno y exportación CSV." } }
 }

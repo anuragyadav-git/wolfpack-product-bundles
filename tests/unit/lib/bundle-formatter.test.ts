@@ -220,6 +220,33 @@ describe("formatBundleForWidget", () => {
     });
   });
 
+  it("emits countdown presentation with OfferPolicy.endsAt as its only deadline", () => {
+    const result = formatBundleForWidget(makeBundle({
+      countdownEnabled: true,
+      countdownLayout: "full",
+      countdownPosition: "below",
+      countdownTitle: "Ends soon",
+      countdownExpiryAction: "show_message",
+      countdownExpiredMessage: "This offer has ended",
+      offerPolicy: {
+        id: "policy-1",
+        ruleVersion: 1,
+        specificLinkRequired: false,
+        startsAt: null,
+        endsAt: new Date("2030-01-02T03:04:05.000Z"),
+      },
+    }) as any);
+
+    expect(result.countdown).toEqual({
+      layout: "full",
+      position: "below",
+      title: "Ends soon",
+      expiryAction: "show_message",
+      expiredMessage: "This offer has ended",
+      endsAt: "2030-01-02T03:04:05.000Z",
+    });
+  });
+
   it("keeps product-page compare-at visibility enabled despite a stale persisted setting", () => {
     const result = formatBundleForWidget(makeBundle({
       bundleType: "product_page",

@@ -359,6 +359,29 @@
       "description": "Control how bundle savings appear on the cart line item, including retail price and You Save messaging."
     }
   },
+  "specificLinkOffer": {
+    "title": "Specific link access", "description": "Show the bundle builder only when shoppers open this product through a generated private link.", "statusLabel": "Link status", "enableLabel": "Require the specific link", "enableDetails": "Save the bundle after changing this setting.", "generate": "Generate link", "regenerate": "Regenerate link", "revoke": "Revoke link", "copy": "Copy link", "oneTimeNotice": "Copy this link now. For security, it cannot be shown again after you leave or reload this page.", "generatedSuccess": "Specific link generated", "revokedSuccess": "Specific link revoked", "copiedSuccess": "Specific link copied", "status": { "not_generated": "Not generated", "active": "Active", "revoked": "Revoked", "expired": "Expired" }
+  },
+  "offerOperations": {
+    "title": "Offer scheduling and priority", "description": "Control when this bundle can appear in Only Bundles storefront placements and which matching offer is shown first.", "shopifyOwnership": "Shopify controls checkout discount dates and combinations. These settings only control Only Bundles storefront visibility and offer selection.", "priorityLabel": "Storefront priority", "priorityDetails": "Lower numbers are considered first when multiple Only Bundles offers match the same placement.", "stopLowerLabel": "Stop lower-priority storefront offers", "stopLowerDetails": "After this offer is selected, hide matching Only Bundles offers with a larger priority number.", "startsAtLabel": "Starts at", "endsAtLabel": "Ends at", "dateDetails": "Enter an ISO 8601 instant with a time-zone offset. Leave blank for no boundary.", "datePlaceholder": "2026-09-01T10:00:00Z", "validation": { "priority": "Enter a whole-number priority from 1 to 9999.", "startsAt": "Enter a valid ISO 8601 start instant.", "endsAt": "Enter a valid ISO 8601 end instant.", "range": "The end instant must be later than the start instant." }
+  },
+  "countdown": {
+    "title": "カウントダウンタイマー",
+    "description": "このバンドルオファーの設定された終了時刻までの残り時間を表示します。",
+    "missingSchedule": "カウントダウンを有効にする前に、バンドルの表示設定でオファー終了時刻を追加してください。",
+    "layoutLabel": "レイアウト",
+    "layoutCompact": "コンパクト表示",
+    "layoutFull": "日、時、分、秒",
+    "positionLabel": "位置",
+    "positionAbove": "バンドルの上",
+    "positionBelow": "バンドルの下",
+    "timerTitleLabel": "タイマーのタイトル",
+    "expiryActionLabel": "カウントダウン終了時",
+    "expiryHide": "カウントダウンを非表示",
+    "expiryZeros": "ゼロを表示",
+    "expiryMessage": "メッセージを表示",
+    "expiredMessageLabel": "終了メッセージ"
+  },
   "common": {
     "alerts": {
       "actionFailed": "操作に失敗しました", "previewUnavailable": "プレビューを利用できません", "settingsNotSaved": "設定を保存できませんでした", "exportUnavailable": "エクスポートを利用できません", "backfillUnavailable": "バックフィルを利用できません", "trackingNotUpdated": "トラッキングを更新できませんでした", "bundleNotSaved": "バンドルを保存できませんでした", "operationFailed": "処理に失敗しました"
@@ -625,5 +648,6 @@
       "helpBody": "請求に関する質問やカスタムプランのご相談がありますか？サポートチームがお手伝いします。"
     }
   },
+  "analyticsPage": { "offers": { "title": "Offer performance", "description": "Compare privacy-safe offer decisions with bundle engagement, add-to-cart activity, completed orders, and revenue.", "filterLabel": "Offer policy", "allOffers": "All offers", "ruleVersion": "Rule version {{version}}", "tierCount_one": "{{count}} reached tier", "tierCount_other": "{{count}} reached tiers", "engaged": "Engaged sessions", "addedToCart": "Added to cart", "checkedOut": "Completed orders", "revenue": "Revenue" } },
   "subscription": { "analytics": { "summaryNotice": "無料プランには30日間のアクティビティ概要が含まれます。Growthでは期間指定、詳細、UTM、バックフィル、CSV出力を利用できます。" } }
 }

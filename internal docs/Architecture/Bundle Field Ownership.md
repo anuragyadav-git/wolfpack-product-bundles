@@ -129,6 +129,13 @@ The action is presentation state, not a second cart contract: direct add
 delegates to the canonical PPB CTA and incomplete selections return to that
 existing validation surface.
 
+Countdown presentation has exactly six direct Bundle owners:
+`countdownEnabled`, `countdownLayout`, `countdownPosition`, `countdownTitle`,
+`countdownExpiryAction`, and `countdownExpiredMessage`. The nullable runtime
+`countdown` object is derived from those fields plus `OfferPolicy.endsAt`, which
+remains the only deadline owner. No countdown timestamp or duration is stored
+on `Bundle`.
+
 ## FPB Page ownership
 
 The app-proxy document is the canonical FPB host. Current Admin and storefront

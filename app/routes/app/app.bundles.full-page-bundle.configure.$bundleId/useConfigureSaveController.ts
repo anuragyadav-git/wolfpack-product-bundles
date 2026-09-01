@@ -131,6 +131,15 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
       );
       formData.append("lowStockAlertThreshold", flow.lowStockAlertThreshold);
       formData.append("lowStockAlertMessage", flow.lowStockAlertMessage);
+      formData.append("countdownEnabled", String(flow.countdownEnabled));
+      formData.append("countdownLayout", flow.countdownLayout);
+      formData.append("countdownPosition", flow.countdownPosition);
+      formData.append("countdownTitle", flow.countdownTitle);
+      formData.append("countdownExpiryAction", flow.countdownExpiryAction);
+      formData.append(
+        "countdownExpiredMessage",
+        flow.countdownExpiredMessage,
+      );
       formData.append("searchBarEnabled", String(flow.searchBarEnabled));
       formData.append(
         "variantSelectorEnabled",
@@ -290,6 +299,14 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
             flow.lowStockAlertThreshold;
           flow.originalLowStockAlertMessageRef.current =
             flow.lowStockAlertMessage;
+          flow.originalCountdownEnabledRef.current = flow.countdownEnabled;
+          flow.originalCountdownLayoutRef.current = flow.countdownLayout;
+          flow.originalCountdownPositionRef.current = flow.countdownPosition;
+          flow.originalCountdownTitleRef.current = flow.countdownTitle;
+          flow.originalCountdownExpiryActionRef.current =
+            flow.countdownExpiryAction;
+          flow.originalCountdownExpiredMessageRef.current =
+            flow.countdownExpiredMessage;
           flow.originalTextOverridesRef.current = flow.textOverrides;
           flow.originalTextOverridesByLocaleRef.current =
             flow.textOverridesByLocale;
@@ -392,6 +409,16 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
     );
     flow.setLowStockAlertMessage(
       flow.originalLowStockAlertMessageRef.current,
+    );
+    flow.setCountdownEnabled(flow.originalCountdownEnabledRef.current);
+    flow.setCountdownLayout(flow.originalCountdownLayoutRef.current);
+    flow.setCountdownPosition(flow.originalCountdownPositionRef.current);
+    flow.setCountdownTitle(flow.originalCountdownTitleRef.current);
+    flow.setCountdownExpiryAction(
+      flow.originalCountdownExpiryActionRef.current,
+    );
+    flow.setCountdownExpiredMessage(
+      flow.originalCountdownExpiredMessageRef.current,
     );
     flow.setTextOverrides(flow.originalTextOverridesRef.current);
     flow.setTextOverridesByLocale(

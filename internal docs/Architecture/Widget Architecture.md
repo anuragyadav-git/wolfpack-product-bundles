@@ -470,6 +470,20 @@ it is disabled, the action returns to the incomplete bundle surface instead.
 It owns no cart payload, request, validation, inventory, pending, error, or
 redirect logic.
 
+### Schedule-derived Countdown
+
+Both storefront widgets consume one nullable `countdown` runtime object. Its
+`endsAt` value is serialized only from `OfferPolicy.endsAt`; disabled
+presentation, missing schedules, and invalid instants produce `null`. The
+shared renderer recomputes remaining time from `Date.now()` every second and on
+document visibility changes, so background tabs and clock jumps do not create
+decrement drift. Active ticks use `role="timer"` with `aria-live="off"`; only a
+merchant-configured expiry message may become a polite status announcement.
+
+There is no visitor-reset duration, midnight mode, countdown analytics event,
+or transition job. A fresh storefront eligibility decision remains the owner
+of whether an expired scheduled offer is visible at all.
+
 ### Product-Page Block Stage — Shopify-Hosted Snapshot
 
 The PPB app block serializes only a complete schema-v3

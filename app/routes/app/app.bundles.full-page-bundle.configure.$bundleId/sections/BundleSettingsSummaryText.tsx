@@ -1,5 +1,6 @@
 import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
 import { DisabledConfigurationRegion } from "../../_shared/bundle-configure/DisabledConfigurationRegion";
+import { CountdownSettingsSection } from "../../_shared/bundle-configure/CountdownSettingsSection";
 
 export function FpbSummaryTextSettings({
   flow,
@@ -151,6 +152,22 @@ export function FpbSummaryTextSettings({
           </DisabledConfigurationRegion>
         </s-stack>
       </s-section>
+      <CountdownSettingsSection
+        enabled={flow.countdownEnabled}
+        layout={flow.countdownLayout}
+        position={flow.countdownPosition}
+        title={flow.countdownTitle}
+        expiryAction={flow.countdownExpiryAction}
+        expiredMessage={flow.countdownExpiredMessage}
+        scheduledEndsAt={flow.offerDeliveryState.endsAt}
+        markAsDirty={flow.markAsDirty}
+        setEnabled={flow.setCountdownEnabled}
+        setLayout={flow.setCountdownLayout}
+        setPosition={flow.setCountdownPosition}
+        setTitle={flow.setCountdownTitle}
+        setExpiryAction={flow.setCountdownExpiryAction}
+        setExpiredMessage={flow.setCountdownExpiredMessage}
+      />
       {/* Bundle Cart */}
     </>
   );

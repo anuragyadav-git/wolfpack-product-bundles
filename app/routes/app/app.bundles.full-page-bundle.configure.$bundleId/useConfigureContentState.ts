@@ -6,6 +6,11 @@ import {
 } from "../../../lib/bundle-config/default-products";
 import type { ConfigureBundleFlowDraft } from "./configure-flow-types";
 import { buildFpbStorefrontUrl } from "../../../lib/fpb-storefront-url";
+import type {
+  CountdownExpiryAction,
+  CountdownLayout,
+  CountdownPosition,
+} from "../../../lib/bundle-countdown";
 
 export function useConfigureContentState(flow: ConfigureBundleFlowDraft) {
   const { bundle, shop } = flow;
@@ -75,6 +80,28 @@ export function useConfigureContentState(flow: ConfigureBundleFlowDraft) {
   const [lowStockAlertMessage, setLowStockAlertMessage] = useState<string>(
     (bundle as any).lowStockAlertMessage ?? "Only {{stock}} left",
   );
+  const [countdownEnabled, setCountdownEnabled] = useState<boolean>(
+    (bundle as any).countdownEnabled ?? false,
+  );
+  const [countdownLayout, setCountdownLayout] = useState<CountdownLayout>(
+    (bundle as any).countdownLayout === "full" ? "full" : "compact",
+  );
+  const [countdownPosition, setCountdownPosition] = useState<CountdownPosition>(
+    (bundle as any).countdownPosition === "below" ? "below" : "above",
+  );
+  const [countdownTitle, setCountdownTitle] = useState<string>(
+    (bundle as any).countdownTitle ?? "",
+  );
+  const [countdownExpiryAction, setCountdownExpiryAction] =
+    useState<CountdownExpiryAction>(
+      (bundle as any).countdownExpiryAction === "show_zeros" ||
+        (bundle as any).countdownExpiryAction === "show_message"
+        ? (bundle as any).countdownExpiryAction
+        : "hide",
+    );
+  const [countdownExpiredMessage, setCountdownExpiredMessage] = useState<string>(
+    (bundle as any).countdownExpiredMessage ?? "",
+  );
   const initialValidateQuantityPerProduct =
     ((bundle as any).validateQuantityPerProduct as {
       isEnabled?: boolean;
@@ -131,6 +158,12 @@ export function useConfigureContentState(flow: ConfigureBundleFlowDraft) {
   const originalLowStockAlertMessageRef = useRef<string>(
     (bundle as any).lowStockAlertMessage ?? "Only {{stock}} left",
   );
+  const originalCountdownEnabledRef = useRef(countdownEnabled);
+  const originalCountdownLayoutRef = useRef(countdownLayout);
+  const originalCountdownPositionRef = useRef(countdownPosition);
+  const originalCountdownTitleRef = useRef(countdownTitle);
+  const originalCountdownExpiryActionRef = useRef(countdownExpiryAction);
+  const originalCountdownExpiredMessageRef = useRef(countdownExpiredMessage);
   const directBundleSummary =
     (
       (bundle as any).bundleTextConfig as {
@@ -197,6 +230,12 @@ export function useConfigureContentState(flow: ConfigureBundleFlowDraft) {
     lowStockAlertEnabled,
     lowStockAlertMessage,
     lowStockAlertThreshold,
+    countdownEnabled,
+    countdownLayout,
+    countdownPosition,
+    countdownTitle,
+    countdownExpiryAction,
+    countdownExpiredMessage,
     maxQtyPerProduct,
     normalizeDefaultProductsData,
     originalAllowQuantityChangesRef,
@@ -208,6 +247,12 @@ export function useConfigureContentState(flow: ConfigureBundleFlowDraft) {
     originalLowStockAlertEnabledRef,
     originalLowStockAlertMessageRef,
     originalLowStockAlertThresholdRef,
+    originalCountdownEnabledRef,
+    originalCountdownLayoutRef,
+    originalCountdownPositionRef,
+    originalCountdownTitleRef,
+    originalCountdownExpiryActionRef,
+    originalCountdownExpiredMessageRef,
     originalPromoBannerBgImageRef,
     originalShowProductPricesRef,
     originalShowStepTimelineRef,
@@ -227,6 +272,12 @@ export function useConfigureContentState(flow: ConfigureBundleFlowDraft) {
     setLowStockAlertEnabled,
     setLowStockAlertMessage,
     setLowStockAlertThreshold,
+    setCountdownEnabled,
+    setCountdownLayout,
+    setCountdownPosition,
+    setCountdownTitle,
+    setCountdownExpiryAction,
+    setCountdownExpiredMessage,
     setMaxQtyPerProduct,
     setProductSlotIconUrl,
     setProductSlotsEnabled,

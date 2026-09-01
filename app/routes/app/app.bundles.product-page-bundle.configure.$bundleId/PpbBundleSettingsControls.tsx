@@ -6,6 +6,7 @@ import { PpbCartDiscountDisplaySettings } from "./PpbBundleSettingsControls.disc
 import { PpbDefaultProductsSettings } from "./PpbBundleSettingsControls.defaultProducts";
 import { PpbQuantitySettings } from "./PpbBundleSettingsControls.quantity";
 import { PpbStickyAddToCartSettings } from "./PpbBundleSettingsControls.stickyAddToCart";
+import { PpbCountdownSettings } from "./PpbBundleSettingsControls.countdown";
 
 export function PpbBundleSettingsControls() {
   return (
@@ -14,6 +15,7 @@ export function PpbBundleSettingsControls() {
         <PpbDefaultProductsSettings />
         <PpbQuantitySettings />
         <PpbStickyAddToCartSettings />
+        <PpbCountdownSettings />
         <PpbCategoryStepSettings />
         <PpbCartDiscountDisplaySettings />
         <PpbBundleBannerSettings />

@@ -109,6 +109,12 @@ and mobile gates, and action selector. Its direct-add choice delegates to the
 existing storefront bundle CTA; Configure does not expose a second cart or
 checkout integration.
 
+FPB and PPB Bundle Settings share one countdown presentation section built from
+Polaris web components. It configures layout, placement, title, and expiry
+presentation only. The control reads the existing Bundle Visibility offer end
+instant and warns when no end is scheduled; it never exposes or persists a
+second countdown deadline.
+
 During SIT development, adding or removing React hooks in a configure-state
 hook can leave an already-mounted iframe on an incompatible Vite HMR hook
 shape. The resulting React `Should have a queue` error is not by itself API or

@@ -1,5 +1,6 @@
 import type { CheckoutOffer } from "../../checkout-bundle-offers.server";
 import type { BundleSubscriptionConfigV1 } from "../../../lib/bundle-subscriptions";
+import type { CountdownRuntimeConfig } from "../../../lib/bundle-countdown";
 
 /**
  * Metafield Sync Types
@@ -88,6 +89,7 @@ export interface BundleUiConfig {
     showMobile: boolean;
     action: 'scroll_to_offers' | 'add_selected_offer';
   };
+  countdown?: CountdownRuntimeConfig | null;
   bundleVariantId: string;
   steps: BundleUiStep[];
   pricing: BundleUiPricing | null;

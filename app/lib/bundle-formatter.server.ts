@@ -15,6 +15,10 @@ import {
   type BundleSubscriptionConfigV1,
 } from "./bundle-subscriptions";
 import { buildOfferDecisionMarker } from "./offer-policy-decision";
+import {
+  buildCountdownRuntimeConfig,
+  type CountdownRuntimeConfig,
+} from "./bundle-countdown";
 
 /** Convert a Shopify GID to its numeric ID for storefront cart operations. */
 function extractNumericId(gid: string): string {
@@ -71,6 +75,7 @@ export interface FormattedBundle {
     showMobile: boolean;
     action: "scroll_to_offers" | "add_selected_offer";
   };
+  countdown: CountdownRuntimeConfig | null;
   showTextOnAddButton: boolean;
   // Per-bundle text overrides
   textOverrides: Record<string, string> | null;
@@ -354,6 +359,7 @@ export function formatBundleForWidget(bundle: any): FormattedBundle {
           ? "add_selected_offer"
           : "scroll_to_offers",
     },
+    countdown: buildCountdownRuntimeConfig(bundle, bundle.offerPolicy),
     showTextOnAddButton: bundle.showTextOnAddButton ?? false,
     textOverrides: (bundle.textOverrides as Record<string, string> | null) ?? null,
     textOverridesByLocale: (bundle.textOverridesByLocale as Record<string, Record<string, string>> | null) ?? null,

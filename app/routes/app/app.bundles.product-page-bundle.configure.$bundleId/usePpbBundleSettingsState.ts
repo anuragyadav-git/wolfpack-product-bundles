@@ -3,6 +3,11 @@ import {
   normalizeDefaultProductsData,
   type DefaultProductsData,
 } from "../../../lib/bundle-config/default-products";
+import type {
+  CountdownExpiryAction,
+  CountdownLayout,
+  CountdownPosition,
+} from "../../../lib/bundle-countdown";
 
 export function usePpbBundleSettingsState({ bundle }: { bundle: any }) {
   const [preSelectedProductVariantId, setPreSelectedProductVariantId] =
@@ -42,6 +47,34 @@ export function usePpbBundleSettingsState({ bundle }: { bundle: any }) {
   const originalLowStockAlertMessageRef = useRef<string>(
     (bundle as any).lowStockAlertMessage ?? "Only {{stock}} left",
   );
+  const [countdownEnabled, setCountdownEnabled] = useState<boolean>(
+    (bundle as any).countdownEnabled ?? false,
+  );
+  const [countdownLayout, setCountdownLayout] = useState<CountdownLayout>(
+    (bundle as any).countdownLayout === "full" ? "full" : "compact",
+  );
+  const [countdownPosition, setCountdownPosition] = useState<CountdownPosition>(
+    (bundle as any).countdownPosition === "below" ? "below" : "above",
+  );
+  const [countdownTitle, setCountdownTitle] = useState<string>(
+    (bundle as any).countdownTitle ?? "",
+  );
+  const [countdownExpiryAction, setCountdownExpiryAction] =
+    useState<CountdownExpiryAction>(
+      (bundle as any).countdownExpiryAction === "show_zeros" ||
+        (bundle as any).countdownExpiryAction === "show_message"
+        ? (bundle as any).countdownExpiryAction
+        : "hide",
+    );
+  const [countdownExpiredMessage, setCountdownExpiredMessage] = useState<string>(
+    (bundle as any).countdownExpiredMessage ?? "",
+  );
+  const originalCountdownEnabledRef = useRef(countdownEnabled);
+  const originalCountdownLayoutRef = useRef(countdownLayout);
+  const originalCountdownPositionRef = useRef(countdownPosition);
+  const originalCountdownTitleRef = useRef(countdownTitle);
+  const originalCountdownExpiryActionRef = useRef(countdownExpiryAction);
+  const originalCountdownExpiredMessageRef = useRef(countdownExpiredMessage);
   const [stickyAddToCartEnabled, setStickyAddToCartEnabled] =
     useState<boolean>((bundle as any).stickyAddToCartEnabled ?? false);
   const [stickyAddToCartShowDesktop, setStickyAddToCartShowDesktop] =
@@ -123,6 +156,24 @@ export function usePpbBundleSettingsState({ bundle }: { bundle: any }) {
     originalLowStockAlertEnabledRef,
     originalLowStockAlertThresholdRef,
     originalLowStockAlertMessageRef,
+    countdownEnabled,
+    setCountdownEnabled,
+    countdownLayout,
+    setCountdownLayout,
+    countdownPosition,
+    setCountdownPosition,
+    countdownTitle,
+    setCountdownTitle,
+    countdownExpiryAction,
+    setCountdownExpiryAction,
+    countdownExpiredMessage,
+    setCountdownExpiredMessage,
+    originalCountdownEnabledRef,
+    originalCountdownLayoutRef,
+    originalCountdownPositionRef,
+    originalCountdownTitleRef,
+    originalCountdownExpiryActionRef,
+    originalCountdownExpiredMessageRef,
     stickyAddToCartEnabled,
     setStickyAddToCartEnabled,
     stickyAddToCartShowDesktop,
