@@ -148,7 +148,7 @@ export function DashboardStatusGrid({
       : "warning";
 
   return (
-    <s-box paddingBlockEnd="base">
+    <s-box paddingBlockEnd="small-200">
       <s-banner
         tone={tone}
         heading={title}

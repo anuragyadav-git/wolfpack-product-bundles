@@ -31,11 +31,17 @@ export function UnlistedBundleBanner({
   if (loading) {
     const loadingLabel = t("common.parentProductStatus.loadingTitle");
     return (
-      <s-box padding="base">
-        <s-stack direction="inline" alignItems="center" gap="small">
-          <s-spinner size="base" accessibilityLabel={loadingLabel} />
-          <s-text>{t("common.parentProductStatus.loadingBody")}</s-text>
-        </s-stack>
+      <s-box paddingBlockEnd="small-200">
+        <s-banner
+          tone="info"
+          heading={loadingLabel}
+          dismissible
+        >
+          <s-stack direction="inline" alignItems="center" gap="small">
+            <s-spinner size="base" accessibilityLabel={loadingLabel} />
+            <s-text>{t("common.parentProductStatus.loadingBody")}</s-text>
+          </s-stack>
+        </s-banner>
       </s-box>
     );
   }
@@ -43,7 +49,7 @@ export function UnlistedBundleBanner({
   if (!adminUrl) return null;
 
   return (
-    <s-box paddingBlockEnd="base">
+    <s-box paddingBlockEnd="small-200">
       <s-banner
         tone="warning"
         heading={t("common.unlistedBundle.title")}

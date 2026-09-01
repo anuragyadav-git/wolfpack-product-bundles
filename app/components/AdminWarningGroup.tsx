@@ -36,7 +36,7 @@ export function AdminWarningGroup({ warnings }: { warnings: AdminWarningItem[] }
   if (presentation === "single") {
     const warning = warnings[0];
     return (
-      <s-box paddingBlockEnd="base">
+      <s-box paddingBlockEnd="small-200">
         <s-banner
           tone="warning"
           heading={warning.heading}
@@ -56,7 +56,7 @@ export function AdminWarningGroup({ warnings }: { warnings: AdminWarningItem[] }
 
   return (
     <>
-      <s-box paddingBlockEnd="base">
+      <s-box paddingBlockEnd="small-200">
         <s-banner
           tone="warning"
           heading={t("common.warningGroup.heading")}

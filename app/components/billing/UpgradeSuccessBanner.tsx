@@ -15,7 +15,7 @@ export function UpgradeSuccessBanner({
   ];
 
   return (
-    <s-box paddingBlockEnd="base">
+    <s-box paddingBlockEnd="small-200">
       <s-banner
         heading={t("billing.success.heading")}
         tone="success"

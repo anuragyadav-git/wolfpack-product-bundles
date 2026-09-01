@@ -93,20 +93,28 @@ export function CommonBundleWidgetSection(props: CommonBundleWidgetSectionProps)
                   alt={`Product page with a bundle upsell ${displayMode}`}
                 />
                 <s-box padding="base">
-                  <s-choice-list
-                    label="Widget type"
-                    labelAccessibilityVisibility="exclusive"
-                    name="sharedUpsellWidgetType"
-                    values={[displayMode]}
-                    disabled={disabled || undefined}
-                    onChange={(event: Event) => {
-                      const value = (event.target as HTMLElement & { values?: string[] }).values?.[0];
-                      if (value === "block" || value === "button") onDisplayModeChange(value);
-                    }}
-                  >
-                    <s-choice value="block">Offer Upsell Block</s-choice>
-                    <s-choice value="button">Offer Upsell Button</s-choice>
-                  </s-choice-list>
+                  <div className={styles.widgetTypeChoices}>
+                    <s-choice-list
+                      label="Widget type"
+                      labelAccessibilityVisibility="exclusive"
+                      name="sharedUpsellWidgetTypeBlock"
+                      values={displayMode === "block" ? ["block"] : []}
+                      disabled={disabled || undefined}
+                      onChange={() => onDisplayModeChange("block")}
+                    >
+                      <s-choice value="block">Offer Upsell Block</s-choice>
+                    </s-choice-list>
+                    <s-choice-list
+                      label="Widget type"
+                      labelAccessibilityVisibility="exclusive"
+                      name="sharedUpsellWidgetTypeButton"
+                      values={displayMode === "button" ? ["button"] : []}
+                      disabled={disabled || undefined}
+                      onChange={() => onDisplayModeChange("button")}
+                    >
+                      <s-choice value="button">Offer Upsell Button</s-choice>
+                    </s-choice-list>
+                  </div>
                 </s-box>
               </div>
 

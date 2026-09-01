@@ -118,19 +118,21 @@ export function SettingsLandingShell({
 export function SettingsWorkspaceError({ onExit }: { onExit: () => void }) {
   return (
     <s-page heading="Settings" inlineSize="large">
-      <s-banner
-        heading="Settings could not be loaded"
-        tone="critical"
-        dismissible={false}
-        hidden={false}
-      >
-        <s-stack direction="block" gap="small">
-          <s-paragraph>
-            Reload the page or return to Settings and try again.
-          </s-paragraph>
-          <s-button onClick={onExit}>Return to Settings</s-button>
-        </s-stack>
-      </s-banner>
+      <s-box paddingBlockEnd="small-200">
+        <s-banner
+          heading="Settings could not be loaded"
+          tone="critical"
+          dismissible={false}
+          hidden={false}
+        >
+          <s-stack direction="block" gap="small">
+            <s-paragraph>
+              Reload the page or return to Settings and try again.
+            </s-paragraph>
+            <s-button onClick={onExit}>Return to Settings</s-button>
+          </s-stack>
+        </s-banner>
+      </s-box>
     </s-page>
   );
 }

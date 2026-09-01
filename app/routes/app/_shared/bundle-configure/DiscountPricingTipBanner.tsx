@@ -10,15 +10,17 @@ export function DiscountPricingTipBanner() {
   if (dismissed) return null;
 
   return (
-    <s-banner
-      tone="info"
-      heading="Discount setup tip"
-      dismissible
-      onDismiss={dismiss}
-    >
-      Tip: Discounts are calculated based on the products in cart, make sure to
-      add the &quot;Default Product&quot; quantity or amount while configuring
-      discounts.
-    </s-banner>
+    <s-box paddingBlockEnd="small-200">
+      <s-banner
+        tone="info"
+        heading="Discount setup tip"
+        dismissible
+        onDismiss={dismiss}
+      >
+        Tip: Discounts are calculated based on the products in cart, make sure to
+        add the &quot;Default Product&quot; quantity or amount while configuring
+        discounts.
+      </s-banner>
+    </s-box>
   );
 }

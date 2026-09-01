@@ -75,7 +75,7 @@ export function SubscriptionQuotaCard({
         </s-stack>
         {isFreePlan && <CustomProgressBar progress={percentage} tone={progressBarTone} />}
         {showBanner && (
-          <s-box paddingBlockEnd="base">
+          <s-box paddingBlockEnd="small-200">
             <s-banner
               tone={bannerTone}
               heading={t("billing.route.bundleUsage")}

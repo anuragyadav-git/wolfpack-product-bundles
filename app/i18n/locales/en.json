@@ -575,8 +575,8 @@
       "modalTitle": "Actions needed"
     },
     "parentProductStatus": {
-      "loadingTitle": "Checking parent product status",
-      "loadingBody": "Getting the latest status from Shopify Products."
+      "loadingTitle": "Scanning bundle status",
+      "loadingBody": "bundle status is being fetched."
     },
     "proxyHealth": {
       "title": "App proxy not connected",

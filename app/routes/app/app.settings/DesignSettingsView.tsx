@@ -228,13 +228,15 @@ export function DesignSettingsView({
               >
                 <s-stack gap="base">
                   {!advancedDesignAvailable ? (
-                    <s-banner
-                      tone="info"
-                      heading={t("settingsDcp.growthGate.heading")}
-                      dismissible
-                    >
-                      {t("settingsDcp.growthGate.body")}
-                    </s-banner>
+                    <s-box paddingBlockEnd="small-200">
+                      <s-banner
+                        tone="info"
+                        heading={t("settingsDcp.growthGate.heading")}
+                        dismissible
+                      >
+                        {t("settingsDcp.growthGate.body")}
+                      </s-banner>
+                    </s-box>
                   ) : null}
                   <s-box>
                     <s-heading>{t("settingsDcp.preview.inspector.customize", { context: activeContextLabel })}</s-heading>

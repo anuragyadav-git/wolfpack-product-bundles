@@ -56,7 +56,7 @@ export function PpbSelectTemplateDialog() {
                   </s-button>
                 </div>
                 {templateSaveError ? (
-                  <s-box paddingBlockEnd="base">
+                  <s-box paddingBlockEnd="small-200">
                     <s-banner heading="Template not saved" tone="critical">{templateSaveError}</s-banner>
                   </s-box>
                 ) : null}
@@ -250,7 +250,7 @@ export function PpbSelectTemplateDialog() {
                   </div>
                 </div>
                 {templateSaveError ? (
-                  <s-box paddingBlockEnd="base">
+                  <s-box paddingBlockEnd="small-200">
                     <s-banner heading="Template not saved" tone="critical">{templateSaveError}</s-banner>
                   </s-box>
                 ) : null}

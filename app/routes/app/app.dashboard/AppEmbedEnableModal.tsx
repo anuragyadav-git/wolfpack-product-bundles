@@ -119,13 +119,17 @@ export function AppEmbedEnableModal({
         )}
 
         {phase === "success" && (
-          <s-banner tone="success" heading={t("dashboard.storefrontSetup.enableModal.enabled")} />
+          <s-box paddingBlockEnd="small-200">
+            <s-banner tone="success" heading={t("dashboard.storefrontSetup.enableModal.enabled")} />
+          </s-box>
         )}
 
         {phase === "failure" && (
-          <s-banner tone="warning" heading={t("dashboard.storefrontSetup.enableModal.notDetected")}>
-            <s-text>{t("dashboard.storefrontSetup.enableModal.description")}</s-text>
-          </s-banner>
+          <s-box paddingBlockEnd="small-200">
+            <s-banner tone="warning" heading={t("dashboard.storefrontSetup.enableModal.notDetected")}>
+              <s-text>{t("dashboard.storefrontSetup.enableModal.description")}</s-text>
+            </s-banner>
+          </s-box>
         )}
       </s-stack>
     </s-modal>

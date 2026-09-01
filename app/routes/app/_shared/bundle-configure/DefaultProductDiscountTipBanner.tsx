@@ -10,7 +10,7 @@ export function DefaultProductDiscountTipBanner() {
   if (discountTipDismissed) return null;
 
   return (
-    <s-box paddingBlockEnd="base">
+    <s-box paddingBlockEnd="small-200">
       <s-banner
         tone="info"
         heading="Discount tip"

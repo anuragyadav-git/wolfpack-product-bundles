@@ -64,7 +64,7 @@ export function FilePickerDialog({
           ) : null}
 
           {uploadStatus === "error" && uploadError ? (
-            <s-box paddingBlockEnd="base">
+            <s-box paddingBlockEnd="small-200">
               <s-banner
                 heading="Upload failed"
                 tone="critical"
@@ -77,7 +77,7 @@ export function FilePickerDialog({
           ) : null}
 
           {uploadStatus === "timeout" ? (
-            <s-box paddingBlockEnd="base">
+            <s-box paddingBlockEnd="small-200">
               <s-banner
                 heading="Upload processing"
                 tone="success"
